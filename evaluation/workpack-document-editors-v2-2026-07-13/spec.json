@@ -1,11 +1,13 @@
 {
-  "schemaVersion": "2.2.0",
+  "schemaVersion": "2.3.0",
   "meta": {
       "artifact": "SafeClaw Workpack Document Editors v2",
       "date": "2026-07-13",
       "branch": "feat/workpack-document-editors-v2",
       "base": "d3ad86530bc786d8024206cc5b7c7db60c055278",
       "reviewed": "dc8435c4211da54ed1f81cd5f5486d52d26ab6d0",
+      "lastRejected": "77f12a05acec6e1fb48fd94a0ccba329008062e2",
+      "integrationReferenceHead": "acf809ee47713123469c3c9b31edd11ad5f8deae",
       "status": "HOLD_PENDING_INDEPENDENT_PASS",
       "implementationStarted": false,
       "allowedFiles": ["evaluation/workpack-document-editors-v2-2026-07-13/spec.md", "evaluation/workpack-document-editors-v2-2026-07-13/spec.json"],
@@ -13,26 +15,27 @@
             "markdown": [1400, 2200],
             "json": [1200, 2400]
           },
-      "canonicalRule": "spec.json is the machine registry; spec.md is the implementer guide. Stable IDs and registries must pass parity, not sentence equality."
+      "canonicalRule": "spec.json is the canonical machine registry and spec.md is the implementer guide. Current checks prove JSON integrity and stable registry coverage only; they do not claim sentence-level or full semantic parity."
     },
-  "contractIds": ["PARITY-001", "SCOPE-001", "DOC-001", "RISK-001", "FIELD-001", "BODY-001", "BODY-002", "BODY-003", "FLOW-001", "FLOW-002", "FLOW-003", "FLOW-004", "HUMAN-001", "CONFIRM-001", "EVIDENCE-001", "EVIDENCE-002", "SHARE-001", "PHOTO-001", "EXPORT-001", "UI-001", "UI-002", "UI-003", "UI-004", "UI-005", "UI-006", "UI-007", "UI-008", "UI-009", "UI-010", "UI-011", "LINK-001", "STATE-001", "ROLLBACK-001", "WAVE-001", "WAVE-002", "PASS-001"],
+  "contractIds": ["PARITY-001", "SCOPE-001", "DOC-001", "COMPONENT-001", "RISK-001", "FIELD-001", "FIELD-002", "BODY-001", "BODY-002", "BODY-003", "FLOW-001", "FLOW-002", "FLOW-003", "FLOW-004", "FLOW-005", "HUMAN-001", "CONFIRM-001", "EVIDENCE-001", "EVIDENCE-002", "SHARE-001", "SHARE-002", "PHOTO-001", "EXPORT-001", "UI-001", "UI-002", "UI-003", "UI-004", "UI-005", "UI-006", "UI-007", "UI-008", "UI-009", "UI-010", "UI-011", "LINK-001", "STATE-001", "CONFLICT-001", "ROLLBACK-001", "WAVE-001", "WAVE-002", "PASS-001"],
   "tupleSchemas": {
       "field": ["path", "type", "required", "codec", "currentStructuredPath|null"],
       "source": ["id", "path", "symbol", "contract"],
       "acceptance": ["id", "assertion"],
-      "transition": ["from", "event", "to", "effectsId"]
+      "transition": ["from", "event", "to", "effectsId"],
+      "browserAssertion": ["id", "fixture", "measurableAssertion"]
     },
   "sourceSeams": [
       ["SRC-01", "lib/risk-assessment-schema.ts", "RiskAssessmentRow", "All 21 production field names and enum/range validation are canonical; editor rows add only stable id in editorV2."],
       ["SRC-02", "lib/types.ts", "WorkPlanStructured | PermitInspectionStructured | TbmBriefingStructured | TbmLogStructured | EducationRecordStructured | TbmRiskLink", "Known fields project to these existing structured payloads; richer v2-only fields remain in editorV2 and export manifests."],
       ["SRC-03", "lib/workpack-readiness.ts", "applyWorkpackDeliverablesChange | assessWorkpackReadiness", "Current edit invalidates ontologyQa, qualityContract, and dbHarness; v2 extends invalidation to generationEvidence and generationEvidenceError."],
       ["SRC-04", "app/api/ask/route.ts", "POST", "Current full regeneration seam calls runAsk then attachGenerationEvidence; it is the fallback when no verified base exists, not an edit-preserving revalidator."],
-      ["SRC-05", "lib/generation-evidence.ts", "verifyAskResponseGenerationEvidence | generationEvidenceReferences | attachGenerationEvidence | buildResponseContentDigest", "Revalidation verifies the base seal, recovers trusted references, and reseals the final materialization."],
+      ["SRC-05", "lib/generation-evidence.ts", "verifyAskResponseGenerationEvidence | generationEvidenceReferences | attachGenerationEvidence | buildResponseContentDigest", "The seal exists only at top-level AskResponse.generationEvidence. buildResponseContentDigest deletes only top-level generationEvidence/generationEvidenceError before hashing the remaining canonical response; editorV2 never nests either field."],
       ["SRC-06", "lib/workpack-ontology-qa.ts", "attachWebOntologyQa | buildOntologyQaSource", "V2 review mode must attach a verdict without auto-mutating structured editor content; failed review returns blocking issues."],
       ["SRC-07", "lib/quality-contract.ts", "attachQualityContract", "Quality is recomputed only after deterministic editor projection and ontology review."],
       ["SRC-08", "app/api/workpacks/route.ts", "POST", "Current authoritative persistence is insert-only and requires valid generation evidence; v2 preserves immutable inserts and adds server-stamped human confirmation."],
       ["SRC-09", "lib/workpack-store.ts", "buildWorkpackEvidenceSummary | buildWorkpackInsertPayload | buildReopenData", "Existing deliverables/evidence_summary/status JSONB carry editorV2, structured data, review metadata, and seals without a migration."],
-      ["SRC-10", "lib/workpack-commercial-store.ts", "assessStoredWorkpackShareAuthority", "Share authority is derived from the stored workpack and must additionally verify v2 review and digest freshness."],
+      ["SRC-10", "lib/workpack-commercial-store.ts", "assessStoredWorkpackShareAuthority", "Current authority derives legacy readiness but does not verify editor block identity/revision/digest. Wave 4 owns that extension; v2 share remains blocked until it lands."],
       ["SRC-11", "app/api/workpacks/[id]/read-confirmations/route.ts", "GET | POST", "Stores share-session read acknowledgment only; it cannot satisfy TBM attendance, understanding, signature, or safety confirmation."],
       ["SRC-12", "app/api/workpacks/[id]/improvements/route.ts", "GET | POST", "POST returns improvementId but not photo row id/storagePath; GET returns improvements and photo_summary but not workpack_improvement_photos."],
       ["SRC-13", "components/WorkpackEditor.tsx", "META_SECTION_PATTERNS | META_KEY_PATTERNS | parseSheetRows", "Existing patterns prove body/metadata separation is already recognized for export; v2 moves the boundary into a shared lossless adapter used before editing."],
@@ -44,8 +47,53 @@
       ["SRC-19", "app/api/export/xlsx/route.ts", "POST", "Existing structured modes remain; v2 adds the deterministic hidden manifest and never drops richer fields."],
       ["SRC-20", "app/api/export/pdf/route.ts", "POST", "Visible PDF body uses submission content; deterministic provenance/audit appendix and field-path manifest remain outside editable body semantics."],
       ["SRC-21", "app/api/export/hwp/route.ts", "POST", "Existing HWP-compatible output remains; v2 appends deterministic semantic data outside the editable body."],
-      ["SRC-22", "lib/xlsx-builder.ts | lib/hwp-table-builder.ts | components/WorkpackEditor.tsx @rhwp client", "builders and HWPX client", "All formats consume one ExportManifestBridge; current document-specific structured projections remain compatibility views."]
+      ["SRC-22", "lib/xlsx-builder.ts | lib/hwp-table-builder.ts | components/WorkpackEditor.tsx @rhwp client", "builders and HWPX client", "All formats consume one ExportManifestBridge; current document-specific structured projections remain compatibility views."],
+      ["SRC-23", "app/api/workpacks/[id]/share-sessions/route.ts", "GET | POST", "Current POST accepts recipients only and persists no editor document/block/revision/digest binding. Wave 4 must validate and store that binding in existing access_policy JSONB before v2 share unlocks."],
+      ["SRC-24", "app/api/workflow/dispatch/route.ts", "POST", "Current allowed fields reject client freshness fields and load a session without access_policy binding. Wave 4 keeps the client request shape, loads the server session binding, and rejects stale or missing bindings before provider dispatch."]
     ],
+  "validation": {
+      "currentGate": "CURRENT_REGISTRY_CHECKS_ONLY",
+      "semanticParity": "NOT_CLAIMED",
+      "currentClaims": ["spec.json parses", "the exact 12 production DocumentKeys/titles and 21 RiskAssessmentRow fields match source", "all field codecs resolve", "JSON fingerprints match the compact Markdown fingerprint table", "Wave/document/viewport stable IDs are present in Markdown", "only the two allowed files change", "line budgets and LF are enforced"],
+      "notCurrentlyProved": ["sentence-level Markdown/JSON equality", "a canonicalContract deep-equal mirror", "future production behavior", "future scripts or tests that do not exist at this commit"],
+      "commands": {
+            "jsonParse": "node -e \"const fs=require('fs');const p='evaluation/workpack-document-editors-v2-2026-07-13/spec.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));if(j.meta.status!=='HOLD_PENDING_INDEPENDENT_PASS'||j.independentGate.holdState!==j.meta.status||j.documents.length!==12)process.exit(1);console.log('JSON_PARSE=PASS')\"",
+            "sourceShape": "node -e 'const fs=require(\"fs\");const j=JSON.parse(fs.readFileSync(\"evaluation/workpack-document-editors-v2-2026-07-13/spec.json\"));const w=fs.readFileSync(\"components/WorkpackEditor.tsx\",\"utf8\");const r=fs.readFileSync(\"lib/risk-assessment-schema.ts\",\"utf8\");const keys=[...w.match(/export type DocumentKey =([\\s\\S]*?);/)[1].matchAll(/\"([^\"]+)\"/g)].map(x=>x[1]);const meta=w.match(/const documentMeta: EditableDocument\\[\\] = \\[([\\s\\S]*?)\\n\\];/)[1];const docs=[...meta.matchAll(/key: \"([^\"]+)\"[\\s\\S]*?title: \"([^\"]+)\"/g)].map(x=>[x[1],x[2]]);const fields=[...r.match(/export type RiskAssessmentRow = \\{([\\s\\S]*?)\\n\\};/)[1].matchAll(/^\\s{2}([A-Za-z][A-Za-z0-9]*):/gm)].map(x=>x[1]);if(JSON.stringify(keys)!==JSON.stringify(j.documents.map(x=>x.key))||JSON.stringify(docs)!==JSON.stringify(j.documents.map(x=>[x.key,x.title]))||JSON.stringify(fields)!==JSON.stringify(j.common.typeRegistry.RiskAssessmentEditorRow.fields.slice(1).map(x=>x[0])))process.exit(1);console.log(\"SOURCE_SHAPE=PASS\")'",
+            "registryIntegrity": "node -e 'const fs=require(\"fs\"),p=\"evaluation/workpack-document-editors-v2-2026-07-13/\",j=JSON.parse(fs.readFileSync(p+\"spec.json\")),m=fs.readFileSync(p+\"spec.md\",\"utf8\"),f=j.integrityFingerprints,H=v=>{let h=14695981039346656037n;for(const b of Buffer.from(JSON.stringify(v))){h^=BigInt(b);h=BigInt.asUintN(64,h*1099511628211n)}return h.toString(16).padStart(16,\"0\")},E=d=>[...d.typeBindings.flatMap(b=>j.common.typeRegistry[b.type].fields.map(q=>{const x=[b.prefix+\".\"+q[0],...q.slice(1)];if(Object.hasOwn(b.currentOverrides,q[0]))x[4]=b.currentOverrides[q[0]];return x})),...d.fields];for(let i=0;i<j.documents.length;i++){const e=E(j.documents[i]),r=f.documents[i];if(r[2]!==e.length||r[3]!==H(e)||!m.includes(r[3]))process.exit(1)}for(let i=0;i<j.implementation.waves.length;i++){const w=j.implementation.waves[i],r=f.waves[i],n={documents:w.documents,ownedFiles:w.ownedFiles,readOnlyDependencies:w.readOnlyDependencies,testFiles:w.testFiles,commands:w.commands,rollback:w.rollback};if(r[2]!==H(n)||!m.includes(r[2]))process.exit(1)}for(const [v,r] of [[j.implementation.viewports,f.viewports],[j.implementation.browserMatrix,f.browserMatrix],[j.contractIds,f.contractIds],[j.ui.browserAssertions,f.browserAssertions]])if(r[0]!==v.length||r[1]!==H(v)||!m.includes(r[1]))process.exit(1);const c=new Set(Object.keys(j.common.codecs)),t=[...Object.values(j.common.typeRegistry).flatMap(x=>x.fields),...j.documents.flatMap(x=>x.fields)];if(t.some(x=>!c.has(x[3]))||[...j.contractIds,...j.ui.browserAssertions.map(x=>x[0])].some(x=>!m.includes(\"`\"+x+\"`\")))process.exit(1);console.log(\"REGISTRY_INTEGRITY=PASS\")'",
+            "diff": "git diff --check",
+            "scope": "git diff --name-only"
+          },
+      "wave0Prerequisite": {
+            "rule": "Before any product file changes, Wave 0 first creates and runs the contract validator in an isolated commit.",
+            "futureFiles": ["scripts/workpack_editor_contract_audit.mjs", "tests/workpack-editor-contract.test.ts"],
+            "requiredChecks": ["parse this JSON", "extract Markdown stable-ID tables", "expand shared type bindings", "compare document fields/codecs/waves/viewports", "compare production DocumentKey/RiskAssessmentRow", "fail on an unresolved codec or undocumented shared file"],
+            "productImplementationBlockedUntilGreen": true
+          }
+    },
+  "integrationLedger": {
+      "referenceHead": "acf809ee47713123469c3c9b31edd11ad5f8deae",
+      "referenceBranch": "feat/phase-a-evidence-integration",
+      "mobilePriority": {
+            "branch": "feat/documents-mobile-priority",
+            "worktree": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/documents-mobile-priority",
+            "head": "ec132129979dcbb684a87c7bbe89ff2a85180533",
+            "dirty": ["tests/documents-editor-layout.test.ts", "output/playwright/2026-07-11/"],
+            "reviewedCommitMapping": {
+                  "2226aa22b648d324b8cc4c5360bac7a19d39f298": "cf451c5f34667d5d4a35d6b7f05aa50f936d4280",
+                  "ec132129979dcbb684a87c7bbe89ff2a85180533": "24513457c7855450c4c335269325df28a6ecbd37"
+                },
+            "rule": "The reviewed product patches already exist in the integration lineage under mapped commits. Exclude the dirty stale worktree from implementation inputs."
+          },
+      "rules": ["Start each implementation wave from the then-current integration head or its designated successor, never this stale spec base.", "Assign one owner before editing any shared file.", "Hand-merge reviewed hunks; never wholesale-copy a file or directory from another worktree.", "Never copy output/playwright/2026-07-11 or the dirty documents-editor-layout test.", "Re-run source-shape and wave tests after every integration handoff."],
+      "waves": [
+            {"wave": "wave0", "owner": "workpack-editor-wave0", "order": 1, "sharedFiles": ["lib/workpack-readiness.ts", "app/api/workpacks/route.ts", "lib/workpack-store.ts", "lib/workpack-commercial-store.ts"], "handoff": "contract-validator-first, then adapter/review authority"},
+            {"wave": "wave1", "owner": "workpack-editor-wave1", "order": 2, "sharedFiles": ["components/WorkpackEditor.tsx", "components/WorkpackEditor.module.css", "components/CurrentWorkpackModules.tsx", "tests/documents-editor-layout.test.ts", "lib/xlsx-builder.ts", "lib/hwp-table-builder.ts", "app/api/export/xlsx/route.ts", "app/api/export/pdf/route.ts", "app/api/export/hwp/route.ts"], "handoff": "start from integration mappings cf451c5/2451345; recreate tests from clean lineage"},
+            {"wave": "wave2", "owner": "workpack-editor-wave2", "order": 3, "sharedFiles": ["lib/workpack-editor-document-specs.ts", "lib/workpack-editor-adapter.ts", "lib/workpack-editor-export-manifest.ts", "tests/documents-editor-layout.test.ts", "lib/xlsx-builder.ts", "lib/hwp-table-builder.ts"], "handoff": "after Wave 1 owner releases shared modules"},
+            {"wave": "wave3", "owner": "workpack-editor-wave3", "order": 4, "sharedFiles": ["lib/workpack-editor-document-specs.ts", "lib/workpack-editor-adapter.ts", "lib/workpack-editor-export-manifest.ts"], "handoff": "improvements route and photo libraries remain read-only"},
+            {"wave": "wave4", "owner": "workpack-editor-wave4-share-freshness", "order": 5, "sharedFiles": ["lib/workpack-commercial.ts", "lib/workpack-commercial-store.ts", "app/api/workpacks/[id]/share-sessions/route.ts", "app/api/workflow/dispatch/route.ts"], "handoff": "single owner coordinates with active share/workflow branches before edits"},
+            {"wave": "wave5", "owner": "workpack-editor-wave5-gate", "order": 6, "sharedFiles": ["tests/workpack-editor-browser-matrix.test.ts", "tests/workpack-editor-export-roundtrip.test.ts", "tests/documents-editor-layout.test.ts"], "handoff": "verification only after Waves 0-4 are integrated"}
+          ]
+    },
   "common": {
       "projection": {
             "editorV2": "deliverables.editorV2.documents.<DocumentKey>.content.<fieldPath>",
@@ -92,8 +140,13 @@
                     "serialize": "canonicalJsonArray",
                     "onInvalid": "validation_error_and_preserve_raw_in_unmapped"
                   },
-            "stableIdArray": {
-                    "parse": "acceptNonEmptyStringArrayPreservingOrderAndRejectUnknownReferences",
+            "stableIdArrayNonEmpty": {
+                    "parse": "acceptArrayWithAtLeastOneNonEmptyStableIdPreservingOrderAndRejectUnknownReferences",
+                    "serialize": "canonicalJsonArray",
+                    "onInvalid": "blocking_reference_error"
+                  },
+            "stableIdArrayAllowEmpty": {
+                    "parse": "acceptZeroOrMoreNonEmptyStableIdsPreservingOrderAndRejectUnknownReferences",
                     "serialize": "canonicalJsonArray",
                     "onInvalid": "blocking_reference_error"
                   },
@@ -126,6 +179,11 @@
                     "parse": "acceptNullOrStringPreservingUnicodeAndInteriorAndBoundaryWhitespace",
                     "serialize": "canonicalJsonNullOrString",
                     "onInvalid": "blocking_type_error"
+                  },
+            "nullableStableId": {
+                    "parse": "acceptNullOrNonEmptyStableIdWithoutGeneratingOrCoercing",
+                    "serialize": "canonicalJsonNullOrString",
+                    "onInvalid": "blocking_reference_error"
                   },
             "nullableStrictNumber": {
                     "parse": "acceptNullOrFiniteNumberOnly",
@@ -188,7 +246,7 @@
                               ["verificationChecker", "string", "always", "exactString", "structured.riskAssessmentRows[].verificationChecker"],
                               ["whyLikelihood", "string", "always", "exactString", "structured.riskAssessmentRows[].whyLikelihood"],
                               ["whySeverity", "string", "always", "exactString", "structured.riskAssessmentRows[].whySeverity"],
-                              ["evidenceRefs", "string[]", "at least one", "stableIdArray", "structured.riskAssessmentRows[].evidenceRefs"]
+                              ["evidenceRefs", "string[]", "at least one", "stableIdArrayNonEmpty", "structured.riskAssessmentRows[].evidenceRefs"]
                             ],
                     "notes": {
                               "id": "Editor-only stable identity derived deterministically for legacy rows; it never replaces a production field.",
@@ -200,7 +258,7 @@
                               ["actorType", "\"authenticated_user\"|\"worker_self\"|\"recorded_for_worker\"", "as declared", "strictEnum", null],
                               ["actorId", "string", "as declared", "stableId", null],
                               ["displayName", "string", "as declared", "exactString", null],
-                              ["recordedForWorkerId", "string|null", "as declared", "nullableExactString", null],
+                              ["recordedForWorkerId", "string|null", "as declared", "nullableStableId", null],
                               ["occurredAt", "string", "as declared", "isoDateTime", null],
                               ["authority", "\"server_session\"|\"worker_confirmation\"", "as declared", "strictEnum", null]
                             ],
@@ -239,8 +297,8 @@
                     "fields": [
                               ["id", "string", "after read", "stableId", "GET /api/workpacks/[id]/read-confirmations -> confirmations[].id"],
                               ["shareBlockId", "string", "always", "stableId", null],
-                              ["shareSessionId", "string", "always", "stableId", "GET /api/workpacks/[id]/read-confirmations -> confirmations[].share_session_id"],
-                              ["workerId", "string", "when known", "stableId", "GET /api/workpacks/[id]/read-confirmations -> confirmations[].worker_id"],
+                              ["shareSessionId", "string|null", "always", "nullableStableId", "GET /api/workpacks/[id]/read-confirmations -> confirmations[].share_session_id"],
+                              ["workerId", "string|null", "when known", "nullableStableId", "GET /api/workpacks/[id]/read-confirmations -> confirmations[].worker_id"],
                               ["workerDisplayName", "string", "always", "exactString", "GET /api/workpacks/[id]/read-confirmations -> confirmations[].worker_display_name"],
                               ["languageCode", "string", "always", "exactString", "GET /api/workpacks/[id]/read-confirmations -> confirmations[].language_code"],
                               ["confirmationMethod", "\"button\"", "always", "strictEnum", "GET /api/workpacks/[id]/read-confirmations -> confirmations[].confirmation_method"],
@@ -252,6 +310,7 @@
             "ShareBlockBase": {
                     "fields": [
                               ["id", "string", "always", "stableId", null],
+                              ["documentKey", "DocumentKey", "always", "documentKey", null],
                               ["sourceDocumentKeys", "DocumentKey[]", "at least one", "documentKeyArray", null],
                               ["sourceRevision", "integer", "always", "strictInteger", null],
                               ["evidenceDigest", "string", "always", "digest", null],
@@ -260,10 +319,11 @@
                               ["actionRequired", "string", "always", "exactString", null],
                               ["confirmationRequired", "boolean", "always", "strictBoolean", null],
                               ["state", "\"draft\"|\"stale\"|\"ready\"|\"dispatched\"", "always", "strictEnum", null],
-                              ["shareSessionId", "string", "after server creation", "stableId", "workpack_share_sessions.id"]
+                              ["shareSessionId", "string|null", "always", "nullableStableId", "workpack_share_sessions.id or null before server creation"]
                             ],
                     "staleOn": ["edit to any sourceDocumentKey", "evidence add/remove/change", "translation source edit", "worker audience or language change", "human confirmation cleared", "server digest mismatch"],
-                    "rebuild": "Rebuild creates a new block id and current revision/digest while preserving intended recipients only; it clears shareSessionId, dispatch state, and current acknowledgment display."
+                    "rebuild": "Rebuild creates a new block id and current revision/digest while preserving intended recipients only; it clears shareSessionId, dispatch state, and current acknowledgment display.",
+                    "serverBinding": "access_policy.editorV2Binding stores documentKey, blockId=id, sourceRevision, and evidenceDigest after server-side comparison with the authoritative stored block."
                   },
             "EvidenceMaterializationTarget": {
                     "fields": [
@@ -276,22 +336,25 @@
             "EditorEvidenceRef": {
                     "reviewedBooleanForbidden": true,
                     "fields": [
-                              ["id", "string", "always", "stableId", "AskResponse.dbHarness.packet.directEvidence|sifCases|supportingEvidence[].id or ontology evidence citedUid"],
-                              ["sourceType", "\"law\"|\"kosha_guidance\"|\"sif_case\"|\"photo\"|\"field_record\"", "always", "strictEnum", "SafetyReferenceItem.item_type/source_id plus ontology evidence sourceType"],
-                              ["lifecycle", "\"current\"|\"stale\"|\"retired\"", "always", "strictEnum", "SafetyReferenceItem.kosha_guide.lifecycle or current published-law overlay derivation"],
-                              ["reviewState", "\"draft\"|\"verified\"|\"published\"", "always", "strictEnum", "ontology evidence reviewState"],
+                              ["id", "string", "always", "stableId", "Stable editor key; use SafetyReferenceItem.id unchanged when present, otherwise ontology citedUid"],
+                              ["sourceItemId", "string|null", "catalog evidence only", "nullableStableId", "SafetyReferenceItem.id exactly; null for ontology-only evidence"],
+                              ["rawItemType", "string|null", "catalog evidence only", "nullableExactString", "SafetyReferenceItem.item_type exactly, including technical-guideline, technical-support-regulation, and future values"],
+                              ["rawSourceId", "string|null", "catalog evidence only", "nullableStableId", "SafetyReferenceItem.source_id exactly"],
+                              ["rawEvidenceRole", "\"direct\"|\"supporting\"|null", "catalog evidence when present", "nullableStrictEnum", "SafetyReferenceItem.evidence_role exactly; null remains null"],
+                              ["normalizedSourceClass", "\"law\"|\"kosha_guidance\"|\"sif_case\"|\"photo\"|\"field_record\"|\"other\"", "always", "strictEnum", "Derived classification stored alongside, never instead of, rawItemType/rawSourceId"],
+                              ["lifecycle", "\"current\"|\"stale\"|\"retired\"|\"unknown\"", "always", "strictEnum", "SafetyReferenceItem.kosha_guide.lifecycle or reviewed ontology/catalog derivation"],
+                              ["reviewState", "\"draft\"|\"verified\"|\"published\"|\"unknown\"", "always", "strictEnum", "ontology reviewState or explicit unknown"],
                               ["resolution", "\"resolved\"|\"unresolved\"", "always", "strictEnum", "ontology evidence resolution"],
                               ["quality", "\"accepted\"|\"review_required\"|null", "always", "nullableStrictEnum", "SafetyReferenceItem.kosha_guide.quality or null"],
-                              ["evidenceRole", "\"direct\"|\"supporting\"", "always", "strictEnum", "SafetyReferenceItem.evidence_role"],
+                              ["evidenceRole", "\"direct\"|\"supporting\"", "always", "strictEnum", "Exact rawEvidenceRole when present; otherwise a versioned derivation recorded without mutating rawEvidenceRole"],
                               ["directEligibility", "boolean", "always", "strictBoolean", "SafetyReferenceItem.kosha_guide.directEligible or deterministic law/SIF rule"],
                               ["obligationClassification", "\"statutory_mandate\"|\"technical_guidance_only\"|\"statutory_mandate_with_guidance\"|\"review_required\"", "always", "strictEnum", "ontology evidence-chain obligation classification"],
                               ["relation", "\"mandatedBy\"|\"supportedBy\"|\"prioritizedBy\"|\"observedBy\"", "always", "strictEnum", "ontology evidence relation"],
                               ["roleDetail", "\"hazard_priority_only\"|\"technical_guidance_only\"|null", "always", "nullableStrictEnum", "ontology SIF role or KOSHA guidance role"],
                               ["bodyKind", "\"native\"|\"unknown\"|null", "always", "nullableStrictEnum", "SafetyReferenceItem.kosha_guide.bodyKind or null"],
-                              ["citedUid", "string", "always", "exactString", "ontology evidence citedUid"],
-                              ["sourceItemId", "string", "always", "stableId", "SafetyReferenceItem.id or ontology itemId"],
-                              ["productionItemId", "string|null", "optional", "nullableExactString", "ontology KOSHA guidance productionItemId or null"],
-                              ["chunkId", "string|null", "optional", "nullableExactString", "ontology KOSHA guidance chunk.chunkId or null"],
+                              ["citedUid", "string|null", "ontology evidence only", "nullableExactString", "Ontology citedUid exactly; null for non-ontology catalog/photo/field evidence"],
+                              ["productionItemId", "string|null", "optional", "nullableStableId", "ontology KOSHA guidance productionItemId or null"],
+                              ["chunkId", "string|null", "optional", "nullableStableId", "ontology KOSHA guidance chunk.chunkId or null"],
                               ["chunkSha256", "string|null", "optional", "nullableExactString", "ontology KOSHA guidance chunk.chunkSha256 or null"],
                               ["page", "number|null", "optional", "nullableStrictNumber", "SafetyReferenceItem.kosha_guide.anchors[0].page or ontology guidance chunk.page"],
                               ["location", "string|null", "optional", "nullableExactString", "ontology KOSHA guidance chunk.location or null"],
@@ -299,9 +362,17 @@
                               ["materializationTargets", "EvidenceMaterializationTarget[]", "always", "evidenceTargetArray", "structured document evidenceRefs plus evidenceLabels document mapping"],
                               ["unresolvedReason", "string|null", "optional", "nullableExactString", "ontology QA missing/registry bridge reason or null"]
                             ],
+                    "losslessIdentityRule": "Never replace rawItemType, rawSourceId, rawEvidenceRole, sourceItemId, or citedUid with normalized values. Non-ontology evidence has citedUid=null. Unknown/future item_type values normalize to other and review_required while the raw string and original ID remain byte-preserved.",
+                    "normalizationMap": [
+                              {"rawItemType": ["technical-guideline", "technical-support-regulation"], "normalizedSourceClass": "kosha_guidance"},
+                              {"rawItemType": ["sif-case"], "normalizedSourceClass": "sif_case"},
+                              {"rawItemType": ["photo"], "normalizedSourceClass": "photo"},
+                              {"rawItemType": ["field-record"], "normalizedSourceClass": "field_record"},
+                              {"rawItemType": ["future or unmapped string"], "normalizedSourceClass": "other", "effect": "review_required and not direct eligible"}
+                            ],
                     "validRoleCombinations": [
                               {
-                                          "sourceType": "law",
+                                          "normalizedSourceClass": "law",
                                           "required": {
                                                         "evidenceRole": "direct",
                                                         "directEligibility": true,
@@ -316,9 +387,8 @@
                                           "forbidden": ["technical_guidance_only", "review_required", "SIF-only legal claim"]
                                         },
                               {
-                                          "sourceType": "kosha_guidance",
+                                          "normalizedSourceClass": "kosha_guidance",
                                           "required": {
-                                                        "evidenceRole": "supporting",
                                                         "directEligibility": true,
                                                         "lifecycle": "current",
                                                         "reviewState": "verified_or_published",
@@ -329,11 +399,13 @@
                                                         "bodyKind": "native",
                                                         "anchor": "chunkSha256,page,location present"
                                                       },
+                                          "allowedEvidenceRole": ["direct", "supporting"],
+                                          "evidenceRoleRule": "Preserve rawEvidenceRole when present. direct may describe document wording support but never upgrades a technical source into a statutory mandate.",
                                           "allowedObligation": ["technical_guidance_only", "statutory_mandate_with_guidance"],
                                           "forbidden": ["statutory_mandate without a separate eligible published law source"]
                                         },
                               {
-                                          "sourceType": "kosha_guidance",
+                                          "normalizedSourceClass": "kosha_guidance",
                                           "required": {
                                                         "evidenceRole": "supporting",
                                                         "directEligibility": false,
@@ -343,7 +415,7 @@
                                           "shareEffect": "blocking"
                                         },
                               {
-                                          "sourceType": "sif_case",
+                                          "normalizedSourceClass": "sif_case",
                                           "required": {
                                                         "evidenceRole": "supporting",
                                                         "directEligibility": false,
@@ -354,7 +426,7 @@
                                           "forbidden": ["statutory_mandate", "statutory_mandate_with_guidance", "technical_guidance_only", "control auto-confirm", "human confirmation"]
                                         },
                               {
-                                          "sourceType": "photo",
+                                          "normalizedSourceClass": "photo",
                                           "required": {
                                                         "evidenceRole": "supporting",
                                                         "directEligibility": false,
@@ -364,7 +436,7 @@
                                           "note": "May support observed Before/After state or actionTaken only; cannot establish legal duty."
                                         },
                               {
-                                          "sourceType": "field_record",
+                                          "normalizedSourceClass": "field_record",
                                           "required": {
                                                         "evidenceRole": "supporting",
                                                         "directEligibility": false,
@@ -372,10 +444,18 @@
                                                         "obligationClassification": "review_required"
                                                       },
                                           "note": "May support a field observation only; cannot establish legal duty."
+                                        },
+                              {
+                                          "normalizedSourceClass": "other",
+                                          "required": {
+                                                        "directEligibility": false,
+                                                        "obligationClassification": "review_required"
+                                                      },
+                                          "note": "Future and unmapped item types remain lossless but cannot unlock direct use or sharing until a reviewed normalization rule exists."
                                         }
                             ],
                     "reviewRequiredRule": "quality=review_required, resolution=unresolved, obligationClassification=review_required, non-current lifecycle, missing target, or invalid direct use is derived; no reviewed boolean is stored.",
-                    "digestRule": "evidenceDigest is sha256:base64url over canonical evidence refs sorted by id and including lifecycle, reviewState, resolution, quality, role, eligibility, obligation, relation, roleDetail, bodyKind, source UID, chunk hash, page, location, targets, and URL validation result."
+                    "digestRule": "evidenceDigest is sha256:base64url over canonical evidence refs sorted by id and including sourceItemId, rawItemType, rawSourceId, rawEvidenceRole, normalizedSourceClass, citedUid|null, lifecycle, reviewState, resolution, quality, role, eligibility, obligation, relation, roleDetail, bodyKind, production/chunk IDs, chunk hash, page, location, targets, and URL validation result."
                   }
           }
     },
@@ -390,16 +470,23 @@
                   ],
             "globalRoots": [
                     ["evidence", "Record<string,EditorEvidenceRef>"],
-                    ["reviewArtifacts", "dbHarness + ontologyQa + qualityContract + generationEvidence"],
+                    ["reviewArtifacts", "dbHarness + ontologyQa + qualityContract only"],
                     ["auditHistory", "prior invalidated appendices/digests"]
                   ]
+          },
+      "generationSeal": {
+            "location": "AskResponse.generationEvidence and AskResponse.generationEvidenceError at top level only",
+            "editorV2Forbidden": ["reviewArtifacts.generationEvidence", "reviewArtifacts.generationEvidenceError", "any copied signature or snapshot"],
+            "digestBoundary": "Use existing buildResponseContentDigest unchanged: shallow-clone the final AskResponse candidate, delete only top-level generationEvidence and generationEvidenceError, canonicalize every remaining top-level field including deliverables.editorV2, dbHarness, ontologyQa, and qualityContract, then SHA-256 base64url.",
+            "resealSequence": ["verify the untouched base response top-level envelope", "recover trusted generationEvidenceReferences from the verified snapshot", "build the final candidate response with fresh review metadata and no top-level seal/error", "assert editorV2 contains no seal copy", "call existing attachGenerationEvidence(candidate,{secret,generatedAt})", "verifyAskResponseGenerationEvidence on the returned response"],
+            "moduleOwnership": "lib/generation-evidence.ts remains read-only in Waves 0 and 1; no digest algorithm or envelope change is required."
           },
       "boundary": {
             "id": "BODY-001",
             "plannedModule": "lib/workpack-editor-legacy-boundary.ts",
             "sourcePatterns": "Move META_SECTION_PATTERNS and META_KEY_PATTERNS from WorkpackEditor.tsx.",
             "appendixSentinels": ["연결 상태", "KOSHA 기술지침/기술지원규정 직접 인용", "KOSHA 기술지침/기술지원규정 검토 필요", "내부 안전지식 DB 반영", "근거 요약", "반영 근거", "법령 근거 요약", "KOSHA 보강", "확인 근거 첨부", "중대재해 예방 관리체계 점검", "교육 적합성 확인", "유사 재해사례", "KOSHA 교육포털 연계", "TBM 필수 반영 체크"],
-            "parse": ["Prefer verified editorV2 content.", "Otherwise prefer current production structured payload.", "Tokenize the exact legacy deliverables.<DocumentKey> string while retaining original line endings and section order.", "Classify versioned META_SECTION_PATTERNS and META_KEY_PATTERNS into legacyAppendix; classify known form sections into legacySubmissionBody.", "Parse only legacySubmissionBody into document fields.", "Normalize recognized appendix provenance into evidence/reviewArtifacts while preserving the raw section verbatim in legacyAppendix.", "Put unknown lines in unmappedLegacyLines and block authoritative revalidation instead of guessing."],
+            "parse": ["Prefer verified editorV2 content.", "Otherwise prefer current production structured payload.", "Tokenize the exact legacy deliverables.<DocumentKey> string while retaining original line endings and section order.", "Classify versioned META_SECTION_PATTERNS and META_KEY_PATTERNS into legacyAppendix; classify known form sections into legacySubmissionBody.", "Parse only legacySubmissionBody into document fields.", "Normalize recognized appendix provenance into evidence and non-seal reviewArtifacts while preserving the raw section verbatim in legacyAppendix.", "Put unknown lines in unmappedLegacyLines and block authoritative revalidation instead of guessing."],
             "serialize": ["Serialize document content to deterministic submission-body prose or structured payload.", "Serialize field-path fallback lines in the non-editable [SafeClaw Editor v2 fields] section.", "Materialize a fresh non-editable provenance/review appendix from current evidence and reviewArtifacts only when a legacy/export consumer requires it.", "Never bind the combined legacy string back to an editable control."],
             "editableForbidden": ["DB harness summaries", "ontology QA payloads", "qualityContract payloads", "generation evidence seals", "KOSHA/law source metadata", "internal safety DB metadata", "management notes", "operation graph", "raw provenance appendix"],
             "invariant": "parse(serialize(envelope)) deep-equals the normalized envelope including raw legacy appendix sections, unknown lines, inline citation refs, and audit history."
@@ -415,27 +502,32 @@
       "reviewStates": ["generated", "edited", "review_pending", "human_confirmed"],
       "transitions": [
             ["generated", "USER_EDIT", "edited", "EDIT_INVALIDATE"],
+            ["generated", "VALIDATE_UNEDITED_PASS", "review_pending", "VALIDATE_UNEDITED_PASS"],
+            ["generated", "VALIDATE_UNEDITED_FAIL", "generated", "VALIDATE_UNEDITED_FAIL"],
             ["human_confirmed", "USER_EDIT", "edited", "EDIT_INVALIDATE"],
             ["edited", "REVALIDATION_PASS", "review_pending", "REVALIDATE_PASS"],
             ["edited", "REVALIDATION_FAIL", "edited", "REVALIDATE_FAIL"],
             ["review_pending", "USER_EDIT", "edited", "EDIT_INVALIDATE"],
             ["review_pending", "AUTHENTICATED_CONFIRM_AND_SAVE", "human_confirmed", "SERVER_CONFIRM_SAVE"]
           ],
-      "forbiddenTransitions": ["generated -> review_pending", "generated -> human_confirmed", "edited -> human_confirmed", "model output -> approved", "model output -> approver identity", "model output -> legal or safety confirmation"],
+      "forbiddenTransitions": ["generated -> human_confirmed", "edited -> human_confirmed", "model output -> review_pending", "model output -> approved", "model output -> approver identity", "model output -> legal or safety confirmation"],
       "effects": {
             "EDIT_INVALIDATE": {
                     "increment": "revision",
-                    "clear": ["dbHarness", "ontologyQa", "qualityContract", "generationEvidence", "generationEvidenceError", "humanConfirmation"],
+                    "clear": ["AskResponse.dbHarness", "AskResponse.ontologyQa", "AskResponse.qualityContract", "AskResponse.generationEvidence", "AskResponse.generationEvidenceError", "editorV2.reviewArtifacts.dbHarness", "editorV2.reviewArtifacts.ontologyQa", "editorV2.reviewArtifacts.qualityContract", "editorV2.humanConfirmation"],
                     "preserveAuditOnly": ["baseGenerationDigest", "previous materializationDigest", "previous evidenceDigest", "raw legacy appendix"],
                     "stale": "all dependent share blocks"
                   },
-            "REVALIDATE_PASS": ["verify prior generation seal", "recover trusted generationEvidenceReferences", "project editable content without audit appendix", "validate RiskAssessmentRow fields and all references", "buildDbHarnessPacket", "attach ontology QA in review-only/no-mutation mode", "attachQualityContract", "compute evidenceDigest and materializationDigest", "set review_pending and reseal"],
+            "VALIDATE_UNEDITED_PASS": ["verify the existing top-level generationEvidence", "assert all document content and legacy submission body bytes are unchanged", "validate current risk/evidence/review artifacts", "compute editorV2 revision/digests and set review_pending metadata without changing document content", "clear only top-level generationEvidence/generationEvidenceError on the candidate", "reseal with existing attachGenerationEvidence"],
+            "VALIDATE_UNEDITED_FAIL": ["leave generated document content unchanged", "surface blocking issues", "keep human confirmation and share locked"],
+            "REVALIDATE_PASS": ["verify untouched base top-level generationEvidence", "recover trusted generationEvidenceReferences", "project editable content without audit appendix", "validate RiskAssessmentRow fields and all references", "buildDbHarnessPacket", "attach ontology QA in review-only/no-mutation mode", "attachQualityContract", "compute evidenceDigest and materializationDigest", "set review_pending", "clear top-level generationEvidence/generationEvidenceError on final candidate", "reseal with existing attachGenerationEvidence; never copy the seal into editorV2"],
             "REVALIDATE_FAIL": ["retain local draft", "surface blocking issues", "keep share locked"],
-            "SERVER_CONFIRM_SAVE": ["authenticate and ignore client identity", "verify seal/revision/materializationDigest/evidenceDigest", "stamp ActorProvenance and HumanConfirmation", "set human_confirmed, recompute, reseal", "insert immutable workpack revision in existing JSONB", "return workpackId/revision/digests"]
+            "SERVER_CONFIRM_SAVE": ["authenticate and ignore client identity", "verify top-level seal/revision/materializationDigest/evidenceDigest", "require explicit confirmMaterialization=true", "stamp ActorProvenance and HumanConfirmation", "set human_confirmed without changing document content", "clear top-level seal/error on candidate and reseal with existing attachGenerationEvidence", "insert immutable workpack revision in existing JSONB", "return workpackId/revision/digests"]
           },
       "revalidation": {
             "endpoint": "POST /api/workpack/revalidate",
-            "request": ["sealed baseResponse", "edited editorV2", "expectedBaseGenerationDigest", "expectedRevision"],
+            "modes": ["validate_unedited", "revalidate_edited"],
+            "request": ["mode", "sealed baseResponse", "editorV2 candidate", "expectedBaseGenerationDigest", "expectedRevision"],
             "fallback": "POST /api/ask only when base is absent/unsealed/invalid; full regeneration never claims edit preservation",
             "pass": ["risk valid", "evidence resolves", "dbHarness ready", "ontology QA pass", "quality ready", "zero dropped/unmapped fields"],
             "failClosed": true
@@ -448,10 +540,28 @@
             "databaseMigration": false
           },
       "share": {
-            "unlock": ["load authoritative stored workpack", "verify generationEvidence", "require editorV2.reviewState=human_confirmed", "require authenticated HumanConfirmation digest/revision match", "require assessWorkpackReadiness.canShare", "require every share block sourceRevision/evidenceDigest match stored envelope", "create share session", "dispatch only through existing server authority"],
-            "everyBlock": ["sourceRevision", "evidenceDigest"],
+            "currentServerEnforcement": false,
+            "blockedUntil": "Wave 4 share-session and dispatch freshness contracts are implemented and green; before then the v2 feature flag must disable share-session creation and dispatch with freshness_server_contract_missing while legacy flag-off behavior remains unchanged.",
+            "unlock": ["load authoritative stored workpack", "verify top-level generationEvidence", "require editorV2.reviewState=human_confirmed", "require authenticated HumanConfirmation digest/revision match", "require assessWorkpackReadiness.canShare", "resolve owning documentKey and blockId", "require block sourceRevision/evidenceDigest match stored authority", "create bound share session", "dispatch only after rechecking the stored session binding"],
+            "everyBlock": ["documentKey", "id as blockId", "sourceRevision", "evidenceDigest"],
             "staleBehavior": ["set block state=stale", "disable session creation and dispatch", "retain old read confirmations as historical records only", "show one primary action: rebuild share block"],
-            "serverEnforcement": "share-session creation and workflow dispatch compare block sourceRevision/evidenceDigest to the authoritative stored workpack."
+            "shareSessionContract": {
+                    "ownerWave": "wave4",
+                    "route": "app/api/workpacks/[id]/share-sessions/route.ts",
+                    "postRequest": ["recipients", "documentKey", "blockId", "sourceRevision", "evidenceDigest"],
+                    "authority": "Treat client freshness values as assertions. Reload the stored editorV2 block by documentKey+blockId and compare revision/digest/state=ready plus human_confirmed authority.",
+                    "persist": "Store {version:'editor-v2-share-binding/v1',documentKey,blockId,sourceRevision,evidenceDigest} in existing workpack_share_sessions.access_policy.editorV2Binding JSONB; no migration.",
+                    "reject409": ["missing block", "stale block", "revision mismatch", "digest mismatch", "not human_confirmed", "readiness blocked"],
+                    "response": ["shareSessionId", "expiresAt", "authoritative editorV2Binding"]
+                  },
+            "dispatchContract": {
+                    "ownerWave": "wave4",
+                    "route": "app/api/workflow/dispatch/route.ts",
+                    "requestShape": "Keep current workpackId/shareSessionId/idempotencyKey/channels/operatorNote; do not trust or accept client freshness overrides.",
+                    "authority": "loadActiveOwnedShareSession must select and strictly parse access_policy.editorV2Binding; reload the workpack and compare documentKey, blockId, sourceRevision, evidenceDigest, state, and human confirmation immediately before provider preflight.",
+                    "reject409": ["binding missing/invalid", "block missing", "block stale", "revision mismatch", "digest mismatch", "confirmation/readiness changed"],
+                    "providerRule": "No fixture or live provider call occurs before the freshness comparison passes."
+                  }
           },
       "commands": {
             "autosave": "local draft recovery only; it is never authoritative server save",
@@ -477,16 +587,29 @@
             ["version", "\"safeclaw-workpack-editor/v2\"", "code_constant", "strictEnum", null],
             ["baseGenerationDigest", "string", "verified_generation_evidence", "digest", "generationEvidence.snapshot.responseContentDigest"],
             ["revision", "integer", "server_validated_monotonic_revision", "strictInteger", null],
-            ["materializationDigest", "string", "server_recomputed", "digest", "generationEvidence.snapshot.responseContentDigest plus editor revision derivation"],
+            ["materializationDigest", "string", "server_recomputed", "digest", "sha256 over canonical materialization input defined below; never derived from responseContentDigest"],
             ["evidenceDigest", "string", "server_recomputed", "digest", "generationEvidenceReferences plus dbHarness/ontologyQa provenance derivation"],
             ["reviewState", "\"generated\"|\"edited\"|\"review_pending\"|\"human_confirmed\"", "state_machine", "strictEnum", null],
             ["documents", "Record<DocumentKey,DocumentEnvelope>", "adapter_and_editor", "canonicalObject", "deliverables strings plus deliverables.*Structured and structured riskAssessmentRows/tbmRiskLinks"],
-            ["reviewArtifacts", "ReviewArtifacts", "server_recomputed", "canonicalObject", "dbHarness + ontologyQa + qualityContract + generationEvidence"],
+            ["reviewArtifacts", "ReviewArtifacts", "server_recomputed", "canonicalObject", "dbHarness + ontologyQa + qualityContract only; generationEvidence forbidden"],
             ["auditHistory", "AuditHistoryEntry[]", "adapter_and_server", "canonicalArray", null],
             ["evidence", "Record<string,EditorEvidenceRef>", "verified_base_plus_human_selection", "canonicalObject", "dbHarness.packet plus ontologyQa.result plus evidenceLabels"],
             ["humanConfirmation", "HumanConfirmation|null", "authenticated_server_only", "nullableCanonicalObject", null],
             ["unmapped", "Record<string,unknown>", "lossless_parser", "canonicalObject", "unrecognized current deliverables and legacy lines"]
           ],
+      "digestDefinitions": {
+            "evidenceDigest": "sha256:base64url over canonical EditorEvidenceRef records sorted by id using EditorEvidenceRef.digestRule.",
+            "materializationDigest": "sha256:base64url over canonical {version,revision,documents,evidenceDigest,reviewArtifacts,auditHead,unmapped}; exclude materializationDigest itself, humanConfirmation, and top-level generationEvidence/generationEvidenceError.",
+            "responseContentDigest": "Existing buildResponseContentDigest over the complete final AskResponse candidate after deleting only top-level generationEvidence/generationEvidenceError; it includes the already-computed materializationDigest and humanConfirmation when present.",
+            "order": ["compute evidenceDigest", "compute materializationDigest", "stamp review state/human confirmation as applicable", "call attachGenerationEvidence to compute responseContentDigest and top-level envelope"]
+          },
+      "topLevelSeal": {
+            "path": "AskResponse.generationEvidence",
+            "errorPath": "AskResponse.generationEvidenceError",
+            "storedWithResponse": true,
+            "copiedIntoEditorV2": false,
+            "digestImplementation": "existing lib/generation-evidence.ts buildResponseContentDigest/attachGenerationEvidence/verifyAskResponseGenerationEvidence unchanged"
+          },
       "localDraftKey": "safeclaw:workpack-editor:v2:<generationFingerprint>",
       "noMigration": true,
       "featureFlag": {
@@ -498,7 +621,22 @@
             "rollback": "Set flag to 0 and redeploy; do not delete editorV2 data or rewrite workpack rows."
           },
       "photo": {
-            "phaseAStates": ["local_pending", "uploading", "server_metadata_only", "upload_failed", "deferred_asset_hydration"],
+            "phaseAStates": ["not_selected", "local_display_only", "upload_in_flight", "server_metadata_only", "upload_failed"],
+            "canonicalField": "documents.photoEvidenceDraft.content.improvements[].photoState",
+            "mapping": {
+                    "not_selected": "photoState=not_selected; no selected file names or object URLs",
+                    "local_display_only": "photoState=local_display_only; one or two local File objects may exist only in component memory",
+                    "upload_in_flight": "photoState=upload_in_flight while POST is pending; reload converts it to upload_failed with an interruption issue and preserves the raw prior state in auditHistory",
+                    "server_metadata_only": "photoState=server_metadata_only only with an actual POST improvementId or matching GET improvement row; file names may reload but pixels cannot",
+                    "upload_failed": "photoState=upload_failed after a failed/interrupted POST; local preview remains only for the current session"
+                  },
+            "legacyTwoFieldMap": [
+                    {"recordState": ["local_pending", "display_only"], "photoAssetState": ["not_selected", "local_display_only"], "to": "not_selected when no file metadata exists, otherwise local_display_only"},
+                    {"recordState": ["server_improvement_recorded"], "photoAssetState": ["persistence_unverified"], "to": "server_metadata_only only when serverImprovementId is present"},
+                    {"recordState": ["error"], "photoAssetState": ["not_selected", "local_display_only", "persistence_unverified"], "to": "upload_failed"},
+                    {"recordState": ["unknown/conflicting"], "photoAssetState": ["unknown/conflicting"], "to": "preserve both raw values in unmapped and emit a blocking issue"}
+                  ],
+            "transitions": ["not_selected -> local_display_only on file selection", "local_display_only -> upload_in_flight on POST start", "upload_in_flight -> server_metadata_only only on ok=true plus non-empty improvementId", "upload_in_flight -> upload_failed on failure or interrupted reload", "upload_failed -> upload_in_flight on explicit retry", "server_metadata_only -> local_display_only when replacement files are selected"],
             "local": {
                     "contains": ["File object in ephemeral component state", "object URL for current-session preview", "file name", "mime type", "size", "caption and pairing metadata"],
                     "persistence": "File and object URL are never serialized to editorV2 or localStorage; metadata may be serialized.",
@@ -517,10 +655,11 @@
                     "displayRule": "Hydrate metadata-only rows and show file names with preview unavailable; never synthesize assetId or storagePath."
                   },
             "storedAssetDeferred": {
-                    "state": "deferred_asset_hydration",
+                    "runtimeState": null,
                     "activationRequirement": "A future existing-response change must return owned photo rows and authorized display URLs.",
-                    "waveOneAllowed": false,
-                    "databaseOrApiChangeInWaveOne": false
+                    "waveThreeAllowed": false,
+                    "databaseOrApiChangeInWaveThree": false,
+                    "rule": "Hydratable stored pixels are a deferred capability, not a Phase A photoState."
                   },
             "beforeAfter": "Before and After metadata remain paired by local IDs and server improvementId; human verification is required before claiming improvement completion."
           }
@@ -672,14 +811,15 @@
           },
       "warning": {
             "warning": "준제출형 source-confirmation caveat",
-            "presentation": "Persistent inline AlertTriangle warning directly below title/status, role=alert, minimum 14px/20px semibold text, strong Day/Night contrast and 2px leading border.",
-            "precedence": "The warning is visually and semantically stronger than the neutral evidence trigger.",
+            "presentation": "Persistent inline AlertTriangle warning directly below title/status with role=alert, data-severity=warning, font-size>=14px, line-height>=20px, font-weight>=600, and a 2px leading border.",
+            "contrast": "In Day and Night fixtures, warning text/background contrast is >=4.5:1 and the leading-border/background contrast is >=3:1 using computed RGB values. EvidenceSummaryTrigger has no role=alert or data-severity=warning.",
+            "precedence": "DOM order is title/status, warning, commands, evidence trigger. Screen-reader order matches DOM order; this measurable order and role distinction establish warning priority.",
             "distinction": "This warning is not an evidence badge and must not use the removed yellow badge composition."
           },
       "actions": {
             "oneDominantAction": true,
             "statePrimary": {
-                    "generated": "편집 시작",
+                    "generated": "검토 시작",
                     "edited": "재검수 요청",
                     "review_pending": "확인하고 저장",
                     "human_confirmed": "공유로 이동",
@@ -692,7 +832,8 @@
                     "ariaLabel": "다운로드",
                     "rule": "Rendered label and aria-label are byte-identical. It is neutral secondary styling and cannot compete with the lifecycle primary CTA."
                   },
-            "shareReadiness": "Read-only status text or compact status row; it is never a second CTA."
+            "shareReadiness": "Read-only status text or compact status row; it is never a second CTA.",
+            "generatedSecondary": "편집 is a neutral secondary command that triggers generated -> edited without forcing content mutation for confirmation."
           },
       "states": {
             "empty": "Document-specific structured empty state with one create action; no empty state exposes a mixed master textarea.",
@@ -704,7 +845,7 @@
           },
       "accessibility": {
             "standard": "WCAG 2.2 AA",
-            "requirements": ["One active tabpanel with matching accessible name.", "Native select document navigation on mobile.", "Programmatic labels, descriptions, and error associations for every control.", "Polite live regions for save/review status and focused validation summary links.", "Move up and Move down controls for every reorder operation.", "Predictable focus after add, remove, undo, cancel, and conflict resolution.", "Color is never the only state indicator.", "Day and Night contrast parity.", "Reduced-motion support.", "Minimum 44 by 44 CSS pixel interactive targets.", "Evidence trigger rendered text and accessible name match; drawer uses dialog semantics, focus trap, Escape close, and trigger focus restoration.", "Download visible label and aria-label are both exactly 다운로드.", "The 준제출형 source-confirmation caveat uses role=alert and is announced before provenance controls.", "On mobile the document page is the sole editor scrolling surface; drawer scrolling is isolated while the background is inert."]
+            "requirements": ["One active tabpanel with matching accessible name.", "Native select document navigation on mobile.", "Programmatic labels, descriptions, and error associations for every control.", "Polite live regions for save/review status and focused validation summary links.", "Move up and Move down controls for every reorder operation.", "Predictable focus after add, remove, undo, cancel, and conflict resolution.", "Color is never the only state indicator.", "Day and Night normal text contrast is >=4.5:1 and non-text state boundary contrast is >=3:1.", "Reduced-motion support.", "Minimum 44 by 44 CSS pixel interactive targets.", "Evidence trigger rendered text and accessible name match; drawer uses dialog semantics, focus trap, Escape close, and trigger focus restoration.", "Download visible label and aria-label are both exactly 다운로드.", "The 준제출형 source-confirmation caveat uses role=alert and is announced before provenance controls.", "On mobile the document page is the sole editor scrolling surface; drawer scrolling is isolated while the background is inert."]
           },
       "invariant": {
             "controlMinPx": 44,
@@ -712,11 +853,41 @@
             "horizontalOverflow": false,
             "nestedDecorativeCards": false,
             "progressiveDisclosure": true
-          }
+          },
+      "browserFixtures": {
+            "coreGenerated": "riskAssessmentDraft with three referenced evidence IDs: eligible-law, eligible-kosha, unresolved-future; expected trigger 근거 3건 · 확인 필요 1건",
+            "mixedLegacyRisk": "the audited 5,221-character string containing editable body plus every known appendix sentinel",
+            "sourceWarning": "준제출형 response with source confirmation caveat present",
+            "lifecycle": ["generated", "edited", "review_pending", "human_confirmed", "share_block_stale"],
+            "themes": ["day", "night"]
+          },
+      "browserAssertions": [
+            ["BROWSER-001", "all", "document.documentElement.scrollWidth === document.documentElement.clientWidth"],
+            ["BROWSER-002", "coreGenerated/default", "exactly one [data-testid=evidence-summary-trigger], zero yellow evidence badges, zero persistent evidence rails, zero duplicate left evidence summaries, and zero default result/citation/operation-graph panels"],
+            ["BROWSER-003", "coreGenerated/default", "document.body.innerText has zero occurrences of 중처법 §4-3호 증빙; open drawer has at most one"],
+            ["BROWSER-004", "coreGenerated/default", "trigger text and accessible name both equal 근거 3건 · 확인 필요 1건 and drawer section totals use the same selectDocumentEvidenceSummary result object"],
+            ["BROWSER-005", "1150x900", "selector width <=220px, main editor width >=700px, readable body width >=560px, evidence rail width=0px"],
+            ["BROWSER-006", "1440x1000", "main editor width >=920px, readable body width >=720px, evidence rail width=0px"],
+            ["BROWSER-007", "mixedLegacyRisk", "no input/textarea/contenteditable value contains any appendixSentinel, dbHarness, ontologyQa, qualityContract, generationEvidence, management note, or operation graph token"],
+            ["BROWSER-008", "390x844 and 391x844", "after activating 편집, selected editor heading getBoundingClientRect().top <=160px"],
+            ["BROWSER-009", "390x844 and 391x844", "every visible editor textarea has scrollHeight <= clientHeight+1, page scrollHeight <=3600px for mixedLegacyRisk collapsed fixture, and only an open drawer may have overflow-y auto/scroll"],
+            ["BROWSER-010", "all/default", "computed body font-size>=15px and line-height>=23px; table>=14/20; label>=13/18; no default text=11px; letter-spacing=0px"],
+            ["BROWSER-011", "each lifecycle fixture", "enabled visible [data-cta-priority=primary] count is exactly one when an action is available and zero in loading/offline; all other commands lack primary styling"],
+            ["BROWSER-012", "all/default", "each Download control has textContent=다운로드 and aria-label=다운로드 byte-for-byte"],
+            ["BROWSER-013", "sourceWarning/day+night", "warning has role=alert, data-severity=warning, font-size>=14px, line-height>=20px, font-weight>=600, leading border width=2px, text contrast>=4.5:1, border contrast>=3:1; evidence trigger lacks alert role/severity"],
+            ["BROWSER-014", "drawer/day+night", "opening drawer changes main editor width by <=1px; focus remains inside, Escape closes, trigger regains focus, and mobile background is inert"],
+            ["BROWSER-015", "coreGenerated", "direct/supporting evidence, DB harness, safety readiness, law actions, provenance, materialization, and review_required nodes are absent when drawer closed and present only under the open drawer"],
+            ["BROWSER-016", "unverified guidanceX.do", "zero rendered anchors have href containing guidanceX.do; only verified=true HTTPS URLs tied to current digest render anchors inside drawer"],
+            ["BROWSER-017", "each viewport day vs night", "selector, title, warning, command row, evidence trigger, editor, primary action, and share-readiness bounding x/y/width/height differ by <=1px and DOM/accessibility order is identical"],
+            ["BROWSER-018", "all/default", "every visible interactive target is >=44x44 CSS px; [data-editor-stack] computed gap=8px; non-overlay selector/title/commands/editor/share-readiness rectangles have zero intersection area"]
+          ]
     },
   "components": {
       "orchestrators": ["WorkpackEditor owns selected document, canonical draft, commands, lifecycle, the single evidence drawer state, and feature-flag fallback.", "DocumentEditorRegistry exhaustively maps all 12 keys to typed specifications and thin domain wrappers.", "DocumentEditorShell owns one tabpanel, title/status, source-confirmation warning, one neutral evidence trigger, one primary lifecycle action, and secondary edit/download commands; it has no evidence rail.", "WorkpackEditorAdapter owns body/appendix separation, parse, serialize, dual projection, digest input, and unknown preservation.", "WorkpackReviewClient calls revalidation and save seams but cannot stamp human identity.", "selectDocumentEvidenceSummary is the only count source for EvidenceSummaryTrigger and EvidenceDetailsDrawer.", "EvidenceDetailsDrawer owns provenance, review artifacts, validated links, open actions, and audit appendices as one progressive-disclosure surface.", "WorkerAttendanceEditor owns event attendance/understanding and never consumes ShareReadConfirmation.", "ExportManifestBridge owns one canonical manifest for XLSX, PDF, HWP, and HWPX and keeps appendices outside editable body semantics."],
       "primitives": ["FieldGroup", "ExactTextField", "AutoGrowTextField", "EnumSelect", "DateTimeField", "ChecklistField", "EditableRowList", "ResponsiveDataGrid", "PeoplePicker", "EvidenceReferencePicker", "WorkerAttendanceEditor", "LanguageVariantEditor", "ShareBlockEditor", "ValidationSummary", "DocumentActionBar", "EvidenceSummaryTrigger", "EvidenceDetailsDrawer", "SourceConfirmationWarning"],
+      "exportNameRule": "Each document component field equals the named export and file basename exactly.",
+      "resolvedNames": {"workpackSummaryDraft": "components/workpack-editor/WorkpackSummaryEditor.tsx#WorkpackSummaryEditor", "workPermitDraft": "components/workpack-editor/WorkPermitEditor.tsx#WorkPermitEditor"},
+      "forbiddenAliases": ["SummaryEditor", "PermitInspectionEditor"],
       "documentSpecificRule": "A document wrapper is required when sequencing, row behavior, validation, projection, or primary action differs. Shared primitives are not a universal schema renderer.",
       "duplicationRule": "Do not create twelve copy-pasted editors. Create twelve typed document specifications and only the thin wrappers needed for distinct domain interactions."
     },
@@ -750,7 +921,7 @@
             "key": "workpackSummaryDraft",
             "title": "점검결과 요약",
             "type": "WorkpackSummaryDraft",
-            "component": "SummaryEditor",
+            "component": "WorkpackSummaryEditor",
             "family": "finding-summary",
             "primaryAction": "조치 항목 추가",
             "primaryActionRule": "Shown as the only dominant action only when compatible with the global lifecycle action; otherwise rendered as a secondary row command.",
@@ -770,7 +941,7 @@
                     ["findings[].owner", "string", "when status is open", "exactString", null],
                     ["findings[].dueDate", "string", "when status is open", "localDate", null],
                     ["findings[].status", "\"open\"|\"in_progress\"|\"done\"", "always", "strictEnum", null],
-                    ["findings[].evidenceRefs", "string[]", "at least one unless explicit no-evidence reason", "stableIdArray", null]
+                    ["findings[].evidenceRefs", "string[]", "at least one unless explicit no-evidence reason", "stableIdArrayNonEmpty", null]
                   ],
             "fieldNotes": {},
             "interactions": ["Filter by open, in-progress, and done without changing canonical row order.", "Jump from a finding's inline citation marker to the matching item in the single 근거 및 검수 drawer.", "Completed findings collapse only after the first open item remains visible."],
@@ -824,8 +995,8 @@
                     ["workSteps[].equipment", "string", "always", "exactString", "deliverables.workPlanStructured.workSteps[].equipment"],
                     ["workSteps[].safetyMeasure", "string", "always", "exactString", "deliverables.workPlanStructured.workSteps[].safetyMeasure"],
                     ["workSteps[].owner", "string", "always", "exactString", "deliverables.workPlanStructured.workSteps[].owner"],
-                    ["workSteps[].relatedRiskRowIds", "string[]", "zero or more", "stableIdArray", "deliverables.workPlanStructured.workSteps[].relatedRiskRowIndex"],
-                    ["workSteps[].evidenceRefs", "string[]", "zero or more", "stableIdArray", "deliverables.workPlanStructured.workSteps[].evidenceRefs"],
+                    ["workSteps[].relatedRiskRowIds", "string[]", "zero or more", "stableIdArrayAllowEmpty", "deliverables.workPlanStructured.workSteps[].relatedRiskRowIndex"],
+                    ["workSteps[].evidenceRefs", "string[]", "zero or more", "stableIdArrayAllowEmpty", "deliverables.workPlanStructured.workSteps[].evidenceRefs"],
                     ["workSteps[].verification", "string", "always", "exactString", "deliverables.workPlanStructured.workSteps[].verification"],
                     ["stopCriteria", "string[]", "at least one", "orderedStringArray", "deliverables.workPlanStructured.stopCriteria"],
                     ["emergencyResponse.contacts[].id", "string", "always", "stableId", null],
@@ -852,7 +1023,7 @@
             "key": "workPermitDraft",
             "title": "안전작업허가 확인서",
             "type": "WorkPermitEditorDraft",
-            "component": "PermitInspectionEditor",
+            "component": "WorkPermitEditor",
             "family": "existing-structured-permit",
             "primaryAction": "허가조건 추가",
             "primaryActionRule": "Shown as the only dominant action only when compatible with the global lifecycle action; otherwise rendered as a secondary row command.",
@@ -874,8 +1045,8 @@
                     ["conditions[].action", "string", "always", "exactString", "deliverables.permitInspectionStructured.conditions[].action"],
                     ["conditions[].owner", "string", "always", "exactString", "deliverables.permitInspectionStructured.conditions[].owner"],
                     ["conditions[].status", "PermitInspectionStructured.conditions[].status", "always", "strictEnum", "deliverables.permitInspectionStructured.conditions[].status"],
-                    ["conditions[].relatedRiskRowId", "string|null", "optional", "stableId", "deliverables.permitInspectionStructured.conditions[].relatedRiskRowIndex"],
-                    ["conditions[].evidenceRefs", "string[]", "zero or more", "stableIdArray", "deliverables.permitInspectionStructured.conditions[].evidenceRefs"],
+                    ["conditions[].relatedRiskRowId", "string|null", "optional", "nullableStableId", "deliverables.permitInspectionStructured.conditions[].relatedRiskRowIndex"],
+                    ["conditions[].evidenceRefs", "string[]", "zero or more", "stableIdArrayAllowEmpty", "deliverables.permitInspectionStructured.conditions[].evidenceRefs"],
                     ["conditions[].verification", "string", "always", "exactString", "deliverables.permitInspectionStructured.conditions[].verification"],
                     ["attachments[].id", "string", "always", "stableId", null],
                     ["attachments[].name", "string", "always", "exactString", "deliverables.permitInspectionStructured.attachments[].name"],
@@ -930,14 +1101,14 @@
                     ["hazards[].riskRowId", "string", "always", "stableId", "deliverables.tbmRiskLinks[].riskRowIndex"],
                     ["hazards[].weatherSignal", "string", "when applicable", "exactString", "deliverables.tbmRiskLinks[].weatherSignal"],
                     ["hazards[].confirmQuestion", "string", "always", "exactString", "deliverables.tbmRiskLinks[].confirmQuestion"],
-                    ["hazards[].evidenceRefs", "string[]", "at least one", "stableIdArray", "deliverables.tbmRiskLinks[].evidenceRefs"],
+                    ["hazards[].evidenceRefs", "string[]", "at least one", "stableIdArrayNonEmpty", "deliverables.tbmRiskLinks[].evidenceRefs"],
                     ["measures[].id", "string", "always", "stableId", null],
                     ["measures[].hazardId", "string", "always", "stableId", "deliverables.tbmBriefingStructured.measures[].hazardRef"],
                     ["measures[].action", "string", "always", "exactString", "deliverables.tbmBriefingStructured.measures[].action"],
                     ["measures[].owner", "string", "always", "exactString", "deliverables.tbmBriefingStructured.measures[].owner"],
                     ["measures[].verification", "string", "always", "exactString", "deliverables.tbmRiskLinks[].verification"],
                     ["measures[].actionTaken", "string", "after briefing", "exactString", null],
-                    ["measures[].evidenceRefs", "string[]", "at least one", "stableIdArray", "deliverables.tbmRiskLinks[].evidenceRefs"],
+                    ["measures[].evidenceRefs", "string[]", "at least one", "stableIdArrayNonEmpty", "deliverables.tbmRiskLinks[].evidenceRefs"],
                     ["stopCriteria", "string[]", "at least one", "orderedStringArray", "deliverables.tbmBriefingStructured.stopCriteria"],
                     ["confirmTopics", "string[]", "at least one", "orderedStringArray", "deliverables.tbmBriefingStructured.confirmTopics"],
                     ["photoEvidenceLocation", "string", "always", "exactString", "deliverables.tbmBriefingStructured.photoEvidenceLocation"]
@@ -990,7 +1161,7 @@
                     ["hazardsDiscussed[].category", "\"Man\"|\"Machine\"|\"Media\"|\"Management\"", "always", "strictEnum", "deliverables.tbmLogStructured.hazardsDiscussed[].category"],
                     ["hazardsDiscussed[].description", "string", "always", "exactString", "deliverables.tbmLogStructured.hazardsDiscussed[].description"],
                     ["hazardsDiscussed[].riskRowId", "string", "when linked", "stableId", "deliverables.tbmLogStructured.hazardsDiscussed[].relatedRiskRowIndex"],
-                    ["hazardsDiscussed[].evidenceRefs", "string[]", "at least one", "stableIdArray", "deliverables.tbmRiskLinks[].evidenceRefs"],
+                    ["hazardsDiscussed[].evidenceRefs", "string[]", "at least one", "stableIdArrayNonEmpty", "deliverables.tbmRiskLinks[].evidenceRefs"],
                     ["hazardsDiscussed[].verification", "string", "always", "exactString", "deliverables.tbmRiskLinks[].verification"],
                     ["hazardsDiscussed[].actionTaken", "string", "after TBM", "exactString", null],
                     ["safetyEducation.topic", "string", "always", "exactString", "deliverables.tbmLogStructured.safetyEducation.topic"],
@@ -1049,7 +1220,7 @@
                     ["curriculum[].topic", "string", "always", "exactString", "deliverables.educationRecordStructured.curriculum[].topic"],
                     ["curriculum[].lawCitation", "string", "when applicable", "exactString", "deliverables.educationRecordStructured.curriculum[].lawCitation"],
                     ["curriculum[].keyPoints", "string[]", "at least one", "orderedStringArray", "deliverables.educationRecordStructured.curriculum[].keyPoints"],
-                    ["curriculum[].evidenceRefs", "string[]", "at least one", "stableIdArray", null],
+                    ["curriculum[].evidenceRefs", "string[]", "at least one", "stableIdArrayNonEmpty", null],
                     ["curriculum[].actionTaken", "string", "after education", "exactString", null],
                     ["understandingCheck", "string", "always", "exactString", "deliverables.educationRecordStructured.understandingCheck"],
                     ["tbmLink", "string", "always", "exactString", "deliverables.educationRecordStructured.tbmLink"],
@@ -1088,13 +1259,13 @@
                     ["contacts[].alternatePhone", "string", "when applicable", "exactString", null],
                     ["scenarios[].id", "string", "always", "stableId", null],
                     ["scenarios[].hazard", "string", "always", "exactString", null],
-                    ["scenarios[].riskRowIds", "string[]", "at least one", "stableIdArray", null],
+                    ["scenarios[].riskRowIds", "string[]", "at least one", "stableIdArrayNonEmpty", null],
                     ["scenarios[].trigger", "string", "always", "exactString", null],
                     ["scenarios[].immediateActions", "string[]", "at least one", "orderedStringArray", null],
                     ["scenarios[].evacuationRoute", "string", "always", "exactString", null],
                     ["scenarios[].responsibleRole", "string", "always", "exactString", null],
                     ["scenarios[].callOrder", "string[]", "at least one", "orderedStringArray", null],
-                    ["scenarios[].evidenceRefs", "string[]", "at least one", "stableIdArray", null],
+                    ["scenarios[].evidenceRefs", "string[]", "at least one", "stableIdArrayNonEmpty", null],
                     ["scenarios[].verification", "string", "always", "exactString", null],
                     ["scenarios[].actionTaken", "string", "after drill or incident", "exactString", null],
                     ["workerAccountingMethod", "string", "always", "exactString", null],
@@ -1123,14 +1294,13 @@
                     ["improvements[].hazardLabel", "string", "always", "exactString", "GET /api/workpacks/[id]/improvements -> improvements[].hazard_label or POST form.hazardLabel"],
                     ["improvements[].improvementText", "string", "always", "exactString", "GET /api/workpacks/[id]/improvements -> improvements[].improvement_text or POST form.improvementText"],
                     ["improvements[].reflectedDocumentKeys", "DocumentKey[]", "at least one", "documentKeyArray", "GET /api/workpacks/[id]/improvements -> improvements[].reflected_documents or POST form.reflectedDocuments"],
-                    ["improvements[].beforeFileName", "string", "when selected", "exactString", "GET /api/workpacks/[id]/improvements -> improvements[].photo_summary.beforePhotoName or POST beforePhoto.name"],
-                    ["improvements[].afterFileName", "string", "when selected", "exactString", "GET /api/workpacks/[id]/improvements -> improvements[].photo_summary.afterPhotoName or POST afterPhoto.name"],
+                    ["improvements[].beforeFileName", "string|null", "always", "nullableExactString", "GET /api/workpacks/[id]/improvements -> improvements[].photo_summary.beforePhotoName or POST beforePhoto.name or null"],
+                    ["improvements[].afterFileName", "string|null", "always", "nullableExactString", "GET /api/workpacks/[id]/improvements -> improvements[].photo_summary.afterPhotoName or POST afterPhoto.name or null"],
                     ["improvements[].captureNote", "string", "always", "exactString", null],
                     ["improvements[].actionTaken", "string", "human-only", "exactString", null],
-                    ["improvements[].evidenceRefs", "string[]", "zero or more", "stableIdArray", null],
-                    ["improvements[].recordState", "\"local_pending\"|\"display_only\"|\"server_improvement_recorded\"|\"error\"", "always", "strictEnum", "POST /api/workpacks/[id]/improvements -> ok and improvementId or GET improvements[].id"],
-                    ["improvements[].photoAssetState", "\"not_selected\"|\"local_display_only\"|\"persistence_unverified\"", "always", "strictEnum", null],
-                    ["improvements[].serverImprovementId", "string", "after successful response", "stableId", "POST /api/workpacks/[id]/improvements -> improvementId or GET improvements[].id"],
+                    ["improvements[].evidenceRefs", "string[]", "zero or more", "stableIdArrayAllowEmpty", null],
+                    ["improvements[].photoState", "\"not_selected\"|\"local_display_only\"|\"upload_in_flight\"|\"server_metadata_only\"|\"upload_failed\"", "always", "strictEnum", "Total mapping from the common Phase A photo state machine; successful POST/GET can yield server_metadata_only only"],
+                    ["improvements[].serverImprovementId", "string|null", "always", "nullableStableId", "POST /api/workpacks/[id]/improvements -> improvementId or GET improvements[].id or null"],
                     ["improvements[].reviewStatus", "string", "after successful response", "exactString", "POST /api/workpacks/[id]/improvements -> reviewStatus or GET improvements[].review_status"],
                     ["improvements[].sourceType", "\"manual\"|\"photo_analysis\"", "after successful response", "strictEnum", "POST /api/workpacks/[id]/improvements -> sourceType or GET improvements[].source_type"],
                     ["improvements[].verificationNote", "string", "human-only", "exactString", null]
@@ -1138,12 +1308,12 @@
             "fieldNotes": {
                     "improvements[].reflectedDocumentKeys": "Adapter uses the exact 12-key title map in both directions and preserves unmapped legacy labels in unmapped; it never guesses.",
                     "improvements[].actionTaken": "Never copied from a generated recommendation.",
-                    "improvements[].recordState": "server_improvement_recorded means only that the existing improvement endpoint returned or reloaded an improvement row; it does not assert photo asset hydration.",
-                    "improvements[].photoAssetState": "Wave 1 has no stored or hydrated state because existing GET/POST responses expose no photo asset ID or storage path."
+                    "improvements[].photoState": "Exactly the common Phase A state. Wave 3 has no hydrated/stored pixel state because existing GET/POST responses expose no photo asset ID or storage path.",
+                    "improvements[].serverImprovementId": "Non-null proves only an improvement row response/reload, never a photo asset row or authorized pixel URL."
                   },
-            "interactions": ["Select and compare Before/After files locally; use object URLs only in ephemeral component state and revoke them on replace, remove, or unmount.", "Submit the existing improvements endpoint only when a stored workpack exists; record the returned improvementId but never claim the photos are reloadable.", "After reload, show filenames and persistence_unverified metadata without a fabricated thumbnail, assetId, or storagePath.", "Defer hydratable stored photos until an existing response actually exposes an authorized asset reference or a separately approved API change."],
-            "gates": ["Never serialize File, Blob, object URL, assetId, or storagePath into editorV2.", "Before/After comparison requires both filenames; one-sided selections remain local_pending.", "server_improvement_recorded requires an actual successful POST response or matching GET row.", "No export may imply that persistence_unverified pixels were embedded; manifests preserve all metadata and state."],
-            "schemaOrder": ["siteTimeZone", "improvements[].localId", "improvements[].taskLabel", "improvements[].hazardLabel", "improvements[].improvementText", "improvements[].reflectedDocumentKeys", "improvements[].beforeFileName", "improvements[].afterFileName", "improvements[].captureNote", "improvements[].actionTaken", "improvements[].evidenceRefs", "improvements[].recordState", "improvements[].photoAssetState", "improvements[].serverImprovementId", "improvements[].reviewStatus", "improvements[].sourceType", "improvements[].verificationNote"]
+            "interactions": ["Select and compare Before/After files locally; use object URLs only in ephemeral component state and revoke them on replace, remove, or unmount.", "Submit the existing improvements endpoint only when a stored workpack exists; record the returned improvementId but never claim the photos are reloadable.", "After reload, show filenames with server_metadata_only and preview unavailable; never fabricate thumbnail, assetId, or storagePath.", "Defer hydratable stored photos until an existing response actually exposes an authorized asset reference or a separately approved API change."],
+            "gates": ["Never serialize File, Blob, object URL, assetId, or storagePath into editorV2.", "Before/After comparison requires both filenames; one-sided selections remain local_display_only.", "server_metadata_only requires an actual successful POST response or matching GET row and a non-null serverImprovementId.", "No export may imply that server_metadata_only pixels were embedded; manifests preserve all metadata and state."],
+            "schemaOrder": ["siteTimeZone", "improvements[].localId", "improvements[].taskLabel", "improvements[].hazardLabel", "improvements[].improvementText", "improvements[].reflectedDocumentKeys", "improvements[].beforeFileName", "improvements[].afterFileName", "improvements[].captureNote", "improvements[].actionTaken", "improvements[].evidenceRefs", "improvements[].photoState", "improvements[].serverImprovementId", "improvements[].reviewStatus", "improvements[].sourceType", "improvements[].verificationNote"]
           },
       {
             "id": "DOC-10",
@@ -1160,14 +1330,14 @@
                     ["sourceDocumentKeys", "DocumentKey[]", "at least one", "documentKeyArray", null],
                     ["sourceRevision", "integer", "always", "strictInteger", null],
                     ["evidenceDigest", "string", "always", "digest", null],
-                    ["targetWorkerIds", "string[]", "at least one", "stableIdArray", null],
+                    ["targetWorkerIds", "string[]", "at least one", "stableIdArrayNonEmpty", null],
                     ["variants[].id", "string", "always", "stableId", null],
                     ["variants[].code", "string", "always", "exactString", "deliverables.foreignWorkerLanguages[].code"],
                     ["variants[].label", "string", "always", "exactString", "deliverables.foreignWorkerLanguages[].label"],
                     ["variants[].nativeLabel", "string", "always", "exactString", "deliverables.foreignWorkerLanguages[].nativeLabel"],
                     ["variants[].rationale", "string", "always", "exactString", "deliverables.foreignWorkerLanguages[].rationale"],
                     ["variants[].lines", "string[]", "at least one", "orderedStringArray", "deliverables.foreignWorkerLanguages[].lines"],
-                    ["variants[].evidenceRefs", "string[]", "at least one", "stableIdArray", null],
+                    ["variants[].evidenceRefs", "string[]", "at least one", "stableIdArrayNonEmpty", null],
                     ["printFooter", "string", "always", "exactString", null],
                     ["workerConfirmationRequired", "boolean", "always", "strictBoolean", null]
                   ],
@@ -1200,12 +1370,12 @@
                             }
                   ],
             "fields": [
-                    ["shareBlocks[].recipientWorkerIds", "string[]", "at least one", "stableIdArray", null],
+                    ["shareBlocks[].recipientWorkerIds", "string[]", "at least one", "stableIdArrayNonEmpty", null],
                     ["shareBlocks[].bodyLines", "string[]", "at least one", "orderedStringArray", "deliverables.foreignWorkerLanguages[].lines"]
                   ],
             "fieldNotes": {},
             "interactions": ["Rebuild stale blocks from current sourceRevision and evidenceDigest, creating a new block ID while retaining intended recipients only.", "Create share sessions and dispatch only after server authority confirms a human-confirmed workpack and matching freshness values.", "Show read receipts as share history; never promote them to attendance, signature, TBM completion, education completion, or understanding."],
-            "gates": ["Every share block contains sourceDocumentKeys, sourceRevision, and evidenceDigest.", "Any source, evidence, language, audience, or confirmation change sets state=stale and clears shareSessionId.", "ShareReadConfirmation must match the block and server session but has no WorkerAttendance authority."],
+            "gates": ["Every share block contains owning documentKey, stable id/blockId, sourceDocumentKeys, sourceRevision, and evidenceDigest.", "Any source, evidence, language, audience, or confirmation change sets state=stale and clears shareSessionId.", "ShareReadConfirmation must match the block and server session but has no WorkerAttendance authority."],
             "schemaOrder": ["@ShareBlockBase:shareBlocks[]", "@ShareReadConfirmation:shareReadConfirmations[]", "shareBlocks[].recipientWorkerIds", "shareBlocks[].bodyLines"]
           },
       {
@@ -1236,7 +1406,7 @@
                   ],
             "fieldNotes": {},
             "interactions": ["Build concise site messages from selected source documents without exposing provenance links on the default surface.", "Rebuild stale blocks before session creation or dispatch.", "Keep all provenance, audit, materialization, and review_required detail in the evidence drawer and export manifest."],
-            "gates": ["Every block has current sourceRevision and evidenceDigest.", "Dispatch is blocked unless server save authority is human_confirmed and all selected evidence is eligible.", "Read receipts remain share acknowledgments only."],
+            "gates": ["Every block has owning documentKey, stable id/blockId, current sourceRevision, and evidenceDigest.", "Dispatch is blocked until Wave 4 server binding is installed and unless stored authority is human_confirmed with eligible evidence.", "Read receipts remain share acknowledgments only."],
             "schemaOrder": ["@ShareBlockBase:shareBlocks[]", "@ShareReadConfirmation:shareReadConfirmations[]", "shareBlocks[].subject", "shareBlocks[].body", "shareBlocks[].recipientGroup"]
           }
     ],
@@ -1246,26 +1416,27 @@
                     "id": "wave0",
                     "name": "Migration-free adapter and authority",
                     "documents": [],
-                    "objective": "Create strict types, lossless body/appendix adapters, deterministic digests, revalidation, immutable server confirmation/save, and stored share authority before editor UI.",
+                    "objective": "Create the contract validator first, then strict types, lossless body/appendix adapters, deterministic digests, no-edit/edited validation, and immutable server confirmation/save. V2 sharing remains blocked until Wave 4.",
                     "entryGate": "An independent reviewer marks this exact spec commit PASS; current generated response fixtures and seals are available.",
-                    "ownedFiles": ["lib/workpack-editor-types.ts", "lib/workpack-editor-adapter.ts", "lib/workpack-editor-legacy-boundary.ts", "lib/workpack-editor-review.ts", "app/api/workpack/revalidate/route.ts", "lib/workpack-readiness.ts", "app/api/workpacks/route.ts", "lib/workpack-store.ts", "lib/workpack-commercial-store.ts"],
+                    "ownedFiles": ["scripts/workpack_editor_contract_audit.mjs", "tests/workpack-editor-contract.test.ts", "lib/workpack-editor-types.ts", "lib/workpack-editor-adapter.ts", "lib/workpack-editor-legacy-boundary.ts", "lib/workpack-editor-review.ts", "app/api/workpack/revalidate/route.ts", "lib/workpack-readiness.ts", "app/api/workpacks/route.ts", "lib/workpack-store.ts", "lib/workpack-commercial-store.ts"],
                     "readOnlyDependencies": ["lib/risk-assessment-schema.ts", "lib/types.ts", "lib/generation-evidence.ts", "lib/db-harness.ts", "lib/workpack-ontology-qa.ts", "lib/quality-contract.ts", "lib/search.ts"],
-                    "testFiles": ["tests/workpack-editor-types.test.ts", "tests/workpack-editor-adapter.test.ts", "tests/workpack-editor-legacy-boundary.test.ts", "tests/workpack-editor-review-lifecycle.test.ts", "tests/workpack-editor-revalidate-route.test.ts", "tests/workpack-readiness.test.ts", "tests/workpack-store.test.ts", "tests/workpack-share-authority.test.ts"],
+                    "testFiles": ["tests/workpack-editor-contract.test.ts", "tests/workpack-editor-types.test.ts", "tests/workpack-editor-adapter.test.ts", "tests/workpack-editor-legacy-boundary.test.ts", "tests/workpack-editor-review-lifecycle.test.ts", "tests/workpack-editor-revalidate-route.test.ts", "tests/workpack-readiness.test.ts", "tests/workpack-store.test.ts", "tests/workpack-share-authority.test.ts"],
                     "commands": {
+                              "prerequisite": "node scripts/workpack_editor_contract_audit.mjs && npx.cmd vitest run tests/workpack-editor-contract.test.ts --maxWorkers=1 --no-file-parallelism",
                               "red": "npx.cmd vitest run tests/workpack-editor-types.test.ts tests/workpack-editor-adapter.test.ts tests/workpack-editor-legacy-boundary.test.ts tests/workpack-editor-review-lifecycle.test.ts tests/workpack-editor-revalidate-route.test.ts --maxWorkers=1 --no-file-parallelism",
                               "green": "npx.cmd vitest run tests/workpack-editor-types.test.ts tests/workpack-editor-adapter.test.ts tests/workpack-editor-legacy-boundary.test.ts tests/workpack-editor-review-lifecycle.test.ts tests/workpack-editor-revalidate-route.test.ts tests/workpack-readiness.test.ts tests/workpack-store.test.ts tests/workpack-share-authority.test.ts --maxWorkers=1 --no-file-parallelism",
                               "typecheck": "npm.cmd run typecheck",
                               "diff": "git diff --check"
                             },
-                    "tddGates": ["RED: mixed 5221-character risk fixture fails until body and every known appendix section are separated and preserved.", "RED: edited content still carrying any active dbHarness/ontologyQa/qualityContract/generationEvidence fails.", "GREEN: all 12 document fixtures deep-equal after structured/current-string parse, dual projection, reload, and unknown preservation.", "GREEN: only the server can stamp ActorProvenance and human_confirmed; invalid seal/revision/digest fails closed.", "REFACTOR: no any, no DB migration, and current /api/ask fallback remains behaviorally intact."],
+                    "tddGates": ["PREREQUISITE: contract audit script/test is the first isolated commit and must be green before any product file is edited.", "RED: mixed 5221-character risk fixture fails until body and every known appendix section are separated and preserved.", "RED: edited content still carrying active top-level dbHarness/ontologyQa/qualityContract/generationEvidence or nested seal copies fails.", "GREEN: generated content validates to review_pending without document mutation; edited content revalidates before review_pending.", "GREEN: reseal uses existing top-level generation evidence functions unchanged and all 12 adapters preserve unknown values.", "GREEN: only the server can stamp ActorProvenance and human_confirmed; invalid seal/revision/digest fails closed.", "REFACTOR: no any, no DB migration, and current /api/ask fallback remains behaviorally intact."],
                     "browserAssertions": [],
-                    "exitGate": "Adapters report zero dropped fields/appendix lines, lifecycle tests pass, revalidation produces fresh digests/seal, immutable save and stored share authority fail closed.",
+                    "exitGate": "Contract validator, adapters, no-edit/edited lifecycle, top-level reseal, and immutable save are green; v2 share is still explicitly blocked pending Wave 4.",
                     "rollback": "Disable the feature flag, stop routing v2 clients to /api/workpack/revalidate, and leave existing /api/ask plus insert-only /api/workpacks behavior active. Remove only new unreferenced modules/route if needed; no data or schema rollback.",
                     "featureFlagRef": "FLAG-001",
                     "browserMatrixRef": null,
                     "databaseMigration": false,
                     "apiChange": null,
-                    "productionFixBoundary": null
+                    "productionFixBoundary": "lib/generation-evidence.ts is read-only; use its existing top-level digest/seal functions unchanged."
                   },
             {
                     "id": "wave1",
@@ -1285,7 +1456,7 @@
                               "diff": "git diff --check"
                             },
                     "tddGates": ["RED: existing single textarea, repeated provenance, 11px evidence labels, 260px right rail, and nested mobile scroll fixtures fail.", "RED: risk/TBM lossless export tests fail until riskRowId, evidenceRefs, verification, WorkerAttendance, and actionTaken survive every target.", "GREEN: the three document editors use strict schemas and domain interactions, not title-swapped textareas.", "GREEN: one selector owns all evidence counts and one drawer owns all detail.", "GREEN: browser matrix and semantic export round trips pass.", "REFACTOR: wrappers share only genuine primitives; no universal any-based schema renderer and no twelve duplicated components."],
-                    "browserAssertions": ["Run every matrix row in Day and Night and assert documentElement.scrollWidth === clientWidth.", "Default DOM has one EvidenceSummaryTrigger, zero yellow preview evidence badges, zero persistent evidence rails, zero duplicate left evidence summaries, and no default result-summary/citation-list/operation-graph blocks.", "Default DOM contains zero occurrences of 중처법 §4-3호 증빙; when applicable the open drawer contains at most one.", "Trigger text matches /^근거 [0-9]+건 · 확인 필요 [0-9]+건$/ and exactly equals counts from selectDocumentEvidenceSummary used by the drawer.", "At measuredDesktop1150 selector width <=220px, main editor width >=700px, readable preview text width >=560px, and evidence rail width is 0px.", "At desktop1440 main editor width >=920px and readable preview text width >=720px.", "No editable value contains a known appendix sentinel, DB harness summary, ontology QA, operation graph, KOSHA source metadata, or management notes from the audited mixed fixture.", "At mobile390 and auditMobile391, clicking 편집 시작 focuses an editor heading with viewport y <=160px.", "At mobile390 and auditMobile391 no visible editor textarea has scrollHeight > clientHeight + 1; the default audited risk sample page height is <=3600px.", "Body computed font is >=15px, table text >=14px, labels >=13px, no default workbench text is 11px, and letter spacing is 0.", "Exactly one enabled element has primary CTA styling for the lifecycle state; share readiness is status text.", "Every Download control has visible text 다운로드 and aria-label 다운로드 exactly.", "The 준제출형 source-confirmation caveat has role=alert, 14px/20px minimum text, and stronger border/background contrast than the neutral evidence trigger.", "Opening the drawer does not change main editor width; drawer traps focus, Escape closes, focus returns, and mobile background is inert.", "directEvidence, DB harness, safety-control readiness, supporting refs, law actions, provenance, materialization, and review_required appear only inside the open drawer.", "No official safety URL is clickable unless the current reference has verified=true and https; unverified guidanceX.do produces no href."],
+                    "browserAssertions": ["BROWSER-001", "BROWSER-002", "BROWSER-003", "BROWSER-004", "BROWSER-005", "BROWSER-006", "BROWSER-007", "BROWSER-008", "BROWSER-009", "BROWSER-010", "BROWSER-011", "BROWSER-012", "BROWSER-013", "BROWSER-014", "BROWSER-015", "BROWSER-016", "BROWSER-017", "BROWSER-018"],
                     "exitGate": "Core three editors are structured, every Wave 1 browser assertion passes, exports round-trip, and flag-off restores current UI without deleting v2 state.",
                     "rollback": "Disable the feature flag to restore the current WorkpackEditor textarea path. Keep v2 data and manifests untouched; export routes ignore optional manifests when flag/context is absent. Revert only Wave 1 owned files if needed.",
                     "featureFlagRef": "FLAG-001",
@@ -1311,7 +1482,7 @@
                               "diff": "git diff --check"
                             },
                     "tddGates": ["RED: current structured fixtures lose v2-only IDs/evidence/actionTaken until adapter and manifests are extended.", "GREEN: current WorkPlanStructured, PermitInspectionStructured, and EducationRecordStructured paths round-trip with all richer v2 fields.", "GREEN: generated approver/instructor/confirmer placeholders cannot become human confirmation.", "REFACTOR: reuse tables/attendance only where field semantics match."],
-                    "browserAssertions": ["All Wave 1 layout, drawer, typography, one-primary, and scroll assertions remain green for each Wave 2 document.", "Permit and plan risk references navigate by stable ID without horizontal overflow.", "Education WorkerAttendance controls remain distinct from share-read history."],
+                    "browserAssertions": ["BROWSER-001 through BROWSER-018 rerun for each Wave 2 document", "Clicking a [data-risk-row-id] reference focuses the unique matching row and does not change documentElement.scrollWidth", "WorkerAttendance controls live under [data-confirmation-kind=attendance]; share-read rows live under [data-confirmation-kind=share-read]; neither container contains the other kind"],
                     "exitGate": "Three document schemas, lifecycle, matrix, and export gates pass with no Wave 1 regression.",
                     "rollback": "Disable the feature flag; the existing text and structured payloads remain readable. Revert only Wave 2 owned files; no schema/data rollback.",
                     "featureFlagRef": "FLAG-001",
@@ -1336,8 +1507,8 @@
                               "typecheck": "npm.cmd run typecheck",
                               "diff": "git diff --check"
                             },
-                    "tddGates": ["RED: tests reject stored/hydrated photo state from current GET/POST.", "GREEN: local pending/display-only and server improvement metadata states are honest and lossless.", "GREEN: no app/api, DB, schema, migration, package, or Supabase type file changes are present in this wave.", "REFACTOR: photo binary remains ephemeral and metadata stays in canonical fields/manifests."],
-                    "browserAssertions": ["All shared surface assertions remain green.", "Local Before/After preview revokes object URLs and never survives reload as a fabricated image.", "Reloaded metadata-only photo rows show filenames plus persistence_unverified, never assetId/storagePath or a false stored thumbnail."],
+                    "tddGates": ["RED: tests reject stored/hydrated photo state from current GET/POST.", "GREEN: not_selected/local_display_only/upload_in_flight/server_metadata_only/upload_failed map one-to-one to DOC-09 photoState and legacy two-field values map totally.", "GREEN: no app/api, DB, schema, migration, package, or Supabase type file changes are present in this wave.", "REFACTOR: photo binary remains ephemeral and metadata stays in canonical fields/manifests."],
+                    "browserAssertions": ["BROWSER-001 through BROWSER-018 rerun for each Wave 3 document", "Object URL exists only while local_display_only/upload_in_flight is mounted and is revoked exactly once on replace/remove/unmount", "Reloaded server_metadata_only row renders filenames plus preview-unavailable text and has zero img[src^=blob:], assetId, storagePath, or stored-thumbnail nodes"],
                     "exitGate": "Photo state claims match actual endpoint responses and all three documents pass shared browser/export gates.",
                     "rollback": "Disable the feature flag and revoke local object URLs. Existing improvement records remain untouched; no endpoint or DB rollback exists because Wave 3 owns neither.",
                     "featureFlagRef": "FLAG-001",
@@ -1350,27 +1521,27 @@
                     "id": "wave4",
                     "name": "Multilingual output and versioned sharing",
                     "documents": ["foreignWorkerBriefing", "foreignWorkerTransmission", "kakaoMessage"],
-                    "objective": "Add multilingual print and versioned share-block editors with sourceRevision/evidenceDigest freshness and read-confirmation boundaries.",
-                    "entryGate": "Wave 3 green and stored share authority from Wave 0 verified.",
-                    "ownedFiles": ["components/workpack-editor/ForeignWorkerPrintEditor.tsx", "components/workpack-editor/ForeignWorkerTransmissionEditor.tsx", "components/workpack-editor/FieldShareMessageEditor.tsx", "components/workpack-editor/LanguageVariantEditor.tsx", "components/workpack-editor/ShareBlockEditor.tsx", "lib/workpack-editor-document-specs.ts", "lib/workpack-editor-adapter.ts", "lib/workpack-editor-export-manifest.ts", "lib/workpack-commercial-store.ts"],
-                    "readOnlyDependencies": ["app/api/workpacks/[id]/read-confirmations/route.ts", "app/api/workpacks/[id]/share-sessions/route.ts", "lib/workpack-commercial.ts", "lib/types.ts"],
-                    "testFiles": ["tests/workpack-editor-wave4.test.ts", "tests/workpack-editor-share-freshness.test.ts", "tests/workpack-editor-confirmation-boundaries.test.ts", "tests/foreign-worker-languages.test.ts", "tests/workflow-share-panel-behavior.test.ts", "tests/workpack-share-authority-routes.test.ts"],
+                    "objective": "Add multilingual/share-block editors and install server freshness enforcement in share-session creation and workflow dispatch using existing JSONB only.",
+                    "entryGate": "Wave 3 green; v2 share remains blocked until this wave's route tests are green.",
+                    "ownedFiles": ["components/workpack-editor/ForeignWorkerPrintEditor.tsx", "components/workpack-editor/ForeignWorkerTransmissionEditor.tsx", "components/workpack-editor/FieldShareMessageEditor.tsx", "components/workpack-editor/LanguageVariantEditor.tsx", "components/workpack-editor/ShareBlockEditor.tsx", "lib/workpack-editor-document-specs.ts", "lib/workpack-editor-adapter.ts", "lib/workpack-editor-export-manifest.ts", "lib/workpack-commercial.ts", "lib/workpack-commercial-store.ts", "app/api/workpacks/[id]/share-sessions/route.ts", "app/api/workflow/dispatch/route.ts"],
+                    "readOnlyDependencies": ["app/api/workpacks/[id]/read-confirmations/route.ts", "lib/types.ts"],
+                    "testFiles": ["tests/workpack-editor-wave4.test.ts", "tests/workpack-editor-share-freshness.test.ts", "tests/workpack-editor-confirmation-boundaries.test.ts", "tests/foreign-worker-languages.test.ts", "tests/workflow-share-panel-behavior.test.ts", "tests/workpack-share-authority-routes.test.ts", "tests/workflow-dispatch-freshness.test.ts"],
                     "commands": {
                               "red": "npx.cmd vitest run tests/workpack-editor-wave4.test.ts tests/workpack-editor-share-freshness.test.ts tests/workpack-editor-confirmation-boundaries.test.ts --maxWorkers=1 --no-file-parallelism",
-                              "green": "npx.cmd vitest run tests/workpack-editor-wave4.test.ts tests/workpack-editor-share-freshness.test.ts tests/workpack-editor-confirmation-boundaries.test.ts tests/foreign-worker-languages.test.ts tests/workflow-share-panel-behavior.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --no-file-parallelism",
+                              "green": "npx.cmd vitest run tests/workpack-editor-wave4.test.ts tests/workpack-editor-share-freshness.test.ts tests/workpack-editor-confirmation-boundaries.test.ts tests/foreign-worker-languages.test.ts tests/workflow-share-panel-behavior.test.ts tests/workpack-share-authority-routes.test.ts tests/workflow-dispatch-freshness.test.ts --maxWorkers=1 --no-file-parallelism",
                               "browser": "npx.cmd vitest run tests/workpack-editor-browser-matrix.test.ts --maxWorkers=1 --no-file-parallelism",
                               "typecheck": "npm.cmd run typecheck",
                               "diff": "git diff --check"
                             },
-                    "tddGates": ["RED: source/evidence/audience/language edits leave blocks stale and dispatch locked.", "GREEN: rebuild creates a new block with current sourceRevision/evidenceDigest and clears session/dispatch/read-display state.", "GREEN: server authority rejects mismatched stored revision/digest or non-human-confirmed workpack.", "REFACTOR: ForeignWorkerTransmission and FieldShareMessage share versioned blocks but retain distinct fields and interaction wrappers."],
-                    "browserAssertions": ["All shared surface assertions remain green.", "Stale share blocks show one primary rebuild action and no dispatch action.", "Read receipts render as share history only and never as attendance, understanding, signature, or completion."],
+                    "tddGates": ["RED: current share-session route ignores documentKey/blockId/sourceRevision/evidenceDigest and current dispatch route lacks a persisted binding; v2 share stays locked.", "GREEN: share-session POST validates the authoritative block and stores editorV2Binding in access_policy JSONB.", "GREEN: dispatch loads that server binding and returns 409 before provider preflight for missing/stale/mismatched identity, revision, digest, confirmation, or readiness.", "GREEN: rebuild creates a new block with current sourceRevision/evidenceDigest and clears session/dispatch/read-display state.", "REFACTOR: ForeignWorkerTransmission and FieldShareMessage share versioned blocks but retain distinct fields and interaction wrappers."],
+                    "browserAssertions": ["BROWSER-001 through BROWSER-018 rerun for each Wave 4 document", "Before Wave 4 server capability is reported, v2 share/dispatch controls are disabled with freshness_server_contract_missing", "A stale block renders exactly one primary rebuild action and zero enabled dispatch actions", "Share-read nodes use data-confirmation-kind=share-read and never render under attendance/understanding/signature/completion summaries"],
                     "exitGate": "All three documents pass freshness, authority, confirmation-boundary, browser, and export gates.",
                     "rollback": "Disable the feature flag; current foreignWorker strings and kakaoMessage remain available. Existing share sessions/read confirmations remain historical and untouched.",
                     "featureFlagRef": "FLAG-001",
                     "browserMatrixRef": "BROWSER-MATRIX-001",
                     "databaseMigration": false,
-                    "apiChange": null,
-                    "productionFixBoundary": null
+                    "apiChange": true,
+                    "productionFixBoundary": "Extend only existing request parsing and existing workpack_share_sessions.access_policy JSONB; no schema/migration. Dispatch request does not accept client freshness overrides."
                   },
             {
                     "id": "wave5",
@@ -1378,19 +1549,19 @@
                     "documents": [],
                     "objective": "Run all contract, browser, export, compatibility, and rollback gates before enabling the feature flag.",
                     "entryGate": "Waves 0-4 green with no unresolved dropped-field or provenance-boundary issue.",
-                    "ownedFiles": ["tests/workpack-editor-contract.test.ts", "tests/workpack-editor-browser-matrix.test.ts", "tests/workpack-editor-export-roundtrip.test.ts", "scripts/workpack_editor_contract_audit.mjs"],
+                    "ownedFiles": ["tests/workpack-editor-browser-matrix.test.ts", "tests/workpack-editor-export-roundtrip.test.ts"],
                     "readOnlyDependencies": ["all production files owned by Waves 0-4"],
-                    "testFiles": ["tests/workpack-editor-contract.test.ts", "tests/workpack-editor-browser-matrix.test.ts", "tests/workpack-editor-export-roundtrip.test.ts", "tests/documents-editor-layout.test.ts", "tests/editor-export-integrity.test.ts", "tests/workpack-readiness.test.ts", "tests/workpack-store.test.ts", "tests/workpack-share-authority-routes.test.ts", "tests/workpack-improvement-route.test.ts"],
+                    "testFiles": ["tests/workpack-editor-contract.test.ts", "tests/workpack-editor-browser-matrix.test.ts", "tests/workpack-editor-export-roundtrip.test.ts", "tests/documents-editor-layout.test.ts", "tests/editor-export-integrity.test.ts", "tests/workpack-readiness.test.ts", "tests/workpack-store.test.ts", "tests/workpack-share-authority-routes.test.ts", "tests/workflow-dispatch-freshness.test.ts", "tests/workpack-improvement-route.test.ts"],
                     "commands": {
                               "contract": "node scripts/workpack_editor_contract_audit.mjs",
-                              "targeted": "npx.cmd vitest run tests/workpack-editor-contract.test.ts tests/workpack-editor-browser-matrix.test.ts tests/workpack-editor-export-roundtrip.test.ts tests/documents-editor-layout.test.ts tests/editor-export-integrity.test.ts tests/workpack-readiness.test.ts tests/workpack-store.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-improvement-route.test.ts --maxWorkers=1 --no-file-parallelism",
+                              "targeted": "npx.cmd vitest run tests/workpack-editor-contract.test.ts tests/workpack-editor-browser-matrix.test.ts tests/workpack-editor-export-roundtrip.test.ts tests/documents-editor-layout.test.ts tests/editor-export-integrity.test.ts tests/workpack-readiness.test.ts tests/workpack-store.test.ts tests/workpack-share-authority-routes.test.ts tests/workflow-dispatch-freshness.test.ts tests/workpack-improvement-route.test.ts --maxWorkers=1 --no-file-parallelism",
                               "full": "npm.cmd test -- --maxWorkers=1 --no-file-parallelism",
                               "typecheck": "npm.cmd run typecheck",
                               "build": "npm.cmd run build",
                               "diff": "git diff --check"
                             },
                     "tddGates": ["RED audit fixtures remain pinned and demonstrably fail against d3ad865 behavior.", "GREEN every canonical field, appendix, evidence record, viewport, browser, theme, and authority gate.", "GREEN flag-off fallback and flag-on rollback rehearsal.", "RELEASE remains HOLD until an independent reviewer marks the implementation commit PASS."],
-                    "browserAssertions": ["Exactly 12 production DocumentKeys in canonical order and exact titles.", "Wave 1 contains exactly riskAssessmentDraft, tbmBriefing, and tbmLogDraft as its document scope.", "Markdown canonical JSON mirror deep-equals spec.json canonicalContract.", "Every document field has parser, serializer, editorV2 path, current structured path or explicit null, exact legacy fallback, export manifest path, and reload/XLSX/PDF/HWP/HWPX targets.", "Risk production fields exactly match RiskAssessmentRow plus editor-only stable id; divergent aliases are absent.", "Legacy submission body and provenance/audit appendices split losslessly; no known appendix sentinel or review artifact enters an editable control.", "The audited 5221-character mixed risk string is a failing fixture and does not become a master textarea value.", "No edit retains active dbHarness, ontologyQa, qualityContract, generationEvidence, or generationEvidenceError.", "Revalidation recomputes evidenceDigest/materializationDigest, reseals review_pending, and server save alone stamps human_confirmed.", "Model output cannot set approved, approver identity, legal/safety confirmation, signature, attendance, or understanding.", "WorkerAttendanceConfirmation cannot be inferred from ShareReadConfirmation.", "Every share block carries current sourceRevision and evidenceDigest and becomes stale on source/evidence/review change.", "No photo assetId/storagePath/hydrated pixel state is inferred from current improvements GET/POST.", "Reload, XLSX, PDF, HWP, and HWPX semantic round trips preserve every field, evidence record, body/appendix boundary, and unknown raw value.", "Default surface has exactly one evidence trigger, zero yellow evidence badges, zero persistent right rails, zero duplicate left evidence summaries, and zero below-editor result/citation/operation-graph surfaces.", "The default DOM contains zero occurrences of 중처법 §4-3호 증빙; applicable detail may appear once inside the open drawer.", "Header and drawer counts come only from selectDocumentEvidenceSummary and match for the selected document; no conflicting count source renders.", "At 1150x900 the selector is <=220px, main editor >=700px, readable preview >=560px, and persistent evidence rail is 0px.", "At 1440x1000 main editor >=920px and readable preview >=720px.", "At 390x844 and 391x844 the editor heading is <=160px after Edit, no visible editor textarea has internal vertical overflow, and the audited sample page is <=3600px.", "Day/Night geometry and semantic hierarchy match at all six required viewports.", "documentElement.scrollWidth equals clientWidth at every required viewport.", "No default workbench text is 11px; body >=15px, table >=14px, label >=13px, caption >=12px only in details.", "Exactly one lifecycle CTA is dominant; Download visible and aria labels are byte-identical; share readiness is non-competing status.", "The 준제출형 source-confirmation caveat is role=alert and visually stronger than neutral provenance chrome.", "Only runtime-verified HTTPS safety URLs render as links, only inside the drawer; guidanceX.do has no rendered href while unverified.", "Feature flag off restores current textarea rendering without deleting editorV2/body/appendix data.", "No database schema or migration change is introduced."],
+                    "browserAssertions": ["BROWSER-001 through BROWSER-018 pass for every required browser/viewport/theme row", "Contract audit verifies 12 keys/titles, 21 risk fields, every expanded codec/path, Wave scopes, viewport registry, and component export/file names", "No editorV2 or reviewArtifacts object contains generationEvidence/generationEvidenceError; top-level seal verifies after unedited validation, edited revalidation, and human confirmation", "Generated content reaches review_pending without content mutation; edited content cannot bypass revalidation", "Wave 4 share-session binding and dispatch stale-rejection tests pass before v2 share controls enable", "Photo state is the single common/DOC-09 enum and never claims hydratable pixels", "Feature flag off restores current behavior and no database migration exists"],
                     "exitGate": "All commands pass, changed paths are within declared ownership, feature flag remains off by default, and an independent reviewer issues PASS.",
                     "rollback": "Keep the feature flag off. Revert only Wave-owned production changes; preserve optional JSON and immutable revisions. No DB rollback.",
                     "featureFlagRef": "FLAG-001",
@@ -1508,24 +1679,28 @@
                   }
           ],
       "acceptance": [
-            ["PARITY-001", "JSON parses; Markdown registry parity matches contract IDs, document order/titles, expanded fields, Wave scopes, and viewports."],
+            ["PARITY-001", "Current executable checks prove JSON parse/source-shape/codec/fingerprint/Markdown stable-ID coverage only; semantic mirror parity is explicitly not claimed and the durable validator is Wave 0's first prerequisite."],
             ["SCOPE-001", "Only spec.md and spec.json change; no production, test, package, CSS, API, DB, migration, or existing evidence file changes."],
             ["DOC-001", "Exactly 12 DocumentKeys and titles occur in production order."],
+            ["COMPONENT-001", "WorkpackSummaryEditor and WorkPermitEditor are both file basenames and named exports; SummaryEditor and PermitInspectionEditor aliases are forbidden."],
             ["RISK-001", "Expanded RiskAssessmentEditorRow is id plus the exact 21 RiskAssessmentRow names; hazard4M, existingControls, dueDate, and reason aliases are absent."],
             ["FIELD-001", "Every expanded field resolves a codec and derives exact editorV2, legacy fallback, export manifest, and reload/XLSX/PDF/HWP/HWPX paths."],
+            ["FIELD-002", "Zero-or-more ID arrays use stableIdArrayAllowEmpty, non-empty ID arrays use stableIdArrayNonEmpty, and nullable identifiers use nullableStableId."],
             ["BODY-001", "Legacy submission body and provenance/audit appendix split losslessly before field parsing."],
             ["BODY-002", "No editable value contains DB harness, ontology QA, quality contract, generation seal, KOSHA/law source metadata, management notes, operation graph, or raw appendix."],
             ["BODY-003", "The measured 5,221-character mixed risk string is a failing fixture and never becomes a v2 master textarea."],
-            ["FLOW-001", "Any edit clears active dbHarness, ontologyQa, qualityContract, generationEvidence, and generationEvidenceError, increments revision, clears human confirmation, and stales share blocks."],
-            ["FLOW-002", "Revalidation verifies the base seal, recomputes review artifacts/evidenceDigest/materializationDigest, and reseals review_pending."],
+            ["FLOW-001", "Any edit clears active review artifacts and the top-level generationEvidence/error, increments revision, clears human confirmation, and stales share blocks; no nested seal exists."],
+            ["FLOW-002", "Revalidation verifies the untouched base seal, builds a seal-free final candidate, hashes all remaining AskResponse fields with existing buildResponseContentDigest, and attaches one top-level envelope."],
             ["FLOW-003", "POST /api/workpacks alone authenticates the actor, stamps human_confirmed, reseals, and inserts an immutable revision."],
-            ["FLOW-004", "Share unlock reloads stored authority and matches block sourceRevision/evidenceDigest."],
+            ["FLOW-004", "V2 share is blocked until Wave 4; then both session creation and dispatch reload stored authority and match documentKey/blockId/sourceRevision/evidenceDigest."],
+            ["FLOW-005", "Unedited generated content may validate to review_pending without document mutation, then requires explicit authenticated confirmation; edited content must revalidate first."],
             ["HUMAN-001", "Generated/model output cannot approve, identify an approver, confirm legal/safety review, sign, record attendance, or confirm understanding."],
             ["CONFIRM-001", "WorkerAttendanceConfirmation and ShareReadConfirmation are non-substitutable."],
-            ["EVIDENCE-001", "EditorEvidenceRef has no reviewed boolean and preserves production lifecycle/review/quality/role/obligation/provenance/target states."],
+            ["EVIDENCE-001", "EditorEvidenceRef has no reviewed boolean and losslessly preserves original item ID, raw item_type/source_id/evidence_role, nullable ontology citedUid, normalized class, lifecycle/review/quality/obligation/chunk/page/target states."],
             ["EVIDENCE-002", "SIF is supporting hazard-priority evidence only; KOSHA guidance cannot establish a statutory mandate without eligible law."],
-            ["SHARE-001", "Every expanded share block includes sourceRevision and evidenceDigest and becomes stale on source/evidence/review/audience/language change."],
-            ["PHOTO-001", "Current improvement GET/POST never yields a hydratable assetId/storagePath state; Wave 3 owns no API or DB change."],
+            ["SHARE-001", "Every expanded share block includes owning documentKey, stable block ID, sourceRevision, and evidenceDigest and becomes stale on source/evidence/review/audience/language change."],
+            ["SHARE-002", "Wave 4 owns share-session and dispatch routes; access_policy.editorV2Binding is server-validated and dispatch rejects stale/missing bindings before any provider call."],
+            ["PHOTO-001", "Common photo state and DOC-09 photoState are identical with a total legacy mapping; current GET/POST never yields hydratable assetId/storagePath and Wave 3 owns no API/DB change."],
             ["EXPORT-001", "All expanded fields and separate appendices round-trip semantically through reload, XLSX, PDF, HWP, and HWPX without silent defaults."],
             ["UI-001", "Default surface priority is selector, title/status, edit/download, preview/editor, share readiness."],
             ["UI-002", "Default surface has zero yellow evidence badges, persistent right rails, duplicate left evidence summaries, and below-editor result/citation/operation graph blocks."],
@@ -1533,13 +1708,14 @@
             ["UI-004", "The trigger is exactly 근거 N건 · 확인 필요 M건 and both numbers come only from selectDocumentEvidenceSummary."],
             ["UI-005", "At 1150x900 selector <=220px, editor >=700px, readable preview >=560px, evidence rail=0px; at 1440x1000 editor >=920px and preview >=720px."],
             ["UI-006", "At 390x844 and 391x844 editor heading y<=160px after Edit, no visible editor textarea internally scrolls, and audited sample page height <=3600px."],
-            ["UI-007", "Day/Night parity, 44px controls, 8px spacing, no horizontal overflow, and progressive disclosure hold at all viewports."],
+            ["UI-007", "BROWSER-001 through BROWSER-018 measure <=1px Day/Night geometry delta, >=44px targets, exact 8px stack gaps, zero overlap/overflow, and progressive disclosure at all viewports."],
             ["UI-008", "Body >=15/23px, table >=14/20px, label >=13/18px, details-only caption >=12/18px, no default 11px text, letter-spacing=0."],
             ["UI-009", "Exactly one lifecycle CTA is dominant; Download visible label and aria-label are both 다운로드; share readiness is status only."],
-            ["UI-010", "The 준제출형 source-confirmation caveat is role=alert and visually stronger than neutral provenance chrome."],
+            ["UI-010", "The 준제출형 warning is role=alert/data-severity=warning with >=4.5:1 text contrast, >=3:1 leading-border contrast, and precedes the non-alert evidence trigger in DOM/accessibility order."],
             ["UI-011", "Drawer overlays without shrinking preview, traps focus, closes on Escape, restores trigger focus, and is a single full-width mobile scroller."],
             ["LINK-001", "Only current runtime verified HTTPS safety URLs render, only in the drawer; unverified guidanceX.do has no href."],
             ["STATE-001", "Empty/loading/error/offline/conflict/read-only states preserve stable geometry and never silently claim authority."],
+            ["CONFLICT-001", "Implementation starts from integration head acf809e or successor, excludes the dirty documents-mobile-priority worktree, honors mapped commits, assigns one shared-file owner, and forbids wholesale copy."],
             ["ROLLBACK-001", "Feature flag off restores current editor/export rendering while preserving unknown editorV2 data; no data rollback."],
             ["WAVE-001", "Wave 1 document scope is exactly riskAssessmentDraft, tbmBriefing, tbmLogDraft."],
             ["WAVE-002", "Each wave declares exact owned/read-only files, tests, commands, TDD gates, rollback, and no migration."],
@@ -1548,35 +1724,38 @@
     },
   "independentGate": {
       "required": true,
-      "rule": "Do not start Wave 1 until another independent reviewer marks this exact commit PASS after running the mechanical validators.",
-      "holdState": "HOLD"
+      "rule": "Do not start Wave 0 or any later implementation until another independent reviewer marks this exact spec commit PASS. After PASS, Wave 0 creates the durable validator first and still may not touch product files until that prerequisite is green.",
+      "holdState": "HOLD_PENDING_INDEPENDENT_PASS"
     },
-  "parity": {
+  "integrityFingerprints": {
+      "claim": "Compact registry change detection only; not a canonicalContract or semantic Markdown mirror.",
       "algorithm": "fnv1a64 over UTF-8 JSON of normalized registries",
+      "normalization": {"documents": "expanded field tuples only", "waves": "documents+ownedFiles+readOnlyDependencies+testFiles+commands+rollback", "viewports": "implementation.viewports", "browserMatrix": "implementation.browserMatrix", "contractIds": "contractIds", "browserAssertions": "ui.browserAssertions"},
       "documents": [
-            ["DOC-01", "workpackSummaryDraft", 15, "328039b9da831ab6"],
-            ["DOC-02", "riskAssessmentDraft", 22, "b793d15ad793e204"],
-            ["DOC-03", "workPlanDraft", 24, "f6c0d7ad2fdfc4e8"],
-            ["DOC-04", "workPermitDraft", 33, "43e297afdca5c566"],
-            ["DOC-05", "tbmBriefing", 25, "9b42c27a1167b763"],
-            ["DOC-06", "tbmLogDraft", 45, "889c9cee79a57ef6"],
-            ["DOC-07", "safetyEducationRecordDraft", 26, "135ec35225aa3eb2"],
-            ["DOC-08", "emergencyResponseDraft", 29, "694a478a5fcfc5b9"],
-            ["DOC-09", "photoEvidenceDraft", 17, "dcf32718202626ab"],
-            ["DOC-10", "foreignWorkerBriefing", 14, "de96f7010a6388d8"],
-            ["DOC-11", "foreignWorkerTransmission", 20, "c5dc4b13f62352cc"],
-            ["DOC-12", "kakaoMessage", 21, "d41c2c554f588473"]
+            ["DOC-01", "workpackSummaryDraft", 15, "79795d3bd3c15992"],
+            ["DOC-02", "riskAssessmentDraft", 22, "6b4a3ad7fd99b6e4"],
+            ["DOC-03", "workPlanDraft", 24, "89a545142f088f30"],
+            ["DOC-04", "workPermitDraft", 33, "adc9332eef6ef367"],
+            ["DOC-05", "tbmBriefing", 25, "681c90307ae7525b"],
+            ["DOC-06", "tbmLogDraft", 45, "60aea561cdcd5852"],
+            ["DOC-07", "safetyEducationRecordDraft", 26, "3a8e8a6d4b7dffca"],
+            ["DOC-08", "emergencyResponseDraft", 29, "df6f7f4c2ba3512d"],
+            ["DOC-09", "photoEvidenceDraft", 16, "69ab5c57fa10bbcf"],
+            ["DOC-10", "foreignWorkerBriefing", 14, "db4999b52b3afbd0"],
+            ["DOC-11", "foreignWorkerTransmission", 21, "c2d6a715e4f46a5f"],
+            ["DOC-12", "kakaoMessage", 22, "41b2932756b91dd0"]
           ],
       "waves": [
-            ["wave0", 0, "d789faadbfc510af"],
+            ["wave0", 0, "d5d20cc0702daaaf"],
             ["wave1", 3, "43d777e896eb1696"],
             ["wave2", 3, "f52783820840ba71"],
             ["wave3", 3, "88be720b6e7048d7"],
-            ["wave4", 3, "3d027a26a90ee35d"],
-            ["wave5", 0, "1dbd764d44594bdc"]
+            ["wave4", 3, "9fb8cd297d6c3da3"],
+            ["wave5", 0, "604d3c9194f073e8"]
           ],
       "viewports": [6, "c95625222074ee9b"],
       "browserMatrix": [12, "2229ba55536c5e94"],
-      "contractIds": [36, "f928357f8680e96f"]
+      "contractIds": [41, "e0205088c5816fa7"],
+      "browserAssertions": [18, "6fddac770de4137b"]
     }
 }

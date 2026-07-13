@@ -2,11 +2,13 @@
 
 > **HOLD_PENDING_INDEPENDENT_PASS**
 
-이 문서는 구현자가 읽는 설계·결정·수용 기준이다. 기계 검증용 registry는 `spec.json`이며, 두 파일은 문장 복제가 아니라 stable ID, 문서 순서, 확장 필드 digest, wave, viewport digest로 parity를 확인한다.
+이 문서는 구현자가 읽는 설계·결정·수용 기준이고 `spec.json`은 canonical machine registry다. 현재 검증은 JSON integrity와 Markdown stable registry coverage만 증명한다. 문장 단위 또는 전체 semantic parity는 주장하지 않는다.
 
 - Branch: `feat/workpack-document-editors-v2`
 - Base: `d3ad86530bc786d8024206cc5b7c7db60c055278`
 - Reviewed HOLD: `dc8435c4211da54ed1f81cd5f5486d52d26ab6d0`
+- Rejected remediation: `77f12a05acec6e1fb48fd94a0ccba329008062e2`
+- Integration reference: `acf809ee47713123469c3c9b31edd11ad5f8deae`
 - Production implementation started: `false`
 - Allowed changes: this `spec.md` and `spec.json` only
 - Database migration: forbidden
@@ -38,7 +40,7 @@ A `null` current path means v2-only. The adapter must check the exact legacy fal
 
 Shared type bindings are expanded before validation and export. `RiskAssessmentEditorRow`, `WorkerAttendanceConfirmation`, `ShareReadConfirmation`, and `ShareBlockBase` are each defined once and referenced by prefix in document registries.
 
-The Markdown parity table near the end records FNV-1a digests of normalized expanded registries. Changing any field name, type, requirement, codec, current path, wave ownership, command, or viewport requires updating both artifacts.
+The integrity table near the end records compact FNV-1a change fingerprints. It detects registry drift but is not a canonicalContract mirror. Wave 0 must create the durable cross-artifact validator as its first isolated commit before touching product files.
 
 ## Scope And Non-Goals
 
@@ -68,7 +70,7 @@ The following are explicitly out of scope for this spec remediation:
 
 - rewriting current evidence
 
-- starting Wave 0 or Wave 1 before independent PASS
+- starting Wave 0 or any later wave before independent PASS
 
 ## Verified Production Seams
 
@@ -80,12 +82,12 @@ These are the current call sites the future implementation must reuse or deliber
 | SRC-02 | `lib/types.ts` | `WorkPlanStructured | PermitInspectionStructured | TbmBriefingStructured | TbmLogStructured | EducationRecordStructured | TbmRiskLink` | Known fields project to these existing structured payloads; richer v2-only fields remain in editorV2 and export manifests. |
 | SRC-03 | `lib/workpack-readiness.ts` | `applyWorkpackDeliverablesChange | assessWorkpackReadiness` | Current edit invalidates ontologyQa, qualityContract, and dbHarness; v2 extends invalidation to generationEvidence and generationEvidenceError. |
 | SRC-04 | `app/api/ask/route.ts` | `POST` | Current full regeneration seam calls runAsk then attachGenerationEvidence; it is the fallback when no verified base exists, not an edit-preserving revalidator. |
-| SRC-05 | `lib/generation-evidence.ts` | `verifyAskResponseGenerationEvidence | generationEvidenceReferences | attachGenerationEvidence | buildResponseContentDigest` | Revalidation verifies the base seal, recovers trusted references, and reseals the final materialization. |
+| SRC-05 | `lib/generation-evidence.ts` | `verifyAskResponseGenerationEvidence | generationEvidenceReferences | attachGenerationEvidence | buildResponseContentDigest` | One seal exists only at top-level AskResponse. The digest deletes only top-level generationEvidence/error before hashing the rest; editorV2 must never copy the seal. |
 | SRC-06 | `lib/workpack-ontology-qa.ts` | `attachWebOntologyQa | buildOntologyQaSource` | V2 review mode must attach a verdict without auto-mutating structured editor content; failed review returns blocking issues. |
 | SRC-07 | `lib/quality-contract.ts` | `attachQualityContract` | Quality is recomputed only after deterministic editor projection and ontology review. |
 | SRC-08 | `app/api/workpacks/route.ts` | `POST` | Current authoritative persistence is insert-only and requires valid generation evidence; v2 preserves immutable inserts and adds server-stamped human confirmation. |
 | SRC-09 | `lib/workpack-store.ts` | `buildWorkpackEvidenceSummary | buildWorkpackInsertPayload | buildReopenData` | Existing deliverables/evidence_summary/status JSONB carry editorV2, structured data, review metadata, and seals without a migration. |
-| SRC-10 | `lib/workpack-commercial-store.ts` | `assessStoredWorkpackShareAuthority` | Share authority is derived from the stored workpack and must additionally verify v2 review and digest freshness. |
+| SRC-10 | `lib/workpack-commercial-store.ts` | `assessStoredWorkpackShareAuthority` | Current authority does not verify editor block ID/revision/digest. Wave 4 owns that extension; v2 share stays blocked first. |
 | SRC-11 | `app/api/workpacks/[id]/read-confirmations/route.ts` | `GET | POST` | Stores share-session read acknowledgment only; it cannot satisfy TBM attendance, understanding, signature, or safety confirmation. |
 | SRC-12 | `app/api/workpacks/[id]/improvements/route.ts` | `GET | POST` | POST returns improvementId but not photo row id/storagePath; GET returns improvements and photo_summary but not workpack_improvement_photos. |
 | SRC-13 | `components/WorkpackEditor.tsx` | `META_SECTION_PATTERNS | META_KEY_PATTERNS | parseSheetRows` | Existing patterns prove body/metadata separation is already recognized for export; v2 moves the boundary into a shared lossless adapter used before editing. |
@@ -98,6 +100,30 @@ These are the current call sites the future implementation must reuse or deliber
 | SRC-20 | `app/api/export/pdf/route.ts` | `POST` | Visible PDF body uses submission content; deterministic provenance/audit appendix and field-path manifest remain outside editable body semantics. |
 | SRC-21 | `app/api/export/hwp/route.ts` | `POST` | Existing HWP-compatible output remains; v2 appends deterministic semantic data outside the editable body. |
 | SRC-22 | `lib/xlsx-builder.ts | lib/hwp-table-builder.ts | components/WorkpackEditor.tsx @rhwp client` | `builders and HWPX client` | All formats consume one ExportManifestBridge; current document-specific structured projections remain compatibility views. |
+| SRC-23 | `app/api/workpacks/[id]/share-sessions/route.ts` | `GET | POST` | Current POST accepts recipients but no document/block/revision/digest binding. Wave 4 must validate and persist it in existing access_policy JSONB. |
+| SRC-24 | `app/api/workflow/dispatch/route.ts` | `POST` | Current request rejects freshness fields and its session load has no binding. Wave 4 reads the server session binding and rejects stale state before provider preflight. |
+
+## CONFLICT-001 Integration Ledger
+
+Implementation reference is `acf809ee47713123469c3c9b31edd11ad5f8deae` on `feat/phase-a-evidence-integration`, or its designated successor at implementation time.
+
+`feat/documents-mobile-priority` at `ec132129979dcbb684a87c7bbe89ff2a85180533` is excluded as an input: `tests/documents-editor-layout.test.ts` is dirty and `output/playwright/2026-07-11/` is untracked. Its reviewed commits are already mapped into the integration lineage:
+
+| Source | Integration mapping |
+| --- | --- |
+| `2226aa22b648d324b8cc4c5360bac7a19d39f298` | `cf451c5f34667d5d4a35d6b7f05aa50f936d4280` |
+| `ec132129979dcbb684a87c7bbe89ff2a85180533` | `24513457c7855450c4c335269325df28a6ecbd37` |
+
+Each wave has one owner before shared-file edits. Integration order is wave0 through wave5; hand-merge reviewed hunks from the current integration lineage. Never wholesale-copy files/directories from another worktree, never copy that dirty test or Playwright output, and rerun source-shape plus wave tests after each handoff.
+
+| Order | Wave owner | Shared files | Handoff |
+| --- | --- | --- | --- |
+| 1 `wave0` | `workpack-editor-wave0` | `lib/workpack-readiness.ts`; `app/api/workpacks/route.ts`; `lib/workpack-store.ts`; `lib/workpack-commercial-store.ts` | contract validator first, then adapter/review authority |
+| 2 `wave1` | `workpack-editor-wave1` | `components/WorkpackEditor.tsx`; `components/WorkpackEditor.module.css`; `components/CurrentWorkpackModules.tsx`; `tests/documents-editor-layout.test.ts`; `lib/xlsx-builder.ts`; `lib/hwp-table-builder.ts`; `app/api/export/xlsx/route.ts`; `app/api/export/pdf/route.ts`; `app/api/export/hwp/route.ts` | start from mapped integration commits; recreate tests from clean lineage |
+| 3 `wave2` | `workpack-editor-wave2` | `lib/workpack-editor-document-specs.ts`; `lib/workpack-editor-adapter.ts`; `lib/workpack-editor-export-manifest.ts`; `tests/documents-editor-layout.test.ts`; `lib/xlsx-builder.ts`; `lib/hwp-table-builder.ts` | after Wave 1 releases shared modules |
+| 4 `wave3` | `workpack-editor-wave3` | `lib/workpack-editor-document-specs.ts`; `lib/workpack-editor-adapter.ts`; `lib/workpack-editor-export-manifest.ts` | improvements route and photo libraries remain read-only |
+| 5 `wave4` | `workpack-editor-wave4-share-freshness` | `lib/workpack-commercial.ts`; `lib/workpack-commercial-store.ts`; `app/api/workpacks/[id]/share-sessions/route.ts`; `app/api/workflow/dispatch/route.ts` | coordinate one owner with active share/workflow branches |
+| 6 `wave5` | `workpack-editor-wave5-gate` | `tests/workpack-editor-browser-matrix.test.ts`; `tests/workpack-editor-export-roundtrip.test.ts`; `tests/documents-editor-layout.test.ts` | verification only after Waves 0-4 integrate |
 
 ## Measured Failing Baseline
 
@@ -134,10 +160,22 @@ A document is not a string. Each document envelope has five roots:
 Three workpack-level roots stay outside document content:
 
 - `evidence`: `Record<string,EditorEvidenceRef>`
-- `reviewArtifacts`: `dbHarness + ontologyQa + qualityContract + generationEvidence`
+- `reviewArtifacts`: `dbHarness + ontologyQa + qualityContract` only
 - `auditHistory`: `prior invalidated appendices/digests`
 
 This boundary is enforced before parsing, editing, materialization, validation, export, and share freshness calculation.
+
+The generation seal is not an editor root. It exists only as top-level `AskResponse.generationEvidence` with top-level `generationEvidenceError`. `editorV2.reviewArtifacts.generationEvidence`, copied snapshots, and copied signatures are forbidden.
+
+Exact existing digest boundary:
+
+1. Verify the untouched base response with `verifyAskResponseGenerationEvidence`.
+2. Build the final response candidate, including editorV2 and fresh non-seal review artifacts.
+3. Ensure the candidate has no nested seal; clear only top-level generationEvidence/error.
+4. Existing `buildResponseContentDigest` canonicalizes and hashes every remaining AskResponse field.
+5. Existing `attachGenerationEvidence` attaches one top-level envelope, then verification runs again.
+
+`lib/generation-evidence.ts` is read-only in Waves 0 and 1. No algorithm or envelope change is required, so the seal cannot hash a copy of itself.
 
 ### Legacy Split Algorithm
 
@@ -146,7 +184,7 @@ This boundary is enforced before parsing, editing, materialization, validation, 
 3. Tokenize the exact legacy deliverables.<DocumentKey> string while retaining original line endings and section order.
 4. Classify versioned META_SECTION_PATTERNS and META_KEY_PATTERNS into legacyAppendix; classify known form sections into legacySubmissionBody.
 5. Parse only legacySubmissionBody into document fields.
-6. Normalize recognized appendix provenance into evidence/reviewArtifacts while preserving the raw section verbatim in legacyAppendix.
+6. Normalize recognized appendix provenance into evidence and non-seal reviewArtifacts while preserving the raw section verbatim in legacyAppendix.
 7. Put unknown lines in unmappedLegacyLines and block authoritative revalidation instead of guessing.
 
 Serializer flow:
@@ -218,13 +256,15 @@ The current structured projection is a compatibility view, not the canonical own
 | `strictBoolean` | acceptBooleanOnly | canonicalJsonBoolean | `validation_error_and_preserve_raw_in_unmapped` |
 | `strictEnum` | acceptExactDeclaredEnumMemberOnly | canonicalJsonString | `validation_error_and_preserve_raw_in_unmapped` |
 | `orderedStringArray` | acceptStringArrayPreservingOrderDuplicatesAndExactValues | canonicalJsonArray | `validation_error_and_preserve_raw_in_unmapped` |
-| `stableIdArray` | acceptNonEmptyStringArrayPreservingOrderAndRejectUnknownReferences | canonicalJsonArray | `blocking_reference_error` |
+| `stableIdArrayNonEmpty` | acceptArrayWithAtLeastOneNonEmptyStableIdPreservingOrderAndRejectUnknownReferences | canonicalJsonArray | `blocking_reference_error` |
+| `stableIdArrayAllowEmpty` | acceptZeroOrMoreNonEmptyStableIdsPreservingOrderAndRejectUnknownReferences | canonicalJsonArray | `blocking_reference_error` |
 | `documentKeyArray` | acceptArrayOfExactDocumentKeyMembersPreservingOrder | canonicalJsonArray | `blocking_reference_error` |
 | `localDate` | acceptExactStringThenValidateYYYYMMDDOrDeclaredFieldFallback | canonicalJsonString | `validation_error_and_preserve_raw_in_unmapped` |
 | `isoDateTime` | acceptExactStringThenValidateISO8601 | canonicalJsonString | `validation_error_and_preserve_raw_in_unmapped` |
 | `digest` | acceptStringMatchingSha256Base64urlPrefix | canonicalJsonString | `blocking_freshness_error` |
 | `actorProvenance` | acceptStrictActorProvenanceObjectAndRejectModelClaimingHumanIdentity | canonicalJsonObjectWithSortedKeys | `blocking_human_confirmation_error` |
 | `nullableExactString` | acceptNullOrStringPreservingUnicodeAndInteriorAndBoundaryWhitespace | canonicalJsonNullOrString | `blocking_type_error` |
+| `nullableStableId` | acceptNullOrNonEmptyStableIdWithoutGeneratingOrCoercing | canonicalJsonNullOrString | `blocking_reference_error` |
 | `nullableStrictNumber` | acceptNullOrFiniteNumberOnly | canonicalJsonNullOrNumber | `blocking_type_error` |
 | `canonicalObject` | acceptPlainObjectRecursivelyRejectingUndefinedFunctionsSymbolsAndCycles | canonicalJsonObjectWithSortedKeys | `blocking_type_error` |
 | `nullableCanonicalObject` | acceptNullOrPlainObjectRecursivelyRejectingUndefinedFunctionsSymbolsAndCycles | canonicalJsonNullOrObjectWithSortedKeys | `blocking_type_error` |
@@ -266,7 +306,7 @@ Production base: `RiskAssessmentRow from lib/risk-assessment-schema.ts`
 | `verificationChecker` | string | always | `exactString` | structured.riskAssessmentRows[].verificationChecker |
 | `whyLikelihood` | string | always | `exactString` | structured.riskAssessmentRows[].whyLikelihood |
 | `whySeverity` | string | always | `exactString` | structured.riskAssessmentRows[].whySeverity |
-| `evidenceRefs` | string[] | at least one | `stableIdArray` | structured.riskAssessmentRows[].evidenceRefs |
+| `evidenceRefs` | string[] | at least one | `stableIdArrayNonEmpty` | structured.riskAssessmentRows[].evidenceRefs |
 
 Field notes:
 
@@ -280,7 +320,7 @@ Field notes:
 | `actorType` | "authenticated_user"\|"worker_self"\|"recorded_for_worker" | as declared | `strictEnum` | (v2 only) |
 | `actorId` | string | as declared | `stableId` | (v2 only) |
 | `displayName` | string | as declared | `exactString` | (v2 only) |
-| `recordedForWorkerId` | string\|null | as declared | `nullableExactString` | (v2 only) |
+| `recordedForWorkerId` | string\|null | as declared | `nullableStableId` | (v2 only) |
 | `occurredAt` | string | as declared | `isoDateTime` | (v2 only) |
 | `authority` | "server_session"\|"worker_confirmation" | as declared | `strictEnum` | (v2 only) |
 
@@ -329,8 +369,8 @@ Proves:
 | --- | --- | --- | --- | --- |
 | `id` | string | after read | `stableId` | GET /api/workpacks/[id]/read-confirmations -> confirmations[].id |
 | `shareBlockId` | string | always | `stableId` | (v2 only) |
-| `shareSessionId` | string | always | `stableId` | GET /api/workpacks/[id]/read-confirmations -> confirmations[].share_session_id |
-| `workerId` | string | when known | `stableId` | GET /api/workpacks/[id]/read-confirmations -> confirmations[].worker_id |
+| `shareSessionId` | string\|null | always | `nullableStableId` | GET /api/workpacks/[id]/read-confirmations -> confirmations[].share_session_id |
+| `workerId` | string\|null | when known | `nullableStableId` | GET /api/workpacks/[id]/read-confirmations -> confirmations[].worker_id |
 | `workerDisplayName` | string | always | `exactString` | GET /api/workpacks/[id]/read-confirmations -> confirmations[].worker_display_name |
 | `languageCode` | string | always | `exactString` | GET /api/workpacks/[id]/read-confirmations -> confirmations[].language_code |
 | `confirmationMethod` | "button" | always | `strictEnum` | GET /api/workpacks/[id]/read-confirmations -> confirmations[].confirmation_method |
@@ -355,6 +395,7 @@ Cannot prove:
 | Relative path | Type | Required | Codec | Current source/target |
 | --- | --- | --- | --- | --- |
 | `id` | string | always | `stableId` | (v2 only) |
+| `documentKey` | DocumentKey | always | `documentKey` | (v2 only) |
 | `sourceDocumentKeys` | DocumentKey[] | at least one | `documentKeyArray` | (v2 only) |
 | `sourceRevision` | integer | always | `strictInteger` | (v2 only) |
 | `evidenceDigest` | string | always | `digest` | (v2 only) |
@@ -363,7 +404,7 @@ Cannot prove:
 | `actionRequired` | string | always | `exactString` | (v2 only) |
 | `confirmationRequired` | boolean | always | `strictBoolean` | (v2 only) |
 | `state` | "draft"\|"stale"\|"ready"\|"dispatched" | always | `strictEnum` | (v2 only) |
-| `shareSessionId` | string | after server creation | `stableId` | workpack_share_sessions.id |
+| `shareSessionId` | string\|null | always | `nullableStableId` | workpack_share_sessions.id or null before server creation |
 
 Stales on:
 
@@ -387,22 +428,25 @@ Stales on:
 
 | Relative path | Type | Required | Codec | Current source/target |
 | --- | --- | --- | --- | --- |
-| `id` | string | always | `stableId` | AskResponse.dbHarness.packet.directEvidence\|sifCases\|supportingEvidence[].id or ontology evidence citedUid |
-| `sourceType` | "law"\|"kosha_guidance"\|"sif_case"\|"photo"\|"field_record" | always | `strictEnum` | SafetyReferenceItem.item_type/source_id plus ontology evidence sourceType |
-| `lifecycle` | "current"\|"stale"\|"retired" | always | `strictEnum` | SafetyReferenceItem.kosha_guide.lifecycle or current published-law overlay derivation |
-| `reviewState` | "draft"\|"verified"\|"published" | always | `strictEnum` | ontology evidence reviewState |
+| `id` | string | always | `stableId` | Stable editor key; use SafetyReferenceItem.id unchanged when present, otherwise ontology citedUid |
+| `sourceItemId` | string\|null | catalog evidence only | `nullableStableId` | SafetyReferenceItem.id exactly; null for ontology-only evidence |
+| `rawItemType` | string\|null | catalog evidence only | `nullableExactString` | SafetyReferenceItem.item_type exactly, including technical-guideline, technical-support-regulation, and future values |
+| `rawSourceId` | string\|null | catalog evidence only | `nullableStableId` | SafetyReferenceItem.source_id exactly |
+| `rawEvidenceRole` | "direct"\|"supporting"\|null | catalog evidence when present | `nullableStrictEnum` | SafetyReferenceItem.evidence_role exactly; null remains null |
+| `normalizedSourceClass` | "law"\|"kosha_guidance"\|"sif_case"\|"photo"\|"field_record"\|"other" | always | `strictEnum` | Derived classification stored alongside, never instead of, rawItemType/rawSourceId |
+| `lifecycle` | "current"\|"stale"\|"retired"\|"unknown" | always | `strictEnum` | SafetyReferenceItem.kosha_guide.lifecycle or reviewed ontology/catalog derivation |
+| `reviewState` | "draft"\|"verified"\|"published"\|"unknown" | always | `strictEnum` | ontology reviewState or explicit unknown |
 | `resolution` | "resolved"\|"unresolved" | always | `strictEnum` | ontology evidence resolution |
 | `quality` | "accepted"\|"review_required"\|null | always | `nullableStrictEnum` | SafetyReferenceItem.kosha_guide.quality or null |
-| `evidenceRole` | "direct"\|"supporting" | always | `strictEnum` | SafetyReferenceItem.evidence_role |
+| `evidenceRole` | "direct"\|"supporting" | always | `strictEnum` | Exact rawEvidenceRole when present; otherwise a versioned derivation recorded without mutating rawEvidenceRole |
 | `directEligibility` | boolean | always | `strictBoolean` | SafetyReferenceItem.kosha_guide.directEligible or deterministic law/SIF rule |
 | `obligationClassification` | "statutory_mandate"\|"technical_guidance_only"\|"statutory_mandate_with_guidance"\|"review_required" | always | `strictEnum` | ontology evidence-chain obligation classification |
 | `relation` | "mandatedBy"\|"supportedBy"\|"prioritizedBy"\|"observedBy" | always | `strictEnum` | ontology evidence relation |
 | `roleDetail` | "hazard_priority_only"\|"technical_guidance_only"\|null | always | `nullableStrictEnum` | ontology SIF role or KOSHA guidance role |
 | `bodyKind` | "native"\|"unknown"\|null | always | `nullableStrictEnum` | SafetyReferenceItem.kosha_guide.bodyKind or null |
-| `citedUid` | string | always | `exactString` | ontology evidence citedUid |
-| `sourceItemId` | string | always | `stableId` | SafetyReferenceItem.id or ontology itemId |
-| `productionItemId` | string\|null | optional | `nullableExactString` | ontology KOSHA guidance productionItemId or null |
-| `chunkId` | string\|null | optional | `nullableExactString` | ontology KOSHA guidance chunk.chunkId or null |
+| `citedUid` | string\|null | ontology evidence only | `nullableExactString` | Ontology citedUid exactly; null for non-ontology catalog/photo/field evidence |
+| `productionItemId` | string\|null | optional | `nullableStableId` | ontology KOSHA guidance productionItemId or null |
+| `chunkId` | string\|null | optional | `nullableStableId` | ontology KOSHA guidance chunk.chunkId or null |
 | `chunkSha256` | string\|null | optional | `nullableExactString` | ontology KOSHA guidance chunk.chunkSha256 or null |
 | `page` | number\|null | optional | `nullableStrictNumber` | SafetyReferenceItem.kosha_guide.anchors[0].page or ontology guidance chunk.page |
 | `location` | string\|null | optional | `nullableExactString` | ontology KOSHA guidance chunk.location or null |
@@ -418,24 +462,25 @@ The aliases `hazard4M`, `existingControls`, `dueDate`, and `reason` are forbidde
 
 ## MODEL-EVIDENCE-001 Provenance Contract
 
-`EditorEvidenceRef` replaces the rejected `reviewed:boolean` shape. Review readiness is derived from lifecycle, reviewState, resolution, quality, obligation, targets, and direct-use eligibility.
+`EditorEvidenceRef` replaces the rejected `reviewed:boolean` shape. It preserves `sourceItemId`, raw `item_type`, raw `source_id`, and raw `evidence_role` separately from `normalizedSourceClass`. Non-ontology evidence has `citedUid=null`; no adapter fabricates one. `technical-guideline`, `technical-support-regulation`, and future item types remain byte-preserved.
 
 Valid combinations:
 
-| Source | Required role | Direct eligibility | Required provenance | Allowed obligation |
+| Normalized class | Allowed role | Direct eligibility | Required provenance | Allowed obligation |
 | --- | --- | --- | --- | --- |
 | `law` | `direct` | `true` | lifecycle=current; reviewState=published; resolution=resolved; quality=null; relation=mandatedBy; roleDetail=null | statutory_mandate, statutory_mandate_with_guidance |
-| `kosha_guidance` | `supporting` | `true` | lifecycle=current; reviewState=verified_or_published; resolution=resolved; quality=accepted; relation=supportedBy; roleDetail=technical_guidance_only; bodyKind=native; anchor=chunkSha256,page,location present | technical_guidance_only, statutory_mandate_with_guidance |
+| `kosha_guidance` | exact raw `direct` or `supporting` | `true` | lifecycle=current; reviewState=verified_or_published; resolution=resolved; quality=accepted; relation=supportedBy; roleDetail=technical_guidance_only; bodyKind=native; anchor=chunkSha256,page,location present | technical_guidance_only, statutory_mandate_with_guidance |
 | `kosha_guidance` | `supporting` | `false` | quality=review_required, lifecycle stale/retired, unresolved bridge, unknown body, missing chunk hash/page/location, or reviewState=draft | review_required |
 | `sif_case` | `supporting` | `false` | relation=prioritizedBy; roleDetail=hazard_priority_only | review_required |
 | `photo` | `supporting` | `false` | relation=observedBy | review_required |
 | `field_record` | `supporting` | `false` | relation=observedBy | review_required |
+| `other` | preserved/derived | `false` | raw identity retained; reviewed normalization absent | review_required |
 
 Rules:
 
 - Published, resolved, current law with `mandatedBy` may be direct statutory evidence.
 
-- KOSHA is supporting technical guidance. It may be direct-eligible support only when current, accepted, resolved, native, and anchored by chunk hash/page/location.
+- KOSHA role preserves the raw direct/supporting value. Direct wording support never upgrades technical guidance into a statutory mandate. Direct eligibility still requires current, accepted, resolved, native, anchored material.
 
 - KOSHA cannot establish `statutory_mandate` without a separate eligible published law source.
 
@@ -445,15 +490,20 @@ Rules:
 
 - Unresolved or `review_required` evidence remains visible in the drawer and blocks confirmation/share.
 
-Evidence digest: evidenceDigest is sha256:base64url over canonical evidence refs sorted by id and including lifecycle, reviewState, resolution, quality, role, eligibility, obligation, relation, roleDetail, bodyKind, source UID, chunk hash, page, location, targets, and URL validation result.
+Evidence digest includes original IDs, all three raw identity fields, normalized class, nullable citedUid, lifecycle/review/quality/role/obligation, production/chunk IDs, chunk hash, page/location, materialization targets, and URL validation result. Unknown types therefore round-trip and change the digest without silently becoming eligible.
 
 ## FLOW-001 Edit To Persist To Share
 
-Strict review state path: `generated` -> `edited` -> `review_pending` -> `human_confirmed`
+Two valid review paths exist. No content mutation is required merely to confirm:
+
+- no edit: `generated` -> validate unchanged content -> `review_pending` -> explicit authenticated confirmation -> `human_confirmed`
+- edited: `generated|human_confirmed` -> edit/invalidate -> `edited` -> revalidate/reseal -> `review_pending` -> explicit authenticated confirmation -> `human_confirmed`
 
 | From | Event | To | Effect set |
 | --- | --- | --- | --- |
 | `generated` | `USER_EDIT` | `edited` | `EDIT_INVALIDATE` |
+| `generated` | `VALIDATE_UNEDITED_PASS` | `review_pending` | `VALIDATE_UNEDITED_PASS` |
+| `generated` | `VALIDATE_UNEDITED_FAIL` | `generated` | `VALIDATE_UNEDITED_FAIL` |
 | `human_confirmed` | `USER_EDIT` | `edited` | `EDIT_INVALIDATE` |
 | `edited` | `REVALIDATION_PASS` | `review_pending` | `REVALIDATE_PASS` |
 | `edited` | `REVALIDATION_FAIL` | `edited` | `REVALIDATE_FAIL` |
@@ -470,7 +520,7 @@ Every user edit:
 
 - clears human confirmation
 
-- clears active dbHarness, ontologyQa, qualityContract, generationEvidence, and generationEvidenceError
+- clears top-level AskResponse dbHarness, ontologyQa, qualityContract, generationEvidence/error and editorV2 non-seal review artifacts
 
 - moves prior digests and appendices to audit history
 
@@ -484,22 +534,20 @@ Endpoint: `POST /api/workpack/revalidate`
 
 Request:
 
+- `mode=validate_unedited|revalidate_edited`
 - `sealed baseResponse`
-- `edited editorV2`
+- `editorV2 candidate`
 - `expectedBaseGenerationDigest`
 - `expectedRevision`
 
 Server sequence:
 
-1. verify prior generation seal
-2. recover trusted generationEvidenceReferences
-3. project editable content without audit appendix
-4. validate RiskAssessmentRow fields and all references
-5. buildDbHarnessPacket
-6. attach ontology QA in review-only/no-mutation mode
-7. attachQualityContract
-8. compute evidenceDigest and materializationDigest
-9. set review_pending and reseal
+1. Verify the untouched base top-level seal and recover trusted references.
+2. For `validate_unedited`, assert every document content/body byte is unchanged; for edited mode, project only editable content.
+3. Validate risk rows/references, rebuild dbHarness, attach review-only ontology QA, and attach qualityContract.
+4. Compute evidenceDigest, then materializationDigest over canonical `{version,revision,documents,evidenceDigest,reviewArtifacts,auditHead,unmapped}`. Exclude the digest itself, humanConfirmation, and top-level seal/error.
+5. Set review_pending metadata, clear top-level seal/error on the final candidate, and call existing attachGenerationEvidence.
+6. Verify the returned top-level envelope. A nested envelope is a blocking error.
 
 Pass conditions:
 
@@ -512,13 +560,13 @@ Pass conditions:
 
 Fallback seam: POST /api/ask only when base is absent/unsealed/invalid; full regeneration never claims edit preservation
 
-A failed review leaves the editor in `edited`, retains the draft, reports blockers, and keeps share locked.
+A failed edited review remains `edited`; a failed unchanged review remains `generated`. Both retain content, report blockers, and keep share locked.
 
 ### FLOW-SAVE-001 Human Confirmation And Immutable Save
 
 Endpoint: `POST /api/workpacks`
 
-The endpoint accepts only a sealed `review_pending` response plus expected revision and digests. It authenticates the session, ignores client identity, stamps actor provenance, transitions to `human_confirmed`, reseals, and inserts one new workpack row using existing JSONB columns.
+The endpoint accepts only a top-level sealed `review_pending` response plus expected revision/digests and `confirmMaterialization=true`. It authenticates the session, ignores client identity, stamps actor provenance, transitions to `human_confirmed` without changing document content, clears the top-level seal/error on the candidate, reseals through existing helpers, and inserts one new workpack row using existing JSONB columns.
 
 There is no update-in-place path and no DB migration.
 
@@ -546,7 +594,14 @@ Required plain-language disclaimer:
 
 ### FLOW-SHARE-001 Stored Authority
 
-Share unlock is server-side. It reloads the stored workpack, verifies the generation seal, requires a matching human confirmation, applies existing readiness, and compares every share block's `sourceRevision` and `evidenceDigest`.
+Current v2 server freshness enforcement is **not installed**. Until Wave 4 route tests pass, feature-flag-on share-session creation and dispatch are disabled with `freshness_server_contract_missing`; flag-off legacy behavior is unchanged.
+
+Wave 4 exact contract:
+
+1. Each block carries owning `documentKey`, stable `id` as blockId, sourceRevision, and evidenceDigest.
+2. `POST app/api/workpacks/[id]/share-sessions/route.ts` accepts those four assertions plus recipients, reloads the stored block, and rejects missing/stale/mismatched/non-human-confirmed state with 409.
+3. The validated binding is stored at existing `workpack_share_sessions.access_policy.editorV2Binding`; no migration.
+4. `app/api/workflow/dispatch/route.ts` keeps its current client request shape. `loadActiveOwnedShareSession` loads the server binding, reloads current authority, and rejects any identity/revision/digest/readiness mismatch before fixture or live provider preflight.
 
 Stale share behavior:
 
@@ -574,15 +629,17 @@ Primary storage: `deliverables.editorV2` inside `existing workpacks.deliverables
 | `version` | "safeclaw-workpack-editor/v2" | `code_constant` | `strictEnum` | (v2 only) |
 | `baseGenerationDigest` | string | `verified_generation_evidence` | `digest` | generationEvidence.snapshot.responseContentDigest |
 | `revision` | integer | `server_validated_monotonic_revision` | `strictInteger` | (v2 only) |
-| `materializationDigest` | string | `server_recomputed` | `digest` | generationEvidence.snapshot.responseContentDigest plus editor revision derivation |
+| `materializationDigest` | string | `server_recomputed` | `digest` | independent canonical materialization input; never responseContentDigest-derived |
 | `evidenceDigest` | string | `server_recomputed` | `digest` | generationEvidenceReferences plus dbHarness/ontologyQa provenance derivation |
 | `reviewState` | "generated"\|"edited"\|"review_pending"\|"human_confirmed" | `state_machine` | `strictEnum` | (v2 only) |
 | `documents` | Record<DocumentKey,DocumentEnvelope> | `adapter_and_editor` | `canonicalObject` | deliverables strings plus deliverables.*Structured and structured riskAssessmentRows/tbmRiskLinks |
-| `reviewArtifacts` | ReviewArtifacts | `server_recomputed` | `canonicalObject` | dbHarness + ontologyQa + qualityContract + generationEvidence |
+| `reviewArtifacts` | ReviewArtifacts | `server_recomputed` | `canonicalObject` | dbHarness + ontologyQa + qualityContract only; seal forbidden |
 | `auditHistory` | AuditHistoryEntry[] | `adapter_and_server` | `canonicalArray` | (v2 only) |
 | `evidence` | Record<string,EditorEvidenceRef> | `verified_base_plus_human_selection` | `canonicalObject` | dbHarness.packet plus ontologyQa.result plus evidenceLabels |
 | `humanConfirmation` | HumanConfirmation\|null | `authenticated_server_only` | `nullableCanonicalObject` | (v2 only) |
 | `unmapped` | Record<string,unknown> | `lossless_parser` | `canonicalObject` | unrecognized current deliverables and legacy lines |
+
+Digest order is evidenceDigest -> materializationDigest -> review state/human stamp -> existing `attachGenerationEvidence`. The final top-level responseContentDigest may include the already-computed materializationDigest and humanConfirmation, but neither editor digest includes itself. The top-level seal/error is persisted with AskResponse and is never copied into editorV2.
 
 Command behavior:
 
@@ -602,7 +659,28 @@ Shortcuts:
 
 ## PHOTO-001 Honest Before And After State
 
-Phase A states: `local_pending`, `uploading`, `server_metadata_only`, `upload_failed`, `deferred_asset_hydration`
+Canonical field: `documents.photoEvidenceDraft.content.improvements[].photoState`
+
+Phase A states: `not_selected`, `local_display_only`, `upload_in_flight`, `server_metadata_only`, `upload_failed`. Hydratable stored pixels are a deferred capability, not a sixth state.
+
+| State | Exact meaning |
+| --- | --- |
+| `not_selected` | No selected filename or object URL. |
+| `local_display_only` | One or two local `File` objects may exist only in component memory. |
+| `upload_in_flight` | Existing improvements POST is pending; interrupted reload maps to `upload_failed` and preserves the raw prior state in audit history. |
+| `server_metadata_only` | Actual successful POST with nonempty `improvementId`, or matching GET row; filenames may reload but pixels cannot. |
+| `upload_failed` | POST failed or was interrupted; any local preview survives only for the current mounted session. |
+
+Transitions are total and explicit: select `not_selected -> local_display_only`; POST start `local_display_only -> upload_in_flight`; success with nonempty `improvementId` `upload_in_flight -> server_metadata_only`; failure/interruption `upload_in_flight -> upload_failed`; retry `upload_failed -> upload_in_flight`; replacement `server_metadata_only -> local_display_only`.
+
+Legacy `recordState` + `photoAssetState` mapping:
+
+| Legacy pair | Canonical result |
+| --- | --- |
+| `local_pending|display_only` + `not_selected|local_display_only` | `not_selected` when no file metadata exists; otherwise `local_display_only`. |
+| `server_improvement_recorded` + `persistence_unverified` | `server_metadata_only` only with nonnull `serverImprovementId`. |
+| `error` + any legacy asset state | `upload_failed`. |
+| Unknown or conflicting values | Preserve both raw values in `unmapped`; emit a blocking issue. |
 
 Local files and object URLs live only in component memory. Object URLs are revoked on replacement, removal, and unmount. File/Blob/object URL values never enter editorV2 or localStorage.
 
@@ -622,7 +700,7 @@ It does not return:
 
 The current GET can reload improvement text, status, source type, photo-summary filenames, and analysis metadata. It cannot hydrate a photo row ID, storage path, binary, or signed URL.
 
-Therefore Wave 3 may show local pending/display-only pixels and reloaded filenames with `persistence_unverified`. It may not show a fabricated stored thumbnail, `assetId`, or `storagePath`. Hydratable stored photo state is deferred behind a separately reviewed actual response contract.
+Therefore Wave 3 may show local display-only pixels and reloaded filenames with `server_metadata_only` plus preview-unavailable text. It may not show a fabricated stored thumbnail, `assetId`, or `storagePath`; Wave 3 owns no API, DB, schema, or migration change.
 
 ## UI-COMPOSE-001 Default Workbench
 
@@ -747,7 +825,7 @@ Letter spacing is 0. Default workbench text may not be 11px. A narrow column may
 
 | State | Sole primary CTA |
 | --- | --- |
-| `generated` | `편집 시작` |
+| `generated` | `검토 시작` |
 | `edited` | `재검수 요청` |
 | `review_pending` | `확인하고 저장` |
 | `human_confirmed` | `공유로 이동` |
@@ -762,9 +840,7 @@ Edit, download, evidence, and document navigation are secondary unless one is th
 
 ### UI-WARN-001 Source Confirmation Warning
 
-`준제출형 source-confirmation caveat` is a real warning. Persistent inline AlertTriangle warning directly below title/status, role=alert, minimum 14px/20px semibold text, strong Day/Night contrast and 2px leading border.
-
-The warning is visually and semantically stronger than the neutral evidence trigger.
+`준제출형 source-confirmation caveat` is a real warning directly below title/status and before the evidence trigger in DOM/accessibility order. It has `role=alert`, `data-severity=warning`, minimum 14px/20px semibold text, a 2px leading border, text contrast >=4.5:1, and border contrast >=3:1 in Day and Night. The evidence trigger has neither alert role nor warning severity.
 
 It is distinct from the removed yellow preview evidence badge.
 
@@ -779,6 +855,29 @@ A URL is clickable only when the current reference is `verified=true`, uses HTTP
 Unvalidated links have no `href`; a disabled `링크 확인 필요` row may appear inside the drawer only.
 
 The hardcoded `https://www.kosha.or.kr/kosha/data/guidanceX.do` candidate is omitted as a link while unverified.
+
+### Deterministic Browser Assertions
+
+| ID | Fixture/view | Assertion |
+| --- | --- | --- |
+| `BROWSER-001` | all | document.documentElement.scrollWidth === document.documentElement.clientWidth |
+| `BROWSER-002` | coreGenerated/default | exactly one [data-testid=evidence-summary-trigger], zero yellow evidence badges, zero persistent evidence rails, zero duplicate left evidence summaries, and zero default result/citation/operation-graph panels |
+| `BROWSER-003` | coreGenerated/default | document.body.innerText has zero occurrences of 중처법 §4-3호 증빙; open drawer has at most one |
+| `BROWSER-004` | coreGenerated/default | trigger text and accessible name both equal 근거 3건 · 확인 필요 1건 and drawer section totals use the same selectDocumentEvidenceSummary result object |
+| `BROWSER-005` | 1150x900 | selector width <=220px, main editor width >=700px, readable body width >=560px, evidence rail width=0px |
+| `BROWSER-006` | 1440x1000 | main editor width >=920px, readable body width >=720px, evidence rail width=0px |
+| `BROWSER-007` | mixedLegacyRisk | no input/textarea/contenteditable value contains any appendixSentinel, dbHarness, ontologyQa, qualityContract, generationEvidence, management note, or operation graph token |
+| `BROWSER-008` | 390x844 and 391x844 | after activating 편집, selected editor heading getBoundingClientRect().top <=160px |
+| `BROWSER-009` | 390x844 and 391x844 | every visible editor textarea has scrollHeight <= clientHeight+1, page scrollHeight <=3600px for mixedLegacyRisk collapsed fixture, and only an open drawer may have overflow-y auto/scroll |
+| `BROWSER-010` | all/default | computed body font-size>=15px and line-height>=23px; table>=14/20; label>=13/18; no default text=11px; letter-spacing=0px |
+| `BROWSER-011` | each lifecycle fixture | enabled visible [data-cta-priority=primary] count is exactly one when an action is available and zero in loading/offline; all other commands lack primary styling |
+| `BROWSER-012` | all/default | each Download control has textContent=다운로드 and aria-label=다운로드 byte-for-byte |
+| `BROWSER-013` | sourceWarning/day+night | warning has role=alert, data-severity=warning, font-size>=14px, line-height>=20px, font-weight>=600, leading border width=2px, text contrast>=4.5:1, border contrast>=3:1; evidence trigger lacks alert role/severity |
+| `BROWSER-014` | drawer/day+night | opening drawer changes main editor width by <=1px; focus remains inside, Escape closes, trigger regains focus, and mobile background is inert |
+| `BROWSER-015` | coreGenerated | direct/supporting evidence, DB harness, safety readiness, law actions, provenance, materialization, and review_required nodes are absent when drawer closed and present only under the open drawer |
+| `BROWSER-016` | unverified guidanceX.do | zero rendered anchors have href containing guidanceX.do; only verified=true HTTPS URLs tied to current digest render anchors inside drawer |
+| `BROWSER-017` | each viewport day vs night | selector, title, warning, command row, evidence trigger, editor, primary action, and share-readiness bounding x/y/width/height differ by <=1px and DOM/accessibility order is identical |
+| `BROWSER-018` | all/default | every visible interactive target is >=44x44 CSS px; [data-editor-stack] computed gap=8px; non-overlay selector/title/commands/editor/share-readiness rectangles have zero intersection area |
 
 ## Accessibility And System States
 
@@ -871,6 +970,8 @@ Reusable primitives:
 - `EvidenceDetailsDrawer`
 - `SourceConfirmationWarning`
 
+Each document component name is both its file basename and named export. In particular, `workpackSummaryDraft` resolves to `components/workpack-editor/WorkpackSummaryEditor.tsx#WorkpackSummaryEditor`, and `workPermitDraft` resolves to `components/workpack-editor/WorkPermitEditor.tsx#WorkPermitEditor`. The aliases `SummaryEditor` and `PermitInspectionEditor` are forbidden.
+
 A document wrapper is required when sequencing, row behavior, validation, projection, or primary action differs. Shared primitives are not a universal schema renderer.
 
 Do not create twelve copy-pasted editors. Create twelve typed document specifications and only the thin wrappers needed for distinct domain interactions.
@@ -892,7 +993,7 @@ Common gates for every document:
 
 - Key: `workpackSummaryDraft`
 - Draft type: `WorkpackSummaryDraft`
-- Component: `SummaryEditor`
+- Component: `WorkpackSummaryEditor`
 - Family: `finding-summary`
 - Document command: `조치 항목 추가`
 - Command hierarchy: Shown as the only dominant action only when compatible with the global lifecycle action; otherwise rendered as a secondary row command.
@@ -915,7 +1016,7 @@ Direct field delta:
 | `findings[].owner` | string | when status is open | `exactString` | (v2 only) |
 | `findings[].dueDate` | string | when status is open | `localDate` | (v2 only) |
 | `findings[].status` | "open"\|"in_progress"\|"done" | always | `strictEnum` | (v2 only) |
-| `findings[].evidenceRefs` | string[] | at least one unless explicit no-evidence reason | `stableIdArray` | (v2 only) |
+| `findings[].evidenceRefs` | string[] | at least one unless explicit no-evidence reason | `stableIdArrayNonEmpty` | (v2 only) |
 
 Required interactions:
 
@@ -996,8 +1097,8 @@ Direct field delta:
 | `workSteps[].equipment` | string | always | `exactString` | deliverables.workPlanStructured.workSteps[].equipment |
 | `workSteps[].safetyMeasure` | string | always | `exactString` | deliverables.workPlanStructured.workSteps[].safetyMeasure |
 | `workSteps[].owner` | string | always | `exactString` | deliverables.workPlanStructured.workSteps[].owner |
-| `workSteps[].relatedRiskRowIds` | string[] | zero or more | `stableIdArray` | deliverables.workPlanStructured.workSteps[].relatedRiskRowIndex |
-| `workSteps[].evidenceRefs` | string[] | zero or more | `stableIdArray` | deliverables.workPlanStructured.workSteps[].evidenceRefs |
+| `workSteps[].relatedRiskRowIds` | string[] | zero or more | `stableIdArrayAllowEmpty` | deliverables.workPlanStructured.workSteps[].relatedRiskRowIndex |
+| `workSteps[].evidenceRefs` | string[] | zero or more | `stableIdArrayAllowEmpty` | deliverables.workPlanStructured.workSteps[].evidenceRefs |
 | `workSteps[].verification` | string | always | `exactString` | deliverables.workPlanStructured.workSteps[].verification |
 | `stopCriteria` | string[] | at least one | `orderedStringArray` | deliverables.workPlanStructured.stopCriteria |
 | `emergencyResponse.contacts[].id` | string | always | `stableId` | (v2 only) |
@@ -1033,7 +1134,7 @@ Document gates:
 
 - Key: `workPermitDraft`
 - Draft type: `WorkPermitEditorDraft`
-- Component: `PermitInspectionEditor`
+- Component: `WorkPermitEditor`
 - Family: `existing-structured-permit`
 - Document command: `허가조건 추가`
 - Command hierarchy: Shown as the only dominant action only when compatible with the global lifecycle action; otherwise rendered as a secondary row command.
@@ -1058,8 +1159,8 @@ Direct field delta:
 | `conditions[].action` | string | always | `exactString` | deliverables.permitInspectionStructured.conditions[].action |
 | `conditions[].owner` | string | always | `exactString` | deliverables.permitInspectionStructured.conditions[].owner |
 | `conditions[].status` | PermitInspectionStructured.conditions[].status | always | `strictEnum` | deliverables.permitInspectionStructured.conditions[].status |
-| `conditions[].relatedRiskRowId` | string\|null | optional | `stableId` | deliverables.permitInspectionStructured.conditions[].relatedRiskRowIndex |
-| `conditions[].evidenceRefs` | string[] | zero or more | `stableIdArray` | deliverables.permitInspectionStructured.conditions[].evidenceRefs |
+| `conditions[].relatedRiskRowId` | string\|null | optional | `nullableStableId` | deliverables.permitInspectionStructured.conditions[].relatedRiskRowIndex |
+| `conditions[].evidenceRefs` | string[] | zero or more | `stableIdArrayAllowEmpty` | deliverables.permitInspectionStructured.conditions[].evidenceRefs |
 | `conditions[].verification` | string | always | `exactString` | deliverables.permitInspectionStructured.conditions[].verification |
 | `attachments[].id` | string | always | `stableId` | (v2 only) |
 | `attachments[].name` | string | always | `exactString` | deliverables.permitInspectionStructured.attachments[].name |
@@ -1127,14 +1228,14 @@ Direct field delta:
 | `hazards[].riskRowId` | string | always | `stableId` | deliverables.tbmRiskLinks[].riskRowIndex |
 | `hazards[].weatherSignal` | string | when applicable | `exactString` | deliverables.tbmRiskLinks[].weatherSignal |
 | `hazards[].confirmQuestion` | string | always | `exactString` | deliverables.tbmRiskLinks[].confirmQuestion |
-| `hazards[].evidenceRefs` | string[] | at least one | `stableIdArray` | deliverables.tbmRiskLinks[].evidenceRefs |
+| `hazards[].evidenceRefs` | string[] | at least one | `stableIdArrayNonEmpty` | deliverables.tbmRiskLinks[].evidenceRefs |
 | `measures[].id` | string | always | `stableId` | (v2 only) |
 | `measures[].hazardId` | string | always | `stableId` | deliverables.tbmBriefingStructured.measures[].hazardRef |
 | `measures[].action` | string | always | `exactString` | deliverables.tbmBriefingStructured.measures[].action |
 | `measures[].owner` | string | always | `exactString` | deliverables.tbmBriefingStructured.measures[].owner |
 | `measures[].verification` | string | always | `exactString` | deliverables.tbmRiskLinks[].verification |
 | `measures[].actionTaken` | string | after briefing | `exactString` | (v2 only) |
-| `measures[].evidenceRefs` | string[] | at least one | `stableIdArray` | deliverables.tbmRiskLinks[].evidenceRefs |
+| `measures[].evidenceRefs` | string[] | at least one | `stableIdArrayNonEmpty` | deliverables.tbmRiskLinks[].evidenceRefs |
 | `stopCriteria` | string[] | at least one | `orderedStringArray` | deliverables.tbmBriefingStructured.stopCriteria |
 | `confirmTopics` | string[] | at least one | `orderedStringArray` | deliverables.tbmBriefingStructured.confirmTopics |
 | `photoEvidenceLocation` | string | always | `exactString` | deliverables.tbmBriefingStructured.photoEvidenceLocation |
@@ -1199,7 +1300,7 @@ Direct field delta:
 | `hazardsDiscussed[].category` | "Man"\|"Machine"\|"Media"\|"Management" | always | `strictEnum` | deliverables.tbmLogStructured.hazardsDiscussed[].category |
 | `hazardsDiscussed[].description` | string | always | `exactString` | deliverables.tbmLogStructured.hazardsDiscussed[].description |
 | `hazardsDiscussed[].riskRowId` | string | when linked | `stableId` | deliverables.tbmLogStructured.hazardsDiscussed[].relatedRiskRowIndex |
-| `hazardsDiscussed[].evidenceRefs` | string[] | at least one | `stableIdArray` | deliverables.tbmRiskLinks[].evidenceRefs |
+| `hazardsDiscussed[].evidenceRefs` | string[] | at least one | `stableIdArrayNonEmpty` | deliverables.tbmRiskLinks[].evidenceRefs |
 | `hazardsDiscussed[].verification` | string | always | `exactString` | deliverables.tbmRiskLinks[].verification |
 | `hazardsDiscussed[].actionTaken` | string | after TBM | `exactString` | (v2 only) |
 | `safetyEducation.topic` | string | always | `exactString` | deliverables.tbmLogStructured.safetyEducation.topic |
@@ -1272,7 +1373,7 @@ Direct field delta:
 | `curriculum[].topic` | string | always | `exactString` | deliverables.educationRecordStructured.curriculum[].topic |
 | `curriculum[].lawCitation` | string | when applicable | `exactString` | deliverables.educationRecordStructured.curriculum[].lawCitation |
 | `curriculum[].keyPoints` | string[] | at least one | `orderedStringArray` | deliverables.educationRecordStructured.curriculum[].keyPoints |
-| `curriculum[].evidenceRefs` | string[] | at least one | `stableIdArray` | (v2 only) |
+| `curriculum[].evidenceRefs` | string[] | at least one | `stableIdArrayNonEmpty` | (v2 only) |
 | `curriculum[].actionTaken` | string | after education | `exactString` | (v2 only) |
 | `understandingCheck` | string | always | `exactString` | deliverables.educationRecordStructured.understandingCheck |
 | `tbmLink` | string | always | `exactString` | deliverables.educationRecordStructured.tbmLink |
@@ -1321,13 +1422,13 @@ Direct field delta:
 | `contacts[].alternatePhone` | string | when applicable | `exactString` | (v2 only) |
 | `scenarios[].id` | string | always | `stableId` | (v2 only) |
 | `scenarios[].hazard` | string | always | `exactString` | (v2 only) |
-| `scenarios[].riskRowIds` | string[] | at least one | `stableIdArray` | (v2 only) |
+| `scenarios[].riskRowIds` | string[] | at least one | `stableIdArrayNonEmpty` | (v2 only) |
 | `scenarios[].trigger` | string | always | `exactString` | (v2 only) |
 | `scenarios[].immediateActions` | string[] | at least one | `orderedStringArray` | (v2 only) |
 | `scenarios[].evacuationRoute` | string | always | `exactString` | (v2 only) |
 | `scenarios[].responsibleRole` | string | always | `exactString` | (v2 only) |
 | `scenarios[].callOrder` | string[] | at least one | `orderedStringArray` | (v2 only) |
-| `scenarios[].evidenceRefs` | string[] | at least one | `stableIdArray` | (v2 only) |
+| `scenarios[].evidenceRefs` | string[] | at least one | `stableIdArrayNonEmpty` | (v2 only) |
 | `scenarios[].verification` | string | always | `exactString` | (v2 only) |
 | `scenarios[].actionTaken` | string | after drill or incident | `exactString` | (v2 only) |
 | `workerAccountingMethod` | string | always | `exactString` | (v2 only) |
@@ -1366,14 +1467,13 @@ Direct field delta:
 | `improvements[].hazardLabel` | string | always | `exactString` | GET /api/workpacks/[id]/improvements -> improvements[].hazard_label or POST form.hazardLabel |
 | `improvements[].improvementText` | string | always | `exactString` | GET /api/workpacks/[id]/improvements -> improvements[].improvement_text or POST form.improvementText |
 | `improvements[].reflectedDocumentKeys` | DocumentKey[] | at least one | `documentKeyArray` | GET /api/workpacks/[id]/improvements -> improvements[].reflected_documents or POST form.reflectedDocuments |
-| `improvements[].beforeFileName` | string | when selected | `exactString` | GET /api/workpacks/[id]/improvements -> improvements[].photo_summary.beforePhotoName or POST beforePhoto.name |
-| `improvements[].afterFileName` | string | when selected | `exactString` | GET /api/workpacks/[id]/improvements -> improvements[].photo_summary.afterPhotoName or POST afterPhoto.name |
+| `improvements[].beforeFileName` | string\|null | always | `nullableExactString` | GET /api/workpacks/[id]/improvements -> improvements[].photo_summary.beforePhotoName or POST beforePhoto.name or null |
+| `improvements[].afterFileName` | string\|null | always | `nullableExactString` | GET /api/workpacks/[id]/improvements -> improvements[].photo_summary.afterPhotoName or POST afterPhoto.name or null |
 | `improvements[].captureNote` | string | always | `exactString` | (v2 only) |
 | `improvements[].actionTaken` | string | human-only | `exactString` | (v2 only) |
-| `improvements[].evidenceRefs` | string[] | zero or more | `stableIdArray` | (v2 only) |
-| `improvements[].recordState` | "local_pending"\|"display_only"\|"server_improvement_recorded"\|"error" | always | `strictEnum` | POST /api/workpacks/[id]/improvements -> ok and improvementId or GET improvements[].id |
-| `improvements[].photoAssetState` | "not_selected"\|"local_display_only"\|"persistence_unverified" | always | `strictEnum` | (v2 only) |
-| `improvements[].serverImprovementId` | string | after successful response | `stableId` | POST /api/workpacks/[id]/improvements -> improvementId or GET improvements[].id |
+| `improvements[].evidenceRefs` | string[] | zero or more | `stableIdArrayAllowEmpty` | (v2 only) |
+| `improvements[].photoState` | "not_selected"\|"local_display_only"\|"upload_in_flight"\|"server_metadata_only"\|"upload_failed" | always | `strictEnum` | Total mapping from the common Phase A photo state machine; successful POST/GET can yield server_metadata_only only |
+| `improvements[].serverImprovementId` | string\|null | always | `nullableStableId` | POST /api/workpacks/[id]/improvements -> improvementId or GET improvements[].id or null |
 | `improvements[].reviewStatus` | string | after successful response | `exactString` | POST /api/workpacks/[id]/improvements -> reviewStatus or GET improvements[].review_status |
 | `improvements[].sourceType` | "manual"\|"photo_analysis" | after successful response | `strictEnum` | POST /api/workpacks/[id]/improvements -> sourceType or GET improvements[].source_type |
 | `improvements[].verificationNote` | string | human-only | `exactString` | (v2 only) |
@@ -1382,22 +1482,22 @@ Projection notes:
 
 - `improvements[].reflectedDocumentKeys`: Adapter uses the exact 12-key title map in both directions and preserves unmapped legacy labels in unmapped; it never guesses.
 - `improvements[].actionTaken`: Never copied from a generated recommendation.
-- `improvements[].recordState`: server_improvement_recorded means only that the existing improvement endpoint returned or reloaded an improvement row; it does not assert photo asset hydration.
-- `improvements[].photoAssetState`: Wave 1 has no stored or hydrated state because existing GET/POST responses expose no photo asset ID or storage path.
+- `improvements[].photoState`: Exactly PHOTO-001. Wave 3 has no hydrated/stored pixel state because existing GET/POST responses expose no photo asset ID or storage path.
+- `improvements[].serverImprovementId`: Nonnull proves only an improvement row response/reload, never a photo asset row or authorized pixel URL.
 
 Required interactions:
 
 - Select and compare Before/After files locally; use object URLs only in ephemeral component state and revoke them on replace, remove, or unmount.
 - Submit the existing improvements endpoint only when a stored workpack exists; record the returned improvementId but never claim the photos are reloadable.
-- After reload, show filenames and persistence_unverified metadata without a fabricated thumbnail, assetId, or storagePath.
+- After reload, show filenames with `server_metadata_only` and preview unavailable; never fabricate a thumbnail, assetId, or storagePath.
 - Defer hydratable stored photos until an existing response actually exposes an authorized asset reference or a separately approved API change.
 
 Document gates:
 
 - Never serialize File, Blob, object URL, assetId, or storagePath into editorV2.
-- Before/After comparison requires both filenames; one-sided selections remain local_pending.
-- server_improvement_recorded requires an actual successful POST response or matching GET row.
-- No export may imply that persistence_unverified pixels were embedded; manifests preserve all metadata and state.
+- Before/After comparison requires both filenames; one-sided selections remain `local_display_only`.
+- `server_metadata_only` requires an actual successful POST response or matching GET row and nonnull `serverImprovementId`.
+- No export may imply that `server_metadata_only` pixels were embedded; manifests preserve all metadata and state.
 
 
 ### DOC-10 외국인 근로자 출력본
@@ -1417,14 +1517,14 @@ Direct field delta:
 | `sourceDocumentKeys` | DocumentKey[] | at least one | `documentKeyArray` | (v2 only) |
 | `sourceRevision` | integer | always | `strictInteger` | (v2 only) |
 | `evidenceDigest` | string | always | `digest` | (v2 only) |
-| `targetWorkerIds` | string[] | at least one | `stableIdArray` | (v2 only) |
+| `targetWorkerIds` | string[] | at least one | `stableIdArrayNonEmpty` | (v2 only) |
 | `variants[].id` | string | always | `stableId` | (v2 only) |
 | `variants[].code` | string | always | `exactString` | deliverables.foreignWorkerLanguages[].code |
 | `variants[].label` | string | always | `exactString` | deliverables.foreignWorkerLanguages[].label |
 | `variants[].nativeLabel` | string | always | `exactString` | deliverables.foreignWorkerLanguages[].nativeLabel |
 | `variants[].rationale` | string | always | `exactString` | deliverables.foreignWorkerLanguages[].rationale |
 | `variants[].lines` | string[] | at least one | `orderedStringArray` | deliverables.foreignWorkerLanguages[].lines |
-| `variants[].evidenceRefs` | string[] | at least one | `stableIdArray` | (v2 only) |
+| `variants[].evidenceRefs` | string[] | at least one | `stableIdArrayNonEmpty` | (v2 only) |
 | `printFooter` | string | always | `exactString` | (v2 only) |
 | `workerConfirmationRequired` | boolean | always | `strictBoolean` | (v2 only) |
 
@@ -1461,7 +1561,7 @@ Direct field delta:
 
 | Field path | Type | Required | Codec | Current structured source/target |
 | --- | --- | --- | --- | --- |
-| `shareBlocks[].recipientWorkerIds` | string[] | at least one | `stableIdArray` | (v2 only) |
+| `shareBlocks[].recipientWorkerIds` | string[] | at least one | `stableIdArrayNonEmpty` | (v2 only) |
 | `shareBlocks[].bodyLines` | string[] | at least one | `orderedStringArray` | deliverables.foreignWorkerLanguages[].lines |
 
 Required interactions:
@@ -1556,7 +1656,7 @@ All files listed under `ownedFiles` are future implementation ownership, not cha
 
 ### wave0 Migration-free adapter and authority
 
-Objective: Create strict types, lossless body/appendix adapters, deterministic digests, revalidation, immutable server confirmation/save, and stored share authority before editor UI.
+Objective: Create the contract validator first, then strict types, lossless body/appendix adapters, deterministic digests, no-edit/edited validation, and immutable server confirmation/save. V2 sharing remains blocked until Wave 4.
 
 Document scope: (infrastructure or hardening only)
 
@@ -1564,6 +1664,8 @@ Entry gate: An independent reviewer marks this exact spec commit PASS; current g
 
 Owned files:
 
+- `scripts/workpack_editor_contract_audit.mjs`
+- `tests/workpack-editor-contract.test.ts`
 - `lib/workpack-editor-types.ts`
 - `lib/workpack-editor-adapter.ts`
 - `lib/workpack-editor-legacy-boundary.ts`
@@ -1586,6 +1688,7 @@ Read-only dependencies:
 
 Test files:
 
+- `tests/workpack-editor-contract.test.ts`
 - `tests/workpack-editor-types.test.ts`
 - `tests/workpack-editor-adapter.test.ts`
 - `tests/workpack-editor-legacy-boundary.test.ts`
@@ -1597,6 +1700,7 @@ Test files:
 
 Commands:
 
+- **prerequisite**: `node scripts/workpack_editor_contract_audit.mjs && npx.cmd vitest run tests/workpack-editor-contract.test.ts --maxWorkers=1 --no-file-parallelism`
 - **red**: `npx.cmd vitest run tests/workpack-editor-types.test.ts tests/workpack-editor-adapter.test.ts tests/workpack-editor-legacy-boundary.test.ts tests/workpack-editor-review-lifecycle.test.ts tests/workpack-editor-revalidate-route.test.ts --maxWorkers=1 --no-file-parallelism`
 - **green**: `npx.cmd vitest run tests/workpack-editor-types.test.ts tests/workpack-editor-adapter.test.ts tests/workpack-editor-legacy-boundary.test.ts tests/workpack-editor-review-lifecycle.test.ts tests/workpack-editor-revalidate-route.test.ts tests/workpack-readiness.test.ts tests/workpack-store.test.ts tests/workpack-share-authority.test.ts --maxWorkers=1 --no-file-parallelism`
 - **typecheck**: `npm.cmd run typecheck`
@@ -1604,17 +1708,21 @@ Commands:
 
 TDD gates:
 
+- PREREQUISITE: Contract audit script/test is the first isolated commit and must be green before any product file is edited.
 - RED: mixed 5221-character risk fixture fails until body and every known appendix section are separated and preserved.
-- RED: edited content still carrying any active dbHarness/ontologyQa/qualityContract/generationEvidence fails.
-- GREEN: all 12 document fixtures deep-equal after structured/current-string parse, dual projection, reload, and unknown preservation.
+- RED: Edited content still carrying active top-level dbHarness/ontologyQa/qualityContract/generationEvidence or nested seal copies fails.
+- GREEN: Generated content validates to review_pending without document mutation; edited content revalidates before review_pending.
+- GREEN: Reseal uses existing top-level generation-evidence functions unchanged and all 12 adapters preserve unknown values.
 - GREEN: only the server can stamp ActorProvenance and human_confirmed; invalid seal/revision/digest fails closed.
 - REFACTOR: no any, no DB migration, and current /api/ask fallback remains behaviorally intact.
 
-Exit gate: Adapters report zero dropped fields/appendix lines, lifecycle tests pass, revalidation produces fresh digests/seal, immutable save and stored share authority fail closed.
+Exit gate: Contract validator, adapters, no-edit/edited lifecycle, top-level reseal, and immutable save are green; v2 share is still explicitly blocked pending Wave 4.
 
 Rollback: Disable the feature flag, stop routing v2 clients to /api/workpack/revalidate, and leave existing /api/ask plus insert-only /api/workpacks behavior active. Remove only new unreferenced modules/route if needed; no data or schema rollback.
 
 Feature flag: `FLAG-001`; browser matrix: `(not applicable)`; migration: `false`
+
+Production-fix boundary: `lib/generation-evidence.ts` is read-only. Wave 0 reuses its existing top-level digest, attach, and verify functions unchanged.
 
 ### wave1 Core structured editors and simplified review surface
 
@@ -1691,22 +1799,7 @@ TDD gates:
 
 Browser assertions:
 
-- Run every matrix row in Day and Night and assert documentElement.scrollWidth === clientWidth.
-- Default DOM has one EvidenceSummaryTrigger, zero yellow preview evidence badges, zero persistent evidence rails, zero duplicate left evidence summaries, and no default result-summary/citation-list/operation-graph blocks.
-- Default DOM contains zero occurrences of 중처법 §4-3호 증빙; when applicable the open drawer contains at most one.
-- Trigger text matches /^근거 [0-9]+건 · 확인 필요 [0-9]+건$/ and exactly equals counts from selectDocumentEvidenceSummary used by the drawer.
-- At measuredDesktop1150 selector width <=220px, main editor width >=700px, readable preview text width >=560px, and evidence rail width is 0px.
-- At desktop1440 main editor width >=920px and readable preview text width >=720px.
-- No editable value contains a known appendix sentinel, DB harness summary, ontology QA, operation graph, KOSHA source metadata, or management notes from the audited mixed fixture.
-- At mobile390 and auditMobile391, clicking 편집 시작 focuses an editor heading with viewport y <=160px.
-- At mobile390 and auditMobile391 no visible editor textarea has scrollHeight > clientHeight + 1; the default audited risk sample page height is <=3600px.
-- Body computed font is >=15px, table text >=14px, labels >=13px, no default workbench text is 11px, and letter spacing is 0.
-- Exactly one enabled element has primary CTA styling for the lifecycle state; share readiness is status text.
-- Every Download control has visible text 다운로드 and aria-label 다운로드 exactly.
-- The 준제출형 source-confirmation caveat has role=alert, 14px/20px minimum text, and stronger border/background contrast than the neutral evidence trigger.
-- Opening the drawer does not change main editor width; drawer traps focus, Escape closes, focus returns, and mobile background is inert.
-- directEvidence, DB harness, safety-control readiness, supporting refs, law actions, provenance, materialization, and review_required appear only inside the open drawer.
-- No official safety URL is clickable unless the current reference has verified=true and https; unverified guidanceX.do produces no href.
+- `BROWSER-001` through `BROWSER-018` above run for every required Wave 1 browser/viewport/theme row; the fixture names and numeric/DOM assertions are normative.
 
 Exit gate: Core three editors are structured, every Wave 1 browser assertion passes, exports round-trip, and flag-off restores current UI without deleting v2 state.
 
@@ -1768,9 +1861,9 @@ TDD gates:
 
 Browser assertions:
 
-- All Wave 1 layout, drawer, typography, one-primary, and scroll assertions remain green for each Wave 2 document.
-- Permit and plan risk references navigate by stable ID without horizontal overflow.
-- Education WorkerAttendance controls remain distinct from share-read history.
+- `BROWSER-001` through `BROWSER-018` rerun for each Wave 2 document.
+- Clicking a `[data-risk-row-id]` reference focuses the unique matching row and does not change `documentElement.scrollWidth`.
+- WorkerAttendance controls live under `[data-confirmation-kind=attendance]`; share-read rows live under `[data-confirmation-kind=share-read]`; neither contains the other kind.
 
 Exit gate: Three document schemas, lifecycle, matrix, and export gates pass with no Wave 1 regression.
 
@@ -1821,15 +1914,15 @@ Commands:
 TDD gates:
 
 - RED: tests reject stored/hydrated photo state from current GET/POST.
-- GREEN: local pending/display-only and server improvement metadata states are honest and lossless.
+- GREEN: `not_selected/local_display_only/upload_in_flight/server_metadata_only/upload_failed` map one-to-one to DOC-09 `photoState`, and legacy two-field values map totally.
 - GREEN: no app/api, DB, schema, migration, package, or Supabase type file changes are present in this wave.
 - REFACTOR: photo binary remains ephemeral and metadata stays in canonical fields/manifests.
 
 Browser assertions:
 
-- All shared surface assertions remain green.
-- Local Before/After preview revokes object URLs and never survives reload as a fabricated image.
-- Reloaded metadata-only photo rows show filenames plus persistence_unverified, never assetId/storagePath or a false stored thumbnail.
+- `BROWSER-001` through `BROWSER-018` rerun for each Wave 3 document.
+- An object URL exists only while `local_display_only|upload_in_flight` is mounted and is revoked exactly once on replace, remove, or unmount.
+- A reloaded `server_metadata_only` row renders filenames plus preview-unavailable text and zero `img[src^=blob:]`, assetId, storagePath, or stored-thumbnail nodes.
 
 Exit gate: Photo state claims match actual endpoint responses and all three documents pass shared browser/export gates.
 
@@ -1837,13 +1930,15 @@ Rollback: Disable the feature flag and revoke local object URLs. Existing improv
 
 Feature flag: `FLAG-001`; browser matrix: `BROWSER-MATRIX-001`; migration: `false`
 
+API change: `false`; the improvements route remains read-only to this wave.
+
 ### wave4 Multilingual output and versioned sharing
 
-Objective: Add multilingual print and versioned share-block editors with sourceRevision/evidenceDigest freshness and read-confirmation boundaries.
+Objective: Add multilingual/share-block editors and install server freshness enforcement in share-session creation and workflow dispatch using existing JSONB only.
 
 Document scope: `foreignWorkerBriefing`, `foreignWorkerTransmission`, `kakaoMessage`
 
-Entry gate: Wave 3 green and stored share authority from Wave 0 verified.
+Entry gate: Wave 3 green; v2 share remains blocked until this wave's route tests are green.
 
 Owned files:
 
@@ -1855,13 +1950,14 @@ Owned files:
 - `lib/workpack-editor-document-specs.ts`
 - `lib/workpack-editor-adapter.ts`
 - `lib/workpack-editor-export-manifest.ts`
+- `lib/workpack-commercial.ts`
 - `lib/workpack-commercial-store.ts`
+- `app/api/workpacks/[id]/share-sessions/route.ts`
+- `app/api/workflow/dispatch/route.ts`
 
 Read-only dependencies:
 
 - `app/api/workpacks/[id]/read-confirmations/route.ts`
-- `app/api/workpacks/[id]/share-sessions/route.ts`
-- `lib/workpack-commercial.ts`
 - `lib/types.ts`
 
 Test files:
@@ -1872,33 +1968,38 @@ Test files:
 - `tests/foreign-worker-languages.test.ts`
 - `tests/workflow-share-panel-behavior.test.ts`
 - `tests/workpack-share-authority-routes.test.ts`
+- `tests/workflow-dispatch-freshness.test.ts`
 
 Commands:
 
 - **red**: `npx.cmd vitest run tests/workpack-editor-wave4.test.ts tests/workpack-editor-share-freshness.test.ts tests/workpack-editor-confirmation-boundaries.test.ts --maxWorkers=1 --no-file-parallelism`
-- **green**: `npx.cmd vitest run tests/workpack-editor-wave4.test.ts tests/workpack-editor-share-freshness.test.ts tests/workpack-editor-confirmation-boundaries.test.ts tests/foreign-worker-languages.test.ts tests/workflow-share-panel-behavior.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --no-file-parallelism`
+- **green**: `npx.cmd vitest run tests/workpack-editor-wave4.test.ts tests/workpack-editor-share-freshness.test.ts tests/workpack-editor-confirmation-boundaries.test.ts tests/foreign-worker-languages.test.ts tests/workflow-share-panel-behavior.test.ts tests/workpack-share-authority-routes.test.ts tests/workflow-dispatch-freshness.test.ts --maxWorkers=1 --no-file-parallelism`
 - **browser**: `npx.cmd vitest run tests/workpack-editor-browser-matrix.test.ts --maxWorkers=1 --no-file-parallelism`
 - **typecheck**: `npm.cmd run typecheck`
 - **diff**: `git diff --check`
 
 TDD gates:
 
-- RED: source/evidence/audience/language edits leave blocks stale and dispatch locked.
+- RED: Current share-session route ignores documentKey/blockId/sourceRevision/evidenceDigest and current dispatch lacks a persisted binding; v2 share stays locked.
+- GREEN: Share-session POST validates the authoritative block and stores `editorV2Binding` in existing `access_policy` JSONB.
+- GREEN: Dispatch loads that server binding and returns 409 before provider preflight for missing/stale/mismatched identity, revision, digest, confirmation, or readiness.
 - GREEN: rebuild creates a new block with current sourceRevision/evidenceDigest and clears session/dispatch/read-display state.
-- GREEN: server authority rejects mismatched stored revision/digest or non-human-confirmed workpack.
 - REFACTOR: ForeignWorkerTransmission and FieldShareMessage share versioned blocks but retain distinct fields and interaction wrappers.
 
 Browser assertions:
 
-- All shared surface assertions remain green.
-- Stale share blocks show one primary rebuild action and no dispatch action.
-- Read receipts render as share history only and never as attendance, understanding, signature, or completion.
+- `BROWSER-001` through `BROWSER-018` rerun for each Wave 4 document.
+- Before Wave 4 capability is reported, v2 share/dispatch controls are disabled with `freshness_server_contract_missing`.
+- A stale block renders exactly one primary rebuild action and zero enabled dispatch actions.
+- Share-read nodes use `data-confirmation-kind=share-read` and never render under attendance/understanding/signature/completion summaries.
 
 Exit gate: All three documents pass freshness, authority, confirmation-boundary, browser, and export gates.
 
 Rollback: Disable the feature flag; current foreignWorker strings and kakaoMessage remain available. Existing share sessions/read confirmations remain historical and untouched.
 
 Feature flag: `FLAG-001`; browser matrix: `BROWSER-MATRIX-001`; migration: `false`
+
+API change: `true`. Extend only existing request parsing and existing `workpack_share_sessions.access_policy` JSONB; no schema/migration. Dispatch accepts no client freshness override.
 
 ### wave5 Full regression and release hold
 
@@ -1910,10 +2011,8 @@ Entry gate: Waves 0-4 green with no unresolved dropped-field or provenance-bound
 
 Owned files:
 
-- `tests/workpack-editor-contract.test.ts`
 - `tests/workpack-editor-browser-matrix.test.ts`
 - `tests/workpack-editor-export-roundtrip.test.ts`
-- `scripts/workpack_editor_contract_audit.mjs`
 
 Read-only dependencies:
 
@@ -1929,12 +2028,13 @@ Test files:
 - `tests/workpack-readiness.test.ts`
 - `tests/workpack-store.test.ts`
 - `tests/workpack-share-authority-routes.test.ts`
+- `tests/workflow-dispatch-freshness.test.ts`
 - `tests/workpack-improvement-route.test.ts`
 
 Commands:
 
 - **contract**: `node scripts/workpack_editor_contract_audit.mjs`
-- **targeted**: `npx.cmd vitest run tests/workpack-editor-contract.test.ts tests/workpack-editor-browser-matrix.test.ts tests/workpack-editor-export-roundtrip.test.ts tests/documents-editor-layout.test.ts tests/editor-export-integrity.test.ts tests/workpack-readiness.test.ts tests/workpack-store.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-improvement-route.test.ts --maxWorkers=1 --no-file-parallelism`
+- **targeted**: `npx.cmd vitest run tests/workpack-editor-contract.test.ts tests/workpack-editor-browser-matrix.test.ts tests/workpack-editor-export-roundtrip.test.ts tests/documents-editor-layout.test.ts tests/editor-export-integrity.test.ts tests/workpack-readiness.test.ts tests/workpack-store.test.ts tests/workpack-share-authority-routes.test.ts tests/workflow-dispatch-freshness.test.ts tests/workpack-improvement-route.test.ts --maxWorkers=1 --no-file-parallelism`
 - **full**: `npm.cmd test -- --maxWorkers=1 --no-file-parallelism`
 - **typecheck**: `npm.cmd run typecheck`
 - **build**: `npm.cmd run build`
@@ -1949,34 +2049,13 @@ TDD gates:
 
 Browser assertions:
 
-- Exactly 12 production DocumentKeys in canonical order and exact titles.
-- Wave 1 contains exactly riskAssessmentDraft, tbmBriefing, and tbmLogDraft as its document scope.
-- Markdown canonical JSON mirror deep-equals spec.json canonicalContract.
-- Every document field has parser, serializer, editorV2 path, current structured path or explicit null, exact legacy fallback, export manifest path, and reload/XLSX/PDF/HWP/HWPX targets.
-- Risk production fields exactly match RiskAssessmentRow plus editor-only stable id; divergent aliases are absent.
-- Legacy submission body and provenance/audit appendices split losslessly; no known appendix sentinel or review artifact enters an editable control.
-- The audited 5221-character mixed risk string is a failing fixture and does not become a master textarea value.
-- No edit retains active dbHarness, ontologyQa, qualityContract, generationEvidence, or generationEvidenceError.
-- Revalidation recomputes evidenceDigest/materializationDigest, reseals review_pending, and server save alone stamps human_confirmed.
-- Model output cannot set approved, approver identity, legal/safety confirmation, signature, attendance, or understanding.
-- WorkerAttendanceConfirmation cannot be inferred from ShareReadConfirmation.
-- Every share block carries current sourceRevision and evidenceDigest and becomes stale on source/evidence/review change.
-- No photo assetId/storagePath/hydrated pixel state is inferred from current improvements GET/POST.
-- Reload, XLSX, PDF, HWP, and HWPX semantic round trips preserve every field, evidence record, body/appendix boundary, and unknown raw value.
-- Default surface has exactly one evidence trigger, zero yellow evidence badges, zero persistent right rails, zero duplicate left evidence summaries, and zero below-editor result/citation/operation-graph surfaces.
-- The default DOM contains zero occurrences of 중처법 §4-3호 증빙; applicable detail may appear once inside the open drawer.
-- Header and drawer counts come only from selectDocumentEvidenceSummary and match for the selected document; no conflicting count source renders.
-- At 1150x900 the selector is <=220px, main editor >=700px, readable preview >=560px, and persistent evidence rail is 0px.
-- At 1440x1000 main editor >=920px and readable preview >=720px.
-- At 390x844 and 391x844 the editor heading is <=160px after Edit, no visible editor textarea has internal vertical overflow, and the audited sample page is <=3600px.
-- Day/Night geometry and semantic hierarchy match at all six required viewports.
-- documentElement.scrollWidth equals clientWidth at every required viewport.
-- No default workbench text is 11px; body >=15px, table >=14px, label >=13px, caption >=12px only in details.
-- Exactly one lifecycle CTA is dominant; Download visible and aria labels are byte-identical; share readiness is non-competing status.
-- The 준제출형 source-confirmation caveat is role=alert and visually stronger than neutral provenance chrome.
-- Only runtime-verified HTTPS safety URLs render as links, only inside the drawer; guidanceX.do has no rendered href while unverified.
-- Feature flag off restores current textarea rendering without deleting editorV2/body/appendix data.
-- No database schema or migration change is introduced.
+- `BROWSER-001` through `BROWSER-018` pass for every required browser/viewport/theme row.
+- Contract audit verifies 12 keys/titles, 21 risk fields, every expanded codec/path, Wave scopes, viewport registry, and component export/file names.
+- No editorV2 or reviewArtifacts object contains generationEvidence/error; the top-level seal verifies after unchanged validation, edited revalidation, and human confirmation.
+- Generated content reaches review_pending without content mutation; edited content cannot bypass revalidation.
+- Wave 4 share-session binding and dispatch stale-rejection tests pass before v2 share controls enable.
+- Photo state is the single common/DOC-09 enum and never claims hydratable pixels.
+- Feature flag off restores current behavior and no database migration exists.
 
 Production-fix boundary: Any failure may be fixed only in a production file already owned by Waves 0-4; adding a new production path requires spec amendment and independent re-review.
 
@@ -2016,15 +2095,17 @@ Feature flag: `FLAG-001`; browser matrix: `BROWSER-MATRIX-001`; migration: `fals
 
 ## Acceptance IDs
 
-The exact machine assertions live in `spec.json`. This table maps each stable ID to the implementation section that owns it. Parity checks ID membership and digest, not prose equality.
+The exact machine assertions live in `spec.json`. This table maps each stable ID to its Markdown owner; it is registry coverage, not prose or semantic parity.
 
 | ID | Owner section |
 | --- | --- |
-| `PARITY-001` | Mechanical parity |
+| `PARITY-001` | Current integrity gate |
 | `SCOPE-001` | Scope and non-goals |
 | `DOC-001` | Document registry |
+| `COMPONENT-001` | Component boundaries |
 | `RISK-001` | Common type registry |
 | `FIELD-001` | Common field projection |
+| `FIELD-002` | Codec registry |
 | `BODY-001` | Editable body boundary |
 | `BODY-002` | Editable body boundary |
 | `BODY-003` | Editable body boundary |
@@ -2032,11 +2113,13 @@ The exact machine assertions live in `spec.json`. This table maps each stable ID
 | `FLOW-002` | Edit to persist to share |
 | `FLOW-003` | Edit to persist to share |
 | `FLOW-004` | Edit to persist to share |
+| `FLOW-005` | Edit to persist to share |
 | `HUMAN-001` | Human confirmation |
 | `CONFIRM-001` | Confirmation boundaries |
 | `EVIDENCE-001` | Provenance contract |
 | `EVIDENCE-002` | Provenance contract |
 | `SHARE-001` | Stored share authority |
+| `SHARE-002` | Stored share authority |
 | `PHOTO-001` | Photo persistence |
 | `EXPORT-001` | Export determinism |
 | `UI-001` | Default workbench |
@@ -2052,72 +2135,65 @@ The exact machine assertions live in `spec.json`. This table maps each stable ID
 | `UI-011` | Default workbench |
 | `LINK-001` | External safety links |
 | `STATE-001` | System states |
+| `CONFLICT-001` | Integration ledger |
 | `ROLLBACK-001` | Feature flag and waves |
 | `WAVE-001` | Implementation waves |
 | `WAVE-002` | Implementation waves |
 | `PASS-001` | Independent gate |
 
-## Parity Fingerprints
+## Current Integrity Fingerprints
 
 Algorithm: `fnv1a64 over UTF-8 JSON of normalized registries`
 
-Document registries are expanded through shared type bindings before hashing.
+These detect compact registry drift only. They are not a `canonicalContract`, a Markdown semantic mirror, or proof of future behavior. Document registries are expanded through shared type bindings before hashing.
 
 | Document ID | Key | Expanded fields | Digest |
 | --- | --- | --- | --- |
-| DOC-01 | `workpackSummaryDraft` | 15 | `328039b9da831ab6` |
-| DOC-02 | `riskAssessmentDraft` | 22 | `b793d15ad793e204` |
-| DOC-03 | `workPlanDraft` | 24 | `f6c0d7ad2fdfc4e8` |
-| DOC-04 | `workPermitDraft` | 33 | `43e297afdca5c566` |
-| DOC-05 | `tbmBriefing` | 25 | `9b42c27a1167b763` |
-| DOC-06 | `tbmLogDraft` | 45 | `889c9cee79a57ef6` |
-| DOC-07 | `safetyEducationRecordDraft` | 26 | `135ec35225aa3eb2` |
-| DOC-08 | `emergencyResponseDraft` | 29 | `694a478a5fcfc5b9` |
-| DOC-09 | `photoEvidenceDraft` | 17 | `dcf32718202626ab` |
-| DOC-10 | `foreignWorkerBriefing` | 14 | `de96f7010a6388d8` |
-| DOC-11 | `foreignWorkerTransmission` | 20 | `c5dc4b13f62352cc` |
-| DOC-12 | `kakaoMessage` | 21 | `d41c2c554f588473` |
+| DOC-01 | `workpackSummaryDraft` | 15 | `79795d3bd3c15992` |
+| DOC-02 | `riskAssessmentDraft` | 22 | `6b4a3ad7fd99b6e4` |
+| DOC-03 | `workPlanDraft` | 24 | `89a545142f088f30` |
+| DOC-04 | `workPermitDraft` | 33 | `adc9332eef6ef367` |
+| DOC-05 | `tbmBriefing` | 25 | `681c90307ae7525b` |
+| DOC-06 | `tbmLogDraft` | 45 | `60aea561cdcd5852` |
+| DOC-07 | `safetyEducationRecordDraft` | 26 | `3a8e8a6d4b7dffca` |
+| DOC-08 | `emergencyResponseDraft` | 29 | `df6f7f4c2ba3512d` |
+| DOC-09 | `photoEvidenceDraft` | 16 | `69ab5c57fa10bbcf` |
+| DOC-10 | `foreignWorkerBriefing` | 14 | `db4999b52b3afbd0` |
+| DOC-11 | `foreignWorkerTransmission` | 21 | `c2d6a715e4f46a5f` |
+| DOC-12 | `kakaoMessage` | 22 | `41b2932756b91dd0` |
 
 | Wave | Document count | Ownership digest |
 | --- | --- | --- |
-| wave0 | 0 | `d789faadbfc510af` |
+| wave0 | 0 | `d5d20cc0702daaaf` |
 | wave1 | 3 | `43d777e896eb1696` |
 | wave2 | 3 | `f52783820840ba71` |
 | wave3 | 3 | `88be720b6e7048d7` |
-| wave4 | 3 | `3d027a26a90ee35d` |
-| wave5 | 0 | `1dbd764d44594bdc` |
+| wave4 | 3 | `9fb8cd297d6c3da3` |
+| wave5 | 0 | `604d3c9194f073e8` |
 
 - Viewports: 6 / `c95625222074ee9b`
 - Browser rows: 12 / `2229ba55536c5e94`
-- Acceptance IDs: 36 / `f928357f8680e96f`
+- Contract IDs: 41 / `e0205088c5816fa7`
+- Browser assertions: 18 / `6fddac770de4137b`
 
 ## Mechanical Validation Before Commit
 
 Run in the dedicated worktree:
 
 ```powershell
-$spec = Get-Content evaluation/workpack-document-editors-v2-2026-07-13/spec.json -Raw | ConvertFrom-Json -Depth 100
+node -e "const fs=require('fs');const p='evaluation/workpack-document-editors-v2-2026-07-13/spec.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));if(j.meta.status!=='HOLD_PENDING_INDEPENDENT_PASS'||j.independentGate.holdState!==j.meta.status||j.documents.length!==12)process.exit(1);console.log('JSON_PARSE=PASS')"
+node -e 'const fs=require("fs");const j=JSON.parse(fs.readFileSync("evaluation/workpack-document-editors-v2-2026-07-13/spec.json"));const w=fs.readFileSync("components/WorkpackEditor.tsx","utf8");const r=fs.readFileSync("lib/risk-assessment-schema.ts","utf8");const keys=[...w.match(/export type DocumentKey =([\s\S]*?);/)[1].matchAll(/"([^"]+)"/g)].map(x=>x[1]);const meta=w.match(/const documentMeta: EditableDocument\[\] = \[([\s\S]*?)\n\];/)[1];const docs=[...meta.matchAll(/key: "([^"]+)"[\s\S]*?title: "([^"]+)"/g)].map(x=>[x[1],x[2]]);const fields=[...r.match(/export type RiskAssessmentRow = \{([\s\S]*?)\n\};/)[1].matchAll(/^\s{2}([A-Za-z][A-Za-z0-9]*):/gm)].map(x=>x[1]);if(JSON.stringify(keys)!==JSON.stringify(j.documents.map(x=>x.key))||JSON.stringify(docs)!==JSON.stringify(j.documents.map(x=>[x.key,x.title]))||JSON.stringify(fields)!==JSON.stringify(j.common.typeRegistry.RiskAssessmentEditorRow.fields.slice(1).map(x=>x[0])))process.exit(1);console.log("SOURCE_SHAPE=PASS")'
+node -e 'const fs=require("fs"),p="evaluation/workpack-document-editors-v2-2026-07-13/",j=JSON.parse(fs.readFileSync(p+"spec.json")),m=fs.readFileSync(p+"spec.md","utf8"),f=j.integrityFingerprints,H=v=>{let h=14695981039346656037n;for(const b of Buffer.from(JSON.stringify(v))){h^=BigInt(b);h=BigInt.asUintN(64,h*1099511628211n)}return h.toString(16).padStart(16,"0")},E=d=>[...d.typeBindings.flatMap(b=>j.common.typeRegistry[b.type].fields.map(q=>{const x=[b.prefix+"."+q[0],...q.slice(1)];if(Object.hasOwn(b.currentOverrides,q[0]))x[4]=b.currentOverrides[q[0]];return x})),...d.fields];for(let i=0;i<j.documents.length;i++){const e=E(j.documents[i]),r=f.documents[i];if(r[2]!==e.length||r[3]!==H(e)||!m.includes(r[3]))process.exit(1)}for(let i=0;i<j.implementation.waves.length;i++){const w=j.implementation.waves[i],r=f.waves[i],n={documents:w.documents,ownedFiles:w.ownedFiles,readOnlyDependencies:w.readOnlyDependencies,testFiles:w.testFiles,commands:w.commands,rollback:w.rollback};if(r[2]!==H(n)||!m.includes(r[2]))process.exit(1)}for(const [v,r] of [[j.implementation.viewports,f.viewports],[j.implementation.browserMatrix,f.browserMatrix],[j.contractIds,f.contractIds],[j.ui.browserAssertions,f.browserAssertions]])if(r[0]!==v.length||r[1]!==H(v)||!m.includes(r[1]))process.exit(1);const c=new Set(Object.keys(j.common.codecs)),t=[...Object.values(j.common.typeRegistry).flatMap(x=>x.fields),...j.documents.flatMap(x=>x.fields)];if(t.some(x=>!c.has(x[3]))||[...j.contractIds,...j.ui.browserAssertions.map(x=>x[0])].some(x=>!m.includes("`"+x+"`")))process.exit(1);console.log("REGISTRY_INTEGRITY=PASS")'
 git diff --check
-git status --short
+git diff --name-only
 ```
 
-The parity validator must additionally:
-
-1. parse JSON
-2. expand all shared field bindings
-3. compare the exact 12 production keys and titles
-4. compare the exact 21 production risk field names
-5. recompute every document, wave, viewport, browser, and acceptance digest
-6. confirm Markdown parity tables match JSON
-7. confirm only the two allowed files changed
-8. compare actual type and call-site symbols
-9. confirm no CRLF conversion
-10. confirm both files remain inside their line budgets
+Current gate: `CURRENT_REGISTRY_CHECKS_ONLY`; semantic parity: `NOT_CLAIMED`. Before any product edit, Wave 0 must first create `scripts/workpack_editor_contract_audit.mjs` and `tests/workpack-editor-contract.test.ts` in an isolated commit. That validator must parse JSON, extract Markdown stable-ID tables, expand shared bindings, compare all document fields/codecs/waves/viewports and production DocumentKey/RiskAssessmentRow, and fail on unresolved codecs or undocumented shared files. Those future files are not cited as a current PASS.
 
 ## Independent PASS Gate
 
-Do not start Wave 1 until another independent reviewer marks this exact commit PASS after running the mechanical validators.
+Do not start Wave 0 or any later wave until another independent reviewer marks this exact commit PASS after running the current checks.
 
-Current state: **HOLD**.
+Current state: **HOLD_PENDING_INDEPENDENT_PASS**.
 
-Do not start Wave 0 or Wave 1 from this commit. An independent reviewer must run the mechanical validators and issue PASS against the exact pushed SHA.
+After that PASS, Wave 0's validator prerequisite runs before any product file change. An independent reviewer must issue PASS against the exact pushed SHA; no implementation starts from this commit.
