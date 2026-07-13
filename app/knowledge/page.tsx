@@ -176,7 +176,7 @@ export default async function KnowledgePage() {
         <section className={styles.section} aria-labelledby="technical-support-heading">
           <header className={styles.sectionHeader}>
             <div>
-              <span className={styles.kicker}>KOSHA Technical Support</span>
+              <span className={styles.kicker}>KOSHA 기술 지원</span>
               <h2 id="technical-support-heading">문서 반영용 KOSHA 기술 지원 자료</h2>
             </div>
             <p>
@@ -237,7 +237,7 @@ export default async function KnowledgePage() {
         <section className={styles.section} aria-labelledby="reference-library-heading">
           <header className={styles.sectionHeader}>
             <div>
-              <span className={styles.kicker}>KOSHA Reference Library</span>
+              <span className={styles.kicker}>KOSHA 참고 자료실</span>
               <h2 id="reference-library-heading">참고 자료실 (PDF)</h2>
             </div>
             <p>위험성평가·안전보건진단 작성 시 본문 옆에 펼쳐 참고하세요.</p>
@@ -281,7 +281,7 @@ export default async function KnowledgePage() {
         <section className={styles.section} aria-labelledby="wiki-index-heading">
           <header className={styles.sectionHeader}>
             <div>
-              <span className={styles.kicker}>Index</span>
+              <span className={styles.kicker}>색인</span>
               <h2 id="wiki-index-heading">위키 인덱스</h2>
             </div>
             <p>위험요인/서식 위키의 전체 목차입니다. 화면 기본 흐름에서는 근거 행과 반영 위치를 먼저 확인합니다.</p>
@@ -295,7 +295,7 @@ export default async function KnowledgePage() {
         <section className={styles.wikiGrid} aria-label="내장 위키">
           <article className={styles.wikiColumn}>
             <header className={styles.compactHeader}>
-              <span className={styles.kicker}>Hazards</span>
+              <span className={styles.kicker}>위험요인</span>
               <h2>위험요인 위키</h2>
             </header>
             <ul className={styles.wikiList}>
@@ -311,7 +311,7 @@ export default async function KnowledgePage() {
           </article>
           <article className={styles.wikiColumn}>
             <header className={styles.compactHeader}>
-              <span className={styles.kicker}>Forms</span>
+              <span className={styles.kicker}>서식</span>
               <h2>서식 위키</h2>
             </header>
             <ul className={styles.wikiList}>
@@ -330,7 +330,7 @@ export default async function KnowledgePage() {
         <section className={styles.section} aria-labelledby="schema-heading">
           <header className={styles.sectionHeader}>
             <div>
-              <span className={styles.kicker}>Schema</span>
+              <span className={styles.kicker}>스키마</span>
               <h2 id="schema-heading">LLM 재생성 스키마</h2>
             </div>
             <p>재생성 스키마는 개발/운영 확인용입니다. 현장 문서에는 roleLabel, shortSummary, documentReflectionLabel만 반영합니다.</p>

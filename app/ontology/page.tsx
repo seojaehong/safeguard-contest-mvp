@@ -44,81 +44,81 @@ export default async function OntologyPage() {
   const hoverCardsById = new Map(model?.hoverCards.map((card) => [card.id, card]) || []);
   const status = result.ok ? "live" : graph ? "partial" : result.configured ? "partial" : "planned";
   const mappedTo = graph
-    ? `${graph.counts.nodes.toLocaleString("ko-KR")}개 노드 · ${graph.counts.edges.toLocaleString("ko-KR")}개 관계${isSeedFallback ? " · seed fallback" : ""}`
-    : "published graph 조회 대기";
+    ? `${graph.counts.nodes.toLocaleString("ko-KR")}개 노드 · ${graph.counts.edges.toLocaleString("ko-KR")}개 관계${isSeedFallback ? " · 시드 대체본" : ""}`
+    : "배포된 그래프 조회 대기";
 
   return (
     <SafeClawModuleShell
       eyebrow="운영 온톨로지"
       title="작업 이력 그래프."
-      description="작업, 위험요인, 조치, 법령, 문서 반영 위치를 리스트와 hover card로 확인합니다."
+      description="작업, 위험요인, 조치, 법령, 문서 반영 위치를 목록과 마우스오버 카드로 확인합니다."
       status={status}
       mappedTo={mappedTo}
       activeHref="/ontology"
-      actions={<Link href="/api/ontology/graph">Graph JSON</Link>}
+      actions={<Link href="/api/ontology/graph">그래프 JSON</Link>}
     >
       {!graph || !model ? (
         <section className="safeclaw-module-panel ontology-empty-panel">
           <span>그래프를 사용할 수 없음</span>
-          <h2>published 온톨로지 그래프를 불러오지 못했습니다.</h2>
+          <h2>배포된 온톨로지 그래프를 불러오지 못했습니다.</h2>
           <p>{result.message}</p>
         </section>
       ) : (
         <>
           <section className="ontology-summary-grid">
             <article className="safeclaw-module-panel">
-              <span>Nodes</span>
+              <span>노드</span>
               <h2>{graph.counts.nodes.toLocaleString("ko-KR")}개</h2>
-              <p>Task, Hazard, Control, Article, Document를 published 범위에서만 표시합니다.</p>
+              <p>작업, 위험요인, 조치, 법령, 문서를 배포된 범위에서만 표시합니다.</p>
             </article>
             <article className="safeclaw-module-panel">
-              <span>Edges</span>
+              <span>관계</span>
               <h2>{graph.counts.edges.toLocaleString("ko-KR")}개</h2>
-              <p>관계가 끊긴 edge와 출처 없는 항목은 조립 단계에서 제외됩니다.</p>
+              <p>연결이 끊긴 관계와 출처 없는 항목은 조립 단계에서 제외됩니다.</p>
             </article>
             <article className="safeclaw-module-panel">
-              <span>Gate</span>
+              <span>근거 차단</span>
               <h2>{graph.counts.uncited_dropped_nodes + graph.counts.uncited_dropped_edges}개 제외</h2>
-              <p>근거 없는 draft/uncited 항목은 사용자 근거처럼 노출하지 않습니다.</p>
+              <p>근거 없는 초안과 미인용 항목은 사용자 근거처럼 노출하지 않습니다.</p>
             </article>
             {isSeedFallback ? (
               <article className="safeclaw-module-panel">
-                <span>Fallback</span>
-                <h2>{SEED_STATS.published_nodes.toLocaleString("ko-KR")}개 seed</h2>
-                <p>Supabase graph가 없을 때만 bundled published seed를 읽기 전용으로 표시합니다.</p>
+                <span>대체본</span>
+                <h2>{SEED_STATS.published_nodes.toLocaleString("ko-KR")}개 시드</h2>
+                <p>Supabase 그래프가 없을 때만 내장된 배포 시드를 읽기 전용으로 표시합니다.</p>
               </article>
             ) : null}
           </section>
 
           <section className="safeclaw-module-panel ontology-operation-loop" aria-label="작업팩 운영 이력 그래프 계약">
             <div className="compact-head">
-              <span className="eyebrow">Operation Memory</span>
+              <span className="eyebrow">운영 이력</span>
               <strong>작업팩별 개선 루프</strong>
             </div>
             <p>
-              published 지식 그래프는 고정 근거이고, 작업팩 그래프는 오늘 작업에서 실제로 사용한 근거,
+              배포된 지식 그래프는 고정 근거이고, 작업팩 그래프는 오늘 작업에서 실제로 사용한 근거,
               사진 분석 개선사항, 열람 확인 이력을 묶습니다. 저장된 작업팩은
-              <code>/api/workpacks/[id]/operation-graph</code>에서 Workpack → Hazard → Control/Improvement → Evidence/Ack
+              <code>/api/workpacks/[id]/operation-graph</code>에서 작업팩 → 위험요인 → 조치/개선사항 → 근거/열람 확인
               구조로 내려받습니다.
             </p>
             <div className="ontology-operation-flow">
               <article>
-                <span>Workpack</span>
+                <span>작업팩</span>
                 <strong>오늘 작업</strong>
                 <small>질문 · 생성일 · 현장 맥락</small>
               </article>
               <article>
-                <span>Evidence</span>
+                <span>근거</span>
                 <strong>SIF/KOSHA 근거</strong>
                 <small>문서에 반영된 직접/보조 근거</small>
               </article>
               <article>
-                <span>Improvement</span>
+                <span>개선사항</span>
                 <strong>사진/메모 개선</strong>
-                <small>before-after 분석과 반영 문서</small>
+                <small>개선 전후 분석과 반영 문서</small>
               </article>
               <article>
-                <span>Ack</span>
+                <span>열람 확인</span>
                 <strong>열람 확인</strong>
                 <small>작업자 표시명 · 언어 · 확인 시각</small>
               </article>
