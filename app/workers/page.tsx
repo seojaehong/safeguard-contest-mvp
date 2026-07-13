@@ -1,10 +1,14 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { CurrentWorkersModule } from "@/components/CurrentWorkpackModules";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import { resolveSafeShareReturnPath } from "@/lib/workspace-pages";
 
-export default function WorkersPage() {
+export default async function WorkersPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const params = await searchParams;
   const data = buildSampleWorkpack();
+  const shareReturn = params.next ? resolveSafeShareReturnPath(params.next, "day") : null;
 
   return (
     <SafeClawModuleShell
@@ -14,7 +18,9 @@ export default function WorkersPage() {
       status="partial"
       mappedTo="작업자 명단 · 교육 확인 · 언어별 안내"
       activeHref="/workers"
-      actions={<Link href="/workspace#workers">작업공간에서 편집</Link>}
+      actions={shareReturn
+        ? <Link href={shareReturn as Route}>전송으로 돌아가기</Link>
+        : <Link href="/workspace#workers">작업공간에서 편집</Link>}
     >
       <CurrentWorkersModule sample={data} />
     </SafeClawModuleShell>

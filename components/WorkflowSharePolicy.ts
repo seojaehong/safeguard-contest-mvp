@@ -1,4 +1,8 @@
 import type { WorkflowDispatchResult } from "@/lib/workflow-share-client";
+import {
+  buildShareOwnerHref,
+  type WorkspaceTheme
+} from "@/lib/workspace-pages";
 
 export type ShareAuthority = {
   workpackId: string;
@@ -527,4 +531,299 @@ export function getDispatchLogRetryPolicy(serverSupportsIdempotency: boolean): {
     duplicateRisk: true,
     message: "서버가 idempotency key 중복 방지를 지원하지 않아 자동 재시도를 중단했습니다. 다시 전송하면 로그가 중복될 수 있습니다."
   };
+}
+
+export type ShareProductState =
+  | "sending"
+  | "success"
+  | "partial"
+  | "fail"
+  | "stale"
+  | "workpack_revalidation"
+  | "blocked"
+  | "offline"
+  | "no_recipients"
+  | "logged_out"
+  | "review_required"
+  | "selected"
+  | "ready";
+
+export type ShareProductAuthorityStatus =
+  | "idle"
+  | "loading"
+  | "ready"
+  | "workpack_not_saved"
+  | "workpack_revision_or_digest_changed"
+  | "recipient_locale_invalid"
+  | "translation_incomplete"
+  | "translation_not_reviewed"
+  | "translation_rejected";
+
+export type ShareProductChannelStatus = "idle" | "empty" | "loading" | "ready" | "unavailable" | "error";
+
+export type ShareProductOutcome = {
+  stage: "accepted" | "partial" | "session_failed" | "dispatch_failed" | "log_unpersisted" | "unknown";
+  logIds: string[];
+};
+
+export type ShareProductPresentation = {
+  state: ShareProductState;
+  headline: string;
+  detail: string;
+  primary: {
+    kind: "button" | "link";
+    label: string;
+    href?: string;
+    action?: "send" | "recheck";
+    disabled: boolean;
+  };
+};
+
+export type ShareProductPresentationInput = {
+  theme: WorkspaceTheme;
+  sending: boolean;
+  outcome: ShareProductOutcome | null;
+  staleReason: string | null;
+  requiresRevalidation: boolean;
+  readinessCanShare: boolean;
+  online: boolean;
+  targetCount: number;
+  authenticated: boolean;
+  authorityStatus: ShareProductAuthorityStatus;
+  channelStatus: ShareProductChannelStatus;
+  validatedLanguage?: unknown;
+};
+
+function linkPresentation(
+  state: ShareProductState,
+  headline: string,
+  detail: string,
+  label: string,
+  href: string
+): ShareProductPresentation {
+  return {
+    state,
+    headline,
+    detail,
+    primary: { kind: "link", label, href, disabled: false }
+  };
+}
+
+function buttonPresentation(
+  state: ShareProductState,
+  headline: string,
+  detail: string,
+  label: string,
+  action: "send" | "recheck",
+  disabled = false
+): ShareProductPresentation {
+  return {
+    state,
+    headline,
+    detail,
+    primary: { kind: "button", label, action, disabled }
+  };
+}
+
+function staleOwnerHref(input: ShareProductPresentationInput): string {
+  if (input.staleReason === "recipient_snapshot_changed" || input.staleReason === "recipient_locale_invalid") {
+    return buildShareOwnerHref({ owner: "worker-language", theme: input.theme });
+  }
+  if (input.staleReason === "channel_configuration_changed") {
+    return buildShareOwnerHref({ owner: "settings", theme: input.theme });
+  }
+  if (input.staleReason === "translation_incomplete") {
+    return buildShareOwnerHref({ owner: "translation", theme: input.theme, language: input.validatedLanguage });
+  }
+  return buildShareOwnerHref({ owner: "document", theme: input.theme });
+}
+
+export function resolveShareProductPresentation(input: ShareProductPresentationInput): ShareProductPresentation {
+  if (input.sending) {
+    return buttonPresentation("sending", "전송 중", "초대 세션과 채널 요청을 순서대로 확인하고 있습니다.", "전송 중", "send", true);
+  }
+  if (input.outcome) {
+    const hasPersistedLogs = input.outcome.logIds.length > 0;
+    if (input.outcome.stage === "accepted" && hasPersistedLogs) {
+      return linkPresentation(
+        "success",
+        "전송 요청 접수",
+        "선택한 채널이 전송 요청을 접수했습니다. 전달 여부는 전파 이력에서 확인합니다.",
+        "전파 이력 확인",
+        "/dispatch"
+      );
+    }
+    if (input.outcome.stage === "partial" && hasPersistedLogs) {
+      return linkPresentation(
+        "partial",
+        "일부 채널 확인 필요",
+        "일부 채널은 요청을 접수했고 일부는 실패하거나 결과를 확인하지 못했습니다.",
+        "전파 이력 확인",
+        "/dispatch"
+      );
+    }
+    if (input.outcome.stage === "session_failed") {
+      return buttonPresentation(
+        "fail",
+        "초대 세션 생성 실패",
+        "초대 세션을 만들지 못해 전송을 시작하지 않았습니다.",
+        "초대 세션 다시 시도",
+        "send"
+      );
+    }
+    if (hasPersistedLogs) {
+      return linkPresentation(
+        "fail",
+        "전송 결과 확인 필요",
+        "채널 전송 결과를 전파 이력에서 확인합니다.",
+        "전파 이력 확인",
+        "/dispatch"
+      );
+    }
+    return buttonPresentation(
+      "fail",
+      "중복 전송 방지 확인 필요",
+      "전송 결과를 확정하지 못했습니다. 자동으로 다시 보내지 말고 연결 상태를 확인합니다.",
+      "연결 다시 확인",
+      "recheck"
+    );
+  }
+  if (input.staleReason) {
+    return linkPresentation(
+      "stale",
+      "변경사항 확인 필요",
+      "문서팩 또는 오늘 참여자 정보가 변경되어 다시 확인해야 합니다.",
+      "변경사항 다시 확인",
+      staleOwnerHref(input)
+    );
+  }
+  if (input.requiresRevalidation) {
+    return linkPresentation(
+      "workpack_revalidation",
+      "문서팩 재검수 필요",
+      "문서팩이 변경되어 다시 검수해야 합니다.",
+      "문서 다시 검수",
+      buildShareOwnerHref({ owner: "document", theme: input.theme })
+    );
+  }
+  if (!input.readinessCanShare) {
+    return linkPresentation(
+      "blocked",
+      "문서 보완 필요",
+      "공유 전 검수 항목을 보완해야 합니다.",
+      "문서 보완",
+      buildShareOwnerHref({ owner: "document", theme: input.theme })
+    );
+  }
+  if (!input.online) {
+    return buttonPresentation(
+      "offline",
+      "인터넷 연결 확인",
+      "연결이 복구되면 서버 권위를 다시 확인합니다.",
+      "연결 다시 확인",
+      "recheck"
+    );
+  }
+  if (input.targetCount < 1) {
+    return linkPresentation(
+      "no_recipients",
+      "오늘 참여자가 없습니다",
+      "작업자 화면에서 오늘 참여자를 선택합니다.",
+      "오늘 참여자 선택",
+      buildShareOwnerHref({ owner: "workers", theme: input.theme })
+    );
+  }
+  if (!input.authenticated) {
+    return linkPresentation(
+      "logged_out",
+      "관리자 로그인 필요",
+      "로그인한 관리자만 서버 검증 후 전송할 수 있습니다.",
+      "로그인하고 전송",
+      buildShareOwnerHref({ owner: "login", theme: input.theme })
+    );
+  }
+  if (input.authorityStatus === "recipient_locale_invalid") {
+    return linkPresentation(
+      "review_required",
+      "작업자 언어 확인 필요",
+      "작업자 언어 정보가 올바르지 않습니다. 작업자 화면에서 언어를 확인합니다.",
+      "작업자 언어 확인",
+      buildShareOwnerHref({ owner: "worker-language", theme: input.theme })
+    );
+  }
+  if (
+    input.authorityStatus === "translation_incomplete"
+    || input.authorityStatus === "translation_not_reviewed"
+    || input.authorityStatus === "translation_rejected"
+  ) {
+    const label = input.authorityStatus === "translation_not_reviewed"
+      ? "번역본 검토"
+      : input.authorityStatus === "translation_rejected"
+        ? "번역본 수정"
+        : "번역본 보완";
+    return linkPresentation(
+      "review_required",
+      "검토된 번역본 필요",
+      "검토된 전송본을 보완한 뒤 Share로 돌아옵니다.",
+      label,
+      buildShareOwnerHref({ owner: "translation", theme: input.theme, language: input.validatedLanguage })
+    );
+  }
+  if (
+    input.authorityStatus === "workpack_not_saved"
+    || input.authorityStatus === "workpack_revision_or_digest_changed"
+  ) {
+    return linkPresentation(
+      "selected",
+      "현재 문서팩 확인 필요",
+      "서버에 저장된 현재 문서팩을 확인한 뒤 전송합니다.",
+      "문서팩 확인",
+      buildShareOwnerHref({ owner: "document", theme: input.theme })
+    );
+  }
+  if (input.authorityStatus !== "ready") {
+    return buttonPresentation(
+      "selected",
+      "전송 준비 확인 중",
+      "서버 문서팩, 참여자, 번역본을 확인하고 있습니다.",
+      "전송 준비 확인 중",
+      "recheck",
+      true
+    );
+  }
+  if (input.channelStatus === "unavailable" || input.channelStatus === "error") {
+    return linkPresentation(
+      "selected",
+      "채널 설정 확인 필요",
+      "선택한 전송 채널을 Settings에서 확인합니다.",
+      "채널 설정 확인",
+      buildShareOwnerHref({ owner: "settings", theme: input.theme })
+    );
+  }
+  if (input.channelStatus === "empty") {
+    return buttonPresentation(
+      "selected",
+      "전송 채널 선택",
+      "메일, 문자, 카카오 중 하나 이상을 선택합니다.",
+      "전송 채널 선택",
+      "recheck"
+    );
+  }
+  if (input.channelStatus !== "ready") {
+    return buttonPresentation(
+      "selected",
+      "채널 확인 중",
+      "선택한 채널의 서버 설정과 연락처를 확인하고 있습니다.",
+      "채널 확인 중",
+      "recheck",
+      true
+    );
+  }
+  return buttonPresentation(
+    "ready",
+    "전송 준비 완료",
+    `오늘 참여자 ${input.targetCount}명을 선택했습니다.`,
+    `${input.targetCount}명에게 전송`,
+    "send"
+  );
 }

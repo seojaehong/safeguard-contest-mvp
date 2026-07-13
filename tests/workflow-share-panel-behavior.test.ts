@@ -9,7 +9,8 @@ import {
   createWorkflowShareEvidenceState,
   readWorkflowShareEvidenceForScope,
   reduceWorkflowShareEvidence,
-  resolveShareLanguagePresentation
+  resolveShareLanguagePresentation,
+  resolveShareProductPresentation
 } from "@/components/WorkflowSharePolicy";
 
 describe("workflow share panel behavior", () => {
@@ -171,5 +172,137 @@ describe("workflow share panel behavior", () => {
         ]
       }
     })).toEqual({ succeeded: true, hasFailure: false, fullySent: true });
+  });
+
+  it("applies revalidation before generic blocked, offline, target, and auth states", () => {
+    const presentation = resolveShareProductPresentation({
+      theme: "night",
+      sending: false,
+      outcome: null,
+      staleReason: null,
+      requiresRevalidation: true,
+      readinessCanShare: false,
+      online: false,
+      targetCount: 0,
+      authenticated: false,
+      authorityStatus: "idle",
+      channelStatus: "idle"
+    });
+
+    expect(presentation).toMatchObject({
+      state: "workpack_revalidation",
+      primary: {
+        kind: "link",
+        label: "문서 다시 검수",
+        href: "/workspace?step=document&returnStep=share&theme=night"
+      }
+    });
+  });
+
+  it("routes an empty target and invalid locale to the workers owner without interpolating locale", () => {
+    expect(resolveShareProductPresentation({
+      theme: "day",
+      sending: false,
+      outcome: null,
+      staleReason: null,
+      requiresRevalidation: false,
+      readinessCanShare: true,
+      online: true,
+      targetCount: 0,
+      authenticated: true,
+      authorityStatus: "idle",
+      channelStatus: "idle"
+    })).toMatchObject({
+      state: "no_recipients",
+      primary: {
+        label: "오늘 참여자 선택",
+        href: `/workers?next=${encodeURIComponent("/workspace?step=share&theme=day")}`
+      }
+    });
+
+    const invalid = resolveShareProductPresentation({
+      theme: "day",
+      sending: false,
+      outcome: null,
+      staleReason: null,
+      requiresRevalidation: false,
+      readinessCanShare: true,
+      online: true,
+      targetCount: 1,
+      authenticated: true,
+      authorityStatus: "recipient_locale_invalid",
+      channelStatus: "idle",
+      validatedLanguage: "vi-VN"
+    });
+    expect(invalid).toMatchObject({
+      state: "review_required",
+      primary: {
+        label: "작업자 언어 확인",
+        href: expect.stringContaining("/workers?focus=language&next=")
+      }
+    });
+    expect(invalid.primary.href).not.toContain("language=");
+    expect(invalid.primary.href).not.toContain("vi-VN");
+  });
+
+  it("routes a supported incomplete translation to the validated document owner", () => {
+    expect(resolveShareProductPresentation({
+      theme: "night",
+      sending: false,
+      outcome: null,
+      staleReason: null,
+      requiresRevalidation: false,
+      readinessCanShare: true,
+      online: true,
+      targetCount: 2,
+      authenticated: true,
+      authorityStatus: "translation_incomplete",
+      channelStatus: "idle",
+      validatedLanguage: "vi"
+    })).toMatchObject({
+      state: "review_required",
+      primary: {
+        label: "번역본 보완",
+        href: "/workspace?step=document&document=foreignWorkerTransmission&language=vi&returnStep=share&theme=night"
+      }
+    });
+  });
+
+  it("keeps exactly one state-specific primary through ready, sending, session failure, and persisted result", () => {
+    const base = {
+      theme: "day" as const,
+      staleReason: null,
+      requiresRevalidation: false,
+      readinessCanShare: true,
+      online: true,
+      targetCount: 2,
+      authenticated: true,
+      authorityStatus: "ready" as const,
+      channelStatus: "ready" as const
+    };
+    expect(resolveShareProductPresentation({ ...base, sending: false, outcome: null })).toMatchObject({
+      state: "ready",
+      primary: { kind: "button", label: "2명에게 전송", action: "send", disabled: false }
+    });
+    expect(resolveShareProductPresentation({ ...base, sending: true, outcome: null })).toMatchObject({
+      state: "sending",
+      primary: { kind: "button", label: "전송 중", disabled: true }
+    });
+    expect(resolveShareProductPresentation({
+      ...base,
+      sending: false,
+      outcome: { stage: "session_failed", logIds: [] }
+    })).toMatchObject({
+      state: "fail",
+      primary: { kind: "button", label: "초대 세션 다시 시도", action: "send" }
+    });
+    expect(resolveShareProductPresentation({
+      ...base,
+      sending: false,
+      outcome: { stage: "accepted", logIds: ["77777777-7777-4777-8777-777777777777"] }
+    })).toMatchObject({
+      state: "success",
+      primary: { kind: "link", label: "전파 이력 확인", href: "/dispatch" }
+    });
   });
 });

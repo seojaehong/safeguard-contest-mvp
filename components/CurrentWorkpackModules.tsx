@@ -1339,7 +1339,6 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
         {current.isCurrent ? (
           <WorkflowSharePanel
             data={current.data}
-            recipientSuggestions={recipientSuggestions}
             targetWorkers={targetWorkers}
           />
         ) : (

@@ -4,6 +4,15 @@ import { describe, expect, it, vi } from "vitest";
 
 const clientPath = path.join(process.cwd(), "lib", "workflow-share-client.ts");
 const policyPath = path.join(process.cwd(), "components", "WorkflowSharePolicy.ts");
+const WORKPACK_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const WORKER_ID = "11111111-1111-4111-8111-111111111111";
+const CANONICAL_REVISION = "a".repeat(64);
+const AVAILABILITY_TOKEN = "signed-availability-token";
+const SESSION_AUTHORITY = {
+  channels: ["email", "sms"] as const,
+  canonicalWorkpackRevision: CANONICAL_REVISION,
+  availabilityToken: AVAILABILITY_TOKEN
+};
 
 async function loadClient() {
   expect(fs.existsSync(clientPath), "authenticated share client helper must exist").toBe(true);
@@ -44,8 +53,9 @@ describe("authenticated workflow share client", () => {
 
     const result = await createAuthenticatedShareSession(fetcher, {
       authToken: "access-token",
-      workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-      workerIds: ["11111111-1111-4111-8111-111111111111"]
+      workpackId: WORKPACK_ID,
+      workerIds: [WORKER_ID],
+      ...SESSION_AUTHORITY
     });
 
     expect(result.shareSessionId).toBe("33333333-3333-4333-8333-333333333333");
@@ -58,7 +68,12 @@ describe("authenticated workflow share client", () => {
           authorization: "Bearer access-token",
           "content-type": "application/json"
         },
-        body: JSON.stringify({ recipients: ["11111111-1111-4111-8111-111111111111"] })
+        body: JSON.stringify({
+          recipients: [WORKER_ID],
+          channels: ["email", "sms"],
+          canonicalWorkpackRevision: CANONICAL_REVISION,
+          availabilityToken: AVAILABILITY_TOKEN
+        })
       }
     );
   });
@@ -174,8 +189,9 @@ describe("authenticated workflow share client", () => {
 
     await expect(createAuthenticatedShareSession(rejectedFetcher, {
       authToken: "access-token",
-      workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-      workerIds: ["11111111-1111-4111-8111-111111111111"]
+      workpackId: WORKPACK_ID,
+      workerIds: [WORKER_ID],
+      ...SESSION_AUTHORITY
     })).rejects.toThrow("서버 검수에서 공유 준비가 확인되지 않았습니다. (HTTP 409)");
 
     const malformedFetcher = vi.fn(async () => new Response(JSON.stringify({
@@ -185,8 +201,9 @@ describe("authenticated workflow share client", () => {
     }), { status: 200, headers: { "content-type": "application/json" } }));
     await expect(createAuthenticatedShareSession(malformedFetcher, {
       authToken: "access-token",
-      workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-      workerIds: ["11111111-1111-4111-8111-111111111111"]
+      workpackId: WORKPACK_ID,
+      workerIds: [WORKER_ID],
+      ...SESSION_AUTHORITY
     })).rejects.toThrow("공유 세션 응답에 shareSessionId가 없습니다.");
 
     const invalidSessionFetcher = vi.fn(async () => new Response(JSON.stringify({
@@ -197,8 +214,9 @@ describe("authenticated workflow share client", () => {
     }), { status: 200, headers: { "content-type": "application/json" } }));
     await expect(createAuthenticatedShareSession(invalidSessionFetcher, {
       authToken: "access-token",
-      workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-      workerIds: ["11111111-1111-4111-8111-111111111111"]
+      workpackId: WORKPACK_ID,
+      workerIds: [WORKER_ID],
+      ...SESSION_AUTHORITY
     })).rejects.toThrow("공유 세션 응답의 shareSessionId가 올바른 UUID가 아닙니다.");
 
     const dispatchFetcher = vi.fn(async () => new Response("gateway unavailable", { status: 502 }));
@@ -246,15 +264,238 @@ describe("authenticated workflow share client", () => {
       channelResults: [{ channel: "sms", provider: "latest-sms", status: "sent" }]
     })).toBe(true);
   });
+
+  it("loads current server workpack and worker authority without mutating the roster", async () => {
+    const { loadAuthenticatedShareAuthority } = await loadClient();
+    const requests: Array<{ input: string; init: RequestInit }> = [];
+    const validDetail = {
+      ok: true,
+      workpack: {
+        id: WORKPACK_ID,
+        reopenData: {
+          question: "성수동 외벽 도장",
+          generationEvidence: { signature: "generation-signature-1" },
+          scenario: {
+            companyName: "SafeClaw Pilot",
+            siteName: "성수 현장",
+            workSummary: "외벽 도장"
+          },
+          riskSummary: {
+            topRisk: "추락",
+            immediateActions: ["난간 확인"]
+          },
+          deliverables: {
+            foreignWorkerTransmission: "작업 전 난간을 확인합니다."
+          }
+        }
+      },
+      shareLocalization: {
+        ok: true,
+        canonicalWorkpackRevision: CANONICAL_REVISION,
+        reviewedEnvelopes: {
+          vi: {
+            targetLocale: "vi",
+            artifactDigest: "b".repeat(64),
+            review: { state: "approved" },
+            artifact: {
+              targetLocale: "vi",
+              localized: {
+                subject: "Thông báo an toàn",
+                metadata: {
+                  siteLabel: "Công trường",
+                  siteValue: "Seongsu",
+                  taskLabel: "Công việc",
+                  taskValue: "Sơn tường ngoài",
+                  coreRiskLabel: "Rủi ro chính",
+                  coreRiskValue: "Ngã cao"
+                },
+                bodyLines: ["Kiểm tra lan can trước khi làm việc."],
+                semanticRiskLabels: ["Nguy cơ ngã", "Dừng việc và báo cáo"]
+              }
+            }
+          }
+        }
+      }
+    };
+    const fetcher = vi.fn(async (input: string, init: RequestInit) => {
+      requests.push({ input, init });
+      if (input === "/api/workpacks?limit=50") {
+        return Response.json({ ok: true, workpacks: [{ id: WORKPACK_ID, question: "성수동 외벽 도장" }] });
+      }
+      if (input === `/api/workpacks/${WORKPACK_ID}`) return Response.json(validDetail);
+      if (input.startsWith("/api/workers?")) {
+        return Response.json({
+          ok: true,
+          workers: [{
+            id: WORKER_ID,
+            external_key: "worker-local-a",
+            display_name: "Nguyen Van A",
+            language_code: "vi"
+          }]
+        });
+      }
+      throw new Error(`Unexpected request ${input}`);
+    });
+
+    const result = await loadAuthenticatedShareAuthority(fetcher, {
+      authToken: "access-token",
+      knownWorkpackId: null,
+      question: "성수동 외벽 도장",
+      generationEvidenceSignature: "generation-signature-1",
+      scenario: {
+        companyName: "SafeClaw Pilot",
+        siteName: "성수 현장",
+        companyType: "건설업"
+      },
+      selectedWorkers: [{
+        externalKey: "worker-local-a",
+        displayName: "Nguyen Van A",
+        languageCode: "vi"
+      }]
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      workpackId: WORKPACK_ID,
+      workerIds: [WORKER_ID],
+      recipientLocales: ["vi"],
+      canonicalWorkpackRevision: CANONICAL_REVISION,
+      previews: {
+        vi: {
+          subject: "Thông báo an toàn",
+          metadata: { coreRiskValue: "Ngã cao" }
+        }
+      }
+    });
+    expect(requests.every((item) => !item.init.method || item.init.method === "GET")).toBe(true);
+  });
+
+  it("fails closed when a supported translation is incomplete or retains Korean metadata", async () => {
+    const { parseAuthenticatedWorkpackShareAuthority } = await loadClient();
+    const result = parseAuthenticatedWorkpackShareAuthority({
+      expectedWorkpackId: WORKPACK_ID,
+      expectedGenerationEvidenceSignature: "generation-signature-1",
+      recipientLocales: ["vi"],
+      payload: {
+        ok: true,
+        workpack: {
+          id: WORKPACK_ID,
+          reopenData: { generationEvidence: { signature: "generation-signature-1" } }
+        },
+        shareLocalization: {
+          ok: true,
+          canonicalWorkpackRevision: CANONICAL_REVISION,
+          reviewedEnvelopes: {
+            vi: {
+              targetLocale: "vi",
+              artifactDigest: "b".repeat(64),
+              review: { state: "approved" },
+              artifact: {
+                targetLocale: "vi",
+                localized: {
+                  subject: "Thông báo an toàn",
+                  metadata: {
+                    siteLabel: "Công trường",
+                    siteValue: "성수 현장",
+                    taskLabel: "Công việc",
+                    taskValue: "Sơn tường ngoài",
+                    coreRiskLabel: "Rủi ro chính",
+                    coreRiskValue: "Ngã cao"
+                  },
+                  bodyLines: ["Kiểm tra lan can."],
+                  semanticRiskLabels: ["Nguy cơ ngã"]
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      reasonCode: "translation_incomplete",
+      validatedSupportedCode: "vi"
+    });
+  });
+
+  it("resolves channels with exact server identifiers and persists only log IDs as evidence", async () => {
+    const { persistAuthenticatedDispatchLogs, resolveAuthenticatedShareChannels } = await loadClient();
+    const fetcher = vi.fn(async (input: string, init: RequestInit) => {
+      if (input === "/api/settings/channels/resolve") {
+        return Response.json({
+          ok: true,
+          version: "channel-availability/v1",
+          workpackId: WORKPACK_ID,
+          canonicalWorkpackRevision: CANONICAL_REVISION,
+          recipientDigest: "c".repeat(64),
+          requestedChannels: ["email", "sms"],
+          dispatchMode: "fixture",
+          channels: [
+            { channel: "email", available: true, reasonCode: "available" },
+            { channel: "sms", available: true, reasonCode: "available" }
+          ],
+          configurationVersion: "channel-configuration/v2",
+          configurationRevision: 7,
+          configurationDigestKeyId: "channel-key-2026-07",
+          configurationDigest: "d".repeat(64),
+          resolvedAt: "2026-07-14T00:00:00.000Z",
+          expiresAt: "2099-01-01T00:00:00.000Z",
+          availabilityToken: AVAILABILITY_TOKEN,
+          ready: true
+        });
+      }
+      if (input === "/api/dispatch-logs") {
+        return Response.json({
+          ok: true,
+          configured: true,
+          savedCount: 2,
+          logIds: [
+            "77777777-7777-4777-8777-777777777777",
+            "88888888-8888-4888-8888-888888888888"
+          ],
+          message: "전파 이력을 저장했습니다."
+        });
+      }
+      throw new Error(`Unexpected request ${input}: ${String(init.body)}`);
+    });
+
+    const channels = await resolveAuthenticatedShareChannels(fetcher, {
+      authToken: "access-token",
+      workpackId: WORKPACK_ID,
+      canonicalWorkpackRevision: CANONICAL_REVISION,
+      workerIds: [WORKER_ID],
+      requestedChannels: ["email", "sms"]
+    });
+    expect(channels).toMatchObject({ ready: true, availabilityToken: AVAILABILITY_TOKEN });
+    expect(JSON.parse(String(fetcher.mock.calls[0]?.[1]?.body))).toEqual({
+      workpackId: WORKPACK_ID,
+      canonicalWorkpackRevision: CANONICAL_REVISION,
+      recipients: [WORKER_ID],
+      requestedChannels: ["email", "sms"]
+    });
+
+    const logs = await persistAuthenticatedDispatchLogs(fetcher, {
+      authToken: "access-token",
+      workpackId: WORKPACK_ID,
+      logs: [
+        { channel: "email", providerStatus: "sent" },
+        { channel: "sms", providerStatus: "failed" }
+      ]
+    });
+    expect(logs.logIds).toHaveLength(2);
+    expect(logs.savedCount).toBe(2);
+  });
 });
 
 describe("workflow share component wiring", () => {
-  it("retains the saved worker map and passes server worker IDs into the share panel", () => {
+  it("passes local worker keys only as read-only server lookup inputs on Share", () => {
     const source = fs.readFileSync(path.join(process.cwd(), "components", "FieldOperationsWorkspace.tsx"), "utf8");
 
-    expect(source).toContain("setSavedWorkerMap");
-    expect(source).toContain("resolveSavedWorkerIds");
-    expect(source).toContain("workerIds={savedWorkerIds}");
+    expect(source).toContain("selectedWorkerKeys={selectedWorkerIds}");
+    const shareOnly = source.slice(source.indexOf('if (surface === "share")'), source.indexOf("const workspaceSide"));
+    expect(shareOnly).not.toContain("ensureWorkpackSaved");
+    expect(shareOnly).not.toContain("workerIds={savedWorkerIds}");
   });
 
   it("adapts dense share controls to the panel width instead of only the viewport", () => {
@@ -264,18 +505,20 @@ describe("workflow share component wiring", () => {
     expect(fs.existsSync(cssPath)).toBe(true);
     const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
     expect(source).toContain('import styles from "@/components/WorkflowSharePanel.module.css"');
-    expect(source).toContain('className={`share-panel workflow-panel ${styles.panel}`}');
-    expect(source).toContain("useReducer(");
-    expect(source).toContain('type: "scope_changed"');
+    expect(source).toContain("data-share-primary");
+    expect(source).toContain("data-share-preview");
+    expect(source).toContain("loadAuthenticatedShareAuthority");
+    expect(source).toContain("resolveAuthenticatedShareChannels");
     expect(source).toContain("buildProviderDispatchIdempotencyKey");
-    expect(source).toContain("resolveShareLanguagePresentation");
-    expect(source).toContain("buildShareEvidenceSummary");
-    expect(source).not.toContain("4개 기록 분리");
+    expect(source).not.toContain("parseWorkflowShareArchive");
+    expect(source).not.toContain("buildReadConfirmationStatus");
+    expect(source).not.toContain("share-session-details");
+    expect(source).not.toContain("language-chip");
     expect(source).toContain("<textarea");
     expect(css).toContain("container-type: inline-size");
     expect(css).toContain("@container (max-width: 560px)");
-    expect(css).toContain(":global(.channel-grid)");
-    expect(css).toContain("grid-template-columns: repeat(2, minmax(0, 1fr))");
+    expect(css).toContain("min-height: 44px");
+    expect(css).toContain("max-height: min(34vh, 320px)");
   });
 
 });

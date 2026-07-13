@@ -33,6 +33,7 @@ import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/workpack-readiness";
 import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
 import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
+import type { WorkspaceTheme } from "@/lib/workspace-pages";
 import {
   buildDefaultWorkers,
   buildEducationRecordDrafts,
@@ -839,6 +840,8 @@ export function FieldOperationsWorkspace({
   editorFocusToken = 0,
   requestedDocumentKey,
   readiness,
+  requiresRevalidation = false,
+  workspaceTheme = "day",
   onDeliverablesChange,
   surface = "full"
 }: {
@@ -847,6 +850,8 @@ export function FieldOperationsWorkspace({
   editorFocusToken?: number;
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
+  requiresRevalidation?: boolean;
+  workspaceTheme?: WorkspaceTheme;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
   surface?: "full" | "share" | "editor";
 }) {
@@ -1228,13 +1233,13 @@ export function FieldOperationsWorkspace({
       <section className="field-workspace field-workspace-share-only workbench-root">
         <WorkflowSharePanel
           data={workspaceData}
-          recipientSuggestions={recipientSuggestions}
           targetWorkers={targetWorkers}
+          selectedWorkerKeys={selectedWorkerIds}
           authToken={session?.access_token}
           workpackId={savedWorkpackId}
-          workerIds={savedWorkerIds}
-          ensureWorkpackSaved={ensureWorkpackSaved}
           readiness={readiness}
+          requiresRevalidation={requiresRevalidation}
+          workspaceTheme={workspaceTheme}
         />
       </section>
     );
@@ -1260,13 +1265,13 @@ export function FieldOperationsWorkspace({
       />
       <WorkflowSharePanel
         data={workspaceData}
-        recipientSuggestions={recipientSuggestions}
         targetWorkers={targetWorkers}
+        selectedWorkerKeys={selectedWorkerIds}
         authToken={session?.access_token}
         workpackId={savedWorkpackId}
-        workerIds={savedWorkerIds}
-        ensureWorkpackSaved={ensureWorkpackSaved}
         readiness={readiness}
+        requiresRevalidation={requiresRevalidation}
+        workspaceTheme={workspaceTheme}
       />
       <WorkpackHistoryPanel
         session={session}

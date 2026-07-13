@@ -49,9 +49,12 @@ import {
   canOpenWorkspacePage,
   nextWorkspacePageAfterGenerationError,
   nextWorkspacePageAfterGenerate,
+  type WorkspaceDocumentKey,
   type WorkspacePage,
-  type WorkspaceStepStatus
+  type WorkspaceStepStatus,
+  type WorkspaceTheme
 } from "@/lib/workspace-pages";
+import type { SupportedLanguageCode } from "@/lib/foreign-worker";
 import { buildGenerationProgressState } from "@/lib/workspace-generation-progress";
 import {
   applyWorkpackDeliverablesChange,
@@ -65,12 +68,20 @@ type SafeGuardCommandCenterProps = {
   initialQuestion: string;
   autoGenerate: boolean;
   workspaceTheme?: WorkspaceTheme;
+  initialWorkspacePage?: WorkspacePage;
+  initialWorkspaceStepExplicit?: boolean;
+  initialDocumentKey?: WorkspaceDocumentKey | null;
+  initialLanguage?: SupportedLanguageCode | null;
+  initialReturnStep?: "share" | null;
 };
 
-type WorkspaceTheme = "night" | "day";
 type DocumentSurfaceMode = "review" | "editor";
 
 type GenerationState = "idle" | "generating" | "ready" | "error";
+
+function shouldRenderLegacyShareSurface(): boolean {
+  return false;
+}
 
 type WorkflowStep = {
   key: WorkspacePage;
@@ -1036,7 +1047,12 @@ export function SafeGuardCommandCenter({
   initialScenarioId,
   initialQuestion,
   autoGenerate,
-  workspaceTheme = "day"
+  workspaceTheme = "day",
+  initialWorkspacePage = "input",
+  initialWorkspaceStepExplicit = false,
+  initialDocumentKey = null,
+  initialLanguage = null,
+  initialReturnStep = null
 }: SafeGuardCommandCenterProps) {
   const initialExample = examples.find((example) => example.id === initialScenarioId) || examples[0];
   const [selectedExampleId, setSelectedExampleId] = useState<string | null>(initialQuestion ? initialExample.id : null);
@@ -1053,10 +1069,13 @@ export function SafeGuardCommandCenter({
   const [checkedActions, setCheckedActions] = useState<boolean[]>([]);
   const [liveWeather, setLiveWeather] = useState<WeatherBrief | null>(null);
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
-  const [workspacePage, setWorkspacePage] = useState<WorkspacePage>("input");
-  const [documentSurfaceMode, setDocumentSurfaceMode] = useState<DocumentSurfaceMode>("review");
+  const [workspacePage, setWorkspacePage] = useState<WorkspacePage>(initialWorkspacePage);
+  const [documentSurfaceMode, setDocumentSurfaceMode] = useState<DocumentSurfaceMode>(
+    initialWorkspacePage === "document" && initialDocumentKey ? "editor" : "review"
+  );
   const [editorFocusToken, setEditorFocusToken] = useState(0);
-  const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>("riskAssessmentDraft");
+  const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>(initialDocumentKey || "riskAssessmentDraft");
+  const [requestedLanguage, setRequestedLanguage] = useState<SupportedLanguageCode | null>(initialLanguage);
   const [consoleLines, setConsoleLines] = useState<AgentConsoleLine[]>([]);
   const [improvementText, setImprovementText] = useState("");
   const [operationImprovements, setOperationImprovements] = useState<OperationImprovement[]>(() => parseStoredImprovements());
@@ -1103,6 +1122,35 @@ export function SafeGuardCommandCenter({
     inputHazardPhotosRef.current.forEach((photo) => URL.revokeObjectURL(photo.url));
   }, []);
 
+  function replaceWorkspaceLocation(input: {
+    step: WorkspacePage;
+    document?: DocumentKey | null;
+    language?: SupportedLanguageCode | null;
+    returnStep?: "share" | null;
+    theme?: WorkspaceTheme;
+  }) {
+    if (typeof window === "undefined") return;
+    const search = new URLSearchParams({
+      step: input.step,
+      theme: input.theme || activeWorkspaceTheme
+    });
+    if (input.step === "document" && input.document) search.set("document", input.document);
+    if (input.step === "document" && input.language) search.set("language", input.language);
+    if (input.step === "document" && input.returnStep === "share") search.set("returnStep", "share");
+    window.history.replaceState(null, "", `/workspace?${search.toString()}`);
+  }
+
+  function changeWorkspaceTheme(theme: WorkspaceTheme) {
+    setActiveWorkspaceTheme(theme);
+    replaceWorkspaceLocation({
+      step: workspacePage,
+      document: workspacePage === "document" && documentSurfaceMode === "editor" ? requestedDocumentKey : null,
+      language: workspacePage === "document" ? requestedLanguage : null,
+      returnStep: workspacePage === "document" ? initialReturnStep : null,
+      theme
+    });
+  }
+
   function moveToWorkspacePage(targetPage: WorkspacePage) {
     const readiness = data ? assessWorkpackReadiness(data, { requiresRevalidation }) : null;
     const gate = canOpenWorkspacePage({
@@ -1119,20 +1167,32 @@ export function SafeGuardCommandCenter({
       setDocumentSurfaceMode("review");
     }
     setWorkspacePage(targetPage);
+    replaceWorkspaceLocation({ step: targetPage });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function focusWorkpackEditor(key: DocumentKey) {
     setRequestedDocumentKey(key);
+    setRequestedLanguage(null);
     setDocumentSurfaceMode("editor");
     setWorkspacePage("document");
+    replaceWorkspaceLocation({ step: "document", document: key });
     window.scrollTo({ top: 0, behavior: "smooth" });
     setEditorFocusToken((current) => current + 1);
     setMessage("선택한 문서를 편집·다운로드 영역으로 열었습니다. PDF·XLS·HWPX 버튼으로 출력하세요.");
   }
 
   function returnToDocumentReview() {
+    if (initialReturnStep === "share") {
+      setDocumentSurfaceMode("review");
+      setWorkspacePage("share");
+      replaceWorkspaceLocation({ step: "share" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setMessage("전송 화면으로 돌아왔습니다. 변경된 문서팩은 다시 검수해야 합니다.");
+      return;
+    }
     setDocumentSurfaceMode("review");
+    replaceWorkspaceLocation({ step: "document" });
     window.scrollTo({ top: 0, behavior: "smooth" });
     setMessage("생성된 문서와 근거 검토 화면으로 돌아왔습니다.");
   }
@@ -1662,10 +1722,22 @@ export function SafeGuardCommandCenter({
     setGenerationFingerprint(stored.generationFingerprint);
     setRequiresRevalidation(false);
     setState("ready");
-    setDocumentSurfaceMode("review");
-    setWorkspacePage("document");
-    setMessage("브라우저에 저장된 최근 작업팩을 이어서 열었습니다. 새 작업은 입력 메뉴에서 시작하세요.");
-  }, [autoGenerate]);
+    const restoredPage = initialWorkspaceStepExplicit ? initialWorkspacePage : "document";
+    const restoredDocument = restoredPage === "document" && initialDocumentKey;
+    setDocumentSurfaceMode(restoredDocument ? "editor" : "review");
+    setWorkspacePage(restoredPage);
+    setRequestedDocumentKey(initialDocumentKey || "riskAssessmentDraft");
+    setRequestedLanguage(initialLanguage);
+    setMessage(restoredPage === "share"
+      ? "브라우저에 저장된 최근 작업팩의 전송 화면을 열었습니다."
+      : "브라우저에 저장된 최근 작업팩을 이어서 열었습니다. 새 작업은 입력 메뉴에서 시작하세요.");
+  }, [
+    autoGenerate,
+    initialDocumentKey,
+    initialLanguage,
+    initialWorkspacePage,
+    initialWorkspaceStepExplicit
+  ]);
 
   useEffect(() => {
     const trimmed = question.trim();
@@ -1788,7 +1860,7 @@ export function SafeGuardCommandCenter({
             type="button"
             className={activeWorkspaceTheme === "day" ? "active" : ""}
             aria-pressed={activeWorkspaceTheme === "day"}
-            onClick={() => setActiveWorkspaceTheme("day")}
+            onClick={() => changeWorkspaceTheme("day")}
           >
             Day
           </button>
@@ -1796,7 +1868,7 @@ export function SafeGuardCommandCenter({
             type="button"
             className={activeWorkspaceTheme === "night" ? "active" : ""}
             aria-pressed={activeWorkspaceTheme === "night"}
-            onClick={() => setActiveWorkspaceTheme("night")}
+            onClick={() => changeWorkspaceTheme("night")}
           >
             Night
           </button>
@@ -2302,7 +2374,7 @@ export function SafeGuardCommandCenter({
                   <strong>{selectedOutputItem.title}</strong>
                 </div>
                 <button type="button" className="button" onClick={returnToDocumentReview}>
-                  문서 검토로 돌아가기
+                  {initialReturnStep === "share" ? "전송 화면으로 돌아가기" : "문서 검토로 돌아가기"}
                 </button>
               </div>
               <section className="result-ribbon" aria-label="생성 결과 요약">
@@ -2351,6 +2423,22 @@ export function SafeGuardCommandCenter({
           ) : null}
 
           {workspacePage === "share" ? (
+            <section className="workspace-step-page workspace-share-page" id="workspace-share-page">
+              {data ? (
+                <FieldOperationsWorkspace
+                  data={data}
+                  generationFingerprint={generationFingerprint || undefined}
+                  readiness={workpackReadiness || undefined}
+                  requiresRevalidation={requiresRevalidation}
+                  workspaceTheme={activeWorkspaceTheme}
+                  onDeliverablesChange={handleWorkpackDeliverablesChange}
+                  surface="share"
+                />
+              ) : null}
+            </section>
+          ) : null}
+
+          {data && workpackReadiness && workspacePage === "share" && shouldRenderLegacyShareSurface() ? (
             <section className="workspace-step-page workspace-share-page" id="workspace-share-page">
           <section className="dispatch-preview-panel" id="dispatch-overview">
             <div className="share-workbench-title">

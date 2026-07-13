@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import { BriefingSettingsCard } from "@/components/BriefingSettingsCard";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
+import { resolveSafeShareReturnPath } from "@/lib/workspace-pages";
 
 const settings = [
   ["조직·현장", "회사와 현장 정보를 작업공간 기본값으로 관리"],
@@ -11,7 +12,9 @@ const settings = [
   ["권한", "관리자 로그인 기준으로 접근 범위 관리"]
 ] as const;
 
-export default function SettingsPage() {
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const params = await searchParams;
+  const shareReturn = params.next ? resolveSafeShareReturnPath(params.next, "day") : null;
   return (
     <SafeClawModuleShell
       eyebrow="설정"
@@ -20,7 +23,9 @@ export default function SettingsPage() {
       status="planned"
       mappedTo="조직 · 현장 · 발송 채널"
       activeHref="/settings"
-      actions={<Link href={"/settings/ai-connect" as Route}>내 AI 연결</Link>}
+      actions={shareReturn
+        ? <Link href={shareReturn as Route}>전송으로 돌아가기</Link>
+        : <Link href={"/settings/ai-connect" as Route}>내 AI 연결</Link>}
     >
       <section className="safeclaw-module-grid two">
         {settings.map(([title, body]) => (

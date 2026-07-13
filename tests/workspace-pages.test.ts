@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildCanonicalShareReturnPath,
+  buildShareOwnerHref,
   buildWorkspaceStepStatuses,
   canOpenWorkspacePage,
   nextWorkspacePageAfterGenerationError,
-  nextWorkspacePageAfterGenerate
+  nextWorkspacePageAfterGenerate,
+  resolveSafeShareReturnPath,
+  resolveWorkspaceRouteState
 } from "@/lib/workspace-pages";
 
 describe("workspace page navigation", () => {
@@ -48,7 +52,7 @@ describe("workspace page navigation", () => {
     });
   });
 
-  it("keeps the share page locked until the workpack passes readiness", () => {
+  it("keeps a blocked workpack inspectable on Share without making it sendable", () => {
     const gate = canOpenWorkspacePage({
       targetPage: "share",
       hasWorkpack: true,
@@ -56,8 +60,8 @@ describe("workspace page navigation", () => {
       canShare: false
     });
 
-    expect(gate.allowed).toBe(false);
-    expect(gate.reason).toBe("공유 전 검수와 보완을 완료해 주세요.");
+    expect(gate.allowed).toBe(true);
+    expect(gate.reason).toBeUndefined();
   });
 
   it("marks share as blocked instead of pending when readiness gates fail", () => {
@@ -90,5 +94,74 @@ describe("workspace page navigation", () => {
 
   it("returns users to input after generation fails so they can revise or retry", () => {
     expect(nextWorkspacePageAfterGenerationError()).toBe("input");
+  });
+
+  it("strictly validates workspace step, document, locale, return step, and theme", () => {
+    expect(resolveWorkspaceRouteState({
+      step: "document",
+      document: "foreignWorkerTransmission",
+      language: "vi",
+      returnStep: "share",
+      theme: "night"
+    })).toEqual({
+      step: "document",
+      document: "foreignWorkerTransmission",
+      language: "vi",
+      returnStep: "share",
+      theme: "night"
+    });
+
+    expect(resolveWorkspaceRouteState({
+      step: "share<script>",
+      document: "../../settings",
+      language: "vi-VN",
+      returnStep: "javascript:alert(1)",
+      theme: "purple"
+    })).toEqual({
+      step: "input",
+      document: null,
+      language: null,
+      returnStep: null,
+      theme: "day"
+    });
+  });
+
+  it("builds owner links with one encoded canonical Share return and no raw locale interpolation", () => {
+    const shareReturn = "/workspace?step=share&theme=night";
+    expect(buildCanonicalShareReturnPath("night")).toBe(shareReturn);
+    expect(buildShareOwnerHref({ owner: "workers", theme: "night" })).toBe(
+      `/workers?next=${encodeURIComponent(shareReturn)}`
+    );
+    expect(buildShareOwnerHref({ owner: "worker-language", theme: "night" })).toBe(
+      `/workers?focus=language&next=${encodeURIComponent(shareReturn)}`
+    );
+    expect(buildShareOwnerHref({ owner: "settings", theme: "night" })).toBe(
+      `/settings?next=${encodeURIComponent(shareReturn)}`
+    );
+    expect(buildShareOwnerHref({ owner: "login", theme: "night" })).toBe(
+      `/login?next=${encodeURIComponent(shareReturn)}`
+    );
+    expect(buildShareOwnerHref({ owner: "translation", theme: "night", language: "vi" })).toBe(
+      "/workspace?step=document&document=foreignWorkerTransmission&language=vi&returnStep=share&theme=night"
+    );
+    expect(buildShareOwnerHref({ owner: "worker-language", theme: "night", language: "vi-VN" })).not.toContain("language=");
+  });
+
+  it("accepts only a canonical local Share next path", () => {
+    expect(resolveSafeShareReturnPath("/workspace?step=share&theme=night", "day")).toBe(
+      "/workspace?step=share&theme=night"
+    );
+    expect(resolveSafeShareReturnPath("https://evil.example/workspace?step=share", "night")).toBe(
+      "/workspace?step=share&theme=night"
+    );
+    expect(resolveSafeShareReturnPath("//evil.example/workspace?step=share", "day")).toBe(
+      "/workspace?step=share&theme=day"
+    );
+    expect(resolveSafeShareReturnPath("/workspace?step=document&theme=night", "day")).toBe(
+      "/workspace?step=share&theme=day"
+    );
+    expect(resolveSafeShareReturnPath("/workspace?step=share&theme=night&language=vi", "day")).toBe(
+      "/workspace?step=share&theme=day"
+    );
   });
 });
