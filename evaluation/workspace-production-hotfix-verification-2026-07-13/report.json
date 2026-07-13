@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "safeclaw-evaluation/v1",
+  "verifiedAt": "2026-07-13T07:06:59.3396331Z",
+  "deployment": {
+    "sourceSha": "40c448e8ac2366fadd57d140ca65df23cba4cac5",
+    "verifiedSourceSha": "514b2d9a3c884c1a18ecf725285dde0e8a95b6cd",
+    "productionDeployment": "https://safeguard-contest-rjzo1etk0-seojaehongs-projects.vercel.app",
+    "deploymentId": "dpl_B8cgx7SG6Q2jwAMcgECP1x3Q5krd",
+    "productionAlias": "https://www.safeclaw.kr",
+    "buildPages": 27,
+    "status": "ready"
+  },
+  "browser": {
+    "url": "https://www.safeclaw.kr/workspace?scenario=seoul-construction-windy&theme=day",
+    "viewport": {
+      "width": 1560,
+      "height": 700
+    },
+    "theme": "day",
+    "inputClearMethod": "ControlOrMeta+A then Backspace",
+    "httpStatus": 200,
+    "finalUrlMatches": true,
+    "cacheControl": "no-store, must-revalidate, no-cache, max-age=0, private"
+  },
+  "filledState": {
+    "inputCharacters": 120,
+    "placeholder": "",
+    "sidebarTopPx": 8.65,
+    "mainPanelTopPx": 8.65,
+    "topDeltaPx": 0,
+    "sidebarBottomPx": 739.8,
+    "mainPanelBottomPx": 739.8,
+    "bottomDeltaPx": 0,
+    "independentSidebarScroll": false,
+    "horizontalOverflow": false
+  },
+  "clearedState": {
+    "inputValue": "",
+    "inputCharacters": 0,
+    "placeholder": "",
+    "visibleExampleSentenceCount": 0,
+    "restoreActionVisible": false,
+    "currentWorkVisible": false,
+    "sidebarTopPx": 8.65,
+    "mainPanelTopPx": 8.65,
+    "topDeltaPx": 0,
+    "sidebarBottomPx": 679.8,
+    "mainPanelBottomPx": 679.8,
+    "bottomDeltaPx": 0,
+    "independentSidebarScroll": false,
+    "horizontalOverflow": false
+  },
+  "verdict": "pass"
+}
