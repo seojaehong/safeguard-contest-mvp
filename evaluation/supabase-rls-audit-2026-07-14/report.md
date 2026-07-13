@@ -24,7 +24,7 @@ The migrations define 22 application tables and touch one Supabase-managed table
 - Child policies check only the row's `organization_id`. They do not prove that related `site_id`, `workpack_id`, `worker_id`, `daily_entry_id`, each UUID in `raw_event_ids`, `share_session_id`, or `improvement_id` belongs to the same organization.
 - `created_by` and `approved_by` are actor-attribution fields, not tenant-ownership predicates. Their identity integrity is not enforced by the owner policies or an `auth.users` FK.
 - User-facing server routes use a service-role client. RLS is bypassed, so route predicates and relational integrity are the effective boundary.
-- The service-role HTTP inventory separates 21 tenant/admin API routes (19 direct and 2 broker-mediated) from 6 public/global API routes. The public API routes plus 2 server-rendered pages total 8 public HTTP surfaces.
+- The service-role HTTP inventory separates 21 tenant/admin API routes (19 direct and 2 broker-mediated) from 6 public/global API routes. The public API routes plus 5 server-rendered pages total 11 public HTTP surfaces.
 - The private `safeclaw-improvement-photos` bucket and service-role upload/remove route are source-known, but live `storage.objects` policies, GRANTs, object ownership, and path-level cross-tenant isolation are unverified.
 - The resumed live probe made 44 fresh HEAD requests and failed closed with 30 HTTP 200, 4 HTTP 206, and 10 HTTP 404 responses. Its payload matches the recovered successful-target attempt except for `generatedAt`. No authenticated cross-tenant result is marked PASS.
 
@@ -87,8 +87,8 @@ No migration was applied. No insert, update, delete, upload, token issuance, sig
 | Direct service-role tenant/admin API entry points | 19 |
 | Broker-mediated service-role tenant/admin API entry points | 2 |
 | Public/global service-role API routes | 6 |
-| Public/global service-role server page surfaces | 2 |
-| Total public/global service-role HTTP surfaces | 8 |
+| Public/global service-role server page surfaces | 5 |
+| Total public/global service-role HTTP surfaces | 11 |
 | Focused contract test files / tests passed | 10 / 82 |
 
 `storage.buckets` is counted once as a managed operator object because migration 010 inserts a private bucket. `storage.objects` is counted separately as an application-used managed tenant-data boundary, not as a migration-created or migration-touched table. Neither is counted among the 22 application tables.
@@ -184,7 +184,7 @@ The source has 21 tenant/admin API entry points backed by `createSupabaseAdminCl
 | Cron automation | `briefing/run` | exact bearer `CRON_SECRET`, then service-role scan of every enabled site (`app/api/briefing/run/route.ts:38-66`, `:103-140`) | intended operator-wide route; secret/runtime behavior not live-tested |
 | Agent broker (indirect) | `agent/context`, `agent/chat` | helper validates bearer and resolves a requested site through its owner organization (`app/api/agent/context/route.ts:1-12`, `app/api/agent/chat/route.ts:1-10`, `lib/openclaw-broker-auth.ts:146-199`) | source boundary present; no A/B runtime fixture |
 
-Six public/global API routes use service-role-backed reads. Two server-rendered pages call the same read helpers, making eight public HTTP surfaces in total. These are separate from the 21 tenant/admin API routes above.
+Six public/global API routes use service-role-backed reads. Five server-rendered pages (`/ask`, `/ontology`, `/evidence`, `/knowledge`, and `/ops/api`) call the same service-role-backed read helpers, making eleven public HTTP surfaces in total. These are separate from the 21 tenant/admin API routes above.
 
 | Public HTTP surface | Kind | Service-role-backed read path | Source evidence |
 |---|---|---|---|
@@ -196,6 +196,9 @@ Six public/global API routes use service-role-backed reads. Two server-rendered 
 | `/api/workpack/remediate` | API route | remediation prompt reads the global safety-reference catalog | `app/api/workpack/remediate/route.ts:113-124`, `:177-189` |
 | `/ask` | server page | page invokes `runAsk()` directly | `app/ask/page.tsx:13-16`, `lib/search.ts:1649-1664` |
 | `/ontology` | server page | page invokes `loadGraph("published")` directly | `app/ontology/page.tsx:35-41`, `lib/ontology/graph-store.ts:154-199` |
+| `/evidence` | server page | page invokes `getSafetyReferenceStats()` directly | `app/evidence/page.tsx:4-11`, `lib/safety-reference-catalog.ts:2328-2340`, `:2537-2580` |
+| `/knowledge` | server page | page invokes `getSafetyReferenceStats()` directly | `app/knowledge/page.tsx:4`, `:140-146`, `lib/safety-reference-catalog.ts:2328-2340`, `:2537-2580` |
+| `/ops/api` | server page | page invokes `getSafetyReferenceStats()` directly | `app/ops/api/page.tsx:3-15`, `lib/safety-reference-catalog.ts:2328-2340`, `:2537-2580` |
 
 The reference catalog is intentionally global. Ontology routes request `scope="published"`, and the service-role REST fetch adds `review_state=eq.published`. This corrected source inventory does not reduce the findings below or prove live route isolation.
 
@@ -348,12 +351,13 @@ Operator-table negative cases are separate: after corresponding command reachabi
 
 ## Tests and typecheck
 
-- Final report launch-gate validator: parses the JSON and verifies top-level `launchReadiness=false`, `noMutation=true`, the exact source SHA, all 10 finding titles character-for-character between Markdown and JSON, inventory 24, negative cases 14, executed cases 0, expected denies 56, tenant/admin service-role API routes 21 (19 direct and 2 broker-mediated), public/global API routes 6, public HTTP surfaces 8, and RED finding counts P0/P1/P2/P3 = 0/3/4/3. The final result is recorded in `logs/verification.log`.
+- Final report launch-gate validator: parses the JSON and verifies top-level `launchReadiness=false`, `noMutation=true`, the exact source SHA, all 10 finding titles character-for-character between Markdown and JSON, inventory 24, negative cases 14, executed cases 0, expected denies 56, tenant/admin service-role API routes 21 (19 direct and 2 broker-mediated), all 6 public/global API routes, all 5 public server pages, 11 public HTTP surfaces, and RED finding counts P0/P1/P2/P3 = 0/3/4/3. The final result is recorded in `logs/verification.log`.
 - Probe syntax: `node --check` passed.
 - Probe fail-closed test: with all Supabase variables blank and `--no-env-file`, exit 2, `blocked`, zero requests, and no secret fields stored.
 - Probe live run: exit 1 after all 44 HEAD requests, with a redacted result written.
-- Strict typecheck: the first run could not resolve declared dependencies because this worktree had no `node_modules`; after `npm.cmd ci`, `npm.cmd run typecheck` passed. Both outputs are preserved as `logs/typecheck-preinstall.log`, `logs/npm-ci.log`, and `logs/typecheck.log`.
-- Focused existing contract tests: 10 files and 82 tests passed, covering the commercial migration, share authority, read confirmation/improvement routes, workpack store, MCP token/scope contracts, broker context, chat route, and operation evidence routes. These are static/unit route-contract results, not authenticated live tenant A/B RLS tests. Output: `logs/focused-tests.log`.
+- Unchanged-product provenance: this second remediation changes audit evidence only. `git diff f45bba17bcce0d8ebb2690f82d014dbe42ae8191..HEAD -- app lib supabase tests __tests__` is empty, so the audited product, migration, and test source remains unchanged.
+- Strict typecheck: the first run could not resolve declared dependencies because this worktree had no `node_modules`; after `npm.cmd ci`, `npm.cmd run typecheck` passed. Both outputs are preserved as `logs/typecheck-preinstall.log`, `logs/npm-ci.log`, and `logs/typecheck.log`. The command was not rerun for this evidence-only correction; the existing success log is reused under the unchanged-product provenance above.
+- Focused existing contract tests: 10 files and 82 tests passed, covering the commercial migration, share authority, read confirmation/improvement routes, workpack store, MCP token/scope contracts, broker context, chat route, and operation evidence routes. These are static/unit route-contract results, not authenticated live tenant A/B RLS tests. The tests were not rerun and `logs/focused-tests.log` was not regenerated for this evidence-only correction; the existing result is reused under the unchanged-product provenance above.
 - Authenticated cross-tenant tests: not executed because two isolated auth fixtures are unavailable.
 - Mutating CRUD probes: not executed by design.
 - Managed Storage object tests: not executed; the live catalog and Storage API were not probed, and no upload or object mutation was performed.
