@@ -1,0 +1,76 @@
+{
+  "generatedAt": "2026-07-13T22:50:00+09:00",
+  "parentSha": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+  "productSha": "aca2f1db878e8597fd946ce99cabc9ecd4fe0345",
+  "buildId": "dpm4TZUQTCz5X9Eugous3",
+  "branch": "fix/web-localization-current-target",
+  "harnessMode": "prod",
+  "verification": {
+    "baseline": {
+      "files": 4,
+      "passed": 55,
+      "failed": 0
+    },
+    "tddRed": {
+      "files": 2,
+      "passed": 39,
+      "failed": 4,
+      "boundaries": [
+        "reports surface improvement labels",
+        "ontology node kind and status labels",
+        "knowledge surface status labels",
+        "CSV and Markdown improvement boundaries"
+      ]
+    },
+    "tddGreen": {
+      "files": 2,
+      "passed": 43,
+      "failed": 0
+    },
+    "focused": {
+      "files": 5,
+      "passed": 59,
+      "failed": 0
+    },
+    "typecheck": "pass",
+    "build": {
+      "result": "pass",
+      "nextVersion": "15.5.20",
+      "staticPages": 27
+    },
+    "productionBrowser": {
+      "testFiles": 1,
+      "passed": 13,
+      "failed": 0,
+      "matrixRows": 12,
+      "jsonArtifacts": 12,
+      "pngArtifacts": 12,
+      "horizontalOverflowTotal": 0,
+      "overlapTotal": 0,
+      "unnamedInteractiveTotal": 0,
+      "issueOverlayDetectedRows": 0
+    }
+  },
+  "matrix": {
+    "routes": ["/reports", "/ontology", "/knowledge"],
+    "themes": ["day", "night"],
+    "viewports": [
+      { "label": "desktop", "width": 1440, "height": 900 },
+      { "label": "mobile", "width": 390, "height": 844 }
+    ]
+  },
+  "issueOverlayVariants": [
+    "1 Issue",
+    "2 Issues",
+    "N Issues",
+    "Issue (1)",
+    "Issues (2)",
+    "Issue: 1",
+    "Issues: N"
+  ],
+  "preservedContracts": [
+    "internal asIs and toBe corpus keys",
+    "five fail-closed report download locks"
+  ],
+  "pushStatus": "not pushed pending independent review"
+}

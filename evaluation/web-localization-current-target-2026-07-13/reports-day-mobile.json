@@ -1,0 +1,16 @@
+{
+  "sourceSha": "aca2f1db878e8597fd946ce99cabc9ecd4fe0345",
+  "buildId": "dpm4TZUQTCz5X9Eugous3",
+  "harnessMode": "prod",
+  "route": "/reports",
+  "theme": "day",
+  "viewport": {
+    "label": "mobile",
+    "width": 390,
+    "height": 844
+  },
+  "horizontalOverflow": 0,
+  "overlapCount": 0,
+  "unnamedInteractiveCount": 0,
+  "issueOverlayDetected": false
+}
