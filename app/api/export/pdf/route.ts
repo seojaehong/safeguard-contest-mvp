@@ -646,7 +646,7 @@ function buildPdfReadyHtml(
     <header class="topline">
       <div>
         <h1>${escapeHtml(title)}</h1>
-        <p class="subtitle">SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 ${escapeHtml(generatedAt)}</p>
+        <p class="subtitle">SafeClaw 공식자료 연결 후보 · 현장 검토용 출력 초안 · 생성 ${escapeHtml(generatedAt)}</p>
       </div>
       <div class="approval">
         <div><b>작성</b>서명</div>
@@ -660,7 +660,7 @@ function buildPdfReadyHtml(
       <div><b>작업내용</b>${escapeHtml(scenario.workSummary)}</div>
       <div><b>인원/기상</b>${scenario.workerCount.toLocaleString("ko-KR")}명 · ${escapeHtml(scenario.weatherNote)}</div>
     </section>
-    <p class="kind-note">서식 구분: ${escapeHtml(kindLabels[kind])} · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다.</p>
+    <p class="kind-note">법령 근거: 검토 필요<br />공식자료 연결 후보<br />서식 구분: ${escapeHtml(kindLabels[kind])} · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다.</p>
     <section class="riskbox">
       <b>위험수준 ${escapeHtml(riskLevel || "확인")}</b>
       <span>${escapeHtml(topRisk || "핵심 위험요인을 현장에서 최종 확인하세요.")}</span>
@@ -672,14 +672,14 @@ function buildPdfReadyHtml(
       <div><b>TBM·교육 확인</b><br />성명/서명:</div>
       <div><b>보관 위치</b><br />문서번호/철:</div>
     </section>
-    <p class="notice">본 출력물은 공식자료 기반 현장 검토용 초안입니다. 발주처 지정 원본 양식, 현장 실측, 작업중지 기준, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.</p>
+    <p class="notice">본 출력물은 공식자료 연결 후보를 담은 검토 필요 초안입니다. 발주처 지정 원본 양식, 현장 실측, 작업중지 기준, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.</p>
   </main>
 </body>
 </html>`;
 }
 
 function normalizePdfText(value: string) {
-  return value.replace(/\s+/g, " ").trim();
+  return value.replace(/공식자료 기반/g, "공식자료 연결 후보").replace(/\s+/g, " ").trim();
 }
 
 function wrapPdfLine(value: string, maxChars: number) {
@@ -1056,7 +1056,8 @@ function buildPdfContentLines(
   lines.push(
     { text: "", role: "note", gap: 14 },
     { text: "작성자: ____________________    검토: ____________________    승인: ____________________", role: "table" },
-    { text: "본 출력물은 공식자료 기반 현장 검토용 초안입니다. 발주처 지정 양식, 현장 실측, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.", role: "note" }
+    { text: "법령 근거: 검토 필요 / 공식자료 연결 후보", role: "note" },
+    { text: "본 출력물은 검토 필요 초안입니다. 발주처 지정 양식, 현장 실측, 법령 원문, 서명·결재선을 최종 확인한 뒤 사용하세요.", role: "note" }
   );
   return lines;
 }
@@ -1164,7 +1165,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
+    const html = buildPdfReadyHtml(
+      title,
+      scenario,
+      bodyRows,
+      riskLevel,
+      topRisk,
+      riskRows,
+      structuredRiskRows,
+    ).replace(/공식자료 기반/g, "공식자료 연결 후보");
     const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.html`;
     const encodedFileName = encodeURIComponent(fileName);
 

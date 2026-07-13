@@ -2,18 +2,56 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
 import { assessPhaseAReviewAuthority, buildPhaseAReviewUiState } from "@/lib/phase-a-review";
+import type { PhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
 import type { PhaseAReview } from "@/lib/types";
 
-type PhaseAReviewWithCoverage = PhaseAReview & {
+type PlanBinding = PhaseAPlanBinding;
+
+type PhaseAReviewWithCoverage = Omit<
+  PhaseAReview,
+  "materializationCoverage" | "humanConfirmation"
+> & {
+  planBinding: PlanBinding;
   materializationCoverage: {
     status: "complete" | "partial" | "missing";
+    chainId: PlanBinding["chainId"];
+    planDigest: string;
     expectedRecordCount: number;
     materializedRecordCount: number;
     expectedStableKeys: string[];
     materializedStableKeys: string[];
     unresolvedStableKeys: string[];
   };
+  humanConfirmation:
+    | { required: true; status: "pending" }
+    | {
+        required: true;
+        status: "confirmed";
+        reviewerId: string;
+        confirmedAt: string;
+        chainId: PlanBinding["chainId"];
+        planDigest: string;
+      };
+};
+
+type ConfirmedHumanConfirmation = Extract<
+  PhaseAReviewWithCoverage["humanConfirmation"],
+  { status: "confirmed" }
+>;
+
+const planBinding: PlanBinding = structuredClone(
+  buildCanonicalPhaseAPlanBinding("vehicle-machinery-entrapment"),
+);
+const planDigest = planBinding.planDigest;
+const confirmedHumanConfirmation: ConfirmedHumanConfirmation = {
+  required: true,
+  status: "confirmed",
+  reviewerId: "reviewer-001",
+  confirmedAt: "2026-07-14T03:00:00.000Z",
+  chainId: planBinding.chainId,
+  planDigest,
 };
 
 const pendingReview: PhaseAReviewWithCoverage = {
@@ -23,13 +61,16 @@ const pendingReview: PhaseAReviewWithCoverage = {
   groundingStatus: "review_required",
   outputStatus: "review_required_draft",
   verifiedRecords: 0,
+  planBinding,
   materializationCoverage: {
     status: "missing",
+    chainId: planBinding.chainId,
+    planDigest,
     expectedRecordCount: 2,
     materializedRecordCount: 0,
-    expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+    expectedStableKeys: [...planBinding.expectedStableKeys],
     materializedStableKeys: [],
-    unresolvedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+    unresolvedStableKeys: [...planBinding.expectedStableKeys],
   },
   humanConfirmation: { required: true, status: "pending" },
   actionableReason: "Phase A source resolution과 사람 확인이 필요합니다.",
@@ -42,15 +83,18 @@ const readyReview: PhaseAReviewWithCoverage = {
   groundingStatus: "resolved",
   outputStatus: "grounded_draft",
   verifiedRecords: 2,
+  planBinding,
   materializationCoverage: {
     status: "complete",
+    chainId: planBinding.chainId,
+    planDigest,
     expectedRecordCount: 2,
     materializedRecordCount: 2,
-    expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
-    materializedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+    expectedStableKeys: [...planBinding.expectedStableKeys],
+    materializedStableKeys: [...planBinding.expectedStableKeys],
     unresolvedStableKeys: [],
   },
-  humanConfirmation: { required: true, status: "confirmed" },
+  humanConfirmation: confirmedHumanConfirmation,
   actionableReason: "Phase A 근거와 문서 반영 실적을 사람이 확인했습니다.",
 };
 
@@ -94,8 +138,8 @@ describe("Phase A citation authority UI", () => {
         ...readyReview.materializationCoverage,
         status: "partial",
         materializedRecordCount: 1,
-        materializedStableKeys: ["chain:risk:control"],
-        unresolvedStableKeys: ["chain:tbm:control"],
+        materializedStableKeys: [planBinding.expectedStableKeys[0]],
+        unresolvedStableKeys: [planBinding.expectedStableKeys[1]],
       },
     };
 
@@ -108,12 +152,75 @@ describe("Phase A citation authority UI", () => {
     });
   });
 
+  it("rejects a client-shrunk singleton expected set against the server plan binding", () => {
+    const shrunkReview: PhaseAReviewWithCoverage = {
+      ...readyReview,
+      verifiedRecords: 1,
+      materializationCoverage: {
+        ...readyReview.materializationCoverage,
+        expectedRecordCount: 1,
+        materializedRecordCount: 1,
+        expectedStableKeys: [planBinding.expectedStableKeys[0]],
+        materializedStableKeys: [planBinding.expectedStableKeys[0]],
+        unresolvedStableKeys: [],
+      },
+    };
+
+    expect(assessPhaseAReviewAuthority(shrunkReview).authoritative).toBe(false);
+  });
+
+  it("rejects duplicate server-plan stableKeys even when the DTO claims complete coverage", () => {
+    const duplicatePlanReview: PhaseAReviewWithCoverage = {
+      ...readyReview,
+      planBinding: {
+        ...readyReview.planBinding,
+        expectedStableKeys: [planBinding.expectedStableKeys[0], planBinding.expectedStableKeys[0]],
+      },
+    };
+
+    expect(assessPhaseAReviewAuthority(duplicatePlanReview).authoritative).toBe(false);
+  });
+
+  it("rejects a forged digest even when every DTO field repeats the forged value", () => {
+    const forgedDigest = `sha256:${"f".repeat(64)}`;
+    const forgedReview: PhaseAReviewWithCoverage = {
+      ...readyReview,
+      planBinding: { ...readyReview.planBinding, planDigest: forgedDigest },
+      materializationCoverage: {
+        ...readyReview.materializationCoverage,
+        planDigest: forgedDigest,
+      },
+      humanConfirmation: {
+        ...confirmedHumanConfirmation,
+        planDigest: forgedDigest,
+      },
+    };
+
+    expect(assessPhaseAReviewAuthority(forgedReview).authoritative).toBe(false);
+  });
+
+  it.each([
+    ["blank reviewer", { reviewerId: "" }],
+    ["invalid time", { confirmedAt: "not-an-iso-timestamp" }],
+    ["different plan", { planDigest: `sha256:${"b".repeat(64)}` }],
+  ] as const)("rejects human confirmation bound to %s", (_label, override) => {
+    const invalidConfirmation: PhaseAReviewWithCoverage = {
+      ...readyReview,
+      humanConfirmation: {
+        ...confirmedHumanConfirmation,
+        ...override,
+      },
+    };
+
+    expect(assessPhaseAReviewAuthority(invalidConfirmation).authoritative).toBe(false);
+  });
+
   it("rejects duplicate stableKeys even when counts claim full coverage", () => {
     const duplicatedReview: PhaseAReviewWithCoverage = {
       ...readyReview,
       materializationCoverage: {
         ...readyReview.materializationCoverage,
-        materializedStableKeys: ["chain:risk:control", "chain:risk:control"],
+        materializedStableKeys: [planBinding.expectedStableKeys[0], planBinding.expectedStableKeys[0]],
       },
     };
 

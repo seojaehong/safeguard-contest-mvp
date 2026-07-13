@@ -67,6 +67,10 @@ function readString(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
+function pendingAuthorityText(value: string): string {
+  return value.replace(/공식자료 기반/g, "공식자료 연결 후보");
+}
+
 function readNumber(value: unknown, fallback = 0) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
@@ -83,12 +87,12 @@ function parseRows(value: unknown, fallbackDoc: string): SheetRow[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((item): SheetRow[] => {
     if (!isRecord(item)) return [];
-    const content = readString(item.content);
+    const content = pendingAuthorityText(readString(item.content));
     if (!content && readString(item.item) === "") return [];
     return [{
-      document: readString(item.document, fallbackDoc),
-      section: readString(item.section, "본문"),
-      item: readString(item.item, "확인"),
+      document: pendingAuthorityText(readString(item.document, fallbackDoc)),
+      section: pendingAuthorityText(readString(item.section, "본문")),
+      item: pendingAuthorityText(readString(item.item, "확인")),
       content
     }];
   });
@@ -172,14 +176,15 @@ function buildHwpBuffer(args: {
   profile: SafetyFormProfile;
   scenario: ReturnType<typeof parseScenario>;
   structuredRiskRows?: StructuredRiskAssessmentRow[];
+  authorityMarker: string;
 }): Buffer {
   ensureWasm();
-  const { title, rows, profile, scenario, structuredRiskRows } = args;
+  const { title, rows, profile, scenario, structuredRiskRows, authorityMarker } = args;
   const document = HwpDocument.createEmpty();
   try {
     document.createBlankDocument();
 
-    document.insertText(0, 0, 0, `${title}(공식자료 기반 표 양식)\nSafeClaw · 현장 검토 후 사용\n\n`);
+    document.insertText(0, 0, 0, `${title}(공식자료 연결 후보 표 양식)\n${authorityMarker}\nSafeClaw · 현장 검토 후 사용\n\n`);
 
     // Metadata table (4 col x 2 row)
     {
@@ -282,9 +287,17 @@ export async function POST(request: NextRequest) {
   const profile = parseProfile(body.profile);
   const scenario = parseScenario(body.scenario);
   const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
+  const authorityMarker = "법령 근거: 검토 필요\n공식자료 연결 후보";
 
   try {
-    const buffer = buildHwpBuffer({ title, rows, profile, scenario, structuredRiskRows });
+    const buffer = buildHwpBuffer({
+      title,
+      rows,
+      profile,
+      scenario,
+      structuredRiskRows,
+      authorityMarker,
+    });
     const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.hwp`;
     return new NextResponse(new Uint8Array(buffer), {
       headers: {

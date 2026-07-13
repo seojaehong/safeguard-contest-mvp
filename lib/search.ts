@@ -8,10 +8,13 @@ import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAl
 import {
   buildEvidenceMaterializationCoverage,
   buildPhaseAGenerationGrounding,
+  buildPhaseAGenerationSnapshot,
   verifyEvidenceMaterialization,
+  type PhaseAGenerationContextInput,
   type PhaseAGenerationGrounding,
+  type PhaseAGenerationSnapshot,
 } from "./ontology/evidence-chain";
-import { assessPhaseAReviewAuthority } from "./phase-a-review";
+import { applyPhaseADocumentAuthorityMarker } from "./phase-a-review";
 import type { OntologyGraph } from "./ontology/graph-store";
 import {
   deriveSafetyReferenceOperationalView,
@@ -58,6 +61,32 @@ const log = createLogger("search");
 
 function safeFailureContext(error: unknown): { errorType: string } {
   return { errorType: error instanceof Error ? error.name : typeof error };
+}
+
+type CapturedGenerationSource<Value> =
+  | { available: true; value: Value }
+  | { available: false; value: null };
+
+async function captureGenerationSource<Value>(
+  promise: Promise<Value>,
+): Promise<CapturedGenerationSource<Value>> {
+  try {
+    return { available: true, value: await promise };
+  } catch {
+    return { available: false, value: null };
+  }
+}
+
+function generationSourceState(source: CapturedGenerationSource<unknown>): "available" | "fallback" | "missing" {
+  if (!source.available) return "missing";
+  if (
+    typeof source.value === "object" &&
+    source.value !== null &&
+    Reflect.get(source.value, "mode") === "fallback"
+  ) {
+    return "fallback";
+  }
+  return "available";
 }
 
 const FINAL_DELIVERABLE_TRACE_KEYS = [
@@ -1378,7 +1407,7 @@ function attachPhaseAReview(
       })
     : [];
   const materializationCoverage = buildEvidenceMaterializationCoverage({
-    plannedTargets: grounding.materializationTargets,
+    planBinding: grounding.planBinding,
     verifiedRecords: verifiedMaterialization,
   });
   const actionableReason = grounding.groundingStatus === "resolved"
@@ -1393,20 +1422,14 @@ function attachPhaseAReview(
     groundingStatus: grounding.groundingStatus,
     outputStatus: grounding.generationPolicy.outputStatus,
     verifiedRecords: materializationCoverage.materializedRecordCount,
+    planBinding: grounding.planBinding,
     materializationCoverage,
     humanConfirmation: { required: true, status: "pending" },
     actionableReason,
   };
-  const authoritative = assessPhaseAReviewAuthority(phaseAReview).authoritative;
   const deliverables = { ...response.deliverables };
-  const lawEvidenceLabel = authoritative ? "연결됨" : "검토 필요";
   for (const key of TEXT_DELIVERABLE_KEYS) {
-    deliverables[key] = deliverables[key]
-      .replace(/법령 근거:\s*연결됨/g, `법령 근거: ${lawEvidenceLabel}`)
-      .replace(/법령 근거:\s*일부 근거 보류/g, `법령 근거: ${lawEvidenceLabel}`);
-  }
-  if (!/법령 근거:\s*/.test(deliverables.workpackSummaryDraft)) {
-    deliverables.workpackSummaryDraft = `${deliverables.workpackSummaryDraft.trim()}\n\n[Phase A 근거 상태]\n- 법령 근거: ${lawEvidenceLabel}`;
+    deliverables[key] = applyPhaseADocumentAuthorityMarker(deliverables[key], phaseAReview);
   }
 
   return attachQualityContract({
@@ -1659,28 +1682,6 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       raw.length ? raw : searchLegalSources("산업안전보건법")
     );
     const citationsPromise = rawCitationsBasePromise;
-    // generateAnswer uses raw citations directly — no longer waits for enhance.
-    const responsePromise = rawCitationsBasePromise.then((rawBase) =>
-      generateAnswer(question, rawBase.slice(0, 6), {
-        traceId,
-        phaseAGrounding,
-      }).catch((error): AnswerGenerationResult => {
-        log.error("AI response generation failed; using DB harness fallback", safeFailureContext(error));
-        return {
-          response: buildMockAskResponse(
-            question,
-            rawBase.slice(0, 6),
-            "fallback",
-            "AI 응답 생성에 실패해 공식자료 기반 산출물 초안으로 전환했습니다."
-          ),
-          trace: {
-            provider: "mock",
-            model: null,
-            fallbackUsed: true
-          }
-        };
-      })
-    );
 
     const weatherPromise = fetchWeatherSignal(question);
     const trainingPromise = fetchTrainingRecommendations(question);
@@ -1780,13 +1781,157 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       };
     })();
 
-    // Fix 6: Start full-mode deliverables generation as a Promise BEFORE awaiting allSettled.
-    // Scenario is derived synchronously from the question (inferScenario is pure).
-    // We chain off rawCitationsBasePromise/weather/training/kosha/accident so the
-    // full-mode Vertex calls start as soon as those resolve (~2-5s), running
-    // fully in parallel with responsePromise's Vertex call. Enhanced mode is
-    // row-first: DB/SIF/KOSHA/photo harness rows are assembled deterministically.
     const earlyScenario = inferScenario(question);
+    const phaseAGenerationSnapshotBundlePromise = Promise.all([
+      captureGenerationSource(rawCitationsBasePromise),
+      captureGenerationSource(weatherPromise),
+      captureGenerationSource(trainingPromise),
+      captureGenerationSource(koshaEducationPromise),
+      captureGenerationSource(koshaPromise),
+      captureGenerationSource(koshaOpenApiPromise),
+      captureGenerationSource(accidentCasesPromise),
+      captureGenerationSource(safetyReferencePromise),
+    ]).then(([
+      legalSearch,
+      weather,
+      training,
+      koshaEducation,
+      kosha,
+      koshaOpenApi,
+      accidentCases,
+      safetyReference,
+    ]) => {
+      const contextualInputs: PhaseAGenerationContextInput[] = [
+        {
+          kind: "site_context",
+          provenance: {
+            source: "request_context",
+            authority: "context_only",
+            state: "available",
+          },
+          content: { question, scenario: earlyScenario },
+        },
+        {
+          kind: "history",
+          provenance: {
+            source: "request_harness_memory",
+            authority: "context_only",
+            state: "available",
+          },
+          content: harnessMemory,
+        },
+        {
+          kind: "weather",
+          provenance: {
+            source: "kma",
+            authority: "context_only",
+            state: generationSourceState(weather),
+          },
+          content: weather.value ?? { unavailable: true },
+        },
+        {
+          kind: "legal_search",
+          provenance: {
+            source: "law_search",
+            authority: "candidate_only",
+            state: generationSourceState(legalSearch),
+          },
+          content: legalSearch.value ?? [],
+        },
+        {
+          kind: "training",
+          provenance: {
+            source: "work24",
+            authority: "context_only",
+            state: generationSourceState(training),
+          },
+          content: training.value ?? { unavailable: true },
+        },
+        {
+          kind: "kosha_education",
+          provenance: {
+            source: "kosha_education",
+            authority: "candidate_only",
+            state: generationSourceState(koshaEducation),
+          },
+          content: koshaEducation.value ?? { unavailable: true },
+        },
+        {
+          kind: "kosha_reference",
+          provenance: {
+            source: "kosha_reference",
+            authority: "candidate_only",
+            state: generationSourceState(kosha),
+          },
+          content: kosha.value ?? { unavailable: true },
+        },
+        {
+          kind: "kosha_openapi",
+          provenance: {
+            source: "kosha_openapi",
+            authority: "candidate_only",
+            state: generationSourceState(koshaOpenApi),
+          },
+          content: koshaOpenApi.value ?? { unavailable: true },
+        },
+        {
+          kind: "accident_case",
+          provenance: {
+            source: "kosha_accident",
+            authority: "candidate_only",
+            state: generationSourceState(accidentCases),
+          },
+          content: accidentCases.value ?? { unavailable: true },
+        },
+        {
+          kind: "safety_reference",
+          provenance: {
+            source: "safety_reference_catalog",
+            authority: "candidate_only",
+            state: generationSourceState(safetyReference),
+          },
+          content: safetyReference.value ?? { unavailable: true },
+        },
+      ];
+      return {
+        snapshot: buildPhaseAGenerationSnapshot({
+          grounding: phaseAGrounding,
+          contextualInputs,
+        }),
+        legalSearch,
+        weather,
+        training,
+        kosha,
+        accidentCases,
+        safetyReference,
+      };
+    });
+
+    const responsePromise = phaseAGenerationSnapshotBundlePromise.then(({ snapshot, legalSearch }) => {
+      const rawBase = legalSearch.value ?? [];
+      return generateAnswer(question, rawBase.slice(0, 6), {
+        traceId,
+        phaseAGrounding,
+        phaseAGenerationSnapshot: snapshot,
+      }).catch((error): AnswerGenerationResult => {
+        log.error("AI response generation failed; using DB harness fallback", safeFailureContext(error));
+        return {
+          response: buildMockAskResponse(
+            question,
+            rawBase.slice(0, 6),
+            "fallback",
+            "AI 응답 생성에 실패해 근거 검토 필요 산출물 초안으로 전환했습니다."
+          ),
+          trace: {
+            provider: "mock",
+            model: null,
+            fallbackUsed: true
+          }
+        };
+      });
+    });
+
+    // Full-mode providers share the same immutable source snapshot as the answer provider.
     const earlyScenarioParsed = {
       companyName: earlyScenario.companyName,
       companyType: earlyScenario.companyType,
@@ -1797,14 +1942,21 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     };
     const deliverablesPromise: Promise<{ deliverables: Awaited<ReturnType<typeof generateAllDeliverables>>; diagnostics: Awaited<ReturnType<typeof generateAllDeliverablesWithDiagnostics>>["diagnostics"] } | null> =
       aiMode === "full"
-        ? Promise.all([
-            rawCitationsBasePromise.catch(() => [] as Awaited<ReturnType<typeof searchLegalSources>>),
-            weatherPromise.catch(() => null),
-            trainingPromise.catch(() => null),
-            koshaPromise.catch(() => null),
-            accidentCasesPromise.catch(() => null),
-            safetyReferencePromise.catch(() => null),
-          ]).then(([rawBase, wthr, trng, ksha, acc, safeRef]) => {
+        ? phaseAGenerationSnapshotBundlePromise.then(({
+            snapshot,
+            legalSearch,
+            weather,
+            training,
+            kosha,
+            accidentCases,
+            safetyReference,
+          }) => {
+            const rawBase = legalSearch.value ?? [];
+            const wthr = weather.value;
+            const trng = training.value;
+            const ksha = kosha.value;
+            const acc = accidentCases.value;
+            const safeRef = safetyReference.value;
             const safeRefItems = safeRef?.items ?? [];
             const dbHarnessPacket = buildDbHarnessPacket({
               question,
@@ -1844,6 +1996,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               koshaPrimaryRefs: koshaPrimaryRefsEarly,
               dbHarnessContext,
               phaseAGrounding,
+              phaseAGenerationSnapshot: snapshot,
               scope: "full",
               onProgress,
               traceId

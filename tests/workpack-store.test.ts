@@ -7,6 +7,7 @@ import {
   verifyAskResponseGenerationEvidence
 } from "@/lib/generation-evidence";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
+import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
 import type { AskResponse } from "@/lib/types";
 import {
   buildReopenData,
@@ -52,6 +53,11 @@ const dbHarness = {
 
 function makeStoredResponse() {
   const response = buildMockAskResponse("성수동 외벽 도장 작업", mockSearchResults.slice(0, 2), "live", "test");
+  const planBinding = structuredClone(
+    buildCanonicalPhaseAPlanBinding("vehicle-machinery-entrapment"),
+  );
+  const planDigest = planBinding.planDigest;
+  const expectedStableKeys = [...planBinding.expectedStableKeys];
   return {
     ...response,
     generationMode: "enhanced" as const,
@@ -62,13 +68,16 @@ function makeStoredResponse() {
       groundingStatus: "review_required" as const,
       outputStatus: "review_required_draft" as const,
       verifiedRecords: 0,
+      planBinding,
       materializationCoverage: {
         status: "missing" as const,
-        expectedRecordCount: 1,
+        chainId: "vehicle-machinery-entrapment" as const,
+        planDigest,
+        expectedRecordCount: expectedStableKeys.length,
         materializedRecordCount: 0,
-        expectedStableKeys: ["chain:risk:control"],
+        expectedStableKeys,
         materializedStableKeys: [],
-        unresolvedStableKeys: ["chain:risk:control"],
+        unresolvedStableKeys: expectedStableKeys,
       },
       humanConfirmation: { required: true as const, status: "pending" as const },
       actionableReason: "Phase A 근거와 문서 반영 위치를 확인하세요."
@@ -185,6 +194,37 @@ describe("workpack store persistence contract", () => {
     expect(reopen.data?.structured).toEqual(response.structured);
     expect(reopen.data?.dbHarness).toEqual(response.dbHarness);
     expect(reopen.data?.generationMode).toBe("enhanced");
+  });
+
+  it("fails closed instead of casting a malformed persisted Phase A authority state", () => {
+    const response = makeStoredResponse();
+    const evidenceSummary = buildWorkpackEvidenceSummary(response);
+    evidenceSummary.phaseAReview = {
+      ...response.phaseAReview,
+      verified: true,
+      verdict: "통과",
+      humanConfirmation: {
+        required: true,
+        status: "confirmed",
+        reviewerId: "",
+        confirmedAt: "not-a-time",
+        chainId: "work-at-height-fall",
+        planDigest: `sha256:${"d".repeat(64)}`,
+      },
+    };
+
+    const reopen = buildReopenData({
+      question: response.question,
+      scenario: response.scenario,
+      deliverables: response.deliverables,
+      evidenceSummary,
+      status: response.status,
+    });
+
+    expect(reopen.data?.phaseAReview).toBeUndefined();
+    expect(reopen.blockers).toContain(
+      "저장된 Phase A 검토 상태가 권위 계약 형식과 일치하지 않아 검토 필요로 복원했습니다.",
+    );
   });
 
   it("preserves every signed response field required to verify a reopened workpack", () => {

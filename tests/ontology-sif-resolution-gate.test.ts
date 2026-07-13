@@ -120,4 +120,31 @@ describe("Phase A SIF resolution gate", () => {
       documents: { riskAssessmentDraft: `${target.controlLabel} | ${lawUid}` },
     })).toEqual([]);
   });
+
+  it("does not resolve from SIF and law when the exact Control KOSHA role is unresolved", () => {
+    const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "고소작업");
+    if (!knowledge.found || !knowledge.evidenceContract) {
+      throw new Error("expected review-required evidence contract");
+    }
+    const sifReadyPack = {
+      ...knowledge.evidenceContract,
+      hazardPriority: knowledge.evidenceContract.hazardPriority.map((source) => ({
+        ...source,
+        reviewState: "published" as const,
+        resolution: "resolved" as const,
+      })),
+    };
+
+    const grounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "resolved",
+      evidencePack: sifReadyPack,
+    });
+
+    expect(grounding).toMatchObject({
+      evidenceChainState: "review_required",
+      groundingStatus: "review_required",
+      allowedEvidence: [],
+      allowedCitedUids: [],
+    });
+  });
 });

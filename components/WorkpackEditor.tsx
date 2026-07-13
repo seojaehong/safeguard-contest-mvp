@@ -10,7 +10,11 @@ import {
   type RubricEvaluationItem
 } from "@/lib/safety-document-rubric";
 import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
-import { buildPhaseAReviewUiState } from "@/lib/phase-a-review";
+import {
+  applyPhaseADocumentAuthorityMarker,
+  buildPhaseADocumentAuthorityMarker,
+  buildPhaseAReviewUiState,
+} from "@/lib/phase-a-review";
 import styles from "./WorkpackEditor.module.css";
 
 declare global {
@@ -1098,6 +1102,7 @@ function buildSafetyFormMarkup(
   data?: AskResponse,
   riskRows: SheetRow[] = []
 ) {
+  const phaseADocumentAuthorityMarker = buildPhaseADocumentAuthorityMarker(data?.phaseAReview);
   const bridgeSections = data && (profile.layout === "tbmBriefing" || profile.layout === "tbmLog")
     ? buildTbmWeatherRiskBridge(data, riskRows.length ? riskRows : rows)
     : "";
@@ -1127,11 +1132,11 @@ function buildSafetyFormMarkup(
       <div class="form-title">
         <span>${escapeHtml(profile.code)}</span>
         <h1>${escapeHtml(title)}</h1>
-        <p>${escapeHtml(profile.subtitle)} · SafeClaw 공식자료 기반 현장 검토용 초안</p>
+        <p>${escapeHtml(profile.subtitle)} · SafeClaw 공식자료 연결 후보 · 현장 검토용 초안</p>
       </div>
       <div class="approval-grid" style="--approval-count: ${profile.approvalLabels.length};">${approvalCells}</div>
     </header>
-    <p class="form-lineage">서식 구분: ${escapeHtml(profile.subtitle)} · 원본 서식 1:1 재현이 아니라 현장 입력값과 공식자료를 정리한 검토용 출력입니다.</p>
+    <p class="form-lineage">${escapeHtml(phaseADocumentAuthorityMarker).replace(/\n/g, "<br />")}<br />서식 구분: ${escapeHtml(profile.subtitle)} · 원본 서식 1:1 재현이 아니라 현장 입력값과 공식자료 연결 후보를 정리한 검토용 출력입니다.</p>
     <div class="meta-grid">
       <div class="meta-item"><b>사업장</b><span>${escapeHtml(scenario.companyName)}</span></div>
       <div class="meta-item"><b>현장/공정</b><span>${escapeHtml(scenario.siteName)}</span></div>
@@ -1596,7 +1601,7 @@ function buildHwpTemplateText(
 
   return [
     `${title}(초안)`,
-    "SafeClaw 공식자료 기반 서식 · 현장 검토 후 사용",
+    "SafeClaw 공식자료 연결 후보 서식 · 법령 근거 검토 후 사용",
     `현장: ${scenario.siteName}`,
     `작업: ${scenario.workSummary}`,
     "",
@@ -1986,6 +1991,18 @@ export function WorkpackEditor({
   const totalQualityIssues = rubricEvaluation.summary.total - rubricEvaluation.summary.fulfilled;
   const selectedEvidenceLabel = data.evidenceLabels?.[selected.key];
   const phaseAState = buildPhaseAReviewUiState(data.phaseAReview);
+  const phaseADocumentAuthorityMarker = buildPhaseADocumentAuthorityMarker(data.phaseAReview);
+  const selectedExportText = applyPhaseADocumentAuthorityMarker(selectedText, data.phaseAReview);
+  const authoritySafeValues = useMemo(() => {
+    const next = { ...values };
+    for (const document of documentMeta) {
+      next[document.key] = applyPhaseADocumentAuthorityMarker(
+        values[document.key],
+        data.phaseAReview,
+      );
+    }
+    return next;
+  }, [data.phaseAReview, values]);
   const harnessSummary = data.dbHarness?.summary;
   const harnessPacket = data.dbHarness?.packet;
   const selectedCoverage = useMemo(() => {
@@ -2285,14 +2302,14 @@ export function WorkpackEditor({
   }
 
   function downloadText() {
-    downloadBlob(new Blob([selectedText], { type: "text/plain;charset=utf-8" }), `${baseName}.txt`);
+    downloadBlob(new Blob([selectedExportText], { type: "text/plain;charset=utf-8" }), `${baseName}.txt`);
   }
 
   function downloadJson() {
     const payload = {
       title: selected.title,
       scenario: data.scenario,
-      document: selectedText,
+      document: selectedExportText,
       generatedAt: new Date().toISOString()
     };
     downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" }), `${baseName}.json`);
@@ -2306,7 +2323,7 @@ export function WorkpackEditor({
   }
 
   function downloadCsv() {
-    const rows = buildRowsForDocument(selected, values);
+    const rows = buildRowsForDocument(selected, authoritySafeValues);
     downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, ",")}`], { type: "text/csv;charset=utf-8" }), `${baseName}.csv`);
   }
 
@@ -2395,6 +2412,7 @@ export function WorkpackEditor({
           rows: selectedRows,
           profile: selectedFormProfile,
           scenario: data.scenario,
+          authorityMarker: phaseADocumentAuthorityMarker,
           riskAssessmentRows: selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
         })
       });
@@ -2467,22 +2485,22 @@ export function WorkpackEditor({
   }
 
   function downloadAll() {
-    const combined = buildCombinedText(values);
+    const combined = buildCombinedText(authoritySafeValues);
     downloadBlob(new Blob([combined], { type: "text/plain;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeclaw-workpack.txt`);
   }
 
   function downloadAllCsv() {
-    const rows = buildLaunchSheetRows(values);
+    const rows = buildLaunchSheetRows(authoritySafeValues);
     downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, ",")}`], { type: "text/csv;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeclaw-workpack.csv`);
   }
 
   function downloadAllXls() {
-    const rows = buildLaunchSheetRows(values);
+    const rows = buildLaunchSheetRows(authoritySafeValues);
     downloadBlob(new Blob([buildLaunchWorkbookHtml("SafeClaw 문서팩", rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeclaw-workpack.xls`);
   }
 
   function downloadSheetsTsv() {
-    const rows = buildLaunchSheetRows(values);
+    const rows = buildLaunchSheetRows(authoritySafeValues);
     downloadBlob(
       new Blob([`\uFEFF${buildDelimited(rows, "\t")}`], { type: "text/tab-separated-values;charset=utf-8" }),
       `${sanitizeFileName(data.scenario.companyName)}-google-sheets.tsv`
@@ -2505,7 +2523,7 @@ export function WorkpackEditor({
     const confirmed = window.confirm("새 Google Sheets를 열고 표 데이터를 클립보드에 복사합니다. 열린 빈 시트의 A1 셀에 Ctrl+V로 붙여넣으면 문서팩 표가 들어갑니다.");
     if (!confirmed) return;
 
-    const rows = buildLaunchSheetRows(values);
+    const rows = buildLaunchSheetRows(authoritySafeValues);
     const sheetWindow = window.open("https://sheets.new", "_blank", "noopener,noreferrer");
     try {
       await navigator.clipboard.writeText(buildDelimited(rows, "\t"));
@@ -2544,7 +2562,8 @@ export function WorkpackEditor({
           scenario: data.scenario,
           rows: selectedRows,
           riskRows: riskAssessmentRows,
-          documentText: selectedText,
+          documentText: selectedExportText,
+          authorityMarker: phaseADocumentAuthorityMarker,
           riskLevel: data.riskSummary.riskLevel,
           topRisk: data.riskSummary.topRisk
         })
@@ -2657,6 +2676,10 @@ export function WorkpackEditor({
               {selected.title} 본문 편집을 시작합니다.
             </p>
           ) : null}
+
+          <p className="muted small phase-a-authority-marker" role="status">
+            {phaseADocumentAuthorityMarker}
+          </p>
 
           <textarea
             ref={textareaRef}
@@ -3014,6 +3037,7 @@ export function WorkpackEditor({
               <em>인쇄물</em>
             </summary>
             <div className={styles.utilityContent}>
+              <p className="muted small phase-a-authority-marker">{phaseADocumentAuthorityMarker}</p>
               <p className="muted small">다운로드와 출력에 사용되는 제출형 표 서식입니다.</p>
               <SafetyDocumentPreview
                 title={selected.title}

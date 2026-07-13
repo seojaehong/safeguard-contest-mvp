@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
 import { applyWorkpackDeliverablesChange, assessWorkpackReadiness } from "@/lib/workpack-readiness";
 import type { AskResponse, QualityContract } from "@/lib/types";
+
+const phaseAPlanBinding = structuredClone(
+  buildCanonicalPhaseAPlanBinding("vehicle-machinery-entrapment"),
+);
+const phaseAPlanDigest = phaseAPlanBinding.planDigest;
 
 const readyQuality: QualityContract = {
   overall: "ready",
@@ -59,15 +65,25 @@ function makeResponse(): AskResponse {
       groundingStatus: "resolved",
       outputStatus: "grounded_draft",
       verifiedRecords: 2,
+      planBinding: phaseAPlanBinding,
       materializationCoverage: {
         status: "complete",
+        chainId: phaseAPlanBinding.chainId,
+        planDigest: phaseAPlanDigest,
         expectedRecordCount: 2,
         materializedRecordCount: 2,
-        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
-        materializedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        expectedStableKeys: [...phaseAPlanBinding.expectedStableKeys],
+        materializedStableKeys: [...phaseAPlanBinding.expectedStableKeys],
         unresolvedStableKeys: []
       },
-      humanConfirmation: { required: true, status: "confirmed" },
+      humanConfirmation: {
+        required: true,
+        status: "confirmed",
+        reviewerId: "reviewer-001",
+        confirmedAt: "2026-07-14T03:00:00.000Z",
+        chainId: phaseAPlanBinding.chainId,
+        planDigest: phaseAPlanDigest,
+      },
       actionableReason: "확인 완료"
     },
     qualityContract: readyQuality,
@@ -181,13 +197,16 @@ describe("workpack readiness", () => {
       groundingStatus: "review_required",
       outputStatus: "review_required_draft",
       verifiedRecords: 0,
+      planBinding: phaseAPlanBinding,
       materializationCoverage: {
         status: "missing",
+        chainId: phaseAPlanBinding.chainId,
+        planDigest: phaseAPlanDigest,
         expectedRecordCount: 2,
         materializedRecordCount: 0,
-        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        expectedStableKeys: [...phaseAPlanBinding.expectedStableKeys],
         materializedStableKeys: [],
-        unresolvedStableKeys: ["chain:risk:control", "chain:tbm:control"]
+        unresolvedStableKeys: [...phaseAPlanBinding.expectedStableKeys]
       },
       humanConfirmation: { required: true, status: "pending" },
       actionableReason: "Phase A 근거와 문서 반영 위치를 확인하세요."
@@ -207,13 +226,15 @@ describe("workpack readiness", () => {
       verifiedRecords: 1,
       materializationCoverage: {
         status: "partial",
+        chainId: phaseAPlanBinding.chainId,
+        planDigest: phaseAPlanDigest,
         expectedRecordCount: 2,
         materializedRecordCount: 1,
-        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
-        materializedStableKeys: ["chain:risk:control"],
-        unresolvedStableKeys: ["chain:tbm:control"],
+        expectedStableKeys: [...phaseAPlanBinding.expectedStableKeys],
+        materializedStableKeys: [phaseAPlanBinding.expectedStableKeys[0]],
+        unresolvedStableKeys: [phaseAPlanBinding.expectedStableKeys[1]],
       },
-    } as NonNullable<AskResponse["phaseAReview"]>;
+    } satisfies NonNullable<AskResponse["phaseAReview"]>;
 
     const readiness = assessWorkpackReadiness(response);
 

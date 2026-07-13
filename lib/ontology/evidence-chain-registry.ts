@@ -614,6 +614,14 @@ export const EVIDENCE_CHAIN_REGISTRY: readonly EvidenceChainDefinition[] = Objec
   },
 ]);
 
+export const PHASE_A_AUTHORITY_PLAN_DIGESTS: Readonly<
+  Record<EvidenceChainDefinition["chainId"], `sha256:${string}`>
+> = Object.freeze({
+  "work-at-height-fall": "sha256:f1469aea1e519074ee595dc456f04c6fce9074c9acba3bc6e8ce26af8253f115",
+  "vehicle-machinery-entrapment": "sha256:912ac561bca3ff59e781778c68577361a959789704f36fbea9108e81b4c279d1",
+  "electrical-work-electrocution": "sha256:af7de8f4ead5ab9c19d673062d9ec8a78b06ff42c5f8a149c3e350f5e0763932",
+});
+
 export function getLawEvidence(articleNo: string): LawEvidenceRecord | null {
   return LAW_EVIDENCE_BY_ARTICLE[articleNo] ?? null;
 }

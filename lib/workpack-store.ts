@@ -10,6 +10,7 @@ import {
 } from "@/lib/supabase-admin";
 import type { AskResponse, GenerationEvidenceSnapshot } from "@/lib/types";
 import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
+import { parsePhaseAReview } from "@/lib/phase-a-review";
 
 type WorkpackInsert = WorkspaceDatabase["public"]["Tables"]["workpacks"]["Insert"];
 
@@ -158,7 +159,10 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
     ? evidence.generationMode
     : undefined;
   const qualityContract = readJsonObject(evidence.qualityContract);
-  const phaseAReview = readJsonObject(evidence.phaseAReview);
+  const phaseAReview = parsePhaseAReview(evidence.phaseAReview);
+  if (typeof evidence.phaseAReview !== "undefined" && !phaseAReview) {
+    blockers.push("저장된 Phase A 검토 상태가 권위 계약 형식과 일치하지 않아 검토 필요로 복원했습니다.");
+  }
   const ontologyQa = readJsonObject(evidence.ontologyQa);
   const evidenceLabels = readJsonObject(evidence.evidenceLabels);
   const structured = readJsonObject(evidence.structured);
@@ -174,7 +178,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
     data: {
       question: input.question,
       answer: readString(evidence.answer, "저장된 문서팩 상세입니다. 원문 답변은 이전 저장 형식에 없을 수 있습니다."),
-      phaseAReview: phaseAReview ? phaseAReview as AskResponse["phaseAReview"] : undefined,
+      phaseAReview: phaseAReview ?? undefined,
       practicalPoints: readStringArray(evidence.practicalPoints),
       citations: Array.isArray(evidence.citations) ? evidence.citations as AskResponse["citations"] : [],
       sourceMix: isRecord(evidence.sourceMix) ? evidence.sourceMix as AskResponse["sourceMix"] : undefined,
@@ -195,7 +199,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
         : undefined,
       status: status as AskResponse["status"]
     },
-    blockers: []
+    blockers
   };
 }
 

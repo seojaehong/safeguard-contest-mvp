@@ -8,6 +8,7 @@ import {
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import {
   buildPhaseAGenerationPrompt,
+  buildPhaseAGenerationSnapshot,
   classifyControlObligation,
 } from "@/lib/ontology/evidence-chain";
 import { assembleGraph } from "@/lib/ontology/graph-store";
@@ -30,20 +31,57 @@ function requireKnowledge(query: string): SafetyKnowledgeFound {
   return knowledge;
 }
 
-function withResolvedSif(knowledge: SafetyKnowledgeFound): SafetyKnowledgeFound {
+function withResolvedEvidenceRoles(knowledge: SafetyKnowledgeFound): SafetyKnowledgeFound {
   if (!knowledge.evidenceContract) throw new Error("expected evidence contract");
+  const guidance = knowledge.evidenceContract.guidance.map((source) => ({
+    ...source,
+    reviewState: "verified" as const,
+    resolution: "resolved" as const,
+  }));
+  const guidanceByEvidenceId = new Map(guidance.map((source) => [source.evidenceId, source]));
+  const controls = knowledge.evidenceContract.controls.map((control) => {
+    const guidanceEvidence = control.guidanceEvidence.map((source) =>
+      guidanceByEvidenceId.get(source.evidenceId) ?? source,
+    );
+    const guidanceStatus = guidanceEvidence.length > 0 ? "verified" as const : "missing" as const;
+    return {
+      ...control,
+      guidanceEvidence,
+      guidanceStatus,
+      guidanceReviewRequired: false,
+      obligation: classifyControlObligation([...control.lawEvidence, ...guidanceEvidence]),
+    };
+  });
+  const controlById = new Map(controls.map((control) => [control.controlId, control]));
   return {
     ...knowledge,
     evidenceChainState: "resolved",
     evidenceContract: {
       ...knowledge.evidenceContract,
+      guidance,
       hazardPriority: knowledge.evidenceContract.hazardPriority.map((source) => ({
         ...source,
         reviewState: "published" as const,
         resolution: "resolved" as const,
       })),
+      controls,
+      materializationTargets: knowledge.evidenceContract.materializationTargets.map((plan) => {
+        const control = controlById.get(plan.controlId);
+        return control
+          ? {
+              ...plan,
+              obligation: control.obligation,
+              guidanceStatus: control.guidanceStatus,
+              guidanceReviewRequired: control.guidanceReviewRequired,
+            }
+          : plan;
+      }),
     },
   };
+}
+
+function materializedSection(rowOrSection: string, line: string): string {
+  return [`[${rowOrSection}]`, line].join("\n");
 }
 
 function generatedResponse(question: string, riskAssessmentDraft = "검증용 위험성평가"): AskResponse {
@@ -155,18 +193,20 @@ describe("production ontology docpack handler", () => {
 
     expect(output.evidenceQuery).toBe(canonicalTask);
     expect(calls).toEqual([`evidence:${canonicalTask}`, `generate:${question}`]);
-    expect(output.docpack.evidenceContract?.task.label).toBe(canonicalTask);
+    expect(output.phaseAGrounding.evidencePack?.task.label).toBe(canonicalTask);
+    expect(output.docpack.publicEvidence).toBeDefined();
+    expect(output.docpack).not.toHaveProperty("evidenceContract");
     expect(runAskOptions).toMatchObject({
       aiMode: "template",
       phaseAGrounding: {
         evidenceChainState: "review_required",
         groundingStatus: "review_required",
-        evidencePack: output.docpack.evidenceContract,
+        evidencePack: output.phaseAGrounding.evidencePack,
         generationPolicy: {
           llmRole: "naturalize_only",
           outputStatus: "review_required_draft",
         },
-        materializationTargets: output.docpack.evidenceContract?.materializationTargets,
+        materializationTargets: output.phaseAGrounding.evidencePack?.materializationTargets,
       },
     });
     expect(output.docpack.ontologyGrounding).toMatchObject({
@@ -191,10 +231,13 @@ describe("production ontology docpack handler", () => {
     const output = await handleGenerateSafetyDocpack(
       { question, mode: "template", includeFull: true },
       {
-        querySafetyKnowledge: async () => withResolvedSif(knowledge),
+        querySafetyKnowledge: async () => withResolvedEvidenceRoles(knowledge),
         runAsk: async (input) => generatedResponse(
           input,
-          `${plan.controlLabel} | ${sifUid}`,
+          materializedSection(
+            plan.targets[0].rowOrSection,
+            `${plan.controlLabel} | ${sifUid}`,
+          ),
         ),
       },
     );
@@ -216,10 +259,13 @@ describe("production ontology docpack handler", () => {
     const output = await handleGenerateSafetyDocpack(
       { question, mode: "template", includeFull: true },
       {
-        querySafetyKnowledge: async () => withResolvedSif(knowledge),
+        querySafetyKnowledge: async () => withResolvedEvidenceRoles(knowledge),
         runAsk: async (input) => generatedResponse(
           input,
-          `${plan.controlLabel}\n${lawUid}`,
+          materializedSection(
+            plan.targets[0].rowOrSection,
+            `${plan.controlLabel}\n${lawUid}`,
+          ),
         ),
       },
     );
@@ -237,7 +283,7 @@ describe("production ontology docpack handler", () => {
     const plan = knowledge.evidenceContract?.materializationTargets[0];
     const lawUid = plan?.lawCitedUids[0];
     if (!plan || !lawUid) throw new Error("expected vehicle current-law plan");
-    const resolvedKnowledge = withResolvedSif(knowledge);
+    const resolvedKnowledge = withResolvedEvidenceRoles(knowledge);
 
     let runAskQuestion: string | undefined;
     let runAskOptions: unknown;
@@ -250,7 +296,10 @@ describe("production ontology docpack handler", () => {
           runAskOptions = options;
           return generatedResponse(
             input,
-            `${plan.controlLabel} | ${lawUid}`,
+            materializedSection(
+              plan.targets[0].rowOrSection,
+              `${plan.controlLabel} | ${lawUid}`,
+            ),
           );
         },
       },
@@ -282,7 +331,7 @@ describe("production ontology docpack handler", () => {
     expect(output.docpack.ontologyGrounding).toMatchObject({
       groundingStatus: "resolved",
       outputStatus: "grounded_draft",
-      verified: true,
+      verified: false,
     });
     expect(output.docpack.evidenceMaterialization).toMatchObject({
       evidenceChainState: "resolved",
@@ -294,7 +343,7 @@ describe("production ontology docpack handler", () => {
     });
   });
 
-  test("emits a resolved Control-scoped KOSHA guidance record", async () => {
+  test("fails closed for a client-shrunk KOSHA-only plan", async () => {
     const question = "고소 작업대 작업";
     const knowledge = requireKnowledge(question);
     const contract = knowledge.evidenceContract;
@@ -335,17 +384,14 @@ describe("production ontology docpack handler", () => {
       evidenceChainState: "resolved",
       evidenceContract: {
         ...contract,
+        guidance: [verifiedGuidance],
         hazardPriority: contract.hazardPriority.map((source) => ({
           ...source,
           reviewState: "published" as const,
           resolution: "resolved" as const,
         })),
-        controls: contract.controls.map((control) =>
-          control.controlId === resolvedControl.controlId ? resolvedControl : control
-        ),
-        materializationTargets: contract.materializationTargets.map((plan) =>
-          plan.controlId === resolvedPlan.controlId ? resolvedPlan : plan
-        ),
+        controls: [resolvedControl],
+        materializationTargets: [resolvedPlan],
       },
     };
 
@@ -355,7 +401,48 @@ describe("production ontology docpack handler", () => {
         querySafetyKnowledge: async () => resolvedKnowledge,
         runAsk: async (input) => generatedResponse(
           input,
-          `${resolvedPlan.controlLabel} | ${verifiedGuidance.citedUid}`,
+          materializedSection(
+            resolvedPlan.targets[0].rowOrSection,
+            `${resolvedPlan.controlLabel} | ${verifiedGuidance.citedUid}`,
+          ),
+        ),
+      },
+    );
+
+    expect(output.docpack.ontologyGrounding).toMatchObject({
+      groundingStatus: "review_required",
+      verified: false,
+    });
+    expect(output.docpack.evidenceMaterialization).toMatchObject({
+      evidenceChainState: "review_required",
+      humanConfirmation: { required: true, status: "pending" },
+      verifiedRecords: [],
+    });
+  });
+
+  test("emits a resolved Control-scoped law and KOSHA guidance record", async () => {
+    const question = "고소 작업대 작업";
+    const resolvedKnowledge = withResolvedEvidenceRoles(requireKnowledge(question));
+    const contract = resolvedKnowledge.evidenceContract;
+    const plan = contract?.materializationTargets.find(
+      (candidate) => candidate.controlId === "fall-work-platform",
+    );
+    const lawUid = plan?.lawCitedUids[0];
+    const guidanceUid = plan?.guidanceCitedUids[0];
+    if (!contract || !plan || !lawUid || !guidanceUid) {
+      throw new Error("expected resolved fall law and KOSHA plan");
+    }
+
+    const output = await handleGenerateSafetyDocpack(
+      { question, mode: "template", includeFull: true },
+      {
+        querySafetyKnowledge: async () => resolvedKnowledge,
+        runAsk: async (input) => generatedResponse(
+          input,
+          materializedSection(
+            plan.targets[0].rowOrSection,
+            `${plan.controlLabel} | ${lawUid} | ${guidanceUid}`,
+          ),
         ),
       },
     );
@@ -364,11 +451,11 @@ describe("production ontology docpack handler", () => {
       evidenceChainState: "resolved",
       humanConfirmation: { required: true, status: "pending" },
       verifiedRecords: [expect.objectContaining({
-        controlId: resolvedControl.controlId,
-        citedEvidence: [{
-          citedUid: verifiedGuidance.citedUid,
-          role: "kosha_technical_guidance",
-        }],
+        controlId: plan.controlId,
+        citedEvidence: [
+          { citedUid: lawUid, role: "current_law_mandate" },
+          { citedUid: guidanceUid, role: "kosha_technical_guidance" },
+        ],
       })],
     });
   });
@@ -465,7 +552,7 @@ describe("production ontology docpack handler", () => {
     const knowledge = requireKnowledge(question);
     const plan = knowledge.evidenceContract?.materializationTargets[0];
     if (!plan) throw new Error("expected vehicle materialization plan");
-    const resolvedKnowledge = withResolvedSif(knowledge);
+    const resolvedKnowledge = withResolvedEvidenceRoles(knowledge);
 
     const output = await handleGenerateSafetyDocpack(
       { question, mode: "template", includeFull: true },
@@ -473,7 +560,10 @@ describe("production ontology docpack handler", () => {
         querySafetyKnowledge: async () => resolvedKnowledge,
         runAsk: async (input) => generatedResponse(
           input,
-          `${plan.controlLabel} | law:산업안전보건기준에관한규칙:제999조`,
+          materializedSection(
+            plan.targets[0].rowOrSection,
+            `${plan.controlLabel} | law:산업안전보건기준에관한규칙:제999조`,
+          ),
         ),
       },
     );
@@ -575,7 +665,7 @@ describe("production ontology docpack handler", () => {
     const question = "차량계 하역운반기계 인접 작업";
     const knowledge = requireKnowledge(question);
     if (!knowledge.evidenceContract) throw new Error("expected vehicle evidence contract");
-    const resolvedFixture = withResolvedSif(knowledge);
+    const resolvedFixture = withResolvedEvidenceRoles(knowledge);
     if (!resolvedFixture.evidenceContract) throw new Error("expected resolved evidence contract");
     const sourcePack = structuredClone(resolvedFixture.evidenceContract);
     const sourcePlan = sourcePack.materializationTargets[0];
@@ -607,21 +697,44 @@ describe("production ontology docpack handler", () => {
           expect(Object.isFrozen(grounding.materializationTargets)).toBe(true);
           expect(Object.isFrozen(grounding.materializationTargets[0])).toBe(true);
 
-          const promptBeforeMutation = buildPhaseAGenerationPrompt(grounding, { question: input });
+          const promptSnapshot = buildPhaseAGenerationSnapshot({
+            grounding,
+            contextualInputs: [{
+              kind: "site_context",
+              provenance: {
+                source: "handler_mutation_test",
+                authority: "context_only",
+                state: "available",
+              },
+              content: { question: input },
+            }],
+          });
+          const promptBeforeMutation = buildPhaseAGenerationPrompt(promptSnapshot, {
+            document: "risk_assessment",
+          });
           sourcePack.task.label = "SOURCE_PACK_MUTATION";
           sourcePack.controls[0].label = "SOURCE_CONTROL_MUTATION";
           sourcePack.materializationTargets[0].controlLabel = "SOURCE_TARGET_MUTATION";
           expect(Reflect.set(pack.task, "label", "FROZEN_GROUNDING_MUTATION")).toBe(false);
           expect(Reflect.set(grounding.allowedEvidence[0], "citedUid", "law:mutated")).toBe(false);
-          expect(buildPhaseAGenerationPrompt(grounding, { question: input }))
+          expect(buildPhaseAGenerationPrompt(promptSnapshot, {
+            document: "risk_assessment",
+          }))
             .toBe(promptBeforeMutation);
 
-          return generatedResponse(input, `${originalControlLabel} | ${lawUid}`);
+          return generatedResponse(
+            input,
+            materializedSection(
+              sourcePlan.targets[0].rowOrSection,
+              `${originalControlLabel} | ${lawUid}`,
+            ),
+          );
         },
       },
     );
 
-    expect(output.docpack.evidenceContract?.task.label).toBe(originalTaskLabel);
+    expect(output.phaseAGrounding.evidencePack?.task.label).toBe(originalTaskLabel);
+    expect(output.docpack).not.toHaveProperty("evidenceContract");
     expect(output.docpack.evidenceMaterialization).toMatchObject({
       evidenceChainState: "resolved",
       verifiedRecords: [expect.objectContaining({

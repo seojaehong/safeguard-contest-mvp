@@ -122,13 +122,26 @@ describe("answer generation trace", () => {
     expect(jsonEnd).toBeGreaterThan(jsonStart);
     const payload = JSON.parse(prompt.slice(jsonStart, jsonEnd)) as unknown;
     expect(payload).toMatchObject({
-      phaseAGrounding,
-      providerInput: {
-        question,
-        citations: [expect.objectContaining({
-          title: "UNLISTED_SEARCH_SOURCE",
-          citation: "산업안전보건법 제999조",
-        })],
+      evidenceSnapshot: {
+        schemaVersion: "phase-a-generation-snapshot/v1",
+        phaseAGrounding,
+        contextualInputs: expect.arrayContaining([
+          expect.objectContaining({
+            kind: "site_context",
+            content: { question },
+          }),
+          expect.objectContaining({
+            kind: "legal_search",
+            content: [expect.objectContaining({
+              title: "UNLISTED_SEARCH_SOURCE",
+              citation: "산업안전보건법 제999조",
+            })],
+          }),
+        ]),
+        snapshotDigest: expect.stringMatching(/^sha256:/),
+      },
+      outputRequest: {
+        document: "answer",
       },
     });
 

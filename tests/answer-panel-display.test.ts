@@ -5,7 +5,13 @@ import {
   sanitizeAnswerForDisplay,
   type AnswerPanelPublicStatusInput
 } from "@/lib/answer-panel-display";
+import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
 import type { PhaseAReview } from "@/lib/types";
+
+const planBinding = structuredClone(
+  buildCanonicalPhaseAPlanBinding("vehicle-machinery-entrapment"),
+);
+const planDigest = planBinding.planDigest;
 
 const pendingReview: PhaseAReview = {
   verdict: "검토 필요",
@@ -14,13 +20,16 @@ const pendingReview: PhaseAReview = {
   groundingStatus: "review_required",
   outputStatus: "review_required_draft",
   verifiedRecords: 0,
+  planBinding,
   materializationCoverage: {
     status: "missing",
-    expectedRecordCount: 1,
+    chainId: planBinding.chainId,
+    planDigest,
+    expectedRecordCount: 2,
     materializedRecordCount: 0,
-    expectedStableKeys: ["chain:risk:control"],
+    expectedStableKeys: [...planBinding.expectedStableKeys],
     materializedStableKeys: [],
-    unresolvedStableKeys: ["chain:risk:control"],
+    unresolvedStableKeys: [...planBinding.expectedStableKeys],
   },
   humanConfirmation: { required: true, status: "pending" },
   actionableReason: "Phase A source resolution과 사람 확인이 필요합니다.",
@@ -32,16 +41,26 @@ const readyReview: PhaseAReview = {
   evidenceChainState: "resolved",
   groundingStatus: "resolved",
   outputStatus: "grounded_draft",
-  verifiedRecords: 1,
+  verifiedRecords: 2,
+  planBinding,
   materializationCoverage: {
     status: "complete",
-    expectedRecordCount: 1,
-    materializedRecordCount: 1,
-    expectedStableKeys: ["chain:risk:control"],
-    materializedStableKeys: ["chain:risk:control"],
+    chainId: planBinding.chainId,
+    planDigest,
+    expectedRecordCount: 2,
+    materializedRecordCount: 2,
+    expectedStableKeys: [...planBinding.expectedStableKeys],
+    materializedStableKeys: [...planBinding.expectedStableKeys],
     unresolvedStableKeys: [],
   },
-  humanConfirmation: { required: true, status: "confirmed" },
+  humanConfirmation: {
+    required: true,
+    status: "confirmed",
+    reviewerId: "reviewer-001",
+    confirmedAt: "2026-07-14T03:00:00.000Z",
+    chainId: planBinding.chainId,
+    planDigest,
+  },
   actionableReason: "Phase A 근거와 문서 반영 실적을 사람이 확인했습니다.",
 };
 

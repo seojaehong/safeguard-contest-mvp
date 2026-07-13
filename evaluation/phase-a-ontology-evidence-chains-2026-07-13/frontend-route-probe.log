@@ -1,0 +1,33 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/frontend-route-coverage.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/frontend-route-coverage.test.ts (37 tests | 1 failed) 57097ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/frontend-route-coverage.test.ts > browser evidence reconciliation > reconciles the complete route, theme, special-state, and generated-surface evidence
+AssertionError: expected 'cf3acf32f236a5c6ecdca5cf0b244ef16bd36…' to be '6c6c5998637cf219e9c8d9e56d60ee2e4a312…' // Object.is equality
+
+Expected: "6c6c5998637cf219e9c8d9e56d60ee2e4a312d7c66c741947c38d6da76c89bcd"
+Received: "cf3acf32f236a5c6ecdca5cf0b244ef16bd36c1ff8ecfa6b063e522a2ed723ac"
+
+ ❯ tests/frontend-route-coverage.test.ts:693:35
+     × reconciles the complete route, theme, special-state, and generated-surface evidence 1135ms
+    691|     expect(report.sourceSha).toMatch(/^[0-9a-f]{40}$/u);
+    692|     expect(report.sourceIdentity).toMatch(/^[0-9a-f]{64}$/u);
+    693|     expect(report.sourceIdentity).toBe(currentSource.sourceIdentity);
+       |                                   ^
+    694|     expect(report.sourceSha).toBe(staticAudit.sourceSha);
+    695|     expect(report.sourceIdentity).toBe(staticAudit.sourceIdentity);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 36 passed (37)
+   Start at  02:48:26
+   Duration  57.99s (transform 111ms, setup 0ms, import 158ms, tests 57.10s, environment 0ms)

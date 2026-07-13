@@ -8,6 +8,7 @@ import { runAsk } from "@/lib/search";
 import type { SafetyReferenceSearchResult } from "@/lib/safety-reference-catalog";
 import type { SearchResult } from "@/lib/types";
 import { assembleGraph } from "@/lib/ontology/graph-store";
+import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 
 const mocks = vi.hoisted(() => ({
@@ -165,7 +166,57 @@ describe("generation trace failure privacy", () => {
       }
     });
 
-    const response = await runAsk("성수동 외벽 도장 작업", { aiMode: "full" });
+    const graphSnapshot = assembleGraph(
+      SEED_NODES.filter((node) => node.review_state === "published"),
+      SEED_EDGES.filter((edge) => edge.review_state === "published"),
+    );
+    const evidence = buildPublishedSafetyKnowledge(graphSnapshot, "고소작업");
+    if (!evidence.found || !evidence.evidenceContract) {
+      throw new Error("expected Phase A evidence pack");
+    }
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: evidence.evidenceChainState,
+      evidencePack: evidence.evidenceContract,
+    });
+    const response = await runAsk("성수동 외벽 도장 작업", {
+      aiMode: "full",
+      phaseAGrounding,
+      phaseAGraphSnapshot: graphSnapshot,
+      harnessMemory: {
+        improvements: [],
+        workpackMemory: [],
+      },
+    });
+
+    const answerOptions = mocks.generateAnswer.mock.calls[0]?.[2];
+    const deliverableInput = mocks.generateAllDeliverablesWithDiagnostics.mock.calls[0]?.[0];
+    const generationSnapshot = answerOptions?.phaseAGenerationSnapshot;
+    expect(generationSnapshot).toBe(deliverableInput?.phaseAGenerationSnapshot);
+    expect(generationSnapshot).toMatchObject({
+      schemaVersion: "phase-a-generation-snapshot/v1",
+      planBinding: expect.objectContaining({ chainId: "work-at-height-fall" }),
+      orderedOntologyEvidence: [
+        expect.objectContaining({ role: "hazard_priority_only", sourceType: "sif_case" }),
+        expect.objectContaining({ role: "kosha_technical_guidance", sourceType: "kosha_guidance" }),
+        expect.objectContaining({ role: "current_law_mandate", sourceType: "law" }),
+      ],
+      contextualInputs: expect.arrayContaining([
+        expect.objectContaining({ kind: "site_context", digest: expect.stringMatching(/^sha256:/) }),
+        expect.objectContaining({ kind: "history", digest: expect.stringMatching(/^sha256:/) }),
+        expect.objectContaining({ kind: "weather", digest: expect.stringMatching(/^sha256:/) }),
+        expect.objectContaining({ kind: "legal_search", digest: expect.stringMatching(/^sha256:/) }),
+        expect.objectContaining({ kind: "training", digest: expect.stringMatching(/^sha256:/) }),
+        expect.objectContaining({ kind: "kosha_education", digest: expect.stringMatching(/^sha256:/) }),
+        expect.objectContaining({ kind: "kosha_reference", digest: expect.stringMatching(/^sha256:/) }),
+        expect.objectContaining({ kind: "kosha_openapi", digest: expect.stringMatching(/^sha256:/) }),
+        expect.objectContaining({ kind: "accident_case", digest: expect.stringMatching(/^sha256:/) }),
+        expect.objectContaining({ kind: "safety_reference", digest: expect.stringMatching(/^sha256:/) }),
+      ]),
+      snapshotDigest: expect.stringMatching(/^sha256:/),
+    });
+    expect(Object.isFrozen(generationSnapshot)).toBe(true);
+    expect(Object.isFrozen(generationSnapshot?.orderedOntologyEvidence)).toBe(true);
+    expect(Object.isFrozen(generationSnapshot?.contextualInputs)).toBe(true);
 
     expect(response.answer).toContain("하네스 판단");
     expect(response.answer).not.toContain("provider-only-draft-must-not-be-final");
@@ -300,6 +351,16 @@ describe("generation trace failure privacy", () => {
     });
     expect(response.deliverables.workpackSummaryDraft).toContain("법령 근거: 검토 필요");
     expect(response.deliverables.workpackSummaryDraft).not.toContain("법령 근거: 연결됨");
+    for (const body of [
+      response.deliverables.riskAssessmentDraft,
+      response.deliverables.tbmBriefing,
+      response.deliverables.tbmLogDraft,
+      response.deliverables.safetyEducationRecordDraft,
+    ]) {
+      expect(body).toContain("법령 근거: 검토 필요");
+      expect(body).toContain("공식자료 연결 후보");
+      expect(body).not.toContain("법령 근거: 연결됨");
+    }
 
     const dispatch = buildBriefingDispatchWorkpack(response, "테스트 현장");
     expect(dispatch).toMatchObject({
@@ -309,5 +370,11 @@ describe("generation trace failure privacy", () => {
       },
     });
     expect(JSON.stringify(dispatch)).not.toContain("법령 근거: 연결됨");
+    const dispatchDocuments = dispatch.documents;
+    if (typeof dispatchDocuments !== "object" || dispatchDocuments === null) {
+      throw new Error("expected briefing dispatch documents");
+    }
+    expect(Reflect.get(dispatchDocuments, "riskAssessmentDraft")).toContain("법령 근거: 검토 필요");
+    expect(Reflect.get(dispatchDocuments, "tbmBriefing")).toContain("법령 근거: 검토 필요");
   });
 });
