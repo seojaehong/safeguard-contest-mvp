@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-13T08:17:13.773Z",
+  "generatedAt": "2026-07-13T08:44:58.071Z",
   "baseUrl": "http://127.0.0.1:3071",
-  "sourceHead": "40c448e8ac2366fadd57d140ca65df23cba4cac5",
+  "sourceHead": "2f1f80e8fbdb006e0c1e9af084103e5eb9be8cee",
   "passed": true,
   "rows": [
     {
@@ -14,57 +14,64 @@
       "pass": true,
       "buttonsContained": true,
       "buttonsSeparated": true,
-      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\workspace-document-editor-layout\\evaluation\\workspace-document-editor-layout\\desktop-day.png",
-      "metrics": {
+      "screenshot": "desktop-day.png",
+      "collapsedMetrics": {
         "scrollWidth": 1440,
-        "scrollHeight": 2823,
+        "scrollHeight": 4116,
+        "clientWidth": 1440,
+        "clientHeight": 900,
+        "operationsOpen": false
+      },
+      "expandedMetrics": {
+        "scrollWidth": 1440,
+        "scrollHeight": 8183,
         "clientWidth": 1440,
         "clientHeight": 900,
         "editorSurface": {
           "left": 376,
           "right": 1344,
-          "top": -835.953125,
-          "bottom": 1701.984375,
+          "top": -1002.953125,
+          "bottom": 6894.84375,
           "width": 968,
-          "height": 2537.9375
+          "height": 7897.796875
         },
         "fieldWorkspace": {
           "left": 376,
           "right": 1344,
-          "top": -401.453125,
-          "bottom": 1701.984375,
+          "top": -568.453125,
+          "bottom": 6894.84375,
           "width": 968,
-          "height": 2103.4375
+          "height": 7463.296875
         },
         "canvas": {
           "left": 376,
           "right": 1344,
-          "top": -401.453125,
-          "bottom": 1701.984375,
+          "top": -568.453125,
+          "bottom": 3416.609375,
           "width": 968,
-          "height": 2103.4375
+          "height": 3985.0625
         },
         "workpackShell": {
           "left": 376,
           "right": 1344,
-          "top": -401.453125,
-          "bottom": 1701.984375,
+          "top": -568.453125,
+          "bottom": 1534.984375,
           "width": 968,
           "height": 2103.4375
         },
         "documentEditor": {
           "left": 672,
           "right": 1344,
-          "top": -401.453125,
-          "bottom": 1701.984375,
+          "top": -568.453125,
+          "bottom": 1534.984375,
           "width": 672,
           "height": 2103.4375
         },
         "exportPanel": {
           "left": 685,
           "right": 1331,
-          "top": 584.90625,
-          "bottom": 1572.1875,
+          "top": 417.90625,
+          "bottom": 1405.1875,
           "width": 646,
           "height": 987.28125
         },
@@ -73,26 +80,113 @@
             "text": "Excel 표 양식(.xlsx)",
             "left": 704,
             "right": 901.328125,
-            "top": 667.703125,
-            "bottom": 712.59375
+            "top": 500.703125,
+            "bottom": 545.59375
           },
           {
             "text": "한글 표 양식(.hwp)",
             "left": 909.328125,
             "right": 1106.65625,
-            "top": 667.703125,
-            "bottom": 712.59375
+            "top": 500.703125,
+            "bottom": 545.59375
           },
           {
             "text": "PDF(브라우저 인쇄)",
             "left": 1114.65625,
             "right": 1311.984375,
-            "top": 667.703125,
-            "bottom": 712.59375
+            "top": 500.703125,
+            "bottom": 545.59375
           }
         ],
-        "sidePanelCount": 0,
+        "sidePanelCount": 1,
         "greetingCount": 0,
+        "loginRequiredCount": 1,
+        "compactHeadOverlaps": [],
+        "largestCompactHeadHeight": 49,
+        "impactListHeight": 251.6875,
+        "citationGroupHeight": 561.34375,
+        "sharePanelHeight": 2114.84375,
+        "roleControlWidth": 401,
+        "phoneControlWidth": 401,
+        "workspaceSide": {
+          "left": 393,
+          "right": 1327,
+          "top": 3749.859375,
+          "bottom": 6877.84375,
+          "width": 934,
+          "height": 3127.984375
+        },
+        "workerPanel": {
+          "left": 393,
+          "right": 854,
+          "top": 4031,
+          "bottom": 4751,
+          "width": 461,
+          "height": 720
+        },
+        "workerCard": {
+          "left": 410,
+          "right": 837,
+          "top": 4285,
+          "bottom": 4878.40625,
+          "width": 427,
+          "height": 593.40625
+        },
+        "workerEditGrid": {
+          "left": 423,
+          "right": 824,
+          "top": 4449.71875,
+          "bottom": 4831.21875,
+          "width": 401,
+          "height": 381.5
+        },
+        "compactHeads": [
+          {
+            "text": "운영 체크파일럿 체크리스트",
+            "width": 933.984375,
+            "height": 49
+          },
+          {
+            "text": "전체 문서팩1개 보강 대상",
+            "width": 578,
+            "height": 27
+          },
+          {
+            "text": "근거문서 반영 근거",
+            "width": 341.015625,
+            "height": 49
+          },
+          {
+            "text": "Operation Ontology작업 이력 그래프",
+            "width": 870,
+            "height": 27
+          },
+          {
+            "text": "상주 안전관리자클로에게 묻기",
+            "width": 427,
+            "height": 49
+          },
+          {
+            "text": "이력 저장비회원 임시 저장",
+            "width": 427,
+            "height": 49
+          },
+          {
+            "text": "근로자근로자·교육 확인",
+            "width": 427,
+            "height": 49
+          },
+          {
+            "text": "메시지 미리보기관리자용 한국어 메시지 미리보기",
+            "width": 874,
+            "height": 49
+          },
+          {
+            "text": "이력문서팩·교육 이력",
+            "width": 427,
+            "height": 49
+          }
+        ],
         "shellClass": "command-center-shell workbench-root workspace-theme-day workspace-theme-field"
       }
     },
@@ -106,57 +200,64 @@
       "pass": true,
       "buttonsContained": true,
       "buttonsSeparated": true,
-      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\workspace-document-editor-layout\\evaluation\\workspace-document-editor-layout\\mobile-day.png",
-      "metrics": {
+      "screenshot": "mobile-day.png",
+      "collapsedMetrics": {
         "scrollWidth": 390,
-        "scrollHeight": 4283,
+        "scrollHeight": 7109,
+        "clientWidth": 390,
+        "clientHeight": 844,
+        "operationsOpen": false
+      },
+      "expandedMetrics": {
+        "scrollWidth": 390,
+        "scrollHeight": 14233,
         "clientWidth": 390,
         "clientHeight": 844,
         "editorSurface": {
           "left": 27,
           "right": 363,
-          "top": -1936.953125,
-          "bottom": 1949,
+          "top": -2061.953125,
+          "bottom": 11773.640625,
           "width": 336,
-          "height": 3885.953125
+          "height": 13835.59375
         },
         "fieldWorkspace": {
           "left": 27,
           "right": 363,
-          "top": -801.9375,
-          "bottom": 1949,
+          "top": -926.9375,
+          "bottom": 11773.640625,
           "width": 336,
-          "height": 2750.9375
+          "height": 12700.578125
         },
         "canvas": {
           "left": 27,
           "right": 363,
-          "top": -801.9375,
-          "bottom": 1949,
+          "top": -926.9375,
+          "bottom": 5112.6875,
           "width": 336,
-          "height": 2750.9375
+          "height": 6039.625
         },
         "workpackShell": {
           "left": 27,
           "right": 363,
-          "top": -801.9375,
-          "bottom": 1949,
+          "top": -926.9375,
+          "bottom": 1824,
           "width": 336,
           "height": 2750.9375
         },
         "documentEditor": {
           "left": 27,
           "right": 363,
-          "top": -604.9375,
-          "bottom": 1949,
+          "top": -729.9375,
+          "bottom": 1824,
           "width": 336,
           "height": 2553.9375
         },
         "exportPanel": {
           "left": 36,
           "right": 354,
-          "top": 503.953125,
-          "bottom": 1801.203125,
+          "top": 378.953125,
+          "bottom": 1676.203125,
           "width": 318,
           "height": 1297.25
         },
@@ -165,26 +266,113 @@
             "text": "Excel 표 양식(.xlsx)",
             "left": 49,
             "right": 341,
-            "top": 602.75,
-            "bottom": 647.640625
+            "top": 477.75,
+            "bottom": 522.640625
           },
           {
             "text": "한글 표 양식(.hwp)",
             "left": 49,
             "right": 341,
-            "top": 655.640625,
-            "bottom": 700.53125
+            "top": 530.640625,
+            "bottom": 575.53125
           },
           {
             "text": "PDF(브라우저 인쇄)",
             "left": 49,
             "right": 341,
-            "top": 708.53125,
-            "bottom": 751.421875
+            "top": 583.53125,
+            "bottom": 626.421875
           }
         ],
-        "sidePanelCount": 0,
+        "sidePanelCount": 1,
         "greetingCount": 0,
+        "loginRequiredCount": 1,
+        "compactHeadOverlaps": [],
+        "largestCompactHeadHeight": 76,
+        "impactListHeight": 251.6875,
+        "citationGroupHeight": 796.125,
+        "sharePanelHeight": 3928.28125,
+        "roleControlWidth": 242,
+        "phoneControlWidth": 242,
+        "workspaceSide": {
+          "left": 44,
+          "right": 346,
+          "top": 5859.8125,
+          "bottom": 11756.640625,
+          "width": 302,
+          "height": 5896.828125
+        },
+        "workerPanel": {
+          "left": 44,
+          "right": 346,
+          "top": 6423.21875,
+          "bottom": 7143.21875,
+          "width": 302,
+          "height": 720
+        },
+        "workerCard": {
+          "left": 61,
+          "right": 329,
+          "top": 6677.21875,
+          "bottom": 7306.625,
+          "width": 268,
+          "height": 629.40625
+        },
+        "workerEditGrid": {
+          "left": 74,
+          "right": 316,
+          "top": 6877.9375,
+          "bottom": 7259.4375,
+          "width": 242,
+          "height": 381.5
+        },
+        "compactHeads": [
+          {
+            "text": "운영 체크파일럿 체크리스트",
+            "width": 302,
+            "height": 49
+          },
+          {
+            "text": "전체 문서팩1개 보강 대상",
+            "width": 262,
+            "height": 27
+          },
+          {
+            "text": "근거문서 반영 근거",
+            "width": 302,
+            "height": 49
+          },
+          {
+            "text": "Operation Ontology작업 이력 그래프",
+            "width": 270,
+            "height": 54
+          },
+          {
+            "text": "상주 안전관리자클로에게 묻기",
+            "width": 268,
+            "height": 49
+          },
+          {
+            "text": "이력 저장비회원 임시 저장",
+            "width": 268,
+            "height": 49
+          },
+          {
+            "text": "근로자근로자·교육 확인",
+            "width": 268,
+            "height": 49
+          },
+          {
+            "text": "메시지 미리보기관리자용 한국어 메시지 미리보기",
+            "width": 242,
+            "height": 76
+          },
+          {
+            "text": "이력문서팩·교육 이력",
+            "width": 268,
+            "height": 49
+          }
+        ],
         "shellClass": "command-center-shell workbench-root workspace-theme-day workspace-theme-field"
       }
     },
@@ -198,57 +386,64 @@
       "pass": true,
       "buttonsContained": true,
       "buttonsSeparated": true,
-      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\workspace-document-editor-layout\\evaluation\\workspace-document-editor-layout\\desktop-night.png",
-      "metrics": {
+      "screenshot": "desktop-night.png",
+      "collapsedMetrics": {
         "scrollWidth": 1440,
-        "scrollHeight": 2884,
+        "scrollHeight": 4178,
+        "clientWidth": 1440,
+        "clientHeight": 900,
+        "operationsOpen": false
+      },
+      "expandedMetrics": {
+        "scrollWidth": 1440,
+        "scrollHeight": 8246,
         "clientWidth": 1440,
         "clientHeight": 900,
         "editorSurface": {
           "left": 376,
           "right": 1344,
-          "top": -896.953125,
-          "bottom": 1702.421875,
+          "top": -1044.953125,
+          "bottom": 6916.28125,
           "width": 968,
-          "height": 2599.375
+          "height": 7961.234375
         },
         "fieldWorkspace": {
           "left": 376,
           "right": 1344,
-          "top": -462.453125,
-          "bottom": 1702.421875,
+          "top": -610.453125,
+          "bottom": 6916.28125,
           "width": 968,
-          "height": 2164.875
+          "height": 7526.734375
         },
         "canvas": {
           "left": 376,
           "right": 1344,
-          "top": -462.453125,
-          "bottom": 1702.421875,
+          "top": -610.453125,
+          "bottom": 3436.046875,
           "width": 968,
-          "height": 2164.875
+          "height": 4046.5
         },
         "workpackShell": {
           "left": 376,
           "right": 1344,
-          "top": -462.453125,
-          "bottom": 1702.421875,
+          "top": -610.453125,
+          "bottom": 1554.421875,
           "width": 968,
           "height": 2164.875
         },
         "documentEditor": {
           "left": 672,
           "right": 1344,
-          "top": -462.453125,
-          "bottom": 1702.421875,
+          "top": -610.453125,
+          "bottom": 1554.421875,
           "width": 672,
           "height": 2164.875
         },
         "exportPanel": {
           "left": 705,
           "right": 1311,
-          "top": 565.34375,
-          "bottom": 1552.625,
+          "top": 417.34375,
+          "bottom": 1404.625,
           "width": 606,
           "height": 987.28125
         },
@@ -257,26 +452,113 @@
             "text": "Excel 표 양식(.xlsx)",
             "left": 724,
             "right": 908,
-            "top": 648.140625,
-            "bottom": 693.03125
+            "top": 500.140625,
+            "bottom": 545.03125
           },
           {
             "text": "한글 표 양식(.hwp)",
             "left": 916,
             "right": 1100,
-            "top": 648.140625,
-            "bottom": 693.03125
+            "top": 500.140625,
+            "bottom": 545.03125
           },
           {
             "text": "PDF(브라우저 인쇄)",
             "left": 1108,
             "right": 1292,
-            "top": 648.140625,
-            "bottom": 693.03125
+            "top": 500.140625,
+            "bottom": 545.03125
           }
         ],
-        "sidePanelCount": 0,
+        "sidePanelCount": 1,
         "greetingCount": 0,
+        "loginRequiredCount": 1,
+        "compactHeadOverlaps": [],
+        "largestCompactHeadHeight": 49,
+        "impactListHeight": 251.6875,
+        "citationGroupHeight": 561.34375,
+        "sharePanelHeight": 2114.84375,
+        "roleControlWidth": 400,
+        "phoneControlWidth": 400,
+        "workspaceSide": {
+          "left": 393,
+          "right": 1327,
+          "top": 3769.296875,
+          "bottom": 6899.28125,
+          "width": 934,
+          "height": 3129.984375
+        },
+        "workerPanel": {
+          "left": 394,
+          "right": 854,
+          "top": 4051.4375,
+          "bottom": 4771.4375,
+          "width": 460,
+          "height": 720
+        },
+        "workerCard": {
+          "left": 411,
+          "right": 837,
+          "top": 4305.4375,
+          "bottom": 4898.84375,
+          "width": 426,
+          "height": 593.40625
+        },
+        "workerEditGrid": {
+          "left": 424,
+          "right": 824,
+          "top": 4470.15625,
+          "bottom": 4851.65625,
+          "width": 400,
+          "height": 381.5
+        },
+        "compactHeads": [
+          {
+            "text": "운영 체크파일럿 체크리스트",
+            "width": 933.984375,
+            "height": 49
+          },
+          {
+            "text": "전체 문서팩1개 보강 대상",
+            "width": 538,
+            "height": 27
+          },
+          {
+            "text": "근거문서 반영 근거",
+            "width": 341.015625,
+            "height": 49
+          },
+          {
+            "text": "Operation Ontology작업 이력 그래프",
+            "width": 870,
+            "height": 27
+          },
+          {
+            "text": "상주 안전관리자클로에게 묻기",
+            "width": 426,
+            "height": 49
+          },
+          {
+            "text": "이력 저장비회원 임시 저장",
+            "width": 426,
+            "height": 49
+          },
+          {
+            "text": "근로자근로자·교육 확인",
+            "width": 426,
+            "height": 49
+          },
+          {
+            "text": "메시지 미리보기관리자용 한국어 메시지 미리보기",
+            "width": 872,
+            "height": 49
+          },
+          {
+            "text": "이력문서팩·교육 이력",
+            "width": 426,
+            "height": 49
+          }
+        ],
         "shellClass": "command-center-shell workbench-root workspace-theme-night"
       }
     },
@@ -290,57 +572,64 @@
       "pass": true,
       "buttonsContained": true,
       "buttonsSeparated": true,
-      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\workspace-document-editor-layout\\evaluation\\workspace-document-editor-layout\\mobile-night.png",
-      "metrics": {
+      "screenshot": "mobile-night.png",
+      "collapsedMetrics": {
         "scrollWidth": 390,
-        "scrollHeight": 4418,
+        "scrollHeight": 7141,
+        "clientWidth": 390,
+        "clientHeight": 844,
+        "operationsOpen": false
+      },
+      "expandedMetrics": {
+        "scrollWidth": 390,
+        "scrollHeight": 14370,
         "clientWidth": 390,
         "clientHeight": 844,
         "editorSurface": {
           "left": 27,
           "right": 363,
-          "top": -1968.953125,
-          "bottom": 2051.875,
+          "top": -2073.953125,
+          "bottom": 11898.515625,
           "width": 336,
-          "height": 4020.828125
+          "height": 13972.46875
         },
         "fieldWorkspace": {
           "left": 27,
           "right": 363,
-          "top": -833.9375,
-          "bottom": 2051.875,
+          "top": -938.9375,
+          "bottom": 11898.515625,
           "width": 336,
-          "height": 2885.8125
+          "height": 12837.453125
         },
         "canvas": {
           "left": 27,
           "right": 363,
-          "top": -833.9375,
-          "bottom": 2051.875,
+          "top": -938.9375,
+          "bottom": 5235.5625,
           "width": 336,
-          "height": 2885.8125
+          "height": 6174.5
         },
         "workpackShell": {
           "left": 27,
           "right": 363,
-          "top": -833.9375,
-          "bottom": 2051.875,
+          "top": -938.9375,
+          "bottom": 1946.875,
           "width": 336,
           "height": 2885.8125
         },
         "documentEditor": {
           "left": 27,
           "right": 363,
-          "top": -644.9375,
-          "bottom": 2051.875,
+          "top": -749.9375,
+          "bottom": 1946.875,
           "width": 336,
           "height": 2696.8125
         },
         "exportPanel": {
           "left": 56,
           "right": 334,
-          "top": 483.953125,
-          "bottom": 1884.078125,
+          "top": 378.953125,
+          "bottom": 1779.078125,
           "width": 278,
           "height": 1400.125
         },
@@ -349,26 +638,113 @@
             "text": "Excel 표 양식(.xlsx)",
             "left": 69,
             "right": 321,
-            "top": 582.75,
-            "bottom": 627.640625
+            "top": 477.75,
+            "bottom": 522.640625
           },
           {
             "text": "한글 표 양식(.hwp)",
             "left": 69,
             "right": 321,
-            "top": 635.640625,
-            "bottom": 680.53125
+            "top": 530.640625,
+            "bottom": 575.53125
           },
           {
             "text": "PDF(브라우저 인쇄)",
             "left": 69,
             "right": 321,
-            "top": 688.53125,
-            "bottom": 731.421875
+            "top": 583.53125,
+            "bottom": 626.421875
           }
         ],
-        "sidePanelCount": 0,
+        "sidePanelCount": 1,
         "greetingCount": 0,
+        "loginRequiredCount": 1,
+        "compactHeadOverlaps": [],
+        "largestCompactHeadHeight": 76,
+        "impactListHeight": 251.6875,
+        "citationGroupHeight": 796.125,
+        "sharePanelHeight": 3928.28125,
+        "roleControlWidth": 240,
+        "phoneControlWidth": 240,
+        "workspaceSide": {
+          "left": 44,
+          "right": 346,
+          "top": 5982.6875,
+          "bottom": 11881.515625,
+          "width": 302,
+          "height": 5898.828125
+        },
+        "workerPanel": {
+          "left": 45,
+          "right": 345,
+          "top": 6547.09375,
+          "bottom": 7267.09375,
+          "width": 300,
+          "height": 720
+        },
+        "workerCard": {
+          "left": 62,
+          "right": 328,
+          "top": 6801.09375,
+          "bottom": 7430.5,
+          "width": 266,
+          "height": 629.40625
+        },
+        "workerEditGrid": {
+          "left": 75,
+          "right": 315,
+          "top": 7001.8125,
+          "bottom": 7383.3125,
+          "width": 240,
+          "height": 381.5
+        },
+        "compactHeads": [
+          {
+            "text": "운영 체크파일럿 체크리스트",
+            "width": 302,
+            "height": 49
+          },
+          {
+            "text": "전체 문서팩1개 보강 대상",
+            "width": 222,
+            "height": 27
+          },
+          {
+            "text": "근거문서 반영 근거",
+            "width": 302,
+            "height": 49
+          },
+          {
+            "text": "Operation Ontology작업 이력 그래프",
+            "width": 270,
+            "height": 54
+          },
+          {
+            "text": "상주 안전관리자클로에게 묻기",
+            "width": 266,
+            "height": 49
+          },
+          {
+            "text": "이력 저장비회원 임시 저장",
+            "width": 266,
+            "height": 49
+          },
+          {
+            "text": "근로자근로자·교육 확인",
+            "width": 266,
+            "height": 49
+          },
+          {
+            "text": "메시지 미리보기관리자용 한국어 메시지 미리보기",
+            "width": 240,
+            "height": 76
+          },
+          {
+            "text": "이력문서팩·교육 이력",
+            "width": 266,
+            "height": 49
+          }
+        ],
         "shellClass": "command-center-shell workbench-root workspace-theme-night"
       }
     }
