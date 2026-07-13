@@ -166,6 +166,24 @@ function parseJsonResult(raw: string) {
   }
 }
 
+function insertHwpTable(document: HwpDocument, paraIdx: number, rows: readonly (readonly string[])[], label: string): number {
+  const colCount = rows[0]?.length ?? 0;
+  if (!rows.length || !colCount || rows.some((row) => row.length !== colCount)) {
+    throw new Error(`${label} 표 데이터가 올바르지 않습니다.`);
+  }
+  const table = parseJsonResult(document.createTable(0, paraIdx, 0, rows.length, colCount));
+  if (!table?.ok || typeof table.paraIdx !== "number") {
+    throw new Error(`${label} 표를 만들지 못했습니다.`);
+  }
+  const controlIdx = typeof table.controlIdx === "number" ? table.controlIdx : 0;
+  rows.forEach((row, rIdx) => {
+    row.forEach((value, cIdx) => {
+      document.insertTextInCell(0, table.paraIdx as number, controlIdx, rIdx * colCount + cIdx, 0, 0, value);
+    });
+  });
+  return document.getParagraphCount(0) - 1;
+}
+
 function buildHwpBuffer(args: {
   title: string;
   rows: SheetRow[];
@@ -179,30 +197,19 @@ function buildHwpBuffer(args: {
   try {
     document.createBlankDocument();
 
-    document.insertText(0, 0, 0, `${title}(공식자료 기반 표 양식)\nSafeClaw · 현장 검토 후 사용\n\n`);
+    document.insertText(0, 0, 0, `${title}(공식자료 기반 표 양식)\nSafeClaw · 현장 검토 후 사용`);
+    const titleLength = document.getParagraphLength(0, 0);
+    document.splitParagraph(0, 0, titleLength);
+    let nextParaIdx = document.getParagraphCount(0) - 1;
 
     // Metadata table (4 col x 2 row)
     {
-      const cols = 4;
-      const rowCount = 2;
-      const tbl = parseJsonResult(document.createTable(0, 0, 0, rowCount, cols));
-      if (tbl?.ok && typeof tbl.paraIdx === "number") {
-        const paraIdx = tbl.paraIdx;
-        const controlIdx = typeof tbl.controlIdx === "number" ? tbl.controlIdx : 0;
-        const meta: string[][] = [
-          ["사업장", scenario.companyName, "현장/공정", scenario.siteName],
-          ["작업내용", scenario.workSummary, "인원/조건", `${scenario.workerCount}명 · ${scenario.weatherNote}`]
-        ];
-        meta.forEach((row, rIdx) => {
-          row.forEach((value, cIdx) => {
-            const cellIdx = rIdx * cols + cIdx;
-            document.insertTextInCell(0, paraIdx, controlIdx, cellIdx, 0, 0, String(value));
-          });
-        });
-      }
+      const meta: string[][] = [
+        ["사업장", scenario.companyName, "현장/공정", scenario.siteName],
+        ["작업내용", scenario.workSummary, "인원/조건", `${scenario.workerCount}명 · ${scenario.weatherNote}`]
+      ];
+      nextParaIdx = insertHwpTable(document, nextParaIdx, meta, "기본정보");
     }
-
-    document.insertText(0, 0, 0, "\n");
 
     // Body table
     const riskRows = profile.layout === "risk" && structuredRiskRows?.length
@@ -222,44 +229,23 @@ function buildHwpBuffer(args: {
         `${riskRow.owner || "작업반장"} / ${riskRow.dueDate || "작업 전"}`
       ])
       : rows.map((r, idx) => [
-        r.section || String(idx + 1),
+        profile.layout === "risk" ? (r.section || String(idx + 1)) : String(idx + 1),
         r.item || "",
         r.content || "",
         "□"
       ]);
     const allRows = [cols, ...bodyRows];
-    if (allRows.length >= 1 && colCount >= 1) {
-      const tbl = parseJsonResult(document.createTable(0, 0, 0, allRows.length, colCount));
-      if (tbl?.ok && typeof tbl.paraIdx === "number") {
-        const paraIdx = tbl.paraIdx;
-        const controlIdx = typeof tbl.controlIdx === "number" ? tbl.controlIdx : 0;
-        allRows.forEach((row, rIdx) => {
-          for (let cIdx = 0; cIdx < colCount; cIdx += 1) {
-            const value = row[cIdx] ?? "";
-            const cellIdx = rIdx * colCount + cIdx;
-            document.insertTextInCell(0, paraIdx, controlIdx, cellIdx, 0, 0, String(value));
-          }
-        });
-      }
-    }
+    nextParaIdx = insertHwpTable(document, nextParaIdx, allRows, "본문");
 
-    document.insertText(0, 0, 0, "\n\n확인 및 서명\n");
+    document.insertText(0, nextParaIdx, 0, "확인 및 서명");
+    const approvalLabelLength = document.getParagraphLength(0, nextParaIdx);
+    document.splitParagraph(0, nextParaIdx, approvalLabelLength);
+    nextParaIdx = document.getParagraphCount(0) - 1;
     const approvalRows = [
       ["작성자", "관리감독자", "교육/TBM 확인자", "확인일시"],
       ["성명/서명: ____________________", "성명/서명: ____________________", "성명/서명: ____________________", "____년 ____월 ____일 ____시 ____분"]
     ];
-    const approvalTable = parseJsonResult(document.createTable(0, 0, 0, approvalRows.length, approvalRows[0].length));
-    if (approvalTable?.ok && typeof approvalTable.paraIdx === "number") {
-      const paraIdx = approvalTable.paraIdx;
-      const controlIdx = typeof approvalTable.controlIdx === "number" ? approvalTable.controlIdx : 0;
-      approvalRows.forEach((row, rIdx) => {
-        row.forEach((value, cIdx) => {
-          document.insertTextInCell(0, paraIdx, controlIdx, rIdx * row.length + cIdx, 0, 0, value);
-        });
-      });
-    } else {
-      throw new Error("HWP 확인·서명 표를 만들지 못했습니다.");
-    }
+    insertHwpTable(document, nextParaIdx, approvalRows, "확인·서명");
 
     return Buffer.from(document.exportHwp());
   } finally {

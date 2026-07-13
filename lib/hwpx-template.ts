@@ -124,8 +124,17 @@ export function listAvailableTemplates(): { kind: HwpxTemplateKind; label: strin
  * `noSort` preserves the source template entry order. The committed templates
  * have `mimetype` first and STORED, and that entry is never mutated.
  */
+function escapeXmlText(value: string): string {
+  return value
+    .replace(/&/gu, "&amp;")
+    .replace(/</gu, "&lt;")
+    .replace(/>/gu, "&gt;")
+    .replace(/"/gu, "&quot;")
+    .replace(/'/gu, "&apos;");
+}
+
 export function localizeHwpxXmlText(text: string, companyName: string): string {
-  const replaceCompany = companyName.trim() || "사업장명 입력";
+  const replaceCompany = escapeXmlText(companyName.trim() || "사업장명 입력");
   return text
     .split("__COMPANY__").join(replaceCompany)
     .replace(

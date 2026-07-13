@@ -1,6 +1,7 @@
-import fs from "node:fs";
 import path from "node:path";
 import AdmZip from "adm-zip";
+import { DOMParser } from "@xmldom/xmldom";
+import { HwpDocument } from "@rhwp/core";
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 import { POST as exportHwp } from "@/app/api/export/hwp/route";
@@ -19,6 +20,28 @@ function firstLocalZipEntry(buffer: Buffer) {
 
 function readableEntries(zip: AdmZip) {
   return zip.getEntries().filter((entry) => !entry.isDirectory && /\.(xml|hpf|rdf|txt)$/iu.test(entry.entryName));
+}
+
+function getHwpCellText(document: HwpDocument, paraIdx: number, controlIdx: number, cellIdx: number) {
+  const length = document.getCellParagraphLength(0, paraIdx, controlIdx, cellIdx, 0);
+  return document.getTextInCell(0, paraIdx, controlIdx, cellIdx, 0, 0, length);
+}
+
+function listHwpTables(document: HwpDocument) {
+  const tables: Array<{ paraIdx: number; controlIdx: number }> = [];
+  for (let paraIdx = 0; paraIdx < document.getParagraphCount(0); paraIdx += 1) {
+    const positions = JSON.parse(document.getControlTextPositions(0, paraIdx)) as unknown;
+    if (!Array.isArray(positions)) continue;
+    positions.forEach((_position, controlIdx) => {
+      try {
+        const dimensions = JSON.parse(document.getTableDimensions(0, paraIdx, controlIdx)) as unknown;
+        if (dimensions && typeof dimensions === "object") tables.push({ paraIdx, controlIdx });
+      } catch {
+        // Non-table controls are intentionally ignored while enumerating the document.
+      }
+    });
+  }
+  return tables;
 }
 
 describe("localized editable document exports", () => {
@@ -56,13 +79,23 @@ describe("localized editable document exports", () => {
     );
   });
 
-  it("uses Korean row headings and a table-based approval area in HWP", async () => {
-    const source = fs.readFileSync(path.join(root, "app", "api", "export", "hwp", "route.ts"), "utf8");
-    expect(source).not.toContain('return ["No.",');
-    expect(source).toContain('return ["연번",');
-    expect(source).toContain("const approvalRows");
-    expect(source).not.toContain("[확인/서명]\\n작성자:");
+  it("XML-escapes substituted HWPX company names while preserving rendered text", () => {
+    const companyName = 'A&B 건설 "동부" <1공구>';
+    const output = buildHwpxFromTemplate("risk-assessment", companyName);
+    const zip = new AdmZip(output);
+    const textEntries = readableEntries(zip);
+    const matchingEntry = textEntries.find((entry) => entry.getData().toString("utf8").includes("A&amp;B"));
 
+    expect(matchingEntry).toBeDefined();
+    const xml = matchingEntry?.getData().toString("utf8") ?? "";
+    expect(xml).toContain("A&amp;B 건설 &quot;동부&quot; &lt;1공구&gt;");
+    const parsed = new DOMParser().parseFromString(xml, "application/xml");
+    expect(parsed.getElementsByTagName("parsererror")).toHaveLength(0);
+    expect(parsed.documentElement?.textContent).toContain(companyName);
+    expect(firstLocalZipEntry(output)).toEqual({ fileName: "mimetype", compressionMethod: 0 });
+  });
+
+  it("uses Korean row headings and a table-based approval area in HWP", async () => {
     const response = await exportHwp(new NextRequest("http://localhost/api/export/hwp", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -78,6 +111,28 @@ describe("localized editable document exports", () => {
     const binary = Buffer.from(await response.arrayBuffer());
     expect(binary.subarray(0, 8).toString("hex")).toBe("d0cf11e0a1b11ae1");
     expect(binary.length).toBeGreaterThan(1_000);
+
+    const reloaded = new HwpDocument(new Uint8Array(binary));
+    try {
+      const tables = listHwpTables(reloaded);
+      expect(tables).toHaveLength(3);
+      expect(tables.map((table) => table.paraIdx)).toEqual([...tables.map((table) => table.paraIdx)].sort((a, b) => a - b));
+      expect(tables[0].paraIdx).toBeLessThan(tables[1].paraIdx);
+      expect(tables[1].paraIdx).toBeLessThan(tables[2].paraIdx);
+      expect(getHwpCellText(reloaded, tables[0].paraIdx, tables[0].controlIdx, 0)).toContain("사업장");
+      expect(getHwpCellText(reloaded, tables[0].paraIdx, tables[0].controlIdx, 1)).toContain("테스트 건설");
+      expect(getHwpCellText(reloaded, tables[1].paraIdx, tables[1].controlIdx, 0)).toContain("연번");
+      expect(getHwpCellText(reloaded, tables[1].paraIdx, tables[1].controlIdx, 1)).toContain("항목");
+      expect(getHwpCellText(reloaded, tables[1].paraIdx, tables[1].controlIdx, 4)).toBe("1");
+      expect(getHwpCellText(reloaded, tables[2].paraIdx, tables[2].controlIdx, 0)).toContain("작성자");
+      expect(getHwpCellText(reloaded, tables[2].paraIdx, tables[2].controlIdx, 1)).toContain("관리감독자");
+
+      const approvalLabelPara = tables[2].paraIdx - 1;
+      const approvalLabelLength = reloaded.getParagraphLength(0, approvalLabelPara);
+      expect(reloaded.getTextRange(0, approvalLabelPara, 0, approvalLabelLength)).toContain("확인 및 서명");
+    } finally {
+      reloaded.free();
+    }
   });
 
   it("localizes HTML PDF table headers and typed 4M values", async () => {
