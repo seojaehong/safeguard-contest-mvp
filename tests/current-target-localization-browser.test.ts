@@ -3,7 +3,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { Browser, Page } from "playwright";
+import type { Browser, ConsoleMessage, Page } from "playwright";
+import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
+import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
+import { buildSampleWorkpack } from "@/lib/sample-workpack";
 import {
   startIsolatedNextBrowserHarness,
   type IsolatedNextBrowserHarness
@@ -11,8 +14,8 @@ import {
 
 type Theme = "day" | "night";
 type RouteContract = {
-  name: "reports" | "ontology" | "knowledge";
-  pathname: "/reports" | "/ontology" | "/knowledge";
+  name: "reports" | "ontology" | "knowledge" | "workspace";
+  pathname: "/reports" | "/ontology" | "/knowledge" | "/workspace";
   readyRole: "article" | "region";
   readyName: string;
   forbiddenPattern: RegExp;
@@ -48,11 +51,18 @@ const routes: RouteContract[] = [
     readyRole: "region",
     readyName: "지식 DB 상태",
     forbiddenPattern: /Built-in Wiki|Runtime Knowledge|Knowledge Catalog|KOSHA Technical Support|KOSHA Reference Library|\b(?:Index|Hazards|Forms|Schema)\b/u
+  },
+  {
+    name: "workspace",
+    pathname: "/workspace",
+    readyRole: "region",
+    readyName: "작업 이력 그래프",
+    forbiddenPattern: /\b(?:Ack\s+Node|Operation Ontology)\b/u
   }
 ];
 const viewports = [
-  { label: "desktop" as const, width: 1440, height: 900 },
-  { label: "mobile" as const, width: 390, height: 844 }
+  { label: "desktop" as const, width: 1440, height: 1000 },
+  { label: "mobile" as const, width: 391, height: 844 }
 ];
 
 let harness: IsolatedNextBrowserHarness | null = null;
@@ -65,11 +75,81 @@ function buildId(): string | null {
   return fs.existsSync(buildIdPath) ? fs.readFileSync(buildIdPath, "utf8").trim() : null;
 }
 
+function buildOperationMemoryWorkpack() {
+  const sample = buildSampleWorkpack();
+  const packet = buildDbHarnessPacket({
+    question: sample.question,
+    references: [{
+      id: "current-target-operation-memory-reference",
+      source_id: "current-target-browser-fixture",
+      item_type: "technical-guideline",
+      category: "추락",
+      subcategory: "비계",
+      title: "이동식 비계 추락 예방 지침",
+      summary: "작업 전 난간과 작업발판 상태를 확인합니다.",
+      keywords: ["비계", "추락"],
+      risk_tags: ["fall"],
+      primary_documents: ["위험성평가표", "TBM 브리핑"],
+      controls: ["난간과 작업발판 상태 확인"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    }]
+  });
+  sample.dbHarness = {
+    packet,
+    promptContext: buildHarnessPromptContext(packet),
+    summary: {
+      mode: packet.mode,
+      llmRole: packet.generationContract.llmRole,
+      llmOutputScope: packet.generationContract.llmOutputScope,
+      evidenceAuthority: packet.generationContract.evidenceAuthority,
+      providerRetryScope: packet.generationContract.providerRetryScope,
+      fallbackChainAllowed: packet.generationContract.fallbackChainAllowed,
+      genericProseSubstitutionAllowed: packet.generationContract.genericProseSubstitutionAllowed,
+      missingEvidencePolicy: packet.generationContract.missingEvidencePolicy,
+      directEvidence: packet.directEvidence.length,
+      sifCases: packet.sifCases.length,
+      supportingEvidence: packet.supportingEvidence.length,
+      improvementMemory: packet.improvementMemory.length,
+      workpackMemory: packet.workpackMemory.length,
+      missingEvidence: packet.generationContract.missingEvidence,
+      documentCoverage: packet.generationContract.documentCoverage,
+      retrievalContract: packet.retrievalContract,
+      ontologyStatus: packet.ontologyChecklist.status
+    }
+  };
+  return sample;
+}
+
+function collectRecoverableHydrationErrors(page: Page): string[] {
+  const errors: string[] = [];
+  const record = (message: string): void => {
+    if (/recoverable hydration|hydration failed|server rendered html|hydration mismatch/iu.test(message)) {
+      errors.push(message);
+    }
+  };
+  page.on("console", (message: ConsoleMessage) => {
+    if (message.type() === "error" || message.type() === "warning") record(message.text());
+  });
+  page.on("pageerror", (error: Error) => record(error.message));
+  return errors;
+}
+
 async function prepareRoute(page: Page, contract: RouteContract, theme: Theme): Promise<void> {
   if (!harness) throw new Error("Browser harness was not started");
+  if (contract.name === "workspace") {
+    const stored = buildStoredCurrentWorkpack(buildOperationMemoryWorkpack());
+    await page.addInitScript(
+      ({ key, value }) => window.localStorage.setItem(key, value),
+      { key: CURRENT_WORKPACK_STORAGE_KEY, value: JSON.stringify(stored) }
+    );
+  }
   await page.goto(`${harness.baseUrl}${contract.pathname}?theme=${theme}`, { waitUntil: "networkidle" });
   if (contract.name === "reports") {
     await page.getByRole("button", { name: "샘플 미리보기" }).click();
+  }
+  if (contract.name === "workspace") {
+    await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
   }
   await page.getByRole(contract.readyRole, { name: contract.readyName }).waitFor({ state: "visible" });
 }
@@ -142,6 +222,16 @@ describe("current target localization browser matrix", () => {
     await page.close();
   }, 120_000);
 
+  it("hydrates the workspace operation-memory surface without recoverable errors", async () => {
+    if (!browser) throw new Error("Browser harness was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const recoverableErrors = collectRecoverableHydrationErrors(page);
+    await prepareRoute(page, routes[3], "day");
+    await page.waitForTimeout(250);
+    expect(recoverableErrors).toEqual([]);
+    await page.close();
+  }, 120_000);
+
   it.each(routes.flatMap((contract) => (
     (["day", "night"] as const).flatMap((theme) => (
       viewports.map((viewport) => ({ contract, theme, ...viewport }))
@@ -149,6 +239,7 @@ describe("current target localization browser matrix", () => {
   )))("keeps $contract.name Korean and contained in $theme $label", async ({ contract, theme, width, height, label }) => {
     if (!browser || !harness) throw new Error("Browser harness was not started");
     const page = await browser.newPage({ viewport: { width, height } });
+    const recoverableErrors = collectRecoverableHydrationErrors(page);
     await prepareRoute(page, contract, theme);
     const metrics = await page.evaluate(({ meaningfulSelector, issueSource, issueFlags }) => {
       const clippingValues = new Set(["auto", "clip", "hidden", "scroll"]);
@@ -246,6 +337,7 @@ describe("current target localization browser matrix", () => {
     expect(metrics.unnamedInteractiveCount).toBe(0);
     expect(metrics.issueOverlayDetected).toBe(false);
     expect(metrics.bodyText).not.toMatch(contract.forbiddenPattern);
+    expect(recoverableErrors).toEqual([]);
 
     const evidence = {
       sourceSha,

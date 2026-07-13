@@ -109,6 +109,12 @@ function clampCoordinate(value: number) {
   return Math.min(Math.max(Math.round(value * 10) / 10, 8), 92);
 }
 
+function compareStableText(left: string, right: string) {
+  if (left < right) return -1;
+  if (left > right) return 1;
+  return 0;
+}
+
 function metaLabel(key: string) {
   if (key === "sourceId") return "원본 ID";
   if (key === "generatedAt") return "생성 시각";
@@ -157,7 +163,7 @@ function metaRows(node: OperationMemoryNode): OperationMemoryHoverCard["metaRows
     .sort((a, b) => {
       const priorityDelta = (priority.get(a.key) ?? 100) - (priority.get(b.key) ?? 100);
       if (priorityDelta !== 0) return priorityDelta;
-      return a.label.localeCompare(b.label, "ko");
+      return compareStableText(a.label, b.label);
     })
     .slice(0, 5);
 }
@@ -197,7 +203,7 @@ export function buildOperationMemoryVisualizationModel(
       if (priorityDelta !== 0) return priorityDelta;
       const degreeDelta = (b.incomingCount + b.outgoingCount) - (a.incomingCount + a.outgoingCount);
       if (degreeDelta !== 0) return degreeDelta;
-      return a.label.localeCompare(b.label, "ko");
+      return compareStableText(a.label, b.label);
     });
 
   const degreeById = new Map<string, number>();
@@ -237,11 +243,11 @@ export function buildOperationMemoryVisualizationModel(
       detail: node.detail,
       metaRows: metaRows(node),
       related: [...outgoingRelations, ...incomingRelations].sort((a, b) => {
-        const directionDelta = a.direction.localeCompare(b.direction);
+        const directionDelta = compareStableText(a.direction, b.direction);
         if (directionDelta !== 0) return directionDelta;
-        const relationDelta = operationRelationLabel(a.rel).localeCompare(operationRelationLabel(b.rel), "ko");
+        const relationDelta = compareStableText(operationRelationLabel(a.rel), operationRelationLabel(b.rel));
         if (relationDelta !== 0) return relationDelta;
-        return a.nodeLabel.localeCompare(b.nodeLabel, "ko");
+        return compareStableText(a.nodeLabel, b.nodeLabel);
       })
     };
   });
@@ -251,7 +257,7 @@ export function buildOperationMemoryVisualizationModel(
     if (b.kind === "Workpack") return 1;
     const degreeDelta = (degreeById.get(b.id) || 0) - (degreeById.get(a.id) || 0);
     if (degreeDelta !== 0) return degreeDelta;
-    return a.label.localeCompare(b.label, "ko");
+    return compareStableText(a.label, b.label);
   }).slice(0, MAX_OPERATION_MAP_NODES);
 
   const outerNodes = sortedNodes.filter((node) => node.kind !== "Workpack");

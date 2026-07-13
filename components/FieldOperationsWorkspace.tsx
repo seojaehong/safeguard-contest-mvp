@@ -74,19 +74,22 @@ type WorkspaceSaveSnapshot = {
 
 type ClawContextResponse = { sites?: ClawSiteOption[] };
 
-function resolveInitialWorkerState(data: AskResponse, generationFingerprint?: string): InitialWorkerState {
+function resolveInitialWorkerState(data: AskResponse): InitialWorkerState {
   const fallbackWorkers = buildDefaultWorkers(data);
-  const fallback = {
+  return {
     workers: fallbackWorkers,
     selectedWorkerIds: fallbackWorkers.map((worker) => worker.id)
   };
-  if (typeof window === "undefined") return fallback;
+}
+
+function resolveStoredInitialWorkerState(data: AskResponse, generationFingerprint?: string): InitialWorkerState | null {
+  if (typeof window === "undefined") return null;
 
   const stored = parseStoredCurrentWorkpack(window.localStorage.getItem(CURRENT_WORKPACK_STORAGE_KEY));
   const sameGeneration = stored && generationFingerprint
     ? stored.generationFingerprint === generationFingerprint
     : stored?.data.question === data.question;
-  if (!stored?.workerSnapshot || !sameGeneration) return fallback;
+  if (!stored?.workerSnapshot || !sameGeneration) return null;
 
   return {
     workers: stored.workerSnapshot.workers,
@@ -761,7 +764,7 @@ function WorkspaceOperationGraphPanel({
   session: Session | null;
   storageSnapshot: WorkspaceSaveSnapshot;
 }) {
-  const [generatedAt] = useState(() => new Date().toISOString());
+  const generatedAt = data.qualityContract?.generatedAt || "생성 시각 확인 전";
   const [serverGraph, setServerGraph] = useState<OperationMemoryGraph | null>(null);
   const [graphMessage, setGraphMessage] = useState("");
   const authToken = session?.access_token || "";
@@ -813,13 +816,13 @@ function WorkspaceOperationGraphPanel({
 
   const graph = serverGraph || localGraph;
   const ackMessage = graph.summary.ackCount
-    ? `열람 확인 ${graph.summary.ackCount}건이 Ack 노드로 연결됐습니다.`
-    : "공유 후 작업자가 확인하면 Ack 노드가 채워집니다.";
+    ? `열람 확인 ${graph.summary.ackCount}건이 열람 확인 노드로 연결됐습니다.`
+    : "공유 후 작업자가 확인하면 열람 확인 노드가 채워집니다.";
 
   return (
     <OperationMemoryGraphViewer
       graph={graph}
-      eyebrow="Operation Ontology"
+      eyebrow="작업 이력 온톨로지"
       title="작업 이력 그래프"
       className="workspace-operation-memory"
       description={(
@@ -850,7 +853,7 @@ export function FieldOperationsWorkspace({
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
   surface?: "full" | "share" | "editor";
 }) {
-  const [initialWorkerState] = useState(() => resolveInitialWorkerState(data, generationFingerprint));
+  const [initialWorkerState] = useState(() => resolveInitialWorkerState(data));
   const [editedDeliverables, setEditedDeliverables] = useState<WorkpackDocumentValues | null>(null);
   const editorDataRef = useRef(data);
   const dataRef = useRef(data);
@@ -886,6 +889,13 @@ export function FieldOperationsWorkspace({
     savedCount: 0,
     workerMap: {}
   });
+
+  useEffect(() => {
+    const storedState = resolveStoredInitialWorkerState(data, generationFingerprint);
+    if (!storedState) return;
+    setWorkers(storedState.workers);
+    setSelectedWorkerIds(storedState.selectedWorkerIds);
+  }, [data, generationFingerprint]);
 
   useEffect(() => {
     const token = activeClawAuthToken;
