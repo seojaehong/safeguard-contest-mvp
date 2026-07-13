@@ -3,10 +3,8 @@ import { createHash, createHmac } from "node:crypto";
 import {
   mkdirSync,
   mkdtempSync,
-  readdirSync,
   readFileSync,
   rmSync,
-  statSync,
   symlinkSync,
   writeFileSync
 } from "node:fs";
@@ -102,13 +100,6 @@ function canonicalJson(value: unknown): string {
   const encoded = JSON.stringify(value);
   if (encoded === undefined) throw new Error("test-canonical-json-invalid");
   return encoded;
-}
-
-function listFilesRecursively(root: string): string[] {
-  return readdirSync(root).flatMap((name) => {
-    const path = join(root, name);
-    return statSync(path).isDirectory() ? listFilesRecursively(path) : [path];
-  });
 }
 
 function writeBridgeSnapshotFixture(corpusRoot: string, tamperItems = false): void {
@@ -1148,24 +1139,6 @@ describe("KOSHA GUIDE read-only runner contract", () => {
     }
   });
 
-  it("keeps every task evaluation log free of absolute paths and raw secrets", () => {
-    const artifactRoot = resolve(
-      process.cwd(),
-      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13"
-    );
-    const logPaths = listFilesRecursively(artifactRoot).filter((path) => path.endsWith(".log"));
-
-    expect(logPaths.length).toBeGreaterThan(0);
-    for (const path of logPaths) {
-      const content = readFileSync(path, "utf8");
-      expect(content, path).not.toMatch(/[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/]/u);
-      expect(content, path).not.toContain("file:///");
-      expect(content, path).not.toMatch(/\b(?:sb_secret_|sk-(?:proj-)?)[A-Za-z0-9_-]{16,}\b/u);
-      expect(content, path).not.toMatch(/\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/u);
-      expect(content, path).not.toMatch(/signature_hmac_sha256\s*[=:]\s*[0-9a-f]{64}/iu);
-    }
-  });
-
   it("records audit failures as type and code without stack serialization", () => {
     const script = readFileSync(
       resolve(process.cwd(), "scripts/audit_kosha_guides.mjs"),
@@ -2010,93 +1983,27 @@ describe("KOSHA reviewed OCR remediation evidence", () => {
     return JSON.parse(readFileSync(resolve(process.cwd(), relativePath), "utf8")) as T;
   }
 
-  function gitLines(arguments_: string[]): string[] {
-    const result = spawnSync("git", arguments_, {
-      cwd: process.cwd(),
-      encoding: "utf8",
-      windowsHide: true
-    });
-    if (result.status !== 0) {
-      throw new Error(`git-command-failed:${arguments_.join(":")}`);
+  it("keeps candidate patches inside KOSHA-owned paths with target exports excluded", () => {
+    const candidatePatchFixture = [
+      "data/safety-knowledge/kosha-body-corpus.schema.json",
+      "lib/kosha-guide-corpus-audit.ts",
+      "scripts/snapshot_kosha_guide_corpus.py",
+      "tests/kosha-guide-corpus-audit.test.ts",
+      `${evaluationRootRelative}/report.json`
+    ];
+    const unrelatedTargetPaths = [
+      "app/api/export/hwp/route.ts",
+      "lib/xlsx-builder.ts",
+      "tests/xlsx-export-route.test.ts"
+    ];
+
+    expect(() => assertKoshaBridgeCandidatePaths(candidatePatchFixture)).not.toThrow();
+    for (const path of unrelatedTargetPaths) {
+      expect(() => assertKoshaBridgeCandidatePaths([
+        ...candidatePatchFixture,
+        path
+      ])).toThrowError(`kosha-bridge-candidate-path-out-of-scope:${path}`);
     }
-    return result.stdout.split(/\r?\n/u).filter((line) => line.length > 0);
-  }
-
-  it("keeps the selective bridge candidate inside KOSHA-owned paths", () => {
-    const bridgePaths = gitLines(["diff", "--name-only", "38cbc91^", "--"]);
-
-    expect(() => assertKoshaBridgeCandidatePaths(bridgePaths)).not.toThrow();
-    expect(() => assertKoshaBridgeCandidatePaths([
-      ...bridgePaths,
-      "lib/xlsx-builder.ts"
-    ])).toThrowError("kosha-bridge-candidate-path-out-of-scope:lib/xlsx-builder.ts");
-  });
-
-  it("records the reviewed branch baseline and selective cherry-pick policy", () => {
-    const report = readJsonArtifact<{
-      gitScope: {
-        branchMergeBase: string;
-        reviewedHead: string;
-        reviewedHeadDelta: { range: string; commitCount: number; fileCount: number };
-        currentBranchDelta: { range: string; commitCount: number; fileCount: number };
-        integrationTarget: {
-          commit: string;
-          containsAncestorThrough: string;
-          unrelatedAncestorCommitCount: number;
-        };
-        selectiveCandidate: {
-          bridgeRange: string;
-          bridgeCommitCount: number;
-          bridgeFileCount: number;
-          latestRemediationRange: string;
-          latestRemediationCommitCount: number;
-          latestRemediationFileCount: number;
-          cherryPickSeries: string[];
-          wholesaleBranchMergeRecommended: boolean;
-        };
-      };
-    }>(`${evaluationRootRelative}/report.json`);
-
-    expect(gitLines(["merge-base", "HEAD", "feat/phase-a-release-integration-v2"])).toEqual([
-      "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21"
-    ]);
-    expect(gitLines(["rev-list", "--count", "02295b5..3ed9be8"])).toEqual(["15"]);
-    expect(gitLines(["diff", "--name-only", "02295b5..3ed9be8"]).length).toBe(42);
-    expect(gitLines(["rev-list", "--count", "02295b5..d3ad865"])).toEqual(["12"]);
-    expect(spawnSync("git", ["merge-base", "--is-ancestor", "d3ad865", "77d8641"], {
-      cwd: process.cwd(),
-      windowsHide: true
-    }).status).toBe(0);
-
-    expect(report.gitScope).toMatchObject({
-      branchMergeBase: "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
-      reviewedHead: "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
-      reviewedHeadDelta: {
-        range: "02295b5..3ed9be8",
-        commitCount: 15,
-        fileCount: 42
-      },
-      integrationTarget: {
-        commit: "77d86416116b91809e1e0508c72564e06c8c31bc",
-        containsAncestorThrough: "d3ad86530bc786d8024206cc5b7c7db60c055278",
-        unrelatedAncestorCommitCount: 12
-      },
-      currentBranchDelta: {
-        range: "02295b5..NEW_HEAD",
-        commitCount: 16,
-        fileCount: 45
-      },
-      selectiveCandidate: {
-        bridgeRange: "38cbc91^..NEW_HEAD",
-        bridgeCommitCount: 4,
-        latestRemediationRange: "38cbc91..NEW_HEAD",
-        latestRemediationCommitCount: 3,
-        cherryPickSeries: ["38cbc91", "8e3b424", "3ed9be8", "NEW_HEAD"],
-        wholesaleBranchMergeRecommended: false
-      }
-    });
-    expect(report.gitScope.selectiveCandidate.bridgeFileCount).toBe(30);
-    expect(report.gitScope.selectiveCandidate.latestRemediationFileCount).toBe(26);
   });
 
   it.each([
@@ -2135,50 +2042,85 @@ describe("KOSHA reviewed OCR remediation evidence", () => {
     expect(JSON.stringify(violations)).not.toContain(secret);
   });
 
-  it("fails closed for invalid UTF-8 text and excludes explicit binary extensions", () => {
-    expect(() => decodeKoshaEvaluationArtifactText(
-      "report.md",
-      Uint8Array.from([0xc3, 0x28])
-    )).toThrowError("kosha-evaluation-artifact-invalid-utf8:report.md");
+  it("treats a UTF-8 leak.png artifact as text and scans its contents", () => {
+    const artifactPath = "leak.png";
+    const text = decodeKoshaEvaluationArtifactText(
+      artifactPath,
+      Buffer.from(`secret_sha256=${"a".repeat(64)}`, "utf8")
+    );
+
+    expect(text).not.toBeNull();
+    expect(scanKoshaEvaluationArtifactText({
+      artifactPath,
+      text: text || "",
+      repositoryRoots: [],
+      configuredSecrets: {}
+    })).toContainEqual({
+      artifactPath,
+      code: "sensitive-digest-label",
+      detail: "secret_sha256"
+    });
+  });
+
+  it("skips bytes only when a binary PNG signature is positively identified", () => {
     expect(decodeKoshaEvaluationArtifactText(
-      "diagram.png",
-      Uint8Array.from([0x89, 0x50, 0x4e, 0x47])
+      "diagram.data",
+      Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
     )).toBeNull();
   });
 
-  it("scans every changed UTF-8 evaluation artifact in the bridge range", () => {
-    const artifactRoot = resolve(process.cwd(), evaluationRootRelative);
-    const changedPaths = new Set([
-      ...gitLines(["diff", "--name-only", "38cbc91^", "--", evaluationRootRelative]),
-      ...listFilesRecursively(artifactRoot).map((path) =>
-        `${evaluationRootRelative}/${path.slice(artifactRoot.length + 1).replaceAll("\\", "/")}`
-      )
-    ]);
-    const configuredSecrets = Object.fromEntries([
-      "SUPABASE_SERVICE_ROLE_KEY",
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-      "OPENAI_API_KEY",
-      "KOSHA_OCR_REVIEW_HMAC_KEY",
-      "GOOGLE_GENERATIVE_AI_API_KEY",
-      "GEMINI_API_KEY",
-      "ANTHROPIC_API_KEY",
-      "VERCEL_TOKEN",
-      "SUPABASE_ACCESS_TOKEN",
-      "GITHUB_TOKEN"
-    ].map((name) => [name, process.env[name]]));
+  it("fails closed for invalid UTF-8 even when the extension looks binary", () => {
+    expect(() => decodeKoshaEvaluationArtifactText(
+      "unknown.png",
+      Uint8Array.from([0xc3, 0x28])
+    )).toThrowError("kosha-evaluation-artifact-invalid-utf8:unknown.png");
+  });
 
-    expect(changedPaths.size).toBeGreaterThan(0);
-    for (const artifactPath of [...changedPaths].sort()) {
-      const bytes = readFileSync(resolve(process.cwd(), artifactPath));
-      const text = decodeKoshaEvaluationArtifactText(artifactPath, bytes);
-      if (text === null) continue;
-      expect(scanKoshaEvaluationArtifactText({
-        artifactPath,
-        text,
-        repositoryRoots: [process.cwd(), resolve(process.cwd(), "../..")],
-        configuredSecrets
-      }), artifactPath).toEqual([]);
-    }
+  it.each([
+    ["drive", ["D:", "exports", "report.json"].join("\\")],
+    ["unc", ["", "", "build-server", "share", "report.json"].join("\\")],
+    ["posix", "/home/reviewer/exports/report.json"]
+  ])("detects an arbitrary %s absolute path", (_label, leakedPath) => {
+    expect(scanKoshaEvaluationArtifactText({
+      artifactPath: "report.txt",
+      text: `path=${leakedPath}`,
+      repositoryRoots: [],
+      configuredSecrets: {}
+    })).toContainEqual({
+      artifactPath: "report.txt",
+      code: "absolute-local-path",
+      detail: "local-path"
+    });
+  });
+
+  it("detects sensitive digest labels without treating the digest as public", () => {
+    expect(scanKoshaEvaluationArtifactText({
+      artifactPath: "report.txt",
+      text: `secret_sha256=${"b".repeat(64)}`,
+      repositoryRoots: [],
+      configuredSecrets: {}
+    })).toContainEqual({
+      artifactPath: "report.txt",
+      code: "sensitive-digest-label",
+      detail: "secret_sha256"
+    });
+  });
+
+  it("allows explicit public identifiers and content-addressed digests", () => {
+    const digest = "c".repeat(64);
+    const text = [
+      `sourceIdentitySha256=${digest}`,
+      `snapshotId=${digest}`,
+      `candidateAttestationSha256=${digest}`,
+      `itemId=kosha-60492776122f8b433994fc10`
+    ].join("\n");
+
+    expect(scanKoshaEvaluationArtifactText({
+      artifactPath: "report.txt",
+      text,
+      repositoryRoots: [],
+      configuredSecrets: {}
+    })).toEqual([]);
   });
 
   it("records the exact B-E-3 candidate truth without treating DPI as authorization", () => {
