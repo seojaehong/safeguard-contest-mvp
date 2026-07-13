@@ -18,6 +18,7 @@ import {
   parseStructuredRiskAssessmentRows,
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
+import type { AccidentType, FourM } from "@/lib/risk-assessment-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -157,6 +158,44 @@ function localizeVerificationStatus(value: string | undefined): string {
   return value?.trim() || "확인";
 }
 
+const FOUR_M_LABELS = {
+  Man: "인적 요인",
+  Machine: "기계·설비 요인",
+  Media: "작업환경 요인",
+  Management: "관리 요인"
+} satisfies Readonly<Record<FourM, string>>;
+
+const ACCIDENT_TYPE_LABELS = {
+  fall: "추락",
+  slip: "미끄러짐",
+  struckBy: "맞음",
+  caughtIn: "끼임",
+  cut: "베임",
+  burn: "화상",
+  electricShock: "감전",
+  chemicalExposure: "화학물질 노출",
+  asphyxiation: "질식",
+  heatIllness: "온열질환",
+  traffic: "교통사고",
+  collapse: "붕괴",
+  fireExplosion: "화재·폭발",
+  other: "기타"
+} satisfies Readonly<Record<AccidentType, string>>;
+
+function localizeFourM(value: string | undefined): string {
+  const normalized = value?.trim();
+  return normalized && normalized in FOUR_M_LABELS
+    ? FOUR_M_LABELS[normalized as FourM]
+    : normalized || "확인";
+}
+
+function localizeAccidentType(value: string | undefined): string {
+  const normalized = value?.trim();
+  return normalized && normalized in ACCIDENT_TYPE_LABELS
+    ? ACCIDENT_TYPE_LABELS[normalized as AccidentType]
+    : normalized || "확인";
+}
+
 function readNumber(value: unknown, fallback = 0) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
@@ -289,6 +328,8 @@ function structuredRiskRowsToPdfRows(rows: StructuredRiskAssessmentRow[], docume
     const localizedStatus = localizeVerificationStatus(row.verificationStatus || row.status);
     const localizedRow: StructuredRiskAssessmentRow = {
       ...row,
+      fourM: localizeFourM(row.fourM),
+      accidentType: localizeAccidentType(row.accidentType),
       riskLevel: localizeRiskLevel(row.riskLevel),
       status: localizedStatus,
       verificationStatus: localizedStatus
