@@ -1,3 +1,4 @@
 
 > safeclaw@0.1.0 typecheck
 > tsc --noEmit --incremental false
+TYPECHECK_EXIT=0

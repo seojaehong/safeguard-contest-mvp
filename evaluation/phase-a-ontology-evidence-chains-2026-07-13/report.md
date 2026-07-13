@@ -4,7 +4,7 @@
 - Branch: `fix/phase-a-ontology-review`
 - Base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
 - Contract: `phase-a-evidence-chains/1.3.0`
-- Status: fresh-review findings remediated, awaiting re-review
+- Status: final-correction findings remediated, awaiting re-review
 - Runtime/DB publication: not performed
 - Schema, migration, Supabase data, generated core seed: unchanged
 
@@ -83,6 +83,7 @@ SIF-only evidence returns `review_required`; there is no fifth `neither` state.
 - MCP `provenance` remains the backward-compatible `법제처 검증 시드 v1`; the layered pack is returned separately in `evidenceContract`, with `evidenceChainState=review_required` while the KOSHA bridge is unresolved.
 - Planning remains deterministic: 9 controls create 18 risk-assessment/TBM targets and retain production item UID, local item ID, local chunk ID, exact SHA-256, page/location, and unresolved bridge state without inventing a chunk citation.
 - Planned targets are `materializationTargets`; they are not completion claims. `verifiedRecords` are created only after exact inspection of a generated risk-assessment/TBM line containing both the Control label and a Control-scoped current-law Article UID or verified KOSHA technical-guidance UID.
+- Evidence UIDs must appear as complete, delimiter-bounded citation tokens. Article `제172조` does not match `제172조의2`, and KOSHA UID prefix/suffix collisions do not materialize a Control.
 - SIF evidence remains `hazard_priority_only` and can never materialize a Control, even when a SIF UID appears on the same generated line as the Control label. Wrong-source and different-line citations also produce no record.
 - `review_required`, unverified, unpublished, unmatched, or Control-level `review_required` output always produces zero verified materialization records. Human confirmation remains pending in the tool result.
 
@@ -125,6 +126,13 @@ SIF-only evidence returns `review_required`; there is no fifth `neither` state.
 | F-3 coverage stopped below the production handler | Added full production-shaped handler tests proving all three aliases expose `evidenceContract`, verified-record gating, and pending human confirmation, plus positive law/KOSHA and unresolved paths. |
 | F-4 report artifact state contradicted Git | `report.json` now records the report and logs as committed branch artifacts, matching this report. |
 
+## Final corrections
+
+| Finding | Remediation |
+|---|---|
+| C-1 citation matching accepted UID substrings | Replaced citation `includes` matching with NFC-normalized extraction that requires explicit token boundaries on both sides. Law `제172조` versus `제172조의2` and both KOSHA prefix/suffix collisions fail closed while same-line Control and source-role gates remain unchanged. |
+| C-2 exact punctuated vehicle alias lacked handler coverage | Added `차량계·기계 인접작업` to the actual production handler matrix and verified it resolves to `지게차 상하차` with the existing pending-confirmation semantics. |
+
 ## Official law verification
 
 The current `산업안전보건기준에 관한 규칙` was checked as effective `2026-03-02` under 고용노동부령 제450호.
@@ -148,7 +156,9 @@ The Article 172 direct surface identifies `접촉의 방지`: paragraph 1 prohib
 - Independent-review TDD RED: 10 failing assertions were observed across three RED cycles for sequence, fail-closed behavior, materialization separation, Control-level review gating, MCP output, and Article 172.
 - Fresh-review TDD RED: 8 tests failed and 48 passed in one 56-test RED run, covering source-role leakage and the missing production handler seam.
 - Fresh-review targeted GREEN: 2 files passed, 59 tests passed, including handler-level SIF, line-location, KOSHA, law, alias, and pending-confirmation cases.
-- Focused ontology/generation/MCP/commercial/DB harness plus production handler, serial: 6 files passed, 132 tests passed.
+- Final-correction TDD RED: 3 tests failed and 60 passed in one 63-test RED run for Article suffix and KOSHA prefix/suffix collisions.
+- Final-correction targeted GREEN: 2 files passed, 63 tests passed, including the exact `차량계·기계 인접작업` handler alias.
+- Focused ontology/generation/MCP/commercial/DB harness plus production handler, serial: 6 files passed, 136 tests passed.
 - Strict TypeScript: passed.
 - Previous full suite is informational only and was not rerun for this remediation: 125 files passed, 7 failed, 5 skipped; 1229 tests passed, 7 failed, 22 skipped. Failures were outside owned ontology/MCP/test/report files.
 - Full-suite failed suites: `knowledge-page-layout`, `product-module-shell`, and `reports-download-center` due missing `.next/prerender-manifest.json` or hook timeout during concurrent dev-server tests.

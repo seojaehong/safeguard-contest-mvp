@@ -1,10 +1,10 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-13T19:56:08.2919523+09:00",
+  "generatedAt": "2026-07-13T20:17:31.2666646+09:00",
   "branch": "fix/phase-a-ontology-review",
   "base": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
   "contractVersion": "phase-a-evidence-chains/1.3.0",
-  "status": "fresh_review_remediated_awaiting_rereview",
+  "status": "final_corrections_remediated_awaiting_rereview",
   "counts": {
     "canonicalChains": 3,
     "controls": 9,
@@ -247,6 +247,9 @@
       "kosha_technical_guidance"
     ],
     "ontologyAliasesReachProductionHandler": true,
+    "exactEvidenceCitationTokensRequired": true,
+    "citationPrefixSuffixCollisionsMaterialize": false,
+    "punctuatedVehicleAliasHandlerCovered": true,
     "reviewRequiredMaterializationRecords": 0,
     "humanConfirmationPreserved": true
   },
@@ -319,7 +322,9 @@
     { "finding": "F-1", "status": "fixed", "summary": "SIF is hazard-priority evidence only; Control materialization requires role-matched current law or verified KOSHA guidance" },
     { "finding": "F-2", "status": "fixed", "summary": "production handler canonicalizes original input with the ontology registry and preserves all three task aliases" },
     { "finding": "F-3", "status": "fixed", "summary": "full production-shaped handler tests cover aliases, role-scoped positive records, fail-closed records, and pending confirmation" },
-    { "finding": "F-4", "status": "fixed", "summary": "report and verification logs are recorded as committed branch artifacts" }
+    { "finding": "F-4", "status": "fixed", "summary": "report and verification logs are recorded as committed branch artifacts" },
+    { "finding": "C-1", "status": "fixed", "summary": "materialization requires a complete delimiter-bounded citation token; law and KOSHA prefix/suffix collisions fail closed" },
+    { "finding": "C-2", "status": "fixed", "summary": "the exact 차량계·기계 인접작업 alias reaches the production handler and resolves to 지게차 상하차" }
   ],
   "lawVerification": {
     "verifiedOn": "2026-07-13",
@@ -348,11 +353,14 @@
       "independentPhaseARedCycles": 3,
       "freshReviewFailures": 8,
       "freshReviewRedCycles": 1,
-      "freshReviewRedTestsPassed": 48
+      "freshReviewRedTestsPassed": 48,
+      "finalCorrectionFailures": 3,
+      "finalCorrectionRedCycles": 1,
+      "finalCorrectionRedTestsPassed": 60
     },
     "focused": {
       "filesPassed": 6,
-      "testsPassed": 132,
+      "testsPassed": 136,
       "status": "pass",
       "serial": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"
