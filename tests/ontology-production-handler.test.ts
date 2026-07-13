@@ -30,6 +30,22 @@ function requireKnowledge(query: string): SafetyKnowledgeFound {
   return knowledge;
 }
 
+function withResolvedSif(knowledge: SafetyKnowledgeFound): SafetyKnowledgeFound {
+  if (!knowledge.evidenceContract) throw new Error("expected evidence contract");
+  return {
+    ...knowledge,
+    evidenceChainState: "resolved",
+    evidenceContract: {
+      ...knowledge.evidenceContract,
+      hazardPriority: knowledge.evidenceContract.hazardPriority.map((source) => ({
+        ...source,
+        reviewState: "published" as const,
+        resolution: "resolved" as const,
+      })),
+    },
+  };
+}
+
 function generatedResponse(question: string, riskAssessmentDraft = "검증용 위험성평가"): AskResponse {
   const response = buildMockAskResponse(
     question,
@@ -108,10 +124,7 @@ describe("production ontology docpack handler", () => {
     const output = await handleGenerateSafetyDocpack(
       { question, mode: "template", includeFull: true },
       {
-        querySafetyKnowledge: async () => ({
-          ...knowledge,
-          evidenceChainState: "resolved",
-        }),
+        querySafetyKnowledge: async () => withResolvedSif(knowledge),
         runAsk: async (input) => generatedResponse(
           input,
           `${plan.controlLabel} | ${sifUid}`,
@@ -136,10 +149,7 @@ describe("production ontology docpack handler", () => {
     const output = await handleGenerateSafetyDocpack(
       { question, mode: "template", includeFull: true },
       {
-        querySafetyKnowledge: async () => ({
-          ...knowledge,
-          evidenceChainState: "resolved",
-        }),
+        querySafetyKnowledge: async () => withResolvedSif(knowledge),
         runAsk: async (input) => generatedResponse(
           input,
           `${plan.controlLabel}\n${lawUid}`,
@@ -160,10 +170,7 @@ describe("production ontology docpack handler", () => {
     const plan = knowledge.evidenceContract?.materializationTargets[0];
     const lawUid = plan?.lawCitedUids[0];
     if (!plan || !lawUid) throw new Error("expected vehicle current-law plan");
-    const resolvedKnowledge: SafetyKnowledgeFound = {
-      ...knowledge,
-      evidenceChainState: "resolved",
-    };
+    const resolvedKnowledge = withResolvedSif(knowledge);
 
     let runAskQuestion: string | undefined;
     let runAskOptions: unknown;
@@ -261,6 +268,11 @@ describe("production ontology docpack handler", () => {
       evidenceChainState: "resolved",
       evidenceContract: {
         ...contract,
+        hazardPriority: contract.hazardPriority.map((source) => ({
+          ...source,
+          reviewState: "published" as const,
+          resolution: "resolved" as const,
+        })),
         controls: contract.controls.map((control) =>
           control.controlId === resolvedControl.controlId ? resolvedControl : control
         ),
@@ -386,10 +398,7 @@ describe("production ontology docpack handler", () => {
     const knowledge = requireKnowledge(question);
     const plan = knowledge.evidenceContract?.materializationTargets[0];
     if (!plan) throw new Error("expected vehicle materialization plan");
-    const resolvedKnowledge: SafetyKnowledgeFound = {
-      ...knowledge,
-      evidenceChainState: "resolved",
-    };
+    const resolvedKnowledge = withResolvedSif(knowledge);
 
     const output = await handleGenerateSafetyDocpack(
       { question, mode: "template", includeFull: true },
@@ -499,7 +508,9 @@ describe("production ontology docpack handler", () => {
     const question = "차량계 하역운반기계 인접 작업";
     const knowledge = requireKnowledge(question);
     if (!knowledge.evidenceContract) throw new Error("expected vehicle evidence contract");
-    const sourcePack = structuredClone(knowledge.evidenceContract);
+    const resolvedFixture = withResolvedSif(knowledge);
+    if (!resolvedFixture.evidenceContract) throw new Error("expected resolved evidence contract");
+    const sourcePack = structuredClone(resolvedFixture.evidenceContract);
     const sourcePlan = sourcePack.materializationTargets[0];
     const lawUid = sourcePlan?.lawCitedUids[0];
     if (!sourcePlan || !lawUid) throw new Error("expected vehicle law materialization target");

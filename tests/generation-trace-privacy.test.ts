@@ -206,4 +206,56 @@ describe("generation trace failure privacy", () => {
       expect.objectContaining({ phaseAGrounding }),
     );
   }, 30_000);
+
+  it("fails closed with explicit missing Phase A grounding when a caller omits it", async () => {
+    mocks.searchSafetyReferences.mockResolvedValue(successfulSafetyReferenceSearch());
+
+    const response = await runAsk("PUBLIC_ASK_WITHOUT_GROUNDING", { aiMode: "enhanced" });
+
+    expect(mocks.enhanceLegalEvidenceMappings).not.toHaveBeenCalled();
+    expect(mocks.generateAnswer).toHaveBeenCalledWith(
+      "PUBLIC_ASK_WITHOUT_GROUNDING",
+      expect.any(Array),
+      expect.objectContaining({
+        phaseAGrounding: expect.objectContaining({
+          evidenceChainState: "not_evaluated",
+          groundingStatus: "missing",
+          evidencePack: null,
+          allowedCitedUids: [],
+          generationPolicy: expect.objectContaining({
+            llmRole: "naturalize_only",
+            outputStatus: "missing_evidence_draft",
+          }),
+        }),
+      }),
+    );
+    expect(response.phaseAReview).toMatchObject({
+      verdict: "검토 필요",
+      verified: false,
+      groundingStatus: "missing",
+      outputStatus: "missing_evidence_draft",
+      verifiedRecords: 0,
+      humanConfirmation: { required: true, status: "pending" },
+    });
+  }, 30_000);
+
+  it("keeps the public template path provider-free and explicitly human-pending", async () => {
+    const response = await runAsk("PUBLIC_TEMPLATE_WITHOUT_GROUNDING", { aiMode: "template" });
+
+    expect(mocks.enhanceLegalEvidenceMappings).not.toHaveBeenCalled();
+    expect(mocks.generateAnswer).not.toHaveBeenCalled();
+    expect(mocks.generateAllDeliverablesWithDiagnostics).not.toHaveBeenCalled();
+    expect(response.generationTrace).toMatchObject({
+      askMode: "template",
+      deliverables: { attempted: false },
+    });
+    expect(response.phaseAReview).toMatchObject({
+      verdict: "검토 필요",
+      verified: false,
+      groundingStatus: "missing",
+      outputStatus: "missing_evidence_draft",
+      verifiedRecords: 0,
+      humanConfirmation: { required: true, status: "pending" },
+    });
+  });
 });

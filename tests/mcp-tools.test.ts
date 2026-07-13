@@ -54,9 +54,19 @@ function makePhaseAGrounding(evidenceChainState: "resolved" | "review_required")
   if (!knowledge.found || !knowledge.evidenceContract) {
     throw new Error("expected vehicle evidence contract");
   }
+  const evidencePack = evidenceChainState === "resolved"
+    ? {
+        ...knowledge.evidenceContract,
+        hazardPriority: knowledge.evidenceContract.hazardPriority.map((source) => ({
+          ...source,
+          reviewState: "published" as const,
+          resolution: "resolved" as const,
+        })),
+      }
+    : knowledge.evidenceContract;
   return buildPhaseAGenerationGrounding({
     evidenceChainState,
-    evidencePack: knowledge.evidenceContract,
+    evidencePack,
   });
 }
 
@@ -170,11 +180,20 @@ describe("buildDocpackResult", () => {
 });
 
 describe("buildReviewedDocpackResult", () => {
-  it("allows an authoritative pass only for resolved grounding with passing coverage QA", () => {
+  it("keeps legacy QA non-authoritative while human confirmation is pending", () => {
     const qaReview = passingQaReview();
     const phaseAGrounding = makePhaseAGrounding("resolved");
+    const target = phaseAGrounding.materializationTargets[0];
+    const lawUid = target?.lawCitedUids[0];
+    if (!target || !lawUid) throw new Error("expected resolved materialization target");
+    const materializedDraft = `${target.controlLabel} | ${lawUid}.`.padEnd(650, "가");
     const result = buildReviewedDocpackResult(
-      makeAskResponse(),
+      makeAskResponse({
+        deliverables: {
+          ...makeAskResponse().deliverables,
+          riskAssessmentDraft: materializedDraft,
+        },
+      }),
       qaReview,
       "지게차 상하차",
       false,
@@ -185,23 +204,50 @@ describe("buildReviewedDocpackResult", () => {
     expect(result.engine).toBe("safeclaw-runAsk");
     expect(result.qualityPipeline).toEqual(["generate_safety_docpack", "qa_review_docpack"]);
     expect(result.reviewStatus).toMatchObject({
-      verdict: "통과",
-      verified: true,
+      verdict: "검토 필요",
+      verified: false,
       groundingStatus: "resolved",
-      reasonCode: null,
+      reasonCode: "human_confirmation_pending",
       humanConfirmation: { required: true, status: "pending" },
     });
     expect(result.qa).toMatchObject({
-      authoritative: true,
+      authoritative: false,
       diagnostic: qaReview,
     });
+    expect(result.docpack.evidenceMaterialization?.verifiedRecords.length).toBeGreaterThan(0);
     expect(result.docpack.documents.riskAssessmentDraft).toMatchObject({
       totalLength: 650,
       truncated: true,
     });
-    expect(result.openClawUsageNote).toContain("SafeClaw 문서 엔진");
-    expect(result.openClawUsageNote).toContain("QA");
+    expect(result.openClawUsageNote).toContain("검토 필요");
+    expect(result.openClawUsageNote).toContain("pending");
+    expect(result.openClawUsageNote).toContain("verified 근거로 사용하지 마세요");
     expect(result.openClawUsageNote).not.toContain("최종 답변의 근거로 사용");
+  });
+
+  it("keeps a passing legacy QA non-authoritative when verified records are zero", () => {
+    const qaReview = passingQaReview();
+    const result = buildReviewedDocpackResult(
+      makeAskResponse(),
+      qaReview,
+      "지게차 상하차",
+      false,
+      undefined,
+      makePhaseAGrounding("resolved"),
+    );
+
+    expect(result.docpack.evidenceMaterialization).toMatchObject({
+      verifiedRecords: [],
+      humanConfirmation: { required: true, status: "pending" },
+    });
+    expect(result.reviewStatus).toMatchObject({
+      verdict: "검토 필요",
+      verified: false,
+      groundingStatus: "resolved",
+      reasonCode: "verified_materialization_missing",
+      humanConfirmation: { required: true, status: "pending" },
+    });
+    expect(result.qa).toMatchObject({ authoritative: false, diagnostic: qaReview });
   });
 
   it("does not pass resolved grounding when coverage QA is not passing", () => {

@@ -4,8 +4,8 @@
 - Branch: `fix/phase-a-ontology-review`
 - Base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
 - Contract: `phase-a-evidence-chains/1.3.0`
-- Status: closed generation harness remediated, awaiting re-review
-- Generated: `2026-07-13T22:14:50.9208582+09:00`, after focused and typecheck logs completed
+- Status: release-review HOLD candidate, awaiting fresh independent review
+- Generated: `2026-07-13T22:49:40.5186259+09:00`, after focused and typecheck logs completed
 - Runtime/DB publication: not performed
 - Schema, migration, Supabase data, generated core seed: unchanged
 
@@ -156,12 +156,23 @@ This remediation intentionally preserves the template fast path (no provider cal
 |---|---|
 | P1-H untrusted text could escape the grounding boundary | Every grounded answer/document provider prompt now starts with the immutable `naturalize_only` security policy, followed by exactly one delimited JSON block. The original question, search context, scenario, Task/Control/source labels, and follow-on risk rows remain JSON data and are never appended raw after the boundary. Boundary characters inside JSON strings are Unicode-escaped, so injection-shaped delimiter text cannot create or duplicate a boundary while `JSON.parse` still restores the exact input. |
 | P1-H generic persona instructions could request outside citations | Grounded persona, schema, emergency, legal, and KOSHA instructions now require the Phase A allow-list or `현장 확인 필요`; the legacy generic citation instructions remain only on ungrounded paths. The optional raw legal-citation mapper is skipped when Phase A grounding is present. |
-| P1-H QA verdict could conflict with grounding state | Top-level reviewed status can be `통과` only when grounding is resolved and the existing coverage/quality QA passes. For `review_required` or missing grounding it is always `검토 필요`, not verified, zero-record, and human-pending; the original QA result is retained only under the non-authoritative diagnostic field with an actionable reason. |
+| P1-H QA verdict could conflict with grounding state | Legacy QA is retained only as a nested diagnostic and is never authoritative. Top-level reviewed status additionally requires resolved grounding, passing coverage/quality, nonzero deterministic materialization, and completed human confirmation. The current pending flow therefore remains `검토 필요` and not verified. |
 | P1-H ontology lookup failure aborted generation | Lookup exceptions are logged without exception text or secrets and become explicit missing Phase A grounding. Template mode stays deterministic and provider-free; enhanced/full provider fallback remains reachable, but the returned docpack is marked review-required and unverified. No published ontology fallback is synthesized. |
 | P1-H the provider pack was not mutation-proof | The complete grounding object, including the pack, allowed evidence, citation UIDs, and materialization targets, is structured-cloned and recursively frozen before `runAsk`. A handler-seam mutation test verifies that source and frozen-object mutation attempts cannot alter either the provider prompt or deterministic post-check. |
 | P1-H Claw generation bypassed the grounded handler | Both reviewed and plain Claw document tools now call the same production grounding handler, including the ontology-failure behavior and reconciled reviewed status. |
 
 Chosen compatibility behavior: unresolved or unavailable Phase A evidence does not stop demo generation in enhanced/full modes. Those modes may call the existing provider fallback, but their output is explicitly a review-required, unverified draft with no verified materialization records and pending human confirmation. Template mode never calls a provider, including when ontology lookup fails.
+
+## Fresh release HOLD candidate
+
+| Finding | Candidate change awaiting independent review |
+|---|---|
+| HOLD-1 public/general `runAsk` callers bypassed Phase A | Enumerated every production invocation. JSON ask, SSE ask, the `/ask` page call path, and briefing now use one grounded wrapper; MCP continues through its grounded handler. The wrapper resolves ontology before `runAsk`, converts lookup failure or an unmatched Task to explicit missing grounding without leaking error text, and `runAsk` itself also defaults omitted grounding to the secured missing object. The legacy raw citation-mapping branch was removed. |
+| HOLD-1 provider/template compatibility | Enhanced/full generation remains reachable through the fixed policy and one JSON boundary. Template remains provider-free. Every public `AskResponse` carries `phaseAReview` with `검토 필요`, `verified=false`, zero verified records, and human confirmation pending. JSON/SSE and briefing are exercised through actual handlers; the App Router page is covered by a source call-site contract because this Vitest configuration preserves TSX. |
+| HOLD-2 legacy QA could become authoritative | `qa.authoritative` is always false. Passing legacy QA alone cannot produce a top-level pass. The gate requires resolved grounding, nonzero deterministic materialization, and completed human confirmation in addition to coverage/quality. Tests cover both nonzero records with human pending and zero records; both remain `검토 필요`. |
+| HOLD-3 draft SIF could enter a resolved allow-list | `hazard_priority_only` retains its limited role but now also requires `verified|published` and exact `resolved` state. With a test-only ready KOSHA gate and unchanged draft SIF registry data, the actual resolver returns `review_required`; allowed evidence and verified materialization remain empty. A caller-forced resolved state is downgraded before post-check. |
+
+This is a review candidate, not a release-completion claim. `launchReady` remains false and no production SIF or KOSHA registry record was promoted.
 
 ## Official law verification
 
@@ -193,7 +204,8 @@ The Article 172 direct surface identifies `접촉의 방지`: paragraph 1 prohib
 - Citation-boundary P2 targeted GREEN: 2 files passed, 96 tests passed.
 - Phase A generation-grounding TDD RED: 8 tests failed and 11 passed in one 19-test serial run, covering handler payload binding, provider prompt order, resolved/review-required/missing states, and zero-record unsupported citations.
 - Closed-harness TDD RED: 16 failures were reproduced across five narrow runs: 10/56 at answer/document/MCP/handler seams, 2/2 at the actual Claw tool seam, 1/3 for grounded raw-citation mapping, 1/8 for a remaining generic legal instruction, and 2/11 for literal delimiter-token duplication inside serialized malicious input.
-- Focused ontology/generation/MCP/commercial/DB harness plus production/provider/Claw handlers and fallback compatibility, serial: 12 files passed, 213 tests passed. This includes the prior 203 focused tests plus 10 new harness regressions.
+- Fresh release-HOLD TDD RED: 8 product failures across five runs: omitted grounding 1/4, JSON/SSE call sites 3/4, QA authority 2/31, KOSHA-ready plus draft SIF resolver 1/1, and forced-resolved SIF post-check 1/2. A separate App Router TSX import-analysis limitation was corrected to the repo's source-contract test style and is not counted as a product RED.
+- Focused ontology/generation/MCP/commercial/DB harness plus production/provider/Claw/public handlers and fallback compatibility, serial: 15 files passed, 224 tests passed. This includes all prior 213 focused tests and 11 added or expanded HOLD regressions.
 - Strict TypeScript: passed.
 - Previous full suite is informational only and was not rerun for this remediation: 125 files passed, 7 failed, 5 skipped; 1229 tests passed, 7 failed, 22 skipped. Failures were outside owned ontology/MCP/test/report files.
 - Full-suite failed suites: `knowledge-page-layout`, `product-module-shell`, and `reports-download-center` due missing `.next/prerender-manifest.json` or hook timeout during concurrent dev-server tests.
@@ -206,7 +218,7 @@ Logs:
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log`
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log`
 
-Log provenance: focused log completed `2026-07-13T13:14:45.3751465Z`; typecheck log completed `2026-07-13T13:14:45.3781548Z`; this report was generated afterward.
+Log provenance: focused log completed `2026-07-13T13:49:34.8156333Z`; typecheck log completed `2026-07-13T13:49:34.8186390Z`; this report was generated afterward.
 
 This report, `report.json`, and both verification logs are tracked artifacts committed on this branch.
 

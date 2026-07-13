@@ -2,6 +2,7 @@ import type { RiskAssessmentRow, RiskAssessmentValidationIssue } from "./risk-as
 import type { SmsaEvidenceLabel } from "./smsa-mapping";
 import type { QaReviewResult } from "./ontology/qa-review";
 import type { DbHarnessPacket } from "./db-harness";
+import type { PhaseAGenerationGrounding } from "./ontology/evidence-chain";
 
 export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
@@ -376,6 +377,16 @@ export type GenerationEvidenceError = {
 
 export type AskResponse = {
   question: string;
+  phaseAReview?: {
+    verdict: "검토 필요";
+    verified: false;
+    evidenceChainState: PhaseAGenerationGrounding["evidenceChainState"];
+    groundingStatus: PhaseAGenerationGrounding["groundingStatus"];
+    outputStatus: PhaseAGenerationGrounding["generationPolicy"]["outputStatus"];
+    verifiedRecords: 0;
+    humanConfirmation: { required: true; status: "pending" };
+    actionableReason: string;
+  };
   answer: string;
   practicalPoints: string[];
   citations: SearchResult[];
