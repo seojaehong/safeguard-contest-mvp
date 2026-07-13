@@ -3,34 +3,52 @@
 - Date: 2026-07-13
 - Branch: `fix/pdf-pagination-release-gate`
 - Result: PASS
-- Scope: binary PDF pagination only; no database changes
+- Scope: PDF route resource budgets and pagination; no database changes
 
-## Fix
+## Fail-Closed Budgets
 
-- Removed the binary PDF caps that truncated source rows and wrapped row lines.
-- Added deterministic page creation when the next line would cross the 48-point bottom margin.
-- Registered the existing Korean Regular/Bold subset fonts on every generated page.
-- Preserved the document title on the first page and the final approval/disclaimer footer after the last source row.
+| Budget | Limit | Enforcement |
+| --- | ---: | --- |
+| Request body | 262,144 bytes | Rejects an oversized declared `Content-Length` before reading and cancels the body stream when actual bytes cross the limit. |
+| Combined input rows | 128 rows | Counts raw PDF/risk/structured row arrays and parsed `documentText` rows without truncation. |
+| String field | 4,000 Unicode characters | Iteratively checks every string value in the parsed JSON payload. |
+| Binary render lines | 512 lines | Counts the complete wrapped content line list before loading fonts or creating a PDF document. |
+| Binary PDF pages | 8 pages | Uses the same line placement function as the renderer to reject an over-budget layout before rendering. |
+
+Every budget failure returns status `413`, `cache-control: no-store`, and the same public response:
+
+```json
+{
+  "ok": false,
+  "code": "PDF_EXPORT_LIMIT_EXCEEDED",
+  "message": "PDF 내보내기 요청이 허용된 크기 한도를 초과했습니다."
+}
+```
+
+No over-budget request is partially rendered or truncated.
+
+## Pagination Regression
+
+The legitimate 64-row fixture still renders across multiple pages. The first page preserves the Korean document title, and the last page preserves sentinel `마지막행보존확인`, the approval line, and the disclaimer.
 
 ## TDD Evidence
 
 | Phase | Command | Result |
 | --- | --- | --- |
-| RED | `npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t "paginates long content"` | Expected failure: 1 page was generated; assertion required more than 1 page. |
-| GREEN | `npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t "paginates long content"` | 1 passed, 0 failed, 11 skipped. |
-
-The regression fixture submits 64 rows and verifies that the PDF has more than one page, the first-page Korean title remains extractable, and the last-page sentinel `마지막행보존확인`, approval line, and disclaimer remain extractable.
+| Budget RED | `npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t "rejects"` | Expected failure: 4 tests received `200`; each required deterministic `413`. |
+| Budget GREEN | `npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t "rejects"` | 4 passed, 0 failed, 12 skipped. |
+| Pagination GREEN | `npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t "paginates long content"` | 1 passed, 0 failed, 15 skipped. |
 
 ## Verification
 
 | Command | Counts | Result |
 | --- | --- | --- |
-| `npm.cmd test -- tests/pdf-korean-font-integration.test.ts tests/pdf-font-failure.test.ts` | 2 files, 17 passed, 0 failed | PASS |
+| `npm.cmd test -- tests/pdf-korean-font-integration.test.ts tests/pdf-font-failure.test.ts` | 2 files, 21 passed, 0 failed | PASS |
 | `npm.cmd run typecheck` | 0 TypeScript errors | PASS |
-| `npm.cmd run build` | compiled in 33.9s; 27/27 static pages generated | PASS |
+| `npm.cmd run build` | compiled in 10.8s; 27/27 static pages generated | PASS |
 | `git diff --check` | 0 whitespace errors | PASS |
 
-The focused suite includes 12 Korean PDF integration tests and 5 font-failure tests. Missing/invalid font assets still return controlled `PDF_FONT_ASSET_UNAVAILABLE` responses, while non-font PDF creation and embedding failures are still logged and rethrown.
+The focused suite contains 16 Korean PDF integration tests and 5 font-failure tests. Missing or invalid font assets still return controlled `PDF_FONT_ASSET_UNAVAILABLE` responses. Non-font PDF creation and embedding failures are still logged and rethrown.
 
 ## Changed Files
 

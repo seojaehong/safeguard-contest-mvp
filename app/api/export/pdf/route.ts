@@ -21,6 +21,14 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const MAX_PDF_REQUEST_BYTES = 256 * 1024;
+const MAX_PDF_ROWS = 128;
+const MAX_PDF_FIELD_CHARACTERS = 4_000;
+const MAX_PDF_RENDER_LINES = 512;
+const MAX_PDF_PAGES = 8;
+const PDF_PAGE_TOP = 790;
+const PDF_PAGE_BOTTOM = 48;
+
 type PdfRow = {
   document: string;
   section: string;
@@ -57,6 +65,76 @@ export async function GET() {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+class PdfExportLimitError extends Error {
+  constructor() {
+    super("PDF export request exceeds a resource budget");
+    this.name = "PdfExportLimitError";
+  }
+}
+
+function assertPdfFieldBudget(value: unknown): void {
+  const pending = [value];
+  while (pending.length) {
+    const current = pending.pop();
+    if (typeof current === "string") {
+      if (Array.from(current).length > MAX_PDF_FIELD_CHARACTERS) throw new PdfExportLimitError();
+      continue;
+    }
+    if (Array.isArray(current)) {
+      current.forEach((item) => pending.push(item));
+      continue;
+    }
+    if (isRecord(current)) {
+      Object.values(current).forEach((item) => pending.push(item));
+    }
+  }
+}
+
+async function readPdfRequestJson(request: NextRequest): Promise<unknown> {
+  const declaredLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_PDF_REQUEST_BYTES) {
+    throw new PdfExportLimitError();
+  }
+  if (!request.body) return {};
+
+  const reader = request.body.getReader();
+  const chunks: Buffer[] = [];
+  let totalBytes = 0;
+  try {
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      totalBytes += chunk.value.byteLength;
+      if (totalBytes > MAX_PDF_REQUEST_BYTES) {
+        await reader.cancel();
+        throw new PdfExportLimitError();
+      }
+      chunks.push(Buffer.from(chunk.value));
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const text = Buffer.concat(chunks, totalBytes).toString("utf8");
+  if (!text.trim()) return {};
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return {};
+  }
+}
+
+function pdfExportLimitResponse() {
+  return NextResponse.json(
+    {
+      ok: false,
+      code: "PDF_EXPORT_LIMIT_EXCEEDED",
+      message: "PDF 내보내기 요청이 허용된 크기 한도를 초과했습니다."
+    },
+    { status: 413, headers: { "cache-control": "no-store" } }
+  );
 }
 
 function readString(value: unknown, fallback = "") {
@@ -149,11 +227,11 @@ function parseBodyText(value: unknown, documentTitle: string): PdfRow[] {
   return rows;
 }
 
-function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAssessmentRow[] {
+function getStructuredRiskRowCandidates(body: Record<string, unknown>): unknown[] {
   const structured = isRecord(body.structured) ? body.structured : {};
   const response = isRecord(body.response) ? body.response : {};
   const responseStructured = isRecord(response.structured) ? response.structured : {};
-  const candidates = [
+  return [
     body.structuredRiskRows,
     body.riskAssessmentRows,
     body.structuredRows,
@@ -163,7 +241,27 @@ function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAss
     responseStructured.riskAssessmentRows,
     responseStructured.structuredRiskRows
   ];
-  for (const candidate of candidates) {
+}
+
+function assertPdfRowBudget(body: Record<string, unknown>): void {
+  const candidates = [body.rows, body.riskRows, ...getStructuredRiskRowCandidates(body)];
+  const countedArrays = new Set<unknown[]>();
+  let rowCount = 0;
+  candidates.forEach((candidate) => {
+    if (!Array.isArray(candidate) || countedArrays.has(candidate)) return;
+    countedArrays.add(candidate);
+    rowCount += candidate.length;
+    if (rowCount > MAX_PDF_ROWS) throw new PdfExportLimitError();
+  });
+}
+
+function assertParsedPdfRowBudget(rowGroups: ReadonlyArray<ReadonlyArray<unknown>>): void {
+  const rowCount = rowGroups.reduce((total, rows) => total + rows.length, 0);
+  if (rowCount > MAX_PDF_ROWS) throw new PdfExportLimitError();
+}
+
+function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAssessmentRow[] {
+  for (const candidate of getStructuredRiskRowCandidates(body)) {
     const rows = parseStructuredRiskAssessmentRows(candidate);
     if (rows.length) return rows;
   }
@@ -871,6 +969,37 @@ function loadEmbeddedPdfFonts(): { regular: Buffer; bold: Buffer } {
 type PdfTextRole = "title" | "section" | "body" | "table" | "note";
 type PdfContentLine = { text: string; role: PdfTextRole; gap?: number };
 
+const pdfTextStyles = {
+  title: { font: "F2", size: 20, leading: 24, tracking: -0.4 },
+  section: { font: "F2", size: 14, leading: 18, tracking: -0.14 },
+  body: { font: "F1", size: 10, leading: 15, tracking: 0 },
+  table: { font: "F1", size: 8.5, leading: 12, tracking: 0 },
+  note: { font: "F1", size: 8, leading: 11, tracking: 0 }
+} as const;
+
+function placePdfContentLine(y: number, line: PdfContentLine) {
+  const typography = pdfTextStyles[line.role];
+  const gap = line.gap || 0;
+  const blankLineHeight = line.text ? 0 : typography.leading;
+  if (y - gap - blankLineHeight < PDF_PAGE_BOTTOM) {
+    return { startsNewPage: true, y: PDF_PAGE_TOP };
+  }
+  return { startsNewPage: false, y: y - gap };
+}
+
+function assertPdfRenderBudget(lines: PdfContentLine[]): void {
+  if (lines.length > MAX_PDF_RENDER_LINES) throw new PdfExportLimitError();
+
+  let pageCount = 1;
+  let y = PDF_PAGE_TOP;
+  lines.forEach((line) => {
+    const placement = placePdfContentLine(y, line);
+    if (placement.startsNewPage) pageCount += 1;
+    if (pageCount > MAX_PDF_PAGES) throw new PdfExportLimitError();
+    y = placement.y - pdfTextStyles[line.role].leading;
+  });
+}
+
 function buildPdfContentLines(
   title: string,
   scenario: PdfScenario,
@@ -931,18 +1060,13 @@ async function buildBinaryPdf(
   riskRows: PdfRow[],
   structuredRiskRows: StructuredRiskAssessmentRow[]
 ) {
+  const lines = buildPdfContentLines(title, scenario, rows, riskLevel, topRisk, riskRows, structuredRiskRows);
+  assertPdfRenderBudget(lines);
   const fonts = loadEmbeddedPdfFonts();
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(checksumCorrectingFontkit);
   const regularFont = await pdf.embedFont(fonts.regular, { subset: true });
   const boldFont = await pdf.embedFont(fonts.bold, { subset: true });
-  const roles = {
-    title: { font: "F2", size: 20, leading: 24, tracking: -0.4 },
-    section: { font: "F2", size: 14, leading: 18, tracking: -0.14 },
-    body: { font: "F1", size: 10, leading: 15, tracking: 0 },
-    table: { font: "F1", size: 8.5, leading: 12, tracking: 0 },
-    note: { font: "F1", size: 8, leading: 11, tracking: 0 }
-  } as const;
   const createPage = () => {
     const page = pdf.addPage([595, 842]);
     return {
@@ -952,17 +1076,14 @@ async function buildBinaryPdf(
     };
   };
   let pageState = createPage();
-  let y = 790;
-  for (const line of buildPdfContentLines(title, scenario, rows, riskLevel, topRisk, riskRows, structuredRiskRows)) {
-    const typography = roles[line.role];
-    const gap = line.gap || 0;
-    const blankLineHeight = line.text ? 0 : typography.leading;
-    if (y - gap - blankLineHeight < 48) {
+  let y = PDF_PAGE_TOP;
+  for (const line of lines) {
+    const typography = pdfTextStyles[line.role];
+    const placement = placePdfContentLine(y, line);
+    if (placement.startsNewPage) {
       pageState = createPage();
-      y = 790;
-    } else {
-      y -= gap;
     }
+    y = placement.y;
     if (!line.text) {
       y -= typography.leading;
       continue;
@@ -989,54 +1110,63 @@ async function buildBinaryPdf(
 }
 
 export async function POST(request: NextRequest) {
-  const parsed = await request.json().catch((): unknown => ({}));
-  const body = isRecord(parsed) ? parsed : {};
-  const title = readString(body.title, "SafeClaw 제출 문서");
-  const scenario = parseScenario(body.scenario);
-  const rows = parseRows(body.rows, title);
-  const riskRows = parseRows(body.riskRows, "위험성평가표");
-  const structuredRiskRows = parseRiskRowsFromBody(body);
-  const bodyRows = rows.length ? rows : parseBodyText(body.documentText, title);
-  const riskLevel = readString(body.riskLevel, "확인");
-  const topRisk = readString(body.topRisk, "");
-  const requestedFormat = request.nextUrl.searchParams.get("format");
-  const wantsHtml = requestedFormat === "html";
-  const wantsBinaryPdf = !wantsHtml;
+  try {
+    const parsed = await readPdfRequestJson(request);
+    assertPdfFieldBudget(parsed);
+    const body = isRecord(parsed) ? parsed : {};
+    assertPdfRowBudget(body);
+    const title = readString(body.title, "SafeClaw 제출 문서");
+    const scenario = parseScenario(body.scenario);
+    const rows = parseRows(body.rows, title);
+    const riskRows = parseRows(body.riskRows, "위험성평가표");
+    const structuredRiskRows = parseRiskRowsFromBody(body);
+    const bodyRows = rows.length ? rows : parseBodyText(body.documentText, title);
+    assertParsedPdfRowBudget([bodyRows, riskRows, structuredRiskRows]);
+    const riskLevel = readString(body.riskLevel, "확인");
+    const topRisk = readString(body.topRisk, "");
+    const requestedFormat = request.nextUrl.searchParams.get("format");
+    const wantsHtml = requestedFormat === "html";
+    const wantsBinaryPdf = !wantsHtml;
 
-  if (wantsBinaryPdf) {
-    let pdf: Buffer;
-    try {
-      pdf = await buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
-    } catch (error) {
-      if (error instanceof PdfFontAssetError) {
-        console.error("PDF export font assets are unavailable or invalid", error.source);
-        return NextResponse.json(
-          { ok: false, error: "PDF_FONT_ASSET_UNAVAILABLE" },
-          { status: 500, headers: { "cache-control": "no-store" } }
-        );
+    if (wantsBinaryPdf) {
+      let pdf: Buffer;
+      try {
+        pdf = await buildBinaryPdf(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
+      } catch (error) {
+        if (error instanceof PdfExportLimitError) throw error;
+        if (error instanceof PdfFontAssetError) {
+          console.error("PDF export font assets are unavailable or invalid", error.source);
+          return NextResponse.json(
+            { ok: false, error: "PDF_FONT_ASSET_UNAVAILABLE" },
+            { status: 500, headers: { "cache-control": "no-store" } }
+          );
+        }
+        console.error("PDF export failed", error);
+        throw error;
       }
-      console.error("PDF export failed", error);
-      throw error;
+      const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
+      return new NextResponse(new Uint8Array(pdf), {
+        headers: {
+          "content-type": "application/pdf",
+          "content-disposition": `attachment; filename="safeclaw-document.pdf"; filename*=UTF-8''${encodeURIComponent(pdfFileName)}`,
+          "cache-control": "no-store"
+        }
+      });
     }
-    const pdfFileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.pdf`;
-    return new NextResponse(new Uint8Array(pdf), {
+
+    const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
+    const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.html`;
+    const encodedFileName = encodeURIComponent(fileName);
+
+    return new NextResponse(html, {
       headers: {
-        "content-type": "application/pdf",
-        "content-disposition": `attachment; filename="safeclaw-document.pdf"; filename*=UTF-8''${encodeURIComponent(pdfFileName)}`,
+        "content-type": "text/html; charset=utf-8",
+        "content-disposition": `inline; filename="safeclaw-pdf-ready.html"; filename*=UTF-8''${encodedFileName}`,
         "cache-control": "no-store"
       }
     });
+  } catch (error) {
+    if (error instanceof PdfExportLimitError) return pdfExportLimitResponse();
+    throw error;
   }
-
-  const html = buildPdfReadyHtml(title, scenario, bodyRows, riskLevel, topRisk, riskRows, structuredRiskRows);
-  const fileName = `${sanitizeFileName(`${scenario.companyName}-${title}`)}.html`;
-  const encodedFileName = encodeURIComponent(fileName);
-
-  return new NextResponse(html, {
-    headers: {
-      "content-type": "text/html; charset=utf-8",
-      "content-disposition": `inline; filename="safeclaw-pdf-ready.html"; filename*=UTF-8''${encodedFileName}`,
-      "cache-control": "no-store"
-    }
-  });
 }

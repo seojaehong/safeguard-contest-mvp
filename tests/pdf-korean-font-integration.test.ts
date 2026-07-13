@@ -46,11 +46,27 @@ const payload = {
 };
 
 function createRequest(format?: "html"): NextRequest {
+  return createRequestForPayload(payload, format);
+}
+
+function createRequestForPayload(value: unknown, format?: "html"): NextRequest {
   const suffix = format ? `?format=${format}` : "";
   return new NextRequest(`http://localhost/api/export/pdf${suffix}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(value)
+  });
+}
+
+async function expectPayloadTooLarge(response: Response): Promise<void> {
+  expect(response.status).toBe(413);
+  expect(response.headers.get("content-type")).toBe("application/json");
+  expect(response.headers.get("content-disposition")).toBeNull();
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  await expect(response.json()).resolves.toEqual({
+    ok: false,
+    code: "PDF_EXPORT_LIMIT_EXCEEDED",
+    message: "PDF 내보내기 요청이 허용된 크기 한도를 초과했습니다."
   });
 }
 
@@ -247,6 +263,43 @@ describe("Korean PDF font integration", () => {
     expect(extractedPages.at(-1)).toContain("승인");
     expect(extractedPages.at(-1)).toContain("본 출력물은 공식자료 기반 현장 검토용 초안입니다.");
     await document.destroy();
+  });
+
+  it("rejects request bodies above the byte budget instead of truncating them", async () => {
+    const padding = Object.fromEntries(
+      Array.from({ length: 70 }, (_, index) => [`padding${index}`, "x".repeat(4_000)])
+    );
+
+    await expectPayloadTooLarge(await POST(createRequestForPayload({ ...payload, padding })));
+  });
+
+  it("rejects row counts above the budget instead of dropping trailing rows", async () => {
+    const oversizedRows = Array.from({ length: 129 }, (_, index) => ({
+      document: "위험성평가표",
+      section: "전체 위험요인",
+      item: `위험요인 ${index + 1}`,
+      content: `작업 단계 ${index + 1}의 감소대책을 확인합니다.`
+    }));
+
+    await expectPayloadTooLarge(await POST(createRequestForPayload({ ...payload, rows: oversizedRows })));
+  });
+
+  it("rejects fields above the character budget instead of shortening them", async () => {
+    await expectPayloadTooLarge(await POST(createRequestForPayload({
+      ...payload,
+      title: "가".repeat(4_001)
+    })));
+  });
+
+  it("rejects render workloads above the line or page budget instead of clipping output", async () => {
+    const expensiveRows = Array.from({ length: 128 }, (_, index) => ({
+      document: "위험성평가표",
+      section: "전체 위험요인",
+      item: `위험요인 ${index + 1}`,
+      content: `${index + 1} ${"감소대책을확인합니다".repeat(20)}`
+    }));
+
+    await expectPayloadTooLarge(await POST(createRequestForPayload({ ...payload, rows: expensiveRows })));
   });
 
   it("embeds checksum-valid final FontFile2 subsets", async () => {
