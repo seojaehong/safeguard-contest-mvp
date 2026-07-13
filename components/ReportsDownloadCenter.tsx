@@ -539,7 +539,7 @@ function ReportDocument({
       <section className="safeclaw-workdoc-section">
         <div className="safeclaw-workdoc-section-head">
           <span>02</span>
-          <h3>위험 As-Is/To-Be</h3>
+          <h3>위험 개선 전/개선 후</h3>
         </div>
         <div className="safeclaw-report-table" role="table" aria-label="위험성평가 리포트">
           <div role="row">
