@@ -104,6 +104,7 @@ describe("OpenClaw owned-site context wiring", () => {
     expect(source).toContain("const canSend = Boolean(authToken && selectedSiteId && contextStatus === \"ready\")");
     expect(source).toContain("disabled={busy || !canSend}");
     expect(source).toContain("로그인 후 소유 현장을 연결하면");
+    expect(source).toContain("turns.length === 0 && canSend");
   });
 
   it("aborts active requests and resets turns when the auth token or site changes", async () => {

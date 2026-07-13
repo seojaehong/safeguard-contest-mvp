@@ -848,7 +848,7 @@ export function FieldOperationsWorkspace({
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
-  surface?: "full" | "share";
+  surface?: "full" | "share" | "editor";
 }) {
   const [initialWorkerState] = useState(() => resolveInitialWorkerState(data, generationFingerprint));
   const [editedDeliverables, setEditedDeliverables] = useState<WorkpackDocumentValues | null>(null);
@@ -1222,6 +1222,22 @@ export function FieldOperationsWorkspace({
       console.warn("safeclaw current workpack snapshot update failed", error);
     }
   }, [dispatchSnapshot, generationFingerprint, workerSnapshot, workspaceData]);
+
+  if (surface === "editor") {
+    return (
+      <section className="field-workspace field-workspace-editor-only workbench-root" id="workpack">
+        <main className="workspace-canvas">
+          <WorkpackEditor
+            data={editorDataRef.current}
+            generationFingerprint={generationFingerprint}
+            focusToken={editorFocusToken}
+            requestedDocumentKey={requestedDocumentKey}
+            onDeliverablesChange={handleDeliverablesChange}
+          />
+        </main>
+      </section>
+    );
+  }
 
   if (surface === "share") {
     return (

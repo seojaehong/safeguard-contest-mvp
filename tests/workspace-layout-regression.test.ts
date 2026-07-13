@@ -1463,9 +1463,7 @@ describe("workspace layout regression", () => {
       }
 
       const fieldWorkspace = readRect(".field-workspace");
-      const rail = readRect(".workspace-rail");
       const canvas = readRect(".workspace-canvas");
-      const side = readRect(".workspace-side");
       const shell = readRect(".workpack-shell");
       const navigator = readRect(".workpack-sidebar");
       const editor = readRect(".document-editor");
@@ -1478,12 +1476,12 @@ describe("workspace layout regression", () => {
 
       return {
         viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
         scrollWidth: document.documentElement.scrollWidth,
+        scrollHeight: document.documentElement.scrollHeight,
         activeElementClass: document.activeElement?.className || "",
         fieldWorkspace,
-        rail,
         canvas,
-        side,
         shell,
         navigator,
         editor,
@@ -1496,15 +1494,15 @@ describe("workspace layout regression", () => {
     });
 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+    expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 6);
     expect(metrics.fieldWorkspace.display).toBe("grid");
-    expect(metrics.rail.left).toBeGreaterThanOrEqual(metrics.fieldWorkspace.left);
-    expect(metrics.rail.right).toBeLessThanOrEqual(metrics.fieldWorkspace.right);
-    expect(metrics.rail.bottom).toBeLessThanOrEqual(Math.min(metrics.canvas.top, metrics.side.top) - 12);
-    expect(metrics.canvas.right).toBeLessThanOrEqual(metrics.side.left - 12);
+    expect(await page.locator(".field-workspace-editor-only").count()).toBe(1);
+    expect(await page.locator(".workspace-rail, .workspace-side").count()).toBe(0);
+    expect(metrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(metrics.fieldWorkspace.width * 0.98));
     expect(metrics.shell.display).toBe("grid");
-    expect(metrics.navigator.bottom).toBeLessThanOrEqual(metrics.editor.top - 12);
-    expect(metrics.desktopTabsDisplay).toBe("none");
-    expect(metrics.mobilePickerDisplay).not.toBe("none");
+    expect(metrics.navigator.right).toBeLessThanOrEqual(metrics.editor.left - 12);
+    expect(metrics.desktopTabsDisplay).not.toBe("none");
+    expect(metrics.mobilePickerDisplay).toBe("none");
     expect(metrics.shell.backgroundColor).toBe("rgba(0, 0, 0, 0)");
     expect(metrics.editor.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.editor.color).not.toBe("rgb(246, 245, 239)");
@@ -1514,11 +1512,56 @@ describe("workspace layout regression", () => {
     expect(metrics.textarea.backgroundColor).toBe("rgb(255, 255, 255)");
     expect(metrics.textarea.borderTopWidth).toBeGreaterThanOrEqual(1);
     expect(metrics.textarea.lineHeight / metrics.textarea.fontSize).toBeGreaterThanOrEqual(1.68);
-    expect(metrics.textarea.width).toBeGreaterThanOrEqual(Math.floor(metrics.shell.width * 0.78));
+    expect(metrics.textarea.width).toBeGreaterThanOrEqual(Math.floor(metrics.editor.width * 0.8));
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
     expect(metrics.focusMessage.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
     expect(String(metrics.activeElementClass)).toContain("document-textarea");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    });
+    await page.locator('[data-testid="editor-export-panel"] > summary').click();
+    const mobileMetrics = await page.evaluate(() => {
+      const editorSurface = document.querySelector<HTMLElement>(".document-editor-surface");
+      const fieldWorkspace = document.querySelector<HTMLElement>(".field-workspace-editor-only");
+      const canvas = document.querySelector<HTMLElement>(".workspace-canvas");
+      const exportPanel = document.querySelector<HTMLElement>('[data-testid="editor-export-panel"]');
+      const exportButtons = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-testid="editor-export-panel"] [class*="primaryExports"] > button'),
+      );
+      if (!editorSurface || !fieldWorkspace || !canvas || !exportPanel || exportButtons.length !== 3) {
+        throw new Error("Missing mobile editor geometry target");
+      }
+      const toRect = (element: HTMLElement) => {
+        const rect = element.getBoundingClientRect();
+        return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, width: rect.width };
+      };
+      return {
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        scrollWidth: document.documentElement.scrollWidth,
+        scrollHeight: document.documentElement.scrollHeight,
+        editorSurface: toRect(editorSurface),
+        fieldWorkspace: toRect(fieldWorkspace),
+        canvas: toRect(canvas),
+        exportPanel: toRect(exportPanel),
+        exportButtons: exportButtons.map(toRect),
+      };
+    });
+    expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.viewportWidth + 1);
+    expect(mobileMetrics.scrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 9);
+    expect(mobileMetrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(mobileMetrics.fieldWorkspace.width * 0.98));
+    for (const button of mobileMetrics.exportButtons) {
+      expect(button.left).toBeGreaterThanOrEqual(mobileMetrics.exportPanel.left);
+      expect(button.right).toBeLessThanOrEqual(mobileMetrics.exportPanel.right);
+    }
+    for (let index = 1; index < mobileMetrics.exportButtons.length; index += 1) {
+      expect(mobileMetrics.exportButtons[index].top).toBeGreaterThanOrEqual(
+        mobileMetrics.exportButtons[index - 1].bottom - CSS_PIXEL_ADJACENCY_TOLERANCE,
+      );
+    }
 
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });

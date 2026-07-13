@@ -106,6 +106,25 @@ describe("workbench visual contract", () => {
     expect(mobileStart).toBeGreaterThan(tabletStart);
   });
 
+  it("gives document edit focus a single full-width canvas and readable supporting controls", () => {
+    expect(components["SafeGuardCommandCenter.tsx"]).toMatch(
+      /<FieldOperationsWorkspace[\s\S]*?surface="editor"/u,
+    );
+    expect(components["FieldOperationsWorkspace.tsx"]).toContain('surface?: "full" | "share" | "editor"');
+    expect(css).toMatch(
+      /\.field-workspace-editor-only\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);/u,
+    );
+    expect(css).toMatch(
+      /\.field-workspace-editor-only\s+\.workspace-canvas\s*\{[^}]*grid-column:\s*1;[^}]*width:\s*100%;/u,
+    );
+    expect(css).toMatch(
+      /\.field-workspace\s+\.compact-head\s*\{[^}]*flex-direction:\s*column;[^}]*gap:\s*var\(--space-1\);/u,
+    );
+    expect(css).toMatch(
+      /\.workspace-side\s+\.worker-edit-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);/u,
+    );
+  });
+
   it("keeps the rendered progress node animated and reduced-motion safe", () => {
     expect(components["SafeGuardCommandCenter.tsx"]).toMatch(/document-review-meter[\s\S]*?<progress\s+value=/u);
     expect(css).toMatch(/\.inline-progress\.animated progress::-(?:webkit-progress-value|moz-progress-bar)[^{]*\{[\s\S]*?animation:\s*progressPulse/u);

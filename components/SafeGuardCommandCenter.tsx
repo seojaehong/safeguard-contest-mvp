@@ -2343,6 +2343,7 @@ export function SafeGuardCommandCenter({
                 requestedDocumentKey={requestedDocumentKey}
                 readiness={workpackReadiness || undefined}
                 onDeliverablesChange={handleWorkpackDeliverablesChange}
+                surface="editor"
               />
             </section>
           ) : null}

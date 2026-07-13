@@ -1,0 +1,376 @@
+{
+  "generatedAt": "2026-07-13T08:17:13.773Z",
+  "baseUrl": "http://127.0.0.1:3071",
+  "sourceHead": "40c448e8ac2366fadd57d140ca65df23cba4cac5",
+  "passed": true,
+  "rows": [
+    {
+      "theme": "day",
+      "viewport": {
+        "label": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "pass": true,
+      "buttonsContained": true,
+      "buttonsSeparated": true,
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\workspace-document-editor-layout\\evaluation\\workspace-document-editor-layout\\desktop-day.png",
+      "metrics": {
+        "scrollWidth": 1440,
+        "scrollHeight": 2823,
+        "clientWidth": 1440,
+        "clientHeight": 900,
+        "editorSurface": {
+          "left": 376,
+          "right": 1344,
+          "top": -835.953125,
+          "bottom": 1701.984375,
+          "width": 968,
+          "height": 2537.9375
+        },
+        "fieldWorkspace": {
+          "left": 376,
+          "right": 1344,
+          "top": -401.453125,
+          "bottom": 1701.984375,
+          "width": 968,
+          "height": 2103.4375
+        },
+        "canvas": {
+          "left": 376,
+          "right": 1344,
+          "top": -401.453125,
+          "bottom": 1701.984375,
+          "width": 968,
+          "height": 2103.4375
+        },
+        "workpackShell": {
+          "left": 376,
+          "right": 1344,
+          "top": -401.453125,
+          "bottom": 1701.984375,
+          "width": 968,
+          "height": 2103.4375
+        },
+        "documentEditor": {
+          "left": 672,
+          "right": 1344,
+          "top": -401.453125,
+          "bottom": 1701.984375,
+          "width": 672,
+          "height": 2103.4375
+        },
+        "exportPanel": {
+          "left": 685,
+          "right": 1331,
+          "top": 584.90625,
+          "bottom": 1572.1875,
+          "width": 646,
+          "height": 987.28125
+        },
+        "exportButtons": [
+          {
+            "text": "Excel 표 양식(.xlsx)",
+            "left": 704,
+            "right": 901.328125,
+            "top": 667.703125,
+            "bottom": 712.59375
+          },
+          {
+            "text": "한글 표 양식(.hwp)",
+            "left": 909.328125,
+            "right": 1106.65625,
+            "top": 667.703125,
+            "bottom": 712.59375
+          },
+          {
+            "text": "PDF(브라우저 인쇄)",
+            "left": 1114.65625,
+            "right": 1311.984375,
+            "top": 667.703125,
+            "bottom": 712.59375
+          }
+        ],
+        "sidePanelCount": 0,
+        "greetingCount": 0,
+        "shellClass": "command-center-shell workbench-root workspace-theme-day workspace-theme-field"
+      }
+    },
+    {
+      "theme": "day",
+      "viewport": {
+        "label": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "pass": true,
+      "buttonsContained": true,
+      "buttonsSeparated": true,
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\workspace-document-editor-layout\\evaluation\\workspace-document-editor-layout\\mobile-day.png",
+      "metrics": {
+        "scrollWidth": 390,
+        "scrollHeight": 4283,
+        "clientWidth": 390,
+        "clientHeight": 844,
+        "editorSurface": {
+          "left": 27,
+          "right": 363,
+          "top": -1936.953125,
+          "bottom": 1949,
+          "width": 336,
+          "height": 3885.953125
+        },
+        "fieldWorkspace": {
+          "left": 27,
+          "right": 363,
+          "top": -801.9375,
+          "bottom": 1949,
+          "width": 336,
+          "height": 2750.9375
+        },
+        "canvas": {
+          "left": 27,
+          "right": 363,
+          "top": -801.9375,
+          "bottom": 1949,
+          "width": 336,
+          "height": 2750.9375
+        },
+        "workpackShell": {
+          "left": 27,
+          "right": 363,
+          "top": -801.9375,
+          "bottom": 1949,
+          "width": 336,
+          "height": 2750.9375
+        },
+        "documentEditor": {
+          "left": 27,
+          "right": 363,
+          "top": -604.9375,
+          "bottom": 1949,
+          "width": 336,
+          "height": 2553.9375
+        },
+        "exportPanel": {
+          "left": 36,
+          "right": 354,
+          "top": 503.953125,
+          "bottom": 1801.203125,
+          "width": 318,
+          "height": 1297.25
+        },
+        "exportButtons": [
+          {
+            "text": "Excel 표 양식(.xlsx)",
+            "left": 49,
+            "right": 341,
+            "top": 602.75,
+            "bottom": 647.640625
+          },
+          {
+            "text": "한글 표 양식(.hwp)",
+            "left": 49,
+            "right": 341,
+            "top": 655.640625,
+            "bottom": 700.53125
+          },
+          {
+            "text": "PDF(브라우저 인쇄)",
+            "left": 49,
+            "right": 341,
+            "top": 708.53125,
+            "bottom": 751.421875
+          }
+        ],
+        "sidePanelCount": 0,
+        "greetingCount": 0,
+        "shellClass": "command-center-shell workbench-root workspace-theme-day workspace-theme-field"
+      }
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "label": "desktop",
+        "width": 1440,
+        "height": 900
+      },
+      "pass": true,
+      "buttonsContained": true,
+      "buttonsSeparated": true,
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\workspace-document-editor-layout\\evaluation\\workspace-document-editor-layout\\desktop-night.png",
+      "metrics": {
+        "scrollWidth": 1440,
+        "scrollHeight": 2884,
+        "clientWidth": 1440,
+        "clientHeight": 900,
+        "editorSurface": {
+          "left": 376,
+          "right": 1344,
+          "top": -896.953125,
+          "bottom": 1702.421875,
+          "width": 968,
+          "height": 2599.375
+        },
+        "fieldWorkspace": {
+          "left": 376,
+          "right": 1344,
+          "top": -462.453125,
+          "bottom": 1702.421875,
+          "width": 968,
+          "height": 2164.875
+        },
+        "canvas": {
+          "left": 376,
+          "right": 1344,
+          "top": -462.453125,
+          "bottom": 1702.421875,
+          "width": 968,
+          "height": 2164.875
+        },
+        "workpackShell": {
+          "left": 376,
+          "right": 1344,
+          "top": -462.453125,
+          "bottom": 1702.421875,
+          "width": 968,
+          "height": 2164.875
+        },
+        "documentEditor": {
+          "left": 672,
+          "right": 1344,
+          "top": -462.453125,
+          "bottom": 1702.421875,
+          "width": 672,
+          "height": 2164.875
+        },
+        "exportPanel": {
+          "left": 705,
+          "right": 1311,
+          "top": 565.34375,
+          "bottom": 1552.625,
+          "width": 606,
+          "height": 987.28125
+        },
+        "exportButtons": [
+          {
+            "text": "Excel 표 양식(.xlsx)",
+            "left": 724,
+            "right": 908,
+            "top": 648.140625,
+            "bottom": 693.03125
+          },
+          {
+            "text": "한글 표 양식(.hwp)",
+            "left": 916,
+            "right": 1100,
+            "top": 648.140625,
+            "bottom": 693.03125
+          },
+          {
+            "text": "PDF(브라우저 인쇄)",
+            "left": 1108,
+            "right": 1292,
+            "top": 648.140625,
+            "bottom": 693.03125
+          }
+        ],
+        "sidePanelCount": 0,
+        "greetingCount": 0,
+        "shellClass": "command-center-shell workbench-root workspace-theme-night"
+      }
+    },
+    {
+      "theme": "night",
+      "viewport": {
+        "label": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "pass": true,
+      "buttonsContained": true,
+      "buttonsSeparated": true,
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\workspace-document-editor-layout\\evaluation\\workspace-document-editor-layout\\mobile-night.png",
+      "metrics": {
+        "scrollWidth": 390,
+        "scrollHeight": 4418,
+        "clientWidth": 390,
+        "clientHeight": 844,
+        "editorSurface": {
+          "left": 27,
+          "right": 363,
+          "top": -1968.953125,
+          "bottom": 2051.875,
+          "width": 336,
+          "height": 4020.828125
+        },
+        "fieldWorkspace": {
+          "left": 27,
+          "right": 363,
+          "top": -833.9375,
+          "bottom": 2051.875,
+          "width": 336,
+          "height": 2885.8125
+        },
+        "canvas": {
+          "left": 27,
+          "right": 363,
+          "top": -833.9375,
+          "bottom": 2051.875,
+          "width": 336,
+          "height": 2885.8125
+        },
+        "workpackShell": {
+          "left": 27,
+          "right": 363,
+          "top": -833.9375,
+          "bottom": 2051.875,
+          "width": 336,
+          "height": 2885.8125
+        },
+        "documentEditor": {
+          "left": 27,
+          "right": 363,
+          "top": -644.9375,
+          "bottom": 2051.875,
+          "width": 336,
+          "height": 2696.8125
+        },
+        "exportPanel": {
+          "left": 56,
+          "right": 334,
+          "top": 483.953125,
+          "bottom": 1884.078125,
+          "width": 278,
+          "height": 1400.125
+        },
+        "exportButtons": [
+          {
+            "text": "Excel 표 양식(.xlsx)",
+            "left": 69,
+            "right": 321,
+            "top": 582.75,
+            "bottom": 627.640625
+          },
+          {
+            "text": "한글 표 양식(.hwp)",
+            "left": 69,
+            "right": 321,
+            "top": 635.640625,
+            "bottom": 680.53125
+          },
+          {
+            "text": "PDF(브라우저 인쇄)",
+            "left": 69,
+            "right": 321,
+            "top": 688.53125,
+            "bottom": 731.421875
+          }
+        ],
+        "sidePanelCount": 0,
+        "greetingCount": 0,
+        "shellClass": "command-center-shell workbench-root workspace-theme-night"
+      }
+    }
+  ]
+}

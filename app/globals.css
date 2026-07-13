@@ -6249,6 +6249,21 @@ ul {
   align-items: start;
 }
 
+.field-workspace-editor-only {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.field-workspace-editor-only .workspace-canvas {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+}
+
+.field-workspace .compact-head {
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
 .workspace-rail,
 .workspace-side {
   display: grid;
@@ -6442,6 +6457,14 @@ ul {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.workspace-side .worker-edit-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace-side .worker-edit-grid label:last-child {
+  grid-column: auto;
 }
 
 .worker-edit-grid label {
