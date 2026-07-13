@@ -4,9 +4,9 @@
   "reviewStatus": "pending",
   "reviewedClaim": false,
   "branch": "feat/workpack-share-v2",
-  "sourceBase": "69a022ac2a03ed509022d12d219b1483c9d0cbe7",
-  "candidate": "7649fc0c528514988ad1be11ff492cf156b7b473",
-  "candidateParent": "69a022ac2a03ed509022d12d219b1483c9d0cbe7",
+  "sourceBase": "8804e33421d4b7ea75dd32022acf728f7adb5c43",
+  "candidate": "2131681b86fb56efef44ae8f1e506dfdd84e2e9f",
+  "candidateParent": "8804e33421d4b7ea75dd32022acf728f7adb5c43",
   "candidateChangedFiles": [
     "evaluation/workpack-share-v2-2026-07-13/spec.json",
     "evaluation/workpack-share-v2-2026-07-13/spec.md",
@@ -20,7 +20,7 @@
   },
   "evidenceCommitContract": {
     "recordsOwnCommitSha": false,
-    "requiredParent": "7649fc0c528514988ad1be11ff492cf156b7b473",
+    "requiredParent": "2131681b86fb56efef44ae8f1e506dfdd84e2e9f",
     "changedFiles": [
       "evaluation/workpack-share-v2-2026-07-13/review-evidence.json"
     ]
@@ -28,6 +28,6 @@
   "independentReview": {
     "status": "pending",
     "passClaim": false,
-    "requiredAction": "Run a fresh independent review against candidate 7649fc0c528514988ad1be11ff492cf156b7b473."
+    "requiredAction": "Run a fresh independent review against candidate 2131681b86fb56efef44ae8f1e506dfdd84e2e9f."
   }
 }
