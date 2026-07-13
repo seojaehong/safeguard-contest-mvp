@@ -1,11 +1,11 @@
 # SafeClaw 공유 화면 v2 제품 명세
 
 - Spec ID: workpack-share-v2-2026-07-13
-- Revision: independent-review-remediation-5
+- Revision: independent-review-remediation-6
 - 상태: HOLD_PENDING_FRESH_REVIEW
 - Review status: pending
 - 기준 branch: feat/workpack-share-v2
-- Source base: 69a022ac2a03ed509022d12d219b1483c9d0cbe7
+- Source base: 8804e33421d4b7ea75dd32022acf728f7adb5c43
 - Candidate evidence: evaluation/workpack-share-v2-2026-07-13/review-evidence.json의 full candidate SHA
 - Review claim: 없음. candidate와 source base는 machine-resolvable해야 하고 fresh independent review는 pending입니다.
 - 쓰기 범위: spec candidate commit은 evaluation/workpack-share-v2-2026-07-13/spec.md, spec.json, validate-spec.cjs만, 후속 evidence-only commit은 review-evidence.json만 수정합니다.
@@ -592,6 +592,38 @@ taskDistancePx = primary.getBoundingClientRect().top - shareRoot.getBoundingClie
 
 각 browser case는 normal_100과 computed_text_200 두 mode로 실행합니다. canonical application tokens가 fixed px이므로 root font 변경은 delivery로 인정하지 않습니다. computed_text_200은 모든 representative node의 100% computed font-size와 line-height를 어떠한 mutation보다 먼저 immutable baseline으로 캡처하고, 각 node에 그 baseline의 정확히 2배를 한 번만 적용해 layout reflow를 일으킵니다. 조상을 먼저 변경한 뒤 descendant computed style을 읽는 순차 scaling은 금지합니다.
 
+Executable invariant table:
+
+| Invariant ID | Normative value |
+|---|---|
+| representative_source | complete derived visible text-leaf owners plus visible interactables with rendered text |
+| ancestor_traversal | each representative itself through every parentElement until documentElement HTML |
+| device_scale_factor | 1 |
+| device_pixel_ratio | 1 |
+| visual_viewport_scale | 1 |
+| configured_css_viewport | exact equality |
+| immutable_baseline_passes | 1 before any style mutation |
+| text_scaling_passes | 1 from immutable per-node baselines |
+| font_and_line_ratio | 1.9..2.1 for every representative |
+| genuine_fresh_dom_runs | 2 |
+| same_dom_repeated_runs | 0 |
+| nested_scroll_result | empty array |
+| body_scroll_region_roots | exactly 1 |
+| preview_scroll_region_roots | exactly 1 |
+
+Geometry coverage table:
+
+| Coverage set | Derived source | Independent expected-count contract |
+|---|---|---|
+| visibleElements | share root plus every descendant whose computed box is visible | static fixture manifest exact positive count |
+| interactables | every visible native or ARIA interactive element derived from visibleElements | static fixture manifest exact positive count |
+| textLeaves | every non-empty visible DOM Text node, deduplicated to its owning HTMLElement | static fixture manifest exact positive count |
+| ownerMappings | every visibleElements entry resolved through nearest mandatory data-share-owner | exact equality with visibleElements count and static owner allowlist |
+| scrollRegionMappings | every visibleElements entry resolved through nearest mandatory data-share-scroll-region | exact body/preview counts from static fixture manifest |
+
+`WORKPACK_SHARE_GEOMETRY_COVERAGE`는 `tests/fixtures/workpack-share-v2.ts`에 fixture ID별 exact positive integer counts, exact owner allowlist, `body`와 `preview` 두 required region, required text owner, meaning owner를 렌더링 전에 정적으로 선언합니다. DOM 측정 결과로 expectation을 생성하거나 갱신하면 contract failure입니다. `data-share-owner`와 `data-share-scroll-region`은 optional probe marker가 아니라 모든 visible element가 해석할 수 있어야 하는 production ownership mapping입니다. 개별 font/overlap/reflow marker는 사용하지 않습니다.
+
+<!-- normative-code:accessibility-and-geometry/v3 -->
 ~~~ts
 type TextMetrics = {
   fontSizePx: number;
@@ -600,32 +632,141 @@ type TextMetrics = {
   heightPx: number;
 };
 
-test.use({ deviceScaleFactor: 1 });
-async function assertComputedText200(page: Page, testInfo: TestInfo) {
-expect(testInfo.project.use.deviceScaleFactor).toBe(1);
-const configuredViewport = page.viewportSize();
-if (!configuredViewport) throw new Error("The browser case must configure an explicit viewport");
-const browserScaleInvariant = await page.evaluate(() => ({
-  devicePixelRatio: window.devicePixelRatio,
-  visualViewportScale: window.visualViewport?.scale ?? 1,
-  cssViewportWidth: document.documentElement.clientWidth
-}));
-expect(browserScaleInvariant.devicePixelRatio).toBe(1);
-expect(browserScaleInvariant.visualViewportScale).toBe(1);
-expect(browserScaleInvariant.cssViewportWidth).toBe(configuredViewport.width);
+type GeometryCoverageExpectation = {
+  counts: {
+    visibleElements: number;
+    interactables: number;
+    textLeaves: number;
+    ownerMappings: number;
+    bodyMappings: number;
+    previewMappings: number;
+  };
+  owners: readonly string[];
+  requiredTextOwners: readonly string[];
+  meaningOwners: readonly string[];
+  requiredScrollRegions: readonly ["body", "preview"];
+  reflowProbeMinCharacters: number;
+};
 
-const zoomResult = await page.locator("[data-share-root]").evaluate(async (root) => {
-  const requiredRoles = [
-    "status",
-    "target",
-    "channel",
-    "preview-title",
-    "preview-metadata",
-    "preview-body",
-    "operator-note",
-    "result",
-    "primary"
-  ];
+test.use({ deviceScaleFactor: 1 });
+async function assertComputedText200(
+  page: Page,
+  testInfo: TestInfo,
+  fixtureId: WorkpackShareFixtureId
+) {
+  expect(testInfo.project.use.deviceScaleFactor).toBe(1);
+  const configuredViewport = page.viewportSize();
+  if (!configuredViewport) throw new Error("The browser case must configure an explicit viewport");
+  const expectation: GeometryCoverageExpectation = WORKPACK_SHARE_GEOMETRY_COVERAGE[fixtureId];
+  expect(expectation).toBeDefined();
+  for (const count of Object.values(expectation.counts)) {
+    expect(Number.isInteger(count) && count > 0).toBe(true);
+  }
+  expect(expectation.owners.length).toBeGreaterThan(0);
+  expect(expectation.requiredTextOwners.length).toBeGreaterThan(0);
+  expect(expectation.meaningOwners.length).toBeGreaterThan(0);
+  expect(expectation.requiredScrollRegions).toEqual(["body", "preview"]);
+
+  const browserScaleInvariant = await page.evaluate(() => ({
+    devicePixelRatio: window.devicePixelRatio,
+    visualViewportScale: window.visualViewport?.scale ?? 1,
+    cssViewportWidth: document.documentElement.clientWidth
+  }));
+  expect(browserScaleInvariant.devicePixelRatio).toBe(1);
+  expect(browserScaleInvariant.visualViewportScale).toBe(1);
+  expect(browserScaleInvariant.cssViewportWidth).toBe(configuredViewport.width);
+
+  const result = await page.locator("[data-share-root]").evaluate(async (rootNode, expected) => {
+    const root = rootNode as HTMLElement;
+    const interactiveSelector = [
+      "a[href]",
+      "button",
+      "input",
+      "select",
+      "textarea",
+      "summary",
+      "[role=button]",
+      "[role=link]",
+      "[role=checkbox]",
+      "[role=radio]",
+      "[role=switch]",
+      "[tabindex]:not([tabindex='-1'])"
+    ].join(",");
+    const isVisible = (element: HTMLElement) => {
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" &&
+        style.opacity !== "0" && rect.width > 0 && rect.height > 0;
+    };
+    const allElements = [root, ...root.querySelectorAll<HTMLElement>("*")];
+    const visibleElements = allElements.filter(isVisible);
+    const interactables = visibleElements.filter((element) => element.matches(interactiveSelector));
+    const textLeafSet = new Set<HTMLElement>();
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const value = node.textContent?.replace(/\s+/gu, " ").trim() ?? "";
+      const owner = node.parentElement;
+      if (value && owner && !owner.matches("script,style,noscript") && isVisible(owner)) {
+        textLeafSet.add(owner);
+      }
+    }
+    const textLeaves = [...textLeafSet];
+    const withinRootClosest = (element: HTMLElement, selector: string) => {
+      const match = element.closest<HTMLElement>(selector);
+      return match && (match === root || root.contains(match)) ? match : null;
+    };
+    const coverage = visibleElements.map((element, index) => {
+      const owner = withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner;
+      const scrollRegion = withinRootClosest(
+        element,
+        "[data-share-scroll-region]"
+      )?.dataset.shareScrollRegion;
+      if (!owner || !scrollRegion) {
+        throw new Error(`Unmapped visible element at derived index ${index}`);
+      }
+      if (!expected.owners.includes(owner)) {
+        throw new Error(`Unexpected geometry owner: ${owner}`);
+      }
+      if (!expected.requiredScrollRegions.includes(scrollRegion as "body" | "preview")) {
+        throw new Error(`Unexpected scroll region: ${scrollRegion}`);
+      }
+      return { element, owner, scrollRegion };
+    });
+    const regionRoots = Object.fromEntries(expected.requiredScrollRegions.map((region) => [
+      region,
+      root.querySelectorAll(`[data-share-scroll-region="${region}"]`).length
+    ]));
+    if (regionRoots.body !== 1 || regionRoots.preview !== 1) {
+      throw new Error(`Required body/preview region roots missing: ${JSON.stringify(regionRoots)}`);
+    }
+    const actualCounts = {
+      visibleElements: visibleElements.length,
+      interactables: interactables.length,
+      textLeaves: textLeaves.length,
+      ownerMappings: coverage.length,
+      bodyMappings: coverage.filter((entry) => entry.scrollRegion === "body").length,
+      previewMappings: coverage.filter((entry) => entry.scrollRegion === "preview").length
+    };
+    for (const [key, count] of Object.entries(actualCounts)) {
+      if (count <= 0 || count !== expected.counts[key as keyof typeof actualCounts]) {
+        throw new Error(`Geometry expected-count mismatch for ${key}: ${count}`);
+      }
+    }
+    if (actualCounts.ownerMappings !== actualCounts.visibleElements) {
+      throw new Error("Every visible element must have ownership and scroll-region coverage");
+    }
+    const actualOwners = [...new Set(coverage.map((entry) => entry.owner))].sort();
+    const expectedOwners = [...expected.owners].sort();
+    if (JSON.stringify(actualOwners) !== JSON.stringify(expectedOwners)) {
+      throw new Error("Geometry owner allowlist coverage mismatch");
+    }
+    const textOwners = new Set(textLeaves.map((element) =>
+      withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner
+    ));
+    for (const owner of expected.requiredTextOwners) {
+      if (!textOwners.has(owner)) throw new Error(`Missing required text owner: ${owner}`);
+    }
+
   const readMetrics = (element: HTMLElement): TextMetrics => {
     const style = getComputedStyle(element);
     const range = document.createRange();
@@ -642,17 +783,16 @@ const zoomResult = await page.locator("[data-share-root]").evaluate(async (root)
   };
 
   await document.fonts.ready;
-  const representatives = [...root.querySelectorAll<HTMLElement>(
-    "[data-share-font-node][data-share-font-role]"
-  )];
-  const roles = new Set(representatives.map((element) => element.dataset.shareFontRole));
-  const missingRoles = requiredRoles.filter((role) => !roles.has(role));
-  if (missingRoles.length || representatives.length === 0) {
-    throw new Error(`Missing representative font roles: ${missingRoles.join(",")}`);
-  }
-  if (root instanceof HTMLElement && representatives.includes(root)) {
-    throw new Error("The share root is not a representative text node");
-  }
+  const representatives = [...new Set([
+    ...textLeaves,
+    ...interactables.filter((element) => {
+      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+        return Boolean(element.value || element.placeholder || element.getAttribute("aria-label"));
+      }
+      return Boolean(element.innerText.trim() || element.getAttribute("aria-label"));
+    })
+  ])];
+  if (representatives.length === 0) throw new Error("Derived representative set is empty");
   if (root.getAttribute("data-share-text-scale-run") !== null) {
     throw new Error("Repeated computed_text_200 evaluation requires a fresh production fixture DOM");
   }
@@ -669,7 +809,7 @@ const zoomResult = await page.locator("[data-share-root]").evaluate(async (root)
     }
     return {
       element,
-      key: `${element.dataset.shareFontRole}:${index}`,
+      key: `derived-representative:${visibleElements.indexOf(element)}:${index}`,
       before
     };
   });
@@ -719,15 +859,66 @@ const zoomResult = await page.locator("[data-share-root]").evaluate(async (root)
     before: baseline.before,
     after: readMetrics(baseline.element)
   }));
-  const probe = nodes.find((node) =>
-    node.key.startsWith("preview-body:") &&
-    immutableBaselines.find((baseline) => baseline.key === node.key)?.element.matches("[data-share-reflow-probe]")
-  );
+  const probeBaseline = immutableBaselines.find((baseline) => {
+    const owner = withinRootClosest(baseline.element, "[data-share-owner]")?.dataset.shareOwner;
+    return owner === "preview-body" &&
+      (baseline.element.textContent?.trim().length ?? 0) >= expected.reflowProbeMinCharacters;
+  });
+  const probe = nodes.find((node) => node.key === probeBaseline?.key);
   if (!probe) throw new Error("The natural preview-body reflow probe is missing");
+
+  const collisionNodes = [...new Set([
+    ...interactables,
+    ...textLeaves.filter((textElement) =>
+      !interactables.some((interactive) => interactive.contains(textElement))
+    )
+  ])];
+  const overlapPairs: string[] = [];
+  for (let left = 0; left < collisionNodes.length; left += 1) {
+    for (let right = left + 1; right < collisionNodes.length; right += 1) {
+      const a = collisionNodes[left];
+      const b = collisionNodes[right];
+      if (a.contains(b) || b.contains(a)) continue;
+      const ar = a.getBoundingClientRect();
+      const br = b.getBoundingClientRect();
+      const intersectionWidth = Math.min(ar.right, br.right) - Math.max(ar.left, br.left);
+      const intersectionHeight = Math.min(ar.bottom, br.bottom) - Math.max(ar.top, br.top);
+      if (intersectionWidth > 0.5 && intersectionHeight > 0.5) {
+        overlapPairs.push(`${left}:${right}`);
+      }
+    }
+  }
+  const clippedText = textLeaves.filter((element) => {
+    const style = getComputedStyle(element);
+    const clipsX = ["hidden", "clip"].includes(style.overflowX) &&
+      element.scrollWidth > element.clientWidth + 1;
+    const clipsY = ["hidden", "clip"].includes(style.overflowY) &&
+      element.scrollHeight > element.clientHeight + 1;
+    const lineClamp = style.getPropertyValue("-webkit-line-clamp");
+    return clipsX || clipsY || style.textOverflow === "ellipsis" ||
+      (lineClamp !== "" && lineClamp !== "none");
+  }).map((element) => withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner);
+  const nestedScroll = visibleElements.filter((element) => {
+    const style = getComputedStyle(element);
+    return ["auto", "scroll"].includes(style.overflowY) &&
+      element.scrollHeight > element.clientHeight + 1;
+  }).map((element) => withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner);
+  const undersizedTargets = interactables.filter((element) => {
+    const rect = element.getBoundingClientRect();
+    return rect.width < 44 || rect.height < 44;
+  }).map((element) => withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner);
 
   return {
     nodes,
     probe,
+    coverageCounts: actualCounts,
+    overlapPairs,
+    clippedText,
+    nestedScroll,
+    undersizedTargets,
+    documentHorizontalOverflowPx:
+      document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    shareHorizontalOverflowPx: root.scrollWidth - root.clientWidth,
     scaledCount: scaled.size,
     rootFontSizeBefore,
     rootFontSizeAfter: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
@@ -739,10 +930,11 @@ const zoomResult = await page.locator("[data-share-root]").evaluate(async (root)
     rootZoom: getComputedStyle(document.documentElement).getPropertyValue("zoom") || "1",
     shareZoom: getComputedStyle(root).getPropertyValue("zoom") || "1"
   };
-});
+  }, expectation);
 
-expect(zoomResult.scaledCount).toBe(zoomResult.nodes.length);
-for (const node of zoomResult.nodes) {
+expect(result.coverageCounts).toEqual(expectation.counts);
+expect(result.scaledCount).toBe(result.nodes.length);
+for (const node of result.nodes) {
   const fontRatio = node.after.fontSizePx / node.before.fontSizePx;
   const lineRatio = node.after.lineHeightPx / node.before.lineHeightPx;
   expect(fontRatio, node.key).toBeGreaterThanOrEqual(1.9);
@@ -750,98 +942,40 @@ for (const node of zoomResult.nodes) {
   expect(lineRatio, node.key).toBeGreaterThanOrEqual(1.9);
   expect(lineRatio, node.key).toBeLessThanOrEqual(2.1);
 }
-expect(zoomResult.probe.after.lineCount).toBeGreaterThan(zoomResult.probe.before.lineCount);
-expect(zoomResult.probe.after.heightPx).toBeGreaterThan(zoomResult.probe.before.heightPx);
-expect(zoomResult.rootFontSizeAfter).toBeCloseTo(zoomResult.rootFontSizeBefore, 5);
-expect(zoomResult.rootInlineFontAfter).toBe(zoomResult.rootInlineFontBefore);
-expect([zoomResult.rootTransform, zoomResult.shareTransform]).toEqual(["none", "none"]);
-expect([zoomResult.rootZoom, zoomResult.shareZoom]).toEqual(["1", "1"]);
-expect(zoomResult.representativePaths.every(
+expect(result.probe.after.lineCount).toBeGreaterThan(result.probe.before.lineCount);
+expect(result.probe.after.heightPx).toBeGreaterThan(result.probe.before.heightPx);
+expect(result.rootFontSizeAfter).toBeCloseTo(result.rootFontSizeBefore, 5);
+expect(result.rootInlineFontAfter).toBe(result.rootInlineFontBefore);
+expect([result.rootTransform, result.shareTransform]).toEqual(["none", "none"]);
+expect([result.rootZoom, result.shareZoom]).toEqual(["1", "1"]);
+expect(result.representativePaths.every(
   (path) => path.mechanisms.at(-1)?.tag === "HTML" && path.mechanisms.every(
     (mechanism) => mechanism.transform === "none" && mechanism.zoom === "1"
   )
 )).toBe(true);
-
-const geometryResult = await page.locator("[data-share-root]").evaluate((root) => {
-  const isVisible = (element: HTMLElement) => {
-    const style = getComputedStyle(element);
-    const rect = element.getBoundingClientRect();
-    return style.display !== "none" && style.visibility !== "hidden" &&
-      rect.width > 0 && rect.height > 0;
-  };
-  const overlapNodes = [...root.querySelectorAll<HTMLElement>("[data-share-overlap-node]")]
-    .filter(isVisible);
-  const overlapPairs: string[] = [];
-  for (let left = 0; left < overlapNodes.length; left += 1) {
-    for (let right = left + 1; right < overlapNodes.length; right += 1) {
-      const a = overlapNodes[left];
-      const b = overlapNodes[right];
-      if (a.contains(b) || b.contains(a)) {
-        overlapPairs.push(`nested-marker:${left}:${right}`);
-        continue;
-      }
-      const ar = a.getBoundingClientRect();
-      const br = b.getBoundingClientRect();
-      const intersectionWidth = Math.min(ar.right, br.right) - Math.max(ar.left, br.left);
-      const intersectionHeight = Math.min(ar.bottom, br.bottom) - Math.max(ar.top, br.top);
-      if (intersectionWidth > 0.5 && intersectionHeight > 0.5) {
-        overlapPairs.push(`${left}:${right}`);
-      }
-    }
-  }
-  const clippedText = [...root.querySelectorAll<HTMLElement>("[data-share-font-node]")]
-    .filter(isVisible)
-    .filter((element) => {
-      const style = getComputedStyle(element);
-      const clipsX = ["hidden", "clip"].includes(style.overflowX) &&
-        element.scrollWidth > element.clientWidth + 1;
-      const clipsY = ["hidden", "clip"].includes(style.overflowY) &&
-        element.scrollHeight > element.clientHeight + 1;
-      const lineClamp = style.getPropertyValue("-webkit-line-clamp");
-      return clipsX || clipsY || style.textOverflow === "ellipsis" ||
-        (lineClamp !== "" && lineClamp !== "none");
-    })
-    .map((element) => element.dataset.shareFontRole || "unknown");
-  const nestedScroll = [...root.querySelectorAll<HTMLElement>(
-    '[data-share-scroll-region="body"], [data-share-scroll-region="preview"]'
-  )]
-    .filter(isVisible)
-    .filter((element) => ["auto", "scroll"].includes(getComputedStyle(element).overflowY))
-    .map((element) => element.dataset.shareScrollRegion || "unknown");
-
-  return {
-    overlapPairs,
-    clippedText,
-    nestedScroll,
-    documentHorizontalOverflowPx:
-      document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    shareHorizontalOverflowPx: root.scrollWidth - root.clientWidth
-  };
-});
-
-expect(geometryResult.overlapPairs).toEqual([]);
-expect(geometryResult.clippedText).toEqual([]);
-expect(geometryResult.nestedScroll).toEqual([]);
-expect(geometryResult.documentHorizontalOverflowPx).toBeLessThanOrEqual(0);
-expect(geometryResult.shareHorizontalOverflowPx).toBeLessThanOrEqual(0);
-
+expect(result.overlapPairs).toEqual([]);
+expect(result.clippedText).toEqual([]);
+expect(result.nestedScroll).toEqual([]);
+expect(result.undersizedTargets).toEqual([]);
+expect(result.documentHorizontalOverflowPx).toBeLessThanOrEqual(0);
+expect(result.shareHorizontalOverflowPx).toBeLessThanOrEqual(0);
 }
 
 for (const independentRun of [1, 2]) {
   await page.goto(caseUrl);
   await settleProductionFixture(page, fixtureId);
   expect(await page.locator("[data-share-root]").getAttribute("data-share-text-scale-run")).toBeNull();
-  await assertComputedText200(page, testInfo);
+  await assertComputedText200(page, testInfo, fixtureId);
 }
-await expect(assertComputedText200(page, testInfo)).rejects.toThrow(
+await expect(assertComputedText200(page, testInfo, fixtureId)).rejects.toThrow(
   "Repeated computed_text_200 evaluation requires a fresh production fixture DOM"
 );
 ~~~
 
-- 모든 representative node는 data-share-font-node와 required data-share-font-role을 사용합니다. role coverage가 하나라도 빠지면 test가 즉시 실패하며 한 node만 표시해 false green을 만들 수 없습니다.
-- `baselineCaptureBeforeAnyMutation=true`이며 representativePaths는 각 text node 자체, 모든 internal wrapper, share root, outer body, document root HTML을 빠짐없이 포함합니다. root 하나의 ancestor path만 검사하는 결과는 contract failure입니다.
-- data-share-overlap-node는 서로 포함하지 않는 visible leaf text/interactive surface에만 붙입니다. nested marker 자체도 failure이며 위 geometry block은 200% 적용 뒤 Day/Night desktop/mobile 모든 case에서 실행합니다.
-- [data-share-reflow-probe]는 preview-body role의 실제 localized preview text block이며 fixture가 desktop에서도 200%에서 줄바꿈이 증가할 만큼 긴 검토된 문장을 제공합니다. 별도 test-only element를 삽입하지 않습니다.
+- representative는 complete derived textLeaves와 rendered-text interactables의 합집합입니다. data-share-font-node, data-share-font-role, data-share-overlap-node, data-share-reflow-probe가 0개여도 coverage가 줄지 않으며 이 marker들을 검사 근거로 사용하면 contract failure입니다.
+- `baselineCaptureBeforeAnyMutation=true`이며 representativePaths는 각 derived representative 자체, 모든 internal wrapper, share root, outer body, document root HTML을 빠짐없이 포함합니다. root 하나의 ancestor path만 검사하는 결과는 contract failure입니다.
+- overlap은 derived textLeaves와 interactables에서 containment를 정규화한 complete collision set으로 검사하고, clipping은 complete textLeaves로 검사합니다. 위 geometry block은 200% 적용 뒤 Day/Night desktop/mobile 모든 case에서 실행합니다.
+- reflow probe는 mandatory owner mapping `preview-body` 아래 실제 localized text leaf에서 text length threshold로 도출합니다. 별도 marker나 test-only element를 삽입하지 않습니다.
 - 모든 node의 100% computed font-size와 line-height는 첫 mutation 전에 finite positive px로 캡처되어야 합니다. line-height=normal이면 contract failure이며 제품 token을 명시적 line-height로 고친 뒤 다시 측정합니다.
 - scale은 immutableBaselines second pass에서 node당 정확히 한 번만 적용합니다. 모든 node의 font/line ratio upper bound 2.1이 ancestor 누적 4x/8x를 차단합니다.
 - page.setViewportSize는 mode 적용 전에 desktop 1440x1000 또는 mobile 391x844로 고정하고 mode 도중 바꾸지 않습니다.
@@ -873,7 +1007,14 @@ Negative fixture contract:
 | device_scale_factor | context deviceScaleFactor와 devicePixelRatio를 2로 설정 | fail before text mutation |
 | page_zoom | visualViewport.scale 또는 CSS viewport width를 configured viewport와 다르게 설정 | fail before text mutation |
 
-`tests/workpack-share-v2-browser.test.ts`는 위 여섯 negative fixture를 실제 DOM/browser case로 실행하고, genuine fresh-DOM positive를 두 번 실행합니다. spec validator의 contract fixtures는 이 실패/성공 산술만 검증하며 128개 browser case 실행을 주장하지 않습니다.
+Geometry coverage fixture contract:
+
+| Geometry fixture ID | DOM ownership mutation | Required result |
+|---|---|---|
+| marker_removal | body/preview ownership and scroll-region mappings removed from the derived visible set | fail on unmapped visible element or missing required region |
+| partial_marker | one derived visible text leaf loses resolvable owner or scroll-region mapping | fail before geometry assertions |
+
+`tests/workpack-share-v2-browser.test.ts`는 위 여섯 zoom negative fixture와 두 geometry coverage fixture를 실제 DOM/browser case로 실행하고, genuine fresh-DOM positive와 complete geometry positive를 각각 두 번 실행합니다. spec validator의 contract fixtures는 이 실패/성공 산술만 검증하며 128개 browser case 실행을 주장하지 않습니다.
 
 ### 5.4 Mobile Priority
 
@@ -984,20 +1125,191 @@ browser test는 request log를 수집해 다음을 검사합니다.
 23. computed_text_200은 각 representative text node에서 document root까지 모든 internal/outer ancestor의 transform과 zoom을 검사합니다.
 24. context deviceScaleFactor, window.devicePixelRatio, visualViewport.scale은 1이고 CSS viewport width는 configured viewport와 같아야 합니다.
 25. fresh production DOM positive를 두 번 독립 실행하며 같은 DOM repeated evaluation과 internal wrapper transform/zoom, outer transform fixture는 실패합니다.
+26. server authority auto loop는 12개 SupportedLanguageCode를 각각 선택하고 title, metadata labels, metadata values, body를 렌더링해 script allowlist와 non-ko Hangul residual 0을 검사합니다.
+27. manual loop도 12개 option을 각각 실제 선택하고 같은 surface를 검사하되 recipient language, dispatch language와 DispatchPlan digest는 바뀌지 않습니다.
+28. invalid locale CTA는 exact static workers owner route이며 raw locale와 language query 보간 0, share-session/dispatch 0입니다.
+29. geometry는 share root의 complete visibleElements/interactables/textLeaves를 도출해 static exact positive counts, owner mapping, body/preview mapping과 각각 한 region root를 검사합니다. 누락 또는 부분 mapping은 실패합니다.
+30. fixture별 meaning owner는 localized visible text와 accessible name을 가지며 emoji는 유일한 의미가 될 수 없습니다.
 
 ### 6.5 Vietnamese And Language Gates
 
-ready fixture에는 languageCode=vi recipient와 review route가 저장한 source-matching, approved, server-signed Vietnamese envelope를 workpack GET mock으로 넣습니다.
+ready fixture family는 각 SupportedLanguageCode recipient와 review route가 저장한 source-matching, approved, server-signed envelope 12개를 workpack GET mock으로 제공합니다. 언어 loop는 fixture ID를 추가하지 않고 각 ready browser case 내부의 table-driven assertion으로 실행하므로 128 case 산술은 변하지 않습니다.
+
+Language script policy:
+
+| Language code | Allowed letter script plus neutral identifiers | Auto render | Manual render | Hangul residual rule |
+|---|---|---|---|---|
+| ko | Hangul and Han | required | required | target script, not residual |
+| vi | Latin | required | required | 0 |
+| zh | Han | required | required | 0 |
+| th | Thai | required | required | 0 |
+| uz | Latin | required | required | 0 |
+| mn | Cyrillic | required | required | 0 |
+| ne | Devanagari | required | required | 0 |
+| km | Khmer | required | required | 0 |
+| id | Latin | required | required | 0 |
+| my | Myanmar | required | required | 0 |
+| tl | Latin | required | required | 0 |
+| en | Latin | required | required | 0 |
+
+Localized surface coverage:
+
+| Surface ID | Semantic source | Auto assertion | Manual assertion | Script assertion |
+|---|---|---|---|---|
+| title | preview-title owner | required non-empty | required non-empty | language policy |
+| metadataLabels | preview-metadata owner dt elements | required non-empty set | required non-empty set | language policy |
+| metadataValues | preview-metadata owner dd elements | required non-empty set | required non-empty set | language policy or neutral identifier |
+| body | preview-body owner | required non-empty | required non-empty | language policy |
+
+Language authority cases:
+
+| Case ID | Preview authority | Dispatch authority | Required result |
+|---|---|---|---|
+| auto_all_languages | server allowlisted recipient locale | same server locale | all 12 selected and rendered; localized surface contract; non-ko Hangul residual 0 |
+| manual_all_languages | operator dropdown preview override | original server auto locale and unchanged DispatchPlan digest | all 12 manually selected and rendered; no recipient or dispatch mutation |
+| invalid_locale | none | none | review_required; exact static workers owner CTA; no language query/raw interpolation; session 0; dispatch 0 |
+| semantic_meaning | localized visible text | not applicable | accessible icon plus visible text or visible text-only; emoji is never sole meaning |
+
+Neutral identifiers are only URL/email, ASCII uppercase/digit IDs, dates, times and punctuation tokens recognized by the executable allowlist. They do not permit arbitrary fallback prose. Every non-`ko` title, metadata label, metadata value and body has Hangul residual count 0. Vietnamese retains the stricter named title/site/task/core-risk/body residual-0 assertions from the reviewed artifact contract.
+
+<!-- normative-code:language-matrix/v2 -->
+~~~ts
+const SUPPORTED_LANGUAGE_CASES = [
+  { code: "ko", allowedLetter: /[\p{Script_Extensions=Hangul}\p{Script_Extensions=Han}]/u },
+  { code: "vi", allowedLetter: /\p{Script_Extensions=Latin}/u },
+  { code: "zh", allowedLetter: /\p{Script_Extensions=Han}/u },
+  { code: "th", allowedLetter: /\p{Script_Extensions=Thai}/u },
+  { code: "uz", allowedLetter: /\p{Script_Extensions=Latin}/u },
+  { code: "mn", allowedLetter: /\p{Script_Extensions=Cyrillic}/u },
+  { code: "ne", allowedLetter: /\p{Script_Extensions=Devanagari}/u },
+  { code: "km", allowedLetter: /\p{Script_Extensions=Khmer}/u },
+  { code: "id", allowedLetter: /\p{Script_Extensions=Latin}/u },
+  { code: "my", allowedLetter: /\p{Script_Extensions=Myanmar}/u },
+  { code: "tl", allowedLetter: /\p{Script_Extensions=Latin}/u },
+  { code: "en", allowedLetter: /\p{Script_Extensions=Latin}/u }
+] as const satisfies readonly {
+  code: SupportedLanguageCode;
+  allowedLetter: RegExp;
+}[];
+
+const LOCALIZED_SURFACES = [
+  { id: "title", selector: '[data-share-owner="preview-title"]' },
+  { id: "metadataLabels", selector: '[data-share-owner="preview-metadata"] dt' },
+  { id: "metadataValues", selector: '[data-share-owner="preview-metadata"] dd' },
+  { id: "body", selector: '[data-share-owner="preview-body"]' }
+] as const;
+
+const HANGUL = /\p{Script_Extensions=Hangul}/gu;
+const LETTER_OR_MARK = /[\p{L}\p{M}]/u;
+const EMOJI = /\p{Extended_Pictographic}/gu;
+const NEUTRAL_IDENTIFIER = /^(?:https?:\/\/\S+|[^\s@]+@[^\s@]+|[A-Z0-9][A-Z0-9._:/-]*|\d[\d.:/-]*)$/u;
+
+async function assertLocalizedSurfaceContract(
+  page: Page,
+  languageCase: (typeof SUPPORTED_LANGUAGE_CASES)[number]
+) {
+  const collected: Record<(typeof LOCALIZED_SURFACES)[number]["id"], string[]> = {
+    title: [],
+    metadataLabels: [],
+    metadataValues: [],
+    body: []
+  };
+  for (const surface of LOCALIZED_SURFACES) {
+    const locator = page.locator(surface.selector);
+    const count = await locator.count();
+    expect(count, `${languageCase.code}/${surface.id}`).toBeGreaterThan(0);
+    collected[surface.id] = (await locator.allTextContents())
+      .map((value) => value.replace(/\s+/gu, " ").trim())
+      .filter(Boolean);
+    expect(collected[surface.id].length, `${languageCase.code}/${surface.id}`).toBe(count);
+    for (const text of collected[surface.id]) {
+      if (languageCase.code !== "ko") {
+        expect(text.match(HANGUL) ?? [], `${languageCase.code}/${surface.id}`).toHaveLength(0);
+      }
+      for (const token of text.split(/\s+/u)) {
+        if (NEUTRAL_IDENTIFIER.test(token)) continue;
+        for (const character of token) {
+          if (LETTER_OR_MARK.test(character)) {
+            expect(
+              languageCase.allowedLetter.test(character),
+              `${languageCase.code}/${surface.id}/${character}`
+            ).toBe(true);
+          }
+        }
+      }
+    }
+  }
+  expect(collected.title.join(" ")).not.toBe("");
+  expect(collected.metadataLabels.join(" ")).not.toBe("");
+  expect(collected.metadataValues.join(" ")).not.toBe("");
+  expect(collected.body.join(" ")).not.toBe("");
+}
+
+async function assertEmojiIsNotSoleMeaning(page: Page, fixtureId: WorkpackShareFixtureId) {
+  const meaningOwners = WORKPACK_SHARE_GEOMETRY_COVERAGE[fixtureId].meaningOwners;
+  expect(meaningOwners.length).toBeGreaterThan(0);
+  for (const owner of meaningOwners) {
+    const meaning = page.locator(`[data-share-owner="${owner}"]`);
+    await expect(meaning).toBeVisible();
+    const visibleText = (await meaning.innerText()).replace(/\s+/gu, " ").trim();
+    const nonEmojiText = visibleText.replace(EMOJI, "").trim();
+    expect(nonEmojiText, owner).not.toBe("");
+    const accessibleName = (await meaning.getAttribute("aria-label"))?.trim() || visibleText;
+    expect(accessibleName, owner).not.toBe("");
+  }
+}
+
+for (const autoLanguage of SUPPORTED_LANGUAGE_CASES) {
+  await page.goto(readyCaseUrl({ recipientLanguage: autoLanguage.code }));
+  await settleProductionFixture(page, "ready");
+  const authority = await readServerResolvedShareAuthority(page);
+  expect(authority.recipientLanguage).toBe(autoLanguage.code);
+  expect(authority.dispatchLanguage).toBe(autoLanguage.code);
+  await expect(page.getByRole("combobox", { name: "미리보기 언어" })).toHaveValue(autoLanguage.code);
+  await expect(page.locator("[data-share-preview]")).toHaveAttribute("lang", autoLanguage.code);
+  await assertLocalizedSurfaceContract(page, autoLanguage);
+  await assertEmojiIsNotSoleMeaning(page, "ready");
+}
+
+for (const manualLanguage of SUPPORTED_LANGUAGE_CASES) {
+  await page.goto(readyCaseUrl({ recipientLanguage: "vi" }));
+  await settleProductionFixture(page, "ready");
+  const before = await readServerResolvedShareAuthority(page);
+  await page.getByRole("combobox", { name: "미리보기 언어" }).selectOption(manualLanguage.code);
+  await expect(page.locator("[data-share-preview]")).toHaveAttribute("lang", manualLanguage.code);
+  await assertLocalizedSurfaceContract(page, manualLanguage);
+  await assertEmojiIsNotSoleMeaning(page, "ready");
+  const after = await readServerResolvedShareAuthority(page);
+  expect(after.recipientLanguage).toBe(before.recipientLanguage);
+  expect(after.dispatchLanguage).toBe(before.dispatchLanguage);
+  expect(after.dispatchPlanDigest).toBe(before.dispatchPlanDigest);
+}
+
+for (const invalidLocale of [null, "", "xx", "vi-VN", "ko|vi"] as const) {
+  await page.goto(reviewRequiredCaseUrl({ invalidLocale }));
+  await settleProductionFixture(page, "review_required");
+  const canonicalShareReturn = "/workspace?step=share&theme=day";
+  const expectedOwnerHref = `/workers?focus=language&next=${encodeURIComponent(canonicalShareReturn)}`;
+  const ownerCta = page.getByRole("link", { name: "작업자 언어 확인" });
+  await expect(ownerCta).toHaveAttribute("href", expectedOwnerHref);
+  const actualOwnerUrl = new URL(await ownerCta.getAttribute("href") ?? "", "https://safeclaw.invalid");
+  expect(actualOwnerUrl.searchParams.has("language")).toBe(false);
+  expect(actualOwnerUrl.searchParams.get("next")).toBe(canonicalShareReturn);
+  expect(requestLog.shareSession).toHaveLength(0);
+  expect(requestLog.dispatch).toHaveLength(0);
+  await expect(page.locator("[data-share-state]")).toHaveAttribute("data-share-state", "review_required");
+}
+~~~
 
 - dropdown은 하나이고 option 순서는 ko, vi, zh, th, uz, mn, ne, km, id, my, tl, en입니다.
-- allowlisted server parser가 auto-resolved dispatch language를 vi로 결정하고, manual dropdown은 preview만 바꿉니다.
-- preview override 전후 recipient language와 DispatchPlan digest는 같습니다.
+- allowlisted server parser가 auto-resolved recipient/dispatch language를 결정하고, manual dropdown은 preview만 바꿉니다.
+- preview override 전후 recipient language, dispatch language와 DispatchPlan digest는 같습니다.
 - Vietnamese title/subject, site label/value, task label/value, core-risk label/value, body 전체의 Korean residual count는 각각 0입니다.
-- Korean-only title/site/task/core-risk/body value가 없습니다.
-- structural emoji가 preview DOM과 outbound artifact에 없고, 모든 상태/위험 의미는 accessible icon+text 또는 text-only입니다. icon-only와 emoji-only meaning count는 0입니다.
+- Korean-only non-ko title/site/task/core-risk/body value가 없습니다.
+- structural emoji가 outbound artifact에 없고, 모든 상태/위험 의미는 accessible icon+visible text 또는 visible text-only입니다. icon-only와 emoji-only meaning count는 0입니다.
 - provenance, reviewer, reviewedAt, generationRevision, sourceDocumentDigest, artifactRevision, artifactDigest, signature를 검사합니다.
 - body 3줄만 바꾼 artifact, 영어 fallback, unknown/malformed locale fallback은 review_required이며 share-session/dispatch count는 0입니다.
-- 12개 언어 unit fixture 모두 같은 artifact completeness contract를 통과해야 합니다.
+- 12개 언어 auto fixture와 12개 manual selection 모두 같은 artifact completeness와 surface contract를 통과해야 합니다.
 
 실제 signing secret, provider credential, provider call, Supabase insert/update/delete는 browser gate에서 사용하지 않습니다.
 
@@ -1102,6 +1414,7 @@ Rollback: git revert <wave-2-sha>. Wave 1 authority와 /workers roster, 기존 s
 Required exact files:
 
 - tests/workpack-share-v2-browser.test.ts (new)
+- tests/fixtures/workpack-share-v2.ts (new)
 
 Conditional fix files:
 
@@ -1119,7 +1432,7 @@ npm.cmd run audit:frontend-consistency
 git diff --check
 ~~~
 
-Exit: 128개 Chromium case, localization/channel authority, request order/payload, stage-specific CTA routing, normal task distance, executable computed_text_200 reflow, Vietnamese gate가 GREEN입니다.
+Exit: 128개 Chromium case, 12-language auto/manual localization과 channel authority, request order/payload, stage-specific CTA routing, normal task distance, executable computed_text_200 reflow, complete geometry coverage가 GREEN입니다.
 
 Authority assertion이 실패하면 Wave 3에서 server file을 고치지 않고 Wave 1을 다시 엽니다. UI geometry/semantics failure만 conditional fix files에서 수정합니다.
 
@@ -1176,17 +1489,18 @@ Non-goals:
 
 ## 9. Executable Structural MD/JSON Parity
 
-`evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs`가 유일한 parity validator입니다. validator는 embedded JSON, Markdown hash, `parityManifest`, `normativeParity`를 authority로 사용하지 않습니다. 실제 Markdown front matter, section heading, route/state/blocker/failure/fixture/environment table, TypeScript type/union, authority/fallback 문장, Wave heading/order/exact file list를 구조적으로 파싱해 spec.json의 해당 계약과 비교합니다.
+`evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs`가 유일한 parity validator입니다. validator는 embedded JSON, 전체 Markdown hash, `parityManifest`, `normativeParity`를 authority로 사용하지 않습니다. 실제 Markdown front matter, section heading, route/state/blocker/failure/fixture/environment table, TypeScript type/union, authority/fallback 문장, language/script/surface/geometry invariant table, Wave heading/order/exact file list를 구조적으로 파싱해 spec.json의 해당 계약과 비교합니다. 추가로 사람용 table에서 독립적으로 도출한 요구사항을 유지한 채 두 normative executable code block 전체를 CRLF->LF 정규화 SHA-256으로 결속하므로 code 내부의 ancestor traversal, DSF, nested-scroll, fresh-DOM, language loop 또는 CTA 한 줄 변경도 실패합니다.
 
 TDD contract:
 
-1. RED source `69a022ac2a03ed509022d12d219b1483c9d0cbe7`의 embedded validator는 실제 Markdown만 revision, server authority, Wave, route/state/blocker/channel/language/fixture, one-send job, locale fallback, evidence binding으로 바꾼 12개 case를 모두 exit 0으로 잘못 승인했습니다.
-2. GREEN candidate는 standalone structural validator의 정상 실행 2회가 exit 0이어야 합니다.
-3. 각 MD-only mutation은 원본 file을 쓰지 않고 memory copy에만 적용하며 모두 exit 1이어야 합니다.
-4. computed text positive는 fresh production fixture DOM 두 개에서 각각 2x/reflow로 exit 0이어야 하고, 여섯 negative fixture는 각각 exit 1이어야 합니다.
-5. REFACTOR 뒤 JSON parse, exact commit scope, source/candidate parent, evidence-only parent, git diff --check를 다시 검사합니다.
+1. RED source `69a022ac2a03ed509022d12d219b1483c9d0cbe7`의 embedded validator false-green count는 아래 original mutation list length에서 13으로 도출하며, 과거 prose의 12는 오기입니다.
+2. RED source `8804e33421d4b7ea75dd32022acf728f7adb5c43`에서 reviewer attack harness의 semantic Markdown 12개와 evidence 1개가 모두 exit 0으로 false-green임을 먼저 관찰했습니다.
+3. GREEN candidate의 full matrix는 surface omission과 expected-count 약화까지 추가한 semantic Markdown 19개와 evidence 1개를 포함하며, 모든 MD/JSON/evidence mutation은 원본 file을 쓰지 않는 memory copy에서 exit 1이어야 합니다.
+4. 사람용 invariant/language/coverage table은 JSON 의미 모델과 비교하고, accessibility/geometry 및 language normative code block 전체는 CRLF를 LF로 정규화한 SHA-256으로 결속합니다. token presence만으로 승인하지 않습니다.
+5. computed text와 complete geometry positive는 각각 fresh fixture 두 개에서 exit 0이어야 하고, zoom 6개와 geometry 2개 negative fixture는 각각 exit 1이어야 합니다.
+6. REFACTOR 뒤 JSON parse, exact commit scope, source/candidate parent, evidence-only parent와 changedFiles exact diff-tree, git diff --check를 다시 검사합니다.
 
-MD-only mutation modes:
+Original MD-only mutation modes:
 
 - revision
 - authority
@@ -1202,15 +1516,93 @@ MD-only mutation modes:
 - locale_fallback
 - evidence_binding
 
+Semantic MD-only mutation modes:
+
+- ancestor_traversal_removed
+- device_scale_factor_2
+- nested_scroll_inverted
+- fresh_dom_once
+- unknown_locale_cta_parameterized
+- language_matrix_single
+- non_target_hangul_allowed
+- auto_selection_client_authority
+- manual_override_dispatch_authority
+- emoji_only_semantics
+- manual_language_matrix_single
+- language_title_omitted
+- language_metadata_labels_omitted
+- language_metadata_values_omitted
+- language_body_omitted
+- invalid_locale_session_allowed
+- geometry_marker_removal
+- geometry_partial_marker
+- geometry_expected_counts_empty
+
+Language contract mutation subset:
+
+- unknown_locale_cta_parameterized
+- language_matrix_single
+- non_target_hangul_allowed
+- auto_selection_client_authority
+- manual_override_dispatch_authority
+- emoji_only_semantics
+- manual_language_matrix_single
+- language_title_omitted
+- language_metadata_labels_omitted
+- language_metadata_values_omitted
+- language_body_omitted
+- invalid_locale_session_allowed
+
+JSON-only mutation modes:
+
+- revision
+- authority
+- wave_order
+- route
+- state
+- blocker
+- channel
+- language
+- fixture
+- one_send_job
+- locale_fallback
+- evidence_binding
+- zoom_ancestor
+- zoom_device_scale_factor
+- zoom_nested_scroll
+- zoom_fresh_dom
+- language_auto_count
+- language_manual_count
+- language_surface
+- language_hangul
+- language_manual_authority
+- language_invalid_cta
+- language_emoji
+- geometry_coverage
+- geometry_regions
+- geometry_expected_counts
+- accessibility_executable_hash
+- language_executable_hash
+
+Evidence mutation modes:
+
+- contradictory_changed_files
+
 Zoom contract modes:
 
-- positive_twice: fresh production fixture DOM 두 개를 각각 한 번 평가하고 exit 0
-- internal_wrapper_transform: exit 1
-- internal_zoom: exit 1
-- outer_transform: exit 1
-- repeated_evaluation: exit 1
-- device_scale_factor: exit 1
-- page_zoom: exit 1
+- positive_twice
+- internal_wrapper_transform
+- internal_zoom
+- outer_transform
+- repeated_evaluation
+- device_scale_factor
+- page_zoom
+
+Geometry coverage modes:
+
+- positive_twice
+- marker_removal
+- partial_marker
 
 Candidate 전에는 evidence chain만 건너뛰고 구조 계약을 실행합니다.
 
@@ -1228,16 +1620,24 @@ node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs
 
 ~~~powershell
 node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --md-mutation revision
+node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --json-mutation revision
+node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --evidence-mutation contradictory_changed_files
 node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --zoom-fixture internal_wrapper_transform
+node evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs --geometry-fixture marker_removal
 ~~~
 
 Completion gate:
 
 - spec.json과 review-evidence.json JSON parse
 - structural validator normal 2회 exit 0
-- MD-only mutation 13개 각각 2회 exit 1
+- MD-only mutation 32개 각각 2회 exit 1
+- JSON-only mutation 28개 각각 2회 exit 1
+- evidence mutation 1개 각각 2회 exit 1
+- language contract mutation subset 12개 각각 2회 exit 1
 - zoom positive_twice 2회 exit 0
 - zoom negative fixture 6개 각각 2회 exit 1
+- geometry positive_twice 2회 exit 0
+- geometry negative fixture 2개 각각 2회 exit 1
 - candidate direct parent = full sourceBase SHA
 - candidate changed files = spec.md, spec.json, validate-spec.cjs
 - evidence-only HEAD direct parent = candidate

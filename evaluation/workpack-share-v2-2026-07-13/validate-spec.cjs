@@ -2,6 +2,7 @@
 
 const assert = require("node:assert/strict");
 const childProcess = require("node:child_process");
+const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -12,7 +13,7 @@ const JSON_PATH = path.join(SPEC_DIR, "spec.json");
 const EVIDENCE_PATH = path.join(SPEC_DIR, "review-evidence.json");
 const EVIDENCE_RELATIVE_PATH = "evaluation/workpack-share-v2-2026-07-13/review-evidence.json";
 
-const MD_MUTATIONS = [
+const ORIGINAL_MD_MUTATIONS = [
   "revision",
   "authority",
   "wave_heading",
@@ -28,6 +29,78 @@ const MD_MUTATIONS = [
   "evidence_binding"
 ];
 
+const SEMANTIC_MD_MUTATIONS = [
+  "ancestor_traversal_removed",
+  "device_scale_factor_2",
+  "nested_scroll_inverted",
+  "fresh_dom_once",
+  "unknown_locale_cta_parameterized",
+  "language_matrix_single",
+  "non_target_hangul_allowed",
+  "auto_selection_client_authority",
+  "manual_override_dispatch_authority",
+  "emoji_only_semantics",
+  "manual_language_matrix_single",
+  "language_title_omitted",
+  "language_metadata_labels_omitted",
+  "language_metadata_values_omitted",
+  "language_body_omitted",
+  "invalid_locale_session_allowed",
+  "geometry_marker_removal",
+  "geometry_partial_marker",
+  "geometry_expected_counts_empty"
+];
+
+const MD_MUTATIONS = [...ORIGINAL_MD_MUTATIONS, ...SEMANTIC_MD_MUTATIONS];
+
+const LANGUAGE_MD_MUTATIONS = [
+  "unknown_locale_cta_parameterized",
+  "language_matrix_single",
+  "non_target_hangul_allowed",
+  "auto_selection_client_authority",
+  "manual_override_dispatch_authority",
+  "emoji_only_semantics",
+  "manual_language_matrix_single",
+  "language_title_omitted",
+  "language_metadata_labels_omitted",
+  "language_metadata_values_omitted",
+  "language_body_omitted",
+  "invalid_locale_session_allowed"
+];
+
+const JSON_MUTATIONS = [
+  "revision",
+  "authority",
+  "wave_order",
+  "route",
+  "state",
+  "blocker",
+  "channel",
+  "language",
+  "fixture",
+  "one_send_job",
+  "locale_fallback",
+  "evidence_binding",
+  "zoom_ancestor",
+  "zoom_device_scale_factor",
+  "zoom_nested_scroll",
+  "zoom_fresh_dom",
+  "language_auto_count",
+  "language_manual_count",
+  "language_surface",
+  "language_hangul",
+  "language_manual_authority",
+  "language_invalid_cta",
+  "language_emoji",
+  "geometry_coverage",
+  "geometry_regions",
+  "geometry_expected_counts",
+  "accessibility_executable_hash",
+  "language_executable_hash"
+];
+
+const EVIDENCE_MUTATIONS = ["contradictory_changed_files"];
+
 const ZOOM_NEGATIVE_FIXTURES = [
   "internal_wrapper_transform",
   "internal_zoom",
@@ -36,6 +109,8 @@ const ZOOM_NEGATIVE_FIXTURES = [
   "device_scale_factor",
   "page_zoom"
 ];
+
+const GEOMETRY_NEGATIVE_FIXTURES = ["marker_removal", "partial_marker"];
 
 function git(...args) {
   return childProcess.execFileSync("git", args, {
@@ -118,6 +193,28 @@ function bulletListAfter(sectionText, label) {
     values.push(lines[index].slice(2).replace(/ \(new\)$/u, ""));
   }
   return values;
+}
+
+function namedCodeBlock(markdown, contractId) {
+  const marker = `<!-- normative-code:${contractId} -->`;
+  const markerCount = markdown.split(marker).length - 1;
+  assert.equal(markerCount, 1, `Expected one normative code marker for ${contractId}`);
+  const afterMarker = markdown.slice(markdown.indexOf(marker) + marker.length).replace(/^\r?\n/u, "");
+  const match = afterMarker.match(/^~~~ts\r?\n([\s\S]*?)\r?\n~~~/u);
+  assert.ok(match, `Missing TypeScript code block after ${contractId}`);
+  return match[1].replace(/\r\n/gu, "\n").trimEnd();
+}
+
+function sha256(value) {
+  return crypto.createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function rowsAsObjects(rows, keys) {
+  return rows.map((row) => Object.fromEntries(keys.map((key, index) => [key, row[index]])));
+}
+
+function rowsAsMap(rows) {
+  return Object.fromEntries(rows.map((row) => [row[0], row[1]]));
 }
 
 function waveContract(markdown) {
@@ -212,9 +309,247 @@ function mutateMarkdown(markdown, mutation) {
       );
     case "evidence_binding":
       return markdown.replace(/^- Source base: [0-9a-f]{40}$/mu, "- Source base: 0000000000000000000000000000000000000000");
+    case "ancestor_traversal_removed":
+      return replaceExactly(
+        markdown,
+        "for (let element: Element | null = baseline.element; element; element = element.parentElement) {",
+        "for (let element: Element | null = document.documentElement; element; element = null) {",
+        mutation
+      );
+    case "device_scale_factor_2":
+      return replaceExactly(
+        markdown,
+        "test.use({ deviceScaleFactor: 1 });",
+        "test.use({ deviceScaleFactor: 2 });",
+        mutation
+      );
+    case "nested_scroll_inverted":
+      return replaceExactly(
+        markdown,
+        "expect(result.nestedScroll).toEqual([]);",
+        "expect(result.nestedScroll).not.toEqual([]);",
+        mutation
+      );
+    case "fresh_dom_once":
+      return replaceExactly(
+        markdown,
+        "for (const independentRun of [1, 2]) {",
+        "for (const independentRun of [1]) {",
+        mutation
+      );
+    case "unknown_locale_cta_parameterized":
+      return replaceExactly(
+        markdown,
+        "const expectedOwnerHref = `/workers?focus=language&next=${encodeURIComponent(canonicalShareReturn)}`;",
+        "const expectedOwnerHref = `/workers?focus=language&language=${invalidLocale}&next=${encodeURIComponent(canonicalShareReturn)}`;",
+        mutation
+      );
+    case "language_matrix_single":
+      return replaceExactly(
+        markdown,
+        "for (const autoLanguage of SUPPORTED_LANGUAGE_CASES) {",
+        "for (const autoLanguage of SUPPORTED_LANGUAGE_CASES.filter(({ code }) => code === \"vi\")) {",
+        mutation
+      );
+    case "non_target_hangul_allowed":
+      return replaceExactly(
+        markdown,
+        'if (languageCase.code !== "ko") {',
+        "if (false) {",
+        mutation
+      );
+    case "auto_selection_client_authority":
+      return replaceExactly(
+        markdown,
+        "expect(authority.dispatchLanguage).toBe(autoLanguage.code);",
+        "expect(authority.dispatchLanguage).toBe(clientSelectedLanguage);",
+        mutation
+      );
+    case "manual_override_dispatch_authority":
+      return replaceExactly(
+        markdown,
+        "expect(after.dispatchLanguage).toBe(before.dispatchLanguage);",
+        "expect(after.dispatchLanguage).toBe(manualLanguage.code);",
+        mutation
+      );
+    case "emoji_only_semantics":
+      return replaceExactly(
+        markdown,
+        "expect(nonEmojiText, owner).not.toBe(\"\");",
+        "expect(nonEmojiText, owner).toBe(\"\");",
+        mutation
+      );
+    case "manual_language_matrix_single":
+      return replaceExactly(
+        markdown,
+        "for (const manualLanguage of SUPPORTED_LANGUAGE_CASES) {",
+        "for (const manualLanguage of SUPPORTED_LANGUAGE_CASES.filter(({ code }) => code === \"vi\")) {",
+        mutation
+      );
+    case "language_title_omitted":
+      return replaceExactly(
+        markdown,
+        '{ id: "title", selector: \'[data-share-owner="preview-title"]\' },',
+        '{ id: "title", selector: ":not(*)" },',
+        mutation
+      );
+    case "language_metadata_labels_omitted":
+      return replaceExactly(
+        markdown,
+        '{ id: "metadataLabels", selector: \'[data-share-owner="preview-metadata"] dt\' },',
+        '{ id: "metadataLabels", selector: ":not(*)" },',
+        mutation
+      );
+    case "language_metadata_values_omitted":
+      return replaceExactly(
+        markdown,
+        '{ id: "metadataValues", selector: \'[data-share-owner="preview-metadata"] dd\' },',
+        '{ id: "metadataValues", selector: ":not(*)" },',
+        mutation
+      );
+    case "language_body_omitted":
+      return replaceExactly(
+        markdown,
+        '{ id: "body", selector: \'[data-share-owner="preview-body"]\' }',
+        '{ id: "body", selector: ":not(*)" }',
+        mutation
+      );
+    case "invalid_locale_session_allowed":
+      return replaceExactly(
+        markdown,
+        "expect(requestLog.shareSession).toHaveLength(0);",
+        "expect(requestLog.shareSession).toHaveLength(1);",
+        mutation
+      );
+    case "geometry_marker_removal":
+      return replaceExactly(
+        markdown,
+        'const owner = withinRootClosest(element, "[data-share-owner]")?.dataset.shareOwner;',
+        "const owner = undefined;",
+        mutation
+      );
+    case "geometry_partial_marker":
+      return replaceExactly(
+        markdown,
+        "const visibleElements = allElements.filter(isVisible);",
+        "const visibleElements = allElements.filter(isVisible).slice(0, 1);",
+        mutation
+      );
+    case "geometry_expected_counts_empty":
+      return replaceExactly(
+        markdown,
+        "expect(Number.isInteger(count) && count > 0).toBe(true);",
+        "expect(Number.isInteger(count) && count >= 0).toBe(true);",
+        mutation
+      );
     default:
       throw new Error(`Unknown Markdown mutation: ${mutation}`);
   }
+}
+
+function mutateJson(spec, mutation) {
+  const mutated = structuredClone(spec);
+  switch (mutation) {
+    case "revision":
+      mutated.revision = "deliberately-broken";
+      break;
+    case "authority":
+      mutated.dataContracts.sessionDispatchBinding.serverAuthoritative = false;
+      break;
+    case "wave_order":
+      [mutated.implementation.waves[1], mutated.implementation.waves[2]] = [
+        mutated.implementation.waves[2],
+        mutated.implementation.waves[1]
+      ];
+      break;
+    case "route":
+      mutated.routeOwnership.pop();
+      break;
+    case "state":
+      mutated.stateMachine.states.pop();
+      break;
+    case "blocker":
+      mutated.stateMachine.blockingReasons.pop();
+      break;
+    case "channel":
+      mutated.dataContracts.dispatchChannels.pop();
+      break;
+    case "language":
+      mutated.dataContracts.supportedLanguageCodes.pop();
+      break;
+    case "fixture":
+      mutated.browserGate.fixtures.pop();
+      break;
+    case "one_send_job":
+      mutated.product.job = "send many workpacks many times";
+      break;
+    case "locale_fallback":
+      mutated.dataContracts.localeParser.koreanAllowedOnlyWhenAuthoritativeLocaleIsExactlyKo = false;
+      break;
+    case "evidence_binding":
+      mutated.metadata.sourceBase = "0000000000000000000000000000000000000000";
+      break;
+    case "zoom_ancestor":
+      mutated.accessibility.zoom200.pathTraversalFromEveryRepresentativeToDocumentRoot = false;
+      break;
+    case "zoom_device_scale_factor":
+      mutated.accessibility.zoom200.deviceScaleFactor = 2;
+      break;
+    case "zoom_nested_scroll":
+      mutated.accessibility.zoom200.geometryCoverage.nestedScrollExpected = ["preview"];
+      break;
+    case "zoom_fresh_dom":
+      mutated.accessibility.zoom200.positiveFreshDomRunsRequired = 1;
+      break;
+    case "language_auto_count":
+      mutated.browserGate.languageGate.autoSelectionLanguagesRequired = 1;
+      break;
+    case "language_manual_count":
+      mutated.browserGate.languageGate.manualSelectionLanguagesRequired = 1;
+      break;
+    case "language_surface":
+      mutated.browserGate.languageGate.localizedSurfaces.pop();
+      break;
+    case "language_hangul":
+      mutated.browserGate.languageGate.hangulResidueAllowedInNonKoreanArtifact = true;
+      break;
+    case "language_manual_authority":
+      mutated.browserGate.languageGate.previewOverrideKeepsDispatchLanguage = false;
+      break;
+    case "language_invalid_cta":
+      mutated.browserGate.languageGate.unknownUnsupportedOrMalformedLocale.rawLocaleInterpolationAllowed = true;
+      break;
+    case "language_emoji":
+      mutated.browserGate.languageGate.emojiOnlyMeaningAllowed = true;
+      break;
+    case "geometry_coverage":
+      mutated.accessibility.zoom200.geometryCoverage.sets.pop();
+      break;
+    case "geometry_regions":
+      mutated.accessibility.zoom200.geometryCoverage.requiredScrollRegions = ["body"];
+      break;
+    case "geometry_expected_counts":
+      mutated.accessibility.zoom200.geometryCoverage.expectedCountsMustBePositiveIntegers = false;
+      break;
+    case "accessibility_executable_hash":
+      mutated.accessibility.zoom200.executableContractSha256 = "f".repeat(64);
+      break;
+    case "language_executable_hash":
+      mutated.browserGate.languageGate.executableContractSha256 = "f".repeat(64);
+      break;
+    default:
+      throw new Error(`Unknown JSON mutation: ${mutation}`);
+  }
+  return mutated;
+}
+
+function mutateEvidence(evidence, mutation) {
+  const mutated = structuredClone(evidence);
+  if (mutation === "contradictory_changed_files") {
+    mutated.evidenceCommitContract.changedFiles = ["app/globals.css"];
+    return mutated;
+  }
+  throw new Error(`Unknown evidence mutation: ${mutation}`);
 }
 
 function assertStructuralParity(markdown, spec) {
@@ -439,24 +774,46 @@ function assertStructuralParity(markdown, spec) {
   ]);
 
   const zoomSection = section(markdown, "### 5.3 Text Zoom 200%");
-  for (const requiredToken of [
-    "representativePaths",
-    "window.devicePixelRatio",
-    "window.visualViewport",
-    "data-share-text-scale-run",
-    "path does not reach document root",
-    "baselineCaptureBeforeAnyMutation",
-    "fresh production fixture DOM"
-  ]) {
-    assert.ok(zoomSection.includes(requiredToken), `200% Markdown contract missing ${requiredToken}`);
-  }
+  const zoomContract = spec.accessibility.zoom200;
+  const zoomExecutable = namedCodeBlock(markdown, zoomContract.executableContractId);
+  assert.equal(sha256(zoomExecutable), zoomContract.executableContractSha256);
+  const zoomInvariants = rowsAsMap(tableRows(zoomSection, "Invariant ID"));
+  assert.deepEqual(zoomInvariants, {
+    representative_source: zoomContract.representativeSource,
+    ancestor_traversal: "each representative itself through every parentElement until documentElement HTML",
+    device_scale_factor: String(zoomContract.deviceScaleFactor),
+    device_pixel_ratio: String(zoomContract.devicePixelRatio),
+    visual_viewport_scale: String(zoomContract.visualViewportScale),
+    configured_css_viewport: "exact equality",
+    immutable_baseline_passes: `${zoomContract.baselineCaptureBeforeAnyMutation ? 1 : 0} before any style mutation`,
+    text_scaling_passes: `${zoomContract.scalingPassCount} from immutable per-node baselines`,
+    font_and_line_ratio: `${zoomContract.fontSizeRatioMin}..${zoomContract.fontSizeRatioMax} for every representative`,
+    genuine_fresh_dom_runs: String(zoomContract.positiveFreshDomRunsRequired),
+    same_dom_repeated_runs: String(zoomContract.repeatedEvaluationWithoutFreshDomAllowed ? 1 : 0),
+    nested_scroll_result: zoomContract.geometryCoverage.nestedScrollExpected.length === 0 ? "empty array" : "non-empty",
+    body_scroll_region_roots: `exactly ${zoomContract.geometryCoverage.requiredScrollRegionRootCountEach}`,
+    preview_scroll_region_roots: `exactly ${zoomContract.geometryCoverage.requiredScrollRegionRootCountEach}`
+  });
+  const geometryRows = rowsAsObjects(
+    tableRows(zoomSection, "Coverage set"),
+    ["id", "source", "expected"]
+  );
+  assert.deepEqual(geometryRows, zoomContract.geometryCoverage.sets);
   const zoomFixtureIds = tableRows(zoomSection, "Fixture ID").map((row) => row[0]);
-  assert.deepEqual(zoomFixtureIds, spec.accessibility.zoom200.negativeFixtureIds);
-  assert.equal(spec.accessibility.zoom200.pathTraversalFromEveryRepresentativeToDocumentRoot, true);
-  assert.equal(spec.accessibility.zoom200.repeatedEvaluationWithoutFreshDomAllowed, false);
-  assert.equal(spec.accessibility.zoom200.deviceScaleFactor, 1);
-  assert.equal(spec.accessibility.zoom200.devicePixelRatio, 1);
-  assert.equal(spec.accessibility.zoom200.visualViewportScale, 1);
+  assert.deepEqual(zoomFixtureIds, zoomContract.negativeFixtureIds);
+  const geometryFixtureIds = tableRows(zoomSection, "Geometry fixture ID").map((row) => row[0]);
+  assert.deepEqual(geometryFixtureIds, zoomContract.geometryCoverage.negativeFixtureIds);
+  assert.equal(zoomContract.pathTraversalFromEveryRepresentativeToDocumentRoot, true);
+  assert.equal(zoomContract.repeatedEvaluationWithoutFreshDomAllowed, false);
+  assert.equal(zoomContract.deviceScaleFactor, 1);
+  assert.equal(zoomContract.devicePixelRatio, 1);
+  assert.equal(zoomContract.visualViewportScale, 1);
+  assert.equal(zoomContract.optionalFontOverlapOrReflowMarkersUsed, false);
+  assert.deepEqual(zoomContract.geometryCoverage.requiredScrollRegions, ["body", "preview"]);
+  assert.equal(zoomContract.geometryCoverage.expectationMayBeDerivedFromRenderedDom, false);
+  assert.equal(zoomContract.geometryCoverage.expectedCountsMustBePositiveIntegers, true);
+  assert.equal(zoomContract.geometryCoverage.everyVisibleElementRequiresOwnerMapping, true);
+  assert.equal(zoomContract.geometryCoverage.everyVisibleElementRequiresScrollRegionMapping, true);
 
   const environmentRows = tableRows(section(markdown, "### 6.1 Environments"), "Env ID");
   assert.deepEqual(
@@ -471,10 +828,47 @@ function assertStructuralParity(markdown, spec) {
     spec.browserGate.environments.length * spec.browserGate.fixtures.length * spec.browserGate.zoomModes.length,
     spec.browserGate.caseCount
   );
-  assert.match(section(markdown, "### 6.5 Vietnamese And Language Gates"), /Korean residual count는 각각 0입니다\./u);
-  assert.match(section(markdown, "### 6.5 Vietnamese And Language Gates"), /실제 signing secret, provider credential, provider call, Supabase insert\/update\/delete는 browser gate에서 사용하지 않습니다\./u);
-  assert.equal(spec.browserGate.languageGate.vietnameseKoreanResidualZeroSurfaces.length, 5);
-  assert.equal(spec.browserGate.languageGate.emojiOnlyMeaningAllowed, false);
+  const languageSection = section(markdown, "### 6.5 Vietnamese And Language Gates");
+  const languageContract = spec.browserGate.languageGate;
+  const languageExecutable = namedCodeBlock(markdown, languageContract.executableContractId);
+  assert.equal(sha256(languageExecutable), languageContract.executableContractSha256);
+  const languagePolicies = rowsAsObjects(
+    tableRows(languageSection, "Language code"),
+    ["code", "script", "auto", "manual", "hangul"]
+  );
+  const localizedSurfaces = rowsAsObjects(
+    tableRows(languageSection, "Surface ID"),
+    ["id", "source", "auto", "manual", "script"]
+  );
+  const authorityCases = rowsAsObjects(
+    tableRows(languageSection, "Case ID"),
+    ["id", "preview", "dispatch", "result"]
+  );
+  assert.deepEqual(languagePolicies, languageContract.languagePolicies);
+  assert.deepEqual(localizedSurfaces, languageContract.localizedSurfaces);
+  assert.deepEqual(authorityCases, languageContract.authorityCases);
+  assert.deepEqual(languagePolicies.map((policy) => policy.code), spec.dataContracts.supportedLanguageCodes);
+  assert.deepEqual(languagePolicies.map((policy) => policy.code), languageContract.optionOrder);
+  assert.equal(
+    languagePolicies.filter((policy) => policy.auto === "required").length,
+    languageContract.autoSelectionLanguagesRequired
+  );
+  assert.equal(
+    languagePolicies.filter((policy) => policy.manual === "required").length,
+    languageContract.manualSelectionLanguagesRequired
+  );
+  assert.equal(languageContract.autoSelectionLanguagesRequired, 12);
+  assert.equal(languageContract.manualSelectionLanguagesRequired, 12);
+  assert.equal(languageContract.previewOverrideKeepsRecipientLanguage, true);
+  assert.equal(languageContract.previewOverrideKeepsDispatchLanguage, true);
+  assert.equal(languageContract.previewOverrideKeepsDispatchPlanDigest, true);
+  assert.equal(languageContract.hangulResidueAllowedInNonKoreanArtifact, false);
+  assert.equal(languageContract.unknownUnsupportedOrMalformedLocale.rawLocaleInterpolationAllowed, false);
+  assert.equal(languageContract.invalidLocaleSessionRequestCount, 0);
+  assert.equal(languageContract.invalidLocaleDispatchRequestCount, 0);
+  assert.equal(languageContract.vietnameseKoreanResidualZeroSurfaces.length, 5);
+  assert.equal(languageContract.emojiOnlyMeaningAllowed, false);
+  assert.match(languageSection, /실제 signing secret, provider credential, provider call, Supabase insert\/update\/delete는 browser gate에서 사용하지 않습니다\./u);
   assert.equal(spec.browserGate.providerCallsAllowed, false);
   assert.equal(spec.browserGate.databaseWritesAllowed, false);
 
@@ -531,6 +925,50 @@ function assertStructuralParity(markdown, spec) {
   assert.equal(userCopyMap.get("Unknown + no log"), spec.userCopy.unknownWithoutLog);
   assert.equal(userCopyMap.get("Stale"), spec.userCopy.stale);
   assert.equal(userCopyRows.length, Object.keys(spec.userCopy).length);
+
+  const paritySection = section(markdown, "## 9. Executable Structural MD/JSON Parity");
+  assert.deepEqual(bulletListAfter(paritySection, "Original MD-only mutation modes:"), ORIGINAL_MD_MUTATIONS);
+  assert.deepEqual(bulletListAfter(paritySection, "Semantic MD-only mutation modes:"), SEMANTIC_MD_MUTATIONS);
+  assert.deepEqual(bulletListAfter(paritySection, "Language contract mutation subset:"), LANGUAGE_MD_MUTATIONS);
+  assert.deepEqual(bulletListAfter(paritySection, "JSON-only mutation modes:"), JSON_MUTATIONS);
+  assert.deepEqual(bulletListAfter(paritySection, "Evidence mutation modes:"), EVIDENCE_MUTATIONS);
+  assert.deepEqual(
+    bulletListAfter(paritySection, "Zoom contract modes:"),
+    ["positive_twice", ...ZOOM_NEGATIVE_FIXTURES]
+  );
+  assert.deepEqual(
+    bulletListAfter(paritySection, "Geometry coverage modes:"),
+    ["positive_twice", ...GEOMETRY_NEGATIVE_FIXTURES]
+  );
+  const executionContract = spec.parityCheck.executionContract;
+  assert.deepEqual(executionContract.originalMarkdownMutationModes, ORIGINAL_MD_MUTATIONS);
+  assert.deepEqual(executionContract.semanticMarkdownMutationModes, SEMANTIC_MD_MUTATIONS);
+  assert.deepEqual(executionContract.languageMarkdownMutationModes, LANGUAGE_MD_MUTATIONS);
+  assert.deepEqual(executionContract.markdownMutationModes, MD_MUTATIONS);
+  assert.deepEqual(executionContract.jsonMutationModes, JSON_MUTATIONS);
+  assert.deepEqual(executionContract.evidenceMutationModes, EVIDENCE_MUTATIONS);
+  assert.deepEqual(executionContract.zoomNegativeFixtureModes, ZOOM_NEGATIVE_FIXTURES);
+  assert.deepEqual(executionContract.geometryNegativeFixtureModes, GEOMETRY_NEGATIVE_FIXTURES);
+  assert.equal(executionContract.originalMarkdownMutationModeCount, ORIGINAL_MD_MUTATIONS.length);
+  assert.equal(executionContract.semanticMarkdownMutationModeCount, SEMANTIC_MD_MUTATIONS.length);
+  assert.equal(executionContract.languageMarkdownMutationModeCount, LANGUAGE_MD_MUTATIONS.length);
+  assert.equal(executionContract.markdownMutationModeCount, MD_MUTATIONS.length);
+  assert.equal(executionContract.jsonMutationModeCount, JSON_MUTATIONS.length);
+  assert.equal(executionContract.evidenceMutationModeCount, EVIDENCE_MUTATIONS.length);
+  assert.equal(spec.completionGate.markdownMutationModesRequired, MD_MUTATIONS.length);
+  assert.equal(spec.completionGate.languageMarkdownMutationModesRequired, LANGUAGE_MD_MUTATIONS.length);
+  assert.equal(spec.completionGate.jsonMutationModesRequired, JSON_MUTATIONS.length);
+  assert.equal(spec.completionGate.evidenceMutationModesRequired, EVIDENCE_MUTATIONS.length);
+  assert.equal(spec.completionGate.geometryNegativeFixtureModesRequired, GEOMETRY_NEGATIVE_FIXTURES.length);
+  assert.equal(spec.completionGate.zoomNegativeFixtureModesRequired, ZOOM_NEGATIVE_FIXTURES.length);
+  assert.match(
+    paritySection,
+    new RegExp(`original mutation list length에서 ${ORIGINAL_MD_MUTATIONS.length}으로 도출`, "u")
+  );
+  assert.match(
+    paritySection,
+    new RegExp(`semantic Markdown ${SEMANTIC_MD_MUTATIONS.length}개와 evidence ${EVIDENCE_MUTATIONS.length}개`, "u")
+  );
 }
 
 function freshZoomFixture() {
@@ -640,8 +1078,88 @@ function assertZoomContractSelfTests() {
   }
 }
 
+function freshGeometryFixture() {
+  return {
+    expected: {
+      counts: {
+        visibleElements: 5,
+        interactables: 1,
+        textLeaves: 3,
+        ownerMappings: 5,
+        bodyMappings: 3,
+        previewMappings: 2
+      },
+      owners: ["share-root", "target", "primary", "preview-title", "preview-body"],
+      requiredRegions: ["body", "preview"],
+      regionRoots: { body: 1, preview: 1 }
+    },
+    elements: [
+      { id: "root", visible: true, interactive: false, textLeaf: false, owner: "share-root", region: "body" },
+      { id: "target", visible: true, interactive: false, textLeaf: true, owner: "target", region: "body" },
+      { id: "primary", visible: true, interactive: true, textLeaf: true, owner: "primary", region: "body" },
+      { id: "preview-title", visible: true, interactive: false, textLeaf: true, owner: "preview-title", region: "preview" },
+      { id: "preview-body", visible: true, interactive: false, textLeaf: false, owner: "preview-body", region: "preview" }
+    ]
+  };
+}
+
+function evaluateGeometryFixture(fixture) {
+  const visible = fixture.elements.filter((element) => element.visible);
+  for (const element of visible) {
+    assert.ok(element.owner, `visible element ${element.id} lacks owner mapping`);
+    assert.ok(element.region, `visible element ${element.id} lacks scroll-region mapping`);
+    assert.ok(fixture.expected.owners.includes(element.owner), `unexpected owner ${element.owner}`);
+    assert.ok(fixture.expected.requiredRegions.includes(element.region), `unexpected region ${element.region}`);
+  }
+  assert.deepEqual(fixture.expected.requiredRegions, ["body", "preview"]);
+  assert.deepEqual(fixture.expected.regionRoots, { body: 1, preview: 1 });
+  const actual = {
+    visibleElements: visible.length,
+    interactables: visible.filter((element) => element.interactive).length,
+    textLeaves: visible.filter((element) => element.textLeaf).length,
+    ownerMappings: visible.filter((element) => element.owner).length,
+    bodyMappings: visible.filter((element) => element.region === "body").length,
+    previewMappings: visible.filter((element) => element.region === "preview").length
+  };
+  for (const count of Object.values(fixture.expected.counts)) {
+    assert.ok(Number.isInteger(count) && count > 0, "geometry expected counts must be positive integers");
+  }
+  assert.deepEqual(actual, fixture.expected.counts);
+  assert.equal(actual.ownerMappings, actual.visibleElements);
+  assert.deepEqual(
+    [...new Set(visible.map((element) => element.owner))].sort(),
+    [...fixture.expected.owners].sort()
+  );
+  return actual;
+}
+
+function geometryFixture(name) {
+  const fixture = freshGeometryFixture();
+  if (name === "marker_removal") {
+    for (const element of fixture.elements) {
+      element.owner = null;
+      element.region = null;
+    }
+  } else if (name === "partial_marker") {
+    const previewBody = fixture.elements.find((element) => element.id === "preview-body");
+    previewBody.owner = null;
+  } else {
+    throw new Error(`Unknown geometry fixture: ${name}`);
+  }
+  return fixture;
+}
+
+function assertGeometryContractSelfTests() {
+  evaluateGeometryFixture(freshGeometryFixture());
+  evaluateGeometryFixture(freshGeometryFixture());
+  for (const name of GEOMETRY_NEGATIVE_FIXTURES) {
+    assert.throws(() => evaluateGeometryFixture(geometryFixture(name)), undefined, `Geometry fixture ${name} did not fail`);
+  }
+}
+
 function assertEvidence(spec, evidence) {
   const fullSha = /^[0-9a-f]{40}$/u;
+  const expectedEvidenceFiles = [spec.metadata.evidenceOnlyWriteFile].sort();
   assert.match(evidence.sourceBase, fullSha);
   assert.match(evidence.candidate, fullSha);
   assert.equal(evidence.status, "HOLD_PENDING_FRESH_REVIEW");
@@ -659,10 +1177,11 @@ function assertEvidence(spec, evidence) {
     sortedLines(git("diff-tree", "--no-commit-id", "--name-only", "-r", evidence.candidate)),
     [...spec.metadata.candidateWriteFiles].sort()
   );
-  assert.deepEqual(
-    sortedLines(git("diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD")),
-    [spec.metadata.evidenceOnlyWriteFile]
-  );
+  const actualEvidenceFiles = sortedLines(git("diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"));
+  const declaredEvidenceFiles = [...evidence.evidenceCommitContract.changedFiles].sort();
+  assert.deepEqual(declaredEvidenceFiles, expectedEvidenceFiles);
+  assert.deepEqual(actualEvidenceFiles, expectedEvidenceFiles);
+  assert.deepEqual(declaredEvidenceFiles, actualEvidenceFiles);
   assert.equal(evidence.evidenceCommitContract.recordsOwnCommitSha, false);
   assert.equal(evidence.evidenceCommitContract.requiredParent, evidence.candidate);
   assert.equal(Object.hasOwn(evidence, "evidenceCommitSha"), false);
@@ -670,19 +1189,42 @@ function assertEvidence(spec, evidence) {
 }
 
 function parseArgs(argv) {
-  const result = { mutation: null, zoom: null, skipEvidence: false };
+  const result = {
+    mutation: null,
+    jsonMutation: null,
+    evidenceMutation: null,
+    zoom: null,
+    geometry: null,
+    skipEvidence: false
+  };
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
     if (value === "--md-mutation") {
       result.mutation = argv[++index];
       if (!result.mutation) throw new Error("--md-mutation requires a value");
+    } else if (value === "--json-mutation") {
+      result.jsonMutation = argv[++index];
+      if (!result.jsonMutation) throw new Error("--json-mutation requires a value");
     } else if (value === "--zoom-fixture") {
       result.zoom = argv[++index];
       if (!result.zoom) throw new Error("--zoom-fixture requires a value");
-    }
-    else if (value === "--skip-evidence") result.skipEvidence = true;
+    } else if (value === "--geometry-fixture") {
+      result.geometry = argv[++index];
+      if (!result.geometry) throw new Error("--geometry-fixture requires a value");
+    } else if (value === "--evidence-mutation") {
+      result.evidenceMutation = argv[++index];
+      if (!result.evidenceMutation) throw new Error("--evidence-mutation requires a value");
+    } else if (value === "--skip-evidence") result.skipEvidence = true;
     else throw new Error(`Unknown argument: ${value}`);
   }
+  const exclusiveModeCount = [
+    result.mutation,
+    result.jsonMutation,
+    result.evidenceMutation,
+    result.zoom,
+    result.geometry
+  ].filter(Boolean).length;
+  assert.ok(exclusiveModeCount <= 1, "Only one mutation or fixture mode may run at a time");
   return result;
 }
 
@@ -691,8 +1233,17 @@ function main() {
   if (args.mutation && !MD_MUTATIONS.includes(args.mutation)) {
     throw new Error(`Unknown Markdown mutation: ${args.mutation}`);
   }
+  if (args.jsonMutation && !JSON_MUTATIONS.includes(args.jsonMutation)) {
+    throw new Error(`Unknown JSON mutation: ${args.jsonMutation}`);
+  }
+  if (args.evidenceMutation && !EVIDENCE_MUTATIONS.includes(args.evidenceMutation)) {
+    throw new Error(`Unknown evidence mutation: ${args.evidenceMutation}`);
+  }
   if (args.zoom && ![...ZOOM_NEGATIVE_FIXTURES, "positive_twice"].includes(args.zoom)) {
     throw new Error(`Unknown zoom fixture: ${args.zoom}`);
+  }
+  if (args.geometry && ![...GEOMETRY_NEGATIVE_FIXTURES, "positive_twice"].includes(args.geometry)) {
+    throw new Error(`Unknown geometry fixture: ${args.geometry}`);
   }
 
   if (args.zoom) {
@@ -708,17 +1259,34 @@ function main() {
     return;
   }
 
+  if (args.geometry) {
+    if (args.geometry === "positive_twice") {
+      evaluateGeometryFixture(freshGeometryFixture());
+      evaluateGeometryFixture(freshGeometryFixture());
+      console.log(JSON.stringify({ result: "GEOMETRY_CONTRACT_OK", positiveFreshFixtureRuns: 2 }));
+      return;
+    }
+    evaluateGeometryFixture(geometryFixture(args.geometry));
+    return;
+  }
+
   const originalMarkdown = fs.readFileSync(MD_PATH, "utf8");
   const markdown = args.mutation ? mutateMarkdown(originalMarkdown, args.mutation) : originalMarkdown;
-  const spec = JSON.parse(fs.readFileSync(JSON_PATH, "utf8"));
-  const evidence = JSON.parse(fs.readFileSync(EVIDENCE_PATH, "utf8"));
+  const originalSpec = JSON.parse(fs.readFileSync(JSON_PATH, "utf8"));
+  const spec = args.jsonMutation ? mutateJson(originalSpec, args.jsonMutation) : originalSpec;
+  const originalEvidence = JSON.parse(fs.readFileSync(EVIDENCE_PATH, "utf8"));
+  const evidence = args.evidenceMutation
+    ? mutateEvidence(originalEvidence, args.evidenceMutation)
+    : originalEvidence;
   assertStructuralParity(markdown, spec);
   assertZoomContractSelfTests();
+  assertGeometryContractSelfTests();
   if (!args.skipEvidence) assertEvidence(spec, evidence);
 
   console.log(JSON.stringify({
     result: "STRUCTURAL_PARITY_OK",
     markdownMutation: args.mutation || "none",
+    jsonMutation: args.jsonMutation || "none",
     routes: spec.routeOwnership.length,
     states: spec.stateMachine.states.length,
     blockers: spec.stateMachine.blockingReasons.length,
@@ -726,8 +1294,14 @@ function main() {
     languages: spec.dataContracts.supportedLanguageCodes.length,
     fixtures: spec.browserGate.fixtures.length,
     browserCaseArithmetic: spec.browserGate.caseCount,
+    markdownMutationModeCount: MD_MUTATIONS.length,
+    jsonMutationModeCount: JSON_MUTATIONS.length,
+    languageMutationModeCount: LANGUAGE_MD_MUTATIONS.length,
+    evidenceMutationModeCount: EVIDENCE_MUTATIONS.length,
     zoomPositiveFreshDomRuns: 2,
     zoomNegativeFixtureCount: ZOOM_NEGATIVE_FIXTURES.length,
+    geometryPositiveFreshFixtureRuns: 2,
+    geometryNegativeFixtureCount: GEOMETRY_NEGATIVE_FIXTURES.length,
     sourceBase: spec.metadata.sourceBase,
     candidate: args.skipEvidence ? null : evidence.candidate
   }, null, 2));
