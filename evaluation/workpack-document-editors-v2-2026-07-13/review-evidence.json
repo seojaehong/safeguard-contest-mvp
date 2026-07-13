@@ -1,0 +1,215 @@
+{
+  "kind": "review_evidence",
+  "schemaVersion": "4.0.0",
+  "capturedAt": "2026-07-13T23:49:10.709Z",
+  "branch": "feat/workpack-document-editors-v2-target-ready-v4",
+  "candidateCommit": "2ec14aaf92e7c03376e6086b889b254e77a6c412",
+  "candidateParent": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+  "sourceBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+  "currentIntegrationTarget": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+  "mergeBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+  "candidateScope": {
+    "kind": "scope_identity",
+    "paths": [
+      "evaluation/workpack-document-editors-v2-2026-07-13/spec.json",
+      "evaluation/workpack-document-editors-v2-2026-07-13/spec.md",
+      "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs"
+    ]
+  },
+  "evidenceScope": {
+    "kind": "scope_identity",
+    "paths": [
+      "evaluation/workpack-document-editors-v2-2026-07-13/review-evidence.json"
+    ]
+  },
+  "candidateArtifacts": [
+    {
+      "kind": "blob_identity",
+      "path": "evaluation/workpack-document-editors-v2-2026-07-13/spec.json",
+      "gitBlob": "31d377b7873c0eb73ed28e0a36d5230af869d3ee",
+      "sha256": "sha256:68a0b09455513f6eb61619954b37f7b6a54702d503e17e69aac3fa9b0e9a501c",
+      "bytes": 71551
+    },
+    {
+      "kind": "blob_identity",
+      "path": "evaluation/workpack-document-editors-v2-2026-07-13/spec.md",
+      "gitBlob": "5755853c0563d18f2a7a5cd5de33c8926eddfc4a",
+      "sha256": "sha256:07bd653c6c9b9a3658ee3f33a63ab1bee75c5c915023028d888ed380b28fcd7d",
+      "bytes": 104229
+    },
+    {
+      "kind": "blob_identity",
+      "path": "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs",
+      "gitBlob": "ad3e8360e054f3dad122f6f1417f69c336c1a0fa",
+      "sha256": "sha256:5c50b5cd0588f32745054c7da5abe0c3e9f2f92e278d8852d931f1719192e8c7",
+      "bytes": 81519
+    }
+  ],
+  "targetBlobs": [
+    {
+      "kind": "blob_identity",
+      "path": "app/api/export/hwp/route.ts",
+      "gitBlob": "3732b3177cdf811147bda87951f29257bb5fa327",
+      "sha256": "sha256:fe24d1f91bfa9a978011c8ae89f6e1e0fc50154a6cb21874c0c29a60aece5031",
+      "bytes": 11756
+    },
+    {
+      "kind": "blob_identity",
+      "path": "app/api/export/hwpx-template/route.ts",
+      "gitBlob": "db17d136793641440a40154e8da0341f1a9e7ea9",
+      "sha256": "sha256:240bbfd822fda580f9ed4edb363a764a907f4f4dab6d0662a5239410a75aaaf9",
+      "bytes": 2030
+    },
+    {
+      "kind": "blob_identity",
+      "path": "app/api/export/pdf/route.ts",
+      "gitBlob": "08140acf24dc468ccb4894c9fff3af1ca277adfe",
+      "sha256": "sha256:baecf4ec5d04d5f91e5845a3489da9fbcaac61f307336276e18fc8b4288cfd6c",
+      "bytes": 53007
+    },
+    {
+      "kind": "blob_identity",
+      "path": "app/api/export/xlsx/route.ts",
+      "gitBlob": "7d09b692b4fc00c424d2cdde72e584b5216e1ed9",
+      "sha256": "sha256:fe817c558c69c045c451cf3b903fa1c6e53e145de08137cccd4db40b87f88030",
+      "bytes": 9373
+    },
+    {
+      "kind": "blob_identity",
+      "path": "app/api/workflow/dispatch/route.ts",
+      "gitBlob": "b797f93332a8fef77a49a58f2d9772042014ee27",
+      "sha256": "sha256:a7aa246fc2077b15d7c8241e7daa23f288294a028afe576f9f9beaae3481a819",
+      "bytes": 16029
+    },
+    {
+      "kind": "blob_identity",
+      "path": "app/api/workpacks/[id]/improvements/route.ts",
+      "gitBlob": "00e7c8a88134f8636cae5d98949eafe5b0ba1a1a",
+      "sha256": "sha256:b94630d4bce8e3aff9abeec0b9e90df9e958da2c09a48fc9380ca1ded57162f5",
+      "bytes": 13466
+    },
+    {
+      "kind": "blob_identity",
+      "path": "app/api/workpacks/[id]/share-sessions/route.ts",
+      "gitBlob": "8ed0713940bc246f523b2e9c29af071882ed2cde",
+      "sha256": "sha256:7e6e7d2c4996852db0599c6234a8db480fc2c426a0020742d513c9d573407f6f",
+      "bytes": 6235
+    },
+    {
+      "kind": "blob_identity",
+      "path": "app/api/workpacks/route.ts",
+      "gitBlob": "78eb800c1b982a7356f4751189098ce201539101",
+      "sha256": "sha256:8d29489c2f70a5ca962189103b7be092ccded7925e3a96ce53d3bfc2491cdd8c",
+      "bytes": 8407
+    },
+    {
+      "kind": "blob_identity",
+      "path": "components/WorkpackEditor.tsx",
+      "gitBlob": "359ae50fb654a2c3a472983dc5ba0d927a4b716a",
+      "sha256": "sha256:f89b4bd145aeeb1c73314204dbcc5c0decacb25ac03a7a613283d5a739156740",
+      "bytes": 141326
+    },
+    {
+      "kind": "blob_identity",
+      "path": "lib/generation-evidence.ts",
+      "gitBlob": "a6517ec8edac3f06375e201b54f4bbc397b9982d",
+      "sha256": "sha256:377a59a57402a3a75337f255d75214af946094ee686108f8a840eef39e49497c",
+      "bytes": 8293
+    },
+    {
+      "kind": "blob_identity",
+      "path": "lib/ontology/evidence-chain-registry.ts",
+      "gitBlob": "740120b9d11e5f25da6ed98aefc8e1c5b801cf78",
+      "sha256": "sha256:cf364b0656cd1b4137f423df2d33cf8d1625f55081040c73b64b5112945a4e32",
+      "bytes": 26047
+    },
+    {
+      "kind": "blob_identity",
+      "path": "lib/risk-assessment-schema.ts",
+      "gitBlob": "54fd0e5ef3fdd0c31a83ef7ea4ca858da23b8e35",
+      "sha256": "sha256:68601198eecc8e3a4fc62ada069b634c7b25c2d9902b8afb301faf56aa321927",
+      "bytes": 10229
+    },
+    {
+      "kind": "blob_identity",
+      "path": "lib/safety-reference-catalog.ts",
+      "gitBlob": "350b1eed8e2e6761ce4da3e667f63ad398757531",
+      "sha256": "sha256:a533567acc08fc8435e9875d88306caca4899037b464c5c02c39ec100fa61479",
+      "bytes": 123571
+    },
+    {
+      "kind": "blob_identity",
+      "path": "supabase/migrations/002_workspace_productization.sql",
+      "gitBlob": "c88950d636b0da7bc36278ccb4170417c0fdb177",
+      "sha256": "sha256:bf00e55aed5dd7d2d37072ec331d0c50a33cc08d8be898cc4b96542e7e886e1c",
+      "bytes": 6401
+    }
+  ],
+  "ledgerCapturedAt": "2026-07-13T23:36:58.239Z",
+  "refSnapshotDigest": "sha256:54827a4ae6fd21a29444854da56c06d985fb02e55a23f5982473af417ef63b1f",
+  "browserExecutions": 0,
+  "productExecutions": 0,
+  "buildExecutions": 0,
+  "exportExecutions": 0,
+  "implementationExecutions": 0,
+  "blockedAuthorities": [
+    "server_revision_authority",
+    "photo_confirmation_persistence",
+    "share_freshness_authority"
+  ],
+  "unexecutedBrowserMatrix": "FUTURE_UNEXECUTED_200_PERCENT",
+  "validationSummary": {
+    "kind": "validation_summary",
+    "authoringChecks": 2,
+    "unknownKeyMatrixRuns": 2,
+    "deliberateAttackRuns": 52,
+    "contractAttackCaseCount": 26,
+    "allExitExpectationsMet": true,
+    "commandLog": [
+      "v3 authoring-check exit=0 closedObjects=328 runtimeMs=769 validationTime=2026-07-13T23:33:47.416Z",
+      "v3 browser text-scaling correction gate exit=1 failures=4 runtimeMs=872",
+      "v4 authoring-check pass=1 exit=0 runtimeMs=2329 validationTime=2026-07-13T23:42:48.819Z",
+      "v4 authoring-check pass=2 exit=0 runtimeMs=1347 validationTime=2026-07-13T23:42:51.495Z",
+      "v4 unknown-key-matrix pass=1 exit=0 attacks=656 exactKeyRejections=656 runtimeMs=4125",
+      "v4 unknown-key-matrix pass=2 exit=0 attacks=656 exactKeyRejections=656 runtimeMs=3800",
+      "v4 deliberate attacks passes=2 cases=26 runs=52 expectedExit=1 matched=52 runtimeMs=32049",
+      "v4 node --check exit=0 runtimeMs=669",
+      "v4 JSON parse exit=0 runtimeMs=799",
+      "v4 object census exit=0 closedObjects=328 runtimeMs=736",
+      "v4 structural SHA stale claim scan exit=0 runtimeMs=579",
+      "v4 scope scan exit=0 files=3 v3DirtyEntries=0 runtimeMs=566",
+      "v4 implementation mode exit=1 expectedBlock=true runtimeMs=634"
+    ],
+    "browserExecutions": 0
+  },
+  "redBaseline": {
+    "kind": "red_baseline",
+    "referenceBranch": "feat/workpack-document-editors-v2-target-ready-v2",
+    "observedExit": 1,
+    "failures": [
+      "legacy matrix closed fewer objects than the remediated contract",
+      "legacy stale year-2000 ledger was accepted"
+    ],
+    "legacyMatrixObjectCount": 255,
+    "staleYear2000Accepted": true,
+    "browserExecutions": 0
+  },
+  "v3CorrectionRedBaseline": {
+    "kind": "v3_correction_red_baseline",
+    "referenceBranch": "feat/workpack-document-editors-v2-target-ready-v3",
+    "referenceCommit": "c2ed91db690b9db508580099590130e0cf057209",
+    "baselineAuthoringExit": 0,
+    "correctionGateExit": 1,
+    "failures": [
+      "missing owning-root textScalingContract",
+      "positive mobile rows used selected width plus one",
+      "missing synthetic leaf-scaling rejection attack",
+      "missing nonselected mobile viewport rejection attack"
+    ],
+    "closedObjects": 328,
+    "positiveMobileWrongWidthRows": 3,
+    "baselineAuthoringRuntimeMs": 769,
+    "correctionGateRuntimeMs": 872,
+    "browserExecutions": 0
+  }
+}
