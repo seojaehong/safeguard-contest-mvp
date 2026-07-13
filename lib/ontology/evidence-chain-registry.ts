@@ -1,6 +1,6 @@
 import type { ReviewState } from "@/lib/ontology/schema";
 
-export const EVIDENCE_CHAIN_CONTRACT_VERSION = "phase-a-evidence-chains/1.1.0" as const;
+export const EVIDENCE_CHAIN_CONTRACT_VERSION = "phase-a-evidence-chains/1.2.0" as const;
 export const CURRENT_LAW_EFFECTIVE_DATE = "2026-03-02" as const;
 
 export const SIF_CORPUS_STATE = Object.freeze({
@@ -59,8 +59,8 @@ export type KoshaGuidanceRecord = EvidenceReviewStatus & {
   citedUid: string;
   chunk: {
     chunkId: string;
+    chunkSha256: string;
     chunkIdFragment: string;
-    chunkCitedUid: string;
     page: number;
     location: string;
     supportStatement: string;
@@ -253,6 +253,7 @@ function guidance(input: {
   productionItemId: string;
   guideCode: string;
   chunkId: string;
+  chunkSha256: string;
   chunkIdFragment: string;
   page: number;
   supportStatement: string;
@@ -267,8 +268,8 @@ function guidance(input: {
     citedUid: `ref:safety_reference_items:${input.productionItemId}`,
     chunk: {
       chunkId: input.chunkId,
+      chunkSha256: input.chunkSha256,
       chunkIdFragment: input.chunkIdFragment,
-      chunkCitedUid: `manual:kosha-body-recovery-2026-07-12-v3/${input.chunkId}`,
       page: input.page,
       location: `physical_page_${input.page}`,
       supportStatement: input.supportStatement,
@@ -290,6 +291,7 @@ const FALL_GUIDANCE = [
       "technical-support-01-0043-c-74-2015-건설공사의-고소작업대-안전보건작업지침",
     guideCode: "C-74",
     chunkId: "kosha-chunk-470a9a64364fcf013b0127ff",
+    chunkSha256: "57d4bb7f3c28241c9abf545e95626ec48b17e6a915838460d196a3e2232d3f08",
     chunkIdFragment: "470a9a64364fcf013b0127ff",
     page: 11,
     supportStatement:
@@ -302,6 +304,7 @@ const FALL_GUIDANCE = [
       "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정",
     guideCode: "D-C-7",
     chunkId: "kosha-chunk-784b7f55fa7a16fe52255cec",
+    chunkSha256: "ec3800145a730fba64d74992fca73ce4c1144a90d891fd31b0ab70993c4f9579",
     chunkIdFragment: "784b7f55fa7a16fe52255cec",
     page: 19,
     supportStatement:
@@ -313,6 +316,7 @@ const FALL_GUIDANCE = [
       "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정",
     guideCode: "D-C-7",
     chunkId: "kosha-chunk-dd07e81d5176bd73484f685e",
+    chunkSha256: "edf92ba7b5251b3018f6277f5e0f9868a6675b446f17eec186745d7d4f623d9c",
     chunkIdFragment: "dd07e81d5176bd73484f685e",
     page: 58,
     supportStatement:
@@ -324,6 +328,7 @@ const FALL_GUIDANCE = [
       "technical-support-06-0001-a-g-1-2025-추락방호망-설치-기술지원규정-수직형-추락방망-설치",
     guideCode: "A-G-1",
     chunkId: "kosha-chunk-57c50cf2248cf860969982a4",
+    chunkSha256: "34a6098735ce5e53d9c457b1846f088fd9874ddc4a4daeefa909fc62cd3b471e",
     chunkIdFragment: "57c50cf2248cf860969982a4",
     page: 7,
     supportStatement:
@@ -337,6 +342,7 @@ const ENTRAPMENT_GUIDANCE = [
     productionItemId: "technical-support-01-0024-c-48-2022-건설기계-안전보건작업지침",
     guideCode: "C-48",
     chunkId: "kosha-chunk-1602e569f8fbe9c789d06cbc",
+    chunkSha256: "2f05b1f423792951f2397da45c975b454943a4daca83152011e8a4c51448d0f6",
     chunkIdFragment: "1602e569f8fbe9c789d06cbc",
     page: 4,
     supportStatement:
@@ -349,6 +355,7 @@ const ENTRAPMENT_GUIDANCE = [
       "technical-support-01-0070-d-c-4-2025-굴착기-안전보건작업-기술지원규정",
     guideCode: "D-C-4",
     chunkId: "kosha-chunk-318945791a391ef2ab83fc8b",
+    chunkSha256: "4874d14bc74995c3a2503a875c8e47a8141cf59450a64d37bbe573785549f805",
     chunkIdFragment: "318945791a391ef2ab83fc8b",
     page: 20,
     supportStatement:
@@ -361,6 +368,7 @@ const ENTRAPMENT_GUIDANCE = [
       "technical-support-02-0033-b-m-37-2026-회전기계-등의-끼임-절단재해-예방을-위한-기술지원규정",
     guideCode: "B-M-37",
     chunkId: "kosha-chunk-9a5c5df7fc303f229134ead0",
+    chunkSha256: "d984bea7fade1b122a07135e652a1c789f4df86391a80701e2acae7792d866cd",
     chunkIdFragment: "9a5c5df7fc303f229134ead0",
     page: 15,
     supportStatement:
@@ -373,6 +381,7 @@ const ENTRAPMENT_GUIDANCE = [
       "technical-support-02-0033-b-m-37-2026-회전기계-등의-끼임-절단재해-예방을-위한-기술지원규정",
     guideCode: "B-M-37",
     chunkId: "kosha-chunk-6f5898c423e8425d84201656",
+    chunkSha256: "71069aa99bfd07f52fc7b8568f9ce172c589a7919ad06424d709d5c1abe32122",
     chunkIdFragment: "6f5898c423e8425d84201656",
     page: 40,
     supportStatement:
@@ -388,6 +397,7 @@ const ELECTRICAL_GUIDANCE = [
       "technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
     guideCode: "B-E-10",
     chunkId: "kosha-chunk-c300b03bbb724268225a73f7",
+    chunkSha256: "a9b5b5cb5b7294517b3954ead3cc755996a7f6e2e7f45792d97cf017a93894db",
     chunkIdFragment: "c300b03bbb724268225a73f7",
     page: 9,
     supportStatement:
@@ -399,6 +409,7 @@ const ELECTRICAL_GUIDANCE = [
       "technical-support-09-0003-b-e-11-2026-충전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
     guideCode: "B-E-11",
     chunkId: "kosha-chunk-7f40eb9fd888ee9a78bde37e",
+    chunkSha256: "32df4dffa73b6d65c948e86827c09b248d3c334bcea99104f0f264ce991b1315",
     chunkIdFragment: "7f40eb9fd888ee9a78bde37e",
     page: 7,
     supportStatement:
@@ -410,6 +421,7 @@ const ELECTRICAL_GUIDANCE = [
       "technical-support-09-0003-b-e-11-2026-충전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
     guideCode: "B-E-11",
     chunkId: "kosha-chunk-ddd57dc246a2ae6e93f5aa14",
+    chunkSha256: "8dbc8188c089319d2acfa517423d24c71e985a1af6a454bd4be16dd93682b1a1",
     chunkIdFragment: "ddd57dc246a2ae6e93f5aa14",
     page: 15,
     supportStatement:
@@ -421,6 +433,7 @@ const ELECTRICAL_GUIDANCE = [
       "technical-support-09-0003-b-e-11-2026-충전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
     guideCode: "B-E-11",
     chunkId: "kosha-chunk-1828d0072421b7434a65cdba",
+    chunkSha256: "9432bd17f6b94f83abe2e465aad9d8bf3db3964a59460affce32e17e608d0ede",
     chunkIdFragment: "1828d0072421b7434a65cdba",
     page: 16,
     supportStatement:
@@ -432,6 +445,7 @@ const ELECTRICAL_GUIDANCE = [
       "technical-support-09-0022-b-e-9-2026-접지설비에-관한-기술지원규정",
     guideCode: "B-E-9",
     chunkId: "kosha-chunk-77d92b287dac21705c7eff74",
+    chunkSha256: "36994d9b5831140ede9247ca39324f3964a53ea1482edaf5ab48ca9ba9d85174",
     chunkIdFragment: "77d92b287dac21705c7eff74",
     page: 10,
     supportStatement:
