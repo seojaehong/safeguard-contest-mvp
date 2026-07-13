@@ -189,6 +189,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
           ? confirmedReview.humanConfirmation.confirmationId
           : null,
         phaseAReview: confirmedReview,
+        workpack: stored,
         message: "기존 Phase A 확인을 멱등하게 재사용했습니다.",
       }, { headers: { "cache-control": "no-store" } });
     }
@@ -292,6 +293,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         ? confirmedReview.humanConfirmation.confirmationId
         : null,
       phaseAReview: confirmedReview,
+      workpack: resealed,
       message: "Phase A 근거와 문서 반영 실적 확인을 저장했습니다.",
     }, { headers: { "cache-control": "no-store" } });
   } catch (error) {

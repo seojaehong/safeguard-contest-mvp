@@ -146,6 +146,12 @@ export type PublicMaterializationTarget = {
   document: "risk_assessment" | "tbm";
   rowOrSection: string;
   obligationClassification: string;
+  hazardPriorityRelation: "evidencedBy";
+  hazardPriorityCitedUids: string[];
+  controlGuidanceCitedUids: string[];
+  controlMandateCitedUids: string[];
+  controlRequiredCitedUids: string[];
+  requiredCitedUidsSemantics: "control_required_only_excludes_sif";
   requiredCitedUids: string[];
 };
 
@@ -307,21 +313,35 @@ function buildPublicPhaseAEvidence(
 function buildPublicMaterializationTargets(
   grounding: PhaseAGenerationGrounding,
 ): PublicMaterializationTarget[] {
-  return grounding.materializationTargets.flatMap((plan) =>
-    plan.targets.map((target) => ({
+  return grounding.materializationTargets.flatMap((plan) => {
+    const controlGuidanceCitedUids = plan.obligation.classification === "technical_guidance_only"
+      || plan.obligation.classification === "statutory_mandate_with_guidance"
+      ? [...plan.guidanceCitedUids]
+      : [];
+    const controlMandateCitedUids = plan.obligation.classification === "statutory_mandate"
+      || plan.obligation.classification === "statutory_mandate_with_guidance"
+      ? [...plan.lawCitedUids]
+      : [];
+    const controlRequiredCitedUids = [
+      ...controlGuidanceCitedUids,
+      ...controlMandateCitedUids,
+    ];
+    return plan.targets.map((target) => ({
       stableKey: target.stableKey,
       controlId: plan.controlId,
       controlLabel: plan.controlLabel,
       document: target.document,
       rowOrSection: target.rowOrSection,
       obligationClassification: plan.obligation.classification,
-      requiredCitedUids: [
-        ...plan.sifCitedUids,
-        ...plan.guidanceCitedUids,
-        ...plan.lawCitedUids,
-      ],
-    })),
-  );
+      hazardPriorityRelation: "evidencedBy" as const,
+      hazardPriorityCitedUids: [...plan.sifCitedUids],
+      controlGuidanceCitedUids,
+      controlMandateCitedUids,
+      controlRequiredCitedUids,
+      requiredCitedUidsSemantics: "control_required_only_excludes_sif" as const,
+      requiredCitedUids: [...controlRequiredCitedUids],
+    }));
+  });
 }
 
 /**

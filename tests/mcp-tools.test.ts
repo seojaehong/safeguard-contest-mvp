@@ -216,6 +216,70 @@ describe("buildDocpackResult", () => {
       phaseAGrounding.planBinding?.expectedRecordCount ?? 0,
     );
   });
+
+  it.each([
+    {
+      classification: "statutory_mandate" as const,
+      expectedGuidance: [] as string[],
+      expectedLaw: ["law:test:article-1"],
+    },
+    {
+      classification: "technical_guidance_only" as const,
+      expectedGuidance: ["kosha:test:guide-1"],
+      expectedLaw: [] as string[],
+    },
+    {
+      classification: "statutory_mandate_with_guidance" as const,
+      expectedGuidance: ["kosha:test:guide-1"],
+      expectedLaw: ["law:test:article-1"],
+    },
+    {
+      classification: "review_required" as const,
+      expectedGuidance: [] as string[],
+      expectedLaw: [] as string[],
+    },
+  ])(
+    "keeps SIF hazard priority separate from $classification control evidence",
+    ({ classification, expectedGuidance, expectedLaw }) => {
+      const grounding = focusGroundingOnFirstPlan(makePhaseAGrounding("resolved"));
+      const plan = grounding.materializationTargets[0];
+      if (!plan) throw new Error("expected public materialization plan");
+      const sifCitedUid = "sif:test:case-1";
+      const guidanceCitedUid = "kosha:test:guide-1";
+      const lawCitedUid = "law:test:article-1";
+      const classifiedPlan = {
+        ...plan,
+        obligation: {
+          ...plan.obligation,
+          classification,
+          categoricalLegalDuty: classification === "statutory_mandate"
+            || classification === "statutory_mandate_with_guidance",
+        },
+        sifCitedUids: [sifCitedUid],
+        guidanceCitedUids: [guidanceCitedUid],
+        lawCitedUids: [lawCitedUid],
+      };
+      const classifiedGrounding: PhaseAGenerationGrounding = {
+        ...grounding,
+        materializationTargets: [classifiedPlan],
+      };
+
+      const result = buildDocpackResult(makeAskResponse(), false, undefined, classifiedGrounding);
+      const targets = result.evidenceMaterialization?.plannedTargets;
+      expect(targets).toHaveLength(2);
+      for (const target of targets ?? []) {
+        expect(target.hazardPriorityRelation).toBe("evidencedBy");
+        expect(target.hazardPriorityCitedUids).toEqual([sifCitedUid]);
+        expect(target.controlGuidanceCitedUids).toEqual(expectedGuidance);
+        expect(target.controlMandateCitedUids).toEqual(expectedLaw);
+        expect(target.controlRequiredCitedUids).toEqual([...expectedGuidance, ...expectedLaw]);
+        expect(target.requiredCitedUids).toEqual(target.controlRequiredCitedUids);
+        expect(target.requiredCitedUidsSemantics).toBe("control_required_only_excludes_sif");
+        expect(target.controlRequiredCitedUids).not.toContain(sifCitedUid);
+        expect(target.requiredCitedUids).not.toContain(sifCitedUid);
+      }
+    },
+  );
 });
 
 describe("buildReviewedDocpackResult", () => {

@@ -22,13 +22,19 @@ import {
   type WorkpackDocumentValues
 } from "@/components/WorkpackEditor";
 import {
+  buildWorkpackGenerationFingerprint,
   buildStoredCurrentWorkpack,
   CURRENT_WORKPACK_STORAGE_KEY,
   parseStoredCurrentWorkpack,
   type CurrentDispatchSnapshot,
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
-import { buildPhaseAReviewUiState } from "@/lib/phase-a-review";
+import type { PhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
+import {
+  buildPhaseAReviewUiState,
+  isPhaseAReviewReadyForConfirmation,
+  parsePhaseAReview
+} from "@/lib/phase-a-review";
 import type { AskResponse } from "@/lib/types";
 import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/workpack-readiness";
@@ -74,6 +80,123 @@ type WorkspaceSaveSnapshot = {
 };
 
 type ClawContextResponse = { sites?: ClawSiteOption[] };
+
+type PhaseAConfirmationStatus =
+  | "idle"
+  | "saving"
+  | "confirming"
+  | "conflict"
+  | "error"
+  | "auth-expired"
+  | "success";
+
+type PhaseAConfirmationBinding = {
+  workpackId: string;
+  generationFingerprint: string;
+  generationEvidenceVersion: string;
+  generationEvidenceGeneratedAt: string;
+  question: string;
+  chainId: PhaseAPlanBinding["chainId"];
+  planDigest: string;
+  sessionAccessToken: string;
+  sessionUserId: string;
+};
+
+type GenerationEvidenceUiBinding = {
+  version: string;
+  generatedAt: string;
+};
+
+const PHASE_A_UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const PHASE_A_SIGNATURE_PATTERN = /^[a-f0-9]{64}$/;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readGenerationEvidenceUiBinding(data: AskResponse): GenerationEvidenceUiBinding | null {
+  const evidence: unknown = data.generationEvidence;
+  if (!isRecord(evidence) || evidence.version !== "safeclaw-generation-evidence/v1") return null;
+  if (evidence.algorithm !== "HMAC-SHA256" || typeof evidence.signature !== "string") return null;
+  if (!PHASE_A_SIGNATURE_PATTERN.test(evidence.signature) || !isRecord(evidence.snapshot)) return null;
+  if (
+    typeof evidence.snapshot.generatedAt !== "string" ||
+    typeof evidence.snapshot.question !== "string" ||
+    evidence.snapshot.question !== data.question
+  ) {
+    return null;
+  }
+  return {
+    version: evidence.version,
+    generatedAt: evidence.snapshot.generatedAt
+  };
+}
+
+async function readApiRecord(response: Response): Promise<Record<string, unknown>> {
+  try {
+    const payload: unknown = await response.json();
+    return isRecord(payload) ? payload : {};
+  } catch (error) {
+    console.error("phase a confirmation response parse failed", error);
+    return {};
+  }
+}
+
+async function buildBrowserSessionFingerprint(accessToken: string): Promise<string> {
+  if (!globalThis.crypto?.subtle) {
+    throw new Error("browser crypto is unavailable");
+  }
+  const digest = await globalThis.crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(accessToken)
+  );
+  const hex = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `sha256:${hex}`;
+}
+
+async function parseServerConfirmedWorkpack(
+  payload: Record<string, unknown>,
+  binding: PhaseAConfirmationBinding,
+  expectedConfirmationId?: string
+): Promise<AskResponse | null> {
+  if (
+    payload.ok !== true ||
+    typeof payload.confirmationId !== "string" ||
+    !PHASE_A_UUID_PATTERN.test(payload.confirmationId) ||
+    !isRecord(payload.workpack)
+  ) {
+    return null;
+  }
+  if (expectedConfirmationId && payload.confirmationId !== expectedConfirmationId) return null;
+
+  const stored = parseStoredCurrentWorkpack(JSON.stringify({
+    savedAt: new Date().toISOString(),
+    source: "workspace",
+    generationFingerprint: "server-confirmed",
+    data: payload.workpack
+  }));
+  if (!stored) return null;
+  const workpack = stored.data;
+  const review = parsePhaseAReview(workpack.phaseAReview);
+  const evidenceBinding = readGenerationEvidenceUiBinding(workpack);
+  if (!review || !evidenceBinding || review.humanConfirmation.status !== "confirmed") return null;
+  const confirmation = review.humanConfirmation;
+  const sessionFingerprint = await buildBrowserSessionFingerprint(binding.sessionAccessToken);
+  if (
+    confirmation.confirmationId !== payload.confirmationId ||
+    confirmation.workpackId !== binding.workpackId ||
+    confirmation.chainId !== binding.chainId ||
+    confirmation.planDigest !== binding.planDigest ||
+    confirmation.reviewer.userId !== binding.sessionUserId ||
+    confirmation.reviewer.sessionFingerprint !== sessionFingerprint ||
+    workpack.question !== binding.question ||
+    evidenceBinding.version !== binding.generationEvidenceVersion ||
+    evidenceBinding.generatedAt !== binding.generationEvidenceGeneratedAt
+  ) {
+    return null;
+  }
+  return { ...workpack, phaseAReview: review };
+}
 
 function resolveInitialWorkerState(data: AskResponse, generationFingerprint?: string): InitialWorkerState {
   const fallbackWorkers = buildDefaultWorkers(data);
@@ -842,6 +965,7 @@ export function FieldOperationsWorkspace({
   requestedDocumentKey,
   readiness,
   onDeliverablesChange,
+  onWorkpackStateChange,
   surface = "full"
 }: {
   data: AskResponse;
@@ -850,13 +974,14 @@ export function FieldOperationsWorkspace({
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
+  onWorkpackStateChange?: (data: AskResponse) => void;
   surface?: "full" | "share" | "editor";
 }) {
   const [initialWorkerState] = useState(() => resolveInitialWorkerState(data, generationFingerprint));
   const [editedDeliverables, setEditedDeliverables] = useState<WorkpackDocumentValues | null>(null);
-  const editorDataRef = useRef(data);
   const dataRef = useRef(data);
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
+  const onWorkpackStateChangeRef = useRef(onWorkpackStateChange);
   const lastEditorValuesRef = useRef<WorkpackDocumentValues | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const activeClawAuthToken = session?.access_token;
@@ -879,6 +1004,10 @@ export function FieldOperationsWorkspace({
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(initialWorkerState.selectedWorkerIds);
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
   const [savedWorkerMap, setSavedWorkerMap] = useState<Record<string, string>>({});
+  const [phaseAConfirmationBinding, setPhaseAConfirmationBinding] = useState<PhaseAConfirmationBinding | null>(null);
+  const [phaseAConfirmationStatus, setPhaseAConfirmationStatus] = useState<PhaseAConfirmationStatus>("idle");
+  const [phaseAConfirmationMessage, setPhaseAConfirmationMessage] = useState("");
+  const [phaseAConfirmationRetryId, setPhaseAConfirmationRetryId] = useState<string | null>(null);
   const [storageSnapshot, setStorageSnapshot] = useState<WorkspaceSaveSnapshot>({
     ok: false,
     label: "비회원 임시 저장",
@@ -959,6 +1088,38 @@ export function FieldOperationsWorkspace({
       ? { ...data, deliverables: { ...data.deliverables, ...editedDeliverables } }
       : data
   ), [data, editedDeliverables]);
+  const parsedPhaseAReview = useMemo(
+    () => parsePhaseAReview(workspaceData.phaseAReview),
+    [workspaceData.phaseAReview]
+  );
+  const phaseAPlanBinding = parsedPhaseAReview?.planBinding ?? null;
+  const generationEvidenceBinding = useMemo(
+    () => readGenerationEvidenceUiBinding(workspaceData),
+    [workspaceData]
+  );
+  const currentGenerationFingerprint = useMemo(
+    () => buildWorkpackGenerationFingerprint(workspaceData),
+    [workspaceData]
+  );
+  const generationBindingMatches = Boolean(
+    generationFingerprint && currentGenerationFingerprint === generationFingerprint
+  );
+  const phaseAReadyForConfirmation = Boolean(
+    parsedPhaseAReview && isPhaseAReviewReadyForConfirmation(parsedPhaseAReview)
+  );
+  const confirmationBindingIsCurrent = Boolean(
+    phaseAConfirmationBinding &&
+    savedWorkpackId === phaseAConfirmationBinding.workpackId &&
+    generationFingerprint === phaseAConfirmationBinding.generationFingerprint &&
+    currentGenerationFingerprint === phaseAConfirmationBinding.generationFingerprint &&
+    generationEvidenceBinding?.version === phaseAConfirmationBinding.generationEvidenceVersion &&
+    generationEvidenceBinding.generatedAt === phaseAConfirmationBinding.generationEvidenceGeneratedAt &&
+    workspaceData.question === phaseAConfirmationBinding.question &&
+    phaseAPlanBinding?.chainId === phaseAConfirmationBinding.chainId &&
+    phaseAPlanBinding.planDigest === phaseAConfirmationBinding.planDigest &&
+    session?.access_token === phaseAConfirmationBinding.sessionAccessToken &&
+    session.user.id === phaseAConfirmationBinding.sessionUserId
+  );
   const selectedWorkers = useMemo(
     () => workers.filter((worker) => selectedWorkerIds.includes(worker.id)),
     [selectedWorkerIds, workers]
@@ -1019,9 +1180,15 @@ export function FieldOperationsWorkspace({
   useEffect(() => {
     dataRef.current = data;
     onDeliverablesChangeRef.current = onDeliverablesChange;
+    onWorkpackStateChangeRef.current = onWorkpackStateChange;
     workerSnapshotRef.current = workerSnapshot;
     dispatchSnapshotRef.current = dispatchSnapshot;
-  }, [data, dispatchSnapshot, onDeliverablesChange, workerSnapshot]);
+  }, [data, dispatchSnapshot, onDeliverablesChange, onWorkpackStateChange, workerSnapshot]);
+
+  useEffect(() => {
+    setEditedDeliverables(null);
+    lastEditorValuesRef.current = null;
+  }, [generationFingerprint]);
 
   const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => {
     const previousValues = lastEditorValuesRef.current;
@@ -1032,6 +1199,23 @@ export function FieldOperationsWorkspace({
       const currentDocuments: Partial<Record<DocumentKey, string>> = current ?? dataRef.current.deliverables;
       return documentKeys.every((key) => currentDocuments[key] === values[key]) ? current : values;
     });
+    if (change.requiresRevalidation) {
+      setSavedWorkpackId(null);
+      setSavedWorkerMap({});
+      setPhaseAConfirmationBinding(null);
+      setPhaseAConfirmationRetryId(null);
+      setPhaseAConfirmationStatus("idle");
+      setPhaseAConfirmationMessage("편집 내용을 반영한 뒤 근거를 다시 검수하고 현재 작업팩을 저장해 주세요.");
+      setStorageSnapshot({
+        ok: false,
+        label: "비회원 임시 저장",
+        message: "편집으로 기존 서버 확인이 무효화되었습니다. 재검수 후 현재 작업팩을 다시 저장해 주세요.",
+        workpackId: null,
+        savedAt: null,
+        savedCount: 0,
+        workerMap: {}
+      });
+    }
     onDeliverablesChangeRef.current?.(values, change);
     if (typeof window === "undefined") return;
     const currentData = dataRef.current;
@@ -1048,7 +1232,7 @@ export function FieldOperationsWorkspace({
     } catch (error) {
       console.warn("safeclaw current workpack update failed", error);
     }
-  }, []);
+  }, [generationFingerprint]);
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
     ["PLAN", "계획", `${workspaceData.citations.length}건 근거 · 위험성평가·작업계획`],
@@ -1124,8 +1308,6 @@ export function FieldOperationsWorkspace({
 
       const workerMap = workerResponse.workerMap || {};
       resolveSavedWorkerIds(workerMap, selectedWorkerIds);
-      setSavedWorkpackId(workpackResponse.workpackId);
-      setSavedWorkerMap(workerMap);
 
       const selectedEducationRecords = educationRecords.filter((record) => (
         selectedWorkers.some((worker) => worker.id === record.workerId)
@@ -1138,6 +1320,32 @@ export function FieldOperationsWorkspace({
         records: selectedEducationRecords
       });
       if (!educationResponse.ok) return setStorageFailure(educationResponse.message);
+
+      setSavedWorkpackId(workpackResponse.workpackId);
+      setSavedWorkerMap(workerMap);
+      if (
+        phaseAReadyForConfirmation &&
+        phaseAPlanBinding &&
+        generationBindingMatches &&
+        generationFingerprint &&
+        generationEvidenceBinding
+      ) {
+        setPhaseAConfirmationBinding({
+          workpackId: workpackResponse.workpackId,
+          generationFingerprint,
+          generationEvidenceVersion: generationEvidenceBinding.version,
+          generationEvidenceGeneratedAt: generationEvidenceBinding.generatedAt,
+          question: workspaceData.question,
+          chainId: phaseAPlanBinding.chainId,
+          planDigest: phaseAPlanBinding.planDigest,
+          sessionAccessToken: session.access_token,
+          sessionUserId: session.user.id
+        });
+        setPhaseAConfirmationRetryId(null);
+        setPhaseAConfirmationMessage("현재 생성 근거와 계획에 묶인 작업팩을 저장했습니다. 서버 확인을 진행할 수 있습니다.");
+      } else {
+        setPhaseAConfirmationBinding(null);
+      }
 
       const savedCount = 1 + workers.length + (educationResponse.savedCount || selectedEducationRecords.length);
       const snapshot: WorkspaceSaveSnapshot = {
@@ -1170,6 +1378,128 @@ export function FieldOperationsWorkspace({
       workpackId: snapshot.workpackId,
       workerIds: resolveSavedWorkerIds(snapshot.workerMap, selectedWorkerIds)
     };
+  }
+
+  async function saveCurrentWorkpackForPhaseA() {
+    if (!session) {
+      setPhaseAConfirmationStatus("auth-expired");
+      setPhaseAConfirmationMessage("관리자 로그인 후 현재 작업팩을 저장해 주세요.");
+      return;
+    }
+    if (!phaseAReadyForConfirmation || !generationBindingMatches || !generationEvidenceBinding) {
+      setPhaseAConfirmationStatus("error");
+      setPhaseAConfirmationMessage("현재 문서의 근거 검수 또는 생성 근거 봉인이 유효하지 않습니다. 문서를 다시 검수해 주세요.");
+      return;
+    }
+    setPhaseAConfirmationStatus("saving");
+    setPhaseAConfirmationMessage("현재 생성 근거와 계획을 서버 작업팩에 저장하고 있습니다.");
+    const snapshot = await saveWorkspaceToSupabase();
+    if (!snapshot.ok || !snapshot.workpackId) {
+      setPhaseAConfirmationStatus("error");
+      setPhaseAConfirmationMessage(snapshot.message);
+      return;
+    }
+    setPhaseAConfirmationStatus("idle");
+  }
+
+  async function confirmCurrentPhaseAWorkpack() {
+    const binding = phaseAConfirmationBinding;
+    if (!session) {
+      setPhaseAConfirmationStatus("auth-expired");
+      setPhaseAConfirmationMessage("관리자 로그인 세션이 없습니다. 다시 로그인한 뒤 현재 작업팩을 저장해 주세요.");
+      return;
+    }
+    if (!binding || !confirmationBindingIsCurrent || !phaseAReadyForConfirmation) {
+      setPhaseAConfirmationBinding(null);
+      setPhaseAConfirmationRetryId(null);
+      setPhaseAConfirmationStatus("error");
+      setPhaseAConfirmationMessage("현재 작업팩의 생성 근거, 계획 또는 로그인 바인딩이 달라졌습니다. 현재 작업팩을 다시 저장해 주세요.");
+      return;
+    }
+
+    setPhaseAConfirmationStatus("confirming");
+    setPhaseAConfirmationMessage("서버에서 인증 세션과 작업팩 근거를 확인하고 있습니다.");
+    try {
+      const response = await fetch(
+        `/api/workpacks/${encodeURIComponent(binding.workpackId)}/phase-a-confirmation`,
+        {
+          method: "POST",
+          headers: {
+            "authorization": `Bearer ${session.access_token}`,
+            "content-type": "application/json"
+          },
+          body: JSON.stringify({
+            chainId: binding.chainId,
+            planDigest: binding.planDigest,
+            ...(phaseAConfirmationRetryId ? { confirmationId: phaseAConfirmationRetryId } : {})
+          })
+        }
+      );
+      const payload = await readApiRecord(response);
+      const responseMessage = typeof payload.message === "string"
+        ? payload.message
+        : "Phase A 확인 요청을 처리하지 못했습니다.";
+
+      if (response.status === 401) {
+        setSavedWorkpackId(null);
+        setSavedWorkerMap({});
+        setPhaseAConfirmationBinding(null);
+        setPhaseAConfirmationRetryId(null);
+        setPhaseAConfirmationStatus("auth-expired");
+        setPhaseAConfirmationMessage("로그인 세션이 만료되었습니다. 다시 로그인한 뒤 현재 작업팩을 저장해 주세요.");
+        return;
+      }
+
+      if (response.status === 409) {
+        const confirmationId = typeof payload.confirmationId === "string" && PHASE_A_UUID_PATTERN.test(payload.confirmationId)
+          ? payload.confirmationId
+          : null;
+        if (confirmationId) {
+          setPhaseAConfirmationRetryId(confirmationId);
+          setPhaseAConfirmationStatus("conflict");
+          setPhaseAConfirmationMessage(responseMessage);
+          return;
+        }
+        setSavedWorkpackId(null);
+        setSavedWorkerMap({});
+        setPhaseAConfirmationBinding(null);
+        setPhaseAConfirmationRetryId(null);
+        setPhaseAConfirmationStatus("error");
+        setPhaseAConfirmationMessage(`${responseMessage} 최신 작업팩을 다시 저장해 주세요.`);
+        return;
+      }
+
+      if (!response.ok) {
+        setPhaseAConfirmationStatus("error");
+        setPhaseAConfirmationMessage(`${responseMessage} 잠시 후 다시 시도해 주세요.`);
+        return;
+      }
+
+      const confirmedWorkpack = await parseServerConfirmedWorkpack(
+        payload,
+        binding,
+        phaseAConfirmationRetryId ?? undefined
+      );
+      if (!confirmedWorkpack) {
+        console.error("phase a confirmation response binding validation failed");
+        setPhaseAConfirmationStatus("error");
+        setPhaseAConfirmationMessage("서버 확인 결과의 작업팩 또는 바인딩을 검증하지 못했습니다. 현재 작업팩을 다시 저장해 주세요.");
+        return;
+      }
+
+      dataRef.current = confirmedWorkpack;
+      setEditedDeliverables(null);
+      lastEditorValuesRef.current = null;
+      setPhaseAConfirmationBinding(null);
+      setPhaseAConfirmationRetryId(null);
+      setPhaseAConfirmationStatus("success");
+      setPhaseAConfirmationMessage("서버 확인 완료. 서버가 반환한 작업팩과 근거 봉인을 현재 상태에 반영했습니다.");
+      onWorkpackStateChangeRef.current?.(confirmedWorkpack);
+    } catch (error) {
+      console.error("phase a confirmation request failed", error);
+      setPhaseAConfirmationStatus("error");
+      setPhaseAConfirmationMessage("서버 확인 요청 중 오류가 발생했습니다. 연결을 확인한 뒤 다시 시도해 주세요.");
+    }
   }
 
   function toggleWorker(id: string) {
@@ -1224,6 +1554,69 @@ export function FieldOperationsWorkspace({
       console.warn("safeclaw current workpack snapshot update failed", error);
     }
   }, [dispatchSnapshot, generationFingerprint, workerSnapshot, workspaceData]);
+
+  const phaseAUiState = buildPhaseAReviewUiState(parsedPhaseAReview ?? undefined);
+  const phaseAAlreadyConfirmed = parsedPhaseAReview?.humanConfirmation.status === "confirmed";
+  const phaseAConfirmationBusy = phaseAConfirmationStatus === "saving" || phaseAConfirmationStatus === "confirming";
+  let phaseAConfirmationTitle = "현재 작업팩 저장 필요";
+  let phaseAConfirmationCopy = "서버 확인 전에 현재 생성 근거와 계획에 묶인 작업팩을 저장해 주세요.";
+  if (phaseAConfirmationStatus === "auth-expired") {
+    phaseAConfirmationTitle = "로그인 다시 필요";
+    phaseAConfirmationCopy = phaseAConfirmationMessage;
+  } else if (phaseAConfirmationStatus === "conflict") {
+    phaseAConfirmationTitle = "서버 확인 재시도 필요";
+    phaseAConfirmationCopy = phaseAConfirmationMessage;
+  } else if (phaseAConfirmationStatus === "error") {
+    phaseAConfirmationTitle = "확인 진행 중 문제 발생";
+    phaseAConfirmationCopy = phaseAConfirmationMessage;
+  } else if (phaseAConfirmationStatus === "saving") {
+    phaseAConfirmationTitle = "현재 작업팩 저장 중";
+    phaseAConfirmationCopy = phaseAConfirmationMessage;
+  } else if (phaseAConfirmationStatus === "confirming") {
+    phaseAConfirmationTitle = "서버 확인 중";
+    phaseAConfirmationCopy = phaseAConfirmationMessage;
+  } else if (phaseAAlreadyConfirmed || phaseAConfirmationStatus === "success") {
+    phaseAConfirmationTitle = "확인 완료";
+    phaseAConfirmationCopy = phaseAConfirmationMessage || "서버가 인증 세션과 현재 작업팩의 근거 바인딩을 확인했습니다.";
+  } else if (!session) {
+    phaseAConfirmationTitle = "관리자 로그인 필요";
+    phaseAConfirmationCopy = "관리자 로그인 후 현재 작업팩을 저장해야 서버 확인을 진행할 수 있습니다.";
+  } else if (!phaseAReadyForConfirmation) {
+    phaseAConfirmationTitle = "근거 재검수 필요";
+    phaseAConfirmationCopy = "resolved grounding과 전체 materialization이 완료된 현재 문서만 서버 확인할 수 있습니다.";
+  } else if (!generationEvidenceBinding) {
+    phaseAConfirmationTitle = "생성 근거 봉인 필요";
+    phaseAConfirmationCopy = "서버 생성 근거 봉인이 없는 문서는 확인할 수 없습니다. 문서를 다시 생성해 주세요.";
+  } else if (!generationBindingMatches) {
+    phaseAConfirmationTitle = "편집 후 재검수 필요";
+    phaseAConfirmationCopy = "현재 문서가 검수된 생성본과 달라졌습니다. 편집 내용을 반영해 다시 검수해 주세요.";
+  } else if (confirmationBindingIsCurrent) {
+    phaseAConfirmationTitle = "서버 확인 준비 완료";
+    phaseAConfirmationCopy = phaseAConfirmationMessage || "저장된 작업팩, 생성 근거, 계획, 로그인 세션이 현재 상태와 일치합니다.";
+  }
+  const showPhaseASaveAction = Boolean(
+    session &&
+    phaseAReadyForConfirmation &&
+    generationEvidenceBinding &&
+    generationBindingMatches &&
+    !confirmationBindingIsCurrent &&
+    phaseAConfirmationStatus !== "auth-expired" &&
+    !phaseAConfirmationBusy
+  );
+  const phaseAConfirmButtonLabel = phaseAConfirmationStatus === "conflict"
+    ? "서버 확인 다시 시도"
+    : phaseAConfirmationStatus === "confirming"
+      ? "서버 확인 중"
+      : phaseAConfirmationStatus === "error" && confirmationBindingIsCurrent
+        ? "Phase A 확인 다시 시도"
+        : phaseAAlreadyConfirmed || phaseAConfirmationStatus === "success"
+          ? "Phase A 확인 완료"
+          : "Phase A 확인 저장";
+  const phaseAConfirmDisabled = phaseAConfirmationBusy ||
+    phaseAConfirmationStatus === "auth-expired" ||
+    phaseAAlreadyConfirmed ||
+    phaseAConfirmationStatus === "success" ||
+    !confirmationBindingIsCurrent;
 
   if (surface === "share") {
     return (
@@ -1296,12 +1689,44 @@ export function FieldOperationsWorkspace({
 
       <div className="workspace-canvas">
         <WorkpackEditor
-          data={editorDataRef.current}
+          data={workspaceData}
           generationFingerprint={generationFingerprint}
           focusToken={editorFocusToken}
           requestedDocumentKey={requestedDocumentKey}
           onDeliverablesChange={handleDeliverablesChange}
         />
+        <section
+          className={`phase-a-confirmation-panel${phaseAUiState.authoritative ? " is-ready" : " is-pending"}`}
+          aria-label="Phase A 근거 확인"
+        >
+          <div className="phase-a-confirmation-copy">
+            <span className="eyebrow">Phase A Review</span>
+            <strong>{phaseAConfirmationTitle}</strong>
+            <p aria-live="polite">{phaseAConfirmationCopy}</p>
+            <small>
+              근거 상태: {phaseAUiState.status} · 공유 준비: {readiness?.status === "ready" ? "준비됨" : "확인 필요"}
+            </small>
+          </div>
+          <div className="phase-a-confirmation-actions">
+            {showPhaseASaveAction ? (
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => void saveCurrentWorkpackForPhaseA()}
+              >
+                현재 작업팩 저장
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="button"
+              onClick={() => void confirmCurrentPhaseAWorkpack()}
+              disabled={phaseAConfirmDisabled}
+            >
+              {phaseAConfirmButtonLabel}
+            </button>
+          </div>
+        </section>
         <EvidenceImpactPanel data={workspaceData} />
         <WorkspaceOperationGraphPanel
           data={workspaceData}

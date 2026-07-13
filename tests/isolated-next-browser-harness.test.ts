@@ -83,6 +83,7 @@ describe("isolated next browser harness", () => {
         expect(runtimeErrors, route).toEqual([]);
         expect(body, route).not.toContain("Internal browser harness error");
       }
+      expect(first.readServerOutput()).not.toContain("EADDRINUSE");
       await first.stop();
       first = null;
       expect(fs.existsSync(firstTemporaryDirectory)).toBe(false);

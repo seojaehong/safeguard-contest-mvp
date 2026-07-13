@@ -1149,7 +1149,10 @@ export function SafeGuardCommandCenter({
     values: WorkpackDocumentValues,
     change: WorkpackDeliverablesChange
   ) => {
-    if (change.requiresRevalidation) setRequiresRevalidation(true);
+    if (change.requiresRevalidation) {
+      setRequiresRevalidation(true);
+      setSavedWorkpackId(null);
+    }
     setData((current) => {
       if (!current) return current;
       const currentDocuments: Partial<Record<DocumentKey, string>> = current.deliverables;
@@ -1169,6 +1172,17 @@ export function SafeGuardCommandCenter({
     } catch (error) {
       console.warn("safeclaw current workpack save failed", error);
     }
+  }
+
+  function applyServerConfirmedWorkpack(payload: AskResponse) {
+    const fingerprint = buildGenerationEvidenceFingerprint(payload);
+    const confirmation = payload.phaseAReview?.humanConfirmation;
+    persistCurrentWorkpack(payload, fingerprint);
+    setGenerationFingerprint(fingerprint);
+    setData(payload);
+    setRequiresRevalidation(false);
+    setSavedWorkpackId(confirmation?.status === "confirmed" ? confirmation.workpackId : null);
+    setMessage("서버 확인이 완료된 현재 작업팩과 생성 근거 봉인을 반영했습니다.");
   }
 
   function attachImprovementPhoto(kind: "before" | "after", fileList: FileList | null) {
@@ -2351,6 +2365,7 @@ export function SafeGuardCommandCenter({
                 requestedDocumentKey={requestedDocumentKey}
                 readiness={workpackReadiness || undefined}
                 onDeliverablesChange={handleWorkpackDeliverablesChange}
+                onWorkpackStateChange={applyServerConfirmedWorkpack}
                 surface="editor"
               />
             </section>
@@ -2381,6 +2396,7 @@ export function SafeGuardCommandCenter({
                   generationFingerprint={generationFingerprint || undefined}
                   readiness={workpackReadiness || undefined}
                   onDeliverablesChange={handleWorkpackDeliverablesChange}
+                  onWorkpackStateChange={applyServerConfirmedWorkpack}
                   surface="share"
                 />
               </div>

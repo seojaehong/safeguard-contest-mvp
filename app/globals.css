@@ -18009,6 +18009,86 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+.command-center-shell .phase-a-confirmation-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-5);
+  min-width: 0;
+  border-top: 1px solid var(--workspace-rule-strong);
+  border-bottom: 1px solid var(--workspace-rule-strong);
+  border-left: 4px solid var(--workspace-accent);
+  border-radius: 0;
+  background: var(--workspace-surface-1);
+  padding: var(--space-5);
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .phase-a-confirmation-panel.is-ready {
+  border-left-color: var(--workspace-success);
+}
+
+.command-center-shell .phase-a-confirmation-copy {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.command-center-shell .phase-a-confirmation-copy strong {
+  color: var(--workspace-ink);
+  font-size: var(--text-component-title);
+  line-height: var(--leading-component-title);
+  letter-spacing: 0;
+}
+
+.command-center-shell .phase-a-confirmation-copy :is(p, small) {
+  max-width: 72ch;
+  margin: 0;
+  color: var(--workspace-muted);
+  line-height: var(--leading-body);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.command-center-shell .phase-a-confirmation-copy small {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.command-center-shell .phase-a-confirmation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.command-center-shell .phase-a-confirmation-actions .button {
+  min-width: 156px;
+  min-height: 44px;
+  letter-spacing: 0;
+}
+
+@media (max-width: 720px) {
+  .command-center-shell .phase-a-confirmation-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  .command-center-shell .phase-a-confirmation-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .command-center-shell .phase-a-confirmation-actions .button {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 /* Workspace generated-edit bridge: WorkpackEditor is also mounted after
    generation inside /workspace. Keep that edit surface in the same daylight
    workbench system as the main document route. */

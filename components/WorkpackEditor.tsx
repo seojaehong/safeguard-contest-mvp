@@ -1918,26 +1918,39 @@ export function WorkpackEditor({
   onSelectedDocumentChange?: (key: DocumentKey) => void;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
 }) {
+  const generationSourceKey = generationFingerprint || [
+    data.question,
+    data.scenario.companyName,
+    data.scenario.siteName,
+  ].join(":");
+  const generationDataRef = useRef<{ key: string; data: AskResponse }>({
+    key: generationSourceKey,
+    data,
+  });
+  if (generationDataRef.current.key !== generationSourceKey) {
+    generationDataRef.current = { key: generationSourceKey, data };
+  }
+  const generationData = generationDataRef.current.data;
   const initialValues = useMemo<WorkpackDocumentValues>(
     () => ({
-      workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
-      riskAssessmentDraft: withSubmitReadiness("위험성평가표", data.deliverables.riskAssessmentDraft, data),
-      workPlanDraft: withSubmitReadiness("작업계획서", data.deliverables.workPlanDraft, data),
-      workPermitDraft: resolveInitialWorkPermitDraft(data),
-      tbmBriefing: withSubmitReadiness("TBM 브리핑", data.deliverables.tbmBriefing, data),
-      tbmLogDraft: withSubmitReadiness("TBM 일지", data.deliverables.tbmLogDraft, data),
-      safetyEducationRecordDraft: withSubmitReadiness("안전교육", data.deliverables.safetyEducationRecordDraft, data),
-      emergencyResponseDraft: data.deliverables.emergencyResponseDraft,
-      photoEvidenceDraft: data.deliverables.photoEvidenceDraft,
-      foreignWorkerBriefing: data.deliverables.foreignWorkerBriefing,
-      foreignWorkerTransmission: data.deliverables.foreignWorkerTransmission,
-      kakaoMessage: data.deliverables.kakaoMessage
+      workpackSummaryDraft: generationData.deliverables.workpackSummaryDraft,
+      riskAssessmentDraft: withSubmitReadiness("위험성평가표", generationData.deliverables.riskAssessmentDraft, generationData),
+      workPlanDraft: withSubmitReadiness("작업계획서", generationData.deliverables.workPlanDraft, generationData),
+      workPermitDraft: resolveInitialWorkPermitDraft(generationData),
+      tbmBriefing: withSubmitReadiness("TBM 브리핑", generationData.deliverables.tbmBriefing, generationData),
+      tbmLogDraft: withSubmitReadiness("TBM 일지", generationData.deliverables.tbmLogDraft, generationData),
+      safetyEducationRecordDraft: withSubmitReadiness("안전교육", generationData.deliverables.safetyEducationRecordDraft, generationData),
+      emergencyResponseDraft: generationData.deliverables.emergencyResponseDraft,
+      photoEvidenceDraft: generationData.deliverables.photoEvidenceDraft,
+      foreignWorkerBriefing: generationData.deliverables.foreignWorkerBriefing,
+      foreignWorkerTransmission: generationData.deliverables.foreignWorkerTransmission,
+      kakaoMessage: generationData.deliverables.kakaoMessage
     }),
-    [data]
+    [generationData]
   );
   const storageKey = useMemo(
-    () => `safeclaw-workpack:${data.scenario.companyName}:${data.scenario.siteName}:${data.question}:${generationFingerprint || buildGenerationEvidenceFingerprint(data)}`,
-    [data, generationFingerprint]
+    () => `safeclaw-workpack:${generationData.scenario.companyName}:${generationData.scenario.siteName}:${generationData.question}:${generationSourceKey}`,
+    [generationData, generationSourceKey]
   );
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
@@ -1967,16 +1980,22 @@ export function WorkpackEditor({
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
   const selectedText = values[selected.key];
+  const effectivePhaseAReview = dirtyDocumentKeys.length > 0 ? undefined : data.phaseAReview;
+  const authorityData = useMemo<AskResponse>(() => (
+    effectivePhaseAReview === data.phaseAReview
+      ? data
+      : { ...data, phaseAReview: effectivePhaseAReview }
+  ), [data, effectivePhaseAReview]);
   const authoritySafeValues = useMemo(() => {
     const next = { ...values };
     for (const document of documentMeta) {
       next[document.key] = applyPhaseADocumentAuthorityMarker(
         values[document.key],
-        data.phaseAReview,
+        effectivePhaseAReview,
       );
     }
     return next;
-  }, [data.phaseAReview, values]);
+  }, [effectivePhaseAReview, values]);
   const selectedHasIntentionalEmptyPermitDraft = selected.key === "workPermitDraft"
     && selectedText === ""
     && (
@@ -2000,9 +2019,9 @@ export function WorkpackEditor({
   const selectedQualityIssues = selectedRubricItems.filter((item) => item.status !== "fulfilled").length;
   const totalQualityIssues = rubricEvaluation.summary.total - rubricEvaluation.summary.fulfilled;
   const selectedEvidenceLabel = data.evidenceLabels?.[selected.key];
-  const phaseAState = buildPhaseAReviewUiState(data.phaseAReview);
-  const phaseADocumentAuthorityMarker = buildPhaseADocumentAuthorityMarker(data.phaseAReview);
-  const selectedExportText = applyPhaseADocumentAuthorityMarker(selectedText, data.phaseAReview);
+  const phaseAState = buildPhaseAReviewUiState(effectivePhaseAReview);
+  const phaseADocumentAuthorityMarker = buildPhaseADocumentAuthorityMarker(effectivePhaseAReview);
+  const selectedExportText = applyPhaseADocumentAuthorityMarker(selectedText, effectivePhaseAReview);
   const harnessSummary = data.dbHarness?.summary;
   const harnessPacket = data.dbHarness?.packet;
   const selectedCoverage = useMemo(() => {
@@ -2150,7 +2169,9 @@ export function WorkpackEditor({
         setSaveAnnouncement("편집 내용 저장에 실패했습니다.");
       }
     }
-    onDeliverablesChangeRef.current?.(values, pendingChangeRef.current);
+    if (pendingChangeRef.current.source !== "generated") {
+      onDeliverablesChangeRef.current?.(values, pendingChangeRef.current);
+    }
     if (saveAnnouncementTimerRef.current) {
       window.clearTimeout(saveAnnouncementTimerRef.current);
     }
@@ -2317,7 +2338,7 @@ export function WorkpackEditor({
 
   function downloadHtml() {
     downloadBlob(
-      new Blob([buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows)], { type: "text/html;charset=utf-8" }),
+      new Blob([buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, authorityData, riskAssessmentRows)], { type: "text/html;charset=utf-8" }),
       `${baseName}.html`
     );
   }
@@ -2330,7 +2351,7 @@ export function WorkpackEditor({
   function downloadXls() {
     // Legacy HTML-as-.xls — kept for backward compatibility but new UI prefers downloadXlsx().
     downloadBlob(
-      new Blob([buildExcelHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows)], { type: "application/vnd.ms-excel;charset=utf-8" }),
+      new Blob([buildExcelHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, authorityData, riskAssessmentRows)], { type: "application/vnd.ms-excel;charset=utf-8" }),
       `${baseName}.xls`
     );
   }
@@ -2431,14 +2452,14 @@ export function WorkpackEditor({
 
   function downloadDoc() {
     downloadBlob(
-      new Blob([buildWordHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows)], { type: "application/msword;charset=utf-8" }),
+      new Blob([buildWordHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, authorityData, riskAssessmentRows)], { type: "application/msword;charset=utf-8" }),
       `${baseName}.doc`
     );
   }
 
   function downloadJpg() {
     setImageStatus("idle");
-    const markup = buildSafetyFormMarkup(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows);
+    const markup = buildSafetyFormMarkup(selected.title, selectedRows, data.scenario, selectedFormProfile, authorityData, riskAssessmentRows);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1754">
       <rect width="100%" height="100%" fill="#fafafb"/>
       <foreignObject x="34" y="34" width="1172" height="1686">
@@ -2475,7 +2496,7 @@ export function WorkpackEditor({
   async function downloadHwpx() {
     setHwpxStatus("building");
     try {
-      const blob = await buildHwpxWithRhwp(buildHwpTemplateText(selected.title, selectedRows, selectedFormProfile, data.scenario, data, riskAssessmentRows));
+      const blob = await buildHwpxWithRhwp(buildHwpTemplateText(selected.title, selectedRows, selectedFormProfile, data.scenario, authorityData, riskAssessmentRows));
       downloadBlob(blob, `${baseName}.hwpx`);
       setHwpxStatus("idle");
     } catch (error) {
@@ -2584,7 +2605,7 @@ export function WorkpackEditor({
     } catch (error) {
       console.error("server PDF print source failed", error);
       popup.document.open();
-      popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows));
+      popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, authorityData, riskAssessmentRows));
       popup.document.close();
       popup.focus();
       popup.print();
@@ -3044,7 +3065,7 @@ export function WorkpackEditor({
                 rows={selectedRows}
                 scenario={data.scenario}
                 profile={selectedFormProfile}
-                data={data}
+                data={authorityData}
                 riskRows={riskAssessmentRows}
               />
             </div>

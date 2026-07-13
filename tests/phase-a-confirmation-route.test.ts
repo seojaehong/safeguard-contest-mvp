@@ -189,6 +189,7 @@ describe("Phase A confirmation route", () => {
     const body = await response.json() as {
       confirmationId?: string;
       phaseAReview?: AskResponse["phaseAReview"];
+      workpack?: AskResponse;
     };
 
     expect(response.status).toBe(200);
@@ -208,6 +209,11 @@ describe("Phase A confirmation route", () => {
     });
     expect(JSON.stringify(body)).not.toContain("forged-client-reviewer");
     expect(JSON.stringify(body)).not.toContain("2099-01-01");
+    expect(body.workpack?.phaseAReview).toEqual(body.phaseAReview);
+    expect(body.workpack?.status.summary).toBe("Phase A 근거 및 사람 확인 완료");
+    expect(body.workpack?.deliverables.riskAssessmentDraft).toContain("법령 근거: 연결됨");
+    if (!body.workpack) throw new Error("expected the server-confirmed workpack result");
+    expect(verifyAskResponseGenerationEvidence(body.workpack, SECRET)).toMatchObject({ ok: true });
 
     const persisted = fake.updated();
     if (!persisted) throw new Error("expected persisted confirmation");
@@ -297,9 +303,13 @@ describe("Phase A confirmation route", () => {
       ...requestBody,
       confirmationId: conflict?.confirmationId,
     }), { params: Promise.resolve({ id: WORKPACK_ID }) });
-    const retryBody = await retry.json() as { confirmationId?: string };
+    const retryBody = await retry.json() as { confirmationId?: string; workpack?: AskResponse };
     expect(retry.status).toBe(200);
     expect(retryBody.confirmationId).toBe(success?.confirmationId);
+    expect(retryBody.workpack?.phaseAReview?.humanConfirmation).toMatchObject({
+      status: "confirmed",
+      confirmationId: success?.confirmationId,
+    });
     expect(fake.updateCount()).toBe(1);
   });
 });

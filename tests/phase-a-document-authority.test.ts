@@ -135,10 +135,13 @@ describe("Phase A pending document authority marker", () => {
     const hwpRoute = read("app/api/export/hwp/route.ts");
     const hwpBuilder = read("lib/hwp-table-builder.ts");
 
-    expect(editor).toContain("buildPhaseADocumentAuthorityMarker(data.phaseAReview)");
+    expect(editor).toContain("dirtyDocumentKeys.length > 0 ? undefined : data.phaseAReview");
+    expect(editor).toContain("buildPhaseADocumentAuthorityMarker(effectivePhaseAReview)");
     expect(editor).toContain("phaseADocumentAuthorityMarker");
     expect(editor).toContain("selectedExportText");
-    expect(editor).toContain("applyPhaseADocumentAuthorityMarker(selectedText, data.phaseAReview)");
+    expect(editor).toContain("applyPhaseADocumentAuthorityMarker(selectedText, effectivePhaseAReview)");
+    expect(editor).toContain("phaseAReview: effectivePhaseAReview");
+    expect(editor).toContain("data={authorityData}");
     expect(editor).toContain("const selectedRows = buildRowsForDocument(selected, authoritySafeValues)");
     expect(editor).toContain("const riskAssessmentRows = buildRowsForDocument(riskAssessmentMeta, authoritySafeValues)");
     expect(editor).toContain("authorityMarker: phaseADocumentAuthorityMarker");
