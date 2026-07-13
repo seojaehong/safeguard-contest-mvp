@@ -7507,6 +7507,12 @@ ul {
     grid-column: 1;
     grid-row: auto;
   }
+
+  .field-workspace-editor-focus .workspace-side > .share-panel,
+  .field-workspace-editor-focus .workspace-side > #history {
+    grid-column: 1;
+    grid-row: auto;
+  }
 }
 
 @media (max-width: 720px) {
