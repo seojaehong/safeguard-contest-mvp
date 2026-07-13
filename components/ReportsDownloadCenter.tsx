@@ -1030,6 +1030,17 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
             )}
           </section>
 
+          <section className="safeclaw-report-core-summary-section">
+            <span>핵심 요약</span>
+            <div className="safeclaw-workdoc-stats safeclaw-report-core-summary" aria-label="리포트 핵심 요약">
+              <p><strong>{snapshot?.summary.riskRows || 0}</strong><span>평가 행</span></p>
+              <p><strong>{snapshot?.summary.highRiskRows || 0}</strong><span>고위험</span></p>
+              <p><strong>{snapshot?.summary.improvements || 0}</strong><span>개선사항</span></p>
+              <p><strong>{snapshot?.summary.photoCandidates || 0}</strong><span>사진 후보</span></p>
+              <p><strong>{snapshot?.summary.photoImprovements || 0}</strong><span>승인 사진</span></p>
+            </div>
+          </section>
+
           <details className="safeclaw-report-secondary-tools">
             <summary>추가 리포트 정보</summary>
             {snapshot ? (
@@ -1038,16 +1049,6 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
                 <ReportProvenanceFacts snapshot={snapshot} label="고정 리포트 데이터 출처" />
               </section>
             ) : null}
-            <section>
-              <span>요약</span>
-              <div className="safeclaw-workdoc-stats">
-                <p><strong>{snapshot?.summary.riskRows || 0}</strong><span>평가 행</span></p>
-                <p><strong>{snapshot?.summary.highRiskRows || 0}</strong><span>고위험</span></p>
-                <p><strong>{snapshot?.summary.improvements || 0}</strong><span>개선사항</span></p>
-                <p><strong>{snapshot?.summary.photoCandidates || 0}</strong><span>사진 후보</span></p>
-                <p><strong>{snapshot?.summary.photoImprovements || 0}</strong><span>승인 사진</span></p>
-              </div>
-            </section>
 
             {sourceMode !== "browser_local" && preservedHistory.length ? (
               <PreservedHistorySection
