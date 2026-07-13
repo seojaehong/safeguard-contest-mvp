@@ -1563,7 +1563,7 @@ describe("Reports Wave 1 browser design contract", () => {
     expect(await selected.getAttribute("aria-pressed")).toBe("true");
     expect(await selected.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(selectedBeforeHover);
 
-    const metrics = await page.evaluate(() => {
+    const browserMetrics = await page.evaluate(() => {
       const tuple = (selector: string) => {
         const element = document.querySelector(selector);
         if (!element) throw new Error(`Missing typography target: ${selector}`);
@@ -1578,9 +1578,8 @@ describe("Reports Wave 1 browser design contract", () => {
       const hero = document.querySelector(".safeclaw-page-decision-header");
       const heroMeta = document.querySelector(".safeclaw-page-decision-action > div:first-child");
       const heroCta = document.querySelector(".safeclaw-module-principal-command a");
-      const content = document.querySelector(".safeclaw-module-content > *");
       if (!selectedControl) throw new Error("Selected report period was not rendered");
-      if (!hero || !heroMeta || !heroCta || !content) throw new Error("Reports hero geometry targets were not rendered");
+      if (!hero || !heroMeta || !heroCta) throw new Error("Reports hero geometry targets were not rendered");
       const heroMetaRect = heroMeta.getBoundingClientRect();
       const heroCtaRect = heroCta.getBoundingClientRect();
       const heroCtaStyle = getComputedStyle(heroCta);
@@ -1595,7 +1594,6 @@ describe("Reports Wave 1 browser design contract", () => {
         heroCtaBackground: heroCtaStyle.backgroundColor,
         heroCtaColor: heroCtaStyle.color,
         heroCtaClipped: heroCta.scrollWidth > heroCta.clientWidth + 1,
-        contentTop: Math.round(content.getBoundingClientRect().top),
         heroMetaCtaOverlap: !(
           heroMetaRect.bottom <= heroCtaRect.top
           || heroCtaRect.bottom <= heroMetaRect.top
@@ -1621,6 +1619,10 @@ describe("Reports Wave 1 browser design contract", () => {
           }).length
       };
     });
+    const metrics = {
+      ...browserMetrics,
+      contentTop: contentTopFromPageTop
+    };
 
     expect(metrics.horizontalOverflow).toBe(0);
     expect(metrics.controlHeights.every((controlHeight) => controlHeight >= 44)).toBe(true);
@@ -1633,6 +1635,7 @@ describe("Reports Wave 1 browser design contract", () => {
       expect(metrics.heroColumnCount).toBe(1);
       expect(metrics.heroCtaClipped).toBe(false);
       expect(metrics.heroMetaCtaOverlap).toBe(false);
+      expect(metrics.contentTop).toBeGreaterThanOrEqual(0);
       expect(metrics.contentTop).toBeLessThanOrEqual(387);
     } else {
       expect(metrics.heroColumnCount).toBe(2);
