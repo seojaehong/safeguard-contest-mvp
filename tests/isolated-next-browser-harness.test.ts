@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { createServer, type Server } from "node:net";
 import os from "node:os";
 import path from "node:path";
 
@@ -7,6 +8,12 @@ import { describe, expect, it } from "vitest";
 import { startIsolatedNextBrowserHarness } from "./helpers/isolated-next-browser-harness";
 
 const root = process.cwd();
+
+function closeServer(server: Server): Promise<void> {
+  return new Promise((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve());
+  });
+}
 
 describe("isolated next browser harness", () => {
   it("uses unique OS temp dist dirs, cleans them on stop, and releases the same port salt", async () => {
@@ -131,4 +138,47 @@ describe("isolated next browser harness", () => {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   }, 30_000);
+
+  it("retries with a new port when the probed port is claimed before Next starts", async () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-isolated-harness-port-race-"));
+    const temporaryDirectories: string[] = [];
+    const attempts: number[] = [];
+    let blocker: Server | null = null;
+    let harness: Awaited<ReturnType<typeof startIsolatedNextBrowserHarness>> | null = null;
+
+    try {
+      harness = await startIsolatedNextBrowserHarness({
+        slug: "isolated-harness-port-race",
+        initialPath: "/reports",
+        portSalt: 16121,
+        mode: "dev",
+        tempRoot,
+        onTemporaryDirectory: (directory) => temporaryDirectories.push(directory),
+        beforeServerStart: async (port, attempt) => {
+          attempts.push(attempt);
+          if (attempt === 0) {
+            blocker = createServer();
+            await new Promise<void>((resolve, reject) => {
+              blocker?.once("error", reject);
+              blocker?.listen(port, "127.0.0.1", resolve);
+            });
+            return;
+          }
+          if (blocker) {
+            await closeServer(blocker);
+            blocker = null;
+          }
+        }
+      });
+
+      expect(attempts.slice(0, 2)).toEqual([0, 1]);
+      expect(temporaryDirectories).toHaveLength(2);
+      expect(fs.existsSync(temporaryDirectories[0])).toBe(false);
+      expect((await fetch(`${harness.baseUrl}/reports`)).status).toBe(200);
+    } finally {
+      await harness?.stop();
+      if (blocker) await closeServer(blocker);
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  }, 120_000);
 });

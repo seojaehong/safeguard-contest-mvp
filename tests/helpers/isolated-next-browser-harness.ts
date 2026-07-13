@@ -11,6 +11,7 @@ type ServerExit = {
 };
 
 const MAX_SERVER_OUTPUT_CHARS = 20_000;
+const MAX_PORT_BIND_ATTEMPTS = 8;
 
 type HarnessOptions = {
   slug: string;
@@ -21,6 +22,7 @@ type HarnessOptions = {
   tempRoot?: string;
   makeTempDirectory?: (prefix: string) => string;
   onTemporaryDirectory?: (directory: string) => void;
+  beforeServerStart?: (port: number, attempt: number) => void | Promise<void>;
   environment?: Readonly<Record<string, string | undefined>>;
 };
 
@@ -113,8 +115,9 @@ async function stopProcessTree(server: ChildProcessWithoutNullStreams | null): P
   }
 }
 
-export async function startIsolatedNextBrowserHarness(
-  options: HarnessOptions
+async function startIsolatedNextBrowserHarnessAttempt(
+  options: HarnessOptions,
+  attempt: number
 ): Promise<IsolatedNextBrowserHarness> {
   if (!/^[a-z0-9-]+$/u.test(options.slug)) {
     throw new Error(`Invalid browser harness slug: ${options.slug}`);
@@ -122,8 +125,9 @@ export async function startIsolatedNextBrowserHarness(
 
   const timeoutMs = options.timeoutMs ?? 90_000;
   const mode = options.mode ?? "dev";
-  const preferredPort = 20_000 + ((process.pid * 97 + options.portSalt) % 20_000);
+  const preferredPort = 20_000 + ((process.pid * 97 + options.portSalt + attempt) % 20_000);
   const port = await resolveLoopbackPort(preferredPort);
+  await options.beforeServerStart?.(port, attempt);
   const baseUrl = `http://127.0.0.1:${port}`;
   let serverOutput = "";
   let serverExit: ServerExit | null = null;
@@ -335,4 +339,26 @@ export async function startIsolatedNextBrowserHarness(
     cleanupTemporaryDirectory();
   }
   throw new Error(`Timed out waiting for ${baseUrl}${options.initialPath}\n${serverOutput}`);
+}
+
+function isRetryablePortBindError(error: unknown): error is Error {
+  return error instanceof Error && /\b(?:EADDRINUSE|EACCES)\b/u.test(error.message);
+}
+
+export async function startIsolatedNextBrowserHarness(
+  options: HarnessOptions
+): Promise<IsolatedNextBrowserHarness> {
+  let lastPortBindError: Error | null = null;
+  for (let attempt = 0; attempt < MAX_PORT_BIND_ATTEMPTS; attempt += 1) {
+    try {
+      return await startIsolatedNextBrowserHarnessAttempt(options, attempt);
+    } catch (error) {
+      if (!isRetryablePortBindError(error)) throw error;
+      lastPortBindError = error;
+    }
+  }
+  throw new Error(
+    `Unable to start an isolated Next.js server after ${MAX_PORT_BIND_ATTEMPTS} port attempts`,
+    { cause: lastPortBindError }
+  );
 }

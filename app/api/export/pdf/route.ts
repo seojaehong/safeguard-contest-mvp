@@ -1027,16 +1027,26 @@ function buildPdfContentLines(
   const canonicalRiskRows = kind === "risk" && structuredRiskRows.length
     ? structuredRiskRowsToPdfRows(structuredRiskRows, title)
     : [];
+  const fallbackRows = [{
+    document: title,
+    section: "본문",
+    item: "확인",
+    content: "문서 본문을 현장에서 확인하세요."
+  }];
   const sourceRows = canonicalRiskRows.length
     ? canonicalRiskRows
-    : kind === "tbm" && riskRows.length ? riskRows : (rows.length ? rows : [{ document: title, section: "본문", item: "확인", content: "문서 본문을 현장에서 확인하세요." }]);
+    : kind === "tbm"
+      ? (riskRows.length ? [...riskRows, ...rows] : (rows.length ? rows : fallbackRows))
+      : (rows.length ? rows : fallbackRows);
   if (kind === "tbm") {
     lines.push({ text: "위험성평가표 위험요인과 오늘 기상/환경 신호를 TBM 전달사항으로 연결합니다.", role: "table" });
     lines.push({ text: `오늘 기상/환경 신호: ${scenario.weatherNote}`, role: "table", gap: 8 });
   }
   sourceRows.forEach((row, index) => {
     const prefix = kind === "tbm"
-      ? `${index + 1}. [위험성평가표 → TBM] `
+      ? index < riskRows.length
+        ? `${index + 1}. [위험성평가표 → TBM] `
+        : `${index + 1}. [TBM 전달사항] `
       : `${index + 1}. [${row.section}] ${row.item}: `;
     wrapPdfLine(`${prefix}${row.content}`, 42).forEach((line, lineIndex) => {
       lines.push({ text: lineIndex === 0 ? line : `   ${line}`, role: "table" });

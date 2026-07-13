@@ -265,6 +265,45 @@ describe("Korean PDF font integration", () => {
     await document.destroy();
   });
 
+  it("preserves TBM delivery rows alongside linked risk-assessment rows", async () => {
+    const response = await POST(createRequestForPayload({
+      ...payload,
+      title: "TBM 일지",
+      riskRows: [{
+        document: "위험성평가표",
+        section: "유해·위험요인",
+        item: "추락",
+        content: "추락위험근거행"
+      }],
+      rows: [{
+        document: "TBM 일지",
+        section: "전달사항",
+        item: "작업중지 기준",
+        content: "작업중지복창행"
+      }]
+    }));
+
+    expect(response.status).toBe(200);
+    Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const document = await pdfjs.getDocument({
+      data: new Uint8Array(await response.arrayBuffer())
+    }).promise;
+    const extractedPages: string[] = [];
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber);
+      const textContent = await page.getTextContent();
+      extractedPages.push(textContent.items.flatMap((item) => "str" in item ? [item.str] : []).join(" "));
+    }
+    const extracted = extractedPages.join(" ");
+
+    expect(extracted).toContain("추락위험근거행");
+    expect(extracted).toContain("작업중지복창행");
+    expect(extracted).toContain("위험성평가표 → TBM");
+    expect(extracted).toContain("TBM 전달사항");
+    await document.destroy();
+  });
+
   it("rejects request bodies above the byte budget instead of truncating them", async () => {
     const padding = Object.fromEntries(
       Array.from({ length: 70 }, (_, index) => [`padding${index}`, "x".repeat(4_000)])
