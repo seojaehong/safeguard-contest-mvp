@@ -1,35 +1,204 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-13T08:20:38.6664740+09:00",
+  "generatedAt": "2026-07-13T09:26:45.2198759+09:00",
   "branch": "feat/phase-a-ontology-evidence-chains",
   "base": "b39f8135e784f69aac12d947cf6a734aa429a3c5",
-  "contractVersion": "phase-a-evidence-chains/1.0.0",
-  "status": "implemented_not_published",
+  "rejectedCommit": "8e6cf05e501edb4ecccce7a8c92e87b9ec7fb88d",
+  "contractVersion": "phase-a-evidence-chains/1.1.0",
+  "status": "remediated_awaiting_independent_review",
   "counts": {
     "canonicalChains": 3,
     "controls": 9,
     "selectedSif": 7,
     "reviewOnlySif": 1,
-    "selectedKosha": 7,
-    "lawArticles": 10,
+    "koshaProductionDocuments": 9,
+    "koshaLocalChunks": 13,
+    "koshaControlMappings": 11,
+    "koshaUnmappedChunks": 5,
+    "lawArticles": 9,
     "materializationTargets": 18,
     "nodeKinds": 7,
-    "edgeRelations": 7
+    "edgeRelations": 7,
+    "obligationClassifications": 4
   },
+  "chains": [
+    {
+      "chainId": "work-at-height-fall",
+      "taskNodeId": "Task_work_at_height",
+      "hazardNodeId": "Hazard_추락",
+      "articles": ["42", "43", "44"],
+      "controls": ["fall-work-platform", "fall-opening-guard", "fall-anchor"]
+    },
+    {
+      "chainId": "vehicle-machinery-entrapment",
+      "taskNodeId": "Task_forklift_loading",
+      "hazardNodeId": "Hazard_충돌_협착_끼임",
+      "articles": ["172"],
+      "controls": ["vehicle-contact-prevention"],
+      "excludedAliases": ["건설기계 인접 작업"]
+    },
+    {
+      "chainId": "electrical-work-electrocution",
+      "taskNodeId": "Task_electrical_work",
+      "hazardNodeId": "Hazard_감전_직접_간접_접촉",
+      "articles": ["301", "302", "319", "321", "323"],
+      "controls": [
+        "electrical-live-part-guarding",
+        "electrical-grounding",
+        "electrical-deenergized-isolation",
+        "electrical-live-work-distance",
+        "electrical-insulating-ppe"
+      ]
+    }
+  ],
+  "koshaEvidence": [
+    {
+      "guideCode": "C-74",
+      "productionItemId": "technical-support-01-0043-c-74-2015-건설공사의-고소작업대-안전보건작업지침",
+      "localItemId": "kosha-a3c8a491f835c6eaf5109705",
+      "chunkId": "kosha-chunk-470a9a64364fcf013b0127ff",
+      "page": 11,
+      "mapping": "direct_support_missing",
+      "controlIds": []
+    },
+    {
+      "guideCode": "D-C-7",
+      "productionItemId": "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정",
+      "localItemId": "kosha-07e82640daba8e37ebb73cdb",
+      "chunkId": "kosha-chunk-784b7f55fa7a16fe52255cec",
+      "page": 19,
+      "mapping": "mapped",
+      "controlIds": ["fall-work-platform"]
+    },
+    {
+      "guideCode": "D-C-7",
+      "productionItemId": "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정",
+      "localItemId": "kosha-07e82640daba8e37ebb73cdb",
+      "chunkId": "kosha-chunk-dd07e81d5176bd73484f685e",
+      "page": 58,
+      "mapping": "mapped",
+      "controlIds": ["fall-anchor"]
+    },
+    {
+      "guideCode": "A-G-1",
+      "productionItemId": "technical-support-06-0001-a-g-1-2025-추락방호망-설치-기술지원규정-수직형-추락방망-설치",
+      "localItemId": "kosha-1cad3b4b264aa96277dcfae8",
+      "chunkId": "kosha-chunk-57c50cf2248cf860969982a4",
+      "page": 7,
+      "mapping": "mapped",
+      "controlIds": ["fall-work-platform", "fall-opening-guard"]
+    },
+    {
+      "guideCode": "C-48",
+      "productionItemId": "technical-support-01-0024-c-48-2022-건설기계-안전보건작업지침",
+      "localItemId": "kosha-2817664393f505499a71d63d",
+      "chunkId": "kosha-chunk-1602e569f8fbe9c789d06cbc",
+      "page": 4,
+      "mapping": "task_scope_mismatch",
+      "controlIds": []
+    },
+    {
+      "guideCode": "D-C-4",
+      "productionItemId": "technical-support-01-0070-d-c-4-2025-굴착기-안전보건작업-기술지원규정",
+      "localItemId": "kosha-32d7faa3ac4ef74e48d959d4",
+      "chunkId": "kosha-chunk-318945791a391ef2ab83fc8b",
+      "page": 20,
+      "mapping": "task_scope_mismatch",
+      "controlIds": []
+    },
+    {
+      "guideCode": "B-M-37",
+      "productionItemId": "technical-support-02-0033-b-m-37-2026-회전기계-등의-끼임-절단재해-예방을-위한-기술지원규정",
+      "localItemId": "kosha-c6bba4fd3e9a9305c1edce41",
+      "chunkId": "kosha-chunk-9a5c5df7fc303f229134ead0",
+      "page": 15,
+      "mapping": "registry_control_missing",
+      "controlIds": []
+    },
+    {
+      "guideCode": "B-M-37",
+      "productionItemId": "technical-support-02-0033-b-m-37-2026-회전기계-등의-끼임-절단재해-예방을-위한-기술지원규정",
+      "localItemId": "kosha-c6bba4fd3e9a9305c1edce41",
+      "chunkId": "kosha-chunk-6f5898c423e8425d84201656",
+      "page": 40,
+      "mapping": "task_scope_mismatch",
+      "controlIds": []
+    },
+    {
+      "guideCode": "B-E-10",
+      "productionItemId": "technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
+      "localItemId": "kosha-7161ec0c8b05f2cccbe519b3",
+      "chunkId": "kosha-chunk-c300b03bbb724268225a73f7",
+      "page": 9,
+      "mapping": "mapped",
+      "controlIds": ["electrical-deenergized-isolation"]
+    },
+    {
+      "guideCode": "B-E-11",
+      "productionItemId": "technical-support-09-0003-b-e-11-2026-충전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
+      "localItemId": "kosha-a8a1ea385da644ac8f48149f",
+      "chunkId": "kosha-chunk-7f40eb9fd888ee9a78bde37e",
+      "page": 7,
+      "mapping": "mapped",
+      "controlIds": ["electrical-live-part-guarding"]
+    },
+    {
+      "guideCode": "B-E-11",
+      "productionItemId": "technical-support-09-0003-b-e-11-2026-충전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
+      "localItemId": "kosha-a8a1ea385da644ac8f48149f",
+      "chunkId": "kosha-chunk-ddd57dc246a2ae6e93f5aa14",
+      "page": 15,
+      "mapping": "mapped",
+      "controlIds": ["electrical-live-part-guarding", "electrical-live-work-distance"]
+    },
+    {
+      "guideCode": "B-E-11",
+      "productionItemId": "technical-support-09-0003-b-e-11-2026-충전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
+      "localItemId": "kosha-a8a1ea385da644ac8f48149f",
+      "chunkId": "kosha-chunk-1828d0072421b7434a65cdba",
+      "page": 16,
+      "mapping": "mapped",
+      "controlIds": ["electrical-live-work-distance", "electrical-insulating-ppe"]
+    },
+    {
+      "guideCode": "B-E-9",
+      "productionItemId": "technical-support-09-0022-b-e-9-2026-접지설비에-관한-기술지원규정",
+      "localItemId": "kosha-7e511f17893129148a46714c",
+      "chunkId": "kosha-chunk-77d92b287dac21705c7eff74",
+      "page": 10,
+      "mapping": "mapped",
+      "controlIds": ["electrical-grounding"]
+    }
+  ],
   "invariants": {
     "publishedOnlyRuntimeGraph": true,
+    "requiredPublishedEndpoints": true,
+    "requiredPublishedDirectedEdges": [
+      "Task-entailsHazard-Hazard",
+      "Hazard-mitigatedBy-Control",
+      "Control-mandatedBy-Article"
+    ],
+    "missingDraftWrongDirectionFailClosed": true,
     "exactTaskFailClosed": true,
-    "publishedGraphLawFailClosed": true,
     "citedUidParserReused": true,
     "reviewStatesUnchanged": true,
     "koshaAsLaw": false,
     "sifCreatesDuty": false,
     "fieldHistoryWeatherAuthority": "scope_only",
     "llmRole": "naturalize_only",
-    "humanConfirmationRequired": true,
+    "qualityPassedBeforeHumanConfirm": true,
+    "fixedPackDeepFrozen": true,
     "providerFallback": "preserve_current_provider_fallback",
-    "fulfillsDuty": "partial_evidence_only"
+    "fulfillsDuty": "partial_evidence_only",
+    "mcpProvenance": "법제처 검증 시드 v1",
+    "mcpEvidenceChainField": "evidenceContract"
   },
+  "obligationClassifications": [
+    "statutory_mandate",
+    "technical_guidance_only",
+    "statutory_mandate_with_guidance",
+    "review_required"
+  ],
   "corpusState": {
     "sif": {
       "prepared": true,
@@ -38,10 +207,14 @@
       "ontologyPromoted": false
     },
     "kosha": {
+      "productionRowStatus": "ready",
+      "localSnapshotState": "current-unverified",
       "launchReady": false,
       "bodyMissingCount": 1,
       "downloadProvenance": "incomplete",
-      "selectedResolution": "review_required"
+      "productionChunkBridge": "absent",
+      "runtimeResolution": "review_required",
+      "callerPromotionAllowed": false
     }
   },
   "excludedEvidence": [
@@ -57,19 +230,27 @@
       "autoConfirm": false
     }
   ],
+  "reviewerRemediation": [
+    { "finding": "P1-1", "status": "fixed", "summary": "forklift uses published Article 172; Article 200 and Article 92 maintenance mapping removed" },
+    { "finding": "P1-2", "status": "fixed", "summary": "chunk-level direct mappings added; unsupported chunks remain explicitly unmapped" },
+    { "finding": "P1-3", "status": "fixed", "summary": "published endpoints and all three directed edge types are required" },
+    { "finding": "P1-4", "status": "fixed", "summary": "global corpus and absent bridge gate dominate all overrides" },
+    { "finding": "P1-5", "status": "fixed", "summary": "production IDs, local item IDs, local chunk IDs, and page/location are separate" },
+    { "finding": "P1-6", "status": "fixed", "summary": "quality must pass before confirmation; fixed pack is cloned and recursively frozen" },
+    { "finding": "P2-7", "status": "fixed", "summary": "public classification union contains exactly four states; SIF-only is review_required" },
+    { "finding": "P2-8", "status": "fixed", "summary": "Article 44 condition includes height at least 2 metres and safety-belt wearing" },
+    { "finding": "P2-9", "status": "fixed", "summary": "legacy MCP provenance semantics restored; evidence chain is separate" }
+  ],
   "lawVerification": {
     "verifiedOn": "2026-07-13",
     "currentEffectiveDate": "2026-03-02",
     "instrument": "산업안전보건기준에 관한 규칙",
     "officialCurrentFullText": "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lspttninfSeq=153999",
-    "article200DirectSurfaceEffectiveDate": "2025-09-01",
-    "article200CurrentTextCrossChecked": true,
     "articles": [
       { "articleNo": "42", "url": "https://law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1024005275" },
       { "articleNo": "43", "url": "https://www.law.go.kr/lsLinkCommonInfo.do?lsJoLnkSeq=1028063341" },
       { "articleNo": "44", "url": "https://law.go.kr/lsLinkCommonInfo.do?lsJoLnkSeq=1016700539" },
-      { "articleNo": "92", "url": "https://www.law.go.kr/LSW/lsSideInfoP.do?docCls=jo&joBrNo=00&joNo=0092&lsiSeq=273603&urlMode=lsScJoRltInfoR" },
-      { "articleNo": "200", "url": "https://www.law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000727229" },
+      { "articleNo": "172", "url": "https://www.law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000727233" },
       { "articleNo": "301", "url": "https://law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1024005221" },
       { "articleNo": "302", "url": "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1030668033" },
       { "articleNo": "319", "url": "https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029038625" },
@@ -78,36 +259,50 @@
     ]
   },
   "verification": {
-    "requestedBaseline": { "filesPassed": 5, "testsPassed": 41, "statedTests": 68, "reproducedStatedCount": false },
-    "focused": { "filesPassed": 2, "testsPassed": 31, "status": "pass" },
-    "finalCombinedGate": {
+    "tddRed": {
+      "independentReviewFailures": 17,
+      "sidecarMappingFailures": 7,
+      "bridgeAndStatusFailures": 4
+    },
+    "focused": {
       "filesPassed": 4,
-      "testsPassed": 88,
+      "testsPassed": 103,
       "status": "pass",
+      "serial": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"
     },
-    "ontology": { "filesPassed": 10, "filesSkipped": 1, "testsPassed": 83, "testsSkipped": 1, "status": "pass" },
-    "mcpTools": { "filesPassed": 1, "testsPassed": 26, "status": "pass" },
-    "dbHarness": { "filesPassed": 1, "testsPassed": 31, "status": "pass" },
     "typecheck": {
       "status": "pass",
+      "strict": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log"
     },
     "diffCheck": { "status": "pass" },
     "fullSuite": {
-      "status": "fail_unrelated_ui",
-      "durationSeconds": 903.55,
-      "filesPassed": 129,
-      "filesFailed": 3,
+      "status": "fail_unrelated_ui_reports",
+      "durationSeconds": 206.95,
+      "filesPassed": 125,
+      "filesFailed": 7,
       "filesSkipped": 5,
-      "testsPassed": 1231,
-      "testsFailed": 5,
-      "testsSkipped": 7,
+      "testsPassed": 1229,
+      "testsFailed": 7,
+      "testsSkipped": 22,
       "failedFiles": [
-        "tests/workspace-layout-regression.test.ts",
+        "tests/knowledge-page-layout.test.ts",
+        "tests/product-module-shell.test.ts",
+        "tests/reports-download-center.test.ts",
         "tests/frontend-route-coverage.test.ts",
-        "tests/module-shell-design-regression.test.ts"
-      ]
+        "tests/module-shell-design-regression.test.ts",
+        "tests/reports-wave1-publish-support.test.ts",
+        "tests/workspace-layout-regression.test.ts"
+      ],
+      "serialIsolation": {
+        "status": "interrupted_by_user",
+        "reproducedBeforeInterruption": [
+          "tests/frontend-route-coverage.test.ts:1",
+          "tests/module-shell-design-regression.test.ts:1",
+          "tests/workspace-layout-regression.test.ts:3"
+        ]
+      }
     }
   },
   "publication": {
@@ -115,6 +310,12 @@
     "supabaseMutated": false,
     "schemaChanged": false,
     "migrationAdded": false,
-    "generatedCoreSeedStatsChanged": false
+    "generatedCoreSeedStatsChanged": false,
+    "uiChanged": false,
+    "outputArtifactsCommitted": false
+  },
+  "approval": {
+    "selfApproved": false,
+    "freshIndependentReviewRequired": true
   }
 }
