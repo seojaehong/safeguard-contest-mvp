@@ -187,7 +187,7 @@ export default async function OntologyPage() {
                 <span className="eyebrow">목록 온톨로지</span>
                 <h2 className="safeclaw-section-title">노드 리스트</h2>
               </div>
-              <div className="ontology-node-list">
+              <div className="ontology-node-list" style={{ gap: "6px" }}>
                 {model.list.map((item) => {
                   const card = model.hoverCards.find((hoverCard) => hoverCard.id === item.id);
                   return (
