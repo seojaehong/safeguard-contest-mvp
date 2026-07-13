@@ -34,7 +34,8 @@ const defaultProductionBuildManifestPath = path.join(
 );
 const reportsTaskDistanceEvidenceRelativeDir = path.join(
   "evaluation",
-  "reports-mobile-task-distance-2026-07-13"
+  "reports-mobile-task-distance-2026-07-13",
+  "fresh-review-2026-07-14"
 );
 
 type CssRule = {
@@ -234,6 +235,210 @@ async function prepareDownloadReadyFixture(page: Page, theme: Theme): Promise<vo
   await page.locator("[aria-label='리포트 다운로드'] button:not(:disabled)").first().waitFor({ state: "visible" });
 }
 
+type InteractiveTargetMetric = {
+  descriptor: string;
+  height: number;
+  width: number;
+};
+
+async function openNamedReportsDisclosure(page: Page, name: string): Promise<void> {
+  const summary = page.locator("summary").filter({ hasText: name });
+  await summary.waitFor({ state: "visible" });
+  expect((await summary.textContent())?.trim()).toBe(name);
+  const details = summary.locator("..");
+  if (!(await details.evaluate((element) => (element as HTMLDetailsElement).open))) {
+    await summary.click();
+  }
+  expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+}
+
+async function measureInteractiveTargets(page: Page, state: string): Promise<{
+  state: string;
+  targets: InteractiveTargetMetric[];
+  undersized: InteractiveTargetMetric[];
+}> {
+  return page.evaluate((stateLabel) => {
+    const root = document.querySelector<HTMLElement>(".safeclaw-workdoc-shell");
+    if (!root) throw new Error("Reports workbench was not rendered");
+    const visible = (element: HTMLElement): boolean => {
+      const closedDetails = element.closest<HTMLDetailsElement>("details:not([open])");
+      if (closedDetails) {
+        const visibleSummary = closedDetails.querySelector<HTMLElement>(":scope > summary");
+        if (!visibleSummary?.contains(element)) return false;
+      }
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+    };
+    const interactive = Array.from(root.querySelectorAll<HTMLElement>(
+      "button, a[href], select, input, summary, [tabindex]:not([tabindex='-1'])"
+    )).filter((element) => {
+      if (!visible(element)) return false;
+      return !(element instanceof HTMLButtonElement || element instanceof HTMLInputElement || element instanceof HTMLSelectElement)
+        || !element.disabled;
+    });
+    const targets = interactive.map((element, index) => {
+      const target = element instanceof HTMLInputElement && element.type === "checkbox"
+        ? element.closest<HTMLElement>("label") ?? element
+        : element;
+      const rect = target.getBoundingClientRect();
+      const name = element.getAttribute("aria-label")
+        ?? element.textContent?.replace(/\s+/gu, " ").trim()
+        ?? element.getAttribute("name")
+        ?? "";
+      return {
+        descriptor: `${index}:${element.tagName.toLowerCase()}[${name.slice(0, 48)}]`,
+        height: Math.round(rect.height * 100) / 100,
+        width: Math.round(rect.width * 100) / 100
+      };
+    });
+    return {
+      state: stateLabel,
+      targets,
+      undersized: targets.filter((target) => target.height < 44)
+    };
+  }, state);
+}
+
+async function applyDeterministicTextReflow(page: Page): Promise<{
+  mechanism: string;
+  textElementCount: number;
+  representative: {
+    selector: string;
+    beforeFontSize: number;
+    afterFontSize: number;
+    growthRatio: number;
+    beforeLineHeight: number;
+    afterLineHeight: number;
+    lineHeightGrowthRatio: number;
+    beforeHeight: number;
+    afterHeight: number;
+  };
+  rootHeight: { before: number; after: number };
+  wrappingOrHeightChanged: boolean;
+  horizontalOverflow: number;
+  toolsFirstInDom: boolean;
+  previewFollowsTools: boolean;
+  overlapFailures: string[];
+  verticalClippingFailures: string[];
+  nestedScrollFailures: string[];
+}> {
+  return page.evaluate(() => {
+    const root = document.querySelector<HTMLElement>(".safeclaw-module-shell[data-module-route='/reports']");
+    const workbench = root?.querySelector<HTMLElement>(".safeclaw-workdoc-shell");
+    const representativeSelector = ".safeclaw-report-period-control strong";
+    const representative = root?.querySelector<HTMLElement>(representativeSelector);
+    if (!root || !workbench || !representative) throw new Error("Reports text reflow targets were not rendered");
+
+    const visible = (element: HTMLElement): boolean => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+    };
+    const textElements = Array.from(root.querySelectorAll<HTMLElement>(
+      "h1, h2, h3, p, span, strong, em, code, label, button, a, select, input, summary"
+    )).filter((element) => visible(element) && Number.parseFloat(getComputedStyle(element).fontSize) > 0);
+    const beforeRepresentativeStyle = getComputedStyle(representative);
+    const beforeFontSize = Number.parseFloat(beforeRepresentativeStyle.fontSize);
+    const beforeLineHeight = Number.parseFloat(beforeRepresentativeStyle.lineHeight);
+    const beforeHeight = representative.getBoundingClientRect().height;
+    const beforeRootHeight = workbench.getBoundingClientRect().height;
+    const textSnapshots = textElements.map((element) => {
+      const style = getComputedStyle(element);
+      const fontSize = Number.parseFloat(style.fontSize);
+      const parsedLineHeight = Number.parseFloat(style.lineHeight);
+      const lineHeight = Number.isFinite(parsedLineHeight) ? parsedLineHeight : fontSize * 1.2;
+      return { element, fontSize, lineHeight };
+    });
+
+    for (const snapshot of textSnapshots) {
+      snapshot.element.style.fontSize = `${snapshot.fontSize * 2}px`;
+      snapshot.element.style.lineHeight = `${snapshot.lineHeight * 2}px`;
+    }
+
+    const afterFontSize = Number.parseFloat(getComputedStyle(representative).fontSize);
+    const afterLineHeight = Number.parseFloat(getComputedStyle(representative).lineHeight);
+    const afterHeight = representative.getBoundingClientRect().height;
+    const afterRootHeight = workbench.getBoundingClientRect().height;
+    const layoutElements = Array.from(workbench.querySelectorAll<HTMLElement>([
+      ":scope > *",
+      ".safeclaw-workdoc-rail > section",
+      ".safeclaw-workdoc-rail > details",
+      ".safeclaw-report-secondary-tools > section",
+      ".safeclaw-report-controls > button",
+      ".workbench-report-filters > p",
+      ".safeclaw-download-actions > *",
+      ".safeclaw-workdoc-links > *",
+      ".safeclaw-workdoc > header",
+      ".safeclaw-workdoc > section"
+    ].join(","))).filter(visible);
+    const overlapFailures: string[] = [];
+    for (let leftIndex = 0; leftIndex < layoutElements.length; leftIndex += 1) {
+      const left = layoutElements[leftIndex];
+      const leftRect = left.getBoundingClientRect();
+      for (let rightIndex = leftIndex + 1; rightIndex < layoutElements.length; rightIndex += 1) {
+        const right = layoutElements[rightIndex];
+        if (left.parentElement !== right.parentElement) continue;
+        const rightRect = right.getBoundingClientRect();
+        const overlapWidth = Math.min(leftRect.right, rightRect.right) - Math.max(leftRect.left, rightRect.left);
+        const overlapHeight = Math.min(leftRect.bottom, rightRect.bottom) - Math.max(leftRect.top, rightRect.top);
+        if (overlapWidth > 1 && overlapHeight > 1) {
+          overlapFailures.push(`${left.tagName.toLowerCase()}:${leftIndex}<->${right.tagName.toLowerCase()}:${rightIndex}`);
+        }
+      }
+    }
+    const clipCandidates = Array.from(workbench.querySelectorAll<HTMLElement>(
+      "h1, h2, h3, p, span, strong, em, code, label, button, a, select, input, summary"
+    )).filter(visible);
+    const verticalClippingFailures = clipCandidates.filter((element) => {
+      const style = getComputedStyle(element);
+      return ["hidden", "clip"].includes(style.overflowY) && element.scrollHeight > element.clientHeight + 1;
+    }).map((element) => `${element.tagName.toLowerCase()}[${element.textContent?.trim().slice(0, 32) ?? ""}]`);
+    const nestedScrollFailures = Array.from(workbench.querySelectorAll<HTMLElement>("*"))
+      .filter((element) => {
+        if (!visible(element)) return false;
+        const style = getComputedStyle(element);
+        const scrollsVertically = ["auto", "scroll"].includes(style.overflowY)
+          && element.scrollHeight > element.clientHeight + 1;
+        const scrollsHorizontally = ["auto", "scroll"].includes(style.overflowX)
+          && element.scrollWidth > element.clientWidth + 1;
+        return scrollsVertically || scrollsHorizontally;
+      })
+      .map((element) => `${element.tagName.toLowerCase()}.${Array.from(element.classList).join(".")}`);
+    const tools = workbench.querySelector<HTMLElement>(".safeclaw-workdoc-rail");
+    const preview = workbench.querySelector<HTMLElement>(".safeclaw-report-preview");
+
+    return {
+      mechanism: "double-visible-computed-font-size-and-line-height-inline",
+      textElementCount: textElements.length,
+      representative: {
+        selector: representativeSelector,
+        beforeFontSize,
+        afterFontSize,
+        growthRatio: afterFontSize / beforeFontSize,
+        beforeLineHeight,
+        afterLineHeight,
+        lineHeightGrowthRatio: afterLineHeight / beforeLineHeight,
+        beforeHeight: Math.round(beforeHeight * 100) / 100,
+        afterHeight: Math.round(afterHeight * 100) / 100
+      },
+      rootHeight: {
+        before: Math.round(beforeRootHeight * 100) / 100,
+        after: Math.round(afterRootHeight * 100) / 100
+      },
+      wrappingOrHeightChanged: Math.abs(afterHeight - beforeHeight) >= 1 || Math.abs(afterRootHeight - beforeRootHeight) >= 1,
+      horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
+      toolsFirstInDom: workbench.firstElementChild === tools,
+      previewFollowsTools: Boolean(
+        tools && preview && tools.compareDocumentPosition(preview) & Node.DOCUMENT_POSITION_FOLLOWING
+      ),
+      overlapFailures,
+      verticalClippingFailures,
+      nestedScrollFailures
+    };
+  });
+}
+
 async function startReportsHarness(): Promise<IsolatedNextBrowserHarness> {
   const candidateSalts = [7121, 8121, 9121, 10121];
   const mode = process.env.SAFECLAW_HARNESS_MODE === "prod" ? "prod" : "dev";
@@ -307,83 +512,134 @@ describe("Reports Wave 1 browser design contract", () => {
 
   it("keeps the mobile report workbench ahead of its long document by default", async () => {
     if (!browser) throw new Error("Browser was not started");
-    const page = await browser.newPage({ viewport: { width: 391, height: 844 } });
-    try {
-      await prepareDownloadReadyFixture(page, "day");
-      const metrics = await page.evaluate(() => {
-        const root = document.querySelector(".safeclaw-workdoc-shell");
-        const tools = root?.querySelector(".safeclaw-workdoc-rail");
-        const preview = root?.querySelector<HTMLDetailsElement>(".safeclaw-report-preview");
-        const download = root?.querySelector<HTMLButtonElement>(
-          "[aria-label='리포트 다운로드'] button:not(:disabled)"
-        );
-        const violations: string[] = [];
-        if (!root) return { violations: ["Reports workbench was not rendered"], rootHeight: 0, downloadDistance: 0 };
-        if (!tools) violations.push("Reports operational tools were not rendered");
-        if (!download) violations.push("Reports sample did not expose an enabled download action");
-        const rootRect = root.getBoundingClientRect();
-        const downloadRect = download?.getBoundingClientRect();
-        if (root.firstElementChild !== tools) violations.push("tools are not first in Reports DOM order");
-        if (!preview) violations.push("long report document is not behind a disclosure preview");
-        if (preview?.open) violations.push("long report document preview is expanded by default");
-        const downloadDistance = downloadRect ? Math.round(downloadRect.top - rootRect.top) : 0;
-        const rootHeight = Math.round(rootRect.height);
-        if (downloadDistance > 1_200) {
-          violations.push("first enabled download exceeds the 1200px task-distance budget");
-        }
-        if (rootHeight > 2_600) violations.push("default Reports document exceeds the 2600px height budget");
-        return { violations, rootHeight, downloadDistance };
+    const evidence: Array<Record<string, unknown>> = [];
+    for (const scenario of [
+      { label: "mobile", width: 391, height: 844 },
+      { label: "desktop", width: 1440, height: 1000 }
+    ] as const) {
+      const page = await browser.newPage({
+        viewport: { width: scenario.width, height: scenario.height },
+        deviceScaleFactor: 1
       });
-
-      expect(metrics.violations, JSON.stringify(metrics)).toEqual([]);
-
-      const client = await page.context().newCDPSession(page);
-      await client.send("Emulation.setEmulatedOSTextScale", { scale: 2 });
-      const zoomMetrics = await page.evaluate(() => {
-        const root = document.querySelector(".safeclaw-workdoc-shell");
-        const tools = root?.querySelector(".safeclaw-workdoc-rail");
-        const preview = root?.querySelector(".safeclaw-report-preview");
-        if (!root || !tools || !preview) throw new Error("Reports zoom targets were not rendered");
-        const clippedControls = Array.from(root.querySelectorAll<HTMLElement>("button, select, input, summary"))
-          .filter((element) => element.scrollWidth > element.clientWidth + 1).length;
-        const nestedScrollers = Array.from(root.querySelectorAll<HTMLElement>(
-          ".safeclaw-workdoc-rail, .safeclaw-report-preview, .safeclaw-workdoc"
-        )).filter((element) => {
-          const style = getComputedStyle(element);
-          return ["auto", "scroll"].includes(style.overflowY) && element.scrollHeight > element.clientHeight + 1;
-        }).length;
-        return {
-          horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
-          clippedControls,
-          nestedScrollers,
-          toolsFirstInDom: root.firstElementChild === tools,
-          previewFollowsTools: Boolean(tools.compareDocumentPosition(preview) & Node.DOCUMENT_POSITION_FOLLOWING)
-        };
-      });
-      expect(zoomMetrics).toEqual({
-        horizontalOverflow: 0,
-        clippedControls: 0,
-        nestedScrollers: 0,
-        toolsFirstInDom: true,
-        previewFollowsTools: true
-      });
-      await client.send("Emulation.setEmulatedOSTextScale", { scale: 1 });
-      if (process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1") {
-        fs.writeFileSync(
-          path.join(outputDirectory, "reports-download-ready-day-mobile-task-distance-metrics.json"),
-          `${JSON.stringify({
-            viewport: { width: 391, height: 844 },
-            default: metrics,
-            textZoom200: zoomMetrics
-          }, null, 2)}\n`
-        );
-        await page.screenshot({
-          path: path.join(outputDirectory, "reports-download-ready-day-mobile.png"),
-          fullPage: true
+      try {
+        await prepareDownloadReadyFixture(page, "day");
+        const defaultMetrics = await page.evaluate(() => {
+          const root = document.querySelector(".safeclaw-workdoc-shell");
+          const tools = root?.querySelector(".safeclaw-workdoc-rail");
+          const preview = root?.querySelector<HTMLDetailsElement>(".safeclaw-report-preview");
+          const secondary = root?.querySelector<HTMLDetailsElement>(".safeclaw-report-secondary-tools");
+          const download = root?.querySelector<HTMLButtonElement>(
+            "[aria-label='리포트 다운로드'] button:not(:disabled)"
+          );
+          const violations: string[] = [];
+          if (!root) return { violations: ["Reports workbench was not rendered"], rootHeight: 0, downloadDistance: 0 };
+          if (!tools) violations.push("Reports operational tools were not rendered");
+          if (!download) violations.push("Reports fixture did not expose an enabled download action");
+          const rootRect = root.getBoundingClientRect();
+          const downloadRect = download?.getBoundingClientRect();
+          if (root.firstElementChild !== tools) violations.push("tools are not first in Reports DOM order");
+          if (!preview || !secondary) violations.push("Reports disclosures were not rendered");
+          if (preview?.open || secondary?.open) violations.push("Reports disclosures are expanded by default");
+          const downloadDistance = downloadRect ? Math.round(downloadRect.top - rootRect.top) : 0;
+          const toolsFirstInDom = root.firstElementChild === tools;
+          const previewFollowsTools = Boolean(
+            tools && preview && tools.compareDocumentPosition(preview) & Node.DOCUMENT_POSITION_FOLLOWING
+          );
+          return {
+            violations,
+            rootHeight: Math.round(rootRect.height),
+            downloadDistance,
+            devicePixelRatio: window.devicePixelRatio,
+            toolsFirstInDom,
+            previewFollowsTools,
+            horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth)
+          };
         });
+        expect(defaultMetrics.violations, JSON.stringify({ scenario, defaultMetrics })).toEqual([]);
+        expect(defaultMetrics.devicePixelRatio).toBe(1);
+        expect(defaultMetrics.toolsFirstInDom).toBe(true);
+        expect(defaultMetrics.previewFollowsTools).toBe(true);
+        expect(defaultMetrics.horizontalOverflow).toBe(0);
+        if (scenario.label === "mobile") {
+          expect(defaultMetrics.downloadDistance).toBeLessThanOrEqual(1_200);
+          expect(defaultMetrics.rootHeight).toBeLessThanOrEqual(2_600);
+        }
+
+        const defaultTargets = await measureInteractiveTargets(page, "default");
+        expect(defaultTargets.undersized, JSON.stringify({ scenario, ...defaultTargets }, null, 2)).toEqual([]);
+        const defaultLinks = defaultTargets.targets.filter((target) => target.descriptor.includes(":a["));
+        expect(defaultLinks).toHaveLength(0);
+
+        await openNamedReportsDisclosure(page, "추가 리포트 정보");
+        const secondaryOpenTargets = await measureInteractiveTargets(page, "secondary-open");
+        expect(
+          secondaryOpenTargets.undersized,
+          JSON.stringify({ scenario, ...secondaryOpenTargets }, null, 2)
+        ).toEqual([]);
+        const secondaryOpenLinks = secondaryOpenTargets.targets.filter((target) => target.descriptor.includes(":a["));
+        expect(secondaryOpenLinks).toHaveLength(2);
+
+        await openNamedReportsDisclosure(page, "리포트 본문 미리보기");
+        const bothOpenTargets = await measureInteractiveTargets(page, "both-open");
+        expect(bothOpenTargets.undersized, JSON.stringify({ scenario, ...bothOpenTargets }, null, 2)).toEqual([]);
+        const bothOpenLinks = bothOpenTargets.targets.filter((target) => target.descriptor.includes(":a["));
+        expect(bothOpenLinks).toHaveLength(3);
+        const reportDocument = page.getByLabel("작업문서형 리포트");
+        await reportDocument.waitFor({ state: "visible" });
+        expect(await reportDocument.locator("[role='row']").count()).toBeGreaterThan(1);
+        expect(await page.getByLabel("리포트 다운로드").getByRole("button").count()).toBe(5);
+
+        const previewSummary = page.locator(".safeclaw-report-preview > summary");
+        await previewSummary.focus();
+        expect(await previewSummary.evaluate((element) => document.activeElement === element)).toBe(true);
+
+        if (process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1") {
+          await page.screenshot({
+            path: path.join(
+              outputDirectory,
+              `reports-download-ready-day-${scenario.label}-disclosures-open.png`
+            ),
+            fullPage: true
+          });
+        }
+
+        const zoomMetrics = await applyDeterministicTextReflow(page);
+        expect(zoomMetrics.representative.growthRatio).toBeGreaterThanOrEqual(1.9);
+        expect(zoomMetrics.representative.lineHeightGrowthRatio).toBeGreaterThanOrEqual(1.9);
+        expect(zoomMetrics.wrappingOrHeightChanged).toBe(true);
+        expect(zoomMetrics.horizontalOverflow).toBe(0);
+        expect(zoomMetrics.toolsFirstInDom).toBe(true);
+        expect(zoomMetrics.previewFollowsTools).toBe(true);
+        expect(zoomMetrics.overlapFailures, JSON.stringify({ scenario, zoomMetrics }, null, 2)).toEqual([]);
+        expect(zoomMetrics.verticalClippingFailures, JSON.stringify({ scenario, zoomMetrics }, null, 2)).toEqual([]);
+        expect(zoomMetrics.nestedScrollFailures, JSON.stringify({ scenario, zoomMetrics }, null, 2)).toEqual([]);
+
+        if (process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1") {
+          await page.screenshot({
+            path: path.join(outputDirectory, `reports-download-ready-day-${scenario.label}-text-reflow-200.png`),
+            fullPage: true
+          });
+        }
+
+        evidence.push({
+          scenario,
+          default: defaultMetrics,
+          interactiveTargets: {
+            default: defaultTargets,
+            secondaryOpen: secondaryOpenTargets,
+            bothOpen: bothOpenTargets
+          },
+          textZoom200: zoomMetrics
+        });
+      } finally {
+        await page.close();
       }
-    } finally {
-      await page.close();
+    }
+    if (process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1") {
+      fs.writeFileSync(
+        path.join(outputDirectory, "reports-download-ready-task-distance-metrics.json"),
+        `${JSON.stringify({ scenarios: evidence }, null, 2)}\n`
+      );
     }
   }, 120_000);
 
