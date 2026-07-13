@@ -318,29 +318,42 @@ describe("/api/export/xlsx structured contract", () => {
     expect(worksheet.getCell(accidentHeader.row + 1, 14).text).toBe("other");
   });
 
-  it("centers workpack controls while keeping body text top-left and wrapped", async () => {
+  it("matches workpack body and section alignment to the single-document sheet", async () => {
+    const rows = [{ document: "작업계획서", section: "작업 개요", item: "작업순서", content: "작업구역 통제 후 순차 작업" }];
+    const profile = { ...riskProfile, layout: "generic" };
     const response = await POST(xlsxRequest({
       mode: "workpack",
       scenario,
       documents: [{
         title: "작업계획서",
-        profile: { ...riskProfile, layout: "generic" },
-        rows: [{ document: "작업계획서", section: "작업 개요", item: "작업순서", content: "작업구역 통제 후 순차 작업" }]
+        profile,
+        rows
       }]
     }));
+    const singleResponse = await POST(xlsxRequest({ mode: "single", title: "작업계획서", scenario, profile, rows }));
     const workbook = await loadWorkbook(response);
+    const singleWorkbook = await loadWorkbook(singleResponse);
     const worksheet = workbook.getWorksheet("작업계획서");
-    if (!worksheet) throw new Error("Missing 작업계획서 worksheet");
+    const singleWorksheet = singleWorkbook.getWorksheet("작업계획서");
+    if (!worksheet || !singleWorksheet) throw new Error("Missing 작업계획서 worksheet");
     const contentCell = findCellByText(worksheet, "작업구역 통제 후 순차 작업");
-    if (!contentCell) throw new Error("Missing workpack body row");
+    const singleContentCell = findCellByText(singleWorksheet, "작업구역 통제 후 순차 작업");
+    if (!contentCell || !singleContentCell) throw new Error("Missing workpack body row");
     const row = contentCell.row;
+    const singleRow = singleContentCell.row;
 
-    [1, 5, 6].forEach((column) => {
-      expect(worksheet.getCell(row, column).alignment).toMatchObject({ vertical: "middle", horizontal: "center" });
+    [1, 5].forEach((column) => {
+      expect(worksheet.getCell(row, column).alignment).toEqual(singleWorksheet.getCell(singleRow, column).alignment);
     });
-    [2, 3, 4].forEach((column) => {
-      expect(worksheet.getCell(row, column).alignment).toMatchObject({ vertical: "top", horizontal: "left", wrapText: true });
+    [2, 3, 4, 6].forEach((column) => {
+      expect(worksheet.getCell(row, column).alignment).toEqual(singleWorksheet.getCell(singleRow, column).alignment);
     });
+    const sectionHeader = worksheet.getCell(row - 1, 1);
+    const singleSectionHeader = singleWorksheet.getCell(singleRow - 1, 1);
+    expect(sectionHeader.text).toBe("작업 개요");
+    expect(singleSectionHeader.text).toBe("작업 개요");
+    expect(sectionHeader.alignment).toEqual(singleSectionHeader.alignment);
+    expect(sectionHeader.alignment).toMatchObject({ vertical: "middle", horizontal: "left", indent: 1 });
   });
 
   it("uses actual column and merged-span widths when estimating row heights", async () => {

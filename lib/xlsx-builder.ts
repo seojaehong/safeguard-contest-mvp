@@ -1549,6 +1549,7 @@ export async function buildWorkpackXlsx(
       s.value = section;
       s.fill = SECTION_FILL;
       s.font = SECTION_FONT;
+      s.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
       applyBorders(ws, `A${row}:F${row}`);
       row += 1;
       for (const r of sectionRows) {
@@ -1559,10 +1560,10 @@ export async function buildWorkpackXlsx(
         ws.getCell(row, 4).value = r.content;
         ws.getCell(row, 5).value = "□";
         ws.getCell(row, 6).value = "______";
-        [1, 5, 6].forEach((c) => {
-          ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+        [1, 5].forEach((c) => {
+          ws.getCell(row, c).alignment = { vertical: "middle", horizontal: "center" };
         });
-        [2, 3, 4].forEach((c) => {
+        [2, 3, 4, 6].forEach((c) => {
           ws.getCell(row, c).alignment = { vertical: "top", horizontal: "left", wrapText: true };
         });
         applyBorders(ws, `A${row}:F${row}`);
