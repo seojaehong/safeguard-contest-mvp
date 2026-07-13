@@ -292,9 +292,25 @@ export function safeParseJson<T = unknown>(raw: string): T | null {
   }
 }
 
-export function persona(phaseAGrounding?: PhaseAGenerationGrounding) {
+export function persona(
+  phaseAGrounding?: PhaseAGenerationGrounding,
+  providerInput: unknown = {},
+) {
+  if (phaseAGrounding) {
+    return [
+      buildPhaseAGenerationPrompt(phaseAGrounding, providerInput),
+      "",
+      "[TRUSTED DOCUMENT PERSONA]",
+      "당신은 한국 산업안전 현장 검토용 문서팩 편집자다.",
+      "Phase A 고정 정책과 allow-list 안의 내용을 문서 양식에 맞게 자연화한다.",
+      "4M(Man·Machine·Media·Management), 위험도 근거, 실행 가능한 감소대책 형식을 사용한다.",
+      "허용목록 밖 위험요인·법령·KOSHA·사례·사실은 만들거나 인용하지 말고 '현장 확인 필요'로 표시한다.",
+      "사람 이름·회사 정식명칭·주소는 providerInput에 없으면 '____' 또는 '현장 확인 필요'로 표시한다.",
+      "모든 출력은 반드시 JSON이며 마크다운 fence를 사용하지 않는다.",
+    ].join("\n");
+  }
+
   return [
-    ...(phaseAGrounding ? [buildPhaseAGenerationPrompt(phaseAGrounding), ""] : []),
     "당신은 한국 산업안전기사 자격을 갖춘 5년 차 현장 안전관리자다.",
     "사용자의 작업 시나리오를 받아 위험성평가·작업계획·TBM·안전보건교육·비상대응 등 산업안전 문서팩 본문을 작성한다.",
     "원칙:",
@@ -312,7 +328,50 @@ export function persona(phaseAGrounding?: PhaseAGenerationGrounding) {
   ].join("\n");
 }
 
+function buildPhaseAProviderInput(
+  ctx: GenContext,
+  extra: Readonly<Record<string, unknown>> = {},
+) {
+  return {
+    question: ctx.question,
+    scenario: ctx.scenario,
+    citations: ctx.citationLines,
+    weatherNote: ctx.weatherNote ?? null,
+    trainingLines: ctx.trainingLines,
+    koshaLines: ctx.koshaLines,
+    accidentLines: ctx.accidentLines,
+    koshaPrimaryRefs: ctx.koshaPrimaryRefs ?? [],
+    dbHarnessContext: ctx.dbHarnessContext ?? null,
+    workDate: ctx.workDate,
+    ...extra,
+  };
+}
+
+function personaForContext(
+  ctx: GenContext,
+  extra: Readonly<Record<string, unknown>> = {},
+) {
+  return persona(
+    ctx.phaseAGrounding,
+    ctx.phaseAGrounding ? buildPhaseAProviderInput(ctx, extra) : {},
+  );
+}
+
+function groundedEvidenceInstruction(ctx: GenContext, legacy: string): string {
+  return ctx.phaseAGrounding
+    ? "근거·인용 필드는 Phase A allowedEvidence와 allowedCitedUids 안의 항목만 사용하고, 없으면 '현장 확인 필요'로 작성한다."
+    : legacy;
+}
+
 export function contextBlock(ctx: GenContext) {
+  if (ctx.phaseAGrounding) {
+    return [
+      "[PHASE A INPUT LOCATION]",
+      "모든 동적 입력은 prompt 상단의 단일 untrusted JSON block에만 있다.",
+      "이 위치에 사용자 질문이나 검색·DB·KOSHA·사고 텍스트를 다시 출력하지 않는다.",
+    ].join("\n");
+  }
+
   const cites = ctx.citationLines.length ? ctx.citationLines.join("\n") : "(법령 후보 없음)";
   const training = ctx.trainingLines.length ? ctx.trainingLines.join("\n") : "(연계 교육 후보 없음)";
   const kosha = ctx.koshaLines.length ? ctx.koshaLines.join("\n") : "(KOSHA 보강 자료 없음)";
@@ -369,7 +428,7 @@ export function contextBlock(ctx: GenContext) {
 
 function riskAssessmentSinglePrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx),
     "",
     "위험성평가표(초안)를 작성하고 다음 JSON 형식으로만 반환하라.",
     "[기본정보] [1.사전준비] [2.유해·위험요인 파악] (4M 표시) [3.위험성 결정] (가능성/중대성/등급) [4.감소대책 수립 및 실행] [5.공유·교육] [6.조치 확인] 섹션 포함.",
@@ -387,10 +446,13 @@ function riskAssessmentSinglePrompt(ctx: GenContext) {
 // 정해진 행/열 레이아웃에 그대로 채운다.
 function workPlanStructuredPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx),
     "",
     "한국 산업안전 표준 작업계획서의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
-    "산문/장문 금지. 각 필드는 셀에 들어갈 짧은 문구(80자 이내) 단위로 작성. 위험요인·감소대책은 시나리오 특화. KOSHA 자료가 있으면 safetyMeasure 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식으로 1줄 포함.",
+    groundedEvidenceInstruction(
+      ctx,
+      "산문/장문 금지. 각 필드는 셀에 들어갈 짧은 문구(80자 이내) 단위로 작성. 위험요인·감소대책은 시나리오 특화. KOSHA 자료가 있으면 safetyMeasure 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식으로 1줄 포함.",
+    ),
     "",
     "응답 JSON 스키마:",
     `{
@@ -404,7 +466,7 @@ function workPlanStructuredPrompt(ctx: GenContext) {
       "equipment": ["string", "string"]
     },
     "workSteps": [
-      { "stepNo": 1, "action": "string (작업 단계, 60자 이내)", "equipment": "string (해당 장비, 30자 이내)", "safetyMeasure": "string (단계별 안전조치, 80자 이내. KOSHA 인용 가능)", "owner": "string (담당자/직책, 30자 이내)", "relatedRiskRowIndex": [0], "evidenceRefs": ["string"], "verification": "string (확인 방법 1줄)" }
+      { "stepNo": 1, "action": "string (작업 단계, 60자 이내)", "equipment": "string (해당 장비, 30자 이내)", "safetyMeasure": "string (단계별 안전조치, 80자 이내. ${ctx.phaseAGrounding ? "Phase A 허용 UID만 인용 가능" : "KOSHA 인용 가능"})", "owner": "string (담당자/직책, 30자 이내)", "relatedRiskRowIndex": [0], "evidenceRefs": ["string"], "verification": "string (확인 방법 1줄)" }
     ],
     "stopCriteria": ["string (작업중지 기준 1줄, 60자 이내)"],
     "emergencyResponse": {
@@ -430,10 +492,13 @@ function workPlanStructuredPrompt(ctx: GenContext) {
 // TBM 브리핑 schema-first. workPlan과 동일하게 산문 대신 셀 객체 직접 반환.
 function tbmBriefingStructuredPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx),
     "",
     "한국 산업안전 표준 TBM 브리핑의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
-    "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazards/measures는 시나리오 특화 4M 분류. KOSHA 자료가 있으면 measures.action 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
+    groundedEvidenceInstruction(
+      ctx,
+      "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazards/measures는 시나리오 특화 4M 분류. KOSHA 자료가 있으면 measures.action 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
+    ),
     "",
     "응답 JSON 스키마:",
     `{
@@ -454,7 +519,7 @@ function tbmBriefingStructuredPrompt(ctx: GenContext) {
       { "category": "Man|Machine|Media|Management", "description": "string (위험요인, 60자 이내)" }
     ],
     "measures": [
-      { "hazardRef": 1, "action": "string (안전대책, 80자 이내. KOSHA 인용 가능)", "owner": "string" }
+      { "hazardRef": 1, "action": "string (안전대책, 80자 이내. ${ctx.phaseAGrounding ? "Phase A 허용 UID만 인용 가능" : "KOSHA 인용 가능"})", "owner": "string" }
     ],
     "stopCriteria": ["string (작업중지 기준 1줄)"],
     "confirmTopics": ["string (마무리 확인질문)"],
@@ -472,7 +537,7 @@ function tbmBriefingStructuredPrompt(ctx: GenContext) {
 // Schema-first TBM 일지 (사후 기록). tbmBriefing(사전)과 분리된 export.
 function tbmLogStructuredPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx),
     "",
     "한국 산업안전 표준 TBM 일지(사후 기록)의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
     "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazardsDiscussed/safetyEducation은 실제 진행한 내용 기준. unaddressedItems는 미조치 항목(없으면 빈 배열).",
@@ -508,7 +573,7 @@ function tbmLogStructuredPrompt(ctx: GenContext) {
     "safetyEducation": {
       "topic": "string (교육 주제)",
       "keyPoints": ["string (핵심 1줄)"],
-      "materials": "string (사용 자료/근거, 예: KOSHA Guide C-12-2024)"
+      "materials": "string (사용 자료/근거, ${ctx.phaseAGrounding ? "Phase A 허용 UID 또는 현장 확인 필요" : "예: KOSHA Guide C-12-2024"})"
     },
     "unaddressedItems": [
       { "item": "string", "plannedAction": "string", "owner": "string", "dueDate": "YYYY-MM-DD 또는 현장 확인" }
@@ -533,7 +598,7 @@ function tbmLogStructuredPrompt(ctx: GenContext) {
 
 function tbmLogSinglePrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx),
     "",
     "TBM 일지(초안)를 작성하고 다음 JSON 형식으로만 반환하라.",
     "결재/공종/일자/근로자 확인사항/금일 작업/금일 위험요인/일일 안전교육/참석자명단/인원집계/미조치 및 사진증빙 섹션 포함. 길이 1500~3500자.",
@@ -547,10 +612,13 @@ function tbmLogSinglePrompt(ctx: GenContext) {
 // 안전보건교육 기록 schema-first.
 function educationRecordStructuredPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx),
     "",
     "한국 산업안전 표준 안전보건교육 기록의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
-    "산문/장문 금지. curriculum 각 항목의 lawCitation은 산업안전보건법/시행규칙/시행령 조항 명시. KOSHA 자료가 있으면 keyPoints 항목 끝에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
+    groundedEvidenceInstruction(
+      ctx,
+      "산문/장문 금지. curriculum 각 항목의 lawCitation은 산업안전보건법/시행규칙/시행령 조항 명시. KOSHA 자료가 있으면 keyPoints 항목 끝에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
+    ),
     "",
     "응답 JSON 스키마:",
     `{
@@ -565,7 +633,7 @@ function educationRecordStructuredPrompt(ctx: GenContext) {
     "curriculum": [
       {
         "topic": "string (교육 주제, 60자 이내)",
-        "lawCitation": "string (예: 산업안전보건법 제29조)",
+        "lawCitation": "string (${ctx.phaseAGrounding ? "Phase A allowedCitedUids의 UID 또는 현장 확인 필요" : "예: 산업안전보건법 제29조"})",
         "keyPoints": ["string (핵심 내용 1줄)", "string", "string"]
       }
     ],
@@ -584,10 +652,13 @@ function educationRecordStructuredPrompt(ctx: GenContext) {
 
 function safetyEducationSinglePrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx),
     "",
     "안전보건교육 기록 초안 + 강조사항 5개를 작성하고 다음 JSON 형식으로만 반환하라.",
-    "safetyEducationRecordDraft: 교육명/구분/일시/장소/대상/실시자/확인자/교육내용(법령조항 명시)/이해확인방법/TBM 연계/후속 교육 추천. 길이 1500~3500자.",
+    groundedEvidenceInstruction(
+      ctx,
+      "safetyEducationRecordDraft: 교육명/구분/일시/장소/대상/실시자/확인자/교육내용(법령조항 명시)/이해확인방법/TBM 연계/후속 교육 추천. 길이 1500~3500자.",
+    ),
     "safetyEducationPoints: 작업자에게 강조할 핵심 메시지 5개 짧은 문장 배열.",
     "",
     "응답 JSON 스키마: { \"safetyEducationRecordDraft\": \"string\", \"safetyEducationPoints\": [\"string\",\"string\",\"string\",\"string\",\"string\"] }",
@@ -599,7 +670,7 @@ function safetyEducationSinglePrompt(ctx: GenContext) {
 function structuredRiskRowsPrompt(ctx: GenContext) {
   const rowSchema = FORM_SCHEMA_REGISTRY.riskAssessment.rowSchema;
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx),
     "",
     "위험성평가표 렌더러가 바로 사용할 수 있는 JSON rows만 반환하라.",
     "산문, 마크다운, 설명, 코드 fence 금지. 최상위 객체는 반드시 {\"rows\":[...]} 형태.",
@@ -614,7 +685,10 @@ function structuredRiskRowsPrompt(ctx: GenContext) {
     `  - riskLevel enum: ${RISK_LEVEL_VALUES.join(", ")}. likelihood×severity 기준으로 1~4는 low, 5~9는 medium, 10 이상은 high.`,
     "  - due는 YYYY-MM-DD 또는 \"현장 확인\"만 허용한다.",
     "  - verificationDate는 YYYY-MM-DD 또는 \"현장 확인\"만 허용하고, verificationStatus는 planned/done/needsReview 중 하나다.",
-    "  - evidenceRefs는 법령, KOSHA, 재해사례, 지식 DB 후보 중 해당 행을 뒷받침하는 짧은 근거 문자열 배열이다.",
+    groundedEvidenceInstruction(
+      ctx,
+      "  - evidenceRefs는 법령, KOSHA, 재해사례, 지식 DB 후보 중 해당 행을 뒷받침하는 짧은 근거 문자열 배열이다.",
+    ),
     "  - whyLikelihood와 whySeverity는 수치 판단 근거를 각각 한 문장으로 적는다.",
     "",
     "행 JSON schema:",
@@ -639,14 +713,16 @@ function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
     evidenceRefs: row.evidenceRefs
   }));
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx, { riskRows: compactRows }),
     "",
     "위험성평가 rows를 TBM에서 바로 확인할 수 있는 연결 질문 JSON으로 변환하라.",
     "산문, 마크다운, 설명, 코드 fence 금지. 최상위 객체는 반드시 {\"tbmRiskLinks\":[...]} 형태.",
     "",
     "필수 규칙:",
     "  - tbmRiskLinks는 입력 risk rows 중 TBM에서 공유해야 할 핵심 행 3~6개를 고른다.",
-    "  - riskRowIndex는 아래 입력 배열의 0부터 시작하는 인덱스다. 없는 행을 참조하지 않는다.",
+    ctx.phaseAGrounding
+      ? "  - riskRowIndex는 untrusted JSON의 providerInput.riskRows 배열에서 0부터 시작하는 인덱스다. 없는 행을 참조하지 않는다."
+      : "  - riskRowIndex는 아래 입력 배열의 0부터 시작하는 인덱스다. 없는 행을 참조하지 않는다.",
     "  - hazard는 연결된 risk row의 hazard 표현을 그대로 재사용한다.",
     "  - control은 해당 row의 additionalControls 또는 currentControls를 TBM 행동 문장으로 짧게 바꾼다.",
     "  - weatherSignal은 기상 신호와 현장 조건을 연결한 1줄 문장이다.",
@@ -669,8 +745,9 @@ function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
   ]
 }`,
     "",
-    "[입력 risk rows]",
-    JSON.stringify(compactRows, null, 2),
+    ...(ctx.phaseAGrounding
+      ? ["[PHASE A RISK ROW LOCATION]", "동적 risk rows는 untrusted JSON의 providerInput.riskRows에만 있다."]
+      : ["[입력 risk rows]", JSON.stringify(compactRows, null, 2)]),
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -680,7 +757,13 @@ function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
 // text. Prevents the model from inventing institutions/phone numbers or a fake
 // accident-report procedure (2026-07-02 prod: "한국산재보험공단(1644-0644)",
 // "법무부 출입국 관리소 재해자 신고(KOICA 협력)" — see lib/safety-contacts.ts).
-function emergencyContactRules() {
+function emergencyContactRules(phaseAGrounding?: PhaseAGenerationGrounding) {
+  if (phaseAGrounding) {
+    return [
+      "비상연락처·신고 절차·법령 인용은 Phase A allowedContent/allowedCitedUids에 있는 경우만 작성한다.",
+      "허용목록에 없으면 기관명·전화번호·조문을 만들지 말고 '현장 확인 필요'로 표시한다.",
+    ].join("\n");
+  }
   return [
     `비상연락처는 다음 공식 번호만 사용: 119, 근로복지공단 ${OFFICIAL_CONTACTS.workersCompensationService}, 안전보건공단 ${OFFICIAL_CONTACTS.koshaSafetyAgency}, 고용노동부 ${OFFICIAL_CONTACTS.moelCounseling}. 그 외 기관 전화번호를 지어내지 마라(지역 지사 번호 포함).`,
     `산재 보고 절차는 다음 문구를 그대로 사용: ${ACCIDENT_REPORT_TEMPLATE}`
@@ -689,7 +772,7 @@ function emergencyContactRules() {
 
 export function freeFormPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx),
     "",
     "다음 4개의 자유 텍스트 본문을 모두 작성하고 JSON 객체로 반환하라:",
     "  - workpackSummaryDraft: 점검결과 요약(초안). 현장명/작업조건/핵심 위험/즉시 조치/연결 상태를 첫 장으로 정리. 600자 내외.",
@@ -697,7 +780,7 @@ export function freeFormPrompt(ctx: GenContext) {
     "  - photoEvidenceDraft: 사진/증빙 기록(초안). 작업 전 / 조치 전·후 / TBM·교육 증빙 / 확인자. 800~1200자.",
     "  - kakaoMessage: 현장 공유 메시지. 카톡 단톡방에 바로 붙여넣을 수 있게 이모지 일부 사용 가능. 400~700자.",
     "",
-    emergencyContactRules(),
+    emergencyContactRules(ctx.phaseAGrounding),
     "",
     "응답 JSON 스키마:",
     `{
@@ -713,16 +796,18 @@ export function freeFormPrompt(ctx: GenContext) {
 
 export function foreignWorkerPrompt(ctx: GenContext) {
   return [
-    persona(ctx.phaseAGrounding),
+    personaForContext(ctx),
     "",
     "외국인 근로자용 안내문 2종을 작성하고 JSON 객체로 반환하라.",
     "반드시 세 키(foreignWorkerBriefing, foreignWorkerTransmission, foreignWorkerLanguages)를 모두 포함한 하나의 JSON 객체만 출력하라. JSON 앞뒤에 코드펜스·설명·후기 등 어떤 텍스트도 붙이지 마라.",
     "  - foreignWorkerBriefing: 한국어 + 영어 + 베트남어 3가지 버전을 한 본문 안에 [한국어] [English] [Tiếng Việt] 헤더로 연속 작성. 각 버전은 위험요인 / 즉시 조치 / 작업중지 기준 / 보호구 / 비상연락 항목 포함. 길이 기준: 한국어 800~1500자, 영어·베트남어는 한국어와 동등한 내용(글자수 무관 — 언어 특성상 글자수가 달라도 됨). foreignWorkerBriefing 전체 12,000자 이내.",
     "  - foreignWorkerTransmission: 단톡방·문자에 그대로 붙여넣을 전송용 안내문. 한국어 + 영어 + 베트남어 + 태국어 + 우즈베크어 5개 언어 짧은 버전, 각 언어 블록 시작에 [한국어]/[English]/[Tiếng Việt]/[ภาษาไทย]/[O'zbekcha] 헤더. 길이 기준: 한국어 800~1500자, 나머지 4개 언어는 한국어와 동등한 내용(글자수 무관). foreignWorkerTransmission 전체 12,000자 이내.",
     "  - foreignWorkerLanguages: 본 본문에서 사용한 언어 코드 배열 예: [\"ko\",\"en\",\"vi\",\"th\",\"uz\"]. ISO 639-1 코드.",
-    "  - 금지 지시: 지게차 포크·팔레트 위에 근로자를 태우거나 그 위에서 작업하도록 허용/권장하는 안내를 쓰지 마라(산업안전보건기준에 관한 규칙 제86조 등 탑승 제한 위반). 고소 작업이 필요한 경우의 대안으로 고소작업대(차량탑재형 리프트 등) 사용을 안내하라.",
+    ctx.phaseAGrounding
+      ? "  - 탑승·고소 작업 관련 추가 통제나 법령은 Phase A allow-list에 있을 때만 작성하고, 없으면 '현장 확인 필요'로 표시하라."
+      : "  - 금지 지시: 지게차 포크·팔레트 위에 근로자를 태우거나 그 위에서 작업하도록 허용/권장하는 안내를 쓰지 마라(산업안전보건기준에 관한 규칙 제86조 등 탑승 제한 위반). 고소 작업이 필요한 경우의 대안으로 고소작업대(차량탑재형 리프트 등) 사용을 안내하라.",
     "",
-    emergencyContactRules(),
+    emergencyContactRules(ctx.phaseAGrounding),
     "",
     "응답 JSON 스키마:",
     `{

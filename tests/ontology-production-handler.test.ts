@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import {
   handleGenerateSafetyDocpack,
@@ -6,10 +6,14 @@ import {
   type SafetyKnowledgeResult,
 } from "@/lib/mcp-tools";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
-import { classifyControlObligation } from "@/lib/ontology/evidence-chain";
+import {
+  buildPhaseAGenerationPrompt,
+  classifyControlObligation,
+} from "@/lib/ontology/evidence-chain";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
+import { runAsk } from "@/lib/search";
 import type { AskResponse } from "@/lib/types";
 
 const publishedGraph = assembleGraph(
@@ -401,6 +405,151 @@ describe("production ontology docpack handler", () => {
     expect(output.docpack.evidenceMaterialization).toMatchObject({
       evidenceChainState: "resolved",
       verifiedRecords: [],
+      humanConfirmation: { required: true, status: "pending" },
+    });
+  });
+
+  test("keeps the production template path provider-free when ontology lookup throws", async () => {
+    const secret = "ONTOLOGY_SECRET_SHOULD_NOT_LEAK";
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    try {
+      const output = await handleGenerateSafetyDocpack(
+        { question: "등록되지 않은 해체 작업", mode: "template", includeFull: true },
+        {
+          querySafetyKnowledge: async () => {
+            throw new Error(secret);
+          },
+          runAsk,
+        },
+      );
+
+      expect(output.phaseAGrounding).toMatchObject({
+        evidenceChainState: "not_evaluated",
+        groundingStatus: "missing",
+        evidencePack: null,
+        allowedContent: { facts: [], controls: [] },
+        allowedCitedUids: [],
+        materializationTargets: [],
+        generationPolicy: { outputStatus: "missing_evidence_draft" },
+      });
+      expect(output.response.generationTrace).toMatchObject({
+        askMode: "template",
+        answer: { provider: "safeclaw" },
+        deliverables: { attempted: false, provider: "safeclaw", modelPerDocument: {} },
+      });
+      expect(output.docpack.ontologyGrounding).toMatchObject({
+        groundingStatus: "missing",
+        verified: false,
+      });
+      expect(output.docpack.evidenceMaterialization).toMatchObject({
+        verifiedRecords: [],
+        humanConfirmation: { required: true, status: "pending" },
+      });
+      expect(JSON.stringify(errorSpy.mock.calls)).not.toContain(secret);
+    } finally {
+      errorSpy.mockRestore();
+    }
+  });
+
+  test.each(["enhanced", "full"] as const)(
+    "keeps the %s runAsk fallback seam reachable when ontology lookup throws",
+    async (mode) => {
+      const secret = `ONTOLOGY_${mode.toUpperCase()}_SECRET`;
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+      let capturedOptions: unknown;
+      try {
+        const output = await handleGenerateSafetyDocpack(
+          { question: "등록되지 않은 해체 작업", mode, includeFull: true },
+          {
+            querySafetyKnowledge: async () => {
+              throw new Error(secret);
+            },
+            runAsk: async (input, options) => {
+              capturedOptions = options;
+              return generatedResponse(input, "현장 확인 필요");
+            },
+          },
+        );
+
+        expect(capturedOptions).toMatchObject({
+          aiMode: mode,
+          phaseAGrounding: {
+            groundingStatus: "missing",
+            evidencePack: null,
+            generationPolicy: { outputStatus: "missing_evidence_draft" },
+          },
+        });
+        expect(output.docpack.ontologyGrounding).toMatchObject({
+          groundingStatus: "missing",
+          outputStatus: "missing_evidence_draft",
+          verified: false,
+        });
+        expect(output.docpack.evidenceMaterialization).toMatchObject({
+          verifiedRecords: [],
+          humanConfirmation: { required: true, status: "pending" },
+        });
+        expect(JSON.stringify(errorSpy.mock.calls)).not.toContain(secret);
+      } finally {
+        errorSpy.mockRestore();
+      }
+    },
+  );
+
+  test("deep clones and recursively freezes the generation snapshot before runAsk", async () => {
+    const question = "차량계 하역운반기계 인접 작업";
+    const knowledge = requireKnowledge(question);
+    if (!knowledge.evidenceContract) throw new Error("expected vehicle evidence contract");
+    const sourcePack = structuredClone(knowledge.evidenceContract);
+    const sourcePlan = sourcePack.materializationTargets[0];
+    const lawUid = sourcePlan?.lawCitedUids[0];
+    if (!sourcePlan || !lawUid) throw new Error("expected vehicle law materialization target");
+    const originalTaskLabel = sourcePack.task.label;
+    const originalControlLabel = sourcePlan.controlLabel;
+    const resolvedKnowledge: SafetyKnowledgeFound = {
+      ...knowledge,
+      evidenceChainState: "resolved",
+      evidenceContract: sourcePack,
+    };
+
+    const output = await handleGenerateSafetyDocpack(
+      { question, mode: "template", includeFull: true },
+      {
+        querySafetyKnowledge: async () => resolvedKnowledge,
+        runAsk: async (input, options) => {
+          const grounding = options.phaseAGrounding;
+          const pack = grounding.evidencePack;
+          if (!pack) throw new Error("expected frozen generation pack");
+          expect(Object.isFrozen(grounding)).toBe(true);
+          expect(Object.isFrozen(pack)).toBe(true);
+          expect(Object.isFrozen(pack.task)).toBe(true);
+          expect(Object.isFrozen(pack.controls)).toBe(true);
+          expect(Object.isFrozen(pack.controls[0])).toBe(true);
+          expect(Object.isFrozen(grounding.allowedEvidence)).toBe(true);
+          expect(Object.isFrozen(grounding.allowedEvidence[0])).toBe(true);
+          expect(Object.isFrozen(grounding.materializationTargets)).toBe(true);
+          expect(Object.isFrozen(grounding.materializationTargets[0])).toBe(true);
+
+          const promptBeforeMutation = buildPhaseAGenerationPrompt(grounding, { question: input });
+          sourcePack.task.label = "SOURCE_PACK_MUTATION";
+          sourcePack.controls[0].label = "SOURCE_CONTROL_MUTATION";
+          sourcePack.materializationTargets[0].controlLabel = "SOURCE_TARGET_MUTATION";
+          expect(Reflect.set(pack.task, "label", "FROZEN_GROUNDING_MUTATION")).toBe(false);
+          expect(Reflect.set(grounding.allowedEvidence[0], "citedUid", "law:mutated")).toBe(false);
+          expect(buildPhaseAGenerationPrompt(grounding, { question: input }))
+            .toBe(promptBeforeMutation);
+
+          return generatedResponse(input, `${originalControlLabel} | ${lawUid}`);
+        },
+      },
+    );
+
+    expect(output.docpack.evidenceContract?.task.label).toBe(originalTaskLabel);
+    expect(output.docpack.evidenceMaterialization).toMatchObject({
+      evidenceChainState: "resolved",
+      verifiedRecords: [expect.objectContaining({
+        controlId: sourcePlan.controlId,
+        citedEvidence: [{ citedUid: lawUid, role: "current_law_mandate" }],
+      })],
       humanConfirmation: { required: true, status: "pending" },
     });
   });

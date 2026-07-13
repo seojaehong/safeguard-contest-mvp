@@ -29,6 +29,7 @@ import {
   type PhaseAGenerationGrounding,
 } from "./ontology/evidence-chain";
 import { gateCitations } from "./law-citation-gate";
+import { createLogger } from "./logger";
 import { sanitizeContacts, OFFICIAL_CONTACTS } from "./safety-contacts";
 import { getEvidenceLabel, SMSA_ARTICLE_MAP, type SmsaEvidenceLabel } from "./smsa-mapping";
 import type { KnowledgeResult } from "./ontology/query";
@@ -40,6 +41,8 @@ import type {
   SafetyReferenceVectorStatus
 } from "./safety-reference-catalog";
 import { deriveSafetyReferenceRetrievalModeFromItems } from "./safety-reference-catalog";
+
+const log = createLogger("mcp-tools");
 
 /** MCP 도구가 반환하는 CallToolResult의 최소 형태 (SDK 타입과 호환). */
 export type McpToolResult = {
@@ -114,6 +117,7 @@ export type DocpackResult = {
     allowedCitedUids: string[];
     generationPolicy: PhaseAGenerationGrounding["generationPolicy"];
     notice: string;
+    actionableReason: string;
   };
   evidenceMaterialization?: {
     evidenceChainState: SafetyKnowledgeResult["evidenceChainState"];
@@ -129,7 +133,22 @@ export type ReviewedDocpackResult = {
   qualityPipeline: ["generate_safety_docpack", "qa_review_docpack"];
   reviewTask: string;
   docpack: DocpackResult;
-  qa: QaReviewResult;
+  reviewStatus: {
+    verdict: "통과" | "검토 필요";
+    verified: boolean;
+    groundingStatus: PhaseAGenerationGrounding["groundingStatus"];
+    reasonCode:
+      | "qa_coverage_not_passed"
+      | "phase_a_review_required"
+      | "phase_a_evidence_missing"
+      | null;
+    actionableReason: string;
+    humanConfirmation: { required: true; status: "pending" };
+  };
+  qa: {
+    authoritative: boolean;
+    diagnostic: QaReviewResult;
+  };
   openClawUsageNote: string;
 };
 
@@ -218,7 +237,10 @@ export function buildDocpackResult(
   if (response.evidenceLabels) {
     result.evidenceLabels = response.evidenceLabels;
   }
-  if (evidence?.found && evidence.evidenceContract) {
+  if (phaseAGrounding?.evidencePack) {
+    result.evidenceContract = phaseAGrounding.evidencePack;
+    result.evidenceChainState = phaseAGrounding.evidenceChainState;
+  } else if (evidence?.found && evidence.evidenceContract) {
     result.evidenceContract = evidence.evidenceContract;
     result.evidenceChainState = evidence.evidenceChainState;
   }
@@ -235,6 +257,11 @@ export function buildDocpackResult(
       notice: isResolved
         ? "Phase A 고정 evidence pack이 provider 호출 전에 결합된 검토용 초안입니다. 문서 위치별 실적은 결정적 검사 후에도 사람 확인 대기 상태입니다."
         : "검토 필요 초안입니다. Phase A 근거가 해결·검증되지 않았으므로 grounded 또는 verified 산출물로 사용하지 마세요.",
+      actionableReason: phaseAGrounding.groundingStatus === "resolved"
+        ? "결정적 문서 위치 검사를 확인하고 지정된 검토자가 최종 확인하세요."
+        : phaseAGrounding.groundingStatus === "review_required"
+          ? "KOSHA/법령 source resolution을 완료한 뒤 다시 생성·검수하세요."
+          : "canonical Task 매핑과 ontology availability를 확인한 뒤 다시 생성하세요.",
     };
     result.evidenceMaterialization = {
       evidenceChainState: phaseAGrounding.evidenceChainState,
@@ -304,7 +331,22 @@ export async function handleGenerateSafetyDocpack(
   const question = input.question.trim();
   const task = input.task?.trim() ?? "";
   const evidenceQuery = resolveEvidenceTaskLabel(task, question) || question || task;
-  const evidence = await dependencies.querySafetyKnowledge(evidenceQuery);
+  let evidence: SafetyKnowledgeResult;
+  try {
+    evidence = await dependencies.querySafetyKnowledge(evidenceQuery);
+  } catch (error) {
+    log.error("Phase A ontology lookup unavailable; continuing with missing grounding", {
+      errorType: error instanceof Error ? error.name : typeof error,
+    });
+    evidence = {
+      found: false,
+      message: "Phase A ontology evidence를 조회하지 못했습니다. canonical Task와 ontology availability를 확인한 뒤 다시 검토하세요.",
+      registeredTasks: [],
+      evidenceContract: null,
+      evidenceDiagnostics: null,
+      evidenceChainState: "not_evaluated",
+    };
+  }
   const phaseAGrounding = buildPhaseAGenerationGrounding({
     evidenceChainState: evidence.evidenceChainState,
     evidencePack: evidence.found ? evidence.evidenceContract : null,
@@ -334,14 +376,44 @@ export function buildReviewedDocpackResult(
   evidence?: SafetyKnowledgeResult,
   phaseAGrounding?: PhaseAGenerationGrounding,
 ): ReviewedDocpackResult {
+  const groundingStatus = phaseAGrounding?.groundingStatus ?? "missing";
+  const qaPassed = qa.reviewable && qa.verdict === "통과";
+  const authoritativePass = groundingStatus === "resolved" && qaPassed;
+  const reasonCode = authoritativePass
+    ? null
+    : groundingStatus === "review_required"
+      ? "phase_a_review_required"
+      : groundingStatus === "missing"
+        ? "phase_a_evidence_missing"
+        : "qa_coverage_not_passed";
+  const actionableReason = authoritativePass
+    ? "Phase A grounding과 QA coverage가 통과했지만 지정된 사람의 최종 확인은 계속 필요합니다."
+    : reasonCode === "phase_a_review_required"
+      ? "Phase A evidence chain이 review_required입니다. KOSHA/법령 source resolution을 완료한 뒤 다시 생성·검수하세요."
+      : reasonCode === "phase_a_evidence_missing"
+        ? "Phase A Task/evidence pack을 찾거나 조회하지 못했습니다. canonical Task 매핑과 ontology availability를 확인한 뒤 다시 생성하세요."
+        : "QA 커버리지/품질 검사가 통과하지 않았습니다. 누락 위험요인·통제·조문을 보완한 뒤 다시 검수하세요.";
+
   return {
     engine: "safeclaw-runAsk",
     qualityPipeline: ["generate_safety_docpack", "qa_review_docpack"],
     reviewTask,
     docpack: buildDocpackResult(response, includeFull, evidence, phaseAGrounding),
-    qa,
-    openClawUsageNote:
-      "이 응답은 SafeClaw 문서 엔진(/api/ask runAsk) 산출물을 QA 검수 계층으로 다시 확인한 결과입니다. OpenClaw는 이 페이로드를 최종 답변의 근거로 사용하세요.",
+    reviewStatus: {
+      verdict: authoritativePass ? "통과" : "검토 필요",
+      verified: authoritativePass,
+      groundingStatus,
+      reasonCode,
+      actionableReason,
+      humanConfirmation: { required: true, status: "pending" },
+    },
+    qa: {
+      authoritative: authoritativePass,
+      diagnostic: qa,
+    },
+    openClawUsageNote: authoritativePass
+      ? "SafeClaw 문서 엔진과 Phase A grounding, QA coverage를 통과한 검토용 초안입니다. 사람 확인 전 최종 확정 근거로 사용하지 마세요."
+      : `검토 필요: ${actionableReason} 이 응답을 grounded 또는 verified 근거로 사용하지 마세요.`,
   };
 }
 

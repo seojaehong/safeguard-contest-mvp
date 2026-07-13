@@ -166,6 +166,30 @@ function buildPrompt(
   citations: SearchResult[],
   phaseAGrounding?: PhaseAGenerationGrounding,
 ) {
+  if (phaseAGrounding) {
+    const providerInput = {
+      question,
+      citations: citations.slice(0, 4).map((citation) => ({
+        id: citation.id,
+        type: citation.type,
+        title: trimCitationText(citation.title, 120),
+        summary: trimCitationText(citation.summary, 200),
+        citation: trimCitationText(citation.citation || "", 100),
+        sourceLabel: citation.sourceLabel,
+        tags: citation.tags || [],
+      })),
+    };
+    return [
+      buildPhaseAGenerationPrompt(phaseAGrounding, providerInput),
+      "",
+      "[TRUSTED ANSWER OUTPUT CONTRACT]",
+      "Phase A 고정 정책과 allow-list 범위 안에서만 한국어 현장 검토용 초안을 작성하라.",
+      "출력 순서는 1) 핵심 판단 2) 즉시 조치 3) 실무 체크포인트 3개다.",
+      "허용되지 않은 사실이나 인용이 필요하면 단정하지 말고 '현장 확인 필요'로 표시하라.",
+      "법정 제출 최종본이 아니며 사람 확인 전 확정된 근거로 표현하지 말라.",
+    ].join("\n");
+  }
+
   const trimmedQuestion = trimCitationText(question.trim(), 220);
   const compactCitations = citations.slice(0, 4).map((citation, index) => {
     const title = trimCitationText(citation.title, 60);
@@ -175,7 +199,6 @@ function buildPrompt(
   });
 
   return [
-    ...(phaseAGrounding ? [buildPhaseAGenerationPrompt(phaseAGrounding), ""] : []),
     "당신은 산업안전 실무용 코파일럿이다.",
     "사용자가 현장 조건을 제공하면, 법정 제출 최종본이 아니라 현장 검토용 초안을 바로 작성하라.",
     "현장 실측값이 부족하다는 이유로 생성을 거절하지 말고, 부족한 항목은 '현장 확인 필요'로 표시하라.",
