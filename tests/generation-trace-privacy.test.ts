@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { buildPhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
 import { runAsk } from "@/lib/search";
 import type { SafetyReferenceSearchResult } from "@/lib/safety-reference-catalog";
 import type { SearchResult } from "@/lib/types";
@@ -184,5 +185,25 @@ describe("generation trace failure privacy", () => {
         }
       }
     });
+  }, 30_000);
+
+  it("skips the raw citation-mapping provider prompt when Phase A grounding is present", async () => {
+    mocks.searchSafetyReferences.mockResolvedValue(successfulSafetyReferenceSearch());
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_evaluated",
+      evidencePack: null,
+    });
+
+    await runAsk("RAW_MAPPING_PROMPT_MUST_NOT_RUN", {
+      aiMode: "enhanced",
+      phaseAGrounding,
+    });
+
+    expect(mocks.enhanceLegalEvidenceMappings).not.toHaveBeenCalled();
+    expect(mocks.generateAnswer).toHaveBeenCalledWith(
+      "RAW_MAPPING_PROMPT_MUST_NOT_RUN",
+      expect.any(Array),
+      expect.objectContaining({ phaseAGrounding }),
+    );
   }, 30_000);
 });

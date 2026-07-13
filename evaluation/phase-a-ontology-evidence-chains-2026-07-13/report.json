@@ -1,10 +1,15 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-13T21:28:54.6309906+09:00",
+  "generatedAt": "2026-07-13T22:14:50.9208582+09:00",
   "branch": "fix/phase-a-ontology-review",
   "base": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
   "contractVersion": "phase-a-evidence-chains/1.3.0",
-  "status": "phase_a_generation_grounding_remediated_awaiting_rereview",
+  "status": "closed_generation_harness_remediated_awaiting_rereview",
+  "provenance": {
+    "focusedLogCompletedAt": "2026-07-13T13:14:45.3751465Z",
+    "typecheckLogCompletedAt": "2026-07-13T13:14:45.3781548Z",
+    "reportGeneratedAfterFreshVerification": true
+  },
   "counts": {
     "canonicalChains": 3,
     "controls": 9,
@@ -23,6 +28,22 @@
     "nodeKinds": 7,
     "edgeRelations": 7,
     "obligationClassifications": 4
+  },
+  "generationHarness": {
+    "verifiedScope": "actual answer, document, MCP, and Claw handler seams",
+    "fixedNaturalizeOnlyPolicyFirst": true,
+    "singleJsonSerializedUntrustedInputBlock": true,
+    "delimiterCharactersUnicodeEscapedInsideJson": true,
+    "rawQuestionOrSearchContextAfterBoundary": false,
+    "groundedRawCitationMapperSkipped": true,
+    "outOfAllowListPersonaInstructionsDisabled": true,
+    "reviewedQaTopLevelReconciled": true,
+    "diagnosticQaNestedNonAuthoritative": true,
+    "ontologyLookupFailure": "explicit_missing_review_required_generation",
+    "templateProviderFreeOnOntologyFailure": true,
+    "enhancedAndFullFallbackReachable": true,
+    "fixedPackDeepClonedAndRecursivelyFrozen": true,
+    "postGenerationVerificationDeterministic": true
   },
   "chains": [
     {
@@ -217,6 +238,10 @@
     "llmRole": "naturalize_only",
     "qualityPassedBeforeHumanConfirm": true,
     "fixedPackDeepFrozen": true,
+    "fixedPackDeepFrozenTestedAtProviderAndPostCheckSeams": true,
+    "untrustedProviderInputJsonOnly": true,
+    "reviewRequiredNeverAuthoritativeQaPass": true,
+    "ontologyLookupFailureNeverPublishesFallback": true,
     "providerFallback": "preserve_current_provider_fallback",
     "fulfillsDuty": "partial_evidence_only",
     "mcpProvenance": "법제처 검증 시드 v1",
@@ -355,7 +380,8 @@
     { "finding": "C-1", "status": "fixed", "summary": "materialization requires a complete delimiter-bounded citation token; law and KOSHA prefix/suffix collisions fail closed" },
     { "finding": "C-2", "status": "fixed", "summary": "the exact 차량계·기계 인접작업 alias reaches the production handler and resolves to 지게차 상하차" },
     { "finding": "CB-P2", "status": "fixed", "summary": "ordinary citation punctuation is accepted while Unicode, UID-grammar continuation, and non-punctuation symbol collisions fail closed" },
-    { "finding": "P1-G", "status": "fixed", "summary": "the actual handler binds the structured Phase A pack and exact allow-list into runAsk before answer/document provider calls; review-required and missing outputs stay explicit, unverified, zero-record, and human-pending" }
+    { "finding": "P1-G", "status": "fixed", "summary": "the actual handler binds the structured Phase A pack and exact allow-list into runAsk before answer/document provider calls; review-required and missing outputs stay explicit, unverified, zero-record, and human-pending" },
+    { "finding": "P1-H", "status": "fixed", "summary": "the immutable naturalize-only policy precedes one JSON untrusted block; reviewed QA is reconciled with grounding state; ontology failures fail closed while preserving template and provider fallback behavior" }
   ],
   "lawVerification": {
     "verifiedOn": "2026-07-13",
@@ -396,11 +422,20 @@
       ],
       "phaseAGenerationGroundingFailures": 8,
       "phaseAGenerationGroundingRedCycles": 1,
-      "phaseAGenerationGroundingRedRun": { "failed": 8, "passed": 11, "total": 19 }
+      "phaseAGenerationGroundingRedRun": { "failed": 8, "passed": 11, "total": 19 },
+      "closedHarnessFailuresAcrossCycles": 16,
+      "closedHarnessRedCycles": 5,
+      "closedHarnessRedRuns": [
+        { "failed": 10, "passed": 46, "total": 56 },
+        { "failed": 2, "passed": 0, "total": 2 },
+        { "failed": 1, "passed": 2, "total": 3 },
+        { "failed": 1, "passed": 7, "total": 8 },
+        { "failed": 2, "passed": 9, "total": 11 }
+      ]
     },
     "focused": {
-      "filesPassed": 11,
-      "testsPassed": 203,
+      "filesPassed": 12,
+      "testsPassed": 213,
       "status": "pass",
       "serial": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"

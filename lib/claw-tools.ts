@@ -8,12 +8,12 @@ import { fetchAccidentCases } from "./accident-cases";
 import type { AiMode } from "./ai-deliverables";
 import {
   buildAccidentCasesResult,
-  buildDocpackResult,
   buildEvidenceMappingResult,
   buildHarnessAgentResult,
   buildReviewedDocpackResult,
   buildSanitizeContactsResult,
   buildWeatherResult,
+  handleGenerateSafetyDocpack,
   resolveReviewTaskLabel,
   summarizeHarnessSearch,
   validateCitations,
@@ -104,19 +104,34 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
     }
     case "generate_reviewed_safety_docpack": {
       const question = asString(input, "question");
-      const task = resolveReviewTaskLabel(asString(input, "task"), question);
+      const taskInput = asString(input, "task");
+      const task = resolveReviewTaskLabel(taskInput, question);
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
-      const response = await runAsk(question, { aiMode: mode });
+      const generated = await handleGenerateSafetyDocpack(
+        { question, task: taskInput, mode, includeFull },
+        { querySafetyKnowledge, runAsk },
+      );
+      const { evidence, phaseAGrounding, response } = generated;
       const qa = await reviewDocpack(task, selectQaDocumentText(response));
-      return buildReviewedDocpackResult(response, qa, task, includeFull);
+      return buildReviewedDocpackResult(
+        response,
+        qa,
+        task,
+        includeFull,
+        evidence,
+        phaseAGrounding,
+      );
     }
     case "generate_safety_docpack": {
       const question = asString(input, "question");
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
-      const response = await runAsk(question, { aiMode: mode });
-      return buildDocpackResult(response, includeFull);
+      const generated = await handleGenerateSafetyDocpack(
+        { question, mode, includeFull },
+        { querySafetyKnowledge, runAsk },
+      );
+      return generated.docpack;
     }
     case "get_evidence_mapping": {
       const docType = (input as Record<string, unknown> | null)?.docType;

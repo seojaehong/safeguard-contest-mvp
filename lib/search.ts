@@ -1594,15 +1594,17 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       raw.length ? raw : searchLegalSources("산업안전보건법")
     );
     // enhanceLegalEvidenceMappings: optional quality pass, runs in parallel, best-effort.
-    const citationsPromise = rawCitationsBasePromise.then((base) =>
-      enhanceLegalEvidenceMappings(question, base).catch((error) => {
-        log.error(
-          "AI legal evidence mapping failed; using original legal evidence order",
-          safeFailureContext(error)
+    const citationsPromise = options.phaseAGrounding
+      ? rawCitationsBasePromise
+      : rawCitationsBasePromise.then((base) =>
+          enhanceLegalEvidenceMappings(question, base).catch((error) => {
+            log.error(
+              "AI legal evidence mapping failed; using original legal evidence order",
+              safeFailureContext(error)
+            );
+            return base;
+          })
         );
-        return base;
-      })
-    );
     // generateAnswer uses raw citations directly — no longer waits for enhance.
     const responsePromise = rawCitationsBasePromise.then((rawBase) =>
       generateAnswer(question, rawBase.slice(0, 6), {

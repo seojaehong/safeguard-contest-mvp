@@ -4,7 +4,8 @@
 - Branch: `fix/phase-a-ontology-review`
 - Base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
 - Contract: `phase-a-evidence-chains/1.3.0`
-- Status: citation-boundary P2 remediated, awaiting re-review
+- Status: closed generation harness remediated, awaiting re-review
+- Generated: `2026-07-13T22:14:50.9208582+09:00`, after focused and typecheck logs completed
 - Runtime/DB publication: not performed
 - Schema, migration, Supabase data, generated core seed: unchanged
 
@@ -144,10 +145,23 @@ SIF-only evidence returns `review_required`; there is no fifth `neither` state.
 | Finding | Remediation |
 |---|---|
 | P1-G `handleGenerateSafetyDocpack` resolved the ontology pack but called `runAsk` with only question and mode | The actual handler now passes a structured `phaseAGrounding` object containing the exact pack, allowed Task/Hazard/Control content, exact cited UIDs and source roles, obligation classifications, materialization targets, and `generationPolicy.llmRole=naturalize_only`. |
-| P1-G provider prompts could draft before seeing the fixed pack | Both the answer provider and all full-mode document provider prompts now begin with a one-line JSON-serialized untrusted evidence block, followed by fixed naturalization instructions, before the existing persona and context. Labels containing quotes, newlines, or delimiter text remain escaped JSON data. |
+| P1-G provider prompts could draft before seeing the fixed pack | Both the answer provider and all full-mode document provider prompts receive the fixed pack and exact allow-list before drafting. Labels containing quotes, newlines, or delimiter text remain escaped JSON data. |
 | P1-G unresolved or missing evidence could look grounded | Demo generation continues, but the MCP docpack explicitly reports `review_required_draft` or `missing_evidence_draft`; citation allow-lists and deterministic verified records remain empty and human confirmation remains pending. Missing Tasks receive no pack, allowed content, citation, or target fallback. |
 
 This remediation intentionally preserves the template fast path (no provider call), enhanced-mode deterministic document bodies, and the existing Anthropic/Vertex/OpenAI fallback order. When those modes invoke an answer provider, its prompt receives the same Phase A block. Full mode also binds the block into every document provider prompt. Deterministic document-location inspection remains post-generation and does not infer materialization from prompt inclusion.
+
+## Closed generation harness remediation
+
+| Finding | Remediation |
+|---|---|
+| P1-H untrusted text could escape the grounding boundary | Every grounded answer/document provider prompt now starts with the immutable `naturalize_only` security policy, followed by exactly one delimited JSON block. The original question, search context, scenario, Task/Control/source labels, and follow-on risk rows remain JSON data and are never appended raw after the boundary. Boundary characters inside JSON strings are Unicode-escaped, so injection-shaped delimiter text cannot create or duplicate a boundary while `JSON.parse` still restores the exact input. |
+| P1-H generic persona instructions could request outside citations | Grounded persona, schema, emergency, legal, and KOSHA instructions now require the Phase A allow-list or `현장 확인 필요`; the legacy generic citation instructions remain only on ungrounded paths. The optional raw legal-citation mapper is skipped when Phase A grounding is present. |
+| P1-H QA verdict could conflict with grounding state | Top-level reviewed status can be `통과` only when grounding is resolved and the existing coverage/quality QA passes. For `review_required` or missing grounding it is always `검토 필요`, not verified, zero-record, and human-pending; the original QA result is retained only under the non-authoritative diagnostic field with an actionable reason. |
+| P1-H ontology lookup failure aborted generation | Lookup exceptions are logged without exception text or secrets and become explicit missing Phase A grounding. Template mode stays deterministic and provider-free; enhanced/full provider fallback remains reachable, but the returned docpack is marked review-required and unverified. No published ontology fallback is synthesized. |
+| P1-H the provider pack was not mutation-proof | The complete grounding object, including the pack, allowed evidence, citation UIDs, and materialization targets, is structured-cloned and recursively frozen before `runAsk`. A handler-seam mutation test verifies that source and frozen-object mutation attempts cannot alter either the provider prompt or deterministic post-check. |
+| P1-H Claw generation bypassed the grounded handler | Both reviewed and plain Claw document tools now call the same production grounding handler, including the ontology-failure behavior and reconciled reviewed status. |
+
+Chosen compatibility behavior: unresolved or unavailable Phase A evidence does not stop demo generation in enhanced/full modes. Those modes may call the existing provider fallback, but their output is explicitly a review-required, unverified draft with no verified materialization records and pending human confirmation. Template mode never calls a provider, including when ontology lookup fails.
 
 ## Official law verification
 
@@ -178,7 +192,8 @@ The Article 172 direct surface identifies `접촉의 방지`: paragraph 1 prohib
 - Citation-boundary P2 TDD RED cycle 2: 2 broad-symbol boundary tests failed and 94 tests passed in a 96-test run.
 - Citation-boundary P2 targeted GREEN: 2 files passed, 96 tests passed.
 - Phase A generation-grounding TDD RED: 8 tests failed and 11 passed in one 19-test serial run, covering handler payload binding, provider prompt order, resolved/review-required/missing states, and zero-record unsupported citations.
-- Focused ontology/generation/MCP/commercial/DB harness plus production/provider handlers and fallback compatibility, serial: 11 files passed, 203 tests passed. This includes all prior 169 focused tests.
+- Closed-harness TDD RED: 16 failures were reproduced across five narrow runs: 10/56 at answer/document/MCP/handler seams, 2/2 at the actual Claw tool seam, 1/3 for grounded raw-citation mapping, 1/8 for a remaining generic legal instruction, and 2/11 for literal delimiter-token duplication inside serialized malicious input.
+- Focused ontology/generation/MCP/commercial/DB harness plus production/provider/Claw handlers and fallback compatibility, serial: 12 files passed, 213 tests passed. This includes the prior 203 focused tests plus 10 new harness regressions.
 - Strict TypeScript: passed.
 - Previous full suite is informational only and was not rerun for this remediation: 125 files passed, 7 failed, 5 skipped; 1229 tests passed, 7 failed, 22 skipped. Failures were outside owned ontology/MCP/test/report files.
 - Full-suite failed suites: `knowledge-page-layout`, `product-module-shell`, and `reports-download-center` due missing `.next/prerender-manifest.json` or hook timeout during concurrent dev-server tests.
@@ -190,6 +205,8 @@ Logs:
 
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log`
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log`
+
+Log provenance: focused log completed `2026-07-13T13:14:45.3751465Z`; typecheck log completed `2026-07-13T13:14:45.3781548Z`; this report was generated afterward.
 
 This report, `report.json`, and both verification logs are tracked artifacts committed on this branch.
 

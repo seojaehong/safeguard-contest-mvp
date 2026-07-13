@@ -3,6 +3,10 @@ import { describe, expect, it } from "vitest";
 import type { AskResponse } from "@/lib/types";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
 import type { SafetyKnowledgeResult } from "@/lib/mcp-tools";
+import { buildPhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
+import { assembleGraph } from "@/lib/ontology/graph-store";
+import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
+import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 import { OFFICIAL_CONTACTS } from "@/lib/safety-contacts";
 import {
   buildAccidentCasesResult,
@@ -38,6 +42,34 @@ function makeAskResponse(overrides: Partial<AskResponse> = {}): AskResponse {
     },
   };
   return { ...base, ...overrides } as unknown as AskResponse;
+}
+
+const publishedGraph = assembleGraph(
+  SEED_NODES.filter((node) => node.review_state === "published"),
+  SEED_EDGES.filter((edge) => edge.review_state === "published"),
+);
+
+function makePhaseAGrounding(evidenceChainState: "resolved" | "review_required") {
+  const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "차량계 하역운반기계 인접 작업");
+  if (!knowledge.found || !knowledge.evidenceContract) {
+    throw new Error("expected vehicle evidence contract");
+  }
+  return buildPhaseAGenerationGrounding({
+    evidenceChainState,
+    evidencePack: knowledge.evidenceContract,
+  });
+}
+
+function passingQaReview(): QaReviewFound {
+  return {
+    reviewable: true,
+    task: "지게차 상하차",
+    covered: { hazards: ["끼임"], controls: ["출입통제"], articles: ["산업안전보건기준에 관한 규칙 제172조"] },
+    missing: { hazards: [], controls: [], articles: [] },
+    coverageRate: 1,
+    verdict: "통과",
+    advisory: "검수 고지",
+  };
 }
 
 describe("validateCitations", () => {
@@ -138,32 +170,111 @@ describe("buildDocpackResult", () => {
 });
 
 describe("buildReviewedDocpackResult", () => {
-  it("combines the SafeClaw workpack engine result with QA review evidence", () => {
-    const qaReview: QaReviewFound = {
-      reviewable: true,
-      task: "용접",
-      covered: { hazards: ["화재"], controls: ["화재감시자 배치"], articles: ["산업안전보건기준에 관한 규칙 제241조"] },
-      missing: { hazards: [], controls: [], articles: [] },
-      coverageRate: 1,
-      verdict: "통과",
-      advisory: "검수 고지",
-    };
-
-    const result = buildReviewedDocpackResult(makeAskResponse(), qaReview, "용접");
+  it("allows an authoritative pass only for resolved grounding with passing coverage QA", () => {
+    const qaReview = passingQaReview();
+    const phaseAGrounding = makePhaseAGrounding("resolved");
+    const result = buildReviewedDocpackResult(
+      makeAskResponse(),
+      qaReview,
+      "지게차 상하차",
+      false,
+      undefined,
+      phaseAGrounding,
+    );
 
     expect(result.engine).toBe("safeclaw-runAsk");
     expect(result.qualityPipeline).toEqual(["generate_safety_docpack", "qa_review_docpack"]);
-    expect(result.qa.reviewable).toBe(true);
-    if (!result.qa.reviewable) throw new Error("expected reviewable QA result");
-    expect(result.qa.task).toBe("용접");
-    expect(result.qa.verdict).toBe("통과");
+    expect(result.reviewStatus).toMatchObject({
+      verdict: "통과",
+      verified: true,
+      groundingStatus: "resolved",
+      reasonCode: null,
+      humanConfirmation: { required: true, status: "pending" },
+    });
+    expect(result.qa).toMatchObject({
+      authoritative: true,
+      diagnostic: qaReview,
+    });
     expect(result.docpack.documents.riskAssessmentDraft).toMatchObject({
       totalLength: 650,
       truncated: true,
     });
     expect(result.openClawUsageNote).toContain("SafeClaw 문서 엔진");
     expect(result.openClawUsageNote).toContain("QA");
+    expect(result.openClawUsageNote).not.toContain("최종 답변의 근거로 사용");
   });
+
+  it("does not pass resolved grounding when coverage QA is not passing", () => {
+    const qaReview: QaReviewFound = {
+      ...passingQaReview(),
+      missing: {
+        hazards: [],
+        controls: [{ control: "출입통제", articles: ["제172조"] }],
+        articles: [],
+      },
+      coverageRate: 0,
+      verdict: "보완 권장",
+    };
+    const result = buildReviewedDocpackResult(
+      makeAskResponse(),
+      qaReview,
+      "지게차 상하차",
+      false,
+      undefined,
+      makePhaseAGrounding("resolved"),
+    );
+
+    expect(result.reviewStatus).toMatchObject({
+      verdict: "검토 필요",
+      verified: false,
+      groundingStatus: "resolved",
+      reasonCode: "qa_coverage_not_passed",
+    });
+    expect(result.qa).toMatchObject({ authoritative: false, diagnostic: qaReview });
+  });
+
+  it.each(["review_required", "missing"] as const)(
+    "keeps a diagnostic QA pass non-authoritative for %s grounding",
+    (groundingStatus) => {
+      const phaseAGrounding = groundingStatus === "review_required"
+        ? makePhaseAGrounding("review_required")
+        : buildPhaseAGenerationGrounding({
+            evidenceChainState: "not_evaluated",
+            evidencePack: null,
+          });
+      const qaReview = passingQaReview();
+      const result = buildReviewedDocpackResult(
+        makeAskResponse(),
+        qaReview,
+        "지게차 상하차",
+        false,
+        undefined,
+        phaseAGrounding,
+      );
+
+      expect(result.reviewStatus).toMatchObject({
+        verdict: "검토 필요",
+        verified: false,
+        groundingStatus,
+        reasonCode: groundingStatus === "review_required"
+          ? "phase_a_review_required"
+          : "phase_a_evidence_missing",
+        humanConfirmation: { required: true, status: "pending" },
+      });
+      expect(result.reviewStatus.actionableReason.length).toBeGreaterThan(10);
+      expect(result.qa).toMatchObject({
+        authoritative: false,
+        diagnostic: expect.objectContaining({ verdict: "통과" }),
+      });
+      expect(result.docpack.evidenceMaterialization).toMatchObject({
+        verifiedRecords: [],
+        humanConfirmation: { required: true, status: "pending" },
+      });
+      expect(result.openClawUsageNote).toContain("검토 필요");
+      expect(result.openClawUsageNote).toContain("verified 근거로 사용하지 마세요");
+      expect(result.openClawUsageNote).not.toContain("최종 답변의 근거로 사용");
+    },
+  );
 });
 
 describe("buildHarnessAgentResult", () => {
