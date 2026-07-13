@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "safeclaw-evaluation/v1",
+  "generatedAt": "2026-07-13T07:05:09.363505+00:00",
+  "source": {
+    "itemId": "kosha-60492776122f8b433994fc10",
+    "documentCode": "B-E-3-2025",
+    "title": "변전실 등의 양압유지에 관한 기술지원규정",
+    "rawSha256": "24aee7bdb72a1d69159122329267eed2fd68dc607d35d5270eeb6b326513a3c9",
+    "nativeTextAvailable": false,
+    "pageCount": 14,
+    "renderDpi": 180
+  },
+  "collection": {
+    "itemCount": 1,
+    "pageCount": 14,
+    "successCount": 14,
+    "failureCount": 0,
+    "emptyPageCount": 0,
+    "missingResponseIdCount": 0,
+    "incompleteResponseCount": 0,
+    "normalizedCharacterCount": 8946,
+    "responseWindowSeconds": 144,
+    "candidateWriteElapsedSeconds": 148,
+    "model": "gpt-4.1-mini-2025-04-14"
+  },
+  "candidate": {
+    "path": "evaluation/kosha-ocr-boundary-recovery-2026-07-13/B-E-3-2025-candidate.json",
+    "fileSha256": "8ded6bed994721546bf0f54a24f2612c4fc8fb0a5d339f48dce1b248688cff40",
+    "bodySha256": "fbe98a41cdae6dce7cf024649362786a81608233054a5fa7a11ef853b8a2ab02",
+    "generatorId": "safeclaw-kosha-ocr-boundary",
+    "generatorVersion": "1",
+    "generatorScriptSha256": "5c56fb8f35d9bf4349ae17c152d437dd86b2bc22a15b0fed212976873efebcdf",
+    "status": "candidate",
+    "reviewState": "draft",
+    "humanConfirmed": false,
+    "dbMutationPerformed": false,
+    "containsSecretOrAbsolutePath": false
+  },
+  "supersededCandidates": [
+    {
+      "fileSha256": "41f629dd8f4f19d8b498ad0887781f39fb6926cb9bbf7b132bdee0ee8a516045",
+      "bodySha256": "940ee81cc52457a65e54fe2d3d1d5aec0e90380a9163ae297a42e97ec8490fe2",
+      "reason": "rejected boundary implementation"
+    },
+    {
+      "fileSha256": "8b17bdf229593b680283eee7070e97cbcfa5904842153e37c1e72422097e7235",
+      "bodySha256": "d3276a93100fdd442e545ca60abb75ca0619d7a78ae02059e9bd9f6afec009ef",
+      "reason": "regenerated after fail-closed hardening but superseded after generator allowlist remediation"
+    }
+  ],
+  "verification": {
+    "preflight": "pass",
+    "unitTests": {
+      "files": 1,
+      "tests": 9,
+      "status": "pass"
+    },
+    "syntaxCheck": "pass",
+    "generatorHashMatches": true,
+    "generatorAllowlistMismatchRejected": true,
+    "draftImportGate": "ocr_candidate_not_human_confirmed",
+    "representativeVisualPages": [1, 2, 3, 4, 7, 10, 14],
+    "knownHumanReviewCorrections": [
+      {
+        "page": 2,
+        "ocr": "가입실",
+        "source": "가압실"
+      },
+      {
+        "page": 3,
+        "ocr": "전산관",
+        "source": "전선관"
+      },
+      {
+        "page": 7,
+        "ocr": "클랜드",
+        "source": "글랜드"
+      },
+      {
+        "page": 13,
+        "ocr": "양압실폐시",
+        "source": "양압실패시"
+      }
+    ],
+    "knownStructureCorrections": [
+      {
+        "page": 12,
+        "issue": "표 1의 병합 헤더와 4열 셀 귀속이 평문 파이프 구조에서 손실됨"
+      }
+    ],
+    "candidateHumanReview": "blocked",
+    "priorIndependentReview": "reject",
+    "fullVisualReview": "interrupted after completing the 14-page comparison",
+    "freshCodeBoundaryReview": {
+      "spec": "pass",
+      "code": "pass",
+      "p0": 0,
+      "p1": 0,
+      "p2": 0,
+      "p3": 0,
+      "independentGeneratorMismatchProbe": "pass"
+    }
+  },
+  "securityBoundary": {
+    "completedOpenAiResponsesOnly": true,
+    "sourcePdfRerenderRequired": true,
+    "trustedReviewerAllowlistRequired": true,
+    "reviewHmacAttestationRequired": true,
+    "generatorHashBound": true,
+    "trustedGeneratorHashRequired": true,
+    "sourceOverwriteBlocked": true,
+    "jsonOutputOnly": true,
+    "absoluteOutputPathLogged": false
+  },
+  "releaseBoundary": {
+    "corpusImportAllowed": false,
+    "ontologyPublicationAllowed": false,
+    "productionBridgeResolved": false,
+    "bodyMissingCount": 1,
+    "downloadProvenance": "incomplete",
+    "productionChunkBridge": "absent",
+    "nextGate": "complete page-by-page human verification, create trusted attestation, then build a schema-free supporting-only provenance bridge"
+  }
+}
