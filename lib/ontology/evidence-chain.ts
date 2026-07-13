@@ -459,10 +459,47 @@ const MATERIALIZATION_DOCUMENT_KEYS: Readonly<
   tbm: ["tbmBriefing", "tbmLogDraft"],
 };
 
-const EVIDENCE_CITATION_BOUNDARY = /[\s|,;()[\]{}<>"'`]/u;
+const EVIDENCE_UID_CONTINUATION = /[\p{L}\p{M}\p{N}_\/-]/u;
+const EVIDENCE_CITATION_DELIMITER = /[\s\p{P}]/u;
 
-function isEvidenceCitationBoundary(character: string | undefined): boolean {
-  return character === undefined || EVIDENCE_CITATION_BOUNDARY.test(character);
+function codePointBefore(value: string, index: number): string | undefined {
+  const characters = Array.from(value.slice(0, index));
+  return characters[characters.length - 1];
+}
+
+function codePointAt(value: string, index: number): string | undefined {
+  return Array.from(value.slice(index))[0];
+}
+
+function isEvidenceUidContinuation(character: string | undefined): boolean {
+  return character !== undefined && EVIDENCE_UID_CONTINUATION.test(character);
+}
+
+function isEvidenceCitationDelimiter(character: string | undefined): boolean {
+  return character !== undefined && EVIDENCE_CITATION_DELIMITER.test(character);
+}
+
+function isEvidenceCitationBoundary(
+  line: string,
+  index: number,
+  side: "before" | "after",
+): boolean {
+  const adjacent = side === "before"
+    ? codePointBefore(line, index)
+    : codePointAt(line, index);
+  if (adjacent === undefined) return true;
+  if (isEvidenceUidContinuation(adjacent)) return false;
+  if (adjacent !== ":") return isEvidenceCitationDelimiter(adjacent);
+
+  // A terminal colon is punctuation; a colon joined to another UID character extends the token.
+  const beyond = side === "before"
+    ? codePointBefore(line, index - adjacent.length)
+    : codePointAt(line, index + adjacent.length);
+  return beyond === undefined || (
+    beyond !== ":" &&
+    !isEvidenceUidContinuation(beyond) &&
+    isEvidenceCitationDelimiter(beyond)
+  );
 }
 
 function extractEvidenceCitationTokens(
@@ -480,8 +517,8 @@ function extractEvidenceCitationTokens(
       if (start < 0) break;
       const end = start + citedUid.length;
       if (
-        isEvidenceCitationBoundary(line[start - 1]) &&
-        isEvidenceCitationBoundary(line[end])
+        isEvidenceCitationBoundary(line, start, "before") &&
+        isEvidenceCitationBoundary(line, end, "after")
       ) {
         tokens.add(citedUid);
         break;
