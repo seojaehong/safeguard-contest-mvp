@@ -18,7 +18,11 @@ import {
   type CurrentDispatchSnapshot,
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
-import { buildPhaseAReviewUiState, type PhaseAReviewUiState } from "@/lib/phase-a-review";
+import {
+  applyPhaseADocumentAuthorityMarker,
+  buildPhaseAReviewUiState,
+  type PhaseAReviewUiState,
+} from "@/lib/phase-a-review";
 import type { AskResponse } from "@/lib/types";
 import { applyWorkpackDeliverablesChange } from "@/lib/workpack-readiness";
 import {
@@ -607,10 +611,15 @@ function excerpt(text: string, maxLength = 190) {
 
 function buildDerivedDocumentText(data: AskResponse, key: DocumentKey) {
   const storedDraft = data.deliverables[key];
-  if (typeof storedDraft === "string" && storedDraft.trim()) return storedDraft;
+  if (typeof storedDraft === "string" && storedDraft.trim()) {
+    return applyPhaseADocumentAuthorityMarker(storedDraft, data.phaseAReview);
+  }
 
   const actions = data.riskSummary.immediateActions.slice(0, 2).join(" / ");
-  return `허가대상 작업: ${data.scenario.workSummary}. 핵심위험: ${data.riskSummary.topRisk}. 작업 전 허가조건: ${actions}`;
+  return applyPhaseADocumentAuthorityMarker(
+    `허가대상 작업: ${data.scenario.workSummary}. 핵심위험: ${data.riskSummary.topRisk}. 작업 전 허가조건: ${actions}`,
+    data.phaseAReview,
+  );
 }
 
 function buildDeliverablePatch(values: WorkpackDocumentValues) {

@@ -25,7 +25,6 @@ import {
   type EvidenceChainDiagnostics,
   type EvidenceMaterializationDocumentKey,
   type EvidenceMaterializationCoverage,
-  type EvidenceMaterializationPlan,
   type EvidenceMaterializationRecord,
   type EvidenceChainResolution,
   type PhaseAGenerationGrounding,
@@ -105,6 +104,51 @@ export type DocpackDocumentPreview = {
   truncated: boolean;
 };
 
+export type PublicPhaseAEvidence = {
+  schemaVersion: "phase-a-public-evidence/v1";
+  authority: "candidate" | "review_required";
+  reviewState: PhaseAGenerationGrounding["groundingStatus"];
+  sources: {
+    sif: Array<{
+      citedUid: string;
+      title: string;
+      rank: number;
+      role: "hazard_priority_only";
+      reviewState: string;
+      resolution: string;
+    }>;
+    kosha: Array<{
+      citedUid: string;
+      guideCode: string;
+      page: number;
+      location: string;
+      role: "technical_guidance_only";
+      reviewState: string;
+      resolution: string;
+    }>;
+    law: Array<{
+      citedUid: string;
+      articleNo: string;
+      title: string;
+      effectiveDate: string;
+      officialUrl: string;
+      role: "current_law_mandate";
+      reviewState: string;
+      resolution: string;
+    }>;
+  };
+};
+
+export type PublicMaterializationTarget = {
+  stableKey: string;
+  controlId: string;
+  controlLabel: string;
+  document: "risk_assessment" | "tbm";
+  rowOrSection: string;
+  obligationClassification: string;
+  requiredCitedUids: string[];
+};
+
 export type DocpackResult = {
   summary: string;
   scenario: AskResponse["scenario"];
@@ -112,7 +156,7 @@ export type DocpackResult = {
   evidenceLabels?: Record<string, SmsaEvidenceLabel>;
   documents: Record<string, DocpackDocumentPreview | string>;
   fullDocumentsNote: string;
-  evidenceContract?: ActiveEvidenceChainPack;
+  publicEvidence?: PublicPhaseAEvidence;
   evidenceChainState?: SafetyKnowledgeResult["evidenceChainState"];
   ontologyGrounding?: {
     evidenceChainState: SafetyKnowledgeResult["evidenceChainState"];
@@ -127,7 +171,7 @@ export type DocpackResult = {
   evidenceMaterialization?: {
     evidenceChainState: SafetyKnowledgeResult["evidenceChainState"];
     operationSequence: Array<EvidenceAssemblyStage | "document_materialization">;
-    plannedTargets: EvidenceMaterializationPlan[];
+    plannedTargets: PublicMaterializationTarget[];
     verifiedRecords: EvidenceMaterializationRecord[];
     coverage: EvidenceMaterializationCoverage;
     humanConfirmation: { required: true; status: "pending" | "confirmed" };
@@ -219,6 +263,67 @@ export function resolveReviewTaskLabel(task: string, question: string): string {
   return match?.label ?? trimmed;
 }
 
+function buildPublicPhaseAEvidence(
+  grounding: PhaseAGenerationGrounding,
+): PublicPhaseAEvidence | undefined {
+  const pack = grounding.evidencePack;
+  if (!pack) return undefined;
+  return {
+    schemaVersion: "phase-a-public-evidence/v1",
+    authority: grounding.groundingStatus === "resolved" ? "candidate" : "review_required",
+    reviewState: grounding.groundingStatus,
+    sources: {
+      sif: pack.hazardPriority.map((source) => ({
+        citedUid: source.citedUid,
+        title: source.title,
+        rank: source.rank,
+        role: "hazard_priority_only",
+        reviewState: source.reviewState,
+        resolution: source.resolution,
+      })),
+      kosha: pack.guidance.map((source) => ({
+        citedUid: source.citedUid,
+        guideCode: source.guideCode,
+        page: source.chunk.page,
+        location: source.chunk.location,
+        role: "technical_guidance_only",
+        reviewState: source.reviewState,
+        resolution: source.resolution,
+      })),
+      law: pack.law.map((source) => ({
+        citedUid: source.citedUid,
+        articleNo: source.articleNo,
+        title: source.title,
+        effectiveDate: source.effectiveDate,
+        officialUrl: source.officialUrl,
+        role: "current_law_mandate",
+        reviewState: source.reviewState,
+        resolution: source.resolution,
+      })),
+    },
+  };
+}
+
+function buildPublicMaterializationTargets(
+  grounding: PhaseAGenerationGrounding,
+): PublicMaterializationTarget[] {
+  return grounding.materializationTargets.flatMap((plan) =>
+    plan.targets.map((target) => ({
+      stableKey: target.stableKey,
+      controlId: plan.controlId,
+      controlLabel: plan.controlLabel,
+      document: target.document,
+      rowOrSection: target.rowOrSection,
+      obligationClassification: plan.obligation.classification,
+      requiredCitedUids: [
+        ...plan.sifCitedUids,
+        ...plan.guidanceCitedUids,
+        ...plan.lawCitedUids,
+      ],
+    })),
+  );
+}
+
 /**
  * runAsk 결과를 문서팩 도구 응답으로 정형화한다.
  * - includeFull=false(기본): 각 문서는 앞 500자 프리뷰 + 총길이 메타만.
@@ -263,69 +368,51 @@ export function buildDocpackResult(
   if (response.evidenceLabels) {
     result.evidenceLabels = response.evidenceLabels;
   }
-  if (phaseAGrounding?.evidencePack) {
-    result.evidenceContract = phaseAGrounding.evidencePack;
-    result.evidenceChainState = phaseAGrounding.evidenceChainState;
-  } else if (evidence?.found && evidence.evidenceContract) {
-    result.evidenceContract = evidence.evidenceContract;
-    result.evidenceChainState = evidence.evidenceChainState;
-  }
-  if (phaseAGrounding) {
-    const isResolved = phaseAGrounding.groundingStatus === "resolved";
-    result.evidenceChainState = phaseAGrounding.evidenceChainState;
+  const effectiveGrounding = phaseAGrounding ?? (
+    evidence?.found && evidence.evidenceContract
+      ? buildPhaseAGenerationGrounding({
+          evidenceChainState: evidence.evidenceChainState,
+          evidencePack: evidence.evidenceContract,
+        })
+      : undefined
+  );
+  if (effectiveGrounding) {
+    const isResolved = effectiveGrounding.groundingStatus === "resolved";
+    result.evidenceChainState = effectiveGrounding.evidenceChainState;
+    result.publicEvidence = buildPublicPhaseAEvidence(effectiveGrounding);
     result.ontologyGrounding = {
-      evidenceChainState: phaseAGrounding.evidenceChainState,
-      groundingStatus: phaseAGrounding.groundingStatus,
-      outputStatus: phaseAGrounding.generationPolicy.outputStatus,
-      verified: isResolved,
-      allowedCitedUids: phaseAGrounding.allowedCitedUids,
-      generationPolicy: phaseAGrounding.generationPolicy,
+      evidenceChainState: effectiveGrounding.evidenceChainState,
+      groundingStatus: effectiveGrounding.groundingStatus,
+      outputStatus: effectiveGrounding.generationPolicy.outputStatus,
+      verified: false,
+      allowedCitedUids: effectiveGrounding.allowedCitedUids,
+      generationPolicy: effectiveGrounding.generationPolicy,
       notice: isResolved
         ? "Phase A 고정 evidence pack이 provider 호출 전에 결합된 검토용 초안입니다. 문서 위치별 실적은 결정적 검사 후에도 사람 확인 대기 상태입니다."
         : "검토 필요 초안입니다. Phase A 근거가 해결·검증되지 않았으므로 grounded 또는 verified 산출물로 사용하지 마세요.",
-      actionableReason: phaseAGrounding.groundingStatus === "resolved"
+      actionableReason: effectiveGrounding.groundingStatus === "resolved"
         ? "결정적 문서 위치 검사를 확인하고 지정된 검토자가 최종 확인하세요."
-        : phaseAGrounding.groundingStatus === "review_required"
+        : effectiveGrounding.groundingStatus === "review_required"
           ? "KOSHA/법령 source resolution을 완료한 뒤 다시 생성·검수하세요."
           : "canonical Task 매핑과 ontology availability를 확인한 뒤 다시 생성하세요.",
     };
-    const verifiedRecords = phaseAGrounding.evidencePack
+    const verifiedRecords = effectiveGrounding.evidencePack
       ? verifyEvidenceMaterialization({
-          evidenceChainState: phaseAGrounding.evidenceChainState,
-          pack: phaseAGrounding.evidencePack,
+          evidenceChainState: effectiveGrounding.evidenceChainState,
+          pack: effectiveGrounding.evidencePack,
           documents: materializationDocuments,
         })
       : [];
     result.evidenceMaterialization = {
-      evidenceChainState: phaseAGrounding.evidenceChainState,
+      evidenceChainState: effectiveGrounding.evidenceChainState,
       operationSequence: [
-        ...(phaseAGrounding.evidencePack?.assemblyTrace ?? []),
+        ...(effectiveGrounding.evidencePack?.assemblyTrace ?? []),
         "document_materialization",
       ],
-      plannedTargets: phaseAGrounding.materializationTargets,
+      plannedTargets: buildPublicMaterializationTargets(effectiveGrounding),
       verifiedRecords,
       coverage: buildEvidenceMaterializationCoverage({
-        plannedTargets: phaseAGrounding.materializationTargets,
-        verifiedRecords,
-      }),
-      humanConfirmation: { required: true, status: "pending" },
-    };
-  } else if (evidence?.found && evidence.evidenceContract) {
-    const verifiedRecords = verifyEvidenceMaterialization({
-      evidenceChainState: evidence.evidenceChainState,
-      pack: evidence.evidenceContract,
-      documents: materializationDocuments,
-    });
-    result.evidenceMaterialization = {
-      evidenceChainState: evidence.evidenceChainState,
-      operationSequence: [
-        ...evidence.evidenceContract.assemblyTrace,
-        "document_materialization",
-      ],
-      plannedTargets: evidence.evidenceContract.materializationTargets,
-      verifiedRecords,
-      coverage: buildEvidenceMaterializationCoverage({
-        plannedTargets: evidence.evidenceContract.materializationTargets,
+        planBinding: effectiveGrounding.planBinding,
         verifiedRecords,
       }),
       humanConfirmation: { required: true, status: "pending" },
@@ -1045,23 +1132,44 @@ export type SafetyKnowledgeMaterializationAuthority = {
   humanConfirmation: { required: true; status: "pending" };
 };
 
+type SafetyKnowledgeCandidateBase = {
+  schemaVersion: "query_safety_knowledge/v2";
+  coreProvenance: "candidate_only";
+  compatibilityVersion: "v1-candidate";
+  authority: "review_required";
+  authoritative: false;
+  evidenceChainState: "review_required";
+  candidateNotice: string;
+  materializationAuthority: SafetyKnowledgeMaterializationAuthority;
+};
+
 export type SafetyKnowledgeCandidateResult =
-  | (Omit<
-      SafetyKnowledgeFound,
-      "evidenceContract" | "evidenceDiagnostics" | "evidenceChainState"
-    > & {
-      authority: "review_required";
-      authoritative: false;
-      evidenceChainState: "review_required";
-      candidateNotice: string;
-      materializationAuthority: SafetyKnowledgeMaterializationAuthority;
+  | (SafetyKnowledgeCandidateBase & {
+      found: true;
+      matchedBy: "task" | "hazard";
+      task: string | null;
+      hazards: string[];
+      controls: Array<{ authority: "candidate"; control: string; articles: string[] }>;
+      articles: string[];
+      accidents: string[];
+      duties: string[];
+      dutiesNote: string;
+      provenance: SafetyKnowledgeProvenance;
+      candidateAnnotations: {
+        controls: KnowledgeControlView[];
+        articles: KnowledgeArticleView[];
+        duties: KnowledgeDutyView[];
+      };
     })
-  | (Omit<SafetyKnowledgeNotFound, "evidenceChainState"> & {
-      authority: "review_required";
-      authoritative: false;
-      evidenceChainState: "review_required";
-      candidateNotice: string;
-      materializationAuthority: SafetyKnowledgeMaterializationAuthority;
+  | (SafetyKnowledgeCandidateBase & {
+      found: false;
+      message: string;
+      registeredTasks: string[];
+      candidateAnnotations: {
+        controls: [];
+        articles: [];
+        duties: [];
+      };
     });
 
 export function buildSafetyKnowledgeCandidateResult(
@@ -1071,11 +1179,17 @@ export function buildSafetyKnowledgeCandidateResult(
     "연결 후보입니다. Phase A 전체 문서 반영과 지정된 사람의 확인 전에는 확정 근거나 법적 의무 판단으로 사용하지 마세요.";
   if (!result.found) {
     return {
-      ...result,
+      found: false,
+      message: result.message,
+      registeredTasks: result.registeredTasks,
+      schemaVersion: "query_safety_knowledge/v2",
+      coreProvenance: "candidate_only",
+      compatibilityVersion: "v1-candidate",
       authority: "review_required",
       authoritative: false,
       evidenceChainState: "review_required",
       candidateNotice,
+      candidateAnnotations: { controls: [], articles: [], duties: [] },
       materializationAuthority: {
         status: "review_required",
         authoritative: false,
@@ -1087,45 +1201,68 @@ export function buildSafetyKnowledgeCandidateResult(
     };
   }
 
-  const expectedStableKeys = Array.from(new Set(
-    result.evidenceContract?.materializationTargets.flatMap(
-      (plan) => plan.targets.map((target) => target.stableKey),
-    ) ?? [],
-  ));
-  const controls = result.controls.map((control) => ({
-    ...control,
-    authority: "candidate" as const,
+  const hasCompleteEvidencePack = Boolean(
+    result.evidenceContract &&
+    Array.isArray(result.evidenceContract.hazardPriority) &&
+    Array.isArray(result.evidenceContract.controls) &&
+    Array.isArray(result.evidenceContract.materializationTargets),
+  );
+  const grounding = result.evidenceContract && hasCompleteEvidencePack
+    ? buildPhaseAGenerationGrounding({
+        evidenceChainState: result.evidenceChainState,
+        evidencePack: result.evidenceContract,
+      })
+    : null;
+  const expectedStableKeys = grounding?.planBinding?.expectedStableKeys ?? [];
+  const annotatedControls: KnowledgeControlView[] = result.controls.map((control) => ({
+    authority: "candidate",
+    control: control.control,
     articles: control.articles.map((article) => (
       typeof article === "string"
-        ? { authority: "candidate" as const, label: article }
-        : { ...article, authority: "candidate" as const }
+        ? { authority: "candidate", label: article }
+        : { ...article, authority: "candidate" }
     )),
   }));
-  const articles = result.articles.map((article) => ({
+  const controls = annotatedControls.map((control) => ({
+    authority: "candidate" as const,
+    control: control.control,
+    articles: control.articles.map((article) => article.label),
+  }));
+  const annotatedArticles = result.articles.map((article) => ({
     ...article,
     authority: "candidate" as const,
   }));
-  const duties = result.duties.map((duty) => (
+  const articles = annotatedArticles.map((article) => article.label);
+  const annotatedDuties: KnowledgeDutyView[] = result.duties.map((duty) => (
     typeof duty === "string"
       ? { authority: "candidate" as const, label: duty }
       : { ...duty, authority: "candidate" as const }
   ));
-  const {
-    evidenceContract: _evidenceContract,
-    evidenceDiagnostics: _evidenceDiagnostics,
-    evidenceChainState: _evidenceChainState,
-    ...candidate
-  } = result;
+  const duties = annotatedDuties.map((duty) => duty.label);
 
   return {
-    ...candidate,
+    found: true,
+    matchedBy: result.matchedBy,
+    task: result.task,
+    hazards: result.hazards,
     controls,
     articles,
+    accidents: result.accidents,
     duties,
+    dutiesNote: result.dutiesNote,
+    provenance: result.provenance,
+    schemaVersion: "query_safety_knowledge/v2",
+    coreProvenance: "candidate_only",
+    compatibilityVersion: "v1-candidate",
     authority: "review_required",
     authoritative: false,
     evidenceChainState: "review_required",
     candidateNotice,
+    candidateAnnotations: {
+      controls: annotatedControls,
+      articles: annotatedArticles,
+      duties: annotatedDuties,
+    },
     materializationAuthority: {
       status: "review_required",
       authoritative: false,

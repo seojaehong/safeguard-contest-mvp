@@ -1,20 +1,22 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-14T01:19:49.7892024+09:00",
+  "generatedAt": "2026-07-14T02:52:54.7954556+09:00",
   "branch": "fix/phase-a-ontology-review",
   "base": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
   "contractVersion": "phase-a-evidence-chains/1.3.0",
-  "status": "full_materialization_authority_remediation_candidate_awaiting_fresh_independent_review",
+  "status": "whole_candidate_authority_remediation_awaiting_fresh_independent_review",
   "provenance": {
-    "focusedLogCompletedAt": "2026-07-13T16:17:20.0227034Z",
-    "typecheckLogCompletedAt": "2026-07-13T16:17:30.9832625Z",
+    "focusedLogCompletedAt": "2026-07-13T17:51:17.2657895Z",
+    "typecheckLogCompletedAt": "2026-07-13T17:51:17.2707983Z",
+    "frontendRouteProbeLogCompletedAt": "2026-07-13T17:51:17.2747995Z",
     "reportGeneratedAfterFreshVerification": true
   },
   "scopeMetrics": {
     "reviewedBaselineBranchDiffFilesAtC51c6c1": 59,
-    "currentBranchDiffFilesFromBase": 61,
-    "currentCountIncreaseReason": "the reviewed 59-file diff now additionally includes WorkpackEditor authority wiring and direct standalone knowledge-tool contract coverage; the regenerated typecheck log content is unchanged from the tracked artifact",
-    "focusedTestFiles": 28
+    "reviewedWholeCandidateBranchDiffFilesAtA5ae9f7": 61,
+    "currentBranchDiffFilesFromBase": 66,
+    "currentCountIncreaseReason": "relative to a5ae9f7, the base-to-candidate diff newly includes HWP, PDF, and XLSX export authority markers, the pending-document authority regression file, and the preserved frontend-route probe log",
+    "focusedTestFiles": 29
   },
   "counts": {
     "canonicalChains": 3,
@@ -80,7 +82,16 @@
     "failedPreflightRetriesGraphDuringPostQa": false,
     "standaloneKnowledgeAuthority": "review_required_candidate_only",
     "standaloneKnowledgeFixedProvenanceRemoved": true,
-    "standaloneKnowledgeEvidenceContractHidden": true
+    "standaloneKnowledgeEvidenceContractHidden": true,
+    "authorityExpectedKeysDerivedFromServerRegistryPlan": true,
+    "authorityRejectsShrunkSingletonOrDuplicatePlans": true,
+    "authorityBindsCanonicalPlanDigestChainAndHumanConfirmation": true,
+    "requiredSourceRolesRevalidatedAtExactControl": true,
+    "materializationRequiresExactUniquePlannedSection": true,
+    "pendingAuthorityMarkerInjectedIntoBodyPreviewBriefingAndExports": true,
+    "externalEvidencePackUsesTypedPrivacyProjection": true,
+    "providerNaturalizesOneImmutableAllEvidenceSnapshot": true,
+    "querySafetyKnowledgeV1StringAliasesPreserved": true
   },
   "chains": [
     {
@@ -349,6 +360,15 @@
       "single_untrusted_phase_a_json_block",
       "conditioned_persona_and_context"
     ],
+    "snapshotOrder": [
+      "sif_hazard_priority",
+      "kosha_technical_guidance",
+      "current_law",
+      "site_and_history",
+      "weather_and_external_context"
+    ],
+    "snapshotBuiltBeforeProviderInvocation": true,
+    "laterProviderSideChannelsAllowed": false,
     "resolvedBehavior": "answer provider and full-mode document providers receive the fixed pack before generation; deterministic materialization inspection remains post-generation",
     "reviewRequiredBehavior": "generation remains demo-usable but output is explicitly review_required_draft, allowed citation records are empty, verifiedRecords stays zero, and human confirmation stays pending",
     "missingBehavior": "generation remains demo-usable but output is explicitly missing_evidence_draft with no pack, allowed content, citations, targets, or verified records",
@@ -438,8 +458,38 @@
     { "finding": "INTEGRATION-HOLD-4", "status": "candidate_fix_awaiting_independent_review", "summary": "one published graph snapshot is reused by generation and post-generation QA; a failed preflight uses a null sentinel and is not retried by QA" },
     { "finding": "INTEGRATION-HOLD-5", "status": "candidate_fix_awaiting_independent_review", "summary": "report prompt order and legacy QA authority now match the fixed-policy-first production code" },
     { "finding": "AUTHORITY-P1-1", "status": "candidate_fix_awaiting_independent_review", "summary": "standalone MCP and Claw QA preserve raw coverage under diagnostic_only while top-level review remains review_required, unverified, non-authoritative, and human-pending" },
-    { "finding": "AUTHORITY-P1-2", "status": "candidate_fix_awaiting_independent_review", "summary": "ask, field workspace, and current-workpack citation surfaces consume Phase A authority; pending or missing state uses candidate labels and only fully confirmed state uses connected/direct labels" }
+    { "finding": "AUTHORITY-P1-2", "status": "candidate_fix_awaiting_independent_review", "summary": "ask, field workspace, and current-workpack citation surfaces consume Phase A authority; pending or missing state uses candidate labels and only fully confirmed state uses connected/direct labels" },
+    { "finding": "WHOLE-CANDIDATE-1", "status": "candidate_fix_awaiting_independent_review", "summary": "authority derives the complete ordered stableKey set and canonical digest from the server registry plan; shrunk, singleton, duplicate, or forged DTO plans fail closed and confirmation is bound to chain and digest" },
+    { "finding": "WHOLE-CANDIDATE-2", "status": "candidate_fix_awaiting_independent_review", "summary": "resolved grounding revalidates ready SIF priority, ready KOSHA guidance, and current-law mandate evidence at each exact Control; unresolved SIF or KOSHA cannot verify" },
+    { "finding": "WHOLE-CANDIDATE-3", "status": "candidate_fix_awaiting_independent_review", "summary": "materialization requires exactly one planned rowOrSection and same-line Control plus classification-required citations; wrong, missing, or duplicate sections fail" },
+    { "finding": "WHOLE-CANDIDATE-4", "status": "candidate_fix_awaiting_independent_review", "summary": "pending risk, TBM, briefing, preview, editor, HWP, PDF, XLSX, text, and JSON surfaces visibly inject the standardized legal-review marker without mutating stored editable bodies" },
+    { "finding": "WHOLE-CANDIDATE-5", "status": "candidate_fix_awaiting_independent_review", "summary": "external MCP, Claw, and docpack output exposes a typed candidate provenance projection and strips raw packs, graph IDs, runtime IDs, raw input, and internal references" },
+    { "finding": "WHOLE-CANDIDATE-6", "status": "candidate_fix_awaiting_independent_review", "summary": "one deterministic recursively frozen snapshot containing ordered ontology and contextual provenance is built before provider invocation and is the sole naturalization input" },
+    { "finding": "WHOLE-CANDIDATE-7", "status": "candidate_fix_awaiting_independent_review", "summary": "query_safety_knowledge is versioned v2 while retaining v1 candidate compatibility aliases with string articles and duties; unresolved unknowns remain neutral candidates" },
+    { "finding": "WHOLE-CANDIDATE-8", "status": "candidate_fix_awaiting_independent_review", "summary": "false-green singleton, SIF-only, unresolved KOSHA, wrong-section, pending export, privacy, compatibility, and all-evidence snapshot tests were replaced or added" }
   ],
+  "candidateIntegration": {
+    "target": "77d8641",
+    "performed": false,
+    "mergeBase": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
+    "freshFrontendRouteIdentityRedPreserved": true,
+    "overlappingFiles": [
+      {
+        "file": "components/FieldOperationsWorkspace.tsx",
+        "candidateHunks": ["+31", "+573", "585-586", "611", "630"],
+        "targetHunks": ["851", "1243-1278", "1280", "1295", "1309", "1311-1319"],
+        "threeWayPreviewConflict": false,
+        "preserveOnSelectiveIntegration": ["Phase A authority labels and CitationList state", "editor surface union and collapsible operations sidebar"]
+      },
+      {
+        "file": "components/SafeGuardCommandCenter.tsx",
+        "candidateHunks": ["+56", "454-459", "475-503", "527-551", "611-637", "700-826"],
+        "targetHunks": ["2346"],
+        "threeWayPreviewConflict": false,
+        "preserveOnSelectiveIntegration": ["Phase A readiness and evidence authority gates", "surface=editor input"]
+      }
+    ]
+  },
   "lawVerification": {
     "verifiedOn": "2026-07-13",
     "currentEffectiveDate": "2026-03-02",
@@ -529,11 +579,21 @@
         { "failed": 18, "passed": 191, "total": 209, "failedSuites": 1, "scope": "expanded_authority_document_and_standalone_tool_contracts" },
         { "failed": 1, "passed": 7, "total": 8, "scope": "missing_knowledge_candidate_fail_closed" },
         { "failed": 1, "passed": 5, "total": 6, "scope": "workpack_editor_pending_authority_copy" }
+      ],
+      "wholeCandidateReviewProductFailuresAcrossNonOverlappingRuns": 25,
+      "wholeCandidateReviewSuiteInitializationReds": 1,
+      "wholeCandidateReviewRedRuns": [
+        { "failed": 9, "passed": 107, "total": 116, "scope": "canonical_plan_source_roles_sections_and_privacy" },
+        { "failed": 7, "passed": 50, "total": 57, "scope": "pending_document_public_dto_and_compatibility_paths" },
+        { "failed": 2, "passed": 4, "total": 6, "scope": "deterministic_all_evidence_provider_snapshot" },
+        { "failed": 2, "passed": 0, "total": 2, "scope": "claw_contract_isolation", "overlapWithPreviousRun": true },
+        { "failed": 6, "passed": 121, "total": 127, "failedSuites": 1, "scope": "false_green_shrunk_pack_aliases_sections_and_v1_strings" },
+        { "failed": 1, "passed": 4, "total": 5, "scope": "actual_structured_tbm_xlsx_pending_marker" }
       ]
     },
     "focused": {
-      "filesPassed": 28,
-      "testsPassed": 337,
+      "filesPassed": 29,
+      "testsPassed": 360,
       "status": "pass",
       "serial": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"
@@ -547,7 +607,8 @@
       "status": "fail_stale_external_browser_evidence_provenance",
       "testsPassed": 36,
       "testsFailed": 1,
-      "failure": "tracked frontend browser audit sourceIdentity predates the current owned authority-label changes; the preserved failure remains tests/frontend-route-coverage.test.ts:693"
+      "failure": "tracked frontend browser audit sourceIdentity predates the current owned authority-label changes; the preserved failure remains tests/frontend-route-coverage.test.ts:693",
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/frontend-route-probe.log"
     },
     "diffCheck": { "status": "pass" },
     "fullSuite": {

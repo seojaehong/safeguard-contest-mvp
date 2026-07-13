@@ -125,6 +125,48 @@ describe("buildSafetyKnowledgeResult — 도구 페이로드 정형화", () => {
     expect(serialized).not.toContain("direct");
   });
 
+  test("versions the candidate DTO while preserving v1 string aliases", () => {
+    const internal = buildPublishedSafetyKnowledge(graph, "고소작업");
+    if (!internal.found) throw new Error("expected published graph candidate");
+    const projector = Reflect.get(mcpTools, "buildSafetyKnowledgeCandidateResult");
+    if (typeof projector !== "function") {
+      throw new Error("standalone knowledge projection is missing");
+    }
+
+    const external = projector(internal) as Record<string, unknown>;
+    expect(external).toMatchObject({
+      schemaVersion: "query_safety_knowledge/v2",
+      coreProvenance: "candidate_only",
+      compatibilityVersion: "v1-candidate",
+      candidateAnnotations: {
+        controls: expect.any(Array),
+        articles: expect.any(Array),
+        duties: expect.any(Array),
+      },
+    });
+    const controls = external.controls;
+    const articles = external.articles;
+    const duties = external.duties;
+    expect(Array.isArray(controls)).toBe(true);
+    expect(Array.isArray(articles)).toBe(true);
+    expect(Array.isArray(duties)).toBe(true);
+    if (!Array.isArray(controls) || !Array.isArray(articles) || !Array.isArray(duties)) {
+      throw new Error("expected v1-compatible arrays");
+    }
+    for (const control of controls) {
+      expect(control).toEqual(expect.objectContaining({ articles: expect.any(Array) }));
+      if (
+        typeof control !== "object" ||
+        control === null ||
+        !("articles" in control) ||
+        !Array.isArray(control.articles)
+      ) continue;
+      expect(control.articles.every((article: unknown) => typeof article === "string")).toBe(true);
+    }
+    expect(articles.every((article) => typeof article === "string")).toBe(true);
+    expect(duties.every((duty) => typeof duty === "string")).toBe(true);
+  });
+
   test("fails closed with review-required authority when no knowledge candidate resolves", () => {
     const internal = buildSafetyKnowledgeResult(
       "우주유영",

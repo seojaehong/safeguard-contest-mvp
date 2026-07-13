@@ -6,7 +6,9 @@ import { resolvePositiveIntEnv } from "@/lib/ai-deliverables-policy";
 import { createLogger } from "@/lib/logger";
 import {
   buildPhaseAGenerationPrompt,
+  buildPhaseAGenerationSnapshot,
   type PhaseAGenerationGrounding,
+  type PhaseAGenerationSnapshot,
 } from "@/lib/ontology/evidence-chain";
 
 const log = createLogger("ai");
@@ -165,22 +167,37 @@ function buildPrompt(
   question: string,
   citations: SearchResult[],
   phaseAGrounding?: PhaseAGenerationGrounding,
+  phaseAGenerationSnapshot?: PhaseAGenerationSnapshot,
 ) {
   if (phaseAGrounding) {
-    const providerInput = {
-      question,
-      citations: citations.slice(0, 4).map((citation) => ({
-        id: citation.id,
-        type: citation.type,
-        title: trimCitationText(citation.title, 120),
-        summary: trimCitationText(citation.summary, 200),
-        citation: trimCitationText(citation.citation || "", 100),
-        sourceLabel: citation.sourceLabel,
-        tags: citation.tags || [],
-      })),
-    };
+    const snapshot = phaseAGenerationSnapshot ?? buildPhaseAGenerationSnapshot({
+      grounding: phaseAGrounding,
+      contextualInputs: [
+        {
+          kind: "site_context",
+          provenance: {
+            source: "direct_answer_request",
+            authority: "context_only",
+            state: "available",
+          },
+          content: { question },
+        },
+        {
+          kind: "legal_search",
+          provenance: {
+            source: "direct_answer_citations",
+            authority: "candidate_only",
+            state: citations.length > 0 ? "available" : "missing",
+          },
+          content: citations.slice(0, 4),
+        },
+      ],
+    });
     return [
-      buildPhaseAGenerationPrompt(phaseAGrounding, providerInput),
+      buildPhaseAGenerationPrompt(snapshot, {
+        document: "answer",
+        outputOrder: ["핵심 판단", "즉시 조치", "실무 체크포인트 3개"],
+      }),
       "",
       "[TRUSTED ANSWER OUTPUT CONTRACT]",
       "Phase A 고정 정책과 allow-list 범위 안에서만 한국어 현장 검토용 초안을 작성하라.",
@@ -330,7 +347,11 @@ export async function enhanceLegalEvidenceMappings(question: string, citations: 
 export async function generateAnswer(
   question: string,
   citations: SearchResult[],
-  options: { traceId: string; phaseAGrounding?: PhaseAGenerationGrounding }
+  options: {
+    traceId: string;
+    phaseAGrounding?: PhaseAGenerationGrounding;
+    phaseAGenerationSnapshot?: PhaseAGenerationSnapshot;
+  }
 ): Promise<AnswerGenerationResult> {
   if (!isVertexConfigured() && !openAiApiKey) {
     const trace = { provider: "mock", model: null, fallbackUsed: false } as const;
@@ -350,7 +371,12 @@ export async function generateAnswer(
     };
   }
 
-  const prompt = buildPrompt(question, citations, options.phaseAGrounding);
+  const prompt = buildPrompt(
+    question,
+    citations,
+    options.phaseAGrounding,
+    options.phaseAGenerationSnapshot,
+  );
 
   const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {

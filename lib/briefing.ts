@@ -6,7 +6,11 @@
 // Supabase/네트워크 의존성 없음 — vitest로 바로 검증 가능.
 
 import type { AskResponse } from "@/lib/types";
-import { assessPhaseAReviewAuthority } from "@/lib/phase-a-review";
+import {
+  applyPhaseADocumentAuthorityMarker,
+  assessPhaseAReviewAuthority,
+  buildPhaseADocumentAuthorityMarker,
+} from "@/lib/phase-a-review";
 
 export type BriefingSite = {
   name: string;
@@ -180,6 +184,7 @@ export function buildBriefingEmail(response: AskResponse, siteName: string, work
 
   const body = [
     `${siteName} 오늘의 안전 브리핑입니다.`,
+    buildPhaseADocumentAuthorityMarker(response.phaseAReview),
     "",
     "[기상 요약]",
     weatherSummary,
@@ -233,6 +238,8 @@ export function buildBriefingDispatchWorkpack(
   const kosha = response.externalData.kosha.references.slice(0, 3);
   const koshaEducation = response.externalData.koshaEducation.recommendations.slice(0, 3);
   const accidentCases = response.externalData.accidentCases.cases.slice(0, 3);
+  const documentCopy = (body: string): string =>
+    applyPhaseADocumentAuthorityMarker(body, response.phaseAReview);
 
   return {
     companyName: response.scenario.companyName,
@@ -254,16 +261,16 @@ export function buildBriefingDispatchWorkpack(
       nativeLabel: "한국어"
     },
     documents: {
-      workpackSummaryDraft: response.deliverables.workpackSummaryDraft,
-      riskAssessmentDraft: response.deliverables.riskAssessmentDraft,
-      workPlanDraft: response.deliverables.workPlanDraft,
-      tbmBriefing: response.deliverables.tbmBriefing,
-      tbmLogDraft: response.deliverables.tbmLogDraft,
-      safetyEducationRecordDraft: response.deliverables.safetyEducationRecordDraft,
-      emergencyResponseDraft: response.deliverables.emergencyResponseDraft,
-      photoEvidenceDraft: response.deliverables.photoEvidenceDraft,
-      foreignWorkerBriefing: response.deliverables.foreignWorkerBriefing,
-      foreignWorkerTransmission: response.deliverables.foreignWorkerTransmission,
+      workpackSummaryDraft: documentCopy(response.deliverables.workpackSummaryDraft),
+      riskAssessmentDraft: documentCopy(response.deliverables.riskAssessmentDraft),
+      workPlanDraft: documentCopy(response.deliverables.workPlanDraft),
+      tbmBriefing: documentCopy(response.deliverables.tbmBriefing),
+      tbmLogDraft: documentCopy(response.deliverables.tbmLogDraft),
+      safetyEducationRecordDraft: documentCopy(response.deliverables.safetyEducationRecordDraft),
+      emergencyResponseDraft: documentCopy(response.deliverables.emergencyResponseDraft),
+      photoEvidenceDraft: documentCopy(response.deliverables.photoEvidenceDraft),
+      foreignWorkerBriefing: documentCopy(response.deliverables.foreignWorkerBriefing),
+      foreignWorkerTransmission: documentCopy(response.deliverables.foreignWorkerTransmission),
       foreignWorkerLanguages: response.deliverables.foreignWorkerLanguages
     },
     evidence: {

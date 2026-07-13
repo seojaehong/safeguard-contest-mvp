@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import { assembleGraph } from "@/lib/ontology/graph-store";
+import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
+import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 
 const mocks = vi.hoisted(() => ({
   querySafetyKnowledge: vi.fn(),
@@ -11,10 +13,14 @@ const mocks = vi.hoisted(() => ({
   runAsk: vi.fn(),
 }));
 
-vi.mock("@/lib/ontology/knowledge-tool", () => ({
-  querySafetyKnowledge: mocks.querySafetyKnowledge,
-  resolveSafetyKnowledgeSnapshot: mocks.resolveSafetyKnowledgeSnapshot,
-}));
+vi.mock("@/lib/ontology/knowledge-tool", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/ontology/knowledge-tool")>();
+  return {
+    ...original,
+    querySafetyKnowledge: mocks.querySafetyKnowledge,
+    resolveSafetyKnowledgeSnapshot: mocks.resolveSafetyKnowledgeSnapshot,
+  };
+});
 
 vi.mock("@/lib/ontology/qa-review-tool", () => ({
   reviewDocpack: mocks.reviewDocpack,
@@ -166,15 +172,51 @@ describe("claw ontology generation handlers", () => {
 
     expect(result).toMatchObject({
       found: true,
+      schemaVersion: "query_safety_knowledge/v2",
+      coreProvenance: "candidate_only",
+      compatibilityVersion: "v1-candidate",
       authority: "review_required",
       authoritative: false,
       evidenceChainState: "review_required",
       controls: [expect.objectContaining({ authority: "candidate" })],
-      articles: [expect.objectContaining({ authority: "candidate" })],
-      duties: [expect.objectContaining({ authority: "candidate" })],
+      articles: [expect.any(String)],
+      duties: [expect.any(String)],
+      candidateAnnotations: {
+        articles: [expect.objectContaining({ authority: "candidate" })],
+        duties: [expect.objectContaining({ authority: "candidate" })],
+      },
     });
     expect(result).not.toHaveProperty("evidenceContract");
     expect(JSON.stringify(result)).not.toContain("법제처 검증");
+  });
+
+  test("strips raw graph and internal provenance from the Claw docpack surface", async () => {
+    const graph = assembleGraph(
+      SEED_NODES.filter((node) => node.review_state === "published"),
+      SEED_EDGES.filter((edge) => edge.review_state === "published"),
+    );
+    const evidence = buildPublishedSafetyKnowledge(graph, "고소작업");
+    mocks.resolveSafetyKnowledgeSnapshot.mockResolvedValue({ evidence, graphSnapshot: graph });
+
+    const result = await executeClawTool("generate_safety_docpack", {
+      question: "고소작업",
+      mode: "template",
+      includeFull: true,
+    });
+    const serialized = JSON.stringify(result);
+
+    expect(result).not.toHaveProperty("evidenceContract");
+    expect(result).toHaveProperty("publicEvidence");
+    for (const privateField of [
+      "graphControlNodeId",
+      "graphArticleNodeId",
+      "taskNodeId",
+      "hazardNodeId",
+      "snapshotItemId",
+      "chunkSha256",
+    ]) {
+      expect(serialized).not.toContain(privateField);
+    }
   });
 
   test("routes the plain docpack tool through missing Phase A grounding", async () => {

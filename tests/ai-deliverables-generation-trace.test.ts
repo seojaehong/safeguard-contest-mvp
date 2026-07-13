@@ -420,16 +420,34 @@ describe("deliverables generation trace", () => {
     expect(jsonEnd).toBeGreaterThan(jsonStart);
     const payload = JSON.parse(prompt.slice(jsonStart, jsonEnd)) as unknown;
     expect(payload).toMatchObject({
-      phaseAGrounding,
-      providerInput: {
-        question,
-        scenario: expect.objectContaining({
-          companyName: "COMPANY_SENTINEL",
-          siteName: "SITE_SENTINEL",
-        }),
-        citations: [expect.stringContaining("UNLISTED_SEARCH_SOURCE")],
-        koshaLines: ["UNLISTED_KOSHA_SOURCE"],
+      evidenceSnapshot: {
+        schemaVersion: "phase-a-generation-snapshot/v1",
+        phaseAGrounding,
+        contextualInputs: expect.arrayContaining([
+          expect.objectContaining({
+            kind: "site_context",
+            content: expect.objectContaining({
+              question,
+              scenario: expect.objectContaining({
+                companyName: "COMPANY_SENTINEL",
+                siteName: "SITE_SENTINEL",
+              }),
+            }),
+          }),
+          expect.objectContaining({
+            kind: "legal_search",
+            content: [expect.stringContaining("UNLISTED_SEARCH_SOURCE")],
+          }),
+          expect.objectContaining({
+            kind: "kosha_reference",
+            content: expect.objectContaining({
+              lines: ["UNLISTED_KOSHA_SOURCE"],
+            }),
+          }),
+        ]),
+        snapshotDigest: expect.stringMatching(/^sha256:/),
       },
+      outputRequest: expect.any(Object),
     });
 
     const outsideJson = `${prompt.slice(0, jsonStart)}${prompt.slice(jsonEnd)}`;

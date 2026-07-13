@@ -11,9 +11,14 @@ import {
   type BriefingSiteRow
 } from "@/lib/briefing";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
 import type { AskResponse } from "@/lib/types";
 
 function withPendingPhaseAReview(response: AskResponse): AskResponse {
+  const planBinding = structuredClone(
+    buildCanonicalPhaseAPlanBinding("vehicle-machinery-entrapment"),
+  );
+  const planDigest = planBinding.planDigest;
   const phaseAReview = {
     verdict: "검토 필요" as const,
     verified: false,
@@ -21,17 +26,20 @@ function withPendingPhaseAReview(response: AskResponse): AskResponse {
     groundingStatus: "review_required" as const,
     outputStatus: "review_required_draft" as const,
     verifiedRecords: 0,
+    planBinding,
     materializationCoverage: {
       status: "missing",
+      chainId: planBinding.chainId,
+      planDigest,
       expectedRecordCount: 2,
       materializedRecordCount: 0,
-      expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+      expectedStableKeys: [...planBinding.expectedStableKeys],
       materializedStableKeys: [],
-      unresolvedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+      unresolvedStableKeys: [...planBinding.expectedStableKeys],
     },
     humanConfirmation: { required: true as const, status: "pending" as const },
     actionableReason: "SIF/KOSHA/법령 source resolution을 완료하세요.",
-  } as NonNullable<AskResponse["phaseAReview"]>;
+  } satisfies NonNullable<AskResponse["phaseAReview"]>;
   return {
     ...response,
     phaseAReview,

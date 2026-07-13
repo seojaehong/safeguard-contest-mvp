@@ -6,8 +6,13 @@ import type { AskResponse, TbmBriefingStructured, TbmLogStructured, WorkPlanStru
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
 
 const question = "세이프건설 서울 현장 고소 작업 위험성평가와 TBM을 만들어줘.";
+const phaseAPlanBinding = structuredClone(
+  buildCanonicalPhaseAPlanBinding("vehicle-machinery-entrapment"),
+);
+const phaseAPlanDigest = phaseAPlanBinding.planDigest;
 
 const harnessReferences: SafetyReferenceItem[] = [
   {
@@ -159,15 +164,25 @@ function makeLiveStructuredResponse(): AskResponse {
       groundingStatus: "resolved",
       outputStatus: "grounded_draft",
       verifiedRecords: 2,
+      planBinding: phaseAPlanBinding,
       materializationCoverage: {
         status: "complete",
+        chainId: phaseAPlanBinding.chainId,
+        planDigest: phaseAPlanDigest,
         expectedRecordCount: 2,
         materializedRecordCount: 2,
-        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
-        materializedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        expectedStableKeys: [...phaseAPlanBinding.expectedStableKeys],
+        materializedStableKeys: [...phaseAPlanBinding.expectedStableKeys],
         unresolvedStableKeys: []
       },
-      humanConfirmation: { required: true, status: "confirmed" },
+      humanConfirmation: {
+        required: true,
+        status: "confirmed",
+        reviewerId: "reviewer-001",
+        confirmedAt: "2026-07-14T03:00:00.000Z",
+        chainId: phaseAPlanBinding.chainId,
+        planDigest: phaseAPlanDigest,
+      },
       actionableReason: "확인 완료"
     },
     mode: "live",
@@ -301,13 +316,16 @@ describe("qualityContract", () => {
       groundingStatus: "review_required",
       outputStatus: "review_required_draft",
       verifiedRecords: 0,
+      planBinding: phaseAPlanBinding,
       materializationCoverage: {
         status: "missing",
+        chainId: phaseAPlanBinding.chainId,
+        planDigest: phaseAPlanDigest,
         expectedRecordCount: 2,
         materializedRecordCount: 0,
-        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
+        expectedStableKeys: [...phaseAPlanBinding.expectedStableKeys],
         materializedStableKeys: [],
-        unresolvedStableKeys: ["chain:risk:control", "chain:tbm:control"]
+        unresolvedStableKeys: [...phaseAPlanBinding.expectedStableKeys]
       },
       humanConfirmation: { required: true, status: "pending" },
       actionableReason: "Phase A 근거와 문서 반영 위치를 확인하세요."
@@ -328,13 +346,15 @@ describe("qualityContract", () => {
       verifiedRecords: 1,
       materializationCoverage: {
         status: "partial",
+        chainId: phaseAPlanBinding.chainId,
+        planDigest: phaseAPlanDigest,
         expectedRecordCount: 2,
         materializedRecordCount: 1,
-        expectedStableKeys: ["chain:risk:control", "chain:tbm:control"],
-        materializedStableKeys: ["chain:risk:control"],
-        unresolvedStableKeys: ["chain:tbm:control"],
+        expectedStableKeys: [...phaseAPlanBinding.expectedStableKeys],
+        materializedStableKeys: [phaseAPlanBinding.expectedStableKeys[0]],
+        unresolvedStableKeys: [phaseAPlanBinding.expectedStableKeys[1]],
       },
-    } as NonNullable<AskResponse["phaseAReview"]>;
+    } satisfies NonNullable<AskResponse["phaseAReview"]>;
 
     const contract = buildQualityContract(response, "2026-07-08T00:00:00.000Z");
 

@@ -5,6 +5,7 @@ import type { DbHarnessPacket } from "./db-harness";
 import type {
   EvidenceMaterializationCoverage,
   PhaseAGenerationGrounding,
+  PhaseAPlanBinding,
 } from "./ontology/evidence-chain";
 
 export type SourceType = "law" | "precedent" | "interpretation";
@@ -385,8 +386,18 @@ export type PhaseAReview = {
   groundingStatus: PhaseAGenerationGrounding["groundingStatus"];
   outputStatus: PhaseAGenerationGrounding["generationPolicy"]["outputStatus"];
   verifiedRecords: number;
+  planBinding: PhaseAPlanBinding | null;
   materializationCoverage: EvidenceMaterializationCoverage;
-  humanConfirmation: { required: true; status: "pending" | "confirmed" };
+  humanConfirmation:
+    | { required: true; status: "pending" }
+    | {
+        required: true;
+        status: "confirmed";
+        reviewerId: string;
+        confirmedAt: string;
+        chainId: PhaseAPlanBinding["chainId"];
+        planDigest: string;
+      };
   actionableReason: string;
 };
 

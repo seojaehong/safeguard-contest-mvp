@@ -3,6 +3,8 @@ import { describe, expect, test } from "vitest";
 import { buildDbHarnessPacket } from "@/lib/db-harness";
 import { assembleGraph, type OntologyGraph } from "@/lib/ontology/graph-store";
 import {
+  buildPhaseAGenerationGrounding,
+  buildCanonicalPhaseAPlanBinding,
   classifyControlObligation,
   confirmNaturalizedEvidenceChain,
   naturalizeEvidenceChain,
@@ -16,6 +18,7 @@ import {
 import {
   EVIDENCE_CHAIN_CONTRACT_VERSION,
   EXCLUDED_KOSHA_ITEM_IDS,
+  PHASE_A_AUTHORITY_PLAN_DIGESTS,
   SIF_CORPUS_STATE,
 } from "@/lib/ontology/evidence-chain-registry";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
@@ -42,6 +45,18 @@ function requireReviewRequired(input: string) {
   return resolution.pack;
 }
 
+function readyHazardPriority(pack: ReturnType<typeof requireReviewRequired>) {
+  return pack.hazardPriority.map((source) => ({
+    ...source,
+    reviewState: "published" as const,
+    resolution: "resolved" as const,
+  }));
+}
+
+function documentSection(rowOrSection: string, line: string): string {
+  return [`[${rowOrSection}]`, line].join("\n");
+}
+
 function requireVerifiedGuidanceMaterializationFixture() {
   const sourcePack = requireReviewRequired("고소작업");
   const sourceControl = sourcePack.controls.find(
@@ -61,6 +76,7 @@ function requireVerifiedGuidanceMaterializationFixture() {
   };
   const obligation = classifyControlObligation([resolvedGuidance]);
   return {
+    hazardPriority: readyHazardPriority(sourcePack),
     control: {
       ...sourceControl,
       lawEvidence: [],
@@ -102,6 +118,7 @@ function requireMandateWithGuidanceMaterializationFixture() {
   const obligation = classifyControlObligation([law, guidance]);
   expect(obligation.classification).toBe("statutory_mandate_with_guidance");
   return {
+    hazardPriority: readyHazardPriority(sourcePack),
     control: {
       ...sourceControl,
       guidanceEvidence: [guidance],
@@ -790,6 +807,17 @@ describe("pipeline and document materialization contract", () => {
     expect(requireReviewRequired("전기작업").assemblyTrace).toEqual(stages);
   });
 
+  test.each(Object.entries(PHASE_A_AUTHORITY_PLAN_DIGESTS))(
+    "keeps the %s authority digest derived from the full server plan",
+    (chainId, digest) => {
+      const binding = buildCanonicalPhaseAPlanBinding(
+        chainId as keyof typeof PHASE_A_AUTHORITY_PLAN_DIGESTS,
+      );
+      expect(binding.planDigest).toBe(digest);
+      expect(binding.expectedStableKeys).toHaveLength(binding.expectedRecordCount);
+    },
+  );
+
   test("fails closed at the graph stage without consulting later evidence layers", () => {
     const stages: string[] = [];
     const graphWithoutTask: OntologyGraph = {
@@ -831,18 +859,38 @@ describe("pipeline and document materialization contract", () => {
     }
   });
 
+  test("rejects a server evidence pack whose planned target set was shrunk", () => {
+    const sourcePack = requireReviewRequired("차량계 하역운반기계 인접 작업");
+    const tamperedPack = structuredClone(sourcePack);
+    tamperedPack.hazardPriority = readyHazardPriority(sourcePack);
+    tamperedPack.materializationTargets[0]?.targets.pop();
+
+    const grounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "resolved",
+      evidencePack: tamperedPack,
+    });
+
+    expect(grounding).toMatchObject({
+      evidenceChainState: "review_required",
+      groundingStatus: "review_required",
+      planBinding: null,
+      allowedEvidence: [],
+    });
+  });
+
   test("records a Control only from same-line current-law evidence", () => {
     const pack = requireReviewRequired("차량계·기계 인접작업");
     const lawUid = "law:산업안전보건기준에 관한 규칙:제172조";
     const controlLabel = pack.controls[0]?.label;
-    if (!controlLabel) throw new Error("expected vehicle contact Control");
+    const plan = pack.materializationTargets[0];
+    if (!controlLabel || !plan) throw new Error("expected vehicle contact Control");
 
     const records = verifyEvidenceMaterialization({
       evidenceChainState: "resolved",
-      pack,
+      pack: { ...pack, hazardPriority: readyHazardPriority(pack) },
       documents: {
-        riskAssessmentDraft: `위험성평가\n${controlLabel} | ${lawUid}`,
-        tbmBriefing: `TBM\n${controlLabel} - ${lawUid}`,
+        riskAssessmentDraft: documentSection(plan.targets[0].rowOrSection, `${controlLabel} | ${lawUid}`),
+        tbmBriefing: documentSection(plan.targets[1].rowOrSection, `${controlLabel} - ${lawUid}`),
       },
     });
 
@@ -890,9 +938,12 @@ describe("pipeline and document materialization contract", () => {
 
       expect(verifyEvidenceMaterialization({
         evidenceChainState: "resolved",
-        pack,
+        pack: { ...pack, hazardPriority: readyHazardPriority(pack) },
         documents: {
-          riskAssessmentDraft: `${plan.controlLabel} | ${before}${lawUid}${after}`,
+          riskAssessmentDraft: documentSection(
+            plan.targets[0].rowOrSection,
+            `${plan.controlLabel} | ${before}${lawUid}${after}`,
+          ),
         },
       })).toEqual([
         expect.objectContaining({
@@ -911,9 +962,12 @@ describe("pipeline and document materialization contract", () => {
 
     expect(verifyEvidenceMaterialization({
       evidenceChainState: "resolved",
-      pack,
+      pack: { ...pack, hazardPriority: readyHazardPriority(pack) },
       documents: {
-        riskAssessmentDraft: `${plan.controlLabel} | 근거: “${lawUid}”: 작업 전 확인한다.`,
+        riskAssessmentDraft: documentSection(
+          plan.targets[0].rowOrSection,
+          `${plan.controlLabel} | 근거: “${lawUid}”: 작업 전 확인한다.`,
+        ),
       },
     })).toHaveLength(1);
   });
@@ -948,9 +1002,12 @@ describe("pipeline and document materialization contract", () => {
 
       expect(verifyEvidenceMaterialization({
         evidenceChainState: "resolved",
-        pack,
+        pack: { ...pack, hazardPriority: readyHazardPriority(pack) },
         documents: {
-          riskAssessmentDraft: `${plan.controlLabel} | ${before}${lawUid}${after}`,
+          riskAssessmentDraft: documentSection(
+            plan.targets[0].rowOrSection,
+            `${plan.controlLabel} | ${before}${lawUid}${after}`,
+          ),
         },
       })).toEqual([]);
     },
@@ -964,9 +1021,12 @@ describe("pipeline and document materialization contract", () => {
 
     expect(verifyEvidenceMaterialization({
       evidenceChainState: "resolved",
-      pack,
+      pack: { ...pack, hazardPriority: readyHazardPriority(pack) },
       documents: {
-        riskAssessmentDraft: `${plan.controlLabel} | ${lawUid}의2`,
+        riskAssessmentDraft: documentSection(
+          plan.targets[0].rowOrSection,
+          `${plan.controlLabel} | ${lawUid}의2`,
+        ),
       },
     })).toEqual([]);
   });
@@ -980,24 +1040,37 @@ describe("pipeline and document materialization contract", () => {
 
     expect(verifyEvidenceMaterialization({
       evidenceChainState: "resolved",
-      pack,
-      documents: { riskAssessmentDraft: `${plan.controlLabel} | ${sifUid}` },
+      pack: { ...pack, hazardPriority: readyHazardPriority(pack) },
+      documents: {
+        riskAssessmentDraft: documentSection(
+          plan.targets[0].rowOrSection,
+          `${plan.controlLabel} | ${sifUid}`,
+        ),
+      },
     })).toEqual([]);
     expect(verifyEvidenceMaterialization({
       evidenceChainState: "resolved",
-      pack,
-      documents: { riskAssessmentDraft: `${plan.controlLabel}\n${lawUid}` },
+      pack: { ...pack, hazardPriority: readyHazardPriority(pack) },
+      documents: {
+        riskAssessmentDraft: documentSection(
+          plan.targets[0].rowOrSection,
+          `${plan.controlLabel}\n${lawUid}`,
+        ),
+      },
     })).toEqual([]);
   });
 
   test("records verified Control-scoped KOSHA guidance with its technical role", () => {
-    const { control, plan, guidance } = requireVerifiedGuidanceMaterializationFixture();
+    const { hazardPriority, control, plan, guidance } = requireVerifiedGuidanceMaterializationFixture();
 
     expect(verifyEvidenceMaterialization({
       evidenceChainState: "resolved",
-      pack: { controls: [control], materializationTargets: [plan] },
+      pack: { hazardPriority, controls: [control], materializationTargets: [plan] },
       documents: {
-        riskAssessmentDraft: `${plan.controlLabel} | ${guidance.citedUid}`,
+        riskAssessmentDraft: documentSection(
+          plan.targets[0].rowOrSection,
+          `${plan.controlLabel} | ${guidance.citedUid}`,
+        ),
       },
     })).toEqual([
       expect.objectContaining({
@@ -1017,27 +1090,33 @@ describe("pipeline and document materialization contract", () => {
   ] as const)(
     "does not materialize mandate-with-guidance from %s",
     (_label, source) => {
-      const { control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
+      const { hazardPriority, control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
       const citedUid = source === "law" ? law.citedUid : guidance.citedUid;
 
       expect(verifyEvidenceMaterialization({
         evidenceChainState: "resolved",
-        pack: { controls: [control], materializationTargets: [plan] },
+        pack: { hazardPriority, controls: [control], materializationTargets: [plan] },
         documents: {
-          riskAssessmentDraft: `${plan.controlLabel} | ${citedUid}`,
+          riskAssessmentDraft: documentSection(
+            plan.targets[0].rowOrSection,
+            `${plan.controlLabel} | ${citedUid}`,
+          ),
         },
       })).toEqual([]);
     },
   );
 
   test("materializes mandate-with-guidance only when law and KOSHA provenance share the Control location", () => {
-    const { control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
+    const { hazardPriority, control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
 
     expect(verifyEvidenceMaterialization({
       evidenceChainState: "resolved",
-      pack: { controls: [control], materializationTargets: [plan] },
+      pack: { hazardPriority, controls: [control], materializationTargets: [plan] },
       documents: {
-        riskAssessmentDraft: `${plan.controlLabel} | ${law.citedUid} | ${guidance.citedUid}`,
+        riskAssessmentDraft: documentSection(
+          plan.targets[0].rowOrSection,
+          `${plan.controlLabel} | ${law.citedUid} | ${guidance.citedUid}`,
+        ),
       },
     })).toEqual([
       expect.objectContaining({
@@ -1050,16 +1129,54 @@ describe("pipeline and document materialization contract", () => {
     ]);
   });
 
+  test("does not materialize a Control cited under a different planned section", () => {
+    const { hazardPriority, control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
+    const wrongSection = "개구부 방호조치";
+
+    expect(verifyEvidenceMaterialization({
+      evidenceChainState: "resolved",
+      pack: { hazardPriority, controls: [control], materializationTargets: [plan] },
+      documents: {
+        riskAssessmentDraft: [
+          `[${wrongSection}]`,
+          `${plan.controlLabel} | ${law.citedUid} | ${guidance.citedUid}`,
+        ].join("\n"),
+      },
+    })).toEqual([]);
+  });
+
+  test("fails closed when a planned section occurs more than once", () => {
+    const { hazardPriority, control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
+    const plannedSection = plan.targets[0].rowOrSection;
+    const materializedLine = `${plan.controlLabel} | ${law.citedUid} | ${guidance.citedUid}`;
+
+    expect(verifyEvidenceMaterialization({
+      evidenceChainState: "resolved",
+      pack: { hazardPriority, controls: [control], materializationTargets: [plan] },
+      documents: {
+        riskAssessmentDraft: [
+          `[${plannedSection}]`,
+          materializedLine,
+          `[${plannedSection}]`,
+          materializedLine,
+        ].join("\n"),
+      },
+    })).toEqual([]);
+  });
+
   test("does not let duplicate document hits inflate one planned stableKey", () => {
-    const { control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
+    const { hazardPriority, control, plan, law, guidance } = requireMandateWithGuidanceMaterializationFixture();
     const line = `${plan.controlLabel} | ${law.citedUid} | ${guidance.citedUid}`;
 
     const records = verifyEvidenceMaterialization({
       evidenceChainState: "resolved",
-      pack: { controls: [control], materializationTargets: [plan] },
+      pack: { hazardPriority, controls: [control], materializationTargets: [plan] },
       documents: {
-        tbmBriefing: line,
-        tbmLogDraft: line,
+        tbmBriefing: [
+          `[${plan.targets[1].rowOrSection}]`,
+          line,
+          line,
+        ].join("\n"),
       },
     });
 
@@ -1070,16 +1187,19 @@ describe("pipeline and document materialization contract", () => {
   test.each(["prefix", "suffix"] as const)(
     "does not materialize KOSHA guidance when the allowed UID is a %s of another token",
     (collision) => {
-      const { control, plan, guidance } = requireVerifiedGuidanceMaterializationFixture();
+      const { hazardPriority, control, plan, guidance } = requireVerifiedGuidanceMaterializationFixture();
       const collidingUid = collision === "prefix"
         ? `${guidance.citedUid}-supplement`
         : `ref:safety_reference_items:archive-${guidance.citedUid}`;
 
       expect(verifyEvidenceMaterialization({
         evidenceChainState: "resolved",
-        pack: { controls: [control], materializationTargets: [plan] },
+        pack: { hazardPriority, controls: [control], materializationTargets: [plan] },
         documents: {
-          riskAssessmentDraft: `${plan.controlLabel} | ${collidingUid}`,
+          riskAssessmentDraft: documentSection(
+            plan.targets[0].rowOrSection,
+            `${plan.controlLabel} | ${collidingUid}`,
+          ),
         },
       })).toEqual([]);
     },
@@ -1174,7 +1294,7 @@ describe("pipeline and document materialization contract", () => {
     expect(() =>
       confirmNaturalizedEvidenceChain(naturalized, {
         reviewerId: "safety-reviewer-1",
-        confirmedAt: "2026-07-13T08:00:00+09:00",
+        confirmedAt: "2026-07-12T23:00:00.000Z",
       }),
     ).toThrow(/quality check.*passed/i);
 
@@ -1182,7 +1302,7 @@ describe("pipeline and document materialization contract", () => {
     expect(() =>
       confirmNaturalizedEvidenceChain(failed, {
         reviewerId: "safety-reviewer-1",
-        confirmedAt: "2026-07-13T08:00:00+09:00",
+        confirmedAt: "2026-07-12T23:00:00.000Z",
       }),
     ).toThrow(/quality check.*passed/i);
 
@@ -1190,14 +1310,16 @@ describe("pipeline and document materialization contract", () => {
 
     const confirmed = confirmNaturalizedEvidenceChain(passed, {
       reviewerId: "safety-reviewer-1",
-      confirmedAt: "2026-07-13T08:00:00+09:00",
+      confirmedAt: "2026-07-12T23:00:00.000Z",
     });
-    expect(confirmed.humanConfirmation).toEqual({
+    expect(confirmed.humanConfirmation).toEqual(expect.objectContaining({
       required: true,
       status: "confirmed",
       reviewerId: "safety-reviewer-1",
-      confirmedAt: "2026-07-13T08:00:00+09:00",
-    });
+      confirmedAt: "2026-07-12T23:00:00.000Z",
+      chainId: confirmed.planBinding.chainId,
+      planDigest: confirmed.planBinding.planDigest,
+    }));
     expect(confirmed.qualityCheck).toEqual({ required: true, status: "passed" });
   });
 
@@ -1206,7 +1328,7 @@ describe("pipeline and document materialization contract", () => {
     const passed = recordNaturalizedEvidenceChainQuality(naturalized, "passed");
     const confirmed = confirmNaturalizedEvidenceChain(passed, {
       reviewerId: "safety-reviewer-1",
-      confirmedAt: "2026-07-13T08:00:00+09:00",
+      confirmedAt: "2026-07-12T23:00:00.000Z",
     });
 
     const failed = recordNaturalizedEvidenceChainQuality(confirmed, "failed");
@@ -1216,7 +1338,7 @@ describe("pipeline and document materialization contract", () => {
     expect(() =>
       confirmNaturalizedEvidenceChain(failed, {
         reviewerId: "safety-reviewer-2",
-        confirmedAt: "2026-07-13T09:00:00+09:00",
+        confirmedAt: "2026-07-13T00:00:00.000Z",
       }),
     ).toThrow(/quality check.*passed/i);
   });
@@ -1228,7 +1350,7 @@ describe("pipeline and document materialization contract", () => {
     const passed = recordNaturalizedEvidenceChainQuality(naturalized, "passed");
     const confirmed = confirmNaturalizedEvidenceChain(passed, {
       reviewerId: "safety-reviewer-1",
-      confirmedAt: "2026-07-13T08:00:00+09:00",
+      confirmedAt: "2026-07-12T23:00:00.000Z",
     });
 
     if (sourcePack.controls[0]) sourcePack.controls[0].label = "mutated after confirmation";

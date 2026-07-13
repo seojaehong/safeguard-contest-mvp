@@ -44,7 +44,9 @@ import { createLogger } from "@/lib/logger";
 import { safeEmit, type OnAskProgress } from "@/lib/ask-progress";
 import {
   buildPhaseAGenerationPrompt,
+  buildPhaseAGenerationSnapshot,
   type PhaseAGenerationGrounding,
+  type PhaseAGenerationSnapshot,
 } from "@/lib/ontology/evidence-chain";
 
 const log = createLogger("ai-deliverables");
@@ -125,6 +127,8 @@ type GenContext = {
   dbHarnessContext?: string;
   /** Fixed Phase A ontology pack and allow-list serialized before the persona. */
   phaseAGrounding?: PhaseAGenerationGrounding;
+  /** Immutable request-scoped evidence snapshot shared by every provider call. */
+  phaseAGenerationSnapshot?: PhaseAGenerationSnapshot;
   /** KST (Asia/Seoul) calendar date of this generation run — YYYY-MM-DD. */
   workDate: string;
 };
@@ -294,18 +298,23 @@ export function safeParseJson<T = unknown>(raw: string): T | null {
 
 export function persona(
   phaseAGrounding?: PhaseAGenerationGrounding,
-  providerInput: unknown = {},
+  phaseAGenerationSnapshot?: PhaseAGenerationSnapshot,
+  outputRequest: unknown = {},
 ) {
   if (phaseAGrounding) {
+    const snapshot = phaseAGenerationSnapshot ?? buildPhaseAGenerationSnapshot({
+      grounding: phaseAGrounding,
+      contextualInputs: [],
+    });
     return [
-      buildPhaseAGenerationPrompt(phaseAGrounding, providerInput),
+      buildPhaseAGenerationPrompt(snapshot, outputRequest),
       "",
       "[TRUSTED DOCUMENT PERSONA]",
       "당신은 한국 산업안전 현장 검토용 문서팩 편집자다.",
       "Phase A 고정 정책과 allow-list 안의 내용을 문서 양식에 맞게 자연화한다.",
       "4M(Man·Machine·Media·Management), 위험도 근거, 실행 가능한 감소대책 형식을 사용한다.",
       "허용목록 밖 위험요인·법령·KOSHA·사례·사실은 만들거나 인용하지 말고 '현장 확인 필요'로 표시한다.",
-      "사람 이름·회사 정식명칭·주소는 providerInput에 없으면 '____' 또는 '현장 확인 필요'로 표시한다.",
+      "사람 이름·회사 정식명칭·주소는 evidenceSnapshot에 없으면 '____' 또는 '현장 확인 필요'로 표시한다.",
       "모든 출력은 반드시 JSON이며 마크다운 fence를 사용하지 않는다.",
     ].join("\n");
   }
@@ -328,32 +337,14 @@ export function persona(
   ].join("\n");
 }
 
-function buildPhaseAProviderInput(
-  ctx: GenContext,
-  extra: Readonly<Record<string, unknown>> = {},
-) {
-  return {
-    question: ctx.question,
-    scenario: ctx.scenario,
-    citations: ctx.citationLines,
-    weatherNote: ctx.weatherNote ?? null,
-    trainingLines: ctx.trainingLines,
-    koshaLines: ctx.koshaLines,
-    accidentLines: ctx.accidentLines,
-    koshaPrimaryRefs: ctx.koshaPrimaryRefs ?? [],
-    dbHarnessContext: ctx.dbHarnessContext ?? null,
-    workDate: ctx.workDate,
-    ...extra,
-  };
-}
-
 function personaForContext(
   ctx: GenContext,
   extra: Readonly<Record<string, unknown>> = {},
 ) {
   return persona(
     ctx.phaseAGrounding,
-    ctx.phaseAGrounding ? buildPhaseAProviderInput(ctx, extra) : {},
+    ctx.phaseAGenerationSnapshot,
+    ctx.phaseAGrounding ? extra : {},
   );
 }
 
@@ -721,7 +712,7 @@ function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
     "필수 규칙:",
     "  - tbmRiskLinks는 입력 risk rows 중 TBM에서 공유해야 할 핵심 행 3~6개를 고른다.",
     ctx.phaseAGrounding
-      ? "  - riskRowIndex는 untrusted JSON의 providerInput.riskRows 배열에서 0부터 시작하는 인덱스다. 없는 행을 참조하지 않는다."
+      ? "  - riskRowIndex는 untrusted JSON의 outputRequest.riskRows 배열에서 0부터 시작하는 인덱스다. 없는 행을 참조하지 않는다."
       : "  - riskRowIndex는 아래 입력 배열의 0부터 시작하는 인덱스다. 없는 행을 참조하지 않는다.",
     "  - hazard는 연결된 risk row의 hazard 표현을 그대로 재사용한다.",
     "  - control은 해당 row의 additionalControls 또는 currentControls를 TBM 행동 문장으로 짧게 바꾼다.",
@@ -746,7 +737,7 @@ function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
 }`,
     "",
     ...(ctx.phaseAGrounding
-      ? ["[PHASE A RISK ROW LOCATION]", "동적 risk rows는 untrusted JSON의 providerInput.riskRows에만 있다."]
+      ? ["[PHASE A RISK ROW LOCATION]", "동적 risk rows는 untrusted JSON의 outputRequest.riskRows에만 있다."]
       : ["[입력 risk rows]", JSON.stringify(compactRows, null, 2)]),
     "",
     contextBlock(ctx)
@@ -866,6 +857,8 @@ export type GenerateAllOptions = {
   dbHarnessContext?: string;
   /** Fixed Phase A ontology pack and exact citation/source-role allow-list. */
   phaseAGrounding?: PhaseAGenerationGrounding;
+  /** Immutable request-scoped evidence snapshot shared across every provider document. */
+  phaseAGenerationSnapshot?: PhaseAGenerationSnapshot;
   /**
    * Which call groups to run.
    * - "full" (default): all tabular + free + foreign -> broad document pack AI generation
@@ -885,6 +878,82 @@ function buildContext(opts: GenerateAllOptions): GenContext {
     const cite = c.citation ? c.citation.slice(0, 60) : "";
     return `${i + 1}. [${c.type || "-"}] ${head} | ${body}${cite ? ` | ${cite}` : ""}`;
   });
+  const workDate = formatWorkDate(new Date());
+  const phaseAGenerationSnapshot = opts.phaseAGenerationSnapshot ?? (
+    opts.phaseAGrounding
+      ? buildPhaseAGenerationSnapshot({
+          grounding: opts.phaseAGrounding,
+          contextualInputs: [
+            {
+              kind: "site_context",
+              provenance: {
+                source: "direct_deliverables_request",
+                authority: "context_only",
+                state: "available",
+              },
+              content: { question: opts.question, scenario: opts.scenario, workDate },
+            },
+            {
+              kind: "legal_search",
+              provenance: {
+                source: "direct_deliverables_citations",
+                authority: "candidate_only",
+                state: cites.length > 0 ? "available" : "missing",
+              },
+              content: cites,
+            },
+            {
+              kind: "weather",
+              provenance: {
+                source: "direct_deliverables_weather",
+                authority: "context_only",
+                state: opts.weatherSummary ? "available" : "missing",
+              },
+              content: opts.weatherSummary ?? null,
+            },
+            {
+              kind: "training",
+              provenance: {
+                source: "direct_deliverables_training",
+                authority: "context_only",
+                state: opts.trainingLines?.length ? "available" : "missing",
+              },
+              content: opts.trainingLines ?? [],
+            },
+            {
+              kind: "kosha_reference",
+              provenance: {
+                source: "direct_deliverables_kosha",
+                authority: "candidate_only",
+                state: opts.koshaLines?.length ? "available" : "missing",
+              },
+              content: {
+                lines: opts.koshaLines ?? [],
+                primaryReferences: opts.koshaPrimaryRefs ?? [],
+              },
+            },
+            {
+              kind: "accident_case",
+              provenance: {
+                source: "direct_deliverables_accident",
+                authority: "candidate_only",
+                state: opts.accidentLines?.length ? "available" : "missing",
+              },
+              content: opts.accidentLines ?? [],
+            },
+            {
+              kind: "history",
+              provenance: {
+                source: "direct_deliverables_harness",
+                authority: "context_only",
+                state: opts.dbHarnessContext ? "available" : "missing",
+              },
+              content: opts.dbHarnessContext ?? null,
+            },
+          ],
+        })
+      : undefined
+  );
   return {
     question: opts.question,
     scenario: opts.scenario,
@@ -896,7 +965,8 @@ function buildContext(opts: GenerateAllOptions): GenContext {
     koshaPrimaryRefs: opts.koshaPrimaryRefs || [],
     dbHarnessContext: opts.dbHarnessContext,
     phaseAGrounding: opts.phaseAGrounding,
-    workDate: formatWorkDate(new Date())
+    phaseAGenerationSnapshot,
+    workDate,
   };
 }
 

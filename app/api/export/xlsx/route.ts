@@ -20,6 +20,15 @@ type SheetRow = {
   content: string;
 };
 
+function pendingAuthorityRows(document: string): SheetRow[] {
+  return [{
+    document,
+    section: "Phase A 근거 검토",
+    item: "법령 근거",
+    content: "법령 근거: 검토 필요\n공식자료 연결 후보"
+  }];
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -174,7 +183,11 @@ export async function POST(request: NextRequest) {
           { status: 400, headers: { "cache-control": "no-store" } }
         );
       }
-      const editedRows = body.edited === true ? parseRows(body.rows, structuredFallbackTitle(mode)) : [];
+      const fallbackTitle = structuredFallbackTitle(mode);
+      const editedRows = [
+        ...pendingAuthorityRows(fallbackTitle),
+        ...(body.edited === true ? parseRows(body.rows, fallbackTitle) : [])
+      ];
 
       if (mode === "workPlanStructured") {
         const buffer = await buildWorkPlanStructuredXlsx(scenario, body.structured, { editedRows });
@@ -209,7 +222,7 @@ export async function POST(request: NextRequest) {
           if (!title) return null;
           return {
             title,
-            rows: parseRows(d.rows, title),
+            rows: [...parseRows(d.rows, title), ...pendingAuthorityRows(title)],
             profile: parseProfile(d.profile),
             structuredRiskRows: d.edited === true ? [] : parseRiskRowsFromBody(d)
           };
@@ -225,7 +238,7 @@ export async function POST(request: NextRequest) {
     }
 
     const title = readString(body.title, "SafeClaw 안전 문서");
-    const rows = parseRows(body.rows, title);
+    const rows = [...parseRows(body.rows, title), ...pendingAuthorityRows(title)];
     const profile = parseProfile(body.profile);
     const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
     const buffer = await buildXlsxForDocument({ title, rows, profile, scenario, structuredRiskRows });

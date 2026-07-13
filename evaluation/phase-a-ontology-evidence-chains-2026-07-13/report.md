@@ -4,8 +4,8 @@
 - Branch: `fix/phase-a-ontology-review`
 - Base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
 - Contract: `phase-a-evidence-chains/1.3.0`
-- Status: Full-materialization authority remediation candidate, awaiting fresh independent review
-- Generated: `2026-07-14T01:19:49.7892024+09:00`, after focused and typecheck logs completed
+- Status: Whole-candidate authority remediation, awaiting fresh independent review
+- Generated: `2026-07-14T02:52:54.7954556+09:00`, after focused, typecheck, and frontend-route probe logs completed
 - Runtime/DB publication: not performed
 - Schema, migration, Supabase data, generated core seed: unchanged
 
@@ -206,9 +206,29 @@ This change does not make standalone coverage QA authoritative and does not infe
 | P1-3 standalone knowledge query looked validated | MCP and Claw now project query results through a candidate-only DTO. Controls, articles, and duties are marked candidate; provenance is built from actual SIF/KOSHA/law UIDs; the internal evidence pack is not exposed; found and not-found outputs both remain `review_required`. Agent instructions and descriptors no longer call this output law.go.kr-validated or direct authority. |
 | P1-4 prior authority fixes regressed | Focused tests retain nested `diagnostic_only` standalone QA, pending citation labels, unresolved-SIF gating, timeout/snapshot reuse, and public grounding boundaries. |
 
-Scope accounting is explicit: the independent review observed 59 branch-diff files at `c51c6c1`. The current branch diff is 61 files because this remediation newly places `components/WorkpackEditor.tsx` and `tests/ontology-knowledge-tool.test.ts` in the base-to-branch diff. `typecheck.log` was regenerated, but its content is unchanged from the tracked artifact and therefore does not add a diff file. The focused verification command still contains 28 test files; that number is not a branch-diff count.
+Scope accounting is explicit: the independent review observed 59 branch-diff files at `c51c6c1`, and the rejected whole candidate `a5ae9f7` contained 61. The current `02295b5..candidate` diff contains 66 files. Relative to `a5ae9f7`, the five additions are the HWP/PDF/XLSX export authority paths, `tests/phase-a-document-authority.test.ts`, and the preserved frontend-route probe log. The serial focused command contains 29 test files; that number is not a branch-diff count.
 
 This remains a HOLD candidate. It is not an integration or launch completion claim.
+
+## Whole-candidate remediation
+
+| Finding | Candidate change awaiting independent review |
+|---|---|
+| WC-1 client/DTO could shrink the expected plan | The authority gate derives the complete ordered stableKey set from the immutable server registry plan and checks the canonical `planDigest` and `chainId`. Singleton, reordered, duplicate, shrunk, and forged plans fail closed. A confirmed review must carry a nonblank reviewer ID and strict ISO confirmation time bound to that exact chain and digest. Persisted state is parsed from `unknown` with structural guards. |
+| WC-2 source roles were not fully revalidated | Resolved grounding revalidates ready SIF priority evidence, ready KOSHA guidance, and current-law mandate evidence at each exact Control. Combined mandate-plus-guidance requires both law and KOSHA; unresolved/draft SIF or KOSHA and pending Control review remain `review_required`. |
+| WC-3 another document section could satisfy a target | Inspection requires exactly one `[rowOrSection]` heading for each planned document target, then requires the Control label and classification-specific citations on one line inside that section. Wrong, missing, and duplicate sections do not materialize a stableKey. |
+| WC-4 pending body/export copy could look authoritative | Pending risk assessment, TBM, briefing, mobile preview, editor, TXT/JSON, HWP/PDF, and structured XLSX surfaces inject `법령 근거: 검토 필요` plus `공식자료 연결 후보`. Misleading `공식자료 기반` copy is downgraded on the rendered/exported copy while the editable stored body remains unchanged. |
+| WC-5 raw evidence pack escaped externally | MCP, Claw, and reviewed docpack responses use a typed candidate-only public projection containing safe SIF/KOSHA/law provenance and review state. Raw packs, graph/task/hazard/article node IDs, runtime IDs, raw input, and internal references are excluded. |
+| WC-6 provider inputs were assembled through side channels | One deterministic recursively frozen snapshot is built before the first answer/document provider call. It orders SIF, KOSHA, and current law, then carries site/history/weather/legal-search/training/accident/reference context with typed provenance and per-input digests. Provider prompts naturalize only that snapshot through the fixed policy and single JSON boundary. |
+| WC-7 query DTO compatibility risk | `query_safety_knowledge/v2` retains `compatibilityVersion=v1-candidate`, `coreProvenance`, and top-level string article/duty aliases. Rich candidate annotations remain nested, and unknown/unresolved queries stay neutral, non-authoritative candidates. |
+| WC-8 false-green coverage | New or corrected tests reject shrunk/singleton plans, SIF-only and unresolved-KOSHA resolution, wrong/duplicate sections, marker-less pending TBM/XLSX/export bodies, private pack fields, non-string v1 aliases, and incomplete provider snapshots. |
+
+Integration was not performed. The target remains `77d8641` with merge base `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`. The three-way preview reports both files changed but no overlapping textual conflict:
+
+- `components/FieldOperationsWorkspace.tsx`: candidate authority hunks at `+31`, `+573`, `585-586`, `611`, and `630`; target editor/sidebar hunks at `851`, `1243-1278`, `1280`, `1295`, `1309`, and `1311-1319`. A later selective integration must preserve both the Phase A labels/CitationList state and the target's `editor` surface plus collapsible operations sidebar.
+- `components/SafeGuardCommandCenter.tsx`: candidate authority hunks at `+56`, `454-459`, `475-503`, `527-551`, `611-637`, and `700-826`; target input hunk at `2346`. A later selective integration must preserve the authority/readiness gates and `surface="editor"`.
+
+The frontend route probe intentionally remains RED at `tests/frontend-route-coverage.test.ts:693` because its tracked browser-audit `sourceIdentity` is stale. This remediation does not regenerate or claim that integration evidence.
 
 ## Official law verification
 
@@ -245,7 +265,9 @@ The Article 172 direct surface identifies `접촉의 방지`: paragraph 1 prohib
 - Fresh authority-leak TDD RED: 11 product assertions failed across five narrow runs: standalone MCP/Claw authority 2/13, pending/ready/missing shared citation UI and call-site wiring 4/4, Claw tool-schema authority copy 1/18, AnswerPanel detail/location copy 3/8, and AnswerPanel top-level summary 1/4. A TSX direct-import parser limitation and one test-regex formatting mismatch were test-harness issues and are not counted as product RED.
 - Full-materialization representative RED: 5 product tests failed and 92 passed in a 97-test serial run, reproducing one-sided mandate/guidance materialization, duplicate stableKey inflation, and partial/duplicate authority acceptance.
 - Expanded authority/tool RED: 18 product assertions failed and 191 passed across 12 files; one TSX direct-import parser suite error was a test-harness issue and was replaced with the repo's source-contract style. Additional fail-closed candidate and editor-copy runs each reproduced 1 expected failure.
-- Focused ontology/generation/MCP/commercial/DB harness plus quality/readiness/UI, briefing/storage, deadline, snapshot, production/provider/Claw/public handlers and fallback compatibility, serial: 28 files passed, 337 tests passed.
+- Whole-candidate RED: 25 product assertions failed across five non-overlapping runs (`9/116`, `7/57`, `2/6`, `6/127`, and `1/5`); a sixth `2/2` Claw isolation run repeated failures already counted in the `7/57` run. The `6/127` run also had one suite-initialization RED until the canonical plan helper existed.
+- Whole-candidate intermediate GREEN: 29 files/351 tests, then 12 files/201 tests and 6 files/145 tests passed while false-green fixtures were tightened; the actual structured XLSX regression moved from `1 failed, 4 passed` to `5 passed`.
+- Focused ontology/generation/MCP/commercial/DB harness plus quality/readiness/UI, briefing/storage, deadline, snapshot, production/provider/Claw/public handlers, exports, and fallback compatibility, serial: 29 files passed, 360 tests passed.
 - Additional frontend evidence probe: 36 tests passed and 1 provenance assertion failed because the separately tracked browser-audit `sourceIdentity` predates these owned TSX label changes. That external browser audit bundle was not regenerated outside this remediation artifact scope.
 - Strict TypeScript: passed.
 - Previous full suite is informational only and was not rerun for this remediation: 125 files passed, 7 failed, 5 skipped; 1229 tests passed, 7 failed, 22 skipped. Failures were outside owned ontology/MCP/test/report files.
@@ -258,9 +280,10 @@ Logs:
 
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log`
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log`
+- `evaluation/phase-a-ontology-evidence-chains-2026-07-13/frontend-route-probe.log`
 
-Log provenance: focused log completed `2026-07-13T16:17:20.0227034Z`; typecheck log completed `2026-07-13T16:17:30.9832625Z`; the frontend provenance probe then retained 36 passes and the single expected stale-identity RED at line 693. This report was generated afterward.
+Log provenance: focused log finalized `2026-07-13T17:51:17.2657895Z`; typecheck log finalized `2026-07-13T17:51:17.2707983Z`; frontend-route probe log finalized `2026-07-13T17:51:17.2747995Z` with 36 passes and the single stale-identity RED at line 693. This report was generated afterward.
 
-This report, `report.json`, and both verification logs are tracked artifacts committed on this branch.
+This report, `report.json`, and all three verification logs are candidate commit artifacts on this branch.
 
 No DB publication, migration, schema change, Supabase mutation, or generated seed change is included. The authority UI changes only expose Phase A state and replace authority-looking labels; citation data and links remain available. This remediation does not self-approve; fresh independent re-review remains required.

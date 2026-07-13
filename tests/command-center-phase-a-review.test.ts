@@ -2,8 +2,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
 import { buildPhaseAReviewUiState } from "@/lib/phase-a-review";
 import type { PhaseAReview } from "@/lib/types";
+
+const planBinding = structuredClone(
+  buildCanonicalPhaseAPlanBinding("vehicle-machinery-entrapment"),
+);
+const planDigest = planBinding.planDigest;
 
 const pendingReview: PhaseAReview = {
   verdict: "검토 필요",
@@ -12,13 +18,16 @@ const pendingReview: PhaseAReview = {
   groundingStatus: "review_required",
   outputStatus: "review_required_draft",
   verifiedRecords: 0,
+  planBinding,
   materializationCoverage: {
     status: "missing",
-    expectedRecordCount: 1,
+    chainId: planBinding.chainId,
+    planDigest,
+    expectedRecordCount: 2,
     materializedRecordCount: 0,
-    expectedStableKeys: ["chain:risk:control"],
+    expectedStableKeys: [...planBinding.expectedStableKeys],
     materializedStableKeys: [],
-    unresolvedStableKeys: ["chain:risk:control"],
+    unresolvedStableKeys: [...planBinding.expectedStableKeys],
   },
   humanConfirmation: { required: true, status: "pending" },
   actionableReason: "Phase A source resolution을 완료하세요."

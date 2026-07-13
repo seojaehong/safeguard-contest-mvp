@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import type { AskResponse } from "@/lib/types";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
-import type { SafetyKnowledgeResult } from "@/lib/mcp-tools";
 import {
   buildPhaseAGenerationGrounding,
   type PhaseAGenerationGrounding,
@@ -157,28 +156,33 @@ describe("buildDocpackResult", () => {
     expect(withoutLabels.evidenceLabels).toBeUndefined();
   });
 
-  it("reports plans but no verified materialization for review-required evidence", () => {
-    const evidence = {
-      found: true,
-      evidenceChainState: "review_required",
-      evidenceContract: {
-        assemblyTrace: ["task_graph", "sif_accident", "kosha_guidance", "current_law"],
-        controls: [{ controlId: "fall-control", label: "작업발판 설치" }],
-        materializationTargets: [{
-          controlId: "fall-control",
-          controlLabel: "작업발판 설치",
-          lawCitedUids: ["law:산업안전보건기준에 관한 규칙:제42조"],
-          guidanceCitedUids: [],
-          sifCitedUids: [],
-          targets: [{
-            document: "risk_assessment",
-            rowOrSection: "추락 위험 감소대책",
-            stableKey: "fall:risk:control",
-          }],
-        }],
-        pipeline: { humanConfirmationRequired: true },
+  it("projects only public Phase A provenance and never returns the raw evidence pack", () => {
+    const grounding = makePhaseAGrounding("review_required");
+    const result = buildDocpackResult(makeAskResponse(), true, undefined, grounding);
+    const serialized = JSON.stringify(result);
+
+    expect(result).not.toHaveProperty("evidenceContract");
+    expect(result).toHaveProperty("publicEvidence");
+    expect(serialized).not.toContain("graphControlNodeId");
+    expect(serialized).not.toContain("graphArticleNodeId");
+    expect(serialized).not.toContain("taskNodeId");
+    expect(serialized).not.toContain("hazardNodeId");
+    expect(serialized).not.toContain('"input"');
+    expect(serialized).not.toContain("snapshotItemId");
+    expect(serialized).not.toContain("chunkSha256");
+    expect(result.publicEvidence).toMatchObject({
+      schemaVersion: "phase-a-public-evidence/v1",
+      authority: "review_required",
+      sources: {
+        sif: expect.any(Array),
+        kosha: expect.any(Array),
+        law: expect.any(Array),
       },
-    } as unknown as SafetyKnowledgeResult;
+    });
+  });
+
+  it("reports plans but no verified materialization for review-required evidence", () => {
+    const phaseAGrounding = makePhaseAGrounding("review_required");
 
     const result = buildDocpackResult(makeAskResponse({
       deliverables: {
@@ -186,7 +190,7 @@ describe("buildDocpackResult", () => {
         riskAssessmentDraft:
           "작업발판 설치 | law:산업안전보건기준에 관한 규칙:제42조",
       },
-    }), false, evidence);
+    }), false, undefined, phaseAGrounding);
 
     expect(result.evidenceMaterialization).toMatchObject({
       evidenceChainState: "review_required",
@@ -201,14 +205,16 @@ describe("buildDocpackResult", () => {
       verifiedRecords: [],
       coverage: {
         status: "missing",
-        expectedRecordCount: 1,
+        expectedRecordCount: phaseAGrounding.planBinding?.expectedRecordCount,
         materializedRecordCount: 0,
-        expectedStableKeys: ["fall:risk:control"],
+        expectedStableKeys: phaseAGrounding.planBinding?.expectedStableKeys,
         materializedStableKeys: [],
-        unresolvedStableKeys: ["fall:risk:control"],
+        unresolvedStableKeys: phaseAGrounding.planBinding?.expectedStableKeys,
       },
     });
-    expect(result.evidenceMaterialization?.plannedTargets).toHaveLength(1);
+    expect(result.evidenceMaterialization?.plannedTargets).toHaveLength(
+      phaseAGrounding.planBinding?.expectedRecordCount ?? 0,
+    );
   });
 });
 
@@ -219,7 +225,10 @@ describe("buildReviewedDocpackResult", () => {
     const target = phaseAGrounding.materializationTargets[0];
     const lawUid = target?.lawCitedUids[0];
     if (!target || !lawUid) throw new Error("expected resolved materialization target");
-    const materializedDraft = `${target.controlLabel} | ${lawUid}.`.padEnd(650, "가");
+    const materializedDraft = [
+      `[${target.targets[0].rowOrSection}]`,
+      `${target.controlLabel} | ${lawUid}.`,
+    ].join("\n").padEnd(650, "가");
     const result = buildReviewedDocpackResult(
       makeAskResponse({
         deliverables: {
@@ -269,14 +278,21 @@ describe("buildReviewedDocpackResult", () => {
     const target = phaseAGrounding.materializationTargets[0];
     const lawUid = target?.lawCitedUids[0];
     if (!target || !lawUid) throw new Error("expected focused materialization target");
-    const line = `${target.controlLabel} | ${lawUid}`;
+    const riskLine = [
+      `[${target.targets[0].rowOrSection}]`,
+      `${target.controlLabel} | ${lawUid}`,
+    ].join("\n");
+    const tbmLine = [
+      `[${target.targets[1].rowOrSection}]`,
+      `${target.controlLabel} | ${lawUid}`,
+    ].join("\n");
 
     const result = buildReviewedDocpackResult(
       makeAskResponse({
         deliverables: {
           ...makeAskResponse().deliverables,
-          riskAssessmentDraft: line,
-          tbmBriefing: line,
+          riskAssessmentDraft: riskLine,
+          tbmBriefing: tbmLine,
         },
       }),
       qaReview,
