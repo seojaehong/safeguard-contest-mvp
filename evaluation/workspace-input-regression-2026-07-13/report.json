@@ -2,6 +2,7 @@
   "date": "2026-07-13",
   "sourceCommit": "59f48123da62fb405e639da03912aa1ed6c000b9",
   "route": "http://127.0.0.1:3024/workspace?theme=day",
+  "publicRoute": "https://www.safeclaw.kr/workspace?theme=day",
   "browser": "Codex in-app browser",
   "viewport": {
     "width": 1560,
@@ -12,8 +13,9 @@
     "example clear state",
     "sidebar and main column alignment"
   ],
-  "verdict": "pass-local-source",
-  "liveDeploymentVerified": false,
+  "verdict": "pass-local-source-and-current-public-deployment",
+  "liveDeploymentVerified": true,
+  "previewDeploymentVerified": false,
   "states": {
     "initialEmpty": {
       "inputLength": 0,
@@ -53,6 +55,34 @@
       "horizontalOverflowCssPx": 0
     }
   },
+  "publicDeploymentStates": {
+    "initialEmpty": {
+      "inputLength": 0,
+      "placeholder": "",
+      "currentBriefCount": 0,
+      "sourceStatusCount": 0,
+      "recognizedChipRowCount": 0,
+      "revertActionCount": 0,
+      "topDeltaCssPx": 0,
+      "bottomDeltaCssPx": 0,
+      "sidebarOverflowY": "visible",
+      "sidebarHasIndependentScroll": false,
+      "horizontalOverflowCssPx": 0
+    },
+    "clearedWithKeyboard": {
+      "inputLength": 0,
+      "placeholder": "",
+      "currentBriefCount": 0,
+      "sourceStatusCount": 0,
+      "recognizedChipRowCount": 0,
+      "revertActionCount": 0,
+      "topDeltaCssPx": 0,
+      "bottomDeltaCssPx": 0,
+      "sidebarOverflowY": "visible",
+      "sidebarHasIndependentScroll": false,
+      "horizontalOverflowCssPx": 0
+    }
+  },
   "automatedContract": {
     "command": "npm.cmd test -- tests/workspace-layout-regression.test.ts tests/workspace-input-css-contract.test.ts --maxWorkers=1 --no-file-parallelism",
     "filesPassed": 2,
@@ -62,10 +92,13 @@
   "screenshots": [
     "empty-day-1560x700.png",
     "filled-day-1560x700.png",
-    "cleared-keyboard-day-1560x700.png"
+    "cleared-keyboard-day-1560x700.png",
+    "production-empty-day-1560x700.png",
+    "production-cleared-keyboard-day-1560x700.png"
   ],
   "notes": [
     "The browser runtime fill-empty helper did not preserve the controlled value in this run.",
-    "The user-equivalent Ctrl+A and Backspace path cleared the input and all dependent surfaces."
+    "The user-equivalent keyboard path cleared the input and all dependent surfaces.",
+    "The public deployment was checked separately from the SSO-protected Vercel PR preview."
   ]
 }
