@@ -1,86 +1,112 @@
-# Phase A ontology target-ready evidence
+# SafeClaw Phase A ontology remediation evidence
 
-- Generated: `2026-07-14T05:56:43.9740702+09:00`
-- Status: `HOLD_PENDING_FRESH_REVIEW`
+- Generated: `2026-07-14T08:41:03.4432161+09:00`
+- Status: `FINAL_GATE_RED_PENDING_FRESH_REVIEW`
 - Branch: `fix/phase-a-ontology-target-ready`
-- Original Phase A base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
-- Authoritative integration target: `f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5`
-- Preserved reviewed source: `9539f04896698f548bd01e33ff24ab70415bc68e`
-- Rejected product/evidence pair: `35283baaf3aad4e14fa20da4df803b4cc3c046f2` / `f613f5d73118bb81e6199a5ff057e850b3859692`
-- Product parent: `f613f5d73118bb81e6199a5ff057e850b3859692`
-- Product candidate: `31767959b5904afbab77ab5ee36f24da6d15b1c8`
-- Product tree: `5d52b3bc22ebb49909110773e2c2d5b88b5401c6`
-- Main integration: not performed
+- Second independent REJECT base: `888ad1c16b17b88b16bd0163deffbf7ebde740e1`
+- Product commits: `fd573630afe72977deec7debe58649a850101fbd`, `fae7cbd139efecad00cf192b0788db2bd2f4e4cc`
+- Final product SHA: `fae7cbd139efecad00cf192b0788db2bd2f4e4cc`
+- Final product tree: `7fe278d9b72ac436789a5b47e45d36a96fe30220`
+- Evidence child binding: the evidence commit must have the final product SHA as its single parent; its own SHA is intentionally not embedded here.
+- Integration: not performed
 - Launch readiness: `false`
-- DB, schema, migration, data, seed, package, and lock files: unchanged
-
-The report and logs are committed only in the evidence child. The evidence commit cannot truthfully contain its own Git hash. A fresh reviewer or PR must bind that child SHA externally. `evidence-manifest.json` instead binds the exact product parent, product tree, commands, counts, and Git blob IDs, and can be checked from the evidence commit with Git.
-
-## Construction
-
-The target-ready branch remains based on `f98ae7d`. It retains the previously reviewed 11-commit mapping and the documented `9539f04` HWP conflict resolution: target `splitParagraph`, `nextParaIdx`, and `insertHwpTable` behavior plus the candidate pending marker/title were preserved. This remediation is one narrow product commit:
-
-`31767959b5904afbab77ab5ee36f24da6d15b1c8 fix: restore phase a export and confirmation contracts`
+- DB, schema, migration, data, seed, package, and lock changes: none
 
 ## Findings Closed
 
-### PDF failure contract
+### Stale local authority after edit
 
-Only typed font asset/read/embed/subset failures are converted to the controlled `PDF_FONT_ASSET_UNAVAILABLE` 500 response. Generic `PDFDocument.create`, page/content construction, and `pdf.save` failures are logged with only `errorType` and internal `errorCode`, then the original error object is rethrown. They are never returned as a misleading `PDF_EXPORT_FAILED` JSON payload.
+`WorkpackEditor` now keeps the generation source stable without pinning stale current authority. Any user edit immediately makes `effectivePhaseAReview` pending, removes confirmed authority markers from all local document values, and drives TXT, JSON, HTML, CSV, XLS, and TSV through the same authority-safe values. The browser contract performs a real edit, downloads all six formats, remounts the editor, and verifies that no output contains `법령 근거: 연결됨` or `공식자료 확인 완료`.
 
-The regression injects distinct create, page, save, and embed failures. It proves that generic errors preserve object identity on rejection, font embed failures use the font code, and neither public output nor structured logs expose candidate paths or secret-like text.
+The top connection card now follows shared readiness. The fresh edit screenshot shows `편집 후 재검수 필요`; the editor body and authority marker show pending language only.
 
-### Atomic confirmation persistence
+### Production confirmation transition
 
-The confirmation route now reads the existing workpack `updated_at` revision and performs a single conditional update over workpack ID, organization ID, and that exact revision. A zero-row update is an explicit revision conflict, not success. The route then reloads the owned workpack, verifies the server generation-evidence HMAC, and validates the exact reviewer/workpack/chain/plan binding before returning the stored server-issued confirmation ID in a 409. Retrying with that ID is idempotent and performs no second write.
+The authenticated editor surface now has one primary `Phase A 확인 저장` action. It is enabled only after the current workpack is persisted with matching generation fingerprint, generation-evidence version/time, Phase A chain/plan, workpack ID, user, and access-token session binding.
 
-The concurrent regression starts two first confirmations from the same pending revision, evidence fingerprint, and authenticated reviewer. Exactly one returns 200 and persists; the other returns 409 with the winner's ID; the bound retry returns 200 with the same ID. No process-local mutex or client-owned actor, timestamp, or ID is used.
+The caller uses `POST /api/workpacks/[id]/phase-a-confirmation`. It handles saving, loading, 401 expiry, 409 conflict, server-issued confirmation-ID retry, network/server error, and success. A successful response is accepted only after the full server workpack, confirmed review, workpack/chain/plan/session binding, and generation-evidence envelope are validated. The parent current-workpack state and browser storage are then replaced with that server result. No local or fake confirmation path exists.
 
-No schema or confirmation table was added. Multi-instance safety relies on PostgreSQL/PostgREST conditional update atomicity and on all workpack writers advancing the existing `updated_at` revision. There is still no separate durable revocation/audit ledger; confirmation remains in existing workpack JSON protected by ownership checks and the generation-evidence HMAC.
+### MCP role-separated materialization
 
-## Preserved Invariants
+Public planned targets now publish:
 
-- Authority order remains `SIF -> KOSHA guidance -> current law validation`.
-- SIF remains hazard priority only; KOSHA remains guidance; current law validates mandates.
-- Three chains/aliases, `naturalize_only`, full materialization coverage, one request-scoped snapshot, four review states, 7 node kinds, and 7 edge relations remain intact.
-- KOSHA counts and draft gate, workspace empty-input/sidebar behavior, and HWP/HWPX/PDF/XLSX localization/layout remain unchanged.
-- Pending authority markers, HWP conflict resolution, PDF pagination/font/signature/risk-row behavior, and privacy boundaries remain covered.
+- `hazardPriorityRelation: evidencedBy`
+- `hazardPriorityCitedUids` for SIF IDs only
+- `controlGuidanceCitedUids` for eligible KOSHA guidance
+- `controlMandateCitedUids` for eligible current-law mandate evidence
+- `controlRequiredCitedUids` and narrowed legacy `requiredCitedUids`
+- `requiredCitedUidsSemantics: control_required_only_excludes_sif`
 
-## TDD Evidence
+Tests cover `statutory_mandate`, `technical_guidance_only`, `statutory_mandate_with_guidance`, and `review_required`. SIF IDs are excluded from every Control-required and legacy required list.
 
-The initial RED was captured before production edits against parent `f613f5d`: 3 files, 4 failed, 21 passed. Failures covered generic PDF swallowing, embed misclassification, the stale public PDF payload source contract, and two concurrent 200 confirmations. See `remediation-red.log`.
+## Fresh Browser Evidence
 
-Final product-tree verification:
+The product browser suite passed `7/7` in a sequential isolated Next dev harness. It covers edit-to-pending, six local exports, remount, authenticated save, real production-route request shape, bound 409 retry, server-result adoption, missing auth, expired 401, and four visual combinations.
+
+| Theme | Viewport | Horizontal overflow | Copy/action overlap | Clipped text | Control height | Primary actions |
+|---|---:|---:|---|---:|---:|---:|
+| Day | 1440 x 900 | 0 | false | 0 | 45px | 1 |
+| Night | 1440 x 900 | 0 | false | 0 | 45px | 1 |
+| Day | 390 x 844 | 0 | false | 0 | 45px | 1 |
+| Night | 390 x 844 | 0 | false | 0 | 45px | 1 |
+
+Local export evidence covers `txt`, `json`, `html`, `csv`, `xls`, and `tsv`: stale connected-authority count `0`, stale confirmed-authority count `0`. The JSON field `editedSentinelPresent` is false because the literal sentinel is not retained by every derived tabular representation; it is not an authority PASS signal. The browser assertion separately proves the edited/remounted text and pending authority state.
+
+Fresh screenshots and metrics:
+
+```text
+phase-a-edit-pending-export-day-desktop.png
+phase-a-confirmation-day-desktop.png
+phase-a-confirmation-night-desktop.png
+phase-a-confirmation-day-mobile.png
+phase-a-confirmation-night-mobile.png
+phase-a-local-export-status.json
+phase-a-confirmation-*-metrics.json
+```
+
+All five screenshots were visually inspected after generation. No incoherent overlap, clipping, or stale confirmed authority was observed on the focused surfaces.
+
+## TDD And Verification
 
 | Gate | Result | Artifact |
 |---|---|---|
-| New remediation tests | 3 files, 25 passed | `remediation-green.log` |
-| Prior contract set | 8 files, 143 passed | `prior-contract-tests.log` |
-| Focused ontology/generation | 29 files, 360 passed | `focused-tests.log` |
-| KOSHA/export/workspace/confirmation | 28 files, 291 passed, 1 skipped | `combined-tests.log` |
-| Strict TypeScript | PASS, `tsc --noEmit --incremental false` | `typecheck.log` |
-| Frontend route probe | 36 passed, 1 stale `sourceIdentity` RED at line 693 | `frontend-route-probe.log` |
-| `git diff --check` | PASS | `diff-check.log` |
+| Initial unit RED | 2 files, 6 failed, 34 passed | `product-remediation-unit-red.log` |
+| Initial browser RED | 2 failed, 5 skipped | `product-remediation-browser-red.log` |
+| Focused visual RED | 1 failed, 6 skipped | `product-remediation-visual-red.log` |
+| Exact remediation unit GREEN | 2 files, 40 passed | `product-remediation-unit-green.log` |
+| Representative grounding/export/confirmation GREEN | 14 files, 218 passed | `product-remediation-representative-green.log` |
+| Full product browser GREEN | 1 file, 7 passed | `product-remediation-browser-green.log` |
+| Focused visual GREEN | 1 passed, 6 skipped | `product-remediation-visual-green.log` |
+| Isolated browser harness regression | 1 file, 3 passed | verified before final visual-only follow-up; full final browser run also exercised the same harness |
+| Strict TypeScript | PASS | `product-remediation-typecheck.log` |
+| Target merge-tree | both exit 0 | `product-remediation-merge-tree.log` |
+| `git diff --check` | PASS | `product-remediation-diff-check.log` |
 
-One earlier combined attempt had a 30-second visibility timeout in the unrelated non-streaming workspace progress test. That exact test passed alone, and the final full product-tree combined run passed 291 with one existing skip. The final passing combined log is the committed artifact.
+No production build was run. The browser evidence used the isolated Next dev harness, so a second build was unnecessary.
 
-The exact serial commands are recorded in `report.json` and `evidence-manifest.json`.
+## Target Verification
 
-## Changed Files
+- `f45bba17bcce0d8ebb2690f82d014dbe42ae8191 + product` merge-tree: `550d63f5218fba2ea3f701fb6f7d183b9282f408`
+- Current target `b3762867d380f20faee2a83a17354dc61557ce12 + product` merge-tree: `2f206e71acbc8ff97f66eb1a19bc7c5495b8e746`
+- `b376286` is `f45bba1` plus editor-spec commits `99b1af5` and `b376286`.
+- Both commands exited `0`. No merge, rebase, ref update, or history rewrite was performed. Later integration remains a regular merge.
 
-The product commit changes exactly six files:
+## Retained Reviewed Invariants
 
-```text
-app/api/export/pdf/route.ts
-app/api/workpacks/[id]/phase-a-confirmation/route.ts
-lib/workpack-commercial-store.ts
-tests/pdf-font-failure.test.ts
-tests/pdf-korean-font-integration.test.ts
-tests/phase-a-confirmation-route.test.ts
-```
+- PDF typed font boundary and non-font rethrow remain covered.
+- CAS confirmation still yields one winner, explicit conflict, idempotent bound retry, and evidence/session binding.
+- Authority order remains `SIF -> KOSHA guidance -> current law validation`.
+- SIF remains hazard priority only; KOSHA remains guidance; current law validates mandates.
+- `naturalize_only`, full materialization coverage, and existing ontology contracts remain covered.
+- No DB, schema, migration, data, seed, package, or lock file changed.
 
-At the product candidate, `f98ae7d..3176795` contains 81 changed files and `02295b5..3176795` contains 144 changed files. These counts include inherited target-ready product and evidence history; this remediation product commit itself remains six files.
+## Reviewed History Preserved
+
+- Original Phase A base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
+- Preserved reviewed source: `9539f04896698f548bd01e33ff24ab70415bc68e`
+- Earlier rejected product/evidence: `35283baaf3aad4e14fa20da4df803b4cc3c046f2` / `f613f5d73118bb81e6199a5ff057e850b3859692`
+- Earlier remediation product/evidence: `31767959b5904afbab77ab5ee36f24da6d15b1c8` / `888ad1c16b17b88b16bd0163deffbf7ebde740e1`
 
 ## Gate
 
-This is not an integration completion claim. The branch remains `HOLD_PENDING_FRESH_REVIEW` pending another independent whole-candidate review.
+The global static/108 audit is explicitly deferred to the final integrated HEAD. The old 108 audit identity carries no PASS claim for this product SHA. Final gate remains RED pending that integrated audit and a fresh independent review. This report is evidence, not self-approval.

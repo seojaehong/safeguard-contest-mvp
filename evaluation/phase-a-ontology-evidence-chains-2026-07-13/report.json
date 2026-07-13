@@ -1,147 +1,191 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-14T05:56:43.9740702+09:00",
-  "status": "HOLD_PENDING_FRESH_REVIEW",
+  "generatedAt": "2026-07-14T08:41:03.4432161+09:00",
+  "status": "FINAL_GATE_RED_PENDING_FRESH_REVIEW",
   "launchReadiness": false,
   "integratedToMain": false,
+  "selfApproved": false,
   "branch": "fix/phase-a-ontology-target-ready",
   "source": {
-    "originalBase": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
-    "authoritativeIntegrationTarget": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "secondIndependentRejectBase": "888ad1c16b17b88b16bd0163deffbf7ebde740e1",
+    "originalPhaseABase": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
     "preservedReviewedSource": "9539f04896698f548bd01e33ff24ab70415bc68e",
-    "rejectedProduct": "35283baaf3aad4e14fa20da4df803b4cc3c046f2",
-    "rejectedEvidence": "f613f5d73118bb81e6199a5ff057e850b3859692"
+    "currentMainTarget": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "editorSpecPair": [
+      "99b1af5385e0b5eaa9ff479761ecea944f0958ab",
+      "b3762867d380f20faee2a83a17354dc61557ce12"
+    ],
+    "currentTargetWithEditorPair": "b3762867d380f20faee2a83a17354dc61557ce12"
   },
   "product": {
-    "commit": "31767959b5904afbab77ab5ee36f24da6d15b1c8",
-    "parent": "f613f5d73118bb81e6199a5ff057e850b3859692",
-    "tree": "5d52b3bc22ebb49909110773e2c2d5b88b5401c6",
-    "subject": "fix: restore phase a export and confirmation contracts",
-    "fileCount": 6,
+    "commits": [
+      {
+        "sha": "fd573630afe72977deec7debe58649a850101fbd",
+        "subject": "fix: close phase a product confirmation gaps"
+      },
+      {
+        "sha": "fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
+        "subject": "fix: clear stale phase a editor authority"
+      }
+    ],
+    "finalCommit": "fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
+    "finalTree": "7fe278d9b72ac436789a5b47e45d36a96fe30220",
+    "parent": "888ad1c16b17b88b16bd0163deffbf7ebde740e1",
+    "uniqueFileCount": 12,
     "files": [
-      { "path": "app/api/export/pdf/route.ts", "gitBlobOid": "90181cb33604f51585185743e00e952470d00290" },
-      { "path": "app/api/workpacks/[id]/phase-a-confirmation/route.ts", "gitBlobOid": "4eccd7cdb5bac3394e7f6168d11db35bb6dc8750" },
-      { "path": "lib/workpack-commercial-store.ts", "gitBlobOid": "bfa3ca6c5f908f067a2f3f172a250a95abbfd750" },
-      { "path": "tests/pdf-font-failure.test.ts", "gitBlobOid": "c45516c3f98f46e5fbb506984dc15f758be53669" },
-      { "path": "tests/pdf-korean-font-integration.test.ts", "gitBlobOid": "3445294642239c2f07028f43a3ee5f9e6d672e09" },
-      { "path": "tests/phase-a-confirmation-route.test.ts", "gitBlobOid": "6e1b63677a02ae613ddb0a9928d8be3cceb072e6" }
+      "app/api/workpacks/[id]/phase-a-confirmation/route.ts",
+      "app/globals.css",
+      "components/FieldOperationsWorkspace.tsx",
+      "components/SafeGuardCommandCenter.tsx",
+      "components/WorkpackEditor.tsx",
+      "lib/mcp-tools.ts",
+      "tests/helpers/isolated-next-browser-harness.ts",
+      "tests/isolated-next-browser-harness.test.ts",
+      "tests/mcp-tools.test.ts",
+      "tests/phase-a-confirmation-route.test.ts",
+      "tests/phase-a-document-authority.test.ts",
+      "tests/phase-a-product-remediation-browser.test.ts"
     ]
   },
   "remediation": {
-    "pdfFailureContract": {
-      "controlledPublicFailure": "typed font asset/read/embed/subset failures only",
-      "controlledCode": "PDF_FONT_ASSET_UNAVAILABLE",
-      "genericCreatePageContentSaveFailure": "safe structured log then original error rethrow",
-      "genericPublicPdfExportFailedPayload": false,
-      "rawMessageOrPathLogged": false
+    "localAuthorityInvalidation": {
+      "dirtyEditClearsEffectiveReviewSynchronously": true,
+      "visibleEditorAuthorityNormalizedToPending": true,
+      "currentDataUsesLiveWorkspaceData": true,
+      "generatedInitializationMutatesSealedParent": false,
+      "formats": ["txt", "json", "html", "csv", "xls", "tsv"],
+      "remountCovered": true
     },
-    "confirmationPersistence": {
-      "primitive": "PostgreSQL/PostgREST conditional update using existing workpacks.updated_at revision",
-      "predicate": ["id", "organization_id", "updated_at"],
-      "zeroRows": "explicit 409 phase_a_confirmation_revision_conflict",
-      "conflictRead": "owned workpack reload plus generation-evidence HMAC and exact reviewer/workpack/chain/plan validation",
-      "concurrentOutcome": "one 200 winner and one 409 loser carrying the stored winner confirmationId",
-      "idempotentRetry": "same stored ID and exact bindings returns 200 without another write",
-      "processLocalMutex": false,
-      "clientOwnedActorTimeOrId": false,
-      "limitation": "No confirmation table, revocation ledger, or migration was added. Atomicity depends on the existing updated_at CAS revision and on all workpack writers advancing that revision."
+    "productConfirmation": {
+      "productionRoute": "/api/workpacks/[id]/phase-a-confirmation",
+      "productionCallerAdded": true,
+      "localConfirmationFallback": false,
+      "onePrimaryAction": true,
+      "persistedWorkpackRequired": true,
+      "generationFingerprintBound": true,
+      "generationEvidenceBound": true,
+      "planChainBound": true,
+      "sessionBound": true,
+      "auth401FailClosed": true,
+      "conflict409BoundRetry": true,
+      "serverWorkpackAdopted": true
+    },
+    "mcpMaterialization": {
+      "hazardPriorityRelation": "evidencedBy",
+      "sifRole": "hazard_priority_only",
+      "controlGuidanceRole": "eligible_kosha_guidance",
+      "controlMandateRole": "eligible_current_law",
+      "legacyRequiredSemantics": "control_required_only_excludes_sif",
+      "classificationsCovered": [
+        "statutory_mandate",
+        "technical_guidance_only",
+        "statutory_mandate_with_guidance",
+        "review_required"
+      ]
     }
   },
-  "ontologyInvariants": {
-    "chains": 3,
-    "nodeKinds": 7,
-    "edgeRelations": 7,
-    "obligationClassifications": 4,
-    "hierarchy": "SIF -> KOSHA guidance -> current law validation",
-    "naturalizeOnly": true,
-    "launchReady": false,
-    "draftGatePreserved": true
-  },
   "tdd": {
-    "red": {
-      "baseHead": "f613f5d73118bb81e6199a5ff057e850b3859692",
-      "command": "npm.cmd test -- --run tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
-      "filesFailed": 3,
-      "failed": 4,
-      "passed": 21,
-      "total": 25,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-red.log"
+    "unitRed": {
+      "command": "npm.cmd test -- --run tests/mcp-tools.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
+      "filesFailed": 2,
+      "testsFailed": 6,
+      "testsPassed": 34,
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-unit-red.log"
     },
-    "green": {
-      "command": "npm.cmd test -- --run tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
-      "files": 3,
-      "passed": 25,
-      "failed": 0,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-green.log"
+    "browserRed": {
+      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts -t invalidates confirmed authority|calls the production confirmation route --maxWorkers=1 --no-file-parallelism",
+      "testsFailed": 2,
+      "testsSkipped": 5,
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-browser-red.log"
+    },
+    "visualRed": {
+      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts -t invalidates confirmed authority --maxWorkers=1 --no-file-parallelism",
+      "testsFailed": 1,
+      "testsSkipped": 6,
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-visual-red.log"
+    },
+    "unitGreen": {
+      "command": "npm.cmd test -- --run tests/mcp-tools.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
+      "filesPassed": 2,
+      "testsPassed": 40,
+      "testsFailed": 0,
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-unit-green.log"
+    },
+    "visualGreen": {
+      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts -t invalidates confirmed authority --maxWorkers=1 --no-file-parallelism",
+      "testsPassed": 1,
+      "testsSkipped": 6,
+      "testsFailed": 0,
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-visual-green.log"
     }
   },
   "verification": {
-    "priorContract": {
-      "command": "npm.cmd test -- --run tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts tests/export-error-contract.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/phase-a-document-authority.test.ts tests/document-export-localization.test.ts tests/ontology-evidence-chains.test.ts --maxWorkers=1 --no-file-parallelism",
-      "files": 8,
-      "passed": 143,
-      "failed": 0,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/prior-contract-tests.log"
+    "representative": {
+      "command": "npm.cmd test -- --run tests/ontology-evidence-chains.test.ts tests/ontology-production-handler.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-tools-ontology-grounding.test.ts tests/ontology-sif-resolution-gate.test.ts tests/mcp-tools.test.ts tests/workpack-readiness.test.ts tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts tests/phase-a-document-authority.test.ts tests/editor-export-integrity.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts --maxWorkers=1 --no-file-parallelism",
+      "filesPassed": 14,
+      "testsPassed": 218,
+      "testsFailed": 0,
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-representative-green.log"
     },
-    "focused": {
-      "command": "npm.cmd test -- --run tests/ontology-evidence-chains.test.ts tests/ontology-knowledge-tool.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/mcp-route-scope-contract.test.ts tests/ontology-production-handler.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-generation-trace.test.ts tests/generation-trace-privacy.test.ts tests/kosha-current-review-run-ask.test.ts tests/ai-deliverables-prompts.test.ts tests/claw-tools-ontology-grounding.test.ts tests/ask-generation-evidence-routes.test.ts tests/public-ask-grounding-call-sites.test.ts tests/ontology-sif-resolution-gate.test.ts tests/quality-contract.test.ts tests/workpack-readiness.test.ts tests/command-center-phase-a-review.test.ts tests/briefing.test.ts tests/workpack-store.test.ts tests/ontology-graph-store.test.ts tests/ontology-deadline-policy.test.ts tests/ontology-grounding-deadline.test.ts tests/ontology-snapshot-reuse.test.ts tests/workpack-ontology-qa.test.ts tests/agent-loop.test.ts tests/phase-a-citation-authority.test.ts tests/answer-panel-display.test.ts tests/phase-a-document-authority.test.ts --maxWorkers=1 --no-file-parallelism",
-      "files": 29,
-      "passed": 360,
-      "failed": 0,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"
-    },
-    "combined": {
-      "command": "npm.cmd test -- --run tests/command-center-phase-a-review.test.ts tests/command-center-request-lifecycle.test.ts tests/document-export-localization.test.ts tests/documents-editor-layout.test.ts tests/editor-export-integrity.test.ts tests/editor-first-state.test.ts tests/export-error-contract.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-current-review-photo-storage.test.ts tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-run-ask.test.ts tests/kosha-guide-corpus-audit.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/workspace-generation-progress.test.ts tests/workspace-input-css-contract.test.ts tests/workspace-layout-regression.test.ts tests/workspace-operation-graph.test.ts tests/workspace-pages.test.ts tests/workspace-workers.test.ts tests/xlsx-export-route.test.ts tests/phase-a-document-authority.test.ts tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
-      "files": 28,
-      "passed": 291,
-      "failed": 0,
-      "skipped": 1,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/combined-tests.log"
+    "browser": {
+      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts --maxWorkers=1 --no-file-parallelism",
+      "filesPassed": 1,
+      "testsPassed": 7,
+      "testsFailed": 0,
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-browser-green.log"
     },
     "strictTypecheck": {
       "command": "npm.cmd run typecheck",
       "status": "passed",
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log"
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-typecheck.log"
     },
-    "frontendRouteProbe": {
-      "command": "npm.cmd test -- --run tests/frontend-route-coverage.test.ts --maxWorkers=1 --no-file-parallelism",
-      "files": 1,
-      "passed": 36,
-      "failed": 1,
-      "expectedFailureOnly": true,
-      "failure": "stale sourceIdentity at tests/frontend-route-coverage.test.ts:693",
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/frontend-route-probe.log"
+    "mergeTree": {
+      "f45Product": {
+        "command": "git merge-tree --write-tree f45bba17bcce0d8ebb2690f82d014dbe42ae8191 fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
+        "exitCode": 0,
+        "tree": "550d63f5218fba2ea3f701fb6f7d183b9282f408"
+      },
+      "f45EditorPairProduct": {
+        "command": "git merge-tree --write-tree b3762867d380f20faee2a83a17354dc61557ce12 fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
+        "exitCode": 0,
+        "tree": "2f206e71acbc8ff97f66eb1a19bc7c5495b8e746"
+      },
+      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-merge-tree.log"
     },
-    "diffCheck": {
-      "command": "git diff --check",
-      "status": "passed",
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/diff-check.log"
+    "strictNoAny": true,
+    "buildRun": false
+  },
+  "browserEvidence": {
+    "harnessMode": "dev",
+    "localExports": {
+      "formats": ["txt", "json", "html", "csv", "xls", "tsv"],
+      "staleConnectedAuthorityCount": 0,
+      "staleConfirmedAuthorityCount": 0,
+      "editedSentinelPresentInEveryDerivedFormat": false,
+      "sentinelNote": "The literal edit sentinel is not preserved by every derived tabular representation. Remount/edit state and pending authority are asserted separately."
     },
-    "strictNoAny": true
+    "views": [
+      { "theme": "day", "viewport": { "width": 1440, "height": 900 }, "horizontalOverflow": 0, "panelWithinViewport": true, "copyActionOverlap": false, "minimumControlHeight": 45, "clippedTextCount": 0, "primaryActionCount": 1 },
+      { "theme": "night", "viewport": { "width": 1440, "height": 900 }, "horizontalOverflow": 0, "panelWithinViewport": true, "copyActionOverlap": false, "minimumControlHeight": 45, "clippedTextCount": 0, "primaryActionCount": 1 },
+      { "theme": "day", "viewport": { "width": 390, "height": 844 }, "horizontalOverflow": 0, "panelWithinViewport": true, "copyActionOverlap": false, "minimumControlHeight": 45, "clippedTextCount": 0, "primaryActionCount": 1 },
+      { "theme": "night", "viewport": { "width": 390, "height": 844 }, "horizontalOverflow": 0, "panelWithinViewport": true, "copyActionOverlap": false, "minimumControlHeight": 45, "clippedTextCount": 0, "primaryActionCount": 1 }
+    ],
+    "screenshotsVisuallyInspected": 5
   },
-  "provenance": {
-    "remediationGreenCompletedAtUtc": "2026-07-13T20:38:50.4377385Z",
-    "typecheckCompletedAtUtc": "2026-07-13T20:39:01.4036234Z",
-    "priorContractCompletedAtUtc": "2026-07-13T20:40:34.1589416Z",
-    "focusedCompletedAtUtc": "2026-07-13T20:42:12.0710867Z",
-    "combinedCompletedAtUtc": "2026-07-13T20:52:05.9424173Z",
-    "frontendRouteProbeCompletedAtUtc": "2026-07-13T20:54:25.8953713Z",
-    "reportGeneratedAfterFreshLogs": true
-  },
-  "diff": {
-    "productCommitFileCount": 6,
-    "targetDiffBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
-    "targetDiffFileCountAtProductCandidate": 81,
-    "originalBaseDiff": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
-    "originalBaseDiffFileCountAtProductCandidate": 144,
-    "schemaMigrationDbDataSeedPackageLockChanged": false
-  },
-  "evidence": {
-    "manifest": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/evidence-manifest.json",
-    "outputArtifactsCommitted": true,
-    "evidenceCommitSelfHashIncluded": false,
-    "binding": "The evidence child parent and artifact Git blob IDs are bound by the manifest. The evidence commit Git object must be bound externally by the fresh reviewer or PR.",
-    "artifactFileCountIncludingManifest": 11
+  "retainedPass": [
+    "PDF typed font boundary",
+    "PDF non-font rethrow",
+    "CAS one winner and explicit conflict",
+    "idempotent confirmation retry",
+    "evidence and session binding",
+    "SIF -> KOSHA guidance -> current law validation",
+    "naturalize_only"
+  ],
+  "history": {
+    "earlierRejectedProduct": "35283baaf3aad4e14fa20da4df803b4cc3c046f2",
+    "earlierRejectedEvidence": "f613f5d73118bb81e6199a5ff057e850b3859692",
+    "earlierRemediationProduct": "31767959b5904afbab77ab5ee36f24da6d15b1c8",
+    "earlierRemediationEvidence": "888ad1c16b17b88b16bd0163deffbf7ebde740e1"
   },
   "constraints": {
     "dbChanged": false,
@@ -150,7 +194,17 @@
     "dataChanged": false,
     "seedChanged": false,
     "packageOrLockChanged": false,
+    "rebaseOrHistoryRewrite": false,
     "buildRun": false
   },
-  "reviewGate": "HOLD_PENDING_FRESH_REVIEW. No integration completion claim."
+  "evidence": {
+    "manifest": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/evidence-manifest.json",
+    "evidenceCommitSelfHashIncluded": false,
+    "binding": "The evidence child must have fae7cbd139efecad00cf192b0788db2bd2f4e4cc as its single parent. Its resulting SHA is recorded externally after commit creation."
+  },
+  "deferred": {
+    "globalStatic108Audit": "Deferred to final integrated HEAD",
+    "passClaimForOld108Identity": false
+  },
+  "reviewGate": "FINAL_GATE_RED. Fresh independent review and final integrated static/108 audit are required."
 }

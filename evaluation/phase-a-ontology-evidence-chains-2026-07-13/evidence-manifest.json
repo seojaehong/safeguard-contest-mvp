@@ -1,18 +1,35 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-07-14T05:58:57.9858216+09:00",
-  "status": "HOLD_PENDING_FRESH_REVIEW",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-14T08:41:03.4432161+09:00",
+  "status": "FINAL_GATE_RED_PENDING_FRESH_REVIEW",
   "branch": "fix/phase-a-ontology-target-ready",
   "binding": {
     "originalPhaseABase": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
-    "authoritativeIntegrationTarget": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
     "preservedReviewedSource": "9539f04896698f548bd01e33ff24ab70415bc68e",
-    "rejectedProduct": "35283baaf3aad4e14fa20da4df803b4cc3c046f2",
-    "rejectedEvidence": "f613f5d73118bb81e6199a5ff057e850b3859692",
-    "productParent": "f613f5d73118bb81e6199a5ff057e850b3859692",
-    "productCommit": "31767959b5904afbab77ab5ee36f24da6d15b1c8",
-    "productTree": "5d52b3bc22ebb49909110773e2c2d5b88b5401c6",
-    "productSubject": "fix: restore phase a export and confirmation contracts"
+    "earlierRejectedProduct": "35283baaf3aad4e14fa20da4df803b4cc3c046f2",
+    "earlierRejectedEvidence": "f613f5d73118bb81e6199a5ff057e850b3859692",
+    "earlierRemediationProduct": "31767959b5904afbab77ab5ee36f24da6d15b1c8",
+    "secondIndependentRejectBase": "888ad1c16b17b88b16bd0163deffbf7ebde740e1",
+    "productParent": "888ad1c16b17b88b16bd0163deffbf7ebde740e1",
+    "productCommits": [
+      {
+        "sha": "fd573630afe72977deec7debe58649a850101fbd",
+        "subject": "fix: close phase a product confirmation gaps"
+      },
+      {
+        "sha": "fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
+        "subject": "fix: clear stale phase a editor authority"
+      }
+    ],
+    "finalProductCommit": "fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
+    "finalProductTree": "7fe278d9b72ac436789a5b47e45d36a96fe30220",
+    "currentMainTarget": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "editorSpecPair": [
+      "99b1af5385e0b5eaa9ff479761ecea944f0958ab",
+      "b3762867d380f20faee2a83a17354dc61557ce12"
+    ],
+    "currentTargetWithEditorPair": "b3762867d380f20faee2a83a17354dc61557ce12",
+    "evidenceChildRequiredParent": "fae7cbd139efecad00cf192b0788db2bd2f4e4cc"
   },
   "hashContract": {
     "fileIdentity": "Git blob object ID (SHA-1 object format used by this repository)",
@@ -20,86 +37,395 @@
     "manifestSelfHashIncluded": false,
     "evidenceCommitHashIncluded": false,
     "externalBindingRequired": true,
-    "statement": "This manifest binds its exact product parent and every other evidence artifact blob. It cannot bind the Git object of the commit that contains itself. The fresh reviewer or PR must record the evidence commit SHA externally and verify its parent and artifact blobs from Git."
+    "statement": "This manifest binds the final product tree, product file blobs, and every other evidence artifact blob. It cannot bind its own blob or the commit object that contains itself. The fresh reviewer or PR must record the evidence commit SHA externally and verify its single parent and artifact blobs from Git."
   },
   "productFiles": [
-    { "path": "app/api/export/pdf/route.ts", "gitBlobOid": "90181cb33604f51585185743e00e952470d00290" },
-    { "path": "app/api/workpacks/[id]/phase-a-confirmation/route.ts", "gitBlobOid": "4eccd7cdb5bac3394e7f6168d11db35bb6dc8750" },
-    { "path": "lib/workpack-commercial-store.ts", "gitBlobOid": "bfa3ca6c5f908f067a2f3f172a250a95abbfd750" },
-    { "path": "tests/pdf-font-failure.test.ts", "gitBlobOid": "c45516c3f98f46e5fbb506984dc15f758be53669" },
-    { "path": "tests/pdf-korean-font-integration.test.ts", "gitBlobOid": "3445294642239c2f07028f43a3ee5f9e6d672e09" },
-    { "path": "tests/phase-a-confirmation-route.test.ts", "gitBlobOid": "6e1b63677a02ae613ddb0a9928d8be3cceb072e6" }
+    {
+      "path": "app/api/workpacks/[id]/phase-a-confirmation/route.ts",
+      "gitBlobOid": "03fda6deeb1f3d95881cfd5e617ef3f00bc9091a"
+    },
+    {
+      "path": "app/globals.css",
+      "gitBlobOid": "6a5361edf71165a571ed8823ae4eadbf62b15ac0"
+    },
+    {
+      "path": "components/FieldOperationsWorkspace.tsx",
+      "gitBlobOid": "9dc42c93d15288b57ac3ebf631ac809729785fba"
+    },
+    {
+      "path": "components/SafeGuardCommandCenter.tsx",
+      "gitBlobOid": "4f360af6a724e5a76c840fe2832de4bf74f4f174"
+    },
+    {
+      "path": "components/WorkpackEditor.tsx",
+      "gitBlobOid": "f744e15a4efc08ade96f9432f1d5e9ee0e5d40d1"
+    },
+    {
+      "path": "lib/mcp-tools.ts",
+      "gitBlobOid": "c5932f3c9dc40b38e4ed390048c7f3725caeac4c"
+    },
+    {
+      "path": "tests/helpers/isolated-next-browser-harness.ts",
+      "gitBlobOid": "23ef718e69cff466a4ededb4812115b82397f1e2"
+    },
+    {
+      "path": "tests/isolated-next-browser-harness.test.ts",
+      "gitBlobOid": "d73aa10f241df27fcf213a482a3d8f34ca42beb8"
+    },
+    {
+      "path": "tests/mcp-tools.test.ts",
+      "gitBlobOid": "dec69567845165ccf7794e45483657bc8a11e8d8"
+    },
+    {
+      "path": "tests/phase-a-confirmation-route.test.ts",
+      "gitBlobOid": "bbdc25c9135449bcddcfff9ded38e46aa395ece8"
+    },
+    {
+      "path": "tests/phase-a-document-authority.test.ts",
+      "gitBlobOid": "871cddacfab843062611af5de52ae752e54a20c0"
+    },
+    {
+      "path": "tests/phase-a-product-remediation-browser.test.ts",
+      "gitBlobOid": "334b08fba346904a7a5e224c39462094e43db92e"
+    }
   ],
   "evidenceArtifacts": [
-    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/combined-tests.log", "gitBlobOid": "f7d705cb3913ae52daba17e857ed7915147a3318" },
-    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/diff-check.log", "gitBlobOid": "188e9c16bd4fdf90fd604da82533329538029f26" },
-    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log", "gitBlobOid": "c810fa9551fb35f4ab70a44b0660727b74213863" },
-    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/frontend-route-probe.log", "gitBlobOid": "0959338e5cdc727b706454f29a6e18b4a3cfe883" },
-    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/prior-contract-tests.log", "gitBlobOid": "c6026c1b9b1ad105d40d8b588f4d98fbcbd19689" },
-    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-green.log", "gitBlobOid": "4970d8e7d08cbf855baa73cc448a8ceb77d159a1" },
-    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-red.log", "gitBlobOid": "2f4f3bf7ff9d9be80f252339ad13968c7229e7d2" },
-    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.json", "gitBlobOid": "81fcbd857de83f2d0458f65ec231eef6cf5991ee" },
-    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.md", "gitBlobOid": "ee10aff3a469e7f2a16fd5cf0f046c9a76324b5f" },
-    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log", "gitBlobOid": "75713a17a214d13e824c4724baed77ee7c8b87bb" }
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-unit-red.log",
+      "gitBlobOid": "64eda05d63e8ed7f38dbbb144a9b5f0663ef0e76"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-browser-red.log",
+      "gitBlobOid": "8f603653bff188f80d16d2a244d929f6e512413b"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-visual-red.log",
+      "gitBlobOid": "25f129d1113a7c83f2693ba21e216a267fc44d8c"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-unit-green.log",
+      "gitBlobOid": "e7aa1d521dadf56fcb874738254f809ad95301c3"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-representative-green.log",
+      "gitBlobOid": "b2b75e889c1103021bb58be34ed8d526553bb875"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-browser-green.log",
+      "gitBlobOid": "acdd391d0fe10fc4dc652ed2fff133b8adf02a36"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-visual-green.log",
+      "gitBlobOid": "8e192c19f1914b14019cdd4edc92b78922d431ed"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-typecheck.log",
+      "gitBlobOid": "0747902ad2588f8388b8456a383d227d6eeaa655"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-merge-tree.log",
+      "gitBlobOid": "9eb01145df2a6373e5ec132857d493844a3e03cf"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-diff-check.log",
+      "gitBlobOid": "72a1c872b87a801b8b62b8af882685bb4fbba0bc"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-local-export-status.json",
+      "gitBlobOid": "c2bc651ea978841e1d2d1051f398db9d849cddaa"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-day-desktop-metrics.json",
+      "gitBlobOid": "24e956efd558d78cb0f6b0b95014ca0dd1c747b6"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-night-desktop-metrics.json",
+      "gitBlobOid": "aea27928ed2a1aa14dd71a7b27f67dfa3fc5e77a"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-day-mobile-metrics.json",
+      "gitBlobOid": "a4655496554610bcea48dbb9ee01713d3abb16dd"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-night-mobile-metrics.json",
+      "gitBlobOid": "70e85850fe848808b4b656fac0c4be243f76475c"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-edit-pending-export-day-desktop.png",
+      "gitBlobOid": "9a7d6efd4ab826183d8c5b236e423501f5bb3df7"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-day-desktop.png",
+      "gitBlobOid": "d2a449a97c74ef784b3aae363d9e30c38b15a228"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-night-desktop.png",
+      "gitBlobOid": "1d00c1c66cdb358d6ef6fbb2ef827e5cafb70cfa"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-day-mobile.png",
+      "gitBlobOid": "25037e00b360c477846681e789ad850d6ec18b91"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-night-mobile.png",
+      "gitBlobOid": "261093bd9bb516d1fc49fea11179ec0c53512ed6"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.json",
+      "gitBlobOid": "4f91baec4bb595cbf98979214b1508fbe9b6be12"
+    },
+    {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.md",
+      "gitBlobOid": "c19a420362c9b9554718b5a5da04ad5d1ccab486"
+    }
   ],
   "commands": [
     {
-      "id": "remediation-green",
-      "command": "npm.cmd test -- --run tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
-      "result": { "filesPassed": 3, "testsPassed": 25, "testsFailed": 0 }
+      "id": "unit-red",
+      "command": "npm.cmd test -- --run tests/mcp-tools.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": {
+        "filesFailed": 2,
+        "testsFailed": 6,
+        "testsPassed": 34
+      }
     },
     {
-      "id": "prior-contract",
-      "command": "npm.cmd test -- --run tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts tests/export-error-contract.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/phase-a-document-authority.test.ts tests/document-export-localization.test.ts tests/ontology-evidence-chains.test.ts --maxWorkers=1 --no-file-parallelism",
-      "result": { "filesPassed": 8, "testsPassed": 143, "testsFailed": 0 }
+      "id": "browser-red",
+      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts -t invalidates confirmed authority|calls the production confirmation route --maxWorkers=1 --no-file-parallelism",
+      "result": {
+        "testsFailed": 2,
+        "testsSkipped": 5
+      }
     },
     {
-      "id": "focused-author",
-      "command": "npm.cmd test -- --run tests/ontology-evidence-chains.test.ts tests/ontology-knowledge-tool.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/mcp-route-scope-contract.test.ts tests/ontology-production-handler.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-generation-trace.test.ts tests/generation-trace-privacy.test.ts tests/kosha-current-review-run-ask.test.ts tests/ai-deliverables-prompts.test.ts tests/claw-tools-ontology-grounding.test.ts tests/ask-generation-evidence-routes.test.ts tests/public-ask-grounding-call-sites.test.ts tests/ontology-sif-resolution-gate.test.ts tests/quality-contract.test.ts tests/workpack-readiness.test.ts tests/command-center-phase-a-review.test.ts tests/briefing.test.ts tests/workpack-store.test.ts tests/ontology-graph-store.test.ts tests/ontology-deadline-policy.test.ts tests/ontology-grounding-deadline.test.ts tests/ontology-snapshot-reuse.test.ts tests/workpack-ontology-qa.test.ts tests/agent-loop.test.ts tests/phase-a-citation-authority.test.ts tests/answer-panel-display.test.ts tests/phase-a-document-authority.test.ts --maxWorkers=1 --no-file-parallelism",
-      "result": { "filesPassed": 29, "testsPassed": 360, "testsFailed": 0 }
+      "id": "visual-red",
+      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts -t invalidates confirmed authority --maxWorkers=1 --no-file-parallelism",
+      "result": {
+        "testsFailed": 1,
+        "testsSkipped": 6
+      }
     },
     {
-      "id": "combined-kosha-export-workspace-confirmation",
-      "command": "npm.cmd test -- --run tests/command-center-phase-a-review.test.ts tests/command-center-request-lifecycle.test.ts tests/document-export-localization.test.ts tests/documents-editor-layout.test.ts tests/editor-export-integrity.test.ts tests/editor-first-state.test.ts tests/export-error-contract.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-current-review-photo-storage.test.ts tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-run-ask.test.ts tests/kosha-guide-corpus-audit.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/workspace-generation-progress.test.ts tests/workspace-input-css-contract.test.ts tests/workspace-layout-regression.test.ts tests/workspace-operation-graph.test.ts tests/workspace-pages.test.ts tests/workspace-workers.test.ts tests/xlsx-export-route.test.ts tests/phase-a-document-authority.test.ts tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
-      "result": { "filesPassed": 28, "testsPassed": 291, "testsFailed": 0, "testsSkipped": 1 }
+      "id": "unit-green",
+      "command": "npm.cmd test -- --run tests/mcp-tools.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": {
+        "filesPassed": 2,
+        "testsPassed": 40,
+        "testsFailed": 0
+      }
+    },
+    {
+      "id": "representative-green",
+      "command": "npm.cmd test -- --run tests/ontology-evidence-chains.test.ts tests/ontology-production-handler.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-tools-ontology-grounding.test.ts tests/ontology-sif-resolution-gate.test.ts tests/mcp-tools.test.ts tests/workpack-readiness.test.ts tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts tests/phase-a-document-authority.test.ts tests/editor-export-integrity.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": {
+        "filesPassed": 14,
+        "testsPassed": 218,
+        "testsFailed": 0
+      }
+    },
+    {
+      "id": "browser-green",
+      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": {
+        "filesPassed": 1,
+        "testsPassed": 7,
+        "testsFailed": 0
+      }
+    },
+    {
+      "id": "visual-green",
+      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts -t invalidates confirmed authority --maxWorkers=1 --no-file-parallelism",
+      "result": {
+        "testsPassed": 1,
+        "testsSkipped": 6,
+        "testsFailed": 0
+      }
     },
     {
       "id": "strict-typecheck",
       "command": "npm.cmd run typecheck",
-      "result": { "status": "passed" }
+      "result": {
+        "status": "passed"
+      }
     },
     {
-      "id": "frontend-route-probe",
-      "command": "npm.cmd test -- --run tests/frontend-route-coverage.test.ts --maxWorkers=1 --no-file-parallelism",
-      "result": { "testsPassed": 36, "testsFailed": 1, "expectedFailureOnly": "stale sourceIdentity at tests/frontend-route-coverage.test.ts:693" }
+      "id": "f45-product-merge-tree",
+      "command": "git merge-tree --write-tree f45bba17bcce0d8ebb2690f82d014dbe42ae8191 fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
+      "result": {
+        "exitCode": 0,
+        "tree": "550d63f5218fba2ea3f701fb6f7d183b9282f408"
+      }
+    },
+    {
+      "id": "editor-pair-product-merge-tree",
+      "command": "git merge-tree --write-tree b3762867d380f20faee2a83a17354dc61557ce12 fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
+      "result": {
+        "exitCode": 0,
+        "tree": "2f206e71acbc8ff97f66eb1a19bc7c5495b8e746"
+      }
     },
     {
       "id": "diff-check",
       "command": "git diff --check",
-      "result": { "status": "passed" }
+      "result": {
+        "status": "passed"
+      }
     }
   ],
-  "redObservation": {
-    "baseHead": "f613f5d73118bb81e6199a5ff057e850b3859692",
-    "testState": "review tests added before production remediation",
-    "filesFailed": 3,
-    "testsFailed": 4,
-    "testsPassed": 21,
-    "testsTotal": 25
+  "browserEvidence": {
+    "harnessMode": "dev",
+    "fullSuite": {
+      "testsPassed": 7,
+      "testsFailed": 0
+    },
+    "localExports": {
+      "formats": [
+        "txt",
+        "json",
+        "html",
+        "csv",
+        "xls",
+        "tsv"
+      ],
+      "staleConnectedAuthorityCount": 0,
+      "staleConfirmedAuthorityCount": 0,
+      "editedSentinelPresentInEveryDerivedFormat": false,
+      "sentinelNote": "The literal edit sentinel is not retained by every derived tabular representation. It is not an authority PASS signal; edited remount state and pending authority are asserted separately."
+    },
+    "views": [
+      {
+        "theme": "day",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "horizontalOverflow": 0,
+        "panelWithinViewport": true,
+        "copyActionOverlap": false,
+        "minimumControlHeight": 45,
+        "clippedTextCount": 0,
+        "primaryActionCount": 1
+      },
+      {
+        "theme": "night",
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "horizontalOverflow": 0,
+        "panelWithinViewport": true,
+        "copyActionOverlap": false,
+        "minimumControlHeight": 45,
+        "clippedTextCount": 0,
+        "primaryActionCount": 1
+      },
+      {
+        "theme": "day",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "horizontalOverflow": 0,
+        "panelWithinViewport": true,
+        "copyActionOverlap": false,
+        "minimumControlHeight": 45,
+        "clippedTextCount": 0,
+        "primaryActionCount": 1
+      },
+      {
+        "theme": "night",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "horizontalOverflow": 0,
+        "panelWithinViewport": true,
+        "copyActionOverlap": false,
+        "minimumControlHeight": 45,
+        "clippedTextCount": 0,
+        "primaryActionCount": 1
+      }
+    ],
+    "screenshotsVisuallyInspected": 5
   },
+  "remediationContracts": {
+    "localAuthorityInvalidation": {
+      "dirtyEditClearsEffectiveReviewSynchronously": true,
+      "visibleEditorAuthorityNormalizedToPending": true,
+      "currentDataUsesLiveWorkspaceData": true,
+      "formatsCovered": [
+        "txt",
+        "json",
+        "html",
+        "csv",
+        "xls",
+        "tsv"
+      ],
+      "remountCovered": true
+    },
+    "productConfirmation": {
+      "productionRoute": "/api/workpacks/[id]/phase-a-confirmation",
+      "productionCallerAdded": true,
+      "localConfirmationFallback": false,
+      "onePrimaryAction": true,
+      "persistedCurrentWorkpackRequired": true,
+      "generationEvidencePlanSessionBindingsRequired": true,
+      "auth401FailClosed": true,
+      "conflict409BoundRetry": true,
+      "serverWorkpackAdopted": true
+    },
+    "mcpMaterialization": {
+      "hazardPriorityRelation": "evidencedBy",
+      "sifRole": "hazard_priority_only",
+      "controlGuidanceRole": "eligible_kosha_guidance",
+      "controlMandateRole": "eligible_current_law",
+      "legacyRequiredSemantics": "control_required_only_excludes_sif",
+      "classificationsCovered": [
+        "statutory_mandate",
+        "technical_guidance_only",
+        "statutory_mandate_with_guidance",
+        "review_required"
+      ]
+    }
+  },
+  "retainedPass": [
+    "PDF typed font boundary",
+    "PDF non-font rethrow",
+    "CAS one winner and explicit conflict",
+    "idempotent confirmation retry",
+    "evidence and session binding",
+    "SIF -> KOSHA guidance -> current law validation",
+    "naturalize_only"
+  ],
   "diff": {
-    "productCommitFiles": 6,
-    "authoritativeTargetToProductFiles": 81,
-    "originalBaseToProductFiles": 144,
+    "productCommitCount": 2,
+    "productUniqueFileCount": 12,
+    "evidenceArtifactCountExcludingManifest": 22,
+    "plannedEvidenceCommitFileCountIncludingManifest": 23,
     "forbiddenDbSchemaMigrationDataSeedPackageLockChanges": 0
+  },
+  "constraints": {
+    "dbChanged": false,
+    "schemaChanged": false,
+    "migrationChanged": false,
+    "dataChanged": false,
+    "seedChanged": false,
+    "packageOrLockChanged": false,
+    "rebaseOrHistoryRewrite": false,
+    "buildRun": false
+  },
+  "deferred": {
+    "globalStatic108Audit": "Deferred to final integrated HEAD",
+    "passClaimForOld108Identity": false
   },
   "verificationProcedure": [
     "Record the evidence commit SHA externally in the fresh review or PR.",
-    "Run git cat-file -p <evidenceSha> and require its single parent to equal 31767959b5904afbab77ab5ee36f24da6d15b1c8.",
-    "Run git show -s --format=%T 31767959b5904afbab77ab5ee36f24da6d15b1c8 and require 5d52b3bc22ebb49909110773e2c2d5b88b5401c6.",
-    "For every productFiles entry, run git rev-parse 31767959b5904afbab77ab5ee36f24da6d15b1c8:<path> and compare the Git blob ID.",
+    "Run git cat-file -p <evidenceSha> and require exactly one parent equal to fae7cbd139efecad00cf192b0788db2bd2f4e4cc.",
+    "Run git show -s --format=%T fae7cbd139efecad00cf192b0788db2bd2f4e4cc and require 7fe278d9b72ac436789a5b47e45d36a96fe30220.",
+    "For every productFiles entry, run git rev-parse fae7cbd139efecad00cf192b0788db2bd2f4e4cc:<path> and compare the Git blob ID.",
     "For every evidenceArtifacts entry, run git rev-parse <evidenceSha>:<path> and compare the Git blob ID.",
-    "Parse report.json and evidence-manifest.json from <evidenceSha>; do not infer evidence-head integrity from an omitted self hash."
+    "Parse report.json, evidence-manifest.json, local export status, and all four metrics JSON files from <evidenceSha>.",
+    "Do not infer evidence-head integrity from an omitted manifest self hash; verify the evidence commit object externally."
   ],
-  "reviewGate": "HOLD_PENDING_FRESH_REVIEW. The evidence commit object is externally bound by the next reviewer or PR; this manifest does not claim integration completion."
+  "reviewGate": "FINAL_GATE_RED. Fresh independent review and the final integrated static/108 audit are required. This manifest makes no self-approval or integration-complete claim."
 }

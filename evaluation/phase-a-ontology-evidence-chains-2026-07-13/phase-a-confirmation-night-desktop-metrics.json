@@ -1,0 +1,17 @@
+{
+  "harnessMode": "dev",
+  "theme": "night",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "generationFingerprint": "3dc19f43",
+  "horizontalOverflow": 0,
+  "panelWithinViewport": true,
+  "copyActionOverlap": false,
+  "controlHeights": [
+    45
+  ],
+  "clippedTextCount": 0,
+  "primaryActionCount": 1
+}

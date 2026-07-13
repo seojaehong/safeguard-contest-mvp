@@ -1,0 +1,56 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-product-remediation-browser.test.ts -t invalidates confirmed authority|calls the production confirmation route --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts (7 tests | 2 failed | 5 skipped) 49461ms
+     × invalidates confirmed authority before every local export and after editor remount 14624ms
+     × calls the production confirmation route, retries a bound 409, and applies only the server workpack 13721ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > invalidates confirmed authority before every local export and after editor remount
+AssertionError: expected '법령 근거: 연결됨\n공식자료 확인 완료' to contain '법령 근거: 검토 필요'
+
+- Expected
++ Received
+
+- 법령 근거: 검토 필요
++ 법령 근거: 연결됨
++ 공식자료 확인 완료
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts:371:72
+    369|     const editedText = `[EDIT_REQUIRES_REVALIDATION]\n${await editor.i…
+    370|     await editor.fill(editedText);
+    371|     await expect.poll(async () => await authorityMarker.textContent())…
+       |                                                                        ^
+    372|
+    373|     const exportPanel = page.getByTestId("editor-export-panel");
+
+Caused by: Error: Matcher did not succeed in time.
+ ❯ tests/phase-a-product-remediation-browser.test.ts:371:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > calls the production confirmation route, retries a bound 409, and applies only the server workpack
+TimeoutError: locator.waitFor: Timeout 8000ms exceeded.
+Call log:
+  - waiting for getByLabel('Phase A 근거 확인') to be visible
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts:462:24
+    460|     await openEditor(page);
+    461|     const confirmation = page.getByLabel("Phase A 근거 확인");
+    462|     await confirmation.waitFor({ state: "visible" });
+       |                        ^
+    463|     const confirmButton = confirmation.getByRole("button", { name: "Ph…
+    464|     expect(await confirmButton.isDisabled()).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 skipped (7)
+   Start at  07:46:08
+   Duration  50.92s (transform 316ms, setup 0ms, import 839ms, tests 49.46s, environment 0ms)

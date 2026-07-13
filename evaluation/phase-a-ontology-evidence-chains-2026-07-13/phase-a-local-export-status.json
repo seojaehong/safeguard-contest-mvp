@@ -1,0 +1,13 @@
+{
+  "editedSentinelPresent": false,
+  "staleConnectedAuthorityCount": 0,
+  "staleConfirmedAuthorityCount": 0,
+  "formats": [
+    "txt",
+    "json",
+    "html",
+    "csv",
+    "xls",
+    "tsv"
+  ]
+}

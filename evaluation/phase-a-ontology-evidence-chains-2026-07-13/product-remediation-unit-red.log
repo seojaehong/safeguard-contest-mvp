@@ -1,0 +1,136 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/mcp-tools.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-confirmation-route.test.ts (2 tests | 2 failed) 84ms
+     × ignores client identity/time, persists a server-bound confirmation, and rejects mismatched replay 71ms
+     × allows only one CAS winner for concurrent first confirmations and retries from the stored ID 12ms
+ ❯ tests/mcp-tools.test.ts (38 tests | 4 failed) 55ms
+     × keeps SIF hazard priority separate from 'statutory_mandate' control evidence 8ms
+     × keeps SIF hazard priority separate from 'technical_guidance_only' control evidence 2ms
+     × keeps SIF hazard priority separate from 'statutory_mandate_with_guidance' control evidence 2ms
+     × keeps SIF hazard priority separate from 'review_required' control evidence 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/mcp-tools.test.ts > buildDocpackResult > keeps SIF hazard priority separate from 'statutory_mandate' control evidence
+ FAIL  tests/mcp-tools.test.ts > buildDocpackResult > keeps SIF hazard priority separate from 'technical_guidance_only' control evidence
+ FAIL  tests/mcp-tools.test.ts > buildDocpackResult > keeps SIF hazard priority separate from 'statutory_mandate_with_guidance' control evidence
+ FAIL  tests/mcp-tools.test.ts > buildDocpackResult > keeps SIF hazard priority separate from 'review_required' control evidence
+AssertionError: expected undefined to deeply equal [ 'sif:test:case-1' ]
+
+- Expected:
+[
+  "sif:test:case-1",
+]
+
++ Received:
+undefined
+
+ ❯ tests/mcp-tools.test.ts:271:48
+    269|       expect(targets).toHaveLength(2);
+    270|       for (const target of targets ?? []) {
+    271|         expect(target.hazardPriorityCitedUids).toEqual([sifCitedUid]);
+       |                                                ^
+    272|         expect(target.controlGuidanceCitedUids).toEqual(expectedGuidan…
+    273|         expect(target.controlMandateCitedUids).toEqual(expectedLaw);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/phase-a-confirmation-route.test.ts > Phase A confirmation route > ignores client identity/time, persists a server-bound confirmation, and rejects mismatched replay
+AssertionError: expected undefined to deeply equal { verdict: '통과', verified: true, …(8) }
+
+- Expected:
+{
+  "actionableReason": "Phase A 근거와 문서 반영 실적을 인증된 검토자가 확인했습니다.",
+  "evidenceChainState": "resolved",
+  "groundingStatus": "resolved",
+  "humanConfirmation": {
+    "chainId": "vehicle-machinery-entrapment",
+    "confirmationId": "0ff1f91b-864c-47d2-b276-b82b558a2e42",
+    "confirmedAt": "2026-07-13T22:36:22.306Z",
+    "issuedBy": "safeclaw_server",
+    "planDigest": "sha256:912ac561bca3ff59e781778c68577361a959789704f36fbea9108e81b4c279d1",
+    "required": true,
+    "reviewer": {
+      "principalType": "authenticated_workspace_user",
+      "sessionFingerprint": "sha256:419761cca357de9e24f35d00ed703aa52e6b05fb037979b972631b1a65215423",
+      "userId": "user-1",
+    },
+    "status": "confirmed",
+    "workpackId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  },
+  "materializationCoverage": {
+    "chainId": "vehicle-machinery-entrapment",
+    "expectedRecordCount": 2,
+    "expectedStableKeys": [
+      "vehicle-machinery-entrapment:risk-assessment:vehicle-contact-prevention",
+      "vehicle-machinery-entrapment:tbm:vehicle-contact-prevention",
+    ],
+    "materializedRecordCount": 2,
+    "materializedStableKeys": [
+      "vehicle-machinery-entrapment:risk-assessment:vehicle-contact-prevention",
+      "vehicle-machinery-entrapment:tbm:vehicle-contact-prevention",
+    ],
+    "planDigest": "sha256:912ac561bca3ff59e781778c68577361a959789704f36fbea9108e81b4c279d1",
+    "status": "complete",
+    "unresolvedStableKeys": [],
+  },
+  "outputStatus": "grounded_draft",
+  "planBinding": {
+    "chainId": "vehicle-machinery-entrapment",
+    "expectedRecordCount": 2,
+    "expectedStableKeys": [
+      "vehicle-machinery-entrapment:risk-assessment:vehicle-contact-prevention",
+      "vehicle-machinery-entrapment:tbm:vehicle-contact-prevention",
+    ],
+    "planDigest": "sha256:912ac561bca3ff59e781778c68577361a959789704f36fbea9108e81b4c279d1",
+  },
+  "verdict": "통과",
+  "verified": true,
+  "verifiedRecords": 2,
+}
+
++ Received:
+undefined
+
+ ❯ tests/phase-a-confirmation-route.test.ts:212:41
+    210|     expect(JSON.stringify(body)).not.toContain("forged-client-reviewer…
+    211|     expect(JSON.stringify(body)).not.toContain("2099-01-01");
+    212|     expect(body.workpack?.phaseAReview).toEqual(body.phaseAReview);
+       |                                         ^
+    213|     expect(body.workpack?.status.summary).toBe("Phase A 근거 및 사람 확인 완료"…
+    214|     expect(body.workpack?.deliverables.riskAssessmentDraft).toContain(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/phase-a-confirmation-route.test.ts > Phase A confirmation route > allows only one CAS winner for concurrent first confirmations and retries from the stored ID
+AssertionError: expected undefined to match object { status: 'confirmed', …(1) }
+
+- Expected:
+{
+  "confirmationId": "740b08b1-583a-44ff-98bb-42a2f2044489",
+  "status": "confirmed",
+}
+
++ Received:
+undefined
+
+ ❯ tests/phase-a-confirmation-route.test.ts:309:65
+    307|     expect(retry.status).toBe(200);
+    308|     expect(retryBody.confirmationId).toBe(success?.confirmationId);
+    309|     expect(retryBody.workpack?.phaseAReview?.humanConfirmation).toMatc…
+       |                                                                 ^
+    310|       status: "confirmed",
+    311|       confirmationId: success?.confirmationId,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 34 passed (40)
+   Start at  07:36:21
+   Duration  2.17s (transform 505ms, setup 0ms, import 751ms, tests 139ms, environment 0ms)
