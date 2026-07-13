@@ -1,0 +1,209 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-contract-amendment/v1",
+  "amendmentId": "workpack-share-v2-product-2026-07-14",
+  "status": "AUTHORITATIVE_ADDITIVE_ERRATUM",
+  "effectiveScope": {
+    "historicalAuthorityPreserved": true,
+    "historicalDirectory": "evaluation/workpack-share-v2-2026-07-13",
+    "amendmentDirectory": "evaluation/workpack-share-v2-product-2026-07-14",
+    "productBranchExactBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "authorityRule": "The immutable target-ready files remain historical evidence; this additive amendment exclusively replaces the selected mobile viewport and text-scaling delivery contract for Share v2 product and browser evidence."
+  },
+  "immutableAuthority": {
+    "gitObjectHashAlgorithm": "sha1",
+    "sourceBaseCommit": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "targetReadySpecCommit": "c590cf184df352d5d319fae64cca087e77a31ba8",
+    "reviewEvidenceCommit": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "files": [
+      {
+        "role": "target_ready_spec_markdown",
+        "path": "evaluation/workpack-share-v2-2026-07-13/spec.md",
+        "commit": "c590cf184df352d5d319fae64cca087e77a31ba8",
+        "gitBlob": "82290bc98c21342665d87c706c648143e3c7c6b3"
+      },
+      {
+        "role": "target_ready_spec_json",
+        "path": "evaluation/workpack-share-v2-2026-07-13/spec.json",
+        "commit": "c590cf184df352d5d319fae64cca087e77a31ba8",
+        "gitBlob": "80f0d9672e87c992f194bf598768d5a7d0d48d84"
+      },
+      {
+        "role": "target_ready_spec_validator",
+        "path": "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs",
+        "commit": "c590cf184df352d5d319fae64cca087e77a31ba8",
+        "gitBlob": "327556f49837bc012edf790ffda0f9f0f0af1d86"
+      },
+      {
+        "role": "target_ready_review_evidence",
+        "path": "evaluation/workpack-share-v2-2026-07-13/review-evidence.json",
+        "commit": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "gitBlob": "1bca7b1c78d046fc68082022f5f12a3d1fc33c82"
+      }
+    ]
+  },
+  "supersededLegacyTokens": [
+    {
+      "id": "selected_mobile_viewport",
+      "token": "391x844",
+      "disposition": "historical_only_not_product_authority"
+    },
+    {
+      "id": "per_node_text_scaling",
+      "token": "computed_text_200 per-node/leaf fontSize/lineHeight mutation",
+      "disposition": "historical_only_not_product_authority"
+    }
+  ],
+  "replacementAuthority": {
+    "mobileViewport": {
+      "widthCssPx": 390,
+      "heightCssPx": 844,
+      "exact": true,
+      "selectedEvidenceOnly": true
+    },
+    "textScaling": {
+      "baselineModeId": "normal_100",
+      "scaledModeId": "owning_root_text_200",
+      "scaleFactor": 2,
+      "owningMechanismCount": 1,
+      "deliveryMechanism": "product-owned root data attribute with CSS cascade",
+      "rootSelector": "[data-share-root]",
+      "rootAttribute": "data-share-text-scale",
+      "baselineValue": "100",
+      "scaledValue": "200",
+      "rootAttributeMutationCount": 1,
+      "descendantStyleMutationCount": 0,
+      "directLeafInlineMutationCount": 0,
+      "cssTransformAllowed": false,
+      "cssZoomAllowed": false,
+      "viewportMutationAllowed": false,
+      "deviceScaleMutationAllowed": false
+    },
+    "measurement": {
+      "baselineCapturedBeforeMutation": true,
+      "rootMechanismAppliedExactlyOnce": true,
+      "freshDomRunsPerScaledCase": 2,
+      "requiredSurfaces": [
+        "computed_style_cascade",
+        "pseudo_elements_before_after",
+        "media_and_layout_reflow",
+        "localized_text_wrap_and_growth",
+        "button_hit_area",
+        "horizontal_overflow",
+        "unintended_overlap",
+        "nested_vertical_scroll"
+      ],
+      "pseudoElements": [
+        "::before",
+        "::after"
+      ],
+      "minimumInteractiveTargetCssPx": 44,
+      "maximumHorizontalOverflowCssPx": 0,
+      "maximumUnintendedOverlapCount": 0,
+      "maximumNestedVerticalScrollCount": 0
+    }
+  },
+  "censusRemap": {
+    "caseIdTemplate": "{environmentId}:{fixtureId}:{scaleModeId}",
+    "environmentCount": 4,
+    "fixtureCount": 16,
+    "scaleModeCount": 2,
+    "exactCaseCount": 128,
+    "formula": "4 environments * 16 fixtures * 2 scale modes",
+    "countChanged": false,
+    "countExplanation": "The count is recomputed, not preserved by assertion: the mobile viewport and scaled mode are deterministic one-for-one replacements, so all axis cardinalities remain 4, 16, and 2.",
+    "environments": [
+      {
+        "id": "day-desktop",
+        "theme": "day",
+        "viewport": "1440x1000"
+      },
+      {
+        "id": "night-desktop",
+        "theme": "night",
+        "viewport": "1440x1000"
+      },
+      {
+        "id": "day-mobile",
+        "theme": "day",
+        "viewport": "390x844"
+      },
+      {
+        "id": "night-mobile",
+        "theme": "night",
+        "viewport": "390x844"
+      }
+    ],
+    "scaleModes": [
+      {
+        "id": "normal_100",
+        "replacementFor": "normal_100",
+        "caseCount": 64
+      },
+      {
+        "id": "owning_root_text_200",
+        "replacementFor": "computed_text_200",
+        "caseCount": 64
+      }
+    ],
+    "fixtureStates": [
+      "empty",
+      "selected",
+      "channel_unavailable",
+      "review_required",
+      "workpack_revalidation",
+      "logged_out",
+      "blocked",
+      "ready",
+      "sending",
+      "result_accepted",
+      "result_partial",
+      "fail_session",
+      "fail_dispatch",
+      "fail_dispatch_unpersisted",
+      "offline",
+      "stale"
+    ],
+    "languages": [
+      "ko",
+      "vi",
+      "zh",
+      "th",
+      "uz",
+      "mn",
+      "ne",
+      "km",
+      "id",
+      "my",
+      "tl",
+      "en"
+    ],
+    "preservedAxes": [
+      "fixture_state",
+      "language_authority",
+      "theme",
+      "desktop_viewport"
+    ],
+    "remappedAxes": [
+      "mobile_viewport_391_to_390",
+      "computed_per_node_to_owning_root_scale"
+    ]
+  },
+  "validation": {
+    "validator": "evaluation/workpack-share-v2-product-2026-07-14/validate-contract-amendment.cjs",
+    "productEvidenceSchemaVersion": "safeclaw-workpack-share-v2-contract-evidence/v1",
+    "productEvidenceRequiresAmendmentCommit": true,
+    "closedSchema": true,
+    "unknownKeysAllowed": false,
+    "historicalFilesMayContainSupersededTokens": true,
+    "activeProductFilesMayContainSupersededTokens": false,
+    "attackModes": [
+      "missing_amendment",
+      "stale_candidate_sha",
+      "stale_evidence_sha",
+      "stale_blob_hash",
+      "unknown_key",
+      "legacy_mobile_reintroduced",
+      "per_node_scaling_reintroduced"
+    ]
+  }
+}
