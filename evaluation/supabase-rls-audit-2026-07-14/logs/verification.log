@@ -1,9 +1,9 @@
-verificationStartedAt=2026-07-13T22:13:43.3332154Z
+verificationStartedAt=2026-07-13T23:09:10.0000000Z
 mode=read-only
 noMutation=true
 PASS report.json parses
-PASS HEAD equals requested source SHA
-PASS report source/base SHA equals HEAD
+PASS report source/base SHA equals audited revision f45bba17bcce0d8ebb2690f82d014dbe42ae8191
+PASS audited source SHA is an ancestor of the audit-artifact worktree HEAD
 PASS launchReadiness is boolean false
 PASS top-level noMutation is boolean true
 PASS all mutation flags are false
@@ -12,13 +12,18 @@ PASS final report and probe syntax statuses are passed
 PASS inventory counts are 24 boundaries and 22 application tables
 PASS RLS enabled/missing/FORCE counts are 20/2/0
 PASS policy counts are 20 total, 13 FOR ALL, 7 SELECT-only, 0 explicit role
-PASS finding counts are P0/P1/P2/P3 0/3/4/2
+PASS finding counts are P0/P1/P2/P3 0/3/4/3
 PASS negative matrix has 14 cases, 0 executed, 56 expected denies
-PASS all 9 finding titles match Markdown exactly
+PASS all 10 finding titles match Markdown exactly
+PASS P1-03 cites external workpackId input and service-role insert; no client DB INSERT is required for that route attempt
+PASS P1-03 records external UUID knowledge and cross-tenant inclusion as unproven
+PASS P2-03 traces DB token site/org context into a siteId-only MCP memory read and records no reproduced cross-tenant read
+PASS P3-03 records the empty-provenance publish gap and no current violating row proven
 PASS Markdown reports the finalized elapsed values
-PASS all 123 source evidence references resolve in range
-PASS all 21 service-role tenant/admin route entry points exist
-PASS three public/global service-role read surfaces inventoried
+PASS all 136 JSON source evidence references resolve in range
+PASS all 166 Markdown full/shorthand source citations resolve in range
+PASS all 21 service-role tenant/admin API entry points exist: 19 direct and 2 broker-mediated
+PASS six public/global service-role API routes and two server pages exist: eight public HTTP surfaces total
 PASS fresh live probe records 44 HEAD and zero verified tenant assertions
 PASS fresh live status counts are 200/206/404 = 30/4/10
 PASS all four probe artifacts have mutationPerformed=false
@@ -30,8 +35,14 @@ PASS working changes are confined to the requested audit artifact directory
 PASS restored node_modules remains gitignored
 PASS strict typecheck success log present
 PASS focused test log records 10 files and 82 tests passed
-evidenceReferenceCount=123
+jsonEvidenceReferenceCount=136
+markdownSourceCitationCount=166
 serviceRoleTenantAdminEntryPoints=21
+serviceRoleTenantAdminDirectEntryPoints=19
+serviceRoleTenantAdminBrokerEntryPoints=2
+publicGlobalServiceRoleApiRoutes=6
+publicGlobalServiceRoleServerPageSurfaces=2
+publicGlobalServiceRoleHttpSurfaces=8
 expectedCrossTenantDenyAssertions=56
 verificationFailures=0
-verificationFinishedAt=2026-07-13T22:13:45.1569347Z
+verificationFinishedAt=2026-07-13T23:09:25.2562404Z

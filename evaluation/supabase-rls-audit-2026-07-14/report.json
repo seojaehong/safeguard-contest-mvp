@@ -68,8 +68,8 @@
       "P0": 0,
       "P1": 3,
       "P2": 4,
-      "P3": 2,
-      "total": 9
+      "P3": 3,
+      "total": 10
     },
     "liveReadOnlyRequests": 44,
     "liveHttpStatusCounts": {
@@ -85,7 +85,11 @@
     "totalReadOnlyRequestsRepresented": 132,
     "expectedCrossTenantDenyAssertions": 56,
     "serviceRoleTenantAdminEntryPoints": 21,
-    "publicGlobalServiceRoleReadSurfaces": 3,
+    "serviceRoleTenantAdminDirectEntryPoints": 19,
+    "serviceRoleTenantAdminBrokerEntryPoints": 2,
+    "publicGlobalServiceRoleApiRoutes": 6,
+    "publicGlobalServiceRoleServerPageSurfaces": 2,
+    "publicGlobalServiceRoleHttpSurfaces": 8,
     "focusedTestFiles": 10,
     "focusedTests": 82
   },
@@ -358,7 +362,7 @@
       "using": "organization_id is null OR owner exists through organization_id",
       "withCheck": "same as using",
       "tenantPredicateSource": "dispatch_logs.organization_id with null escape",
-      "serviceRoleBypassExposure": "Archive GET owner-filters organization IDs; POST derives organization/site but accepts workpackId without ownership lookup.",
+      "serviceRoleBypassExposure": "Archive GET owner-filters organization IDs; POST parses external workpackId, derives organization/site, and inserts with service role without re-owning workpackId. The route attempt needs no client DB INSERT privilege, while external UUID knowledge and exploitability remain unproven.",
       "relationshipConcerns": [
         "site_id",
         "workpack_id",
@@ -369,6 +373,7 @@
         "supabase/migrations/002_workspace_productization.sql:104",
         "supabase/migrations/002_workspace_productization.sql:183-200",
         "app/api/dispatch-logs/route.ts:73-111",
+        "app/api/dispatch-logs/route.ts:184-187",
         "app/api/dispatch-logs/route.ts:192-208"
       ]
     },
@@ -582,16 +587,19 @@
       "using": null,
       "withCheck": null,
       "tenantPredicateSource": "operator application filters org_id/site_id; no RLS tenant predicate",
-      "serviceRoleBypassExposure": "All runtime access is service-role; mcp-auth also updates last_used_at on successful DB token resolution.",
+      "serviceRoleBypassExposure": "All runtime access is service-role. DB token site_id/org_id becomes auth context, while the MCP workpack-memory read filters by siteId without revalidating orgId. Normal API issuance binds both from one owned context.",
       "ownershipConcerns": [
         "org_id has no organizations FK",
         "site_id and org_id may both be null",
-        "site/org consistency is not schema-enforced"
+        "site/org consistency is not schema-enforced",
+        "a wrongly bound token can direct the service-role MCP memory read to another tenant's site; no such read was reproduced"
       ],
       "evidence": [
         "supabase/migrations/007_mcp_tokens.sql:14-24",
         "supabase/migrations/007_mcp_tokens.sql:32-33",
+        "lib/mcp-auth.ts:134-143",
         "lib/mcp-auth.ts:217-238",
+        "app/api/mcp/[transport]/route.ts:134-146",
         "app/api/mcp-tokens/route.ts:98-151",
         "app/api/mcp-tokens/route.ts:214-253"
       ]
@@ -617,11 +625,14 @@
       "withCheck": null,
       "tenantPredicateSource": null,
       "serviceRoleBypassExposure": "Graph-store and seed/validation scripts use service role to see non-public states.",
-      "concerns": [],
+      "concerns": [
+        "published nodes may have empty cited_uids because the physical default is [] and the policy checks only review_state; application guards do not constrain direct service-role PostgREST writes"
+      ],
       "evidence": [
         "supabase/migrations/008_safety_ontology.sql:9-18",
         "supabase/migrations/008_safety_ontology.sql:35",
-        "supabase/migrations/008_safety_ontology.sql:39-41"
+        "supabase/migrations/008_safety_ontology.sql:39-41",
+        "lib/ontology/graph-store.ts:73-115"
       ]
     },
     {
@@ -646,12 +657,14 @@
       "tenantPredicateSource": null,
       "serviceRoleBypassExposure": "Graph-store and seed/validation scripts use service role to see non-public states.",
       "concerns": [
-        "edge publication does not independently require both endpoint nodes to be published"
+        "edge publication does not independently require both endpoint nodes to be published",
+        "published edges may have empty cited_uids because the physical default is [] and the policy checks only review_state; application guards do not constrain direct service-role PostgREST writes"
       ],
       "evidence": [
         "supabase/migrations/008_safety_ontology.sql:20-29",
         "supabase/migrations/008_safety_ontology.sql:36",
-        "supabase/migrations/008_safety_ontology.sql:43-45"
+        "supabase/migrations/008_safety_ontology.sql:43-45",
+        "lib/ontology/graph-store.ts:253-276"
       ]
     },
     {
@@ -1297,6 +1310,7 @@
         "supabase/migrations/010_commercial_operations.sql:21-86",
         "supabase/migrations/010_commercial_operations.sql:161-227",
         "app/api/education-records/route.ts:31-56",
+        "app/api/dispatch-logs/route.ts:184-187",
         "app/api/dispatch-logs/route.ts:192-208",
         "app/api/workpacks/[id]/share-sessions/route.ts:34-55",
         "app/api/workpacks/[id]/read-confirmations/route.ts:32-42",
@@ -1304,12 +1318,16 @@
       ],
       "provenEvidence": [
         "The schema allows organization_id/related-ID mismatch when ordinary FK existence checks pass because row policies validate only organization_id.",
-        "Education and dispatch APIs accept request-supplied workpack/worker related IDs without specific ownership validation.",
+        "The education API accepts request-supplied related IDs without specific ownership validation.",
+        "The dispatch API parses external workpackId input and performs the insert with service role without re-owning that workpack ID.",
         "Commercial child reads validate an owned parent and then query children by workpack_id without an additional organization_id predicate."
       ],
-      "conditionalImpact": "If an authenticated role has INSERT/UPDATE object privilege, knows a foreign related UUID, and satisfies its own organization predicate, a mismatched relationship can be accepted. If such a row exists and matches a privileged child query, it could be included in that response.",
+      "conditionalImpact": "Direct table mismatch paths require corresponding INSERT/UPDATE object privilege, foreign UUID knowledge, and a row satisfying the caller's organization predicate. A dispatch_logs mismatch attempt through the authenticated server route does not require client DB INSERT because the route uses service role, but it still requires knowledge of an external valid workpack UUID. Mismatch acceptance and cross-tenant response inclusion were not reproduced.",
+      "dispatchClientDbInsertPrivilegeRequired": false,
+      "externalForeignUuidKnowledgeRequired": true,
+      "externalForeignUuidKnowledgeProven": false,
       "crossTenantResponseInjectionReproduced": false,
-      "severityRationale": "P1 retained because the proven schema gap and privileged query shape can combine at a tenant boundary; exploitability remains conditional on unverified privileges, UUID knowledge, and row existence.",
+      "severityRationale": "P1 retained because the proven schema gap, the dispatch service-role insert shape, and privileged child query shape can combine at a tenant boundary; exploitability remains conditional on unproven foreign UUID knowledge, mismatch acceptance, and row inclusion.",
       "remediation": "Add same-tenant relational constraints or checks; add organization/site predicates to privileged child queries; re-own request-supplied IDs.",
       "liveValidation": "not-executed-no-two-tenant-fixtures"
     },
@@ -1358,11 +1376,16 @@
       ],
       "evidence": [
         "supabase/migrations/007_mcp_tokens.sql:14-24",
+        "lib/mcp-auth.ts:134-143",
+        "lib/mcp-auth.ts:155-163",
+        "app/api/mcp/[transport]/route.ts:134-146",
         "app/api/mcp-tokens/route.ts:214-253"
       ],
-      "impact": "Privileged paths can create orphaned, unscoped, or site/organization-mismatched credential rows.",
-      "remediation": "Add organization FK, valid-scope constraints, and site-to-organization consistency enforcement in an approved migration.",
-      "liveValidation": "HEAD observed one service-role row and zero anon-visible rows; privileged write constraints were not tested."
+      "impact": "Privileged paths can create orphaned, unscoped, or site/organization-mismatched credential rows. A wrongly bound token can carry another tenant's siteId into the MCP memory query because that read filters by siteId without comparing orgId.",
+      "normalIssuanceBinding": "The current API assigns siteId and orgId from one owned workspace context.",
+      "crossTenantMemoryReadReproduced": false,
+      "remediation": "Add organization FK, valid-scope constraints, and site-to-organization consistency enforcement in an approved migration; revalidate site-to-organization binding before MCP reads.",
+      "liveValidation": "HEAD observed one service-role row and zero anon-visible rows; no wrongly bound token or cross-tenant memory read was created or reproduced."
     },
     {
       "id": "P2-04",
@@ -1426,6 +1449,25 @@
       "impact": "If a role has EXECUTE privilege, function reachability and namespace behavior rely on defaults even though invoker RLS prevents non-bypass embedding rows.",
       "remediation": "Schema-qualify relations, explicitly use invoker semantics, pin search_path, and revoke/grant EXECUTE to the intended roles.",
       "liveValidation": "The embedding table returned 404 and effective EXECUTE grants were not inspected."
+    },
+    {
+      "id": "P3-03",
+      "priority": "P3",
+      "title": "Ontology publication policy does not require provenance",
+      "tables": [
+        "safety_ontology_nodes",
+        "safety_ontology_edges"
+      ],
+      "evidence": [
+        "supabase/migrations/008_safety_ontology.sql:9-29",
+        "supabase/migrations/008_safety_ontology.sql:35-45",
+        "lib/ontology/graph-store.ts:73-115",
+        "lib/ontology/graph-store.ts:253-276"
+      ],
+      "impact": "An uncited row can be marked published through a direct service-role PostgREST or equivalent BYPASSRLS write and then satisfy the public SELECT predicate even though the normal application path rejects or drops it. Migration 008 defines no non-bypass INSERT/UPDATE policy.",
+      "currentViolatingRowProven": false,
+      "remediation": "Enforce non-empty cited_uids for published rows with database constraints or a guarded publish transition in an approved migration, while retaining application checks.",
+      "liveValidation": "Effective object grants were not inspected, no direct service-role write was executed, and no current published row with empty cited_uids was proven."
     }
   ],
   "commandResults": [
@@ -1467,7 +1509,7 @@
     {
       "id": "final-report-verification",
       "exitCode": 0,
-      "result": "0 failures; 123 evidence references, 21 service-role tenant/admin routes, 14 negative cases, and 56 expected denies validated; secret and mutation scans clear"
+      "result": "0 failures; 136 JSON evidence references and 166 Markdown source citations, 21 tenant/admin service-role API routes (19 direct, 2 broker-mediated), 6 public/global API routes, 8 public HTTP surfaces, 14 negative cases, and 56 expected denies validated; secret and mutation scans clear"
     }
   ],
   "testExecution": {
@@ -1478,7 +1520,7 @@
       "launchReadinessValue": false,
       "noMutationPropertyPresent": true,
       "noMutationValue": true,
-      "findingTitleCharacterExactMatches": 9,
+      "findingTitleCharacterExactMatches": 10,
       "inventoryCount": 24,
       "negativeCaseCount": 14,
       "executedNegativeCaseCount": 0,
@@ -1487,8 +1529,14 @@
         "P0": 0,
         "P1": 3,
         "P2": 4,
-        "P3": 2
+        "P3": 3
       },
+      "serviceRoleTenantAdminEntryPoints": 21,
+      "serviceRoleTenantAdminDirectEntryPoints": 19,
+      "serviceRoleTenantAdminBrokerEntryPoints": 2,
+      "publicGlobalServiceRoleApiRoutes": 6,
+      "publicGlobalServiceRoleServerPageSurfaces": 2,
+      "publicGlobalServiceRoleHttpSurfaces": 8,
       "logPath": "evaluation/supabase-rls-audit-2026-07-14/logs/verification.log"
     },
     "probeSyntax": {
@@ -1615,12 +1663,20 @@
         ]
       }
     ],
-    "publicGlobalReadSurfaces": [
+    "publicGlobalApiRoutes": [
       "app/api/safety-reference/search/route.ts",
       "app/api/safety-reference/status/route.ts",
-      "app/api/ontology/graph/route.ts"
+      "app/api/ontology/graph/route.ts",
+      "app/api/ask/route.ts",
+      "app/api/ask/stream/route.ts",
+      "app/api/workpack/remediate/route.ts"
     ],
-    "interpretation": "Service-role/BYPASSRLS routes rely on application authorization checks rather than tenant RLS."
+    "publicServerPageSurfaces": [
+      "app/ask/page.tsx",
+      "app/ontology/page.tsx"
+    ],
+    "publicHttpSurfaceCount": 8,
+    "interpretation": "The 21 tenant/admin API routes rely on application authorization rather than tenant RLS. Separately, 6 public/global API routes and 2 server pages use service-role-backed global reads; those 8 public HTTP surfaces are not tenant/admin routes."
   },
   "logs": {
     "staticAudit": "evaluation/supabase-rls-audit-2026-07-14/logs/static-audit.log",

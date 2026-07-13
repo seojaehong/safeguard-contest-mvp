@@ -24,13 +24,14 @@ The migrations define 22 application tables and touch one Supabase-managed table
 - Child policies check only the row's `organization_id`. They do not prove that related `site_id`, `workpack_id`, `worker_id`, `daily_entry_id`, each UUID in `raw_event_ids`, `share_session_id`, or `improvement_id` belongs to the same organization.
 - `created_by` and `approved_by` are actor-attribution fields, not tenant-ownership predicates. Their identity integrity is not enforced by the owner policies or an `auth.users` FK.
 - User-facing server routes use a service-role client. RLS is bypassed, so route predicates and relational integrity are the effective boundary.
+- The service-role HTTP inventory separates 21 tenant/admin API routes (19 direct and 2 broker-mediated) from 6 public/global API routes. The public API routes plus 2 server-rendered pages total 8 public HTTP surfaces.
 - The private `safeclaw-improvement-photos` bucket and service-role upload/remove route are source-known, but live `storage.objects` policies, GRANTs, object ownership, and path-level cross-tenant isolation are unverified.
 - The resumed live probe made 44 fresh HEAD requests and failed closed with 30 HTTP 200, 4 HTTP 206, and 10 HTTP 404 responses. Its payload matches the recovered successful-target attempt except for `generatedAt`. No authenticated cross-tenant result is marked PASS.
 
 ## Resume provenance
 
 - The preserved 2026-07-13 tracked audit was used as a reviewed baseline. It recorded source revision `b39f813`.
-- The requested source and base are both `f45bba17bcce0d8ebb2690f82d014dbe42ae8191`. A targeted diff found no changes between those revisions in `supabase/migrations`, `lib/supabase-admin.ts`, `lib/workpack-store.ts`, `lib/workpack-commercial-store.ts`, `lib/mcp-auth.ts`, or the tenant-facing Supabase API routes. The static inventory and nine finding dispositions therefore remain applicable at the requested source SHA.
+- The requested source and base are both `f45bba17bcce0d8ebb2690f82d014dbe42ae8191`. A targeted diff found no changes between those revisions in `supabase/migrations`, `lib/supabase-admin.ts`, `lib/workpack-store.ts`, `lib/workpack-commercial-store.ts`, `lib/mcp-auth.ts`, or the tenant-facing Supabase API routes. The corrected static inventory and ten finding dispositions therefore apply at the requested source SHA.
 - All three recovered untracked probe JSON files were preserved. `live-probe-result.json` is the recovered successful-target attempt; `live-probe-env-file-result.json` is a separate rejected target/key attempt with 44 HTTP 401 responses; `live-probe-fail-closed.json` proves zero-request fail-closed behavior. `live-probe-resume-result.json` is the additional fresh current-turn probe.
 - The rejected target/key attempt is not treated as evidence about RLS. No URL, host, key, response body, or exception text is stored in any probe artifact.
 
@@ -83,6 +84,11 @@ No migration was applied. No insert, update, delete, upload, token issuance, sig
 | Cross-tenant runtime cases executed | 0 |
 | Expected cross-tenant deny assertions | 56 |
 | Service-role tenant/admin API entry points | 21 |
+| Direct service-role tenant/admin API entry points | 19 |
+| Broker-mediated service-role tenant/admin API entry points | 2 |
+| Public/global service-role API routes | 6 |
+| Public/global service-role server page surfaces | 2 |
+| Total public/global service-role HTTP surfaces | 8 |
 | Focused contract test files / tests passed | 10 / 82 |
 
 `storage.buckets` is counted once as a managed operator object because migration 010 inserts a private bucket. `storage.objects` is counted separately as an application-used managed tenant-data boundary, not as a migration-created or migration-touched table. Neither is counted among the 22 application tables.
@@ -127,7 +133,7 @@ If the role first has the corresponding object command privilege, `FOR ALL` supp
 | `workers` | covered | covered | covered | covered | same owner `EXISTS` in both | `workers.organization_id -> organizations.owner_id` | worker API and share recipient loader; `app/api/workers/route.ts:8-28`, `:39-80`, `lib/workpack-commercial-store.ts:90-104` |
 | `workpacks` | covered | covered | covered | covered | same owner `EXISTS` in both | `workpacks.organization_id -> organizations.owner_id` | archive/detail/commercial/MCP routes; `app/api/workpacks/route.ts:27`, `:59-92`, `lib/workpack-commercial-store.ts:175-208` |
 | `education_records` | covered | covered | covered | covered | same owner `EXISTS` in both | `education_records.organization_id -> organizations.owner_id` | insert API; request-supplied related IDs are not re-owned; `app/api/education-records/route.ts:31-56` |
-| `dispatch_logs` | covered but unsafe null branch | covered but unsafe null branch | covered but unsafe null branch | covered but unsafe null branch | owner `EXISTS` **or `organization_id is null`** in both | row `organization_id`, with global-null escape | archive/insert API; `app/api/dispatch-logs/route.ts:73-111`, `:192-208` |
+| `dispatch_logs` | covered but unsafe null branch | covered but unsafe null branch | covered but unsafe null branch | covered but unsafe null branch | owner `EXISTS` **or `organization_id is null`** in both | row `organization_id`, with global-null escape | archive/insert API; external `workpackId` is parsed before service-role insert; `app/api/dispatch-logs/route.ts:73-111`, `:184-187`, `:192-208` |
 | `daily_entries` | covered | covered | covered | covered | same owner `EXISTS` in both | `daily_entries.organization_id -> organizations.owner_id` | no runtime `.from("daily_entries")` call found |
 | `knowledge_events` | covered | covered | covered | covered | same owner `EXISTS` in both | `knowledge_events.organization_id -> organizations.owner_id` | knowledge ingest API; `app/api/knowledge/ingest/route.ts:35-75` |
 | `knowledge_regeneration_runs` | covered | covered | covered | covered | same owner `EXISTS` in both | `knowledge_regeneration_runs.organization_id -> organizations.owner_id` | knowledge ingest/regenerate APIs; `app/api/knowledge/ingest/route.ts:77-96`, `app/api/knowledge/regenerate/route.ts:97-131` |
@@ -171,14 +177,27 @@ The source has 21 tenant/admin API entry points backed by `createSupabaseAdminCl
 
 | Route group | Entry points | Effective source boundary | Audit disposition |
 |---|---|---|---|
-| Core workspace | `briefing/settings`, `dispatch-logs`, `education-records`, `workers`, `workpacks`, `workpacks/[id]` | bearer validation plus owner/context filters; request-supplied related IDs in education/dispatch remain unowned (`app/api/education-records/route.ts:21-56`, `app/api/dispatch-logs/route.ts:179-208`) | covered by P1-03 |
+| Core workspace | `briefing/settings`, `dispatch-logs`, `education-records`, `workers`, `workpacks`, `workpacks/[id]` | bearer validation plus owner/context filters; request-supplied related IDs in education/dispatch remain unowned (`app/api/education-records/route.ts:21-56`, `app/api/dispatch-logs/route.ts:179-208`) | covered by P1-03; dispatch mismatch attempt does not require direct client DB INSERT |
 | Commercial workpack | `workflow/dispatch`, `share-sessions`, `read-confirmations`, `improvements`, `operation-graph`, `learning-export` | `loadOwnedWorkpackOperationContext()` checks the parent workpack; child queries then commonly use only `workpack_id` (`lib/workpack-commercial-store.ts:175-208`) | parent authorization present; mismatched-child defense remains conditional P1-03 |
 | Knowledge and photo auth | `knowledge/ingest`, `knowledge/regenerate`, `input-photos/hazard-analysis` | knowledge writes occur only after bearer validation and own-context resolution; the photo route uses the admin client for auth lookup only (`app/api/knowledge/ingest/route.ts:35-97`, `app/api/knowledge/regenerate/route.ts:97-132`, `app/api/input-photos/hazard-analysis/route.ts:54-62`) | no cross-tenant write reproduced |
-| MCP and token administration | `mcp`, `mcp-tokens`, `mcp-tokens/[id]` | DB token/site context plus manual owner filters; legacy env tokens are unbound; MCP save re-resolves site organization and rejects mismatch (`lib/mcp-auth.ts:203-245`, `lib/workpack-store.ts:231-268`) | P2-03 plus manual-boundary residual risk |
+| MCP and token administration | `mcp`, `mcp-tokens`, `mcp-tokens/[id]` | DB token `site_id`/`org_id` becomes auth context; the MCP memory read filters by `siteId` without revalidating `orgId`; normal token issuance binds both from one owned context; MCP save separately re-resolves site organization (`lib/mcp-auth.ts:134-143`, `app/api/mcp/[transport]/route.ts:134-146`, `app/api/mcp-tokens/route.ts:214-253`, `lib/workpack-store.ts:231-268`) | P2-03 plus manual-boundary residual risk |
 | Cron automation | `briefing/run` | exact bearer `CRON_SECRET`, then service-role scan of every enabled site (`app/api/briefing/run/route.ts:38-66`, `:103-140`) | intended operator-wide route; secret/runtime behavior not live-tested |
 | Agent broker (indirect) | `agent/context`, `agent/chat` | helper validates bearer and resolves a requested site through its owner organization (`app/api/agent/context/route.ts:1-12`, `app/api/agent/chat/route.ts:1-10`, `lib/openclaw-broker-auth.ts:146-199`) | source boundary present; no A/B runtime fixture |
 
-Three public/global read surfaces also use service-role fetches: `safety-reference/search`, `safety-reference/status`, and `ontology/graph`. The reference catalog is intentionally global. The ontology route explicitly requests `scope="published"`, and the service-role REST fetch adds `review_state=eq.published` (`app/api/ontology/graph/route.ts:1-18`, `lib/ontology/graph-store.ts:154-199`). No public tenant table route without an application ownership check was found. This does not reduce the findings above or prove live route isolation.
+Six public/global API routes use service-role-backed reads. Two server-rendered pages call the same read helpers, making eight public HTTP surfaces in total. These are separate from the 21 tenant/admin API routes above.
+
+| Public HTTP surface | Kind | Service-role-backed read path | Source evidence |
+|---|---|---|---|
+| `/api/safety-reference/search` | API route | global safety-reference search | `app/api/safety-reference/search/route.ts:7-25`, `lib/safety-reference-catalog-server.ts:65-80`, `lib/safety-reference-catalog.ts:161-168` |
+| `/api/safety-reference/status` | API route | global catalog status/count reads | `app/api/safety-reference/status/route.ts:6-8`, `lib/safety-reference-catalog.ts:2331-2340`, `:2537-2565` |
+| `/api/ontology/graph` | API route | published ontology graph read | `app/api/ontology/graph/route.ts:10-18`, `lib/ontology/graph-store.ts:154-199` |
+| `/api/ask` | API route | `runAsk()` performs global safety-reference searches | `app/api/ask/route.ts:21-30`, `lib/search.ts:1649-1664` |
+| `/api/ask/stream` | API route | streaming `runAsk()` performs the same global searches | `app/api/ask/stream/route.ts:25-50`, `lib/search.ts:1649-1664` |
+| `/api/workpack/remediate` | API route | remediation prompt reads the global safety-reference catalog | `app/api/workpack/remediate/route.ts:113-124`, `:177-189` |
+| `/ask` | server page | page invokes `runAsk()` directly | `app/ask/page.tsx:13-16`, `lib/search.ts:1649-1664` |
+| `/ontology` | server page | page invokes `loadGraph("published")` directly | `app/ontology/page.tsx:35-41`, `lib/ontology/graph-store.ts:154-199` |
+
+The reference catalog is intentionally global. Ontology routes request `scope="published"`, and the service-role REST fetch adds `review_state=eq.published`. This corrected source inventory does not reduce the findings below or prove live route isolation.
 
 ## Findings
 
@@ -204,9 +223,9 @@ No P0 finding was proven from source or live evidence.
 
 ### P1-03: Tenant policies do not enforce same-organization relationships and service-role child queries trust them
 
-**Proven schema/API evidence:** child tables carry independent `organization_id` plus related IDs (`supabase/migrations/002_workspace_productization.sql:21-90`, `supabase/migrations/003_knowledge_runtime.sql:1-63`, `supabase/migrations/010_commercial_operations.sql:21-86`), while every owner `WITH CHECK` only resolves the row's `organization_id` (`supabase/migrations/002_workspace_productization.sql:132-200`, `supabase/migrations/003_knowledge_runtime.sql:77-126`, `supabase/migrations/010_commercial_operations.sql:161-227`). The schema therefore allows an `organization_id`/related-ID mismatch when ordinary FK existence checks pass. The education and dispatch APIs accept request-supplied `workpackId` and worker-map IDs without specific ownership validation of those related rows (`app/api/education-records/route.ts:31-56`, `app/api/dispatch-logs/route.ts:192-208`). Commercial reads validate the parent workpack, then query children by `workpack_id` only (`app/api/workpacks/[id]/share-sessions/route.ts:34-55`, `app/api/workpacks/[id]/read-confirmations/route.ts:32-42`, `app/api/workpacks/[id]/improvements/route.ts:187-197`).
+**Proven schema/API evidence:** child tables carry independent `organization_id` plus related IDs (`supabase/migrations/002_workspace_productization.sql:21-90`, `supabase/migrations/003_knowledge_runtime.sql:1-63`, `supabase/migrations/010_commercial_operations.sql:21-86`), while every owner `WITH CHECK` only resolves the row's `organization_id` (`supabase/migrations/002_workspace_productization.sql:132-200`, `supabase/migrations/003_knowledge_runtime.sql:77-126`, `supabase/migrations/010_commercial_operations.sql:161-227`). The schema therefore allows an `organization_id`/related-ID mismatch when ordinary FK existence checks pass. The education API accepts request-supplied related IDs without specific ownership validation (`app/api/education-records/route.ts:31-56`). The dispatch API parses an external `workpackId` from the request (`app/api/dispatch-logs/route.ts:184-187`), combines it with the caller's resolved workspace context, and performs a service-role insert (`:192-208`) without re-owning that workpack ID. Commercial reads validate the parent workpack, then query children by `workpack_id` only (`app/api/workpacks/[id]/share-sessions/route.ts:34-55`, `app/api/workpacks/[id]/read-confirmations/route.ts:32-42`, `app/api/workpacks/[id]/improvements/route.ts:187-197`).
 
-**Conditional impact, not reproduced:** if an authenticated role has INSERT/UPDATE object privilege, knows a foreign related UUID, and can satisfy the row's own-organization predicate, the policy and FK shape can accept a mismatched relationship. If such a mismatched child row exists and matches a service-role child query, that row could be included because those queries do not add an `organization_id` predicate. Direct privilege reachability, mismatch creation, and cross-tenant response inclusion were not executed or reproduced. P1 is retained because the proven schema gap and privileged query shape can combine at a tenant boundary, while exploitability remains conditional on those unverified prerequisites.
+**Conditional impact, not reproduced:** for direct table paths, an authenticated role would still need the corresponding INSERT/UPDATE object privilege, a foreign related UUID, and a row satisfying its own-organization predicate. For `dispatch_logs`, however, a mismatch attempt through the authenticated server route needs no client-side DB INSERT privilege because the route performs the insert with service role; it still requires knowledge of an external valid workpack UUID. External UUID knowledge, mismatch acceptance, and cross-tenant response inclusion were not executed or proven. If a mismatched child row exists and matches a service-role child query, that row could be included because those queries do not add an `organization_id` predicate. P1 is retained because the proven schema gap and privileged query shape can combine at a tenant boundary, while exploitability remains conditional on the unverified UUID and row prerequisites.
 
 **Bounded remediation proposal:** add approved same-tenant relational enforcement, preferably composite tenant FKs/unique keys or narrowly scoped validation functions plus `WITH CHECK`; add `organization_id` and, where applicable, `site_id` filters to service-role child queries; re-own all request-supplied related IDs before writes.
 
@@ -228,11 +247,11 @@ No P0 finding was proven from source or live evidence.
 
 ### P2-03: `mcp_tokens` tenant binding is not schema-enforced
 
-**Evidence:** `site_id` references `sites`, but `org_id` has no FK; neither binding is required and no consistency check links both (`supabase/migrations/007_mcp_tokens.sql:14-24`). API creation currently supplies both from an owned context (`app/api/mcp-tokens/route.ts:214-253`), but service scripts and future operator paths can bypass that convention.
+**Evidence:** `site_id` references `sites`, but `org_id` has no FK; neither binding is required and no consistency check links both (`supabase/migrations/007_mcp_tokens.sql:14-24`). A DB token row's `site_id` and `org_id` become the runtime auth context (`lib/mcp-auth.ts:134-143`, `:155-163`). The MCP workpack-memory read then filters the service-role query by `authContext.siteId` without revalidating that site's organization against `authContext.orgId` (`app/api/mcp/[transport]/route.ts:134-146`). Normal API issuance correctly assigns both values from one owned workspace context (`app/api/mcp-tokens/route.ts:214-253`), but direct privileged writes, service scripts, and future operator paths can bypass that convention.
 
-**Impact:** orphaned, unscoped, or site/organization-mismatched bearer-token rows can be created by privileged paths. RLS does not protect this table from service-role mistakes.
+**Impact:** orphaned, unscoped, or site/organization-mismatched bearer-token rows can be created by privileged paths. A wrongly bound token can carry another tenant's `siteId` into the MCP read path and expose that site's workpack memory because the read does not compare `orgId`. No wrongly bound token or cross-tenant memory read was created or reproduced; normal issuance remains correctly bound. RLS does not protect this table from service-role mistakes, so P2 is retained.
 
-**Bounded remediation proposal:** in an approved migration, add an organization FK and a constraint defining valid scope combinations; enforce that a supplied site belongs to the supplied organization. Preserve the current API owner checks.
+**Bounded remediation proposal:** in an approved migration, add an organization FK and a constraint defining valid scope combinations; enforce that a supplied site belongs to the supplied organization. Preserve the current API owner checks and revalidate site-to-organization binding before MCP reads.
 
 ### P2-04: Published ontology edges do not require published endpoint nodes
 
@@ -257,6 +276,14 @@ No P0 finding was proven from source or live evidence.
 **Impact:** if a role has EXECUTE privilege, current invoker RLS prevents non-bypass embedding rows, but function reachability and namespace behavior are left to defaults and platform configuration. Effective EXECUTE grants were not inspected live.
 
 **Bounded remediation proposal:** schema-qualify relations, explicitly declare invoker semantics, pin an appropriate search path, and revoke/grant EXECUTE to match the intended caller set.
+
+### P3-03: Ontology publication policy does not require provenance
+
+**Evidence:** migration 008 defines node and edge `cited_uids` as non-null JSONB with an empty-array default, so empty provenance is valid physical data (`supabase/migrations/008_safety_ontology.sql:9-29`). Its public SELECT policies check only `review_state = 'published'` (`:35-45`). The application graph assembler drops empty-`cited_uids` rows and the application upsert path rejects them (`lib/ontology/graph-store.ts:73-115`, `:253-276`), but a direct service-role PostgREST or equivalent BYPASSRLS write bypasses those application guards.
+
+**Impact:** an uncited row can be marked published through a service-role write and then satisfy the public SELECT predicate even though the normal application path would reject or drop it. Migration 008 defines no non-bypass INSERT/UPDATE policy; effective object grants were not inspected, no direct service-role write was executed, and no current published row with empty `cited_uids` was proven. This is a publish-integrity gap, not evidence of a current violating row.
+
+**Bounded remediation proposal:** in an approved migration, enforce non-empty `cited_uids` for published rows with database constraints or a guarded publish transition, while retaining the application-level provenance checks.
 
 ## Cross-tenant negative-test matrix
 
@@ -321,7 +348,7 @@ Operator-table negative cases are separate: after corresponding command reachabi
 
 ## Tests and typecheck
 
-- Final report launch-gate validator: parses the JSON and verifies top-level `launchReadiness=false`, `noMutation=true`, the exact source SHA, all 9 finding titles character-for-character between Markdown and JSON, inventory 24, negative cases 14, executed cases 0, expected denies 56, and RED finding counts P0/P1/P2/P3 = 0/3/4/2. The final result is recorded in `logs/verification.log`.
+- Final report launch-gate validator: parses the JSON and verifies top-level `launchReadiness=false`, `noMutation=true`, the exact source SHA, all 10 finding titles character-for-character between Markdown and JSON, inventory 24, negative cases 14, executed cases 0, expected denies 56, tenant/admin service-role API routes 21 (19 direct and 2 broker-mediated), public/global API routes 6, public HTTP surfaces 8, and RED finding counts P0/P1/P2/P3 = 0/3/4/3. The final result is recorded in `logs/verification.log`.
 - Probe syntax: `node --check` passed.
 - Probe fail-closed test: with all Supabase variables blank and `--no-env-file`, exit 2, `blocked`, zero requests, and no secret fields stored.
 - Probe live run: exit 1 after all 44 HEAD requests, with a redacted result written.
@@ -336,6 +363,7 @@ Operator-table negative cases are separate: after corresponding command reachabi
 1. Approval-gated migration: close RLS gaps on `query_logs`/`documents` and remove the `dispatch_logs` null-tenant branch.
 2. Approval-gated migration plus route patch: enforce same-tenant relationships and add organization/site predicates to service-role child queries.
 3. Split history-table CRUD policies and remove public ingestion-run details.
-4. Constrain `mcp_tokens`; make role targets, FORCE decisions, function grants, and search path explicit.
-5. Decide the intended `storage.objects` access model, inspect live policies/GRANTs, and apply the approval-gated object-level test/remediation plan.
-6. Provision two disposable auth fixtures and rerun the full negative matrix against a non-production target before claiming live isolation.
+4. Constrain `mcp_tokens`; revalidate MCP site/organization binding; make role targets, FORCE decisions, function grants, and search path explicit.
+5. Enforce ontology endpoint-publication and non-empty-provenance integrity at the database publish boundary.
+6. Decide the intended `storage.objects` access model, inspect live policies/GRANTs, and apply the approval-gated object-level test/remediation plan.
+7. Provision two disposable auth fixtures and rerun the full negative matrix against a non-production target before claiming live isolation.
