@@ -67,7 +67,7 @@ same SafeClaw facts, approvals, and effect receipts authoritative.
 
 ## ADR-PA-002: Isolated Versioned EngineAdapter Path
 
-Status: Accepted as an experimental and future-promotion path
+Status: Accepted as a future-promotion architecture path; no Phase A execution authorization
 
 ### Decision
 

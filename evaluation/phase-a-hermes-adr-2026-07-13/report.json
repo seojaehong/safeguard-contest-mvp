@@ -17,7 +17,7 @@
     {
       "id": "ADR-PA-002",
       "name": "isolated_versioned_engine_adapter",
-      "result": "runtime_remains_an_isolated_adapter_not_a_core_or_provider_branch_and_phase_a_authorizes_no_runtime_experiment"
+      "result": "runtime_is_a_future_promotion_architecture_path_isolated_from_core_and_provider_policy_and_phase_a_authorizes_no_runtime_experiment"
     },
     {
       "id": "ADR-PA-003",
@@ -44,17 +44,17 @@
     {
       "check": "markdown_local_links",
       "status": "passed",
-      "evidence": "28 local Markdown links counted mechanically with a PowerShell regex"
+      "evidence": "28 total local Markdown links counted mechanically across the ADR and Phase B plan: 28 in the ADR and 0 in the Phase B plan"
     },
     {
       "check": "phase_b_execution_gate",
       "status": "passed",
-      "evidence": "ADR requires Phase B step 6, the Phase B entry gate, and separate explicit approval before a representative GPT OAuth proof of concept"
+      "evidence": "Both the ADR and Phase B plan require delivery step 6, Phase B entry-gate acceptance of the Phase A closeout, and separate explicit approval before a representative GPT OAuth proof of concept"
     },
     {
       "check": "owned_path_only_diff",
       "status": "passed",
-      "evidence": "git diff --name-only 02295b5 listed exactly the three assigned files"
+      "evidence": "git diff --name-only 02295b5 listed exactly the four assigned files"
     },
     {
       "check": "git_diff_check",
