@@ -60,7 +60,7 @@ describe("buildSafetyKnowledgeResult — 도구 페이로드 정형화", () => {
     expect(payload.found).toBe(true);
     if (!payload.found) throw new Error("unreachable");
     expect(payload.provenance).toBe(ONTOLOGY_PROVENANCE);
-    expect(payload.provenance).toBe("SafeClaw 계층형 안전근거 계약 phase-a/v1");
+    expect(payload.provenance).toBe("법제처 검증 시드 v1");
     expect(payload.coreProvenance).toBe(CORE_ONTOLOGY_PROVENANCE);
     expect(payload.coreProvenance).toBe("법제처 검증 시드 v1");
     expect(payload.task).toBe("밀폐공간 작업");

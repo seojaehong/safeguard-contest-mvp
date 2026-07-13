@@ -44,7 +44,6 @@ export type ObligationClassification =
   | "statutory_mandate"
   | "technical_guidance_only"
   | "statutory_mandate_with_guidance"
-  | "neither"
   | "review_required";
 
 export type ControlObligation = {
@@ -66,16 +65,31 @@ export type EvidenceMaterialization = {
   obligation: ControlObligation;
   lawCitedUids: string[];
   guidanceCitedUids: string[];
+  guidanceStatus: "missing" | "unresolved" | "verified";
+  guidanceReviewRequired: boolean;
+  guidanceProvenance: Array<{
+    itemCitedUid: string;
+    productionItemId: string;
+    snapshotItemId: string;
+    chunkId: string;
+    chunkCitedUid: string;
+    page: number;
+    location: string;
+    bridgeResolution: "unresolved";
+  }>;
   sifCitedUids: string[];
   targets: [EvidenceMaterializationTarget, EvidenceMaterializationTarget];
 };
 
 export type ResolvedEvidenceControl = {
   controlId: string;
+  graphControlNodeId: string;
   label: string;
   applicabilityCondition: string;
   lawEvidence: LawEvidenceRecord[];
   guidanceEvidence: KoshaGuidanceRecord[];
+  guidanceStatus: "missing" | "unresolved" | "verified";
+  guidanceReviewRequired: boolean;
   obligation: ControlObligation;
   confirmationQuestion: string;
 };
@@ -128,6 +142,7 @@ export type EvidenceChainPack = {
       launchReady: false;
       bodyMissingCount: number;
       downloadProvenance: "incomplete";
+      productionChunkBridge: "absent";
     };
     sifOverlay: typeof SIF_CORPUS_STATE & {
       authority: "hazard_priority_only";
@@ -166,7 +181,11 @@ export type EvidenceChainResolution =
         | "not_registered"
         | "published_task_missing"
         | "published_hazard_missing"
-        | "published_law_missing";
+        | "published_law_missing"
+        | "published_control_missing"
+        | "published_task_hazard_edge_missing"
+        | "published_hazard_control_edge_missing"
+        | "published_control_law_edge_missing";
       message: string;
       candidateChainId?: EvidenceChainDefinition["chainId"];
       canonicalTaskLabel?: string;
@@ -192,7 +211,7 @@ export type NaturalizedEvidenceChain = {
   providerFallback: "preserve_current_provider_fallback";
   qualityCheck: {
     required: true;
-    status: "pending";
+    status: "pending" | "passed" | "failed";
   };
   humanConfirmation:
     | { required: true; status: "pending" }
@@ -264,11 +283,9 @@ export function classifyControlObligation(
       statement: "검증된 KOSHA 기술지침 근거이며 법령상 mandatedBy 근거로 취급하지 않습니다.",
     };
   }
-  return {
-    classification: "neither",
-    categoricalLegalDuty: false,
-    statement: "SIF 또는 기타 참고근거만으로 법적 의무나 기술지침 적용을 자동 결정하지 않습니다.",
-  };
+  return reviewRequired(
+    "SIF 또는 기타 참고근거만으로 법적 의무나 기술지침 적용을 자동 결정하지 않고 사람의 검토를 요구합니다.",
+  );
 }
 
 function findDefinition(input: string): {
@@ -302,8 +319,17 @@ function applyGuidanceResolution(
   source: KoshaGuidanceRecord,
   resolutions: Readonly<Record<string, EvidenceReviewStatus>> | undefined,
 ): KoshaGuidanceRecord {
+  const clone = { ...source, chunk: { ...source.chunk } };
+  const corpusBlocked =
+    !KOSHA_CORPUS_STATE.launchReady ||
+    KOSHA_CORPUS_STATE.bodyMissingCount > 0 ||
+    KOSHA_CORPUS_STATE.downloadProvenance === "incomplete" ||
+    KOSHA_CORPUS_STATE.productionChunkBridge === "absent";
+  if (corpusBlocked) {
+    return { ...clone, reviewState: "draft", resolution: "unresolved" };
+  }
   const override = resolutions?.[source.citedUid];
-  return override ? { ...source, ...override } : { ...source, chunk: { ...source.chunk } };
+  return override ? { ...clone, ...override } : clone;
 }
 
 function materialize(
@@ -324,6 +350,18 @@ function materialize(
       obligation: control.obligation,
       lawCitedUids: control.lawEvidence.map((source) => source.citedUid),
       guidanceCitedUids: control.guidanceEvidence.map((source) => source.citedUid),
+      guidanceStatus: control.guidanceStatus,
+      guidanceReviewRequired: control.guidanceReviewRequired,
+      guidanceProvenance: control.guidanceEvidence.map((source) => ({
+        itemCitedUid: source.citedUid,
+        productionItemId: source.productionItemId,
+        snapshotItemId: source.itemId,
+        chunkId: source.chunk.chunkId,
+        chunkCitedUid: source.chunk.chunkCitedUid,
+        page: source.chunk.page,
+        location: source.chunk.location,
+        bridgeResolution: source.provenanceBridge,
+      })),
       sifCitedUids: [...sifCitedUids],
       targets: [
         {
@@ -353,24 +391,34 @@ function resolveControls(
   guidance: readonly KoshaGuidanceRecord[],
 ): ResolvedEvidenceControl[] {
   const lawByArticle = new Map(law.map((source) => [source.articleNo, source]));
-  const guidanceByItem = new Map(guidance.map((source) => [source.itemId, source]));
+  const guidanceByEvidenceId = new Map(guidance.map((source) => [source.evidenceId, source]));
   return definition.controls.map((control) => {
     const lawEvidence = control.lawArticles.map((articleNo) => {
       const source = lawByArticle.get(articleNo);
       if (!source) throw new Error(`control ${control.controlId}의 법령 evidence 누락: 제${articleNo}조`);
       return source;
     });
-    const guidanceEvidence = control.guidanceItemIds.map((itemId) => {
-      const source = guidanceByItem.get(itemId);
-      if (!source) throw new Error(`control ${control.controlId}의 KOSHA evidence 누락: ${itemId}`);
+    const guidanceEvidence = control.guidanceEvidenceIds.map((evidenceId) => {
+      const source = guidanceByEvidenceId.get(evidenceId);
+      if (!source) throw new Error(`control ${control.controlId}의 KOSHA evidence 누락: ${evidenceId}`);
       return source;
     });
+    const guidanceStatus = guidanceEvidence.length === 0
+      ? "missing"
+      : guidanceEvidence.some(
+          (source) => source.reviewState === "draft" || source.resolution === "unresolved",
+        )
+        ? "unresolved"
+        : "verified";
     return {
       controlId: control.controlId,
+      graphControlNodeId: control.graphControlNodeId,
       label: control.label,
       applicabilityCondition: control.applicabilityCondition,
       lawEvidence,
       guidanceEvidence,
+      guidanceStatus,
+      guidanceReviewRequired: guidanceStatus !== "verified",
       obligation: classifyControlObligation([...lawEvidence, ...guidanceEvidence]),
       confirmationQuestion: control.confirmationQuestion,
     };
@@ -437,6 +485,24 @@ export function resolveEvidenceChain(
     };
   }
 
+  const hasTaskHazardEdge = runtime.edges.some(
+    (edge) =>
+      edge.src === task.node_id &&
+      edge.rel === "entailsHazard" &&
+      edge.dst === hazard.node_id,
+  );
+  if (!hasTaskHazardEdge) {
+    return {
+      resolved: false,
+      published: false,
+      inferenceState: "unverified",
+      reason: "published_task_hazard_edge_missing",
+      message: "canonical Task-entailsHazard-Hazard published 간선이 없어 evidence chain을 게시하지 않습니다.",
+      candidateChainId: matched.definition.chainId,
+      canonicalTaskLabel: matched.definition.canonicalTaskLabel,
+    };
+  }
+
   const law = matched.definition.lawArticles.map(requireLaw);
   const missingPublishedLaw = law.find(
     (source) =>
@@ -456,6 +522,62 @@ export function resolveEvidenceChain(
       candidateChainId: matched.definition.chainId,
       canonicalTaskLabel: matched.definition.canonicalTaskLabel,
     };
+  }
+  for (const controlDefinition of matched.definition.controls) {
+    const controlNode = runtime.nodes.find(
+      (node) =>
+        node.node_id === controlDefinition.graphControlNodeId && node.kind === "Control",
+    );
+    if (!controlNode) {
+      return {
+        resolved: false,
+        published: false,
+        inferenceState: "unverified",
+        reason: "published_control_missing",
+        message: `${controlDefinition.controlId} Control이 published 부분그래프에 없어 evidence chain을 게시하지 않습니다.`,
+        candidateChainId: matched.definition.chainId,
+        canonicalTaskLabel: matched.definition.canonicalTaskLabel,
+      };
+    }
+    const hasHazardControlEdge = runtime.edges.some(
+      (edge) =>
+        edge.src === hazard.node_id &&
+        edge.rel === "mitigatedBy" &&
+        edge.dst === controlNode.node_id,
+    );
+    if (!hasHazardControlEdge) {
+      return {
+        resolved: false,
+        published: false,
+        inferenceState: "unverified",
+        reason: "published_hazard_control_edge_missing",
+        message: `${controlDefinition.controlId}의 Hazard-mitigatedBy-Control published 간선이 없어 evidence chain을 게시하지 않습니다.`,
+        candidateChainId: matched.definition.chainId,
+        canonicalTaskLabel: matched.definition.canonicalTaskLabel,
+      };
+    }
+    for (const articleNo of controlDefinition.lawArticles) {
+      const lawSource = law.find((source) => source.articleNo === articleNo);
+      const hasControlLawEdge = lawSource?.graphArticleNodeId
+        ? runtime.edges.some(
+            (edge) =>
+              edge.src === controlNode.node_id &&
+              edge.rel === "mandatedBy" &&
+              edge.dst === lawSource.graphArticleNodeId,
+          )
+        : false;
+      if (!hasControlLawEdge) {
+        return {
+          resolved: false,
+          published: false,
+          inferenceState: "unverified",
+          reason: "published_control_law_edge_missing",
+          message: `${controlDefinition.controlId}의 Control-mandatedBy-Article 제${articleNo}조 published 간선이 없어 evidence chain을 게시하지 않습니다.`,
+          candidateChainId: matched.definition.chainId,
+          canonicalTaskLabel: matched.definition.canonicalTaskLabel,
+        };
+      }
+    }
   }
   const guidance = matched.definition.guidance.map((source) =>
     applyGuidanceResolution(source, options.guidanceResolutions),
@@ -519,6 +641,7 @@ export function resolveEvidenceChain(
         launchReady: KOSHA_CORPUS_STATE.launchReady,
         bodyMissingCount: KOSHA_CORPUS_STATE.bodyMissingCount,
         downloadProvenance: KOSHA_CORPUS_STATE.downloadProvenance,
+        productionChunkBridge: KOSHA_CORPUS_STATE.productionChunkBridge,
       },
       sifOverlay: {
         ...SIF_CORPUS_STATE,
@@ -567,12 +690,26 @@ export function resolveEvidenceCitations(pack: EvidenceChainPack): ResolvedEvide
     .map((citedUid) => ({ citedUid, parsed: parseCitedUid(citedUid) }));
 }
 
+function deepFreeze(value: unknown): void {
+  if (typeof value !== "object" || value === null || Object.isFrozen(value)) return;
+  for (const key of Reflect.ownKeys(value)) {
+    deepFreeze(Reflect.get(value, key));
+  }
+  Object.freeze(value);
+}
+
+function immutableEvidencePack(pack: EvidenceChainPack): EvidenceChainPack {
+  const clone = structuredClone(pack);
+  deepFreeze(clone);
+  return clone;
+}
+
 export function naturalizeEvidenceChain(
   fixedPack: EvidenceChainPack,
   naturalizedText: string,
 ): NaturalizedEvidenceChain {
   return {
-    fixedPack,
+    fixedPack: immutableEvidencePack(fixedPack),
     naturalizedText,
     llmRole: "naturalize_only",
     providerFallback: "preserve_current_provider_fallback",
@@ -581,10 +718,23 @@ export function naturalizeEvidenceChain(
   };
 }
 
+export function recordNaturalizedEvidenceChainQuality(
+  naturalized: NaturalizedEvidenceChain,
+  status: "passed" | "failed",
+): NaturalizedEvidenceChain {
+  return {
+    ...naturalized,
+    qualityCheck: { required: true, status },
+  };
+}
+
 export function confirmNaturalizedEvidenceChain(
   naturalized: NaturalizedEvidenceChain,
   confirmation: { reviewerId: string; confirmedAt: string },
 ): NaturalizedEvidenceChain {
+  if (naturalized.qualityCheck.status !== "passed") {
+    throw new Error("human confirmation 전에 quality check status가 passed여야 합니다.");
+  }
   const reviewerId = confirmation.reviewerId.trim();
   const confirmedAt = confirmation.confirmedAt.trim();
   if (!reviewerId || !confirmedAt) {

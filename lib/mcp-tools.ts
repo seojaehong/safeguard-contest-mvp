@@ -531,9 +531,8 @@ export function buildEvidenceMappingResult(docType?: string): EvidenceMappingRes
 
 // ── query_safety_knowledge ────────────────────────────────────────────────
 
-/** 안전 지식 그래프 조회 결과의 계층형 출처 표기(고정 문자열). */
-export const ONTOLOGY_PROVENANCE = "SafeClaw 계층형 안전근거 계약 phase-a/v1";
-/** 기존 core graph 출처 필드의 호환용 값. */
+/** 기존 query_safety_knowledge provenance 필드의 호환용 고정 값. */
+export const ONTOLOGY_PROVENANCE = "법제처 검증 시드 v1";
 export const CORE_ONTOLOGY_PROVENANCE = "법제처 검증 시드 v1";
 
 export type KnowledgeArticleView = {
@@ -564,7 +563,7 @@ export type SafetyKnowledgeFound = {
   provenance: string;
   coreProvenance: string;
   evidenceContract: EvidenceChainPack | null;
-  evidenceChainState: "resolved" | "unverified" | "not_registered" | "not_evaluated";
+  evidenceChainState: "resolved" | "review_required" | "unverified" | "not_registered" | "not_evaluated";
 };
 
 export type SafetyKnowledgeNotFound = {
@@ -572,7 +571,7 @@ export type SafetyKnowledgeNotFound = {
   message: string;
   registeredTasks: string[];
   evidenceContract: null;
-  evidenceChainState: "unverified" | "not_registered" | "not_evaluated";
+  evidenceChainState: "review_required" | "unverified" | "not_registered" | "not_evaluated";
 };
 
 export type SafetyKnowledgeResult = SafetyKnowledgeFound | SafetyKnowledgeNotFound;
@@ -597,14 +596,18 @@ export function buildSafetyKnowledgeResult(
 ): SafetyKnowledgeResult {
   const evidenceChainState = evidenceResolution
     ? evidenceResolution.resolved
-      ? "resolved"
+      ? evidenceResolution.pack.provenance.guidanceOverlay.resolution === "unresolved"
+        ? "review_required"
+        : "resolved"
       : evidenceResolution.reason === "not_registered"
         ? "not_registered"
         : "unverified"
     : "not_evaluated";
   if (!result) {
     const notFoundEvidenceState =
-      evidenceChainState === "resolved" ? "unverified" : evidenceChainState;
+      evidenceChainState === "resolved" || evidenceChainState === "review_required"
+        ? "unverified"
+        : evidenceChainState;
     return {
       found: false,
       message:
