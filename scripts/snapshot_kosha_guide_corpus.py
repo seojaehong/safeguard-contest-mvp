@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 import time
 import unicodedata
 import uuid
@@ -23,6 +24,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from scripts import recover_kosha_ocr_boundary
 from scripts.ingest_safety_reference_catalog import (
     ReferenceItem,
     ReferenceSource,
@@ -43,6 +45,7 @@ OFFICIAL_LIST_URL = "https://portal.kosha.or.kr/archive/resources/tech-support/s
 OFFICIAL_API_URL = "https://portal.kosha.or.kr/api/portal24/bizV/p/VCPDG08009/selectList"
 DATA_FILES = ("items.jsonl", "chunks.jsonl", "failures.jsonl")
 OUTPUT_FILES = (*DATA_FILES, "checkpoint.json")
+OCR_REVIEW_HMAC_KEY_ENV = "KOSHA_OCR_REVIEW_HMAC_KEY"
 
 
 class HashDigest(Protocol):
@@ -127,6 +130,13 @@ class LocalPdfEntry:
     @property
     def key(self) -> str:
         return f"{self.archive_name or '<direct>'}::{self.member_name}"
+
+
+@dataclass(frozen=True)
+class ReviewedOcrCandidate:
+    file_sha256: str
+    payload: dict[str, object]
+    item_id: str
 
 
 def _sha256_bytes(value: bytes) -> str:
@@ -216,6 +226,172 @@ def _normalized_for_hash(value: str) -> str:
 
 def _normalized_char_count(value: str) -> int:
     return len(_normalized_for_hash(value))
+
+
+def _item_id(entry: LocalPdfEntry) -> str:
+    return f"kosha-{_sha256_bytes(entry.key.encode('utf-8'))[:24]}"
+
+
+def _load_reviewed_ocr_candidates(
+    paths: Sequence[Path] | None,
+) -> dict[str, ReviewedOcrCandidate]:
+    candidates: dict[str, ReviewedOcrCandidate] = {}
+    for declared_path in paths or ():
+        path = declared_path.resolve()
+        if not path.is_file():
+            raise RuntimeError(f"reviewed OCR candidate does not exist: {path}")
+        candidate_bytes = path.read_bytes()
+        try:
+            payload = json.loads(candidate_bytes.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise RuntimeError(f"reviewed OCR candidate is not valid UTF-8 JSON: {path}") from exc
+        if not isinstance(payload, dict):
+            raise RuntimeError(f"reviewed OCR candidate must be a JSON object: {path}")
+        source = payload.get("source")
+        item_id = source.get("item_id") if isinstance(source, dict) else None
+        if not isinstance(item_id, str) or not item_id.strip():
+            raise RuntimeError(f"reviewed OCR candidate item_id is missing: {path}")
+        if item_id in candidates:
+            raise RuntimeError(f"duplicate reviewed OCR candidate for item: {item_id}")
+        candidates[item_id] = ReviewedOcrCandidate(
+            file_sha256=_sha256_bytes(candidate_bytes),
+            payload=payload,
+            item_id=item_id,
+        )
+    return candidates
+
+
+def _apply_reviewed_ocr_candidate(
+    item: dict[str, object],
+    pdf_bytes: bytes,
+    candidate: ReviewedOcrCandidate,
+    *,
+    trusted_reviewer_ids: set[str] | None,
+    review_hmac_key: bytes | None,
+    expected_generator_sha256: str | None,
+) -> dict[str, object]:
+    reasons = item.get("ocr_candidate_reasons")
+    if (
+        item.get("extraction_status") != "boundary"
+        or not isinstance(reasons, list)
+        or "empty-native-text" not in reasons
+        or item.get("normalized_char_count") != 0
+        or item.get("normalized_text_sha256") != _sha256_bytes(b"")
+        or "body" in item
+    ):
+        raise RuntimeError(
+            f"reviewed OCR candidate cannot overwrite native extraction: {candidate.item_id}"
+        )
+    raw_sha256 = item.get("raw_sha256")
+    if not isinstance(raw_sha256, str):
+        raise RuntimeError(f"reviewed OCR target raw hash is missing: {candidate.item_id}")
+    with tempfile.TemporaryDirectory(prefix="safeclaw-kosha-reviewed-ocr-") as temp_dir:
+        source_pdf = Path(temp_dir) / "source.pdf"
+        _atomic_write_bytes(source_pdf, pdf_bytes)
+        reviewed = recover_kosha_ocr_boundary.validate_reviewed_candidate(
+            candidate.payload,
+            expected_item_id=candidate.item_id,
+            expected_raw_sha256=raw_sha256,
+            source_pdf=source_pdf,
+            trusted_reviewer_ids=trusted_reviewer_ids,
+            review_hmac_key=review_hmac_key,
+            expected_generator_sha256=expected_generator_sha256,
+        )
+
+    body = reviewed.get("body")
+    candidate_pages = reviewed.get("pages")
+    native_pages = item.get("pages")
+    review = reviewed.get("review")
+    generator = reviewed.get("generator")
+    if (
+        not isinstance(body, str)
+        or not isinstance(candidate_pages, list)
+        or not isinstance(native_pages, list)
+        or not isinstance(review, dict)
+        or not isinstance(generator, dict)
+    ):
+        raise RuntimeError(
+            f"validated reviewed OCR candidate has invalid shape: {candidate.item_id}"
+        )
+
+    page_rows: list[dict[str, object]] = []
+    page_provenance: list[dict[str, object]] = []
+    canonical_page_texts: list[str] = []
+    body_offset = 0
+    for page_index, (candidate_page, native_page) in enumerate(
+        zip(candidate_pages, native_pages, strict=True),
+        start=1,
+    ):
+        if not isinstance(candidate_page, dict) or not isinstance(native_page, dict):
+            raise RuntimeError(
+                f"validated reviewed OCR page has invalid shape: "
+                f"{candidate.item_id}:{page_index}"
+            )
+        candidate_text = candidate_page.get("text")
+        if not isinstance(candidate_text, str):
+            raise RuntimeError(
+                f"validated reviewed OCR page text is missing: "
+                f"{candidate.item_id}:{page_index}"
+            )
+        text = recover_kosha_ocr_boundary._normalize_text(candidate_text)
+        canonical_page_texts.append(text)
+        text_sha256 = _sha256_bytes(text.encode("utf-8"))
+        page_start = body_offset
+        page_end = page_start + len(text)
+        page_rows.append(
+            {
+                "page_number": page_index,
+                "char_count": len(text),
+                "normalized_char_count": _normalized_char_count(text),
+                "normalized_text_sha256": _sha256_bytes(
+                    _normalized_for_hash(text).encode("utf-8")
+                ),
+                "has_image": native_page.get("has_image") is True,
+                "ocr_candidate": False,
+                "body_char_start": page_start,
+                "body_char_end": page_end,
+                "extraction_status": "success",
+            }
+        )
+        page_provenance.append(
+            {
+                "page_number": page_index,
+                "image_sha256": candidate_page.get("image_sha256"),
+                "text_sha256": text_sha256,
+                "response_id": candidate_page.get("response_id"),
+                "model": candidate_page.get("model"),
+            }
+        )
+        body_offset = page_end + (1 if page_index < len(candidate_pages) else 0)
+
+    if "\n".join(canonical_page_texts) != body:
+        raise RuntimeError(
+            f"validated reviewed OCR pages do not rejoin body: {candidate.item_id}"
+        )
+    normalized_body = _normalized_for_hash(body)
+    return {
+        **item,
+        "extraction_status": "success",
+        "pages": page_rows,
+        "body": body,
+        "body_origin": "human-reviewed-ocr",
+        "normalized_char_count": len(normalized_body),
+        "normalized_text_sha256": _sha256_bytes(normalized_body.encode("utf-8")),
+        "ocr_candidate": False,
+        "ocr_candidate_reasons": [],
+        "reviewed_ocr_provenance": {
+            "candidate_sha256": candidate.file_sha256,
+            "content_sha256": review.get("content_sha256"),
+            "attestation_sha256": _sha256_bytes(
+                _canonical_json(review).encode("utf-8")
+            ),
+            "attestation_schema": review.get("attestation_schema"),
+            "reviewed_by": review.get("reviewed_by"),
+            "reviewed_at": review.get("reviewed_at"),
+            "generator_script_sha256": generator.get("script_sha256"),
+            "pages": page_provenance,
+        },
+    }
 
 
 def _normalize_version_code(value: str) -> str | None:
@@ -510,7 +686,18 @@ def _build_generation_policy(
     state: str | None,
     provenance: dict[str, object],
     resource_limits: ResourceLimits,
+    reviewed_ocr_candidates: Sequence[ReviewedOcrCandidate],
 ) -> tuple[dict[str, object], str]:
+    reviewed_candidate_policy = [
+        {
+            "item_id": candidate.item_id,
+            "candidate_sha256": candidate.file_sha256,
+        }
+        for candidate in sorted(
+            reviewed_ocr_candidates,
+            key=lambda value: (value.item_id, value.file_sha256),
+        )
+    ]
     policy: dict[str, object] = {
         "schema_version": CORPUS_SCHEMA_VERSION,
         "extractor_version": EXTRACTOR_VERSION,
@@ -523,6 +710,11 @@ def _build_generation_policy(
             "document_normalized_chars": DOCUMENT_OCR_CHAR_THRESHOLD,
         },
         "resource_limits": resource_limits.as_policy(),
+        **(
+            {"reviewed_ocr_candidates": reviewed_candidate_policy}
+            if reviewed_candidate_policy
+            else {}
+        ),
         "provenance_identity_sha256": provenance.get("identity_sha256"),
         "normalization": "NFKC+line-ending+horizontal-whitespace/v1",
         "chunking": "per-page-fixed-character-span/v1",
@@ -596,7 +788,7 @@ def _build_item(
     version_key = _normalize_version_code(title)
     stable_key = _stable_key(version_key)
     raw_sha256 = _sha256_bytes(data)
-    item_id = f"kosha-{_sha256_bytes(entry.key.encode('utf-8'))[:24]}"
+    item_id = _item_id(entry)
     lineage_map = provenance.get("lineage_by_member")
     lineage = lineage_map.get(entry.member_name) if isinstance(lineage_map, dict) else None
     state = lineage.get("state") if isinstance(lineage, dict) else "current-unverified"
@@ -770,6 +962,52 @@ def _build_item(
         "ocr_candidate": bool(reasons),
         "ocr_candidate_reasons": reasons,
     }, None
+
+
+def _prepare_reviewed_ocr_items(
+    entries: Sequence[LocalPdfEntry],
+    candidates: dict[str, ReviewedOcrCandidate],
+    provenance: dict[str, object],
+    resource_limits: ResourceLimits,
+    *,
+    trusted_reviewer_ids: set[str] | None,
+    review_hmac_key: bytes | None,
+    expected_generator_sha256: str | None,
+) -> dict[str, dict[str, object]]:
+    if not candidates:
+        return {}
+    entries_by_item_id = {_item_id(entry): entry for entry in entries}
+    prepared: dict[str, dict[str, object]] = {}
+    open_archives: dict[Path, zipfile.ZipFile] = {}
+    try:
+        for item_id in sorted(candidates):
+            candidate = candidates[item_id]
+            entry = entries_by_item_id[item_id]
+            archive = None
+            if entry.archive_path:
+                archive = open_archives.get(entry.archive_path)
+                if archive is None:
+                    archive = zipfile.ZipFile(entry.archive_path)
+                    open_archives[entry.archive_path] = archive
+            pdf_bytes = _read_entry_bytes(entry, archive)
+            native_item, _native_failure = _build_item(
+                entry,
+                pdf_bytes,
+                provenance,
+                resource_limits,
+            )
+            prepared[entry.key] = _apply_reviewed_ocr_candidate(
+                native_item,
+                pdf_bytes,
+                candidate,
+                trusted_reviewer_ids=trusted_reviewer_ids,
+                review_hmac_key=review_hmac_key,
+                expected_generator_sha256=expected_generator_sha256,
+            )
+    finally:
+        for archive in open_archives.values():
+            archive.close()
+    return prepared
 
 
 def _source_identity(
@@ -1403,6 +1641,10 @@ def recover_corpus(
     progress: Callable[[int, int, str], None] | None = None,
     resource_limits: ResourceLimits | None = None,
     publication_hook: Callable[[str], None] | None = None,
+    reviewed_ocr_candidate_paths: Sequence[Path] | None = None,
+    trusted_ocr_reviewer_ids: set[str] | None = None,
+    ocr_review_hmac_key: bytes | None = None,
+    expected_ocr_generator_sha256: str | None = None,
 ) -> dict[str, object]:
     if max_files is not None and max_files <= 0:
         raise ValueError("max_files must be greater than zero")
@@ -1424,12 +1666,29 @@ def recover_corpus(
             and isinstance(lineage_map.get(entry.member_name), dict)
             and lineage_map[entry.member_name].get("state") == state
         ]
+    reviewed_ocr_candidates = _load_reviewed_ocr_candidates(reviewed_ocr_candidate_paths)
+    selected_item_ids = {_item_id(entry) for entry in entries}
+    unknown_candidate_items = sorted(set(reviewed_ocr_candidates) - selected_item_ids)
+    if unknown_candidate_items:
+        raise RuntimeError(
+            f"reviewed OCR candidate item is not in selected inventory: {unknown_candidate_items}"
+        )
+    prepared_reviewed_ocr_items = _prepare_reviewed_ocr_items(
+        entries,
+        reviewed_ocr_candidates,
+        provenance,
+        effective_limits,
+        trusted_reviewer_ids=trusted_ocr_reviewer_ids,
+        review_hmac_key=ocr_review_hmac_key,
+        expected_generator_sha256=expected_ocr_generator_sha256,
+    )
     generation_policy, generation_policy_sha256 = _build_generation_policy(
         chunk_chars,
         category,
         state,
         provenance,
         effective_limits,
+        list(reviewed_ocr_candidates.values()),
     )
     run_key = _staging_key(
         str(source_identity["identity_sha256"]),
@@ -1511,48 +1770,53 @@ def recover_corpus(
     open_archives: dict[Path, zipfile.ZipFile] = {}
     try:
         for pending_index, entry in enumerate(pending, start=1):
-            try:
-                archive = None
-                if entry.archive_path:
-                    archive = open_archives.get(entry.archive_path)
-                    if archive is None:
-                        archive = zipfile.ZipFile(entry.archive_path)
-                        open_archives[entry.archive_path] = archive
-                data = _read_entry_bytes(entry, archive)
-                item, failure = _build_item(entry, data, provenance, effective_limits)
-            except Exception as exc:
-                item_id = f"kosha-{_sha256_bytes(entry.key.encode('utf-8'))[:24]}"
-                item = {
-                    "schema_version": CORPUS_SCHEMA_VERSION,
-                    "item_id": item_id,
-                    "stable_key": _stable_key(_normalize_version_code(Path(entry.member_name).stem)),
-                    "version_key": _normalize_version_code(Path(entry.member_name).stem),
-                    "title": Path(entry.member_name).stem,
-                    "item_type": "technical-support-regulation" if "기술지원규정" in entry.member_name else "technical-guideline",
-                    "category": entry.category,
-                    "state": "current-unverified",
-                    "source_zip": entry.archive_name,
-                    "source_member": entry.member_name,
-                    "source_key": entry.key,
-                    "source_file_size": entry.file_size,
-                    "source_compressed_size": entry.compressed_size,
-                    "source_crc32": entry.crc32,
-                    "extraction_status": "failure",
-                    "page_count": 0,
-                    "pages": [],
-                    "ocr_candidate": True,
-                    "ocr_candidate_reasons": ["source-read-failure"],
-                }
-                failure = {
-                    "schema_version": CORPUS_SCHEMA_VERSION,
-                    "item_id": item_id,
-                    "source_key": entry.key,
-                    "source_zip": entry.archive_name,
-                    "source_member": entry.member_name,
-                    "error_code": "source-read-failure",
-                    "error_type": type(exc).__name__,
-                    "message": str(exc),
-                }
+            prepared_item = prepared_reviewed_ocr_items.get(entry.key)
+            if prepared_item is not None:
+                item = prepared_item
+                failure = None
+            else:
+                try:
+                    archive = None
+                    if entry.archive_path:
+                        archive = open_archives.get(entry.archive_path)
+                        if archive is None:
+                            archive = zipfile.ZipFile(entry.archive_path)
+                            open_archives[entry.archive_path] = archive
+                    data = _read_entry_bytes(entry, archive)
+                    item, failure = _build_item(entry, data, provenance, effective_limits)
+                except Exception as exc:
+                    item_id = _item_id(entry)
+                    item = {
+                        "schema_version": CORPUS_SCHEMA_VERSION,
+                        "item_id": item_id,
+                        "stable_key": _stable_key(_normalize_version_code(Path(entry.member_name).stem)),
+                        "version_key": _normalize_version_code(Path(entry.member_name).stem),
+                        "title": Path(entry.member_name).stem,
+                        "item_type": "technical-support-regulation" if "기술지원규정" in entry.member_name else "technical-guideline",
+                        "category": entry.category,
+                        "state": "current-unverified",
+                        "source_zip": entry.archive_name,
+                        "source_member": entry.member_name,
+                        "source_key": entry.key,
+                        "source_file_size": entry.file_size,
+                        "source_compressed_size": entry.compressed_size,
+                        "source_crc32": entry.crc32,
+                        "extraction_status": "failure",
+                        "page_count": 0,
+                        "pages": [],
+                        "ocr_candidate": True,
+                        "ocr_candidate_reasons": ["source-read-failure"],
+                    }
+                    failure = {
+                        "schema_version": CORPUS_SCHEMA_VERSION,
+                        "item_id": item_id,
+                        "source_key": entry.key,
+                        "source_zip": entry.archive_name,
+                        "source_member": entry.member_name,
+                        "error_code": "source-read-failure",
+                        "error_type": type(exc).__name__,
+                        "message": str(exc),
+                    }
             _apply_item_dedupe(item, raw_first, text_first)
             chunks = _chunk_pages(item, chunk_chars) if item.get("extraction_status") == "success" else []
             _append_jsonl_rows(file_states["items.jsonl"], (item,))
@@ -1779,6 +2043,13 @@ def write_quality_report(
     counts = manifest.get("counts")
     if not isinstance(counts, dict):
         raise TypeError("recovery manifest counts must be an object")
+    generation_policy = manifest.get("generation_policy")
+    if not isinstance(generation_policy, dict):
+        raise TypeError("recovery manifest generation_policy must be an object")
+    reviewed_ocr_candidates = generation_policy.get("reviewed_ocr_candidates", [])
+    if not isinstance(reviewed_ocr_candidates, list):
+        raise TypeError("recovery generation policy reviewed_ocr_candidates must be a list")
+    reviewed_ocr_import_count = len(reviewed_ocr_candidates)
     body_missing = int(counts.get("boundary", 0)) + int(counts.get("failure", 0))
     completed = int(counts.get("completed", 0))
     inventory = int(counts.get("inventory", 0))
@@ -1839,6 +2110,11 @@ def write_quality_report(
         "db_mutation_performed": False,
         "network_calls_performed": False,
         "ocr_performed": False,
+        **(
+            {"reviewed_ocr_import_count": reviewed_ocr_import_count}
+            if reviewed_ocr_import_count
+            else {}
+        ),
         "elapsed_seconds": snapshot_elapsed_seconds,
         "snapshot_elapsed_seconds": snapshot_elapsed_seconds,
         "invocation_elapsed_seconds": invocation_elapsed_seconds,
@@ -1855,7 +2131,7 @@ def write_quality_report(
             "hashes": actual_output_hashes,
         },
         "source_identity": summary.get("source_identity"),
-        "generation_policy": manifest.get("generation_policy"),
+        "generation_policy": generation_policy,
         "generation_policy_sha256": manifest.get("generation_policy_sha256"),
         "local_artifacts": {
             "output_dir": str(output_dir.resolve()),
@@ -1885,7 +2161,16 @@ def write_quality_report(
             ),
             f"- elapsed_semantics: `{report['elapsed_semantics']}`",
             f"- source PDF inventory / completed: {inventory} / {completed}",
-            f"- native body success: {counts.get('success', 0)}",
+            (
+                f"- body success: {counts.get('success', 0)}"
+                if reviewed_ocr_import_count
+                else f"- native body success: {counts.get('success', 0)}"
+            ),
+            *(
+                [f"- Human-reviewed OCR imports: {reviewed_ocr_import_count}"]
+                if reviewed_ocr_import_count
+                else []
+            ),
             f"- body missing boundary / hard failure: {counts.get('boundary', 0)} / {counts.get('failure', 0)}",
             f"- OCR candidate items / pages: {counts.get('ocr_candidate_items', 0)} / {counts.get('ocr_candidate_pages', 0)}",
             f"- chunks: {counts.get('chunks', 0)}",
@@ -1899,7 +2184,15 @@ def write_quality_report(
             "",
             "- Local ZIP/PDF bytes were read only. No DB write, migration, upload, network request, OCR, embedding, or external API call was performed.",
             f"- Launch readiness remains false: body_missing={body_missing}; {item_download_boundary}.",
-            "- OCR candidates are boundaries only. No OCR result is represented as recovered text.",
+            (
+                "- Snapshot generation did not perform OCR; declared human-reviewed OCR "
+                "candidates were validated before import."
+                if reviewed_ocr_import_count
+                else (
+                    "- OCR candidates are boundaries only. No OCR result is represented "
+                    "as recovered text."
+                )
+            ),
             "",
             "## Artifact sizes",
             "",
@@ -1962,6 +2255,22 @@ def parse_args() -> argparse.Namespace:
         default=str(REPO_ROOT / "evaluation" / "kosha-guide-audit-2026-07-11" / "report.json"),
         help="Optional offline KOSHA audit JSON used only for provenance and version lineage.",
     )
+    parser.add_argument(
+        "--reviewed-ocr-candidate",
+        action="append",
+        default=[],
+        help="Reviewed OCR candidate JSON to validate and import; repeat for multiple items.",
+    )
+    parser.add_argument(
+        "--trusted-ocr-reviewer-id",
+        action="append",
+        default=[],
+        help="Trusted reviewer identity for declared OCR candidates; repeat as needed.",
+    )
+    parser.add_argument(
+        "--expected-ocr-generator-sha256",
+        help="Trusted SHA-256 of the OCR candidate generator script.",
+    )
     parser.add_argument("--report-dir", help="Optional directory for quality report.json and report.md.")
     parser.add_argument("--preflight", action="store_true", help="Validate and identify the local source without extracting PDFs.")
     return parser.parse_args()
@@ -1993,6 +2302,7 @@ def main() -> int:
                 raise ValueError("--output-dir is required with --source unless --preflight is used")
             started = time.perf_counter()
             provenance_path = Path(args.provenance) if args.provenance else None
+            review_hmac_key_value = os.environ.get(OCR_REVIEW_HMAC_KEY_ENV)
             summary = recover_corpus(
                 source=source,
                 output_dir=Path(args.output_dir),
@@ -2004,6 +2314,16 @@ def main() -> int:
                 provenance_path=provenance_path,
                 progress=_stderr_progress,
                 resource_limits=resource_limits,
+                reviewed_ocr_candidate_paths=[
+                    Path(value) for value in args.reviewed_ocr_candidate
+                ],
+                trusted_ocr_reviewer_ids=set(args.trusted_ocr_reviewer_id),
+                ocr_review_hmac_key=(
+                    review_hmac_key_value.encode("utf-8")
+                    if review_hmac_key_value is not None
+                    else None
+                ),
+                expected_ocr_generator_sha256=args.expected_ocr_generator_sha256,
             )
             elapsed_seconds = time.perf_counter() - started
             report_paths: list[str] = []
