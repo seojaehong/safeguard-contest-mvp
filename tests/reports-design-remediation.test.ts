@@ -18,6 +18,10 @@ import {
   buildStoredCurrentWorkpack,
   CURRENT_WORKPACK_STORAGE_KEY
 } from "@/lib/current-workpack";
+import {
+  OPERATION_IMPROVEMENTS_STORAGE_KEY,
+  type OperationImprovement
+} from "@/lib/operation-improvement-history";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 
 const root = process.cwd();
@@ -25,6 +29,7 @@ const cssPath = path.join(root, "app", "globals.css");
 const componentPath = path.join(root, "components", "ReportsDownloadCenter.tsx");
 const shellPath = path.join(root, "components", "SafeClawModuleShell.tsx");
 const reportingDownloadsPath = path.join(root, "lib", "reporting-downloads.ts");
+const evidenceTestPath = path.join(root, "tests", "reports-design-remediation.test.ts");
 const reportsWave1TestSupabaseUrl = "https://wave8-fixture.supabase.co";
 const reportsWave1TestAuthStorageKey = "sb-wave8-fixture-auth-token";
 const reportsWave1TestAccessToken = "reports-wave1-evidence-access-token";
@@ -36,8 +41,9 @@ const defaultProductionBuildManifestPath = path.join(
 const reportsTaskDistanceEvidenceRelativeDir = path.join(
   "evaluation",
   "reports-mobile-task-distance-2026-07-14",
-  "target-ready-f98-label-remediation"
+  "selected-target-ready-remediation-v2"
 );
+const photoApprovalLabel = "개선 전/개선 후 사진 포함 승인";
 
 type EvidenceIdentity = {
   productCandidateSha: string;
@@ -172,6 +178,11 @@ describe("Reports Wave 1 static design contract", () => {
 
   it("uses the canonical Reports typography and interaction tuples", () => {
     const css = fs.readFileSync(cssPath, "utf8");
+    const evidenceTest = fs.readFileSync(evidenceTestPath, "utf8");
+    const owningRootMutation = [
+      "document.documentElement.style",
+      'fontSize = "200%"'
+    ].join(".");
     const scope = '.safeclaw-module-shell[data-module-route="/reports"]';
     const roles = {
       [`${scope} .safeclaw-report-facts strong`]: ["var(--text-caption)", "600", "var(--leading-caption)"],
@@ -185,6 +196,24 @@ describe("Reports Wave 1 static design contract", () => {
       [`${scope} .safeclaw-report-controls span`]: ["var(--text-caption)", "600", "var(--leading-caption)"],
       [`${scope} .safeclaw-download-note`]: ["var(--text-caption)", "600", "var(--leading-caption)"]
     } as const;
+
+    expect(declarationsFor(css, scope)).toMatchObject({
+      "font-size": "var(--text-body)",
+      "line-height": "var(--leading-body)",
+      "--text-body-lg": "1.0625rem",
+      "--text-body": "0.9375rem",
+      "--text-support": "0.875rem",
+      "--text-control": "0.875rem",
+      "--text-table": "0.8125rem",
+      "--text-caption": "0.75rem",
+      "--text-hud": "0.6875rem",
+      "--leading-control": "1.428571",
+      "--leading-table": "1.538462",
+      "--leading-caption": "1.5",
+      "--leading-hud": "1.454545"
+    });
+    expect(evidenceTest).not.toMatch(/snapshot\.element\.style\.(?:fontSize|lineHeight)/u);
+    expect(evidenceTest).toContain(owningRootMutation);
 
     for (const [selector, [size, weight, lineHeight]] of Object.entries(roles)) {
       expect(declarationsFor(css, selector), selector).toMatchObject({
@@ -255,6 +284,15 @@ describe("Reports Wave 1 static design contract", () => {
       "min-height": "44px"
     });
     expect(declarationsFor(
+      css,
+      '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-photo-approval input[type="checkbox"]'
+    )).toMatchObject({
+      "inline-size": "44px",
+      "width": "44px",
+      "block-size": "44px",
+      "height": "44px"
+    });
+    expect(declarationsFor(
       mobileReportsCss,
       '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a'
     )).toMatchObject({
@@ -297,13 +335,30 @@ async function prepareSample(page: Page, theme: Theme): Promise<void> {
 }
 
 async function prepareDownloadReadyFixture(page: Page, theme: Theme): Promise<void> {
-  await page.addInitScript(({ expectedOrigin, storageKey, workpack }) => {
+  const photoImprovement: OperationImprovement = {
+    id: "reports-target-ready-photo-pair",
+    createdAt: new Date().toISOString(),
+    siteName: "세이프건설 서울 성수동 근린생활시설",
+    workSummary: "외벽 도장 작업",
+    hazardLabel: "이동식 비계 추락 위험",
+    improvementText: "난간과 작업 발판 보강 상태를 확인했습니다.",
+    reflectedDocuments: ["riskAssessmentDraft", "photoEvidenceDraft"],
+    status: "candidate",
+    beforePhotoName: "reports-before-guardrail.jpg",
+    afterPhotoName: "reports-after-guardrail.jpg",
+    sourceType: "photo_analysis",
+    photoPairAttached: true
+  };
+  await page.addInitScript(({ expectedOrigin, workpackKey, improvementKey, workpack, improvements }) => {
     if (window.location.origin !== expectedOrigin) return;
-    window.localStorage.setItem(storageKey, workpack);
+    window.localStorage.setItem(workpackKey, workpack);
+    window.localStorage.setItem(improvementKey, improvements);
   }, {
     expectedOrigin: baseUrl,
-    storageKey: CURRENT_WORKPACK_STORAGE_KEY,
-    workpack: JSON.stringify(buildStoredCurrentWorkpack(buildSampleWorkpack()))
+    workpackKey: CURRENT_WORKPACK_STORAGE_KEY,
+    improvementKey: OPERATION_IMPROVEMENTS_STORAGE_KEY,
+    workpack: JSON.stringify(buildStoredCurrentWorkpack(buildSampleWorkpack())),
+    improvements: JSON.stringify([photoImprovement])
   });
   await page.goto(`${baseUrl}/reports?theme=${theme}`, { waitUntil: "networkidle" });
   await page.locator(".safeclaw-module-shell[data-ready='true']").waitFor({ state: "attached" });
@@ -438,10 +493,7 @@ async function measureInteractiveTargets(page: Page, state: string): Promise<Int
       return classes ? `${element.tagName.toLowerCase()}${classes}` : `${element.tagName.toLowerCase()}:interactive(${index})`;
     };
     const targets = interactive.map((element, index) => {
-      const target = element instanceof HTMLInputElement && element.type === "checkbox"
-        ? element.closest<HTMLElement>("label") ?? element
-        : element;
-      const rect = target.getBoundingClientRect();
+      const rect = element.getBoundingClientRect();
       const name = element.getAttribute("aria-label")
         ?? element.textContent?.replace(/\s+/gu, " ").trim()
         ?? element.getAttribute("name")
@@ -456,12 +508,11 @@ async function measureInteractiveTargets(page: Page, state: string): Promise<Int
         width: Math.round(rect.width * 100) / 100
       };
     });
-    const targetRectangles = interactive.map((element, index) => {
-      const target = element instanceof HTMLInputElement && element.type === "checkbox"
-        ? element.closest<HTMLElement>("label") ?? element
-        : element;
-      return { element: target, rect: target.getBoundingClientRect(), selector: selectorFor(element, index) };
-    });
+    const targetRectangles = interactive.map((element, index) => ({
+      element,
+      rect: element.getBoundingClientRect(),
+      selector: selectorFor(element, index)
+    }));
     const overlapFailures: string[] = [];
     for (let leftIndex = 0; leftIndex < targetRectangles.length; leftIndex += 1) {
       const left = targetRectangles[leftIndex];
@@ -496,11 +547,30 @@ async function measureInteractiveTargets(page: Page, state: string): Promise<Int
   }, state);
 }
 
-async function applyDeterministicTextReflow(page: Page): Promise<{
-  mechanism: string;
-  baselineImmutable: boolean;
+async function applyRootTextScaling(page: Page): Promise<{
+  mechanism: {
+    owner: string;
+    executedValue: string;
+    browserZoomExecuted: boolean;
+    limitation: string;
+  };
+  rootFontSize: { before: number; after: number; growthRatio: number };
+  descendantInlineTypographyMutations: string[];
   textElementCount: number;
+  textRoleCount: number;
+  pseudoElementRoleCount: number;
   interactiveElementCount: number;
+  textRoles: Array<{
+    descriptor: string;
+    source: "element" | "pseudo-before" | "pseudo-after";
+    content: string;
+    beforeFontSize: number;
+    afterFontSize: number;
+    fontGrowthRatio: number;
+    beforeLineHeight: number;
+    afterLineHeight: number;
+    lineHeightGrowthRatio: number;
+  }>;
   representative: {
     selector: string;
     beforeFontSize: number;
@@ -542,6 +612,13 @@ async function applyDeterministicTextReflow(page: Page): Promise<{
     rectanglePairs: number;
     crossParentRectanglePairs: number;
     scrollPositions: number;
+  };
+  mediaEffects: {
+    mobileQueryMatches: boolean;
+    reportTableDisplay: string;
+    reportTableRowDisplay: string;
+    reportTableCellDisplay: string;
+    visiblePseudoContentCount: number;
   };
 }> {
   return page.evaluate(() => {
@@ -604,51 +681,109 @@ async function applyDeterministicTextReflow(page: Page): Promise<{
       const value = Number.parseFloat(style.lineHeight);
       return Number.isFinite(value) ? value : fontSize * 1.2;
     };
-    const textSnapshots = Object.freeze(textElements.map((element) => {
+    const inlineTypographyDescriptors = (): string[] => Array.from(
+      root.querySelectorAll<HTMLElement>("[style]")
+    ).filter((element) => Boolean(element.style.fontSize || element.style.lineHeight)).map(descriptor);
+    const baselineInlineTypography = new Set(inlineTypographyDescriptors());
+    const elementContent = (element: HTMLElement): string => {
+      const directText = Array.from(element.childNodes)
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent?.trim() ?? "")
+        .filter(Boolean)
+        .join(" ");
+      if (directText) return directText;
+      if (element instanceof HTMLSelectElement) {
+        return Array.from(element.selectedOptions).map((option) => option.textContent?.trim() ?? "").join(" ");
+      }
+      return element.getAttribute("aria-label") ?? "";
+    };
+    const textSnapshots = textElements.map((element) => {
       const style = getComputedStyle(element);
       const fontSize = Number.parseFloat(style.fontSize);
-      return Object.freeze({
+      return {
         element,
+        descriptor: descriptor(element),
+        source: "element" as const,
+        content: elementContent(element),
         fontSize,
         lineHeight: parsedLineHeight(style, fontSize)
-      });
-    }));
+      };
+    });
+    type PseudoSnapshot = {
+      element: HTMLElement;
+      descriptor: string;
+      source: "pseudo-before" | "pseudo-after";
+      pseudo: "::before" | "::after";
+      content: string;
+      fontSize: number;
+      lineHeight: number;
+    };
+    const pseudoSnapshots: PseudoSnapshot[] = [];
+    for (const element of Array.from(root.querySelectorAll<HTMLElement>("*"))) {
+      if (!visible(element)) continue;
+      for (const pseudo of ["::before", "::after"] as const) {
+        const style = getComputedStyle(element, pseudo);
+        const content = style.content.trim();
+        if (!content || content === "none" || content === "normal" || content === '""' || content === "''") continue;
+        const fontSize = Number.parseFloat(style.fontSize);
+        if (!Number.isFinite(fontSize) || fontSize <= 0) continue;
+        pseudoSnapshots.push({
+          element,
+          descriptor: `${descriptor(element)}${pseudo}`,
+          source: pseudo === "::before" ? "pseudo-before" : "pseudo-after",
+          pseudo,
+          content,
+          fontSize,
+          lineHeight: parsedLineHeight(style, fontSize)
+        });
+      }
+    }
     const representativeBaseline = textSnapshots.find((snapshot) => snapshot.element === representative);
     const brandBaseline = textSnapshots.find((snapshot) => snapshot.element === brand);
     if (!representativeBaseline || !brandBaseline) throw new Error("Reports typography baselines were not captured");
 
+    const rootFontSizeBefore = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
     const beforeFontSize = representativeBaseline.fontSize;
     const beforeLineHeight = representativeBaseline.lineHeight;
     const beforeHeight = representative.getBoundingClientRect().height;
     const beforeDocumentHeight = document.documentElement.scrollHeight;
     const beforeWorkbenchHeight = workbench.getBoundingClientRect().height;
 
-    for (const snapshot of textSnapshots) {
-      snapshot.element.style.fontSize = `${snapshot.fontSize * 2}px`;
-      snapshot.element.style.lineHeight = `${snapshot.lineHeight * 2}px`;
-    }
+    document.documentElement.style.fontSize = "200%";
 
+    const rootFontSizeAfter = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
     const afterFontSize = Number.parseFloat(getComputedStyle(representative).fontSize);
     const afterLineHeight = Number.parseFloat(getComputedStyle(representative).lineHeight);
     const afterHeight = representative.getBoundingClientRect().height;
     const afterDocumentHeight = document.documentElement.scrollHeight;
     const afterWorkbenchHeight = workbench.getBoundingClientRect().height;
-    const scaleFailures = textSnapshots.flatMap((snapshot) => {
-      const style = getComputedStyle(snapshot.element);
+    const textRoles = [...textSnapshots, ...pseudoSnapshots].map((snapshot) => {
+      const style = "pseudo" in snapshot
+        ? getComputedStyle(snapshot.element, snapshot.pseudo)
+        : getComputedStyle(snapshot.element);
       const actualFontSize = Number.parseFloat(style.fontSize);
-      const actualLineHeight = Number.parseFloat(style.lineHeight);
-      const fontRatio = actualFontSize / snapshot.fontSize;
-      const lineRatio = actualLineHeight / snapshot.lineHeight;
-      return Math.abs(fontRatio - 2) > 0.02 || Math.abs(lineRatio - 2) > 0.02
-        ? [`${descriptor(snapshot.element)} font=${fontRatio.toFixed(3)} line=${lineRatio.toFixed(3)}`]
-        : [];
+      const actualLineHeight = parsedLineHeight(style, actualFontSize);
+      return {
+        descriptor: snapshot.descriptor,
+        source: snapshot.source,
+        content: snapshot.content,
+        beforeFontSize: snapshot.fontSize,
+        afterFontSize: actualFontSize,
+        fontGrowthRatio: actualFontSize / snapshot.fontSize,
+        beforeLineHeight: snapshot.lineHeight,
+        afterLineHeight: actualLineHeight,
+        lineHeightGrowthRatio: actualLineHeight / snapshot.lineHeight
+      };
     });
+    const scaleFailures = textRoles.flatMap((role) => (
+      Math.abs(role.fontGrowthRatio - 2) > 0.02 || Math.abs(role.lineHeightGrowthRatio - 2) > 0.02
+        ? [`${role.descriptor} font=${role.fontGrowthRatio.toFixed(3)} line=${role.lineHeightGrowthRatio.toFixed(3)}`]
+        : []
+    ));
+    const descendantInlineTypographyMutations = inlineTypographyDescriptors()
+      .filter((item) => !baselineInlineTypography.has(item));
 
-    const targetElements = Array.from(new Set(interactiveElements.map((element) => {
-      return element instanceof HTMLInputElement && element.type === "checkbox"
-        ? element.closest<HTMLElement>("label") ?? element
-        : element;
-    })));
+    const targetElements = Array.from(new Set(interactiveElements));
     const dimensionElements = Array.from(new Set([...textElements, ...targetElements])).filter(visible);
     const dimensionOverflowObservations = dimensionElements.flatMap((element) => {
       if (element.clientWidth <= 0 || element.clientHeight <= 0) return [];
@@ -792,13 +927,28 @@ async function applyDeterministicTextReflow(page: Page): Promise<{
     const preview = workbench.querySelector<HTMLElement>(".safeclaw-report-preview");
     const brandStyle = getComputedStyle(brand);
     const brandAfterFontSize = Number.parseFloat(brandStyle.fontSize);
+    const reportTable = root.querySelector<HTMLElement>(".safeclaw-report-table");
+    const reportTableRow = root.querySelector<HTMLElement>(".safeclaw-report-table > div:nth-child(2)");
+    const reportTableCell = root.querySelector<HTMLElement>(".safeclaw-report-table span");
 
     return {
-      mechanism: "freeze-full-shell-visible-computed-font-size-and-line-height-then-double-inline",
-      baselineImmutable: Object.isFrozen(textSnapshots)
-        && textSnapshots.every((snapshot) => Object.isFrozen(snapshot)),
+      mechanism: {
+        owner: "document.documentElement",
+        executedValue: "font-size: 200%",
+        browserZoomExecuted: false,
+        limitation: "Executed Chromium CSS root text scaling only; no browser UI page-zoom behavior is claimed."
+      },
+      rootFontSize: {
+        before: rootFontSizeBefore,
+        after: rootFontSizeAfter,
+        growthRatio: rootFontSizeAfter / rootFontSizeBefore
+      },
+      descendantInlineTypographyMutations,
       textElementCount: textElements.length,
+      textRoleCount: textRoles.length,
+      pseudoElementRoleCount: pseudoSnapshots.length,
       interactiveElementCount: interactiveElements.length,
+      textRoles,
       representative: {
         selector: representativeSelector,
         beforeFontSize,
@@ -849,6 +999,13 @@ async function applyDeterministicTextReflow(page: Page): Promise<{
         rectanglePairs,
         crossParentRectanglePairs,
         scrollPositions: scrollPositions.length
+      },
+      mediaEffects: {
+        mobileQueryMatches: window.matchMedia("(max-width: 900px)").matches,
+        reportTableDisplay: reportTable ? getComputedStyle(reportTable).display : "missing",
+        reportTableRowDisplay: reportTableRow ? getComputedStyle(reportTableRow).display : "missing",
+        reportTableCellDisplay: reportTableCell ? getComputedStyle(reportTableCell).display : "missing",
+        visiblePseudoContentCount: pseudoSnapshots.length
       }
     };
   });
@@ -933,8 +1090,8 @@ describe("Reports Wave 1 browser design contract", () => {
     const evidence: Array<Record<string, unknown>> = [];
     const reflowViolations: string[] = [];
     for (const scenario of [
-      { theme: "day" as const, label: "mobile", width: 391, height: 844 },
-      { theme: "night" as const, label: "mobile", width: 391, height: 844 },
+      { theme: "day" as const, label: "mobile", width: 390, height: 844 },
+      { theme: "night" as const, label: "mobile", width: 390, height: 844 },
       { theme: "day" as const, label: "desktop", width: 1440, height: 1000 },
       { theme: "night" as const, label: "desktop", width: 1440, height: 1000 }
     ] as const) {
@@ -1063,7 +1220,8 @@ describe("Reports Wave 1 browser design contract", () => {
         expect(bothOpenTargets.targets.some((target) => !target.disabled)).toBe(true);
         expect(bothOpenTargets.targets.some((target) => target.descriptor.includes("[문서팩 편집]"))).toBe(true);
         expect(bothOpenTargets.targets.some((target) => target.descriptor.includes("[개선사항 추가]"))).toBe(true);
-        expect(bothOpenTargets.targets.some((target) => target.descriptor.includes("[개선사항 저장하기]"))).toBe(true);
+        expect(bothOpenTargets.targets.some((target) => target.descriptor.includes(`[${photoApprovalLabel}]`))).toBe(true);
+        expect(bothOpenTargets.targets.some((target) => target.descriptor.includes("[개선사항 저장하기]"))).toBe(false);
         const reportDocument = page.getByLabel("작업문서형 리포트");
         await reportDocument.waitFor({ state: "visible" });
         expect(await reportDocument.locator("[role='row']").count()).toBeGreaterThan(1);
@@ -1072,6 +1230,39 @@ describe("Reports Wave 1 browser design contract", () => {
         const previewSummary = page.locator(".safeclaw-report-preview > summary");
         await previewSummary.focus();
         expect(await previewSummary.evaluate((element) => document.activeElement === element)).toBe(true);
+
+        const photoApproval = page.getByLabel(photoApprovalLabel);
+        await photoApproval.waitFor({ state: "visible" });
+        const photoApprovalRect = await photoApproval.boundingBox();
+        const photoApprovalLabelRect = await photoApproval.locator("..").boundingBox();
+        if (!photoApprovalRect || !photoApprovalLabelRect) {
+          throw new Error("Photo approval checkbox geometry was not rendered");
+        }
+        expect(photoApprovalRect.width).toBeGreaterThanOrEqual(44);
+        expect(photoApprovalRect.height).toBeGreaterThanOrEqual(44);
+        expect(photoApprovalLabelRect.width).toBeGreaterThan(photoApprovalRect.width);
+        expect(photoApprovalLabelRect.height).toBeGreaterThanOrEqual(44);
+        let checkboxReachedByKeyboard = false;
+        for (let attempt = 0; attempt <= bothOpenTargets.targets.length; attempt += 1) {
+          await page.keyboard.press("Tab");
+          checkboxReachedByKeyboard = await photoApproval.evaluate((element) => document.activeElement === element);
+          if (checkboxReachedByKeyboard) break;
+        }
+        expect(checkboxReachedByKeyboard).toBe(true);
+        const photoApprovalVisual = photoApproval.locator("..").locator(".safeclaw-report-photo-checkbox-visual");
+        const photoApprovalFocus = await photoApprovalVisual.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return { color: style.outlineColor, width: style.outlineWidth };
+        });
+        expect(photoApprovalFocus).toEqual({
+          color: scenario.theme === "day" ? "rgb(245, 197, 24)" : "rgb(108, 111, 247)",
+          width: "2px"
+        });
+        expect(await photoApproval.isChecked()).toBe(false);
+        await page.keyboard.press("Space");
+        expect(await photoApproval.isChecked()).toBe(true);
+        await page.keyboard.press("Space");
+        expect(await photoApproval.isChecked()).toBe(false);
 
         if (process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1") {
           await page.screenshot({
@@ -1083,13 +1274,28 @@ describe("Reports Wave 1 browser design contract", () => {
           });
         }
 
-        const zoomMetrics = await applyDeterministicTextReflow(page);
+        const zoomMetrics = await applyRootTextScaling(page);
         const scenarioId = `${scenario.theme}-${scenario.label}-${scenario.width}x${scenario.height}`;
         const requireReflow = (condition: boolean, message: string): void => {
           if (!condition) reflowViolations.push(`${scenarioId}: ${message}`);
         };
-        requireReflow(zoomMetrics.baselineImmutable, "typography baseline was mutable");
+        requireReflow(zoomMetrics.mechanism.owner === "document.documentElement", "text scaling owner was not documentElement");
+        requireReflow(zoomMetrics.mechanism.executedValue === "font-size: 200%", "unexpected root text scaling value");
+        requireReflow(!zoomMetrics.mechanism.browserZoomExecuted, "browser zoom was claimed without execution");
+        requireReflow(
+          zoomMetrics.mechanism.limitation.includes("no browser UI page-zoom behavior is claimed"),
+          "text scaling limitation was not recorded"
+        );
+        requireReflow(zoomMetrics.rootFontSize.growthRatio >= 1.99, "document root font did not grow 2x");
+        requireReflow(
+          zoomMetrics.descendantInlineTypographyMutations.length === 0,
+          `descendant inline typography mutations=${zoomMetrics.descendantInlineTypographyMutations.join(", ")}`
+        );
         requireReflow(zoomMetrics.textElementCount > 0, "no visible text elements were inspected");
+        requireReflow(
+          zoomMetrics.textRoleCount === zoomMetrics.textElementCount + zoomMetrics.pseudoElementRoleCount,
+          "visible text role inventory is incomplete"
+        );
         requireReflow(
           zoomMetrics.interactiveElementCount === bothOpenTargets.targets.length,
           `inspected ${zoomMetrics.interactiveElementCount} interactive elements; expected ${bothOpenTargets.targets.length}`
@@ -1132,6 +1338,16 @@ describe("Reports Wave 1 browser design contract", () => {
           "no cross-parent rectangle pairs were inspected"
         );
         requireReflow(zoomMetrics.inspected.scrollPositions >= 2, "fewer than two scroll positions were inspected");
+        requireReflow(
+          zoomMetrics.mediaEffects.mobileQueryMatches === (scenario.label === "mobile"),
+          "mobile media query did not match the exact viewport"
+        );
+        if (scenario.label === "mobile") {
+          requireReflow(zoomMetrics.pseudoElementRoleCount > 0, "mobile pseudo-element text roles were not measured");
+          requireReflow(zoomMetrics.mediaEffects.reportTableRowDisplay === "block", "mobile report table did not reflow to blocks");
+        } else {
+          requireReflow(zoomMetrics.mediaEffects.reportTableRowDisplay === "grid", "desktop report table did not retain grid rows");
+        }
 
         if (process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1") {
           await page.screenshot({
@@ -1152,6 +1368,12 @@ describe("Reports Wave 1 browser design contract", () => {
             previewOnly: previewOnlyTargets,
             bothOpen: bothOpenTargets
           },
+          photoApproval: {
+            inputRect: photoApprovalRect,
+            labelRect: photoApprovalLabelRect,
+            focus: photoApprovalFocus,
+            keyboardToggleSequence: [false, true, false]
+          },
           textZoom200: zoomMetrics
         });
       } finally {
@@ -1167,8 +1389,8 @@ describe("Reports Wave 1 browser design contract", () => {
   it.each([
     { theme: "day" as const, width: 1440, height: 1000, label: "desktop" as const },
     { theme: "night" as const, width: 1440, height: 1000, label: "desktop" as const },
-    { theme: "day" as const, width: 391, height: 844, label: "mobile" as const },
-    { theme: "night" as const, width: 391, height: 844, label: "mobile" as const }
+    { theme: "day" as const, width: 390, height: 844, label: "mobile" as const },
+    { theme: "night" as const, width: 390, height: 844, label: "mobile" as const }
   ])("keeps sample Reports stable in $theme $label", async ({ theme, width, height, label }: Viewport & { theme: Theme }) => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width, height } });
@@ -1314,8 +1536,8 @@ describe("Reports Wave 1 browser design contract", () => {
     const stateScenarios = [
       { theme: "day" as const, width: 1440, height: 1000, label: "desktop" as const },
       { theme: "night" as const, width: 1440, height: 1000, label: "desktop" as const },
-      { theme: "day" as const, width: 391, height: 844, label: "mobile" as const },
-      { theme: "night" as const, width: 391, height: 844, label: "mobile" as const }
+      { theme: "day" as const, width: 390, height: 844, label: "mobile" as const },
+      { theme: "night" as const, width: 390, height: 844, label: "mobile" as const }
     ];
     const loadingResults: Array<Record<string, unknown>> = [];
     for (const scenario of stateScenarios) {
