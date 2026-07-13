@@ -6,7 +6,11 @@ import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 import { POST as exportHwp } from "@/app/api/export/hwp/route";
 import { POST as exportPdf } from "@/app/api/export/pdf/route";
-import { buildHwpxFromTemplate, localizeHwpxXmlText } from "@/lib/hwpx-template";
+import {
+  buildHwpxFromTemplate,
+  localizeHwpxPlainText,
+  localizeHwpxXmlText
+} from "@/lib/hwpx-template";
 
 const root = process.cwd();
 
@@ -60,6 +64,9 @@ describe("localized editable document exports", () => {
     expect(outputText).not.toContain("__COMPANY__");
     expect(outputText).not.toMatch(/>\s*(?:NO|No\.)\s*</u);
     expect(outputText).toContain("연번");
+    const preview = outputZip.getEntry("Preview/PrvText.txt")?.getData().toString("utf8") ?? "";
+    expect(preview).not.toContain("<NO><");
+    expect(preview).toContain("<연번><");
 
     for (const sourceEntry of sourceZip.getEntries()) {
       if (sourceEntry.isDirectory || /\.(xml|hpf|rdf|txt)$/iu.test(sourceEntry.entryName)) continue;
@@ -76,6 +83,10 @@ describe("localized editable document exports", () => {
 
     expect(localized).toBe(
       "<hp:t>연번</hp:t><hp:t>연번</hp:t><hp:t>SNS 알림</hp:t><hp:t>NO 작업 금지</hp:t>"
+    );
+
+    expect(localizeHwpxPlainText("<NO><직종><No.><비고><NO 작업 금지>", "테스트 건설")).toBe(
+      "<연번><직종><연번><비고><NO 작업 금지>"
     );
   });
 

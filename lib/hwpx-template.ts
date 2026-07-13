@@ -143,9 +143,11 @@ export function localizeHwpxXmlText(text: string, companyName: string): string {
     );
 }
 
-function localizeHwpxPlainText(text: string, companyName: string): string {
+export function localizeHwpxPlainText(text: string, companyName: string): string {
   const replaceCompany = companyName.trim() || "사업장명 입력";
-  return text.split("__COMPANY__").join(replaceCompany);
+  return text
+    .split("__COMPANY__").join(replaceCompany)
+    .replace(/<(?:NO|No\.)></gu, "<연번><");
 }
 
 export function buildHwpxFromTemplate(kind: HwpxTemplateKind, companyName: string): Buffer {
