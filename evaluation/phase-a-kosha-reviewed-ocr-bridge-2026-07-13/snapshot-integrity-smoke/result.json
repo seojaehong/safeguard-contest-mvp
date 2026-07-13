@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "safeclaw-kosha-bridge-snapshot-integrity-smoke/v1",
+  "generatedAt": "2026-07-13T14:10:33.575Z",
+  "snapshotId": "bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51",
+  "sourceIdentitySha256": "6d13d26f5038b0cc11ec840ec3c56bfafa014b3885e97942a3f0eb8cfdb8ab0e",
+  "generationPolicySha256": "8abedcd1e046c6d0761d959689562fa95db4136d8772935c2f29796d462a462b",
+  "snapshotIntegrityVerifiedBeforeFetch": true,
+  "expectedStop": "Supabase read credentials are unavailable",
+  "networkRequestPerformed": false,
+  "dbMutationPerformed": false,
+  "launchReadiness": false,
+  "elapsedSeconds": 16.003
+}

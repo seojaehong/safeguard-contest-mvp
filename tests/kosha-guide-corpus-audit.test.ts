@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import {
   mkdirSync,
   mkdtempSync,
@@ -28,6 +28,7 @@ import {
   fetchKoshaJsonWithRetry,
   listKoshaManifestGateFailures,
   normalizeKoshaVersionCode,
+  prepareKoshaReviewedCandidateBridgeInput,
   reconcileKoshaVisibleSnapshots,
   summarizeKoshaAuditChecks,
   summarizeKoshaVisibleStatus,
@@ -74,8 +75,24 @@ function runKoshaAuditScript(arguments_: string[]) {
   });
 }
 
-function sha256(value: string): string {
+function sha256(value: string | Uint8Array): string {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => canonicalJson(item)).join(",")}]`;
+  }
+  if (typeof value === "object" && value !== null) {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`)
+      .join(",")}}`;
+  }
+  const encoded = JSON.stringify(value);
+  if (encoded === undefined) throw new Error("test-canonical-json-invalid");
+  return encoded;
 }
 
 function archiveEntry(overrides: Partial<KoshaArchiveEntry> = {}): KoshaArchiveEntry {
@@ -133,7 +150,6 @@ describe("KOSHA GUIDE identity", () => {
 });
 
 describe("KOSHA GUIDE production/local bridge", () => {
-  const snapshotId = "a".repeat(64);
   const rawSha256 = "e".repeat(64);
   const itemBody = "검토 전 로컬 본문";
   const itemSha256 = sha256(itemBody);
@@ -144,25 +160,109 @@ describe("KOSHA GUIDE production/local bridge", () => {
     internalPath: "B-E-3-2025 exact.pdf"
   };
 
-  function reviewedCandidate(reviewState: "draft" | "verified" = "verified"): Record<string, unknown> {
+  const sourceIdentityMaterial = {
+    entry_manifest_sha256: "1".repeat(64),
+    files: [{ name: tuple.zipFile, sha256: "2".repeat(64), size: 1024 }],
+    max_compression_ratio: 2.5,
+    max_member_bytes: 1024,
+    pdf_entry_count: 1,
+    source_member_count: 1,
+    total_uncompressed_bytes: 1024
+  };
+  const sourceIdentityMaterialCanonicalJson = canonicalJson(sourceIdentityMaterial);
+  const sourceIdentitySha256 = sha256(sourceIdentityMaterialCanonicalJson);
+  const manifestSourceIdentity = {
+    identity_sha256: sourceIdentitySha256,
+    ...sourceIdentityMaterial
+  };
+  const manifestGenerationPolicy = {
+    chunk_chars: 1200,
+    chunking: "per-page-fixed-character-span/v1",
+    extractor_version: "safeclaw-kosha-native-pdf/v2",
+    resource_limits: { max_compression_ratio: 100 },
+    schema_version: "safeclaw-kosha-body-corpus/v2"
+  };
+  const generationPolicyCanonicalJson = canonicalJson(manifestGenerationPolicy).replace(
+    '"max_compression_ratio":100',
+    '"max_compression_ratio":100.0'
+  );
+  const generationPolicySha256 = sha256(generationPolicyCanonicalJson);
+  const outputHashes = {
+    "checkpoint.json": "3".repeat(64),
+    "chunks.jsonl": "d".repeat(64),
+    "failures.jsonl": "4".repeat(64),
+    "items.jsonl": "c".repeat(64)
+  };
+  const snapshotId = sha256(canonicalJson({
+    generation_policy_sha256: generationPolicySha256,
+    output_hashes: outputHashes,
+    schema_version: "safeclaw-kosha-body-corpus/v2",
+    source_identity_sha256: sourceIdentitySha256
+  }));
+
+  function reviewedCandidate(
+    reviewState: "draft" | "verified" = "verified",
+    reviewOverrides: Record<string, unknown> = {},
+    sourceOverrides: Record<string, unknown> = {}
+  ): Record<string, unknown> {
     const immutableContent = {
-      source: { item_id: "local-1", raw_sha256: rawSha256 }
+      source: { item_id: "local-1", raw_sha256: rawSha256, ...sourceOverrides }
     };
-    const contentSha256 = sha256(JSON.stringify(immutableContent));
+    const contentSha256 = sha256(canonicalJson(immutableContent));
+    const { signature_hmac_sha256: signatureOverride, ...reviewFields } = reviewOverrides;
+    const verifiedReview = {
+      state: "verified",
+      human_confirmed: true,
+      reviewed_by: "reviewer-a",
+      reviewed_at: "2026-07-13T00:00:00Z",
+      attestation_schema: "safeclaw-kosha-ocr-review-attestation/v1",
+      content_sha256: contentSha256,
+      ...reviewFields
+    };
+    const signaturePayload = {
+      attestation_schema: verifiedReview.attestation_schema,
+      content_sha256: verifiedReview.content_sha256,
+      human_confirmed: verifiedReview.human_confirmed,
+      reviewed_at: verifiedReview.reviewed_at,
+      reviewed_by: verifiedReview.reviewed_by,
+      state: verifiedReview.state
+    };
     return {
       ...immutableContent,
       review: reviewState === "verified"
         ? {
-            state: "verified",
-            human_confirmed: true,
-            content_sha256: contentSha256
+            ...verifiedReview,
+            signature_hmac_sha256: typeof signatureOverride === "string"
+              ? signatureOverride
+              : createHmac("sha256", "a".repeat(32))
+                  .update(canonicalJson(signaturePayload))
+                  .digest("hex")
           }
         : {
             state: "draft",
             human_confirmed: false,
             reviewed_by: null,
-            reviewed_at: null
+            reviewed_at: null,
+            ...reviewOverrides
           }
+    };
+  }
+
+  function reviewedCandidateInput(
+    reviewState: "draft" | "verified" = "verified",
+    reviewOverrides: Record<string, unknown> = {},
+    sourceOverrides: Record<string, unknown> = {}
+  ) {
+    const candidate = reviewedCandidate(reviewState, reviewOverrides, sourceOverrides);
+    const candidateBytes = Buffer.from(JSON.stringify(candidate, null, 2), "utf8");
+    const immutableContent = Object.fromEntries(
+      Object.entries(candidate).filter(([key]) => key !== "review")
+    );
+    return {
+      candidateBytes,
+      candidateFileSha256: sha256(candidateBytes),
+      candidateContentSha256: sha256(canonicalJson(immutableContent)),
+      candidateAttestationSha256: sha256(canonicalJson(candidate.review))
     };
   }
 
@@ -204,30 +304,40 @@ describe("KOSHA GUIDE production/local bridge", () => {
           text: firstChunkText
         }
       ],
-      reviewedCandidates: [reviewedCandidate()],
+      reviewedCandidates: [reviewedCandidateInput()],
       snapshot: {
+        currentSchemaVersion: "safeclaw-kosha-body-current/v1",
         currentSnapshotId: snapshotId,
         currentReproducibilityHash: snapshotId,
+        currentSourceIdentitySha256: sourceIdentitySha256,
+        currentGenerationPolicySha256: generationPolicySha256,
+        manifestSchemaVersion: "safeclaw-kosha-body-corpus/v2",
         manifestSnapshotId: snapshotId,
         manifestReproducibilityHash: snapshotId,
+        manifestSourceIdentity,
+        manifestSourceIdentityMaterialCanonicalJson: sourceIdentityMaterialCanonicalJson,
+        manifestSourceIdentitySha256: sourceIdentitySha256,
+        manifestGenerationPolicy,
+        manifestGenerationPolicyCanonicalJson: generationPolicyCanonicalJson,
+        manifestGenerationPolicySha256: generationPolicySha256,
         currentManifestSha256: "b".repeat(64),
         manifestFileSha256: "b".repeat(64),
         manifestItemsSha256: "c".repeat(64),
         itemsFileSha256: "c".repeat(64),
         manifestChunksSha256: "d".repeat(64),
-        chunksFileSha256: "d".repeat(64)
+        chunksFileSha256: "d".repeat(64),
+        manifestOutputHashes: { ...outputHashes },
+        snapshotOutputHashes: { ...outputHashes }
       }
     };
   }
 
   it("builds a pending read-only candidate from an exact provenance tuple", () => {
-    const candidate = buildKoshaProductionLocalBridgeCandidate(bridgeInput());
-    const expectedContentSha256 = sha256(JSON.stringify({
-      source: { item_id: "local-1", raw_sha256: rawSha256 }
-    }));
-
-    expect(candidate).toEqual({
-      schemaVersion: "safeclaw-kosha-production-local-bridge-candidate/v1",
+    const input = bridgeInput();
+    const reviewed = input.reviewedCandidates?.[0] as ReturnType<typeof reviewedCandidateInput>;
+    const candidate = buildKoshaProductionLocalBridgeCandidate(input);
+    const identityMaterial = {
+      schemaVersion: "safeclaw-kosha-production-local-bridge-candidate/v2",
       production: {
         id: "production-1",
         sourceId: "kosha-production",
@@ -239,7 +349,9 @@ describe("KOSHA GUIDE production/local bridge", () => {
         rawSha256,
         itemSha256
       },
-      reviewedCandidateContentSha256: expectedContentSha256,
+      candidateFileSha256: reviewed.candidateFileSha256,
+      candidateContentSha256: reviewed.candidateContentSha256,
+      candidateAttestationSha256: reviewed.candidateAttestationSha256,
       chunks: [
         { chunkId: "chunk-1", sha256: sha256(firstChunkText), pageStart: 1, pageEnd: 2 },
         { chunkId: "chunk-2", sha256: sha256(secondChunkText), pageStart: 3, pageEnd: 4 }
@@ -248,21 +360,47 @@ describe("KOSHA GUIDE production/local bridge", () => {
       readOnly: true,
       dbMutationPerformed: false,
       launchReadiness: false
+    };
+
+    expect(candidate).toEqual({
+      ...identityMaterial,
+      reproducibilityHash: sha256(canonicalJson(identityMaterial))
     });
   });
 
   it("records a deterministic content hash for the current draft without accepting it", () => {
     const input = bridgeInput();
-    input.reviewedCandidates = [reviewedCandidate("draft")];
+    input.reviewedCandidates = [reviewedCandidateInput("draft")];
 
     const candidate = buildKoshaProductionLocalBridgeCandidate(input);
 
-    expect(candidate.reviewedCandidateContentSha256).toBe(sha256(JSON.stringify({
+    expect(candidate.candidateContentSha256).toBe(sha256(canonicalJson({
       source: { item_id: "local-1", raw_sha256: rawSha256 }
+    })));
+    expect(candidate.candidateFileSha256).toMatch(/^[0-9a-f]{64}$/u);
+    expect(candidate.candidateAttestationSha256).toBe(sha256(canonicalJson({
+      state: "draft",
+      human_confirmed: false,
+      reviewed_by: null,
+      reviewed_at: null
     })));
     expect(candidate.humanConfirmation).toBe("pending");
     expect(candidate.launchReadiness).toBe(false);
     expect(candidate.dbMutationPerformed).toBe(false);
+  });
+
+  it("keeps exact candidate file bytes separate from canonical content and attestation", () => {
+    const payload = reviewedCandidate();
+    const compact = prepareKoshaReviewedCandidateBridgeInput(
+      Buffer.from(JSON.stringify(payload), "utf8")
+    );
+    const formatted = prepareKoshaReviewedCandidateBridgeInput(
+      Buffer.from(JSON.stringify(payload, null, 2), "utf8")
+    );
+
+    expect(compact.candidateFileSha256).not.toBe(formatted.candidateFileSha256);
+    expect(compact.candidateContentSha256).toBe(formatted.candidateContentSha256);
+    expect(compact.candidateAttestationSha256).toBe(formatted.candidateAttestationSha256);
   });
 
   it.each([
@@ -281,6 +419,71 @@ describe("KOSHA GUIDE production/local bridge", () => {
       expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(expectedError);
     }
   );
+
+  it.each([
+    ["currentSourceIdentitySha256", "kosha-bridge-source-identity-mismatch"],
+    ["manifestSourceIdentitySha256", "kosha-bridge-manifest-source-identity-mismatch"],
+    ["currentGenerationPolicySha256", "kosha-bridge-generation-policy-identity-mismatch"],
+    ["manifestGenerationPolicySha256", "kosha-bridge-manifest-generation-policy-hash-mismatch"]
+  ])("rejects mixed declared snapshot identity %s", (field, expectedError) => {
+    const input = bridgeInput();
+    const snapshot = input.snapshot as unknown as Record<string, unknown>;
+    snapshot[field] = "9".repeat(64);
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(expectedError);
+  });
+
+  it("rejects a manifest with tampered source identity material", () => {
+    const input = bridgeInput();
+    const snapshot = input.snapshot as unknown as Record<string, unknown>;
+    snapshot.manifestSourceIdentity = {
+      ...manifestSourceIdentity,
+      total_uncompressed_bytes: 2048
+    };
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-manifest-source-identity-mismatch"
+    );
+  });
+
+  it("rejects a manifest with tampered generation policy material", () => {
+    const input = bridgeInput();
+    const snapshot = input.snapshot as unknown as Record<string, unknown>;
+    snapshot.manifestGenerationPolicy = {
+      ...manifestGenerationPolicy,
+      chunk_chars: 999
+    };
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-manifest-generation-policy-hash-mismatch"
+    );
+  });
+
+  it("rejects manifest output hashes mixed with different snapshot bytes", () => {
+    const input = bridgeInput();
+    const snapshot = input.snapshot as unknown as {
+      manifestOutputHashes: Record<string, string>;
+    };
+    snapshot.manifestOutputHashes["failures.jsonl"] = "6".repeat(64);
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-output-hash-mismatch:failures.jsonl"
+    );
+  });
+
+  it("rejects a stale reproducibility hash after actual snapshot inputs change", () => {
+    const input = bridgeInput();
+    const snapshot = input.snapshot as unknown as {
+      manifestOutputHashes: Record<string, string>;
+      snapshotOutputHashes: Record<string, string>;
+    };
+    snapshot.manifestOutputHashes["failures.jsonl"] = "6".repeat(64);
+    snapshot.snapshotOutputHashes["failures.jsonl"] = "6".repeat(64);
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-reproducibility-hash-mismatch"
+    );
+  });
 
   it.each([0, 2])("rejects %i production tuple matches", (count) => {
     const input = bridgeInput();
@@ -357,8 +560,9 @@ describe("KOSHA GUIDE production/local bridge", () => {
 
   it("rejects a reviewed candidate bound to a different raw source hash", () => {
     const input = bridgeInput();
-    const reviewedCandidate = input.reviewedCandidates?.[0] as Record<string, unknown>;
-    (reviewedCandidate.source as Record<string, unknown>).raw_sha256 = "9".repeat(64);
+    input.reviewedCandidates = [reviewedCandidateInput("verified", {}, {
+      raw_sha256: "9".repeat(64)
+    })];
 
     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
       "kosha-bridge-reviewed-candidate-raw-hash-mismatch"
@@ -376,8 +580,9 @@ describe("KOSHA GUIDE production/local bridge", () => {
 
   it("rejects a verified candidate without a valid content hash", () => {
     const input = bridgeInput();
-    const reviewedCandidate = input.reviewedCandidates?.[0] as Record<string, unknown>;
-    (reviewedCandidate.review as Record<string, unknown>).content_sha256 = "invalid";
+    input.reviewedCandidates = [reviewedCandidateInput("verified", {
+      content_sha256: "invalid"
+    })];
 
     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
       "kosha-bridge-reviewed-candidate-content-hash-invalid"
@@ -386,12 +591,60 @@ describe("KOSHA GUIDE production/local bridge", () => {
 
   it("rejects a verified candidate whose declared content hash does not match its bytes", () => {
     const input = bridgeInput();
-    const reviewed = input.reviewedCandidates?.[0] as Record<string, unknown>;
-    (reviewed.review as Record<string, unknown>).content_sha256 = "1".repeat(64);
+    input.reviewedCandidates = [reviewedCandidateInput("verified", {
+      content_sha256: "1".repeat(64)
+    })];
 
     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
       "kosha-bridge-reviewed-candidate-content-hash-mismatch"
     );
+  });
+
+  it.each([
+    ["candidateFileSha256", "kosha-bridge-reviewed-candidate-file-hash-mismatch"],
+    ["candidateContentSha256", "kosha-bridge-reviewed-candidate-content-hash-mismatch"],
+    ["candidateAttestationSha256", "kosha-bridge-reviewed-candidate-attestation-hash-mismatch"]
+  ] as const)("rejects a mismatched provided %s", (field, expectedError) => {
+    const input = bridgeInput();
+    const reviewed = input.reviewedCandidates?.[0] as ReturnType<typeof reviewedCandidateInput>;
+    reviewed[field] = "9".repeat(64);
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(expectedError);
+  });
+
+  it("rejects candidate bytes tampered after the raw file hash was captured", () => {
+    const input = bridgeInput();
+    const reviewed = input.reviewedCandidates?.[0] as ReturnType<typeof reviewedCandidateInput>;
+    reviewed.candidateBytes = Buffer.from(JSON.stringify(
+      reviewedCandidate("verified", { reviewed_by: "tampered-reviewer" }),
+      null,
+      2
+    ), "utf8");
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-reviewed-candidate-file-hash-mismatch"
+    );
+  });
+
+  it("does not collapse identical OCR content with distinct valid review attestations", () => {
+    const firstInput = bridgeInput();
+    firstInput.reviewedCandidates = [reviewedCandidateInput("verified", {
+      reviewed_by: "reviewer-a",
+      reviewed_at: "2026-07-13T00:00:00Z"
+    })];
+    const secondInput = bridgeInput();
+    secondInput.reviewedCandidates = [reviewedCandidateInput("verified", {
+      reviewed_by: "reviewer-b",
+      reviewed_at: "2026-07-13T01:00:00Z"
+    })];
+
+    const first = buildKoshaProductionLocalBridgeCandidate(firstInput);
+    const second = buildKoshaProductionLocalBridgeCandidate(secondInput);
+
+    expect(first.candidateContentSha256).toBe(second.candidateContentSha256);
+    expect(first.candidateFileSha256).not.toBe(second.candidateFileSha256);
+    expect(first.candidateAttestationSha256).not.toBe(second.candidateAttestationSha256);
+    expect(first.reproducibilityHash).not.toBe(second.reproducibilityHash);
   });
 
   it("rejects missing production identity fields", () => {
