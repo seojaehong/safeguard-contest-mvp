@@ -16,6 +16,16 @@
       "effectiveGrantCatalogState": "live-unverified",
       "mutationPrivilegeState": "live-unverified",
       "selectEndpointObservation": "HEAD observed endpoint behavior but did not identify the direct, inherited, or default GRANT source."
+    },
+    "identitySemantics": {
+      "tenantOwnershipIdentity": "organizations.owner_id is the auth identity used by RLS as the tenant-ownership anchor.",
+      "actorAttributionIdentity": "created_by and approved_by are nullable audit-attribution fields; they do not grant tenant ownership.",
+      "actorIntegrityState": "No migration FK to auth.users and no owner policy comparison to auth.uid() or organization membership; conditional spoof tests were not executed."
+    },
+    "managedStorageBoundaryState": {
+      "status": "explicitly-unverified",
+      "known": "A private bucket is declared and application upload/remove calls use service role with an organization-prefixed generated path.",
+      "unknown": "Live storage.objects policies, GRANTs, object ownership, role bypass, direct-client reachability, and path-level cross-tenant isolation were not inspected."
     }
   },
   "counts": {
@@ -23,7 +33,8 @@
     "migrationLines": 760,
     "applicationTables": 22,
     "managedTablesTouched": 1,
-    "totalInventoriedTableObjects": 23,
+    "additionalManagedTenantDataBoundariesInventoried": 1,
+    "totalInventoriedTableObjects": 24,
     "applicationClassification": {
       "tenant": 13,
       "public": 5,
@@ -34,6 +45,7 @@
       "tenant": 13,
       "public": 5,
       "operator": 4,
+      "managedTenantDataBoundary": 1,
       "unclassified": 1
     },
     "rlsEnabledApplicationTables": 20,
@@ -165,6 +177,7 @@
       "tenantPredicateSource": "workpacks.organization_id -> organizations.owner_id",
       "serviceRoleBypassExposure": "Archive, detail, commercial, and MCP routes use service role; main owner helper filters id plus owned organization IDs.",
       "relationshipConcerns": ["site_id is not proven to belong to organization_id by policy or composite FK"],
+      "actorIdentityConcerns": ["created_by is audit attribution, not tenant ownership; no FK to auth.users and no owner-policy check against auth.uid() or organization membership"],
       "evidence": ["supabase/migrations/002_workspace_productization.sql:44-57", "supabase/migrations/002_workspace_productization.sql:102", "supabase/migrations/002_workspace_productization.sql:149-164", "lib/workpack-commercial-store.ts:175-208"]
     },
     {
@@ -214,6 +227,7 @@
       "tenantPredicateSource": "daily_entries.organization_id -> organizations.owner_id",
       "serviceRoleBypassExposure": "No runtime .from(\"daily_entries\") call found.",
       "relationshipConcerns": ["site_id", "workpack_id"],
+      "actorIdentityConcerns": ["created_by is audit attribution, not tenant ownership; no FK to auth.users and no owner-policy check against auth.uid() or organization membership"],
       "evidence": ["supabase/migrations/003_knowledge_runtime.sql:1-19", "supabase/migrations/003_knowledge_runtime.sql:73", "supabase/migrations/003_knowledge_runtime.sql:77-92"]
     },
     {
@@ -230,6 +244,7 @@
       "tenantPredicateSource": "knowledge_events.organization_id -> organizations.owner_id",
       "serviceRoleBypassExposure": "Knowledge ingest API uses an authenticated workspace context and service-role upsert.",
       "relationshipConcerns": ["site_id", "workpack_id", "daily_entry_id"],
+      "actorIdentityConcerns": ["created_by is audit attribution, not tenant ownership; no FK to auth.users and no owner-policy check against auth.uid() or organization membership"],
       "evidence": ["supabase/migrations/003_knowledge_runtime.sql:21-44", "supabase/migrations/003_knowledge_runtime.sql:74", "supabase/migrations/003_knowledge_runtime.sql:94-109", "app/api/knowledge/ingest/route.ts:35-75"]
     },
     {
@@ -245,7 +260,8 @@
       "withCheck": "same as using",
       "tenantPredicateSource": "knowledge_regeneration_runs.organization_id -> organizations.owner_id",
       "serviceRoleBypassExposure": "Knowledge ingest/regenerate APIs use authenticated workspace contexts and service-role inserts.",
-      "relationshipConcerns": ["site_id", "workpack_id", "daily_entry_id"],
+      "relationshipConcerns": ["site_id", "workpack_id", "daily_entry_id", "each raw_event_ids UUID has no FK and is not proven to reference a knowledge_events row in the same organization"],
+      "actorIdentityConcerns": ["created_by is audit attribution, not tenant ownership; no FK to auth.users and no owner-policy check against auth.uid() or organization membership"],
       "evidence": ["supabase/migrations/003_knowledge_runtime.sql:46-64", "supabase/migrations/003_knowledge_runtime.sql:75", "supabase/migrations/003_knowledge_runtime.sql:111-126", "app/api/knowledge/ingest/route.ts:77-96", "app/api/knowledge/regenerate/route.ts:97-131"]
     },
     {
@@ -365,6 +381,7 @@
       "tenantPredicateSource": "workpack_share_sessions.organization_id -> organizations.owner_id",
       "serviceRoleBypassExposure": "Route validates owned workpack then queries children by workpack_id.",
       "relationshipConcerns": ["site_id", "workpack_id"],
+      "actorIdentityConcerns": ["created_by is audit attribution, not tenant ownership; no FK to auth.users and no owner-policy check against auth.uid() or organization membership"],
       "evidence": ["supabase/migrations/010_commercial_operations.sql:21-34", "supabase/migrations/010_commercial_operations.sql:155", "supabase/migrations/010_commercial_operations.sql:161-176", "app/api/workpacks/[id]/share-sessions/route.ts:34-55"]
     },
     {
@@ -397,6 +414,7 @@
       "tenantPredicateSource": "workpack_improvements.organization_id -> organizations.owner_id",
       "serviceRoleBypassExposure": "Commercial route validates owned workpack then queries children by workpack_id; site-scoped MCP queries by site_id.",
       "relationshipConcerns": ["site_id", "workpack_id"],
+      "actorIdentityConcerns": ["created_by and approved_by are audit attribution, not tenant ownership; no FK to auth.users and no owner-policy check against auth.uid() or organization membership"],
       "evidence": ["supabase/migrations/010_commercial_operations.sql:51-69", "supabase/migrations/010_commercial_operations.sql:157", "supabase/migrations/010_commercial_operations.sql:195-210", "app/api/workpacks/[id]/improvements/route.ts:187-197", "app/api/mcp/[transport]/route.ts:178-189"]
     },
     {
@@ -413,6 +431,7 @@
       "tenantPredicateSource": "workpack_improvement_photos.organization_id -> organizations.owner_id",
       "serviceRoleBypassExposure": "Photo upload/removal and metadata insert use service role after owned-workpack resolution.",
       "relationshipConcerns": ["site_id", "workpack_id", "improvement_id"],
+      "actorIdentityConcerns": ["created_by is audit attribution, not tenant ownership; no FK to auth.users and no owner-policy check against auth.uid() or organization membership"],
       "evidence": ["supabase/migrations/010_commercial_operations.sql:71-86", "supabase/migrations/010_commercial_operations.sql:158", "supabase/migrations/010_commercial_operations.sql:212-227", "app/api/workpacks/[id]/improvements/route.ts:86-143", "app/api/workpacks/[id]/improvements/route.ts:146-173"]
     },
     {
@@ -445,25 +464,71 @@
       "withCheck": null,
       "tenantPredicateSource": null,
       "serviceRoleBypassExposure": "Migration inserts a private bucket; app upload/remove calls use service role.",
-      "concerns": ["No storage.objects client policy is defined in this migration set; current design is server-only."],
+      "concerns": ["No storage.objects client policy is defined in this migration set; application use is service-role based, while live direct-client access remains unverified."],
       "evidence": ["supabase/migrations/010_commercial_operations.sql:7-15", "app/api/workpacks/[id]/improvements/route.ts:108-113", "app/api/workpacks/[id]/improvements/route.ts:164-166"]
+    },
+    {
+      "schema": "storage",
+      "table": "objects",
+      "classification": "managed-tenant-data-boundary",
+      "classificationDetail": "Supabase-managed object metadata and authorization boundary for tenant improvement photos; inventoried from application use, not as a migration-touched table",
+      "tenantScoped": true,
+      "rls": "live-unverified-managed",
+      "forceRls": null,
+      "crudPolicyCoverage": null,
+      "using": null,
+      "withCheck": null,
+      "tenantPredicateSource": "Generated application paths begin organizations/{organizationId}/workpacks/{workpackId}/improvements/{improvementId}; live policy enforcement of that namespace is unverified.",
+      "serviceRoleBypassExposure": "Application upload/remove calls use the service-role client after owned-workpack resolution, so Storage RLS is not the boundary for those calls.",
+      "relationshipConcerns": ["path organization/workpack/improvement identifiers are not database FKs", "metadata-to-object bucket/path consistency is not schema-enforced in the audited migrations"],
+      "concerns": ["Known private bucket does not itself prove tenant isolation", "No storage.objects policy is defined in this migration set", "Live policies, direct/inherited/default GRANTs, object ownership, role bypass, direct-client reachability, signed URL exposure, and path isolation were not inspected"],
+      "evidence": ["supabase/migrations/010_commercial_operations.sql:7-15", "lib/workpack-commercial.ts:411-433", "app/api/workpacks/[id]/improvements/route.ts:86-143", "app/api/workpacks/[id]/improvements/route.ts:146-173", "app/api/workpacks/[id]/improvements/route.ts:212-250"]
     }
   ],
   "crossTenantNegativeMatrix": [
-    { "table": "organizations", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owner spoof/transfer", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "sites", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "foreign organization_id", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "workers", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign site_id", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "workpacks", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign site_id", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "education_records", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign workpack_id/worker_id", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "dispatch_logs", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "null organization_id must deny; source currently allows", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "daily_entries", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign site_id/workpack_id", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "knowledge_events", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign daily_entry_id/workpack_id", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "knowledge_regeneration_runs", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign daily_entry_id/workpack_id", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "workpack_share_sessions", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign workpack_id", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "workpack_read_confirmations", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign share_session_id/worker_id", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "workpack_improvements", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign workpack_id", "reason": "tenant A/B auth fixtures unavailable" },
-    { "table": "workpack_improvement_photos", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "additionalCase": "owned organization_id plus foreign improvement_id/workpack_id", "reason": "tenant A/B auth fixtures unavailable" }
+    { "table": "organizations", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "change owner_id to tenant B must deny", "actorIdentityCase": "not separate: owner_id is the ownership/auth predicate, not audit attribution", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "sites", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "no secondary tenant relation", "actorIdentityCase": "none", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "workers", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "owned organization_id plus tenant-B site_id must deny", "actorIdentityCase": "none", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "workpacks", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "owned organization_id plus tenant-B site_id must deny", "actorIdentityCase": "tenant-B created_by must reject if attribution is trusted; source policy does not check it", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "education_records", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "owned organization_id plus tenant-B workpack_id/worker_id must deny", "actorIdentityCase": "none", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "dispatch_logs", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "null organization_id must deny; source policy currently allows", "actorIdentityCase": "none", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "daily_entries", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "owned organization_id plus tenant-B site_id/workpack_id must deny", "actorIdentityCase": "tenant-B created_by must reject if attribution is trusted; source policy does not check it", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "knowledge_events", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "owned organization_id plus tenant-B daily_entry_id/workpack_id must deny", "actorIdentityCase": "tenant-B created_by must reject if attribution is trusted; source policy does not check it", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "knowledge_regeneration_runs", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "if raw_event_ids are trusted event references, owned organization_id plus tenant-B daily_entry_id/workpack_id or any tenant-B/nonexistent array element must deny", "actorIdentityCase": "tenant-B created_by must reject if attribution is trusted; source policy does not check it", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "workpack_share_sessions", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "owned organization_id plus tenant-B workpack_id must deny", "actorIdentityCase": "tenant-B created_by must reject if attribution is trusted; source policy does not check it", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "workpack_read_confirmations", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "owned organization_id plus tenant-B share_session_id/worker_id must deny", "actorIdentityCase": "none", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "workpack_improvements", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "owned organization_id plus tenant-B workpack_id must deny", "actorIdentityCase": "tenant-B created_by/approved_by must reject if attribution is trusted; source policy does not check them", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "workpack_improvement_photos", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "owned organization_id plus tenant-B improvement_id/workpack_id must deny", "actorIdentityCase": "tenant-B created_by must reject if attribution is trusted; source policy does not check it", "reason": "tenant A/B auth fixtures unavailable" },
+    { "table": "storage.objects", "select": "not-executed", "insert": "not-executed", "update": "not-executed", "delete": "not-executed", "tenantRelationshipCase": "tenant A must not list/read/write/delete tenant-B objects, spoof organizations/{B}, or create metadata/object tenant mismatch", "actorIdentityCase": "none in managed object row", "reason": "tenant A/B auth fixtures unavailable; Storage API and live catalog not probed" }
   ],
+  "managedStorageBoundaryPlan": {
+    "boundary": "storage.objects for bucket safeclaw-improvement-photos",
+    "status": "unverified-no-live-object-test",
+    "knownSourceFacts": [
+      "The migration declares the bucket private.",
+      "Application upload/remove operations use the service-role client.",
+      "Generated paths are namespaced under organizations/{organizationId}/workpacks/{workpackId}/improvements/{improvementId}."
+    ],
+    "unknownLiveFacts": [
+      "storage.objects RLS enablement and policy definitions",
+      "direct, inherited, and default GRANTs",
+      "object ownership and role bypass state",
+      "direct authenticated list/download/upload/update/delete reachability and signed URL exposure",
+      "enforcement that path tenant IDs match metadata and the caller's tenant"
+    ],
+    "approvalGatedObjectTests": [
+      "On a non-production target, create isolated tenant A/B users and objects.",
+      "Verify own-tenant success separately from A-to-B list/read/download/upload/overwrite/move/delete and forged B-prefix attempts.",
+      "Inspect Storage API responses and resulting storage.objects rows, then test the service-role route with foreign workpack/improvement identifiers.",
+      "Require every cross-tenant operation to deny without revealing object existence."
+    ],
+    "conditionalRemediation": [
+      "If direct client Storage access is not intended, explicitly revoke or deny it and retain the authorized service route as the boundary.",
+      "If direct access is intended, add explicit bucket-scoped storage.objects policies and GRANTs whose path predicate derives an organization the caller owns.",
+      "In either design, re-own organization/workpack/improvement identifiers before service-role operations and enforce metadata-to-object bucket/path consistency."
+    ],
+    "remediationApplied": false
+  },
   "liveProbe": {
     "status": "blocked-partial-surface-observed",
     "scriptPath": "evaluation/phase-a-supabase-rls-audit-2026-07-13/live_rls_head_probe.mjs",
@@ -635,16 +700,16 @@
       "result": "fail-closed blocked result after 44 HEAD requests; statuses 200 x30, 206 x4, 404 x10; redacted result written"
     },
     {
-      "id": "report-probe-consistency",
+      "id": "pre-review-report-probe-consistency",
       "command": "PowerShell JSON classification, authorization semantics, probe inventory, and probe count validator",
       "exitCode": 0,
-      "result": "23 objects; all-object classes tenant/public/operator/unclassified 13/5/4/1; application classes 13/5/3/1; documents unclassified; probe inventory exact; 44 requests"
+      "result": "Pre-review baseline validated 23 migration-target objects; the reviewed inventory now separately includes storage.objects as an additional managed tenant-data boundary."
     },
     {
-      "id": "source-evidence-line-validation",
+      "id": "pre-review-source-evidence-line-validation",
       "command": "PowerShell report.json evidence file and line-range validator",
       "exitCode": 0,
-      "result": "all 23 inventory evidence rows and all 9 finding evidence rows reference existing in-range source lines"
+      "result": "Pre-review baseline validated 23 inventory items and 9 findings; current review-remediation evidence validation is recorded separately."
     },
     {
       "id": "rejected-claim-scan",
@@ -665,10 +730,28 @@
       "result": "no matches; rg uses exit 1 for an empty result set"
     },
     {
-      "id": "git-diff-check",
+      "id": "pre-review-git-diff-check",
       "command": "git diff --cached --check",
       "exitCode": 0,
-      "result": "no whitespace errors; staged scope contains only report.md, report.json, live_rls_head_probe.mjs, and live-probe-result.json"
+      "result": "Pre-review audit commit had no whitespace errors in its four-file staged scope."
+    },
+    {
+      "id": "review-remediation-preflight",
+      "command": "git status --short --branch; git rev-parse HEAD; git merge-base HEAD 02295b5",
+      "exitCode": 0,
+      "result": "clean fix/phase-a-rls-audit-review worktree at base 02295b5 before review remediation"
+    },
+    {
+      "id": "review-remediation-structure-and-scope",
+      "command": "PowerShell JSON parse plus RED, inventory, raw_event_ids, actor-table, storage.objects, Markdown parity, changed-file scope, and git diff --check validator",
+      "exitCode": 0,
+      "result": "24 inventory objects/boundaries; 14 negative cases; 7 actor-attribution tables; RED preserved; only report.md and report.json changed; no whitespace errors"
+    },
+    {
+      "id": "review-remediation-evidence-lines",
+      "command": "PowerShell report.json inventory/finding evidence file and line-range validator",
+      "exitCode": 0,
+      "result": "123 evidence references across 24 inventory items and 9 findings resolve to existing in-range source lines"
     }
   ],
   "testExecution": {
@@ -700,6 +783,10 @@
     "mutatingCrudProbe": {
       "status": "not-executed",
       "reason": "Read-only approval prohibits DB writes."
+    },
+    "managedStorageObjectTests": {
+      "status": "not-executed",
+      "reason": "The live catalog and Storage API were not probed; no upload or object mutation was performed."
     }
   },
   "references": [
