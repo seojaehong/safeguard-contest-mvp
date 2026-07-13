@@ -1,0 +1,4 @@
+2026-07-13T15:32:21.639Z KOSHA GUIDE audit started
+readOnly=true dbMutationPerformed=false uploadPerformed=false
+fatal_type=Error
+fatal_code=supabase-read-credentials-unavailable

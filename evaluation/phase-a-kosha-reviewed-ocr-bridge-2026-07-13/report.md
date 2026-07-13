@@ -1,65 +1,75 @@
-# Phase A KOSHA reviewed OCR bridge P2 remediation
+# Phase A KOSHA reviewed OCR bridge HOLD remediation
 
 - Status: **HOLD_PENDING_FRESH_REVIEW**
 - Launch readiness: **false**
-- Read-only: **true**
-- DB/Supabase/API mutation performed: **false**
-- Migration performed: **false**
+- DB/Supabase/API/schema/migration mutation: **false**
+- Production GET performed: **false**
 
-## Source and candidate truth
+## Fixed snapshot truth
 
-The unchanged corpus remains 1,040 items, 1,039 native successes, one OCR boundary, 20,520 chunks, and one failure-ledger row. `launchReady` remains false.
+The fixed generator rebuilt the offline corpus from the local ZIP source in 1,929.811 seconds. A zero-work resume validation completed in 2.950 seconds with `processed_this_run=0`.
 
-The unchanged B-E-3 candidate remains `draft` and `human_confirmed=false`. A fresh validator regression rejected it with `ocr_candidate_not_human_confirmed`. It has zero chunks and zero imported rows.
+| Measure | Actual |
+|---|---:|
+| Inventory / completed | 1,040 / 1,040 |
+| Native successes | 1,039 |
+| OCR boundaries / hard failures | 1 / 0 |
+| Failure-ledger rows | 1 |
+| Chunks | 20,520 |
+| Reviewed OCR imports | 0 |
 
-| Candidate identity | SHA-256 |
+The fixed identities all recompute exactly:
+
+| Identity | SHA-256 |
 |---|---|
-| Exact file bytes | `5d06ba7a04329e32e8fafb30b9311f6fb2ea70e248dfcb706aaa883e3632753b` |
-| Canonical immutable content | `e18c2ae92e938f564c5dff20f9c90fb76170bf27122ec71c9f03f5531719577e` |
-| Canonical full review attestation | `9dbb03c1ddd14dfc293b800cc4d4762244996b3cac050545d813add30d97d57d` |
+| Source | `1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d` |
+| Generation policy | `54840fedece9d4b347ad7fd88808866f7ca1b41c5a08b9c6ca47b284c9411b1f` |
+| Snapshot | `976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282` |
+| Manifest | `702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519` |
 
-The candidate file was read only. It was not edited, confirmed, attested, imported, copied into the corpus, or used for a DB/API write.
+The fixed `items.jsonl`, `chunks.jsonl`, and `failures.jsonl` hashes match the prior bytes. `checkpoint.json` changed because the fixed source and policy identities are now bound into a newly generated checkpoint; no hash constant was overwritten.
 
-## P2 fixes
+## Stale snapshot finding
 
-The pure snapshot verifier now receives current and manifest source identity plus generation policy identity. It hashes canonical source and policy material taken from the actual manifest bytes, preserving Python number forms such as `100.0`. It also hashes the actual bytes of `items.jsonl`, `chunks.jsonl`, `failures.jsonl`, and `checkpoint.json`, then recomputes the same content-addressed snapshot ID used by snapshot publication. Mixed source, policy, manifest, output, and stale reproducibility inputs fail before artifact construction.
+The prior artifact declared source `6d13d26f...`, but its parsed manifest material recomputes to `419fd79e...`. Keeping the prior declared policy while replacing only that source identity produces the reviewer-observed snapshot `18b4b4e0...`.
 
-The bridge now hashes candidate raw bytes before JSON parsing. It verifies separate `candidateFileSha256`, `candidateContentSha256`, and `candidateAttestationSha256` values and includes all three in the v2 artifact reproducibility hash. The attestation digest covers the complete canonical review object, including reviewer, timestamp, review state, confirmation flag, content binding, attestation schema, and HMAC signature when present.
+Applying the same semantic canonicalization to policy as well yields policy `8e41acbf...` and full stale-artifact snapshot `f2f1991f...`. The fixed generator therefore rebuilt source, policy, checkpoint, manifest, and current pointer together instead of patching the intermediate `18b4b4e0...` value.
 
-Adversarial tests cover mixed identities, tampered source/policy/output material, a stale snapshot ID, provided digest mismatch, raw-byte tampering, and identical OCR content with distinct valid review attestations producing distinct artifact identities.
+## P1 smoke order
 
-## Actual snapshot smoke
+| Case | First terminal code | Credential check | GET | Elapsed |
+|---|---|---:|---:|---:|
+| Stale snapshot + missing credential | `kosha-bridge-manifest-source-identity-mismatch` | no | no | 14.892s |
+| Fixed snapshot + missing credential | `supabase-read-credentials-unavailable` | yes | no | 13.538s |
 
-The existing snapshot `bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51` passed the strengthened local verifier. Credentials were intentionally absent, so execution stopped at `Supabase read credentials are unavailable` before any production request. No network request or mutation occurred. Evidence is in `snapshot-integrity-smoke/result.json` and `snapshot-integrity-smoke/audit.log`.
+Neither failed run records `snapshotIntegrityVerifiedBeforeFetch=true`. That field is emitted only after a successful GET and bridge artifact build; no successful production run is claimed here.
+
+## Candidate and multiplicity
+
+The unchanged B-E-3 candidate is still `draft`, `human_confirmed=false`, and rejected with `ocr_candidate_not_human_confirmed`. Its exact file/content/attestation hashes remain unchanged. The fixed corpus item remains `boundary`, with no body, zero chunks, and zero imports. The candidate also has no source `render_dpi`; it was not edited or promoted.
+
+Snapshot import now permits reviewed candidates for distinct item IDs. It fails closed on two candidates for the same item and on a duplicate canonical attestation. Tests cover the two-item success and both collision paths.
+
+## Privacy
+
+Audit failures now serialize only `fatal_type` and `fatal_code`, never a stack. Fourteen evaluation logs were scanned with zero absolute local path matches and zero raw secret/HMAC matches.
 
 ## Verification
 
-| Check | Passed | Failed | Wall elapsed |
+| Check | Passed | Failed | Elapsed |
 |---|---:|---:|---:|
-| Focused Python | 61 | 0 | 17.759s |
-| Focused TypeScript | 100 | 0 | 33.810s |
-| Ontology evidence regression | 45 | 0 | 7.376s |
-| Strict TypeScript typecheck | yes | no | 35.873s |
+| Focused Python | 64 | 0 | 11.827s |
+| Focused TypeScript | 106 | 0 | 43.920s |
+| Ontology evidence regression | 45 | 0 | 5.125s command wall |
+| Strict TypeScript typecheck | yes | no | 32.602s command wall |
 | `git diff --check` | yes | no | n/a |
 
-Final automated test total: **206 passed, 0 failed**. Test command wall time was 58.945s; tests plus strict typecheck took 94.818s before the final diff check.
-
-P2 RED evidence is preserved in `p2-red-typescript.log`: 84 tests ran, 66 passed, and the 18 new expectations failed before implementation. The earlier phase RED logs remain preserved separately.
-
-Commands:
-
-```text
-python -m unittest scripts.tests.test_recover_kosha_ocr_boundary scripts.tests.test_snapshot_kosha_guide_corpus
-npm.cmd test -- --run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-corpus-audit.test.ts
-npm.cmd test -- --run tests/ontology-evidence-chains.test.ts
-npm.cmd run typecheck
-git diff --check
-```
+Final automated test total: **215 passed, 0 failed**. RED evidence remains separate: Python 4/4 expected failures and TypeScript 5 expected failures out of 91 tests before implementation.
 
 ## Remaining hold
 
-- Fresh review of this remediation is required. No approval is claimed.
-- B-E-3 has no trusted human confirmation and remains rejected from import.
-- The corpus retains one OCR boundary; B-E-3 remains at chunks 0 and imported 0.
-- No fresh production GET was performed, and no deployment identity is established by this task.
-- `launchReadiness=false` and `dbMutationPerformed=false` remain mandatory.
+- Fresh independent review is required. No integration approval is claimed.
+- B-E-3 remains unconfirmed and unimported.
+- One OCR boundary remains, so `launchReadiness=false`.
+- No production GET or deployment identity was established.
+- `dbMutationPerformed=false` remains unchanged.

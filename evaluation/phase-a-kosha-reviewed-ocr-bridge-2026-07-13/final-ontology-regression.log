@@ -1,14 +1,14 @@
 
 > safeclaw@0.1.0 test
-> vitest run --run tests/ontology-evidence-chains.test.ts
+> vitest run tests/ontology-evidence-chains.test.ts
 
 
- RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
+ RUN  v4.1.10 <user-root>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
 
 
  Test Files  1 passed (1)
       Tests  45 passed (45)
-   Start at  23:13:30
-   Duration  1.77s (transform 472ms, setup 0ms, import 639ms, tests 66ms, environment 0ms)
+   Start at  00:33:41
+   Duration  1.75s (transform 511ms, setup 0ms, import 681ms, tests 96ms, environment 0ms)
 
-elapsed_seconds=7.376
+elapsed_seconds=5.125

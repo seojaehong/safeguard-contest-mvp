@@ -1,73 +1,69 @@
-.F.................invalid pdf header: b'not a'
-EOF marker not found
-.....F....invalid pdf header: b'not a'
-EOF marker not found
-........F.......................
+EFFE
 ======================================================================
-FAIL: test_current_b_e_3_draft_candidate_remains_rejected (scripts.tests.test_recover_kosha_ocr_boundary.RecoverKoshaOcrBoundaryTests.test_current_b_e_3_draft_candidate_remains_rejected)
-----------------------------------------------------------------------
-scripts.recover_kosha_ocr_boundary.OcrBoundaryError: ocr_candidate_not_human_confirmed
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\scripts\tests\test_recover_kosha_ocr_boundary.py", line 73, in test_current_b_e_3_draft_candidate_remains_rejected
-    with self.assertRaisesRegex(
-         ~~~~~~~~~~~~~~~~~~~~~~^
-        recover_kosha_ocr_boundary.OcrBoundaryError,
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        "ocr_candidate_generator_missing",
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ):
-    ^
-AssertionError: "ocr_candidate_generator_missing" does not match "ocr_candidate_not_human_confirmed"
-
-======================================================================
-FAIL: test_imports_reviewed_ocr_only_for_native_empty_boundary_with_provenance (scripts.tests.test_snapshot_kosha_guide_corpus.KoshaBodyRecoveryTest.test_imports_reviewed_ocr_only_for_native_empty_boundary_with_provenance)
+ERROR: test_imports_reviewed_ocr_candidates_for_two_distinct_items (scripts.tests.test_snapshot_kosha_guide_corpus.KoshaBodyRecoveryTest.test_imports_reviewed_ocr_candidates_for_two_distinct_items)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\scripts\tests\test_snapshot_kosha_guide_corpus.py", line 497, in test_imports_reviewed_ocr_only_for_native_empty_boundary_with_provenance
-    self.assertEqual(
-    ~~~~~~~~~~~~~~~~^
-        manifest["generation_policy"]["reviewed_ocr_candidates"],
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ...<11 lines>...
-        ],
-        ^^
+  File "<user-root>\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\scripts\tests\test_snapshot_kosha_guide_corpus.py", line 700, in test_imports_reviewed_ocr_candidates_for_two_distinct_items
+    summary = self.run_recovery(
+        source_dir,
+    ...<4 lines>...
+        expected_ocr_generator_sha256=current_ocr_generator_sha256(),
+    )
+  File "<user-root>\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\scripts\tests\test_snapshot_kosha_guide_corpus.py", line 354, in run_recovery
+    return snapshot_kosha_guide_corpus.recover_corpus(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        source=source,
+        ^^^^^^^^^^^^^^
+    ...<8 lines>...
+        **kwargs,
+        ^^^^^^^^^
     )
     ^
-AssertionError: Lists differ: [{'candidate_sha256': '43aa69eebeaa6c8b2f159[86 chars]db'}] != [{'item_id': 'kosha-9fccc18b3998dd1cea660bdb[262 chars]2a'}]
-
-First differing element 0:
-{'candidate_sha256': '43aa69eebeaa6c8b2f159[85 chars]bdb'}
-{'item_id': 'kosha-9fccc18b3998dd1cea660bdb[261 chars]22a'}
-
-+ [{'attestation_sha256': 'fd5288fc6a8f093458da16a18af18794f429a03c0d9745fe156f25f3d8e1722a',
-- [{'candidate_sha256': '43aa69eebeaa6c8b2f159a23f07fa9f17d6e53c1aa02235df392712263b3a38a',
-? ^^
-
-+   'candidate_sha256': '43aa69eebeaa6c8b2f159a23f07fa9f17d6e53c1aa02235df392712263b3a38a',
-? ^^
-
-+   'content_sha256': '215bf0438b22d117eee7ac8cfe3d9d8c0baaef9317ae17f07aebc2176ffdcab1',
-    'item_id': 'kosha-9fccc18b3998dd1cea660bdb'}]
-
+  File "<user-root>\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\scripts\snapshot_kosha_guide_corpus.py", line 1691, in recover_corpus
+    reviewed_ocr_candidates = _load_reviewed_ocr_candidates(reviewed_ocr_candidate_paths)
+  File "<user-root>\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\scripts\snapshot_kosha_guide_corpus.py", line 240, in _load_reviewed_ocr_candidates
+    raise RuntimeError("exactly one reviewed OCR candidate may be declared")
+RuntimeError: exactly one reviewed OCR candidate may be declared
 ======================================================================
-FAIL: test_rejects_more_than_one_reviewed_ocr_candidate_before_output (scripts.tests.test_snapshot_kosha_guide_corpus.KoshaBodyRecoveryTest.test_rejects_more_than_one_reviewed_ocr_candidate_before_output)
+ERROR: test_identity_hash_normalizes_integral_floats_for_cross_runtime_canonicalization (scripts.tests.test_snapshot_kosha_guide_corpus.KoshaBodyRecoveryTest.test_identity_hash_normalizes_integral_floats_for_cross_runtime_canonicalization)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\scripts\tests\test_snapshot_kosha_guide_corpus.py", line 700, in test_rejects_more_than_one_reviewed_ocr_candidate_before_output
+  File "<user-root>\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\scripts\tests\test_snapshot_kosha_guide_corpus.py", line 1445, in test_identity_hash_normalizes_integral_floats_for_cross_runtime_canonicalization
+    snapshot_kosha_guide_corpus._identity_sha256(material),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'scripts.snapshot_kosha_guide_corpus' has no attribute '_identity_sha256'
+======================================================================
+FAIL: test_rejects_two_reviewed_ocr_candidates_for_the_same_item (scripts.tests.test_snapshot_kosha_guide_corpus.KoshaBodyRecoveryTest.test_rejects_two_reviewed_ocr_candidates_for_the_same_item)
+----------------------------------------------------------------------
+RuntimeError: exactly one reviewed OCR candidate may be declared
+During handling of the above exception, another exception occurred:
+Traceback (most recent call last):
+  File "<user-root>\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\scripts\tests\test_snapshot_kosha_guide_corpus.py", line 761, in test_rejects_two_reviewed_ocr_candidates_for_the_same_item
     with self.assertRaisesRegex(
          ~~~~~~~~~~~~~~~~~~~~~~^
         RuntimeError,
         ^^^^^^^^^^^^^
-        "exactly one reviewed OCR candidate",
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "duplicate reviewed OCR candidate for item",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     ):
     ^
-AssertionError: RuntimeError not raised
-
+AssertionError: "duplicate reviewed OCR candidate for item" does not match "exactly one reviewed OCR candidate may be declared"
+======================================================================
+FAIL: test_rejects_duplicate_reviewed_ocr_attestation_across_items (scripts.tests.test_snapshot_kosha_guide_corpus.KoshaBodyRecoveryTest.test_rejects_duplicate_reviewed_ocr_attestation_across_items)
 ----------------------------------------------------------------------
-Ran 61 tests in 11.046s
-
-FAILED (failures=3)
+RuntimeError: exactly one reviewed OCR candidate may be declared
+During handling of the above exception, another exception occurred:
+Traceback (most recent call last):
+  File "<user-root>\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\scripts\tests\test_snapshot_kosha_guide_corpus.py", line 810, in test_rejects_duplicate_reviewed_ocr_attestation_across_items
+    with self.assertRaisesRegex(
+         ~~~~~~~~~~~~~~~~~~~~~~^
+        RuntimeError,
+        ^^^^^^^^^^^^^
+        "duplicate reviewed OCR candidate attestation",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+AssertionError: "duplicate reviewed OCR candidate attestation" does not match "exactly one reviewed OCR candidate may be declared"
+----------------------------------------------------------------------
+Ran 4 tests in 1.186s
+FAILED (failures=2, errors=2)

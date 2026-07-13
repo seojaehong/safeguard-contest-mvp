@@ -3,8 +3,10 @@ import { createHash, createHmac } from "node:crypto";
 import {
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
+  statSync,
   symlinkSync,
   writeFileSync
 } from "node:fs";
@@ -66,10 +68,14 @@ function reference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenc
   };
 }
 
-function runKoshaAuditScript(arguments_: string[]) {
-  return spawnSync(process.execPath, ["scripts/audit_kosha_guides.mjs", ...arguments_], {
+function runKoshaAuditScript(
+  arguments_: string[],
+  environment: NodeJS.ProcessEnv = process.env
+) {
+  return spawnSync(process.execPath, ["--", "scripts/audit_kosha_guides.mjs", ...arguments_], {
     cwd: process.cwd(),
     encoding: "utf8",
+    env: environment,
     timeout: 30_000,
     windowsHide: true
   });
@@ -93,6 +99,83 @@ function canonicalJson(value: unknown): string {
   const encoded = JSON.stringify(value);
   if (encoded === undefined) throw new Error("test-canonical-json-invalid");
   return encoded;
+}
+
+function listFilesRecursively(root: string): string[] {
+  return readdirSync(root).flatMap((name) => {
+    const path = join(root, name);
+    return statSync(path).isDirectory() ? listFilesRecursively(path) : [path];
+  });
+}
+
+function writeBridgeSnapshotFixture(corpusRoot: string, tamperItems = false): void {
+  const sourceIdentityMaterial = {
+    entry_manifest_sha256: "1".repeat(64),
+    files: [{ name: "fixture.zip", sha256: "2".repeat(64), size: 1024 }],
+    max_compression_ratio: 2.5,
+    max_member_bytes: 1024,
+    pdf_entry_count: 1,
+    source_member_count: 1,
+    total_uncompressed_bytes: 1024
+  };
+  const sourceIdentitySha256 = sha256(canonicalJson(sourceIdentityMaterial));
+  const sourceIdentity = {
+    identity_sha256: sourceIdentitySha256,
+    ...sourceIdentityMaterial
+  };
+  const generationPolicy = {
+    chunk_chars: 4000,
+    resource_limits: { max_compression_ratio: 100 },
+    schema_version: "safeclaw-kosha-body-corpus/v2"
+  };
+  const generationPolicySha256 = sha256(canonicalJson(generationPolicy));
+  const outputBytes = {
+    "items.jsonl": Buffer.from('{"item_id":"fixture-item"}\n', "utf8"),
+    "chunks.jsonl": Buffer.from("", "utf8"),
+    "failures.jsonl": Buffer.from("", "utf8"),
+    "checkpoint.json": Buffer.from('{"stage_state":"complete"}\n', "utf8")
+  };
+  const outputHashes = Object.fromEntries(
+    Object.entries(outputBytes).map(([name, bytes]) => [name, sha256(bytes)])
+  );
+  const snapshotId = sha256(canonicalJson({
+    generation_policy_sha256: generationPolicySha256,
+    output_hashes: outputHashes,
+    schema_version: "safeclaw-kosha-body-corpus/v2",
+    source_identity_sha256: sourceIdentitySha256
+  }));
+  const snapshotDir = join(corpusRoot, "snapshots", snapshotId);
+  mkdirSync(snapshotDir, { recursive: true });
+  for (const [name, bytes] of Object.entries(outputBytes)) {
+    writeFileSync(join(snapshotDir, name), bytes);
+  }
+  const manifest = {
+    schema_version: "safeclaw-kosha-body-corpus/v2",
+    snapshot_id: snapshotId,
+    source_identity: sourceIdentity,
+    generation_policy: generationPolicy,
+    generation_policy_sha256: generationPolicySha256,
+    output_hashes: outputHashes,
+    reproducibility_hash: snapshotId
+  };
+  const manifestBytes = Buffer.from(`${canonicalJson(manifest)}\n`, "utf8");
+  writeFileSync(join(snapshotDir, "manifest.json"), manifestBytes);
+  writeFileSync(join(corpusRoot, "current.json"), `${canonicalJson({
+    schema_version: "safeclaw-kosha-body-current/v1",
+    snapshot_path: `snapshots/${snapshotId}`,
+    snapshot_id: snapshotId,
+    source_identity_sha256: sourceIdentitySha256,
+    generation_policy_sha256: generationPolicySha256,
+    reproducibility_hash: snapshotId,
+    manifest: {
+      path: `snapshots/${snapshotId}/manifest.json`,
+      size_bytes: manifestBytes.byteLength,
+      sha256: sha256(manifestBytes)
+    }
+  })}\n`, "utf8");
+  if (tamperItems) {
+    writeFileSync(join(snapshotDir, "items.jsonl"), '{"item_id":"tampered"}\n', "utf8");
+  }
 }
 
 function archiveEntry(overrides: Partial<KoshaArchiveEntry> = {}): KoshaArchiveEntry {
@@ -182,10 +265,7 @@ describe("KOSHA GUIDE production/local bridge", () => {
     resource_limits: { max_compression_ratio: 100 },
     schema_version: "safeclaw-kosha-body-corpus/v2"
   };
-  const generationPolicyCanonicalJson = canonicalJson(manifestGenerationPolicy).replace(
-    '"max_compression_ratio":100',
-    '"max_compression_ratio":100.0'
-  );
+  const generationPolicyCanonicalJson = canonicalJson(manifestGenerationPolicy);
   const generationPolicySha256 = sha256(generationPolicyCanonicalJson);
   const outputHashes = {
     "checkpoint.json": "3".repeat(64),
@@ -315,10 +395,8 @@ describe("KOSHA GUIDE production/local bridge", () => {
         manifestSnapshotId: snapshotId,
         manifestReproducibilityHash: snapshotId,
         manifestSourceIdentity,
-        manifestSourceIdentityMaterialCanonicalJson: sourceIdentityMaterialCanonicalJson,
         manifestSourceIdentitySha256: sourceIdentitySha256,
         manifestGenerationPolicy,
-        manifestGenerationPolicyCanonicalJson: generationPolicyCanonicalJson,
         manifestGenerationPolicySha256: generationPolicySha256,
         currentManifestSha256: "b".repeat(64),
         manifestFileSha256: "b".repeat(64),
@@ -453,6 +531,70 @@ describe("KOSHA GUIDE production/local bridge", () => {
       ...manifestGenerationPolicy,
       chunk_chars: 999
     };
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-manifest-generation-policy-hash-mismatch"
+    );
+  });
+
+  it("rejects a source identity whose hash depends on a stale numeric JSON spelling", () => {
+    const input = bridgeInput();
+    const numericMaterial = {
+      ...sourceIdentityMaterial,
+      max_compression_ratio: 100
+    };
+    const staleCanonical = canonicalJson(numericMaterial).replace(
+      '"max_compression_ratio":100',
+      '"max_compression_ratio":100.0'
+    );
+    const staleSourceIdentitySha256 = sha256(staleCanonical);
+    const staleSnapshotId = sha256(canonicalJson({
+      generation_policy_sha256: generationPolicySha256,
+      output_hashes: outputHashes,
+      schema_version: "safeclaw-kosha-body-corpus/v2",
+      source_identity_sha256: staleSourceIdentitySha256
+    }));
+    Object.assign(input.snapshot, {
+      currentSnapshotId: staleSnapshotId,
+      currentReproducibilityHash: staleSnapshotId,
+      currentSourceIdentitySha256: staleSourceIdentitySha256,
+      manifestSnapshotId: staleSnapshotId,
+      manifestReproducibilityHash: staleSnapshotId,
+      manifestSourceIdentity: {
+        identity_sha256: staleSourceIdentitySha256,
+        ...numericMaterial
+      },
+      manifestSourceIdentityMaterialCanonicalJson: staleCanonical,
+      manifestSourceIdentitySha256: staleSourceIdentitySha256
+    });
+
+    expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
+      "kosha-bridge-manifest-source-identity-mismatch"
+    );
+  });
+
+  it("rejects a generation policy hash whose identity uses stale numeric JSON spelling", () => {
+    const input = bridgeInput();
+    const staleCanonical = canonicalJson(manifestGenerationPolicy).replace(
+      '"max_compression_ratio":100',
+      '"max_compression_ratio":100.0'
+    );
+    const staleGenerationPolicySha256 = sha256(staleCanonical);
+    const staleSnapshotId = sha256(canonicalJson({
+      generation_policy_sha256: staleGenerationPolicySha256,
+      output_hashes: outputHashes,
+      schema_version: "safeclaw-kosha-body-corpus/v2",
+      source_identity_sha256: sourceIdentitySha256
+    }));
+    Object.assign(input.snapshot, {
+      currentSnapshotId: staleSnapshotId,
+      currentReproducibilityHash: staleSnapshotId,
+      currentGenerationPolicySha256: staleGenerationPolicySha256,
+      manifestSnapshotId: staleSnapshotId,
+      manifestReproducibilityHash: staleSnapshotId,
+      manifestGenerationPolicyCanonicalJson: staleCanonical,
+      manifestGenerationPolicySha256: staleGenerationPolicySha256
+    });
 
     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toThrow(
       "kosha-bridge-manifest-generation-policy-hash-mismatch"
@@ -727,6 +869,89 @@ describe("KOSHA GUIDE read-only runner contract", () => {
     expect(result.stdout).toContain("absolute paths, parent traversal, and symlink escapes are rejected");
   });
 
+  it("rejects a tampered snapshot before checking missing production credentials", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "kosha-bridge-integrity-first-"));
+    const corpusRoot = join(fixtureRoot, "corpus");
+    const outputRoot = join(fixtureRoot, "output");
+    mkdirSync(corpusRoot, { recursive: true });
+    writeBridgeSnapshotFixture(corpusRoot, true);
+    const environment = {
+      ...process.env,
+      SUPABASE_URL: "",
+      NEXT_PUBLIC_SUPABASE_URL: "",
+      SUPABASE_SERVICE_ROLE_KEY: "",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ""
+    };
+
+    try {
+      const result = runKoshaAuditScript([
+        "--bridge-only",
+        "--local-corpus-root",
+        corpusRoot,
+        "--bridge-zip-file",
+        "fixture.zip",
+        "--bridge-internal-path",
+        "fixture.pdf",
+        "--env-file",
+        join(fixtureRoot, "missing.env"),
+        "--output-dir",
+        outputRoot
+      ], environment);
+      const output = `${result.stdout}${result.stderr}`;
+
+      expect(result.status).not.toBe(0);
+      expect(output).toContain("kosha-bridge-items-hash-mismatch");
+      expect(output).not.toContain("supabase-read-credentials-unavailable");
+      expect(readFileSync(join(outputRoot, "audit.log"), "utf8")).not.toContain(
+        "snapshotIntegrityVerifiedBeforeFetch=true"
+      );
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 40_000);
+
+  it("checks a valid snapshot before reporting the missing credential blocker", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "kosha-bridge-credential-after-integrity-"));
+    const corpusRoot = join(fixtureRoot, "corpus");
+    const outputRoot = join(fixtureRoot, "output");
+    mkdirSync(corpusRoot, { recursive: true });
+    writeBridgeSnapshotFixture(corpusRoot);
+    const environment = {
+      ...process.env,
+      SUPABASE_URL: "",
+      NEXT_PUBLIC_SUPABASE_URL: "",
+      SUPABASE_SERVICE_ROLE_KEY: "",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ""
+    };
+
+    try {
+      const result = runKoshaAuditScript([
+        "--bridge-only",
+        "--local-corpus-root",
+        corpusRoot,
+        "--bridge-zip-file",
+        "fixture.zip",
+        "--bridge-internal-path",
+        "fixture.pdf",
+        "--env-file",
+        join(fixtureRoot, "missing.env"),
+        "--output-dir",
+        outputRoot
+      ], environment);
+      const output = `${result.stdout}${result.stderr}`;
+      const auditLog = readFileSync(join(outputRoot, "audit.log"), "utf8");
+
+      expect(result.status).not.toBe(0);
+      expect(output).toContain("supabase-read-credentials-unavailable");
+      expect(output).not.toContain("kosha-bridge-items-hash-mismatch");
+      expect(auditLog).not.toContain("snapshotIntegrityVerifiedBeforeFetch=true");
+      expect(`${output}\n${auditLog}`).not.toMatch(/[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/]/u);
+      expect(`${output}\n${auditLog}`).not.toContain("file:///");
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  }, 40_000);
+
   it("rejects an absolute reviewed-candidate path before corpus or network reads", () => {
     const fixtureRoot = mkdtempSync(join(tmpdir(), "kosha-bridge-candidate-absolute-"));
     const corpusRoot = join(fixtureRoot, "corpus");
@@ -918,6 +1143,37 @@ describe("KOSHA GUIDE read-only runner contract", () => {
       const value = process.env[key];
       if (value && value.length >= 8) expect(artifacts).not.toContain(value);
     }
+  });
+
+  it("keeps every task evaluation log free of absolute paths and raw secrets", () => {
+    const artifactRoot = resolve(
+      process.cwd(),
+      "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13"
+    );
+    const logPaths = listFilesRecursively(artifactRoot).filter((path) => path.endsWith(".log"));
+
+    expect(logPaths.length).toBeGreaterThan(0);
+    for (const path of logPaths) {
+      const content = readFileSync(path, "utf8");
+      expect(content, path).not.toMatch(/[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/]/u);
+      expect(content, path).not.toContain("file:///");
+      expect(content, path).not.toMatch(/\b(?:sb_secret_|sk-(?:proj-)?)[A-Za-z0-9_-]{16,}\b/u);
+      expect(content, path).not.toMatch(/\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/u);
+      expect(content, path).not.toMatch(/signature_hmac_sha256\s*[=:]\s*[0-9a-f]{64}/iu);
+    }
+  });
+
+  it("records audit failures as type and code without stack serialization", () => {
+    const script = readFileSync(
+      resolve(process.cwd(), "scripts/audit_kosha_guides.mjs"),
+      "utf8"
+    );
+
+    expect(script).toContain("classifyAuditFailure");
+    expect(script).toContain("fatal_type=");
+    expect(script).toContain("fatal_code=");
+    expect(script).not.toContain("error.stack");
+    expect(script).not.toContain("fatal=${message}");
   });
 
   it("selects provenance payload without requesting a non-schema item URL column or mutation method", () => {

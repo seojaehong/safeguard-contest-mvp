@@ -1,16 +1,22 @@
 {
+  "generatedAt": "2026-07-14T00:34:42.7510310+09:00",
   "candidatePath": "evaluation/kosha-ocr-boundary-recovery-2026-07-13/B-E-3-2025-candidate.json",
+  "itemId": "kosha-60492776122f8b433994fc10",
   "candidateFileSha256": "5d06ba7a04329e32e8fafb30b9311f6fb2ea70e248dfcb706aaa883e3632753b",
   "candidateContentSha256": "e18c2ae92e938f564c5dff20f9c90fb76170bf27122ec71c9f03f5531719577e",
   "candidateAttestationSha256": "9dbb03c1ddd14dfc293b800cc4d4762244996b3cac050545d813add30d97d57d",
   "reviewState": "draft",
   "humanConfirmed": false,
   "generatorPresent": true,
-  "renderDpi": 180,
+  "renderDpiPresent": false,
+  "renderDpi": null,
   "validatorAccepted": false,
   "validatorError": "ocr_candidate_not_human_confirmed",
+  "corpusExtractionStatus": "boundary",
+  "bodyPresent": false,
   "chunkCount": 0,
   "importedCount": 0,
+  "candidateModified": false,
   "dbMutationPerformed": false,
   "launchReadiness": false
 }

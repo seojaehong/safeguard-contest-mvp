@@ -351,10 +351,8 @@ export type KoshaBridgeSnapshotIntegrity = {
   manifestSnapshotId: string;
   manifestReproducibilityHash: string;
   manifestSourceIdentity: unknown;
-  manifestSourceIdentityMaterialCanonicalJson: string;
   manifestSourceIdentitySha256: string;
   manifestGenerationPolicy: unknown;
-  manifestGenerationPolicyCanonicalJson: string;
   manifestGenerationPolicySha256: string;
   currentManifestSha256: string;
   manifestFileSha256: string;
@@ -492,26 +490,6 @@ function canonicalSha256(value: unknown): string {
   return createHash("sha256").update(canonicalJson(value)).digest("hex");
 }
 
-function canonicalMaterialSha256(
-  canonicalMaterial: string,
-  expectedValue: unknown,
-  mismatchError: string
-): string {
-  if (typeof canonicalMaterial !== "string" || !canonicalMaterial) {
-    throw new Error(mismatchError);
-  }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(canonicalMaterial) as unknown;
-  } catch (error) {
-    throw new Error(mismatchError, { cause: error });
-  }
-  if (canonicalJson(parsed) !== canonicalJson(expectedValue)) {
-    throw new Error(mismatchError);
-  }
-  return createHash("sha256").update(canonicalMaterial).digest("hex");
-}
-
 function readSnapshotOutputHashes(value: unknown, label: "manifest" | "snapshot"): Record<string, string> {
   if (!isRecord(value)) throw new Error(`kosha-bridge-${label}-output-hashes-invalid`);
   const expectedKeys = [...KOSHA_SNAPSHOT_OUTPUT_FILES].sort(codepointCompare);
@@ -533,7 +511,9 @@ function readSnapshotOutputHashes(value: unknown, label: "manifest" | "snapshot"
   return outputHashes;
 }
 
-function assertKoshaBridgeSnapshotIntegrity(snapshot: KoshaBridgeSnapshotIntegrity): void {
+export function verifyKoshaBridgeSnapshotIntegrity(
+  snapshot: KoshaBridgeSnapshotIntegrity
+): void {
   if (snapshot.currentSchemaVersion !== KOSHA_BODY_CURRENT_SCHEMA_VERSION) {
     throw new Error("kosha-bridge-current-schema-version-mismatch");
   }
@@ -546,11 +526,7 @@ function assertKoshaBridgeSnapshotIntegrity(snapshot: KoshaBridgeSnapshotIntegri
   const sourceIdentityMaterial = Object.fromEntries(
     Object.entries(snapshot.manifestSourceIdentity).filter(([key]) => key !== "identity_sha256")
   );
-  const recomputedSourceIdentitySha256 = canonicalMaterialSha256(
-    snapshot.manifestSourceIdentityMaterialCanonicalJson,
-    sourceIdentityMaterial,
-    "kosha-bridge-manifest-source-identity-mismatch"
-  );
+  const recomputedSourceIdentitySha256 = canonicalSha256(sourceIdentityMaterial);
   const embeddedSourceIdentitySha256 = readString(
     snapshot.manifestSourceIdentity.identity_sha256
   );
@@ -572,10 +548,8 @@ function assertKoshaBridgeSnapshotIntegrity(snapshot: KoshaBridgeSnapshotIntegri
   if (!isRecord(snapshot.manifestGenerationPolicy)) {
     throw new Error("kosha-bridge-manifest-generation-policy-hash-mismatch");
   }
-  const recomputedGenerationPolicySha256 = canonicalMaterialSha256(
-    snapshot.manifestGenerationPolicyCanonicalJson,
-    snapshot.manifestGenerationPolicy,
-    "kosha-bridge-manifest-generation-policy-hash-mismatch"
+  const recomputedGenerationPolicySha256 = canonicalSha256(
+    snapshot.manifestGenerationPolicy
   );
   if (
     !isSha256(snapshot.manifestGenerationPolicySha256) ||
@@ -748,7 +722,7 @@ function verifyKoshaReviewedCandidateBridgeInput(
 export function buildKoshaProductionLocalBridgeCandidate(
   input: KoshaProductionLocalBridgeInput
 ): KoshaProductionLocalBridgeCandidate {
-  assertKoshaBridgeSnapshotIntegrity(input.snapshot);
+  verifyKoshaBridgeSnapshotIntegrity(input.snapshot);
   if (input.productionRows.length !== 1) {
     throw new Error(`kosha-bridge-production-match-count:${input.productionRows.length}`);
   }
