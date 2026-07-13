@@ -199,7 +199,7 @@ export function ClawChat({ authToken, siteOptions, selectedSiteId, onSiteChange,
       {!canSend ? <p className="muted small">{contextMessage(contextStatus)}</p> : null}
 
       <div className="claw-chat-scroll" ref={scrollRef}>
-        {turns.length === 0 ? (
+        {turns.length === 0 && canSend ? (
           <div className="claw-chat-empty">
             <p>안녕하세요, 클로입니다. 오늘 현장에 대해 무엇이든 물어보세요.</p>
             <div className="claw-suggestions">
