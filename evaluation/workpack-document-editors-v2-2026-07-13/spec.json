@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2.4.0",
+  "schemaVersion": "2.5.0",
   "meta": {
       "artifact": "SafeClaw Workpack Document Editors v2",
       "date": "2026-07-13",
@@ -7,24 +7,31 @@
       "branch": "feat/workpack-document-editors-v2",
       "sourceBase": "d3ad86530bc786d8024206cc5b7c7db60c055278",
       "currentIntegrationTarget": "77d86416116b91809e1e0508c72564e06c8c31bc",
-      "remediationParent": "91a15c63feb44d53599012a5f1f395805efe3db2",
-      "reviewRange": {
-            "expression": "d3ad86530bc786d8024206cc5b7c7db60c055278...HEAD",
-            "mode": "triple-dot-from-verified-merge-base",
+      "remediationParent": "0a214224afad31a7181c96655ff0fef36eead651",
+      "reviewScope": {
             "mergeBase": "d3ad86530bc786d8024206cc5b7c7db60c055278",
             "forbidTwoDot": true,
-            "allowedPaths": ["evaluation/workpack-document-editors-v2-2026-07-13/spec.md", "evaluation/workpack-document-editors-v2-2026-07-13/spec.json", "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs"]
+            "candidateCommit": {
+              "parent": "0a214224afad31a7181c96655ff0fef36eead651",
+              "allowedPaths": ["evaluation/workpack-document-editors-v2-2026-07-13/spec.md", "evaluation/workpack-document-editors-v2-2026-07-13/spec.json", "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs"]
+            },
+            "evidenceCommit": {
+              "parentMustEqualCandidate": true,
+              "allowedPaths": ["evaluation/workpack-document-editors-v2-2026-07-13/review-evidence.json"]
+            },
+            "historicalReview": "Use sourceBase...candidateCommit only for historical context; do not assert that this accumulated range contains only current remediation files. Candidate and evidence commit scopes are checked independently with git diff-tree."
           },
-      "status": "HOLD_PENDING_INDEPENDENT_PASS",
+      "status": "HOLD_PENDING_FRESH_REVIEW",
+      "implementationProgramStatus": "BLOCKED_PENDING_USER_DB_APPROVAL",
       "implementationStarted": false,
-      "allowedFiles": ["evaluation/workpack-document-editors-v2-2026-07-13/spec.md", "evaluation/workpack-document-editors-v2-2026-07-13/spec.json", "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs"],
+      "allowedFiles": ["evaluation/workpack-document-editors-v2-2026-07-13/spec.md", "evaluation/workpack-document-editors-v2-2026-07-13/spec.json", "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs", "evaluation/workpack-document-editors-v2-2026-07-13/review-evidence.json"],
       "lineBudgets": {
             "markdown": [1400, 2200],
             "json": [1200, 2400]
           },
-      "canonicalRule": "spec.json is normative. spec.md is the implementer guide and contains a machine mirror whose canonical SHA-256 binds every JSON value plus projected registry IDs/digests. validate-contract.mjs must prove both before implementation."
+      "canonicalRule": "spec.json is canonical. The SAFECLAW-NORMATIVE Markdown block is deterministically rendered into human-readable tables from every declared normative domain and must byte-match the renderer; a digest-only embedded mirror is insufficient. Explanatory prose outside that block may not override it."
     },
-  "contractIds": ["PARITY-001", "RANGE-001", "SCOPE-001", "DOC-001", "COMPONENT-001", "OWNERSHIP-001", "RISK-001", "FIELD-001", "FIELD-002", "CODEC-001", "BODY-001", "BODY-002", "BODY-003", "FLOW-001", "FLOW-002", "FLOW-003", "FLOW-004", "FLOW-005", "REVISION-001", "HUMAN-001", "CONFIRM-001", "EVIDENCE-001", "EVIDENCE-002", "PROVENANCE-001", "SHARE-001", "SHARE-002", "PHOTO-001", "PHOTO-002", "EXPORT-001", "UI-001", "UI-002", "UI-003", "UI-004", "UI-005", "UI-006", "UI-007", "UI-008", "UI-009", "UI-010", "UI-011", "TASK-001", "LINK-001", "STATE-001", "CONFLICT-001", "ROLLBACK-001", "WAVE-001", "WAVE-002", "PASS-001"],
+  "contractIds": ["PARITY-001", "RANGE-001", "SCOPE-001", "DOC-001", "COMPONENT-001", "OWNERSHIP-001", "RISK-001", "FIELD-001", "FIELD-002", "CODEC-001", "BODY-001", "BODY-002", "BODY-003", "FLOW-001", "FLOW-002", "FLOW-003", "FLOW-004", "FLOW-005", "REVISION-001", "IDEMPOTENCY-001", "APPROVAL-001", "HUMAN-001", "CONFIRM-001", "EVIDENCE-001", "EVIDENCE-002", "PROVENANCE-001", "SHARE-001", "SHARE-002", "PHOTO-001", "PHOTO-002", "EXPORT-001", "EXPORT-002", "UI-001", "UI-002", "UI-003", "UI-004", "UI-005", "UI-006", "UI-007", "UI-008", "UI-009", "UI-010", "UI-011", "TASK-001", "ZOOM-001", "LINK-001", "STATE-001", "CONFLICT-001", "ROLLBACK-001", "WAVE-001", "WAVE-002", "VALIDATOR-001", "PASS-001"],
   "tupleSchemas": {
       "field": ["path", "type", "required", "codec", "currentStructuredPath|null"],
       "source": ["id", "path", "symbol", "contract"],
@@ -42,7 +49,7 @@
       ["SRC-07", "lib/quality-contract.ts", "attachQualityContract", "Quality is recomputed only after deterministic editor projection and ontology review."],
       ["SRC-08", "app/api/workpacks/route.ts", "POST", "Current persistence verifies a top-level generation seal and performs one insert. It has no logical chain lookup, expectedRevision comparison, idempotency replay, transaction, or concurrent-writer exclusion; it cannot be v2 revision authority."],
       ["SRC-09", "lib/workpack-store.ts", "buildWorkpackEvidenceSummary | buildWorkpackInsertPayload | buildReopenData", "Existing JSONB can preserve optional editorV2 data losslessly, but JSONB alone cannot guarantee a unique monotonic revision chain or idempotent insert."],
-      ["SRC-10", "lib/workpack-commercial-store.ts", "assessStoredWorkpackShareAuthority", "Current authority derives legacy readiness but does not verify editor block identity/revision/digest. Wave 4 owns that extension; v2 share remains blocked until it lands."],
+      ["SRC-10", "lib/workpack-commercial-store.ts", "assessStoredWorkpackShareAuthority", "Current authority derives legacy readiness but does not verify editor block identity/revision/digest. No Wave owns that extension while DB authority is unapproved; v2 share remains blocked."],
       ["SRC-11", "app/api/workpacks/[id]/read-confirmations/route.ts", "GET | POST", "Stores share-session read acknowledgment only; it cannot satisfy TBM attendance, understanding, signature, or safety confirmation."],
       ["SRC-12", "app/api/workpacks/[id]/improvements/route.ts", "GET | POST", "POST returns improvementId but not photo row id/storagePath; GET returns improvements and photo_summary but not workpack_improvement_photos."],
       ["SRC-13", "components/WorkpackEditor.tsx", "META_SECTION_PATTERNS | META_KEY_PATTERNS | parseSheetRows", "Existing patterns prove body/metadata separation is already recognized for export; v2 moves the boundary into a shared lossless adapter used before editing."],
@@ -51,10 +58,10 @@
       ["SRC-16", "lib/kosha.ts", "fetchKoshaReferences | verifyReference | verified", "Only current runtime verified=true HTTPS results may become drawer links."],
       ["SRC-17", "components/CurrentWorkpackModules.tsx", "WorkpackEditor onChange -> applyWorkpackDeliverablesChange", "Current user edits propagate to workpack readiness; v2 passes canonical envelope changes and explicit revalidation invalidation through this call site."],
       ["SRC-18", "app/api/workpacks/[id]/route.ts", "GET", "Current reopen seam hydrates stored deliverables/evidence_summary/status; adapter precedence begins from the authoritative stored JSON."],
-      ["SRC-19", "app/api/export/xlsx/route.ts", "POST", "Existing structured modes remain; v2 adds the deterministic hidden manifest and never drops richer fields."],
-      ["SRC-20", "app/api/export/pdf/route.ts", "POST", "Visible PDF body uses submission content; deterministic provenance/audit appendix and field-path manifest remain outside editable body semantics."],
-      ["SRC-21", "app/api/export/hwp/route.ts", "POST", "Existing HWP-compatible output remains; v2 appends deterministic semantic data outside the editable body."],
-      ["SRC-22", "lib/xlsx-builder.ts | lib/hwp-table-builder.ts | components/WorkpackEditor.tsx @rhwp client", "builders and HWPX client", "All formats consume one ExportManifestBridge; current document-specific structured projections remain compatibility views."],
+      ["SRC-19", "components/WorkpackEditor.tsx -> app/api/export/xlsx/route.ts", "downloadXlsx -> POST", "At target 77d8641 the editor posts single or one of five structured modes to /api/export/xlsx. Round-trip integration belongs only to the later owner of both WorkpackEditor and the route."],
+      ["SRC-20", "components/WorkpackEditor.tsx -> app/api/export/pdf/route.ts", "printPdf -> POST ?format=html", "At target 77d8641 the editor posts title/scenario/rows/riskRows/documentText/risk summary and prints returned HTML. PDF round-trip integration belongs to the later owner of both call site and route."],
+      ["SRC-21", "components/WorkpackEditor.tsx -> app/api/export/hwp/route.ts", "downloadHwp -> binary POST", "At target 77d8641 the editor posts document rows/profile/scenario/risk rows and downloads the binary .hwp response. It is not an HTML-only seam."],
+      ["SRC-22", "components/WorkpackEditor.tsx", "buildHwpxWithRhwp -> downloadHwpx", "At target 77d8641 HWPX is built client-side with @rhwp/core HwpDocument.exportHwpx. The separate GET /api/export/hwpx-template route is not the document editor HWPX call site and is excluded from editor round-trip exits."],
       ["SRC-23", "app/api/workpacks/[id]/share-sessions/route.ts", "GET | POST", "Current POST accepts recipients only and persists no editor document/block/revision/digest binding. V2 session creation remains disabled until server revision authority and a reviewed route contract land together."],
       ["SRC-24", "app/api/workflow/dispatch/route.ts", "POST", "Current request parsing and session load do not enforce editor block freshness. V2 dispatch remains disabled; client assertions or app-level preflight cannot substitute for transactional server authority."],
       ["SRC-25", "supabase/migrations/002_workspace_productization.sql", "workpacks", "Current columns have no logical_workpack_id, parent_workpack_id, revision, idempotency_key, or unique chain constraint. Authoritative revision work therefore requires separately approved migration/RPC or proof of an equivalent existing transactional facility."],
@@ -63,74 +70,99 @@
       ["SRC-28", "lib/ontology/evidence-chain-registry.ts", "LawEvidenceRecord | SifEvidenceRecord | KoshaGuidanceRecord", "Raw ontology provenance preserves its discriminator and complete record. KOSHA guidance additionally preserves chunk.supportStatement, registryMapping, and provenanceBridge; resolution is ontology-only."]
     ],
   "validation": {
-      "currentGate": "CURRENT_EXECUTABLE_CANONICAL_PARITY",
-      "semanticParity": "CANONICAL_JSON_SHA256_PLUS_PROJECTED_MACHINE_MIRROR",
-      "currentClaims": ["spec.json parses and is normative", "the Markdown mirror binds the complete canonical JSON digest", "the Markdown mirror deep-equals projected document/type/codec/wave/viewport/browser/range registries", "the exact 12 production DocumentKeys/titles and 21 RiskAssessmentRow fields match source", "all expanded field codecs resolve and nullable/zero-or-more rules hold", "every planned product/test path has exactly one write owner", "all four current export routes and all 12 codec fixture rows are covered", "the explicit triple-dot review range contains only allowed evaluation artifacts", "the validator's in-memory deliberate mismatch exits through its RED assertion"],
-      "notCurrentlyProved": ["future product behavior", "authoritative server revision persistence", "photo confirmation persistence", "v2 share freshness enforcement", "independent reviewer PASS"],
-      "commands": {
-            "contract": "node evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs --range d3ad86530bc786d8024206cc5b7c7db60c055278...HEAD",
-            "selfTest": "node evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs --self-test --range d3ad86530bc786d8024206cc5b7c7db60c055278...HEAD",
-            "deliberateMismatchExpectedExit1": "node evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs --deliberate-mismatch --skip-range",
-            "exactRange": "git diff --name-only d3ad86530bc786d8024206cc5b7c7db60c055278...HEAD --",
-            "diffCheck": "git diff --check d3ad86530bc786d8024206cc5b7c7db60c055278...HEAD"
-          },
+      "currentGate": "STAGE_AWARE_SPEC_REVIEW_ONLY",
+      "semanticParity": "DETERMINISTIC_HUMAN_NORMATIVE_TABLES",
+      "modes": {
+        "spec-review": "Reads spec artifacts from the immutable candidate commit and target source blobs with git show. Requires an evidence-only child commit manifest. It validates declarations and source shape only and never prints product behavior/browser PASS.",
+        "implementation": "Requires exact immutable spec/evidence commit SHAs, explicit non-empty unequal implementation base/head SHAs, both approvals, blob-bound records for every actual A/M/D range artifact, and successful timestamped command evidence. Browser PASS additionally requires separate immutable 100%/200% 144-case JSON manifests bound to successful command IDs. It never constrains the implementation range to evaluation files."
+      },
+      "candidateArtifacts": ["evaluation/workpack-document-editors-v2-2026-07-13/spec.md", "evaluation/workpack-document-editors-v2-2026-07-13/spec.json", "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs"],
+      "evidenceManifest": "evaluation/workpack-document-editors-v2-2026-07-13/review-evidence.json",
+      "targetBlobPaths": ["components/WorkpackEditor.tsx", "lib/risk-assessment-schema.ts", "lib/safety-reference-catalog.ts", "lib/ontology/evidence-chain-registry.ts", "lib/generation-evidence.ts", "app/api/workpacks/route.ts", "supabase/migrations/002_workspace_productization.sql", "app/api/workpacks/[id]/improvements/route.ts", "app/api/workpacks/[id]/share-sessions/route.ts", "app/api/workflow/dispatch/route.ts", "app/api/export/hwp/route.ts", "app/api/export/pdf/route.ts", "app/api/export/xlsx/route.ts", "app/api/export/hwpx-template/route.ts"],
+      "currentClaims": ["candidate JSON parses", "generated human normative tables exactly match candidate JSON", "candidate and evidence commits have disjoint exact scopes", "manifest hashes candidate and target blobs", "target 77d8641 source shapes match declared seams", "registry/codecs/wave ownership declarations are internally coherent"],
+      "notCurrentlyProved": ["browser behavior", "export round-trip behavior", "any implementation test", "authoritative server revision persistence", "photo confirmation persistence", "v2 share freshness enforcement", "independent reviewer PASS", "user DB approval"],
+      "redCases": ["normative-parity", "source-shape", "target-ref", "spec-ref", "implementation-empty"],
       "validator": "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs",
-      "redProof": "--self-test mutates the first document key in memory and must observe a rejected mirror comparison before printing DELIBERATE_MISMATCH_RED=PASS.",
-      "productImplementationBlockedUntilIndependentPass": true
+      "implementationProgramGate": "Both independent PASS of the candidate/evidence pair and explicit user DB approval are required. Neither alone starts Wave 0."
     },
   "integrationLedger": {
+      "snapshotId": "CONFLICT-SNAPSHOT-2026-07-14T01:56:33+09:00",
+      "capturedAt": "2026-07-14T01:56:33+09:00",
+      "binding": "This is an observed ref/worktree snapshot, not a live-state claim. review-evidence.json binds the commit IDs and target blobs. Implementation must run freshRecheck and replace this snapshot before any integration decision.",
       "sourceBase": "d3ad86530bc786d8024206cc5b7c7db60c055278",
       "currentIntegrationTarget": "77d86416116b91809e1e0508c72564e06c8c31bc",
-      "remediationParent": "91a15c63feb44d53599012a5f1f395805efe3db2",
-      "reviewRange": "d3ad86530bc786d8024206cc5b7c7db60c055278...HEAD",
-      "competingHeads": [
-            {
-              "id": "integration",
-              "ref": "feat/phase-a-evidence-integration@77d86416116b91809e1e0508c72564e06c8c31bc",
-              "state": "current integration target; contains later input/export work",
-              "overlaps": ["app/api/export/hwp/route.ts: readNumber, deriveColumns, parseJsonResult, buildHwpBuffer, POST", "app/api/export/pdf/route.ts: structuredRiskRowsToPdfRows, render*Rows, buildPdfReadyHtml, buildPdfContentLines, buildBinaryPdf", "app/api/export/hwpx-template/route.ts: GET", "lib/hwpx-template.ts: listAvailableTemplates, buildHwpxFromTemplate", "tests/document-export-localization.test.ts", "tests/pdf-korean-font-integration.test.ts"],
-              "decision": "Mandatory base for implementation. Export integration wave consumes this lineage and hand-merges only reviewed editor-manifest hunks."
-            },
-            {
-              "id": "editor-first-ui",
-              "ref": "feature/editor-first-ui-v2@57b778e8dfa2c7ef896ba19911b79f537354439a",
-              "state": "parallel lineage; merge-base 596ea1447702b4b13cf06f3b6014e7cb5e87e883, not sourceBase",
-              "overlaps": ["components/WorkpackEditor.tsx: documentMeta, buildGenerationEvidenceFingerprint, buildPermitDraft, parseStoredValues, WorkpackEditor", "components/CurrentWorkpackModules.tsx: useCurrentWorkpack, buildDerivedDocumentText, buildDeliverablePatch, CurrentDocumentsModule", "lib/current-workpack.ts: parseStoredCurrentWorkpack, buildStoredCurrentWorkpack", "lib/types.ts: AskResponse", "lib/xlsx-builder.ts: addWorkbookNote and six structured builders", "app/api/export/hwp/route.ts: POST", "app/api/export/xlsx/route.ts: parseRiskRowsFromBody, POST", "tests/documents-editor-layout.test.ts", "tests/editor-export-integrity.test.ts"],
-              "decision": "High-risk overlap. No merge/cherry-pick/wholesale copy until owner compares each symbol against the current integration successor; accepted hunks are recreated under the single integration owner."
-            },
-            {
-              "id": "share-session-ui",
-              "ref": "feature/share-session-ui-v2@76a67c55cff0f50cb0f230a5ca49a260a7989055",
-              "state": "local worktree head; no matching origin ref at review time",
-              "overlaps": ["app/api/workpacks/[id]/share-sessions/route.ts: POST", "app/api/workflow/dispatch/route.ts: POST", "components/WorkflowSharePanel.tsx: WorkflowSharePanel", "lib/workflow-share-client.ts: createAuthenticatedShareSession, dispatchAuthenticatedShareSession, isProviderDispatchConfirmed", "tests/workpack-share-authority-routes.test.ts"],
-              "decision": "Defer from editor waves. Share owner must rebase separately after revision-authority approval; v2 share controls stay disabled."
-            },
-            {
-              "id": "ontology",
-              "ref": "fix/phase-a-ontology-review@c51c6c1f4e82b470885dad4884456ecc7395b4bb",
-              "state": "blocked candidate",
-              "overlaps": ["lib/types.ts: AskResponse", "lib/search.ts: runAsk", "lib/quality-contract.ts: ontologyItem", "lib/workpack-readiness.ts: applyWorkpackDeliverablesChange, assessWorkpackReadiness", "lib/workpack-store.ts: buildWorkpackEvidenceSummary, buildReopenData", "components/CurrentWorkpackModules.tsx: evidence card builders"],
-              "decision": "Read-only source contract until ontology owner integrates; adapter stores raw provenance without copying candidate files."
-            },
-            {
-              "id": "reports",
-              "ref": "fix/reports-mobile-task-distance@429f0ffe237c5ebf327d3d9f0c08ae648daf1f51",
-              "state": "blocked candidate",
-              "overlaps": ["app/api/export/hwp/route.ts: buildHwpBuffer, POST", "app/api/export/pdf/route.ts: render/build functions", "app/api/export/hwpx-template/route.ts: GET", "lib/hwpx-template.ts: listAvailableTemplates, buildHwpxFromTemplate", "components/ReportsDownloadCenter.tsx: ReportsDownloadCenter", "export localization/font tests"],
-              "decision": "Resolve before export integration; do not let editor waves own report-center files."
-            },
-            {
-              "id": "web",
-              "ref": "fix/web-localization-current-target@f15e88d46994768543b1071d99940b1e968db9d8",
-              "state": "blocked candidate",
-              "overlaps": ["components/FieldOperationsWorkspace.tsx: resolveInitialWorkerState, WorkspaceOperationGraphPanel, FieldOperationsWorkspace", "components/ReportsDownloadCenter.tsx: DownloadActions, ReportStatePanel, ReportDocument", "lib/reporting-downloads.ts: normalization and report builders"],
-              "decision": "Defer. Default editor integration must consume public APIs and must not copy these files."
-            }
-          ],
-      "staleWorktreeExclusion": {"worktree": "C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/documents-mobile-priority", "dirty": ["tests/documents-editor-layout.test.ts", "output/playwright/2026-07-11/"], "mappedReviewedCommits": {"2226aa22b648d324b8cc4c5360bac7a19d39f298": "cf451c5f34667d5d4a35d6b7f05aa50f936d4280", "ec132129979dcbb684a87c7bbe89ff2a85180533": "24513457c7855450c4c335269325df28a6ecbd37"}, "rule": "Exclude the dirty worktree and output directory; reviewed product commits already map into integration lineage."},
-      "integrationOrder": ["Fetch/prune and resolve every named ref immediately before implementation.", "Verify the implementation merge-base and start from currentIntegrationTarget or its designated successor.", "Integrate already-reviewed input/export commits first.", "Resolve editor-first-ui symbol by symbol under the integration wave owner; never copy a whole file or directory.", "Keep ontology/reports/web candidates read-only until their owners publish an integration decision.", "Keep share-session-ui separate and disabled until revision authority is approved and implemented transactionally.", "Run contract/source/ownership/browser/export gates after each handoff."],
-      "liveRecheck": ["git fetch origin --prune", "git rev-parse 77d8641 57b778e 76a67c5 c51c6c1 429f0ff f15e88d", "git worktree list --porcelain", "git status --short --branch in every competing worktree", "git diff --unified=0 <verified-merge-base>...<head> -- <owned-paths>"],
-      "rules": ["Every planned product/test file has one write owner in implementation.fileOwnership.", "Later waves call earlier public APIs and list prior files as read-only; they never re-own them.", "No wholesale file/directory copy, stale-worktree copy, or output artifact copy.", "Any changed head, merge-base, dirty target, or symbol overlap pauses that wave for ledger amendment and independent review."]
+      "heads": [
+        {
+          "id": "integration",
+          "localRef": "feat/phase-a-evidence-integration",
+          "localHead": "77d86416116b91809e1e0508c72564e06c8c31bc",
+          "remoteRef": "origin/feat/phase-a-evidence-integration",
+          "remoteHead": "77d86416116b91809e1e0508c72564e06c8c31bc",
+          "worktreeState": "clean",
+          "overlapHunks": ["components/WorkpackEditor.tsx: downloadXlsx 2298+, downloadHwp 2363+, buildHwpxWithRhwp 1644+, downloadHwpx 2434+, printPdf 2503+", "app/api/export/hwp/route.ts: POST 291+ binary HWP", "app/api/export/pdf/route.ts: POST 1209+ HTML/binary paths", "app/api/export/xlsx/route.ts: POST 163+ structured modes"],
+          "decision": "Only eligible future implementation base, subject to fresh approval and recheck."
+        },
+        {
+          "id": "ontology",
+          "localRef": "fix/phase-a-ontology-review",
+          "localHead": "a5ae9f74410ffe652205811135e9d28095419b48",
+          "remoteRef": "origin/fix/phase-a-ontology-review",
+          "remoteHead": "a5ae9f74410ffe652205811135e9d28095419b48",
+          "reviewState": "rejected_and_remediating",
+          "worktreeState": "dirty_tests",
+          "dirtyPaths": ["tests/ontology-evidence-chains.test.ts", "tests/ontology-sif-resolution-gate.test.ts", "tests/phase-a-citation-authority.test.ts", "tests/workpack-store.test.ts"],
+          "overlapHunks": ["components/WorkpackEditor.tsx: WorkpackEditor 1988..2720 phaseA review/materialization controls", "lib/search.ts: attachPhaseAReview 1369..1415", "lib/types.ts: PhaseAReview 388+", "lib/ontology/evidence-chain.ts: EvidenceMaterializationRecord/verifyEvidenceMaterialization 108..938", "tests/workpack-store.test.ts and three currently dirty ontology tests"],
+          "decision": "Read-only rejected candidate; no hunk may be copied while remediation is dirty or unreviewed."
+        },
+        {
+          "id": "reports",
+          "localRef": "fix/reports-mobile-task-distance",
+          "localHead": "b7adabf233c85eb8d1ceef8c916dc4d1db394ccd",
+          "remoteRef": "origin/fix/reports-mobile-task-distance",
+          "remoteHead": "b7adabf233c85eb8d1ceef8c916dc4d1db394ccd",
+          "productCommit": "0be5859f618990ffe4b5d9f60f4b22008b5fb460",
+          "evidenceCommit": "b7adabf233c85eb8d1ceef8c916dc4d1db394ccd",
+          "worktreeState": "clean",
+          "productHunks": ["app/globals.css: reports text reflow/touch rules 20171..20206", "tests/reports-design-remediation.test.ts: 200% fixture and assertions 238..640", "tests/reports-download-center.test.ts: server-state/remount assertions 169..508"],
+          "evidenceHunks": ["evaluation/reports-mobile-task-distance-2026-07-13/fresh-review-2026-07-14/: report/manifest/metrics plus PNG evidence only"],
+          "decision": "Do not re-own reports CSS/tests or import its evidence as editor evidence; use only after independent reports decision."
+        },
+        {
+          "id": "web",
+          "localRef": "fix/web-localization-current-target",
+          "localHead": "804833c4291ef01360928ee59b19e903a3b928bb",
+          "remoteRef": "origin/fix/web-localization-current-target",
+          "remoteHead": "f15e88d46994768543b1071d99940b1e968db9d8",
+          "reviewState": "pending_local_commit",
+          "worktreeState": "ahead_1_with_untracked_evidence_only",
+          "dirtyPaths": ["evaluation/web-localization-current-target-2026-07-14-v4/"],
+          "overlapHunks": ["components/FieldOperationsWorkspace.tsx: resolveStoredInitialWorkerState 101+, WorkspaceOperationGraphPanel 778+, FieldOperationsWorkspace 903..1256", "components/OperationMemoryPreview.tsx: OperationMemoryGraphViewer 101..228", "lib/ontology/operation-memory-visualization.ts: metaLabel/metaValue/model 79..360", "lib/ontology/operation-memory.ts: buildOperationMemoryGraph 88..112", "tests/current-target-localization-browser.test.ts 244..495"],
+          "decision": "Pending and not remote-bound; exclude both product hunks and untracked evidence from editor implementation."
+        },
+        {
+          "id": "editor-first-ui",
+          "localRef": "feature/editor-first-ui-v2",
+          "localHead": "57b778e8dfa2c7ef896ba19911b79f537354439a",
+          "remoteHead": "57b778e8dfa2c7ef896ba19911b79f537354439a",
+          "worktreeState": "dirty_image_only",
+          "dirtyPaths": ["output/playwright/2026-07-10/module-shell-hardening/desktop-tbm-night.png", "output/playwright/2026-07-10/module-shell-hardening/desktop-workers-night.png"],
+          "overlapHunks": ["components/WorkpackEditor.tsx documentMeta/parser/export handlers", "components/CurrentWorkpackModules.tsx current document module", "lib/types.ts AskResponse", "app/api/export/hwp/route.ts POST", "app/api/export/xlsx/route.ts POST"],
+          "decision": "High-risk parallel lineage; no wholesale copy or merge."
+        },
+        {
+          "id": "share-session-ui",
+          "localRef": "feature/share-session-ui-v2",
+          "localHead": "76a67c55cff0f50cb0f230a5ca49a260a7989055",
+          "remoteRef": null,
+          "remoteHead": null,
+          "worktreeState": "clean_local_only",
+          "overlapHunks": ["app/api/workpacks/[id]/share-sessions/route.ts POST", "app/api/workflow/dispatch/route.ts POST", "components/WorkflowSharePanel.tsx", "lib/workflow-share-client.ts"],
+          "decision": "Blocked behind revision authority; local-only head is not an integration source."
+        }
+      ],
+      "freshRecheck": ["git fetch origin --prune", "resolve every local and remote ref to a full commit", "git worktree list --porcelain", "git -C <worktree> status --short --branch for every named worktree", "git diff --unified=0 <fresh-merge-base>...<fresh-head> -- <planned-owned-paths>", "amend the ledger and obtain independent review if any head/status/hunk differs"],
+      "integrationOrder": ["Obtain explicit user DB approval and independent spec PASS; otherwise stop before Wave 0.", "Refresh this snapshot and select the approved integration successor of 77d8641.", "Resolve ontology/reports/web/editor/share overlap symbol-by-symbol with their owners.", "Never copy a whole file/directory or any output/evidence artifact.", "Run implementation-mode validator with explicit non-empty base/head and executed evidence manifests."],
+      "rules": ["Snapshot values are historical evidence only.", "Every planned product/test path has one write owner.", "Later waves consume APIs and never re-own prior files.", "Changed refs, dirty state, or hunk overlap blocks implementation until the ledger is refreshed and reviewed."]
     },
   "common": {
       "projection": {
@@ -207,6 +239,16 @@
                     "parse": "acceptStringMatchingSha256Base64urlPrefix",
                     "serialize": "canonicalJsonString",
                     "onInvalid": "blocking_freshness_error"
+                  },
+            "sha256HexDigest": {
+                    "parse": "acceptExactStringMatching^sha256:[0-9a-f]{64}$",
+                    "serialize": "sameLowercasePrefixedString",
+                    "onInvalid": "blocking_digest_error"
+                  },
+            "nullableSha256HexDigest": {
+                    "parse": "acceptNullOrExactStringMatching^sha256:[0-9a-f]{64}$",
+                    "serialize": "canonicalJsonNullOrSameLowercasePrefixedString",
+                    "onInvalid": "blocking_digest_error"
                   },
             "actorProvenance": {
                     "parse": "acceptStrictActorProvenanceObjectAndRejectModelClaimingHumanIdentity",
@@ -620,8 +662,10 @@
       "save": {
             "currentEndpoint": "POST /api/workpacks is insert-only and is not v2 revision authority",
             "futureEndpoint": "POST /api/workpacks after REVISION-001 approval and transactional implementation",
-            "wave0Behavior": "local checkpoint only; no server-authoritative save, human_confirmed persistence, or share unlock",
-            "request": ["sealed review_pending response", "logicalWorkpackId", "parentWorkpackId|null", "expectedRevision", "idempotencyKey", "expected materializationDigest", "expected evidenceDigest", "confirmMaterialization=true"],
+            "futureLocalDraftBehaviorAfterProgramStartGate": "Only after independent spec PASS and explicit user DB approval may Wave 0 implement a local checkpoint; it is never a server-authoritative save, human_confirmed persistence, or share unlock.",
+            "commonRequest": ["sealed review_pending response", "parentWorkpackId|null", "expectedRevision", "idempotencyKey", "expected materializationDigest", "expected evidenceDigest", "confirmMaterialization=true"],
+            "rootRequest": {"strategyA": ["client-generated stable logicalWorkpackId", "parentWorkpackId=null", "expectedRevision=0"], "strategyB": ["stable rootOperationKey", "parentWorkpackId=null", "expectedRevision=0", "server allocates logicalWorkpackId"], "selection": "Exactly one user-approved strategy; never both."},
+            "successorRequest": ["logicalWorkpackId", "exact parentWorkpackId", "expectedRevision>=1"],
             "authority": "authenticated server actor and server time inside one transaction/RPC only",
             "databaseMigrationOrRpcApprovalRequired": true
           },
@@ -703,25 +747,44 @@
           },
       "serverRevisionAuthority": {
             "id": "REVISION-001",
-            "status": "BLOCKED_MIGRATION_OR_TRANSACTIONAL_RPC_APPROVAL",
+            "status": "BLOCKED_PENDING_USER_DB_APPROVAL",
             "currentLimitation": "POST /api/workpacks performs an insert after seal verification. Neither the route, current schema, nor buildWorkpackInsertPayload provides a unique logical chain, monotonic revision, idempotency replay, or concurrent-writer exclusion. An app-level select-latest then insert is race-prone and forbidden.",
-            "wave0": "May implement strict codecs, legacy adapters, localDraftRevision, local checkpoint/reload, and deterministic review inputs only. It must leave logicalWorkpackId/parentWorkpackId/revision/humanConfirmation null and share locked.",
-            "approvalGate": "Before server implementation, approve either a migration plus transactional RPC/unique constraints or prove an existing facility with equivalent atomic guarantees. This spec authorizes neither DB nor RPC work.",
+            "wave0": "Blocked. No codec, adapter, local draft, test, UI, or other product file starts before both independent spec PASS and explicit user approval for the DB migration/transactional RPC authority. Spec and validator review are the only permitted work.",
+            "approvalGate": "User must explicitly approve one root identity/idempotency strategy plus its migration, unique constraints, immutable event storage, and transactional RPC. An independent spec PASS is also required. This artifact authorizes none of that work.",
             "futureRequest": {
               "endpoint": "POST /api/workpacks",
-              "fields": ["sealedReviewPendingResponse", "logicalWorkpackId", "parentWorkpackId|null", "expectedRevision", "idempotencyKey", "materializationDigest", "evidenceDigest", "confirmMaterialization=true"],
-              "idempotencyKey": "non-empty opaque client operation ID, scoped to authenticated organization and logicalWorkpackId"
+              "commonFields": ["sealedReviewPendingResponse", "parentWorkpackId|null", "expectedRevision", "idempotencyKey", "materializationDigest", "evidenceDigest", "confirmMaterialization=true"],
+              "rootStrategyAFields": ["client-generated stable logicalWorkpackId"],
+              "rootStrategyBFields": ["rootOperationKey; server allocates logicalWorkpackId"],
+              "successorFields": ["logicalWorkpackId", "parentWorkpackId", "expectedRevision>=1"],
+              "idempotencyKey": "non-empty opaque operation ID scoped by authenticated organization and logical chain/root operation"
             },
-            "transaction": ["Authenticate; derive actorId/displayName and serverTime from server context only.", "Verify the incoming review_pending top-level generation seal; recompute and compare its pre-authority materialization/evidence digests without mutating content.", "Lock/resolve logicalWorkpackId and its latest authoritative row inside the transaction/RPC.", "For a new root require parentWorkpackId=null and expectedRevision=0; allocate revision=1 and stable logicalWorkpackId.", "For a successor require parentWorkpackId=latest workpack id and expectedRevision=latest revision; allocate nextRevision=latest+1.", "Apply idempotency lookup and unique constraint in the same transaction.", "Place the authoritative chain values into the final candidate, then recompute evidenceDigest and materializationDigest; the latter therefore binds the allocated logicalWorkpackId, parentWorkpackId, and revision.", "Stamp ActorProvenance/HumanConfirmation and serverTime with the final digests/revision and set human_confirmed without changing documents.", "Delete only top-level generationEvidence/generationEvidenceError, call existing attachGenerationEvidence over the complete final response, insert exactly one immutable row, and commit.", "Return the committed row identity, chain identity, parent, revision, digests, actor/time, seal summary, and replayed flag."],
-            "replay": {"sameKeySameDigest": "Return the original 200 response with replayed=true and create no row.", "sameKeyDifferentDigest": "409 idempotency_mismatch; create no row.", "transportRetry": "May repeat the same key/body; result is the original response.", "duplicateWithoutKey": "No retry guarantee; clients must provide a key."},
-            "conflict": {"staleExpectedRevision": "409 revision_conflict with latest workpackId/revision/materializationDigest/evidenceDigest and no mutation.", "wrongParent": "409 revision_conflict and no mutation.", "concurrentSameParent": "Exactly one transaction commits nextRevision; every loser receives 409 or a valid idempotent replay. Two rows with the same logicalWorkpackId/revision are impossible."},
-            "testsAfterApproval": ["root save allocates revision 1", "successor uses exact parent and latest expectedRevision", "stale expectedRevision returns 409", "wrong parent returns 409", "same idempotency key+digest replays original actor/time/seal response", "same key+different digest returns 409", "parallel saves yield one commit and one 409/replay", "client actor/time/approved fields are ignored", "review_pending seal is verified and final human_confirmed response is resealed", "no-edit confirmation does not mutate documents", "edited confirmation requires revalidation/reseal"],
+            "rootIdempotency": {
+              "selectionRule": "The approval chooses exactly one strategy. App-level preflight is forbidden for both.",
+              "strategyA": {
+                "name": "client_logical_id",
+                "request": "Client generates one stable UUID logicalWorkpackId before first attempt; root requires parentWorkpackId=null and expectedRevision=0.",
+                "requiredUniqueConstraints": ["UNIQUE(organization_id, logical_workpack_id, revision)", "UNIQUE(organization_id, logical_workpack_id) WHERE revision=1", "UNIQUE(organization_id, logical_workpack_id, idempotency_key)"],
+                "identityConflict": "A different root operation using the same organization/logicalWorkpackId returns 409 logical_root_conflict; it never creates another chain."
+              },
+              "strategyB": {
+                "name": "server_logical_id_from_root_operation",
+                "request": "Client supplies stable rootOperationKey; root requires parentWorkpackId=null and expectedRevision=0; server allocates logicalWorkpackId.",
+                "requiredUniqueConstraints": ["UNIQUE(organization_id, root_operation_key)", "UNIQUE(organization_id, logical_workpack_id, revision)", "UNIQUE(organization_id, logical_workpack_id, idempotency_key)"],
+                "identityConflict": "Same organization/rootOperationKey with a different request digest returns 409 root_operation_mismatch; no second logical chain is allocated."
+              }
+            },
+            "transaction": ["Authenticate; derive organization, actor ID/display name, and server time from server context only.", "Verify the incoming review_pending top-level generation seal and recompute the pre-authority materialization/evidence/request digests without content mutation.", "Inside the approved RPC, look up the scoped idempotency record first. Same key+same request digest returns the original committed response; same key+different digest returns 409 idempotency_mismatch.", "For root Strategy A, insert/lock the organization+logicalWorkpackId root identity under its unique constraint. For Strategy B, insert/lock organization+rootOperationKey and allocate logicalWorkpackId exactly once.", "For a successor, lock the logical chain and latest row; require exact parentWorkpackId and expectedRevision, then allocate latest+1 under UNIQUE(organization_id,logical_workpack_id,revision).", "Put authoritative chain values into the final candidate, recompute evidenceDigest and materializationDigest, then stamp authenticated HumanConfirmation and server time with final revision/digests.", "Set human_confirmed without document mutation, delete only top-level generationEvidence/error, and call existing attachGenerationEvidence over the complete response.", "Atomically insert the immutable revision and idempotency response record, then commit and return identifiers/revision/digests/actor/time/seal/replayed."],
+            "replay": {"sameKeySameRequestDigest": "200 original response byte-for-semantic-value with original actor/time/seal and replayed=true; no row/event is added.", "sameKeyDifferentRequestDigest": "409 idempotency_mismatch; no mutation.", "sameRootIdentitySameKey": "Apply the same replay rules.", "sameRootIdentityDifferentKey": "409 logical_root_conflict or root_operation_mismatch unless it is a successor request with the exact committed parent/revision.", "transportRetry": "Repeat the same key and body; return the original response.", "missingKey": "400 idempotency_key_required; no best-effort duplicate handling."},
+            "conflict": {"staleExpectedRevision": "409 revision_conflict with latest workpackId/revision/materializationDigest/evidenceDigest and no mutation.", "wrongParent": "409 revision_conflict and no mutation.", "concurrentRoot": "Unique root identity permits one root commit; exact retry replays, conflicting digest returns 409.", "concurrentSameParent": "Exactly one transaction commits nextRevision; every loser receives 409 or exact replay. Duplicate logicalWorkpackId/revision is impossible."},
+            "testsAfterApproval": ["both root strategies have isolated migration/RPC tests before one is selected", "root save allocates exactly revision 1", "same root key/logical ID exact retry replays original response", "same root identity different digest/key returns the defined 409", "successor uses exact parent/latest expectedRevision", "stale revision and wrong parent return 409", "parallel roots and successors yield one commit", "client actor/time/approved fields are ignored", "review_pending seal is verified and final human_confirmed response is resealed", "no-edit confirmation does not mutate documents", "edited confirmation requires revalidation/reseal"],
             "plannedOwner": "blocked-server-revision-authority",
             "plannedFiles": ["app/api/workpacks/route.ts", "lib/workpack-store.ts", "lib/workpack-revision-authority.ts", "tests/workpack-revision-authority.test.ts", "tests/workpack-route-revision-authority.test.ts", "supabase/migrations/<approved>_workpack_revision_authority.sql"],
             "shareEffect": "V2 share-session creation and dispatch remain disabled until this gate and the share freshness gate both pass."
           },
       "localDraftKey": "safeclaw:workpack-editor:v2:<generationFingerprint>",
-      "noMigration": true,
+      "migrationPerformedByThisArtifact": false,
+      "authorityMigrationApprovalRequired": true,
       "featureFlag": {
             "id": "FLAG-001",
             "name": "NEXT_PUBLIC_SAFECLAW_WORKPACK_EDITORS_V2",
@@ -774,15 +837,25 @@
             "beforeAfter": "Before and After metadata remain paired by local IDs and server improvementId; human verification is required before claiming improvement completion.",
             "reviewAuthority": {
               "id": "PHOTO-002",
-              "status": "BLOCKED_AUTHENTICATED_EVENT_AND_HISTORY_APPROVAL",
+              "status": "BLOCKED_PENDING_USER_DB_APPROVAL",
               "currentReality": "The authenticated improvements route supports GET/POST only. POST creates review_status=candidate; no current route performs confirmed/rejected transition or records an immutable review event. Existing approved_by/approved_at columns do not by themselves supply transition history, source-photo digests, accepted control text, or concurrency guarantees.",
               "states": ["candidate", "confirmed", "rejected"],
               "events": ["HUMAN_CONFIRM_IMPROVEMENT", "HUMAN_REJECT_IMPROVEMENT"],
-              "futureEvent": ["improvementId", "decision", "actorId from authenticated server session", "actorDisplayName from server session", "occurredAt from server clock", "beforeDigest", "afterDigest", "pairId", "acceptedControlText", "reason for rejection or change", "sourceRevision", "prior materializationDigest", "prior evidenceDigest"],
+              "digestType": "Sha256Digest = `sha256:${LowercaseHex64}`; parse requires exactly 64 lowercase hexadecimal characters after the prefix and serialization is byte-identical lowercase.",
+              "futureEvent": {
+                "identity": ["eventId server-generated stable ID", "improvementId", "pairId", "action=HUMAN_CONFIRM_IMPROVEMENT|HUMAN_REJECT_IMPROVEMENT"],
+                "actor": ["actorId from authenticated server session", "actorDisplayName from server session", "occurredAt from server clock"],
+                "photoDigests": ["beforeDigest:Sha256Digest non-null for every event", "afterDigest:Sha256Digest non-null for confirmation and for rejection of a completed pair; nullable only for rejectionReason=missing_after_photo"],
+                "content": ["acceptedControlText non-empty only for confirmation", "rejectionReason non-empty only for rejection"],
+                "revision": ["candidateRevision positive integer", "resultingRevision=candidateRevision+1", "prior materializationDigest", "prior evidenceDigest", "resulting materializationDigest", "resulting evidenceDigest"],
+                "seal": ["resulting top-level generationEvidence seal summary", "canonicalEventDigest:Sha256Digest"]
+              },
+              "canonicalEventDigest": "sha256 lowercase hex over canonical {eventId,improvementId,pairId,action,actorId,actorDisplayName,occurredAt,beforeDigest,afterDigest,acceptedControlText,rejectionReason,candidateRevision,resultingRevision,priorMaterializationDigest,priorEvidenceDigest,resultingMaterializationDigest,resultingEvidenceDigest,resultingGenerationEvidenceSnapshotDigest}; exclude canonicalEventDigest itself.",
               "transition": "candidate -> confirmed or candidate -> rejected exactly once per authoritative review event; later changes append a superseding event and create a new document revision, never rewrite history.",
               "evidenceGate": "A candidate, local preview, POST success, server_metadata_only state, or model analysis is never document/share evidence. Only a persisted confirmed event whose pair digests match the source photos may derive a photo EditorEvidenceRef. Rejected candidates remain audit-only.",
-              "revisionSealImpact": "Confirmation/rejection changes DOC-09 content/audit state, invalidates materialization/evidence digests, all dependent review artifacts and share blocks, then requires revalidation/reseal and new authoritative revision before share.",
-              "persistenceGate": "Implement only through an authenticated route backed by approved immutable event/history and concurrency authority. If this needs a migration/RPC, obtain approval first; Wave 3 may implement local candidate UI only.",
+              "atomicWrite": "The approved transaction/RPC locks the candidate revision, validates pair digests and action fields, creates resultingRevision, recomputes document/evidence/materialization digests, reseals the final response, computes canonicalEventDigest, and writes immutable event+resulting revision+seal/idempotency response atomically. No partial event or state-only update is valid.",
+              "revisionSealImpact": "Confirmation/rejection creates the next authoritative document revision, invalidates prior review/share blocks, recomputes final digests, and reseals before any share eligibility. Candidate and resulting revision IDs are both retained in history.",
+              "persistenceGate": "Confirmed/rejected persistence cannot exist before explicit user approval of immutable event/history plus transactional revision authority. The entire Wave program, including local candidate UI, remains blocked until that approval and independent spec PASS.",
               "plannedOwner": "blocked-photo-review-authority",
               "plannedFiles": ["app/api/workpacks/[id]/improvements/[improvementId]/review/route.ts", "lib/workpack-improvement-review.ts", "tests/workpack-improvement-review-route.test.ts", "supabase/migrations/<approved>_workpack_improvement_review_events.sql"]
             }
@@ -986,6 +1059,17 @@
             "lifecycle": ["generated", "edited", "review_pending", "human_confirmed", "share_block_stale"],
             "themes": ["day", "night"]
           },
+      "textZoom200": {
+            "id": "ZOOM-001",
+            "status": "DECLARED_NOT_EXECUTED",
+            "matrix": {"browsers": ["Chromium", "Firefox", "WebKit"], "viewports": ["desktop1440", "mobile390"], "themes": ["day", "night"], "documentKeys": "all 12 in exact registry order", "caseCountPerBrowser": 48, "totalCaseCount": 144},
+            "baseline": "For each browser/viewport/theme/document fixture in a fresh context with deviceScaleFactor=1 and no zoom, store immutable JSON containing implementation commit, fixture ID, computed fontSize/lineHeight, client/scroll dimensions, relevant DOMRect values, overlap pairs, clipping flags, scroll-owner chain, and textarea overflow. Hash the canonical JSON with sha256HexDigest and bind it in the implementation evidence manifest before applying zoom.",
+            "applyExactlyOnce": "From the same loaded fixture, call the browser-native text-zoom adapter exactly once with factor 2.0. Record adapter name, browser protocol/preference command, applicationCount=1, deviceScaleFactor=1, devicePixelRatio=1, and visualViewport.scale=1. CSS transform, CSS zoom, screenshot scaling, repeated root-font mutation, or deviceScaleFactor changes are forbidden. If a browser lacks a controllable native text-zoom mechanism, that browser remains RED rather than substituting a simulation.",
+            "scaleAssertion": "For every measured text role, zoomFontSize/baselineFontSize and zoomLineHeight/baselineLineHeight are each within 1.9..2.1. The designated long title, warning, table label, and action fixture must increase line count or block height while staying inside its container, proving reflow rather than bitmap scaling.",
+            "geometryAssertion": "At 200% each case has documentElement.scrollWidth=clientWidth, zero positive-area intersections among selector/title/warning/commands/evidence trigger/editor/primary/share readiness, zero clipped text/control rectangles, every control >=44x44 CSS px, no persistent right rail/yellow badge, and the single evidence drawer remains closed by default.",
+            "scrollAssertion": "The document page is the sole editor vertical scroller; no ancestor between a field and document surface has overflow-y auto/scroll, every visible textarea has overflow-y:hidden and scrollHeight<=clientHeight+1, and only an open evidence drawer may own internal vertical scroll.",
+            "evidenceGate": "Only implementation mode may emit a 200% browser PASS, and only when the immutable baseline and zoom result manifests contain all 144 cases, command exit 0, artifact hashes, and every measurable assertion. Spec-review mode validates this schema but prints no browser PASS."
+          },
       "taskDistanceBudgets": {
             "id": "TASK-DISTANCE-001",
             "coordinateRule": "Record element.getBoundingClientRect().top and cumulative absolute window.scrollY delta from a freshly loaded selected-document fixture. A click is a pointer activation; keyboard focus caused by that activation is not another click.",
@@ -1024,7 +1108,9 @@
             ["BROWSER-020", "drawer", "closed default has zero directEvidence/dbHarness/safety-control/supporting-ref/law-open-action nodes; open drawer has exactly one section root for each available category and closing removes or hides all from the accessibility tree"],
             ["BROWSER-021", "photo candidate", "candidate and server_metadata_only fixtures render data-evidence-eligible=false, reviewDecision/event/control empty, zero enabled share controls, zero assetId/storagePath nodes, and no img for reloaded pixels"],
             ["BROWSER-022", "all editors at 391x844", "every auto-grow textarea has overflow-y=hidden, max-height=none, scrollHeight<=clientHeight+1; section editors use page scroll only and no ancestor between field and document surface has overflow-y auto/scroll"],
-            ["BROWSER-023", "blocked server authority", "logicalWorkpackId/parentWorkpackId/revision absent or null yields zero enabled human-confirm/save/share/dispatch controls and exactly one data-blocker=revision-authority-required message"]
+            ["BROWSER-023", "blocked server authority", "logicalWorkpackId/parentWorkpackId/revision absent or null yields zero enabled human-confirm/save/share/dispatch controls and exactly one data-blocker=revision-authority-required message"],
+            ["BROWSER-024", "200% matrix baseline and scale", "all 144 browser/viewport/theme/document cases use immutable 100% computed baselines, deviceScaleFactor=1, exactly one native text-zoom application, font-size and line-height ratios within 1.9..2.1, and designated long content reflows"],
+            ["BROWSER-025", "200% matrix containment", "all 144 zoomed cases have zero horizontal overflow, positive-area overlap, clipping, nested editor scroll, or hidden textarea scroll and preserve the no-yellow-badge/no-right-rail/single-drawer contract"]
           ]
     },
   "components": {
@@ -1082,17 +1168,25 @@
             "content": "canonical documents, evidence refs, revision, materializationDigest, evidenceDigest, and human confirmation metadata",
             "xlsxLocation": "hidden worksheet named _safeclaw_editor_v2, cell A1 canonical JSON",
             "pdfLocation": "final appendix headed SafeClaw 편집 데이터 with deterministic field-path/value rows and manifest digest",
-            "hwpxLocation": "Contents/safeclaw-editor-v2.json registered in content.hpf",
-            "hwpLegacyLocation": "final HTML table headed SafeClaw 편집 데이터",
+            "hwpxLocation": "client-side @rhwp document text appendix between deterministic SafeClaw editor-v2 begin/end markers; HWPX text extraction reconstructs the canonical manifest",
+            "hwpBinaryLocation": "binary HWP table/record headed SafeClaw 편집 데이터 emitted by the POST route builder; a binary HWP parser reconstructs deterministic field-path/value rows and digest",
             "visibleEvidenceRule": "Editable/visible submission bodies retain concise inline citation markers. Full provenance, DB harness, ontology QA, materialization, review_required, and audit appendices are generated from separate manifest roots and never become editable body text."
           },
-      "roundTripDefinition": ["Legacy mixed string -> versioned body/appendix split -> structured parse -> serialize -> split preserves editable fields and every raw appendix line without exposing appendix text to an editor.", "draft -> dual projection -> JSON serialize -> buildReopenData -> adapter deep-equals normalized draft", "XLSX unzip/load and parse _safeclaw_editor_v2 A1 deep-equals export manifest", "PDF text extraction contains every deterministic field-path/value record and matching digest", "HWPX unzip and parse Contents/safeclaw-editor-v2.json deep-equals export manifest", "HWP HTML parse contains every deterministic field-path/value record", "No parser may substitute defaults without emitting a blocking issue and preserving the raw value"],
+      "roundTripDefinition": ["Legacy mixed string -> versioned body/appendix split -> structured parse -> serialize -> split preserves editable fields and every raw appendix line without exposing appendix text to an editor.", "draft -> dual projection -> JSON serialize -> buildReopenData -> adapter deep-equals normalized draft", "XLSX unzip/load and parse _safeclaw_editor_v2 A1 deep-equals export manifest", "PDF returned-HTML/text extraction contains every deterministic field-path/value record and matching digest", "client-built HWPX text extraction parses the deterministic begin/end appendix and deep-equals the export manifest", "binary HWP parser recovers every deterministic field-path/value record and matching digest", "No parser may substitute defaults without emitting a blocking issue and preserving the raw value"],
+      "roundTripOwner": {"wave": "wave5", "reason": "wave5 alone owns WorkpackEditor plus HWP/PDF/XLSX route call sites and export integration tests; it also owns the client-side buildHwpxWithRhwp integration hunk.", "entryGate": "BLOCKED_PENDING_USER_DB_APPROVAL and independent spec PASS", "exitRule": "Only implementation-mode evidence may claim route/client round-trip PASS."},
+      "pureCodecLimit": "Wave 0 may eventually test canonical encode/decode fixtures in memory only. It owns no export route, WorkpackEditor call site, binary parser, browser, or round-trip exit and may not print export PASS.",
+      "actualSeamsAtTarget": [
+            {"id": "EXPORT-XLSX", "kind": "server_post", "clientPath": "components/WorkpackEditor.tsx", "clientSymbol": "downloadXlsx", "serverPath": "app/api/export/xlsx/route.ts", "serverSymbol": "POST", "url": "/api/export/xlsx", "targetContract": "single or one of five structured modes"},
+            {"id": "EXPORT-PDF", "kind": "server_post", "clientPath": "components/WorkpackEditor.tsx", "clientSymbol": "printPdf", "serverPath": "app/api/export/pdf/route.ts", "serverSymbol": "POST", "url": "/api/export/pdf?format=html", "targetContract": "returns printable HTML at the editor call site"},
+            {"id": "EXPORT-HWP", "kind": "server_binary_post", "clientPath": "components/WorkpackEditor.tsx", "clientSymbol": "downloadHwp", "serverPath": "app/api/export/hwp/route.ts", "serverSymbol": "POST", "url": "/api/export/hwp", "targetContract": "binary .hwp Blob response"},
+            {"id": "EXPORT-HWPX-CLIENT", "kind": "client_builder", "clientPath": "components/WorkpackEditor.tsx", "clientSymbol": "buildHwpxWithRhwp -> downloadHwpx", "serverPath": null, "serverSymbol": null, "url": null, "targetContract": "@rhwp/core HwpDocument.exportHwpx; no editor export route"}
+          ],
       "actualRoutes": [
             {"id": "EXPORT-XLSX", "method": "POST", "path": "app/api/export/xlsx/route.ts", "url": "/api/export/xlsx", "roundTrip": "parse hidden _safeclaw_editor_v2!A1 manifest"},
-            {"id": "EXPORT-PDF", "method": "POST", "path": "app/api/export/pdf/route.ts", "url": "/api/export/pdf", "roundTrip": "extract deterministic field-path/value appendix plus manifest digest"},
-            {"id": "EXPORT-HWP", "method": "POST", "path": "app/api/export/hwp/route.ts", "url": "/api/export/hwp", "roundTrip": "parse deterministic SafeClaw 편집 데이터 HTML table"},
-            {"id": "EXPORT-HWPX", "method": "GET", "path": "app/api/export/hwpx-template/route.ts", "url": "/api/export/hwpx-template", "roundTrip": "unzip and parse Contents/safeclaw-editor-v2.json after planned manifest integration"}
+            {"id": "EXPORT-PDF", "method": "POST", "path": "app/api/export/pdf/route.ts", "url": "/api/export/pdf?format=html", "roundTrip": "extract deterministic field-path/value appendix plus manifest digest"},
+            {"id": "EXPORT-HWP", "method": "POST", "path": "app/api/export/hwp/route.ts", "url": "/api/export/hwp", "roundTrip": "parse deterministic SafeClaw 편집 data from binary HWP"}
           ],
+      "excludedTargetSeam": {"path": "app/api/export/hwpx-template/route.ts", "method": "GET", "reason": "Exists at 77d8641 but WorkpackEditor does not call it; it is not an editor HWPX round-trip exit."},
       "unknownFieldPolicy": {"knownOptionalMissing": "Omit and preserve absence; do not inject null.", "nullableNull": "Preserve explicit null only for nullable fields.", "nonReservedUnknown": "Move to extensions: JsonObject and merge back losslessly.", "reservedUnknownOrCollision": "Fail closed and preserve original JSON in unmapped.", "invalidKnownType": "Fail closed; preserve original value in unmapped; never coerce/default silently."},
       "currentRouteCompatibility": {
             "riskAssessmentDraft": "single plus structuredRiskRows",
@@ -1486,8 +1580,8 @@
                     ["improvements[].reflectedDocumentKeys", "DocumentKey[]", "at least one", "documentKeyArray", "GET /api/workpacks/[id]/improvements -> improvements[].reflected_documents or POST form.reflectedDocuments"],
                     ["improvements[].beforeFileName", "string|null", "always", "nullableExactString", "GET /api/workpacks/[id]/improvements -> improvements[].photo_summary.beforePhotoName or POST beforePhoto.name or null"],
                     ["improvements[].afterFileName", "string|null", "always", "nullableExactString", "GET /api/workpacks/[id]/improvements -> improvements[].photo_summary.afterPhotoName or POST afterPhoto.name or null"],
-                    ["improvements[].beforeDigest", "string|null", "when source bytes are locally available", "nullableExactString", "editorV2/export manifest only; never fabricated from filename"],
-                    ["improvements[].afterDigest", "string|null", "when source bytes are locally available", "nullableExactString", "editorV2/export manifest only; never fabricated from filename"],
+                    ["improvements[].beforeDigest", "Sha256Digest|null", "when source bytes are locally available", "nullableSha256HexDigest", "editorV2/export manifest only; never fabricated from filename"],
+                    ["improvements[].afterDigest", "Sha256Digest|null", "when source bytes are locally available", "nullableSha256HexDigest", "editorV2/export manifest only; never fabricated from filename"],
                     ["improvements[].pairId", "string|null", "when both source digests exist", "nullableStableId", "deterministic local pair identity until an authoritative confirmed event exists"],
                     ["improvements[].captureNote", "string", "always", "exactString", null],
                     ["improvements[].actionTaken", "string", "human-only", "exactString", null],
@@ -1499,6 +1593,10 @@
                     ["improvements[].reviewDecision", "\"confirmed\"|\"rejected\"|null", "authoritative review event only", "nullableStrictEnum", "null in Wave 3; future authenticated review event"],
                     ["improvements[].reviewEventId", "string|null", "authoritative review event only", "nullableStableId", "null until approved route returns immutable event identity"],
                     ["improvements[].acceptedControlText", "string|null", "confirmed event only", "nullableExactString", "null until authenticated human confirmation"],
+                    ["improvements[].rejectionReason", "string|null", "rejected event only", "nullableExactString", "null until authenticated human rejection"],
+                    ["improvements[].candidateRevision", "integer|null", "authoritative review event only", "nullableStrictInteger", "null until approved transaction binds the candidate revision"],
+                    ["improvements[].resultingRevision", "integer|null", "authoritative review event only", "nullableStrictInteger", "null until approved transaction writes candidateRevision+1"],
+                    ["improvements[].reviewEventDigest", "Sha256Digest|null", "authoritative review event only", "nullableSha256HexDigest", "null until approved transaction returns canonical event digest"],
                     ["improvements[].verificationNote", "string", "human-only", "exactString", null]
                   ],
             "fieldNotes": {
@@ -1506,11 +1604,12 @@
                     "improvements[].actionTaken": "Never copied from a generated recommendation.",
                     "improvements[].photoState": "Exactly the common Phase A state. Wave 3 has no hydrated/stored pixel state because existing GET/POST responses expose no photo asset ID or storage path.",
                     "improvements[].serverImprovementId": "Non-null proves only an improvement candidate row response/reload, never a photo asset row, review event, evidence eligibility, or authorized pixel URL.",
-                    "improvements[].reviewDecision": "Remains null until PHOTO-002 authority is approved and returns an immutable authenticated event."
+                    "improvements[].reviewDecision": "Remains null until PHOTO-002 authority is approved and returns an immutable authenticated event.",
+                    "improvements[].reviewEventDigest": "Binds the immutable event but never copies the top-level generationEvidence seal into the document."
                   },
             "interactions": ["Select and compare Before/After files locally; use object URLs only in ephemeral component state and revoke them on replace, remove, or unmount.", "Submit the existing improvements endpoint only when a stored workpack exists; record the returned improvementId as a candidate but never claim the photos are reloadable or reviewed.", "After reload, show filenames with server_metadata_only and preview unavailable; never fabricate thumbnail, assetId, or storagePath.", "A candidate cannot enter evidenceRefs or share until PHOTO-002 confirms matching before/after digests and accepted control text.", "Defer hydratable stored photos and confirmed/rejected persistence until an authorized response/route exists."],
-            "gates": ["Never serialize File, Blob, object URL, assetId, or storagePath into editorV2.", "Before/After comparison requires both filenames and source digests; one-sided selections remain local_display_only.", "server_metadata_only requires an actual successful POST response or matching GET row and a non-null serverImprovementId but remains candidate-only.", "reviewDecision/reviewEventId/acceptedControlText stay null until PHOTO-002 authority.", "No export may imply that server_metadata_only pixels were embedded or human-confirmed; manifests preserve all metadata and state."],
-            "schemaOrder": ["siteTimeZone", "improvements[].localId", "improvements[].taskLabel", "improvements[].hazardLabel", "improvements[].improvementText", "improvements[].reflectedDocumentKeys", "improvements[].beforeFileName", "improvements[].afterFileName", "improvements[].beforeDigest", "improvements[].afterDigest", "improvements[].pairId", "improvements[].captureNote", "improvements[].actionTaken", "improvements[].evidenceRefs", "improvements[].photoState", "improvements[].serverImprovementId", "improvements[].reviewStatus", "improvements[].sourceType", "improvements[].reviewDecision", "improvements[].reviewEventId", "improvements[].acceptedControlText", "improvements[].verificationNote"]
+            "gates": ["Never serialize File, Blob, object URL, assetId, or storagePath into editorV2.", "Before/After comparison requires both filenames and typed source digests; one-sided selections remain local_display_only.", "server_metadata_only requires an actual successful POST response or matching GET row and a non-null serverImprovementId but remains candidate-only.", "reviewDecision/reviewEventId/acceptedControlText/rejectionReason/candidateRevision/resultingRevision/reviewEventDigest stay null until PHOTO-002 authority is explicitly approved and atomically implemented.", "No export may imply that server_metadata_only pixels were embedded or human-confirmed; manifests preserve all metadata and state."],
+            "schemaOrder": ["siteTimeZone", "improvements[].localId", "improvements[].taskLabel", "improvements[].hazardLabel", "improvements[].improvementText", "improvements[].reflectedDocumentKeys", "improvements[].beforeFileName", "improvements[].afterFileName", "improvements[].beforeDigest", "improvements[].afterDigest", "improvements[].pairId", "improvements[].captureNote", "improvements[].actionTaken", "improvements[].evidenceRefs", "improvements[].photoState", "improvements[].serverImprovementId", "improvements[].reviewStatus", "improvements[].sourceType", "improvements[].reviewDecision", "improvements[].reviewEventId", "improvements[].acceptedControlText", "improvements[].rejectionReason", "improvements[].candidateRevision", "improvements[].resultingRevision", "improvements[].reviewEventDigest", "improvements[].verificationNote"]
           },
       {
             "id": "DOC-10",
@@ -1608,6 +1707,8 @@
           }
     ],
   "implementation": {
+      "programStatus": "BLOCKED_PENDING_USER_DB_APPROVAL",
+      "startGate": {"independentSpecPassRequired": true, "explicitUserDbApprovalRequired": true, "logic": "AND", "scope": "Every product/test/API/UI/codec wave including Wave 0", "permittedBeforeGate": ["spec review", "validator review", "evidence-manifest review"], "forbiddenBeforeGate": ["product code", "product tests", "codec implementation", "UI implementation", "API/store work", "DB/schema/migration/RPC work", "data changes", "Wave branch creation or execution"]},
       "codecFixtureMatrix": {
             "id": "CODEC-MATRIX-001",
             "caseSet": {
@@ -1617,9 +1718,10 @@
               "optional": "Exercise every optional/conditional field absent and present; preserve absent versus null and exact values.",
               "unknown": "Unknown non-reserved keys round-trip in extensions; reserved-name collisions and invalid known types fail closed into unmapped.",
               "legacy": "Hydrate the current string/structured path and exact [SafeClaw Editor v2 fields] fallback for every expanded field, serialize, reload, and deep-equal the normalized envelope plus raw appendix/unmapped values.",
-              "export": "For every expanded field and raw provenance member, reload plus all four actual export routes recover the same semantic value, array order, null/absence, extension bag, evidence target, worker confirmation, actionTaken, and digest. Binary byte equality is not required."
+              "export": "Wave 5 only: for every expanded field and raw provenance member, reload plus three server export routes and the client HWPX builder recover the same semantic value, array order, null/absence, extension bag, evidence target, worker confirmation, actionTaken, and digest. Binary byte equality is not required."
             },
-            "targets": ["reload", "EXPORT-XLSX", "EXPORT-PDF", "EXPORT-HWP", "EXPORT-HWPX"],
+            "ownership": {"wave0PureCases": ["missing", "empty", "null", "optional", "unknown", "legacy"], "wave5IntegrationCases": ["export", "reload-through-current-call-sites"], "rule": "Wave 0 may execute only in-memory codec/parser fixtures. Wave 5 owns all actual route/client, binary, browser, and export round-trip exits."},
+            "targets": ["reload", "EXPORT-XLSX", "EXPORT-PDF", "EXPORT-HWP", "EXPORT-HWPX-CLIENT"],
             "rows": [
               ["DOC-01", "workpackSummaryDraft", "missing|empty|null|optional|unknown|legacy|export", "all expanded fields"],
               ["DOC-02", "riskAssessmentDraft", "missing|empty|null|optional|unknown|legacy|export", "all 21 RiskAssessmentRow fields plus stable id/evidence"],
@@ -1638,22 +1740,23 @@
       "waves": [
             {
                     "id": "wave0",
+                    "status": "BLOCKED_PENDING_USER_DB_APPROVAL",
                     "owner": "workpack-editor-local-contract",
-                    "name": "Migration-free local codecs and draft",
+                    "name": "Local codecs and draft after authority approval",
                     "documents": [],
                     "objective": "Implement strict types/codecs, all 12 lossless adapters, body/appendix separation, deterministic local digests, localDraftRevision, and recovery checkpoints only. Do not implement server revision, confirmation, persistence, or share authority.",
-                    "entryGate": "An independent reviewer marks this exact spec commit PASS and the evaluation validator is green.",
+                    "entryGate": "Both an independent reviewer PASSes the immutable candidate/evidence pair and the user explicitly approves the DB migration/transactional RPC authority. Until both, do not create or edit any owned/test file.",
                     "ownedFiles": ["lib/workpack-editor-types.ts", "lib/workpack-editor-codecs.ts", "lib/workpack-editor-adapter.ts", "lib/workpack-editor-legacy-boundary.ts", "lib/workpack-editor-document-specs.ts", "lib/workpack-editor-local-draft.ts", "lib/workpack-editor-review.ts"],
                     "readOnlyDependencies": ["lib/risk-assessment-schema.ts", "lib/types.ts", "lib/generation-evidence.ts", "lib/db-harness.ts", "lib/workpack-ontology-qa.ts", "lib/quality-contract.ts", "lib/search.ts"],
                     "testFiles": ["tests/workpack-editor-types.test.ts", "tests/workpack-editor-codecs.test.ts", "tests/workpack-editor-adapter.test.ts", "tests/workpack-editor-legacy-boundary.test.ts", "tests/workpack-editor-local-draft.test.ts", "tests/workpack-editor-review-lifecycle.test.ts", "tests/workpack-editor-codec-matrix.test.ts"],
                     "commands": {
-                              "prerequisite": "node evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs --self-test --range d3ad86530bc786d8024206cc5b7c7db60c055278...HEAD",
+                              "prerequisite": "node evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs implementation --spec <immutable-spec-candidate-SHA> --evidence <immutable-implementation-evidence-commit-SHA> --manifest <implementation-manifest-path> --base <non-empty-implementation-base-SHA> --head <non-empty-implementation-head-SHA>",
                               "red": "npx.cmd vitest run tests/workpack-editor-types.test.ts tests/workpack-editor-codecs.test.ts tests/workpack-editor-adapter.test.ts tests/workpack-editor-legacy-boundary.test.ts tests/workpack-editor-local-draft.test.ts tests/workpack-editor-codec-matrix.test.ts --maxWorkers=1 --no-file-parallelism",
                               "green": "npx.cmd vitest run tests/workpack-editor-types.test.ts tests/workpack-editor-codecs.test.ts tests/workpack-editor-adapter.test.ts tests/workpack-editor-legacy-boundary.test.ts tests/workpack-editor-local-draft.test.ts tests/workpack-editor-review-lifecycle.test.ts tests/workpack-editor-codec-matrix.test.ts --maxWorkers=1 --no-file-parallelism",
                               "typecheck": "npm.cmd run typecheck",
                               "diff": "git diff --check"
                             },
-                    "tddGates": ["RED: mixed 5221-character risk fixture fails until body and every known appendix section are separated and preserved.", "RED: every missing/empty/null/optional/unknown/legacy/export fixture row fails before codecs exist.", "GREEN: all 12 adapters preserve exact fields, null/absence, raw provenance, extension bags, appendix, and unmapped values.", "GREEN: generated validates locally to review_pending without content mutation; edited requires deterministic revalidation inputs.", "GREEN: logicalWorkpackId/parentWorkpackId/revision/humanConfirmation remain null and v2 share remains locked.", "REFACTOR: no any, API, DB, schema, migration, package, CSS, or current store/readiness change."],
+                    "tddGates": ["RED: mixed 5221-character risk fixture fails until body and every known appendix section are separated and preserved.", "RED: every missing/empty/null/optional/unknown/legacy pure codec fixture fails before codecs exist; no export route/client fixture runs in this wave.", "GREEN: all 12 adapters preserve exact fields, null/absence, raw provenance, extension bags, appendix, and unmapped values in memory.", "GREEN: generated validates locally to review_pending without content mutation; edited requires deterministic revalidation inputs.", "GREEN: logicalWorkpackId/parentWorkpackId/revision/humanConfirmation remain null and v2 share remains locked.", "REFACTOR: no any, API, DB, schema, migration, package, CSS, current store/readiness, export, or browser change."],
                     "browserAssertions": [],
                     "exitGate": "Local codecs/adapters/draft/review inputs are green; server save, human confirmation, photo authority, and v2 share remain blocked.",
                     "rollback": "Disable the flag and stop reading local v2 checkpoints. Preserve unknown editorV2 data; no server/data/schema rollback.",
@@ -1665,11 +1768,12 @@
                   },
             {
                     "id": "wave1",
+                    "status": "BLOCKED_PENDING_USER_DB_APPROVAL",
                     "owner": "workpack-editor-core-components",
                     "name": "Core structured editors and simplified review surface",
                     "documents": ["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"],
                     "objective": "Build genuine structured risk assessment, TBM briefing, and TBM record domain editors plus only the shared field/table/attendance primitives their matching structures require.",
-                    "entryGate": "Wave 0 is green and an independent reviewer has marked this exact spec commit PASS.",
+                    "entryGate": "Program startGate satisfied and Wave 0 green; otherwise blocked.",
                     "ownedFiles": ["components/workpack-editor/FieldGroup.tsx", "components/workpack-editor/ExactTextField.tsx", "components/workpack-editor/AutoGrowTextField.tsx", "components/workpack-editor/EnumSelect.tsx", "components/workpack-editor/DateTimeField.tsx", "components/workpack-editor/ChecklistField.tsx", "components/workpack-editor/EditableRowList.tsx", "components/workpack-editor/ResponsiveDataGrid.tsx", "components/workpack-editor/EvidenceReferencePicker.tsx", "components/workpack-editor/WorkerAttendanceEditor.tsx", "components/workpack-editor/ValidationSummary.tsx", "components/workpack-editor/RiskAssessmentEditor.tsx", "components/workpack-editor/TbmBriefingEditor.tsx", "components/workpack-editor/TbmLogEditor.tsx"],
                     "readOnlyDependencies": ["lib/workpack-editor-types.ts", "lib/workpack-editor-codecs.ts", "lib/workpack-editor-adapter.ts", "lib/workpack-editor-document-specs.ts", "lib/risk-assessment-schema.ts", "lib/types.ts"],
                     "testFiles": ["tests/workpack-editor-wave1.test.ts", "tests/workpack-editor-worker-attendance.test.ts", "tests/tbm-deterministic-structures.test.ts"],
@@ -1692,11 +1796,12 @@
                   },
             {
                     "id": "wave2",
+                    "status": "BLOCKED_PENDING_USER_DB_APPROVAL",
                     "owner": "workpack-editor-plan-components",
                     "name": "Plans, permit, and education",
                     "documents": ["workPlanDraft", "workPermitDraft", "safetyEducationRecordDraft"],
                     "objective": "Add structured plan, permit, and education editors using risk links, approval boundaries, curriculum rows, and the genuine shared WorkerAttendance primitive.",
-                    "entryGate": "Wave 1 green with browser and export gates.",
+                    "entryGate": "Program startGate satisfied and Wave 1 green; otherwise blocked. No export gate is owned here.",
                     "ownedFiles": ["components/workpack-editor/WorkPlanEditor.tsx", "components/workpack-editor/WorkPermitEditor.tsx", "components/workpack-editor/EducationRecordEditor.tsx", "components/workpack-editor/PeoplePicker.tsx"],
                     "readOnlyDependencies": ["lib/workpack-editor-document-specs.ts", "lib/workpack-editor-adapter.ts", "components/workpack-editor/EvidenceReferencePicker.tsx", "components/workpack-editor/WorkerAttendanceEditor.tsx", "lib/types.ts", "lib/risk-assessment-schema.ts"],
                     "testFiles": ["tests/workpack-editor-wave2.test.ts"],
@@ -1718,11 +1823,12 @@
                   },
             {
                     "id": "wave3",
+                    "status": "BLOCKED_PENDING_USER_DB_APPROVAL",
                     "owner": "workpack-editor-evidence-components",
                     "name": "Summary, emergency, and honest photo evidence",
                     "documents": ["workpackSummaryDraft", "emergencyResponseDraft", "photoEvidenceDraft"],
                     "objective": "Add summary/scenario editors and honest local/display-only Before/After handling without claiming photo asset hydration.",
-                    "entryGate": "Wave 2 green and current improvements endpoint contract fixtures pinned.",
+                    "entryGate": "Program startGate satisfied, Wave 2 green, and current improvements endpoint contract fixtures pinned; otherwise blocked.",
                     "ownedFiles": ["components/workpack-editor/WorkpackSummaryEditor.tsx", "components/workpack-editor/EmergencyResponseEditor.tsx", "components/workpack-editor/ImprovementEvidenceEditor.tsx", "components/workpack-editor/LocalPhotoPair.tsx"],
                     "readOnlyDependencies": ["app/api/workpacks/[id]/improvements/route.ts", "lib/workpack-commercial.ts", "lib/photo-vision-analysis.ts"],
                     "testFiles": ["tests/workpack-editor-wave3.test.ts", "tests/workpack-editor-photo-state.test.ts"],
@@ -1744,11 +1850,12 @@
                   },
             {
                     "id": "wave4",
+                    "status": "BLOCKED_PENDING_USER_DB_APPROVAL",
                     "owner": "workpack-editor-multilingual-components",
                     "name": "Multilingual and share-block drafting",
                     "documents": ["foreignWorkerBriefing", "foreignWorkerTransmission", "kakaoMessage"],
                     "objective": "Build multilingual print/transmission/message editors and local versioned share blocks. Do not alter share-session or dispatch authority; all v2 network share actions remain disabled.",
-                    "entryGate": "Wave 3 green; REVISION-001 and server share authority are still blocked.",
+                    "entryGate": "Program startGate satisfied and Wave 3 green; server share actions remain separately blocked until approved authority is implemented.",
                     "ownedFiles": ["components/workpack-editor/ForeignWorkerPrintEditor.tsx", "components/workpack-editor/ForeignWorkerTransmissionEditor.tsx", "components/workpack-editor/FieldShareMessageEditor.tsx", "components/workpack-editor/LanguageVariantEditor.tsx", "components/workpack-editor/ShareBlockEditor.tsx"],
                     "readOnlyDependencies": ["lib/workpack-editor-document-specs.ts", "lib/workpack-editor-adapter.ts", "app/api/workpacks/[id]/read-confirmations/route.ts", "app/api/workpacks/[id]/share-sessions/route.ts", "app/api/workflow/dispatch/route.ts", "lib/workpack-commercial.ts", "lib/workpack-commercial-store.ts", "lib/types.ts"],
                     "testFiles": ["tests/workpack-editor-wave4.test.ts", "tests/workpack-editor-confirmation-boundaries.test.ts"],
@@ -1770,24 +1877,25 @@
                   },
             {
                     "id": "wave5",
+                    "status": "BLOCKED_PENDING_USER_DB_APPROVAL",
                     "owner": "workpack-editor-integration",
                     "name": "Workbench, review, export integration and release hold",
                     "documents": [],
-                    "objective": "Mount all 12 editors behind the migration-free flag, add one evidence drawer and non-authoritative review endpoint, integrate deterministic manifests with all current export routes, and run measurable browser/regression gates. Server save/share/photo review remain blocked.",
-                    "entryGate": "Waves 0-4 green; currentIntegrationTarget successor selected; editor/export/report/ontology overlap ledger rechecked and resolved symbol by symbol.",
-                    "ownedFiles": ["components/WorkpackEditor.tsx", "components/WorkpackEditor.module.css", "components/CurrentWorkpackModules.tsx", "components/workpack-editor/DocumentEditorRegistry.tsx", "components/workpack-editor/DocumentEditorShell.tsx", "components/workpack-editor/DocumentActionBar.tsx", "components/workpack-editor/EvidenceSummaryTrigger.tsx", "components/workpack-editor/EvidenceDetailsDrawer.tsx", "components/workpack-editor/SourceConfirmationWarning.tsx", "lib/workpack-editor-evidence-summary.ts", "lib/workpack-editor-export-manifest.ts", "lib/workpack-editor-review-client.ts", "app/api/workpacks/revalidate/route.ts", "lib/official-safety-resources.ts", "lib/kosha.ts", "app/api/export/xlsx/route.ts", "app/api/export/pdf/route.ts", "app/api/export/hwp/route.ts", "app/api/export/hwpx-template/route.ts", "lib/xlsx-builder.ts", "lib/hwp-table-builder.ts", "lib/hwpx-template.ts"],
-                    "readOnlyDependencies": ["all Wave 0-4 owned files", "lib/generation-evidence.ts", "lib/workpack-readiness.ts", "lib/workpack-store.ts", "app/api/workpacks/route.ts", "app/api/workpacks/[id]/share-sessions/route.ts", "app/api/workflow/dispatch/route.ts", "app/api/workpacks/[id]/improvements/route.ts"],
+                    "objective": "After approval gates, mount all 12 editors behind the fallback flag, add one evidence drawer and non-authoritative review endpoint, integrate deterministic manifests at the three server export routes plus client buildHwpxWithRhwp call site, and run measurable browser/regression gates. Server save/share/photo review remain blocked until their approved authority implementation is independently green.",
+                    "entryGate": "Program startGate satisfied, Waves 0-4 green, currentIntegrationTarget successor selected, and conflict snapshot freshly rechecked/resolved symbol by symbol; otherwise blocked.",
+                    "ownedFiles": ["components/WorkpackEditor.tsx", "components/WorkpackEditor.module.css", "components/CurrentWorkpackModules.tsx", "components/workpack-editor/DocumentEditorRegistry.tsx", "components/workpack-editor/DocumentEditorShell.tsx", "components/workpack-editor/DocumentActionBar.tsx", "components/workpack-editor/EvidenceSummaryTrigger.tsx", "components/workpack-editor/EvidenceDetailsDrawer.tsx", "components/workpack-editor/SourceConfirmationWarning.tsx", "lib/workpack-editor-evidence-summary.ts", "lib/workpack-editor-export-manifest.ts", "lib/workpack-editor-review-client.ts", "app/api/workpacks/revalidate/route.ts", "lib/official-safety-resources.ts", "lib/kosha.ts", "app/api/export/xlsx/route.ts", "app/api/export/pdf/route.ts", "app/api/export/hwp/route.ts", "lib/xlsx-builder.ts", "lib/hwp-table-builder.ts"],
+                    "readOnlyDependencies": ["all Wave 0-4 owned files", "lib/generation-evidence.ts", "lib/workpack-readiness.ts", "lib/workpack-store.ts", "app/api/workpacks/route.ts", "app/api/workpacks/[id]/share-sessions/route.ts", "app/api/workflow/dispatch/route.ts", "app/api/workpacks/[id]/improvements/route.ts", "app/api/export/hwpx-template/route.ts", "lib/hwpx-template.ts"],
                     "testFiles": ["tests/workpack-editor-review-route.test.ts", "tests/workpack-editor-evidence-drawer.test.ts", "tests/workpack-editor-browser-matrix.test.ts", "tests/workpack-editor-export-roundtrip.test.ts", "tests/documents-editor-layout.test.ts", "tests/editor-export-integrity.test.ts", "tests/official-safety-resources-validation.test.ts", "tests/xlsx-export-route.test.ts"],
                     "commands": {
-                              "contract": "node evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs --self-test --range d3ad86530bc786d8024206cc5b7c7db60c055278...HEAD",
+                              "contract": "node evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs implementation --spec <immutable-spec-candidate-SHA> --evidence <immutable-implementation-evidence-commit-SHA> --manifest <implementation-manifest-path> --base <non-empty-implementation-base-SHA> --head <non-empty-implementation-head-SHA>",
                               "targeted": "npx.cmd vitest run tests/workpack-editor-review-route.test.ts tests/workpack-editor-evidence-drawer.test.ts tests/workpack-editor-browser-matrix.test.ts tests/workpack-editor-export-roundtrip.test.ts tests/documents-editor-layout.test.ts tests/editor-export-integrity.test.ts tests/official-safety-resources-validation.test.ts tests/xlsx-export-route.test.ts --maxWorkers=1 --no-file-parallelism",
                               "full": "npm.cmd test -- --maxWorkers=1 --no-file-parallelism",
                               "typecheck": "npm.cmd run typecheck",
                               "build": "npm.cmd run build",
                               "diff": "git diff --check"
                             },
-                    "tddGates": ["RED: d3ad865 fixtures show four-way provenance repetition, 5,221-character mixed textarea, narrow preview, nested mobile scroll, and missing 12-document round trips.", "GREEN: all canonical fields/raw provenance/appendices round-trip through reload and four exports.", "GREEN: review endpoint supports no-edit and edited review_pending reseal but cannot stamp human confirmation or authoritative revision.", "GREEN: every measurable task-distance/browser/theme/action gate and flag-off fallback passes.", "GREEN: v2 save/share/photo confirmation controls remain unavailable until their blocked authority gates pass."],
-                    "browserAssertions": ["BROWSER-001 through BROWSER-023 and TASK-001 through TASK-006 pass for every declared browser/viewport/theme row"],
+                    "tddGates": ["RED: d3ad865 fixtures show four-way provenance repetition, 5,221-character mixed textarea, narrow preview, nested mobile scroll, and missing 12-document round trips.", "GREEN: all canonical fields/raw provenance/appendices round-trip through reload, three server export routes, and client buildHwpxWithRhwp.", "GREEN: review endpoint supports no-edit and edited review_pending reseal but cannot stamp human confirmation or authoritative revision.", "GREEN: every measurable task-distance/browser/theme/action gate, including the immutable 200% matrix, and flag-off fallback passes with executed implementation manifests.", "GREEN: v2 save/share/photo confirmation controls remain unavailable until their blocked authority gates pass."],
+                    "browserAssertions": ["Implementation evidence only: BROWSER-001 through BROWSER-025, ZOOM-001, and TASK-001 through TASK-006 execute for every declared browser/viewport/theme/document row. Spec mode must not report these as behavior PASS."],
                     "exitGate": "All owned tests and regressions pass, ownership/range remain clean, flag stays off by default, and server authority features remain disabled pending separate approval and independent implementation review.",
                     "rollback": "Keep the flag off; current editor/export routes remain active and optional editorV2 data is preserved. Revert only Wave 5 owned hunks after hand-merge review; no DB rollback.",
                     "featureFlagRef": "FLAG-001",
@@ -1915,16 +2023,16 @@
                   }
           ],
       "acceptance": [
-            ["PARITY-001", "The current evaluation validator proves canonical JSON SHA-256 plus deep-equal Markdown machine projection and rejects a deliberate in-memory mismatch."],
-            ["RANGE-001", "sourceBase=d3ad865, currentIntegrationTarget=77d8641, remediationParent=91a15c6, and review range is the explicit true-merge-base triple-dot d3ad865...HEAD only."],
-            ["SCOPE-001", "Only spec.md, spec.json, and the evaluation-only validate-contract.mjs change; no product, test, package, CSS, API, DB, migration, lock, or existing evidence file changes."],
+            ["PARITY-001", "spec.json is canonical and the candidate Markdown SAFECLAW-NORMATIVE block byte-equals deterministic human-readable tables rendered from all declared normative domains; digest-only mirroring is insufficient."],
+            ["RANGE-001", "sourceBase=d3ad865, currentIntegrationTarget=77d8641, remediationParent=0a21422; candidate and evidence-only commit scopes are validated separately, and no accumulated future range is required to remain three files."],
+            ["SCOPE-001", "The candidate commit changes spec.md/spec.json/validate-contract.mjs only; its child evidence commit adds review-evidence.json only. No product, product test, package, CSS, API, DB, schema, migration, lock, or data file changes."],
             ["DOC-001", "Exactly 12 DocumentKeys and titles occur in production order."],
             ["COMPONENT-001", "WorkpackSummaryEditor and WorkPermitEditor are both file basenames and named exports; SummaryEditor and PermitInspectionEditor aliases are forbidden."],
             ["OWNERSHIP-001", "Every planned component, primitive, type module, product path, and test path has exactly one wave write owner; blocked authority paths belong to no executable wave."],
             ["RISK-001", "Expanded RiskAssessmentEditorRow is id plus the exact 21 RiskAssessmentRow names; hazard4M, existingControls, dueDate, and reason aliases are absent."],
             ["FIELD-001", "Every expanded field resolves a codec and derives exact editorV2, legacy fallback, export manifest, and reload/XLSX/PDF/HWP/HWPX paths."],
             ["FIELD-002", "Zero-or-more ID arrays use stableIdArrayAllowEmpty, non-empty ID arrays use stableIdArrayNonEmpty, and nullable identifiers use nullableStableId."],
-            ["CODEC-001", "Every one of 12 documents executes missing/empty/null/optional/unknown/legacy/export fixtures over reload and all four actual export routes; extension bags preserve allowed unknowns and collisions fail closed."],
+            ["CODEC-001", "Every one of 12 documents declares missing/empty/null/optional/unknown/legacy/export fixtures; Wave 0 owns pure in-memory cases only and Wave 5 owns reload plus three server exports and client HWPX integration."],
             ["BODY-001", "Legacy submission body and provenance/audit appendix split losslessly before field parsing."],
             ["BODY-002", "No editable value contains DB harness, ontology QA, quality contract, generation seal, KOSHA/law source metadata, management notes, operation graph, or raw appendix."],
             ["BODY-003", "The measured 5,221-character mixed risk string is a failing fixture and never becomes a v2 master textarea."],
@@ -1933,7 +2041,9 @@
             ["FLOW-003", "Current POST /api/workpacks is insert-only and cannot stamp authoritative v2 human_confirmed/revision; that transition is blocked behind REVISION-001 transactional approval."],
             ["FLOW-004", "V2 share remains blocked until both REVISION-001 and blocked-server-share-authority pass; current share-session/dispatch routes provide no freshness authority."],
             ["FLOW-005", "Unedited generated content may validate to review_pending without document mutation, then requires explicit authenticated confirmation; edited content must revalidate first."],
-            ["REVISION-001", "Future authority atomically resolves logicalWorkpackId/latest parent, compares expectedRevision, allocates next revision, handles idempotency replay/conflict, stamps actor/time, reseals, and rejects concurrent losers; no Wave 0 server claim."],
+            ["REVISION-001", "Future approved authority atomically resolves the logical root/latest parent, compares expectedRevision, allocates revisions, stamps actor/time, reseals, and rejects concurrent losers; current insert-only POST is not authority."],
+            ["IDEMPOTENCY-001", "User approval selects exactly one transactionally unique root strategy: client stable logicalWorkpackId or organization+rootOperationKey with server ID allocation. Exact retries replay the original response; conflicting digest/identity returns the specified 409 without mutation."],
+            ["APPROVAL-001", "The entire implementation program including Wave 0 is BLOCKED_PENDING_USER_DB_APPROVAL until both independent spec PASS and explicit user approval of the migration/transactional RPC authority exist."],
             ["HUMAN-001", "Generated/model output cannot approve, identify an approver, confirm legal/safety review, sign, record attendance, or confirm understanding."],
             ["CONFIRM-001", "WorkerAttendanceConfirmation and ShareReadConfirmation are non-substitutable."],
             ["EVIDENCE-001", "EditorEvidenceRef has no reviewed boolean and losslessly preserves the complete discriminated raw SafetyReferenceItem/ontology/photo/field record plus extensions; normalized display is separate."],
@@ -1942,40 +2052,44 @@
             ["SHARE-001", "Every expanded share block includes owning documentKey, stable block ID, sourceRevision, and evidenceDigest and becomes stale on source/evidence/review/audience/language change."],
             ["SHARE-002", "No implementation wave owns share-session/dispatch routes; a future separately approved owner must bind latest authoritative revision and reject stale/missing bindings before provider calls."],
             ["PHOTO-001", "Common photo state and DOC-09 photoState are identical with a total legacy mapping; current GET/POST never yields hydratable assetId/storagePath and Wave 3 owns no API/DB change."],
-            ["PHOTO-002", "Candidate photos cannot become evidence/share; confirmed/rejected requires an authenticated immutable event with actor/time, pair digests, accepted control, audit history, and revision/reseal impact behind approval."],
-            ["EXPORT-001", "All expanded fields and separate appendices round-trip semantically through reload, XLSX, PDF, HWP, and HWPX without silent defaults."],
+            ["PHOTO-002", "Candidate photos cannot become evidence/share; confirmed/rejected requires approved atomic immutable event+resulting revision persistence with authenticated actor/action/time, typed photo digests, canonical event digest, final seal, and audit history."],
+            ["EXPORT-001", "All expanded fields and separate appendices must round-trip semantically through reload, XLSX POST, PDF HTML POST, binary HWP POST, and client buildHwpxWithRhwp without silent defaults."],
+            ["EXPORT-002", "At target 77d8641 HWPX is client-built in WorkpackEditor; GET /api/export/hwpx-template is not the editor call site. Only Wave 5 owns actual export round-trip exits."],
             ["UI-001", "Default surface priority is selector, title/status, edit/download, preview/editor, share readiness."],
             ["UI-002", "Default surface has zero yellow evidence badges, persistent right rails, duplicate left evidence summaries, and below-editor result/citation/operation graph blocks."],
             ["UI-003", "Default DOM has one evidence trigger and zero occurrences of 중처법 §4-3호 증빙; applicable detail appears at most once in the drawer."],
             ["UI-004", "The trigger is exactly 근거 N건 · 확인 필요 M건 and both numbers come only from selectDocumentEvidenceSummary."],
             ["UI-005", "At 1150x900 selector <=220px, editor >=700px, readable preview >=560px, evidence rail=0px; at 1440x1000 editor >=920px and preview >=720px."],
             ["UI-006", "At 390x844 and 391x844 editor heading y<=160px after Edit, no visible editor textarea internally scrolls, and audited sample page height <=3600px."],
-            ["UI-007", "BROWSER-001 through BROWSER-023 measure Day/Night geometry, targets/gaps, body/provenance separation, drawer ownership, photo eligibility, nested scroll, and blocked authority."],
+            ["UI-007", "BROWSER-001 through BROWSER-025 declare Day/Night geometry, targets/gaps, body/provenance separation, drawer ownership, photo eligibility, nested scroll, blocked authority, and 200% reflow requirements; spec review does not claim execution."],
             ["UI-008", "Body >=15/23px, table >=14/20px, label >=13/18px, details-only caption >=12/18px, no default 11px text, letter-spacing=0."],
             ["UI-009", "Exactly one lifecycle CTA is dominant; Download visible label and aria-label are both 다운로드; share readiness is status only."],
             ["UI-010", "The 준제출형 warning is role=alert/data-severity=warning with >=4.5:1 text contrast, >=3:1 leading-border contrast, and precedes the non-alert evidence trigger in DOM/accessibility order."],
             ["UI-011", "Drawer overlays without shrinking preview, traps focus, closes on Escape, restores trigger focus, and is a single full-width mobile scroller."],
             ["TASK-001", "TASK-001 through TASK-006 impose click, cumulative scroll, and y-position budgets for edit, first field, review/save, download, and share readiness at 1440x1000 and 391x844."],
+            ["ZOOM-001", "The 200% matrix stores immutable 100% computed baselines, applies native text zoom exactly once at deviceScaleFactor=1, requires 1.9..2.1 font/line ratios and reflow, and rejects overlap/clipping/overflow/nested scroll across 12 documents, Day/Night, 1440/390, and all three browsers."],
             ["LINK-001", "Only current runtime verified HTTPS safety URLs render, only in the drawer; unverified guidanceX.do has no href."],
             ["STATE-001", "Empty/loading/error/offline/conflict/read-only states preserve stable geometry and never silently claim authority."],
-            ["CONFLICT-001", "Implementation starts from integration target 77d8641 or successor, rechecks all six competing heads/worktrees, excludes stale dirty inputs, resolves symbol-level overlaps, assigns one owner, and forbids wholesale copy."],
+            ["CONFLICT-001", "The timestamped/ref-bound snapshot records 77d8641, rejected/remediating ontology a5ae9f7, reports 0be5859+b7adabf, pending local web 804833c, editor/share heads, dirty/image/evidence-only states, and exact overlap hunks; it must be freshly rechecked before implementation."],
             ["ROLLBACK-001", "Feature flag off restores current editor/export rendering while preserving unknown editorV2 data; no data rollback."],
             ["WAVE-001", "Wave 1 document scope is exactly riskAssessmentDraft, tbmBriefing, tbmLogDraft."],
-            ["WAVE-002", "Each wave declares exact owned/read-only files, tests, commands, TDD gates, rollback, and no migration."],
-            ["PASS-001", "Implementation remains HOLD until an independent reviewer marks the exact spec commit PASS."]
+            ["WAVE-002", "Each wave declares exact owned/read-only files, tests, commands, TDD gates, rollback, and status BLOCKED_PENDING_USER_DB_APPROVAL."],
+            ["VALIDATOR-001", "Spec-review mode reads immutable candidate and target blobs with git show plus a separate evidence-only manifest; implementation mode requires immutable spec and explicit non-empty base/head plus executed evidence, and deliberate parity/source/target/spec/empty failures exit nonzero."],
+            ["PASS-001", "Status remains HOLD_PENDING_FRESH_REVIEW and implementation remains BLOCKED_PENDING_USER_DB_APPROVAL after this evidence pair until fresh independent PASS and explicit user DB approval."]
           ]
     },
   "independentGate": {
       "required": true,
-      "rule": "Do not start Wave 0 or any later implementation until another independent reviewer runs the current evaluation validator against this exact pushed commit and marks it PASS. Server revision/share/photo authority still requires separate approval even after spec PASS.",
-      "holdState": "HOLD_PENDING_INDEPENDENT_PASS"
+      "rule": "Do not start Wave 0 or any later implementation until another independent reviewer PASSes the immutable candidate/evidence commit pair and the user separately gives explicit approval for DB migration/transactional RPC authority. The gate is AND, not either/or.",
+      "holdState": "HOLD_PENDING_FRESH_REVIEW",
+      "implementationState": "BLOCKED_PENDING_USER_DB_APPROVAL"
     },
-  "machineMirrorContract": {
-      "algorithm": "SHA-256 over recursively key-sorted JSON with arrays preserved, UTF-8, no insignificant whitespace",
-      "markdownStart": "<!-- SAFECLAW-CONTRACT-MIRROR:BEGIN -->",
-      "markdownEnd": "<!-- SAFECLAW-CONTRACT-MIRROR:END -->",
-      "fullSemanticBinding": "canonicalJsonSha256 in the Markdown mirror must equal the complete normative spec.json digest.",
-      "projectedDeepEqual": ["schemaVersion", "sourceBase/currentIntegrationTarget/remediationParent/reviewRange", "contractIds", "document ids/keys/titles/components/expanded-field digests", "codec ids", "raw provenance union kinds/required fields", "wave ids/documents/owners/owned-file and test-file digests", "component file map", "codec fixture rows/targets", "export route ids/methods/paths", "viewport ids/sizes", "browser assertion ids", "task ids", "status"],
-      "deliberateMismatch": "Validator mutates DOC-01 key in memory and must reject the unchanged mirror before reporting RED proof."
+  "humanParityContract": {
+      "markdownStart": "<!-- SAFECLAW-NORMATIVE:BEGIN -->",
+      "markdownEnd": "<!-- SAFECLAW-NORMATIVE:END -->",
+      "renderer": "validate-contract.mjs renderNormativeMarkdown",
+      "normativeDomains": ["meta/reviewScope/status/approval", "contractIds and acceptance", "documents with expanded fields/codecs/interactions/gates/projection", "common codecs/type registry/raw provenance", "workflow transitions/effects/disclaimer", "persistence revision/idempotency/photo/share authority", "components/file ownership", "export seams/round-trip ownership", "implementation program/waves including readOnlyDependencies", "viewport/browser/task/200% declarations", "conflict snapshot"],
+      "comparison": "Byte-equal generated human Markdown tables/sections from immutable candidate spec.json; no embedded full-JSON mirror or standalone digest is accepted.",
+      "deliberateMismatch": "normative-parity mutates a rendered normative value in memory while retaining candidate Markdown and must exit nonzero."
     }
 }
