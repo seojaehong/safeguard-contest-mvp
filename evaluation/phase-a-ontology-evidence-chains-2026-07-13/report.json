@@ -1,13 +1,13 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-13T23:48:08.1796214+09:00",
+  "generatedAt": "2026-07-14T00:35:19.9906632+09:00",
   "branch": "fix/phase-a-ontology-review",
   "base": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
   "contractVersion": "phase-a-evidence-chains/1.3.0",
-  "status": "integration_hold_candidate_awaiting_fresh_independent_review",
+  "status": "authority_leak_remediation_candidate_awaiting_fresh_independent_review",
   "provenance": {
-    "focusedLogCompletedAt": "2026-07-13T14:45:01.3442548Z",
-    "typecheckLogCompletedAt": "2026-07-13T14:45:09.0852966Z",
+    "focusedLogCompletedAt": "2026-07-13T15:35:06.2203267Z",
+    "typecheckLogCompletedAt": "2026-07-13T15:35:06.2233372Z",
     "reportGeneratedAfterFreshVerification": true
   },
   "counts": {
@@ -30,7 +30,7 @@
     "obligationClassifications": 4
   },
   "generationHarness": {
-    "verifiedScope": "actual answer, document, JSON/SSE, briefing, MCP, Claw, quality/readiness/share, storage, and post-generation QA seams plus ask-page and command-center source contracts",
+    "verifiedScope": "actual answer, document, JSON/SSE, briefing, MCP, Claw, quality/readiness/share, storage, post-generation QA, standalone QA authority, and ask/shared-citation UI source contracts",
     "fixedNaturalizeOnlyPolicyFirst": true,
     "singleJsonSerializedUntrustedInputBlock": true,
     "delimiterCharactersUnicodeEscapedInsideJson": true,
@@ -48,11 +48,16 @@
     "publicMissingGroundingNeverUsesLegacyPrompt": true,
     "publicTemplateProviderFreeAndHumanPending": true,
     "legacyQaAlwaysDiagnosticNonAuthoritative": true,
+    "standaloneLegacyQaAuthority": "diagnostic_only_review_required",
+    "standaloneLegacyQaTopLevelPassBlocked": true,
     "currentReviewedFlowAuthoritativePass": false,
     "authoritativePassRequiresResolvedQaMaterializationAndHumanConfirmation": true,
     "draftOrUnresolvedSifExcludedFromResolvedAllowList": true,
     "forcedResolvedSifStateDowngradedBeforePostCheck": true,
     "phaseAReviewGatesQualityReadinessUiAndShare": true,
+    "phaseAReviewThreadsAskAndSharedCitationSurfaces": true,
+    "pendingOrMissingCitationLabels": "candidate_only",
+    "directCitationLabelsRequireConfirmedPhaseAAuthority": true,
     "automaticBriefingDispatchFailsClosedWhilePending": true,
     "pendingLawAndKoshaEvidenceDiagnosticOnly": true,
     "ontologyTimeoutPolicyIndependentFromProviderTimeouts": true,
@@ -258,6 +263,8 @@
     "reviewRequiredNeverAuthoritativeQaPass": true,
     "legacyQaAuthoritative": false,
     "legacyCoverageQaDiagnosticOnly": true,
+    "standaloneQaTopLevelVerdictCanPass": false,
+    "standaloneQaHumanConfirmationState": "pending",
     "currentHumanConfirmationState": "pending",
     "authoritativePassRequiresNonzeroVerifiedRecords": true,
     "authoritativePassRequiresCompletedHumanConfirmation": true,
@@ -306,7 +313,9 @@
     "phaseAPromptInjectionLabelsTreatedAsData": true,
     "missingEvidenceCanMasqueradeAsPublished": false,
     "reviewRequiredMaterializationRecords": 0,
-    "humanConfirmationPreserved": true
+    "humanConfirmationPreserved": true,
+    "pendingCitationDataPreservedAsNonAuthoritativeCandidates": true,
+    "missingPhaseAReviewUsesCandidateLabels": true
   },
   "generationGrounding": {
     "runAskInput": [
@@ -410,7 +419,9 @@
     { "finding": "INTEGRATION-HOLD-2", "status": "candidate_fix_awaiting_independent_review", "summary": "briefing email, dispatch payload, and workpack persistence preserve zero records and pending human confirmation; automatic dispatch is blocked and raw law/KOSHA data is diagnostic only" },
     { "finding": "INTEGRATION-HOLD-3", "status": "candidate_fix_awaiting_independent_review", "summary": "ontology-only deadline policy bounds and aborts grounding preflight and Supabase graph fetch without inheriting Vertex or deliverables timeout settings" },
     { "finding": "INTEGRATION-HOLD-4", "status": "candidate_fix_awaiting_independent_review", "summary": "one published graph snapshot is reused by generation and post-generation QA; a failed preflight uses a null sentinel and is not retried by QA" },
-    { "finding": "INTEGRATION-HOLD-5", "status": "candidate_fix_awaiting_independent_review", "summary": "report prompt order and legacy QA authority now match the fixed-policy-first production code" }
+    { "finding": "INTEGRATION-HOLD-5", "status": "candidate_fix_awaiting_independent_review", "summary": "report prompt order and legacy QA authority now match the fixed-policy-first production code" },
+    { "finding": "AUTHORITY-P1-1", "status": "candidate_fix_awaiting_independent_review", "summary": "standalone MCP and Claw QA preserve raw coverage under diagnostic_only while top-level review remains review_required, unverified, non-authoritative, and human-pending" },
+    { "finding": "AUTHORITY-P1-2", "status": "candidate_fix_awaiting_independent_review", "summary": "ask, field workspace, and current-workpack citation surfaces consume Phase A authority; pending or missing state uses candidate labels and only fully confirmed state uses connected/direct labels" }
   ],
   "lawVerification": {
     "verifiedOn": "2026-07-13",
@@ -486,11 +497,19 @@
         { "failed": 3, "passed": 0, "total": 3, "scope": "mcp_handler_never_settling_resolver" },
         { "failed": 1, "passed": 0, "total": 1, "scope": "pending_kosha_dispatch_classification" },
         { "failed": 7, "passed": 23, "total": 30, "scope": "failed_preflight_null_snapshot_sentinel" }
+      ],
+      "authorityLeakProductFailuresAcrossRuns": 11,
+      "authorityLeakRedRuns": [
+        { "failed": 2, "passed": 11, "total": 13, "scope": "standalone_mcp_and_claw_qa_authority" },
+        { "failed": 4, "passed": 0, "total": 4, "scope": "pending_ready_missing_citation_ui_and_call_sites" },
+        { "failed": 1, "passed": 17, "total": 18, "scope": "claw_tool_schema_diagnostic_authority_copy" },
+        { "failed": 3, "passed": 5, "total": 8, "scope": "answer_panel_detail_notes_and_candidate_location_copy" },
+        { "failed": 1, "passed": 3, "total": 4, "scope": "answer_panel_top_level_status_summary" }
       ]
     },
     "focused": {
-      "filesPassed": 25,
-      "testsPassed": 297,
+      "filesPassed": 28,
+      "testsPassed": 325,
       "status": "pass",
       "serial": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"
@@ -499,6 +518,12 @@
       "status": "pass",
       "strict": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log"
+    },
+    "additionalFrontendEvidenceProbe": {
+      "status": "fail_stale_external_browser_evidence_provenance",
+      "testsPassed": 36,
+      "testsFailed": 1,
+      "failure": "tracked frontend browser audit sourceIdentity predates the owned TSX authority-label changes; that separate audit bundle was not regenerated outside this remediation's artifact scope"
     },
     "diffCheck": { "status": "pass" },
     "fullSuite": {

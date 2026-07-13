@@ -32,7 +32,7 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
       </section>
       <section className="safeclaw-module-grid two">
         <AnswerPanel data={data} />
-        <CitationList citations={data.citations} question={q} />
+        <CitationList citations={data.citations} question={q} phaseAReview={data.phaseAReview} />
       </section>
     </SafeClawModuleShell>
   );

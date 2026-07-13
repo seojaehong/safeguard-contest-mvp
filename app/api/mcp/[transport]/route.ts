@@ -41,6 +41,7 @@ import {
 import { registerScopedTool } from "@/lib/mcp-scoped-tool";
 import {
   buildAccidentCasesResult,
+  buildDiagnosticQaReviewResult,
   buildEvidenceMappingResult,
   buildHarnessAgentResult,
   buildReviewedDocpackResult,
@@ -488,7 +489,7 @@ function registerTools(server: McpServer): void {
     {
       title: "안전 문서 QA 검수",
       description:
-        "생성된 안전 문서(위험성평가·TBM 등) 본문을 작업유형의 법정 필수 조치 목록과 대조해 누락을 검출할 때 호출. 문서 전파·증빙 저장 전 자기 검수용.",
+        "생성된 안전 문서(위험성평가·TBM 등) 본문을 작업유형의 필수 조치 목록과 대조하는 진단 전용 도구. 단독 결과는 승인이나 verified 근거가 아니며, 권위 있는 검수에는 generate_reviewed_safety_docpack과 사람 확인이 필요하다.",
       inputSchema: {
         task: z.string().describe("작업유형 라벨 (예: 용접, 밀폐공간 작업)"),
         document_text: z
@@ -497,7 +498,9 @@ function registerTools(server: McpServer): void {
       },
     },
     async ({ task, document_text }) => {
-      return toToolResult(await reviewDocpack(task, document_text));
+      return toToolResult(
+        buildDiagnosticQaReviewResult(await reviewDocpack(task, document_text)),
+      );
     }
   );
 }

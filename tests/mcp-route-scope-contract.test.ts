@@ -212,6 +212,10 @@ describe("MCP route scope contract", () => {
 
     expect(route).toContain("resolveSafetyKnowledgeSnapshot");
     expect(route).toContain("publishedGraphSnapshot");
+    expect(route).toContain("buildDiagnosticQaReviewResult");
+    expect(route).toMatch(
+      /toToolResult\(\s*buildDiagnosticQaReviewResult\(\s*await reviewDocpack\(task, document_text\)\s*\)\s*,?\s*\)/,
+    );
     const analysis = analyzeRouteRegistrations(route);
 
     expect(analysis.canonicalImportCount).toBe(1);

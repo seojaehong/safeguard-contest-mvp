@@ -10,6 +10,12 @@ export type PhaseAReviewUiState = {
   status: "확인 완료" | "검토 필요";
   detail: string;
   tone: "ready" | "warn";
+  connectionLabel: "근거 연결됨" | "근거 검토 필요";
+  directEvidenceLabel: "직접 근거" | "연결 후보";
+  supportingEvidenceLabel: "보조 근거" | "보조 후보";
+  lawCitationLabel: "법제처 인용" | "법제처 확인 후보";
+  evidenceHeading: "직접 근거와 보조 근거" | "근거 연결 후보";
+  reflectionLabel: "반영 라벨" | "검토 위치 후보";
 };
 
 export function assessPhaseAReviewAuthority(
@@ -62,10 +68,17 @@ export function buildPhaseAReviewUiState(
   review: PhaseAReview | undefined,
 ): PhaseAReviewUiState {
   const authority = assessPhaseAReviewAuthority(review);
+  const authoritative = authority.authoritative;
   return {
-    authoritative: authority.authoritative,
-    status: authority.authoritative ? "확인 완료" : "검토 필요",
+    authoritative,
+    status: authoritative ? "확인 완료" : "검토 필요",
     detail: authority.reason,
-    tone: authority.authoritative ? "ready" : "warn",
+    tone: authoritative ? "ready" : "warn",
+    connectionLabel: authoritative ? "근거 연결됨" : "근거 검토 필요",
+    directEvidenceLabel: authoritative ? "직접 근거" : "연결 후보",
+    supportingEvidenceLabel: authoritative ? "보조 근거" : "보조 후보",
+    lawCitationLabel: authoritative ? "법제처 인용" : "법제처 확인 후보",
+    evidenceHeading: authoritative ? "직접 근거와 보조 근거" : "근거 연결 후보",
+    reflectionLabel: authoritative ? "반영 라벨" : "검토 위치 후보",
   };
 }

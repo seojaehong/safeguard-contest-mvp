@@ -4,8 +4,8 @@
 - Branch: `fix/phase-a-ontology-review`
 - Base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
 - Contract: `phase-a-evidence-chains/1.3.0`
-- Status: Integration HOLD candidate, awaiting fresh independent review
-- Generated: `2026-07-13T23:48:08.1796214+09:00`, after focused and typecheck logs completed
+- Status: Authority-leak remediation candidate, awaiting fresh independent review
+- Generated: `2026-07-14T00:35:19.9906632+09:00`, after focused and typecheck logs completed
 - Runtime/DB publication: not performed
 - Schema, migration, Supabase data, generated core seed: unchanged
 
@@ -186,6 +186,15 @@ This is a review candidate, not a release-completion claim. `launchReady` remain
 
 This remains an Integration HOLD candidate. No launch or integration completion is claimed before a new independent review.
 
+## Fresh authority-leak remediation
+
+| Finding | Candidate change awaiting independent review |
+|---|---|
+| P1-1 standalone legacy QA exposed an authoritative-looking pass | Both the MCP route and direct Claw tool now wrap the complete legacy coverage result under `qa.authority=diagnostic_only`. The external result has no top-level legacy `verdict`; its `reviewStatus` is always `review_required`, `검토 필요`, `verified=false`, `authoritative=false`, and human-confirmation `pending`. Tool descriptions also direct authority-seeking consumers to `generate_reviewed_safety_docpack` plus human confirmation. |
+| P1-2 ask and reused citation UI promoted pending evidence | `AnswerPanel`, `CitationList`, `FieldOperationsWorkspace`, and `CurrentWorkpackModules` now consume the same Phase A authority projection. Pending, review-required, or missing state preserves every citation/link while labeling it `근거 검토 필요`, `연결 후보`, `보조 후보`, or `법제처 확인 후보`. Answer summary/status notes, DB harness counts, citation locations, and TBM/education locations also remain candidate-only. `근거 연결됨`, `직접 근거`, and `법제처 인용` appear only when resolved grounding, verified output, nonzero materialization, and completed human confirmation all hold. |
+
+This change does not make standalone coverage QA authoritative and does not infer per-citation materialization from raw law/KOSHA retrieval. It changes authority copy/state wiring only. `launchReady` remains false, and another fresh independent review is required before integration.
+
 ## Official law verification
 
 The current `산업안전보건기준에 관한 규칙` was checked as effective `2026-03-02` under 고용노동부령 제450호.
@@ -218,7 +227,9 @@ The Article 172 direct surface identifies `접촉의 방지`: paragraph 1 prohib
 - Closed-harness TDD RED: 16 failures were reproduced across five narrow runs: 10/56 at answer/document/MCP/handler seams, 2/2 at the actual Claw tool seam, 1/3 for grounded raw-citation mapping, 1/8 for a remaining generic legal instruction, and 2/11 for literal delimiter-token duplication inside serialized malicious input.
 - Fresh release-HOLD TDD RED: 8 product failures across five runs: omitted grounding 1/4, JSON/SSE call sites 3/4, QA authority 2/31, KOSHA-ready plus draft SIF resolver 1/1, and forced-resolved SIF post-check 1/2. A separate App Router TSX import-analysis limitation was corrected to the repo's source-contract test style and is not counted as a product RED.
 - Integration-HOLD TDD RED: 35 product assertions failed across 12 narrow contract runs, plus one missing-policy-module RED suite. These covered quality/readiness/UI/share, briefing/dispatch/storage, bounded fallback, exact snapshot reuse, MCP/Claw wiring, pending KOSHA diagnostics, and failed-preflight no-reload behavior.
-- Focused ontology/generation/MCP/commercial/DB harness plus quality/readiness/UI, briefing/storage, deadline, snapshot, production/provider/Claw/public handlers and fallback compatibility, serial: 25 files passed, 297 tests passed.
+- Fresh authority-leak TDD RED: 11 product assertions failed across five narrow runs: standalone MCP/Claw authority 2/13, pending/ready/missing shared citation UI and call-site wiring 4/4, Claw tool-schema authority copy 1/18, AnswerPanel detail/location copy 3/8, and AnswerPanel top-level summary 1/4. A TSX direct-import parser limitation and one test-regex formatting mismatch were test-harness issues and are not counted as product RED.
+- Focused ontology/generation/MCP/commercial/DB harness plus quality/readiness/UI, briefing/storage, deadline, snapshot, production/provider/Claw/public handlers and fallback compatibility, serial: 28 files passed, 325 tests passed.
+- Additional frontend evidence probe: 36 tests passed and 1 provenance assertion failed because the separately tracked browser-audit `sourceIdentity` predates these owned TSX label changes. That external browser audit bundle was not regenerated outside this remediation artifact scope.
 - Strict TypeScript: passed.
 - Previous full suite is informational only and was not rerun for this remediation: 125 files passed, 7 failed, 5 skipped; 1229 tests passed, 7 failed, 22 skipped. Failures were outside owned ontology/MCP/test/report files.
 - Full-suite failed suites: `knowledge-page-layout`, `product-module-shell`, and `reports-download-center` due missing `.next/prerender-manifest.json` or hook timeout during concurrent dev-server tests.
@@ -231,8 +242,8 @@ Logs:
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log`
 - `evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log`
 
-Log provenance: focused log completed `2026-07-13T14:45:01.3442548Z`; typecheck log completed `2026-07-13T14:45:09.0852966Z`; this report was generated afterward.
+Log provenance: focused log completed `2026-07-13T15:35:06.2203267Z`; typecheck log completed `2026-07-13T15:35:06.2233372Z`; this report was generated afterward.
 
 This report, `report.json`, and both verification logs are tracked artifacts committed on this branch.
 
-No DB publication, migration, schema change, Supabase mutation, or generated seed change is included. The command-center UI readiness/evidence surface changed only to expose and enforce Phase A pending state. This remediation does not self-approve; fresh independent re-review remains required.
+No DB publication, migration, schema change, Supabase mutation, or generated seed change is included. The authority UI changes only expose Phase A state and replace authority-looking labels; citation data and links remain available. This remediation does not self-approve; fresh independent re-review remains required.

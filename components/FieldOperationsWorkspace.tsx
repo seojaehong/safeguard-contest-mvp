@@ -28,6 +28,7 @@ import {
   type CurrentDispatchSnapshot,
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
+import { buildPhaseAReviewUiState } from "@/lib/phase-a-review";
 import type { AskResponse } from "@/lib/types";
 import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/workpack-readiness";
@@ -569,6 +570,7 @@ function WorkerEducationPanel({
 }
 
 function EvidenceImpactPanel({ data }: { data: AskResponse }) {
+  const phaseAState = buildPhaseAReviewUiState(data.phaseAReview);
   const koshaReferences = data.externalData.kosha.references.slice(0, 3);
   const accidentCases = data.externalData.accidentCases.cases.slice(0, 2);
   const safetyReferences = data.externalData.safetyReference?.items.slice(0, 3) || [];
@@ -580,8 +582,8 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
     <section className="evidence-impact-grid workbench-evidence-rail" id="references">
       <article className="workspace-panel card">
         <div className="compact-head">
-          <span className="eyebrow">근거</span>
-          <strong>문서 반영 근거</strong>
+          <span className="eyebrow">{phaseAState.connectionLabel}</span>
+          <strong>{phaseAState.evidenceHeading}</strong>
         </div>
         <div className="impact-list">
           {koshaReferences.map((item, index) => (
@@ -606,7 +608,7 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
               className="impact-card"
             >
               <strong>{item.title}</strong>
-              <span>유사 재해사례 · TBM/교육 반영</span>
+              <span>{phaseAState.authoritative ? "유사 재해사례 · TBM/교육 반영" : "유사 재해사례 · TBM/교육 검토 후보"}</span>
               <small>{item.preventionPoint}</small>
             </a>
           ))}
@@ -625,7 +627,7 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
           ) : null}
         </div>
       </article>
-      <CitationList citations={data.citations} question={data.question} />
+      <CitationList citations={data.citations} question={data.question} phaseAReview={data.phaseAReview} />
     </section>
   );
 }

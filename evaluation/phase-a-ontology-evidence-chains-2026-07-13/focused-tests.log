@@ -1,12 +1,12 @@
 
 > safeclaw@0.1.0 test
-> vitest run tests/ontology-evidence-chains.test.ts tests/ontology-knowledge-tool.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/mcp-route-scope-contract.test.ts tests/ontology-production-handler.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-generation-trace.test.ts tests/generation-trace-privacy.test.ts tests/kosha-current-review-run-ask.test.ts tests/ai-deliverables-prompts.test.ts tests/claw-tools-ontology-grounding.test.ts tests/ask-generation-evidence-routes.test.ts tests/public-ask-grounding-call-sites.test.ts tests/ontology-sif-resolution-gate.test.ts tests/quality-contract.test.ts tests/workpack-readiness.test.ts tests/command-center-phase-a-review.test.ts tests/briefing.test.ts tests/workpack-store.test.ts tests/ontology-graph-store.test.ts tests/ontology-deadline-policy.test.ts tests/ontology-grounding-deadline.test.ts tests/ontology-snapshot-reuse.test.ts tests/workpack-ontology-qa.test.ts --maxWorkers=1 --no-file-parallelism
+> vitest run --run tests/ontology-evidence-chains.test.ts tests/ontology-knowledge-tool.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/mcp-route-scope-contract.test.ts tests/ontology-production-handler.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-generation-trace.test.ts tests/generation-trace-privacy.test.ts tests/kosha-current-review-run-ask.test.ts tests/ai-deliverables-prompts.test.ts tests/claw-tools-ontology-grounding.test.ts tests/ask-generation-evidence-routes.test.ts tests/public-ask-grounding-call-sites.test.ts tests/ontology-sif-resolution-gate.test.ts tests/quality-contract.test.ts tests/workpack-readiness.test.ts tests/command-center-phase-a-review.test.ts tests/briefing.test.ts tests/workpack-store.test.ts tests/ontology-graph-store.test.ts tests/ontology-deadline-policy.test.ts tests/ontology-grounding-deadline.test.ts tests/ontology-snapshot-reuse.test.ts tests/workpack-ontology-qa.test.ts tests/agent-loop.test.ts tests/phase-a-citation-authority.test.ts tests/answer-panel-display.test.ts --maxWorkers=1 --no-file-parallelism
 
 
  RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
 
 
- Test Files  25 passed (25)
-      Tests  297 passed (297)
-   Start at  23:43:52
-   Duration  68.92s (transform 2.74s, setup 0ms, import 11.19s, tests 33.35s, environment 5ms)
+ Test Files  28 passed (28)
+      Tests  325 passed (325)
+   Start at  00:33:29
+   Duration  48.48s (transform 2.67s, setup 0ms, import 10.53s, tests 11.81s, environment 7ms)
