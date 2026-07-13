@@ -1,0 +1,16 @@
+{
+  "sourceSha": "45df617d6eced74bc5e9673104aa306338612ce6",
+  "nftPath": ".next/server/app/api/export/pdf/route.js.nft.json",
+  "fileCount": 57,
+  "requiredAssets": {
+    "regular": 1,
+    "bold": 1,
+    "license": 1
+  },
+  "assetPaths": [
+    "../../../../../../public/fonts/NotoSansKR-Bold.ttf",
+    "../../../../../../public/fonts/NotoSansKR-OFL.txt",
+    "../../../../../../public/fonts/NotoSansKR-Regular.ttf"
+  ],
+  "status": "pass"
+}

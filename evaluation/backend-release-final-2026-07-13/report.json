@@ -1,0 +1,115 @@
+{
+  "status": "pass",
+  "sourceSha": "45df617d6eced74bc5e9673104aa306338612ce6",
+  "sourceIdentity": "a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb",
+  "branch": "feat/backend-release-integration-v2",
+  "verificationDate": "2026-07-13",
+  "workspaceRegression": {
+    "emptyInputLength": 0,
+    "emptyPlaceholder": "",
+    "emptyRestoreButtonCount": 0,
+    "emptyCurrentBriefCount": 0,
+    "emptySourceStatusCount": 0,
+    "filledBottomDeltaPx": 0,
+    "clearedBottomDeltaPx": 0,
+    "independentSidebarScroll": false,
+    "horizontalOverflow": false
+  },
+  "verification": {
+    "fullSuite": {
+      "filesPassed": 132,
+      "filesSkipped": 5,
+      "testsPassed": 1270,
+      "testsSkipped": 7,
+      "durationSeconds": 878.27,
+      "status": "pass"
+    },
+    "typecheck": "pass",
+    "ontologyFocused": {
+      "filesPassed": 4,
+      "testsPassed": 104,
+      "status": "pass"
+    },
+    "pdfFocused": {
+      "filesPassed": 2,
+      "testsPassed": 16,
+      "status": "pass"
+    },
+    "frontendAuditFocused": {
+      "filesPassed": 2,
+      "testsPassed": 41,
+      "status": "pass"
+    },
+    "staticAudit": {
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violations": 0,
+      "status": "pass"
+    },
+    "builds": {
+      "normalPages": 27,
+      "normalMarkerCount": 0,
+      "auditPages": 27,
+      "auditMarkerCount": 1,
+      "postTestNormalPages": 27,
+      "postTestNormalMarkerCount": 0,
+      "status": "pass"
+    },
+    "browserAudit": {
+      "routeRows": 96,
+      "workspaceThemeRows": 6,
+      "specialSurfaceRows": 4,
+      "generatedSurfaceRows": 2,
+      "successes": 108,
+      "failedRows": 0,
+      "findings": 0,
+      "recoveredRows": 0,
+      "status": "pass"
+    },
+    "forbiddenPathMatches": 0
+  },
+  "pdf": {
+    "statusCode": 200,
+    "contentType": "application/pdf",
+    "cacheControl": "no-store",
+    "byteLength": 16276,
+    "underOneMiB": true,
+    "pages": 1,
+    "renderWidth": 1190,
+    "renderHeight": 1684,
+    "nonwhitePixels": 38160,
+    "extractedTextLength": 405,
+    "containsKoreanTitle": true,
+    "containsRisk": true,
+    "containsControl": true,
+    "nftFiles": 57,
+    "nftRegular": 1,
+    "nftBold": 1,
+    "nftLicense": 1
+  },
+  "ontology": {
+    "canonicalChains": 3,
+    "controls": 9,
+    "sifReferences": 7,
+    "koshaProductionDocuments": 9,
+    "koshaLocalChunks": 13,
+    "activeGuidanceChunks": 8,
+    "reviewOnlyGuidanceChunks": 5,
+    "controlMappings": 11,
+    "lawArticles": 9,
+    "materializationTargets": 18,
+    "resolved": false,
+    "published": false,
+    "graphPublicationState": "published",
+    "inferenceState": "review_required"
+  },
+  "boundaries": {
+    "databaseChanged": false,
+    "schemaChanged": false,
+    "migrationAdded": false,
+    "ontologyPublished": false,
+    "phaseBImplemented": false,
+    "protectedScreenshotsCommitted": false
+  }
+}
