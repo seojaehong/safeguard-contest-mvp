@@ -160,7 +160,7 @@ other source-of-truth state.
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
-| Local Markdown links and line ranges resolve | `PASS` | 60 local links resolved; 59 line fragments fit their target files |
+| Local Markdown links and line ranges resolve | `PASS` | 61 local links resolved; 60 line fragments fit their target files |
 | Required and prohibited terminology | `PASS` | 28 required architecture/remediation terms present; 2 rejected overclaim phrases absent |
 | Decision counts match the ADR register | `PASS` | 6 adopted, 4 deferred, 6 rejected; total 16 |
 | `report.json` parses and matches this report | `PASS` | 14 parity checks passed; 8 unresolved prerequisites retained |
