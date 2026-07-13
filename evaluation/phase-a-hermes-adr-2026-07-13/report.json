@@ -17,7 +17,7 @@
     {
       "id": "ADR-PA-002",
       "name": "isolated_versioned_engine_adapter",
-      "result": "runtime_is_experimental_adapter_not_core_or_provider_branch"
+      "result": "runtime_remains_an_isolated_adapter_not_a_core_or_provider_branch_and_phase_a_authorizes_no_runtime_experiment"
     },
     {
       "id": "ADR-PA-003",
@@ -32,34 +32,34 @@
     {
       "id": "ADR-PA-005",
       "name": "oauth_experiment_and_service_auth",
-      "result": "bounded_representative_local_oauth_poc_and_service_auth_for_commercial_traffic"
+      "result": "representative_gpt_oauth_poc_is_phase_b_step_6_only_after_entry_gate_and_separate_explicit_approval_with_service_auth_for_commercial_traffic"
     }
   ],
   "verification": [
     {
       "check": "json_syntax",
       "status": "passed",
-      "evidence": "5 decisions and 5 verification entries parsed"
+      "evidence": "5 decisions and 5 verification entries parsed with PowerShell ConvertFrom-Json"
     },
     {
       "check": "markdown_local_links",
       "status": "passed",
-      "evidence": "29 local links and referenced line ranges resolved"
+      "evidence": "28 local Markdown links counted mechanically with a PowerShell regex"
     },
     {
-      "check": "required_decision_assertions",
+      "check": "phase_b_execution_gate",
       "status": "passed",
-      "evidence": "28 required architecture phrases present"
+      "evidence": "ADR requires Phase B step 6, the Phase B entry gate, and separate explicit approval before a representative GPT OAuth proof of concept"
     },
     {
       "check": "owned_path_only_diff",
       "status": "passed",
-      "evidence": "3 changed files across 2 assigned ownership roots"
+      "evidence": "git diff --name-only 02295b5 listed exactly the three assigned files"
     },
     {
       "check": "git_diff_check",
       "status": "passed",
-      "evidence": "git diff --cached --check exited 0"
+      "evidence": "git diff --check 02295b5 and git diff --check 02295b5..HEAD exited 0 for the worktree and committed range"
     }
   ]
 }
