@@ -352,7 +352,7 @@ function DownloadActions({
   return (
     <div className="safeclaw-download-actions" aria-label="리포트 다운로드">
       <p className="safeclaw-download-note">
-        승인한 개선 전/개선 후 사진만 포함해 개선 리포트와 운영 메모리를 분리합니다.
+        개선 전/개선 후 사진 포함 승인 항목만 개선 리포트와 운영 메모리에 포함합니다.
       </p>
       <p
         className={downloadState.status === "error" ? "export-error" : "safeclaw-download-note"}
@@ -580,12 +580,14 @@ function ReportDocument({
               <p><b>개선</b>{compactText(item.toBe, 62)}</p>
               <span>{item.reflectedDocuments.join(" · ") || "반영 문서 확인"}</span>
               {item.hasPhotoPair ? (
-                <label>
+                <label className="safeclaw-report-photo-approval">
                   <input
                     type="checkbox"
+                    aria-label="개선 전/개선 후 사진 포함 승인"
                     checked={item.photoApproved}
                     onChange={() => onTogglePhotoApproval(item.id)}
                   />
+                  <span className="safeclaw-report-photo-checkbox-visual" aria-hidden="true" />
                   개선 전/개선 후 사진 포함 승인
                 </label>
               ) : null}

@@ -223,9 +223,9 @@ describe("reports download center remount behavior", () => {
   it("resets exact-pair photo approval after a real page reload", async () => {
     if (!browser) throw new Error("Browser was not started");
     const approvalAccessibleName = "개선 전/개선 후 사진 포함 승인";
-    const downloadApprovalNote = "승인한 개선 전/개선 후 사진만 포함해 개선 리포트와 운영 메모리를 분리합니다.";
-    const reportApprovalNote = "개선 전/개선 후 사진은 이 화면에서 포함 승인한 항목만 다운로드 산출물에 기록됩니다.";
-    const legacyPhotoTerm = ["Before", "After"].join("/");
+    const downloadApprovalNote = "개선 전/개선 후 사진 포함 승인 항목만 개선 리포트와 운영 메모리에 포함합니다.";
+    const reportApprovalNote = "개선 전/개선 후 사진 포함 승인 항목만 다운로드 산출물에 기록됩니다.";
+    const legacyPhotoTerm = new RegExp(["Before", "After"].join("\\s*/\\s*"), "iu");
     const now = new Date().toISOString();
     const generatedAt = "2026-07-10T07:45:00.000Z";
     const workpack = {
@@ -276,10 +276,10 @@ describe("reports download center remount behavior", () => {
 
       const downloadBoundary = page.getByLabel("리포트 다운로드");
       expect(await downloadBoundary.getByText(downloadApprovalNote, { exact: true }).count()).toBe(1);
-      expect(await downloadBoundary.getByText(new RegExp(legacyPhotoTerm, "u")).count()).toBe(0);
+      expect(await downloadBoundary.getByText(legacyPhotoTerm).count()).toBe(0);
       const reportDocument = page.getByLabel("작업문서형 리포트");
       expect(await reportDocument.getByText(reportApprovalNote, { exact: true }).count()).toBe(1);
-      expect(await reportDocument.getByText(new RegExp(legacyPhotoTerm, "u")).count()).toBe(0);
+      expect(await reportDocument.getByText(legacyPhotoTerm).count()).toBe(0);
 
       const approval = page.getByLabel(approvalAccessibleName);
       await approval.waitFor({ state: "visible" });

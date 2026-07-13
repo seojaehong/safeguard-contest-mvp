@@ -906,6 +906,8 @@ describe("reporting downloads", () => {
   });
 
   it("renders As-Is/To-Be markdown without external submission wording", () => {
+    const exactPhotoApprovalBoundary = "개선 전/개선 후 사진 포함 승인";
+    const legacyPhotoTerm = new RegExp(["Before", "After"].join("\\s*/\\s*"), "iu");
     const snapshot = buildReportSnapshot({
       workpack: makeWorkpack(),
       improvements,
@@ -918,10 +920,14 @@ describe("reporting downloads", () => {
       now: new Date("2026-07-08T12:00:00.000Z")
     });
     const markdown = buildReportMarkdown(snapshot);
+    const json = buildReportJson(snapshot);
 
     expect(markdown).toContain("## 위험성평가 As-Is / To-Be");
-    expect(markdown).toContain("개선 전/개선 후 사진");
+    expect(markdown).toContain(exactPhotoApprovalBoundary);
+    expect(json).toContain(exactPhotoApprovalBoundary);
     expect(markdown).toContain("before-scaffold.jpg");
+    expect(markdown).not.toMatch(legacyPhotoTerm);
+    expect(json).not.toMatch(legacyPhotoTerm);
     expect(markdown).not.toContain("KRAS");
     expect(markdown).not.toContain("자동 제출");
   });
@@ -994,6 +1000,8 @@ describe("reporting downloads", () => {
   });
 
   it("exports a readable operation corpus markdown without fine-tuning claims", () => {
+    const exactPhotoApprovalBoundary = "개선 전/개선 후 사진 포함 승인";
+    const legacyPhotoTerm = new RegExp(["Before", "After"].join("\\s*/\\s*"), "iu");
     const snapshot = buildReportSnapshot({
       workpack: makeWorkpack(),
       improvements,
@@ -1007,7 +1015,8 @@ describe("reporting downloads", () => {
     expect(markdown).toContain("authority: operator_review_corpus");
     expect(markdown).toContain("재생성 가능한 코퍼스");
     expect(markdown).toContain("## 개선 이벤트");
-    expect(markdown).toContain("개선 전/개선 후 사진");
+    expect(markdown).toContain(exactPhotoApprovalBoundary);
+    expect(markdown).not.toMatch(legacyPhotoTerm);
     expect(markdown).toContain("## 분류 인덱스");
     expect(markdown).not.toContain("파인튜닝 완료");
     expect(markdown).not.toContain("학습 완료");
