@@ -149,11 +149,11 @@ function deriveColumns(profile: SafetyFormProfile): string[] {
       return ["순번", profile.primaryColumn || "허가항목", profile.actionColumn || "조건/조치", "확인"];
     case "tbmLog":
     case "tbmBriefing":
-      return ["No.", profile.primaryColumn || "항목", profile.actionColumn || "전달 문구", "확인"];
+      return ["연번", profile.primaryColumn || "항목", profile.actionColumn || "전달 문구", "확인"];
     case "education":
-      return ["No.", profile.primaryColumn || "교육항목", profile.actionColumn || "내용", "확인"];
+      return ["연번", profile.primaryColumn || "교육항목", profile.actionColumn || "내용", "확인"];
     default:
-      return ["No.", "항목", "내용", "확인"];
+      return ["연번", "항목", "내용", "확인"];
   }
 }
 
@@ -243,12 +243,23 @@ function buildHwpBuffer(args: {
       }
     }
 
-    document.insertText(
-      0,
-      0,
-      0,
-      "\n\n[확인/서명]\n작성자: ____________________\n관리감독자: ____________________\n교육/TBM 확인자: ____________________\n확인일시: ______년 ____월 ____일 ____시 ____분"
-    );
+    document.insertText(0, 0, 0, "\n\n확인 및 서명\n");
+    const approvalRows = [
+      ["작성자", "관리감독자", "교육/TBM 확인자", "확인일시"],
+      ["성명/서명: ____________________", "성명/서명: ____________________", "성명/서명: ____________________", "____년 ____월 ____일 ____시 ____분"]
+    ];
+    const approvalTable = parseJsonResult(document.createTable(0, 0, 0, approvalRows.length, approvalRows[0].length));
+    if (approvalTable?.ok && typeof approvalTable.paraIdx === "number") {
+      const paraIdx = approvalTable.paraIdx;
+      const controlIdx = typeof approvalTable.controlIdx === "number" ? approvalTable.controlIdx : 0;
+      approvalRows.forEach((row, rIdx) => {
+        row.forEach((value, cIdx) => {
+          document.insertTextInCell(0, paraIdx, controlIdx, rIdx * row.length + cIdx, 0, 0, value);
+        });
+      });
+    } else {
+      throw new Error("HWP 확인·서명 표를 만들지 못했습니다.");
+    }
 
     return Buffer.from(document.exportHwp());
   } finally {
@@ -262,7 +273,7 @@ export async function GET() {
       ok: true,
       route: "/api/export/hwp",
       methods: ["POST"],
-      message: "POST a single document spec. Returns binary .hwp with table grid (한컴 native).",
+      message: "POST 요청의 단일 문서 내용을 편집 가능한 한컴 HWP 표 양식으로 반환합니다.",
       schema: {
         title: "string",
         rows: "SheetRow[]",
@@ -295,7 +306,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "hwp build failed" },
+      { ok: false, error: error instanceof Error ? error.message : "HWP 문서를 만들지 못했습니다." },
       { status: 500 }
     );
   }

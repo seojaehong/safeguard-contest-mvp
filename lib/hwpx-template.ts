@@ -121,40 +121,38 @@ export function listAvailableTemplates(): { kind: HwpxTemplateKind; label: strin
  * Uses pure-JS zip (adm-zip) so the route works in Vercel serverless runtime,
  * which does not guarantee a system `zip`/`unzip` CLI is present.
  *
- * Note: adm-zip may not preserve the strict HWPX requirement that `mimetype` be
- * the first entry and STORED. In practice 한컴 opens HWPX produced by adm-zip,
- * but for strict spec compliance the build-time anonymizer
- * (scripts/anonymize_hwpx_templates.mjs) uses the system `zip` CLI.
+ * `noSort` preserves the source template entry order. The committed templates
+ * have `mimetype` first and STORED, and that entry is never mutated.
  */
+export function localizeHwpxXmlText(text: string, companyName: string): string {
+  const replaceCompany = companyName.trim() || "사업장명 입력";
+  return text
+    .split("__COMPANY__").join(replaceCompany)
+    .replace(
+      /(<(?:\w+:)?t(?:\s[^>]*)?>)\s*(?:NO|No\.)\s*(<\/(?:\w+:)?t>)/gu,
+      "$1연번$2"
+    );
+}
+
 export function buildHwpxFromTemplate(kind: HwpxTemplateKind, companyName: string): Buffer {
   const srcPath = path.join(templatesDir(), TEMPLATE_FILES[kind]);
   if (!fs.existsSync(srcPath)) {
     throw new Error(`HWPX template not found: ${kind}`);
   }
 
-  const replaceCompany = String(companyName ?? "").trim() || "__COMPANY__";
-  const inputZip = new AdmZip(srcPath);
-  const outZip = new AdmZip();
-
-  // Always add `mimetype` first, STORED if possible (adm-zip will deflate small entries
-  // by default, but consumers we care about accept either).
-  const mimetypeEntry = inputZip.getEntry("mimetype");
-  if (mimetypeEntry) {
-    outZip.addFile("mimetype", mimetypeEntry.getData());
-  }
+  const replaceCompany = String(companyName ?? "").trim();
+  const inputZip = new AdmZip(srcPath, { noSort: true });
 
   for (const entry of inputZip.getEntries()) {
     if (entry.isDirectory) continue;
-    if (entry.entryName === "mimetype") continue;
-    let data = entry.getData();
     if (/\.(xml|hpf|rdf|txt)$/i.test(entry.entryName)) {
-      const text = data.toString("utf8");
-      if (text.includes("__COMPANY__")) {
-        data = Buffer.from(text.split("__COMPANY__").join(replaceCompany), "utf8");
+      const text = entry.getData().toString("utf8");
+      const localized = localizeHwpxXmlText(text, replaceCompany);
+      if (localized !== text) {
+        entry.setData(Buffer.from(localized, "utf8"));
       }
     }
-    outZip.addFile(entry.entryName, data, "", entry.attr);
   }
 
-  return outZip.toBuffer();
+  return inputZip.toBuffer();
 }

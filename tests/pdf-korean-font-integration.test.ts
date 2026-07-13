@@ -258,6 +258,10 @@ describe("Korean PDF font integration", () => {
     }
 
     expect(extractedPages[0]).toContain("위험성평가표");
+    extractedPages.forEach((pageText, index) => {
+      expect(pageText).toContain("위험성평가표 · 가온테크");
+      expect(pageText).toContain(`${index + 1} / ${document.numPages}쪽`);
+    });
     expect(extractedPages.at(-1)).toContain(sentinel);
     expect(extractedPages.at(-1)).toContain("작성자");
     expect(extractedPages.at(-1)).toContain("승인");
