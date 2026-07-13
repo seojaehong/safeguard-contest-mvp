@@ -1,0 +1,133 @@
+{
+  "reportId": "hermes-engine-adr-review-2026-07-14",
+  "generatedAt": "2026-07-14T06:52:29.1180011+09:00",
+  "status": "ready_for_fresh_review",
+  "selfApproved": false,
+  "freshReviewRequired": true,
+  "source": {
+    "sha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "baseSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "branch": "docs/hermes-engine-adr-sidecar-2026-07-14",
+    "filesReviewed": [
+      "ARCHITECTURE_DECISIONS.md",
+      "CONTEXT.md",
+      "docs/adr/0001-agent-runtime-boundary.md",
+      "docs/agent-runtime-long-term-roadmap.md",
+      "docs/phase-b-organization-knowledge-and-engine-plan.md",
+      "docs/mcp-server.md",
+      "docs/superpowers/specs/2026-07-12-openclaw-broker-hardening-design.md",
+      "lib/ai-provider-policy.ts",
+      "lib/engine-adapter.ts",
+      "lib/db-harness.ts",
+      "lib/mcp-auth.ts",
+      "lib/mcp-scoped-tool.ts",
+      "lib/mcp-tools.ts",
+      "app/api/mcp/[transport]/route.ts",
+      "lib/openclaw-broker-route.ts",
+      "lib/openclaw-chat.ts",
+      "tests/engine-adapter.test.ts",
+      "tests/editor-export-integrity.test.ts",
+      "tests/tbm-deterministic-structures.test.ts"
+    ]
+  },
+  "artifacts": [
+    "ARCHITECTURE_DECISIONS.md",
+    "evaluation/hermes-engine-adr-review-2026-07-14/report.md",
+    "evaluation/hermes-engine-adr-review-2026-07-14/report.json"
+  ],
+  "decisionCounts": {
+    "adopted": 6,
+    "deferred": 4,
+    "rejected": 6,
+    "total": 16
+  },
+  "decisionIds": {
+    "adopted": ["AD-01", "AD-02", "AD-03", "AD-04", "AD-05", "AD-06"],
+    "deferred": ["DE-01", "DE-02", "DE-03", "DE-04"],
+    "rejected": ["RJ-01", "RJ-02", "RJ-03", "RJ-04", "RJ-05", "RJ-06"]
+  },
+  "unresolved": [
+    {
+      "id": "U-01",
+      "status": "open",
+      "item": "Versioned engine request, result, error, cancellation, resume, capability, and trajectory contracts are not implemented."
+    },
+    {
+      "id": "U-02",
+      "status": "open",
+      "item": "Durable worker jobs, leases, checkpoints, bounded retry, terminal states, and dead-letter handling are not implemented."
+    },
+    {
+      "id": "U-03",
+      "status": "open",
+      "item": "A durable approval and effect ledger with idempotency keys and receipts is not proven end to end."
+    },
+    {
+      "id": "U-04",
+      "status": "open",
+      "item": "Runtime tenant isolation, legacy unbound MCP token handling, and cross-tenant resume and failover tests are not proven."
+    },
+    {
+      "id": "U-05",
+      "status": "open",
+      "item": "Three-layer knowledge storage, promotion workflow, and usage and billing ledger implementation require separately approved database design."
+    },
+    {
+      "id": "U-06",
+      "status": "open",
+      "item": "Service authentication, secret rotation, provider privacy and retention, license, incident response, and capacity reviews are open."
+    },
+    {
+      "id": "U-07",
+      "status": "open",
+      "item": "Hermes or fork and OpenClaw parity, recovery, duplicate-effect defense, and deterministic export parity are not proven."
+    },
+    {
+      "id": "U-08",
+      "status": "open",
+      "item": "The representative GPT OAuth proof of concept is not authorized and was not run."
+    }
+  ],
+  "noCodeChange": true,
+  "noDbMutation": true,
+  "noDbMigration": true,
+  "runtimeExperimentRun": false,
+  "gptOauthAttempted": false,
+  "validation": {
+    "markdownLinks": {
+      "status": "pass",
+      "checked": 41,
+      "lineFragments": 40,
+      "failures": 0
+    },
+    "requiredTerms": {
+      "status": "pass",
+      "checked": 21,
+      "missing": 0
+    },
+    "decisionCounts": {
+      "status": "pass",
+      "adopted": 6,
+      "deferred": 4,
+      "rejected": 6,
+      "total": 16
+    },
+    "jsonParity": {
+      "status": "pass",
+      "unresolved": 8
+    },
+    "scope": {
+      "status": "pass",
+      "changedPaths": 3,
+      "unexpectedPaths": 0
+    },
+    "noCodeOrDbDiff": {
+      "status": "pass",
+      "forbiddenPaths": 0
+    },
+    "diffCheck": {
+      "status": "pass",
+      "whitespaceFailures": 0
+    }
+  }
+}
