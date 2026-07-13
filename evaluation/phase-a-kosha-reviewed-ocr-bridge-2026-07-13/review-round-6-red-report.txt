@@ -1,0 +1,11 @@
+{
+  "status": "EXPECTED_RED",
+  "errors": [
+    "mutable-new-head-reference",
+    "stale-reviewed-head-reference",
+    "framework-duration-aggregate:57.345/54.603"
+  ],
+  "expectedFrameworkDurationSeconds": 54.603,
+  "recordedFrameworkDurationSeconds": 57.345
+}
+exitCode=1

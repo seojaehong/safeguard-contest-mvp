@@ -1,0 +1,42 @@
+status=EXPECTED_RED
+integrationTarget=77d86416116b91809e1e0508c72564e06c8c31bc
+candidateHead=c7261b7d632e1778f3280f059d1e122308817635
+command=npm.cmd test -- tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-corpus-audit.test.ts
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-corpus-audit.test.ts
+
+
+ RUN  v4.1.10 <integration-worktree>
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts (106 tests | 1 failed) 40362ms
+     × keeps the selective bridge candidate inside KOSHA-owned paths 319ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > keeps the selective bridge candidate inside KOSHA-owned paths
+AssertionError: expected [Function] to not throw an error but 'Error: kosha-bridge-candidate-path-ou…' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"Error: kosha-bridge-candidate-path-out-of-scope:app/api/export/hwp/route.ts"
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2028:68
+    2026|     const bridgePaths = gitLines(["diff", "--name-only", "38cbc91^", "…
+    2027|
+    2028|     expect(() => assertKoshaBridgeCandidatePaths(bridgePaths)).not.toT…
+       |                                                                    ^
+    2029|     expect(() => assertKoshaBridgeCandidatePaths([
+    2030|       ...bridgePaths,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 119 passed (120)
+   Start at  01:45:38
+   Duration  41.64s (transform 1.32s, setup 0ms, import 2.60s, tests 46.96s, environment 0ms)
+
+exitCode=1

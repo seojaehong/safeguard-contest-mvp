@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "safeclaw-kosha-bridge-integration-simulation/v1",
+  "status": "pass",
+  "integrationTargetSha": "77d86416116b91809e1e0508c72564e06c8c31bc",
+  "candidateParentSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+  "applyCommand": {
+    "executable": "git",
+    "args": [
+      "cherry-pick",
+      "38cbc9176453368237d85cb56903f782f9c09823",
+      "8e3b42492135799536913af9d1d6427256ad2ae4",
+      "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+      "c7261b7d632e1778f3280f059d1e122308817635",
+      "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f"
+    ]
+  },
+  "seriesAppliedCleanly": true,
+  "simulatedCommits": [
+    {
+      "sourceSha": "38cbc9176453368237d85cb56903f782f9c09823",
+      "simulatedSha": "61dfa4b2a6482391dfb23eed6134dd381f913edc"
+    },
+    {
+      "sourceSha": "8e3b42492135799536913af9d1d6427256ad2ae4",
+      "simulatedSha": "879e595987f2877bf5eca10e20fedf322e1b46a1"
+    },
+    {
+      "sourceSha": "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+      "simulatedSha": "692916d7acc0edfc60ba8249bddb054ab536603e"
+    },
+    {
+      "sourceSha": "c7261b7d632e1778f3280f059d1e122308817635",
+      "simulatedSha": "414d4e3f9b4dcc234343a67b7ef0cd1cd585fe65"
+    },
+    {
+      "sourceSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+      "simulatedSha": "5b61eb2e30cc5487fb9d4716b439e8c0a3e1cdbd"
+    }
+  ],
+  "candidateScope": {
+    "commitCount": 5,
+    "fileCount": 31,
+    "outOfScopeCount": 0
+  },
+  "targetExistingPaths": [
+    "app/api/export/hwp/route.ts",
+    "lib/xlsx-builder.ts",
+    "tests/xlsx-export-route.test.ts"
+  ],
+  "targetExistingPathsPreserved": true,
+  "verification": {
+    "pythonFocused": {
+      "tests": 64,
+      "frameworkDurationSeconds": 10.866,
+      "wallElapsedSeconds": 12.502,
+      "exitCode": 0,
+      "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/integration-simulation-python.log",
+      "canonicalLfSha256": "7ea9508cc8e8ce0c776bc28480a7d530d9b182e4926a0315bcd1e5184a422695"
+    },
+    "typescriptFocused": {
+      "tests": 124,
+      "frameworkDurationSeconds": 43.53,
+      "wallElapsedSeconds": 46.4,
+      "exitCode": 0,
+      "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/integration-simulation-typescript.log",
+      "canonicalLfSha256": "377571bd115646b84850a6287c05a77b1e6f2df544aee423a8d90b5a6aed4d86"
+    },
+    "ontologyEvidenceRegression": {
+      "tests": 45,
+      "frameworkDurationSeconds": 1.5,
+      "wallElapsedSeconds": 4.637,
+      "exitCode": 0,
+      "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/integration-simulation-ontology.log",
+      "canonicalLfSha256": "58fb8df9f4281f00ca28f8aa1fa1aadc8467b2c375d96f6ca8cce16d0c7a833e"
+    },
+    "strictTypecheck": {
+      "exitCode": 0,
+      "wallElapsedSeconds": 23.912,
+      "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/integration-simulation-typecheck.log",
+      "canonicalLfSha256": "2140dc94f32f31f06495a3bd416b5e39daa07358edfbf8ed50970d01298f47ae"
+    },
+    "totals": {
+      "tests": 233,
+      "frameworkDurationAggregateSeconds": 55.896,
+      "wallElapsedAggregateSeconds": 87.451
+    },
+    "diffCheckExitCode": 0,
+    "textHashCanonicalization": "utf8-crlf-to-lf"
+  },
+  "temporaryWorktreeRemoved": true,
+  "pycacheCountAfterCleanup": 0,
+  "productionGetPerformed": false,
+  "networkMutationPerformed": false,
+  "dbMutationPerformed": false,
+  "schemaMutationPerformed": false,
+  "migrationPerformed": false,
+  "dataMutationPerformed": false,
+  "corpusImportPerformed": false,
+  "launchReadiness": false
+}

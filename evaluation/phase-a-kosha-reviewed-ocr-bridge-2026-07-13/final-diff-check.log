@@ -1,0 +1,12 @@
+command=git diff --check
+startedAt=2026-07-13T17:19:58.1052968Z
+
+warning: in the working copy of 'evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-ontology-regression.log', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-python.log', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typecheck.log', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typescript.log', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/report.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/report.md', LF will be replaced by CRLF the next time Git touches it
+
+wallElapsedSeconds=0.519
+exitCode=0
