@@ -32,24 +32,55 @@ const KOSHA_BRIDGE_CANDIDATE_EXACT_PATHS = new Set([
 const KOSHA_BRIDGE_EVALUATION_PREFIX =
   "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/";
 
-export const KOSHA_EVALUATION_BINARY_MIME_BY_EXTENSION: Readonly<Record<string, string>> = {
-  ".7z": "application/x-7z-compressed",
-  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ".gif": "image/gif",
-  ".gz": "application/gzip",
-  ".ico": "image/x-icon",
-  ".jpeg": "image/jpeg",
-  ".jpg": "image/jpeg",
-  ".pdf": "application/pdf",
-  ".png": "image/png",
-  ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  ".ttf": "font/ttf",
-  ".webp": "image/webp",
-  ".woff": "font/woff",
-  ".woff2": "font/woff2",
-  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  ".zip": "application/zip"
-};
+const KOSHA_EVALUATION_BINARY_SIGNATURES: readonly {
+  mimeType: string;
+  signature: readonly number[];
+}[] = [
+  { mimeType: "image/png", signature: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] },
+  { mimeType: "image/jpeg", signature: [0xff, 0xd8, 0xff] },
+  { mimeType: "image/gif", signature: [0x47, 0x49, 0x46, 0x38, 0x37, 0x61] },
+  { mimeType: "image/gif", signature: [0x47, 0x49, 0x46, 0x38, 0x39, 0x61] },
+  { mimeType: "application/pdf", signature: [0x25, 0x50, 0x44, 0x46, 0x2d] },
+  { mimeType: "application/zip", signature: [0x50, 0x4b, 0x03, 0x04] },
+  { mimeType: "application/zip", signature: [0x50, 0x4b, 0x05, 0x06] },
+  { mimeType: "application/gzip", signature: [0x1f, 0x8b] },
+  { mimeType: "application/x-7z-compressed", signature: [0x37, 0x7a, 0xbc, 0xaf, 0x27, 0x1c] },
+  { mimeType: "application/x-ole-storage", signature: [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1] },
+  { mimeType: "font/woff", signature: [0x77, 0x4f, 0x46, 0x46] },
+  { mimeType: "font/woff2", signature: [0x77, 0x4f, 0x46, 0x32] },
+  { mimeType: "font/ttf", signature: [0x00, 0x01, 0x00, 0x00] },
+  { mimeType: "image/x-icon", signature: [0x00, 0x00, 0x01, 0x00] }
+];
+
+const KOSHA_EVALUATION_SAFE_DIGEST_LABELS = new Set([
+  "body_sha256",
+  "candidateattestationsha256",
+  "candidatecontentsha256",
+  "candidatefilesha256",
+  "current_sha256",
+  "currentsha256",
+  "entry_manifest_sha256",
+  "entrymanifestsha256",
+  "generationpolicysha256",
+  "identity_sha256",
+  "manifest_sha256",
+  "manifestsha256",
+  "provenance_identity_sha256",
+  "raw_sha256",
+  "recomputedgenerationpolicysha256",
+  "recomputedsourceidentitysha256",
+  "recomputedsnapshotid",
+  "recorder_sha256",
+  "recordersha256",
+  "reproducibility_hash",
+  "resume_log_sha256",
+  "resumelogsha256",
+  "sha256",
+  "snapshot_script_sha256",
+  "snapshotid",
+  "snapshotscriptsha256",
+  "sourceidentitysha256"
+]);
 
 export type KoshaEvaluationArtifactViolation = {
   artifactPath: string;
@@ -58,6 +89,7 @@ export type KoshaEvaluationArtifactViolation = {
     | "configured-secret-value"
     | "credential-assignment"
     | "raw-hmac-value"
+    | "sensitive-digest-label"
     | "token-pattern";
   detail: string;
 };
@@ -90,36 +122,71 @@ export function assertKoshaBridgeCandidatePaths(paths: readonly string[]): void 
   }
 }
 
-function artifactExtension(path: string): string {
-  const normalized = normalizeCandidatePath(path);
-  const fileName = normalized.slice(normalized.lastIndexOf("/") + 1);
-  const dotIndex = fileName.lastIndexOf(".");
-  return dotIndex === -1 ? "" : fileName.slice(dotIndex).toLowerCase();
+function startsWithBytes(bytes: Uint8Array, signature: readonly number[]): boolean {
+  return signature.length <= bytes.length && signature.every((value, index) => bytes[index] === value);
+}
+
+function identifyKoshaEvaluationBinaryMimeType(bytes: Uint8Array): string | null {
+  const directMatch = KOSHA_EVALUATION_BINARY_SIGNATURES.find(({ signature }) =>
+    startsWithBytes(bytes, signature)
+  );
+  if (directMatch) return directMatch.mimeType;
+  const riffWebp =
+    startsWithBytes(bytes, [0x52, 0x49, 0x46, 0x46]) &&
+    bytes.length >= 12 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50;
+  return riffWebp ? "image/webp" : null;
 }
 
 export function decodeKoshaEvaluationArtifactText(
   artifactPath: string,
   bytes: Uint8Array
 ): string | null {
-  if (KOSHA_EVALUATION_BINARY_MIME_BY_EXTENSION[artifactExtension(artifactPath)]) {
-    return null;
-  }
-  if (bytes.includes(0)) {
-    throw new Error(`kosha-evaluation-artifact-invalid-utf8:${artifactPath}`);
-  }
+  let decoded: string;
   try {
-    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    decoded = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } catch {
+    if (identifyKoshaEvaluationBinaryMimeType(bytes)) return null;
     throw new Error(`kosha-evaluation-artifact-invalid-utf8:${artifactPath}`);
   }
+  if (identifyKoshaEvaluationBinaryMimeType(bytes)) return null;
+  if (decoded.includes("\u0000")) {
+    throw new Error(`kosha-evaluation-artifact-invalid-utf8:${artifactPath}`);
+  }
+  return decoded;
 }
 
 function normalizedPathText(value: string): string {
   return value
-    .replaceAll("\\\\", "\\")
+    .replaceAll("\\\\", "//")
     .replaceAll("\\/", "/")
     .replaceAll("\\", "/")
     .toLowerCase();
+}
+
+function containsUncPath(value: string): boolean {
+  const separatorCode = 92;
+  const allowedPrefix = new Set([" ", "\t", "\r", "\n", "\"", "'", "(", "=", ":", ","]);
+  const segmentCharacter = (character: string): boolean => /[A-Za-z0-9._$-]/u.test(character);
+  for (let index = 0; index + 1 < value.length; index += 1) {
+    if (value.charCodeAt(index) !== separatorCode || value.charCodeAt(index + 1) !== separatorCode) {
+      continue;
+    }
+    if (index > 0 && !allowedPrefix.has(value[index - 1] || "")) continue;
+    let cursor = index + 2;
+    while (value.charCodeAt(cursor) === separatorCode) cursor += 1;
+    const serverStart = cursor;
+    while (cursor < value.length && segmentCharacter(value[cursor] || "")) cursor += 1;
+    if (cursor === serverStart || value.charCodeAt(cursor) !== separatorCode) continue;
+    while (value.charCodeAt(cursor) === separatorCode) cursor += 1;
+    const shareStart = cursor;
+    while (cursor < value.length && segmentCharacter(value[cursor] || "")) cursor += 1;
+    if (cursor > shareStart) return true;
+  }
+  return false;
 }
 
 function addEvaluationViolation(
@@ -137,12 +204,18 @@ export function scanKoshaEvaluationArtifactText(
 ): KoshaEvaluationArtifactViolation[] {
   const violations: KoshaEvaluationArtifactViolation[] = [];
   const normalizedText = normalizedPathText(input.text);
-  const genericWindowsPath = /(?:^|[\s"'(=])(?:file:\/{3})?[a-z]:\/(?:users|documents and settings)\//iu;
+  const drivePath = /(?:^|[\s"'(=])(?:file:\/{2,})?[a-z]:\/+[^\s"'<>]+/iu;
+  const posixPath = /(?:^|[\s"'(=])\/(?:builds|etc|exports|github|home|mnt|opt|private|root|runner|srv|tmp|users|var|volumes|workspace|workspaces)\/+[^\s"'<>]+/iu;
   const repositoryPathPresent = input.repositoryRoots.some((root) => {
     const normalizedRoot = normalizedPathText(root).replace(/\/+$/u, "");
     return normalizedRoot.length > 2 && normalizedText.includes(normalizedRoot);
   });
-  if (genericWindowsPath.test(normalizedText) || repositoryPathPresent) {
+  if (
+    drivePath.test(normalizedText) ||
+    containsUncPath(input.text) ||
+    posixPath.test(normalizedText) ||
+    repositoryPathPresent
+  ) {
     addEvaluationViolation(violations, {
       artifactPath: input.artifactPath,
       code: "absolute-local-path",
@@ -194,6 +267,24 @@ export function scanKoshaEvaluationArtifactText(
       code: "raw-hmac-value",
       detail: "hmac"
     });
+  }
+
+  const digestLabelPattern = /\b([A-Za-z][A-Za-z0-9_-]*(?:sha256|digest|hash))\b["']?\s*[:,=]\s*["']?([A-Fa-f0-9]{64}|[A-Za-z0-9+/]{40,}={0,2})\b/giu;
+  for (const match of input.text.matchAll(digestLabelPattern)) {
+    const label = match[1] || "digest";
+    const normalizedLabel = label.toLowerCase();
+    const compactLabel = normalizedLabel.replaceAll("-", "").replaceAll("_", "");
+    const explicitlySafe =
+      KOSHA_EVALUATION_SAFE_DIGEST_LABELS.has(normalizedLabel) ||
+      KOSHA_EVALUATION_SAFE_DIGEST_LABELS.has(compactLabel);
+    const sensitive = /secret|hmac|token|credential|password|apikey|servicerole/u.test(compactLabel);
+    if (sensitive && !explicitlySafe) {
+      addEvaluationViolation(violations, {
+        artifactPath: input.artifactPath,
+        code: "sensitive-digest-label",
+        detail: label
+      });
+    }
   }
 
   for (const [name, value] of Object.entries(input.configuredSecrets)) {
