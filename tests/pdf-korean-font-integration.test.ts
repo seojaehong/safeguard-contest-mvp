@@ -207,6 +207,48 @@ describe("Korean PDF font integration", () => {
     await document.destroy();
   });
 
+  it("paginates long content and preserves the final row and document footer", async () => {
+    const sentinel = "마지막행보존확인";
+    const longPayload = {
+      ...payload,
+      rows: Array.from({ length: 64 }, (_, index) => ({
+        document: "위험성평가표",
+        section: "전체 위험요인",
+        item: `위험요인 ${index + 1}`,
+        content: index === 63
+          ? `${sentinel} 최종 감소대책을 현장에서 확인합니다.`
+          : `작업 단계 ${index + 1}의 위험요인과 감소대책을 현장에서 확인합니다.`
+      }))
+    };
+    const response = await POST(new NextRequest("http://localhost/api/export/pdf", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(longPayload)
+    }));
+
+    expect(response.status).toBe(200);
+    Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const document = await pdfjs.getDocument({
+      data: new Uint8Array(await response.arrayBuffer())
+    }).promise;
+    expect(document.numPages).toBeGreaterThan(1);
+
+    const extractedPages: string[] = [];
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber);
+      const textContent = await page.getTextContent();
+      extractedPages.push(textContent.items.flatMap((item) => "str" in item ? [item.str] : []).join(" "));
+    }
+
+    expect(extractedPages[0]).toContain("위험성평가표");
+    expect(extractedPages.at(-1)).toContain(sentinel);
+    expect(extractedPages.at(-1)).toContain("작성자");
+    expect(extractedPages.at(-1)).toContain("승인");
+    expect(extractedPages.at(-1)).toContain("본 출력물은 공식자료 기반 현장 검토용 초안입니다.");
+    await document.destroy();
+  });
+
   it("embeds checksum-valid final FontFile2 subsets", async () => {
     const response = await POST(createRequest());
     const fonts = await extractFinalFontFile2Streams(new Uint8Array(await response.arrayBuffer()));

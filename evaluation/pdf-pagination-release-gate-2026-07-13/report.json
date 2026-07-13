@@ -1,0 +1,66 @@
+{
+  "gate": "pdf-pagination-release-gate",
+  "date": "2026-07-13",
+  "branch": "fix/pdf-pagination-release-gate",
+  "status": "pass",
+  "databaseChanges": false,
+  "regressionFixture": {
+    "inputRows": 64,
+    "pageAssertion": ">1",
+    "sentinel": "마지막행보존확인",
+    "sentinelExtractableFromLastPage": true,
+    "firstPageTitleExtractable": true,
+    "lastPageApprovalAndDisclaimerExtractable": true
+  },
+  "tdd": {
+    "red": {
+      "command": "npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t \"paginates long content\"",
+      "result": "expected_failure",
+      "testFilesFailed": 1,
+      "testsFailed": 1,
+      "actualPages": 1
+    },
+    "green": {
+      "command": "npm.cmd test -- tests/pdf-korean-font-integration.test.ts -t \"paginates long content\"",
+      "result": "pass",
+      "testFilesPassed": 1,
+      "testsPassed": 1,
+      "testsFailed": 0,
+      "testsSkipped": 11
+    }
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests/pdf-korean-font-integration.test.ts tests/pdf-font-failure.test.ts",
+      "exitCode": 0,
+      "testFilesPassed": 2,
+      "testsPassed": 17,
+      "testsFailed": 0,
+      "integrationTests": 12,
+      "fontFailureTests": 5
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "typeScriptErrors": 0
+    },
+    {
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "compileSeconds": 33.9,
+      "staticPagesGenerated": 27,
+      "staticPagesExpected": 27
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "whitespaceErrors": 0
+    }
+  ],
+  "changedFiles": [
+    "app/api/export/pdf/route.ts",
+    "tests/pdf-korean-font-integration.test.ts",
+    "evaluation/pdf-pagination-release-gate-2026-07-13/report.md",
+    "evaluation/pdf-pagination-release-gate-2026-07-13/report.json"
+  ]
+}
