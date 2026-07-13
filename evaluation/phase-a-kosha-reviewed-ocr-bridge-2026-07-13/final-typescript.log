@@ -1,14 +1,12 @@
 
 > safeclaw@0.1.0 test
-> vitest run --run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-corpus-audit.test.ts
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-corpus-audit.test.ts
 
 
- RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
+ RUN  v4.1.10 <user-root>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
 
 
  Test Files  2 passed (2)
-      Tests  100 passed (100)
-   Start at  23:12:50
-   Duration  28.34s (transform 1.45s, setup 0ms, import 2.87s, tests 36.66s, environment 0ms)
-
-elapsed_seconds=33.810
+      Tests  106 passed (106)
+   Start at  00:38:35
+   Duration  43.92s (transform 1.36s, setup 0ms, import 2.48s, tests 47.02s, environment 1ms)

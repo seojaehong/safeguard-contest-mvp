@@ -159,6 +159,23 @@ function toReportPath(path) {
   return relative(process.cwd(), path).replaceAll("\\", "/");
 }
 
+function classifyAuditFailure(error) {
+  const errorType = error instanceof Error && /^[A-Za-z][A-Za-z0-9_.-]*$/u.test(error.name)
+    ? error.name
+    : "Error";
+  const message = error instanceof Error ? error.message : "";
+  const koshaCode = message.match(/\b(kosha-[a-z0-9][a-z0-9.-]*(?::[A-Za-z0-9._-]+)*)\b/u)?.[1];
+  let errorCode = koshaCode || "audit-failure";
+  if (message === "Supabase read credentials are unavailable") {
+    errorCode = "supabase-read-credentials-unavailable";
+  } else if (message.startsWith("Supabase bridge GET failed:")) {
+    errorCode = "supabase-bridge-get-failed";
+  } else if (message.startsWith("--") || message.startsWith("Unknown argument:")) {
+    errorCode = "audit-arguments-invalid";
+  }
+  return { errorType, errorCode };
+}
+
 function sanitizeLocalSource(source) {
   if (!source || typeof source !== "object") return source;
   const metadata = source.metadata && typeof source.metadata === "object"
@@ -215,109 +232,6 @@ function readJsonObject(path, label) {
     throw new Error(`${label} must be a JSON object`);
   }
   return value;
-}
-
-function skipJsonWhitespace(value, index) {
-  let cursor = index;
-  while (cursor < value.length && /\s/u.test(value[cursor])) cursor += 1;
-  return cursor;
-}
-
-function scanJsonStringEnd(value, index, label) {
-  if (value[index] !== '"') throw new Error(`${label} contains an invalid JSON key`);
-  let cursor = index + 1;
-  while (cursor < value.length) {
-    if (value[cursor] === "\\") {
-      cursor += 2;
-      continue;
-    }
-    if (value[cursor] === '"') return cursor + 1;
-    cursor += 1;
-  }
-  throw new Error(`${label} contains an unterminated JSON string`);
-}
-
-function scanJsonValueEnd(value, index, label) {
-  const start = skipJsonWhitespace(value, index);
-  if (value[start] === '"') return scanJsonStringEnd(value, start, label);
-  if (value[start] !== "{" && value[start] !== "[") {
-    let cursor = start;
-    while (cursor < value.length && !/[\s,}\]]/u.test(value[cursor])) cursor += 1;
-    if (cursor === start) throw new Error(`${label} contains an invalid JSON value`);
-    return cursor;
-  }
-  const closers = [];
-  let cursor = start;
-  while (cursor < value.length) {
-    const character = value[cursor];
-    if (character === '"') {
-      cursor = scanJsonStringEnd(value, cursor, label);
-      continue;
-    }
-    if (character === "{") closers.push("}");
-    else if (character === "[") closers.push("]");
-    else if (character === "}" || character === "]") {
-      if (closers.pop() !== character) {
-        throw new Error(`${label} contains unbalanced JSON containers`);
-      }
-      if (closers.length === 0) return cursor + 1;
-    }
-    cursor += 1;
-  }
-  throw new Error(`${label} contains an unterminated JSON value`);
-}
-
-function readRootJsonMembers(value, label) {
-  let cursor = skipJsonWhitespace(value, 0);
-  if (value[cursor] !== "{") throw new Error(`${label} must be a JSON object`);
-  cursor += 1;
-  const members = [];
-  const keys = new Set();
-  while (cursor < value.length) {
-    cursor = skipJsonWhitespace(value, cursor);
-    if (value[cursor] === "}") {
-      cursor = skipJsonWhitespace(value, cursor + 1);
-      if (cursor !== value.length) throw new Error(`${label} has trailing JSON content`);
-      return members;
-    }
-    const keyStart = cursor;
-    const keyEnd = scanJsonStringEnd(value, keyStart, label);
-    const keyToken = value.slice(keyStart, keyEnd);
-    const key = JSON.parse(keyToken);
-    if (typeof key !== "string" || keys.has(key)) {
-      throw new Error(`${label} contains a duplicate or invalid JSON key`);
-    }
-    keys.add(key);
-    cursor = skipJsonWhitespace(value, keyEnd);
-    if (value[cursor] !== ":") throw new Error(`${label} contains a JSON member without a colon`);
-    const valueStart = skipJsonWhitespace(value, cursor + 1);
-    const valueEnd = scanJsonValueEnd(value, valueStart, label);
-    members.push({ key, keyToken, valueToken: value.slice(valueStart, valueEnd) });
-    cursor = skipJsonWhitespace(value, valueEnd);
-    if (value[cursor] === ",") {
-      cursor += 1;
-      continue;
-    }
-    if (value[cursor] !== "}") throw new Error(`${label} contains an invalid JSON separator`);
-  }
-  throw new Error(`${label} contains an unterminated JSON object`);
-}
-
-function extractRootJsonValue(value, key, label) {
-  const member = readRootJsonMembers(value, label).find((candidate) => candidate.key === key);
-  if (!member) throw new Error(`${label} is missing ${key}`);
-  return member.valueToken;
-}
-
-function removeRootJsonMember(value, excludedKey, label) {
-  const members = readRootJsonMembers(value, label);
-  if (!members.some((member) => member.key === excludedKey)) {
-    throw new Error(`${label} is missing ${excludedKey}`);
-  }
-  return `{${members
-    .filter((member) => member.key !== excludedKey)
-    .map((member) => `${member.keyToken}:${member.valueToken}`)
-    .join(",")}}`;
 }
 
 function readJsonLinesBytes(value, label) {
@@ -421,11 +335,6 @@ function readKoshaBridgeSnapshot(rootPath) {
     "checkpoint.json": hashBytes(checkpointBytes)
   };
   const manifestSourceIdentity = manifest.source_identity;
-  const manifestSourceIdentityCanonicalJson = extractRootJsonValue(
-    manifestJson,
-    "source_identity",
-    "KOSHA snapshot manifest"
-  );
   return {
     localItems: readJsonLinesBytes(itemsBytes, "KOSHA items"),
     localChunks: readJsonLinesBytes(chunksBytes, "KOSHA chunks"),
@@ -439,20 +348,10 @@ function readKoshaBridgeSnapshot(rootPath) {
       manifestSnapshotId: manifest.snapshot_id,
       manifestReproducibilityHash: manifest.reproducibility_hash,
       manifestSourceIdentity,
-      manifestSourceIdentityMaterialCanonicalJson: removeRootJsonMember(
-        manifestSourceIdentityCanonicalJson,
-        "identity_sha256",
-        "KOSHA snapshot source identity"
-      ),
       manifestSourceIdentitySha256: manifestSourceIdentity && typeof manifestSourceIdentity === "object"
         ? manifestSourceIdentity.identity_sha256
         : null,
       manifestGenerationPolicy: manifest.generation_policy,
-      manifestGenerationPolicyCanonicalJson: extractRootJsonValue(
-        manifestJson,
-        "generation_policy",
-        "KOSHA snapshot manifest"
-      ),
       manifestGenerationPolicySha256: manifest.generation_policy_sha256,
       currentManifestSha256: current.manifest.sha256,
       manifestFileSha256: hashBytes(manifestBytes),
@@ -568,6 +467,8 @@ async function runProductionLocalBridgeAudit({
     throw new Error("--bridge-zip-file and --bridge-internal-path are required with --bridge-only");
   }
   if (options.offline) throw new Error("--bridge-only requires a production GET");
+  const local = readKoshaBridgeSnapshot(options.localCorpusRoot);
+  audit.verifyKoshaBridgeSnapshotIntegrity(local.snapshot);
   const defaultEnvCandidates = [
     resolve(process.cwd(), ".env.local"),
     resolve(process.cwd(), "..", "..", ".env.local")
@@ -576,7 +477,6 @@ async function runProductionLocalBridgeAudit({
     ? resolve(options.envFile)
     : defaultEnvCandidates.find((candidate) => existsSync(candidate)) || null;
   const envLoaded = readEnvFile(envFile);
-  const local = readKoshaBridgeSnapshot(options.localCorpusRoot);
   const production = await fetchProductionBridgeRows(
     options.bridgeZipFile,
     options.bridgeInternalPath,
@@ -613,6 +513,7 @@ async function runProductionLocalBridgeAudit({
       deploymentIdentityProven: false
     },
     snapshotIntegrity: "verified",
+    snapshotIntegrityVerifiedBeforeFetch: true,
     candidate,
     environment: {
       envFileConfigured: Boolean(envFile),
@@ -625,6 +526,7 @@ async function runProductionLocalBridgeAudit({
   const markdownReference = toReportPath(markdownPath);
   const logReference = toReportPath(logPath);
   logLines.push("mode=production-local-bridge requestMethod=GET");
+  logLines.push("snapshotIntegrityVerifiedBeforeFetch=true");
   logLines.push(`productionRows=${production.rows.length} localItem=${candidate.local.itemId} chunks=${candidate.chunks.length}`);
   logLines.push(`report=${reportReference}`);
   logLines.push(`elapsedSeconds=${elapsedSeconds}`);
@@ -1233,14 +1135,19 @@ ${report.boundaries.map((item) => `- ${item}`).join("\n")}
 `;
 }
 
-const options = parseArguments(process.argv.slice(2));
+let options;
+try {
+  options = parseArguments(process.argv.slice(2));
+} catch (error) {
+  const failure = classifyAuditFailure(error);
+  console.error(`${failure.errorType}:${failure.errorCode}`);
+  process.exit(1);
+}
 if (options.help) {
   console.log(AUDIT_USAGE);
   process.exit(0);
 }
-const reviewedCandidatePath = options.bridgeOnly && options.reviewedCandidate
-  ? resolveKoshaReviewedCandidatePath(options.localCorpusRoot, options.reviewedCandidate)
-  : null;
+let reviewedCandidatePath = null;
 const started = performance.now();
 const generatedAt = new Date().toISOString();
 const outputDir = resolve(process.cwd(), options.outputDir);
@@ -1253,6 +1160,9 @@ const logLines = [`${generatedAt} KOSHA GUIDE audit started`, "readOnly=true dbM
 
 let moduleServer;
 try {
+  reviewedCandidatePath = options.bridgeOnly && options.reviewedCandidate
+    ? resolveKoshaReviewedCandidatePath(options.localCorpusRoot, options.reviewedCandidate)
+    : null;
   moduleServer = await createServer({
     root: process.cwd(),
     appType: "custom",
@@ -1909,7 +1819,7 @@ try {
   writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
   writeFileSync(markdownPath, `${formatMarkdown(report).trim()}\n`, "utf8");
   logLines.push(`checks=${verification.checkCount} failed=${verification.failedCheckCount} boundaries=${verification.boundaryCheckCount}`);
-  logLines.push(`report=${reportPath}`);
+  logLines.push(`report=${toReportPath(reportPath)}`);
   logLines.push(`elapsedSeconds=${elapsedSeconds}`);
   writeFileSync(logPath, `${logLines.join("\n")}\n`, "utf8");
 
@@ -1922,10 +1832,10 @@ try {
     elapsed_seconds: report.elapsed_seconds,
     verification,
     manifestFailures,
-    reportPath,
-    markdownPath,
-    logPath,
-    manifestCandidatePath
+    reportPath: toReportPath(reportPath),
+    markdownPath: toReportPath(markdownPath),
+    logPath: toReportPath(logPath),
+    manifestCandidatePath: toReportPath(manifestCandidatePath)
   }, null, 2));
 
   if (options.strict && (verification.failedCheckCount > 0 || manifestFailures.length > 0)) {
@@ -1933,10 +1843,11 @@ try {
   }
   }
 } catch (error) {
-  const message = error instanceof Error ? error.stack || error.message : String(error);
-  logLines.push(`fatal=${message}`);
+  const failure = classifyAuditFailure(error);
+  logLines.push(`fatal_type=${failure.errorType}`);
+  logLines.push(`fatal_code=${failure.errorCode}`);
   writeFileSync(logPath, `${logLines.join("\n")}\n`, "utf8");
-  console.error(message);
+  console.error(`${failure.errorType}:${failure.errorCode}`);
   process.exitCode = 1;
 } finally {
   if (moduleServer) await moduleServer.close();

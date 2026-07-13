@@ -135,6 +135,7 @@ class LocalPdfEntry:
 @dataclass(frozen=True)
 class ReviewedOcrCandidate:
     file_sha256: str
+    attestation_sha256: str
     payload: dict[str, object]
     item_id: str
 
@@ -164,6 +165,26 @@ def _file_descriptor(path: Path) -> dict[str, object]:
 
 def _canonical_json(value: object) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _normalize_identity_value(value: object) -> object:
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    if isinstance(value, list):
+        return [_normalize_identity_value(item) for item in value]
+    if isinstance(value, dict):
+        normalized: dict[str, object] = {}
+        for key, nested in value.items():
+            if not isinstance(key, str):
+                raise TypeError("identity material keys must be strings")
+            normalized[key] = _normalize_identity_value(nested)
+        return normalized
+    return value
+
+
+def _identity_sha256(value: object) -> str:
+    canonical = _canonical_json(_normalize_identity_value(value))
+    return _sha256_bytes(canonical.encode("utf-8"))
 
 
 def _atomic_write_bytes(path: Path, value: bytes) -> None:
@@ -236,9 +257,8 @@ def _load_reviewed_ocr_candidates(
     paths: Sequence[Path] | None,
 ) -> dict[str, ReviewedOcrCandidate]:
     declared_paths = list(paths or ())
-    if len(declared_paths) > 1:
-        raise RuntimeError("exactly one reviewed OCR candidate may be declared")
     candidates: dict[str, ReviewedOcrCandidate] = {}
+    attestation_items: dict[str, str] = {}
     for declared_path in declared_paths:
         path = declared_path.resolve()
         if not path.is_file():
@@ -256,11 +276,23 @@ def _load_reviewed_ocr_candidates(
             raise RuntimeError(f"reviewed OCR candidate item_id is missing: {path}")
         if item_id in candidates:
             raise RuntimeError(f"duplicate reviewed OCR candidate for item: {item_id}")
+        review = payload.get("review")
+        if not isinstance(review, dict):
+            raise RuntimeError(f"reviewed OCR candidate review is missing: {item_id}")
+        attestation_sha256 = _sha256_bytes(_canonical_json(review).encode("utf-8"))
+        duplicate_item_id = attestation_items.get(attestation_sha256)
+        if duplicate_item_id is not None:
+            raise RuntimeError(
+                "duplicate reviewed OCR candidate attestation: "
+                f"{duplicate_item_id}/{item_id}"
+            )
         candidates[item_id] = ReviewedOcrCandidate(
             file_sha256=_sha256_bytes(candidate_bytes),
+            attestation_sha256=attestation_sha256,
             payload=payload,
             item_id=item_id,
         )
+        attestation_items[attestation_sha256] = item_id
     return candidates
 
 
@@ -715,9 +747,7 @@ def _build_generation_policy(
                 "item_id": candidate.item_id,
                 "candidate_sha256": candidate.file_sha256,
                 "content_sha256": content_sha256,
-                "attestation_sha256": _sha256_bytes(
-                    _canonical_json(review).encode("utf-8")
-                ),
+                "attestation_sha256": candidate.attestation_sha256,
             }
         )
     policy: dict[str, object] = {
@@ -741,7 +771,7 @@ def _build_generation_policy(
         "normalization": "NFKC+line-ending+horizontal-whitespace/v1",
         "chunking": "per-page-fixed-character-span/v1",
     }
-    return policy, _sha256_bytes(_canonical_json(policy).encode("utf-8"))
+    return policy, _identity_sha256(policy)
 
 
 def _staging_key(source_identity_sha256: str, generation_policy_sha256: str) -> str:
@@ -1060,7 +1090,7 @@ def _source_identity(
         "max_compression_ratio": scan_stats.max_compression_ratio,
         "entry_manifest_sha256": _sha256_bytes(_canonical_json(inventory_rows).encode("utf-8")),
     }
-    identity_hash = _sha256_bytes(_canonical_json(source_identity).encode("utf-8"))
+    identity_hash = _identity_sha256(source_identity)
     return {
         "identity_sha256": identity_hash,
         **source_identity,
@@ -1272,6 +1302,17 @@ def _validate_checkpoint_identity(
     generation_policy: dict[str, object],
     generation_policy_sha256: str,
 ) -> None:
+    source_identity_material = {
+        key: value
+        for key, value in source_identity.items()
+        if key != "identity_sha256"
+    }
+    if source_identity.get("identity_sha256") != _identity_sha256(
+        source_identity_material
+    ):
+        raise RuntimeError("source identity canonical hash mismatch")
+    if generation_policy_sha256 != _identity_sha256(generation_policy):
+        raise RuntimeError("generation policy canonical hash mismatch")
     if checkpoint.get("source_identity_sha256") != source_identity["identity_sha256"]:
         raise RuntimeError("resume source identity mismatch")
     if checkpoint.get("source_identity") != source_identity:
@@ -1435,6 +1476,25 @@ def _validate_snapshot_directory(
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if not isinstance(manifest, dict):
         raise RuntimeError("snapshot manifest must be an object")
+    manifest_source_identity = manifest.get("source_identity")
+    if not isinstance(manifest_source_identity, dict):
+        raise RuntimeError("snapshot source identity must be an object")
+    manifest_source_material = {
+        key: value
+        for key, value in manifest_source_identity.items()
+        if key != "identity_sha256"
+    }
+    if manifest_source_identity.get("identity_sha256") != _identity_sha256(
+        manifest_source_material
+    ):
+        raise RuntimeError("snapshot source identity canonical hash mismatch")
+    manifest_generation_policy = manifest.get("generation_policy")
+    if not isinstance(manifest_generation_policy, dict):
+        raise RuntimeError("snapshot generation policy must be an object")
+    if manifest.get("generation_policy_sha256") != _identity_sha256(
+        manifest_generation_policy
+    ):
+        raise RuntimeError("snapshot generation policy canonical hash mismatch")
     if manifest.get("source_identity") != source_identity:
         raise RuntimeError("snapshot exact source identity mismatch")
     if manifest.get("generation_policy") != generation_policy:
@@ -2281,7 +2341,10 @@ def parse_args() -> argparse.Namespace:
         "--reviewed-ocr-candidate",
         action="append",
         default=[],
-        help="One reviewed OCR candidate JSON to validate and import.",
+        help=(
+            "Reviewed OCR candidate JSON to validate and import; repeat for "
+            "distinct corpus items."
+        ),
     )
     parser.add_argument(
         "--trusted-ocr-reviewer-id",

@@ -1,16 +1,24 @@
 {
-  "schemaVersion": "safeclaw-phase-a-kosha-reviewed-ocr-bridge-evaluation/v2",
-  "generatedAt": "2026-07-13T23:15:34.022+09:00",
+  "schemaVersion": "safeclaw-phase-a-kosha-reviewed-ocr-bridge-evaluation/v3",
+  "generatedAt": "2026-07-14T00:34:42.7510310+09:00",
   "status": "HOLD_PENDING_FRESH_REVIEW",
   "launchReadiness": false,
   "readOnly": true,
   "dbMutationPerformed": false,
   "supabaseMutationPerformed": false,
   "apiMutationPerformed": false,
+  "schemaMutationPerformed": false,
   "migrationPerformed": false,
+  "packageOrLockMutationPerformed": false,
   "networkRequestPerformed": false,
+  "productionGetPerformed": false,
   "source": {
-    "reportPath": "evaluation/kosha-corpus-body-recovery-2026-07-12-v3/report.json",
+    "artifactLabel": "kosha-corpus-body-recovery-2026-07-13-fixed-v1",
+    "generatorLog": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-generation.log",
+    "resumeLog": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-resume.log",
+    "generationElapsedSeconds": 1929.811,
+    "resumeValidationElapsedSeconds": 2.95,
+    "resumeProcessedCount": 0,
     "inventoryCount": 1040,
     "completedCount": 1040,
     "nativeSuccessCount": 1039,
@@ -19,7 +27,40 @@
     "failureLedgerCount": 1,
     "chunkCount": 20520,
     "bodyMissingCount": 1,
-    "launchReady": false
+    "reviewedOcrImportCount": 0,
+    "launchReady": false,
+    "sourceIdentitySha256": "1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d",
+    "recomputedSourceIdentitySha256": "1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d",
+    "generationPolicySha256": "54840fedece9d4b347ad7fd88808866f7ca1b41c5a08b9c6ca47b284c9411b1f",
+    "recomputedGenerationPolicySha256": "54840fedece9d4b347ad7fd88808866f7ca1b41c5a08b9c6ca47b284c9411b1f",
+    "snapshotId": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+    "recomputedSnapshotId": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+    "manifestSha256": "702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519",
+    "currentSha256": "479751702c27ebeaba2da5233bddb33318dd52028bdcea4701f150990efae2a5",
+    "outputHashes": {
+      "items.jsonl": "17ac72ec9ba85330e9a02f77b4c68c5fc4ade1f735b432233a31f6e8b424bf78",
+      "chunks.jsonl": "33733a50dc835fbf3cf3776ddeb20253da47fa50034a95035f86794303463786",
+      "failures.jsonl": "9ccdfc86c21c3c5aab65624778dfade5b6062504748d1ff162784c3e2f1242a1",
+      "checkpoint.json": "c9a6e7288ac17db864469ec9e25c74fd6ff6495a62adf82953b9102a55c3d531"
+    }
+  },
+  "staleSnapshotFinding": {
+    "declaredSourceIdentitySha256": "6d13d26f5038b0cc11ec840ec3c56bfafa014b3885e97942a3f0eb8cfdb8ab0e",
+    "recomputedSourceIdentitySha256": "419fd79edb324499c10f3efce6ef08b9624f93e3102a87624d8902f14a536c3f",
+    "declaredGenerationPolicySha256": "8abedcd1e046c6d0761d959689562fa95db4136d8772935c2f29796d462a462b",
+    "recomputedGenerationPolicySha256": "8e41acbf29713715589ecbf81e803b069426ff71fd8bb3db4bf8d156dae1790a",
+    "declaredSnapshotId": "bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51",
+    "sourceOnlyRecomputedSnapshotId": "18b4b4e0483a57c479aa095fe342b19ad57d7e6bbc3594a3285bb07916e73aaf",
+    "fullyRecomputedSnapshotId": "f2f1991fda891d9606f4d3123ee350fd2886c43a7b042b23aa9ec90beca3d037",
+    "unchangedOutputHashes": [
+      "items.jsonl",
+      "chunks.jsonl",
+      "failures.jsonl"
+    ],
+    "changedOutputHashes": [
+      "checkpoint.json"
+    ],
+    "rejectedByCurrentVerifier": true
   },
   "reviewedCandidate": {
     "path": "evaluation/kosha-ocr-boundary-recovery-2026-07-13/B-E-3-2025-candidate.json",
@@ -29,104 +70,107 @@
     "candidateAttestationSha256": "9dbb03c1ddd14dfc293b800cc4d4762244996b3cac050545d813add30d97d57d",
     "reviewState": "draft",
     "humanConfirmed": false,
-    "generatorPresent": true,
-    "renderDpi": 180,
+    "renderDpiPresent": false,
     "validatorAccepted": false,
     "validatorError": "ocr_candidate_not_human_confirmed",
+    "corpusExtractionStatus": "boundary",
+    "bodyPresent": false,
     "chunkCount": 0,
     "importedCount": 0,
     "modified": false
   },
-  "p2Remediation": {
-    "snapshotIntegrity": {
-      "currentAndManifestSourceIdentityBound": true,
-      "currentAndManifestGenerationPolicyBound": true,
-      "manifestCanonicalNumberLexemesPreserved": true,
-      "actualOutputFilesHashed": [
-        "items.jsonl",
-        "chunks.jsonl",
-        "failures.jsonl",
-        "checkpoint.json"
-      ],
-      "reproducibilityHashRecomputed": true,
-      "mixedOrTamperedInputsRejectedBeforeArtifact": true
-    },
-    "candidateIdentity": {
-      "rawBytesHashedBeforeJsonParse": true,
-      "fileContentAndAttestationDigestsSeparated": true,
-      "reviewAttestationUsesCanonicalFullReviewObject": true,
-      "allThreeDigestsIncludedInArtifactReproducibility": true,
-      "providedDigestMismatchRejected": true
-    }
+  "remediation": {
+    "snapshotVerifiedBeforeEnvCredentialAndFetch": true,
+    "successFlagWrittenOnlyWithSuccessfulBridgeArtifact": true,
+    "semanticSourceAndPolicyCanonicalizationUnified": true,
+    "multipleDistinctReviewedCandidateItemsAllowed": true,
+    "sameItemCandidateCollisionRejected": true,
+    "duplicateCandidateAttestationRejected": true,
+    "auditFailureStackSerialized": false,
+    "evaluationAbsolutePathMatchCount": 0,
+    "rawSecretOrHmacMatchCount": 0
   },
   "snapshotIntegritySmoke": {
-    "snapshotId": "bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51",
-    "sourceIdentitySha256": "6d13d26f5038b0cc11ec840ec3c56bfafa014b3885e97942a3f0eb8cfdb8ab0e",
-    "generationPolicySha256": "8abedcd1e046c6d0761d959689562fa95db4136d8772935c2f29796d462a462b",
-    "snapshotIntegrityVerifiedBeforeFetch": true,
-    "expectedStop": "Supabase read credentials are unavailable",
-    "networkRequestPerformed": false,
-    "elapsedSeconds": 16.003,
     "resultPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/result.json",
-    "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/audit.log"
+    "staleSnapshotErrorCode": "kosha-bridge-manifest-source-identity-mismatch",
+    "staleCredentialCheckReached": false,
+    "staleElapsedSeconds": 14.892,
+    "fixedSnapshotErrorCode": "supabase-read-credentials-unavailable",
+    "fixedCredentialCheckReached": true,
+    "fixedElapsedSeconds": 13.538,
+    "snapshotIntegrityVerifiedBeforeFetchRecorded": false,
+    "networkRequestPerformed": false
   },
   "verification": {
-    "p2Red": {
+    "red": {
+      "python": {
+        "testCount": 4,
+        "passedCount": 0,
+        "expectedFailureCount": 4,
+        "elapsedSeconds": 1.186,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/red-python.log"
+      },
       "typescript": {
-        "testCount": 84,
-        "passedCount": 66,
-        "expectedFailureCount": 18,
-        "elapsedSeconds": 18.52,
-        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/p2-red-typescript.log"
+        "testCount": 91,
+        "passedCount": 86,
+        "expectedFailureCount": 5,
+        "frameworkDurationSeconds": 47.597,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/red-typescript.log"
       }
     },
     "final": {
       "pythonFocused": {
-        "testCount": 61,
-        "passedCount": 61,
+        "testCount": 64,
+        "passedCount": 64,
         "failedCount": 0,
-        "elapsedSeconds": 17.759,
+        "frameworkDurationSeconds": 11.827,
         "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-python.log"
       },
       "typescriptFocused": {
-        "testCount": 100,
-        "passedCount": 100,
+        "testCount": 106,
+        "passedCount": 106,
         "failedCount": 0,
-        "elapsedSeconds": 33.81,
+        "frameworkDurationSeconds": 43.92,
         "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typescript.log"
       },
       "ontologyEvidenceRegression": {
         "testCount": 45,
         "passedCount": 45,
         "failedCount": 0,
-        "elapsedSeconds": 7.376,
+        "commandWallElapsedSeconds": 5.125,
         "naturalizeOnlyPreserved": true,
         "failClosedPreserved": true,
         "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-ontology-regression.log"
       },
       "strictTypecheck": {
         "passed": true,
-        "elapsedSeconds": 35.873,
+        "commandWallElapsedSeconds": 32.602,
         "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typecheck.log"
+      },
+      "pathScanner": {
+        "logFileCount": 14,
+        "absolutePathMatchCount": 0,
+        "rawSecretOrHmacMatchCount": 0,
+        "coveredByTypescriptFocused": true
       },
       "gitDiffCheck": {
         "passed": true
       },
       "totals": {
-        "testCount": 206,
-        "passedCount": 206,
+        "testCount": 215,
+        "passedCount": 215,
         "failedCount": 0,
-        "testElapsedSeconds": 58.945,
-        "verificationElapsedSecondsBeforeDiffCheck": 94.818
+        "testElapsedSeconds": 60.872,
+        "verificationElapsedSecondsBeforeDiffCheck": 93.474
       }
     }
   },
   "concerns": [
-    "Fresh review is still required; this report does not approve commit 38cbc917 or its remediation.",
+    "Fresh independent review is still required; no integration approval is claimed.",
     "The B-E-3 candidate remains draft and human_confirmed=false, so validator acceptance and import remain blocked.",
-    "The local corpus still has one body boundary and B-E-3 has zero chunks and zero imported rows.",
-    "The snapshot smoke intentionally stopped before a production GET; no fresh live production identity was established.",
-    "No DB, Supabase, API, migration, upload, candidate, or corpus mutation was performed.",
+    "The fixed local corpus still has one native OCR boundary and B-E-3 has zero chunks and zero imported rows.",
+    "Both production/local smoke runs stopped before any GET; no fresh production or deployment identity was established.",
+    "No DB, Supabase, API, schema, migration, package, lock, candidate, or tracked corpus data mutation was performed.",
     "This task does not make the corpus or product launch-ready."
   ]
 }
