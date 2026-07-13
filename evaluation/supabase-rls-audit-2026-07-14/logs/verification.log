@@ -1,0 +1,37 @@
+verificationStartedAt=2026-07-13T22:13:43.3332154Z
+mode=read-only
+noMutation=true
+PASS report.json parses
+PASS HEAD equals requested source SHA
+PASS report source/base SHA equals HEAD
+PASS launchReadiness is boolean false
+PASS top-level noMutation is boolean true
+PASS all mutation flags are false
+PASS elapsed timing fields are finalized and internally consistent
+PASS final report and probe syntax statuses are passed
+PASS inventory counts are 24 boundaries and 22 application tables
+PASS RLS enabled/missing/FORCE counts are 20/2/0
+PASS policy counts are 20 total, 13 FOR ALL, 7 SELECT-only, 0 explicit role
+PASS finding counts are P0/P1/P2/P3 0/3/4/2
+PASS negative matrix has 14 cases, 0 executed, 56 expected denies
+PASS all 9 finding titles match Markdown exactly
+PASS Markdown reports the finalized elapsed values
+PASS all 123 source evidence references resolve in range
+PASS all 21 service-role tenant/admin route entry points exist
+PASS three public/global service-role read surfaces inventoried
+PASS fresh live probe records 44 HEAD and zero verified tenant assertions
+PASS fresh live status counts are 200/206/404 = 30/4/10
+PASS all four probe artifacts have mutationPerformed=false
+PASS all four probe artifacts store no URL, host, key, body, or exception text
+PASS probe syntax passes node --check
+PASS probe source contains no mutating method or database mutation call pattern
+PASS audit artifacts contain no JWT, project host, or key assignment pattern
+PASS working changes are confined to the requested audit artifact directory
+PASS restored node_modules remains gitignored
+PASS strict typecheck success log present
+PASS focused test log records 10 files and 82 tests passed
+evidenceReferenceCount=123
+serviceRoleTenantAdminEntryPoints=21
+expectedCrossTenantDenyAssertions=56
+verificationFailures=0
+verificationFinishedAt=2026-07-13T22:13:45.1569347Z

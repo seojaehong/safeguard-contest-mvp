@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "phase-a-supabase-rls-live-probe/v1",
+  "generatedAt": "2026-07-13T21:05:18.172Z",
+  "probe": "supabase-rest-table-head-count-exact",
+  "mode": "read-only",
+  "mutationPerformed": false,
+  "failClosed": true,
+  "tableCount": 22,
+  "credentialCount": 2,
+  "expectedRequestCount": 44,
+  "requestTimeoutMs": 20000,
+  "requestMethodsAllowed": [
+    "HEAD",
+    "GET"
+  ],
+  "requestMethodsUsed": [],
+  "secretSafety": {
+    "urlStored": false,
+    "hostStored": false,
+    "keyStored": false,
+    "responseBodyStored": false,
+    "exceptionTextStored": false
+  },
+  "configuration": {
+    "envFileLoaded": false,
+    "supabaseUrlPresent": false,
+    "nextPublicSupabaseUrlPresent": false,
+    "urlValuesEqual": null,
+    "serviceRoleKeyPresent": false,
+    "anonKeyPresent": false
+  },
+  "status": "blocked",
+  "reason": "required_configuration_unavailable",
+  "attemptedRequestCount": 0,
+  "statusCounts": {},
+  "liveAssertionsVerified": 0,
+  "results": []
+}
