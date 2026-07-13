@@ -47,7 +47,7 @@ export function canonicalFrontendSourceIdentity(root) {
   for (const filePath of files) {
     identity.update(path.relative(root, filePath).replaceAll("\\", "/"));
     identity.update("\0");
-    identity.update(fs.readFileSync(filePath));
+    identity.update(fs.readFileSync(filePath, "utf8").replace(/\r\n?/gu, "\n"));
     identity.update("\0");
   }
   return {

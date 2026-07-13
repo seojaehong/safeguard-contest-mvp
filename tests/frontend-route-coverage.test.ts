@@ -400,6 +400,15 @@ describe("browser evidence reconciliation", () => {
       const fixtureIdentity = runFrontendIdentityProbe(fixtureRoot);
       expect(fixtureIdentity.sourceIdentity).toBe(identity.sourceIdentity);
 
+      const lineEndingTarget = path.join(fixtureRoot, "app/layout.tsx");
+      const normalizedLineEndingSource = fs.readFileSync(lineEndingTarget, "utf8").replace(/\r\n?/gu, "\n");
+      fs.writeFileSync(lineEndingTarget, normalizedLineEndingSource.replace(/\n/gu, "\r\n"), "utf8");
+      const crlfIdentity = runFrontendIdentityProbe(fixtureRoot);
+      fs.writeFileSync(lineEndingTarget, normalizedLineEndingSource, "utf8");
+      const lfIdentity = runFrontendIdentityProbe(fixtureRoot);
+      expect(crlfIdentity.sourceIdentity).toBe(lfIdentity.sourceIdentity);
+      expect(lfIdentity.sourceIdentity).toBe(fixtureIdentity.sourceIdentity);
+
       for (const relativePath of boundaryFiles) {
         const target = path.join(fixtureRoot, relativePath);
         fs.appendFileSync(target, "\n// deterministic identity mutation\n", "utf8");
