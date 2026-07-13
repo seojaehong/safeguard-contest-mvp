@@ -76,10 +76,10 @@ isolated adapters behind a versioned `EngineAdapter` contract. The adapter path
 is not a wholesale core replacement and is not permission to move SafeClaw
 domain tools into a runtime-owned registry.
 
-Phase A permits an isolated, bounded experiment. It does not promote Hermes or
-a fork to production. The current adapter interface exposes no execution
-capabilities, and its checked-in mode gate supports only disabled or local
-OpenClaw operation, with the local mode disabled on Vercel
+Phase A authorizes this architecture record only; it does not authorize a
+Hermes, GPT OAuth, or other runtime experiment. The current adapter interface
+exposes no execution capabilities, and its checked-in mode gate supports only
+disabled or local OpenClaw operation, with the local mode disabled on Vercel
 ([`lib/engine-adapter.ts:20-25`](lib/engine-adapter.ts#L20-L25),
 [`lib/engine-adapter.ts:77-96`](lib/engine-adapter.ts#L77-L96)). This is evidence
 of the seam and current kill boundary, not evidence of Hermes availability.
@@ -185,14 +185,20 @@ Ontology reads exposed to external consumers remain published-only
 
 ## ADR-PA-005: OAuth Experiment and Commercial Service Authentication
 
-Status: Accepted with a bounded experiment
+Status: Accepted as a future Phase B contract; no Phase A execution authorization
 
 ### Decision
 
-A representative local GPT OAuth proof of concept is allowed only as a bounded
-experiment for adapter conformance and operator evaluation. It must use an
-isolated runtime home and scoped SafeClaw access, must not receive database
-credentials, and must not be described as commercial or live Hermes proof.
+A representative local GPT OAuth proof of concept is documented as a future
+Phase B delivery-order step 6, not as a Phase A experiment. It may be executed
+only after the Phase B entry gate accepts the Phase A closeout and after a
+separate explicit approval authorizes that specific proof of concept. This ADR
+does not itself authorize OAuth login, Hermes startup, provider access, or any
+runtime execution.
+
+When separately approved, the proof of concept must use an isolated runtime
+home and scoped SafeClaw access, must not receive database credentials, and
+must not be described as commercial or live Hermes proof.
 
 Commercial customer traffic later requires service authentication: an approved
 OpenAI project service account/API credential or equivalent workload identity,
@@ -285,19 +291,25 @@ require converting runtime-owned data back into product truth.
 ## Phase B Relationship
 
 Phase A records the authority, evidence, adapter, authentication, and rollback
-contracts. It does not implement Phase B. Phase B remains an approved design
-with implementation deferred, cannot widen Phase A or trigger a database change
-by itself, and requires separate approval for any migration or traffic cutover
+contracts. It does not implement or authorize Phase B step 6. Phase B remains
+an approved design with implementation deferred, cannot widen Phase A or
+trigger a database change by itself, and requires separate approval for any
+migration, traffic cutover, or representative GPT OAuth proof of concept
 ([`phase-b-organization-knowledge-and-engine-plan.md:3-26`](docs/phase-b-organization-knowledge-and-engine-plan.md#L3-L26)).
 
 The Phase B entry gate requires the Phase A ADR, reviewed provenance, read-only
 RLS audit, tenant-isolation and rollback plans, service-auth policy, and
 explicit database migration approval
 ([`phase-b-organization-knowledge-and-engine-plan.md:174-186`](docs/phase-b-organization-knowledge-and-engine-plan.md#L174-L186)).
+The representative GPT OAuth proof of concept remains Phase B delivery-order
+step 6 and may begin only after that entry gate and its separate explicit
+approval are accepted.
 
 ## Explicit Non-Goals
 
 - No Hermes, OpenClaw, fork, provider, MCP, queue, or executor implementation.
+- No Phase A GPT OAuth login, Hermes startup, provider access, or runtime
+  experiment.
 - No production runtime promotion or traffic cutover.
 - No database schema change, migration, backfill, or data mutation.
 - No direct runtime database credential or direct write path.
