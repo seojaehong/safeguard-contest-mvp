@@ -469,6 +469,8 @@ describe("browser evidence reconciliation", () => {
     expect(provenance).toEqual({
       sourceSha: source.sourceSha,
       sourceIdentity: source.sourceIdentity,
+      evidenceHead: source.sourceSha,
+      evidenceOnlyDescendant: false,
       staticAudit: {
         sourceSha: source.sourceSha,
         sourceIdentity: source.sourceIdentity,
@@ -489,6 +491,47 @@ describe("browser evidence reconciliation", () => {
         }
       })()`);
       expect(failure, JSON.stringify(mutation)).toBe("Static audit prerequisite is stale.");
+    }
+  }, 30_000);
+
+  it("accepts only approved evidence-only descendants without weakening source identity", () => {
+    const verifiedSourceSha = "1".repeat(40);
+    const evidenceHead = "2".repeat(40);
+    const sourceIdentity = "3".repeat(64);
+    const newestMtime = Date.now() - 5_000;
+    const staticAudit = {
+      schemaVersion: 2,
+      generatedAt: new Date(newestMtime + 1_000).toISOString(),
+      sourceSha: verifiedSourceSha,
+      sourceIdentity,
+      status: "pass",
+      counts: { pageFiles: 32, componentFiles: 23 },
+      coverageIssues: 0,
+      violationCount: 0,
+    };
+    const source = { sourceSha: evidenceHead, sourceIdentity, newestMtime };
+    const timing = { now: newestMtime + 3_000, reportMtime: newestMtime + 2_000, evidenceOnlyDescendant: true };
+    const validationExpression = `audit.validateStaticAuditPrerequisite(${JSON.stringify(staticAudit)}, ${JSON.stringify(source)}, ${JSON.stringify(timing)})`;
+    const provenance = runBrowserContractProbe(`audit.browserReportProvenance(${validationExpression})`);
+
+    expect(provenance).toEqual({
+      sourceSha: verifiedSourceSha,
+      sourceIdentity,
+      evidenceHead,
+      evidenceOnlyDescendant: true,
+      staticAudit: { sourceSha: verifiedSourceSha, sourceIdentity },
+    });
+    expect(runBrowserContractProbe(`audit.evidenceOnlyPathsAreAllowed(${JSON.stringify([
+      "evaluation/backend-release-final-2026-07-13/report.json",
+      "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json",
+    ])})`)).toBe(true);
+    for (const paths of [
+      ["app/globals.css"],
+      ["evaluation/unapproved/report.json"],
+      ["evaluation/backend-release-final-2026-07-13/report.json", "lib/db-harness.ts"],
+      ["../evaluation/backend-release-final-2026-07-13/report.json"],
+    ]) {
+      expect(runBrowserContractProbe(`audit.evidenceOnlyPathsAreAllowed(${JSON.stringify(paths)})`), JSON.stringify(paths)).toBe(false);
     }
   }, 30_000);
 

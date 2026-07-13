@@ -18,6 +18,10 @@ const staticAuditPath = path.resolve(
   process.env.FRONTEND_AUDIT_STATIC_REPORT
     ?? "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
 );
+const evidenceOnlyPathPrefixes = [
+  "evaluation/backend-release-final-2026-07-13/",
+  "evaluation/frontend-audit-runner-port-v2-2026-07-11/",
+];
 
 const routes = [
   ["/", "/"], ["/archive", "/archive"], ["/ask", "/ask?q=추락"],
@@ -67,15 +71,47 @@ export function currentSourceIdentity() {
   };
 }
 
-export function validateStaticAuditPrerequisite(staticAudit, source, { now, reportMtime }) {
+export function evidenceOnlyPathsAreAllowed(paths) {
+  return Array.isArray(paths)
+    && paths.length > 0
+    && paths.every((filePath) => {
+      if (typeof filePath !== "string") return false;
+      const normalized = filePath.replaceAll("\\", "/");
+      return !normalized.startsWith("../")
+        && !normalized.includes("/../")
+        && evidenceOnlyPathPrefixes.some((prefix) => normalized.startsWith(prefix));
+    });
+}
+
+export function isEvidenceOnlyDescendant(verifiedSourceSha, currentHead, repoRoot = root) {
+  if (!/^[0-9a-f]{40}$/u.test(verifiedSourceSha)
+    || !/^[0-9a-f]{40}$/u.test(currentHead)
+    || verifiedSourceSha === currentHead) return false;
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", verifiedSourceSha, currentHead], {
+      cwd: repoRoot,
+      stdio: "ignore",
+    });
+    const paths = execFileSync("git", ["diff", "--name-only", `${verifiedSourceSha}..${currentHead}`], {
+      cwd: repoRoot,
+      encoding: "utf8",
+    }).split(/\r?\n/u).filter(Boolean);
+    return evidenceOnlyPathsAreAllowed(paths);
+  } catch {
+    return false;
+  }
+}
+
+export function validateStaticAuditPrerequisite(staticAudit, source, { now, reportMtime, evidenceOnlyDescendant = false }) {
   if (!/^[0-9a-f]{40}$/u.test(source.sourceSha)
     || !/^[0-9a-f]{64}$/u.test(source.sourceIdentity)
     || !Number.isFinite(source.newestMtime)) {
     throw new Error("Current frontend source identity is invalid.");
   }
   const generatedAt = Date.parse(staticAudit.generatedAt);
+  const exactSource = staticAudit.sourceSha === source.sourceSha;
   if (staticAudit.schemaVersion !== 2
-    || staticAudit.sourceSha !== source.sourceSha
+    || (!exactSource && evidenceOnlyDescendant !== true)
     || staticAudit.sourceIdentity !== source.sourceIdentity
     || !Number.isFinite(generatedAt)
     || generatedAt < source.newestMtime
@@ -92,13 +128,21 @@ export function validateStaticAuditPrerequisite(staticAudit, source, { now, repo
       `Static audit prerequisite failed: status=${staticAudit.status}, violations=${staticAudit.violationCount}, coverage=${staticAudit.coverageIssues}, pages=${staticAudit.counts?.pageFiles}, components=${staticAudit.counts?.componentFiles}`,
     );
   }
-  return { staticAudit, sourceSha: source.sourceSha, sourceIdentity: source.sourceIdentity };
+  return {
+    staticAudit,
+    sourceSha: staticAudit.sourceSha,
+    sourceIdentity: source.sourceIdentity,
+    evidenceHead: source.sourceSha,
+    evidenceOnlyDescendant: !exactSource,
+  };
 }
 
 export function browserReportProvenance(validatedPrerequisite) {
   return {
     sourceSha: validatedPrerequisite.sourceSha,
     sourceIdentity: validatedPrerequisite.sourceIdentity,
+    evidenceHead: validatedPrerequisite.evidenceHead,
+    evidenceOnlyDescendant: validatedPrerequisite.evidenceOnlyDescendant,
     staticAudit: {
       sourceSha: validatedPrerequisite.staticAudit.sourceSha,
       sourceIdentity: validatedPrerequisite.staticAudit.sourceIdentity,
@@ -115,6 +159,7 @@ function loadStaticAuditPrerequisite() {
   return validateStaticAuditPrerequisite(staticAudit, source, {
     now: Date.now(),
     reportMtime: fs.statSync(staticAuditPath).mtimeMs,
+    evidenceOnlyDescendant: isEvidenceOnlyDescendant(staticAudit.sourceSha, source.sourceSha),
   });
 }
 
@@ -581,6 +626,8 @@ async function main() {
     schemaVersion: 3, generatedAt: new Date().toISOString(), baseUrl,
     sourceSha: provenance.sourceSha,
     sourceIdentity: provenance.sourceIdentity,
+    evidenceHead: provenance.evidenceHead,
+    evidenceOnlyDescendant: provenance.evidenceOnlyDescendant,
     rowContract,
     totals: { routes: routes.length, routeRows: routeRows.length, workspaceThemeRows: workspaceThemeRows.length, specialSurfaceRows: specialSurfaceRows.length, generatedSurfaceRows: generatedSurfaceRows.length, screenshots: allRows.length, successes: allRows.length - failedRows.length, failedRows: failedRows.length, recoveredRows: recoveredRows.length, findingCount: findings.length, failures: failedRows.length, elapsedMs: Date.now() - startedAt },
     staticAudit: {
@@ -605,7 +652,7 @@ async function main() {
   };
   fs.writeFileSync(path.join(outputDirectory, "browser-report.json"), `${JSON.stringify(report, null, 2)}\n`);
   const gateLines = verificationCommands.map((gate) => `- \`${gate.command}\`: ${gate.outcome}, exit ${gate.exitCode}${gate.testFiles ? `, ${gate.testFiles} files/${gate.tests} tests` : ""}${gate.buildId ? `, build ${gate.buildId}` : ""}${gate.pages ? `, ${gate.pages} pages/${gate.components} components, coverage ${gate.coverageIssues}, violations ${gate.violations}` : ""}${gate.rows ? `, ${gate.rows} rows, failed ${gate.failedRows}, findings ${gate.findings}` : ""}`).join("\n");
-  const markdown = `# SafeClaw frontend consistency browser audit\n\n- Generated: ${report.generatedAt}\n- Source SHA: ${report.sourceSha}\n- Source identity: ${report.sourceIdentity}\n- Routes: ${report.totals.routes}/${report.rowContract.routes}\n- Route matrix: ${report.totals.routeRows}/${report.rowContract.routeRows}\n- Workspace Day/Night: ${report.totals.workspaceThemeRows}/${report.rowContract.workspaceThemeRows}\n- Special surfaces: ${report.totals.specialSurfaceRows}/${report.rowContract.specialSurfaceRows}\n- Generated surfaces: ${report.totals.generatedSurfaceRows}/${report.rowContract.generatedSurfaceRows}\n- Total rows: ${report.totals.screenshots}/${report.rowContract.totalRows}\n- Successful rows: ${report.totals.successes}\n- Failed rows: ${report.totals.failedRows}\n- Recovered transient rows: ${report.totals.recoveredRows}\n- Findings: ${report.totals.findingCount}\n- Elapsed: ${report.totals.elapsedMs} ms\n\n## Executed verification\n\n${gateLines}\n\n## Scope\n\nThis report contains browser facts measured by this invocation only. External test, typecheck, build, and integration results are not provided. The validated static prerequisite identity is recorded separately in the JSON report.\n\n## Findings\n\n${findings.length ? findings.map((item) => `- ${item}`).join("\n") : "None."}\n`;
+  const markdown = `# SafeClaw frontend consistency browser audit\n\n- Generated: ${report.generatedAt}\n- Source SHA: ${report.sourceSha}\n- Source identity: ${report.sourceIdentity}\n- Evidence HEAD: ${report.evidenceHead}\n- Evidence-only descendant: ${report.evidenceOnlyDescendant}\n- Routes: ${report.totals.routes}/${report.rowContract.routes}\n- Route matrix: ${report.totals.routeRows}/${report.rowContract.routeRows}\n- Workspace Day/Night: ${report.totals.workspaceThemeRows}/${report.rowContract.workspaceThemeRows}\n- Special surfaces: ${report.totals.specialSurfaceRows}/${report.rowContract.specialSurfaceRows}\n- Generated surfaces: ${report.totals.generatedSurfaceRows}/${report.rowContract.generatedSurfaceRows}\n- Total rows: ${report.totals.screenshots}/${report.rowContract.totalRows}\n- Successful rows: ${report.totals.successes}\n- Failed rows: ${report.totals.failedRows}\n- Recovered transient rows: ${report.totals.recoveredRows}\n- Findings: ${report.totals.findingCount}\n- Elapsed: ${report.totals.elapsedMs} ms\n\n## Executed verification\n\n${gateLines}\n\n## Scope\n\nThis report contains browser facts measured by this invocation only. External test, typecheck, build, and integration results are not provided. The validated static prerequisite identity is recorded separately in the JSON report.\n\n## Findings\n\n${findings.length ? findings.map((item) => `- ${item}`).join("\n") : "None."}\n`;
   fs.writeFileSync(path.join(outputDirectory, "browser-report.md"), markdown);
   if (failedRows.length) {
     console.error(JSON.stringify(report.totals, null, 2));
