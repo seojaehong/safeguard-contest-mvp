@@ -9,6 +9,8 @@ const SPEC_MARKDOWN_PATH = `${SPEC_DIRECTORY}/spec.md`;
 const VALIDATOR_PATH = `${SPEC_DIRECTORY}/validate-contract.mjs`;
 const EVIDENCE_PATH = `${SPEC_DIRECTORY}/review-evidence.json`;
 const FULL_SHA = /^[0-9a-f]{40}$/u;
+const HEX_SHA256 = /^[0-9a-f]{64}$/u;
+const TYPED_SHA256 = /^sha256:[0-9a-f]{64}$/u;
 const DOCUMENT_KEYS = [
   "workpackSummaryDraft",
   "riskAssessmentDraft",
@@ -53,10 +55,30 @@ const EXPECTED_EXPORT_SEAMS = [
 ];
 const DELIBERATE_CASES = new Set([
   "normative-parity",
+  "md-prose",
+  "json-model",
+  "json-document-primary-action",
+  "json-unknown-domain",
   "source-shape",
   "target-ref",
   "spec-ref",
-  "implementation-empty"
+  "implementation-empty",
+  "approval-boolean",
+  "command-unbound-hash",
+  "browser-pass-flag",
+  "browser-cumulative-scale",
+  "browser-inner-transform",
+  "browser-cross-parent-overlap",
+  "browser-fixed-offscreen",
+  "browser-sticky-cover",
+  "browser-horizontal-clip",
+  "browser-vertical-clip",
+  "browser-nested-scroll",
+  "browser-textarea-scroll",
+  "browser-inner-zoom",
+  "browser-mobile-late",
+  "browser-ratio-reflow",
+  "browser-pixel-viewport-scale"
 ]);
 
 function parseArguments(argv) {
@@ -72,6 +94,8 @@ function parseArguments(argv) {
     spec: "",
     base: "",
     head: "",
+    approvalEvidence: "",
+    approvalManifest: "",
     specFile: SPEC_JSON_PATH,
     deliberate: ""
   };
@@ -91,6 +115,8 @@ function parseArguments(argv) {
     else if (argument === "--spec") result.spec = next();
     else if (argument === "--base") result.base = next();
     else if (argument === "--head") result.head = next();
+    else if (argument === "--approval-evidence") result.approvalEvidence = next();
+    else if (argument === "--approval-manifest") result.approvalManifest = next();
     else if (argument === "--spec-file") result.specFile = next();
     else if (argument === "--deliberate") result.deliberate = next();
     else throw new Error(`Unknown argument: ${argument}`);
@@ -131,19 +157,6 @@ function escapeCell(value) {
     .replaceAll("\n", "\\n");
 }
 
-function expandDocumentFields(spec, document) {
-  const bound = document.typeBindings.flatMap((binding) => {
-    const registered = spec.common.typeRegistry[binding.type];
-    if (!registered) throw new Error(`Unknown type binding ${binding.type} in ${document.id}`);
-    return registered.fields.map((field) => {
-      const expanded = [`${binding.prefix}.${field[0]}`, ...field.slice(1)];
-      if (Object.hasOwn(binding.currentOverrides, field[0])) expanded[4] = binding.currentOverrides[field[0]];
-      return expanded;
-    });
-  });
-  return [...bound, ...document.fields];
-}
-
 function renderTable(lines, heading, headers, rows) {
   lines.push(`### ${heading}`, "");
   lines.push(`| ${headers.join(" | ")} |`);
@@ -152,157 +165,88 @@ function renderTable(lines, heading, headers, rows) {
   lines.push("");
 }
 
+function valueKind(value) {
+  if (Array.isArray(value)) return "array";
+  if (value === null) return "null";
+  return typeof value;
+}
+
+function directChildCount(value) {
+  if (Array.isArray(value)) return value.length;
+  if (value !== null && typeof value === "object") return Object.keys(value).length;
+  return 0;
+}
+
+function recursiveLeafCount(value) {
+  if (Array.isArray(value)) return value.reduce((total, child) => total + recursiveLeafCount(child), 0);
+  if (value !== null && typeof value === "object") {
+    return Object.values(value).reduce((total, child) => total + recursiveLeafCount(child), 0);
+  }
+  return 1;
+}
+
+function maximumDepth(value) {
+  const children = Array.isArray(value)
+    ? value
+    : value !== null && typeof value === "object"
+      ? Object.values(value)
+      : [];
+  return children.length === 0 ? 0 : 1 + Math.max(...children.map(maximumDepth));
+}
+
+function structuralRow(path, value, includeValue = true) {
+  const normalized = canonicalJson(value);
+  return [
+    path,
+    valueKind(value),
+    directChildCount(value),
+    recursiveLeafCount(value),
+    maximumDepth(value),
+    `sha256:${sha256(normalized)}`,
+    includeValue ? value : "<bound by complete top-level domain rows>"
+  ];
+}
+
+function structuralRows(spec) {
+  const rows = [structuralRow("$", spec, false)];
+  for (const key of Object.keys(spec).sort()) {
+    const value = spec[key];
+    rows.push(structuralRow(key, value));
+  }
+  return rows;
+}
+
 function renderNormativeMarkdown(spec) {
-  const lines = ["<!-- SAFECLAW-NORMATIVE:BEGIN -->", ""];
-  renderTable(lines, "Contract And Review Gates", ["Key", "Normative value"], [
-    ["schemaVersion", spec.schemaVersion],
-    ["status", spec.meta.status],
-    ["implementationProgramStatus", spec.meta.implementationProgramStatus],
-    ["sourceBase", spec.meta.sourceBase],
-    ["currentIntegrationTarget", spec.meta.currentIntegrationTarget],
-    ["remediationParent", spec.meta.remediationParent],
-    ["reviewScope", spec.meta.reviewScope],
-    ["canonicalRule", spec.meta.canonicalRule],
-    ["independentGate", spec.independentGate],
-    ["validation", spec.validation]
-  ]);
-  renderTable(lines, "Registry And Source Contract", ["Key", "Normative value"], [
-    ["contractIds", spec.contractIds],
-    ["acceptance", spec.implementation.acceptance],
-    ["tupleSchemas", spec.tupleSchemas],
-    ["sourceSeams", spec.sourceSeams],
-    ["common.projection", spec.common.projection],
-    ["common.codecs", spec.common.codecs],
-    ["common.typeRegistry", spec.common.typeRegistry],
-    ["common.rawProvenance", spec.common.rawProvenance]
-  ]);
+  const lines = [
+    "<!-- SAFECLAW-NORMATIVE:BEGIN -->",
+    "",
+    "### Complete Structural Contract",
+    "",
+    "Every top-level JSON domain is enumerated without an allowlist. Each domain row contains its complete canonical normalized value, including all nested fields; the root row independently binds the whole contract.",
+    ""
+  ];
   renderTable(
     lines,
-    "Twelve Document Schemas",
-    ["ID", "Key", "Title", "Type", "Component", "Family", "Expanded fields", "Field notes", "Interactions", "Gates", "Schema order"],
-    spec.documents.map((document) => [
-      document.id,
-      document.key,
-      document.title,
-      document.type,
-      document.component,
-      document.family,
-      expandDocumentFields(spec, document),
-      document.fieldNotes,
-      document.interactions,
-      document.gates,
-      document.schemaOrder
-    ])
+    "Normalized Domains",
+    ["Path", "Kind", "Direct children", "Recursive leaves", "Max depth", "Canonical SHA-256", "Canonical normalized value"],
+    structuralRows(spec)
   );
-  renderTable(lines, "Workflow And Authority", ["Key", "Normative value"], [
-    ["workflow.reviewStates", spec.workflow.reviewStates],
-    ["workflow.transitions", spec.workflow.transitions],
-    ["workflow.forbiddenTransitions", spec.workflow.forbiddenTransitions],
-    ["workflow.effects", spec.workflow.effects],
-    ["workflow.revalidation", spec.workflow.revalidation],
-    ["workflow.save", spec.workflow.save],
-    ["workflow.share", spec.workflow.share],
-    ["workflow.commands", spec.workflow.commands],
-    ["workflow.disclaimer", spec.workflow.disclaimer],
-    ["persistence.envelopeFields", spec.persistence.envelopeFields],
-    ["persistence.digestDefinitions", spec.persistence.digestDefinitions],
-    ["persistence.topLevelSeal", spec.persistence.topLevelSeal],
-    ["persistence.serverRevisionAuthority", spec.persistence.serverRevisionAuthority],
-    ["persistence.photo", spec.persistence.photo],
-    ["evidencePresentation", spec.evidencePresentation]
-  ]);
-  renderTable(lines, "Components And Export Seams", ["Key", "Normative value"], [
-    ["components", spec.components],
-    ["export.semanticDeterminism", spec.export.semanticDeterminism],
-    ["export.manifest", spec.export.manifest],
-    ["export.roundTripDefinition", spec.export.roundTripDefinition],
-    ["export.roundTripOwner", spec.export.roundTripOwner],
-    ["export.pureCodecLimit", spec.export.pureCodecLimit],
-    ["export.actualRoutes", spec.export.actualRoutes],
-    ["export.excludedTargetSeam", spec.export.excludedTargetSeam],
-    ["export.unknownFieldPolicy", spec.export.unknownFieldPolicy]
-  ]);
-  renderTable(
-    lines,
-    "Target Export Call Sites",
-    ["ID", "Kind", "Client path", "Client symbol", "Server path", "Server symbol", "URL", "Target contract"],
-    spec.export.actualSeamsAtTarget.map((seam) => [
-      seam.id,
-      seam.kind,
-      seam.clientPath,
-      seam.clientSymbol,
-      seam.serverPath,
-      seam.serverSymbol,
-      seam.url,
-      seam.targetContract
-    ])
-  );
-  renderTable(
-    lines,
-    "Implementation Waves",
-    ["Wave", "Status", "Owner", "Documents", "Entry gate", "Owned files", "Read-only dependencies", "Test files", "Commands", "TDD gates", "Browser assertions", "Exit gate", "Rollback"],
-    spec.implementation.waves.map((wave) => [
-      wave.id,
-      wave.status,
-      wave.owner,
-      wave.documents,
-      wave.entryGate,
-      wave.ownedFiles,
-      wave.readOnlyDependencies,
-      wave.testFiles,
-      wave.commands,
-      wave.tddGates,
-      wave.browserAssertions,
-      wave.exitGate,
-      wave.rollback
-    ])
-  );
-  renderTable(lines, "Implementation And Browser Contract", ["Key", "Normative value"], [
-    ["implementation.programStatus", spec.implementation.programStatus],
-    ["implementation.startGate", spec.implementation.startGate],
-    ["implementation.codecFixtureMatrix", spec.implementation.codecFixtureMatrix],
-    ["implementation.fileOwnership", spec.implementation.fileOwnership],
-    ["implementation.viewports", spec.implementation.viewports],
-    ["implementation.browserMatrix", spec.implementation.browserMatrix],
-    ["ui.core", {
-      direction: spec.ui.direction,
-      layout: spec.ui.layout,
-      mobileScroll: spec.ui.mobileScroll,
-      typography: spec.ui.typography,
-      warning: spec.ui.warning,
-      actions: spec.ui.actions,
-      states: spec.ui.states,
-      accessibility: spec.ui.accessibility,
-      invariant: spec.ui.invariant
-    }],
-    ["ui.taskDistanceBudgets", spec.ui.taskDistanceBudgets],
-    ["ui.textZoom200", spec.ui.textZoom200],
-    ["ui.browserAssertions", spec.ui.browserAssertions]
-  ]);
-  renderTable(
-    lines,
-    "Timestamped Conflict Snapshot",
-    ["ID", "Local ref/head", "Remote ref/head", "Review/worktree state", "Dirty paths", "Exact overlap hunks", "Decision"],
-    spec.integrationLedger.heads.map((head) => [
-      head.id,
-      [head.localRef, head.localHead],
-      [head.remoteRef ?? null, head.remoteHead ?? null],
-      [head.reviewState ?? null, head.worktreeState],
-      head.dirtyPaths ?? [],
-      head.overlapHunks ?? head.productHunks ?? [],
-      head.decision
-    ])
-  );
-  renderTable(lines, "Snapshot Rules", ["Key", "Normative value"], [
-    ["snapshotId", spec.integrationLedger.snapshotId],
-    ["capturedAt", spec.integrationLedger.capturedAt],
-    ["binding", spec.integrationLedger.binding],
-    ["freshRecheck", spec.integrationLedger.freshRecheck],
-    ["integrationOrder", spec.integrationLedger.integrationOrder],
-    ["rules", spec.integrationLedger.rules],
-    ["humanParityContract", spec.humanParityContract]
-  ]);
   lines.push("<!-- SAFECLAW-NORMATIVE:END -->");
+  return lines.join("\n");
+}
+
+function renderHumanMarkdown(spec) {
+  const contract = spec.humanParityContract;
+  const lines = [
+    contract.humanStart,
+    "",
+    "### Human Normative Requirements",
+    ""
+  ];
+  for (const [id, title, requirement] of contract.humanRequirements) {
+    lines.push(`- **${id} ${title}:** ${requirement}`);
+  }
+  lines.push("", contract.humanEnd);
   return lines.join("\n");
 }
 
@@ -360,6 +304,27 @@ function extractMarkedBlock(markdown, start, end) {
   return markdown.slice(startIndex, endIndex + end.length);
 }
 
+function replaceMarkedBlock(markdown, start, end, placeholder) {
+  const block = extractMarkedBlock(markdown, start, end);
+  return markdown.replace(block, `${start}\n${placeholder}\n${end}`);
+}
+
+function normalizedMarkdownProse(markdown, contract) {
+  const withoutStructural = replaceMarkedBlock(
+    markdown,
+    contract.markdownStart,
+    contract.markdownEnd,
+    "<STRUCTURAL-CONTRACT>"
+  );
+  const withoutHuman = replaceMarkedBlock(
+    withoutStructural,
+    contract.humanStart,
+    contract.humanEnd,
+    "<HUMAN-REQUIREMENTS>"
+  );
+  return withoutHuman.replaceAll("\r\n", "\n");
+}
+
 function sortedCanonical(value) {
   return canonicalJson([...value].sort());
 }
@@ -410,14 +375,645 @@ function validateBoundBlob(root, commit, record, label) {
   return buffer;
 }
 
+function isRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function findForbiddenKey(value, forbidden, path = "$") {
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const found = findForbiddenKey(value[index], forbidden, `${path}[${index}]`);
+      if (found) return found;
+    }
+    return null;
+  }
+  if (!isRecord(value)) return null;
+  for (const [key, child] of Object.entries(value)) {
+    if (forbidden.has(key)) return `${path}.${key}`;
+    const found = findForbiddenKey(child, forbidden, `${path}.${key}`);
+    if (found) return found;
+  }
+  return null;
+}
+
+function requireString(value, label) {
+  if (typeof value !== "string" || value.trim().length === 0) throw new Error(`${label} must be a non-empty string`);
+  return value;
+}
+
+function requireIsoDateTime(value, label) {
+  requireString(value, label);
+  if (!Number.isFinite(Date.parse(value))) throw new Error(`${label} must be an ISO date-time`);
+  return value;
+}
+
+function requireTypedSha256(value, label) {
+  if (typeof value !== "string" || !TYPED_SHA256.test(value)) {
+    throw new Error(`${label} must be sha256:<64 lowercase hex>`);
+  }
+  return value;
+}
+
+function validateTypedBoundBlob(root, commit, record, label) {
+  if (!record || typeof record.path !== "string" || record.path.length === 0) {
+    throw new Error(`${label} blob record is missing a path`);
+  }
+  requireTypedSha256(record.sha256, `${label}.sha256`);
+  const buffer = readBlob(root, commit, record.path);
+  if (record.gitBlob !== blobOid(root, commit, record.path)) throw new Error(`${label} git blob mismatch`);
+  if (record.sha256 !== `sha256:${sha256(buffer)}`) throw new Error(`${label} SHA-256 mismatch`);
+  if (record.bytes !== buffer.byteLength) throw new Error(`${label} byte count mismatch`);
+  return buffer;
+}
+
+function validateApprovalManifestShape(manifest) {
+  if (!isRecord(manifest)) throw new Error("external approval manifest must be an object");
+  const forbidden = findForbiddenKey(manifest, new Set(["approvals", "approved", "pass"]));
+  if (forbidden) throw new Error(`external approval manifest contains forbidden self-assertion ${forbidden}`);
+  if (manifest.kind !== "safeclaw-external-approval-manifest/v1") {
+    throw new Error("external approval manifest kind differs");
+  }
+  if (!FULL_SHA.test(requireString(manifest.specCommit, "approval specCommit"))) throw new Error("approval specCommit must be a full SHA");
+  if (!FULL_SHA.test(requireString(manifest.targetSha, "approval targetSha"))) throw new Error("approval targetSha must be a full SHA");
+  requireTypedSha256(manifest.migrationRpcProposalDigest, "approval migrationRpcProposalDigest");
+  requireString(manifest.approvalRootOperationId, "approvalRootOperationId");
+  if (!isRecord(manifest.migrationRpcProposal)) throw new Error("external approval manifest must bind the proposal blob");
+  if (!Array.isArray(manifest.events) || manifest.events.length !== 2) {
+    throw new Error("external approval manifest must contain exactly two external events");
+  }
+  const eventTypes = manifest.events.map((event) => event.type).sort();
+  if (canonicalJson(eventTypes) !== canonicalJson(["INDEPENDENT_SPEC_PASS", "USER_DB_AUTHORITY_APPROVAL"])) {
+    throw new Error("external approval event types differ");
+  }
+}
+
+function validateExternalApproval(root, args, spec, specCommit, base, head, implementationEvidence) {
+  const forbidden = findForbiddenKey(implementationEvidence, new Set(["approvals", "approved", "pass", "passed"]));
+  if (forbidden) throw new Error(`implementation evidence contains forbidden self-assertion ${forbidden}`);
+  const approvalCommit = resolveCommit(root, args.approvalEvidence, "external approval evidence");
+  for (const [label, commit] of [["spec", specCommit], ["implementation evidence", args.evidence], ["base", base], ["head", head]]) {
+    if (approvalCommit === commit) throw new Error(`external approval evidence must be separate from ${label}`);
+  }
+  const approvalPath = requireString(args.approvalManifest, "--approval-manifest");
+  const approval = parseJsonBuffer(readBlob(root, approvalCommit, approvalPath), "external approval manifest");
+  validateApprovalManifestShape(approval);
+  if (approval.specCommit !== specCommit || approval.targetSha !== spec.meta.currentIntegrationTarget || base !== approval.targetSha) {
+    throw new Error("external approval manifest is not bound to the immutable spec and exact implementation target/base");
+  }
+  if (
+    implementationEvidence.approvalEvidenceCommit !== approvalCommit ||
+    implementationEvidence.approvalManifestPath !== approvalPath ||
+    implementationEvidence.migrationRpcProposalDigest !== approval.migrationRpcProposalDigest ||
+    implementationEvidence.approvalRootOperationId !== approval.approvalRootOperationId
+  ) {
+    throw new Error("implementation evidence approval binding differs from external approval manifest");
+  }
+  const proposalBuffer = validateTypedBoundBlob(root, approvalCommit, approval.migrationRpcProposal, "migration/RPC proposal");
+  if (`sha256:${sha256(proposalBuffer)}` !== approval.migrationRpcProposalDigest) {
+    throw new Error("migration/RPC proposal digest differs from its actual blob");
+  }
+  for (const event of approval.events) {
+    requireString(event.eventId, `${event.type}.eventId`);
+    requireString(event.producer, `${event.type}.producer`);
+    requireString(event.repository, `${event.type}.repository`);
+    requireString(event.actorId, `${event.type}.actorId`);
+    requireString(event.actorLogin, `${event.type}.actorLogin`);
+    requireIsoDateTime(event.occurredAt, `${event.type}.occurredAt`);
+    if (event.decision !== "APPROVED") throw new Error(`${event.type} decision is not the external APPROVED event`);
+    if (
+      event.repository !== "seojaehong/safeguard-contest-mvp" ||
+      event.specCommit !== specCommit ||
+      event.targetSha !== approval.targetSha ||
+      event.migrationRpcProposalDigest !== approval.migrationRpcProposalDigest ||
+      event.approvalRootOperationId !== approval.approvalRootOperationId
+    ) {
+      throw new Error(`${event.type} binding differs from approval manifest`);
+    }
+    const expectedProducer = event.type === "INDEPENDENT_SPEC_PASS" ? "github-review-event" : "codex-user-approval-event";
+    if (event.producer !== expectedProducer) throw new Error(`${event.type} producer is not the required external event source`);
+    const raw = parseJsonBuffer(
+      validateTypedBoundBlob(root, approvalCommit, event.rawEvent, `${event.type} raw external event`),
+      `${event.type} raw external event`
+    );
+    for (const field of ["type", "eventId", "producer", "repository", "actorId", "actorLogin", "occurredAt", "decision", "specCommit", "targetSha", "migrationRpcProposalDigest", "approvalRootOperationId"]) {
+      if (raw[field] !== event[field]) throw new Error(`${event.type} raw event field differs: ${field}`);
+    }
+  }
+  return { approvalCommit, approval };
+}
+
+function validateExecutionReceiptShape(receipt) {
+  if (!isRecord(receipt)) throw new Error("execution receipt must be an object");
+  const forbidden = findForbiddenKey(receipt, new Set(["command", "outputSha256", "pass", "passed", "approved"]));
+  if (forbidden) throw new Error(`execution receipt contains forbidden unbound assertion ${forbidden}`);
+  if (receipt.kind !== "safeclaw-command-execution-receipt/v1") throw new Error("execution receipt kind differs");
+  requireString(receipt.sourceSha, "execution sourceSha");
+  requireString(receipt.buildId, "execution buildId");
+  requireString(receipt.commandId, "execution commandId");
+  requireString(receipt.cwd, "execution cwd");
+  requireIsoDateTime(receipt.startedAt, "execution startedAt");
+  requireIsoDateTime(receipt.completedAt, "execution completedAt");
+  if (!Array.isArray(receipt.commandArgv) || receipt.commandArgv.length === 0 || receipt.commandArgv.some((item) => typeof item !== "string" || item.length === 0)) {
+    throw new Error("execution commandArgv must be a non-empty string array");
+  }
+  if (!Number.isInteger(receipt.exitCode)) throw new Error("execution exitCode must come from the loaded receipt");
+  for (const field of ["producer", "runId", "jobId"]) requireString(receipt[field], `execution ${field}`);
+  if (!receipt.stdout || !receipt.stderr || !Array.isArray(receipt.artifacts)) {
+    throw new Error("execution receipt must bind stdout, stderr, and artifact blobs");
+  }
+}
+
+function validateCommandArgv(spec, receipt, context) {
+  const { base, head, declaredWaves } = context;
+  const exact = {
+    typecheck: ["npm.cmd", "run", "typecheck"],
+    build: ["npm.cmd", "run", "build"],
+    "diff-check": ["git", "diff", "--check", `${base}...${head}`, "--"],
+    browser: ["npx.cmd", "playwright", "test", "tests/workpack-editor-browser-matrix.test.ts"]
+  };
+  if (Object.hasOwn(exact, receipt.commandId)) {
+    if (canonicalJson(receipt.commandArgv) !== canonicalJson(exact[receipt.commandId])) {
+      throw new Error(`execution argv differs for ${receipt.commandId}`);
+    }
+    return;
+  }
+  if (receipt.commandId !== "wave-tests") throw new Error(`unknown execution commandId ${receipt.commandId}`);
+  const prefix = ["npx.cmd", "vitest", "run"];
+  if (canonicalJson(receipt.commandArgv.slice(0, 3)) !== canonicalJson(prefix)) throw new Error("wave-tests argv prefix differs");
+  const allowedTests = new Set(
+    spec.implementation.waves
+      .filter((wave) => declaredWaves.includes(wave.id))
+      .flatMap((wave) => wave.testFiles)
+  );
+  const flags = new Set(["--maxWorkers=1", "--no-file-parallelism"]);
+  const testArgs = receipt.commandArgv.slice(3).filter((item) => !flags.has(item));
+  if (testArgs.length === 0 || testArgs.some((item) => !allowedTests.has(item))) {
+    throw new Error("wave-tests argv contains no owned test or an undeclared test");
+  }
+}
+
+function validateExecutionEvidence(root, evidenceCommit, manifest, spec, context) {
+  if (!Array.isArray(manifest.executions) || manifest.executions.length === 0) {
+    throw new Error("implementation manifest has no receipt-bound executions");
+  }
+  if (Object.hasOwn(manifest, "executedCommands")) throw new Error("free-form executedCommands is forbidden");
+  const receiptById = new Map();
+  for (const reference of manifest.executions) {
+    const receipt = parseJsonBuffer(
+      validateTypedBoundBlob(root, evidenceCommit, reference.receipt, `execution receipt ${reference.id ?? "unknown"}`),
+      `execution receipt ${reference.id ?? "unknown"}`
+    );
+    validateExecutionReceiptShape(receipt);
+    if (reference.id !== receipt.commandId || receiptById.has(receipt.commandId)) {
+      throw new Error("execution receipt IDs are missing, duplicated, or mismatched");
+    }
+    if (receipt.sourceSha !== context.head || receipt.buildId !== manifest.buildId) {
+      throw new Error(`${receipt.commandId} source SHA/build ID differs from implementation evidence`);
+    }
+    if (receipt.exitCode !== 0) throw new Error(`${receipt.commandId} loaded receipt exitCode is nonzero`);
+    validateCommandArgv(spec, receipt, context);
+    validateTypedBoundBlob(root, evidenceCommit, receipt.stdout, `${receipt.commandId} stdout`);
+    validateTypedBoundBlob(root, evidenceCommit, receipt.stderr, `${receipt.commandId} stderr`);
+    for (const artifact of receipt.artifacts) {
+      validateTypedBoundBlob(root, evidenceCommit, artifact, `${receipt.commandId} artifact ${artifact.path}`);
+    }
+    receiptById.set(receipt.commandId, receipt);
+  }
+  for (const id of ["typecheck", "diff-check", "wave-tests"]) {
+    if (!receiptById.has(id)) throw new Error(`required execution receipt is missing: ${id}`);
+  }
+  if (context.declaredWaves.includes("wave5") && !receiptById.has("build")) throw new Error("Wave 5 build receipt is missing");
+  return receiptById;
+}
+
+function requireFiniteNumber(value, label) {
+  if (typeof value !== "number" || !Number.isFinite(value)) throw new Error(`${label} must be a finite number`);
+  return value;
+}
+
+function validateRect(rect, label) {
+  if (!isRecord(rect)) throw new Error(`${label} must be a DOMRect record`);
+  for (const field of ["x", "y", "width", "height"]) requireFiniteNumber(rect[field], `${label}.${field}`);
+  if (rect.width < 0 || rect.height < 0) throw new Error(`${label} has a negative dimension`);
+}
+
+function rectangleIntersectionArea(left, right) {
+  const width = Math.max(0, Math.min(left.x + left.width, right.x + right.width) - Math.max(left.x, right.x));
+  const height = Math.max(0, Math.min(left.y + left.height, right.y + right.height) - Math.max(left.y, right.y));
+  return width * height;
+}
+
+function validatePageMetrics(page, label) {
+  if (!isRecord(page)) throw new Error(`${label} page metrics are missing`);
+  for (const field of ["clientWidth", "scrollWidth", "clientHeight", "scrollHeight"]) {
+    requireFiniteNumber(page[field], `${label}.page.${field}`);
+  }
+  if (page.scrollWidth > page.clientWidth + 1) throw new Error(`${label} document has horizontal overflow`);
+}
+
+function validateNode(node, label) {
+  if (!isRecord(node)) throw new Error(`${label} node is not an object`);
+  requireString(node.id, `${label}.id`);
+  if (node.parentId !== null) requireString(node.parentId, `${label}.parentId`);
+  if (typeof node.visible !== "boolean" || typeof node.interactive !== "boolean") {
+    throw new Error(`${label} visibility/interactivity must be raw booleans`);
+  }
+  validateRect(node.rect, `${label}.rect`);
+  for (const field of ["clientWidth", "scrollWidth", "clientHeight", "scrollHeight", "lineCount"]) {
+    requireFiniteNumber(node[field], `${label}.${field}`);
+  }
+  if (!Number.isInteger(node.lineCount) || node.lineCount < 0) throw new Error(`${label}.lineCount must be a non-negative integer`);
+  if (!isRecord(node.computed)) throw new Error(`${label}.computed is missing`);
+  for (const field of ["fontSize", "lineHeight", "zoom"]) requireFiniteNumber(node.computed[field], `${label}.computed.${field}`);
+  for (const field of ["overflowX", "overflowY", "position", "transform", "textSizeAdjust", "maxHeight"]) {
+    requireString(node.computed[field], `${label}.computed.${field}`);
+  }
+  if (node.computed.transform !== "none") throw new Error(`${label} uses an inner transform`);
+  if (node.computed.zoom !== 1) throw new Error(`${label} uses inner CSS zoom`);
+  if (node.computed.textSizeAdjust !== "100%") throw new Error(`${label} changes text-size-adjust`);
+}
+
+function indexSnapshot(snapshot, label) {
+  if (!isRecord(snapshot) || !Array.isArray(snapshot.nodes)) throw new Error(`${label} snapshot is missing nodes`);
+  validatePageMetrics(snapshot.page, label);
+  const nodes = new Map();
+  for (const node of snapshot.nodes) {
+    validateNode(node, `${label}.${node?.id ?? "unknown"}`);
+    if (nodes.has(node.id)) throw new Error(`${label} contains duplicate node ${node.id}`);
+    nodes.set(node.id, node);
+  }
+  for (const node of nodes.values()) {
+    if (node.parentId !== null && !nodes.has(node.parentId)) throw new Error(`${label}.${node.id} has an unknown parent`);
+    const visited = new Set([node.id]);
+    let parentId = node.parentId;
+    while (parentId !== null) {
+      if (visited.has(parentId)) throw new Error(`${label}.${node.id} has a parent cycle`);
+      visited.add(parentId);
+      parentId = nodes.get(parentId).parentId;
+    }
+  }
+  return nodes;
+}
+
+function requireNodeIds(sidecar, nodes, field, allowEmpty = false) {
+  const ids = sidecar[field];
+  if (!Array.isArray(ids) || (!allowEmpty && ids.length === 0) || ids.some((id) => typeof id !== "string" || !nodes.has(id))) {
+    throw new Error(`browser sidecar ${field} is empty or references an unknown node`);
+  }
+  if (new Set(ids).size !== ids.length) throw new Error(`browser sidecar ${field} contains duplicate IDs`);
+  return ids;
+}
+
+function validateSnapshotGeometry(sidecar, snapshotName, nodes, drawerIds) {
+  const tolerance = 1;
+  const clippingValues = new Set(["hidden", "clip", "auto", "scroll"]);
+  for (const node of nodes.values()) {
+    if (!node.visible) continue;
+    if (node.interactive && (node.rect.width < 44 || node.rect.height < 44)) {
+      throw new Error(`${snapshotName}.${node.id} interactive target is smaller than 44x44`);
+    }
+    if (["fixed", "sticky"].includes(node.computed.position)) {
+      if (
+        node.rect.x < -tolerance ||
+        node.rect.y < -tolerance ||
+        node.rect.x + node.rect.width > sidecar.viewportWidth + tolerance ||
+        node.rect.y + node.rect.height > sidecar.viewportHeight + tolerance
+      ) {
+        throw new Error(`${snapshotName}.${node.id} fixed/sticky rect escapes the viewport`);
+      }
+    }
+    if (
+      !drawerIds.has(node.id) &&
+      ["auto", "scroll"].includes(node.computed.overflowY) &&
+      node.scrollHeight > node.clientHeight + tolerance
+    ) {
+      throw new Error(`${snapshotName}.${node.id} creates nested vertical scroll`);
+    }
+    let parentId = node.parentId;
+    while (parentId !== null) {
+      const parent = nodes.get(parentId);
+      if (parent.visible) {
+        if (
+          clippingValues.has(parent.computed.overflowX) &&
+          (node.rect.x < parent.rect.x - tolerance || node.rect.x + node.rect.width > parent.rect.x + parent.rect.width + tolerance)
+        ) {
+          throw new Error(`${snapshotName}.${node.id} is horizontally clipped by ${parent.id}`);
+        }
+        if (
+          clippingValues.has(parent.computed.overflowY) &&
+          (node.rect.y < parent.rect.y - tolerance || node.rect.y + node.rect.height > parent.rect.y + parent.rect.height + tolerance)
+        ) {
+          throw new Error(`${snapshotName}.${node.id} is vertically clipped by ${parent.id}`);
+        }
+      }
+      parentId = parent.parentId;
+    }
+  }
+}
+
+function validateBrowserTypographySidecar(sidecar, context = {}) {
+  if (!isRecord(sidecar)) throw new Error("browser sidecar must be an object");
+  const forbidden = findForbiddenKey(sidecar, new Set(["pass", "passed", "result", "outputSha256", "claimedMetrics"]));
+  if (forbidden) throw new Error(`browser sidecar contains forbidden self-assertion ${forbidden}`);
+  if (sidecar.kind !== "safeclaw-browser-typography-sidecar/v1") throw new Error("browser sidecar kind differs");
+  if (!FULL_SHA.test(sidecar.sourceSha)) throw new Error("browser sidecar sourceSha must be a full SHA");
+  requireString(sidecar.buildId, "browser sidecar buildId");
+  requireString(sidecar.fixtureId, "browser sidecar fixtureId");
+  if (!new Set(["Chromium", "Firefox", "WebKit"]).has(sidecar.browser)) throw new Error("browser sidecar browser differs");
+  if (!new Set(["desktop1440", "mobile390"]).has(sidecar.viewportId)) throw new Error("browser sidecar viewport differs");
+  if (!new Set(["day", "night"]).has(sidecar.theme)) throw new Error("browser sidecar theme differs");
+  if (!DOCUMENT_KEYS.includes(sidecar.documentKey)) throw new Error("browser sidecar documentKey differs");
+  const expectedViewport = sidecar.viewportId === "desktop1440" ? [1440, 1000] : [390, 844];
+  if (sidecar.viewportWidth !== expectedViewport[0] || sidecar.viewportHeight !== expectedViewport[1]) {
+    throw new Error("browser sidecar viewport dimensions differ");
+  }
+  for (const field of ["deviceScaleFactor", "devicePixelRatio", "visualViewportScale"]) {
+    if (sidecar[field] !== 1) throw new Error(`browser sidecar ${field} must remain 1`);
+  }
+  if (sidecar.applicationCount !== 1 || sidecar.baselineRootScale !== 1 || sidecar.scaledRootScale !== 2) {
+    throw new Error("browser sidecar shows cumulative or incorrect root typography scaling");
+  }
+  if (sidecar.baselinePolicy !== "baseline" || sidecar.scaledPolicy !== "double") {
+    throw new Error("browser sidecar root typography policy differs");
+  }
+  if (sidecar.structuredGapPx !== 8) throw new Error("browser sidecar structured editor gap is not 8px");
+  if (context.sourceSha && sidecar.sourceSha !== context.sourceSha) throw new Error("browser sidecar sourceSha differs from implementation head");
+  if (context.buildId && sidecar.buildId !== context.buildId) throw new Error("browser sidecar buildId differs from implementation evidence");
+
+  const baselineNodes = indexSnapshot(sidecar.baseline, "baseline");
+  const scaledNodes = indexSnapshot(sidecar.scaled, "scaled");
+  if (canonicalJson([...baselineNodes.keys()].sort()) !== canonicalJson([...scaledNodes.keys()].sort())) {
+    throw new Error("browser baseline/scaled node IDs differ");
+  }
+  const priorityIds = requireNodeIds(sidecar, scaledNodes, "priorityRegionIds");
+  const reflowIds = requireNodeIds(sidecar, scaledNodes, "reflowProbeIds");
+  const textareaIds = requireNodeIds(sidecar, scaledNodes, "textareaIds");
+  const drawerIds = new Set(requireNodeIds(sidecar, scaledNodes, "drawerIds", true));
+  requireString(sidecar.editorRootId, "browser sidecar editorRootId");
+  requireString(sidecar.mobileEditorHeadingId, "browser sidecar mobileEditorHeadingId");
+  if (!scaledNodes.has(sidecar.editorRootId) || !scaledNodes.has(sidecar.mobileEditorHeadingId)) {
+    throw new Error("browser sidecar editor start IDs are unknown");
+  }
+
+  validateSnapshotGeometry(sidecar, "baseline", baselineNodes, drawerIds);
+  validateSnapshotGeometry(sidecar, "scaled", scaledNodes, drawerIds);
+  for (const id of baselineNodes.keys()) {
+    const baseline = baselineNodes.get(id);
+    const scaled = scaledNodes.get(id);
+    if (baseline.visible && scaled.visible && typeof baseline.textRole === "string" && baseline.textRole.length > 0) {
+      const fontRatio = scaled.computed.fontSize / baseline.computed.fontSize;
+      const lineRatio = scaled.computed.lineHeight / baseline.computed.lineHeight;
+      if (fontRatio < 1.9 || fontRatio > 2.1 || lineRatio < 1.9 || lineRatio > 2.1) {
+        throw new Error(`scaled text ratio differs for ${id}`);
+      }
+    }
+  }
+  for (const id of reflowIds) {
+    if (scaledNodes.get(id).lineCount <= baselineNodes.get(id).lineCount) {
+      throw new Error(`designated long-text probe did not reflow: ${id}`);
+    }
+  }
+  for (let leftIndex = 0; leftIndex < priorityIds.length; leftIndex += 1) {
+    const left = scaledNodes.get(priorityIds[leftIndex]);
+    if (!left.visible) continue;
+    for (let rightIndex = leftIndex + 1; rightIndex < priorityIds.length; rightIndex += 1) {
+      const right = scaledNodes.get(priorityIds[rightIndex]);
+      if (right.visible && rectangleIntersectionArea(left.rect, right.rect) > 0) {
+        throw new Error(`scaled priority regions overlap across parents: ${left.id}/${right.id}`);
+      }
+    }
+  }
+  for (const fixedOrSticky of [...scaledNodes.values()].filter((node) => node.visible && ["fixed", "sticky"].includes(node.computed.position))) {
+    for (const priorityId of priorityIds) {
+      const priority = scaledNodes.get(priorityId);
+      if (priority.id !== fixedOrSticky.id && priority.visible && rectangleIntersectionArea(fixedOrSticky.rect, priority.rect) > 0) {
+        throw new Error(`fixed/sticky node covers priority region: ${fixedOrSticky.id}/${priority.id}`);
+      }
+    }
+  }
+  for (const id of textareaIds) {
+    const textarea = scaledNodes.get(id);
+    if (textarea.computed.overflowY !== "hidden" || textarea.computed.maxHeight !== "none" || textarea.scrollHeight > textarea.clientHeight + 1) {
+      throw new Error(`textarea ${id} has hidden inner scroll or max-height`);
+    }
+  }
+  if (sidecar.viewportId === "mobile390") {
+    if (scaledNodes.get(sidecar.editorRootId).rect.y > 200 || scaledNodes.get(sidecar.mobileEditorHeadingId).rect.y > 160) {
+      throw new Error("mobile editor starts below the task-distance budget");
+    }
+  }
+  return {
+    fixtureId: sidecar.fixtureId,
+    matrixKey: [sidecar.browser, sidecar.viewportId, sidecar.theme, sidecar.documentKey].join("|")
+  };
+}
+
+function makeBrowserNegativeFixture(kind) {
+  const computed = (fontSize, lineHeight) => ({
+    fontSize,
+    lineHeight,
+    overflowX: "visible",
+    overflowY: "visible",
+    position: "static",
+    transform: "none",
+    zoom: 1,
+    textSizeAdjust: "100%",
+    maxHeight: "none"
+  });
+  const node = (id, parentId, rect, overrides = {}) => ({
+    id,
+    parentId,
+    semanticRole: "region",
+    textRole: "",
+    visible: true,
+    interactive: false,
+    rect,
+    clientWidth: rect.width,
+    scrollWidth: rect.width,
+    clientHeight: rect.height,
+    scrollHeight: rect.height,
+    lineCount: 0,
+    computed: computed(0, 0),
+    ...overrides
+  });
+  const baselineNodes = [
+    node("surface", null, { x: 0, y: 0, width: 390, height: 1200 }),
+    node("section", "surface", { x: 0, y: 100, width: 390, height: 600 }),
+    node("title", "surface", { x: 0, y: 0, width: 180, height: 24 }, { textRole: "title", lineCount: 1, computed: computed(16, 24) }),
+    node("editor", "section", { x: 0, y: 110, width: 390, height: 500 }),
+    node("heading", "editor", { x: 0, y: 120, width: 180, height: 24 }, { textRole: "label", lineCount: 1, computed: computed(14, 20) }),
+    node("textarea", "editor", { x: 0, y: 160, width: 300, height: 200 }, {
+      textRole: "body",
+      lineCount: 4,
+      computed: { ...computed(15, 23), overflowY: "hidden" }
+    })
+  ];
+  const scaledNodes = structuredClone(baselineNodes);
+  Object.assign(scaledNodes.find((item) => item.id === "title"), {
+    rect: { x: 0, y: 0, width: 180, height: 96 },
+    clientHeight: 96,
+    scrollHeight: 96,
+    lineCount: 2,
+    computed: computed(32, 48)
+  });
+  Object.assign(scaledNodes.find((item) => item.id === "heading"), {
+    rect: { x: 0, y: 120, width: 180, height: 40 },
+    clientHeight: 40,
+    scrollHeight: 40,
+    computed: computed(28, 40)
+  });
+  Object.assign(scaledNodes.find((item) => item.id === "textarea"), {
+    computed: { ...computed(30, 46), overflowY: "hidden" }
+  });
+  const sidecar = {
+    kind: "safeclaw-browser-typography-sidecar/v1",
+    fixtureId: "negative-fixture",
+    sourceSha: "1".repeat(40),
+    buildId: "negative-build",
+    browser: "Chromium",
+    viewportId: "mobile390",
+    viewportWidth: 390,
+    viewportHeight: 844,
+    theme: "day",
+    documentKey: "riskAssessmentDraft",
+    deviceScaleFactor: 1,
+    devicePixelRatio: 1,
+    visualViewportScale: 1,
+    applicationCount: 1,
+    baselineRootScale: 1,
+    scaledRootScale: 2,
+    baselinePolicy: "baseline",
+    scaledPolicy: "double",
+    structuredGapPx: 8,
+    priorityRegionIds: ["title", "editor"],
+    reflowProbeIds: ["title"],
+    textareaIds: ["textarea"],
+    drawerIds: [],
+    editorRootId: "editor",
+    mobileEditorHeadingId: "heading",
+    baseline: { page: { clientWidth: 390, scrollWidth: 390, clientHeight: 844, scrollHeight: 1200 }, nodes: baselineNodes },
+    scaled: { page: { clientWidth: 390, scrollWidth: 390, clientHeight: 844, scrollHeight: 1200 }, nodes: scaledNodes }
+  };
+  const scaled = (id) => sidecar.scaled.nodes.find((item) => item.id === id);
+  if (kind === "pass_flag_present") sidecar.pass = true;
+  else if (kind === "cumulative_root_application") { sidecar.applicationCount = 2; sidecar.scaledRootScale = 4; }
+  else if (kind === "inner_transform") scaled("heading").computed.transform = "matrix(2, 0, 0, 2, 0, 0)";
+  else if (kind === "inner_zoom") scaled("heading").computed.zoom = 2;
+  else if (kind === "cross_parent_overlap") scaled("editor").rect.y = 50;
+  else if (kind === "fixed_offscreen") { scaled("title").computed.position = "fixed"; scaled("title").rect.x = -20; }
+  else if (kind === "sticky_cover") { scaled("title").computed.position = "sticky"; scaled("editor").rect.y = 50; }
+  else if (kind === "horizontal_clip") { scaled("section").computed.overflowX = "hidden"; scaled("section").rect.width = 200; }
+  else if (kind === "vertical_clip") { scaled("section").computed.overflowY = "hidden"; scaled("section").rect.height = 300; }
+  else if (kind === "nested_scroll") { scaled("editor").computed.overflowY = "auto"; scaled("editor").scrollHeight = 700; }
+  else if (kind === "textarea_hidden_scroll") scaled("textarea").scrollHeight = 300;
+  else if (kind === "mobile_editor_late") { scaled("editor").rect.y = 240; scaled("heading").rect.y = 220; }
+  else if (kind === "ratio_or_reflow") { scaled("title").computed.fontSize = 18; scaled("title").lineCount = 1; }
+  else if (kind === "pixel_or_viewport_scale") { sidecar.devicePixelRatio = 2; sidecar.visualViewportScale = 2; }
+  else throw new Error(`unknown browser negative fixture ${kind}`);
+  return sidecar;
+}
+
+function validateBrowserNegativeFixtures(spec) {
+  const declaredKinds = spec.ui.textZoom200.negativeFixtures.map((fixture) => fixture[1]);
+  const expectedKinds = [
+    "pass_flag_present",
+    "cumulative_root_application",
+    "inner_transform",
+    "inner_zoom",
+    "cross_parent_overlap",
+    "fixed_offscreen",
+    "sticky_cover",
+    "horizontal_clip",
+    "vertical_clip",
+    "nested_scroll",
+    "textarea_hidden_scroll",
+    "mobile_editor_late",
+    "ratio_or_reflow",
+    "pixel_or_viewport_scale"
+  ];
+  if (canonicalJson(declaredKinds) !== canonicalJson(expectedKinds)) throw new Error("browser negative fixture registry differs");
+  const valid = makeBrowserNegativeFixture("pass_flag_present");
+  delete valid.pass;
+  validateBrowserTypographySidecar(valid);
+  for (const kind of expectedKinds) {
+    let failed = false;
+    try {
+      validateBrowserTypographySidecar(makeBrowserNegativeFixture(kind));
+    } catch {
+      failed = true;
+    }
+    if (!failed) throw new Error(`browser negative fixture did not fail: ${kind}`);
+  }
+}
+
+function validateBrowserEvidence(root, evidenceCommit, manifest, receiptById, context) {
+  const receipt = receiptById.get("browser");
+  if (!receipt) throw new Error("ZOOM-001 requires a successful browser execution receipt");
+  const records = manifest.browserEvidence?.sidecars;
+  if (!Array.isArray(records) || records.length !== 144) throw new Error("implementation browser evidence must contain 144 raw sidecar blobs");
+  const receiptArtifacts = new Map(receipt.artifacts.map((record) => [record.path, record]));
+  const matrixKeys = [];
+  const fixtureIds = new Set();
+  for (const record of records) {
+    if (record.commandId !== "browser") throw new Error("browser sidecar is not bound to the browser receipt");
+    const artifact = receiptArtifacts.get(record.path);
+    if (!artifact || canonicalJson(artifact) !== canonicalJson({ path: record.path, gitBlob: record.gitBlob, sha256: record.sha256, bytes: record.bytes })) {
+      throw new Error(`browser sidecar is not an exact browser receipt artifact: ${record.path}`);
+    }
+    const sidecar = parseJsonBuffer(
+      validateTypedBoundBlob(root, evidenceCommit, record, `browser sidecar ${record.path}`),
+      `browser sidecar ${record.path}`
+    );
+    const recomputed = validateBrowserTypographySidecar(sidecar, context);
+    if (fixtureIds.has(recomputed.fixtureId)) throw new Error(`duplicate browser fixtureId ${recomputed.fixtureId}`);
+    fixtureIds.add(recomputed.fixtureId);
+    matrixKeys.push(recomputed.matrixKey);
+  }
+  const expectedMatrix = [];
+  for (const browser of ["Chromium", "Firefox", "WebKit"]) {
+    for (const viewport of ["desktop1440", "mobile390"]) {
+      for (const theme of ["day", "night"]) {
+        for (const documentKey of DOCUMENT_KEYS) expectedMatrix.push([browser, viewport, theme, documentKey].join("|"));
+      }
+    }
+  }
+  if (canonicalJson(matrixKeys.sort()) !== canonicalJson(expectedMatrix.sort())) {
+    throw new Error("browser sidecars do not cover the exact 144-case matrix");
+  }
+}
+
 function validateNormativeParity(spec, markdown) {
-  const expected = renderNormativeMarkdown(spec);
-  const actual = extractMarkedBlock(
+  const expectedStructural = renderNormativeMarkdown(spec);
+  const actualStructural = extractMarkedBlock(
     markdown,
     spec.humanParityContract.markdownStart,
     spec.humanParityContract.markdownEnd
   );
-  if (actual !== expected) throw new Error("candidate Markdown normative tables differ from canonical spec.json");
+  if (actualStructural !== expectedStructural) {
+    throw new Error("candidate Markdown structural contract differs from canonical spec.json");
+  }
+  const expectedHuman = renderHumanMarkdown(spec);
+  const actualHuman = extractMarkedBlock(
+    markdown,
+    spec.humanParityContract.humanStart,
+    spec.humanParityContract.humanEnd
+  );
+  if (actualHuman !== expectedHuman) {
+    throw new Error("candidate Markdown human prose requirements differ from canonical spec.json");
+  }
+  requireTypedSha256(spec.humanParityContract.proseSha256, "humanParityContract.proseSha256");
+  const proseDigest = `sha256:${sha256(normalizedMarkdownProse(markdown, spec.humanParityContract))}`;
+  if (proseDigest !== spec.humanParityContract.proseSha256) {
+    throw new Error("candidate Markdown prose outside generated blocks differs from canonical spec.json binding");
+  }
+  for (const marker of [
+    spec.humanParityContract.markdownStart,
+    spec.humanParityContract.markdownEnd,
+    spec.humanParityContract.humanStart,
+    spec.humanParityContract.humanEnd
+  ]) {
+    if (markdown.split(marker).length !== 2) throw new Error(`candidate Markdown marker is not unique: ${marker}`);
+  }
   for (const stale of [
     "SAFECLAW-CONTRACT-MIRROR",
     "HOLD_PENDING_INDEPENDENT_PASS",
@@ -428,6 +1024,13 @@ function validateNormativeParity(spec, markdown) {
 }
 
 function validateInternalContract(spec) {
+  if (spec.schemaVersion !== "2.6.0") throw new Error("spec schemaVersion differs");
+  if (spec.meta.currentIntegrationTarget !== "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5") {
+    throw new Error("spec integration target differs from the reviewed snapshot");
+  }
+  if (spec.integrationLedger.currentIntegrationTarget !== spec.meta.currentIntegrationTarget) {
+    throw new Error("conflict snapshot target differs from spec target");
+  }
   if (spec.meta.status !== "HOLD_PENDING_FRESH_REVIEW") throw new Error("spec status is not HOLD_PENDING_FRESH_REVIEW");
   if (spec.meta.implementationProgramStatus !== "BLOCKED_PENDING_USER_DB_APPROVAL") {
     throw new Error("meta implementation program is not approval-blocked");
@@ -448,6 +1051,11 @@ function validateInternalContract(spec) {
   if (new Set(spec.documents.map((document) => document.id)).size !== 12) throw new Error("document IDs are not unique");
   if (new Set(spec.documents.map((document) => document.component)).size !== 12) {
     throw new Error("document component names are not unique");
+  }
+  for (const document of spec.documents) {
+    if (typeof document.primaryAction !== "string" || document.primaryAction.length === 0) {
+      throw new Error(`${document.key} is missing primaryAction`);
+    }
   }
   const acceptanceIds = spec.implementation.acceptance.map((entry) => entry[0]);
   if (canonicalJson(acceptanceIds) !== canonicalJson(spec.contractIds)) {
@@ -569,11 +1177,21 @@ function validateInternalContract(spec) {
   const photoText = canonicalJson(photo);
   for (const token of [
     "Sha256Digest",
-    "beforeDigest",
-    "afterDigest",
+    "analysis_id",
+    "analysis_payload",
+    "analysisPayloadDigest",
+    "modelProvider",
+    "candidateControlTextDigests",
+    "beforeImageSha256",
+    "afterImageSha256",
+    "reviewerId",
+    "confirmedAt",
+    "transactionId",
+    "rootOperationId",
     "candidateRevision",
     "resultingRevision",
     "canonicalEventDigest",
+    "site-memory/session only",
     "atomic"
   ]) {
     if (!photoText.includes(token)) throw new Error(`photo event authority omits ${token}`);
@@ -587,13 +1205,37 @@ function validateInternalContract(spec) {
   const zoomText = canonicalJson(zoom);
   for (const token of [
     "deviceScaleFactor=1",
+    "devicePixelRatio=1",
+    "visualViewport.scale=1",
     "applicationCount=1",
+    "--safeclaw-type-scale=2",
+    "data-safeclaw-text-policy=double",
     "1.9..2.1",
     "overflow-y:hidden",
-    "all 144"
+    "all 144",
+    "cross-parent",
+    "inner transform/zoom"
   ]) {
     if (!zoomText.includes(token)) throw new Error(`200% browser contract omits ${token}`);
   }
+  if (canonicalJson([...spec.validation.redCases].sort()) !== canonicalJson([...DELIBERATE_CASES].sort())) {
+    throw new Error("declared deliberate RED cases differ from executable validator cases");
+  }
+  if (spec.humanParityContract.humanRequirements.length !== 10) throw new Error("human prose requirement count differs");
+  if (spec.humanParityContract.deliberateMismatch.length !== 5) throw new Error("parity deliberate mismatch set differs");
+  const trustText = canonicalJson(spec.validation.implementationEvidence);
+  for (const token of [
+    "safeclaw-external-approval-manifest/v1",
+    "rawEvent blob",
+    "migration/RPC proposal",
+    "safeclaw-command-execution-receipt/v1",
+    "commandArgv string[]",
+    "stdout blob",
+    "sidecar blob records"
+  ]) {
+    if (!trustText.includes(token)) throw new Error(`implementation evidence trust contract omits ${token}`);
+  }
+  validateBrowserNegativeFixtures(spec);
   if (spec.ui.browserAssertions.length !== 25) throw new Error("browser assertion count must be 25");
 }
 
@@ -739,7 +1381,14 @@ function validateSpecReview(args) {
   const specBuffer = readBlob(root, candidate, SPEC_JSON_PATH);
   const markdownBuffer = readBlob(root, candidate, SPEC_MARKDOWN_PATH);
   const spec = parseJsonBuffer(specBuffer, "candidate spec.json");
-  const markdown = markdownBuffer.toString("utf8");
+  let markdown = markdownBuffer.toString("utf8");
+  requireIsoDateTime(manifest.capturedAt, "review evidence capturedAt");
+  if (manifest.branch !== spec.meta.branch || manifest.mergeBase !== sourceBase) {
+    throw new Error("review evidence branch/merge-base differs from candidate contract");
+  }
+  if (canonicalJson(manifest.refSnapshot) !== canonicalJson(spec.integrationLedger)) {
+    throw new Error("review evidence ref snapshot differs from the candidate conflict ledger");
+  }
   const candidatePaths = commitPaths(root, candidate);
   const evidencePaths = commitPaths(root, evidence);
   if (canonicalJson(candidatePaths) !== canonicalJson([...spec.meta.reviewScope.candidateCommit.allowedPaths].sort())) {
@@ -758,10 +1407,73 @@ function validateSpecReview(args) {
   }
   validateCandidateArtifactManifest(root, manifest, candidate, spec);
 
-  const paritySpec = args.deliberate === "normative-parity" ? structuredClone(spec) : spec;
+  const parityCases = new Set(["normative-parity", "json-model", "json-document-primary-action", "json-unknown-domain"]);
+  const paritySpec = parityCases.has(args.deliberate) ? structuredClone(spec) : spec;
   if (args.deliberate === "normative-parity") paritySpec.meta.status = "__deliberate_normative_mismatch__";
+  if (args.deliberate === "json-model") paritySpec.model.documentEnvelope.fields[0][2] = "__deliberate_model_mismatch__";
+  if (args.deliberate === "json-document-primary-action") paritySpec.documents[0].primaryAction = "__deliberate_action_mismatch__";
+  if (args.deliberate === "json-unknown-domain") paritySpec.__deliberateUnknownDomain = { normative: true };
+  if (args.deliberate === "md-prose") {
+    const original = markdown;
+    markdown = markdown.replace("# SafeClaw", "# Deliberately changed SafeClaw");
+    if (markdown === original) throw new Error("md-prose deliberate fixture could not mutate prose outside generated blocks");
+  }
   validateNormativeParity(paritySpec, markdown);
   validateInternalContract(spec);
+
+  if (args.deliberate === "approval-boolean") {
+    validateApprovalManifestShape({
+      kind: "safeclaw-external-approval-manifest/v1",
+      specCommit: candidate,
+      targetSha: target,
+      migrationRpcProposalDigest: `sha256:${"a".repeat(64)}`,
+      migrationRpcProposal: { path: "proposal.sql" },
+      approvalRootOperationId: "deliberate-root",
+      approved: true,
+      events: [{ type: "INDEPENDENT_SPEC_PASS" }, { type: "USER_DB_AUTHORITY_APPROVAL" }]
+    });
+  }
+  if (args.deliberate === "command-unbound-hash") {
+    validateExecutionReceiptShape({
+      kind: "safeclaw-command-execution-receipt/v1",
+      sourceSha: target,
+      buildId: "deliberate-build",
+      commandId: "typecheck",
+      command: "npm.cmd run typecheck",
+      outputSha256: "a".repeat(64),
+      cwd: ".",
+      startedAt: "2026-07-14T00:00:00.000Z",
+      completedAt: "2026-07-14T00:00:01.000Z",
+      commandArgv: ["npm.cmd", "run", "typecheck"],
+      exitCode: 0,
+      producer: "deliberate",
+      runId: "deliberate",
+      jobId: "deliberate",
+      stdout: {},
+      stderr: {},
+      artifacts: []
+    });
+  }
+  const browserDeliberateKinds = new Map([
+    ["browser-pass-flag", "pass_flag_present"],
+    ["browser-cumulative-scale", "cumulative_root_application"],
+    ["browser-inner-transform", "inner_transform"],
+    ["browser-inner-zoom", "inner_zoom"],
+    ["browser-cross-parent-overlap", "cross_parent_overlap"],
+    ["browser-fixed-offscreen", "fixed_offscreen"],
+    ["browser-sticky-cover", "sticky_cover"],
+    ["browser-horizontal-clip", "horizontal_clip"],
+    ["browser-vertical-clip", "vertical_clip"],
+    ["browser-nested-scroll", "nested_scroll"],
+    ["browser-textarea-scroll", "textarea_hidden_scroll"],
+    ["browser-mobile-late", "mobile_editor_late"],
+    ["browser-ratio-reflow", "ratio_or_reflow"],
+    ["browser-pixel-viewport-scale", "pixel_or_viewport_scale"]
+  ]);
+  if (browserDeliberateKinds.has(args.deliberate)) {
+    validateBrowserTypographySidecar(makeBrowserNegativeFixture(browserDeliberateKinds.get(args.deliberate)));
+  }
+  if (args.deliberate === "implementation-empty") throw new Error("implementation-empty must fail before implementation evidence is read");
 
   const targetBlobs = loadAndValidateTargetBlobs(root, manifest, target, spec);
   if (args.deliberate === "source-shape") {
@@ -771,12 +1483,13 @@ function validateSpecReview(args) {
   validateTargetSourceShapes(targetBlobs, spec);
 
   console.log("SPEC_JSON_PARSE=PASS");
-  console.log("HUMAN_NORMATIVE_PARITY=PASS");
+  console.log("FULL_MARKDOWN_JSON_PARITY=PASS");
   console.log("CANDIDATE_COMMIT_SCOPE=PASS");
   console.log("EVIDENCE_ONLY_COMMIT_SCOPE=PASS");
   console.log("TARGET_BLOB_BINDING=PASS");
   console.log("TARGET_SOURCE_SHAPE=PASS");
   console.log("CONTRACT_INTERNAL_CONSISTENCY=PASS");
+  console.log("BROWSER_NEGATIVE_FIXTURES=PASS");
   console.log("SPEC_REVIEW_VALIDATION=PASS");
   console.log("IMPLEMENTATION_PROGRAM=BLOCKED_PENDING_USER_DB_APPROVAL");
 }
@@ -798,10 +1511,10 @@ function validateImplementation(args) {
   if (manifest.specCommit !== specCommit || manifest.implementationBase !== base || manifest.implementationHead !== head) {
     throw new Error("implementation manifest refs differ from explicit refs");
   }
-  if (manifest.approvals?.independentSpecPass?.approved !== true || manifest.approvals?.userDbApproval?.approved !== true) {
-    throw new Error("implementation manifest lacks independent spec PASS and explicit user DB approval");
-  }
   const spec = parseJsonBuffer(readBlob(root, specCommit, SPEC_JSON_PATH), "immutable implementation spec");
+  validateInternalContract(spec);
+  requireString(manifest.buildId, "implementation buildId");
+  validateExternalApproval(root, args, spec, specCommit, base, head, manifest);
   const changedOutput = gitText(root, ["diff", "--name-status", `${base}...${head}`, "--"]);
   const changedRecords = changedOutput
     ? changedOutput.split(/\r?\n/u).filter(Boolean).map((line) => {
@@ -840,61 +1553,19 @@ function validateImplementation(args) {
       }
       continue;
     }
-    validateBoundBlob(root, head, record, `implementation artifact ${record.path}`);
+    validateTypedBoundBlob(root, head, record, `implementation artifact ${record.path}`);
   }
-  if (!Array.isArray(manifest.executedCommands) || manifest.executedCommands.length === 0) {
-    throw new Error("implementation manifest has no executed commands");
-  }
-  const executedCommandIds = new Set();
-  for (const command of manifest.executedCommands) {
-    if (typeof command.id !== "string" || command.id.length === 0 || executedCommandIds.has(command.id)) {
-      throw new Error("implementation command IDs must be non-empty and unique");
-    }
-    executedCommandIds.add(command.id);
-    if (
-      typeof command.command !== "string" ||
-      command.command.length === 0 ||
-      typeof command.executedAt !== "string" ||
-      !Number.isFinite(Date.parse(command.executedAt)) ||
-      command.exitCode !== 0 ||
-      !FULL_SHA.test(command.outputSha256?.replace(/^sha256:/u, "") ?? "")
-    ) {
-      throw new Error(`implementation command lacks successful immutable evidence: ${command.id ?? "unknown"}`);
-    }
-  }
+  const receiptById = validateExecutionEvidence(root, evidence, manifest, spec, {
+    base,
+    head,
+    declaredWaves
+  });
   console.log("IMPLEMENTATION_REFS=PASS");
   console.log("IMPLEMENTATION_ARTIFACT_SCOPE=PASS");
-  console.log("IMPLEMENTATION_EXECUTED_COMMANDS=PASS");
+  console.log("IMPLEMENTATION_EXTERNAL_APPROVAL=PASS");
+  console.log("IMPLEMENTATION_EXECUTION_RECEIPTS=PASS");
   if (manifest.claimedGates?.includes("ZOOM-001")) {
-    const baselineRecord = manifest.browserEvidence?.baselineManifest;
-    const zoomRecord = manifest.browserEvidence?.zoomManifest;
-    if (!executedCommandIds.has(baselineRecord?.commandId) || !executedCommandIds.has(zoomRecord?.commandId)) {
-      throw new Error("implementation 200% manifests are not bound to successful executed commands");
-    }
-    const baselineDocument = parseJsonBuffer(
-      validateBoundBlob(root, evidence, baselineRecord, "implementation 100% baseline manifest"),
-      "implementation 100% baseline manifest"
-    );
-    const zoomDocument = parseJsonBuffer(
-      validateBoundBlob(root, evidence, zoomRecord, "implementation 200% result manifest"),
-      "implementation 200% result manifest"
-    );
-    const baseline = baselineDocument.cases;
-    const results = zoomDocument.cases;
-    if (!Array.isArray(baseline) || !Array.isArray(results) || baseline.length !== 144 || results.length !== 144) {
-      throw new Error("implementation 200% evidence does not contain 144 immutable baseline/result cases");
-    }
-    const baselineIds = baseline.map((item) => item.fixtureId).sort();
-    const resultIds = results.map((item) => item.fixtureId).sort();
-    if (new Set(baselineIds).size !== 144 || canonicalJson(baselineIds) !== canonicalJson(resultIds)) {
-      throw new Error("implementation 100% and 200% fixture IDs are not the same complete 144-case matrix");
-    }
-    if (baseline.some((item) => item.deviceScaleFactor !== 1 || item.pass !== true)) {
-      throw new Error("implementation 100% baseline contains a failed or non-unit-scale case");
-    }
-    if (results.some((item) => item.applicationCount !== 1 || item.deviceScaleFactor !== 1 || item.pass !== true)) {
-      throw new Error("implementation 200% evidence contains a failed or multiply-applied case");
-    }
+    validateBrowserEvidence(root, evidence, manifest, receiptById, { sourceSha: head, buildId: manifest.buildId });
     console.log("IMPLEMENTATION_200_PERCENT_BROWSER_EVIDENCE=PASS");
   }
   console.log("IMPLEMENTATION_VALIDATION=PASS");
@@ -907,6 +1578,28 @@ function main() {
     process.stdout.write(renderNormativeMarkdown(spec));
     return;
   }
+  if (args.mode === "render-human") {
+    const spec = JSON.parse(readFileSync(join(resolve(args.root), args.specFile), "utf8"));
+    process.stdout.write(renderHumanMarkdown(spec));
+    return;
+  }
+  if (args.mode === "render-prose-digest") {
+    const root = resolve(args.root);
+    const spec = JSON.parse(readFileSync(join(root, args.specFile), "utf8"));
+    const markdown = readFileSync(join(root, SPEC_MARKDOWN_PATH), "utf8");
+    process.stdout.write(`sha256:${sha256(normalizedMarkdownProse(markdown, spec.humanParityContract))}`);
+    return;
+  }
+  if (args.mode === "authoring-check") {
+    const root = resolve(args.root);
+    const spec = JSON.parse(readFileSync(join(root, args.specFile), "utf8"));
+    const markdown = readFileSync(join(root, SPEC_MARKDOWN_PATH), "utf8");
+    validateNormativeParity(spec, markdown);
+    validateInternalContract(spec);
+    console.log("AUTHORING_PARITY_AND_INTERNAL_CONTRACT=PASS");
+    console.log("AUTHORING_CHECK_IS_NOT_REVIEW_EVIDENCE");
+    return;
+  }
   if (args.mode === "spec-review") {
     validateSpecReview(args);
     return;
@@ -915,7 +1608,7 @@ function main() {
     validateImplementation(args);
     return;
   }
-  throw new Error("Mode must be render-normative, spec-review, or implementation");
+  throw new Error("Mode must be render-normative, render-human, render-prose-digest, authoring-check, spec-review, or implementation");
 }
 
 try {
