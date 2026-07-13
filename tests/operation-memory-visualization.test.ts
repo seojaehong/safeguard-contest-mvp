@@ -84,14 +84,51 @@ describe("buildOperationMemoryVisualizationModel", () => {
       hiddenEdges: 0
     });
     expect(improvementCard?.metaRows).toEqual(expect.arrayContaining([
-      { key: "analysisMode", label: "분석 방식", value: "vision_ocr" },
-      { key: "photoPairAttached", label: "비포/애프터", value: "예" },
-      { key: "visionLabel", label: "이미지 분석", value: "vision/OCR 분석 완료" }
+      { key: "sourceType", label: "수집 방식", value: "개선 사진 분석" },
+      { key: "visionStatus", label: "이미지 상태", value: "분석 완료" },
+      { key: "analysisMode", label: "분석 방식", value: "이미지·문자 인식 분석" },
+      { key: "photoPairAttached", label: "개선 전/개선 후", value: "예" },
+      { key: "visionLabel", label: "이미지 분석", value: "이미지·문자 인식 분석 완료" }
     ]));
     expect(improvementCard?.related).toEqual(expect.arrayContaining([
       expect.objectContaining({ rel: "addressesHazard", direction: "outgoing" }),
       expect.objectContaining({ rel: "hasImprovement", direction: "incoming" })
     ]));
+  });
+
+  it("uses a neutral display label for unknown metadata without changing canonical values", () => {
+    const graph = buildOperationMemoryGraph({
+      workpack: {
+        id: "wp-unknown-metadata",
+        question: "알 수 없는 분석 분류 검사",
+        generatedAt: "생성 시각 확인 전"
+      },
+      references: [],
+      improvements: [improvement("imp-unknown-metadata")],
+      confirmations: []
+    });
+    const improvementNode = graph.nodes.find((node) => node.kind === "Improvement");
+    const workpackNode = graph.nodes.find((node) => node.kind === "Workpack");
+    if (!improvementNode || !workpackNode) throw new Error("Expected operation-memory fixture nodes");
+    improvementNode.meta.sourceType = "future_machine_token";
+    improvementNode.meta.analysisMode = "future_analysis_mode";
+
+    const model = buildOperationMemoryVisualizationModel(graph);
+    const card = model.hoverCards.find((item) => item.id === improvementNode.id);
+    const generatedAt = model.hoverCards
+      .find((item) => item.id === workpackNode.id)
+      ?.metaRows.find((row) => row.key === "generatedAt");
+
+    expect(improvementNode.meta).toMatchObject({
+      sourceType: "future_machine_token",
+      analysisMode: "future_analysis_mode"
+    });
+    expect(card?.metaRows).toEqual(expect.arrayContaining([
+      { key: "sourceType", label: "수집 방식", value: "분류 검토 필요" },
+      { key: "analysisMode", label: "분석 방식", value: "분류 검토 필요" }
+    ]));
+    expect(workpackNode.meta.generatedAt).toBeNull();
+    expect(generatedAt).toEqual({ key: "generatedAt", label: "생성 시각", value: "생성 시각 확인 전" });
   });
 
   it("keeps fire controls and energy isolation visible in evidence and control nodes", () => {
@@ -141,9 +178,12 @@ describe("buildOperationMemoryVisualizationModel", () => {
 
     const model = buildOperationMemoryVisualizationModel(graph);
 
+    expect(model.list.length).toBe(graph.nodes.length);
     expect(model.list.length).toBeGreaterThan(24);
-    expect(model.map.nodes.length).toBeLessThanOrEqual(24);
+    expect(model.map.nodes.length).toBeLessThanOrEqual(9);
     expect(model.map.edges.length).toBeLessThanOrEqual(48);
+    expect(model.map.edges.length).toBe(model.stats.visibleEdges);
+    expect(model.map.edges.every((edge) => edge.x1 !== edge.x2 || edge.y1 !== edge.y2)).toBe(true);
     expect(model.stats.hiddenNodes).toBeGreaterThan(0);
   });
 

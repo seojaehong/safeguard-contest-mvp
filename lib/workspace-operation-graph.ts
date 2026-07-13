@@ -6,7 +6,7 @@ export type WorkspaceOperationConfirmation = OperationMemoryGraphInput["confirma
 
 export type WorkspaceOperationGraphOptions = {
   workpackId?: string | null;
-  generatedAt: string;
+  generatedAt: string | null;
   confirmations?: WorkspaceOperationConfirmation[];
 };
 

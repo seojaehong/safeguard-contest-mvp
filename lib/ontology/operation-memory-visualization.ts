@@ -4,6 +4,8 @@ import type {
   OperationMemoryNode,
   OperationMemoryNodeKind
 } from "@/lib/ontology/operation-memory";
+import type { HarnessImprovement } from "@/lib/db-harness";
+import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 
 export type OperationMemoryListItem = {
   id: string;
@@ -74,7 +76,7 @@ export type OperationMemoryVisualizationModel = {
   };
 };
 
-const MAX_OPERATION_MAP_NODES = 18;
+const MAX_OPERATION_MAP_NODES = 9;
 const MAX_OPERATION_MAP_EDGES = 36;
 
 export function operationKindLabel(kind: OperationMemoryNodeKind) {
@@ -94,15 +96,6 @@ export function operationRelationLabel(value: OperationMemoryEdge["relation"]) {
   if (value === "hasImprovement") return "개선";
   if (value === "addressesHazard") return "대상";
   return "확인";
-}
-
-function kindRadius(kind: OperationMemoryNodeKind) {
-  if (kind === "Workpack") return 0;
-  if (kind === "Evidence") return 22;
-  if (kind === "Hazard") return 30;
-  if (kind === "Control") return 36;
-  if (kind === "Improvement") return 24;
-  return 38;
 }
 
 function clampCoordinate(value: number) {
@@ -126,7 +119,7 @@ function metaLabel(key: string) {
   if (key === "sourceType") return "수집 방식";
   if (key === "visionStatus") return "이미지 상태";
   if (key === "analysisMode") return "분석 방식";
-  if (key === "photoPairAttached") return "비포/애프터";
+  if (key === "photoPairAttached") return "개선 전/개선 후";
   if (key === "visionLabel") return "이미지 분석";
   if (key === "visionModel") return "분석 모델";
   if (key === "photoCount") return "사진 수";
@@ -138,8 +131,92 @@ function metaLabel(key: string) {
   return key;
 }
 
-function metaValue(raw: string | number | boolean | null) {
+type ImprovementSourceType = HarnessImprovement["sourceType"];
+type VisionStatus = NonNullable<HarnessImprovement["visionStatus"]>;
+type AnalysisMode = NonNullable<HarnessImprovement["analysisMode"]>;
+type KnownItemType =
+  | "sif-case"
+  | "technical-guideline"
+  | "technical-support-regulation"
+  | "machinery"
+  | "kosha-guide"
+  | "guide"
+  | "guideline"
+  | "source";
+
+const improvementSourceLabels = {
+  manual: "수기 입력",
+  photo_analysis: "개선 사진 분석",
+  operator_note: "작업자 메모"
+} satisfies Record<ImprovementSourceType, string>;
+
+const visionStatusLabels = {
+  analyzed: "분석 완료",
+  unconfigured: "분석 설정 필요",
+  failed: "분석 실패"
+} satisfies Record<VisionStatus, string>;
+
+const analysisModeLabels = {
+  vision_ocr: "이미지·문자 인식 분석",
+  photo_pair_unanalyzed: "개선 전/개선 후 사진 미분석",
+  manual_text: "수기 입력"
+} satisfies Record<AnalysisMode, string>;
+
+const itemTypeLabels = {
+  "sif-case": "중대위험 사례",
+  "technical-guideline": "기술 지침",
+  "technical-support-regulation": "기술지원 규정",
+  machinery: "기계 안전 자료",
+  "kosha-guide": "KOSHA 가이드",
+  guide: "안전 가이드",
+  guideline: "안전 지침",
+  source: "원문 근거"
+} satisfies Record<KnownItemType, string>;
+
+const languageLabels: Record<string, string> = {
+  ko: "한국어",
+  vi: "베트남어",
+  zh: "중국어",
+  mn: "몽골어",
+  th: "태국어",
+  tl: "타갈로그어",
+  uz: "우즈베크어",
+  km: "크메르어",
+  id: "인도네시아어",
+  ne: "네팔어"
+};
+
+function mappedValue(value: string, labels: Readonly<Record<string, string>>): string {
+  return labels[value] || "분류 검토 필요";
+}
+
+function metaValue(key: string, raw: string | number | boolean | null) {
+  if (key === "generatedAt") {
+    return typeof raw === "string" && isRfc3339OffsetTimestamp(raw) ? raw : "생성 시각 확인 전";
+  }
   if (typeof raw === "boolean") return raw ? "예" : "아니오";
+  if (typeof raw === "string") {
+    if (key === "sourceType") return mappedValue(raw, improvementSourceLabels);
+    if (key === "visionStatus") return mappedValue(raw, visionStatusLabels);
+    if (key === "analysisMode") return mappedValue(raw, analysisModeLabels);
+    if (key === "itemType") return mappedValue(raw, itemTypeLabels);
+    if (key === "evidenceRole") return mappedValue(raw, { direct: "직접 근거", supporting: "보조 근거" });
+    if (key === "source") return mappedValue(raw, {
+      safety_reference_items: "안전 근거 카탈로그",
+      manual: "수기 입력",
+      photo_analysis: "개선 사진 분석",
+      operator_note: "작업자 메모"
+    });
+    if (key === "languageCode") return mappedValue(raw, languageLabels);
+    if (key === "visionLabel") return mappedValue(raw, {
+      "vision/OCR 분석 완료": "이미지·문자 인식 분석 완료",
+      "수기 개선사항": "수기 개선사항"
+    });
+    if (key === "visionModel") return mappedValue(raw, {
+      "gpt-4.1-mini": "이미지 분석 모델",
+      "gemini-2.5-flash": "이미지 분석 모델"
+    });
+  }
   return String(raw);
 }
 
@@ -157,8 +234,8 @@ function metaRows(node: OperationMemoryNode): OperationMemoryHoverCard["metaRows
   ]);
   return Object.entries(node.meta)
     .flatMap(([label, raw]) => {
-      if (raw === null || typeof raw === "undefined" || raw === "") return [];
-      return [{ key: label, label: metaLabel(label), value: metaValue(raw) }];
+      if (typeof raw === "undefined" || raw === "" || (raw === null && label !== "generatedAt")) return [];
+      return [{ key: label, label: metaLabel(label), value: metaValue(label, raw) }];
     })
     .sort((a, b) => {
       const priorityDelta = (priority.get(a.key) ?? 100) - (priority.get(b.key) ?? 100);
@@ -276,13 +353,12 @@ export function buildOperationMemoryVisualizationModel(
     }
     const outerIndex = Math.max(0, outerNodes.findIndex((item) => item.id === node.id));
     const angle = ((outerIndex / Math.max(outerNodes.length, 1)) * Math.PI * 2) - Math.PI / 2;
-    const radius = kindRadius(node.kind) + (index % 2) * 2.8;
     return {
       id: node.id,
       kind: node.kind,
       label: node.label,
-      x: clampCoordinate(50 + Math.cos(angle) * radius),
-      y: clampCoordinate(50 + Math.sin(angle) * radius * 0.68),
+      x: clampCoordinate(50 + Math.cos(angle) * 40),
+      y: clampCoordinate(50 + Math.sin(angle) * 30),
       size: Math.min(10.2, 4.4 + Math.sqrt(degree + 1) * 1.2),
       degree
     };

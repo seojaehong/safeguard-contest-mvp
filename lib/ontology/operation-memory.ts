@@ -1,4 +1,5 @@
 import type { HarnessImprovement, HarnessWorkpackMemory } from "@/lib/db-harness";
+import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import {
   deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplayTitle,
@@ -42,7 +43,7 @@ export type OperationMemoryGraphInput = {
   workpack: {
     id: string;
     question: string;
-    generatedAt: string;
+    generatedAt: string | null;
     taskLabel?: string;
   };
   references: SafetyReferenceItem[];
@@ -84,6 +85,10 @@ export function buildOperationMemoryGraph(input: OperationMemoryGraphInput): Ope
   const reflectedDocuments = new Set<string>();
   const workpackId = `workpack:${slugSegment(input.workpack.id, "current")}`;
 
+  const generatedAt = typeof input.workpack.generatedAt === "string"
+    && isRfc3339OffsetTimestamp(input.workpack.generatedAt)
+    ? input.workpack.generatedAt
+    : null;
   pushUniqueNode(nodes, {
     id: workpackId,
     kind: "Workpack",
@@ -91,7 +96,7 @@ export function buildOperationMemoryGraph(input: OperationMemoryGraphInput): Ope
     detail: input.workpack.question,
     meta: {
       sourceId: input.workpack.id,
-      generatedAt: input.workpack.generatedAt
+      generatedAt
     }
   });
 
@@ -104,7 +109,7 @@ export function buildOperationMemoryGraph(input: OperationMemoryGraphInput): Ope
       detail: relatedWorkpack.statusLabel,
       meta: {
         sourceId: relatedWorkpack.id,
-        generatedAt: relatedWorkpack.generatedAt,
+        generatedAt: isRfc3339OffsetTimestamp(relatedWorkpack.generatedAt) ? relatedWorkpack.generatedAt : null,
         reflectedDocuments: relatedWorkpack.reflectedDocuments.join(", ")
       }
     });

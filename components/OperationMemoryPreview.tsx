@@ -98,6 +98,7 @@ export function OperationMemoryGraphViewer({
     [model.hoverCards]
   );
   const activeCard = activeNodeId ? hoverCardsById.get(activeNodeId) : undefined;
+  const mapNodesById = useMemo(() => new Map(model.map.nodes.map((node) => [node.id, node])), [model.map.nodes]);
 
   useEffect(() => {
     setActiveNodeId((current) => {
@@ -129,21 +130,59 @@ export function OperationMemoryGraphViewer({
       {statusMessage ? <p className="operation-memory-message" role="status">{statusMessage}</p> : null}
 
       <div className="operation-memory-grid">
-        <div className="operation-memory-board" aria-label="작업 이력 노드 선택" style={{ padding: "64px 16px 16px" }}>
+        <div
+          className="operation-memory-board"
+          aria-label="작업 이력 노드 선택"
+          style={{ minHeight: "clamp(430px, 54vw, 620px)", padding: 0, position: "relative" }}
+        >
           <div className="operation-memory-stats" aria-label="작업 이력 그래프 통계">
             <span>노드 {model.stats.visibleNodes}/{model.stats.totalNodes}</span>
             <span>관계 {model.stats.visibleEdges}/{model.stats.totalEdges}</span>
             <span>확인 {graph.summary.ackCount}</span>
           </div>
+          <svg
+            className="operation-memory-relation-map"
+            viewBox="0 0 100 100"
+            role="img"
+            aria-label={`작업 이력 관계 ${model.map.edges.length}개`}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 1, pointerEvents: "none" }}
+          >
+            <defs>
+              <marker id="operation-memory-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(145, 121, 31, 0.72)" />
+              </marker>
+            </defs>
+            {model.map.edges.map((edge) => {
+              const source = mapNodesById.get(edge.sourceId);
+              const target = mapNodesById.get(edge.targetId);
+              const relation = operationRelationLabel(edge.rel);
+              return (
+                <line
+                  key={edge.id}
+                  className={`operation-memory-edge relation-${edge.rel}`}
+                  data-source-id={edge.sourceId}
+                  data-target-id={edge.targetId}
+                  x1={edge.x1}
+                  y1={edge.y1}
+                  x2={edge.x2}
+                  y2={edge.y2}
+                  stroke="rgba(246, 245, 239, 0.3)"
+                  strokeWidth="0.45"
+                  vectorEffect="non-scaling-stroke"
+                  markerEnd="url(#operation-memory-arrow)"
+                  role="img"
+                  aria-label={`${source?.label || edge.sourceId}에서 ${target?.label || edge.targetId}로 ${relation}`}
+                  style={{ stroke: "rgba(145, 121, 31, 0.72)" }}
+                />
+              );
+            })}
+          </svg>
           <div
             className="operation-memory-node-layer"
             style={{
-              position: "relative",
-              inset: "auto",
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))",
-              gap: "12px",
-              alignContent: "start"
+              position: "absolute",
+              inset: 0,
+              zIndex: 2
             }}
           >
             {model.map.nodes.map((node) => {
@@ -152,13 +191,20 @@ export function OperationMemoryGraphViewer({
                 <article
                   key={node.id}
                   className={`operation-memory-point kind-${node.kind}${isActive ? " is-active" : ""}`}
+                  data-node-id={node.id}
                   style={{
-                    position: "relative",
-                    left: "auto",
-                    top: "auto",
-                    minWidth: 0,
-                    maxWidth: "none",
-                    transform: "none"
+                    position: "absolute",
+                    left: `clamp(42px, ${node.x}%, calc(100% - 42px))`,
+                    top: `${node.y}%`,
+                    width: "clamp(72px, 16vw, 104px)",
+                    minWidth: "clamp(72px, 16vw, 104px)",
+                    maxWidth: "clamp(72px, 16vw, 104px)",
+                    height: "72px",
+                    minHeight: "72px",
+                    maxHeight: "72px",
+                    overflow: "hidden",
+                    padding: "6px 8px",
+                    transform: "translate(-50%, -50%)"
                   }}
                   role="button"
                   tabIndex={0}
@@ -169,9 +215,16 @@ export function OperationMemoryGraphViewer({
                   onFocus={() => selectNode(node.id)}
                   onKeyDown={(event) => selectNodeWithKey(event, node.id)}
                 >
-                  <span>{operationKindLabel(node.kind)}</span>
-                  <strong>{node.label}</strong>
-                  <small>{node.degree}개 연결</small>
+                  <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "4px" }}>
+                    {operationKindLabel(node.kind)}
+                    <small style={{ display: "inline", fontFamily: "var(--font-base)" }}>연결 {node.degree}</small>
+                  </span>
+                  <strong style={{
+                    display: "-webkit-box",
+                    overflow: "hidden",
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 2
+                  }}>{node.label}</strong>
                 </article>
               );
             })}

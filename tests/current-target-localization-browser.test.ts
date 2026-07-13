@@ -4,7 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Browser, ConsoleMessage, Page } from "playwright";
-import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
+import {
+  buildStoredCurrentWorkpack,
+  CURRENT_WORKPACK_STORAGE_KEY,
+  type CurrentWorkerSnapshot
+} from "@/lib/current-workpack";
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 import {
@@ -46,7 +50,7 @@ const routes: RouteContract[] = [
     readyRole: "region",
     readyName: "옵시디언형 온톨로지 그래프",
     geometryScope: "main",
-    forbiddenPattern: /\b(?:Task|Hazard|Control|Article|Document|Accident|Duty|Nodes|Edges|Gate|Fallback)\b|Graph unavailable/u
+    forbiddenPattern: /\b(?:Task|Hazard|Control|Article|Document|Accident|Duty|Nodes|Edges|Gate|Fallback|photo_analysis|analyzed|vision_ocr|photo_pair_unanalyzed|manual_text|future_machine_token)\b|Graph unavailable|비포\/애프터/u
   },
   {
     name: "knowledge",
@@ -62,7 +66,7 @@ const routes: RouteContract[] = [
     readyRole: "region",
     readyName: "작업 이력 그래프",
     geometryScope: ".workspace-operation-memory",
-    forbiddenPattern: /\b(?:Ack\s+Node|Operation Ontology)\b/u
+    forbiddenPattern: /\b(?:Ack\s+Node|Operation Ontology|photo_analysis|analyzed|vision_ocr|photo_pair_unanalyzed|manual_text)\b|비포\/애프터/u
   }
 ];
 const viewports = [
@@ -237,6 +241,81 @@ describe("current target localization browser matrix", () => {
     await page.close();
   }, 120_000);
 
+  it.each([1, 2])("restores the canonical worker snapshot without a pre-restore write (run %i)", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    const restoredWorker = {
+      id: "worker-canonical-restored",
+      displayName: "복원 기준 작업자",
+      role: "도장 작업자",
+      joinedAt: "2026-07-11",
+      experienceLevel: "숙련" as const,
+      experienceSummary: "외벽 도장 숙련 작업자",
+      nationality: "대한민국",
+      languageCode: "ko",
+      languageLabel: "한국어",
+      isNewWorker: false,
+      isForeignWorker: false,
+      trainingStatus: "이수" as const,
+      trainingSummary: "당일 TBM 확인 완료"
+    };
+    const workerSnapshot: CurrentWorkerSnapshot = {
+      savedAt: "2026-07-11T16:40:00+09:00",
+      source: "workspace",
+      workers: [restoredWorker],
+      selectedWorkerIds: [restoredWorker.id]
+    };
+    const stored = buildStoredCurrentWorkpack(buildOperationMemoryWorkpack(), { workerSnapshot });
+    await page.addInitScript(({ key, value }) => {
+      window.localStorage.setItem(key, value);
+      const originalGetItem = Storage.prototype.getItem;
+      const originalSetItem = Storage.prototype.setItem;
+      const events: Array<{ kind: "read" } | { kind: "write"; workerIds: string[] }> = [];
+      (window as unknown as { __currentWorkpackStorageEvents: typeof events }).__currentWorkpackStorageEvents = events;
+      Storage.prototype.getItem = function trackedGetItem(storageKey: string): string | null {
+        if (storageKey === key) events.push({ kind: "read" });
+        return originalGetItem.call(this, storageKey);
+      };
+      Storage.prototype.setItem = function trackedSetItem(storageKey: string, storageValue: string): void {
+        if (storageKey === key) {
+          const parsed = JSON.parse(storageValue) as { workerSnapshot?: { workers?: Array<{ id?: string }> } };
+          events.push({
+            kind: "write",
+            workerIds: parsed.workerSnapshot?.workers?.flatMap((worker) => worker.id ? [worker.id] : []) || []
+          });
+        }
+        originalSetItem.call(this, storageKey, storageValue);
+      };
+    }, { key: CURRENT_WORKPACK_STORAGE_KEY, value: JSON.stringify(stored) });
+
+    await page.goto(`${harness.baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
+    const restoredWorkerName = page.locator(".worker-card-head strong", { hasText: "복원 기준 작업자" });
+    await restoredWorkerName.waitFor({ state: "attached" });
+    expect(await restoredWorkerName.textContent()).toBe("복원 기준 작업자");
+    await page.waitForFunction(() => (
+      (window as unknown as {
+        __currentWorkpackStorageEvents: Array<{ kind: "read" } | { kind: "write"; workerIds: string[] }>;
+      }).__currentWorkpackStorageEvents.some((event) => event.kind === "write")
+    ));
+    const events = await page.evaluate(() => (
+      (window as unknown as {
+        __currentWorkpackStorageEvents: Array<{ kind: "read" } | { kind: "write"; workerIds: string[] }>;
+      }).__currentWorkpackStorageEvents
+    ));
+    const firstRead = events.findIndex((event) => event.kind === "read");
+    const writes = events.filter((event): event is { kind: "write"; workerIds: string[] } => event.kind === "write");
+
+    expect(firstRead).toBeGreaterThanOrEqual(0);
+    expect(events.slice(0, firstRead).some((event) => event.kind === "write")).toBe(false);
+    expect(writes.length).toBeGreaterThan(0);
+    expect(
+      writes.every((event) => event.workerIds.length === 1 && event.workerIds[0] === restoredWorker.id),
+      JSON.stringify(events)
+    ).toBe(true);
+    await page.close();
+  }, 120_000);
+
   it.each(routes.flatMap((contract) => (
     (["day", "night"] as const).flatMap((theme) => (
       viewports.map((viewport) => ({ contract, theme, ...viewport }))
@@ -246,6 +325,10 @@ describe("current target localization browser matrix", () => {
     const page = await browser.newPage({ viewport: { width, height } });
     const recoverableErrors = collectRecoverableHydrationErrors(page);
     await prepareRoute(page, contract, theme);
+    if (contract.name === "ontology") {
+      await page.locator(".operation-memory-list-item").filter({ hasText: "개선" }).first()
+        .evaluate((element) => (element as HTMLElement).click());
+    }
     const metrics = await page.evaluate(({ meaningfulSelector, issueSource, issueFlags, scopeSelector }) => {
       const clippingValues = new Set(["auto", "clip", "hidden", "scroll"]);
       const visibleRect = (element: HTMLElement) => {
@@ -325,13 +408,48 @@ describe("current target localization browser matrix", () => {
         if (element.shadowRoot?.textContent) shadowText.push(element.shadowRoot.textContent);
       });
       const overlayCorpus = [document.body.innerText, ...shadowText].join("\n");
+      const operationBoard = scope.querySelector<HTMLElement>(".operation-memory-board");
+      const relationLines = [...scope.querySelectorAll<SVGLineElement>(".operation-memory-edge")];
+      const operationNodes = [...scope.querySelectorAll<HTMLElement>(".operation-memory-point")]
+        .filter((node) => node.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }));
+      const visibleOperationNodeIds = new Set(operationNodes.flatMap((node) => {
+        const nodeId = node.dataset.nodeId;
+        return nodeId ? [nodeId] : [];
+      }));
+      const connectedOperationNodeIds = new Set(relationLines.flatMap((line) => (
+        [line.dataset.sourceId, line.dataset.targetId].filter((nodeId): nodeId is string => Boolean(nodeId))
+      )));
+      const boardRect = operationBoard?.getBoundingClientRect();
+      const visibleNodeArea = operationNodes.reduce((sum, node) => {
+        const rect = node.getBoundingClientRect();
+        return sum + rect.width * rect.height;
+      }, 0);
+      const clippedOperationNodeCount = boardRect
+        ? operationNodes.filter((node) => {
+            const rect = node.getBoundingClientRect();
+            return rect.left < boardRect.left - 1
+              || rect.right > boardRect.right + 1
+              || rect.top < boardRect.top - 1
+              || rect.bottom > boardRect.bottom + 1;
+          }).length
+        : operationNodes.length;
       return {
         horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
         overlapCount: overlapPairs.length,
         overlapPairs: overlapPairs.slice(0, 20),
         unnamedInteractiveCount,
         issueOverlayDetected: issuePattern.test(overlayCorpus),
-        bodyText: document.body.innerText
+        bodyText: document.body.innerText,
+        relationLineCount: relationLines.length,
+        inaccessibleRelationCount: relationLines.filter((line) => !line.getAttribute("aria-label")).length,
+        zeroLengthRelationCount: relationLines.filter((line) => line.getTotalLength() <= 0).length,
+        missingConnectedNodeCount: [...connectedOperationNodeIds]
+          .filter((nodeId) => !visibleOperationNodeIds.has(nodeId)).length,
+        visibleOperationNodeCount: operationNodes.length,
+        clippedOperationNodeCount,
+        operationNodeOccupancy: boardRect && boardRect.width > 0 && boardRect.height > 0
+          ? visibleNodeArea / (boardRect.width * boardRect.height)
+          : 0
       };
     }, {
       meaningfulSelector,
@@ -346,6 +464,15 @@ describe("current target localization browser matrix", () => {
     expect(metrics.issueOverlayDetected).toBe(false);
     expect(metrics.bodyText).not.toMatch(contract.forbiddenPattern);
     expect(recoverableErrors).toEqual([]);
+    if (contract.name === "ontology" || contract.name === "workspace") {
+      expect(metrics.relationLineCount).toBeGreaterThan(0);
+      expect(metrics.inaccessibleRelationCount).toBe(0);
+      expect(metrics.zeroLengthRelationCount).toBe(0);
+      expect(metrics.missingConnectedNodeCount).toBe(0);
+      expect(metrics.visibleOperationNodeCount).toBeGreaterThan(2);
+      expect(metrics.clippedOperationNodeCount).toBe(0);
+      expect(metrics.operationNodeOccupancy).toBeGreaterThan(0.04);
+    }
 
     const evidence = {
       sourceSha,
@@ -357,7 +484,14 @@ describe("current target localization browser matrix", () => {
       horizontalOverflow: metrics.horizontalOverflow,
       overlapCount: metrics.overlapCount,
       unnamedInteractiveCount: metrics.unnamedInteractiveCount,
-      issueOverlayDetected: metrics.issueOverlayDetected
+      issueOverlayDetected: metrics.issueOverlayDetected,
+      relationLineCount: metrics.relationLineCount,
+      inaccessibleRelationCount: metrics.inaccessibleRelationCount,
+      zeroLengthRelationCount: metrics.zeroLengthRelationCount,
+      missingConnectedNodeCount: metrics.missingConnectedNodeCount,
+      visibleOperationNodeCount: metrics.visibleOperationNodeCount,
+      clippedOperationNodeCount: metrics.clippedOperationNodeCount,
+      operationNodeOccupancy: metrics.operationNodeOccupancy
     };
     fs.writeFileSync(
       path.join(outputDirectory, `${contract.name}-${theme}-${label}.json`),

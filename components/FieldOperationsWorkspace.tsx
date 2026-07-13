@@ -30,6 +30,7 @@ import {
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
 import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
+import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/workpack-readiness";
 import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
 import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
@@ -95,6 +96,16 @@ function resolveStoredInitialWorkerState(data: AskResponse, generationFingerprin
     workers: stored.workerSnapshot.workers,
     selectedWorkerIds: stored.workerSnapshot.selectedWorkerIds
   };
+}
+
+function resolveOperationGeneratedAt(data: AskResponse): string | null {
+  const candidates = [
+    data.generationEvidence?.snapshot.generatedAt,
+    data.qualityContract?.generatedAt
+  ];
+  return candidates.find((value): value is string => (
+    typeof value === "string" && isRfc3339OffsetTimestamp(value)
+  )) || null;
 }
 
 type LearningExportFormat = "markdown" | "jsonl" | "obsidian";
@@ -764,7 +775,7 @@ function WorkspaceOperationGraphPanel({
   session: Session | null;
   storageSnapshot: WorkspaceSaveSnapshot;
 }) {
-  const generatedAt = data.qualityContract?.generatedAt || "생성 시각 확인 전";
+  const generatedAt = resolveOperationGeneratedAt(data);
   const [serverGraph, setServerGraph] = useState<OperationMemoryGraph | null>(null);
   const [graphMessage, setGraphMessage] = useState("");
   const authToken = session?.access_token || "";
@@ -889,13 +900,19 @@ export function FieldOperationsWorkspace({
     savedCount: 0,
     workerMap: {}
   });
+  const storageHydrationKey = generationFingerprint || data.question;
+  const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
+  const hydratedStorageKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
+    hydratedStorageKeyRef.current = null;
     const storedState = resolveStoredInitialWorkerState(data, generationFingerprint);
-    if (!storedState) return;
-    setWorkers(storedState.workers);
-    setSelectedWorkerIds(storedState.selectedWorkerIds);
-  }, [data, generationFingerprint]);
+    if (storedState) {
+      setWorkers(storedState.workers);
+      setSelectedWorkerIds(storedState.selectedWorkerIds);
+    }
+    setHydratedStorageKey(storageHydrationKey);
+  }, [data, generationFingerprint, storageHydrationKey]);
 
   useEffect(() => {
     const token = activeClawAuthToken;
@@ -1031,6 +1048,11 @@ export function FieldOperationsWorkspace({
     dispatchSnapshotRef.current = dispatchSnapshot;
   }, [data, dispatchSnapshot, onDeliverablesChange, workerSnapshot]);
 
+  useEffect(() => {
+    if (hydratedStorageKey !== storageHydrationKey) return;
+    hydratedStorageKeyRef.current = storageHydrationKey;
+  }, [hydratedStorageKey, storageHydrationKey, workerSnapshot]);
+
   const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => {
     const previousValues = lastEditorValuesRef.current;
     const documentKeys = Object.keys(values) as DocumentKey[];
@@ -1041,7 +1063,7 @@ export function FieldOperationsWorkspace({
       return documentKeys.every((key) => currentDocuments[key] === values[key]) ? current : values;
     });
     onDeliverablesChangeRef.current?.(values, change);
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || hydratedStorageKeyRef.current !== storageHydrationKey) return;
     const currentData = dataRef.current;
     const nextData = applyWorkpackDeliverablesChange(currentData, values, change);
     try {
@@ -1056,7 +1078,7 @@ export function FieldOperationsWorkspace({
     } catch (error) {
       console.warn("safeclaw current workpack update failed", error);
     }
-  }, []);
+  }, [generationFingerprint, storageHydrationKey]);
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
     ["PLAN", "계획", `${workspaceData.citations.length}건 근거 · 위험성평가·작업계획`],
@@ -1218,7 +1240,7 @@ export function FieldOperationsWorkspace({
   }
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || hydratedStorageKey !== storageHydrationKey) return;
     try {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
@@ -1231,7 +1253,7 @@ export function FieldOperationsWorkspace({
     } catch (error) {
       console.warn("safeclaw current workpack snapshot update failed", error);
     }
-  }, [dispatchSnapshot, generationFingerprint, workerSnapshot, workspaceData]);
+  }, [dispatchSnapshot, generationFingerprint, hydratedStorageKey, storageHydrationKey, workerSnapshot, workspaceData]);
 
   if (surface === "share") {
     return (

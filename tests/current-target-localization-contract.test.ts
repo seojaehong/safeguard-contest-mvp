@@ -54,6 +54,44 @@ describe("current target user-visible Korean localization", () => {
     expect(operationKindLabel("Ack")).not.toMatch(/Ack|Node/u);
   });
 
+  it("keeps canonical metadata for audit while excluding machine values from display rows", () => {
+    const graph = operationMemoryGraphWithTiedLabels();
+    graph.nodes.push({
+      id: "improvement-known",
+      kind: "Improvement",
+      label: "사진 기반 개선",
+      meta: {
+        sourceType: "photo_analysis",
+        visionStatus: "analyzed",
+        analysisMode: "vision_ocr",
+        photoPairAttached: true
+      }
+    }, {
+      id: "improvement-unknown",
+      kind: "Improvement",
+      label: "신규 분류 개선",
+      meta: {
+        sourceType: "future_machine_token"
+      }
+    });
+
+    const model = buildOperationMemoryVisualizationModel(graph);
+    const knownCard = model.hoverCards.find((card) => card.id === "improvement-known");
+    const unknownCard = model.hoverCards.find((card) => card.id === "improvement-unknown");
+    const displayCorpus = [...(knownCard?.metaRows || []), ...(unknownCard?.metaRows || [])]
+      .map((row) => `${row.label}: ${row.value}`)
+      .join("\n");
+
+    expect(graph.nodes.find((node) => node.id === "improvement-known")?.meta).toMatchObject({
+      sourceType: "photo_analysis",
+      visionStatus: "analyzed",
+      analysisMode: "vision_ocr"
+    });
+    expect(displayCorpus).toContain("개선 전/개선 후");
+    expect(displayCorpus).toContain("분류 검토 필요");
+    expect(displayCorpus).not.toMatch(/photo_analysis|\banalyzed\b|vision_ocr|future_machine_token|비포\/애프터/u);
+  });
+
   it("keeps server and client operation-memory ordering equal when locale collation differs", () => {
     const graph = operationMemoryGraphWithTiedLabels();
     const serverModel = buildOperationMemoryVisualizationModel(graph);
