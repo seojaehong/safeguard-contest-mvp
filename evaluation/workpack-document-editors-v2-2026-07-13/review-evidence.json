@@ -1,0 +1,261 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "safeclaw-spec-review-evidence/v1",
+  "capturedAt": "2026-07-13T17:23:55.736Z",
+  "branch": "feat/workpack-document-editors-v2",
+  "candidateCommit": "011a7277850b0c8ba1c0cc9c7b931cd2fa7042a5",
+  "candidateParent": "0a214224afad31a7181c96655ff0fef36eead651",
+  "sourceBase": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+  "currentIntegrationTarget": "77d86416116b91809e1e0508c72564e06c8c31bc",
+  "mergeBase": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+  "candidateArtifacts": [
+    {
+      "path": "evaluation/workpack-document-editors-v2-2026-07-13/spec.md",
+      "gitBlob": "d3134a32f46886c06c0bd6ef3ef67c7f63262432",
+      "sha256": "0b4e4dd7b9c925906923ce266f6ab3a8315cc67fc68792867e9472b0c22dcb53",
+      "bytes": 318336
+    },
+    {
+      "path": "evaluation/workpack-document-editors-v2-2026-07-13/spec.json",
+      "gitBlob": "71b19ab98b17ae733c8a8c8d99a2a10a5685a771",
+      "sha256": "006cc9c271a8853a66565d0da587fc3018c320e9ca7d6416fe9e6db782369241",
+      "bytes": 232692
+    },
+    {
+      "path": "evaluation/workpack-document-editors-v2-2026-07-13/validate-contract.mjs",
+      "gitBlob": "14c4b43b9786837582af896dc74ca11d5fba51f6",
+      "sha256": "997c1df04928f4ff97e3e7f7e23b8578be74df523049f98964629b94ab2fa790",
+      "bytes": 44012
+    }
+  ],
+  "targetBlobs": [
+    {
+      "path": "components/WorkpackEditor.tsx",
+      "gitBlob": "359ae50fb654a2c3a472983dc5ba0d927a4b716a",
+      "sha256": "f89b4bd145aeeb1c73314204dbcc5c0decacb25ac03a7a613283d5a739156740",
+      "bytes": 141326
+    },
+    {
+      "path": "lib/risk-assessment-schema.ts",
+      "gitBlob": "54fd0e5ef3fdd0c31a83ef7ea4ca858da23b8e35",
+      "sha256": "68601198eecc8e3a4fc62ada069b634c7b25c2d9902b8afb301faf56aa321927",
+      "bytes": 10229
+    },
+    {
+      "path": "lib/safety-reference-catalog.ts",
+      "gitBlob": "350b1eed8e2e6761ce4da3e667f63ad398757531",
+      "sha256": "a533567acc08fc8435e9875d88306caca4899037b464c5c02c39ec100fa61479",
+      "bytes": 123571
+    },
+    {
+      "path": "lib/ontology/evidence-chain-registry.ts",
+      "gitBlob": "740120b9d11e5f25da6ed98aefc8e1c5b801cf78",
+      "sha256": "cf364b0656cd1b4137f423df2d33cf8d1625f55081040c73b64b5112945a4e32",
+      "bytes": 26047
+    },
+    {
+      "path": "lib/generation-evidence.ts",
+      "gitBlob": "a6517ec8edac3f06375e201b54f4bbc397b9982d",
+      "sha256": "377a59a57402a3a75337f255d75214af946094ee686108f8a840eef39e49497c",
+      "bytes": 8293
+    },
+    {
+      "path": "app/api/workpacks/route.ts",
+      "gitBlob": "78eb800c1b982a7356f4751189098ce201539101",
+      "sha256": "8d29489c2f70a5ca962189103b7be092ccded7925e3a96ce53d3bfc2491cdd8c",
+      "bytes": 8407
+    },
+    {
+      "path": "supabase/migrations/002_workspace_productization.sql",
+      "gitBlob": "c88950d636b0da7bc36278ccb4170417c0fdb177",
+      "sha256": "bf00e55aed5dd7d2d37072ec331d0c50a33cc08d8be898cc4b96542e7e886e1c",
+      "bytes": 6401
+    },
+    {
+      "path": "app/api/workpacks/[id]/improvements/route.ts",
+      "gitBlob": "00e7c8a88134f8636cae5d98949eafe5b0ba1a1a",
+      "sha256": "b94630d4bce8e3aff9abeec0b9e90df9e958da2c09a48fc9380ca1ded57162f5",
+      "bytes": 13466
+    },
+    {
+      "path": "app/api/workpacks/[id]/share-sessions/route.ts",
+      "gitBlob": "8ed0713940bc246f523b2e9c29af071882ed2cde",
+      "sha256": "7e6e7d2c4996852db0599c6234a8db480fc2c426a0020742d513c9d573407f6f",
+      "bytes": 6235
+    },
+    {
+      "path": "app/api/workflow/dispatch/route.ts",
+      "gitBlob": "b797f93332a8fef77a49a58f2d9772042014ee27",
+      "sha256": "a7aa246fc2077b15d7c8241e7daa23f288294a028afe576f9f9beaae3481a819",
+      "bytes": 16029
+    },
+    {
+      "path": "app/api/export/hwp/route.ts",
+      "gitBlob": "3732b3177cdf811147bda87951f29257bb5fa327",
+      "sha256": "fe24d1f91bfa9a978011c8ae89f6e1e0fc50154a6cb21874c0c29a60aece5031",
+      "bytes": 11756
+    },
+    {
+      "path": "app/api/export/pdf/route.ts",
+      "gitBlob": "08140acf24dc468ccb4894c9fff3af1ca277adfe",
+      "sha256": "baecf4ec5d04d5f91e5845a3489da9fbcaac61f307336276e18fc8b4288cfd6c",
+      "bytes": 53007
+    },
+    {
+      "path": "app/api/export/xlsx/route.ts",
+      "gitBlob": "7d09b692b4fc00c424d2cdde72e584b5216e1ed9",
+      "sha256": "fe817c558c69c045c451cf3b903fa1c6e53e145de08137cccd4db40b87f88030",
+      "bytes": 9373
+    },
+    {
+      "path": "app/api/export/hwpx-template/route.ts",
+      "gitBlob": "db17d136793641440a40154e8da0341f1a9e7ea9",
+      "sha256": "240bbfd822fda580f9ed4edb363a764a907f4f4dab6d0662a5239410a75aaaf9",
+      "bytes": 2030
+    }
+  ],
+  "refSnapshot": {
+    "snapshotId": "CONFLICT-SNAPSHOT-2026-07-14T01:56:33+09:00",
+    "capturedAt": "2026-07-14T01:56:33+09:00",
+    "binding": "This is an observed ref/worktree snapshot, not a live-state claim. review-evidence.json binds the commit IDs and target blobs. Implementation must run freshRecheck and replace this snapshot before any integration decision.",
+    "heads": [
+      {
+        "id": "integration",
+        "localRef": "feat/phase-a-evidence-integration",
+        "localHead": "77d86416116b91809e1e0508c72564e06c8c31bc",
+        "remoteRef": "origin/feat/phase-a-evidence-integration",
+        "remoteHead": "77d86416116b91809e1e0508c72564e06c8c31bc",
+        "worktreeState": "clean",
+        "overlapHunks": [
+          "components/WorkpackEditor.tsx: downloadXlsx 2298+, downloadHwp 2363+, buildHwpxWithRhwp 1644+, downloadHwpx 2434+, printPdf 2503+",
+          "app/api/export/hwp/route.ts: POST 291+ binary HWP",
+          "app/api/export/pdf/route.ts: POST 1209+ HTML/binary paths",
+          "app/api/export/xlsx/route.ts: POST 163+ structured modes"
+        ],
+        "decision": "Only eligible future implementation base, subject to fresh approval and recheck."
+      },
+      {
+        "id": "ontology",
+        "localRef": "fix/phase-a-ontology-review",
+        "localHead": "a5ae9f74410ffe652205811135e9d28095419b48",
+        "remoteRef": "origin/fix/phase-a-ontology-review",
+        "remoteHead": "a5ae9f74410ffe652205811135e9d28095419b48",
+        "reviewState": "rejected_and_remediating",
+        "worktreeState": "dirty_tests",
+        "dirtyPaths": [
+          "tests/ontology-evidence-chains.test.ts",
+          "tests/ontology-sif-resolution-gate.test.ts",
+          "tests/phase-a-citation-authority.test.ts",
+          "tests/workpack-store.test.ts"
+        ],
+        "overlapHunks": [
+          "components/WorkpackEditor.tsx: WorkpackEditor 1988..2720 phaseA review/materialization controls",
+          "lib/search.ts: attachPhaseAReview 1369..1415",
+          "lib/types.ts: PhaseAReview 388+",
+          "lib/ontology/evidence-chain.ts: EvidenceMaterializationRecord/verifyEvidenceMaterialization 108..938",
+          "tests/workpack-store.test.ts and three currently dirty ontology tests"
+        ],
+        "decision": "Read-only rejected candidate; no hunk may be copied while remediation is dirty or unreviewed."
+      },
+      {
+        "id": "reports",
+        "localRef": "fix/reports-mobile-task-distance",
+        "localHead": "b7adabf233c85eb8d1ceef8c916dc4d1db394ccd",
+        "remoteRef": "origin/fix/reports-mobile-task-distance",
+        "remoteHead": "b7adabf233c85eb8d1ceef8c916dc4d1db394ccd",
+        "productCommit": "0be5859f618990ffe4b5d9f60f4b22008b5fb460",
+        "evidenceCommit": "b7adabf233c85eb8d1ceef8c916dc4d1db394ccd",
+        "worktreeState": "clean",
+        "productHunks": [
+          "app/globals.css: reports text reflow/touch rules 20171..20206",
+          "tests/reports-design-remediation.test.ts: 200% fixture and assertions 238..640",
+          "tests/reports-download-center.test.ts: server-state/remount assertions 169..508"
+        ],
+        "evidenceHunks": [
+          "evaluation/reports-mobile-task-distance-2026-07-13/fresh-review-2026-07-14/: report/manifest/metrics plus PNG evidence only"
+        ],
+        "decision": "Do not re-own reports CSS/tests or import its evidence as editor evidence; use only after independent reports decision."
+      },
+      {
+        "id": "web",
+        "localRef": "fix/web-localization-current-target",
+        "localHead": "804833c4291ef01360928ee59b19e903a3b928bb",
+        "remoteRef": "origin/fix/web-localization-current-target",
+        "remoteHead": "f15e88d46994768543b1071d99940b1e968db9d8",
+        "reviewState": "pending_local_commit",
+        "worktreeState": "ahead_1_with_untracked_evidence_only",
+        "dirtyPaths": [
+          "evaluation/web-localization-current-target-2026-07-14-v4/"
+        ],
+        "overlapHunks": [
+          "components/FieldOperationsWorkspace.tsx: resolveStoredInitialWorkerState 101+, WorkspaceOperationGraphPanel 778+, FieldOperationsWorkspace 903..1256",
+          "components/OperationMemoryPreview.tsx: OperationMemoryGraphViewer 101..228",
+          "lib/ontology/operation-memory-visualization.ts: metaLabel/metaValue/model 79..360",
+          "lib/ontology/operation-memory.ts: buildOperationMemoryGraph 88..112",
+          "tests/current-target-localization-browser.test.ts 244..495"
+        ],
+        "decision": "Pending and not remote-bound; exclude both product hunks and untracked evidence from editor implementation."
+      },
+      {
+        "id": "editor-first-ui",
+        "localRef": "feature/editor-first-ui-v2",
+        "localHead": "57b778e8dfa2c7ef896ba19911b79f537354439a",
+        "remoteHead": "57b778e8dfa2c7ef896ba19911b79f537354439a",
+        "worktreeState": "dirty_image_only",
+        "dirtyPaths": [
+          "output/playwright/2026-07-10/module-shell-hardening/desktop-tbm-night.png",
+          "output/playwright/2026-07-10/module-shell-hardening/desktop-workers-night.png"
+        ],
+        "overlapHunks": [
+          "components/WorkpackEditor.tsx documentMeta/parser/export handlers",
+          "components/CurrentWorkpackModules.tsx current document module",
+          "lib/types.ts AskResponse",
+          "app/api/export/hwp/route.ts POST",
+          "app/api/export/xlsx/route.ts POST"
+        ],
+        "decision": "High-risk parallel lineage; no wholesale copy or merge."
+      },
+      {
+        "id": "share-session-ui",
+        "localRef": "feature/share-session-ui-v2",
+        "localHead": "76a67c55cff0f50cb0f230a5ca49a260a7989055",
+        "remoteRef": null,
+        "remoteHead": null,
+        "worktreeState": "clean_local_only",
+        "overlapHunks": [
+          "app/api/workpacks/[id]/share-sessions/route.ts POST",
+          "app/api/workflow/dispatch/route.ts POST",
+          "components/WorkflowSharePanel.tsx",
+          "lib/workflow-share-client.ts"
+        ],
+        "decision": "Blocked behind revision authority; local-only head is not an integration source."
+      }
+    ]
+  },
+  "behaviorExecution": {
+    "executed": false,
+    "reason": "Spec-review evidence binds declarations and target source shapes only; no browser, export, save, share, or photo behavior was executed."
+  },
+  "implementationExecution": {
+    "executed": false,
+    "reason": "No Wave, codec, product, test, API, DB, schema, migration, RPC, package, CSS, or data implementation was started."
+  },
+  "reviewClaims": [
+    "candidate JSON parses",
+    "candidate Markdown normative block is deterministic from candidate JSON",
+    "candidate and evidence commits have disjoint exact scopes",
+    "target blobs are read from the immutable target commit",
+    "source-shape and internal-contract declarations can be validated",
+    "implementation remains blocked pending fresh independent PASS and explicit user DB approval"
+  ],
+  "notClaims": [
+    "independent reviewer PASS",
+    "user DB approval",
+    "product behavior PASS",
+    "browser or 200 percent PASS",
+    "export round-trip PASS",
+    "server revision authority",
+    "photo confirmation persistence",
+    "share freshness enforcement"
+  ]
+}
