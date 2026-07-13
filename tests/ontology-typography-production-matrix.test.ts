@@ -213,7 +213,7 @@ productionMatrix("ontology typography production matrix", () => {
         await expectRole(page, renderedOntologyFamilies.hud, { firstFont: "Geist Mono", size: "11px", weight: "700", lineHeight: 16, tracking: 0 });
         await expectRole(page, [".ontology-map-column > span"], { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
         await expectRole(page, renderedOntologyFamilies.componentTitle, { firstFont: "Noto Sans KR", size: "17px", weight: "500", lineHeight: 28.05, tracking: 0 });
-        await expectRole(page, [".ontology-hover-card strong"], { firstFont: "Noto Sans KR", size: "20px", weight: "700", lineHeight: 27, tracking: -0.3 });
+        await expectRole(page, [".ontology-hover-card strong"], { firstFont: "Noto Sans KR", size: "20px", weight: "700", lineHeight: 27, tracking: 0 });
         await expectRole(page, renderedOntologyFamilies.caption, { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
         await expectRole(page, [".ontology-map-column > p"], { firstFont: "Noto Sans KR", size: "15px", weight: "500", lineHeight: 24, tracking: 0 });
         await expectRole(page, renderedOntologyFamilies.table, { firstFont: "Noto Sans KR", size: "13px", weight: "500", lineHeight: 20, tracking: 0 });
