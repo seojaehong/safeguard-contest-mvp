@@ -6,7 +6,7 @@ import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 
 export const metadata: Metadata = {
   title: "SafeClaw 리포트 · 다운로드 센터",
-  description: "위험성평가 As-Is/To-Be와 승인된 사진을 기간·분류별로 내려받습니다."
+  description: "위험성평가 개선 전/개선 후와 승인된 사진을 기간·분류별로 내려받습니다."
 };
 
 export default async function ReportsPage({
