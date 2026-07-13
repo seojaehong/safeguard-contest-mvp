@@ -1,0 +1,16 @@
+{
+  "sourceSha": "188b3b38de48c102f199cfd0942a93d59d56d7fa",
+  "buildId": "OYLfEPZhNwrBG1IPM04At",
+  "harnessMode": "prod",
+  "route": "/ontology",
+  "theme": "day",
+  "viewport": {
+    "label": "desktop",
+    "width": 1440,
+    "height": 900
+  },
+  "horizontalOverflow": 0,
+  "overlapCount": 0,
+  "unnamedInteractiveCount": 0,
+  "issueOverlayDetected": false
+}

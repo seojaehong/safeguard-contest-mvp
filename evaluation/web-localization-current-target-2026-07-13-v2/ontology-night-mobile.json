@@ -1,0 +1,16 @@
+{
+  "sourceSha": "188b3b38de48c102f199cfd0942a93d59d56d7fa",
+  "buildId": "OYLfEPZhNwrBG1IPM04At",
+  "harnessMode": "prod",
+  "route": "/ontology",
+  "theme": "night",
+  "viewport": {
+    "label": "mobile",
+    "width": 390,
+    "height": 844
+  },
+  "horizontalOverflow": 0,
+  "overlapCount": 0,
+  "unnamedInteractiveCount": 0,
+  "issueOverlayDetected": false
+}

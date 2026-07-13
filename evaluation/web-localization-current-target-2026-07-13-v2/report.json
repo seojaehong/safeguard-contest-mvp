@@ -1,0 +1,94 @@
+{
+  "generatedAt": "2026-07-13T23:29:00+09:00",
+  "authoritativeParent": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+  "productSha": "188b3b38de48c102f199cfd0942a93d59d56d7fa",
+  "buildId": "OYLfEPZhNwrBG1IPM04At",
+  "branch": "fix/web-localization-current-target",
+  "harnessMode": "prod",
+  "adoptionCandidates": [
+    "aca2f1db878e8597fd946ce99cabc9ecd4fe0345",
+    "14dc197e9c253c45a5ea79476acddbf6ac0f1a33",
+    "188b3b38de48c102f199cfd0942a93d59d56d7fa"
+  ],
+  "proposedCherryPickSequence": [
+    "aca2f1db878e8597fd946ce99cabc9ecd4fe0345",
+    "14dc197e9c253c45a5ea79476acddbf6ac0f1a33",
+    "188b3b38de48c102f199cfd0942a93d59d56d7fa",
+    "v2 evidence commit (this report's commit; exact SHA is reported after Git creates it)"
+  ],
+  "supersededEvidence": {
+    "commit": "1835d9fd703f84b8209f718bdc97cf3e7de55dea",
+    "folder": "evaluation/web-localization-current-target-2026-07-13/"
+  },
+  "selectiveIntegration": {
+    "wholeBranchOrRangeMergeProhibited": true,
+    "orderIsMandatory": true,
+    "changedFilesByProductCommit": {
+      "aca2f1db878e8597fd946ce99cabc9ecd4fe0345": [
+        "app/knowledge/page.tsx",
+        "app/ontology/page.tsx",
+        "app/reports/page.tsx",
+        "components/ReportsDownloadCenter.tsx",
+        "lib/reporting-downloads.ts",
+        "tests/current-target-localization-browser.test.ts",
+        "tests/current-target-localization-contract.test.ts",
+        "tests/reporting-downloads.test.ts",
+        "tests/reports-download-center.test.ts"
+      ],
+      "14dc197e9c253c45a5ea79476acddbf6ac0f1a33": [
+        "app/ontology/page.tsx",
+        "components/OperationMemoryPreview.tsx",
+        "tests/current-target-localization-browser.test.ts",
+        "tests/current-target-localization-contract.test.ts"
+      ],
+      "188b3b38de48c102f199cfd0942a93d59d56d7fa": [
+        "app/ontology/page.tsx"
+      ]
+    }
+  },
+  "verification": {
+    "baseline": { "files": 4, "passed": 55, "failed": 0 },
+    "initialBoundaryRed": { "files": 2, "passed": 39, "failed": 4 },
+    "reviewRemediationRed": { "files": 1, "passed": 2, "failed": 2 },
+    "operationGeometryRed": {
+      "desktopOverlapPairs": 3,
+      "mobileOverlapPairs": 7
+    },
+    "focused": { "files": 6, "passed": 64, "failed": 0 },
+    "typecheck": "pass",
+    "build": {
+      "result": "pass",
+      "nextVersion": "15.5.20",
+      "staticPages": 27
+    },
+    "productionBrowser": {
+      "testFiles": 1,
+      "passed": 15,
+      "failed": 0,
+      "screenMatrixRows": 12,
+      "focusedGeometryRows": 2,
+      "overlayRegexRows": 1,
+      "jsonArtifacts": 12,
+      "pngArtifacts": 12,
+      "horizontalOverflowTotal": 0,
+      "overlapTotal": 0,
+      "unnamedInteractiveTotal": 0,
+      "issueOverlayDetectedRows": 0
+    }
+  },
+  "matrix": {
+    "routes": ["/reports", "/ontology", "/knowledge"],
+    "themes": ["day", "night"],
+    "viewports": [
+      { "label": "desktop", "width": 1440, "height": 900 },
+      { "label": "mobile", "width": 390, "height": 844 }
+    ]
+  },
+  "preservedContracts": [
+    "internal asIs and toBe corpus keys",
+    "five fail-closed report download locks",
+    "published ontology topology and complete node list"
+  ],
+  "sharedGlobalsCssChanged": false,
+  "pushStatus": "not pushed pending independent review"
+}
