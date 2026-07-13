@@ -1,10 +1,10 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-13T20:17:31.2666646+09:00",
+  "generatedAt": "2026-07-13T20:47:53.1742021+09:00",
   "branch": "fix/phase-a-ontology-review",
   "base": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
   "contractVersion": "phase-a-evidence-chains/1.3.0",
-  "status": "final_corrections_remediated_awaiting_rereview",
+  "status": "citation_boundary_p2_remediated_awaiting_rereview",
   "counts": {
     "canonicalChains": 3,
     "controls": 9,
@@ -249,6 +249,10 @@
     "ontologyAliasesReachProductionHandler": true,
     "exactEvidenceCitationTokensRequired": true,
     "citationPrefixSuffixCollisionsMaterialize": false,
+    "ordinaryCitationPunctuationAccepted": true,
+    "unicodeUidContinuationRejected": true,
+    "contextualColonBoundary": true,
+    "nonPunctuationSymbolBoundaryAccepted": false,
     "punctuatedVehicleAliasHandlerCovered": true,
     "reviewRequiredMaterializationRecords": 0,
     "humanConfirmationPreserved": true
@@ -324,7 +328,8 @@
     { "finding": "F-3", "status": "fixed", "summary": "full production-shaped handler tests cover aliases, role-scoped positive records, fail-closed records, and pending confirmation" },
     { "finding": "F-4", "status": "fixed", "summary": "report and verification logs are recorded as committed branch artifacts" },
     { "finding": "C-1", "status": "fixed", "summary": "materialization requires a complete delimiter-bounded citation token; law and KOSHA prefix/suffix collisions fail closed" },
-    { "finding": "C-2", "status": "fixed", "summary": "the exact 차량계·기계 인접작업 alias reaches the production handler and resolves to 지게차 상하차" }
+    { "finding": "C-2", "status": "fixed", "summary": "the exact 차량계·기계 인접작업 alias reaches the production handler and resolves to 지게차 상하차" },
+    { "finding": "CB-P2", "status": "fixed", "summary": "ordinary citation punctuation is accepted while Unicode, UID-grammar continuation, and non-punctuation symbol collisions fail closed" }
   ],
   "lawVerification": {
     "verifiedOn": "2026-07-13",
@@ -356,11 +361,17 @@
       "freshReviewRedTestsPassed": 48,
       "finalCorrectionFailures": 3,
       "finalCorrectionRedCycles": 1,
-      "finalCorrectionRedTestsPassed": 60
+      "finalCorrectionRedTestsPassed": 60,
+      "citationBoundaryP2FailuresAcrossCycles": 10,
+      "citationBoundaryP2RedCycles": 2,
+      "citationBoundaryP2RedRuns": [
+        { "failed": 8, "passed": 86, "total": 94 },
+        { "failed": 2, "passed": 94, "total": 96 }
+      ]
     },
     "focused": {
       "filesPassed": 6,
-      "testsPassed": 136,
+      "testsPassed": 169,
       "status": "pass",
       "serial": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"

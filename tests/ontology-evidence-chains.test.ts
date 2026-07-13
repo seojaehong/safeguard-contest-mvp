@@ -825,6 +825,96 @@ describe("pipeline and document materialization contract", () => {
     ]);
   });
 
+  test.each([
+    ["ASCII period", ".", "."],
+    ["ASCII comma", ",", ","],
+    ["ASCII semicolon", ";", ";"],
+    ["ASCII colon", ":", ":"],
+    ["parentheses", "(", ")"],
+    ["brackets", "[", "]"],
+    ["ASCII double quotes", "\"", "\""],
+    ["ASCII single quotes", "'", "'"],
+    ["smart double quotes", "“", "”"],
+    ["smart single quotes", "‘", "’"],
+    ["fullwidth comma", "，", "，"],
+    ["ideographic full stop", "。", "。"],
+    ["ideographic comma", "、", "、"],
+  ] as const)(
+    "accepts a complete current-law UID surrounded by %s",
+    (_label, before, after) => {
+      const pack = requireReviewRequired("차량계·기계 인접작업");
+      const plan = pack.materializationTargets[0];
+      const lawUid = plan?.lawCitedUids[0];
+      if (!plan || !lawUid) throw new Error("expected vehicle current-law plan");
+
+      expect(verifyEvidenceMaterialization({
+        evidenceChainState: "resolved",
+        pack,
+        documents: {
+          riskAssessmentDraft: `${plan.controlLabel} | ${before}${lawUid}${after}`,
+        },
+      })).toEqual([
+        expect.objectContaining({
+          controlId: plan.controlId,
+          citedUids: [lawUid],
+        }),
+      ]);
+    },
+  );
+
+  test("accepts a complete UID in normal Korean sentence punctuation", () => {
+    const pack = requireReviewRequired("차량계·기계 인접작업");
+    const plan = pack.materializationTargets[0];
+    const lawUid = plan?.lawCitedUids[0];
+    if (!plan || !lawUid) throw new Error("expected vehicle current-law plan");
+
+    expect(verifyEvidenceMaterialization({
+      evidenceChainState: "resolved",
+      pack,
+      documents: {
+        riskAssessmentDraft: `${plan.controlLabel} | 근거: “${lawUid}”: 작업 전 확인한다.`,
+      },
+    })).toHaveLength(1);
+  });
+
+  test.each([
+    ["law article suffix", "", "의2"],
+    ["ASCII letter suffix", "", "A"],
+    ["ASCII number suffix", "", "2"],
+    ["Unicode letter suffix", "", "Ω"],
+    ["Unicode number suffix", "", "２"],
+    ["Hangul suffix", "", "가"],
+    ["underscore suffix", "", "_revision"],
+    ["hyphen suffix", "", "-revision"],
+    ["slash suffix", "", "/revision"],
+    ["colon suffix", "", ":revision"],
+    ["plus symbol suffix", "", "+revision"],
+    ["ASCII letter prefix", "A", ""],
+    ["Unicode letter prefix", "Ω", ""],
+    ["Hangul prefix", "가", ""],
+    ["underscore prefix", "_", ""],
+    ["hyphen prefix", "-", ""],
+    ["slash prefix", "/", ""],
+    ["colon token prefix", "archive:", ""],
+    ["equals symbol prefix", "=", ""],
+  ] as const)(
+    "rejects a current-law UID embedded by %s continuation",
+    (_label, before, after) => {
+      const pack = requireReviewRequired("차량계·기계 인접작업");
+      const plan = pack.materializationTargets[0];
+      const lawUid = plan?.lawCitedUids[0];
+      if (!plan || !lawUid) throw new Error("expected vehicle current-law plan");
+
+      expect(verifyEvidenceMaterialization({
+        evidenceChainState: "resolved",
+        pack,
+        documents: {
+          riskAssessmentDraft: `${plan.controlLabel} | ${before}${lawUid}${after}`,
+        },
+      })).toEqual([]);
+    },
+  );
+
   test("does not materialize Article 172 from an Article 172-2 citation token", () => {
     const pack = requireReviewRequired("차량계·기계 인접작업");
     const plan = pack.materializationTargets[0];
