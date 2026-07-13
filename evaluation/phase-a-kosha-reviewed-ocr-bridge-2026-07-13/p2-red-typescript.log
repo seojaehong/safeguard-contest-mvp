@@ -1,0 +1,298 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/kosha-guide-corpus-audit.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts (84 tests | 18 failed) 17259ms
+     × builds a pending read-only candidate from an exact provenance tuple 21ms
+     × records a deterministic content hash for the current draft without accepting it 2ms
+     × rejects mixed declared snapshot identity currentSourceIdentitySha256 2ms
+     × rejects mixed declared snapshot identity manifestSourceIdentitySha256 1ms
+     × rejects mixed declared snapshot identity currentGenerationPolicySha256 1ms
+     × rejects mixed declared snapshot identity manifestGenerationPolicySha256 1ms
+     × rejects a manifest with tampered source identity material 1ms
+     × rejects a manifest with tampered generation policy material 1ms
+     × rejects manifest output hashes mixed with different snapshot bytes 1ms
+     × rejects a stale reproducibility hash after actual snapshot inputs change 5ms
+     × rejects a reviewed candidate bound to a different raw source hash 1ms
+     × rejects multiple reviewed candidates for one exact local item 1ms
+     × rejects a verified candidate without a valid content hash 1ms
+     × rejects a verified candidate whose declared content hash does not match its bytes 1ms
+     × rejects a mismatched provided candidateFileSha256 1ms
+     × rejects a mismatched provided candidateContentSha256 1ms
+     × rejects a mismatched provided candidateAttestationSha256 1ms
+     × does not collapse identical OCR content with distinct valid review attestations 1ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 18 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > builds a pending read-only candidate from an exact provenance tuple
+AssertionError: expected { …(9) } to deeply equal { …(12) }
+
+- Expected
++ Received
+
+@@ -1,9 +1,6 @@
+  {
+-   "candidateAttestationSha256": "6c15bc2f309d84871368a0ecb96f989959274cc3d2cb3e8e7e0c649d45043a90",
+-   "candidateContentSha256": "496c1c1b6a7e81d5e06108f510d62210abf46e29b1925ed6a475eb8d658cc123",
+-   "candidateFileSha256": "9c11e06ea2e0b0f196be662d561a222ff132407052b6c79849d56141c151b60a",
+    "chunks": [
+      {
+        "chunkId": "chunk-1",
+        "pageEnd": 2,
+        "pageStart": 1,
+@@ -32,8 +29,8 @@
+        "internalPath": "B-E-3-2025 exact.pdf",
+        "zipFile": "[2025] technical.zip",
+      },
+    },
+    "readOnly": true,
+-   "reproducibilityHash": "b9df0d753afeeaec6b4aac2ab773e4310856be1a5f901be9641d3a4a1ebcd616",
+-   "schemaVersion": "safeclaw-kosha-production-local-bridge-candidate/v2",
++   "reviewedCandidateContentSha256": null,
++   "schemaVersion": "safeclaw-kosha-production-local-bridge-candidate/v1",
+  }
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:340:23
+    338|     };
+    339|
+    340|     expect(candidate).toEqual({
+       |                       ^
+    341|       ...identityMaterial,
+    342|       reproducibilityHash: sha256(canonicalJson(identityMaterial))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > records a deterministic content hash for the current draft without accepting it
+AssertionError: expected undefined to be '496c1c1b6a7e81d5e06108f510d62210abf46…' // Object.is equality
+
+- Expected:
+"496c1c1b6a7e81d5e06108f510d62210abf46e29b1925ed6a475eb8d658cc123"
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:352:46
+    350|     const candidate = buildKoshaProductionLocalBridgeCandidate(input);
+    351|
+    352|     expect(candidate.candidateContentSha256).toBe(sha256(canonicalJson…
+       |                                              ^
+    353|       source: { item_id: "local-1", raw_sha256: rawSha256 }
+    354|     })));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects mixed declared snapshot identity currentSourceIdentitySha256
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects mixed declared snapshot identity manifestSourceIdentitySha256
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects mixed declared snapshot identity currentGenerationPolicySha256
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects mixed declared snapshot identity manifestGenerationPolicySha256
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:394:67
+    392|     snapshot[field] = "9".repeat(64);
+    393|
+    394|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    395|   });
+    396|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a manifest with tampered source identity material
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:405:67
+    403|     };
+    404|
+    405|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    406|       "kosha-bridge-manifest-source-identity-mismatch"
+    407|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a manifest with tampered generation policy material
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:418:67
+    416|     };
+    417|
+    418|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    419|       "kosha-bridge-manifest-generation-policy-hash-mismatch"
+    420|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects manifest output hashes mixed with different snapshot bytes
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:430:67
+    428|     snapshot.manifestOutputHashes["failures.jsonl"] = "6".repeat(64);
+    429|
+    430|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    431|       "kosha-bridge-output-hash-mismatch:failures.jsonl"
+    432|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a stale reproducibility hash after actual snapshot inputs change
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:444:67
+    442|     snapshot.snapshotOutputHashes["failures.jsonl"] = "6".repeat(64);
+    443|
+    444|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    445|       "kosha-bridge-reproducibility-hash-mismatch"
+    446|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a reviewed candidate bound to a different raw source hash
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:528:67
+    526|     })];
+    527|
+    528|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    529|       "kosha-bridge-reviewed-candidate-raw-hash-mismatch"
+    530|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects multiple reviewed candidates for one exact local item
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:537:67
+    535|     input.reviewedCandidates?.push(input.reviewedCandidates[0]);
+    536|
+    537|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    538|       "kosha-bridge-reviewed-candidate-match-count:2"
+    539|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a verified candidate without a valid content hash
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:548:67
+    546|     })];
+    547|
+    548|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    549|       "kosha-bridge-reviewed-candidate-content-hash-invalid"
+    550|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a verified candidate whose declared content hash does not match its bytes
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:559:67
+    557|     })];
+    558|
+    559|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    560|       "kosha-bridge-reviewed-candidate-content-hash-mismatch"
+    561|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a mismatched provided candidateFileSha256
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a mismatched provided candidateContentSha256
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a mismatched provided candidateAttestationSha256
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:573:67
+    571|     reviewed[field] = "9".repeat(64);
+    572|
+    573|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    574|   });
+    575|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/18]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > does not collapse identical OCR content with distinct valid review attestations
+AssertionError: expected undefined not to be undefined // Object.is equality
+ ❯ tests/kosha-guide-corpus-audit.test.ts:594:43
+    592|
+    593|     expect(first.candidateContentSha256).toBe(second.candidateContentS…
+    594|     expect(first.candidateFileSha256).not.toBe(second.candidateFileSha…
+       |                                           ^
+    595|     expect(first.candidateAttestationSha256).not.toBe(second.candidate…
+    596|     expect(first.reproducibilityHash).not.toBe(second.reproducibilityH…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/18]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  18 failed | 66 passed (84)
+   Start at  23:01:36
+   Duration  18.52s (transform 293ms, setup 0ms, import 375ms, tests 17.26s, environment 0ms)

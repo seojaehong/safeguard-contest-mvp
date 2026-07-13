@@ -1,0 +1,6 @@
+2026-07-13T14:10:33.575Z KOSHA GUIDE audit started
+readOnly=true dbMutationPerformed=false uploadPerformed=false
+fatal=Error: Supabase read credentials are unavailable
+    at fetchProductionBridgeRows (file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge/scripts/audit_kosha_guides.mjs:477:46)
+    at runProductionLocalBridgeAudit (file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge/scripts/audit_kosha_guides.mjs:580:28)
+    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge/scripts/audit_kosha_guides.mjs:1266:11
