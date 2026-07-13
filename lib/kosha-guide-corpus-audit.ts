@@ -17,6 +17,198 @@ export const KOSHA_GUIDE_OFFICIAL_DOWNLOAD_BASE = "https://portal.kosha.or.kr/op
 export const KOSHA_AUDIT_REQUEST_TIMEOUT_MS = 20_000;
 export const KOSHA_AUDIT_REQUEST_RETRIES = 1;
 
+const KOSHA_BRIDGE_CANDIDATE_EXACT_PATHS = new Set([
+  "data/safety-knowledge/kosha-body-corpus.schema.json",
+  "lib/kosha-guide-corpus-audit.ts",
+  "lib/kosha-guide-corpus.ts",
+  "scripts/audit_kosha_guides.mjs",
+  "scripts/recover_kosha_ocr_boundary.py",
+  "scripts/snapshot_kosha_guide_corpus.py",
+  "scripts/tests/test_recover_kosha_ocr_boundary.py",
+  "scripts/tests/test_snapshot_kosha_guide_corpus.py",
+  "tests/kosha-guide-corpus-audit.test.ts",
+  "tests/kosha-guide-offline-harness.test.ts"
+]);
+const KOSHA_BRIDGE_EVALUATION_PREFIX =
+  "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/";
+
+export const KOSHA_EVALUATION_BINARY_MIME_BY_EXTENSION: Readonly<Record<string, string>> = {
+  ".7z": "application/x-7z-compressed",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".gif": "image/gif",
+  ".gz": "application/gzip",
+  ".ico": "image/x-icon",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ".ttf": "font/ttf",
+  ".webp": "image/webp",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ".zip": "application/zip"
+};
+
+export type KoshaEvaluationArtifactViolation = {
+  artifactPath: string;
+  code:
+    | "absolute-local-path"
+    | "configured-secret-value"
+    | "credential-assignment"
+    | "raw-hmac-value"
+    | "token-pattern";
+  detail: string;
+};
+
+export type KoshaEvaluationArtifactScanInput = {
+  artifactPath: string;
+  text: string;
+  repositoryRoots: readonly string[];
+  configuredSecrets: Readonly<Record<string, string | undefined>>;
+};
+
+function normalizeCandidatePath(path: string): string {
+  return path.replaceAll("\\", "/");
+}
+
+export function assertKoshaBridgeCandidatePaths(paths: readonly string[]): void {
+  for (const originalPath of paths) {
+    const path = normalizeCandidatePath(originalPath);
+    const invalidShape =
+      path.length === 0 ||
+      path.startsWith("/") ||
+      /^[A-Za-z]:\//u.test(path) ||
+      path.split("/").includes("..");
+    const allowed =
+      KOSHA_BRIDGE_CANDIDATE_EXACT_PATHS.has(path) ||
+      path.startsWith(KOSHA_BRIDGE_EVALUATION_PREFIX);
+    if (invalidShape || !allowed) {
+      throw new Error(`kosha-bridge-candidate-path-out-of-scope:${path}`);
+    }
+  }
+}
+
+function artifactExtension(path: string): string {
+  const normalized = normalizeCandidatePath(path);
+  const fileName = normalized.slice(normalized.lastIndexOf("/") + 1);
+  const dotIndex = fileName.lastIndexOf(".");
+  return dotIndex === -1 ? "" : fileName.slice(dotIndex).toLowerCase();
+}
+
+export function decodeKoshaEvaluationArtifactText(
+  artifactPath: string,
+  bytes: Uint8Array
+): string | null {
+  if (KOSHA_EVALUATION_BINARY_MIME_BY_EXTENSION[artifactExtension(artifactPath)]) {
+    return null;
+  }
+  if (bytes.includes(0)) {
+    throw new Error(`kosha-evaluation-artifact-invalid-utf8:${artifactPath}`);
+  }
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    throw new Error(`kosha-evaluation-artifact-invalid-utf8:${artifactPath}`);
+  }
+}
+
+function normalizedPathText(value: string): string {
+  return value
+    .replaceAll("\\\\", "\\")
+    .replaceAll("\\/", "/")
+    .replaceAll("\\", "/")
+    .toLowerCase();
+}
+
+function addEvaluationViolation(
+  violations: KoshaEvaluationArtifactViolation[],
+  violation: KoshaEvaluationArtifactViolation
+): void {
+  const duplicate = violations.some((candidate) =>
+    candidate.code === violation.code && candidate.detail === violation.detail
+  );
+  if (!duplicate) violations.push(violation);
+}
+
+export function scanKoshaEvaluationArtifactText(
+  input: KoshaEvaluationArtifactScanInput
+): KoshaEvaluationArtifactViolation[] {
+  const violations: KoshaEvaluationArtifactViolation[] = [];
+  const normalizedText = normalizedPathText(input.text);
+  const genericWindowsPath = /(?:^|[\s"'(=])(?:file:\/{3})?[a-z]:\/(?:users|documents and settings)\//iu;
+  const repositoryPathPresent = input.repositoryRoots.some((root) => {
+    const normalizedRoot = normalizedPathText(root).replace(/\/+$/u, "");
+    return normalizedRoot.length > 2 && normalizedText.includes(normalizedRoot);
+  });
+  if (genericWindowsPath.test(normalizedText) || repositoryPathPresent) {
+    addEvaluationViolation(violations, {
+      artifactPath: input.artifactPath,
+      code: "absolute-local-path",
+      detail: "local-path"
+    });
+  }
+
+  const tokenPatterns: readonly RegExp[] = [
+    /\bsk-(?:proj-)?[A-Za-z0-9_-]{16,}\b/gu,
+    /\bsb_secret_[A-Za-z0-9_-]{16,}\b/gu,
+    /\bBearer\s+[A-Za-z0-9._~+/=-]{16,}\b/giu,
+    /\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/gu
+  ];
+  if (tokenPatterns.some((pattern) => pattern.test(input.text))) {
+    addEvaluationViolation(violations, {
+      artifactPath: input.artifactPath,
+      code: "token-pattern",
+      detail: "token"
+    });
+  }
+
+  const safeAssignmentValues = new Set([
+    "absent",
+    "false",
+    "null",
+    "present",
+    "redacted",
+    "true",
+    "undefined"
+  ]);
+  const credentialAssignmentPattern = /\b([A-Za-z][A-Za-z0-9_]*(?:api_key|service_role_key|anon_key|hmac_key|access_token|auth_token|password|secret|token))\b["']?\s*[:=]\s*["']?([^\s"',}\]]+)/giu;
+  for (const match of input.text.matchAll(credentialAssignmentPattern)) {
+    const value = match[2]?.replace(/[;.]$/u, "") || "";
+    const normalizedValue = value.toLowerCase();
+    const placeholder = value.startsWith("<") || value.startsWith("${");
+    if (value.length >= 8 && !placeholder && !safeAssignmentValues.has(normalizedValue)) {
+      addEvaluationViolation(violations, {
+        artifactPath: input.artifactPath,
+        code: "credential-assignment",
+        detail: match[1] || "credential"
+      });
+    }
+  }
+
+  const hmacPattern = /\b(?:signature_hmac_sha256|review_hmac|hmac(?:_key|_sha256)?)\b["']?\s*[:,=]\s*["']?([A-Fa-f0-9]{64}|[A-Za-z0-9+/]{40,}={0,2})\b/giu;
+  if (hmacPattern.test(input.text)) {
+    addEvaluationViolation(violations, {
+      artifactPath: input.artifactPath,
+      code: "raw-hmac-value",
+      detail: "hmac"
+    });
+  }
+
+  for (const [name, value] of Object.entries(input.configuredSecrets)) {
+    if (value && value.length >= 8 && input.text.includes(value)) {
+      addEvaluationViolation(violations, {
+        artifactPath: input.artifactPath,
+        code: "configured-secret-value",
+        detail: name
+      });
+    }
+  }
+
+  return violations;
+}
+
 export type KoshaJsonResponse = {
   ok: boolean;
   status: number;

@@ -5,9 +5,23 @@
 - DB/Supabase/API/schema/migration mutation: **false**
 - Production GET performed: **false**
 
+## Selective integration scope
+
+The branch merge-base against `feat/phase-a-release-integration-v2` is `02295b5`. At reviewed head `3ed9be8`, the branch delta from that base is 15 commits and 42 files. Twelve of those commits are unrelated OAuth/RLS/XLSX ancestors through `d3ad865`; integration target `77d8641` already contains that ancestor tip.
+
+Do not merge this branch wholesale. The selective KOSHA candidate is exactly:
+
+```text
+git cherry-pick 38cbc91 8e3b424 3ed9be8 NEW_HEAD
+```
+
+The complete bridge range is `38cbc91^..NEW_HEAD`: 4 commits and 30 files. The remediation-only range after the initial bridge commit is `38cbc91..NEW_HEAD`: 3 commits and 26 files. A committed path gate rejects any candidate file outside the assigned KOSHA source, tests, schema, or this task's evaluation directory. `NEW_HEAD` denotes the single commit containing this report; its immutable SHA is reported after push.
+
 ## Fixed snapshot truth
 
-The fixed generator rebuilt the offline corpus from the local ZIP source in 1,929.811 seconds. A zero-work resume validation completed in 2.950 seconds with `processed_this_run=0`.
+The historical fixed generator rebuilt the offline corpus from the local ZIP source in 1,929.811 seconds. Its exact core Python command was recovered from the actual session tool-call evidence; the 32-minute generation was not rerun in this remediation.
+
+A fresh recorded zero-work resume completed with 2.422 seconds of script-reported validation time and 6.113 seconds of recorder wall time. It exited 0 with `processed_this_run=0`, and the current, manifest, and four snapshot output hashes were byte-identical before and after. The machine-readable command record is `zero-work-resume-command.json`; it contains ordered arguments, path aliases, environment presence flags, input/output hashes, timing, and exit code without absolute paths or secret values.
 
 | Measure | Actual |
 |---|---:|
@@ -46,25 +60,25 @@ Neither failed run records `snapshotIntegrityVerifiedBeforeFetch=true`. That fie
 
 ## Candidate and multiplicity
 
-The unchanged B-E-3 candidate is still `draft`, `human_confirmed=false`, and rejected with `ocr_candidate_not_human_confirmed`. Its exact file/content/attestation hashes remain unchanged. The fixed corpus item remains `boundary`, with no body, zero chunks, and zero imports. The candidate also has no source `render_dpi`; it was not edited or promoted.
+The unchanged B-E-3 candidate is still `draft`, `human_confirmed=false`, and rejected with `ocr_candidate_not_human_confirmed`. Its exact file/content/attestation hashes remain unchanged. The fixed corpus item remains `boundary`, with no body, zero chunks, and zero imports. The candidate source has `render_dpi=180`; DPI metadata alone does not authorize review acceptance or import. The candidate was not edited or promoted.
 
 Snapshot import now permits reviewed candidates for distinct item IDs. It fails closed on two candidates for the same item and on a duplicate canonical attestation. Tests cover the two-item success and both collision paths.
 
 ## Privacy
 
-Audit failures now serialize only `fatal_type` and `fatal_code`, never a stack. Fourteen evaluation logs were scanned with zero absolute local path matches and zero raw secret/HMAC matches.
+Audit failures serialize only `fatal_type` and `fatal_code`, never a stack. The committed scanner now covers all 21 changed UTF-8 evaluation artifacts in `38cbc91^..NEW_HEAD`, including `.log`, `.json`, `.md`, `.txt`, and `.mjs`. It found zero absolute path, credential value, token, configured-secret, or raw HMAC matches. Explicit binary MIME/extension exclusions are allowed; invalid or unreadable text fails closed.
 
 ## Verification
 
 | Check | Passed | Failed | Elapsed |
 |---|---:|---:|---:|
-| Focused Python | 64 | 0 | 11.827s |
-| Focused TypeScript | 106 | 0 | 43.920s |
-| Ontology evidence regression | 45 | 0 | 5.125s command wall |
-| Strict TypeScript typecheck | yes | no | 32.602s command wall |
+| Focused Python | 64 | 0 | 10.833s framework / 12.192s wall |
+| Focused TypeScript | 120 | 0 | 42.520s framework / 45.493s wall |
+| Ontology evidence regression | 45 | 0 | 1.250s framework / 3.992s wall |
+| Strict TypeScript typecheck | yes | no | 31.528s command wall |
 | `git diff --check` | yes | no | n/a |
 
-Final automated test total: **215 passed, 0 failed**. RED evidence remains separate: Python 4/4 expected failures and TypeScript 5 expected failures out of 91 tests before implementation.
+Final automated test total: **229 passed, 0 failed**. Focused TypeScript is the prior 106 tests plus 14 new remediation tests, including 10 scanner cases. The fresh review RED is separate in `review-red-typescript.txt`: 14 expected failures and 92 passes out of 106 tests before implementation. Earlier task RED logs remain unchanged.
 
 ## Remaining hold
 

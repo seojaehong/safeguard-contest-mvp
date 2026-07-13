@@ -1,0 +1,164 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-corpus-audit.test.ts
+
+
+ RUN  v4.1.10 <user-root>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts (106 tests | 14 failed) 37882ms
+     × keeps the selective bridge candidate inside KOSHA-owned paths 232ms
+     × records the reviewed branch baseline and selective cherry-pick policy 226ms
+     × detects a sensitive evaluation leak in report.json 1ms
+     × detects a sensitive evaluation leak in report.md 0ms
+     × detects a sensitive evaluation leak in candidate-regression.json 0ms
+     × detects a sensitive evaluation leak in snapshot-integrity-smoke/result.json 0ms
+     × detects a sensitive evaluation leak in resume.txt 2ms
+     × detects a sensitive evaluation leak in resume.jsonl 0ms
+     × detects a sensitive evaluation leak in resume.csv 0ms
+     × detects configured secret values without returning the secret 0ms
+     × fails closed for invalid UTF-8 text and excludes explicit binary extensions 3ms
+     × scans every changed UTF-8 evaluation artifact in the bridge range 177ms
+     × records the exact B-E-3 candidate truth without treating DPI as authorization 4ms
+     × records observed zero-work resume command provenance without paths or secrets 1ms
+System.Management.Automation.RemoteException
+⎯⎯⎯⎯⎯⎯ Failed Tests 14 ⎯⎯⎯⎯⎯⎯⎯
+System.Management.Automation.RemoteException
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > keeps the selective bridge candidate inside KOSHA-owned paths
+AssertionError: expected [Function] to not throw an error but 'TypeError: (0 , __vite_ssr_import_6__…' was thrown
+System.Management.Automation.RemoteException
+- Expected:
+undefined
+System.Management.Automation.RemoteException
++ Received:
+"TypeError: (0 , __vite_ssr_import_6__.assertKoshaBridgeCandidatePaths) is not a function"
+System.Management.Automation.RemoteException
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2028:68
+    2026|     const bridgePaths = gitLines(["diff", "--name-only", "38cbc91^", "…
+    2027|
+    2028|     expect(() => assertKoshaBridgeCandidatePaths(bridgePaths)).not.toT…
+       |                                                                    ^
+    2029|     expect(() => assertKoshaBridgeCandidatePaths([
+    2030|       ...bridgePaths,
+System.Management.Automation.RemoteException
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/14]⎯
+System.Management.Automation.RemoteException
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > records the reviewed branch baseline and selective cherry-pick policy
+AssertionError: expected [ Array(1) ] to deeply equal [ Array(1) ]
+System.Management.Automation.RemoteException
+- Expected
++ Received
+System.Management.Automation.RemoteException
+  [
+-   "02295b5be5a76b930a79c45b0f5ddcc29d022c73",
++   "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
+  ]
+System.Management.Automation.RemoteException
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2059:85
+    2057|     }>(`${evaluationRootRelative}/report.json`);
+    2058|
+    2059|     expect(gitLines(["merge-base", "HEAD", "feat/phase-a-release-integ…
+       |                                                                                     ^
+    2060|       "02295b5be5a76b930a79c45b0f5ddcc29d022c73"
+    2061|     ]);
+System.Management.Automation.RemoteException
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/14]⎯
+System.Management.Automation.RemoteException
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects a sensitive evaluation leak in report.json
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects a sensitive evaluation leak in report.md
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects a sensitive evaluation leak in candidate-regression.json
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects a sensitive evaluation leak in snapshot-integrity-smoke/result.json
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects a sensitive evaluation leak in resume.txt
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects a sensitive evaluation leak in resume.jsonl
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects a sensitive evaluation leak in resume.csv
+TypeError: scanKoshaEvaluationArtifactText is not a function
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2105:24
+    2103|     ["resume.csv", `review_hmac,${Buffer.from("review-attestation-secr…
+    2104|   ])("detects a sensitive evaluation leak in %s", (artifactPath, text)…
+    2105|     const violations = scanKoshaEvaluationArtifactText({
+       |                        ^
+    2106|       artifactPath,
+    2107|       text,
+System.Management.Automation.RemoteException
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/14]⎯
+System.Management.Automation.RemoteException
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects configured secret values without returning the secret
+TypeError: scanKoshaEvaluationArtifactText is not a function
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2117:24
+    2115|   it("detects configured secret values without returning the secret", …
+    2116|     const secret = "configured-secret-value";
+    2117|     const violations = scanKoshaEvaluationArtifactText({
+       |                        ^
+    2118|       artifactPath: "report.md",
+    2119|       text: `value=${secret}`,
+System.Management.Automation.RemoteException
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/14]⎯
+System.Management.Automation.RemoteException
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > fails closed for invalid UTF-8 text and excludes explicit binary extensions
+AssertionError: expected [Function] to throw error including 'kosha-evaluation-artifact-invalid-utf…' but got '(0 , __vite_ssr_import_6__.decodeKosh…'
+System.Management.Automation.RemoteException
+Expected: "kosha-evaluation-artifact-invalid-utf8:report.md"
+Received: "(0 , __vite_ssr_import_6__.decodeKoshaEvaluationArtifactText) is not a function"
+System.Management.Automation.RemoteException
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2136:8
+    2134|       "report.md",
+    2135|       Uint8Array.from([0xc3, 0x28])
+    2136|     )).toThrowError("kosha-evaluation-artifact-invalid-utf8:report.md"…
+       |        ^
+    2137|     expect(decodeKoshaEvaluationArtifactText(
+    2138|       "diagram.png",
+System.Management.Automation.RemoteException
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/14]⎯
+System.Management.Automation.RemoteException
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > scans every changed UTF-8 evaluation artifact in the bridge range
+TypeError: decodeKoshaEvaluationArtifactText is not a function
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2161:20
+    2159|     for (const artifactPath of [...changedPaths].sort()) {
+    2160|       const bytes = readFileSync(resolve(process.cwd(), artifactPath));
+    2161|       const text = decodeKoshaEvaluationArtifactText(artifactPath, byt…
+       |                    ^
+    2162|       if (text === null) continue;
+    2163|       expect(scanKoshaEvaluationArtifactText({
+System.Management.Automation.RemoteException
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/14]⎯
+System.Management.Automation.RemoteException
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > records the exact B-E-3 candidate truth without treating DPI as authorization
+AssertionError: expected { human_confirmed: false, …(3) } to deeply equal { state: 'draft', …(1) }
+System.Management.Automation.RemoteException
+- Expected
++ Received
+System.Management.Automation.RemoteException
+  {
+    "human_confirmed": false,
++   "reviewed_at": null,
++   "reviewed_by": null,
+    "state": "draft",
+  }
+System.Management.Automation.RemoteException
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2191:36
+    2189|
+    2190|     expect(sourceCandidate.source.render_dpi).toBe(180);
+    2191|     expect(sourceCandidate.review).toEqual({
+       |                                    ^
+    2192|       state: "draft",
+    2193|       human_confirmed: false
+System.Management.Automation.RemoteException
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/14]⎯
+System.Management.Automation.RemoteException
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > records observed zero-work resume command provenance without paths or secrets
+Error: ENOENT: no such file or directory, open '<repo-root>\evaluation\phase-a-kosha-reviewed-ocr-bridge-2026-07-13\zero-work-resume-command.json'
+ ❯ readJsonArtifact tests/kosha-guide-corpus-audit.test.ts:2010:23
+    2008|
+    2009|   function readJsonArtifact<T>(relativePath: string): T {
+    2010|     return JSON.parse(readFileSync(resolve(process.cwd(), relativePath…
+       |                       ^
+    2011|   }
+    2012|
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2210:24
+System.Management.Automation.RemoteException
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/14]⎯
+System.Management.Automation.RemoteException
+
+ Test Files  1 failed (1)
+      Tests  14 failed | 92 passed (106)
+   Start at  01:07:47
+   Duration  39.29s (transform 336ms, setup 0ms, import 430ms, tests 37.88s, environment 0ms)

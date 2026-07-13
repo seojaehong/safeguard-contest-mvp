@@ -1,12 +1,17 @@
+command=npm.cmd test -- tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-corpus-audit.test.ts
+startedAt=2026-07-13T16:15:23.8204885Z
 
 > safeclaw@0.1.0 test
 > vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-corpus-audit.test.ts
 
 
- RUN  v4.1.10 <user-root>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
+ RUN  v4.1.10 <repo-root>
 
 
  Test Files  2 passed (2)
-      Tests  106 passed (106)
-   Start at  00:38:35
-   Duration  43.92s (transform 1.36s, setup 0ms, import 2.48s, tests 47.02s, environment 1ms)
+      Tests  120 passed (120)
+   Start at  01:15:26
+   Duration  42.52s (transform 1.42s, setup 0ms, import 2.82s, tests 47.44s, environment 0ms)
+
+wallElapsedSeconds=45.493
+exitCode=0

@@ -1,6 +1,6 @@
 {
-  "schemaVersion": "safeclaw-phase-a-kosha-reviewed-ocr-bridge-evaluation/v3",
-  "generatedAt": "2026-07-14T00:34:42.7510310+09:00",
+  "schemaVersion": "safeclaw-phase-a-kosha-reviewed-ocr-bridge-evaluation/v4",
+  "generatedAt": "2026-07-14T01:17:14.6173766+09:00",
   "status": "HOLD_PENDING_FRESH_REVIEW",
   "launchReadiness": false,
   "readOnly": true,
@@ -12,13 +12,52 @@
   "packageOrLockMutationPerformed": false,
   "networkRequestPerformed": false,
   "productionGetPerformed": false,
+  "gitScope": {
+    "branchMergeBase": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
+    "reviewedHead": "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+    "reviewedHeadDelta": {
+      "range": "02295b5..3ed9be8",
+      "commitCount": 15,
+      "fileCount": 42
+    },
+    "integrationTarget": {
+      "commit": "77d86416116b91809e1e0508c72564e06c8c31bc",
+      "containsAncestorThrough": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+      "unrelatedAncestorCommitCount": 12
+    },
+    "currentBranchDelta": {
+      "range": "02295b5..NEW_HEAD",
+      "commitCount": 16,
+      "fileCount": 45
+    },
+    "selectiveCandidate": {
+      "bridgeRange": "38cbc91^..NEW_HEAD",
+      "bridgeCommitCount": 4,
+      "bridgeFileCount": 30,
+      "latestRemediationRange": "38cbc91..NEW_HEAD",
+      "latestRemediationCommitCount": 3,
+      "latestRemediationFileCount": 26,
+      "cherryPickSeries": [
+        "38cbc91",
+        "8e3b424",
+        "3ed9be8",
+        "NEW_HEAD"
+      ],
+      "wholesaleBranchMergeRecommended": false,
+      "candidatePathScopeVerified": true
+    }
+  },
   "source": {
     "artifactLabel": "kosha-corpus-body-recovery-2026-07-13-fixed-v1",
     "generatorLog": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-generation.log",
     "resumeLog": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-resume.log",
     "generationElapsedSeconds": 1929.811,
-    "resumeValidationElapsedSeconds": 2.95,
+    "resumeValidationElapsedSeconds": 2.422,
+    "resumeCommandWallElapsedSeconds": 6.113,
     "resumeProcessedCount": 0,
+    "resumeCommandManifest": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/zero-work-resume-command.json",
+    "historicalGenerationCommandEvidence": "verified_from_actual_session_tool_call",
+    "historicalGenerationIndependentlyRerun": false,
     "inventoryCount": 1040,
     "completedCount": 1040,
     "nativeSuccessCount": 1039,
@@ -70,7 +109,9 @@
     "candidateAttestationSha256": "9dbb03c1ddd14dfc293b800cc4d4762244996b3cac050545d813add30d97d57d",
     "reviewState": "draft",
     "humanConfirmed": false,
-    "renderDpiPresent": false,
+    "renderDpiPresent": true,
+    "renderDpi": 180,
+    "renderDpiAuthorizesImport": false,
     "validatorAccepted": false,
     "validatorError": "ocr_candidate_not_human_confirmed",
     "corpusExtractionStatus": "boundary",
@@ -88,7 +129,10 @@
     "duplicateCandidateAttestationRejected": true,
     "auditFailureStackSerialized": false,
     "evaluationAbsolutePathMatchCount": 0,
-    "rawSecretOrHmacMatchCount": 0
+    "rawSecretOrHmacMatchCount": 0,
+    "allChangedEvaluationTextArtifactsScanned": true,
+    "unreadableTextArtifactCount": 0,
+    "binaryArtifactExclusionRule": "explicit-extension-to-mime-map"
   },
   "snapshotIntegritySmoke": {
     "resultPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/result.json",
@@ -103,6 +147,13 @@
   },
   "verification": {
     "red": {
+      "reviewRound": {
+        "testCount": 106,
+        "passedCount": 92,
+        "expectedFailureCount": 14,
+        "frameworkDurationSeconds": 39.29,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/review-red-typescript.txt"
+      },
       "python": {
         "testCount": 4,
         "passedCount": 0,
@@ -123,51 +174,61 @@
         "testCount": 64,
         "passedCount": 64,
         "failedCount": 0,
-        "frameworkDurationSeconds": 11.827,
+        "frameworkDurationSeconds": 10.833,
+        "commandWallElapsedSeconds": 12.192,
         "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-python.log"
       },
       "typescriptFocused": {
-        "testCount": 106,
-        "passedCount": 106,
+        "testCount": 120,
+        "passedCount": 120,
         "failedCount": 0,
-        "frameworkDurationSeconds": 43.92,
+        "preexistingTestCount": 106,
+        "newRemediationTestCount": 14,
+        "newScannerTestCount": 10,
+        "frameworkDurationSeconds": 42.52,
+        "commandWallElapsedSeconds": 45.493,
         "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typescript.log"
       },
       "ontologyEvidenceRegression": {
         "testCount": 45,
         "passedCount": 45,
         "failedCount": 0,
-        "commandWallElapsedSeconds": 5.125,
+        "frameworkDurationSeconds": 1.25,
+        "commandWallElapsedSeconds": 3.992,
         "naturalizeOnlyPreserved": true,
         "failClosedPreserved": true,
         "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-ontology-regression.log"
       },
       "strictTypecheck": {
         "passed": true,
-        "commandWallElapsedSeconds": 32.602,
+        "commandWallElapsedSeconds": 31.528,
         "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typecheck.log"
       },
       "pathScanner": {
-        "logFileCount": 14,
+        "textArtifactCount": 21,
+        "binaryExcludedCount": 0,
+        "unreadableTextArtifactCount": 0,
         "absolutePathMatchCount": 0,
         "rawSecretOrHmacMatchCount": 0,
+        "scope": "all changed UTF-8 evaluation artifacts in 38cbc91^..NEW_HEAD",
         "coveredByTypescriptFocused": true
       },
       "gitDiffCheck": {
         "passed": true
       },
       "totals": {
-        "testCount": 215,
-        "passedCount": 215,
+        "testCount": 229,
+        "passedCount": 229,
         "failedCount": 0,
-        "testElapsedSeconds": 60.872,
-        "verificationElapsedSecondsBeforeDiffCheck": 93.474
+        "frameworkOrCommandTestElapsedSeconds": 57.345,
+        "testCommandWallElapsedSeconds": 61.677,
+        "verificationCommandWallElapsedSecondsBeforeDiffCheck": 93.205
       }
     }
   },
   "concerns": [
     "Fresh independent review is still required; no integration approval is claimed.",
-    "The B-E-3 candidate remains draft and human_confirmed=false, so validator acceptance and import remain blocked.",
+    "The B-E-3 candidate remains draft and human_confirmed=false, so validator acceptance and import remain blocked; render_dpi=180 alone does not authorize either action.",
     "The fixed local corpus still has one native OCR boundary and B-E-3 has zero chunks and zero imported rows.",
     "Both production/local smoke runs stopped before any GET; no fresh production or deployment identity was established.",
     "No DB, Supabase, API, schema, migration, package, lock, candidate, or tracked corpus data mutation was performed.",

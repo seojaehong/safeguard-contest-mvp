@@ -21,17 +21,20 @@ import {
   KOSHA_GUIDE_REFRESH_PLAN,
   auditKoshaGuideRows,
   auditKoshaRetrievalScenario,
+  assertKoshaBridgeCandidatePaths,
   buildKoshaArchiveInventory,
   buildKoshaProductionLocalBridgeCandidate,
   buildKoshaOfficialDownloadUrl,
   compareKoshaInventoryToOfficial,
   decodeKoshaArchiveEntryName,
+  decodeKoshaEvaluationArtifactText,
   fetchHeadersWithRetry,
   fetchKoshaJsonWithRetry,
   listKoshaManifestGateFailures,
   normalizeKoshaVersionCode,
   prepareKoshaReviewedCandidateBridgeInput,
   reconcileKoshaVisibleSnapshots,
+  scanKoshaEvaluationArtifactText,
   summarizeKoshaAuditChecks,
   summarizeKoshaVisibleStatus,
   toKoshaOfficialGuideRecord,
@@ -1996,5 +1999,314 @@ describe("KOSHA GUIDE refresh plan", () => {
       emptyResponsePolicy: "reject-empty-page-and-empty-file-provenance",
       reconciliation: "full-stable-key-current-vs-retired"
     });
+  });
+});
+
+describe("KOSHA reviewed OCR remediation evidence", () => {
+  const evaluationRootRelative =
+    "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13";
+
+  function readJsonArtifact<T>(relativePath: string): T {
+    return JSON.parse(readFileSync(resolve(process.cwd(), relativePath), "utf8")) as T;
+  }
+
+  function gitLines(arguments_: string[]): string[] {
+    const result = spawnSync("git", arguments_, {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      windowsHide: true
+    });
+    if (result.status !== 0) {
+      throw new Error(`git-command-failed:${arguments_.join(":")}`);
+    }
+    return result.stdout.split(/\r?\n/u).filter((line) => line.length > 0);
+  }
+
+  it("keeps the selective bridge candidate inside KOSHA-owned paths", () => {
+    const bridgePaths = gitLines(["diff", "--name-only", "38cbc91^", "--"]);
+
+    expect(() => assertKoshaBridgeCandidatePaths(bridgePaths)).not.toThrow();
+    expect(() => assertKoshaBridgeCandidatePaths([
+      ...bridgePaths,
+      "lib/xlsx-builder.ts"
+    ])).toThrowError("kosha-bridge-candidate-path-out-of-scope:lib/xlsx-builder.ts");
+  });
+
+  it("records the reviewed branch baseline and selective cherry-pick policy", () => {
+    const report = readJsonArtifact<{
+      gitScope: {
+        branchMergeBase: string;
+        reviewedHead: string;
+        reviewedHeadDelta: { range: string; commitCount: number; fileCount: number };
+        currentBranchDelta: { range: string; commitCount: number; fileCount: number };
+        integrationTarget: {
+          commit: string;
+          containsAncestorThrough: string;
+          unrelatedAncestorCommitCount: number;
+        };
+        selectiveCandidate: {
+          bridgeRange: string;
+          bridgeCommitCount: number;
+          bridgeFileCount: number;
+          latestRemediationRange: string;
+          latestRemediationCommitCount: number;
+          latestRemediationFileCount: number;
+          cherryPickSeries: string[];
+          wholesaleBranchMergeRecommended: boolean;
+        };
+      };
+    }>(`${evaluationRootRelative}/report.json`);
+
+    expect(gitLines(["merge-base", "HEAD", "feat/phase-a-release-integration-v2"])).toEqual([
+      "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21"
+    ]);
+    expect(gitLines(["rev-list", "--count", "02295b5..3ed9be8"])).toEqual(["15"]);
+    expect(gitLines(["diff", "--name-only", "02295b5..3ed9be8"]).length).toBe(42);
+    expect(gitLines(["rev-list", "--count", "02295b5..d3ad865"])).toEqual(["12"]);
+    expect(spawnSync("git", ["merge-base", "--is-ancestor", "d3ad865", "77d8641"], {
+      cwd: process.cwd(),
+      windowsHide: true
+    }).status).toBe(0);
+
+    expect(report.gitScope).toMatchObject({
+      branchMergeBase: "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
+      reviewedHead: "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+      reviewedHeadDelta: {
+        range: "02295b5..3ed9be8",
+        commitCount: 15,
+        fileCount: 42
+      },
+      integrationTarget: {
+        commit: "77d86416116b91809e1e0508c72564e06c8c31bc",
+        containsAncestorThrough: "d3ad86530bc786d8024206cc5b7c7db60c055278",
+        unrelatedAncestorCommitCount: 12
+      },
+      currentBranchDelta: {
+        range: "02295b5..NEW_HEAD",
+        commitCount: 16,
+        fileCount: 45
+      },
+      selectiveCandidate: {
+        bridgeRange: "38cbc91^..NEW_HEAD",
+        bridgeCommitCount: 4,
+        latestRemediationRange: "38cbc91..NEW_HEAD",
+        latestRemediationCommitCount: 3,
+        cherryPickSeries: ["38cbc91", "8e3b424", "3ed9be8", "NEW_HEAD"],
+        wholesaleBranchMergeRecommended: false
+      }
+    });
+    expect(report.gitScope.selectiveCandidate.bridgeFileCount).toBe(30);
+    expect(report.gitScope.selectiveCandidate.latestRemediationFileCount).toBe(26);
+  });
+
+  it.each([
+    ["report.json", ["C:", "Users", "reviewer", "worktree"].join("\\")],
+    ["report.md", `OPENAI_API_KEY=${"x".repeat(24)}`],
+    ["candidate-regression.json", `signature_hmac_sha256=${"a".repeat(64)}`],
+    ["snapshot-integrity-smoke/result.json", `token=${"sk-" + "proj-" + "x".repeat(24)}`],
+    ["resume.txt", `authorization=Bearer ${"x".repeat(32)}`],
+    ["resume.jsonl", `{"token":"${`eyJ${"a".repeat(24)}.${"b".repeat(24)}.${"c".repeat(24)}`}"}`],
+    ["resume.csv", `review_hmac,${Buffer.from("review-attestation-secret-material").toString("base64")}`]
+  ])("detects a sensitive evaluation leak in %s", (artifactPath, text) => {
+    const violations = scanKoshaEvaluationArtifactText({
+      artifactPath,
+      text,
+      repositoryRoots: [process.cwd()],
+      configuredSecrets: {}
+    });
+
+    expect(violations.length).toBeGreaterThan(0);
+  });
+
+  it("detects configured secret values without returning the secret", () => {
+    const secret = "actual-configured-material-12345";
+    const violations = scanKoshaEvaluationArtifactText({
+      artifactPath: "report.md",
+      text: `value=${secret}`,
+      repositoryRoots: [],
+      configuredSecrets: { KOSHA_OCR_REVIEW_HMAC_KEY: secret }
+    });
+
+    expect(violations).toEqual([{
+      artifactPath: "report.md",
+      code: "configured-secret-value",
+      detail: "KOSHA_OCR_REVIEW_HMAC_KEY"
+    }]);
+    expect(JSON.stringify(violations)).not.toContain(secret);
+  });
+
+  it("fails closed for invalid UTF-8 text and excludes explicit binary extensions", () => {
+    expect(() => decodeKoshaEvaluationArtifactText(
+      "report.md",
+      Uint8Array.from([0xc3, 0x28])
+    )).toThrowError("kosha-evaluation-artifact-invalid-utf8:report.md");
+    expect(decodeKoshaEvaluationArtifactText(
+      "diagram.png",
+      Uint8Array.from([0x89, 0x50, 0x4e, 0x47])
+    )).toBeNull();
+  });
+
+  it("scans every changed UTF-8 evaluation artifact in the bridge range", () => {
+    const artifactRoot = resolve(process.cwd(), evaluationRootRelative);
+    const changedPaths = new Set([
+      ...gitLines(["diff", "--name-only", "38cbc91^", "--", evaluationRootRelative]),
+      ...listFilesRecursively(artifactRoot).map((path) =>
+        `${evaluationRootRelative}/${path.slice(artifactRoot.length + 1).replaceAll("\\", "/")}`
+      )
+    ]);
+    const configuredSecrets = Object.fromEntries([
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "OPENAI_API_KEY",
+      "KOSHA_OCR_REVIEW_HMAC_KEY",
+      "GOOGLE_GENERATIVE_AI_API_KEY",
+      "GEMINI_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "VERCEL_TOKEN",
+      "SUPABASE_ACCESS_TOKEN",
+      "GITHUB_TOKEN"
+    ].map((name) => [name, process.env[name]]));
+
+    expect(changedPaths.size).toBeGreaterThan(0);
+    for (const artifactPath of [...changedPaths].sort()) {
+      const bytes = readFileSync(resolve(process.cwd(), artifactPath));
+      const text = decodeKoshaEvaluationArtifactText(artifactPath, bytes);
+      if (text === null) continue;
+      expect(scanKoshaEvaluationArtifactText({
+        artifactPath,
+        text,
+        repositoryRoots: [process.cwd(), resolve(process.cwd(), "../..")],
+        configuredSecrets
+      }), artifactPath).toEqual([]);
+    }
+  });
+
+  it("records the exact B-E-3 candidate truth without treating DPI as authorization", () => {
+    const sourceCandidate = readJsonArtifact<{
+      source: { render_dpi: number };
+      review: {
+        state: string;
+        human_confirmed: boolean;
+        reviewed_at: null;
+        reviewed_by: null;
+      };
+    }>("evaluation/kosha-ocr-boundary-recovery-2026-07-13/B-E-3-2025-candidate.json");
+    const regression = readJsonArtifact<{
+      renderDpiPresent: boolean;
+      renderDpi: number;
+      reviewState: string;
+      humanConfirmed: boolean;
+      chunkCount: number;
+      importedCount: number;
+      validatorAccepted: boolean;
+      renderDpiAuthorizesImport: boolean;
+    }>(`${evaluationRootRelative}/candidate-regression.json`);
+    const report = readJsonArtifact<{
+      reviewedCandidate: typeof regression;
+    }>(`${evaluationRootRelative}/report.json`);
+
+    expect(sourceCandidate.source.render_dpi).toBe(180);
+    expect(sourceCandidate.review).toEqual({
+      state: "draft",
+      human_confirmed: false,
+      reviewed_at: null,
+      reviewed_by: null
+    });
+    for (const record of [regression, report.reviewedCandidate]) {
+      expect(record).toMatchObject({
+        renderDpiPresent: true,
+        renderDpi: 180,
+        reviewState: "draft",
+        humanConfirmed: false,
+        chunkCount: 0,
+        importedCount: 0,
+        validatorAccepted: false,
+        renderDpiAuthorizesImport: false
+      });
+    }
+  });
+
+  it("records observed zero-work resume command provenance without paths or secrets", () => {
+    const provenancePath = `${evaluationRootRelative}/zero-work-resume-command.json`;
+    const provenance = readJsonArtifact<{
+      schemaVersion: string;
+      status: string;
+      command: {
+        executable: string;
+        orderedArgs: string[];
+        cwd: { base: string; relative: string };
+      };
+      environment: Record<string, { present: boolean; valueRecorded: boolean }>;
+      timing: { startedAt: string; endedAt: string; elapsedSeconds: number; exitCode: number };
+      inputs: { sourceIdentitySha256: string; currentSha256: string; manifestSha256: string };
+      outputs: {
+        processedThisRun: number;
+        snapshotId: string;
+        currentSha256: string;
+        manifestSha256: string;
+        snapshotBytesUnchanged: boolean;
+      };
+      historicalFullGeneration: {
+        commandEvidence: string;
+        independentlyRerun: boolean;
+        elapsedSeconds: number;
+        orderedArgs: string[];
+      };
+      networkRequestPerformed: boolean;
+      dbMutationPerformed: boolean;
+    }>(provenancePath);
+
+    expect(provenance).toMatchObject({
+      schemaVersion: "safeclaw-kosha-zero-work-resume-command/v1",
+      status: "observed_success",
+      command: {
+        executable: "python",
+        orderedArgs: [
+          "scripts/snapshot_kosha_guide_corpus.py",
+          "--source",
+          "${KOSHA_SOURCE_DIR}",
+          "--output-dir",
+          "${KOSHA_SNAPSHOT_OUTPUT_DIR}",
+          "--resume"
+        ],
+        cwd: { base: "repository", relative: "." }
+      },
+      inputs: {
+        sourceIdentitySha256: "1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d",
+        currentSha256: "479751702c27ebeaba2da5233bddb33318dd52028bdcea4701f150990efae2a5",
+        manifestSha256: "702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519"
+      },
+      outputs: {
+        processedThisRun: 0,
+        snapshotId: "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+        currentSha256: "479751702c27ebeaba2da5233bddb33318dd52028bdcea4701f150990efae2a5",
+        manifestSha256: "702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519",
+        snapshotBytesUnchanged: true
+      },
+      historicalFullGeneration: {
+        commandEvidence: "verified_from_actual_session_tool_call",
+        independentlyRerun: false,
+        elapsedSeconds: 1929.811,
+        orderedArgs: [
+          "scripts/snapshot_kosha_guide_corpus.py",
+          "--source",
+          "${HOME}/Downloads/기술지원규정",
+          "--output-dir",
+          "${USERPROFILE}/dev/safeclaw-local-artifacts/kosha-corpus-body-recovery-2026-07-13-fixed-v1"
+        ]
+      },
+      networkRequestPerformed: false,
+      dbMutationPerformed: false
+    });
+    expect(provenance.timing.exitCode).toBe(0);
+    expect(Date.parse(provenance.timing.endedAt)).toBeGreaterThanOrEqual(
+      Date.parse(provenance.timing.startedAt)
+    );
+    expect(provenance.timing.elapsedSeconds).toBeGreaterThan(0);
+    for (const value of Object.values(provenance.environment)) {
+      expect(value.valueRecorded).toBe(false);
+    }
+    const raw = readFileSync(resolve(process.cwd(), provenancePath), "utf8");
+    expect(raw).not.toMatch(/[A-Za-z]:[\\/]/u);
   });
 });
