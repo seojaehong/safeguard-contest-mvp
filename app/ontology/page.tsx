@@ -59,7 +59,7 @@ export default async function OntologyPage() {
     >
       {!graph || !model ? (
         <section className="safeclaw-module-panel ontology-empty-panel">
-          <span>Graph unavailable</span>
+          <span>그래프를 사용할 수 없음</span>
           <h2>published 온톨로지 그래프를 불러오지 못했습니다.</h2>
           <p>{result.message}</p>
         </section>
@@ -129,7 +129,7 @@ export default async function OntologyPage() {
 
           <section className="ontology-graph-shell safeclaw-module-panel" aria-label="옵시디언형 온톨로지 그래프">
             <div className="compact-head">
-              <span className="eyebrow">Graph Ontology</span>
+              <span className="eyebrow">그래프 온톨로지</span>
               <strong>작업 이력 그래프 맵</strong>
             </div>
             <p>
@@ -213,7 +213,7 @@ export default async function OntologyPage() {
           <section className="ontology-workbench">
             <div className="ontology-list-column">
               <div className="compact-head">
-                <span className="eyebrow">List Ontology</span>
+                <span className="eyebrow">목록 온톨로지</span>
                 <h2 className="safeclaw-section-title">노드 리스트</h2>
               </div>
               <div className="ontology-node-list">
@@ -249,7 +249,7 @@ export default async function OntologyPage() {
             </div>
 
             <aside className="ontology-map-column safeclaw-module-panel">
-              <span>Hover Cards</span>
+              <span>마우스오버 카드</span>
               <h2>Obsidian식 탐색 표면</h2>
               <p>
                 왼쪽 노드에 마우스를 올리면 연결된 위험요인, 조치, 법령, 문서 관계가 카드로 떠오릅니다.

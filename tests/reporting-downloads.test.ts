@@ -922,7 +922,9 @@ describe("reporting downloads", () => {
     const markdown = buildReportMarkdown(snapshot);
     const json = buildReportJson(snapshot);
 
-    expect(markdown).toContain("## 위험성평가 As-Is / To-Be");
+    expect(markdown).toContain("## 위험성평가 개선 전 / 개선 후");
+    expect(markdown).toContain("- 개선 전:");
+    expect(markdown).toContain("- 개선 후:");
     expect(markdown).toContain(exactPhotoApprovalBoundary);
     expect(json).toContain(exactPhotoApprovalBoundary);
     expect(markdown).toContain("before-scaffold.jpg");
