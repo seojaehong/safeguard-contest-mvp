@@ -10,6 +10,8 @@ DB/schema/data mutations: **none**
 
 **Status: RED for remediation planning; live enforcement unverified.**
 
+**Launch readiness: false.** The machine-readable contract is the top-level JSON boolean `"launchReadiness": false`. This launch gate is explicit and separate from the RED remediation status; neither is a claim that live enforcement was tested.
+
 The migrations define 22 application tables and touch one Supabase-managed table. This review also inventories `storage.objects` as an additional managed tenant-data boundary because application routes write tenant photos there. All 13 tenant-scoped application tables enable RLS, and their owner policies provide source-level CRUD policy coverage after a role has the corresponding object command privilege. Policy coverage is not proof that a role can reach a command, and it is not sufficient to close the tenant boundary:
 
 - `query_logs` and legacy/unclassified `documents` are in the exposed `public` schema with no RLS declaration.
@@ -283,6 +285,7 @@ Operator-table negative cases are separate: after corresponding command reachabi
 
 ## Tests and typecheck
 
+- Final report launch-gate validator: passed JSON parse; verified top-level `launchReadiness` property presence, boolean type, and `false` value; compared all 9 finding titles character-for-character between Markdown and JSON; preserved inventory 24, negative cases 14, executed cases 0, expected denies 56, `storage.objects` actor status `unverified/not_assessed`, and RED finding counts P0/P1/P2/P3 = 0/3/4/2; `git diff --check` passed with only `report.md` and `report.json` changed.
 - Probe syntax: `node --check` passed.
 - Probe fail-closed test: with all Supabase variables blank and `--no-env-file`, exit 2, `blocked`, zero requests, and no secret fields stored.
 - Probe live run: exit 1 after all 44 HEAD requests, with a redacted result written.

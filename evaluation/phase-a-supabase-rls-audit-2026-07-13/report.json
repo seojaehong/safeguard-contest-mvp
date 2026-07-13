@@ -1,6 +1,7 @@
 {
   "schemaVersion": "phase-a-supabase-rls-audit/v1",
   "generatedAt": "2026-07-13T08:17:21.6562980+09:00",
+  "launchReadiness": false,
   "audit": {
     "branch": "audit/phase-a-supabase-rls",
     "auditedRevision": "b39f813",
@@ -590,7 +591,7 @@
     {
       "id": "P1-02",
       "priority": "P1",
-      "title": "dispatch_logs has a role-agnostic global-null CRUD branch",
+      "title": "`dispatch_logs` has a role-agnostic global-null CRUD branch",
       "tables": ["dispatch_logs"],
       "evidence": ["supabase/migrations/002_workspace_productization.sql:76-90", "supabase/migrations/002_workspace_productization.sql:183-200"],
       "impact": "If a role has the corresponding SELECT, INSERT, UPDATE, or DELETE object privilege, the applicable policy accepts null-organization rows for that command.",
@@ -637,7 +638,7 @@
     {
       "id": "P2-03",
       "priority": "P2",
-      "title": "mcp_tokens tenant binding is not schema-enforced",
+      "title": "`mcp_tokens` tenant binding is not schema-enforced",
       "tables": ["mcp_tokens"],
       "evidence": ["supabase/migrations/007_mcp_tokens.sql:14-24", "app/api/mcp-tokens/route.ts:214-253"],
       "impact": "Privileged paths can create orphaned, unscoped, or site/organization-mismatched credential rows.",
@@ -753,9 +754,28 @@
       "command": "PowerShell report.json inventory/finding evidence file and line-range validator",
       "exitCode": 0,
       "result": "123 evidence references across 24 inventory items and 9 findings resolve to existing in-range source lines"
+    },
+    {
+      "id": "final-launch-gate-report-validation",
+      "command": "PowerShell JSON parse plus top-level launchReadiness presence/type/value, all finding-title exact equality, preserved count, changed-file scope, and git diff --check validator",
+      "exitCode": 0,
+      "result": "launchReadiness present as boolean false; all 9 Markdown/JSON finding titles match character-for-character; inventory 24; negative cases 14; executed 0; expected denies 56; storage actor unverified/not_assessed; RED findings P0/P1/P2/P3 0/3/4/2; only report.md and report.json changed; no whitespace errors"
     }
   ],
   "testExecution": {
+    "reportLaunchGateValidator": {
+      "status": "passed",
+      "launchReadinessPropertyPresent": true,
+      "launchReadinessType": "boolean",
+      "launchReadinessValue": false,
+      "findingTitleCharacterExactMatches": 9,
+      "inventoryCount": 24,
+      "negativeCaseCount": 14,
+      "executedNegativeCaseCount": 0,
+      "expectedDenyCount": 56,
+      "findingCounts": { "P0": 0, "P1": 3, "P2": 4, "P3": 2 },
+      "command": "PowerShell report launch-gate and Markdown/JSON parity validator"
+    },
     "probeSyntax": {
       "status": "passed",
       "command": "node --check evaluation/phase-a-supabase-rls-audit-2026-07-13/live_rls_head_probe.mjs"
