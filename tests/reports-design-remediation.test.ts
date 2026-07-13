@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { Browser, Page } from "playwright";
+import type { Browser, Page, Route } from "playwright";
 import {
   REPORTS_WAVE1_BUILD_MANIFEST_FILENAME,
   REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR,
@@ -35,8 +35,54 @@ const defaultProductionBuildManifestPath = path.join(
 const reportsTaskDistanceEvidenceRelativeDir = path.join(
   "evaluation",
   "reports-mobile-task-distance-2026-07-13",
-  "fresh-review-round-2-2026-07-14"
+  "fresh-review-round-3-2026-07-14"
 );
+
+type EvidenceIdentity = {
+  productCandidateSha: string;
+  buildId: string;
+  generatedAt: string;
+  measurementCommandIdentity: string;
+};
+
+function asRecord(value: unknown, label: string): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${label} must be a JSON object`);
+  }
+  return value as Record<string, unknown>;
+}
+
+function requiredEvidenceEnvironment(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) throw new Error(`Missing required Reports evidence environment: ${name}`);
+  return value;
+}
+
+function resolveEvidenceIdentity(): EvidenceIdentity | null {
+  if (process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE !== "1") return null;
+  const productCandidateSha = requiredEvidenceEnvironment("SAFECLAW_REPORTS_EVIDENCE_PRODUCT_SHA");
+  const buildId = requiredEvidenceEnvironment("SAFECLAW_REPORTS_EVIDENCE_BUILD_ID");
+  const generatedAt = requiredEvidenceEnvironment("SAFECLAW_REPORTS_EVIDENCE_GENERATED_AT");
+  const measurementCommandIdentity = requiredEvidenceEnvironment("SAFECLAW_REPORTS_EVIDENCE_COMMAND_IDENTITY");
+  if (!/^[0-9a-f]{40}$/u.test(productCandidateSha)) {
+    throw new Error(`Invalid Reports evidence product SHA: ${productCandidateSha}`);
+  }
+  if (new Date(generatedAt).toISOString() !== generatedAt) {
+    throw new Error(`Reports evidence generatedAt must be canonical ISO-8601: ${generatedAt}`);
+  }
+  if (!measurementCommandIdentity.includes("tests/reports-design-remediation.test.ts")) {
+    throw new Error("Reports evidence command identity must name the focused test file");
+  }
+  const manifestPath = process.env.SAFECLAW_PRODUCTION_BUILD_MANIFEST ?? defaultProductionBuildManifestPath;
+  const manifest = asRecord(JSON.parse(fs.readFileSync(manifestPath, "utf8")) as unknown, "Reports build manifest");
+  if (manifest.productSourceSha !== productCandidateSha) {
+    throw new Error(`Reports evidence candidate SHA does not match build manifest: ${productCandidateSha}`);
+  }
+  if (manifest.buildId !== buildId) {
+    throw new Error(`Reports evidence build ID does not match build manifest: ${buildId}`);
+  }
+  return Object.freeze({ productCandidateSha, buildId, generatedAt, measurementCommandIdentity });
+}
 
 type CssRule = {
   selectors: string[];
@@ -193,6 +239,15 @@ describe("Reports Wave 1 static design contract", () => {
       "border-radius": "var(--radius-control)"
     });
     expect(declarationsFor(
+      css,
+      '.safeclaw-module-shell[data-module-route="/reports"] button'
+    )).toMatchObject({
+      "min-inline-size": "44px",
+      "min-width": "44px",
+      "min-block-size": "44px",
+      "min-height": "44px"
+    });
+    expect(declarationsFor(
       mobileReportsCss,
       '.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-module-principal-command a'
     )).toMatchObject({
@@ -207,6 +262,7 @@ describe("Reports Wave 1 static design contract", () => {
       "gap": "var(--space-3)"
     });
     expect(reportsLayer).not.toContain(".safeclaw-report-custom-range");
+    expect([...css.matchAll(/\.safeclaw-report-head(?:[\s,.:{>]|$)/gu)]).toHaveLength(0);
   });
 });
 
@@ -218,6 +274,12 @@ let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
 let outputDirectory = "";
 let outputResolution: ReturnType<typeof resolveReportsWave1OutputDirectory> | null = null;
+let evidenceIdentity: EvidenceIdentity | null = null;
+
+function writeEvidenceJson(fileName: string, payload: Record<string, unknown>): void {
+  const document = evidenceIdentity ? { ...evidenceIdentity, ...payload } : payload;
+  fs.writeFileSync(path.join(outputDirectory, fileName), `${JSON.stringify(document, null, 2)}\n`);
+}
 
 async function prepareSample(page: Page, theme: Theme): Promise<void> {
   await page.goto(`${baseUrl}/reports?theme=${theme}`, { waitUntil: "networkidle" });
@@ -242,12 +304,78 @@ async function prepareDownloadReadyFixture(page: Page, theme: Theme): Promise<vo
   await page.locator("[aria-label='리포트 다운로드'] button:not(:disabled)").first().waitFor({ state: "visible" });
 }
 
+async function installServerAuth(page: Page): Promise<void> {
+  await page.addInitScript(({
+    expectedOrigin,
+    authStorageKey,
+    accessToken,
+    supabaseUrl,
+    supabaseAnonKey
+  }) => {
+    if (window.location.origin !== expectedOrigin) return;
+    const browserGlobal = window as Window & {
+      process?: { env: Record<string, string> };
+    };
+    browserGlobal.process = {
+      env: {
+        NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnonKey
+      }
+    };
+    window.localStorage.setItem(authStorageKey, JSON.stringify({
+      access_token: accessToken,
+      refresh_token: "reports-wave1-evidence-refresh-token",
+      expires_at: 4_102_444_800,
+      token_type: "bearer"
+    }));
+  }, {
+    expectedOrigin: baseUrl,
+    authStorageKey: reportsWave1TestAuthStorageKey,
+    accessToken: reportsWave1TestAccessToken,
+    supabaseUrl: reportsWave1TestSupabaseUrl,
+    supabaseAnonKey: "wave8-public-anon-key"
+  });
+}
+
 type InteractiveTargetMetric = {
   descriptor: string;
+  selector: string;
   disabled: boolean;
   height: number;
   width: number;
 };
+
+type InteractiveTargetInventory = {
+  state: string;
+  targets: InteractiveTargetMetric[];
+  undersized: InteractiveTargetMetric[];
+  horizontalOverflow: number;
+  overlapFailures: string[];
+  nestedScrollFailures: string[];
+};
+
+type InteractiveTargetMatrixRow = InteractiveTargetInventory & {
+  rowId: string;
+  theme: Theme;
+  viewport: Viewport;
+};
+
+const interactiveTargetMatrixRows: InteractiveTargetMatrixRow[] = [];
+
+function recordInteractiveTargetRow(
+  rowId: string,
+  theme: Theme,
+  viewport: Viewport,
+  inventory: InteractiveTargetInventory,
+): void {
+  expect(interactiveTargetMatrixRows.some((row) => row.rowId === rowId), `duplicate matrix row ${rowId}`).toBe(false);
+  expect(inventory.targets.length, `${rowId} interactive inventory`).toBeGreaterThan(0);
+  expect(inventory.undersized, `${rowId} undersized targets\n${JSON.stringify(inventory.undersized, null, 2)}`).toEqual([]);
+  expect(inventory.horizontalOverflow, `${rowId} horizontal overflow`).toBe(0);
+  expect(inventory.overlapFailures, `${rowId} interactive overlaps`).toEqual([]);
+  expect(inventory.nestedScrollFailures, `${rowId} nested scroll`).toEqual([]);
+  interactiveTargetMatrixRows.push({ rowId, theme, viewport, ...inventory });
+}
 
 async function openNamedReportsDisclosure(page: Page, name: string): Promise<void> {
   const summary = page.locator("summary").filter({ hasText: name });
@@ -260,11 +388,17 @@ async function openNamedReportsDisclosure(page: Page, name: string): Promise<voi
   expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
 }
 
-async function measureInteractiveTargets(page: Page, state: string): Promise<{
-  state: string;
-  targets: InteractiveTargetMetric[];
-  undersized: InteractiveTargetMetric[];
-}> {
+async function closeNamedReportsDisclosure(page: Page, name: string): Promise<void> {
+  const summary = page.locator("summary").filter({ hasText: name });
+  await summary.waitFor({ state: "visible" });
+  const details = summary.locator("..");
+  if (await details.evaluate((element) => (element as HTMLDetailsElement).open)) {
+    await summary.click();
+  }
+  expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
+}
+
+async function measureInteractiveTargets(page: Page, state: string): Promise<InteractiveTargetInventory> {
   return page.evaluate((stateLabel) => {
     document.documentElement.style.scrollBehavior = "auto";
     document.body.style.scrollBehavior = "auto";
@@ -289,6 +423,13 @@ async function measureInteractiveTargets(page: Page, state: string): Promise<{
     const interactive = Array.from(root.querySelectorAll<HTMLElement>(
       "button, a[href], select, input, summary, [tabindex]:not([tabindex='-1'])"
     )).filter(visible);
+    const selectorFor = (element: HTMLElement, index: number): string => {
+      if (element.id) return `#${CSS.escape(element.id)}`;
+      const ariaLabel = element.getAttribute("aria-label");
+      if (ariaLabel) return `${element.tagName.toLowerCase()}[aria-label=${JSON.stringify(ariaLabel)}]`;
+      const classes = Array.from(element.classList).map((name) => `.${CSS.escape(name)}`).join("");
+      return classes ? `${element.tagName.toLowerCase()}${classes}` : `${element.tagName.toLowerCase()}:interactive(${index})`;
+    };
     const targets = interactive.map((element, index) => {
       const target = element instanceof HTMLInputElement && element.type === "checkbox"
         ? element.closest<HTMLElement>("label") ?? element
@@ -300,6 +441,7 @@ async function measureInteractiveTargets(page: Page, state: string): Promise<{
         ?? "";
       return {
         descriptor: `${index}:${element.tagName.toLowerCase()}[${name.slice(0, 48)}]`,
+        selector: selectorFor(element, index),
         disabled: (element instanceof HTMLButtonElement
           || element instanceof HTMLInputElement
           || element instanceof HTMLSelectElement) && element.disabled,
@@ -307,10 +449,42 @@ async function measureInteractiveTargets(page: Page, state: string): Promise<{
         width: Math.round(rect.width * 100) / 100
       };
     });
+    const targetRectangles = interactive.map((element, index) => {
+      const target = element instanceof HTMLInputElement && element.type === "checkbox"
+        ? element.closest<HTMLElement>("label") ?? element
+        : element;
+      return { element: target, rect: target.getBoundingClientRect(), selector: selectorFor(element, index) };
+    });
+    const overlapFailures: string[] = [];
+    for (let leftIndex = 0; leftIndex < targetRectangles.length; leftIndex += 1) {
+      const left = targetRectangles[leftIndex];
+      for (let rightIndex = leftIndex + 1; rightIndex < targetRectangles.length; rightIndex += 1) {
+        const right = targetRectangles[rightIndex];
+        if (left.element === right.element
+          || left.element.contains(right.element)
+          || right.element.contains(left.element)) continue;
+        const overlapWidth = Math.min(left.rect.right, right.rect.right) - Math.max(left.rect.left, right.rect.left);
+        const overlapHeight = Math.min(left.rect.bottom, right.rect.bottom) - Math.max(left.rect.top, right.rect.top);
+        if (overlapWidth > 1 && overlapHeight > 1) {
+          overlapFailures.push(`${left.selector}<->${right.selector}`);
+        }
+      }
+    }
+    const nestedScrollFailures = Array.from(root.querySelectorAll<HTMLElement>("*"))
+      .filter((element) => {
+        if (!visible(element)) return false;
+        const style = getComputedStyle(element);
+        return (["auto", "scroll"].includes(style.overflowX) && element.scrollWidth > element.clientWidth + 1)
+          || (["auto", "scroll"].includes(style.overflowY) && element.scrollHeight > element.clientHeight + 1);
+      })
+      .map((element) => selectorFor(element, -1));
     return {
       state: stateLabel,
       targets,
-      undersized: targets.filter((target) => target.height < 44)
+      undersized: targets.filter((target) => target.width < 44 || target.height < 44),
+      horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
+      overlapFailures,
+      nestedScrollFailures
     };
   }, state);
 }
@@ -709,6 +883,8 @@ async function startReportsHarness(): Promise<IsolatedNextBrowserHarness> {
 
 describe("Reports Wave 1 browser design contract", () => {
   beforeAll(async () => {
+    interactiveTargetMatrixRows.length = 0;
+    evidenceIdentity = resolveEvidenceIdentity();
     outputResolution = process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1"
       ? {
         directory: path.join(root, reportsTaskDistanceEvidenceRelativeDir),
@@ -740,6 +916,7 @@ describe("Reports Wave 1 browser design contract", () => {
         harness = null;
         browser = null;
         outputResolution = null;
+        evidenceIdentity = null;
       }
     }
   }, 30_000);
@@ -813,6 +990,12 @@ describe("Reports Wave 1 browser design contract", () => {
 
         const defaultTargets = await measureInteractiveTargets(page, "default");
         expect(defaultTargets.undersized, JSON.stringify({ scenario, ...defaultTargets }, null, 2)).toEqual([]);
+        recordInteractiveTargetRow(
+          `${scenario.theme}-${scenario.label}-report-default`,
+          scenario.theme,
+          { width: scenario.width, height: scenario.height, label: scenario.label },
+          defaultTargets,
+        );
         expect(defaultTargets.targets.some((target) => target.disabled)).toBe(true);
         expect(defaultTargets.targets.some((target) => !target.disabled)).toBe(true);
         for (const name of ["SafeClaw 홈", "Day", "Night"]) {
@@ -828,6 +1011,12 @@ describe("Reports Wave 1 browser design contract", () => {
           secondaryOpenTargets.undersized,
           JSON.stringify({ scenario, ...secondaryOpenTargets }, null, 2)
         ).toEqual([]);
+        recordInteractiveTargetRow(
+          `${scenario.theme}-${scenario.label}-additional-info-open`,
+          scenario.theme,
+          { width: scenario.width, height: scenario.height, label: scenario.label },
+          secondaryOpenTargets,
+        );
         expect(
           secondaryOpenTargets.targets.length,
           JSON.stringify({ scenario, defaultTargets, secondaryOpenTargets }, null, 2)
@@ -837,9 +1026,29 @@ describe("Reports Wave 1 browser design contract", () => {
         expect(secondaryOpenTargets.targets.some((target) => target.descriptor.includes("[개선사항 추가]"))).toBe(true);
         expect(secondaryOpenTargets.targets.some((target) => target.descriptor.includes("[개선사항 저장하기]"))).toBe(false);
 
-        await openNamedReportsDisclosure(page, "리포트 본문 미리보기");
+        let previewOnlyTargets: InteractiveTargetInventory | null = null;
+        if (scenario.label === "mobile") {
+          await closeNamedReportsDisclosure(page, "추가 리포트 정보");
+          await openNamedReportsDisclosure(page, "리포트 본문 미리보기");
+          previewOnlyTargets = await measureInteractiveTargets(page, "preview-only");
+          recordInteractiveTargetRow(
+            `${scenario.theme}-${scenario.label}-preview-only`,
+            scenario.theme,
+            { width: scenario.width, height: scenario.height, label: scenario.label },
+            previewOnlyTargets,
+          );
+          await openNamedReportsDisclosure(page, "추가 리포트 정보");
+        } else {
+          await openNamedReportsDisclosure(page, "리포트 본문 미리보기");
+        }
         const bothOpenTargets = await measureInteractiveTargets(page, "both-open");
         expect(bothOpenTargets.undersized, JSON.stringify({ scenario, ...bothOpenTargets }, null, 2)).toEqual([]);
+        recordInteractiveTargetRow(
+          `${scenario.theme}-${scenario.label}-both-disclosures-open`,
+          scenario.theme,
+          { width: scenario.width, height: scenario.height, label: scenario.label },
+          bothOpenTargets,
+        );
         expect(
           bothOpenTargets.targets.length,
           JSON.stringify({ scenario, secondaryOpenTargets, bothOpenTargets }, null, 2)
@@ -933,6 +1142,7 @@ describe("Reports Wave 1 browser design contract", () => {
           interactiveTargets: {
             default: defaultTargets,
             secondaryOpen: secondaryOpenTargets,
+            previewOnly: previewOnlyTargets,
             bothOpen: bothOpenTargets
           },
           textZoom200: zoomMetrics
@@ -942,10 +1152,7 @@ describe("Reports Wave 1 browser design contract", () => {
       }
     }
     if (process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1") {
-      fs.writeFileSync(
-        path.join(outputDirectory, "reports-download-ready-task-distance-metrics.json"),
-        `${JSON.stringify({ scenarios: evidence }, null, 2)}\n`
-      );
+      writeEvidenceJson("reports-download-ready-task-distance-metrics.json", { scenarios: evidence });
     }
     expect(reflowViolations, JSON.stringify(reflowViolations, null, 2)).toEqual([]);
   }, 240_000);
@@ -959,6 +1166,11 @@ describe("Reports Wave 1 browser design contract", () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width, height } });
     await prepareSample(page, theme);
+    const sampleTargets = await measureInteractiveTargets(page, "sample-report-default");
+    expect(sampleTargets.undersized, JSON.stringify({ theme, label, ...sampleTargets }, null, 2)).toEqual([]);
+    expect(sampleTargets.horizontalOverflow).toBe(0);
+    expect(sampleTargets.overlapFailures).toEqual([]);
+    expect(sampleTargets.nestedScrollFailures).toEqual([]);
 
     const controls = page.locator(".safeclaw-report-period-control");
     const selected = controls.filter({ hasText: "주간" }).first();
@@ -1069,17 +1281,18 @@ describe("Reports Wave 1 browser design contract", () => {
       control: ["14px", "500", "22.4px", "normal"]
     });
 
-    fs.writeFileSync(
-      path.join(outputDirectory, `reports-sample-${theme}-${label}-metrics.json`),
-      `${JSON.stringify({
+    writeEvidenceJson(
+      `reports-sample-${theme}-${label}-metrics.json`,
+      {
         harnessMode: harness?.mode ?? "dev",
         theme,
         viewport: { width, height },
+        interactiveTargets: sampleTargets,
         selectedBackground: selectedBeforeHover,
         hoverBackground,
         focusOutline,
         ...metrics
-      }, null, 2)}\n`
+      }
     );
     await page.screenshot({
       path: path.join(outputDirectory, `reports-sample-${theme}-${label}.png`),
@@ -1090,56 +1303,87 @@ describe("Reports Wave 1 browser design contract", () => {
 
   it("captures deterministic empty and fail-closed server-error states", async () => {
     if (!browser) throw new Error("Browser was not started");
-    const empty = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    await empty.goto(`${baseUrl}/reports?theme=day`, { waitUntil: "networkidle" });
-    await empty.getByLabel("리포트 빈 상태").waitFor({ state: "visible" });
-    expect(await empty.getByLabel("다운로드 준비 상태").textContent()).toContain("현재 작업팩 필요");
-    const emptyMetrics = await empty.evaluate(() => ({
-      horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
-      state: document.querySelector("[aria-label='리포트 빈 상태']") ? "empty" : "missing"
-    }));
-    await empty.screenshot({ path: path.join(outputDirectory, "reports-empty-day-desktop.png"), fullPage: true });
-    await empty.close();
-
-    const serverErrorResults: Array<Record<string, unknown>> = [];
-    const expectedServerErrorMessage = "서버 작업팩 조회 중 검증용 오류가 발생했습니다.";
-    for (const scenario of [
+    const reportRowsWereCollected = interactiveTargetMatrixRows.length === 14;
+    const stateScenarios = [
       { theme: "day" as const, width: 1440, height: 1000, label: "desktop" as const },
       { theme: "night" as const, width: 1440, height: 1000, label: "desktop" as const },
       { theme: "day" as const, width: 391, height: 844, label: "mobile" as const },
       { theme: "night" as const, width: 391, height: 844, label: "mobile" as const }
-    ]) {
-      const serverError = await browser.newPage({ viewport: { width: scenario.width, height: scenario.height } });
-      await serverError.addInitScript(({
-        expectedOrigin,
-        authStorageKey,
-        accessToken,
-        supabaseUrl,
-        supabaseAnonKey
-      }) => {
-        if (window.location.origin !== expectedOrigin) return;
-        const browserGlobal = window as Window & {
-          process?: { env: Record<string, string> };
-        };
-        browserGlobal.process = {
-          env: {
-            NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
-            NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseAnonKey
-          }
-        };
-        window.localStorage.setItem(authStorageKey, JSON.stringify({
-          access_token: accessToken,
-          refresh_token: "reports-wave1-evidence-refresh-token",
-          expires_at: 4_102_444_800,
-          token_type: "bearer"
-        }));
-      }, {
-        expectedOrigin: baseUrl,
-        authStorageKey: reportsWave1TestAuthStorageKey,
-        accessToken: reportsWave1TestAccessToken,
-        supabaseUrl: reportsWave1TestSupabaseUrl,
-        supabaseAnonKey: "wave8-public-anon-key"
+    ];
+    const loadingResults: Array<Record<string, unknown>> = [];
+    for (const scenario of stateScenarios) {
+      const loadingPage = await browser.newPage({
+        viewport: { width: scenario.width, height: scenario.height },
+        deviceScaleFactor: 1
       });
+      await installServerAuth(loadingPage);
+      let routeHitCount = 0;
+      let captureInterceptedRoute: (route: Route) => void = () => {
+        throw new Error("Reports loading route resolver was not initialized");
+      };
+      const interceptedRoutePromise = new Promise<Route>((resolve) => {
+        captureInterceptedRoute = resolve;
+      });
+      await loadingPage.route("**/api/workpacks/wave-1-loading", async (route) => {
+        routeHitCount += 1;
+        captureInterceptedRoute(route);
+      });
+      const serverRequest = loadingPage.waitForRequest("**/api/workpacks/wave-1-loading");
+      await loadingPage.goto(`${baseUrl}/reports?theme=${scenario.theme}&workpackId=wave-1-loading`, {
+        waitUntil: "domcontentloaded"
+      });
+      await serverRequest;
+      await loadingPage.getByLabel("리포트 데이터 확인 상태").waitFor({ state: "visible" });
+      expect(routeHitCount).toBeGreaterThan(0);
+      const targets = await measureInteractiveTargets(loadingPage, "loading");
+      recordInteractiveTargetRow(
+        `${scenario.theme}-${scenario.label}-loading`,
+        scenario.theme,
+        scenario,
+        targets,
+      );
+      loadingResults.push({ ...scenario, routeHitCount, interactiveTargets: targets });
+      await loadingPage.screenshot({
+        path: path.join(outputDirectory, `reports-loading-${scenario.theme}-${scenario.label}.png`),
+        fullPage: true
+      });
+      const interceptedRoute = await interceptedRoutePromise;
+      await interceptedRoute.abort("aborted");
+      await loadingPage.close();
+    }
+
+    const emptyResults: Array<Record<string, unknown>> = [];
+    for (const scenario of stateScenarios) {
+      const empty = await browser.newPage({
+        viewport: { width: scenario.width, height: scenario.height },
+        deviceScaleFactor: 1
+      });
+      await empty.goto(`${baseUrl}/reports?theme=${scenario.theme}`, { waitUntil: "networkidle" });
+      await empty.getByLabel("리포트 빈 상태").waitFor({ state: "visible" });
+      expect(await empty.getByLabel("다운로드 준비 상태").textContent()).toContain("현재 작업팩 필요");
+      const targets = await measureInteractiveTargets(empty, "empty");
+      recordInteractiveTargetRow(
+        `${scenario.theme}-${scenario.label}-empty`,
+        scenario.theme,
+        scenario,
+        targets,
+      );
+      emptyResults.push({ ...scenario, interactiveTargets: targets });
+      await empty.screenshot({
+        path: path.join(outputDirectory, `reports-empty-${scenario.theme}-${scenario.label}.png`),
+        fullPage: true
+      });
+      await empty.close();
+    }
+
+    const serverErrorResults: Array<Record<string, unknown>> = [];
+    const expectedServerErrorMessage = "서버 작업팩 조회 중 검증용 오류가 발생했습니다.";
+    for (const scenario of stateScenarios) {
+      const serverError = await browser.newPage({
+        viewport: { width: scenario.width, height: scenario.height },
+        deviceScaleFactor: 1
+      });
+      await installServerAuth(serverError);
       let routeHitCount = 0;
       let authorizationHeader = "";
       await serverError.route("**/api/workpacks/wave-1-error", async (route) => {
@@ -1165,6 +1409,13 @@ describe("Reports Wave 1 browser design contract", () => {
       for (const button of await downloads.all()) expect(await button.isDisabled()).toBe(true);
       const readiness = errorState.getByLabel("다운로드 준비 상태");
       expect(await readiness.textContent()).toContain("다운로드 잠김");
+      const targets = await measureInteractiveTargets(serverError, "server-error");
+      recordInteractiveTargetRow(
+        `${scenario.theme}-${scenario.label}-server-error`,
+        scenario.theme,
+        scenario,
+        targets,
+      );
       const metrics = await serverError.evaluate(() => {
         const hero = document.querySelector(".safeclaw-page-decision-header");
         const heroMeta = document.querySelector(".safeclaw-page-decision-action > div:first-child");
@@ -1223,6 +1474,7 @@ describe("Reports Wave 1 browser design contract", () => {
         routeHitCount,
         disabledDownloadCount: await downloads.count(),
         state: "server-error",
+        interactiveTargets: targets,
         ...metrics
       });
       await serverError.screenshot({
@@ -1231,13 +1483,35 @@ describe("Reports Wave 1 browser design contract", () => {
       });
       await serverError.close();
     }
-    fs.writeFileSync(
-      path.join(outputDirectory, "reports-state-metrics.json"),
-      `${JSON.stringify({
-        harnessMode: harness?.mode ?? "dev",
-        empty: emptyMetrics,
-        serverError: serverErrorResults
-      }, null, 2)}\n`
-    );
-  }, 120_000);
+    const stateCounts = interactiveTargetMatrixRows.reduce<Record<string, number>>((counts, row) => {
+      counts[row.state] = (counts[row.state] ?? 0) + 1;
+      return counts;
+    }, {});
+    if (reportRowsWereCollected || evidenceIdentity) {
+      expect(interactiveTargetMatrixRows).toHaveLength(26);
+      expect(stateCounts).toEqual({
+        default: 4,
+        "secondary-open": 4,
+        "preview-only": 2,
+        "both-open": 4,
+        loading: 4,
+        empty: 4,
+        "server-error": 4
+      });
+    } else {
+      expect(interactiveTargetMatrixRows).toHaveLength(12);
+      expect(stateCounts).toEqual({ loading: 4, empty: 4, "server-error": 4 });
+    }
+    writeEvidenceJson("reports-state-metrics.json", {
+      harnessMode: harness?.mode ?? "dev",
+      loading: loadingResults,
+      empty: emptyResults,
+      serverError: serverErrorResults
+    });
+    writeEvidenceJson("reports-interactive-target-matrix.json", {
+      rowCount: interactiveTargetMatrixRows.length,
+      stateCounts,
+      rows: interactiveTargetMatrixRows
+    });
+  }, 240_000);
 });
