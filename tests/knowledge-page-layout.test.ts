@@ -118,7 +118,7 @@ describe("knowledge page decision layout", () => {
       throw new Error(`Refusing to remove unexpected test dist directory: ${absoluteDistDir}`);
     }
     fs.rmSync(absoluteDistDir, { recursive: true, force: true });
-  });
+  }, 30_000);
 
   it("uses semantic KOSHA row lists with optional detail disclosures", () => {
     const technicalList = sourceBetween(

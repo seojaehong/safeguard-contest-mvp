@@ -612,9 +612,11 @@ describe("KOSHA GUIDE read-only runner contract", () => {
 
   it("keeps the production/local bridge bounded to exact-tuple GET reads", () => {
     const script = readFileSync(resolve(process.cwd(), "scripts/audit_kosha_guides.mjs"), "utf8");
-    const bridgeFetch = script.match(
-      /async function fetchProductionBridgeRows[\s\S]+?\n\}\n/u
-    )?.[0] || "";
+    const bridgeStart = script.indexOf("async function fetchProductionBridgeRows");
+    const bridgeEnd = script.indexOf("function formatBridgeMarkdown", bridgeStart);
+    const bridgeFetch = bridgeStart >= 0 && bridgeEnd > bridgeStart
+      ? script.slice(bridgeStart, bridgeEnd)
+      : "";
 
     expect(script).toContain('"--bridge-only"');
     expect(script).toContain('"--local-corpus-root"');
