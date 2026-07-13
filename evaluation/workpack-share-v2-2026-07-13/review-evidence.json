@@ -1,18 +1,25 @@
 {
-  "schemaVersion": "safeclaw-spec-review-evidence/v1",
-  "status": "HOLD_PENDING_FRESH_REVIEW",
+  "schemaVersion": "safeclaw-spec-review-evidence/v2",
+  "status": "SPEC_REVIEW_ONLY",
+  "implementationStatus": "IMPLEMENTATION_BLOCKED",
+  "browserTddStatus": "IMPLEMENTATION_BLOCKED_PENDING_REAL_TDD",
+  "browserExecutions": 0,
   "reviewStatus": "pending",
   "reviewedClaim": false,
+  "semanticPassClaim": false,
+  "implementationReadyClaim": false,
+  "browserPassClaim": false,
   "branch": "feat/workpack-share-v2",
-  "sourceBase": "8804e33421d4b7ea75dd32022acf728f7adb5c43",
-  "candidate": "2131681b86fb56efef44ae8f1e506dfdd84e2e9f",
-  "candidateParent": "8804e33421d4b7ea75dd32022acf728f7adb5c43",
+  "sourceBase": "353a41be1be2028c61d9fa2096bd8be5ac4cfad8",
+  "candidate": "0c6603adf7159dc98df6b6b365d3a03cddb65be1",
+  "candidateParent": "353a41be1be2028c61d9fa2096bd8be5ac4cfad8",
   "candidateChangedFiles": [
-    "evaluation/workpack-share-v2-2026-07-13/spec.json",
     "evaluation/workpack-share-v2-2026-07-13/spec.md",
+    "evaluation/workpack-share-v2-2026-07-13/spec.json",
     "evaluation/workpack-share-v2-2026-07-13/validate-spec.cjs"
   ],
   "candidateEvidence": {
+    "scope": "identity_and_exact_file_scope_only",
     "sourceBaseResolves": true,
     "candidateResolves": true,
     "candidateDirectParentIsSourceBase": true,
@@ -20,14 +27,28 @@
   },
   "evidenceCommitContract": {
     "recordsOwnCommitSha": false,
-    "requiredParent": "2131681b86fb56efef44ae8f1e506dfdd84e2e9f",
+    "requiredParent": "0c6603adf7159dc98df6b6b365d3a03cddb65be1",
     "changedFiles": [
       "evaluation/workpack-share-v2-2026-07-13/review-evidence.json"
     ]
   },
+  "validationScope": {
+    "proves": [
+      "source and candidate commit identities",
+      "candidate parent and exact three-file diff-tree",
+      "evidence parent and exact one-file diff-tree",
+      "browser execution count is honestly zero"
+    ],
+    "doesNotProve": [
+      "browser behavior",
+      "language rendering",
+      "geometry or zoom behavior",
+      "implementation readiness",
+      "semantic review approval"
+    ]
+  },
   "independentReview": {
     "status": "pending",
-    "passClaim": false,
-    "requiredAction": "Run a fresh independent review against candidate 2131681b86fb56efef44ae8f1e506dfdd84e2e9f."
+    "requiredAction": "Perform a fresh independent manual spec review of candidate 0c6603adf7159dc98df6b6b365d3a03cddb65be1; later browser implementation requires real Playwright tests."
   }
 }
