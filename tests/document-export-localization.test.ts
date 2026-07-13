@@ -95,6 +95,29 @@ describe("localized editable document exports", () => {
     expect(firstLocalZipEntry(output)).toEqual({ fileName: "mimetype", compressionMethod: 0 });
   });
 
+  it("uses entry-aware HWPX substitution for XML and plain-text previews", () => {
+    const companyName = 'A&B 건설 "동부" <1공구>';
+    const output = buildHwpxFromTemplate("emergency-response", companyName);
+    const zip = new AdmZip(output);
+    const preview = zip.getEntry("Preview/PrvText.txt")?.getData().toString("utf8") ?? "";
+    const xmlEntry = readableEntries(zip).find((entry) => (
+      entry.entryName !== "Preview/PrvText.txt"
+      && entry.getData().toString("utf8").includes("A&amp;B")
+    ));
+
+    expect(preview).toContain(companyName);
+    expect(preview).not.toContain("A&amp;B");
+    expect(preview).not.toContain("A&amp;amp;B");
+    expect(xmlEntry).toBeDefined();
+    const xml = xmlEntry?.getData().toString("utf8") ?? "";
+    expect(xml).toContain("A&amp;B 건설 &quot;동부&quot; &lt;1공구&gt;");
+    expect(xml).not.toContain("A&amp;amp;B");
+    const parsed = new DOMParser().parseFromString(xml, "application/xml");
+    expect(parsed.getElementsByTagName("parsererror")).toHaveLength(0);
+    expect(parsed.documentElement?.textContent).toContain(companyName);
+    expect(firstLocalZipEntry(output)).toEqual({ fileName: "mimetype", compressionMethod: 0 });
+  });
+
   it("uses Korean row headings and a table-based approval area in HWP", async () => {
     const response = await exportHwp(new NextRequest("http://localhost/api/export/hwp", {
       method: "POST",
@@ -135,6 +158,47 @@ describe("localized editable document exports", () => {
     }
   });
 
+  it("localizes structured risk and verification enums in a reloaded HWP", async () => {
+    const response = await exportHwp(new NextRequest("http://localhost/api/export/hwp", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        title: "위험성평가표",
+        profile: { layout: "risk" },
+        scenario: { companyName: "테스트 건설", siteName: "제1현장", workSummary: "비계 작업", workerCount: 4 },
+        structuredRiskRows: [
+          { unitTask: "비계 조립", hazard: "추락", riskLevel: "high", additionalControls: "생명줄 설치", status: "planned" },
+          { unitTask: "전기 점검", hazard: "감전", riskLevel: "medium", additionalControls: "잠금 표지", status: "done" },
+          { unitTask: "자재 정리", hazard: "전도", riskLevel: "low", additionalControls: "통로 확보", status: "needsReview" }
+        ]
+      })
+    }));
+
+    expect(response.status).toBe(200);
+    const reloaded = new HwpDocument(new Uint8Array(await response.arrayBuffer()));
+    try {
+      const bodyTable = listHwpTables(reloaded)[1];
+      const dimensions = JSON.parse(reloaded.getTableDimensions(0, bodyTable.paraIdx, bodyTable.controlIdx)) as {
+        colCount: number;
+        rowCount: number;
+      };
+      const header = Array.from({ length: dimensions.colCount }, (_, cellIdx) => (
+        getHwpCellText(reloaded, bodyTable.paraIdx, bodyTable.controlIdx, cellIdx)
+      )).join(" ");
+      const values = Array.from({ length: (dimensions.rowCount - 1) * dimensions.colCount }, (_, offset) => (
+        getHwpCellText(reloaded, bodyTable.paraIdx, bodyTable.controlIdx, dimensions.colCount + offset)
+      )).join(" ");
+
+      expect(header).toContain("상태");
+      for (const localized of ["상", "중", "하", "조치 예정", "조치 완료", "검토 필요"]) {
+        expect(values).toContain(localized);
+      }
+      expect(values).not.toMatch(/\b(?:high|medium|low|planned|done|needsReview)\b/u);
+    } finally {
+      reloaded.free();
+    }
+  });
+
   it("localizes HTML PDF table headers and typed 4M values", async () => {
     const response = await exportPdf(new NextRequest("http://localhost/api/export/pdf?format=html", {
       method: "POST",
@@ -152,5 +216,30 @@ describe("localized editable document exports", () => {
     expect(html).toContain("인적 요인/기계·설비 요인/작업환경 요인/관리 요인");
     expect(html).not.toContain(">No.<");
     expect(html).not.toContain("Man/Machine/Media/Management");
+  });
+
+  it("localizes structured PDF risk and verification enums in HTML", async () => {
+    const response = await exportPdf(new NextRequest("http://localhost/api/export/pdf?format=html", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        title: "위험성평가표",
+        riskLevel: "low",
+        scenario: { companyName: "테스트 건설", siteName: "제1현장", workSummary: "비계 작업", workerCount: 4 },
+        structuredRiskRows: [
+          { unitTask: "비계 조립", hazard: "추락", riskLevel: "high", additionalControls: "생명줄 설치", status: "planned" },
+          { unitTask: "전기 점검", hazard: "감전", riskLevel: "medium", additionalControls: "잠금 표지", status: "done" },
+          { unitTask: "자재 정리", hazard: "전도", riskLevel: "low", additionalControls: "통로 확보", status: "needsReview" }
+        ]
+      })
+    }));
+
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    expect(html).toContain("위험수준 하");
+    for (const localized of ["상", "중", "하", "조치 예정", "조치 완료", "검토 필요"]) {
+      expect(html).toContain(`>${localized}</td>`);
+    }
+    expect(html).not.toMatch(/>\s*(?:high|medium|low|planned|done|needsReview)\s*</u);
   });
 });

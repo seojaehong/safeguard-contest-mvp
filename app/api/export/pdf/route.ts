@@ -141,6 +141,22 @@ function readString(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
+function localizeRiskLevel(value: string | undefined): string {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "high") return "상";
+  if (normalized === "medium") return "중";
+  if (normalized === "low") return "하";
+  return value?.trim() || "확인";
+}
+
+function localizeVerificationStatus(value: string | undefined): string {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "planned") return "조치 예정";
+  if (normalized === "done") return "조치 완료";
+  if (normalized === "needsreview") return "검토 필요";
+  return value?.trim() || "확인";
+}
+
 function readNumber(value: unknown, fallback = 0) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
@@ -269,12 +285,21 @@ function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAss
 }
 
 function structuredRiskRowsToPdfRows(rows: StructuredRiskAssessmentRow[], documentTitle: string): PdfRow[] {
-  return rows.map((row) => ({
-    document: documentTitle,
-    section: row.section || "위험성평가",
-    item: row.hazard,
-    content: buildRiskAssessmentText(row)
-  }));
+  return rows.map((row) => {
+    const localizedStatus = localizeVerificationStatus(row.verificationStatus || row.status);
+    const localizedRow: StructuredRiskAssessmentRow = {
+      ...row,
+      riskLevel: localizeRiskLevel(row.riskLevel),
+      status: localizedStatus,
+      verificationStatus: localizedStatus
+    };
+    return {
+      document: documentTitle,
+      section: row.section || "위험성평가",
+      item: row.hazard,
+      content: buildRiskAssessmentText(localizedRow)
+    };
+  });
 }
 
 function groupRows(rows: PdfRow[]) {
@@ -367,7 +392,7 @@ function renderCanonicalRiskAssessmentRows(rows: StructuredRiskAssessmentRow[], 
           <tr><th class="no">연번</th><th>세부작업</th><th>유해·위험요인</th><th>현재 안전보건조치</th><th>위험성</th><th>감소대책</th><th>담당/기한</th><th>확인</th></tr>
         </thead>
         <tbody>
-          ${rows.map((row, index) => `<tr><td>${escapeHtml(row.id || String(index + 1))}</td><td>${escapeHtml(row.unitTask)}</td><td>${escapeHtml(row.hazard)}</td><td>${escapeHtml(row.currentControls || "현장 확인")}</td><td>${escapeHtml(row.riskLevel || "확인")}</td><td>${escapeHtml(row.additionalControls)}</td><td>${escapeHtml(`${row.owner || "작업반장"} / ${row.dueDate || "작업 전"}`)}</td><td>${escapeHtml(row.status || "□")}</td></tr>`).join("")}
+          ${rows.map((row, index) => `<tr><td>${escapeHtml(row.id || String(index + 1))}</td><td>${escapeHtml(row.unitTask)}</td><td>${escapeHtml(row.hazard)}</td><td>${escapeHtml(row.currentControls || "현장 확인")}</td><td>${escapeHtml(localizeRiskLevel(row.riskLevel))}</td><td>${escapeHtml(row.additionalControls)}</td><td>${escapeHtml(`${row.owner || "작업반장"} / ${row.dueDate || "작업 전"}`)}</td><td>${escapeHtml(localizeVerificationStatus(row.verificationStatus || row.status))}</td></tr>`).join("")}
         </tbody>
       </table>
     </section>
@@ -662,7 +687,7 @@ function buildPdfReadyHtml(
     </section>
     <p class="kind-note">서식 구분: ${escapeHtml(kindLabels[kind])} · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다.</p>
     <section class="riskbox">
-      <b>위험수준 ${escapeHtml(riskLevel || "확인")}</b>
+      <b>위험수준 ${escapeHtml(localizeRiskLevel(riskLevel))}</b>
       <span>${escapeHtml(topRisk || "핵심 위험요인을 현장에서 최종 확인하세요.")}</span>
     </section>
     ${renderStructuredRows(kind, scenario, rows, topRisk, riskRows, structuredRiskRows)}
@@ -1018,7 +1043,7 @@ function buildPdfContentLines(
     { text: `현장: ${scenario.siteName}`, role: "body" },
     { text: `작업: ${scenario.workSummary}`, role: "body" },
     { text: `인원/기상: ${scenario.workerCount.toLocaleString("ko-KR")}명 · ${scenario.weatherNote}`, role: "body", gap: 14 },
-    { text: `위험수준: ${riskLevel || "확인"}`, role: "section" },
+    { text: `위험수준: ${localizeRiskLevel(riskLevel)}`, role: "section" },
     { text: `핵심위험: ${topRisk || "현장 최종 확인 필요"}`, role: "body", gap: 16 },
     { text: `서식 구분: ${kind === "risk" ? "위험성평가표" : kind === "workPlan" ? "작업계획서" : kind === "permit" ? "허가/점검" : kind === "tbm" ? "TBM일지" : "일반 문서"}`, role: "body", gap: 12 },
     { text: "확인 항목", role: "section", gap: 10 }

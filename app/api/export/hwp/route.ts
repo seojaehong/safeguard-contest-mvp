@@ -71,6 +71,22 @@ function readNumber(value: unknown, fallback = 0) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
+function localizeRiskLevel(value: string | undefined): string {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "high") return "상";
+  if (normalized === "medium") return "중";
+  if (normalized === "low") return "하";
+  return value?.trim() || "확인";
+}
+
+function localizeVerificationStatus(value: string | undefined): string {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "planned") return "조치 예정";
+  if (normalized === "done") return "조치 완료";
+  if (normalized === "needsreview") return "검토 필요";
+  return value?.trim() || "확인";
+}
+
 function sanitizeFileName(value: string) {
   return value
     .replace(/[\\/:*?"<>|]/g, "-")
@@ -216,7 +232,7 @@ function buildHwpBuffer(args: {
       ? resolveRiskAssessmentRows({ structuredRows: structuredRiskRows, fallbackRows: rows })
       : [];
     const cols = riskRows.length
-      ? ["세부작업", "유해·위험요인", "현재조치", "위험성", "감소대책", "담당/기한"]
+      ? ["세부작업", "유해·위험요인", "현재조치", "위험성", "감소대책", "담당/기한", "상태"]
       : deriveColumns(profile);
     const colCount = cols.length;
     const bodyRows: string[][] = riskRows.length
@@ -224,9 +240,10 @@ function buildHwpBuffer(args: {
         riskRow.unitTask,
         riskRow.hazard,
         riskRow.currentControls || "현장 확인",
-        riskRow.riskLevel || "확인",
+        localizeRiskLevel(riskRow.riskLevel),
         riskRow.additionalControls,
-        `${riskRow.owner || "작업반장"} / ${riskRow.dueDate || "작업 전"}`
+        `${riskRow.owner || "작업반장"} / ${riskRow.dueDate || "작업 전"}`,
+        localizeVerificationStatus(riskRow.verificationStatus || riskRow.status)
       ])
       : rows.map((r, idx) => [
         profile.layout === "risk" ? (r.section || String(idx + 1)) : String(idx + 1),

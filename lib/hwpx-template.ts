@@ -143,6 +143,11 @@ export function localizeHwpxXmlText(text: string, companyName: string): string {
     );
 }
 
+function localizeHwpxPlainText(text: string, companyName: string): string {
+  const replaceCompany = companyName.trim() || "사업장명 입력";
+  return text.split("__COMPANY__").join(replaceCompany);
+}
+
 export function buildHwpxFromTemplate(kind: HwpxTemplateKind, companyName: string): Buffer {
   const srcPath = path.join(templatesDir(), TEMPLATE_FILES[kind]);
   if (!fs.existsSync(srcPath)) {
@@ -154,7 +159,13 @@ export function buildHwpxFromTemplate(kind: HwpxTemplateKind, companyName: strin
 
   for (const entry of inputZip.getEntries()) {
     if (entry.isDirectory) continue;
-    if (/\.(xml|hpf|rdf|txt)$/i.test(entry.entryName)) {
+    if (/\.txt$/i.test(entry.entryName)) {
+      const text = entry.getData().toString("utf8");
+      const localized = localizeHwpxPlainText(text, replaceCompany);
+      if (localized !== text) {
+        entry.setData(Buffer.from(localized, "utf8"));
+      }
+    } else if (/\.(xml|hpf|rdf)$/i.test(entry.entryName)) {
       const text = entry.getData().toString("utf8");
       const localized = localizeHwpxXmlText(text, replaceCompany);
       if (localized !== text) {
