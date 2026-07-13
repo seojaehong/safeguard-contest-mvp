@@ -605,6 +605,16 @@ describe("published runtime gate and provenance", () => {
     );
   });
 
+  test("never emits review-only SIF evidence as an active citation", () => {
+    const pack = requireReviewRequired("차량계·기계 인접작업");
+    const reviewOnlySif = pack.reviewOnlyEvidence[0];
+
+    expect(reviewOnlySif?.itemId).toBe("sif-아카이브-건설업-01985");
+    expect(resolveEvidenceCitations(pack).map((citation) => citation.citedUid)).not.toContain(
+      reviewOnlySif?.citedUid,
+    );
+  });
+
   test("keeps local recovery chunks as structured non-citation provenance with SHA-256", () => {
     const pack = requireReviewRequired("전기작업");
     expect(Array.from(new Set(pack.guidance.map((source) => source.productionItemId)))).toEqual([
@@ -741,6 +751,21 @@ describe("pipeline and document materialization contract", () => {
     expect(harness.generationContract.llmRole).toBe("naturalize_only");
   });
 
+  test("keeps review-only SIF evidence outside the naturalizer fixed pack", () => {
+    const pack = requireReviewRequired("차량계·기계 인접작업");
+    const naturalized = naturalizeEvidenceChain(pack, "차량계·기계 인접작업의 끼임 위험을 설명합니다.");
+
+    expect(naturalized.fixedPack).not.toHaveProperty("reviewOnlyEvidence");
+    expect(JSON.stringify(naturalized.fixedPack)).not.toContain("sif-아카이브-건설업-01985");
+    expect(naturalized.reviewOnlyEvidence).toEqual([
+      expect.objectContaining({
+        itemId: "sif-아카이브-건설업-01985",
+        autoConfirm: false,
+        reviewState: "draft",
+      }),
+    ]);
+  });
+
   test("requires passed quality and explicit human confirmation after naturalization", () => {
     const naturalized = naturalizeEvidenceChain(requireReviewRequired("전기작업"), "고정 근거팩 문장화 결과");
     expect(naturalized.humanConfirmation).toEqual({ required: true, status: "pending" });
@@ -773,6 +798,26 @@ describe("pipeline and document materialization contract", () => {
       confirmedAt: "2026-07-13T08:00:00+09:00",
     });
     expect(confirmed.qualityCheck).toEqual({ required: true, status: "passed" });
+  });
+
+  test("revokes human confirmation when a later quality check fails", () => {
+    const naturalized = naturalizeEvidenceChain(requireReviewRequired("전기작업"), "고정 근거팩 문장화 결과");
+    const passed = recordNaturalizedEvidenceChainQuality(naturalized, "passed");
+    const confirmed = confirmNaturalizedEvidenceChain(passed, {
+      reviewerId: "safety-reviewer-1",
+      confirmedAt: "2026-07-13T08:00:00+09:00",
+    });
+
+    const failed = recordNaturalizedEvidenceChainQuality(confirmed, "failed");
+
+    expect(failed.qualityCheck).toEqual({ required: true, status: "failed" });
+    expect(failed.humanConfirmation).toEqual({ required: true, status: "pending" });
+    expect(() =>
+      confirmNaturalizedEvidenceChain(failed, {
+        reviewerId: "safety-reviewer-2",
+        confirmedAt: "2026-07-13T09:00:00+09:00",
+      }),
+    ).toThrow(/quality check.*passed/i);
   });
 
   test("isolates and freezes the fixed evidence pack across confirmation", () => {
@@ -813,6 +858,23 @@ describe("pipeline and document materialization contract", () => {
       "llm_naturalize_only",
       "quality_check",
       "human_confirm",
+    ]);
+  });
+
+  test("returns review-only SIF evidence from MCP as diagnostics, never active evidence", () => {
+    const payload = buildPublishedSafetyKnowledge(publishedGraph, "차량계·기계 인접작업");
+    expect(payload.found).toBe(true);
+    if (!payload.found) throw new Error("expected found knowledge");
+
+    expect(payload.evidenceContract).not.toHaveProperty("reviewOnlyEvidence");
+    expect(payload.evidenceContract).not.toHaveProperty("reviewOnlyGuidance");
+    expect(JSON.stringify(payload.evidenceContract)).not.toContain("sif-아카이브-건설업-01985");
+    expect(payload.evidenceDiagnostics?.reviewOnlyEvidence).toEqual([
+      expect.objectContaining({
+        itemId: "sif-아카이브-건설업-01985",
+        autoConfirm: false,
+        reviewState: "draft",
+      }),
     ]);
   });
 });

@@ -14,9 +14,11 @@ import {
   type HarnessWorkpackMemory,
 } from "./db-harness";
 import type { QaReviewResult } from "./ontology/qa-review";
-import type {
-  EvidenceChainPack,
-  EvidenceChainResolution,
+import {
+  splitEvidenceChainPack,
+  type ActiveEvidenceChainPack,
+  type EvidenceChainDiagnostics,
+  type EvidenceChainResolution,
 } from "./ontology/evidence-chain";
 import { gateCitations } from "./law-citation-gate";
 import { sanitizeContacts, OFFICIAL_CONTACTS } from "./safety-contacts";
@@ -562,7 +564,8 @@ export type SafetyKnowledgeFound = {
   dutiesNote: string;
   provenance: string;
   coreProvenance: string;
-  evidenceContract: EvidenceChainPack | null;
+  evidenceContract: ActiveEvidenceChainPack | null;
+  evidenceDiagnostics: EvidenceChainDiagnostics | null;
   evidenceChainState: "resolved" | "review_required" | "unverified" | "not_registered" | "not_evaluated";
 };
 
@@ -571,6 +574,7 @@ export type SafetyKnowledgeNotFound = {
   message: string;
   registeredTasks: string[];
   evidenceContract: null;
+  evidenceDiagnostics: null;
   evidenceChainState: "review_required" | "unverified" | "not_registered" | "not_evaluated";
 };
 
@@ -616,9 +620,13 @@ export function buildSafetyKnowledgeResult(
           : `'${query}'은(는) 등록된 작업유형·위험요인이 아닙니다. 아래 등록된 작업유형 중 하나로 다시 조회하거나, 검증된 조문 없이 답할 때는 validate_safety_citations로 자체 검증하세요.`,
       registeredTasks,
       evidenceContract: null,
+      evidenceDiagnostics: null,
       evidenceChainState: notFoundEvidenceState,
     };
   }
+  const evidencePack = evidenceResolution && "pack" in evidenceResolution
+    ? splitEvidenceChainPack(evidenceResolution.pack)
+    : null;
   return {
     found: true,
     matchedBy: result.matchedBy,
@@ -634,9 +642,8 @@ export function buildSafetyKnowledgeResult(
     dutiesNote: DUTIES_NOTE,
     provenance: ONTOLOGY_PROVENANCE,
     coreProvenance: CORE_ONTOLOGY_PROVENANCE,
-    evidenceContract: evidenceResolution && "pack" in evidenceResolution
-      ? evidenceResolution.pack
-      : null,
+    evidenceContract: evidencePack?.activePack ?? null,
+    evidenceDiagnostics: evidencePack?.diagnostics ?? null,
     evidenceChainState,
   };
 }
