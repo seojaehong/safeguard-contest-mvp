@@ -878,18 +878,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
       </section>
 
       <section className="safeclaw-workdoc-shell">
-        {snapshot ? (
-          <ReportDocument snapshot={snapshot} onTogglePhotoApproval={togglePhotoApproval} />
-        ) : (
-          <ReportStatePanel viewState={viewState} />
-        )}
         <aside className="safeclaw-workdoc-rail" aria-label="작업문서 도구">
-          {snapshot ? (
-            <section>
-              <span>데이터 출처</span>
-              <ReportProvenanceFacts snapshot={snapshot} label="고정 리포트 데이터 출처" />
-            </section>
-          ) : null}
           <section>
             <span>기간</span>
             <div className="safeclaw-report-controls" aria-label="리포트 기간 선택">
@@ -1041,47 +1030,64 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
             )}
           </section>
 
-          <section>
-            <span>요약</span>
-            <div className="safeclaw-workdoc-stats">
-              <p><strong>{snapshot?.summary.riskRows || 0}</strong><span>평가 행</span></p>
-              <p><strong>{snapshot?.summary.highRiskRows || 0}</strong><span>고위험</span></p>
-              <p><strong>{snapshot?.summary.improvements || 0}</strong><span>개선사항</span></p>
-              <p><strong>{snapshot?.summary.photoCandidates || 0}</strong><span>사진 후보</span></p>
-              <p><strong>{snapshot?.summary.photoImprovements || 0}</strong><span>승인 사진</span></p>
-            </div>
-          </section>
+          <details className="safeclaw-report-secondary-tools">
+            <summary>추가 리포트 정보</summary>
+            {snapshot ? (
+              <section>
+                <span>데이터 출처</span>
+                <ReportProvenanceFacts snapshot={snapshot} label="고정 리포트 데이터 출처" />
+              </section>
+            ) : null}
+            <section>
+              <span>요약</span>
+              <div className="safeclaw-workdoc-stats">
+                <p><strong>{snapshot?.summary.riskRows || 0}</strong><span>평가 행</span></p>
+                <p><strong>{snapshot?.summary.highRiskRows || 0}</strong><span>고위험</span></p>
+                <p><strong>{snapshot?.summary.improvements || 0}</strong><span>개선사항</span></p>
+                <p><strong>{snapshot?.summary.photoCandidates || 0}</strong><span>사진 후보</span></p>
+                <p><strong>{snapshot?.summary.photoImprovements || 0}</strong><span>승인 사진</span></p>
+              </div>
+            </section>
 
-          {sourceMode !== "browser_local" && preservedHistory.length ? (
-            <PreservedHistorySection
-              improvements={preservedHistory}
-              excludedFrom={usingSample ? "샘플" : "서버 저장 작업팩"}
-            />
-          ) : null}
+            {sourceMode !== "browser_local" && preservedHistory.length ? (
+              <PreservedHistorySection
+                improvements={preservedHistory}
+                excludedFrom={usingSample ? "샘플" : "서버 저장 작업팩"}
+              />
+            ) : null}
 
-          <section>
-            <span>근거</span>
-            <EvidenceList refs={evidenceRefs} />
-          </section>
+            <section>
+              <span>근거</span>
+              <EvidenceList refs={evidenceRefs} />
+            </section>
 
-          <section>
-            <span>분류</span>
-            <div className="safeclaw-report-groups">
-              <GroupList title="공정별" groups={snapshot?.groups.byProcess || []} />
-              <GroupList title="작업별" groups={snapshot?.groups.byTask || []} />
-              <GroupList title="위험등급별" groups={snapshot?.groups.byRiskLevel || []} />
-              <GroupList title="문서반영별" groups={snapshot?.groups.byDocument || []} />
-            </div>
-          </section>
+            <section>
+              <span>분류</span>
+              <div className="safeclaw-report-groups">
+                <GroupList title="공정별" groups={snapshot?.groups.byProcess || []} />
+                <GroupList title="작업별" groups={snapshot?.groups.byTask || []} />
+                <GroupList title="위험등급별" groups={snapshot?.groups.byRiskLevel || []} />
+                <GroupList title="문서반영별" groups={snapshot?.groups.byDocument || []} />
+              </div>
+            </section>
 
-          <section>
-            <span>다음</span>
-            <div className="safeclaw-workdoc-links">
-              <Link href="/documents">문서팩 편집</Link>
-              <Link href="/workspace">개선사항 추가</Link>
-            </div>
-          </section>
+            <section>
+              <span>다음</span>
+              <div className="safeclaw-workdoc-links">
+                <Link href="/documents">문서팩 편집</Link>
+                <Link href="/workspace">개선사항 추가</Link>
+              </div>
+            </section>
+          </details>
         </aside>
+        {snapshot ? (
+          <details className="safeclaw-report-preview">
+            <summary>리포트 본문 미리보기</summary>
+            <ReportDocument snapshot={snapshot} onTogglePhotoApproval={togglePhotoApproval} />
+          </details>
+        ) : (
+          <ReportStatePanel viewState={viewState} />
+        )}
       </section>
     </>
   );

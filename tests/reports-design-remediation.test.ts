@@ -14,6 +14,11 @@ import {
   startIsolatedNextBrowserHarness,
   type IsolatedNextBrowserHarness
 } from "./helpers/isolated-next-browser-harness";
+import {
+  buildStoredCurrentWorkpack,
+  CURRENT_WORKPACK_STORAGE_KEY
+} from "@/lib/current-workpack";
+import { buildSampleWorkpack } from "@/lib/sample-workpack";
 
 const root = process.cwd();
 const cssPath = path.join(root, "app", "globals.css");
@@ -26,6 +31,10 @@ const defaultProductionBuildManifestPath = path.join(
   root,
   REPORTS_WAVE1_EVIDENCE_RELATIVE_DIR,
   REPORTS_WAVE1_BUILD_MANIFEST_FILENAME,
+);
+const reportsTaskDistanceEvidenceRelativeDir = path.join(
+  "evaluation",
+  "reports-mobile-task-distance-2026-07-13"
 );
 
 type CssRule = {
@@ -210,6 +219,21 @@ async function prepareSample(page: Page, theme: Theme): Promise<void> {
   await page.locator(".safeclaw-report-period-control").first().waitFor({ state: "visible" });
 }
 
+async function prepareDownloadReadyFixture(page: Page, theme: Theme): Promise<void> {
+  await page.addInitScript(({ expectedOrigin, storageKey, workpack }) => {
+    if (window.location.origin !== expectedOrigin) return;
+    window.localStorage.setItem(storageKey, workpack);
+  }, {
+    expectedOrigin: baseUrl,
+    storageKey: CURRENT_WORKPACK_STORAGE_KEY,
+    workpack: JSON.stringify(buildStoredCurrentWorkpack(buildSampleWorkpack()))
+  });
+  await page.goto(`${baseUrl}/reports?theme=${theme}`, { waitUntil: "networkidle" });
+  await page.locator(".safeclaw-module-shell[data-ready='true']").waitFor({ state: "attached" });
+  await page.locator(".safeclaw-workdoc-shell").waitFor({ state: "visible" });
+  await page.locator("[aria-label='리포트 다운로드'] button:not(:disabled)").first().waitFor({ state: "visible" });
+}
+
 async function startReportsHarness(): Promise<IsolatedNextBrowserHarness> {
   const candidateSalts = [7121, 8121, 9121, 10121];
   const mode = process.env.SAFECLAW_HARNESS_MODE === "prod" ? "prod" : "dev";
@@ -246,8 +270,15 @@ async function startReportsHarness(): Promise<IsolatedNextBrowserHarness> {
 
 describe("Reports Wave 1 browser design contract", () => {
   beforeAll(async () => {
-    outputResolution = resolveReportsWave1OutputDirectory({ root, env: process.env });
+    outputResolution = process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1"
+      ? {
+        directory: path.join(root, reportsTaskDistanceEvidenceRelativeDir),
+        publish: true,
+        cleanup: false
+      }
+      : resolveReportsWave1OutputDirectory({ root, env: process.env });
     outputDirectory = outputResolution.directory;
+    fs.mkdirSync(outputDirectory, { recursive: true });
     try {
       harness = await startReportsHarness();
       baseUrl = harness.baseUrl;
@@ -274,11 +305,93 @@ describe("Reports Wave 1 browser design contract", () => {
     }
   }, 30_000);
 
+  it("keeps the mobile report workbench ahead of its long document by default", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 391, height: 844 } });
+    try {
+      await prepareDownloadReadyFixture(page, "day");
+      const metrics = await page.evaluate(() => {
+        const root = document.querySelector(".safeclaw-workdoc-shell");
+        const tools = root?.querySelector(".safeclaw-workdoc-rail");
+        const preview = root?.querySelector<HTMLDetailsElement>(".safeclaw-report-preview");
+        const download = root?.querySelector<HTMLButtonElement>(
+          "[aria-label='리포트 다운로드'] button:not(:disabled)"
+        );
+        const violations: string[] = [];
+        if (!root) return { violations: ["Reports workbench was not rendered"], rootHeight: 0, downloadDistance: 0 };
+        if (!tools) violations.push("Reports operational tools were not rendered");
+        if (!download) violations.push("Reports sample did not expose an enabled download action");
+        const rootRect = root.getBoundingClientRect();
+        const downloadRect = download?.getBoundingClientRect();
+        if (root.firstElementChild !== tools) violations.push("tools are not first in Reports DOM order");
+        if (!preview) violations.push("long report document is not behind a disclosure preview");
+        if (preview?.open) violations.push("long report document preview is expanded by default");
+        const downloadDistance = downloadRect ? Math.round(downloadRect.top - rootRect.top) : 0;
+        const rootHeight = Math.round(rootRect.height);
+        if (downloadDistance > 1_200) {
+          violations.push("first enabled download exceeds the 1200px task-distance budget");
+        }
+        if (rootHeight > 2_600) violations.push("default Reports document exceeds the 2600px height budget");
+        return { violations, rootHeight, downloadDistance };
+      });
+
+      expect(metrics.violations, JSON.stringify(metrics)).toEqual([]);
+
+      const client = await page.context().newCDPSession(page);
+      await client.send("Emulation.setEmulatedOSTextScale", { scale: 2 });
+      const zoomMetrics = await page.evaluate(() => {
+        const root = document.querySelector(".safeclaw-workdoc-shell");
+        const tools = root?.querySelector(".safeclaw-workdoc-rail");
+        const preview = root?.querySelector(".safeclaw-report-preview");
+        if (!root || !tools || !preview) throw new Error("Reports zoom targets were not rendered");
+        const clippedControls = Array.from(root.querySelectorAll<HTMLElement>("button, select, input, summary"))
+          .filter((element) => element.scrollWidth > element.clientWidth + 1).length;
+        const nestedScrollers = Array.from(root.querySelectorAll<HTMLElement>(
+          ".safeclaw-workdoc-rail, .safeclaw-report-preview, .safeclaw-workdoc"
+        )).filter((element) => {
+          const style = getComputedStyle(element);
+          return ["auto", "scroll"].includes(style.overflowY) && element.scrollHeight > element.clientHeight + 1;
+        }).length;
+        return {
+          horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
+          clippedControls,
+          nestedScrollers,
+          toolsFirstInDom: root.firstElementChild === tools,
+          previewFollowsTools: Boolean(tools.compareDocumentPosition(preview) & Node.DOCUMENT_POSITION_FOLLOWING)
+        };
+      });
+      expect(zoomMetrics).toEqual({
+        horizontalOverflow: 0,
+        clippedControls: 0,
+        nestedScrollers: 0,
+        toolsFirstInDom: true,
+        previewFollowsTools: true
+      });
+      await client.send("Emulation.setEmulatedOSTextScale", { scale: 1 });
+      if (process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1") {
+        fs.writeFileSync(
+          path.join(outputDirectory, "reports-download-ready-day-mobile-task-distance-metrics.json"),
+          `${JSON.stringify({
+            viewport: { width: 391, height: 844 },
+            default: metrics,
+            textZoom200: zoomMetrics
+          }, null, 2)}\n`
+        );
+        await page.screenshot({
+          path: path.join(outputDirectory, "reports-download-ready-day-mobile.png"),
+          fullPage: true
+        });
+      }
+    } finally {
+      await page.close();
+    }
+  }, 120_000);
+
   it.each([
-    { theme: "day" as const, width: 1440, height: 900, label: "desktop" as const },
-    { theme: "night" as const, width: 1440, height: 900, label: "desktop" as const },
-    { theme: "day" as const, width: 390, height: 844, label: "mobile" as const },
-    { theme: "night" as const, width: 390, height: 844, label: "mobile" as const }
+    { theme: "day" as const, width: 1440, height: 1000, label: "desktop" as const },
+    { theme: "night" as const, width: 1440, height: 1000, label: "desktop" as const },
+    { theme: "day" as const, width: 391, height: 844, label: "mobile" as const },
+    { theme: "night" as const, width: 391, height: 844, label: "mobile" as const }
   ])("keeps sample Reports stable in $theme $label", async ({ theme, width, height, label }: Viewport & { theme: Theme }) => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width, height } });
@@ -428,10 +541,10 @@ describe("Reports Wave 1 browser design contract", () => {
     const serverErrorResults: Array<Record<string, unknown>> = [];
     const expectedServerErrorMessage = "서버 작업팩 조회 중 검증용 오류가 발생했습니다.";
     for (const scenario of [
-      { theme: "day" as const, width: 1440, height: 900, label: "desktop" as const },
-      { theme: "night" as const, width: 1440, height: 900, label: "desktop" as const },
-      { theme: "day" as const, width: 390, height: 844, label: "mobile" as const },
-      { theme: "night" as const, width: 390, height: 844, label: "mobile" as const }
+      { theme: "day" as const, width: 1440, height: 1000, label: "desktop" as const },
+      { theme: "night" as const, width: 1440, height: 1000, label: "desktop" as const },
+      { theme: "day" as const, width: 391, height: 844, label: "mobile" as const },
+      { theme: "night" as const, width: 391, height: 844, label: "mobile" as const }
     ]) {
       const serverError = await browser.newPage({ viewport: { width: scenario.width, height: scenario.height } });
       await serverError.addInitScript(({ expectedOrigin, authStorageKey, accessToken }) => {
