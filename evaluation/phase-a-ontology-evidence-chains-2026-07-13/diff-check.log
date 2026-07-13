@@ -1,0 +1,4 @@
+COMMAND=git diff --check
+RESULT=PASS
+PRODUCT_CANDIDATE=31767959b5904afbab77ab5ee36f24da6d15b1c8
+SCOPE=product commit plus evidence working tree before evidence commit

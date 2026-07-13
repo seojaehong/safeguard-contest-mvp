@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  3 passed (3)
+      Tests  25 passed (25)
+   Start at  05:38:39
+   Duration  11.15s (transform 807ms, setup 0ms, import 2.94s, tests 3.78s, environment 1ms)

@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T05:58:57.9858216+09:00",
+  "status": "HOLD_PENDING_FRESH_REVIEW",
+  "branch": "fix/phase-a-ontology-target-ready",
+  "binding": {
+    "originalPhaseABase": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
+    "authoritativeIntegrationTarget": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "preservedReviewedSource": "9539f04896698f548bd01e33ff24ab70415bc68e",
+    "rejectedProduct": "35283baaf3aad4e14fa20da4df803b4cc3c046f2",
+    "rejectedEvidence": "f613f5d73118bb81e6199a5ff057e850b3859692",
+    "productParent": "f613f5d73118bb81e6199a5ff057e850b3859692",
+    "productCommit": "31767959b5904afbab77ab5ee36f24da6d15b1c8",
+    "productTree": "5d52b3bc22ebb49909110773e2c2d5b88b5401c6",
+    "productSubject": "fix: restore phase a export and confirmation contracts"
+  },
+  "hashContract": {
+    "fileIdentity": "Git blob object ID (SHA-1 object format used by this repository)",
+    "treeIdentity": "Git tree object ID",
+    "manifestSelfHashIncluded": false,
+    "evidenceCommitHashIncluded": false,
+    "externalBindingRequired": true,
+    "statement": "This manifest binds its exact product parent and every other evidence artifact blob. It cannot bind the Git object of the commit that contains itself. The fresh reviewer or PR must record the evidence commit SHA externally and verify its parent and artifact blobs from Git."
+  },
+  "productFiles": [
+    { "path": "app/api/export/pdf/route.ts", "gitBlobOid": "90181cb33604f51585185743e00e952470d00290" },
+    { "path": "app/api/workpacks/[id]/phase-a-confirmation/route.ts", "gitBlobOid": "4eccd7cdb5bac3394e7f6168d11db35bb6dc8750" },
+    { "path": "lib/workpack-commercial-store.ts", "gitBlobOid": "bfa3ca6c5f908f067a2f3f172a250a95abbfd750" },
+    { "path": "tests/pdf-font-failure.test.ts", "gitBlobOid": "c45516c3f98f46e5fbb506984dc15f758be53669" },
+    { "path": "tests/pdf-korean-font-integration.test.ts", "gitBlobOid": "3445294642239c2f07028f43a3ee5f9e6d672e09" },
+    { "path": "tests/phase-a-confirmation-route.test.ts", "gitBlobOid": "6e1b63677a02ae613ddb0a9928d8be3cceb072e6" }
+  ],
+  "evidenceArtifacts": [
+    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/combined-tests.log", "gitBlobOid": "f7d705cb3913ae52daba17e857ed7915147a3318" },
+    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/diff-check.log", "gitBlobOid": "188e9c16bd4fdf90fd604da82533329538029f26" },
+    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log", "gitBlobOid": "c810fa9551fb35f4ab70a44b0660727b74213863" },
+    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/frontend-route-probe.log", "gitBlobOid": "0959338e5cdc727b706454f29a6e18b4a3cfe883" },
+    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/prior-contract-tests.log", "gitBlobOid": "c6026c1b9b1ad105d40d8b588f4d98fbcbd19689" },
+    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-green.log", "gitBlobOid": "4970d8e7d08cbf855baa73cc448a8ceb77d159a1" },
+    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-red.log", "gitBlobOid": "2f4f3bf7ff9d9be80f252339ad13968c7229e7d2" },
+    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.json", "gitBlobOid": "81fcbd857de83f2d0458f65ec231eef6cf5991ee" },
+    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.md", "gitBlobOid": "ee10aff3a469e7f2a16fd5cf0f046c9a76324b5f" },
+    { "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/typecheck.log", "gitBlobOid": "75713a17a214d13e824c4724baed77ee7c8b87bb" }
+  ],
+  "commands": [
+    {
+      "id": "remediation-green",
+      "command": "npm.cmd test -- --run tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": { "filesPassed": 3, "testsPassed": 25, "testsFailed": 0 }
+    },
+    {
+      "id": "prior-contract",
+      "command": "npm.cmd test -- --run tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts tests/export-error-contract.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/phase-a-document-authority.test.ts tests/document-export-localization.test.ts tests/ontology-evidence-chains.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": { "filesPassed": 8, "testsPassed": 143, "testsFailed": 0 }
+    },
+    {
+      "id": "focused-author",
+      "command": "npm.cmd test -- --run tests/ontology-evidence-chains.test.ts tests/ontology-knowledge-tool.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts tests/mcp-route-scope-contract.test.ts tests/ontology-production-handler.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-generation-trace.test.ts tests/generation-trace-privacy.test.ts tests/kosha-current-review-run-ask.test.ts tests/ai-deliverables-prompts.test.ts tests/claw-tools-ontology-grounding.test.ts tests/ask-generation-evidence-routes.test.ts tests/public-ask-grounding-call-sites.test.ts tests/ontology-sif-resolution-gate.test.ts tests/quality-contract.test.ts tests/workpack-readiness.test.ts tests/command-center-phase-a-review.test.ts tests/briefing.test.ts tests/workpack-store.test.ts tests/ontology-graph-store.test.ts tests/ontology-deadline-policy.test.ts tests/ontology-grounding-deadline.test.ts tests/ontology-snapshot-reuse.test.ts tests/workpack-ontology-qa.test.ts tests/agent-loop.test.ts tests/phase-a-citation-authority.test.ts tests/answer-panel-display.test.ts tests/phase-a-document-authority.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": { "filesPassed": 29, "testsPassed": 360, "testsFailed": 0 }
+    },
+    {
+      "id": "combined-kosha-export-workspace-confirmation",
+      "command": "npm.cmd test -- --run tests/command-center-phase-a-review.test.ts tests/command-center-request-lifecycle.test.ts tests/document-export-localization.test.ts tests/documents-editor-layout.test.ts tests/editor-export-integrity.test.ts tests/editor-first-state.test.ts tests/export-error-contract.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-current-review-photo-storage.test.ts tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-run-ask.test.ts tests/kosha-guide-corpus-audit.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/workspace-generation-progress.test.ts tests/workspace-input-css-contract.test.ts tests/workspace-layout-regression.test.ts tests/workspace-operation-graph.test.ts tests/workspace-pages.test.ts tests/workspace-workers.test.ts tests/xlsx-export-route.test.ts tests/phase-a-document-authority.test.ts tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": { "filesPassed": 28, "testsPassed": 291, "testsFailed": 0, "testsSkipped": 1 }
+    },
+    {
+      "id": "strict-typecheck",
+      "command": "npm.cmd run typecheck",
+      "result": { "status": "passed" }
+    },
+    {
+      "id": "frontend-route-probe",
+      "command": "npm.cmd test -- --run tests/frontend-route-coverage.test.ts --maxWorkers=1 --no-file-parallelism",
+      "result": { "testsPassed": 36, "testsFailed": 1, "expectedFailureOnly": "stale sourceIdentity at tests/frontend-route-coverage.test.ts:693" }
+    },
+    {
+      "id": "diff-check",
+      "command": "git diff --check",
+      "result": { "status": "passed" }
+    }
+  ],
+  "redObservation": {
+    "baseHead": "f613f5d73118bb81e6199a5ff057e850b3859692",
+    "testState": "review tests added before production remediation",
+    "filesFailed": 3,
+    "testsFailed": 4,
+    "testsPassed": 21,
+    "testsTotal": 25
+  },
+  "diff": {
+    "productCommitFiles": 6,
+    "authoritativeTargetToProductFiles": 81,
+    "originalBaseToProductFiles": 144,
+    "forbiddenDbSchemaMigrationDataSeedPackageLockChanges": 0
+  },
+  "verificationProcedure": [
+    "Record the evidence commit SHA externally in the fresh review or PR.",
+    "Run git cat-file -p <evidenceSha> and require its single parent to equal 31767959b5904afbab77ab5ee36f24da6d15b1c8.",
+    "Run git show -s --format=%T 31767959b5904afbab77ab5ee36f24da6d15b1c8 and require 5d52b3bc22ebb49909110773e2c2d5b88b5401c6.",
+    "For every productFiles entry, run git rev-parse 31767959b5904afbab77ab5ee36f24da6d15b1c8:<path> and compare the Git blob ID.",
+    "For every evidenceArtifacts entry, run git rev-parse <evidenceSha>:<path> and compare the Git blob ID.",
+    "Parse report.json and evidence-manifest.json from <evidenceSha>; do not infer evidence-head integrity from an omitted self hash."
+  ],
+  "reviewGate": "HOLD_PENDING_FRESH_REVIEW. The evidence commit object is externally bound by the next reviewer or PR; this manifest does not claim integration completion."
+}

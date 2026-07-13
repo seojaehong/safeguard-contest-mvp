@@ -8,5 +8,5 @@
 
  Test Files  29 passed (29)
       Tests  360 passed (360)
-   Start at  03:56:43
-   Duration  47.63s (transform 1.92s, setup 0ms, import 8.27s, tests 21.36s, environment 3ms)
+   Start at  05:40:51
+   Duration  80.54s (transform 3.91s, setup 0ms, import 14.44s, tests 20.27s, environment 9ms)

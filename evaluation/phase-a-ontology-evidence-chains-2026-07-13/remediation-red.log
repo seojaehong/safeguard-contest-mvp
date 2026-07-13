@@ -1,0 +1,7 @@
+RECORDED_RED_OBSERVATION
+BASE_HEAD=f613f5d73118bb81e6199a5ff057e850b3859692
+STATE=review tests added before production remediation
+COMMAND=npm.cmd test -- --run tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism
+TEST_FILES=3 failed
+TESTS=4 failed, 21 passed, 25 total
+FAILURES=generic PDF create resolved as controlled JSON; font embed was mislabeled PDF_EXPORT_FAILED; source retained PDF_EXPORT_FAILED public payload; concurrent confirmations both returned 200
