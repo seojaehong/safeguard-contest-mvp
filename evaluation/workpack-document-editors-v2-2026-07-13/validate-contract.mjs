@@ -8,9 +8,34 @@ const SPEC_JSON_PATH = `${SPEC_DIRECTORY}/spec.json`;
 const SPEC_MARKDOWN_PATH = `${SPEC_DIRECTORY}/spec.md`;
 const VALIDATOR_PATH = `${SPEC_DIRECTORY}/validate-contract.mjs`;
 const EVIDENCE_PATH = `${SPEC_DIRECTORY}/review-evidence.json`;
+const IMPLEMENTATION_BLOCK =
+  "IMPLEMENTATION_BLOCKED_PENDING_USER_DB_APPROVAL: implementation evidence is not evaluated; this repository cannot authenticate a Codex/user approval event, and a separate post-approval verifier may be designed only after explicit user approval and fresh review.";
 const FULL_SHA = /^[0-9a-f]{40}$/u;
 const HEX_SHA256 = /^[0-9a-f]{64}$/u;
 const TYPED_SHA256 = /^sha256:[0-9a-f]{64}$/u;
+const LOCAL_DATE = /^(\d{4})-(\d{2})-(\d{2})$/u;
+const RFC3339 = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})$/u;
+const TOP_LEVEL_DOMAINS = [
+  "schemaVersion",
+  "meta",
+  "contractIds",
+  "tupleSchemas",
+  "sourceSeams",
+  "validation",
+  "integrationLedger",
+  "common",
+  "model",
+  "workflow",
+  "persistence",
+  "evidencePresentation",
+  "ui",
+  "components",
+  "export",
+  "documents",
+  "implementation",
+  "independentGate",
+  "humanParityContract"
+];
 const DOCUMENT_KEYS = [
   "workpackSummaryDraft",
   "riskAssessmentDraft",
@@ -53,49 +78,74 @@ const EXPECTED_EXPORT_SEAMS = [
   ["EXPORT-HWP", "server_binary_post", "downloadHwp", "app/api/export/hwp/route.ts", "POST"],
   ["EXPORT-HWPX-CLIENT", "client_builder", "buildHwpxWithRhwp -> downloadHwpx", null, null]
 ];
+const EXPECTED_PHOTO_EVENT_FIELDS = {
+  eventId: "stableId",
+  improvementId: "stableId",
+  pairId: "stableId",
+  action: "HUMAN_CONFIRM_IMPROVEMENT|HUMAN_REJECT_IMPROVEMENT",
+  transactionId: "stableId",
+  rootOperationId: "stableId",
+  analysis_id: "stableId",
+  analysis_payload: "canonicalObject",
+  analysisPayloadDigest: "sha256HexDigest",
+  modelProvider: "exactString",
+  modelName: "exactString",
+  modelVersion: "exactString",
+  candidateControlIds: "stableIdArrayNonEmpty",
+  candidateControlTextDigests: "canonicalObject",
+  acceptedControlIds: "stableIdArrayAllowEmpty",
+  acceptedControlTextDigests: "canonicalObject",
+  rejectionReason: "nullableExactString",
+  beforeImageSha256: "sha256HexDigest",
+  afterImageSha256: "nullableSha256HexDigest",
+  reviewerId: "stableId",
+  reviewerDisplayName: "exactString",
+  confirmedAt: "nullableRfc3339",
+  rejectedAt: "nullableRfc3339",
+  occurredAt: "isoDateTime",
+  candidateRevision: "strictInteger",
+  resultingRevision: "strictInteger",
+  priorMaterializationDigest: "digest",
+  priorEvidenceDigest: "digest",
+  resultingMaterializationDigest: "digest",
+  resultingEvidenceDigest: "digest",
+  resultingGenerationEvidenceSnapshotDigest: "digest",
+  canonicalEventDigest: "sha256HexDigest"
+};
 const DELIBERATE_CASES = new Set([
   "normative-parity",
   "md-prose",
   "json-model",
   "json-document-primary-action",
   "json-unknown-domain",
-  "source-shape",
+  "domain-missing",
+  "domain-empty",
+  "document-fields-empty",
+  "document-primary-action-empty",
+  "photo-object-empty",
+  "photo-analysis-missing",
+  "photo-confirm-after-missing",
+  "conflict-heads-empty",
+  "conflict-local-ref-empty",
+  "wave-unblocked",
+  "candidate-ref",
+  "source-base-ref",
   "target-ref",
-  "spec-ref",
+  "evidence-parent",
   "implementation-empty",
-  "approval-boolean",
-  "command-unbound-hash",
-  "browser-pass-flag",
-  "browser-cumulative-scale",
-  "browser-inner-transform",
-  "browser-cross-parent-overlap",
-  "browser-fixed-offscreen",
-  "browser-sticky-cover",
-  "browser-horizontal-clip",
-  "browser-vertical-clip",
-  "browser-nested-scroll",
-  "browser-textarea-scroll",
-  "browser-inner-zoom",
-  "browser-mobile-late",
-  "browser-ratio-reflow",
-  "browser-pixel-viewport-scale"
+  "implementation-forged",
+  "implementation-complete-looking"
 ]);
 
 function parseArguments(argv) {
-  const mode = argv[0] ?? "";
   const result = {
-    mode,
+    mode: argv[0] ?? "",
     root: process.cwd(),
     manifest: EVIDENCE_PATH,
     evidence: "",
     candidate: "",
     sourceBase: "",
     target: "",
-    spec: "",
-    base: "",
-    head: "",
-    approvalEvidence: "",
-    approvalManifest: "",
     specFile: SPEC_JSON_PATH,
     deliberate: ""
   };
@@ -112,11 +162,6 @@ function parseArguments(argv) {
     else if (argument === "--candidate") result.candidate = next();
     else if (argument === "--source-base") result.sourceBase = next();
     else if (argument === "--target") result.target = next();
-    else if (argument === "--spec") result.spec = next();
-    else if (argument === "--base") result.base = next();
-    else if (argument === "--head") result.head = next();
-    else if (argument === "--approval-evidence") result.approvalEvidence = next();
-    else if (argument === "--approval-manifest") result.approvalManifest = next();
     else if (argument === "--spec-file") result.specFile = next();
     else if (argument === "--deliberate") result.deliberate = next();
     else throw new Error(`Unknown argument: ${argument}`);
@@ -208,12 +253,12 @@ function structuralRow(path, value, includeValue = true) {
 }
 
 function structuralRows(spec) {
-  const rows = [structuralRow("$", spec, false)];
-  for (const key of Object.keys(spec).sort()) {
-    const value = spec[key];
-    rows.push(structuralRow(key, value));
-  }
-  return rows;
+  return [
+    structuralRow("$", spec, false),
+    ...Object.keys(spec)
+      .sort()
+      .map((key) => structuralRow(key, spec[key]))
+  ];
 }
 
 function renderNormativeMarkdown(spec) {
@@ -237,12 +282,7 @@ function renderNormativeMarkdown(spec) {
 
 function renderHumanMarkdown(spec) {
   const contract = spec.humanParityContract;
-  const lines = [
-    contract.humanStart,
-    "",
-    "### Human Normative Requirements",
-    ""
-  ];
+  const lines = [contract.humanStart, "", "### Human Normative Requirements", ""];
   for (const [id, title, requirement] of contract.humanRequirements) {
     lines.push(`- **${id} ${title}:** ${requirement}`);
   }
@@ -251,23 +291,17 @@ function renderHumanMarkdown(spec) {
 }
 
 function gitBuffer(root, args) {
-  return execFileSync("git", args, {
-    cwd: root,
-    encoding: null,
-    stdio: ["ignore", "pipe", "pipe"]
-  });
+  return execFileSync("git", args, { cwd: root, encoding: "buffer", maxBuffer: 64 * 1024 * 1024 });
 }
 
 function gitText(root, args) {
   return gitBuffer(root, args).toString("utf8").trim();
 }
 
-function resolveCommit(root, value, label, requireFull = true) {
-  if (!value) throw new Error(`${label} is required and must be non-empty`);
-  if (requireFull && !FULL_SHA.test(value)) throw new Error(`${label} must be an explicit 40-character commit SHA`);
-  const resolved = gitText(root, ["rev-parse", `${value}^{commit}`]);
-  if (!FULL_SHA.test(resolved)) throw new Error(`${label} did not resolve to a commit`);
-  if (requireFull && resolved !== value) throw new Error(`${label} must already be the resolved commit SHA`);
+function resolveCommit(root, value, label) {
+  if (!FULL_SHA.test(value)) throw new Error(`${label} must be an explicit full 40-character SHA`);
+  const resolved = gitText(root, ["rev-parse", "--verify", `${value}^{commit}`]);
+  if (resolved !== value) throw new Error(`${label} does not resolve byte-for-byte to the explicit SHA`);
   return resolved;
 }
 
@@ -281,7 +315,7 @@ function blobOid(root, commit, path) {
 
 function commitPaths(root, commit) {
   const output = gitText(root, ["diff-tree", "--no-commit-id", "--name-only", "-r", commit]);
-  return output ? output.split(/\r?\n/u).sort() : [];
+  return output ? output.split(/\r?\n/u).filter(Boolean).sort() : [];
 }
 
 function commitParent(root, commit) {
@@ -300,1279 +334,814 @@ function parseJsonBuffer(buffer, label) {
 function extractMarkedBlock(markdown, start, end) {
   const startIndex = markdown.indexOf(start);
   const endIndex = markdown.indexOf(end);
-  if (startIndex < 0 || endIndex <= startIndex) throw new Error("Markdown normative markers are missing or out of order");
-  return markdown.slice(startIndex, endIndex + end.length);
+  if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) throw new Error(`Missing or invalid Markdown markers ${start} / ${end}`);
+  return markdown.slice(startIndex, endIndex + end.length).replaceAll("\r\n", "\n");
 }
 
 function replaceMarkedBlock(markdown, start, end, placeholder) {
-  const block = extractMarkedBlock(markdown, start, end);
-  return markdown.replace(block, `${start}\n${placeholder}\n${end}`);
+  const startIndex = markdown.indexOf(start);
+  const endIndex = markdown.indexOf(end);
+  if (startIndex < 0 || endIndex < 0 || endIndex < startIndex) throw new Error(`Missing or invalid Markdown markers ${start} / ${end}`);
+  return `${markdown.slice(0, startIndex)}${start}\n${placeholder}\n${end}${markdown.slice(endIndex + end.length)}`;
 }
 
 function normalizedMarkdownProse(markdown, contract) {
-  const withoutStructural = replaceMarkedBlock(
-    markdown,
-    contract.markdownStart,
-    contract.markdownEnd,
-    "<STRUCTURAL-CONTRACT>"
-  );
-  const withoutHuman = replaceMarkedBlock(
-    withoutStructural,
-    contract.humanStart,
-    contract.humanEnd,
-    "<HUMAN-REQUIREMENTS>"
-  );
-  return withoutHuman.replaceAll("\r\n", "\n");
-}
-
-function sortedCanonical(value) {
-  return canonicalJson([...value].sort());
-}
-
-function validateCandidateArtifactManifest(root, manifest, candidate, spec) {
-  const expectedPaths = [...spec.validation.candidateArtifacts].sort();
-  const records = manifest.candidateArtifacts;
-  if (!Array.isArray(records)) throw new Error("manifest candidateArtifacts is missing");
-  const actualPaths = records.map((record) => record.path).sort();
-  if (canonicalJson(actualPaths) !== canonicalJson(expectedPaths)) {
-    throw new Error("manifest candidate artifact paths differ from candidate scope");
-  }
-  for (const record of records) {
-    const buffer = readBlob(root, candidate, record.path);
-    if (record.gitBlob !== blobOid(root, candidate, record.path)) throw new Error(`candidate blob OID mismatch: ${record.path}`);
-    if (record.sha256 !== sha256(buffer)) throw new Error(`candidate SHA-256 mismatch: ${record.path}`);
-    if (record.bytes !== buffer.byteLength) throw new Error(`candidate byte count mismatch: ${record.path}`);
-  }
-}
-
-function loadAndValidateTargetBlobs(root, manifest, target, spec) {
-  const expectedPaths = [...spec.validation.targetBlobPaths].sort();
-  const records = manifest.targetBlobs;
-  if (!Array.isArray(records)) throw new Error("manifest targetBlobs is missing");
-  const actualPaths = records.map((record) => record.path).sort();
-  if (canonicalJson(actualPaths) !== canonicalJson(expectedPaths)) {
-    throw new Error("manifest target blob paths differ from candidate targetBlobPaths");
-  }
-  const blobs = new Map();
-  for (const record of records) {
-    const buffer = readBlob(root, target, record.path);
-    if (record.gitBlob !== blobOid(root, target, record.path)) throw new Error(`target blob OID mismatch: ${record.path}`);
-    if (record.sha256 !== sha256(buffer)) throw new Error(`target SHA-256 mismatch: ${record.path}`);
-    if (record.bytes !== buffer.byteLength) throw new Error(`target byte count mismatch: ${record.path}`);
-    blobs.set(record.path, buffer.toString("utf8"));
-  }
-  return blobs;
-}
-
-function validateBoundBlob(root, commit, record, label) {
-  if (!record || typeof record.path !== "string" || record.path.length === 0) {
-    throw new Error(`${label} blob record is missing a path`);
-  }
-  const buffer = readBlob(root, commit, record.path);
-  if (record.gitBlob !== blobOid(root, commit, record.path)) throw new Error(`${label} git blob mismatch`);
-  if (record.sha256 !== sha256(buffer)) throw new Error(`${label} SHA-256 mismatch`);
-  if (record.bytes !== buffer.byteLength) throw new Error(`${label} byte count mismatch`);
-  return buffer;
+  let normalized = markdown.replaceAll("\r\n", "\n");
+  normalized = replaceMarkedBlock(normalized, contract.markdownStart, contract.markdownEnd, "<SAFECLAW-NORMATIVE:GENERATED>");
+  normalized = replaceMarkedBlock(normalized, contract.humanStart, contract.humanEnd, "<SAFECLAW-HUMAN:GENERATED>");
+  return normalized;
 }
 
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-function findForbiddenKey(value, forbidden, path = "$") {
-  if (Array.isArray(value)) {
-    for (let index = 0; index < value.length; index += 1) {
-      const found = findForbiddenKey(value[index], forbidden, `${path}[${index}]`);
-      if (found) return found;
-    }
-    return null;
-  }
-  if (!isRecord(value)) return null;
-  for (const [key, child] of Object.entries(value)) {
-    if (forbidden.has(key)) return `${path}.${key}`;
-    const found = findForbiddenKey(child, forbidden, `${path}.${key}`);
-    if (found) return found;
-  }
-  return null;
-}
-
-function requireString(value, label) {
-  if (typeof value !== "string" || value.trim().length === 0) throw new Error(`${label} must be a non-empty string`);
+function requireObject(value, label) {
+  if (!isRecord(value)) throw new Error(`${label} must be an object`);
   return value;
 }
 
-function requireIsoDateTime(value, label) {
+function requireArray(value, label, minimum = 0) {
+  if (!Array.isArray(value) || value.length < minimum) throw new Error(`${label} must be an array with at least ${minimum} item(s)`);
+  return value;
+}
+
+function requireString(value, label) {
+  if (typeof value !== "string" || value.length === 0) throw new Error(`${label} must be a non-empty string`);
+  return value;
+}
+
+function requireBoolean(value, label) {
+  if (typeof value !== "boolean") throw new Error(`${label} must be boolean`);
+  return value;
+}
+
+function requireInteger(value, label, minimum = Number.MIN_SAFE_INTEGER) {
+  if (!Number.isSafeInteger(value) || value < minimum) throw new Error(`${label} must be an integer >= ${minimum}`);
+  return value;
+}
+
+function requireFullSha(value, label) {
   requireString(value, label);
-  if (!Number.isFinite(Date.parse(value))) throw new Error(`${label} must be an ISO date-time`);
+  if (!FULL_SHA.test(value)) throw new Error(`${label} must be a full lowercase Git SHA`);
   return value;
 }
 
 function requireTypedSha256(value, label) {
-  if (typeof value !== "string" || !TYPED_SHA256.test(value)) {
-    throw new Error(`${label} must be sha256:<64 lowercase hex>`);
+  requireString(value, label);
+  if (!TYPED_SHA256.test(value)) throw new Error(`${label} must be sha256:<64 lowercase hex>`);
+  return value;
+}
+
+function isLeapYear(year) {
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
+function requireCalendarDateParts(year, month, day, label) {
+  if (month < 1 || month > 12) throw new Error(`${label} has an invalid month`);
+  const days = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (day < 1 || day > days[month - 1]) throw new Error(`${label} has an invalid calendar day`);
+}
+
+function requireLocalDate(value, label) {
+  requireString(value, label);
+  const match = LOCAL_DATE.exec(value);
+  if (!match) throw new Error(`${label} must be strict YYYY-MM-DD`);
+  requireCalendarDateParts(Number(match[1]), Number(match[2]), Number(match[3]), label);
+  return value;
+}
+
+function requireRfc3339(value, label) {
+  requireString(value, label);
+  const match = RFC3339.exec(value);
+  if (!match) throw new Error(`${label} must be strict RFC3339`);
+  requireCalendarDateParts(Number(match[1]), Number(match[2]), Number(match[3]), label);
+  if (Number(match[4]) > 23 || Number(match[5]) > 59 || Number(match[6]) > 59) {
+    throw new Error(`${label} has an invalid RFC3339 time`);
+  }
+  if (match[8] !== "Z") {
+    const [offsetHour, offsetMinute] = match[8].slice(1).split(":").map(Number);
+    if (offsetHour > 23 || offsetMinute > 59) throw new Error(`${label} has an invalid RFC3339 offset`);
   }
   return value;
 }
 
-function validateTypedBoundBlob(root, commit, record, label) {
-  if (!record || typeof record.path !== "string" || record.path.length === 0) {
-    throw new Error(`${label} blob record is missing a path`);
+function requireExactKeys(value, expected, label) {
+  const record = requireObject(value, label);
+  const actual = Object.keys(record).sort();
+  const wanted = [...expected].sort();
+  if (canonicalJson(actual) !== canonicalJson(wanted)) {
+    throw new Error(`${label} keys differ; expected ${wanted.join(", ")}, got ${actual.join(", ")}`);
   }
-  requireTypedSha256(record.sha256, `${label}.sha256`);
-  const buffer = readBlob(root, commit, record.path);
-  if (record.gitBlob !== blobOid(root, commit, record.path)) throw new Error(`${label} git blob mismatch`);
-  if (record.sha256 !== `sha256:${sha256(buffer)}`) throw new Error(`${label} SHA-256 mismatch`);
-  if (record.bytes !== buffer.byteLength) throw new Error(`${label} byte count mismatch`);
-  return buffer;
+  return record;
 }
 
-function validateApprovalManifestShape(manifest) {
-  if (!isRecord(manifest)) throw new Error("external approval manifest must be an object");
-  const forbidden = findForbiddenKey(manifest, new Set(["approvals", "approved", "pass"]));
-  if (forbidden) throw new Error(`external approval manifest contains forbidden self-assertion ${forbidden}`);
-  if (manifest.kind !== "safeclaw-external-approval-manifest/v1") {
-    throw new Error("external approval manifest kind differs");
+function requireKeys(value, expected, label) {
+  const record = requireObject(value, label);
+  for (const key of expected) {
+    if (!Object.hasOwn(record, key)) throw new Error(`${label} is missing ${key}`);
   }
-  if (!FULL_SHA.test(requireString(manifest.specCommit, "approval specCommit"))) throw new Error("approval specCommit must be a full SHA");
-  if (!FULL_SHA.test(requireString(manifest.targetSha, "approval targetSha"))) throw new Error("approval targetSha must be a full SHA");
-  requireTypedSha256(manifest.migrationRpcProposalDigest, "approval migrationRpcProposalDigest");
-  requireString(manifest.approvalRootOperationId, "approvalRootOperationId");
-  if (!isRecord(manifest.migrationRpcProposal)) throw new Error("external approval manifest must bind the proposal blob");
-  if (!Array.isArray(manifest.events) || manifest.events.length !== 2) {
-    throw new Error("external approval manifest must contain exactly two external events");
-  }
-  const eventTypes = manifest.events.map((event) => event.type).sort();
-  if (canonicalJson(eventTypes) !== canonicalJson(["INDEPENDENT_SPEC_PASS", "USER_DB_AUTHORITY_APPROVAL"])) {
-    throw new Error("external approval event types differ");
-  }
+  return record;
 }
 
-function validateExternalApproval(root, args, spec, specCommit, base, head, implementationEvidence) {
-  const forbidden = findForbiddenKey(implementationEvidence, new Set(["approvals", "approved", "pass", "passed"]));
-  if (forbidden) throw new Error(`implementation evidence contains forbidden self-assertion ${forbidden}`);
-  const approvalCommit = resolveCommit(root, args.approvalEvidence, "external approval evidence");
-  for (const [label, commit] of [["spec", specCommit], ["implementation evidence", args.evidence], ["base", base], ["head", head]]) {
-    if (approvalCommit === commit) throw new Error(`external approval evidence must be separate from ${label}`);
-  }
-  const approvalPath = requireString(args.approvalManifest, "--approval-manifest");
-  const approval = parseJsonBuffer(readBlob(root, approvalCommit, approvalPath), "external approval manifest");
-  validateApprovalManifestShape(approval);
-  if (approval.specCommit !== specCommit || approval.targetSha !== spec.meta.currentIntegrationTarget || base !== approval.targetSha) {
-    throw new Error("external approval manifest is not bound to the immutable spec and exact implementation target/base");
-  }
-  if (
-    implementationEvidence.approvalEvidenceCommit !== approvalCommit ||
-    implementationEvidence.approvalManifestPath !== approvalPath ||
-    implementationEvidence.migrationRpcProposalDigest !== approval.migrationRpcProposalDigest ||
-    implementationEvidence.approvalRootOperationId !== approval.approvalRootOperationId
-  ) {
-    throw new Error("implementation evidence approval binding differs from external approval manifest");
-  }
-  const proposalBuffer = validateTypedBoundBlob(root, approvalCommit, approval.migrationRpcProposal, "migration/RPC proposal");
-  if (`sha256:${sha256(proposalBuffer)}` !== approval.migrationRpcProposalDigest) {
-    throw new Error("migration/RPC proposal digest differs from its actual blob");
-  }
-  for (const event of approval.events) {
-    requireString(event.eventId, `${event.type}.eventId`);
-    requireString(event.producer, `${event.type}.producer`);
-    requireString(event.repository, `${event.type}.repository`);
-    requireString(event.actorId, `${event.type}.actorId`);
-    requireString(event.actorLogin, `${event.type}.actorLogin`);
-    requireIsoDateTime(event.occurredAt, `${event.type}.occurredAt`);
-    if (event.decision !== "APPROVED") throw new Error(`${event.type} decision is not the external APPROVED event`);
-    if (
-      event.repository !== "seojaehong/safeguard-contest-mvp" ||
-      event.specCommit !== specCommit ||
-      event.targetSha !== approval.targetSha ||
-      event.migrationRpcProposalDigest !== approval.migrationRpcProposalDigest ||
-      event.approvalRootOperationId !== approval.approvalRootOperationId
-    ) {
-      throw new Error(`${event.type} binding differs from approval manifest`);
-    }
-    const expectedProducer = event.type === "INDEPENDENT_SPEC_PASS" ? "github-review-event" : "codex-user-approval-event";
-    if (event.producer !== expectedProducer) throw new Error(`${event.type} producer is not the required external event source`);
-    const raw = parseJsonBuffer(
-      validateTypedBoundBlob(root, approvalCommit, event.rawEvent, `${event.type} raw external event`),
-      `${event.type} raw external event`
-    );
-    for (const field of ["type", "eventId", "producer", "repository", "actorId", "actorLogin", "occurredAt", "decision", "specCommit", "targetSha", "migrationRpcProposalDigest", "approvalRootOperationId"]) {
-      if (raw[field] !== event[field]) throw new Error(`${event.type} raw event field differs: ${field}`);
-    }
-  }
-  return { approvalCommit, approval };
+function requireStringArray(value, label, minimum = 1) {
+  const items = requireArray(value, label, minimum);
+  items.forEach((item, index) => requireString(item, `${label}[${index}]`));
+  return items;
 }
 
-function validateExecutionReceiptShape(receipt) {
-  if (!isRecord(receipt)) throw new Error("execution receipt must be an object");
-  const forbidden = findForbiddenKey(receipt, new Set(["command", "outputSha256", "pass", "passed", "approved"]));
-  if (forbidden) throw new Error(`execution receipt contains forbidden unbound assertion ${forbidden}`);
-  if (receipt.kind !== "safeclaw-command-execution-receipt/v1") throw new Error("execution receipt kind differs");
-  requireString(receipt.sourceSha, "execution sourceSha");
-  requireString(receipt.buildId, "execution buildId");
-  requireString(receipt.commandId, "execution commandId");
-  requireString(receipt.cwd, "execution cwd");
-  requireIsoDateTime(receipt.startedAt, "execution startedAt");
-  requireIsoDateTime(receipt.completedAt, "execution completedAt");
-  if (!Array.isArray(receipt.commandArgv) || receipt.commandArgv.length === 0 || receipt.commandArgv.some((item) => typeof item !== "string" || item.length === 0)) {
-    throw new Error("execution commandArgv must be a non-empty string array");
-  }
-  if (!Number.isInteger(receipt.exitCode)) throw new Error("execution exitCode must come from the loaded receipt");
-  for (const field of ["producer", "runId", "jobId"]) requireString(receipt[field], `execution ${field}`);
-  if (!receipt.stdout || !receipt.stderr || !Array.isArray(receipt.artifacts)) {
-    throw new Error("execution receipt must bind stdout, stderr, and artifact blobs");
-  }
+function requireTuple(value, length, label) {
+  const tuple = requireArray(value, label, length);
+  if (tuple.length !== length) throw new Error(`${label} must contain exactly ${length} items`);
+  return tuple;
 }
 
-function validateCommandArgv(spec, receipt, context) {
-  const { base, head, declaredWaves } = context;
-  const exact = {
-    typecheck: ["npm.cmd", "run", "typecheck"],
-    build: ["npm.cmd", "run", "build"],
-    "diff-check": ["git", "diff", "--check", `${base}...${head}`, "--"],
-    browser: ["npx.cmd", "playwright", "test", "tests/workpack-editor-browser-matrix.test.ts"]
-  };
-  if (Object.hasOwn(exact, receipt.commandId)) {
-    if (canonicalJson(receipt.commandArgv) !== canonicalJson(exact[receipt.commandId])) {
-      throw new Error(`execution argv differs for ${receipt.commandId}`);
+function validateJsonTree(value, path = "$") {
+  if (value === null || typeof value === "boolean") return;
+  if (typeof value === "string") {
+    requireString(value, path);
+    return;
+  }
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) throw new Error(`${path} must be a finite JSON number`);
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => validateJsonTree(item, `${path}[${index}]`));
+    return;
+  }
+  if (isRecord(value)) {
+    for (const [key, child] of Object.entries(value)) {
+      requireString(key, `${path} key`);
+      validateJsonTree(child, `${path}.${key}`);
     }
     return;
   }
-  if (receipt.commandId !== "wave-tests") throw new Error(`unknown execution commandId ${receipt.commandId}`);
-  const prefix = ["npx.cmd", "vitest", "run"];
-  if (canonicalJson(receipt.commandArgv.slice(0, 3)) !== canonicalJson(prefix)) throw new Error("wave-tests argv prefix differs");
-  const allowedTests = new Set(
-    spec.implementation.waves
-      .filter((wave) => declaredWaves.includes(wave.id))
-      .flatMap((wave) => wave.testFiles)
+  throw new Error(`${path} contains a non-JSON value`);
+}
+
+function validateFieldTuple(field, label, codecs) {
+  requireTuple(field, 5, label);
+  requireString(field[0], `${label}[path]`);
+  requireString(field[1], `${label}[type]`);
+  requireString(field[2], `${label}[required]`);
+  requireString(field[3], `${label}[codec]`);
+  if (field[4] !== null) requireString(field[4], `${label}[currentStructuredPath]`);
+  if (!codecs.has(field[3])) throw new Error(`${label} references unknown codec ${field[3]}`);
+  if (field[1].includes("|null") && !field[3].startsWith("nullable")) {
+    throw new Error(`${label} is nullable but does not use a nullable codec`);
+  }
+  if (field[2] === "zero or more" && field[3].startsWith("stableIdArray") && field[3] !== "stableIdArrayAllowEmpty") {
+    throw new Error(`${label} zero-or-more stable IDs must use stableIdArrayAllowEmpty`);
+  }
+  if (field[2].includes("at least one") && field[3].startsWith("stableIdArray") && field[3] !== "stableIdArrayNonEmpty") {
+    throw new Error(`${label} required stable IDs must use stableIdArrayNonEmpty`);
+  }
+  if (/(?:dateTime|confirmedAt|readAt|occurredAt)$/u.test(field[0]) && field[3] !== "isoDateTime") {
+    throw new Error(`${label} timestamp must use strict RFC3339 isoDateTime codec`);
+  }
+}
+
+function validateMeta(meta) {
+  requireExactKeys(
+    meta,
+    ["artifact", "date", "remediationDate", "branch", "sourceBase", "currentIntegrationTarget", "remediationParent", "reviewScope", "status", "implementationProgramStatus", "implementationStarted", "allowedFiles", "lineBudgets", "canonicalRule"],
+    "meta"
   );
-  const flags = new Set(["--maxWorkers=1", "--no-file-parallelism"]);
-  const testArgs = receipt.commandArgv.slice(3).filter((item) => !flags.has(item));
-  if (testArgs.length === 0 || testArgs.some((item) => !allowedTests.has(item))) {
-    throw new Error("wave-tests argv contains no owned test or an undeclared test");
+  requireLocalDate(meta.date, "meta.date");
+  requireLocalDate(meta.remediationDate, "meta.remediationDate");
+  requireFullSha(meta.sourceBase, "meta.sourceBase");
+  requireFullSha(meta.currentIntegrationTarget, "meta.currentIntegrationTarget");
+  requireFullSha(meta.remediationParent, "meta.remediationParent");
+  if (meta.status !== "HOLD_PENDING_FRESH_REVIEW") throw new Error("meta.status must remain HOLD_PENDING_FRESH_REVIEW");
+  if (meta.implementationProgramStatus !== "BLOCKED_PENDING_USER_DB_APPROVAL" || meta.implementationStarted !== false) {
+    throw new Error("meta implementation program must remain unstarted and approval-blocked");
+  }
+  requireStringArray(meta.allowedFiles, "meta.allowedFiles", 4);
+  const scope = requireExactKeys(meta.reviewScope, ["mergeBase", "forbidTwoDot", "candidateCommit", "evidenceCommit", "historicalReview"], "meta.reviewScope");
+  requireFullSha(scope.mergeBase, "meta.reviewScope.mergeBase");
+  if (scope.mergeBase !== meta.sourceBase || scope.forbidTwoDot !== true) throw new Error("meta review scope merge-base/two-dot boundary differs");
+  const candidate = requireExactKeys(scope.candidateCommit, ["parent", "allowedPaths"], "meta.reviewScope.candidateCommit");
+  requireFullSha(candidate.parent, "meta.reviewScope.candidateCommit.parent");
+  if (candidate.parent !== meta.remediationParent) throw new Error("candidate parent differs from remediationParent");
+  const expectedCandidatePaths = [SPEC_MARKDOWN_PATH, SPEC_JSON_PATH, VALIDATOR_PATH].sort();
+  if (canonicalJson([...requireStringArray(candidate.allowedPaths, "candidate allowedPaths", 3)].sort()) !== canonicalJson(expectedCandidatePaths)) {
+    throw new Error("candidate allowed paths differ from the three evaluation artifacts");
+  }
+  const evidence = requireExactKeys(scope.evidenceCommit, ["parentMustEqualCandidate", "allowedPaths"], "meta.reviewScope.evidenceCommit");
+  if (evidence.parentMustEqualCandidate !== true || canonicalJson(evidence.allowedPaths) !== canonicalJson([EVIDENCE_PATH])) {
+    throw new Error("evidence commit scope must be the evidence manifest only");
   }
 }
 
-function validateExecutionEvidence(root, evidenceCommit, manifest, spec, context) {
-  if (!Array.isArray(manifest.executions) || manifest.executions.length === 0) {
-    throw new Error("implementation manifest has no receipt-bound executions");
+function validateTupleSchemas(tupleSchemas) {
+  requireExactKeys(tupleSchemas, ["field", "source", "acceptance", "transition", "browserAssertion"], "tupleSchemas");
+  const lengths = { field: 5, source: 4, acceptance: 2, transition: 4, browserAssertion: 3 };
+  for (const [key, length] of Object.entries(lengths)) {
+    const tuple = requireTuple(tupleSchemas[key], length, `tupleSchemas.${key}`);
+    tuple.forEach((item, index) => requireString(item, `tupleSchemas.${key}[${index}]`));
   }
-  if (Object.hasOwn(manifest, "executedCommands")) throw new Error("free-form executedCommands is forbidden");
-  const receiptById = new Map();
-  for (const reference of manifest.executions) {
-    const receipt = parseJsonBuffer(
-      validateTypedBoundBlob(root, evidenceCommit, reference.receipt, `execution receipt ${reference.id ?? "unknown"}`),
-      `execution receipt ${reference.id ?? "unknown"}`
+}
+
+function validateSourceSeams(sourceSeams) {
+  const seams = requireArray(sourceSeams, "sourceSeams", 1);
+  const ids = new Set();
+  seams.forEach((seam, index) => {
+    requireTuple(seam, 4, `sourceSeams[${index}]`);
+    seam.forEach((item, part) => requireString(item, `sourceSeams[${index}][${part}]`));
+    if (ids.has(seam[0])) throw new Error(`duplicate source seam ${seam[0]}`);
+    ids.add(seam[0]);
+  });
+}
+
+function validateValidationDomain(validation) {
+  requireExactKeys(
+    validation,
+    ["currentGate", "semanticParity", "modes", "candidateArtifacts", "evidenceManifest", "targetBlobPaths", "currentClaims", "notCurrentlyProved", "redCases", "validator", "implementationProgramGate", "futurePostApprovalVerifierRequirements"],
+    "validation"
+  );
+  requireExactKeys(validation.modes, ["spec-review", "implementation"], "validation.modes");
+  if (!validation.modes.implementation.includes("Always exits nonzero") || !validation.modes.implementation.includes("IMPLEMENTATION_BLOCKED_PENDING_USER_DB_APPROVAL")) {
+    throw new Error("validation implementation mode does not declare unconditional blocking");
+  }
+  const expectedArtifacts = [SPEC_MARKDOWN_PATH, SPEC_JSON_PATH, VALIDATOR_PATH];
+  if (canonicalJson(validation.candidateArtifacts) !== canonicalJson(expectedArtifacts)) throw new Error("validation candidate artifacts differ");
+  if (validation.evidenceManifest !== EVIDENCE_PATH || validation.validator !== VALIDATOR_PATH) throw new Error("validation artifact paths differ");
+  requireStringArray(validation.targetBlobPaths, "validation.targetBlobPaths", 1);
+  requireStringArray(validation.currentClaims, "validation.currentClaims", 1);
+  requireStringArray(validation.notCurrentlyProved, "validation.notCurrentlyProved", 1);
+  if (canonicalJson([...validation.redCases].sort()) !== canonicalJson([...DELIBERATE_CASES].sort())) {
+    throw new Error("validation.redCases differ from executable deliberate cases");
+  }
+  const future = requireExactKeys(
+    validation.futurePostApprovalVerifierRequirements,
+    ["status", "repositoryCanAuthenticateUserApprovalEvent", "repositoryAuthoredManifestAuthoritative", "activation", "approval", "providerAndCi", "domAndBrowser", "postApprovalVerifier"],
+    "validation.futurePostApprovalVerifierRequirements"
+  );
+  if (future.status !== "FUTURE_NORMATIVE_ONLY_UNAUTHENTICATED_UNEXECUTED" || future.repositoryCanAuthenticateUserApprovalEvent !== false || future.repositoryAuthoredManifestAuthoritative !== false) {
+    throw new Error("future verifier requirements improperly claim current authority");
+  }
+  for (const key of ["approval", "providerAndCi", "domAndBrowser"]) {
+    requireKeys(future[key], ["futureRequirement", "currentExecutableAcceptance"], `future verifier ${key}`);
+    if (future[key].currentExecutableAcceptance !== "none") throw new Error(`future verifier ${key} claims current acceptance`);
+  }
+  if (future.domAndBrowser.browserExecutions !== 0) throw new Error("future DOM/browser requirement must record zero executions");
+}
+
+function validateIntegrationLedger(ledger, meta) {
+  requireExactKeys(ledger, ["snapshotId", "capturedAt", "captureMethod", "binding", "sourceBase", "currentIntegrationTarget", "heads", "freshRecheck", "amendmentPolicy", "integrationOrder"], "integrationLedger");
+  requireRfc3339(ledger.capturedAt, "integrationLedger.capturedAt");
+  requireStringArray(ledger.captureMethod, "integrationLedger.captureMethod", 1);
+  requireStringArray(ledger.freshRecheck, "integrationLedger.freshRecheck", 1);
+  requireStringArray(ledger.integrationOrder, "integrationLedger.integrationOrder", 1);
+  if (ledger.sourceBase !== meta.sourceBase || ledger.currentIntegrationTarget !== meta.currentIntegrationTarget) {
+    throw new Error("integration ledger source/target differs from meta");
+  }
+  const heads = requireArray(ledger.heads, "integrationLedger.heads", 1);
+  const ids = new Set();
+  for (const [index, head] of heads.entries()) {
+    requireKeys(head, ["id", "localRef", "localHead", "worktreeState", "decision"], `integrationLedger.heads[${index}]`);
+    requireString(head.id, `integrationLedger.heads[${index}].id`);
+    requireString(head.localRef, `integrationLedger.heads[${index}].localRef`);
+    requireFullSha(head.localHead, `integrationLedger.heads[${index}].localHead`);
+    requireString(head.worktreeState, `integrationLedger.heads[${index}].worktreeState`);
+    requireString(head.decision, `integrationLedger.heads[${index}].decision`);
+    if (ids.has(head.id)) throw new Error(`duplicate watched head ${head.id}`);
+    ids.add(head.id);
+    if (head.remoteRef !== null && head.remoteRef !== undefined) requireString(head.remoteRef, `integrationLedger.heads[${index}].remoteRef`);
+    if (head.remoteHead !== null && head.remoteHead !== undefined) requireFullSha(head.remoteHead, `integrationLedger.heads[${index}].remoteHead`);
+    if (head.aheadBehind !== undefined) {
+      requireTuple(head.aheadBehind, 2, `integrationLedger.heads[${index}].aheadBehind`);
+      requireInteger(head.aheadBehind[0], `integrationLedger.heads[${index}].aheadBehind[0]`, 0);
+      requireInteger(head.aheadBehind[1], `integrationLedger.heads[${index}].aheadBehind[1]`, 0);
+    }
+  }
+  const integration = heads.find((head) => head.id === "integration");
+  if (!integration || integration.localHead !== meta.currentIntegrationTarget) throw new Error("integration watched head does not bind current target");
+  const policy = requireExactKeys(ledger.amendmentPolicy, ["noAmendment", "amendmentAndFreshReview", "localResolution"], "integrationLedger.amendmentPolicy");
+  requireStringArray(policy.noAmendment, "integrationLedger.amendmentPolicy.noAmendment", 1);
+  requireStringArray(policy.amendmentAndFreshReview, "integrationLedger.amendmentPolicy.amendmentAndFreshReview", 1);
+}
+
+function validateCommon(common) {
+  requireExactKeys(common, ["projection", "codecs", "rawProvenance", "typeRegistry"], "common");
+  if (Object.keys(requireObject(common.projection, "common.projection")).length === 0) throw new Error("common.projection cannot be empty");
+  const codecObject = requireObject(common.codecs, "common.codecs");
+  if (Object.keys(codecObject).length === 0) throw new Error("common.codecs cannot be empty");
+  for (const [name, codec] of Object.entries(codecObject)) {
+    requireExactKeys(codec, ["parse", "serialize", "onInvalid"], `common.codecs.${name}`);
+    requireString(codec.parse, `common.codecs.${name}.parse`);
+    requireString(codec.serialize, `common.codecs.${name}.serialize`);
+    requireString(codec.onInvalid, `common.codecs.${name}.onInvalid`);
+  }
+  if (!codecObject.isoDateTime.parse.includes("StrictRFC3339") || !codecObject.isoDateTime.parse.includes("Date.parse")) {
+    throw new Error("isoDateTime codec must require strict RFC3339 and reject Date.parse-only acceptance");
+  }
+  if (!codecObject.nullableRfc3339.parse.includes("StrictRFC3339")) throw new Error("nullableRfc3339 codec is missing strict RFC3339 validation");
+  const raw = requireExactKeys(common.rawProvenance, ["codec", "unknownFieldRule", "union", "displayProjection", "roundTrip"], "common.rawProvenance");
+  const members = requireArray(raw.union, "common.rawProvenance.union", EXPECTED_RAW_KINDS.length);
+  const rawKinds = members.map((member, index) => {
+    requireKeys(member, ["kind", "sourceType", "required", "identity"], `common.rawProvenance.union[${index}]`);
+    requireStringArray(member.required, `common.rawProvenance.union[${index}].required`, 1);
+    return requireString(member.kind, `common.rawProvenance.union[${index}].kind`);
+  });
+  if (canonicalJson(rawKinds) !== canonicalJson(EXPECTED_RAW_KINDS)) throw new Error("raw provenance discriminator order differs");
+  const typeRegistry = requireObject(common.typeRegistry, "common.typeRegistry");
+  if (Object.keys(typeRegistry).length === 0) throw new Error("common.typeRegistry cannot be empty");
+  const codecs = new Set(Object.keys(codecObject));
+  for (const [name, registered] of Object.entries(typeRegistry)) {
+    requireKeys(registered, ["fields"], `common.typeRegistry.${name}`);
+    requireArray(registered.fields, `common.typeRegistry.${name}.fields`, 1).forEach((field, index) =>
+      validateFieldTuple(field, `common.typeRegistry.${name}.fields[${index}]`, codecs)
     );
-    validateExecutionReceiptShape(receipt);
-    if (reference.id !== receipt.commandId || receiptById.has(receipt.commandId)) {
-      throw new Error("execution receipt IDs are missing, duplicated, or mismatched");
-    }
-    if (receipt.sourceSha !== context.head || receipt.buildId !== manifest.buildId) {
-      throw new Error(`${receipt.commandId} source SHA/build ID differs from implementation evidence`);
-    }
-    if (receipt.exitCode !== 0) throw new Error(`${receipt.commandId} loaded receipt exitCode is nonzero`);
-    validateCommandArgv(spec, receipt, context);
-    validateTypedBoundBlob(root, evidenceCommit, receipt.stdout, `${receipt.commandId} stdout`);
-    validateTypedBoundBlob(root, evidenceCommit, receipt.stderr, `${receipt.commandId} stderr`);
-    for (const artifact of receipt.artifacts) {
-      validateTypedBoundBlob(root, evidenceCommit, artifact, `${receipt.commandId} artifact ${artifact.path}`);
-    }
-    receiptById.set(receipt.commandId, receipt);
   }
-  for (const id of ["typecheck", "diff-check", "wave-tests"]) {
-    if (!receiptById.has(id)) throw new Error(`required execution receipt is missing: ${id}`);
-  }
-  if (context.declaredWaves.includes("wave5") && !receiptById.has("build")) throw new Error("Wave 5 build receipt is missing");
-  return receiptById;
+  return codecs;
 }
 
-function requireFiniteNumber(value, label) {
-  if (typeof value !== "number" || !Number.isFinite(value)) throw new Error(`${label} must be a finite number`);
-  return value;
-}
-
-function validateRect(rect, label) {
-  if (!isRecord(rect)) throw new Error(`${label} must be a DOMRect record`);
-  for (const field of ["x", "y", "width", "height"]) requireFiniteNumber(rect[field], `${label}.${field}`);
-  if (rect.width < 0 || rect.height < 0) throw new Error(`${label} has a negative dimension`);
-}
-
-function rectangleIntersectionArea(left, right) {
-  const width = Math.max(0, Math.min(left.x + left.width, right.x + right.width) - Math.max(left.x, right.x));
-  const height = Math.max(0, Math.min(left.y + left.height, right.y + right.height) - Math.max(left.y, right.y));
-  return width * height;
-}
-
-function validatePageMetrics(page, label) {
-  if (!isRecord(page)) throw new Error(`${label} page metrics are missing`);
-  for (const field of ["clientWidth", "scrollWidth", "clientHeight", "scrollHeight"]) {
-    requireFiniteNumber(page[field], `${label}.page.${field}`);
-  }
-  if (page.scrollWidth > page.clientWidth + 1) throw new Error(`${label} document has horizontal overflow`);
-}
-
-function validateNode(node, label) {
-  if (!isRecord(node)) throw new Error(`${label} node is not an object`);
-  requireString(node.id, `${label}.id`);
-  if (node.parentId !== null) requireString(node.parentId, `${label}.parentId`);
-  if (typeof node.visible !== "boolean" || typeof node.interactive !== "boolean") {
-    throw new Error(`${label} visibility/interactivity must be raw booleans`);
-  }
-  validateRect(node.rect, `${label}.rect`);
-  for (const field of ["clientWidth", "scrollWidth", "clientHeight", "scrollHeight", "lineCount"]) {
-    requireFiniteNumber(node[field], `${label}.${field}`);
-  }
-  if (!Number.isInteger(node.lineCount) || node.lineCount < 0) throw new Error(`${label}.lineCount must be a non-negative integer`);
-  if (!isRecord(node.computed)) throw new Error(`${label}.computed is missing`);
-  for (const field of ["fontSize", "lineHeight", "zoom"]) requireFiniteNumber(node.computed[field], `${label}.computed.${field}`);
-  for (const field of ["overflowX", "overflowY", "position", "transform", "textSizeAdjust", "maxHeight"]) {
-    requireString(node.computed[field], `${label}.computed.${field}`);
-  }
-  if (node.computed.transform !== "none") throw new Error(`${label} uses an inner transform`);
-  if (node.computed.zoom !== 1) throw new Error(`${label} uses inner CSS zoom`);
-  if (node.computed.textSizeAdjust !== "100%") throw new Error(`${label} changes text-size-adjust`);
-}
-
-function indexSnapshot(snapshot, label) {
-  if (!isRecord(snapshot) || !Array.isArray(snapshot.nodes)) throw new Error(`${label} snapshot is missing nodes`);
-  validatePageMetrics(snapshot.page, label);
-  const nodes = new Map();
-  for (const node of snapshot.nodes) {
-    validateNode(node, `${label}.${node?.id ?? "unknown"}`);
-    if (nodes.has(node.id)) throw new Error(`${label} contains duplicate node ${node.id}`);
-    nodes.set(node.id, node);
-  }
-  for (const node of nodes.values()) {
-    if (node.parentId !== null && !nodes.has(node.parentId)) throw new Error(`${label}.${node.id} has an unknown parent`);
-    const visited = new Set([node.id]);
-    let parentId = node.parentId;
-    while (parentId !== null) {
-      if (visited.has(parentId)) throw new Error(`${label}.${node.id} has a parent cycle`);
-      visited.add(parentId);
-      parentId = nodes.get(parentId).parentId;
-    }
-  }
-  return nodes;
-}
-
-function requireNodeIds(sidecar, nodes, field, allowEmpty = false) {
-  const ids = sidecar[field];
-  if (!Array.isArray(ids) || (!allowEmpty && ids.length === 0) || ids.some((id) => typeof id !== "string" || !nodes.has(id))) {
-    throw new Error(`browser sidecar ${field} is empty or references an unknown node`);
-  }
-  if (new Set(ids).size !== ids.length) throw new Error(`browser sidecar ${field} contains duplicate IDs`);
-  return ids;
-}
-
-function validateSnapshotGeometry(sidecar, snapshotName, nodes, drawerIds) {
-  const tolerance = 1;
-  const clippingValues = new Set(["hidden", "clip", "auto", "scroll"]);
-  for (const node of nodes.values()) {
-    if (!node.visible) continue;
-    if (node.interactive && (node.rect.width < 44 || node.rect.height < 44)) {
-      throw new Error(`${snapshotName}.${node.id} interactive target is smaller than 44x44`);
-    }
-    if (["fixed", "sticky"].includes(node.computed.position)) {
-      if (
-        node.rect.x < -tolerance ||
-        node.rect.y < -tolerance ||
-        node.rect.x + node.rect.width > sidecar.viewportWidth + tolerance ||
-        node.rect.y + node.rect.height > sidecar.viewportHeight + tolerance
-      ) {
-        throw new Error(`${snapshotName}.${node.id} fixed/sticky rect escapes the viewport`);
-      }
-    }
-    if (
-      !drawerIds.has(node.id) &&
-      ["auto", "scroll"].includes(node.computed.overflowY) &&
-      node.scrollHeight > node.clientHeight + tolerance
-    ) {
-      throw new Error(`${snapshotName}.${node.id} creates nested vertical scroll`);
-    }
-    let parentId = node.parentId;
-    while (parentId !== null) {
-      const parent = nodes.get(parentId);
-      if (parent.visible) {
-        if (
-          clippingValues.has(parent.computed.overflowX) &&
-          (node.rect.x < parent.rect.x - tolerance || node.rect.x + node.rect.width > parent.rect.x + parent.rect.width + tolerance)
-        ) {
-          throw new Error(`${snapshotName}.${node.id} is horizontally clipped by ${parent.id}`);
-        }
-        if (
-          clippingValues.has(parent.computed.overflowY) &&
-          (node.rect.y < parent.rect.y - tolerance || node.rect.y + node.rect.height > parent.rect.y + parent.rect.height + tolerance)
-        ) {
-          throw new Error(`${snapshotName}.${node.id} is vertically clipped by ${parent.id}`);
-        }
-      }
-      parentId = parent.parentId;
-    }
+function validateModel(model, codecs) {
+  requireExactKeys(model, ["documentEnvelope", "generationSeal", "boundary", "strictTypeScript"], "model");
+  const envelope = requireExactKeys(model.documentEnvelope, ["fields", "globalRoots"], "model.documentEnvelope");
+  requireArray(envelope.fields, "model.documentEnvelope.fields", 1).forEach((field, index) => {
+    requireTuple(field, 3, `model.documentEnvelope.fields[${index}]`);
+    field.forEach((item, part) => requireString(item, `model.documentEnvelope.fields[${index}][${part}]`));
+  });
+  requireArray(envelope.globalRoots, "model.documentEnvelope.globalRoots", 1).forEach((root, index) => {
+    requireTuple(root, 2, `model.documentEnvelope.globalRoots[${index}]`);
+    root.forEach((item, part) => requireString(item, `model.documentEnvelope.globalRoots[${index}][${part}]`));
+  });
+  for (const key of ["generationSeal", "boundary", "strictTypeScript"]) {
+    if (Object.keys(requireObject(model[key], `model.${key}`)).length === 0) throw new Error(`model.${key} cannot be empty`);
   }
 }
 
-function validateBrowserTypographySidecar(sidecar, context = {}) {
-  if (!isRecord(sidecar)) throw new Error("browser sidecar must be an object");
-  const forbidden = findForbiddenKey(sidecar, new Set(["pass", "passed", "result", "outputSha256", "claimedMetrics"]));
-  if (forbidden) throw new Error(`browser sidecar contains forbidden self-assertion ${forbidden}`);
-  if (sidecar.kind !== "safeclaw-browser-typography-sidecar/v1") throw new Error("browser sidecar kind differs");
-  if (!FULL_SHA.test(sidecar.sourceSha)) throw new Error("browser sidecar sourceSha must be a full SHA");
-  requireString(sidecar.buildId, "browser sidecar buildId");
-  requireString(sidecar.fixtureId, "browser sidecar fixtureId");
-  if (!new Set(["Chromium", "Firefox", "WebKit"]).has(sidecar.browser)) throw new Error("browser sidecar browser differs");
-  if (!new Set(["desktop1440", "mobile390"]).has(sidecar.viewportId)) throw new Error("browser sidecar viewport differs");
-  if (!new Set(["day", "night"]).has(sidecar.theme)) throw new Error("browser sidecar theme differs");
-  if (!DOCUMENT_KEYS.includes(sidecar.documentKey)) throw new Error("browser sidecar documentKey differs");
-  const expectedViewport = sidecar.viewportId === "desktop1440" ? [1440, 1000] : [390, 844];
-  if (sidecar.viewportWidth !== expectedViewport[0] || sidecar.viewportHeight !== expectedViewport[1]) {
-    throw new Error("browser sidecar viewport dimensions differ");
+function validateWorkflow(workflow) {
+  requireExactKeys(workflow, ["reviewStates", "transitions", "forbiddenTransitions", "effects", "revalidation", "save", "share", "commands", "disclaimer"], "workflow");
+  const states = requireStringArray(workflow.reviewStates, "workflow.reviewStates", 4);
+  if (canonicalJson(states) !== canonicalJson(["generated", "edited", "review_pending", "human_confirmed"])) throw new Error("workflow review states differ");
+  requireArray(workflow.transitions, "workflow.transitions", 1).forEach((transition, index) => {
+    requireTuple(transition, 4, `workflow.transitions[${index}]`);
+    transition.forEach((item, part) => requireString(item, `workflow.transitions[${index}][${part}]`));
+  });
+  requireStringArray(workflow.forbiddenTransitions, "workflow.forbiddenTransitions", 1);
+  for (const key of ["effects", "revalidation", "save", "share", "commands"]) {
+    if (Object.keys(requireObject(workflow[key], `workflow.${key}`)).length === 0) throw new Error(`workflow.${key} cannot be empty`);
   }
-  for (const field of ["deviceScaleFactor", "devicePixelRatio", "visualViewportScale"]) {
-    if (sidecar[field] !== 1) throw new Error(`browser sidecar ${field} must remain 1`);
-  }
-  if (sidecar.applicationCount !== 1 || sidecar.baselineRootScale !== 1 || sidecar.scaledRootScale !== 2) {
-    throw new Error("browser sidecar shows cumulative or incorrect root typography scaling");
-  }
-  if (sidecar.baselinePolicy !== "baseline" || sidecar.scaledPolicy !== "double") {
-    throw new Error("browser sidecar root typography policy differs");
-  }
-  if (sidecar.structuredGapPx !== 8) throw new Error("browser sidecar structured editor gap is not 8px");
-  if (context.sourceSha && sidecar.sourceSha !== context.sourceSha) throw new Error("browser sidecar sourceSha differs from implementation head");
-  if (context.buildId && sidecar.buildId !== context.buildId) throw new Error("browser sidecar buildId differs from implementation evidence");
+  requireString(workflow.disclaimer, "workflow.disclaimer");
+}
 
-  const baselineNodes = indexSnapshot(sidecar.baseline, "baseline");
-  const scaledNodes = indexSnapshot(sidecar.scaled, "scaled");
-  if (canonicalJson([...baselineNodes.keys()].sort()) !== canonicalJson([...scaledNodes.keys()].sort())) {
-    throw new Error("browser baseline/scaled node IDs differ");
+function validatePhotoAuthority(photo, codecs) {
+  requireExactKeys(photo, ["phaseAStates", "canonicalField", "mapping", "legacyTwoFieldMap", "transitions", "local", "post", "get", "storedAssetDeferred", "beforeAfter", "reviewAuthority"], "persistence.photo");
+  requireStringArray(photo.phaseAStates, "persistence.photo.phaseAStates", 1);
+  for (const key of ["mapping", "local", "post", "get", "storedAssetDeferred"]) {
+    if (Object.keys(requireObject(photo[key], `persistence.photo.${key}`)).length === 0) throw new Error(`persistence.photo.${key} cannot be empty`);
   }
-  const priorityIds = requireNodeIds(sidecar, scaledNodes, "priorityRegionIds");
-  const reflowIds = requireNodeIds(sidecar, scaledNodes, "reflowProbeIds");
-  const textareaIds = requireNodeIds(sidecar, scaledNodes, "textareaIds");
-  const drawerIds = new Set(requireNodeIds(sidecar, scaledNodes, "drawerIds", true));
-  requireString(sidecar.editorRootId, "browser sidecar editorRootId");
-  requireString(sidecar.mobileEditorHeadingId, "browser sidecar mobileEditorHeadingId");
-  if (!scaledNodes.has(sidecar.editorRootId) || !scaledNodes.has(sidecar.mobileEditorHeadingId)) {
-    throw new Error("browser sidecar editor start IDs are unknown");
+  requireArray(photo.legacyTwoFieldMap, "persistence.photo.legacyTwoFieldMap", 1);
+  requireArray(photo.transitions, "persistence.photo.transitions", 1);
+  const review = requireExactKeys(
+    photo.reviewAuthority,
+    ["id", "status", "currentReality", "states", "events", "digestType", "futureEvent", "canonicalAnalysisPayload", "canonicalEventDigest", "transition", "evidenceGate", "privacy", "atomicWrite", "revisionSealImpact", "persistenceGate", "plannedOwner", "plannedFiles"],
+    "persistence.photo.reviewAuthority"
+  );
+  if (review.status !== "BLOCKED_PENDING_USER_DB_APPROVAL") throw new Error("photo review authority is not blocked");
+  if (canonicalJson(review.states) !== canonicalJson(["candidate", "confirmed", "rejected"])) throw new Error("photo review states differ");
+  if (canonicalJson(review.events) !== canonicalJson(["HUMAN_CONFIRM_IMPROVEMENT", "HUMAN_REJECT_IMPROVEMENT"])) throw new Error("photo review events differ");
+  const event = requireExactKeys(review.futureEvent, ["status", "fields", "relationships"], "persistence.photo.reviewAuthority.futureEvent");
+  if (event.status !== "FUTURE_NORMATIVE_ONLY_PENDING_APPROVED_TRANSACTION") throw new Error("photo event improperly claims current authority");
+  requireExactKeys(event.fields, Object.keys(EXPECTED_PHOTO_EVENT_FIELDS), "photo future event fields");
+  if (canonicalJson(event.fields) !== canonicalJson(EXPECTED_PHOTO_EVENT_FIELDS)) throw new Error("photo future event field codecs differ");
+  for (const [name, codec] of Object.entries(event.fields)) {
+    if (name !== "action" && !codecs.has(codec)) throw new Error(`photo event field ${name} references unknown codec ${codec}`);
   }
-
-  validateSnapshotGeometry(sidecar, "baseline", baselineNodes, drawerIds);
-  validateSnapshotGeometry(sidecar, "scaled", scaledNodes, drawerIds);
-  for (const id of baselineNodes.keys()) {
-    const baseline = baselineNodes.get(id);
-    const scaled = scaledNodes.get(id);
-    if (baseline.visible && scaled.visible && typeof baseline.textRole === "string" && baseline.textRole.length > 0) {
-      const fontRatio = scaled.computed.fontSize / baseline.computed.fontSize;
-      const lineRatio = scaled.computed.lineHeight / baseline.computed.lineHeight;
-      if (fontRatio < 1.9 || fontRatio > 2.1 || lineRatio < 1.9 || lineRatio > 2.1) {
-        throw new Error(`scaled text ratio differs for ${id}`);
-      }
+  const relationships = requireExactKeys(event.relationships, ["always", "confirm", "rejectCompletedPair", "rejectMissingAfter", "revision", "controlBinding", "analysisBinding", "eventBinding"], "photo future event relationships");
+  const fieldNames = new Set(Object.keys(event.fields));
+  const checkReferences = (items, label) => {
+    for (const item of requireStringArray(items, label, 1)) {
+      if (!fieldNames.has(item)) throw new Error(`${label} references unknown field ${item}`);
     }
-  }
-  for (const id of reflowIds) {
-    if (scaledNodes.get(id).lineCount <= baselineNodes.get(id).lineCount) {
-      throw new Error(`designated long-text probe did not reflow: ${id}`);
-    }
-  }
-  for (let leftIndex = 0; leftIndex < priorityIds.length; leftIndex += 1) {
-    const left = scaledNodes.get(priorityIds[leftIndex]);
-    if (!left.visible) continue;
-    for (let rightIndex = leftIndex + 1; rightIndex < priorityIds.length; rightIndex += 1) {
-      const right = scaledNodes.get(priorityIds[rightIndex]);
-      if (right.visible && rectangleIntersectionArea(left.rect, right.rect) > 0) {
-        throw new Error(`scaled priority regions overlap across parents: ${left.id}/${right.id}`);
-      }
-    }
-  }
-  for (const fixedOrSticky of [...scaledNodes.values()].filter((node) => node.visible && ["fixed", "sticky"].includes(node.computed.position))) {
-    for (const priorityId of priorityIds) {
-      const priority = scaledNodes.get(priorityId);
-      if (priority.id !== fixedOrSticky.id && priority.visible && rectangleIntersectionArea(fixedOrSticky.rect, priority.rect) > 0) {
-        throw new Error(`fixed/sticky node covers priority region: ${fixedOrSticky.id}/${priority.id}`);
-      }
-    }
-  }
-  for (const id of textareaIds) {
-    const textarea = scaledNodes.get(id);
-    if (textarea.computed.overflowY !== "hidden" || textarea.computed.maxHeight !== "none" || textarea.scrollHeight > textarea.clientHeight + 1) {
-      throw new Error(`textarea ${id} has hidden inner scroll or max-height`);
-    }
-  }
-  if (sidecar.viewportId === "mobile390") {
-    if (scaledNodes.get(sidecar.editorRootId).rect.y > 200 || scaledNodes.get(sidecar.mobileEditorHeadingId).rect.y > 160) {
-      throw new Error("mobile editor starts below the task-distance budget");
-    }
-  }
-  return {
-    fixtureId: sidecar.fixtureId,
-    matrixKey: [sidecar.browser, sidecar.viewportId, sidecar.theme, sidecar.documentKey].join("|")
   };
-}
-
-function makeBrowserNegativeFixture(kind) {
-  const computed = (fontSize, lineHeight) => ({
-    fontSize,
-    lineHeight,
-    overflowX: "visible",
-    overflowY: "visible",
-    position: "static",
-    transform: "none",
-    zoom: 1,
-    textSizeAdjust: "100%",
-    maxHeight: "none"
-  });
-  const node = (id, parentId, rect, overrides = {}) => ({
-    id,
-    parentId,
-    semanticRole: "region",
-    textRole: "",
-    visible: true,
-    interactive: false,
-    rect,
-    clientWidth: rect.width,
-    scrollWidth: rect.width,
-    clientHeight: rect.height,
-    scrollHeight: rect.height,
-    lineCount: 0,
-    computed: computed(0, 0),
-    ...overrides
-  });
-  const baselineNodes = [
-    node("surface", null, { x: 0, y: 0, width: 390, height: 1200 }),
-    node("section", "surface", { x: 0, y: 100, width: 390, height: 600 }),
-    node("title", "surface", { x: 0, y: 0, width: 180, height: 24 }, { textRole: "title", lineCount: 1, computed: computed(16, 24) }),
-    node("editor", "section", { x: 0, y: 110, width: 390, height: 500 }),
-    node("heading", "editor", { x: 0, y: 120, width: 180, height: 24 }, { textRole: "label", lineCount: 1, computed: computed(14, 20) }),
-    node("textarea", "editor", { x: 0, y: 160, width: 300, height: 200 }, {
-      textRole: "body",
-      lineCount: 4,
-      computed: { ...computed(15, 23), overflowY: "hidden" }
-    })
-  ];
-  const scaledNodes = structuredClone(baselineNodes);
-  Object.assign(scaledNodes.find((item) => item.id === "title"), {
-    rect: { x: 0, y: 0, width: 180, height: 96 },
-    clientHeight: 96,
-    scrollHeight: 96,
-    lineCount: 2,
-    computed: computed(32, 48)
-  });
-  Object.assign(scaledNodes.find((item) => item.id === "heading"), {
-    rect: { x: 0, y: 120, width: 180, height: 40 },
-    clientHeight: 40,
-    scrollHeight: 40,
-    computed: computed(28, 40)
-  });
-  Object.assign(scaledNodes.find((item) => item.id === "textarea"), {
-    computed: { ...computed(30, 46), overflowY: "hidden" }
-  });
-  const sidecar = {
-    kind: "safeclaw-browser-typography-sidecar/v1",
-    fixtureId: "negative-fixture",
-    sourceSha: "1".repeat(40),
-    buildId: "negative-build",
-    browser: "Chromium",
-    viewportId: "mobile390",
-    viewportWidth: 390,
-    viewportHeight: 844,
-    theme: "day",
-    documentKey: "riskAssessmentDraft",
-    deviceScaleFactor: 1,
-    devicePixelRatio: 1,
-    visualViewportScale: 1,
-    applicationCount: 1,
-    baselineRootScale: 1,
-    scaledRootScale: 2,
-    baselinePolicy: "baseline",
-    scaledPolicy: "double",
-    structuredGapPx: 8,
-    priorityRegionIds: ["title", "editor"],
-    reflowProbeIds: ["title"],
-    textareaIds: ["textarea"],
-    drawerIds: [],
-    editorRootId: "editor",
-    mobileEditorHeadingId: "heading",
-    baseline: { page: { clientWidth: 390, scrollWidth: 390, clientHeight: 844, scrollHeight: 1200 }, nodes: baselineNodes },
-    scaled: { page: { clientWidth: 390, scrollWidth: 390, clientHeight: 844, scrollHeight: 1200 }, nodes: scaledNodes }
-  };
-  const scaled = (id) => sidecar.scaled.nodes.find((item) => item.id === id);
-  if (kind === "pass_flag_present") sidecar.pass = true;
-  else if (kind === "cumulative_root_application") { sidecar.applicationCount = 2; sidecar.scaledRootScale = 4; }
-  else if (kind === "inner_transform") scaled("heading").computed.transform = "matrix(2, 0, 0, 2, 0, 0)";
-  else if (kind === "inner_zoom") scaled("heading").computed.zoom = 2;
-  else if (kind === "cross_parent_overlap") scaled("editor").rect.y = 50;
-  else if (kind === "fixed_offscreen") { scaled("title").computed.position = "fixed"; scaled("title").rect.x = -20; }
-  else if (kind === "sticky_cover") { scaled("title").computed.position = "sticky"; scaled("editor").rect.y = 50; }
-  else if (kind === "horizontal_clip") { scaled("section").computed.overflowX = "hidden"; scaled("section").rect.width = 200; }
-  else if (kind === "vertical_clip") { scaled("section").computed.overflowY = "hidden"; scaled("section").rect.height = 300; }
-  else if (kind === "nested_scroll") { scaled("editor").computed.overflowY = "auto"; scaled("editor").scrollHeight = 700; }
-  else if (kind === "textarea_hidden_scroll") scaled("textarea").scrollHeight = 300;
-  else if (kind === "mobile_editor_late") { scaled("editor").rect.y = 240; scaled("heading").rect.y = 220; }
-  else if (kind === "ratio_or_reflow") { scaled("title").computed.fontSize = 18; scaled("title").lineCount = 1; }
-  else if (kind === "pixel_or_viewport_scale") { sidecar.devicePixelRatio = 2; sidecar.visualViewportScale = 2; }
-  else throw new Error(`unknown browser negative fixture ${kind}`);
-  return sidecar;
-}
-
-function validateBrowserNegativeFixtures(spec) {
-  const declaredKinds = spec.ui.textZoom200.negativeFixtures.map((fixture) => fixture[1]);
-  const expectedKinds = [
-    "pass_flag_present",
-    "cumulative_root_application",
-    "inner_transform",
-    "inner_zoom",
-    "cross_parent_overlap",
-    "fixed_offscreen",
-    "sticky_cover",
-    "horizontal_clip",
-    "vertical_clip",
-    "nested_scroll",
-    "textarea_hidden_scroll",
-    "mobile_editor_late",
-    "ratio_or_reflow",
-    "pixel_or_viewport_scale"
-  ];
-  if (canonicalJson(declaredKinds) !== canonicalJson(expectedKinds)) throw new Error("browser negative fixture registry differs");
-  const valid = makeBrowserNegativeFixture("pass_flag_present");
-  delete valid.pass;
-  validateBrowserTypographySidecar(valid);
-  for (const kind of expectedKinds) {
-    let failed = false;
-    try {
-      validateBrowserTypographySidecar(makeBrowserNegativeFixture(kind));
-    } catch {
-      failed = true;
+  const always = requireExactKeys(relationships.always, ["requires"], "photo relationship always");
+  checkReferences(always.requires, "photo relationship always.requires");
+  for (const name of ["confirm", "rejectCompletedPair", "rejectMissingAfter"]) {
+    const relationship = requireObject(relationships[name], `photo relationship ${name}`);
+    requireString(relationship.when, `photo relationship ${name}.when`);
+    requireString(relationship.timestampEquality, `photo relationship ${name}.timestampEquality`);
+    for (const key of ["requiresNonNull", "forbidsNonNull", "requiresNull"]) {
+      if (relationship[key] !== undefined) checkReferences(relationship[key], `photo relationship ${name}.${key}`);
     }
-    if (!failed) throw new Error(`browser negative fixture did not fail: ${kind}`);
+  }
+  const confirmRequired = relationships.confirm.requiresNonNull;
+  if (!confirmRequired.includes("afterImageSha256") || !confirmRequired.includes("confirmedAt")) {
+    throw new Error("photo confirmation must require non-null after image and confirmedAt");
+  }
+  if (!relationships.rejectCompletedPair.requiresNonNull.includes("afterImageSha256")) {
+    throw new Error("completed-pair rejection must require non-null after image");
+  }
+  if (!relationships.rejectMissingAfter.requiresNull.includes("afterImageSha256")) {
+    throw new Error("missing-after rejection must require null after image");
+  }
+  if (relationships.revision !== "resultingRevision=candidateRevision+1") throw new Error("photo revision relationship differs");
+  requireStringArray(review.plannedFiles, "persistence.photo.reviewAuthority.plannedFiles", 1);
+}
+
+function validatePersistence(persistence, codecs) {
+  requireExactKeys(persistence, ["primaryPath", "storage", "envelopeFields", "digestDefinitions", "topLevelSeal", "serverRevisionAuthority", "localDraftKey", "migrationPerformedByThisArtifact", "authorityMigrationApprovalRequired", "featureFlag", "photo"], "persistence");
+  requireArray(persistence.envelopeFields, "persistence.envelopeFields", 1).forEach((field, index) =>
+    validateFieldTuple(field, `persistence.envelopeFields[${index}]`, codecs)
+  );
+  for (const key of ["digestDefinitions", "topLevelSeal", "featureFlag"]) {
+    if (Object.keys(requireObject(persistence[key], `persistence.${key}`)).length === 0) throw new Error(`persistence.${key} cannot be empty`);
+  }
+  if (persistence.migrationPerformedByThisArtifact !== false || persistence.authorityMigrationApprovalRequired !== true) {
+    throw new Error("persistence migration approval boundary differs");
+  }
+  const authority = requireObject(persistence.serverRevisionAuthority, "persistence.serverRevisionAuthority");
+  if (authority.status !== "BLOCKED_PENDING_USER_DB_APPROVAL") throw new Error("server revision authority is not blocked");
+  requireKeys(authority, ["rootIdempotency", "transaction", "replay", "conflict", "plannedFiles"], "persistence.serverRevisionAuthority");
+  requireKeys(authority.rootIdempotency, ["strategyA", "strategyB"], "persistence.serverRevisionAuthority.rootIdempotency");
+  requireStringArray(authority.transaction, "server revision transaction", 1);
+  requireStringArray(authority.plannedFiles, "server revision plannedFiles", 1);
+  validatePhotoAuthority(persistence.photo, codecs);
+}
+
+function validateEvidencePresentation(presentation) {
+  requireExactKeys(presentation, ["defaultPriority", "defaultForbidden", "trigger", "countSource", "drawer", "externalLinks"], "evidencePresentation");
+  requireStringArray(presentation.defaultPriority, "evidencePresentation.defaultPriority", 5);
+  requireStringArray(presentation.defaultForbidden, "evidencePresentation.defaultForbidden", 1);
+  for (const key of ["trigger", "countSource", "drawer", "externalLinks"]) {
+    if (Object.keys(requireObject(presentation[key], `evidencePresentation.${key}`)).length === 0) throw new Error(`evidencePresentation.${key} cannot be empty`);
   }
 }
 
-function validateBrowserEvidence(root, evidenceCommit, manifest, receiptById, context) {
-  const receipt = receiptById.get("browser");
-  if (!receipt) throw new Error("ZOOM-001 requires a successful browser execution receipt");
-  const records = manifest.browserEvidence?.sidecars;
-  if (!Array.isArray(records) || records.length !== 144) throw new Error("implementation browser evidence must contain 144 raw sidecar blobs");
-  const receiptArtifacts = new Map(receipt.artifacts.map((record) => [record.path, record]));
-  const matrixKeys = [];
-  const fixtureIds = new Set();
-  for (const record of records) {
-    if (record.commandId !== "browser") throw new Error("browser sidecar is not bound to the browser receipt");
-    const artifact = receiptArtifacts.get(record.path);
-    if (!artifact || canonicalJson(artifact) !== canonicalJson({ path: record.path, gitBlob: record.gitBlob, sha256: record.sha256, bytes: record.bytes })) {
-      throw new Error(`browser sidecar is not an exact browser receipt artifact: ${record.path}`);
+function validateUi(ui) {
+  requireExactKeys(ui, ["direction", "measuredFailingBaseline", "layout", "mobileScroll", "typography", "warning", "actions", "states", "accessibility", "invariant", "browserFixtures", "textZoom200", "browserAssertions"], "ui");
+  for (const key of ["measuredFailingBaseline", "layout", "mobileScroll", "typography", "warning", "actions", "states", "accessibility", "invariant", "browserFixtures"]) {
+    if (Object.keys(requireObject(ui[key], `ui.${key}`)).length === 0) throw new Error(`ui.${key} cannot be empty`);
+  }
+  const zoom = requireExactKeys(ui.textZoom200, ["id", "status", "browserExecutions", "validatorCoverage", "matrix", "harness", "futureLocatorCensus", "futureImplementationChecks", "futureTestGeneration", "evidenceGate"], "ui.textZoom200");
+  if (zoom.status !== "DECLARED_NOT_EXECUTED" || zoom.browserExecutions !== 0) throw new Error("200 percent browser contract must be unexecuted");
+  if (Object.hasOwn(zoom, "negativeFixtures")) throw new Error("synthetic zoom negative fixtures must not be an acceptance claim");
+  requireExactKeys(zoom.matrix, ["browsers", "viewports", "themes", "documentKeys", "caseCountPerBrowser", "totalCaseCount"], "ui.textZoom200.matrix");
+  if (zoom.matrix.totalCaseCount !== 144 || zoom.matrix.caseCountPerBrowser !== 48) throw new Error("200 percent matrix cardinality differs");
+  requireStringArray(zoom.matrix.browsers, "ui.textZoom200.matrix.browsers", 3);
+  requireStringArray(zoom.matrix.viewports, "ui.textZoom200.matrix.viewports", 2);
+  requireStringArray(zoom.matrix.themes, "ui.textZoom200.matrix.themes", 2);
+  for (const key of ["harness", "futureLocatorCensus", "futureImplementationChecks"]) {
+    if (Object.keys(requireObject(zoom[key], `ui.textZoom200.${key}`)).length === 0) throw new Error(`ui.textZoom200.${key} cannot be empty`);
+  }
+  requireArray(ui.browserAssertions, "ui.browserAssertions", 25).forEach((assertion, index) => {
+    requireTuple(assertion, 3, `ui.browserAssertions[${index}]`);
+    assertion.forEach((item, part) => requireString(item, `ui.browserAssertions[${index}][${part}]`));
+  });
+  if (ui.browserAssertions.length !== 25) throw new Error("ui.browserAssertions must contain exactly 25 entries");
+}
+
+function validateComponents(components) {
+  requireExactKeys(components, ["orchestrators", "primitives", "fileMap", "documentComponentPath", "testOwnershipRule", "exportNameRule", "resolvedNames", "forbiddenAliases", "documentSpecificRule", "duplicationRule"], "components");
+  requireStringArray(components.orchestrators, "components.orchestrators", 1);
+  requireStringArray(components.primitives, "components.primitives", 1);
+  const symbols = new Set();
+  const paths = new Set();
+  requireArray(components.fileMap, "components.fileMap", 1).forEach((entry, index) => {
+    requireTuple(entry, 3, `components.fileMap[${index}]`);
+    entry.forEach((item, part) => requireString(item, `components.fileMap[${index}][${part}]`));
+    if (symbols.has(entry[0]) || paths.has(entry[1])) throw new Error("components.fileMap contains a duplicate symbol or path");
+    symbols.add(entry[0]);
+    paths.add(entry[1]);
+  });
+  if (Object.keys(requireObject(components.resolvedNames, "components.resolvedNames")).length === 0) throw new Error("components.resolvedNames cannot be empty");
+  requireStringArray(components.forbiddenAliases, "components.forbiddenAliases", 1);
+}
+
+function validateExport(exportContract) {
+  requireExactKeys(exportContract, ["semanticDeterminism", "binaryByteEqualityRequired", "manifest", "roundTripDefinition", "roundTripOwner", "pureCodecLimit", "actualSeamsAtTarget", "actualRoutes", "excludedTargetSeam", "unknownFieldPolicy", "currentRouteCompatibility"], "export");
+  if (exportContract.binaryByteEqualityRequired !== false) throw new Error("export binary byte equality requirement differs");
+  for (const key of ["manifest", "roundTripOwner", "excludedTargetSeam", "currentRouteCompatibility"]) {
+    if (Object.keys(requireObject(exportContract[key], `export.${key}`)).length === 0) throw new Error(`export.${key} cannot be empty`);
+  }
+  const seams = requireArray(exportContract.actualSeamsAtTarget, "export.actualSeamsAtTarget", 4);
+  const shape = seams.map((seam, index) => {
+    requireKeys(seam, ["id", "kind", "clientSymbol", "serverPath", "serverSymbol"], `export.actualSeamsAtTarget[${index}]`);
+    return [seam.id, seam.kind, seam.clientSymbol, seam.serverPath, seam.serverSymbol];
+  });
+  if (canonicalJson(shape) !== canonicalJson(EXPECTED_EXPORT_SEAMS)) throw new Error("export seams differ from target contract");
+  const routes = requireArray(exportContract.actualRoutes, "export.actualRoutes", 3);
+  if (routes.length !== 3) throw new Error("export.actualRoutes must contain XLSX, PDF, and binary HWP only");
+  routes.forEach((route, index) => {
+    requireExactKeys(route, ["id", "method", "path", "url", "roundTrip"], `export.actualRoutes[${index}]`);
+    if (route.method !== "POST") throw new Error(`export route ${route.id} must be POST`);
+  });
+  if (exportContract.roundTripOwner.wave !== "wave5") throw new Error("export round-trip owner must be wave5");
+}
+
+function validateDocuments(documents, codecs, typeRegistry) {
+  const registry = requireArray(documents, "documents", 12);
+  if (registry.length !== 12 || canonicalJson(registry.map((document) => document.key)) !== canonicalJson(DOCUMENT_KEYS)) {
+    throw new Error("documents must contain the exact 12 keys in production order");
+  }
+  const ids = new Set();
+  const components = new Set();
+  for (const [index, document] of registry.entries()) {
+    requireExactKeys(document, ["id", "key", "title", "type", "component", "family", "primaryAction", "primaryActionRule", "typeBindings", "fields", "fieldNotes", "interactions", "gates", "schemaOrder"], `documents[${index}]`);
+    for (const key of ["id", "key", "title", "type", "component", "family", "primaryAction", "primaryActionRule"]) requireString(document[key], `documents[${index}].${key}`);
+    if (ids.has(document.id) || components.has(document.component)) throw new Error(`documents[${index}] duplicates an ID or component`);
+    ids.add(document.id);
+    components.add(document.component);
+    const fields = requireArray(document.fields, `documents[${index}].fields`, 1);
+    fields.forEach((field, fieldIndex) => validateFieldTuple(field, `documents[${index}].fields[${fieldIndex}]`, codecs));
+    requireObject(document.fieldNotes, `documents[${index}].fieldNotes`);
+    requireStringArray(document.interactions, `documents[${index}].interactions`, 1);
+    requireStringArray(document.gates, `documents[${index}].gates`, 1);
+    const markers = [];
+    requireArray(document.typeBindings, `documents[${index}].typeBindings`).forEach((binding, bindingIndex) => {
+      requireExactKeys(binding, ["prefix", "type", "currentOverrides"], `documents[${index}].typeBindings[${bindingIndex}]`);
+      requireString(binding.prefix, `documents[${index}].typeBindings[${bindingIndex}].prefix`);
+      requireString(binding.type, `documents[${index}].typeBindings[${bindingIndex}].type`);
+      requireObject(binding.currentOverrides, `documents[${index}].typeBindings[${bindingIndex}].currentOverrides`);
+      if (!Object.hasOwn(typeRegistry, binding.type)) throw new Error(`${document.key} references unknown type binding ${binding.type}`);
+      markers.push(`@${binding.type}:${binding.prefix}`);
+    });
+    const expectedOrderMembers = [...markers, ...fields.map((field) => field[0])].sort();
+    const actualOrderMembers = [...requireStringArray(document.schemaOrder, `documents[${index}].schemaOrder`, 1)].sort();
+    if (canonicalJson(actualOrderMembers) !== canonicalJson(expectedOrderMembers)) throw new Error(`${document.key} schemaOrder differs from fields and bindings`);
+  }
+}
+
+function validateImplementation(implementation, contractIds, documents, components, exportContract) {
+  requireExactKeys(implementation, ["programStatus", "startGate", "codecFixtureMatrix", "waves", "fileOwnership", "browserMatrixId", "viewports", "browserMatrix", "acceptance"], "implementation");
+  if (implementation.programStatus !== "BLOCKED_PENDING_USER_DB_APPROVAL") throw new Error("implementation program is not approval-blocked");
+  const matrix = requireExactKeys(implementation.codecFixtureMatrix, ["id", "caseSet", "ownership", "targets", "rows"], "implementation.codecFixtureMatrix");
+  if (Object.keys(requireObject(matrix.caseSet, "implementation.codecFixtureMatrix.caseSet")).length === 0) throw new Error("codec fixture caseSet cannot be empty");
+  if (Object.keys(requireObject(matrix.ownership, "implementation.codecFixtureMatrix.ownership")).length === 0) throw new Error("codec fixture ownership cannot be empty");
+  requireStringArray(matrix.targets, "implementation.codecFixtureMatrix.targets", 1);
+  if (requireArray(matrix.rows, "implementation.codecFixtureMatrix.rows", 12).length !== 12) throw new Error("codec fixture matrix must have 12 rows");
+  matrix.rows.forEach((row, index) => {
+    requireTuple(row, 4, `implementation.codecFixtureMatrix.rows[${index}]`);
+    row.forEach((item, part) => requireString(item, `implementation.codecFixtureMatrix.rows[${index}][${part}]`));
+  });
+  if (canonicalJson(matrix.rows.map((row) => row[1])) !== canonicalJson(DOCUMENT_KEYS)) throw new Error("codec fixture matrix document order differs");
+  const waves = requireArray(implementation.waves, "implementation.waves", 6);
+  if (waves.length !== 6) throw new Error("implementation must declare exactly six waves");
+  const writeOwners = new Map();
+  for (const [index, wave] of waves.entries()) {
+    requireExactKeys(wave, ["id", "status", "owner", "name", "documents", "objective", "entryGate", "ownedFiles", "readOnlyDependencies", "testFiles", "commands", "tddGates", "browserAssertions", "exitGate", "rollback", "featureFlagRef", "browserMatrixRef", "databaseMigration", "apiChange", "productionFixBoundary"], `implementation.waves[${index}]`);
+    if (wave.id !== `wave${index}` || wave.status !== "BLOCKED_PENDING_USER_DB_APPROVAL") throw new Error(`implementation wave${index} is not correctly blocked`);
+    for (const key of ["owner", "name", "objective", "entryGate", "exitGate", "rollback"]) requireString(wave[key], `implementation.waves[${index}].${key}`);
+    if (wave.productionFixBoundary !== null) requireString(wave.productionFixBoundary, `implementation.waves[${index}].productionFixBoundary`);
+    requireArray(wave.documents, `implementation.waves[${index}].documents`);
+    requireArray(wave.readOnlyDependencies, `implementation.waves[${index}].readOnlyDependencies`);
+    requireArray(wave.browserAssertions, `implementation.waves[${index}].browserAssertions`);
+    requireStringArray(wave.tddGates, `implementation.waves[${index}].tddGates`, 1);
+    const commands = requireObject(wave.commands, `implementation.waves[${index}].commands`);
+    if (Object.keys(commands).length === 0) throw new Error(`implementation.waves[${index}].commands cannot be empty`);
+    Object.entries(commands).forEach(([key, value]) => requireString(value, `implementation.waves[${index}].commands.${key}`));
+    for (const kind of ["ownedFiles", "testFiles"]) {
+      const files = requireArray(wave[kind], `implementation.waves[${index}].${kind}`);
+      files.forEach((file, fileIndex) => {
+        requireString(file, `implementation.waves[${index}].${kind}[${fileIndex}]`);
+        if (writeOwners.has(file)) throw new Error(`${file} is write-owned by both ${writeOwners.get(file)} and ${wave.id}`);
+        writeOwners.set(file, wave.id);
+      });
     }
-    const sidecar = parseJsonBuffer(
-      validateTypedBoundBlob(root, evidenceCommit, record, `browser sidecar ${record.path}`),
-      `browser sidecar ${record.path}`
-    );
-    const recomputed = validateBrowserTypographySidecar(sidecar, context);
-    if (fixtureIds.has(recomputed.fixtureId)) throw new Error(`duplicate browser fixtureId ${recomputed.fixtureId}`);
-    fixtureIds.add(recomputed.fixtureId);
-    matrixKeys.push(recomputed.matrixKey);
   }
-  const expectedMatrix = [];
-  for (const browser of ["Chromium", "Firefox", "WebKit"]) {
-    for (const viewport of ["desktop1440", "mobile390"]) {
-      for (const theme of ["day", "night"]) {
-        for (const documentKey of DOCUMENT_KEYS) expectedMatrix.push([browser, viewport, theme, documentKey].join("|"));
-      }
-    }
+  const wave1 = waves[1];
+  if (canonicalJson(wave1.documents) !== canonicalJson(["riskAssessmentDraft", "tbmBriefing", "tbmLogDraft"])) throw new Error("Wave 1 document scope differs");
+  for (const [symbol, file, owner] of components.fileMap) {
+    if (writeOwners.get(file) !== owner) throw new Error(`${symbol} file ${file} is not uniquely owned by ${owner}`);
   }
-  if (canonicalJson(matrixKeys.sort()) !== canonicalJson(expectedMatrix.sort())) {
-    throw new Error("browser sidecars do not cover the exact 144-case matrix");
+  for (const document of documents) {
+    const file = `components/workpack-editor/${document.component}.tsx`;
+    const owner = DOCUMENT_WAVES.get(document.key);
+    if (writeOwners.get(file) !== owner || basename(file, ".tsx") !== document.component) throw new Error(`${document.component} ownership or filename differs`);
   }
+  const ownership = requireExactKeys(implementation.fileOwnership, ["rule", "validator", "blockedOwners", "highRiskDeferrals"], "implementation.fileOwnership");
+  requireArray(ownership.blockedOwners, "implementation.fileOwnership.blockedOwners", 1).forEach((blocked, index) => {
+    requireKeys(blocked, ["owner", "status", "paths"], `implementation.fileOwnership.blockedOwners[${index}]`);
+    requireStringArray(blocked.paths, `implementation.fileOwnership.blockedOwners[${index}].paths`, 1).forEach((file) => {
+      if (writeOwners.has(file)) throw new Error(`blocked authority path ${file} has executable wave owner ${writeOwners.get(file)}`);
+    });
+  });
+  const wave5 = waves[5];
+  for (const path of ["components/WorkpackEditor.tsx", "app/api/export/xlsx/route.ts", "app/api/export/pdf/route.ts", "app/api/export/hwp/route.ts"]) {
+    if (!wave5.ownedFiles.includes(path)) throw new Error(`wave5 does not own export call-site path ${path}`);
+  }
+  if (wave5.ownedFiles.includes("app/api/export/hwpx-template/route.ts") || exportContract.roundTripOwner.wave !== "wave5") throw new Error("HWPX template/round-trip wave ownership differs");
+  const viewports = requireArray(implementation.viewports, "implementation.viewports", 1);
+  viewports.forEach((viewport, index) => {
+    requireExactKeys(viewport, ["id", "width", "height", "requiredThemes", "containment"], `implementation.viewports[${index}]`);
+    requireInteger(viewport.width, `implementation.viewports[${index}].width`, 1);
+    requireInteger(viewport.height, `implementation.viewports[${index}].height`, 1);
+    if (canonicalJson(viewport.requiredThemes) !== canonicalJson(["day", "night"])) throw new Error(`viewport ${viewport.id} theme matrix differs`);
+  });
+  requireArray(implementation.browserMatrix, "implementation.browserMatrix", 1).forEach((entry, index) => {
+    requireExactKeys(entry, ["browser", "viewportId", "themes"], `implementation.browserMatrix[${index}]`);
+    requireString(entry.browser, `implementation.browserMatrix[${index}].browser`);
+    requireString(entry.viewportId, `implementation.browserMatrix[${index}].viewportId`);
+    if (canonicalJson(entry.themes) !== canonicalJson(["day", "night"])) throw new Error(`browser matrix row ${index} themes differ`);
+  });
+  const acceptance = requireArray(implementation.acceptance, "implementation.acceptance", contractIds.length);
+  acceptance.forEach((entry, index) => {
+    requireTuple(entry, 2, `implementation.acceptance[${index}]`);
+    entry.forEach((item, part) => requireString(item, `implementation.acceptance[${index}][${part}]`));
+  });
+  if (canonicalJson(acceptance.map((entry) => entry[0])) !== canonicalJson(contractIds)) throw new Error("implementation acceptance IDs differ from contractIds");
+}
+
+function validateIndependentGate(gate) {
+  requireExactKeys(gate, ["required", "rule", "holdState", "implementationState"], "independentGate");
+  if (gate.required !== true || gate.holdState !== "HOLD_PENDING_FRESH_REVIEW" || gate.implementationState !== "BLOCKED_PENDING_USER_DB_APPROVAL") {
+    throw new Error("independent gate does not preserve hold and approval block");
+  }
+}
+
+function validateHumanParityContract(contract) {
+  requireExactKeys(contract, ["markdownStart", "markdownEnd", "humanStart", "humanEnd", "renderer", "topLevelEnumeration", "comparison", "proseNormalization", "proseSha256", "humanRequirements", "deliberateMismatch"], "humanParityContract");
+  for (const key of ["markdownStart", "markdownEnd", "humanStart", "humanEnd", "renderer", "topLevelEnumeration", "comparison", "proseNormalization"]) requireString(contract[key], `humanParityContract.${key}`);
+  requireTypedSha256(contract.proseSha256, "humanParityContract.proseSha256");
+  const requirements = requireArray(contract.humanRequirements, "humanParityContract.humanRequirements", 10);
+  if (requirements.length !== 10) throw new Error("human parity requirements must contain exactly 10 entries");
+  requirements.forEach((entry, index) => {
+    requireTuple(entry, 3, `humanParityContract.humanRequirements[${index}]`);
+    entry.forEach((item, part) => requireString(item, `humanParityContract.humanRequirements[${index}][${part}]`));
+  });
+  requireStringArray(contract.deliberateMismatch, "humanParityContract.deliberateMismatch", 1);
+}
+
+function validateContractSchema(spec) {
+  validateJsonTree(spec);
+  requireExactKeys(spec, TOP_LEVEL_DOMAINS, "spec root");
+  if (spec.schemaVersion !== "2.7.0") throw new Error("schemaVersion must be 2.7.0");
+  validateMeta(spec.meta);
+  const contractIds = requireStringArray(spec.contractIds, "contractIds", 1);
+  if (new Set(contractIds).size !== contractIds.length) throw new Error("contractIds must be unique");
+  validateTupleSchemas(spec.tupleSchemas);
+  validateSourceSeams(spec.sourceSeams);
+  validateValidationDomain(spec.validation);
+  validateIntegrationLedger(spec.integrationLedger, spec.meta);
+  const codecs = validateCommon(spec.common);
+  validateModel(spec.model, codecs);
+  validateWorkflow(spec.workflow);
+  validatePersistence(spec.persistence, codecs);
+  validateEvidencePresentation(spec.evidencePresentation);
+  validateUi(spec.ui);
+  validateComponents(spec.components);
+  validateExport(spec.export);
+  validateDocuments(spec.documents, codecs, spec.common.typeRegistry);
+  validateImplementation(spec.implementation, contractIds, spec.documents, spec.components, spec.export);
+  validateIndependentGate(spec.independentGate);
+  validateHumanParityContract(spec.humanParityContract);
+  if (spec.meta.sourceBase !== "d3ad86530bc786d8024206cc5b7c7db60c055278") throw new Error("sourceBase differs from reviewed source");
+  if (spec.meta.currentIntegrationTarget !== "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5") throw new Error("currentIntegrationTarget differs from reviewed target");
+  if (spec.meta.remediationParent !== "75b522e8ee49f86482300a5bb3e3ae4ff0dc09ac") throw new Error("remediationParent differs from previous evidence child");
 }
 
 function validateNormativeParity(spec, markdown) {
+  const contract = spec.humanParityContract;
   const expectedStructural = renderNormativeMarkdown(spec);
-  const actualStructural = extractMarkedBlock(
-    markdown,
-    spec.humanParityContract.markdownStart,
-    spec.humanParityContract.markdownEnd
-  );
-  if (actualStructural !== expectedStructural) {
-    throw new Error("candidate Markdown structural contract differs from canonical spec.json");
-  }
+  const actualStructural = extractMarkedBlock(markdown, contract.markdownStart, contract.markdownEnd);
+  if (actualStructural !== expectedStructural) throw new Error("candidate Markdown structural contract differs from canonical spec.json");
   const expectedHuman = renderHumanMarkdown(spec);
-  const actualHuman = extractMarkedBlock(
-    markdown,
-    spec.humanParityContract.humanStart,
-    spec.humanParityContract.humanEnd
-  );
-  if (actualHuman !== expectedHuman) {
-    throw new Error("candidate Markdown human prose requirements differ from canonical spec.json");
-  }
-  requireTypedSha256(spec.humanParityContract.proseSha256, "humanParityContract.proseSha256");
-  const proseDigest = `sha256:${sha256(normalizedMarkdownProse(markdown, spec.humanParityContract))}`;
-  if (proseDigest !== spec.humanParityContract.proseSha256) {
-    throw new Error("candidate Markdown prose outside generated blocks differs from canonical spec.json binding");
-  }
-  for (const marker of [
-    spec.humanParityContract.markdownStart,
-    spec.humanParityContract.markdownEnd,
-    spec.humanParityContract.humanStart,
-    spec.humanParityContract.humanEnd
-  ]) {
+  const actualHuman = extractMarkedBlock(markdown, contract.humanStart, contract.humanEnd);
+  if (actualHuman !== expectedHuman) throw new Error("candidate Markdown human requirements differ from canonical spec.json");
+  const proseDigest = `sha256:${sha256(normalizedMarkdownProse(markdown, contract))}`;
+  if (proseDigest !== contract.proseSha256) throw new Error("candidate Markdown prose outside generated blocks differs from canonical spec.json binding");
+  for (const marker of [contract.markdownStart, contract.markdownEnd, contract.humanStart, contract.humanEnd]) {
     if (markdown.split(marker).length !== 2) throw new Error(`candidate Markdown marker is not unique: ${marker}`);
   }
-  for (const stale of [
-    "SAFECLAW-CONTRACT-MIRROR",
-    "HOLD_PENDING_INDEPENDENT_PASS",
-    "CURRENT_EXECUTABLE_CANONICAL_PARITY"
-  ]) {
-    if (markdown.includes(stale)) throw new Error(`candidate Markdown retains stale contract marker: ${stale}`);
+}
+
+function validateBoundBlob(root, commit, record, label) {
+  requireExactKeys(record, ["path", "gitBlob", "sha256", "bytes"], label);
+  requireString(record.path, `${label}.path`);
+  requireString(record.gitBlob, `${label}.gitBlob`);
+  if (!FULL_SHA.test(record.gitBlob)) throw new Error(`${label}.gitBlob must be a Git object SHA`);
+  requireString(record.sha256, `${label}.sha256`);
+  if (!HEX_SHA256.test(record.sha256)) throw new Error(`${label}.sha256 must be lowercase hex`);
+  requireInteger(record.bytes, `${label}.bytes`, 0);
+  const blob = readBlob(root, commit, record.path);
+  if (blobOid(root, commit, record.path) !== record.gitBlob || sha256(blob) !== record.sha256 || blob.length !== record.bytes) {
+    throw new Error(`${label} blob identity differs`);
   }
 }
 
-function validateInternalContract(spec) {
-  if (spec.schemaVersion !== "2.6.0") throw new Error("spec schemaVersion differs");
-  if (spec.meta.currentIntegrationTarget !== "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5") {
-    throw new Error("spec integration target differs from the reviewed snapshot");
-  }
-  if (spec.integrationLedger.currentIntegrationTarget !== spec.meta.currentIntegrationTarget) {
-    throw new Error("conflict snapshot target differs from spec target");
-  }
-  if (spec.meta.status !== "HOLD_PENDING_FRESH_REVIEW") throw new Error("spec status is not HOLD_PENDING_FRESH_REVIEW");
-  if (spec.meta.implementationProgramStatus !== "BLOCKED_PENDING_USER_DB_APPROVAL") {
-    throw new Error("meta implementation program is not approval-blocked");
-  }
-  if (spec.implementation.programStatus !== "BLOCKED_PENDING_USER_DB_APPROVAL") {
-    throw new Error("implementation program is not approval-blocked");
-  }
-  if (!spec.independentGate.required || spec.independentGate.implementationState !== "BLOCKED_PENDING_USER_DB_APPROVAL") {
-    throw new Error("independent/user approval AND gate is incomplete");
-  }
-  for (const wave of spec.implementation.waves) {
-    if (wave.status !== "BLOCKED_PENDING_USER_DB_APPROVAL") throw new Error(`${wave.id} is not approval-blocked`);
-  }
-  if (spec.documents.length !== 12) throw new Error("document registry does not contain 12 entries");
-  if (canonicalJson(spec.documents.map((document) => document.key)) !== canonicalJson(DOCUMENT_KEYS)) {
-    throw new Error("document key order differs from the exact 12-key contract");
-  }
-  if (new Set(spec.documents.map((document) => document.id)).size !== 12) throw new Error("document IDs are not unique");
-  if (new Set(spec.documents.map((document) => document.component)).size !== 12) {
-    throw new Error("document component names are not unique");
-  }
-  for (const document of spec.documents) {
-    if (typeof document.primaryAction !== "string" || document.primaryAction.length === 0) {
-      throw new Error(`${document.key} is missing primaryAction`);
-    }
-  }
-  const acceptanceIds = spec.implementation.acceptance.map((entry) => entry[0]);
-  if (canonicalJson(acceptanceIds) !== canonicalJson(spec.contractIds)) {
-    throw new Error("acceptance IDs differ from contractIds or order");
-  }
-
-  const codecs = new Set(Object.keys(spec.common.codecs));
-  const allFields = [
-    ...Object.values(spec.common.typeRegistry).flatMap((registered) => registered.fields),
-    ...spec.documents.flatMap((document) => document.fields)
-  ];
-  for (const field of allFields) {
-    if (!codecs.has(field[3])) throw new Error(`field ${field[0]} references unknown codec ${field[3]}`);
-    if (String(field[1]).includes("|null") && !String(field[3]).startsWith("nullable")) {
-      throw new Error(`nullable field ${field[0]} uses non-nullable codec ${field[3]}`);
-    }
-    if (field[2] === "zero or more" && String(field[3]).startsWith("stableIdArray") && field[3] !== "stableIdArrayAllowEmpty") {
-      throw new Error(`zero-or-more ID array ${field[0]} is not allow-empty`);
-    }
-    if (String(field[2]).includes("at least one") && String(field[3]).startsWith("stableIdArray") && field[3] !== "stableIdArrayNonEmpty") {
-      throw new Error(`required ID array ${field[0]} is not strict non-empty`);
-    }
-  }
-  for (const codec of ["sha256HexDigest", "nullableSha256HexDigest"]) {
-    if (!codecs.has(codec)) throw new Error(`photo event digest codec is missing: ${codec}`);
-  }
-
-  const rawKinds = spec.common.rawProvenance.union.map((member) => member.kind);
-  if (canonicalJson(rawKinds) !== canonicalJson(EXPECTED_RAW_KINDS)) throw new Error("raw provenance discriminators differ");
-  const rawText = canonicalJson(spec.common.rawProvenance);
-  for (const field of [
-    "anchors[].page",
-    "anchors[].excerpt",
-    "referenceId",
-    "stableDocumentKey",
-    "version",
-    "evidenceRef",
-    "chunk.supportStatement",
-    "registryMapping",
-    "provenanceBridge"
-  ]) {
-    if (!rawText.includes(field)) throw new Error(`raw provenance contract omits ${field}`);
-  }
-  if (rawText.includes('"reviewed"')) throw new Error("raw provenance contract contains reviewed boolean");
-
-  const writeOwners = new Map();
-  for (const wave of spec.implementation.waves) {
-    for (const file of [...wave.ownedFiles, ...wave.testFiles]) {
-      if (writeOwners.has(file)) throw new Error(`${file} is write-owned by both ${writeOwners.get(file)} and ${wave.id}`);
-      writeOwners.set(file, wave.id);
-    }
-  }
-  const mappedSymbols = spec.components.fileMap.map(([symbol]) => symbol);
-  const mappedFiles = spec.components.fileMap.map(([, file]) => file);
-  if (new Set(mappedSymbols).size !== mappedSymbols.length) throw new Error("component/type file map contains duplicate symbols");
-  if (new Set(mappedFiles).size !== mappedFiles.length) throw new Error("component/type file map contains duplicate paths");
-  for (const [symbol, file, owner] of spec.components.fileMap) {
-    if (writeOwners.get(file) !== owner) throw new Error(`${symbol} file ${file} is not owned by ${owner}`);
-  }
-  for (const document of spec.documents) {
-    const file = `components/workpack-editor/${document.component}.tsx`;
-    const owner = DOCUMENT_WAVES.get(document.key);
-    if (writeOwners.get(file) !== owner) throw new Error(`${document.component} is not uniquely owned by ${owner}`);
-    if (basename(file, ".tsx") !== document.component) throw new Error(`${document.component} file basename mismatch`);
-  }
-  for (const blocked of spec.implementation.fileOwnership.blockedOwners) {
-    for (const file of blocked.paths) {
-      if (writeOwners.has(file)) throw new Error(`blocked path ${file} is owned by executable ${writeOwners.get(file)}`);
-    }
-  }
-
-  const fixtureRows = spec.implementation.codecFixtureMatrix.rows;
-  if (fixtureRows.length !== 12) throw new Error("codec fixture matrix does not contain 12 rows");
-  if (canonicalJson(fixtureRows.map((row) => row[1])) !== canonicalJson(DOCUMENT_KEYS)) {
-    throw new Error("codec fixture rows differ from document order");
-  }
-  const pureCases = spec.implementation.codecFixtureMatrix.ownership.wave0PureCases;
-  if (pureCases.includes("export")) throw new Error("Wave 0 pure cases incorrectly include export");
-  if (spec.export.roundTripOwner.wave !== "wave5") throw new Error("actual export round-trip exits are not owned by wave5");
-  const wave5 = spec.implementation.waves.find((wave) => wave.id === "wave5");
-  for (const path of [
-    "components/WorkpackEditor.tsx",
-    "app/api/export/xlsx/route.ts",
-    "app/api/export/pdf/route.ts",
-    "app/api/export/hwp/route.ts"
-  ]) {
-    if (!wave5.ownedFiles.includes(path)) throw new Error(`wave5 does not own export call-site path ${path}`);
-  }
-  if (wave5.ownedFiles.includes("app/api/export/hwpx-template/route.ts")) {
-    throw new Error("wave5 incorrectly owns the unrelated HWPX template route");
-  }
-  const seamShape = spec.export.actualSeamsAtTarget.map((seam) => [
-    seam.id,
-    seam.kind,
-    seam.clientSymbol,
-    seam.serverPath,
-    seam.serverSymbol
-  ]);
-  if (canonicalJson(seamShape) !== canonicalJson(EXPECTED_EXPORT_SEAMS)) throw new Error("target export seam registry differs");
-
-  const authority = spec.persistence.serverRevisionAuthority;
-  if (authority.status !== "BLOCKED_PENDING_USER_DB_APPROVAL") throw new Error("server authority is not user-approval blocked");
-  if (!authority.rootIdempotency?.strategyA || !authority.rootIdempotency?.strategyB) {
-    throw new Error("both root idempotency strategies are not defined");
-  }
-  const authorityText = canonicalJson(authority);
-  for (const token of [
-    "logicalWorkpackId",
-    "rootOperationKey",
-    "UNIQUE(organization_id, logical_workpack_id, revision)",
-    "idempotency_mismatch",
-    "logical_root_conflict",
-    "root_operation_mismatch"
-  ]) {
-    if (!authorityText.includes(token)) throw new Error(`root authority omits ${token}`);
-  }
-  const photo = spec.persistence.photo.reviewAuthority;
-  if (photo.status !== "BLOCKED_PENDING_USER_DB_APPROVAL") throw new Error("photo authority is not user-approval blocked");
-  const photoText = canonicalJson(photo);
-  for (const token of [
-    "Sha256Digest",
-    "analysis_id",
-    "analysis_payload",
-    "analysisPayloadDigest",
-    "modelProvider",
-    "candidateControlTextDigests",
-    "beforeImageSha256",
-    "afterImageSha256",
-    "reviewerId",
-    "confirmedAt",
-    "transactionId",
-    "rootOperationId",
-    "candidateRevision",
-    "resultingRevision",
-    "canonicalEventDigest",
-    "site-memory/session only",
-    "atomic"
-  ]) {
-    if (!photoText.includes(token)) throw new Error(`photo event authority omits ${token}`);
-  }
-
-  const zoom = spec.ui.textZoom200;
-  if (zoom.status !== "DECLARED_NOT_EXECUTED") throw new Error("200% contract incorrectly claims execution");
-  if (zoom.matrix.totalCaseCount !== 144 || zoom.matrix.caseCountPerBrowser !== 48) {
-    throw new Error("200% browser matrix count differs from 12 docs x 2 themes x 2 viewports x 3 browsers");
-  }
-  const zoomText = canonicalJson(zoom);
-  for (const token of [
-    "deviceScaleFactor=1",
-    "devicePixelRatio=1",
-    "visualViewport.scale=1",
-    "applicationCount=1",
-    "--safeclaw-type-scale=2",
-    "data-safeclaw-text-policy=double",
-    "1.9..2.1",
-    "overflow-y:hidden",
-    "all 144",
-    "cross-parent",
-    "inner transform/zoom"
-  ]) {
-    if (!zoomText.includes(token)) throw new Error(`200% browser contract omits ${token}`);
-  }
-  if (canonicalJson([...spec.validation.redCases].sort()) !== canonicalJson([...DELIBERATE_CASES].sort())) {
-    throw new Error("declared deliberate RED cases differ from executable validator cases");
-  }
-  if (spec.humanParityContract.humanRequirements.length !== 10) throw new Error("human prose requirement count differs");
-  if (spec.humanParityContract.deliberateMismatch.length !== 5) throw new Error("parity deliberate mismatch set differs");
-  const trustText = canonicalJson(spec.validation.implementationEvidence);
-  for (const token of [
-    "safeclaw-external-approval-manifest/v1",
-    "rawEvent blob",
-    "migration/RPC proposal",
-    "safeclaw-command-execution-receipt/v1",
-    "commandArgv string[]",
-    "stdout blob",
-    "sidecar blob records"
-  ]) {
-    if (!trustText.includes(token)) throw new Error(`implementation evidence trust contract omits ${token}`);
-  }
-  validateBrowserNegativeFixtures(spec);
-  if (spec.ui.browserAssertions.length !== 25) throw new Error("browser assertion count must be 25");
+function validateCandidateArtifacts(root, manifest, candidate, spec) {
+  const records = requireArray(manifest.candidateArtifacts, "manifest.candidateArtifacts", 3);
+  const expectedPaths = [...spec.validation.candidateArtifacts].sort();
+  const actualPaths = records.map((record) => record.path).sort();
+  if (canonicalJson(actualPaths) !== canonicalJson(expectedPaths)) throw new Error("manifest candidate artifact paths differ");
+  records.forEach((record, index) => validateBoundBlob(root, candidate, record, `manifest.candidateArtifacts[${index}]`));
 }
 
-function validateSafetyReferenceSource(source, spec) {
-  const safetyMatch = source.match(/export type SafetyReferenceItem = \{([\s\S]*?)^\};/mu);
-  if (!safetyMatch) throw new Error("cannot extract target SafetyReferenceItem");
-  const raw = spec.common.rawProvenance.union.find((member) => member.kind === "safety_reference_item");
-  const productionFields = [...safetyMatch[1].matchAll(/^\s{2}([A-Za-z_][A-Za-z0-9_]*)(\?)?:/gmu)]
-    .map((match) => [match[1], match[2] === "?"]);
-  const required = productionFields.filter(([, optional]) => !optional).map(([name]) => name).sort();
-  const optional = productionFields.filter(([, isOptional]) => isOptional).map(([name]) => name).sort();
-  if (canonicalJson(required) !== sortedCanonical(raw.required)) throw new Error("raw SafetyReferenceItem required fields differ from target");
-  if (canonicalJson(optional) !== sortedCanonical(raw.optional)) throw new Error("raw SafetyReferenceItem optional fields differ from target");
-  const guideMatch = safetyMatch[1].match(/^\s{2}kosha_guide\?: \{([\s\S]*?)^\s{2}\};/mu);
-  if (!guideMatch) throw new Error("cannot extract target SafetyReferenceItem.kosha_guide");
-  const guideFields = [...guideMatch[1].matchAll(/^\s{4}([A-Za-z_][A-Za-z0-9_]*):/gmu)].map((match) => match[1]);
-  const expected = ["referenceId", "stableDocumentKey", "version", "quality", "lifecycle", "bodyKind", "anchors", "evidenceRef", "directEligible"];
-  if (canonicalJson(guideFields) !== canonicalJson(expected)) throw new Error("raw KOSHA guide fields differ from target");
+function validateTargetBlobs(root, manifest, target, spec) {
+  const records = requireArray(manifest.targetBlobs, "manifest.targetBlobs", spec.validation.targetBlobPaths.length);
+  const expectedPaths = [...spec.validation.targetBlobPaths].sort();
+  const actualPaths = records.map((record) => record.path).sort();
+  if (canonicalJson(actualPaths) !== canonicalJson(expectedPaths)) throw new Error("manifest target blob paths differ");
+  records.forEach((record, index) => validateBoundBlob(root, target, record, `manifest.targetBlobs[${index}]`));
 }
 
-function validateTargetSourceShapes(blobs, spec) {
-  const workpackEditor = blobs.get("components/WorkpackEditor.tsx");
-  const keyMatch = workpackEditor.match(/export type DocumentKey =([\s\S]*?);/u);
-  if (!keyMatch) throw new Error("cannot extract target DocumentKey");
-  const productionKeys = [...keyMatch[1].matchAll(/"([^"]+)"/gu)].map((match) => match[1]);
-  if (canonicalJson(productionKeys) !== canonicalJson(DOCUMENT_KEYS)) throw new Error("target DocumentKey differs from normative registry");
-  const metaMatch = workpackEditor.match(/const documentMeta: EditableDocument\[\] = \[([\s\S]*?)\n\];/u);
-  if (!metaMatch) throw new Error("cannot extract target documentMeta");
-  const productionDocuments = [...metaMatch[1].matchAll(/key: "([^"]+)"[\s\S]*?title: "([^"]+)"/gu)]
-    .map((match) => [match[1], match[2]]);
-  const normativeDocuments = spec.documents.map((document) => [document.key, document.title]);
-  if (canonicalJson(productionDocuments) !== canonicalJson(normativeDocuments)) {
-    throw new Error("target documentMeta differs from normative registry");
-  }
+function validateEvidenceManifestShape(manifest) {
+  requireExactKeys(manifest, ["schemaVersion", "kind", "capturedAt", "branch", "candidateCommit", "candidateParent", "sourceBase", "currentIntegrationTarget", "mergeBase", "candidateArtifacts", "targetBlobs", "refSnapshot", "behaviorExecution", "implementationExecution", "reviewClaims", "notClaims"], "review evidence manifest");
+  if (manifest.kind !== "safeclaw-spec-review-evidence/v1") throw new Error("review evidence manifest kind differs");
+  requireRfc3339(manifest.capturedAt, "review evidence capturedAt");
+  for (const key of ["candidateCommit", "candidateParent", "sourceBase", "currentIntegrationTarget", "mergeBase"]) requireFullSha(manifest[key], `manifest.${key}`);
+  requireStringArray(manifest.reviewClaims, "manifest.reviewClaims", 1);
+  requireStringArray(manifest.notClaims, "manifest.notClaims", 1);
+  const behavior = requireExactKeys(manifest.behaviorExecution, ["executed", "reason"], "manifest.behaviorExecution");
+  const implementation = requireExactKeys(manifest.implementationExecution, ["executed", "reason"], "manifest.implementationExecution");
+  if (behavior.executed !== false || implementation.executed !== false) throw new Error("spec evidence must record zero behavior and implementation execution");
+}
 
-  const riskSource = blobs.get("lib/risk-assessment-schema.ts");
-  const riskMatch = riskSource.match(/export type RiskAssessmentRow = \{([\s\S]*?)\n\};/u);
-  if (!riskMatch) throw new Error("cannot extract target RiskAssessmentRow");
-  const productionRiskFields = [...riskMatch[1].matchAll(/^\s{2}([A-Za-z][A-Za-z0-9]*):/gmu)].map((match) => match[1]);
-  const normativeRiskFields = spec.common.typeRegistry.RiskAssessmentEditorRow.fields.slice(1).map((field) => field[0]);
-  if (canonicalJson(productionRiskFields) !== canonicalJson(normativeRiskFields)) {
-    throw new Error("target RiskAssessmentRow field names differ");
-  }
-
-  validateSafetyReferenceSource(blobs.get("lib/safety-reference-catalog.ts"), spec);
-  const ontology = blobs.get("lib/ontology/evidence-chain-registry.ts");
-  for (const token of [
-    "LawEvidenceRecord",
-    "SifEvidenceRecord",
-    "KoshaGuidanceRecord",
-    "supportStatement",
-    "registryMapping",
-    "provenanceBridge"
-  ]) {
-    if (!ontology.includes(token)) throw new Error(`target ontology source omits ${token}`);
-  }
-  const generation = blobs.get("lib/generation-evidence.ts");
-  if (!generation.includes("delete content.generationEvidence;") || !generation.includes("delete content.generationEvidenceError;")) {
-    throw new Error("target generation-evidence digest boundary changed");
-  }
-  const workpacksRoute = blobs.get("app/api/workpacks/route.ts");
-  if (!workpacksRoute.includes(".insert(")) throw new Error("target workpacks route is no longer insert-based");
-  for (const token of ["expectedRevision", "rootOperationKey", "idempotencyKey", "logicalWorkpackId", "parentWorkpackId"]) {
-    if (workpacksRoute.includes(token)) throw new Error(`target workpacks route unexpectedly contains ${token}; authority contract must be re-reviewed`);
-  }
-  const migration = blobs.get("supabase/migrations/002_workspace_productization.sql");
-  for (const token of ["logical_workpack_id", "parent_workpack_id", "root_operation_key", "idempotency_key"]) {
-    if (migration.includes(token)) throw new Error(`target migration unexpectedly contains ${token}; approval contract must be re-reviewed`);
-  }
-  const improvements = blobs.get("app/api/workpacks/[id]/improvements/route.ts");
-  if (!improvements.includes("export async function GET") || !improvements.includes("export async function POST")) {
-    throw new Error("target improvements GET/POST seam changed");
-  }
-  if (improvements.includes("export async function PATCH") || improvements.includes("export async function PUT")) {
-    throw new Error("target improvements route now has a review transition; PHOTO-002 must be re-reviewed");
-  }
-  for (const path of [
-    "app/api/workpacks/[id]/share-sessions/route.ts",
-    "app/api/workflow/dispatch/route.ts"
-  ]) {
-    const source = blobs.get(path);
-    if (source.includes("sourceRevision") || source.includes("evidenceDigest")) {
-      throw new Error(`target share freshness seam changed in ${path}`);
-    }
-  }
-
-  for (const token of [
-    "async function downloadXlsx()",
-    'fetch("/api/export/xlsx"',
-    "async function downloadHwp()",
-    'fetch("/api/export/hwp"',
-    "async function buildHwpxWithRhwp(body: string)",
-    "document.exportHwpx()",
-    "async function downloadHwpx()",
-    "async function printPdf()",
-    'fetch("/api/export/pdf?format=html"'
-  ]) {
-    if (!workpackEditor.includes(token)) throw new Error(`target WorkpackEditor export seam omits ${token}`);
-  }
-  if (workpackEditor.includes('fetch("/api/export/hwpx-template')) {
-    throw new Error("target WorkpackEditor unexpectedly calls the HWPX template route");
-  }
-  const hwp = blobs.get("app/api/export/hwp/route.ts");
-  if (!hwp.includes("export async function POST") || !hwp.includes("buildHwpBuffer") || !hwp.includes('"content-type": "application/x-hwp"')) {
-    throw new Error("target HWP route is not the declared binary POST seam");
-  }
-  const pdf = blobs.get("app/api/export/pdf/route.ts");
-  if (!pdf.includes("export async function POST") || !pdf.includes('"content-type": "text/html; charset=utf-8"')) {
-    throw new Error("target PDF HTML POST seam differs");
-  }
-  const xlsx = blobs.get("app/api/export/xlsx/route.ts");
-  if (!xlsx.includes("export async function POST") || !xlsx.includes("workPlanStructured") || !xlsx.includes("educationRecordStructured")) {
-    throw new Error("target XLSX structured POST seam differs");
-  }
-  const hwpxTemplate = blobs.get("app/api/export/hwpx-template/route.ts");
-  if (!hwpxTemplate.includes("export async function GET")) throw new Error("target HWPX template route shape differs");
+function mutateSchemaForDeliberate(spec, deliberate) {
+  const mutated = structuredClone(spec);
+  if (deliberate === "domain-missing") delete mutated.export;
+  else if (deliberate === "domain-empty") mutated.workflow = {};
+  else if (deliberate === "document-fields-empty") mutated.documents[0].fields = [];
+  else if (deliberate === "document-primary-action-empty") mutated.documents[0].primaryAction = "";
+  else if (deliberate === "photo-object-empty") mutated.persistence.photo.reviewAuthority = {};
+  else if (deliberate === "photo-analysis-missing") delete mutated.persistence.photo.reviewAuthority.futureEvent.fields.analysis_id;
+  else if (deliberate === "photo-confirm-after-missing") {
+    mutated.persistence.photo.reviewAuthority.futureEvent.relationships.confirm.requiresNonNull =
+      mutated.persistence.photo.reviewAuthority.futureEvent.relationships.confirm.requiresNonNull.filter((field) => field !== "afterImageSha256");
+  } else if (deliberate === "conflict-heads-empty") mutated.integrationLedger.heads = [];
+  else if (deliberate === "conflict-local-ref-empty") mutated.integrationLedger.heads[0].localRef = "";
+  else if (deliberate === "wave-unblocked") mutated.implementation.waves[0].status = "READY";
+  return mutated;
 }
 
 function validateSpecReview(args) {
   const root = resolve(args.root);
   const evidence = resolveCommit(root, args.evidence, "evidence");
-  const manifestBuffer = readBlob(root, evidence, args.manifest);
-  const manifest = parseJsonBuffer(manifestBuffer, "review evidence manifest");
-  if (manifest.kind !== "safeclaw-spec-review-evidence/v1") throw new Error("manifest kind is not spec-review evidence");
-  if (manifest.behaviorExecution?.executed !== false || manifest.implementationExecution?.executed !== false) {
-    throw new Error("spec-review evidence must explicitly record no behavior/implementation execution");
-  }
+  const manifest = parseJsonBuffer(readBlob(root, evidence, args.manifest), "review evidence manifest");
+  validateEvidenceManifestShape(manifest);
 
-  let candidateInput = args.candidate;
-  let targetInput = args.target;
-  if (args.deliberate === "spec-ref") candidateInput = manifest.candidateParent;
-  if (args.deliberate === "target-ref") targetInput = manifest.sourceBase;
+  const candidateInput = args.deliberate === "candidate-ref" ? manifest.candidateParent : args.candidate;
+  const sourceBaseInput = args.deliberate === "source-base-ref" ? manifest.currentIntegrationTarget : args.sourceBase;
+  const targetInput = args.deliberate === "target-ref" ? manifest.sourceBase : args.target;
   const candidate = resolveCommit(root, candidateInput, "candidate");
-  const sourceBase = resolveCommit(root, args.sourceBase, "source-base");
+  const sourceBase = resolveCommit(root, sourceBaseInput, "source-base");
   const target = resolveCommit(root, targetInput, "target");
-
-  if (manifest.candidateCommit !== candidate) throw new Error("manifest candidate SHA differs from explicit candidate ref");
-  if (manifest.sourceBase !== sourceBase) throw new Error("manifest sourceBase differs from explicit source-base ref");
-  if (manifest.currentIntegrationTarget !== target) throw new Error("manifest target SHA differs from explicit target ref");
-  if (commitParent(root, evidence) !== candidate) throw new Error("evidence commit parent is not the candidate commit");
+  if (manifest.candidateCommit !== candidate || manifest.sourceBase !== sourceBase || manifest.currentIntegrationTarget !== target) {
+    throw new Error("manifest candidate/source/target identity differs from explicit refs");
+  }
+  const actualEvidenceParent = commitParent(root, evidence);
+  const checkedEvidenceParent = args.deliberate === "evidence-parent" ? manifest.candidateParent : actualEvidenceParent;
+  if (checkedEvidenceParent !== candidate) throw new Error("evidence commit parent is not the candidate commit");
   if (commitParent(root, candidate) !== manifest.candidateParent) throw new Error("candidate parent differs from manifest");
 
-  const specBuffer = readBlob(root, candidate, SPEC_JSON_PATH);
-  const markdownBuffer = readBlob(root, candidate, SPEC_MARKDOWN_PATH);
-  const spec = parseJsonBuffer(specBuffer, "candidate spec.json");
-  let markdown = markdownBuffer.toString("utf8");
-  requireIsoDateTime(manifest.capturedAt, "review evidence capturedAt");
-  if (manifest.branch !== spec.meta.branch || manifest.mergeBase !== sourceBase) {
-    throw new Error("review evidence branch/merge-base differs from candidate contract");
+  const spec = parseJsonBuffer(readBlob(root, candidate, SPEC_JSON_PATH), "candidate spec.json");
+  let markdown = readBlob(root, candidate, SPEC_MARKDOWN_PATH).toString("utf8");
+  if (manifest.branch !== spec.meta.branch || manifest.mergeBase !== sourceBase) throw new Error("manifest branch/merge-base differs from candidate");
+  if (canonicalJson(manifest.refSnapshot) !== canonicalJson(spec.integrationLedger)) throw new Error("manifest ref snapshot differs from candidate ledger");
+  if (spec.meta.remediationParent !== manifest.candidateParent || spec.meta.sourceBase !== sourceBase || spec.meta.currentIntegrationTarget !== target) {
+    throw new Error("candidate provenance differs from manifest and explicit refs");
   }
-  if (canonicalJson(manifest.refSnapshot) !== canonicalJson(spec.integrationLedger)) {
-    throw new Error("review evidence ref snapshot differs from the candidate conflict ledger");
-  }
-  const candidatePaths = commitPaths(root, candidate);
-  const evidencePaths = commitPaths(root, evidence);
-  if (canonicalJson(candidatePaths) !== canonicalJson([...spec.meta.reviewScope.candidateCommit.allowedPaths].sort())) {
-    throw new Error(`candidate commit scope differs: ${candidatePaths.join(", ")}`);
-  }
-  if (canonicalJson(evidencePaths) !== canonicalJson([...spec.meta.reviewScope.evidenceCommit.allowedPaths].sort())) {
-    throw new Error(`evidence commit scope differs: ${evidencePaths.join(", ")}`);
-  }
-  if (spec.meta.remediationParent !== manifest.candidateParent) throw new Error("candidate remediationParent differs from manifest");
-  if (spec.meta.sourceBase !== sourceBase || spec.meta.currentIntegrationTarget !== target) {
-    throw new Error("candidate sourceBase/currentIntegrationTarget differs from explicit refs");
-  }
-  const mergeBase = gitText(root, ["merge-base", candidate, target]);
-  if (mergeBase !== sourceBase || spec.meta.reviewScope.mergeBase !== sourceBase) {
-    throw new Error(`true candidate/target merge-base is ${mergeBase}, expected ${sourceBase}`);
-  }
-  validateCandidateArtifactManifest(root, manifest, candidate, spec);
+  const trueMergeBase = gitText(root, ["merge-base", candidate, target]);
+  if (trueMergeBase !== sourceBase || spec.meta.reviewScope.mergeBase !== sourceBase) throw new Error("candidate/target merge-base differs from sourceBase");
+  if (canonicalJson(commitPaths(root, candidate)) !== canonicalJson([...spec.meta.reviewScope.candidateCommit.allowedPaths].sort())) throw new Error("candidate commit scope differs");
+  if (canonicalJson(commitPaths(root, evidence)) !== canonicalJson([...spec.meta.reviewScope.evidenceCommit.allowedPaths].sort())) throw new Error("evidence commit scope differs");
+  validateCandidateArtifacts(root, manifest, candidate, spec);
+  validateTargetBlobs(root, manifest, target, spec);
 
-  const parityCases = new Set(["normative-parity", "json-model", "json-document-primary-action", "json-unknown-domain"]);
-  const paritySpec = parityCases.has(args.deliberate) ? structuredClone(spec) : spec;
+  const structuralCases = new Set([
+    "domain-missing",
+    "domain-empty",
+    "document-fields-empty",
+    "document-primary-action-empty",
+    "photo-object-empty",
+    "photo-analysis-missing",
+    "photo-confirm-after-missing",
+    "conflict-heads-empty",
+    "conflict-local-ref-empty",
+    "wave-unblocked"
+  ]);
+  const schemaSpec = structuralCases.has(args.deliberate) ? mutateSchemaForDeliberate(spec, args.deliberate) : spec;
+  validateContractSchema(schemaSpec);
+
+  const paritySpec = structuredClone(spec);
   if (args.deliberate === "normative-parity") paritySpec.meta.status = "__deliberate_normative_mismatch__";
-  if (args.deliberate === "json-model") paritySpec.model.documentEnvelope.fields[0][2] = "__deliberate_model_mismatch__";
-  if (args.deliberate === "json-document-primary-action") paritySpec.documents[0].primaryAction = "__deliberate_action_mismatch__";
-  if (args.deliberate === "json-unknown-domain") paritySpec.__deliberateUnknownDomain = { normative: true };
+  else if (args.deliberate === "json-model") paritySpec.model.documentEnvelope.fields[0][2] = "__deliberate_model_mismatch__";
+  else if (args.deliberate === "json-document-primary-action") paritySpec.documents[0].primaryAction = "__deliberate_action_mismatch__";
+  else if (args.deliberate === "json-unknown-domain") paritySpec.__deliberateUnknownDomain = { normative: true };
   if (args.deliberate === "md-prose") {
     const original = markdown;
     markdown = markdown.replace("# SafeClaw", "# Deliberately changed SafeClaw");
-    if (markdown === original) throw new Error("md-prose deliberate fixture could not mutate prose outside generated blocks");
+    if (markdown === original) throw new Error("md-prose deliberate mutation did not apply");
   }
   validateNormativeParity(paritySpec, markdown);
-  validateInternalContract(spec);
-
-  if (args.deliberate === "approval-boolean") {
-    validateApprovalManifestShape({
-      kind: "safeclaw-external-approval-manifest/v1",
-      specCommit: candidate,
-      targetSha: target,
-      migrationRpcProposalDigest: `sha256:${"a".repeat(64)}`,
-      migrationRpcProposal: { path: "proposal.sql" },
-      approvalRootOperationId: "deliberate-root",
-      approved: true,
-      events: [{ type: "INDEPENDENT_SPEC_PASS" }, { type: "USER_DB_AUTHORITY_APPROVAL" }]
-    });
-  }
-  if (args.deliberate === "command-unbound-hash") {
-    validateExecutionReceiptShape({
-      kind: "safeclaw-command-execution-receipt/v1",
-      sourceSha: target,
-      buildId: "deliberate-build",
-      commandId: "typecheck",
-      command: "npm.cmd run typecheck",
-      outputSha256: "a".repeat(64),
-      cwd: ".",
-      startedAt: "2026-07-14T00:00:00.000Z",
-      completedAt: "2026-07-14T00:00:01.000Z",
-      commandArgv: ["npm.cmd", "run", "typecheck"],
-      exitCode: 0,
-      producer: "deliberate",
-      runId: "deliberate",
-      jobId: "deliberate",
-      stdout: {},
-      stderr: {},
-      artifacts: []
-    });
-  }
-  const browserDeliberateKinds = new Map([
-    ["browser-pass-flag", "pass_flag_present"],
-    ["browser-cumulative-scale", "cumulative_root_application"],
-    ["browser-inner-transform", "inner_transform"],
-    ["browser-inner-zoom", "inner_zoom"],
-    ["browser-cross-parent-overlap", "cross_parent_overlap"],
-    ["browser-fixed-offscreen", "fixed_offscreen"],
-    ["browser-sticky-cover", "sticky_cover"],
-    ["browser-horizontal-clip", "horizontal_clip"],
-    ["browser-vertical-clip", "vertical_clip"],
-    ["browser-nested-scroll", "nested_scroll"],
-    ["browser-textarea-scroll", "textarea_hidden_scroll"],
-    ["browser-mobile-late", "mobile_editor_late"],
-    ["browser-ratio-reflow", "ratio_or_reflow"],
-    ["browser-pixel-viewport-scale", "pixel_or_viewport_scale"]
-  ]);
-  if (browserDeliberateKinds.has(args.deliberate)) {
-    validateBrowserTypographySidecar(makeBrowserNegativeFixture(browserDeliberateKinds.get(args.deliberate)));
-  }
-  if (args.deliberate === "implementation-empty") throw new Error("implementation-empty must fail before implementation evidence is read");
-
-  const targetBlobs = loadAndValidateTargetBlobs(root, manifest, target, spec);
-  if (args.deliberate === "source-shape") {
-    const path = "components/WorkpackEditor.tsx";
-    targetBlobs.set(path, targetBlobs.get(path).replace("async function downloadHwp()", "async function __deliberatelyBrokenHwp()"));
-  }
-  validateTargetSourceShapes(targetBlobs, spec);
 
   console.log("SPEC_JSON_PARSE=PASS");
+  console.log("STRUCTURAL_19_DOMAIN_SCHEMA=PASS");
   console.log("FULL_MARKDOWN_JSON_PARITY=PASS");
-  console.log("CANDIDATE_COMMIT_SCOPE=PASS");
-  console.log("EVIDENCE_ONLY_COMMIT_SCOPE=PASS");
-  console.log("TARGET_BLOB_BINDING=PASS");
-  console.log("TARGET_SOURCE_SHAPE=PASS");
-  console.log("CONTRACT_INTERNAL_CONSISTENCY=PASS");
-  console.log("BROWSER_NEGATIVE_FIXTURES=PASS");
+  console.log("IMMUTABLE_CANDIDATE_EVIDENCE_TARGET_IDENTITY=PASS");
   console.log("SPEC_REVIEW_VALIDATION=PASS");
+  console.log("BROWSER_EXECUTIONS=0");
   console.log("IMPLEMENTATION_PROGRAM=BLOCKED_PENDING_USER_DB_APPROVAL");
 }
 
-function validateImplementation(args) {
-  const root = resolve(args.root);
-  if (args.deliberate === "implementation-empty") {
-    args.base = "";
-    args.head = "";
-  }
-  const specCommit = resolveCommit(root, args.spec, "immutable spec");
-  const base = resolveCommit(root, args.base, "implementation base");
-  const head = resolveCommit(root, args.head, "implementation head");
-  if (base === head) throw new Error("implementation base and head must be different");
-  execFileSync("git", ["merge-base", "--is-ancestor", base, head], { cwd: root, stdio: "ignore" });
-  const evidence = resolveCommit(root, args.evidence, "implementation evidence");
-  const manifest = parseJsonBuffer(readBlob(root, evidence, args.manifest), "implementation evidence manifest");
-  if (manifest.kind !== "safeclaw-implementation-evidence/v1") throw new Error("manifest kind is not implementation evidence");
-  if (manifest.specCommit !== specCommit || manifest.implementationBase !== base || manifest.implementationHead !== head) {
-    throw new Error("implementation manifest refs differ from explicit refs");
-  }
-  const spec = parseJsonBuffer(readBlob(root, specCommit, SPEC_JSON_PATH), "immutable implementation spec");
-  validateInternalContract(spec);
-  requireString(manifest.buildId, "implementation buildId");
-  validateExternalApproval(root, args, spec, specCommit, base, head, manifest);
-  const changedOutput = gitText(root, ["diff", "--name-status", `${base}...${head}`, "--"]);
-  const changedRecords = changedOutput
-    ? changedOutput.split(/\r?\n/u).filter(Boolean).map((line) => {
-        const [status, ...paths] = line.split("\t");
-        if (!/^[AMD]$/u.test(status) || paths.length !== 1) {
-          throw new Error(`implementation range contains unsupported change record: ${line}`);
-        }
-        return { status, path: paths[0] };
-      })
-    : [];
-  if (changedRecords.length === 0) throw new Error("implementation range is empty");
-  const declaredWaves = manifest.waves;
-  if (!Array.isArray(declaredWaves) || declaredWaves.length === 0) throw new Error("implementation manifest declares no waves");
-  const owned = new Set();
-  for (const waveId of declaredWaves) {
-    const wave = spec.implementation.waves.find((entry) => entry.id === waveId);
-    if (!wave) throw new Error(`implementation manifest names unknown wave ${waveId}`);
-    for (const path of [...wave.ownedFiles, ...wave.testFiles]) owned.add(path);
-  }
-  for (const { path } of changedRecords) {
-    if (!owned.has(path)) throw new Error(`implementation path is outside declared wave ownership: ${path}`);
-  }
-  const implementationArtifacts = manifest.implementationArtifacts;
-  if (!Array.isArray(implementationArtifacts)) throw new Error("implementation manifest has no artifact records");
-  const expectedArtifactShape = changedRecords.map(({ status, path }) => [path, status]).sort(([left], [right]) => left.localeCompare(right));
-  const manifestArtifactShape = implementationArtifacts
-    .map((record) => [record.path, record.status])
-    .sort(([left], [right]) => left.localeCompare(right));
-  if (canonicalJson(expectedArtifactShape) !== canonicalJson(manifestArtifactShape)) {
-    throw new Error("implementation artifact records differ from the explicit base...head range");
-  }
-  for (const record of implementationArtifacts) {
-    if (record.status === "D") {
-      if (record.gitBlob !== null || record.sha256 !== null || record.bytes !== 0) {
-        throw new Error(`deleted implementation artifact is not represented exactly: ${record.path}`);
-      }
-      continue;
-    }
-    validateTypedBoundBlob(root, head, record, `implementation artifact ${record.path}`);
-  }
-  const receiptById = validateExecutionEvidence(root, evidence, manifest, spec, {
-    base,
-    head,
-    declaredWaves
-  });
-  console.log("IMPLEMENTATION_REFS=PASS");
-  console.log("IMPLEMENTATION_ARTIFACT_SCOPE=PASS");
-  console.log("IMPLEMENTATION_EXTERNAL_APPROVAL=PASS");
-  console.log("IMPLEMENTATION_EXECUTION_RECEIPTS=PASS");
-  if (manifest.claimedGates?.includes("ZOOM-001")) {
-    validateBrowserEvidence(root, evidence, manifest, receiptById, { sourceSha: head, buildId: manifest.buildId });
-    console.log("IMPLEMENTATION_200_PERCENT_BROWSER_EVIDENCE=PASS");
-  }
-  console.log("IMPLEMENTATION_VALIDATION=PASS");
-}
-
 function main() {
-  const args = parseArguments(process.argv.slice(2));
+  const rawArguments = process.argv.slice(2);
+  if (rawArguments[0] === "implementation") throw new Error(IMPLEMENTATION_BLOCK);
+  const args = parseArguments(rawArguments);
   if (args.mode === "render-normative") {
     const spec = JSON.parse(readFileSync(join(resolve(args.root), args.specFile), "utf8"));
     process.stdout.write(renderNormativeMarkdown(spec));
@@ -1594,18 +1163,15 @@ function main() {
     const root = resolve(args.root);
     const spec = JSON.parse(readFileSync(join(root, args.specFile), "utf8"));
     const markdown = readFileSync(join(root, SPEC_MARKDOWN_PATH), "utf8");
+    validateContractSchema(spec);
     validateNormativeParity(spec, markdown);
-    validateInternalContract(spec);
-    console.log("AUTHORING_PARITY_AND_INTERNAL_CONTRACT=PASS");
+    console.log("AUTHORING_STRUCTURAL_AND_PARITY=PASS");
     console.log("AUTHORING_CHECK_IS_NOT_REVIEW_EVIDENCE");
+    console.log("BROWSER_EXECUTIONS=0");
     return;
   }
   if (args.mode === "spec-review") {
     validateSpecReview(args);
-    return;
-  }
-  if (args.mode === "implementation") {
-    validateImplementation(args);
     return;
   }
   throw new Error("Mode must be render-normative, render-human, render-prose-digest, authoring-check, spec-review, or implementation");
