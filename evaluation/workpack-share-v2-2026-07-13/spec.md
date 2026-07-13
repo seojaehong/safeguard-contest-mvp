@@ -1,10 +1,12 @@
 # SafeClaw 공유 화면 v2 제품 명세
 
 - Spec ID: workpack-share-v2-2026-07-13
-- Revision: independent-review-remediation-1
+- Revision: independent-review-remediation-2
 - 상태: HOLD_PENDING_INDEPENDENT_PASS
+- Review status: pending
 - 기준 branch: feat/workpack-share-v2
-- 기준 commit: 2adca4e98bab7854982bdd840c48a48944dc705e
+- Remediation parent: 04b465bbe7131847cc01628cf72f592ff21bf14a
+- Review range: 59f4812..next-candidate
 - 최초 base: 59f48123da62fb405e639da03912aa1ed6c000b9
 - 쓰기 범위: evaluation/workpack-share-v2-2026-07-13/spec.md, spec.json
 - 제품 Job: 오늘 문서팩을 선택된 오늘 참여자에게 보냅니다.
@@ -21,7 +23,9 @@
 | CurrentWorkpackModules.tsx, /workers | 작업자 명부, quick add, 오늘 선택 snapshot을 소유합니다. | Share의 작업자 입력, drawer, 저장 command를 모두 금지합니다. |
 | share-sessions API | 관리자 인증 뒤 session ID와 expiry를 생성합니다. | ready 이후 첫 network 단계로 원자적 session 생성만 수행합니다. |
 | workflow dispatch API/client | email, sms, kakao를 production channel로 허용합니다. | typed union과 payload에서 세 채널을 손실 없이 유지합니다. |
-| foreignWorkerLanguages | 언어별 본문 줄만 있고 review/provenance/source binding이 없습니다. | Share가 번역하지 않고 문서 편집 owner가 승인한 artifact만 소비합니다. |
+| generation-evidence.ts, /api/workpacks | responseContentDigest가 원본 deliverables를 포함한 응답 전체를 봉인하고 저장 때 다시 검증합니다. | 원본 deliverables를 수정하지 않고 별도 server-signed reviewed localization envelope를 인증 route로 저장합니다. |
+| workflow dispatch route | provider와 Kakao 환경 설정은 현재 dispatch 시점에 검사합니다. | Settings 소유 server resolver를 session 전에 호출하고 dispatch 검사는 defense-in-depth로 유지합니다. |
+| foreignWorkerLanguages | 언어별 본문 줄만 있고 review/provenance/source binding이 없습니다. | Share가 번역하지 않고 문서 편집 owner가 저장한 server-signed envelope만 소비합니다. |
 | d3ad865, 391x844 | share 약 3836px, overlap, 44px 미만 target 15개가 확인됐습니다. | 391x844를 고정 mobile gate로 사용합니다. |
 | d3ad865 베트남어 | 본문 3줄만 번역되고 제목과 meta label/value는 한국어입니다. | 부분 번역은 review_required이며 전송 완료 번역으로 취급하지 않습니다. |
 
@@ -30,12 +34,12 @@
 1. Share는 roster나 today participant snapshot을 만들거나 변경하지 않습니다.
 2. no_recipients는 /workers로 돌아가는 CTA 하나만 표시합니다.
 3. ready는 session이나 invitation artifact가 이미 있다는 뜻이 아닙니다. session을 만들 수 있는 입력이 유효하다는 뜻입니다.
-4. 전송 순서는 create_session -> dispatch -> save_channel_log입니다. session 실패 시 dispatch count는 0입니다.
+4. ready 전 validate_reviewed_localization -> resolve_channels를 완료하고, primary 이후 create_session -> dispatch -> save_channel_log 순서입니다. session 실패 시 dispatch count는 0입니다.
 5. 결과는 request/channel 단위 accepted, failed, unknown만 말합니다. 수신자별 전달, 열람, 교육 이수는 주장하지 않습니다.
 6. Kakao는 Settings에서 사전 설정 및 승인된 경우에만 Share에 나타나지만 production 호환성에서 제거하지 않습니다.
-7. 비한국어 전송본은 source-bound, reviewed LocalizedDispatchArtifact가 있을 때만 사용합니다.
+7. 비한국어 전송본은 source-bound, server-signed reviewed localization envelope가 있을 때만 사용합니다.
 8. quality fallback example의 canShare=false를 그대로 보존합니다. localStorage 값으로 readiness나 revalidation을 우회하지 않습니다.
-8. 정상 배율에서는 primary까지 task distance를 측정합니다. 200% 배율에서는 고정 높이 상한을 사용하지 않습니다.
+9. 정상 배율에서는 primary까지 task distance를 측정합니다. 200% 배율에서는 고정 높이 상한을 사용하지 않습니다.
 
 ## 2. Target IA And Ownership
 
@@ -48,7 +52,7 @@
 | 3 | channel | 메일, 문자, 승인된 카카오의 선택 및 수신 가능 수 | 준비된 채널 선택 |
 | 4 | localized_preview | 자동 해석 언어, option 12개 dropdown, 검토 artifact 미리보기 | preview 언어만 변경 |
 | 5 | operator_note | 선택 전달 메모 | 메모 입력 |
-| 6 | result_strip | accepted, failed, unknown 채널/request 요약 | 이력 route 이동 |
+| 6 | result_strip | accepted, failed, unknown 채널/request 요약 | persistedLogIds>0일 때만 이력 route 이동 |
 | 7 | primary_action | 현재 state의 primary 하나 | resolver가 정한 action 하나 |
 
 Share body에는 번호 장식, worker form, quick add, worker drawer, channel setup, 공개 링크 생성, 중복 CTA, confirmation modal, 내부 preview scroll을 두지 않습니다.
@@ -62,8 +66,8 @@ SafeGuardCommandCenter가 화면 제목 하나를 소유하고 WorkflowSharePane
 | R1 | roster 등록, 수정, quick add | /workers | Share는 읽기만 합니다. |
 | R2 | 오늘 참여자 선택 snapshot | /workspace?step=input, /workers | Share는 snapshot을 변경하지 않습니다. |
 | R3 | 현재 문서팩 전송 orchestration | /workspace?step=share | session 생성과 dispatch action만 소유합니다. |
-| R4 | 번역 생성, 수정, 검토 | document editor의 foreignWorkerTransmission | Share는 approved artifact만 소비합니다. |
-| R5 | email, sms, kakao 설정과 승인 | /settings | Share는 resolved availability만 표시합니다. |
+| R4 | 번역 생성, 수정, 검토, 서명 저장 | foreignWorkerTransmission editor + authenticated review route | Share는 서버가 검증한 approved envelope만 소비합니다. |
+| R5 | email, sms, kakao 설정·승인·availability | /settings + server channel resolver | Share는 secret 없는 resolved availability와 검증 토큰만 소비합니다. |
 | R6 | organization reporting recipient group | /settings | 작업자 N명과 분리된 결과만 표시합니다. |
 | R7 | 전송 request/channel 결과 | /dispatch | Share는 compact result strip만 표시합니다. |
 | R8 | session, 저장, 열람 이력 | /archive | 기존 ID와 row를 삭제하지 않습니다. |
@@ -97,20 +101,20 @@ Canonical share return path는 다음 두 값만 허용합니다.
 
 평가 우선순위:
 
-sending -> success|partial|fail -> stale -> blocked -> offline -> no_recipients -> logged_out -> review_required -> selected -> ready
+sending -> success|partial|fail -> stale -> review_required(workpack_revalidation) -> blocked -> offline -> no_recipients -> logged_out -> review_required(localization|participant) -> selected -> ready
 
 | State | 진입 조건 | Primary label | Enabled | Action |
 |---|---|---|---:|---|
-| blocked | readiness.canShare=false | 문서 보완 | yes | document review route |
+| blocked | readiness.canShare=false AND requiresRevalidation=false | 문서 보완 | yes | generic document review route |
 | no_recipients | today selected count=0 | 오늘 참여자 선택 | yes | /workers?next={shareReturn} |
 | selected | 대상은 있으나 worker/channel 입력이 미완료 | reason별 label | reason별 | 아래 reason catalog |
 | logged_out | 입력은 유효하지만 관리자 session 없음 | 로그인하고 전송 | yes | /login?next={shareReturn} |
-| review_required | workpack 또는 번역 검토가 필요함 | reason별 label | yes | 아래 review catalog |
+| review_required | requiresRevalidation=true 또는 번역/participant 검토 필요 | reason별 label | yes | 아래 review catalog |
 | ready | 모든 pre-session guard가 유효함 | {N}명에게 전송 | yes | create_session 시작 |
 | sending | session 생성 또는 dispatch 진행 중 | 전송 중 | no | 중복 action 차단 |
-| success | 모든 요청 channel이 provider accepted | 전파 이력 확인 | yes | /dispatch |
-| partial | accepted와 failed|unknown이 함께 있음 | 전파 이력 확인 | yes | /dispatch |
-| fail | session 실패, 모든 channel 실패, 또는 결과 unknown | 전파 이력 확인 | yes | /dispatch 또는 owner recovery |
+| success | 모든 요청 channel accepted + persistedLogIds>0 | 전파 이력 확인 | yes | /dispatch |
+| partial | accepted와 failed|unknown 혼합 + persistedLogIds>0 | 전파 이력 확인 | yes | /dispatch |
+| fail | channel resolver, session, dispatch, log 단계 실패 | failure stage별 label | stage별 | 아래 failure CTA catalog |
 | offline | network preflight 실패, provider 미호출 | 연결 다시 확인 | yes | resolver 재평가 |
 | stale | sourceRevision 또는 digest mismatch | 변경사항 다시 확인 | yes | stale owner route |
 
@@ -124,6 +128,7 @@ no_recipients에서는 target 영역의 별도 변경 link를 렌더링하지 �
 - sending + dispatch outcomes all accepted -> success; mixed -> partial; accepted 0 또는 all unknown -> fail
 - blocked, no_recipients, selected, logged_out, review_required, stale의 owner action 완료 -> canonical share return -> production resolver
 - offline에서는 전송 요청을 만들지 않고 reconnect 뒤 resolver를 다시 실행합니다.
+- requiresRevalidation=true이면 readiness.canShare=false여도 generic blocked보다 workpack_revalidation reason을 먼저 선택합니다.
 
 ### 3.1 Selected Reasons
 
@@ -150,6 +155,20 @@ reporting_group_unavailable은 작업자 전송 state를 바꾸지 않는 inline
 | participant_snapshot_stale | input/workers | 오늘 참여자 다시 확인 | next={shareReturn} |
 
 비한국어 artifact blocker는 실제 recipient language에 필요한 artifact에만 적용합니다. dropdown으로 미사용 언어를 미리보기만 한 경우 dispatch plan은 바뀌지 않으며, 그 언어의 검토 route만 보여줍니다.
+
+### 3.3 Failure CTA Catalog
+
+| Failure stage/reason | Persisted dispatch/log | Primary label | Action/route |
+|---|---:|---|---|
+| channel_resolution_unresolved | no | 채널 상태 다시 확인 | server resolver 재호출; session POST 0 |
+| channel_unavailable | no | 채널 설정 확인 | /settings?next={shareReturn}; session POST 0 |
+| session_create_failed | no | 초대 세션 다시 시도 | canonical Share에서 workpack/envelope/channel을 재검증한 뒤 새 session attempt |
+| dispatch_rejected_before_provider | no | 전송 조건 다시 확인 | canonical Share resolver 재실행; 자동 재전송 없음 |
+| dispatch_result_log_missing | no | 중복 전송 방지 확인 | accepted|failed|unknown 응답을 Share에 유지; 자동 재전송과 /dispatch 이동 없음 |
+| dispatch_failed_log_persisted | yes | 전파 이력 확인 | /dispatch |
+| sent_or_partial_log_persisted | yes | 전파 이력 확인 | /dispatch |
+
+전파 이력 CTA는 현재 workpack과 attempt를 가리키는 dispatch log ID가 1개 이상 서버에 저장됐을 때만 표시합니다. session 생성 실패나 log 저장 실패는 /dispatch로 보내지 않습니다.
 
 ## 4. Data And Lifecycle Contracts
 
@@ -189,16 +208,46 @@ type ResolvedChannel = {
   approved: boolean;
   available: boolean;
   recipientCount: number;
+  reasonCode:
+    | "available"
+    | "recipient_contact_missing"
+    | "provider_unconfigured"
+    | "relay_unconfigured"
+    | "idempotency_unsupported"
+    | "template_unapproved"
+    | "policy_disabled";
   ownerRoute: "/settings";
+};
+
+type ChannelAvailabilityResolution = {
+  version: "channel-availability/v1";
+  workpackId: string;
+  canonicalWorkpackRevision: string;
+  recipientDigest: string;
+  requestedChannels: DispatchChannel[];
+  dispatchMode: "fixture" | "live";
+  channels: ResolvedChannel[];
+  configurationRevision: string;
+  resolvedAt: string;
+  expiresAt: string;
+  availabilityToken: string;
 };
 ~~~
 
-- email과 sms는 현재 연락처 및 provider 설정으로 해석합니다.
-- kakao는 SAFEGUARD_KAKAO_ENABLED 또는 SAFECLAW_KAKAO_ENABLED와 provider/template 설정이 모두 충족된 경우에만 available입니다.
-- unavailable Kakao는 선택 control로 노출하지 않고 Settings 상태와 이동 경로만 표시합니다.
-- Share에는 channel 연결, template 승인, sender key 입력 UI가 없습니다.
+Authoritative resolver 계약:
+
+1. Owner는 Settings/channel configuration이며 route는 authenticated POST /api/settings/channels/resolve, pure server function은 resolveServerChannelAvailability입니다.
+2. Request는 workpackId, canonicalWorkpackRevision, recipients: serverWorkerUuid[], requestedChannels만 받습니다. 서버는 관리자 auth, workpack 조직 소유권, server worker snapshot을 다시 확인합니다.
+3. email/sms는 recipient contact, dispatchMode, relay/provider, persistent idempotency policy를 검사합니다. live mode인데 idempotency가 지원되지 않으면 idempotency_unsupported로 unavailable입니다. kakao는 여기에 SAFEGUARD_KAKAO_ENABLED|SAFECLAW_KAKAO_ENABLED, provider, sender/template 승인까지 검사합니다.
+4. configurationRevision은 secret 값이 아닌 설정 존재/승인 상태의 opaque server digest입니다. 응답은 token, webhook URL, sender key, template ID, credential을 노출하지 않습니다.
+5. availabilityToken은 SAFECLAW_CHANNEL_AVAILABILITY_SECRET으로 user/org/site/workpack, canonicalWorkpackRevision, recipientDigest, requestedChannels, dispatchMode, configurationRevision, resolvedAt, expiresAt을 HMAC-SHA256으로 묶으며 TTL은 120초입니다. secret 미설정은 503, token 없음, ready=false입니다.
+6. ready는 response가 인증됐고 만료되지 않았으며 선택한 모든 channel.available=true일 때만 가능합니다. unresolved, expired, recipient/channel/revision mismatch는 selected 또는 stale이며 session POST는 0입니다.
+7. share-session route는 token 서명과 binding을 검증하고 같은 pure resolver를 현재 서버 설정으로 다시 실행합니다. 하나라도 unavailable이면 row를 만들지 않고 Settings reason을 반환합니다.
+8. resolver route, share-session route, dispatch route는 같은 resolveServerChannelAvailability pure preflight를 사용합니다. dispatch의 현재 env/provider/template/contact/idempotency 검사는 제거하지 않고 defense-in-depth로 다시 실행합니다.
+9. unavailable Kakao는 선택 control로 노출하지 않고 Settings 상태와 이동 경로만 표시합니다. typed union, resolver, session request, dispatch payload, result/log adapter는 email|sms|kakao를 모두 보존합니다.
+10. Share에는 channel 연결, template 승인, sender key 입력 UI가 없습니다.
+
 - organization reporting recipient group은 worker count와 분리하며 Settings가 소유합니다.
-- typed channel union, request payload, result mapping, log adapter는 email|sms|kakao를 모두 보존합니다.
 
 지원 언어 code는 ko, vi, zh, th, uz, mn, ne, km, id, my, tl, en입니다.
 
@@ -208,9 +257,7 @@ type ResolvedChannel = {
 type LocalizedDispatchArtifact = {
   version: "localized-dispatch-artifact/v1";
   artifactId: string;
-  sourceRevision: string;
-  sourceDigest: string;
-  targetLanguage: SupportedLanguageCode;
+  targetLocale: SupportedLanguageCode;
   localized: {
     subject: string;
     metadata: {
@@ -230,58 +277,93 @@ type LocalizedDispatchArtifact = {
     modelOrVersion: string | null;
     generatedAt: string;
   };
+  artifactRevision: number;
+};
+
+type ReviewedLocalizationEnvelope = {
+  version: "reviewed-localization-envelope/v1";
+  workpackId: string;
+  generationRevision: string;
+  sourceDocumentKey: "foreignWorkerTransmission";
+  sourceDocumentDigest: string;
+  targetLocale: SupportedLanguageCode;
+  artifact: LocalizedDispatchArtifact;
   review: {
-    state: "not_reviewed" | "approved" | "rejected";
-    reviewerId: string | null;
-    reviewerDisplayName: string | null;
-    reviewedAt: string | null;
+    state: "approved" | "rejected";
+    reviewerId: string;
+    reviewerDisplayName: string;
+    reviewedAt: string;
   };
-  revision: string;
   artifactDigest: string;
+  signedAt: string;
+  signature: string;
+};
+
+type ReviewRouteRequest = {
+  expectedWorkpackRevision: string;
+  sourceDocumentDigest: string;
+  artifact: LocalizedDispatchArtifact;
+  decision: "approved" | "rejected";
+};
+
+type ReviewRouteResponse = {
+  ok: true;
+  workpackId: string;
+  targetLocale: SupportedLanguageCode;
+  envelope: ReviewedLocalizationEnvelope;
+  canonicalWorkpackRevision: string;
 };
 ~~~
 
 Authority rules:
 
-1. Owner는 foreignWorkerTransmission document editor입니다. Share는 artifact를 생성, 수정, 자동 승인하지 않습니다.
-2. sourceDigest는 companyName, siteName, workSummary, topRisk, source foreignWorkerTransmission, sourceRevision의 canonical JSON SHA-256입니다.
-3. sourceDigest 또는 sourceRevision이 현재 문서팩과 다르면 stale입니다.
-4. 비한국어 recipient는 artifact가 존재하고 review.state=approved이며 reviewerId와 reviewedAt이 있어야 합니다.
-5. non-Korean subject, metadata label/value, body에는 Hangul 범위가 남지 않습니다.
-6. 한국어 site/task/risk 값을 label만 바꾼 artifact는 incomplete입니다.
-7. 영어 fallback, static fixture line, body 3줄만 있는 값은 번역 완료 근거가 아닙니다.
-8. structural emoji는 의미 전달에 사용하지 않습니다. localized text-only가 기본이며 아이콘을 쓰면 accessible name과 같은 의미의 text를 함께 둡니다.
-9. dropdown은 12개 option을 유지하지만 preview artifact만 바꿉니다. recipient language와 DispatchPlan digest는 바꾸지 않습니다.
-10. 기존 workpack JSON/request/reopenData 경계의 deliverables.localizedDispatchArtifacts에 저장합니다. 새 DB column이나 migration은 만들지 않습니다.
+1. UI owner는 foreignWorkerTransmission document editor이고 server authority는 authenticated PUT /api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review와 lib/reviewed-localization-envelope.ts입니다. Share는 생성, 수정, 승인, 저장하지 않습니다.
+2. 원본 workpacks.deliverables와 generationEvidence는 불변입니다. responseContentDigest를 깨는 deliverables.localizedDispatchArtifacts client mutation은 금지합니다.
+3. review route는 getWorkspaceUser, organization ownership, locale allowlist를 검증하고 저장된 generationEvidence를 verifyAskResponseGenerationEvidence로 다시 확인합니다.
+   검증 순서는 raw evidence_summary에서 reviewedLocalizationEnvelopes를 분리 -> 원본 AskResponse/generationEvidence 검증 -> source document digest 계산 -> candidate 검토 -> envelope 서명 -> 조건부 저장입니다. envelope를 deliverables에 merge한 뒤 generation seal을 검사하지 않습니다.
+4. generationRevision = sha256(canonical { workpackId, generationEvidence.version, generationEvidence.signature, responseContentDigest })입니다.
+5. sourceDocumentDigest는 서버가 sealed foreignWorkerTransmission 문서와 companyName, siteName, workSummary, topRisk를 canonical JSON SHA-256으로 계산합니다. client가 보낸 digest는 비교용일 뿐 authority가 아닙니다.
+6. route는 expectedWorkpackRevision compare-and-swap을 요구하고 reviewerId/name은 auth session, reviewedAt/signedAt은 server clock, artifactRevision은 locale별 server increment로 결정합니다. UPDATE는 eq(updated_at, loadedUpdatedAt) 조건과 updated_at=serverNow를 함께 쓰며 0행이면 409 stale입니다.
+7. artifactDigest = sha256(canonical { generationRevision, sourceDocumentKey, sourceDocumentDigest, targetLocale, localized, provenance, artifactRevision, review })입니다. reviewer/time/source/locale가 달라지면 digest도 달라집니다.
+8. envelope signature는 SAFECLAW_REVIEWED_LOCALIZATION_SECRET으로 위 필드와 artifactDigest를 server HMAC-SHA256으로 봉인합니다. secret 미설정은 503, write 0, readiness blocked이며 signature secret과 원문 provider credential은 응답에 노출하지 않습니다.
+9. envelope는 기존 evidence_summary.reviewedLocalizationEnvelopes[locale] JSON 경계에 저장합니다. generationEvidence를 다시 쓰지 않고 새 column, schema, migration을 만들지 않습니다.
+10. reviewSetDigest = sha256(canonical locale 순으로 정렬한 signed envelope 집합), canonicalWorkpackRevision = sha256(canonical { generationRevision, reviewSetDigest })입니다. review 저장마다 새 revision을 반환하며 workpack GET/readiness/channel token/session은 이 값을 사용합니다.
+11. 비한국어 recipient는 envelope signature, generationRevision, sourceDocumentDigest, targetLocale, artifactDigest가 모두 유효하고 review.state=approved여야 합니다. missing, rejected, malformed, signature invalid, stale, revision mismatch는 review_required이며 fail-closed입니다.
+12. non-Korean subject, metadata label/value, body에는 Hangul 범위가 남지 않습니다. 한국어 site/task/risk 값을 label만 바꾼 값, 영어 fallback, static line, body 3줄만 번역한 값은 완료가 아닙니다.
+13. structural emoji는 의미 전달에 사용하지 않습니다. localized text-only가 기본이며 아이콘을 쓰면 accessible name과 같은 의미의 text를 함께 둡니다.
+14. dropdown은 12개 option을 유지하지만 preview만 바꿉니다. recipient locale, recipientDigest, canonicalWorkpackRevision, dispatch plan을 바꾸지 않습니다.
+15. localStorage와 client state는 envelope, signature, review authority, canonicalWorkpackRevision을 만들거나 덮어쓸 수 없습니다.
 
-베트남어 gate는 subject, site/task/core-risk label과 value, body 전체, semanticRiskLabels, provenance, review, revision, digest를 검사합니다. 임의의 한국어 값을 browser fixture가 즉석 번역했다고 가정하지 않습니다. fixture는 editor owner가 승인한 source-matching artifact를 production workpack JSON으로 제공합니다.
+베트남어 gate는 subject, site/task/core-risk label과 value, body 전체, semanticRiskLabels, provenance, review, artifactRevision, sourceDocumentDigest, artifactDigest, signature를 검사합니다. browser fixture는 review route response와 workpack GET response를 mock하고 production parser/readiness를 거쳐 envelope를 주입합니다. 임의 client object를 붙이거나 fixture가 한국어 값을 즉석 번역했다고 가정하지 않습니다.
 
 ### 4.4 Ready Guards And Send Lifecycle
 
 ready는 다음 pre-session guard가 모두 참인 상태입니다.
 
-1. readiness.canShare=true이고 requiresRevalidation=false입니다.
+1. requiresRevalidation=false를 먼저 확인한 뒤 readiness.canShare=true를 확인합니다.
 2. today participant가 1명 이상이며 server worker UUID와 선택 channel 연락처가 있습니다.
-3. 선택 channel이 1개 이상이고 ResolvedChannel.available=true입니다.
-4. 필요한 모든 non-Korean LocalizedDispatchArtifact가 source-matching, approved입니다.
-5. workpack/participant sourceRevision과 digest가 validated 값과 같습니다.
+3. 선택 channel이 1개 이상이고 authenticated server ChannelAvailabilityResolution이 resolved, unexpired이며 모두 available=true입니다.
+4. 필요한 모든 non-Korean ReviewedLocalizationEnvelope가 server-verified, source-matching, approved입니다.
+5. canonicalWorkpackRevision, participant sourceRevision/digest, channel token binding이 validated 값과 같습니다.
 6. 관리자 auth session이 있습니다.
 7. online이며 unresolved duplicate risk가 없습니다.
-8. 아직 share session을 만들지 않았어도 됩니다.
+8. 아직 share session이나 recipient invitation artifact를 만들지 않았어도 됩니다.
 
 Primary click lifecycle:
 
-1. UI는 input snapshot과 idempotency attempt scope를 잠급니다.
+1. UI는 validated canonicalWorkpackRevision, recipient snapshot/digest, selected channels, availabilityToken, idempotency attempt scope를 잠급니다.
 2. POST /api/workpacks/{workpackId}/share-sessions를 정확히 한 번 호출합니다.
-3. request body는 recipients: serverWorkerUuid[]만 사용합니다.
-4. session row와 잠근 recipients 전체의 invitation binding은 하나의 원자적 결과입니다. 일부 binding만 성공한 상태는 session_created가 아니며 route는 실패해야 합니다.
-5. response가 ok=true, UUID shareSessionId, 미래 expiresAt을 모두 반환해야 session_created입니다.
-6. session 생성이 실패하거나 malformed이면 fail로 종료하고 /api/workflow/dispatch 호출 수는 0입니다.
-7. session_created 뒤에만 POST /api/workflow/dispatch를 정확히 한 번 호출합니다.
-8. dispatch payload는 workpackId, 새 shareSessionId, idempotencyKey, channels, operatorNote만 포함합니다.
-9. dispatch 결과 뒤 기존 /api/dispatch-logs adapter가 지원하는 channel-level log만 저장합니다.
-10. 성공한 sessionId, expiresAt, workflowRunId, idempotencyKey, log ID는 기존 응답/저장이 제공할 때만 보존합니다.
-11. session과 dispatch 사이 대상, revision, digest가 변하면 dispatch하지 않고 stale로 종료합니다.
+3. request body는 recipients: serverWorkerUuid[], channels, canonicalWorkpackRevision, availabilityToken만 사용합니다.
+4. share-session route는 generationEvidence, required reviewed envelopes, canonicalWorkpackRevision, availabilityToken을 검증하고 server channel resolver를 현재 설정으로 재실행합니다. unresolved/unavailable이면 insert와 dispatch는 모두 0입니다.
+5. session row의 recipients_snapshot과 access_policy는 잠근 recipients 전체를 포함한 하나의 원자적 insert입니다. 일부 recipient만 담긴 결과는 session_created가 아닙니다.
+6. response가 ok=true, UUID shareSessionId, 미래 expiresAt을 모두 반환해야 session_created입니다.
+7. session 생성이 실패하거나 malformed이면 fail(session_create_failed)로 종료하고 /api/workflow/dispatch 호출 수는 0이며 /dispatch CTA를 표시하지 않습니다.
+8. session_created 뒤에만 POST /api/workflow/dispatch를 정확히 한 번 호출합니다.
+9. dispatch payload는 workpackId, 새 shareSessionId, idempotencyKey, channels, operatorNote만 포함합니다.
+10. dispatch route는 contact/env/provider/template 검사를 defense-in-depth로 유지합니다.
+11. dispatch 결과 뒤 기존 /api/dispatch-logs adapter가 지원하는 request/channel-level log만 저장합니다.
+12. 성공한 sessionId, expiresAt, workflowRunId, idempotencyKey, log ID는 기존 응답/저장이 제공할 때만 보존합니다.
+13. session과 dispatch 사이 대상, canonicalWorkpackRevision, recipientDigest, channel configurationRevision이 변하면 dispatch하지 않고 stale로 종료합니다.
 
 각 전송 attempt는 새 session을 만듭니다. 기존 session 재사용은 v2 send lifecycle에 사용하지 않습니다.
 
@@ -291,12 +373,14 @@ Primary click lifecycle:
 type RequestOutcome = "accepted" | "failed" | "unknown";
 
 type DispatchResultStripV2 = {
+  stage: "session_create" | "dispatch" | "log_persist";
   requestOutcome: RequestOutcome;
   shareSessionId: string | null;
   workflowRunId: string | null;
   idempotencyKey: string | null;
   providerCalled: boolean | null;
   duplicateRisk: boolean;
+  persistedLogIds: string[];
   channels: Array<{
     channel: DispatchChannel;
     outcome: RequestOutcome;
@@ -311,7 +395,9 @@ type DispatchResultStripV2 = {
 - unknown은 provider 호출 후 응답 미확정, 누락 channel result, validation-only/copy 응답, 또는 provider accepted 근거가 없는 결과입니다. browser mock 사용 자체는 outcome을 정하지 않습니다.
 - success state는 요청한 모든 channel이 accepted이고 duplicateRisk=false일 때만 사용합니다.
 - partial state는 accepted와 failed|unknown이 함께 있을 때 사용합니다.
-- fail state는 session 실패, accepted channel 0개, 또는 전체 결과 unknown일 때 사용합니다.
+- fail state는 stage와 persistedLogIds를 함께 보존합니다. session 실패, accepted channel 0개, 또는 전체 결과 unknown을 같은 CTA로 합치지 않습니다.
+- /dispatch CTA는 persistedLogIds.length>0인 dispatch_failed, partial, success 결과에서만 허용합니다.
+- authenticated POST /api/dispatch-logs는 기존 dispatch_logs insert에 select("id")를 붙여 logIds를 반환해야 합니다. savedCount, client cache, workflowRunId만으로 persistence를 추정하지 않으며 새 column/migration은 없습니다.
 - current provider/log가 channel-level이므로 recipient별 delivered 상태나 persistence를 만들지 않습니다.
 - session 생성만으로 invitation 전달을 주장하지 않습니다.
 - public link, anonymous access, worker account provisioning은 만들지 않습니다. session policy는 invited, viewer, anonymousAllowed=false, future expiry를 유지합니다.
@@ -359,11 +445,32 @@ taskDistancePx = primary.getBoundingClientRect().top - shareRoot.getBoundingClie
 
 ### 5.3 Text Zoom 200%
 
-200%에서는 고정 total height와 task distance 상한을 적용하지 않습니다. 다음만 측정합니다.
+각 browser case는 normal_100과 root_font_200 두 mode로 실행합니다. root_font_200 delivery는 deviceScaleFactor가 아닙니다.
+
+~~~ts
+const baseRootFontPx = await page.evaluate(() =>
+  Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+);
+await page.evaluate((basePx) => {
+  document.documentElement.style.setProperty(
+    "font-size",
+    `${basePx * 2}px`,
+    "important"
+  );
+}, baseRootFontPx);
+await expect.poll(() => page.evaluate(() =>
+  Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+)).toBe(baseRootFontPx * 2);
+~~~
+
+- page.setViewportSize는 mode 적용 전에 desktop 1440x1000 또는 mobile 391x844로 고정합니다.
+- browser context deviceScaleFactor는 1로 유지하며 확대 수단으로 사용하지 않습니다.
+- fixture는 production resolver/action으로 목표 state에 도달한 뒤 root font를 2배로 적용하고 layout settle을 기다립니다.
+- 200%에서는 고정 total height, body height, task distance 상한을 적용하지 않습니다. normal_100 task-distance gate와 별도 결과로 기록합니다.
 
 - overlap 0
 - text clipping 0
-- horizontal overflow 0
+- document와 share root horizontal overflow 0
 - interactive target 44x44 CSS px 이상
 - target -> channel -> preview -> memo -> primary DOM/focus order 유지
 - preview expand/collapse와 primary가 keyboard로 동작
@@ -396,6 +503,13 @@ taskDistancePx = primary.getBoundingClientRect().top - shareRoot.getBoundingClie
 | day-mobile | Day | 391x844 |
 | night-mobile | Night | 391x844 |
 
+| Zoom ID | Delivery | Task-distance gate |
+|---|---|---:|
+| normal_100 | browser default root font | yes |
+| root_font_200 | 5.3의 page.evaluate root font 2x | no |
+
+case ID는 {envId}:{fixtureId}:{zoomId}이며 모든 fixture를 두 zoom mode에서 실행합니다.
+
 ### 6.2 Fixture Ingress Contract
 
 모든 fixture는 tests/helpers/isolated-next-browser-harness.ts와 Playwright Chromium을 사용합니다.
@@ -405,7 +519,7 @@ taskDistancePx = primary.getBoundingClientRect().top - shareRoot.getBoundingClie
 - 실제 URL /workspace?step=share&theme={theme}
 - buildStoredCurrentWorkpack 및 parseStoredCurrentWorkpack 형식의 current workpack restore input
 - production auth resolver가 읽는 mocked Supabase session response
-- page.route로 mocking한 production API response
+- page.route로 mocking한 workpack GET, localization review, channel resolver, share-session, dispatch, dispatch-log production API response
 - 실제 button, link, select click과 keyboard action
 - navigator online/offline event
 
@@ -418,51 +532,59 @@ taskDistancePx = primary.getBoundingClientRect().top - shareRoot.getBoundingClie
 - component 내부 함수 직접 호출
 - jsdom/static markup을 browser 결과로 계산
 
-current workpack cache는 문서와 snapshot 복원 입력으로만 사용할 수 있습니다. auth, server authority, session/dispatch 결과는 production resolver와 mocked route response로만 들어옵니다.
+current workpack cache는 문서와 snapshot 복원 입력으로만 사용할 수 있습니다. signed localization envelope, canonicalWorkpackRevision, channel token, auth, session/dispatch/log 결과는 production parser가 읽는 mocked route response로만 들어옵니다.
 
 ### 6.3 Fixtures
 
 | Fixture ID | Production resolver input/action | 핵심 GREEN |
 |---|---|---|
 | empty | selectedWorkerIds=[] | route-back/primary 각 1개인 오늘 참여자 선택, /workers next route, worker mutation request 0 |
-| selected | worker contact 또는 channel 미완료 | reason owner/action/return route 일치 |
-| review_required | required artifact missing/stale/not_reviewed | 번역본 검토 route, session/dispatch 0 |
+| selected | channel 미선택 | Share channel focus action, session request 0 |
+| channel_unavailable | resolver deferred 후 idempotency_unsupported 또는 available=false | unresolved 동안 session 0, Settings CTA, unavailable 뒤에도 session 0 |
+| review_required | signed envelope missing/stale/rejected/invalid | 번역본 검토 route, session/dispatch 0 |
+| workpack_revalidation | requiresRevalidation=true와 canShare=false | 문서 다시 검수 copy/route가 generic 문서 보완보다 우선, session/dispatch 0 |
 | logged_out | auth resolver session 없음 | 로그인하고 전송, encoded share return |
-| blocked | canShare=false workpack restore | blocker 표시, session/dispatch 0 |
-| ready | valid snapshot, approved artifacts, available channels, auth | {N}명에게 전송, session은 아직 없음 |
+| blocked | requiresRevalidation=false, canShare=false | 문서 보완 blocker, session/dispatch 0 |
+| ready | server-verified envelopes와 unexpired channel token, valid snapshot/auth | {N}명에게 전송, session은 아직 없음 |
 | sending | ready CTA click, session response deferred | session request 1, dispatch 0 until session success, layout stable |
-| result_accepted | session success then provider accepted | request/channel accepted, 전달 완료 문구 없음 |
-| result_partial | accepted와 failed|unknown channel 혼합 | partial strip과 channel text |
-| fail_session | session route failure 또는 malformed response | dispatch request 0, fail reason 표시 |
-| fail_dispatch | session success 뒤 dispatch failure/unknown | 새 session ID 보존, duplicate recovery 정확 |
+| result_accepted | session success, provider accepted, dispatch log persisted | request/channel accepted, 전파 이력 CTA, 전달 완료 문구 없음 |
+| result_partial | mixed channel outcome과 dispatch log persisted | partial strip, 전파 이력 CTA |
+| fail_session | session route failure 또는 malformed response | 초대 세션 다시 시도, dispatch 0, /dispatch href 0 |
+| fail_dispatch | dispatch failed와 log persisted | 전파 이력 확인, /dispatch route |
+| fail_dispatch_unpersisted | dispatch accepted/failed/unknown 뒤 log save failure | 중복 전송 방지 확인, 자동 retry 0, /dispatch href 0 |
 | offline | offline event before click | session/dispatch 0, reconnect 후 resolver 재평가 |
-| stale | sourceRevision/digest mismatch | 이전 preview/session/result 숨김, owner route |
+| stale | canonicalWorkpackRevision, envelope, recipient, channel token mismatch | 이전 preview/session/result 숨김, owner route |
 
-4개 environment에서 13개 fixture를 실행하므로 총 52개 browser case입니다.
+4개 environment, 16개 fixture, 2개 zoom mode의 완전 교차곱이므로 총 128개 browser case입니다. normal_100 64개와 root_font_200 64개를 별도 집계합니다.
 
 ### 6.4 Request And Routing Assertions
 
 browser test는 request log를 수집해 다음을 검사합니다.
 
-1. share CTA click 전 share-session request는 0입니다.
-2. click 뒤 첫 POST는 /api/workpacks/{id}/share-sessions입니다.
-3. session body는 현재 selected server worker UUID 집합과 정확히 일치합니다.
-4. dispatch POST는 session success 뒤에만 발생하고 새 shareSessionId를 사용합니다.
-5. session failure case의 dispatch POST count는 0입니다.
-6. dispatch channels는 UI 선택과 같고 kakao를 선택한 approved fixture에서 kakao가 payload에 남습니다.
-7. dispatch body는 fixture의 workpackId, 새 shareSessionId, idempotencyKey, 선택 channels, operatorNote와 deep equality로 비교합니다.
-8. dispatch payload에 worker form 값, translation fallback, public URL을 추가하지 않습니다.
-9. request log index로 session success가 dispatch보다 먼저임을 검사합니다.
-10. result classifier는 accepted, failed, unknown을 route response에서 계산합니다.
-11. no_recipients와 owner blocker CTA는 실제 URL과 next를 확인합니다.
-12. login callback 뒤 /workspace?step=share&theme={theme}로 복귀하고 production resolver가 share를 엽니다.
-13. 모든 case에서 visible primary count는 1입니다.
-14. 화면 title, 로그인 action, [data-share-preview] count는 각각 최대 1입니다.
-15. task distance, touch, gap, overlap, overflow, nested scroll, preview row cap을 실제 rect와 computed style로 검사합니다.
+1. workpack GET의 signed envelope와 canonicalWorkpackRevision만 production parser/readiness로 들어가며 local mutation은 0입니다.
+2. 선택 channel 뒤 POST /api/settings/channels/resolve body는 workpackId, revision, recipients, channels와 deep equality입니다.
+3. channel response가 unresolved, expired, unavailable, binding mismatch이면 share-session request는 0입니다.
+4. ready CTA click 전 share-session request는 0이고 유효한 resolver token이 있어야 ready가 됩니다.
+5. click 뒤 첫 send POST는 /api/workpacks/{id}/share-sessions입니다.
+6. session body는 recipients, channels, canonicalWorkpackRevision, availabilityToken과 deep equality입니다.
+7. dispatch POST는 session success 뒤에만 발생하고 새 shareSessionId를 사용합니다.
+8. session failure case는 dispatch count 0, primary 초대 세션 다시 시도, /dispatch href count 0입니다.
+9. dispatch channels는 UI 선택과 같고 approved Kakao fixture에서 resolver, session, dispatch payload에 kakao가 남습니다.
+10. dispatch body는 workpackId, 새 shareSessionId, idempotencyKey, channels, operatorNote와 deep equality입니다.
+11. dispatch payload에 worker form 값, translation fallback, public URL을 추가하지 않습니다.
+12. request log index로 channel resolve -> session success -> dispatch -> log persist 순서를 검사합니다.
+13. result classifier는 accepted, failed, unknown을 route response에서 계산합니다.
+14. mocked dispatch-log POST가 반환한 logIds만 persistence authority입니다. savedCount-only 또는 logIds 없음이면 /dispatch href count는 0이고, logIds가 있는 failure/sent result만 전파 이력 확인을 표시합니다.
+15. requiresRevalidation=true fixture는 문서 다시 검수와 document return route를, generic blocked fixture는 문서 보완을 각각 검사합니다.
+16. no_recipients와 owner blocker CTA는 실제 URL과 next를 확인합니다.
+17. login callback 뒤 /workspace?step=share&theme={theme}로 복귀하고 production resolver가 share를 엽니다.
+18. 모든 case에서 visible primary count는 1입니다.
+19. 화면 title, 로그인 action, [data-share-preview] count는 각각 최대 1입니다.
+20. normal_100은 task distance를 포함한 공통 geometry를, root_font_200은 exact viewport에서 overlap/clipping/horizontal overflow 0과 DOM order를 검사합니다.
 
 ### 6.5 Vietnamese And Language Gates
 
-ready fixture에는 languageCode=vi recipient와 source-matching approved Vietnamese artifact를 넣습니다.
+ready fixture에는 languageCode=vi recipient와 review route가 저장한 source-matching, approved, server-signed Vietnamese envelope를 workpack GET mock으로 넣습니다.
 
 - dropdown은 하나이고 option 순서는 ko, vi, zh, th, uz, mn, ne, km, id, my, tl, en입니다.
 - auto-resolved dispatch language는 vi입니다.
@@ -470,11 +592,11 @@ ready fixture에는 languageCode=vi recipient와 source-matching approved Vietna
 - Vietnamese subject, metadata label/value, body에 Hangul이 없습니다.
 - Korean-only site/task/core-risk value가 없습니다.
 - structural emoji가 preview DOM과 outbound artifact에 없습니다.
-- provenance, reviewer, reviewedAt, sourceDigest, revision, artifactDigest를 검사합니다.
+- provenance, reviewer, reviewedAt, generationRevision, sourceDocumentDigest, artifactRevision, artifactDigest, signature를 검사합니다.
 - body 3줄만 바꾼 artifact와 영어 fallback은 review_required입니다.
 - 12개 언어 unit fixture 모두 같은 artifact completeness contract를 통과해야 합니다.
 
-실제 provider credential, provider call, Supabase insert/update/delete는 browser gate에서 사용하지 않습니다.
+실제 signing secret, provider credential, provider call, Supabase insert/update/delete는 browser gate에서 사용하지 않습니다.
 
 ## 7. Implementation Waves
 
@@ -504,17 +626,26 @@ Exact files:
 - lib/workspace-pages.ts
 - components/WorkflowSharePolicy.ts
 - lib/workflow-share-client.ts
+- lib/channel-availability.ts (new)
+- app/api/settings/channels/resolve/route.ts (new)
+- app/api/workpacks/[id]/share-sessions/route.ts
+- app/api/workflow/dispatch/route.ts
+- app/api/dispatch-logs/route.ts
 - tests/workspace-pages.test.ts
 - tests/workflow-share-client.test.ts
 - tests/workflow-share-panel-behavior.test.ts
+- tests/channel-availability.test.ts (new)
+- tests/channel-availability-route.test.ts (new)
+- tests/dispatch-logs-route.test.ts (new)
+- tests/workpack-share-authority-routes.test.ts
 
 ~~~powershell
-npm.cmd test -- tests/workspace-pages.test.ts tests/workflow-share-client.test.ts tests/workflow-share-panel-behavior.test.ts --maxWorkers=1 --no-file-parallelism
+npm.cmd test -- tests/channel-availability.test.ts tests/channel-availability-route.test.ts tests/dispatch-logs-route.test.ts tests/workpack-share-authority-routes.test.ts tests/workspace-pages.test.ts tests/workflow-share-client.test.ts tests/workflow-share-panel-behavior.test.ts --maxWorkers=1 --no-file-parallelism
 npm.cmd run typecheck
 git diff --check
 ~~~
 
-Exit: validated step return, exact CTA strings, new-session-before-dispatch, session failure dispatch=0, accepted/failed/unknown classifier, Kakao union이 pure/route contract에서 통과합니다.
+Exit: revalidation precedence, exact CTA strings, authenticated channel resolver/token, unresolved/unavailable session=0, new-session-before-dispatch, stage-specific failure CTA, Kakao union과 dispatch defense-in-depth가 통과합니다.
 
 Rollback: git revert <wave-1-sha>. DB row나 다른 workstream commit을 되돌리지 않습니다.
 
@@ -523,22 +654,30 @@ Rollback: git revert <wave-1-sha>. DB row나 다른 workstream commit을 되돌�
 Exact files:
 
 - lib/types.ts
-- lib/localized-dispatch-artifact.ts (new)
+- lib/reviewed-localization-envelope.ts (new)
 - lib/foreign-worker.ts
 - lib/current-workpack.ts
+- lib/workpack-store.ts
+- lib/workpack-commercial-store.ts
+- lib/workpack-readiness.ts
+- app/api/workpacks/[id]/route.ts
+- app/api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review/route.ts (new)
 - components/CurrentWorkpackModules.tsx
 - components/SafeGuardCommandCenter.tsx
-- tests/localized-dispatch-artifact.test.ts (new)
+- tests/reviewed-localization-envelope.test.ts (new)
+- tests/reviewed-localization-route.test.ts (new)
+- tests/workpack-generation-evidence-route.test.ts
+- tests/workpack-share-authority.test.ts
 - tests/foreign-worker-languages.test.ts
 - tests/documents-editor-layout.test.ts
 
 ~~~powershell
-npm.cmd test -- tests/localized-dispatch-artifact.test.ts tests/foreign-worker-languages.test.ts tests/documents-editor-layout.test.ts --maxWorkers=1 --no-file-parallelism
+npm.cmd test -- tests/reviewed-localization-envelope.test.ts tests/reviewed-localization-route.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/foreign-worker-languages.test.ts tests/documents-editor-layout.test.ts --maxWorkers=1 --no-file-parallelism
 npm.cmd run typecheck
 git diff --check
 ~~~
 
-Exit: editor owner, sourceDigest/revision, provenance, human review, stale detection, 12-language completeness가 기존 workpack JSON boundary에서 통과합니다.
+Exit: 원본 generationEvidence/deliverables 불변, authenticated review route, envelope HMAC, canonicalWorkpackRevision, compare-and-swap, stale fail-closed, 12-language completeness가 기존 evidence_summary JSON 경계에서 통과합니다.
 
 Rollback: git revert <wave-2-sha>. schema/migration을 만들지 않습니다.
 
@@ -553,7 +692,7 @@ Exact files:
 - app/workers/page.tsx
 - app/settings/page.tsx
 - lib/module-navigation.ts
-- app/globals.css
+- components/WorkflowSharePanel.module.css
 - tests/workspace-workers.test.ts
 - tests/frontend-shared-surfaces.test.ts
 - tests/product-module-shell.test.ts
@@ -582,7 +721,6 @@ Conditional fix files:
 - components/SafeGuardCommandCenter.tsx
 - components/WorkflowSharePanel.tsx
 - components/WorkflowSharePanel.module.css
-- app/globals.css
 
 ~~~powershell
 npm.cmd test -- tests/workpack-share-v2-browser.test.ts --maxWorkers=1 --no-file-parallelism
@@ -593,7 +731,7 @@ npm.cmd run audit:frontend-consistency
 git diff --check
 ~~~
 
-Exit: 52개 Chromium case, request order/payload, return routing, task distance, 200% zoom, Vietnamese gate가 GREEN입니다.
+Exit: 128개 Chromium case, localization/channel authority, request order/payload, stage-specific CTA routing, normal task distance, executable root_font_200, Vietnamese gate가 GREEN입니다.
 
 Rollback: git revert <wave-4-sha>. 실제 provider와 DB mutation rollback은 없습니다.
 
@@ -603,7 +741,7 @@ Wave 공통 규칙:
 - 각 wave는 한 commit입니다.
 - exact/conditional 목록 밖 변경은 중단 사유입니다.
 - ours/theirs 일괄 선택을 하지 않습니다.
-- package와 lock을 변경하지 않습니다.
+- package, lock, app/globals.css를 변경하지 않습니다.
 
 ## 8. Non-Goals And User Copy
 
@@ -630,10 +768,12 @@ Non-goals:
 | 전송 CTA | {N}명에게 전송 |
 | 언어 | 작업자 정보와 검토된 번역본에 따라 언어를 정했습니다. |
 | 번역 blocker | 검토된 {language} 전송본이 필요합니다. 번역본을 검토한 뒤 돌아옵니다. |
+| Revalidation | 문서팩이 변경되어 다시 검수해야 합니다. |
 | Session 실패 | 초대 세션을 만들지 못해 전송을 시작하지 않았습니다. |
-| Accepted | 선택한 채널이 전송 요청을 접수했습니다. 전달 여부는 전파 이력에서 확인합니다. |
+| Session 실패 CTA | 초대 세션 다시 시도 |
+| Accepted + log | 선택한 채널이 전송 요청을 접수했습니다. 전달 여부는 전파 이력에서 확인합니다. |
 | Partial | 일부 채널은 요청을 접수했고 일부는 실패하거나 결과를 확인하지 못했습니다. |
-| Unknown | 전송 결과를 확정하지 못했습니다. 중복 전송을 피하고 전파 이력을 확인합니다. |
+| Unknown + no log | 전송 결과를 확정하지 못했습니다. 자동으로 다시 보내지 말고 중복 전송 방지 안내를 확인합니다. |
 | Stale | 문서팩 또는 오늘 참여자 정보가 변경되어 다시 확인해야 합니다. |
 
 저장 성공을 법적 증빙, 접수 성공을 전달 또는 열람 완료, 부분 번역을 번역 완료로 표현하지 않습니다.
@@ -641,12 +781,23 @@ Non-goals:
 
 ## 9. Executable MD/JSON Parity
 
+TDD-style consistency 순서는 다음과 같습니다.
+
+1. RED: 04b465b spec에 remediationParent, signed envelope persistence, server channel resolver, revalidation precedence, session failure CTA, zoomModes=2, browserCaseCount=128 assertion을 먼저 실행하면 실패해야 합니다.
+2. GREEN: 이 revision의 embedded command가 같은 assertion과 MD/JSON manifest equality를 모두 통과해야 합니다.
+3. REFACTOR: 중복 문구를 줄인 뒤에도 JSON parse, forbidden contradiction scan, changed-file scope, git diff --check를 다시 통과해야 합니다.
+
 아래 manifest는 spec.json의 parityManifest와 byte-for-byte JSON 의미가 같아야 합니다.
 
 <!-- PARITY_MANIFEST_START -->
 ~~~json
 {
   "status": "HOLD_PENDING_INDEPENDENT_PASS",
+  "review": {
+    "remediationParent": "04b465bbe7131847cc01628cf72f592ff21bf14a",
+    "reviewRange": "59f4812..next-candidate",
+    "reviewStatus": "pending"
+  },
   "sequence": [
     "target",
     "channel",
@@ -661,21 +812,39 @@ Non-goals:
       "/workers"
     ],
     "translationOwner": "document-editor:foreignWorkerTransmission",
+    "translationPersistenceOwner": "/api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review",
     "channelSetupOwner": "/settings"
   },
   "cta": {
     "no_recipients": "오늘 참여자 선택",
     "logged_out": "로그인하고 전송",
     "ready": "{N}명에게 전송",
-    "review_required": "번역본 검토"
+    "review_required": "번역본 검토",
+    "workpack_revalidation": "문서 다시 검수",
+    "session_create_failed": "초대 세션 다시 시도"
   },
   "lifecycle": [
-    "validate_ready_inputs",
+    "validate_reviewed_localization",
+    "resolve_channels",
     "create_session",
     "dispatch",
     "save_channel_log"
   ],
   "sessionFailureDispatchCount": 0,
+  "sessionFailureHistoryAllowed": false,
+  "revalidationBeforeBlocked": true,
+  "historyRequiresPersistedLog": true,
+  "localizationPersistence": {
+    "mode": "separate_server_signed_review_envelope",
+    "storage": "evidence_summary.reviewedLocalizationEnvelopes",
+    "originalDeliverablesMutable": false,
+    "originalGenerationEvidenceMutable": false
+  },
+  "channelResolver": {
+    "route": "/api/settings/channels/resolve",
+    "tokenTtlSeconds": 120,
+    "sessionBeforeResolvedAvailable": false
+  },
   "channels": [
     "email",
     "sms",
@@ -686,11 +855,18 @@ Non-goals:
     "mobile": "391x844"
   },
   "zoom200FixedHeightCeiling": false,
+  "zoomModes": [
+    "normal_100",
+    "root_font_200"
+  ],
+  "zoom200Delivery": "page_evaluate_root_font_2x",
   "fixtureIngress": "production_resolver_inputs_and_mocked_routes",
   "browserFixtureIds": [
     "empty",
     "selected",
+    "channel_unavailable",
     "review_required",
+    "workpack_revalidation",
     "logged_out",
     "blocked",
     "ready",
@@ -699,10 +875,11 @@ Non-goals:
     "result_partial",
     "fail_session",
     "fail_dispatch",
+    "fail_dispatch_unpersisted",
     "offline",
     "stale"
   ],
-  "browserCaseCount": 52,
+  "browserCaseCount": 128,
   "languageCodes": [
     "ko",
     "vi",
@@ -717,7 +894,8 @@ Non-goals:
     "tl",
     "en"
   ],
-  "publicLinkAllowed": false
+  "publicLinkAllowed": false,
+  "databaseMigrationCount": 0
 }
 ~~~
 <!-- PARITY_MANIFEST_END -->
@@ -736,6 +914,10 @@ assert.ok(match, "Markdown parity manifest is missing");
 const markdownManifest = JSON.parse(match[1]);
 assert.deepEqual(markdownManifest, spec.parityManifest);
 
+assert.equal(spec.metadata.remediationParent, "04b465bbe7131847cc01628cf72f592ff21bf14a");
+assert.equal(spec.metadata.reviewRange, "59f4812..next-candidate");
+assert.equal(spec.metadata.reviewStatus, "pending");
+assert.equal(Object.hasOwn(spec.metadata, "reviewedCommit"), false);
 assert.equal(spec.product.screenSequence.join(">"), "target>channel>localized_preview>send");
 assert.equal(spec.product.singletonSurfaces.localizedPreviewMaxCount, 1);
 assert.equal(spec.product.singletonSurfaces.loggedOutAdditionalLoginCtaCount, 0);
@@ -748,26 +930,69 @@ assert.deepEqual(spec.routeOwnership.map((route) => route.id), ["R1", "R2", "R3"
 assert.deepEqual(spec.returnContract.implementationOwners, ["app/workspace/page.tsx", "components/SafeGuardCommandCenter.tsx", "lib/workspace-pages.ts"]);
 assert.equal(spec.stateMachine.primaryCta.logged_out, "로그인하고 전송");
 assert.equal(spec.stateMachine.primaryCta.ready, "{N}명에게 전송");
+assert.equal(spec.stateMachine.primaryCta.workpack_revalidation, "문서 다시 검수");
+assert.ok(spec.stateMachine.precedence.indexOf("workpack_revalidation") < spec.stateMachine.precedence.indexOf("blocked"));
+assert.equal(spec.stateMachine.revalidationDecisionRule.evaluateBeforeGenericBlocked, true);
 assert.equal(spec.stateMachine.states.find((state) => state.id === "no_recipients").routeBackControlCount, 1);
 assert.equal(spec.stateMachine.nonBlockingStatus.mayOwnPrimary, false);
 assert.equal(spec.stateMachine.transitions.find((transition) => transition.event === "session failure").dispatchRequestCount, 0);
+assert.equal(spec.stateMachine.failureCta.session_create_failed.primaryLabel, "초대 세션 다시 시도");
+assert.equal(spec.stateMachine.failureCta.session_create_failed.historyHrefAllowed, false);
+assert.equal(spec.stateMachine.failureCta.dispatch_failed_log_persisted.route, "/dispatch");
+assert.ok(Object.values(spec.stateMachine.failureCta).every((failure) =>
+  failure.historyHrefAllowed ? failure.persistedDispatchLog === true : failure.route !== "/dispatch"
+));
 assert.deepEqual(spec.dataContracts.dispatchChannels, ["email", "sms", "kakao"]);
-assert.deepEqual(spec.sendLifecycle.order, ["validate_ready_inputs", "create_session", "dispatch", "save_channel_log"]);
-assert.deepEqual(spec.sendLifecycle.createSession.atomicScope, ["share session row", "invitation binding for every locked recipient"]);
+assert.equal(spec.dataContracts.channelAvailability.route, "/api/settings/channels/resolve");
+assert.equal(spec.dataContracts.channelAvailability.token.ttlSeconds, 120);
+assert.equal(spec.dataContracts.channelAvailability.unresolvedOrUnavailableSessionRequestCount, 0);
+assert.equal(spec.dataContracts.channelAvailability.dispatchDefenseInDepthPreserved, true);
+assert.equal(spec.dataContracts.channelAvailability.serverChecks.persistentIdempotencyPolicy, true);
+assert.equal(spec.dataContracts.channelAvailability.dispatchRouteUsesSameServerFunction, true);
+assert.equal(spec.dataContracts.localizedDispatchArtifact.serverAuthority.route, "/api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review");
+assert.equal(spec.dataContracts.localizedDispatchArtifact.persistence.mode, "separate_server_signed_review_envelope");
+assert.equal(spec.dataContracts.localizedDispatchArtifact.persistence.originalDeliverablesMutable, false);
+assert.equal(spec.dataContracts.localizedDispatchArtifact.persistence.originalGenerationEvidenceMutable, false);
+assert.equal(spec.dataContracts.localizedDispatchArtifact.persistence.clientOrLocalMutationAllowed, false);
+assert.equal(spec.dataContracts.localizedDispatchArtifact.reviewRouteContract.mergeEnvelopeIntoDeliverablesBeforeGenerationVerification, false);
+assert.ok(spec.dataContracts.localizedDispatchArtifact.reviewRouteContract.clientCannotSet.includes("reviewedAt"));
+assert.equal(spec.dataContracts.localizedDispatchArtifact.reviewWrite.expectedWorkpackRevisionRequired, true);
+assert.equal(spec.dataContracts.localizedDispatchArtifact.reviewWrite.newEnvelopeSigned, true);
+assert.equal(spec.dataContracts.localizedDispatchArtifact.reviewWrite.routeWritesUpdatedAt, "server clock");
+assert.ok(spec.dataContracts.localizedDispatchArtifact.artifactDigest.bindings.includes("reviewedAt"));
+assert.deepEqual(spec.sendLifecycle.order, ["validate_reviewed_localization", "resolve_channels", "create_session", "dispatch", "save_channel_log"]);
+assert.deepEqual(Object.keys(spec.sendLifecycle.createSession.requestBody), ["recipients", "channels", "canonicalWorkpackRevision", "availabilityToken"]);
+assert.deepEqual(spec.sendLifecycle.createSession.atomicScope, ["one share session row containing complete recipients_snapshot and access_policy"]);
 assert.equal(spec.sendLifecycle.onSessionFailure.dispatchRequestCount, 0);
+assert.equal(spec.sendLifecycle.onSessionFailure.historyHrefCount, 0);
 assert.equal(spec.resultContract.recipientLevelDeliveredPersistence, false);
+assert.equal(spec.resultContract.historyRequiresPersistedLog, true);
+assert.equal(spec.resultContract.persistenceProof.savedCountAloneIsAuthority, false);
+assert.equal(spec.resultContract.persistenceProof.databaseMigrationRequired, false);
 assert.equal(spec.accessibility.viewports.mobile, "391x844");
 assert.equal(spec.accessibility.zoom200.fixedHeightCeiling, false);
+assert.equal(spec.accessibility.zoom200.deviceScaleFactorUsedForZoom, false);
+assert.match(spec.accessibility.zoom200.delivery, /page\.evaluate/u);
 assert.equal(spec.browserGate.fixtureIngress, "production_resolver_inputs_and_mocked_routes");
-assert.equal(spec.browserGate.environments.length * spec.browserGate.fixtures.length, 52);
+assert.deepEqual(spec.browserGate.zoomModes.map((mode) => mode.id), ["normal_100", "root_font_200"]);
+assert.equal(spec.browserGate.environments.length * spec.browserGate.fixtures.length * spec.browserGate.zoomModes.length, 128);
+assert.equal(spec.browserGate.caseCount, 128);
+assert.equal(spec.browserGate.caseCountByZoom.normal_100 + spec.browserGate.caseCountByZoom.root_font_200, 128);
 assert.ok(spec.browserGate.fixtures.every((fixture) => fixture.entry === "production_resolver"));
 assert.deepEqual(spec.browserGate.fixtures.map((fixture) => fixture.id), spec.parityManifest.browserFixtureIds);
 assert.deepEqual(spec.browserGate.environments.map((env) => env.viewport), ["1440x1000", "1440x1000", "391x844", "391x844"]);
+assert.ok(spec.browserGate.fixtures.find((fixture) => fixture.id === "workpack_revalidation").assertions.includes("generic 문서 보완 primary absent"));
+assert.ok(spec.browserGate.fixtures.find((fixture) => fixture.id === "fail_session").assertions.includes("/dispatch href count 0"));
+assert.ok(spec.browserGate.fixtures.find((fixture) => fixture.id === "fail_dispatch_unpersisted").assertions.includes("/dispatch href count 0"));
 assert.ok(spec.stateMachine.blockingReasons.every((reason) => reason.owner && reason.action && reason.returnRoute));
 assert.equal(spec.dataContracts.localizedDispatchArtifact.owner, "document-editor:foreignWorkerTransmission");
 assert.equal(spec.dataContracts.localizedDispatchArtifact.shareMayGenerate, false);
 assert.equal(spec.dataContracts.localizedDispatchArtifact.languageUi.optionCount, 12);
 assert.equal(spec.sendLifecycle.invitationPolicy.publicLinkAllowed, false);
+assert.equal(spec.parityManifest.databaseMigrationCount, 0);
+assert.ok(spec.implementation.waves.every((wave) =>
+  ![...(wave.exactFiles || []), ...(wave.conditionalFixFiles || [])].includes("app/globals.css")
+));
 
 const forbidden = [
   ["quick add", "drawer"].join(" "),
@@ -775,7 +1000,9 @@ const forbidden = [
   ["선택한 {N}명에게", "전송합니다"].join(" "),
   ["390", "x844"].join(""),
   ["mobileReadyBody", "MaxPx"].join(""),
-  ["explicit component", "state"].join(" ")
+  ["explicit component", "state"].join(" "),
+  ["2ad", "ca4e"].join(""),
+  ["browserCaseCount", "52"].join(String.fromCharCode(34, 58, 32))
 ];
 for (const value of forbidden) {
   assert.equal(md.includes(value), false, "Forbidden Markdown contradiction: " + value);
@@ -788,6 +1015,7 @@ console.log(JSON.stringify({
   states: spec.stateMachine.states.length,
   channels: spec.dataContracts.dispatchChannels.length,
   fixtures: spec.browserGate.fixtures.length,
+  zoomModes: spec.browserGate.zoomModes.length,
   browserCases: spec.parityManifest.browserCaseCount,
   languages: spec.parityManifest.languageCodes.length
 }, null, 2));

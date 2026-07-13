@@ -1,11 +1,13 @@
 {
   "schemaVersion": "safeclaw-workpack-share-v2-product-spec/v2",
   "specId": "workpack-share-v2-2026-07-13",
-  "revision": "independent-review-remediation-1",
+  "revision": "independent-review-remediation-2",
   "status": "HOLD_PENDING_INDEPENDENT_PASS",
   "metadata": {
     "branch": "feat/workpack-share-v2",
-    "reviewedCommit": "2adca4e98bab7854982bdd840c48a48944dc705e",
+    "remediationParent": "04b465bbe7131847cc01628cf72f592ff21bf14a",
+    "reviewRange": "59f4812..next-candidate",
+    "reviewStatus": "pending",
     "originalBase": "59f48123da62fb405e639da03912aa1ed6c000b9",
     "specOnly": true,
     "writeFiles": [
@@ -69,6 +71,19 @@
       "sms",
       "kakao"
     ],
+    "currentGenerationSeal": {
+      "implementation": "lib/generation-evidence.ts",
+      "saveRoute": "/api/workpacks",
+      "responseContentDigestIncludesDeliverables": true,
+      "saveRecomputesAndVerifiesDigest": true,
+      "clientDeliverablesMutationWouldMismatch": true
+    },
+    "currentChannelChecks": {
+      "implementation": "app/api/workflow/dispatch/route.ts",
+      "timing": "dispatch",
+      "serverResolverBeforeSessionExists": false,
+      "requiredV2Change": "authenticated Settings-owned resolver before session while retaining dispatch defense-in-depth"
+    },
     "currentQualityFallback": {
       "canShare": false,
       "preserveFailClosed": true,
@@ -172,7 +187,7 @@
         "order": 6,
         "id": "result_strip",
         "content": "accepted, failed, unknown 채널/request 요약",
-        "shareAction": "이력 route 이동"
+        "shareAction": "persistedLogIds>0일 때만 이력 route 이동"
       },
       {
         "order": 7,
@@ -208,7 +223,9 @@
       "/workers"
     ],
     "translationOwner": "document-editor:foreignWorkerTransmission",
+    "translationPersistenceOwner": "/api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review",
     "channelSetupOwner": "/settings",
+    "channelAvailabilityOwner": "/api/settings/channels/resolve",
     "reportingRecipientOwner": "/settings",
     "dispatchHistoryOwner": "/dispatch",
     "archiveOwner": "/archive"
@@ -237,15 +254,21 @@
     },
     {
       "id": "R4",
-      "capability": "translation generation, edit, review",
-      "owner": "document-editor:foreignWorkerTransmission",
-      "shareContract": "consume_approved_artifact_only"
+      "capability": "translation generation, edit, review, signed persistence",
+      "owner": [
+        "document-editor:foreignWorkerTransmission",
+        "/api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review"
+      ],
+      "shareContract": "consume_server_verified_approved_envelope_only"
     },
     {
       "id": "R5",
-      "capability": "email, sms, kakao configuration and approval",
-      "owner": "/settings",
-      "shareContract": "show_resolved_availability_only"
+      "capability": "email, sms, kakao configuration, approval, availability",
+      "owner": [
+        "/settings",
+        "/api/settings/channels/resolve"
+      ],
+      "shareContract": "consume_secret_free_resolution_and_token_only"
     },
     {
       "id": "R6",
@@ -368,11 +391,12 @@
       "sending",
       "success_or_partial_or_fail",
       "stale",
+      "workpack_revalidation",
       "blocked",
       "offline",
       "no_recipients",
       "logged_out",
-      "review_required",
+      "review_required_localization_or_participant",
       "selected",
       "ready"
     ],
@@ -383,18 +407,20 @@
       "no_recipients": "오늘 참여자 선택",
       "logged_out": "로그인하고 전송",
       "review_required": "번역본 검토",
+      "workpack_revalidation": "문서 다시 검수",
       "ready": "{N}명에게 전송",
       "sending": "전송 중",
       "success": "전파 이력 확인",
       "partial": "전파 이력 확인",
-      "fail": "전파 이력 확인",
+      "fail": "failure stage catalog label",
+      "session_create_failed": "초대 세션 다시 시도",
       "offline": "연결 다시 확인",
       "stale": "변경사항 다시 확인"
     },
     "states": [
       {
         "id": "blocked",
-        "entry": "readiness.canShare=false",
+        "entry": "readiness.canShare=false and requiresRevalidation=false",
         "primaryLabel": "문서 보완",
         "enabled": true,
         "action": "document review route",
@@ -426,14 +452,14 @@
       },
       {
         "id": "review_required",
-        "entry": "workpack or required localized artifact needs review",
+        "entry": "requiresRevalidation=true or required signed localization envelope or participant snapshot needs review",
         "primaryLabel": "review reason catalog label",
         "enabled": true,
         "action": "specific review owner route"
       },
       {
         "id": "ready",
-        "entry": "all pre-session guards valid",
+        "entry": "all pre-session guards valid including server-verified localization and unexpired available channel resolution",
         "primaryLabel": "{N}명에게 전송",
         "enabled": true,
         "action": "create_session",
@@ -448,24 +474,24 @@
       },
       {
         "id": "success",
-        "entry": "all requested channels are accepted and duplicateRisk=false",
+        "entry": "all requested channels accepted, duplicateRisk=false, and at least one dispatch log ID persisted",
         "primaryLabel": "전파 이력 확인",
         "enabled": true,
         "action": "/dispatch"
       },
       {
         "id": "partial",
-        "entry": "accepted and failed or unknown channel outcomes are mixed",
+        "entry": "accepted and failed or unknown outcomes mixed and at least one dispatch log ID persisted",
         "primaryLabel": "전파 이력 확인",
         "enabled": true,
         "action": "/dispatch"
       },
       {
         "id": "fail",
-        "entry": "session failure, zero accepted channels, or all outcomes unknown",
-        "primaryLabel": "전파 이력 확인",
-        "enabled": true,
-        "action": "/dispatch or specific recovery owner"
+        "entry": "channel resolver, session, dispatch, or log persistence failed",
+        "primaryLabel": "failure stage catalog label",
+        "enabled": "stage dependent",
+        "action": "failure stage catalog action; history only when persisted log exists"
       },
       {
         "id": "offline",
@@ -476,7 +502,7 @@
       },
       {
         "id": "stale",
-        "entry": "sourceRevision or digest mismatch",
+        "entry": "canonicalWorkpackRevision, signed envelope, participant, or channel token mismatch",
         "primaryLabel": "변경사항 다시 확인",
         "enabled": true,
         "action": "stale reason owner route"
@@ -503,7 +529,9 @@
         "from": "sending",
         "event": "session failure",
         "to": "fail",
-        "dispatchRequestCount": 0
+        "failureStage": "session_create_failed",
+        "dispatchRequestCount": 0,
+        "historyHrefCount": 0
       },
       {
         "from": "sending",
@@ -545,6 +573,13 @@
         "networkRequestsWhileOffline": 0
       }
     ],
+    "revalidationDecisionRule": {
+      "evaluateBeforeGenericBlocked": true,
+      "condition": "requiresRevalidation=true",
+      "reasonId": "workpack_revalidation",
+      "primaryLabel": "문서 다시 검수",
+      "genericBlockedPrimaryLabelForbidden": "문서 보완"
+    },
     "blockingReasons": [
       {
         "id": "channel_not_selected",
@@ -647,6 +682,63 @@
       "changesWorkerDispatchState": false,
       "mayOwnPrimary": false
     },
+    "failureCta": {
+      "channel_resolution_unresolved": {
+        "persistedDispatchLog": false,
+        "primaryLabel": "채널 상태 다시 확인",
+        "action": "rerun authenticated channel resolver",
+        "route": "/workspace?step=share&theme={theme}",
+        "sessionRequestCount": 0,
+        "historyHrefAllowed": false
+      },
+      "channel_unavailable": {
+        "persistedDispatchLog": false,
+        "primaryLabel": "채널 설정 확인",
+        "action": "open Settings owner",
+        "route": "/settings?next={encoded shareReturn}",
+        "sessionRequestCount": 0,
+        "historyHrefAllowed": false
+      },
+      "session_create_failed": {
+        "persistedDispatchLog": false,
+        "primaryLabel": "초대 세션 다시 시도",
+        "action": "revalidate workpack envelopes and channel resolution, then start a new session attempt",
+        "route": "/workspace?step=share&theme={theme}",
+        "dispatchRequestCount": 0,
+        "historyHrefAllowed": false
+      },
+      "dispatch_rejected_before_provider": {
+        "persistedDispatchLog": false,
+        "primaryLabel": "전송 조건 다시 확인",
+        "action": "rerun Share resolver without automatic resend",
+        "route": "/workspace?step=share&theme={theme}",
+        "automaticRetry": false,
+        "historyHrefAllowed": false
+      },
+      "dispatch_result_log_missing": {
+        "persistedDispatchLog": false,
+        "primaryLabel": "중복 전송 방지 확인",
+        "action": "keep accepted, failed, or unknown response in Share without automatic resend",
+        "route": "/workspace?step=share&theme={theme}",
+        "automaticRetry": false,
+        "historyHrefAllowed": false
+      },
+      "dispatch_failed_log_persisted": {
+        "persistedDispatchLog": true,
+        "primaryLabel": "전파 이력 확인",
+        "action": "open persisted history",
+        "route": "/dispatch",
+        "historyHrefAllowed": true
+      },
+      "sent_or_partial_log_persisted": {
+        "persistedDispatchLog": true,
+        "primaryLabel": "전파 이력 확인",
+        "action": "open persisted history",
+        "route": "/dispatch",
+        "historyHrefAllowed": true
+      }
+    },
+    "historyAuthority": "show /dispatch only when persistedLogIds.length > 0 for current workpack and attempt",
     "unusedPreviewLanguageRule": "previewing an unused language does not alter dispatch plan and shows only that language review route"
   },
   "dataContracts": {
@@ -696,6 +788,7 @@
         "approved": "boolean",
         "available": "boolean",
         "recipientCount": "number",
+        "reasonCode": "available | recipient_contact_missing | provider_unconfigured | relay_unconfigured | idempotency_unsupported | template_unapproved | policy_disabled",
         "ownerRoute": "/settings"
       },
       "emailSmsResolution": "recipient contact and provider configuration",
@@ -707,6 +800,83 @@
         "request payload",
         "result mapping",
         "log adapter"
+      ]
+    },
+    "channelAvailability": {
+      "typeName": "ChannelAvailabilityResolution",
+      "version": "channel-availability/v1",
+      "owner": "/settings",
+      "route": "/api/settings/channels/resolve",
+      "method": "POST",
+      "serverFunction": "resolveServerChannelAvailability",
+      "authenticated": true,
+      "requestFields": [
+        "workpackId",
+        "canonicalWorkpackRevision",
+        "recipients",
+        "requestedChannels"
+      ],
+      "responseFields": [
+        "workpackId",
+        "canonicalWorkpackRevision",
+        "recipientDigest",
+        "requestedChannels",
+        "dispatchMode",
+        "channels",
+        "configurationRevision",
+        "resolvedAt",
+        "expiresAt",
+        "availabilityToken"
+      ],
+      "token": {
+        "algorithm": "HMAC-SHA256",
+        "secret": "SAFECLAW_CHANNEL_AVAILABILITY_SECRET",
+        "ttlSeconds": 120,
+        "bindings": [
+          "userId",
+          "organizationId",
+          "siteId",
+          "workpackId",
+          "canonicalWorkpackRevision",
+          "recipientDigest",
+          "requestedChannels",
+          "dispatchMode",
+          "configurationRevision",
+          "resolvedAt",
+          "expiresAt"
+        ],
+        "secretsExposed": false,
+        "secretUnconfigured": "503, no token, ready=false"
+      },
+      "serverChecks": {
+        "authentication": true,
+        "workpackOwnership": true,
+        "serverWorkerSnapshot": true,
+        "emailSmsContacts": true,
+        "dispatchMode": true,
+        "relayAndProviderPolicy": true,
+        "persistentIdempotencyPolicy": true,
+        "kakaoEnabledFlags": true,
+        "kakaoProviderAndTemplateApproval": true
+      },
+      "readyRequires": [
+        "authenticated response",
+        "unexpired token",
+        "matching workpack revision",
+        "matching recipients and channels",
+        "all selected channels available"
+      ],
+      "sessionRouteRevalidatesToken": true,
+      "sessionRouteRerunsServerFunction": true,
+      "dispatchRouteUsesSameServerFunction": true,
+      "unresolvedOrUnavailableSessionRequestCount": 0,
+      "dispatchDefenseInDepthPreserved": true,
+      "forbiddenResponseFields": [
+        "webhook URL",
+        "webhook token",
+        "sender key",
+        "template ID",
+        "provider credential"
       ]
     },
     "reportingRecipientGroup": {
@@ -730,19 +900,69 @@
       "en"
     ],
     "localizedDispatchArtifact": {
-      "typeName": "LocalizedDispatchArtifact",
-      "version": "localized-dispatch-artifact/v1",
+      "artifactTypeName": "LocalizedDispatchArtifact",
+      "artifactVersion": "localized-dispatch-artifact/v1",
+      "envelopeTypeName": "ReviewedLocalizationEnvelope",
+      "envelopeVersion": "reviewed-localization-envelope/v1",
       "owner": "document-editor:foreignWorkerTransmission",
+      "serverAuthority": {
+        "route": "/api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review",
+        "method": "PUT",
+        "implementation": "lib/reviewed-localization-envelope.ts",
+        "authenticated": true,
+        "organizationOwnershipRequired": true,
+        "localeAllowlistRequired": true
+      },
+      "reviewRouteContract": {
+        "requestFields": [
+          "expectedWorkpackRevision",
+          "sourceDocumentDigest",
+          "artifact",
+          "decision"
+        ],
+        "clientCannotSet": [
+          "reviewerId",
+          "reviewerDisplayName",
+          "reviewedAt",
+          "signedAt",
+          "artifactRevision",
+          "artifactDigest",
+          "signature",
+          "canonicalWorkpackRevision"
+        ],
+        "responseFields": [
+          "ok",
+          "workpackId",
+          "targetLocale",
+          "envelope",
+          "canonicalWorkpackRevision"
+        ],
+        "verificationOrder": [
+          "separate reviewedLocalizationEnvelopes from raw evidence_summary",
+          "reconstruct and verify original AskResponse generationEvidence",
+          "compute server sourceDocumentDigest",
+          "validate candidate and review decision",
+          "compute artifactDigest and sign envelope",
+          "compare-and-swap evidence_summary",
+          "return new canonicalWorkpackRevision"
+        ],
+        "mergeEnvelopeIntoDeliverablesBeforeGenerationVerification": false
+      },
       "shareMayGenerate": false,
       "shareMayEdit": false,
       "shareMayApprove": false,
-      "storageBoundary": "existing workpack JSON/request/reopenData deliverables.localizedDispatchArtifacts",
-      "databaseMigrationRequired": false,
-      "fields": {
+      "shareMayPersist": false,
+      "persistence": {
+        "mode": "separate_server_signed_review_envelope",
+        "storageBoundary": "evidence_summary.reviewedLocalizationEnvelopes[locale]",
+        "originalDeliverablesMutable": false,
+        "originalGenerationEvidenceMutable": false,
+        "clientOrLocalMutationAllowed": false,
+        "databaseMigrationRequired": false
+      },
+      "artifactFields": {
         "artifactId": "string",
-        "sourceRevision": "string",
-        "sourceDigest": "string",
-        "targetLanguage": "SupportedLanguageCode",
+        "targetLocale": "SupportedLanguageCode",
         "localized": {
           "subject": "string",
           "metadata": {
@@ -766,38 +986,96 @@
           "modelOrVersion": "string | null",
           "generatedAt": "ISO timestamp"
         },
+        "artifactRevision": "positive server-controlled integer"
+      },
+      "envelopeFields": {
+        "workpackId": "string",
+        "generationRevision": "string",
+        "sourceDocumentKey": "foreignWorkerTransmission",
+        "sourceDocumentDigest": "string",
+        "targetLocale": "SupportedLanguageCode",
+        "artifact": "LocalizedDispatchArtifact",
         "review": {
           "state": [
-            "not_reviewed",
             "approved",
             "rejected"
           ],
-          "reviewerId": "string | null",
-          "reviewerDisplayName": "string | null",
-          "reviewedAt": "ISO timestamp | null"
+          "reviewerId": "auth user ID",
+          "reviewerDisplayName": "auth user display name",
+          "reviewedAt": "server ISO timestamp"
         },
-        "revision": "string",
-        "artifactDigest": "string"
+        "artifactDigest": "string",
+        "signedAt": "server ISO timestamp",
+        "signature": "HMAC-SHA256 with SAFECLAW_REVIEWED_LOCALIZATION_SECRET"
       },
-      "sourceDigestInput": [
-        "companyName",
-        "siteName",
-        "workSummary",
-        "topRisk",
-        "source foreignWorkerTransmission",
-        "sourceRevision"
+      "revisionSemantics": {
+        "generationRevision": "sha256(canonical {workpackId, generationEvidence.version, generationEvidence.signature, responseContentDigest})",
+        "reviewSetDigest": "sha256(canonical signed envelopes sorted by locale)",
+        "canonicalWorkpackRevision": "sha256(canonical {generationRevision, reviewSetDigest})",
+        "changesAfterEveryReviewWrite": true,
+        "returnedBy": [
+          "review route",
+          "workpack GET",
+          "readiness"
+        ]
+      },
+      "sourceDocumentDigest": {
+        "algorithm": "canonical JSON SHA-256",
+        "serverInputs": [
+          "sealed foreignWorkerTransmission",
+          "companyName",
+          "siteName",
+          "workSummary",
+          "topRisk"
+        ],
+        "clientDigestAuthority": false
+      },
+      "artifactDigest": {
+        "algorithm": "canonical JSON SHA-256",
+        "bindings": [
+          "generationRevision",
+          "sourceDocumentKey",
+          "sourceDocumentDigest",
+          "targetLocale",
+          "localized",
+          "provenance",
+          "artifactRevision",
+          "review state",
+          "reviewerId",
+          "reviewerDisplayName",
+          "reviewedAt"
+        ]
+      },
+      "reviewWrite": {
+        "expectedWorkpackRevisionRequired": true,
+        "originalGenerationEvidenceVerified": true,
+        "reviewerFromAuth": true,
+        "timestampsFromServerClock": true,
+        "artifactRevisionServerIncremented": true,
+        "compareAndSwap": "conditional update on loaded updated_at",
+        "routeWritesUpdatedAt": "server clock",
+        "zeroUpdatedRows": "409 stale",
+        "generationEvidenceResealed": false,
+        "newEnvelopeSigned": true,
+        "secretUnconfigured": "503, write count 0, readiness blocked"
+      },
+      "staleOrInvalidWhen": [
+        "envelope missing",
+        "review rejected",
+        "envelope malformed",
+        "signature invalid",
+        "generationRevision mismatch",
+        "sourceDocumentDigest mismatch",
+        "targetLocale mismatch",
+        "artifactDigest mismatch",
+        "canonicalWorkpackRevision mismatch"
       ],
-      "sourceDigestAlgorithm": "canonical JSON SHA-256",
-      "staleWhen": [
-        "sourceDigest differs from current workpack",
-        "sourceRevision differs from current workpack"
-      ],
+      "failClosedState": "review_required",
       "nonKoreanReadyRequirements": [
-        "artifact exists",
+        "server-verified envelope exists",
         "review.state=approved",
-        "reviewerId present",
-        "reviewedAt present",
-        "source matches current workpack",
+        "reviewer and reviewedAt present",
+        "source and generation match current workpack",
         "subject has no Hangul",
         "metadata labels have no Hangul",
         "metadata values have no Hangul",
@@ -820,6 +1098,8 @@
         "dropdownCount": 1,
         "optionCount": 12,
         "previewOverrideChangesRecipientLanguage": false,
+        "previewOverrideChangesRecipientDigest": false,
+        "previewOverrideChangesWorkpackRevision": false,
         "previewOverrideChangesDispatchPlanDigest": false
       },
       "vietnameseGateChecks": [
@@ -830,12 +1110,15 @@
         "body",
         "semanticRiskLabels",
         "provenance",
-        "review",
-        "revision",
-        "sourceDigest",
-        "artifactDigest"
+        "reviewer",
+        "reviewedAt",
+        "generationRevision",
+        "sourceDocumentDigest",
+        "artifactRevision",
+        "artifactDigest",
+        "signature"
       ],
-      "fixtureAuthority": "source-matching artifact approved by editor owner and provided through production workpack JSON"
+      "fixtureAuthority": "mock review and workpack GET route responses parsed by production resolver; no direct object attachment"
     },
     "adapterContract": {
       "preserve": [
@@ -843,8 +1126,10 @@
         "existing audit fields",
         "existing storage rows",
         "existing dispatch logs",
-        "sourceRevision",
-        "sourceDigest",
+        "original generationEvidence and responseContentDigest",
+        "original deliverables",
+        "canonicalWorkpackRevision",
+        "sourceDocumentDigest",
         "artifactDigest",
         "revalidation requirements"
       ],
@@ -865,26 +1150,30 @@
     "reuseExistingSession": false,
     "newSessionPerAttempt": true,
     "order": [
-      "validate_ready_inputs",
+      "validate_reviewed_localization",
+      "resolve_channels",
       "create_session",
       "dispatch",
       "save_channel_log"
     ],
     "readyGuards": [
-      "readiness.canShare=true",
       "requiresRevalidation=false",
+      "readiness.canShare=true",
       "at least one today participant",
       "each recipient has server worker UUID",
       "selected channel contact is present",
-      "at least one selected channel is available",
-      "required non-Korean artifacts are approved and source-matching",
-      "workpack and participant revision and digest equal validated values",
+      "authenticated channel resolution is unexpired and all selected channels are available",
+      "required non-Korean signed envelopes are server-verified, approved, and source-matching",
+      "canonicalWorkpackRevision, participant digest, and channel token bindings equal validated values",
       "admin auth session exists",
       "online",
       "no unresolved duplicate risk"
     ],
     "attemptLock": [
-      "input snapshot",
+      "canonicalWorkpackRevision",
+      "recipient snapshot and digest",
+      "selected channels",
+      "availabilityToken",
       "idempotency attempt scope"
     ],
     "createSession": {
@@ -892,8 +1181,20 @@
       "route": "/api/workpacks/{workpackId}/share-sessions",
       "requestCount": 1,
       "requestBody": {
-        "recipients": "serverWorkerUuid[]"
+        "recipients": "serverWorkerUuid[]",
+        "channels": "DispatchChannel[]",
+        "canonicalWorkpackRevision": "string",
+        "availabilityToken": "string"
       },
+      "serverValidationBeforeInsert": [
+        "original generationEvidence",
+        "required reviewed localization envelopes",
+        "canonicalWorkpackRevision",
+        "availability token signature and bindings",
+        "current resolveServerChannelAvailability result"
+      ],
+      "unresolvedOrUnavailableInsertCount": 0,
+      "unresolvedOrUnavailableDispatchCount": 0,
       "successRequires": [
         "ok=true",
         "UUID shareSessionId",
@@ -901,15 +1202,17 @@
       ],
       "atomicBeforeDispatch": true,
       "atomicScope": [
-        "share session row",
-        "invitation binding for every locked recipient"
+        "one share session row containing complete recipients_snapshot and access_policy"
       ],
       "partialBindingCanReturnSuccess": false,
       "onPartialBinding": "fail route and make zero dispatch requests"
     },
     "onSessionFailure": {
       "state": "fail",
+      "failureStage": "session_create_failed",
+      "primaryLabel": "초대 세션 다시 시도",
       "dispatchRequestCount": 0,
+      "historyHrefCount": 0,
       "covers": [
         "route failure",
         "malformed response",
@@ -930,6 +1233,7 @@
         "operatorNote"
       ],
       "requiresNewSessionId": true,
+      "channelChecksPreservedAsDefenseInDepth": true,
       "forbiddenPayloadAdditions": [
         "worker form values",
         "translation fallback",
@@ -938,16 +1242,18 @@
     },
     "betweenStepsFreshnessGate": {
       "inputs": [
-        "recipients",
-        "sourceRevision",
-        "sourceDigest"
+        "canonicalWorkpackRevision",
+        "reviewed localization envelope set",
+        "recipientDigest",
+        "channel configurationRevision"
       ],
       "onChange": "stop before dispatch and enter stale"
     },
     "saveChannelLog": {
       "route": "/api/dispatch-logs adapter",
       "granularity": "request and channel",
-      "recipientDeliveryPersistence": false
+      "recipientDeliveryPersistence": false,
+      "historyAllowedOnlyAfterPersistedLogId": true
     },
     "preserveIdsOnlyWhenExistingStorageSupports": [
       "shareSessionId",
@@ -973,12 +1279,14 @@
       "unknown"
     ],
     "stripFields": {
+      "stage": "session_create | dispatch | log_persist",
       "requestOutcome": "accepted | failed | unknown",
       "shareSessionId": "string | null",
       "workflowRunId": "string | null",
       "idempotencyKey": "string | null",
       "providerCalled": "boolean | null",
       "duplicateRisk": "boolean",
+      "persistedLogIds": "string[]",
       "channels": {
         "channel": "email | sms | kakao",
         "outcome": "accepted | failed | unknown",
@@ -990,9 +1298,21 @@
       "accepted": "provider accepted the request or channel; no recipient receipt or read claim",
       "failed": "pre-provider rejection or explicit failure",
       "unknown": "unconfirmed response after call, missing channel result, validation-only or copied response, or result without provider accepted evidence; browser mocking alone does not determine outcome",
-      "successState": "all requested channels accepted and duplicateRisk=false",
-      "partialState": "accepted mixed with failed or unknown",
-      "failState": "session failure, zero accepted channels, or all outcomes unknown"
+      "successState": "all requested channels accepted, duplicateRisk=false, and persistedLogIds nonempty",
+      "partialState": "accepted mixed with failed or unknown and persistedLogIds nonempty",
+      "failState": "preserve exact channel, session, dispatch, or log stage and use stateMachine.failureCta"
+    },
+    "historyRequiresPersistedLog": true,
+    "sessionFailureHistoryAllowed": false,
+    "persistenceProof": {
+      "route": "/api/dispatch-logs",
+      "method": "POST",
+      "requiredServerChange": "insert rows with select(id) and return logIds",
+      "authorityField": "logIds",
+      "savedCountAloneIsAuthority": false,
+      "clientCacheIsAuthority": false,
+      "workflowRunIdAloneIsAuthority": false,
+      "databaseMigrationRequired": false
     },
     "providerAndLogGranularity": "channel_level",
     "recipientLevelDeliveredPersistence": false,
@@ -1047,7 +1367,9 @@
       "mobile": "391x844"
     },
     "normalZoom": {
+      "id": "normal_100",
       "zoomPercent": 100,
+      "delivery": "browser default root font",
       "previewState": "collapsed",
       "measurement": "primary.top - shareRoot.top",
       "taskDistanceMaxPx": {
@@ -1078,7 +1400,17 @@
       "contentTruncatedByFixedPageHeight": false
     },
     "zoom200": {
+      "id": "root_font_200",
       "zoomPercent": 200,
+      "delivery": "after production fixture state settles, page.evaluate reads computed root font size and sets documentElement font-size to baseRootFontPx * 2 with important",
+      "verification": "expect.poll computed root font size equals baseRootFontPx * 2",
+      "deviceScaleFactor": 1,
+      "deviceScaleFactorUsedForZoom": false,
+      "viewportSetBeforeDelivery": true,
+      "exactViewports": [
+        "1440x1000",
+        "391x844"
+      ],
       "fixedHeightCeiling": false,
       "fixedTaskDistanceCeiling": false,
       "required": [
@@ -1121,11 +1453,11 @@
       "/workspace?step=share&theme={theme}",
       "buildStoredCurrentWorkpack and parseStoredCurrentWorkpack restore input",
       "mocked Supabase session response read by production auth resolver",
-      "production API response mocked with page.route",
+      "workpack GET, localization review, channel resolver, share-session, dispatch, and dispatch-log API responses mocked with page.route",
       "real button link select and keyboard actions",
       "navigator online and offline event"
     ],
-    "cacheAuthority": "document and participant snapshot restore only",
+    "cacheAuthority": "document and participant snapshot restore only; signed envelope, canonical revision, channel token, auth, session, dispatch, and log authority come from mocked production routes",
     "forbiddenFixtureMechanisms": [
       "React setter invocation",
       "test-only window state",
@@ -1159,6 +1491,28 @@
         "viewport": "391x844"
       }
     ],
+    "zoomModes": [
+      {
+        "id": "normal_100",
+        "delivery": "browser default root font",
+        "taskDistanceGate": true
+      },
+      {
+        "id": "root_font_200",
+        "delivery": "page.evaluate computed root font multiplied by 2 after fixture state settles",
+        "verification": "expect.poll computed root font equals base times 2",
+        "deviceScaleFactor": 1,
+        "deviceScaleFactorUsedForZoom": false,
+        "taskDistanceGate": false
+      }
+    ],
+    "caseAxes": [
+      "environment",
+      "fixture",
+      "zoomMode"
+    ],
+    "caseIdTemplate": "{envId}:{fixtureId}:{zoomId}",
+    "allFixturesUseAllZoomModes": true,
     "fixtures": [
       {
         "id": "empty",
@@ -1178,27 +1532,59 @@
       {
         "id": "selected",
         "entry": "production_resolver",
-        "resolverInput": "participant contact or channel incomplete",
+        "resolverInput": "recipients exist and channel is not selected",
         "actions": [
           "open canonical share URL",
-          "activate owner action"
+          "activate channel focus action"
         ],
         "assertions": [
-          "reason owner",
-          "reason action",
-          "reason return route"
+          "Share channel section owns primary",
+          "first channel control receives focus",
+          "session request count 0"
+        ]
+      },
+      {
+        "id": "channel_unavailable",
+        "entry": "production_resolver",
+        "resolverInput": "channel resolver response deferred, then mocked idempotency_unsupported or available=false response",
+        "actions": [
+          "select channel",
+          "defer /api/settings/channels/resolve",
+          "resolve route as unavailable"
+        ],
+        "assertions": [
+          "session request count 0 while unresolved",
+          "session request count 0 after unavailable",
+          "채널 설정 확인",
+          "/settings next route"
         ]
       },
       {
         "id": "review_required",
         "entry": "production_resolver",
-        "resolverInput": "required artifact missing, stale, or not reviewed",
+        "resolverInput": "required signed envelope missing, stale, rejected, malformed, or signature invalid in workpack GET",
         "actions": [
           "activate 번역본 검토"
         ],
         "assertions": [
           "document editor route",
           "returnStep=share",
+          "session request count 0",
+          "dispatch request count 0"
+        ]
+      },
+      {
+        "id": "workpack_revalidation",
+        "entry": "production_resolver",
+        "resolverInput": "requiresRevalidation=true and readiness.canShare=false",
+        "actions": [
+          "open canonical share URL",
+          "activate 문서 다시 검수"
+        ],
+        "assertions": [
+          "문서 다시 검수 copy",
+          "document returnStep=share route",
+          "generic 문서 보완 primary absent",
           "session request count 0",
           "dispatch request count 0"
         ]
@@ -1218,12 +1604,13 @@
       {
         "id": "blocked",
         "entry": "production_resolver",
-        "resolverInput": "restored workpack has canShare=false",
+        "resolverInput": "requiresRevalidation=false and restored workpack has canShare=false",
         "actions": [
           "open canonical share URL"
         ],
         "assertions": [
           "blocker visible",
+          "문서 보완 primary",
           "session request count 0",
           "dispatch request count 0"
         ]
@@ -1231,14 +1618,15 @@
       {
         "id": "ready",
         "entry": "production_resolver",
-        "resolverInput": "valid snapshot, approved artifacts, available channels, authenticated session",
+        "resolverInput": "valid snapshot and auth, server-verified envelopes from workpack GET, unexpired available channel token",
         "actions": [
           "open canonical share URL"
         ],
         "assertions": [
           "{N}명에게 전송",
           "session request count 0 before click",
-          "no invitation artifact exists before click"
+          "no invitation artifact exists before click",
+          "channel token binding matches recipients, channels, and canonical revision"
         ]
       },
       {
@@ -1258,7 +1646,7 @@
       {
         "id": "result_accepted",
         "entry": "production_resolver",
-        "resolverInput": "session success then provider accepted route response",
+        "resolverInput": "session success, provider accepted route response, then dispatch log persist success",
         "actions": [
           "click ready primary",
           "resolve mocked routes"
@@ -1266,20 +1654,24 @@
         "assertions": [
           "request outcome accepted",
           "channel outcomes accepted",
+          "persisted log ID present",
+          "전파 이력 확인 routes to /dispatch",
           "no recipient receipt-complete wording"
         ]
       },
       {
         "id": "result_partial",
         "entry": "production_resolver",
-        "resolverInput": "accepted mixed with failed or unknown channel response",
+        "resolverInput": "accepted mixed with failed or unknown response and dispatch log persist success",
         "actions": [
           "click ready primary",
           "resolve mocked routes"
         ],
         "assertions": [
           "partial state",
-          "per-channel accepted failed unknown text"
+          "per-channel accepted failed unknown text",
+          "persisted log ID present",
+          "전파 이력 확인 routes to /dispatch"
         ]
       },
       {
@@ -1292,21 +1684,40 @@
         "assertions": [
           "dispatch request count 0",
           "session failure reason",
+          "초대 세션 다시 시도",
+          "/dispatch href count 0",
           "no invitation-sent claim"
         ]
       },
       {
         "id": "fail_dispatch",
         "entry": "production_resolver",
-        "resolverInput": "session success then dispatch failure or unknown response",
+        "resolverInput": "session success, dispatch failed, then dispatch log persist success",
         "actions": [
           "click ready primary",
           "resolve session then dispatch routes"
         ],
         "assertions": [
           "new session ID preserved when supported",
-          "failed or unknown classification",
-          "duplicate recovery message"
+          "failed classification",
+          "persisted log ID present",
+          "전파 이력 확인 routes to /dispatch"
+        ]
+      },
+      {
+        "id": "fail_dispatch_unpersisted",
+        "entry": "production_resolver",
+        "resolverInput": "session success, dispatch accepted, failed, or unknown, then dispatch log persist failure",
+        "actions": [
+          "click ready primary",
+          "resolve session and dispatch routes",
+          "fail dispatch-log route"
+        ],
+        "assertions": [
+          "persisted log ID count 0",
+          "중복 전송 방지 확인",
+          "automatic retry count 0",
+          "/dispatch href count 0"
         ]
       },
       {
@@ -1326,7 +1737,7 @@
       {
         "id": "stale",
         "entry": "production_resolver",
-        "resolverInput": "sourceRevision or digest mismatch",
+        "resolverInput": "canonicalWorkpackRevision, signed envelope, recipient digest, or channel token mismatch",
         "actions": [
           "open canonical share URL"
         ],
@@ -1337,39 +1748,54 @@
         ]
       }
     ],
-    "caseCount": 52,
+    "caseCount": 128,
+    "caseCountFormula": "4 environments * 16 fixtures * 2 zoom modes",
+    "caseCountByZoom": {
+      "normal_100": 64,
+      "root_font_200": 64
+    },
     "requestAssertions": [
-      "share-session request count is 0 before primary click",
-      "first POST after click is /api/workpacks/{id}/share-sessions",
-      "session request recipients exactly equal current selected server worker UUID set",
-      "dispatch occurs only after valid session success",
-      "dispatch uses new shareSessionId",
-      "session failure dispatch count is 0",
-      "selected approved Kakao remains in dispatch channels",
+      "signed localization envelope and canonicalWorkpackRevision enter only through workpack GET production parser",
+      "client and local localization mutation count is 0",
+      "channel resolver body deep-equals fixture workpackId, canonical revision, recipients, and requested channels",
+      "unresolved, expired, unavailable, or mismatched channel response yields share-session request count 0",
+      "share-session request count is 0 before ready primary click",
+      "first send POST after click is /api/workpacks/{id}/share-sessions",
+      "session body deep-equals recipients, channels, canonicalWorkpackRevision, and availabilityToken",
+      "dispatch occurs only after valid session success and uses new shareSessionId",
+      "session failure dispatch count is 0, primary is 초대 세션 다시 시도, and /dispatch href count is 0",
+      "selected approved Kakao remains in resolver, session, and dispatch channels",
       "dispatch body deep-equals fixture workpackId, new shareSessionId, idempotencyKey, selected channels, and operatorNote",
       "dispatch payload has no worker form value, translation fallback, or public URL",
-      "request log order proves session success precedes dispatch",
+      "request log order proves channel resolve then session success then dispatch then log persist",
       "result classifier derives accepted, failed, unknown from mocked route response",
+      "history href requires at least one log ID returned by mocked authenticated dispatch-log POST",
+      "savedCount without logIds does not authorize history",
+      "unpersisted dispatch failure has no history href and no automatic retry",
+      "requiresRevalidation fixture resolves 문서 다시 검수 before generic blocked",
       "owner CTAs have actual URL and next",
       "auth callback restores /workspace?step=share&theme={theme}",
       "production resolver opens share after return",
       "visible primary count is 1",
       "screen title, login action, and localized preview counts are each at most 1",
-      "rect and computed style gates pass"
+      "normal_100 rect and task-distance gates pass",
+      "root_font_200 exact viewport has zero overlap, clipping, and horizontal overflow with correct DOM order"
     ],
     "layoutAssertions": [
-      "normal zoom task distance",
+      "normal_100 task distance only",
       "touch target",
       "interactive gap",
       "overlap",
       "horizontal overflow",
       "nested scroll",
       "preview row cap",
-      "200 percent zoom DOM order and no clipping"
+      "root_font_200 delivered by page.evaluate, not deviceScaleFactor",
+      "root_font_200 at exact viewports has zero overlap, text clipping, and horizontal overflow",
+      "root_font_200 DOM and focus order"
     ],
     "languageGate": {
       "readyFixtureLanguage": "vi",
-      "artifact": "source-matching approved Vietnamese LocalizedDispatchArtifact",
+      "artifact": "source-matching approved server-signed Vietnamese ReviewedLocalizationEnvelope from mocked workpack GET",
       "dropdownCount": 1,
       "optionOrder": [
         "ko",
@@ -1395,9 +1821,11 @@
         "provenance",
         "reviewerId",
         "reviewedAt",
-        "sourceDigest",
-        "revision",
-        "artifactDigest"
+        "generationRevision",
+        "sourceDocumentDigest",
+        "artifactRevision",
+        "artifactDigest",
+        "signature"
       ],
       "partialBodyOrEnglishFallbackState": "review_required",
       "allTwelveLanguagesUseSameCompletenessContract": true
@@ -1413,7 +1841,7 @@
       "one commit per wave",
       "stop on edits outside exact or conditional lists",
       "do not bulk-select ours or theirs",
-      "do not change package or lock"
+      "do not change package, lock, or app/globals.css"
     ],
     "waves": [
       {
@@ -1438,16 +1866,32 @@
           "lib/workspace-pages.ts",
           "components/WorkflowSharePolicy.ts",
           "lib/workflow-share-client.ts",
+          "lib/channel-availability.ts",
+          "app/api/settings/channels/resolve/route.ts",
+          "app/api/workpacks/[id]/share-sessions/route.ts",
+          "app/api/workflow/dispatch/route.ts",
+          "app/api/dispatch-logs/route.ts",
           "tests/workspace-pages.test.ts",
           "tests/workflow-share-client.test.ts",
-          "tests/workflow-share-panel-behavior.test.ts"
+          "tests/workflow-share-panel-behavior.test.ts",
+          "tests/channel-availability.test.ts",
+          "tests/channel-availability-route.test.ts",
+          "tests/dispatch-logs-route.test.ts",
+          "tests/workpack-share-authority-routes.test.ts"
+        ],
+        "newFiles": [
+          "lib/channel-availability.ts",
+          "app/api/settings/channels/resolve/route.ts",
+          "tests/channel-availability.test.ts",
+          "tests/channel-availability-route.test.ts",
+          "tests/dispatch-logs-route.test.ts"
         ],
         "commands": [
-          "npm.cmd test -- tests/workspace-pages.test.ts tests/workflow-share-client.test.ts tests/workflow-share-panel-behavior.test.ts --maxWorkers=1 --no-file-parallelism",
+          "npm.cmd test -- tests/channel-availability.test.ts tests/channel-availability-route.test.ts tests/dispatch-logs-route.test.ts tests/workpack-share-authority-routes.test.ts tests/workspace-pages.test.ts tests/workflow-share-client.test.ts tests/workflow-share-panel-behavior.test.ts --maxWorkers=1 --no-file-parallelism",
           "npm.cmd run typecheck",
           "git diff --check"
         ],
-        "exit": "validated step return, exact CTA strings, new-session-before-dispatch, zero dispatch on session failure, accepted/failed/unknown classification, and Kakao union pass",
+        "exit": "revalidation precedence, exact CTA strings, authenticated channel resolver token, unresolved or unavailable session count zero, stage-specific failure CTA, Kakao union, and dispatch defense-in-depth pass",
         "rollback": "git revert <wave-1-sha>; do not revert DB rows or other workstream commits"
       },
       {
@@ -1455,25 +1899,35 @@
         "name": "Localized Artifact Authority",
         "exactFiles": [
           "lib/types.ts",
-          "lib/localized-dispatch-artifact.ts",
+          "lib/reviewed-localization-envelope.ts",
           "lib/foreign-worker.ts",
           "lib/current-workpack.ts",
+          "lib/workpack-store.ts",
+          "lib/workpack-commercial-store.ts",
+          "lib/workpack-readiness.ts",
+          "app/api/workpacks/[id]/route.ts",
+          "app/api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review/route.ts",
           "components/CurrentWorkpackModules.tsx",
           "components/SafeGuardCommandCenter.tsx",
-          "tests/localized-dispatch-artifact.test.ts",
+          "tests/reviewed-localization-envelope.test.ts",
+          "tests/reviewed-localization-route.test.ts",
+          "tests/workpack-generation-evidence-route.test.ts",
+          "tests/workpack-share-authority.test.ts",
           "tests/foreign-worker-languages.test.ts",
           "tests/documents-editor-layout.test.ts"
         ],
         "newFiles": [
-          "lib/localized-dispatch-artifact.ts",
-          "tests/localized-dispatch-artifact.test.ts"
+          "lib/reviewed-localization-envelope.ts",
+          "app/api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review/route.ts",
+          "tests/reviewed-localization-envelope.test.ts",
+          "tests/reviewed-localization-route.test.ts"
         ],
         "commands": [
-          "npm.cmd test -- tests/localized-dispatch-artifact.test.ts tests/foreign-worker-languages.test.ts tests/documents-editor-layout.test.ts --maxWorkers=1 --no-file-parallelism",
+          "npm.cmd test -- tests/reviewed-localization-envelope.test.ts tests/reviewed-localization-route.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/foreign-worker-languages.test.ts tests/documents-editor-layout.test.ts --maxWorkers=1 --no-file-parallelism",
           "npm.cmd run typecheck",
           "git diff --check"
         ],
-        "exit": "editor ownership, source binding, provenance, human review, stale detection, and 12-language completeness pass inside existing workpack JSON boundary",
+        "exit": "original generationEvidence and deliverables remain immutable; authenticated review route, envelope HMAC, canonical revision, compare-and-swap, fail-closed stale detection, and 12-language completeness pass in evidence_summary JSON",
         "rollback": "git revert <wave-2-sha>; create no schema or migration"
       },
       {
@@ -1487,7 +1941,7 @@
           "app/workers/page.tsx",
           "app/settings/page.tsx",
           "lib/module-navigation.ts",
-          "app/globals.css",
+          "components/WorkflowSharePanel.module.css",
           "tests/workspace-workers.test.ts",
           "tests/frontend-shared-surfaces.test.ts",
           "tests/product-module-shell.test.ts",
@@ -1515,8 +1969,7 @@
           "app/workspace/page.tsx",
           "components/SafeGuardCommandCenter.tsx",
           "components/WorkflowSharePanel.tsx",
-          "components/WorkflowSharePanel.module.css",
-          "app/globals.css"
+          "components/WorkflowSharePanel.module.css"
         ],
         "commands": [
           "npm.cmd test -- tests/workpack-share-v2-browser.test.ts --maxWorkers=1 --no-file-parallelism",
@@ -1526,7 +1979,7 @@
           "npm.cmd run audit:frontend-consistency",
           "git diff --check"
         ],
-        "exit": "52 Chromium cases, request order and payload, return routing, task distance, 200 percent zoom, and Vietnamese gates pass",
+        "exit": "128 Chromium cases, localization and channel authority, request order and payload, stage-specific CTA routes, normal task distance, root_font_200 delivery, and Vietnamese gates pass",
         "rollback": "git revert <wave-4-sha>; no real provider or DB mutation rollback exists"
       }
     ]
@@ -1542,7 +1995,7 @@
     "recipient-level receipt, read, training, or legal evidence claim",
     "changing export, ontology, KOSHA, or document-editor workstreams on this spec branch"
   ],
-  "runtimePersistenceClarification": "product runtime continues to use existing session and log storage APIs; this revision neither calls them nor changes their storage shape",
+  "runtimePersistenceClarification": "future runtime uses existing workpacks.evidence_summary JSONB plus existing session and log tables; this spec revision calls none of them and adds no migration",
   "userCopy": {
     "target": "오늘 참여자 {N}명을 선택했습니다.",
     "noRecipients": "오늘 참여자가 없습니다. 작업자 화면에서 오늘 참여자를 선택합니다.",
@@ -1551,10 +2004,12 @@
     "readyCta": "{N}명에게 전송",
     "language": "작업자 정보와 검토된 번역본에 따라 언어를 정했습니다.",
     "translationBlocker": "검토된 {language} 전송본이 필요합니다. 번역본을 검토한 뒤 돌아옵니다.",
+    "revalidation": "문서팩이 변경되어 다시 검수해야 합니다.",
     "sessionFailure": "초대 세션을 만들지 못해 전송을 시작하지 않았습니다.",
-    "accepted": "선택한 채널이 전송 요청을 접수했습니다. 전달 여부는 전파 이력에서 확인합니다.",
+    "sessionFailureCta": "초대 세션 다시 시도",
+    "acceptedWithPersistedLog": "선택한 채널이 전송 요청을 접수했습니다. 전달 여부는 전파 이력에서 확인합니다.",
     "partial": "일부 채널은 요청을 접수했고 일부는 실패하거나 결과를 확인하지 못했습니다.",
-    "unknown": "전송 결과를 확정하지 못했습니다. 중복 전송을 피하고 전파 이력을 확인합니다.",
+    "unknownWithoutLog": "전송 결과를 확정하지 못했습니다. 자동으로 다시 보내지 말고 중복 전송 방지 안내를 확인합니다.",
     "stale": "문서팩 또는 오늘 참여자 정보가 변경되어 다시 확인해야 합니다."
   },
   "claimRules": {
@@ -1565,6 +2020,11 @@
   },
   "parityManifest": {
     "status": "HOLD_PENDING_INDEPENDENT_PASS",
+    "review": {
+      "remediationParent": "04b465bbe7131847cc01628cf72f592ff21bf14a",
+      "reviewRange": "59f4812..next-candidate",
+      "reviewStatus": "pending"
+    },
     "sequence": [
       "target",
       "channel",
@@ -1579,21 +2039,39 @@
         "/workers"
       ],
       "translationOwner": "document-editor:foreignWorkerTransmission",
+      "translationPersistenceOwner": "/api/workpacks/{id}/localized-dispatch-artifacts/{locale}/review",
       "channelSetupOwner": "/settings"
     },
     "cta": {
       "no_recipients": "오늘 참여자 선택",
       "logged_out": "로그인하고 전송",
       "ready": "{N}명에게 전송",
-      "review_required": "번역본 검토"
+      "review_required": "번역본 검토",
+      "workpack_revalidation": "문서 다시 검수",
+      "session_create_failed": "초대 세션 다시 시도"
     },
     "lifecycle": [
-      "validate_ready_inputs",
+      "validate_reviewed_localization",
+      "resolve_channels",
       "create_session",
       "dispatch",
       "save_channel_log"
     ],
     "sessionFailureDispatchCount": 0,
+    "sessionFailureHistoryAllowed": false,
+    "revalidationBeforeBlocked": true,
+    "historyRequiresPersistedLog": true,
+    "localizationPersistence": {
+      "mode": "separate_server_signed_review_envelope",
+      "storage": "evidence_summary.reviewedLocalizationEnvelopes",
+      "originalDeliverablesMutable": false,
+      "originalGenerationEvidenceMutable": false
+    },
+    "channelResolver": {
+      "route": "/api/settings/channels/resolve",
+      "tokenTtlSeconds": 120,
+      "sessionBeforeResolvedAvailable": false
+    },
     "channels": [
       "email",
       "sms",
@@ -1604,11 +2082,18 @@
       "mobile": "391x844"
     },
     "zoom200FixedHeightCeiling": false,
+    "zoomModes": [
+      "normal_100",
+      "root_font_200"
+    ],
+    "zoom200Delivery": "page_evaluate_root_font_2x",
     "fixtureIngress": "production_resolver_inputs_and_mocked_routes",
     "browserFixtureIds": [
       "empty",
       "selected",
+      "channel_unavailable",
       "review_required",
+      "workpack_revalidation",
       "logged_out",
       "blocked",
       "ready",
@@ -1617,10 +2102,11 @@
       "result_partial",
       "fail_session",
       "fail_dispatch",
+      "fail_dispatch_unpersisted",
       "offline",
       "stale"
     ],
-    "browserCaseCount": 52,
+    "browserCaseCount": 128,
     "languageCodes": [
       "ko",
       "vi",
@@ -1635,24 +2121,40 @@
       "tl",
       "en"
     ],
-    "publicLinkAllowed": false
+    "publicLinkAllowed": false,
+    "databaseMigrationCount": 0
   },
   "parityCheck": {
     "location": "spec.md section 9",
     "runtime": "PowerShell plus node",
+    "tddStyle": {
+      "redBaseline": "04b465b fails assertions for remediation metadata, signed envelope persistence, server channel resolver, revalidation precedence, session failure CTA, two zoom modes, and 128 cases",
+      "greenCandidate": "embedded command passes the same assertions plus MD/JSON manifest equality",
+      "refactorGate": [
+        "JSON parse",
+        "forbidden contradiction scan",
+        "changed-file scope",
+        "git diff --check"
+      ]
+    },
     "covers": [
       "embedded manifest deep equality",
       "route ownership",
       "screen sequence",
       "exact CTA strings",
+      "reviewed localization envelope persistence and immutable generation seal",
+      "authenticated channel resolver and token before session",
+      "revalidation precedence before generic blocked",
+      "stage-specific failure CTA and persisted history gate",
       "session lifecycle order",
       "zero dispatch on session failure",
       "email sms kakao channel union",
       "391x844 and 1440x1000 viewports",
-      "no fixed 200 percent height ceiling",
+      "root_font_200 delivery without deviceScaleFactor and no fixed height ceiling",
+      "128-case matrix arithmetic",
       "production resolver fixture ingress",
       "all blocking reason owner action return routes",
-      "localized artifact editor authority",
+      "localized artifact editor and authenticated persistence authority",
       "forbidden contradiction scan"
     ],
     "expectedResult": "PARITY_PASS"
