@@ -3,7 +3,7 @@ import Link from "next/link";
 import { AnswerPanel } from "@/components/AnswerPanel";
 import { CitationList } from "@/components/CitationList";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
-import { runAsk } from "@/lib/search";
+import { runPhaseAGroundedAsk } from "@/lib/ontology/grounded-ask";
 
 export const metadata: Metadata = {
   title: "안전 질의 | SafeClaw",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function AskPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const params = await searchParams;
   const q = params.q || "하청 작업에서 원청의 안전보건 책임을 실무적으로 어떻게 확인해야 하나요?";
-  const data = await runAsk(q);
+  const data = await runPhaseAGroundedAsk(q);
 
   return (
     <SafeClawModuleShell

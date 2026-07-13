@@ -1,13 +1,13 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-13T22:14:50.9208582+09:00",
+  "generatedAt": "2026-07-13T22:49:40.5186259+09:00",
   "branch": "fix/phase-a-ontology-review",
   "base": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
   "contractVersion": "phase-a-evidence-chains/1.3.0",
-  "status": "closed_generation_harness_remediated_awaiting_rereview",
+  "status": "release_review_hold_candidate_awaiting_fresh_independent_review",
   "provenance": {
-    "focusedLogCompletedAt": "2026-07-13T13:14:45.3751465Z",
-    "typecheckLogCompletedAt": "2026-07-13T13:14:45.3781548Z",
+    "focusedLogCompletedAt": "2026-07-13T13:49:34.8156333Z",
+    "typecheckLogCompletedAt": "2026-07-13T13:49:34.8186390Z",
     "reportGeneratedAfterFreshVerification": true
   },
   "counts": {
@@ -30,7 +30,7 @@
     "obligationClassifications": 4
   },
   "generationHarness": {
-    "verifiedScope": "actual answer, document, MCP, and Claw handler seams",
+    "verifiedScope": "actual answer, document, JSON/SSE, briefing, MCP, and Claw handler seams plus ask-page source call-site contract",
     "fixedNaturalizeOnlyPolicyFirst": true,
     "singleJsonSerializedUntrustedInputBlock": true,
     "delimiterCharactersUnicodeEscapedInsideJson": true,
@@ -43,7 +43,15 @@
     "templateProviderFreeOnOntologyFailure": true,
     "enhancedAndFullFallbackReachable": true,
     "fixedPackDeepClonedAndRecursivelyFrozen": true,
-    "postGenerationVerificationDeterministic": true
+    "postGenerationVerificationDeterministic": true,
+    "allProductionRunAskInvocationsGrounded": true,
+    "publicMissingGroundingNeverUsesLegacyPrompt": true,
+    "publicTemplateProviderFreeAndHumanPending": true,
+    "legacyQaAlwaysDiagnosticNonAuthoritative": true,
+    "currentReviewedFlowAuthoritativePass": false,
+    "authoritativePassRequiresResolvedQaMaterializationAndHumanConfirmation": true,
+    "draftOrUnresolvedSifExcludedFromResolvedAllowList": true,
+    "forcedResolvedSifStateDowngradedBeforePostCheck": true
   },
   "chains": [
     {
@@ -241,6 +249,11 @@
     "fixedPackDeepFrozenTestedAtProviderAndPostCheckSeams": true,
     "untrustedProviderInputJsonOnly": true,
     "reviewRequiredNeverAuthoritativeQaPass": true,
+    "legacyQaAuthoritative": false,
+    "currentHumanConfirmationState": "pending",
+    "authoritativePassRequiresNonzeroVerifiedRecords": true,
+    "authoritativePassRequiresCompletedHumanConfirmation": true,
+    "sifAllowListRequiresVerifiedOrPublishedAndResolved": true,
     "ontologyLookupFailureNeverPublishesFallback": true,
     "providerFallback": "preserve_current_provider_fallback",
     "fulfillsDuty": "partial_evidence_only",
@@ -381,7 +394,10 @@
     { "finding": "C-2", "status": "fixed", "summary": "the exact 차량계·기계 인접작업 alias reaches the production handler and resolves to 지게차 상하차" },
     { "finding": "CB-P2", "status": "fixed", "summary": "ordinary citation punctuation is accepted while Unicode, UID-grammar continuation, and non-punctuation symbol collisions fail closed" },
     { "finding": "P1-G", "status": "fixed", "summary": "the actual handler binds the structured Phase A pack and exact allow-list into runAsk before answer/document provider calls; review-required and missing outputs stay explicit, unverified, zero-record, and human-pending" },
-    { "finding": "P1-H", "status": "fixed", "summary": "the immutable naturalize-only policy precedes one JSON untrusted block; reviewed QA is reconciled with grounding state; ontology failures fail closed while preserving template and provider fallback behavior" }
+    { "finding": "P1-H", "status": "fixed", "summary": "the immutable naturalize-only policy precedes one JSON untrusted block; reviewed QA is reconciled with grounding state; ontology failures fail closed while preserving template and provider fallback behavior" },
+    { "finding": "HOLD-1", "status": "candidate_fix_awaiting_independent_review", "summary": "all enumerated public runAsk call sites resolve and pass Phase A grounding; omitted or unavailable ontology becomes explicit missing grounding and never selects the legacy raw prompt" },
+    { "finding": "HOLD-2", "status": "candidate_fix_awaiting_independent_review", "summary": "legacy QA is always diagnostic; current human-pending reviewed output remains not verified even with passing QA and nonzero materialization" },
+    { "finding": "HOLD-3", "status": "candidate_fix_awaiting_independent_review", "summary": "draft or unresolved SIF keeps the resolver and forced generation state review-required even when the KOSHA test gate is ready" }
   ],
   "lawVerification": {
     "verifiedOn": "2026-07-13",
@@ -431,11 +447,20 @@
         { "failed": 1, "passed": 2, "total": 3 },
         { "failed": 1, "passed": 7, "total": 8 },
         { "failed": 2, "passed": 9, "total": 11 }
+      ],
+      "releaseReviewHoldFailuresAcrossCycles": 8,
+      "releaseReviewHoldRedCycles": 5,
+      "releaseReviewHoldRedRuns": [
+        { "failed": 1, "passed": 3, "total": 4 },
+        { "failed": 3, "passed": 1, "total": 4 },
+        { "failed": 2, "passed": 29, "total": 31 },
+        { "failed": 1, "passed": 0, "total": 1 },
+        { "failed": 1, "passed": 1, "total": 2 }
       ]
     },
     "focused": {
-      "filesPassed": 12,
-      "testsPassed": 213,
+      "filesPassed": 15,
+      "testsPassed": 224,
       "status": "pass",
       "serial": true,
       "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/focused-tests.log"

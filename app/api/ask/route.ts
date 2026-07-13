@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { runAsk } from "@/lib/search";
+import { runPhaseAGroundedAsk } from "@/lib/ontology/grounded-ask";
 import type { AiMode } from "@/lib/ai-deliverables";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { enforceRateLimit } from "@/lib/api-guard";
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   const requestedMode = typeof record.aiMode === "string" ? (record.aiMode as AiMode) : undefined;
   const aiMode = requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined;
   const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
-  const result = await runAsk(question, { aiMode, harnessMemory });
+  const result = await runPhaseAGroundedAsk(question, { aiMode, harnessMemory });
   const sealed = attachGenerationEvidence(result, {
     secret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
     generatedAt: new Date().toISOString()

@@ -1,11 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { AskResponse, type GenerationDeliverableModelTrace, type GenerationTrace, type PermitInspectionStructured, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
-import { enhanceLegalEvidenceMappings, generateAnswer, type AnswerGenerationResult } from "./ai";
+import { generateAnswer, type AnswerGenerationResult } from "./ai";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
-import type { PhaseAGenerationGrounding } from "./ontology/evidence-chain";
+import {
+  buildPhaseAGenerationGrounding,
+  type PhaseAGenerationGrounding,
+} from "./ontology/evidence-chain";
 import {
   deriveSafetyReferenceOperationalView,
   deriveSafetyReferenceRetrievalModeFromItems,
@@ -1353,6 +1356,30 @@ export type RunAskOptions = {
   onProgress?: OnAskProgress;
 };
 
+function attachPhaseAReview(
+  response: AskResponse,
+  grounding: PhaseAGenerationGrounding,
+): AskResponse {
+  const actionableReason = grounding.groundingStatus === "resolved"
+    ? "결정적 문서 materialization 검사와 지정된 사람의 최종 확인이 필요합니다."
+    : grounding.groundingStatus === "review_required"
+      ? "Phase A SIF/KOSHA/법령 source resolution을 완료한 뒤 다시 검수하세요."
+      : "canonical Task 매핑과 ontology availability를 확인한 뒤 다시 검수하세요.";
+  return {
+    ...response,
+    phaseAReview: {
+      verdict: "검토 필요",
+      verified: false,
+      evidenceChainState: grounding.evidenceChainState,
+      groundingStatus: grounding.groundingStatus,
+      outputStatus: grounding.generationPolicy.outputStatus,
+      verifiedRecords: 0,
+      humanConfirmation: { required: true, status: "pending" },
+      actionableReason,
+    },
+  };
+}
+
 function summarizeDbHarnessPacket(packet: ReturnType<typeof buildDbHarnessPacket>): NonNullable<AskResponse["dbHarness"]>["summary"] {
   return {
     mode: packet.mode,
@@ -1532,6 +1559,10 @@ export function attachDbHarnessFallback(response: AskResponse, input: {
 export async function runAsk(question: string, options: RunAskOptions = {}): Promise<AskResponse> {
   const onProgress = options.onProgress;
   const traceId = randomUUID();
+  const phaseAGrounding = options.phaseAGrounding ?? buildPhaseAGenerationGrounding({
+    evidenceChainState: "not_evaluated",
+    evidencePack: null,
+  });
   const harnessMemory = {
     improvements: options.harnessMemory?.improvements || [],
     workpackMemory: options.harnessMemory?.workpackMemory || []
@@ -1575,7 +1606,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       },
       fallbackUsed: deliverablesTrace.fallbackUsed
     };
-    return { ...response, generationTrace };
+    return attachPhaseAReview({ ...response, generationTrace }, phaseAGrounding);
   }
 
   try {
@@ -1585,31 +1616,18 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       budgetLabel: "KOSHA accident case enrichment budget"
     });
 
-    // Fix 5: decouple enhance and generateAnswer — both branch off rawCitations in parallel.
-    // enhanceLegalEvidenceMappings is a quality add-on (AI reorders citations); it no longer
-    // gates generateAnswer. generateAnswer starts as soon as raw citations arrive.
-    // citationsPromise resolves to enhanced citations when available (best-effort).
+    // Phase A generation uses the deterministic source order. A second provider prompt may not
+    // reinterpret or reorder citations outside the fixed grounding allow-list.
     const rawCitationsPromise = searchLegalSources(question);
     const rawCitationsBasePromise = rawCitationsPromise.then(async (raw) =>
       raw.length ? raw : searchLegalSources("산업안전보건법")
     );
-    // enhanceLegalEvidenceMappings: optional quality pass, runs in parallel, best-effort.
-    const citationsPromise = options.phaseAGrounding
-      ? rawCitationsBasePromise
-      : rawCitationsBasePromise.then((base) =>
-          enhanceLegalEvidenceMappings(question, base).catch((error) => {
-            log.error(
-              "AI legal evidence mapping failed; using original legal evidence order",
-              safeFailureContext(error)
-            );
-            return base;
-          })
-        );
+    const citationsPromise = rawCitationsBasePromise;
     // generateAnswer uses raw citations directly — no longer waits for enhance.
     const responsePromise = rawCitationsBasePromise.then((rawBase) =>
       generateAnswer(question, rawBase.slice(0, 6), {
         traceId,
-        phaseAGrounding: options.phaseAGrounding,
+        phaseAGrounding,
       }).catch((error): AnswerGenerationResult => {
         log.error("AI response generation failed; using DB harness fallback", safeFailureContext(error));
         return {
@@ -1789,7 +1807,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               accidentLines: accidentLinesEarly,
               koshaPrimaryRefs: koshaPrimaryRefsEarly,
               dbHarnessContext,
-              phaseAGrounding: options.phaseAGrounding,
+              phaseAGrounding,
               scope: "full",
               onProgress,
               traceId
@@ -2317,7 +2335,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const withOntologyQa = await attachWebOntologyQa(withMcpDetail, question);
     const finalResponse = attachQualityContract(withOntologyQa);
     const finalDeliverablesTrace = finalizeDeliverablesTrace(finalResponse, deliverablesExecutionTrace);
-    return {
+    return attachPhaseAReview({
       ...finalResponse,
       generationTrace: {
         ...generationTrace,
@@ -2328,7 +2346,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         },
         fallbackUsed: answerResult.trace.fallbackUsed || finalDeliverablesTrace.fallbackUsed
       }
-    };
+    }, phaseAGrounding);
   } catch (error) {
     log.error("runAsk pipeline failed; using DB harness fallback", {
       errorType: error instanceof Error ? error.name : typeof error
@@ -2352,7 +2370,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       fallbackUsed: true
     });
     const finalDeliverablesTrace = finalizeDeliverablesTrace(response, failedDeliverables.trace);
-    return {
+    return attachPhaseAReview({
       ...response,
       generationTrace: {
         traceId,
@@ -2365,7 +2383,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         },
         fallbackUsed: true
       }
-    };
+    }, phaseAGrounding);
   }
 }
 

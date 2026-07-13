@@ -6,11 +6,16 @@ import { buildMockAskResponse } from "@/lib/mock-data";
 import type { AskResponse } from "@/lib/types";
 
 const mocks = vi.hoisted(() => ({
-  runAsk: vi.fn()
+  querySafetyKnowledge: vi.fn(),
+  runAsk: vi.fn(),
 }));
 
 vi.mock("@/lib/search", () => ({
   runAsk: mocks.runAsk
+}));
+
+vi.mock("@/lib/ontology/knowledge-tool", () => ({
+  querySafetyKnowledge: mocks.querySafetyKnowledge,
 }));
 
 function responseWithHarness(): AskResponse {
@@ -78,6 +83,14 @@ function request(path: string): NextRequest {
 describe("ask generation evidence routes", () => {
   beforeEach(() => {
     process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET = "ask-route-generation-evidence-secret";
+    mocks.querySafetyKnowledge.mockResolvedValue({
+      found: false,
+      message: "Phase A Task 미등록",
+      registeredTasks: [],
+      evidenceContract: null,
+      evidenceDiagnostics: null,
+      evidenceChainState: "not_registered",
+    });
     mocks.runAsk.mockResolvedValue(responseWithHarness());
   });
 
@@ -100,6 +113,21 @@ describe("ask generation evidence routes", () => {
     expect(body.generationEvidence?.snapshot.generationTrace).toEqual(body.generationTrace);
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("[api/ask] safeclaw_generation_trace"));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"traceId":"trace-ask-route-test"'));
+    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith("성수동 외벽 도장 작업");
+    expect(mocks.runAsk).toHaveBeenCalledWith(
+      "성수동 외벽 도장 작업",
+      expect.objectContaining({
+        phaseAGrounding: expect.objectContaining({
+          evidenceChainState: "not_registered",
+          groundingStatus: "missing",
+          evidencePack: null,
+          generationPolicy: expect.objectContaining({
+            llmRole: "naturalize_only",
+            outputStatus: "missing_evidence_draft",
+          }),
+        }),
+      }),
+    );
     logSpy.mockRestore();
   });
 
@@ -111,6 +139,41 @@ describe("ask generation evidence routes", () => {
     expect(body).toContain('"kind":"final"');
     expect(body).toContain('"version":"safeclaw-generation-evidence/v1"');
     expect(body).toContain('"algorithm":"HMAC-SHA256"');
+    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith("성수동 외벽 도장 작업");
+    expect(mocks.runAsk).toHaveBeenCalledWith(
+      "성수동 외벽 도장 작업",
+      expect.objectContaining({
+        phaseAGrounding: expect.objectContaining({
+          groundingStatus: "missing",
+          generationPolicy: expect.objectContaining({ llmRole: "naturalize_only" }),
+        }),
+        onProgress: expect.any(Function),
+      }),
+    );
+  });
+
+  it("keeps the JSON route available with explicit missing grounding when ontology lookup throws", async () => {
+    const secret = "PRIVATE_ROUTE_ONTOLOGY_FAILURE";
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    mocks.querySafetyKnowledge.mockRejectedValueOnce(new Error(secret));
+
+    const { POST } = await import("@/app/api/ask/route");
+    const response = await POST(request("/api/ask"));
+
+    expect(response.status).toBe(200);
+    expect(mocks.runAsk).toHaveBeenCalledWith(
+      "성수동 외벽 도장 작업",
+      expect.objectContaining({
+        phaseAGrounding: expect.objectContaining({
+          evidenceChainState: "not_evaluated",
+          groundingStatus: "missing",
+          allowedCitedUids: [],
+          generationPolicy: expect.objectContaining({ outputStatus: "missing_evidence_draft" }),
+        }),
+      }),
+    );
+    expect(JSON.stringify(errorSpy.mock.calls)).not.toContain(secret);
+    errorSpy.mockRestore();
   });
 
   it("does not expose raw internal errors through the SSE response", async () => {

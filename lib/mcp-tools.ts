@@ -124,7 +124,7 @@ export type DocpackResult = {
     operationSequence: Array<EvidenceAssemblyStage | "document_materialization">;
     plannedTargets: EvidenceMaterializationPlan[];
     verifiedRecords: EvidenceMaterializationRecord[];
-    humanConfirmation: { required: true; status: "pending" };
+    humanConfirmation: { required: true; status: "pending" | "confirmed" };
   };
 };
 
@@ -139,11 +139,13 @@ export type ReviewedDocpackResult = {
     groundingStatus: PhaseAGenerationGrounding["groundingStatus"];
     reasonCode:
       | "qa_coverage_not_passed"
+      | "verified_materialization_missing"
+      | "human_confirmation_pending"
       | "phase_a_review_required"
       | "phase_a_evidence_missing"
       | null;
     actionableReason: string;
-    humanConfirmation: { required: true; status: "pending" };
+    humanConfirmation: { required: true; status: "pending" | "confirmed" };
   };
   qa: {
     authoritative: boolean;
@@ -377,42 +379,61 @@ export function buildReviewedDocpackResult(
   phaseAGrounding?: PhaseAGenerationGrounding,
 ): ReviewedDocpackResult {
   const groundingStatus = phaseAGrounding?.groundingStatus ?? "missing";
+  const docpack = buildDocpackResult(response, includeFull, evidence, phaseAGrounding);
   const qaPassed = qa.reviewable && qa.verdict === "통과";
-  const authoritativePass = groundingStatus === "resolved" && qaPassed;
+  const verifiedRecords = docpack.evidenceMaterialization?.verifiedRecords ?? [];
+  const humanConfirmation = docpack.evidenceMaterialization?.humanConfirmation ?? {
+    required: true as const,
+    status: "pending" as const,
+  };
+  const hasVerifiedMaterialization = verifiedRecords.length > 0;
+  const humanConfirmationCompleted = humanConfirmation.status === "confirmed";
+  const authoritativePass = groundingStatus === "resolved" &&
+    qaPassed &&
+    hasVerifiedMaterialization &&
+    humanConfirmationCompleted;
   const reasonCode = authoritativePass
     ? null
     : groundingStatus === "review_required"
       ? "phase_a_review_required"
       : groundingStatus === "missing"
         ? "phase_a_evidence_missing"
-        : "qa_coverage_not_passed";
+        : !qaPassed
+          ? "qa_coverage_not_passed"
+          : !hasVerifiedMaterialization
+            ? "verified_materialization_missing"
+            : "human_confirmation_pending";
   const actionableReason = authoritativePass
-    ? "Phase A grounding과 QA coverage가 통과했지만 지정된 사람의 최종 확인은 계속 필요합니다."
+    ? "Phase A grounding, QA coverage, verified materialization, 지정된 사람의 최종 확인이 모두 완료되었습니다."
     : reasonCode === "phase_a_review_required"
       ? "Phase A evidence chain이 review_required입니다. KOSHA/법령 source resolution을 완료한 뒤 다시 생성·검수하세요."
       : reasonCode === "phase_a_evidence_missing"
         ? "Phase A Task/evidence pack을 찾거나 조회하지 못했습니다. canonical Task 매핑과 ontology availability를 확인한 뒤 다시 생성하세요."
-        : "QA 커버리지/품질 검사가 통과하지 않았습니다. 누락 위험요인·통제·조문을 보완한 뒤 다시 검수하세요.";
+        : reasonCode === "qa_coverage_not_passed"
+          ? "QA 커버리지/품질 검사가 통과하지 않았습니다. 누락 위험요인·통제·조문을 보완한 뒤 다시 검수하세요."
+          : reasonCode === "verified_materialization_missing"
+            ? "생성 문서에서 Control과 허용 근거가 같은 위치에 확인되지 않았습니다. 문서 근거 위치를 보완한 뒤 다시 검수하세요."
+            : "결정적 materialization 검사는 통과했지만 지정된 사람의 최종 확인이 아직 pending입니다.";
 
   return {
     engine: "safeclaw-runAsk",
     qualityPipeline: ["generate_safety_docpack", "qa_review_docpack"],
     reviewTask,
-    docpack: buildDocpackResult(response, includeFull, evidence, phaseAGrounding),
+    docpack,
     reviewStatus: {
       verdict: authoritativePass ? "통과" : "검토 필요",
       verified: authoritativePass,
       groundingStatus,
       reasonCode,
       actionableReason,
-      humanConfirmation: { required: true, status: "pending" },
+      humanConfirmation,
     },
     qa: {
-      authoritative: authoritativePass,
+      authoritative: false,
       diagnostic: qa,
     },
     openClawUsageNote: authoritativePass
-      ? "SafeClaw 문서 엔진과 Phase A grounding, QA coverage를 통과한 검토용 초안입니다. 사람 확인 전 최종 확정 근거로 사용하지 마세요."
+      ? "Phase A grounding, QA coverage, verified materialization, 지정된 사람의 최종 확인이 모두 완료된 결과입니다."
       : `검토 필요: ${actionableReason} 이 응답을 grounded 또는 verified 근거로 사용하지 마세요.`,
   };
 }

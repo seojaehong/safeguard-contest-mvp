@@ -172,6 +172,8 @@ export type EvidenceChainPack = {
     };
     sifOverlay: typeof SIF_CORPUS_STATE & {
       authority: "hazard_priority_only";
+      reviewState: ReviewState;
+      resolution: "resolved" | "unresolved";
     };
   };
   pipeline: {
@@ -356,7 +358,12 @@ function isAllowedPhaseAEvidence(
   evidence: PhaseAGenerationEvidence,
   pack: ActiveEvidenceChainPack,
 ): boolean {
-  if (evidence.sourceRole === "hazard_priority_only") return true;
+  if (evidence.sourceRole === "hazard_priority_only") {
+    return (
+      (evidence.reviewState === "verified" || evidence.reviewState === "published") &&
+      evidence.resolution === "resolved"
+    );
+  }
   const control = pack.controls.find((candidate) => candidate.controlId === evidence.controlId);
   if (!control || control.obligation.classification === "review_required") return false;
   if (evidence.sourceRole === "current_law_mandate") {
@@ -396,7 +403,19 @@ export function buildPhaseAGenerationGrounding(input: {
   evidencePack: ActiveEvidenceChainPack | null;
 }): PhaseAGenerationGrounding {
   const evidencePack = input.evidencePack ? structuredClone(input.evidencePack) : null;
-  const resolved = input.evidenceChainState === "resolved" && evidencePack !== null;
+  const sifResolved = evidencePack !== null &&
+    evidencePack.hazardPriority.length > 0 &&
+    evidencePack.hazardPriority.every(
+      (source) =>
+        (source.reviewState === "verified" || source.reviewState === "published") &&
+        source.resolution === "resolved",
+    );
+  const resolved = input.evidenceChainState === "resolved" &&
+    evidencePack !== null &&
+    sifResolved;
+  const evidenceChainState: EvidenceChainState = input.evidenceChainState === "resolved" && !resolved
+    ? "review_required"
+    : input.evidenceChainState;
   const groundingStatus = resolved
     ? "resolved"
     : evidencePack
@@ -414,7 +433,7 @@ export function buildPhaseAGenerationGrounding(input: {
   const allowedKeys = new Set(allowedEvidence.map(phaseAEvidenceKey));
 
   const grounding: PhaseAGenerationGrounding = {
-    evidenceChainState: input.evidenceChainState,
+    evidenceChainState,
     groundingStatus,
     evidencePack,
     allowedContent: {
@@ -922,6 +941,22 @@ function aggregateGuidanceStatus(guidance: readonly KoshaGuidanceRecord[]): Evid
   return { reviewState: "verified", resolution: "resolved" };
 }
 
+function aggregateSifStatus(sifEvidence: readonly SifEvidenceRecord[]): EvidenceReviewStatus {
+  if (
+    sifEvidence.length === 0 ||
+    sifEvidence.some(
+      (source) =>
+        source.resolution !== "resolved" ||
+        (source.reviewState !== "verified" && source.reviewState !== "published"),
+    )
+  ) {
+    return { reviewState: "draft", resolution: "unresolved" };
+  }
+  return sifEvidence.every((source) => source.reviewState === "published")
+    ? { reviewState: "published", resolution: "resolved" }
+    : { reviewState: "verified", resolution: "resolved" };
+}
+
 export function resolveEvidenceChain(
   graph: OntologyGraph,
   input: string,
@@ -1042,6 +1077,7 @@ export function resolveEvidenceChain(
   const hazardPriority = [...matched.definition.sif].sort(
     (left, right) => left.rank - right.rank || left.itemId.localeCompare(right.itemId, "ko"),
   );
+  const sifStatus = aggregateSifStatus(hazardPriority);
   const reviewOnlyEvidence = matched.definition.reviewOnlyEvidence.map((source) => ({ ...source }));
 
   recordAssemblyStage("kosha_guidance");
@@ -1164,6 +1200,8 @@ export function resolveEvidenceChain(
       sifOverlay: {
         ...SIF_CORPUS_STATE,
         authority: "hazard_priority_only",
+        reviewState: sifStatus.reviewState,
+        resolution: sifStatus.resolution,
       },
     },
     pipeline: {
@@ -1183,7 +1221,7 @@ export function resolveEvidenceChain(
       providerFallback: "preserve_current_provider_fallback",
     },
   };
-  if (guidanceStatus.resolution === "unresolved") {
+  if (guidanceStatus.resolution === "unresolved" || sifStatus.resolution === "unresolved") {
     return {
       resolved: false,
       published: false,
@@ -1191,7 +1229,7 @@ export function resolveEvidenceChain(
       inferenceState: "review_required",
       reason: "evidence_chain_review_required",
       message:
-        "published 그래프 경로는 확인되었으나 KOSHA production/local provenance bridge 또는 corpus gate가 미해결이어서 조립된 evidence chain을 게시하지 않습니다.",
+        "published 그래프 경로는 확인되었으나 SIF 또는 KOSHA source review/resolution gate가 미해결이어서 조립된 evidence chain을 게시하지 않습니다.",
       pack,
     };
   }
