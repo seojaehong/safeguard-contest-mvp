@@ -20168,6 +20168,42 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell button,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell select,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell input:not([type="checkbox"]),
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell summary {
+  min-block-size: 44px;
+  min-height: 44px;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .workbench-report-filters select,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-custom-range input {
+  width: 100%;
+  max-width: 100%;
+  padding-block: var(--space-2);
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-links a,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-list a,
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-list label {
+  display: flex;
+  min-block-size: 44px;
+  min-height: 44px;
+  align-items: center;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-list a {
+  width: fit-content;
+  max-width: 100%;
+  padding-block: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-list label {
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-workdoc-shell > .safeclaw-workdoc-rail {
   grid-column: 2;
   grid-row: 1;

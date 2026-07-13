@@ -166,6 +166,17 @@ async function expectBlockedServerState(page: Page, workpackId: string): Promise
   }
 }
 
+async function openReportsDisclosure(page: Page, name: string): Promise<void> {
+  const summary = page.locator("summary").filter({ hasText: name });
+  await summary.waitFor({ state: "visible" });
+  expect((await summary.textContent())?.trim()).toBe(name);
+  const details = summary.locator("..");
+  if (!(await details.evaluate((element) => (element as HTMLDetailsElement).open))) {
+    await summary.click();
+  }
+  expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+}
+
 describe("reports download center remount behavior", () => {
   beforeAll(async () => {
     server = spawn(process.execPath, [resolveNextBin(), "dev", "--port", String(port)], {
@@ -243,6 +254,8 @@ describe("reports download center remount behavior", () => {
 
     try {
       await page.goto(`${baseUrl}/reports`, { waitUntil: "networkidle" });
+      await openReportsDisclosure(page, "추가 리포트 정보");
+      await openReportsDisclosure(page, "리포트 본문 미리보기");
       const headerProvenance = page.getByLabel("리포트 헤더 데이터 출처");
       const stickyProvenance = page.getByLabel("고정 리포트 데이터 출처");
       expect(await headerProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
@@ -251,6 +264,7 @@ describe("reports download center remount behavior", () => {
       expect(await stickyProvenance.locator(`time[datetime="${generatedAt}"]`).count()).toBe(1);
 
       await page.evaluate(() => window.scrollTo(0, 900));
+      await stickyProvenance.scrollIntoViewIfNeeded();
       const stickyBox = await stickyProvenance.boundingBox();
       if (!stickyBox) throw new Error("Sticky report provenance was not rendered");
       expect(stickyBox.y).toBeGreaterThanOrEqual(0);
@@ -264,6 +278,7 @@ describe("reports download center remount behavior", () => {
       expect(await approval.isChecked()).toBe(true);
 
       await page.reload({ waitUntil: "networkidle" });
+      await openReportsDisclosure(page, "리포트 본문 미리보기");
       const remountedApproval = page.getByLabel("Before/After 사진 포함 승인");
       await remountedApproval.waitFor({ state: "visible" });
       expect(await remountedApproval.isChecked()).toBe(false);
@@ -321,6 +336,8 @@ describe("reports download center remount behavior", () => {
 
     try {
       await page.goto(`${baseUrl}/reports?workpackId=server-report-1`, { waitUntil: "networkidle" });
+      await openReportsDisclosure(page, "추가 리포트 정보");
+      await openReportsDisclosure(page, "리포트 본문 미리보기");
 
       const headerProvenance = page.getByLabel("리포트 헤더 데이터 출처");
       const stickyProvenance = page.getByLabel("고정 리포트 데이터 출처");
@@ -352,6 +369,8 @@ describe("reports download center remount behavior", () => {
       expect(await switchButton.count()).toBe(1);
 
       await switchButton.click();
+      await openReportsDisclosure(page, "추가 리포트 정보");
+      await openReportsDisclosure(page, "리포트 본문 미리보기");
       const browserProvenance = page.getByLabel("고정 리포트 데이터 출처");
       await browserProvenance.waitFor({ state: "visible" });
       expect(await browserProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
@@ -484,6 +503,8 @@ describe("reports download center remount behavior", () => {
       await previewButton.waitFor({ state: "visible" });
       expect(await previewButton.isVisible()).toBe(true);
       await previewButton.click();
+      await openReportsDisclosure(page, "추가 리포트 정보");
+      await openReportsDisclosure(page, "리포트 본문 미리보기");
 
       expect(await page.getByText("샘플 리포트", { exact: true }).isVisible()).toBe(true);
       expect(await page.getByLabel("고정 리포트 데이터 출처").getByText("샘플 데이터", { exact: true }).count()).toBe(1);
