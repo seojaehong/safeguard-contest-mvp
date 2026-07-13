@@ -1,3 +1,7 @@
+
+> safeclaw@0.1.0 audit:frontend-bundle
+> node ./scripts/frontend_audit_bundle_contract.mjs --mode normal
+
 {
   "schemaVersion": 1,
   "generatedAt": "2026-07-13T05:44:51.297Z",
@@ -12,3 +16,5 @@
   "markerFiles": [],
   "status": "pass"
 }
+
+EXIT_CODE=0

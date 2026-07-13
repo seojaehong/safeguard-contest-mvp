@@ -2,14 +2,15 @@
 
 ## Verdict
 
-**Verification PASS for source `b321f0c881b475a517f2c16db801baed36b36692`.**
+**Verification PASS for source `514b2d9a3c884c1a18ecf725285dde0e8a95b6cd`.**
 
 This report supersedes the earlier blocked port report from 2026-07-11. That historical state had 2,444 unresolved static findings and did not run the 108-row browser audit. The integrated remediation now has a zero-violation static prerequisite and a complete browser run.
 
 ## Source Identity
 
-- Source SHA: `b321f0c881b475a517f2c16db801baed36b36692`
-- Source identity: `19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b`
+- Source SHA: `514b2d9a3c884c1a18ecf725285dde0e8a95b6cd`
+- Source identity: `cf3acf32f236a5c6ecdca5cf0b244ef16bd36c1ff8ecfa6b063e522a2ed723ac`
+- Line-ending contract: CRLF and LF normalize to the same identity before hashing.
 - Product pages: `32`
 - Product components: `23`
 - Database/schema/data mutation: none
@@ -29,7 +30,7 @@ The earlier blocked classification remains available in Git history. It is not t
 Normal build:
 
 - Static pages: `27/27`
-- Build ID: `hoG-ToEwbicsoxHE6Fwnp`
+- Build ID: `GZHsLnN8pBcRAUWz5FMu1`
 - Chunks: `98`
 - Audit markers: `0`
 - Artifact: `bundle-normal.json`
@@ -37,7 +38,7 @@ Normal build:
 Audit build:
 
 - Static pages: `27/27`
-- Build ID: `WtOGHIYNjzirknfb9uTs3`
+- Build ID: `KWLW3gxAjtwayCo6QPlnx`
 - Chunks: `98`
 - Audit markers: exactly `1`
 - Marker file: `static/chunks/app/layout-4a08a2eec725a6bc.js`

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-13T04:59:00.000Z",
+  "generatedAt": "2026-07-13T05:49:00.000Z",
   "verificationStatus": "pass",
   "launchReadiness": "not_evaluated_here",
   "supersedes": {
@@ -9,8 +9,9 @@
     "staticViolations": 2444,
     "browserAudit": "not_run"
   },
-  "sourceSha": "b321f0c881b475a517f2c16db801baed36b36692",
-  "sourceIdentity": "19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b",
+  "sourceSha": "514b2d9a3c884c1a18ecf725285dde0e8a95b6cd",
+  "sourceIdentity": "cf3acf32f236a5c6ecdca5cf0b244ef16bd36c1ff8ecfa6b063e522a2ed723ac",
+  "lineEndingsNormalized": true,
   "staticAudit": {
     "status": "pass",
     "pageFiles": 32,
@@ -24,7 +25,7 @@
     "normal": {
       "status": "pass",
       "staticPages": 27,
-      "buildId": "hoG-ToEwbicsoxHE6Fwnp",
+      "buildId": "GZHsLnN8pBcRAUWz5FMu1",
       "chunkCount": 98,
       "markerCount": 0,
       "artifact": "bundle-normal.json"
@@ -32,7 +33,7 @@
     "audit": {
       "status": "pass",
       "staticPages": 27,
-      "buildId": "WtOGHIYNjzirknfb9uTs3",
+      "buildId": "KWLW3gxAjtwayCo6QPlnx",
       "chunkCount": 98,
       "markerCount": 1,
       "markerFile": "static/chunks/app/layout-4a08a2eec725a6bc.js",
