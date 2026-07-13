@@ -711,7 +711,7 @@ function buildGenericSections(rows: SheetRow[], profile: SafetyFormProfile) {
       <div class="section-label">${escapeHtml(group.section)}</div>
       <table>
         <colgroup><col style="width: 7%;" /><col style="width: 21%;" /><col style="width: 52%;" /><col style="width: 20%;" /></colgroup>
-        <thead><tr><th>No.</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인/담당</th></tr></thead>
+        <thead><tr><th>번호</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인/담당</th></tr></thead>
         <tbody>
           ${group.rows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인<br />담당: ______</td></tr>`).join("")}
         </tbody>
@@ -814,7 +814,7 @@ function buildWorkPlanSections(rows: SheetRow[], scenario: AskResponse["scenario
       <div class="section-label">2. 세부 작업순서</div>
       <table>
         <colgroup><col style="width: 8%;" /><col style="width: 24%;" /><col style="width: 38%;" /><col style="width: 16%;" /><col style="width: 14%;" /></colgroup>
-        <thead><tr><th>No.</th><th>세부작업</th><th>작업방법/안전관리대책</th><th>담당</th><th>확인</th></tr></thead>
+        <thead><tr><th>번호</th><th>세부작업</th><th>작업방법/안전관리대책</th><th>담당</th><th>확인</th></tr></thead>
         <tbody>
           ${sequenceRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td>작업반장</td><td>□</td></tr>`).join("")}
         </tbody>
@@ -916,7 +916,7 @@ function buildEducationSections(rows: SheetRow[], scenario: AskResponse["scenari
       <div class="section-label">2. 교육 내용 및 이해 확인</div>
       <table>
         <colgroup><col style="width: 8%;" /><col style="width: 24%;" /><col style="width: 38%;" /><col style="width: 15%;" /><col style="width: 15%;" /></colgroup>
-        <thead><tr><th>No.</th><th>교육 항목</th><th>주요 내용</th><th>확인 방법</th><th>추가교육</th></tr></thead>
+        <thead><tr><th>번호</th><th>교육 항목</th><th>주요 내용</th><th>확인 방법</th><th>추가교육</th></tr></thead>
         <tbody>
           ${educationRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td>□ 질문 □ 복창 □ 서명</td><td>□ 필요 □ 불필요</td></tr>`).join("")}
         </tbody>
@@ -925,7 +925,7 @@ function buildEducationSections(rows: SheetRow[], scenario: AskResponse["scenari
     <section class="section-block">
       <div class="section-label">3. 교육 참석자 확인</div>
       <table class="attendee-table">
-        <thead><tr><th>No.</th><th>성명</th><th>소속</th><th>역할/직종</th><th>언어</th><th>서명</th></tr></thead>
+        <thead><tr><th>번호</th><th>성명</th><th>소속</th><th>역할/직종</th><th>언어</th><th>서명</th></tr></thead>
         <tbody>
           ${Array.from({ length: Math.max(4, Math.min(10, scenario.workerCount)) }, (_, index) => `<tr><td class="center">${index + 1}</td><td></td><td></td><td></td><td>한국어</td><td></td></tr>`).join("")}
         </tbody>
@@ -993,7 +993,7 @@ function buildTbmLogSections(rows: SheetRow[], scenario: AskResponse["scenario"]
           <col style="width: 5%;" /><col style="width: 9%;" /><col style="width: 14%;" /><col style="width: 6%;" /><col style="width: 6%;" /><col style="width: 10%;" />
           <col style="width: 5%;" /><col style="width: 9%;" /><col style="width: 14%;" /><col style="width: 6%;" /><col style="width: 6%;" /><col style="width: 10%;" />
         </colgroup>
-        <thead><tr><th>NO</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th><th>NO</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th></tr></thead>
+        <thead><tr><th>연번</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th><th>연번</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th></tr></thead>
         <tbody>
           ${attendanceRows}
         </tbody>
@@ -1035,7 +1035,7 @@ function buildTbmBriefingSections(rows: SheetRow[], scenario: AskResponse["scena
       <div class="section-label">2. 위험성평가 기반 TBM 전달</div>
       <table>
         <colgroup><col style="width: 7%;" /><col style="width: 28%;" /><col style="width: 24%;" /><col style="width: 16%;" /><col style="width: 17%;" /><col style="width: 8%;" /></colgroup>
-        <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>기상/환경 반영</th><th>출처 연결</th><th>작업중지 기준</th><th>복창</th></tr></thead>
+        <thead><tr><th>번호</th><th>주요 유해·위험요인</th><th>기상/환경 반영</th><th>출처 연결</th><th>작업중지 기준</th><th>복창</th></tr></thead>
         <tbody>
           ${bridgeRows.map((row, index) => `<tr>
             <td class="center">${index + 1}</td>
@@ -1074,7 +1074,7 @@ function buildTbmWeatherRiskBridge(data: AskResponse, riskRows: SheetRow[]) {
       <div class="section-label">위험성평가·기상 API 반영</div>
       <table>
         <colgroup><col style="width: 7%;" /><col style="width: 27%;" /><col style="width: 26%;" /><col style="width: 16%;" /><col style="width: 24%;" /></colgroup>
-        <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>출처 연결</th><th>TBM 전달 문구</th></tr></thead>
+        <thead><tr><th>번호</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>출처 연결</th><th>TBM 전달 문구</th></tr></thead>
         <tbody>
           ${bridgeRows.map((row, index) => `<tr>
             <td class="center">${index + 1}</td>
@@ -1460,7 +1460,7 @@ function buildExcelHtml(
   </table>
   <table>
     <colgroup><col style="width: 6%;" /><col style="width: 22%;" /><col style="width: 52%;" /><col style="width: 10%;" /><col style="width: 10%;" /></colgroup>
-    <thead><tr><th>No.</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인</th><th>담당</th></tr></thead>
+    <thead><tr><th>번호</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인</th><th>담당</th></tr></thead>
     <tbody>${tableRows}</tbody>
   </table>
   <table class="approval"><tbody><tr>${approvalRows}<td>보관 위치<br /><br />______</td></tr></tbody></table>
@@ -1836,7 +1836,7 @@ function SafetyDocumentPreview({
             <table>
               <thead>
                 <tr>
-                  <th>No.</th>
+                  <th>번호</th>
                   <th>주요 유해·위험요인</th>
                   <th>오늘 기상/환경 신호</th>
                   <th>출처 연결</th>
@@ -1866,7 +1866,7 @@ function SafetyDocumentPreview({
               <table>
                 <thead>
                   <tr>
-                    <th>No.</th>
+                    <th>번호</th>
                     <th>{tableLabels.primary}</th>
                     <th>{tableLabels.action}</th>
                     <th>{tableLabels.confirm}</th>
@@ -2871,7 +2871,7 @@ export function WorkpackEditor({
                     <button type="button" className="button secondary" onClick={downloadHwpx} disabled={hwpxStatus === "building"} title="rhwp 텍스트 기반 HWPX 초안 (표 미지원)">
                       {hwpxStatus === "building" ? "HWPX 생성 중" : ".hwpx 텍스트 초안"}
                     </button>
-                    <button type="button" className="button secondary" onClick={downloadXls} title="구버전 호환 HTML 기반 .xls (Excel 보안 경고 가능)">XLS(legacy)</button>
+                    <button type="button" className="button secondary" onClick={downloadXls} title="구버전 호환 HTML 기반 .xls (Excel 보안 경고 가능)">XLS(구형 호환)</button>
                     <button type="button" className="button secondary" onClick={downloadDoc} title="Word 또는 한글에서 열 수 있는 보고서형 문서">DOC</button>
                     <button type="button" className="button secondary" onClick={downloadText} title="메신저·메일 본문에 붙여넣기 쉬운 순수 텍스트">TXT</button>
                     <button type="button" className="button secondary" onClick={downloadJson} title="외부 시스템 연동과 자동화용 구조화 데이터">JSON</button>
@@ -2883,7 +2883,7 @@ export function WorkpackEditor({
               </div>
 
               {xlsxStatus === "error" ? (
-                <p className="export-error">Excel(.xlsx) 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 PDF/XLS(legacy)를 사용해 주세요.</p>
+                <p className="export-error">Excel(.xlsx) 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 PDF 또는 구형 호환 XLS를 사용해 주세요.</p>
               ) : null}
               {hwpStatus === "error" ? (
                 <p className="export-error">한글 표(.hwp) 생성 중 오류가 발생했습니다. .hwpx 텍스트 초안 또는 PDF를 사용해 주세요.</p>
