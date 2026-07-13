@@ -94,6 +94,10 @@ export type EvidenceMaterializationRecord = {
   documentKey: EvidenceMaterializationDocumentKey;
   plannedLocation: string;
   citedUids: string[];
+  citedEvidence: Array<{
+    citedUid: string;
+    role: "current_law_mandate" | "kosha_technical_guidance";
+  }>;
   location: {
     kind: "line";
     lineNumber: number;
@@ -366,6 +370,14 @@ function findDefinition(input: string): {
   return null;
 }
 
+export function resolveEvidenceTaskLabel(...inputs: readonly string[]): string | null {
+  for (const input of inputs) {
+    const matched = findDefinition(input);
+    if (matched) return matched.definition.canonicalTaskLabel;
+  }
+  return null;
+}
+
 function publishedRuntimeGraph(graph: OntologyGraph): Pick<OntologyGraph, "nodes" | "edges"> {
   const nodes = graph.nodes.filter((node) => node.review_state === "published");
   const nodeIds = new Set(nodes.map((node) => node.node_id));
@@ -449,19 +461,69 @@ const MATERIALIZATION_DOCUMENT_KEYS: Readonly<
 
 export function verifyEvidenceMaterialization(input: {
   evidenceChainState: EvidenceChainState;
-  pack: Pick<EvidenceChainPack, "materializationTargets">;
+  pack: Pick<EvidenceChainPack, "controls" | "materializationTargets">;
   documents: Partial<Record<EvidenceMaterializationDocumentKey, string>>;
 }): EvidenceMaterializationRecord[] {
   if (input.evidenceChainState !== "resolved") return [];
 
   const records: EvidenceMaterializationRecord[] = [];
   for (const plan of input.pack.materializationTargets) {
-    if (plan.obligation.classification === "review_required") continue;
-    const plannedCitedUids = [
-      ...plan.lawCitedUids,
-      ...plan.guidanceCitedUids,
-      ...plan.sifCitedUids,
-    ];
+    const control = input.pack.controls.find(
+      (candidate) => candidate.controlId === plan.controlId,
+    );
+    if (
+      !control ||
+      control.label !== plan.controlLabel ||
+      control.obligation.classification !== plan.obligation.classification
+    ) {
+      continue;
+    }
+
+    const lawEvidence = control.lawEvidence
+      .filter(
+        (source) =>
+          source.sourceType === "law" &&
+          source.relation === "mandatedBy" &&
+          source.reviewState === "published" &&
+          source.resolution === "resolved" &&
+          plan.lawCitedUids.includes(source.citedUid),
+      )
+      .map((source) => ({
+        citedUid: source.citedUid,
+        role: "current_law_mandate" as const,
+      }));
+    const guidanceEvidence = control.guidanceStatus === "verified" &&
+      !control.guidanceReviewRequired
+      ? control.guidanceEvidence
+          .filter(
+            (source) =>
+              source.sourceType === "kosha_guidance" &&
+              source.role === "technical_guidance_only" &&
+              (source.reviewState === "verified" || source.reviewState === "published") &&
+              source.resolution === "resolved" &&
+              plan.guidanceCitedUids.includes(source.citedUid),
+          )
+          .map((source) => ({
+            citedUid: source.citedUid,
+            role: "kosha_technical_guidance" as const,
+          }))
+      : [];
+    const allowedEvidence = (() => {
+      switch (control.obligation.classification) {
+        case "statutory_mandate":
+          return lawEvidence;
+        case "technical_guidance_only":
+          return guidanceEvidence;
+        case "statutory_mandate_with_guidance":
+          return lawEvidence.length > 0 && guidanceEvidence.length > 0
+            ? [...lawEvidence, ...guidanceEvidence]
+            : [];
+        case "review_required":
+          return [];
+      }
+    })();
+    if (allowedEvidence.length === 0) continue;
+
     for (const target of plan.targets) {
       for (const documentKey of MATERIALIZATION_DOCUMENT_KEYS[target.document]) {
         const document = input.documents[documentKey];
@@ -470,8 +532,8 @@ export function verifyEvidenceMaterialization(input: {
         for (const [index, rawLine] of lines.entries()) {
           const line = rawLine.normalize("NFC");
           if (!line.includes(plan.controlLabel.normalize("NFC"))) continue;
-          const citedUids = plannedCitedUids.filter((citedUid) => line.includes(citedUid));
-          if (citedUids.length === 0) continue;
+          const citedEvidence = allowedEvidence.filter((source) => line.includes(source.citedUid));
+          if (citedEvidence.length === 0) continue;
           records.push({
             materialized: true,
             stableKey: target.stableKey,
@@ -479,7 +541,8 @@ export function verifyEvidenceMaterialization(input: {
             controlLabel: plan.controlLabel,
             documentKey,
             plannedLocation: target.rowOrSection,
-            citedUids,
+            citedUids: citedEvidence.map((source) => source.citedUid),
+            citedEvidence,
             location: {
               kind: "line",
               lineNumber: index + 1,

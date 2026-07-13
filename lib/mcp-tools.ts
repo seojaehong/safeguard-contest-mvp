@@ -16,6 +16,7 @@ import {
 import type { QaReviewResult } from "./ontology/qa-review";
 import {
   splitEvidenceChainPack,
+  resolveEvidenceTaskLabel,
   verifyEvidenceMaterialization,
   type ActiveEvidenceChainPack,
   type EvidenceAssemblyStage,
@@ -101,6 +102,8 @@ export type DocpackResult = {
   evidenceLabels?: Record<string, SmsaEvidenceLabel>;
   documents: Record<string, DocpackDocumentPreview | string>;
   fullDocumentsNote: string;
+  evidenceContract?: ActiveEvidenceChainPack;
+  evidenceChainState?: SafetyKnowledgeResult["evidenceChainState"];
   evidenceMaterialization?: {
     evidenceChainState: SafetyKnowledgeResult["evidenceChainState"];
     operationSequence: Array<EvidenceAssemblyStage | "document_materialization">;
@@ -204,6 +207,8 @@ export function buildDocpackResult(
     result.evidenceLabels = response.evidenceLabels;
   }
   if (evidence?.found && evidence.evidenceContract) {
+    result.evidenceContract = evidence.evidenceContract;
+    result.evidenceChainState = evidence.evidenceChainState;
     result.evidenceMaterialization = {
       evidenceChainState: evidence.evidenceChainState,
       operationSequence: [
@@ -220,6 +225,47 @@ export function buildDocpackResult(
     };
   }
   return result;
+}
+
+export type GenerateSafetyDocpackHandlerInput = {
+  question: string;
+  task?: string;
+  mode?: "template" | "enhanced" | "full";
+  includeFull?: boolean;
+};
+
+export type GenerateSafetyDocpackHandlerDependencies = {
+  querySafetyKnowledge: (query: string) => Promise<SafetyKnowledgeResult>;
+  runAsk: (
+    question: string,
+    options: { aiMode: "template" | "enhanced" | "full" },
+  ) => Promise<AskResponse>;
+};
+
+export type GenerateSafetyDocpackHandlerOutput = {
+  evidenceQuery: string;
+  evidence: SafetyKnowledgeResult;
+  response: AskResponse;
+  docpack: DocpackResult;
+};
+
+export async function handleGenerateSafetyDocpack(
+  input: GenerateSafetyDocpackHandlerInput,
+  dependencies: GenerateSafetyDocpackHandlerDependencies,
+): Promise<GenerateSafetyDocpackHandlerOutput> {
+  const question = input.question.trim();
+  const task = input.task?.trim() ?? "";
+  const evidenceQuery = resolveEvidenceTaskLabel(task, question) || question || task;
+  const evidence = await dependencies.querySafetyKnowledge(evidenceQuery);
+  const response = await dependencies.runAsk(question, {
+    aiMode: input.mode ?? "full",
+  });
+  return {
+    evidenceQuery,
+    evidence,
+    response,
+    docpack: buildDocpackResult(response, input.includeFull ?? false, evidence),
+  };
 }
 
 /**
