@@ -21,9 +21,12 @@ Phase A remains limited to:
   isolated Hermes adapter path;
 - no database migration or product schema mutation.
 
-Phase B implementation starts only after the Phase A gate is complete. Any
-database migration, billing schema, data backfill, or production traffic
-cutover requires separate explicit approval.
+Phase B implementation starts only after the Phase B entry gate accepts the
+Phase A closeout. The representative GPT OAuth proof of concept additionally
+requires separate explicit approval for that specific proof of concept; entry
+gate acceptance does not authorize it. Any database migration, billing schema,
+data backfill, or production traffic cutover also requires separate explicit
+approval.
 
 ## 2. Product and Billing Contract
 
@@ -125,10 +128,14 @@ the database directly.
 
 SafeClaw does not deploy one Hermes or GPT OAuth identity per customer or site.
 
+The representative GPT OAuth proof of concept is documented only as delivery
+step 6. This design does not authorize it. It may be executed only after the
+Phase B entry gate accepts the Phase A closeout and separate explicit approval
+is granted for that specific proof of concept.
+
 - Hermes runs as a central, stateless worker pool.
 - SafeClaw owns the Tenant Gateway, job queue, versioned `EngineAdapter`, MCP
   interceptor, Evidence Harness, approval ledger, and effect ledger.
-- The representative's local proof of concept may use GPT OAuth.
 - Contract customer traffic uses an OpenAI project service account/API or an
   equivalent workload identity approved for service traffic.
 - `ai-provider-policy.ts` continues to select model providers such as Vertex,
@@ -166,7 +173,9 @@ escalations.
 3. Add workpack accept, edit, and reject actions.
 4. Add the usage and billing ledger.
 5. Introduce the versioned `EngineAdapter`.
-6. Validate the representative GPT OAuth proof of concept.
+6. After the Phase B entry gate accepts the Phase A closeout and separate
+   explicit approval is granted for that PoC, validate the representative GPT
+   OAuth proof of concept.
 7. Add service authentication, the job queue, and the Hermes worker pool.
 8. Connect TBM and worker pages to production tenant data.
 9. Add Legal AI only after evidence, tenancy, approval, and effect gates pass.
@@ -183,4 +192,6 @@ as the next design gate and provide:
 - tenant-isolation and rollback test plans;
 - an agreed usage-cap and service-authentication policy.
 
-Until those items are accepted, Phase B remains a design contract only.
+Until those items are accepted, Phase B remains a design contract only. Even
+after they are accepted, delivery step 6 remains deferred until separate
+explicit approval is granted for the representative GPT OAuth proof of concept.
