@@ -1437,6 +1437,13 @@ describe("workspace layout regression", () => {
     expect(await page.locator(".document-workbench").count()).toBe(0);
     expect(await page.locator(".field-workspace").count()).toBe(1);
 
+    const operationsDisclosure = page.locator(".editor-operations-disclosure");
+    expect(await operationsDisclosure.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
+    const collapsedScrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    const collapsedActiveElementClass = await page.evaluate(() => document.activeElement?.className || "");
+    await operationsDisclosure.locator(":scope > summary").click();
+    await page.locator(".workspace-side").waitFor({ state: "visible" });
+
     const metrics = await page.evaluate(() => {
       function readRect(selector: string) {
         const element = document.querySelector(selector);
@@ -1463,7 +1470,9 @@ describe("workspace layout regression", () => {
       }
 
       const fieldWorkspace = readRect(".field-workspace");
+      const rail = readRect(".workspace-rail");
       const canvas = readRect(".workspace-canvas");
+      const side = readRect(".workspace-side");
       const shell = readRect(".workpack-shell");
       const navigator = readRect(".workpack-sidebar");
       const editor = readRect(".document-editor");
@@ -1474,6 +1483,28 @@ describe("workspace layout regression", () => {
       const mobilePicker = document.querySelector('select[aria-label="편집 문서 선택"]')?.parentElement;
       if (!desktopTabs || !mobilePicker) throw new Error("Missing responsive document navigation");
 
+      const heights = (selector: string) => Array.from(
+        document.querySelectorAll<HTMLElement>(selector),
+        (element) => element.getBoundingClientRect().height,
+      );
+      const maxHeight = (selector: string) => Math.max(0, ...heights(selector));
+      const compactHeadOverlaps = Array.from(document.querySelectorAll<HTMLElement>(".field-workspace .compact-head"))
+        .filter((head) => {
+          const eyebrow = head.querySelector<HTMLElement>(".eyebrow");
+          const title = head.querySelector<HTMLElement>("strong");
+          if (!eyebrow || !title) return false;
+          const eyebrowRect = eyebrow.getBoundingClientRect();
+          const titleRect = title.getBoundingClientRect();
+          return eyebrowRect.left < titleRect.right - 0.01
+            && eyebrowRect.right > titleRect.left + 0.01
+            && eyebrowRect.top < titleRect.bottom - 0.01
+            && eyebrowRect.bottom > titleRect.top + 0.01;
+        }).map((head) => head.textContent?.replace(/\s+/gu, " ").trim() || "unknown");
+      const workerLabels = Array.from(document.querySelectorAll<HTMLLabelElement>(".worker-edit-grid label"));
+      const roleControl = workerLabels.find((label) => label.querySelector("span")?.textContent?.trim() === "역할")?.querySelector<HTMLElement>("select");
+      const phoneControl = workerLabels.find((label) => label.querySelector("span")?.textContent?.trim() === "휴대폰")?.querySelector<HTMLElement>("input");
+      if (!roleControl || !phoneControl) throw new Error("Missing worker role or phone control");
+
       return {
         viewportWidth: window.innerWidth,
         viewportHeight: window.innerHeight,
@@ -1481,24 +1512,49 @@ describe("workspace layout regression", () => {
         scrollHeight: document.documentElement.scrollHeight,
         activeElementClass: document.activeElement?.className || "",
         fieldWorkspace,
+        rail,
         canvas,
+        side,
         shell,
         navigator,
         editor,
         textarea,
         activeTab,
         focusMessage,
+        compactHeadOverlaps,
+        largestCompactHeadHeight: maxHeight(".field-workspace .compact-head"),
+        impactListHeight: maxHeight(".impact-list"),
+        citationGroupHeight: maxHeight(".citation-group"),
+        sharePanelHeight: maxHeight(".share-panel"),
+        roleControlWidth: roleControl.getBoundingClientRect().width,
+        phoneControlWidth: phoneControl.getBoundingClientRect().width,
+        loginRequiredMessageCount: Array.from(document.querySelectorAll("p")).filter((element) => element.textContent?.includes("로그인 후 소유 현장을 연결하면")).length,
+        clawGreetingCount: Array.from(document.querySelectorAll("p")).filter((element) => element.textContent?.includes("안녕하세요, 클로입니다")).length,
         desktopTabsDisplay: getComputedStyle(desktopTabs).display,
         mobilePickerDisplay: getComputedStyle(mobilePicker).display
       };
     });
 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
-    expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 6);
+    expect(collapsedScrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 6);
+    expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 10);
     expect(metrics.fieldWorkspace.display).toBe("grid");
-    expect(await page.locator(".field-workspace-editor-only").count()).toBe(1);
-    expect(await page.locator(".workspace-rail, .workspace-side").count()).toBe(0);
+    expect(await page.locator(".field-workspace-editor-focus").count()).toBe(1);
+    expect(await page.locator(".workspace-rail").count()).toBe(1);
+    expect(await page.locator(".workspace-side").count()).toBe(1);
     expect(metrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(metrics.fieldWorkspace.width * 0.98));
+    expect(metrics.rail.top).toBeGreaterThanOrEqual(metrics.canvas.bottom + 12);
+    expect(metrics.side.top).toBeGreaterThanOrEqual(metrics.rail.bottom + 12);
+    expect(metrics.side.width).toBeGreaterThanOrEqual(Math.floor(metrics.fieldWorkspace.width * 0.95));
+    expect(metrics.compactHeadOverlaps).toEqual([]);
+    expect(metrics.largestCompactHeadHeight).toBeLessThanOrEqual(160);
+    expect(metrics.impactListHeight).toBeLessThanOrEqual(2000);
+    expect(metrics.citationGroupHeight).toBeLessThanOrEqual(2000);
+    expect(metrics.sharePanelHeight).toBeLessThanOrEqual(3000);
+    expect(metrics.roleControlWidth).toBeGreaterThanOrEqual(240);
+    expect(metrics.phoneControlWidth).toBeGreaterThanOrEqual(240);
+    expect(metrics.loginRequiredMessageCount).toBe(1);
+    expect(metrics.clawGreetingCount).toBe(0);
     expect(metrics.shell.display).toBe("grid");
     expect(metrics.navigator.right).toBeLessThanOrEqual(metrics.editor.left - 12);
     expect(metrics.desktopTabsDisplay).not.toBe("none");
@@ -1516,16 +1572,19 @@ describe("workspace layout regression", () => {
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
     expect(metrics.focusMessage.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
-    expect(String(metrics.activeElementClass)).toContain("document-textarea");
+    expect(String(collapsedActiveElementClass)).toContain("document-textarea");
 
+    await operationsDisclosure.locator(":scope > summary").click();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.evaluate(async () => {
       await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     });
+    const mobileCollapsedScrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    await operationsDisclosure.locator(":scope > summary").click();
     await page.locator('[data-testid="editor-export-panel"] > summary').click();
     const mobileMetrics = await page.evaluate(() => {
       const editorSurface = document.querySelector<HTMLElement>(".document-editor-surface");
-      const fieldWorkspace = document.querySelector<HTMLElement>(".field-workspace-editor-only");
+      const fieldWorkspace = document.querySelector<HTMLElement>(".field-workspace-editor-focus");
       const canvas = document.querySelector<HTMLElement>(".workspace-canvas");
       const exportPanel = document.querySelector<HTMLElement>('[data-testid="editor-export-panel"]');
       const exportButtons = Array.from(
@@ -1551,7 +1610,7 @@ describe("workspace layout regression", () => {
       };
     });
     expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.viewportWidth + 1);
-    expect(mobileMetrics.scrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 9);
+    expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 9);
     expect(mobileMetrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(mobileMetrics.fieldWorkspace.width * 0.98));
     for (const button of mobileMetrics.exportButtons) {
       expect(button.left).toBeGreaterThanOrEqual(mobileMetrics.exportPanel.left);

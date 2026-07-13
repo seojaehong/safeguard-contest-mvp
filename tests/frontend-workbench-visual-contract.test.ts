@@ -75,7 +75,7 @@ describe("workbench visual contract", () => {
     expect(exactBlock(".command-center-shell .workspace-theme-toggle")).toMatch(/padding:\s*var\(--space-1\);/u);
     expect(exactBlock(".command-center-shell .workspace-theme-toggle button")).toMatch(/min-width:\s*var\(--control-height\);/u);
     expect(css).toMatch(/\.command-center-shell \.linear-workspace-layout\s*\{[^}]*grid-template-columns:\s*224px minmax\(0, 1fr\);/u);
-    expect(css).toMatch(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*224px minmax\(0, 1fr\) 320px;[^}]*gap:\s*var\(--space-4\);/u);
+    expect(css).toMatch(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) 320px;[^}]*gap:\s*var\(--space-4\);/u);
     expect(css).toMatch(/\.share-panel\.workflow-panel\s*\{[^}]*gap:\s*(?:16px|var\(--space-4\));[^}]*padding:\s*(?:16px|var\(--space-4\));/u);
     expect(exactBlock(".safeclaw-module-shell.module-variant-document .safeclaw-report-controls button")).toMatch(/min-height:\s*(?:44px|var\(--control-height\));[\s\S]*padding:\s*(?:12px 16px|var\(--space-3\) var\(--space-4\));/u);
   });
@@ -88,14 +88,16 @@ describe("workbench visual contract", () => {
   });
 
   it("implements the field workspace desktop, tablet, and mobile cascade", () => {
-    const desktopRule = css.match(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*224px minmax\(0, 1fr\) 320px;[^}]*\}/u)?.[0] ?? "";
+    const desktopRule = css.match(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) 320px;[^}]*\}/u)?.[0] ?? "";
     const tabletStart = css.indexOf("@media (min-width: 768px) and (max-width: 1279px)");
     const mobileStart = css.indexOf("@media (max-width: 767px)", tabletStart);
     const nextMedia = css.indexOf("@media", mobileStart + 1);
     const tabletRule = css.slice(tabletStart, mobileStart);
     const mobileRule = css.slice(mobileStart, nextMedia);
 
-    expect(desktopRule).toContain("224px minmax(0, 1fr) 320px");
+    expect(desktopRule).toContain("minmax(0, 1fr) 320px");
+    expect(css).toMatch(/(?:^|\n)\.workspace-canvas\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*2;/u);
+    expect(css).toMatch(/(?:^|\n)\.workspace-side\s*\{[^}]*grid-column:\s*2;[^}]*grid-row:\s*2;/u);
     expect(tabletRule).toMatch(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) 320px;/u);
     expect(tabletRule).toMatch(/\.workspace-canvas\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*1;/u);
     expect(tabletRule).toMatch(/\.workspace-side\s*\{[^}]*grid-column:\s*2;[^}]*grid-row:\s*1;/u);
@@ -111,15 +113,12 @@ describe("workbench visual contract", () => {
       /<FieldOperationsWorkspace[\s\S]*?surface="editor"/u,
     );
     expect(components["FieldOperationsWorkspace.tsx"]).toContain('surface?: "full" | "share" | "editor"');
-    expect(css).toMatch(
-      /\.field-workspace-editor-only\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);/u,
-    );
-    expect(css).toMatch(
-      /\.field-workspace-editor-only\s+\.workspace-canvas\s*\{[^}]*grid-column:\s*1;[^}]*width:\s*100%;/u,
-    );
-    expect(css).toMatch(
-      /\.field-workspace\s+\.compact-head\s*\{[^}]*flex-direction:\s*column;[^}]*gap:\s*var\(--space-1\);/u,
-    );
+    expect(components["FieldOperationsWorkspace.tsx"]).toContain('className="editor-operations-disclosure"');
+    expect(css).toMatch(/\.field-workspace-editor-focus\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);/u);
+    expect(css).toMatch(/\.field-workspace-editor-focus\s+\.workspace-canvas\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*1;[^}]*width:\s*100%;/u);
+    expect(css).toMatch(/\.field-workspace-editor-focus\s+\.workspace-side\s*\{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\);/u);
+    expect(css).toMatch(/\.editor-operations-disclosure\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*3;/u);
+    expect(css).toMatch(/\.workspace-side\s+\.compact-head[^}]*\{[^}]*flex-direction:\s*column;[^}]*gap:\s*var\(--space-1\);/u);
     expect(css).toMatch(
       /\.workspace-side\s+\.worker-edit-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);/u,
     );

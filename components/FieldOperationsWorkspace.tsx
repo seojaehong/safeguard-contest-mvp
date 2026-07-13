@@ -1223,22 +1223,6 @@ export function FieldOperationsWorkspace({
     }
   }, [dispatchSnapshot, generationFingerprint, workerSnapshot, workspaceData]);
 
-  if (surface === "editor") {
-    return (
-      <section className="field-workspace field-workspace-editor-only workbench-root" id="workpack">
-        <main className="workspace-canvas">
-          <WorkpackEditor
-            data={editorDataRef.current}
-            generationFingerprint={generationFingerprint}
-            focusToken={editorFocusToken}
-            requestedDocumentKey={requestedDocumentKey}
-            onDeliverablesChange={handleDeliverablesChange}
-          />
-        </main>
-      </section>
-    );
-  }
-
   if (surface === "share") {
     return (
       <section className="field-workspace field-workspace-share-only workbench-root">
@@ -1256,8 +1240,44 @@ export function FieldOperationsWorkspace({
     );
   }
 
+  const workspaceSide = (
+    <aside className="workspace-side" id="workers">
+      <ClawChat
+        authToken={session?.access_token}
+        siteOptions={clawSiteOptions}
+        selectedSiteId={selectedClawSiteId}
+        onSiteChange={selectClawSite}
+        contextStatus={clawContextStatus}
+      />
+      <AdminAccessPanel session={session} storageSnapshot={storageSnapshot} onSessionChange={setSession} />
+      <WorkerEducationPanel
+        workers={workers}
+        selectedWorkerIds={selectedWorkerIds}
+        educationRecords={educationRecords}
+        onToggleWorker={toggleWorker}
+        onUpdateWorker={updateWorker}
+        onAddWorker={addWorker}
+      />
+      <WorkflowSharePanel
+        data={workspaceData}
+        recipientSuggestions={recipientSuggestions}
+        targetWorkers={targetWorkers}
+        authToken={session?.access_token}
+        workpackId={savedWorkpackId}
+        workerIds={savedWorkerIds}
+        ensureWorkpackSaved={ensureWorkpackSaved}
+        readiness={readiness}
+      />
+      <WorkpackHistoryPanel
+        session={session}
+        storageSnapshot={storageSnapshot}
+        onSaveWorkspace={saveWorkspaceToSupabase}
+      />
+    </aside>
+  );
+
   return (
-    <section className="field-workspace workbench-root" id="workpack">
+    <section className={`field-workspace${surface === "editor" ? " field-workspace-editor-focus" : ""} workbench-root`} id="workpack">
       <aside className="workspace-rail card" aria-label="SafeClaw 파일럿 체크리스트">
         <div className="compact-head">
           <span className="eyebrow">운영 체크</span>
@@ -1272,7 +1292,7 @@ export function FieldOperationsWorkspace({
         ))}
       </aside>
 
-      <main className="workspace-canvas">
+      <div className="workspace-canvas">
         <WorkpackEditor
           data={editorDataRef.current}
           generationFingerprint={generationFingerprint}
@@ -1286,41 +1306,17 @@ export function FieldOperationsWorkspace({
           session={session}
           storageSnapshot={storageSnapshot}
         />
-      </main>
+      </div>
 
-      <aside className="workspace-side" id="workers">
-        <ClawChat
-          authToken={session?.access_token}
-          siteOptions={clawSiteOptions}
-          selectedSiteId={selectedClawSiteId}
-          onSiteChange={selectClawSite}
-          contextStatus={clawContextStatus}
-        />
-        <AdminAccessPanel session={session} storageSnapshot={storageSnapshot} onSessionChange={setSession} />
-        <WorkerEducationPanel
-          workers={workers}
-          selectedWorkerIds={selectedWorkerIds}
-          educationRecords={educationRecords}
-          onToggleWorker={toggleWorker}
-          onUpdateWorker={updateWorker}
-          onAddWorker={addWorker}
-        />
-        <WorkflowSharePanel
-          data={workspaceData}
-          recipientSuggestions={recipientSuggestions}
-          targetWorkers={targetWorkers}
-          authToken={session?.access_token}
-          workpackId={savedWorkpackId}
-          workerIds={savedWorkerIds}
-          ensureWorkpackSaved={ensureWorkpackSaved}
-          readiness={readiness}
-        />
-        <WorkpackHistoryPanel
-          session={session}
-          storageSnapshot={storageSnapshot}
-          onSaveWorkspace={saveWorkspaceToSupabase}
-        />
-      </aside>
+      {surface === "editor" ? (
+        <details className="editor-operations-disclosure">
+          <summary>
+            <span>운영 도구</span>
+            <strong>작업자·교육·전파·이력 관리</strong>
+          </summary>
+          {workspaceSide}
+        </details>
+      ) : workspaceSide}
     </section>
   );
 }
