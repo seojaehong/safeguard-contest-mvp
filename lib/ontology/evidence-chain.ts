@@ -216,10 +216,21 @@ export type ResolvedEvidenceCitation = {
   parsed: ParsedCitedUid | null;
 };
 
-export type NaturalizerEvidencePack = Omit<EvidenceChainPack, "reviewOnlyGuidance">;
+export type ActiveEvidenceChainPack = Omit<
+  EvidenceChainPack,
+  "reviewOnlyEvidence" | "reviewOnlyGuidance"
+>;
+
+export type EvidenceChainDiagnostics = Pick<
+  EvidenceChainPack,
+  "reviewOnlyEvidence" | "reviewOnlyGuidance"
+>;
+
+export type NaturalizerEvidencePack = ActiveEvidenceChainPack;
 
 export type NaturalizedEvidenceChain = {
   fixedPack: NaturalizerEvidencePack;
+  reviewOnlyEvidence: SifEvidenceRecord[];
   reviewOnlyGuidance: KoshaGuidanceRecord[];
   naturalizedText: string;
   llmRole: "naturalize_only";
@@ -725,9 +736,7 @@ export function resolveEvidenceChain(
 
 export function resolveEvidenceCitations(pack: EvidenceChainPack): ResolvedEvidenceCitation[] {
   const citedUids = new Set<string>();
-  for (const source of [...pack.hazardPriority, ...pack.reviewOnlyEvidence]) {
-    citedUids.add(source.citedUid);
-  }
+  for (const source of pack.hazardPriority) citedUids.add(source.citedUid);
   for (const source of pack.guidance) {
     citedUids.add(source.citedUid);
   }
@@ -751,14 +760,26 @@ function immutableClone<Value>(value: Value): Value {
   return clone;
 }
 
+export function splitEvidenceChainPack(fixedPack: EvidenceChainPack): {
+  activePack: ActiveEvidenceChainPack;
+  diagnostics: EvidenceChainDiagnostics;
+} {
+  const { reviewOnlyEvidence, reviewOnlyGuidance, ...activePack } = fixedPack;
+  return {
+    activePack,
+    diagnostics: { reviewOnlyEvidence, reviewOnlyGuidance },
+  };
+}
+
 export function naturalizeEvidenceChain(
   fixedPack: EvidenceChainPack,
   naturalizedText: string,
 ): NaturalizedEvidenceChain {
-  const { reviewOnlyGuidance, ...activePack } = fixedPack;
+  const { activePack, diagnostics } = splitEvidenceChainPack(fixedPack);
   return {
     fixedPack: immutableClone(activePack),
-    reviewOnlyGuidance: immutableClone(reviewOnlyGuidance),
+    reviewOnlyEvidence: immutableClone(diagnostics.reviewOnlyEvidence),
+    reviewOnlyGuidance: immutableClone(diagnostics.reviewOnlyGuidance),
     naturalizedText,
     llmRole: "naturalize_only",
     providerFallback: "preserve_current_provider_fallback",
@@ -774,6 +795,10 @@ export function recordNaturalizedEvidenceChainQuality(
   return {
     ...naturalized,
     qualityCheck: { required: true, status },
+    humanConfirmation:
+      status === "failed"
+        ? { required: true, status: "pending" }
+        : naturalized.humanConfirmation,
   };
 }
 
