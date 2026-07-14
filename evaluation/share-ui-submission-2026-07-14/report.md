@@ -17,7 +17,7 @@
 
 ## Verification
 
-- Focused tests: 2 files, 29 tests passed.
+- Focused tests: 3 files, 41 tests passed.
 - Strict TypeScript typecheck: passed.
 - Production build: passed, 27 static pages generated.
 - Diff check: passed.
@@ -30,10 +30,10 @@ The rejected Share authority restoration branch was not integrated. This patch c
 
 ## Live production verification
 
-- Product source: `28dbdc2`
+- Product source: `087589f`
 - Production: `https://www.safeclaw.kr/workspace?scenario=seoul-construction-windy`
-- Vercel deployment: `EFif9uejqC4GzchVcgb4EhYXFnw9`
-- Viewport: `390x844`
+- Vercel deployment: `DvUjJVRnk7ZHZbFx8zsdK2j4nT1Y`
+- Viewport: `391x844`
 - Share heading: `문서팩 보내기`
 - Selected preview: `베트남어 · Tiếng Việt`
 - Korean metadata prefixes in the foreign preview: none
@@ -41,3 +41,5 @@ The rejected Share authority restoration branch was not integrated. This patch c
 - Interactive overlap: none
 - Visible controls below 44px: none
 - Default-collapsed secondary details: 3
+- Closed delivery note participates in layout: no
+- Blocked workpack Share inspection: available; real send remains disabled

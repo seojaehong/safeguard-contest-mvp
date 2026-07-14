@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T08:50:00.000Z",
+  "generatedAt": "2026-07-14T11:52:00.000Z",
   "scope": "share-ui-presentation-only",
   "databaseChanged": false,
   "schemaChanged": false,
@@ -15,8 +15,8 @@
     "inspectable-blocked-share-state"
   ],
   "verification": {
-    "focusedTestFiles": 2,
-    "focusedTestsPassed": 29,
+    "focusedTestFiles": 3,
+    "focusedTestsPassed": 41,
     "typecheck": "pass",
     "productionBuild": "pass",
     "staticPages": 27,
@@ -31,16 +31,19 @@
   },
   "excludedCandidate": "workpack-share-v2-authority-restoration",
   "liveProduction": {
-    "productSourceSha": "28dbdc2852c992f194dbfc17b14b69e9d5d8bb17",
-    "deploymentId": "EFif9uejqC4GzchVcgb4EhYXFnw9",
+    "productSourceSha": "087589fa75f072cf876fc431ef9f1d5a2bf3cdd9",
+    "deploymentId": "DvUjJVRnk7ZHZbFx8zsdK2j4nT1Y",
     "url": "https://www.safeclaw.kr/workspace?scenario=seoul-construction-windy",
-    "viewport": "390x844",
+    "viewport": "391x844",
     "shareHeading": "문서팩 보내기",
     "selectedLanguage": "베트남어 · Tiếng Việt",
     "koreanMetadataPrefixCount": 0,
     "horizontalOverflow": 0,
     "interactiveOverlap": 0,
     "visibleControlsBelow44Px": 0,
-    "collapsedSecondaryDetails": 3
+    "collapsedSecondaryDetails": 3,
+    "closedDeliveryNoteVisible": false,
+    "blockedShareInspectable": true,
+    "blockedSendDisabled": true
   }
 }
