@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
@@ -582,6 +583,27 @@ export type WorkspaceContext = {
   siteId: string;
 };
 
+export type WorkspaceScopeSelection = {
+  organizationId: string;
+  siteId: string;
+};
+
+export class WorkspaceContextResolutionError extends Error {
+  readonly status = 409;
+
+  constructor(
+    readonly code:
+      | "workspace_scope_incomplete"
+      | "workspace_scope_invalid"
+      | "workspace_scope_forbidden"
+      | "workspace_scope_ambiguous",
+    message: string,
+  ) {
+    super(message);
+    this.name = "WorkspaceContextResolutionError";
+  }
+}
+
 export type WorkspaceUser = {
   id: string;
   email: string | null;
@@ -625,6 +647,89 @@ function normalizeUser(user: User): WorkspaceUser {
   };
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function deterministicContextUuid(parts: readonly string[]): string {
+  const bytes = createHash("sha256").update(JSON.stringify(parts), "utf8").digest().subarray(0, 16);
+  bytes[6] = (bytes[6] & 0x0f) | 0x80;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = bytes.toString("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+function databaseErrorCode(error: unknown): string | null {
+  return isRecord(error) && typeof error.code === "string" ? error.code : null;
+}
+
+function parseWorkspaceScopeSelection(value: unknown): WorkspaceScopeSelection | null {
+  if (typeof value === "undefined" || value === null) return null;
+  if (!isRecord(value)) {
+    throw new WorkspaceContextResolutionError(
+      "workspace_scope_invalid",
+      "조직과 현장 선택 형식을 확인해 주세요.",
+    );
+  }
+  const organizationId = typeof value.organizationId === "string" ? value.organizationId.trim() : "";
+  const siteId = typeof value.siteId === "string" ? value.siteId.trim() : "";
+  if (!organizationId || !siteId) {
+    throw new WorkspaceContextResolutionError(
+      "workspace_scope_incomplete",
+      "조직과 현장은 함께 선택해야 합니다.",
+    );
+  }
+  if (!UUID_PATTERN.test(organizationId) || !UUID_PATTERN.test(siteId)) {
+    throw new WorkspaceContextResolutionError(
+      "workspace_scope_invalid",
+      "조직과 현장 선택값을 확인해 주세요.",
+    );
+  }
+  return { organizationId, siteId };
+}
+
+export async function resolveAuthenticatedWorkspaceContext(
+  client: SupabaseClient<WorkspaceDatabase>,
+  user: WorkspaceUser,
+  requestedScope: unknown,
+  fallback: { companyName?: string; siteName?: string; companyType?: string; region?: string },
+): Promise<WorkspaceContext> {
+  const selection = parseWorkspaceScopeSelection(requestedScope);
+  if (!selection) return ensureWorkspaceContext(client, user, fallback);
+
+  const { data: organization, error: organizationError } = await client
+    .from("organizations")
+    .select("id")
+    .eq("id", selection.organizationId)
+    .eq("owner_id", user.id)
+    .maybeSingle();
+  if (organizationError) throw organizationError;
+  if (!organization) {
+    throw new WorkspaceContextResolutionError(
+      "workspace_scope_forbidden",
+      "선택한 조직과 현장을 현재 계정에서 확인할 수 없습니다.",
+    );
+  }
+
+  const { data: site, error: siteError } = await client
+    .from("sites")
+    .select("id,organization_id")
+    .eq("id", selection.siteId)
+    .eq("organization_id", organization.id)
+    .maybeSingle();
+  if (siteError) throw siteError;
+  if (!site || site.organization_id !== organization.id) {
+    throw new WorkspaceContextResolutionError(
+      "workspace_scope_forbidden",
+      "선택한 조직과 현장을 현재 계정에서 확인할 수 없습니다.",
+    );
+  }
+
+  return { organizationId: organization.id, siteId: site.id };
+}
+
 export async function ensureWorkspaceContext(
   client: SupabaseClient<WorkspaceDatabase>,
   user: WorkspaceUser,
@@ -633,29 +738,40 @@ export async function ensureWorkspaceContext(
   const organizationName = input.companyName || "SafeClaw Pilot";
   const siteName = input.siteName || "기본 현장";
 
-  const { data: existingOrganization, error: organizationSelectError } = await client
+  const { data: matchingOrganizations, error: organizationSelectError } = await client
     .from("organizations")
     .select("id")
     .eq("owner_id", user.id)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+    .eq("name", organizationName)
+    .limit(2);
 
   if (organizationSelectError) throw organizationSelectError;
+  if ((matchingOrganizations || []).length > 1) {
+    throw new WorkspaceContextResolutionError(
+      "workspace_scope_ambiguous",
+      "같은 이름의 조직이 여러 개라 조직과 현장을 직접 선택해야 합니다.",
+    );
+  }
 
-  const organizationId = existingOrganization?.id || await insertOrganization(client, user.id, organizationName);
+  const organizationId = matchingOrganizations?.[0]?.id
+    || await insertOrganization(client, user.id, organizationName);
 
-  const { data: existingSite, error: siteSelectError } = await client
+  const { data: matchingSites, error: siteSelectError } = await client
     .from("sites")
     .select("id")
     .eq("organization_id", organizationId)
     .eq("name", siteName)
-    .limit(1)
-    .maybeSingle();
+    .limit(2);
 
   if (siteSelectError) throw siteSelectError;
+  if ((matchingSites || []).length > 1) {
+    throw new WorkspaceContextResolutionError(
+      "workspace_scope_ambiguous",
+      "같은 이름의 현장이 여러 개라 조직과 현장을 직접 선택해야 합니다.",
+    );
+  }
 
-  const siteId = existingSite?.id || await insertSite(client, organizationId, {
+  const siteId = matchingSites?.[0]?.id || await insertSite(client, organizationId, {
     name: siteName,
     industry: input.companyType || null,
     region: input.region || null
@@ -669,13 +785,26 @@ async function insertOrganization(
   ownerId: string,
   name: string
 ) {
+  const id = deterministicContextUuid(["safeclaw-workspace-organization/v1", ownerId, name]);
   const { data, error } = await client
     .from("organizations")
-    .insert({ name, owner_id: ownerId })
+    .insert({ id, name, owner_id: ownerId })
     .select("id")
     .single();
 
-  if (error) throw error;
+  if (error) {
+    if (databaseErrorCode(error) === "23505") {
+      const { data: raced, error: racedError } = await client
+        .from("organizations")
+        .select("id")
+        .eq("id", id)
+        .eq("owner_id", ownerId)
+        .maybeSingle();
+      if (racedError) throw racedError;
+      if (raced) return raced.id;
+    }
+    throw error;
+  }
   return data.id;
 }
 
@@ -684,9 +813,11 @@ async function insertSite(
   organizationId: string,
   site: { name: string; industry: string | null; region: string | null }
 ) {
+  const id = deterministicContextUuid(["safeclaw-workspace-site/v1", organizationId, site.name]);
   const { data, error } = await client
     .from("sites")
     .insert({
+      id,
       organization_id: organizationId,
       name: site.name,
       industry: site.industry,
@@ -695,6 +826,18 @@ async function insertSite(
     .select("id")
     .single();
 
-  if (error) throw error;
+  if (error) {
+    if (databaseErrorCode(error) === "23505") {
+      const { data: raced, error: racedError } = await client
+        .from("sites")
+        .select("id,organization_id")
+        .eq("id", id)
+        .eq("organization_id", organizationId)
+        .maybeSingle();
+      if (racedError) throw racedError;
+      if (raced?.organization_id === organizationId) return raced.id;
+    }
+    throw error;
+  }
   return data.id;
 }

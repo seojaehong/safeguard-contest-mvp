@@ -9,6 +9,7 @@ import { attachQualityContract } from "@/lib/quality-contract";
 import {
   buildPhaseAWorkpackIdempotencyBinding,
   buildReopenData,
+  buildWorkpackEvidenceSummary,
 } from "@/lib/workpack-store";
 import type { AskResponse } from "@/lib/types";
 
@@ -157,7 +158,17 @@ function makeUpdateClient(onCommit?: (payload: Record<string, unknown>) => void)
   };
 }
 
-function ownedContext(stored: AskResponse, revision: string) {
+function storedEvidenceSummary(stored: AskResponse): Record<string, unknown> {
+  const verification = verifyAskResponseGenerationEvidence(stored, SECRET);
+  if (!verification.ok) throw new Error("expected verified stored response");
+  return buildWorkpackEvidenceSummary(stored, verification.snapshot, AUTHORITY_BINDING);
+}
+
+function ownedContext(
+  stored: AskResponse,
+  revision: string,
+  evidenceSummary: Record<string, unknown> = storedEvidenceSummary(stored),
+) {
   return {
     ok: true as const,
     context: {
@@ -169,6 +180,7 @@ function ownedContext(stored: AskResponse, revision: string) {
       revision,
       createdBy: USER_ID,
       authorityBinding: AUTHORITY_BINDING,
+      evidenceSummary,
       shareAuthority: {
         workpack: stored,
         readiness: { canShare: false, status: "blocked" as const, summary: "확인 대기", reasons: [] },
@@ -190,10 +202,36 @@ describe("Phase A confirmation route", () => {
 
   it("ignores client identity/time, persists a server-bound confirmation, and rejects mismatched replay", async () => {
     let stored = responseReadyForConfirmation();
+    const canonicalWorkpackRevision = `sha256:${"9".repeat(64)}`;
+    const rawEvidenceSummary = {
+      ...storedEvidenceSummary(stored),
+      reviewedLocalizationEnvelopes: {
+        vi: {
+          canonicalWorkpackRevision,
+          reviewedAgainstWorkpackUpdatedAt: INITIAL_REVISION,
+          review: {
+            state: "reviewed",
+            futurePolicy: { preserveTone: true, revisionFamily: "share-content-hash" },
+          },
+          dispatch: { futureChannelHints: ["kakao", "sms"] },
+        },
+      },
+      dispatch: {
+        cas: { table: "workpack_share_sessions", field: "updated_at" },
+        futureDeliveryPolicy: { retryWindow: "operator_owned" },
+      },
+      localization: {
+        futureLocalePolicy: { naturalizeOnly: true, unknownNested: { keep: "exact" } },
+      },
+      futureShareEnvelope: {
+        schemaVersion: "share-future/v7",
+        nested: { unknownKeys: ["must", "survive"] },
+      },
+    };
     const fake = makeUpdateClient();
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
     mocks.loadOwnedWorkpackOperationContext.mockImplementation(async () => (
-      ownedContext(stored, fake.revision())
+      ownedContext(stored, fake.revision(), rawEvidenceSummary)
     ));
     const { POST } = await import("@/app/api/workpacks/[id]/phase-a-confirmation/route");
     const binding = stored.phaseAReview?.planBinding;
@@ -236,6 +274,25 @@ describe("Phase A confirmation route", () => {
 
     const persisted = fake.updated();
     if (!persisted) throw new Error("expected persisted confirmation");
+    const persistedEvidenceSummary = persisted.evidence_summary as Record<string, unknown>;
+    expect(persistedEvidenceSummary).toMatchObject({
+      reviewedLocalizationEnvelopes: rawEvidenceSummary.reviewedLocalizationEnvelopes,
+      dispatch: rawEvidenceSummary.dispatch,
+      localization: rawEvidenceSummary.localization,
+      futureShareEnvelope: rawEvidenceSummary.futureShareEnvelope,
+      phaseAReview: body.phaseAReview,
+      qualityContract: body.workpack.qualityContract,
+      generationEvidence: body.workpack.generationEvidence,
+      workpackAuthorityBinding: AUTHORITY_BINDING,
+    });
+    const persistedLocalizationEnvelopes = (
+      persistedEvidenceSummary.reviewedLocalizationEnvelopes as Record<string, unknown>
+    );
+    expect(persistedLocalizationEnvelopes.vi).toMatchObject({
+      canonicalWorkpackRevision,
+      reviewedAgainstWorkpackUpdatedAt: INITIAL_REVISION,
+    });
+    expect(Reflect.get(persisted, "updated_at")).not.toBe(INITIAL_REVISION);
     const reopen = buildReopenData({
       question: stored.question,
       scenario: stored.scenario,

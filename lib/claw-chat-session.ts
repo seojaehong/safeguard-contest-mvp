@@ -12,7 +12,7 @@ export type ClawChatRequestSession = {
 };
 
 export type ClawContextStatus = "login-required" | "loading" | "ready" | "unavailable";
-export type ClawContextSiteOption = { id: string; name: string };
+export type ClawContextSiteOption = { id: string; name: string; organizationId: string };
 export type ClawContextViewState = {
   authToken: string | null;
   siteOptions: ClawContextSiteOption[];

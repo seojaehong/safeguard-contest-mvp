@@ -96,6 +96,7 @@ export type WorkpackOperationContext = {
   revision: string;
   createdBy: string | null;
   authorityBinding: PhaseAWorkpackIdempotencyBinding | null;
+  evidenceSummary: Record<string, unknown>;
   shareAuthority: StoredWorkpackShareAuthority;
 };
 
@@ -267,6 +268,7 @@ export async function loadOwnedWorkpackOperationContext(
           ? workpack.evidence_summary.workpackAuthorityBinding
           : null,
       ),
+      evidenceSummary: isRecord(workpack.evidence_summary) ? workpack.evidence_summary : {},
       shareAuthority: assessStoredWorkpackShareAuthority({
         question: workpack.question,
         scenario: workpack.scenario,

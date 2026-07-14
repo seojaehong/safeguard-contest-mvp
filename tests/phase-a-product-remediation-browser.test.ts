@@ -5,7 +5,11 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Browser, Locator, Page } from "playwright";
 
-import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
+import {
+  buildStoredCurrentWorkpack,
+  buildWorkpackGenerationFingerprint,
+  CURRENT_WORKPACK_STORAGE_KEY,
+} from "@/lib/current-workpack";
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
@@ -358,7 +362,13 @@ async function prepareWorkspace(
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({ sites: [{ id: "site-a", name: "성수 현장" }] }),
+      body: JSON.stringify({
+        sites: [{
+          id: "33333333-3333-4333-8333-333333333333",
+          name: "성수 현장",
+          organizationId: "22222222-2222-4222-8222-222222222222",
+        }],
+      }),
     });
   });
   await page.route("**/api/ask", async (route) => {
@@ -531,10 +541,92 @@ describe("Phase A product remediation browser contract", () => {
     await harness?.stop();
   }, 30_000);
 
-  it("invalidates confirmed authority before every local export and after editor remount", async () => {
+  it("invalidates delayed local-restore authority on edit before every local export and after editor remount", async () => {
     if (!browser) throw new Error("Browser was not started");
+    const localConfirmed = buildConfirmedFixture();
+    const lateServerConfirmed: AskResponse = {
+      ...localConfirmed,
+      status: { ...localConfirmed.status, summary: "LATE_SERVER_RESTORE_MUST_NOT_COMMIT" },
+    };
+    const lateServerAuthority = buildFixtureAuthority(lateServerConfirmed, CONFIRMED_REVISION);
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
-    await prepareWorkspace(page, buildConfirmedFixture());
+    await seedAuthenticatedSession(page);
+    await page.addInitScript(({ expectedOrigin, storageKey, storedWorkpack, workpackId }) => {
+      if (window.location.origin !== expectedOrigin) return;
+      window.localStorage.setItem("safeclaw.aiMode", "template");
+      window.localStorage.setItem(storageKey, storedWorkpack);
+      const nativeFetch = window.fetch.bind(window);
+      window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+        const target = typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url;
+        if (target.includes(`/api/workpacks/${workpackId}`)) {
+          return nativeFetch(input, { ...init, signal: undefined });
+        }
+        return nativeFetch(input, init);
+      };
+    }, {
+      expectedOrigin: baseUrl,
+      storageKey: CURRENT_WORKPACK_STORAGE_KEY,
+      workpackId: WORKPACK_ID,
+      storedWorkpack: JSON.stringify(buildStoredCurrentWorkpack(localConfirmed, {
+        generationFingerprint: buildWorkpackGenerationFingerprint(localConfirmed),
+      })),
+    });
+    await page.route("**/api/weather?**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, weather: null }),
+      });
+    });
+    await page.route("**/api/agent/context", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          sites: [{
+            id: "33333333-3333-4333-8333-333333333333",
+            name: "성수 현장",
+            organizationId: "22222222-2222-4222-8222-222222222222",
+          }],
+        }),
+      });
+    });
+    let markRestoreStarted = (): void => undefined;
+    const restoreStarted = new Promise<void>((resolve) => { markRestoreStarted = resolve; });
+    let releaseRestore = (): void => undefined;
+    const restoreGate = new Promise<void>((resolve) => { releaseRestore = resolve; });
+    let markRestoreCompleted = (): void => undefined;
+    const restoreCompleted = new Promise<void>((resolve) => { markRestoreCompleted = resolve; });
+    await page.route(`**/api/workpacks/${WORKPACK_ID}`, async (route) => {
+      markRestoreStarted();
+      await restoreGate;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          configured: true,
+          canReopen: true,
+          workpack: {
+            id: WORKPACK_ID,
+            updatedAt: CONFIRMED_REVISION,
+            reopenData: lateServerConfirmed,
+          },
+          authority: lateServerAuthority,
+          blockers: [],
+          message: "서버 작업팩 재검증 완료",
+        }),
+      });
+      markRestoreCompleted();
+    });
+
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "domcontentloaded" });
+    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await restoreStarted;
     await openEditor(page);
     await page.evaluate(() => {
       window.localStorage.setItem("safeclaw.pendingWorkpackSave.v1", "stale-pending-authority");
@@ -542,8 +634,7 @@ describe("Phase A product remediation browser contract", () => {
 
     const editor = page.locator(".document-textarea");
     const authorityMarker = page.locator(".phase-a-authority-marker").first();
-    expect(await authorityMarker.textContent()).toContain("법령 근거: 연결됨");
-    const editedText = `[EDIT_REQUIRES_REVALIDATION]\n${await editor.inputValue()}`;
+    const editedText = `[EDIT_DURING_DELAYED_RESTORE]\n${await editor.inputValue()}`;
     await editor.fill(editedText);
     await expect.poll(async () => await authorityMarker.textContent()).toContain("법령 근거: 검토 필요");
     await expect.poll(async () => await editor.inputValue()).not.toContain("법령 근거: 연결됨");
@@ -554,7 +645,18 @@ describe("Phase A product remediation browser contract", () => {
     const connectionStatus = page.locator(".result-ribbon article", { hasText: "연결 상태" });
     await expect.poll(async () => await connectionStatus.locator("strong").textContent()).toContain("편집 후 재검수 필요");
     const pendingEditedText = await editor.inputValue();
-    expect(pendingEditedText).toContain("EDIT_REQUIRES_REVALIDATION");
+    expect(pendingEditedText).toContain("EDIT_DURING_DELAYED_RESTORE");
+
+    releaseRestore();
+    await restoreCompleted;
+    await page.waitForTimeout(100);
+    expect(await editor.inputValue()).toContain("EDIT_DURING_DELAYED_RESTORE");
+    expect(await authorityMarker.textContent()).toContain("법령 근거: 검토 필요");
+    const currentAfterLateRestore = await page.evaluate((storageKey) => (
+      window.localStorage.getItem(storageKey)
+    ), CURRENT_WORKPACK_STORAGE_KEY);
+    expect(currentAfterLateRestore).toContain("EDIT_DURING_DELAYED_RESTORE");
+    expect(currentAfterLateRestore).not.toContain("LATE_SERVER_RESTORE_MUST_NOT_COMMIT");
 
     const exportPanel = page.getByTestId("editor-export-panel");
     await exportPanel.evaluate((element) => {
@@ -595,7 +697,7 @@ describe("Phase A product remediation browser contract", () => {
         fullPage: true,
       });
       writeEvidenceJson("phase-a-local-export-status.json", {
-        editedSentinelPresent: Object.values(downloads).every((content) => content.includes("EDIT_REQUIRES_REVALIDATION")),
+        editedSentinelPresent: Object.values(downloads).every((content) => content.includes("EDIT_DURING_DELAYED_RESTORE")),
         staleConnectedAuthorityCount: Object.values(downloads).filter((content) => content.includes("법령 근거: 연결됨")).length,
         staleConfirmedAuthorityCount: Object.values(downloads).filter((content) => content.includes("공식자료 확인 완료")).length,
         formats: Object.keys(downloads),
@@ -956,7 +1058,10 @@ describe("Phase A product remediation browser contract", () => {
       const count = await workerCheckboxes.count();
       for (let index = 0; index < count; index += 1) {
         const checkbox = workerCheckboxes.nth(index);
-        if (await checkbox.isChecked()) await checkbox.click();
+        if (await checkbox.isChecked()) {
+          await checkbox.click();
+          await expect.poll(async () => await checkbox.isChecked()).toBe(false);
+        }
       }
     }
 

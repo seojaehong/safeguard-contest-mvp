@@ -187,6 +187,14 @@ function attachReportServerGenerationEvidence(
   }, { secret: reportAuthoritySecret, generatedAt });
 }
 
+function createDeferred(): { promise: Promise<void>; resolve: () => void } {
+  let resolvePromise = (): void => undefined;
+  const promise = new Promise<void>((resolve) => {
+    resolvePromise = resolve;
+  });
+  return { promise, resolve: resolvePromise };
+}
+
 async function expectBlockedServerState(page: Page, workpackId: string): Promise<void> {
   const errorState = page.getByLabel("서버 작업팩 오류 상태");
   await errorState.waitFor({ state: "visible", timeout: 5_000 });
@@ -310,9 +318,10 @@ describe("reports download center remount behavior", () => {
     }
   }, 90_000);
 
-  it("loads a requested server-saved workpack through the existing bearer session contract", async () => {
+  it("revalidates the exact server row at export click and ignores a stale export response", async () => {
     if (!browser) throw new Error("Browser was not started");
     const serverSavedAt = "2026-07-10T09:15:00.000Z";
+    const changedServerSavedAt = "2026-07-10T09:16:00.000Z";
     const workpackGeneratedAt = "2026-07-10T09:00:00.000Z";
     const serverWorkpackId = "6b29fc40-ca47-4f9e-98e7-6f4493f9d20a";
     const reopenData = attachReportServerGenerationEvidence(attachQualityContract(buildMockAskResponse(
@@ -344,45 +353,44 @@ describe("reports download center remount behavior", () => {
         generationSealAtCreate: generationSeal,
       },
     };
-    const context = await browser.newContext();
-    await context.addInitScript(({ expectedOrigin, authStorageKey, accessToken }) => {
-      if (window.location.origin !== expectedOrigin) return;
-      window.localStorage.setItem(authStorageKey, JSON.stringify({
-        access_token: accessToken,
-        refresh_token: "reports-test-refresh-token",
-        expires_at: 4_102_444_800,
-        token_type: "bearer"
-      }));
-    }, {
-      expectedOrigin: baseUrl,
-      authStorageKey: testSupabaseAuthStorageKey,
-      accessToken: testAccessToken
+    const payloadAt = (updatedAt: string) => ({
+      ok: true,
+      configured: true,
+      canReopen: true,
+      workpack: {
+        id: serverWorkpackId,
+        createdAt: "2026-07-10T09:05:00.000Z",
+        updatedAt,
+        reopenData,
+      },
+      authority: {
+        ...authority,
+        revision: updatedAt,
+        updatedAt,
+      },
+      blockers: [],
+      message: "저장된 문서팩 상세를 불러왔습니다.",
     });
+
+    const context = await browser.newContext({ acceptDownloads: true });
+    await installAuthSession(context);
     const page = await context.newPage();
     let authorizationHeader = "";
+    let requestCount = 0;
+    const changedRowDownloads: string[] = [];
+    page.on("download", (download) => changedRowDownloads.push(download.suggestedFilename()));
     await page.route(`**/api/workpacks/${serverWorkpackId}`, async (route) => {
+      requestCount += 1;
       authorizationHeader = route.request().headers().authorization || "";
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({
-          ok: true,
-          configured: true,
-          canReopen: true,
-          workpack: {
-            id: serverWorkpackId,
-            createdAt: "2026-07-10T09:05:00.000Z",
-            updatedAt: serverSavedAt,
-            reopenData
-          },
-          authority,
-          blockers: [],
-          message: "저장된 문서팩 상세를 불러왔습니다."
-        })
+        body: JSON.stringify(payloadAt(requestCount === 1 ? serverSavedAt : changedServerSavedAt)),
       });
     });
 
     try {
+      await page.clock.setFixedTime(new Date("2026-07-10T12:00:00.000Z"));
       await page.goto(`${baseUrl}/reports?workpackId=${serverWorkpackId}`, { waitUntil: "networkidle" });
 
       const headerProvenance = page.getByLabel("리포트 헤더 데이터 출처");
@@ -392,8 +400,69 @@ describe("reports download center remount behavior", () => {
       expect(await stickyProvenance.getByText("서버 검증 작업팩", { exact: true }).count()).toBe(1);
       expect(await stickyProvenance.locator(`time[datetime="${serverSavedAt}"]`).count()).toBe(1);
       expect(await stickyProvenance.locator(`time[datetime="${workpackGeneratedAt}"]`).count()).toBe(1);
+
+      await page.getByRole("button", { name: "개선사항 포함 MD" }).click();
+      await expect.poll(() => requestCount, { timeout: 5_000 }).toBe(2);
+      await expect.poll(() => page.getByLabel("다운로드 준비 상태").textContent()).toContain(
+        "서버 작업팩이 변경되어 다시 불러와야 합니다."
+      );
+      expect(changedRowDownloads).toEqual([]);
     } finally {
       await context.close();
+    }
+
+    const staleContext = await browser.newContext({ acceptDownloads: true });
+    await installAuthSession(staleContext);
+    await staleContext.addInitScript(({ requestPath }) => {
+      const nativeFetch = window.fetch.bind(window);
+      window.fetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+        const url = typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url;
+        if (!url.includes(requestPath) || !init?.signal) return nativeFetch(input, init);
+        const unabortableInit: RequestInit = { ...init };
+        delete unabortableInit.signal;
+        return nativeFetch(input, unabortableInit);
+      };
+    }, { requestPath: `/api/workpacks/${serverWorkpackId}` });
+    const stalePage = await staleContext.newPage();
+    const staleRequestStarted = createDeferred();
+    const releaseStaleRequest = createDeferred();
+    const staleDownloads: string[] = [];
+    let staleRequestCount = 0;
+    stalePage.on("download", (download) => staleDownloads.push(download.suggestedFilename()));
+    await stalePage.route(`**/api/workpacks/${serverWorkpackId}`, async (route) => {
+      staleRequestCount += 1;
+      if (staleRequestCount === 2) {
+        staleRequestStarted.resolve();
+        await releaseStaleRequest.promise;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(payloadAt(serverSavedAt)),
+      });
+    });
+
+    try {
+      await stalePage.clock.setFixedTime(new Date("2026-07-10T12:00:00.000Z"));
+      await stalePage.goto(`${baseUrl}/reports?workpackId=${serverWorkpackId}`, { waitUntil: "networkidle" });
+      await stalePage.getByRole("button", { name: "개선사항 포함 MD" }).click();
+      await staleRequestStarted.promise;
+      await stalePage.getByRole("button", { name: "월간 이번 달" }).click();
+      releaseStaleRequest.resolve();
+
+      await expect.poll(() => stalePage.getByLabel("다운로드 준비 상태").textContent()).not.toContain(
+        "다운로드 준비 중"
+      );
+      expect(staleRequestCount).toBe(2);
+      expect(staleDownloads).toEqual([]);
+      expect(await stalePage.getByLabel("다운로드 준비 상태").textContent()).not.toContain("다운로드 시작됨");
+    } finally {
+      releaseStaleRequest.resolve();
+      await staleContext.close();
     }
   }, 90_000);
 

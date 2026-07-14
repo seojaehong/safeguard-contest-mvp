@@ -125,12 +125,14 @@ export function buildPhaseAWorkpackIdempotencyBindingFromSeal(input: {
   userId: string;
   generationSealAtCreate: PhaseAWorkpackGenerationSeal;
 }): PhaseAWorkpackIdempotencyBinding {
-  // Context row IDs can race on first use; creator plus the full server seal is stable across tabs and devices.
+  // Exact authenticated scope is part of identity; deterministic context creation handles first-use races.
   const digest = createHash("sha256")
     .update(JSON.stringify([
       PHASE_A_WORKPACK_IDEMPOTENCY_VERSION,
-      "creator_generation",
+      "authenticated_scope_generation",
       input.userId,
+      input.organizationId,
+      input.siteId,
       input.generationSealAtCreate.version,
       input.generationSealAtCreate.algorithm,
       input.generationSealAtCreate.signature,
@@ -204,6 +206,23 @@ export function buildWorkpackEvidenceSummary(
     generationEvidence: generationEvidenceSnapshot ? response.generationEvidence : undefined,
     generationEvidenceSnapshot,
     workpackAuthorityBinding,
+  };
+}
+
+export function overlayPhaseAConfirmationEvidenceSummary(input: {
+  existingEvidenceSummary: Readonly<Record<string, unknown>>;
+  response: AskResponse;
+  generationEvidenceSnapshot: GenerationEvidenceSnapshot;
+  workpackAuthorityBinding: PhaseAWorkpackIdempotencyBinding;
+}): Record<string, unknown> {
+  return {
+    ...input.existingEvidenceSummary,
+    answer: input.response.answer,
+    phaseAReview: input.response.phaseAReview,
+    qualityContract: input.response.qualityContract,
+    generationEvidence: input.response.generationEvidence,
+    generationEvidenceSnapshot: input.generationEvidenceSnapshot,
+    workpackAuthorityBinding: input.workpackAuthorityBinding,
   };
 }
 

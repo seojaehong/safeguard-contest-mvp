@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser } from "@/lib/supabase-admin";
+import {
+  createSupabaseAdminClient,
+  getWorkspaceUser,
+  resolveAuthenticatedWorkspaceContext,
+} from "@/lib/supabase-admin";
 import { documentKeysFromDeliverables } from "@/lib/evidence-file";
 import type { AskResponse } from "@/lib/types";
 import { isRecord, parseScenarioContext } from "@/lib/workspace-api";
@@ -33,6 +37,19 @@ function readAskResponse(value: unknown): AskResponse | null {
 
 function databaseErrorCode(error: unknown): string | null {
   return isRecord(error) && typeof error.code === "string" ? error.code : null;
+}
+
+function workspaceContextError(error: unknown): { code: string; message: string; status: number } | null {
+  if (
+    !isRecord(error)
+    || typeof error.code !== "string"
+    || !error.code.startsWith("workspace_scope_")
+    || error.status !== 409
+    || typeof error.message !== "string"
+  ) {
+    return null;
+  }
+  return { code: error.code, message: error.message, status: error.status };
 }
 
 export async function GET(request: NextRequest) {
@@ -223,7 +240,36 @@ export async function POST(request: NextRequest) {
       message: "확인 완료 작업팩은 새 행으로 저장할 수 없습니다. 정확한 서버 작업팩 ID를 다시 검증해 재개해야 합니다.",
     }, { status: 409, headers: { "cache-control": "no-store" } });
   }
-  const context = await ensureWorkspaceContext(client, user, parseScenarioContext(scenario));
+  let context;
+  try {
+    context = await resolveAuthenticatedWorkspaceContext(
+      client,
+      user,
+      body.workspaceScope,
+      parseScenarioContext(scenario),
+    );
+  } catch (error) {
+    const scopeError = workspaceContextError(error);
+    if (scopeError) {
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        workpackId: null,
+        code: scopeError.code,
+        message: scopeError.message,
+      }, { status: scopeError.status, headers: { "cache-control": "no-store" } });
+    }
+    console.error("workpack workspace context resolution failed", {
+      errorCode: databaseErrorCode(error) || "unknown",
+    });
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      workpackId: null,
+      code: "workspace_scope_resolution_failed",
+      message: "조직과 현장 권한을 확인하지 못했습니다.",
+    }, { status: 500, headers: { "cache-control": "no-store" } });
+  }
   const idempotency = buildPhaseAWorkpackIdempotencyBinding({
     organizationId: context.organizationId,
     siteId: context.siteId,

@@ -5,23 +5,26 @@ import { buildDbHarnessPacket } from "@/lib/db-harness";
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import { buildMockAskResponse } from "@/lib/mock-data";
 import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
-import { buildPhaseAWorkpackIdempotencyBinding } from "@/lib/workpack-store";
 import type { AskResponse } from "@/lib/types";
 
 const SECRET = "workpack-route-generation-evidence-secret";
 const USER_ID = "11111111-1111-4111-8111-111111111111";
 const ORGANIZATION_ID = "22222222-2222-4222-8222-222222222222";
 const SITE_ID = "33333333-3333-4333-8333-333333333333";
+const SECOND_ORGANIZATION_ID = "66666666-6666-4666-8666-666666666666";
+const SECOND_SITE_ID = "77777777-7777-4777-8777-777777777777";
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
   getWorkspaceUser: vi.fn(),
-  ensureWorkspaceContext: vi.fn()
+  ensureWorkspaceContext: vi.fn(),
+  resolveAuthenticatedWorkspaceContext: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase-admin", () => ({
   createSupabaseAdminClient: mocks.createSupabaseAdminClient,
   getWorkspaceUser: mocks.getWorkspaceUser,
   ensureWorkspaceContext: mocks.ensureWorkspaceContext,
+  resolveAuthenticatedWorkspaceContext: mocks.resolveAuthenticatedWorkspaceContext,
   toJson: (value: unknown) => value
 }));
 
@@ -199,6 +202,10 @@ describe("workpack generation evidence save gate", () => {
     process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET = SECRET;
     mocks.getWorkspaceUser.mockResolvedValue({ id: USER_ID, email: "user@example.com" });
     mocks.ensureWorkspaceContext.mockResolvedValue({ organizationId: ORGANIZATION_ID, siteId: SITE_ID });
+    mocks.resolveAuthenticatedWorkspaceContext.mockResolvedValue({
+      organizationId: ORGANIZATION_ID,
+      siteId: SITE_ID,
+    });
   });
 
   afterEach(() => {
@@ -222,33 +229,47 @@ describe("workpack generation evidence save gate", () => {
     expect(evidenceSummary.generationEvidenceSnapshot).toEqual(sealed.generationEvidence?.snapshot);
   });
 
-  it("keeps one creator-generation identity when first-use workspace contexts race", () => {
+  it("converges within each authenticated scope and separates the same user and seal across organizations and sites", async () => {
     const sealed = attachGenerationEvidence(responseWithHarness(), {
       secret: SECRET,
       generatedAt: "2026-07-10T09:30:00.000Z"
     });
-    const firstContext = buildPhaseAWorkpackIdempotencyBinding({
-      organizationId: ORGANIZATION_ID,
-      siteId: SITE_ID,
-      userId: USER_ID,
-      response: sealed,
-    });
-    const racedContext = buildPhaseAWorkpackIdempotencyBinding({
-      organizationId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-      siteId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
-      userId: USER_ID,
-      response: sealed,
-    });
-    const otherCreator = buildPhaseAWorkpackIdempotencyBinding({
-      organizationId: ORGANIZATION_ID,
-      siteId: SITE_ID,
-      userId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
-      response: sealed,
-    });
+    const firstScope = { organizationId: ORGANIZATION_ID, siteId: SITE_ID };
+    const secondScope = { organizationId: SECOND_ORGANIZATION_ID, siteId: SECOND_SITE_ID };
+    const { POST } = await import("@/app/api/workpacks/route");
 
-    expect(racedContext.deterministicId).toBe(firstContext.deterministicId);
-    expect(racedContext.scopeDigest).toBe(firstContext.scopeDigest);
-    expect(otherCreator.deterministicId).not.toBe(firstContext.deterministicId);
+    // This replaces the rejected creator+seal-only contract: exact authenticated scope is identity.
+    const firstStore = fakeClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(firstStore.client);
+    mocks.resolveAuthenticatedWorkspaceContext.mockResolvedValue(firstScope);
+    const [firstCreatedResponse, firstReopenedResponse] = await Promise.all([
+      POST(jsonRequest({ data: sealed, workspaceScope: firstScope })),
+      POST(jsonRequest({ data: sealed, workspaceScope: firstScope })),
+    ]);
+    const firstCreated = await firstCreatedResponse.json() as Record<string, unknown>;
+    const firstReopened = await firstReopenedResponse.json() as Record<string, unknown>;
+
+    const secondStore = fakeClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(secondStore.client);
+    mocks.resolveAuthenticatedWorkspaceContext.mockResolvedValue(secondScope);
+    const [secondCreatedResponse, secondReopenedResponse] = await Promise.all([
+      POST(jsonRequest({ data: sealed, workspaceScope: secondScope })),
+      POST(jsonRequest({ data: sealed, workspaceScope: secondScope })),
+    ]);
+    const secondCreated = await secondCreatedResponse.json() as Record<string, unknown>;
+    const secondReopened = await secondReopenedResponse.json() as Record<string, unknown>;
+
+    expect([firstCreatedResponse.status, firstReopenedResponse.status]).toEqual([200, 200]);
+    expect([secondCreatedResponse.status, secondReopenedResponse.status]).toEqual([200, 200]);
+    expect(firstCreated.workpackId).toBe(firstReopened.workpackId);
+    expect(secondCreated.workpackId).toBe(secondReopened.workpackId);
+    expect(secondCreated.workpackId).not.toBe(firstCreated.workpackId);
+    expect(mocks.resolveAuthenticatedWorkspaceContext).toHaveBeenCalledWith(
+      expect.anything(),
+      { id: USER_ID, email: "user@example.com" },
+      secondScope,
+      expect.anything(),
+    );
   });
 
   it("atomically reopens one deterministic server workpack across tabs and devices", async () => {
@@ -260,8 +281,10 @@ describe("workpack generation evidence save gate", () => {
     });
     const { POST } = await import("@/app/api/workpacks/route");
 
-    const firstResponse = await POST(jsonRequest({ data: sealed }));
-    const secondResponse = await POST(jsonRequest({ data: sealed }));
+    const [firstResponse, secondResponse] = await Promise.all([
+      POST(jsonRequest({ data: sealed })),
+      POST(jsonRequest({ data: sealed })),
+    ]);
     const first = await firstResponse.json() as Record<string, unknown>;
     const second = await secondResponse.json() as Record<string, unknown>;
 
@@ -312,6 +335,29 @@ describe("workpack generation evidence save gate", () => {
       updatedAt: "2026-07-14T01:00:00.000Z",
       reopenData: { question: sealed.question }
     });
+
+    const changedRevision = "2026-07-14T01:01:00.000Z";
+    const stored = fake.stored();
+    if (!stored) throw new Error("Expected stored workpack row");
+    stored.updated_at = changedRevision;
+
+    const changedResponse = await GET(
+      jsonRequest(null),
+      { params: Promise.resolve({ id: created.workpackId }) }
+    );
+    const changedBody = await changedResponse.json() as Record<string, unknown>;
+
+    expect(changedResponse.status).toBe(200);
+    expect(changedBody.authority).toMatchObject({
+      workpackId: created.workpackId,
+      revision: changedRevision,
+      updatedAt: changedRevision,
+      generationSeal: { signature: sealed.generationEvidence?.signature }
+    });
+    expect(changedBody.workpack).toMatchObject({
+      id: created.workpackId,
+      updatedAt: changedRevision
+    });
   });
 
   it("returns a local-only candidate without authority when the stored generation seal changed", async () => {
@@ -347,14 +393,57 @@ describe("workpack generation evidence save gate", () => {
     ]));
   });
 
-  it("fails closed when a deterministic UUID collision is not the exact owned generation binding", async () => {
+  it("denies foreign or site-only scope before preserving exact-scope collision fail-close", async () => {
     const sealed = attachGenerationEvidence(responseWithHarness(), {
       secret: SECRET,
       generatedAt: "2026-07-10T09:30:00.000Z"
     });
+    const foreignStore = fakeClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(foreignStore.client);
+    mocks.resolveAuthenticatedWorkspaceContext.mockRejectedValueOnce(Object.assign(
+      new Error("requested organization/site is outside the authenticated workspace"),
+      { code: "workspace_scope_forbidden", status: 409 },
+    ));
     const first = fakeClient();
-    mocks.createSupabaseAdminClient.mockReturnValue(first.client);
     const { POST } = await import("@/app/api/workpacks/route");
+
+    const foreignResponse = await POST(jsonRequest({
+      data: sealed,
+      workspaceScope: {
+        organizationId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        siteId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      },
+    }));
+    const foreignBody = await foreignResponse.json() as Record<string, unknown>;
+    expect(foreignResponse.status).toBe(409);
+    expect(foreignBody).toMatchObject({ ok: false, code: "workspace_scope_forbidden", workpackId: null });
+    expect(foreignStore.inserted()).toBeNull();
+
+    mocks.resolveAuthenticatedWorkspaceContext.mockRejectedValueOnce(Object.assign(
+      new Error("organization and site must be selected together"),
+      { code: "workspace_scope_incomplete", status: 409 },
+    ));
+    const siteOnlyResponse = await POST(jsonRequest({
+      data: sealed,
+      workspaceScope: { siteId: SITE_ID },
+    }));
+    const siteOnlyBody = await siteOnlyResponse.json() as Record<string, unknown>;
+    expect(siteOnlyResponse.status).toBe(409);
+    expect(siteOnlyBody).toMatchObject({ ok: false, code: "workspace_scope_incomplete", workpackId: null });
+    expect(foreignStore.inserted()).toBeNull();
+
+    mocks.getWorkspaceUser.mockResolvedValueOnce(null);
+    const unauthenticatedResponse = await POST(jsonRequest({
+      data: sealed,
+      workspaceScope: { organizationId: ORGANIZATION_ID, siteId: SITE_ID },
+    }));
+    expect(unauthenticatedResponse.status).toBe(401);
+
+    mocks.createSupabaseAdminClient.mockReturnValue(first.client);
+    mocks.resolveAuthenticatedWorkspaceContext.mockResolvedValue({
+      organizationId: ORGANIZATION_ID,
+      siteId: SITE_ID,
+    });
     await POST(jsonRequest({ data: sealed }));
     const collisionRow = {
       ...first.stored(),
@@ -511,6 +600,7 @@ describe("workpack generation evidence save gate", () => {
     expect(response.status).toBe(400);
     expect(body.code).toMatch(/generation_evidence/);
     expect(mocks.ensureWorkspaceContext).not.toHaveBeenCalled();
+    expect(mocks.resolveAuthenticatedWorkspaceContext).not.toHaveBeenCalled();
     expect(fake.inserted()).toBeNull();
   });
 

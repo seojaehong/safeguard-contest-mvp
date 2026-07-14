@@ -1200,6 +1200,7 @@ export function SafeGuardCommandCenter({
     change: WorkpackDeliverablesChange
   ) => {
     if (change.requiresRevalidation) {
+      workpackRevalidationGateRef.current.abortCurrent();
       improvementSaveRequestGateRef.current.abortCurrent();
       setRequiresRevalidation(true);
       setSavedWorkpackId(null);
@@ -2365,8 +2366,17 @@ export function SafeGuardCommandCenter({
                     if (question !== selectedExample.question && !window.confirm("현재 입력한 내용을 예시 문장으로 되돌릴까요?")) {
                       return;
                     }
+                    generationRequestBindingRef.current = null;
+                    generationRequestGateRef.current.abortCurrent();
+                    workpackRevalidationGateRef.current.abortCurrent();
+                    improvementSaveRequestGateRef.current.abortCurrent();
                     setQuestion(selectedExample.question);
                     setData(null);
+                    setGenerationFingerprint(null);
+                    setRequiresRevalidation(false);
+                    setSavedWorkpackId(null);
+                    setSavedWorkpackAuthority(null);
+                    setImprovementSaveState("idle");
                     setState("idle");
                     setWorkspacePage("input");
                   }}

@@ -26,7 +26,7 @@ import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-sto
 import {
   buildPhaseAWorkpackAuthority,
   buildPhaseAWorkpackIdempotencyBindingFromSeal,
-  buildWorkpackEvidenceSummary,
+  overlayPhaseAConfirmationEvidenceSummary,
   phaseAWorkpackIdempotencyBindingsEqual,
 } from "@/lib/workpack-store";
 import type { AskResponse } from "@/lib/types";
@@ -272,11 +272,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
       }, { status: 500, headers: { "cache-control": "no-store" } });
     }
 
-    const evidenceSummary = buildWorkpackEvidenceSummary(
-      resealed,
-      resealedVerification.snapshot,
-      authorityBinding,
-    );
+    const evidenceSummary = overlayPhaseAConfirmationEvidenceSummary({
+      existingEvidenceSummary: owned.context.evidenceSummary,
+      response: resealed,
+      generationEvidenceSnapshot: resealedVerification.snapshot,
+      workpackAuthorityBinding: authorityBinding,
+    });
     const persistedRevision = nextWorkpackRevision(owned.context.revision, confirmationNow);
     const update: WorkspaceDatabase["public"]["Tables"]["workpacks"]["Update"] = {
       deliverables: toJson(resealed.deliverables),

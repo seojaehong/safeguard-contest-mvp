@@ -1100,7 +1100,9 @@ export function FieldOperationsWorkspace({
       .then((payload) => {
         const sites = Array.isArray(payload.sites)
           ? payload.sites.filter((site): site is ClawSiteOption => (
-            typeof site?.id === "string" && typeof site.name === "string"
+            typeof site?.id === "string"
+            && typeof site.name === "string"
+            && typeof site.organizationId === "string"
           ))
           : [];
         clawContextRequestSession.commit(contextRequest, () => {
@@ -1140,6 +1142,12 @@ export function FieldOperationsWorkspace({
       ? { ...data, deliverables: { ...data.deliverables, ...editedDeliverables } }
       : data
   ), [data, editedDeliverables]);
+  const selectedWorkspaceScope = useMemo(() => {
+    const site = clawSiteOptions.find((option) => option.id === selectedClawSiteId);
+    return site
+      ? { organizationId: site.organizationId, siteId: site.id }
+      : undefined;
+  }, [clawSiteOptions, selectedClawSiteId]);
   const parsedPhaseAReview = useMemo(
     () => parsePhaseAReview(workspaceData.phaseAReview),
     [workspaceData.phaseAReview]
@@ -1574,6 +1582,7 @@ export function FieldOperationsWorkspace({
       if (!serverSaved) {
         const workpackResponse = await postJson<SaveResponse>("/api/workpacks", {
           data: workspaceData,
+          workspaceScope: selectedWorkspaceScope,
           workerSummary: {
             ...summarizeWorkers(selectedWorkers),
             selectedWorkers: buildWorkerDispatchTargets(selectedWorkers),

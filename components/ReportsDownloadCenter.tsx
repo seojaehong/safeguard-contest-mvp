@@ -37,8 +37,15 @@ import {
   type ReportViewState
 } from "@/lib/reporting-downloads";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
-import type { PhaseAWorkpackAuthority } from "@/lib/workpack-authority";
-import { createBoundRequestGate, type BoundRequestHandle } from "@/lib/request-version-guard";
+import {
+  phaseAWorkpackGenerationSealsEqual,
+  type PhaseAWorkpackAuthority,
+} from "@/lib/workpack-authority";
+import {
+  createBoundRequestGate,
+  isAbortError,
+  type BoundRequestHandle,
+} from "@/lib/request-version-guard";
 
 const periodOptions: Array<{ value: ReportPeriod; label: string; detail: string }> = [
   { value: "daily", label: "오늘", detail: "당일" },
@@ -53,9 +60,9 @@ type DownloadState = {
 };
 
 type DownloadRequest = {
-  fileName: string;
   contentType: string;
-  buildContent: () => string;
+  buildFileName: (snapshot: ReportSnapshot) => string;
+  buildContent: (snapshot: ReportSnapshot) => string;
 };
 
 type CurrentWorkpackReadResult =
@@ -207,6 +214,24 @@ function readResponseMessage(payload: unknown, fallback: string) {
   return isRecord(payload) && typeof payload.message === "string" ? payload.message : fallback;
 }
 
+function phaseAWorkpackAuthoritiesEqual(
+  actual: PhaseAWorkpackAuthority,
+  expected: PhaseAWorkpackAuthority,
+): boolean {
+  return actual.version === expected.version
+    && actual.workpackId === expected.workpackId
+    && actual.revision === expected.revision
+    && actual.updatedAt === expected.updatedAt
+    && phaseAWorkpackGenerationSealsEqual(actual.generationSeal, expected.generationSeal)
+    && actual.idempotency.version === expected.idempotency.version
+    && actual.idempotency.deterministicId === expected.idempotency.deterministicId
+    && actual.idempotency.scopeDigest === expected.idempotency.scopeDigest
+    && phaseAWorkpackGenerationSealsEqual(
+      actual.idempotency.generationSealAtCreate,
+      expected.idempotency.generationSealAtCreate,
+    );
+}
+
 async function readReportAccessToken(): Promise<string | null> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -342,12 +367,10 @@ function BlockedDownloadActions({ detail }: { detail: string }) {
 }
 
 function DownloadActions({
-  snapshot,
   viewState,
   downloadState,
   onDownload
 }: {
-  snapshot: ReportSnapshot;
   viewState: ReportViewState;
   downloadState: DownloadState;
   onDownload: (request: DownloadRequest) => Promise<void>;
@@ -374,9 +397,9 @@ function DownloadActions({
         className="button"
         disabled={disabled}
         onClick={() => void onDownload({
-          fileName: `${snapshot.fileBaseName}.md`,
           contentType: "text/markdown;charset=utf-8",
-          buildContent: () => buildReportMarkdown(snapshot)
+          buildFileName: (current) => `${current.fileBaseName}.md`,
+          buildContent: buildReportMarkdown,
         })}
       >
         개선사항 포함 MD
@@ -386,9 +409,9 @@ function DownloadActions({
         className="button secondary"
         disabled={disabled}
         onClick={() => void onDownload({
-          fileName: `${snapshot.fileBaseName}.csv`,
           contentType: "text/csv;charset=utf-8",
-          buildContent: () => buildReportCsv(snapshot)
+          buildFileName: (current) => `${current.fileBaseName}.csv`,
+          buildContent: buildReportCsv,
         })}
       >
         공정·작업 분류 CSV
@@ -398,9 +421,9 @@ function DownloadActions({
         className="button secondary"
         disabled={disabled}
         onClick={() => void onDownload({
-          fileName: `${snapshot.fileBaseName}.json`,
           contentType: "application/json;charset=utf-8",
-          buildContent: () => buildReportJson(snapshot)
+          buildFileName: (current) => `${current.fileBaseName}.json`,
+          buildContent: buildReportJson,
         })}
       >
         관리자 원본 JSON
@@ -413,9 +436,9 @@ function DownloadActions({
         className="button secondary"
         disabled={disabled}
         onClick={() => void onDownload({
-          fileName: `${snapshot.fileBaseName}-corpus.md`,
           contentType: "text/markdown;charset=utf-8",
-          buildContent: () => buildReportLearningMarkdown(snapshot)
+          buildFileName: (current) => `${current.fileBaseName}-corpus.md`,
+          buildContent: buildReportLearningMarkdown,
         })}
       >
         다음 생성용 MD
@@ -425,9 +448,9 @@ function DownloadActions({
         className="button secondary"
         disabled={disabled}
         onClick={() => void onDownload({
-          fileName: `${snapshot.fileBaseName}-corpus.jsonl`,
           contentType: "application/x-ndjson;charset=utf-8",
-          buildContent: () => buildReportLearningJsonl(snapshot)
+          buildFileName: (current) => `${current.fileBaseName}-corpus.jsonl`,
+          buildContent: buildReportLearningJsonl,
         })}
       >
         하네스 JSONL
@@ -640,6 +663,9 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
   const loadRequestGateRef = useRef(createBoundRequestGate<string>());
   const loadRequestBindingRef = useRef("");
   const loadRequestEpochRef = useRef(0);
+  const downloadRequestGateRef = useRef(createBoundRequestGate<string>());
+  const downloadRequestBindingRef = useRef("");
+  const downloadRequestEpochRef = useRef(0);
   const usingSample = sourceMode === "sample";
 
   function canCommitLoadRequest(request: BoundRequestHandle<string>): boolean {
@@ -650,6 +676,16 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
     loadRequestEpochRef.current += 1;
     loadRequestBindingRef.current = `${selection}:${loadRequestEpochRef.current}`;
     loadRequestGateRef.current.abortCurrent();
+  }
+
+  function canCommitDownloadRequest(request: BoundRequestHandle<string>): boolean {
+    return downloadRequestGateRef.current.canCommit(request, downloadRequestBindingRef.current);
+  }
+
+  function invalidateDownloadRequest(reason: string) {
+    downloadRequestEpochRef.current += 1;
+    downloadRequestBindingRef.current = `${reason}:${downloadRequestEpochRef.current}`;
+    downloadRequestGateRef.current.abortCurrent();
   }
 
   function loadLocalState() {
@@ -690,6 +726,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
   }
 
   async function loadRequestedState() {
+    invalidateDownloadRequest("source_reload");
     loadRequestEpochRef.current += 1;
     const requestBinding = `${serverWorkpackId ?? "browser_local"}:${loadRequestEpochRef.current}`;
     loadRequestBindingRef.current = requestBinding;
@@ -753,6 +790,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
 
   function switchToLocalWorkpack() {
     if (!localSwitchCandidate) return;
+    invalidateDownloadRequest("browser_local");
     invalidateLoadRequest("browser_local");
     setPhotoApprovals([]);
     setWorkpack(localSwitchCandidate.workpack);
@@ -768,6 +806,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
   }
 
   function loadSamplePreview() {
+    invalidateDownloadRequest("sample");
     invalidateLoadRequest("sample");
     setPhotoApprovals([]);
     setWorkpack(buildStoredCurrentWorkpack(buildSampleWorkpack()));
@@ -783,7 +822,10 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
 
   useEffect(() => {
     void loadRequestedState();
-    return () => invalidateLoadRequest("unmounted");
+    return () => {
+      invalidateLoadRequest("unmounted");
+      invalidateDownloadRequest("unmounted");
+    };
   }, [serverWorkpackId]);
 
   const preservedHistory = useMemo(
@@ -823,23 +865,68 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   useEffect(() => {
+    invalidateDownloadRequest("report_parameters_changed");
     setDownloadState(INITIAL_DOWNLOAD_STATE);
   }, [dateRange, filters, period, photoApprovals]);
 
   function togglePhotoApproval(improvementId: string) {
+    invalidateDownloadRequest("photo_approval_changed");
     setPhotoApprovals((current) => toggleReportPhotoApproval(current, improvements, improvementId));
   }
 
   async function handleDownload(request: DownloadRequest) {
-    if (!viewState.canDownload) return;
+    if (!viewState.canDownload || !snapshot) return;
+    downloadRequestEpochRef.current += 1;
+    const requestBinding = [
+      sourceMode,
+      sourceWorkpackId || "local",
+      sourceAuthority?.revision || "unverified",
+      downloadRequestEpochRef.current,
+    ].join(":");
+    downloadRequestBindingRef.current = requestBinding;
+    const downloadRequest = downloadRequestGateRef.current.begin(requestBinding);
     setDownloadState({ status: "preparing", message: "다운로드 준비 중" });
     await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
     try {
-      downloadTextFile(request.fileName, request.buildContent(), request.contentType);
-      setDownloadState({ status: "ready", message: `다운로드 시작됨 · ${request.fileName}` });
+      if (!canCommitDownloadRequest(downloadRequest)) return;
+      let exportSnapshot = snapshot;
+      if (sourceMode === "server_saved") {
+        if (!sourceWorkpackId || !sourceAuthority) {
+          throw new Error("서버 작업팩 권위를 다시 확인해야 합니다.");
+        }
+        const server = await fetchServerReportWorkpack(sourceWorkpackId, downloadRequest.signal);
+        if (!canCommitDownloadRequest(downloadRequest)) return;
+        if (
+          server.id !== sourceWorkpackId
+          || !phaseAWorkpackAuthoritiesEqual(server.authority, sourceAuthority)
+        ) {
+          throw new Error("서버 작업팩이 변경되어 다시 불러와야 합니다.");
+        }
+        exportSnapshot = buildReportSnapshot({
+          workpack: server.workpack,
+          improvements: [],
+          period,
+          dateRange: period === "custom" ? dateRange : undefined,
+          filters,
+          photoApprovals,
+          sourceMode: "server_saved",
+          sourceWorkpackId: server.id,
+          sourceAuthority: server.authority,
+        });
+        if (!resolveReportViewState(exportSnapshot, null).canDownload) {
+          throw new Error("재검증한 서버 작업팩으로 내보내기 범위를 만들 수 없습니다.");
+        }
+      }
+      if (!canCommitDownloadRequest(downloadRequest)) return;
+      const fileName = request.buildFileName(exportSnapshot);
+      downloadTextFile(fileName, request.buildContent(exportSnapshot), request.contentType);
+      setDownloadState({ status: "ready", message: `다운로드 시작됨 · ${fileName}` });
     } catch (error) {
+      if (!canCommitDownloadRequest(downloadRequest) || isAbortError(error)) return;
       console.error("safeclaw report download failed", error);
       setDownloadState({ status: "error", message: `다운로드 오류 · ${errorMessage(error)}` });
+    } finally {
+      downloadRequestGateRef.current.finish(downloadRequest);
     }
   }
 
@@ -1061,7 +1148,6 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
             <span>다운로드</span>
             {snapshot ? (
               <DownloadActions
-                snapshot={snapshot}
                 viewState={viewState}
                 downloadState={downloadState}
                 onDownload={handleDownload}

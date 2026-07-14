@@ -192,14 +192,18 @@ async function findOwnedSites(
 
   const { data: sites, error: siteError } = await client
     .from("sites")
-    .select("id,name")
+    .select("id,name,organization_id")
     .in("organization_id", organizationIds)
     .order("created_at", { ascending: true });
   if (siteError) throw siteError;
-  return (sites ?? []).map((site) => ({ id: site.id, name: site.name }));
+  return (sites ?? []).map((site) => ({
+    id: site.id,
+    name: site.name,
+    organizationId: site.organization_id,
+  }));
 }
 
-export type BrokerSiteOption = { id: string; name: string };
+export type BrokerSiteOption = { id: string; name: string; organizationId: string };
 
 export type ListOwnedBrokerSites = (
   authentication: BrokerAuthenticatedRequest,

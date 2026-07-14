@@ -30,7 +30,7 @@ describe("OpenClaw owned-site context wiring", () => {
   it("returns only owned-site selector identifiers and names after authentication", async () => {
     const get = createAgentContextGet({
       authenticate: async () => ({ client: { marker: "client" }, user: { id: "user-1", email: "owner@example.com" } }),
-      listOwnedSites: async () => [{ id: "site-1", name: "성수 현장" }],
+      listOwnedSites: async () => [{ id: "site-1", name: "성수 현장", organizationId: "org-1" }],
     });
 
     const response = await get(new Request("https://www.safeclaw.kr/api/agent/context", {
@@ -39,7 +39,7 @@ describe("OpenClaw owned-site context wiring", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
-      sites: [{ id: "site-1", name: "성수 현장" }],
+      sites: [{ id: "site-1", name: "성수 현장", organizationId: "org-1" }],
     });
   });
 
