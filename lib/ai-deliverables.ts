@@ -1173,6 +1173,7 @@ export type AiDeliverablesDiagnostics = {
     sourceIdentity: string;
     rejectedGroups: string[];
     violations: Array<Pick<GroundingViolation, "code" | "path"> & { group: string }>;
+    criticalControls: string[];
   };
   trace: GenerationTrace["deliverables"] & { fallbackUsed: boolean };
 };
@@ -1361,7 +1362,8 @@ export async function generateAllDeliverablesWithDiagnostics(
           : "review_required",
         sourceIdentity: opts.groundingPacket.sourceIdentity,
         rejectedGroups: rejectedGroundingGroups,
-        violations: groundingViolations
+        violations: groundingViolations,
+        criticalControls: [...new Set(opts.groundingPacket.sources.flatMap((source) => source.controls))].sort()
       } : undefined,
       trace: {
         attempted: allSpecs.length > 0,
