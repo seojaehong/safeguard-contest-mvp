@@ -1,0 +1,97 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-editor-structured-sections.test.ts tests/editor-first-state.test.ts tests/editor-export-integrity.test.ts tests/frontend-workbench-visual-contract.test.ts tests/xlsx-export-route.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+ ❯ tests/xlsx-export-route.test.ts (10 tests | 1 failed) 287ms
+     × keeps schema-first TBM exports on the structured workbook contract after edits 86ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/xlsx-export-route.test.ts > /api/export/xlsx structured contract > keeps schema-first TBM exports on the structured workbook contract after edits
+AssertionError: expected 'TBM 브리핑\nTBM 브리핑\nTBM 브리핑\nTBM 브리핑\nT…' to contain 'TBM 기본정보'
+
+- Expected
++ Received
+
+- TBM 기본정보
++ TBM 브리핑
++ TBM 브리핑
++ TBM 브리핑
++ TBM 브리핑
++ TBM 브리핑
++ TBM 브리핑
++ 사업장
++ 세이프건설
++ 세이프건설
++ 현장
++ 서울 성수동 근린생활시설 현장
++ 서울 성수동 근린생활시설 현장
++ 작업내용
++ 외벽 도장 작업
++ 외벽 도장 작업
++ 인원/조건
++ 5명 · 오후 강풍 예보
++ 5명 · 오후 강풍 예보
++ 사용자 편집
++ 사용자 편집
++ 사용자 편집
++ 사용자 편집
++ 사용자 편집
++ 사용자 편집
++ 번호
++ 항목
++ 내용
++ 상태
++ 담당
++ 확인
++ 1
++ 편집 문구
++ SAFECLAW_EDITED_TBM_SENTINEL
++ 편집 반영
++ 현장 확인
++ □ 확인
++ 확인 및 결재
++ 확인 및 결재
++ 확인 및 결재
++ 확인 및 결재
++ 확인 및 결재
++ 확인 및 결재
++ 작성자
++ 서명: ______
++ 작성자
++ 서명: ______
++ 검토자
++ 서명: ______
++ 검토자
++ 서명: ______
++ 승인자
++ 서명: ______
++ 승인자
++ 서명: ______
++ 편집된 제출 본문을 schema-first canonical 행으로 반영했습니다. 현장 확인 후 결재 및 서명하세요.
++ 편집된 제출 본문을 schema-first canonical 행으로 반영했습니다. 현장 확인 후 결재 및 서명하세요.
++ 편집된 제출 본문을 schema-first canonical 행으로 반영했습니다. 현장 확인 후 결재 및 서명하세요.
++ 편집된 제출 본문을 schema-first canonical 행으로 반영했습니다. 현장 확인 후 결재 및 서명하세요.
++ 편집된 제출 본문을 schema-first canonical 행으로 반영했습니다. 현장 확인 후 결재 및 서명하세요.
++ 편집된 제출 본문을 schema-first canonical 행으로 반영했습니다. 현장 확인 후 결재 및 서명하세요.
+
+ ❯ tests/xlsx-export-route.test.ts:163:23
+    161|
+    162|     const sheetText = readWorksheetText(workbook, "TBM 브리핑");
+    163|     expect(sheetText).toContain("TBM 기본정보");
+       |                       ^
+    164|     expect(sheetText).toContain("안전대책");
+    165|     expect(sheetText).toContain(sentinel);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 32 passed (33)
+   Start at  22:11:03
+   Duration  2.65s (transform 577ms, setup 0ms, import 1.81s, tests 847ms, environment 1ms)
+
+EXPLICIT_EXIT_CODE=1

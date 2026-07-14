@@ -1,0 +1,43 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/north-star-document-ux.test.ts -t mobile-day
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+stdout | tests/north-star-document-ux.test.ts > North Star document cockpit and editor UX > keeps 'mobile-day' review and editing surfaces focused
+NORTH_STAR_DOCUMENT_METRIC {"label":"mobile-day","theme":"day","width":391,"height":844,"review":{"viewportWidth":391,"scrollWidth":391,"nestedScrollCount":0,"drawerHeight":50},"editor":{"viewportWidth":391,"viewportHeight":844,"scrollWidth":391,"bodyOffset":194,"nestedScrollCount":0,"tooSmallTouchTargets":["a:지식 DB"],"interactionOverlaps":[],"layoutOverlaps":[],"sectionOverlaps":0,"sectionCount":7}}
+
+ ❯ tests/north-star-document-ux.test.ts (4 tests | 1 failed | 3 skipped) 58627ms
+     × keeps 'mobile-day' review and editing surfaces focused 16000ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/north-star-document-ux.test.ts > North Star document cockpit and editor UX > keeps 'mobile-day' review and editing surfaces focused
+AssertionError: expected [ 'a:지식 DB' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "a:지식 DB",
++ ]
+
+ ❯ tests/north-star-document-ux.test.ts:265:48
+    263|     expect(editorMetrics.nestedScrollCount).toBe(0);
+    264|     expect(editorMetrics.bodyOffset).toBeLessThanOrEqual(width === 391…
+    265|     expect(editorMetrics.tooSmallTouchTargets).toEqual([]);
+       |                                                ^
+    266|     expect(editorMetrics.interactionOverlaps).toEqual([]);
+    267|     expect(editorMetrics.layoutOverlaps).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 skipped (4)
+   Start at  22:03:46
+   Duration  63.41s (transform 436ms, setup 0ms, import 1.93s, tests 58.63s, environment 0ms)
+
+EXPLICIT_EXIT_CODE=1

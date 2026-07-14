@@ -1,76 +1,88 @@
-# North Star document UX 24h evaluation
+# North Star document UX remediation evaluation
 
 ## Verdict
 
-**PASS for branch review. HOLD for main integration.**
+**PASS for fresh branch review. HOLD for main integration.**
 
-The document review/editor UX is implemented and pushed as product commit
-`d9c8781410df37189d0312d870a52bcc58bf0c2f`. Its tree is
-`15b44ad46e604fcda1883bad4073a45c2e335546` and its sole parent is the requested
-authority `01ba1c924e5ab19803bdb86527fce9eccfc1ab60`.
+The remediation product is commit `9bda2882b2ae9f97be7357bf56ab2d21dce6d7e6`,
+tree `fb601e77cb693b8dfbdff6981e3904c3f4a82316`, with parent
+`98dfe7aee1fc397b40c2042a8c6ded4bb97133f9`. The original authority remains
+`01ba1c924e5ab19803bdb86527fce9eccfc1ab60` through the existing product series.
 
-No Share component, Share route, DB schema, migration, data, package, lockfile,
-or environment file changed. Main integration remains prohibited for this round.
+No Share component or route, DB schema, migration, data, package, lockfile, or
+environment file changed. Main integration remains on hold for independent review.
 
-## Product outcome
+## Remediation outcome
 
-- SafeGuard document review now has one collapsed summary, `근거 N건 · 확인 필요 M건`.
-- The duplicate preview provenance badge, right evidence rail, and numbered left-rail evidence copy are absent from the default review surface.
-- Review stages, DB harness state, source links, safety-action QA, work history, and supporting documents remain available.
-- Editor evidence, quality, lineage, and source appendices are owned by one provenance drawer.
-- The editable submission body is separated from read-only provenance appendices without deleting either from the canonical source string.
-- A `[제출 본문]` boundary promotes legacy drafts on first edit so user text remains present in XLSX/HWP rows.
-- All 12 documents have document-specific editor profiles. Bracketed body sections render as separate structured fields; raw-source mode remains available for full-document editing.
-- The mobile document header is compact, the field navigator has no internal scroll, body textareas do not own nested vertical scrolling, and the editor context disclosure follows the editor.
+- Structured edits no longer render stale schema payload values followed by a
+  separate manual-edit appendix. When `edited=true`, the route writes every edited
+  `section/item/content` row into the document's canonical schema sections.
+- The former 24-row slice and truncation notice are removed. Actual route and browser
+  downloads round-trip 27 edited rows, including row 26, in OOXML binary.
+- Work plan, permit, TBM briefing/log, and education exports retain their schema-first
+  section headings while stale structured values are omitted.
+- All 12 document profiles own at least three unique fallback sections. Actual sample
+  transmission and field-message bodies render four meaningful sections each; an
+  empty work permit renders four empty, editable permit sections.
+- Mobile interaction measurement opens the provenance drawer and audits visible
+  buttons, summaries, selects, links, inputs, checkboxes, and textareas. Pairwise
+  interaction and structural overlap checks include the editor header, body, drawer,
+  and product-owned fixed/sticky descendants.
+- The knowledge DB link now has a 44px minimum hit area. Cockpit compression,
+  provenance drawers, Day/Night behavior, and the raw-source fallback remain intact.
 
 ## TDD record
 
-1. RED: the structured-section test failed because the model did not exist (`exit 1`). GREEN: 12 profiles, provenance separation, offset-checked replacement, and legacy draft promotion pass `4/4`.
-2. RED: actual `/workspace` timed out waiting for the single provenance drawer (`exit 1`). GREEN: the 1440/391 Day/Night matrix passes `4/4`.
-3. RED: initial 391 Day metrics reported body offset `393`, apparent nested-scroll count `3`, and hidden controls as small targets. GREEN: visible-only measurement plus product compaction yields offsets `194/198`, nested scroll `0`, and small targets `0`.
-4. RED: a prepended structured edit remained under a meta heading and was omitted from export rows. GREEN: explicit submission-body promotion preserves the text in editor storage, XLSX rows, HWP rows, review remount, and regenerated-document replacement.
+1. XLSX RED: actual binary retained stale structured fields, added a `사용자 편집 반영`
+   appendix, and omitted row 26. GREEN: canonical replacement contains all 27 rows,
+   stale values and appendix label absent.
+2. Document schema RED: 12 empty profiles, actual transmission/message samples, and
+   empty permit collapsed to one body. GREEN: all 12 have unique fallback schemas;
+   the three required browser/parse cases render four sections.
+3. Mobile RED: expanded interaction audit found `a:지식 DB` below 44px. GREEN: small
+   targets `0`, interaction overlaps `0`, structural overlaps `0` in both mobile themes.
+4. Regression RED: existing TBM export expected canonical `TBM 기본정보` and
+   `안전대책` after editing. GREEN: document-specific schema headings remain while
+   stale payload values stay excluded.
+5. Browser harness RED: the first focused cases targeted controls hidden at the
+   opposite breakpoint. GREEN uses the visible mobile select and desktop tab without
+   weakening any content or geometry assertion.
 
-## Browser matrix
-
-Authoritative matrix: `1440x900` and exact `391x844`, Day and Night.
-
-| Row | Review width | Review nested scroll | Drawer | Editor offset | Editor nested scroll | Small touch targets | Overlaps | Sections |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| desktop-day | 1440/1440 | 0 | 50px | 73px | 0 | 0 | 0 | 7 |
-| desktop-night | 1440/1440 | 0 | 50px | 93px | 0 | 0 | 0 | 7 |
-| mobile-day | 391/391 | 0 | 50px | 194px | 0 | 0 | 0 | 7 |
-| mobile-night | 391/391 | 0 | 50px | 198px | 0 | 0 | 0 | 7 |
-
-The matrix finished `4/4`, explicit exit `0`, in `40.41s`. Exact values are in
-`browser-metrics.json`; four reviewed screenshots are under `screenshots/`.
+Raw RED and GREEN logs are retained under `remediation/`.
 
 ## Verification
 
-- Focused unit/static contract: `4 files`, `20/20`, exit `0`.
-- `/documents` browser regression: `20/20`, exit `0`, `180.73s`.
-- North Star browser matrix: `4/4`, exit `0`, `40.41s`.
-- Workspace document generation and edit-preservation cases: `2/2` passed in the combined run.
-- Workspace Night case: combined run had one setup timeout waiting for preview; the preserved failure log remains. Immediate isolated rerun passed `1/1`, exit `0`, `31.81s`.
+- Focused unit/route/static contracts: `5 files`, `33/33`, exit `0`.
+- Full `/documents` browser regression: `22/22`, exit `0`, `111.92s`.
+- North Star Day/Night geometry matrix: `4/4`, exit `0`, `35.25s`.
 - Strict TypeScript: `tsc --noEmit --incremental false`, exit `0`.
-- Production build: compiled, type checked, and generated static pages `27/27`, exit `0`.
-- `next lint`: not executable non-interactively because this repository has no ESLint configuration and opens the setup prompt. It exited `1`; no configuration/package change was made.
-- `git diff --check`: clean.
-- Final worktree-owned Node/Next/Vitest process count before commit: `0`.
+- Production build bound to the product SHA/tree: compiled, type checked, static pages
+  `27/27`, exit `0`.
+- `git diff --check` for the product commit: exit `0`, no output.
+- `build.log` trailing-whitespace lines: `0`.
+- Product-file diff after commit: `0`; Share diff: `0`.
+- Final worktree-owned Node/Next/Vitest process count at audit: `0`.
 
-## Evidence files
+## Browser geometry
 
-- `browser.log` and `browser-metrics.json`
-- `documents-editor-regression.log`
-- `workspace-document-regression.log` and `workspace-night-isolated.log`
-- `unit.log`, `typecheck.log`, `lint.log`, and `build.log`
-- `artifact-hashes.json` with SHA-256 and byte size for product/evidence files
-- `screenshots/desktop-day-editor.png`
-- `screenshots/desktop-night-editor.png`
-- `screenshots/mobile-day-editor.png`
-- `screenshots/mobile-night-editor.png`
+| Row | Width | Nested scroll | Editor offset | Small targets | Interaction overlap | Layout overlap |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| desktop-day | 1440/1440 | 0 | 73px | 0 | 0 | 0 |
+| desktop-night | 1440/1440 | 0 | 93px | 0 | 0 | 0 |
+| mobile-day | 391/391 | 0 | 194px | 0 | 0 | 0 |
+| mobile-night | 391/391 | 0 | 198px | 0 | 0 | 0 |
 
-## Adoption hold
+All rows retain drawer height `50px` and section overlap count `0`. Exact values are
+in `browser-metrics.json`; reviewed Day/Night screenshots remain under `screenshots/`.
 
-This branch is deliberately not merged. A reviewer should verify the single-drawer
-information hierarchy, the `[제출 본문]` export boundary, and the document-profile
-section labels before any selective adoption into main.
+## Evidence
+
+- `remediation/red-*.log` and matching GREEN logs
+- `remediation/focused-unit-green.log`
+- `remediation/documents-browser.log`
+- `remediation/browser-matrix.log`
+- `remediation/typecheck.log`
+- `remediation/build.log`
+- `remediation/source-audit.json`
+- `browser-metrics.json` and four Day/Night screenshots
+- `artifact-hashes.json` with SHA-256 and byte size
