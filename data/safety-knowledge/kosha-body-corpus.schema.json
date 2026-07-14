@@ -589,6 +589,8 @@
         "schema_version",
         "source_snapshot_id",
         "official_metadata_sha256",
+        "trusted_metadata_registry_sha256",
+        "generator_source_sha256",
         "selection",
         "required_provenance"
       ],
@@ -601,6 +603,8 @@
             { "type": "null" }
           ]
         },
+        "trusted_metadata_registry_sha256": { "$ref": "#/$defs/sha256" },
+        "generator_source_sha256": { "$ref": "#/$defs/sha256" },
         "selection": { "const": "technical-support-regulation+current-unverified+success+native" },
         "required_provenance": {
           "type": "array",

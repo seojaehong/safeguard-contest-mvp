@@ -18,6 +18,7 @@ import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import {
   cleanupKoshaFixtures,
   createKoshaFixture,
+  koshaTestLookup,
   withNoSupabase
 } from "@/tests/helpers/kosha-offline-fixture";
 
@@ -115,7 +116,7 @@ describe("KOSHA offline harness expanded regressions", () => {
     const result = await withNoSupabase(() => searchSafetyReferences({
       query: "지게차 보행자 동선 충돌",
       limit: 2,
-      offlineCorpus: { rootDir }
+      offlineCorpus: koshaTestLookup(rootDir)
     }));
     const local = result.items.find((item) => item.kosha_guide);
     expect(local?.evidence_role).toBe("supporting");
@@ -124,7 +125,7 @@ describe("KOSHA offline harness expanded regressions", () => {
       query: "지게차 보행자 동선 충돌",
       evidenceRole: "direct",
       limit: 2,
-      offlineCorpus: { rootDir }
+      offlineCorpus: koshaTestLookup(rootDir)
     }));
     expect(directOnly.items.some((item) => item.kosha_guide)).toBe(false);
 
@@ -138,13 +139,13 @@ describe("KOSHA offline harness expanded regressions", () => {
       query: "지게차",
       itemType: "sif-case",
       limit: 1,
-      offlineCorpus: { rootDir }
+      offlineCorpus: koshaTestLookup(rootDir)
     }));
     const regulation = await withNoSupabase(() => searchSafetyReferences({
       query: "지게차",
       itemType: "technical-support-regulation",
       limit: 1,
-      offlineCorpus: { rootDir }
+      offlineCorpus: koshaTestLookup(rootDir)
     }));
     expect(sif.items).toEqual([]);
     expect(regulation.items).toHaveLength(1);
@@ -179,16 +180,13 @@ describe("KOSHA offline harness expanded regressions", () => {
   it("rejects a JSONL stream that grows beyond 48 MiB after opening", async () => {
     const rootDir = createKoshaFixture();
     let appended = false;
-    const loaded = await loadKoshaGuideCorpus({
-      rootDir,
-      testHooks: {
+    const loaded = await loadKoshaGuideCorpus(koshaTestLookup(rootDir, {
         afterStreamChunk(path) {
           if (!path.endsWith("items.jsonl") || appended) return;
           appended = true;
           appendFileSync(path, Buffer.alloc(48 * 1024 * 1024));
         }
-      }
-    });
+    }));
     expect(appended).toBe(true);
     expect(loaded.status).toBe("blocked");
     expect(loaded.status === "blocked" && loaded.failures).toContain("limit:file:items.jsonl");

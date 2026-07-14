@@ -1,12 +1,16 @@
-[python-focused]
-test_complete_matching_official_metadata_creates_launch_ready_subset (scripts.tests.test_build_kosha_verified_subset.BuildKoshaVerifiedSubsetTests.test_complete_matching_official_metadata_creates_launch_ready_subset) ... ok
+[command] python -m unittest -v scripts.tests.test_build_kosha_verified_subset
+test_existing_snapshot_is_never_overwritten_when_bytes_differ (scripts.tests.test_build_kosha_verified_subset.BuildKoshaVerifiedSubsetTests.test_existing_snapshot_is_never_overwritten_when_bytes_differ) ... ok
+test_explicit_test_only_trust_registry_can_exercise_ready_path (scripts.tests.test_build_kosha_verified_subset.BuildKoshaVerifiedSubsetTests.test_explicit_test_only_trust_registry_can_exercise_ready_path) ... ok
 test_missing_official_metadata_writes_only_reject_ledger (scripts.tests.test_build_kosha_verified_subset.BuildKoshaVerifiedSubsetTests.test_missing_official_metadata_writes_only_reject_ledger) ... ok
+test_rejects_one_row_source_that_bypasses_the_pinned_fixed_v1_scope (scripts.tests.test_build_kosha_verified_subset.BuildKoshaVerifiedSubsetTests.test_rejects_one_row_source_that_bypasses_the_pinned_fixed_v1_scope) ... ok
+test_snapshot_identity_changes_with_generator_or_policy (scripts.tests.test_build_kosha_verified_subset.BuildKoshaVerifiedSubsetTests.test_snapshot_identity_changes_with_generator_or_policy) ... ok
+test_untrusted_caller_metadata_cannot_create_launch_ready_subset (scripts.tests.test_build_kosha_verified_subset.BuildKoshaVerifiedSubsetTests.test_untrusted_caller_metadata_cannot_create_launch_ready_subset) ... ok
 
 ----------------------------------------------------------------------
-Ran 2 tests in 0.082s
+Ran 6 tests in 0.430s
 
 OK
-[vitest-kosha]
+[command] npm.cmd test -- --run tests/kosha-current-review-lifecycle.test.ts tests/kosha-current-review-photo-storage.test.ts tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-run-ask.test.ts tests/kosha-grounding-fail-closed.test.ts tests/kosha-guide-corpus-audit.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/kosha-verified-subset-gate.test.ts
 
 > safeclaw@0.1.0 test
 > vitest run --run tests/kosha-current-review-lifecycle.test.ts tests/kosha-current-review-photo-storage.test.ts tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-run-ask.test.ts tests/kosha-grounding-fail-closed.test.ts tests/kosha-guide-corpus-audit.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/kosha-verified-subset-gate.test.ts
@@ -16,16 +20,16 @@ OK
 
 
  Test Files  11 passed (11)
-      Tests  194 passed (194)
-   Start at  23:55:35
-   Duration  41.65s (transform 7.10s, setup 0ms, import 13.17s, tests 64.49s, environment 1ms)
+      Tests  196 passed (196)
+   Start at  00:19:11
+   Duration  34.66s (transform 7.56s, setup 0ms, import 13.18s, tests 52.35s, environment 1ms)
 
-[typecheck]
+[command] npm.cmd run typecheck
 
 > safeclaw@0.1.0 typecheck
 > tsc --noEmit --incremental false
 
-[build]
+[command] npm.cmd run build
 
 > safeclaw@0.1.0 build
 > next build
@@ -33,7 +37,7 @@ OK
    ▲ Next.js 15.5.20
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 9.6s
+ ✓ Compiled successfully in 7.5s
    Linting and checking validity of types ...
    Collecting page data ...
    Generating static pages (0/28) ...

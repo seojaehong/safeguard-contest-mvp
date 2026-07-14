@@ -10,7 +10,8 @@ import {
 import {
   ACTUAL_KOSHA_ROOT,
   cleanupKoshaFixtures,
-  createKoshaFixture
+  createKoshaFixture,
+  koshaTestLookup
 } from "@/tests/helpers/kosha-offline-fixture";
 
 afterEach(() => {
@@ -27,7 +28,7 @@ describe("current-base KOSHA lifecycle quality", () => {
 
   it("accepts valid current records while stale and retired remain review-required", async () => {
     for (const lifecycle of ["current", "stale", "retired"] as const) {
-      const loaded = await loadKoshaGuideCorpus({ rootDir: createKoshaFixture({ state: lifecycle }) });
+      const loaded = await loadKoshaGuideCorpus(koshaTestLookup(createKoshaFixture({ state: lifecycle })));
       if (lifecycle !== "current") {
         expect(loaded.status).toBe("blocked");
         expect(loaded.status === "blocked" && loaded.failures).toContain("gate:provenance-incomplete");
