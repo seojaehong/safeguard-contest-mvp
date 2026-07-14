@@ -1,0 +1,230 @@
+{
+  "sourceSha": "920c7f360688352156de4854b4957a9f2f1f0e43",
+  "generatedAt": "2026-07-14",
+  "documentCount": 12,
+  "structuredEditorCount": 0,
+  "sharedTextareaCount": 12,
+  "documentSpecificRenderCount": 7,
+  "documentKeys": [
+    "workpackSummaryDraft",
+    "riskAssessmentDraft",
+    "workPlanDraft",
+    "workPermitDraft",
+    "tbmBriefing",
+    "tbmLogDraft",
+    "safetyEducationRecordDraft",
+    "emergencyResponseDraft",
+    "photoEvidenceDraft",
+    "foreignWorkerBriefing",
+    "foreignWorkerTransmission",
+    "kakaoMessage"
+  ],
+  "launchBlockers": [
+    {
+      "id": "core-3-structured-editor-gap",
+      "summary": "Core 3 documents can render/export structured data, but the edit UI is still one shared textarea.",
+      "fixScope": "no-db",
+      "evidence": [
+        "components/WorkpackEditor.tsx:2638",
+        "components/WorkpackEditor.tsx:2298",
+        "app/api/export/xlsx/route.ts:170",
+        "lib/xlsx-builder.ts:961",
+        "lib/xlsx-builder.ts:1020"
+      ]
+    },
+    {
+      "id": "photo-profile-generic-render",
+      "summary": "photoEvidenceDraft has a photo profile token but no dedicated photo section renderer in the safety form path.",
+      "fixScope": "no-db",
+      "evidence": [
+        "components/WorkpackEditor.tsx:616",
+        "components/WorkpackEditor.tsx:1092"
+      ]
+    },
+    {
+      "id": "editable-body-provenance-copy",
+      "summary": "Evidence/rubric/graph are separate from the editable body, but user-facing export copy needs a clearer editable-body versus provenance boundary.",
+      "fixScope": "no-db",
+      "evidence": [
+        "components/WorkpackEditor.tsx:2650",
+        "components/WorkpackEditor.tsx:2835",
+        "components/WorkpackEditor.tsx:1133"
+      ]
+    }
+  ],
+  "noDbCandidate": [
+    {
+      "id": "core-3-structured-shell",
+      "summary": "Add structured edit affordances for riskAssessmentDraft, tbmBriefing, and tbmLogDraft using existing risk rows and TBM structured DTOs, then serialize back to current deliverables.",
+      "files": [
+        "components/WorkpackEditor.tsx",
+        "components/WorkpackEditor.module.css",
+        "tests/documents-editor-layout.test.ts",
+        "tests/xlsx-export-route.test.ts",
+        "tests/editor-export-integrity.test.ts"
+      ],
+      "evidence": [
+        "components/WorkpackEditor.tsx:237",
+        "lib/types.ts:135",
+        "lib/types.ts:582",
+        "lib/types.ts:613"
+      ]
+    },
+    {
+      "id": "truthful-format-copy",
+      "summary": "Keep HWPX/PDF/XLS limitations explicit in the editor and export panel without changing persistence.",
+      "files": [
+        "components/WorkpackEditor.tsx"
+      ],
+      "evidence": [
+        "components/WorkpackEditor.tsx:141",
+        "components/WorkpackEditor.tsx:527",
+        "components/WorkpackEditor.tsx:2867",
+        "components/WorkpackEditor.tsx:2962"
+      ]
+    },
+    {
+      "id": "photo-section-renderer-or-copy",
+      "summary": "Either add a small photo evidence section renderer or make the generic evidence-notes limitation explicit.",
+      "files": [
+        "components/WorkpackEditor.tsx",
+        "tests/documents-editor-layout.test.ts"
+      ],
+      "evidence": [
+        "components/WorkpackEditor.tsx:616",
+        "components/WorkpackEditor.tsx:1092"
+      ]
+    }
+  ],
+  "approvalBlocked": [
+    {
+      "id": "server-share-nonce-binding",
+      "summary": "Server nonce, binding, idempotency, and dispatch authority require explicit approval and are outside this audit slice.",
+      "evidence": [
+        "evaluation/workpack-share-v2-2026-07-13/spec.md:300",
+        "evaluation/workpack-share-v2-2026-07-13/spec.md:303"
+      ]
+    },
+    {
+      "id": "rls-production-policy-work",
+      "summary": "RLS hardening and production policy changes are approval-blocked server/DB work.",
+      "evidence": [
+        "evaluation/workspace-production-hotfix-verification-2026-07-13/report.md:49",
+        "evaluation/workpack-share-v2-2026-07-13/spec.md:217"
+      ]
+    },
+    {
+      "id": "localization-envelope-persistence",
+      "summary": "Reviewed localization envelope persistence/signature rotation is server authority work, not a client editor patch.",
+      "evidence": [
+        "evaluation/workpack-share-v2-2026-07-13/spec.md:425",
+        "evaluation/workpack-share-v2-2026-07-13/spec.md:440"
+      ]
+    },
+    {
+      "id": "template-version-storage",
+      "summary": "Customer template mapping, versioning, and one-to-one cell persistence would need approved schema/storage decisions.",
+      "evidence": [
+        "components/WorkpackEditor.tsx:2928",
+        "components/WorkpackEditor.tsx:2947"
+      ]
+    }
+  ],
+  "phaseB": [
+    {
+      "id": "all-12-structured-editors",
+      "summary": "Expand structured field/table editing to all 12 document keys.",
+      "evidence": [
+        "components/WorkpackEditor.tsx:19",
+        "components/WorkpackEditor.tsx:2638"
+      ]
+    },
+    {
+      "id": "customer-template-one-to-one",
+      "summary": "Reviewed customer XLSX/HWPX template upload, cell mapping, and parity QA.",
+      "evidence": [
+        "components/WorkpackEditor.tsx:2928",
+        "components/WorkpackEditor.tsx:2947"
+      ]
+    },
+    {
+      "id": "photo-evidence-attachments",
+      "summary": "Structured before/after photo evidence table with OCR-bound cells and attachment lifecycle.",
+      "evidence": [
+        "components/WorkpackEditor.tsx:208",
+        "components/WorkpackEditor.tsx:616"
+      ]
+    },
+    {
+      "id": "pdf-binary-parity",
+      "summary": "Full binary PDF parity checks across document-specific layouts.",
+      "evidence": [
+        "app/api/export/pdf/route.ts:50",
+        "app/api/export/pdf/route.ts:1130"
+      ]
+    },
+    {
+      "id": "reviewed-localized-worker-editor",
+      "summary": "Worker-facing multi-language editor integrated with reviewed localization envelopes.",
+      "evidence": [
+        "evaluation/workpack-share-v2-2026-07-13/spec.md:425",
+        "evaluation/workpack-share-v2-2026-07-13/spec.md:791"
+      ]
+    }
+  ],
+  "evidencePaths": [
+    "components/WorkpackEditor.tsx:19",
+    "components/WorkpackEditor.tsx:158",
+    "components/WorkpackEditor.tsx:540",
+    "components/WorkpackEditor.tsx:1092",
+    "components/WorkpackEditor.tsx:1269",
+    "components/WorkpackEditor.tsx:1915",
+    "components/WorkpackEditor.tsx:2070",
+    "components/WorkpackEditor.tsx:2165",
+    "components/WorkpackEditor.tsx:2298",
+    "components/WorkpackEditor.tsx:2503",
+    "components/WorkpackEditor.tsx:2638",
+    "components/WorkpackEditor.tsx:2857",
+    "components/FieldOperationsWorkspace.tsx:1024",
+    "components/FieldOperationsWorkspace.tsx:1085",
+    "components/FieldOperationsWorkspace.tsx:1210",
+    "components/SafeGuardCommandCenter.tsx:200",
+    "components/SafeGuardCommandCenter.tsx:216",
+    "components/SafeGuardCommandCenter.tsx:1106",
+    "components/SafeGuardCommandCenter.tsx:1140",
+    "components/SafeGuardCommandCenter.tsx:2281",
+    "app/api/export/xlsx/route.ts:170",
+    "app/api/export/hwp/route.ts:208",
+    "app/api/export/pdf/route.ts:50",
+    "app/api/workpacks/[id]/share-sessions/route.ts:83",
+    "app/api/workpacks/[id]/share-sessions/route.ts:93",
+    "lib/types.ts:135",
+    "lib/types.ts:238",
+    "lib/types.ts:582",
+    "lib/workpack-readiness.ts:49",
+    "lib/workpack-readiness.ts:71",
+    "lib/xlsx-builder.ts:468",
+    "lib/xlsx-builder.ts:961",
+    "lib/xlsx-builder.ts:1020",
+    "lib/xlsx-builder.ts:1252",
+    "tests/editor-export-integrity.test.ts:33",
+    "tests/xlsx-export-route.test.ts:103",
+    "tests/documents-editor-layout.test.ts:292",
+    "tests/documents-editor-layout.test.ts:687",
+    "evaluation/ui-ux-browser-check-2026-07-08/report.md:22",
+    "evaluation/ui-ux-browser-check-2026-07-08/report.md:79",
+    "evaluation/workpack-share-v2-2026-07-13/spec.md:47",
+    "evaluation/workpack-share-v2-2026-07-13/spec.md:217"
+  ],
+  "verification": {
+    "gitHeadChecked": true,
+    "rgAuditOnly": true,
+    "testsRun": [],
+    "browserRun": false,
+    "buildRun": false,
+    "notes": [
+      "git fetch origin completed.",
+      "git pull --rebase had no upstream for the audit branch, so the exact requested source SHA was not rebased away."
+    ]
+  }
+}
