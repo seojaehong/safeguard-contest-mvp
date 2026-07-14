@@ -2236,7 +2236,7 @@ export function SafeGuardCommandCenter({
                   <button
                     type="button"
                     className="button command-primary document-next-button workbench-primary-action workbench-disabled-state"
-                    disabled={!data || !workpackReadiness?.canShare}
+                    disabled={!data}
                     onClick={() => moveToWorkspacePage("share")}
                   >
                     공유 단계로 이동

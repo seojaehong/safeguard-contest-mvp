@@ -13,6 +13,7 @@
 - Delivery notes and storage/history details are collapsed by default.
 - The default surface keeps one primary send action.
 - Worker management remains owned by `/workers`; Share only links to target selection.
+- A generated workpack may open the Share screen even when readiness needs work; the real send action remains fail-closed.
 
 ## Verification
 
