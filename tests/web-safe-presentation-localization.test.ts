@@ -88,6 +88,9 @@ describe("web-safe presentation localization", () => {
     expect(formatDryrunQualityNote("All document dry-run cases returned output, but quality may still be generic.")).toBe(
       "모든 문서 생성 점검이 응답을 반환했지만, 내용은 추가 검토가 필요합니다."
     );
+    expect(formatDryrunQualityNote("One or more document dry-run cases failed or returned weak output.")).toBe(
+      "문서 생성 점검 중 실패했거나 응답이 부족한 사례가 있습니다."
+    );
     expect(formatDryrunQualityNote(null)).toBe("최근 점검 결과가 없습니다.");
 
     for (const value of [{}, 7, [], ["quality"]]) {

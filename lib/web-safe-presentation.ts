@@ -277,7 +277,9 @@ const DISPATCH_LANGUAGE_LABELS: LabelMap = {
 
 const DRYRUN_QUALITY_NOTE_LABELS: LabelMap = {
   "All document dry-run cases returned output, but quality may still be generic.":
-    "모든 문서 생성 점검이 응답을 반환했지만, 내용은 추가 검토가 필요합니다."
+    "모든 문서 생성 점검이 응답을 반환했지만, 내용은 추가 검토가 필요합니다.",
+  "One or more document dry-run cases failed or returned weak output.":
+    "문서 생성 점검 중 실패했거나 응답이 부족한 사례가 있습니다."
 };
 
 const PHOTO_FILE_VALIDATION_MODE_LABELS: LabelMap = {
