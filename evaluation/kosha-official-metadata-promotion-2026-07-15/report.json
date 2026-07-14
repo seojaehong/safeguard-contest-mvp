@@ -4,12 +4,59 @@
     "failure-ledger-not-empty"
   ],
   "candidate_count": 234,
-  "elapsed_seconds": 92.016,
+  "category_reconciliations": [
+    {
+      "category": "A",
+      "duplicate_count": 0,
+      "expected_total_count": 115,
+      "matches_total_count": true,
+      "normalized_row_count": 115,
+      "raw_row_count": 115,
+      "unique_row_count": 115
+    },
+    {
+      "category": "B",
+      "duplicate_count": 0,
+      "expected_total_count": 233,
+      "matches_total_count": true,
+      "normalized_row_count": 233,
+      "raw_row_count": 233,
+      "unique_row_count": 233
+    },
+    {
+      "category": "C",
+      "duplicate_count": 0,
+      "expected_total_count": 234,
+      "matches_total_count": true,
+      "normalized_row_count": 234,
+      "raw_row_count": 234,
+      "unique_row_count": 234
+    },
+    {
+      "category": "D",
+      "duplicate_count": 0,
+      "expected_total_count": 76,
+      "matches_total_count": true,
+      "normalized_row_count": 76,
+      "raw_row_count": 76,
+      "unique_row_count": 76
+    },
+    {
+      "category": "E",
+      "duplicate_count": 0,
+      "expected_total_count": 381,
+      "matches_total_count": true,
+      "normalized_row_count": 381,
+      "raw_row_count": 381,
+      "unique_row_count": 381
+    }
+  ],
+  "elapsed_seconds": 77.459,
   "failure_count": 22,
   "failure_counts": {
     "official-pdf-hash-mismatch": 22
   },
-  "generated_at": "2026-07-14T16:41:52.051681+00:00",
+  "generated_at": "2026-07-14T17:01:46.503053+00:00",
   "item_count": 234,
   "launch_ready": false,
   "official_metadata_sha256": null,
@@ -19,7 +66,7 @@
     "official-metadata.jsonl": "6edbf8b081c86a9d646f0128bc804e9822501120858a1cbe77010e5084da5d70"
   },
   "page_shard_count": 13,
-  "snapshot_id": "b13a4e39e045d7446cc4d2d597efbf82bb1d71f9c7815fa44ebf9f8b84f40a01",
+  "snapshot_id": "9180a236b91b820379cd2fa02b1942b8ea688c840d77f2be2de4c43c1ce4ede1",
   "source_snapshot_id": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
   "success_count": 212,
   "trusted_registry_populated": false,

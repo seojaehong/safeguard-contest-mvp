@@ -232,6 +232,60 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
             self.assertFalse(manifest["trusted_registry_populated"])
             self.assertEqual(manifest["network_policy"], {"timeout_seconds": 20.0, "retries": 1})
 
+    def test_fails_closed_when_non_empty_category_is_truncated_below_total_count(self) -> None:
+        pdf_bytes = b"official-pdf"
+        official_url = "https://portal.kosha.or.kr/openapi/v1/file/down/FILE-A/1"
+        pages = {1: {"result": "success", "payload": {
+            "totalCount": 2,
+            "list": [official_row("B-E-10-2026", "FILE-A", 1, "20260130")],
+        }}}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source"
+            output = root / "output"
+            source.mkdir()
+            write_source(source, [("B-E-10-2026", pdf_bytes, "본문")])
+
+            report = promote_kosha_official_metadata.run_promotion(
+                promote_kosha_official_metadata.PromotionConfig(
+                    source_root=source,
+                    output_root=output,
+                    categories=("B",),
+                    expected_candidate_count=1,
+                    expected_source_snapshot_id="1" * 64,
+                ),
+                FakeTransport(pages, {official_url: pdf_bytes}),
+            )
+
+            self.assertFalse(report["launch_ready"])
+            self.assertEqual(report["verified_count"], 1)
+            self.assertEqual(report["failure_counts"], {"official-category-count-mismatch": 1})
+            self.assertEqual(report["category_reconciliations"], [{
+                "category": "B",
+                "duplicate_count": 0,
+                "expected_total_count": 2,
+                "matches_total_count": False,
+                "normalized_row_count": 1,
+                "raw_row_count": 1,
+                "unique_row_count": 1,
+            }])
+            current = json.loads((output / "current.json").read_text(encoding="utf-8"))
+            failures_path = output / current["snapshot_path"] / "failures.jsonl"
+            failures = [
+                json.loads(line)
+                for line in failures_path.read_text(encoding="utf-8").splitlines()
+            ]
+            self.assertEqual(failures, [{
+                "category": "B",
+                "code": "official-category-count-mismatch",
+                "duplicate_count": 0,
+                "expected_total_count": 2,
+                "normalized_row_count": 1,
+                "raw_row_count": 1,
+                "unique_row_count": 1,
+            }])
+
     def test_reuses_canonical_page_shards_on_incremental_resume(self) -> None:
         pdf_bytes = b"official-pdf"
         url = "https://portal.kosha.or.kr/openapi/v1/file/down/FILE-A/1"
@@ -432,6 +486,8 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
                     downloads,
                 )
                 self.assertIn(expected_code, codes)
+                if label == "duplicate":
+                    self.assertIn("official-category-count-mismatch", codes)
 
     def test_url_transport_uses_twenty_second_timeout_and_one_retry(self) -> None:
         transport = promote_kosha_official_metadata.UrlLibTransport()
@@ -503,6 +559,11 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
         self.assertEqual(len(ledger), 212)
         self.assertEqual(len(failures), 22)
         self.assertEqual({row["code"] for row in failures}, {"official-pdf-hash-mismatch"})
+        reconciliations = manifest["identity"]["category_reconciliations"]
+        self.assertEqual([row["category"] for row in reconciliations], ["A", "B", "C", "D", "E"])
+        self.assertTrue(all(row["matches_total_count"] for row in reconciliations))
+        self.assertEqual(sum(row["expected_total_count"] for row in reconciliations), 1039)
+        self.assertEqual(sum(row["duplicate_count"] for row in reconciliations), 0)
         self.assertFalse(manifest["launch_ready"])
         self.assertFalse(manifest["trusted_registry_populated"])
         self.assertEqual(build_kosha_verified_subset.PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256, frozenset())

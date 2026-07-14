@@ -228,10 +228,11 @@ def fetch_cached_page(
 def collect_current_rows(
     config: PromotionConfig,
     transport: PromotionTransport,
-) -> tuple[list[JsonObject], list[JsonObject], list[JsonObject]]:
+) -> tuple[list[JsonObject], list[JsonObject], list[JsonObject], list[JsonObject]]:
     records: list[JsonObject] = []
     failures: list[JsonObject] = []
     page_shards: list[JsonObject] = []
+    category_reconciliations: list[JsonObject] = []
     for category in config.categories:
         try:
             first, first_shard = fetch_cached_page(config, transport, category, 1)
@@ -251,10 +252,15 @@ def collect_current_rows(
             continue
         total_count = payload.get("totalCount")
         try:
-            page_count = max(1, math.ceil(int(total_count) / config.rows_per_page))
+            expected_total_count = int(total_count)
+            if expected_total_count < 0:
+                raise ValueError("negative totalCount")
+            page_count = max(1, math.ceil(expected_total_count / config.rows_per_page))
         except (TypeError, ValueError):
             failures.append({"code": "official-total-invalid", "category": category, "page": 1})
             continue
+        raw_row_count = 0
+        category_records: list[JsonObject] = []
         for page in range(1, page_count + 1):
             try:
                 if page == 1:
@@ -273,17 +279,56 @@ def collect_current_rows(
                 continue
             page_payload = page_response.get("payload") if page_response.get("result") == "success" else None
             page_rows = page_payload.get("list") if isinstance(page_payload, dict) else None
+            page_total_count = page_payload.get("totalCount") if isinstance(page_payload, dict) else None
+            try:
+                page_total_matches = int(page_total_count) == expected_total_count
+            except (TypeError, ValueError):
+                page_total_matches = False
+            if not page_total_matches:
+                failures.append({
+                    "code": "official-page-total-mismatch",
+                    "category": category,
+                    "page": page,
+                    "expected_total_count": expected_total_count,
+                    "page_total_count": page_total_count,
+                })
             if not isinstance(page_rows, list) or not page_rows:
                 failures.append({"code": "official-page-empty", "category": category, "page": page})
                 continue
+            raw_row_count += len(page_rows)
             for row in page_rows:
                 normalized = normalize_official_row(row)
                 if normalized is None:
                     failures.append({"code": "official-row-invalid", "category": category, "page": page})
                 else:
+                    category_records.append(normalized)
                     records.append(normalized)
+        normalized_row_count = len(category_records)
+        unique_row_count = len({str(row["stable_key"]) for row in category_records})
+        duplicate_count = normalized_row_count - unique_row_count
+        matches_total_count = not (
+            raw_row_count != expected_total_count
+            or normalized_row_count != expected_total_count
+            or unique_row_count != expected_total_count
+        )
+        reconciliation = {
+            "category": category,
+            "expected_total_count": expected_total_count,
+            "raw_row_count": raw_row_count,
+            "normalized_row_count": normalized_row_count,
+            "unique_row_count": unique_row_count,
+            "duplicate_count": duplicate_count,
+            "matches_total_count": matches_total_count,
+        }
+        category_reconciliations.append(reconciliation)
+        if not matches_total_count:
+            failures.append({
+                "code": "official-category-count-mismatch",
+                **{key: value for key, value in reconciliation.items() if key != "matches_total_count"},
+            })
     page_shards.sort(key=lambda shard: (str(shard["category"]), int(shard["page"])))
-    return records, failures, page_shards
+    category_reconciliations.sort(key=lambda item: str(item["category"]))
+    return records, failures, page_shards, category_reconciliations
 
 
 def write_immutable_snapshot(snapshot_dir: Path, artifacts: dict[str, str]) -> None:
@@ -304,7 +349,10 @@ def run_promotion(config: PromotionConfig, transport: PromotionTransport) -> Jso
     failures: list[JsonObject] = []
     if len(source.candidates) != config.expected_candidate_count:
         raise PromotionError(f"candidate-count-mismatch:{len(source.candidates)}")
-    official_rows, collection_failures, page_shards = collect_current_rows(config, transport)
+    official_rows, collection_failures, page_shards, category_reconciliations = collect_current_rows(
+        config,
+        transport,
+    )
     failures.extend(collection_failures)
     official_by_key: dict[str, JsonObject] = {}
     for row in official_rows:
@@ -390,6 +438,7 @@ def run_promotion(config: PromotionConfig, transport: PromotionTransport) -> Jso
         },
         "official_collection_sha256": collection_hash,
         "page_shards": page_shards,
+        "category_reconciliations": category_reconciliations,
         "output_hashes": output_hashes,
     }
     snapshot_id = sha256_bytes(canonical_json(identity).encode("utf-8"))
@@ -456,6 +505,7 @@ def run_promotion(config: PromotionConfig, transport: PromotionTransport) -> Jso
         "failure_counts": failure_counts,
         "blockers": blockers,
         "page_shard_count": len(page_shards),
+        "category_reconciliations": category_reconciliations,
         "launch_ready": launch_ready,
         "trusted_registry_populated": False,
         "official_metadata_sha256": output_hashes["official-metadata.jsonl"] if launch_ready else None,
@@ -470,6 +520,11 @@ def run_promotion(config: PromotionConfig, transport: PromotionTransport) -> Jso
     failure_summary = ", ".join(
         f"{code}={count}" for code, count in sorted(failure_counts.items())
     ) or "none"
+    category_summary = ", ".join(
+        f"{item['category']}={item['unique_row_count']}/{item['expected_total_count']}"
+        f" duplicates={item['duplicate_count']}"
+        for item in category_reconciliations
+    ) or "none"
     markdown = (
         "# KOSHA Official Metadata Promotion\n\n"
         f"- Source snapshot: `{source.snapshot_id}`\n"
@@ -479,6 +534,7 @@ def run_promotion(config: PromotionConfig, transport: PromotionTransport) -> Jso
         f"- Verified: `{len(verified)}`\n"
         f"- Failures: `{len(failures)}`\n"
         f"- Failure codes: `{failure_summary}`\n"
+        f"- Category reconciliation: `{category_summary}`\n"
         f"- Page shards: `{len(page_shards)}`\n"
         f"- Launch ready: `{str(launch_ready).lower()}`\n"
         "- Trusted production registry populated: `false`\n"
@@ -496,6 +552,7 @@ def run_promotion(config: PromotionConfig, transport: PromotionTransport) -> Jso
         f"verified={len(verified)}",
         f"failures={len(failures)}",
         f"failure_counts={failure_summary}",
+        f"category_reconciliation={category_summary}",
         f"page_shards={len(page_shards)}",
         f"launch_ready={str(launch_ready).lower()}",
         "trusted_registry_populated=false",
