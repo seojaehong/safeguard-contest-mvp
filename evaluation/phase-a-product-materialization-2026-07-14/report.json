@@ -55,12 +55,53 @@
     "human_confirmation_required": true,
     "human_confirmation_status": "pending"
   },
+  "remediation": {
+    "plain_docpack_matcher": {
+      "canonical_tasks_tested": 3,
+      "registry_aliases_tested": [
+        "높은 곳 작업",
+        "차량계·기계 인접작업",
+        "전기작업"
+      ],
+      "claw_and_mcp_use_registry_matcher_input": true
+    },
+    "mcp_persistence_behavior": {
+      "actual_handler_invocation_tested": true,
+      "repository": "injectable_in_memory",
+      "exact_insert_and_tenant_read_tested": true,
+      "foreign_tenant_insert_and_read_blocked": true,
+      "hmac_reopen_verified": true,
+      "live_database_mutations": 0
+    }
+  },
   "verification": {
-    "focused_test_files": 10,
-    "focused_tests": 136,
-    "focused_tests_exit_code": 0,
+    "focused": {
+      "test_files_passed": 11,
+      "tests_passed": 147,
+      "exit_code": 0
+    },
     "typecheck_exit_code": 0,
-    "remaining_red_tests": 0
+    "full_suite": {
+      "exit_code": 1,
+      "test_files": {
+        "total": 143,
+        "passed": 134,
+        "failed": 4,
+        "skipped": 5
+      },
+      "tests": {
+        "total": 1435,
+        "passed": 1420,
+        "failed": 1,
+        "skipped": 14
+      },
+      "non_green_causes": [
+        "knowledge-page-layout.test.ts: Next dev timeout after corrupt webpack cache and missing .next/prerender-manifest.json",
+        "product-module-shell.test.ts: Next dev exited after corrupt webpack cache and missing .next/prerender-manifest.json",
+        "reports-download-center.test.ts: browser cleanup afterAll hook exceeded 10000ms",
+        "frontend-route-coverage.test.ts: committed browser evidence sourceIdentity does not match the current source identity"
+      ]
+    }
   },
   "constraints": {
     "share_authority_files_changed": 0,

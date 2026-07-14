@@ -23,7 +23,11 @@ import { fetchAccidentCases } from "@/lib/accident-cases";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { createLogger } from "@/lib/logger";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
-import { saveMcpDocpackWorkpack } from "@/lib/workpack-store";
+import {
+  createSupabaseMcpWorkpackRepository,
+  saveMcpDocpackWorkpack,
+} from "@/lib/workpack-store";
+import { createGenerateSafetyDocpackHandler } from "@/lib/mcp-docpack-handler";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "@/lib/sif-embedding-corpus";
@@ -39,7 +43,6 @@ import {
 import { registerScopedTool } from "@/lib/mcp-scoped-tool";
 import {
   buildAccidentCasesResult,
-  buildDocpackResult,
   buildEvidenceMappingResult,
   buildHarnessAgentResult,
   buildReviewedDocpackResult,
@@ -55,6 +58,17 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300; // docpack full 생성 ~150초
 
 const log = createLogger("mcp-route");
+
+const generateSafetyDocpackHandler = createGenerateSafetyDocpackHandler({
+  defaultMode: "full",
+  generateResponse: (question, mode) => runAsk(question, { aiMode: mode }),
+  queryKnowledge: querySafetyKnowledge,
+  getWorkpackRepository: () => {
+    const client = createSupabaseAdminClient();
+    return client ? createSupabaseMcpWorkpackRepository(client) : null;
+  },
+  getGenerationEvidenceSecret: () => process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+});
 
 type SupabaseAdminClient = NonNullable<ReturnType<typeof createSupabaseAdminClient>>;
 
@@ -286,11 +300,12 @@ function registerTools(server: McpServer): void {
       },
     },
     async ({ question, task, mode, includeFull }, authContext) => {
-        const reviewTask = resolveReviewTaskLabel(task, question);
         const [generatedResponse, knowledge] = await Promise.all([
           runAsk(question, { aiMode: mode ?? "full" }),
-          querySafetyKnowledge(reviewTask),
+          querySafetyKnowledge(task),
         ]);
+        const reviewTask = knowledge.phaseAProduct?.task.label
+          ?? resolveReviewTaskLabel(task, question);
         const response = knowledge.found && knowledge.phaseAProduct
           ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
               generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
@@ -346,42 +361,7 @@ function registerTools(server: McpServer): void {
           .describe("각 문서 전체 본문 포함 여부 (기본 false — 프리뷰만)"),
       },
     },
-    async ({ question, mode, includeFull }, authContext) => {
-        const reviewTask = resolveReviewTaskLabel("", question);
-        const [generatedResponse, knowledge] = await Promise.all([
-          runAsk(question, { aiMode: mode ?? "full" }),
-          reviewTask ? querySafetyKnowledge(reviewTask) : Promise.resolve(null),
-        ]);
-        const response = knowledge?.found && knowledge.phaseAProduct
-          ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
-              generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
-            })
-          : generatedResponse;
-        const result = buildDocpackResult(response, includeFull ?? false) as Record<string, unknown>;
-
-        // 테넌트 귀속: 토큰에 siteId가 있으면 결과 workpack을 해당 사이트로 저장 시도하고,
-        // 저장 성패와 무관하게 site_id/org_id를 결과 meta에 기록한다(스펙 ① 폴백).
-        if (authContext?.siteId) {
-          const client = createSupabaseAdminClient();
-          if (client) {
-            const attribution = await saveMcpDocpackWorkpack(
-              client,
-              { siteId: authContext.siteId, orgId: authContext.orgId },
-              response
-            );
-            result.attribution = attribution;
-          } else {
-            result.attribution = {
-              siteId: authContext.siteId,
-              orgId: authContext.orgId,
-              workpackId: null,
-              saved: false,
-            };
-          }
-        }
-
-        return toToolResult(result);
-    }
+    generateSafetyDocpackHandler
   );
 
   registerScopedTool(server,

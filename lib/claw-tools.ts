@@ -105,13 +105,15 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
     }
     case "generate_reviewed_safety_docpack": {
       const question = asString(input, "question");
-      const task = resolveReviewTaskLabel(asString(input, "task"), question);
+      const requestedTask = asString(input, "task");
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
       const [generatedResponse, knowledge] = await Promise.all([
         runAsk(question, { aiMode: mode }),
-        querySafetyKnowledge(task),
+        querySafetyKnowledge(requestedTask),
       ]);
+      const task = knowledge.phaseAProduct?.task.label
+        ?? resolveReviewTaskLabel(requestedTask, question);
       const response = knowledge.found && knowledge.phaseAProduct
         ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
             generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
@@ -124,12 +126,11 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
       const question = asString(input, "question");
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
-      const task = resolveReviewTaskLabel("", question);
       const [generatedResponse, knowledge] = await Promise.all([
         runAsk(question, { aiMode: mode }),
-        task ? querySafetyKnowledge(task) : Promise.resolve(null),
+        querySafetyKnowledge(question),
       ]);
-      const response = knowledge?.found && knowledge.phaseAProduct
+      const response = knowledge.found && knowledge.phaseAProduct
         ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
             generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
           })

@@ -107,18 +107,18 @@ describe("Claw Phase A product handlers", () => {
     });
   });
 
-  test("infers the canonical Task for the plain docpack product path", async () => {
-    mocks.querySafetyKnowledge.mockResolvedValue(
-      buildPublishedSafetyKnowledge(publishedGraph, "전기 작업"),
+  test("materializes an electrical registry alias through the plain docpack product path", async () => {
+    mocks.querySafetyKnowledge.mockImplementation(async (query: string) =>
+      buildPublishedSafetyKnowledge(publishedGraph, query),
     );
 
     const result = await executeClawTool("generate_safety_docpack", {
-      question: "수전설비 감전 위험이 있는 전기 작업",
+      question: "전기작업",
       mode: "template",
       includeFull: true,
     });
 
-    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith("전기 작업");
+    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith("전기작업");
     expect(result).toMatchObject({
       phaseAProduct: {
         chainId: "electrical-work-electrocution",
@@ -136,8 +136,45 @@ describe("Claw Phase A product handlers", () => {
     });
   });
 
+  test.each([
+    { task: "고소작업", chainId: "work-at-height-fall" },
+    { task: "높은 곳 작업", chainId: "work-at-height-fall" },
+    { task: "지게차 상하차", chainId: "vehicle-machinery-entrapment" },
+    { task: "차량계·기계 인접작업", chainId: "vehicle-machinery-entrapment" },
+    { task: "전기 작업", chainId: "electrical-work-electrocution" },
+  ])("materializes canonical and registry alias task '$task' through the same matcher path", async ({
+    task,
+    chainId,
+  }) => {
+    mocks.querySafetyKnowledge.mockImplementation(async (query: string) =>
+      buildPublishedSafetyKnowledge(publishedGraph, query),
+    );
+
+    const result = await executeClawTool("generate_safety_docpack", {
+      question: task,
+      mode: "template",
+      includeFull: true,
+    });
+
+    expect(mocks.querySafetyKnowledge).toHaveBeenCalledTimes(1);
+    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith(task);
+    expect(result).toMatchObject({
+      phaseAProduct: {
+        chainId,
+        authorityState: "review_required",
+        humanConfirmation: { required: true, status: "pending" },
+      },
+      documents: {
+        riskAssessmentDraft: expect.stringContaining(`${chainId}:risk-assessment:`),
+        tbmBriefing: expect.stringContaining(`${chainId}:tbm:`),
+      },
+    });
+  });
+
   test("preserves plain docpack generation outside the registered Phase A chains", async () => {
-    mocks.querySafetyKnowledge.mockRejectedValue(new Error("ontology unavailable"));
+    mocks.querySafetyKnowledge.mockImplementation(async (query: string) =>
+      buildPublishedSafetyKnowledge(publishedGraph, query),
+    );
 
     const result = await executeClawTool("generate_safety_docpack", {
       question: "일반 정리 작업 문서팩",
@@ -145,7 +182,7 @@ describe("Claw Phase A product handlers", () => {
       includeFull: true,
     });
 
-    expect(mocks.querySafetyKnowledge).not.toHaveBeenCalled();
+    expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith("일반 정리 작업 문서팩");
     expect(result).toMatchObject({
       documents: {
         riskAssessmentDraft: expect.any(String),
