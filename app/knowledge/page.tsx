@@ -1,6 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
+import {
+  KNOWLEDGE_AUTHORITY_LANES,
+  KNOWLEDGE_PROMOTION_STAGES
+} from "@/lib/knowledge-governance";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 import styles from "./KnowledgePage.module.css";
 
@@ -163,14 +167,85 @@ export default async function KnowledgePage() {
           </article>
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>Runtime Knowledge</span>
-            <h2>근거 매칭 · 원본 누적 · AI 보완</h2>
-            <p>현장 API 호출 결과는 원본 이벤트로 검증되고, 로그인 시 Supabase 지식 테이블에 누적됩니다.</p>
+            <h2>원본 이벤트 · 후보 · 사람 검토</h2>
+            <p>AI 출력은 미게시 후보로 분리하고, 사람이 검토한 published ontology만 확정 지식으로 사용합니다.</p>
           </article>
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>Knowledge Catalog</span>
             <h2>{stats.items.toLocaleString("ko-KR")}개 항목 · {stats.sources.toLocaleString("ko-KR")}개 출처</h2>
             <p>{stats.message}</p>
           </article>
+        </section>
+
+        <section
+          className={`${styles.section} ${styles.governanceSection}`}
+          aria-labelledby="knowledge-governance-heading"
+          data-knowledge-governance-flow="true"
+        >
+          <header className={styles.sectionHeader}>
+            <div>
+              <span className={styles.kicker}>Promotion Contract</span>
+              <h2 id="knowledge-governance-heading">지식 승격 흐름</h2>
+            </div>
+            <p>
+              knowledge_events의 원본성과 출처를 유지한 채 후보, 사람 검토, published ontology를
+              서로 다른 상태로 관리합니다.
+            </p>
+          </header>
+
+          <ol className={styles.promotionFlow} aria-label="지식 승격 네 단계">
+            {KNOWLEDGE_PROMOTION_STAGES.map((stage) => (
+              <li key={stage.id} className={styles.promotionStage} data-knowledge-stage={stage.id}>
+                <div className={styles.stageHeading}>
+                  <span className={styles.stageSequence}>{stage.sequence}</span>
+                  <span className={styles.stageState}>{stage.stateLabel}</span>
+                </div>
+                <h3>{stage.label}</h3>
+                <p>{stage.detail}</p>
+                <dl className={styles.stageMeta}>
+                  <div>
+                    <dt>소유</dt>
+                    <dd>{stage.ownerLabel}</dd>
+                  </div>
+                  <div>
+                    <dt>다음 상태</dt>
+                    <dd>{stage.nextStage || "최종 읽기 범위"}</dd>
+                  </div>
+                </dl>
+              </li>
+            ))}
+          </ol>
+
+          <div className={styles.authorityMap} data-knowledge-authority-map="true">
+            <header className={styles.authorityMapHeader}>
+              <span className={styles.kicker}>Authority &amp; Provenance</span>
+              <h3>근거별 권위와 적용 범위</h3>
+            </header>
+            <ul className={styles.authorityTable} aria-label="지식 근거별 권위와 적용 범위">
+              {KNOWLEDGE_AUTHORITY_LANES.map((lane) => (
+                <li key={lane.id} className={styles.authorityRow} data-knowledge-authority={lane.id}>
+                  <div className={styles.authorityIdentity}>
+                    <strong>{lane.label}</strong>
+                    <span>{lane.provenanceRule}</span>
+                  </div>
+                  <dl className={styles.authorityFacts}>
+                    <div>
+                      <dt>권위</dt>
+                      <dd>{lane.authorityLabel}</dd>
+                    </div>
+                    <div>
+                      <dt>범위</dt>
+                      <dd>{lane.scopeLabel}</dd>
+                    </div>
+                    <div>
+                      <dt>법적 역할</dt>
+                      <dd>{lane.legalDutyLabel}</dd>
+                    </div>
+                  </dl>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
 
         <section className={styles.section} aria-labelledby="technical-support-heading">
