@@ -1886,7 +1886,7 @@ describe("KOSHA GUIDE production visibility", () => {
 });
 
 describe("KOSHA GUIDE retrieval-to-document evidence", () => {
-  it("surfaces task-specific KOSHA evidence only through the branch actually executed", () => {
+  it("keeps task controls in source evidence while a parentless prompt exposes identity only", () => {
     const branch = "rest" as const;
     const items = [
         reference({
@@ -1943,6 +1943,9 @@ describe("KOSHA GUIDE retrieval-to-document evidence", () => {
         requiredControlTerms: ["도료", "유기용제", "작업발판", "안전대"],
         forbiddenTerms: ["정전도장기", "피도장물 접지"]
       }, items, branch);
+    const supportingPromptRows = result.promptContext
+      .split("\n")
+      .filter((line) => line.startsWith("KOSHA_SUPPORTING_BODY_JSON: "));
 
     expect(result.failures).toEqual([]);
     expect(result.executionStatus).toBe("tested");
@@ -1951,7 +1954,10 @@ describe("KOSHA GUIDE retrieval-to-document evidence", () => {
     expect(result.promptContext).toContain("B-E-17-2026");
     expect(result.promptContext).toContain("D-C-13-2026");
     expect(result.promptContext).toMatch(/도료|유기용제/);
-    expect(result.promptContext).toMatch(/작업발판|안전대/);
+    expect(supportingPromptRows).toHaveLength(2);
+    expect(supportingPromptRows.every((line) => line.includes('"parentEvidenceReady":false'))).toBe(true);
+    expect(supportingPromptRows.every((line) => !/"(?:bodyExcerpt|summary|controls|evidenceRef)":/.test(line))).toBe(true);
+    expect(supportingPromptRows.join("\n")).not.toMatch(/작업발판|안전대/);
     expect(result.answer).not.toContain("정전도장기");
     expect(result.documentReflections.every((item) => item.documents.includes("위험성평가표"))).toBe(true);
     expect(result.documentReflections.every((item) => item.label.includes("위험성평가표"))).toBe(true);
