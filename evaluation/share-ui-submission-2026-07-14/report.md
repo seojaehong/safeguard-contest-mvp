@@ -9,6 +9,7 @@
 
 - Default flow is now `오늘 대상 -> 채널 -> 언어 미리보기 -> 전송`.
 - The 12-language chip wall is replaced by one language preview selector.
+- Foreign-language previews no longer prepend Korean site, task, risk, or administrator labels.
 - Delivery notes and storage/history details are collapsed by default.
 - The default surface keeps one primary send action.
 - Worker management remains owned by `/workers`; Share only links to target selection.

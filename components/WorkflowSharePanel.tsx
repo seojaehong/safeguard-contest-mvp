@@ -493,15 +493,10 @@ function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
   if (!language) return data.deliverables.foreignWorkerTransmission;
 
   return [
-    `[SafeClaw ${language.label} 안전공지] ${data.scenario.companyName}`,
-    `현장: ${data.scenario.siteName}`,
-    `작업: ${data.scenario.workSummary}`,
-    `핵심 위험: ${data.riskSummary.topRisk}`,
+    "[SafeClaw]",
+    language.nativeLabel,
     "",
-    `${language.label}(${language.nativeLabel})`,
     ...language.lines.map((line) => `- ${line}`),
-    "",
-    "관리자 확인: 현장 통역 또는 해당 언어 가능자 확인 후 전송하세요."
   ].join("\n");
 }
 

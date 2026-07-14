@@ -9,6 +9,7 @@
     "recipient-summary",
     "channel-selection",
     "language-preview-selector",
+    "foreign-preview-korean-prefix-removal",
     "collapsed-delivery-note",
     "collapsed-record-detail"
   ],
