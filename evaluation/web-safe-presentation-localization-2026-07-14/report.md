@@ -40,6 +40,12 @@ Result: **PASS**. Log: `integrated-typecheck.log`.
 
 Independent review: **PASS**, with no P0-P2 findings. The sole P3 finding was stale evidence metadata from the source branch; this report replaces the old `ea7` base and incorrect changed-file list.
 
+## Cross-platform fixture remediation
+
+CI run `29306989527` exposed a second, test-only failure: the complete machine fixture used `localeCompare` to order keys, so its hash depended on the runner locale. The machine payload itself was not changed. Canonical key ordering now uses a locale-independent lexical comparison and fixes the cross-platform hash at `0bd6c6f5790210bb9ffa89e24cdf6c847344a9cf27974cd31e5f91c65e620f00`.
+
+The exact hash test passed under both `LANG=C` and `LANG=ko_KR.UTF-8`, and the full focused localization group remained **4 files / 20 tests PASS**.
+
 ## Deferred final gates
 
 - production build

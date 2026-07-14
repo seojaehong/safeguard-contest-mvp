@@ -45,8 +45,20 @@
       "command": "npm.cmd run typecheck",
       "status": "pass",
       "detail": "tsc --noEmit --incremental false"
+    },
+    {
+      "command": "npm.cmd test -- tests/sif-embedding-gate-status.test.ts --maxWorkers=1 --no-file-parallelism -t matches the cross-platform base machine fixture hash outside Markdown",
+      "status": "pass",
+      "detail": "passed under LANG=C and LANG=ko_KR.UTF-8"
     }
   ],
+  "ciRemediation": {
+    "redRun": "29306989527",
+    "redFailure": "localeCompare produced a platform-dependent canonical key order for the complete machine fixture hash",
+    "fix": "canonical machine-fixture keys now use locale-independent lexical ordering",
+    "canonicalHash": "0bd6c6f5790210bb9ffa89e24cdf6c847344a9cf27974cd31e5f91c65e620f00",
+    "machinePayloadChanged": false
+  },
   "independentReview": {
     "verdict": "pass",
     "scope": "exact three-commit presentation boundary diff",

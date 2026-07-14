@@ -14,7 +14,7 @@ function canonicalizeMachineFixture(value: unknown, key = ""): unknown {
 
   return Object.fromEntries(
     Object.entries(value)
-      .sort(([left], [right]) => left.localeCompare(right))
+      .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
       .map(([entryKey, entryValue]) => [entryKey, canonicalizeMachineFixture(entryValue, entryKey)])
   );
 }
@@ -306,7 +306,7 @@ describe("SIF embedding gate status", () => {
     });
   });
 
-  it("matches the complete base machine fixture hash outside Markdown", () => {
+  it("matches the cross-platform base machine fixture hash outside Markdown", () => {
     const status = getSifEmbeddingGateStatus({
       OPENAI_API_KEY: "",
       SUPABASE_URL: "https://example.supabase.co",
@@ -317,6 +317,6 @@ describe("SIF embedding gate status", () => {
     const canonicalFixture = JSON.stringify(canonicalizeMachineFixture(jsonValue));
     const fixtureHash = createHash("sha256").update(canonicalFixture).digest("hex");
 
-    expect(fixtureHash).toBe("67dc41b064dad095c4bda8a8e0edf001ed6ac4a9dbcc81b66c86c9cd2d366eda");
+    expect(fixtureHash).toBe("0bd6c6f5790210bb9ffa89e24cdf6c847344a9cf27974cd31e5f91c65e620f00");
   });
 });
