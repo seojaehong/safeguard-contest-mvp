@@ -19933,7 +19933,7 @@ body:has(.safeclaw-landing) :is(
   --leading-caption: 1.5;
   --leading-hud: 1.454545;
   --tracking-display: 0;
-  --tracking-page-title: 0;
+  --tracking-page-title: -0.035em;
   --tracking-section-title: 0;
   --tracking-body: 0;
   font-size: var(--text-body);

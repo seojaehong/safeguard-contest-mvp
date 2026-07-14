@@ -232,7 +232,8 @@ describe("Reports Wave 1 static design contract", () => {
       "--leading-control": "1.428571",
       "--leading-table": "1.538462",
       "--leading-caption": "1.5",
-      "--leading-hud": "1.454545"
+      "--leading-hud": "1.454545",
+      "--tracking-page-title": "-0.035em"
     });
     expect(typographyAssignments).toEqual(["document.documentElement.style.fontSize ="]);
     expect(scalingFunction).toContain("const requestedRootFontSize = rootFontSizeBefore * 2;");
