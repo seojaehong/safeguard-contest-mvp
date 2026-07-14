@@ -9,7 +9,13 @@ function canonicalizeMachineFixture(value: unknown, key = ""): unknown {
   if (key === "sha256" || key === "byteSize" || key === "approvalFingerprint") {
     return `<${typeof value}>`;
   }
-  if (Array.isArray(value)) return value.map((item) => canonicalizeMachineFixture(item));
+  if (typeof value === "string") {
+    const normalizedPath = /path$/iu.test(key) ? value.replace(/\\/g, "/") : value;
+    return key === "evidenceSummary"
+      ? normalizedPath.replace(/승인 지문 [0-9a-f]{64}/u, "승인 지문 <sha256>")
+      : normalizedPath;
+  }
+  if (Array.isArray(value)) return value.map((item) => canonicalizeMachineFixture(item, key));
   if (typeof value !== "object" || value === null) return value;
 
   return Object.fromEntries(
@@ -306,6 +312,35 @@ describe("SIF embedding gate status", () => {
     });
   });
 
+  it("normalizes filesystem-only machine fixture fields across operating systems", () => {
+    const windowsFingerprint = "a".repeat(64);
+    const linuxFingerprint = "b".repeat(64);
+    const windowsFixture = {
+      artifact: {
+        path: "evaluation\\sif-embedding-gate\\report.json",
+        byteSize: 123,
+        sha256: "c".repeat(64)
+      },
+      approvalFingerprint: windowsFingerprint,
+      evidenceSummary: [
+        `승인 지문 ${windowsFingerprint}로 corpus hash, 모델/차원, migration SQL을 고정합니다.`
+      ]
+    };
+    const linuxFixture = {
+      artifact: {
+        path: "evaluation/sif-embedding-gate/report.json",
+        byteSize: 456,
+        sha256: "d".repeat(64)
+      },
+      approvalFingerprint: linuxFingerprint,
+      evidenceSummary: [
+        `승인 지문 ${linuxFingerprint}로 corpus hash, 모델/차원, migration SQL을 고정합니다.`
+      ]
+    };
+
+    expect(canonicalizeMachineFixture(windowsFixture)).toEqual(canonicalizeMachineFixture(linuxFixture));
+  });
+
   it("matches the cross-platform base machine fixture hash outside Markdown", () => {
     const status = getSifEmbeddingGateStatus({
       OPENAI_API_KEY: "",
@@ -317,6 +352,6 @@ describe("SIF embedding gate status", () => {
     const canonicalFixture = JSON.stringify(canonicalizeMachineFixture(jsonValue));
     const fixtureHash = createHash("sha256").update(canonicalFixture).digest("hex");
 
-    expect(fixtureHash).toBe("0bd6c6f5790210bb9ffa89e24cdf6c847344a9cf27974cd31e5f91c65e620f00");
+    expect(fixtureHash).toBe("f1fefacf29a64968543595754c3ebcab2b7288def75359f9d294051824e89451");
   });
 });
