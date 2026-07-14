@@ -1,9 +1,27 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
+import type { GroundedGenerationPacket } from "@/lib/grounded-generation-contract";
+
 const mocks = vi.hoisted(() => ({
   anthropicGenerate: vi.fn(),
   vertexGenerate: vi.fn()
 }));
+
+const groundingPacket: GroundedGenerationPacket = Object.freeze({
+  version: "grounded-generation-v1",
+  sourceIdentity: "test-packet",
+  status: "ready",
+  llmRole: "naturalize_only",
+  sources: Object.freeze([Object.freeze({
+    referenceKey: "LAW:law-38",
+    kind: "law",
+    sourceId: "law-38",
+    title: "산업안전보건법 제38조",
+    summary: "사업주의 안전조치 의무",
+    aliases: Object.freeze(["LAW:law-38", "산업안전보건법 제38조"]),
+    controls: Object.freeze([])
+  })])
+});
 
 vi.mock("@/lib/anthropic-client", () => ({
   generateWithAnthropic: mocks.anthropicGenerate
@@ -323,5 +341,80 @@ describe("deliverables generation trace", () => {
     expect(diagnostics).not.toContain("sk-private-deliverables");
     expect(logged).not.toContain("900101-1234567");
     expect(logged).not.toContain("sk-private-deliverables");
+  });
+
+  test("fails closed when a parsed document cites a law outside the immutable grounding packet", async () => {
+    mocks.anthropicGenerate.mockImplementation(async (_model: string, prompt: string) => {
+      if (prompt.includes('"riskAssessmentDraft"')) {
+        return JSON.stringify({
+          riskAssessmentDraft: `산업안전보건법 제39조를 근거로 임의 통제조치를 적용한다. ${"형식상 유효한 본문 ".repeat(15)}`
+        });
+      }
+      throw new Error("fixture deterministic fallback");
+    });
+    mocks.vertexGenerate.mockRejectedValue(new Error("fixture vertex unavailable"));
+    const { generateAllDeliverablesWithDiagnostics } = await import("@/lib/ai-deliverables");
+
+    const result = await generateAllDeliverablesWithDiagnostics({
+      scenario: {
+        companyName: "테스트사",
+        siteName: "테스트 현장",
+        workSummary: "외벽 도장",
+        workerCount: 4,
+        weatherNote: "강풍 주의"
+      },
+      question: "성수동 외벽 도장 작업",
+      groundingPacket,
+      traceId: "trace-grounding-rejection"
+    });
+
+    expect(result.deliverables.riskAssessmentDraft).toBeUndefined();
+    expect(result.diagnostics.groupResults).toContainEqual(expect.objectContaining({
+      group: "riskAssessment",
+      status: "rejected",
+      reason: "grounding review required"
+    }));
+    expect(result.diagnostics.grounding).toMatchObject({
+      status: "review_required",
+      sourceIdentity: "test-packet",
+      rejectedGroups: ["riskAssessment"]
+    });
+  });
+
+  test("preserves a valid generated document whose citation resolves to the packet", async () => {
+    mocks.anthropicGenerate.mockImplementation(async (_model: string, prompt: string) => {
+      if (prompt.includes('"riskAssessmentDraft"')) {
+        return JSON.stringify({
+          riskAssessmentDraft: `산업안전보건법 제38조를 근거로 안전조치를 적용한다. ${"근거 패킷을 반영한 본문 ".repeat(15)}`
+        });
+      }
+      throw new Error("fixture deterministic fallback");
+    });
+    mocks.vertexGenerate.mockRejectedValue(new Error("fixture vertex unavailable"));
+    const { generateAllDeliverablesWithDiagnostics } = await import("@/lib/ai-deliverables");
+
+    const result = await generateAllDeliverablesWithDiagnostics({
+      scenario: {
+        companyName: "테스트사",
+        siteName: "테스트 현장",
+        workSummary: "외벽 도장",
+        workerCount: 4,
+        weatherNote: "강풍 주의"
+      },
+      question: "성수동 외벽 도장 작업",
+      groundingPacket,
+      traceId: "trace-grounding-accepted"
+    });
+
+    expect(result.deliverables.riskAssessmentDraft).toContain("산업안전보건법 제38조");
+    expect(result.diagnostics.groupResults).toContainEqual(expect.objectContaining({
+      group: "riskAssessment",
+      status: "fulfilled"
+    }));
+    expect(result.diagnostics.grounding).toMatchObject({
+      status: "grounded",
+      sourceIdentity: "test-packet",
+      rejectedGroups: []
+    });
   });
 });

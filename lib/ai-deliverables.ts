@@ -36,6 +36,12 @@ import {
 import { formatWorkDate, isHeavyOutputDoc, planModelAttempts, planPostAnthropicAttempts, resolveAnthropicModelForDoc, resolveDeliverablesTimeoutMs, resolveDocBudget, type DocBudget } from "@/lib/ai-deliverables-policy";
 import { ACCIDENT_REPORT_TEMPLATE, OFFICIAL_CONTACTS, sanitizeContacts } from "@/lib/safety-contacts";
 import { gateCitations } from "@/lib/law-citation-gate";
+import {
+  serializeGroundedGenerationPacket,
+  validateGroundedGenerationOutput,
+  type GroundedGenerationPacket,
+  type GroundingViolation
+} from "@/lib/grounded-generation-contract";
 import { clampOneBased, clampRiskRefs } from "@/lib/risk-ref-gate";
 import { resolveDeliverablesProvider } from "@/lib/ai-provider-policy";
 import { generateWithAnthropic } from "@/lib/anthropic-client";
@@ -119,6 +125,8 @@ type GenContext = {
   koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
   /** DB harness packet contract: LLM may naturalize fixed evidence only. */
   dbHarnessContext?: string;
+  /** Immutable runtime allowlist used by both the prompt and output gate. */
+  groundingPacket?: GroundedGenerationPacket;
   /** KST (Asia/Seoul) calendar date of this generation run — YYYY-MM-DD. */
   workDate: string;
 };
@@ -291,7 +299,7 @@ export function persona() {
     "당신은 한국 산업안전기사 자격을 갖춘 5년 차 현장 안전관리자다.",
     "사용자의 작업 시나리오를 받아 위험성평가·작업계획·TBM·안전보건교육·비상대응 등 산업안전 문서팩 본문을 작성한다.",
     "원칙:",
-    "  1) 산업안전보건법 제38조·제39조와 시행규칙·시행령의 구체적인 조항을 가능한 한 인용한다.",
+    "  1) 법령 조항은 컨텍스트의 불변 생성 근거 패킷에 제공된 후보만 인용한다. 후보가 없으면 조문 번호를 만들지 않는다.",
     "  2) 위험요인은 DB 하네스·근거 후보 안에서 구체화한다. 근거 밖 새 위험요인은 만들지 말고 '현장 확인 필요'로 표기한다. 일반론(\"안전을 지키세요\") 금지.",
     "  3) 4M(Man·Machine·Media·Management) 분류로 위험요인을 정리한다.",
     "  4) 위험도는 가능성×중대성 매트릭스로 상/중/하 결정 + 판단근거를 1문장으로.",
@@ -306,12 +314,22 @@ export function persona() {
 }
 
 export function contextBlock(ctx: GenContext) {
-  const cites = ctx.citationLines.length ? ctx.citationLines.join("\n") : "(법령 후보 없음)";
+  const packetEnforced = Boolean(ctx.groundingPacket);
+  const cites = packetEnforced
+    ? "(불변 생성 근거 패킷의 law source만 사용)"
+    : ctx.citationLines.length ? ctx.citationLines.join("\n") : "(법령 후보 없음)";
   const training = ctx.trainingLines.length ? ctx.trainingLines.join("\n") : "(연계 교육 후보 없음)";
-  const kosha = ctx.koshaLines.length ? ctx.koshaLines.join("\n") : "(KOSHA 보강 자료 없음)";
+  const kosha = packetEnforced
+    ? "(불변 생성 근거 패킷의 kosha source만 사용)"
+    : ctx.koshaLines.length ? ctx.koshaLines.join("\n") : "(KOSHA 보강 자료 없음)";
   const accidents = ctx.accidentLines.length ? ctx.accidentLines.join("\n") : "(유사 재해사례 없음)";
-  const dbHarness = ctx.dbHarnessContext?.trim() || "(DB 하네스 패킷 없음)";
-  const koshaPrimaryBlock = ctx.koshaPrimaryRefs && ctx.koshaPrimaryRefs.length
+  const dbHarness = packetEnforced
+    ? "naturalize_only; evidence authority is the immutable packet below."
+    : ctx.dbHarnessContext?.trim() || "(DB 하네스 패킷 없음)";
+  const groundingPacket = ctx.groundingPacket
+    ? serializeGroundedGenerationPacket(ctx.groundingPacket)
+    : "(불변 생성 근거 패킷 없음)";
+  const koshaPrimaryBlock = !packetEnforced && ctx.koshaPrimaryRefs && ctx.koshaPrimaryRefs.length
     ? [
         "",
         "**[★최우선 인용 자료 — KOSHA 기술지침/기술지원규정★]**",
@@ -337,6 +355,11 @@ export function contextBlock(ctx: GenContext) {
     "",
     "[DB 하네스 계약]",
     dbHarness,
+    "",
+    "[불변 생성 근거 패킷]",
+    "referenceKey와 통제문구는 아래 패킷에 있는 값만 사용한다. 구조화 출력의 evidenceRefs에는 referenceKey를 그대로 기록한다.",
+    "패킷 밖 인용·통제 provenance는 출력하지 말고 '현장 확인 필요'로 둔다.",
+    groundingPacket,
     "",
     "[법령·해석례·판례 근거 후보]",
     cites,
@@ -772,6 +795,8 @@ export type GenerateAllOptions = {
   koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
   /** DB harness packet prompt context. When present, generation must stay inside this evidence packet. */
   dbHarnessContext?: string;
+  /** Runtime-built immutable allowlist for references and structured control provenance. */
+  groundingPacket?: GroundedGenerationPacket;
   /**
    * Which call groups to run.
    * - "full" (default): all tabular + free + foreign -> broad document pack AI generation
@@ -801,6 +826,7 @@ function buildContext(opts: GenerateAllOptions): GenContext {
     accidentLines: opts.accidentLines || [],
     koshaPrimaryRefs: opts.koshaPrimaryRefs || [],
     dbHarnessContext: opts.dbHarnessContext,
+    groundingPacket: opts.groundingPacket,
     workDate: formatWorkDate(new Date())
   };
 }
@@ -1142,6 +1168,12 @@ export type AiDeliverablesDiagnostics = {
     reason?: string;
   }>;
   filledKeys: string[];
+  grounding?: {
+    status: "grounded" | "review_required";
+    sourceIdentity: string;
+    rejectedGroups: string[];
+    violations: Array<Pick<GroundingViolation, "code" | "path"> & { group: string }>;
+  };
   trace: GenerationTrace["deliverables"] & { fallbackUsed: boolean };
 };
 
@@ -1260,10 +1292,33 @@ export async function generateAllDeliverablesWithDiagnostics(
   const settled = await Promise.allSettled(allSpecs.map((s) => s.promise));
   const out: AiDeliverables = {};
   const groupResults: AiDeliverablesDiagnostics["groupResults"] = [];
+  const rejectedGroundingGroups: string[] = [];
+  const groundingViolations: NonNullable<AiDeliverablesDiagnostics["grounding"]>["violations"] = [];
+
+  const rejectForGrounding = (name: string, value: Partial<AiDeliverables>): boolean => {
+    if (!opts.groundingPacket) return false;
+    const validation = validateGroundedGenerationOutput(value, opts.groundingPacket);
+    if (validation.status === "grounded") return false;
+    rejectedGroundingGroups.push(name);
+    groundingViolations.push(...validation.violations.map((violation) => ({
+      group: name,
+      code: violation.code,
+      path: violation.path
+    })));
+    for (const documentKey of DELIVERABLE_GROUP_DOCUMENT_KEYS[name] || []) {
+      modelPerDocument[documentKey] = deterministicDocumentTrace(true);
+    }
+    return true;
+  };
 
   settled.forEach((s, i) => {
     const name = allSpecs[i].name;
     if (s.status === "fulfilled") {
+      if (rejectForGrounding(name, s.value)) {
+        groupResults.push({ group: name, status: "rejected", reason: "grounding review required" });
+        safeEmit(onProgress, { kind: "doc", name, status: "fail" });
+        return;
+      }
       groupResults.push({ group: name, status: "fulfilled" });
       Object.assign(out, s.value);
       safeEmit(onProgress, { kind: "doc", name, status: "ok" });
@@ -1281,12 +1336,13 @@ export async function generateAllDeliverablesWithDiagnostics(
   applyRiskRowClamp(out);
   if (scope === "full") {
     const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || [], traceOptions);
-    Object.assign(out, tbmRiskLinksResult);
-    const tbmRiskLinksOk = (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0;
+    const groundingRejected = rejectForGrounding("tbmRiskLinks", tbmRiskLinksResult);
+    if (!groundingRejected) Object.assign(out, tbmRiskLinksResult);
+    const tbmRiskLinksOk = !groundingRejected && (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0;
     groupResults.push({
       group: "tbmRiskLinks",
       status: tbmRiskLinksOk ? "fulfilled" : "rejected",
-      reason: tbmRiskLinksOk ? undefined : "empty or skipped"
+      reason: tbmRiskLinksOk ? undefined : groundingRejected ? "grounding review required" : "empty or skipped"
     });
     safeEmit(onProgress, { kind: "doc", name: "tbmRiskLinks", status: tbmRiskLinksOk ? "ok" : "fail" });
   }
@@ -1299,6 +1355,14 @@ export async function generateAllDeliverablesWithDiagnostics(
       configuredProvider,
       groupResults,
       filledKeys: Object.keys(out),
+      grounding: opts.groundingPacket ? {
+        status: rejectedGroundingGroups.length === 0 && opts.groundingPacket.status === "ready"
+          ? "grounded"
+          : "review_required",
+        sourceIdentity: opts.groundingPacket.sourceIdentity,
+        rejectedGroups: rejectedGroundingGroups,
+        violations: groundingViolations
+      } : undefined,
       trace: {
         attempted: allSpecs.length > 0,
         provider: summarizeDeliverablesProvider(modelPerDocument),
