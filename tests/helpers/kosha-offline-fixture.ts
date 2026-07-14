@@ -41,11 +41,21 @@ function defaultItems(state: FixtureLifecycle): JsonRecord[] {
       category: "기계안전",
       body: guidelineBody,
       normalized_text_sha256: sha256(guidelineBody),
+      raw_sha256: sha256(`pdf:${guidelineBody}`),
       state,
       stable_key: "forklift-traffic-guideline",
       version_key: "KOSHA-GUIDE-2026",
       source_key: "kosha-synthetic",
-      extraction_status: "success"
+      extraction_status: "success",
+      official_provenance: {
+        official_url: "https://portal.kosha.or.kr/archive/resources/tech-support/search/all",
+        official_file_id: "fixture-guideline-file",
+        publication_date: "2026-01-30",
+        official_version: "KOSHA-GUIDE-2026",
+        official_status: "current",
+        pdf_sha256: sha256(`pdf:${guidelineBody}`),
+        body_sha256: sha256(guidelineBody)
+      }
     },
     {
       schema_version: "safeclaw-kosha-body-corpus/v2",
@@ -55,11 +65,21 @@ function defaultItems(state: FixtureLifecycle): JsonRecord[] {
       category: "운반하역",
       body: regulationBody,
       normalized_text_sha256: sha256(regulationBody),
+      raw_sha256: sha256(`pdf:${regulationBody}`),
       state,
       stable_key: "forklift-loading-regulation",
       version_key: "KOSHA-REG-2026",
       source_key: "kosha-synthetic",
-      extraction_status: "success"
+      extraction_status: "success",
+      official_provenance: {
+        official_url: "https://portal.kosha.or.kr/archive/resources/tech-support/search/all",
+        official_file_id: "fixture-regulation-file",
+        publication_date: "2026-01-30",
+        official_version: "KOSHA-REG-2026",
+        official_status: "current",
+        pdf_sha256: sha256(`pdf:${regulationBody}`),
+        body_sha256: sha256(regulationBody)
+      }
     }
   ];
 }
@@ -93,7 +113,7 @@ export function writeSnapshot(
   snapshotId: string,
   overrides: SnapshotOverrides = {}
 ): void {
-  const items = overrides.items ?? defaultItems(overrides.state ?? "stale");
+  const items = overrides.items ?? defaultItems(overrides.state ?? "current");
   const chunks = overrides.chunks ?? defaultChunks();
   const failures = overrides.failures ?? [];
   const snapshotPath = `snapshots/${snapshotId}`;
@@ -112,18 +132,37 @@ export function writeSnapshot(
   const sourceIdentity = "1".repeat(64);
   const generationPolicy = "2".repeat(64);
   const manifest: JsonRecord = {
-    schema_version: "safeclaw-kosha-body-corpus/v2",
+    schema_version: "safeclaw-kosha-verified-subset/v1",
     snapshot_id: snapshotId,
     reproducibility_hash: sha256(snapshotId),
     generation_policy_sha256: generationPolicy,
     source_identity: { identity_sha256: sourceIdentity },
     counts: {
-      inventory: items.length,
+      inventory: items.length + failures.length,
       completed: items.length,
-      success: items.length - failures.length,
+      success: items.length,
       failure: failures.length,
       chunks: chunks.length,
       failure_ledger: failures.length
+    },
+    launch_gate: {
+      launch_ready: failures.length === 0,
+      failure_count: failures.length,
+      partial_coverage: failures.length > 0,
+      provenance_complete: failures.length === 0,
+      blockers: failures.length ? ["fixture-failure"] : []
+    },
+    coverage_scope: {
+      scope_id: "fixture-current-native",
+      source_inventory_count: items.length + failures.length,
+      candidate_count: items.length + failures.length,
+      accepted_count: items.length,
+      rejected_count: failures.length,
+      out_of_scope_count: 0,
+      item_types: ["technical-guideline", "technical-support-regulation"],
+      official_statuses: ["current"],
+      body_kinds: ["native"],
+      complete: failures.length === 0
     },
     output_hashes: {
       "items.jsonl": sha256(itemsText),

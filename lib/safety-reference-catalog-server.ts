@@ -47,7 +47,7 @@ function buildLocalItem(hit: KoshaGuideCorpusHit): SafetyReferenceItem {
     risk_tags: record.tags.riskTags,
     primary_documents: record.tags.primaryDocuments,
     controls: record.tags.controls,
-    source_url: null,
+    source_url: record.provenance.officialUrl,
     evidence_role: "supporting",
     retrieval_source: hit.retrievalMode,
     display_title: `${record.version} ${record.title}`,
@@ -61,7 +61,14 @@ function buildLocalItem(hit: KoshaGuideCorpusHit): SafetyReferenceItem {
       bodyKind: record.bodyKind,
       anchors: record.anchors,
       evidenceRef: hit.evidenceRef,
-      directEligible: hit.directEligible
+      directEligible: hit.directEligible,
+      officialUrl: record.provenance.officialUrl,
+      officialFileId: record.provenance.officialFileId,
+      publicationDate: record.provenance.publicationDate,
+      officialVersion: record.provenance.officialVersion,
+      officialStatus: record.provenance.officialStatus,
+      pdfSha256: record.provenance.pdfHash,
+      bodySha256: record.provenance.bodyHash
     }
   };
   return {

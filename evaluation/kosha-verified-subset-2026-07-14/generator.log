@@ -1,0 +1,23 @@
+{
+  "accepted_count": 0,
+  "blockers": [
+    "verified-subset-empty",
+    "failure-ledger-not-empty",
+    "partial-coverage",
+    "official-metadata-artifact-missing"
+  ],
+  "candidate_count": 234,
+  "elapsed_seconds": 2.043,
+  "launch_ready": false,
+  "official_metadata_sha256": null,
+  "out_of_scope_count": 806,
+  "output_hashes": {
+    "chunks.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "failures.jsonl": "9ec1feefe9306f65529c3221382a1f7847f9a167c7a35a806504727b8384c7fe",
+    "items.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "rejected_count": 234,
+  "source_inventory_count": 1040,
+  "source_snapshot_id": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+  "subset_snapshot_id": "3c4fe965bb713947568149c92c3c45d118e60f3d5426a9d5c4a9a25b764ae905"
+}

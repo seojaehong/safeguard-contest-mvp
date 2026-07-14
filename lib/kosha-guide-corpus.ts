@@ -30,6 +30,12 @@ export type KoshaGuideCorpusRecord = {
     lifecycle: "current" | "stale" | "retired";
     chunkId: string;
     bodyHash: string;
+    officialUrl: string;
+    officialFileId: string;
+    publicationDate: string;
+    officialVersion: string;
+    officialStatus: "current";
+    pdfHash: string;
   };
   tags: {
     keywords: string[];
@@ -65,8 +71,22 @@ export type KoshaGuideCorpusReady = {
   itemCount: number;
   chunkCount: number;
   failureCount: number;
+  coverageScope: KoshaGuideCoverageScope;
   records: KoshaGuideCorpusRecord[];
   indexedRecords: IndexedRecord[];
+};
+
+export type KoshaGuideCoverageScope = {
+  scopeId: string;
+  sourceInventoryCount: number;
+  candidateCount: number;
+  acceptedCount: number;
+  rejectedCount: number;
+  outOfScopeCount: number;
+  itemTypes: KoshaGuideCorpusItemType[];
+  officialStatuses: ["current"];
+  bodyKinds: ["native"];
+  complete: boolean;
 };
 
 export type KoshaGuideCorpusLoadResult =
@@ -107,6 +127,14 @@ type ManifestSnapshot = {
     failureLedger: number;
   };
   reviewedOcrCandidates: ReviewedOcrCandidateBinding[];
+  launchGate: {
+    launchReady: boolean;
+    failureCount: number;
+    partialCoverage: boolean;
+    provenanceComplete: boolean;
+    blockers: string[];
+  };
+  coverageScope: KoshaGuideCoverageScope;
 };
 
 type ReviewedOcrCandidateBinding = {
@@ -132,6 +160,16 @@ type RawItem = {
   reviewedOcrCandidateSha256: string | null;
   reviewedOcrContentSha256: string | null;
   reviewedOcrAttestationSha256: string | null;
+  rawSha256: string;
+  officialProvenance: {
+    officialUrl: string;
+    officialFileId: string;
+    publicationDate: string;
+    officialVersion: string;
+    officialStatus: "current";
+    pdfSha256: string;
+    bodySha256: string;
+  } | null;
 };
 
 type RawChunk = {
@@ -215,6 +253,119 @@ function isRfc3339(value: string): boolean {
   const offsetMinute = Number(offsetMinuteText ?? 0);
   if (month < 1 || month > 12 || hour > 23 || minute > 59 || second > 59 || offsetHour > 23 || offsetMinute > 59) return false;
   return day >= 1 && day <= new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function isIsoDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/u.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return month >= 1 && month <= 12 && day >= 1 && day <= new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function isOfficialKoshaUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    return url.protocol === "https:" && (hostname === "kosha.or.kr" || hostname.endsWith(".kosha.or.kr"));
+  } catch {
+    return false;
+  }
+}
+
+function parseLaunchGate(value: unknown): ManifestSnapshot["launchGate"] | null {
+  if (!isRecord(value)) return null;
+  const failureCount = readInteger(value.failure_count);
+  const blockers = Array.isArray(value.blockers) && value.blockers.every((item) => typeof item === "string")
+    ? value.blockers
+    : null;
+  if (
+    typeof value.launch_ready !== "boolean"
+    || failureCount === null
+    || typeof value.partial_coverage !== "boolean"
+    || typeof value.provenance_complete !== "boolean"
+    || !blockers
+  ) return null;
+  return {
+    launchReady: value.launch_ready,
+    failureCount,
+    partialCoverage: value.partial_coverage,
+    provenanceComplete: value.provenance_complete,
+    blockers
+  };
+}
+
+function parseCoverageScope(value: unknown): KoshaGuideCoverageScope | null {
+  if (!isRecord(value)) return null;
+  const sourceInventoryCount = readInteger(value.source_inventory_count);
+  const candidateCount = readInteger(value.candidate_count);
+  const acceptedCount = readInteger(value.accepted_count);
+  const rejectedCount = readInteger(value.rejected_count);
+  const outOfScopeCount = readInteger(value.out_of_scope_count);
+  const itemTypes = value.item_types;
+  const officialStatuses = value.official_statuses;
+  const bodyKinds = value.body_kinds;
+  if (
+    !readCanonicalIdentifier(value.scope_id)
+    || sourceInventoryCount === null
+    || candidateCount === null
+    || acceptedCount === null
+    || rejectedCount === null
+    || outOfScopeCount === null
+    || !Array.isArray(itemTypes)
+    || itemTypes.length === 0
+    || !itemTypes.every((item) => item === "technical-guideline" || item === "technical-support-regulation")
+    || !Array.isArray(officialStatuses)
+    || officialStatuses.length !== 1
+    || officialStatuses[0] !== "current"
+    || !Array.isArray(bodyKinds)
+    || bodyKinds.length !== 1
+    || bodyKinds[0] !== "native"
+    || typeof value.complete !== "boolean"
+  ) return null;
+  return {
+    scopeId: value.scope_id as string,
+    sourceInventoryCount,
+    candidateCount,
+    acceptedCount,
+    rejectedCount,
+    outOfScopeCount,
+    itemTypes: itemTypes as KoshaGuideCorpusItemType[],
+    officialStatuses: ["current"],
+    bodyKinds: ["native"],
+    complete: value.complete
+  };
+}
+
+function parseOfficialProvenance(value: unknown): RawItem["officialProvenance"] {
+  if (!isRecord(value)) return null;
+  const officialUrl = readCanonicalIdentifier(value.official_url);
+  const officialFileId = readCanonicalIdentifier(value.official_file_id);
+  const publicationDate = readCanonicalIdentifier(value.publication_date);
+  const officialVersion = readCanonicalIdentifier(value.official_version);
+  const pdfSha256 = readCanonicalSha256(value.pdf_sha256);
+  const bodySha256 = readCanonicalSha256(value.body_sha256);
+  if (
+    !officialUrl
+    || !isOfficialKoshaUrl(officialUrl)
+    || !officialFileId
+    || !publicationDate
+    || !isIsoDate(publicationDate)
+    || !officialVersion
+    || value.official_status !== "current"
+    || !pdfSha256
+    || !bodySha256
+  ) return null;
+  return {
+    officialUrl,
+    officialFileId,
+    publicationDate,
+    officialVersion,
+    officialStatus: "current",
+    pdfSha256,
+    bodySha256
+  };
 }
 
 function parseReviewedOcrProvenance(value: unknown): {
@@ -318,12 +469,14 @@ function parseCurrent(value: unknown): CurrentSnapshot | null {
 }
 
 function parseManifest(value: unknown): ManifestSnapshot | null {
-  if (!isRecord(value) || value.schema_version !== "safeclaw-kosha-body-corpus/v2") return null;
+  if (!isRecord(value) || value.schema_version !== "safeclaw-kosha-verified-subset/v1") return null;
   const counts = isRecord(value.counts) ? value.counts : null;
   const hashes = isRecord(value.output_hashes) ? value.output_hashes : null;
   const identity = isRecord(value.source_identity) ? value.source_identity : null;
   const reviewedOcrCandidates = parseReviewedOcrCandidateBindings(value.generation_policy);
-  if (!counts || !hashes || !identity || !reviewedOcrCandidates) return null;
+  const launchGate = parseLaunchGate(value.launch_gate);
+  const coverageScope = parseCoverageScope(value.coverage_scope);
+  if (!counts || !hashes || !identity || !reviewedOcrCandidates || !launchGate || !coverageScope) return null;
   const parsed: ManifestSnapshot = {
     snapshotId: readString(value.snapshot_id),
     reproducibilityHash: readString(value.reproducibility_hash).toLowerCase(),
@@ -340,7 +493,9 @@ function parseManifest(value: unknown): ManifestSnapshot | null {
       chunks: readInteger(counts.chunks) ?? -1,
       failureLedger: readInteger(counts.failure_ledger) ?? -1
     },
-    reviewedOcrCandidates
+    reviewedOcrCandidates,
+    launchGate,
+    coverageScope
   };
   if (!parsed.snapshotId || Object.values(parsed.counts).some((count) => count < 0)) return null;
   if (![parsed.reproducibilityHash, parsed.sourceIdentitySha256, parsed.generationPolicySha256, ...Object.values(parsed.hashes)].every(isSha256)) return null;
@@ -367,6 +522,7 @@ function parseItem(value: unknown): RawItem | null {
     reviewedOcrAttestationSha256 = provenance.attestationSha256;
   }
   const body = readRawString(value.body) ?? "";
+  const officialProvenance = parseOfficialProvenance(value.official_provenance);
   const parsed: RawItem = {
     itemId: readString(value.item_id),
     itemType,
@@ -382,7 +538,9 @@ function parseItem(value: unknown): RawItem | null {
     bodyOrigin,
     reviewedOcrCandidateSha256,
     reviewedOcrContentSha256,
-    reviewedOcrAttestationSha256
+    reviewedOcrAttestationSha256,
+    rawSha256: readString(value.raw_sha256).toLowerCase(),
+    officialProvenance
   };
   if (!parsed.itemId || !parsed.title || !parsed.category || !parsed.state || !parsed.stableKey || !parsed.versionKey || !parsed.sourceKey || !parsed.extractionStatus || !isSha256(parsed.bodyHash)) return null;
   if (parsed.bodyOrigin === "human-reviewed-ocr") {
@@ -390,6 +548,7 @@ function parseItem(value: unknown): RawItem | null {
     const normalizedBody = normalizeText(parsed.body);
     if (!normalizedBody || sha256(normalizedBody) !== parsed.bodyHash) return null;
   }
+  if (!isSha256(parsed.rawSha256)) return null;
   return parsed;
 }
 
@@ -550,6 +709,12 @@ function tokens(value: string): string[] {
 function buildRecord(item: RawItem, chunks: RawChunk[], snapshotId: string): KoshaGuideCorpusRecord {
   const normalizedBody = normalizeText(item.body);
   const validBody = Boolean(normalizedBody) && sha256(normalizedBody) === item.bodyHash;
+  const official = item.officialProvenance;
+  const validOfficialProvenance = official !== null
+    && official.officialStatus === "current"
+    && official.officialVersion === item.versionKey
+    && official.pdfSha256 === item.rawSha256
+    && official.bodySha256 === item.bodyHash;
   const anchors = chunks.slice(0, 8).map((chunk) => ({
     page: chunk.pageStart,
     excerpt: normalizeText(chunk.text).slice(0, 220)
@@ -560,7 +725,11 @@ function buildRecord(item: RawItem, chunks: RawChunk[], snapshotId: string): Kos
     .slice(0, 2)
     .map((sentence) => sentence.slice(0, 180));
   const lifecycle = item.state === "current" ? "current" : item.state === "retired" ? "retired" : "stale";
-  const quality = validBody && item.bodyOrigin === "native" && anchors.length > 0 && lifecycle === "current"
+  const quality = validBody
+    && item.bodyOrigin === "native"
+    && anchors.length > 0
+    && lifecycle === "current"
+    && validOfficialProvenance
     ? "accepted"
     : "review_required";
   return {
@@ -579,7 +748,13 @@ function buildRecord(item: RawItem, chunks: RawChunk[], snapshotId: string): Kos
       generatedAt: "",
       lifecycle,
       chunkId: anchors.length ? chunks[0]?.chunkId ?? "" : "",
-      bodyHash: item.bodyHash
+      bodyHash: item.bodyHash,
+      officialUrl: official?.officialUrl ?? "",
+      officialFileId: official?.officialFileId ?? "",
+      publicationDate: official?.publicationDate ?? "",
+      officialVersion: official?.officialVersion ?? "",
+      officialStatus: "current",
+      pdfHash: official?.pdfSha256 ?? ""
     },
     tags: {
       keywords: tokens(`${item.title} ${item.category}`).slice(0, 24),
@@ -673,8 +848,35 @@ async function loadUncached(rootDir: string, current: CurrentSnapshot, hooks?: K
     const records = [...items.values()]
       .filter((item) => !failedIds.has(item.itemId))
       .map((item) => buildRecord(item, chunksByItem.get(item.itemId) ?? [], current.snapshotId));
-    if (manifest.counts.inventory !== items.size || manifest.counts.success !== records.length || manifest.counts.chunks !== chunksFile.rows.length || manifest.counts.failureLedger !== failuresFile.rows.length) {
+    if (
+      manifest.counts.inventory !== items.size + failuresFile.rows.length
+      || manifest.counts.success !== records.length
+      || manifest.counts.chunks !== chunksFile.rows.length
+      || manifest.counts.failureLedger !== failuresFile.rows.length
+    ) {
       throw new CorpusGateError("count:manifest");
+    }
+    const gate = manifest.launchGate;
+    const coverage = manifest.coverageScope;
+    if (!gate.launchReady) throw new CorpusGateError("gate:launch-not-ready");
+    if (gate.failureCount > 0 || failuresFile.rows.length > 0 || coverage.rejectedCount > 0) {
+      throw new CorpusGateError("gate:failures");
+    }
+    if (gate.partialCoverage || !coverage.complete || coverage.acceptedCount !== coverage.candidateCount) {
+      throw new CorpusGateError("gate:partial-coverage");
+    }
+    if (!gate.provenanceComplete || records.some((record) => record.quality !== "accepted")) {
+      throw new CorpusGateError("gate:provenance-incomplete");
+    }
+    if (
+      gate.failureCount !== manifest.counts.failureLedger
+      || coverage.acceptedCount !== records.length
+      || coverage.rejectedCount !== failuresFile.rows.length
+      || coverage.candidateCount !== coverage.acceptedCount + coverage.rejectedCount
+      || coverage.sourceInventoryCount !== coverage.candidateCount + coverage.outOfScopeCount
+      || records.some((record) => !coverage.itemTypes.includes(record.itemType))
+    ) {
+      throw new CorpusGateError("gate:count-mismatch");
     }
     return {
       status: "ready",
@@ -685,6 +887,7 @@ async function loadUncached(rootDir: string, current: CurrentSnapshot, hooks?: K
       itemCount: records.length,
       chunkCount: chunksFile.rows.length,
       failureCount: failuresFile.rows.length,
+      coverageScope: coverage,
       records,
       indexedRecords: records.map((record) => ({
         record,
@@ -719,7 +922,17 @@ export async function loadKoshaGuideCorpus(options: KoshaGuideCorpusLookup = {})
 }
 
 function directEligible(record: KoshaGuideCorpusRecord): boolean {
-  return record.quality === "accepted" && record.bodyKind === "native" && record.provenance.lifecycle === "current" && record.anchors.length > 0;
+  return record.quality === "accepted"
+    && record.bodyKind === "native"
+    && record.provenance.lifecycle === "current"
+    && record.anchors.length > 0
+    && isOfficialKoshaUrl(record.provenance.officialUrl)
+    && Boolean(record.provenance.officialFileId)
+    && isIsoDate(record.provenance.publicationDate)
+    && record.provenance.officialStatus === "current"
+    && record.provenance.officialVersion === record.version
+    && isSha256(record.provenance.pdfHash)
+    && isSha256(record.provenance.bodyHash);
 }
 
 function evidenceRef(record: KoshaGuideCorpusRecord): string | null {

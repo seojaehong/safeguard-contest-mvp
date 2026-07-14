@@ -19,37 +19,25 @@ afterEach(() => {
 });
 
 describe("current-base KOSHA lifecycle quality", () => {
-  it.skipIf(!existsSync(ACTUAL_KOSHA_ROOT))("maps the actual stale1038/retired1 v3 distribution to review-required", async () => {
+  it.skipIf(!existsSync(ACTUAL_KOSHA_ROOT))("blocks the legacy v3 lifecycle snapshot before retrieval", async () => {
     const loaded = await loadKoshaGuideCorpus({ rootDir: ACTUAL_KOSHA_ROOT });
-    expect(loaded.status === "blocked" ? loaded.failures.join(", ") : loaded.status).toBe("ready");
-    if (loaded.status !== "ready") return;
-    const lifecycleCounts = loaded.records.reduce<Record<string, number>>((counts, record) => {
-      counts[record.provenance.lifecycle] = (counts[record.provenance.lifecycle] ?? 0) + 1;
-      return counts;
-    }, {});
-
-    expect(lifecycleCounts).toEqual({ stale: 1038, retired: 1 });
-    expect(loaded.records.every((record) => record.quality === "review_required")).toBe(true);
-    expect(loaded.records.every((record) => !isKoshaGuideDirectEvidenceAccepted(record))).toBe(true);
-
-    const dc13 = loaded.records.find((record) => record.version === "D-C-13-2026");
-    expect(dc13).toMatchObject({
-      version: "D-C-13-2026",
-      quality: "review_required",
-      provenance: { lifecycle: "stale" }
-    });
+    expect(loaded.status).toBe("blocked");
+    expect(loaded.status === "blocked" && loaded.failures).toContain("schema:manifest.json");
   }, 20_000);
 
   it("accepts valid current records while stale and retired remain review-required", async () => {
     for (const lifecycle of ["current", "stale", "retired"] as const) {
       const loaded = await loadKoshaGuideCorpus({ rootDir: createKoshaFixture({ state: lifecycle }) });
+      if (lifecycle !== "current") {
+        expect(loaded.status).toBe("blocked");
+        expect(loaded.status === "blocked" && loaded.failures).toContain("gate:provenance-incomplete");
+        continue;
+      }
       expect(loaded.status).toBe("ready");
       if (loaded.status !== "ready") continue;
-      const expectedQuality = lifecycle === "current" ? "accepted" : "review_required";
-      const expectedDirect = lifecycle === "current";
-      expect(new Set(loaded.records.map((record) => record.quality))).toEqual(new Set([expectedQuality]));
-      expect(new Set(loaded.records.map((record) => record.provenance.lifecycle))).toEqual(new Set([lifecycle]));
-      expect(loaded.records.every((record) => isKoshaGuideDirectEvidenceAccepted(record) === expectedDirect)).toBe(true);
+      expect(new Set(loaded.records.map((record) => record.quality))).toEqual(new Set(["accepted"]));
+      expect(new Set(loaded.records.map((record) => record.provenance.lifecycle))).toEqual(new Set(["current"]));
+      expect(loaded.records.every(isKoshaGuideDirectEvidenceAccepted)).toBe(true);
     }
   });
 });

@@ -56,7 +56,14 @@ describe("current-base KOSHA provenance review regressions", () => {
         bodyKind: "native",
         anchors: [{ page: 1, excerpt: "지게차와 보행자 동선을 분리한다." }],
         evidenceRef: localEvidenceRef,
-        directEligible: true
+        directEligible: true,
+        officialUrl: "https://portal.kosha.or.kr/archive/resources/tech-support/search/all",
+        officialFileId: "fixture-forklift-local",
+        publicationDate: "2026-01-30",
+        officialVersion: "2026",
+        officialStatus: "current",
+        pdfSha256: "1".repeat(64),
+        bodySha256: "2".repeat(64)
       }
     });
     const response = buildMockAskResponse("지게차 보행자 동선 충돌", mockSearchResults, "mock", "test");

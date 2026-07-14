@@ -43,7 +43,14 @@ function supporting(
       bodyKind: "native",
       anchors: [{ page: 1, excerpt: overrides.summary ?? id }],
       evidenceRef,
-      directEligible: true
+      directEligible: true,
+      officialUrl: "https://portal.kosha.or.kr/archive/resources/tech-support/search/all",
+      officialFileId: `fixture-${id}`,
+      publicationDate: "2026-01-30",
+      officialVersion: "2026",
+      officialStatus: "current",
+      pdfSha256: "1".repeat(64),
+      bodySha256: "2".repeat(64)
     }
   };
 }
