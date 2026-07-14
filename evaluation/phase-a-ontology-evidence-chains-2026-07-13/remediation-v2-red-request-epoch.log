@@ -1,0 +1,42 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/command-center-request-lifecycle.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/command-center-request-lifecycle.test.ts (7 tests | 2 failed) 30ms
+     × invalidates an in-flight generation when its input binding is edited 4ms
+     × lets only the second generation commit after the first response is delayed 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/command-center-request-lifecycle.test.ts > command center request lifecycle > invalidates an in-flight generation when its input binding is edited
+TypeError: createBoundRequestGate is not a function
+ ❯ tests/command-center-request-lifecycle.test.ts:15:18
+     13| describe("command center request lifecycle", () => {
+     14|   it("invalidates an in-flight generation when its input binding is ed…
+     15|     const gate = createBoundRequestGate<string>();
+       |                  ^
+     16|     const generation = gate.begin("question:scaffold-a");
+     17|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/command-center-request-lifecycle.test.ts > command center request lifecycle > lets only the second generation commit after the first response is delayed
+TypeError: createBoundRequestGate is not a function
+ ❯ tests/command-center-request-lifecycle.test.ts:25:18
+     23|
+     24|   it("lets only the second generation commit after the first response …
+     25|     const gate = createBoundRequestGate<string>();
+       |                  ^
+     26|     const first = gate.begin("question:first");
+     27|     const second = gate.begin("question:second");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 passed (7)
+   Start at  12:30:09
+   Duration  777ms (transform 83ms, setup 0ms, import 108ms, tests 30ms, environment 0ms)

@@ -1,0 +1,38 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-share-authority-contract.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-share-authority-contract.test.ts (6 tests | 1 failed) 10ms
+     × is bound to the exact Share review and product heads 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/phase-a-share-authority-contract.test.ts > Phase A and Share v2 joint authority contract > is bound to the exact Share review and product heads
+AssertionError: expected undefined to be 'fc2bd1783fcc413981306f689d67bb6c659a9…' // Object.is equality
+
+- Expected:
+"fc2bd1783fcc413981306f689d67bb6c659a985e"
+
++ Received:
+undefined
+
+ ❯ tests/phase-a-share-authority-contract.test.ts:144:54
+    142|   it("is bound to the exact Share review and product heads", () => {
+    143|     expect(PHASE_A_SHARE_CONTRACT_REVIEW_HEAD).toBe("22de1180d69263f7c…
+    144|     expect(PHASE_A_SHARE_CONTRACT_BASE_PRODUCT_HEAD).toBe("fc2bd1783fc…
+       |                                                      ^
+    145|     expect(PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD).toBe("7141baac3e0abca1…
+    146|     expect(PHASE_A_SHARE_SEMANTIC_CONFLICT_PATHS).toEqual([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  14:35:34
+   Duration  791ms (transform 97ms, setup 0ms, import 124ms, tests 10ms, environment 0ms)
+
+EXIT_CODE=1

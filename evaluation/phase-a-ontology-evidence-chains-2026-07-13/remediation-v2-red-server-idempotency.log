@@ -1,0 +1,68 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/workpack-generation-evidence-route.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+stderr | tests/workpack-generation-evidence-route.test.ts > workpack generation evidence save gate > atomically reopens one deterministic server workpack across tabs and devices
+workpack save failed {
+  code: '23505',
+  message: 'duplicate key value violates unique constraint'
+}
+
+stderr | tests/workpack-generation-evidence-route.test.ts > workpack generation evidence save gate > fails closed when a deterministic UUID collision is not the exact owned generation binding
+workpack save failed {
+  code: '23505',
+  message: 'duplicate key value violates unique constraint'
+}
+
+ ❯ tests/workpack-generation-evidence-route.test.ts (11 tests | 2 failed) 244ms
+     × atomically reopens one deterministic server workpack across tabs and devices 16ms
+     × fails closed when a deterministic UUID collision is not the exact owned generation binding 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-generation-evidence-route.test.ts > workpack generation evidence save gate > atomically reopens one deterministic server workpack across tabs and devices
+AssertionError: expected 500 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 500
+
+ ❯ tests/workpack-generation-evidence-route.test.ts:176:35
+    174|
+    175|     expect(firstResponse.status).toBe(200);
+    176|     expect(secondResponse.status).toBe(200);
+       |                                   ^
+    177|     expect(first).toMatchObject({ ok: true, created: true, reopened: f…
+    178|     expect(second).toMatchObject({ ok: true, created: false, reopened:…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/workpack-generation-evidence-route.test.ts > workpack generation evidence save gate > fails closed when a deterministic UUID collision is not the exact owned generation binding
+AssertionError: expected 500 to be 409 // Object.is equality
+
+- Expected
++ Received
+
+- 409
++ 500
+
+ ❯ tests/workpack-generation-evidence-route.test.ts:211:29
+    209|     const body = await response.json() as Record<string, unknown>;
+    210|
+    211|     expect(response.status).toBe(409);
+       |                             ^
+    212|     expect(body).toMatchObject({
+    213|       ok: false,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 9 passed (11)
+   Start at  12:38:41
+   Duration  1.32s (transform 337ms, setup 0ms, import 377ms, tests 244ms, environment 0ms)

@@ -1,0 +1,4523 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/phase-a-citation-authority.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-citation-authority.test.ts (13 tests | 2 failed) 24ms
+     × logs every rejected generation source without leaking the rejected value 10ms
+     × wires phaseAReview and the shared authority projection into citation surfaces 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/phase-a-citation-authority.test.ts > Phase A citation authority UI > logs every rejected generation source without leaking the rejected value
+AssertionError: expected 'async function captureGenerationSourc…' to contain 'sourceLabel: PhaseAGenerationSourceLa…'
+
+- Expected
++ Received
+
+- sourceLabel: PhaseAGenerationSourceLabel
++ async function captureGenerationSource<Value>(
++   promise: Promise<Value>,
++ ): Promise<CapturedGenerationSource<Value>> {
++   try {
++     return { available: true, value: await promise };
++   } catch {
++     return { available: false, value: null };
++   }
++ }
++
++ function generationSourceState(source: CapturedGenerationSource<unknown>): "available" | "fallback" | "missing" {
++   if (!source.available) return "missing";
++   if (
++     typeof source.value === "object" &&
++     source.value !== null &&
++     Reflect.get(source.value, "mode") === "fallback"
++   ) {
++     return "fallback";
++   }
++   return "available";
++ }
++
++ const FINAL_DELIVERABLE_TRACE_KEYS = [
++   "workpackSummaryDraft",
++   "riskAssessmentDraft",
++   "workPlanDraft",
++   "workPlanStructured",
++   "permitInspectionStructured",
++   "tbmBriefing",
++   "tbmBriefingStructured",
++   "tbmLogDraft",
++   "tbmLogStructured",
++   "safetyEducationRecordDraft",
++   "educationRecordStructured",
++   "emergencyResponseDraft",
++   "photoEvidenceDraft",
++   "foreignWorkerBriefing",
++   "foreignWorkerTransmission",
++   "kakaoMessage"
++ ] as const;
++
++ function buildFinalAnswerTrace(upstream: AnswerGenerationResult["trace"]): GenerationTrace["answer"] {
++   return {
++     provider: "safeclaw",
++     model: null,
++     composition: "safeclaw_db_harness",
++     upstream: {
++       provider: upstream.provider,
++       model: upstream.model,
++       fallbackUsed: upstream.fallbackUsed,
++       usedInFinal: false
++     }
++   };
++ }
++
++ function deterministicDeliverableTrace(fallbackUsed: boolean): GenerationDeliverableModelTrace {
++   return {
++     provider: "safeclaw",
++     model: null,
++     source: "deterministic",
++     fallbackUsed
++   };
++ }
++
++ function summarizeFinalDeliverablesProvider(
++   modelPerDocument: Record<string, GenerationDeliverableModelTrace>
++ ): GenerationTrace["deliverables"]["provider"] {
++   const providers = new Set(Object.values(modelPerDocument).map((item) => item.provider));
++   if (!providers.size) return null;
++   if (providers.size > 1) return "mixed";
++   return providers.values().next().value ?? null;
++ }
++
++ function finalizeDeliverablesTrace(
++   response: AskResponse,
++   execution: GenerationTrace["deliverables"] & { fallbackUsed: boolean }
++ ): GenerationTrace["deliverables"] & { fallbackUsed: boolean } {
++   const modelPerDocument = { ...execution.modelPerDocument };
++   for (const key of FINAL_DELIVERABLE_TRACE_KEYS) {
++     if (typeof response.deliverables[key] !== "undefined" && !modelPerDocument[key]) {
++       modelPerDocument[key] = deterministicDeliverableTrace(false);
++     }
++   }
++   if (response.structured?.riskAssessmentRows.length && !modelPerDocument.structuredRiskRows) {
++     modelPerDocument.structuredRiskRows = deterministicDeliverableTrace(false);
++   }
++   if (response.structured?.tbmRiskLinks?.length && !modelPerDocument.tbmRiskLinks) {
++     modelPerDocument.tbmRiskLinks = deterministicDeliverableTrace(false);
++   }
++   return {
++     attempted: execution.attempted,
++     provider: summarizeFinalDeliverablesProvider(modelPerDocument),
++     modelPerDocument,
++     fallbackUsed: execution.fallbackUsed
++       || Object.values(modelPerDocument).some((item) => item.fallbackUsed === true)
++   };
++ }
++
++ export async function runSearch(query: string) {
++   return searchLegalSources(query);
++ }
++
++ function inferLegalEvidenceMode(sourceMix: ReturnType<typeof summarizeLegalSourceMix>): AskResponse["status"]["lawgo"] {
++   if ((sourceMix.counts.lawgo || 0) > 0 || (sourceMix.counts["korean-law-mcp"] || 0) > 0) {
++     return "live";
++   }
++   if ((sourceMix.counts.mock || 0) > 0) {
++     return "fallback";
++   }
++   return "mock";
++ }
++
++ function riskLevelFrom(likelihood: number, severity: number): RiskAssessmentRow["riskLevel"] {
++   const score = likelihood * severity;
++   if (score >= 10) return "high";
++   if (score >= 5) return "medium";
++   return "low";
++ }
++
++ export function normalizeRiskAssessmentRiskLevels(rows: RiskAssessmentRow[]): RiskAssessmentRow[] {
++   return rows.map((row) => ({
++     ...row,
++     riskLevel: riskLevelFrom(row.likelihood, row.severity)
++   }));
++ }
++
++ export function normalizeAndValidateRiskAssessmentRows(rows: RiskAssessmentRow[]): {
++   rows: RiskAssessmentRow[];
++   issues: RiskAssessmentValidationIssue[];
++ } {
++   const normalized = normalizeRiskAssessmentRiskLevels(rows);
++   const validation = validateRiskAssessmentRows(normalized);
++   return { rows: validation.rows, issues: validation.issues };
++ }
++
++ function inferFourM(text: string): FourM {
++   if (/비계|지게차|장비|기계|차량|전기|용접|공구|호스|배관|펌프|밸브/.test(text)) return "Machine";
++   if (/강풍|우천|폭염|자외선|누수|천장|바닥|밀폐|환기|화학|가스|분진/.test(text)) return "Media";
++   if (/신규|외국인|고령|2인|작업자|숙련|피로|보호구/.test(text)) return "Man";
++   return "Management";
++ }
++
++ function inferAccidentType(text: string): AccidentType {
++   if (/추락|고소|비계|개구부|사다리/.test(text)) return "fall";
++   if (/미끄|우천|바닥|전도/.test(text)) return "slip";
++   if (/지게차|차량|동선|충돌|교통/.test(text)) return "traffic";
++   if (/끼임|협착|말림/.test(text)) return "caughtIn";
++   if (/화학|세정|유해|누출|가스|분진/.test(text)) return "chemicalExposure";
++   if (/폭염|온열|열사병|자외선/.test(text)) return "heatIllness";
++   if (/화기|용접|화재|폭발/.test(text)) return "fireExplosion";
++   if (/밀폐|산소|질식/.test(text)) return "asphyxiation";
++   if (/감전|전기/.test(text)) return "electricShock";
++   if (/붕괴|전도|전복/.test(text)) return "collapse";
++   return "other";
++ }
++
++ function buildRiskRow(params: {
++   location: string;
++   process: string;
++   task: string;
++   equipment: string;
++   hazard: string;
++   currentControls: string;
++   likelihood: number;
++   severity: number;
++   additionalControls: string;
++   owner: string;
++   due: string;
++   verification: string;
++   verificationChecker: string;
++   evidenceRefs: string[];
++   verificationStatus?: RiskAssessmentRow["verificationStatus"];
++ }): RiskAssessmentRow {
++   const hazardContext = `${params.task} ${params.equipment} ${params.hazard}`;
++   return {
++     location: params.location,
++     process: params.process,
++     task: params.task,
++     equipment: params.equipment,
++     hazard: params.hazard,
++     fourM: inferFourM(hazardContext),
++     accidentType: inferAccidentType(hazardContext),
++     currentControls: params.currentControls,
++     likelihood: params.likelihood,
++     severity: params.severity,
++     riskLevel: riskLevelFrom(params.likelihood, params.severity),
++     additionalControls: params.additionalControls,
++     owner: params.owner,
++     due: params.due,
++     verification: params.verification,
++     verificationStatus: params.verificationStatus || "planned",
++     verificationDate: params.due,
++     verificationChecker: params.verificationChecker,
++     whyLikelihood: `${params.location}의 작업 조건과 ${params.equipment} 사용 상태를 고려해 발생 가능성을 ${params.likelihood}로 산정했습니다.`,
++     whySeverity: `${params.hazard} 발생 시 작업중지, 부상 또는 중대재해로 이어질 수 있어 중대성을 ${params.severity}로 산정했습니다.`,
++     evidenceRefs: params.evidenceRefs
++   };
++ }
++
++ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: string): RiskAssessmentRow[] {
++   const scenario = response.scenario;
++   const topRisk = response.riskSummary.topRisk || "작업 조건 변화로 인한 현장 안전 위험";
++   const actions = response.riskSummary.immediateActions.length
++     ? response.riskSummary.immediateActions
++     : ["작업 전 현장 점검", "작업중지 기준 공유", "관리감독자 확인"];
++   const workText = `${scenario.workSummary} ${topRisk}`;
++   const weatherText = weatherSummary || scenario.weatherNote || "기상청 현재·예보 신호 확인";
++   const location = scenario.siteName || "현장 작업구역";
++   const process = response.riskSummary.title || scenario.companyType || "현장 작업";
++   const due = "현장 확인";
++
++   return [
++     buildRiskRow({
++       location,
++       process,
++       task: scenario.workSummary,
++       equipment: /비계/.test(workText) ? "이동식 비계, 작업발판, 보호구" : /지게차/.test(workText) ? "지게차, 팔레트, 하역구역 표지" : "작업 장비·공구·보호구",
++       hazard: topRisk,
++       currentControls: "작업 전 장비 상태, 작업구역, 보호구 착용 상태를 확인합니다.",
++       likelihood: 4,
++       severity: 5,
++       additionalControls: actions[0] || "작업 전 핵심 위험요인과 통제대책을 TBM에서 공유합니다.",
++       owner: "작업반장",
++       due,
++       verification: "작업 시작 전 현장 점검과 TBM 구두 복창으로 확인",
++       verificationChecker: "관리감독자",
++       evidenceRefs: ["산업안전보건법", "KOSHA 위험성평가", "문서팩 입력 조건"]
++     }),
++     buildRiskRow({
++       location,
++       process,
++       task: "작업환경 및 기상 조건 확인",
++       equipment: "기상청 현재·예보, 작업중지 기준표",
++       hazard: `${weatherText}에 따른 작업환경 변화 위험`,
++       currentControls: "기상 변화와 작업장 바닥·시야·풍속 상태를 작업 전 확인합니다.",
++       likelihood: /강풍|우천|폭염|위험|높음/.test(weatherText) ? 4 : 3,
++       severity: /강풍|폭염|위험/.test(weatherText) ? 4 : 3,
++       additionalControls: actions[1] || "기상 악화 또는 위험 징후 체감 시 즉시 작업을 중지하고 대기합니다.",
++       owner: "관리감독자",
++       due,
++       verification: "기상청 신호와 현장 체감 조건을 함께 확인해 작업 지속 여부 결정",
++       verificationChecker: "현장소장",
++       evidenceRefs: ["기상청 현재·예보", "KOSHA 위험성평가", "작업중지 기준"]
++     }),
++     buildRiskRow({
++       location,
++       process,
++       task: "장비·도구 안전점검",
++       equipment: /누수|천장/.test(workText) ? "사다리, 전동공구, 누수 점검 장비" : "작업 장비, 공구, 방호장치",
++       hazard: "장비·도구 상태 불량 또는 방호조치 미흡으로 인한 사고 위험",
++       currentControls: "사용 전 외관, 고정상태, 전원·잠금·방호장치 상태를 점검합니다.",
++       likelihood: 3,
++       severity: 4,
++       additionalControls: "이상 발견 시 해당 장비 사용을 중지하고 대체 장비 또는 보수 후 작업합니다.",
++       owner: "장비 담당자",
++       due,
++       verification: "장비별 점검 체크와 사진 증빙으로 확인",
++       verificationChecker: "작업반장",
++       evidenceRefs: ["KOSHA 안전작업 지침", "장비 점검표", "사진·증빙 기록"]
++     }),
++     buildRiskRow({
++       location,
++       process,
++       task: "작업자 배치 및 의사소통",
++       equipment: "보호구, 무전·휴대전화, 다국어 안내문",
++       hazard: "신규·외국인·소수 인원 작업에서 지시 미이해 또는 단독작업으로 인한 위험",
++       currentControls: "작업 전 역할, 연락체계, 보호구 착용, 이해 여부를 확인합니다.",
++       likelihood: /신규|외국인|2인|소수/.test(workText) ? 4 : 3,
++       severity: 3,
++       additionalControls: "핵심 위험 문구를 쉬운 한국어와 필요 언어로 공유하고 이해하지 못하면 작업을 시작하지 않습니다.",
++       owner: "작업반장",
++       due,
++       verification: "TBM 참석자 확인, 구두 복창, 서명 또는 전송 로그로 확인",
++       verificationChecker: "관리감독자",
++       evidenceRefs: ["안전보건교육 기록", "외국인 근로자 안내문", "TBM 기록"]
++     }),
++     buildRiskRow({
++       location,
++       process,
++       task: "관리체계 및 조치 확인",
++       equipment: "위험성평가표, TBM일지, 사진·증빙 기록",
++       hazard: "위험성평가 결과가 TBM·교육·현장 전파로 이어지지 않아 조치가 누락될 위험",
++       currentControls: "위험성평가 결과와 즉시조치 항목을 문서팩과 TBM에 함께 반영합니다.",
++       likelihood: 2,
++       severity: 3,
++       additionalControls: actions[2] || "조치 담당자, 확인자, 확인시각을 남기고 미조치 항목은 후속조치로 분리합니다.",
++       owner: "현장소장",
++       due,
++       verification: "문서팩 저장, 전파 로그, 사진 증빙, 확인자 서명으로 추적",
++       verificationChecker: "안전관리 담당자",
++       evidenceRefs: ["산업안전보건법", "KOSHA TBM OPS", "전파·이력 로그"]
++     })
++   ];
++ }
++
++ function compactRiskCell(value: string | null | undefined, maxLength = 96): string {
++   const normalized = (value || "").replace(/\s+/g, " ").trim();
++   if (!normalized) return "";
++   return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 1)}…` : normalized;
++ }
++
++ function includesRiskAssessmentDocument(item: SafetyReferenceItem): boolean {
++   const documents = [...(item.primary_documents || []), ...(item.reflected_documents || [])];
++   return documents.length === 0 || documents.some((document) =>
++     /위험성평가|TBM|티비엠|안전보건교육|작업계획/.test(document)
++   );
++ }
++
++ const MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW = 2;
++
++ export function buildSafetyReferenceRiskRows(
++   response: AskResponse,
++   references: readonly SafetyReferenceItem[],
++   weatherSummary: string,
++   query?: string
++ ): RiskAssessmentRow[] {
++   const scenario = response.scenario;
++   const location = scenario.siteName || "현장 작업구역";
++   const process = response.riskSummary.title || scenario.companyType || "현장 작업";
++   const rankQuery = query || [
++     scenario.siteName,
++     scenario.workSummary,
++     response.riskSummary.title,
++     response.riskSummary.topRisk
++   ].filter(Boolean).join(" ");
++   const eligibleReferences = references
++     .filter(isSafetyReferenceRiskEligible)
++     .filter(includesRiskAssessmentDocument)
++     .filter((item) => item.title || item.summary || item.controls.length);
++   const supportingKoshaReferences = references.filter((item) =>
++     item.evidence_role === "supporting"
++       && Boolean(item.kosha_guide?.evidenceRef)
++       && isSafetyReferenceDirectEligible(item)
++   );
++   const rankedEligibleReferences = filterAndRankSafetyReferencesByQuery(
++     rankQuery,
++     [...eligibleReferences],
++     eligibleReferences.length
++   );
++   const topCandidates = rankedEligibleReferences;
++   const seen = new Set<string>();
++   const rows: RiskAssessmentRow[] = [];
++
++   for (const item of topCandidates) {
++     const displayTitle = getSafetyReferenceDisplayTitle(item);
++     const operationalView = deriveSafetyReferenceOperationalView(item);
++     const control = compactRiskCell(operationalView.controls[0], 120) ||
++       "해당 근거의 필수 확인 항목을 작업 전 점검합니다.";
++     const additionalControl = compactRiskCell(operationalView.controls[1], 120) ||
++       compactRiskCell(item.document_reflection_label, 120) ||
++       control;
++     const hazard = compactRiskCell(operationalView.hazard, 120);
++     const dedupeKey = `${hazard}|${control}`;
++     if (seen.has(dedupeKey)) continue;
++     seen.add(dedupeKey);
++     const supportingEvidenceRefs = item.evidence_role === "direct"
++       ? Array.from(new Set(filterAndRankSafetyReferencesByQuery(
++       `${rankQuery} ${displayTitle} ${hazard} ${control}`,
++       supportingKoshaReferences.filter((supporting) => hasStrongSafetyReferenceRowOverlap(item, supporting)),
++       supportingKoshaReferences.length
++     ).map((supporting) => supporting.kosha_guide?.evidenceRef)
++       .filter((ref): ref is string => Boolean(ref))))
++         .slice(0, MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW)
++       : [];
++     const evidenceRefs = [
++       item.evidence_role === "direct" ? "DB 하네스 직접근거" : "DB 하네스 보조근거",
++       item.source_kind_label || item.item_type || "safety_reference_items",
++       displayTitle,
++       item.retrieval_source ? `검색: ${item.retrieval_source}` : "",
++       item.source_url || "",
++       ...supportingEvidenceRefs
++     ].filter(Boolean);
++     const candidateRow = buildRiskRow({
++       location,
++       process,
++       task: scenario.workSummary || compactRiskCell(displayTitle, 48) || "현장 작업",
++       equipment: compactRiskCell([item.category, item.subcategory].filter(Boolean).join(", "), 80) || "작업 장비·공구·보호구",
++       hazard,
++       currentControls: control,
++       likelihood: item.item_type === "sif-case" ? 4 : item.evidence_role === "direct" ? 3 : 2,
++       severity: item.item_type === "sif-case" ? 5 : /추락|질식|폭발|감전|화재|붕괴|끼임/.test(hazard) ? 5 : 4,
++       additionalControls: additionalControl,
++       owner: "작업반장",
++       due: "현장 확인",
++       verification: operationalView.reviewRequired
++         ? "DB 하네스 근거의 위험요인·통제대책을 원문 및 현장 조건과 대조해 검토"
++         : "DB 하네스 근거와 현장 사진·TBM 확인으로 조치 반영 여부를 확인",
++       verificationChecker: "관리감독자",
++       evidenceRefs,
++       verificationStatus: operationalView.reviewRequired ? "needsReview" : "planned"
++     });
++     rows.push(candidateRow);
++
++     if (rows.length >= 4) break;
++   }
++
++   if (!rows.length) return [];
++   const baselineRows = buildFallbackRiskAssessmentRows(response, weatherSummary);
++   const rowKeys = new Set(rows.map((row) => `${row.hazard}|${row.currentControls}`));
++   for (const row of baselineRows) {
++     const key = `${row.hazard}|${row.currentControls}`;
++     if (!rowKeys.has(key)) {
++       rows.push(row);
++       rowKeys.add(key);
++     }
++     if (rows.length >= 5) break;
++   }
++   return rows;
++ }
++
++ function photoSeverityFromImprovement(item: HarnessImprovement): "high" | "medium" | "low" | "review" {
++   const severityTag = item.detectedHazards?.find((hazard) => /^severity:/.test(hazard))?.replace("severity:", "");
++   if (severityTag === "high" || severityTag === "medium" || severityTag === "low") return severityTag;
++   return "review";
++ }
++
++ function buildPhotoHazardRiskRows(response: AskResponse, improvements: readonly HarnessImprovement[]): RiskAssessmentRow[] {
++   const scenario = response.scenario;
++   const location = scenario.siteName || "현장 작업구역";
++   const process = response.riskSummary.title || scenario.companyType || "현장 작업";
++   return improvements
++     .filter((item) => item.sourceType === "photo_analysis")
++     .filter((item) => item.hazardLabel || item.detectedHazards?.length || item.visionEvidence || item.sourcePhotoNames?.length)
++     .slice(0, 4)
++     .map((item) => {
++       const severity = photoSeverityFromImprovement(item);
++       const hazard = item.hazardLabel || item.detectedHazards?.find((value) => !value.startsWith("severity:")) || "사진 기반 위험요인";
++       const likelihood = severity === "high" ? 4 : severity === "medium" ? 3 : 2;
++       const severityValue = severity === "high" ? 5 : severity === "medium" ? 4 : 3;
++       const photoNames = item.sourcePhotoNames?.length ? item.sourcePhotoNames.slice(0, 5).join(", ") : "";
++       const siteSignals = item.siteSignals?.length ? item.siteSignals.slice(0, 4).join(", ") : "";
++       const evidenceRefs = [
++         item.visionUserLabel || "사진 위험요인 후보",
++         photoNames ? `사진: ${photoNames}` : "",
++         item.ocrText ? `OCR: ${item.ocrText}` : "",
++         siteSignals ? `현장 신호: ${siteSignals}` : "",
++         item.visionEvidence ? `사진 분석 근거: ${item.visionEvidence}` : ""
++       ].filter(Boolean);
++       return buildRiskRow({
++         location,
++         process,
++         task: item.taskLabel || scenario.workSummary || "사진 첨부 작업",
++         equipment: siteSignals ? `사진 첨부 작업면, ${siteSignals}` : "사진 첨부 작업면, 보호구, 작업구역",
++         hazard,
++         currentControls: item.improvementText || "사진 위험요인 확인 결과를 작업 전 현장 확인 항목으로 반영합니다.",
++         likelihood,
++         severity: severityValue,
++         additionalControls: item.observedImprovement || item.visionSummary || item.improvementText || "사진에서 확인된 위험요인을 TBM에서 공유하고 조치 완료 사진을 남깁니다.",
++         owner: "작업반장",
++         due: "현장 확인",
++         verification: "첨부 사진, OCR, 현장 재확인을 통해 위험요인과 조치 반영 여부를 확인",
++         verificationChecker: "관리감독자",
++         evidenceRefs
++       });
++     });
++ }
++
++ function appendPhotoSeedRiskRows(rows: RiskAssessmentRow[], photoRows: RiskAssessmentRow[]) {
++   if (!photoRows.length) return rows;
++   const existingHazards = new Set(rows.map((row) => row.hazard.trim()));
++   const uniquePhotoRows = photoRows.filter((row) => !existingHazards.has(row.hazard.trim()));
++   return uniquePhotoRows.length ? [...rows, ...uniquePhotoRows] : rows;
++ }
++
++ function buildTbmQuestionHazardLabel(hazard: string): string {
++   const label = compactRiskCell(hazard, 140);
++   if (!label) return "해당 위험";
++   return /위험/.test(label) ? label : `${label} 위험`;
++ }
++
++ export function buildTbmRiskLinks(rows: RiskAssessmentRow[], weatherSummary: string): TbmRiskLink[] {
++   return rows.slice(0, 6).map((row, index) => {
++     const owner = row.owner || "작업반장";
++     const checker = row.verificationChecker || "관리감독자";
++     const verificationStatus = row.verificationStatus || "planned";
++     const verificationDate = row.verificationDate || "작업 전";
++     const control = row.additionalControls || row.currentControls || "작업 전 안전조치를 확인합니다.";
++     const hazardLabel = buildTbmQuestionHazardLabel(row.hazard);
++     return {
++       riskRowIndex: index,
++       hazard: row.hazard,
++       control,
++       weatherSignal: weatherSummary || "기상청 현재·예보 신호 확인",
++       confirmQuestion: `${hazardLabel}에 대해 ${control} 조치를 이해하고 작업 전 확인했습니까?`,
++       owner,
++       verification: `${checker}가 ${verificationDate} 기준 ${verificationStatus} 상태로 확인하고 TBM 기록에 남깁니다.`,
++       evidenceRefs: row.evidenceRefs || []
++     };
++   });
++ }
++
++ type TbmHazardCategory = TbmBriefingStructured["hazards"][number]["category"];
++
++ function compactTbmText(value: string | undefined, fallback: string, maxLength: number): string {
++   const text = (value || fallback).replace(/\s+/g, " ").trim() || fallback;
++   if (text.length <= maxLength) return text;
++   return `${text.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
++ }
++
++ function uniqueNonEmpty(values: string[]): string[] {
++   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
++ }
++
++ function tbmCategory(row: RiskAssessmentRow): TbmHazardCategory {
++   return row.fourM;
++ }
++
++ function equipmentFromScenarioRows(scenario: AskResponse["scenario"], rows: RiskAssessmentRow[]): string[] {
++   const fromRows = rows.flatMap((row) => row.equipment.split(/[,/·]/).map((part) => part.trim()));
++   const values = uniqueNonEmpty(fromRows);
++   if (values.length) return values.slice(0, 5);
++   return uniqueNonEmpty([scenario.workSummary, "보호구", "작업구역 표지"]).slice(0, 5);
++ }
++
++ function tbmRows(rows: RiskAssessmentRow[]): RiskAssessmentRow[] {
++   return rows.length ? rows.slice(0, 5) : [];
++ }
++
++ function fillTbmList(values: string[], fallbacks: string[], count: number): string[] {
++   const filled = uniqueNonEmpty([...values, ...fallbacks]).slice(0, count);
++   return filled.length >= count ? filled : [...filled, ...fallbacks].slice(0, count);
++ }
++
++ export function buildTbmBriefingStructuredFromRiskRows(
++   scenario: AskResponse["scenario"],
++   rows: RiskAssessmentRow[],
++   weatherSummary: string
++ ): TbmBriefingStructured {
++   const selectedRows = tbmRows(rows);
++   const hazards = selectedRows.map((row) => ({
++     category: tbmCategory(row),
++     description: compactTbmText(row.hazard, "작업 전 위험요인 확인", 60)
++   }));
++   const safeHazards = hazards.length ? hazards : [
++     { category: "Management" as const, description: "작업 전 위험요인 확인" }
++   ];
++   const measures = selectedRows.map((row, index) => ({
++     hazardRef: Math.min(index + 1, safeHazards.length),
++     action: compactTbmText(row.additionalControls || row.currentControls, "작업 전 안전조치 확인", 80),
++     owner: compactTbmText(row.owner, "작업반장", 30)
++   }));
++   const stopCriteria = fillTbmList(
++     [
++       weatherSummary ? `기상 신호 이상 시 작업중지: ${compactTbmText(weatherSummary, "", 46)}` : "",
++       ...selectedRows
++         .filter((row) => row.riskLevel === "high")
++         .map((row) => `${compactTbmText(row.hazard, "고위험", 32)} 조치 전 작업 금지`)
++     ],
++     ["보호구 미착용 시 작업 금지", "통제구역 이탈 시 작업 중지", "관리감독자 확인 전 작업 재개 금지"],
++     5
++   );
++   const confirmTopics = fillTbmList(
++     selectedRows.map((row) => `${compactTbmText(row.hazard, "위험요인", 34)} 조치를 확인했습니까?`),
++     ["작업중지 기준을 이해했습니까?", "비상연락과 대피경로를 확인했습니까?", "사진 증빙 위치를 확인했습니까?", "작업자 동선을 확인했습니까?", "보호구 착용을 확인했습니까?"],
++     5
++   );
++
++   return {
++     meta: {
++       dateTime: "작업 전 TBM",
++       location: scenario.siteName,
++       target: `전 작업자 ${scenario.workerCount}명`,
++       attendees: "현장 서명 또는 열람 확인 버튼"
++     },
++     todayWork: {
++       name: scenario.workSummary,
++       location: scenario.siteName,
++       time: "작업 전",
++       equipment: equipmentFromScenarioRows(scenario, selectedRows)
++     },
++     hazards: safeHazards,
++     measures: measures.length ? measures : [{
++       hazardRef: 1,
++       action: "작업 전 안전조치 확인",
++       owner: "작업반장"
++     }],
++     stopCriteria,
++     confirmTopics,
++     photoEvidenceLocation: "작업 전·중·후 사진을 문서팩 사진 증빙에 첨부"
++   };
++ }
++
++ export function buildTbmLogStructuredFromRiskRows(
++   scenario: AskResponse["scenario"],
++   rows: RiskAssessmentRow[],
++   weatherSummary: string
++ ): TbmLogStructured {
++   const selectedRows = tbmRows(rows);
++   const workerCount = Math.max(1, scenario.workerCount || 1);
++   const confirmations = fillTbmList(
++     selectedRows.map((row) => `${compactTbmText(row.hazard, "위험요인", 34)} 조치 확인`),
++     ["작업중지 기준 공유", "보호구 착용 확인", "비상연락망 확인", "사진 증빙 위치 공유", "작업자 동선 확인"],
++     5
++   );
++   const keyPoints = fillTbmList(
++     [
++       ...selectedRows.map((row) => compactTbmText(row.additionalControls || row.currentControls, "작업 전 안전조치 확인", 70)),
++       weatherSummary ? `기상 신호 확인: ${compactTbmText(weatherSummary, "기상 확인", 46)}` : ""
++     ],
++     ["위험성평가 결과를 TBM에서 재확인", "현장 변경사항은 즉시 작업반장에게 보고", "작업중지 기준 발생 시 즉시 대피"],
++     5
++   );
++   const unaddressedItems = selectedRows
++     .filter((row) => row.verificationStatus === "needsReview")
++     .slice(0, 3)
++     .map((row) => ({
++       item: compactTbmText(row.hazard, "보완 필요 위험요인", 50),
++       plannedAction: compactTbmText(row.additionalControls || row.verification, "관리감독자 확인 후 작업 재개", 70),
++       owner: compactTbmText(row.owner, "작업반장", 30),
++       dueDate: row.due || "현장 확인"
++     }));
++
++   return {
++     meta: {
++       dateTime: "작업 당일 TBM 기록",
++       location: scenario.siteName,
++       workType: scenario.workSummary,
++       instructor: "작업반장"
++     },
++     attendance: {
++       expected: workerCount,
++       actual: workerCount,
++       attendees: Array.from({ length: Math.min(workerCount, 12) }, (_, index) => `작업자 ${index + 1}`),
++       absenceReason: "없음",
++       confirmationMethod: "현장 서명 또는 열람 확인 버튼"
++     },
++     todayWork: {
++       name: scenario.workSummary,
++       location: scenario.siteName,
++       time: "작업 전·중",
++       equipment: equipmentFromScenarioRows(scenario, selectedRows)
++     },
++     workerConfirmations: confirmations,
++     hazardsDiscussed: (selectedRows.length ? selectedRows : []).slice(0, 5).map((row, index) => ({
++       category: tbmCategory(row),
++       description: compactTbmText(row.hazard, "작업 전 위험요인 확인", 60),
++       relatedRiskRowIndex: index
++     })),
++     safetyEducation: {
++       topic: `${scenario.workSummary} 작업 전 위험성평가 공유`,
++       keyPoints,
++       materials: uniqueNonEmpty(selectedRows.flatMap((row) => row.evidenceRefs)).slice(0, 4).join(" / ") || "위험성평가표, KOSHA 자료, 현장 사진"
++     },
++     unaddressedItems,
++     photoEvidence: {
++       captureLocations: uniqueNonEmpty([scenario.siteName, scenario.workSummary]).slice(0, 3),
++       storagePath: "SafeClaw 문서팩 사진 증빙"
++     },
++     signatures: {
++       author: "작성자",
++       reviewer: "검토자",
++       approver: "승인자"
++     }
++   };
++ }
++
++ function tokenizeForRiskLink(value: string): string[] {
++   return [...new Set(
++     value
++       .toLowerCase()
++       .replace(/[^\p{L}\p{N}\s]/gu, " ")
++       .split(/\s+/)
++       .map((token) => token.trim())
++       .filter((token) => token.length >= 2)
++   )];
++ }
++
++ function riskRowLinkText(row: RiskAssessmentRow): string {
++   return [
++     row.location,
++     row.process,
++     row.task,
++     row.equipment,
++     row.hazard,
++     row.fourM,
++     row.accidentType,
++     row.currentControls,
++     row.additionalControls,
++     row.verification,
++     ...row.evidenceRefs
++   ].join(" ");
++ }
++
++ function scoreRiskRowLink(targetText: string, row: RiskAssessmentRow): number {
++   const targetTokens = tokenizeForRiskLink(targetText);
++   const rowTokens = new Set(tokenizeForRiskLink(riskRowLinkText(row)));
++   const overlap = targetTokens.filter((token) => rowTokens.has(token)).length;
++   const hazardBonus = tokenizeForRiskLink(row.hazard).some((token) => targetText.toLowerCase().includes(token)) ? 4 : 0;
++   const controlBonus = tokenizeForRiskLink(row.additionalControls).some((token) => targetText.toLowerCase().includes(token)) ? 2 : 0;
++   const fourMBonus = row.fourM && targetText.includes(row.fourM) ? 1 : 0;
++   const accidentBonus = row.accidentType && targetText.includes(row.accidentType) ? 1 : 0;
++   return overlap + hazardBonus + controlBonus + fourMBonus + accidentBonus;
++ }
++
++ function fallbackRiskRowIndex(rows: RiskAssessmentRow[]): number {
++   const highIndex = rows.findIndex((row) => row.riskLevel === "high");
++   return highIndex >= 0 ? highIndex : 0;
++ }
++
++ function pickRiskRowIndexes(targetText: string, rows: RiskAssessmentRow[], limit: number): number[] {
++   if (!rows.length) return [];
++   const fallbackIndex = fallbackRiskRowIndex(rows);
++   const ranked = rows
++     .map((row, index) => ({ index, score: scoreRiskRowLink(targetText, row) }))
++     .sort((a, b) => b.score - a.score || a.index - b.index)
++     .filter((item) => item.score > 0)
++     .slice(0, limit)
++     .map((item) => item.index);
++   return ranked.length ? ranked : [fallbackIndex];
++ }
++
++ function buildRiskRowVerification(row: RiskAssessmentRow): string {
++   const checker = row.verificationChecker || "관리감독자";
++   const date = row.verificationDate || row.due || "작업 전";
++   return row.verification || `${checker}가 ${date} 기준 위험성평가 조치 이행을 확인`;
++ }
++
++ function linkWorkPlanToRiskRows(
++   workPlan: WorkPlanStructured | undefined,
++   rows: RiskAssessmentRow[]
++ ): WorkPlanStructured | undefined {
++   if (!workPlan || !rows.length) return workPlan;
++
++   return {
++     ...workPlan,
++     workSteps: workPlan.workSteps.map((step, index) => {
++       const existingIndexes = Array.isArray(step.relatedRiskRowIndex)
++         ? step.relatedRiskRowIndex.filter((value) => Number.isInteger(value) && value >= 0 && value < rows.length)
++         : [];
++       const relatedRiskRowIndex = existingIndexes.length
++         ? existingIndexes
++         : pickRiskRowIndexes(`${step.action} ${step.equipment} ${step.safetyMeasure} ${step.owner}`, rows, 2);
++       const primaryRow = rows[relatedRiskRowIndex[0] ?? fallbackRiskRowIndex(rows)];
++       return {
++         ...step,
++         stepNo: step.stepNo || index + 1,
++         relatedRiskRowIndex,
++         evidenceRefs: step.evidenceRefs?.length ? step.evidenceRefs : primaryRow.evidenceRefs,
++         verification: step.verification || buildRiskRowVerification(primaryRow)
++       };
++     })
++   };
++ }
++
++ function linkPermitToRiskRows(
++   permit: PermitInspectionStructured | undefined,
++   rows: RiskAssessmentRow[]
++ ): PermitInspectionStructured | undefined {
++   if (!permit || !rows.length) return permit;
++
++   return {
++     ...permit,
++     conditions: permit.conditions.map((condition) => {
++       const candidateIndex = condition.relatedRiskRowIndex;
++       const existingIndex = typeof candidateIndex === "number" && Number.isInteger(candidateIndex) && candidateIndex >= 0 && candidateIndex < rows.length
++         ? candidateIndex
++         : undefined;
++       const relatedRiskRowIndex = existingIndex ?? pickRiskRowIndexes(`${condition.category} ${condition.requirement} ${condition.action} ${condition.owner}`, rows, 1)[0] ?? fallbackRiskRowIndex(rows);
++       const linkedRow = rows[relatedRiskRowIndex];
++       return {
++         ...condition,
++         relatedRiskRowIndex,
++         evidenceRefs: condition.evidenceRefs?.length ? condition.evidenceRefs : linkedRow.evidenceRefs,
++         verification: condition.verification || buildRiskRowVerification(linkedRow)
++       };
++     })
++   };
++ }
++
++ type DocumentEvidenceTarget = "risk" | "workPlan" | "tbm" | "education" | "emergency";
++
++ function getTargetLabel(target: DocumentEvidenceTarget) {
++   if (target === "risk") return "위험성평가표";
++   if (target === "workPlan") return "작업계획서";
++   if (target === "tbm") return "TBM 기록";
++   if (target === "education") return "안전교육 기록";
++   return "비상대응 절차";
++ }
++
++ function getTargetAction(target: DocumentEvidenceTarget) {
++   if (target === "risk") return "위험요인, 감소대책, 조치 확인란에 반영합니다.";
++   if (target === "workPlan") return "작업순서, 통제구역, 작업중지 기준에 반영합니다.";
++   if (target === "tbm") return "작업 전 공유 질문과 현장 확인 멘트에 반영합니다.";
++   if (target === "education") return "교육내용, 이해도 확인, 서명·사진 증빙 항목에 반영합니다.";
++   return "초기조치, 보고, 현장보존, 재발방지 확인 항목에 반영합니다.";
++ }
++
++ function compactTitleList(titles: string[]) {
++   return titles.filter(Boolean).slice(0, 2).join(" / ");
++ }
++
++ function formatOfficialTemplateAppendix(references: Awaited<ReturnType<typeof fetchKoshaReferences>>["references"]) {
++   if (!references.length) return "";
++
++   return [
++     "",
++     "[반영 근거: 공식자료]",
++     ...references.slice(0, 3).map((item) => (
++       `- ${item.agency || "KOSHA"} ${item.title}: ${(item.templateHints || []).slice(0, 2).join(", ") || item.category} 항목을 확인란으로 옮깁니다.`
++     ))
++   ].join("\n");
++ }
++
++ function formatRiskAssessmentOfficialAppendix(references: Awaited<ReturnType<typeof fetchKoshaReferences>>["references"]) {
++   const riskReferences = references.filter((item) => (item.appliesTo || item.appliedTo || []).includes("위험성평가표"));
++   if (!riskReferences.length) return "";
++
++   return [
++     "",
++     "[공식 서식 기준 보강]",
++     "- KOSHA 위험성평가 흐름에 맞춰 사전준비, 유해·위험요인 파악, 위험성 결정, 감소대책, 공유·교육, 조치 확인 순서로 기록합니다.",
++     "- 4M 관점(작업자, 장비·도구, 작업환경, 관리체계)을 누락 점검 기준으로 사용합니다.",
++     `- 반영 근거: ${riskReferences.slice(0, 3).map((item) => item.title).join(" / ")}`
++   ].join("\n");
++ }
++
++ function formatSafetyEducationOfficialAppendix(references: Awaited<ReturnType<typeof fetchKoshaReferences>>["references"]) {
++   const educationReferences = references.filter((item) => (item.appliesTo || item.appliedTo || []).includes("안전교육일지"));
++   if (!educationReferences.length) return "";
++
++   return [
++     "",
++     "[공식 교육기록 기준 보강]",
++     "- 교육대상, 교육내용, 확인방법, 후속 교육 추천을 분리해 기록합니다.",
++     "- TBM 기록은 위험성평가 결과를 반영한 경우 정기교육 증빙 활용 가능 여부를 검토할 수 있습니다.",
++     "- 본 문서는 법정 제출서식 대체가 아니라 현장 기록 보조용 초안입니다.",
++     `- 반영 근거: ${educationReferences.slice(0, 3).map((item) => item.title).join(" / ")}`
++   ].join("\n");
++ }
++
++ function formatAccidentCaseAppendix(accidentCases: Awaited<ReturnType<typeof fetchAccidentCases>>["cases"]) {
++   if (!accidentCases.length) return "";
++
++   return [
++     "",
++     "[근거 요약: 유사 재해사례]",
++     ...accidentCases.slice(0, 2).map((item) => (
++       `- ${item.title}: ${item.preventionPoint} 항목을 작업 전 확인과 재발방지 조치에 반영합니다.`
++     ))
++   ].join("\n");
++ }
++
++ function buildPhotoEvidenceAppendix(
++   citations: AskResponse["citations"],
++   koshaReferences: Awaited<ReturnType<typeof fetchKoshaReferences>>["references"],
++   accidentCases: Awaited<ReturnType<typeof fetchAccidentCases>>["cases"]
++ ) {
++   return [
++     "",
++     "[사진/증빙 체계 보강]",
++     "- 작업 전 사진: 작업구역, 장비, 작업환경, 출입통제 상태를 작업 시작 전 촬영합니다.",
++     "- 조치 전 사진: 위험구역, 장비, 작업환경, 출입통제의 미조치 상태를 촬영합니다.",
++     "- 조치 후 사진: 감소대책 실행 후 방호조치, 표지, 차단, 보호구 착용 상태를 같은 각도에서 촬영합니다.",
++     "- 전후 비교: 조치 전 사진과 조치 후 사진을 같은 위험요인 번호로 묶고 촬영자, 확인자, 보관 위치를 남깁니다.",
++     "",
++     "[확인 근거 첨부]",
++     `- 법령·해석례·판례: ${citations.slice(0, 3).map((item) => item.title).join(" / ") || "현장 문서 확인 후 첨부"}`,
++     `- KOSHA 자료: ${koshaReferences.slice(0, 2).map((item) => item.title).join(" / ") || "현장 작업유형 확인 후 첨부"}`,
++     `- 유사 재해사례: ${accidentCases.slice(0, 2).map((item) => item.title).join(" / ") || "사례 확인 후 첨부"}`
++   ].join("\n");
++ }
++
++ function ensurePhotoEvidenceDraft(baseDraft: string, appendix: string) {
++   const requiredTerms = ["작업 전 사진", "조치 전 사진", "조치 후 사진", "보관 위치"];
++   const missingTerms = requiredTerms.filter((term) => !baseDraft.includes(term));
++   if (!missingTerms.length && baseDraft.includes("[사진/증빙 체계 보강]")) {
++     return baseDraft;
++   }
++   return `${baseDraft.trim()}${appendix}`.trim();
++ }
++
++ function formatKoshaOpenApiAppendix(
++   references: Awaited<ReturnType<typeof fetchKoshaOpenApiEvidence>>["references"],
++   target: DocumentEvidenceTarget
++ ) {
++   const targetLabel = getTargetLabel(target);
++   const matched = references.filter((item) => (
++     item.reflectedIn.includes(targetLabel)
++       || (target === "tbm" && item.reflectedIn.includes("TBM"))
++       || item.reflectedIn.includes("문서 반영 근거")
++   ));
++   if (!matched.length) return "";
++
++   return [
++     "",
++     `[근거 요약: ${targetLabel}]`,
++     ...matched.slice(0, 2).map((item) => (
++       `- ${item.service}: ${item.title} 자료를 확인해 ${getTargetAction(target)}`
++     ))
++   ].join("\n");
++ }
++
++ type CompressedSafetyReference = {
++   id: string;
++   title: string;
++   reflectsDocuments: string[];
++   evidenceShort: string;
++   documentSentence: string;
++   kind: "kosha-support-regulation" | "kosha-guideline" | "construction-process" | "machinery" | "sif-case" | "other";
++   /** Short label for the source kind, e.g., "KOSHA 기술지침" / "KOSHA 기술지원규정" / "KOSHA 사고사례" */
++   kindLabel: string;
++   quality?: "accepted" | "review_required";
++   lifecycle?: "current" | "stale" | "retired";
++   directEligible?: boolean;
++ };
++
++ function classifySafetyReferenceKind(itemType: string | undefined): { kind: CompressedSafetyReference["kind"]; kindLabel: string } {
++   switch (itemType) {
++     case "technical-support-regulation":
++       return { kind: "kosha-support-regulation", kindLabel: "KOSHA 기술지원규정" };
++     case "technical-guideline":
++       return { kind: "kosha-guideline", kindLabel: "KOSHA 기술지침" };
++     case "construction-process":
++       return { kind: "construction-process", kindLabel: "KOSHA 작업공정" };
++     case "machinery":
++       return { kind: "machinery", kindLabel: "KOSHA 기계류" };
++     case "sif-case":
++       return { kind: "sif-case", kindLabel: "KOSHA 사고사례" };
++     default:
++       return { kind: "other", kindLabel: itemType || "내부지식DB" };
++   }
++ }
++
++ /**
++  * Compress raw Supabase safety_reference_items into a "문서 반영 문장" form.
++  * Per Hermes review: never inject the raw catalog into the AI prompt or document body —
++  * keep it short, name the reflection target, and write a sentence that the document
++  * can directly use as a control statement. Also dedupe near-identical entries.
++  */
++ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5): CompressedSafetyReference[] {
++   const seen = new Set<string>();
++   const out: CompressedSafetyReference[] = [];
++   for (const item of items) {
++     const displayTitle = getSafetyReferenceDisplayTitle(item);
++     const operationalView = deriveSafetyReferenceOperationalView(item);
++     const operationalControls = operationalView.controls.slice(0, 2);
++     const evidenceCore = operationalControls.slice(0, 1).join(", ");
++     const dedupeKey = `${operationalView.hazard}|${operationalControls.join("|")}|${(item.primary_documents || []).join("|")}`;
++     if (seen.has(dedupeKey)) continue;
++     seen.add(dedupeKey);
++     const documents = (item.primary_documents || []).filter(Boolean).slice(0, 3);
++     const evidenceShort = evidenceCore.replace(/\s+/g, " ").trim().slice(0, 80);
++     const sentenceBase = `${operationalView.hazard}: ${operationalControls.join(" / ")}`.replace(/\s+/g, " ").trim();
++     const documentSentence = `${sentenceBase}.`;
++     const { kind, kindLabel } = classifySafetyReferenceKind(item.item_type);
++     out.push({
++       id: item.id,
++       title: displayTitle,
++       reflectsDocuments: documents,
++       evidenceShort,
++       documentSentence: documentSentence.slice(0, 200),
++       kind,
++       kindLabel,
++       quality: item.kosha_guide?.quality,
++       lifecycle: item.kosha_guide?.lifecycle,
++       directEligible: item.kosha_guide?.directEligible
++     });
++     if (out.length >= limit) break;
++   }
++   return out;
++ }
++
++ export function buildSafetyReferenceSurfaceItem(
++   item: SafetyReferenceItem,
++   retrievalMode?: SafetyReferenceRetrievalMode
++ ) {
++   const operationalView = deriveSafetyReferenceOperationalView(item);
++   const controls = operationalView.controls.slice(0, 2);
++   const displayTitle = getSafetyReferenceDisplayTitle(item);
++   return {
++     rawTitle: item.title,
++     id: item.id,
++     itemType: item.item_type,
++     title: displayTitle,
++     displayTitle,
++     displaySummary: item.display_summary,
++     shortSummary: item.display_summary || `${operationalView.hazard} · ${controls.join(" · ")}`,
++     primaryDocuments: item.primary_documents || [],
++     controls,
++     evidenceRoleLabel: item.evidence_role_label,
++     evidenceRole: item.evidence_role,
++     sourceKindLabel: item.source_kind_label,
++     operationSignalLabel: controls[0] ? `문서와 TBM에 ${controls[0]} 반영` : item.operation_signal_label,
++     stableDocumentKey: item.kosha_guide?.stableDocumentKey,
++     anchor: item.kosha_guide?.anchors[0],
++     retrievalSource: item.retrieval_source,
++     retrievalMode,
++     quality: item.kosha_guide?.quality,
++     lifecycle: item.kosha_guide?.lifecycle,
++     directEligible: item.kosha_guide?.directEligible,
++     reviewRequired: operationalView.reviewRequired
++   };
++ }
++
++ function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): string {
++   if (!items.length) return "";
++   // Surface KOSHA 기술지침/기술지원규정 as a separate, prominent block above
++   // the generic 내부 안전지식 DB block.
++   const koshaItems = items.filter((item) => item.kind === "kosha-support-regulation" || item.kind === "kosha-guideline");
++   const koshaPrimary = koshaItems.filter((item) => item.directEligible !== false && item.quality !== "review_required");
++   const koshaReviewRequired = koshaItems.filter((item) => item.directEligible === false || item.quality === "review_required");
++   const others = items.filter((item) => item.kind !== "kosha-support-regulation" && item.kind !== "kosha-guideline");
++   const blocks: string[] = [];
++   if (koshaPrimary.length) {
++     blocks.push("");
++     blocks.push("[KOSHA 기술지침/기술지원규정 직접 인용]");
++     for (const item of koshaPrimary) {
++       blocks.push(
++         `- ${item.kindLabel}: ${item.title} / 반영 위치: ${item.reflectsDocuments.join(" / ") || "현장 확인 필요"} / 문서 문장: ${item.documentSentence}`
++       );
++     }
++   }
++   if (koshaReviewRequired.length) {
++     blocks.push("");
++     blocks.push("[KOSHA 기술지침/기술지원규정 검토 필요]");
++     for (const item of koshaReviewRequired) {
++       blocks.push(
++         `- ${item.kindLabel}: ${item.title} / quality=${item.quality || "review_required"} / lifecycle=${item.lifecycle || "stale"} / 현행 여부 검토 전 직접 근거로 사용하지 않음`
++       );
++     }
++   }
++   if (others.length) {
++     blocks.push("");
++     blocks.push("[내부 안전지식 DB 반영]");
++     for (const item of others) {
++       blocks.push(
++         `- ${item.kindLabel} / 반영 위치: ${item.reflectsDocuments.join(" / ") || "현장 확인 필요"} / 근거: ${item.evidenceShort || item.title} / 문서 문장: ${item.documentSentence}`
++       );
++     }
++   }
++   return blocks.join("\n");
++ }
++
++ function formatSafetyKnowledgeAppendix(matches: ReturnType<typeof matchSafetyKnowledge>, target: "risk" | "tbm" | "education") {
++   if (!matches.length) return "";
++
++   const targetLabel = target === "risk" ? "위험성평가표" : target === "tbm" ? "TBM 기록" : "안전보건교육";
++   const action = target === "risk"
++     ? "감소대책과 잔여위험 확인란에 넣습니다."
++     : target === "tbm"
++       ? "작업 전 질문과 확인 멘트로 바꿉니다."
++       : "교육내용과 이해도 확인 질문으로 바꿉니다.";
++   return [
++     "",
++     `[문서 반영: ${targetLabel}]`,
++     ...matches.slice(0, 2).map((item) => (
++       `- ${item.title}: ${item.shortSummary} / ${item.documentReflectionLabel}. ${action}`
++     ))
++   ].join("\n");
++ }
++
++ function hasOutdoorHeatSignal(weather: Awaited<ReturnType<typeof fetchWeatherSignal>>, question: string) {
++   // 명시적 실내 마커가 있으면 옥외 폭염 부록을 붙이지 않는다.
++   // 한빛로지스 검수에서 "인천 남동공단 물류센터 ... 실내 작업"인데 '하역' 키워드 때문에
++   // 옥외 폭염 섹션이 부록으로 들어가던 버그 차단. 'indoor' fast-path가 outdoor 휴리스틱을 누른다.
++   const indoorByInput = /실내|옥내|물류센터|창고\s|클린룸|반도체|데이터센터|기계실|지하실|밀폐공간|반응기 내부/.test(question);
++   if (indoorByInput) {
++     // 기상 신호가 폭염 경보 수준이어도 실내라면 옥외 폭염 섹션은 부적합.
++     // 단, 31°C 이상 + 실내 + 환기 부재 같은 조합은 별도(열중증)이지만 그건 outdoor 부록 아님.
++     return false;
++   }
++   // '하역'은 항만 하역(옥외) ↔ 물류센터 하역(실내) 양쪽이라 모호. 위에서 indoor 마커 없음을
++   // 확인했으니 여기 도달했다면 outdoor 가능성이 더 큼. 다만 키워드만으로 단정하지 않고
++   // 명시적 옥외 마커(외벽/지붕/조경/도장/건설/비계/고소/도로 등)만 신뢰.
++   const outdoorByInput = /옥외|실외|야외|외벽|지붕|도로|조경|도장|건설|비계|고소|폭염|자외선|여름|한여름|온열|열사병|열탈진|열경련/.test(question);
++   const outdoorBySignal = (weather.signals || []).some((signal) => {
++     if (signal.endpoint === "생활기상 자외선" || signal.endpoint === "실시간 홍반자외선") return true;
++     if (signal.endpoint === "영향예보" && /폭염|온열|더위|고온|주의|경고|위험/.test(signal.summary)) return true;
++     const temp = Number(signal.temperatureC || "");
++     return Number.isFinite(temp) && temp >= 31;
++   });
++   return outdoorByInput || outdoorBySignal;
++ }
++
++ function formatOutdoorHeatAppendix(weather: Awaited<ReturnType<typeof fetchWeatherSignal>>, target: "risk" | "tbm" | "education" | "message") {
++   const signals = weather.signals || [];
++   const uvSignals = signals.filter((signal) => signal.endpoint === "생활기상 자외선" || signal.endpoint === "실시간 홍반자외선");
++   const heatSignal = signals.find((signal) => signal.endpoint === "영향예보" && /폭염|온열|더위|고온|주의|경고|위험/.test(signal.summary))
++     || signals.find((signal) => signal.endpoint === "생활기상 체감온도")
++     || signals.find((signal) => {
++       const temp = Number(signal.apparentTemperature || signal.temperatureC || "");
++       return Number.isFinite(temp) && temp >= 31;
++     });
++   const uvLine = uvSignals.length
++     ? `- 자외선 신호: ${uvSignals.map((signal) => signal.summary).join(" / ")}`
++     : "- 자외선 신호: 옥외작업 시 차광 보호구와 그늘 휴식을 보수적으로 적용";
++   const heatLine = heatSignal
++     ? `- 폭염·고온 신호: ${heatSignal.summary}`
++     : "- 폭염·고온 신호: 한여름 옥외작업 기준으로 물·그늘·휴식 계획을 선반영";
++
++   if (target === "message") {
++     return [
++       "",
++       "[한여름 옥외작업 추가공지]",
++       "- 물을 자주 마시고, 그늘에서 쉬며, 어지러움·구토·두통이 있으면 즉시 작업을 멈추고 보고하세요.",
++       "- 오후 가장 더운 시간대에는 작업반장 지시에 따라 작업 조절 또는 대기합니다."
++     ].join("\n");
++   }
++
++   if (target === "risk") {
++     return [
++       "",
++       "[옥외작업 폭염·자외선 위험 반영]",
++       heatLine,
++       uvLine,
++       "- 유해·위험요인: 고온 노출, 직사광선, 탈수, 열탈진·열사병, 자외선 노출, 신규·고령·민감군 작업자 상태 악화",
++       "- 감소대책: 작업 전 기상청 현재/예보/생활기상 신호 확인, 가까운 그늘 휴게공간 확보, 시원한 물 비치, 14~17시 작업 조절, 동료 작업자 상호관찰",
++       "- 확인기준: 어지러움·두통·구토·근육경련 등 이상 징후자는 정해진 휴식시간과 무관하게 작업중단 및 보고",
++       "- 관련 법령 확인 대상: 산업안전보건법상 안전보건조치, 근로자 안전보건교육, 산업안전보건기준에 관한 규칙의 휴식·건강장해 예방 관련 기준"
++     ].join("\n");
++   }
++
++   if (target === "tbm") {
++     return [
++       "",
++       "[한여름 옥외작업 TBM 추가질문]",
++       heatLine,
++       uvLine,
++       "- 오늘 그늘 휴게공간, 시원한 물, 휴식 주기, 가장 더운 시간대 작업 조절 기준을 누가 확인했는가?",
++       "- 신규 투입자, 고령자, 민감군, 중작업 수행자는 동료 작업자와 짝을 지어 이상 징후를 확인하는가?",
++       "- 어지러움·두통·구토·경련이 있으면 불이익 없이 즉시 작업을 멈추고 보고한다는 내용을 전원이 이해했는가?"
++     ].join("\n");
++   }
++
++   return [
++     "",
++     "[폭염·자외선 안전교육 추가]",
++     heatLine,
++     uvLine,
++     "- 교육내용: 열사병·열탈진·열경련 증상, 물·그늘·휴식 3대 수칙, 자외선 차단 보호구, 동료 작업자 상호관찰, 응급조치와 119 신고 기준",
++     "- 확인방법: 작업자가 물 마시는 위치, 그늘 휴게공간, 작업중지 보고 절차를 직접 말하게 하고 교육기록에 확인자와 시간을 남김",
++     "- 현장 문구: 이해하지 못했거나 몸이 이상하면 작업을 시작하지 말고 관리자에게 다시 설명을 요청"
++   ].join("\n");
++ }
++
++ function formatLegalEvidenceAppendix(citations: AskResponse["citations"], target: "risk" | "workPlan" | "tbm" | "education") {
++   const targetLabel = getTargetLabel(target);
++   const legalItems = citations
++     .filter((item) => item.type === "law" || item.type === "interpretation")
++     .slice(0, 2);
++   const precedentItems = citations
++     .filter((item) => item.type === "precedent")
++     .slice(0, 1);
++
++   if (!legalItems.length && !precedentItems.length) return "";
++
++   const targetPurpose = {
++     risk: "위험요인, 감소대책, 조치 확인란에 연결합니다.",
++     workPlan: "작업순서, 작업허가, 통제구역, 작업중지 기준에 연결합니다.",
++     tbm: "작업중지 기준, 보호구, 접근통제 공유 문구에 연결합니다.",
++     education: "교육내용, 이해도 확인, 반복 교육 문구에 연결합니다."
++   }[target];
++
++   return [
++     "",
++     `[반영 근거: ${targetLabel}]`,
++     `- 법령·해석례: ${compactTitleList(legalItems.map((item) => item.title)) || "공식 법령정보"} 기준을 ${targetPurpose}`,
++     ...(
++       precedentItems.length
++         ? [
++             `- 판례 보조: ${precedentItems[0].title}은 조치·교육·보호구 이행 여부 점검용으로만 참고합니다.`
++           ]
++         : []
++     )
++   ].join("\n");
++ }
++
++ function formatKoshaPracticalAppendix(
++   references: Awaited<ReturnType<typeof fetchKoshaReferences>>["references"],
++   target: DocumentEvidenceTarget,
++   title: string
++ ) {
++   const targetLabel = getTargetLabel(target);
++   const matched = references.filter((item) => {
++     const appliesTo = item.appliesTo || item.appliedTo || [];
++     return appliesTo.includes(targetLabel) || (target === "tbm" && appliesTo.some((value) => value.includes("TBM")));
++   });
++   const picked = (matched.length ? matched : references).slice(0, 2);
++   if (!picked.length) return "";
++
++   return [
++     "",
++     `[${title}]`,
++     ...picked.map((item) => (
++       `- ${item.title}: ${getTargetAction(target)}`
++     ))
++   ].join("\n");
++ }
++
++ function formatTbmQualityAppendix(
++   response: AskResponse,
++   weather: Awaited<ReturnType<typeof fetchWeatherSignal>>,
++   foreignWorkerLanguages: AskResponse["deliverables"]["foreignWorkerLanguages"],
++   references: Awaited<ReturnType<typeof fetchKoshaReferences>>["references"]
++ ) {
++   const tbmReferences = references.filter((item) => {
++     const appliesTo = item.appliesTo || item.appliedTo || [];
++     return /TBM|작업 전 안전점검|Tool Box/i.test(item.title) || appliesTo.some((value) => value.includes("TBM"));
++   });
++   const referenceTitles = tbmReferences.length
++     ? tbmReferences.slice(0, 2).map((item) => item.title).join(" / ")
++     : "고용노동부 작업 전 안전점검회의 가이드 및 TBM 일지 서식";
++   const weatherAction = weather.actions[0] || "기상 변화 시 관리감독자가 작업 가능 여부를 재판단";
++   const languageLine = foreignWorkerLanguages.length
++     ? foreignWorkerLanguages.map((item) => item.label).slice(0, 3).join(", ")
++     : "필요 시 쉬운 한국어와 현장 통역";
++
++   return [
++     "",
++     "[TBM 필수 반영 체크]",
++     `- 주요 유해·위험요인: ${response.riskSummary.topRisk}`,
++     `- 기상 API 결과: ${weather.summary} / ${weatherAction}`,
++     `- 작업중지 기준: ${response.riskSummary.immediateActions.slice(0, 2).join(" / ") || "위험 발견 즉시 작업중지 및 보고"}`,
++     `- 참석자 확인: 작업자 ${response.scenario.workerCount.toLocaleString("ko-KR")}명 대상 구두 복창·서명·보호구 확인`,
++     `- 신규·외국인·미숙련 작업자: ${languageLine}로 이해 여부 별도 확인`,
++     "- 사진·증빙 위치: 작업 전 현장, 보호구, 위험구역 통제, TBM 실시 사진을 작업일지·모바일 기록·문서팩 첨부자료에 보관",
++     `- 반영 근거: ${referenceTitles}. 원문성 근거는 evidence UI/metadata에서 확인`
++   ].join("\n");
++ }
++
++ function formatSeriousAccidentReferenceAppendix(target: "risk" | "tbm" | "education") {
++   const common = [
++     "- 내부 참고자료 반영: 중대재해처벌법 실무서 파싱 요약을 바탕으로 유해·위험요인 확인, 개선조치, 교육, 작업중지, 도급관리 축을 점검합니다.",
++     "- 주의: 해당 참고자료는 공식 법령 원문을 대체하지 않으며, 최종 근거는 법제처 법령정보와 공식 자료로 재확인합니다."
++   ];
++   const targetLines = {
++     risk: [
++       "- 위험성평가 연결: 유해·위험요인을 확인한 뒤 개선대책, 이행 담당자, 조치 완료 확인까지 같은 표에서 남깁니다.",
++       "- 도급·협력 작업이 있으면 원청·협력업체 간 위험정보 공유와 작업구역 통제 책임을 별도 확인 항목으로 둡니다."
++     ],
++     tbm: [
++       "- TBM 연결: 작업중지 기준, 보호구 착용, 위험구역 접근금지, 관리감독자 확인을 작업 시작 전에 구두로 확인합니다.",
++       "- 작업자가 이해하지 못했거나 위험을 발견한 경우 즉시 멈추고 보고하는 문구를 현장 공유 메시지에 포함합니다."
++     ],
++     education: [
++       "- 안전교육 연결: 신규 투입자, 외국인 근로자, 협력업체 작업자는 이해 여부 확인과 서명·사진·모바일 기록을 남깁니다.",
++       "- 교육 후 확인: 위험요인, 작업중지 기준, 보호구·작업방법을 작업자에게 다시 말하게 해 이해도를 확인합니다."
++     ]
++   }[target];
++
++   return [
++     "",
++     "[중대재해 예방 관리체계 점검]",
++     ...common,
++     ...targetLines
++   ].join("\n");
++ }
++
++ /**
++  * workPlanDraft / tbmBriefing / safetyEducationRecordDraft have no free-text AI
++  * producer (only *Structured schema-first prompts exist — see ai-deliverables.ts
++  * TABULAR_SPECS), so `aiBodies.*` is always empty for these three fields and the
++  * template + appendix-chain branch below always runs. Prod evidence (2026-07-02)
++  * showed the appended evidence-log blocks ("[반영 근거]", "[문서 반영]",
++  * "[KOSHA ... 직접 인용]", "[공식 서식 기준 보강]", "[근거 요약]") leaking into the
++  * printed document — in the worst cases roughly half the document was meta.
++  * Strip them here, right before the text becomes the printed document body.
++  */
++ function stripPipelineMeta(text: string): string {
++   return splitDocumentMeta(text).body;
++ }
++
++ const SAFETY_TERM_TYPO_REPLACEMENTS: ReadonlyArray<readonly [RegExp, string]> = [
++   [/\b지게브\b/g, "지게차"],
++   [/지게브(?=\s*동선)/g, "지게차"],
++   [/지게브(?=\s*후진|\s*선회|\s*작업|\s*운행|\s*충돌|\s*협착|\s*상하차)/g, "지게차"]
++ ];
++
++ const TEXT_DELIVERABLE_KEYS = [
++   "workpackSummaryDraft",
++   "riskAssessmentDraft",
++   "workPlanDraft",
++   "tbmBriefing",
++   "tbmLogDraft",
++   "safetyEducationRecordDraft",
++   "emergencyResponseDraft",
++   "photoEvidenceDraft",
++   "foreignWorkerBriefing",
++   "foreignWorkerTransmission",
++   "kakaoMessage"
++ ] as const;
++
++ export function normalizeSafetyTermTypos(text: string): string {
++   return SAFETY_TERM_TYPO_REPLACEMENTS.reduce(
++     (current, [pattern, replacement]) => current.replace(pattern, replacement),
++     text
++   );
++ }
++
++ function normalizeStringArray(values: readonly string[]): string[] {
++   return values.map(normalizeSafetyTermTypos);
++ }
++
++ function normalizeAskResponseText(response: AskResponse): AskResponse {
++   const deliverables = { ...response.deliverables };
++   for (const key of TEXT_DELIVERABLE_KEYS) {
++     deliverables[key] = normalizeSafetyTermTypos(deliverables[key]);
++   }
++
++   return {
++     ...response,
++     answer: normalizeSafetyTermTypos(response.answer),
++     practicalPoints: normalizeStringArray(response.practicalPoints),
++     riskSummary: {
++       ...response.riskSummary,
++       title: normalizeSafetyTermTypos(response.riskSummary.title),
++       topRisk: normalizeSafetyTermTypos(response.riskSummary.topRisk),
++       immediateActions: normalizeStringArray(response.riskSummary.immediateActions)
++     },
++     deliverables
++   };
++ }
++
++ export type RunAskOptions = {
++   aiMode?: AiMode;
++   harnessMemory?: HarnessMemoryInput;
++   /** Fixed Phase A ontology pack and allow-list bound before any provider generation. */
++   phaseAGrounding?: PhaseAGenerationGrounding;
++   /** Published graph snapshot that produced phaseAGrounding; reused by post-generation QA. */
++   phaseAGraphSnapshot?: OntologyGraph | null;
++   /** Task D-2a: SSE progress callback for the AI console. Defaults to no-op. */
++   onProgress?: OnAskProgress;
++ };
++
++ function attachPhaseAReview(
++   response: AskResponse,
++   grounding: PhaseAGenerationGrounding,
++ ): AskResponse {
++   const verifiedMaterialization = grounding.evidencePack
++     ? verifyEvidenceMaterialization({
++         evidenceChainState: grounding.evidenceChainState,
++         pack: grounding.evidencePack,
++         documents: {
++           riskAssessmentDraft: response.deliverables.riskAssessmentDraft,
++           tbmBriefing: response.deliverables.tbmBriefing,
++           tbmLogDraft: response.deliverables.tbmLogDraft,
++         },
++       })
++     : [];
++   const materializationCoverage = buildEvidenceMaterializationCoverage({
++     planBinding: grounding.planBinding,
++     verifiedRecords: verifiedMaterialization,
++   });
++   const actionableReason = grounding.groundingStatus === "resolved"
++     ? "결정적 문서 materialization 검사와 지정된 사람의 최종 확인이 필요합니다."
++     : grounding.groundingStatus === "review_required"
++       ? "Phase A SIF/KOSHA/법령 source resolution을 완료한 뒤 다시 검수하세요."
++       : "canonical Task 매핑과 ontology availability를 확인한 뒤 다시 검수하세요.";
++   const phaseAReview: NonNullable<AskResponse["phaseAReview"]> = {
++     verdict: "검토 필요",
++     verified: false,
++     evidenceChainState: grounding.evidenceChainState,
++     groundingStatus: grounding.groundingStatus,
++     outputStatus: grounding.generationPolicy.outputStatus,
++     verifiedRecords: materializationCoverage.materializedRecordCount,
++     planBinding: grounding.planBinding,
++     materializationCoverage,
++     humanConfirmation: { required: true, status: "pending" },
++     actionableReason,
++   };
++   const deliverables = normalizePhaseAAuthorityValue(
++     { ...response.deliverables },
++     phaseAReview,
++   );
++   for (const key of TEXT_DELIVERABLE_KEYS) {
++     deliverables[key] = applyPhaseADocumentAuthorityMarker(deliverables[key], phaseAReview);
++   }
++
++   return attachQualityContract({
++     ...response,
++     answer: applyPhaseADocumentAuthorityMarker(response.answer, phaseAReview),
++     practicalPoints: normalizePhaseAAuthorityValue(response.practicalPoints, phaseAReview),
++     riskSummary: normalizePhaseAAuthorityValue(response.riskSummary, phaseAReview),
++     structured: response.structured
++       ? normalizePhaseAAuthorityValue(response.structured, phaseAReview)
++       : undefined,
++     status: {
++       ...response.status,
++       summary: "Phase A 근거 검토 필요",
++     },
++     deliverables,
++     phaseAReview,
++   });
++ }
++
+
+ ❯ tests/phase-a-citation-authority.test.ts:107:21
+    105|     const capture = source.match(/async function captureGenerationSour…
+    106|
+    107|     expect(capture).toContain("sourceLabel: PhaseAGenerationSourceLabe…
+       |                     ^
+    108|     expect(capture).toContain("catch (error)");
+    109|     expect(capture).toContain('log.warn("phase a generation source rej…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/phase-a-citation-authority.test.ts > Phase A citation authority UI > wires phaseAReview and the shared authority projection into citation surfaces
+AssertionError: expected '"use client";\r\n\r\nimport { useEffe…' to contain 'workpackSummaryDraft: data.deliverabl…'
+
+- Expected
++ Received
+
+- workpackSummaryDraft: data.deliverables.workpackSummaryDraft
++ "use client";
++
++ import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
++ import { AskResponse, type PermitInspectionStructured } from "@/lib/types";
++ import {
++   evaluatePublicSafetyRubric,
++   rubricCategoryLabel,
++   rubricStatusLabel,
++   type RubricDocumentKey,
++   type RubricEvaluationItem
++ } from "@/lib/safety-document-rubric";
++ import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
++ import {
++   applyPhaseADocumentAuthorityMarker,
++   buildPhaseADocumentAuthorityMarker,
++   buildPhaseAReviewUiState,
++ } from "@/lib/phase-a-review";
++ import styles from "./WorkpackEditor.module.css";
++
++ declare global {
++   var measureTextWidth: ((font: string, text: string) => number) | undefined;
++ }
++
++ export type DocumentKey =
++   | "workpackSummaryDraft"
++   | "riskAssessmentDraft"
++   | "workPlanDraft"
++   | "workPermitDraft"
++   | "tbmBriefing"
++   | "tbmLogDraft"
++   | "safetyEducationRecordDraft"
++   | "emergencyResponseDraft"
++   | "photoEvidenceDraft"
++   | "foreignWorkerBriefing"
++   | "foreignWorkerTransmission"
++   | "kakaoMessage";
++
++ export type WorkpackDocumentValues = Record<DocumentKey, string>;
++
++ export type WorkpackDeliverablesChange = {
++   source: "generated" | "stored-draft" | "user-edit";
++   requiresRevalidation: boolean;
++ };
++
++ const rubricDocumentKeys: RubricDocumentKey[] = [
++   "workpackSummaryDraft",
++   "riskAssessmentDraft",
++   "workPlanDraft",
++   "tbmBriefing",
++   "tbmLogDraft",
++   "safetyEducationRecordDraft",
++   "emergencyResponseDraft",
++   "photoEvidenceDraft",
++   "foreignWorkerBriefing",
++   "foreignWorkerTransmission",
++   "kakaoMessage"
++ ];
++
++ function isRubricDocumentKey(key: DocumentKey): key is RubricDocumentKey {
++   return rubricDocumentKeys.includes(key as RubricDocumentKey);
++ }
++
++ type EditableDocument = {
++   key: DocumentKey;
++   title: string;
++   description: string;
++   fileBase: string;
++ };
++
++ type RhwpModule = typeof import("@rhwp/core");
++ type SheetRow = {
++   document: string;
++   section: string;
++   item: string;
++   content: string;
++ };
++ type TemplateKind = "sheet" | "word" | "hwp";
++ type TemplatePreset = {
++   kind: TemplateKind;
++   label: string;
++   description: string;
++   previewTitle: string;
++   previewBullets: string[];
++ };
++ type CustomerTemplateField = {
++   key: string;
++   label: string;
++   mapsTo: string;
++   appliesTo: string;
++ };
++ type SafetyFormProfile = {
++   code: string;
++   subtitle: string;
++   layout: "generic" | "risk" | "workPlan" | "permit" | "tbmBriefing" | "tbmLog" | "education" | "photo";
++   primaryColumn: string;
++   actionColumn: string;
++   confirmationRows: string[];
++   approvalLabels: string[];
++ };
++ type SectionGroup = {
++   section: string;
++   rows: SheetRow[];
++ };
++ type RemediationDraft = {
++   itemId: string;
++   text: string;
++   status: "ready" | "error";
++   message: string;
++   providerLabel: string | null;
++   policyNote: string;
++   catalogStatus: {
++     configured: boolean;
++     ok: boolean;
++     count: number;
++     message: string;
++   } | null;
++   sources: Array<{
++     title: string;
++     agency: string;
++     url: string;
++     sourceType: string;
++     roleLabel: string;
++     reflectionLabel: string;
++   }>;
++ };
++
++ let rhwpModulePromise: Promise<RhwpModule> | null = null;
++
++ const templatePresets: TemplatePreset[] = [
++   {
++     kind: "sheet",
++     label: "XLS(HTML 호환)",
++     description: "Excel에서 열 수 있는 HTML 기반 .xls 표 양식입니다.",
++     previewTitle: "표지 + 섹션 요약 + 확인 칸",
++     previewBullets: ["섹션별 행·열 구조", "No./항목/내용/확인 컬럼", "바이너리 XLSX가 아닌 HTML 호환 파일"]
++   },
++   {
++     kind: "word",
++     label: "Word 보고서형",
++     description: "본문과 표를 함께 보여주는 점검 보고서형 문서",
++     previewTitle: "보고서 헤더 + 본문 표",
++     previewBullets: ["제목/메타/섹션 헤더", "본문형 설명과 표 혼합", "원청·관리자 보고용"]
++   },
++   {
++     kind: "hwp",
++     label: "HWPX 제출형 초안",
++     description: "rhwp로 생성한 한글 제출 보조 초안입니다. 원본 한글 서식 1:1 복제는 아닙니다.",
++     previewTitle: "rhwp 한글 문서 + 확인/서명란",
++     previewBullets: ["공식 서식 항목명 유지", "확인자·관리감독자 서명란", "원본 셀·결재칸은 제출 전 확인"]
++   }
++ ];
++
++ const customerTemplateFields: CustomerTemplateField[] = [
++   { key: "siteName", label: "현장명", mapsTo: "scenario.siteName", appliesTo: "표지, 작업개요, 결재란" },
++   { key: "workName", label: "작업명", mapsTo: "scenario.workName / 정제된 작업내용", appliesTo: "작업계획서, TBM, 교육기록" },
++   { key: "riskFactors", label: "주요 유해·위험요인", mapsTo: "riskAssessmentDraft rows", appliesTo: "위험성평가표, TBM" },
++   { key: "controls", label: "감소대책", mapsTo: "risk controls / immediate actions", appliesTo: "위험성평가표, 작업허가, TBM" },
++   { key: "workers", label: "작업자·교육대상", mapsTo: "worker summary", appliesTo: "TBM 기록, 안전보건교육 기록" },
++   { key: "educationContent", label: "교육내용", mapsTo: "safetyEducationRecordDraft", appliesTo: "교육일지, 외국인 안내문" },
++   { key: "approver", label: "확인자·승인자", mapsTo: "user-entered approval line", appliesTo: "결재란, 서명란" }
++ ];
++
++ const documentMeta: EditableDocument[] = [
++   {
++     key: "workpackSummaryDraft",
++     title: "점검결과 요약",
++     description: "현장명, 작업조건, 핵심 위험, 즉시조치, 연결 상태를 첫 장으로 정리합니다.",
++     fileBase: "workpack-summary"
++   },
++   {
++     key: "riskAssessmentDraft",
++     title: "위험성평가표",
++     description: "KOSHA 절차에 맞춰 사전준비, 위험요인, 감소대책, 조치 확인을 정리합니다.",
++     fileBase: "risk-assessment"
++   },
++   {
++     key: "workPlanDraft",
++     title: "작업계획서",
++     description: "작업구간, 작업순서, 장비·인원, 허가·첨부, 작업중지 기준을 정리합니다.",
++     fileBase: "work-plan"
++   },
++   {
++     key: "workPermitDraft",
++     title: "안전작업허가 확인서",
++     description: "위험작업 허가, 작업시간, 격리·차단, 화재·가스·보호구, 종료 확인을 분리합니다.",
++     fileBase: "work-permit"
++   },
++   {
++     key: "tbmBriefing",
++     title: "TBM/작업 전 안전점검회의",
++     description: "작업내용, 위험요인, 안전대책, 참석자 확인을 브리핑 형식으로 정리합니다.",
++     fileBase: "tbm-briefing"
++   },
++   {
++     key: "tbmLogDraft",
++     title: "TBM 기록",
++     description: "작업일지·모바일 앱·사진·영상 기록까지 함께 남기는 회의 기록입니다.",
++     fileBase: "tbm-log"
++   },
++   {
++     key: "safetyEducationRecordDraft",
++     title: "안전보건교육 기록",
++     description: "교육대상, 교육내용, 확인방법, 후속 교육 추천을 분리해 남깁니다.",
++     fileBase: "safety-education"
++   },
++   {
++     key: "emergencyResponseDraft",
++     title: "비상대응 절차",
++     description: "사고 징후, 초기조치, 보고체계, 현장보존, 재발방지 흐름을 정리합니다.",
++     fileBase: "emergency-response"
++   },
++   {
++     key: "photoEvidenceDraft",
++     title: "사진/증빙",
++     description: "작업 전·후 사진, TBM/교육 증빙, 확인자와 보관 위치를 남깁니다.",
++     fileBase: "photo-evidence"
++   },
++   {
++     key: "foreignWorkerBriefing",
++     title: "외국인 근로자 출력본",
++     description: "쉬운 한국어와 상위 체류국가 언어 기본팩을 함께 제공하는 교육용 출력본입니다.",
++     fileBase: "foreign-worker-briefing"
++   },
++   {
++     key: "foreignWorkerTransmission",
++     title: "외국인 근로자 전송본",
++     description: "문자·카카오·밴드로 전송하기 좋은 짧은 다국어 안전공지입니다.",
++     fileBase: "foreign-worker-message"
++   },
++   {
++     key: "kakaoMessage",
++     title: "현장 공유 메시지",
++     description: "카카오톡·문자·단체방에 붙여넣기 좋은 축약본입니다.",
++     fileBase: "field-message"
++   }
++ ];
++
++ function documentTabId(key: DocumentKey) {
++   return `workpack-document-tab-${key}`;
++ }
++
++ const documentCoverageLabels: Partial<Record<DocumentKey, string>> = {
++   riskAssessmentDraft: "위험성평가표",
++   tbmBriefing: "TBM 브리핑",
++   tbmLogDraft: "TBM 기록"
++ };
++
++ function sanitizeFileName(value: string) {
++   return value.replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, "-").slice(0, 80) || "safeclaw";
++ }
++
++ const SAVE_ANNOUNCEMENT_DELAY_MS = 450;
++
++ export function buildGenerationEvidenceFingerprint(data: AskResponse) {
++   return buildWorkpackGenerationFingerprint(data);
++ }
++
++ function downloadBlob(blob: Blob, fileName: string) {
++   const url = URL.createObjectURL(blob);
++   const link = document.createElement("a");
++   link.href = url;
++   link.download = fileName;
++   document.body.appendChild(link);
++   link.click();
++   link.remove();
++   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
++ }
++
++ function escapeHtml(value: string) {
++   return value
++     .replace(/&/g, "&amp;")
++     .replace(/</g, "&lt;")
++     .replace(/>/g, "&gt;")
++     .replace(/"/g, "&quot;");
++ }
++
++ function groupRowsBySection(rows: SheetRow[]) {
++   return rows.reduce<SectionGroup[]>((groups, row) => {
++     const existing = groups.find((group) => group.section === row.section);
++     if (existing) {
++       existing.rows.push(row);
++       return groups;
++     }
++     groups.push({ section: row.section, rows: [row] });
++     return groups;
++   }, []);
++ }
++
++ function rowText(row: SheetRow) {
++   return [row.item, row.content].filter(Boolean).join(" ");
++ }
++
++ function findRows(rows: SheetRow[], patterns: string[], fallbackCount = 3) {
++   const matched = rows.filter((row) => {
++     const text = rowText(row);
++     return patterns.some((pattern) => text.includes(pattern));
++   });
++   return (matched.length ? matched : rows).slice(0, fallbackCount);
++ }
++
++ function compactContent(row: SheetRow | undefined, fallback: string) {
++   if (!row) return fallback;
++   return row.content || row.item || fallback;
++ }
++
++ function previewRowItem(row: SheetRow, fallback: string) {
++   const item = row.item.trim();
++   if (item && !/^\d+[-\s]*$/.test(item)) return item;
++
++   const content = compactContent(row, fallback).replace(/\s+/g, " ").trim();
++   const firstClause = content
++     .split(/[.。]/)[0]
++     .split(/[,(（]/)[0]
++     .trim();
++   const label = firstClause || content || item || fallback;
++   return label.length > 34 ? `${label.slice(0, 34)}...` : label;
++ }
++
++ function buildTbmBridgeRows(data: AskResponse, riskRows: SheetRow[]) {
++   const riskItems = findRows(riskRows, ["위험", "추락", "전도", "충돌", "끼임", "화재", "중독", "노출"], 4);
++   const weatherSignals = data.externalData.weather.actions.length
++     ? data.externalData.weather.actions
++     : [data.externalData.weather.summary || data.scenario.weatherNote];
++   return riskItems.map((row, index) => ({
++     risk: compactContent(row, data.riskSummary.topRisk),
++     weather: weatherSignals[index % weatherSignals.length] || data.scenario.weatherNote,
++     source: "위험성평가표 → TBM",
++     message: "위험성평가 결과를 작업 전 공유 · 이해 확인 · 위험 시 즉시 작업중지"
++   }));
++ }
++
++ function inferDisasterType(text: string, index: number) {
++   if (/추락|떨어|비계|고소|발판/.test(text)) return "추락";
++   if (/전도|넘어|미끄|우천|바닥/.test(text)) return "전도/미끄럼";
++   if (/충돌|지게차|동선|차량|운반/.test(text)) return "충돌/끼임";
++   if (/화재|용접|화기|폭발/.test(text)) return "화재/폭발";
++   if (/화학|중독|질식|밀폐|가스|노출/.test(text)) return "중독/노출";
++   return index % 2 === 0 ? "협착/충돌" : "기타 재해";
++ }
++
++ function inferRiskFactor4M(text: string, index: number) {
++   if (/지게차|장비|기계|비계|발판|공구|차량/.test(text)) return "Machine";
++   if (/강풍|우천|폭염|날씨|바닥|밀폐|고소|작업장소/.test(text)) return "Media";
++   if (/신규|미숙련|보호구|교육|작업자|근로자/.test(text)) return "Man";
++   if (/작업중지|통제|감독|유도자|신호수|절차/.test(text)) return "Management";
++   return ["Man", "Machine", "Media", "Management"][index % 4];
++ }
++
++ function inferEquipment(text: string, scenario: AskResponse["scenario"], index: number) {
++   if (/지게차|운반|하역/.test(text)) return "지게차/운반장비";
++   if (/비계|고소|발판/.test(text)) return "비계/작업발판";
++   if (/용접|화기/.test(text)) return "용접기/화기장비";
++   if (/화학|세척|약품/.test(text)) return "세척제/MSDS";
++   if (/밀폐|가스|질식/.test(text)) return "가스측정기/환기설비";
++   return index % 2 === 0 ? "작업장비/공도구" : scenario.companyType;
++ }
++
++ function buildPermitDraft(data: AskResponse) {
++   const actionList = data.riskSummary.immediateActions.map((action, index) => `${index + 1}. ${action}`).join("\n");
++   const weatherActions = data.externalData.weather.actions.slice(0, 2).map((action, index) => `${index + 1}. ${action}`).join("\n");
++   return [
++     "[1. 허가 기본정보]",
++     `허가대상 작업: ${data.scenario.workSummary}`,
++     `작업현장: ${data.scenario.siteName}`,
++     `작업일시: ${new Date().toLocaleDateString("ko-KR")} 작업 전 확인`,
++     `작업인원: ${data.scenario.workerCount.toLocaleString("ko-KR")}명`,
++     "허가구분: 위험작업 / 작업계획서·위험성평가표 첨부 확인",
++     "",
++     "[2. 작업 전 허가조건]",
++     `핵심위험: ${data.riskSummary.topRisk}`,
++     `필수조치:\n${actionList}`,
++     `기상·환경 확인:\n${weatherActions || data.scenario.weatherNote}`,
++     "보호구: 안전모, 안전화, 작업특성별 보호구 착용 확인",
++     "",
++     "[3. 첨부서류 체크리스트]",
++     "작업계획서: □ 첨부 □ 보완필요",
++     "위험성평가표: □ 첨부 □ 보완필요",
++     "TBM 참석명단: □ 첨부 □ 보완필요",
++     "장비 제원/검사증/운전원 자격: □ 해당 □ 비해당 □ 보완필요",
++     "MSDS/화기·밀폐·고소작업 별도 허가: □ 해당 □ 비해당 □ 보완필요",
++     "사진/작업계획도/통제구역 표시: □ 첨부 □ 보완필요",
++     "",
++     "[4. 종료 확인]",
++     "작업종료: □ 원상복구 □ 잔류위험 없음 □ 미조치사항 있음",
++     "미조치사항 및 후속조치:",
++     "종료 확인자:"
++   ].join("\n");
++ }
++
++ function resolveInitialWorkPermitDraft(data: AskResponse) {
++   if (data.deliverables.workPermitDraft === "") return "";
++   return withSubmitReadiness(
++     "허가서/첨부 안전작업허가 확인서",
++     data.deliverables.workPermitDraft ?? buildPermitDraft(data),
++     data
++   );
++ }
++
++ function inferPermitType(data: AskResponse): PermitInspectionStructured["basicInfo"]["permitType"] {
++   const text = `${data.question} ${data.scenario.workSummary} ${data.riskSummary.topRisk}`;
++   if (/비계|고소|추락|지붕|외벽/.test(text)) return "고소작업";
++   if (/용접|화기|절단|불꽃/.test(text)) return "화기작업";
++   if (/밀폐|질식|산소|탱크|맨홀/.test(text)) return "밀폐공간";
++   if (/전기|정전|감전|분전반/.test(text)) return "전기작업";
++   if (/지게차|크레인|굴삭|중장비|하역/.test(text)) return "중장비작업";
++   if (/화학|약품|MSDS|세척|누출/.test(text)) return "화학물질";
++   return "일반 위험작업";
++ }
++
++ function conditionCategoryFromRisk(row: NonNullable<AskResponse["structured"]>["riskAssessmentRows"][number]): PermitInspectionStructured["conditions"][number]["category"] {
++   if (row.fourM === "Machine") return "장비·동선";
++   if (row.fourM === "Media") return "기상·환경";
++   if (row.fourM === "Man") return "보호구";
++   return "교육·TBM";
++ }
++
++ function primaryConditionCategory(permitType: PermitInspectionStructured["basicInfo"]["permitType"]): PermitInspectionStructured["conditions"][number]["category"] {
++   if (permitType === "화기작업") return "화재·폭발";
++   if (permitType === "밀폐공간") return "질식·가스";
++   if (permitType === "고소작업") return "추락·낙하";
++   return "장비·동선";
++ }
++
++ function buildPermitInspectionStructured(data: AskResponse): PermitInspectionStructured {
++   const permitType = inferPermitType(data);
++   const today = new Date().toLocaleDateString("ko-KR");
++   const riskRows = data.structured?.riskAssessmentRows ?? [];
++   const topRows = riskRows.slice(0, 4);
++   const weatherActions = data.externalData.weather.actions.slice(0, 2);
++   const immediateActions = data.riskSummary.immediateActions.slice(0, 3);
++   const questionAndWork = `${data.question} ${data.scenario.workSummary}`;
++
++   const conditions: PermitInspectionStructured["conditions"] = [
++     {
++       category: "작업구역",
++       requirement: "작업구역 출입통제와 작업반경 표시",
++       action: immediateActions[0] || "작업 전 위험구역을 표시하고 관계자 외 접근을 제한",
++       owner: "작업반장",
++       status: "확인 전",
++       relatedRiskRowIndex: riskRows.length ? 0 : undefined,
++       evidenceRefs: riskRows[0]?.evidenceRefs || ["위험성평가표"],
++       verification: riskRows[0]?.verification || "작업 전 통제구역 사진과 TBM 복창으로 확인"
++     },
++     {
++       category: primaryConditionCategory(permitType),
++       requirement: `${permitType} 핵심 위험 사전 통제`,
++       action: immediateActions[1] || data.riskSummary.topRisk,
++       owner: "관리감독자",
++       status: "확인 전",
++       relatedRiskRowIndex: riskRows.length ? Math.min(1, riskRows.length - 1) : undefined,
++       evidenceRefs: riskRows[Math.min(1, Math.max(0, riskRows.length - 1))]?.evidenceRefs || ["위험성평가표"],
++       verification: riskRows[Math.min(1, Math.max(0, riskRows.length - 1))]?.verification || "관리감독자가 핵심 위험 조치 이행을 확인"
++     },
++     {
++       category: "기상·환경",
++       requirement: "기상/API 신호와 현장 체감 조건 확인",
++       action: weatherActions.join(" / ") || data.scenario.weatherNote || "기상·현장 조건 확인 후 작업 여부 결정",
++       owner: "안전관리자",
++       status: "확인 전",
++       relatedRiskRowIndex: riskRows.length ? Math.min(1, riskRows.length - 1) : undefined,
++       evidenceRefs: riskRows[Math.min(1, Math.max(0, riskRows.length - 1))]?.evidenceRefs || ["기상청 현재·예보", "위험성평가표"],
++       verification: "기상 신호와 현장 체감 조건을 함께 확인"
++     },
++     {
++       category: "교육·TBM",
++       requirement: "위험성평가 결과와 작업중지 기준 TBM 공유",
++       action: immediateActions[2] || "작업 전 TBM에서 위험요인과 중지기준을 전원 확인",
++       owner: "TBM 리더",
++       status: "확인 전",
++       relatedRiskRowIndex: riskRows.length ? Math.min(2, riskRows.length - 1) : undefined,
++       evidenceRefs: riskRows[Math.min(2, Math.max(0, riskRows.length - 1))]?.evidenceRefs || ["TBM 기록", "위험성평가표"],
++       verification: "TBM 참석자 서명과 구두 복창으로 확인"
++     }
++   ];
++
++   topRows.forEach((row, index) => {
++     conditions.push({
++       category: conditionCategoryFromRisk(row),
++       requirement: row.hazard,
++       action: row.additionalControls,
++       owner: row.owner || "담당자 지정",
++       status: "확인 전",
++       relatedRiskRowIndex: index,
++       evidenceRefs: row.evidenceRefs,
++       verification: row.verification
++     });
++   });
++
++   return {
++     basicInfo: {
++       permitNo: "현장 발급",
++       permitType,
++       workName: data.scenario.workSummary || "작업명 확인",
++       location: data.scenario.siteName || "작업장소 확인",
++       workDate: today,
++       workerCount: data.scenario.workerCount,
++       requester: "작업반장",
++       approver: "관리감독자"
++     },
++     conditions,
++     attachments: [
++       { name: "작업계획서", required: true, status: "첨부", note: "작업순서·장비·인원·중지기준 확인" },
++       { name: "위험성평가표", required: true, status: riskRows.length ? "첨부" : "보완 필요", note: "유해·위험요인과 감소대책 확인" },
++       { name: "TBM 참석명단", required: true, status: "보완 필요", note: "작업 전 공유 후 참석자 서명" },
++       { name: "장비 제원/검사증/운전원 자격", required: /중장비|지게차|크레인|장비/.test(questionAndWork), status: "보완 필요", note: "해당 장비 사용 시 첨부" },
++       { name: "MSDS/화기·밀폐·고소작업 별도 확인", required: permitType !== "일반 위험작업", status: "보완 필요", note: `${permitType} 조건 확인` },
++       { name: "사진/작업계획도/통제구역 표시", required: true, status: "보완 필요", note: "작업 전·후 증빙 보관" }
++     ],
++     completionChecks: [
++       { item: "작업구역 원상복구", method: "통제선·잔재물·공도구 회수 사진 확인", owner: "작업반장", status: "확인 전" },
++       { item: "잔류위험 확인", method: "미조치 위험요인 여부를 관리감독자가 확인", owner: "관리감독자", status: "확인 전" },
++       { item: "교육·TBM 기록 보관", method: "참석자 서명과 사진증빙 보관 위치 기록", owner: "안전관리자", status: "확인 전" }
++     ],
++     approvers: {
++       requester: "작업반장",
++       safetyManager: "안전관리자",
++       siteManager: "현장소장",
++       completionChecker: "종료 확인자"
++     }
++   };
++ }
++
++ function withSubmitReadiness(title: string, body: string, data: AskResponse) {
++   const readinessLabel = `서식상태: 준제출형 - ${title} 제출 필수 항목을 반영한 현장 검토용입니다.`;
++   if (body.includes(readinessLabel) && body.includes("[필수 확인 항목]")) {
++     return body;
++   }
++   const references = data.externalData.kosha.references.map((item) => item.title).join(" / ");
++   return [
++     "[제출상태]",
++     readinessLabel,
++     "원본 재현 한계: 발주처 지정 직인, 허가번호, 결재선, 표 병합 레이아웃은 제출 전 원본 양식으로 확인 필요",
++     "",
++     "[필수 확인 항목]",
++     `기상: ${data.externalData.weather.summary || data.scenario.weatherNote}`,
++     `위험요인: ${data.riskSummary.topRisk}`,
++     "확인/서명란: 작성자 / 관리감독자 / 안전관리자 / 현장책임자",
++     `근거 반영: ${references || "공식 근거 확인 필요"}`,
++     "증빙: 사진/영상 증빙, 참석자 서명, 개선조치 전후 기록",
++     "",
++     body
++   ].join("\n");
++ }
++
++ function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
++   if (key === "riskAssessmentDraft") {
++     return {
++       code: "SC-RISK-01",
++       subtitle: "위험성평가 및 감소대책 확인서",
++       layout: "risk",
++       primaryColumn: "위험요인",
++       actionColumn: "감소대책 / 잔여위험",
++       confirmationRows: ["위험요인 확인", "감소대책 담당 지정", "작업 전 공유", "잔여위험 승인"],
++       approvalLabels: ["작성", "검토", "승인"]
++     };
++   }
++
++   if (key === "workPlanDraft") {
++     return {
++       code: "SC-WP-01",
++       subtitle: "작업계획서 및 작업순서 확인서",
++       layout: "workPlan",
++       primaryColumn: "작업계획 항목",
++       actionColumn: "작성 내용 / 기준",
++       confirmationRows: ["작업구간 확인", "작업순서 확인", "장비·인원 확인", "작업중지 기준 공유"],
++       approvalLabels: ["작성", "검토", "승인"]
++     };
++   }
++
++   if (key === "workPermitDraft") {
++     return {
++       code: "SC-PTW-01",
++       subtitle: "허가서/첨부 및 위험작업 종료 확인서",
++       layout: "permit",
++       primaryColumn: "허가 항목",
++       actionColumn: "확인 내용 / 조건",
++       confirmationRows: ["허가대상 확인", "격리·차단 확인", "보호구 확인", "종료 확인"],
++       approvalLabels: ["신청", "허가", "종료"]
++     };
++   }
++
++   if (key === "tbmLogDraft") {
++     return {
++       code: "SC-TBM-01",
++       subtitle: "TBM 일지 및 작업 전 안전점검 회의록",
++       layout: "tbmLog",
++       primaryColumn: "점검/논의 항목",
++       actionColumn: "전달 내용 / 조치",
++       confirmationRows: ["보호구 확인", "건강상태 확인", "음주 여부 확인", "참석자 확인"],
++       approvalLabels: ["담당", "소장"]
++     };
++   }
++
++   if (key === "tbmBriefing") {
++     return {
++       code: "SC-TBM-01",
++       subtitle: "TBM 및 작업 전 안전점검 회의록",
++       layout: "tbmBriefing",
++       primaryColumn: "점검/논의 항목",
++       actionColumn: "전달 내용 / 조치",
++       confirmationRows: ["작업내용 공유", "위험요인 전달", "작업중지 기준 확인", "참석자 확인"],
++       approvalLabels: ["진행", "관리감독", "보관"]
++     };
++   }
++
++   if (key === "safetyEducationRecordDraft" || key === "foreignWorkerBriefing") {
++     return {
++       code: "SC-EDU-01",
++       subtitle: "안전보건교육 실시 및 이해 확인서",
++       layout: "education",
++       primaryColumn: "교육 항목",
++       actionColumn: "교육 내용 / 확인 방법",
++       confirmationRows: ["교육대상 확인", "교육자료 사용", "이해도 확인", "추가교육 필요성"],
++       approvalLabels: ["교육자", "확인자", "보관"]
++     };
++   }
++
++   return {
++     code: "SC-WP-01",
++     subtitle: "SafeClaw 현장 안전문서 확인서",
++     layout: key === "photoEvidenceDraft" ? "photo" : "generic",
++     primaryColumn: "항목",
++     actionColumn: "내용 / 조치",
++     confirmationRows: ["현장조건 확인", "담당자 확인", "작업 전 공유", "보관 위치 확인"],
++     approvalLabels: ["작성", "확인", "보관"]
++   };
++ }
++
++ function formCss(pageMargin = "36px") {
++   return `
++     body { margin: 0; background: #fafafb; color: #1a1b1e; font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
++     .safety-form-page { max-width: 1080px; margin: ${pageMargin} auto; background: #ffffff; border: 1px solid #e6e8eb; border-radius: 12px; box-shadow: none; overflow: hidden; }
++     .form-head { display: grid; grid-template-columns: 1fr 240px; border-bottom: 1px solid #e6e8eb; }
++     .form-title { padding: 20px 24px; }
++     .form-title span { display: inline-block; margin-bottom: 8px; color: #5c6169; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
++     .form-title h1 { margin: 0; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
++     .form-title p { margin: 8px 0 0; color: #5c6169; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
++     .approval-grid { display: grid; grid-template-columns: repeat(var(--approval-count, 3), 1fr); border-left: 1px solid #e6e8eb; }
++     .approval-cell { display: grid; grid-template-rows: 34px 1fr; min-height: 108px; border-left: 1px solid #e6e8eb; text-align: center; }
++     .approval-cell:first-child { border-left: 0; }
++     .approval-cell b { display: grid; place-items: center; background: #f4f5f7; border-bottom: 1px solid #e6e8eb; font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; }
++     .approval-cell em { display: grid; place-items: end center; padding-bottom: 12px; color: #8a8f98; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; font-style: normal; }
++     .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #e6e8eb; }
++     .meta-item { min-height: 58px; border-right: 1px solid #e6e8eb; }
++     .meta-item:last-child { border-right: 0; }
++     .meta-item b { display: block; padding: 7px 10px; background: #f4f5f7; color: #5c6169; font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; }
++     .meta-item span { display: block; padding: 10px; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
++     .check-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #e6e8eb; }
++     .check-grid div { padding: 10px; border-right: 1px solid #e6e8eb; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; }
++     .check-grid div:last-child { border-right: 0; }
++     .section-block { padding: 18px 22px 4px; }
++     .section-label { display: inline-flex; align-items: center; min-height: 30px; margin-bottom: 10px; padding: 5px 12px; border: 1px solid #e6e8eb; border-radius: 8px; background: #f4f5f7; color: #1a1b1e; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; }
++     table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 16px; }
++     th, td { border: 1px solid #e6e8eb; padding: 9px 10px; vertical-align: top; word-break: keep-all; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; }
++     th { background: #f4f5f7; color: #1a1b1e; font-weight: 700; text-align: center; }
++     .center { text-align: center; }
++     .check-cell { text-align: center; color: #5c6169; font-weight: 700; }
++     .signature-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 10px 22px 22px; border: 1px solid #e6e8eb; border-radius: 8px; overflow: hidden; }
++     .signature-grid div { min-height: 62px; padding: 9px 10px; border-right: 1px solid #e6e8eb; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; }
++     .signature-grid div:last-child { border-right: 0; }
++     .signature-grid b { display: block; margin-bottom: 18px; }
++     .form-note { margin: 0 22px 22px; color: #5c6169; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
++     .section-help { margin: 0 0 10px; color: #5c6169; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
++     .mini-table th { background: #f4f5f7; color: #1a1b1e; }
++     .form-layout-risk .form-title span,
++     .form-layout-workPlan .form-title span,
++     .form-layout-permit .form-title span,
++     .form-layout-tbmBriefing .form-title span,
++     .form-layout-tbmLog .form-title span { color: #6c6ff7; background: transparent; }
++     .form-layout-risk .check-grid div { background: #fff8f7; }
++     .form-layout-workPlan .check-grid div { background: #f8f9ff; }
++     .form-layout-permit .check-grid div { background: #fffaf0; }
++     .form-layout-tbmBriefing .meta-item b, .form-layout-tbmBriefing .mini-table th,
++     .form-layout-tbmLog .meta-item b, .form-layout-tbmLog .mini-table th { background: #f4f5f7; color: #1a1b1e; }
++     .form-layout-tbmBriefing .check-grid div, .form-layout-tbmLog .check-grid div { background: #f8fbf9; }
++     .form-lineage { margin: 0; padding: 10px 22px; border-bottom: 1px solid #e6e8eb; background: #f8f9fb; color: #5c6169; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
++     .risk-table th, .risk-table td { padding: 7px 6px; }
++     .risk-level-high { background: #ffe3df; font-weight: 900; color: #a83224; }
++     .permit-check td:nth-child(2), .permit-check td:nth-child(3) { text-align: center; font-weight: 900; }
++     .attendee-table td { height: 42px; }
++     .tbm-daily-table th, .tbm-daily-table td { padding: 6px 5px; }
++     .tbm-check-list td:first-child { width: 28%; font-weight: 800; background: #f8f9fb; }
++     .tbm-two-column td { min-height: 92px; }
++     .tbm-attendance th, .tbm-attendance td { text-align: center; padding: 5px 4px; }
++     .tbm-attendance td:nth-child(3), .tbm-attendance td:nth-child(9) { text-align: left; }
++     @media print { body { background: #ffffff; } .safety-form-page { margin: 0; box-shadow: none; max-width: none; border-radius: 0; } }
++   `;
++ }
++
++ const documentPreviewCss = `
++   .document-print-typography { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
++   .document-print-typography .safety-form-preview-head strong { font-family: inherit; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
++   .document-print-typography .safety-form-bridge h3,
++   .document-print-typography .safety-form-section-stack h3 { font-family: inherit; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; }
++   .document-print-typography .safety-form-meta-grid span { font-family: inherit; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
++   .document-print-typography th,
++   .document-print-typography td { font-family: inherit; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; }
++   .document-print-typography th { font-weight: 700; }
++   .document-print-typography .safety-form-preview-head small,
++   .document-print-typography .safety-form-preview-head span { font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; font-family: inherit; }
++   .document-print-typography .approval-preview b { font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
++   .document-print-typography .approval-preview em { font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; font-family: inherit; }
++   .document-print-typography .safety-form-meta-grid b { font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
++   .document-print-typography .safety-form-check-row span { font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
++   .document-print-typography .safety-form-signatures span { font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
++   .safeclaw-module-shell.module-variant-document .document-editor .submission-preview-panel .safety-form-preview.document-print-typography .safety-form-preview-head strong { letter-spacing: -0.02em; }
++   .safeclaw-module-shell.module-variant-document .document-editor .submission-preview-panel .safety-form-preview.document-print-typography .safety-form-bridge h3,
++   .safeclaw-module-shell.module-variant-document .document-editor .submission-preview-panel .safety-form-preview.document-print-typography .safety-form-section-stack h3 { letter-spacing: -0.01em; }
++   .safeclaw-module-shell.module-variant-document .safeclaw-module-content .document-print-typography .safety-form-preview-head small,
++   .safeclaw-module-shell.module-variant-document .safeclaw-module-content .document-print-typography .safety-form-preview-head span { line-height: 11pt; }
++ `;
++
++ function buildGenericSections(rows: SheetRow[], profile: SafetyFormProfile) {
++   return groupRowsBySection(rows).map((group) => `
++     <section class="section-block">
++       <div class="section-label">${escapeHtml(group.section)}</div>
++       <table>
++         <colgroup><col style="width: 7%;" /><col style="width: 21%;" /><col style="width: 52%;" /><col style="width: 20%;" /></colgroup>
++         <thead><tr><th>No.</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인/담당</th></tr></thead>
++         <tbody>
++           ${group.rows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인<br />담당: ______</td></tr>`).join("")}
++         </tbody>
++       </table>
++     </section>
++   `).join("");
++ }
++
++ function buildRiskAssessmentSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
++   const hazardRows = findRows(rows, ["위험", "추락", "전도", "충돌", "화재", "중독", "끼임"], 4);
++   const controlRows = findRows(rows, ["조치", "대책", "점검", "통제", "작업중지"], 4);
++   const controlFor = (index: number) => compactContent(controlRows[index] || controlRows[0], "작업 전 통제대책을 지정하고 이행 여부를 확인");
++   return `
++     <section class="section-block">
++       <div class="section-label">1. 사전준비</div>
++       <table class="mini-table">
++         <colgroup><col style="width: 16%;" /><col style="width: 34%;" /><col style="width: 16%;" /><col style="width: 34%;" /></colgroup>
++         <tbody>
++           <tr><th>평가대상 작업</th><td>${escapeHtml(scenario.workSummary)}</td><th>평가방법</th><td>4M + 가능성·중대성 판단</td></tr>
++           <tr><th>작업장소</th><td>${escapeHtml(scenario.siteName)}</td><th>참여자</th><td>관리감독자, 작업반장, 근로자 대표</td></tr>
++           <tr><th>작업조건</th><td>${escapeHtml(scenario.weatherNote)}</td><th>검토자료</th><td>작업계획서, TBM, KOSHA 자료, 법령 근거</td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">2. 유해·위험요인 파악 및 위험성 결정</div>
++       <p class="section-help">제공 서식 기준에 맞춰 단위공종, 작업장소, 사용 장비, 재해형태, 가능성·중대성·등급을 분리합니다.</p>
++       <table class="risk-table">
++         <colgroup>
++           <col style="width: 8%;" /><col style="width: 10%;" /><col style="width: 10%;" /><col style="width: 8%;" />
++           <col style="width: 18%;" /><col style="width: 8%;" /><col style="width: 6%;" /><col style="width: 6%;" />
++           <col style="width: 6%;" /><col style="width: 20%;" />
++         </colgroup>
++         <thead><tr><th>단위공종</th><th>작업장소</th><th>장비/도구</th><th>4M</th><th>유해·위험요인</th><th>재해형태</th><th>가능성</th><th>중대성</th><th>등급</th><th>현재 안전조치</th></tr></thead>
++         <tbody>
++           ${hazardRows.map((row, index) => {
++             const text = rowText(row);
++             return `<tr>
++             <td>${escapeHtml(scenario.workSummary)}</td>
++             <td>${escapeHtml(scenario.siteName)}</td>
++             <td>${escapeHtml(inferEquipment(text, scenario, index))}</td>
++             <td class="center">${escapeHtml(inferRiskFactor4M(text, index))}</td>
++             <td>${escapeHtml(compactContent(row, "작업 중 유해·위험요인"))}</td>
++             <td>${escapeHtml(inferDisasterType(text, index))}</td>
++             <td class="center">중</td>
++             <td class="center">상</td>
++             <td class="center risk-level-high">상</td>
++             <td>${escapeHtml(controlFor(index))}</td>
++           </tr>`;
++           }).join("")}
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">3. 감소대책 수립·실행 및 이행확인</div>
++       <table>
++         <colgroup><col style="width: 32%;" /><col style="width: 28%;" /><col style="width: 14%;" /><col style="width: 12%;" /><col style="width: 14%;" /></colgroup>
++         <thead><tr><th>추가 감소대책</th><th>확인 근거/증빙</th><th>조치담당자</th><th>조치기한</th><th>확인자 서명</th></tr></thead>
++         <tbody>
++           ${controlRows.map((row, index) => `<tr><td>${escapeHtml(compactContent(row, "감소대책"))}</td><td>TBM 공유, 사진/점검 기록, 작업 전 확인</td><td>작업반장</td><td>작업 전</td><td>________</td></tr>`).join("")}
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">4. 위험성평가 회의록 및 재평가 기준</div>
++       <table>
++         <colgroup><col style="width: 20%;" /><col style="width: 30%;" /><col style="width: 20%;" /><col style="width: 30%;" /></colgroup>
++         <tbody>
++           <tr><th>회의일시</th><td>____년 ____월 ____일 ____시</td><th>참석대상</th><td>관리감독자, 작업반장, 작업자 대표</td></tr>
++           <tr><th>재평가 사유</th><td>공법·장비·인원·기상 조건 변경</td><th>재평가 기준</th><td>상 등급 잔류위험 또는 작업중지 발생 시</td></tr>
++           <tr><th>주요 결정</th><td colspan="3">□ 감소대책 이행 후 작업 □ 보완 후 재평가 □ 작업중지 유지</td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">5. 공유·교육 및 조치 확인</div>
++       <table>
++         <thead><tr><th>공유 대상</th><th>공유 방법</th><th>이해 확인</th><th>미조치/재평가 필요</th></tr></thead>
++         <tbody><tr><td>투입 근로자 전원</td><td>작업 전 TBM 및 안전보건교육</td><td>구두 복창·서명</td><td>□ 없음 □ 있음: ____________________</td></tr></tbody>
++       </table>
++     </section>
++   `;
++ }
++
++ function buildWorkPlanSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
++   const sequenceRows = findRows(rows, ["순서", "작업", "구간", "장비", "인원"], 5);
++   const stopRows = findRows(rows, ["중지", "강풍", "우천", "위험", "비상"], 3);
++   return `
++     <section class="section-block">
++       <div class="section-label">1. 작업개요 및 관리자 지정</div>
++       <table class="mini-table">
++         <tbody>
++           <tr><th>공사명/현장</th><td>${escapeHtml(scenario.siteName)}</td><th>해당 작업</th><td>${escapeHtml(scenario.workSummary)}</td></tr>
++           <tr><th>작업업체</th><td>${escapeHtml(scenario.companyName)}</td><th>작업인원</th><td>${scenario.workerCount.toLocaleString("ko-KR")}명</td></tr>
++           <tr><th>작업일시</th><td>____년 ____월 ____일 ____시</td><th>작업지휘자</th><td>성명/연락처: ____________________</td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">2. 세부 작업순서</div>
++       <table>
++         <colgroup><col style="width: 8%;" /><col style="width: 24%;" /><col style="width: 38%;" /><col style="width: 16%;" /><col style="width: 14%;" /></colgroup>
++         <thead><tr><th>No.</th><th>세부작업</th><th>작업방법/안전관리대책</th><th>담당</th><th>확인</th></tr></thead>
++         <tbody>
++           ${sequenceRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td>작업반장</td><td>□</td></tr>`).join("")}
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">3. 장비·인원·첨부서류 확인</div>
++       <table class="permit-check">
++         <thead><tr><th>확인 항목</th><th>해당</th><th>첨부/확인</th><th>비고</th></tr></thead>
++         <tbody>
++           <tr><td>장비 제원표, 검사증, 운전원 자격</td><td>□</td><td>□</td><td>해당 장비 사용 시 첨부</td></tr>
++           <tr><td>위험성평가표 및 TBM 참석명단</td><td>■</td><td>□</td><td>작업 전 최종본 확인</td></tr>
++           <tr><td>작업계획도, 통제구역, 유도자 배치도</td><td>□</td><td>□</td><td>현장 게시 권장</td></tr>
++           <tr><td>보험·자격·이수증·사업자등록 등 기본 서류</td><td>□</td><td>□</td><td>발주자/원청 요구 시 첨부</td></tr>
++           <tr><td>MSDS, 안전인증서, 안전검사합격증</td><td>□</td><td>□</td><td>화학물질·장비 사용 시 첨부</td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">4. 작업중지 기준 및 비상대응</div>
++       <table>
++         <thead><tr><th>중지 기준</th><th>판단자</th><th>전파 방법</th><th>재개 조건</th></tr></thead>
++         <tbody>
++           ${stopRows.map((row) => `<tr><td>${escapeHtml(compactContent(row, scenario.weatherNote))}</td><td>관리감독자</td><td>TBM/문자/무전</td><td>위험요인 제거 후 재확인</td></tr>`).join("")}
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">5. 작업계획도 및 역할 지정</div>
++       <table>
++         <colgroup><col style="width: 18%;" /><col style="width: 32%;" /><col style="width: 18%;" /><col style="width: 32%;" /></colgroup>
++         <tbody>
++           <tr><th>작업계획도</th><td>□ 첨부 □ 현장 게시 □ 보완 필요</td><th>통제구역</th><td>□ 표시 □ 접근금지 □ 유도자 배치</td></tr>
++           <tr><th>작업지휘자</th><td>성명/연락처: ____________________</td><th>유도자/신호수</th><td>성명/연락처: ____________________</td></tr>
++           <tr><th>운전원/장비담당</th><td>자격·면허 확인: □</td><th>감시자</th><td>위험작업 해당 시 지정: □</td></tr>
++         </tbody>
++       </table>
++     </section>
++   `;
++ }
++
++ function buildPermitSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
++   const permitRows = findRows(rows, ["허가", "작업", "핵심", "보호구", "첨부", "종료"], 6);
++   return `
++     <section class="section-block">
++       <div class="section-label">1. 허가 기본정보</div>
++       <table class="mini-table">
++         <tbody>
++           <tr><th>허가번호</th><td>PTW-${new Date().getFullYear()}-____</td><th>작업명</th><td>${escapeHtml(scenario.workSummary)}</td></tr>
++           <tr><th>작업장소</th><td>${escapeHtml(scenario.siteName)}</td><th>작업시간</th><td>____:____ ~ ____:____</td></tr>
++           <tr><th>신청자</th><td>____________________</td><th>허가자</th><td>____________________</td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">2. 작업 전 허가조건</div>
++       <table class="permit-check">
++         <thead><tr><th>확인 항목</th><th>적합</th><th>보완</th><th>확인 내용</th></tr></thead>
++         <tbody>
++           ${permitRows.slice(0, 4).map((row) => `<tr><td>${escapeHtml(row.item)}</td><td>□</td><td>□</td><td>${escapeHtml(row.content)}</td></tr>`).join("")}
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">3. 첨부서류 체크리스트</div>
++       <table class="permit-check">
++         <thead><tr><th>첨부서류</th><th>해당</th><th>첨부</th><th>비고</th></tr></thead>
++         <tbody>
++           <tr><td>작업계획서</td><td>■</td><td>□</td><td>작업순서·장비·인원 포함</td></tr>
++           <tr><td>위험성평가표</td><td>■</td><td>□</td><td>감소대책·담당·기한 포함</td></tr>
++           <tr><td>TBM 참석명단/교육기록</td><td>■</td><td>□</td><td>성명·소속·직위·서명</td></tr>
++           <tr><td>장비 검사증/자격증/MSDS/작업계획도</td><td>□</td><td>□</td><td>해당 작업 시 첨부</td></tr>
++           <tr><td>보험가입증명·자격/면허·안전교육 이수증</td><td>□</td><td>□</td><td>원청 제출 요구 시 첨부</td></tr>
++           <tr><td>작업반경도·인양능력표·정비/점검 이력</td><td>□</td><td>□</td><td>장비·중량물 작업 시 첨부</td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">4. 종료 확인</div>
++       <table><thead><tr><th>종료 상태</th><th>잔류위험</th><th>원상복구</th><th>종료 확인자</th></tr></thead><tbody><tr><td>□ 완료 □ 중단</td><td>□ 없음 □ 있음</td><td>□ 확인</td><td>성명/서명: __________</td></tr></tbody></table>
++     </section>
++   `;
++ }
++
++ function buildEducationSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
++   const educationRows = findRows(rows, ["교육", "보호구", "위험", "확인", "이해", "작업중지"], 6);
++   return `
++     <section class="section-block">
++       <div class="section-label">1. 교육 실시 개요</div>
++       <table class="mini-table">
++         <tbody>
++           <tr><th>교육명</th><td>${escapeHtml(scenario.workSummary)} 작업 전 안전보건교육</td><th>교육일시</th><td>____년 ____월 ____일 ____시</td></tr>
++           <tr><th>교육장소</th><td>${escapeHtml(scenario.siteName)}</td><th>교육대상</th><td>투입 근로자 ${scenario.workerCount.toLocaleString("ko-KR")}명</td></tr>
++           <tr><th>교육자</th><td>관리감독자 / 작업반장</td><th>교육방법</th><td>TBM, 현장 시연, 구두 이해 확인</td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">2. 교육 내용 및 이해 확인</div>
++       <table>
++         <colgroup><col style="width: 8%;" /><col style="width: 24%;" /><col style="width: 38%;" /><col style="width: 15%;" /><col style="width: 15%;" /></colgroup>
++         <thead><tr><th>No.</th><th>교육 항목</th><th>주요 내용</th><th>확인 방법</th><th>추가교육</th></tr></thead>
++         <tbody>
++           ${educationRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td>□ 질문 □ 복창 □ 서명</td><td>□ 필요 □ 불필요</td></tr>`).join("")}
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">3. 교육 참석자 확인</div>
++       <table class="attendee-table">
++         <thead><tr><th>No.</th><th>성명</th><th>소속</th><th>역할/직종</th><th>언어</th><th>서명</th></tr></thead>
++         <tbody>
++           ${Array.from({ length: Math.max(4, Math.min(10, scenario.workerCount)) }, (_, index) => `<tr><td class="center">${index + 1}</td><td></td><td></td><td></td><td>한국어</td><td></td></tr>`).join("")}
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">4. 미이해자 및 후속 조치</div>
++       <table><thead><tr><th>대상자</th><th>미이해 내용</th><th>재교육 방법</th><th>완료 확인</th></tr></thead><tbody><tr><td></td><td></td><td></td><td>□ 완료 □ 추적</td></tr></tbody></table>
++     </section>
++   `;
++ }
++
++ function buildTbmLogSections(rows: SheetRow[], scenario: AskResponse["scenario"]) {
++   const agendaRows = findRows(rows, ["위험", "조치", "확인", "보호구", "작업중지", "질문"], 5);
++   const dailyRiskText = agendaRows.slice(0, 3).map((row) => compactContent(row, "금일 위험요인")).join("<br />");
++   const educationText = agendaRows.slice(0, 4).map((row, index) => `${index + 1}. ${escapeHtml(row.item)} - ${escapeHtml(row.content)}`).join("<br />");
++   const attendeeHalf = Math.max(10, Math.min(20, Math.ceil(scenario.workerCount / 2)));
++   const attendanceRows = Array.from({ length: attendeeHalf }, (_, index) => {
++     const leftNo = index + 1;
++     const rightNo = index + attendeeHalf + 1;
++     return `<tr>
++       <td>${leftNo}</td><td></td><td></td><td>□</td><td>□</td><td></td>
++       <td>${rightNo}</td><td></td><td></td><td>□</td><td>□</td><td></td>
++     </tr>`;
++   }).join("");
++   return `
++     <section class="section-block">
++       <div class="section-label">1. TBM 일지 기본정보</div>
++       <table class="mini-table tbm-daily-table">
++         <tbody>
++           <tr><th>공종</th><td>${escapeHtml(scenario.workSummary)}</td><th>일자</th><td>____년 ____월 ____일</td></tr>
++           <tr><th>현장</th><td>${escapeHtml(scenario.siteName)}</td><th>작업인원</th><td>${scenario.workerCount.toLocaleString("ko-KR")}명</td></tr>
++           <tr><th>진행자</th><td>작업반장 / 관리감독자</td><th>기상·조건</th><td>${escapeHtml(scenario.weatherNote)}</td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">2. 근로자 확인 사항</div>
++       <table class="tbm-check-list">
++         <tbody>
++           <tr><td>개인 보호구 착용 상태</td><td>□ 안전모 □ 안전화 □ 각반 □ 복장 □ 턱끈 □ 작업별 보호구</td></tr>
++           <tr><td>건강상태</td><td>□ 고혈압 □ 당뇨 □ 어지러움 □ 근골격계 통증 □ 기타 질병/이상 없음</td></tr>
++           <tr><td>음주 여부</td><td>□ 이상 없음 □ 확인 필요: ____________________</td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">3. 금일 작업사항 및 위험요인</div>
++       <table class="tbm-two-column">
++         <colgroup><col style="width: 50%;" /><col style="width: 50%;" /></colgroup>
++         <thead><tr><th>금일 작업사항</th><th>금일 위험요인</th></tr></thead>
++         <tbody><tr><td>${escapeHtml(scenario.workSummary)}</td><td>${dailyRiskText || "작업 전 위험요인 확인 및 공유"}</td></tr></tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">4. 일일 안전교육 및 전달사항</div>
++       <table>
++         <tbody><tr><td>${educationText || "작업 전 안전교육, 작업중지 기준, 비상연락체계를 전달하고 이해 여부를 확인합니다."}</td></tr></tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">5. 참석자 명단</div>
++       <table class="tbm-attendance">
++         <colgroup>
++           <col style="width: 5%;" /><col style="width: 9%;" /><col style="width: 14%;" /><col style="width: 6%;" /><col style="width: 6%;" /><col style="width: 10%;" />
++           <col style="width: 5%;" /><col style="width: 9%;" /><col style="width: 14%;" /><col style="width: 6%;" /><col style="width: 6%;" /><col style="width: 10%;" />
++         </colgroup>
++         <thead><tr><th>NO</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th><th>NO</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th></tr></thead>
++         <tbody>
++           ${attendanceRows}
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">6. 인원 집계 및 확인자</div>
++       <table class="tbm-daily-table">
++         <thead><tr><th>분류</th><th>인원</th><th>담당</th><th>비고</th></tr></thead>
++         <tbody>
++           <tr><td>근로자</td><td>${scenario.workerCount.toLocaleString("ko-KR")}명</td><td>담당자</td><td></td></tr>
++           <tr><td>관리자</td><td></td><td>현장소장</td><td></td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">7. 미조치 및 사진·영상 증빙</div>
++       <table><thead><tr><th>미조치 위험요인</th><th>후속조치</th><th>사진/영상 파일명</th><th>확인자</th></tr></thead><tbody><tr><td></td><td></td><td></td><td></td></tr></tbody></table>
++     </section>
++   `;
++ }
++
++ function buildTbmBriefingSections(rows: SheetRow[], scenario: AskResponse["scenario"], data: AskResponse, riskRows: SheetRow[]) {
++   const bridgeRows = buildTbmBridgeRows(data, riskRows.length ? riskRows : rows);
++   const questionRows = findRows(rows, ["질문", "확인", "누가", "알고", "복창"], 3);
++   const weatherText = data.externalData.weather.summary || data.scenario.weatherNote;
++   return `
++     <section class="section-block">
++       <div class="section-label">1. 작업 전 브리핑 개요</div>
++       <table class="mini-table">
++         <tbody>
++           <tr><th>현장</th><td>${escapeHtml(scenario.siteName)}</td><th>작업</th><td>${escapeHtml(scenario.workSummary)}</td></tr>
++           <tr><th>위험수준</th><td>${escapeHtml(data.riskSummary.riskLevel)}</td><th>기상 신호</th><td>${escapeHtml(weatherText)}</td></tr>
++           <tr><th>진행자</th><td>작업반장 / 관리감독자</td><th>참석 대상</th><td>투입 근로자 전원</td></tr>
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">2. 위험성평가 기반 TBM 전달</div>
++       <table>
++         <colgroup><col style="width: 7%;" /><col style="width: 28%;" /><col style="width: 24%;" /><col style="width: 16%;" /><col style="width: 17%;" /><col style="width: 8%;" /></colgroup>
++         <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>기상/환경 반영</th><th>출처 연결</th><th>작업중지 기준</th><th>복창</th></tr></thead>
++         <tbody>
++           ${bridgeRows.map((row, index) => `<tr>
++             <td class="center">${index + 1}</td>
++             <td>${escapeHtml(row.risk)}</td>
++             <td>${escapeHtml(row.weather)}</td>
++             <td>${escapeHtml(row.source)}</td>
++             <td>${escapeHtml(row.message)}</td>
++             <td class="center">□</td>
++           </tr>`).join("")}
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">3. 확인 질문</div>
++       <table>
++         <thead><tr><th>질문</th><th>기대 답변</th><th>미이해자 조치</th></tr></thead>
++         <tbody>
++           ${questionRows.map((row) => `<tr><td>${escapeHtml(compactContent(row, "오늘 작업중지 기준을 누가 판단합니까?"))}</td><td>작업중지 기준과 보고자를 구두로 답변</td><td>작업 전 재설명 후 서명</td></tr>`).join("")}
++         </tbody>
++       </table>
++     </section>
++     <section class="section-block">
++       <div class="section-label">4. 보호구·통제·증빙</div>
++       <table>
++         <thead><tr><th>보호구</th><th>통제구역</th><th>사진/영상 증빙</th><th>관리자 확인</th></tr></thead>
++         <tbody><tr><td>□ 착용 확인</td><td>□ 접근금지 표시 □ 유도자 배치</td><td>□ TBM 사진 □ 작업 전 점검 사진</td><td>서명: __________</td></tr></tbody>
++       </table>
++     </section>
++   `;
++ }
++
++ function buildTbmWeatherRiskBridge(data: AskResponse, riskRows: SheetRow[]) {
++   const bridgeRows = buildTbmBridgeRows(data, riskRows);
++   return `
++     <section class="section-block">
++       <div class="section-label">위험성평가·기상 API 반영</div>
++       <table>
++         <colgroup><col style="width: 7%;" /><col style="width: 27%;" /><col style="width: 26%;" /><col style="width: 16%;" /><col style="width: 24%;" /></colgroup>
++         <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>출처 연결</th><th>TBM 전달 문구</th></tr></thead>
++         <tbody>
++           ${bridgeRows.map((row, index) => `<tr>
++             <td class="center">${index + 1}</td>
++             <td>${escapeHtml(row.risk)}</td>
++             <td>${escapeHtml(row.weather)}</td>
++             <td>${escapeHtml(row.source)}</td>
++             <td>${escapeHtml(row.message)}</td>
++           </tr>`).join("")}
++         </tbody>
++       </table>
++     </section>
++   `;
++ }
++
++ function buildSafetyFormMarkup(
++   title: string,
++   rows: SheetRow[],
++   scenario: AskResponse["scenario"],
++   profile: SafetyFormProfile,
++   data?: AskResponse,
++   riskRows: SheetRow[] = []
++ ) {
++   const phaseADocumentAuthorityMarker = buildPhaseADocumentAuthorityMarker(data?.phaseAReview);
++   const bridgeSections = data && (profile.layout === "tbmBriefing" || profile.layout === "tbmLog")
++     ? buildTbmWeatherRiskBridge(data, riskRows.length ? riskRows : rows)
++     : "";
++   const sections = profile.layout === "risk"
++     ? buildRiskAssessmentSections(rows, scenario)
++     : profile.layout === "workPlan"
++       ? buildWorkPlanSections(rows, scenario)
++       : profile.layout === "permit"
++         ? buildPermitSections(rows, scenario)
++         : profile.layout === "tbmLog"
++           ? `${bridgeSections}${buildTbmLogSections(rows, scenario)}`
++           : profile.layout === "tbmBriefing"
++             ? (data ? buildTbmBriefingSections(rows, scenario, data, riskRows) : buildGenericSections(rows, profile))
++             : profile.layout === "education"
++               ? buildEducationSections(rows, scenario)
++               : buildGenericSections(rows, profile);
++   const approvalCells = profile.approvalLabels.map((label) => `
++     <div class="approval-cell"><b>${escapeHtml(label)}</b><em>서명</em></div>
++   `).join("");
++   const confirmationCells = profile.confirmationRows.map((label) => `
++     <div>□ ${escapeHtml(label)}</div>
++   `).join("");
++
++   return `
++   <article class="safety-form-page form-layout-${profile.layout}">
++     <header class="form-head">
++       <div class="form-title">
++         <span>${escapeHtml(profile.code)}</span>
++         <h1>${escapeHtml(title)}</h1>
++         <p>${escapeHtml(profile.subtitle)} · SafeClaw 공식자료 연결 후보 · 현장 검토용 초안</p>
++       </div>
++       <div class="approval-grid" style="--approval-count: ${profile.approvalLabels.length};">${approvalCells}</div>
++     </header>
++     <p class="form-lineage">${escapeHtml(phaseADocumentAuthorityMarker).replace(/\n/g, "<br />")}<br />서식 구분: ${escapeHtml(profile.subtitle)} · 원본 서식 1:1 재현이 아니라 현장 입력값과 공식자료 연결 후보를 정리한 검토용 출력입니다.</p>
++     <div class="meta-grid">
++       <div class="meta-item"><b>사업장</b><span>${escapeHtml(scenario.companyName)}</span></div>
++       <div class="meta-item"><b>현장/공정</b><span>${escapeHtml(scenario.siteName)}</span></div>
++       <div class="meta-item"><b>작업내용</b><span>${escapeHtml(scenario.workSummary)}</span></div>
++       <div class="meta-item"><b>인원/조건</b><span>${scenario.workerCount.toLocaleString("ko-KR")}명 · ${escapeHtml(scenario.weatherNote)}</span></div>
++     </div>
++     <div class="check-grid">${confirmationCells}</div>
++     ${sections}
++     <div class="signature-grid">
++       <div><b>작성자</b>성명/서명:</div>
++       <div><b>관리감독자</b>성명/서명:</div>
++       <div><b>교육/TBM 확인자</b>성명/서명:</div>
++       <div><b>보관 위치</b>문서번호/철:</div>
++     </div>
++     <p class="form-note">본 문서는 현장 확인 전 초안입니다. 발주처 지정 원본 양식, 작업 전 위험요인, 참석자, 작업중지 기준, 서명란을 최종 확인한 뒤 사용하세요.</p>
++   </article>`;
++ }
++
++ function buildHtml(
++   title: string,
++   rows: SheetRow[],
++   scenario: AskResponse["scenario"],
++   profile: SafetyFormProfile,
++   data?: AskResponse,
++   riskRows: SheetRow[] = []
++ ) {
++   return `<!doctype html>
++ <html lang="ko">
++ <head>
++   <meta charset="utf-8" />
++   <title>${escapeHtml(title)}</title>
++   <style>
++     ${formCss()}
++   </style>
++ </head>
++ <body>
++   ${buildSafetyFormMarkup(title, rows, scenario, profile, data, riskRows)}
++ </body>
++ </html>`;
++ }
++
++ // Sections that are decoration / connection-status / RAG metadata, NOT real form rows.
++ // Excluded from the .xlsx / .hwp body table to keep the official form clean.
++ const META_SECTION_PATTERNS = [
++   /^연결 상태/,
++   /^KOSHA 기술지침\/기술지원규정 직접 인용/,
++   /^내부 안전지식 DB 반영/,
++   /^근거 요약/,
++   /^문서 반영$/,
++   /^문서 반영:/,
++   /^법령 근거 요약/,
++   /^KOSHA 보강/,
++   /^추천 후속 교육/,
++   /^KOSHA 교육포털 연계/,
++   /^교육 적합성 확인/,
++   /^옥외 (폭염|위험|작업)/,
++   /^위험성평가·기상/,
++   /^TBM 필수 반영 체크/,
++   /^외국인 근로자 (공지|안내)/,
++   /^유사 재해사례/,
++   /^기상 신호/,
++   /^서식 구조/,
++   /^서식 상태/,
++   /^서식상태$/,
++   /^안전 기초 지식/,
++   /^라이브 보강/,
++   // Added 2026-05-07 after 가온테크 .xlsx/.hwp 검수 — 본문 표 안에 들어가던 잡음.
++   /^공식 서식 기준 보강/,
++   /^반영 근거(:|: )/,
++   /^반영 근거$/,
++   /^중대재해 예방 관리체계 점검/,
++   /^필수 확인 항목$/,
++   /^섹션 요약$/,
++   /^본문 표$/,
++   /^제출상태/,
++   /^원본 재현 한계/,
++   /^안전보건진단 가이드/,
++   /^위험성평가 이행·점검/,
++   /^TBM 메인 가이드/
++ ];
++
++ function isMetaSection(section: string) {
++   return META_SECTION_PATTERNS.some((pattern) => pattern.test(section));
++ }
++
++ // First-line meta keys that show up as `key: value` even outside a meta section.
++ const META_KEY_PATTERNS = [
++   /^서식상태$/,
++   /^연결 상태$/,
++   /^생성일자$/,
++   /^생성시각$/,
++   /^제출상태$/,
++   /^원본 재현 한계/,
++   /^반영 근거$/,
++   /^법령·해석례$/,
++   /^판례 보조$/,
++   /^내부 참고자료 반영$/,
++   /^주의$/,
++   /^위험성평가 연결$/,
++   /^TBM 연결$/,
++   /^교육 연결$/,
++   /^신호$/,  // 기상 신호 등
++   /^감소대책$/,  // META 섹션 내부의 감소대책 (실제 위험성평가표 §4와 다른 위치)
++   /^확인기준$/,
++   /^관련 법령 확인 대상$/
++ ];
++
++ function isMetaKey(key: string) {
++   return META_KEY_PATTERNS.some((pattern) => pattern.test(key));
++ }
++
++ /**
++  * Robust key:value matcher — only the FIRST colon at top level (outside any
++  * unmatched parens / brackets) counts. Prevents lines like
++  * "- 위험요인 (KOSHA 지침 C-59-2022: 인용)" from being split at the inner colon.
++  */
++ function matchTopLevelKeyValue(line: string): { key: string; value: string } | null {
++   let depth = 0;
++   for (let i = 0; i < line.length; i += 1) {
++     const ch = line[i];
++     if (ch === "(" || ch === "[" || ch === "{") depth += 1;
++     else if (ch === ")" || ch === "]" || ch === "}") depth = Math.max(0, depth - 1);
++     else if (depth === 0 && (ch === ":" || ch === "：")) {
++       const key = line.slice(0, i).trim();
++       const value = line.slice(i + 1).trim();
++       // require both sides non-empty + key isn't just punctuation
++       if (key && value && /[^\s\-·:：]/.test(key)) {
++         return { key, value };
++       }
++       return null;
++     }
++   }
++   return null;
++ }
++
++ function parseSheetRows(title: string, body: string): SheetRow[] {
++   const rows: SheetRow[] = [];
++   let section = "기본정보";
++   let itemNumber = 1;
++   let metaActive = false;
++
++   body.split(/\r?\n/).forEach((rawLine) => {
++     const line = rawLine.trim();
++     if (!line) return;
++
++     const sectionMatch = line.match(/^\[(.+)\]$/);
++     if (sectionMatch) {
++       section = sectionMatch[1];
++       metaActive = isMetaSection(section);
++       itemNumber = 1;
++       return;
++     }
++     if (metaActive) return;
++
++     // Defensive: keyed pattern must NOT match colons inside parentheses
++     // (e.g., "...(KOSHA 지침 X-XX-YYYY: 인용)" should stay as one cell, not split).
++     // Approach: only consider top-level `:` — find the first `:` before any unmatched
++     // opening parenthesis. If the first `:` lives inside (), treat as plain content.
++     const keyedMatch = matchTopLevelKeyValue(line);
++     const numbered = line.match(/^(\d+)\.\s*(.+)$/);
++     const bullet = line.match(/^[-ㆍ]\s*(.+)$/);
++
++     if (keyedMatch) {
++       const { key, value } = keyedMatch;
++       if (isMetaKey(key)) return;
++       rows.push({ document: title, section, item: key, content: value });
++       return;
++     }
++     if (numbered) {
++       rows.push({ document: title, section, item: numbered[1].trim(), content: numbered[2].trim() });
++       return;
++     }
++     if (bullet) {
++       rows.push({ document: title, section, item: String(itemNumber), content: bullet[1].trim() });
++       itemNumber += 1;
++       return;
++     }
++
++     rows.push({ document: title, section, item: String(itemNumber), content: line });
++     itemNumber += 1;
++   });
++
++   return rows;
++ }
++
++ function buildRowsForDocument(meta: EditableDocument, values: Record<DocumentKey, string>) {
++   return parseSheetRows(meta.title, values[meta.key]);
++ }
++
++ function buildRowsForAll(values: Record<DocumentKey, string>) {
++   return documentMeta.flatMap((meta) => buildRowsForDocument(meta, values));
++ }
++
++ function buildLaunchSheetRows(values: Record<DocumentKey, string>) {
++   const sheetMap: Array<{ sheet: string; keys: DocumentKey[] }> = [
++     { sheet: "0. 문서팩 요약", keys: ["workpackSummaryDraft"] },
++     { sheet: "1. 위험성평가", keys: ["riskAssessmentDraft"] },
++     { sheet: "2. 작업계획·허가", keys: ["workPlanDraft", "workPermitDraft"] },
++     { sheet: "3. TBM 및 일일점검", keys: ["tbmBriefing", "tbmLogDraft"] },
++     { sheet: "4. 안전보건교육", keys: ["safetyEducationRecordDraft", "foreignWorkerBriefing", "foreignWorkerTransmission"] },
++     { sheet: "5. 비상대응", keys: ["emergencyResponseDraft"] },
++     { sheet: "6. 사진/증빙", keys: ["photoEvidenceDraft"] }
++   ];
++
++   const documentRows = sheetMap.flatMap(({ sheet, keys }) => (
++     keys.flatMap((key) => {
++       const meta = documentMeta.find((item) => item.key === key);
++       if (!meta) return [];
++       return buildRowsForDocument(meta, values).map((row) => ({ ...row, section: `${sheet} / ${row.section}` }));
++     })
++   ));
++   const rubricRows = evaluatePublicSafetyRubric(values).items.map((item) => ({
++     document: "제출 전 점검",
++     section: `7. 제출 전 점검 / ${rubricCategoryLabel(item.category)}`,
++     item: item.title,
++     content: `${rubricStatusLabel(item.status)} · ${item.description} · 보완: ${item.improvementAction} · 리서치: ${item.researchAction}`
++   }));
++
++   return [...documentRows, ...rubricRows];
++ }
++
++ function escapeCell(value: string) {
++   return `"${value.replace(/"/g, "\"\"")}"`;
++ }
++
++ function buildDelimited(rows: SheetRow[], delimiter: "," | "\t") {
++   const header = ["문서", "섹션", "항목", "내용"];
++   const body = rows.map((row) => [row.document, row.section, row.item, row.content]
++     .map((value) => delimiter === "," ? escapeCell(value) : value.replace(/\t/g, " ").replace(/\r?\n/g, " "))
++     .join(delimiter));
++   return [header.join(delimiter), ...body].join("\n");
++ }
++
++ function buildExcelHtml(
++   title: string,
++   rows: SheetRow[],
++   scenario: AskResponse["scenario"],
++   profile: SafetyFormProfile,
++   data?: AskResponse,
++   riskRows: SheetRow[] = []
++ ) {
++   if (profile.layout === "risk" || profile.layout === "workPlan" || profile.layout === "permit" || profile.layout === "tbmLog" || profile.layout === "tbmBriefing" || profile.layout === "education") {
++     return `<!doctype html>
++ <html lang="ko">
++ <head>
++   <meta charset="utf-8" />
++   <title>${escapeHtml(title)}</title>
++   <style>
++     ${formCss("18px")}
++     body { background: #ffffff; }
++     .safety-form-page { box-shadow: none; }
++   </style>
++ </head>
++ <body>
++   ${buildSafetyFormMarkup(title, rows, scenario, profile, data, riskRows)}
++ </body>
++ </html>`;
++   }
++   const grouped = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
++     acc[row.section] = [...(acc[row.section] || []), row];
++     return acc;
++   }, {});
++   const summaryRows = Object.entries(grouped).map(([section, sectionRows]) => `
++     <tr>
++       <td>${escapeHtml(section)}</td>
++       <td>${sectionRows.length}</td>
++       <td>${escapeHtml(sectionRows.slice(0, 2).map((row) => row.item).join(", "))}</td>
++     </tr>
++   `).join("");
++   const tableRows = Object.entries(grouped).map(([section, sectionRows]) => `
++     <tr class="section-row"><td colspan="5">${escapeHtml(section)}</td></tr>
++     ${sectionRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인</td><td>담당: ______</td></tr>`).join("")}
++   `).join("");
++   const confirmationRows = profile.confirmationRows.map((row) => `<td>□ ${escapeHtml(row)}</td>`).join("");
++   const approvalRows = profile.approvalLabels.map((label) => `<td>${escapeHtml(label)}<br /><br />서명: ______</td>`).join("");
++   return `<!doctype html>
++ <html lang="ko">
++ <head>
++   <meta charset="utf-8" />
++   <title>${escapeHtml(title)}</title>
++   <!--[if gte mso 9]>
++   <xml>
++     <x:ExcelWorkbook>
++       <x:ExcelWorksheets>
++         <x:ExcelWorksheet>
++           <x:Name>${escapeHtml(title).slice(0, 28)}</x:Name>
++           <x:WorksheetOptions><x:FitToPage/><x:Print><x:FitWidth>1</x:FitWidth><x:FitHeight>0</x:FitHeight></x:Print></x:WorksheetOptions>
++         </x:ExcelWorksheet>
++       </x:ExcelWorksheets>
++     </x:ExcelWorkbook>
++   </xml>
++   <![endif]-->
++   <style>
++     body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color: #17201d; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
++     .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 14px; }
++     .cover h1 { margin: 0 0 8px; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
++     .cover p { margin: 0; color: #5e6677; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
++     .meta-grid td { background: #fffdf8; }
++     .meta-grid .label { background: #21594f; color: #ffffff; font-weight: 700; text-align: center; width: 16%; }
++     table { border-collapse: collapse; width: 100%; table-layout: fixed; font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; margin-bottom: 14px; }
++     th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; mso-number-format:"\\@"; word-break: keep-all; }
++     th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
++     .summary th { background: #6f4b26; }
++     .section-row td { background: #e8f1ed; color: #1f4d43; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; border-top: 2px solid #1f4d43; }
++     .center { text-align: center; width: 42px; }
++     .check-cell { text-align: center; color: #6f4b26; width: 90px; }
++     .confirm td, .approval td { text-align: center; font-weight: 700; }
++     .note { color: #5e6677; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; margin-top: 10px; }
++   </style>
++ </head>
++ <body>
++   <div class="cover">
++     <h1>${escapeHtml(title)}</h1>
++     <p>${escapeHtml(profile.subtitle)} · SafeClaw 현장 문서팩 · 검토/확인/서명용 HTML 호환 XLS</p>
++   </div>
++   <table class="meta-grid">
++     <tbody>
++       <tr><td class="label">사업장</td><td>${escapeHtml(scenario.companyName)}</td><td class="label">현장/공정</td><td>${escapeHtml(scenario.siteName)}</td></tr>
++       <tr><td class="label">작업내용</td><td>${escapeHtml(scenario.workSummary)}</td><td class="label">인원/조건</td><td>${scenario.workerCount.toLocaleString("ko-KR")}명 · ${escapeHtml(scenario.weatherNote)}</td></tr>
++     </tbody>
++   </table>
++   <table class="confirm"><tbody><tr>${confirmationRows}</tr></tbody></table>
++   <table class="summary">
++     <colgroup><col style="width: 34%;" /><col style="width: 12%;" /><col style="width: 54%;" /></colgroup>
++     <thead><tr><th>섹션</th><th>항목 수</th><th>주요 항목</th></tr></thead>
++     <tbody>${summaryRows}</tbody>
++   </table>
++   <table>
++     <colgroup><col style="width: 6%;" /><col style="width: 22%;" /><col style="width: 52%;" /><col style="width: 10%;" /><col style="width: 10%;" /></colgroup>
++     <thead><tr><th>No.</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인</th><th>담당</th></tr></thead>
++     <tbody>${tableRows}</tbody>
++   </table>
++   <table class="approval"><tbody><tr>${approvalRows}<td>보관 위치<br /><br />______</td></tr></tbody></table>
++   <p class="note">본 파일은 Excel에서 열 수 있는 HTML 호환 .xls 초안입니다. 현장관리자가 작업 전 최종 확인 후 사용하세요.</p>
++ </body>
++ </html>`;
++ }
++
++ function buildLaunchWorkbookHtml(title: string, rows: SheetRow[]) {
++   const groups = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
++     const [sheet] = row.section.split(" / ");
++     acc[sheet] = [...(acc[sheet] || []), row];
++     return acc;
++   }, {});
++   const sections = Object.entries(groups).map(([sheet, sheetRows]) => `
++     <h2>${escapeHtml(sheet)}</h2>
++     <table>
++       <thead><tr><th>문서</th><th>섹션</th><th>항목</th><th>내용</th></tr></thead>
++       <tbody>${sheetRows.map((row) => `<tr><td>${escapeHtml(row.document)}</td><td>${escapeHtml(row.section.replace(`${sheet} / `, ""))}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td></tr>`).join("")}</tbody>
++     </table>
++   `).join("");
++
++   return `<!doctype html>
++ <html lang="ko">
++ <head>
++   <meta charset="utf-8" />
++   <title>${escapeHtml(title)}</title>
++   <style>
++     body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color: #17201d; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
++     .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 16px; }
++     .cover h1 { margin: 0 0 8px; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
++     .cover p { margin: 0; color: #5e6677; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
++     h2 { margin: 24px 0 8px; color: #21594f; border-left: 5px solid #21594f; padding-left: 9px; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; }
++     table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-bottom: 18px; }
++     th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; mso-number-format:"\\@"; word-break: keep-all; }
++     th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
++     td:nth-child(1) { width: 18%; }
++     td:nth-child(2) { width: 20%; }
++     td:nth-child(3) { width: 12%; text-align: center; }
++   </style>
++ </head>
++ <body>
++   <div class="cover">
++     <h1>${escapeHtml(title)}</h1>
++     <p>위험성평가·작업계획·TBM·안전보건교육·비상대응·증빙을 한 파일에 묶은 현장 검토용 Excel 문서팩입니다.</p>
++   </div>
++   ${sections}
++ </body>
++ </html>`;
++ }
++
++ function buildWordHtml(
++   title: string,
++   rows: SheetRow[],
++   scenario: AskResponse["scenario"],
++   profile: SafetyFormProfile,
++   data?: AskResponse,
++   riskRows: SheetRow[] = []
++ ) {
++   return `<!doctype html>
++ <html lang="ko">
++ <head>
++   <meta charset="utf-8" />
++   <title>${escapeHtml(title)}</title>
++   <style>
++     ${formCss("20px")}
++     body { background: #ffffff; }
++     .safety-form-page { box-shadow: none; }
++   </style>
++ </head>
++ <body>
++   ${buildSafetyFormMarkup(title, rows, scenario, profile, data, riskRows)}
++ </body>
++ </html>`;
++ }
++
++ function buildHwpTemplateText(
++   title: string,
++   rows: SheetRow[],
++   profile: SafetyFormProfile,
++   scenario: AskResponse["scenario"],
++   data?: AskResponse,
++   riskRows: SheetRow[] = []
++ ) {
++   const grouped = rows.reduce<Record<string, SheetRow[]>>((acc, row) => {
++     acc[row.section] = [...(acc[row.section] || []), row];
++     return acc;
++   }, {});
++   const tbmBridgeLines = data && (profile.layout === "tbmBriefing" || profile.layout === "tbmLog")
++     ? [
++         "[위험성평가·기상 API 반영]",
++         ...buildTbmBridgeRows(data, riskRows).flatMap((row, index) => [
++           `${index + 1}. 주요 유해·위험요인: ${row.risk}`,
++           `   오늘 기상/환경 신호: ${row.weather}`,
++           `   출처 연결: ${row.source}`,
++           `   TBM 전달 문구: ${row.message}`
++         ]),
++         ""
++       ]
++     : [];
++   const layoutNotice = profile.layout === "risk"
++     ? [
++         "[서식 구조]",
++         "단위공종 / 작업장소 / 사용 기계기구·장비 / 유해·위험요인 / 재해형태 / 가능성 / 중대성 / 등급 / 감소대책 / 조치담당자 / 조치기한 / 확인자 서명",
++         ""
++       ]
++     : profile.layout === "workPlan"
++       ? [
++           "[서식 구조]",
++           "작업개요 / 세부 작업순서 / 장비·인원·첨부서류 / 작업중지 기준 / 비상대응 / 확인자 서명",
++           ""
++         ]
++       : profile.layout === "permit"
++         ? [
++             "[서식 구조]",
++             "허가번호 / 작업시간 / 신청자·허가자 / 작업 전 허가조건 / 첨부서류 체크리스트 / 종료 확인",
++             ""
++           ]
++         : profile.layout === "tbmLog"
++           ? [
++               "[서식 구조]",
++               "담당·소장 결재 / 공종·일자 / 근로자 확인사항 / 금일 작업사항 / 금일 위험요인 / 일일 안전교육 및 전달사항 / 참석자 명단(NO·직종·성명·오전·오후·비고) / 인원 집계 / 미조치 및 사진·영상 증빙",
++               ""
++             ]
++           : profile.layout === "education"
++             ? [
++                 "[서식 구조]",
++                 "교육 실시 개요 / 교육 내용 및 이해 확인 / 참석자 명단(성명·소속·역할·언어·서명) / 미이해자 및 후속 조치",
++                 ""
++               ]
++             : [];
++
++   return [
++     `${title}(초안)`,
++     "SafeClaw 공식자료 연결 후보 서식 · 법령 근거 검토 후 사용",
++     `현장: ${scenario.siteName}`,
++     `작업: ${scenario.workSummary}`,
++     "",
++     ...layoutNotice,
++     ...tbmBridgeLines,
++     ...Object.entries(grouped).flatMap(([section, sectionRows]) => [
++       `[${section}]`,
++       ...sectionRows.map((row) => `${row.item}. ${row.content}`),
++       ""
++     ]),
++     "[확인/서명]",
++     "작성자: ____________________",
++     "관리감독자: ____________________",
++     "교육/TBM 확인자: ____________________",
++     "보관 위치: ____________________",
++     "확인일시: ______년 ____월 ____일 ____시 ____분"
++   ].join("\n");
++ }
++
++ async function loadRhwp() {
++   if (!rhwpModulePromise) {
++     rhwpModulePromise = (async () => {
++       let canvasContext: CanvasRenderingContext2D | null = null;
++       let lastFont = "";
++       globalThis.measureTextWidth = (font: string, text: string) => {
++         if (!canvasContext) {
++           canvasContext = document.createElement("canvas").getContext("2d");
++         }
++         if (!canvasContext) return text.length * 12;
++         if (font !== lastFont) {
++           canvasContext.font = font;
++           lastFont = font;
++         }
++         return canvasContext.measureText(text).width;
++       };
++
++       const rhwp = await import("@rhwp/core");
++       await rhwp.default({ module_or_path: "/rhwp_bg.wasm" });
++       return rhwp;
++     })();
++   }
++
++   return rhwpModulePromise;
++ }
++
++ async function buildHwpxWithRhwp(body: string) {
++   const { HwpDocument } = await loadRhwp();
++   const document = HwpDocument.createEmpty();
++   try {
++     document.createBlankDocument();
++     document.insertText(0, 0, 0, body);
++     const exported = document.exportHwpx();
++     const buffer = new ArrayBuffer(exported.byteLength);
++     new Uint8Array(buffer).set(exported);
++     return new Blob([buffer], { type: "application/hwp+zip" });
++   } finally {
++     document.free();
++   }
++ }
++
++ function buildCombinedText(values: Record<DocumentKey, string>) {
++   const rubricText = evaluatePublicSafetyRubric(values).items.map((item) => (
++     `- [${rubricCategoryLabel(item.category)}] ${item.title}: ${rubricStatusLabel(item.status)}\n  보완: ${item.improvementAction}\n  리서치: ${item.researchAction}`
++   )).join("\n");
++
++   return [
++     documentMeta.map((item) => `# ${item.title}\n\n${values[item.key]}`).join("\n\n---\n\n"),
++     `# 제출 전 점검\n\n${rubricText}`
++   ].join("\n\n---\n\n");
++ }
++
++ type StoredEditorDraft = {
++   version: 1;
++   values: WorkpackDocumentValues;
++   dirtyKeys: DocumentKey[];
++ };
++
++ function isDocumentKey(value: unknown): value is DocumentKey {
++   return typeof value === "string" && documentMeta.some((item) => item.key === value);
++ }
++
++ function parseDocumentValues(value: unknown, fallback: WorkpackDocumentValues): WorkpackDocumentValues {
++   const record = readObject(value) || {};
++   return documentMeta.reduce<WorkpackDocumentValues>((acc, item) => {
++     const documentValue = record[item.key];
++     acc[item.key] = typeof documentValue === "string" ? documentValue : fallback[item.key];
++     return acc;
++   }, { ...fallback });
++ }
++
++ function parseStoredDraft(raw: string | null, fallback: WorkpackDocumentValues): StoredEditorDraft {
++   if (!raw) return { version: 1, values: fallback, dirtyKeys: [] };
++
++   try {
++     const parsed: unknown = JSON.parse(raw);
++     const record = readObject(parsed);
++     if (!record) return { version: 1, values: fallback, dirtyKeys: [] };
++
++     const parsedValues = parseDocumentValues(record.values || record, fallback);
++     const storedDirtyKeys = Array.isArray(record.dirtyKeys)
++       ? record.dirtyKeys.filter(isDocumentKey)
++       : documentMeta.filter((item) => parsedValues[item.key] !== fallback[item.key]).map((item) => item.key);
++     const dirtyKeys = [...new Set(storedDirtyKeys)];
++     const values = dirtyKeys.reduce<WorkpackDocumentValues>((acc, key) => {
++       acc[key] = parsedValues[key];
++       return acc;
++     }, { ...fallback });
++     return { version: 1, values, dirtyKeys };
++   } catch (error) {
++     console.warn("workpack local draft parse failed", error);
++     return { version: 1, values: fallback, dirtyKeys: [] };
++   }
++ }
++
++ function readObject(value: unknown): Record<string, unknown> | null {
++   return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null;
++ }
++
++ function readText(value: unknown): string {
++   return typeof value === "string" ? value.trim() : "";
++ }
++
++ function readRemediationDraft(itemId: string, value: unknown): RemediationDraft {
++   const record = readObject(value);
++   if (!record) {
++     return {
++       itemId,
++       text: "",
++       status: "error",
++       message: "보완 제안 응답을 읽지 못했습니다.",
++       providerLabel: null,
++       policyNote: "",
++       catalogStatus: null,
++       sources: []
++     };
++   }
++
++   const sourcesValue = record.sources;
++   const sources = Array.isArray(sourcesValue)
++     ? sourcesValue.map((source) => {
++         const sourceRecord = readObject(source);
++         return sourceRecord
++           ? {
++               title: readText(sourceRecord.title),
++               agency: readText(sourceRecord.agency),
++               url: readText(sourceRecord.url) || "/knowledge",
++               sourceType: readText(sourceRecord.sourceType) || "source",
++               roleLabel: readText(sourceRecord.roleLabel),
++               reflectionLabel: readText(sourceRecord.reflectionLabel)
++             }
++           : null;
++       }).filter((source): source is RemediationDraft["sources"][number] => Boolean(source && source.title))
++     : [];
++   const catalogStatusRecord = readObject(record.catalogStatus);
++
++   return {
++     itemId,
++     text: readText(record.text),
++     status: record.ok === true ? "ready" : "error",
++     message: readText(record.message) || (record.ok === true ? "보완 제안을 생성했습니다." : "보완 제안을 생성하지 못했습니다."),
++     providerLabel: readText(record.providerLabel) || null,
++     policyNote: readText(record.policyNote),
++     catalogStatus: catalogStatusRecord
++       ? {
++           configured: catalogStatusRecord.configured === true,
++           ok: catalogStatusRecord.ok === true,
++           count: typeof catalogStatusRecord.count === "number" ? catalogStatusRecord.count : 0,
++           message: readText(catalogStatusRecord.message)
++         }
++       : null,
++     sources
++   };
++ }
++
++ function SafetyDocumentPreview({
++   title,
++   rows,
++   scenario,
++   profile,
++   data,
++   riskRows
++ }: {
++   title: string;
++   rows: SheetRow[];
++   scenario: AskResponse["scenario"];
++   profile: SafetyFormProfile;
++   data: AskResponse;
++   riskRows: SheetRow[];
++ }) {
++   const groups = groupRowsBySection(rows);
++   const previewGroups = groups.slice(0, 3);
++   const tbmBridgeRows = profile.layout === "tbmBriefing" || profile.layout === "tbmLog"
++     ? buildTbmBridgeRows(data, riskRows)
++     : [];
++   const tableLabels = profile.layout === "risk"
++     ? { primary: "유해·위험요인", action: "재해형태 / 감소대책", confirm: "등급 / 담당" }
++     : profile.layout === "workPlan"
++       ? { primary: "작업순서/대상", action: "작업방법 / 안전관리대책", confirm: "확인자" }
++     : profile.layout === "permit"
++         ? { primary: "허가 항목", action: "허가조건 / 첨부서류", confirm: "적합/보완" }
++         : profile.layout === "tbmBriefing" || profile.layout === "tbmLog"
++           ? { primary: "전달 항목", action: "전달 내용 / 작업중지 기준", confirm: "복창/서명" }
++           : { primary: profile.primaryColumn, action: profile.actionColumn, confirm: "확인/담당" };
++
++   return (
++     <div className="safety-form-preview document-print-typography" aria-label={`${title} 서식 미리보기`}>
++       <style>{documentPreviewCss}</style>
++       <div className="safety-form-preview-head">
++         <div>
++           <span>{profile.code}</span>
++           <strong>{title}</strong>
++           <small>{profile.subtitle}</small>
++         </div>
++         <div className="approval-preview" aria-label="결재란">
++           {profile.approvalLabels.map((label) => (
++             <div key={label}>
++               <b>{label}</b>
++               <em>서명</em>
++             </div>
++           ))}
++         </div>
++       </div>
++       <div className="safety-form-meta-grid">
++         <div><b>사업장</b><span>{scenario.companyName}</span></div>
++         <div><b>현장/공정</b><span>{scenario.siteName}</span></div>
++         <div><b>작업내용</b><span>{scenario.workSummary}</span></div>
++         <div><b>인원/조건</b><span>{scenario.workerCount.toLocaleString("ko-KR")}명 · {scenario.weatherNote}</span></div>
++       </div>
++       <div className="safety-form-check-row">
++         {profile.confirmationRows.map((row) => (
++           <span key={row}>□ {row}</span>
++         ))}
++       </div>
++       {tbmBridgeRows.length ? (
++         <section className="safety-form-bridge" aria-label="위험성평가와 기상 API 반영">
++           <h3>위험성평가·기상 API 반영</h3>
++           <div className="safety-form-table-wrap">
++             <table>
++               <thead>
++                 <tr>
++                   <th>No.</th>
++                   <th>주요 유해·위험요인</th>
++                   <th>오늘 기상/환경 신호</th>
++                   <th>출처 연결</th>
++                   <th>TBM 전달 문구</th>
++                 </tr>
++               </thead>
++               <tbody>
++                 {tbmBridgeRows.map((row, index) => (
++                   <tr key={`${row.risk}-${index}`}>
++                     <td>{index + 1}</td>
++                     <td>{row.risk}</td>
++                     <td>{row.weather}</td>
++                     <td>{row.source}</td>
++                     <td>{row.message}</td>
++                   </tr>
++                 ))}
++               </tbody>
++             </table>
++           </div>
++         </section>
++       ) : null}
++       <div className="safety-form-section-stack">
++         {previewGroups.map((group) => (
++           <section key={group.section}>
++             <h3>{group.section}</h3>
++             <div className="safety-form-table-wrap">
++               <table>
++                 <thead>
++                   <tr>
++                     <th>No.</th>
++                     <th>{tableLabels.primary}</th>
++                     <th>{tableLabels.action}</th>
++                     <th>{tableLabels.confirm}</th>
++                   </tr>
++                 </thead>
++                 <tbody>
++                   {group.rows.slice(0, 4).map((row, index) => (
++                     <tr key={`${group.section}-${row.item}-${index}`}>
++                       <td>{index + 1}</td>
++                       <td>{previewRowItem(row, tableLabels.primary)}</td>
++                       <td>{row.content}</td>
++                       <td>□ 확인<br />담당: ___</td>
++                     </tr>
++                   ))}
++                 </tbody>
++               </table>
++             </div>
++           </section>
++         ))}
++       </div>
++       <div className="safety-form-signatures">
++         <span>작성자 서명</span>
++         <span>관리감독자 서명</span>
++         <span>교육/TBM 확인</span>
++         <span>보관 위치</span>
++       </div>
++     </div>
++   );
++ }
++
++ export function WorkpackEditor({
++   data,
++   generationFingerprint,
++   focusToken = 0,
++   requestedDocumentKey,
++   onSelectedDocumentChange,
++   onDeliverablesChange
++ }: {
++   data: AskResponse;
++   generationFingerprint?: string;
++   focusToken?: number;
++   requestedDocumentKey?: DocumentKey;
++   onSelectedDocumentChange?: (key: DocumentKey) => void;
++   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
++ }) {
++   const generationSourceKey = generationFingerprint || [
++     data.question,
++     data.scenario.companyName,
++     data.scenario.siteName,
++   ].join(":");
++   const generationDataRef = useRef<{ key: string; data: AskResponse }>({
++     key: generationSourceKey,
++     data,
++   });
++   if (generationDataRef.current.key !== generationSourceKey) {
++     generationDataRef.current = { key: generationSourceKey, data };
++   }
++   const generationData = generationDataRef.current.data;
++   const initialValues = useMemo<WorkpackDocumentValues>(
++     () => ({
++       workpackSummaryDraft: generationData.deliverables.workpackSummaryDraft,
++       riskAssessmentDraft: withSubmitReadiness("위험성평가표", generationData.deliverables.riskAssessmentDraft, generationData),
++       workPlanDraft: withSubmitReadiness("작업계획서", generationData.deliverables.workPlanDraft, generationData),
++       workPermitDraft: resolveInitialWorkPermitDraft(generationData),
++       tbmBriefing: withSubmitReadiness("TBM 브리핑", generationData.deliverables.tbmBriefing, generationData),
++       tbmLogDraft: withSubmitReadiness("TBM 일지", generationData.deliverables.tbmLogDraft, generationData),
++       safetyEducationRecordDraft: withSubmitReadiness("안전교육", generationData.deliverables.safetyEducationRecordDraft, generationData),
++       emergencyResponseDraft: generationData.deliverables.emergencyResponseDraft,
++       photoEvidenceDraft: generationData.deliverables.photoEvidenceDraft,
++       foreignWorkerBriefing: generationData.deliverables.foreignWorkerBriefing,
++       foreignWorkerTransmission: generationData.deliverables.foreignWorkerTransmission,
++       kakaoMessage: generationData.deliverables.kakaoMessage
++     }),
++     [generationData]
++   );
++   const storageKey = useMemo(
++     () => `safeclaw-workpack:${generationData.scenario.companyName}:${generationData.scenario.siteName}:${generationData.question}:${generationSourceKey}`,
++     [generationData, generationSourceKey]
++   );
++   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
++   const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
++   const [dirtyDocumentKeys, setDirtyDocumentKeys] = useState<DocumentKey[]>([]);
++   const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
++   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
++   const [xlsxStatus, setXlsxStatus] = useState<"idle" | "building" | "error">("idle");
++   const [hwpStatus, setHwpStatus] = useState<"idle" | "building" | "error">("idle");
++   const [imageStatus, setImageStatus] = useState<"idle" | "error">("idle");
++   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
++   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
++   const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null);
++   const [saveStatusLabel, setSaveStatusLabel] = useState("자동 저장");
++   const [saveAnnouncement, setSaveAnnouncement] = useState("");
++   const [showFocusCue, setShowFocusCue] = useState(false);
++   const [remediationDrafts, setRemediationDrafts] = useState<Record<string, RemediationDraft>>({});
++   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
++   const documentBodyRef = useRef<HTMLDivElement | null>(null);
++   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
++   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
++   const onSelectedDocumentChangeRef = useRef(onSelectedDocumentChange);
++   const saveAnnouncementTimerRef = useRef<number | null>(null);
++   const pendingChangeRef = useRef<WorkpackDeliverablesChange>({
++     source: "generated",
++     requiresRevalidation: false
++   });
++   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
++   const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
++   const selectedText = values[selected.key];
++   const effectivePhaseAReview = dirtyDocumentKeys.length > 0 ? undefined : data.phaseAReview;
++   const authorityData = useMemo<AskResponse>(() => (
++     effectivePhaseAReview === data.phaseAReview
++       ? data
++       : { ...data, phaseAReview: effectivePhaseAReview }
++   ), [data, effectivePhaseAReview]);
++   const authoritySafeValues = useMemo(() => {
++     const next = { ...values };
++     for (const document of documentMeta) {
++       next[document.key] = applyPhaseADocumentAuthorityMarker(
++         values[document.key],
++         effectivePhaseAReview,
++       );
++     }
++     return next;
++   }, [effectivePhaseAReview, values]);
++   const selectedHasIntentionalEmptyPermitDraft = selected.key === "workPermitDraft"
++     && selectedText === ""
++     && (
++       Object.prototype.hasOwnProperty.call(data.deliverables, "workPermitDraft")
++       || dirtyDocumentKeys.includes("workPermitDraft")
++     );
++   const selectedUsesEditedText = dirtyDocumentKeys.includes(selected.key)
++     || selectedText !== initialValues[selected.key]
++     || selectedHasIntentionalEmptyPermitDraft;
++   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
++   const selectedRows = buildRowsForDocument(selected, authoritySafeValues);
++   const riskAssessmentMeta = documentMeta.find((item) => item.key === "riskAssessmentDraft") || documentMeta[1];
++   const riskAssessmentRows = buildRowsForDocument(riskAssessmentMeta, authoritySafeValues);
++   const selectedFormProfile = getSafetyFormProfile(selected.key);
++   const rubricEvaluation = useMemo(() => evaluatePublicSafetyRubric(values), [values]);
++   const selectedRubricItems = useMemo(() => {
++     const key = selected.key;
++     if (!isRubricDocumentKey(key)) return [];
++     return rubricEvaluation.items.filter((item) => item.documents.includes(key));
++   }, [rubricEvaluation.items, selected.key]);
++   const selectedQualityIssues = selectedRubricItems.filter((item) => item.status !== "fulfilled").length;
++   const totalQualityIssues = rubricEvaluation.summary.total - rubricEvaluation.summary.fulfilled;
++   const selectedEvidenceLabel = data.evidenceLabels?.[selected.key];
++   const phaseAState = buildPhaseAReviewUiState(effectivePhaseAReview);
++   const phaseADocumentAuthorityMarker = buildPhaseADocumentAuthorityMarker(effectivePhaseAReview);
++   const selectedExportText = applyPhaseADocumentAuthorityMarker(selectedText, effectivePhaseAReview);
++   const harnessSummary = data.dbHarness?.summary;
++   const harnessPacket = data.dbHarness?.packet;
++   const selectedCoverage = useMemo(() => {
++     const coverageLabel = documentCoverageLabels[selected.key];
++     if (!coverageLabel || !harnessSummary) return null;
++     return harnessSummary.documentCoverage.find((item) => item.document === coverageLabel) || null;
++   }, [harnessSummary, selected.key]);
++   const evidenceHighlights = useMemo(() => {
++     const references = [
++       ...(harnessPacket?.directEvidence || []).map((item) => ({
++         id: `direct-${item.id}`,
++         badge: phaseAState.authoritative
++           ? item.evidence_role_label || "직접 근거"
++           : phaseAState.directEvidenceLabel,
++         title: item.display_title || item.title,
++         summary: item.display_summary || item.short_summary || item.summary,
++         href: item.source_url || null
++       })),
++       ...(harnessPacket?.sifCases || []).map((item) => ({
++         id: `sif-${item.id}`,
++         badge: phaseAState.authoritative
++           ? item.source_kind_label || "SIF 사례"
++           : "SIF 위험 우선순위 후보",
++         title: item.display_title || item.title,
++         summary: item.display_summary || item.short_summary || item.summary,
++         href: item.source_url || null
++       })),
++       ...(harnessPacket?.supportingEvidence || []).map((item) => ({
++         id: `support-${item.id}`,
++         badge: phaseAState.authoritative
++           ? item.evidence_role_label || "보조 근거"
++           : phaseAState.supportingEvidenceLabel,
++         title: item.display_title || item.title,
++         summary: item.display_summary || item.short_summary || item.summary,
++         href: item.source_url || null
++       }))
++     ];
++
++     if (references.length) return references.slice(0, 4);
++     return data.citations.slice(0, 4).map((citation) => ({
++       id: citation.id,
++       badge: citation.sourceLabel,
++       title: citation.title,
++       summary: citation.citation || citation.summary,
++       href: citation.sourceUrl || null
++     }));
++   }, [
++     data.citations,
++     harnessPacket,
++     phaseAState.authoritative,
++     phaseAState.directEvidenceLabel,
++     phaseAState.supportingEvidenceLabel,
++   ]);
++   const evidenceStats = useMemo(() => {
++     const directEvidenceCount = harnessSummary?.directEvidence ?? 0;
++     const sifCaseCount = harnessSummary?.sifCases ?? 0;
++     const supportingEvidenceCount = harnessSummary?.supportingEvidence ?? 0;
++
++     return [
++       {
++         label: phaseAState.directEvidenceLabel,
++         value: directEvidenceCount,
++         description: phaseAState.authoritative
++           ? selectedEvidenceLabel?.article || "문서 라벨 미지정"
++           : "법령 연결 후보"
++       },
++       {
++         label: "유사사례",
++         value: sifCaseCount,
++         description: harnessSummary ? "DB 하네스 기준" : "현재 페이지 기준"
++       },
++       {
++         label: phaseAState.supportingEvidenceLabel,
++         value: harnessSummary ? supportingEvidenceCount + data.citations.length : data.citations.length,
++         description: `${data.citations.length.toLocaleString("ko-KR")}건 화면 인용`
++       }
++     ];
++   }, [
++     data.citations.length,
++     harnessSummary,
++     phaseAState.authoritative,
++     phaseAState.directEvidenceLabel,
++     phaseAState.supportingEvidenceLabel,
++     selectedEvidenceLabel,
++   ]);
++
++   useEffect(() => {
++     onDeliverablesChangeRef.current = onDeliverablesChange;
++   }, [onDeliverablesChange]);
++
++   useEffect(() => {
++     onSelectedDocumentChangeRef.current = onSelectedDocumentChange;
++   }, [onSelectedDocumentChange]);
++
++   useEffect(() => {
++     onSelectedDocumentChangeRef.current?.(selected.key);
++   }, [selected.key]);
++
++   useEffect(() => () => {
++     if (saveAnnouncementTimerRef.current) {
++       window.clearTimeout(saveAnnouncementTimerRef.current);
++     }
++   }, []);
++
++   useEffect(() => {
++     if (typeof window === "undefined") return;
++     if (hydratedStorageKey === storageKey) return;
++
++     setHydratedStorageKey(null);
++     const stored = parseStoredDraft(window.localStorage.getItem(storageKey), initialValues);
++     const restoredDraft = stored.dirtyKeys.length > 0;
++     pendingChangeRef.current = {
++       source: restoredDraft ? "stored-draft" : "generated",
++       requiresRevalidation: restoredDraft
++     };
++     setValues(stored.values);
++     setDirtyDocumentKeys(stored.dirtyKeys);
++     setLastEditedAt(null);
++     if (saveAnnouncementTimerRef.current) {
++       window.clearTimeout(saveAnnouncementTimerRef.current);
++     }
++     if (restoredDraft) {
++       setSaveStatusLabel("저장본 복원됨");
++       setSaveAnnouncement("저장된 편집본을 복원했습니다.");
++     } else {
++       setSaveStatusLabel("자동 저장");
++       setSaveAnnouncement("");
++     }
++     setHydratedStorageKey(storageKey);
++   }, [hydratedStorageKey, initialValues, storageKey]);
++
++   useEffect(() => {
++     if (hydratedStorageKey !== storageKey) return;
++     if (typeof window !== "undefined") {
++       try {
++         const storedDraft: StoredEditorDraft = {
++           version: 1,
++           values,
++           dirtyKeys: dirtyDocumentKeys
++         };
++         window.localStorage.setItem(storageKey, JSON.stringify(storedDraft));
++       } catch (error) {
++         console.warn("workpack local draft save failed", error);
++         setSaveStatusLabel("저장 실패");
++         setSaveAnnouncement("편집 내용 저장에 실패했습니다.");
++       }
++     }
++     if (pendingChangeRef.current.source !== "generated") {
++       onDeliverablesChangeRef.current?.(values, pendingChangeRef.current);
++     }
++     if (saveAnnouncementTimerRef.current) {
++       window.clearTimeout(saveAnnouncementTimerRef.current);
++     }
++     if (pendingChangeRef.current.source === "stored-draft") {
++       setSaveStatusLabel("저장본 복원됨");
++       return;
++     }
++     if (dirtyDocumentKeys.length > 0) {
++       const savedAt = lastEditedAt;
++       setSaveStatusLabel("저장 중...");
++       setSaveAnnouncement("");
++       saveAnnouncementTimerRef.current = window.setTimeout(() => {
++         const timeLabel = (savedAt || new Date()).toLocaleTimeString("ko-KR", {
++           hour: "2-digit",
++           minute: "2-digit"
++         });
++         setSaveStatusLabel(`저장됨 ${timeLabel}`);
++         setSaveAnnouncement(`저장됨 ${timeLabel}`);
++       }, SAVE_ANNOUNCEMENT_DELAY_MS);
++       return;
++     }
++     setSaveStatusLabel("자동 저장");
++     setSaveAnnouncement("");
++   }, [dirtyDocumentKeys, hydratedStorageKey, lastEditedAt, storageKey, values]);
++
++   useEffect(() => {
++     if (!focusToken) return;
++
++     if (requestedDocumentKey) {
++       setSelectedKey(requestedDocumentKey);
++     }
++     setShowFocusCue(true);
++     const root = document.documentElement;
++     const previousScrollBehavior = root.style.scrollBehavior;
++     root.style.scrollBehavior = "auto";
++     documentBodyRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
++     root.style.scrollBehavior = previousScrollBehavior;
++     const focusFrame = window.requestAnimationFrame(() => {
++       textareaRef.current?.focus({ preventScroll: true });
++     });
++     const focusTimer = window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 120);
++     const backupFocusTimer = window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 320);
++     const timer = window.setTimeout(() => setShowFocusCue(false), 2200);
++     return () => {
++       window.cancelAnimationFrame(focusFrame);
++       window.clearTimeout(focusTimer);
++       window.clearTimeout(backupFocusTimer);
++       window.clearTimeout(timer);
++     };
++   }, [focusToken, requestedDocumentKey]);
++
++   function updateValue(value: string) {
++     pendingChangeRef.current = { source: "user-edit", requiresRevalidation: true };
++     setValues((current) => {
++       const next = { ...current, [selected.key]: value };
++       for (const document of documentMeta) {
++         next[document.key] = applyPhaseADocumentAuthorityMarker(next[document.key], undefined);
++       }
++       return next;
++     });
++     setDirtyDocumentKeys((current) => current.includes(selected.key) ? current : [...current, selected.key]);
++     setLastEditedAt(new Date());
++   }
++
++   function selectDocumentTab(index: number) {
++     const nextDocument = documentMeta[index];
++     if (!nextDocument) return;
++     setSelectedKey(nextDocument.key);
++     document.getElementById(documentTabId(nextDocument.key))?.focus();
++   }
++
++   function handleDocumentTabKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
++     let nextIndex: number | null = null;
++     if (event.key === "ArrowRight" || event.key === "ArrowDown") {
++       nextIndex = (index + 1) % documentMeta.length;
++     } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
++       nextIndex = (index - 1 + documentMeta.length) % documentMeta.length;
++     } else if (event.key === "Home") {
++       nextIndex = 0;
++     } else if (event.key === "End") {
++       nextIndex = documentMeta.length - 1;
++     }
++
++     if (nextIndex === null) return;
++     event.preventDefault();
++     selectDocumentTab(nextIndex);
++   }
++
++   function updateRemediationDraft(itemId: string, text: string) {
++     setRemediationDrafts((current) => {
++       const existing = current[itemId];
++       if (!existing) return current;
++       return {
++         ...current,
++         [itemId]: {
++           ...existing,
++           text
++         }
++       };
++     });
++   }
++
++   function insertRemediationDraft(itemId: string) {
++     const draft = remediationDrafts[itemId];
++     if (!draft || !draft.text.trim()) return;
++     const separator = selectedText.trim() ? "\n\n" : "";
++     updateValue(`${selectedText.trimEnd()}${separator}${draft.text.trim()}`);
++     setRemediationDrafts((current) => {
++       const next = { ...current };
++       delete next[itemId];
++       return next;
++     });
++     window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 80);
++   }
++
++   async function requestRemediation(item: RubricEvaluationItem) {
++     setRemediationLoadingId(item.id);
++     try {
++       const response = await fetch("/api/workpack/remediate", {
++         method: "POST",
++         headers: {
++           "Content-Type": "application/json"
++         },
++         body: JSON.stringify({
++           question: data.question,
++           documentKey: selected.key,
++           documentText: selectedText,
++           rubricItemId: item.id
++         })
++       });
++       const payload = await response.json().catch(() => null) as unknown;
++       const draft = readRemediationDraft(item.id, payload);
++       setRemediationDrafts((current) => ({
++         ...current,
++         [item.id]: response.ok ? draft : { ...draft, status: "error" }
++       }));
++     } catch (error) {
++       console.error("workpack remediation request failed", error);
++       setRemediationDrafts((current) => ({
++         ...current,
++         [item.id]: {
++           itemId: item.id,
++           text: "",
++           status: "error",
++           message: "보완 제안 요청 중 오류가 발생했습니다.",
++           providerLabel: null,
++           policyNote: "",
++           catalogStatus: null,
++           sources: []
++         }
++       }));
++     } finally {
++       setRemediationLoadingId(null);
++     }
++   }
++
++   function downloadText() {
++     downloadBlob(new Blob([selectedExportText], { type: "text/plain;charset=utf-8" }), `${baseName}.txt`);
++   }
++
++   function downloadJson() {
++     const payload = {
++       title: selected.title,
++       scenario: data.scenario,
++       document: selectedExportText,
++       generatedAt: new Date().toISOString()
++     };
++     downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" }), `${baseName}.json`);
++   }
++
++   function downloadHtml() {
++     downloadBlob(
++       new Blob([buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, authorityData, riskAssessmentRows)], { type: "text/html;charset=utf-8" }),
++       `${baseName}.html`
++     );
++   }
++
++   function downloadCsv() {
++     const rows = buildRowsForDocument(selected, authoritySafeValues);
++     downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, ",")}`], { type: "text/csv;charset=utf-8" }), `${baseName}.csv`);
++   }
++
++   function downloadXls() {
++     // Legacy HTML-as-.xls — kept for backward compatibility but new UI prefers downloadXlsx().
++     downloadBlob(
++       new Blob([buildExcelHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, authorityData, riskAssessmentRows)], { type: "application/vnd.ms-excel;charset=utf-8" }),
++       `${baseName}.xls`
++     );
++   }
++
++   async function downloadXlsx() {
++     setXlsxStatus("building");
++     try {
++       // schema-first 경로: AI가 셀 단위 객체를 반환했으면 산문 → row parser → table 경로 우회.
++       // parseSheetRows 손실 없이 표 양식에 직접 매핑.
++       const dl = data.deliverables as {
++         workPlanStructured?: unknown;
++         permitInspectionStructured?: unknown;
++         tbmBriefingStructured?: unknown;
++         tbmLogStructured?: unknown;
++         educationRecordStructured?: unknown;
++       };
++       type StructuredMode = "workPlanStructured" | "permitInspectionStructured" | "tbmBriefingStructured" | "tbmLogStructured" | "educationRecordStructured";
++       let structuredMode: StructuredMode | null = null;
++       let structuredPayload: unknown = null;
++       if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
++         structuredMode = "workPlanStructured";
++         structuredPayload = dl.workPlanStructured;
++       } else if (selected.key === "workPermitDraft" && !selectedHasIntentionalEmptyPermitDraft) {
++         structuredMode = "permitInspectionStructured";
++         structuredPayload = dl?.permitInspectionStructured || buildPermitInspectionStructured(data);
++       } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
++         structuredMode = "tbmBriefingStructured";
++         structuredPayload = dl.tbmBriefingStructured;
++       } else if (selected.key === "tbmLogDraft" && dl?.tbmLogStructured) {
++         structuredMode = "tbmLogStructured";
++         structuredPayload = dl.tbmLogStructured;
++       } else if (selected.key === "safetyEducationRecordDraft" && dl?.educationRecordStructured) {
++         structuredMode = "educationRecordStructured";
++         structuredPayload = dl.educationRecordStructured;
++       }
++       const requestBody = structuredMode
++         ? {
++             mode: structuredMode,
++             edited: selectedUsesEditedText,
++             scenario: data.scenario,
++             structured: structuredPayload,
++             rows: selectedRows
++           }
++         : {
++             mode: "single",
++             edited: selectedUsesEditedText,
++             title: selected.title,
++             rows: selectedRows,
++             profile: selectedFormProfile,
++             scenario: data.scenario,
++             riskAssessmentRows: selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
++           };
++       const response = await fetch("/api/export/xlsx", {
++         method: "POST",
++         headers: { "content-type": "application/json" },
++         body: JSON.stringify(requestBody)
++       });
++       if (!response.ok) {
++         throw new Error(`xlsx export failed (${response.status})`);
++       }
++       const blob = await response.blob();
++       downloadBlob(blob, `${baseName}.xlsx`);
++       setXlsxStatus("idle");
++     } catch (error) {
++       console.error("xlsx export failed", error);
++       setXlsxStatus("error");
++     }
++   }
++
++   async function downloadHwp() {
++     setHwpStatus("building");
++     try {
++       const response = await fetch("/api/export/hwp", {
++         method: "POST",
++         headers: { "content-type": "application/json" },
++         body: JSON.stringify({
++           edited: selectedUsesEditedText,
++           title: selected.title,
++           rows: selectedRows,
++           profile: selectedFormProfile,
++           scenario: data.scenario,
++           authorityMarker: phaseADocumentAuthorityMarker,
++           riskAssessmentRows: selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
++         })
++       });
++       if (!response.ok) {
++         throw new Error(`hwp export failed (${response.status})`);
++       }
++       const blob = await response.blob();
++       downloadBlob(blob, `${baseName}.hwp`);
++       setHwpStatus("idle");
++     } catch (error) {
++       console.error("hwp export failed", error);
++       setHwpStatus("error");
++     }
++   }
++
++
++   function downloadDoc() {
++     downloadBlob(
++       new Blob([buildWordHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, authorityData, riskAssessmentRows)], { type: "application/msword;charset=utf-8" }),
++       `${baseName}.doc`
++     );
++   }
++
++   function downloadJpg() {
++     setImageStatus("idle");
++     const markup = buildSafetyFormMarkup(selected.title, selectedRows, data.scenario, selectedFormProfile, authorityData, riskAssessmentRows);
++     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1754">
++       <rect width="100%" height="100%" fill="#fafafb"/>
++       <foreignObject x="34" y="34" width="1172" height="1686">
++         <div xmlns="http://www.w3.org/1999/xhtml">
++           <style>${formCss("0")}</style>
++           ${markup}
++         </div>
++       </foreignObject>
++     </svg>`;
++     const image = new Image();
++     const svgUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
++     image.onload = () => {
++       const canvas = document.createElement("canvas");
++       canvas.width = 1240;
++       canvas.height = 1754;
++       const context = canvas.getContext("2d");
++       if (!context) return;
++       context.fillStyle = "#fafafb";
++       context.fillRect(0, 0, canvas.width, canvas.height);
++       context.drawImage(image, 0, 0);
++       canvas.toBlob((blob) => {
++         if (blob) downloadBlob(blob, `${baseName}.jpg`);
++         URL.revokeObjectURL(svgUrl);
++       }, "image/jpeg", 0.92);
++     };
++     image.onerror = () => {
++       console.error("JPG export failed: SVG image could not be rendered");
++       URL.revokeObjectURL(svgUrl);
++       setImageStatus("error");
++     };
++     image.src = svgUrl;
++   }
++
++   async function downloadHwpx() {
++     setHwpxStatus("building");
++     try {
++       const blob = await buildHwpxWithRhwp(buildHwpTemplateText(selected.title, selectedRows, selectedFormProfile, data.scenario, authorityData, riskAssessmentRows));
++       downloadBlob(blob, `${baseName}.hwpx`);
++       setHwpxStatus("idle");
++     } catch (error) {
++       console.error("rhwp HWPX export failed", error);
++       setHwpxStatus("error");
++     }
++   }
++
++   function downloadAll() {
++     const combined = buildCombinedText(authoritySafeValues);
++     downloadBlob(new Blob([combined], { type: "text/plain;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeclaw-workpack.txt`);
++   }
++
++   function downloadAllCsv() {
++     const rows = buildLaunchSheetRows(authoritySafeValues);
++     downloadBlob(new Blob([`\uFEFF${buildDelimited(rows, ",")}`], { type: "text/csv;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeclaw-workpack.csv`);
++   }
++
++   function downloadAllXls() {
++     const rows = buildLaunchSheetRows(authoritySafeValues);
++     downloadBlob(new Blob([buildLaunchWorkbookHtml("SafeClaw 문서팩", rows)], { type: "application/vnd.ms-excel;charset=utf-8" }), `${sanitizeFileName(data.scenario.companyName)}-safeclaw-workpack.xls`);
++   }
++
++   function downloadSheetsTsv() {
++     const rows = buildLaunchSheetRows(authoritySafeValues);
++     downloadBlob(
++       new Blob([`\uFEFF${buildDelimited(rows, "\t")}`], { type: "text/tab-separated-values;charset=utf-8" }),
++       `${sanitizeFileName(data.scenario.companyName)}-google-sheets.tsv`
++     );
++   }
++
++   function downloadTemplate() {
++     if (templateKind === "sheet") {
++       downloadXls();
++       return;
++     }
++     if (templateKind === "word") {
++       downloadDoc();
++       return;
++     }
++     void downloadHwpx();
++   }
++
++   async function copySheetsTsv() {
++     const confirmed = window.confirm("새 Google Sheets를 열고 표 데이터를 클립보드에 복사합니다. 열린 빈 시트의 A1 셀에 Ctrl+V로 붙여넣으면 문서팩 표가 들어갑니다.");
++     if (!confirmed) return;
++
++     const rows = buildLaunchSheetRows(authoritySafeValues);
++     const sheetWindow = window.open("https://sheets.new", "_blank", "noopener,noreferrer");
++     try {
++       await navigator.clipboard.writeText(buildDelimited(rows, "\t"));
++       setSheetStatus("copied");
++       if (!sheetWindow) {
++         window.location.href = "https://sheets.new";
++       }
++     } catch (error) {
++       console.error("Google Sheets TSV copy failed", error);
++       setSheetStatus("error");
++       downloadSheetsTsv();
++       if (!sheetWindow) {
++         window.location.href = "https://sheets.new";
++       }
++     }
++   }
++
++   async function printPdf() {
++     const popup = window.open("", "_blank", "width=900,height=1100");
++     if (!popup) {
++       console.error("PDF print window was blocked");
++       downloadHtml();
++       return;
++     }
++     popup.document.write("<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\" /><title>SafeClaw PDF 준비 중</title></head><body><p>제출용 PDF 화면을 준비하고 있습니다.</p></body></html>");
++     popup.document.close();
++
++     try {
++       const response = await fetch("/api/export/pdf?format=html", {
++         method: "POST",
++         headers: {
++           "Content-Type": "application/json"
++         },
++         body: JSON.stringify({
++           title: selected.title,
++           scenario: data.scenario,
++           rows: selectedRows,
++           riskRows: riskAssessmentRows,
++           documentText: selectedExportText,
++           authorityMarker: phaseADocumentAuthorityMarker,
++           riskLevel: data.riskSummary.riskLevel,
++           topRisk: data.riskSummary.topRisk
++         })
++       });
++       if (!response.ok) {
++         throw new Error(`PDF print source failed with ${response.status}`);
++       }
++       const contentType = response.headers.get("content-type") || "";
++       if (!contentType.includes("text/html")) {
++         throw new Error(`PDF print source returned unexpected content type: ${contentType || "unknown"}`);
++       }
++       const html = await response.text();
++       popup.document.open();
++       popup.document.write(html);
++       popup.document.close();
++       popup.focus();
++       popup.print();
++     } catch (error) {
++       console.error("server PDF print source failed", error);
++       popup.document.open();
++       popup.document.write(buildHtml(selected.title, selectedRows, data.scenario, selectedFormProfile, authorityData, riskAssessmentRows));
++       popup.document.close();
++       popup.focus();
++       popup.print();
++     }
++   }
++
++   return (
++     <section
++       className={`workpack-shell ${styles.workspace}`}
++       id="workpack"
++       data-testid="workpack-editor-workspace"
++     >
++       <aside className={`workpack-sidebar card list ${styles.navigator}`} aria-label="문서팩 문서 목록">
++         <div className={styles.navigatorHeader}>
++           <div className="eyebrow">문서팩</div>
++           <div className="h2">오늘 문서</div>
++           <p className="muted">{documentMeta.length.toLocaleString("ko-KR")}개 문서 · 브라우저 자동 저장</p>
++         </div>
++
++         <label className={styles.mobileDocumentPicker}>
++           <span>편집 문서</span>
++           <select
++             aria-label="편집 문서 선택"
++             value={selected.key}
++             onChange={(event) => setSelectedKey(event.target.value as DocumentKey)}
++           >
++             {documentMeta.map((item) => (
++               <option key={item.key} value={item.key}>{item.title}</option>
++             ))}
++           </select>
++         </label>
++
++         <div className={`doc-tab-list ${styles.documentTabs}`} role="tablist" aria-label="편집 문서 선택">
++           {documentMeta.map((item, index) => (
++             <button
++               key={item.key}
++               id={documentTabId(item.key)}
++               type="button"
++               role="tab"
++               className={`doc-tab ${item.key === selected.key ? "active" : ""}`}
++               onClick={() => setSelectedKey(item.key)}
++               onKeyDown={(event) => handleDocumentTabKeyDown(event, index)}
++               aria-selected={item.key === selected.key}
++               aria-controls="workpack-document-body"
++               tabIndex={item.key === selected.key ? 0 : -1}
++             >
++               <span className={styles.documentIndex}>{String(index + 1).padStart(2, "0")}</span>
++               <strong>{item.title}</strong>
++               <span className={styles.documentDescription}>{item.description}</span>
++             </button>
++           ))}
++         </div>
++       </aside>
++
++       <div className={`card document-editor ${styles.editor} ${showFocusCue ? "editor-focus-cue" : ""}`}>
++         <div
++           className={styles.documentBody}
++           id="workpack-document-body"
++           data-testid="editor-document-body"
++           role="tabpanel"
++           aria-labelledby={documentTabId(selected.key)}
++           ref={documentBodyRef}
++         >
++           <header className={`document-toolbar ${styles.documentHeader}`}>
++             <div className={styles.documentHeading}>
++               <div className="eyebrow">문서 본문</div>
++               <div className="h2">{selected.title}</div>
++               <p className="muted">{selected.description}</p>
++             </div>
++             <div className={`editor-document-meta ${styles.documentMeta}`}>
++               <span className={`editor-save-state ${styles.saveState}`}>{saveStatusLabel}</span>
++               <span>{selectedText.length.toLocaleString("ko-KR")}자</span>
++               {lastEditedAt ? (
++                 <span>수정 {lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>
++               ) : null}
++               <span
++                 data-testid="editor-save-status"
++                 role="status"
++                 aria-live="polite"
++                 className={styles.visuallyHidden}
++               >
++                 {saveAnnouncement}
++               </span>
++             </div>
++           </header>
++
++           {showFocusCue ? (
++             <p className={`editor-focus-message ${styles.focusMessage}`}>
++               {selected.title} 본문 편집을 시작합니다.
++             </p>
++           ) : null}
++
++           <p className="muted small phase-a-authority-marker" role="status">
++             {phaseADocumentAuthorityMarker}
++           </p>
++
++           <textarea
++             ref={textareaRef}
++             className="document-textarea"
++             value={selectedText}
++             onChange={(event) => updateValue(event.target.value)}
++             aria-label={`${selected.title} 편집`}
++           />
++           <p className={`muted small ${styles.documentFootnote}`}>
++             발주처 원본 양식, 직인, 결재선은 제출 전 확인 대상입니다.
++           </p>
++         </div>
++
++         <div className={styles.secondaryTools} data-testid="editor-secondary-tools" aria-label="문서 보조 도구">
++           <details className={styles.utilityPanel} data-testid="editor-evidence-panel">
++             <summary className={styles.utilitySummary}>
++               <span>
++                 <b>근거</b>
++                 <small>{selectedEvidenceLabel?.article || "법령, KOSHA, 현장 데이터"}</small>
++               </span>
++               <em>{evidenceStats.reduce((sum, item) => sum + item.value, 0).toLocaleString("ko-KR")}건</em>
++             </summary>
++             <div className={styles.utilityContent}>
++               <div className={styles.sectionHeading}>
++                 <div>
++                   <span className="eyebrow">생성 근거</span>
++                   <strong>{selected.title}의 {phaseAState.evidenceHeading}</strong>
++                 </div>
++                 <a className="knowledge-link" href="/knowledge">지식 DB</a>
++               </div>
++               <div className="rubric-stack">
++                 {evidenceStats.map((item) => (
++                   <div key={item.label} className="rubric-item fulfilled">
++                     <span>{item.label}</span>
++                     <strong>{item.value.toLocaleString("ko-KR")}건</strong>
++                     <em>{item.description}</em>
++                   </div>
++                 ))}
++               </div>
++               {evidenceHighlights.length ? (
++                 <div className={styles.evidenceList}>
++                   {evidenceHighlights.map((item) => item.href ? (
++                     <a key={item.id} href={item.href} target="_blank" rel="noreferrer">
++                       <span>{item.badge}</span>
++                       <strong>{item.title}</strong>
++                       <small>{item.summary}</small>
++                     </a>
++                   ) : (
++                     <article key={item.id}>
++                       <span>{item.badge}</span>
++                       <strong>{item.title}</strong>
++                       <small>{item.summary}</small>
++                     </article>
++                   ))}
++                 </div>
++               ) : (
++                 <p className="muted small">연결된 출처가 없습니다. 제출 전 근거 확인이 필요합니다.</p>
++               )}
++               {selectedCoverage ? (
++                 <p className="muted small">
++                   {selectedCoverage.document} 커버리지: {selectedCoverage.covered
++                     ? phaseAState.connectionLabel
++                     : "보강 필요"}
++                   {selectedCoverage.evidenceTypes.length ? ` · ${selectedCoverage.evidenceTypes.join(" · ")}` : ""}
++                 </p>
++               ) : null}
++             </div>
++           </details>
++
++           <details className={styles.utilityPanel} data-testid="editor-quality-panel">
++             <summary className={styles.utilitySummary}>
++               <span>
++                 <b>품질 점검</b>
++                 <small>{selected.title} 점검과 AI 보완</small>
++               </span>
++               <em>{selectedQualityIssues ? `${selectedQualityIssues}개 확인` : "반영 완료"}</em>
++             </summary>
++             <div className={`${styles.utilityContent} ${styles.qualityContent}`}>
++               <div className={styles.sectionHeading}>
++                 <div>
++                   <span className="eyebrow">현재 문서</span>
++                   <strong>{selected.title} 제출 전 점검</strong>
++                 </div>
++               </div>
++               <div className="selected-rubric-strip" aria-label={`${selected.title} 제출 전 점검`}>
++                 {selectedRubricItems.length ? selectedRubricItems.map((item) => {
++                   const draft = remediationDrafts[item.id];
++                   return (
++                     <div key={item.id} className={`selected-rubric-item ${item.status}`}>
++                       <span>{rubricCategoryLabel(item.category)}</span>
++                       <strong>{item.title}</strong>
++                       <small>{rubricStatusLabel(item.status)} · {item.status === "fulfilled" ? "현재 문서에 반영되어 있습니다." : item.improvementAction}</small>
++                       {item.status !== "fulfilled" ? (
++                         <div className="remediation-actions">
++                           <button
++                             type="button"
++                             className="button secondary"
++                             onClick={() => requestRemediation(item)}
++                             disabled={remediationLoadingId === item.id}
++                           >
++                             {remediationLoadingId === item.id ? "보완 생성 중" : "보완 문구 생성"}
++                           </button>
++                         </div>
++                       ) : null}
++                       {draft ? (
++                         <div className={`remediation-draft ${draft.status}`}>
++                           <div className="compact-head">
++                             <span className="eyebrow">AI 보완 제안</span>
++                             <strong>{draft.status === "ready" ? "편집 후 삽입 가능" : "생성 확인 필요"}</strong>
++                           </div>
++                           <textarea
++                             className="remediation-textarea"
++                             value={draft.text}
++                             onChange={(event) => updateRemediationDraft(item.id, event.target.value)}
++                             aria-label={`${item.title} 보완 제안 편집`}
++                           />
++                           <p className="muted small">
++                             {draft.providerLabel ? `${draft.providerLabel} · ` : ""}
++                             {draft.policyNote || draft.message}
++                           </p>
++                           {draft.catalogStatus && !draft.catalogStatus.ok ? (
++                             <p className="export-error">
++                               지식 DB 근거는 점검 필요 상태입니다. {draft.catalogStatus.message}
++                             </p>
++                           ) : null}
++                           {draft.sources.length ? (
++                             <div className="remediation-sources">
++                               {draft.sources.map((source) => (
++                                 <a key={`${item.id}-${source.title}`} href={source.url} target="_blank" rel="noreferrer">
++                                   <span>{source.roleLabel || (source.sourceType === "catalog" ? "지식 DB" : "기본 근거")}</span>
++                                   {source.agency} · {source.title}
++                                   {source.reflectionLabel ? <small>{source.reflectionLabel}</small> : null}
++                                 </a>
++                               ))}
++                             </div>
++                           ) : null}
++                           <div className="remediation-actions">
++                             <button
++                               type="button"
++                               className="button"
++                               onClick={() => insertRemediationDraft(item.id)}
++                               disabled={draft.status !== "ready" || !draft.text.trim()}
++                             >
++                               문서에 삽입
++                             </button>
++                             <button
++                               type="button"
++                               className="button secondary"
++                               onClick={() => setRemediationDrafts((current) => {
++                                 const next = { ...current };
++                                 delete next[item.id];
++                                 return next;
++                               })}
++                             >
++                               닫기
++                             </button>
++                           </div>
++                         </div>
++                       ) : null}
++                     </div>
++                   );
++                 }) : (
++                   <div className="selected-rubric-item fulfilled">
++                     <span>현장 운영 추천</span>
++                     <strong>문서별 직접 점검 항목 없음</strong>
++                     <small>전체 문서팩 점검에서 공통 보강 항목을 확인할 수 있습니다.</small>
++                   </div>
++                 )}
++               </div>
++
++               <div className="rubric-panel" aria-label="전체 문서팩 제출 전 점검">
++                 <div className="compact-head">
++                   <span className="eyebrow">전체 문서팩</span>
++                   <strong>{totalQualityIssues ? `${totalQualityIssues}개 보강 대상` : "점검 완료"}</strong>
++                 </div>
++                 <div className="rubric-meter" aria-hidden="true">
++                   <span style={{ width: `${(rubricEvaluation.summary.fulfilled / rubricEvaluation.summary.total) * 100}%` }} />
++                 </div>
++                 <div className="rubric-stack">
++                   {rubricEvaluation.items.slice(0, 6).map((item) => (
++                     <div key={item.id} className={`rubric-item ${item.status}`}>
++                       <span>{rubricCategoryLabel(item.category)}</span>
++                       <strong>{item.title}</strong>
++                       <em>{rubricStatusLabel(item.status)}</em>
++                     </div>
++                   ))}
++                 </div>
++               </div>
++             </div>
++           </details>
++
++           <details className={styles.utilityPanel} data-testid="editor-graph-panel">
++             <summary className={styles.utilitySummary}>
++               <span>
++                 <b>문서 연결 그래프</b>
++                 <small>현장 입력에서 제출본까지</small>
++               </span>
++               <em>4단계</em>
++             </summary>
++             <div className={styles.utilityContent}>
++               <ol className={styles.lineageGraph} aria-label={`${selected.title} 생성 연결`}>
++                 {[
++                   { label: "현장 입력", value: data.scenario.workSummary },
++                   { label: "핵심 위험", value: data.riskSummary.topRisk },
++                   { label: "현재 문서", value: selected.title },
++                   { label: "제출본", value: "PDF · XLSX · HWP" }
++                 ].map((node) => (
++                   <li key={node.label}>
++                     <span>{node.label}</span>
++                     <strong>{node.value}</strong>
++                   </li>
++                 ))}
++               </ol>
++             </div>
++           </details>
++
++           <details className={styles.utilityPanel} data-testid="editor-export-panel">
++             <summary className={styles.utilitySummary}>
++               <span>
++                 <b>내보내기</b>
++                 <small>정식 제출본과 호환 형식</small>
++               </span>
++               <em>PDF · XLSX · HWP</em>
++             </summary>
++             <div className={`${styles.utilityContent} ${styles.exportContent}`}>
++               <div className={`download-bar ${styles.primaryExports}`}>
++                 <button type="button" className="button" onClick={() => void downloadXlsx()} disabled={xlsxStatus === "building"} title="OOXML 정식 .xlsx 양식 (시트/헤더/표/서명란)">
++                   {xlsxStatus === "building" ? "Excel 생성 중" : "Excel 표 양식(.xlsx)"}
++                 </button>
++                 <button type="button" className="button" onClick={() => void downloadHwp()} disabled={hwpStatus === "building"} title="한컴 native .hwp 표 양식 (격자 표 + 셀)">
++                   {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
++                 </button>
++                 <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
++                 <details className="advanced-downloads inline">
++                   <summary>베타 형식</summary>
++                   <div className="advanced-download-grid">
++                     <button type="button" className="button secondary" onClick={downloadHwpx} disabled={hwpxStatus === "building"} title="rhwp 텍스트 기반 HWPX 초안 (표 미지원)">
++                       {hwpxStatus === "building" ? "HWPX 생성 중" : ".hwpx 텍스트 초안"}
++                     </button>
++                     <button type="button" className="button secondary" onClick={downloadXls} title="구버전 호환 HTML 기반 .xls (Excel 보안 경고 가능)">XLS(legacy)</button>
++                     <button type="button" className="button secondary" onClick={downloadDoc} title="Word 또는 한글에서 열 수 있는 보고서형 문서">DOC</button>
++                     <button type="button" className="button secondary" onClick={downloadText} title="메신저·메일 본문에 붙여넣기 쉬운 순수 텍스트">TXT</button>
++                     <button type="button" className="button secondary" onClick={downloadJson} title="외부 시스템 연동과 자동화용 구조화 데이터">JSON</button>
++                     <button type="button" className="button secondary" onClick={downloadCsv} title="엑셀·구글시트 업로드용 행 데이터">CSV</button>
++                     <button type="button" className="button secondary" onClick={downloadHtml} title="웹 게시·브라우저 인쇄용 문서">HTML</button>
++                     <button type="button" className="button secondary" onClick={downloadJpg} title="단톡방 이미지 공유와 현장 게시용 이미지">JPG</button>
++                   </div>
++                 </details>
++               </div>
++
++               {xlsxStatus === "error" ? (
++                 <p className="export-error">Excel(.xlsx) 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 PDF/XLS(legacy)를 사용해 주세요.</p>
++               ) : null}
++               {hwpStatus === "error" ? (
++                 <p className="export-error">한글 표(.hwp) 생성 중 오류가 발생했습니다. .hwpx 텍스트 초안 또는 PDF를 사용해 주세요.</p>
++               ) : null}
++               {hwpxStatus === "error" ? (
++                 <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>
++               ) : null}
++               {imageStatus === "error" ? (
++                 <p className="export-error">JPG 변환 중 오류가 발생했습니다. HTML 또는 PDF 저장/인쇄를 먼저 사용해 주세요.</p>
++               ) : null}
++
++               <div className={`sheet-export-panel ${styles.exportWorkbench}`}>
++                 <div className="template-picker" aria-label="서식 템플릿 선택">
++                   {templatePresets.map((preset) => (
++                     <button
++                       key={preset.kind}
++                       type="button"
++                       className={`template-card ${preset.kind === templateKind ? "active" : ""}`}
++                       onClick={() => setTemplateKind(preset.kind)}
++                       aria-label={`${preset.label} 서식 선택`}
++                       aria-pressed={preset.kind === templateKind}
++                     >
++                       <strong>{preset.label}</strong>
++                       <span>{preset.description}</span>
++                     </button>
++                   ))}
++                 </div>
++                 <div className={`template-preview template-${templateKind}`} aria-live="polite">
++                   <span>{selectedTemplate.label} 미리보기</span>
++                   <strong>{selectedTemplate.previewTitle}</strong>
++                   <ul>
++                     {selectedTemplate.previewBullets.map((item) => (
++                       <li key={item}>{item}</li>
++                     ))}
++                   </ul>
++                 </div>
++                 <details className="customer-template-panel">
++                   <summary>사업장 서식 매핑 준비</summary>
++                   <div className="customer-template-copy">
++                     <strong>지금은 SafeClaw 표준 제출형으로 출력합니다.</strong>
++                     <p>
++                       고객사 원본 XLSX/HWPX 서식은 온보딩 때 업로드하고, 아래 공통 필드를 한 번 매핑한 뒤
++                       같은 현장에서 반복 렌더링하는 흐름으로 확장합니다. 자동 덮어쓰기는 하지 않고 제출 전
++                       사용자가 확인합니다.
++                     </p>
++                   </div>
++                   <div className="customer-template-stage" aria-label="사업장 서식 적용 단계">
++                     <article>
++                       <span>01</span>
++                       <strong>원본 서식 수집</strong>
++                       <p>사업장 위험성평가표, 작업계획서, TBM, 교육일지 원본을 등록합니다.</p>
++                     </article>
++                     <article>
++                       <span>02</span>
++                       <strong>필드 매핑</strong>
++                       <p>현장명, 작업명, 위험요인, 감소대책, 결재란을 SafeClaw 문서팩과 연결합니다.</p>
++                     </article>
++                     <article>
++                       <span>03</span>
++                       <strong>검수 후 반복 출력</strong>
++                       <p>검수된 서식만 고객사 제출본으로 쓰고, 원본 셀 단위 복제는 별도 QA로 잠급니다.</p>
++                     </article>
++                   </div>
++                   <div className="customer-template-field-grid" aria-label="고객사 서식 매핑 필드">
++                     {customerTemplateFields.map((field) => (
++                       <article key={field.key}>
++                         <span>{field.label}</span>
++                         <strong>{field.mapsTo}</strong>
++                         <p>{field.appliesTo}</p>
++                       </article>
++                     ))}
++                   </div>
++                 </details>
++                 <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
++                 <p className="muted small">
++                   PDF는 브라우저 인쇄/저장, XLS는 HTML 호환 파일, HWPX는 rhwp 제출형 초안입니다.
++                 </p>
++                 <details className="advanced-downloads">
++                   <summary>전체 문서팩 다운로드</summary>
++                   <div className="advanced-download-grid">
++                     <button type="button" className="button secondary" onClick={downloadAll}>전체 TXT</button>
++                     <button type="button" className="button secondary" onClick={downloadAllCsv}>전체 CSV</button>
++                     <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
++                   </div>
++                 </details>
++                 <div className="sheets-action-box">
++                   <button type="button" className="button" onClick={copySheetsTsv}>새 Google Sheets 열기 + 표 복사</button>
++                   <button type="button" className="button secondary" onClick={downloadSheetsTsv}>Sheets용 TSV 다운로드</button>
++                   <p className="muted small">Google API/OAuth 없이 자동 입력은 하지 않습니다. 새 시트가 열리면 A1 셀에 붙여넣거나 TSV를 업로드해 사용하세요.</p>
++                 </div>
++                 {sheetStatus === "copied" ? <p className="muted small">표 데이터를 복사했습니다. 열린 Google Sheets의 A1 셀에 Ctrl+V로 붙여넣어 주세요.</p> : null}
++                 {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패해 TSV 파일을 내려받았습니다. Google Sheets에서 파일 가져오기로 업로드해 주세요.</p> : null}
++               </div>
++             </div>
++           </details>
++
++           <details className={`submission-preview-panel ${styles.utilityPanel}`}>
++             <summary className={styles.utilitySummary}>
++               <span>
++                 <b>제출 양식 미리보기</b>
++                 <small>표, 결재선, 인쇄 레이아웃</small>
++               </span>
++               <em>인쇄물</em>
++             </summary>
++             <div className={styles.utilityContent}>
++               <p className="muted small phase-a-authority-marker">{phaseADocumentAuthorityMarker}</p>
++               <p className="muted small">다운로드와 출력에 사용되는 제출형 표 서식입니다.</p>
++               <SafetyDocumentPreview
++                 title={selected.title}
++                 rows={selectedRows}
++                 scenario={data.scenario}
++                 profile={selectedFormProfile}
++                 data={authorityData}
++                 riskRows={riskAssessmentRows}
++               />
++             </div>
++           </details>
++         </div>
++       </div>
++     </section>
++   );
++ }
++
+
+ ❯ tests/phase-a-citation-authority.test.ts:272:28
+    270|     expect(currentModules).toContain("phaseAState.evidenceHeading");
+    271|     expect(currentModules).toMatch(/<WorkpackEditor\s+data=\{current\.…
+    272|     expect(workpackEditor).toContain(
+       |                            ^
+    273|       "workpackSummaryDraft: data.deliverables.workpackSummaryDraft",
+    274|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  13:10:21
+   Duration  773ms (transform 105ms, setup 0ms, import 159ms, tests 24ms, environment 0ms)

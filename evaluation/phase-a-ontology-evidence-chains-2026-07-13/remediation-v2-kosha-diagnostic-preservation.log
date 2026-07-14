@@ -1,0 +1,24 @@
+diagnostic_tree=d4c141c1fd1d0e6013f8cee27fff016d13357815
+target_owned_path=lib/db-harness.ts target_blob=c9aa90da20ae9f342ac867d41934c2a7133db6cd diagnostic_blob=c9aa90da20ae9f342ac867d41934c2a7133db6cd exact=True
+target_owned_path=lib/safety-reference-catalog.ts target_blob=23c60ba87e39be7e1633dba0547bafadd9829ff8 diagnostic_blob=23c60ba87e39be7e1633dba0547bafadd9829ff8 exact=True
+target_owned_path=lib/safety-reference-catalog-server.ts target_blob=f0ed998c572f403fd43afeb5dab20cf16d07771f diagnostic_blob=f0ed998c572f403fd43afeb5dab20cf16d07771f exact=True
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/db-harness.ts:150:    llmRole: "naturalize_only";
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/db-harness.ts:351:      llmRole: "naturalize_only",
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/db-harness.ts:709:    "근거 역할: SIF는 사고·위험 우선순위, KOSHA는 기술적 보조지침, 법령은 의무 근거로 분리한다.",
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:48:  | "statutory_mandate_with_guidance"
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:209:    llmRole: "naturalize_only";
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:307:export type PhaseAGenerationGrounding = {
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:332:    llmRole: "naturalize_only";
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:434:        control.obligation.classification === "statutory_mandate_with_guidance") &&
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:441:      control.obligation.classification === "statutory_mandate_with_guidance") &&
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:711:      case "statutory_mandate_with_guidance":
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:804:      llmRole: "naturalize_only",
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:902:  llmRole: "naturalize_only";
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:952:      classification: "statutory_mandate_with_guidance",
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:1254:        case "statutory_mandate_with_guidance":
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:1291:              case "statutory_mandate_with_guidance":
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:1690:      llmRole: "naturalize_only",
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/ontology/evidence-chain.ts:1767:    llmRole: "naturalize_only",
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/search.ts:94:    log.warn("phase a generation source rejected", {
+d4c141c1fd1d0e6013f8cee27fff016d13357815:lib/search.ts:1144:    && item.groundingReason === "verified-current";
+d4c141c1fd1d0e6013f8cee27fff016d13357815:tests/kosha-grounding-fail-closed.test.ts:459:  it("keeps the aggregate blocked when an integrity-failed local corpus retains verified remote KOSHA", async () => {

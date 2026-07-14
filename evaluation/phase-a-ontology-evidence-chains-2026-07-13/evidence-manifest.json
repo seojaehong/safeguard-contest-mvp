@@ -1,15 +1,29 @@
 {
-  "schemaVersion": 3,
-  "generatedAt": "2026-07-14T11:09:19.3623894+09:00",
-  "status": "CANDIDATE_HOLD_PENDING_FRESH_REVIEW_AND_INTEGRATED_STATIC_108",
+  "schemaVersion": 4,
+  "generatedAt": "2026-07-14T14:48:27.6144106+09:00",
+  "status": "HOLD_FRESH_WHOLE_SERIES_REVIEW_REQUIRED",
   "branch": "fix/phase-a-ontology-target-ready",
   "binding": {
-    "currentMainTarget": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
-    "currentTargetWithEditorPair": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "authorityRef": "refs/remotes/origin/feat/phase-a-evidence-integration",
+    "minimumAuthority": "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
+    "currentMainTarget": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "authorityTree": "7e45e4f856d8c6e1a6b6c4e00956bd190a2c6e92",
+    "sourceBase": "ff093fae30c331816f0068f9075b91b151d05813",
+    "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "productTree": "315c753db35faf229daf49a447c2568d138a185a",
+    "productSeries": [
+      "1f9784f4087e240b009c232868e5cd387a55dd48",
+      "ed90a95dad3a28d6171758c52ac03acba83733fd"
+    ],
+    "evidenceChildRequiredParent": "ed90a95dad3a28d6171758c52ac03acba83733fd",
     "targetHistory": [
       {
-        "sha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "sha": "920c7f360688352156de4854b4957a9f2f1f0e43",
         "status": "authoritative-current"
+      },
+      {
+        "sha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "status": "superseded-authority"
       },
       {
         "sha": "b3762867d380f20faee2a83a17354dc61557ce12",
@@ -19,392 +33,312 @@
         "sha": "cc9f5af297950b73b53a9ab4018bdc143830c499",
         "status": "rejected-pending-unintegrated"
       }
+    ]
+  },
+  "reviewScope": {
+    "inheritedSeriesBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "inheritedProductSeries": [
+      "102ff66b67cc40ff16386c61a221d3815b142e1b",
+      "d9cd92daff08b3a261fdeaa9293eeeb995bac089",
+      "7afd363d5288e05b582491e98a33eeda5d4b7398",
+      "1a16a3177bc10ea0861bfbd6d2e09b475068a3d1",
+      "f4b07e4663758e20bca0c9b143da8b2f8680ab2a",
+      "835ff56a07b925270dcea215044d995f984a0cf2",
+      "d2f55c30dc643cc66adfa169755e5dd6db58bd08",
+      "0b821fef29311d0cd9b265c7c7021f663b82390d",
+      "a4134fea9fa81043db03083ac080f55df9715681",
+      "017333f5fbbe79f064be25d0937db0896293905d",
+      "36eb8c7925b5826e1c7e88bba1dc0246cc46b8a2",
+      "35283baaf3aad4e14fa20da4df803b4cc3c046f2",
+      "f613f5d73118bb81e6199a5ff057e850b3859692",
+      "31767959b5904afbab77ab5ee36f24da6d15b1c8",
+      "888ad1c16b17b88b16bd0163deffbf7ebde740e1",
+      "fd573630afe72977deec7debe58649a850101fbd",
+      "fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
+      "e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4",
+      "cc5ba41f96c486e87445efba470c668b36107e4f"
     ],
-    "productCommit": "cc5ba41f96c486e87445efba470c668b36107e4f",
-    "productTree": "faa5c4a3ff6ea7540efc14f68668b9ef16dba9e2",
-    "productParent": "e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4",
-    "evidenceChildRequiredParent": "cc5ba41f96c486e87445efba470c668b36107e4f"
+    "priorEvidenceCommit": "ff093fae30c331816f0068f9075b91b151d05813",
+    "freshIndependentWholeSeriesReviewRequired": true
+  },
+  "targetReconciliation": {
+    "status": "content-conflict-hold",
+    "semanticMergePerformed": false,
+    "targetCommit": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "diagnosticTreeOid": "d4c141c1fd1d0e6013f8cee27fff016d13357815",
+    "conflictPaths": [
+      "tests/reports-download-center.test.ts"
+    ]
+  },
+  "shareAdoption": {
+    "status": "content-conflict-hold",
+    "semanticMergePerformed": false,
+    "reviewHead": "22de1180d69263f7c08ac0ed0cfda0894e2db7f5",
+    "baseProductHead": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+    "productHead": "7141baac3e0abca146ef6c110093c1c0643760a2",
+    "phaseAProductCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "diagnosticTreeOid": "945d7ba696dd0a312d462773800fa4b4fe2bcfc9",
+    "conflictPaths": [
+      "app/api/workpacks/[id]/route.ts",
+      "components/FieldOperationsWorkspace.tsx",
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/workpack-commercial-store.ts",
+      "tests/workpack-generation-evidence-route.test.ts",
+      "tests/workpack-share-authority-routes.test.ts"
+    ]
+  },
+  "testIdentity": {
+    "focusedNonBrowser": {
+      "status": "passed",
+      "testFiles": 19,
+      "tests": 264,
+      "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+      "log": "remediation-v2-focused-non-browser-product-final.log"
+    },
+    "phaseABrowserLifecycle": {
+      "status": "passed",
+      "testFiles": 1,
+      "tests": 13,
+      "executedProductCheckpoint": "1f9784f4087e240b009c232868e5cd387a55dd48",
+      "log": "remediation-v2-green-phase-a-browser-lifecycle-final.log"
+    },
+    "reportsBrowser": {
+      "status": "passed",
+      "testFiles": 1,
+      "tests": 10,
+      "executedProductCheckpoint": "1f9784f4087e240b009c232868e5cd387a55dd48",
+      "log": "remediation-v2-green-reports-browser.log"
+    },
+    "strictTypecheck": {
+      "status": "passed",
+      "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+      "log": "remediation-v2-typecheck-product-final.log"
+    },
+    "fullSuite": {
+      "status": "deferred_post_semantic_integration"
+    }
+  },
+  "buildIdentity": {
+    "status": "deferred_post_semantic_integration",
+    "node": "v24.12.0",
+    "npm": "11.6.2",
+    "next": "15.5.20",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10",
+    "packageJsonBlob": "92f8d7c7dd8d235d979c36eb4b21438f0cbe9e28",
+    "packageLockBlob": "3c5b5dda0a81b4ece4423140015b02a2158cd3f3",
+    "reason": "The user assigned the production build to the post-semantic-integration final gate while Share and KOSHA matrices were active."
+  },
+  "constraints": {
+    "dbSchemaMigrationDataMutation": false,
+    "packageOrLockMutation": false,
+    "liveDbApiProviderMutation": false,
+    "forbiddenPathCount": 0,
+    "dbApprovalBlocker": null,
+    "semanticMergePerformed": false,
+    "integrationAllowed": false
   },
   "hashContract": {
-    "productIdentity": "Git blob object ID from the product commit",
-    "evidenceArtifactIdentity": "Git blob object ID after repository clean filters",
+    "productArtifactIdentity": "Git blob object ID at binding.productCommit",
+    "evidenceArtifactIdentity": "Git blob object ID from the evidence child commit",
     "manifestSelfHashIncluded": false,
-    "evidenceCommitHashIncluded": false,
-    "externalCommitBindingRequired": true
+    "evidenceCommitHashIncluded": false
   },
-  "productFiles": [
+  "productArtifacts": [
     {
-      "path": "app/globals.css",
-      "gitBlobOid": "db3653f83e9d558fc160ca6a392d6856a3ae3c67"
+      "path": "app/api/workpacks/[id]/phase-a-confirmation/route.ts",
+      "gitBlobOid": "14b60852cc80581289f9059f9912be574574bda3"
+    },
+    {
+      "path": "app/api/workpacks/[id]/route.ts",
+      "gitBlobOid": "5290ff3fd320a61abed2074d1df455e8d6315003"
+    },
+    {
+      "path": "app/api/workpacks/route.ts",
+      "gitBlobOid": "c3e6030e036ac24c6c470a1281659d21a71a7261"
     },
     {
       "path": "components/FieldOperationsWorkspace.tsx",
-      "gitBlobOid": "57819744067dad20c909c37bb028956354aa250f"
+      "gitBlobOid": "7d071c23a2820aaed94f5041c323edf0a76f8181"
+    },
+    {
+      "path": "components/ReportsDownloadCenter.tsx",
+      "gitBlobOid": "7522c952ad7a039c0bd209a9d4ae0f393f2c8fde"
     },
     {
       "path": "components/SafeGuardCommandCenter.tsx",
-      "gitBlobOid": "aec3ee647d08bb9431ef19484be261fa989e8662"
+      "gitBlobOid": "2c2dea738b785a411b61989b7d328c80a498fb39"
+    },
+    {
+      "path": "docs/phase-a-share-v2-authority-adoption.md",
+      "gitBlobOid": "aafdc38f0d4299649456880cf174cd3d5f9dcf35"
+    },
+    {
+      "path": "lib/phase-a-share-authority-contract.ts",
+      "gitBlobOid": "9381ab0cbab2fd8a1c9ef29d9be92914b0e37091"
+    },
+    {
+      "path": "lib/reporting-downloads.ts",
+      "gitBlobOid": "df887bbdc841663227a3dc5d4b1893edd945f99d"
+    },
+    {
+      "path": "lib/request-version-guard.ts",
+      "gitBlobOid": "ac8790361ba08cc589b3631bb479c1e57c9f358a"
+    },
+    {
+      "path": "lib/search.ts",
+      "gitBlobOid": "f5275841d4f640fd5f05cfa0a3249a08134ed34f"
     },
     {
       "path": "lib/workpack-authority.ts",
-      "gitBlobOid": "d4282d2ba700522b8598b81204f33db49c228e87"
+      "gitBlobOid": "6337b319ff530274d6b653644f2c210e9df8962d"
     },
     {
       "path": "lib/workpack-commercial-store.ts",
-      "gitBlobOid": "e1c79a84b1915a2278500496304807eb89e0dd75"
+      "gitBlobOid": "f4ff6b409c4f28c309e59c892d1df3b7ee1cbe02"
     },
     {
-      "path": "tests/phase-a-product-remediation-browser.test.ts",
-      "gitBlobOid": "ef43453f7693f61fc43fc3ffd8024c12f921d0f3"
+      "path": "lib/workpack-store.ts",
+      "gitBlobOid": "edd22cf54683cd719d16086e5da94d632e3c2adf"
     },
     {
-      "path": "tests/workpack-share-authority-routes.test.ts",
-      "gitBlobOid": "7eab082e71482c9cea67f3d463db46e081d1bf1f"
+      "path": "tests/command-center-request-lifecycle.test.ts",
+      "gitBlobOid": "0262af5d4d615bfa7cee04c779a3b8a0562c528d"
     },
     {
-      "path": "tests/workpack-share-authority.test.ts",
-      "gitBlobOid": "7832008fa5d6eb1d566c6eac2aa809bfa63ff72f"
-    }
-  ],
-  "evidenceHarnessFiles": [
+      "path": "tests/phase-a-citation-authority.test.ts",
+      "gitBlobOid": "445ebe050b5afade2202f555b4c73ad966327f2e"
+    },
     {
-      "path": "tests/phase-a-product-remediation-browser.test.ts",
-      "gitBlobOid": "67c9fb89e61a3183c40e806ba0e6756344929673"
+      "path": "tests/phase-a-confirmation-route.test.ts",
+      "gitBlobOid": "8777e140e1d0ebc604799078fe109cf853f45fa6"
     },
     {
       "path": "tests/phase-a-evidence-target-authority.test.ts",
-      "gitBlobOid": "06146620e132fe94b75017fb939b338f0a1b4e4f"
+      "gitBlobOid": "d71d02e45b00cc8ac17aa1c393afe6bd711a6635"
+    },
+    {
+      "path": "tests/phase-a-product-remediation-browser.test.ts",
+      "gitBlobOid": "cacdc93a2a9985aff080114b22f5e7c1681684c1"
+    },
+    {
+      "path": "tests/phase-a-share-authority-contract.test.ts",
+      "gitBlobOid": "23fe3c7055e59b181977a6251beeb38dbaee9884"
+    },
+    {
+      "path": "tests/reporting-downloads.test.ts",
+      "gitBlobOid": "c82fbb478842629b501d29fdb3692bff56a308a8"
+    },
+    {
+      "path": "tests/reports-download-center.test.ts",
+      "gitBlobOid": "0305786a5baafd225272b44c4104903b36d780e6"
+    },
+    {
+      "path": "tests/workpack-generation-evidence-route.test.ts",
+      "gitBlobOid": "e6b04d3b157fcc9c6e0ad747e077bce4351d3487"
     }
   ],
   "evidenceArtifacts": [
     {
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/evidence-manifest.json",
+      "selfHashExcluded": true
+    },
+    {
       "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.json",
-      "gitBlobOid": "0f552904434b0520defb03d217ed9813ba9a13a4"
+      "gitBlobOid": "5cfb336c724d921bd0b74d7cc3ff9a052d20c958"
     },
     {
       "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.md",
-      "gitBlobOid": "f3c2898dae425e0126eeba344c154d51cd917b93"
+      "gitBlobOid": "46e6f01e9b469f84dbd1ca108efd3e0cb3ba9666"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-local-export-status.json",
-      "gitBlobOid": "c2bc651ea978841e1d2d1051f398db9d849cddaa"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-current-main-merge-tree-hold.log",
+      "gitBlobOid": "1260ab6a33a4eaf9652c6e536983413426ac93d8"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-day-desktop-metrics.json",
-      "gitBlobOid": "81b734156cd19193b56887511768d96e4f20a1d9"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-diff-forbidden-identity-final.log",
+      "gitBlobOid": "cdb1d38fdc51605358607c2ea71acd7094dbc4c7"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-night-desktop-metrics.json",
-      "gitBlobOid": "582f4002b63aef45c2a5e06cc1b01299826a4300"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-focused-non-browser-product-final.log",
+      "gitBlobOid": "59e37be578ecf09ff86e95437561cbacb1659789"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-day-mobile-metrics.json",
-      "gitBlobOid": "23c31a21b25b354f571f870b918264790dd3ba12"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-green-authority-reuse-export.log",
+      "gitBlobOid": "0abaae57122959963d7189a1d816731ca469faaf"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-night-mobile-metrics.json",
-      "gitBlobOid": "86770b4385151a7ebf85333716ccd528f36a263e"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-green-first-context-race.log",
+      "gitBlobOid": "a132012722270926fed9ee4b6e7c1569eb6989ea"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-delayed-metrics.json",
-      "gitBlobOid": "4f7d68e287283115ac8f1e23a2986c36563067a4"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-green-improvement-save-reset.log",
+      "gitBlobOid": "dd2efe12ad447795d9b909fba82b74f84019bae6"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-http-500-metrics.json",
-      "gitBlobOid": "6f31fcc68a4bff1fcb7e457c34afe0e68b6d1579"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-green-phase-a-browser-lifecycle-final.log",
+      "gitBlobOid": "121e1a2712bed2f06467809c5bf4f56c2e3a33fb"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-network-abort-metrics.json",
-      "gitBlobOid": "ab058b4ee26d590100f34d65e4336d39bd5723b1"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-green-report-revalidation-epoch.log",
+      "gitBlobOid": "20b93edfc52e86162c6ec17f37be953d68ef6d00"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-edit-pending-export-day-desktop.png",
-      "gitBlobOid": "6d7fa4e6236b0d29322f0cac2a0ff577ecc5dfdb"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-green-reports-browser.log",
+      "gitBlobOid": "12242c22e99132f9082747ba4a90863a74027c51"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-day-desktop.png",
-      "gitBlobOid": "d2a449a97c74ef784b3aae363d9e30c38b15a228"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-green-request-epoch.log",
+      "gitBlobOid": "21d098a40d260a3268ca015493865fdb37d47076"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-night-desktop.png",
-      "gitBlobOid": "3f356c9bb444aad30065cc194d7341697cbbde8d"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-green-save-confirm-epoch.log",
+      "gitBlobOid": "77cf34f5ead2e4155e68fc102374b1d45b75100c"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-day-mobile.png",
-      "gitBlobOid": "25037e00b360c477846681e789ad850d6ec18b91"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-green-search-rejection-log.log",
+      "gitBlobOid": "ca61829a0f50f7d069fce805b7d1fcb8d5556e58"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/phase-a-confirmation-night-mobile.png",
-      "gitBlobOid": "30b319219e0023f942b4b90fe5eba3b1ad84029a"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-green-share-7141-adoption.log",
+      "gitBlobOid": "763adfac47a91a43b904895c35126821b0ee3a9c"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p1-single-workpack-red.log",
-      "gitBlobOid": "fd3904b895d2a31db0faf1107ef6ade5c6f0490e"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-kosha-diagnostic-preservation.log",
+      "gitBlobOid": "0cbe7a7ae6a4bbc93869ab28bccbbf9720c6ed3e"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p1-reload-red.log",
-      "gitBlobOid": "4fa59a59d67dfac99256fa39a6f2109368697947"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-red-authority-reuse-export.log",
+      "gitBlobOid": "95c25f806dd5bed7e661d6305837550ea1c1015d"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p1-reload-normalization-red.log",
-      "gitBlobOid": "088a39db611e26001a10269901f475a14a741948"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-red-request-epoch.log",
+      "gitBlobOid": "5fab7bb78f983a1d6837bfcf23a91aa214c5066e"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p1-exact-row-red.log",
-      "gitBlobOid": "66f5d996ee13f58914a78381bb26632b2854c8b0"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-red-save-confirm-epoch.log",
+      "gitBlobOid": "990089bd4f6fb417eb8cfdcd9cf6d59a34fb4757"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p2-night-eyebrow-red.log",
-      "gitBlobOid": "438ad24e7c0ea56b5695fde27a25b80f5e2689ee"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-red-search-rejection-log.log",
+      "gitBlobOid": "f8486fa40c5f876de98fd957189a678fa5c265ec"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p3-confirmation-lifecycle-red.log",
-      "gitBlobOid": "013a6186383b79f34bcd56ad099da04af94370f6"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-red-server-idempotency.log",
+      "gitBlobOid": "b4553ac47532b63801d8b16e60fcf45f55d0ab9f"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p3-confirmation-network-red.log",
-      "gitBlobOid": "6b3db7ae7c1f76bca104c43817b877b943ece783"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-red-share-7141-adoption.log",
+      "gitBlobOid": "232a5c2c2b57342cd3ed54ec32f30c09a81ab748"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p1-evidence-target-red.log",
-      "gitBlobOid": "4ad21c6f1e4db9d55af05c3351572283750b01ce"
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-share-merge-tree-hold.log",
+      "gitBlobOid": "d7e44b2ee646813eeebe94f13d9c1efecd5e855a"
     },
     {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-production-background-red.log",
-      "gitBlobOid": "36b8a23339c0a4c9d50ca74720ffab6f582a485b"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p1-save-invariants-green.log",
-      "gitBlobOid": "f1f335cfdc7a91173c1f948c47ed9b5625b8ac11"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p1-exact-row-routes-green.log",
-      "gitBlobOid": "6e835292601bf9d76e5f958cfece607163ba2df2"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p1-a-share-restore-green.log",
-      "gitBlobOid": "e26ccecc08353dff0968df4b7db1cbf0d3bcbde3"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p2-night-eyebrow-green.log",
-      "gitBlobOid": "2001c9d92a3087b6eb4ce8bd1e3f7670d112e278"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p3-confirmation-lifecycle-green.log",
-      "gitBlobOid": "36493b60d4bb21573f94fc11f827837ee9331695"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-representative-green.log",
-      "gitBlobOid": "087f59874cc70544151170aa1935c6d289954dfb"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-browser-dev-green.log",
-      "gitBlobOid": "9483de46bd3ec8c66728cb72249ea574f771ef57"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-browser-production-green.log",
-      "gitBlobOid": "61bd598145248ec59080651bf66d6d6de648e297"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-p1-evidence-target-final.log",
-      "gitBlobOid": "de4d1cc55e51381a0d0a39f7b296d6cd63b934c5"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-typecheck-final.log",
+      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-v2-typecheck-product-final.log",
       "gitBlobOid": "0747902ad2588f8388b8456a383d227d6eeaa655"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-production-build.log",
-      "gitBlobOid": "a48dd33809a802703d6f6c4d885fa0256e6ca27b"
-    },
-    {
-      "path": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/remediation-f45-product-merge-tree.log",
-      "gitBlobOid": "009ce4beef91a78f32696853851234ed47aaf162"
     }
-  ],
-  "commands": [
-    {
-      "id": "exact-row-routes-green",
-      "command": "npm.cmd test -- --run tests/workpack-share-authority.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --no-file-parallelism",
-      "result": {
-        "filesPassed": 2,
-        "testsPassed": 17,
-        "testsFailed": 0
-      },
-      "log": "remediation-p1-exact-row-routes-green.log"
-    },
-    {
-      "id": "representative-green",
-      "command": "npm.cmd test -- --run <14 Phase A representative files> --maxWorkers=1 --no-file-parallelism",
-      "result": {
-        "filesPassed": 14,
-        "testsPassed": 218,
-        "testsFailed": 0
-      },
-      "log": "remediation-representative-green.log"
-    },
-    {
-      "id": "browser-dev-green",
-      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts --maxWorkers=1 --no-file-parallelism",
-      "result": {
-        "harness": "dev",
-        "testsPassed": 13,
-        "testsFailed": 0
-      },
-      "log": "remediation-browser-dev-green.log"
-    },
-    {
-      "id": "browser-production-green",
-      "command": "$env:PHASE_A_BROWSER_HARNESS_MODE='prod'; npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts --maxWorkers=1 --no-file-parallelism",
-      "result": {
-        "harness": "prod",
-        "testsPassed": 13,
-        "testsFailed": 0
-      },
-      "log": "remediation-browser-production-green.log"
-    },
-    {
-      "id": "evidence-target-green",
-      "command": "npm.cmd test -- --run tests/phase-a-evidence-target-authority.test.ts --maxWorkers=1 --no-file-parallelism",
-      "result": {
-        "testsPassed": 3,
-        "testsFailed": 0
-      },
-      "log": "remediation-p1-evidence-target-final.log"
-    },
-    {
-      "id": "strict-typecheck",
-      "command": "npm.cmd run typecheck",
-      "result": {
-        "status": "green"
-      },
-      "log": "remediation-typecheck-final.log"
-    },
-    {
-      "id": "single-production-build",
-      "command": "npm.cmd run build",
-      "result": {
-        "nextVersion": "15.5.20",
-        "staticPagesGenerated": 27,
-        "preBuildOtherProcessCount": 0,
-        "postBuildProcessCount": 0,
-        "runCount": 1,
-        "status": "green"
-      },
-      "log": "remediation-production-build.log"
-    },
-    {
-      "id": "authoritative-target-merge-tree",
-      "command": "git merge-tree --write-tree f45bba17bcce0d8ebb2690f82d014dbe42ae8191 cc5ba41f96c486e87445efba470c668b36107e4f",
-      "result": {
-        "exitCode": 0,
-        "tree": "69148c5babfb13d665d39c00ac7ffa9a179f8c07",
-        "mergePerformed": false
-      },
-      "log": "remediation-f45-product-merge-tree.log"
-    }
-  ],
-  "browserEvidence": {
-    "harness": "prod",
-    "views": [
-      {
-        "theme": "day",
-        "viewport": "1440x900",
-        "eyebrowColor": "rgb(20, 23, 26)",
-        "contrast": 17.99,
-        "horizontalOverflow": 0,
-        "copyActionOverlap": false,
-        "consoleErrors": 0,
-        "pageErrors": 0,
-        "failedResponses": 0,
-        "nextIssueBadgeCount": 0
-      },
-      {
-        "theme": "night",
-        "viewport": "1440x900",
-        "eyebrowColor": "rgb(139, 141, 252)",
-        "contrast": 6.63,
-        "horizontalOverflow": 0,
-        "copyActionOverlap": false,
-        "consoleErrors": 0,
-        "pageErrors": 0,
-        "failedResponses": 0,
-        "nextIssueBadgeCount": 0
-      },
-      {
-        "theme": "day",
-        "viewport": "390x844",
-        "eyebrowColor": "rgb(20, 23, 26)",
-        "contrast": 17.99,
-        "horizontalOverflow": 0,
-        "copyActionOverlap": false,
-        "consoleErrors": 0,
-        "pageErrors": 0,
-        "failedResponses": 0,
-        "nextIssueBadgeCount": 0
-      },
-      {
-        "theme": "night",
-        "viewport": "390x844",
-        "eyebrowColor": "rgb(139, 141, 252)",
-        "contrast": 6.63,
-        "horizontalOverflow": 0,
-        "copyActionOverlap": false,
-        "consoleErrors": 0,
-        "pageErrors": 0,
-        "failedResponses": 0,
-        "nextIssueBadgeCount": 0
-      }
-    ],
-    "failureLifecycle": {
-      "delayed": {
-        "loadingDisabled": true,
-        "localConfirmationCount": 0,
-        "applicationConsoleErrors": 0,
-        "pageErrors": 0
-      },
-      "http500": {
-        "retryEnabled": true,
-        "localConfirmationCount": 0,
-        "applicationConsoleErrors": 0,
-        "pageErrors": 0
-      },
-      "networkAbort": {
-        "retryEnabled": true,
-        "localConfirmationCount": 0,
-        "applicationConsoleErrors": 0,
-        "pageErrors": 0
-      }
-    },
-    "screenshotsVisuallyInspected": 5
-  },
-  "constraints": {
-    "dbChanged": false,
-    "schemaChanged": false,
-    "migrationChanged": false,
-    "dataChanged": false,
-    "seedChanged": false,
-    "packageOrLockChanged": false,
-    "workflowSharePanelChanged": false,
-    "liveDbOrProviderMutationRun": false
-  },
-  "deferred": {
-    "globalStatic108Audit": "RED_DEFERRED_TO_FINAL_INTEGRATED_HEAD",
-    "oldStatic108IdentityAccepted": false,
-    "freshIndependentReview": "required"
-  },
-  "residual": [
-    "The pending W1 binding is browser-local persistence, not a server uniqueness or idempotency guarantee.",
-    "Cleared storage or a different browser after W1 creation can lose the binding and may create another row.",
-    "No live DB, API, or provider mutation gate was run.",
-    "The authoritative target does not yet include this branch."
-  ],
-  "verificationProcedure": [
-    "Require every current target field to equal f45bba17bcce0d8ebb2690f82d014dbe42ae8191.",
-    "Require the evidence commit to have exactly one parent equal to cc5ba41f96c486e87445efba470c668b36107e4f.",
-    "Compare product file Git blob IDs with the product commit.",
-    "Recompute the Git blob object ID for every evidenceHarnessFiles and evidenceArtifacts entry.",
-    "Keep static/108 and fresh independent review unresolved until final integrated HEAD."
-  ],
-  "reviewGate": "CANDIDATE_HOLD. No integration-complete, launch-ready, or live-DB-verified claim is made."
+  ]
 }

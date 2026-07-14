@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-product-remediation-browser.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  14:15:30
+   Duration  88.93s (transform 299ms, setup 0ms, import 729ms, tests 87.59s, environment 0ms)
+
+EXIT_CODE=0

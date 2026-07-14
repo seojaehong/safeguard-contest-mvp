@@ -1,118 +1,76 @@
-# SafeClaw Phase A ontology remediation evidence
+# Phase A authority remediation evidence
 
-- Generated: `2026-07-14T11:09:19.3623894+09:00`
-- Status: `CANDIDATE_HOLD_PENDING_FRESH_REVIEW_AND_INTEGRATED_STATIC_108`
+- Status: `HOLD_FRESH_WHOLE_SERIES_REVIEW_REQUIRED`
 - Branch: `fix/phase-a-ontology-target-ready`
-- Product commit: `cc5ba41f96c486e87445efba470c668b36107e4f`
-- Product tree: `faa5c4a3ff6ea7540efc14f68668b9ef16dba9e2`
-- Integration: not performed
-- Launch readiness: `false`
-- DB/API live mutation: not performed
+- Remediation product: `ed90a95dad3a28d6171758c52ac03acba83733fd`
+- Product tree: `315c753db35faf229daf49a447c2568d138a185a`
+- Main/Share semantic merge: not performed
+- DB/schema/migration/data/package/lock mutation: none
 
-## Target Authority
+## Review series
 
-Authoritative current target: `f45bba17bcce0d8ebb2690f82d014dbe42ae8191`
+The inherited 19-commit product series is `102ff66b67cc40ff16386c61a221d3815b142e1b..cc5ba41f96c486e87445efba470c668b36107e4f`; every exact SHA is listed in `report.json` and `evidence-manifest.json`. Its prior evidence child is `ff093fae30c331816f0068f9075b91b151d05813`.
 
+The remediation product series is:
+
+1. `1f9784f4087e240b009c232868e5cd387a55dd48` - harden Phase A workpack authority
+2. `ed90a95dad3a28d6171758c52ac03acba83733fd` - bind current-main and Share semantic adoption conflicts
+
+This evidence must be a direct child of the second product commit. A fresh independent review must assess the whole inherited and remediation series. No earlier HOLD is converted into approval here.
+
+## Target authority
+
+Authoritative current target: `920c7f360688352156de4854b4957a9f2f1f0e43`
+
+Authority ref: `refs/remotes/origin/feat/phase-a-evidence-integration`
+
+Minimum authority ancestor: `67d2c9e28e7278c58f46b46c2512c7133d88d1d3`
+
+- `920c7f360688352156de4854b4957a9f2f1f0e43`: authoritative current
+- `f45bba17bcce0d8ebb2690f82d014dbe42ae8191`: superseded authority
 - `b3762867d380f20faee2a83a17354dc61557ce12`: historical rejected
 - `cc9f5af297950b73b53a9ab4018bdc143830c499`: rejected/pending-unintegrated
-- `report.json`과 `evidence-manifest.json`의 모든 `current...target...` 필드는 authoritative target과 exact equality로 고정했다.
-- validator는 stale current target 주입 공격을 별도 테스트한다.
-- 이 branch는 authoritative target에 통합되지 않았다.
 
-## P1-1 Single Workpack
+Current-main reconciliation is HOLD on `tests/reports-download-center.test.ts`. Read-only `git merge-tree --write-tree` produced diagnostic tree `d4c141c1fd1d0e6013f8cee27fff016d13357815`; it did not modify this worktree.
 
-worker mapping을 `/api/workpacks` 이전에 검증한다. 선택 작업자가 비었거나 server mapping이 누락되면 workpack POST는 `0`이다.
+The diagnostic tree preserves target-owned `lib/db-harness.ts`, `lib/safety-reference-catalog.ts`, and `lib/safety-reference-catalog-server.ts` byte-for-byte. Its auto-merged `lib/search.ts` retains safe per-source rejection logging and verified-current technical guidance. The tree also retains integrity-blocked aggregate behavior, SIF -> KOSHA -> law order, `naturalize_only`, mandate/guidance separation, and exact `PhaseAGenerationGrounding`.
 
-workpack row W1이 생성되면 education 요청 전에 W1 ID와 worker map을 pending partial-save binding으로 browser storage에 기록한다. 같은 generation, user session, worker snapshot, selected worker logical retry는 W1의 education만 재시도하며 workpack POST 총수는 `1`이다. 완료 전 share-session과 dispatch provider 호출은 `0`이다.
+## Closed P1 authority gaps
 
-브라우저 reload 뒤의 재시도도 같은 W1을 사용한다. edit/revalidation은 completed ID, worker map, pending binding을 즉시 무효화한다.
+- All generation, save, confirmation, revalidation, improvement-save, and report-loading operations use a request epoch, owned `AbortController`, and post-response current-binding check. Editing or a second generation invalidates prior work; textarea/example actions cannot reset generating state.
+- The server derives one authenticated creator-plus-generation UUID and inserts it against the existing `workpacks.id` primary key. Concurrent tabs/devices converge through atomic PK arbitration. A `23505` response reopens only an exact creator/org/site/scope/generation/HMAC binding; every mismatch or collision fails closed.
+- Local JSON restore/export is always `local_only_unverified`. Connected UI/export requires exact server row ID, revision/updatedAt, generation seal, and authority revalidation.
+- Search rejection is no longer silent. The repository logger records only the safe source label and error type.
 
-## P1-2 Exact Row Authority
+No DB approval blocker remains for this implementation because it uses the existing UUID primary key and evidence-summary binding without changing schema. No live Supabase mutation was run, so the report does not claim live-DB verification.
 
-server share authority는 expected current DB row ID를 필수 입력으로 받고 `humanConfirmation.workpackId`와 exact equality를 검사한다. 유효한 generation seal과 confirmed payload라도 row B 안의 confirmation ID가 row A를 가리키면 fail-closed다.
+## Verification
 
-- row B readiness: blocked
-- row B share-session insert: `0`
-- row B dispatch provider: `0`
-- A 확인 후 reload 및 Share 이동의 두 번째 workpack POST: `0`
-- 새 Share workspace는 worker mapping만 idempotent하게 resolve하고 A를 재사용한다.
+| Gate | Result | Evidence |
+| --- | --- | --- |
+| Phase A browser lifecycle | 1 file, 13/13 passed at `1f9784f`; final delta is contract/docs/evidence gate only | `remediation-v2-green-phase-a-browser-lifecycle-final.log` |
+| Reports browser | 1 file, 10/10 passed at `1f9784f` | `remediation-v2-green-reports-browser.log` |
+| Focused non-browser | 19 files, 264/264 passed; final delta only changes the evidence gate | `remediation-v2-focused-non-browser-product-final.log` |
+| Strict TypeScript | passed at `ed90a95` | `remediation-v2-typecheck-product-final.log` |
+| Diff/forbidden/identity | 23 changed files, diff-check 0, forbidden paths 0, ancestry 0 | `remediation-v2-diff-forbidden-identity-final.log` |
+| Full suite | deferred to post-semantic-integration final HEAD | not run by explicit speed-priority instruction |
+| Production build | deferred to post-semantic-integration final HEAD | not run while Share/KOSHA matrices were active |
 
-## P2/P3 Browser Lifecycle
+Runtime identity: Node `v24.12.0`, npm `11.6.2`, Next `15.5.20`, TypeScript `5.9.3`, Vitest `4.1.10`. `package.json` and `package-lock.json` are unchanged.
 
-`SafeGuardCommandCenter`의 AI mode 첫 렌더를 server/client 동일 값으로 고정하고 local storage 복원은 mount 이후 수행한다. 이 변경으로 hydration pageerror와 Next issue badge 원인을 제거했다. dev overlay를 숨기는 CSS는 사용하지 않았다.
+## Share semantic adoption contract
 
-Night eyebrow는 `.workspace-theme-night .phase-a-confirmation-copy > .eyebrow` 범위에서만 `--workspace-accent-hover`를 사용한다.
+Share v2 baseline `22de1180d69263f7c08ac0ed0cfda0894e2db7f5` and request-scope remediation `7141baac3e0abca146ef6c110093c1c0643760a2` remain under review. Read-only reconciliation against Phase A reports these six content conflicts:
 
-| Theme | Viewport | Label color | Contrast | Overflow | Overlap | Console errors | Page errors | Failed responses | Next issue badge |
-|---|---:|---|---:|---:|---|---:|---:|---:|---:|
-| Day | 1440x900 | `rgb(20, 23, 26)` | 17.99 | 0 | false | 0 | 0 | 0 | 0 |
-| Night | 1440x900 | `rgb(139, 141, 252)` | 6.63 | 0 | false | 0 | 0 | 0 | 0 |
-| Day | 390x844 | `rgb(20, 23, 26)` | 17.99 | 0 | false | 0 | 0 | 0 | 0 |
-| Night | 390x844 | `rgb(139, 141, 252)` | 6.63 | 0 | false | 0 | 0 | 0 | 0 |
+1. `app/api/workpacks/[id]/route.ts`
+2. `components/FieldOperationsWorkspace.tsx`
+3. `components/SafeGuardCommandCenter.tsx`
+4. `lib/workpack-commercial-store.ts`
+5. `tests/workpack-generation-evidence-route.test.ts`
+6. `tests/workpack-share-authority-routes.test.ts`
 
-confirmation failure lifecycle은 production harness에서 다음과 같이 검증했다.
-
-| Mode | Loading disabled | Retry enabled | Local confirmation | Application console errors | Page errors |
-|---|---|---|---:|---:|---:|
-| delayed | true | n/a | 0 | 0 | 0 |
-| HTTP 500 | n/a | true | 0 | 0 | 0 |
-| network abort | n/a | true | 0 | 0 | 0 |
-
-HTTP 500과 network abort의 browser resource error는 원시 수집에 남지만 application console error 필터 결과는 `0`이다. 정상 visual capture에서는 원시 console error와 failed response도 모두 `0`이다.
-
-## TDD Evidence
-
-주요 RED 로그:
-
-- `remediation-p1-single-workpack-red.log`: education 실패 retry가 두 번째 workpack을 만들던 상태
-- `remediation-p1-reload-red.log`: reload 뒤 pending binding을 state가 복원하지 못하던 상태
-- `remediation-p1-reload-normalization-red.log`: 빈 연락처 정규화 차이로 logical key가 달라지던 상태
-- `remediation-p1-exact-row-red.log`: row B가 row A confirmation으로 share-ready가 되던 상태
-- `remediation-p2-night-eyebrow-red.log`: Night desktop/mobile computed color 불일치
-- `remediation-p3-confirmation-lifecycle-red.log`: hydration mismatch pageerror
-- `remediation-p3-confirmation-network-red.log`: retryable abort가 application console error를 만들던 상태
-- `remediation-p1-evidence-target-red.log`: stale current target과 누락 history
-- `remediation-production-background-red.log`: production visual의 미모킹 background 401
-
-최종 GREEN 로그:
-
-| Gate | Result | Log |
-|---|---|---|
-| Single-workpack save invariants | 3 tests | `remediation-p1-save-invariants-green.log` |
-| Exact row unit/routes | 2 files, 17 tests | `remediation-p1-exact-row-routes-green.log` |
-| A reload to Share | 1 test | `remediation-p1-a-share-restore-green.log` |
-| Confirmation lifecycle | 3 tests | `remediation-p3-confirmation-lifecycle-green.log` |
-| Day/Night computed color | 4 tests | `remediation-p2-night-eyebrow-green.log` |
-| Existing representative suite | 14 files, 218 tests | `remediation-representative-green.log` |
-| Development browser suite | 13 tests | `remediation-browser-dev-green.log` |
-| Production browser suite | 13 tests | `remediation-browser-production-green.log` |
-| Evidence target authority | 3 tests | `remediation-p1-evidence-target-green.log` |
-| Strict TypeScript | green | `remediation-typecheck-final.log` |
-
-## Production Build
-
-`remediation-production-build.log`은 build 전 다른 `next build` process `0`, 단일 `next build`, static pages `27/27`, build 후 process `0`을 기록한다. Next.js는 `15.5.20`이다.
-
-최종 PNG는 production harness에서 다시 생성했고 직접 열어 확인했다.
-
-```text
-phase-a-edit-pending-export-day-desktop.png
-phase-a-confirmation-day-desktop.png
-phase-a-confirmation-night-desktop.png
-phase-a-confirmation-day-mobile.png
-phase-a-confirmation-night-mobile.png
-```
-
-## Constraints And Residual
-
-- DB, schema, migration, data, seed, package, lock 변경 없음
-- `WorkflowSharePanel*` 변경 없음
-- live DB/API/provider mutation 실행 없음
-- pending W1 binding은 server idempotency가 아니라 browser-local persistence다. W1 생성 후 storage를 지우거나 다른 browser/device에서 재시도하면 binding을 잃어 다른 row가 만들어질 수 있다.
-- authoritative integration target은 아직 이 branch를 포함하지 않는다.
-- global static/108은 final integrated HEAD 전이므로 `RED_DEFERRED_TO_FINAL_INTEGRATED_HEAD`다.
-- fresh independent review가 남아 있다.
+Main must resolve those files only after both fresh reviews. Preserve Phase A server authority, `revision`, `updatedAt`, complete `evidenceSummary`, generation seal, and exact confirmation compare-and-set. Preserve Share's request-scope stale-response guard, `dispatchBinding`, and dispatch compare-and-set. Build one exact server-row snapshot; any row revision, evidence summary, confirmation, generation, request scope, or dispatch binding drift invalidates the joint authority and blocks connected export/session/dispatch.
 
 ## Gate
 
-`CANDIDATE/HOLD`. 이 보고서는 integration-complete, launch-ready, live DB verified를 주장하지 않는다.
+Verdict: `HOLD`. Fresh independent whole-series review is required. The final semantic integration HEAD must resolve the documented conflicts, rerun the combined full suite and production build, and regenerate both merge-tree identities before any readiness claim.

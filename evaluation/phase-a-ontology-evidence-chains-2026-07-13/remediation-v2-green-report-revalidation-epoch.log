@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/command-center-request-lifecycle.test.ts tests/reporting-downloads.test.ts tests/workpack-generation-evidence-route.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  3 passed (3)
+      Tests  68 passed (68)
+   Start at  13:48:31
+   Duration  2.95s (transform 578ms, setup 0ms, import 810ms, tests 290ms, environment 0ms)

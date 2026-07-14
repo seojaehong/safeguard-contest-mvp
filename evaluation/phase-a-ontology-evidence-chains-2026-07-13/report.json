@@ -1,18 +1,50 @@
 {
-  "phase": "A",
-  "generatedAt": "2026-07-14T11:09:19.3623894+09:00",
-  "status": "CANDIDATE_HOLD_PENDING_FRESH_REVIEW_AND_INTEGRATED_STATIC_108",
-  "launchReadiness": false,
-  "integratedToMain": false,
-  "selfApproved": false,
+  "schemaVersion": 4,
+  "generatedAt": "2026-07-14T14:48:27.6144106+09:00",
+  "status": "HOLD_FRESH_WHOLE_SERIES_REVIEW_REQUIRED",
   "branch": "fix/phase-a-ontology-target-ready",
   "source": {
-    "currentMainTarget": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
-    "currentTargetWithEditorPair": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "authorityRef": "refs/remotes/origin/feat/phase-a-evidence-integration",
+    "minimumAuthority": "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
+    "currentMainTarget": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "authorityTree": "7e45e4f856d8c6e1a6b6c4e00956bd190a2c6e92",
+    "inheritedSeriesBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "inheritedProductSeries": [
+      "102ff66b67cc40ff16386c61a221d3815b142e1b",
+      "d9cd92daff08b3a261fdeaa9293eeeb995bac089",
+      "7afd363d5288e05b582491e98a33eeda5d4b7398",
+      "1a16a3177bc10ea0861bfbd6d2e09b475068a3d1",
+      "f4b07e4663758e20bca0c9b143da8b2f8680ab2a",
+      "835ff56a07b925270dcea215044d995f984a0cf2",
+      "d2f55c30dc643cc66adfa169755e5dd6db58bd08",
+      "0b821fef29311d0cd9b265c7c7021f663b82390d",
+      "a4134fea9fa81043db03083ac080f55df9715681",
+      "017333f5fbbe79f064be25d0937db0896293905d",
+      "36eb8c7925b5826e1c7e88bba1dc0246cc46b8a2",
+      "35283baaf3aad4e14fa20da4df803b4cc3c046f2",
+      "f613f5d73118bb81e6199a5ff057e850b3859692",
+      "31767959b5904afbab77ab5ee36f24da6d15b1c8",
+      "888ad1c16b17b88b16bd0163deffbf7ebde740e1",
+      "fd573630afe72977deec7debe58649a850101fbd",
+      "fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
+      "e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4",
+      "cc5ba41f96c486e87445efba470c668b36107e4f"
+    ],
+    "priorEvidenceCommit": "ff093fae30c331816f0068f9075b91b151d05813",
+    "remediationProductSeries": [
+      "1f9784f4087e240b009c232868e5cd387a55dd48",
+      "ed90a95dad3a28d6171758c52ac03acba83733fd"
+    ],
+    "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "productTree": "315c753db35faf229daf49a447c2568d138a185a",
     "targetHistory": [
       {
-        "sha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "sha": "920c7f360688352156de4854b4957a9f2f1f0e43",
         "status": "authoritative-current"
+      },
+      {
+        "sha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "status": "superseded-authority"
       },
       {
         "sha": "b3762867d380f20faee2a83a17354dc61557ce12",
@@ -24,264 +56,127 @@
       }
     ]
   },
-  "product": {
-    "commit": "cc5ba41f96c486e87445efba470c668b36107e4f",
-    "tree": "faa5c4a3ff6ea7540efc14f68668b9ef16dba9e2",
-    "parent": "e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4",
-    "subject": "fix: enforce exact Phase A workpack authority",
-    "files": [
-      "app/globals.css",
-      "components/FieldOperationsWorkspace.tsx",
-      "components/SafeGuardCommandCenter.tsx",
-      "lib/workpack-authority.ts",
-      "lib/workpack-commercial-store.ts",
-      "tests/phase-a-product-remediation-browser.test.ts",
-      "tests/workpack-share-authority-routes.test.ts",
-      "tests/workpack-share-authority.test.ts"
-    ]
-  },
-  "remediation": {
-    "singleWorkpackSave": {
-      "workerMappingValidatedBeforeWorkpackInsert": true,
-      "serverReturnedIdPersistedBeforeDownstreamEducation": true,
-      "pendingBindingIncludesWorkpackIdAndWorkerMap": true,
-      "sameLogicalRetrySkipsWorkpackPost": true,
-      "reloadRetryCovered": true,
-      "incompleteWorkpackExposedAsShareReady": false,
-      "emptySelectionWorkpackPostCount": 0,
-      "missingMappingWorkpackPostCount": 0,
-      "educationFailureLogicalRetryWorkpackPostCount": 1,
-      "shareSessionBeforeCompletionCount": 0,
-      "dispatchProviderBeforeCompletionCount": 0
-    },
-    "exactRowAuthority": {
-      "expectedServerRowIdRequired": true,
-      "humanConfirmationExactEqualityRequired": true,
-      "rowBWithRowAConfirmationCanShare": false,
-      "rowBShareSessionInsertCount": 0,
-      "rowBDispatchProviderCount": 0,
-      "confirmedASecondWorkpackPostCountAfterReloadAndShare": 0,
-      "workerMappingResolvedWithoutCloningA": true,
-      "editInvalidatesSavedAndPendingAuthority": true
-    },
-    "evidenceAuthority": {
-      "targetExactValidator": true,
-      "staleCurrentAttackCovered": true,
-      "authoritativeTarget": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
-      "integrationCompletionClaimed": false
-    },
-    "browserLifecycle": {
-      "hydrationMismatchRemoved": true,
-      "delayedLoadingDisabled": true,
-      "http500RetryEnabled": true,
-      "networkAbortRetryEnabled": true,
-      "localConfirmationCreatedOnFailure": false,
-      "nightEyebrowScoped": true
-    }
-  },
-  "tdd": {
-    "red": [
-      {
-        "gate": "single-workpack downstream retry",
-        "testsFailed": 1,
-        "log": "remediation-p1-single-workpack-red.log"
-      },
-      {
-        "gate": "pending binding reload",
-        "testsFailed": 1,
-        "log": "remediation-p1-reload-red.log"
-      },
-      {
-        "gate": "pending binding normalization",
-        "testsFailed": 1,
-        "log": "remediation-p1-reload-normalization-red.log"
-      },
-      {
-        "gate": "exact server row authority",
-        "testsFailed": 1,
-        "log": "remediation-p1-exact-row-red.log"
-      },
-      {
-        "gate": "night eyebrow computed color",
-        "testsFailed": 2,
-        "log": "remediation-p2-night-eyebrow-red.log"
-      },
-      {
-        "gate": "confirmation hydration lifecycle",
-        "testsFailed": 3,
-        "log": "remediation-p3-confirmation-lifecycle-red.log"
-      },
-      {
-        "gate": "network abort application console error",
-        "testsFailed": 1,
-        "log": "remediation-p3-confirmation-network-red.log"
-      },
-      {
-        "gate": "evidence current target authority",
-        "testsFailed": 3,
-        "log": "remediation-p1-evidence-target-red.log"
-      },
-      {
-        "gate": "production background response collection",
-        "testsFailed": 1,
-        "log": "remediation-production-background-red.log"
-      }
-    ],
-    "green": [
-      {
-        "gate": "single-workpack invariants",
-        "testsPassed": 3,
-        "log": "remediation-p1-save-invariants-green.log"
-      },
-      {
-        "gate": "exact row unit and routes",
-        "filesPassed": 2,
-        "testsPassed": 17,
-        "log": "remediation-p1-exact-row-routes-green.log"
-      },
-      {
-        "gate": "A confirmation reload to Share",
-        "testsPassed": 1,
-        "log": "remediation-p1-a-share-restore-green.log"
-      },
-      {
-        "gate": "confirmation delayed, 500, abort",
-        "testsPassed": 3,
-        "log": "remediation-p3-confirmation-lifecycle-green.log"
-      },
-      {
-        "gate": "Day and Night computed color and geometry",
-        "testsPassed": 4,
-        "log": "remediation-p2-night-eyebrow-green.log"
-      },
-      {
-        "gate": "representative existing suite",
-        "filesPassed": 14,
-        "testsPassed": 218,
-        "log": "remediation-representative-green.log"
-      },
-      {
-        "gate": "development browser suite",
-        "testsPassed": 13,
-        "log": "remediation-browser-dev-green.log"
-      },
-      {
-        "gate": "production browser suite",
-        "testsPassed": 13,
-        "log": "remediation-browser-production-green.log"
-      }
-    ]
-  },
   "verification": {
+    "focusedNonBrowser": {
+      "status": "passed",
+      "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+      "testFiles": 19,
+      "tests": 264,
+      "log": "remediation-v2-focused-non-browser-product-final.log"
+    },
+    "phaseABrowserLifecycle": {
+      "status": "passed",
+      "executedProductCheckpoint": "1f9784f4087e240b009c232868e5cd387a55dd48",
+      "testFiles": 1,
+      "tests": 13,
+      "finalProductDelta": "typed Share adoption constants, documentation, and evidence gate only",
+      "log": "remediation-v2-green-phase-a-browser-lifecycle-final.log"
+    },
+    "reportsBrowser": {
+      "status": "passed",
+      "executedProductCheckpoint": "1f9784f4087e240b009c232868e5cd387a55dd48",
+      "testFiles": 1,
+      "tests": 10,
+      "log": "remediation-v2-green-reports-browser.log"
+    },
     "strictTypecheck": {
-      "status": "green",
-      "log": "remediation-typecheck-final.log"
+      "status": "passed",
+      "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+      "command": "npm.cmd run typecheck",
+      "log": "remediation-v2-typecheck-product-final.log"
+    },
+    "diffAndIdentity": {
+      "status": "passed",
+      "changedFiles": 23,
+      "diffCheckExit": 0,
+      "forbiddenPathCount": 0,
+      "minimumAuthorityAncestorExit": 0,
+      "log": "remediation-v2-diff-forbidden-identity-final.log"
+    },
+    "fullSuite": {
+      "status": "deferred_post_semantic_integration",
+      "reason": "Share and KOSHA worktree matrices were active; the user directed this gate to the final semantic integration HEAD."
     },
     "productionBuild": {
-      "status": "green",
-      "nextVersion": "15.5.20",
-      "staticPagesGenerated": 27,
-      "preBuildOtherProcessCount": 0,
-      "postBuildProcessCount": 0,
-      "runCount": 1,
-      "log": "remediation-production-build.log"
-    },
-    "browserHarness": "prod",
-    "browserViews": [
-      {
-        "theme": "day",
-        "viewport": "1440x900",
-        "eyebrowColor": "rgb(20, 23, 26)",
-        "contrast": 17.99,
-        "horizontalOverflow": 0,
-        "copyActionOverlap": false,
-        "consoleErrors": 0,
-        "pageErrors": 0,
-        "failedResponses": 0,
-        "nextIssueBadgeCount": 0
-      },
-      {
-        "theme": "night",
-        "viewport": "1440x900",
-        "eyebrowColor": "rgb(139, 141, 252)",
-        "contrast": 6.63,
-        "horizontalOverflow": 0,
-        "copyActionOverlap": false,
-        "consoleErrors": 0,
-        "pageErrors": 0,
-        "failedResponses": 0,
-        "nextIssueBadgeCount": 0
-      },
-      {
-        "theme": "day",
-        "viewport": "390x844",
-        "eyebrowColor": "rgb(20, 23, 26)",
-        "contrast": 17.99,
-        "horizontalOverflow": 0,
-        "copyActionOverlap": false,
-        "consoleErrors": 0,
-        "pageErrors": 0,
-        "failedResponses": 0,
-        "nextIssueBadgeCount": 0
-      },
-      {
-        "theme": "night",
-        "viewport": "390x844",
-        "eyebrowColor": "rgb(139, 141, 252)",
-        "contrast": 6.63,
-        "horizontalOverflow": 0,
-        "copyActionOverlap": false,
-        "consoleErrors": 0,
-        "pageErrors": 0,
-        "failedResponses": 0,
-        "nextIssueBadgeCount": 0
-      }
-    ],
-    "confirmationFailures": [
-      {
-        "mode": "delayed",
-        "loadingDisabled": true,
-        "localConfirmationCount": 0,
-        "applicationConsoleErrors": 0,
-        "pageErrors": 0
-      },
-      {
-        "mode": "http-500",
-        "retryEnabled": true,
-        "localConfirmationCount": 0,
-        "applicationConsoleErrors": 0,
-        "pageErrors": 0
-      },
-      {
-        "mode": "network-abort",
-        "retryEnabled": true,
-        "localConfirmationCount": 0,
-        "applicationConsoleErrors": 0,
-        "pageErrors": 0
-      }
-    ]
+      "status": "deferred_post_semantic_integration",
+      "reason": "No overlapping build was started while Share and KOSHA worktree verification was active."
+    }
   },
-  "constraints": {
-    "dbChanged": false,
+  "authorityRemediation": {
+    "staleAsync": "Generation, save, confirmation, revalidation, improvement-save, and report loading use bound request epochs, AbortController ownership, and post-response current-binding checks.",
+    "serverCreateOrReopen": "The authenticated creator plus full verified generation seal derives one server-owned UUID. The existing workpacks UUID primary key arbitrates concurrent tabs/devices atomically; 23505 reopens only an exact creator, organization, site, scope digest, generation seal, and HMAC-authorized row, otherwise it fails closed.",
+    "reloadAndExport": "Browser-local JSON is local_only_unverified. Connected UI and export require exact server row ID, revision/updatedAt, generation seal, and authority binding revalidation.",
+    "ontology": "SIF -> KOSHA -> law order, naturalize_only, statutory mandate versus technical guidance, and exact PhaseAGenerationGrounding remain preserved.",
+    "searchRejection": "Every rejected generation source is logged through the repository logger with source label and error type only; raw responses and secrets are excluded."
+  },
+  "database": {
     "schemaChanged": false,
     "migrationChanged": false,
     "dataChanged": false,
-    "seedChanged": false,
-    "packageOrLockChanged": false,
-    "workflowSharePanelChanged": false,
-    "liveDbOrApiMutationRun": false
+    "liveMutationExecuted": false,
+    "existingAuthorityPrimitive": "workpacks.id uuid primary key",
+    "dbApprovalBlocker": null,
+    "residual": "Live Supabase concurrency was not mutated in this review run; route and concurrent-insert behavior is covered by focused tests."
   },
-  "residual": [
-    "Pending W1 binding is local browser persistence, not server idempotency. Clearing storage or retrying from another browser after W1 creation can lose the binding and may create another row.",
-    "No live DB or provider mutation gate was run. Route and browser evidence use controlled fixtures.",
-    "The authoritative integration target has not incorporated this branch.",
-    "The global static/108 audit remains deferred until the final integrated HEAD.",
-    "Fresh independent review is still required."
-  ],
-  "deferred": {
-    "globalStatic108Audit": "RED_DEFERRED_TO_FINAL_INTEGRATED_HEAD",
-    "oldStatic108IdentityAccepted": false,
-    "freshIndependentReview": "required"
+  "targetReconciliation": {
+    "status": "content-conflict-hold",
+    "semanticMergePerformed": false,
+    "targetCommit": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "diagnosticTreeOid": "d4c141c1fd1d0e6013f8cee27fff016d13357815",
+    "conflictPaths": [
+      "tests/reports-download-center.test.ts"
+    ],
+    "koshaPreservationLog": "remediation-v2-kosha-diagnostic-preservation.log"
   },
-  "reviewGate": "CANDIDATE_HOLD. No integration-complete or launch-ready claim is made."
+  "shareAdoption": {
+    "status": "content-conflict-hold",
+    "semanticMergePerformed": false,
+    "reviewHead": "22de1180d69263f7c08ac0ed0cfda0894e2db7f5",
+    "baseProductHead": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+    "productHead": "7141baac3e0abca146ef6c110093c1c0643760a2",
+    "phaseAProductCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "diagnosticTreeOid": "945d7ba696dd0a312d462773800fa4b4fe2bcfc9",
+    "conflictPaths": [
+      "app/api/workpacks/[id]/route.ts",
+      "components/FieldOperationsWorkspace.tsx",
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/workpack-commercial-store.ts",
+      "tests/workpack-generation-evidence-route.test.ts",
+      "tests/workpack-share-authority-routes.test.ts"
+    ],
+    "preservePhaseA": [
+      "server row authority",
+      "revision and updatedAt",
+      "complete evidenceSummary",
+      "generation seal",
+      "exact confirmation compare-and-set"
+    ],
+    "preserveShare": [
+      "request-scope stale-response guard",
+      "updatedAt and complete evidenceSummary",
+      "dispatchBinding",
+      "dispatch compare-and-set"
+    ]
+  },
+  "runtimeIdentity": {
+    "node": "v24.12.0",
+    "npm": "11.6.2",
+    "next": "15.5.20",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10",
+    "packageJsonBlob": "92f8d7c7dd8d235d979c36eb4b21438f0cbe9e28",
+    "packageLockBlob": "3c5b5dda0a81b4ece4423140015b02a2158cd3f3"
+  },
+  "review": {
+    "verdict": "HOLD",
+    "freshIndependentWholeSeriesReviewRequired": true,
+    "integrationAllowed": false,
+    "postIntegrationGates": [
+      "resolve the one current-main conflict and six Share conflicts by semantic composition",
+      "run the combined full suite",
+      "run one production build",
+      "recompute target and Share merge-tree identities"
+    ]
+  }
 }
