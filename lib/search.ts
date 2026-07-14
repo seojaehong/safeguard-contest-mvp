@@ -1645,12 +1645,13 @@ export function attachDbHarnessFallback(response: AskResponse, input: {
   question: string;
   harnessMemory: Required<HarnessMemoryInput>;
 }): AskResponse {
-  const packet = buildDbHarnessPacket({
+  const internalPacket = buildDbHarnessPacket({
     question: input.question,
     references: [],
     improvements: input.harnessMemory.improvements,
     workpackMemory: input.harnessMemory.workpackMemory
   });
+  const packet = buildPublicDbHarnessPacket(internalPacket);
   const promptContext = buildHarnessPromptContext(packet);
   const reflectedResponse = reflectDbHarnessInDeliverables(response, packet);
   const structuredResponse = attachPhotoSeedStructuredOutput(reflectedResponse, input.harnessMemory.improvements);
@@ -1888,7 +1889,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             safetyReferencePromise.catch(() => null),
           ]).then(([rawBase, wthr, trng, ksha, acc, safeRef]) => {
             const safeRefItems = safeRef?.items ?? [];
-            const dbHarnessPacket = buildDbHarnessPacket({
+            const internalDbHarnessPacket = buildDbHarnessPacket({
               question,
               references: safeRefItems,
               improvements: harnessMemory.improvements,
@@ -1902,6 +1903,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
                   }
                 : undefined
             });
+            const dbHarnessPacket = buildPublicDbHarnessPacket(internalDbHarnessPacket);
             const koshaParentEvidenceReadyIdsEarly = buildKoshaParentEvidenceReadyIds(dbHarnessPacket);
             const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
             const compressed = compressSafetyReferenceMatches(safeRefItems, 5);
@@ -2077,7 +2079,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       log.warn("safetyReferencePromise failed", safeFailureContext((allResults[7] as PromiseRejectedResult).reason)),
       safetyReferenceFallback
     );
-    const dbHarnessEvidencePacket = buildDbHarnessPacket({
+    const internalDbHarnessEvidencePacket = buildDbHarnessPacket({
       question,
       references: safetyReference.items,
       improvements: harnessMemory.improvements,
@@ -2089,6 +2091,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         message: safetyReference.message
       }
     });
+    const dbHarnessEvidencePacket = buildPublicDbHarnessPacket(internalDbHarnessEvidencePacket);
     const koshaParentEvidenceReadyIds = buildKoshaParentEvidenceReadyIds(dbHarnessEvidencePacket);
     const parentlessKoshaReviewRequired = dbHarnessEvidencePacket.supportingEvidence.some((item) => (
       isKoshaTechnicalReference(item)
@@ -2209,6 +2212,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       : generatedStructuredRiskValidation.rows;
     const photoSeedRiskRows = buildPhotoHazardRiskRows(response, harnessMemory.improvements);
     const harnessStructuredRiskRows = generatedStructuredRiskRows.length
+      || parentlessKoshaReviewRequired
       ? []
       : buildSafetyReferenceRiskRows(response, safetyReference.items, weather.summary, question);
     const fallbackStructuredRiskRows = generatedStructuredRiskRows.length
@@ -2266,7 +2270,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
     const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
     const foreignWorkerTransmissionText = aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput);
-    const dbHarnessPacket = buildDbHarnessPacket({
+    const internalDbHarnessPacket = buildDbHarnessPacket({
       question,
       references: safetyReference.items,
       improvements: harnessMemory.improvements,
@@ -2279,11 +2283,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         message: safetyReference.message
       }
     });
+    const dbHarnessPacket = buildPublicDbHarnessPacket(internalDbHarnessPacket);
     const dbHarnessPromptContext = buildHarnessPromptContext(dbHarnessPacket);
     const dbHarnessSummary = summarizeDbHarnessPacket(dbHarnessPacket);
     const dbHarnessAnswer = buildDbHarnessAnswer(dbHarnessPacket);
     const dbHarnessPracticalPoints = buildDbHarnessPracticalPoints(dbHarnessPacket);
-    const publicDbHarnessPacket = buildPublicDbHarnessPacket(dbHarnessPacket);
     const upstreamDeliverablesExecutionTrace = deliverablesResult?.diagnostics.trace ?? {
       attempted: false,
       provider: null,
@@ -2461,7 +2465,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         ...(structuredRiskRows.length ? ["structuredRiskRows"] : [])
       ]),
       dbHarness: {
-        packet: publicDbHarnessPacket,
+        packet: dbHarnessPacket,
         promptContext: dbHarnessPromptContext,
         summary: dbHarnessSummary
       },
