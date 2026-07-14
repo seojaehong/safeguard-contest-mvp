@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createHash } from "node:crypto";
 import { execFileSync, spawnSync } from "node:child_process";
 
 import { describe, expect, it } from "vitest";
@@ -10,6 +9,18 @@ const MINIMUM_AUTHORITY = "67d2c9e28e7278c58f46b46c2512c7133d88d1d3";
 const HISTORICAL_REJECTED_TARGET = "b3762867d380f20faee2a83a17354dc61557ce12";
 const V4_REJECTED_TARGET = "cc9f5af297950b73b53a9ab4018bdc143830c499";
 const SUPERSEDED_AUTHORITY_TARGET = "f45bba17bcce0d8ebb2690f82d014dbe42ae8191";
+const SHARE_REVIEW_HEAD = "22de1180d69263f7c08ac0ed0cfda0894e2db7f5";
+const SHARE_BASE_PRODUCT_HEAD = "fc2bd1783fcc413981306f689d67bb6c659a985e";
+const SHARE_PRODUCT_HEAD = "7141baac3e0abca146ef6c110093c1c0643760a2";
+const EXPECTED_MAIN_CONFLICT_PATHS = ["tests/reports-download-center.test.ts"];
+const EXPECTED_SHARE_CONFLICT_PATHS = [
+  "app/api/workpacks/[id]/route.ts",
+  "components/FieldOperationsWorkspace.tsx",
+  "components/SafeGuardCommandCenter.tsx",
+  "lib/workpack-commercial-store.ts",
+  "tests/workpack-generation-evidence-route.test.ts",
+  "tests/workpack-share-authority-routes.test.ts",
+];
 const EVIDENCE_DIRECTORY = path.resolve(
   "evaluation/phase-a-ontology-evidence-chains-2026-07-13",
 );
@@ -18,6 +29,12 @@ const REPOSITORY_ROOT = path.resolve(".");
 type TargetHistoryEntry = {
   sha: string;
   status: string;
+};
+
+type MergeTreeInspection = {
+  status: 0 | 1;
+  diagnosticTreeOid: string;
+  conflictPaths: string[];
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -51,6 +68,34 @@ function gitIsAncestor(ancestor: string, descendant: string): boolean {
   return result.status === 0;
 }
 
+function inspectMergeTree(left: string, right: string): MergeTreeInspection {
+  const result = spawnSync("git", ["merge-tree", "--write-tree", left, right], {
+    cwd: REPOSITORY_ROOT,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.status !== 0 && result.status !== 1) {
+    throw new Error(`git merge-tree failed with status ${String(result.status)}: ${result.stderr}`);
+  }
+  const output = result.stdout.trim();
+  const [diagnosticTreeOid = ""] = output.split(/\r?\n/);
+  if (!/^[a-f0-9]{40}$/.test(diagnosticTreeOid)) {
+    throw new Error("git merge-tree did not return a diagnostic tree OID");
+  }
+  const conflictPaths = Array.from(new Set(
+    Array.from(
+      output.matchAll(/^\d{6}\s+[a-f0-9]{40}\s+[123]\t(.+)$/gm),
+      (match) => match[1].replace(/\r$/, ""),
+    ),
+  )).sort();
+  const status: 0 | 1 = result.status === 0 ? 0 : 1;
+  return {
+    status,
+    diagnosticTreeOid,
+    conflictPaths,
+  };
+}
+
 function requireRecord(container: Record<string, unknown>, key: string): Record<string, unknown> {
   const value = container[key];
   if (!isRecord(value)) throw new Error(`${key} object is required`);
@@ -74,12 +119,16 @@ function readArtifactEntries(
   return value;
 }
 
-function normalizedLines(value: string): string[] {
-  return value.split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean).sort();
+function readStringArray(container: Record<string, unknown>, key: string): string[] {
+  const value = container[key];
+  if (!Array.isArray(value) || !value.every((entry) => typeof entry === "string")) {
+    throw new Error(`${key} string array is required`);
+  }
+  return value;
 }
 
-function sha256File(filePath: string): string {
-  return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+function normalizedLines(value: string): string[] {
+  return value.split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean).sort();
 }
 
 const AUTHORITATIVE_TARGET = git("rev-parse", AUTHORITY_REF);
@@ -150,29 +199,37 @@ describe("Phase A evidence target authority", () => {
     expect(readString(binding, "authorityRef")).toBe(AUTHORITY_REF);
     expect(readString(binding, "minimumAuthority")).toBe(MINIMUM_AUTHORITY);
     expect(readString(binding, "currentMainTarget")).toBe(AUTHORITATIVE_TARGET);
-    expect(readString(binding, "currentTargetTree")).toBe(AUTHORITATIVE_TARGET_TREE);
+    expect(readString(binding, "authorityTree")).toBe(AUTHORITATIVE_TARGET_TREE);
     expect(git("rev-parse", readString(binding, "currentMainTarget"))).toBe(AUTHORITATIVE_TARGET);
   });
 
-  it("binds every product artifact and merge tree to the product commit", () => {
+  it("binds the complete product series and every product artifact to its source base", () => {
     const manifest = readJson("evidence-manifest.json");
     const binding = requireRecord(manifest, "binding");
+    const sourceBase = readString(binding, "sourceBase");
     const productCommit = readString(binding, "productCommit");
     const productTree = readString(binding, "productTree");
+    const productSeries = readStringArray(binding, "productSeries");
     const productArtifacts = readArtifactEntries(manifest, "productArtifacts");
     const recordedPaths = productArtifacts.map((entry) => readString(entry, "path")).sort();
     const changedPaths = normalizedLines(git(
-      "diff-tree",
-      "--no-commit-id",
+      "diff",
       "--name-only",
-      "-r",
-      `${productCommit}^`,
+      sourceBase,
       productCommit,
     ));
+    const actualSeries = git(
+      "rev-list",
+      "--reverse",
+      "--ancestry-path",
+      `${sourceBase}..${productCommit}`,
+    ).split(/\r?\n/).filter(Boolean);
 
+    expect(git("rev-parse", `${sourceBase}^{commit}`)).toBe(sourceBase);
     expect(git("rev-parse", `${productCommit}^{commit}`)).toBe(productCommit);
     expect(git("rev-parse", `${productCommit}^{tree}`)).toBe(productTree);
     expect(gitIsAncestor(productCommit, "HEAD")).toBe(true);
+    expect(productSeries).toEqual(actualSeries);
     expect(recordedPaths).toEqual(changedPaths);
     for (const artifact of productArtifacts) {
       const artifactPath = readString(artifact, "path");
@@ -180,12 +237,46 @@ describe("Phase A evidence target authority", () => {
         git("rev-parse", `${productCommit}:${artifactPath}`),
       );
     }
+  });
 
-    const mergeTree = git("merge-tree", "--write-tree", AUTHORITATIVE_TARGET, productCommit);
-    const mergeIdentity = requireRecord(manifest, "mergeIdentity");
-    expect(readString(mergeIdentity, "targetCommit")).toBe(AUTHORITATIVE_TARGET);
-    expect(readString(mergeIdentity, "productCommit")).toBe(productCommit);
-    expect(readString(mergeIdentity, "tree")).toBe(mergeTree);
+  it("records the current-main merge conflict as HOLD instead of claiming a merge tree", () => {
+    const manifest = readJson("evidence-manifest.json");
+    const binding = requireRecord(manifest, "binding");
+    const productCommit = readString(binding, "productCommit");
+    const reconciliation = requireRecord(manifest, "targetReconciliation");
+    const inspection = inspectMergeTree(AUTHORITATIVE_TARGET, productCommit);
+
+    expect(inspection.status).toBe(1);
+    expect(inspection.conflictPaths).toEqual(EXPECTED_MAIN_CONFLICT_PATHS);
+    expect(readString(reconciliation, "status")).toBe("content-conflict-hold");
+    expect(reconciliation.semanticMergePerformed).toBe(false);
+    expect(readString(reconciliation, "targetCommit")).toBe(AUTHORITATIVE_TARGET);
+    expect(readString(reconciliation, "productCommit")).toBe(productCommit);
+    expect(readString(reconciliation, "diagnosticTreeOid")).toBe(inspection.diagnosticTreeOid);
+    expect(readStringArray(reconciliation, "conflictPaths")).toEqual(inspection.conflictPaths);
+    expect(gitIsAncestor(AUTHORITATIVE_TARGET, productCommit)).toBe(false);
+  });
+
+  it("records the six-file Share semantic adoption HOLD at remediation head 7141baa", () => {
+    const manifest = readJson("evidence-manifest.json");
+    const binding = requireRecord(manifest, "binding");
+    const productCommit = readString(binding, "productCommit");
+    const adoption = requireRecord(manifest, "shareAdoption");
+    const inspection = inspectMergeTree(SHARE_PRODUCT_HEAD, productCommit);
+
+    expect(gitIsAncestor(SHARE_BASE_PRODUCT_HEAD, SHARE_REVIEW_HEAD)).toBe(true);
+    expect(gitIsAncestor(SHARE_REVIEW_HEAD, SHARE_PRODUCT_HEAD)).toBe(true);
+    expect(inspection.status).toBe(1);
+    expect(inspection.conflictPaths).toEqual(EXPECTED_SHARE_CONFLICT_PATHS);
+    expect(readString(adoption, "status")).toBe("content-conflict-hold");
+    expect(adoption.semanticMergePerformed).toBe(false);
+    expect(readString(adoption, "reviewHead")).toBe(SHARE_REVIEW_HEAD);
+    expect(readString(adoption, "baseProductHead")).toBe(SHARE_BASE_PRODUCT_HEAD);
+    expect(readString(adoption, "productHead")).toBe(SHARE_PRODUCT_HEAD);
+    expect(readString(adoption, "phaseAProductCommit")).toBe(productCommit);
+    expect(readString(adoption, "diagnosticTreeOid")).toBe(inspection.diagnosticTreeOid);
+    expect(readStringArray(adoption, "conflictPaths")).toEqual(inspection.conflictPaths);
+    expect(gitIsAncestor(SHARE_PRODUCT_HEAD, productCommit)).toBe(false);
   });
 
   it("fully lists and hashes the evidence child artifacts", () => {
@@ -211,10 +302,10 @@ describe("Phase A evidence target authority", () => {
       const artifactPath = readString(artifact, "path");
       if (artifactPath === manifestPath) {
         expect(artifact.selfHashExcluded).toBe(true);
-        expect(artifact).not.toHaveProperty("contentSha256");
+        expect(artifact).not.toHaveProperty("gitBlobOid");
       } else {
-        expect(readString(artifact, "contentSha256")).toBe(
-          sha256File(path.resolve(artifactPath)),
+        expect(readString(artifact, "gitBlobOid")).toBe(
+          git("rev-parse", `HEAD:${artifactPath}`),
         );
       }
     }
@@ -229,7 +320,17 @@ describe("Phase A evidence target authority", () => {
     expect(report).toContain(`\`${SUPERSEDED_AUTHORITY_TARGET}\`: superseded authority`);
     expect(report).toContain(`\`${HISTORICAL_REJECTED_TARGET}\`: historical rejected`);
     expect(report).toContain(`\`${V4_REJECTED_TARGET}\`: rejected/pending-unintegrated`);
-    expect(report).toContain("Share v2 `22de1180d69263f7c08ac0ed0cfda0894e2db7f5` remains under review and was not semantically merged");
+    expect(report).toContain(
+      "Current-main reconciliation is HOLD on `tests/reports-download-center.test.ts`",
+    );
+    expect(report).toContain(
+      "Share v2 baseline `22de1180d69263f7c08ac0ed0cfda0894e2db7f5` and request-scope remediation `7141baac3e0abca146ef6c110093c1c0643760a2` remain under review",
+    );
+    for (const conflictPath of EXPECTED_SHARE_CONFLICT_PATHS) {
+      expect(report).toContain(`\`${conflictPath}\``);
+    }
+    expect(report).toContain("request-scope stale-response guard");
+    expect(report).toContain("dispatch compare-and-set");
     expect(report).not.toMatch(/\bmerge executed\b/i);
     expect(report).not.toMatch(/\bintegration PASS\b/i);
   });

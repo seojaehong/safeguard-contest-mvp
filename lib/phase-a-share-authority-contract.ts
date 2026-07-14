@@ -9,8 +9,18 @@ import {
 
 export const PHASE_A_SHARE_CONTRACT_REVIEW_HEAD =
   "22de1180d69263f7c08ac0ed0cfda0894e2db7f5" as const;
-export const PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD =
+export const PHASE_A_SHARE_CONTRACT_BASE_PRODUCT_HEAD =
   "fc2bd1783fcc413981306f689d67bb6c659a985e" as const;
+export const PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD =
+  "7141baac3e0abca146ef6c110093c1c0643760a2" as const;
+export const PHASE_A_SHARE_SEMANTIC_CONFLICT_PATHS = [
+  "app/api/workpacks/[id]/route.ts",
+  "components/FieldOperationsWorkspace.tsx",
+  "components/SafeGuardCommandCenter.tsx",
+  "lib/workpack-commercial-store.ts",
+  "tests/workpack-generation-evidence-route.test.ts",
+  "tests/workpack-share-authority-routes.test.ts",
+] as const;
 
 type ExactPhaseAConfirmation = Extract<
   PhaseAReview["humanConfirmation"],

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  PHASE_A_SHARE_CONTRACT_BASE_PRODUCT_HEAD,
   PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD,
   PHASE_A_SHARE_CONTRACT_REVIEW_HEAD,
+  PHASE_A_SHARE_SEMANTIC_CONFLICT_PATHS,
   assessPhaseAShareJointAuthority,
   type ShareV2DispatchBindingAuthority,
 } from "@/lib/phase-a-share-authority-contract";
@@ -139,7 +141,16 @@ function assess(overrides: {
 describe("Phase A and Share v2 joint authority contract", () => {
   it("is bound to the exact Share review and product heads", () => {
     expect(PHASE_A_SHARE_CONTRACT_REVIEW_HEAD).toBe("22de1180d69263f7c08ac0ed0cfda0894e2db7f5");
-    expect(PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD).toBe("fc2bd1783fcc413981306f689d67bb6c659a985e");
+    expect(PHASE_A_SHARE_CONTRACT_BASE_PRODUCT_HEAD).toBe("fc2bd1783fcc413981306f689d67bb6c659a985e");
+    expect(PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD).toBe("7141baac3e0abca146ef6c110093c1c0643760a2");
+    expect(PHASE_A_SHARE_SEMANTIC_CONFLICT_PATHS).toEqual([
+      "app/api/workpacks/[id]/route.ts",
+      "components/FieldOperationsWorkspace.tsx",
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/workpack-commercial-store.ts",
+      "tests/workpack-generation-evidence-route.test.ts",
+      "tests/workpack-share-authority-routes.test.ts",
+    ]);
   });
 
   it("preserves exact Phase A and Share authority fields", () => {
