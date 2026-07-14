@@ -1,81 +1,50 @@
-# Web-safe presentation localization report
+# Web-safe presentation localization integration
 
-Generated: 2026-07-14T11:50:18.7285855+09:00
+Generated: 2026-07-14T13:44:00+09:00
 
-## Scope
+## Result
 
-- Branch: `fix/web-safe-presentation-localization-2026-07-14`
-- Base: `ea7aa7223a056c884d5b0ba55563d602af328451`
-- Historical sources: `60227da44c3f7768311450e04a4e436b4ddbf541`, `b299fb975ea81688fb57e3912fa93189c146d629`
-- Production files: 6
-- Focused test files changed or added: 3
-- Evaluation files: 2
+- Scoped integration verdict: **PASS**
+- Release readiness: **false** until the final product-head build and browser evidence are regenerated
+- Integration branch: `feat/phase-a-evidence-integration`
+- Base: `e1e3c02056f8e77cdb1bf38fd13dd6a34620754b`
+- Integrated head: `7909861273ce995f3e093e74a369475103f9087e`
+- Integrated tree: `610006c001645b21517b372b71301571b0a577f7`
 
-## Changed files
+Exact source commits, applied in order:
 
-- `components/AiConnectPanel.tsx`
-- `app/archive/page.tsx`
-- `app/dryrun/page.tsx`
-- `app/ops/api/page.tsx`
-- `lib/sif-embedding-approval-packet.ts`
-- `lib/sif-embedding-gate-status.ts`
-- `tests/web-safe-presentation-localization.test.ts`
-- `tests/sif-embedding-approval-packet.test.ts`
-- `tests/sif-embedding-gate-status.test.ts`
-- `evaluation/web-safe-presentation-localization-2026-07-14/report.md`
-- `evaluation/web-safe-presentation-localization-2026-07-14/report.json`
+1. `c1a9e04f50dfed50ee6beda08c447b1ceba48675`
+2. `d00a0cf9ff499d264cd9a7200c9df9d57d635f06`
+3. `db23f179225064f73b8dff4c0b35a4e3c894008d`
 
-## TDD evidence
+## Product contract
 
-RED command used for each vertical slice:
-
-```powershell
-npm.cmd test -- tests/web-safe-presentation-localization.test.ts
-```
-
-Meaningful product RED cycles:
-
-1. Gate/runtime presentation exports absent: 1 test run, 1 failed.
-2. AiConnect typed mapper/source contract absent: 2 tests run, 1 failed.
-3. AiConnect raw operator copy still present: 3 tests run, 1 failed.
-4. Archive/dry-run/ops raw metadata still present: 4 tests run, 1 failed.
-5. SIF generated status/Markdown localization and unknown fallback absent: 5 tests run, 1 failed.
-
-A direct TSX import attempt was replaced with the repository's source-contract test pattern because the focused Vitest setup did not transform that client component import. Test-harness failures were not counted as product RED evidence.
-
-Final GREEN command:
-
-```powershell
-npm.cmd test -- tests/web-safe-presentation-localization.test.ts tests/sif-embedding-gate-status.test.ts tests/sif-embedding-approval-packet.test.ts tests/ai-connect-design-contract.test.ts
-```
-
-Result: 4 test files passed, 15 tests passed.
+- Raw JSON, JSONL, gate IDs, statuses, modes, run IDs, paths, environment variables, and approval-packet fields remain machine-readable and unchanged.
+- Korean wording is applied only at the presentation boundary.
+- Unknown, malformed, array, and object inputs fail safely without throwing or exposing `[object Object]`.
+- Dry-run failures keep a useful operator-facing reason instead of collapsing to an inaccurate success or empty state.
 
 ## Verification
 
-- `npm.cmd run typecheck`: passed (`tsc --noEmit --incremental false`).
-- `git diff --check`: passed; Git emitted only working-copy LF-to-CRLF conversion warnings.
-- Scope audit: only the 6 owned production files, 3 focused test files, and this evaluation directory changed.
-- Raw presentation audit: visible gate, runtime, verifier, provider, file mode, flow step, and quality-note values pass through typed formatters with `상태 확인 필요` or `분류 검토 필요` fallbacks.
-- Contract audit: raw gate IDs, statuses, modes, run IDs, paths, environment variables, JSON keys, and machine packet fields remain unchanged.
-
-The first typecheck attempt reported missing local declarations for `pdf-lib` and `@pdf-lib/fontkit`. The worktree dependencies were bootstrapped without package or lockfile changes:
-
 ```powershell
-npm.cmd install --no-save --package-lock=false pdf-lib@1.17.1 @pdf-lib/fontkit@1.1.1
+npm.cmd test -- tests/web-safe-presentation-localization.test.ts tests/sif-embedding-gate-status.test.ts tests/sif-embedding-approval-packet.test.ts tests/ai-connect-design-contract.test.ts --maxWorkers=1 --no-file-parallelism
 ```
 
-Typecheck then passed. No dependency file is part of this change.
+Result: **4 files / 20 tests PASS**. Log: `integrated-focused.log`.
 
-## Known exclusions
+```powershell
+npm.cmd run typecheck
+```
 
-- Browser or manual UI verification was not run.
-- Production build was not run.
-- Full test suite was not run.
-- DB/schema/migrations and data mutation were not touched or run.
-- Machine JSON/JSONL contracts and stored raw metadata were not rewritten.
-- Prohibited active-agent files and package files were not touched.
+Result: **PASS**. Log: `integrated-typecheck.log`.
 
-## Blockers
+Independent review: **PASS**, with no P0-P2 findings. The sole P3 finding was stale evidence metadata from the source branch; this report replaces the old `ea7` base and incorrect changed-file list.
 
-None at report generation time.
+## Deferred final gates
+
+- production build
+- desktop/mobile Day/Night browser verification
+- frontend source-identity regeneration
+- static audit and 108-row browser audit
+
+These run once, sequentially, on the final integrated product HEAD. No DB schema, migration, or data mutation occurred.
