@@ -1,0 +1,128 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/mcp-tools.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+ ❯ tests/mcp-tools.test.ts (30 tests | 1 failed) 55ms
+     × v6 removes third-family direct evidence for mixed hazard queries before MCP packet and prompt serialization 14ms
+ ❯ tests/commercial-harness.test.ts (50 tests | 1 failed) 6048ms
+     × v6 blocks third-family direct evidence from mixed-query packet, prompt, answer, and risk rows 16ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/commercial-harness.test.ts > DB harness packet > v6 blocks third-family direct evidence from mixed-query packet, prompt, answer, and risk rows
+AssertionError: expected [ { …(16) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "body": "재해개요: 작업발판과 난간 상태 미확인으로 추락 위험이 확인됨. 위험성 감소대책: 작업발판·난간 확인.",
++     "category": "운반하역",
++     "controls": [
++       "지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
++       "교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인",
++     ],
++     "document_reflection_label": "위험성평가표 · TBM 브리핑 · V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_DOCUMENT에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
++     "evidence_role": "direct",
++     "id": "direct-v6-mixed-query-third-family-fire",
++     "item_type": "machinery",
++     "keywords": [
++       "LPG",
++       "지게차",
++       "보행자",
++       "통행구역",
++       "연료누출",
++       "화재",
++     ],
++     "operation_signal_label": "문서와 TBM에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 반영",
++     "primary_documents": [
++       "위험성평가표",
++       "TBM 브리핑",
++       "V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_DOCUMENT",
++     ],
++     "risk_tags": [
++       "화재",
++     ],
++     "short_summary": "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험 · 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 · 교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인",
++     "source_id": "official-machinery-catalog",
++     "subcategory": "지게차",
++     "summary": "V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_SUMMARY 보행자 통행구역의 LPG 지게차 연료 누출 가스가 점화되어 화재가 발생할 수 있다.",
++     "title": "V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_TITLE LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
++   },
++ ]
+
+ ❯ tests/commercial-harness.test.ts:988:35
+    986|     });
+    987|
+    988|     expect(packet.directEvidence).toEqual([]);
+       |                                   ^
+    989|     expect(packet.ontologyChecklist.status).toBe("review_required");
+    990|     expect(packet.supportingEvidence.find((item) => item.id === unrela…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/mcp-tools.test.ts > buildHarnessAgentResult > v6 removes third-family direct evidence for mixed hazard queries before MCP packet and prompt serialization
+AssertionError: expected [ { …(16) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "category": "운반하역",
++     "controls": [
++       "지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
++       "교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인",
++     ],
++     "document_reflection_label": "위험성평가표 · TBM 브리핑 · V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_DOCUMENT에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
++     "evidence_role": "direct",
++     "id": "mcp-v6-mixed-query-third-family-fire-direct",
++     "item_type": "machinery",
++     "keywords": [
++       "LPG",
++       "지게차",
++       "보행자",
++       "통행구역",
++       "연료누출",
++       "화재",
++     ],
++     "operation_signal_label": "문서와 TBM에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 반영",
++     "primary_documents": [
++       "위험성평가표",
++       "TBM 브리핑",
++       "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_DOCUMENT",
++     ],
++     "retrieval_source": "ranked",
++     "risk_tags": [
++       "화재",
++     ],
++     "short_summary": "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험 · 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 · 교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인",
++     "source_id": "official-machinery-catalog",
++     "subcategory": "지게차",
++     "summary": "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_SUMMARY 연료 누출 가스가 점화되어 화재가 발생할 수 있다.",
++     "title": "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_TITLE LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
++   },
++ ]
+
+ ❯ tests/mcp-tools.test.ts:455:42
+    453|     const serializedMcpPayload = toToolResult(result).content[0]?.text…
+    454|
+    455|     expect(result.packet.directEvidence).toEqual([]);
+       |                                          ^
+    456|     expect(result.promptContext).toContain('"parentEvidenceReady":fals…
+    457|     for (const marker of Object.values(directMarkers)) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 78 passed (80)
+   Start at  21:34:26
+   Duration  8.08s (transform 985ms, setup 0ms, import 1.63s, tests 6.10s, environment 0ms)
+

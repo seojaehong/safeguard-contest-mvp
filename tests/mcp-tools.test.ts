@@ -394,6 +394,72 @@ describe("buildHarnessAgentResult", () => {
       expect(serializedMcpPayload).not.toContain(marker);
     }
   });
+
+  it("v6 removes third-family direct evidence for mixed hazard queries before MCP packet and prompt serialization", () => {
+    const directMarkers = {
+      title: "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_TITLE",
+      summary: "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_SUMMARY",
+      control: "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_CONTROL",
+      document: "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_DOCUMENT"
+    } as const;
+    const collisionGuide = {
+      id: "mcp-v6-mixed-query-collision-guide",
+      source_id: "kosha-guide-offline:mcp-v6-mixed-query-collision-guide",
+      item_type: "technical-guideline",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "KOSHA 지게차 보행자 충돌 예방 기술지침",
+      summary: "지게차와 보행자의 이동 동선을 분리한다.",
+      body: "검증된 현행 KOSHA 지침 본문: 지게차 동선과 보행 동선을 분리한다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      controls: ["후진 경보와 유도자 배치"],
+      evidence_role: "supporting",
+      retrieval_source: "local-ranked",
+      kosha_guide: {
+        referenceId: "mcp-v6-mixed-query-collision-guide",
+        stableDocumentKey: "MCP-V6-MIXED-QUERY-COLLISION",
+        version: "MCP-V6-MIXED-QUERY-COLLISION-2026",
+        quality: "accepted",
+        lifecycle: "current",
+        bodyKind: "native",
+        anchors: [{ page: 1, excerpt: "지게차 동선 분리" }],
+        evidenceRef: "KOSHA 근거 mcp-v6-mixed-query-collision-guide p.1: 지게차 동선 분리",
+        directEligible: true
+      }
+    } satisfies SafetyReferenceItem;
+    const thirdFamilyFireDirect = {
+      id: "mcp-v6-mixed-query-third-family-fire-direct",
+      source_id: "official-machinery-catalog",
+      item_type: "machinery",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: `${directMarkers.title} LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거`,
+      summary: `${directMarkers.summary} 연료 누출 가스가 점화되어 화재가 발생할 수 있다.`,
+      keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
+      risk_tags: ["화재"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", directMarkers.document],
+      controls: [directMarkers.control, "연료 밸브 차단과 점화원 통제"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    } satisfies SafetyReferenceItem;
+    const result = buildHarnessAgentResult({
+      question: "지게차 보행자 충돌과 배전반 감전 위험을 검토해줘",
+      references: [collisionGuide, thirdFamilyFireDirect],
+      referenceSearch: []
+    });
+    const serializedPacket = JSON.stringify(result.packet);
+    const serializedMcpPayload = toToolResult(result).content[0]?.text || "";
+
+    expect(result.packet.directEvidence).toEqual([]);
+    expect(result.promptContext).toContain('"parentEvidenceReady":false');
+    for (const marker of Object.values(directMarkers)) {
+      expect(serializedPacket).not.toContain(marker);
+      expect(result.promptContext).not.toContain(marker);
+      expect(serializedMcpPayload).not.toContain(marker);
+    }
+  });
 });
 
 describe("resolveReviewTaskLabel", () => {
