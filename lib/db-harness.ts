@@ -629,17 +629,68 @@ export function parseHarnessMemoryInput(value: unknown): Required<HarnessMemoryI
 
 const MAX_KOSHA_PROMPT_METADATA_CHARS = 240;
 
-function hasConflictingExplicitRiskTags(
+type KoshaHazardFamily =
+  | "asphyxiation"
+  | "burn"
+  | "caught_in"
+  | "chemical_exposure"
+  | "collision"
+  | "collapse_or_overturn"
+  | "cut"
+  | "drowning"
+  | "electrical"
+  | "ergonomic"
+  | "fall"
+  | "falling_object"
+  | "fire_or_explosion"
+  | "heat_illness"
+  | "noise"
+  | "slip_or_trip";
+
+const KOSHA_HAZARD_FAMILY_PATTERNS: ReadonlyArray<{
+  family: KoshaHazardFamily;
+  pattern: RegExp;
+}> = [
+  { family: "collision", pattern: /충돌|교통사고|보행자|보행\s*동선|차량\s*동선|지게차.*(?:동선|통행|후진)|(?:동선|통행).*지게차/u },
+  { family: "fire_or_explosion", pattern: /화재|폭발|점화|발화|lpg|연료.*(?:누출|가스)|유기용제|인화성|가연물|용탕/u },
+  { family: "fall", pattern: /추락|떨어짐|고소|비계|작업발판|개구부|사다리|안전대|외벽.*로프|로프.*외벽/u },
+  { family: "caught_in", pattern: /끼임|협착|말림|불시기동|가동부/u },
+  { family: "electrical", pattern: /감전|누전|충전부|활선|전기.*접촉/u },
+  { family: "asphyxiation", pattern: /질식|산소결핍|밀폐공간|유해가스/u },
+  { family: "falling_object", pattern: /낙하|비래|인양|양중/u },
+  { family: "collapse_or_overturn", pattern: /붕괴|도괴|전복|전도/u },
+  { family: "slip_or_trip", pattern: /미끄|넘어짐|걸려\s*넘어/u },
+  { family: "chemical_exposure", pattern: /중독|화학물질|유해물질|분진|가스\s*노출|세정제/u },
+  { family: "burn", pattern: /화상|고온|용탕/u },
+  { family: "cut", pattern: /절단|베임/u },
+  { family: "heat_illness", pattern: /폭염|온열|열사병/u },
+  { family: "drowning", pattern: /익사|물에\s*빠/u },
+  { family: "noise", pattern: /소음|청력/u },
+  { family: "ergonomic", pattern: /근골격|중량물|요통/u }
+];
+
+function koshaHazardFamilies(item: SafetyReferenceItem): Set<KoshaHazardFamily> {
+  const semanticText = [
+    item.title,
+    item.summary,
+    item.category || "",
+    item.subcategory || "",
+    ...item.keywords,
+    ...item.risk_tags
+  ].join(" ").normalize("NFC").toLowerCase();
+  return new Set(KOSHA_HAZARD_FAMILY_PATTERNS
+    .filter(({ pattern }) => pattern.test(semanticText))
+    .map(({ family }) => family));
+}
+
+function hasCompatibleKoshaHazardFamily(
   parent: SafetyReferenceItem,
   supporting: SafetyReferenceItem
 ): boolean {
-  const normalizeTags = (tags: readonly string[]): Set<string> => new Set(
-    tags.flatMap((tag) => tag.split(/[·,/]+/u)).map((tag) => tag.trim()).filter(Boolean)
-  );
-  const parentTags = normalizeTags(parent.risk_tags);
-  const supportingTags = normalizeTags(supporting.risk_tags);
-  if (!parentTags.size || !supportingTags.size) return false;
-  return ![...parentTags].some((tag) => supportingTags.has(tag));
+  const parentFamilies = koshaHazardFamilies(parent);
+  const supportingFamilies = koshaHazardFamilies(supporting);
+  if (!parentFamilies.size || !supportingFamilies.size) return false;
+  return [...parentFamilies].some((family) => supportingFamilies.has(family));
 }
 
 function isKoshaParentCandidate(item: SafetyReferenceItem): boolean {
@@ -656,7 +707,7 @@ export function hasRelevantKoshaParent(
   return candidates.some((candidate) => (
     isKoshaParentCandidate(candidate)
     && hasStrongSafetyReferenceRowOverlap(candidate, koshaReference)
-    && !hasConflictingExplicitRiskTags(candidate, koshaReference)
+    && hasCompatibleKoshaHazardFamily(candidate, koshaReference)
   ));
 }
 

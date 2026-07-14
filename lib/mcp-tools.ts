@@ -10,6 +10,7 @@ import type { AccidentCase } from "./types";
 import {
   buildDbHarnessPacket,
   buildHarnessPromptContext,
+  buildPublicDbHarnessPacket,
   type HarnessImprovement,
   type HarnessWorkpackMemory,
 } from "./db-harness";
@@ -232,7 +233,7 @@ export type HarnessAgentResult = {
     "load_improvement_memory",
     "build_db_harness_packet"
   ];
-  packet: ReturnType<typeof buildDbHarnessPacket>;
+  packet: ReturnType<typeof buildPublicDbHarnessPacket>;
   promptContext: string;
   referenceSearch: HarnessAgentSearchSummary[];
   auth: HarnessAgentAuthSummary;
@@ -277,7 +278,7 @@ export function buildHarnessAgentResult(input: {
   referenceSearch: HarnessAgentSearchSummary[];
   auth?: HarnessAgentAuthSummary;
 }): HarnessAgentResult {
-  const packet = buildDbHarnessPacket({
+  const internalPacket = buildDbHarnessPacket({
     question: input.question,
     references: input.references,
     improvements: input.improvements,
@@ -291,6 +292,7 @@ export function buildHarnessAgentResult(input: {
       message: input.referenceSearch.map((item) => `${item.source}: ${item.message}`).join(" / ")
     }
   });
+  const packet = buildPublicDbHarnessPacket(internalPacket);
 
   return {
     agentKind: "safeclaw_harness_engineering_agent",
