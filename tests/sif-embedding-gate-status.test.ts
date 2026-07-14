@@ -1,5 +1,23 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import postMigrationFixture from "@/evaluation/sif-embedding-gate/post-migration-verify.json";
+import preflightFixture from "@/evaluation/sif-embedding-gate/approval-preflight-report.json";
+import runtimeProbeFixture from "@/evaluation/sif-embedding-gate/runtime-db-probe.json";
 import { getSifEmbeddingGateStatus } from "@/lib/sif-embedding-gate-status";
+
+function canonicalizeMachineFixture(value: unknown, key = ""): unknown {
+  if (key === "sha256" || key === "byteSize" || key === "approvalFingerprint") {
+    return `<${typeof value}>`;
+  }
+  if (Array.isArray(value)) return value.map((item) => canonicalizeMachineFixture(item));
+  if (typeof value !== "object" || value === null) return value;
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([entryKey, entryValue]) => [entryKey, canonicalizeMachineFixture(entryValue, entryKey)])
+  );
+}
 
 describe("SIF embedding gate status", () => {
   it("reports the prepared corpus as approval-held without embedding or upload", () => {
@@ -210,5 +228,95 @@ describe("SIF embedding gate status", () => {
     });
     expect(readyRuntime.approvalPacket.safetyLocks.find((lock) => lock.label === "Vector 검색 잠금")?.locked).toBe(true);
     expect(readyRuntime.message).toContain("SAFETY_REFERENCE_VECTOR_SEARCH=1");
+  });
+
+  it("matches the authoritative base machine fixture before presentation", () => {
+    const status = getSifEmbeddingGateStatus({
+      OPENAI_API_KEY: "",
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "service-role-placeholder",
+      SAFETY_REFERENCE_VECTOR_SEARCH: ""
+    });
+
+    expect(status.nextApprovalDecisions).toEqual(preflightFixture.nextApprovalDecisions);
+    expect(status.approvalPacket.decisions).toEqual(preflightFixture.nextApprovalDecisions);
+    expect(status.runtimeDbProbe.message).toBe(runtimeProbeFixture.message);
+    expect(status.postMigrationVerification.nextAction).toBe(postMigrationFixture.nextAction);
+
+    expect({
+      valueTypes: {
+        ok: typeof status.ok,
+        stage: typeof status.stage,
+        gateId: typeof status.nextApprovalGate.id,
+        gateStatus: typeof status.nextApprovalGate.status,
+        runtimeStatus: typeof status.runtimeDbProbe.status,
+        verifierStatus: typeof status.postMigrationVerification.status,
+        canaryMode: typeof status.canary.mode,
+        uploadedCount: typeof status.postMigrationVerification.uploadedCount,
+        failedCheckIdsIsArray: Array.isArray(status.postMigrationVerification.failedCheckIds)
+      },
+      enums: {
+        stage: status.stage,
+        gateId: status.nextApprovalGate.id,
+        operatorGateId: status.operatorGate.gateId,
+        gateStatus: status.nextApprovalGate.status,
+        operatorStatus: status.operatorGate.status,
+        runtimeStatus: status.runtimeDbProbe.status,
+        verifierStatus: status.postMigrationVerification.status,
+        canaryMode: status.canary.mode
+      },
+      paths: {
+        report: status.artifacts.reportPath,
+        manifest: status.artifacts.manifestPath,
+        corpus: status.artifacts.corpusPath,
+        migration: status.artifacts.migrationPath,
+        script: status.artifacts.scriptPath,
+        verifier: status.postMigrationVerification.reportPath
+      }
+    }).toEqual({
+      valueTypes: {
+        ok: "boolean",
+        stage: "string",
+        gateId: "string",
+        gateStatus: "string",
+        runtimeStatus: "string",
+        verifierStatus: "string",
+        canaryMode: "string",
+        uploadedCount: "number",
+        failedCheckIdsIsArray: true
+      },
+      enums: {
+        stage: "ready-for-approval",
+        gateId: "apply-sif-only-migration",
+        operatorGateId: "apply-sif-only-migration",
+        gateStatus: "waiting",
+        operatorStatus: "approval-request-open",
+        runtimeStatus: runtimeProbeFixture.status,
+        verifierStatus: postMigrationFixture.status,
+        canaryMode: "embed-only"
+      },
+      paths: {
+        report: "evaluation\\sif-embedding-gate\\report.json",
+        manifest: "evaluation\\sif-embedding-gate\\sif-embedding-batch-manifest.json",
+        corpus: "evaluation\\sif-embedding-gate\\sif-embedding-corpus.jsonl",
+        migration: "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql",
+        script: "scripts/prepare_sif_embedding_corpus.mjs",
+        verifier: "evaluation/sif-embedding-gate/post-migration-verify.json"
+      }
+    });
+  });
+
+  it("matches the complete base machine fixture hash outside Markdown", () => {
+    const status = getSifEmbeddingGateStatus({
+      OPENAI_API_KEY: "",
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "service-role-placeholder",
+      SAFETY_REFERENCE_VECTOR_SEARCH: ""
+    });
+    const jsonValue: unknown = JSON.parse(JSON.stringify(status));
+    const canonicalFixture = JSON.stringify(canonicalizeMachineFixture(jsonValue));
+    const fixtureHash = createHash("sha256").update(canonicalFixture).digest("hex");
+
+    expect(fixtureHash).toBe("67dc41b064dad095c4bda8a8e0edf001ed6ac4a9dbcc81b66c86c9cd2d366eda");
   });
 });
