@@ -7,9 +7,8 @@
 
 
  Test Files  12 passed (12)
-      Tests  183 passed (183)
-   Start at  22:33:55
-   Duration  35.75s (transform 2.07s, setup 0ms, import 6.19s, tests 18.46s, environment 2ms)
+      Tests  193 passed (193)
+   Start at  23:06:52
+   Duration  20.73s (transform 1.53s, setup 0ms, import 4.84s, tests 7.65s, environment 1ms)
 
 EXIT_CODE=0
-ELAPSED_SECONDS=39.3

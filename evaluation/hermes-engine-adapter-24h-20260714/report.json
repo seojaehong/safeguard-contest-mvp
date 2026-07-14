@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-14T22:40:16.7514542+09:00",
+  "generatedAt": "2026-07-14T23:08:00.6414138+09:00",
   "authoritativeBaseSha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
   "branch": "feat/hermes-engine-adapter-24h-20260714",
   "scope": {
@@ -12,8 +12,8 @@
     "dataFilesChanged": 0
   },
   "tdd": {
-    "redCasesObserved": 13,
-    "greenCasesResolved": 13,
+    "redCasesObserved": 18,
+    "greenCasesResolved": 18,
     "cases": [
       "explicit local Hermes mode gate",
       "versioned authority metadata",
@@ -27,7 +27,12 @@
       "Harness retrieval fail-closed planner gate",
       "packet-attested planner text output",
       "broker-authenticated site/org attribution",
-      "adapter-reserved Harness invocation"
+      "adapter-reserved Harness invocation",
+      "grounded non-empty SIF and KOSHA preload",
+      "required search lane success",
+      "current prompt question binding",
+      "immutable packet content digest",
+      "nested retrieval status validation"
     ]
   },
   "verification": {
@@ -41,9 +46,9 @@
     "focusedFinal": {
       "status": "passed",
       "testFilesPassed": 12,
-      "testsPassed": 183,
+      "testsPassed": 193,
       "testsFailed": 0,
-      "durationSeconds": 35.75,
+      "durationSeconds": 20.73,
       "exitCode": 0
     },
     "typecheckFinal": {
@@ -86,7 +91,7 @@
       "command": "npm.cmd run build",
       "exitCode": 0,
       "nextVersion": "15.5.20",
-      "compileSeconds": 17.4,
+      "compileSeconds": 14.4,
       "staticPagesGenerated": 27,
       "staticPagesExpected": 27
     }
@@ -148,9 +153,9 @@
         "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism",
         "exitCode": 0,
         "testFilesPassed": 12,
-        "testsPassed": 183,
+        "testsPassed": 193,
         "testsFailed": 0,
-        "durationSeconds": 35.75,
+        "durationSeconds": 20.73,
         "log": "evaluation/hermes-engine-adapter-24h-20260714/focused-final.txt"
       },
       {
@@ -163,7 +168,7 @@
         "name": "buildFinal",
         "command": "npm.cmd run build",
         "exitCode": 0,
-        "compileSeconds": 17.4,
+        "compileSeconds": 14.4,
         "staticPages": "27/27",
         "log": "evaluation/hermes-engine-adapter-24h-20260714/build-final.txt"
       }
@@ -193,7 +198,7 @@
       {
         "id": "packet-attested-planner-output",
         "red": "planner emitted text without packet proof",
-        "green": "missing or substituted packet identity fails before text emission"
+        "green": "missing packet proof fails before text emission; later review replaced identity comparison with content digest"
       },
       {
         "id": "broker-auth-attribution",
@@ -217,6 +222,67 @@
       "tokenBound": false,
       "userIdentityPropagatedToMcpContext": false
     }
+  },
+  "independentReviewRemediation": {
+    "baseSha": "b5ee3de6183ebef4cfa30316dbfdfc4b330592e5",
+    "reviewVerdict": "rejected",
+    "findingCounts": { "P2": 2 },
+    "observedRedCases": [
+      {
+        "id": "empty-shaped-packet",
+        "result": "1 failed, 14 skipped; planner was called"
+      },
+      {
+        "id": "required-search-ok-false",
+        "result": "1 failed, 15 skipped; planner was called"
+      },
+      {
+        "id": "preload-other-question",
+        "result": "1 failed, 16 skipped; planner was called"
+      },
+      {
+        "id": "same-object-mutation",
+        "result": "1 failed, 17 skipped; text was emitted"
+      },
+      {
+        "id": "partial-retrieval-status",
+        "result": "1 failed, 22 skipped; planner was called"
+      }
+    ],
+    "groundingGate": {
+      "requiredSearches": ["sif_cases", "supporting_evidence"],
+      "requiresSearchOk": true,
+      "requiresConfiguredRetrieval": true,
+      "requiresNonEmptySif": true,
+      "requiresVerifiedCurrentKosha": true,
+      "requiresReadyOntology": true,
+      "requiresCompleteDocumentCoverage": true,
+      "shapedNaturalizeOnlyPacketIsSufficient": false
+    },
+    "contentAttestation": {
+      "questionBinding": "packet.question equals input.prompt.trim()",
+      "prePlannerClone": "structuredClone",
+      "immutability": "recursive Object.freeze plus DeepReadonly type",
+      "digest": "SHA-256 of key-sorted canonical JSON",
+      "outputComparison": "attested content digest, not object identity"
+    },
+    "behaviorTests": {
+      "hermesFilePassed": 24,
+      "covers": [
+        "ok false",
+        "empty packet",
+        "top-level partial packet",
+        "partial retrieval status",
+        "unresolved KOSHA",
+        "preload other question",
+        "same-object mutation",
+        "output other question",
+        "same-content clone acceptance",
+        "trimmed current prompt binding"
+      ]
+    },
+    "productionFileCount": 10,
+    "authoritativeIntegrationPerformed": false
   },
   "securityBoundary": {
     "contractVersion": "engine-adapter/v1",

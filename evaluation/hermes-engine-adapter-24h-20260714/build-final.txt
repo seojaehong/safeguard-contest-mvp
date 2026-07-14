@@ -5,7 +5,7 @@
    ▲ Next.js 15.5.20
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 17.4s
+ ✓ Compiled successfully in 14.4s
    Linting and checking validity of types ...
    Collecting page data ...
    Generating static pages (0/27) ...
@@ -96,6 +96,5 @@ Route (app)                                     Size  First Load JS
 
 ○  (Static)   prerendered as static content
 ƒ  (Dynamic)  server-rendered on demand
-
 
 EXIT_CODE=0
