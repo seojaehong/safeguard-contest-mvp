@@ -4,7 +4,7 @@ import { enhanceLegalEvidenceMappings, generateAnswer, type AnswerGenerationResu
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
-import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
+import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverables, type AiMode } from "./ai-deliverables";
 import {
   deriveSafetyReferenceOperationalView,
   deriveSafetyReferenceRetrievalModeFromItems,
@@ -45,12 +45,59 @@ import {
   buildDbHarnessPacket,
   buildDbHarnessPracticalPoints,
   buildHarnessPromptContext,
+  buildPublicDbHarnessPacket,
+  hasRelevantKoshaParent,
   type DbHarnessPacket,
   type HarnessImprovement,
   type HarnessMemoryInput
 } from "./db-harness";
 
 const log = createLogger("search");
+
+function selectParentlessKoshaResponseDeliverables(
+  deliverables: AskResponse["deliverables"]
+): AskResponse["deliverables"] {
+  return {
+    workpackSummaryDraft: deliverables.workpackSummaryDraft,
+    riskAssessmentDraft: deliverables.riskAssessmentDraft,
+    workPlanDraft: deliverables.workPlanDraft,
+    ...(deliverables.workPermitDraft !== undefined ? { workPermitDraft: deliverables.workPermitDraft } : {}),
+    tbmBriefing: deliverables.tbmBriefing,
+    tbmLogDraft: deliverables.tbmLogDraft,
+    safetyEducationRecordDraft: deliverables.safetyEducationRecordDraft,
+    emergencyResponseDraft: deliverables.emergencyResponseDraft,
+    photoEvidenceDraft: deliverables.photoEvidenceDraft,
+    foreignWorkerBriefing: deliverables.foreignWorkerBriefing,
+    foreignWorkerTransmission: deliverables.foreignWorkerTransmission,
+    foreignWorkerLanguages: deliverables.foreignWorkerLanguages,
+    safetyEducationPoints: deliverables.safetyEducationPoints,
+    tbmQuestions: deliverables.tbmQuestions,
+    kakaoMessage: deliverables.kakaoMessage
+  };
+}
+
+function selectParentlessKoshaAiDeliverables(deliverables: AiDeliverables): AiDeliverables {
+  return {
+    ...(deliverables.workpackSummaryDraft !== undefined ? { workpackSummaryDraft: deliverables.workpackSummaryDraft } : {}),
+    ...(deliverables.riskAssessmentDraft !== undefined ? { riskAssessmentDraft: deliverables.riskAssessmentDraft } : {}),
+    ...(deliverables.workPlanDraft !== undefined ? { workPlanDraft: deliverables.workPlanDraft } : {}),
+    ...(deliverables.tbmBriefing !== undefined ? { tbmBriefing: deliverables.tbmBriefing } : {}),
+    ...(deliverables.tbmLogDraft !== undefined ? { tbmLogDraft: deliverables.tbmLogDraft } : {}),
+    ...(deliverables.safetyEducationRecordDraft !== undefined
+      ? { safetyEducationRecordDraft: deliverables.safetyEducationRecordDraft }
+      : {}),
+    ...(deliverables.emergencyResponseDraft !== undefined ? { emergencyResponseDraft: deliverables.emergencyResponseDraft } : {}),
+    ...(deliverables.photoEvidenceDraft !== undefined ? { photoEvidenceDraft: deliverables.photoEvidenceDraft } : {}),
+    ...(deliverables.foreignWorkerBriefing !== undefined ? { foreignWorkerBriefing: deliverables.foreignWorkerBriefing } : {}),
+    ...(deliverables.foreignWorkerTransmission !== undefined
+      ? { foreignWorkerTransmission: deliverables.foreignWorkerTransmission }
+      : {}),
+    ...(deliverables.foreignWorkerLanguages !== undefined ? { foreignWorkerLanguages: deliverables.foreignWorkerLanguages } : {}),
+    ...(deliverables.safetyEducationPoints !== undefined ? { safetyEducationPoints: deliverables.safetyEducationPoints } : {}),
+    ...(deliverables.tbmQuestions !== undefined ? { tbmQuestions: deliverables.tbmQuestions } : {}),
+    ...(deliverables.kakaoMessage !== undefined ? { kakaoMessage: deliverables.kakaoMessage } : {})
+  };
+}
 
 function safeFailureContext(error: unknown): { errorType: string } {
   return { errorType: error instanceof Error ? error.name : typeof error };
@@ -372,6 +419,14 @@ function hasConflictingExplicitRiskTags(
   const supportingTags = normalizeTags(supporting.risk_tags);
   if (!primaryTags.size || !supportingTags.size) return false;
   return ![...primaryTags].some((tag) => supportingTags.has(tag));
+}
+
+function buildKoshaParentEvidenceReadyIds(packet: DbHarnessPacket): Set<string> {
+  const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
+  return new Set(packet.supportingEvidence
+    .filter(isKoshaTechnicalReference)
+    .filter((item) => hasRelevantKoshaParent(item, parentCandidates))
+    .map((item) => item.id));
 }
 
 export function buildSafetyReferenceRiskRows(
@@ -1110,15 +1165,15 @@ function isVerifiedCurrentKoshaCompressed(item: CompressedSafetyReference): bool
 
 function buildRequiredKoshaCitations(
   items: readonly SafetyReferenceItem[],
-  options: { parentEvidenceReady: boolean }
+  options: { parentEvidenceReadyIds: ReadonlySet<string> }
 ) {
-  if (!options.parentEvidenceReady) return [];
   const uniqueVerified = new Map<string, SafetyReferenceItem>();
   for (const item of items) {
     const decision = getKoshaGroundingDecision(item);
     const metadata = decision?.metadata;
     if (
       !isKoshaTechnicalReference(item)
+      || !options.parentEvidenceReadyIds.has(item.id)
       || decision?.status !== "verified_current"
       || decision.mandatoryCitationEligible !== true
       || !metadata
@@ -1154,15 +1209,17 @@ function formatSafetyReferencePromptLine(
 
 function formatSafetyReferenceAppendix(
   items: CompressedSafetyReference[],
-  options: { parentEvidenceReady: boolean }
+  options: { parentEvidenceReadyIds: ReadonlySet<string> }
 ): string {
   if (!items.length) return "";
   const koshaItems = items.filter(isTechnicalKoshaCompressed);
-  const koshaPrimary = options.parentEvidenceReady
-    ? koshaItems.filter(isVerifiedCurrentKoshaCompressed)
-    : [];
+  const koshaPrimary = koshaItems.filter((item) => (
+    isVerifiedCurrentKoshaCompressed(item)
+    && options.parentEvidenceReadyIds.has(item.id)
+  ));
   const koshaReviewRequired = koshaItems.filter((item) => (
-    !isVerifiedCurrentKoshaCompressed(item) || !options.parentEvidenceReady
+    !isVerifiedCurrentKoshaCompressed(item)
+    || !options.parentEvidenceReadyIds.has(item.id)
   ));
   const others = items.filter((item) => !isTechnicalKoshaCompressed(item));
   const blocks: string[] = [];
@@ -1179,7 +1236,8 @@ function formatSafetyReferenceAppendix(
     blocks.push("");
     blocks.push("[KOSHA 기술지침/기술지원규정 검토 필요]");
     for (const item of koshaReviewRequired) {
-      const parentMissing = isVerifiedCurrentKoshaCompressed(item) && !options.parentEvidenceReady;
+      const parentMissing = isVerifiedCurrentKoshaCompressed(item)
+        && !options.parentEvidenceReadyIds.has(item.id);
       blocks.push(
         `- ${item.kindLabel}: ${item.title} / reason=${parentMissing ? "parent-evidence-missing" : item.groundingReason || "metadata-absent"} / quality=${item.quality || "review_required"} / lifecycle=${item.lifecycle || "unknown"} / SIF·직접 근거 확인 전 본문·통제문구·필수 인용에 사용하지 않음`
       );
@@ -1892,19 +1950,18 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
                   }
                 : undefined
             });
-            const koshaParentEvidenceReadyEarly = dbHarnessPacket.directEvidence.length > 0
-              || dbHarnessPacket.sifCases.length > 0;
+            const koshaParentEvidenceReadyIdsEarly = buildKoshaParentEvidenceReadyIds(dbHarnessPacket);
             const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
             const compressed = compressSafetyReferenceMatches(safeRefItems, 5);
             const koshaPrimaryRefsEarly = buildRequiredKoshaCitations(safeRefItems, {
-              parentEvidenceReady: koshaParentEvidenceReadyEarly
+              parentEvidenceReadyIds: koshaParentEvidenceReadyIdsEarly
             });
             const koshaLinesEarly = [
               ...(ksha?.references ?? []).slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.url}`),
               ...compressed.slice(0, 5).map((item, index) => formatSafetyReferencePromptLine(
                 item,
                 Math.min(5, (ksha?.references ?? []).length) + index + 1,
-                { parentEvidenceReady: koshaParentEvidenceReadyEarly }
+                { parentEvidenceReady: koshaParentEvidenceReadyIdsEarly.has(item.id) }
               ))
             ].slice(0, 12);
             const trainingLinesEarly = (trng?.recommendations ?? []).slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.institution} | ${r.fitLabel || ""}`);
@@ -2080,10 +2137,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         message: safetyReference.message
       }
     });
-    const koshaParentEvidenceReady = dbHarnessEvidencePacket.directEvidence.length > 0
-      || dbHarnessEvidencePacket.sifCases.length > 0;
-    const parentlessKoshaReviewRequired = !koshaParentEvidenceReady
-      && dbHarnessEvidencePacket.supportingEvidence.some(isKoshaTechnicalReference);
+    const koshaParentEvidenceReadyIds = buildKoshaParentEvidenceReadyIds(dbHarnessEvidencePacket);
+    const parentlessKoshaReviewRequired = dbHarnessEvidencePacket.supportingEvidence.some((item) => (
+      isKoshaTechnicalReference(item)
+      && !koshaParentEvidenceReadyIds.has(item.id)
+    ));
     const citations = allResults[8].status === "fulfilled" ? allResults[8].value : (
       log.warn("citationsPromise failed", safeFailureContext((allResults[8] as PromiseRejectedResult).reason)),
       mockSearchResults.slice(0, 4)
@@ -2156,7 +2214,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // only an honest review-state marker and never expose their body or control text.
     const safetyReferenceCompressed = compressSafetyReferenceMatches(safetyReference.items, 5);
     const safetyReferenceAppendix = formatSafetyReferenceAppendix(safetyReferenceCompressed, {
-      parentEvidenceReady: koshaParentEvidenceReady
+      parentEvidenceReadyIds: koshaParentEvidenceReadyIds
     });
 
     // Fix 6 continued: consume deliverables from the parallel Promise (allResults[9]).
@@ -2167,7 +2225,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         aiModeAppliedDetail = "AI_MODE=enhanced (DB 하네스 row-first: 위험성평가 row 확정, TBM 구조 deterministic 조립)";
       } else if (deliverablesResult) {
         const { deliverables, diagnostics } = deliverablesResult;
-        aiBodies = deliverables;
+        aiBodies = parentlessKoshaReviewRequired
+          ? selectParentlessKoshaAiDeliverables(deliverables)
+          : deliverables;
         const filled = Object.keys(aiBodies);
         const groupBrief = diagnostics.groupResults
           .map((g) => `${g.group}=${g.status === "fulfilled" ? "ok" : "fallback"}`)
@@ -2177,8 +2237,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         aiModeAppliedDetail = `AI_MODE=${aiMode} 문서 생성기 미응답 → 하네스 템플릿 보강`;
       }
     }
+    const responseDeliverables = parentlessKoshaReviewRequired
+      ? selectParentlessKoshaResponseDeliverables(response.deliverables)
+      : response.deliverables;
     const baseDeliverables = {
-      ...response.deliverables,
+      ...responseDeliverables,
       ...Object.fromEntries(Object.entries(aiBodies).filter(([key, v]) => (
         v != null && key !== "structuredRiskRows" && key !== "structuredRiskRowsValidationIssues"
       )))
@@ -2263,6 +2326,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const dbHarnessSummary = summarizeDbHarnessPacket(dbHarnessPacket);
     const dbHarnessAnswer = buildDbHarnessAnswer(dbHarnessPacket);
     const dbHarnessPracticalPoints = buildDbHarnessPracticalPoints(dbHarnessPacket);
+    const publicDbHarnessPacket = buildPublicDbHarnessPacket(dbHarnessPacket);
     const deliverablesExecutionTrace = deliverablesResult?.diagnostics.trace ?? {
       attempted: false,
       provider: null,
@@ -2319,7 +2383,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           message: safetyReference.message,
           items: safetyReference.items.slice(0, 8).map((item) => (
             buildSafetyReferenceSurfaceItem(item, safetyReference.retrievalMode, {
-              parentEvidenceReady: koshaParentEvidenceReady
+              parentEvidenceReady: !isKoshaTechnicalReference(item)
+                || koshaParentEvidenceReadyIds.has(item.id)
             })
           ))
         },
@@ -2432,7 +2497,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         ...(structuredRiskRows.length ? ["structuredRiskRows"] : [])
       ]),
       dbHarness: {
-        packet: dbHarnessPacket,
+        packet: publicDbHarnessPacket,
         promptContext: dbHarnessPromptContext,
         summary: dbHarnessSummary
       },

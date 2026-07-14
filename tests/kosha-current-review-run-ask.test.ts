@@ -1,10 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
-import type { AiDeliverables, AiDeliverablesDiagnostics, GenerateAllOptions } from "@/lib/ai-deliverables";
+import type { AiDeliverables, AiDeliverablesDiagnostics, AiMode, GenerateAllOptions } from "@/lib/ai-deliverables";
+import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { runAsk } from "@/lib/search";
 import type { SafetyReferenceItem, SafetyReferenceSearchResult } from "@/lib/safety-reference-catalog";
-import type { SearchResult } from "@/lib/types";
+import type { SearchResult, TbmRiskLink } from "@/lib/types";
 
 const mocks = vi.hoisted(() => ({
   enhanceLegalEvidenceMappings: vi.fn(),
@@ -113,19 +114,65 @@ function providerResult(deliverables: AiDeliverables = {}) {
   return { deliverables, diagnostics };
 }
 
+type KoshaOnlyFixture = ReturnType<typeof configureKoshaOnlySearch>;
+type ProviderActionSurface = Pick<AiDeliverables, "structuredRiskRows" | "tbmRiskLinks">;
+
+function providerActionSurface(fixture: KoshaOnlyFixture): ProviderActionSurface {
+  const riskRow: RiskAssessmentRow = {
+    location: "provider location",
+    process: "provider process",
+    task: "provider task",
+    equipment: "provider equipment",
+    hazard: fixture.hazard,
+    fourM: "Man",
+    accidentType: "other",
+    currentControls: fixture.control,
+    likelihood: 3,
+    severity: 4,
+    riskLevel: "high",
+    additionalControls: fixture.action,
+    owner: "provider owner",
+    due: "provider due",
+    verification: "provider verification",
+    verificationStatus: "planned",
+    verificationDate: "2026-07-14",
+    verificationChecker: "provider checker",
+    whyLikelihood: "provider likelihood",
+    whySeverity: "provider severity",
+    evidenceRefs: [fixture.evidenceRef]
+  };
+  const tbmRiskLink: TbmRiskLink = {
+    riskRowIndex: 0,
+    hazard: fixture.hazard,
+    control: fixture.control,
+    weatherSignal: "provider weather",
+    confirmQuestion: fixture.action,
+    owner: "provider owner",
+    verification: "provider verification",
+    evidenceRefs: [fixture.evidenceRef]
+  };
+  return {
+    structuredRiskRows: [riskRow],
+    tbmRiskLinks: [tbmRiskLink]
+  };
+}
+
 function configureKoshaOnlySearch() {
   const control = "EXCLUDED_RUNASK_KOSHA_ONLY_CONTROL";
   const body = "EXCLUDED_RUNASK_KOSHA_ONLY_BODY";
+  const action = "EXCLUDED_RUNASK_KOSHA_ACTION 감시인 지정";
+  const evidenceRef = "EXCLUDED_RUNASK_KOSHA_EVIDENCE_REF";
+  const hazard = "EXCLUDED_RUNASK_KOSHA_HAZARD";
   const reference = retrievalReference("verified-kosha-only", "local-ranked");
   reference.item_type = "technical-guideline";
   reference.title = "KOSHA 단독 지게차 기술지침";
-  reference.summary = "직접 근거 없이 KOSHA 기술지침만 검색된 상태";
+  reference.summary = action;
   reference.body = body;
   reference.controls = [control];
   reference.primary_documents = ["위험성평가표", "TBM 브리핑", "TBM 기록"];
   reference.kosha_guide = {
     ...reference.kosha_guide!,
-    evidenceRef: `KOSHA 근거 p.1: ${control}`
+    evidenceRef
   };
   mocks.searchSafetyReferences.mockImplementation(async (options: { query: string; itemType?: string }) => {
     if (options.itemType === "technical-guideline") {
@@ -133,7 +180,7 @@ function configureKoshaOnlySearch() {
     }
     return searchResult("unconfigured", [], options.query);
   });
-  return { body, control, reference };
+  return { action, body, control, evidenceRef, hazard, reference };
 }
 
 describe("current-base runAsk retrieval provenance", () => {
@@ -281,6 +328,226 @@ describe("current-base runAsk retrieval provenance", () => {
     expect(response.deliverables.riskAssessmentDraft).not.toContain(fixture.body);
     expect(response.deliverables.riskAssessmentDraft).not.toContain(fixture.control);
   }, 30_000);
+
+  it.each(["enhanced", "full"] satisfies AiMode[])(
+    "rejects parentless KOSHA provider action surfaces in %s mode",
+    async (aiMode) => {
+      const fixture = configureKoshaOnlySearch();
+      const attack = providerActionSurface(fixture);
+      mocks.generateAnswer.mockImplementation(async (question: string, citations: SearchResult[]) => {
+        const response = buildMockAskResponse(
+          question,
+          citations.length ? citations : mockSearchResults.slice(0, 2),
+          "mock",
+          "provider action-surface attack"
+        );
+        const attackedDeliverables = { ...response.deliverables, ...attack };
+        response.deliverables = attackedDeliverables;
+        return {
+          response,
+          trace: { provider: "mock", model: null, fallbackUsed: false }
+        };
+      });
+      mocks.generateAllDeliverablesWithDiagnostics.mockResolvedValue(providerResult(attack));
+
+      const response = await runAsk("지게차 보행자 동선 충돌", { aiMode });
+      const generationInputs = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.map(([input]) => (
+        input as GenerateAllOptions
+      ));
+      const serializedPrompt = JSON.stringify({
+        dbHarness: response.dbHarness?.promptContext,
+        generationInputs
+      });
+      const serializedCitations = JSON.stringify({
+        citations: response.citations,
+        safetyReferences: response.externalData.safetyReference?.items
+      });
+      const serializedResponse = JSON.stringify(response);
+
+      for (const forbidden of [fixture.hazard]) {
+        expect(serializedPrompt).not.toContain(forbidden);
+        expect(serializedCitations).not.toContain(forbidden);
+        expect(serializedResponse).not.toContain(forbidden);
+      }
+    },
+    30_000
+  );
+
+  it.each(["enhanced", "full"] satisfies AiMode[])(
+    "keeps unrelated direct evidence from unlocking KOSHA action surfaces in %s mode",
+    async (aiMode) => {
+      const fixture = configureKoshaOnlySearch();
+      const unrelatedParent = retrievalReference("unrelated-electrical-parent", "ranked");
+      unrelatedParent.category = "전기";
+      unrelatedParent.subcategory = "배전반";
+      unrelatedParent.title = "배전반 충전부 감전 직접 근거";
+      unrelatedParent.summary = "배전반 충전부 접촉에 따른 감전 위험";
+      unrelatedParent.keywords = ["배전반", "충전부", "감전"];
+      unrelatedParent.risk_tags = ["감전"];
+      unrelatedParent.controls = ["배전반 전원 차단과 잠금표지 확인"];
+      const query = "지게차 충돌 및 배전반 감전";
+      mocks.searchSafetyReferences.mockResolvedValue(searchResult(
+        "hybrid-local-supabase",
+        [fixture.reference, unrelatedParent],
+        query
+      ));
+      const attack = providerActionSurface(fixture);
+      mocks.generateAnswer.mockImplementation(async (question: string, citations: SearchResult[]) => {
+        const response = buildMockAskResponse(
+          question,
+          citations.length ? citations : mockSearchResults.slice(0, 2),
+          "mock",
+          "unrelated parent action-surface attack"
+        );
+        const attackedDeliverables = { ...response.deliverables, ...attack };
+        response.deliverables = attackedDeliverables;
+        return {
+          response,
+          trace: { provider: "mock", model: null, fallbackUsed: false }
+        };
+      });
+      mocks.generateAllDeliverablesWithDiagnostics.mockResolvedValue(providerResult(attack));
+
+      const response = await runAsk(query, { aiMode });
+      const generationInputs = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.map(([input]) => (
+        input as GenerateAllOptions
+      ));
+      const serializedPrompt = JSON.stringify({
+        dbHarness: response.dbHarness?.promptContext,
+        generationInputs
+      });
+      const serializedCitations = JSON.stringify({
+        citations: response.citations,
+        safetyReferences: response.externalData.safetyReference?.items
+      });
+      const surfacedKosha = response.externalData.safetyReference?.items.find((item) => (
+        item.id === fixture.reference.id
+      ));
+
+      expect(response.dbHarness?.promptContext).toContain('"parentEvidenceReady":false');
+      for (const forbidden of [fixture.action, fixture.body, fixture.control, fixture.evidenceRef]) {
+        expect(serializedPrompt).not.toContain(forbidden);
+        expect(serializedCitations).not.toContain(forbidden);
+      }
+      expect(JSON.stringify(response)).not.toContain(fixture.hazard);
+      expect(surfacedKosha?.controls).toEqual([]);
+      expect(
+        surfacedKosha && "supportingCitationEligible" in surfacedKosha
+          ? surfacedKosha.supportingCitationEligible
+          : undefined
+      ).toBe(false);
+    },
+    30_000
+  );
+
+  it.each([
+    ["enhanced", "kosha-only"],
+    ["full", "kosha-only"],
+    ["enhanced", "unrelated-parent"],
+    ["full", "unrelated-parent"]
+  ] satisfies Array<[AiMode, "kosha-only" | "unrelated-parent"]>)(
+    "keeps the serialized %s response identity-only for a %s attack",
+    async (aiMode, parentScenario) => {
+      const fixture = configureKoshaOnlySearch();
+      const query = parentScenario === "kosha-only"
+        ? "지게차 보행자 동선 충돌"
+        : "지게차 충돌 및 배전반 감전";
+      if (parentScenario === "unrelated-parent") {
+        const unrelatedParent = retrievalReference("serialized-unrelated-electrical-parent", "ranked");
+        unrelatedParent.category = "전기";
+        unrelatedParent.subcategory = "배전반";
+        unrelatedParent.title = "배전반 충전부 감전 직접 근거";
+        unrelatedParent.summary = "배전반 충전부 접촉에 따른 감전 위험";
+        unrelatedParent.keywords = ["배전반", "충전부", "감전"];
+        unrelatedParent.risk_tags = ["감전"];
+        unrelatedParent.controls = ["배전반 전원 차단과 잠금표지 확인"];
+        mocks.searchSafetyReferences.mockResolvedValue(searchResult(
+          "hybrid-local-supabase",
+          [fixture.reference, unrelatedParent],
+          query
+        ));
+      }
+      const attack = providerActionSurface(fixture);
+      mocks.generateAnswer.mockImplementation(async (question: string, citations: SearchResult[]) => {
+        const response = buildMockAskResponse(
+          question,
+          citations.length ? citations : mockSearchResults.slice(0, 2),
+          "mock",
+          "serialized action-surface attack"
+        );
+        const attackedDeliverables = { ...response.deliverables, ...attack };
+        response.deliverables = attackedDeliverables;
+        return {
+          response,
+          trace: { provider: "mock", model: null, fallbackUsed: false }
+        };
+      });
+      mocks.generateAllDeliverablesWithDiagnostics.mockResolvedValue(providerResult(attack));
+
+      const response = await runAsk(query, { aiMode });
+      const generationInputs = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.map(([input]) => (
+        input as GenerateAllOptions
+      ));
+      const serializedPrompt = JSON.stringify({
+        dbHarness: response.dbHarness?.promptContext,
+        generationInputs
+      });
+      const serializedCitations = JSON.stringify({
+        citations: response.citations,
+        safetyReferences: response.externalData.safetyReference?.items
+      });
+      const serializedResponse = JSON.stringify(response);
+
+      expect(Object.prototype.hasOwnProperty.call(response.deliverables, "structuredRiskRows")).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(response.deliverables, "tbmRiskLinks")).toBe(false);
+      for (const forbidden of [
+        fixture.hazard,
+        fixture.action,
+        fixture.body,
+        fixture.control,
+        fixture.evidenceRef
+      ]) {
+        expect(serializedPrompt).not.toContain(forbidden);
+        expect(serializedCitations).not.toContain(forbidden);
+        expect(serializedResponse).not.toContain(forbidden);
+      }
+    },
+    30_000
+  );
+
+  it.each(["enhanced", "full"] satisfies AiMode[])(
+    "keeps a relevant direct parent eligible for KOSHA guidance in %s mode",
+    async (aiMode) => {
+      const fixture = configureKoshaOnlySearch();
+      const relevantParent = retrievalReference("relevant-forklift-direct-parent", "ranked");
+      mocks.searchSafetyReferences.mockResolvedValue(searchResult(
+        "hybrid-local-supabase",
+        [fixture.reference, relevantParent]
+      ));
+
+      const response = await runAsk("지게차 보행자 동선 충돌", { aiMode });
+      const surfacedKosha = response.externalData.safetyReference?.items.find((item) => (
+        item.id === fixture.reference.id
+      ));
+
+      expect(response.dbHarness?.promptContext).toContain('"parentEvidenceReady":true');
+      expect(response.dbHarness?.promptContext).toContain(fixture.body);
+      expect(response.dbHarness?.promptContext).toContain(fixture.evidenceRef);
+      expect(surfacedKosha?.controls.length).toBeGreaterThan(0);
+      expect(
+        surfacedKosha && "supportingCitationEligible" in surfacedKosha
+          ? surfacedKosha.supportingCitationEligible
+          : undefined
+      ).toBe(true);
+      if (aiMode === "full") {
+        const requiredTitles = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.flatMap(([input]) => (
+          (input as GenerateAllOptions).koshaPrimaryRefs || []
+        )).map((reference) => reference.title);
+        expect(requiredTitles).toContain(fixture.reference.title);
+      }
+    },
+    30_000
+  );
 
   it("omits structured risk rows and TBM links for a KOSHA-only full-mode packet", async () => {
     configureKoshaOnlySearch();
