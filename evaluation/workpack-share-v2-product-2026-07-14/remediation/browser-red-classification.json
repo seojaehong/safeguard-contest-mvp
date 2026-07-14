@@ -1,0 +1,207 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-browser-red-classification/v1",
+  "rejectedProductCommit": "bec9dd71f2a249bc184abea477e911afd10845ca",
+  "rejectedProductTree": "7bf80b0c99f43c1e71adff00274d035a0bc61fcd",
+  "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/red-browser-bec9dd71.log",
+  "run": {
+    "exitCode": 1,
+    "testFileCountFailed": 1,
+    "runnerTestsPassed": 113,
+    "runnerTestsFailed": 17,
+    "runnerTestCount": 130,
+    "durationSeconds": 1260.09,
+    "matrixRowsExecuted": 111,
+    "matrixRowsUnexecuted": 17
+  },
+  "classificationMethod": "Parse every Vitest FAIL case id, split environment/fixture/scale axes, then map the observed assertion seam to one product or browser-expectation cause.",
+  "groupCount": 3,
+  "groups": [
+    {
+      "category": "async_persistence_settlement_contract",
+      "count": 1,
+      "responsibility": "browser_test_expectation"
+    },
+    {
+      "category": "navigation_settlement_contract",
+      "count": 8,
+      "responsibility": "browser_test_expectation"
+    },
+    {
+      "category": "product_state_transition",
+      "count": 8,
+      "responsibility": "product"
+    }
+  ],
+  "rows": [
+    {
+      "caseId": "day-desktop:review_required:normal_100",
+      "theme": "day",
+      "viewport": "desktop",
+      "fixture": "review_required",
+      "scale": "normal_100",
+      "category": "navigation_settlement_contract",
+      "responsibility": "browser_test_expectation",
+      "minimalFix": "Wait for the real document owner, exercise its return control, and settle back on Share."
+    },
+    {
+      "caseId": "day-desktop:review_required:owning_root_text_200",
+      "theme": "day",
+      "viewport": "desktop",
+      "fixture": "review_required",
+      "scale": "owning_root_text_200",
+      "category": "navigation_settlement_contract",
+      "responsibility": "browser_test_expectation",
+      "minimalFix": "Wait for the real document owner, exercise its return control, and settle back on Share."
+    },
+    {
+      "caseId": "night-desktop:review_required:normal_100",
+      "theme": "night",
+      "viewport": "desktop",
+      "fixture": "review_required",
+      "scale": "normal_100",
+      "category": "navigation_settlement_contract",
+      "responsibility": "browser_test_expectation",
+      "minimalFix": "Wait for the real document owner, exercise its return control, and settle back on Share."
+    },
+    {
+      "caseId": "night-desktop:review_required:owning_root_text_200",
+      "theme": "night",
+      "viewport": "desktop",
+      "fixture": "review_required",
+      "scale": "owning_root_text_200",
+      "category": "navigation_settlement_contract",
+      "responsibility": "browser_test_expectation",
+      "minimalFix": "Wait for the real document owner, exercise its return control, and settle back on Share."
+    },
+    {
+      "caseId": "day-mobile:review_required:normal_100",
+      "theme": "day",
+      "viewport": "mobile",
+      "fixture": "review_required",
+      "scale": "normal_100",
+      "category": "navigation_settlement_contract",
+      "responsibility": "browser_test_expectation",
+      "minimalFix": "Wait for the real document owner, exercise its return control, and settle back on Share."
+    },
+    {
+      "caseId": "day-mobile:review_required:owning_root_text_200",
+      "theme": "day",
+      "viewport": "mobile",
+      "fixture": "review_required",
+      "scale": "owning_root_text_200",
+      "category": "navigation_settlement_contract",
+      "responsibility": "browser_test_expectation",
+      "minimalFix": "Wait for the real document owner, exercise its return control, and settle back on Share."
+    },
+    {
+      "caseId": "night-mobile:review_required:normal_100",
+      "theme": "night",
+      "viewport": "mobile",
+      "fixture": "review_required",
+      "scale": "normal_100",
+      "category": "navigation_settlement_contract",
+      "responsibility": "browser_test_expectation",
+      "minimalFix": "Wait for the real document owner, exercise its return control, and settle back on Share."
+    },
+    {
+      "caseId": "night-mobile:review_required:owning_root_text_200",
+      "theme": "night",
+      "viewport": "mobile",
+      "fixture": "review_required",
+      "scale": "owning_root_text_200",
+      "category": "navigation_settlement_contract",
+      "responsibility": "browser_test_expectation",
+      "minimalFix": "Wait for the real document owner, exercise its return control, and settle back on Share."
+    },
+    {
+      "caseId": "day-desktop:fail_dispatch:owning_root_text_200",
+      "theme": "day",
+      "viewport": "desktop",
+      "fixture": "fail_dispatch",
+      "scale": "owning_root_text_200",
+      "category": "async_persistence_settlement_contract",
+      "responsibility": "browser_test_expectation",
+      "minimalFix": "Wait for the persisted terminal state and dispatch-history link before exact assertions."
+    },
+    {
+      "caseId": "day-desktop:stale:normal_100",
+      "theme": "day",
+      "viewport": "desktop",
+      "fixture": "stale",
+      "scale": "normal_100",
+      "category": "product_state_transition",
+      "responsibility": "product",
+      "minimalFix": "Preserve the server stale reason until channel readiness can restart."
+    },
+    {
+      "caseId": "day-desktop:stale:owning_root_text_200",
+      "theme": "day",
+      "viewport": "desktop",
+      "fixture": "stale",
+      "scale": "owning_root_text_200",
+      "category": "product_state_transition",
+      "responsibility": "product",
+      "minimalFix": "Preserve the server stale reason until channel readiness can restart."
+    },
+    {
+      "caseId": "night-desktop:stale:normal_100",
+      "theme": "night",
+      "viewport": "desktop",
+      "fixture": "stale",
+      "scale": "normal_100",
+      "category": "product_state_transition",
+      "responsibility": "product",
+      "minimalFix": "Preserve the server stale reason until channel readiness can restart."
+    },
+    {
+      "caseId": "night-desktop:stale:owning_root_text_200",
+      "theme": "night",
+      "viewport": "desktop",
+      "fixture": "stale",
+      "scale": "owning_root_text_200",
+      "category": "product_state_transition",
+      "responsibility": "product",
+      "minimalFix": "Preserve the server stale reason until channel readiness can restart."
+    },
+    {
+      "caseId": "day-mobile:stale:normal_100",
+      "theme": "day",
+      "viewport": "mobile",
+      "fixture": "stale",
+      "scale": "normal_100",
+      "category": "product_state_transition",
+      "responsibility": "product",
+      "minimalFix": "Preserve the server stale reason until channel readiness can restart."
+    },
+    {
+      "caseId": "night-mobile:stale:normal_100",
+      "theme": "night",
+      "viewport": "mobile",
+      "fixture": "stale",
+      "scale": "normal_100",
+      "category": "product_state_transition",
+      "responsibility": "product",
+      "minimalFix": "Preserve the server stale reason until channel readiness can restart."
+    },
+    {
+      "caseId": "night-mobile:stale:owning_root_text_200",
+      "theme": "night",
+      "viewport": "mobile",
+      "fixture": "stale",
+      "scale": "owning_root_text_200",
+      "category": "product_state_transition",
+      "responsibility": "product",
+      "minimalFix": "Preserve the server stale reason until channel readiness can restart."
+    },
+    {
+      "caseId": "day-mobile:stale:owning_root_text_200",
+      "theme": "day",
+      "viewport": "mobile",
+      "fixture": "stale",
+      "scale": "owning_root_text_200",
+      "category": "product_state_transition",
+      "responsibility": "product",
+      "minimalFix": "Preserve the server stale reason until channel readiness can restart."
+    }
+  ]
+}

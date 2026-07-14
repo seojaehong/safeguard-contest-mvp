@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-remediation-scope-audit/v1",
+  "productCommit": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+  "remediationParent": "0befdc1799b419d7b379cbbbf10d7e2320cd7d46",
+  "productChangedFileCount": 24,
+  "strictAnyHitCount": 0,
+  "strictAnyHits": [],
+  "koshaProductPathCount": 0,
+  "koshaProductPaths": [],
+  "forbiddenMigrationSchemaDataPackageEnvPathCount": 0,
+  "forbiddenMigrationSchemaDataPackageEnvPaths": [],
+  "commercialStoreRemediationDiffCount": 0,
+  "ontologyOrKoshaFilesModifiedByRemediation": false,
+  "status": "pass"
+}

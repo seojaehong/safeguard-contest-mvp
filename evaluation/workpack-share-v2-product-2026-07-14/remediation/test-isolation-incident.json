@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-test-isolation-incident/v1",
+  "incidentId": "share-v2-concurrent-vitest-2026-07-14",
+  "status": "resolved_contaminated_results_invalid",
+  "observedConcurrentRuns": [
+    {
+      "runId": "contaminated-a",
+      "npmPid": 11628,
+      "vitestPid": 4552,
+      "nextTempServerPid": 7264,
+      "validEvidence": false
+    },
+    {
+      "runId": "contaminated-b",
+      "npmPid": 42560,
+      "vitestPid": 41672,
+      "nextTempServerPid": 40216,
+      "validEvidence": false
+    }
+  ],
+  "additionalLingeringWorkerPids": [
+    49500,
+    33132
+  ],
+  "cleanup": {
+    "terminatedVitestAndWorkerPids": [
+      4552,
+      41672,
+      49500,
+      33132
+    ],
+    "shareTestProcessesAfterCleanup": 0,
+    "shareTempNextProcessesAfterCleanup": 0,
+    "currentProcessCheckPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/process-isolation-final.log"
+  },
+  "evidencePolicy": {
+    "contaminatedRunCount": 2,
+    "contaminatedRunsCountedAsPass": 0,
+    "contaminatedRunsCountedAsFail": 0,
+    "reason": "Concurrent Vitest and temporary Next processes made timing, resources, and generated outputs race-contaminated."
+  },
+  "validReplacementRuns": [
+    {
+      "id": "isolated-precommit-unit",
+      "productCommit": "precommit_worktree",
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/precommit-isolated-unit.log",
+      "exitCode": 0,
+      "testFilesPassed": 22,
+      "testsPassed": 230,
+      "testsSkipped": 128,
+      "durationSeconds": 184.88,
+      "authoritativeFinalGate": false
+    },
+    {
+      "id": "isolated-postcommit-unit",
+      "productCommit": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-unit.log",
+      "exitCode": 0,
+      "testFilesPassed": 22,
+      "testsPassed": 230,
+      "testsSkipped": 128,
+      "durationSeconds": 188.51,
+      "authoritativeFinalGate": true
+    },
+    {
+      "id": "isolated-postcommit-browser",
+      "productCommit": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-browser.log",
+      "exitCode": 0,
+      "runnerTestsPassed": 130,
+      "matrixRowsExecuted": 128,
+      "durationSeconds": 1290.02,
+      "authoritativeFinalGate": true
+    }
+  ]
+}

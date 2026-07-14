@@ -1,0 +1,272 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-remediation-evidence/v1",
+  "evidenceId": "workpack-share-v2-remediation-2026-07-14",
+  "status": "IMPLEMENTATION_EVIDENCE_COMPLETE_REVIEW_PENDING",
+  "amendment": {
+    "amendmentId": "workpack-share-v2-product-2026-07-14",
+    "commit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+    "parentCommit": "4aed97940472d874b65008fd880b21c4e178d173",
+    "validatorPath": "evaluation/workpack-share-v2-product-2026-07-14/validate-contract-amendment.cjs"
+  },
+  "sourceIdentity": {
+    "exactBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "remediationParent": "0befdc1799b419d7b379cbbbf10d7e2320cd7d46",
+    "rejectedProductCommit": "bec9dd71f2a249bc184abea477e911afd10845ca",
+    "rejectedProductTree": "7bf80b0c99f43c1e71adff00274d035a0bc61fcd",
+    "productCommit": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+    "productParent": "bec9dd71f2a249bc184abea477e911afd10845ca",
+    "productTree": "7ce7fee2d80967f02d32b80e110067f581e1c07b",
+    "browserTestBlob": "840dbcea9708e7670297b4dddc46a7f3398eb42f",
+    "remoteRef": "refs/heads/feat/workpack-share-v2-product",
+    "remoteShaAtProductPush": "fc2bd1783fcc413981306f689d67bb6c659a985e"
+  },
+  "productCensus": {
+    "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/product-changed-files.json",
+    "sha256": "d3a8e85da9c3d386320a3bf6bd98ce30068fbfee0b2d5664c0104453791ce187",
+    "wholeSeriesCommitCount": 7,
+    "wholeSeriesChangedFileCount": 78,
+    "wholeSeriesAddedFileCount": 53,
+    "wholeSeriesModifiedFileCount": 25,
+    "remediationChangedFileCount": 24,
+    "remediationAddedFileCount": 6,
+    "remediationModifiedFileCount": 18,
+    "browserFixChangedFileCount": 2
+  },
+  "redRun": {
+    "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/red-browser-bec9dd71.log",
+    "logSha256": "7579260588765bec8fe1416f005d2735bb7bae4871b8ef664bd860488acdfaaf",
+    "metricsPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/red-browser-metrics-bec9dd71.json",
+    "metricsSha256": "5dc33828e05b50695862a19ea9fb1ded57c92426104252678a8066bb0bd122b7",
+    "classificationPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/browser-red-classification.json",
+    "classificationSha256": "6c3ad6cc0f97cde32e8a015aec99e8fb5e8f423490b5e095268bef28bc094003",
+    "exitCode": 1,
+    "runnerTestsPassed": 113,
+    "runnerTestsFailed": 17,
+    "runnerTestCount": 130,
+    "matrixRowsExecuted": 111,
+    "matrixRowsUnexecuted": 17,
+    "durationSeconds": 1260.09,
+    "productCauseCount": 8,
+    "browserExpectationCauseCount": 9
+  },
+  "isolationIncident": {
+    "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/test-isolation-incident.json",
+    "sha256": "3987fe42693687c8b9488d9a72b3fe185bf454304a062981bc1ef0ba78642c5b",
+    "contaminatedRunCount": 2,
+    "contaminatedRunsCountedAsPass": 0,
+    "currentShareTestProcessCount": 0,
+    "processLogPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/process-isolation-final.log",
+    "processLogSha256": "0d30eeb5b0b61e4317f312b3f29b53ff3ca13f73a17d68e25dbc1e1666d7d25f"
+  },
+  "verification": {
+    "unit": {
+      "command": "npm.cmd test -- focused Share suite --maxWorkers=1 --no-file-parallelism",
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-unit.log",
+      "logSha256": "e720396c3ea406623924abe0b00e6c22a4264aa7f222107f4ce0443700568f5e",
+      "exitCode": 0,
+      "testFilesPassed": 22,
+      "testsPassed": 230,
+      "testsSkipped": 128,
+      "durationSeconds": 188.51
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-typecheck.log",
+      "logSha256": "2bb48a757ba929b96e9b57e1980a44defd5ed22c0a30aaddc6433f61f0d739fa",
+      "exitCode": 0
+    },
+    "staticAudit": {
+      "command": "npm.cmd run audit:frontend-consistency",
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-static-audit.log",
+      "logSha256": "5926399225f6630bcdbd91b906c164f6bb67343b9b4a47ae3aa1a7451bdd6113",
+      "exitCode": 0,
+      "violationCount": 0,
+      "coverageIssueCount": 0,
+      "importantDeclarationCount": 0
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-build.log",
+      "logSha256": "1d808754f35cd9e123861e54ad7ab65b134fc52eb45039e128dd59b7f4ba5939",
+      "exitCode": 0,
+      "nextVersion": "15.5.20",
+      "staticPagesGenerated": 27
+    },
+    "browser": {
+      "command": "$env:WORKPACK_SHARE_V2_BROWSER='1'; npm.cmd test -- tests/workpack-share-v2-browser.test.ts --maxWorkers=1 --no-file-parallelism",
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-browser.log",
+      "logSha256": "1f924bfd7938ee168713e3dfeba9893ede47993c0ccaec4503d1c054ffd36ab7",
+      "exitCode": 0,
+      "runnerTestsPassed": 130,
+      "durationSeconds": 1290.02
+    }
+  },
+  "browser": {
+    "metricsPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/browser-metrics.json",
+    "metricsSha256": "5b6fb4d65a98451a0fe1938901920ee003eb17c70b476f0f7fe533749cc9a032",
+    "matrixRowsExpected": 128,
+    "matrixRowsExecuted": 128,
+    "matrixRowsUnexecuted": 0,
+    "uniqueMatrixRows": 128,
+    "mobile390x844Rows": 64,
+    "legacy391Rows": 0,
+    "owningRootText200Rows": 64,
+    "rootAttributeMutationMaximum": 1,
+    "descendantInlineMutationTotal": 0,
+    "directLeafInlineMutationTotal": 0,
+    "pseudoFailureCount": 0,
+    "maximumHorizontalOverflowCssPx": 0,
+    "maximumPanelOverflowCssPx": 0,
+    "touchTargetFailureCount": 0,
+    "overlapFailureCount": 0,
+    "nestedScrollFailureCount": 0,
+    "clippedTextFailureCount": 0,
+    "languageAuthorityCheckCount": 192,
+    "reviewVariantCheckCount": 80,
+    "staleBindingVariantCheckCount": 32
+  },
+  "serverAuthority": {
+    "channelResolverRequestField": "requestedChannels",
+    "actualRouteClientContractTested": true,
+    "browserMockDelegatesTypedContract": true,
+    "acceptedAndPartialRequireConfiguredProvider": true,
+    "unconfiguredProviderState": "blocked",
+    "unconfiguredProviderCalled": false,
+    "providerReceiptStrictlyParsed": true,
+    "durableIdempotencyStore": "workpack_share_sessions.access_policy.dispatchGate",
+    "durableIdempotencyCasColumn": "workpack_share_sessions.updated_at",
+    "workflowRouteOwnsDispatchLogPersistence": true,
+    "clientAuthoredDispatchLogsRejected": true,
+    "noDatabaseMigration": true,
+    "externalCapabilityBlocker": "Live acceptance remains blocked unless authenticated Supabase storage, the live dispatch flag, a live channel runtime, and a configured n8n relay URL/token are all available."
+  },
+  "integration": {
+    "currentIntegrationHead": "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
+    "previousIntegrationHead": "ea7aa7223a056c884d5b0ba55563d602af328451",
+    "currentMergeTreeExitCode": 0,
+    "currentMergeTreeResultTree": "d370929311230df359aad787905fefbc6b018b34",
+    "currentMainPathOverlapCount": 0,
+    "koshaDeltaPathCount": 26,
+    "koshaPathOverlapCount": 0,
+    "wholeSeriesGitCherryPlusCount": 7,
+    "ontologyCandidate": "ff093fae30c331816f0068f9075b91b151d05813",
+    "ontologyMergeBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "ontologyPathOverlapCount": 5,
+    "ontologyContentConflictCount": 3,
+    "preservesRevision": true,
+    "preservesUpdatedAt": true,
+    "preservesEvidenceSummary": true,
+    "preservesConfirmationCas": true,
+    "preservesDispatchCas": true,
+    "directIntegrationReadinessClaimed": false,
+    "semanticConflictReviewRequired": true,
+    "adoptionPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/integration-adoption.json",
+    "adoptionSha256": "6d0dccd8b9cd31c4b3693015200ea7cb835e82b64705f9a51b47219f9ae677ae",
+    "conflictContractPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/ontology-conflict-contract.json",
+    "conflictContractSha256": "09d98569f552fe41d6fa1cb6258997ae6979700e1b02a2489e1347a1a5bab89e"
+  },
+  "generatedArtifacts": {
+    "restorationPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/generated-artifact-restoration.json",
+    "restorationSha256": "ba5286d2d9bfd0d411dd38a35df8792348227a32c2f47e429dd5835e5ae423ce",
+    "trackedPngFileCount": 16,
+    "mismatchCount": 0,
+    "includedInProductCommitCount": 0
+  },
+  "reviewBoundary": {
+    "freshIndependentReviewRequired": true,
+    "freshIndependentReviewStatus": "pending",
+    "selfApproved": false,
+    "integratedIntoMain": false,
+    "completionClaim": "implementation_evidence_complete_review_pending"
+  },
+  "artifacts": [
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-unit.log",
+      "sha256": "e720396c3ea406623924abe0b00e6c22a4264aa7f222107f4ce0443700568f5e"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-typecheck.log",
+      "sha256": "2bb48a757ba929b96e9b57e1980a44defd5ed22c0a30aaddc6433f61f0d739fa"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-static-audit.log",
+      "sha256": "5926399225f6630bcdbd91b906c164f6bb67343b9b4a47ae3aa1a7451bdd6113"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-build.log",
+      "sha256": "1d808754f35cd9e123861e54ad7ab65b134fc52eb45039e128dd59b7f4ba5939"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-browser.log",
+      "sha256": "1f924bfd7938ee168713e3dfeba9893ede47993c0ccaec4503d1c054ffd36ab7"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/browser-metrics.json",
+      "sha256": "5b6fb4d65a98451a0fe1938901920ee003eb17c70b476f0f7fe533749cc9a032"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/red-browser-bec9dd71.log",
+      "sha256": "7579260588765bec8fe1416f005d2735bb7bae4871b8ef664bd860488acdfaaf"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/red-browser-metrics-bec9dd71.json",
+      "sha256": "5dc33828e05b50695862a19ea9fb1ded57c92426104252678a8066bb0bd122b7"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/product-series.tsv",
+      "sha256": "6464b49507421fb42850466f77aaa18b49df6bf0fb5ff3e096314a925a0d803d"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/git-cherry-67d2c9e.log",
+      "sha256": "243d8b727450c40b0ff08cfc4a51de9854cc1eb50147712301df0f09c7e1a622"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/merge-tree-67d2c9e.log",
+      "sha256": "07d6a278b812ca866caafb01011dd959135f458ac45e957c5e347a95aff921aa"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/merge-tree-ontology-ff093fa.log",
+      "sha256": "6b9b34c8a57ee7ce4d5d0aa5149a03d727f3f52fa8819d3f97f8eb94d4a2a5a3"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/path-overlap-67d2c9e.log",
+      "sha256": "96df8339a618952b5b243bdad360d960b50a18914cbc822eaf14b60c816afb84"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/product-pull-rebase.log",
+      "sha256": "c4b69361ec31d09ea73a0260ad418b63f31100543f7fbdf8a612a8fc6fa851d2"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/product-push.log",
+      "sha256": "77e339470b88a74cb528252dc37a463d931d64188d013892da152fd1d996019e"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/process-isolation-final.log",
+      "sha256": "0d30eeb5b0b61e4317f312b3f29b53ff3ca13f73a17d68e25dbc1e1666d7d25f"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/product-changed-files.json",
+      "sha256": "d3a8e85da9c3d386320a3bf6bd98ce30068fbfee0b2d5664c0104453791ce187"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/generated-artifact-restoration.json",
+      "sha256": "ba5286d2d9bfd0d411dd38a35df8792348227a32c2f47e429dd5835e5ae423ce"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/browser-red-classification.json",
+      "sha256": "6c3ad6cc0f97cde32e8a015aec99e8fb5e8f423490b5e095268bef28bc094003"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/test-isolation-incident.json",
+      "sha256": "3987fe42693687c8b9488d9a72b3fe185bf454304a062981bc1ef0ba78642c5b"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/ontology-conflict-contract.json",
+      "sha256": "09d98569f552fe41d6fa1cb6258997ae6979700e1b02a2489e1347a1a5bab89e"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/integration-adoption.json",
+      "sha256": "6d0dccd8b9cd31c4b3693015200ea7cb835e82b64705f9a51b47219f9ae677ae"
+    }
+  ]
+}

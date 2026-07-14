@@ -1,0 +1,6 @@
+product_commit=fc2bd1783fcc413981306f689d67bb6c659a985e
+evidence_parent=fc2bd1783fcc413981306f689d67bb6c659a985e
+command=git diff --cached --check
+staged_file_count=42
+issue_count=0
+exit_code=0

@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-remediation-evidence-census/v1",
+  "evidenceParent": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+  "fileCount": 42,
+  "addedFileCount": 42,
+  "modifiedFileCount": 0,
+  "deletedFileCount": 0,
+  "files": [
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/browser-red-classification.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/browser-red-classification.md"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/contract-evidence.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/evidence-staged-files.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/generated-artifact-restoration.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/integration-adoption.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/integration-adoption.md"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/browser-metrics.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-browser.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-build.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-evidence-diff-check.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-evidence-secret-scan.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-evidence-validator.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-scope-audit.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-static-audit.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-typecheck.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-unit.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/focused-browser-remediation.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/focused-cta-green.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/focused-navigation-green.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/focused-stale-green.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/git-cherry-67d2c9e.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/integration-fetch.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/merge-tree-67d2c9e.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/merge-tree-ontology-ff093fa.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/path-overlap-67d2c9e.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/precommit-isolated-unit.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/process-isolation-final.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/product-pull-rebase.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/product-push.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/product-series.tsv"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/red-browser-bec9dd71.log"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/red-browser-metrics-bec9dd71.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/ontology-conflict-contract.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/ontology-conflict-contract.md"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/product-changed-files.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/report.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/report.md"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/test-isolation-incident.json"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/test-isolation-incident.md"
+    },
+    {
+      "status": "A",
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/validate-remediation-evidence.cjs"
+    },
+    {
+      "status": "A",
+      "path": "tests/workpack-share-v2-remediation-evidence.test.ts"
+    }
+  ]
+}

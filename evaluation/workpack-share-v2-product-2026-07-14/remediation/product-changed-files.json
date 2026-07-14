@@ -1,0 +1,680 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-remediation-changed-file-census/v1",
+  "productCommit": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+  "productTree": "7ce7fee2d80967f02d32b80e110067f581e1c07b",
+  "exactBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+  "remediationParent": "0befdc1799b419d7b379cbbbf10d7e2320cd7d46",
+  "wholeSeries": {
+    "changedFileCount": 78,
+    "addedFileCount": 53,
+    "modifiedFileCount": 25,
+    "deletedFileCount": 0,
+    "insertions": 16510,
+    "deletions": 2011,
+    "files": [
+      {
+        "status": "M",
+        "path": ".env.example",
+        "gitBlob": "6bad97b222ec7e0d38c81bff8ce6d7b4584f697b"
+      },
+      {
+        "status": "M",
+        "path": "app/api/dispatch-logs/route.ts",
+        "gitBlob": "7b20638ed8379150d116c40b6c613282d2c2eaa7"
+      },
+      {
+        "status": "A",
+        "path": "app/api/settings/channels/resolve/route.ts",
+        "gitBlob": "294fa8428c8d6a11daf6f2bd247883c071c1efc7"
+      },
+      {
+        "status": "M",
+        "path": "app/api/workflow/dispatch/route.ts",
+        "gitBlob": "515c172e24db278ed5eb80b4281935fedd48744f"
+      },
+      {
+        "status": "A",
+        "path": "app/api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review/route.ts",
+        "gitBlob": "c8f9f315ed623ffa15c262f1b0d899a63ad4abdd"
+      },
+      {
+        "status": "M",
+        "path": "app/api/workpacks/[id]/route.ts",
+        "gitBlob": "1075abe1d77d276b552b3944bd717a2c84911cc7"
+      },
+      {
+        "status": "M",
+        "path": "app/api/workpacks/[id]/share-sessions/route.ts",
+        "gitBlob": "25dd52774f43fff384b072f8e1c8adaa7e54e9ab"
+      },
+      {
+        "status": "M",
+        "path": "app/settings/page.tsx",
+        "gitBlob": "94487e4be684d7d63d1ac5cd5141844d3315f52c"
+      },
+      {
+        "status": "M",
+        "path": "app/workers/page.tsx",
+        "gitBlob": "41e706a7b24e829b0b0ce59a2a5ee20b4276e5b6"
+      },
+      {
+        "status": "M",
+        "path": "app/workspace/page.tsx",
+        "gitBlob": "8494228aef0ba1394c08eb1ef86a40fac10c616e"
+      },
+      {
+        "status": "M",
+        "path": "components/CurrentWorkpackModules.tsx",
+        "gitBlob": "db57b34a72ddce6a153c36f6fcb531b88a6d4722"
+      },
+      {
+        "status": "M",
+        "path": "components/FieldOperationsWorkspace.tsx",
+        "gitBlob": "7a16ffa83d7250d11c0092cdbb7ffb3dfdb1a380"
+      },
+      {
+        "status": "M",
+        "path": "components/SafeGuardCommandCenter.tsx",
+        "gitBlob": "9922a4e5c2eb1c0a2ae19518518df29750b32ae9"
+      },
+      {
+        "status": "M",
+        "path": "components/WorkflowSharePanel.module.css",
+        "gitBlob": "6f9659661c1d415219e4bb15de4e0486d4578017"
+      },
+      {
+        "status": "M",
+        "path": "components/WorkflowSharePanel.tsx",
+        "gitBlob": "cd321207d7e1fcf2ff77696a5305849203899d6a"
+      },
+      {
+        "status": "M",
+        "path": "components/WorkflowSharePolicy.ts",
+        "gitBlob": "2fa7663935381ba672ac1983076e911909767f58"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/contract-amendment.json",
+        "gitBlob": "0718c65b71cfacef316709199e88c9c7fba5c345"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/contract-amendment.md",
+        "gitBlob": "e7538f29acd75fbd0e44de280f7f84579be89876"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/contract-evidence.json",
+        "gitBlob": "04e7282b6ec86acb50b8579a937e1262c5a3c657"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/browser-metrics.json",
+        "gitBlob": "8be16c3ff872e44cd416b2c92c0be5dc9d2ba204"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/evidence-pull-rebase.log",
+        "gitBlob": "7eb76ef3392ab89e43eced4cbc64feaf0637cac8"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/evidence-staged-files.json",
+        "gitBlob": "4b226612f3605193927aff91a08e67cbacb7da57"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-browser.log",
+        "gitBlob": "1241bdbb69c674082a89191c40ce057f946da7ad"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-build.log",
+        "gitBlob": "62e6404a26c1290ca32d32bc55dbd00964c1c028"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-evidence-diff-check.log",
+        "gitBlob": "00cdc3bc7d5ebb3ee77e25493d235a05241a1ce8"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-evidence-secret-scan.json",
+        "gitBlob": "ae328e872e63de4c238b3557a3bc3029e2066d9a"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-evidence-validator.log",
+        "gitBlob": "2b31551630ea27de588663a3b4a47931b3913f44"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-frontend-audit.log",
+        "gitBlob": "223594106f4d76710ea5b8b646ae30c2fcf5276b"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-product-diff-check.log",
+        "gitBlob": "ba4bd65bbd24258e622e8599b900fc83043ce388"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-product-secret-scan.json",
+        "gitBlob": "58a5ced7876fcb8da95b767f8a9ef0c278eeea5c"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-typecheck.log",
+        "gitBlob": "11909bc3fb0f6135eeb96b55375485d92058fc9e"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-unit.log",
+        "gitBlob": "c2af001b06f500906c6e95c3c8e22bc2327d47d7"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/generated-artifact-restoration.json",
+        "gitBlob": "9b5e4dd72f839c3bf44eb77ea005089416101e6a"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/ontology-fetch.log",
+        "gitBlob": "e13d3b22a54cfe100dbbeff7eeae935dd02d780c"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/ontology-file-overlap.log",
+        "gitBlob": "e64b4980576c3f4bacf40179f3007762e179d27f"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/ontology-merge-tree.json",
+        "gitBlob": "246797b9650eff682d7442f67ce6cd4a8d26bff0"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/ontology-merge-tree.log",
+        "gitBlob": "5cc078478cd9fb90d78ca77a627172574073c860"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/ontology-symbol-overlap.log",
+        "gitBlob": "7e839394be6e91919d4e408e87ff4324f1296983"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/product-changed-files.json",
+        "gitBlob": "e6d27b771d73b3f8ef439e400f4f7a57244267a7"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/product-pull-rebase.log",
+        "gitBlob": "f01843ecaeeedf6ee79f112f76bf2db2366671fd"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/wave3-red.log",
+        "gitBlob": "2dba9f8a617c69789dee32ebefb8088f88e87d2d"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/wave3-result-red.log",
+        "gitBlob": "2b1288c0c4c3145bce21aef4583b4cfd64efd2a5"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/wave3-root-scale-red.log",
+        "gitBlob": "39d5722fca49654ff6504314ab361fe68483ae73"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/wave4-evidence-integrity-red.log",
+        "gitBlob": "b092e3167e3a6b966739e1ea4a431f13179987af"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/report.json",
+        "gitBlob": "d8ffd11e6248661f994778eef7bab693d1fa9c8e"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/report.md",
+        "gitBlob": "ae910e0f7446434cfc263c804577d160a7ce54c2"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/validate-contract-amendment.cjs",
+        "gitBlob": "35ab4cc288175d50417fb5c50e5770fdf8bd280b"
+      },
+      {
+        "status": "A",
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/validate-product-evidence.cjs",
+        "gitBlob": "bce22e259fea371e57d3041a07bdeb23358dcd72"
+      },
+      {
+        "status": "A",
+        "path": "lib/channel-availability.ts",
+        "gitBlob": "09736b81a2a4f67c333b79d80b6965bf70f7de76"
+      },
+      {
+        "status": "A",
+        "path": "lib/channel-resolution-contract.ts",
+        "gitBlob": "3fc3ed7ed126eb1491c0dcfff13faeb2a0a5de45"
+      },
+      {
+        "status": "M",
+        "path": "lib/foreign-worker.ts",
+        "gitBlob": "55ee9c67c421c84cd44ac5da3390b1808742ee5f"
+      },
+      {
+        "status": "A",
+        "path": "lib/localized-content-policy.ts",
+        "gitBlob": "f035a3a40fcd13adec3287743d1fff46db6c2ac5"
+      },
+      {
+        "status": "A",
+        "path": "lib/reviewed-localization-envelope.ts",
+        "gitBlob": "a412619048480586a646f5f88d1535c0e958b694"
+      },
+      {
+        "status": "A",
+        "path": "lib/workflow-dispatch-provider.ts",
+        "gitBlob": "d0a080df02ed1318c45d266590f3134465512fb5"
+      },
+      {
+        "status": "M",
+        "path": "lib/workflow-share-client.ts",
+        "gitBlob": "2baa09cef33209e1e45aefde3f85397e21f4c7c2"
+      },
+      {
+        "status": "M",
+        "path": "lib/workpack-commercial-store.ts",
+        "gitBlob": "28e3e9e8ebe174d2fa6f473fd46e8c4f4bdfc43c"
+      },
+      {
+        "status": "M",
+        "path": "lib/workpack-commercial.ts",
+        "gitBlob": "6a471ff8153feeb798c1d5015d8884299d581430"
+      },
+      {
+        "status": "A",
+        "path": "lib/workpack-dispatch-gate.ts",
+        "gitBlob": "653d26e29c9807fc7fbe701e8774b3499bc434d5"
+      },
+      {
+        "status": "A",
+        "path": "lib/workpack-share-server-config.ts",
+        "gitBlob": "4341ba147cd39b67f8b2660d8d9494680c7a9cc2"
+      },
+      {
+        "status": "M",
+        "path": "lib/workspace-pages.ts",
+        "gitBlob": "ffcb7da243487b6db816dd5d0880eff02a81f2b1"
+      },
+      {
+        "status": "A",
+        "path": "tests/channel-availability-route.test.ts",
+        "gitBlob": "a2604d45cec2c589e1d324abf0e90a35108522d2"
+      },
+      {
+        "status": "A",
+        "path": "tests/channel-availability.test.ts",
+        "gitBlob": "fa62c0b3b2bebc57842f7de5a51e35b601e92503"
+      },
+      {
+        "status": "A",
+        "path": "tests/dispatch-logs-route.test.ts",
+        "gitBlob": "d90c7704a67647268dd15e886230829e50da0452"
+      },
+      {
+        "status": "A",
+        "path": "tests/fixtures/workpack-share-v2.ts",
+        "gitBlob": "7567a9ba16d2ca0a507ef08a0390a1e8870d5553"
+      },
+      {
+        "status": "M",
+        "path": "tests/foreign-worker-languages.test.ts",
+        "gitBlob": "472b89957fa5dab15ae5d15efacc2e7c4c519b88"
+      },
+      {
+        "status": "A",
+        "path": "tests/reviewed-localization-envelope.test.ts",
+        "gitBlob": "3af746c7cf6c9810129728658954925a70fcc121"
+      },
+      {
+        "status": "A",
+        "path": "tests/reviewed-localization-route.test.ts",
+        "gitBlob": "8ea67bbdd1636ec9f52ca95d23a24338e1d45237"
+      },
+      {
+        "status": "A",
+        "path": "tests/workflow-dispatch-provider.test.ts",
+        "gitBlob": "03c9a54690e4452741699a508ab931fc5056c18d"
+      },
+      {
+        "status": "M",
+        "path": "tests/workflow-share-client.test.ts",
+        "gitBlob": "ebb518c4a555e6cfa9a140e42be0cbeef0982969"
+      },
+      {
+        "status": "M",
+        "path": "tests/workflow-share-panel-behavior.test.ts",
+        "gitBlob": "913652144548071df37d48cce97d836441b1f4a7"
+      },
+      {
+        "status": "A",
+        "path": "tests/workpack-dispatch-gate.test.ts",
+        "gitBlob": "602c7faee39bf994d5c203c57443f9066e54f7c1"
+      },
+      {
+        "status": "M",
+        "path": "tests/workpack-generation-evidence-route.test.ts",
+        "gitBlob": "b17639c106dc9e128d5ac311b6d7df1bd32c7ca6"
+      },
+      {
+        "status": "M",
+        "path": "tests/workpack-share-authority-routes.test.ts",
+        "gitBlob": "0149164993fd8c988fe0095cd22a650b195ffb15"
+      },
+      {
+        "status": "A",
+        "path": "tests/workpack-share-server-config.test.ts",
+        "gitBlob": "e74eca807904c6b243c8d5249df361579920acdd"
+      },
+      {
+        "status": "A",
+        "path": "tests/workpack-share-v2-browser.test.ts",
+        "gitBlob": "840dbcea9708e7670297b4dddc46a7f3398eb42f"
+      },
+      {
+        "status": "A",
+        "path": "tests/workpack-share-v2-contract-amendment.test.ts",
+        "gitBlob": "4149f0fac42cccbe5ce6c5a7b1e14e1d7c2529f4"
+      },
+      {
+        "status": "A",
+        "path": "tests/workpack-share-v2-product-evidence.test.ts",
+        "gitBlob": "6e1e59f91cc115ebabfc499a12bc484c875ab267"
+      },
+      {
+        "status": "M",
+        "path": "tests/workspace-pages.test.ts",
+        "gitBlob": "b508d33399962e36bf4b097ed92c763ffe82bfc7"
+      }
+    ]
+  },
+  "remediation": {
+    "changedFileCount": 24,
+    "addedFileCount": 6,
+    "modifiedFileCount": 18,
+    "deletedFileCount": 0,
+    "insertions": 2186,
+    "deletions": 1007,
+    "files": [
+      {
+        "status": "M",
+        "path": "app/api/dispatch-logs/route.ts",
+        "gitBlob": "7b20638ed8379150d116c40b6c613282d2c2eaa7"
+      },
+      {
+        "status": "M",
+        "path": "app/api/settings/channels/resolve/route.ts",
+        "gitBlob": "294fa8428c8d6a11daf6f2bd247883c071c1efc7"
+      },
+      {
+        "status": "M",
+        "path": "app/api/workflow/dispatch/route.ts",
+        "gitBlob": "515c172e24db278ed5eb80b4281935fedd48744f"
+      },
+      {
+        "status": "M",
+        "path": "app/api/workpacks/[id]/share-sessions/route.ts",
+        "gitBlob": "25dd52774f43fff384b072f8e1c8adaa7e54e9ab"
+      },
+      {
+        "status": "M",
+        "path": "components/WorkflowSharePanel.module.css",
+        "gitBlob": "6f9659661c1d415219e4bb15de4e0486d4578017"
+      },
+      {
+        "status": "M",
+        "path": "components/WorkflowSharePanel.tsx",
+        "gitBlob": "cd321207d7e1fcf2ff77696a5305849203899d6a"
+      },
+      {
+        "status": "M",
+        "path": "components/WorkflowSharePolicy.ts",
+        "gitBlob": "2fa7663935381ba672ac1983076e911909767f58"
+      },
+      {
+        "status": "M",
+        "path": "lib/channel-availability.ts",
+        "gitBlob": "09736b81a2a4f67c333b79d80b6965bf70f7de76"
+      },
+      {
+        "status": "A",
+        "path": "lib/channel-resolution-contract.ts",
+        "gitBlob": "3fc3ed7ed126eb1491c0dcfff13faeb2a0a5de45"
+      },
+      {
+        "status": "A",
+        "path": "lib/localized-content-policy.ts",
+        "gitBlob": "f035a3a40fcd13adec3287743d1fff46db6c2ac5"
+      },
+      {
+        "status": "M",
+        "path": "lib/reviewed-localization-envelope.ts",
+        "gitBlob": "a412619048480586a646f5f88d1535c0e958b694"
+      },
+      {
+        "status": "A",
+        "path": "lib/workflow-dispatch-provider.ts",
+        "gitBlob": "d0a080df02ed1318c45d266590f3134465512fb5"
+      },
+      {
+        "status": "M",
+        "path": "lib/workflow-share-client.ts",
+        "gitBlob": "2baa09cef33209e1e45aefde3f85397e21f4c7c2"
+      },
+      {
+        "status": "A",
+        "path": "lib/workpack-dispatch-gate.ts",
+        "gitBlob": "653d26e29c9807fc7fbe701e8774b3499bc434d5"
+      },
+      {
+        "status": "M",
+        "path": "tests/channel-availability-route.test.ts",
+        "gitBlob": "a2604d45cec2c589e1d324abf0e90a35108522d2"
+      },
+      {
+        "status": "M",
+        "path": "tests/channel-availability.test.ts",
+        "gitBlob": "fa62c0b3b2bebc57842f7de5a51e35b601e92503"
+      },
+      {
+        "status": "M",
+        "path": "tests/dispatch-logs-route.test.ts",
+        "gitBlob": "d90c7704a67647268dd15e886230829e50da0452"
+      },
+      {
+        "status": "M",
+        "path": "tests/reviewed-localization-route.test.ts",
+        "gitBlob": "8ea67bbdd1636ec9f52ca95d23a24338e1d45237"
+      },
+      {
+        "status": "A",
+        "path": "tests/workflow-dispatch-provider.test.ts",
+        "gitBlob": "03c9a54690e4452741699a508ab931fc5056c18d"
+      },
+      {
+        "status": "M",
+        "path": "tests/workflow-share-client.test.ts",
+        "gitBlob": "ebb518c4a555e6cfa9a140e42be0cbeef0982969"
+      },
+      {
+        "status": "M",
+        "path": "tests/workflow-share-panel-behavior.test.ts",
+        "gitBlob": "913652144548071df37d48cce97d836441b1f4a7"
+      },
+      {
+        "status": "A",
+        "path": "tests/workpack-dispatch-gate.test.ts",
+        "gitBlob": "602c7faee39bf994d5c203c57443f9066e54f7c1"
+      },
+      {
+        "status": "M",
+        "path": "tests/workpack-share-authority-routes.test.ts",
+        "gitBlob": "0149164993fd8c988fe0095cd22a650b195ffb15"
+      },
+      {
+        "status": "M",
+        "path": "tests/workpack-share-v2-browser.test.ts",
+        "gitBlob": "840dbcea9708e7670297b4dddc46a7f3398eb42f"
+      }
+    ]
+  },
+  "authorityCommit": {
+    "commit": "bec9dd71f2a249bc184abea477e911afd10845ca",
+    "changedFileCount": 24,
+    "files": [
+      {
+        "status": "M",
+        "path": "app/api/dispatch-logs/route.ts",
+        "gitBlob": "7b20638ed8379150d116c40b6c613282d2c2eaa7"
+      },
+      {
+        "status": "M",
+        "path": "app/api/settings/channels/resolve/route.ts",
+        "gitBlob": "294fa8428c8d6a11daf6f2bd247883c071c1efc7"
+      },
+      {
+        "status": "M",
+        "path": "app/api/workflow/dispatch/route.ts",
+        "gitBlob": "515c172e24db278ed5eb80b4281935fedd48744f"
+      },
+      {
+        "status": "M",
+        "path": "app/api/workpacks/[id]/share-sessions/route.ts",
+        "gitBlob": "25dd52774f43fff384b072f8e1c8adaa7e54e9ab"
+      },
+      {
+        "status": "M",
+        "path": "components/WorkflowSharePanel.module.css",
+        "gitBlob": "6f9659661c1d415219e4bb15de4e0486d4578017"
+      },
+      {
+        "status": "M",
+        "path": "components/WorkflowSharePanel.tsx",
+        "gitBlob": "cd321207d7e1fcf2ff77696a5305849203899d6a"
+      },
+      {
+        "status": "M",
+        "path": "components/WorkflowSharePolicy.ts",
+        "gitBlob": "2fa7663935381ba672ac1983076e911909767f58"
+      },
+      {
+        "status": "M",
+        "path": "lib/channel-availability.ts",
+        "gitBlob": "09736b81a2a4f67c333b79d80b6965bf70f7de76"
+      },
+      {
+        "status": "A",
+        "path": "lib/channel-resolution-contract.ts",
+        "gitBlob": "3fc3ed7ed126eb1491c0dcfff13faeb2a0a5de45"
+      },
+      {
+        "status": "A",
+        "path": "lib/localized-content-policy.ts",
+        "gitBlob": "f035a3a40fcd13adec3287743d1fff46db6c2ac5"
+      },
+      {
+        "status": "M",
+        "path": "lib/reviewed-localization-envelope.ts",
+        "gitBlob": "a412619048480586a646f5f88d1535c0e958b694"
+      },
+      {
+        "status": "A",
+        "path": "lib/workflow-dispatch-provider.ts",
+        "gitBlob": "d0a080df02ed1318c45d266590f3134465512fb5"
+      },
+      {
+        "status": "M",
+        "path": "lib/workflow-share-client.ts",
+        "gitBlob": "2baa09cef33209e1e45aefde3f85397e21f4c7c2"
+      },
+      {
+        "status": "A",
+        "path": "lib/workpack-dispatch-gate.ts",
+        "gitBlob": "653d26e29c9807fc7fbe701e8774b3499bc434d5"
+      },
+      {
+        "status": "M",
+        "path": "tests/channel-availability-route.test.ts",
+        "gitBlob": "a2604d45cec2c589e1d324abf0e90a35108522d2"
+      },
+      {
+        "status": "M",
+        "path": "tests/channel-availability.test.ts",
+        "gitBlob": "fa62c0b3b2bebc57842f7de5a51e35b601e92503"
+      },
+      {
+        "status": "M",
+        "path": "tests/dispatch-logs-route.test.ts",
+        "gitBlob": "d90c7704a67647268dd15e886230829e50da0452"
+      },
+      {
+        "status": "M",
+        "path": "tests/reviewed-localization-route.test.ts",
+        "gitBlob": "8ea67bbdd1636ec9f52ca95d23a24338e1d45237"
+      },
+      {
+        "status": "A",
+        "path": "tests/workflow-dispatch-provider.test.ts",
+        "gitBlob": "03c9a54690e4452741699a508ab931fc5056c18d"
+      },
+      {
+        "status": "M",
+        "path": "tests/workflow-share-client.test.ts",
+        "gitBlob": "ebb518c4a555e6cfa9a140e42be0cbeef0982969"
+      },
+      {
+        "status": "M",
+        "path": "tests/workflow-share-panel-behavior.test.ts",
+        "gitBlob": "913652144548071df37d48cce97d836441b1f4a7"
+      },
+      {
+        "status": "A",
+        "path": "tests/workpack-dispatch-gate.test.ts",
+        "gitBlob": "602c7faee39bf994d5c203c57443f9066e54f7c1"
+      },
+      {
+        "status": "M",
+        "path": "tests/workpack-share-authority-routes.test.ts",
+        "gitBlob": "0149164993fd8c988fe0095cd22a650b195ffb15"
+      },
+      {
+        "status": "M",
+        "path": "tests/workpack-share-v2-browser.test.ts",
+        "gitBlob": "840dbcea9708e7670297b4dddc46a7f3398eb42f"
+      }
+    ]
+  },
+  "browserFixCommit": {
+    "commit": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+    "parent": "bec9dd71f2a249bc184abea477e911afd10845ca",
+    "changedFileCount": 2,
+    "files": [
+      {
+        "status": "M",
+        "path": "components/WorkflowSharePanel.tsx",
+        "gitBlob": "cd321207d7e1fcf2ff77696a5305849203899d6a"
+      },
+      {
+        "status": "M",
+        "path": "tests/workpack-share-v2-browser.test.ts",
+        "gitBlob": "840dbcea9708e7670297b4dddc46a7f3398eb42f"
+      }
+    ]
+  }
+}

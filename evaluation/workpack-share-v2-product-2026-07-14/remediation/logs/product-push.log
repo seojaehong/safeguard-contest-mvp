@@ -1,0 +1,8 @@
+local_product=fc2bd1783fcc413981306f689d67bb6c659a985e
+remote_before=0befdc1799b419d7b379cbbbf10d7e2320cd7d46
+command=git push origin feat/workpack-share-v2-product
+To https://github.com/seojaehong/safeguard-contest-mvp.git
+   0befdc1..fc2bd17  feat/workpack-share-v2-product -> feat/workpack-share-v2-product
+exit_code=0
+remote_after=fc2bd1783fcc413981306f689d67bb6c659a985e
+remote_matches_product=True

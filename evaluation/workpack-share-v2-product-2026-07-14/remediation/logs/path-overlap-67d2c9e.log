@@ -1,0 +1,44 @@
+product=fc2bd1783fcc413981306f689d67bb6c659a985e
+exact_base=f45bba17bcce0d8ebb2690f82d014dbe42ae8191
+current_integration_head=67d2c9e28e7278c58f46b46c2512c7133d88d1d3
+previous_integration_head=ea7aa7223a056c884d5b0ba55563d602af328451
+ontology_candidate=ff093fae30c331816f0068f9075b91b151d05813
+ontology_merge_base=f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5
+share_changed_count=78
+current_main_changed_count=185
+current_main_path_overlap_count=0
+kosha_integration_delta_count=26
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/build.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/final-review-red-tests.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/final-scans.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/git-sync.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/independent-review-post-p2.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-focused-tests.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-typecheck.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/integration-evidence.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/p2-diff-check.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/p2-final-focused-tests.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/p2-final-typecheck.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/p2-integrity-block-green-test.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/p2-integrity-block-red-test.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/red-focused-tests.log
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/report.json
+kosha_delta	evaluation/kosha-grounding-fail-closed-2026-07-14/report.md
+kosha_delta	lib/db-harness.ts
+kosha_delta	lib/safety-reference-catalog-server.ts
+kosha_delta	lib/safety-reference-catalog.ts
+kosha_delta	lib/search.ts
+kosha_delta	tests/kosha-current-review-provenance.test.ts
+kosha_delta	tests/kosha-current-review-run-ask.test.ts
+kosha_delta	tests/kosha-grounding-fail-closed.test.ts
+kosha_delta	tests/kosha-guide-corpus-audit.test.ts
+kosha_delta	tests/kosha-guide-supporting-row-relevance.test.ts
+kosha_delta	tests/safety-reference-hybrid.test.ts
+kosha_path_overlap_count=0
+ontology_changed_count=140
+ontology_path_overlap_count=5
+ontology_overlap	components/CurrentWorkpackModules.tsx
+ontology_overlap	components/FieldOperationsWorkspace.tsx
+ontology_overlap	components/SafeGuardCommandCenter.tsx
+ontology_overlap	lib/workpack-commercial-store.ts
+ontology_overlap	tests/workpack-share-authority-routes.test.ts

@@ -1,0 +1,105 @@
+[product-sha] fc2bd1783fcc413981306f689d67bb6c659a985e
+[product-tree] 7ce7fee2d80967f02d32b80e110067f581e1c07b
+[build-concurrency] share_test_processes_before=0
+
+> safeclaw@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.20
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 6.9s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/27) ...
+   Generating static pages (6/27)
+   Generating static pages (13/27)
+   Generating static pages (20/27)
+ ✓ Generating static pages (27/27)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                              Size  First Load JS
+┌ ƒ /                                                                 2.88 kB         109 kB
+├ ○ /_not-found                                                         247 B         103 kB
+├ ○ /.well-known/agent.json                                             247 B         103 kB
+├ ƒ /api/agent/chat                                                     247 B         103 kB
+├ ƒ /api/agent/context                                                  247 B         103 kB
+├ ƒ /api/ask                                                            247 B         103 kB
+├ ƒ /api/ask/stream                                                     247 B         103 kB
+├ ƒ /api/briefing/run                                                   247 B         103 kB
+├ ƒ /api/briefing/settings                                              247 B         103 kB
+├ ƒ /api/dispatch-logs                                                  247 B         103 kB
+├ ƒ /api/education-records                                              247 B         103 kB
+├ ƒ /api/export/hwp                                                     247 B         103 kB
+├ ƒ /api/export/hwpx-template                                           247 B         103 kB
+├ ƒ /api/export/pdf                                                     247 B         103 kB
+├ ƒ /api/export/xlsx                                                    247 B         103 kB
+├ ƒ /api/input-photos/hazard-analysis                                   247 B         103 kB
+├ ƒ /api/knowledge/ingest                                               247 B         103 kB
+├ ƒ /api/knowledge/match                                                247 B         103 kB
+├ ƒ /api/knowledge/regenerate                                           247 B         103 kB
+├ ƒ /api/mcp-tokens                                                     247 B         103 kB
+├ ƒ /api/mcp-tokens/[id]                                                247 B         103 kB
+├ ƒ /api/mcp/[transport]                                                247 B         103 kB
+├ ƒ /api/ontology/graph                                                 247 B         103 kB
+├ ƒ /api/safety-reference/search                                        247 B         103 kB
+├ ƒ /api/safety-reference/status                                        247 B         103 kB
+├ ƒ /api/search                                                         247 B         103 kB
+├ ƒ /api/settings/channels/resolve                                      247 B         103 kB
+├ ƒ /api/sif-embedding-gate/approval-packet                             247 B         103 kB
+├ ƒ /api/sif-embedding-gate/status                                      247 B         103 kB
+├ ƒ /api/weather                                                        247 B         103 kB
+├ ƒ /api/workers                                                        247 B         103 kB
+├ ƒ /api/workflow/dispatch                                              247 B         103 kB
+├ ƒ /api/workpack/remediate                                             247 B         103 kB
+├ ƒ /api/workpacks                                                      247 B         103 kB
+├ ƒ /api/workpacks/[id]                                                 247 B         103 kB
+├ ƒ /api/workpacks/[id]/improvements                                    247 B         103 kB
+├ ƒ /api/workpacks/[id]/learning-export                                 247 B         103 kB
+├ ƒ /api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review    247 B         103 kB
+├ ƒ /api/workpacks/[id]/operation-graph                                 247 B         103 kB
+├ ƒ /api/workpacks/[id]/read-confirmations                              247 B         103 kB
+├ ƒ /api/workpacks/[id]/share-sessions                                  247 B         103 kB
+├ ○ /archive                                                           7.5 kB         174 kB
+├ ƒ /ask                                                              2.43 kB         108 kB
+├ ○ /auth/callback                                                    1.47 kB         168 kB
+├ ƒ /demo                                                             4.92 kB         111 kB
+├ ○ /dispatch                                                           203 B         237 kB
+├ ○ /documents                                                          194 B         237 kB
+├ ƒ /dryrun                                                           2.47 kB         109 kB
+├ ƒ /evidence                                                           204 B         237 kB
+├ ○ /evidence-file                                                    4.77 kB         206 kB
+├ ○ /home                                                             5.46 kB         112 kB
+├ ƒ /interpretation/[id]                                                247 B         103 kB
+├ ƒ /knowledge                                                        2.82 kB         109 kB
+├ ƒ /knowledge/[section]/[slug]                                       2.47 kB         109 kB
+├ ƒ /law/[id]                                                           247 B         103 kB
+├ ○ /login                                                            2.22 kB         169 kB
+├ ƒ /ontology                                                          2.7 kB         134 kB
+├ ƒ /ops/api                                                          2.47 kB         109 kB
+├ ƒ /precedent/[id]                                                     247 B         103 kB
+├ ○ /preview                                                          2.47 kB         109 kB
+├ ○ /prototype                                                          247 B         103 kB
+├ ƒ /reports                                                            17 kB         218 kB
+├ ○ /roadmap                                                          2.47 kB         109 kB
+├ ƒ /search                                                           2.69 kB         109 kB
+├ ƒ /settings                                                         3.78 kB         171 kB
+├ ƒ /settings/ai-connect                                              8.53 kB         175 kB
+├ ○ /sitemap.xml                                                        247 B         103 kB
+├ ○ /tbm                                                              2.47 kB         109 kB
+├ ○ /trust                                                            2.47 kB         109 kB
+├ ○ /why                                                              2.47 kB         109 kB
+├ ○ /worker                                                           1.61 kB         142 kB
+├ ƒ /workers                                                            203 B         237 kB
+└ ƒ /workspace                                                        32.4 kB         283 kB
++ First Load JS shared by all                                          103 kB
+  ├ chunks/1255-d90f22433f14e976.js                                   46.2 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js                               54.2 kB
+  └ other shared chunks (total)                                       2.19 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[explicit-exit-code] 0

@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-remediation-artifact-restoration/v1",
+  "productCommit": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+  "productParent": "bec9dd71f2a249bc184abea477e911afd10845ca",
+  "fileCount": 16,
+  "mismatchCount": 0,
+  "parentHeadWorktreeHashesEqual": true,
+  "files": [
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-documents-day.png",
+      "parentBlob": "8f5fc202d705effd8698aee0eda80f68c14c6622",
+      "headBlob": "8f5fc202d705effd8698aee0eda80f68c14c6622",
+      "worktreeBlob": "8f5fc202d705effd8698aee0eda80f68c14c6622",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-documents-night.png",
+      "parentBlob": "30ce2ae844fe608fb9302ffa57e0c8022fad7c6c",
+      "headBlob": "30ce2ae844fe608fb9302ffa57e0c8022fad7c6c",
+      "worktreeBlob": "30ce2ae844fe608fb9302ffa57e0c8022fad7c6c",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-ops-api-day.png",
+      "parentBlob": "fc59a6723845eb84be3ff59cf73e82ae80a12cb8",
+      "headBlob": "fc59a6723845eb84be3ff59cf73e82ae80a12cb8",
+      "worktreeBlob": "fc59a6723845eb84be3ff59cf73e82ae80a12cb8",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-ops-api-night.png",
+      "parentBlob": "35391fdbc7d2f55d13adf919204f0308880346db",
+      "headBlob": "35391fdbc7d2f55d13adf919204f0308880346db",
+      "worktreeBlob": "35391fdbc7d2f55d13adf919204f0308880346db",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-tbm-day.png",
+      "parentBlob": "44fac482f20b2c5ad6ddfe32a26b8c50a6774d80",
+      "headBlob": "44fac482f20b2c5ad6ddfe32a26b8c50a6774d80",
+      "worktreeBlob": "44fac482f20b2c5ad6ddfe32a26b8c50a6774d80",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-tbm-night.png",
+      "parentBlob": "184c78821f624ffaf31c10bc133aab0e7a16a89f",
+      "headBlob": "184c78821f624ffaf31c10bc133aab0e7a16a89f",
+      "worktreeBlob": "184c78821f624ffaf31c10bc133aab0e7a16a89f",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-workers-day.png",
+      "parentBlob": "f7c620ff9be466cb23e0ec1843fde0cc334d5000",
+      "headBlob": "f7c620ff9be466cb23e0ec1843fde0cc334d5000",
+      "worktreeBlob": "f7c620ff9be466cb23e0ec1843fde0cc334d5000",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/desktop-workers-night.png",
+      "parentBlob": "fbc32e1f6a6e63bbef54686825bef7881590da18",
+      "headBlob": "fbc32e1f6a6e63bbef54686825bef7881590da18",
+      "worktreeBlob": "fbc32e1f6a6e63bbef54686825bef7881590da18",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-documents-day.png",
+      "parentBlob": "8d2662359d530d76c4f9feb408249bea41c0291e",
+      "headBlob": "8d2662359d530d76c4f9feb408249bea41c0291e",
+      "worktreeBlob": "8d2662359d530d76c4f9feb408249bea41c0291e",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-documents-night.png",
+      "parentBlob": "38de39b6d5d4acfef67b48ae7948fac828f28aea",
+      "headBlob": "38de39b6d5d4acfef67b48ae7948fac828f28aea",
+      "worktreeBlob": "38de39b6d5d4acfef67b48ae7948fac828f28aea",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-ops-api-day.png",
+      "parentBlob": "c4fb6c9076b1af8d4fef38901fc741f74e0ce280",
+      "headBlob": "c4fb6c9076b1af8d4fef38901fc741f74e0ce280",
+      "worktreeBlob": "c4fb6c9076b1af8d4fef38901fc741f74e0ce280",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-ops-api-night.png",
+      "parentBlob": "80004ea0329acefbc2f2122575f41e7cff4a0ea6",
+      "headBlob": "80004ea0329acefbc2f2122575f41e7cff4a0ea6",
+      "worktreeBlob": "80004ea0329acefbc2f2122575f41e7cff4a0ea6",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-tbm-day.png",
+      "parentBlob": "54cbdf3c715ebd30e067ef1d71680935f6bb865d",
+      "headBlob": "54cbdf3c715ebd30e067ef1d71680935f6bb865d",
+      "worktreeBlob": "54cbdf3c715ebd30e067ef1d71680935f6bb865d",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-tbm-night.png",
+      "parentBlob": "804e0387a0add12f82bba147b63eab3574e1b436",
+      "headBlob": "804e0387a0add12f82bba147b63eab3574e1b436",
+      "worktreeBlob": "804e0387a0add12f82bba147b63eab3574e1b436",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-workers-day.png",
+      "parentBlob": "91b28a7fbfa76294c22a6de52ad8c29d9c7ffc85",
+      "headBlob": "91b28a7fbfa76294c22a6de52ad8c29d9c7ffc85",
+      "worktreeBlob": "91b28a7fbfa76294c22a6de52ad8c29d9c7ffc85",
+      "allEqual": true
+    },
+    {
+      "path": "output/playwright/2026-07-10/module-shell-hardening/mobile-workers-night.png",
+      "parentBlob": "ff63f9b32a56736f84a336089d318df8bba9d078",
+      "headBlob": "ff63f9b32a56736f84a336089d318df8bba9d078",
+      "worktreeBlob": "ff63f9b32a56736f84a336089d318df8bba9d078",
+      "allEqual": true
+    }
+  ]
+}

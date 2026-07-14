@@ -1,0 +1,132 @@
+[product-sha] bec9dd71f2a249bc184abea477e911afd10845ca
+[product-tree] 7bf80b0c99f43c1e71adff00274d035a0bc61fcd
+[browser-census] expected_rows=128 expected_tests=130
+[build-concurrency] other_next_or_vitest_processes_before=0
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-browser.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+[share-browser-product-sha] bec9dd71f2a249bc184abea477e911afd10845ca
+[share-browser-product-tree] 7bf80b0c99f43c1e71adff00274d035a0bc61fcd
+ ❯ tests/workpack-share-v2-browser.test.ts (130 tests | 17 failed) 1258575ms
+     × day-desktop:review_required:normal_100 20344ms
+     × day-desktop:review_required:owning_root_text_200 21435ms
+     × day-desktop:fail_dispatch:owning_root_text_200 6218ms
+     × day-desktop:stale:normal_100 32776ms
+     × day-desktop:stale:owning_root_text_200 32563ms
+     × night-desktop:review_required:normal_100 18636ms
+     × night-desktop:review_required:owning_root_text_200 24041ms
+     × night-desktop:stale:normal_100 32633ms
+     × night-desktop:stale:owning_root_text_200 32650ms
+     × day-mobile:review_required:normal_100 18378ms
+     × day-mobile:review_required:owning_root_text_200 21707ms
+     × day-mobile:stale:normal_100 32652ms
+     × day-mobile:stale:owning_root_text_200 3002ms
+     × night-mobile:review_required:normal_100 17810ms
+     × night-mobile:review_required:owning_root_text_200 19611ms
+     × night-mobile:stale:normal_100 32559ms
+     × night-mobile:stale:owning_root_text_200 32468ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:review_required:normal_100
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:review_required:owning_root_text_200
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:review_required:normal_100
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:review_required:owning_root_text_200
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:review_required:normal_100
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:review_required:owning_root_text_200
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:review_required:normal_100
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:review_required:owning_root_text_200
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ verifyReviewRequiredVariants tests/workpack-share-v2-browser.test.ts:1311:89
+    1309|           && url.searchParams.get("returnStep") === "share"
+    1310|         ));
+    1311|         expect(await opened.page.getByRole("button", { name: "전송 화면으로 …
+       |                                                                                         ^
+    1312|       }
+    1313|       expect(opened.controller.probe.unexpectedRequests, variant.id).t…
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:1729:7
+ ❯ tests/workpack-share-v2-browser.test.ts:1848:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:fail_dispatch:owning_root_text_200
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ executeFixtureBehavior tests/workpack-share-v2-browser.test.ts:1594:61
+    1592|   expect(controller.probe.dispatchLogRequestCount).toBe(0);
+    1593|   expectRequestOrder(controller.probe);
+    1594|   expect(await page.locator("a[href='/dispatch']").count()).toBe(1);
+       |                                                             ^
+    1595|   expect(await primaryLabel(page)).toBe("전파 이력 확인");
+    1596|
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:1693:20
+ ❯ tests/workpack-share-v2-browser.test.ts:1848:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/17]⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:stale:normal_100
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:stale:owning_root_text_200
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:stale:normal_100
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:stale:owning_root_text_200
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:stale:normal_100
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:stale:normal_100
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:stale:owning_root_text_200
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('[data-share-root][data-share-state=\'stale\']') to be visible
+
+ ❯ waitForShareState tests/workpack-share-v2-browser.test.ts:583:72
+    581|
+    582| async function waitForShareState(page: Page, state: string, timeoutMs …
+    583|   await page.locator(`[data-share-root][data-share-state='${state}']`)…
+       |                                                                        ^
+    584|     state: "visible",
+    585|     timeout: timeoutMs
+ ❯ executeFixtureBehavior tests/workpack-share-v2-browser.test.ts:1475:11
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:1693:20
+ ❯ tests/workpack-share-v2-browser.test.ts:1848:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/17]⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:stale:owning_root_text_200
+AssertionError: expected '문서팩 확인' to be '변경사항 다시 확인' // Object.is equality
+
+Expected: "변경사항 다시 확인"
+Received: "문서팩 확인"
+
+ ❯ executeFixtureBehavior tests/workpack-share-v2-browser.test.ts:1476:38
+    1474|   if (fixtureId === "stale") {
+    1475|     await waitForShareState(page, "stale");
+    1476|     expect(await primaryLabel(page)).toBe("변경사항 다시 확인");
+       |                                      ^
+    1477|     expect(await primaryHref(page)).toContain("returnStep=share");
+    1478|     expect(controller.probe.sessionRequestCount).toBe(0);
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:1693:20
+ ❯ tests/workpack-share-v2-browser.test.ts:1848:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/17]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  17 failed | 113 passed (130)
+   Start at  12:00:14
+   Duration  1260.09s (transform 359ms, setup 0ms, import 923ms, tests 1258.58s, environment 0ms)
+
+[explicit-exit-code] 1

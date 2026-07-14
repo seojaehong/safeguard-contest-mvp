@@ -1,0 +1,214 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-remediation-report/v1",
+  "reportId": "workpack-share-v2-remediation-2026-07-14",
+  "status": "IMPLEMENTATION_EVIDENCE_COMPLETE_REVIEW_PENDING",
+  "branch": "feat/workpack-share-v2-product",
+  "product": {
+    "exactBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "historicalEvidenceHead": "0befdc1799b419d7b379cbbbf10d7e2320cd7d46",
+    "dispatchAuthorityCommit": "bec9dd71f2a249bc184abea477e911afd10845ca",
+    "finalProductCommit": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+    "finalProductParent": "bec9dd71f2a249bc184abea477e911afd10845ca",
+    "finalProductTree": "7ce7fee2d80967f02d32b80e110067f581e1c07b",
+    "remoteShaAtProductPush": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+    "productPushMatchedRemote": true,
+    "evidenceCommitSeparate": true
+  },
+  "reviewRemediation": {
+    "channelResolverDto": "requestedChannels",
+    "actualRouteClientParityTests": true,
+    "browserResolverUsesSharedTypedContract": true,
+    "serverOwnedDispatchReceipt": true,
+    "workflowRouteOwnsDispatchLogPersistence": true,
+    "clientAuthoredDispatchLogPostRejected": true,
+    "durableIdempotency": "existing workpack_share_sessions.access_policy dispatchGate plus updated_at CAS",
+    "schemaMigrationCount": 0,
+    "forgedOrMismatchedReceiptRejected": true,
+    "typed409ErrorsPreserved": true,
+    "providerSessionAndLogRemainZeroBefore409": true,
+    "sessionRetryReentersReadiness": true,
+    "languageReviewNavigationRoundTrip": true,
+    "settingsOwnerBlockedHonestlyWhenUnavailable": true,
+    "previewNestedScrollRemoved": true,
+    "localizationLanguageCount": 12,
+    "nonKoreanHangulResidueRejected": true,
+    "fullEnglishFallbackRejected": true,
+    "emojiOnlyOrEmptyArtifactRejected": true
+  },
+  "externalRuntimeBoundary": {
+    "liveProviderCallExecutedInThisEvidence": false,
+    "liveDatabaseDispatchExecutedInThisEvidence": false,
+    "configuredRoutePathExercisedWithDeterministicAdapters": true,
+    "unconfiguredRuntimeBehavior": "HTTP 409 blocked with providerCalled=false",
+    "requiredForLiveAcceptance": [
+      "authenticated Supabase storage with the existing session and log tables",
+      "SAFEGUARD_RUN_LIVE_DISPATCH=1",
+      "live channel runtime readiness",
+      "configured n8n relay URL and token",
+      "strict provider JSON receipt"
+    ],
+    "hardBlocker": "No live provider or production database capability was supplied to this worktree, so no live accepted or partial outcome is claimed."
+  },
+  "redGreen": {
+    "rejectedCandidate": "bec9dd71f2a249bc184abea477e911afd10845ca",
+    "redExitCode": 1,
+    "redRunnerTestsPassed": 113,
+    "redRunnerTestsFailed": 17,
+    "redRunnerTestCount": 130,
+    "redRowsExecuted": 111,
+    "redRowsUnexecuted": 17,
+    "redDurationSeconds": 1260.09,
+    "failureClassification": {
+      "productStateTransition": 8,
+      "navigationSettlementExpectation": 8,
+      "persistenceSettlementExpectation": 1
+    },
+    "finalCandidate": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+    "finalBrowserExitCode": 0,
+    "finalBrowserRunnerTestsPassed": 130,
+    "finalRowsExecuted": 128,
+    "finalRowsUnexecuted": 0,
+    "finalDurationSeconds": 1290.02
+  },
+  "browserAuthority": {
+    "matrixFormula": "4 environments * 16 fixtures * 2 scale modes",
+    "exactRowCount": 128,
+    "dayNightDesktopMobileCovered": true,
+    "mobileViewport": {
+      "width": 390,
+      "height": 844
+    },
+    "mobileRowCount": 64,
+    "legacy391RowCount": 0,
+    "owningRootText200RowCount": 64,
+    "rootMutationMaximum": 1,
+    "descendantInlineMutationTotal": 0,
+    "directLeafInlineMutationTotal": 0,
+    "realCascadePseudoMediaReflowMeasured": true,
+    "horizontalOverflowMaximum": 0,
+    "panelOverflowMaximum": 0,
+    "touchTargetFailureCount": 0,
+    "overlapFailureCount": 0,
+    "nestedScrollFailureCount": 0,
+    "clippedTextFailureCount": 0
+  },
+  "verification": {
+    "isolatedUnit": {
+      "testFilesPassed": 22,
+      "testsPassed": 230,
+      "testsSkippedBrowserRows": 128,
+      "exitCode": 0,
+      "durationSeconds": 188.51
+    },
+    "strictTypecheck": "pass",
+    "productionBuild": {
+      "status": "pass",
+      "nextVersion": "15.5.20",
+      "staticPagesGenerated": 27
+    },
+    "frontendStaticAudit": {
+      "status": "pass",
+      "violationCount": 0,
+      "coverageIssueCount": 0,
+      "importantDeclarationCount": 0
+    },
+    "evidenceValidator": {
+      "testFileCount": 1,
+      "testsPassed": 16,
+      "attackTestsPassed": 15,
+      "exitCode": 0,
+      "durationSeconds": 23.86
+    },
+    "focusedInvocationError": {
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/focused-browser-remediation.log",
+      "exitCode": 255,
+      "testStarted": false,
+      "countedAsEvidence": false,
+      "reason": "A Windows command-line test-name expression contained a pipe and was rejected before Vitest started."
+    },
+    "evidenceDiffCheck": {
+      "status": "pass",
+      "exitCode": 0,
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-evidence-diff-check.log"
+    },
+    "evidenceSecretScan": {
+      "status": "pass",
+      "hitCount": 0,
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-evidence-secret-scan.json"
+    },
+    "scopeAudit": {
+      "status": "pass",
+      "strictAnyHitCount": 0,
+      "koshaProductPathCount": 0,
+      "migrationSchemaDataPackageEnvPathCount": 0,
+      "commercialStoreRemediationDiffCount": 0,
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-scope-audit.json"
+    },
+    "testIsolation": {
+      "contaminatedConcurrentRunCount": 2,
+      "contaminatedRunsCountedAsPass": 0,
+      "finalShareVitestOrNextProcessCount": 0
+    }
+  },
+  "changedFileCensus": {
+    "wholeSeriesCommitCount": 7,
+    "wholeSeriesChangedFileCount": 78,
+    "wholeSeriesAddedFileCount": 53,
+    "wholeSeriesModifiedFileCount": 25,
+    "wholeSeriesInsertions": 16510,
+    "wholeSeriesDeletions": 2011,
+    "remediationChangedFileCount": 24,
+    "remediationAddedFileCount": 6,
+    "remediationModifiedFileCount": 18,
+    "remediationInsertions": 2186,
+    "remediationDeletions": 1007,
+    "finalBrowserFixChangedFileCount": 2,
+    "generatedTrackedPngIncludedCount": 0,
+    "evidenceCommitStagedFileCount": 42,
+    "evidenceCommitCensusPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/evidence-staged-files.json"
+  },
+  "integration": {
+    "authoritativeCurrentHead": "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
+    "oldHeadNotUsedAsCurrentAuthority": "ea7aa7223a056c884d5b0ba55563d602af328451",
+    "gitCherryPlusCount": 7,
+    "currentMergeTreeExitCode": 0,
+    "currentMergeTreeResultTree": "d370929311230df359aad787905fefbc6b018b34",
+    "currentPathOverlapCount": 0,
+    "koshaIntegrationDeltaPathCount": 26,
+    "koshaPathOverlapCount": 0,
+    "ontologyCandidate": "ff093fae30c331816f0068f9075b91b151d05813",
+    "ontologyPathOverlapCount": 5,
+    "ontologyContentConflictCount": 3,
+    "semanticConflictReviewRequired": true,
+    "directIntegrationReadinessClaimed": false
+  },
+  "artifacts": {
+    "contractEvidence": {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/contract-evidence.json",
+      "sha256": "9fccc112d384470ab0d1fafbaedc924a7a8c3e99d20e709d5ad6c5c17f0f387f"
+    },
+    "contractValidator": {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/validate-remediation-evidence.cjs",
+      "sha256": "a38fd6519b06679053aa1a94d9d1813212e41c52ba462218d586a4e1079d34fa"
+    },
+    "contractTest": {
+      "path": "tests/workpack-share-v2-remediation-evidence.test.ts",
+      "sha256": "19ff599dfa2a4088c8759734a5230a707b913ee057fc404c49a82b0a07d462c2"
+    },
+    "validatorLog": {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/final-evidence-validator.log",
+      "sha256": "d856a6bed2116aadda15d1142827c1d367808542a4094bdb5b01e566c5724686"
+    },
+    "productCensus": "evaluation/workpack-share-v2-product-2026-07-14/remediation/product-changed-files.json",
+    "redClassification": "evaluation/workpack-share-v2-product-2026-07-14/remediation/browser-red-classification.json",
+    "isolationIncident": "evaluation/workpack-share-v2-product-2026-07-14/remediation/test-isolation-incident.json",
+    "integrationAdoption": "evaluation/workpack-share-v2-product-2026-07-14/remediation/integration-adoption.json",
+    "ontologyConflictContract": "evaluation/workpack-share-v2-product-2026-07-14/remediation/ontology-conflict-contract.json"
+  },
+  "reviewBoundary": {
+    "freshIndependentReviewRequired": true,
+    "freshIndependentReviewStatus": "pending",
+    "selfApproved": false,
+    "integratedIntoMain": false
+  }
+}

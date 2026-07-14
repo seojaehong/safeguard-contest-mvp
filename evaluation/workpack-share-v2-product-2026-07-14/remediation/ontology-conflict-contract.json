@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-ontology-conflict-contract/v1",
+  "productCommit": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+  "productTree": "7ce7fee2d80967f02d32b80e110067f581e1c07b",
+  "ontologyCandidate": "ff093fae30c331816f0068f9075b91b151d05813",
+  "mergeBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+  "mergeTree": {
+    "exitCode": 1,
+    "contentConflictFiles": [
+      "components/FieldOperationsWorkspace.tsx",
+      "lib/workpack-commercial-store.ts",
+      "tests/workpack-share-authority-routes.test.ts"
+    ],
+    "autoMergedSemanticReviewFiles": [
+      "components/CurrentWorkpackModules.tsx",
+      "components/SafeGuardCommandCenter.tsx"
+    ],
+    "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/merge-tree-ontology-ff093fa.log"
+  },
+  "overlap": {
+    "pathCount": 5,
+    "paths": [
+      {
+        "path": "components/FieldOperationsWorkspace.tsx",
+        "mergeDisposition": "content_conflict",
+        "shareSymbols": [
+          "WorkspaceOperationGraphPanel",
+          "resolveSavedWorkerIds"
+        ],
+        "ontologySymbols": [
+          "PhaseAConfirmationBinding",
+          "saveCurrentWorkpackForPhaseA",
+          "confirmCurrentPhaseAWorkpack",
+          "onWorkpackStateChange"
+        ]
+      },
+      {
+        "path": "components/SafeGuardCommandCenter.tsx",
+        "mergeDisposition": "auto_merge_semantic_review",
+        "shareSymbols": [
+          "initialReturnStep",
+          "replaceWorkspaceLocation",
+          "workspacePage=share"
+        ],
+        "ontologySymbols": [
+          "applyServerConfirmedWorkpack",
+          "assessExactWorkpackConfirmation"
+        ]
+      },
+      {
+        "path": "components/CurrentWorkpackModules.tsx",
+        "mergeDisposition": "auto_merge_semantic_review",
+        "shareSymbols": [
+          "CurrentDispatchModule",
+          "WorkflowSharePanel"
+        ],
+        "ontologySymbols": [
+          "buildPhaseAReviewUiState",
+          "applyPhaseADocumentAuthorityMarker",
+          "CurrentEvidenceModule"
+        ]
+      },
+      {
+        "path": "lib/workpack-commercial-store.ts",
+        "mergeDisposition": "content_conflict",
+        "shareSymbols": [
+          "WorkpackOperationContext.updatedAt",
+          "WorkpackOperationContext.evidenceSummary",
+          "ActiveOwnedShareSession.dispatchBinding",
+          "loadActiveOwnedShareSession"
+        ],
+        "ontologySymbols": [
+          "WorkpackOperationContext.revision",
+          "assessStoredWorkpackShareAuthority(expectedWorkpackId)",
+          "assessExactWorkpackConfirmation"
+        ]
+      },
+      {
+        "path": "tests/workpack-share-authority-routes.test.ts",
+        "mergeDisposition": "content_conflict",
+        "shareSymbols": [
+          "dispatch access_policy CAS route tests"
+        ],
+        "ontologySymbols": [
+          "phase A confirmation revision CAS route tests"
+        ]
+      }
+    ]
+  },
+  "requiredResolution": {
+    "workpackOperationContextFields": [
+      "revision",
+      "updatedAt",
+      "evidenceSummary"
+    ],
+    "workpackRowBinding": "revision and updatedAt must both derive from the same authenticated workpacks.updated_at row; evidenceSummary must remain the same row's evidence_summary value.",
+    "shareAuthority": "Generation evidence, readiness, and exact Phase A confirmation for expectedWorkpackId must all fail closed before canShare is true.",
+    "confirmationCas": "Phase A confirmation must retain workpacks.updated_at compare-and-swap against context.revision, issue a strictly newer updated_at, and preserve confirmationId replay/conflict handling.",
+    "dispatchCas": "Share dispatch must retain workpack_share_sessions.access_policy dispatchGate transitions ready-to-reserved-to-recorded-or-uncertain with equality on the previously read session updated_at.",
+    "activeSessionBinding": "Keep organizationId, siteId, workpackId, createdBy, recipients, expiresAt, accessPolicy, and dispatchBinding in the authenticated session context.",
+    "uiState": "Keep Share returnStep/language route ownership and stale recovery while applying only server-confirmed Phase A workpack state.",
+    "testResolution": "Retain both actual workflow dispatch route CAS tests and Phase A confirmation revision CAS tests; do not choose one suite over the other."
+  },
+  "prohibitedResolution": [
+    "Dropping revision, updatedAt, or evidenceSummary",
+    "Replacing either CAS with a last-write-wins update",
+    "Treating an auto-merge as semantic approval",
+    "Resolving the ontology conflict on this Share branch"
+  ],
+  "integrationStatus": "semantic_conflict_review_required"
+}

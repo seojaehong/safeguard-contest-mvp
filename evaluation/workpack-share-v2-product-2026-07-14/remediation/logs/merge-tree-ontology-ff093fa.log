@@ -1,0 +1,24 @@
+product=fc2bd1783fcc413981306f689d67bb6c659a985e
+product_tree=7ce7fee2d80967f02d32b80e110067f581e1c07b
+ontology_candidate=ff093fae30c331816f0068f9075b91b151d05813
+merge_base=f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5
+812b96f86e8c5bdc0d32557e4b847b0fd6f4d762
+100644 5194cc86ccbff2eb4fc29fc4d880fcaf84adefee 1	components/FieldOperationsWorkspace.tsx
+100644 7a16ffa83d7250d11c0092cdbb7ffb3dfdb1a380 2	components/FieldOperationsWorkspace.tsx
+100644 57819744067dad20c909c37bb028956354aa250f 3	components/FieldOperationsWorkspace.tsx
+100644 5d1113c75090cbb322064bd4961873e90574d34f 1	lib/workpack-commercial-store.ts
+100644 28e3e9e8ebe174d2fa6f473fd46e8c4f4bdfc43c 2	lib/workpack-commercial-store.ts
+100644 e1c79a84b1915a2278500496304807eb89e0dd75 3	lib/workpack-commercial-store.ts
+100644 3a85bd29b65eb74154f39e2f92bdfdc664ddb4d8 1	tests/workpack-share-authority-routes.test.ts
+100644 0149164993fd8c988fe0095cd22a650b195ffb15 2	tests/workpack-share-authority-routes.test.ts
+100644 7eab082e71482c9cea67f3d463db46e081d1bf1f 3	tests/workpack-share-authority-routes.test.ts
+
+Auto-merging components/CurrentWorkpackModules.tsx
+Auto-merging components/FieldOperationsWorkspace.tsx
+CONFLICT (content): Merge conflict in components/FieldOperationsWorkspace.tsx
+Auto-merging components/SafeGuardCommandCenter.tsx
+Auto-merging lib/workpack-commercial-store.ts
+CONFLICT (content): Merge conflict in lib/workpack-commercial-store.ts
+Auto-merging tests/workpack-share-authority-routes.test.ts
+CONFLICT (content): Merge conflict in tests/workpack-share-authority-routes.test.ts
+merge_tree_exit=1

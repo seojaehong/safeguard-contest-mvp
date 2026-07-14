@@ -1,0 +1,18 @@
+[evidence-class] precommit_dirty_focused_not_final
+[base-product-sha] bec9dd71f2a249bc184abea477e911afd10845ca
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-browser.test.ts --maxWorkers=1 --no-file-parallelism -t day-desktop:review_required:normal_100
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+[share-browser-product-sha] bec9dd71f2a249bc184abea477e911afd10845ca
+[share-browser-product-tree] 7bf80b0c99f43c1e71adff00274d035a0bc61fcd
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 129 skipped (130)
+   Start at  12:27:56
+   Duration  48.01s (transform 320ms, setup 0ms, import 755ms, tests 46.65s, environment 0ms)
+
+[explicit-exit-code] 0
