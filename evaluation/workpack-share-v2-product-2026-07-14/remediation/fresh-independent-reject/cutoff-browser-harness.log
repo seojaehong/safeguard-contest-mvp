@@ -1,0 +1,36 @@
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+ ✓ tests/workpack-share-v2-browser-harness.test.ts > Share browser harness teardown > retries after an actual first taskkill failure and verifies the process tree and port are gone 18437ms
+ × tests/workpack-share-v2-browser-harness.test.ts > Share browser harness teardown > keeps teardown retryable after a bounded termination timeout and then cleans up 18027ms
+   → promise rejected "Error: Windows process-tree termination n…" instead of resolving
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser-harness.test.ts > Share browser harness teardown > keeps teardown retryable after a bounded termination timeout and then cleans up
+AssertionError: promise rejected "Error: Windows process-tree termination n…" instead of resolving
+ ❯ tests/workpack-share-v2-browser-harness.test.ts:97:35
+     95|       const attemptsAfterTimeout = taskkillFailure.invocationCount;
+     96|       taskkillFailure.failuresRemaining = 0;
+     97|       await expect(harness.stop()).resolves.toBeUndefined();
+       |                                   ^
+     98|       expect(taskkillFailure.invocationCount).toBeGreaterThan(attempts…
+     99|       await expect(fetch(harness.baseUrl)).rejects.toThrow();
+
+Caused by: Error: Windows process-tree termination not verified for browser harness PID 38408 on port 31669 after 600ms; processAlive=false; portReleased=true; attempt=1 status=0 error=none output=����: PID 53828�� ���μ���(PID 38408�� �ڽ� ���μ���)�� ����Ǿ����ϴ�.
+����: PID 38408�� ���μ���(PID 61180�� �ڽ� ���μ���)�� ����Ǿ����ϴ�.
+ ❯ stopProcessTree tests/helpers/isolated-next-browser-harness.ts:164:11
+ ❯ operation tests/helpers/isolated-next-browser-harness.ts:385:17
+ ❯ Object.stop tests/helpers/isolated-next-browser-harness.ts:396:22
+ ❯ tests/workpack-share-v2-browser-harness.test.ts:97:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  17:31:19
+   Duration  37.50s (transform 57ms, setup 0ms, import 496ms, tests 36.47s, environment 0ms)
+
+
+[explicit-exit-code] 1

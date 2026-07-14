@@ -1,0 +1,152 @@
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+[share-browser-product-sha] 7a56434a99b043edf8601f772d9b9606220863a0
+[share-browser-product-tree] ecfc310b0e367f45a2588d4b3f1a04a49b576dde
+stderr | tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100
+Delayed local restore incorrectly changed authority state {
+  restoredState: 'ready',
+  editedContentBinding: `{"deliverables":{"emergencyResponseDraft":"비상대응 절차(초안)\\n중대재해·산업재해 발생 대비 현장 초기대응 기록\\n\\n업체명: 세이프건설\\n현장명: 서울 성수동 근린생활시설 현장\\n작업명: 외벽 도장 작업\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n특수 대상/조건: 우천·젖은 바닥 조건 — 미끄럼과 보행/장비 동선 분리 확인\\n적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체\\n\\n[1. 사고 징후 및 즉시 중지]\\n- 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n- 사고 징후, 아차사고, 위험 발견 시 작업자는 즉시 작업을 중지하고 작업반장에게 보고합니다.\\n- 추가 피해 가능성이 있으면 위험구역 접근을 통제하고 전원을 안전한 장소로 이동시킵니다.\\n\\n[2. 초기조치]\\n- 부상자 구조와 응급조치를 우선하되, 구조자 2차 사고 위험을 먼저 확인합니다.\\n- 전기, 화기, 장비, 차량 등 추가 위험원을 정지 또는 격리합니다.\\n- 필요한 경우 119, 원청/발주자, 안전관리자에게 즉시 연락합니다.\\n\\n[3. 보고체계]\\n- 최초 발견자 → 작업반장 → 관리감독자 → 현장소장 → 발주자/원청 안전 담당 순으로 보고합니다.\\n- 보고 내용은 사고시간, 장소, 작업내용, 피해상황, 초기조치, 추가 위험 여부를 포함합니다.\\n\\n[4. 현장보존 및 재발방지]\\n- 인명구조와 추가 피해 방지를 제외하고 현장을 임의 변경하지 않습니다.\\n- 사진/영상, TBM 기록, 위험성평가표, 교육 기록을 함께 보관합니다.\\n- 재개 전 위험성평가를 다시 수행하고 감소대책 이행 여부를 확인합니다.","foreignWorkerBriefing":"외국인 근로자용 쉬운 한국어 브리핑\\n\\n현장: 서울 성수동 근린생활시설 현장\\n\\n오늘 작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n\\n가장 큰 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n\\n\\n\\n[작업 전 꼭 확인]\\n\\n1. 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검\\n\\n2. 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기\\n\\n3. 작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인\\n\\n\\n\\n[쉬운 문장]\\n\\n- 위험하면 멈춥니다.\\n\\n- 혼자 판단하지 말고 바로 말합니다.\\n\\n- 보호구를 착용하고 작업구역 밖으로 함부로 들어가지 않습니다.\\n\\n- ⚠️ 🧪 💧 같은 그림 표시를 먼저 보고, 이해하지 못하면 작업을 시작하지 않습니다.\\n\\n\\n\\n[다국어 기본팩]\\n\\n[베트남어 / Tiếng Việt]\\n- 국내 체류외국인과 제조·건설 현장 근로자 커뮤니케이션에서 우선도가 높은 언어\\n- Công việc hôm nay: Sơn tường ngoài bằng giàn giáo di động\\n- Nguy cơ chính của công việc này: nguy cơ rơi ngã, giàn giáo di động rung hoặc lật, gió mạnh\\n- ⚠️ Dấu hiệu nguy hiểm: ⚠️ 🧱 🌬️. Nếu thấy các dấu hiệu này, hãy dừng lại và hỏi quản lý.\\n- Trước khi bắt đầu: Mang dây an toàn và thiết bị bảo hộ, chỉ làm việc trong khu vực an toàn.\\n- Khóa bánh xe, kiểm tra lan can và không di chuyển giàn giáo khi có người ở trên.\\n- Nếu gió mạnh hơn hoặc giàn giáo rung, hãy dừng công việc ngay.\\n- Nếu chưa hiểu, hãy dừng lại và yêu cầu quản lý giải thích lại.\\n\\n[중국어 / 中文]\\n- 중국 국적 및 중국어권 작업자 안내에 필요한 기본 언어\\n- 今天的作业: 使用移动脚手架进行外墙涂装\\n- 本作业的主要危险: 坠落危险, 移动脚手架晃动或倾倒, 强风\\n- ⚠️ 危险标志：⚠️ 🧱 🌬️。看到这些标志时，请先停止作业并确认负责人说明。\\n- 开始前: 佩戴防坠落防护用品，只在安全平台内作业。\\n- 锁好脚轮，确认护栏，禁止载人移动脚手架。\\n- 如风力增强或脚手架晃动，请立即停止作业。\\n- 如果没有理解，请停止作业并请现场负责人再次说明。\\n\\n[태국어 / ภาษาไทย]\\n- 고용허가제 및 현장 근로자 커뮤니케이션에서 반복적으로 필요한 언어\\n- งานวันนี้: งานทาสีผนังภายนอกโดยใช้นั่งร้านเคลื่อนที่\\n- อันตรายหลักของงานนี้: ความเสี่ยงตกจากที่สูง, นั่งร้านเคลื่อนที่สั่นหรือพลิกคว่ำ, ลมแรง\\n- ⚠️ สัญลักษณ์อันตราย: ⚠️ 🧱 🌬️ หากเห็นสัญลักษณ์เหล่านี้ ให้หยุดก่อนและถามหัวหน้างานนะครับ/ค่ะ\\n- ก่อนเริ่มงาน: สวมอุปกรณ์ป้องกันการตกและทำงานภายในพื้นที่ปลอดภัยเท่านั้น\\n- ล็อกล้อ ตรวจราวกันตก และห้ามเคลื่อนย้ายนั่งร้านขณะมีคนอยู่ด้านบน\\n- หากลมแรงขึ้นหรือนั่งร้านสั่น ให้หยุดงานทันที\\n- หากไม่เข้าใจ ให้หยุดงานและขอให้หัวหน้างานอธิบายอีกครั้งนะครับ/ค่ะ\\n\\n[우즈베크어 / O'zbekcha]\\n- 우즈베키스탄 출신 근로자와 중앙아시아권 작업자 안내에 유용한 언어\\n- Bugungi ish: Ko'chma havozadan foydalanib tashqi devorni bo'yash\\n- Bu ishdagi asosiy xavflar: balandlikdan yiqilish xavfi, ko'chma havoza silkinishi yoki ag'darilishi, kuchli shamol\\n- ⚠️ Xavf belgisi: ⚠️ 🧱 🌬️. Bu belgilarni ko'rsangiz, avval to'xtang va rahbardan so'rang.\\n- Ish boshlashdan oldin: Yiqilishdan saqlovchi himoya vositalarini taqing va xavfsiz platformada ishlang.\\n- G'ildiraklarni qulflang, panjaralarni tekshiring va odam bor paytda havozani siljitmang.\\n- Shamol kuchaysa yoki havoza qimirlay boshlasa, ishni darhol to'xtating.\\n- Tushunmagan bo'lsangiz, ishni to'xtating va rahbardan yana tushuntirishni so'rang.\\n\\n[몽골어 / Монгол хэл]\\n- 몽골 국적 체류자와 건설·서비스 현장 신규 투입자 안내에 필요한 언어\\n- Өнөөдрийн ажил: Зөөврийн шат ашиглан гадна ханын будаг хийх ажил\\n- Энэ ажлын гол аюул: өндрөөс унах эрсдэл, зөөврийн шат ганхах эсвэл унах, хүчтэй салхи\\n- ⚠️ Аюулын тэмдэг: ⚠️ 🧱 🌬️. Эдгээр тэмдгийг харвал эхлээд зогсоож, ахлагчаас асуугаарай.\\n- Ажил эхлэхийн өмнө: Унахаас хамгаалах хэрэгсэл өмсөж, аюулгүй тавцан дотор ажиллана.\\n- Дугуйг түгжиж, хамгаалалтын хашлагыг шалгана.\\n- Салхи хүчтэй болох эсвэл шат ганхвал ажлыг шууд зогсооно.\\n- Ойлгоогүй бол ажлаа зогсоож, ахлагчаас дахин тайлбар хүсээрэй.\\n\\n\\n\\n[사용 전 확인]\\n\\n- 자동 번역 또는 기본 문구는 현장 통역자, 관리자, 해당 언어 가능자 확인 후 사용합니다.\\n\\n- 작업방법, 작업중지 기준, 보호구 명칭은 현장 실물과 함께 다시 확인합니다.\\n\\n- 캄보디아어·네팔어·미얀마어 등은 글 읽기 편차를 고려해 그림 표지, 짧은 영상, 현장 실물 설명을 함께 사용합니다.","foreignWorkerLanguages":[{"code":"vi","label":"베트남어","lines":["Trước khi làm việc, hãy kiểm tra khu vực nguy hiểm và thiết bị bảo hộ.","Nếu thấy nguy hiểm, gió mạnh, xe nâng hoặc hóa chất, hãy dừng công việc và báo ngay.","Hãy làm theo hướng dẫn của quản lý và xác nhận lại nếu chưa hiểu."],"nativeLabel":"Tiếng Việt","rationale":"국내 체류외국인과 제조·건설 현장 근로자 커뮤니케이션에서 우선도가 높은 언어"},{"code":"zh","label":"중국어","lines":["作业前请确认危险区域和个人防护用品。","发现强风、叉车、坠落或化学品危险时，请立即停止作业并报告。","如未完全理解，请向现场负责人再次确认。"],"nativeLabel":"中文","rationale":"중국 국적 및 중국어권 작업자 안내에 필요한 기본 언어"},{"code":"th","label":"태국어","lines":["ก่อนเริ่มงาน ให้ตรวจพื้นที่เสี่ยงและอุปกรณ์ป้องกันส่วนบุคคล","หากพบลมแรง รถยก สารเคมี หรือความเสี่ยงตกจากที่สูง ให้หยุดงานและแจ้งหัวหน้างานทันที","หากไม่เข้าใจ ให้ขอให้หัวหน้างานอธิบายซ้ำ"],"nativeLabel":"ภาษาไทย","rationale":"고용허가제 및 현장 근로자 커뮤니케이션에서 반복적으로 필요한 언어"},{"code":"uz","label":"우즈베크어","lines":["Ish boshlashdan oldin xavfli joylar va himoya vositalarini tekshiring.","Kuchli shamol, yuk ko'targich, kimyoviy modda yoki yiqilish xavfi bo'lsa, ishni to'xtating va darhol xabar bering.","Tushunmagan bo'lsangiz, rahbardan yana tushuntirishni so'rang."],"nativeLabel":"O'zbekcha","rationale":"우즈베키스탄 출신 근로자와 중앙아시아권 작업자 안내에 유용한 언어"},{"code":"mn","label":"몽골어","lines":["Ажил эхлэхээс өмнө аюултай бүс болон хамгаалах хэрэгслийг шалгана уу.","Хүчтэй салхи, сэрээт ачигч, химийн бодис эсвэл унах эрсдэл байвал ажлыг зогсоож шууд мэдэгдэнэ үү.","Ойлгоогүй бол ахлагчаас дахин тайлбарлуулах хэрэгтэй."],"nativeLabel":"Монгол хэл","rationale":"몽골 국적 체류자와 건설·서비스 현장 신규 투입자 안내에 필요한 언어"}],"foreignWorkerTransmission":"[SafeClaw 외국인 근로자 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n\\n쉬운 한국어:\\n✋ 위험하면 작업을 멈추고 바로 관리자에게 말하세요.\\n🦺 보호구를 착용하고, 지시를 이해한 뒤 작업을 시작하세요.\\n💧 더위·자외선 작업에서는 물, 그늘, 휴식 시간을 먼저 확인하세요.\\n⚠️ 이해하지 못하면 작업을 시작하지 말고 관리자에게 다시 설명을 요청하세요.\\n\\n[SafeClaw 베트남어 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n⚠️ Dấu hiệu nguy hiểm: ⚠️ 🧱 🌬️. Nếu thấy các dấu hiệu này, hãy dừng lại và hỏi quản lý.\\n\\n베트남어(Tiếng Việt)\\n- Công việc hôm nay: Sơn tường ngoài bằng giàn giáo di động\\n- Nguy cơ chính của công việc này: nguy cơ rơi ngã, giàn giáo di động rung hoặc lật, gió mạnh\\n- ⚠️ Dấu hiệu nguy hiểm: ⚠️ 🧱 🌬️. Nếu thấy các dấu hiệu này, hãy dừng lại và hỏi quản lý.\\n- Trước khi bắt đầu: Mang dây an toàn và thiết bị bảo hộ, chỉ làm việc trong khu vực an toàn.\\n- Khóa bánh xe, kiểm tra lan can và không di chuyển giàn giáo khi có người ở trên.\\n- Nếu gió mạnh hơn hoặc giàn giáo rung, hãy dừng công việc ngay.\\n- Nếu chưa hiểu, hãy dừng lại và yêu cầu quản lý giải thích lại.\\n\\nQuản lý xác nhận: kiểm tra lại nội dung này với phiên dịch hoặc người biết ngôn ngữ này.\\n\\n[SafeClaw 중국어 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n⚠️ 危险标志：⚠️ 🧱 🌬️。看到这些标志时，请先停止作业并确认负责人说明。\\n\\n중국어(中文)\\n- 今天的作业: 使用移动脚手架进行外墙涂装\\n- 本作业的主要危险: 坠落危险, 移动脚手架晃动或倾倒, 强风\\n- ⚠️ 危险标志：⚠️ 🧱 🌬️。看到这些标志时，请先停止作业并确认负责人说明。\\n- 开始前: 佩戴防坠落防护用品，只在安全平台内作业。\\n- 锁好脚轮，确认护栏，禁止载人移动脚手架。\\n- 如风力增强或脚手架晃动，请立即停止作业。\\n- 如果没有理解，请停止作业并请现场负责人再次说明。\\n\\n管理人员确认：请由翻译或懂该语言的人员确认后再发送。\\n\\n[SafeClaw 태국어 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n⚠️ สัญลักษณ์อันตราย: ⚠️ 🧱 🌬️ หากเห็นสัญลักษณ์เหล่านี้ ให้หยุดก่อนและถามหัวหน้างานนะครับ/ค่ะ\\n\\n태국어(ภาษาไทย)\\n- งานวันนี้: งานทาสีผนังภายนอกโดยใช้นั่งร้านเคลื่อนที่\\n- อันตรายหลักของงานนี้: ความเสี่ยงตกจากที่สูง, นั่งร้านเคลื่อนที่สั่นหรือพลิกคว่ำ, ลมแรง\\n- ⚠️ สัญลักษณ์อันตราย: ⚠️ 🧱 🌬️ หากเห็นสัญลักษณ์เหล่านี้ ให้หยุดก่อนและถามหัวหน้างานนะครับ/ค่ะ\\n- ก่อนเริ่มงาน: สวมอุปกรณ์ป้องกันการตกและทำงานภายในพื้นที่ปลอดภัยเท่านั้น\\n- ล็อกล้อ ตรวจราวกันตก และห้ามเคลื่อนย้ายนั่งร้านขณะมีคนอยู่ด้านบน\\n- หากลมแรงขึ้นหรือนั่งร้านสั่น ให้หยุดงานทันที\\n- หากไม่เข้าใจ ให้หยุดงานและขอให้หัวหน้างานอธิบายอีกครั้งนะครับ/ค่ะ\\n\\nการยืนยันของหัวหน้างาน: ตรวจข้อความนี้กับล่ามหรือผู้ที่อ่านภาษานี้ได้ก่อนส่งนะครับ/ค่ะ\\n\\n[SafeClaw 우즈베크어 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n⚠️ Xavf belgisi: ⚠️ 🧱 🌬️. Bu belgilarni ko'rsangiz, avval to'xtang va rahbardan so'rang.\\n\\n우즈베크어(O'zbekcha)\\n- Bugungi ish: Ko'chma havozadan foydalanib tashqi devorni bo'yash\\n- Bu ishdagi asosiy xavflar: balandlikdan yiqilish xavfi, ko'chma havoza silkinishi yoki ag'darilishi, kuchli shamol\\n- ⚠️ Xavf belgisi: ⚠️ 🧱 🌬️. Bu belgilarni ko'rsangiz, avval to'xtang va rahbardan so'rang.\\n- Ish boshlashdan oldin: Yiqilishdan saqlovchi himoya vositalarini taqing va xavfsiz platformada ishlang.\\n- G'ildiraklarni qulflang, panjaralarni tekshiring va odam bor paytda havozani siljitmang.\\n- Shamol kuchaysa yoki havoza qimirlay boshlasa, ishni darhol to'xtating.\\n- Tushunmagan bo'lsangiz, ishni to'xtating va rahbardan yana tushuntirishni so'rang.\\n\\nRahbar tasdig'i: xabarni tarjimon yoki shu tilni biladigan xodim bilan tekshiring.\\n\\n[SafeClaw 몽골어 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n⚠️ Аюулын тэмдэг: ⚠️ 🧱 🌬️. Эдгээр тэмдгийг харвал эхлээд зогсоож, ахлагчаас `... 15774 more characters,
+  previousServerContentBinding: `{"deliverables":{"emergencyResponseDraft":"비상대응 절차(초안)\\n중대재해·산업재해 발생 대비 현장 초기대응 기록\\n\\n업체명: 세이프건설\\n현장명: 서울 성수동 근린생활시설 현장\\n작업명: 외벽 도장 작업\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n특수 대상/조건: 우천·젖은 바닥 조건 — 미끄럼과 보행/장비 동선 분리 확인\\n적용대상: 현장소장, 관리감독자, 작업반장, 작업자, 협력업체\\n\\n[1. 사고 징후 및 즉시 중지]\\n- 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n- 사고 징후, 아차사고, 위험 발견 시 작업자는 즉시 작업을 중지하고 작업반장에게 보고합니다.\\n- 추가 피해 가능성이 있으면 위험구역 접근을 통제하고 전원을 안전한 장소로 이동시킵니다.\\n\\n[2. 초기조치]\\n- 부상자 구조와 응급조치를 우선하되, 구조자 2차 사고 위험을 먼저 확인합니다.\\n- 전기, 화기, 장비, 차량 등 추가 위험원을 정지 또는 격리합니다.\\n- 필요한 경우 119, 원청/발주자, 안전관리자에게 즉시 연락합니다.\\n\\n[3. 보고체계]\\n- 최초 발견자 → 작업반장 → 관리감독자 → 현장소장 → 발주자/원청 안전 담당 순으로 보고합니다.\\n- 보고 내용은 사고시간, 장소, 작업내용, 피해상황, 초기조치, 추가 위험 여부를 포함합니다.\\n\\n[4. 현장보존 및 재발방지]\\n- 인명구조와 추가 피해 방지를 제외하고 현장을 임의 변경하지 않습니다.\\n- 사진/영상, TBM 기록, 위험성평가표, 교육 기록을 함께 보관합니다.\\n- 재개 전 위험성평가를 다시 수행하고 감소대책 이행 여부를 확인합니다.","foreignWorkerBriefing":"외국인 근로자용 쉬운 한국어 브리핑\\n\\n현장: 서울 성수동 근린생활시설 현장\\n\\n오늘 작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n\\n가장 큰 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n\\n\\n\\n[작업 전 꼭 확인]\\n\\n1. 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검\\n\\n2. 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기\\n\\n3. 작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인\\n\\n\\n\\n[쉬운 문장]\\n\\n- 위험하면 멈춥니다.\\n\\n- 혼자 판단하지 말고 바로 말합니다.\\n\\n- 보호구를 착용하고 작업구역 밖으로 함부로 들어가지 않습니다.\\n\\n- ⚠️ 🧪 💧 같은 그림 표시를 먼저 보고, 이해하지 못하면 작업을 시작하지 않습니다.\\n\\n\\n\\n[다국어 기본팩]\\n\\n[베트남어 / Tiếng Việt]\\n- 국내 체류외국인과 제조·건설 현장 근로자 커뮤니케이션에서 우선도가 높은 언어\\n- Công việc hôm nay: Sơn tường ngoài bằng giàn giáo di động\\n- Nguy cơ chính của công việc này: nguy cơ rơi ngã, giàn giáo di động rung hoặc lật, gió mạnh\\n- ⚠️ Dấu hiệu nguy hiểm: ⚠️ 🧱 🌬️. Nếu thấy các dấu hiệu này, hãy dừng lại và hỏi quản lý.\\n- Trước khi bắt đầu: Mang dây an toàn và thiết bị bảo hộ, chỉ làm việc trong khu vực an toàn.\\n- Khóa bánh xe, kiểm tra lan can và không di chuyển giàn giáo khi có người ở trên.\\n- Nếu gió mạnh hơn hoặc giàn giáo rung, hãy dừng công việc ngay.\\n- Nếu chưa hiểu, hãy dừng lại và yêu cầu quản lý giải thích lại.\\n\\n[중국어 / 中文]\\n- 중국 국적 및 중국어권 작업자 안내에 필요한 기본 언어\\n- 今天的作业: 使用移动脚手架进行外墙涂装\\n- 本作业的主要危险: 坠落危险, 移动脚手架晃动或倾倒, 强风\\n- ⚠️ 危险标志：⚠️ 🧱 🌬️。看到这些标志时，请先停止作业并确认负责人说明。\\n- 开始前: 佩戴防坠落防护用品，只在安全平台内作业。\\n- 锁好脚轮，确认护栏，禁止载人移动脚手架。\\n- 如风力增强或脚手架晃动，请立即停止作业。\\n- 如果没有理解，请停止作业并请现场负责人再次说明。\\n\\n[태국어 / ภาษาไทย]\\n- 고용허가제 및 현장 근로자 커뮤니케이션에서 반복적으로 필요한 언어\\n- งานวันนี้: งานทาสีผนังภายนอกโดยใช้นั่งร้านเคลื่อนที่\\n- อันตรายหลักของงานนี้: ความเสี่ยงตกจากที่สูง, นั่งร้านเคลื่อนที่สั่นหรือพลิกคว่ำ, ลมแรง\\n- ⚠️ สัญลักษณ์อันตราย: ⚠️ 🧱 🌬️ หากเห็นสัญลักษณ์เหล่านี้ ให้หยุดก่อนและถามหัวหน้างานนะครับ/ค่ะ\\n- ก่อนเริ่มงาน: สวมอุปกรณ์ป้องกันการตกและทำงานภายในพื้นที่ปลอดภัยเท่านั้น\\n- ล็อกล้อ ตรวจราวกันตก และห้ามเคลื่อนย้ายนั่งร้านขณะมีคนอยู่ด้านบน\\n- หากลมแรงขึ้นหรือนั่งร้านสั่น ให้หยุดงานทันที\\n- หากไม่เข้าใจ ให้หยุดงานและขอให้หัวหน้างานอธิบายอีกครั้งนะครับ/ค่ะ\\n\\n[우즈베크어 / O'zbekcha]\\n- 우즈베키스탄 출신 근로자와 중앙아시아권 작업자 안내에 유용한 언어\\n- Bugungi ish: Ko'chma havozadan foydalanib tashqi devorni bo'yash\\n- Bu ishdagi asosiy xavflar: balandlikdan yiqilish xavfi, ko'chma havoza silkinishi yoki ag'darilishi, kuchli shamol\\n- ⚠️ Xavf belgisi: ⚠️ 🧱 🌬️. Bu belgilarni ko'rsangiz, avval to'xtang va rahbardan so'rang.\\n- Ish boshlashdan oldin: Yiqilishdan saqlovchi himoya vositalarini taqing va xavfsiz platformada ishlang.\\n- G'ildiraklarni qulflang, panjaralarni tekshiring va odam bor paytda havozani siljitmang.\\n- Shamol kuchaysa yoki havoza qimirlay boshlasa, ishni darhol to'xtating.\\n- Tushunmagan bo'lsangiz, ishni to'xtating va rahbardan yana tushuntirishni so'rang.\\n\\n[몽골어 / Монгол хэл]\\n- 몽골 국적 체류자와 건설·서비스 현장 신규 투입자 안내에 필요한 언어\\n- Өнөөдрийн ажил: Зөөврийн шат ашиглан гадна ханын будаг хийх ажил\\n- Энэ ажлын гол аюул: өндрөөс унах эрсдэл, зөөврийн шат ганхах эсвэл унах, хүчтэй салхи\\n- ⚠️ Аюулын тэмдэг: ⚠️ 🧱 🌬️. Эдгээр тэмдгийг харвал эхлээд зогсоож, ахлагчаас асуугаарай.\\n- Ажил эхлэхийн өмнө: Унахаас хамгаалах хэрэгсэл өмсөж, аюулгүй тавцан дотор ажиллана.\\n- Дугуйг түгжиж, хамгаалалтын хашлагыг шалгана.\\n- Салхи хүчтэй болох эсвэл шат ганхвал ажлыг шууд зогсооно.\\n- Ойлгоогүй бол ажлаа зогсоож, ахлагчаас дахин тайлбар хүсээрэй.\\n\\n\\n\\n[사용 전 확인]\\n\\n- 자동 번역 또는 기본 문구는 현장 통역자, 관리자, 해당 언어 가능자 확인 후 사용합니다.\\n\\n- 작업방법, 작업중지 기준, 보호구 명칭은 현장 실물과 함께 다시 확인합니다.\\n\\n- 캄보디아어·네팔어·미얀마어 등은 글 읽기 편차를 고려해 그림 표지, 짧은 영상, 현장 실물 설명을 함께 사용합니다.","foreignWorkerLanguages":[{"code":"vi","label":"베트남어","lines":["Trước khi làm việc, hãy kiểm tra khu vực nguy hiểm và thiết bị bảo hộ.","Nếu thấy nguy hiểm, gió mạnh, xe nâng hoặc hóa chất, hãy dừng công việc và báo ngay.","Hãy làm theo hướng dẫn của quản lý và xác nhận lại nếu chưa hiểu."],"nativeLabel":"Tiếng Việt","rationale":"국내 체류외국인과 제조·건설 현장 근로자 커뮤니케이션에서 우선도가 높은 언어"},{"code":"zh","label":"중국어","lines":["作业前请确认危险区域和个人防护用品。","发现强风、叉车、坠落或化学品危险时，请立即停止作业并报告。","如未完全理解，请向现场负责人再次确认。"],"nativeLabel":"中文","rationale":"중국 국적 및 중국어권 작업자 안내에 필요한 기본 언어"},{"code":"th","label":"태국어","lines":["ก่อนเริ่มงาน ให้ตรวจพื้นที่เสี่ยงและอุปกรณ์ป้องกันส่วนบุคคล","หากพบลมแรง รถยก สารเคมี หรือความเสี่ยงตกจากที่สูง ให้หยุดงานและแจ้งหัวหน้างานทันที","หากไม่เข้าใจ ให้ขอให้หัวหน้างานอธิบายซ้ำ"],"nativeLabel":"ภาษาไทย","rationale":"고용허가제 및 현장 근로자 커뮤니케이션에서 반복적으로 필요한 언어"},{"code":"uz","label":"우즈베크어","lines":["Ish boshlashdan oldin xavfli joylar va himoya vositalarini tekshiring.","Kuchli shamol, yuk ko'targich, kimyoviy modda yoki yiqilish xavfi bo'lsa, ishni to'xtating va darhol xabar bering.","Tushunmagan bo'lsangiz, rahbardan yana tushuntirishni so'rang."],"nativeLabel":"O'zbekcha","rationale":"우즈베키스탄 출신 근로자와 중앙아시아권 작업자 안내에 유용한 언어"},{"code":"mn","label":"몽골어","lines":["Ажил эхлэхээс өмнө аюултай бүс болон хамгаалах хэрэгслийг шалгана уу.","Хүчтэй салхи, сэрээт ачигч, химийн бодис эсвэл унах эрсдэл байвал ажлыг зогсоож шууд мэдэгдэнэ үү.","Ойлгоогүй бол ахлагчаас дахин тайлбарлуулах хэрэгтэй."],"nativeLabel":"Монгол хэл","rationale":"몽골 국적 체류자와 건설·서비스 현장 신규 투입자 안내에 필요한 언어"}],"foreignWorkerTransmission":"[SafeClaw 외국인 근로자 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n\\n쉬운 한국어:\\n✋ 위험하면 작업을 멈추고 바로 관리자에게 말하세요.\\n🦺 보호구를 착용하고, 지시를 이해한 뒤 작업을 시작하세요.\\n💧 더위·자외선 작업에서는 물, 그늘, 휴식 시간을 먼저 확인하세요.\\n⚠️ 이해하지 못하면 작업을 시작하지 말고 관리자에게 다시 설명을 요청하세요.\\n\\n[SafeClaw 베트남어 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n⚠️ Dấu hiệu nguy hiểm: ⚠️ 🧱 🌬️. Nếu thấy các dấu hiệu này, hãy dừng lại và hỏi quản lý.\\n\\n베트남어(Tiếng Việt)\\n- Công việc hôm nay: Sơn tường ngoài bằng giàn giáo di động\\n- Nguy cơ chính của công việc này: nguy cơ rơi ngã, giàn giáo di động rung hoặc lật, gió mạnh\\n- ⚠️ Dấu hiệu nguy hiểm: ⚠️ 🧱 🌬️. Nếu thấy các dấu hiệu này, hãy dừng lại và hỏi quản lý.\\n- Trước khi bắt đầu: Mang dây an toàn và thiết bị bảo hộ, chỉ làm việc trong khu vực an toàn.\\n- Khóa bánh xe, kiểm tra lan can và không di chuyển giàn giáo khi có người ở trên.\\n- Nếu gió mạnh hơn hoặc giàn giáo rung, hãy dừng công việc ngay.\\n- Nếu chưa hiểu, hãy dừng lại và yêu cầu quản lý giải thích lại.\\n\\nQuản lý xác nhận: kiểm tra lại nội dung này với phiên dịch hoặc người biết ngôn ngữ này.\\n\\n[SafeClaw 중국어 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n⚠️ 危险标志：⚠️ 🧱 🌬️。看到这些标志时，请先停止作业并确认负责人说明。\\n\\n중국어(中文)\\n- 今天的作业: 使用移动脚手架进行外墙涂装\\n- 本作业的主要危险: 坠落危险, 移动脚手架晃动或倾倒, 强风\\n- ⚠️ 危险标志：⚠️ 🧱 🌬️。看到这些标志时，请先停止作业并确认负责人说明。\\n- 开始前: 佩戴防坠落防护用品，只在安全平台内作业。\\n- 锁好脚轮，确认护栏，禁止载人移动脚手架。\\n- 如风力增强或脚手架晃动，请立即停止作业。\\n- 如果没有理解，请停止作业并请现场负责人再次说明。\\n\\n管理人员确认：请由翻译或懂该语言的人员确认后再发送。\\n\\n[SafeClaw 태국어 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n⚠️ สัญลักษณ์อันตราย: ⚠️ 🧱 🌬️ หากเห็นสัญลักษณ์เหล่านี้ ให้หยุดก่อนและถามหัวหน้างานนะครับ/ค่ะ\\n\\n태국어(ภาษาไทย)\\n- งานวันนี้: งานทาสีผนังภายนอกโดยใช้นั่งร้านเคลื่อนที่\\n- อันตรายหลักของงานนี้: ความเสี่ยงตกจากที่สูง, นั่งร้านเคลื่อนที่สั่นหรือพลิกคว่ำ, ลมแรง\\n- ⚠️ สัญลักษณ์อันตราย: ⚠️ 🧱 🌬️ หากเห็นสัญลักษณ์เหล่านี้ ให้หยุดก่อนและถามหัวหน้างานนะครับ/ค่ะ\\n- ก่อนเริ่มงาน: สวมอุปกรณ์ป้องกันการตกและทำงานภายในพื้นที่ปลอดภัยเท่านั้น\\n- ล็อกล้อ ตรวจราวกันตก และห้ามเคลื่อนย้ายนั่งร้านขณะมีคนอยู่ด้านบน\\n- หากลมแรงขึ้นหรือนั่งร้านสั่น ให้หยุดงานทันที\\n- หากไม่เข้าใจ ให้หยุดงานและขอให้หัวหน้างานอธิบายอีกครั้งนะครับ/ค่ะ\\n\\nการยืนยันของหัวหน้างาน: ตรวจข้อความนี้กับล่ามหรือผู้ที่อ่านภาษานี้ได้ก่อนส่งนะครับ/ค่ะ\\n\\n[SafeClaw 우즈베크어 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n⚠️ Xavf belgisi: ⚠️ 🧱 🌬️. Bu belgilarni ko'rsangiz, avval to'xtang va rahbardan so'rang.\\n\\n우즈베크어(O'zbekcha)\\n- Bugungi ish: Ko'chma havozadan foydalanib tashqi devorni bo'yash\\n- Bu ishdagi asosiy xavflar: balandlikdan yiqilish xavfi, ko'chma havoza silkinishi yoki ag'darilishi, kuchli shamol\\n- ⚠️ Xavf belgisi: ⚠️ 🧱 🌬️. Bu belgilarni ko'rsangiz, avval to'xtang va rahbardan so'rang.\\n- Ish boshlashdan oldin: Yiqilishdan saqlovchi himoya vositalarini taqing va xavfsiz platformada ishlang.\\n- G'ildiraklarni qulflang, panjaralarni tekshiring va odam bor paytda havozani siljitmang.\\n- Shamol kuchaysa yoki havoza qimirlay boshlasa, ishni darhol to'xtating.\\n- Tushunmagan bo'lsangiz, ishni to'xtating va rahbardan yana tushuntirishni so'rang.\\n\\nRahbar tasdig'i: xabarni tarjimon yoki shu tilni biladigan xodim bilan tekshiring.\\n\\n[SafeClaw 몽골어 안전공지] 세이프건설\\n현장: 서울 성수동 근린생활시설 현장\\n작업: 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\\n작업조건: 우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요\\n우천·젖은 바닥: 미끄럼과 보행/장비 동선 분리를 확인하세요.\\n⚠️ 핵심 위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\\n⚠️ Аюулын тэмдэг: ⚠️ 🧱 🌬️. Эдгээр тэмдгийг харвал эхлээд зогсоож, ахлагчаас `... 13174 more characters,
+  requests: [
+    {
+      method: 'GET',
+      path: '/api/workpacks?limit=50',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/agent/context',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workpacks/10000000-0000-4000-8000-000000000101',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workers?companyName=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4&siteName=%EC%84%9C%EC%9A%B8+%EC%84%B1%EC%88%98%EB%8F%99+%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4+%ED%98%84%EC%9E%A5&companyType=%EA%B1%B4%EC%84%A4%EC%97%85',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workpacks/10000000-0000-4000-8000-000000000101',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'POST',
+      path: '/api/settings/channels/resolve',
+      body: [Object],
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workers?companyName=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4&siteName=%EC%84%9C%EC%9A%B8+%EC%84%B1%EC%88%98%EB%8F%99+%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4+%ED%98%84%EC%9E%A5&companyType=%EA%B1%B4%EC%84%A4%EC%97%85',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'POST',
+      path: '/api/settings/channels/resolve',
+      body: [Object],
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workpacks?limit=50',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workpacks/10000000-0000-4000-8000-000000000101',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workpacks?limit=50',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/agent/context',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workpacks/10000000-0000-4000-8000-000000000101',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workers?companyName=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4&siteName=%EC%84%9C%EC%9A%B8+%EC%84%B1%EC%88%98%EB%8F%99+%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4+%ED%98%84%EC%9E%A5&companyType=%EA%B1%B4%EC%84%A4%EC%97%85',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workpacks/10000000-0000-4000-8000-000000000101',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'POST',
+      path: '/api/settings/channels/resolve',
+      body: [Object],
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workers?companyName=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4&siteName=%EC%84%9C%EC%9A%B8+%EC%84%B1%EC%88%98%EB%8F%99+%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4+%ED%98%84%EC%9E%A5&companyType=%EA%B1%B4%EC%84%A4%EC%97%85',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'POST',
+      path: '/api/settings/channels/resolve',
+      body: [Object],
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    }
+  ]
+}
+
+------------------x---------------------------------------------------------------------------------------------------------------
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100
+AssertionError: expected 'ready' to be 'workpack_revalidation' // Object.is equality
+
+Expected: "workpack_revalidation"
+Received: "ready"
+
+ ❯ verifyInFlightScopeIsolation tests/workpack-share-v2-browser.test.ts:1942:27
+    1940|       });
+    1941|     }
+    1942|     expect(restoredState).toBe("workpack_revalidation");
+       |                           ^
+    1943|     expect(restorePage.controller.probe.channelRequestCount).toBe(chan…
+    1944|     expect(restorePage.controller.probe.sessionRequestCount).toBe(0);
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:2061:7
+ ❯ tests/workpack-share-v2-browser.test.ts:2178:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 129 skipped (130)
+   Start at  17:41:40
+   Duration  41.66s (transform 285ms, setup 0ms, import 714ms, tests 40.47s, environment 0ms)
+
+
+[explicit-exit-code] 1

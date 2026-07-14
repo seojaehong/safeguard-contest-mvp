@@ -1,0 +1,13 @@
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+ ✓ tests/workpack-share-v2-browser-harness.test.ts > Share browser harness teardown > retries after an actual first taskkill failure and verifies the process tree and port are gone 16891ms
+ ✓ tests/workpack-share-v2-browser-harness.test.ts > Share browser harness teardown > keeps teardown retryable after a bounded termination timeout and then cleans up 17840ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  17:32:34
+   Duration  35.68s (transform 48ms, setup 0ms, import 451ms, tests 34.73s, environment 0ms)
+
+
+[explicit-exit-code] 0

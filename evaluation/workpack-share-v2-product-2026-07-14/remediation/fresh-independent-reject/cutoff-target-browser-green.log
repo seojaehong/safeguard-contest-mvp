@@ -1,0 +1,148 @@
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+[share-browser-product-sha] 6eb00fafdf0da2ff086f826effe884f3be9cbeed
+[share-browser-product-tree] 468fb60ae5662cab73fc06d66a20f97c46f1df25
+stderr | tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100
+Share v2 fixture failed to reach ready {
+  fixtureId: 'sending',
+  state: 'workpack_revalidation',
+  text: '오늘 전송\n' +
+    '오늘 문서팩 전송\n' +
+    '\n' +
+    '서울 성수동 근린생활시설 현장 · 성수동 외벽 도장 작업과 이동식 비계 작업을 위한\n' +
+    '\n' +
+    '문서팩 재검수 필요\n' +
+    '편집 후 재검수 필요\n' +
+    '\n' +
+    '문서팩이 변경되어 다시 검수해야 합니다.\n' +
+    '\n' +
+    '01\n' +
+    '오늘 참여자\n' +
+    '\n' +
+    '오늘 참여자 1명을 선택했습니다.\n' +
+    '\n' +
+    '변경\n' +
+    'Share Worker 1\n' +
+    '작업자 · 베트남어\n' +
+    '02\n' +
+    '전송 채널\n' +
+    '\n' +
+    '메일 · 문자\n' +
+    '\n' +
+    '전송할 채널 선택\n' +
+    '메일\n' +
+    '관리자·원청 보고\n' +
+    '문자\n' +
+    '작업자 즉시 공지\n' +
+    '카카오\n' +
+    '승인된 알림톡\n' +
+    '03\n' +
+    '언어와 미리보기\n' +
+    '\n' +
+    '자동 언어 · 베트남어\n' +
+    '\n' +
+    '미리보기 언어\n' +
+    '한국어 · 한국어\n' +
+    '베트남어 · Tiếng Việt\n' +
+    '중국어 · 中文\n' +
+    '태국어 · ภาษาไทย\n' +
+    "우즈베크어 · O'zbekcha\n" +
+    '몽골어 · Монгол хэл\n' +
+    '네팔어 · नेपाली\n' +
+    '크메르어 · ភាសាខ្មែរ\n' +
+    '인도네시아어 · Bahasa Indonesia\n' +
+    '미얀마어 · မြန်မာဘာသာ\n' +
+    '타갈로그어 · Tagalog\n' +
+    '영어 · English\n' +
+    'Thong bao an toan SafeClaw cho cong viec hom nay\n' +
+    'Cong truong\n' +
+    'Seongsu Seoul\n' +
+    'Cong viec\n' +
+    'Son mat ngoai bang gian giao di dong\n' +
+    'Rui ro chinh\n' +
+    'Nga cao va gio manh\n' +
+    '\n' +
+    'Truoc khi bat dau, hay kiem tra san thao tac, lan can, chan de va day an toan cua gian giao di dong.\n' +
+    '\n' +
+    'Dung cong viec ngay khi gio manh, khu vuc di chuyen khong duoc ngan cach, hoac thiet bi bao ho khong day du.\n' +
+    '\n' +
+    'Nguy co nga cao\n' +
+    'Dung viec khi gio manh\n' +
+    '04\n' +
+    '전달 메모\n' +
+    '\n' +
+    '선택 입력\n' +
+    '\n' +
+    '문서 다시 검수',
+  requests: [
+    {
+      method: 'GET',
+      path: '/api/workpacks?limit=50',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/agent/context',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workpacks/10000000-0000-4000-8000-000000000101',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workers?companyName=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4&siteName=%EC%84%9C%EC%9A%B8+%EC%84%B1%EC%88%98%EB%8F%99+%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4+%ED%98%84%EC%9E%A5&companyType=%EA%B1%B4%EC%84%A4%EC%97%85',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workpacks/10000000-0000-4000-8000-000000000101',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    },
+    {
+      method: 'GET',
+      path: '/api/workers?companyName=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4&siteName=%EC%84%9C%EC%9A%B8+%EC%84%B1%EC%88%98%EB%8F%99+%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4+%ED%98%84%EC%9E%A5&companyType=%EA%B1%B4%EC%84%A4%EC%97%85',
+      body: {},
+      authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjo0MTAyNDQ0ODAwLCJyb2xlIjoiYXV0aGVudGljYXRlZCIsInN1YiI6IjEwMDAwMDAwLTAwMDAtNDAwMC04MDAwLTAwMDAwMDAwMDEwMyJ9.share-v2-fixture-signature'
+    }
+  ],
+  unexpectedRequests: []
+}
+
+------------------x---------------------------------------------------------------------------------------------------------------
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('[data-share-root][data-share-state=\'ready\']') to be visible
+
+ ❯ waitForShareState tests/workpack-share-v2-browser.test.ts:683:72
+    681|
+    682| async function waitForShareState(page: Page, state: string, timeoutMs …
+    683|   await page.locator(`[data-share-root][data-share-state='${state}']`)…
+       |                                                                        ^
+    684|     state: "visible",
+    685|     timeout: timeoutMs
+ ❯ executeFixtureBehavior tests/workpack-share-v2-browser.test.ts:1597:11
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:2017:20
+ ❯ tests/workpack-share-v2-browser.test.ts:2178:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 129 skipped (130)
+   Start at  17:38:47
+   Duration  53.17s (transform 349ms, setup 0ms, import 850ms, tests 51.71s, environment 0ms)
+
+
+[explicit-exit-code] 1

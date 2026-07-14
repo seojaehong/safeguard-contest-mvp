@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "share-v2-cutoff-handoff/v1",
+  "verdict": "HOLD",
+  "integrationAllowed": false,
+  "product": {
+    "commit": "7a56434a99b043edf8601f772d9b9606220863a0",
+    "tree": "ecfc310b0e367f45a2588d4b3f1a04a49b576dde",
+    "redContractCommit": "424331b45c7173c74abe5c053874b06d98b3fa77"
+  },
+  "authorities": {
+    "main": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "ontology": null,
+    "ontologyStatus": "awaiting_latest_authority"
+  },
+  "gates": {
+    "focusedUnit": { "files": 4, "passed": 66, "failed": 0, "exitCode": 0 },
+    "browserHarness": { "files": 1, "passed": 2, "failed": 0, "exitCode": 0 },
+    "typecheck": { "exitCode": 0 },
+    "targetBrowser": {
+      "selected": 1,
+      "passed": 0,
+      "failed": 1,
+      "skipped": 129,
+      "exitCode": 1,
+      "durationSeconds": 41.66,
+      "case": "day-desktop:sending:normal_100"
+    },
+    "shareProcessCountAfterRun": 0,
+    "fullBrowserMatrix": "not_executed_cutoff",
+    "productionBuild": "not_executed_cutoff",
+    "fullShareUnit": "not_executed_cutoff",
+    "evidenceValidator": "not_executed_cutoff",
+    "staticAudit": "not_executed_cutoff",
+    "mergeTrees": "not_refreshed_cutoff"
+  },
+  "blocker": "Delayed edited local restore accepts an old server workpack response and changes workpack_revalidation to ready."
+}
