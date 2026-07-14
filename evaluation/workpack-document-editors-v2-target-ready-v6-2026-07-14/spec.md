@@ -1,4 +1,4 @@
-# SafeClaw Workpack Document Editors v2 target-ready v5
+# SafeClaw Workpack Document Editors v2 target-ready v6
 
 > This entire normative document is deterministically derived from `spec.json`. Manual prose is not authoritative.
 
@@ -7,7 +7,9 @@
 - Contract: HOLD_PENDING_FRESH_INDEPENDENT_REVIEW
 - Implementation: BLOCKED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL
 - Browser executions: 0
-- Frozen source/target/parent: f45bba17bcce0d8ebb2690f82d014dbe42ae8191
+- Immutable source base: f45bba17bcce0d8ebb2690f82d014dbe42ae8191
+- Current fetched integration authority: 67d2c9e28e7278c58f46b46c2512c7133d88d1d3 (refs/remotes/origin/feat/phase-a-evidence-integration)
+- Remediation candidate parent: 82ff4a11b664b55c5ea9d7f6bdd815c72f6f460c
 
 ## Product Contract
 
@@ -78,25 +80,31 @@ Control digest kind: safeclaw-photo-control-acceptance/v3
 
 Control digest inputs: kind, authorityBinding, snapshotRevision, snapshotDigest, selectedControls
 
+External nonce authority kind: safeclaw-external-photo-receipt-nonce-authority/v1
+
+External nonce authority implementation: UNIMPLEMENTED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL
+
+A trusted external authority must perform one atomic compare-and-consume from issued to consumed while binding the exact receipt ID, nonce, authority digest, workpack, logical root, snapshot, and revisions. The same receipt replay and any coherent whole-context forgery absent from that authority must reject. The evaluation-only model tests these semantics but is not product implementation.
+
 The validator resolves acceptedControlIds only through the server-owned full canonicalControlMap and preserves canonicalOrder. The server context owns workpackId, logicalRootId, snapshot identity/revision, image identity/hashes, and every derived digest.
 
-The exact humanReceipt must match server receiptAuthority and bind workpack, logical root, snapshot/revision, before/after image IDs and hashes, accepted control IDs, actor, expiry, and one-time nonce. issued transitions atomically to consumed; consumed, expired, replayed, cross-workpack, and cross-root use fail closed.
+The exact humanReceipt must match server receiptAuthority and bind workpack, logical root, snapshot/revision, before/after image IDs and hashes, accepted control IDs, actor, expiry, and one-time nonce. Local fields never establish consumption. Without the approved external atomic authority, confirmation fails closed and product readiness remains false.
 
-Reject forged, additional, missing, duplicated, or reordered controls; stale snapshot or receipt revision; consumed/expired nonce; replay; cross-workpack/root binding; receipt mismatch; and every client-submitted digest/control object/status/model/analysis surface.
+Reject forged, additional, missing, duplicated, or reordered controls; stale snapshot or receipt revision; consumed/expired nonce; same-receipt replay; coherent whole-context forgery; cross-workpack/root binding; receipt mismatch; missing external authority; and every client-submitted digest/control object/status/model/analysis surface.
 
 ## Photo State Transitions
 
 | From | Event | To | Confirmation blocked | Share blocked | Precondition |
 | --- | --- | --- | --- | --- | --- |
 | candidate | ANALYSIS_REVIEW_REQUESTED | review_required | true | true | A server-authoritative photo-analysis snapshot owns workpack/root/image identity, current revision, canonical full control map, and derived digests; an unconsumed expiring receipt exists in validationContext. |
-| review_required | VALID_HUMAN_CONFIRMATION | human_confirmed | false | false | The event submits only snapshotId, acceptedControlIds, and the exact server-issued humanReceipt without snapshot/control/event digests; authority bindings match and the nonce transitions issued to consumed atomically. |
+| review_required | VALID_HUMAN_CONFIRMATION | human_confirmed | false | false | Future normative transition only: the event submits only snapshotId, acceptedControlIds, and the exact server-issued humanReceipt without snapshot/control/event digests; all bindings match and an approved external authority atomically compare-and-consumes the issued nonce. This authority is currently unimplemented and the transition remains product-blocked. |
 | review_required | VALID_HUMAN_REJECTION | rejected | true | true | The rejection event passes exact-key, codec, reviewer, reason, timestamp, and current revision validation. |
 
 Before confirmation: confirmation and share remain blocked in candidate and review_required
 
-After confirmation: human_confirmed clears the photo confirmation blocker and advances to authority_check_required
+After confirmation: Future normative only: human_confirmed can clear the photo confirmation blocker after approved atomic external authority consumption; current product state remains blocked
 
-External authority: Actual persistence/share remains blocked until approved transactional revision, photo-event, and share freshness authorities exist.
+External authority: The atomic nonce authority, persistence, and share freshness authorities are explicitly unimplemented pending user DB authority approval. Evaluation test doubles do not make the product ready.
 
 ## HWPX Representation
 
@@ -158,25 +166,28 @@ Per-node or leaf inline fontSize and lineHeight mutation is forbidden; both muta
 | Evidence max age seconds | 86400 |
 | Ledger max age seconds | 86400 |
 | Future skew seconds | 300 |
+| Future mtime skew seconds | 1 |
 | Validation clock skew seconds | 300 |
+| Replay clock mode | fresh_self_check_validation_time |
+| Replay clock rule | Recorded command args remain evidence, but a replay within the declared evidence window replaces only the recorded --validation-time value with the fresh self-check validation time. Every other ordered token and all expected output digests remain bound. |
 | Perpetual | false |
 | Regeneration action | Fetch the authoritative integration ref, recapture the ledger and blob identities, create a new candidate/evidence pair, and rerun independent review. Never refresh timestamps in place. |
 
 ## Schema Closure
 
-- Minimum closed objects: 328
+- Minimum closed objects: 331
 - Legacy permissive objects closed: 86
 - Unknown-key passes per matrix: 2
 - Root included: true
-- Object graph SHA-256: sha256:913655905856a4ad3e067f7718086dc3418e571f92d5163f89e664278e6d03df
-- Normative contract SHA-256: sha256:33fc1ef3d9da6e638621cde23f5e918f428b348bd230394b8cce81910b639471
+- Object graph SHA-256: sha256:4d11dab6df464187edea83ed945a408c20d59b2e5824ac52a2aba35b84308709
+- Normative contract SHA-256: sha256:c310cc261c89abc1c620c0d323ae81188d41ecb5605b280109977dc6a51e1461
 
 ## Structured Execution Evidence
 
 - authority-fetch=1
 - authoring-check=2
 - unknown-key-matrix=2
-- deliberate-attack=52
+- deliberate-attack=58
 - focused-remediation-test=2
 - json-parse-check=1
 - object-census=1
@@ -184,12 +195,16 @@ Per-node or leaf inline fontSize and lineHeight mutation is forbidden; both muta
 - merge-tree-proof=1
 - implementation-block=1
 
+Author evidence records one actual spawned process per exact command, dynamic unknown-key matrix twice, all 29 deliberate negative attacks twice, and two focused v6 harness processes. Each focused process contains multiple hostile cases; those cases are not claimed as separate or independent processes. Author runs remain untrusted and require fresh independent rerun.
+
+Each run record is emitted only from an actual spawned process and binds exact command, ordered args, cwd, start/end, exit, stdout/stderr hashes, and its raw JSONL row. The manifest additionally binds the complete LF-only JSONL byte digest, ordered record IDs, and record count to the exact run-record order. Reversed rows, synthetic/fabricated records, marker-only fallback, zero-spawn claims, missing/duplicate records, wrong args/digests/logs, or full-log drift fail closed. Focused hostile cases run inside one process per focused pass and are not called independent processes. Author evidence is UNTRUSTED_REPRODUCIBLE_REQUIRES_FRESH_INDEPENDENT_RERUN.
+
 ## Authority Gates
 
 | ID | Status | DB approval required | Executable commands | Blocked capability |
 | --- | --- | --- | --- | --- |
 | server_revision_authority | BLOCKED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL | true | 0 | Transactional logical root, expected revision, idempotency replay, conflict rejection, and reseal. |
-| photo_confirmation_persistence | BLOCKED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL | true | 0 | Immutable photo review events and atomic resulting revision persistence. |
+| photo_confirmation_persistence | BLOCKED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL | true | 0 | Authority-backed atomic compare-and-consume of receipt nonces, same-receipt replay rejection, coherent-forgery rejection, immutable photo review events, and atomic resulting revision persistence. |
 | share_freshness_authority | BLOCKED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL | true | 0 | Server-side latest revision, document block, evidence digest, audience, and language freshness enforcement. |
 
 ## Browser Matrix
@@ -222,8 +237,8 @@ The complete canonical contract follows. It is parsed and rendered from the same
     "contractDate": "2026-07-14",
     "branch": "feat/workpack-document-editors-v2-target-ready-v5",
     "sourceBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
-    "currentIntegrationTarget": "ea7aa7223a056c884d5b0ba55563d602af328451",
-    "candidateParent": "e50d2743854a96a160c6c3b95cbe74443a7f98c4",
+    "currentIntegrationTarget": "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
+    "candidateParent": "82ff4a11b664b55c5ea9d7f6bdd815c72f6f460c",
     "status": "HOLD_PENDING_FRESH_INDEPENDENT_REVIEW",
     "implementationStatus": "BLOCKED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL",
     "browserExecutions": 0
@@ -231,14 +246,17 @@ The complete canonical contract follows. It is parsed and rendered from the same
   "reviewScope": {
     "kind": "review_scope",
     "candidateAllowedPaths": [
+      "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/.gitattributes",
       "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/contract-remediation-attacks.mjs",
+      "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/remediation-report.md",
       "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/spec.json",
       "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/spec.md",
+      "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/tdd-green-v6-contract-remediation.log",
+      "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/tdd-red-v6-contract-remediation.log",
       "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/validate-contract.mjs"
     ],
     "evidenceAllowedPaths": [
       "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/execution-log.jsonl",
-      "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/red-v5-independent-reject.log",
       "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/review-evidence.json"
     ],
     "targetBlobPaths": [
@@ -262,8 +280,11 @@ The complete canonical contract follows. It is parsed and rendered from the same
     "sourceCandidateUse": "REVIEWED_V5_ANCESTRY_PREFIX_NO_RANGE_IMPORT",
     "rejectedCandidate": "2ec14aaf92e7c03376e6086b889b254e77a6c412",
     "rejectedEvidence": "cc9f5af297950b73b53a9ab4018bdc143830c499",
-    "ancestryRule": "The v6 candidate is an exact child of reviewed v5 evidence e50d274 while immutable sourceBase remains f45 and the moving integration target is separate. Rejected v4 remains absent from ancestry.",
-    "selfHashRule": "The evidence manifest binds candidate, live target, RED log, and raw execution-log identities but contains no evidence commit SHA, own blob OID, or own SHA-256."
+    "rejectedV6Candidate": "106eef7c609e937dbebfe06c3affb89d63f550d5",
+    "rejectedV6Evidence": "82ff4a11b664b55c5ea9d7f6bdd815c72f6f460c",
+    "rejectedV6Verdict": "INDEPENDENT_REJECT_REMEDIATION_SOURCE",
+    "ancestryRule": "The remediated v6 candidate is an exact child of rejected v6 evidence 82ff4a1, preserving the reviewed v5 prefix and rejected-v6 audit trail. Immutable sourceBase remains f45 while the separately fetched moving integration authority is 67d2c9e. Rejected v4 remains absent from ancestry.",
+    "selfHashRule": "The evidence manifest binds candidate, current fetched target, RED log, and the full ordered execution JSONL digest/count without containing the evidence commit SHA, own blob OID, or own SHA-256."
   },
   "freshnessPolicy": {
     "kind": "freshness_policy",
@@ -271,15 +292,18 @@ The complete canonical contract follows. It is parsed and rendered from the same
     "evidenceMaxAgeSeconds": 86400,
     "ledgerMaxAgeSeconds": 86400,
     "futureSkewSeconds": 300,
+    "futureMtimeSkewSeconds": 1,
     "validationTimeSystemClockSkewSeconds": 300,
+    "replayClockMode": "fresh_self_check_validation_time",
+    "replayClockRule": "Recorded command args remain evidence, but a replay within the declared evidence window replaces only the recorded --validation-time value with the fresh self-check validation time. Every other ordered token and all expected output digests remain bound.",
     "notPerpetual": true,
     "regenerationAction": "Fetch the authoritative integration ref, recapture the ledger and blob identities, create a new candidate/evidence pair, and rerun independent review. Never refresh timestamps in place."
   },
   "schemaClosure": {
     "kind": "schema_closure",
-    "objectGraphSha256": "sha256:913655905856a4ad3e067f7718086dc3418e571f92d5163f89e664278e6d03df",
-    "normativeContractSha256": "sha256:33fc1ef3d9da6e638621cde23f5e918f428b348bd230394b8cce81910b639471",
-    "minimumClosedObjects": 328,
+    "objectGraphSha256": "sha256:4d11dab6df464187edea83ed945a408c20d59b2e5824ac52a2aba35b84308709",
+    "normativeContractSha256": "sha256:c310cc261c89abc1c620c0d323ae81188d41ecb5605b280109977dc6a51e1461",
+    "minimumClosedObjects": 331,
     "legacyPermissiveObjectsClosed": 86,
     "unknownKeyPasses": 2,
     "rootIncluded": true,
@@ -679,10 +703,13 @@ The complete canonical contract follows. It is parsed and rendered from the same
         "snapshotDigest",
         "selectedControls"
       ],
+      "nonceAuthorityKind": "safeclaw-external-photo-receipt-nonce-authority/v1",
+      "nonceAuthorityImplementationStatus": "UNIMPLEMENTED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL",
+      "nonceConsumeRule": "A trusted external authority must perform one atomic compare-and-consume from issued to consumed while binding the exact receipt ID, nonce, authority digest, workpack, logical root, snapshot, and revisions. The same receipt replay and any coherent whole-context forgery absent from that authority must reject. The evaluation-only model tests these semantics but is not product implementation.",
       "canonicalization": "Recursively sort object keys, preserve array order, serialize JSON once as UTF-8, and hash with SHA-256.",
       "resolutionRule": "The validator resolves acceptedControlIds only through the server-owned full canonicalControlMap and preserves canonicalOrder. The server context owns workpackId, logicalRootId, snapshot identity/revision, image identity/hashes, and every derived digest.",
-      "receiptRule": "The exact humanReceipt must match server receiptAuthority and bind workpack, logical root, snapshot/revision, before/after image IDs and hashes, accepted control IDs, actor, expiry, and one-time nonce. issued transitions atomically to consumed; consumed, expired, replayed, cross-workpack, and cross-root use fail closed.",
-      "failClosedRule": "Reject forged, additional, missing, duplicated, or reordered controls; stale snapshot or receipt revision; consumed/expired nonce; replay; cross-workpack/root binding; receipt mismatch; and every client-submitted digest/control object/status/model/analysis surface."
+      "receiptRule": "The exact humanReceipt must match server receiptAuthority and bind workpack, logical root, snapshot/revision, before/after image IDs and hashes, accepted control IDs, actor, expiry, and one-time nonce. Local fields never establish consumption. Without the approved external atomic authority, confirmation fails closed and product readiness remains false.",
+      "failClosedRule": "Reject forged, additional, missing, duplicated, or reordered controls; stale snapshot or receipt revision; consumed/expired nonce; same-receipt replay; coherent whole-context forgery; cross-workpack/root binding; receipt mismatch; missing external authority; and every client-submitted digest/control object/status/model/analysis surface."
     },
     "transitions": [
       {
@@ -699,7 +726,7 @@ The complete canonical contract follows. It is parsed and rendered from the same
         "from": "review_required",
         "event": "VALID_HUMAN_CONFIRMATION",
         "to": "human_confirmed",
-        "precondition": "The event submits only snapshotId, acceptedControlIds, and the exact server-issued humanReceipt without snapshot/control/event digests; authority bindings match and the nonce transitions issued to consumed atomically.",
+        "precondition": "Future normative transition only: the event submits only snapshotId, acceptedControlIds, and the exact server-issued humanReceipt without snapshot/control/event digests; all bindings match and an approved external authority atomically compare-and-consumes the issued nonce. This authority is currently unimplemented and the transition remains product-blocked.",
         "confirmationBlocked": false,
         "shareBlocked": false
       },
@@ -716,8 +743,8 @@ The complete canonical contract follows. It is parsed and rendered from the same
     "shareGate": {
       "kind": "photo_share_gate",
       "beforeConfirmation": "confirmation and share remain blocked in candidate and review_required",
-      "afterConfirmation": "human_confirmed clears the photo confirmation blocker and advances to authority_check_required",
-      "externalAuthority": "Actual persistence/share remains blocked until approved transactional revision, photo-event, and share freshness authorities exist.",
+      "afterConfirmation": "Future normative only: human_confirmed can clear the photo confirmation blocker after approved atomic external authority consumption; current product state remains blocked",
+      "externalAuthority": "The atomic nonce authority, persistence, and share freshness authorities are explicitly unimplemented pending user DB authority approval. Evaluation test doubles do not make the product ready.",
       "staleEvent": "Any analysis, review, document, evidence, image, or accepted-control revision change returns the item to review_required.",
       "candidateEvidenceRule": "Candidate, model analysis, local preview, upload success, and server metadata are never confirmed evidence."
     },
@@ -2787,8 +2814,8 @@ The complete canonical contract follows. It is parsed and rendered from the same
       "status": "BLOCKED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL",
       "requiresUserDbApproval": true,
       "executableCommands": 0,
-      "blockedCapability": "Immutable photo review events and atomic resulting revision persistence.",
-      "unblockRule": "A fresh independent contract review and explicit user approval of event/history and transaction storage are both required."
+      "blockedCapability": "Authority-backed atomic compare-and-consume of receipt nonces, same-receipt replay rejection, coherent-forgery rejection, immutable photo review events, and atomic resulting revision persistence.",
+      "unblockRule": "A fresh independent contract review and explicit user approval of the exact DB transaction or RPC for nonce, event/history, and revision persistence are all required."
     },
     {
       "kind": "authority_gate",
@@ -2913,7 +2940,7 @@ The complete canonical contract follows. It is parsed and rendered from the same
       "--source-base",
       "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
       "--target",
-      "ea7aa7223a056c884d5b0ba55563d602af328451",
+      "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
       "--validation-time",
       "<STRICT_CURRENT_RFC3339>"
     ],
@@ -2987,6 +3014,27 @@ The complete canonical contract follows. It is parsed and rendered from the same
         "scope": "photo",
         "mutation": "humanReceipt.reviewRevision is stale",
         "expectedErrorPrefix": "PHOTO_REVISION:"
+      },
+      {
+        "kind": "negative_attack",
+        "id": "photo-authority-unimplemented",
+        "scope": "photo",
+        "mutation": "submit an otherwise coherent confirmation without the approved external nonce authority",
+        "expectedErrorPrefix": "PHOTO_AUTHORITY_UNIMPLEMENTED:"
+      },
+      {
+        "kind": "negative_attack",
+        "id": "photo-same-receipt-replay",
+        "scope": "photo",
+        "mutation": "atomically consume an issued receipt and submit the exact same receipt again",
+        "expectedErrorPrefix": "PHOTO_NONCE_REPLAY:"
+      },
+      {
+        "kind": "negative_attack",
+        "id": "photo-coherent-authority-forgery",
+        "scope": "photo",
+        "mutation": "forge and coherently re-digest the whole event, snapshot, receipt, workpack, logical root, and nonce outside the trusted authority",
+        "expectedErrorPrefix": "PHOTO_AUTHORITY_FORGERY:"
       },
       {
         "kind": "negative_attack",
@@ -3097,16 +3145,16 @@ The complete canonical contract follows. It is parsed and rendered from the same
         "kind": "negative_attack",
         "id": "candidate-parent-drift",
         "scope": "review",
-        "mutation": "manifest candidate parent differs from reviewed e50d274",
+        "mutation": "manifest candidate parent differs from rejected evidence parent 82ff4a1",
         "expectedErrorPrefix": "IDENTITY:"
       }
     ],
-    "requiredRuns": "Author evidence records one actual spawned process per exact command, dynamic unknown-key matrix twice, all 26 preserved deliberate negative attacks twice, and focused v6 remediation tests twice; author runs remain untrusted and require fresh independent rerun.",
+    "requiredRuns": "Author evidence records one actual spawned process per exact command, dynamic unknown-key matrix twice, all 29 deliberate negative attacks twice, and two focused v6 harness processes. Each focused process contains multiple hostile cases; those cases are not claimed as separate or independent processes. Author runs remain untrusted and require fresh independent rerun.",
     "requiredCommandMultiplicities": [
       "authority-fetch=1",
       "authoring-check=2",
       "unknown-key-matrix=2",
-      "deliberate-attack=52",
+      "deliberate-attack=58",
       "focused-remediation-test=2",
       "json-parse-check=1",
       "object-census=1",
@@ -3138,26 +3186,37 @@ The complete canonical contract follows. It is parsed and rendered from the same
       "stdoutDigest",
       "stderrDigest"
     ],
-    "structuredEvidenceRule": "Each record is emitted only from an actual spawned process and binds exact command, args, cwd, start/end, exit, stdout/stderr hashes, and raw immutable JSONL. Synthetic/fabricated records, marker-only fallback, zero-spawn claims, missing/duplicate records, or digest drift fail closed. Author evidence is UNTRUSTED_REPRODUCIBLE_REQUIRES_FRESH_INDEPENDENT_RERUN.",
+    "executionLogBindingKeys": [
+      "kind",
+      "path",
+      "sha256",
+      "recordCount",
+      "orderedRecordIds"
+    ],
+    "structuredEvidenceRule": "Each run record is emitted only from an actual spawned process and binds exact command, ordered args, cwd, start/end, exit, stdout/stderr hashes, and its raw JSONL row. The manifest additionally binds the complete LF-only JSONL byte digest, ordered record IDs, and record count to the exact run-record order. Reversed rows, synthetic/fabricated records, marker-only fallback, zero-spawn claims, missing/duplicate records, wrong args/digests/logs, or full-log drift fail closed. Focused hostile cases run inside one process per focused pass and are not called independent processes. Author evidence is UNTRUSTED_REPRODUCIBLE_REQUIRES_FRESH_INDEPENDENT_RERUN.",
     "implementationMode": "Always exits nonzero with IMPLEMENTATION_BLOCKED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL.",
     "claimBoundary": "Author runs may establish only reproducible structural evidence and never an independent PASS. Fresh independent rerun is required; product, build, export, browser, DB, provider, and implementation execution remain unclaimed.",
     "browserExecutions": 0
   },
   "integrationLedger": {
     "kind": "integration_ledger",
-    "capturedAt": "2026-07-14T02:21:21.810Z",
-    "captureCommand": "git fetch --prune origin feat/phase-a-evidence-integration; git rev-parse --verify refs/remotes/origin/feat/phase-a-evidence-integration^{commit}",
+    "capturedAt": "2026-07-14T03:36:34.451Z",
+    "captureCommand": "Run git fetch --prune origin feat/phase-a-evidence-integration, then git rev-parse --verify 'refs/remotes/origin/feat/phase-a-evidence-integration^{commit}'.",
     "authorityRef": "refs/remotes/origin/feat/phase-a-evidence-integration",
-    "authorityHead": "ea7aa7223a056c884d5b0ba55563d602af328451",
+    "authorityHead": "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
     "sourceBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
-    "currentIntegrationTarget": "ea7aa7223a056c884d5b0ba55563d602af328451",
+    "currentIntegrationTarget": "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
     "candidateBranch": "feat/workpack-document-editors-v2-target-ready-v5",
-    "worktreeWasCleanBeforeEdits": true,
+    "cleanlinessCommand": "git status --porcelain=v1 --untracked-files=all",
+    "futureMtimeRule": "Every candidate and evidence artifact is stat'ed live; an mtime beyond validation time plus the declared one-second filesystem skew must fail closed.",
     "sourceCandidateHead": "af8d343c65445497da2f804bcdde2eb533390ee8",
     "sourceCandidateBranch": "feat/workpack-document-editors-v2-target-ready-v5",
     "sourceCandidateUse": "REVIEWED_V5_ANCESTRY_PREFIX_NO_RANGE_IMPORT",
     "rejectedReferenceHead": "cc9f5af297950b73b53a9ab4018bdc143830c499",
     "rejectedReferenceUse": "READ_ONLY_REJECTED_V4_REFERENCE_NO_ANCESTRY",
+    "rejectedV6Candidate": "106eef7c609e937dbebfe06c3affb89d63f550d5",
+    "rejectedV6Evidence": "82ff4a11b664b55c5ea9d7f6bdd815c72f6f460c",
+    "rejectedV6Verdict": "INDEPENDENT_REJECT_REMEDIATION_SOURCE",
     "refreshRequiredAfterSeconds": 86400
   }
 }

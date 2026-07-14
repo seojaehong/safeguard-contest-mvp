@@ -1,0 +1,41 @@
+DOCUMENT_EDITORS_V6_CONTRACT_REMEDIATION_TDD_RED
+recordedAt=2026-07-14T03:19:08.410Z
+rejectedCandidate=106eef7c609e937dbebfe06c3affb89d63f550d5
+rejectedEvidence=82ff4a11b664b55c5ea9d7f6bdd815c72f6f460c
+
+COMMAND=node evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/contract-remediation-attacks.mjs --validator evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/validate-contract.mjs --spec evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/spec.json --label tdd-red-v6-contract-remediation --root .
+EXIT_CODE=1
+TEST_TARGET=tdd-red-v6-contract-remediation
+HOSTILE_ATTACK_PROCESSES=1
+HOSTILE_ATTACK_INDEPENDENCE_CLAIM=false
+HOSTILE_ATTACK_CASES=63
+HOSTILE_ATTACK_REJECTIONS=53
+HOSTILE_ATTACK_ACCEPTED=10
+NORMATIVE_MUTATION_CASES=2167
+NORMATIVE_MUTATION_REJECTIONS=2167
+NORMATIVE_MUTATION_ACCEPTED=0
+PRESERVED_NORMATIVE_MUTATION_TARGET=2167
+ACCEPTED_ATTACK=photo-authority-unimplemented-fail-closed
+ACCEPTED_ATTACK=photo-same-receipt-replay
+ACCEPTED_ATTACK=photo-coherent-whole-context-forgery
+ACCEPTED_ATTACK=execution-reversed-jsonl-order
+ACCEPTED_ATTACK=execution-full-jsonl-digest-binding
+ACCEPTED_ATTACK=execution-jsonl-order-binding
+ACCEPTED_ATTACK=execution-jsonl-count-binding
+ACCEPTED_ATTACK=execution-fresh-replay-clock
+ACCEPTED_ATTACK=filesystem-dirty-worktree
+ACCEPTED_ATTACK=filesystem-future-mtime
+CONTRACT_REMEDIATION_ATTACKS=FAIL
+
+COMMAND=node evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/validate-contract.mjs evidence-self-check --root . --candidate 106eef7c609e937dbebfe06c3affb89d63f550d5 --validation-time 2026-07-14T03:19:08.410Z
+EXIT_CODE=1
+CONTRACT_ERROR=EXECUTION_REPLAY: authoring-check-pass-1 did not reproduce exit/stdout/stderr digests
+
+COMMAND=node evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/validate-contract.mjs authoring-check --root . --validation-time 2026-07-14T02:29:48.476Z
+EXIT_CODE=1
+CONTRACT_ERROR=FRESHNESS_CLOCK: --validation-time differs from the system clock by more than 300 seconds
+
+AUTHORITY_ADVANCE_OBSERVED=2026-07-14
+PRIOR_DECLARED_AUTHORITY=ea7aa7223a056c884d5b0ba55563d602af328451
+FETCHED_CURRENT_AUTHORITY=67d2c9e28e7278c58f46b46c2512c7133d88d1d3
+REMEDIATION_REQUIREMENT=stale ea7 declarations must fail closed and cannot produce GREEN evidence

@@ -1,19 +1,32 @@
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const REQUIRED_EXPORT_NAMES = [
   "buildValidPhotoConfirmation",
   "computeControlAcceptanceDigest",
   "computePhotoEventDigest",
+  "expectedRunRequirements",
+  "parseExecutionLog",
   "validateContract",
   "validateEvidenceManifestShape",
-  "validatePhotoConfirmation"
+  "validatePhotoConfirmation",
+  "validateRunRecords"
 ];
-const OPTIONAL_EXPORT_NAMES = ["buildSyntheticEvidenceManifest", "resolveLiveAuthorityRef"];
-const EXPECTED_AUTHORITY_HEAD = "ea7aa7223a056c884d5b0ba55563d602af328451";
-const EXPECTED_NORMATIVE_MUTATIONS = 2167;
+const OPTIONAL_EXPORT_NAMES = [
+  "computePhotoSnapshotDigest",
+  "computeReceiptAuthorityDigest",
+  "createEvaluationOnlyNonceAuthorityModel",
+  "materializeReplayArgs",
+  "requireArtifactMtimesNotFuture",
+  "requireCleanWorktree",
+  "resolveLiveAuthorityRef"
+];
+const EXPECTED_AUTHORITY_HEAD = "67d2c9e28e7278c58f46b46c2512c7133d88d1d3";
+const EXPECTED_NORMATIVE_MUTATIONS = 2203;
 
 function parseArguments(argv) {
   const args = { validator: "", spec: "", label: "candidate", root: process.cwd() };
@@ -40,6 +53,22 @@ function typedSha256(value) {
   return `sha256:${createHash("sha256").update(value).digest("hex")}`;
 }
 
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, canonicalize(value[key])])
+    );
+  }
+  return value;
+}
+
+function canonicalJson(value) {
+  return JSON.stringify(canonicalize(value));
+}
+
 function clone(value) {
   return structuredClone(value);
 }
@@ -58,7 +87,7 @@ async function loadInstrumentedValidator(path) {
     ...REQUIRED_EXPORT_NAMES,
     ...OPTIONAL_EXPORT_NAMES.filter((name) => source.includes(`function ${name}(`))
   ];
-  const tempDirectory = mkdtempSync(join(dirname(import.meta.filename), ".tmp-remediation-"));
+  const tempDirectory = mkdtempSync(join(tmpdir(), "safeclaw-contract-remediation-"));
   const instrumentedPath = join(tempDirectory, "instrumented-validator.mjs");
   const exports = `\nexport { ${exportNames.join(", ")} };\n`;
   writeFileSync(instrumentedPath, `${source.slice(0, footer)}${exports}`, "utf8");
@@ -104,7 +133,59 @@ function expectForbiddenClientField(module, results, valid, id, owner, field) {
 
 function runPhotoAuthorityAttacks(module, results) {
   const valid = module.buildValidPhotoConfirmation();
-  module.validatePhotoConfirmation(clone(valid.event), clone(valid.context));
+
+  expectRejection(results, "photo-authority-unimplemented-fail-closed", () => {
+    module.validatePhotoConfirmation(clone(valid.event), clone(valid.context));
+  });
+
+  if (typeof module.createEvaluationOnlyNonceAuthorityModel !== "function") {
+    recordAccepted(results, "photo-same-receipt-replay", "ATOMIC_AUTHORITY_MODEL_MISSING");
+  } else {
+    expectRejection(results, "photo-same-receipt-replay", () => {
+      const fixture = clone(valid);
+      const authority = module.createEvaluationOnlyNonceAuthorityModel([fixture.context.receiptAuthority]);
+      module.validatePhotoConfirmation(fixture.event, fixture.context, undefined, authority);
+      module.validatePhotoConfirmation(fixture.event, fixture.context, undefined, authority);
+    });
+  }
+
+  if (
+    typeof module.computePhotoSnapshotDigest !== "function" ||
+    typeof module.computeReceiptAuthorityDigest !== "function"
+  ) {
+    recordAccepted(results, "photo-coherent-whole-context-forgery", "AUTHORITY_DIGEST_EXPORTS_MISSING");
+  } else {
+    expectRejection(results, "photo-coherent-whole-context-forgery", () => {
+      const fixture = clone(valid);
+      const originalAuthority = clone(valid.context.receiptAuthority);
+      const identity = fixture.context.photoAnalysisSnapshot.authorityIdentity;
+      identity.workpackId = "attacker-workpack";
+      identity.logicalRootId = "attacker-logical-root";
+      identity.snapshotId = "attacker-snapshot";
+      fixture.event.snapshotId = identity.snapshotId;
+      const receiptAuthority = fixture.context.receiptAuthority;
+      receiptAuthority.receiptId = "attacker-receipt";
+      receiptAuthority.receiptNonce = "attacker-nonce";
+      receiptAuthority.workpackId = identity.workpackId;
+      receiptAuthority.logicalRootId = identity.logicalRootId;
+      receiptAuthority.snapshotId = identity.snapshotId;
+      fixture.context.photoAnalysisSnapshot.snapshotDigest = module.computePhotoSnapshotDigest(
+        fixture.context.photoAnalysisSnapshot
+      );
+      receiptAuthority.snapshotDigest = fixture.context.photoAnalysisSnapshot.snapshotDigest;
+      for (const key of Object.keys(fixture.event.humanReceipt)) {
+        fixture.event.humanReceipt[key] = clone(receiptAuthority[key]);
+      }
+      receiptAuthority.controlDigest = module.computeControlAcceptanceDigest(fixture.event, fixture.context);
+      receiptAuthority.eventDigest = module.computePhotoEventDigest(fixture.event);
+      receiptAuthority.receiptAuthorityDigest = module.computeReceiptAuthorityDigest(receiptAuthority);
+      const authority =
+        typeof module.createEvaluationOnlyNonceAuthorityModel === "function"
+          ? module.createEvaluationOnlyNonceAuthorityModel([originalAuthority])
+          : undefined;
+      module.validatePhotoConfirmation(fixture.event, fixture.context, undefined, authority);
+    });
+  }
 
   expectForbiddenClientField(module, results, valid, "photo-client-snapshot-digest", valid.event, "snapshotDigest");
   expectForbiddenClientField(
@@ -264,112 +345,184 @@ function runPhotoAuthorityAttacks(module, results) {
   });
 }
 
-function logsForManifest(manifest) {
-  const logs = new Map();
-  for (const record of manifest.runRecords ?? []) {
-    logs.set(`${record.outputLogPath}#${record.outputRecordId}`, `${record.requiredMarker}\n`);
-  }
-  return logs;
+function serializeExecutionEntries(entries) {
+  return `${entries.map((entry) => JSON.stringify(entry)).join("\n")}\n`;
 }
 
-function validateManifestFixture(module, manifest, spec, validationTime, logs) {
-  module.validateEvidenceManifestShape(
-    manifest,
-    spec,
-    validationTime,
-    (path, recordId) => {
-      const key = `${path}#${recordId}`;
-      if (!logs.has(key)) throw new Error(`TEST_LOG_MISSING: ${key}`);
-      return logs.get(key);
-    }
-  );
+function bindExecutionLog(manifest, parsedLog) {
+  manifest.executionLogBinding = {
+    kind: "execution_log_binding",
+    path: "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/execution-log.jsonl",
+    sha256: parsedLog.rawSha256,
+    recordCount: parsedLog.recordCount,
+    orderedRecordIds: parsedLog.orderedRecordIds
+  };
 }
 
-function runExecutionEvidenceAttacks(module, spec, validationTime, results) {
-  if (typeof module.buildSyntheticEvidenceManifest !== "function") {
-    expectRejection(results, "execution-zero-spawns-64-fabricated-records", () => {
-      module.validateEvidenceManifestShape(
-        { kind: "review_evidence", runRecords: Array.from({ length: 64 }, () => ({ kind: "run_record" })) },
-        spec,
-        validationTime
-      );
-    });
-    expectRejection(results, "execution-marker-only-fallback", () => {
-      module.validateEvidenceManifestShape({ kind: "review_evidence", runRecords: [] }, spec, validationTime);
-    });
-    return;
-  }
-  const baseline = module.buildSyntheticEvidenceManifest(spec, validationTime);
-  const structured = Array.isArray(baseline.runRecords);
-  const baselineLogs = logsForManifest(baseline);
-  validateManifestFixture(module, clone(baseline), spec, validationTime, baselineLogs);
+function buildExecutionAttackFixture(module, validationTime, root) {
+  const capturedAt = new Date(validationTime).toISOString();
+  const candidate = "1111111111111111111111111111111111111111";
+  const requirements = module.expectedRunRequirements(candidate, capturedAt, root);
+  const entries = requirements.map((requirement) => {
+    const stdout = `fixture:${requirement.recordId}\n`;
+    const stderr = "";
+    return {
+      kind: "execution_log_entry",
+      recordId: requirement.recordId,
+      stdout,
+      stderr,
+      stdoutDigest: typedSha256(stdout),
+      stderrDigest: typedSha256(stderr)
+    };
+  });
+  const runRecords = requirements.map((requirement, index) => ({
+    kind: "run_record",
+    recordId: requirement.recordId,
+    commandId: requirement.commandId,
+    executable: requirement.executable,
+    args: requirement.args,
+    cwd: requirement.cwd,
+    startedAt: capturedAt,
+    completedAt: capturedAt,
+    exitCode: requirement.expectedExitCode,
+    stdoutDigest: entries[index].stdoutDigest,
+    stderrDigest: entries[index].stderrDigest,
+    rawLogDigest: typedSha256(canonicalJson(entries[index])),
+    outputLogPath: "evaluation/workpack-document-editors-v2-target-ready-v6-2026-07-14/execution-log.jsonl",
+    outputRecordId: requirement.recordId
+  }));
+  const parsedLog = module.parseExecutionLog(serializeExecutionEntries(entries));
+  const manifest = { candidateCommit: candidate, validationTime: capturedAt, capturedAt, runRecords };
+  bindExecutionLog(manifest, parsedLog);
+  return { manifest, entries, parsedLog, requirements };
+}
 
-  expectRejection(results, "execution-zero-spawns-64-fabricated-records", () => {
-    if (baseline.runRecords.length !== 64) throw new Error("FABRICATED_RECORD_COUNT_DIFFERS");
-    module.validateEvidenceManifestShape(clone(baseline), spec, validationTime);
+function runExecutionEvidenceAttacks(module, spec, validationTime, results, root) {
+  const baseline = buildExecutionAttackFixture(module, validationTime, root);
+  module.validateRunRecords(baseline.manifest, baseline.parsedLog, root, validationTime, false);
+
+  expectRejection(results, "execution-zero-spawns-fabricated-records", () => {
+    module.validateEvidenceManifestShape({ kind: "review_evidence", runRecords: baseline.manifest.runRecords }, spec, validationTime);
   });
   expectRejection(results, "execution-marker-only-fallback", () => {
-    module.validateEvidenceManifestShape(clone(baseline), spec, validationTime);
+    module.validateEvidenceManifestShape({ kind: "review_evidence", runRecords: [] }, spec, validationTime);
   });
 
   const run = (id, mutate) => {
     expectRejection(results, id, () => {
-      const manifest = clone(baseline);
-      const logs = new Map(baselineLogs);
-      mutate(manifest, logs, structured);
-      validateManifestFixture(module, manifest, spec, validationTime, logs);
+      const fixture = {
+        manifest: clone(baseline.manifest),
+        entries: clone(baseline.entries)
+      };
+      mutate(fixture);
+      const parsedLog = module.parseExecutionLog(serializeExecutionEntries(fixture.entries));
+      if (fixture.rebind === true) bindExecutionLog(fixture.manifest, parsedLog);
+      module.validateRunRecords(fixture.manifest, parsedLog, root, validationTime, false);
     });
   };
 
-  run("execution-empty-log", (manifest, logs) => {
-    if (structured) {
-      const record = manifest.runRecords[0];
-      logs.set(`${record.outputLogPath}#${record.outputRecordId}`, "");
-    } else {
-      manifest.validationSummary.commandLog = [];
+  run("execution-empty-log", (fixture) => {
+    fixture.entries = [];
+  });
+  run("execution-arbitrary-log", (fixture) => {
+    fixture.entries[0].stdout = "arbitrary output without the recorded command result\n";
+    fixture.entries[0].stdoutDigest = typedSha256(fixture.entries[0].stdout);
+    fixture.rebind = true;
+  });
+  run("execution-count-999", (fixture) => {
+    fixture.manifest.executionLogBinding.recordCount = 999;
+  });
+  run("execution-missing-record", (fixture) => {
+    fixture.manifest.runRecords.splice(0, 1);
+  });
+  run("execution-duplicate-record", (fixture) => {
+    fixture.manifest.runRecords.push(clone(fixture.manifest.runRecords[0]));
+  });
+  run("execution-wrong-args", (fixture) => {
+    fixture.manifest.runRecords[0].args = ["attacker-selected-args"];
+  });
+  run("execution-wrong-marker", (fixture) => {
+    fixture.manifest.runRecords[0].requiredMarker = "ATTACKER_MARKER=PASS";
+  });
+  run("execution-wrong-digest", (fixture) => {
+    fixture.manifest.runRecords[0].stdoutDigest = typedSha256("wrong digest");
+  });
+  run("execution-wrong-full-jsonl-digest", (fixture) => {
+    fixture.manifest.executionLogBinding.sha256 = typedSha256("wrong full JSONL");
+  });
+  run("execution-reversed-jsonl-order", (fixture) => {
+    fixture.entries.reverse();
+    fixture.rebind = true;
+  });
+  run("execution-missing-log-row", (fixture) => {
+    fixture.entries.splice(0, 1);
+    fixture.rebind = true;
+  });
+  expectRejection(results, "execution-duplicate-log-row", () => {
+    const entries = clone(baseline.entries);
+    entries.push(clone(entries[0]));
+    module.parseExecutionLog(serializeExecutionEntries(entries));
+  });
+}
+
+function runReplayClockAttack(module, results) {
+  if (typeof module.materializeReplayArgs !== "function") {
+    recordAccepted(results, "execution-fresh-replay-clock", "FRESH_REPLAY_CLOCK_MATERIALIZER_MISSING");
+    return;
+  }
+  expectRejection(results, "execution-fresh-replay-clock", () => {
+    const captured = "2026-07-14T00:00:00.000Z";
+    const replay = "2026-07-14T00:10:00.000Z";
+    const materialized = module.materializeReplayArgs(
+      ["authoring-check", "--validation-time", captured],
+      captured,
+      replay
+    );
+    if (materialized[2] === replay && !materialized.includes(captured)) {
+      throw new Error("REPLAY_CLOCK_REFRESHED_WITHIN_DECLARED_EVIDENCE_WINDOW");
     }
   });
-  run("execution-arbitrary-log", (manifest, logs) => {
-    if (structured) {
-      const record = manifest.runRecords[0];
-      const value = "arbitrary output without the required marker\n";
-      logs.set(`${record.outputLogPath}#${record.outputRecordId}`, value);
-      record.stdoutDigest = typedSha256(value);
-    } else {
-      manifest.validationSummary.commandLog = ["arbitrary"];
+}
+
+function runFilesystemAttacks(module, results) {
+  if (typeof module.requireCleanWorktree !== "function") {
+    recordAccepted(results, "filesystem-dirty-worktree", "LIVE_GIT_CLEANLINESS_CHECK_MISSING");
+  } else {
+    const repository = mkdtempSync(join(tmpdir(), "safeclaw-dirty-worktree-"));
+    try {
+      execFileSync("git", ["init"], { cwd: repository, stdio: "ignore" });
+      writeFileSync(join(repository, "tracked.txt"), "clean\n", "utf8");
+      execFileSync("git", ["add", "tracked.txt"], { cwd: repository, stdio: "ignore" });
+      execFileSync(
+        "git",
+        ["-c", "user.name=SafeClaw Contract Test", "-c", "user.email=contract@example.invalid", "commit", "-m", "fixture"],
+        { cwd: repository, stdio: "ignore" }
+      );
+      module.requireCleanWorktree(repository);
+      writeFileSync(join(repository, "tracked.txt"), "dirty\n", "utf8");
+      expectRejection(results, "filesystem-dirty-worktree", () => module.requireCleanWorktree(repository));
+    } finally {
+      rmSync(repository, { recursive: true, force: true });
     }
-  });
-  run("execution-count-999", (manifest) => {
-    if (structured) manifest.passCount = 999;
-    else {
-      manifest.validationSummary.authoringChecks = 999;
-      manifest.validationSummary.unknownKeyMatrixRuns = 999;
-      manifest.validationSummary.deliberateAttackRuns = 999;
+  }
+
+  if (typeof module.requireArtifactMtimesNotFuture !== "function") {
+    recordAccepted(results, "filesystem-future-mtime", "FUTURE_MTIME_CHECK_MISSING");
+  } else {
+    const directory = mkdtempSync(join(tmpdir(), "safeclaw-future-mtime-"));
+    try {
+      const path = join(directory, "artifact.txt");
+      writeFileSync(path, "artifact\n", "utf8");
+      const validationTime = Date.parse("2026-07-14T00:00:00.000Z");
+      const future = new Date(validationTime + 60_000);
+      utimesSync(path, future, future);
+      expectRejection(results, "filesystem-future-mtime", () =>
+        module.requireArtifactMtimesNotFuture(directory, ["artifact.txt"], validationTime, 0)
+      );
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
     }
-  });
-  run("execution-empty-red-failures", (manifest) => {
-    manifest.redBaseline.failures = [];
-  });
-  run("execution-missing-record", (manifest) => {
-    if (structured) manifest.runRecords.splice(0, 1);
-    else manifest.validationSummary.commandLog = ["no structured records exist"];
-  });
-  run("execution-duplicate-record", (manifest) => {
-    if (structured) manifest.runRecords.push(clone(manifest.runRecords[0]));
-    else manifest.validationSummary.commandLog.push("duplicate unstructured claim");
-  });
-  run("execution-wrong-args", (manifest) => {
-    if (structured) manifest.runRecords[0].args = ["attacker-selected-args"];
-    else manifest.validationSummary.commandLog = ["wrong args are not represented"];
-  });
-  run("execution-wrong-marker", (manifest) => {
-    if (structured) manifest.runRecords[0].requiredMarker = "ATTACKER_MARKER=PASS";
-    else manifest.validationSummary.commandLog = ["wrong marker is not represented"];
-  });
-  run("execution-wrong-digest", (manifest) => {
-    if (structured) manifest.runRecords[0].stdoutDigest = typedSha256("wrong digest");
-    else manifest.validationSummary.commandLog = ["wrong digest is not represented"];
-  });
+  }
 }
 
 function runEvidenceSourceAttacks(source, results) {
@@ -563,13 +716,15 @@ function printResults(label, results, normativeMatrix) {
   const rejected = results.filter((result) => result.rejected);
   const accepted = results.filter((result) => !result.rejected);
   console.log(`TEST_TARGET=${label}`);
-  console.log(`EXTERNAL_ATTACK_CASES=${results.length}`);
-  console.log(`EXTERNAL_ATTACK_REJECTIONS=${rejected.length}`);
-  console.log(`EXTERNAL_ATTACK_ACCEPTED=${accepted.length}`);
+  console.log("HOSTILE_ATTACK_PROCESSES=1");
+  console.log("HOSTILE_ATTACK_INDEPENDENCE_CLAIM=false");
+  console.log(`HOSTILE_ATTACK_CASES=${results.length}`);
+  console.log(`HOSTILE_ATTACK_REJECTIONS=${rejected.length}`);
+  console.log(`HOSTILE_ATTACK_ACCEPTED=${accepted.length}`);
   console.log(`NORMATIVE_MUTATION_CASES=${normativeMatrix.total}`);
   console.log(`NORMATIVE_MUTATION_REJECTIONS=${normativeMatrix.total - normativeMatrix.accepted.length}`);
   console.log(`NORMATIVE_MUTATION_ACCEPTED=${normativeMatrix.accepted.length}`);
-  console.log(`PRESERVED_NORMATIVE_MUTATION_TARGET=${EXPECTED_NORMATIVE_MUTATIONS}`);
+  console.log(`CURRENT_NORMATIVE_MUTATION_TARGET=${EXPECTED_NORMATIVE_MUTATIONS}`);
   for (const result of accepted) console.log(`ACCEPTED_ATTACK=${result.id}`);
   for (const path of normativeMatrix.accepted.slice(0, 50)) console.log(`ACCEPTED_NORMATIVE_PATH=${path}`);
   if (normativeMatrix.accepted.length > 50) {
@@ -601,7 +756,9 @@ async function main() {
   try {
     module.validateContract(clone(spec), validationTime, { root });
     runPhotoAuthorityAttacks(module, results);
-    runExecutionEvidenceAttacks(module, spec, validationTime, results);
+    runExecutionEvidenceAttacks(module, spec, validationTime, results, root);
+    runReplayClockAttack(module, results);
+    runFilesystemAttacks(module, results);
     runEvidenceSourceAttacks(source, results);
     runBrowserNormativeAttacks(module, spec, validationTime, root, results);
     runLiveAuthorityAttacks(module, spec, validationTime, root, results);

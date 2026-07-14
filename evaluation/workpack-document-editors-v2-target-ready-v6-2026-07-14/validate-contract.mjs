@@ -1,16 +1,18 @@
 import { createHash } from "node:crypto";
 import { execFileSync, spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const BASE_SHA = "f45bba17bcce0d8ebb2690f82d014dbe42ae8191";
-const CANDIDATE_PARENT_SHA = "e50d2743854a96a160c6c3b95cbe74443a7f98c4";
-const INTEGRATION_TARGET_SHA = "ea7aa7223a056c884d5b0ba55563d602af328451";
+const CANDIDATE_PARENT_SHA = "82ff4a11b664b55c5ea9d7f6bdd815c72f6f460c";
+const INTEGRATION_TARGET_SHA = "67d2c9e28e7278c58f46b46c2512c7133d88d1d3";
 const SOURCE_CANDIDATE_SHA = "af8d343c65445497da2f804bcdde2eb533390ee8";
-const SOURCE_EVIDENCE_SHA = CANDIDATE_PARENT_SHA;
+const SOURCE_EVIDENCE_SHA = "e50d2743854a96a160c6c3b95cbe74443a7f98c4";
 const SOURCE_CANDIDATE_BRANCH = "feat/workpack-document-editors-v2-target-ready-v5";
 const REJECTED_V4_CANDIDATE_SHA = "2ec14aaf92e7c03376e6086b889b254e77a6c412";
 const REJECTED_V4_EVIDENCE_SHA = "cc9f5af297950b73b53a9ab4018bdc143830c499";
+const REJECTED_V6_CANDIDATE_SHA = "106eef7c609e937dbebfe06c3affb89d63f550d5";
+const REJECTED_V6_EVIDENCE_SHA = CANDIDATE_PARENT_SHA;
 const BRANCH = "feat/workpack-document-editors-v2-target-ready-v5";
 const AUTHORITY_REF = "refs/remotes/origin/feat/phase-a-evidence-integration";
 const AUTHORITY_BRANCH = "feat/phase-a-evidence-integration";
@@ -21,10 +23,12 @@ const VALIDATOR_PATH = `${ARTIFACT_DIR}/validate-contract.mjs`;
 const ATTACK_TEST_PATH = `${ARTIFACT_DIR}/contract-remediation-attacks.mjs`;
 const EVIDENCE_PATH = `${ARTIFACT_DIR}/review-evidence.json`;
 const EXECUTION_LOG_PATH = `${ARTIFACT_DIR}/execution-log.jsonl`;
-const RED_LOG_PATH = `${ARTIFACT_DIR}/red-v5-independent-reject.log`;
+const RED_LOG_PATH = `${ARTIFACT_DIR}/tdd-red-v6-contract-remediation.log`;
+const GREEN_LOG_PATH = `${ARTIFACT_DIR}/tdd-green-v6-contract-remediation.log`;
+const REPORT_PATH = `${ARTIFACT_DIR}/remediation-report.md`;
 const IMPLEMENTATION_BLOCK = "IMPLEMENTATION_BLOCKED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL";
-const EXPECTED_SHAPE_SHA256 = "sha256:913655905856a4ad3e067f7718086dc3418e571f92d5163f89e664278e6d03df";
-const EXPECTED_NORMATIVE_SHA256 = "sha256:33fc1ef3d9da6e638621cde23f5e918f428b348bd230394b8cce81910b639471";
+const EXPECTED_SHAPE_SHA256 = "sha256:4d11dab6df464187edea83ed945a408c20d59b2e5824ac52a2aba35b84308709";
+const EXPECTED_NORMATIVE_SHA256 = "sha256:c310cc261c89abc1c620c0d323ae81188d41ecb5605b280109977dc6a51e1461";
 const AUTHOR_EVIDENCE_TRUST = "UNTRUSTED_REPRODUCIBLE_REQUIRES_FRESH_INDEPENDENT_RERUN";
 const INDEPENDENT_VERDICT = "NOT_ESTABLISHED_BY_AUTHOR_RUNS";
 const TEXT_SCALING_PROFILE_ID = "BROWSER-PAGE-ZOOM-200";
@@ -36,9 +40,42 @@ const FULL_SHA = /^[0-9a-f]{40}$/u;
 const GIT_BLOB_OID = /^[0-9a-f]{40}$/u;
 const TYPED_SHA256 = /^sha256:[0-9a-f]{64}$/u;
 const STRICT_RFC3339_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u;
+const PHOTO_NONCE_AUTHORITY_KIND = "safeclaw-external-photo-receipt-nonce-authority/v1";
+const PHOTO_NONCE_AUTHORITY_STATUS = "UNIMPLEMENTED_PENDING_EXPLICIT_USER_DB_AUTHORITY_APPROVAL";
+const EVALUATION_NONCE_AUTHORITY_STATUS = "EVALUATION_ONLY_MODEL_NOT_PRODUCT_IMPLEMENTATION";
+const PHOTO_NONCE_CONSUME_REQUEST_KEYS = [
+  "kind",
+  "receiptId",
+  "receiptNonce",
+  "receiptAuthorityDigest",
+  "workpackId",
+  "logicalRootId",
+  "snapshotId",
+  "snapshotRevision",
+  "reviewRevision",
+  "expectedNonceState",
+  "consumedAt"
+];
+const PHOTO_NONCE_CONSUME_RESULT_KEYS = [
+  "kind",
+  "status",
+  "receiptId",
+  "receiptNonce",
+  "receiptAuthorityDigest",
+  "consumedAt"
+];
 
-const CANDIDATE_PATHS = [ATTACK_TEST_PATH, SPEC_JSON_PATH, SPEC_MARKDOWN_PATH, VALIDATOR_PATH].sort();
-const EVIDENCE_PATHS = [EVIDENCE_PATH, EXECUTION_LOG_PATH, RED_LOG_PATH].sort();
+const CANDIDATE_PATHS = [
+  `${ARTIFACT_DIR}/.gitattributes`,
+  ATTACK_TEST_PATH,
+  GREEN_LOG_PATH,
+  RED_LOG_PATH,
+  REPORT_PATH,
+  SPEC_JSON_PATH,
+  SPEC_MARKDOWN_PATH,
+  VALIDATOR_PATH
+].sort();
+const EVIDENCE_PATHS = [EVIDENCE_PATH, EXECUTION_LOG_PATH].sort();
 const DOCUMENT_KEYS = [
   "workpackSummaryDraft",
   "riskAssessmentDraft",
@@ -129,6 +166,9 @@ const NEGATIVE_ATTACK_IDS = [
   "photo-mismatched-hash",
   "photo-stale-analysis-revision",
   "photo-stale-review-revision",
+  "photo-authority-unimplemented",
+  "photo-same-receipt-replay",
+  "photo-coherent-authority-forgery",
   "photo-share-before-confirmation",
   "kosha-impossible-review-state",
   "sif-promoted-to-control",
@@ -146,12 +186,13 @@ const NEGATIVE_ATTACK_IDS = [
   "evidence-self-sha",
   "candidate-parent-drift"
 ];
-const V5_REJECT_FAILURES = [
-  "client-submitted snapshot/control/event digests and unbound receipt nonce were accepted",
-  "synthetic run records and marker-only fallback could satisfy author evidence",
-  "browser touch, clipping, overflow, scroll, theme, scale, editor, and state assertions were absent",
-  "moving integration authority was not resolved from the live remote-tracking ref",
-  "author-run records could be mistaken for independent PASS evidence"
+const V6_REJECT_FAILURES = [
+  "local nonce-state validation did not atomically consume an authority record, so same-receipt replay and coherent whole-context forgery were accepted",
+  "the 24-hour evidence window replayed the capture-time command clock and failed after the separate 300-second clock-skew limit",
+  "execution JSONL lacked whole-file digest, ordered record ID, and record-count binding, so reversed rows were accepted",
+  "the focused harness counted hostile cases inside one process without an explicit process count and non-independence boundary",
+  "worktree cleanliness was a declared boolean and future artifact mtimes were not checked against live state",
+  "rendered authority prose mislabeled v6 as v5, conflated immutable f45 source base with the then-current ea7 authority, and could not safely represent a moving authority advance"
 ];
 const OPEN_MAP_PATHS = new Set([
   "$.documents[].fieldNotes",
@@ -161,8 +202,8 @@ const OPEN_MAP_PATHS = new Set([
 const OBJECT_KEYS = new Map([
   ["safeclaw_workpack_document_editors_contract", ["kind", "schemaVersion", "meta", "reviewScope", "freshnessPolicy", "schemaClosure", "productContract", "evidenceContract", "photoConfirmation", "markdownContract", "exportContract", "scrollContract", "textScalingContract", "documents", "authorityGates", "browserMatrix", "validationContract", "integrationLedger"]],
   ["meta", ["kind", "artifact", "contractDate", "branch", "sourceBase", "currentIntegrationTarget", "candidateParent", "status", "implementationStatus", "browserExecutions"]],
-  ["review_scope", ["kind", "candidateAllowedPaths", "evidenceAllowedPaths", "targetBlobPaths", "sourceCandidate", "sourceCandidateBranch", "sourceCandidateUse", "rejectedCandidate", "rejectedEvidence", "ancestryRule", "selfHashRule"]],
-  ["freshness_policy", ["kind", "validationTimeArgument", "evidenceMaxAgeSeconds", "ledgerMaxAgeSeconds", "futureSkewSeconds", "validationTimeSystemClockSkewSeconds", "notPerpetual", "regenerationAction"]],
+  ["review_scope", ["kind", "candidateAllowedPaths", "evidenceAllowedPaths", "targetBlobPaths", "sourceCandidate", "sourceCandidateBranch", "sourceCandidateUse", "rejectedCandidate", "rejectedEvidence", "rejectedV6Candidate", "rejectedV6Evidence", "rejectedV6Verdict", "ancestryRule", "selfHashRule"]],
+  ["freshness_policy", ["kind", "validationTimeArgument", "evidenceMaxAgeSeconds", "ledgerMaxAgeSeconds", "futureSkewSeconds", "futureMtimeSkewSeconds", "validationTimeSystemClockSkewSeconds", "replayClockMode", "replayClockRule", "notPerpetual", "regenerationAction"]],
   ["schema_closure", ["kind", "objectGraphSha256", "normativeContractSha256", "minimumClosedObjects", "legacyPermissiveObjectsClosed", "unknownKeyPasses", "rootIncluded", "openMapFamilies", "exactKeyOrder", "shapeBypassRule"]],
   ["open_map_family", ["kind", "pathPattern", "keyCodec", "valueCodec", "purpose"]],
   ["product_contract", ["kind", "documentEditorCount", "evidenceDrawerCount", "evidenceDrawerName", "forbiddenDefaultSurfaces", "bodyProvenanceRule", "mobileEarlyStartMaxY", "mobileScrollOwner", "primaryExperience"]],
@@ -171,7 +212,7 @@ const OBJECT_KEYS = new Map([
   ["photo_confirmation_contract", ["kind", "status", "states", "eventSchema", "validationContext", "transitions", "shareGate", "privacyRule", "authorityGateId"]],
   ["photo_event_schema", ["kind", "schemaId", "fields", "eventDigestRule", "unknownKeyRule"]],
   ["photo_field", ["kind", "name", "type", "codec", "requiredOn", "digestCovered"]],
-  ["photo_validation_context_contract", ["kind", "snapshotKind", "snapshotFields", "canonicalControlFields", "receiptAuthorityFields", "controlDigestKind", "controlDigestInputFields", "canonicalization", "resolutionRule", "receiptRule", "failClosedRule"]],
+  ["photo_validation_context_contract", ["kind", "snapshotKind", "snapshotFields", "canonicalControlFields", "receiptAuthorityFields", "controlDigestKind", "controlDigestInputFields", "nonceAuthorityKind", "nonceAuthorityImplementationStatus", "nonceConsumeRule", "canonicalization", "resolutionRule", "receiptRule", "failClosedRule"]],
   ["photo_transition", ["kind", "from", "event", "to", "precondition", "confirmationBlocked", "shareBlocked"]],
   ["photo_share_gate", ["kind", "beforeConfirmation", "afterConfirmation", "externalAuthority", "staleEvent", "candidateEvidenceRule"]],
   ["markdown_contract", ["kind", "canonicalSource", "renderer", "comparison", "requiredDerivedSections", "photoTableRule", "driftAttacks"]],
@@ -185,15 +226,16 @@ const OBJECT_KEYS = new Map([
   ["authority_gate", ["kind", "id", "status", "requiresUserDbApproval", "executableCommands", "blockedCapability", "unblockRule"]],
   ["browser_matrix_contract", ["kind", "status", "zoomPercent", "browserExecutions", "productExecutions", "cases", "futureAssertions"]],
   ["browser_case", ["kind", "id", "browser", "viewport", "zoomPercent", "textScalingProfileId", "status"]],
-  ["validation_contract", ["kind", "canonicalSpecReviewTokens", "negativeAttacks", "requiredRuns", "requiredCommandMultiplicities", "runRecordKeys", "executionLogKeys", "structuredEvidenceRule", "implementationMode", "claimBoundary", "browserExecutions"]],
+  ["validation_contract", ["kind", "canonicalSpecReviewTokens", "negativeAttacks", "requiredRuns", "requiredCommandMultiplicities", "runRecordKeys", "executionLogKeys", "executionLogBindingKeys", "structuredEvidenceRule", "implementationMode", "claimBoundary", "browserExecutions"]],
   ["negative_attack", ["kind", "id", "scope", "mutation", "expectedErrorPrefix"]],
-  ["integration_ledger", ["kind", "capturedAt", "captureCommand", "authorityRef", "authorityHead", "sourceBase", "currentIntegrationTarget", "candidateBranch", "worktreeWasCleanBeforeEdits", "sourceCandidateHead", "sourceCandidateBranch", "sourceCandidateUse", "rejectedReferenceHead", "rejectedReferenceUse", "refreshRequiredAfterSeconds"]],
-  ["review_evidence", ["kind", "schemaVersion", "capturedAt", "validationTime", "branch", "candidateCommit", "candidateParent", "sourceBase", "currentIntegrationTarget", "mergeBase", "authorityRef", "authorityHead", "authorEvidenceTrust", "independentVerdict", "rebaseDisposition", "candidateScope", "evidenceScope", "candidateArtifacts", "targetBlobs", "ledgerCapturedAt", "refSnapshotDigest", "browserExecutions", "productExecutions", "buildExecutions", "exportExecutions", "implementationExecutions", "blockedAuthorities", "unexecutedBrowserMatrix", "runRecords", "redBaseline", "v5PreservedBaseline"]],
+  ["integration_ledger", ["kind", "capturedAt", "captureCommand", "authorityRef", "authorityHead", "sourceBase", "currentIntegrationTarget", "candidateBranch", "cleanlinessCommand", "futureMtimeRule", "sourceCandidateHead", "sourceCandidateBranch", "sourceCandidateUse", "rejectedReferenceHead", "rejectedReferenceUse", "rejectedV6Candidate", "rejectedV6Evidence", "rejectedV6Verdict", "refreshRequiredAfterSeconds"]],
+  ["review_evidence", ["kind", "schemaVersion", "capturedAt", "validationTime", "branch", "candidateCommit", "candidateParent", "sourceBase", "currentIntegrationTarget", "mergeBase", "authorityRef", "authorityHead", "authorEvidenceTrust", "independentVerdict", "rebaseDisposition", "candidateScope", "evidenceScope", "candidateArtifacts", "targetBlobs", "ledgerCapturedAt", "refSnapshotDigest", "browserExecutions", "productExecutions", "buildExecutions", "exportExecutions", "implementationExecutions", "blockedAuthorities", "unexecutedBrowserMatrix", "executionLogBinding", "runRecords", "redBaseline", "v5PreservedBaseline"]],
   ["scope_identity", ["kind", "paths"]],
   ["blob_identity", ["kind", "path", "gitBlob", "sha256", "bytes"]],
   ["run_record", ["kind", "recordId", "commandId", "executable", "args", "cwd", "startedAt", "completedAt", "exitCode", "stdoutDigest", "stderrDigest", "rawLogDigest", "outputLogPath", "outputRecordId"]],
   ["execution_log_entry", ["kind", "recordId", "stdout", "stderr", "stdoutDigest", "stderrDigest"]],
-  ["red_baseline", ["kind", "referenceBranch", "referenceCandidate", "referenceEvidence", "observedExit", "failures", "externalAttackCases", "acceptedAttackCases", "normativeMutationCases", "acceptedNormativeMutations", "outputLogPath", "stdoutDigest", "browserExecutions"]],
+  ["execution_log_binding", ["kind", "path", "sha256", "recordCount", "orderedRecordIds"]],
+  ["red_baseline", ["kind", "referenceBranch", "referenceCandidate", "referenceEvidence", "observedExit", "findingCount", "reproducedAcceptedAttackCount", "failures", "hostileAttackCases", "hostileAttackProcesses", "independenceClaim", "outputLogPath", "stdoutDigest", "browserExecutions"]],
   ["v5_preserved_baseline", ["kind", "referenceCandidate", "referenceEvidence", "closedObjects", "openMapInstances", "unknownKeyPasses", "unknownKeyAttacksPerRun", "exactKeyRejectionsPerRun", "deliberateAttackCaseCount", "deliberateAttackRequiredRuns", "normativeMutationCases", "normativeMutationRejections", "browserExecutions", "productExecutions", "implementationExecutions"]]
 ]);
 
@@ -297,11 +339,12 @@ const RUN_RECORD_KEYS = [
   "outputRecordId"
 ];
 const EXECUTION_LOG_KEYS = ["kind", "recordId", "stdout", "stderr", "stdoutDigest", "stderrDigest"];
+const EXECUTION_LOG_BINDING_KEYS = ["kind", "path", "sha256", "recordCount", "orderedRecordIds"];
 const REQUIRED_COMMAND_MULTIPLICITIES = [
   "authority-fetch=1",
   "authoring-check=2",
   "unknown-key-matrix=2",
-  "deliberate-attack=52",
+  "deliberate-attack=58",
   "focused-remediation-test=2",
   "json-parse-check=1",
   "object-census=1",
@@ -541,6 +584,13 @@ function validateReviewScope(scope) {
   if (scope.rejectedCandidate !== REJECTED_V4_CANDIDATE_SHA || scope.rejectedEvidence !== REJECTED_V4_EVIDENCE_SHA) {
     throw new Error("IDENTITY: rejected v4 identities differ");
   }
+  if (
+    scope.rejectedV6Candidate !== REJECTED_V6_CANDIDATE_SHA ||
+    scope.rejectedV6Evidence !== REJECTED_V6_EVIDENCE_SHA ||
+    scope.rejectedV6Verdict !== "INDEPENDENT_REJECT_REMEDIATION_SOURCE"
+  ) {
+    throw new Error("IDENTITY: rejected v6 remediation source identities differ");
+  }
   const targets = requireArray(scope.targetBlobPaths, "reviewScope.targetBlobPaths", 1);
   if (new Set(targets).size !== targets.length) throw new Error("SCOPE: target blob paths must be unique");
 }
@@ -551,17 +601,22 @@ function validateFreshnessPolicy(policy) {
     policy.evidenceMaxAgeSeconds !== 86400 ||
     policy.ledgerMaxAgeSeconds !== 86400 ||
     policy.futureSkewSeconds !== 300 ||
+    policy.futureMtimeSkewSeconds !== 1 ||
     policy.validationTimeSystemClockSkewSeconds !== 300 ||
+    policy.replayClockMode !== "fresh_self_check_validation_time" ||
     policy.notPerpetual !== true
   ) {
     throw new Error("FRESHNESS_POLICY: bounded TTL policy differs");
+  }
+  if (!policy.replayClockRule.includes("replaces only the recorded --validation-time value")) {
+    throw new Error("FRESHNESS_POLICY: replay clock substitution rule differs");
   }
   requireString(policy.regenerationAction, "freshnessPolicy.regenerationAction");
 }
 
 function validateSchemaClosure(spec, locations, options) {
   const closure = spec.schemaClosure;
-  if (closure.minimumClosedObjects !== 328 || locations.length !== closure.minimumClosedObjects) {
+  if (closure.minimumClosedObjects !== 331 || locations.length !== closure.minimumClosedObjects) {
     throw new Error(`SCHEMA_CLOSURE: closed objects ${locations.length} differs from required ${closure.minimumClosedObjects}`);
   }
   if (locations[0]?.path !== "$" || closure.rootIncluded !== true) {
@@ -687,10 +742,19 @@ function validatePhotoSchema(photo) {
     canonicalJson(context.canonicalControlFields) !== canonicalJson(CANONICAL_CONTROL_KEYS) ||
     canonicalJson(context.receiptAuthorityFields) !== canonicalJson(RECEIPT_AUTHORITY_FIELD_PATHS) ||
     context.controlDigestKind !== "safeclaw-photo-control-acceptance/v3" ||
+    context.nonceAuthorityKind !== PHOTO_NONCE_AUTHORITY_KIND ||
+    context.nonceAuthorityImplementationStatus !== PHOTO_NONCE_AUTHORITY_STATUS ||
     canonicalJson(context.controlDigestInputFields) !==
       canonicalJson(["kind", "authorityBinding", "snapshotRevision", "snapshotDigest", "selectedControls"])
   ) {
     throw new Error("PHOTO_AUTHORITY: validation context or control digest contract differs");
+  }
+  if (
+    !context.nonceConsumeRule.includes("atomic compare-and-consume") ||
+    !context.nonceConsumeRule.includes("same receipt replay") ||
+    !context.nonceConsumeRule.includes("coherent whole-context forgery")
+  ) {
+    throw new Error("PHOTO_AUTHORITY: atomic external nonce authority rule differs");
   }
   if (photo.transitions.length !== 3) throw new Error("PHOTO_STATE: transition count differs");
   const confirmation = photo.transitions.find(
@@ -879,10 +943,11 @@ function validateValidationContract(contract) {
   if (
     new Set(ids).size !== ids.length ||
     canonicalJson(ids) !== canonicalJson(NEGATIVE_ATTACK_IDS) ||
-    contract.requiredRuns !== "Author evidence records one actual spawned process per exact command, dynamic unknown-key matrix twice, all 26 preserved deliberate negative attacks twice, and focused v6 remediation tests twice; author runs remain untrusted and require fresh independent rerun." ||
+    contract.requiredRuns !== "Author evidence records one actual spawned process per exact command, dynamic unknown-key matrix twice, all 29 deliberate negative attacks twice, and two focused v6 harness processes. Each focused process contains multiple hostile cases; those cases are not claimed as separate or independent processes. Author runs remain untrusted and require fresh independent rerun." ||
     canonicalJson(contract.requiredCommandMultiplicities) !== canonicalJson(REQUIRED_COMMAND_MULTIPLICITIES) ||
     canonicalJson(contract.runRecordKeys) !== canonicalJson(RUN_RECORD_KEYS) ||
-    canonicalJson(contract.executionLogKeys) !== canonicalJson(EXECUTION_LOG_KEYS)
+    canonicalJson(contract.executionLogKeys) !== canonicalJson(EXECUTION_LOG_KEYS) ||
+    canonicalJson(contract.executionLogBindingKeys) !== canonicalJson(EXECUTION_LOG_BINDING_KEYS)
   ) {
     throw new Error("VALIDATION_CONTRACT: required attacks, multiplicities, or structured execution schemas differ");
   }
@@ -899,12 +964,16 @@ function validateIntegrationLedger(spec, validationTime) {
     ledger.sourceBase !== BASE_SHA ||
     ledger.currentIntegrationTarget !== INTEGRATION_TARGET_SHA ||
     ledger.candidateBranch !== BRANCH ||
-    ledger.worktreeWasCleanBeforeEdits !== true ||
+    ledger.cleanlinessCommand !== "git status --porcelain=v1 --untracked-files=all" ||
+    !ledger.futureMtimeRule.includes("fail closed") ||
     ledger.sourceCandidateHead !== SOURCE_CANDIDATE_SHA ||
     ledger.sourceCandidateBranch !== SOURCE_CANDIDATE_BRANCH ||
     ledger.sourceCandidateUse !== "REVIEWED_V5_ANCESTRY_PREFIX_NO_RANGE_IMPORT" ||
     ledger.rejectedReferenceHead !== REJECTED_V4_EVIDENCE_SHA ||
     ledger.rejectedReferenceUse !== "READ_ONLY_REJECTED_V4_REFERENCE_NO_ANCESTRY" ||
+    ledger.rejectedV6Candidate !== REJECTED_V6_CANDIDATE_SHA ||
+    ledger.rejectedV6Evidence !== REJECTED_V6_EVIDENCE_SHA ||
+    ledger.rejectedV6Verdict !== "INDEPENDENT_REJECT_REMEDIATION_SOURCE" ||
     ledger.refreshRequiredAfterSeconds !== spec.freshnessPolicy.ledgerMaxAgeSeconds
   ) {
     throw new Error("IDENTITY: integration ledger does not separate immutable base from moving authority target");
@@ -999,13 +1068,24 @@ function validateContract(spec, validationTime, options = {}) {
   validateValidationContract(spec.validationContract);
   validateIntegrationLedger(spec, validationTime);
   const fixture = buildValidPhotoConfirmation();
-  const confirmation = validatePhotoConfirmation(fixture.event, fixture.context, validationTime);
+  let failClosed = false;
+  try {
+    validatePhotoConfirmation(clone(fixture.event), clone(fixture.context), validationTime);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    failClosed = message.startsWith("PHOTO_AUTHORITY_UNIMPLEMENTED:");
+  }
+  if (!failClosed) throw new Error("PHOTO_AUTHORITY_UNIMPLEMENTED: missing authority did not fail closed");
+  const nonceAuthority = createEvaluationOnlyNonceAuthorityModel([fixture.context.receiptAuthority]);
+  const confirmation = validatePhotoConfirmation(fixture.event, fixture.context, validationTime, nonceAuthority);
   if (
-    confirmation.state !== "human_confirmed" ||
-    confirmation.confirmationBlocked !== false ||
+    confirmation.modeledState !== "human_confirmed" ||
+    confirmation.productReady !== false ||
+    confirmation.implementationStatus !== PHOTO_NONCE_AUTHORITY_STATUS ||
+    confirmation.confirmationBlocked !== true ||
     confirmation.shareState !== "authority_check_required"
   ) {
-    throw new Error("PHOTO_STATE: valid confirmation did not reach human_confirmed");
+    throw new Error("PHOTO_STATE: evaluation authority model crossed the product-readiness boundary");
   }
   validateNormativeExactness(spec);
   return { locations, confirmation, authorityHead };
@@ -1025,7 +1105,7 @@ function renderTable(lines, headers, rows) {
 
 function renderMarkdown(spec) {
   const lines = [
-    "# SafeClaw Workpack Document Editors v2 target-ready v5",
+    "# SafeClaw Workpack Document Editors v2 target-ready v6",
     "",
     "> This entire normative document is deterministically derived from `spec.json`. Manual prose is not authoritative.",
     "",
@@ -1034,7 +1114,9 @@ function renderMarkdown(spec) {
     `- Contract: ${spec.meta.status}`,
     `- Implementation: ${spec.meta.implementationStatus}`,
     `- Browser executions: ${spec.meta.browserExecutions}`,
-    `- Frozen source/target/parent: ${spec.meta.sourceBase}`,
+    `- Immutable source base: ${spec.meta.sourceBase}`,
+    `- Current fetched integration authority: ${spec.meta.currentIntegrationTarget} (${spec.integrationLedger.authorityRef})`,
+    `- Remediation candidate parent: ${spec.meta.candidateParent}`,
     "",
     "## Product Contract",
     "",
@@ -1088,6 +1170,12 @@ function renderMarkdown(spec) {
     `Control digest kind: ${spec.photoConfirmation.validationContext.controlDigestKind}`,
     "",
     `Control digest inputs: ${spec.photoConfirmation.validationContext.controlDigestInputFields.join(", ")}`,
+    "",
+    `External nonce authority kind: ${spec.photoConfirmation.validationContext.nonceAuthorityKind}`,
+    "",
+    `External nonce authority implementation: ${spec.photoConfirmation.validationContext.nonceAuthorityImplementationStatus}`,
+    "",
+    spec.photoConfirmation.validationContext.nonceConsumeRule,
     "",
     spec.photoConfirmation.validationContext.resolutionRule,
     "",
@@ -1174,7 +1262,10 @@ function renderMarkdown(spec) {
     ["Evidence max age seconds", spec.freshnessPolicy.evidenceMaxAgeSeconds],
     ["Ledger max age seconds", spec.freshnessPolicy.ledgerMaxAgeSeconds],
     ["Future skew seconds", spec.freshnessPolicy.futureSkewSeconds],
+    ["Future mtime skew seconds", spec.freshnessPolicy.futureMtimeSkewSeconds],
     ["Validation clock skew seconds", spec.freshnessPolicy.validationTimeSystemClockSkewSeconds],
+    ["Replay clock mode", spec.freshnessPolicy.replayClockMode],
+    ["Replay clock rule", spec.freshnessPolicy.replayClockRule],
     ["Perpetual", !spec.freshnessPolicy.notPerpetual],
     ["Regeneration action", spec.freshnessPolicy.regenerationAction]
   ]);
@@ -1191,6 +1282,10 @@ function renderMarkdown(spec) {
     "## Structured Execution Evidence",
     "",
     ...spec.validationContract.requiredCommandMultiplicities.map((entry) => `- ${entry}`),
+    "",
+    spec.validationContract.requiredRuns,
+    "",
+    spec.validationContract.structuredEvidenceRule,
     "",
     "## Authority Gates",
     ""
@@ -1301,6 +1396,68 @@ function receiptAuthorityDigestInput(authority) {
 
 function computeReceiptAuthorityDigest(authority) {
   return typedSha256(canonicalJson(receiptAuthorityDigestInput(authority)));
+}
+
+function nonceAuthorityRecordKey(value) {
+  return `${value.receiptId}#${value.receiptNonce}`;
+}
+
+function createEvaluationOnlyNonceAuthorityModel(authorities) {
+  const records = new Map();
+  for (const [index, value] of requireArray(authorities, "evaluation nonce authorities", 1).entries()) {
+    const authority = requireRecord(value, `evaluation nonce authorities[${index}]`);
+    const key = nonceAuthorityRecordKey(authority);
+    if (records.has(key)) throw new Error(`PHOTO_AUTHORITY_FORGERY: duplicate authority record ${key}`);
+    if (authority.receiptAuthorityDigest !== computeReceiptAuthorityDigest(authority)) {
+      throw new Error(`PHOTO_AUTHORITY_FORGERY: seeded authority digest differs for ${key}`);
+    }
+    records.set(key, {
+      receiptId: authority.receiptId,
+      receiptNonce: authority.receiptNonce,
+      receiptAuthorityDigest: authority.receiptAuthorityDigest,
+      workpackId: authority.workpackId,
+      logicalRootId: authority.logicalRootId,
+      snapshotId: authority.snapshotId,
+      snapshotRevision: authority.snapshotRevision,
+      reviewRevision: authority.reviewRevision,
+      consumedAt: null
+    });
+  }
+  return {
+    kind: PHOTO_NONCE_AUTHORITY_KIND,
+    implementationStatus: EVALUATION_NONCE_AUTHORITY_STATUS,
+    consumeReceiptNonce(request) {
+      requireExactKeys(request, PHOTO_NONCE_CONSUME_REQUEST_KEYS, "photo nonce consume request");
+      const key = nonceAuthorityRecordKey(request);
+      const stored = records.get(key);
+      if (
+        !stored ||
+        stored.receiptAuthorityDigest !== request.receiptAuthorityDigest ||
+        stored.workpackId !== request.workpackId ||
+        stored.logicalRootId !== request.logicalRootId ||
+        stored.snapshotId !== request.snapshotId ||
+        stored.snapshotRevision !== request.snapshotRevision ||
+        stored.reviewRevision !== request.reviewRevision
+      ) {
+        throw new Error("PHOTO_AUTHORITY_FORGERY: receipt is absent from the trusted external authority");
+      }
+      if (request.expectedNonceState !== "issued") {
+        throw new Error("PHOTO_NONCE_REPLAY: consume request expected state differs");
+      }
+      if (stored.consumedAt !== null) {
+        throw new Error("PHOTO_NONCE_REPLAY: same receipt nonce was already consumed");
+      }
+      stored.consumedAt = request.consumedAt;
+      return {
+        kind: "safeclaw-photo-receipt-nonce-consume-result/v1",
+        status: "consumed",
+        receiptId: stored.receiptId,
+        receiptNonce: stored.receiptNonce,
+        receiptAuthorityDigest: stored.receiptAuthorityDigest,
+        consumedAt: stored.consumedAt
+      };
+    }
+  };
 }
 
 function selectedCanonicalControls(event, context) {
@@ -1483,7 +1640,7 @@ function validateReceiptAuthority(authority, validationTime) {
   }
 }
 
-function validatePhotoConfirmation(event, context, validationTime) {
+function validatePhotoConfirmation(event, context, validationTime, nonceAuthority) {
   requireExactKeys(context, PHOTO_CONTEXT_KEYS, "validationContext");
   if (context.currentState !== "review_required") {
     throw new Error("PHOTO_STATE: confirmation requires review_required");
@@ -1556,11 +1713,49 @@ function validatePhotoConfirmation(event, context, validationTime) {
   if (authority.receiptAuthorityDigest !== computeReceiptAuthorityDigest(authority)) {
     throw new Error("PHOTO_RECEIPT: authoritative receipt digest differs");
   }
+  if (
+    !nonceAuthority ||
+    nonceAuthority.kind !== PHOTO_NONCE_AUTHORITY_KIND ||
+    nonceAuthority.implementationStatus !== EVALUATION_NONCE_AUTHORITY_STATUS ||
+    typeof nonceAuthority.consumeReceiptNonce !== "function"
+  ) {
+    throw new Error(
+      `PHOTO_AUTHORITY_UNIMPLEMENTED: ${PHOTO_NONCE_AUTHORITY_STATUS}; confirmation remains blocked`
+    );
+  }
+  const consumedAt = new Date(validationTime ?? parseStrictRfc3339(authority.confirmedAt, "receiptAuthority.confirmedAt")).toISOString();
+  const consumeRequest = {
+    kind: "safeclaw-photo-receipt-nonce-consume-request/v1",
+    receiptId: authority.receiptId,
+    receiptNonce: authority.receiptNonce,
+    receiptAuthorityDigest: authority.receiptAuthorityDigest,
+    workpackId: authority.workpackId,
+    logicalRootId: authority.logicalRootId,
+    snapshotId: authority.snapshotId,
+    snapshotRevision: authority.snapshotRevision,
+    reviewRevision: authority.reviewRevision,
+    expectedNonceState: "issued",
+    consumedAt
+  };
+  const consumeResult = nonceAuthority.consumeReceiptNonce(consumeRequest);
+  requireExactKeys(consumeResult, PHOTO_NONCE_CONSUME_RESULT_KEYS, "photo nonce consume result");
+  if (
+    consumeResult.kind !== "safeclaw-photo-receipt-nonce-consume-result/v1" ||
+    consumeResult.status !== "consumed" ||
+    consumeResult.receiptId !== authority.receiptId ||
+    consumeResult.receiptNonce !== authority.receiptNonce ||
+    consumeResult.receiptAuthorityDigest !== authority.receiptAuthorityDigest ||
+    consumeResult.consumedAt !== consumedAt
+  ) {
+    throw new Error("PHOTO_AUTHORITY_FORGERY: external consume result does not bind the exact receipt");
+  }
   return {
-    state: "human_confirmed",
-    confirmationBlocked: false,
+    modeledState: "human_confirmed",
+    productReady: false,
+    implementationStatus: PHOTO_NONCE_AUTHORITY_STATUS,
+    confirmationBlocked: true,
     shareState: "authority_check_required",
-    nonceTransition: "issued->consumed"
+    nonceTransition: "external_atomic_issued_to_consumed"
   };
 }
 
@@ -1587,7 +1782,7 @@ function expectedRunRequirements(candidate, validationTime, root) {
   const add = (recordId, commandId, executable, args, expectedExitCode) => {
     records.push({ recordId, commandId, executable, args, cwd, expectedExitCode });
   };
-  add("authority-fetch", "authority-fetch", "git", ["fetch", "--prune", "origin", AUTHORITY_BRANCH], 0);
+  add("authority-fetch", "authority-fetch", "node", [VALIDATOR_PATH, "authority-check", "--root", "."], 0);
   for (let pass = 1; pass <= 2; pass += 1) {
     add(
       `authoring-check-pass-${pass}`,
@@ -1673,6 +1868,24 @@ function expectedRunRequirements(candidate, validationTime, root) {
   return records;
 }
 
+function materializeReplayArgs(args, capturedValidationTime, replayValidationTime) {
+  const materialized = [...args];
+  const positions = materialized
+    .map((value, index) => (value === "--validation-time" ? index : -1))
+    .filter((index) => index >= 0);
+  if (positions.length === 0) return materialized;
+  if (positions.length !== 1) {
+    throw new Error("EXECUTION_REPLAY_CLOCK: command must contain at most one --validation-time token");
+  }
+  const valueIndex = positions[0] + 1;
+  if (materialized[valueIndex] !== capturedValidationTime) {
+    throw new Error("EXECUTION_REPLAY_CLOCK: recorded validation-time value differs from the evidence clock");
+  }
+  parseStrictRfc3339(replayValidationTime, "replay validation time");
+  materialized[valueIndex] = replayValidationTime;
+  return materialized;
+}
+
 function expectDeliberateRejection(id, expectedPrefix, operation) {
   try {
     operation();
@@ -1724,6 +1937,32 @@ function runContractAttack(spec, markdown, id, validationTime) {
     } else if (id === "photo-stale-review-revision") {
       event.humanReceipt.reviewRevision -= 1;
       validateEvent();
+    } else if (id === "photo-authority-unimplemented") {
+      validateEvent();
+    } else if (id === "photo-same-receipt-replay") {
+      const nonceAuthority = createEvaluationOnlyNonceAuthorityModel([context.receiptAuthority]);
+      validatePhotoConfirmation(event, context, validationTime, nonceAuthority);
+      validatePhotoConfirmation(event, context, validationTime, nonceAuthority);
+    } else if (id === "photo-coherent-authority-forgery") {
+      const trustedAuthority = clone(context.receiptAuthority);
+      const identity = context.photoAnalysisSnapshot.authorityIdentity;
+      identity.workpackId = "attacker-workpack";
+      identity.logicalRootId = "attacker-logical-root";
+      identity.snapshotId = "attacker-snapshot";
+      event.snapshotId = identity.snapshotId;
+      context.receiptAuthority.receiptId = "attacker-receipt";
+      context.receiptAuthority.receiptNonce = "attacker-nonce";
+      context.receiptAuthority.workpackId = identity.workpackId;
+      context.receiptAuthority.logicalRootId = identity.logicalRootId;
+      context.receiptAuthority.snapshotId = identity.snapshotId;
+      context.photoAnalysisSnapshot.snapshotDigest = computePhotoSnapshotDigest(context.photoAnalysisSnapshot);
+      context.receiptAuthority.snapshotDigest = context.photoAnalysisSnapshot.snapshotDigest;
+      for (const name of HUMAN_RECEIPT_KEYS) event.humanReceipt[name] = clone(context.receiptAuthority[name]);
+      context.receiptAuthority.controlDigest = computeControlAcceptanceDigest(event, context);
+      context.receiptAuthority.eventDigest = computePhotoEventDigest(event);
+      context.receiptAuthority.receiptAuthorityDigest = computeReceiptAuthorityDigest(context.receiptAuthority);
+      const nonceAuthority = createEvaluationOnlyNonceAuthorityModel([trustedAuthority]);
+      validatePhotoConfirmation(event, context, validationTime, nonceAuthority);
     } else if (id === "photo-share-before-confirmation") {
       requirePhotoShareReady("review_required", false);
     } else if (id === "kosha-impossible-review-state") {
@@ -1850,6 +2089,48 @@ function gitText(root, args) {
   return gitBuffer(root, args).toString("utf8").trim();
 }
 
+function requireCleanWorktree(root) {
+  const status = execFileSync("git", ["status", "--porcelain=v1", "--untracked-files=all"], {
+    cwd: resolve(root),
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+    windowsHide: true
+  });
+  if (status.length > 0) {
+    const paths = status
+      .split(/\r?\n/u)
+      .filter(Boolean)
+      .map((line) => line.slice(3))
+      .join(", ");
+    throw new Error(`WORKTREE_DIRTY: live git status is not clean: ${paths}`);
+  }
+  return true;
+}
+
+function requireArtifactMtimesNotFuture(root, paths, validationTime, futureSkewSeconds) {
+  requireInteger(futureSkewSeconds, "future mtime skew seconds", 0);
+  const limit = validationTime + futureSkewSeconds * 1000;
+  for (const path of paths) {
+    requireString(path, "artifact mtime path");
+    let mtimeMs;
+    try {
+      mtimeMs = statSync(join(resolve(root), path)).mtimeMs;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`ARTIFACT_MTIME: cannot stat ${path}: ${message}`);
+    }
+    if (mtimeMs > limit) {
+      throw new Error(`ARTIFACT_MTIME_FUTURE: ${path} mtime exceeds validation time plus ${futureSkewSeconds} seconds`);
+    }
+  }
+  return true;
+}
+
+function requireLiveWorkingState(root, paths, validationTime, policy) {
+  requireCleanWorktree(root);
+  requireArtifactMtimesNotFuture(root, paths, validationTime, policy.futureMtimeSkewSeconds);
+}
+
 function resolveCommit(root, value, label) {
   if (!FULL_SHA.test(value)) throw new Error(`IDENTITY: ${label} must be a full 40-character SHA`);
   const resolved = gitText(root, ["rev-parse", "--verify", `${value}^{commit}`]);
@@ -1884,15 +2165,22 @@ function isAncestor(root, ancestor, descendant) {
 }
 
 function validateCandidateIdentity(root, candidate, sourceBase, target, spec) {
-  if (candidate === SOURCE_CANDIDATE_SHA || candidate === SOURCE_EVIDENCE_SHA || candidate === CANDIDATE_PARENT_SHA) {
-    throw new Error("IDENTITY: reviewed v5 commits cannot be substituted for the v6 candidate");
+  if (
+    [
+      SOURCE_CANDIDATE_SHA,
+      SOURCE_EVIDENCE_SHA,
+      REJECTED_V6_CANDIDATE_SHA,
+      REJECTED_V6_EVIDENCE_SHA
+    ].includes(candidate)
+  ) {
+    throw new Error("IDENTITY: prior reviewed or rejected commits cannot be substituted for the remediated v6 candidate");
   }
   if (
     commitParent(root, candidate) !== CANDIDATE_PARENT_SHA ||
     sourceBase !== BASE_SHA ||
     target !== INTEGRATION_TARGET_SHA
   ) {
-    throw new Error("IDENTITY: v6 candidate parent, immutable base, or moving integration target differs");
+    throw new Error("IDENTITY: remediated v6 candidate parent, immutable base, or current integration target differs");
   }
   if (gitText(root, ["merge-base", candidate, target]) !== sourceBase) {
     throw new Error("IDENTITY: candidate/target merge-base differs");
@@ -1903,10 +2191,11 @@ function validateCandidateIdentity(root, candidate, sourceBase, target, spec) {
   if (
     commitParent(root, SOURCE_CANDIDATE_SHA) !== BASE_SHA ||
     commitParent(root, SOURCE_EVIDENCE_SHA) !== SOURCE_CANDIDATE_SHA ||
-    commitParent(root, CANDIDATE_PARENT_SHA) !== SOURCE_CANDIDATE_SHA ||
-    !isAncestor(root, SOURCE_EVIDENCE_SHA, candidate)
+    commitParent(root, REJECTED_V6_CANDIDATE_SHA) !== SOURCE_EVIDENCE_SHA ||
+    commitParent(root, REJECTED_V6_EVIDENCE_SHA) !== REJECTED_V6_CANDIDATE_SHA ||
+    !isAncestor(root, REJECTED_V6_EVIDENCE_SHA, candidate)
   ) {
-    throw new Error("IDENTITY: reviewed v5 chain is not the exact v6 ancestry prefix");
+    throw new Error("IDENTITY: reviewed v5 and rejected v6 chain is not the exact remediation ancestry prefix");
   }
   if (canonicalJson(commitPaths(root, candidate)) !== canonicalJson(CANDIDATE_PATHS)) {
     throw new Error("SCOPE: candidate commit scope differs");
@@ -1951,9 +2240,16 @@ function requireExecutionDigest(value, label) {
 }
 
 function parseExecutionLog(value) {
-  const entries = new Map();
-  for (const [index, line] of value.split(/\r?\n/u).entries()) {
-    if (line.trim() === "") continue;
+  if (typeof value !== "string" || value.length === 0 || !value.endsWith("\n") || value.includes("\r")) {
+    throw new Error("EXECUTION_LOG: canonical JSONL must be non-empty LF-only text with one final newline");
+  }
+  const lines = value.slice(0, -1).split("\n");
+  if (lines.some((line) => line.length === 0)) {
+    throw new Error("EXECUTION_LOG: blank JSONL rows are forbidden");
+  }
+  const entriesById = new Map();
+  const orderedEntries = [];
+  for (const [index, line] of lines.entries()) {
     let entry;
     try {
       entry = JSON.parse(line);
@@ -1972,13 +2268,20 @@ function parseExecutionLog(value) {
     if (entry.stdoutDigest !== typedSha256(entry.stdout) || entry.stderrDigest !== typedSha256(entry.stderr)) {
       throw new Error(`EXECUTION_LOG: line ${index + 1} digest differs from actual output`);
     }
-    if (entries.has(entry.recordId)) throw new Error(`EXECUTION_LOG: duplicate record ${entry.recordId}`);
-    entries.set(entry.recordId, entry);
+    if (entriesById.has(entry.recordId)) throw new Error(`EXECUTION_LOG: duplicate record ${entry.recordId}`);
+    entriesById.set(entry.recordId, entry);
+    orderedEntries.push(entry);
   }
-  return entries;
+  return {
+    rawSha256: typedSha256(value),
+    recordCount: orderedEntries.length,
+    orderedRecordIds: orderedEntries.map((entry) => entry.recordId),
+    orderedEntries,
+    entriesById
+  };
 }
 
-function validateRunRecords(manifest, logReader, root, replayCommands = false) {
+function validateRunRecords(manifest, executionLog, root, validationTime, replayCommands = false) {
   const records = requireArray(manifest.runRecords, "manifest.runRecords", 1);
   const requirements = expectedRunRequirements(manifest.candidateCommit, manifest.validationTime, root);
   if (records.length !== requirements.length) {
@@ -1986,10 +2289,33 @@ function validateRunRecords(manifest, logReader, root, replayCommands = false) {
   }
   const ids = records.map((record) => record.recordId);
   if (new Set(ids).size !== ids.length) throw new Error("EXECUTION_RECORD: record IDs must be unique");
+  const binding = requireExactKeys(
+    manifest.executionLogBinding,
+    EXECUTION_LOG_BINDING_KEYS,
+    "manifest.executionLogBinding"
+  );
+  requireExecutionDigest(binding.sha256, "executionLogBinding.sha256");
+  requireInteger(binding.recordCount, "executionLogBinding.recordCount", 1);
+  const boundRecordIds = requireArray(binding.orderedRecordIds, "executionLogBinding.orderedRecordIds", 1);
+  boundRecordIds.forEach((recordId, index) =>
+    requireString(recordId, `executionLogBinding.orderedRecordIds[${index}]`)
+  );
+  if (
+    binding.kind !== "execution_log_binding" ||
+    binding.path !== EXECUTION_LOG_PATH ||
+    binding.sha256 !== executionLog.rawSha256 ||
+    binding.recordCount !== executionLog.recordCount ||
+    canonicalJson(boundRecordIds) !== canonicalJson(executionLog.orderedRecordIds) ||
+    binding.recordCount !== records.length ||
+    canonicalJson(boundRecordIds) !== canonicalJson(ids)
+  ) {
+    throw new Error("EXECUTION_LOG_BINDING: full JSONL digest, order, or count differs");
+  }
   const captureEpoch = parseStrictRfc3339(manifest.capturedAt, "manifest.capturedAt");
   const commandCounts = new Map();
   records.forEach((record, index) => {
     const requirement = requirements[index];
+    requireExactKeys(record, RUN_RECORD_KEYS, `manifest.runRecords[${index}]`);
     if (
       record.kind !== "run_record" ||
       record.recordId !== requirement.recordId ||
@@ -2016,7 +2342,7 @@ function validateRunRecords(manifest, logReader, root, replayCommands = false) {
     if (completed < started || completed > captureEpoch) {
       throw new Error(`EXECUTION_RECORD: ${record.recordId} timestamps are reversed or postdate capture`);
     }
-    const entry = logReader(record.outputLogPath, record.outputRecordId, record);
+    const entry = executionLog.entriesById.get(record.outputRecordId);
     if (!entry || entry.recordId !== record.outputRecordId) {
       throw new Error(`EXECUTION_LOG: ${record.recordId} output entry is missing or mismatched`);
     }
@@ -2027,7 +2353,12 @@ function validateRunRecords(manifest, logReader, root, replayCommands = false) {
       throw new Error(`EXECUTION_RECORD: ${record.recordId} raw immutable log digest differs`);
     }
     if (replayCommands) {
-      const replay = spawnSync(requirement.executable, requirement.args, {
+      const replayArgs = materializeReplayArgs(
+        requirement.args,
+        manifest.validationTime,
+        new Date(validationTime).toISOString()
+      );
+      const replay = spawnSync(requirement.executable, replayArgs, {
         cwd: requirement.cwd,
         encoding: "utf8",
         maxBuffer: 64 * 1024 * 1024,
@@ -2055,9 +2386,13 @@ function validateRunRecords(manifest, logReader, root, replayCommands = false) {
   }
 }
 
-function validateEvidenceManifestShape(manifest, spec, validationTime, logReader, root = process.cwd(), replayCommands = false) {
-  if (typeof logReader !== "function") {
-    throw new Error("EXECUTION_LOG: raw immutable log reader is required; marker-only fallback is forbidden");
+function validateEvidenceManifestShape(manifest, spec, validationTime, executionLog, root = process.cwd(), replayCommands = false) {
+  if (
+    !isRecord(executionLog) ||
+    !(executionLog.entriesById instanceof Map) ||
+    !Array.isArray(executionLog.orderedRecordIds)
+  ) {
+    throw new Error("EXECUTION_LOG: parsed full JSONL evidence is required; marker-only fallback is forbidden");
   }
   collectClosedObjectsAndRequireExactKeys(manifest, "$manifest");
   if (manifest.schemaVersion !== "6.0.0" || manifest.branch !== BRANCH) {
@@ -2121,22 +2456,23 @@ function validateEvidenceManifestShape(manifest, spec, validationTime, logReader
   if (manifest.refSnapshotDigest !== typedSha256(canonicalJson(spec.integrationLedger))) {
     throw new Error("BLOB_IDENTITY: ref snapshot digest differs");
   }
-  validateRunRecords(manifest, logReader, root, replayCommands);
+  validateRunRecords(manifest, executionLog, root, validationTime, replayCommands);
   const red = manifest.redBaseline;
   if (
     red.referenceBranch !== SOURCE_CANDIDATE_BRANCH ||
-    red.referenceCandidate !== SOURCE_CANDIDATE_SHA ||
-    red.referenceEvidence !== SOURCE_EVIDENCE_SHA ||
+    red.referenceCandidate !== REJECTED_V6_CANDIDATE_SHA ||
+    red.referenceEvidence !== REJECTED_V6_EVIDENCE_SHA ||
     red.observedExit !== 1 ||
-    canonicalJson(red.failures) !== canonicalJson(V5_REJECT_FAILURES) ||
-    red.externalAttackCases !== 53 ||
-    red.acceptedAttackCases !== 27 ||
-    red.normativeMutationCases !== 2167 ||
-    red.acceptedNormativeMutations !== 0 ||
+    red.findingCount !== V6_REJECT_FAILURES.length ||
+    red.reproducedAcceptedAttackCount !== 10 ||
+    canonicalJson(red.failures) !== canonicalJson(V6_REJECT_FAILURES) ||
+    red.hostileAttackCases !== 63 ||
+    red.hostileAttackProcesses !== 1 ||
+    red.independenceClaim !== false ||
     red.outputLogPath !== RED_LOG_PATH ||
     red.browserExecutions !== 0
   ) {
-    throw new Error("VALIDATION_EVIDENCE: v5 independent RED baseline differs");
+    throw new Error("VALIDATION_EVIDENCE: rejected v6 RED remediation baseline differs");
   }
   requireExecutionDigest(red.stdoutDigest, "redBaseline.stdoutDigest");
   const preserved = manifest.v5PreservedBaseline;
@@ -2168,13 +2504,9 @@ function validateReviewPair(root, args, validationTime, deliberate = "") {
   const manifestBuffer = readBlob(root, evidence, args.manifest);
   const manifest = parseJsonBuffer(manifestBuffer, "review-evidence.json");
   const executionLog = parseExecutionLog(readBlob(root, evidence, EXECUTION_LOG_PATH).toString("utf8"));
-  if (executionLog.size !== manifest.runRecords.length) {
+  if (executionLog.recordCount !== manifest.runRecords.length) {
     throw new Error("EXECUTION_LOG: entry count differs from manifest records");
   }
-  const logReader = (path, recordId) => {
-    if (path !== EXECUTION_LOG_PATH) throw new Error(`EXECUTION_LOG: unexpected path ${path}`);
-    return executionLog.get(recordId);
-  };
   const spec = parseJsonBuffer(readBlob(root, candidate, SPEC_JSON_PATH), "candidate spec.json");
   const markdown = readBlob(root, candidate, SPEC_MARKDOWN_PATH).toString("utf8");
   validateContract(spec, validationTime);
@@ -2189,7 +2521,7 @@ function validateReviewPair(root, args, validationTime, deliberate = "") {
         collectClosedObjectsAndRequireExactKeys(mutated, "$manifest");
       } else {
         mutated.candidateParent = SOURCE_CANDIDATE_SHA;
-        validateEvidenceManifestShape(mutated, spec, validationTime, logReader, root);
+        validateEvidenceManifestShape(mutated, spec, validationTime, executionLog, root);
         if (mutated.candidateParent !== CANDIDATE_PARENT_SHA) {
           throw new Error("IDENTITY: manifest candidate parent differs");
         }
@@ -2198,7 +2530,7 @@ function validateReviewPair(root, args, validationTime, deliberate = "") {
   }
   if (deliberate) runContractAttack(spec, markdown, deliberate, validationTime);
 
-  validateEvidenceManifestShape(manifest, spec, validationTime, logReader, root);
+  validateEvidenceManifestShape(manifest, spec, validationTime, executionLog, root);
   const redLog = readBlob(root, evidence, RED_LOG_PATH);
   if (typedSha256(redLog) !== manifest.redBaseline.stdoutDigest) {
     throw new Error("VALIDATION_EVIDENCE: RED output log digest differs");
@@ -2375,6 +2707,14 @@ function writeEvidenceArtifacts(root, manifest, records, entries) {
   manifest.capturedAt = new Date().toISOString();
   manifest.runRecords = records;
   const serializedLog = `${entries.map((entry) => JSON.stringify(entry)).join("\n")}\n`;
+  const executionLog = parseExecutionLog(serializedLog);
+  manifest.executionLogBinding = {
+    kind: "execution_log_binding",
+    path: EXECUTION_LOG_PATH,
+    sha256: executionLog.rawSha256,
+    recordCount: executionLog.recordCount,
+    orderedRecordIds: executionLog.orderedRecordIds
+  };
   writeFileSync(join(root, EXECUTION_LOG_PATH), serializedLog, "utf8");
   writeFileSync(join(root, EVIDENCE_PATH), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 }
@@ -2410,18 +2750,26 @@ function evidenceManifest(root, candidate, spec, validationTime, records) {
     implementationExecutions: 0,
     blockedAuthorities: spec.authorityGates.map((gate) => gate.id),
     unexecutedBrowserMatrix: "FUTURE_UNEXECUTED_390x844_100_AND_200_DAY_NIGHT",
+    executionLogBinding: {
+      kind: "execution_log_binding",
+      path: EXECUTION_LOG_PATH,
+      sha256: typedSha256(""),
+      recordCount: 0,
+      orderedRecordIds: []
+    },
     runRecords: records,
     redBaseline: {
       kind: "red_baseline",
       referenceBranch: SOURCE_CANDIDATE_BRANCH,
-      referenceCandidate: SOURCE_CANDIDATE_SHA,
-      referenceEvidence: SOURCE_EVIDENCE_SHA,
+      referenceCandidate: REJECTED_V6_CANDIDATE_SHA,
+      referenceEvidence: REJECTED_V6_EVIDENCE_SHA,
       observedExit: 1,
-      failures: V5_REJECT_FAILURES,
-      externalAttackCases: 53,
-      acceptedAttackCases: 27,
-      normativeMutationCases: 2167,
-      acceptedNormativeMutations: 0,
+      findingCount: V6_REJECT_FAILURES.length,
+      reproducedAcceptedAttackCount: 10,
+      failures: V6_REJECT_FAILURES,
+      hostileAttackCases: 63,
+      hostileAttackProcesses: 1,
+      independenceClaim: false,
       outputLogPath: RED_LOG_PATH,
       stdoutDigest: typedSha256(redLog),
       browserExecutions: 0
@@ -2474,18 +2822,14 @@ function validateWorkingEvidence(root, args, validationTime, replayCommands = tr
   const candidate = resolveCommit(root, args.candidate, "candidate");
   const manifest = JSON.parse(readFileSync(join(root, args.manifest), "utf8"));
   const executionLog = parseExecutionLog(readFileSync(join(root, args.executionLog), "utf8"));
-  if (executionLog.size !== manifest.runRecords.length) {
+  if (executionLog.recordCount !== manifest.runRecords.length) {
     throw new Error("EXECUTION_LOG: working entry count differs from manifest records");
   }
-  const logReader = (path, recordId) => {
-    if (path !== EXECUTION_LOG_PATH) throw new Error(`EXECUTION_LOG: unexpected path ${path}`);
-    return executionLog.get(recordId);
-  };
   const spec = parseJsonBuffer(readBlob(root, candidate, SPEC_JSON_PATH), "candidate spec.json");
   const markdown = readBlob(root, candidate, SPEC_MARKDOWN_PATH).toString("utf8");
   validateContract(spec, validationTime, { root });
   validateMarkdown(spec, markdown);
-  validateEvidenceManifestShape(manifest, spec, validationTime, logReader, root, replayCommands);
+  validateEvidenceManifestShape(manifest, spec, validationTime, executionLog, root, replayCommands);
   authorityHeadCache.clear();
   validateLiveAuthorityRef(spec, root);
   if (
@@ -2532,6 +2876,21 @@ function main() {
   const args = parseArguments(raw);
   const root = resolve(args.root);
 
+  if (args.mode === "authority-check") {
+    const { spec } = loadWorkingPair(args);
+    const systemTime = Date.now();
+    requireLiveWorkingState(root, CANDIDATE_PATHS, systemTime, spec.freshnessPolicy);
+    const fetchedHead = fetchLiveAuthorityRef(root);
+    validateLiveAuthorityRef(spec, root);
+    if (fetchedHead !== INTEGRATION_TARGET_SHA) {
+      throw new Error(`AUTHORITY_REF: fetched head advanced to ${fetchedHead}`);
+    }
+    console.log(`AUTHORITY_REF=${AUTHORITY_REF}`);
+    console.log(`CURRENT_INTEGRATION_AUTHORITY=${fetchedHead}`);
+    console.log("STALE_AUTHORITY_DECLARATIONS_REJECTED=true");
+    return;
+  }
+
   if (args.mode === "shape-fingerprint") {
     const spec = JSON.parse(readFileSync(join(root, args.specFile), "utf8"));
     collectClosedObjectsAndRequireExactKeys(spec);
@@ -2559,6 +2918,7 @@ function main() {
   if (args.mode === "authoring-check" || args.mode === "object-census" || args.mode === "unknown-key-matrix" || args.mode === "attack-check") {
     const { spec, markdown } = loadWorkingPair(args);
     const validationTime = resolveValidationTime(args.validationTime, spec.freshnessPolicy);
+    requireLiveWorkingState(root, CANDIDATE_PATHS, validationTime, spec.freshnessPolicy);
     if (args.mode === "authoring-check") {
       const fetchedHead = fetchLiveAuthorityRef(root);
       if (fetchedHead !== INTEGRATION_TARGET_SHA) {
@@ -2589,7 +2949,8 @@ function main() {
     console.log("EXACT_KEY_CLOSURE=PASS");
     console.log(`CLOSED_OBJECTS=${result.locations.length}`);
     console.log("MARKDOWN_JSON_SEMANTIC_PARITY=PASS");
-    console.log("PHOTO_CONFIRMATION_TRANSITION=PASS");
+    console.log(`PHOTO_NONCE_AUTHORITY=${PHOTO_NONCE_AUTHORITY_STATUS}`);
+    console.log("PHOTO_CONFIRMATION_PRODUCT_READY=false");
     console.log("EVIDENCE_ROLE_STATES=PASS");
     console.log(`TEXT_SCALING_PROFILE=${TEXT_SCALING_PROFILE_ID}`);
     console.log(`SELECTED_MOBILE_VIEWPORT=${SELECTED_MOBILE_VIEWPORT}`);
@@ -2597,6 +2958,8 @@ function main() {
     console.log("PER_NODE_INLINE_LINE_HEIGHT_MUTATIONS=0");
     console.log(`DELIBERATE_ATTACK_CASES=${NEGATIVE_ATTACK_IDS.length}`);
     console.log("FRESHNESS_POLICY=PASS");
+    console.log("LIVE_GIT_CLEANLINESS=PASS");
+    console.log("FUTURE_ARTIFACT_MTIME=PASS");
     console.log("BROWSER_EXECUTIONS=0");
     console.log("PRODUCT_BUILD_EXPORT_EXECUTIONS=0");
     console.log(IMPLEMENTATION_BLOCK);
@@ -2607,6 +2970,7 @@ function main() {
     const sourceBase = resolveCommit(root, args.sourceBase, "source-base");
     const target = resolveCommit(root, args.target, "target");
     const spec = parseJsonBuffer(readBlob(root, candidate, SPEC_JSON_PATH), "candidate spec.json");
+    requireLiveWorkingState(root, CANDIDATE_PATHS, Date.now(), spec.freshnessPolicy);
     const liveHead = resolveLiveAuthorityRef(root);
     if (liveHead !== target || target !== INTEGRATION_TARGET_SHA) {
       throw new Error(`AUTHORITY_REF: diff target ${target} differs from live ${liveHead}`);
@@ -2648,6 +3012,7 @@ function main() {
     const candidateForPolicy = resolveCommit(root, args.candidate, "candidate");
     const specForPolicy = parseJsonBuffer(readBlob(root, candidateForPolicy, SPEC_JSON_PATH), "candidate spec.json");
     const validationTime = resolveValidationTime(args.validationTime, specForPolicy.freshnessPolicy);
+    requireLiveWorkingState(root, CANDIDATE_PATHS, validationTime, specForPolicy.freshnessPolicy);
     const result = recordEvidence(root, args, validationTime);
     console.log("AUTHOR_EVIDENCE_RECORDED=UNTRUSTED_REPRODUCIBLE");
     console.log(`CANDIDATE=${result.candidate}`);
@@ -2658,6 +3023,12 @@ function main() {
     const candidateForPolicy = resolveCommit(root, args.candidate, "candidate");
     const specForPolicy = parseJsonBuffer(readBlob(root, candidateForPolicy, SPEC_JSON_PATH), "candidate spec.json");
     const validationTime = resolveValidationTime(args.validationTime, specForPolicy.freshnessPolicy);
+    requireLiveWorkingState(
+      root,
+      [...CANDIDATE_PATHS, ...EVIDENCE_PATHS],
+      validationTime,
+      specForPolicy.freshnessPolicy
+    );
     const result = validateWorkingEvidence(root, args, validationTime);
     console.log("AUTHOR_EVIDENCE_STRUCTURE=VALID");
     console.log("AUTHOR_COMMAND_REPLAY=REPRODUCED");
@@ -2674,6 +3045,7 @@ function main() {
     const spec = parseJsonBuffer(readBlob(root, candidate, SPEC_JSON_PATH), "candidate spec.json");
     const markdown = readBlob(root, candidate, SPEC_MARKDOWN_PATH).toString("utf8");
     const validationTime = resolveValidationTime(args.validationTime, spec.freshnessPolicy);
+    requireLiveWorkingState(root, CANDIDATE_PATHS, validationTime, spec.freshnessPolicy);
     const fetchedHead = fetchLiveAuthorityRef(root);
     if (fetchedHead !== target) throw new Error(`AUTHORITY_REF: candidate review target advanced to ${fetchedHead}`);
     const result = validateContract(spec, validationTime, { root });
@@ -2694,13 +3066,21 @@ function main() {
     const candidateForPolicy = resolveCommit(root, args.candidate, "candidate");
     const specForPolicy = parseJsonBuffer(readBlob(root, candidateForPolicy, SPEC_JSON_PATH), "candidate spec.json");
     const validationTime = resolveValidationTime(args.validationTime, specForPolicy.freshnessPolicy);
+    requireLiveWorkingState(
+      root,
+      [...CANDIDATE_PATHS, ...EVIDENCE_PATHS],
+      validationTime,
+      specForPolicy.freshnessPolicy
+    );
     const fetchedHead = fetchLiveAuthorityRef(root);
     if (fetchedHead !== args.target) throw new Error(`AUTHORITY_REF: spec review target advanced to ${fetchedHead}`);
     const result = validateReviewPair(root, args, validationTime, args.deliberate);
     console.log("AUTHOR_EVIDENCE_COMMIT_PAIR=STRUCTURALLY_VALID");
     console.log(`CANDIDATE=${result.candidate}`);
     console.log(`EVIDENCE=${result.evidence}`);
-    console.log(`PARENT_CHAIN=${result.evidence}->${result.candidate}->${CANDIDATE_PARENT_SHA}->${SOURCE_CANDIDATE_SHA}->${result.sourceBase}`);
+    console.log(
+      `PARENT_CHAIN=${result.evidence}->${result.candidate}->${REJECTED_V6_EVIDENCE_SHA}->${REJECTED_V6_CANDIDATE_SHA}->${SOURCE_EVIDENCE_SHA}->${SOURCE_CANDIDATE_SHA}->${result.sourceBase}`
+    );
     console.log("CANDIDATE_SCOPE=PASS");
     console.log("EVIDENCE_SCOPE=PASS");
     console.log("BLOB_OID_SHA256_BYTES=PASS");
@@ -2716,7 +3096,7 @@ function main() {
     console.log(IMPLEMENTATION_BLOCK);
     return;
   }
-  throw new Error("Mode must be shape-fingerprint, normative-fingerprint, render-markdown, write-markdown, authoring-check, object-census, unknown-key-matrix, attack-check, diff-contract, record-evidence, evidence-self-check, candidate-review, spec-review, or implementation");
+  throw new Error("Mode must be authority-check, shape-fingerprint, normative-fingerprint, render-markdown, write-markdown, authoring-check, object-census, unknown-key-matrix, attack-check, diff-contract, record-evidence, evidence-self-check, candidate-review, spec-review, or implementation");
 }
 
 try {
