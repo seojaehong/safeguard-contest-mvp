@@ -305,8 +305,10 @@ export function buildDbHarnessPacket(input: {
 }): DbHarnessPacket {
   const improvements = input.improvements || [];
   const workpackMemory = input.workpackMemory || [];
+  const queryHazardFamilies = canonicalKoshaHazardFamiliesFromText(input.question);
   const references = input.references
     .filter((item) => isSafetyReferenceCompatibleWithQuery(input.question, item))
+    .filter((item) => isDirectEvidenceCompatibleWithQueryHazard(item, queryHazardFamilies))
     .map((item) => ({
       ...item,
       evidence_role: isKoshaTechnicalReference(item) || item.item_type === "sif-case"
@@ -676,11 +678,24 @@ function koshaHazardFamiliesFromText(text: string): Set<KoshaHazardFamily> {
     .map(({ family }) => family));
 }
 
+function canonicalKoshaHazardFamiliesFromText(text: string): Set<KoshaHazardFamily> {
+  const families = koshaHazardFamiliesFromText(text);
+  return families.size === 1 ? families : new Set<KoshaHazardFamily>();
+}
+
 function intersectKoshaHazardFamilies(
   first: ReadonlySet<KoshaHazardFamily>,
   second: ReadonlySet<KoshaHazardFamily>
 ): Set<KoshaHazardFamily> {
   return new Set([...first].filter((family) => second.has(family)));
+}
+
+function canonicalKoshaHazardFamilies(
+  item: SafetyReferenceItem,
+  options: { includeOperationalHazard: boolean }
+): Set<KoshaHazardFamily> {
+  const families = koshaHazardFamilies(item, options);
+  return families.size === 1 ? families : new Set<KoshaHazardFamily>();
 }
 
 function koshaHazardFamilies(
@@ -706,12 +721,28 @@ function koshaHazardFamilies(
   return explicitFamilies.size ? explicitFamilies : narrativeFamilies;
 }
 
+function isRawDirectEvidenceCandidate(item: SafetyReferenceItem): boolean {
+  if (item.item_type === "sif-case" || isKoshaTechnicalReference(item)) return false;
+  return item.evidence_role === "direct" && isSafetyReferenceDirectEligible(item);
+}
+
+function isDirectEvidenceCompatibleWithQueryHazard(
+  item: SafetyReferenceItem,
+  queryHazardFamilies: ReadonlySet<KoshaHazardFamily>
+): boolean {
+  if (!isRawDirectEvidenceCandidate(item)) return true;
+  if (!queryHazardFamilies.size) return true;
+  const itemFamilies = canonicalKoshaHazardFamilies(item, { includeOperationalHazard: false });
+  if (!itemFamilies.size) return false;
+  return [...queryHazardFamilies].some((family) => itemFamilies.has(family));
+}
+
 function hasCompatibleKoshaHazardFamily(
   parent: SafetyReferenceItem,
   supporting: SafetyReferenceItem
 ): boolean {
-  const parentFamilies = koshaHazardFamilies(parent, { includeOperationalHazard: false });
-  const supportingFamilies = koshaHazardFamilies(supporting, { includeOperationalHazard: true });
+  const parentFamilies = canonicalKoshaHazardFamilies(parent, { includeOperationalHazard: false });
+  const supportingFamilies = canonicalKoshaHazardFamilies(supporting, { includeOperationalHazard: true });
   if (!parentFamilies.size || !supportingFamilies.size) return false;
   return [...parentFamilies].some((family) => supportingFamilies.has(family));
 }
