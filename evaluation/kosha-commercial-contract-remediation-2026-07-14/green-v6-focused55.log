@@ -1,0 +1,18 @@
+phase=green-v6-focused55
+head=c30e0991956e37bcde8d4ff306ce75ea1ffa1ecb
+command=npm.cmd test -- tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts -t "^(?!.*v[45] )" --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T21:08:22.2268216+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts -t ^(?!.*v[45] ) --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  2 passed (2)
+      Tests  55 passed | 20 skipped (75)
+   Start at  21:08:25
+   Duration  21.00s (transform 1.23s, setup 0ms, import 2.84s, tests 16.71s, environment 0ms)
+
