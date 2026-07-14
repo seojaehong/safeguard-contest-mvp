@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-grounding-fail-closed.test.ts -t keeps the aggregate blocked when an integrity-failed local corpus retains verified remote KOSHA
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-grounding-fail-closed
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 6 skipped (7)
+   Start at  12:07:20
+   Duration  2.10s (transform 837ms, setup 0ms, import 1.41s, tests 55ms, environment 0ms)
+
+EXIT_CODE=0

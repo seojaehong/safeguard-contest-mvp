@@ -1,0 +1,47 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-grounding-fail-closed.test.ts -t keeps the aggregate blocked when an integrity-failed local corpus retains verified remote KOSHA
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-grounding-fail-closed
+
+ ❯ tests/kosha-grounding-fail-closed.test.ts (7 tests | 1 failed | 6 skipped) 60ms
+     × keeps the aggregate blocked when an integrity-failed local corpus retains verified remote KOSHA 58ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-grounding-fail-closed.test.ts > bounded KOSHA grounding fail-closed > keeps the aggregate blocked when an integrity-failed local corpus retains verified remote KOSHA
+AssertionError: expected { status: 'ready', …(6) } to match object { status: 'blocked', …(6) }
+
+- Expected
++ Received
+
+  {
+    "acceptedCount": 1,
+    "excludedCount": 0,
+    "localCorpusStatus": "blocked",
+    "localGateReason": "local-corpus-integrity-failed",
+-   "reason": "local-corpus-integrity-failed",
++   "reason": "verified-current",
+    "reviewRequiredCount": 0,
+-   "status": "blocked",
++   "status": "ready",
+  }
+
+ ❯ tests/kosha-grounding-fail-closed.test.ts:496:35
+    494|       riskRowEligible: false
+    495|     });
+    496|     expect(result.koshaGrounding).toMatchObject({
+       |                                   ^
+    497|       status: "blocked",
+    498|       reason: "local-corpus-integrity-failed",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 skipped (7)
+   Start at  12:06:58
+   Duration  2.20s (transform 797ms, setup 0ms, import 1.47s, tests 60ms, environment 0ms)
+
+EXIT_CODE=1

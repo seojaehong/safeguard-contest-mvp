@@ -1,0 +1,74 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-grounding-fail-closed
+
+ ❯ tests/kosha-grounding-fail-closed.test.ts (6 tests | 1 failed) 89ms
+     × keeps verified remote KOSHA supporting evidence while exposing the unavailable local gate 10ms
+ ❯ tests/kosha-current-review-run-ask.test.ts (6 tests | 1 failed) 5827ms
+     × keeps distinct verified KOSHA documents with identical operational controls 788ms
+stderr | tests/kosha-current-review-run-ask.test.ts > current-base runAsk retrieval provenance > keeps distinct verified KOSHA documents with identical operational controls
+[search] deliverablesPromise setup failed {"errorType":"TypeError"}
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-current-review-run-ask.test.ts > current-base runAsk retrieval provenance > keeps distinct verified KOSHA documents with identical operational controls
+AssertionError: expected [ 'VERIFIED_KOSHA_DOCUMENT_A' ] to deeply equal ArrayContaining{…}
+
+- Expected
++ Received
+
+- ArrayContaining [
++ [
+    "VERIFIED_KOSHA_DOCUMENT_A",
+-   "VERIFIED_KOSHA_DOCUMENT_B",
+  ]
+
+ ❯ tests/kosha-current-review-run-ask.test.ts:262:28
+    260|       (input as { koshaPrimaryRefs?: Array<{ title: string }> }).kosha…
+    261|     ).map((reference) => reference.title));
+    262|     expect(requiredTitles).toEqual(expect.arrayContaining([first.title…
+       |                            ^
+    263|   }, 30_000);
+    264| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/kosha-grounding-fail-closed.test.ts > bounded KOSHA grounding fail-closed > keeps verified remote KOSHA supporting evidence while exposing the unavailable local gate
+AssertionError: expected { status: 'blocked', …(5) } to match object { status: 'ready', …(6) }
+
+- Expected
++ Received
+
+  {
+    "acceptedCount": 1,
+    "excludedCount": 0,
+    "localCorpusStatus": "unconfigured",
+-   "localGateReason": "local-corpus-unavailable",
+-   "reason": "verified-current",
++   "reason": "local-corpus-unavailable",
+    "reviewRequiredCount": 0,
+-   "status": "ready",
++   "status": "blocked",
+  }
+
+ ❯ tests/kosha-grounding-fail-closed.test.ts:523:35
+    521|
+    522|     expect(result.items.map((item) => item.id)).toEqual(["verified-rem…
+    523|     expect(result.koshaGrounding).toMatchObject({
+       |                                   ^
+    524|       status: "ready",
+    525|       reason: "verified-current",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 10 passed (12)
+   Start at  11:58:50
+   Duration  7.93s (transform 1.08s, setup 0ms, import 2.43s, tests 5.92s, environment 0ms)
+
+EXIT_CODE=1
