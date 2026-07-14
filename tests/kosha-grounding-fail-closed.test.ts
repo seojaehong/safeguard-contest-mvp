@@ -48,6 +48,7 @@ type GroundingSearchProjection = {
   koshaGrounding?: {
     status: string;
     reason: string;
+    localGateReason?: string | null;
     localCorpusStatus: string;
     acceptedCount: number;
     reviewRequiredCount: number;
@@ -488,5 +489,46 @@ describe("bounded KOSHA grounding fail-closed", () => {
     });
     expect(isSafetyReferenceDirectEligible(result.items[0] as SafetyReferenceItem)).toBe(true);
     expect(isSafetyReferenceRiskEligible(result.items[0] as SafetyReferenceItem)).toBe(true);
+  });
+
+  it("keeps verified remote KOSHA supporting evidence while exposing the unavailable local gate", async () => {
+    vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const body = `${VERIFIED_BODY_PREFIX}: 로컬 코퍼스 미설정 시 원격 검증 행 유지`;
+    const remoteKosha = referenceRow(
+      "verified-remote-with-local-unavailable",
+      body,
+      verifiedPayload("verified-remote-with-local-unavailable", body)
+    );
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url.includes("/rpc/search_safety_references_ranked")) {
+        return new Response(JSON.stringify([remoteKosha]), {
+          status: 200,
+          headers: { "content-type": "application/json" }
+        });
+      }
+      throw new Error(`Unexpected fetch URL: ${url}`);
+    }));
+
+    const result = await searchServerSafetyReferences({
+      query: "지게차 보행자 동선",
+      limit: 5,
+      offlineCorpus: { rootDir: null, env: { KOSHA_GUIDE_CORPUS_DIR: undefined } }
+    }) as SafetyReferenceSearchResult & GroundingSearchProjection;
+
+    expect(result.items.map((item) => item.id)).toEqual(["verified-remote-with-local-unavailable"]);
+    expect(result.koshaGrounding).toMatchObject({
+      status: "ready",
+      reason: "verified-current",
+      localGateReason: "local-corpus-unavailable",
+      localCorpusStatus: "unconfigured",
+      acceptedCount: 1,
+      reviewRequiredCount: 0,
+      excludedCount: 0
+    });
+    expect(result.message).toMatch(/검증된 현행 원격 KOSHA 1건.*기술적 보조지침/u);
   });
 });

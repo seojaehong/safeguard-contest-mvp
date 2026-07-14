@@ -243,4 +243,22 @@ describe("current-base runAsk retrieval provenance", () => {
       input.koshaPrimaryRefs || []
     ).some((reference) => reference.title === verifiedTitle))).toBe(true);
   }, 30_000);
+
+  it("keeps distinct verified KOSHA documents with identical operational controls", async () => {
+    const first = retrievalReference("verified-same-controls-a", "local-ranked");
+    const second = retrievalReference("verified-same-controls-b", "local-ranked");
+    first.title = "VERIFIED_KOSHA_DOCUMENT_A";
+    second.title = "VERIFIED_KOSHA_DOCUMENT_B";
+    mocks.searchSafetyReferences.mockResolvedValue(searchResult(
+      "local-ranked",
+      [first, second]
+    ));
+
+    await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
+
+    const requiredTitles = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.flatMap(([input]) => (
+      (input as { koshaPrimaryRefs?: Array<{ title: string }> }).koshaPrimaryRefs || []
+    ).map((reference) => reference.title));
+    expect(requiredTitles).toEqual(expect.arrayContaining([first.title, second.title]));
+  }, 30_000);
 });

@@ -76,12 +76,20 @@ function localGateReason(
   return status === "blocked" ? "local-corpus-integrity-failed" : "local-corpus-unavailable";
 }
 
-function localGateMessage(status: "blocked" | "unconfigured", failures: readonly string[], excludedCount: number): string {
+function localGateMessage(
+  status: "blocked" | "unconfigured",
+  failures: readonly string[],
+  excludedCount: number,
+  retainedVerifiedCount: number
+): string {
   const excluded = `검증되지 않은 원격 KOSHA ${excludedCount}건 제외`;
+  const retained = retainedVerifiedCount
+    ? ` 검증된 현행 원격 KOSHA ${retainedVerifiedCount}건은 기술적 보조지침으로 유지.`
+    : "";
   if (status === "blocked") {
-    return `KOSHA 로컬 코퍼스 무결성 게이트 차단: ${failures.join(", ") || "integrity-failed"}; ${excluded}.`;
+    return `KOSHA 로컬 코퍼스 무결성 게이트 차단: ${failures.join(", ") || "integrity-failed"}; ${excluded}.${retained}`;
   }
-  return `KOSHA 로컬 코퍼스 미설정: ${excluded}.`;
+  return `KOSHA 로컬 코퍼스 미설정: ${excluded}.${retained}`;
 }
 
 export async function searchSafetyReferences(
@@ -108,6 +116,9 @@ export async function searchSafetyReferences(
     ? remote.items.filter((item) => !isKoshaTechnicalReference(item) || isKoshaSupportingCitationEligible(item))
     : remote.items;
   const excludedRemoteCount = remote.items.length - retainedRemoteItems.length;
+  const retainedVerifiedRemoteCount = retainedRemoteItems.filter((item) => (
+    isKoshaTechnicalReference(item) && isKoshaSupportingCitationEligible(item)
+  )).length;
   const gatedRemote: SafetyReferenceSearchResult = localGateStatus
     ? {
         ...remote,
@@ -119,7 +130,12 @@ export async function searchSafetyReferences(
           excludedCount: excludedRemoteCount,
           blockedReason: localGateReason(localGateStatus)
         }),
-        message: `${remote.message} ${localGateMessage(localGateStatus, localGateFailures, excludedRemoteCount)}`.trim()
+        message: `${remote.message} ${localGateMessage(
+          localGateStatus,
+          localGateFailures,
+          excludedRemoteCount,
+          retainedVerifiedRemoteCount
+        )}`.trim()
       }
     : remote;
 
@@ -144,7 +160,12 @@ export async function searchSafetyReferences(
       return {
         ...gatedRemote,
         configured: true,
-        message: localGateMessage("blocked", localCorpus.failures, excludedRemoteCount)
+        message: localGateMessage(
+          "blocked",
+          localCorpus.failures,
+          excludedRemoteCount,
+          retainedVerifiedRemoteCount
+        )
       };
     }
     return gatedRemote;
