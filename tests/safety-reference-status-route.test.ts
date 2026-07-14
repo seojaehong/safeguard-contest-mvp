@@ -1,0 +1,120 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  getSafetyReferenceStats: vi.fn(),
+  loadKoshaGuideCorpus: vi.fn()
+}));
+
+vi.mock("@/lib/safety-reference-catalog", () => ({
+  getSafetyReferenceStats: mocks.getSafetyReferenceStats
+}));
+
+vi.mock("@/lib/kosha-guide-corpus", () => ({
+  loadKoshaGuideCorpus: mocks.loadKoshaGuideCorpus
+}));
+
+import { GET } from "@/app/api/safety-reference/status/route";
+
+const readyCatalogStats = {
+  ok: true,
+  configured: true,
+  status: "ready" as const,
+  sources: 5,
+  items: 9_920,
+  expectedTechnicalTotal: 1_040,
+  technicalTotal: 1_040,
+  technicalSupportRegulations: 237,
+  technicalGuidelines: 803,
+  technicalSplitOk: true,
+  catalogSearchOk: true,
+  ingestionRuns: 1,
+  itemTypes: [],
+  samples: [],
+  message: "Supabase catalog ready"
+};
+
+describe("safety-reference status route", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.getSafetyReferenceStats.mockResolvedValue(readyCatalogStats);
+  });
+
+  it("fails closed when the catalog is ready but the local KOSHA corpus is unavailable", async () => {
+    mocks.loadKoshaGuideCorpus.mockResolvedValue({
+      status: "unconfigured",
+      rootDir: null,
+      failures: []
+    });
+
+    const response = await GET();
+    const payload = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(payload).toMatchObject({
+      ok: false,
+      status: "degraded",
+      catalogSearchOk: true,
+      searchReady: false,
+      localCorpus: {
+        status: "unconfigured",
+        failures: []
+      }
+    });
+    expect(payload.message).toContain("KOSHA 로컬 코퍼스가 설정되지 않아 검색 준비 상태가 아닙니다");
+  });
+
+  it("reports ready only when the verified local KOSHA snapshot is loaded", async () => {
+    mocks.loadKoshaGuideCorpus.mockResolvedValue({
+      status: "ready",
+      rootDir: "C:/private/kosha-corpus",
+      snapshotId: "snapshot-id",
+      manifestSha256: "manifest-sha256",
+      inventoryCount: 1_040,
+      itemCount: 1_040,
+      chunkCount: 20_520,
+      failureCount: 0,
+      records: [],
+      indexedRecords: []
+    });
+
+    const response = await GET();
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload).toMatchObject({
+      ok: true,
+      status: "ready",
+      searchReady: true,
+      localCorpus: {
+        status: "ready",
+        snapshotId: "snapshot-id",
+        inventoryCount: 1_040,
+        failureCount: 0
+      }
+    });
+    expect(JSON.stringify(payload)).not.toContain("C:/private/kosha-corpus");
+  });
+
+  it("exposes integrity failure codes without leaking the configured corpus path", async () => {
+    mocks.loadKoshaGuideCorpus.mockResolvedValue({
+      status: "blocked",
+      rootDir: "C:/private/kosha-corpus",
+      failures: ["hash:manifest"]
+    });
+
+    const response = await GET();
+    const payload = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(payload).toMatchObject({
+      ok: false,
+      status: "degraded",
+      searchReady: false,
+      localCorpus: {
+        status: "blocked",
+        failures: ["hash:manifest"]
+      }
+    });
+    expect(JSON.stringify(payload)).not.toContain("C:/private/kosha-corpus");
+  });
+});
