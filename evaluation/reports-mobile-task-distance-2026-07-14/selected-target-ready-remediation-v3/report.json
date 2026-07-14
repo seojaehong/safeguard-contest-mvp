@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 3,
+  "verdict": "HOLD_PENDING_FRESH_INDEPENDENT_REVIEW",
+  "selfApproval": false,
+  "branch": "fix/reports-mobile-task-distance-target-ready",
+  "selectedDirectory": "evaluation/reports-mobile-task-distance-2026-07-14/selected-target-ready-remediation-v3",
+  "generatedAt": "2026-07-14T00:30:31.994Z",
+  "lineage": {
+    "cleanEvidenceHead": "57a0d57ae38e56656fbbd1b31a1368cf8276c6fe",
+    "priorProductSha": "c9d094b07bed2c9b48722ab9e3171da401d3ad04",
+    "runtimeProductSha": "8c19aeb81a5f3d0d84a5cc915bda9ea4511b140c",
+    "evidenceHarnessSha": "02e8cd129efbeb4e3fc9fcc2617ee409a3ca9c05"
+  },
+  "priorV2": {
+    "directory": "evaluation/reports-mobile-task-distance-2026-07-14/selected-target-ready-remediation-v2",
+    "status": "HOLD_STALE_NOT_SELECTED",
+    "sourceIdentityReused": false,
+    "buildIdentityReused": false,
+    "selectedForReview": false
+  },
+  "product": {
+    "runtimeCommit": "8c19aeb81a5f3d0d84a5cc915bda9ea4511b140c",
+    "evidenceHarnessCommit": "02e8cd129efbeb4e3fc9fcc2617ee409a3ca9c05",
+    "changedFiles": [
+      "app/globals.css",
+      "tests/reports-design-remediation.test.ts"
+    ],
+    "productSourceIdentityAlgorithm": "git-head-runtime-contract-blob-oids-sha256-v2",
+    "productSourceIdentity": "62eace84bb405b6b00c5d0bac255797f5a96bebd7b97ee8a9caff176da605930",
+    "sourceFileHashes": "source-file-hashes.json",
+    "globalBoundary": {
+      "preC9SharedRuleSha256": "2fd4e725405b4e13d67afda2c89b5f7bed92528ed6054eae9b93a2625121a556",
+      "currentSharedRuleSha256": "2fd4e725405b4e13d67afda2c89b5f7bed92528ed6054eae9b93a2625121a556",
+      "byteEqual": true,
+      "persistentHtml100PercentPresent": false,
+      "reportsTypographyOwner": ".safeclaw-module-shell[data-module-route=\"/reports\"]"
+    }
+  },
+  "textScaling200": {
+    "mechanismOwner": "document.documentElement",
+    "executedMechanism": "font-size: 30px",
+    "rootFontSizeBeforePx": 15,
+    "rootFontSizeAfterPx": 30,
+    "rootGrowthRatio": 2,
+    "browserUiZoomExecuted": false,
+    "claimLimit": "Chromium executed one CSS root text-size change. Browser UI page zoom was not executed or claimed.",
+    "descendantInlineTypographyMutations": 0,
+    "scenarios": [
+      {
+        "theme": "day",
+        "viewport": "390x844",
+        "visibleTextRoles": 157,
+        "visiblePseudoElementRoles": 5,
+        "scaleFailures": 0,
+        "dimensionOverflowObservations": 6,
+        "documentHeightBeforePx": 6724,
+        "documentHeightAfterPx": 11703
+      },
+      {
+        "theme": "night",
+        "viewport": "390x844",
+        "visibleTextRoles": 157,
+        "visiblePseudoElementRoles": 5,
+        "scaleFailures": 0,
+        "dimensionOverflowObservations": 6,
+        "documentHeightBeforePx": 6724,
+        "documentHeightAfterPx": 11703
+      },
+      {
+        "theme": "day",
+        "viewport": "1440x1000",
+        "visibleTextRoles": 186,
+        "visiblePseudoElementRoles": 0,
+        "scaleFailures": 0,
+        "dimensionOverflowObservations": 7,
+        "documentHeightBeforePx": 3277,
+        "documentHeightAfterPx": 5100
+      },
+      {
+        "theme": "night",
+        "viewport": "1440x1000",
+        "visibleTextRoles": 186,
+        "visiblePseudoElementRoles": 0,
+        "scaleFailures": 0,
+        "dimensionOverflowObservations": 7,
+        "documentHeightBeforePx": 3277,
+        "documentHeightAfterPx": 5100
+      }
+    ],
+    "metrics": "reports-download-ready-task-distance-metrics.json"
+  },
+  "dimensionAudit": {
+    "units": "integer CSS pixels from HTMLElement client and scroll dimensions",
+    "tolerancePx": 1,
+    "observationRule": "scroll dimension minus client dimension is greater than tolerance on either axis",
+    "clippingRule": "an observed axis is actual clipping only when computed overflow on that axis is hidden or clip",
+    "selectorAllowlistCount": 0,
+    "observationCount": 26,
+    "scenarioObservationCounts": [6, 6, 7, 7],
+    "actualDimensionClippingFailures": 0,
+    "observationInventory": "dimension-overflow-observations.json",
+    "realTwoPixelClipRegression": {
+      "clientHeightPx": 20,
+      "scrollHeightPx": 22,
+      "verticalDeltaPx": 2,
+      "tolerancePx": 1,
+      "overflowY": "hidden",
+      "failureDetected": true
+    }
+  },
+  "cleanLayoutFailures": {
+    "horizontalViewport": 0,
+    "dimensionClipping": 0,
+    "ancestorClipping": 0,
+    "overlap": 0,
+    "nestedScroll": 0,
+    "fixedStickyOcclusion": 0,
+    "fixedStickyViewport": 0
+  },
+  "interactiveMatrix": {
+    "rowCount": 26,
+    "targetMeasurements": 522,
+    "minimumWidthPx": 44,
+    "minimumHeightPx": 44,
+    "undersized": 0,
+    "horizontalOverflow": 0,
+    "overlap": 0,
+    "nestedScroll": 0,
+    "nativeCheckboxMeasurements": 6,
+    "nativeCheckboxSize": "44x44",
+    "stateCounts": {
+      "default": 4,
+      "secondaryOpen": 4,
+      "previewOnly": 2,
+      "bothOpen": 4,
+      "loading": 4,
+      "empty": 4,
+      "serverError": 4
+    },
+    "metrics": "reports-interactive-target-matrix.json"
+  },
+  "viewports": {
+    "mobile": "390x844",
+    "desktop": "1440x1000",
+    "screenshotCount": 24,
+    "mobileScreenshotCount": 12,
+    "desktopScreenshotCount": 12,
+    "screenshotWidthFailures": 0,
+    "dimensions": "screenshot-dimensions.json"
+  },
+  "exactPhraseBoundaries": {
+    "requiredPhrase": "개선 전/개선 후 사진 포함 승인",
+    "ui": true,
+    "downloadNote": true,
+    "generatedMarkdown": true,
+    "generatedJson": true,
+    "operationMemory": true,
+    "legacyEnglishSlashLabelMatches": 0
+  },
+  "failClosed": {
+    "coveredBoundaries": ["401", "404", "malformed-200", "500"],
+    "serverErrorBrowserRows": 4,
+    "disabledDownloadsPerServerErrorRow": 5,
+    "localDataLeakFailures": 0
+  },
+  "build": {
+    "command": "npm.cmd run build",
+    "sequentialRunsSelected": 1,
+    "concurrentBuildProcessCount": 0,
+    "exitCode": 0,
+    "nextStaticPageGeneration": "27/27",
+    "buildId": "V7sYEJmXts1AcgoAygczj",
+    "buildIdentity": "1d9b5324f7192560ac2099e71b37037581653ff48a888d1d0157f68be5e2bb03",
+    "buildFileCount": 432,
+    "manifest": "reports-build-manifest.json",
+    "rawLog": "production-build-sequential.log"
+  },
+  "verification": {
+    "tddRedLogs": [
+      "red-global-contract.log",
+      "red-root-scaling-contract.log",
+      "red-two-pixel-clipping-contract.log",
+      "red-rejected-mechanisms.log"
+    ],
+    "focused": {
+      "files": 3,
+      "tests": 61,
+      "previousTestsPreserved": 60,
+      "failures": 0,
+      "exitCode": 0,
+      "log": "focused.log"
+    },
+    "behaviorExport": {
+      "files": 2,
+      "tests": 49,
+      "failures": 0,
+      "exitCode": 0,
+      "log": "behavior-export-49.log"
+    },
+    "strictTypecheck": {
+      "exitCode": 0,
+      "log": "typecheck.log"
+    },
+    "productionBrowser": {
+      "files": 1,
+      "tests": 12,
+      "failures": 0,
+      "exitCode": 0,
+      "log": "browser-production-evidence.log"
+    },
+    "staticDiff": {
+      "newImportant": 0,
+      "newHex": 0,
+      "newAnyToken": 0,
+      "new391Token": 0,
+      "diffCheckExitCode": 0,
+      "log": "static-diff-contract.log"
+    }
+  },
+  "integration": {
+    "authorityStatus": "AUTHORITATIVE_FROZEN",
+    "f45AuthoritySha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "f45MergeTreeCommand": "git merge-tree --write-tree f45bba17bcce0d8ebb2690f82d014dbe42ae8191 02e8cd129efbeb4e3fc9fcc2617ee409a3ca9c05",
+    "f45MergeTreeExitCode": 0,
+    "f45MergeTreeSha": "8ec5761f395a2c26ad3b8d26fcf08e8254a3dd53",
+    "editorV4": {
+      "status": "COMPARED_NOT_INTEGRATED_PENDING_INDEPENDENT_REVIEW",
+      "remoteRef": "origin/feat/workpack-document-editors-v2-target-ready-v4",
+      "remoteSha": "cc9f5af297950b73b53a9ab4018bdc143830c499",
+      "mergeTreeCommand": "git merge-tree --write-tree cc9f5af297950b73b53a9ab4018bdc143830c499 02e8cd129efbeb4e3fc9fcc2617ee409a3ca9c05",
+      "mergeTreeExitCode": 0,
+      "mergeTreeSha": "c1f65c43c7d34a77a8ba2b2d14708108332a0478",
+      "currentAuthority": false,
+      "compatibilityExecuted": false,
+      "integrated": false
+    },
+    "staleV2EditorClaimsCarriedForward": false,
+    "integrationPerformed": false,
+    "log": "integration-merge-tree.log"
+  },
+  "artifacts": {
+    "hashedArtifactCountExcludingManifest": 50,
+    "manifest": "artifact-manifest.json",
+    "selectedOnly": true,
+    "includesPriorV2Files": false
+  }
+}

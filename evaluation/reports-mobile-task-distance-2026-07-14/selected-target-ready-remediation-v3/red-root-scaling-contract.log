@@ -1,0 +1,16 @@
+TRANSCRIPT_SOURCE=interactive command output captured before GREEN
+COMMAND=npm.cmd test -- tests/reports-design-remediation.test.ts -t "uses the canonical Reports typography and interaction tuples"
+
+FAIL tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > uses the canonical Reports typography and interaction tuples
+AssertionError: expected Reports route typography declarations to match the 15px-root rem contract
+
+Expected --text-body: 1rem
+Received --text-body: 0.9375rem
+Expected --text-page-title: 2.666667rem
+Received --text-page-title: 2.5rem
+Expected --text-section-title: 1.866667rem
+Received --text-section-title: 1.75rem
+
+Test Files  1 failed (1)
+Tests       1 failed | 11 skipped (12)
+EXIT_CODE=1
