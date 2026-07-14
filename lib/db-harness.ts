@@ -651,9 +651,9 @@ const KOSHA_HAZARD_FAMILY_PATTERNS: ReadonlyArray<{
   family: KoshaHazardFamily;
   pattern: RegExp;
 }> = [
-  { family: "collision", pattern: /충돌|교통사고|보행자|보행\s*동선|차량\s*동선|지게차.*(?:동선|통행|후진)|(?:동선|통행).*지게차/u },
-  { family: "fire_or_explosion", pattern: /화재|폭발|점화|발화|lpg|연료.*(?:누출|가스)|유기용제|인화성|가연물|용탕/u },
-  { family: "fall", pattern: /추락|떨어짐|고소|비계|작업발판|개구부|사다리|안전대|외벽.*로프|로프.*외벽/u },
+  { family: "collision", pattern: /충돌|교통사고|차량\s*충돌|부딪|접촉\s*사고/u },
+  { family: "fire_or_explosion", pattern: /화재|폭발|점화|발화|연료\s*누출|연료누출|가스\s*누출|인화성|가연물|용탕/u },
+  { family: "fall", pattern: /추락|떨어짐|낙상/u },
   { family: "caught_in", pattern: /끼임|협착|말림|불시기동|가동부/u },
   { family: "electrical", pattern: /감전|누전|충전부|활선|전기.*접촉/u },
   { family: "asphyxiation", pattern: /질식|산소결핍|밀폐공간|유해가스/u },
@@ -669,26 +669,49 @@ const KOSHA_HAZARD_FAMILY_PATTERNS: ReadonlyArray<{
   { family: "ergonomic", pattern: /근골격|중량물|요통/u }
 ];
 
-function koshaHazardFamilies(item: SafetyReferenceItem): Set<KoshaHazardFamily> {
-  const semanticText = [
-    item.title,
-    item.summary,
-    item.category || "",
-    item.subcategory || "",
-    ...item.keywords,
-    ...item.risk_tags
-  ].join(" ").normalize("NFC").toLowerCase();
+function koshaHazardFamiliesFromText(text: string): Set<KoshaHazardFamily> {
+  const semanticText = text.normalize("NFC").toLowerCase();
   return new Set(KOSHA_HAZARD_FAMILY_PATTERNS
     .filter(({ pattern }) => pattern.test(semanticText))
     .map(({ family }) => family));
+}
+
+function intersectKoshaHazardFamilies(
+  first: ReadonlySet<KoshaHazardFamily>,
+  second: ReadonlySet<KoshaHazardFamily>
+): Set<KoshaHazardFamily> {
+  return new Set([...first].filter((family) => second.has(family)));
+}
+
+function koshaHazardFamilies(
+  item: SafetyReferenceItem,
+  options: { includeOperationalHazard: boolean }
+): Set<KoshaHazardFamily> {
+  const explicitFamilies = koshaHazardFamiliesFromText(item.risk_tags.join(" "));
+  const rawNarrativeFamilies = koshaHazardFamiliesFromText([
+    item.title,
+    item.summary,
+    item.body || "",
+    ...item.keywords,
+    ...item.controls
+  ].join(" "));
+  const operationalFamilies = options.includeOperationalHazard && !explicitFamilies.size && !rawNarrativeFamilies.size
+    ? koshaHazardFamiliesFromText(deriveSafetyReferenceOperationalView(item).hazard)
+    : new Set<KoshaHazardFamily>();
+  const narrativeFamilies = rawNarrativeFamilies.size ? rawNarrativeFamilies : operationalFamilies;
+
+  if (explicitFamilies.size && narrativeFamilies.size) {
+    return intersectKoshaHazardFamilies(explicitFamilies, narrativeFamilies);
+  }
+  return explicitFamilies.size ? explicitFamilies : narrativeFamilies;
 }
 
 function hasCompatibleKoshaHazardFamily(
   parent: SafetyReferenceItem,
   supporting: SafetyReferenceItem
 ): boolean {
-  const parentFamilies = koshaHazardFamilies(parent);
-  const supportingFamilies = koshaHazardFamilies(supporting);
+  const parentFamilies = koshaHazardFamilies(parent, { includeOperationalHazard: false });
+  const supportingFamilies = koshaHazardFamilies(supporting, { includeOperationalHazard: true });
   if (!parentFamilies.size || !supportingFamilies.size) return false;
   return [...parentFamilies].some((family) => supportingFamilies.has(family));
 }
@@ -778,10 +801,18 @@ function buildVerifiedKoshaPromptLines(
   const unique = new Map<string, SafetyReferenceItem>();
 
   for (const item of items) {
-    if (!isKoshaTechnicalReference(item) || !isKoshaSupportingCitationEligible(item)) continue;
+    if (!isKoshaTechnicalReference(item)) continue;
     const decision = getKoshaGroundingDecision(item);
     const metadata = decision?.metadata;
-    if (!decision || decision.status !== "verified_current" || !metadata || !item.body?.trim()) continue;
+    const parentEvidenceReady = hasRelevantKoshaParent(item, options.parentCandidates);
+    const parentReadyVerifiedBody = parentEvidenceReady
+      && isKoshaSupportingCitationEligible(item)
+      && decision?.status === "verified_current"
+      && Boolean(item.body?.trim());
+    const parentlessVerifiedIdentity = !parentEvidenceReady
+      && metadata?.reviewState === "verified"
+      && metadata.lifecycle === "current";
+    if (!decision || !metadata || (!parentReadyVerifiedBody && !parentlessVerifiedIdentity)) continue;
 
     const key = `${metadata.stableDocumentKey}|${metadata.currentVersion}`;
     if (!unique.has(key)) unique.set(key, item);
@@ -791,7 +822,7 @@ function buildVerifiedKoshaPromptLines(
   return [...unique.values()].map((item) => {
     const decision = getKoshaGroundingDecision(item);
     const metadata = decision?.metadata;
-    if (!decision || !metadata || !item.body) return "";
+    if (!decision || !metadata) return "";
     const parentEvidenceReady = hasRelevantKoshaParent(item, options.parentCandidates);
 
     const payload = {
@@ -813,7 +844,7 @@ function buildVerifiedKoshaPromptLines(
       lifecycle: metadata.lifecycle,
       reviewRequired: decision.reviewRequired || !parentEvidenceReady,
       parentEvidenceReady,
-      ...(parentEvidenceReady ? { bodyExcerpt: boundKoshaPromptExcerpt(item.body) } : {})
+      ...(parentEvidenceReady && item.body ? { bodyExcerpt: boundKoshaPromptExcerpt(item.body) } : {})
     };
     return `KOSHA_SUPPORTING_BODY_JSON: ${JSON.stringify(payload)}`;
   }).filter(Boolean);
@@ -918,10 +949,16 @@ function verifiedKoshaSupportingEvidence(packet: DbHarnessPacket): SafetyReferen
   ));
 }
 
+function hasVerifiedCurrentKoshaIdentity(item: SafetyReferenceItem): boolean {
+  if (!isKoshaTechnicalReference(item)) return false;
+  const metadata = getKoshaGroundingDecision(item)?.metadata;
+  return metadata?.reviewState === "verified" && metadata.lifecycle === "current";
+}
+
 function parentlessVerifiedKoshaEvidence(packet: DbHarnessPacket): SafetyReferenceItem[] {
   const parentCandidates = koshaParentCandidates(packet);
   return packet.supportingEvidence.filter((item) => (
-    isKoshaSupportingCitationEligible(item)
+    hasVerifiedCurrentKoshaIdentity(item)
     && !hasRelevantKoshaParent(item, parentCandidates)
   ));
 }
