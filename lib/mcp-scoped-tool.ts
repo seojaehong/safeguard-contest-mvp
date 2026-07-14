@@ -26,6 +26,14 @@ type ScopedToolHandler<InputShape extends z.ZodRawShape> = (
   authContext: McpAuthContext,
 ) => McpToolResult | Promise<McpToolResult>;
 
+const SCOPED_TOOL_REGISTRATION = Symbol("safeclaw-scoped-tool-registration");
+
+export type ScopedToolRegistration = {
+  readonly toolName: McpToolName;
+  readonly invoke: (args: unknown, authContext: McpAuthContext) => Promise<McpToolResult>;
+  readonly [SCOPED_TOOL_REGISTRATION]: true;
+};
+
 function readAuthContext(extra: unknown): McpAuthContext | null {
   const authInfo = (extra as { authInfo?: { extra?: unknown } } | undefined)?.authInfo;
   return asAuthContext(authInfo?.extra);
@@ -51,9 +59,9 @@ export function registerScopedTool<InputShape extends z.ZodRawShape>(
   toolName: McpToolName,
   config: ScopedToolConfig<InputShape>,
   handler: ScopedToolHandler<InputShape>,
-): void {
+): ScopedToolRegistration {
   const inputSchema = z.object(config.inputSchema);
-  server.registerTool(toolName, { ...config, inputSchema }, async (args, extra) => {
+  const invoke = async (args: ToolArgs<InputShape>, extra: unknown): Promise<McpToolResult> => {
     try {
       const authContext = readAuthorizedToolContext(extra, toolName);
       logToolContext(toolName, authContext);
@@ -64,5 +72,19 @@ export function registerScopedTool<InputShape extends z.ZodRawShape>(
       }
       return toToolError(error);
     }
+  };
+  server.registerTool(toolName, { ...config, inputSchema }, invoke);
+  return Object.freeze({
+    toolName,
+    async invoke(args, authContext): Promise<McpToolResult> {
+      try {
+        const parsed = inputSchema.parse(args);
+        return await invoke(parsed, { authInfo: { extra: authContext } });
+      } catch (error) {
+        log.error("MCP tool input validation failed", { tool: toolName, error });
+        return toToolError(error);
+      }
+    },
+    [SCOPED_TOOL_REGISTRATION]: true as const,
   });
 }

@@ -24,6 +24,7 @@ import { reviewDocpack } from "./ontology/qa-review-tool";
 import type { SafetyReferenceItem } from "./safety-reference-catalog";
 import { searchSafetyReferences } from "./safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "./sif-embedding-corpus";
+import type { McpAuthContext } from "./mcp-auth";
 
 function asString(input: unknown, key: string): string {
   const value = (input as Record<string, unknown> | null)?.[key];
@@ -63,7 +64,11 @@ function uniqueReferences(items: SafetyReferenceItem[]): SafetyReferenceItem[] {
  * 동일한 코어를 쓰되, generate_safety_docpack 기본 모드만 채팅 맥락에 맞춰 enhanced로 둔다
  * (full 150초는 부적절 — 사용자가 명시 요청 시에만 full).
  */
-export async function executeClawTool(name: string, input: unknown): Promise<unknown> {
+export async function executeClawTool(
+  name: string,
+  input: unknown,
+  authContext?: McpAuthContext,
+): Promise<unknown> {
   switch (name) {
     case "run_safeclaw_harness_agent": {
       const question = asString(input, "question");
@@ -84,6 +89,12 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
           summarizeHarnessSearch("sif_cases", sif),
           summarizeHarnessSearch("supporting_evidence", supporting),
         ],
+        auth: authContext ? {
+          source: authContext.source,
+          siteId: authContext.siteId,
+          orgId: authContext.orgId,
+          tokenBound: Boolean(authContext.siteId),
+        } : undefined,
       });
     }
     case "get_weather_signals": {

@@ -33,8 +33,12 @@ and OpenAI paths remain in place.
 - `engine-adapter/v1` identifies engine runtime, capabilities, and authority.
 - `SAFECLAW_ENGINE_MODE=experimental-hermes` additionally requires
   `SAFECLAW_HERMES_LOCAL_POC=1` and is disabled on Vercel.
-- The application composition remains unavailable when no local Hermes planner
-  and SafeClaw-owned read executor are injected.
+- The application composition remains unavailable unless the local Hermes
+  planner is wrapped by `createSafeClawHermesComposition`.
+- That factory creates the read executor internally. Each supported read tool
+  is registered by `registerScopedTool`, invoked with broker-derived
+  `tools:read` site/org context, and returned through the same scope
+  interceptor used by the MCP route.
 - Hermes receives tenant context, prompt, cancellation, text-only streaming, and a
   read-only tool-intent callback. It receives no Supabase client, MCP token,
   write callback, or publish callback.
@@ -57,24 +61,39 @@ and OpenAI paths remain in place.
 
 ## Verification
 
-- Pre-change baseline: 7 test files, 98 tests passed.
-- TDD RED/GREEN: local mode gate, version/authority metadata, MCP read
-  classification, Hermes adapter module, and production composition boundary.
-- Focused final regression: 12 test files, 176 tests passed.
-- TypeScript strict typecheck: passed.
-- Full suite: 141 test files total; 134 passed, 2 failed, and 5 skipped. Of
-  1,427 tests, 1,418 passed, 2 failed, and 7 skipped in 1,230.81 seconds.
-- Full-suite failure 1 was the authoritative frontend evidence source identity:
-  checked-in `cf3acf32...` versus current `9eab4b0b...`. This identity excludes
-  every file changed by this round, so the mismatch predates this branch.
-- Full-suite failure 2 was a browser save-status timing assertion. Its isolated
-  rerun passed: 1 test passed and 19 skipped in 28.62 seconds.
-- After narrowing the planner surface to `emitText`, the focused 176-test suite
-  and strict typecheck were rerun and passed.
-- Build: not run; this round requested tests and evaluation.
+### P2/P3 RED Evidence
 
-Local logs:
+1. Arbitrary executor injection:
 
-- `evaluation/hermes-engine-adapter-24h-20260714/focused-tests.log`
-- `evaluation/hermes-engine-adapter-24h-20260714/typecheck.log`
-- `evaluation/hermes-engine-adapter-24h-20260714/browser-save-status-rerun.log`
+   `npm.cmd test -- tests/hermes-engine-adapter.test.ts -t "rejects an arbitrarily injected" --maxWorkers=1 --no-file-parallelism`
+
+   Exit `1`; 1 test failed and 7 tests were skipped. Failure: the production
+   composition accepted the forged executor instead of throwing.
+
+2. Scoped Harness attribution:
+
+   `npm.cmd test -- tests/hermes-engine-adapter.test.ts -t "routes the Evidence Harness" --maxWorkers=1 --no-file-parallelism`
+
+   Exit `1`; 1 test failed and 8 tests were skipped. The Harness packet was
+   present, but auth was `source=none`, `siteId=null`, `orgId=null`, and
+   `tokenBound=false`.
+
+### P2/P3 Final GREEN Evidence
+
+| Check | Reproducible command | Exit | Result |
+| --- | --- | ---: | --- |
+| Focused tests | `npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism` | 0 | 12 files passed; 179 tests passed; 0 failed; 19.27 s |
+| TypeScript strict | `npm.cmd run typecheck` | 0 | `tsc --noEmit --incremental false` passed |
+| Production build | `npm.cmd run build` | 0 | Next.js 15.5.20; compiled in 10.5 s; static pages 27/27 |
+
+The tracked `audit.md` and `report.json` are self-contained evidence. They do
+not cite gitignored or untracked log files.
+
+### Prior Full-Suite Context
+
+The pre-remediation full suite had 141 test files: 134 passed, 2 failed, and 5
+skipped. Of 1,427 tests, 1,418 passed, 2 failed, and 7 skipped in 1,230.81
+seconds. One failure was the authoritative frontend evidence source identity
+(`cf3acf32...` checked in versus `9eab4b0b...` current); that identity excludes
+all files changed by this engine round. The other was a browser save-status
+timing assertion whose isolated rerun passed 1/1.

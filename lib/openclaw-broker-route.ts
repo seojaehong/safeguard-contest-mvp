@@ -25,7 +25,7 @@ import {
 } from "@/lib/openclaw-chat";
 import {
   createExperimentalHermesAdapter,
-  type ExperimentalHermesAdapterDependencies,
+  type SafeClawHermesComposition,
 } from "@/lib/hermes-engine-adapter";
 import type { ResolveBrokerContext } from "@/lib/openclaw-broker-auth";
 
@@ -38,7 +38,7 @@ export type AgentChatRouteDependencies = {
 };
 
 export type ProductionEngineAdapterDependencies = {
-  experimentalHermes?: Omit<ExperimentalHermesAdapterDependencies, "env">;
+  experimentalHermes?: SafeClawHermesComposition;
 };
 
 function jsonError(error: BrokerError): Response {
@@ -77,7 +77,7 @@ export function createProductionEngineAdapter(
   } else if (mode === "experimental-hermes" && dependencies.experimentalHermes) {
     base = createExperimentalHermesAdapter({
       env,
-      ...dependencies.experimentalHermes,
+      composition: dependencies.experimentalHermes,
     });
   } else {
     base = createUnavailableEngineAdapter();

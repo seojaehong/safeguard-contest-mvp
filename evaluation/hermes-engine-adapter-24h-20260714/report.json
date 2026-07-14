@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-07-14T21:34:38+09:00",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-14T22:00:56+09:00",
   "authoritativeBaseSha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
   "branch": "feat/hermes-engine-adapter-24h-20260714",
   "scope": {
@@ -34,13 +34,15 @@
     "focusedFinal": {
       "status": "passed",
       "testFilesPassed": 12,
-      "testsPassed": 176,
+      "testsPassed": 179,
       "testsFailed": 0,
-      "durationSeconds": 15.02
+      "durationSeconds": 19.27,
+      "exitCode": 0
     },
     "typecheckFinal": {
       "status": "passed",
-      "command": "npm.cmd run typecheck"
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0
     },
     "fullSuite": {
       "status": "failed",
@@ -73,9 +75,93 @@
       ]
     },
     "build": {
-      "status": "not_run",
-      "reason": "This round requested tests and evaluation."
+      "status": "passed",
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "nextVersion": "15.5.20",
+      "compileSeconds": 10.5,
+      "staticPagesGenerated": 27,
+      "staticPagesExpected": 27
     }
+  },
+  "remediation": {
+    "baseSha": "d8ffff586c14562afcde4cb9b75824c98fdbc0af",
+    "scope": {
+      "databaseFilesChanged": 0,
+      "migrationFilesChanged": 0,
+      "schemaFilesChanged": 0,
+      "dataFilesChanged": 0
+    },
+    "redGreen": [
+      {
+        "id": "arbitrary-executor-runtime-injection",
+        "red": {
+          "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts -t \"rejects an arbitrarily injected\" --maxWorkers=1 --no-file-parallelism",
+          "exitCode": 1,
+          "testsFailed": 1,
+          "testsSkipped": 7,
+          "observed": "forged executor was accepted"
+        },
+        "green": {
+          "coveredBy": "focusedFinal",
+          "runtimeAttestationError": "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+          "typeGuard": "SafeClawHermesComposition private symbol"
+        }
+      },
+      {
+        "id": "scoped-harness-composition",
+        "red": {
+          "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts -t \"routes the Evidence Harness\" --maxWorkers=1 --no-file-parallelism",
+          "exitCode": 1,
+          "testsFailed": 1,
+          "testsSkipped": 8,
+          "observed": {
+            "authSource": "none",
+            "siteId": null,
+            "orgId": null,
+            "tokenBound": false
+          }
+        },
+        "green": {
+          "coveredBy": "focusedFinal",
+          "registration": "registerScopedTool",
+          "scope": "tools:read",
+          "tool": "run_safeclaw_harness_agent",
+          "engine": "safeclaw-db-harness",
+          "llmRole": "naturalize_only",
+          "evidenceAuthority": "db_harness",
+          "siteId": "site-1",
+          "orgId": "org-1"
+        }
+      }
+    ],
+    "reproducibleCommands": [
+      {
+        "name": "focusedFinal",
+        "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism",
+        "exitCode": 0,
+        "testFilesPassed": 12,
+        "testsPassed": 179,
+        "testsFailed": 0,
+        "durationSeconds": 19.27
+      },
+      {
+        "name": "typecheckFinal",
+        "command": "npm.cmd run typecheck",
+        "exitCode": 0
+      },
+      {
+        "name": "buildFinal",
+        "command": "npm.cmd run build",
+        "exitCode": 0,
+        "staticPages": "27/27"
+      }
+    ],
+    "trackedEvidence": [
+      "evaluation/hermes-engine-adapter-24h-20260714/audit.md",
+      "evaluation/hermes-engine-adapter-24h-20260714/report.json"
+    ],
+    "gitignoredOrUntrackedLogsReferenced": 0
   },
   "securityBoundary": {
     "contractVersion": "engine-adapter/v1",
