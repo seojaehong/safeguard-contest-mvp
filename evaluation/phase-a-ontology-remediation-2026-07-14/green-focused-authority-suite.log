@@ -1,13 +1,12 @@
 
 > safeclaw@0.1.0 test
-> vitest run tests/command-center-request-lifecycle.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-readiness.test.ts tests/phase-a-server-confirmation.test.ts
+> vitest run tests/workpack-authenticated-scope-boundary.test.ts tests/editor-first-state.test.ts tests/phase-a-share-authority-contract.test.ts tests/command-center-request-lifecycle.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-readiness.test.ts tests/phase-a-server-confirmation.test.ts
 
 
  RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
 
 
- Test Files  5 passed (5)
-      Tests  49 passed (49)
-   Start at  17:17:15
-   Duration  2.47s (transform 1.45s, setup 0ms, import 1.85s, tests 527ms, environment 1ms)
-
+ Test Files  8 passed (8)
+      Tests  64 passed (64)
+   Start at  17:34:38
+   Duration  3.36s (transform 3.44s, setup 0ms, import 4.17s, tests 859ms, environment 1ms)

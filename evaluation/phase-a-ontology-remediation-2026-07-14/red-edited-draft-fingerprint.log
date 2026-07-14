@@ -27,4 +27,3 @@ AssertionError: expected 'dda69a31' not to be 'dda69a31' // Object.is equality
       Tests  1 failed | 3 passed (4)
    Start at  17:10:22
    Duration  834ms (transform 187ms, setup 0ms, import 235ms, tests 26ms, environment 0ms)
-

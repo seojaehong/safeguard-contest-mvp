@@ -48,4 +48,3 @@
 - Required focused coverage: real workpack scope resolver/call boundary; auth-principal-switch late response; edited draft fingerprint reload; Share target/merge contract; existing connected export; confirmation overlay; 19-file Phase A suite; browser suite; strict typecheck; diff-check; scope/no-any checks.
 - Recompute merge trees against the current main target and the freshly reviewed Share product target. Do not use rejected or stale Share SHAs.
 - Final independent reviewer must report findings first, exact commands/counts, commit ancestry, and SPEC/CODE verdict.
-

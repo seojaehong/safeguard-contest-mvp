@@ -34,4 +34,3 @@ AssertionError: expected '{"savedAt":"2026-07-14T08:11:01.361Z"…' not to conta
       Tests  1 failed | 13 skipped (14)
    Start at  17:10:40
    Duration  22.68s (transform 303ms, setup 0ms, import 718ms, tests 21.41s, environment 0ms)
-
