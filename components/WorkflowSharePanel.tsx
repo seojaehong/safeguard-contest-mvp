@@ -1164,19 +1164,6 @@ export function WorkflowSharePanel({
         </div>
       </header>
 
-      <div className="share-permission-grid share-delivery-summary" aria-label="공유 대상과 권한 요약">
-        <section>
-          <span>대상</span>
-          <strong>{targetCountLabel}</strong>
-          <p>{workerDisplayLabel}</p>
-        </section>
-        <section>
-          <span>공유 범위</span>
-          <strong>{permissionLabel}</strong>
-          <p>{permissionDetail}</p>
-        </section>
-      </div>
-
       <div className="share-form-shell">
         <section className="share-form-card share-recipient-card" aria-labelledby="workflow-recipient-heading">
           <div className="recipient-section-head">
@@ -1221,15 +1208,10 @@ export function WorkflowSharePanel({
                 aria-label={`${channel.label} · ${channel.badge}. 다음 행동: ${channel.nextAction}`}
               >
                 <strong>{channel.label}</strong>
-                <span>{channel.helper}</span>
-                <span>다음 행동 · {channel.nextAction}</span>
                 {channel.badge !== "사용 가능" ? <em>{channel.badge}</em> : null}
               </button>
             ))}
           </div>
-          <p className="channel-readiness-note">
-            메일과 문자는 선택할 수 있으며, 전송 전에 참여자 연락처와 채널 설정을 확인합니다. 카카오와 밴드는 설정을 마치면 사용할 수 있어요.
-          </p>
         </section>
 
         <section className="share-form-card" aria-labelledby="workflow-language-heading">
@@ -1272,12 +1254,7 @@ export function WorkflowSharePanel({
         </details>
       </div>
 
-      {!authToken ? (
-        <div className="share-inline-note">
-          <p>로그인하면 문서팩과 전송·열람 이력이 서버에 안전하게 저장됩니다.</p>
-          <a className="button secondary" href="/login">로그인</a>
-        </div>
-      ) : !archiveWorkpackId ? (
+      {authToken && !archiveWorkpackId ? (
         <p className="share-inline-note">
           전송을 확정하면 문서팩과 선택한 작업자를 먼저 안전하게 저장합니다.
         </p>
@@ -1287,10 +1264,7 @@ export function WorkflowSharePanel({
         <section className="share-readiness-warning" aria-label="공유 전 보완 항목" role="status">
           <span>전송 전 확인</span>
           <strong>{readiness?.summary || "공유 전 보완 필요"}</strong>
-          <ul>
-            {shareDisabledReasons.map((reason) => <li key={reason}>{reason}</li>)}
-          </ul>
-          <p className="share-inline-note">다음 행동 · 문서 검수, 근거, 결재 항목을 보완한 뒤 공유 준비 상태를 다시 확인하세요.</p>
+          <p className="share-inline-note">{shareDisabledReasons.join(" · ")}</p>
         </section>
       ) : null}
 
@@ -1317,14 +1291,18 @@ export function WorkflowSharePanel({
       </section>
 
       <div className="command-actions">
-        <button
-          type="button"
-          className="button command-primary workbench-primary-action"
-          onClick={() => setIsConfirming(true)}
-          disabled={primaryDisabled}
-        >
-          {primaryLabel}
-        </button>
+        {!authToken ? (
+          <a href="/login" className="button command-primary workbench-primary-action">{primaryLabel}</a>
+        ) : (
+          <button
+            type="button"
+            className="button command-primary workbench-primary-action"
+            onClick={() => setIsConfirming(true)}
+            disabled={primaryDisabled}
+          >
+            {primaryLabel}
+          </button>
+        )}
         <button type="button" className="button secondary" onClick={copyMessage}>메시지 복사</button>
       </div>
 
@@ -1340,31 +1318,7 @@ export function WorkflowSharePanel({
             <div><span>언어</span><strong>{languageLabel}</strong></div>
           </div>
           <p className="muted small">미리보기 {targetLabel} · {languageBasis}</p>
-          <div className="dispatch-evidence-ledger" aria-label="전송 과정의 저장 확인과 기록 계획">
-            <article className={storageReady ? "ready" : "warn"}>
-              <span>문서팩 저장</span>
-              <strong>{storageReady ? "저장된 문서팩 사용" : "먼저 안전하게 저장"}</strong>
-              <small>{storageReady ? `${effectiveAuthority?.workerIds.length || 0}명의 작업자 확인` : "문서팩과 작업자 정보를 저장한 뒤 진행"}</small>
-            </article>
-            <article className={sessionReady ? "ready" : "pending"}>
-              <span>공유 설정</span>
-              <strong>{sessionReady ? "기존 공유 설정 사용" : "참여자별 공유 설정 생성"}</strong>
-              <small>선택한 작업자만 열람 가능</small>
-            </article>
-            <article className="pending">
-              <span>전송 로그</span>
-              <strong>전송 결과를 안전하게 저장</strong>
-              <small>중복 전송을 막고 결과를 안전하게 보관</small>
-            </article>
-            <article className="pending">
-              <span>열람 확인</span>
-              <strong>관리자 표시와 분리</strong>
-              <small>관리자 확인과 작업자 열람 확인을 구분해 보관</small>
-            </article>
-          </div>
-          <p className="channel-readiness-note">
-            선택 채널 · {activeChannelLabel}. 카카오는 승인·템플릿 미설정 시 해당 채널만 설정 필요로 남습니다.
-          </p>
+          <p className="channel-readiness-note">선택 채널 · {activeChannelLabel}</p>
           {selectedMessageTarget !== "manager" ? (
             <p className="channel-readiness-note">
               외국어 미리보기는 검토·복사용이며 실제 전송 결과와 구분해 보관합니다.

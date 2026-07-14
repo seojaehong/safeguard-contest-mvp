@@ -1,0 +1,38 @@
+{
+  "scope": "share-screen-submit-hotfix",
+  "date": "2026-07-14",
+  "productFiles": [
+    "app/globals.css",
+    "components/SafeGuardCommandCenter.tsx",
+    "components/WorkflowSharePanel.tsx"
+  ],
+  "tests": {
+    "focusedFiles": 2,
+    "focusedTests": 7,
+    "focusedStatus": "pass",
+    "typecheck": "pass",
+    "staticAudit": {
+      "status": "pass",
+      "pages": 32,
+      "components": 23,
+      "coverageIssues": 0,
+      "violations": 0,
+      "importantDeclarations": 0
+    },
+    "build": {
+      "status": "pass",
+      "staticPages": 28
+    }
+  },
+  "browserFirstPass": {
+    "viewport": "1440x1000",
+    "horizontalOverflow": 0,
+    "controlsBelow44px": 0,
+    "primaryActions": 1,
+    "panelHeightBeforeFinalCompression": 1888
+  },
+  "remainingVerification": [
+    "post-push deployed mobile screenshot",
+    "post-push deployed desktop screenshot"
+  ]
+}
