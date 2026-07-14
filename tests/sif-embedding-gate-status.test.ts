@@ -46,7 +46,7 @@ describe("SIF embedding gate status", () => {
     });
     expect(status.canary).toMatchObject({
       performed: true,
-      label: "Canary 임베딩 완료 · 업로드 전",
+      label: "소규모 검증 임베딩 완료 · 업로드 전",
       corpusCount: 3,
       embeddedCount: 3,
       uploadedCount: 0,
@@ -55,7 +55,7 @@ describe("SIF embedding gate status", () => {
       embeddingDimensions: 1536,
       dbMutationPerformed: false
     });
-    expect(status.canary.answer).toContain("3건 canary 임베딩 벡터");
+    expect(status.canary.answer).toContain("3건 소규모 검증 임베딩 벡터");
     expect(status.canary.vectorsPath).toBe("evaluation\\sif-embedding-canary-2026-07-09\\sif-embedding-vectors.jsonl");
     expect(status.canary.artifactIntegrity).toHaveLength(4);
     expect(status.canary.artifactIntegrity.every((artifact) => artifact.exists)).toBe(true);
@@ -76,20 +76,20 @@ describe("SIF embedding gate status", () => {
       dbUploadVerified: false,
       vectorSearchUsable: false,
       nextGateId: "apply-sif-only-migration",
-      nextGateLabel: "SIF-only DB migration 승인"
+      nextGateLabel: "SIF 전용 DB 마이그레이션 승인"
     });
     expect(status.learningLifecycle.answer).toContain("모델 파인튜닝도 전체 임베딩 생성도 아직 실행하지 않았습니다");
     expect(status.nextApprovalGate).toMatchObject({
       id: "apply-sif-only-migration",
-      label: "SIF-only DB migration 승인",
+      label: "SIF 전용 DB 마이그레이션 승인",
       status: "waiting",
       artifactPath: "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
     });
-    expect(status.nextApprovalGate.detail).toContain("업로드 전 migration 승인");
+    expect(status.nextApprovalGate.detail).toContain("업로드 전 마이그레이션 승인");
     expect(status.operatorGate).toMatchObject({
       status: "approval-request-open",
       gateId: "apply-sif-only-migration",
-      title: "다음 승인 게이트가 열려 있습니다.",
+      title: "다음 승인 단계가 열려 있습니다.",
       migrationArtifact: {
         path: "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql",
         exists: true
@@ -101,14 +101,14 @@ describe("SIF embedding gate status", () => {
         mode: "embed-only"
       }
     });
-    expect(status.operatorGate.approvalQuestion).toContain("SIF-only migration SQL");
+    expect(status.operatorGate.approvalQuestion).toContain("SIF 전용 마이그레이션 SQL");
     expect(status.operatorGate.migrationArtifact.sha256).toHaveLength(64);
     expect(status.operatorGate.evidenceSummary.join("\n")).toContain("전체 SIF 코퍼스 6,032건");
-    expect(status.operatorGate.evidenceSummary.join("\n")).toContain("Canary는 3건 embed-only");
-    expect(status.operatorGate.evidenceSummary.join("\n")).toContain("Post-migration verifier는 migration-required");
-    expect(status.operatorGate.allowedBeforeApproval).toContain("승인 패킷과 migration SQL diff 검토");
+    expect(status.operatorGate.evidenceSummary.join("\n")).toContain("소규모 검증은 3건 임베딩만 생성");
+    expect(status.operatorGate.evidenceSummary.join("\n")).toContain("마이그레이션 후 검증은 마이그레이션 필요");
+    expect(status.operatorGate.allowedBeforeApproval).toContain("승인 패킷과 마이그레이션 SQL 변경 내용 검토");
     expect(status.operatorGate.forbiddenBeforeApproval).toEqual([
-      "운영 DB migration 적용",
+      "운영 DB 마이그레이션 적용",
       "전체 SIF 임베딩 생성",
       "safety_reference_embeddings 업로드",
       "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화"
@@ -139,7 +139,7 @@ describe("SIF embedding gate status", () => {
       decisionCount: 6
     });
     expect(status.approvalPacket.approvalFingerprint).toHaveLength(64);
-    expect(status.approvalPacket.decisions[0]).toContain("SIF-only embedding migration");
+    expect(status.approvalPacket.decisions[0]).toContain("SIF 전용 임베딩 마이그레이션");
     expect(status.approvalPacket.requiredArtifacts.map((artifact) => artifact.path)).toEqual([
       "evaluation\\sif-embedding-gate\\report.json",
       "evaluation\\sif-embedding-gate\\sif-embedding-batch-manifest.json",
@@ -152,7 +152,7 @@ describe("SIF embedding gate status", () => {
       contentHash: status.corpus.corpusHash,
       recordCount: 6032
     });
-    expect(status.approvalPacket.artifactIntegrity.find((artifact) => artifact.label === "SIF-only migration")?.sha256).toHaveLength(64);
+    expect(status.approvalPacket.artifactIntegrity.find((artifact) => artifact.label === "SIF 전용 마이그레이션")?.sha256).toHaveLength(64);
     expect(status.approvalPacket.safetyLocks.every((lock) => lock.locked)).toBe(true);
     expect(status.approvalSteps.map((step) => step.id)).toEqual(["migration", "embedding", "upload", "vector"]);
     expect(status.approvalSteps[0]).toMatchObject({
@@ -208,7 +208,7 @@ describe("SIF embedding gate status", () => {
       vectorSearchUsable: false,
       nextGateId: "disable-vector-flag"
     });
-    expect(readyRuntime.approvalPacket.safetyLocks.find((lock) => lock.label === "Vector 검색 잠금")?.locked).toBe(true);
+    expect(readyRuntime.approvalPacket.safetyLocks.find((lock) => lock.label === "벡터 검색 잠금")?.locked).toBe(true);
     expect(readyRuntime.message).toContain("SAFETY_REFERENCE_VECTOR_SEARCH=1");
   });
 });

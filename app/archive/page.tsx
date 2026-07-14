@@ -48,6 +48,92 @@ type ArchiveState = {
   dispatchLogs: ArchiveDispatchLog[];
 };
 
+const ARCHIVE_STATUS_LABELS: Readonly<Record<ArchiveStatus, string>> = {
+  checking: "확인 중",
+  ready: "준비됨",
+  partial: "일부 확인",
+  empty: "기록 없음",
+  "login-required": "로그인 필요",
+  unconfigured: "연결 설정 필요",
+  error: "오류"
+};
+
+const DISPATCH_PROVIDER_STATUS_LABELS: Readonly<Record<string, string>> = {
+  "sent": "전송 완료",
+  delivered: "전달 완료",
+  accepted: "접수 완료",
+  queued: "전송 대기",
+  pending: "전송 대기",
+  partial: "일부 전송",
+  unconfigured: "서비스 설정 필요",
+  rejected: "요청 거절",
+  failed: "전송 실패",
+  error: "전송 오류",
+  fixture: "점검용 전송",
+  "validation-only": "검증만 수행",
+  "idempotency-unsupported": "중복 방지 확인 필요",
+  "provider-response-uncertain": "전송 결과 확인 필요"
+};
+
+const DISPATCH_PROVIDER_LABELS: Readonly<Record<string, string>> = {
+  "n8n": "전송 자동화",
+  "safe-fixture": "점검용 전송 서비스",
+  "solapi-alimtalk": "알림톡 전송 서비스",
+  twilio: "문자 전송 서비스",
+  sendgrid: "이메일 전송 서비스",
+  "latest-sms": "문자 전송 서비스"
+};
+
+const DISPATCH_CHANNEL_LABELS: Readonly<Record<string, string>> = {
+  email: "이메일",
+  sms: "문자",
+  kakao: "카카오 알림톡",
+  alimtalk: "카카오 알림톡",
+  band: "밴드",
+  slack: "협업 채널",
+  discord: "협업 채널"
+};
+
+const DISPATCH_LANGUAGE_LABELS: Readonly<Record<string, string>> = {
+  ko: "한국어",
+  en: "영어",
+  vi: "베트남어",
+  zh: "중국어",
+  ja: "일본어",
+  th: "태국어"
+};
+
+function formatArchiveStatus(status: string): string {
+  return ARCHIVE_STATUS_LABELS[status as ArchiveStatus] ?? "상태 확인 필요";
+}
+
+function formatDispatchProviderStatus(status: string | null): string {
+  if (!status) return "결과 확인 필요";
+  return DISPATCH_PROVIDER_STATUS_LABELS[status] ?? "상태 확인 필요";
+}
+
+function formatDispatchProvider(provider: string | null): string {
+  if (!provider) return "전송 서비스 미기록";
+  return DISPATCH_PROVIDER_LABELS[provider] ?? "분류 검토 필요";
+}
+
+function formatDispatchChannel(channel: string): string {
+  return DISPATCH_CHANNEL_LABELS[channel] ?? "분류 검토 필요";
+}
+
+function formatDispatchLanguage(languageCode: string | null): string {
+  if (!languageCode) return "언어 미기록";
+  return DISPATCH_LANGUAGE_LABELS[languageCode] ?? "분류 검토 필요";
+}
+
+function formatDispatchFailureReason(failureReason: string | null): string {
+  return failureReason ? "실패 사유 확인 필요" : "";
+}
+
+function formatWorkflowRunId(workflowRunId: string | null): string {
+  return workflowRunId ? `실행 ID ${workflowRunId}` : "실행 기록 없음";
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -233,7 +319,7 @@ function DispatchLogList({ logs }: { logs: ArchiveDispatchLog[] }) {
       <article>
         <strong>전파 로그 대기</strong>
         <code>전파 이력</code>
-        <p>메일·문자 전송 결과가 저장되면 채널, 수신자, provider 상태, 실패 사유를 같은 이력에서 확인합니다.</p>
+        <p>메일·문자 전송 결과가 저장되면 채널, 수신자, 전송 서비스 상태, 실패 사유를 같은 이력에서 확인합니다.</p>
         <Link href="/dispatch">전파 화면으로 이동</Link>
       </article>
     );
@@ -243,16 +329,17 @@ function DispatchLogList({ logs }: { logs: ArchiveDispatchLog[] }) {
     <>
       {logs.slice(0, 8).map((log) => (
         <article key={log.id}>
-          <strong>{log.channel} · {log.providerStatus || "결과 확인"}</strong>
+          <strong>{formatDispatchChannel(log.channel)} · {formatDispatchProviderStatus(log.providerStatus)}</strong>
           <code>{formatArchiveTime(log.createdAt)}</code>
           <p>
             {log.targetLabel || "수신자"} · {log.siteName}
-            {log.languageCode ? ` · ${log.languageCode}` : ""}
-            {log.failureReason ? ` · ${log.failureReason}` : ""}
+            {log.languageCode ? ` · ${formatDispatchLanguage(log.languageCode)}` : ""}
+            {log.failureReason ? ` · ${formatDispatchFailureReason(log.failureReason)}` : ""}
           </p>
           <p className="muted small">
             {log.workpackId ? "연결된 문서팩을 먼저 복원합니다." : "연결된 문서팩 ID가 없어 전파 화면으로 이동합니다."}
-            {" · "}{log.workflowRunId || log.provider || "전파 기록"}
+            {" · "}{formatDispatchProvider(log.provider)}
+            {" · "}{formatWorkflowRunId(log.workflowRunId)}
           </p>
           <a href={log.reopenHref}>{log.workpackId ? "연결 문서팩 열기" : "전파 내역 다시 보기"}</a>
         </article>
@@ -365,7 +452,7 @@ export default function ArchivePage() {
         <article><span>마지막 생성</span><strong>{formatArchiveTime(localWorkpack?.savedAt || serverLatestAt)}</strong></article>
         <article><span>저장 문서팩</span><strong>{archiveReady ? `${archive.workpacks.length}건` : "확인 대기"}</strong></article>
         <article><span>전파 로그</span><strong>{archiveReady ? `${archive.dispatchLogs.length}건` : "확인 대기"}</strong></article>
-        <article><span>로컬 작업자 snapshot</span><strong>{localWorkerCount(localWorkpack)}</strong></article>
+        <article><span>로컬 작업자 저장본</span><strong>{localWorkerCount(localWorkpack)}</strong></article>
       </section>
 
       <section className={`safeclaw-current-workpack ${localWorkpack ? "live" : "sample"}`} aria-live="polite">
@@ -380,7 +467,7 @@ export default function ArchivePage() {
 
       <section className="safeclaw-module-grid two">
         <article className="safeclaw-module-panel">
-          <span>최근 생성 · 로컬 workpack</span>
+          <span>최근 생성 · 로컬 작업팩</span>
           <h2>{localSiteName}</h2>
           <p>{excerpt(localQuestion, 220)}</p>
           <div className="safeclaw-archive-list">
@@ -431,11 +518,11 @@ export default function ArchivePage() {
             <article>
               <strong>전파 증빙</strong>
               <code>전파 로그</code>
-              <p>채널별 수신자, provider 결과, 실패 사유를 문서팩 이력과 함께 조회합니다.</p>
+              <p>채널별 수신자, 전송 서비스 결과, 실패 사유를 문서팩 이력과 함께 조회합니다.</p>
             </article>
             <article>
               <strong>권한 안내</strong>
-              <code>{archive.status}</code>
+              <code>{formatArchiveStatus(archive.status)}</code>
               <p>관리자 세션이 없거나 저장소 연결 전이면 서버 이력 대신 로컬 최근 작업과 다음 이동 경로를 명확히 안내합니다.</p>
             </article>
           </div>
