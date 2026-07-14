@@ -1,0 +1,502 @@
+{
+  "schemaVersion": "safeclaw-launch-gap-inventory/v1",
+  "sourceSha": "920c7f360688352156de4854b4957a9f2f1f0e43",
+  "generatedAt": "2026-07-14T17:11:01.9299562+09:00",
+  "itemCount": 25,
+  "integratedCount": 6,
+  "holdCount": 4,
+  "deferredCount": 11,
+  "approvalBlockedCount": 4,
+  "unknownCount": 0,
+  "categoryCounts": {
+    "integratedVerified": 6,
+    "activeHold": 3,
+    "deferredFinalOnly": 6,
+    "approvalBlocked": 4,
+    "longTermPhaseB": 5,
+    "otherLaunchBlocker": 1
+  },
+  "sourceVerification": {
+    "worktreeBranch": "audit/launch-gap-main-20260714",
+    "preArtifactClean": true,
+    "expectedBase": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "observedHead": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "originTargetRef": "origin/feat/phase-a-evidence-integration",
+    "originTargetSha": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "originTargetAhead": 0,
+    "originTargetBehind": 0,
+    "repositoryDefaultRef": "origin/master",
+    "repositoryDefaultSha": "ba6fd220ec17caa018513d39965e17105486ec3b",
+    "interpretation": "The requested authoritative integration ref is clean and origin-aligned. The repository default ref is a separate authority and is not treated as current for this inventory."
+  },
+  "ci": {
+    "pullRequest": 72,
+    "pullRequestState": "open",
+    "draft": true,
+    "headRef": "feat/phase-a-evidence-integration",
+    "headSha": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "baseRef": "feat/phase-a-release-integration-v2",
+    "baseSha": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
+    "runId": 29309064554,
+    "runAttempt": 1,
+    "runConclusion": "failure",
+    "checkedOutMergeSha": "ce68e39c0e6651fba8d0bd969ec5a45a1d2aba6f",
+    "jobCount": 1,
+    "failedJobCount": 1,
+    "testFiles": {
+      "total": 140,
+      "passed": 133,
+      "failed": 1,
+      "skipped": 6
+    },
+    "tests": {
+      "total": 1414,
+      "passed": 1403,
+      "failed": 1,
+      "skipped": 10
+    },
+    "failure": {
+      "file": "tests/frontend-route-coverage.test.ts",
+      "line": 693,
+      "test": "browser evidence reconciliation > reconciles the complete route, theme, special-state, and generated-surface evidence",
+      "reason": "checked-in browser evidence sourceIdentity is stale",
+      "expectedIdentity": "4db6cce03f730131864e7853443b2aefd486e22afd9497aecbac6efcffd624de",
+      "receivedIdentity": "cf3acf32f236a5c6ecdca5cf0b244ef16bd36c1ff8ecfa6b063e522a2ed723ac",
+      "exitCode": 1,
+      "durationSeconds": 480.74
+    },
+    "typecheckStatus": "passed",
+    "buildStatus": "skipped_after_test_failure",
+    "provenance": {
+      "artifactPaths": [
+        "https://github.com/seojaehong/safeguard-contest-mvp/pull/72",
+        "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/29309064554"
+      ],
+      "evidenceStatus": "LIVE_GITHUB_API_AND_RUN_LOG_VERIFIED"
+    }
+  },
+  "items": [
+    {
+      "id": "I-01",
+      "category": "integrated_verified",
+      "name": "Backend release baseline",
+      "severity": "info",
+      "status": "INTEGRATED_VERIFIED_BOUNDED",
+      "provenance": {
+        "sourceSha": "514b2d9a3c884c1a18ecf725285dde0e8a95b6cd",
+        "artifactPaths": [
+          "evaluation/backend-release-final-2026-07-13/report.md",
+          "evaluation/backend-release-final-2026-07-13/report.json"
+        ],
+        "evidenceStatus": "132 files and 1282 tests, typecheck, static audit, 108 browser rows, and PDF gates passed at the cited source; final-gate currentness is stale after later product changes",
+        "currentness": "source_is_ancestor_of_inventory_head"
+      }
+    },
+    {
+      "id": "I-02",
+      "category": "integrated_verified",
+      "name": "Reports integration hotfix",
+      "severity": "info",
+      "status": "INTEGRATED_VERIFIED_BOUNDED",
+      "provenance": {
+        "sourceSha": "ea7aa7223a056c884d5b0ba55563d602af328451",
+        "artifactPaths": [
+          "evaluation/reports-integration-contract-hotfix-2026-07-14/report.md",
+          "evaluation/reports-integration-contract-hotfix-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "5 files and 34 tests passed; static violations, coverage issues, and important declarations were zero; typecheck and diff-check passed",
+        "currentness": "relevant_product_paths_have_no_delta_to_inventory_head"
+      }
+    },
+    {
+      "id": "I-03",
+      "category": "integrated_verified",
+      "name": "KOSHA fail-closed boundary",
+      "severity": "info",
+      "status": "INTEGRATED_VERIFIED_BOUNDED",
+      "provenance": {
+        "sourceSha": "da0550d60b324e68ed67e87319636681aaaa13c8",
+        "artifactPaths": [
+          "evaluation/kosha-grounding-fail-closed-2026-07-14/report.md",
+          "evaluation/kosha-grounding-fail-closed-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "11 files and 213 focused tests passed, followed by 12 files and 244 grouped regression tests plus strict typecheck",
+        "currentness": "relevant_product_paths_have_no_delta_to_inventory_head",
+        "limits": "full 1039-row corpus, DB live, ranked RPC, and embedding readiness remain false"
+      }
+    },
+    {
+      "id": "I-04",
+      "category": "integrated_verified",
+      "name": "Web-safe presentation and cross-platform SIF fixture",
+      "severity": "info",
+      "status": "INTEGRATED_VERIFIED_BOUNDED",
+      "provenance": {
+        "sourceSha": "920c7f360688352156de4854b4957a9f2f1f0e43",
+        "validationSha": "ac3b0f65b55695ec5f43de9a91683b0f8a58e5cf",
+        "artifactPaths": [
+          "evaluation/web-safe-presentation-localization-2026-07-14/report.md",
+          "evaluation/web-safe-presentation-localization-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "4 files and 21 tests passed, SIF gate 5 of 5 passed under two locale settings, and strict typecheck passed",
+        "currentness": "report_metadata_finalized_at_inventory_source_sha",
+        "limits": "releaseReadiness is false and final build/browser evidence is excluded"
+      }
+    },
+    {
+      "id": "I-05",
+      "category": "integrated_verified",
+      "name": "Workspace clear and rail regression",
+      "severity": "info",
+      "status": "INTEGRATED_VERIFIED_BOUNDED",
+      "provenance": {
+        "sourceSha": "e1e3c02056f8e77cdb1bf38fd13dd6a34620754b",
+        "evidenceCommit": "62128cf196329a4dcd6b9c2ffe4a92e40464db15",
+        "artifactPaths": [
+          "evaluation/ui-regression-readonly-2026-07-14/report.md",
+          "evaluation/ui-regression-readonly-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "four viewport and theme cases plus focused 3-test and pseudo-content 1-test runs passed",
+        "currentness": "relevant_product_paths_have_no_delta_to_inventory_head"
+      }
+    },
+    {
+      "id": "I-06",
+      "category": "integrated_verified",
+      "name": "RLS audit evidence contract",
+      "severity": "info",
+      "status": "AUDIT_INTEGRATED_VERIFIED_NOT_FIXED",
+      "provenance": {
+        "sourceSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "evidenceCommit": "2684cb99de944aa9f54d143f2ae40b4ad6104f02",
+        "artifactPaths": [
+          "evaluation/supabase-rls-audit-2026-07-14/report.md",
+          "evaluation/supabase-rls-audit-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "report parity and 10-file 82-test static contract passed; noMutation is true and launchReadiness is false",
+        "currentness": "audited_auth_and_migration_paths_have_no_delta_to_inventory_head"
+      }
+    },
+    {
+      "id": "H-01",
+      "category": "active_hold",
+      "name": "Share v2 candidate",
+      "severity": "high",
+      "status": "HOLD_FRESH_SHARE_AND_ONTOLOGY_REVIEWS_REQUIRED",
+      "provenance": {
+        "sourceSha": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+        "evidenceSha": "fb5f08ffe3d028dd7c1dbcc48a5ef05e6a70b466",
+        "sourceRef": "origin/feat/workpack-share-v2-product",
+        "artifactPaths": [
+          "evaluation/workpack-share-v2-product-2026-07-14/remediation/p1-report.md",
+          "evaluation/workpack-share-v2-product-2026-07-14/remediation/p1-evidence.json"
+        ],
+        "evidenceStatus": "local 130 of 130 browser matrix and focused gates passed; fresh reviews and semantic integration remain required",
+        "currentness": "remote_candidate_unintegrated",
+        "conflicts": 7
+      }
+    },
+    {
+      "id": "H-02",
+      "category": "active_hold",
+      "name": "KOSHA v4 candidate",
+      "severity": "high",
+      "status": "HOLD_FRESH_INDEPENDENT_REVIEW_REQUIRED",
+      "provenance": {
+        "sourceSha": "e0a67f6e1953d421e58549666d1d44402435dfeb",
+        "evidenceSha": "08f6d6edc168c9a83cb6aac0eca151f45b783131",
+        "sourceRef": "origin/fix/kosha-commercial-contract-remediation",
+        "artifactPaths": [
+          "evaluation/kosha-commercial-contract-remediation-2026-07-14/report.md",
+          "evaluation/kosha-commercial-contract-remediation-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "focused v4 attacks and 262 existing grouped tests passed; no integration, build, full-suite, deployment, or self-approval claim",
+        "currentness": "remote_candidate_unintegrated"
+      }
+    },
+    {
+      "id": "H-03",
+      "category": "active_hold",
+      "name": "Phase A ontology and workpack authority candidate",
+      "severity": "critical",
+      "status": "HOLD_FRESH_INDEPENDENT_REVIEW_REQUIRED",
+      "provenance": {
+        "sourceSha": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
+        "evidenceSha": "6f355ea9d357b52cf44972861446b683660b7a14",
+        "sourceRef": "origin/fix/phase-a-ontology-target-ready",
+        "artifactPaths": [
+          "evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.md",
+          "evaluation/phase-a-ontology-evidence-chains-2026-07-13/report.json",
+          "evaluation/phase-a-ontology-evidence-chains-2026-07-13/evidence-manifest.json"
+        ],
+        "evidenceStatus": "focused unit and browser gates passed; current-target and Share semantic reconciliation remain on HOLD",
+        "currentness": "remote_candidate_unintegrated",
+        "currentTargetConflictPaths": 1,
+        "shareConflictPaths": 7
+      }
+    },
+    {
+      "id": "D-01",
+      "category": "deferred_final_only",
+      "name": "Static contract zero",
+      "severity": "high",
+      "status": "DEFERRED_FINAL_SHA",
+      "provenance": {
+        "sourceSha": "514b2d9a3c884c1a18ecf725285dde0e8a95b6cd",
+        "artifactPaths": [
+          "evaluation/backend-release-final-2026-07-13/final-static-audit-514b2d9.log"
+        ],
+        "evidenceStatus": "historical source passed 32 pages and 23 components with zero violations and coverage issues",
+        "currentness": "stale_regenerate_on_final_product_sha"
+      }
+    },
+    {
+      "id": "D-02",
+      "category": "deferred_final_only",
+      "name": "Source identity reconciliation",
+      "severity": "critical",
+      "status": "DEFERRED_FINAL_SHA_BLOCKING_CI",
+      "provenance": {
+        "sourceSha": "920c7f360688352156de4854b4957a9f2f1f0e43",
+        "artifactPaths": [
+          "evaluation/backend-release-final-2026-07-13/report.md",
+          "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/29309064554"
+        ],
+        "evidenceStatus": "current CI fails because the checked-in browser report identity is stale",
+        "currentness": "live_failure_at_inventory_source_sha"
+      }
+    },
+    {
+      "id": "D-03",
+      "category": "deferred_final_only",
+      "name": "Normal and audit build plus bundle",
+      "severity": "high",
+      "status": "DEFERRED_FINAL_SHA",
+      "provenance": {
+        "sourceSha": "514b2d9a3c884c1a18ecf725285dde0e8a95b6cd",
+        "artifactPaths": [
+          "evaluation/backend-release-final-2026-07-13/final-build-normal-514b2d9.log",
+          "evaluation/backend-release-final-2026-07-13/final-build-audit-514b2d9.log",
+          "evaluation/backend-release-final-2026-07-13/final-bundle-normal-post-tests-514b2d9.log"
+        ],
+        "evidenceStatus": "historical normal and audit builds passed 27 of 27 with expected marker counts",
+        "currentness": "stale_regenerate_on_final_product_sha"
+      }
+    },
+    {
+      "id": "D-04",
+      "category": "deferred_final_only",
+      "name": "108-row Day and Night browser matrix",
+      "severity": "high",
+      "status": "DEFERRED_FINAL_SHA",
+      "provenance": {
+        "sourceSha": "514b2d9a3c884c1a18ecf725285dde0e8a95b6cd",
+        "artifactPaths": [
+          "evaluation/backend-release-final-2026-07-13/final-browser-audit-108-514b2d9.log"
+        ],
+        "evidenceStatus": "historical 108 of 108 browser rows passed",
+        "currentness": "stale_regenerate_on_final_product_sha"
+      }
+    },
+    {
+      "id": "D-05",
+      "category": "deferred_final_only",
+      "name": "Final browser, manual UI, geometry, and live Vercel verification",
+      "severity": "high",
+      "status": "DEFERRED_FINAL_SHA",
+      "provenance": {
+        "sourceSha": "ac3b0f65b55695ec5f43de9a91683b0f8a58e5cf",
+        "artifactPaths": [
+          "evaluation/web-safe-presentation-localization-2026-07-14/report.md",
+          "evaluation/web-safe-presentation-localization-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "artifact explicitly excludes final browser and manual UI verification and production build",
+        "currentness": "not_generated_for_final_product_sha"
+      }
+    },
+    {
+      "id": "D-06",
+      "category": "deferred_final_only",
+      "name": "PDF, NFT, and direct POST",
+      "severity": "high",
+      "status": "DEFERRED_FINAL_SHA",
+      "provenance": {
+        "sourceSha": "514b2d9a3c884c1a18ecf725285dde0e8a95b6cd",
+        "artifactPaths": [
+          "evaluation/backend-release-final-2026-07-13/final-pdf-nft-514b2d9.json",
+          "evaluation/backend-release-final-2026-07-13/final-direct-post-514b2d9.json",
+          "evaluation/backend-release-final-2026-07-13/final-direct-post-514b2d9.pdf"
+        ],
+        "evidenceStatus": "historical direct POST, PDF render, font, pagination, and resource-budget proof passed",
+        "currentness": "stale_regenerate_on_final_product_sha"
+      }
+    },
+    {
+      "id": "A-01",
+      "category": "approval_blocked",
+      "name": "RLS remediation migration",
+      "severity": "critical",
+      "status": "APPROVAL_BLOCKED",
+      "provenance": {
+        "sourceSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "artifactPaths": [
+          "evaluation/supabase-rls-audit-2026-07-14/report.md",
+          "evaluation/supabase-rls-audit-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "10 open findings: P1 3, P2 4, P3 3; no migration applied",
+        "currentness": "audit_current_for_unchanged_auth_and_migration_paths"
+      }
+    },
+    {
+      "id": "A-02",
+      "category": "approval_blocked",
+      "name": "Authenticated cross-tenant and mutating CRUD proof",
+      "severity": "critical",
+      "status": "APPROVAL_BLOCKED",
+      "provenance": {
+        "sourceSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "artifactPaths": [
+          "evaluation/supabase-rls-audit-2026-07-14/report.md",
+          "evaluation/supabase-rls-audit-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "14 cases and 56 expected denies inventoried, zero runtime cases executed; two auth fixtures unavailable and writes not approved",
+        "currentness": "not_executed"
+      }
+    },
+    {
+      "id": "A-03",
+      "category": "approval_blocked",
+      "name": "Live grants, storage object, and path isolation proof",
+      "severity": "high",
+      "status": "APPROVAL_BLOCKED",
+      "provenance": {
+        "sourceSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "artifactPaths": [
+          "evaluation/supabase-rls-audit-2026-07-14/report.md",
+          "evaluation/supabase-rls-audit-2026-07-14/report.json",
+          "evaluation/supabase-rls-audit-2026-07-14/live-probe-resume-result.json"
+        ],
+        "evidenceStatus": "effective grants, storage.objects policies and ownership, uploads, and cross-tenant path isolation remain unverified",
+        "currentness": "read_only_probe_only"
+      }
+    },
+    {
+      "id": "A-04",
+      "category": "approval_blocked",
+      "name": "SIF embeddings and vector runtime",
+      "severity": "high",
+      "status": "APPROVAL_BLOCKED",
+      "provenance": {
+        "sourceSha": "8a6b77ab5e9e9f236ca309eebef900a181d92e79",
+        "artifactPaths": [
+          "evaluation/sif-embedding-gate/runtime-readiness-local.json"
+        ],
+        "evidenceStatus": "6032-row and 61-batch preflight exists; embedding generation, upload, migration decision, RPC smoke, and vector enablement were not executed",
+        "currentness": "approval_held_historical_preflight"
+      }
+    },
+    {
+      "id": "B-01",
+      "category": "long_term_phase_b",
+      "name": "Three-layer knowledge and promotion workflow",
+      "severity": "medium",
+      "status": "DEFERRED_PHASE_B_DESIGN_ONLY",
+      "provenance": {
+        "sourceSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "planCommit": "c241648d901f15130c2d7c3645af69c2d27cfc8b",
+        "artifactPaths": [
+          "docs/phase-b-organization-knowledge-and-engine-plan.md",
+          "evaluation/hermes-engine-adr-review-2026-07-14/report.md",
+          "evaluation/hermes-engine-adr-review-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "design approved and implementation deferred; storage and promotion require separately approved DB design",
+        "currentness": "design_contract_only"
+      }
+    },
+    {
+      "id": "B-02",
+      "category": "long_term_phase_b",
+      "name": "Team plan, organization and site billing, and usage ledger",
+      "severity": "medium",
+      "status": "DEFERRED_PHASE_B_DESIGN_ONLY",
+      "provenance": {
+        "sourceSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "planCommit": "c241648d901f15130c2d7c3645af69c2d27cfc8b",
+        "artifactPaths": [
+          "docs/phase-b-organization-knowledge-and-engine-plan.md",
+          "evaluation/hermes-engine-adr-review-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "no billing schema, data backfill, payment integration, or runtime implementation is authorized",
+        "currentness": "design_contract_only"
+      }
+    },
+    {
+      "id": "B-03",
+      "category": "long_term_phase_b",
+      "name": "Versioned EngineAdapter contracts",
+      "severity": "medium",
+      "status": "DEFERRED_PHASE_B_DESIGN_ONLY",
+      "provenance": {
+        "sourceSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "planCommit": "c241648d901f15130c2d7c3645af69c2d27cfc8b",
+        "artifactPaths": [
+          "docs/phase-b-organization-knowledge-and-engine-plan.md",
+          "evaluation/hermes-engine-adr-review-2026-07-14/report.md"
+        ],
+        "evidenceStatus": "versioned request, result, error, cancellation, resume, capability, and trajectory contracts are not implemented",
+        "currentness": "design_contract_only"
+      }
+    },
+    {
+      "id": "B-04",
+      "category": "long_term_phase_b",
+      "name": "Durable jobs, shared Hermes workers, and service authentication",
+      "severity": "medium",
+      "status": "DEFERRED_PHASE_B_DESIGN_ONLY",
+      "provenance": {
+        "sourceSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "planCommit": "c241648d901f15130c2d7c3645af69c2d27cfc8b",
+        "artifactPaths": [
+          "docs/phase-b-organization-knowledge-and-engine-plan.md",
+          "evaluation/hermes-engine-adr-review-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "leases, checkpoints, retry, dead-letter handling, workload identity, rotation, privacy, license, incident, and capacity reviews remain open",
+        "currentness": "design_contract_only"
+      }
+    },
+    {
+      "id": "B-05",
+      "category": "long_term_phase_b",
+      "name": "Approval and effect ledger plus representative GPT OAuth proof of concept",
+      "severity": "medium",
+      "status": "DEFERRED_PHASE_B_DESIGN_ONLY",
+      "provenance": {
+        "sourceSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "planCommit": "c241648d901f15130c2d7c3645af69c2d27cfc8b",
+        "artifactPaths": [
+          "docs/phase-b-organization-knowledge-and-engine-plan.md",
+          "evaluation/hermes-engine-adr-review-2026-07-14/report.md",
+          "evaluation/hermes-engine-adr-review-2026-07-14/report.json"
+        ],
+        "evidenceStatus": "end-to-end receipts and idempotency are unproven; the PoC needs separate explicit approval after Phase B entry",
+        "currentness": "design_contract_only"
+      }
+    },
+    {
+      "id": "O-01",
+      "category": "other_launch_blocker",
+      "name": "PR 72 is not merge-ready",
+      "severity": "critical",
+      "status": "HOLD_CI_FAILURE",
+      "provenance": {
+        "sourceSha": "920c7f360688352156de4854b4957a9f2f1f0e43",
+        "artifactPaths": [
+          "https://github.com/seojaehong/safeguard-contest-mvp/pull/72",
+          "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/29309064554"
+        ],
+        "evidenceStatus": "PR is open Draft; the single CI job failed in tests and the production build step was skipped",
+        "currentness": "live_github_state_verified_at_generated_at"
+      }
+    }
+  ]
+}
