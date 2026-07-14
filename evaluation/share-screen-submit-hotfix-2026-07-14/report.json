@@ -31,8 +31,19 @@
     "primaryActions": 1,
     "panelHeightBeforeFinalCompression": 1888
   },
+  "browserFinalMobile": {
+    "viewport": "390x844",
+    "horizontalOverflow": 0,
+    "controlsBelow44px": 0,
+    "primaryActions": 1,
+    "sharePanelHeight": 1720,
+    "previewActionGap": 12,
+    "previewHeading": "베트남어(Tiếng Việt) 전송본 미리보기",
+    "residualKoreanMetadataLabels": 0,
+    "screenshot": "output/playwright/share-screen-submit-hotfix-2026-07-14/mobile-vietnamese-final.png"
+  },
   "remainingVerification": [
-    "post-push deployed mobile screenshot",
-    "post-push deployed desktop screenshot"
+    "authentication-protected Vercel preview visual check",
+    "production deployment visual check after explicit release approval"
   ]
 }

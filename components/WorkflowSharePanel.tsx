@@ -537,8 +537,8 @@ function formatMessageTargetLabel(data: AskResponse, selectedTarget: MessageTarg
 }
 
 function formatMessagePreviewHeading(data: AskResponse, selectedTarget: MessageTarget) {
-  if (selectedTarget === "manager") return "관리자용 한국어 메시지 미리보기";
-  return `외국인 근로자 전송본 · ${formatMessageTargetLabel(data, selectedTarget)}`;
+  if (selectedTarget === "manager") return "한국어 전송본 미리보기";
+  return `${formatMessageTargetLabel(data, selectedTarget)} 전송본 미리보기`;
 }
 
 export function WorkflowSharePanel({

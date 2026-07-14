@@ -32,4 +32,10 @@ describe("workspace share simplification", () => {
     expect(sharePanel).not.toContain("관리자 표시와 분리");
     expect(sharePanel).toContain('href="/login"');
   });
+
+  it("keeps the localized message heading compact on mobile", () => {
+    expect(sharePanel).toContain('return "한국어 전송본 미리보기"');
+    expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 전송본 미리보기`');
+    expect(sharePanel).not.toContain("외국인 근로자 전송본 ·");
+  });
 });

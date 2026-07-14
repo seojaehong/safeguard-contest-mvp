@@ -16,7 +16,11 @@
 - Frontend static audit: 32 pages, 23 product components, 0 coverage issues, 0 violations, 0 important declarations.
 - Production build: Next.js 15.5.20, 28 static pages generated, exit 0.
 - Browser first pass at 1440x1000: horizontal overflow 0, controls below 44px 0, primary actions 1. The measured 1,888px panel was then reduced further by removing the duplicate delivery summary, login notice block, verbose channel helper copy, and four-card confirmation ledger.
+- Final mobile browser pass at 390x844: horizontal overflow 0, controls below 44px 0, primary actions 1, and a 12px separation between the message preview and send actions.
+- Vietnamese preview: localized heading and eight message lines rendered, with 0 residual Korean metadata labels (`현장`, `작업`, `핵심 위험`, `필수 조치`, `안전공지`).
+- The mobile preview heading was shortened and stacked so it no longer collapses into narrow vertical words.
+- Screenshot: `output/playwright/share-screen-submit-hotfix-2026-07-14/mobile-vietnamese-final.png`.
 
 ## Honest boundary
 
-The final post-compression mobile browser rerun was not completed before the submission hotfix commit. Source-level responsive rules, focused behavior tests, strict typecheck, static audit, and production build are green. A final deployed mobile screenshot remains a post-push check.
+The final mobile rerun used the current local product HEAD and a real generated sample workpack. The Vercel preview remains authentication-protected, so public deployed visual verification is still separate from this local product verification. Production `www.safeclaw.kr` was not changed in this pass.

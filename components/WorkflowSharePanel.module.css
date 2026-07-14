@@ -36,6 +36,17 @@
     text-align: left;
   }
 
+  .panel :global(.message-preview-panel) :global(.compact-head) {
+    display: grid;
+    justify-content: stretch;
+    gap: 4px;
+  }
+
+  .panel :global(.message-preview-panel) :global(.compact-head) strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
   .panel :global(.command-actions) {
     flex-wrap: wrap;
   }
