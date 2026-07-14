@@ -1,0 +1,43 @@
+{
+  "date": "2026-07-15",
+  "branch": "fix/northstar-grounded-generation-20260715",
+  "base": "dc608c8",
+  "scope": "general /api/ask full-mode deliverable generation",
+  "result": "pass",
+  "contract": {
+    "version": "grounded-generation-v1",
+    "immutable": true,
+    "sourceIdentity": "sha256",
+    "sourceKinds": ["direct", "sif", "kosha", "law"],
+    "unknownReferencePolicy": "reject_group_and_review_required",
+    "unknownControlPolicy": "reject_group_and_review_required",
+    "fallbackPreserved": true
+  },
+  "tdd": {
+    "intentionalRedRuns": 4,
+    "finalTestFilesPassed": 4,
+    "finalTestsPassed": 58,
+    "finalTestsFailed": 0
+  },
+  "verification": [
+    {
+      "command": "npm.cmd ci --ignore-scripts",
+      "exitCode": 0,
+      "packagesInstalled": 373,
+      "dependencyAuditModerateFindings": 5
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts",
+      "exitCode": 0,
+      "testFilesPassed": 4,
+      "testsPassed": 58,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0
+    }
+  ],
+  "remainingBoundary": "Free-form prose is checked for explicit out-of-packet citations, but the report does not claim complete semantic equivalence checking for every naturalized sentence.",
+  "excludedChanges": ["database schema", "migration", "environment contract", "API response schema"]
+}

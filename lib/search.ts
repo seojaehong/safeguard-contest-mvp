@@ -5,6 +5,7 @@ import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-d
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
+import { buildGroundedGenerationPacket } from "./grounded-generation-contract";
 import {
   deriveSafetyReferenceOperationalView,
   deriveSafetyReferenceRetrievalModeFromItems,
@@ -1909,6 +1910,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             });
             const dbHarnessPacket = buildPublicDbHarnessPacket(internalDbHarnessPacket);
             const koshaParentEvidenceReadyIdsEarly = buildKoshaParentEvidenceReadyIds(dbHarnessPacket);
+            const groundingPacket = buildGroundedGenerationPacket({
+              dbHarnessPacket,
+              legalCandidates: rawBase.slice(0, 6),
+              eligibleKoshaIds: koshaParentEvidenceReadyIdsEarly
+            });
             const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
             const publicSafeRefItems = [
               ...dbHarnessPacket.directEvidence,
@@ -1940,6 +1946,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               accidentLines: accidentLinesEarly,
               koshaPrimaryRefs: koshaPrimaryRefsEarly,
               dbHarnessContext,
+              groundingPacket,
               scope: "full",
               onProgress,
               traceId

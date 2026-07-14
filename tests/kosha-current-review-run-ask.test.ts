@@ -467,8 +467,12 @@ describe("current-base runAsk retrieval provenance", () => {
     const generationInputs = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.map(([input]) => input as {
       koshaLines?: string[];
       koshaPrimaryRefs?: Array<{ title: string }>;
+      groundingPacket?: GenerateAllOptions["groundingPacket"];
     });
     expect(generationInputs.every((input) => (input.koshaPrimaryRefs || []).length === 0)).toBe(true);
+    expect(generationInputs.every((input) => input.groundingPacket?.sources.every((source) => (
+      source.sourceId !== unverified.source_id
+    )))).toBe(true);
     expect(generationInputs.flatMap((input) => input.koshaLines || []).join("\n")).not.toContain(
       "EXCLUDED_KOSHA_CONTROL"
     );
@@ -946,10 +950,15 @@ describe("current-base runAsk retrieval provenance", () => {
 
     const generationInputs = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.map(([input]) => input as {
       koshaPrimaryRefs?: Array<{ title: string }>;
+      groundingPacket?: GenerateAllOptions["groundingPacket"];
     });
     expect(generationInputs.some((input) => (
       input.koshaPrimaryRefs || []
     ).some((reference) => reference.title === verifiedTitle))).toBe(true);
+    expect(generationInputs.some((input) => input.groundingPacket?.sources.some((source) => (
+      source.kind === "kosha" && source.sourceId === verified.source_id
+    )))).toBe(true);
+    expect(generationInputs.every((input) => Object.isFrozen(input.groundingPacket))).toBe(true);
   }, 30_000);
 
   it("keeps distinct verified KOSHA documents with identical operational controls", async () => {
