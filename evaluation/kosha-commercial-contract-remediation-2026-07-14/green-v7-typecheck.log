@@ -1,0 +1,9 @@
+phase=green-v7-typecheck
+head=90092bcece5a5e2121b652a4e63b1031ab0f6545
+command=npm.cmd run typecheck
+startedAt=2026-07-14T21:38:44.8487444+09:00
+
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+

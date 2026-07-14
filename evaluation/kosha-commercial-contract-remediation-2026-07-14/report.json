@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 7,
   "date": "2026-07-14",
   "branch": "fix/kosha-commercial-contract-remediation",
   "status": {
@@ -38,6 +38,65 @@
     "log": "red-v4-independent-review.log",
     "worktreeByteSha256": "58b35e8b2fc4db316992db84516c601fcccec038ca0caafb70466ba0ca4236ef",
     "gitBlobSha256": "4e93f3012dc59df6f3cc2b0d73a335696208e98974690feeec55aba9a9faa9ed"
+  },
+  "v7MixedQueryP1Remediation": {
+    "boundInputHead": "9d37024371d815fbdcd373de1cd6ab2876aa9b97",
+    "redCommit": "cc171cbccabfa0c8dd2e31d2f8ed6f9007d8ade0",
+    "productCommit": "90092bcece5a5e2121b652a4e63b1031ab0f6545",
+    "finding": "canonical query hazard families collapsed none and multiple to an empty set, then treated empty as unrestricted, allowing third-family fire direct evidence for a mixed collision/electrical query",
+    "remediation": {
+      "queryFamilyState": ["none", "single", "multiple"],
+      "multipleQueryFamiliesPreserved": true,
+      "directEvidenceRule": "non-empty query family sets require explicit overlap with the direct evidence canonical hazard family",
+      "thirdFamilyBlockedPublicSurfaces": [
+        "public_packet",
+        "mcp_packet",
+        "model_prompt",
+        "answer",
+        "practical_points",
+        "risk_rows",
+        "serialized_mcp_payload"
+      ]
+    },
+    "verification": {
+      "red": {
+        "exitCode": 1,
+        "failedTests": 2,
+        "passedTests": 78,
+        "log": "red-v7-mixed-query-third-family.log"
+      },
+      "greenHostileAndMcp": {
+        "passed": 80,
+        "log": "green-v7-mixed-query-third-family.log"
+      },
+      "focusedRegression": {
+        "passed": 56,
+        "skipped": 20,
+        "log": "green-v7-focused-regression.log"
+      },
+      "mcpRegression": {
+        "passed": 28,
+        "skipped": 2,
+        "log": "green-v7-mcp-regression.log"
+      },
+      "typecheck": {
+        "passed": true,
+        "log": "green-v7-typecheck.log"
+      }
+    },
+    "preserved": {
+      "mixedReferenceParentBlocked": true,
+      "singleFamilyPositive": true,
+      "integrityBlockedKosha": true,
+      "koshaTechnicalGuidanceOnly": true,
+      "naturalizeOnly": true,
+      "evidenceOrder": ["SIF", "KOSHA", "law"]
+    },
+    "scope": {
+      "productFiles": ["lib/db-harness.ts"],
+      "testFiles": ["tests/commercial-harness.test.ts", "tests/mcp-tools.test.ts"],
+      "forbiddenChanges": 0
+    }
   },
   "intermediateProductRegression": {
     "candidate": "f90562cfeabe2610cf3faee255480b1c16680274",
