@@ -1,0 +1,65 @@
+{
+  "authoritativeBase": "785f328e2804ba472a1d659d83ef4c3c89acf342",
+  "branch": "fix/document-typography-audit-20260714",
+  "status": "pass",
+  "focusedRed": {
+    "failedFiles": 4,
+    "failedTests": 4,
+    "passedTests": 26
+  },
+  "focusedGreen": {
+    "passedFiles": 4,
+    "passedTests": 30,
+    "failedTests": 0
+  },
+  "preBuildNorthStar": {
+    "buildIdPresent": false,
+    "skippedFiles": 1,
+    "skippedTests": 4,
+    "reason": "missing .next/BUILD_ID; run npm.cmd run build first"
+  },
+  "build": {
+    "status": "pass",
+    "staticPages": 28
+  },
+  "postBuildNorthStar": {
+    "passedFiles": 1,
+    "passedTests": 4,
+    "failedTests": 0,
+    "viewportCases": 4,
+    "summaryHeightPx": 50,
+    "geometryFindingCount": 0
+  },
+  "frontendAudit": {
+    "status": "pass",
+    "violationCount": 0,
+    "coverageIssues": 0,
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "cssLines": 20967
+  },
+  "typecheck": {
+    "status": "pass"
+  },
+  "fullTestBeforeBuild": {
+    "passedFiles": 135,
+    "skippedFiles": 6,
+    "failedFiles": 9,
+    "passedTests": 1442,
+    "skippedTests": 43,
+    "failedTests": 5,
+    "knownOutOfScope": [
+      "stale frontend route source identity",
+      "dirty working-tree provenance guards",
+      "fresh-worktree dependency and temporary pnpm virtual-store setup"
+    ]
+  },
+  "logs": [
+    "evaluation/document-typography-audit-2026-07-14/full-test-before-build.log",
+    "evaluation/document-typography-audit-2026-07-14/north-star-before-build.log",
+    "evaluation/document-typography-audit-2026-07-14/typecheck.log",
+    "evaluation/document-typography-audit-2026-07-14/frontend-audit.log",
+    "evaluation/document-typography-audit-2026-07-14/build.log",
+    "evaluation/document-typography-audit-2026-07-14/north-star-after-build.log"
+  ]
+}

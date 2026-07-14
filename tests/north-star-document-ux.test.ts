@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
@@ -28,6 +29,12 @@ const viewportCases: ViewportCase[] = [
 ];
 const metricRows: Array<Record<string, unknown>> = [];
 const evaluationDirectory = path.join(process.cwd(), "evaluation", "north-star-document-ux-24h-2026-07-14");
+const productionBuildIdPath = path.join(process.cwd(), ".next", "BUILD_ID");
+const hasProductionBuild = existsSync(productionBuildIdPath);
+const productionBrowserSuite = hasProductionBuild ? describe : describe.skip;
+const productionBrowserSuiteName = hasProductionBuild
+  ? "North Star document cockpit and editor UX"
+  : "North Star document cockpit and editor UX [skipped: missing .next/BUILD_ID; run npm.cmd run build first]";
 
 type ViewportGeometry = {
   clippedControls: string[];
@@ -64,7 +71,7 @@ async function openGeneratedWorkspace(page: Page, theme: Theme) {
   await page.locator(".document-preview-pane").waitFor({ state: "visible" });
 }
 
-describe("North Star document cockpit and editor UX", () => {
+productionBrowserSuite(productionBrowserSuiteName, () => {
   beforeAll(async () => {
     harness = await startIsolatedNextBrowserHarness({
       slug: "north-star-document-ux",

@@ -14296,9 +14296,20 @@ body:has(.safeclaw-landing) :is(
   list-style: none;
   color: var(--workspace-ink);
   padding: 10px 14px;
+}
+
+.command-center-shell .document-provenance-drawer > summary {
   font-size: var(--text-table);
-  font-weight: 650;
+  font-weight: 500;
   line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell .document-editor-context > summary {
+  font-size: var(--text-table);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-provenance-drawer > summary::-webkit-details-marker,
@@ -14312,6 +14323,8 @@ body:has(.safeclaw-landing) :is(
   content: "+";
   font-size: var(--text-body-lg);
   font-weight: 500;
+  line-height: var(--leading-body-lg);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-provenance-drawer[open] > summary::after,
@@ -14352,20 +14365,23 @@ body:has(.safeclaw-landing) :is(
   font-style: normal;
   font-weight: 700;
   line-height: var(--leading-hud);
+  letter-spacing: var(--tracking-hud);
 }
 
 .command-center-shell .document-provenance-evidence article > strong {
   color: var(--workspace-ink);
   font-size: var(--text-table);
-  font-weight: 650;
+  font-weight: 500;
   line-height: var(--leading-table);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-provenance-evidence article > small {
   color: var(--workspace-muted);
   font-size: var(--text-caption);
   font-weight: 600;
-  line-height: var(--leading-longform);
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-provenance-evidence article > a {
@@ -14374,8 +14390,10 @@ body:has(.safeclaw-landing) :is(
   display: inline-flex;
   align-items: center;
   color: var(--workspace-accent-hover);
-  font-size: var(--text-caption);
+  font-size: var(--text-control);
   font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-check-details summary {
