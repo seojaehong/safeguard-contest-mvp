@@ -60,8 +60,8 @@ export function buildChannelRuntimeConfiguration(input: {
     relayEndpoint: fixture ? null : input.relayEndpoint,
     relayConfigured: fixture || Boolean(input.relayEndpoint && input.relayCredential),
     providerCredential: fixture ? null : input.relayCredential,
-    persistentIdempotencyPolicyVersion: fixture ? "fixture-idempotency/v1" : "provider-idempotency/unavailable",
-    persistentIdempotencySupported: fixture,
+    persistentIdempotencyPolicyVersion: "share-session-access-policy-cas/v1",
+    persistentIdempotencySupported: true,
     kakao: {
       enabled: kakaoEnabled,
       provider: fixture ? "safe-fixture" : kakaoEnabled ? "solapi-alimtalk" : null,
@@ -371,6 +371,17 @@ function resolveChannel(input: ChannelAvailabilityInput, channel: WorkpackDispat
       ownerRoute: "/settings"
     };
   }
+  if (input.runtime.dispatchMode === "fixture") {
+    return {
+      channel,
+      configured: false,
+      approved: channel !== "kakao" || input.runtime.kakao.approved,
+      available: false,
+      recipientCount: input.recipients.length,
+      reasonCode: "provider_unconfigured",
+      ownerRoute: "/settings"
+    };
+  }
   if (input.runtime.dispatchMode === "live" && !input.runtime.persistentIdempotencySupported) {
     return {
       channel,
@@ -418,7 +429,7 @@ function resolveChannel(input: ChannelAvailabilityInput, channel: WorkpackDispat
   }
   return {
     channel,
-    configured: input.runtime.dispatchMode === "fixture" || input.runtime.relayConfigured,
+    configured: input.runtime.relayConfigured,
     approved: true,
     available: true,
     recipientCount: input.recipients.length,

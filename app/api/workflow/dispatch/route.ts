@@ -1,311 +1,273 @@
+import { randomUUID } from "node:crypto";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-import { createRateLimiter } from "@/lib/rate-limit";
+
 import { enforceRateLimit } from "@/lib/api-guard";
-import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
-import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
-import { validateDispatchContacts, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
-import {
-  loadActiveOwnedShareSession,
-  loadOwnedWorkpackOperationContext,
-  loadServerShareRecipients
-} from "@/lib/workpack-commercial-store";
 import {
   buildChannelRuntimeConfiguration,
   buildShareRecipientDigest,
   resolveServerChannelAvailability,
   validateShareDispatchBinding
 } from "@/lib/channel-availability";
+import { parseWorkflowShareChannels, type WorkflowShareChannel } from "@/lib/channel-resolution-contract";
+import { isLiveDispatchEnabled, resolveWebhookConfig } from "@/lib/n8n-webhook";
+import { createRateLimiter } from "@/lib/rate-limit";
 import {
   readReviewedLocalizationEnvelopes,
   resolveReviewedLocalizationAuthority
 } from "@/lib/reviewed-localization-envelope";
+import {
+  createSupabaseAdminClient,
+  getWorkspaceUser,
+  toJson,
+  type WorkspaceDatabase
+} from "@/lib/supabase-admin";
+import { validateDispatchContacts } from "@/lib/workpack-commercial";
+import {
+  loadActiveOwnedShareSession,
+  loadOwnedWorkpackOperationContext,
+  loadServerShareRecipients
+} from "@/lib/workpack-commercial-store";
+import {
+  completeServerDispatchGate,
+  markServerDispatchGateUncertain,
+  parseServerDispatchGate,
+  reserveServerDispatchGate,
+  type ServerDispatchGate,
+  type ServerDispatchOutcome
+} from "@/lib/workpack-dispatch-gate";
 import { readWorkpackShareServerConfig } from "@/lib/workpack-share-server-config";
+import {
+  dispatchWithConfiguredProvider,
+  type ConfiguredProviderChannelResult
+} from "@/lib/workflow-dispatch-provider";
 
 export const dynamic = "force-dynamic";
 
 const limiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
+const allowedFields = new Set(["workpackId", "shareSessionId", "idempotencyKey", "channels", "operatorNote"]);
+const idempotencyKeyPattern = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
 
-type WorkflowChannel = "email" | "sms" | "kakao" | "band";
-
-type WorkflowRequest = {
-  workpackId?: string;
-  shareSessionId?: string;
-  idempotencyKey?: string;
-  channels?: WorkflowChannel[];
-  operatorNote?: string;
+type DispatchGateRow = {
+  id: string;
+  accessPolicy: Record<string, unknown>;
+  updatedAt: string;
+  gate: ServerDispatchGate;
 };
-
-type WorkflowSuccessResponse = {
-  ok?: boolean;
-  workflowRunId?: string;
-  providerStatus?: string;
-  message?: string;
-  channelResults?: unknown;
-  summary?: unknown;
-  idempotencySupported?: boolean;
-  duplicateRisk?: boolean;
-  providerCalled?: boolean;
-};
-
-type WorkflowChannelStatus = "sent" | "failed" | "unconfigured" | "skipped" | "partial";
-
-type WorkflowChannelResult = {
-  channel: WorkflowChannel;
-  provider: string;
-  status: WorkflowChannelStatus;
-  message: string;
-  httpStatus?: number;
-};
-
-type WorkflowSummary = {
-  requested: number;
-  sent: number;
-  partial: number;
-  failed: number;
-  unconfigured: number;
-  skipped: number;
-};
-
-const ACTIVE_CHANNELS: WorkflowChannel[] = ["email", "sms", "kakao"];
-const LOCKED_CHANNELS: WorkflowChannel[] = ["band"];
-const PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED = false;
-const PROVIDER_IDEMPOTENCY_KEY_PATTERN = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
-
-function isKakaoDispatchEnabled() {
-  return process.env.SAFEGUARD_KAKAO_ENABLED === "1" || process.env.SAFECLAW_KAKAO_ENABLED === "1";
-}
-
-function isKakaoProviderConfigured() {
-  const senderKey = process.env.SOLAPI_KAKAO_SENDER_KEY?.trim();
-  const templateId = process.env.SOLAPI_KAKAO_TEMPLATE_ID?.trim();
-  const templateCode = process.env.SOLAPI_KAKAO_TEMPLATE_CODE?.trim();
-  return isKakaoDispatchEnabled() && Boolean(senderKey || templateId || templateCode);
-}
-
-function formatChannelLabel(channel: WorkflowChannel) {
-  if (channel === "email") return "메일";
-  if (channel === "sms") return "문자";
-  if (channel === "kakao") return "카카오 알림톡";
-  return "밴드";
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function parseChannels(value: unknown): WorkflowChannel[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is WorkflowChannel => (
-    typeof item === "string" && ACTIVE_CHANNELS.includes(item as WorkflowChannel)
-  ));
-}
-
-function parseLockedChannels(value: unknown): WorkflowChannel[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is WorkflowChannel => (
-    typeof item === "string" && LOCKED_CHANNELS.includes(item as WorkflowChannel)
-  ));
-}
-
-function parseUnsupportedChannels(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  const allowed = new Set<string>([...ACTIVE_CHANNELS, ...LOCKED_CHANNELS]);
-  return value
-    .filter((item): item is string => typeof item === "string")
-    .map((item) => item.trim())
-    .filter((item) => item && !allowed.has(item));
-}
-
-function parseChannelStatus(value: unknown): WorkflowChannelStatus {
-  if (value === "sent" || value === "failed" || value === "unconfigured" || value === "skipped" || value === "partial") {
-    return value;
-  }
-
-  return "skipped";
-}
-
-function parseHttpStatus(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
-function normalizeChannelResults(value: unknown, requestedChannels: WorkflowChannel[]): WorkflowChannelResult[] {
-  const byChannel = new Map<WorkflowChannel, WorkflowChannelResult>();
-
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      if (!isRecord(item)) continue;
-      const channel = item.channel;
-      if (typeof channel !== "string" || !ACTIVE_CHANNELS.includes(channel as WorkflowChannel)) continue;
-      byChannel.set(channel as WorkflowChannel, {
-        channel: channel as WorkflowChannel,
-        provider: typeof item.provider === "string" ? item.provider : "n8n",
-        status: parseChannelStatus(item.status),
-        message: typeof item.message === "string" ? item.message : "채널 처리 결과가 반환되었습니다.",
-        httpStatus: parseHttpStatus(item.httpStatus)
-      });
-    }
-  }
-
-  return requestedChannels.map((channel) => (
-    byChannel.get(channel) || {
-      channel,
-      provider: "n8n",
-      status: "skipped",
-      message: "n8n 응답에서 이 채널의 provider 결과를 확인하지 못했습니다."
-    }
-  ));
-}
-
-function summarizeChannelResults(results: WorkflowChannelResult[]): WorkflowSummary {
-  return results.reduce<WorkflowSummary>((summary, item) => {
-    if (item.status === "sent") summary.sent += 1;
-    if (item.status === "partial") summary.partial += 1;
-    if (item.status === "failed") summary.failed += 1;
-    if (item.status === "unconfigured") summary.unconfigured += 1;
-    if (item.status === "skipped") summary.skipped += 1;
-    return summary;
-  }, {
-    requested: results.length,
-    sent: 0,
-    partial: 0,
-    failed: 0,
-    unconfigured: 0,
-    skipped: 0
-  });
-}
-
-function buildFixtureDispatchResponse(channels: WorkflowChannel[], recipients: Array<Record<string, unknown>>): WorkflowSuccessResponse {
+function parseBodyChannels(value: unknown): {
+  channels: WorkflowShareChannel[] | null;
+  lockedChannels: string[];
+  unsupportedChannels: string[];
+} {
+  const raw = Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string").map((item) => item.trim())
+    : [];
   return {
-    ok: true,
-    workflowRunId: `fixture-${Date.now()}`,
-    providerStatus: "fixture",
-    idempotencySupported: false,
-    duplicateRisk: false,
-    providerCalled: false,
-    channelResults: channels.map((channel) => ({
-      channel,
-      provider: "safe-fixture",
-      status: "sent",
-      message: `SAFEGUARD_RUN_LIVE_DISPATCH=1이 아니므로 실제 ${formatChannelLabel(channel)} provider 호출 없이 fixture 접수로 기록했습니다.`,
-      httpStatus: 202
-    })),
-    summary: {
-      mode: "fixture",
-      recipientCount: recipients.length
-    },
-    message: "안전 fixture 모드로 전파 요청을 검증했습니다. 실제 provider 전송은 실행하지 않았습니다."
+    channels: parseWorkflowShareChannels(value),
+    lockedChannels: raw.filter((channel) => channel === "band"),
+    unsupportedChannels: raw.filter((channel) => !["email", "sms", "kakao", "band"].includes(channel))
   };
 }
 
-function buildPreflightChannelResults(channels: WorkflowChannel[], webhookConfigured: boolean): WorkflowChannelResult[] {
-  return channels.flatMap((channel) => {
-    if (channel !== "kakao") return [];
-
-    if (!isKakaoDispatchEnabled()) {
-      return [{
-        channel,
-        provider: "solapi-alimtalk",
-        status: "unconfigured",
-        message: "카카오 알림톡은 채널 연동과 승인 템플릿 설정 후 활성화됩니다."
-      }];
-    }
-
-    if (!webhookConfigured && !isKakaoProviderConfigured()) {
-      return [{
-        channel,
-        provider: "solapi-alimtalk",
-        status: "unconfigured",
-        message: "카카오 알림톡 전송 설정을 확인해야 합니다. n8n relay 또는 Solapi 템플릿 설정이 필요합니다."
-      }];
-    }
-
-    return [];
-  });
+function gateMatchesRequest(gate: ServerDispatchGate, input: {
+  shareSessionId: string;
+  workpackId: string;
+  canonicalWorkpackRevision: string;
+  channels: WorkflowShareChannel[];
+  idempotencyKey: string;
+}): boolean {
+  return gate.shareSessionId === input.shareSessionId
+    && gate.workpackId === input.workpackId
+    && gate.canonicalWorkpackRevision === input.canonicalWorkpackRevision
+    && gate.idempotencyKey === input.idempotencyKey
+    && JSON.stringify(gate.requestedChannels) === JSON.stringify(input.channels);
 }
 
-function isPreflightBlocked(channel: WorkflowChannel, preflightResults: WorkflowChannelResult[]) {
-  return preflightResults.some((item) => item.channel === channel && item.status === "unconfigured");
+function nextCasTimestamp(previous: string): string {
+  const previousTime = Date.parse(previous);
+  const minimum = Number.isFinite(previousTime) ? previousTime + 1 : 0;
+  return new Date(Math.max(Date.now(), minimum)).toISOString();
+}
+
+async function loadDispatchGateRow(
+  client: SupabaseClient<WorkspaceDatabase>,
+  input: { shareSessionId: string; workpackId: string; organizationId: string; userId: string }
+): Promise<{ ok: true; row: DispatchGateRow } | { ok: false; status: number; reasonCode: string; message: string }> {
+  const { data, error } = await client
+    .from("workpack_share_sessions")
+    .select("id,organization_id,workpack_id,created_by,status,access_policy,updated_at")
+    .eq("id", input.shareSessionId)
+    .eq("workpack_id", input.workpackId)
+    .eq("organization_id", input.organizationId)
+    .eq("created_by", input.userId)
+    .maybeSingle();
+  if (error) {
+    console.error("dispatch gate read failed", error);
+    return { ok: false, status: 500, reasonCode: "dispatch_gate_read_failed", message: "서버 dispatch gate를 읽지 못했습니다." };
+  }
+  if (!data || data.status !== "active" || !isRecord(data.access_policy)) {
+    return { ok: false, status: 409, reasonCode: "dispatch_gate_missing", message: "활성 공유 세션의 서버 dispatch gate를 찾지 못했습니다." };
+  }
+  const gate = parseServerDispatchGate(data.access_policy.dispatchGate);
+  if (!gate) {
+    return { ok: false, status: 409, reasonCode: "dispatch_gate_invalid", message: "공유 세션의 서버 dispatch gate가 올바르지 않습니다." };
+  }
+  return {
+    ok: true,
+    row: { id: data.id, accessPolicy: data.access_policy, updatedAt: data.updated_at, gate }
+  };
+}
+
+async function compareAndSwapDispatchGate(
+  client: SupabaseClient<WorkspaceDatabase>,
+  row: DispatchGateRow,
+  gate: ServerDispatchGate,
+  changedAt: string
+): Promise<{ ok: true; row: DispatchGateRow } | { ok: false; reasonCode: string }> {
+  const accessPolicy = { ...row.accessPolicy, dispatchGate: gate };
+  const { data, error } = await client
+    .from("workpack_share_sessions")
+    .update({ access_policy: toJson(accessPolicy), updated_at: changedAt })
+    .eq("id", row.id)
+    .eq("updated_at", row.updatedAt)
+    .eq("status", "active")
+    .select("id,access_policy,updated_at")
+    .maybeSingle();
+  if (error) {
+    console.error("dispatch gate compare-and-swap failed", error);
+    return { ok: false, reasonCode: "dispatch_gate_cas_failed" };
+  }
+  if (!data || !isRecord(data.access_policy)) {
+    return { ok: false, reasonCode: "dispatch_already_reserved" };
+  }
+  const persistedGate = parseServerDispatchGate(data.access_policy.dispatchGate);
+  if (!persistedGate || persistedGate.integrityDigest !== gate.integrityDigest) {
+    return { ok: false, reasonCode: "dispatch_gate_persistence_mismatch" };
+  }
+  return {
+    ok: true,
+    row: { id: data.id, accessPolicy: data.access_policy, updatedAt: data.updated_at, gate: persistedGate }
+  };
+}
+
+async function persistServerDispatchLogs(
+  client: SupabaseClient<WorkspaceDatabase>,
+  input: {
+    organizationId: string;
+    siteId: string | null;
+    workpackId: string;
+    shareSessionId: string;
+    canonicalWorkpackRevision: string;
+    idempotencyKey: string;
+    receiptId: string;
+    outcome: ServerDispatchOutcome;
+    workflowRunId: string;
+    recipientCount: number;
+    channelResults: ConfiguredProviderChannelResult[];
+  }
+): Promise<{ ok: true; logIds: string[] } | { ok: false }> {
+  const rows: WorkspaceDatabase["public"]["Tables"]["dispatch_logs"]["Insert"][] = input.channelResults.map((result) => ({
+    organization_id: input.organizationId,
+    site_id: input.siteId,
+    workpack_id: input.workpackId,
+    channel: result.channel,
+    target_label: `${input.recipientCount}명`,
+    target_contact: null,
+    language_code: null,
+    provider: result.provider,
+    provider_status: result.status,
+    workflow_run_id: input.workflowRunId,
+    failure_reason: result.status === "failed" ? result.message : null,
+    payload: toJson({
+      version: "server-dispatch-evidence/v1",
+      receiptId: input.receiptId,
+      shareSessionId: input.shareSessionId,
+      idempotencyKey: input.idempotencyKey,
+      workpackId: input.workpackId,
+      canonicalWorkpackRevision: input.canonicalWorkpackRevision,
+      outcome: input.outcome,
+      channel: result.channel,
+      channelOutcome: result.status,
+      providerCalled: true
+    })
+  }));
+  const { data, error } = await client.from("dispatch_logs").insert(rows).select("id");
+  if (error) {
+    console.error("server dispatch evidence insert failed", error);
+    return { ok: false };
+  }
+  const logIds = (data || []).flatMap((item) => (
+    typeof item.id === "string" && item.id.trim() ? [item.id] : []
+  ));
+  if (logIds.length !== rows.length) {
+    console.error("server dispatch evidence identities incomplete", { expected: rows.length, actual: logIds.length });
+    return { ok: false };
+  }
+  return { ok: true, logIds };
+}
+
+function classifyOutcome(results: ConfiguredProviderChannelResult[]): ServerDispatchOutcome {
+  const sent = results.filter((result) => result.status === "sent").length;
+  if (sent === results.length) return "accepted";
+  if (sent > 0) return "partial";
+  return "failed";
 }
 
 export async function POST(request: NextRequest) {
   const limited = enforceRateLimit(request, limiter);
   if (limited) return limited;
-  const webhookConfig = resolveWebhookConfig();
+  const webhook = resolveWebhookConfig();
 
-  let body: WorkflowRequest;
+  let body: Record<string, unknown>;
   try {
     const parsed = await request.json() as unknown;
     body = isRecord(parsed) ? parsed : {};
   } catch (error) {
     console.warn("workflow dispatch body parse failed", error);
-    return NextResponse.json({
-      ok: false,
-      configured: Boolean(webhookConfig.url && webhookConfig.token),
-      message: "요청 본문을 해석하지 못했습니다."
-    }, { status: 400 });
+    return NextResponse.json({ ok: false, configured: false, providerCalled: false, message: "요청 본문을 해석하지 못했습니다." }, { status: 400 });
   }
 
-  const channels = parseChannels(body.channels);
-  const lockedChannels = parseLockedChannels(body.channels);
-  const unsupportedChannels = parseUnsupportedChannels(body.channels);
-  const allowedFields = new Set(["workpackId", "shareSessionId", "idempotencyKey", "channels", "operatorNote"]);
   const rejectedFields = Object.keys(body).filter((key) => !allowedFields.has(key));
-
-  if (rejectedFields.length) {
+  const parsedChannels = parseBodyChannels(body.channels);
+  if (rejectedFields.length || parsedChannels.lockedChannels.length || parsedChannels.unsupportedChannels.length) {
     return NextResponse.json({
       ok: false,
-      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      configured: Boolean(webhook.url && webhook.token),
+      providerCalled: false,
       rejectedFields,
-      message: "전파 요청에는 workpackId, shareSessionId, channels, operatorNote만 사용할 수 있습니다."
-    }, { status: 400 });
-  }
-
-  if (lockedChannels.length) {
-    return NextResponse.json({
-      ok: false,
-      configured: Boolean(webhookConfig.url && webhookConfig.token),
-      lockedChannels,
-      message: "밴드 전파는 승인 대기 상태입니다. 현재 서버 전파는 메일·문자와 설정된 카카오 알림톡만 허용합니다."
-    }, { status: 400 });
-  }
-
-  if (unsupportedChannels.length) {
-    return NextResponse.json({
-      ok: false,
-      configured: Boolean(webhookConfig.url && webhookConfig.token),
-      unsupportedChannels,
-      message: "지원하지 않는 전파 채널입니다. 현재 활성 채널은 메일·문자와 설정된 카카오 알림톡입니다."
+      lockedChannels: parsedChannels.lockedChannels,
+      unsupportedChannels: parsedChannels.unsupportedChannels,
+      message: "전파 요청에는 서버가 허용한 작업팩, 세션, idempotency key와 메일·문자·카카오 채널만 사용할 수 있습니다."
     }, { status: 400 });
   }
 
   const workpackId = typeof body.workpackId === "string" ? body.workpackId.trim() : "";
   const shareSessionId = typeof body.shareSessionId === "string" ? body.shareSessionId.trim() : "";
   const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim() : "";
-  if (!workpackId || !shareSessionId || !PROVIDER_IDEMPOTENCY_KEY_PATTERN.test(idempotencyKey) || channels.length === 0) {
-    return NextResponse.json({
-      ok: false,
-      configured: Boolean(webhookConfig.url && webhookConfig.token),
-      message: "작업팩, 공유 세션, provider idempotency key, 전파 채널을 확인해 주세요."
-    }, { status: 400 });
+  const channels = parsedChannels.channels;
+  if (!workpackId || !shareSessionId || !idempotencyKeyPattern.test(idempotencyKey) || !channels) {
+    return NextResponse.json({ ok: false, configured: false, providerCalled: false, message: "작업팩, 공유 세션, 서버 idempotency key, 전파 채널을 확인해 주세요." }, { status: 400 });
   }
 
   const client = createSupabaseAdminClient();
-  if (!client) {
-    return NextResponse.json({ ok: false, configured: false, message: "Supabase 저장소가 아직 설정되지 않았습니다." }, { status: 503 });
-  }
+  if (!client) return NextResponse.json({ ok: false, configured: false, providerCalled: false, message: "Supabase 저장소가 아직 설정되지 않았습니다." }, { status: 503 });
   const user = await getWorkspaceUser(client, request.headers);
-  if (!user) {
-    return NextResponse.json({ ok: false, configured: true, message: "관리자 로그인이 필요합니다." }, { status: 401 });
-  }
+  if (!user) return NextResponse.json({ ok: false, configured: true, providerCalled: false, message: "관리자 로그인이 필요합니다." }, { status: 401 });
 
   const owned = await loadOwnedWorkpackOperationContext(client, user, workpackId);
-  if (!owned.ok) {
-    return NextResponse.json({ ok: false, configured: true, message: owned.message }, { status: owned.status });
-  }
+  if (!owned.ok) return NextResponse.json({ ok: false, configured: true, providerCalled: false, message: owned.message }, { status: owned.status });
   if (!owned.context.shareAuthority.readiness.canShare || !owned.context.shareAuthority.workpack) {
     return NextResponse.json({
       ok: false,
       configured: true,
+      state: "stale",
+      reasonCode: "workpack_revalidation",
+      providerCalled: false,
       readiness: owned.context.shareAuthority.readiness,
       message: "서버 검수에서 공유 준비가 확인되지 않은 작업팩은 전파할 수 없습니다."
     }, { status: 409 });
@@ -318,9 +280,7 @@ export async function POST(request: NextRequest) {
     shareSessionId,
     userId: user.id
   });
-  if (!activeSession.ok) {
-    return NextResponse.json({ ok: false, configured: true, message: activeSession.message }, { status: activeSession.status });
-  }
+  if (!activeSession.ok) return NextResponse.json({ ok: false, configured: true, providerCalled: false, message: activeSession.message }, { status: activeSession.status });
 
   const serverConfig = readWorkpackShareServerConfig(process.env);
   if (!serverConfig.ok) {
@@ -334,23 +294,15 @@ export async function POST(request: NextRequest) {
       message: "전송 binding을 검증할 서버 설정이 준비되지 않았습니다."
     }, { status: 503 });
   }
-  const sessionWorkerIds = activeSession.session.recipients.flatMap((recipient) => (
-    recipient.workerId ? [recipient.workerId] : []
-  ));
+
+  const workerIds = activeSession.session.recipients.flatMap((recipient) => recipient.workerId ? [recipient.workerId] : []);
   const currentRecipients = await loadServerShareRecipients(client, {
     organizationId: owned.context.organizationId,
     siteId: owned.context.siteId,
-    requestedWorkerIds: sessionWorkerIds
+    requestedWorkerIds: workerIds
   });
   if (!currentRecipients.ok) {
-    return NextResponse.json({
-      ok: false,
-      configured: true,
-      state: "review_required",
-      reasonCode: "recipient_locale_invalid",
-      providerCalled: false,
-      message: currentRecipients.message
-    }, { status: 409 });
+    return NextResponse.json({ ok: false, configured: true, state: "review_required", reasonCode: "recipient_locale_invalid", providerCalled: false, message: currentRecipients.message }, { status: 409 });
   }
   const localization = resolveReviewedLocalizationAuthority({
     workpackId: owned.context.workpackId,
@@ -360,20 +312,16 @@ export async function POST(request: NextRequest) {
     secret: serverConfig.config.reviewedLocalizationSecret
   });
   if (!localization.ok) {
-    return NextResponse.json({
-      ...localization,
-      configured: true,
-      state: "review_required",
-      providerCalled: false
-    }, { status: 409 });
+    return NextResponse.json({ ...localization, configured: true, state: "review_required", providerCalled: false }, { status: 409 });
   }
+
   const runtime = buildChannelRuntimeConfiguration({
     environment: process.env,
     liveDispatch: isLiveDispatchEnabled(),
-    relayEndpoint: webhookConfig.url || null,
-    relayCredential: webhookConfig.token || null
+    relayEndpoint: webhook.url || null,
+    relayCredential: webhook.token || null
   });
-  const currentChannelResolution = resolveServerChannelAvailability({
+  const channelResolution = resolveServerChannelAvailability({
     config: serverConfig.config,
     runtime,
     userId: user.id,
@@ -382,18 +330,21 @@ export async function POST(request: NextRequest) {
     workpackId: owned.context.workpackId,
     canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
     recipients: currentRecipients.recipients,
-    requestedChannels: channels as WorkpackDispatchChannel[],
+    requestedChannels: channels,
     now: new Date()
   });
-  if (!currentChannelResolution.ok) {
+  if (!channelResolution.ok || !channelResolution.ready) {
     return NextResponse.json({
-      ...currentChannelResolution,
-      configured: true,
+      ok: false,
+      configured: Boolean(webhook.url && webhook.token),
       state: "stale",
-      providerCalled: false
+      reasonCode: channelResolution.ok ? "channel_unavailable" : channelResolution.reasonCode,
+      channels: channelResolution.ok ? channelResolution.channels : [],
+      providerCalled: false,
+      message: "현재 서버 채널 상태가 전송 준비 조건을 충족하지 않습니다."
     }, { status: 409 });
   }
-  const bindingValidation = validateShareDispatchBinding({
+  const binding = validateShareDispatchBinding({
     binding: activeSession.session.dispatchBinding,
     sessionIdentity: {
       shareSessionId: activeSession.session.id,
@@ -404,130 +355,188 @@ export async function POST(request: NextRequest) {
     },
     localization,
     recipientSnapshotDigest: buildShareRecipientDigest(currentRecipients.recipients),
-    channelResolution: currentChannelResolution
+    channelResolution
   });
-  if (!bindingValidation.ok) {
+  if (!binding.ok) {
     return NextResponse.json({
       ok: false,
       configured: true,
-      state: bindingValidation.reasonCode === "translation_incomplete" ? "review_required" : "stale",
-      reasonCode: bindingValidation.reasonCode,
+      state: binding.reasonCode === "translation_incomplete" ? "review_required" : "stale",
+      reasonCode: binding.reasonCode,
       providerCalled: false,
       message: "공유 세션 생성 후 전송 조건이 변경되어 provider 호출을 시작하지 않았습니다."
     }, { status: 409 });
   }
-
-  const contactValidation = validateDispatchContacts({
-    channels: channels as WorkpackDispatchChannel[],
-    recipients: currentRecipients.recipients
-  });
-  if (!contactValidation.ok) {
-    return NextResponse.json({ ok: false, configured: true, message: contactValidation.message }, { status: 409 });
+  const contacts = validateDispatchContacts({ channels, recipients: currentRecipients.recipients });
+  if (!contacts.ok) {
+    return NextResponse.json({ ok: false, configured: true, state: "stale", reasonCode: "recipient_contact_missing", providerCalled: false, message: contacts.message }, { status: 409 });
   }
-  const localizedByWorkerId = new Map(localization.dispatchRecipients.map((recipient) => [recipient.workerId, recipient]));
-  const recipients = currentRecipients.recipients.map((recipient) => ({
-    ...(recipient.workerSnapshot || {}),
-    localizedDispatch: recipient.workerId ? localizedByWorkerId.get(recipient.workerId) || null : null
-  }));
 
-  if (isLiveDispatchEnabled() && !PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED) {
+  if (!isLiveDispatchEnabled() || runtime.dispatchMode !== "live" || !webhook.url || !webhook.token) {
     return NextResponse.json({
       ok: false,
       configured: false,
-      providerStatus: "idempotency-unsupported",
-      idempotencySupported: false,
-      duplicateRisk: true,
+      state: "blocked",
+      reasonCode: "provider_adapter_unavailable",
+      idempotencySupported: true,
+      duplicateRisk: false,
       providerCalled: false,
       idempotencyKey,
-      message: "영속 provider idempotency를 보장할 저장 계약이 없어 실제 provider 호출을 차단했습니다. 중복방지 지원 전에는 재전송하지 마세요."
+      message: "설정된 live provider adapter가 없어 실제 전송을 차단했습니다."
     }, { status: 409 });
   }
 
-  const webhookConfigured = Boolean(webhookConfig.url && webhookConfig.token);
-  const preflightChannelResults = buildPreflightChannelResults(channels, webhookConfigured);
-  const dispatchChannels = channels.filter((channel) => !isPreflightBlocked(channel, preflightChannelResults));
-
-  if (!dispatchChannels.length) {
-    const summary = summarizeChannelResults(preflightChannelResults);
-    return NextResponse.json({
-      ok: false,
-      configured: webhookConfigured,
-      idempotencyKey,
-      idempotencySupported: PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED,
-      duplicateRisk: false,
-      providerCalled: false,
-      channelResults: preflightChannelResults,
-      summary,
-      message: "선택한 전파 채널 중 즉시 전송 가능한 채널이 없습니다. 카카오 알림톡 채널·템플릿 설정을 확인해 주세요."
-    });
+  const loadedGate = await loadDispatchGateRow(client, {
+    shareSessionId,
+    workpackId: owned.context.workpackId,
+    organizationId: owned.context.organizationId,
+    userId: user.id
+  });
+  if (!loadedGate.ok) {
+    return NextResponse.json({ ok: false, configured: true, state: "blocked", reasonCode: loadedGate.reasonCode, providerCalled: false, idempotencySupported: true, duplicateRisk: false, message: loadedGate.message }, { status: loadedGate.status });
+  }
+  if (!gateMatchesRequest(loadedGate.row.gate, {
+    shareSessionId,
+    workpackId: owned.context.workpackId,
+    canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
+    channels,
+    idempotencyKey
+  })) {
+    return NextResponse.json({ ok: false, configured: true, state: "stale", reasonCode: "dispatch_gate_binding_mismatch", providerCalled: false, idempotencySupported: true, duplicateRisk: false, message: "서버 발급 dispatch gate와 요청 binding이 일치하지 않습니다." }, { status: 409 });
   }
 
-  if (isLiveDispatchEnabled() && (!webhookConfig.url || !webhookConfig.token)) {
-    const channelResults = [
-      ...dispatchChannels.map((channel) => ({
-        channel,
-        provider: "n8n",
-        status: "unconfigured" as const,
-        message: `${formatChannelLabel(channel)} 전송을 위한 n8n relay 설정을 확인해야 합니다.`
-      })),
-      ...preflightChannelResults
-    ];
-    return NextResponse.json({
-      ok: false,
-      configured: false,
-      idempotencyKey,
-      idempotencySupported: PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED,
-      duplicateRisk: false,
-      providerCalled: false,
-      channelResults,
-      summary: summarizeChannelResults(channelResults),
-      message: "현장 전파 연결을 확인해야 합니다. n8n relay 또는 provider 설정을 점검해 주세요."
-    });
+  const receiptId = randomUUID();
+  const reservedAt = nextCasTimestamp(loadedGate.row.updatedAt);
+  const reservation = reserveServerDispatchGate(loadedGate.row.gate, { idempotencyKey, receiptId, reservedAt });
+  if (!reservation.ok) {
+    return NextResponse.json({ ok: false, configured: true, state: "blocked", reasonCode: reservation.reasonCode, providerCalled: false, idempotencySupported: true, duplicateRisk: false, message: "이미 예약되었거나 일치하지 않는 전송 요청입니다." }, { status: 409 });
+  }
+  const reserved = await compareAndSwapDispatchGate(client, loadedGate.row, reservation.gate, reservedAt);
+  if (!reserved.ok) {
+    return NextResponse.json({ ok: false, configured: true, state: "blocked", reasonCode: reserved.reasonCode, providerCalled: false, idempotencySupported: true, duplicateRisk: false, message: "다른 요청이 먼저 전송 gate를 예약했습니다." }, { status: 409 });
   }
 
-  const payload = {
+  const localizedByWorker = new Map(localization.dispatchRecipients.map((recipient) => [recipient.workerId, recipient]));
+  const providerPayload = {
     event: "safeguard.workpack.dispatch",
+    receiptId,
+    shareSessionId,
     idempotencyKey,
-    sentAt: new Date().toISOString(),
-    channels: dispatchChannels,
-    recipients,
-    operatorNote: typeof body.operatorNote === "string" ? body.operatorNote : "",
+    workpackId: owned.context.workpackId,
+    canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
+    sentAt: reservedAt,
+    channels,
+    recipients: currentRecipients.recipients.map((recipient) => ({
+      ...(recipient.workerSnapshot || {}),
+      localizedDispatch: recipient.workerId ? localizedByWorker.get(recipient.workerId) || null : null
+    })),
+    operatorNote: typeof body.operatorNote === "string" ? body.operatorNote.trim() : "",
     workpack: owned.context.shareAuthority.workpack
   };
 
+  let providerReceipt;
   try {
-    const workflowResponse = isLiveDispatchEnabled()
-      ? await postWebhookWithTimeout(webhookConfig.url, webhookConfig.token, payload)
-      : buildFixtureDispatchResponse(dispatchChannels, recipients);
-    const channelResults = [
-      ...normalizeChannelResults(workflowResponse.channelResults, dispatchChannels),
-      ...preflightChannelResults
-    ];
-    const summary = summarizeChannelResults(channelResults);
-    return NextResponse.json({
-      ok: (workflowResponse.ok ?? true) && summary.failed === 0,
-      configured: true,
-      workflowRunId: workflowResponse.workflowRunId,
-      providerStatus: workflowResponse.providerStatus,
-      idempotencyKey,
-      idempotencySupported: PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED,
-      duplicateRisk: false,
-      providerCalled: isLiveDispatchEnabled(),
-      channelResults,
-      summary,
-      message: workflowResponse.message || "n8n 웹훅이 전파 요청을 접수했습니다."
+    providerReceipt = await dispatchWithConfiguredProvider({
+      url: webhook.url,
+      token: webhook.token,
+      requestedChannels: channels,
+      payload: providerPayload
     });
   } catch (error) {
-    console.error("workflow dispatch failed", error);
+    console.error("configured workflow provider dispatch failed", error);
+    const completedAt = nextCasTimestamp(reserved.row.updatedAt);
+    const uncertain = markServerDispatchGateUncertain(reserved.row.gate, {
+      receiptId,
+      failureReason: error instanceof Error ? error.message : "provider receipt unavailable",
+      completedAt
+    });
+    if (uncertain) await compareAndSwapDispatchGate(client, reserved.row, uncertain, completedAt);
     return NextResponse.json({
       ok: false,
       configured: true,
+      state: "uncertain",
+      reasonCode: "provider_receipt_uncertain",
       providerStatus: "provider-response-uncertain",
       idempotencyKey,
-      idempotencySupported: PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED,
+      idempotencySupported: true,
       duplicateRisk: true,
       providerCalled: true,
-      message: error instanceof Error ? error.message : "n8n 전파 요청에 실패했습니다."
+      message: error instanceof Error ? error.message : "provider 응답을 검증하지 못했습니다."
     }, { status: 502 });
   }
+
+  const outcome = classifyOutcome(providerReceipt.channelResults);
+  const persisted = await persistServerDispatchLogs(client, {
+    organizationId: owned.context.organizationId,
+    siteId: owned.context.siteId,
+    workpackId: owned.context.workpackId,
+    shareSessionId,
+    canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
+    idempotencyKey,
+    receiptId,
+    outcome,
+    workflowRunId: providerReceipt.workflowRunId,
+    recipientCount: currentRecipients.recipients.length,
+    channelResults: providerReceipt.channelResults
+  });
+  if (!persisted.ok) {
+    const completedAt = nextCasTimestamp(reserved.row.updatedAt);
+    const uncertain = markServerDispatchGateUncertain(reserved.row.gate, {
+      receiptId,
+      failureReason: "server dispatch evidence persistence failed",
+      completedAt,
+      workflowRunId: providerReceipt.workflowRunId
+    });
+    if (uncertain) await compareAndSwapDispatchGate(client, reserved.row, uncertain, completedAt);
+    return NextResponse.json({ ok: false, configured: true, state: "uncertain", reasonCode: "dispatch_evidence_unpersisted", providerCalled: true, duplicateRisk: true, idempotencySupported: true, idempotencyKey, message: "provider 결과를 서버 이력에 완전하게 저장하지 못해 성공으로 처리하지 않았습니다." }, { status: 500 });
+  }
+
+  const completedAt = nextCasTimestamp(reserved.row.updatedAt);
+  const completed = completeServerDispatchGate(reserved.row.gate, {
+    receiptId,
+    outcome,
+    workflowRunId: providerReceipt.workflowRunId,
+    logIds: persisted.logIds,
+    completedAt
+  });
+  if (!completed.ok) {
+    console.error("dispatch receipt completion failed", completed);
+    return NextResponse.json({ ok: false, configured: true, state: "uncertain", reasonCode: completed.reasonCode, providerCalled: true, duplicateRisk: true, idempotencySupported: true, idempotencyKey, message: "서버 receipt 완료 binding을 만들지 못해 성공으로 처리하지 않았습니다." }, { status: 500 });
+  }
+  const recorded = await compareAndSwapDispatchGate(client, reserved.row, completed.gate, completedAt);
+  if (!recorded.ok) {
+    return NextResponse.json({ ok: false, configured: true, state: "uncertain", reasonCode: recorded.reasonCode, providerCalled: true, duplicateRisk: true, idempotencySupported: true, idempotencyKey, message: "서버 receipt 최종 CAS를 확인하지 못해 성공으로 처리하지 않았습니다." }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    ok: outcome === "accepted" || outcome === "partial",
+    configured: true,
+    state: "recorded",
+    outcome,
+    workflowRunId: providerReceipt.workflowRunId,
+    providerStatus: providerReceipt.providerStatus,
+    idempotencyKey,
+    idempotencySupported: true,
+    duplicateRisk: false,
+    providerCalled: true,
+    channelResults: providerReceipt.channelResults,
+    logIds: persisted.logIds,
+    receipt: {
+      version: "server-dispatch-receipt/v1",
+      receiptId,
+      shareSessionId,
+      idempotencyKey,
+      workpackId: owned.context.workpackId,
+      canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
+      outcome,
+      workflowRunId: providerReceipt.workflowRunId,
+      logIds: persisted.logIds,
+      recordedAt: completedAt
+    },
+    message: outcome === "accepted"
+      ? "설정된 provider가 전송을 접수했고 서버 receipt와 이력을 저장했습니다."
+      : outcome === "partial"
+        ? "일부 채널이 전송을 접수했고 서버 receipt와 이력을 저장했습니다."
+        : "provider가 모든 채널을 거절했으며 서버 receipt와 이력을 저장했습니다."
+  });
 }

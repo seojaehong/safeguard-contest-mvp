@@ -24,6 +24,7 @@ import {
   resolveReviewedLocalizationAuthority
 } from "@/lib/reviewed-localization-envelope";
 import { readWorkpackShareServerConfig } from "@/lib/workpack-share-server-config";
+import { buildServerDispatchGate } from "@/lib/workpack-dispatch-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -216,6 +217,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
   const shareSessionId = randomUUID();
   const createdAt = new Date().toISOString();
+  const dispatchIdempotencyKey = `provider-dispatch-v1-${randomUUID()}-${randomUUID().slice(0, 8)}`;
   const dispatchBinding = buildShareDispatchBinding({
     sessionIdentity: {
       shareSessionId,
@@ -237,6 +239,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
     recipients: serverRecipients.recipients,
     dispatchBinding
   });
+  const dispatchGate = buildServerDispatchGate({
+    shareSessionId,
+    workpackId: owned.context.workpackId,
+    canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
+    requestedChannels: channelVerification.resolution.requestedChannels,
+    idempotencyKey: dispatchIdempotencyKey,
+    issuedAt: createdAt
+  });
   const expiresAt = new Date(Date.now() + SHARE_SESSION_TTL_MS).toISOString();
 
   const insert: WorkspaceDatabase["public"]["Tables"]["workpack_share_sessions"]["Insert"] = {
@@ -246,7 +256,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     workpack_id: draft.workpack_id,
     share_scope: draft.share_scope,
     recipients_snapshot: toJson(draft.recipients_snapshot),
-    access_policy: toJson(draft.access_policy),
+    access_policy: toJson({ ...draft.access_policy, dispatchGate }),
     status: draft.status,
     expires_at: expiresAt,
     created_by: draft.created_by
@@ -267,6 +277,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     ok: true,
     configured: true,
     shareSessionId: data.id,
+    dispatchIdempotencyKey,
     expiresAt: data.expires_at || expiresAt,
     message: "초대된 작업자 기준 공유 세션을 만들었습니다."
   });

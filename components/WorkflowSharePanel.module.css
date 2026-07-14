@@ -315,11 +315,8 @@
 }
 
 .preview {
-  max-height: min(34vh, 320px);
   margin-left: 40px;
   padding: 16px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   border: 1px solid var(--border, #d8dfdb);
   border-radius: 6px;
   background: color-mix(in srgb, var(--surface, #ffffff) 96%, #2f68a8 4%);

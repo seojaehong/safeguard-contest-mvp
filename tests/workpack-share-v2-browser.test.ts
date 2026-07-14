@@ -1,10 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Browser, BrowserContext, Page, Request, Route } from "playwright";
 
 import { CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
+import { parseChannelResolutionRequest } from "@/lib/channel-resolution-contract";
 import { SUPPORTED_LANGUAGE_CODES, type SupportedLanguageCode } from "@/lib/foreign-worker";
 import type { AskResponse } from "@/lib/types";
 import type { WorkerProfile } from "@/lib/workspace";
@@ -60,10 +62,12 @@ type ShareNetworkProbe = {
   channelRequestCount: number;
 };
 
-type ChannelMode = "ready" | "unavailable" | "deferred";
+type ChannelMode = "ready" | "unavailable" | "deferred" | "stale";
 type SessionMode = "success" | "failure" | "deferred";
 type DispatchMode = "accepted" | "partial" | "failed" | "stale";
 type DispatchLogMode = "success" | "failure" | "saved-count-only";
+
+const BROWSER_IDEMPOTENCY_KEY = "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef";
 
 type ShareScenario = {
   response: AskResponse;
@@ -169,6 +173,8 @@ type TextScaleDeliveryAudit = {
 type BrowserCaseMetric = {
   caseId: string;
   contractAmendmentCommit: string;
+  productCommit: string;
+  productTree: string;
   environmentId: ShareEnvironment["id"];
   fixtureId: ShareFixtureId;
   scaleModeId: ShareScaleMode;
@@ -200,7 +206,32 @@ type BrowserCaseMetric = {
 const browserMatrix = process.env.WORKPACK_SHARE_V2_BROWSER === "1" ? describe : describe.skip;
 let harness: IsolatedNextBrowserHarness | null = null;
 let browser: Browser | null = null;
+let browserProductCommit: string | null = null;
+let browserProductTree: string | null = null;
 const browserCaseMetrics: BrowserCaseMetric[] = [];
+
+function validateBrowserProductIdentity(candidate: string | undefined, head: string): string {
+  if (!candidate || !/^[0-9a-f]{40}$/u.test(candidate)) {
+    throw new Error("WORKPACK_SHARE_V2_PRODUCT_SHA must be an exact commit SHA");
+  }
+  if (candidate !== head) throw new Error("browser product SHA does not match HEAD");
+  return candidate;
+}
+
+function readGitRevision(revision: string): string {
+  return execFileSync("git", ["rev-parse", revision], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"]
+  }).trim();
+}
+
+function requireBrowserProductIdentity(): { commit: string; tree: string } {
+  if (!browserProductCommit || !browserProductTree) {
+    throw new Error("browser product identity was not initialized");
+  }
+  return { commit: browserProductCommit, tree: browserProductTree };
+}
 
 function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -237,15 +268,13 @@ function buildScenario(fixtureId: ShareFixtureId): ShareScenario {
     authenticated: fixtureId !== "logged_out",
     serverLanguageCodes: Object.fromEntries(workers.map((worker) => [worker.id, worker.languageCode])),
     shareLocalization: buildShareLocalizationAuthority(response),
-    channelMode: fixtureId === "channel_unavailable" ? "deferred" : "ready",
+    channelMode: fixtureId === "channel_unavailable" ? "deferred" : fixtureId === "stale" ? "stale" : "ready",
     sessionMode: fixtureId === "sending" ? "deferred" : fixtureId === "fail_session" ? "failure" : "success",
     dispatchMode: fixtureId === "result_partial"
       ? "partial"
       : fixtureId === "fail_dispatch"
         ? "failed"
-        : fixtureId === "stale"
-          ? "stale"
-          : "accepted",
+        : "accepted",
     dispatchLogMode: fixtureId === "fail_dispatch_unpersisted" ? "failure" : "success",
     staleReasonCode: "workpack_revision_or_digest_changed"
   };
@@ -328,7 +357,22 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
         deferredChannelRoute = route;
         return;
       }
-      const requestedChannels = Array.isArray(body.requestedChannels) ? body.requestedChannels : [];
+      const requestDto = parseChannelResolutionRequest(body);
+      if (!requestDto) {
+        await fulfillJson(route, { ok: false, message: "Invalid channel resolver DTO" }, 400);
+        return;
+      }
+      const requestedChannels = requestDto.requestedChannels;
+      if (scenario.channelMode === "stale") {
+        await fulfillJson(route, {
+          ok: false,
+          ready: false,
+          state: "stale",
+          reasonCode: scenario.staleReasonCode,
+          message: "Share resolver binding changed before session creation."
+        }, 409);
+        return;
+      }
       const unavailable = scenario.channelMode === "unavailable";
       await fulfillJson(route, {
         ok: true,
@@ -360,6 +404,7 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
       await fulfillJson(route, {
         ok: true,
         shareSessionId: SHARE_SESSION_ID,
+        dispatchIdempotencyKey: BROWSER_IDEMPOTENCY_KEY,
         expiresAt: "2099-07-14T00:00:00.000Z",
         message: "공유 세션을 만들었습니다."
       });
@@ -377,20 +422,42 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
         return;
       }
       probe.providerDispatchCount += 1;
-      const channels = Array.isArray(body.channels) ? body.channels : [];
+      const channels = Array.isArray(body.channels)
+        ? body.channels.filter((channel): channel is string => typeof channel === "string")
+        : [];
       const channelResults = channels.map((channel, index) => ({
         channel,
-        provider: `share-v2-${String(channel)}-provider`,
+        provider: "n8n-relay",
         status: scenario.dispatchMode === "accepted"
           ? "sent"
           : scenario.dispatchMode === "partial"
-            ? index === 0 ? "sent" : index === 1 ? "failed" : "unknown"
+            ? index === 0 ? "sent" : "failed"
             : "failed",
         message: scenario.dispatchMode === "accepted" ? "accepted" : "provider result requires review"
       }));
+      if (scenario.dispatchLogMode === "failure") {
+        await fulfillJson(route, {
+          ok: false,
+          configured: true,
+          state: "uncertain",
+          reasonCode: "dispatch_evidence_unpersisted",
+          providerCalled: true,
+          duplicateRisk: true,
+          idempotencySupported: true,
+          idempotencyKey: body.idempotencyKey,
+          message: "Server dispatch evidence persistence failed."
+        }, 500);
+        return;
+      }
+      const sentCount = channelResults.filter((result) => result.status === "sent").length;
+      const outcome = sentCount === channelResults.length ? "accepted" : sentCount > 0 ? "partial" : "failed";
+      const logIds = channels.map((_channel, index) => dispatchLogId(index));
+      const localization = isRecord(scenario.shareLocalization) ? scenario.shareLocalization : {};
       await fulfillJson(route, {
-        ok: scenario.dispatchMode === "accepted",
+        ok: outcome === "accepted" || outcome === "partial",
         configured: true,
+        state: "recorded",
+        outcome,
         message: scenario.dispatchMode === "accepted" ? "전송 요청을 접수했습니다." : "전송 결과 확인 필요",
         workflowRunId: "share-v2-workflow-run",
         providerStatus: "live",
@@ -398,25 +465,27 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
         duplicateRisk: false,
         idempotencySupported: true,
         idempotencyKey: body.idempotencyKey,
-        channelResults
+        channelResults,
+        logIds,
+        receipt: {
+          version: "server-dispatch-receipt/v1",
+          receiptId: "55555555-5555-4555-8555-555555555555",
+          shareSessionId: SHARE_SESSION_ID,
+          idempotencyKey: body.idempotencyKey,
+          workpackId: SHARE_WORKPACK_ID,
+          canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
+          outcome,
+          workflowRunId: "share-v2-workflow-run",
+          logIds,
+          recordedAt: "2026-07-14T01:00:00.000Z"
+        }
       });
       return;
     }
     if (url.pathname === "/api/dispatch-logs" && method === "POST") {
       probe.dispatchLogRequestCount += 1;
-      const logs = Array.isArray(body.logs) ? body.logs : [];
-      if (scenario.dispatchLogMode === "failure") {
-        await fulfillJson(route, { ok: false, message: "전파 이력 저장 실패" }, 503);
-        return;
-      }
-      await fulfillJson(route, {
-        ok: true,
-        savedCount: logs.length,
-        logIds: scenario.dispatchLogMode === "saved-count-only"
-          ? []
-          : logs.map((_log, index) => dispatchLogId(index)),
-        message: "전파 이력을 저장했습니다."
-      });
+      probe.unexpectedRequests.push(`${method} ${url.pathname}`);
+      await fulfillJson(route, { ok: false, reasonCode: "server_dispatch_receipt_required" }, 409);
       return;
     }
 
@@ -429,7 +498,9 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
     releaseChannelUnavailable: async () => {
       if (!deferredChannelRoute) throw new Error("No deferred channel route is waiting");
       const body = requestBody(deferredChannelRoute.request());
-      const requestedChannels = Array.isArray(body.requestedChannels) ? body.requestedChannels : [];
+      const requestDto = parseChannelResolutionRequest(body);
+      if (!requestDto) throw new Error("Deferred channel resolver DTO is invalid");
+      const requestedChannels = requestDto.requestedChannels;
       const route = deferredChannelRoute;
       deferredChannelRoute = null;
       scenario.channelMode = "unavailable";
@@ -572,22 +643,19 @@ function expectDispatchBinding(probe: ShareNetworkProbe): void {
     channels: sessionRequest?.body.channels,
     operatorNote: ""
   });
-  expect(request?.body.idempotencyKey).toMatch(
-    /^provider-dispatch-v1-[0-9a-f-]{36}-[0-9a-f]{8}$/u
-  );
+  expect(request?.body.idempotencyKey).toBe(BROWSER_IDEMPOTENCY_KEY);
   expect(JSON.stringify(request?.body)).not.toMatch(/publicUrl|workerForm|translationFallback/iu);
 }
 
-function expectRequestOrder(probe: ShareNetworkProbe, includeLog: boolean): void {
+function expectRequestOrder(probe: ShareNetworkProbe): void {
   const paths = probe.requests.filter((request) => request.method === "POST").map((request) => request.path);
   const channelIndex = paths.indexOf("/api/settings/channels/resolve");
   const sessionIndex = paths.indexOf(`/api/workpacks/${SHARE_WORKPACK_ID}/share-sessions`);
   const dispatchIndex = paths.indexOf("/api/workflow/dispatch");
-  const logIndex = paths.indexOf("/api/dispatch-logs");
   expect(channelIndex).toBeGreaterThanOrEqual(0);
   expect(sessionIndex).toBeGreaterThan(channelIndex);
   expect(dispatchIndex).toBeGreaterThan(sessionIndex);
-  if (includeLog) expect(logIndex).toBeGreaterThan(dispatchIndex);
+  expect(paths).not.toContain("/api/dispatch-logs");
 }
 
 async function expectCommonProductSurface(page: Page): Promise<void> {
@@ -675,7 +743,7 @@ async function readGeometryMetrics(page: Page): Promise<GeometryMetrics> {
         (style.overflowX === "auto" || style.overflowX === "scroll")
         && element.scrollWidth > element.clientWidth + 1
       );
-      if (!scrolls || element.matches("[data-share-scroll-region='preview']")) return [];
+      if (!scrolls) return [];
       return [label(element)];
     });
     const clippedTextFailures = visibleElements.flatMap((element) => {
@@ -725,7 +793,6 @@ function expectCleanGeometry(metrics: GeometryMetrics): void {
   expect(metrics.touchTargetCount).toBeGreaterThan(0);
   expect(metrics.horizontalOverflow).toBe(0);
   expect(metrics.panelOverflow).toBe(0);
-  expect(metrics.previewHeight).toBeLessThanOrEqual(metrics.previewHeightLimit + 2);
   expect(metrics.touchTargetFailures).toEqual([]);
   expect(metrics.overlapFailures).toEqual([]);
   expect(metrics.interactiveGapFailures).toEqual([]);
@@ -1227,6 +1294,22 @@ async function verifyReviewRequiredVariants(environment: ShareEnvironment): Prom
       expect(opened.controller.probe.channelRequestCount, variant.id).toBe(0);
       expect(opened.controller.probe.sessionRequestCount, variant.id).toBe(0);
       expect(opened.controller.probe.dispatchRequestCount, variant.id).toBe(0);
+      if (variant.id === "locale_missing") {
+        await opened.page.locator("[data-share-primary]").click();
+        await opened.page.waitForURL((url) => url.pathname === "/workers");
+        expect(new URL(opened.page.url()).searchParams.get("focus")).toBe("language");
+        expect(await opened.page.getByRole("link", { name: "전송으로 돌아가기" }).count()).toBe(1);
+      }
+      if (variant.id === "translation_missing") {
+        await opened.page.locator("[data-share-primary]").click();
+        await opened.page.waitForURL((url) => (
+          url.pathname === "/workspace"
+          && url.searchParams.get("step") === "document"
+          && url.searchParams.get("language") === "vi"
+          && url.searchParams.get("returnStep") === "share"
+        ));
+        expect(await opened.page.getByRole("button", { name: "전송 화면으로 돌아가기" }).count()).toBe(1);
+      }
       expect(opened.controller.probe.unexpectedRequests, variant.id).toEqual([]);
     } finally {
       await closeSharePage(opened);
@@ -1248,22 +1331,23 @@ async function verifyStaleBindingVariants(environment: ShareEnvironment): Promis
     scenario.staleReasonCode = variant.reasonCode;
     const opened = await openSharePage(environment, scenario);
     try {
-      await waitForShareState(opened.page, "ready");
-      await opened.page.locator("[data-share-primary]").click();
-      await waitForProbe(() => opened.controller.probe.dispatchRequestCount === 1, variant.reasonCode);
-      await waitForShareState(opened.page, "stale");
-      expect(opened.controller.probe.sessionRequestCount, variant.reasonCode).toBe(1);
+      const expectedState = variant.owner === "settings" ? "blocked" : "stale";
+      await waitForShareState(opened.page, expectedState);
+      expect(opened.controller.probe.sessionRequestCount, variant.reasonCode).toBe(0);
+      expect(opened.controller.probe.dispatchRequestCount, variant.reasonCode).toBe(0);
       expect(opened.controller.probe.providerDispatchCount, variant.reasonCode).toBe(0);
       expect(opened.controller.probe.dispatchLogRequestCount, variant.reasonCode).toBe(0);
       expect(await opened.page.locator("[data-share-preview]").count(), variant.reasonCode).toBe(0);
       const href = await primaryHref(opened.page);
-      const ownerUrl = new URL(href!, "https://share-v2.test");
       if (variant.owner === "worker") {
+        const ownerUrl = new URL(href!, "https://share-v2.test");
         expect(ownerUrl.pathname, variant.reasonCode).toBe("/workers");
         expect(ownerUrl.searchParams.get("focus"), variant.reasonCode).toBe("language");
       } else if (variant.owner === "settings") {
-        expect(ownerUrl.pathname, variant.reasonCode).toBe("/settings");
+        expect(href, variant.reasonCode).toBeNull();
+        expect(await opened.page.locator("[data-share-primary]").isDisabled(), variant.reasonCode).toBe(true);
       } else {
+        const ownerUrl = new URL(href!, "https://share-v2.test");
         expect(ownerUrl.pathname, variant.reasonCode).toBe("/workspace");
         expect(ownerUrl.searchParams.get("step"), variant.reasonCode).toBe("document");
       }
@@ -1379,13 +1463,24 @@ async function executeFixtureBehavior(
     await waitForProbe(() => controller.probe.channelRequestCount === 1, "deferred channel request");
     expect(controller.probe.sessionRequestCount).toBe(0);
     await controller.releaseChannelUnavailable();
-    await waitForShareState(page, "selected");
-    expect(await primaryLabel(page)).toBe("채널 설정 확인");
-    expect(await primaryHref(page)).toBe(
-      `/settings?next=${encodeURIComponent(`/workspace?step=share&theme=${environment.theme}`)}`
-    );
+    await waitForShareState(page, "blocked");
+    expect(await primaryLabel(page)).toBe("채널 연결 대기");
+    expect(await primaryHref(page)).toBeNull();
+    expect(await page.locator("[data-share-primary]").isDisabled()).toBe(true);
     expect(controller.probe.sessionRequestCount).toBe(0);
-    return { ...opened, expectedState: "selected", finalize };
+    return { ...opened, expectedState: "blocked", finalize };
+  }
+
+  if (fixtureId === "stale") {
+    await waitForShareState(page, "stale");
+    expect(await primaryLabel(page)).toBe("변경사항 다시 확인");
+    expect(await primaryHref(page)).toContain("returnStep=share");
+    expect(controller.probe.sessionRequestCount).toBe(0);
+    expect(controller.probe.dispatchRequestCount).toBe(0);
+    expect(controller.probe.providerDispatchCount).toBe(0);
+    expect(controller.probe.dispatchLogRequestCount).toBe(0);
+    expect(await page.locator("[data-share-preview]").count()).toBe(0);
+    return { ...opened, expectedState: "stale", finalize };
   }
 
   await waitForShareState(page, "ready");
@@ -1461,36 +1556,41 @@ async function executeFixtureBehavior(
     expect(controller.probe.dispatchRequestCount).toBe(0);
     expect(await page.locator("a[href='/dispatch']").count()).toBe(0);
     expect((await page.locator("[data-share-root]").innerText())).not.toContain("초대장을 보냈습니다");
+    const channelRequestsBeforeRetry = controller.probe.channelRequestCount;
+    finalize = async () => {
+      scenario.sessionMode = "success";
+      await page.locator("[data-share-primary]").click();
+      await waitForProbe(
+        () => controller.probe.channelRequestCount > channelRequestsBeforeRetry,
+        "session retry readiness refresh"
+      );
+      await waitForShareState(page, "ready");
+      expect(controller.probe.sessionRequestCount).toBe(1);
+      expect(controller.probe.dispatchRequestCount).toBe(0);
+      expect(controller.probe.providerDispatchCount).toBe(0);
+      expect(controller.probe.dispatchLogRequestCount).toBe(0);
+    };
     return { ...opened, expectedState: "fail", finalize };
   }
 
   await waitForProbe(() => controller.probe.dispatchRequestCount === 1, "dispatch request");
   expectDispatchBinding(controller.probe);
 
-  if (fixtureId === "stale") {
-    await waitForShareState(page, "stale");
-    expect(await primaryLabel(page)).toBe("변경사항 다시 확인");
-    expect(await primaryHref(page)).toContain("returnStep=share");
-    expect(controller.probe.dispatchLogRequestCount).toBe(0);
-    expect(await page.locator("[data-share-preview]").count()).toBe(0);
-    return { ...opened, expectedState: "stale", finalize };
-  }
-
   if (fixtureId === "fail_dispatch_unpersisted") {
     await waitForShareState(page, "fail");
     expect(await primaryLabel(page)).toBe("연결 다시 확인");
     expect((await page.locator("[data-share-root]").innerText())).toContain("중복 전송 방지 확인 필요");
-    expect(controller.probe.dispatchLogRequestCount).toBe(1);
+    expect(controller.probe.dispatchLogRequestCount).toBe(0);
     expect(await page.locator("a[href='/dispatch']").count()).toBe(0);
     const dispatchCount = controller.probe.dispatchRequestCount;
     await page.waitForTimeout(250);
     expect(controller.probe.dispatchRequestCount).toBe(dispatchCount);
-    expectRequestOrder(controller.probe, true);
+    expectRequestOrder(controller.probe);
     return { ...opened, expectedState: "fail", finalize };
   }
 
-  await waitForProbe(() => controller.probe.dispatchLogRequestCount === 1, "dispatch log request");
-  expectRequestOrder(controller.probe, true);
+  expect(controller.probe.dispatchLogRequestCount).toBe(0);
+  expectRequestOrder(controller.probe);
   expect(await page.locator("a[href='/dispatch']").count()).toBe(1);
   expect(await primaryLabel(page)).toBe("전파 이력 확인");
 
@@ -1507,8 +1607,8 @@ async function executeFixtureBehavior(
     await waitForShareState(page, "partial");
     expect((await page.locator("[data-share-root]").innerText())).toContain("일부 채널 확인 필요");
     expect(await page.locator("[data-share-channel-outcome][data-outcome='accepted']").count()).toBe(1);
-    expect(await page.locator("[data-share-channel-outcome][data-outcome='failed']").count()).toBe(1);
-    expect(await page.locator("[data-share-channel-outcome][data-outcome='unknown']").count()).toBe(1);
+    expect(await page.locator("[data-share-channel-outcome][data-outcome='failed']").count()).toBe(2);
+    expect(await page.locator("[data-share-channel-outcome][data-outcome='unknown']").count()).toBe(0);
     return { ...opened, expectedState: "partial", finalize };
   }
   if (fixtureId === "fail_dispatch") {
@@ -1531,6 +1631,7 @@ function maximum(values: number[]): number {
 }
 
 function writeBrowserMetrics(): void {
+  const productIdentity = requireBrowserProductIdentity();
   const expectedCaseIds = SHARE_ENVIRONMENTS.flatMap((environment) => (
     SHARE_FIXTURE_IDS.flatMap((fixtureId) => (
       SHARE_SCALE_MODES.map((scaleMode) => shareCaseId(environment, fixtureId, scaleMode))
@@ -1541,6 +1642,7 @@ function writeBrowserMetrics(): void {
     process.cwd(),
     "evaluation",
     "workpack-share-v2-product-2026-07-14",
+    "remediation",
     "logs"
   );
   fs.mkdirSync(outputDirectory, { recursive: true });
@@ -1548,6 +1650,11 @@ function writeBrowserMetrics(): void {
     schemaVersion: "safeclaw-workpack-share-v2-browser-metrics/v1",
     amendmentId: "workpack-share-v2-product-2026-07-14",
     contractAmendmentCommit: SHARE_CONTRACT_AMENDMENT_COMMIT,
+    sourceIdentity: {
+      productCommit: productIdentity.commit,
+      productTree: productIdentity.tree,
+      browserTestBlob: readGitRevision(`${productIdentity.commit}:tests/workpack-share-v2-browser.test.ts`)
+    },
     generatedAt: new Date().toISOString(),
     status: browserCaseMetrics.length === expectedCaseIds.length ? "complete" : "partial",
     census: {
@@ -1628,6 +1735,8 @@ async function executeBrowserCase(
   browserCaseMetrics.push({
     caseId: shareCaseId(environment, fixtureId, scaleMode),
     contractAmendmentCommit: SHARE_CONTRACT_AMENDMENT_COMMIT,
+    productCommit: requireBrowserProductIdentity().commit,
+    productTree: requireBrowserProductIdentity().tree,
     environmentId: environment.id,
     fixtureId,
     scaleModeId: scaleMode,
@@ -1691,11 +1800,24 @@ describe("Workpack Share v2 browser matrix census", () => {
         "leaf font mutation is synthetic"
       ]
     });
+    const productCommit = "1234567890abcdef1234567890abcdef12345678";
+    expect(validateBrowserProductIdentity(productCommit, productCommit)).toBe(productCommit);
+    expect(() => validateBrowserProductIdentity(undefined, productCommit))
+      .toThrow("WORKPACK_SHARE_V2_PRODUCT_SHA must be an exact commit SHA");
+    expect(() => validateBrowserProductIdentity("0".repeat(40), productCommit))
+      .toThrow("browser product SHA does not match HEAD");
   });
 });
 
 browserMatrix("Workpack Share v2 real browser matrix", () => {
   beforeAll(async () => {
+    browserProductCommit = validateBrowserProductIdentity(
+      process.env.WORKPACK_SHARE_V2_PRODUCT_SHA,
+      readGitRevision("HEAD")
+    );
+    browserProductTree = readGitRevision(`${browserProductCommit}^{tree}`);
+    process.stdout.write(`[share-browser-product-sha] ${browserProductCommit}\n`);
+    process.stdout.write(`[share-browser-product-tree] ${browserProductTree}\n`);
     harness = await startIsolatedNextBrowserHarness({
       slug: "workpack-share-v2-product",
       initialPath: "/workspace?step=share&theme=day",

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import { buildDbHarnessPacket } from "@/lib/db-harness";
+import { SUPPORTED_LANGUAGE_CODES, type SupportedLanguageCode } from "@/lib/foreign-worker";
 import {
   buildSourceDocumentDigest,
   resolveReviewedLocalizationAuthority,
@@ -93,8 +94,8 @@ function artifact(): LocalizedDispatchArtifactDraft {
   };
 }
 
-function request(body: unknown): NextRequest {
-  return new NextRequest(`http://localhost/api/workpacks/${WORKPACK_ID}/localized-dispatch-artifacts/vi/review`, {
+function request(body: unknown, locale: SupportedLanguageCode = "vi"): NextRequest {
+  return new NextRequest(`http://localhost/api/workpacks/${WORKPACK_ID}/localized-dispatch-artifacts/${locale}/review`, {
     method: "PUT",
     headers: {
       authorization: "Bearer test-token",
@@ -153,6 +154,159 @@ beforeEach(() => {
 });
 
 describe("reviewed localization route", () => {
+  it.each(SUPPORTED_LANGUAGE_CODES)("rejects emoji-only semantic artifacts for %s at the server route", async (locale) => {
+    const contextResult = await mocks.loadOwnedWorkpackOperationContext();
+    const response = contextResult.context.shareAuthority.workpack as AskResponse;
+    const current = resolveReviewedLocalizationAuthority({
+      workpackId: WORKPACK_ID,
+      response,
+      reviewedEnvelopes: {},
+      recipients: [],
+      secret: REVIEW_SECRET
+    });
+    if (!current.ok) throw new Error("sealed source workpack must have a canonical revision");
+    const incomplete = artifact();
+    incomplete.targetLocale = locale;
+    incomplete.localized = {
+      subject: "⚠️",
+      metadata: {
+        siteLabel: "⚠️",
+        siteValue: "⚠️",
+        taskLabel: "⚠️",
+        taskValue: "⚠️",
+        coreRiskLabel: "⚠️",
+        coreRiskValue: "⚠️"
+      },
+      bodyLines: ["⚠️"],
+      semanticRiskLabels: ["⚠️"]
+    };
+    const { PUT } = await import("@/app/api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review/route");
+
+    const result = await PUT(request({
+      expectedWorkpackRevision: current.canonicalWorkpackRevision,
+      sourceDocumentDigest: buildSourceDocumentDigest(response),
+      artifact: incomplete,
+      decision: "approved"
+    }, locale), { params: Promise.resolve({ id: WORKPACK_ID, locale }) });
+
+    expect(result.status).toBe(400);
+    expect(capturedUpdate).toBeNull();
+  });
+
+  it.each(SUPPORTED_LANGUAGE_CODES.filter((locale) => locale !== "ko"))(
+    "rejects Korean Jamo residue for non-Korean locale %s at the server route",
+    async (locale) => {
+      const contextResult = await mocks.loadOwnedWorkpackOperationContext();
+      const response = contextResult.context.shareAuthority.workpack as AskResponse;
+      const current = resolveReviewedLocalizationAuthority({
+        workpackId: WORKPACK_ID,
+        response,
+        reviewedEnvelopes: {},
+        recipients: [],
+        secret: REVIEW_SECRET
+      });
+      if (!current.ok) throw new Error("sealed source workpack must have a canonical revision");
+      const incomplete = artifact();
+      incomplete.targetLocale = locale;
+      incomplete.localized.metadata.coreRiskValue = "ᄀ residue";
+      const { PUT } = await import("@/app/api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review/route");
+
+      const result = await PUT(request({
+        expectedWorkpackRevision: current.canonicalWorkpackRevision,
+        sourceDocumentDigest: buildSourceDocumentDigest(response),
+        artifact: incomplete,
+        decision: "approved"
+      }, locale), { params: Promise.resolve({ id: WORKPACK_ID, locale }) });
+
+      expect(result.status).toBe(400);
+      expect(capturedUpdate).toBeNull();
+    }
+  );
+
+  it.each(SUPPORTED_LANGUAGE_CODES.filter((locale) => locale !== "en"))(
+    "rejects a full English fallback for non-English locale %s at the server route",
+    async (locale) => {
+      const contextResult = await mocks.loadOwnedWorkpackOperationContext();
+      const response = contextResult.context.shareAuthority.workpack as AskResponse;
+      const current = resolveReviewedLocalizationAuthority({
+        workpackId: WORKPACK_ID,
+        response,
+        reviewedEnvelopes: {},
+        recipients: [],
+        secret: REVIEW_SECRET
+      });
+      if (!current.ok) throw new Error("sealed source workpack must have a canonical revision");
+      const fallback = artifact();
+      fallback.targetLocale = locale;
+      fallback.localized = {
+        subject: "SafeClaw Safety Notice",
+        metadata: {
+          siteLabel: "Site",
+          siteValue: "Seongsu Site",
+          taskLabel: "Task",
+          taskValue: "Exterior painting",
+          coreRiskLabel: "Core risk",
+          coreRiskValue: "Fall from height"
+        },
+        bodyLines: ["Check the guardrail before starting work."],
+        semanticRiskLabels: ["Fall hazard", "Stop work and report"]
+      };
+      const { PUT } = await import("@/app/api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review/route");
+
+      const result = await PUT(request({
+        expectedWorkpackRevision: current.canonicalWorkpackRevision,
+        sourceDocumentDigest: buildSourceDocumentDigest(response),
+        artifact: fallback,
+        decision: "approved"
+      }, locale), { params: Promise.resolve({ id: WORKPACK_ID, locale }) });
+
+      expect(result.status).toBe(400);
+      expect(capturedUpdate).toBeNull();
+    }
+  );
+
+  it.each(SUPPORTED_LANGUAGE_CODES.filter((locale) => locale !== "en"))(
+    "rejects a renamed full English fallback for non-English locale %s at the server route",
+    async (locale) => {
+      const contextResult = await mocks.loadOwnedWorkpackOperationContext();
+      const response = contextResult.context.shareAuthority.workpack as AskResponse;
+      const current = resolveReviewedLocalizationAuthority({
+        workpackId: WORKPACK_ID,
+        response,
+        reviewedEnvelopes: {},
+        recipients: [],
+        secret: REVIEW_SECRET
+      });
+      if (!current.ok) throw new Error("sealed source workpack must have a canonical revision");
+      const fallback = artifact();
+      fallback.targetLocale = locale;
+      fallback.localized = {
+        subject: "SafeClaw Workplace Alert",
+        metadata: {
+          siteLabel: "Location",
+          siteValue: "Seongsu construction area",
+          taskLabel: "Operation",
+          taskValue: "Exterior painting",
+          coreRiskLabel: "Main hazard",
+          coreRiskValue: "Fall from height"
+        },
+        bodyLines: ["Inspect the guardrail before starting the job."],
+        semanticRiskLabels: ["Fall hazard", "Stop work and report"]
+      };
+      const { PUT } = await import("@/app/api/workpacks/[id]/localized-dispatch-artifacts/[locale]/review/route");
+
+      const result = await PUT(request({
+        expectedWorkpackRevision: current.canonicalWorkpackRevision,
+        sourceDocumentDigest: buildSourceDocumentDigest(response),
+        artifact: fallback,
+        decision: "approved"
+      }, locale), { params: Promise.resolve({ id: WORKPACK_ID, locale }) });
+
+      expect(result.status).toBe(400);
+      expect(capturedUpdate).toBeNull();
+    }
+  );
+
   it("server-signs and CAS-persists an approved envelope without changing original evidence fields", async () => {
     const contextResult = await mocks.loadOwnedWorkpackOperationContext();
     const response = contextResult.context.shareAuthority.workpack as AskResponse;

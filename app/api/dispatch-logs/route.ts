@@ -1,43 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdminClient, getWorkspaceUser, toJson } from "@/lib/supabase-admin";
-import { isRecord, readString } from "@/lib/workspace-api";
-import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
+import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
-
-type DispatchLogDraft = {
-  channel: string;
-  targetLabel?: string;
-  targetContact?: string;
-  languageCode?: string;
-  provider?: string;
-  providerStatus?: string;
-  workflowRunId?: string;
-  failureReason?: string;
-  payload?: unknown;
-};
-
-function parseDispatchLogs(value: unknown): DispatchLogDraft[] {
-  if (!Array.isArray(value)) return [];
-
-  return value.flatMap((item): DispatchLogDraft[] => {
-    if (!isRecord(item)) return [];
-    const channel = readString(item.channel);
-    if (!channel) return [];
-
-    return [{
-      channel,
-      targetLabel: readString(item.targetLabel) || undefined,
-      targetContact: readString(item.targetContact) || undefined,
-      languageCode: readString(item.languageCode) || undefined,
-      provider: readString(item.provider) || undefined,
-      providerStatus: readString(item.providerStatus) || undefined,
-      workflowRunId: readString(item.workflowRunId) || undefined,
-      failureReason: readString(item.failureReason) || undefined,
-      payload: item.payload
-    }];
-  });
-}
 
 export async function GET(request: NextRequest) {
   const client = createSupabaseAdminClient();
@@ -182,70 +146,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, configured: true, savedCount: 0, message: "관리자 로그인이 필요합니다." }, { status: 401 });
   }
 
-  const parsed = await request.json().catch((): unknown => ({}));
-  const body = isRecord(parsed) ? parsed : {};
-  const logs = parseDispatchLogs(body.logs);
-  const workpackId = readString(body.workpackId);
-  if (!logs.length) {
-    return NextResponse.json({ ok: false, configured: true, savedCount: 0, logIds: [], message: "저장할 전파 이력이 없습니다." }, { status: 400 });
-  }
-  if (!workpackId) {
-    return NextResponse.json({ ok: false, configured: true, savedCount: 0, logIds: [], message: "전파 이력의 작업팩 ID를 확인해 주세요." }, { status: 400 });
-  }
-  const owned = await loadOwnedWorkpackOperationContext(client, user, workpackId);
-  if (!owned.ok) {
-    return NextResponse.json({
-      ok: false,
-      configured: true,
-      savedCount: 0,
-      logIds: [],
-      message: owned.message
-    }, { status: owned.status });
-  }
-  const rows = logs.map((log) => ({
-    organization_id: owned.context.organizationId,
-    site_id: owned.context.siteId,
-    workpack_id: owned.context.workpackId,
-    channel: log.channel,
-    target_label: log.targetLabel || null,
-    target_contact: log.targetContact || null,
-    language_code: log.languageCode || null,
-    provider: log.provider || null,
-    provider_status: log.providerStatus || null,
-    workflow_run_id: log.workflowRunId || null,
-    failure_reason: log.failureReason || null,
-    payload: toJson(log.payload || {})
-  }));
-
-  const { data, error } = await client.from("dispatch_logs").insert(rows).select("id");
-
-  if (error) {
-    console.error("dispatch logs save failed", error);
-    return NextResponse.json({ ok: false, configured: true, savedCount: 0, logIds: [], message: "전파 이력 저장에 실패했습니다." }, { status: 500 });
-  }
-
-  const logIds = (data || []).flatMap((item) => (
-    typeof item.id === "string" && item.id.trim() ? [item.id] : []
-  ));
-  if (logIds.length !== rows.length) {
-    console.error("dispatch logs save returned incomplete row identities", {
-      expected: rows.length,
-      actual: logIds.length
-    });
-    return NextResponse.json({
-      ok: false,
-      configured: true,
-      savedCount: 0,
-      logIds: [],
-      message: "전파 이력 ID를 확인하지 못해 저장 완료로 처리하지 않았습니다."
-    }, { status: 500 });
-  }
-
   return NextResponse.json({
-    ok: true,
+    ok: false,
     configured: true,
-    savedCount: rows.length,
-    logIds,
-    message: "전파 이력을 저장했습니다."
-  });
+    state: "blocked",
+    reasonCode: "server_dispatch_receipt_required",
+    savedCount: 0,
+    logIds: [],
+    message: "전파 이력은 workflow dispatch 라우트가 검증된 서버 receipt와 함께 저장합니다."
+  }, { status: 409 });
 }

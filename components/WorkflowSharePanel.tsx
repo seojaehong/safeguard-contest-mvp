@@ -4,13 +4,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "@/components/WorkflowSharePanel.module.css";
 import {
-  buildProviderDispatchIdempotencyKey,
   resolveShareProductPresentation,
   type ShareProductAuthorityStatus,
   type ShareProductChannelStatus,
   type ShareProductOutcome
 } from "@/components/WorkflowSharePolicy";
-import type { SupportedLanguageCode } from "@/lib/foreign-worker";
+import { parseSupportedLanguageCode, type SupportedLanguageCode } from "@/lib/foreign-worker";
 import type { AskResponse } from "@/lib/types";
 import type { WorkpackReadiness } from "@/lib/workpack-readiness";
 import type { WorkerDispatchTarget } from "@/lib/workspace";
@@ -19,12 +18,10 @@ import {
   createAuthenticatedShareSession,
   dispatchAuthenticatedShareSession,
   loadAuthenticatedShareAuthority,
-  persistAuthenticatedDispatchLogs,
   resolveAuthenticatedShareChannels,
   WorkflowShareRequestError,
   type AuthenticatedChannelResolution,
   type AuthenticatedShareAuthority,
-  type DispatchLogClientDraft,
   type LocalizedSharePreview,
   type WorkflowDispatchResult,
   type WorkflowShareChannel
@@ -86,7 +83,11 @@ const STALE_REASON_CODES = new Set([
   "session_identity_mismatch",
   "workpack_revision_or_digest_changed",
   "recipient_snapshot_changed",
-  "channel_configuration_changed"
+  "channel_configuration_changed",
+  "channel_unavailable",
+  "availability_token_expired",
+  "availability_token_invalid",
+  "dispatch_gate_binding_mismatch"
 ]);
 
 function languageLabel(code: SupportedLanguageCode): string {
@@ -98,36 +99,9 @@ function uniqueChannels(channels: WorkflowShareChannel[]): WorkflowShareChannel[
 }
 
 function classifyDispatchOutcome(result: WorkflowDispatchResult): ShareProductOutcome["stage"] {
-  if (result.duplicateRisk || result.providerCalled === false) return "unknown";
-  const statuses = (result.channelResults || []).map((item) => item.status || "unknown");
-  const acceptedCount = statuses.filter((status) => status === "sent").length;
-  if (result.ok && statuses.length > 0 && acceptedCount === statuses.length) return "accepted";
-  if (acceptedCount > 0 && acceptedCount < statuses.length) return "partial";
+  if (result.outcome === "accepted") return "accepted";
+  if (result.outcome === "partial") return "partial";
   return "dispatch_failed";
-}
-
-function buildDispatchLogs(input: {
-  result: WorkflowDispatchResult;
-  targetCount: number;
-  shareSessionId: string;
-  idempotencyKey: string;
-}): DispatchLogClientDraft[] {
-  return (input.result.channelResults || []).flatMap((item): DispatchLogClientDraft[] => {
-    if (!item.channel) return [];
-    return [{
-      channel: item.channel,
-      targetLabel: `오늘 참여자 ${input.targetCount}명`,
-      provider: item.provider,
-      providerStatus: item.status || "unknown",
-      workflowRunId: input.result.workflowRunId,
-      failureReason: item.status === "sent" ? undefined : item.message || "채널 결과 확인 필요",
-      payload: {
-        shareSessionId: input.shareSessionId,
-        idempotencyKey: input.idempotencyKey,
-        responseMessage: input.result.message
-      }
-    }];
-  });
 }
 
 function buildChannelOutcomes(result: WorkflowDispatchResult): NonNullable<ShareProductOutcome["channelOutcomes"]> {
@@ -142,10 +116,6 @@ function buildChannelOutcomes(result: WorkflowDispatchResult): NonNullable<Share
       message: outcome === "accepted" ? "접수" : outcome === "failed" ? "실패" : "확인 필요"
     }];
   });
-}
-
-function reasonCodeFromError(error: unknown): string | null {
-  return error instanceof WorkflowShareRequestError ? error.reasonCode : null;
 }
 
 function PreviewSurface({ preview }: { preview: LocalizedSharePreview | null }) {
@@ -322,7 +292,7 @@ export function WorkflowSharePanel({
     }).catch((error: unknown) => {
       if (cancelled) return;
       console.error("Share channel resolution failed", error);
-      setChannelView({ status: "error", resolution: null });
+      if (!applyServerError(error)) setChannelView({ status: "error", resolution: null });
     });
     return () => {
       cancelled = true;
@@ -360,10 +330,20 @@ export function WorkflowSharePanel({
     ));
   }
 
-  function applyServerReason(reasonCode: string | null): boolean {
+  function applyServerError(error: unknown): boolean {
+    const requestError = error instanceof WorkflowShareRequestError ? error : null;
+    const reasonCode = requestError?.reasonCode || null;
     if (!reasonCode) return false;
+    const parsedLanguage = parseSupportedLanguageCode(requestError?.validatedLanguage);
+    const validatedLanguage = parsedLanguage.status === "supported" ? parsedLanguage.locale : null;
     if (reasonCode === "recipient_locale_invalid") {
-      setAuthorityView({ status: "recipient_locale_invalid", authority: null });
+      setAuthorityView({
+        status: "recipient_locale_invalid",
+        authority: null,
+        ...(validatedLanguage ? { validatedLanguage } : {})
+      });
+      setChannelView({ status: "idle", resolution: null });
+      setOutcome(null);
       return true;
     }
     if (
@@ -374,12 +354,29 @@ export function WorkflowSharePanel({
       setAuthorityView((current) => ({
         status: reasonCode,
         authority: null,
-        validatedLanguage: current.validatedLanguage
+        validatedLanguage: validatedLanguage || current.validatedLanguage
       }));
+      setChannelView({ status: "idle", resolution: null });
+      setOutcome(null);
       return true;
     }
     if (STALE_REASON_CODES.has(reasonCode)) {
       setStaleReason(reasonCode);
+      setAuthorityView((current) => ({
+        status: reasonCode === "workpack_revision_or_digest_changed"
+          ? "workpack_revision_or_digest_changed"
+          : current.status,
+        authority: null,
+        validatedLanguage: validatedLanguage || current.validatedLanguage
+      }));
+      setChannelView({ status: "idle", resolution: null });
+      setOutcome(null);
+      return true;
+    }
+    if (reasonCode === "provider_adapter_unavailable") {
+      setAuthorityView((current) => ({ ...current, authority: null }));
+      setChannelView({ status: "unavailable", resolution: null });
+      setOutcome(null);
       return true;
     }
     return false;
@@ -400,7 +397,7 @@ export function WorkflowSharePanel({
     setOutcome(null);
     setStaleReason(null);
     try {
-      let session: { shareSessionId: string; expiresAt: string; message: string };
+      let session: { shareSessionId: string; dispatchIdempotencyKey: string; expiresAt: string; message: string };
       try {
         session = await createAuthenticatedShareSession(fetch, {
           authToken,
@@ -412,32 +409,25 @@ export function WorkflowSharePanel({
         });
       } catch (error) {
         console.error("Share session creation failed", error);
-        if (!applyServerReason(reasonCodeFromError(error))) {
+        if (!applyServerError(error)) {
           setOutcome({ stage: "session_failed", logIds: [] });
         }
         return;
       }
 
-      const dispatchAttemptId = crypto.randomUUID();
-      const idempotencyKey = buildProviderDispatchIdempotencyKey({
-        workpackId: authority.workpackId,
-        shareSessionId: session.shareSessionId,
-        dispatchAttemptId,
-        channels: selectedChannels
-      });
       let result: WorkflowDispatchResult;
       try {
         result = await dispatchAuthenticatedShareSession(fetch, {
           authToken,
           workpackId: authority.workpackId,
           shareSessionId: session.shareSessionId,
-          idempotencyKey,
+          idempotencyKey: session.dispatchIdempotencyKey,
           channels: selectedChannels,
           operatorNote: note.trim()
         });
       } catch (error) {
         console.error("Share dispatch failed", error);
-        if (!applyServerReason(reasonCodeFromError(error))) {
+        if (!applyServerError(error)) {
           setOutcome({ stage: "dispatch_failed", logIds: [] });
         }
         return;
@@ -445,37 +435,20 @@ export function WorkflowSharePanel({
 
       const stage = classifyDispatchOutcome(result);
       const channelOutcomes = buildChannelOutcomes(result);
-      const logs = buildDispatchLogs({
-        result,
-        targetCount: targetWorkers.length,
-        shareSessionId: session.shareSessionId,
-        idempotencyKey
-      });
-      if (!logs.length) {
-        setOutcome({
-          stage: stage === "accepted" ? "log_unpersisted" : stage,
-          logIds: [],
-          channelOutcomes
-        });
-        return;
-      }
-      try {
-        const saved = await persistAuthenticatedDispatchLogs(fetch, {
-          authToken,
-          workpackId: authority.workpackId,
-          logs
-        });
-        setOutcome({ stage, logIds: saved.logIds, channelOutcomes });
-      } catch (error) {
-        console.error("Share dispatch log persistence failed", error);
-        setOutcome({ stage: "log_unpersisted", logIds: [], channelOutcomes });
-      }
+      setOutcome({ stage, logIds: result.logIds || [], channelOutcomes });
     } finally {
       setSending(false);
     }
   }
 
   function handlePrimaryAction() {
+    if (outcome?.stage === "session_failed") {
+      setOutcome(null);
+      setStaleReason(null);
+      setChannelView({ status: "idle", resolution: null });
+      setRefreshKey((current) => current + 1);
+      return;
+    }
     if (presentation.primary.action === "send") {
       void sendCurrentPack();
       return;
@@ -612,12 +585,11 @@ export function WorkflowSharePanel({
               ))}
             </select>
           </label>
-          {presentation.state !== "stale" ? (
+          {authorityView.authority && presentation.state !== "stale" && presentation.state !== "blocked" ? (
             <div
               className={styles.preview}
               data-share-preview
               data-share-region="preview"
-              data-share-scroll-region="preview"
               data-share-owner="localized-preview"
               lang={previewLanguage}
             >

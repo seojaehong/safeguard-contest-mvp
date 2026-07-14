@@ -1,6 +1,12 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { evaluateShareSessionReuse } from "@/components/WorkflowSharePolicy";
+import {
+  buildServerDispatchGate,
+  reserveServerDispatchGate,
+  type ServerDispatchGate
+} from "@/lib/workpack-dispatch-gate";
+import { dispatchAuthenticatedShareSession } from "@/lib/workflow-share-client";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
@@ -19,7 +25,8 @@ const mocks = vi.hoisted(() => ({
   verifyChannelAvailabilityToken: vi.fn(),
   buildShareDispatchBinding: vi.fn(),
   buildShareRecipientDigest: vi.fn(),
-  validateShareDispatchBinding: vi.fn()
+  validateShareDispatchBinding: vi.fn(),
+  dispatchWithConfiguredProvider: vi.fn()
 }));
 
 vi.mock("@/lib/supabase-admin", () => ({
@@ -40,14 +47,22 @@ vi.mock("@/lib/n8n-webhook", () => ({
   isLiveDispatchEnabled: mocks.isLiveDispatchEnabled
 }));
 
+vi.mock("@/lib/workflow-dispatch-provider", () => ({
+  dispatchWithConfiguredProvider: mocks.dispatchWithConfiguredProvider
+}));
+
 vi.mock("@/lib/workpack-share-server-config", () => ({
   readWorkpackShareServerConfig: mocks.readWorkpackShareServerConfig
 }));
 
-vi.mock("@/lib/reviewed-localization-envelope", () => ({
-  readReviewedLocalizationEnvelopes: mocks.readReviewedLocalizationEnvelopes,
-  resolveReviewedLocalizationAuthority: mocks.resolveReviewedLocalizationAuthority
-}));
+vi.mock("@/lib/reviewed-localization-envelope", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/reviewed-localization-envelope")>();
+  return {
+    ...actual,
+    readReviewedLocalizationEnvelopes: mocks.readReviewedLocalizationEnvelopes,
+    resolveReviewedLocalizationAuthority: mocks.resolveReviewedLocalizationAuthority
+  };
+});
 
 vi.mock("@/lib/channel-availability", () => ({
   buildChannelRuntimeConfiguration: mocks.buildChannelRuntimeConfiguration,
@@ -121,6 +136,18 @@ const dispatchBinding = {
   version: "share-dispatch-binding/v1",
   marker: "server-created-binding"
 };
+const IDEMPOTENCY_KEY = "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef";
+
+function readyDispatchGate(): ServerDispatchGate {
+  return buildServerDispatchGate({
+    shareSessionId: SESSION_ID,
+    workpackId: WORKPACK_ID,
+    canonicalWorkpackRevision: "a".repeat(64),
+    requestedChannels: ["email", "sms"],
+    idempotencyKey: IDEMPOTENCY_KEY,
+    issuedAt: "2026-07-14T00:00:00.000Z"
+  });
+}
 
 function jsonRequest(path: string, body: unknown) {
   return new NextRequest(`http://localhost${path}`, {
@@ -152,6 +179,7 @@ function ownedContext() {
 }
 
 function activeSession() {
+  const dispatchGate = readyDispatchGate();
   return {
     ok: true,
     session: {
@@ -162,9 +190,91 @@ function activeSession() {
       createdBy: "user-1",
       recipients: [serverRecipient],
       expiresAt: "2099-01-01T00:00:00.000Z",
-      accessPolicy: { dispatchBinding },
+      accessPolicy: { dispatchBinding, dispatchGate },
       dispatchBinding
     }
+  };
+}
+
+function makeDispatchAuthorityClient(input: { logInsertError?: boolean; gate?: ServerDispatchGate } = {}) {
+  let accessPolicy: Record<string, unknown> = { dispatchBinding, dispatchGate: input.gate || readyDispatchGate() };
+  let updatedAt = "2026-07-14T00:00:00.000Z";
+  let reservationCount = 0;
+  let insertedLogs: Array<Record<string, unknown>> = [];
+  const logIds = [
+    "77777777-7777-4777-8777-777777777777",
+    "88888888-8888-4888-8888-888888888888"
+  ];
+
+  function sessionSelectQuery() {
+    const query = {
+      eq() { return query; },
+      maybeSingle: async () => ({
+        data: {
+          id: SESSION_ID,
+          organization_id: "org-1",
+          site_id: "site-1",
+          workpack_id: WORKPACK_ID,
+          created_by: "user-1",
+          status: "active",
+          access_policy: accessPolicy,
+          updated_at: updatedAt
+        },
+        error: null
+      })
+    };
+    return query;
+  }
+
+  return {
+    client: {
+      from(table: string) {
+        if (table === "workpack_share_sessions") {
+          return {
+            select() { return sessionSelectQuery(); },
+            update(value: { access_policy?: Record<string, unknown>; updated_at?: string }) {
+              const expected: Record<string, unknown> = {};
+              const updateQuery = {
+                eq(column: string, match: unknown) {
+                  expected[column] = match;
+                  return updateQuery;
+                },
+                select() {
+                  return {
+                    maybeSingle: async () => {
+                      if (expected.updated_at !== updatedAt || expected.status !== "active") {
+                        return { data: null, error: null };
+                      }
+                      accessPolicy = value.access_policy || accessPolicy;
+                      updatedAt = value.updated_at || updatedAt;
+                      reservationCount += 1;
+                      return { data: { id: SESSION_ID, access_policy: accessPolicy, updated_at: updatedAt }, error: null };
+                    }
+                  };
+                }
+              };
+              return updateQuery;
+            }
+          };
+        }
+        if (table === "dispatch_logs") {
+          return {
+            insert(rows: Array<Record<string, unknown>>) {
+              insertedLogs = rows;
+              return {
+                select: async () => input.logInsertError
+                  ? { data: null, error: { message: "insert failed" } }
+                  : { data: rows.map((_row, index) => ({ id: logIds[index] })), error: null }
+              };
+            }
+          };
+        }
+        throw new Error(`Unexpected table ${table}`);
+      }
+    },
+    accessPolicy: () => accessPolicy,
+    reservationCount: () => reservationCount,
+    insertedLogs: () => insertedLogs
   };
 }
 
@@ -249,6 +359,14 @@ beforeEach(() => {
   mocks.buildShareDispatchBinding.mockReturnValue(dispatchBinding);
   mocks.buildShareRecipientDigest.mockReturnValue("d".repeat(64));
   mocks.validateShareDispatchBinding.mockReturnValue({ ok: true, binding: dispatchBinding });
+  mocks.dispatchWithConfiguredProvider.mockResolvedValue({
+    workflowRunId: "provider-run-1",
+    providerStatus: "live",
+    channelResults: [
+      { channel: "email", provider: "n8n-relay", status: "sent", message: "queued" },
+      { channel: "sms", provider: "n8n-relay", status: "sent", message: "queued" }
+    ]
+  });
 });
 
 describe("share session route authority", () => {
@@ -275,18 +393,34 @@ describe("share session route authority", () => {
     expect(fake.inserted()).toMatchObject({
       id: expect.stringMatching(/^[0-9a-f-]{36}$/i),
       recipients_snapshot: [serverRecipient],
-      access_policy: expect.objectContaining({ dispatchBinding })
+      access_policy: expect.objectContaining({
+        dispatchBinding,
+        dispatchGate: expect.objectContaining({
+          version: "server-dispatch-gate/v1",
+          state: "ready",
+          shareSessionId: expect.stringMatching(/^[0-9a-f-]{36}$/i),
+          workpackId: WORKPACK_ID,
+          canonicalWorkpackRevision: "a".repeat(64),
+          requestedChannels: ["email", "sms"],
+          idempotencyKey: expect.stringMatching(/^provider-dispatch-v1-/)
+        })
+      })
     });
     const inserted = fake.inserted() as {
       expires_at?: string;
       status: string;
       share_scope: string;
-      access_policy: { anonymousAllowed?: boolean; dispatchBinding?: unknown };
+      access_policy: {
+        anonymousAllowed?: boolean;
+        dispatchBinding?: unknown;
+        dispatchGate: { idempotencyKey: string };
+      };
       recipients_snapshot: Array<typeof serverRecipient>;
     };
     expect(Date.parse(inserted.expires_at || "")).toBeGreaterThan(Date.now());
-    const body = await response.json() as { expiresAt?: string };
+    const body = await response.json() as { expiresAt?: string; dispatchIdempotencyKey?: string };
     expect(body.expiresAt).toBe(inserted.expires_at);
+    expect(body.dispatchIdempotencyKey).toBe(inserted.access_policy.dispatchGate.idempotencyKey);
     expect(body).toMatchObject({ shareSessionId: (fake.inserted() as { id: string }).id });
     expect(evaluateShareSessionReuse({
       id: SESSION_ID,
@@ -302,7 +436,8 @@ describe("share session route authority", () => {
   });
 
   it("stops before provider dispatch when the persisted session binding is stale", async () => {
-    mocks.createSupabaseAdminClient.mockReturnValue({});
+    const fake = makeDispatchAuthorityClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
     mocks.validateShareDispatchBinding.mockReturnValueOnce({
       ok: false,
       reasonCode: "channel_configuration_changed"
@@ -326,10 +461,167 @@ describe("share session route authority", () => {
       providerCalled: false
     });
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+    expect(mocks.dispatchWithConfiguredProvider).not.toHaveBeenCalled();
+    expect(fake.reservationCount()).toBe(0);
+    expect(fake.insertedLogs()).toEqual([]);
   });
 });
 
 describe("workflow dispatch route authority", () => {
+  it("returns a client-accepted result only through the actual recorded route receipt", async () => {
+    const fake = makeDispatchAuthorityClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.buildChannelRuntimeConfiguration.mockReturnValue({ dispatchMode: "live", persistentIdempotencySupported: true });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+    const routeFetcher = async (input: string, init: RequestInit): Promise<Response> => POST(new NextRequest(
+      `http://localhost${input}`,
+      { method: init.method, headers: init.headers, body: init.body }
+    ));
+
+    const result = await dispatchAuthenticatedShareSession(routeFetcher, {
+      authToken: "test-token",
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      channels: ["email", "sms"],
+      operatorNote: "route-client parity"
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      state: "recorded",
+      outcome: "accepted",
+      providerCalled: true,
+      logIds: [
+        "77777777-7777-4777-8777-777777777777",
+        "88888888-8888-4888-8888-888888888888"
+      ]
+    });
+    expect(fake.reservationCount()).toBe(2);
+    expect(fake.insertedLogs()).toHaveLength(2);
+  });
+
+  it("atomically reserves the server gate and returns only server-persisted receipt evidence", async () => {
+    const fake = makeDispatchAuthorityClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.buildChannelRuntimeConfiguration.mockReturnValue({ dispatchMode: "live", persistentIdempotencySupported: true });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      channels: ["email", "sms"],
+      operatorNote: "server authority"
+    }));
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      ok: true,
+      outcome: "accepted",
+      providerCalled: true,
+      idempotencySupported: true,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      workflowRunId: "provider-run-1",
+      receipt: expect.objectContaining({
+        shareSessionId: SESSION_ID,
+        workpackId: WORKPACK_ID,
+        canonicalWorkpackRevision: "a".repeat(64),
+        idempotencyKey: IDEMPOTENCY_KEY,
+        outcome: "accepted"
+      }),
+      logIds: [
+        "77777777-7777-4777-8777-777777777777",
+        "88888888-8888-4888-8888-888888888888"
+      ]
+    });
+    expect(mocks.dispatchWithConfiguredProvider).toHaveBeenCalledTimes(1);
+    expect(fake.reservationCount()).toBe(2);
+    expect(fake.insertedLogs()).toHaveLength(2);
+    expect(fake.insertedLogs()[0]?.payload).toMatchObject({
+      receiptId: expect.stringMatching(/^[0-9a-f-]{36}$/i),
+      shareSessionId: SESSION_ID,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      workpackId: WORKPACK_ID,
+      canonicalWorkpackRevision: "a".repeat(64),
+      outcome: "accepted"
+    });
+    expect(fake.accessPolicy().dispatchGate).toMatchObject({ state: "recorded", outcome: "accepted" });
+  });
+
+  it("returns a real partial outcome only after provider evidence, server logs, and final CAS", async () => {
+    const fake = makeDispatchAuthorityClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.buildChannelRuntimeConfiguration.mockReturnValue({ dispatchMode: "live", persistentIdempotencySupported: true });
+    mocks.dispatchWithConfiguredProvider.mockResolvedValueOnce({
+      workflowRunId: "provider-run-partial",
+      providerStatus: "live",
+      channelResults: [
+        { channel: "email", provider: "n8n-relay", status: "sent", message: "queued" },
+        { channel: "sms", provider: "n8n-relay", status: "failed", message: "rejected" }
+      ]
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      channels: ["email", "sms"]
+    }));
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({ ok: true, outcome: "partial", providerCalled: true });
+    expect(fake.reservationCount()).toBe(2);
+    expect(fake.insertedLogs()).toHaveLength(2);
+    expect(fake.accessPolicy().dispatchGate).toMatchObject({ state: "recorded", outcome: "partial" });
+  });
+
+  it("marks the durable gate uncertain and returns no success when provider receipt validation fails", async () => {
+    const fake = makeDispatchAuthorityClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.buildChannelRuntimeConfiguration.mockReturnValue({ dispatchMode: "live", persistentIdempotencySupported: true });
+    mocks.dispatchWithConfiguredProvider.mockRejectedValueOnce(new Error("provider receipt unavailable"));
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      channels: ["email", "sms"]
+    }));
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(502);
+    expect(body).toMatchObject({ ok: false, state: "uncertain", providerCalled: true, duplicateRisk: true });
+    expect(fake.reservationCount()).toBe(2);
+    expect(fake.insertedLogs()).toEqual([]);
+    expect(fake.accessPolicy().dispatchGate).toMatchObject({ state: "uncertain" });
+  });
+
+  it("never returns accepted when server dispatch evidence insertion fails", async () => {
+    const fake = makeDispatchAuthorityClient({ logInsertError: true });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.buildChannelRuntimeConfiguration.mockReturnValue({ dispatchMode: "live", persistentIdempotencySupported: true });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      channels: ["email", "sms"]
+    }));
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(500);
+    expect(body).toMatchObject({ ok: false, reasonCode: "dispatch_evidence_unpersisted", state: "uncertain" });
+    expect(mocks.dispatchWithConfiguredProvider).toHaveBeenCalledTimes(1);
+    expect(fake.reservationCount()).toBe(2);
+    expect(fake.accessPolicy().dispatchGate).toMatchObject({ state: "uncertain" });
+  });
+
   it("rejects client-forged workpack and recipients fields", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     const { POST } = await import("@/app/api/workflow/dispatch/route");
@@ -346,7 +638,7 @@ describe("workflow dispatch route authority", () => {
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 
-  it("fails closed before provider dispatch when persistent idempotency is unavailable", async () => {
+  it("fails closed before provider dispatch when the configured live adapter is unavailable", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     const { POST } = await import("@/app/api/workflow/dispatch/route");
 
@@ -366,15 +658,16 @@ describe("workflow dispatch route authority", () => {
 
     expect(response.status).toBe(409);
     expect(body).toMatchObject({
-      duplicateRisk: true,
-      idempotencySupported: false,
+      reasonCode: "provider_adapter_unavailable",
+      duplicateRisk: false,
+      idempotencySupported: true,
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       providerCalled: false
     });
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 
-  it("keeps fixture validation non-delivery while accepting the idempotency contract", async () => {
+  it("keeps fixture validation blocked and never describes it as delivery", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     mocks.isLiveDispatchEnabled.mockReturnValue(false);
     const { POST } = await import("@/app/api/workflow/dispatch/route");
@@ -393,14 +686,62 @@ describe("workflow dispatch route authority", () => {
       providerCalled?: boolean;
     };
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(409);
     expect(body).toMatchObject({
-      providerStatus: "fixture",
+      reasonCode: "provider_adapter_unavailable",
       duplicateRisk: false,
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       providerCalled: false
     });
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("rejects a forged server idempotency key before reservation, provider, or logs", async () => {
+    const fake = makeDispatchAuthorityClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.buildChannelRuntimeConfiguration.mockReturnValue({ dispatchMode: "live", persistentIdempotencySupported: true });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-99999999-9999-4999-8999-999999999999-deadbeef",
+      channels: ["email", "sms"]
+    }));
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(409);
+    expect(body.reasonCode).toBe("dispatch_gate_binding_mismatch");
+    expect(fake.reservationCount()).toBe(0);
+    expect(fake.insertedLogs()).toEqual([]);
+    expect(mocks.dispatchWithConfiguredProvider).not.toHaveBeenCalled();
+  });
+
+  it("rejects a replayed reservation without a second provider call or log", async () => {
+    const firstReservation = reserveServerDispatchGate(readyDispatchGate(), {
+      idempotencyKey: IDEMPOTENCY_KEY,
+      receiptId: "55555555-5555-4555-8555-555555555555",
+      reservedAt: "2026-07-14T00:01:00.000Z"
+    });
+    if (!firstReservation.ok) throw new Error("expected test reservation");
+    const fake = makeDispatchAuthorityClient({ gate: firstReservation.gate });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.buildChannelRuntimeConfiguration.mockReturnValue({ dispatchMode: "live", persistentIdempotencySupported: true });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      channels: ["email", "sms"]
+    }));
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(409);
+    expect(body.reasonCode).toBe("dispatch_already_reserved");
+    expect(fake.reservationCount()).toBe(0);
+    expect(fake.insertedLogs()).toEqual([]);
+    expect(mocks.dispatchWithConfiguredProvider).not.toHaveBeenCalled();
   });
 });
 

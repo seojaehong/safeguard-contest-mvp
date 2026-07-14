@@ -1,5 +1,9 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  resolveAuthenticatedShareChannels,
+  WorkflowShareRequestError
+} from "@/lib/workflow-share-client";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
@@ -99,44 +103,42 @@ beforeEach(() => {
     dispatchRecipients: [],
     verifiedEnvelopes: {}
   });
-  mocks.resolveWebhookConfig.mockReturnValue({ url: null, token: null });
-  mocks.isLiveDispatchEnabled.mockReturnValue(false);
+  mocks.resolveWebhookConfig.mockReturnValue({ url: "https://relay.example/hook", token: "relay-token" });
+  mocks.isLiveDispatchEnabled.mockReturnValue(true);
 });
 
 describe("channel availability route", () => {
-  it("authenticates and returns a server-signed resolution for exact recipients and channels", async () => {
+  it("uses the requestedChannels DTO through the actual client and route handler", async () => {
     const { POST } = await import("@/app/api/settings/channels/resolve/route");
+    const routeFetcher = async (input: string, init: RequestInit): Promise<Response> => POST(new NextRequest(
+      `http://localhost${input}`,
+      { method: init.method, headers: init.headers, body: init.body }
+    ));
 
-    const response = await POST(request({
+    const resolution = await resolveAuthenticatedShareChannels(routeFetcher, {
+      authToken: "test-token",
       workpackId: WORKPACK_ID,
       canonicalWorkpackRevision: "a".repeat(64),
-      recipients: [WORKER_ID],
-      channels: ["email", "sms"]
-    }));
-    const body = await response.json() as {
-      ready?: boolean;
-      availabilityToken?: string;
-      requestedChannels?: string[];
-      configurationRevision?: number;
-    };
+      workerIds: [WORKER_ID],
+      requestedChannels: ["email", "sms"]
+    });
 
-    expect(response.status).toBe(200);
-    expect(body.ready).toBe(true);
-    expect(body.availabilityToken).toBeTruthy();
-    expect(body.requestedChannels).toEqual(["email", "sms"]);
-    expect(body.configurationRevision).toBe(7);
+    expect(resolution.ready).toBe(true);
+    expect(resolution.availabilityToken).toBeTruthy();
+    expect(resolution.requestedChannels).toEqual(["email", "sms"]);
     expect(mocks.loadServerShareRecipients).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
       requestedWorkerIds: [WORKER_ID]
     }));
-    expect(JSON.stringify(body)).not.toContain("availability-secret");
-    expect(JSON.stringify(body)).not.toContain("binding-secret");
+    expect(JSON.stringify(resolution)).not.toContain("availability-secret");
+    expect(JSON.stringify(resolution)).not.toContain("binding-secret");
   });
 
   it("returns the split worker-language blocker without creating a fallback token", async () => {
     mocks.resolveReviewedLocalizationAuthority.mockReturnValueOnce({
       ok: false,
       reasonCode: "recipient_locale_invalid",
-      owner: "workers"
+      owner: "workers",
+      validatedSupportedCode: "vi"
     });
     const { POST } = await import("@/app/api/settings/channels/resolve/route");
 
@@ -144,7 +146,7 @@ describe("channel availability route", () => {
       workpackId: WORKPACK_ID,
       canonicalWorkpackRevision: "a".repeat(64),
       recipients: [WORKER_ID],
-      channels: ["sms"]
+      requestedChannels: ["sms"]
     }));
     const body = await response.json() as Record<string, unknown>;
 
@@ -155,5 +157,46 @@ describe("channel availability route", () => {
       owner: "workers"
     });
     expect(body.availabilityToken).toBeUndefined();
+  });
+
+  it("preserves typed locale ownership through the actual route and client without downstream calls", async () => {
+    mocks.resolveReviewedLocalizationAuthority.mockReturnValueOnce({
+      ok: false,
+      reasonCode: "translation_incomplete",
+      owner: "document",
+      validatedSupportedCode: "vi"
+    });
+    const { POST } = await import("@/app/api/settings/channels/resolve/route");
+    const paths: string[] = [];
+    const routeFetcher = async (input: string, init: RequestInit): Promise<Response> => {
+      paths.push(input);
+      return POST(new NextRequest(`http://localhost${input}`, {
+        method: init.method,
+        headers: init.headers,
+        body: init.body
+      }));
+    };
+
+    let failure: unknown;
+    try {
+      await resolveAuthenticatedShareChannels(routeFetcher, {
+        authToken: "test-token",
+        workpackId: WORKPACK_ID,
+        canonicalWorkpackRevision: "a".repeat(64),
+        workerIds: [WORKER_ID],
+        requestedChannels: ["sms"]
+      });
+    } catch (error) {
+      failure = error;
+    }
+
+    expect(failure).toBeInstanceOf(WorkflowShareRequestError);
+    expect(failure).toMatchObject({
+      status: 409,
+      reasonCode: "translation_incomplete",
+      owner: "document",
+      validatedLanguage: "vi"
+    });
+    expect(paths).toEqual(["/api/settings/channels/resolve"]);
   });
 });

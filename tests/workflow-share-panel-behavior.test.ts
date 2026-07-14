@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  buildProviderDispatchIdempotencyKey,
   buildShareEvidenceSummary,
   buildWorkflowShareEvidenceScopeKey,
   buildWorkflowShareTargetSignature,
@@ -128,23 +127,6 @@ describe("workflow share panel behavior", () => {
     expect(summary.detail).not.toContain("4개 기록 분리");
   });
 
-  it("builds a stable provider-dispatch idempotency key for one attempt", () => {
-    const input = {
-      workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-      shareSessionId: "33333333-3333-4333-8333-333333333333",
-      dispatchAttemptId: "44444444-4444-4444-8444-444444444444",
-      channels: ["sms", "email"]
-    };
-    const key = buildProviderDispatchIdempotencyKey(input);
-
-    expect(key).toMatch(/^provider-dispatch-v1-44444444-4444-4444-8444-444444444444-[0-9a-f]{8}$/);
-    expect(buildProviderDispatchIdempotencyKey({ ...input, channels: ["email", "sms"] })).toBe(key);
-    expect(buildProviderDispatchIdempotencyKey({
-      ...input,
-      dispatchAttemptId: "55555555-5555-4555-8555-555555555555"
-    })).not.toBe(key);
-  });
-
   it("marks partial and unconfigured channel aggregates as incomplete problem states", () => {
     expect(classifyWorkflowDispatchPresentation({
       resultSource: "dispatch",
@@ -170,6 +152,39 @@ describe("workflow share panel behavior", () => {
           { channel: "email", status: "sent" },
           { channel: "sms", status: "sent" }
         ]
+      }
+    })).toEqual({ succeeded: false, hasFailure: true, fullySent: false });
+    expect(classifyWorkflowDispatchPresentation({
+      resultSource: "dispatch",
+      validationOnly: false,
+      result: {
+        ok: true,
+        configured: true,
+        state: "recorded",
+        outcome: "accepted",
+        message: "recorded",
+        workflowRunId: "run-1",
+        idempotencyKey: "server-key-1",
+        idempotencySupported: true,
+        duplicateRisk: false,
+        providerCalled: true,
+        channelResults: [
+          { channel: "email", provider: "n8n-relay", status: "sent" },
+          { channel: "sms", provider: "n8n-relay", status: "sent" }
+        ],
+        logIds: ["log-1", "log-2"],
+        receipt: {
+          version: "server-dispatch-receipt/v1",
+          receiptId: "receipt-1",
+          shareSessionId: "session-1",
+          idempotencyKey: "server-key-1",
+          workpackId: "workpack-1",
+          canonicalWorkpackRevision: "revision-1",
+          outcome: "accepted",
+          workflowRunId: "run-1",
+          logIds: ["log-1", "log-2"],
+          recordedAt: "2026-07-14T00:00:00.000Z"
+        }
       }
     })).toEqual({ succeeded: true, hasFailure: false, fullySent: true });
   });
@@ -268,6 +283,32 @@ describe("workflow share panel behavior", () => {
     });
   });
 
+  it("keeps an unimplemented channel settings owner as an honest disabled blocker", () => {
+    const presentation = resolveShareProductPresentation({
+      theme: "day",
+      sending: false,
+      outcome: null,
+      staleReason: null,
+      requiresRevalidation: false,
+      readinessCanShare: true,
+      online: true,
+      targetCount: 1,
+      authenticated: true,
+      authorityStatus: "ready",
+      channelStatus: "unavailable"
+    });
+
+    expect(presentation).toMatchObject({
+      state: "blocked",
+      primary: {
+        kind: "button",
+        label: "채널 연결 대기",
+        disabled: true
+      }
+    });
+    expect(presentation.primary.href).toBeUndefined();
+  });
+
   it("keeps exactly one state-specific primary through ready, sending, session failure, and persisted result", () => {
     const base = {
       theme: "day" as const,
@@ -294,7 +335,7 @@ describe("workflow share panel behavior", () => {
       outcome: { stage: "session_failed", logIds: [] }
     })).toMatchObject({
       state: "fail",
-      primary: { kind: "button", label: "초대 세션 다시 시도", action: "send" }
+      primary: { kind: "button", label: "초대 세션 다시 시도", action: "recheck" }
     });
     expect(resolveShareProductPresentation({
       ...base,

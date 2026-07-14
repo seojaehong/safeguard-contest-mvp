@@ -1,4 +1,7 @@
-import type { WorkflowDispatchResult } from "@/lib/workflow-share-client";
+import {
+  isProviderDispatchConfirmed,
+  type WorkflowDispatchResult
+} from "@/lib/workflow-share-client";
 import {
   buildShareOwnerHref,
   type WorkspaceTheme
@@ -45,12 +48,6 @@ export type ShareReadConfirmation = {
   readAt: string | null;
   confirmationKind: "admin_marked" | "worker_confirmed";
   reportedMethod: string;
-};
-
-export type DispatchIdempotencyLog = {
-  channel: string;
-  provider?: string;
-  providerStatus: string;
 };
 
 export type WorkflowShareResultSource = "copy" | "dispatch" | null;
@@ -456,9 +453,7 @@ export function classifyWorkflowDispatchPresentation(input: {
   if (input.validationOnly) return { succeeded: false, hasFailure: false, fullySent: false };
   const channelResults = input.result.channelResults || [];
   const fullySent = Boolean(
-    input.result.ok
-    && !input.result.duplicateRisk
-    && input.result.providerCalled !== false
+    isProviderDispatchConfirmed(input.result)
     && channelResults.length > 0
     && channelResults.every((item) => item.status === "sent")
   );
@@ -466,70 +461,6 @@ export function classifyWorkflowDispatchPresentation(input: {
     succeeded: fullySent,
     hasFailure: !fullySent,
     fullySent
-  };
-}
-
-function fnv1a32(value: string): string {
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0).toString(16).padStart(8, "0");
-}
-
-export function buildProviderDispatchIdempotencyKey(input: {
-  workpackId: string;
-  shareSessionId: string;
-  dispatchAttemptId: string;
-  channels: string[];
-}): string {
-  const canonical = [
-    input.workpackId,
-    input.shareSessionId,
-    input.dispatchAttemptId,
-    [...input.channels].sort().join(";")
-  ].join("::");
-  return `provider-dispatch-v1-${input.dispatchAttemptId}-${fnv1a32(canonical)}`;
-}
-
-export function buildDispatchLogIdempotencyKey(input: {
-  workpackId: string;
-  shareSessionId: string;
-  dispatchAttemptId: string;
-  workflowRunId?: string;
-  logs: DispatchIdempotencyLog[];
-}): string {
-  const canonicalLogs = input.logs
-    .map((log) => [log.channel, log.provider || "", log.providerStatus].join("|"))
-    .sort()
-    .join(";");
-  const canonical = [
-    input.workpackId,
-    input.shareSessionId,
-    input.dispatchAttemptId,
-    input.workflowRunId || "no-workflow-run",
-    canonicalLogs
-  ].join("::");
-  return `dispatch-v1-${input.dispatchAttemptId}-${fnv1a32(canonical)}`;
-}
-
-export function getDispatchLogRetryPolicy(serverSupportsIdempotency: boolean): {
-  retryAllowed: boolean;
-  duplicateRisk: boolean;
-  message: string;
-} {
-  if (serverSupportsIdempotency) {
-    return {
-      retryAllowed: true,
-      duplicateRisk: false,
-      message: "동일 idempotency key로 전송 로그 저장을 다시 시도할 수 있습니다."
-    };
-  }
-  return {
-    retryAllowed: false,
-    duplicateRisk: true,
-    message: "서버가 idempotency key 중복 방지를 지원하지 않아 자동 재시도를 중단했습니다. 다시 전송하면 로그가 중복될 수 있습니다."
   };
 }
 
@@ -674,7 +605,7 @@ export function resolveShareProductPresentation(input: ShareProductPresentationI
         "초대 세션 생성 실패",
         "초대 세션을 만들지 못해 전송을 시작하지 않았습니다.",
         "초대 세션 다시 시도",
-        "send"
+        "recheck"
       );
     }
     if (hasPersistedLogs) {
@@ -695,6 +626,16 @@ export function resolveShareProductPresentation(input: ShareProductPresentationI
     );
   }
   if (input.staleReason) {
+    if (input.staleReason === "channel_configuration_changed" || input.staleReason === "channel_unavailable") {
+      return buttonPresentation(
+        "blocked",
+        "채널 연결 준비 필요",
+        "현재 제품에는 이 채널 설정을 변경하는 운영 화면이 연결되지 않았습니다.",
+        "채널 연결 대기",
+        "recheck",
+        true
+      );
+    }
     return linkPresentation(
       "stale",
       "변경사항 확인 필요",
@@ -798,12 +739,13 @@ export function resolveShareProductPresentation(input: ShareProductPresentationI
     );
   }
   if (input.channelStatus === "unavailable" || input.channelStatus === "error") {
-    return linkPresentation(
-      "selected",
-      "채널 설정 확인 필요",
-      "선택한 전송 채널을 Settings에서 확인합니다.",
-      "채널 설정 확인",
-      buildShareOwnerHref({ owner: "settings", theme: input.theme })
+    return buttonPresentation(
+      "blocked",
+      "채널 연결 준비 필요",
+      "현재 제품에는 이 채널 설정을 변경하는 운영 화면이 연결되지 않았습니다.",
+      "채널 연결 대기",
+      "recheck",
+      true
     );
   }
   if (input.channelStatus === "empty") {

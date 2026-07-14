@@ -4,14 +4,13 @@ import {
   buildChannelRuntimeConfiguration,
   resolveServerChannelAvailability
 } from "@/lib/channel-availability";
+import { parseChannelResolutionRequest } from "@/lib/channel-resolution-contract";
 import { isLiveDispatchEnabled, resolveWebhookConfig } from "@/lib/n8n-webhook";
 import {
   readReviewedLocalizationEnvelopes,
   resolveReviewedLocalizationAuthority
 } from "@/lib/reviewed-localization-envelope";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
-import { isRecord } from "@/lib/workspace-api";
-import { parseShareRecipientIds, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
 import {
   loadOwnedWorkpackOperationContext,
   loadServerShareRecipients
@@ -19,16 +18,6 @@ import {
 import { readWorkpackShareServerConfig } from "@/lib/workpack-share-server-config";
 
 export const dynamic = "force-dynamic";
-
-const CHANNELS: WorkpackDispatchChannel[] = ["email", "sms", "kakao"];
-
-function parseChannels(value: unknown): WorkpackDispatchChannel[] {
-  if (!Array.isArray(value)) return [];
-  const channels = value.filter((item): item is WorkpackDispatchChannel => (
-    typeof item === "string" && CHANNELS.includes(item as WorkpackDispatchChannel)
-  ));
-  return channels.length === value.length ? channels : [];
-}
 
 export async function POST(request: NextRequest) {
   const client = createSupabaseAdminClient();
@@ -43,20 +32,15 @@ export async function POST(request: NextRequest) {
     console.warn("channel availability body parse failed", error);
     return {};
   });
-  const body = isRecord(parsed) ? parsed : {};
-  const workpackId = typeof body.workpackId === "string" ? body.workpackId.trim() : "";
-  const requestedRevision = typeof body.canonicalWorkpackRevision === "string"
-    ? body.canonicalWorkpackRevision.trim()
-    : "";
-  const recipientIds = parseShareRecipientIds(body.recipients);
-  const channels = parseChannels(body.channels);
-  if (!workpackId || !requestedRevision || !recipientIds.ok || !channels.length) {
+  const body = parseChannelResolutionRequest(parsed);
+  if (!body) {
     return NextResponse.json({
       ok: false,
       ready: false,
-      message: recipientIds.ok ? "작업팩 revision과 전파 채널을 확인해 주세요." : recipientIds.message
+      message: "작업팩 revision, 참여자, requestedChannels를 확인해 주세요."
     }, { status: 400 });
   }
+  const { workpackId, canonicalWorkpackRevision: requestedRevision, recipients: recipientIds, requestedChannels } = body;
 
   const serverConfig = readWorkpackShareServerConfig(process.env);
   if (!serverConfig.ok) {
@@ -83,7 +67,7 @@ export async function POST(request: NextRequest) {
   const recipients = await loadServerShareRecipients(client, {
     organizationId: owned.context.organizationId,
     siteId: owned.context.siteId,
-    requestedWorkerIds: recipientIds.workerIds
+    requestedWorkerIds: recipientIds
   });
   if (!recipients.ok) {
     return NextResponse.json({ ok: false, ready: false, message: recipients.message }, { status: 400 });
@@ -123,7 +107,7 @@ export async function POST(request: NextRequest) {
     workpackId: owned.context.workpackId,
     canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
     recipients: recipients.recipients,
-    requestedChannels: channels,
+    requestedChannels,
     now: new Date()
   });
   if (!resolution.ok) {

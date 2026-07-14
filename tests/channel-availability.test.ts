@@ -25,16 +25,16 @@ function serverConfig(): WorkpackShareServerConfig {
 
 function runtime(overrides: Partial<ChannelRuntimeConfiguration> = {}): ChannelRuntimeConfiguration {
   return {
-    dispatchMode: "fixture",
-    relayProvider: "safe-fixture",
-    relayEndpoint: null,
+    dispatchMode: "live",
+    relayProvider: "n8n",
+    relayEndpoint: "https://relay.example/hook",
     relayConfigured: true,
-    providerCredential: null,
-    persistentIdempotencyPolicyVersion: "fixture-idempotency/v1",
+    providerCredential: "relay-credential",
+    persistentIdempotencyPolicyVersion: "share-session-access-policy-cas/v1",
     persistentIdempotencySupported: true,
     kakao: {
       enabled: true,
-      provider: "safe-fixture",
+      provider: "solapi-alimtalk",
       senderId: "fixture-sender",
       templateId: "fixture-template",
       templateVersion: "1",
@@ -81,7 +81,7 @@ describe("server channel availability", () => {
     const resolution = resolveServerChannelAvailability(input());
 
     expect(resolution.ok).toBe(true);
-    if (!resolution.ok) throw new Error("fixture channels must resolve");
+    if (!resolution.ok) throw new Error("configured live channels must resolve");
     expect(resolution.channels.map((channel) => channel.channel)).toEqual(["email", "sms", "kakao"]);
     expect(resolution.channels.every((channel) => channel.available)).toBe(true);
     expect(resolution.configurationVersion).toBe("channel-configuration/v2");
@@ -96,6 +96,20 @@ describe("server channel availability", () => {
       ok: true,
       resolution
     });
+  });
+
+  it("marks fixture mode unavailable instead of presenting validation as delivery readiness", () => {
+    const resolution = resolveServerChannelAvailability(input({}, {
+      dispatchMode: "fixture",
+      relayProvider: "safe-fixture",
+      relayEndpoint: null,
+      providerCredential: null
+    }));
+
+    expect(resolution.ok).toBe(true);
+    if (!resolution.ok) throw new Error("fixture mode should resolve to a blocked result");
+    expect(resolution.ready).toBe(false);
+    expect(resolution.channels.every((channel) => channel.reasonCode === "provider_unconfigured")).toBe(true);
   });
 
   it("invalidates a prior token after binding key ID, revision, and secret rotation", () => {

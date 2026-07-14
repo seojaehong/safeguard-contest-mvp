@@ -8,11 +8,47 @@ const WORKPACK_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const WORKER_ID = "11111111-1111-4111-8111-111111111111";
 const CANONICAL_REVISION = "a".repeat(64);
 const AVAILABILITY_TOKEN = "signed-availability-token";
+const SESSION_ID = "33333333-3333-4333-8333-333333333333";
+const IDEMPOTENCY_KEY = "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef";
+const LOG_IDS = [
+  "77777777-7777-4777-8777-777777777777",
+  "88888888-8888-4888-8888-888888888888"
+];
 const SESSION_AUTHORITY = {
   channels: ["email", "sms"] as const,
   canonicalWorkpackRevision: CANONICAL_REVISION,
   availabilityToken: AVAILABILITY_TOKEN
 };
+
+function recordedDispatchBody(channels: Array<"email" | "sms">) {
+  return {
+    ok: true,
+    configured: true,
+    state: "recorded",
+    outcome: "accepted",
+    workflowRunId: "run-1",
+    providerStatus: "live",
+    idempotencyKey: IDEMPOTENCY_KEY,
+    idempotencySupported: true,
+    duplicateRisk: false,
+    providerCalled: true,
+    channelResults: channels.map((channel) => ({ channel, provider: "n8n-relay", status: "sent", message: "queued" })),
+    logIds: LOG_IDS.slice(0, channels.length),
+    receipt: {
+      version: "server-dispatch-receipt/v1",
+      receiptId: "55555555-5555-4555-8555-555555555555",
+      shareSessionId: SESSION_ID,
+      idempotencyKey: IDEMPOTENCY_KEY,
+      workpackId: WORKPACK_ID,
+      canonicalWorkpackRevision: CANONICAL_REVISION,
+      outcome: "accepted",
+      workflowRunId: "run-1",
+      logIds: LOG_IDS.slice(0, channels.length),
+      recordedAt: "2026-07-14T01:00:00.000Z"
+    },
+    message: "전파 접수 완료"
+  };
+}
 
 async function loadClient() {
   expect(fs.existsSync(clientPath), "authenticated share client helper must exist").toBe(true);
@@ -46,7 +82,8 @@ describe("authenticated workflow share client", () => {
     const fetcher = vi.fn(async (_input: string, _init: RequestInit) => new Response(JSON.stringify({
       ok: true,
       configured: true,
-      shareSessionId: "33333333-3333-4333-8333-333333333333",
+      shareSessionId: SESSION_ID,
+      dispatchIdempotencyKey: IDEMPOTENCY_KEY,
       expiresAt: "2099-01-01T00:00:00.000Z",
       message: "공유 세션 생성 완료"
     }), { status: 200, headers: { "content-type": "application/json" } }));
@@ -58,7 +95,8 @@ describe("authenticated workflow share client", () => {
       ...SESSION_AUTHORITY
     });
 
-    expect(result.shareSessionId).toBe("33333333-3333-4333-8333-333333333333");
+    expect(result.shareSessionId).toBe(SESSION_ID);
+    expect(result.dispatchIdempotencyKey).toBe(IDEMPOTENCY_KEY);
     expect(result.expiresAt).toBe("2099-01-01T00:00:00.000Z");
     expect(fetcher).toHaveBeenCalledWith(
       "/api/workpacks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/share-sessions",
@@ -80,25 +118,23 @@ describe("authenticated workflow share client", () => {
 
   it("dispatches only server authority identifiers, channels, and operator note", async () => {
     const { dispatchAuthenticatedShareSession } = await loadClient();
-    const fetcher = vi.fn(async (_input: string, _init: RequestInit) => new Response(JSON.stringify({
-      ok: true,
-      configured: true,
-      workflowRunId: "run-1",
-      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
-      message: "전파 접수 완료"
-    }), { status: 200, headers: { "content-type": "application/json" } }));
+    const fetcher = vi.fn(async (_input: string, _init: RequestInit) => new Response(
+      JSON.stringify(recordedDispatchBody(["email", "sms"])),
+      { status: 200, headers: { "content-type": "application/json" } }
+    ));
 
     const result = await dispatchAuthenticatedShareSession(fetcher, {
       authToken: "access-token",
       workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-      shareSessionId: "33333333-3333-4333-8333-333333333333",
-      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      shareSessionId: SESSION_ID,
+      idempotencyKey: IDEMPOTENCY_KEY,
       channels: ["email", "sms"],
       operatorNote: "TBM 후 확인"
     });
 
     expect(result.ok).toBe(true);
-    expect(result.idempotencyKey).toBe("provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef");
+    expect(result.idempotencyKey).toBe(IDEMPOTENCY_KEY);
+    expect(result.logIds).toEqual(LOG_IDS);
     const request = fetcher.mock.calls[0];
     expect(request?.[0]).toBe("/api/workflow/dispatch");
     expect(request?.[1]?.headers).toEqual({
@@ -114,8 +150,8 @@ describe("authenticated workflow share client", () => {
     });
   });
 
-  it("returns a fail-closed provider idempotency response without treating it as delivery", async () => {
-    const { dispatchAuthenticatedShareSession, isProviderDispatchConfirmed } = await loadClient();
+  it("throws the typed fail-closed provider blocker instead of treating it as delivery", async () => {
+    const { dispatchAuthenticatedShareSession } = await loadClient();
     const fetcher = vi.fn(async () => new Response(JSON.stringify({
       ok: false,
       configured: false,
@@ -127,27 +163,18 @@ describe("authenticated workflow share client", () => {
       message: "영속 중복방지를 보장할 수 없어 provider 호출을 차단했습니다."
     }), { status: 409, headers: { "content-type": "application/json" } }));
 
-    const result = await dispatchAuthenticatedShareSession(fetcher, {
+    await expect(dispatchAuthenticatedShareSession(fetcher, {
       authToken: "access-token",
       workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       shareSessionId: "33333333-3333-4333-8333-333333333333",
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["sms"],
       operatorNote: ""
-    });
-
-    expect(result).toMatchObject({
-      ok: false,
-      providerStatus: "idempotency-unsupported",
-      idempotencySupported: false,
-      duplicateRisk: true,
-      providerCalled: false
-    });
-    expect(isProviderDispatchConfirmed(result)).toBe(false);
+    })).rejects.toMatchObject({ status: 409 });
   });
 
-  it("preserves an uncertain provider response with its idempotency key and duplicate risk", async () => {
-    const { dispatchAuthenticatedShareSession, isProviderDispatchConfirmed } = await loadClient();
+  it("preserves an uncertain provider response as a typed HTTP error", async () => {
+    const { dispatchAuthenticatedShareSession } = await loadClient();
     const idempotencyKey = "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef";
     const fetcher = vi.fn(async () => new Response(JSON.stringify({
       ok: false,
@@ -160,23 +187,14 @@ describe("authenticated workflow share client", () => {
       message: "provider 호출 후 응답을 확정하지 못했습니다."
     }), { status: 502, headers: { "content-type": "application/json" } }));
 
-    const result = await dispatchAuthenticatedShareSession(fetcher, {
+    await expect(dispatchAuthenticatedShareSession(fetcher, {
       authToken: "access-token",
       workpackId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
       shareSessionId: "33333333-3333-4333-8333-333333333333",
       idempotencyKey,
       channels: ["sms"],
       operatorNote: ""
-    });
-
-    expect(result).toMatchObject({
-      ok: false,
-      idempotencyKey,
-      idempotencySupported: true,
-      duplicateRisk: true,
-      providerCalled: true
-    });
-    expect(isProviderDispatchConfirmed(result)).toBe(false);
+    })).rejects.toMatchObject({ status: 502 });
   });
 
   it("surfaces server errors and malformed success responses explicitly", async () => {
@@ -255,14 +273,26 @@ describe("authenticated workflow share client", () => {
       providerStatus: "accepted",
       message: "provider accepted",
       channelResults: [{ channel: "sms", provider: "twilio", status: "sent" }]
-    })).toBe(true);
+    })).toBe(false);
     expect(client.isProviderDispatchConfirmed({
       ok: true,
       configured: true,
       providerStatus: "accepted",
       message: "provider accepted",
       channelResults: [{ channel: "sms", provider: "latest-sms", status: "sent" }]
-    })).toBe(true);
+    })).toBe(false);
+    const strictResult = await client.dispatchAuthenticatedShareSession(
+      async () => Response.json(recordedDispatchBody(["sms"])),
+      {
+        authToken: "access-token",
+        workpackId: WORKPACK_ID,
+        shareSessionId: SESSION_ID,
+        idempotencyKey: IDEMPOTENCY_KEY,
+        channels: ["sms"],
+        operatorNote: ""
+      }
+    );
+    expect(client.isProviderDispatchConfirmed(strictResult)).toBe(true);
   });
 
   it("loads current server workpack and worker authority without mutating the roster", async () => {
@@ -419,8 +449,43 @@ describe("authenticated workflow share client", () => {
     });
   });
 
-  it("resolves channels with exact server identifiers and persists only log IDs as evidence", async () => {
-    const { persistAuthenticatedDispatchLogs, resolveAuthenticatedShareChannels } = await loadClient();
+  it.each([
+    ["forged receipt session", (body: ReturnType<typeof recordedDispatchBody>) => {
+      body.receipt.shareSessionId = "99999999-9999-4999-8999-999999999999";
+    }],
+    ["client-authored provider", (body: ReturnType<typeof recordedDispatchBody>) => {
+      body.channelResults[0].provider = "client-provider";
+    }],
+    ["missing durable log identity", (body: ReturnType<typeof recordedDispatchBody>) => {
+      body.logIds = [];
+    }],
+    ["conflicting receipt outcome", (body: ReturnType<typeof recordedDispatchBody>) => {
+      body.receipt.outcome = "partial";
+    }],
+    ["false provider call claim", (body: ReturnType<typeof recordedDispatchBody>) => {
+      body.providerCalled = false;
+    }]
+  ])("rejects %s in a recorded dispatch response", async (_label, mutate) => {
+    const { dispatchAuthenticatedShareSession } = await loadClient();
+    const body = recordedDispatchBody(["email", "sms"]);
+    mutate(body);
+
+    await expect(dispatchAuthenticatedShareSession(
+      async () => Response.json(body),
+      {
+        authToken: "access-token",
+        workpackId: WORKPACK_ID,
+        shareSessionId: SESSION_ID,
+        idempotencyKey: IDEMPOTENCY_KEY,
+        channels: ["email", "sms"],
+        operatorNote: ""
+      }
+    )).rejects.toThrow("서버 receipt binding이 올바르지 않습니다");
+  });
+
+  it("resolves channels with the shared requestedChannels DTO and exposes no client log writer", async () => {
+    const client = await loadClient();
+    const { resolveAuthenticatedShareChannels } = client;
     const fetcher = vi.fn(async (input: string, init: RequestInit) => {
       if (input === "/api/settings/channels/resolve") {
         return Response.json({
@@ -445,18 +510,6 @@ describe("authenticated workflow share client", () => {
           ready: true
         });
       }
-      if (input === "/api/dispatch-logs") {
-        return Response.json({
-          ok: true,
-          configured: true,
-          savedCount: 2,
-          logIds: [
-            "77777777-7777-4777-8777-777777777777",
-            "88888888-8888-4888-8888-888888888888"
-          ],
-          message: "전파 이력을 저장했습니다."
-        });
-      }
       throw new Error(`Unexpected request ${input}: ${String(init.body)}`);
     });
 
@@ -475,16 +528,7 @@ describe("authenticated workflow share client", () => {
       requestedChannels: ["email", "sms"]
     });
 
-    const logs = await persistAuthenticatedDispatchLogs(fetcher, {
-      authToken: "access-token",
-      workpackId: WORKPACK_ID,
-      logs: [
-        { channel: "email", providerStatus: "sent" },
-        { channel: "sms", providerStatus: "failed" }
-      ]
-    });
-    expect(logs.logIds).toHaveLength(2);
-    expect(logs.savedCount).toBe(2);
+    expect("persistAuthenticatedDispatchLogs" in client).toBe(false);
   });
 });
 
@@ -509,7 +553,8 @@ describe("workflow share component wiring", () => {
     expect(source).toContain("data-share-preview");
     expect(source).toContain("loadAuthenticatedShareAuthority");
     expect(source).toContain("resolveAuthenticatedShareChannels");
-    expect(source).toContain("buildProviderDispatchIdempotencyKey");
+    expect(source).not.toContain("buildProviderDispatchIdempotencyKey");
+    expect(source).not.toContain("persistAuthenticatedDispatchLogs");
     expect(source).not.toContain("parseWorkflowShareArchive");
     expect(source).not.toContain("buildReadConfirmationStatus");
     expect(source).not.toContain("share-session-details");
@@ -518,7 +563,8 @@ describe("workflow share component wiring", () => {
     expect(css).toContain("container-type: inline-size");
     expect(css).toContain("@container (max-width: 560px)");
     expect(css).toContain("min-height: 44px");
-    expect(css).toContain("max-height: min(34vh, 320px)");
+    expect(css).not.toContain("max-height: min(34vh, 320px)");
+    expect(css).not.toMatch(/\.preview\s*\{[\s\S]*?overflow-y:\s*auto/);
   });
 
 });
@@ -680,31 +726,4 @@ describe("workflow share session policy", () => {
     expect(validateShareAuthority(authority, 1)).toEqual({ ok: true });
   });
 
-  it("builds a stable dispatch-log idempotency key but blocks retry while the server lacks support", async () => {
-    const { buildDispatchLogIdempotencyKey, getDispatchLogRetryPolicy } = await loadPolicy();
-    const input = {
-      workpackId: authority.workpackId,
-      shareSessionId: reusableSession.id,
-      dispatchAttemptId: "44444444-4444-4444-8444-444444444444",
-      workflowRunId: "run-1",
-      logs: [
-        { channel: "sms", provider: "twilio", providerStatus: "sent" },
-        { channel: "email", provider: "sendgrid", providerStatus: "sent" }
-      ]
-    };
-
-    const first = buildDispatchLogIdempotencyKey(input);
-    const reordered = buildDispatchLogIdempotencyKey({ ...input, logs: [...input.logs].reverse() });
-    const nextAttempt = buildDispatchLogIdempotencyKey({
-      ...input,
-      dispatchAttemptId: "55555555-5555-4555-8555-555555555555"
-    });
-    expect(first).toMatch(/^dispatch-v1-44444444-4444-4444-8444-444444444444-[0-9a-f]{8}$/);
-    expect(reordered).toBe(first);
-    expect(nextAttempt).not.toBe(first);
-    expect(getDispatchLogRetryPolicy(false)).toEqual(expect.objectContaining({
-      retryAllowed: false,
-      duplicateRisk: true
-    }));
-  });
 });

@@ -3,8 +3,18 @@ import {
   SUPPORTED_LANGUAGE_CODES,
   type SupportedLanguageCode
 } from "@/lib/foreign-worker";
+import {
+  buildChannelResolutionRequest,
+  parseWorkflowShareChannels,
+  type WorkflowShareChannel
+} from "@/lib/channel-resolution-contract";
+import {
+  containsHangulResidue,
+  hasLocalizedSemanticText,
+  isFullEnglishFallback
+} from "@/lib/localized-content-policy";
 
-export type WorkflowShareChannel = "email" | "sms" | "kakao";
+export type { WorkflowShareChannel } from "@/lib/channel-resolution-contract";
 
 export type LocalizedSharePreview = {
   subject: string;
@@ -67,6 +77,8 @@ export type WorkflowDispatchChannelResult = {
 export type WorkflowDispatchResult = {
   ok: boolean;
   configured: boolean;
+  state?: "recorded";
+  outcome?: "accepted" | "partial" | "failed";
   message: string;
   workflowRunId?: string;
   providerStatus?: string;
@@ -75,17 +87,44 @@ export type WorkflowDispatchResult = {
   duplicateRisk?: boolean;
   providerCalled?: boolean;
   channelResults?: WorkflowDispatchChannelResult[];
+  logIds?: string[];
+  receipt?: {
+    version: "server-dispatch-receipt/v1";
+    receiptId: string;
+    shareSessionId: string;
+    idempotencyKey: string;
+    workpackId: string;
+    canonicalWorkpackRevision: string;
+    outcome: "accepted" | "partial" | "failed";
+    workflowRunId: string;
+    logIds: string[];
+    recordedAt: string;
+  };
 };
 
 type Fetcher = (input: string, init: RequestInit) => Promise<Response>;
 
 export class WorkflowShareRequestError extends Error {
   readonly reasonCode: string | null;
+  readonly status: number;
+  readonly state: string | null;
+  readonly owner: string | null;
+  readonly validatedLanguage: string | null;
 
-  constructor(message: string, reasonCode: string | null = null) {
+  constructor(message: string, input: {
+    reasonCode?: string | null;
+    status?: number;
+    state?: string | null;
+    owner?: string | null;
+    validatedLanguage?: string | null;
+  } = {}) {
     super(message);
     this.name = "WorkflowShareRequestError";
-    this.reasonCode = reasonCode;
+    this.reasonCode = input.reasonCode || null;
+    this.status = input.status || 0;
+    this.state = input.state || null;
+    this.owner = input.owner || null;
+    this.validatedLanguage = input.validatedLanguage || null;
   }
 }
 
@@ -110,8 +149,6 @@ type DispatchRequest = {
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const digestPattern = /^[0-9a-f]{64}$/i;
 const providerIdempotencyKeyPattern = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
-const hangulPattern = /[가-힣]/;
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -145,7 +182,13 @@ function buildHeaders(authToken: string): Record<string, string> {
 function buildHttpError(body: Record<string, unknown>, response: Response, fallback: string): Error {
   return new WorkflowShareRequestError(
     `${readString(body.message) || fallback} (HTTP ${response.status})`,
-    readString(body.reasonCode) || null
+    {
+      reasonCode: readString(body.reasonCode),
+      status: response.status,
+      state: readString(body.state),
+      owner: readString(body.owner),
+      validatedLanguage: readString(body.validatedSupportedCode)
+    }
   );
 }
 
@@ -220,7 +263,17 @@ function parseLocalizedPreview(value: unknown, locale: SupportedLanguageCode): {
     bodyLines,
     semanticRiskLabels
   };
-  if (locale !== "ko" && hangulPattern.test(JSON.stringify(preview))) {
+  const values = [
+    preview.subject,
+    ...Object.values(preview.metadata),
+    ...preview.bodyLines,
+    ...preview.semanticRiskLabels
+  ];
+  if (
+    values.some((value) => !hasLocalizedSemanticText(value))
+    || isFullEnglishFallback(values, locale)
+    || (locale !== "ko" && containsHangulResidue(JSON.stringify(preview)))
+  ) {
     return { ok: false, reasonCode: "translation_incomplete", validatedSupportedCode: locale };
   }
   return { ok: true, preview };
@@ -462,7 +515,7 @@ export function resolveSavedWorkerIds(
 export async function createAuthenticatedShareSession(
   fetcher: Fetcher,
   request: ShareSessionRequest
-): Promise<{ shareSessionId: string; expiresAt: string; message: string }> {
+): Promise<{ shareSessionId: string; dispatchIdempotencyKey: string; expiresAt: string; message: string }> {
   requireBearerContext(request.authToken, request.workpackId);
   if (!request.workerIds.length || request.workerIds.some((workerId) => !uuidPattern.test(workerId))) {
     throw new Error("공유 세션에는 실제 서버 작업자 UUID가 필요합니다.");
@@ -501,19 +554,20 @@ export async function createAuthenticatedShareSession(
   if (!uuidPattern.test(shareSessionId)) {
     throw new Error("공유 세션 응답의 shareSessionId가 올바른 UUID가 아닙니다.");
   }
+  const dispatchIdempotencyKey = readString(body.dispatchIdempotencyKey);
+  if (!dispatchIdempotencyKey || !providerIdempotencyKeyPattern.test(dispatchIdempotencyKey)) {
+    throw new Error("공유 세션 응답의 서버 dispatch idempotency key가 올바르지 않습니다.");
+  }
   const expiresAt = readString(body.expiresAt);
   if (!expiresAt || !Number.isFinite(Date.parse(expiresAt)) || Date.parse(expiresAt) <= Date.now()) {
     throw new Error("공유 세션 응답의 expiresAt이 유효한 미래 시각이 아닙니다.");
   }
   return {
     shareSessionId,
+    dispatchIdempotencyKey,
     expiresAt,
     message: readString(body.message) || "공유 세션을 만들었습니다."
   };
-}
-
-function parseWorkflowShareChannel(value: unknown): WorkflowShareChannel | null {
-  return value === "email" || value === "sms" || value === "kakao" ? value : null;
 }
 
 export async function resolveAuthenticatedShareChannels(fetcher: Fetcher, request: {
@@ -540,24 +594,22 @@ export async function resolveAuthenticatedShareChannels(fetcher: Fetcher, reques
   const response = await fetcher("/api/settings/channels/resolve", {
     method: "POST",
     headers: buildHeaders(request.authToken),
-    body: JSON.stringify({
+    body: JSON.stringify(buildChannelResolutionRequest({
       workpackId: request.workpackId,
       canonicalWorkpackRevision: request.canonicalWorkpackRevision,
       recipients: request.workerIds,
       requestedChannels: request.requestedChannels
-    })
+    }))
   });
   const body = await readResponseBody(response);
   if (!response.ok || body.ok !== true) {
     throw buildHttpError(body, response, "전송 채널 확인에 실패했습니다.");
   }
-  const responseChannels = Array.isArray(body.requestedChannels)
-    ? body.requestedChannels.map(parseWorkflowShareChannel)
-    : [];
+  const responseChannels = parseWorkflowShareChannels(body.requestedChannels);
   const channelResults = Array.isArray(body.channels)
     ? body.channels.flatMap((item): AuthenticatedChannelResolution["channels"] => {
         if (!isRecord(item)) return [];
-        const channel = parseWorkflowShareChannel(item.channel);
+        const channel = parseWorkflowShareChannels([item.channel])?.[0] || null;
         const reasonCode = readRequiredString(item.reasonCode);
         if (!channel || !reasonCode || typeof item.available !== "boolean") return [];
         return [{ channel, available: item.available, reasonCode }];
@@ -569,7 +621,7 @@ export async function resolveAuthenticatedShareChannels(fetcher: Fetcher, reques
     body.version !== "channel-availability/v1"
     || body.workpackId !== request.workpackId
     || body.canonicalWorkpackRevision !== request.canonicalWorkpackRevision
-    || responseChannels.some((channel): channel is null => channel === null)
+    || !responseChannels
     || JSON.stringify(responseChannels) !== JSON.stringify(request.requestedChannels)
     || channelResults.length !== request.requestedChannels.length
     || !availabilityToken
@@ -586,58 +638,10 @@ export async function resolveAuthenticatedShareChannels(fetcher: Fetcher, reques
     ready,
     workpackId: request.workpackId,
     canonicalWorkpackRevision: request.canonicalWorkpackRevision,
-    requestedChannels: responseChannels as WorkflowShareChannel[],
+    requestedChannels: responseChannels,
     availabilityToken,
     expiresAt,
     channels: channelResults
-  };
-}
-
-export type DispatchLogClientDraft = {
-  channel: string;
-  targetLabel?: string;
-  languageCode?: string;
-  provider?: string;
-  providerStatus?: string;
-  workflowRunId?: string;
-  failureReason?: string;
-  payload?: unknown;
-};
-
-export async function persistAuthenticatedDispatchLogs(fetcher: Fetcher, request: {
-  authToken: string;
-  workpackId: string;
-  logs: DispatchLogClientDraft[];
-}): Promise<{ savedCount: number; logIds: string[]; message: string }> {
-  requireBearerContext(request.authToken, request.workpackId);
-  if (!request.logs.length || request.logs.some((log) => !log.channel.trim())) {
-    throw new Error("저장할 전파 이력이 없습니다.");
-  }
-  const response = await fetcher("/api/dispatch-logs", {
-    method: "POST",
-    headers: buildHeaders(request.authToken),
-    body: JSON.stringify({ workpackId: request.workpackId, logs: request.logs })
-  });
-  const body = await readResponseBody(response);
-  if (!response.ok || body.ok !== true) {
-    throw buildHttpError(body, response, "전파 이력 저장에 실패했습니다.");
-  }
-  const logIds = Array.isArray(body.logIds)
-    ? body.logIds.flatMap((item): string[] => {
-        const id = readRequiredString(item);
-        return id && uuidPattern.test(id) ? [id] : [];
-      })
-    : [];
-  const savedCount = typeof body.savedCount === "number" && Number.isSafeInteger(body.savedCount)
-    ? body.savedCount
-    : 0;
-  if (savedCount !== request.logs.length || logIds.length !== request.logs.length) {
-    throw new Error("전파 이력 ID가 완전하지 않아 저장 완료로 처리하지 않았습니다.");
-  }
-  return {
-    savedCount,
-    logIds,
-    message: readRequiredString(body.message) || "전파 이력을 저장했습니다."
   };
 }
 
@@ -666,26 +670,98 @@ export async function dispatchAuthenticatedShareSession(
     })
   });
   const body = await readResponseBody(response);
-  const responseIdempotencyKey = readString(body.idempotencyKey);
-  const result: WorkflowDispatchResult = {
-    ok: body.ok === true,
-    configured: body.configured === true,
-    message: readString(body.message) || (body.ok === true ? "전파 요청을 접수했습니다." : "전파 요청이 완료되지 않았습니다."),
-    workflowRunId: readString(body.workflowRunId),
-    providerStatus: readString(body.providerStatus),
-    idempotencyKey: responseIdempotencyKey,
-    idempotencySupported: typeof body.idempotencySupported === "boolean" ? body.idempotencySupported : undefined,
-    duplicateRisk: typeof body.duplicateRisk === "boolean" ? body.duplicateRisk : undefined,
-    providerCalled: typeof body.providerCalled === "boolean" ? body.providerCalled : undefined,
-    channelResults: parseChannelResults(body.channelResults)
-  };
-  if (!response.ok && !result.duplicateRisk) {
+  if (!response.ok) {
     throw buildHttpError(body, response, "전파 요청에 실패했습니다.");
   }
+  const responseIdempotencyKey = readString(body.idempotencyKey);
   if (responseIdempotencyKey !== request.idempotencyKey) {
     throw new Error("provider 전송 응답의 idempotency key가 요청과 일치하지 않습니다.");
   }
-  return result;
+  const receipt = isRecord(body.receipt) ? body.receipt : null;
+  const outcome = body.outcome === "accepted" || body.outcome === "partial" || body.outcome === "failed"
+    ? body.outcome
+    : null;
+  const receiptOutcome = receipt?.outcome === "accepted" || receipt?.outcome === "partial" || receipt?.outcome === "failed"
+    ? receipt.outcome
+    : null;
+  const workflowRunId = readRequiredString(body.workflowRunId);
+  const receiptWorkflowRunId = readRequiredString(receipt?.workflowRunId);
+  const canonicalWorkpackRevision = readRequiredString(receipt?.canonicalWorkpackRevision);
+  const logIds = Array.isArray(body.logIds)
+    ? body.logIds.flatMap((item): string[] => {
+        const id = readRequiredString(item);
+        return id && uuidPattern.test(id) ? [id] : [];
+      })
+    : [];
+  const receiptLogIds = Array.isArray(receipt?.logIds)
+    ? receipt.logIds.flatMap((item): string[] => {
+        const id = readRequiredString(item);
+        return id && uuidPattern.test(id) ? [id] : [];
+      })
+    : [];
+  const channelResults = parseChannelResults(body.channelResults) || [];
+  const channelNames = channelResults.map((item) => item.channel);
+  const sentCount = channelResults.filter((item) => item.status === "sent").length;
+  const expectedOutcome = sentCount === channelResults.length
+    ? "accepted"
+    : sentCount > 0 ? "partial" : "failed";
+  if (
+    body.state !== "recorded"
+    || !outcome
+    || !receipt
+    || receipt.version !== "server-dispatch-receipt/v1"
+    || !uuidPattern.test(readRequiredString(receipt.receiptId) || "")
+    || receipt.shareSessionId !== request.shareSessionId
+    || receipt.workpackId !== request.workpackId
+    || receipt.idempotencyKey !== request.idempotencyKey
+    || !canonicalWorkpackRevision
+    || !digestPattern.test(canonicalWorkpackRevision)
+    || receiptOutcome !== outcome
+    || !workflowRunId
+    || receiptWorkflowRunId !== workflowRunId
+    || !Number.isFinite(Date.parse(readRequiredString(receipt.recordedAt) || ""))
+    || logIds.length === 0
+    || JSON.stringify(logIds) !== JSON.stringify(receiptLogIds)
+    || body.configured !== true
+    || body.providerStatus !== "live"
+    || body.providerCalled !== true
+    || body.idempotencySupported !== true
+    || body.duplicateRisk !== false
+    || channelResults.length !== request.channels.length
+    || JSON.stringify(channelNames) !== JSON.stringify(request.channels)
+    || channelResults.some((item) => item.provider !== "n8n-relay" || (item.status !== "sent" && item.status !== "failed"))
+    || outcome !== expectedOutcome
+    || body.ok !== (outcome === "accepted" || outcome === "partial")
+  ) {
+    throw new Error("전파 응답의 서버 receipt binding이 올바르지 않습니다.");
+  }
+  return {
+    ok: body.ok === true,
+    configured: true,
+    state: "recorded",
+    outcome,
+    message: readString(body.message) || "서버 receipt와 전파 이력을 저장했습니다.",
+    workflowRunId,
+    providerStatus: "live",
+    idempotencyKey: request.idempotencyKey,
+    idempotencySupported: true,
+    duplicateRisk: false,
+    providerCalled: true,
+    channelResults,
+    logIds,
+    receipt: {
+      version: "server-dispatch-receipt/v1",
+      receiptId: receipt.receiptId as string,
+      shareSessionId: request.shareSessionId,
+      idempotencyKey: request.idempotencyKey,
+      workpackId: request.workpackId,
+      canonicalWorkpackRevision,
+      outcome,
+      workflowRunId,
+      logIds,
+      recordedAt: receipt.recordedAt as string
+    }
+  };
 }
 
 function isValidationOnlyMarker(value: string | undefined): boolean {
@@ -700,13 +776,13 @@ function isValidationOnlyMarker(value: string | undefined): boolean {
 }
 
 export function isProviderDispatchConfirmed(result: WorkflowDispatchResult): boolean {
-  if (
-    !result.ok
-    || result.duplicateRisk
-    || result.providerCalled === false
-    || isValidationOnlyMarker(result.providerStatus)
-  ) return false;
-  return Boolean(result.channelResults?.some((item) => (
-    item.status === "sent" && !isValidationOnlyMarker(item.provider)
-  )));
+  return Boolean(result.state === "recorded"
+    && (result.outcome === "accepted" || result.outcome === "partial")
+    && result.ok
+    && result.providerCalled
+    && result.idempotencySupported
+    && !result.duplicateRisk
+    && Boolean(result.logIds?.length)
+    && result.receipt?.logIds.length === result.logIds?.length
+    && Boolean(result.channelResults?.some((item) => item.status === "sent" && !isValidationOnlyMarker(item.provider))));
 }

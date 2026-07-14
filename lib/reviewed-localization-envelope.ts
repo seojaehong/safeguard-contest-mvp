@@ -5,6 +5,11 @@ import {
   resolveAuthoritativeRecipientLocale,
   type SupportedLanguageCode
 } from "@/lib/foreign-worker";
+import {
+  containsHangulResidue,
+  hasLocalizedSemanticText,
+  isFullEnglishFallback
+} from "@/lib/localized-content-policy";
 import type { AskResponse } from "@/lib/types";
 import type { ShareRecipientInput } from "@/lib/workpack-commercial";
 
@@ -81,8 +86,6 @@ export type LocalizationAuthoritySuccess = {
   }>;
   verifiedEnvelopes: Partial<Record<SupportedLanguageCode, ReviewedLocalizationEnvelope>>;
 };
-
-const HANGUL_PATTERN = /[가-힣]/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -220,7 +223,25 @@ function hasCompleteLocalizedContent(content: LocalizedDispatchContent): boolean
   ];
   return content.bodyLines.length > 0
     && content.semanticRiskLabels.length > 0
-    && required.every((value) => typeof value === "string" && value.trim().length > 0);
+    && required.every((value) => (
+      typeof value === "string"
+      && value.trim().length > 0
+      && hasLocalizedSemanticText(value)
+    ));
+}
+
+function isLocalizedContentComplete(
+  content: LocalizedDispatchContent,
+  locale: SupportedLanguageCode
+): boolean {
+  if (!hasCompleteLocalizedContent(content)) return false;
+  if (locale !== "ko" && containsHangulResidue(canonicalShareJson(content))) return false;
+  return !isFullEnglishFallback([
+    content.subject,
+    ...Object.values(content.metadata),
+    ...content.bodyLines,
+    ...content.semanticRiskLabels
+  ], locale);
 }
 
 export function parseLocalizedDispatchArtifactDraft(
@@ -261,7 +282,7 @@ export function parseLocalizedDispatchArtifactDraft(
     bodyLines: localized.bodyLines,
     semanticRiskLabels: localized.semanticRiskLabels
   };
-  if (!hasCompleteLocalizedContent(content)) return null;
+  if (!isLocalizedContentComplete(content, expectedLocale)) return null;
   return {
     artifactId: value.artifactId.trim(),
     targetLocale: expectedLocale,
@@ -325,16 +346,8 @@ export function verifyReviewedLocalizationEnvelope(input: {
     || envelope.sourceDocumentDigest !== buildSourceDocumentDigest(input.response)
     || !Number.isSafeInteger(envelope.artifact.artifactRevision)
     || envelope.artifact.artifactRevision < 1
-    || !hasCompleteLocalizedContent(envelope.artifact.localized)
+    || !isLocalizedContentComplete(envelope.artifact.localized, envelope.targetLocale)
   ) {
-    return {
-      ok: false,
-      reasonCode: "translation_incomplete",
-      owner: "document",
-      validatedSupportedCode: envelope.targetLocale
-    };
-  }
-  if (envelope.targetLocale !== "ko" && HANGUL_PATTERN.test(canonicalShareJson(envelope.artifact.localized))) {
     return {
       ok: false,
       reasonCode: "translation_incomplete",
