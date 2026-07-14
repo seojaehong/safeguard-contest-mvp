@@ -1,0 +1,13 @@
+PASS packet
+checks.total=1820
+checks.references=1242
+checks.markdown=72
+findings.total=10 severity=P0:0,P1:3,P2:4,P3:3
+boundaries.application=22 boundaries.total=24 rls.enabled=20 rls.missing=2 force=0 policies=20 tenant=13
+service_routes.total=21 direct=19 broker=2 public_api=6 public_pages=5 public_http=11
+negative_cases=14 expected_denials=56 executed=0
+attack.stale-counts=REJECTED errors=1
+attack.missing-approval=REJECTED errors=1
+attack.accidental-migration-path=REJECTED errors=2
+attack.executable-sql=REJECTED errors=1
+attacks.total=4 rejected=4
