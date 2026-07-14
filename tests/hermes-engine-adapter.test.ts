@@ -4,6 +4,7 @@ import type { ClawChatEvent } from "@/lib/agent-loop";
 import * as clawTools from "@/lib/claw-tools";
 import { buildDbHarnessPacket } from "@/lib/db-harness";
 import type { BrokerRequestContext } from "@/lib/engine-adapter";
+import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
   createExperimentalHermesAdapter,
   createSafeClawHermesComposition,
@@ -27,11 +28,70 @@ const localPocEnv = {
 
 const executeClawTool = clawTools.executeClawTool;
 
+function sifReference(): SafetyReferenceItem {
+  return {
+    id: "sif-1",
+    source_id: "kosha-sif-archive",
+    item_type: "sif-case",
+    category: "건설",
+    subcategory: null,
+    title: "오늘 작업 위험 점검 SIF 추락 사례",
+    summary: "오늘 작업의 추락 위험과 작업발판 점검 사례",
+    body: "작업발판과 난간을 확인하고 안전대를 체결합니다.",
+    keywords: ["오늘", "작업", "위험", "점검", "추락"],
+    risk_tags: ["추락"],
+    primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+    controls: ["작업발판과 난간 확인", "안전대 체결"],
+    evidence_role: "supporting",
+    retrieval_source: "ranked",
+  };
+}
+
+function verifiedKoshaReference(): SafetyReferenceItem {
+  const body = "오늘 작업 전 작업발판, 난간, 안전대 상태를 점검합니다.";
+  return {
+    ...sifReference(),
+    id: "kosha-guide-1",
+    source_id: "kosha-technical-guidelines",
+    item_type: "technical-guideline",
+    title: "G-67-2011 오늘 작업 위험 점검 기술지침",
+    summary: "외벽 작업의 추락 예방 점검 지침",
+    body,
+    kosha_guide: {
+      referenceId: "kosha-guide-1",
+      stableDocumentKey: "G-67",
+      version: "G-67-2011",
+      quality: "accepted",
+      lifecycle: "current",
+      bodyKind: "native",
+      anchors: [{ page: 1, excerpt: body }],
+      evidenceRef: "KOSHA G-67-2011 p.1",
+      directEligible: true,
+    },
+  };
+}
+
+function groundedHarnessResult(question = "오늘 작업 위험을 점검해줘") {
+  const packet = buildDbHarnessPacket({
+    question,
+    references: [sifReference(), verifiedKoshaReference()],
+    retrieval: { mode: "ranked-rpc", message: "required evidence resolved" },
+  });
+  return {
+    engine: "safeclaw-db-harness" as const,
+    packet,
+    referenceSearch: [
+      { source: "sif_cases", ok: true, configured: true, count: 1, retrievalMode: "ranked-rpc" },
+      { source: "supporting_evidence", ok: true, configured: true, count: 1, retrievalMode: "ranked-rpc" },
+    ],
+  };
+}
+
 function mockHarnessPreload() {
-  const packet = buildDbHarnessPacket({ question: "오늘 작업 위험을 점검해줘", references: [] });
+  const harnessResult = groundedHarnessResult();
   return vi.spyOn(clawTools, "executeClawTool").mockImplementation(
     async (toolName, input, authContext) => toolName === "run_safeclaw_harness_agent"
-      ? { engine: "safeclaw-db-harness", packet }
+      ? harnessResult
       : executeClawTool(toolName, input, authContext),
   );
 }
@@ -75,18 +135,15 @@ describe("experimental Hermes EngineAdapter", () => {
 
   it("preloads the Evidence Harness packet exactly before planner execution", async () => {
     const order: string[] = [];
-    const packet = buildDbHarnessPacket({
-      question: "오늘 작업 위험을 점검해줘",
-      references: [],
-    });
+    const harnessResult = groundedHarnessResult();
     const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockImplementation(async (toolName) => {
       expect(toolName).toBe("run_safeclaw_harness_agent");
       order.push("harness");
-      return { engine: "safeclaw-db-harness", packet };
+      return harnessResult;
     });
     const composition = createSafeClawHermesComposition(async ({ evidencePacket }) => {
       order.push("planner");
-      expect(evidencePacket).toStrictEqual(packet);
+      expect(evidencePacket).toStrictEqual(harnessResult.packet);
     });
     const engine = createProductionEngineAdapter(localPocEnv, {
       experimentalHermes: composition,
@@ -131,12 +188,295 @@ describe("experimental Hermes EngineAdapter", () => {
     expect(events).toEqual([]);
   });
 
-  it("rejects planner text emitted without the required Evidence Harness packet", async () => {
-    const packet = buildDbHarnessPacket({ question: "근거 확인", references: [] });
+  it("fails closed before planner when the resolved Harness packet is empty", async () => {
+    const packet = buildDbHarnessPacket({
+      question: "오늘 작업 위험을 점검해줘",
+      references: [],
+    });
     const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
       engine: "safeclaw-db-harness",
       packet,
+      referenceSearch: [
+        { source: "sif_cases", ok: true, configured: true, count: 0, retrievalMode: "unconfigured" },
+        { source: "supporting_evidence", ok: true, configured: true, count: 0, retrievalMode: "unconfigured" },
+      ],
     });
+    let plannerCalls = 0;
+    const events: ClawChatEvent[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async () => {
+        plannerCalls += 1;
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(0);
+    expect(events).toEqual([]);
+  });
+
+  it("fails closed before planner when required Harness retrieval resolves ok false", async () => {
+    const harnessResult = groundedHarnessResult();
+    harnessResult.referenceSearch[0] = {
+      source: "sif_cases",
+      ok: false,
+      configured: true,
+      count: 0,
+      retrievalMode: "ranked-rpc",
+    };
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(harnessResult);
+    let plannerCalls = 0;
+    const events: ClawChatEvent[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async () => {
+        plannerCalls += 1;
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(0);
+    expect(events).toEqual([]);
+  });
+
+  it("fails closed before planner when the Harness packet belongs to another question", async () => {
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(
+      groundedHarnessResult("다른 작업 질문"),
+    );
+    let plannerCalls = 0;
+    const events: ClawChatEvent[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async () => {
+        plannerCalls += 1;
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(0);
+    expect(events).toEqual([]);
+  });
+
+  it("binds the Harness question to the trimmed current prompt", async () => {
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(
+      groundedHarnessResult(),
+    );
+    let plannerCalls = 0;
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async ({ evidencePacket }) => {
+        plannerCalls += 1;
+        expect(evidencePacket.question).toBe("오늘 작업 위험을 점검해줘");
+      }),
+    });
+
+    try {
+      await expect(engine.run({
+        ...runInput(),
+        prompt: "  오늘 작업 위험을 점검해줘  ",
+      })).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(1);
+  });
+
+  it("fails closed before planner when the Harness packet is partial", async () => {
+    const harnessResult = groundedHarnessResult();
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...harnessResult,
+      packet: {
+        ...harnessResult.packet,
+        retrievalContract: undefined,
+      },
+    });
+    let plannerCalls = 0;
+    const events: ClawChatEvent[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async () => {
+        plannerCalls += 1;
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(0);
+    expect(events).toEqual([]);
+  });
+
+  it("fails closed before planner when required retrieval status is partial", async () => {
+    const harnessResult = groundedHarnessResult();
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...harnessResult,
+      packet: {
+        ...harnessResult.packet,
+        retrievalContract: {
+          ...harnessResult.packet.retrievalContract,
+          vector: undefined,
+        },
+      },
+    });
+    let plannerCalls = 0;
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async () => {
+        plannerCalls += 1;
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(0);
+  });
+
+  it("fails closed before planner when KOSHA evidence is unresolved", async () => {
+    const unresolvedKosha = verifiedKoshaReference();
+    if (!unresolvedKosha.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
+    unresolvedKosha.kosha_guide.quality = "review_required";
+    const packet = buildDbHarnessPacket({
+      question: "오늘 작업 위험을 점검해줘",
+      references: [sifReference(), unresolvedKosha],
+      retrieval: { mode: "ranked-rpc", message: "unresolved KOSHA evidence" },
+    });
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...groundedHarnessResult(),
+      packet,
+    });
+    let plannerCalls = 0;
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async () => {
+        plannerCalls += 1;
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(0);
+  });
+
+  it("blocks output when planner mutates the same attested packet object", async () => {
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(
+      groundedHarnessResult(),
+    );
+    const events: ClawChatEvent[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async ({ evidencePacket, emitText }) => {
+        expect(Object.isFrozen(evidencePacket)).toBe(true);
+        expect(Object.isFrozen(evidencePacket.retrievalContract)).toBe(true);
+        (evidencePacket as unknown as { question: string }).question = "planner가 바꾼 질문";
+        emitText({ text: "변조된 packet 출력", evidencePacket });
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).rejects.toBeDefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(events).toEqual([]);
+  });
+
+  it("blocks output when planner returns a different-question packet", async () => {
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(
+      groundedHarnessResult(),
+    );
+    const events: ClawChatEvent[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async ({ evidencePacket, emitText }) => {
+        const otherQuestionPacket = structuredClone(evidencePacket);
+        (otherQuestionPacket as unknown as { question: string }).question = "다른 질문";
+        emitText({ text: "다른 질문 packet 출력", evidencePacket: otherQuestionPacket });
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(events).toEqual([]);
+  });
+
+  it("accepts an immutable deep clone with the same attested packet content", async () => {
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(
+      groundedHarnessResult(),
+    );
+    const events: ClawChatEvent[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async ({ evidencePacket, emitText }) => {
+        emitText({ text: "attested output", evidencePacket: structuredClone(evidencePacket) });
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(events).toContainEqual({ kind: "text-delta", text: "attested output" });
+  });
+
+  it("rejects planner text emitted without the required Evidence Harness packet", async () => {
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(
+      groundedHarnessResult(),
+    );
     const events: ClawChatEvent[] = [];
     const engine = createExperimentalHermesAdapter({
       env: localPocEnv,
@@ -179,11 +519,9 @@ describe("experimental Hermes EngineAdapter", () => {
   }, 15_000);
 
   it("reserves the Evidence Harness for the mandatory adapter preload", async () => {
-    const packet = buildDbHarnessPacket({ question: "근거 확인", references: [] });
-    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValue({
-      engine: "safeclaw-db-harness",
-      packet,
-    });
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValue(
+      groundedHarnessResult(),
+    );
     const engine = createExperimentalHermesAdapter({
       env: localPocEnv,
       composition: createSafeClawHermesComposition(async ({ requestReadTool }) => {

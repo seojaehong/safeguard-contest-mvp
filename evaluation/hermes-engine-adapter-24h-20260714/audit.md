@@ -40,11 +40,17 @@ and OpenAI paths remain in place.
   `tools:read` site/org context, and returned through the same scope
   interceptor used by the MCP route.
 - Before planner execution, the adapter invokes `run_safeclaw_harness_agent`
-  exactly once and validates its `db_harness_first` naturalization contract.
-  Retrieval or contract validation failure prevents planner invocation and
-  output. The planner receives the validated packet as preloaded input.
-- Planner text must return the exact preloaded packet identity with the text.
-  Missing or substituted packets fail closed before a text event is emitted.
+  exactly once and validates successful SIF and KOSHA search lanes, non-empty
+  grounded SIF and verified-current KOSHA evidence, retrieval counts/status,
+  ready ontology, required arrays, and complete document coverage. A shaped
+  `naturalize_only` packet alone is insufficient.
+- Packet question must equal the trimmed current prompt. The adapter clones,
+  recursively freezes, canonicalizes, and SHA-256 attests the validated packet
+  before planner execution. Retrieval, shape, grounding, or question failure
+  prevents planner invocation and output.
+- Planner text must return packet content whose digest equals the attested
+  digest. Object identity is irrelevant; same-content clones pass, while
+  mutation, partial content, or a different question fails before text emit.
 - Hermes receives broker-authenticated tenant context, prompt, cancellation,
   packet-attested text streaming, and a read-only tool-intent callback. It
   receives no Supabase client, MCP token, write callback, or publish callback.
@@ -101,16 +107,36 @@ and OpenAI paths remain in place.
    13 skipped.
 
 Each case was run independently with the matching test title in
-`tests/hermes-engine-adapter.test.ts` before its implementation change. The
-final test file has 14 passing behavior tests.
+`tests/hermes-engine-adapter.test.ts` before its implementation change. That
+remediation checkpoint had 14 passing behavior tests.
+
+### Fresh Independent Review RED Evidence at `b5ee3de`
+
+The independent review rejected `b5ee3de` with two P2 findings. Five isolated
+RED executions were observed before implementation:
+
+1. Empty shaped packet resolved and called planner; 1 failed and 14 skipped.
+2. Required SIF search with `ok=false` resolved and called planner; 1 failed
+   and 15 skipped.
+3. Grounded packet for another question resolved and called planner; 1 failed
+   and 16 skipped.
+4. Planner mutated the same packet object and emitted text; 1 failed and 17
+   skipped.
+5. Packet with missing nested retrieval status resolved and called planner; 1
+   failed and 22 skipped.
+
+Additional GREEN behavior tests cover top-level partial packet, unresolved
+KOSHA grounding, different-question output, and same-content clone acceptance.
+The final Hermes test file has 24 passing tests, including trimmed-prompt
+normalization.
 
 ### P2/P3 Final GREEN Evidence
 
 | Check | Reproducible command | Exit | Result |
 | --- | --- | ---: | --- |
-| Focused tests | `npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism` | 0 | 12 files passed; 183 tests passed; 0 failed; 35.75 s |
+| Focused tests | `npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism` | 0 | 12 files passed; 193 tests passed; 0 failed; 20.73 s |
 | TypeScript strict | `npm.cmd run typecheck` | 0 | `tsc --noEmit --incremental false` passed |
-| Production build | `npm.cmd run build` | 0 | Next.js 15.5.20; compiled in 17.4 s; static pages 27/27 |
+| Production build | `npm.cmd run build` | 0 | Next.js 15.5.20; compiled in 14.4 s; static pages 27/27 |
 
 Tracked command output is in `focused-final.txt`, `typecheck-final.txt`, and
 `build-final.txt` beside this audit. The evidence does not cite gitignored or
