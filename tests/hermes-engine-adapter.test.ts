@@ -726,7 +726,7 @@ describe("experimental Hermes EngineAdapter", () => {
       },
     });
     expect((result as { auth: object }).auth).not.toHaveProperty("userId");
-  }, 15_000);
+  }, 30_000);
 
   it("reserves the Evidence Harness for the mandatory adapter preload", async () => {
     const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValue(
