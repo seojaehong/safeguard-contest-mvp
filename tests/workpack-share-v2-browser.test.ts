@@ -9,6 +9,7 @@ import { CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
 import { parseChannelResolutionRequest } from "@/lib/channel-resolution-contract";
 import { SUPPORTED_LANGUAGE_CODES, type SupportedLanguageCode } from "@/lib/foreign-worker";
 import type { AskResponse } from "@/lib/types";
+import { buildWorkflowShareContentBinding } from "@/lib/workflow-share-client";
 import type { WorkerProfile } from "@/lib/workspace";
 
 import {
@@ -1592,7 +1593,18 @@ async function executeFixtureBehavior(
     return { ...opened, expectedState: "stale", finalize };
   }
 
-  await waitForShareState(page, "ready");
+  try {
+    await waitForShareState(page, "ready");
+  } catch (error) {
+    console.error("Share v2 fixture failed to reach ready", {
+      fixtureId,
+      state: await page.locator("[data-share-root]").getAttribute("data-share-state"),
+      text: (await page.locator("[data-share-root]").innerText()).slice(0, 2_000),
+      requests: controller.probe.requests,
+      unexpectedRequests: controller.probe.unexpectedRequests
+    });
+    throw error;
+  }
   expect(controller.probe.sessionRequestCount).toBe(0);
   expect(controller.probe.dispatchRequestCount).toBe(0);
   expect(await page.locator("a[href*='/share/'], a[href*='invitation']").count()).toBe(0);
@@ -1755,7 +1767,17 @@ async function openEditableSharePage(
   const operations = opened.page.locator("details.editor-operations-disclosure");
   await operations.locator("summary").click();
   await opened.page.locator("[data-share-root]").waitFor({ state: "visible", timeout: 30_000 });
-  await waitForShareState(opened.page, "ready");
+  try {
+    await waitForShareState(opened.page, "ready");
+  } catch (error) {
+    console.error("Editable Share v2 surface failed to reach ready", {
+      state: await opened.page.locator("[data-share-root]").getAttribute("data-share-state"),
+      text: (await opened.page.locator("[data-share-root]").innerText()).slice(0, 2_000),
+      requests: opened.controller.probe.requests,
+      unexpectedRequests: opened.controller.probe.unexpectedRequests
+    });
+    throw error;
+  }
   return opened;
 }
 
@@ -1864,6 +1886,18 @@ async function verifyInFlightScopeIsolation(environment: ShareEnvironment): Prom
       const raw = window.localStorage.getItem(storageKey);
       return Boolean(raw?.includes(marker));
     }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, marker: localEditMarker });
+    const editedStoredWorkpack = await restorePage.page.evaluate((storageKey) => {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) return null;
+      const parsed: unknown = JSON.parse(raw);
+      return typeof parsed === "object" && parsed !== null && "data" in parsed
+        ? parsed.data
+        : null;
+    }, CURRENT_WORKPACK_STORAGE_KEY);
+    const editedContentBinding = buildWorkflowShareContentBinding(editedStoredWorkpack);
+    const previousServerContentBinding = buildWorkflowShareContentBinding(restoreScenario.response);
+    expect.soft(editedContentBinding).not.toBe(previousServerContentBinding);
+    expect.soft(restoreScenario.response.deliverables.riskAssessmentDraft).not.toContain(localEditMarker);
     const editedFingerprint = await restorePage.page.evaluate((storageKey) => {
       const raw = window.localStorage.getItem(storageKey);
       if (!raw) return null;
@@ -1896,8 +1930,16 @@ async function verifyInFlightScopeIsolation(environment: ShareEnvironment): Prom
 
     await restorePage.controller.releaseWorkpackDetail();
     await restorePage.page.waitForTimeout(500);
-    expect(await restorePage.page.locator("[data-share-root]").getAttribute("data-share-state"))
-      .toBe("workpack_revalidation");
+    const restoredState = await restorePage.page.locator("[data-share-root]").getAttribute("data-share-state");
+    if (restoredState !== "workpack_revalidation") {
+      console.error("Delayed local restore incorrectly changed authority state", {
+        restoredState,
+        editedContentBinding,
+        previousServerContentBinding,
+        requests: restorePage.controller.probe.requests
+      });
+    }
+    expect(restoredState).toBe("workpack_revalidation");
     expect(restorePage.controller.probe.channelRequestCount).toBe(channelRequestsBeforeRestore);
     expect(restorePage.controller.probe.sessionRequestCount).toBe(0);
     expect(restorePage.controller.probe.dispatchRequestCount).toBe(0);

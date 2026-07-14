@@ -393,7 +393,7 @@ function resolveChannel(input: ChannelAvailabilityInput, channel: WorkpackDispat
       ownerRoute: "/settings"
     };
   }
-  if (input.runtime.dispatchMode === "live" && !input.runtime.relayConfigured && channel !== "kakao") {
+  if (input.runtime.dispatchMode === "live" && !input.runtime.relayConfigured) {
     return {
       channel,
       configured: false,

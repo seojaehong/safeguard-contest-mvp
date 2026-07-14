@@ -299,6 +299,7 @@ describe("workflow share panel behavior", () => {
         href: expect.stringContaining("/workers?focus=language&next=")
       }
     });
+    if (!invalid.primary) throw new Error("invalid locale must expose the worker-language owner");
     expect(invalid.primary.href).not.toContain("language=");
     expect(invalid.primary.href).not.toContain("vi-VN");
   });

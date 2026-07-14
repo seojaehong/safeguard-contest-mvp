@@ -19,6 +19,7 @@ import type { WorkerDispatchTarget } from "@/lib/workspace";
 import type { WorkspaceTheme } from "@/lib/workspace-pages";
 import {
   createAuthenticatedShareSession,
+  buildWorkflowShareContentBinding,
   dispatchAuthenticatedShareSession,
   loadAuthenticatedShareAuthority,
   resolveAuthenticatedShareChannels,
@@ -27,6 +28,7 @@ import {
   type AuthenticatedShareAuthority,
   type LocalizedSharePreview,
   type WorkflowDispatchResult,
+  type WorkflowShareAuthorityIdentity,
   type WorkflowShareChannel
 } from "@/lib/workflow-share-client";
 
@@ -39,6 +41,7 @@ type WorkflowSharePanelProps = {
   readiness?: WorkpackReadiness;
   requiresRevalidation?: boolean;
   workspaceTheme?: WorkspaceTheme;
+  onAuthorityVerified?: (identity: WorkflowShareAuthorityIdentity) => void;
 };
 
 type AuthorityViewState = {
@@ -157,7 +160,8 @@ export function WorkflowSharePanel({
   workpackId = null,
   readiness,
   requiresRevalidation = false,
-  workspaceTheme = "day"
+  workspaceTheme = "day",
+  onAuthorityVerified
 }: WorkflowSharePanelProps) {
   const [selectedChannels, setSelectedChannels] = useState<WorkflowShareChannel[]>(["email", "sms"]);
   const [previewLanguage, setPreviewLanguage] = useState<SupportedLanguageCode>("ko");
@@ -182,6 +186,10 @@ export function WorkflowSharePanel({
     () => buildWorkpackGenerationFingerprint(data),
     [data]
   );
+  const workpackContentBinding = useMemo(
+    () => buildWorkflowShareContentBinding(data),
+    [data]
+  );
   const targetSignature = useMemo(
     () => buildWorkflowShareTargetSignature(targetWorkers),
     [targetWorkers]
@@ -197,12 +205,14 @@ export function WorkflowSharePanel({
     workpackId,
     generationEvidenceSignature,
     workpackContentFingerprint,
+    workpackContentBinding,
     targetSignature,
     workers: authorityRequestWorkers
   }), [
     authorityRequestWorkers,
     generationEvidenceSignature,
     targetSignature,
+    workpackContentBinding,
     workpackContentFingerprint,
     workpackId
   ]);
@@ -266,8 +276,7 @@ export function WorkflowSharePanel({
     setStaleReason(null);
     setChannelView({ status: "idle", resolution: null });
     if (
-      requiresRevalidation
-      || !canShare
+      (!canShare && !requiresRevalidation)
       || !online
       || !targetWorkers.length
       || !authToken
@@ -289,6 +298,7 @@ export function WorkflowSharePanel({
       knownWorkpackId: workpackId,
       question: data.question,
       generationEvidenceSignature,
+      expectedContentBinding: workpackContentBinding,
       scenario: {
         companyName: data.scenario.companyName,
         siteName: data.scenario.siteName,
@@ -307,6 +317,10 @@ export function WorkflowSharePanel({
       }
       setAuthorityView({ status: "ready", authority: result });
       setPreviewLanguage(result.recipientLocales[0] || "ko");
+      onAuthorityVerified?.({
+        workpackId: result.workpackId,
+        contentBinding: workpackContentBinding
+      });
     }).catch((error: unknown) => {
       if (cancelled) return;
       console.error("Share authority resolution failed", error);
@@ -326,9 +340,11 @@ export function WorkflowSharePanel({
     data.scenario.siteName,
     generationEvidenceSignature,
     online,
+    onAuthorityVerified,
     refreshKey,
     requiresRevalidation,
     targetWorkers.length,
+    workpackContentBinding,
     workpackId
   ]);
 
@@ -535,7 +551,9 @@ export function WorkflowSharePanel({
       setRefreshKey((current) => current + 1);
       return;
     }
-    if (presentation.primary.action === "send") {
+    const primary = presentation.primary;
+    if (!primary) return;
+    if (primary.action === "send") {
       void sendCurrentPack();
       return;
     }
@@ -704,28 +722,30 @@ export function WorkflowSharePanel({
         </section>
       </div>
 
-      <footer className={styles.footer} data-share-owner="primary-action">
-        {presentation.primary.kind === "link" && presentation.primary.href ? (
-          <a
-            className={styles.primary}
-            href={presentation.primary.href}
-            data-share-primary
-          >
-            {presentation.primary.label}
-          </a>
-        ) : (
-          <button
-            type="button"
-            className={styles.primary}
-            data-share-primary
-            disabled={presentation.primary.disabled}
-            aria-busy={sending}
-            onClick={handlePrimaryAction}
-          >
-            {presentation.primary.label}
-          </button>
-        )}
-      </footer>
+      {presentation.primary ? (
+        <footer className={styles.footer} data-share-owner="primary-action">
+          {presentation.primary.kind === "link" && presentation.primary.href ? (
+            <a
+              className={styles.primary}
+              href={presentation.primary.href}
+              data-share-primary
+            >
+              {presentation.primary.label}
+            </a>
+          ) : (
+            <button
+              type="button"
+              className={styles.primary}
+              data-share-primary
+              disabled={presentation.primary.disabled}
+              aria-busy={sending}
+              onClick={handlePrimaryAction}
+            >
+              {presentation.primary.label}
+            </button>
+          )}
+        </footer>
+      ) : null}
     </article>
   );
 }

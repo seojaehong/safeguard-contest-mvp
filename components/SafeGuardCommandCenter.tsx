@@ -13,6 +13,7 @@ import {
 import { AgentConsole } from "@/components/AgentConsole";
 import {
   buildStoredCurrentWorkpack,
+  buildWorkpackGenerationFingerprint,
   CURRENT_WORKPACK_STORAGE_KEY,
   parseStoredCurrentWorkpack
 } from "@/lib/current-workpack";
@@ -56,6 +57,10 @@ import {
 } from "@/lib/workspace-pages";
 import type { SupportedLanguageCode } from "@/lib/foreign-worker";
 import { buildGenerationProgressState } from "@/lib/workspace-generation-progress";
+import {
+  buildWorkflowShareContentBinding,
+  type WorkflowShareAuthorityIdentity
+} from "@/lib/workflow-share-client";
 import {
   applyWorkpackDeliverablesChange,
   assessWorkpackReadiness,
@@ -1062,6 +1067,8 @@ export function SafeGuardCommandCenter({
   );
   const [question, setQuestion] = useState(initialQuestion);
   const [data, setData] = useState<AskResponse | null>(null);
+  const shareContentBindingRef = useRef("");
+  shareContentBindingRef.current = data ? buildWorkflowShareContentBinding(data) : "";
   const [generationFingerprint, setGenerationFingerprint] = useState<string | null>(null);
   const [requiresRevalidation, setRequiresRevalidation] = useState(false);
   const [message, setMessage] = useState("");
@@ -1201,14 +1208,28 @@ export function SafeGuardCommandCenter({
     values: WorkpackDocumentValues,
     change: WorkpackDeliverablesChange
   ) => {
-    if (change.requiresRevalidation) setRequiresRevalidation(true);
+    if (change.requiresRevalidation) {
+      setRequiresRevalidation(true);
+      setSavedWorkpackId(null);
+    }
     setData((current) => {
       if (!current) return current;
       const currentDocuments: Partial<Record<DocumentKey, string>> = current.deliverables;
       const documentKeys = Object.keys(values) as DocumentKey[];
       if (documentKeys.every((key) => currentDocuments[key] === values[key])) return current;
-      return applyWorkpackDeliverablesChange(current, values, change);
+      const next = applyWorkpackDeliverablesChange(current, values, change);
+      shareContentBindingRef.current = buildWorkflowShareContentBinding(next);
+      if (change.requiresRevalidation) {
+        setGenerationFingerprint(buildWorkpackGenerationFingerprint(next));
+      }
+      return next;
     });
+  }, []);
+
+  const handleShareAuthorityVerified = useCallback((identity: WorkflowShareAuthorityIdentity) => {
+    if (identity.contentBinding !== shareContentBindingRef.current) return;
+    setSavedWorkpackId(identity.workpackId);
+    setRequiresRevalidation(false);
   }, []);
 
   function persistCurrentWorkpack(payload: AskResponse, fingerprint: string) {
@@ -1619,6 +1640,7 @@ export function SafeGuardCommandCenter({
 
   function applyGeneratedPayload(payload: AskResponse) {
     const fingerprint = buildGenerationEvidenceFingerprint(payload);
+    shareContentBindingRef.current = buildWorkflowShareContentBinding(payload);
     persistCurrentWorkpack(payload, fingerprint);
     setGenerationFingerprint(fingerprint);
     setData(payload);
@@ -1699,6 +1721,7 @@ export function SafeGuardCommandCenter({
   function selectExample(example: FieldExample) {
     setSelectedExampleId(example.id);
     setQuestion(example.question);
+    shareContentBindingRef.current = "";
     setData(null);
     setGenerationFingerprint(null);
     setRequiresRevalidation(false);
@@ -1718,9 +1741,11 @@ export function SafeGuardCommandCenter({
 
     setSelectedExampleId(null);
     setQuestion(stored.data.question);
+    shareContentBindingRef.current = buildWorkflowShareContentBinding(stored.data);
     setData(stored.data);
     setGenerationFingerprint(stored.generationFingerprint);
-    setRequiresRevalidation(false);
+    setSavedWorkpackId(null);
+    setRequiresRevalidation(true);
     setState("ready");
     const restoredPage = initialWorkspaceStepExplicit ? initialWorkspacePage : "document";
     const restoredDocument = restoredPage === "document" && initialDocumentKey;
@@ -1959,6 +1984,7 @@ export function SafeGuardCommandCenter({
                 if (!nextQuestion.trim()) {
                   setSelectedExampleId(null);
                 }
+                shareContentBindingRef.current = "";
                 setData(null);
                 setState("idle");
                 setWorkspacePage("input");
@@ -2159,6 +2185,7 @@ export function SafeGuardCommandCenter({
                       return;
                     }
                     setQuestion(selectedExample.question);
+                    shareContentBindingRef.current = "";
                     setData(null);
                     setState("idle");
                     setWorkspacePage("input");
@@ -2414,7 +2441,9 @@ export function SafeGuardCommandCenter({
                 editorFocusToken={editorFocusToken}
                 requestedDocumentKey={requestedDocumentKey}
                 readiness={workpackReadiness || undefined}
+                requiresRevalidation={requiresRevalidation}
                 onDeliverablesChange={handleWorkpackDeliverablesChange}
+                onShareAuthorityVerified={handleShareAuthorityVerified}
                 surface="editor"
               />
             </section>
@@ -2432,6 +2461,7 @@ export function SafeGuardCommandCenter({
                   requiresRevalidation={requiresRevalidation}
                   workspaceTheme={activeWorkspaceTheme}
                   onDeliverablesChange={handleWorkpackDeliverablesChange}
+                  onShareAuthorityVerified={handleShareAuthorityVerified}
                   surface="share"
                 />
               ) : null}
@@ -2461,6 +2491,7 @@ export function SafeGuardCommandCenter({
                   generationFingerprint={generationFingerprint || undefined}
                   readiness={workpackReadiness || undefined}
                   onDeliverablesChange={handleWorkpackDeliverablesChange}
+                  onShareAuthorityVerified={handleShareAuthorityVerified}
                   surface="share"
                 />
               </div>

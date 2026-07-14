@@ -51,6 +51,11 @@ export type AuthenticatedShareAuthority = {
   previews: Partial<Record<SupportedLanguageCode, LocalizedSharePreview>>;
 };
 
+export type WorkflowShareAuthorityIdentity = {
+  workpackId: string;
+  contentBinding: string;
+};
+
 export type AuthenticatedChannelResolution = {
   ok: true;
   ready: boolean;
@@ -151,6 +156,26 @@ const digestPattern = /^[0-9a-f]{64}$/i;
 const providerIdempotencyKeyPattern = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function canonicalizeShareContent(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalizeShareContent);
+  if (!isRecord(value)) return value;
+  return Object.keys(value).sort().reduce<Record<string, unknown>>((result, key) => {
+    if (value[key] !== undefined) result[key] = canonicalizeShareContent(value[key]);
+    return result;
+  }, {});
+}
+
+export function buildWorkflowShareContentBinding(value: unknown): string {
+  if (!isRecord(value)) return "";
+  return JSON.stringify(canonicalizeShareContent({
+    question: value.question,
+    scenario: value.scenario,
+    riskSummary: value.riskSummary,
+    deliverables: value.deliverables,
+    generationEvidence: value.generationEvidence
+  }));
 }
 
 function readString(value: unknown): string | undefined {
@@ -313,6 +338,7 @@ function buildKoreanPreview(reopenData: Record<string, unknown>): LocalizedShare
 export function parseAuthenticatedWorkpackShareAuthority(input: {
   expectedWorkpackId: string;
   expectedGenerationEvidenceSignature: string;
+  expectedContentBinding: string;
   recipientLocales: SupportedLanguageCode[];
   payload: unknown;
 }): Omit<AuthenticatedShareAuthority, "workerIds" | "recipientLocales"> | AuthenticatedShareAuthorityFailure {
@@ -328,6 +354,7 @@ export function parseAuthenticatedWorkpackShareAuthority(input: {
     || workpack.id !== input.expectedWorkpackId
     || !reopenData
     || generationEvidence?.signature !== input.expectedGenerationEvidenceSignature
+    || buildWorkflowShareContentBinding(reopenData) !== input.expectedContentBinding
   ) {
     return { ok: false, reasonCode: "workpack_revision_or_digest_changed" };
   }
@@ -413,16 +440,24 @@ function detailGenerationSignature(payload: Record<string, unknown>): string | n
   return readRequiredString(generationEvidence?.signature);
 }
 
+function detailContentBinding(payload: Record<string, unknown>): string | null {
+  const workpack = isRecord(payload.workpack) ? payload.workpack : null;
+  const reopenData = workpack && isRecord(workpack.reopenData) ? workpack.reopenData : null;
+  return reopenData ? buildWorkflowShareContentBinding(reopenData) : null;
+}
+
 export async function loadAuthenticatedShareAuthority(fetcher: Fetcher, request: {
   authToken: string;
   knownWorkpackId: string | null;
   question: string;
   generationEvidenceSignature: string;
+  expectedContentBinding: string;
   scenario: { companyName: string; siteName: string; companyType: string };
   selectedWorkers: Array<{ externalKey: string; displayName: string; languageCode: string }>;
 }): Promise<AuthenticatedShareAuthority | AuthenticatedShareAuthorityFailure> {
   if (!request.authToken.trim()) throw new Error("관리자 인증 토큰이 필요합니다.");
   if (!request.selectedWorkers.length) return { ok: false, reasonCode: "recipient_locale_invalid" };
+  if (!request.expectedContentBinding) return { ok: false, reasonCode: "workpack_not_saved" };
   const candidateIds = request.knownWorkpackId && uuidPattern.test(request.knownWorkpackId)
     ? [request.knownWorkpackId]
     : readWorkpackCandidateIds(
@@ -437,7 +472,10 @@ export async function loadAuthenticatedShareAuthority(fetcher: Fetcher, request:
       `/api/workpacks/${encodeURIComponent(candidateId)}`,
       request.authToken
     );
-    if (detailGenerationSignature(payload) === request.generationEvidenceSignature) {
+    if (
+      detailGenerationSignature(payload) === request.generationEvidenceSignature
+      && detailContentBinding(payload) === request.expectedContentBinding
+    ) {
       workpackId = candidateId;
       workpackPayload = payload;
       break;
@@ -479,6 +517,7 @@ export async function loadAuthenticatedShareAuthority(fetcher: Fetcher, request:
   const authority = parseAuthenticatedWorkpackShareAuthority({
     expectedWorkpackId: workpackId,
     expectedGenerationEvidenceSignature: request.generationEvidenceSignature,
+    expectedContentBinding: request.expectedContentBinding,
     recipientLocales,
     payload: workpackPayload
   });

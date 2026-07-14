@@ -296,7 +296,7 @@ describe("authenticated workflow share client", () => {
   });
 
   it("loads current server workpack and worker authority without mutating the roster", async () => {
-    const { loadAuthenticatedShareAuthority } = await loadClient();
+    const { buildWorkflowShareContentBinding, loadAuthenticatedShareAuthority } = await loadClient();
     const requests: Array<{ input: string; init: RequestInit }> = [];
     const validDetail = {
       ok: true,
@@ -372,6 +372,7 @@ describe("authenticated workflow share client", () => {
       knownWorkpackId: null,
       question: "성수동 외벽 도장",
       generationEvidenceSignature: "generation-signature-1",
+      expectedContentBinding: buildWorkflowShareContentBinding(validDetail.workpack.reopenData),
       scenario: {
         companyName: "SafeClaw Pilot",
         siteName: "성수 현장",
@@ -468,16 +469,18 @@ describe("authenticated workflow share client", () => {
   });
 
   it("fails closed when a supported translation is incomplete or retains Korean metadata", async () => {
-    const { parseAuthenticatedWorkpackShareAuthority } = await loadClient();
+    const { buildWorkflowShareContentBinding, parseAuthenticatedWorkpackShareAuthority } = await loadClient();
+    const reopenData = { generationEvidence: { signature: "generation-signature-1" } };
     const result = parseAuthenticatedWorkpackShareAuthority({
       expectedWorkpackId: WORKPACK_ID,
       expectedGenerationEvidenceSignature: "generation-signature-1",
+      expectedContentBinding: buildWorkflowShareContentBinding(reopenData),
       recipientLocales: ["vi"],
       payload: {
         ok: true,
         workpack: {
           id: WORKPACK_ID,
-          reopenData: { generationEvidence: { signature: "generation-signature-1" } }
+          reopenData
         },
         shareLocalization: {
           ok: true,

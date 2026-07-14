@@ -12,6 +12,7 @@ type ServerExit = {
 
 const MAX_SERVER_OUTPUT_CHARS = 20_000;
 const MAX_PORT_BIND_ATTEMPTS = 8;
+const WINDOWS_TERMINATION_ATTEMPTS = 2;
 
 type HarnessOptions = {
   slug: string;
@@ -19,6 +20,7 @@ type HarnessOptions = {
   portSalt: number;
   mode?: "dev" | "prod";
   timeoutMs?: number;
+  terminationTimeoutMs?: number;
   tempRoot?: string;
   makeTempDirectory?: (prefix: string) => string;
   onTemporaryDirectory?: (directory: string) => void;
@@ -96,31 +98,83 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): 
   });
 }
 
-async function stopProcessTree(server: ChildProcessWithoutNullStreams | null): Promise<void> {
+function processIsAlive(server: ChildProcessWithoutNullStreams, processId: number): boolean {
+  if (server.exitCode !== null || server.signalCode !== null) return false;
+  try {
+    process.kill(processId, 0);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code !== "ESRCH";
+  }
+}
+
+async function terminationIsVerified(
+  server: ChildProcessWithoutNullStreams,
+  processId: number,
+  port: number
+): Promise<boolean> {
+  return !processIsAlive(server, processId) && await probeLoopbackPort(port) !== null;
+}
+
+async function waitForTerminationVerification(
+  server: ChildProcessWithoutNullStreams,
+  processId: number,
+  port: number,
+  deadline: number
+): Promise<boolean> {
+  do {
+    if (await terminationIsVerified(server, processId, port)) return true;
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) return false;
+    await delay(Math.min(100, remaining));
+  } while (Date.now() <= deadline);
+  return await terminationIsVerified(server, processId, port);
+}
+
+async function stopProcessTree(
+  server: ChildProcessWithoutNullStreams | null,
+  port: number,
+  timeoutMs: number
+): Promise<void> {
   const processId = server?.pid;
-  if (!processId || server.exitCode !== null || server.signalCode !== null) return;
+  if (!server || !processId) return;
+  const deadline = Date.now() + timeoutMs;
+  if (await terminationIsVerified(server, processId, port)) return;
   if (process.platform === "win32") {
-    const closed = new Promise<void>((resolve) => server.once("close", () => resolve()));
-    const result = spawnSync("taskkill.exe", ["/PID", String(processId), "/T", "/F"], {
-      encoding: "utf8",
-      windowsHide: true
-    });
-    if (result.error || result.status !== 0) {
+    const diagnostics: string[] = [];
+    for (let attempt = 1; attempt <= WINDOWS_TERMINATION_ATTEMPTS; attempt += 1) {
+      const result = spawnSync("taskkill.exe", ["/PID", String(processId), "/T", "/F"], {
+        encoding: "utf8",
+        windowsHide: true
+      });
       const detail = `${result.stdout ?? ""}\n${result.stderr ?? ""}`.trim() || "no taskkill output";
-      throw new Error(
-        `Windows taskkill failed for browser harness PID ${processId} with status ${result.status}: ${detail}`,
-        result.error ? { cause: result.error } : undefined
+      diagnostics.push(
+        `attempt=${attempt} status=${String(result.status)} error=${result.error?.message || "none"} output=${detail}`
       );
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) break;
+      const verificationDeadline = result.error || result.status !== 0
+        ? Math.min(deadline, Date.now() + 150)
+        : deadline;
+      if (await waitForTerminationVerification(server, processId, port, verificationDeadline)) return;
     }
-    await withTimeout(closed, 10_000, `Browser harness PID ${processId} close`);
-    return;
+    if (Date.now() < deadline && await waitForTerminationVerification(server, processId, port, deadline)) return;
+    if (await terminationIsVerified(server, processId, port)) return;
+    const processAlive = processIsAlive(server, processId);
+    const portReleased = await probeLoopbackPort(port) !== null;
+    throw new Error(
+      `Windows process-tree termination not verified for browser harness PID ${processId} on port ${port} after ${timeoutMs}ms; processAlive=${processAlive}; portReleased=${portReleased}; ${diagnostics.join(" | ")}`
+    );
   }
   const exited = new Promise<void>((resolve) => server.once("exit", () => resolve()));
   server.kill("SIGTERM");
-  await Promise.race([exited, delay(5_000)]);
+  await Promise.race([exited, delay(Math.min(5_000, Math.max(0, deadline - Date.now())))]);
   if (server.exitCode === null && server.signalCode === null) {
     server.kill("SIGKILL");
-    await Promise.race([exited, delay(5_000)]);
+    await Promise.race([exited, delay(Math.min(5_000, Math.max(0, deadline - Date.now())))]);
+  }
+  if (!await waitForTerminationVerification(server, processId, port, deadline)) {
+    throw new Error(`Process-tree termination not verified for browser harness PID ${processId} on port ${port}`);
   }
 }
 
@@ -158,6 +212,19 @@ async function startIsolatedNextBrowserHarnessAttempt(
       throw new Error(`Refusing to remove unexpected browser harness temp directory: ${temporaryDirectory}`);
     }
     fs.rmSync(temporaryDirectory, { recursive: true, force: true });
+  };
+
+  const cleanupTemporaryDirectoryAfterTermination = async (): Promise<void> => {
+    for (let attempt = 1; attempt <= 5; attempt += 1) {
+      try {
+        cleanupTemporaryDirectory();
+        return;
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException).code;
+        if (attempt === 5 || (code !== "EPERM" && code !== "EBUSY" && code !== "ENOTEMPTY")) throw error;
+        await delay(attempt * 100);
+      }
+    }
   };
 
   const appendServerOutput = (value: string): void => {
@@ -297,25 +364,37 @@ async function startIsolatedNextBrowserHarnessAttempt(
           const response = await fetch(`${baseUrl}${options.initialPath}`);
           if (response.ok) {
             const browser = await chromium.launch({ headless: true });
-            let stopped = false;
+            let stopState: "running" | "stopping" | "stopped" = "running";
+            let stopPromise: Promise<void> | null = null;
             const stop = async (): Promise<void> => {
-              if (stopped) return;
-              stopped = true;
-              try {
-                const contextClosures = browser.contexts().map((context) => context.close());
-                await withTimeout(Promise.allSettled(contextClosures), 15_000, "Browser context cleanup");
+              if (stopState === "stopped") return;
+              if (stopPromise) return await stopPromise;
+              stopState = "stopping";
+              const operation = async (): Promise<void> => {
+                let browserFailure: unknown = null;
                 try {
-                  await withTimeout(browser.close(), 10_000, "Browser cleanup");
+                  const contextClosures = browser.contexts().map((context) => context.close());
+                  await withTimeout(Promise.allSettled(contextClosures), 15_000, "Browser context cleanup");
+                  try {
+                    await withTimeout(browser.close(), 10_000, "Browser cleanup");
+                  } catch (error) {
+                    if (browser.isConnected()) throw error;
+                  }
                 } catch (error) {
-                  if (browser.isConnected()) throw error;
+                  browserFailure = error;
                 }
-              } finally {
-                try {
-                  await stopProcessTree(server);
-                } finally {
-                  cleanupTemporaryDirectory();
-                }
-              }
+                await stopProcessTree(server, port, options.terminationTimeoutMs ?? 10_000);
+                await cleanupTemporaryDirectoryAfterTermination();
+                if (browserFailure) throw browserFailure;
+                stopState = "stopped";
+              };
+              stopPromise = operation().catch((error: unknown) => {
+                stopState = "running";
+                throw error;
+              }).finally(() => {
+                stopPromise = null;
+              });
+              return await stopPromise;
             };
             return {
               baseUrl,
@@ -334,19 +413,13 @@ async function startIsolatedNextBrowserHarnessAttempt(
       await delay(500);
     }
   } catch (error) {
-    try {
-      await stopProcessTree(server);
-    } finally {
-      cleanupTemporaryDirectory();
-    }
+    await stopProcessTree(server, port, options.terminationTimeoutMs ?? 10_000);
+    await cleanupTemporaryDirectoryAfterTermination();
     throw error;
   }
 
-  try {
-    await stopProcessTree(server);
-  } finally {
-    cleanupTemporaryDirectory();
-  }
+  await stopProcessTree(server, port, options.terminationTimeoutMs ?? 10_000);
+  await cleanupTemporaryDirectoryAfterTermination();
   throw new Error(`Timed out waiting for ${baseUrl}${options.initialPath}\n${serverOutput}`);
 }
 

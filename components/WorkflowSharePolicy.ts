@@ -555,7 +555,7 @@ export type ShareProductPresentation = {
     href?: string;
     action?: "send" | "recheck";
     disabled: boolean;
-  };
+  } | null;
 };
 
 export type ShareProductPresentationInput = {
@@ -604,6 +604,14 @@ function buttonPresentation(
   };
 }
 
+function statusPresentation(
+  state: ShareProductState,
+  headline: string,
+  detail: string
+): ShareProductPresentation {
+  return { state, headline, detail, primary: null };
+}
+
 function staleOwnerHref(input: ShareProductPresentationInput): string {
   if (input.staleReason === "recipient_snapshot_changed" || input.staleReason === "recipient_locale_invalid") {
     return buildShareOwnerHref({ owner: "worker-language", theme: input.theme });
@@ -624,21 +632,17 @@ export function resolveShareProductPresentation(input: ShareProductPresentationI
   if (input.outcome) {
     const hasPersistedLogs = input.outcome.logIds.length > 0;
     if (input.outcome.stage === "accepted" && hasPersistedLogs) {
-      return linkPresentation(
+      return statusPresentation(
         "success",
         "전송 요청 접수",
-        "선택한 채널이 전송 요청을 접수했습니다. 전달 여부는 전파 이력에서 확인합니다.",
-        "전파 이력 확인",
-        "/dispatch"
+        "선택한 채널이 전송 요청을 접수했습니다."
       );
     }
     if (input.outcome.stage === "partial" && hasPersistedLogs) {
-      return linkPresentation(
+      return statusPresentation(
         "partial",
         "일부 채널 확인 필요",
-        "일부 채널은 요청을 접수했고 일부는 실패하거나 결과를 확인하지 못했습니다.",
-        "전파 이력 확인",
-        "/dispatch"
+        "일부 채널은 요청을 접수했고 일부는 실패했습니다."
       );
     }
     if (input.outcome.stage === "session_failed") {
@@ -651,12 +655,10 @@ export function resolveShareProductPresentation(input: ShareProductPresentationI
       );
     }
     if (hasPersistedLogs) {
-      return linkPresentation(
+      return statusPresentation(
         "fail",
         "전송 결과 확인 필요",
-        "채널 전송 결과를 전파 이력에서 확인합니다.",
-        "전파 이력 확인",
-        "/dispatch"
+        "선택한 채널의 요청 결과를 확인해야 합니다."
       );
     }
     return buttonPresentation(
@@ -669,13 +671,10 @@ export function resolveShareProductPresentation(input: ShareProductPresentationI
   }
   if (input.staleReason) {
     if (input.staleReason === "channel_configuration_changed" || input.staleReason === "channel_unavailable") {
-      return buttonPresentation(
+      return statusPresentation(
         "blocked",
-        "채널 연결 준비 필요",
-        "현재 제품에는 이 채널 설정을 변경하는 운영 화면이 연결되지 않았습니다.",
-        "채널 연결 대기",
-        "recheck",
-        true
+        "선택한 채널 전송 불가",
+        "선택한 채널은 현재 전송할 수 없습니다."
       );
     }
     return linkPresentation(
@@ -781,13 +780,10 @@ export function resolveShareProductPresentation(input: ShareProductPresentationI
     );
   }
   if (input.channelStatus === "unavailable" || input.channelStatus === "error") {
-    return buttonPresentation(
+    return statusPresentation(
       "blocked",
-      "채널 연결 준비 필요",
-      "현재 제품에는 이 채널 설정을 변경하는 운영 화면이 연결되지 않았습니다.",
-      "채널 연결 대기",
-      "recheck",
-      true
+      "선택한 채널 전송 불가",
+      "선택한 채널은 현재 전송할 수 없습니다."
     );
   }
   if (input.channelStatus === "empty") {

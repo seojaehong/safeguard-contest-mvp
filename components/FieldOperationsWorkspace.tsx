@@ -32,7 +32,11 @@ import type { AskResponse } from "@/lib/types";
 import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
 import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/workpack-readiness";
 import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
-import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
+import {
+  buildWorkflowShareContentBinding,
+  resolveSavedWorkerIds,
+  type WorkflowShareAuthorityIdentity
+} from "@/lib/workflow-share-client";
 import type { WorkspaceTheme } from "@/lib/workspace-pages";
 import {
   buildDefaultWorkers,
@@ -843,6 +847,7 @@ export function FieldOperationsWorkspace({
   requiresRevalidation = false,
   workspaceTheme = "day",
   onDeliverablesChange,
+  onShareAuthorityVerified,
   surface = "full"
 }: {
   data: AskResponse;
@@ -853,6 +858,7 @@ export function FieldOperationsWorkspace({
   requiresRevalidation?: boolean;
   workspaceTheme?: WorkspaceTheme;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
+  onShareAuthorityVerified?: (identity: WorkflowShareAuthorityIdentity) => void;
   surface?: "full" | "share" | "editor";
 }) {
   const [initialWorkerState] = useState(() => resolveInitialWorkerState(data, generationFingerprint));
@@ -962,6 +968,7 @@ export function FieldOperationsWorkspace({
       ? { ...data, deliverables: { ...data.deliverables, ...editedDeliverables } }
       : data
   ), [data, editedDeliverables]);
+  dataRef.current = workspaceData;
   const selectedWorkers = useMemo(
     () => workers.filter((worker) => selectedWorkerIds.includes(worker.id)),
     [selectedWorkerIds, workers]
@@ -1031,19 +1038,21 @@ export function FieldOperationsWorkspace({
     const documentKeys = Object.keys(values) as DocumentKey[];
     if (previousValues && documentKeys.every((key) => previousValues[key] === values[key])) return;
     lastEditorValuesRef.current = values;
+    if (change.source === "generated" && !change.requiresRevalidation) return;
     setEditedDeliverables((current) => {
       const currentDocuments: Partial<Record<DocumentKey, string>> = current ?? dataRef.current.deliverables;
       return documentKeys.every((key) => currentDocuments[key] === values[key]) ? current : values;
     });
+    if (change.requiresRevalidation) setSavedWorkpackId(null);
     onDeliverablesChangeRef.current?.(values, change);
     if (typeof window === "undefined") return;
     const currentData = dataRef.current;
     const nextData = applyWorkpackDeliverablesChange(currentData, values, change);
+    dataRef.current = nextData;
     try {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(nextData, {
-          generationFingerprint,
           workerSnapshot: workerSnapshotRef.current,
           dispatchSnapshot: dispatchSnapshotRef.current
         }))
@@ -1052,6 +1061,11 @@ export function FieldOperationsWorkspace({
       console.warn("safeclaw current workpack update failed", error);
     }
   }, []);
+  const handleShareAuthorityVerified = useCallback((identity: WorkflowShareAuthorityIdentity) => {
+    if (identity.contentBinding !== buildWorkflowShareContentBinding(dataRef.current)) return;
+    setSavedWorkpackId(identity.workpackId);
+    onShareAuthorityVerified?.(identity);
+  }, [onShareAuthorityVerified]);
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
     ["PLAN", "계획", `${workspaceData.citations.length}건 근거 · 위험성평가·작업계획`],
@@ -1218,7 +1232,7 @@ export function FieldOperationsWorkspace({
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(workspaceData, {
-          generationFingerprint,
+          ...(!requiresRevalidation && generationFingerprint ? { generationFingerprint } : {}),
           workerSnapshot,
           dispatchSnapshot
         }))
@@ -1226,7 +1240,7 @@ export function FieldOperationsWorkspace({
     } catch (error) {
       console.warn("safeclaw current workpack snapshot update failed", error);
     }
-  }, [dispatchSnapshot, generationFingerprint, workerSnapshot, workspaceData]);
+  }, [dispatchSnapshot, generationFingerprint, requiresRevalidation, workerSnapshot, workspaceData]);
 
   if (surface === "share") {
     return (
@@ -1240,6 +1254,7 @@ export function FieldOperationsWorkspace({
           readiness={readiness}
           requiresRevalidation={requiresRevalidation}
           workspaceTheme={workspaceTheme}
+          onAuthorityVerified={handleShareAuthorityVerified}
         />
       </section>
     );
@@ -1272,6 +1287,7 @@ export function FieldOperationsWorkspace({
         readiness={readiness}
         requiresRevalidation={requiresRevalidation}
         workspaceTheme={workspaceTheme}
+        onAuthorityVerified={handleShareAuthorityVerified}
       />
       <WorkpackHistoryPanel
         session={session}
