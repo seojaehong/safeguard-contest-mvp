@@ -21,6 +21,7 @@ import {
 } from "./mcp-tools";
 import { querySafetyKnowledge } from "./ontology/knowledge-tool";
 import { materializePhaseAProductDocuments } from "./ontology/product-materialization";
+import { isEvidenceChainTaskBoundToQuestion } from "./ontology/evidence-chain";
 import { reviewDocpack } from "./ontology/qa-review-tool";
 import type { SafetyReferenceItem } from "./safety-reference-catalog";
 import { searchSafetyReferences } from "./safety-reference-catalog-server";
@@ -126,6 +127,11 @@ export async function executeClawTool(
       const task = knowledge.phaseAProduct?.task.label
         ?? resolveReviewTaskLabel(requestedTask, question);
       const response = knowledge.found && knowledge.phaseAProduct
+        && isEvidenceChainTaskBoundToQuestion(
+          requestedTask,
+          question,
+          knowledge.phaseAProduct.chainId,
+        )
         ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
             generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
           })

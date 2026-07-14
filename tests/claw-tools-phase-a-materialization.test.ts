@@ -56,6 +56,12 @@ function passingQa(task: string): QaReviewFound {
   };
 }
 
+function requireRecord(value: unknown): asserts value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error("expected an object result");
+  }
+}
+
 describe("Claw Phase A product handlers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -104,6 +110,73 @@ describe("Claw Phase A product handlers", () => {
     });
     expect(result).toMatchObject({
       openClawUsageNote: expect.stringContaining("최종 근거로 사용하지 마세요"),
+    });
+  });
+
+  test("does not attach reviewed Phase A provenance from a task unrelated to the question", async () => {
+    mocks.querySafetyKnowledge.mockResolvedValue(
+      buildPublishedSafetyKnowledge(publishedGraph, "고소작업"),
+    );
+
+    const result = await executeClawTool("generate_reviewed_safety_docpack", {
+      question: "전기 설비 작업을 위한 문서팩",
+      task: "고소작업",
+      mode: "template",
+      includeFull: true,
+    });
+    requireRecord(result);
+    requireRecord(result.docpack);
+
+    expect(mocks.reviewDocpack).toHaveBeenCalledWith(
+      "고소작업",
+      expect.not.stringContaining("work-at-height-fall:risk-assessment:"),
+    );
+    expect(result.docpack).not.toHaveProperty("phaseAProduct");
+    expect(result).not.toHaveProperty("phaseAReviewStatus");
+    expect(result).not.toHaveProperty("qaAuthority");
+  });
+
+  test("does not attach reviewed Phase A provenance when the question names multiple chains", async () => {
+    mocks.querySafetyKnowledge.mockResolvedValue(
+      buildPublishedSafetyKnowledge(publishedGraph, "높은 곳 작업"),
+    );
+
+    const result = await executeClawTool("generate_reviewed_safety_docpack", {
+      question: "높은 곳 작업과 전기 작업을 함께 수행하는 문서팩",
+      task: "높은 곳 작업",
+      mode: "template",
+      includeFull: true,
+    });
+    requireRecord(result);
+    requireRecord(result.docpack);
+
+    expect(result.docpack).not.toHaveProperty("phaseAProduct");
+    expect(result).not.toHaveProperty("phaseAReviewStatus");
+  });
+
+  test("keeps reviewed Phase A provenance for a canonical question and alias task", async () => {
+    mocks.querySafetyKnowledge.mockResolvedValue(
+      buildPublishedSafetyKnowledge(publishedGraph, "높은 곳 작업"),
+    );
+
+    const result = await executeClawTool("generate_reviewed_safety_docpack", {
+      question: "외벽 고소작업을 위한 문서팩",
+      task: "높은 곳 작업",
+      mode: "template",
+      includeFull: true,
+    });
+    requireRecord(result);
+    requireRecord(result.docpack);
+
+    expect(result.docpack).toMatchObject({
+      phaseAProduct: {
+        chainId: "work-at-height-fall",
+      },
+      documents: {
+        riskAssessmentDraft: expect.stringContaining(
+          "work-at-height-fall:risk-assessment:",
+        ),
+      },
     });
   });
 

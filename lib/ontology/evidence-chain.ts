@@ -331,6 +331,32 @@ function findDefinition(input: string): {
   return null;
 }
 
+/**
+ * Phase A provenance may be attached only when the requested task and the
+ * question's single explicit registry task resolve to the same canonical chain.
+ */
+export function isEvidenceChainTaskBoundToQuestion(
+  requestedTask: string,
+  question: string,
+  expectedChainId: EvidenceChainDefinition["chainId"],
+): boolean {
+  const requested = findDefinition(requestedTask);
+  if (!requested || requested.definition.chainId !== expectedChainId) return false;
+
+  const normalizedQuestion = normalizeLabel(question);
+  if (!normalizedQuestion) return false;
+
+  const mentionedChainIds = new Set<EvidenceChainDefinition["chainId"]>();
+  for (const definition of EVIDENCE_CHAIN_REGISTRY) {
+    const labels = [definition.canonicalTaskLabel, ...definition.aliases];
+    if (labels.some((label) => normalizedQuestion.includes(normalizeLabel(label)))) {
+      mentionedChainIds.add(definition.chainId);
+    }
+  }
+
+  return mentionedChainIds.size === 1 && mentionedChainIds.has(expectedChainId);
+}
+
 function publishedRuntimeGraph(graph: OntologyGraph): Pick<OntologyGraph, "nodes" | "edges"> {
   const nodes = graph.nodes.filter((node) => node.review_state === "published");
   const nodeIds = new Set(nodes.map((node) => node.node_id));
