@@ -1,0 +1,7 @@
+COMMAND=git diff --check
+HEAD=3a74107e3d8363f437815b877533f7342fd02c45
+warning: in the working copy of 'lib/db-harness.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/search.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/commercial-harness.test.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/kosha-current-review-run-ask.test.ts', LF will be replaced by CRLF the next time Git touches it
+EXIT_CODE=0

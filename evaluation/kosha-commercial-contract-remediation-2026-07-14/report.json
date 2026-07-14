@@ -1,0 +1,87 @@
+{
+  "date": "2026-07-14",
+  "branch": "fix/kosha-commercial-contract-remediation",
+  "baseCommit": "3a74107e3d8363f437815b877533f7342fd02c45",
+  "productCommit": "d120a9235b46d1a2e863ca5364b2e087d521472e",
+  "productTree": "31667de4dd2a7799ee303fc390df49d7bc6b61bc",
+  "red": {
+    "focusedFailures": 3,
+    "coveredFindings": [
+      "kosha_only_independent_action_surface",
+      "non_kosha_supporting_parent_with_kosha_support",
+      "runAsk_kosha_only_action_surface"
+    ]
+  },
+  "green": {
+    "focused": {
+      "files": 2,
+      "tests": 40,
+      "log": "focused-tests.log",
+      "exitCode": 0
+    },
+    "integratedGroups": [
+      {
+        "name": "B",
+        "files": 2,
+        "tests": 14,
+        "log": "integrated-kosha-group-b.log",
+        "exitCode": 0
+      },
+      {
+        "name": "C",
+        "files": 4,
+        "tests": 22,
+        "log": "integrated-kosha-group-c.log",
+        "exitCode": 0
+      },
+      {
+        "name": "D",
+        "files": 3,
+        "tests": 130,
+        "log": "integrated-kosha-group-d-rerun.log",
+        "exitCode": 0,
+        "initialFailureLog": "integrated-kosha-group-d.log"
+      },
+      {
+        "name": "E",
+        "files": 3,
+        "tests": 81,
+        "log": "integrated-kosha-group-e.log",
+        "exitCode": 0
+      }
+    ],
+    "integratedTotal": {
+      "files": 12,
+      "tests": 247,
+      "priorEquivalentTests": 244,
+      "newRemediationTests": 3
+    },
+    "typecheck": {
+      "initialExitCode": 2,
+      "initialFailure": "missing local node_modules packages pdf-lib and @pdf-lib/fontkit",
+      "installRestoreLog": "npm-ci.log",
+      "rerunExitCode": 0,
+      "rerunLog": "typecheck-rerun.log"
+    },
+    "diffCheck": {
+      "exitCode": 0,
+      "log": "diff-check.log"
+    }
+  },
+  "scopeIntegrity": {
+    "changedFiles": [
+      "lib/search.ts",
+      "lib/db-harness.ts",
+      "tests/commercial-harness.test.ts",
+      "tests/kosha-current-review-run-ask.test.ts"
+    ],
+    "evidenceDirectory": "evaluation/kosha-commercial-contract-remediation-2026-07-14",
+    "dbSchemaMigrationDataChanged": false,
+    "packageOrLockChanged": false
+  },
+  "residualRisks": [
+    "Full repository test suite was not run in this remediation scope.",
+    "Production deployment was not run.",
+    "npm.cmd ci reported existing dependency audit warnings; no dependency changes were made."
+  ]
+}

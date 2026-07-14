@@ -1,0 +1,16 @@
+COMMAND=npm.cmd test -- tests/commercial-harness.test.ts tests/safety-reference-relevance.test.ts tests/safety-reference-hybrid.test.ts --maxWorkers=1 --no-file-parallelism
+HEAD=3a74107e3d8363f437815b877533f7342fd02c45
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/safety-reference-relevance.test.ts tests/safety-reference-hybrid.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  3 passed (3)
+      Tests  81 passed (81)
+   Start at  14:02:17
+   Duration  10.21s (transform 679ms, setup 0ms, import 1.15s, tests 7.24s, environment 0ms)
+
+EXIT_CODE=0
