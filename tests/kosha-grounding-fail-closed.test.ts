@@ -456,6 +456,55 @@ describe("bounded KOSHA grounding fail-closed", () => {
     });
   });
 
+  it("keeps the aggregate blocked when an integrity-failed local corpus retains verified remote KOSHA", async () => {
+    const rootDir = createKoshaFixture({ state: "current" });
+    appendFileSync(join(rootDir, "current.json"), "tampered", "utf8");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const body = `${VERIFIED_BODY_PREFIX}: 무결성 차단 시에도 검증 원격 보조근거는 경계 안에서 유지`;
+    const remoteKosha = referenceRow(
+      "verified-remote-with-local-integrity-block",
+      body,
+      verifiedPayload("verified-remote-with-local-integrity-block", body)
+    );
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url.includes("/rpc/search_safety_references_ranked")) {
+        return new Response(JSON.stringify([remoteKosha]), {
+          status: 200,
+          headers: { "content-type": "application/json" }
+        });
+      }
+      throw new Error(`Unexpected fetch URL: ${url}`);
+    }));
+
+    const result = await searchServerSafetyReferences({
+      query: "지게차 보행자 동선",
+      limit: 5,
+      offlineCorpus: { rootDir }
+    }) as SafetyReferenceSearchResult & GroundingSearchProjection;
+    const retained = result.items[0];
+
+    expect(result.items.map((item) => item.id)).toEqual(["verified-remote-with-local-integrity-block"]);
+    expect(grounding(retained)).toMatchObject({
+      status: "verified_current",
+      supportingCitationEligible: true,
+      directEvidenceEligible: false,
+      riskRowEligible: false
+    });
+    expect(result.koshaGrounding).toMatchObject({
+      status: "blocked",
+      reason: "local-corpus-integrity-failed",
+      localGateReason: "local-corpus-integrity-failed",
+      localCorpusStatus: "blocked",
+      acceptedCount: 1,
+      reviewRequiredCount: 0,
+      excludedCount: 0
+    });
+    expect(result.message).toMatch(/무결성.*검증된 현행 원격 KOSHA 1건.*기술적 보조지침/u);
+  });
+
   it("fails closed when the local corpus is unavailable without affecting non-KOSHA rows", async () => {
     vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");

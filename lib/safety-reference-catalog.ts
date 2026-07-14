@@ -1934,6 +1934,17 @@ export function summarizeKoshaGrounding(input: {
   const excludedCount = input.excludedCount || 0;
   const localCorpusStatus = input.localCorpusStatus || "not_applicable";
   const localGateReason = input.blockedReason || null;
+  if (input.blockedReason === "local-corpus-integrity-failed") {
+    return {
+      status: "blocked",
+      reason: input.blockedReason,
+      localGateReason,
+      localCorpusStatus,
+      acceptedCount,
+      reviewRequiredCount: reviewRequired.length,
+      excludedCount
+    };
+  }
   if (reviewRequired.length) {
     return {
       status: "review_required",
