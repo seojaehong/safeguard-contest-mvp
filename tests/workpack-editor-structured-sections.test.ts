@@ -5,6 +5,7 @@ import {
   replaceStructuredDocumentSection,
   type DocumentKey
 } from "@/components/workpack-editor-structure";
+import { buildSampleWorkpack } from "@/lib/sample-workpack";
 
 const documentKeys: DocumentKey[] = [
   "workpackSummaryDraft",
@@ -31,6 +32,20 @@ describe("workpack editor structured sections", () => {
     expect(getDocumentEditorProfile("riskAssessmentDraft").kind).toBe("risk-assessment");
     expect(getDocumentEditorProfile("tbmLogDraft").kind).toBe("meeting-record");
     expect(getDocumentEditorProfile("kakaoMessage").kind).toBe("field-message");
+  });
+
+  it("provides a document-specific fallback section schema for all 12 documents", () => {
+    const schemas = documentKeys.map((key) => {
+      const model = buildStructuredDocumentSections(key, "");
+      return {
+        key,
+        labels: model.body.map((section) => section.label)
+      };
+    });
+
+    expect(schemas.every(({ labels }) => labels.length >= 3)).toBe(true);
+    expect(schemas.every(({ labels }) => new Set(labels).size === labels.length)).toBe(true);
+    expect(new Set(schemas.map(({ labels }) => labels.join("|"))).size).toBe(12);
   });
 
   it("separates editable submission sections from provenance appendices without changing source text", () => {
@@ -76,13 +91,40 @@ describe("workpack editor structured sections", () => {
     expect(edited).not.toContain("- 이동식 비계 추락\n");
   });
 
-  it("uses a type-specific body label for an unsectioned field message", () => {
-    const source = "[현장 공유]\n오늘 작업은 외벽 도장입니다. 강풍 시 즉시 작업을 중지합니다.";
-    const model = buildStructuredDocumentSections("kakaoMessage", source);
+  it("parses actual transmission and field-message samples into meaningful fallback sections", () => {
+    const sample = buildSampleWorkpack();
+    const transmission = buildStructuredDocumentSections(
+      "foreignWorkerTransmission",
+      sample.deliverables.foreignWorkerTransmission
+    );
+    const message = buildStructuredDocumentSections("kakaoMessage", sample.deliverables.kakaoMessage);
 
-    expect(model.body).toHaveLength(1);
-    expect(model.body[0].label).toBe("전송 본문");
-    expect(model.appendices).toEqual([]);
+    expect(transmission.body.map((section) => section.label)).toEqual([
+      "공지 기본 정보",
+      "쉬운 한국어",
+      "다국어 안내",
+      "관리자 확인"
+    ]);
+    expect(transmission.body.map((section) => section.value).join("\n")).toContain("위험하면 작업을 멈추고");
+    expect(message.body.map((section) => section.label)).toEqual([
+      "현장·작업",
+      "핵심 위험",
+      "필수 조치",
+      "시작 전 확인"
+    ]);
+    expect(message.body.map((section) => section.value).join("\n")).toContain("TBM 및 당일 안전교육");
+  });
+
+  it("keeps an empty work permit as a multi-section schema instead of one blank body", () => {
+    const model = buildStructuredDocumentSections("workPermitDraft", "");
+
+    expect(model.body.map((section) => section.label)).toEqual([
+      "허가 기본 정보",
+      "작업 전 허가조건",
+      "격리·보호구 확인",
+      "작업 종료 확인"
+    ]);
+    expect(model.body.every((section) => section.value === "")).toBe(true);
   });
 
   it("keeps an embedded submission body addressable after text is prepended", () => {

@@ -147,6 +147,8 @@ describe("North Star document cockpit and editor UX", () => {
       summaries.filter((summary) => /^근거 \d+건 · 확인 필요 \d+건$/u.test(summary.textContent?.trim() || "")).length
     ));
     expect(exactProvenanceSummaryCount).toBe(1);
+    await editorDrawer.locator(":scope > summary").click();
+    await page.locator('[data-testid="editor-evidence-panel"] .knowledge-link').waitFor({ state: "visible" });
 
     const editorMetrics = await page.evaluate((mobile) => {
       const surface = document.querySelector<HTMLElement>(".document-editor-surface");
@@ -167,19 +169,57 @@ describe("North Star document cockpit and editor UX", () => {
         return false;
       };
       const visibleTouchTargets = Array.from(
-        surface.querySelectorAll<HTMLElement>('button, summary, select')
+        surface.querySelectorAll<HTMLElement>(
+          'button, summary, select, a[href], input:not([type="hidden"]), textarea'
+        )
       ).filter((element) => (
         !isInsideClosedDetails(element)
         && element.getClientRects().length > 0
+        && getComputedStyle(element).display !== "none"
         && getComputedStyle(element).visibility !== "hidden"
       ));
+      const targetLabel = (element: HTMLElement) => {
+        const text = (element.textContent || element.getAttribute("aria-label") || element.getAttribute("href") || "")
+          .trim()
+          .replace(/\s+/gu, " ")
+          .slice(0, 40);
+        return `${element.tagName.toLowerCase()}:${text}`;
+      };
       const tooSmallTouchTargets = mobile
         ? visibleTouchTargets
           .filter((element) => {
             const rect = element.getBoundingClientRect();
             return rect.width < 44 || rect.height < 44;
           })
-          .map((element) => `${element.tagName}:${(element.textContent || element.getAttribute("aria-label") || "").trim().slice(0, 30)}`)
+          .map(targetLabel)
+        : [];
+      const findOverlapPairs = (elements: HTMLElement[]) => {
+        const pairs: string[] = [];
+        elements.forEach((first, firstIndex) => {
+          const firstRect = first.getBoundingClientRect();
+          elements.slice(firstIndex + 1).forEach((second) => {
+            if (first.contains(second) || second.contains(first)) return;
+            const secondRect = second.getBoundingClientRect();
+            const overlapWidth = Math.min(firstRect.right, secondRect.right) - Math.max(firstRect.left, secondRect.left);
+            const overlapHeight = Math.min(firstRect.bottom, secondRect.bottom) - Math.max(firstRect.top, secondRect.top);
+            if (overlapWidth > 1 && overlapHeight > 1) {
+              pairs.push(`${targetLabel(first)} <> ${targetLabel(second)}`);
+            }
+          });
+        });
+        return pairs;
+      };
+      const interactionOverlaps = mobile ? findOverlapPairs(visibleTouchTargets) : [];
+      const structuralTargets = Array.from(surface.querySelectorAll<HTMLElement>(
+        '.document-toolbar, [data-testid="editor-document-body"], [data-testid="document-structured-editor"], [data-testid="editor-provenance-drawer"]'
+      ));
+      const positionedTargets = Array.from(surface.querySelectorAll<HTMLElement>("*"))
+        .filter((element) => {
+          const position = getComputedStyle(element).position;
+          return (position === "fixed" || position === "sticky") && element.getClientRects().length > 0;
+        });
+      const layoutOverlaps = mobile
+        ? findOverlapPairs(Array.from(new Set([...structuralTargets, ...positionedTargets])))
         : [];
       const sectionTextareas = Array.from(structured.querySelectorAll<HTMLElement>(".document-section-textarea"));
       const sectionOverlaps = sectionTextareas.slice(1).filter((element, index) => {
@@ -201,6 +241,8 @@ describe("North Star document cockpit and editor UX", () => {
         bodyOffset: Math.round(bodyRect.top - surfaceRect.top),
         nestedScrollCount: mobile ? nestedScrollCount : 0,
         tooSmallTouchTargets,
+        interactionOverlaps,
+        layoutOverlaps,
         sectionOverlaps,
         sectionCount: sectionTextareas.length
       };
@@ -221,6 +263,8 @@ describe("North Star document cockpit and editor UX", () => {
     expect(editorMetrics.nestedScrollCount).toBe(0);
     expect(editorMetrics.bodyOffset).toBeLessThanOrEqual(width === 391 ? 230 : 300);
     expect(editorMetrics.tooSmallTouchTargets).toEqual([]);
+    expect(editorMetrics.interactionOverlaps).toEqual([]);
+    expect(editorMetrics.layoutOverlaps).toEqual([]);
     expect(editorMetrics.sectionOverlaps).toBe(0);
   }, 90_000);
 });

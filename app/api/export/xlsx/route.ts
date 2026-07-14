@@ -174,7 +174,9 @@ export async function POST(request: NextRequest) {
           { status: 400, headers: { "cache-control": "no-store" } }
         );
       }
-      const editedRows = body.edited === true ? parseRows(body.rows, structuredFallbackTitle(mode)) : [];
+      const editedRows = body.edited === true
+        ? parseRows(body.rows, structuredFallbackTitle(mode))
+        : undefined;
 
       if (mode === "workPlanStructured") {
         const buffer = await buildWorkPlanStructuredXlsx(scenario, body.structured, { editedRows });

@@ -31,6 +31,10 @@ export type DocumentEditorProfile = {
   label: string;
   defaultBodyLabel: string;
   bodyTitlePattern: RegExp;
+  fallbackSections: readonly {
+    label: string;
+    startPattern?: RegExp;
+  }[];
 };
 
 export type StructuredDocumentSection = {
@@ -54,73 +58,145 @@ const documentEditorProfiles: Record<DocumentKey, DocumentEditorProfile> = {
     kind: "document-summary",
     label: "점검 요약",
     defaultBodyLabel: "요약 본문",
-    bodyTitlePattern: /점검결과|문서팩 요약/u
+    bodyTitlePattern: /점검결과|문서팩 요약/u,
+    fallbackSections: [
+      { label: "현장·작업 개요" },
+      { label: "핵심 위험", startPattern: /^핵심\s*위험/u },
+      { label: "즉시 조치", startPattern: /^(?:즉시\s*조치|필수조치)/u },
+      { label: "근거 연결", startPattern: /^(?:연결\s*상태|근거)/u }
+    ]
   },
   riskAssessmentDraft: {
     kind: "risk-assessment",
     label: "위험성평가",
     defaultBodyLabel: "기본 정보",
-    bodyTitlePattern: /위험성평가/u
+    bodyTitlePattern: /위험성평가/u,
+    fallbackSections: [
+      { label: "평가 기본 정보" },
+      { label: "유해·위험요인", startPattern: /^(?:유해[·ㆍ]?위험요인|위험요인)/u },
+      { label: "감소대책", startPattern: /^(?:감소대책|안전조치)/u },
+      { label: "조치 확인", startPattern: /^(?:조치 확인|확인 결과)/u }
+    ]
   },
   workPlanDraft: {
     kind: "work-plan",
     label: "작업계획",
     defaultBodyLabel: "작업 개요",
-    bodyTitlePattern: /작업계획/u
+    bodyTitlePattern: /작업계획/u,
+    fallbackSections: [
+      { label: "작업 개요" },
+      { label: "작업 순서", startPattern: /^(?:작업 순서|작업단계)/u },
+      { label: "안전 조치", startPattern: /^(?:안전 조치|안전조치)/u },
+      { label: "작업중지·비상대응", startPattern: /^(?:작업중지|비상대응)/u }
+    ]
   },
   workPermitDraft: {
     kind: "work-permit",
     label: "작업허가",
     defaultBodyLabel: "허가 기본 정보",
-    bodyTitlePattern: /작업허가|허가서/u
+    bodyTitlePattern: /작업허가|허가서/u,
+    fallbackSections: [
+      { label: "허가 기본 정보" },
+      { label: "작업 전 허가조건", startPattern: /^작업 전 허가조건/u },
+      { label: "격리·보호구 확인", startPattern: /^(?:격리|보호구)/u },
+      { label: "작업 종료 확인", startPattern: /^작업 종료 확인/u }
+    ]
   },
   tbmBriefing: {
     kind: "safety-briefing",
     label: "TBM 브리핑",
     defaultBodyLabel: "회의 기본 정보",
-    bodyTitlePattern: /안전점검회의|TBM.*브리핑/u
+    bodyTitlePattern: /안전점검회의|TBM.*브리핑/u,
+    fallbackSections: [
+      { label: "회의 기본 정보" },
+      { label: "오늘 작업", startPattern: /^(?:오늘 작업|작업내용)/u },
+      { label: "위험요인·안전대책", startPattern: /^(?:위험요인|잠재위험)/u },
+      { label: "확인 질문", startPattern: /^(?:확인 질문|근로자 확인)/u }
+    ]
   },
   tbmLogDraft: {
     kind: "meeting-record",
     label: "TBM 기록",
     defaultBodyLabel: "회의 기록 정보",
-    bodyTitlePattern: /안전점검회의.*기록|TBM.*기록/u
+    bodyTitlePattern: /안전점검회의.*기록|TBM.*기록/u,
+    fallbackSections: [
+      { label: "회의 기록 정보" },
+      { label: "중점 위험·대책", startPattern: /^(?:잠재위험|중점위험|위험요인)/u },
+      { label: "참석자 확인", startPattern: /^참석자 확인/u },
+      { label: "미조치·후속조치", startPattern: /^(?:미조치|후속조치)/u }
+    ]
   },
   safetyEducationRecordDraft: {
     kind: "education-record",
     label: "교육 기록",
     defaultBodyLabel: "교육 기본 정보",
-    bodyTitlePattern: /안전보건교육.*기록/u
+    bodyTitlePattern: /안전보건교육.*기록/u,
+    fallbackSections: [
+      { label: "교육 기본 정보" },
+      { label: "교육 대상", startPattern: /^교육대상/u },
+      { label: "교육 내용", startPattern: /^교육내용/u },
+      { label: "이해도·서명 확인", startPattern: /^(?:이해도|서명|교육 확인)/u }
+    ]
   },
   emergencyResponseDraft: {
     kind: "emergency-plan",
     label: "비상대응",
     defaultBodyLabel: "대응 기본 정보",
-    bodyTitlePattern: /비상대응/u
+    bodyTitlePattern: /비상대응/u,
+    fallbackSections: [
+      { label: "대응 기본 정보" },
+      { label: "사고 징후·초기조치", startPattern: /^(?:사고 징후|초기조치)/u },
+      { label: "보고·연락체계", startPattern: /^(?:보고체계|비상연락)/u },
+      { label: "현장보존·재발방지", startPattern: /^(?:현장보존|재발방지)/u }
+    ]
   },
   photoEvidenceDraft: {
     kind: "evidence-record",
     label: "사진 증빙",
     defaultBodyLabel: "증빙 기본 정보",
-    bodyTitlePattern: /사진.*증빙/u
+    bodyTitlePattern: /사진.*증빙/u,
+    fallbackSections: [
+      { label: "증빙 기본 정보" },
+      { label: "작업 전 사진", startPattern: /^작업 전 사진/u },
+      { label: "조치 전·후 사진", startPattern: /^조치 전[·ㆍ]?후 사진/u },
+      { label: "TBM·교육 증빙", startPattern: /^(?:TBM|교육)\s*(?:및|·)?\s*교육?\s*증빙/u }
+    ]
   },
   foreignWorkerBriefing: {
     kind: "multilingual-briefing",
     label: "다국어 브리핑",
     defaultBodyLabel: "안내 기본 정보",
-    bodyTitlePattern: /외국인.*안내|외국인.*출력|안전.*브리핑/u
+    bodyTitlePattern: /외국인.*안내|외국인.*출력|안전.*브리핑/u,
+    fallbackSections: [
+      { label: "쉬운 한국어 안내" },
+      { label: "다국어 기본팩", startPattern: /^\[다국어 기본팩\]$/u },
+      { label: "언어별 안전수칙", startPattern: /^\[[^\]]+\s\/\s[^\]]+\]$/u },
+      { label: "사용 전 확인", startPattern: /^\[사용 전 확인\]$/u }
+    ]
   },
   foreignWorkerTransmission: {
     kind: "multilingual-message",
     label: "다국어 전송",
     defaultBodyLabel: "전송 기본 정보",
-    bodyTitlePattern: /외국인.*전송|다국어.*전송/u
+    bodyTitlePattern: /외국인.*전송|다국어.*전송/u,
+    fallbackSections: [
+      { label: "공지 기본 정보" },
+      { label: "쉬운 한국어", startPattern: /^쉬운 한국어:/u },
+      { label: "다국어 안내", startPattern: /^\[SafeClaw (?!외국인 근로자).*안전공지\]/u },
+      { label: "관리자 확인", startPattern: /^관리자 확인:/u }
+    ]
   },
   kakaoMessage: {
     kind: "field-message",
     label: "현장 메시지",
     defaultBodyLabel: "전송 본문",
-    bodyTitlePattern: /현장.*공유|현장.*전파|안전.*메시지/u
+    bodyTitlePattern: /현장.*공유|현장.*전파|안전.*메시지/u,
+    fallbackSections: [
+      { label: "현장·작업" },
+      { label: "핵심 위험", startPattern: /^핵심위험:/u },
+      { label: "필수 조치", startPattern: /^필수조치:/u },
+      { label: "시작 전 확인", startPattern: /^TBM 및 당일 안전교육/u }
+    ]
   }
 };
 
@@ -216,9 +292,44 @@ function normalizeBodyLabel(profile: DocumentEditorProfile, heading: string | nu
   return heading;
 }
 
+function buildFallbackSections(profile: DocumentEditorProfile, source: string): StructuredDocumentSection[] {
+  const lines = Array.from(source.matchAll(/[^\r\n]*(?:\r?\n|$)/gu))
+    .filter((match) => match[0].length > 0);
+  const starts = profile.fallbackSections.map((section, index) => {
+    if (index === 0) return 0;
+    if (!section.startPattern) return source.length;
+    const match = lines.find((line) => section.startPattern?.test(line[0].trim()));
+    return match?.index ?? source.length;
+  });
+
+  return profile.fallbackSections.map((section, index) => {
+    const contentStart = starts[index];
+    const laterStarts = starts.slice(index + 1).filter((start) => start > contentStart);
+    const blockEnd = laterStarts.length ? Math.min(...laterStarts) : source.length;
+    const contentEnd = trimSectionBoundary(source, contentStart, blockEnd);
+    const value = source.slice(contentStart, contentEnd);
+    return {
+      id: `body-fallback-${index}-${section.label}`,
+      label: section.label,
+      kind: "body" as const,
+      value,
+      contentStart,
+      contentEnd,
+      replacementPrefix: value.length === 0 ? `${section.label}:\n` : undefined
+    };
+  });
+}
+
 export function buildStructuredDocumentSections(key: DocumentKey, source: string): StructuredDocumentModel {
   const profile = getDocumentEditorProfile(key);
   const matches = Array.from(source.matchAll(/^\s*\[([^\]\r\n]+)\]\s*(?:\r?\n|$)/gmu));
+  if (matches.length === 0) {
+    return {
+      profile,
+      body: buildFallbackSections(profile, source),
+      appendices: []
+    };
+  }
   const sections: StructuredDocumentSection[] = [];
 
   function pushSection(
