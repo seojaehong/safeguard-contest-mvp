@@ -1,6 +1,7 @@
 {
   "schemaVersion": 3,
   "generatedAt": "2026-07-14T00:38:33.909Z",
+  "evidenceHygieneUpdatedAt": "2026-07-14T01:20:44.936Z",
   "selectedDirectory": "evaluation/reports-mobile-task-distance-2026-07-14/selected-target-ready-remediation-v3",
   "verdict": "HOLD_PENDING_FRESH_INDEPENDENT_REVIEW",
   "selfApproval": false,
@@ -89,14 +90,14 @@
     },
     {
       "file": "report.json",
-      "bytes": 8344,
-      "sha256": "a7fbbc4c9168f2a1496248279099c7bf199cce6c796f2534c11f7baae438cbd0",
+      "bytes": 14464,
+      "sha256": "280530dd80644fc4e44aeed1c912ebcfaf69e513ae5cc8d1c72e2c464c065d98",
       "kind": "json"
     },
     {
       "file": "report.md",
-      "bytes": 5917,
-      "sha256": "6fafd6df9205797c50643f7f4de7ed5b60fae2c5f5bdefe20d7ade269d6bfb72",
+      "bytes": 7897,
+      "sha256": "53c58d73744f01a540cbcfeb5f5caa2e398b7cb12e1b42cced3f2659ef72b97d",
       "kind": "md"
     },
     {

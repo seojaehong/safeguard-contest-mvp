@@ -21,6 +21,20 @@
   "product": {
     "runtimeCommit": "8c19aeb81a5f3d0d84a5cc915bda9ea4511b140c",
     "evidenceHarnessCommit": "02e8cd129efbeb4e3fc9fcc2617ee409a3ca9c05",
+    "changedFilesScope": {
+      "scope": "runtime-remediation-commit-range",
+      "comparison": "git-tree-to-tree",
+      "rangeOperator": "..",
+      "baseSha": "57a0d57ae38e56656fbbd1b31a1368cf8276c6fe",
+      "headSha": "8c19aeb81a5f3d0d84a5cc915bda9ea4511b140c",
+      "command": "git diff --name-only 57a0d57ae38e56656fbbd1b31a1368cf8276c6fe..8c19aeb81a5f3d0d84a5cc915bda9ea4511b140c",
+      "pathCounts": {
+        "total": 2,
+        "code": 1,
+        "tests": 1,
+        "evaluation": 0
+      }
+    },
     "changedFiles": [
       "app/globals.css",
       "tests/reports-design-remediation.test.ts"
@@ -223,6 +237,62 @@
     "f45MergeTreeCommand": "git merge-tree --write-tree f45bba17bcce0d8ebb2690f82d014dbe42ae8191 02e8cd129efbeb4e3fc9fcc2617ee409a3ca9c05",
     "f45MergeTreeExitCode": 0,
     "f45MergeTreeSha": "8ec5761f395a2c26ad3b8d26fcf08e8254a3dd53",
+    "fullDiff": {
+      "scope": "f45-authority-commit-to-merged-integration-tree",
+      "base": {
+        "kind": "commit",
+        "sha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191"
+      },
+      "head": {
+        "kind": "git-tree",
+        "sha": "8ec5761f395a2c26ad3b8d26fcf08e8254a3dd53"
+      },
+      "command": "git diff --name-only f45bba17bcce0d8ebb2690f82d014dbe42ae8191 8ec5761f395a2c26ad3b8d26fcf08e8254a3dd53",
+      "classificationRules": [
+        {
+          "class": "tests",
+          "match": "tests/**"
+        },
+        {
+          "class": "evaluation",
+          "match": "evaluation/**"
+        },
+        {
+          "class": "code",
+          "match": "all remaining paths"
+        }
+      ],
+      "pathCounts": {
+        "total": 89,
+        "code": 3,
+        "tests": 3,
+        "evaluation": 83
+      },
+      "pathListIdentity": {
+        "algorithm": "sha256",
+        "normalization": "git command output order, UTF-8, LF-delimited, terminal LF",
+        "full": "ecc4e158cd350bcbd2931dd67333af68ad92a886c2ef0263d19d498783f06fa8",
+        "code": "b17830e653ccd9c6186e09315f44febac1f1302ff706feef1b13a49a8d8f848f",
+        "tests": "b1ec30cb38dba244dd2c52eaa7358f6185a6d712430bfbeaa7d9ea57cd10de10",
+        "evaluation": "71b141d145c145869d21acee12c138d2a187e85b279c56c9b8c41f70f4cba947"
+      },
+      "codePaths": [
+        "app/globals.css",
+        "components/ReportsDownloadCenter.tsx",
+        "lib/reporting-downloads.ts"
+      ],
+      "testPaths": [
+        "tests/reporting-downloads.test.ts",
+        "tests/reports-design-remediation.test.ts",
+        "tests/reports-download-center.test.ts"
+      ],
+      "driftCheck": {
+        "command": "$paths = @(git diff --name-only f45bba17bcce0d8ebb2690f82d014dbe42ae8191 8ec5761f395a2c26ad3b8d26fcf08e8254a3dd53); $code = @($paths | Where-Object { $_ -notlike 'tests/*' -and $_ -notlike 'evaluation/*' }); $tests = @($paths | Where-Object { $_ -like 'tests/*' }); $evaluation = @($paths | Where-Object { $_ -like 'evaluation/*' }); if ($paths.Count -ne 89 -or $code.Count -ne 3 -or $tests.Count -ne 3 -or $evaluation.Count -ne 83) { throw 'Integration diff drift' }",
+        "failOnMismatch": true,
+        "exitCode": 0,
+        "result": "PASS total=89 code=3 tests=3 evaluation=83"
+      }
+    },
     "editorV4": {
       "status": "COMPARED_NOT_INTEGRATED_PENDING_INDEPENDENT_REVIEW",
       "remoteRef": "origin/feat/workpack-document-editors-v2-target-ready-v4",
@@ -237,6 +307,80 @@
     "staleV2EditorClaimsCarriedForward": false,
     "integrationPerformed": false,
     "log": "integration-merge-tree.log"
+  },
+  "evidenceHygiene": {
+    "verifiedAt": "2026-07-14T01:20:44.936Z",
+    "approvedCandidateSha": "f2a77c8ed217cb8d3d7e265beb13df059f8ea28f",
+    "commands": [
+      {
+        "id": "parse-report-json",
+        "command": "Get-Content -Raw 'evaluation/reports-mobile-task-distance-2026-07-14/selected-target-ready-remediation-v3/report.json' | ConvertFrom-Json | Out-Null",
+        "exitCode": 0,
+        "result": "PASS"
+      },
+      {
+        "id": "full-f45-head-diff-check",
+        "command": "git diff --check f45bba17bcce0d8ebb2690f82d014dbe42ae8191..HEAD",
+        "exitCode": 0,
+        "result": "PASS no output"
+      },
+      {
+        "id": "runtime-blob-diff",
+        "command": "git diff --quiet f2a77c8ed217cb8d3d7e265beb13df059f8ea28f..HEAD -- app/globals.css components/ReportsDownloadCenter.tsx lib/reporting-downloads.ts",
+        "exitCode": 0,
+        "result": "PASS unchanged"
+      },
+      {
+        "id": "candidate-scope-guard",
+        "command": "git diff --name-only f2a77c8ed217cb8d3d7e265beb13df059f8ea28f..HEAD",
+        "exitCode": 0,
+        "result": "PASS expected evaluation-only path set"
+      },
+      {
+        "id": "added-line-secret-scan",
+        "command": "$privateKeyPattern = 'BEGIN ' + '(RSA|OPENSSH|EC)' + ' PRIVATE KEY'; $assignmentPattern = '(api[_-]?key|to' + 'ken|sec' + 'ret|password)\\s*[:=]\\s*[\"''][^\"'']{8,}'; $added = @(git diff --unified=0 f2a77c8ed217cb8d3d7e265beb13df059f8ea28f..HEAD | Where-Object { $_ -like '+*' -and $_ -notlike '+++*' }); $matches = @($added | Select-String -CaseSensitive:$false -Pattern $privateKeyPattern,$assignmentPattern); if ($matches.Count -gt 0) { throw 'Secret-like added line detected' }",
+        "exitCode": 0,
+        "result": "PASS zero matches"
+      }
+    ],
+    "runtimeBlobIdentity": {
+      "unchanged": true,
+      "paths": [
+        {
+          "path": "app/globals.css",
+          "candidateBlobOid": "b8a303b437459eec4604cbbb10ac8dc3ac5e608a",
+          "headBlobOid": "b8a303b437459eec4604cbbb10ac8dc3ac5e608a"
+        },
+        {
+          "path": "components/ReportsDownloadCenter.tsx",
+          "candidateBlobOid": "7f338d2efb6aad9fabc344cec62b323a3728c6e2",
+          "headBlobOid": "7f338d2efb6aad9fabc344cec62b323a3728c6e2"
+        },
+        {
+          "path": "lib/reporting-downloads.ts",
+          "candidateBlobOid": "7b6bea68e2c35278c31fa10a8209300db0b381eb",
+          "headBlobOid": "7b6bea68e2c35278c31fa10a8209300db0b381eb"
+        }
+      ]
+    },
+    "candidateScopeGuard": {
+      "allowedChangedFiles": [
+        "evaluation/reports-mobile-task-distance-2026-07-14/selected-target-ready-remediation-v2/production-build-sequential.log",
+        "evaluation/reports-mobile-task-distance-2026-07-14/selected-target-ready-remediation-v3/artifact-manifest.json",
+        "evaluation/reports-mobile-task-distance-2026-07-14/selected-target-ready-remediation-v3/report.json",
+        "evaluation/reports-mobile-task-distance-2026-07-14/selected-target-ready-remediation-v3/report.md"
+      ],
+      "unexpectedChangedFiles": 0,
+      "forbiddenArtifactPathPatterns": [
+        ".env",
+        ".next/**",
+        "node_modules/**",
+        "**/__pycache__/**",
+        "**/*.pyc"
+      ],
+      "forbiddenArtifactPathMatches": 0,
+      "addedLineSecretMatches": 0
+    }
   },
   "artifacts": {
     "hashedArtifactCountExcludingManifest": 50,
