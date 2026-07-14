@@ -1,0 +1,6 @@
+HEAD=da0550d60b324e68ed67e87319636681aaaa13c8
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+EXIT_CODE=0

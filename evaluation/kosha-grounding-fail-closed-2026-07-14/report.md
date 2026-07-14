@@ -43,10 +43,16 @@
 
 ## Applied Integration Verification
 
-- 제품 통합 HEAD: `271d934574212ed1eee922cd8180acba8aca6496`.
+- 제품 통합 HEAD: `da0550d60b324e68ed67e87319636681aaaa13c8`.
 - 통합 커밋 매핑: `ab451d31b095576cc2854e9a3743365d24bd39e0` → `8f0688ca8096c667deeaab5d7ba9f6b120d32ca3` → `265168fa7ce034ad946adb66145592cd7a781116` → `271d934574212ed1eee922cd8180acba8aca6496`.
 - 통합 HEAD 집중 테스트: 11 files, 213 tests passed. `integrated-focused-tests.log`.
 - 통합 HEAD strict typecheck: passed. `integrated-typecheck.log`.
+- 상업 하네스 회귀 복구 커밋: `da0550d60b324e68ed67e87319636681aaaa13c8`.
+- KOSHA는 독립 위험행이나 직접근거가 아니라 검증된 기술 보조지침으로 유지한다. 관련 지침은 SIF 또는 비 KOSHA 직접행에만 결합하고, 명시적 위험태그가 충돌하는 행에는 결합하지 않는다.
+- 사용자 하네스 요약은 KOSHA를 `KOSHA 기술 보조지침`으로 분리 표시하고, 검증 지침의 실행 조치 후보는 현장 개선 이력 뒤에 배치해 개선 이력 우선순위를 보존한다.
+- 통합 상업 하네스 최초 RED는 1 file, 9 failures였다. `integrated-commercial-harness-red.log`.
+- Windows 단일 프로세스에서 12개 묶음 실행이 요약 전 종료되어 해당 시도는 통과 근거에서 제외했다. 불완전 로그는 `integrated-commercial-and-kosha-tests.log`에 보존했다. 같은 12개 파일을 단일 worker 4개 직렬 그룹으로 재실행해 총 244 tests가 모두 통과했다. `integrated-kosha-group-b.log`부터 `integrated-kosha-group-e.log`까지가 권위 로그다.
+- 회귀 복구 후 strict typecheck: passed. `integrated-commercial-typecheck.log`.
 - 이 검증은 source worktree 로그를 재사용하지 않고 `feat/phase-a-evidence-integration`에서 새로 실행했다.
 - final full suite, production build, frontend sourceIdentity/108 브라우저 행렬은 다른 제품 후보 통합이 끝난 최종 HEAD에서 실행한다.
 

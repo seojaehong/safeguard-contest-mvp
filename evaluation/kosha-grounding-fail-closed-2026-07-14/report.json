@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T12:18:45.9714509+09:00",
+  "generatedAt": "2026-07-14T13:27:29.9759737+09:00",
   "task": "bounded-kosha-grounding-fail-closed",
   "branch": "fix/kosha-grounding-fail-closed-2026-07-14",
   "launchReadiness": false,
@@ -36,6 +36,10 @@
     "unverifiedRemoteKoshaMandatoryCitation": false,
     "unverifiedRemoteKoshaRiskRow": false,
     "verifiedCurrentKoshaRole": "technical_guidance_only",
+    "verifiedCurrentKoshaIndependentRiskRow": false,
+    "verifiedCurrentKoshaRowAttachment": "relevant SIF or non-KOSHA direct row with no explicit risk-tag conflict",
+    "verifiedCurrentKoshaHarnessLabel": "KOSHA 기술 보조지침",
+    "improvementMemoryPriorityPreserved": true,
     "localIntegrityFailureAggregate": "blocked",
     "localUnavailableWithVerifiedRemote": "ready_with_local_gate_reason",
     "nonKoshaDirectEvidencePreserved": true,
@@ -107,12 +111,13 @@
     "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/integration-evidence.log"
   },
   "appliedIntegration": {
-    "productHead": "271d934574212ed1eee922cd8180acba8aca6496",
+    "productHead": "da0550d60b324e68ed67e87319636681aaaa13c8",
     "mappedCommits": [
       "ab451d31b095576cc2854e9a3743365d24bd39e0",
       "8f0688ca8096c667deeaab5d7ba9f6b120d32ca3",
       "265168fa7ce034ad946adb66145592cd7a781116",
-      "271d934574212ed1eee922cd8180acba8aca6496"
+      "271d934574212ed1eee922cd8180acba8aca6496",
+      "da0550d60b324e68ed67e87319636681aaaa13c8"
     ],
     "focusedTests": {
       "status": "passed",
@@ -123,6 +128,35 @@
     "strictTypecheck": {
       "status": "passed",
       "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-typecheck.log"
+    },
+    "commercialHarnessRegressionRepair": {
+      "commit": "da0550d60b324e68ed67e87319636681aaaa13c8",
+      "initialRed": {
+        "files": 1,
+        "failedTests": 9,
+        "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-commercial-harness-red.log"
+      },
+      "verification": {
+        "status": "passed",
+        "files": 12,
+        "tests": 244,
+        "execution": "four serial groups with maxWorkers=1 and no-file-parallelism",
+        "logs": [
+          "evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-kosha-group-b.log",
+          "evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-kosha-group-c.log",
+          "evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-kosha-group-d.log",
+          "evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-kosha-group-e.log"
+        ]
+      },
+      "discardedMonolithicAttempt": {
+        "status": "not_evidence",
+        "reason": "process ended before Vitest summary and explicit exit code",
+        "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-commercial-and-kosha-tests.log"
+      },
+      "strictTypecheck": {
+        "status": "passed",
+        "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-commercial-typecheck.log"
+      }
     },
     "fullSuiteBuildAnd108DeferredToFinalProductHead": true
   },
