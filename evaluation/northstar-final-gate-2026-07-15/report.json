@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-15T01:46:47.4941395+09:00",
+  "sourceSha": "1ef6aae442ff1e68658e82a3567b487d91a2ff2b",
+  "sourceIdentity": "64bb5f413b8c4d8817954bd769ecb629387da95914f75af1bd6c5e8f609257db",
+  "status": "pass_with_launch_boundaries",
+  "frontend": {
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "violations": 0,
+    "coverageIssues": 0,
+    "auditBuildPages": 28,
+    "auditMarkerCount": 1,
+    "browserRows": 108,
+    "browserSuccesses": 108,
+    "browserFailures": 0,
+    "browserRecoveries": 0,
+    "browserFindings": 0,
+    "normalBuildPages": 28,
+    "normalMarkerCount": 0
+  },
+  "tests": {
+    "filesPassed": 147,
+    "filesSkipped": 6,
+    "testsPassed": 1559,
+    "testsSkipped": 11,
+    "failures": 0,
+    "durationSeconds": 1044.98
+  },
+  "koshaVerifiedSubset": {
+    "sourceItems": 1040,
+    "candidates": 234,
+    "accepted": 0,
+    "rejected": 234,
+    "launchReady": false
+  },
+  "databaseChanges": false,
+  "schemaChanges": false,
+  "environmentChanges": false
+}

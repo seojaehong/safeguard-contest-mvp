@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "1ef6aae442ff1e68658e82a3567b487d91a2ff2b",
+  "sourceIdentity": "64bb5f413b8c4d8817954bd769ecb629387da95914f75af1bd6c5e8f609257db",
+  "commands": [
+    {
+      "command": "npm.cmd run audit:frontend-consistency",
+      "exitCode": 0,
+      "result": "32 pages, 23 product components, violations 0, coverage issues 0"
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "result": "strict TypeScript passed"
+    },
+    {
+      "command": "$env:SAFECLAW_FRONTEND_AUDIT='1'; npm.cmd run build",
+      "exitCode": 0,
+      "result": "28 generated pages"
+    },
+    {
+      "command": "npm.cmd run audit:frontend-bundle -- --mode audit",
+      "exitCode": 0,
+      "result": "marker count 1"
+    },
+    {
+      "command": "$env:FRONTEND_AUDIT_BASE_URL='http://127.0.0.1:3011'; node ./scripts/frontend_consistency_browser_audit.mjs",
+      "exitCode": 0,
+      "result": "108/108, failed 0, recovered 0, findings 0"
+    },
+    {
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "result": "normal build, 28 generated pages"
+    },
+    {
+      "command": "npm.cmd run audit:frontend-bundle -- --mode normal",
+      "exitCode": 0,
+      "result": "marker count 0"
+    },
+    {
+      "command": "npm.cmd test -- --maxWorkers=1 --fileParallelism=false",
+      "exitCode": 0,
+      "result": "147 files passed, 6 skipped; 1559 tests passed, 11 skipped; failures 0"
+    }
+  ]
+}

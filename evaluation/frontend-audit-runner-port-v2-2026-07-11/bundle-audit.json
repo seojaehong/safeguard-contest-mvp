@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T12:27:10.131Z",
+  "generatedAt": "2026-07-14T16:24:28.115Z",
   "mode": "audit",
   "buildDirectory": ".next",
-  "buildId": "DOYA6aRDRN17an35Lick9",
-  "sourceSha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
-  "sourceIdentity": "cca70a67ac4d51b80d502ba6ace4c731300e3c64ab0b468f26833f3bec4133ab",
-  "buildIdentity": "3263e186015ecc70fc7b6e23f338140c7a9eefe90069c3be7f59fdcfca9f2438",
-  "chunkCount": 99,
+  "buildId": "xMfO-lQ84WBQVNLMRNhpY",
+  "sourceSha": "1ef6aae442ff1e68658e82a3567b487d91a2ff2b",
+  "sourceIdentity": "64bb5f413b8c4d8817954bd769ecb629387da95914f75af1bd6c5e8f609257db",
+  "buildIdentity": "b63c0f06f8888a56ff8bc75fa1a83e2e1a4e6356b2f4b70397cb058b490e22ef",
+  "chunkCount": 100,
   "markerCount": 1,
   "markerFiles": [
-    "static/chunks/app/layout-9e650cf5d4b6fc44.js"
+    "static/chunks/app/layout-6284237563c54ed7.js"
   ],
   "status": "pass"
 }
