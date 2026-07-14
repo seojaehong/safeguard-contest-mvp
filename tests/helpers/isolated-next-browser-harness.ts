@@ -100,10 +100,19 @@ async function stopProcessTree(server: ChildProcessWithoutNullStreams | null): P
   const processId = server?.pid;
   if (!processId || server.exitCode !== null || server.signalCode !== null) return;
   if (process.platform === "win32") {
-    spawnSync("taskkill.exe", ["/PID", String(processId), "/T", "/F"], {
+    const closed = new Promise<void>((resolve) => server.once("close", () => resolve()));
+    const result = spawnSync("taskkill.exe", ["/PID", String(processId), "/T", "/F"], {
       encoding: "utf8",
       windowsHide: true
     });
+    if (result.error || result.status !== 0) {
+      const detail = `${result.stdout ?? ""}\n${result.stderr ?? ""}`.trim() || "no taskkill output";
+      throw new Error(
+        `Windows taskkill failed for browser harness PID ${processId} with status ${result.status}: ${detail}`,
+        result.error ? { cause: result.error } : undefined
+      );
+    }
+    await withTimeout(closed, 10_000, `Browser harness PID ${processId} close`);
     return;
   }
   const exited = new Promise<void>((resolve) => server.once("exit", () => resolve()));
