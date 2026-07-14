@@ -18034,6 +18034,10 @@ body:has(.safeclaw-landing) :is(
   min-width: 0;
 }
 
+.command-center-shell.workspace-theme-night .phase-a-confirmation-copy > .eyebrow {
+  color: var(--workspace-accent-hover);
+}
+
 .command-center-shell .phase-a-confirmation-copy strong {
   color: var(--workspace-ink);
   font-size: var(--text-component-title);

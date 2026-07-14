@@ -24,6 +24,7 @@ const AUTH_STORAGE_KEY = "sb-phase-a-product-fixture-auth-token";
 const EVIDENCE_DIRECTORY = process.env.PHASE_A_BROWSER_EVIDENCE_DIR?.trim()
   ? path.resolve(process.env.PHASE_A_BROWSER_EVIDENCE_DIR)
   : null;
+const BROWSER_HARNESS_MODE = process.env.PHASE_A_BROWSER_HARNESS_MODE === "prod" ? "prod" : "dev";
 
 let baseUrl = "";
 let browser: Browser | null = null;
@@ -199,6 +200,7 @@ function buildConfirmedFixture(): AskResponse {
 function buildServerConfirmedWorkpack(pending: AskResponse): AskResponse {
   const review = confirmedReview();
   const deliverables = { ...pending.deliverables };
+  const documentCoverage = pending.dbHarness?.summary.documentCoverage ?? [];
   for (const key of Object.keys(deliverables) as Array<keyof typeof deliverables>) {
     const value = deliverables[key];
     if (typeof value === "string") {
@@ -209,6 +211,40 @@ function buildServerConfirmedWorkpack(pending: AskResponse): AskResponse {
     ...pending,
     phaseAReview: review,
     deliverables,
+    qualityContract: {
+      overall: "ready",
+      summary: "공유 전 핵심 항목이 준비됐습니다.",
+      generatedAt: "2026-07-14T00:00:00.000Z",
+      items: [],
+      fallback: { hasFallback: false, modes: {} },
+      ontology: { status: "ready", matchCount: 1, verdict: "통과", detail: "안전조치 검수 통과" },
+      evidence: { status: "ready", mappedCount: 3, requiredCount: 3, detail: "증빙 매핑 완료" },
+      structured: { status: "ready", readyCount: 4, requiredCount: 4, detail: "구조화 완료" },
+      persistence: { status: "ready", requiresLogin: true, detail: "저장 준비" },
+      dbHarness: {
+        status: "ready",
+        directEvidenceCount: 1,
+        sifCaseCount: 1,
+        supportingEvidenceCount: 1,
+        missingEvidence: [],
+        documentCoverage,
+        detail: "DB 하네스 준비",
+      },
+    },
+    ontologyQa: {
+      reviewTask: "차량계 하역운반기계 작업",
+      result: {
+        reviewable: true,
+        task: "차량계 하역운반기계 작업",
+        covered: { hazards: ["접촉"], controls: ["작업구역 분리"], articles: [] },
+        missing: { hazards: [], controls: [], articles: [] },
+        coverageRate: 1,
+        verdict: "통과",
+        advisory: "검수 통과",
+      },
+      sourceDocumentKeys: ["riskAssessmentDraft", "tbmBriefing"],
+      detail: "안전조치 검수 통과",
+    },
     status: { ...pending.status, summary: "SERVER_CONFIRMED_WORKPACK" },
   }, "b");
 }
@@ -302,8 +338,16 @@ async function downloadText(page: Page, buttonName: string): Promise<string> {
   return fs.readFileSync(downloadPath, "utf8");
 }
 
-async function installSaveRoutes(page: Page): Promise<void> {
+async function installSaveRoutes(page: Page): Promise<{
+  workerPostCount: () => number;
+  workpackPostCount: () => number;
+  educationPostCount: () => number;
+}> {
+  let workerPostCount = 0;
+  let workpackPostCount = 0;
+  let educationPostCount = 0;
   await page.route("**/api/workers", async (route) => {
+    workerPostCount += 1;
     const requestBody = route.request().postDataJSON() as unknown;
     const workers = typeof requestBody === "object" && requestBody !== null && "workers" in requestBody
       ? Reflect.get(requestBody, "workers")
@@ -324,6 +368,7 @@ async function installSaveRoutes(page: Page): Promise<void> {
     });
   });
   await page.route("**/api/workpacks", async (route) => {
+    workpackPostCount += 1;
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -331,12 +376,18 @@ async function installSaveRoutes(page: Page): Promise<void> {
     });
   });
   await page.route("**/api/education-records", async (route) => {
+    educationPostCount += 1;
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({ ok: true, message: "교육 이력 저장 완료", savedCount: 1 }),
     });
   });
+  return {
+    workerPostCount: () => workerPostCount,
+    workpackPostCount: () => workpackPostCount,
+    educationPostCount: () => educationPostCount,
+  };
 }
 
 function writeEvidenceJson(fileName: string, value: unknown): void {
@@ -351,7 +402,7 @@ describe("Phase A product remediation browser contract", () => {
       slug: "phase-a-product-remediation",
       initialPath: "/workspace?theme=day",
       portSalt: 7140,
-      mode: "dev",
+      mode: BROWSER_HARNESS_MODE,
       environment: {
         NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL,
         NEXT_PUBLIC_SUPABASE_ANON_KEY: "phase-a-product-anon-key",
@@ -370,6 +421,9 @@ describe("Phase A product remediation browser contract", () => {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
     await prepareWorkspace(page, buildConfirmedFixture());
     await openEditor(page);
+    await page.evaluate(() => {
+      window.localStorage.setItem("safeclaw.pendingWorkpackSave.v1", "stale-pending-authority");
+    });
 
     const editor = page.locator(".document-textarea");
     const authorityMarker = page.locator(".phase-a-authority-marker").first();
@@ -379,6 +433,9 @@ describe("Phase A product remediation browser contract", () => {
     await expect.poll(async () => await authorityMarker.textContent()).toContain("법령 근거: 검토 필요");
     await expect.poll(async () => await editor.inputValue()).not.toContain("법령 근거: 연결됨");
     await expect.poll(async () => await editor.inputValue()).not.toContain("공식자료 확인 완료");
+    expect(await page.evaluate(() => (
+      window.localStorage.getItem("safeclaw.pendingWorkpackSave.v1")
+    ))).toBeNull();
     const connectionStatus = page.locator(".result-ribbon article", { hasText: "연결 상태" });
     await expect.poll(async () => await connectionStatus.locator("strong").textContent()).toContain("편집 후 재검수 필요");
     const pendingEditedText = await editor.inputValue();
@@ -437,9 +494,60 @@ describe("Phase A product remediation browser contract", () => {
     const pending = buildPendingFixture();
     const serverConfirmed = buildServerConfirmedWorkpack(pending);
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    await installSaveRoutes(page);
+    const saveRouteCounts = await installSaveRoutes(page);
     const confirmationBodies: Array<Record<string, unknown>> = [];
     const authorizationHeaders: string[] = [];
+    const shareSessionBodies: Array<Record<string, unknown>> = [];
+    let dispatchPostCount = 0;
+    await page.route(`**/api/workpacks/${WORKPACK_ID}/share-sessions`, async (route) => {
+      if (route.request().method() === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ ok: true, configured: true, sessions: [], confirmations: [] }),
+        });
+        return;
+      }
+      shareSessionBodies.push(route.request().postDataJSON() as Record<string, unknown>);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          configured: true,
+          shareSessionId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+          expiresAt: "2099-01-01T00:00:00.000Z",
+          message: "공유 세션 생성 완료",
+        }),
+      });
+    });
+    await page.route("**/api/dispatch-logs?**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, configured: true, logs: [], message: "전송 이력 없음" }),
+      });
+    });
+    await page.route("**/api/workflow/dispatch", async (route) => {
+      dispatchPostCount += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          configured: true,
+          providerStatus: "fixture",
+          providerCalled: false,
+          channelResults: [{
+            channel: "sms",
+            provider: "safe-fixture",
+            status: "sent",
+            message: "fixture 전송 확인",
+          }],
+          message: "fixture 전송 확인",
+        }),
+      });
+    });
     await page.route(`**/api/workpacks/${WORKPACK_ID}/phase-a-confirmation`, async (route) => {
       const body = route.request().postDataJSON() as Record<string, unknown>;
       confirmationBodies.push(body);
@@ -501,6 +609,200 @@ describe("Phase A product remediation browser contract", () => {
     const currentWorkpack = await page.evaluate(() => window.localStorage.getItem("safeclaw.currentWorkpack.v1"));
     expect(currentWorkpack).toContain("SERVER_CONFIRMED_WORKPACK");
     expect(currentWorkpack).toContain(CONFIRMATION_ID);
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    const restoredShareButton = page.getByLabel("작업공간 메뉴").getByRole("button", { name: /공유/ });
+    await expect.poll(async () => await restoredShareButton.isEnabled()).toBe(true);
+    await restoredShareButton.click();
+    const sharePanel = page.locator("#dispatch");
+    await sharePanel.waitFor({ state: "visible" });
+    await sharePanel.getByRole("button", { name: /메일/ }).click();
+    await sharePanel.getByRole("button", { name: "저장 후 전송하기" }).click();
+    const dispatchDialog = page.getByRole("dialog", { name: "현장 전파 전 확인" });
+    await dispatchDialog.getByRole("button", { name: "저장 후 전송" }).click();
+    await expect.poll(() => dispatchPostCount).toBe(1);
+
+    expect(saveRouteCounts.workpackPostCount()).toBe(1);
+    expect(saveRouteCounts.workerPostCount()).toBe(2);
+    expect(saveRouteCounts.educationPostCount()).toBe(1);
+    expect(shareSessionBodies).toHaveLength(1);
+    expect(shareSessionBodies[0]).toMatchObject({
+      recipients: [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002",
+      ],
+    });
+    await page.close();
+  }, 120_000);
+
+  it("retries only W1 downstream storage after education fails", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    let workpackPostCount = 0;
+    let educationPostCount = 0;
+    let shareSessionPostCount = 0;
+    let dispatchPostCount = 0;
+
+    await page.route("**/api/workers", async (route) => {
+      const requestBody = route.request().postDataJSON() as unknown;
+      const workers = typeof requestBody === "object" && requestBody !== null && "workers" in requestBody
+        ? Reflect.get(requestBody, "workers")
+        : [];
+      const workerMap: Record<string, string> = {};
+      if (Array.isArray(workers)) {
+        workers.forEach((worker, index) => {
+          if (typeof worker !== "object" || worker === null) return;
+          const id = Reflect.get(worker, "id");
+          if (typeof id !== "string") return;
+          workerMap[id] = `00000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
+        });
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, message: "작업자 저장 완료", workerMap }),
+      });
+    });
+    await page.route("**/api/workpacks", async (route) => {
+      workpackPostCount += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, message: "문서팩 저장 완료", workpackId: WORKPACK_ID }),
+      });
+    });
+    await page.route("**/api/education-records", async (route) => {
+      educationPostCount += 1;
+      await route.fulfill({
+        status: educationPostCount === 1 ? 500 : 200,
+        contentType: "application/json",
+        body: JSON.stringify(educationPostCount === 1
+          ? { ok: false, message: "교육 확인 이력 저장에 실패했습니다." }
+          : { ok: true, message: "교육 이력 저장 완료", savedCount: 2 }),
+      });
+    });
+    await page.route("**/api/workpacks/*/share-sessions", async (route) => {
+      if (route.request().method() === "POST") shareSessionPostCount += 1;
+      await route.abort();
+    });
+    await page.route("**/api/workflow/dispatch", async (route) => {
+      dispatchPostCount += 1;
+      await route.abort();
+    });
+
+    await prepareWorkspace(page, buildPendingFixture(), { authenticated: true });
+    await openEditor(page);
+    const confirmation = page.getByLabel("Phase A 근거 확인");
+    await confirmation.getByRole("button", { name: "현재 작업팩 저장" }).click();
+    await expect.poll(async () => await confirmation.textContent()).toContain("교육 확인 이력 저장에 실패했습니다");
+    const pendingAfterFailure = await page.evaluate(() => (
+      window.localStorage.getItem("safeclaw.pendingWorkpackSave.v1")
+    ));
+    expect(workpackPostCount).toBe(1);
+    expect(educationPostCount).toBe(1);
+    expect(shareSessionPostCount).toBe(0);
+    expect(dispatchPostCount).toBe(0);
+
+    await page.reload({ waitUntil: "networkidle" });
+    await openEditor(page);
+    const reloadedConfirmation = page.getByLabel("Phase A 근거 확인");
+    await reloadedConfirmation.getByRole("button", { name: "현재 작업팩 저장" }).click();
+    await expect.poll(async () => (
+      await reloadedConfirmation.getByRole("button", { name: "Phase A 확인 저장" }).isEnabled()
+    )).toBe(true);
+
+    expect.soft(workpackPostCount).toBe(1);
+    expect.soft(educationPostCount).toBe(2);
+    expect.soft(pendingAfterFailure ?? "").toContain(WORKPACK_ID);
+    expect.soft(pendingAfterFailure ?? "").toContain("worker-supervisor-1");
+    expect.soft(shareSessionPostCount).toBe(0);
+    expect.soft(dispatchPostCount).toBe(0);
+    expect(await page.evaluate(() => (
+      window.localStorage.getItem("safeclaw.pendingWorkpackSave.v1")
+    ))).toBeNull();
+    await page.close();
+  }, 120_000);
+
+  it.each([
+    { caseName: "empty worker selection", emptySelection: true },
+    { caseName: "missing server worker mapping", emptySelection: false },
+  ])("blocks workpack insertion for $caseName", async ({ emptySelection }) => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    let workerPostCount = 0;
+    let workpackPostCount = 0;
+    let educationPostCount = 0;
+    let shareSessionPostCount = 0;
+    let dispatchPostCount = 0;
+
+    await page.route("**/api/workers", async (route) => {
+      workerPostCount += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          message: "일부 작업자 저장 완료",
+          workerMap: {
+            "worker-supervisor-1": "00000000-0000-4000-8000-000000000001",
+          },
+        }),
+      });
+    });
+    await page.route("**/api/workpacks", async (route) => {
+      workpackPostCount += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, message: "문서팩 저장 완료", workpackId: WORKPACK_ID }),
+      });
+    });
+    await page.route("**/api/education-records", async (route) => {
+      educationPostCount += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, message: "교육 이력 저장 완료", savedCount: 2 }),
+      });
+    });
+    await page.route("**/api/workpacks/*/share-sessions", async (route) => {
+      if (route.request().method() === "POST") shareSessionPostCount += 1;
+      await route.abort();
+    });
+    await page.route("**/api/workflow/dispatch", async (route) => {
+      dispatchPostCount += 1;
+      await route.abort();
+    });
+
+    await prepareWorkspace(page, buildPendingFixture(), { authenticated: true });
+    await openEditor(page);
+    if (emptySelection) {
+      await page.locator("details.editor-operations-disclosure").evaluate((element) => {
+        if (!(element instanceof HTMLDetailsElement)) throw new Error("expected operations disclosure");
+        element.open = true;
+      });
+      const workerCheckboxes = page.getByRole("checkbox", { name: /전파 대상 선택/ });
+      const count = await workerCheckboxes.count();
+      for (let index = 0; index < count; index += 1) {
+        const checkbox = workerCheckboxes.nth(index);
+        if (await checkbox.isChecked()) await checkbox.click();
+      }
+    }
+
+    const confirmation = page.getByLabel("Phase A 근거 확인");
+    await confirmation.getByRole("button", { name: "현재 작업팩 저장" }).click();
+    await expect.poll(async () => await confirmation.textContent()).toContain(
+      emptySelection ? "작업자를 한 명 이상 선택" : "서버 저장 ID를 찾지 못했습니다",
+    );
+
+    expect.soft(workerPostCount).toBe(emptySelection ? 0 : 1);
+    expect.soft(workpackPostCount).toBe(0);
+    expect.soft(educationPostCount).toBe(0);
+    expect.soft(shareSessionPostCount).toBe(0);
+    expect.soft(dispatchPostCount).toBe(0);
+    expect(await page.evaluate(() => (
+      window.localStorage.getItem("safeclaw.pendingWorkpackSave.v1")
+    ))).toBeNull();
     await page.close();
   }, 120_000);
 
@@ -540,6 +842,108 @@ describe("Phase A product remediation browser contract", () => {
   }, 120_000);
 
   it.each([
+    { failureMode: "delayed" as const },
+    { failureMode: "http-500" as const },
+    { failureMode: "network-abort" as const },
+  ])("handles $failureMode confirmation responses without local authority", async ({ failureMode }) => {
+    if (!browser) throw new Error("Browser was not started");
+    const pending = buildPendingFixture();
+    const serverConfirmed = buildServerConfirmedWorkpack(pending);
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const consoleErrors: string[] = [];
+    const pageErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+    page.on("pageerror", (error) => pageErrors.push(error.stack ?? error.message));
+    await installSaveRoutes(page);
+
+    let releaseDelayedResponse = (): void => {};
+    const delayedResponseGate = new Promise<void>((resolve) => {
+      releaseDelayedResponse = resolve;
+    });
+    await page.route(`**/api/workpacks/${WORKPACK_ID}/phase-a-confirmation`, async (route) => {
+      if (failureMode === "network-abort") {
+        await route.abort("failed");
+        return;
+      }
+      if (failureMode === "http-500") {
+        await route.fulfill({
+          status: 500,
+          contentType: "application/json",
+          body: JSON.stringify({ ok: false, message: "서버 내부 오류" }),
+        });
+        return;
+      }
+      await delayedResponseGate;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          confirmationId: CONFIRMATION_ID,
+          phaseAReview: serverConfirmed.phaseAReview,
+          workpack: serverConfirmed,
+          message: "Phase A 확인 완료",
+        }),
+      });
+    });
+
+    await prepareWorkspace(page, pending, { authenticated: true });
+    await openEditor(page);
+    const confirmation = page.getByLabel("Phase A 근거 확인");
+    await confirmation.getByRole("button", { name: "현재 작업팩 저장" }).click();
+    const confirmButton = confirmation.getByRole("button", { name: "Phase A 확인 저장" });
+    await expect.poll(async () => await confirmButton.isEnabled()).toBe(true);
+    await confirmButton.click();
+
+    let loadingDisabled = false;
+    let retryEnabled = false;
+    if (failureMode === "delayed") {
+      const loadingButton = confirmation.getByRole("button", { name: "서버 확인 중" });
+      await loadingButton.waitFor({ state: "visible" });
+      loadingDisabled = await loadingButton.isDisabled();
+      expect(loadingDisabled).toBe(true);
+      expect(await confirmation.textContent()).toContain("서버 확인 중");
+      expect(await page.evaluate((confirmationId) => (
+        window.localStorage.getItem("safeclaw.currentWorkpack.v1")?.includes(confirmationId) ? 1 : 0
+      ), CONFIRMATION_ID)).toBe(0);
+      releaseDelayedResponse();
+      await expect.poll(async () => await confirmation.textContent()).toContain("확인 완료");
+    } else {
+      await expect.poll(async () => await confirmation.textContent()).toContain("문제 발생");
+      const retryButton = confirmation.getByRole("button", { name: "Phase A 확인 다시 시도" });
+      retryEnabled = await retryButton.isEnabled();
+      expect(retryEnabled).toBe(true);
+      expect(await confirmation.textContent()).toContain(
+        failureMode === "http-500" ? "잠시 후 다시 시도" : "연결을 확인한 뒤 다시 시도",
+      );
+      expect(await page.evaluate((confirmationId) => (
+        window.localStorage.getItem("safeclaw.currentWorkpack.v1")?.includes(confirmationId) ? 1 : 0
+      ), CONFIRMATION_ID)).toBe(0);
+    }
+
+    const applicationConsoleErrors = consoleErrors.filter((message) => (
+      !/Failed to load resource|net::ERR_FAILED/i.test(message)
+    ));
+    expect(pageErrors).toEqual([]);
+    expect(applicationConsoleErrors).toEqual([]);
+    if (EVIDENCE_DIRECTORY) {
+      writeEvidenceJson(`phase-a-confirmation-${failureMode}-metrics.json`, {
+        harnessMode: harness?.mode ?? "dev",
+        failureMode,
+        loadingDisabled,
+        retryEnabled,
+        localConfirmationCount: 0,
+        consoleErrors,
+        applicationConsoleErrors,
+        pageErrors,
+      });
+    }
+    await page.close();
+  }, 120_000);
+
+  it.each([
     { theme: "day" as const, width: 1440, height: 900, label: "desktop" as const },
     { theme: "night" as const, width: 1440, height: 900, label: "desktop" as const },
     { theme: "day" as const, width: 390, height: 844, label: "mobile" as const },
@@ -547,6 +951,12 @@ describe("Phase A product remediation browser contract", () => {
   ])("keeps the $theme $label confirmation action accessible without overflow or overlap", async ({ theme, width, height, label }) => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width, height } });
+    const consoleErrors: string[] = [];
+    const pageErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+    page.on("pageerror", (error) => pageErrors.push(error.stack ?? error.message));
     await installSaveRoutes(page);
     const fixture = buildPendingFixture();
     await prepareWorkspace(page, fixture, { theme, authenticated: true });
@@ -559,8 +969,37 @@ describe("Phase A product remediation browser contract", () => {
     const metrics = await page.evaluate(() => {
       const panel = document.querySelector<HTMLElement>("[aria-label='Phase A 근거 확인']");
       const copy = panel?.querySelector<HTMLElement>(".phase-a-confirmation-copy");
+      const eyebrow = copy?.querySelector<HTMLElement>(".eyebrow");
       const actions = panel?.querySelector<HTMLElement>(".phase-a-confirmation-actions");
-      if (!panel || !copy || !actions) throw new Error("confirmation geometry targets missing");
+      if (!panel || !copy || !eyebrow || !actions) throw new Error("confirmation geometry targets missing");
+      const parseRgb = (value: string): [number, number, number] => {
+        const match = value.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (!match) throw new Error(`unsupported computed color: ${value}`);
+        return [Number(match[1]), Number(match[2]), Number(match[3])];
+      };
+      const relativeLuminance = ([red, green, blue]: [number, number, number]): number => {
+        const channels = [red, green, blue].map((channel) => {
+          const normalized = channel / 255;
+          return normalized <= 0.04045
+            ? normalized / 12.92
+            : ((normalized + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+      };
+      const contrastRatio = (foreground: string, background: string): number => {
+        const foregroundLuminance = relativeLuminance(parseRgb(foreground));
+        const backgroundLuminance = relativeLuminance(parseRgb(background));
+        const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+        const darker = Math.min(foregroundLuminance, backgroundLuminance);
+        return Number(((lighter + 0.05) / (darker + 0.05)).toFixed(2));
+      };
+      const collectShadowText = (root: ParentNode): string => {
+        let text = root instanceof Node ? root.textContent ?? "" : "";
+        for (const element of Array.from(root.querySelectorAll<HTMLElement>("*"))) {
+          if (element.shadowRoot) text += ` ${collectShadowText(element.shadowRoot)}`;
+        }
+        return text;
+      };
       const copyRect = copy.getBoundingClientRect();
       const actionRect = actions.getBoundingClientRect();
       const overlaps = !(
@@ -572,6 +1011,11 @@ describe("Phase A product remediation browser contract", () => {
       const controls = Array.from(panel.querySelectorAll<HTMLElement>("button"));
       const clipped = Array.from(panel.querySelectorAll<HTMLElement>("strong, p, button"))
         .filter((element) => element.scrollWidth > element.clientWidth + 1).length;
+      const eyebrowColor = getComputedStyle(eyebrow).color;
+      const panelBackgroundColor = getComputedStyle(panel).backgroundColor;
+      const nextIssueBadgeCount = Array.from(document.querySelectorAll<HTMLElement>("nextjs-portal"))
+        .filter((portal) => /\b1\s+Issues?\b/i.test(collectShadowText(portal.shadowRoot ?? portal)))
+        .length;
       return {
         horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
         panelWithinViewport: panel.getBoundingClientRect().right <= window.innerWidth + 1,
@@ -579,6 +1023,10 @@ describe("Phase A product remediation browser contract", () => {
         controlHeights: controls.map((control) => Math.round(control.getBoundingClientRect().height)),
         clippedTextCount: clipped,
         primaryActionCount: panel.querySelectorAll("button.button:not(.secondary)").length,
+        eyebrowColor,
+        panelBackgroundColor,
+        eyebrowContrast: contrastRatio(eyebrowColor, panelBackgroundColor),
+        nextIssueBadgeCount,
       };
     });
 
@@ -588,6 +1036,11 @@ describe("Phase A product remediation browser contract", () => {
     expect(metrics.controlHeights.every((height) => height >= 44)).toBe(true);
     expect(metrics.clippedTextCount).toBe(0);
     expect(metrics.primaryActionCount).toBe(1);
+    expect(metrics.eyebrowColor).toBe(theme === "night" ? "rgb(139, 141, 252)" : "rgb(20, 23, 26)");
+    expect(metrics.eyebrowContrast).toBeGreaterThanOrEqual(4.5);
+    expect(metrics.nextIssueBadgeCount).toBe(0);
+    expect(pageErrors).toEqual([]);
+    expect(consoleErrors).toEqual([]);
 
     if (EVIDENCE_DIRECTORY) {
       fs.mkdirSync(EVIDENCE_DIRECTORY, { recursive: true });
@@ -599,6 +1052,8 @@ describe("Phase A product remediation browser contract", () => {
         theme,
         viewport: { width, height },
         generationFingerprint: buildWorkpackGenerationFingerprint(fixture),
+        consoleErrors,
+        pageErrors,
         ...metrics,
       });
     }

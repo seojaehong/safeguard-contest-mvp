@@ -4,6 +4,7 @@ import type { AskResponse } from "@/lib/types";
 import { assessWorkpackReadiness, type WorkpackReadiness } from "@/lib/workpack-readiness";
 import { buildReopenData, type ReopenWorkpackInput } from "@/lib/workpack-store";
 import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
+import { assessExactWorkpackConfirmation } from "@/lib/workpack-authority";
 import {
   buildServerShareRecipients,
   parseShareSessionRecipients,
@@ -16,7 +17,10 @@ export type StoredWorkpackShareAuthority = {
   readiness: WorkpackReadiness;
 };
 
-export function assessStoredWorkpackShareAuthority(input: ReopenWorkpackInput): StoredWorkpackShareAuthority {
+export function assessStoredWorkpackShareAuthority(
+  input: ReopenWorkpackInput,
+  expectedWorkpackId: string,
+): StoredWorkpackShareAuthority {
   const reopened = buildReopenData(input);
   if (!reopened.data) {
     return {
@@ -55,6 +59,22 @@ export function assessStoredWorkpackShareAuthority(input: ReopenWorkpackInput): 
         status: "blocked",
         summary: "공유 전 보완 필요",
         reasons: [...readiness.reasons, "생성 근거 서명 검증 필요"]
+      }
+    };
+  }
+
+  const exactConfirmation = assessExactWorkpackConfirmation(
+    reopened.data.phaseAReview,
+    expectedWorkpackId,
+  );
+  if (!exactConfirmation.ok) {
+    return {
+      workpack: reopened.data,
+      readiness: {
+        canShare: false,
+        status: "blocked",
+        summary: "공유 전 보완 필요",
+        reasons: [...new Set([...readiness.reasons, exactConfirmation.reason])]
       }
     };
   }
@@ -240,7 +260,7 @@ export async function loadOwnedWorkpackOperationContext(
         deliverables: workpack.deliverables,
         evidenceSummary: workpack.evidence_summary,
         status: workpack.status
-      })
+      }, workpack.id)
     }
   };
 }

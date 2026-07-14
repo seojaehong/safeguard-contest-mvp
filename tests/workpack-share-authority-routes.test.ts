@@ -96,6 +96,25 @@ function ownedContext() {
   };
 }
 
+function mismatchedRowContext() {
+  const owned = ownedContext();
+  return {
+    ...owned,
+    context: {
+      ...owned.context,
+      shareAuthority: {
+        workpack: serverWorkpack,
+        readiness: {
+          canShare: false,
+          status: "blocked",
+          summary: "공유 전 보완 필요",
+          reasons: ["사람 확인이 현재 서버 workpack row와 일치하지 않음"]
+        }
+      }
+    }
+  };
+}
+
 function activeSession() {
   return {
     ok: true,
@@ -206,6 +225,21 @@ describe("share session route authority", () => {
       workerIds: [WORKER_ID]
     }, 1, Date.now())).toEqual({ reusable: true });
   });
+
+  it("does not insert a share session when central exact-row authority is blocked", async () => {
+    const fake = makeShareInsertClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue(mismatchedRowContext());
+    const { POST } = await import("@/app/api/workpacks/[id]/share-sessions/route");
+
+    const response = await POST(jsonRequest(`/api/workpacks/${WORKPACK_ID}/share-sessions`, {
+      recipients: [WORKER_ID]
+    }), { params: Promise.resolve({ id: WORKPACK_ID }) });
+
+    expect(response.status).toBe(409);
+    expect(fake.inserted()).toBeNull();
+    expect(mocks.loadServerShareRecipients).not.toHaveBeenCalled();
+  });
 });
 
 describe("workflow dispatch route authority", () => {
@@ -250,6 +284,23 @@ describe("workflow dispatch route authority", () => {
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       providerCalled: false
     });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("does not call a provider when central exact-row authority is blocked", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue(mismatchedRowContext());
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["email"]
+    }));
+
+    expect(response.status).toBe(409);
+    expect(mocks.loadActiveOwnedShareSession).not.toHaveBeenCalled();
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 

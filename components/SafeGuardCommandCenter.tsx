@@ -54,6 +54,7 @@ import {
 } from "@/lib/workspace-pages";
 import { buildGenerationProgressState } from "@/lib/workspace-generation-progress";
 import { buildPhaseAReviewUiState } from "@/lib/phase-a-review";
+import { assessExactWorkpackConfirmation } from "@/lib/workpack-authority";
 import {
   applyWorkpackDeliverablesChange,
   assessWorkpackReadiness,
@@ -1079,20 +1080,28 @@ export function SafeGuardCommandCenter({
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
   const [improvementSaveState, setImprovementSaveState] = useState<ImprovementSaveState>("idle");
   const [activeWorkspaceTheme, setActiveWorkspaceTheme] = useState<WorkspaceTheme>(workspaceTheme);
-  const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">(() => {
-    if (typeof window === "undefined") return "enhanced";
-    const stored = window.localStorage.getItem("safeclaw.aiMode");
-    if (stored === "template" || stored === "enhanced" || stored === "full") return stored;
-    return "enhanced";
-  });
+  const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">("enhanced");
+  const [aiModeStorageReady, setAiModeStorageReady] = useState(false);
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    try {
+      const stored = window.localStorage.getItem("safeclaw.aiMode");
+      if (stored === "template" || stored === "enhanced" || stored === "full") {
+        setAiMode(stored);
+      }
+    } catch (error) {
+      console.warn("safeclaw ai mode restore failed", error);
+    } finally {
+      setAiModeStorageReady(true);
+    }
+  }, []);
+  useEffect(() => {
+    if (!aiModeStorageReady) return;
     try {
       window.localStorage.setItem("safeclaw.aiMode", aiMode);
-    } catch {
-      /* ignore quota */
+    } catch (error) {
+      console.warn("safeclaw ai mode persistence failed", error);
     }
-  }, [aiMode]);
+  }, [aiMode, aiModeStorageReady]);
 
   useEffect(() => () => {
     if (beforePhoto) URL.revokeObjectURL(beforePhoto.url);
@@ -1682,6 +1691,12 @@ export function SafeGuardCommandCenter({
     setQuestion(stored.data.question);
     setData(stored.data);
     setGenerationFingerprint(stored.generationFingerprint);
+    const restoredConfirmation = stored.data.phaseAReview?.humanConfirmation;
+    const restoredWorkpackId = restoredConfirmation?.status === "confirmed"
+      && assessExactWorkpackConfirmation(stored.data.phaseAReview, restoredConfirmation.workpackId).ok
+      ? restoredConfirmation.workpackId
+      : null;
+    setSavedWorkpackId(restoredWorkpackId);
     setRequiresRevalidation(false);
     setState("ready");
     setDocumentSurfaceMode("review");
@@ -2368,6 +2383,7 @@ export function SafeGuardCommandCenter({
                 editorFocusToken={editorFocusToken}
                 requestedDocumentKey={requestedDocumentKey}
                 readiness={workpackReadiness || undefined}
+                initialWorkpackId={savedWorkpackId}
                 onDeliverablesChange={handleWorkpackDeliverablesChange}
                 onWorkpackStateChange={applyServerConfirmedWorkpack}
                 surface="editor"
@@ -2399,6 +2415,7 @@ export function SafeGuardCommandCenter({
                   data={data}
                   generationFingerprint={generationFingerprint || undefined}
                   readiness={workpackReadiness || undefined}
+                  initialWorkpackId={savedWorkpackId}
                   onDeliverablesChange={handleWorkpackDeliverablesChange}
                   onWorkpackStateChange={applyServerConfirmedWorkpack}
                   surface="share"

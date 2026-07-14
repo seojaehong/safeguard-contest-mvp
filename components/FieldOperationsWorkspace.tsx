@@ -41,6 +41,15 @@ import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/w
 import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
 import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
 import {
+  assessExactWorkpackConfirmation,
+  createPendingWorkpackSaveBinding,
+  parsePendingWorkpackSaveBinding,
+  pendingWorkpackSaveMatches,
+  PENDING_WORKPACK_SAVE_STORAGE_KEY,
+  type PendingWorkpackSaveBinding,
+  type WorkpackSaveLogicalContext,
+} from "@/lib/workpack-authority";
+import {
   buildDefaultWorkers,
   buildEducationRecordDrafts,
   buildRecipientSuggestions,
@@ -964,6 +973,7 @@ export function FieldOperationsWorkspace({
   editorFocusToken = 0,
   requestedDocumentKey,
   readiness,
+  initialWorkpackId = null,
   onDeliverablesChange,
   onWorkpackStateChange,
   surface = "full"
@@ -973,6 +983,7 @@ export function FieldOperationsWorkspace({
   editorFocusToken?: number;
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
+  initialWorkpackId?: string | null;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
   onWorkpackStateChange?: (data: AskResponse) => void;
   surface?: "full" | "share" | "editor";
@@ -1004,6 +1015,11 @@ export function FieldOperationsWorkspace({
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(initialWorkerState.selectedWorkerIds);
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
   const [savedWorkerMap, setSavedWorkerMap] = useState<Record<string, string>>({});
+  const [pendingWorkpackSave, setPendingWorkpackSave] = useState<PendingWorkpackSaveBinding | null>(() => (
+    typeof window === "undefined"
+      ? null
+      : parsePendingWorkpackSaveBinding(window.localStorage.getItem(PENDING_WORKPACK_SAVE_STORAGE_KEY))
+  ));
   const [phaseAConfirmationBinding, setPhaseAConfirmationBinding] = useState<PhaseAConfirmationBinding | null>(null);
   const [phaseAConfirmationStatus, setPhaseAConfirmationStatus] = useState<PhaseAConfirmationStatus>("idle");
   const [phaseAConfirmationMessage, setPhaseAConfirmationMessage] = useState("");
@@ -1107,6 +1123,11 @@ export function FieldOperationsWorkspace({
   const phaseAReadyForConfirmation = Boolean(
     parsedPhaseAReview && isPhaseAReviewReadyForConfirmation(parsedPhaseAReview)
   );
+  const restoredConfirmedWorkpackId = initialWorkpackId
+    && assessExactWorkpackConfirmation(parsedPhaseAReview ?? undefined, initialWorkpackId).ok
+    ? initialWorkpackId
+    : null;
+  const effectiveSavedWorkpackId = savedWorkpackId ?? restoredConfirmedWorkpackId;
   const confirmationBindingIsCurrent = Boolean(
     phaseAConfirmationBinding &&
     savedWorkpackId === phaseAConfirmationBinding.workpackId &&
@@ -1137,14 +1158,15 @@ export function FieldOperationsWorkspace({
     [selectedWorkers]
   );
   const savedWorkerIds = useMemo(() => {
-    if (!savedWorkpackId || !selectedWorkerIds.length) return [];
+    if (!effectiveSavedWorkpackId || !selectedWorkerIds.length) return [];
+    if (selectedWorkerIds.some((workerId) => !savedWorkerMap[workerId])) return [];
     try {
       return resolveSavedWorkerIds(savedWorkerMap, selectedWorkerIds);
     } catch (error) {
-      console.error("saved worker UUID resolution failed", error);
+      console.warn("saved worker UUID resolution failed", error);
       return [];
     }
-  }, [savedWorkerMap, savedWorkpackId, selectedWorkerIds]);
+  }, [effectiveSavedWorkpackId, savedWorkerMap, selectedWorkerIds]);
   const workerSnapshot = useMemo<CurrentWorkerSnapshot>(() => ({
     savedAt: new Date().toISOString(),
     source: "workspace",
@@ -1202,6 +1224,7 @@ export function FieldOperationsWorkspace({
     if (change.requiresRevalidation) {
       setSavedWorkpackId(null);
       setSavedWorkerMap({});
+      clearPendingWorkpackSave();
       setPhaseAConfirmationBinding(null);
       setPhaseAConfirmationRetryId(null);
       setPhaseAConfirmationStatus("idle");
@@ -1254,15 +1277,64 @@ export function FieldOperationsWorkspace({
     return await response.json() as TResponse;
   }
 
-  function setStorageFailure(message: string) {
+  function persistPendingWorkpackSave(binding: PendingWorkpackSaveBinding | null) {
+    setPendingWorkpackSave(binding);
+    if (typeof window === "undefined") return;
+    try {
+      if (binding) {
+        window.localStorage.setItem(PENDING_WORKPACK_SAVE_STORAGE_KEY, JSON.stringify(binding));
+      } else {
+        window.localStorage.removeItem(PENDING_WORKPACK_SAVE_STORAGE_KEY);
+      }
+    } catch (error) {
+      console.warn("pending workpack save binding persistence failed", error);
+    }
+  }
+
+  function clearPendingWorkpackSave() {
+    persistPendingWorkpackSave(null);
+  }
+
+  function buildSaveLogicalContext(): WorkpackSaveLogicalContext | null {
+    if (!session || !generationFingerprint) return null;
+    return {
+      generationFingerprint,
+      sessionUserId: session.user.id,
+      workers,
+      selectedWorkerIds,
+    };
+  }
+
+  async function resolveCurrentWorkerMap(): Promise<SaveResponse> {
+    const workerResponse = await postJson<SaveResponse>("/api/workers", {
+      scenario: workspaceData.scenario,
+      workers,
+    });
+    if (!workerResponse.ok) return workerResponse;
+    const workerMap = workerResponse.workerMap || {};
+    try {
+      resolveSavedWorkerIds(workerMap, selectedWorkerIds);
+    } catch (error) {
+      console.warn("server worker mapping validation failed", error);
+      return {
+        ok: false,
+        configured: workerResponse.configured,
+        message: error instanceof Error ? error.message : "선택한 작업자의 서버 저장 ID를 확인하지 못했습니다.",
+        workerMap,
+      };
+    }
+    return { ...workerResponse, workerMap };
+  }
+
+  function setStorageFailure(message: string, partial = pendingWorkpackSave) {
     const snapshot: WorkspaceSaveSnapshot = {
       ok: false,
       label: "저장 실패",
       message,
-      workpackId: savedWorkpackId,
+      workpackId: partial?.workpackId ?? effectiveSavedWorkpackId,
       savedAt: null,
       savedCount: 0,
-      workerMap: savedWorkerMap
+      workerMap: partial?.workerMap ?? savedWorkerMap
     };
     setStorageSnapshot(snapshot);
     return snapshot;
@@ -1274,7 +1346,7 @@ export function FieldOperationsWorkspace({
         ok: false,
         label: "관리자 로그인 필요",
         message: "관리자 로그인 후 문서팩, 작업자, 교육 확인, 전파 이력을 저장할 수 있습니다.",
-        workpackId: savedWorkpackId,
+        workpackId: effectiveSavedWorkpackId,
         savedAt: null,
         savedCount: 0,
         workerMap: savedWorkerMap
@@ -1283,46 +1355,76 @@ export function FieldOperationsWorkspace({
       return snapshot;
     }
 
-    try {
-      const workerResponse = await postJson<SaveResponse>("/api/workers", {
-        scenario: workspaceData.scenario,
-        workers
-      });
-      if (!workerResponse.ok) return setStorageFailure(workerResponse.message);
+    if (!selectedWorkerIds.length) {
+      return setStorageFailure("저장할 작업자를 한 명 이상 선택해 주세요.", null);
+    }
+    const logicalContext = buildSaveLogicalContext();
+    if (!logicalContext) {
+      return setStorageFailure("현재 생성본의 저장 바인딩을 확인할 수 없습니다. 문서를 다시 생성해 주세요.", null);
+    }
 
-      const workpackResponse = await postJson<SaveResponse>("/api/workpacks", {
-        data: workspaceData,
-        question: workspaceData.question,
-        scenario: workspaceData.scenario,
-        deliverables: workspaceData.deliverables,
-        evidenceSummary: buildEvidenceSummary(workspaceData),
-        workerSummary: {
-          ...summarizeWorkers(selectedWorkers),
-          selectedWorkers: buildWorkerDispatchTargets(selectedWorkers)
-        },
-        status: workspaceData.status
-      });
-      if (!workpackResponse.ok || !workpackResponse.workpackId) {
-        return setStorageFailure(workpackResponse.message);
+    try {
+      let partial = pendingWorkpackSave;
+      if (!partial && typeof window !== "undefined") {
+        partial = parsePendingWorkpackSaveBinding(
+          window.localStorage.getItem(PENDING_WORKPACK_SAVE_STORAGE_KEY),
+        );
+      }
+      if (partial && !pendingWorkpackSaveMatches(partial, logicalContext)) {
+        clearPendingWorkpackSave();
+        partial = null;
       }
 
-      const workerMap = workerResponse.workerMap || {};
-      resolveSavedWorkerIds(workerMap, selectedWorkerIds);
+      let workpackMessage = "기존 미완료 작업팩을 사용합니다.";
+      let workerMessage = "기존 작업자 매핑을 사용합니다.";
+      if (!partial) {
+        const workerResponse = await resolveCurrentWorkerMap();
+        if (!workerResponse.ok) return setStorageFailure(workerResponse.message, null);
+        const workerMap = workerResponse.workerMap || {};
+        workerMessage = workerResponse.message;
+
+        const workpackResponse = await postJson<SaveResponse>("/api/workpacks", {
+          data: workspaceData,
+          question: workspaceData.question,
+          scenario: workspaceData.scenario,
+          deliverables: workspaceData.deliverables,
+          evidenceSummary: buildEvidenceSummary(workspaceData),
+          workerSummary: {
+            ...summarizeWorkers(selectedWorkers),
+            selectedWorkers: buildWorkerDispatchTargets(selectedWorkers)
+          },
+          status: workspaceData.status
+        });
+        if (!workpackResponse.ok || !workpackResponse.workpackId) {
+          return setStorageFailure(workpackResponse.message, null);
+        }
+        workpackMessage = workpackResponse.message;
+        partial = createPendingWorkpackSaveBinding({
+          context: logicalContext,
+          workpackId: workpackResponse.workpackId,
+          workerMap,
+        });
+        persistPendingWorkpackSave(partial);
+      }
+
+      const workerMap = partial.workerMap;
+      const workpackId = partial.workpackId;
 
       const selectedEducationRecords = educationRecords.filter((record) => (
         selectedWorkers.some((worker) => worker.id === record.workerId)
       ));
       const educationResponse = await postJson<SaveResponse>("/api/education-records", {
         scenario: workspaceData.scenario,
-        workpackId: workpackResponse.workpackId,
+        workpackId,
         workerMap,
         workers,
         records: selectedEducationRecords
       });
-      if (!educationResponse.ok) return setStorageFailure(educationResponse.message);
+      if (!educationResponse.ok) return setStorageFailure(educationResponse.message, partial);
 
-      setSavedWorkpackId(workpackResponse.workpackId);
+      setSavedWorkpackId(workpackId);
       setSavedWorkerMap(workerMap);
+      clearPendingWorkpackSave();
       if (
         phaseAReadyForConfirmation &&
         phaseAPlanBinding &&
@@ -1331,7 +1433,7 @@ export function FieldOperationsWorkspace({
         generationEvidenceBinding
       ) {
         setPhaseAConfirmationBinding({
-          workpackId: workpackResponse.workpackId,
+          workpackId,
           generationFingerprint,
           generationEvidenceVersion: generationEvidenceBinding.version,
           generationEvidenceGeneratedAt: generationEvidenceBinding.generatedAt,
@@ -1351,8 +1453,8 @@ export function FieldOperationsWorkspace({
       const snapshot: WorkspaceSaveSnapshot = {
         ok: true,
         label: "관리자 이력 저장 완료",
-        message: `${workpackResponse.message} ${workerResponse.message} ${educationResponse.message}`,
-        workpackId: workpackResponse.workpackId,
+        message: `${workpackMessage} ${workerMessage} ${educationResponse.message}`,
+        workpackId,
         savedAt: new Date().toISOString(),
         savedCount,
         workerMap
@@ -1366,11 +1468,29 @@ export function FieldOperationsWorkspace({
   }
 
   async function ensureWorkpackSaved() {
-    if (savedWorkpackId) {
+    if (effectiveSavedWorkpackId && selectedWorkerIds.every((workerId) => Boolean(savedWorkerMap[workerId]))) {
       return {
-        workpackId: savedWorkpackId,
+        workpackId: effectiveSavedWorkpackId,
         workerIds: resolveSavedWorkerIds(savedWorkerMap, selectedWorkerIds)
       };
+    }
+    if (restoredConfirmedWorkpackId) {
+      try {
+        const workerResponse = await resolveCurrentWorkerMap();
+        if (!workerResponse.ok) {
+          setStorageFailure(workerResponse.message, null);
+          return null;
+        }
+        const workerMap = workerResponse.workerMap || {};
+        const workerIds = resolveSavedWorkerIds(workerMap, selectedWorkerIds);
+        setSavedWorkpackId(restoredConfirmedWorkpackId);
+        setSavedWorkerMap(workerMap);
+        return { workpackId: restoredConfirmedWorkpackId, workerIds };
+      } catch (error) {
+        console.warn("confirmed workpack worker mapping resolution failed", error);
+        setStorageFailure("현재 작업팩의 서버 작업자 매핑을 확인하지 못했습니다.", null);
+        return null;
+      }
     }
     const snapshot = await saveWorkspaceToSupabase();
     if (!snapshot.ok || !snapshot.workpackId) return null;
@@ -1496,7 +1616,7 @@ export function FieldOperationsWorkspace({
       setPhaseAConfirmationMessage("서버 확인 완료. 서버가 반환한 작업팩과 근거 봉인을 현재 상태에 반영했습니다.");
       onWorkpackStateChangeRef.current?.(confirmedWorkpack);
     } catch (error) {
-      console.error("phase a confirmation request failed", error);
+      console.warn("phase a confirmation request failed", error);
       setPhaseAConfirmationStatus("error");
       setPhaseAConfirmationMessage("서버 확인 요청 중 오류가 발생했습니다. 연결을 확인한 뒤 다시 시도해 주세요.");
     }
@@ -1626,7 +1746,7 @@ export function FieldOperationsWorkspace({
           recipientSuggestions={recipientSuggestions}
           targetWorkers={targetWorkers}
           authToken={session?.access_token}
-          workpackId={savedWorkpackId}
+          workpackId={effectiveSavedWorkpackId}
           workerIds={savedWorkerIds}
           ensureWorkpackSaved={ensureWorkpackSaved}
           readiness={readiness}
@@ -1658,7 +1778,7 @@ export function FieldOperationsWorkspace({
         recipientSuggestions={recipientSuggestions}
         targetWorkers={targetWorkers}
         authToken={session?.access_token}
-        workpackId={savedWorkpackId}
+        workpackId={effectiveSavedWorkpackId}
         workerIds={savedWorkerIds}
         ensureWorkpackSaved={ensureWorkpackSaved}
         readiness={readiness}
