@@ -1,12 +1,11 @@
-COMMAND=npm.cmd run typecheck
-HEAD=3a74107e3d8363f437815b877533f7342fd02c45
+phase=product-verification
+head=7e7910ac475a1e726013f748f73717e380b3657e
+tree=4c02eb011138234930d39c7aa29c1c24c690add7
+startedAt=2026-07-14T14:45:28.0375647+09:00
+command=npm.cmd run typecheck
 
 > safeclaw@0.1.0 typecheck
 > tsc --noEmit --incremental false
 
-app/api/export/pdf/route.ts(5,55): error TS2307: Cannot find module '@pdf-lib/fontkit' or its corresponding type declarations.
-app/api/export/pdf/route.ts(15,8): error TS2307: Cannot find module 'pdf-lib' or its corresponding type declarations.
-tests/helpers/pdf-font-checksum.ts(8,8): error TS2307: Cannot find module 'pdf-lib' or its corresponding type declarations.
-tests/pdf-font-failure.test.ts(3,29): error TS2307: Cannot find module 'pdf-lib' or its corresponding type declarations.
-tests/pdf-korean-font-integration.test.ts(3,21): error TS2307: Cannot find module '@pdf-lib/fontkit' or its corresponding type declarations.
-EXIT_CODE=2
+elapsedSeconds=13.819
+exitCode=0

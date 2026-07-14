@@ -1,0 +1,28 @@
+phase=evidence-integrity
+head=7e7910ac475a1e726013f748f73717e380b3657e
+tree=4c02eb011138234930d39c7aa29c1c24c690add7
+acceptedGreenLogs=7
+focusedFiles=2
+focusedTests=43
+existingSuiteFiles=12
+existingSuiteTests=250
+strictTypecheck=PASS
+productDiffCheck=PASS
+productScopeFiles=4
+reportJson=PASS
+status=PASS
+worktreeStatusBeforeEvidenceCommitBegin
+## fix/kosha-commercial-contract-remediation...origin/fix/kosha-commercial-contract-remediation [ahead 1]
+ M evaluation/kosha-commercial-contract-remediation-2026-07-14/diff-check.log
+ M evaluation/kosha-commercial-contract-remediation-2026-07-14/focused-tests.log
+ M evaluation/kosha-commercial-contract-remediation-2026-07-14/integrated-kosha-group-b.log
+ M evaluation/kosha-commercial-contract-remediation-2026-07-14/integrated-kosha-group-c.log
+ D evaluation/kosha-commercial-contract-remediation-2026-07-14/integrated-kosha-group-d-rerun.log
+ M evaluation/kosha-commercial-contract-remediation-2026-07-14/integrated-kosha-group-d.log
+ M evaluation/kosha-commercial-contract-remediation-2026-07-14/integrated-kosha-group-e.log
+ D evaluation/kosha-commercial-contract-remediation-2026-07-14/npm-ci.log
+ M evaluation/kosha-commercial-contract-remediation-2026-07-14/report.json
+ M evaluation/kosha-commercial-contract-remediation-2026-07-14/report.md
+ D evaluation/kosha-commercial-contract-remediation-2026-07-14/typecheck-rerun.log
+ M evaluation/kosha-commercial-contract-remediation-2026-07-14/typecheck.log
+worktreeStatusBeforeEvidenceCommitEnd

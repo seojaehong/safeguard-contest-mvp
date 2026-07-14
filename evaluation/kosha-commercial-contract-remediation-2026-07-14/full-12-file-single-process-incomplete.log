@@ -1,0 +1,20 @@
+phase=product-verification
+head=7e7910ac475a1e726013f748f73717e380b3657e
+tree=4c02eb011138234930d39c7aa29c1c24c690add7
+startedAt=2026-07-14T14:42:34.7063869+09:00
+command=npm.cmd test -- tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/kosha-guide-corpus-audit.test.ts tests/commercial-harness.test.ts tests/safety-reference-relevance.test.ts tests/safety-reference-hybrid.test.ts --maxWorkers=1 --no-file-parallelism
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/kosha-guide-corpus-audit.test.ts tests/commercial-harness.test.ts tests/safety-reference-relevance.test.ts tests/safety-reference-hybrid.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  12 passed (12)
+      Tests  250 passed (250)
+   Start at  14:42:37
+   Duration  56.78s (transform 1.24s, setup 0ms, import 5.23s, tests 44.30s, environment 1ms)
+
+elapsedSeconds=59.272
+exitCode=0

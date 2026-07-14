@@ -1,29 +1,47 @@
 {
   "date": "2026-07-14",
   "branch": "fix/kosha-commercial-contract-remediation",
-  "baseCommit": "3a74107e3d8363f437815b877533f7342fd02c45",
-  "productCommit": "d120a9235b46d1a2e863ca5364b2e087d521472e",
-  "productTree": "31667de4dd2a7799ee303fc390df49d7bc6b61bc",
-  "red": {
-    "focusedFailures": 3,
-    "coveredFindings": [
-      "kosha_only_independent_action_surface",
-      "non_kosha_supporting_parent_with_kosha_support",
-      "runAsk_kosha_only_action_surface"
-    ]
-  },
+  "startingHead": "049debe47cf6d18e923bb5c91e5fafd8d07c885b",
+  "productParent": "049debe47cf6d18e923bb5c91e5fafd8d07c885b",
+  "authoritativeMainBaseForEventualIntegration": "c6b493c6a780c65776fa1c592871da743f65c618",
+  "productCommit": "7e7910ac475a1e726013f748f73717e380b3657e",
+  "productTree": "4c02eb011138234930d39c7aa29c1c24c690add7",
+  "red": [
+    {
+      "phase": "initial_contract_red",
+      "files": 2,
+      "tests": 43,
+      "failed": 5,
+      "passed": 38,
+      "log": "red-v2.log",
+      "exitCode": 1
+    },
+    {
+      "phase": "provenance_boundary_red",
+      "files": 2,
+      "tests": 43,
+      "failed": 1,
+      "passed": 42,
+      "log": "red-provenance-v2.log",
+      "exitCode": 1
+    }
+  ],
   "green": {
+    "identity": {
+      "commit": "7e7910ac475a1e726013f748f73717e380b3657e",
+      "tree": "4c02eb011138234930d39c7aa29c1c24c690add7"
+    },
     "focused": {
       "files": 2,
-      "tests": 40,
+      "tests": 43,
       "log": "focused-tests.log",
       "exitCode": 0
     },
-    "integratedGroups": [
+    "existingSuiteGroups": [
       {
         "name": "B",
         "files": 2,
-        "tests": 14,
+        "tests": 16,
         "log": "integrated-kosha-group-b.log",
         "exitCode": 0
       },
@@ -38,40 +56,62 @@
         "name": "D",
         "files": 3,
         "tests": 130,
-        "log": "integrated-kosha-group-d-rerun.log",
-        "exitCode": 0,
-        "initialFailureLog": "integrated-kosha-group-d.log"
+        "log": "integrated-kosha-group-d.log",
+        "exitCode": 0
       },
       {
         "name": "E",
         "files": 3,
-        "tests": 81,
+        "tests": 82,
         "log": "integrated-kosha-group-e.log",
         "exitCode": 0
       }
     ],
-    "integratedTotal": {
+    "existingSuiteTotal": {
       "files": 12,
-      "tests": 247,
-      "priorEquivalentTests": 244,
-      "newRemediationTests": 3
+      "tests": 250,
+      "minimumRequiredTests": 247,
+      "log": "full-12-file-tests.log",
+      "exitCode": 0
     },
     "typecheck": {
-      "initialExitCode": 2,
-      "initialFailure": "missing local node_modules packages pdf-lib and @pdf-lib/fontkit",
-      "installRestoreLog": "npm-ci.log",
-      "rerunExitCode": 0,
-      "rerunLog": "typecheck-rerun.log"
+      "strict": true,
+      "log": "typecheck.log",
+      "exitCode": 0
     },
     "diffCheck": {
-      "exitCode": 0,
-      "log": "diff-check.log"
+      "log": "diff-check.log",
+      "exitCode": 0
+    },
+    "evidenceIntegrity": {
+      "log": "evidence-integrity.log",
+      "exitCode": 0
+    },
+    "productState": {
+      "log": "product-state.log",
+      "cleanBeforeEvidence": true
     }
   },
+  "incompleteAttempt": {
+    "log": "full-12-file-single-process-incomplete.log",
+    "acceptedAsPassEvidence": false,
+    "reason": "The single-process run did not emit a completion footer."
+  },
+  "contracts": {
+    "parentReadiness": "SIF case or non-KOSHA direct evidence",
+    "koshaOnlyWithoutParent": "review_required_without_risk_rows_controls_or_actions",
+    "evidenceOrder": [
+      "SIF",
+      "KOSHA",
+      "law"
+    ],
+    "naturalizeOnlyPreserved": true,
+    "scoreOrProbabilityOutputAllowed": false
+  },
   "scopeIntegrity": {
-    "changedFiles": [
-      "lib/search.ts",
+    "productChangedFiles": [
       "lib/db-harness.ts",
+      "lib/search.ts",
       "tests/commercial-harness.test.ts",
       "tests/kosha-current-review-run-ask.test.ts"
     ],
@@ -79,9 +119,9 @@
     "dbSchemaMigrationDataChanged": false,
     "packageOrLockChanged": false
   },
-  "residualRisks": [
-    "Full repository test suite was not run in this remediation scope.",
-    "Production deployment was not run.",
-    "npm.cmd ci reported existing dependency audit warnings; no dependency changes were made."
+  "integrationGate": "fresh_independent_re_review_required_before_integration",
+  "notRun": [
+    "full_repository_test_suite",
+    "production_deployment"
   ]
 }
