@@ -591,6 +591,7 @@ export function WorkflowSharePanel({
   const { result, resultSource, shareSessionId, logSaveState } = visibleDispatchEvidence;
   const targetSignatureRef = useRef(targetSignature);
   const archiveWorkpackIdRef = useRef(archiveWorkpackId);
+  const dispatchInFlightRef = useRef(false);
   targetSignatureRef.current = targetSignature;
   archiveWorkpackIdRef.current = archiveWorkpackId;
 
@@ -801,6 +802,7 @@ export function WorkflowSharePanel({
   }
 
   async function dispatchWorkflow() {
+    if (dispatchInFlightRef.current) return;
     let evidenceScopeKey = dispatchEvidenceScopeKey;
     const activeChannels = selectedChannels.filter((channel): channel is ActiveChannel => (
       activeDispatchChannels.includes(channel as ActiveChannel)
@@ -841,6 +843,7 @@ export function WorkflowSharePanel({
       return;
     }
 
+    dispatchInFlightRef.current = true;
     setIsSending(true);
     updateDispatchEvidence({ type: "begin_dispatch", scopeKey: evidenceScopeKey });
     try {
@@ -1011,6 +1014,7 @@ export function WorkflowSharePanel({
         resultSource: "dispatch"
       });
     } finally {
+      dispatchInFlightRef.current = false;
       setPhase("idle");
       setIsSending(false);
     }
@@ -1044,6 +1048,8 @@ export function WorkflowSharePanel({
     !authToken
     || shareBlocked
     || isSending
+    || shareRecords.status === "loading"
+    || shareRecords.status === "error"
     || !selectedChannels.length
     || !targetWorkers.length
     || !canResolveAuthority
@@ -1061,6 +1067,10 @@ export function WorkflowSharePanel({
       ? "로그인하고 전송하기"
       : shareBlocked
         ? "보완 후 전송할 수 있어요"
+        : shareRecords.status === "loading"
+          ? "공유 이력 확인 중"
+          : shareRecords.status === "error"
+            ? "공유 이력 확인 필요"
         : !targetWorkers.length
           ? "작업자 선택 필요"
           : !canResolveAuthority

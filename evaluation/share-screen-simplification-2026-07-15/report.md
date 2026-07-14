@@ -45,3 +45,9 @@ The share page now owns one job: send today's workpack to selected recipients. I
 - Production DOM: share root 1, target section 1, channel section 1, language section 1, preview 1, primary action 1.
 - Removed labels on production: note editor, history ledger, copy action, raw message disclosure all absent.
 - Production horizontal overflow: 0 px.
+
+## Post-review safety remediation
+
+- A synchronous in-flight guard prevents repeated activation before React rerenders the disabled state.
+- The send action is fail-closed while authoritative share-session history is loading or unavailable.
+- Focused regression after remediation: 4 files, 44 tests passed; strict typecheck passed.

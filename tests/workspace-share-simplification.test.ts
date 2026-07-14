@@ -53,5 +53,8 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain("onClick={dispatchWorkflow}");
     expect(sharePanel).not.toContain("setIsConfirming");
     expect(sharePanel).not.toContain("dispatch-confirm-panel");
+    expect(sharePanel).toContain("dispatchInFlightRef.current");
+    expect(sharePanel).toContain('shareRecords.status === "loading"');
+    expect(sharePanel).toContain('shareRecords.status === "error"');
   });
 });

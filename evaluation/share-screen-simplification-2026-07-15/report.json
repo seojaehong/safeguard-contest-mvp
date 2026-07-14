@@ -52,5 +52,12 @@
       "rawMessageDisclosure": 0
     },
     "horizontalOverflow": 0
+  },
+  "postReviewSafety": {
+    "synchronousDuplicateActivationGuard": true,
+    "sessionHistoryLoadingFailClosed": true,
+    "sessionHistoryErrorFailClosed": true,
+    "focusedTests": 44,
+    "typecheck": "pass"
   }
 }
