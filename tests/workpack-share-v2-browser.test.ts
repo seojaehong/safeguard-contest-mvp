@@ -1308,7 +1308,16 @@ async function verifyReviewRequiredVariants(environment: ShareEnvironment): Prom
           && url.searchParams.get("language") === "vi"
           && url.searchParams.get("returnStep") === "share"
         ));
-        expect(await opened.page.getByRole("button", { name: "전송 화면으로 돌아가기" }).count()).toBe(1);
+        const returnButton = opened.page.getByRole("button", { name: "전송 화면으로 돌아가기" });
+        await returnButton.waitFor({ state: "visible", timeout: 30_000 });
+        expect(await returnButton.count()).toBe(1);
+        await returnButton.click();
+        await opened.page.waitForURL((url) => (
+          url.pathname === "/workspace"
+          && url.searchParams.get("step") === "share"
+          && url.searchParams.get("theme") === environment.theme
+        ));
+        await waitForShareState(opened.page, "review_required");
       }
       expect(opened.controller.probe.unexpectedRequests, variant.id).toEqual([]);
     } finally {
@@ -1591,6 +1600,11 @@ async function executeFixtureBehavior(
 
   expect(controller.probe.dispatchLogRequestCount).toBe(0);
   expectRequestOrder(controller.probe);
+  const persistedOutcomeState = fixtureId === "result_accepted"
+    ? "success"
+    : fixtureId === "result_partial" ? "partial" : "fail";
+  await waitForShareState(page, persistedOutcomeState);
+  await page.locator("a[href='/dispatch']").waitFor({ state: "visible", timeout: 30_000 });
   expect(await page.locator("a[href='/dispatch']").count()).toBe(1);
   expect(await primaryLabel(page)).toBe("전파 이력 확인");
 

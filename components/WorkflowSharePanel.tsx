@@ -266,7 +266,6 @@ export function WorkflowSharePanel({
 
   useEffect(() => {
     setOutcome(null);
-    setStaleReason(null);
     if (!selectedChannels.length) {
       setChannelView({ status: "empty", resolution: null });
       return;
@@ -275,6 +274,7 @@ export function WorkflowSharePanel({
       setChannelView({ status: "idle", resolution: null });
       return;
     }
+    setStaleReason(null);
     let cancelled = false;
     setChannelView({ status: "loading", resolution: null });
     void resolveAuthenticatedShareChannels(fetch, {
