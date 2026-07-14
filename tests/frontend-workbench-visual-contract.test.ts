@@ -87,6 +87,12 @@ describe("workbench visual contract", () => {
     expect(mobile).not.toMatch(/\.command-center-shell \.command-(?:main|console-input)\s*\{[^}]*(?:padding|gap|margin(?:-[\w-]+)?):\s*(?:3|6|10|14|18|42)px/u);
   });
 
+  it("removes collapsed share note content from the layout", () => {
+    expect(css).toMatch(
+      /\.share-form-shell\s*>\s*details:not\(\[open\]\)\s*>\s*:not\(summary\)\s*\{[^}]*display:\s*none;/u,
+    );
+  });
+
   it("implements the field workspace desktop, tablet, and mobile cascade", () => {
     const desktopRule = css.match(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) 320px;[^}]*\}/u)?.[0] ?? "";
     const tabletStart = css.indexOf("@media (min-width: 768px) and (max-width: 1279px)");

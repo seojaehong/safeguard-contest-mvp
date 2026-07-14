@@ -14502,6 +14502,10 @@ body:has(.safeclaw-landing) :is(
   font-weight: 600;
 }
 
+.share-form-shell > details:not([open]) > :not(summary) {
+  display: none;
+}
+
 .share-panel.workflow-panel select.input {
   min-height: 44px;
 }
