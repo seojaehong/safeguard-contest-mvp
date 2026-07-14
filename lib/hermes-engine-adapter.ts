@@ -57,20 +57,28 @@ export type HermesPlannerTextOutput = {
 
 export type HermesPlanner = (input: HermesPlannerInput) => Promise<void>;
 
+export type HermesRuntimeAttestation = (
+  context: BrokerRequestContext,
+  signal?: AbortSignal,
+) => Promise<void>;
+
 const SAFECLAW_HERMES_COMPOSITION = Symbol("safeclaw-hermes-composition");
 
 export type SafeClawHermesComposition = {
   readonly planner: HermesPlanner;
   readonly readExecutor: SafeClawScopedMcpReadExecutor;
+  readonly attestRuntime?: HermesRuntimeAttestation;
   readonly [SAFECLAW_HERMES_COMPOSITION]: true;
 };
 
 export function createSafeClawHermesComposition(
   planner: HermesPlanner,
+  options: { attestRuntime?: HermesRuntimeAttestation } = {},
 ): SafeClawHermesComposition {
   return Object.freeze({
     planner,
     readExecutor: createSafeClawScopedMcpReadExecutor(),
+    attestRuntime: options.attestRuntime,
     [SAFECLAW_HERMES_COMPOSITION]: true as const,
   });
 }
@@ -271,11 +279,13 @@ export function createExperimentalHermesAdapter(
     runtime: "hermes",
     authority: SAFECLAW_ENGINE_AUTHORITY,
     capabilities: ["stream_text", "request_read_tool"],
-    async checkAvailability(): Promise<void> {
+    async checkAvailability(context, signal): Promise<void> {
       assertEnabled();
+      await dependencies.composition.attestRuntime?.(context, signal);
     },
     async run(input): Promise<void> {
       assertEnabled();
+      await dependencies.composition.attestRuntime?.(input.context, input.signal);
       let evidencePacket: ImmutableEvidencePacket;
       let evidenceDigest: string;
       try {

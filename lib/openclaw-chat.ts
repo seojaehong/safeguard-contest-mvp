@@ -75,7 +75,7 @@ export function resolveOpenClawSpawn(config: OpenClawChatConfig, prompt: string)
   return resolveOpenClawCommand(config, buildOpenClawChatArgs(config, prompt));
 }
 
-function resolveOpenClawCommand(config: OpenClawChatConfig, args: string[]): {
+export function resolveOpenClawCommand(config: OpenClawChatConfig, args: string[]): {
   command: string;
   args: string[];
 } {
