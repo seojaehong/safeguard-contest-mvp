@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { KnowledgeRawEvent } from "@/lib/safety-knowledge";
 
 export type KnowledgePromotionStageId =
@@ -63,12 +64,35 @@ export type KnowledgeAuthorityLane = {
   publishAllowed: boolean;
 };
 
+export type KnowledgeTenantContext = {
+  organizationId: string;
+  siteId: string;
+};
+
+type KnowledgeReviewMetadataValue = string | number | boolean | null;
+
+export type KnowledgeEventReference = {
+  sourceId: string;
+  capturedAt: string;
+  digestAlgorithm: "sha256";
+  digest: string;
+};
+
+export type KnowledgePayloadEvidence = {
+  digestAlgorithm: "sha256";
+  digest: string;
+  byteLength: number;
+  topLevelKeyCount: number;
+  omittedTopLevelKeyCount: number;
+  reviewMetadata: Record<string, KnowledgeReviewMetadataValue>;
+  metadataTruncated: boolean;
+};
+
 export type KnowledgeEventProvenance = {
   source: KnowledgeRawEvent["source"];
-  sourceId: string;
-  title: string;
-  url: string | null;
-  capturedAt: string;
+  eventReference: KnowledgeEventReference;
+  tenantContext: KnowledgeTenantContext;
+  payloadEvidence: KnowledgePayloadEvidence;
   authorityId: KnowledgeAuthorityId | "external_context";
   authority: KnowledgeAuthority;
   scope: KnowledgeScope;
@@ -76,7 +100,7 @@ export type KnowledgeEventProvenance = {
 };
 
 export type KnowledgeCandidate = {
-  contractVersion: "knowledge-candidate.v1";
+  contractVersion: "knowledge-candidate.v2";
   stage: "candidate";
   reviewStatus: "pending_review";
   publicationState: "unpublished";
@@ -90,6 +114,7 @@ export type KnowledgeCandidate = {
   question: string;
   generatedText: string;
   matchedHazardIds: string[];
+  tenantContext: KnowledgeTenantContext;
   provenance: KnowledgeEventProvenance[];
 };
 
@@ -330,13 +355,121 @@ function classifyEventAuthority(event: KnowledgeRawEvent): ProvenanceClassificat
   return eventSourceAuthority[event.source];
 }
 
-export function classifyKnowledgeEvent(event: KnowledgeRawEvent): KnowledgeEventProvenance {
+const REVIEW_METADATA_KEYS = [
+  "article",
+  "articleNo",
+  "article_number",
+  "effectiveDate",
+  "guideCode",
+  "guide_code",
+  "itemType",
+  "item_type",
+  "provenanceScope",
+  "provenance_scope"
+] as const;
+const MAX_REVIEW_METADATA_KEYS = 8;
+const MAX_REVIEW_METADATA_LENGTH = 96;
+
+function canonicalJson(value: unknown): string {
+  if (value === null) return "null";
+  if (Array.isArray(value)) {
+    return `[${value.map(canonicalJson).join(",")}]`;
+  }
+
+  if (typeof value === "string") return JSON.stringify(value);
+  if (typeof value === "boolean") return value ? "true" : "false";
+  if (typeof value === "number") return Number.isFinite(value) ? String(value) : "null";
+  if (typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    const entries = Object.keys(record)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`);
+    return `{${entries.join(",")}}`;
+  }
+
+  return JSON.stringify(String(value));
+}
+
+function sha256(value: string): string {
+  return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function readBoundedMetadataValue(value: unknown): {
+  value: KnowledgeReviewMetadataValue;
+  truncated: boolean;
+} | null {
+  if (value === null || typeof value === "number" || typeof value === "boolean") {
+    return { value, truncated: false };
+  }
+  if (typeof value !== "string") return null;
+
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= MAX_REVIEW_METADATA_LENGTH) {
+    return { value: normalized, truncated: false };
+  }
   return {
+    value: normalized.slice(0, MAX_REVIEW_METADATA_LENGTH),
+    truncated: true
+  };
+}
+
+function buildPayloadEvidence(payload: Record<string, unknown>): KnowledgePayloadEvidence {
+  const canonicalPayload = canonicalJson(payload);
+  const reviewMetadata: Record<string, KnowledgeReviewMetadataValue> = {};
+  let metadataTruncated = false;
+
+  for (const key of REVIEW_METADATA_KEYS) {
+    if (!(key in payload)) continue;
+    if (Object.keys(reviewMetadata).length >= MAX_REVIEW_METADATA_KEYS) {
+      metadataTruncated = true;
+      continue;
+    }
+
+    const bounded = readBoundedMetadataValue(payload[key]);
+    if (!bounded) continue;
+    reviewMetadata[key] = bounded.value;
+    metadataTruncated ||= bounded.truncated;
+  }
+
+  const topLevelKeyCount = Object.keys(payload).length;
+  return {
+    digestAlgorithm: "sha256",
+    digest: sha256(canonicalPayload),
+    byteLength: new TextEncoder().encode(canonicalPayload).byteLength,
+    topLevelKeyCount,
+    omittedTopLevelKeyCount: Math.max(topLevelKeyCount - Object.keys(reviewMetadata).length, 0),
+    reviewMetadata,
+    metadataTruncated
+  };
+}
+
+export function classifyKnowledgeEvent(
+  event: KnowledgeRawEvent,
+  tenantContext: KnowledgeTenantContext
+): KnowledgeEventProvenance {
+  const payloadEvidence = buildPayloadEvidence(event.payload);
+  const referenceDigest = sha256(canonicalJson({
     source: event.source,
     sourceId: event.sourceId,
+    capturedAt: event.capturedAt,
     title: event.title,
     url: event.url || null,
-    capturedAt: event.capturedAt,
+    payloadDigest: payloadEvidence.digest,
+    relatedHazardIds: event.relatedHazardIds,
+    reflectedDocuments: event.reflectedDocuments,
+    tenantContext
+  }));
+
+  return {
+    source: event.source,
+    eventReference: {
+      sourceId: event.sourceId,
+      capturedAt: event.capturedAt,
+      digestAlgorithm: "sha256",
+      digest: referenceDigest
+    },
+    tenantContext: { ...tenantContext },
+    payloadEvidence,
     ...classifyEventAuthority(event)
   };
 }
@@ -347,9 +480,14 @@ export function buildKnowledgeCandidate(input: {
   matchedHazardIds: string[];
   generatedText: string;
   providerLabel: string | null;
+  tenantContext: KnowledgeTenantContext;
 }): KnowledgeCandidate {
+  if (input.rawEvents.length === 0) {
+    throw new Error("At least one raw event is required to build a knowledge candidate");
+  }
+
   return {
-    contractVersion: "knowledge-candidate.v1",
+    contractVersion: "knowledge-candidate.v2",
     stage: "candidate",
     reviewStatus: "pending_review",
     publicationState: "unpublished",
@@ -365,6 +503,7 @@ export function buildKnowledgeCandidate(input: {
     question: input.question,
     generatedText: input.generatedText,
     matchedHazardIds: [...new Set(input.matchedHazardIds)],
-    provenance: input.rawEvents.map(classifyKnowledgeEvent)
+    tenantContext: { ...input.tenantContext },
+    provenance: input.rawEvents.map((event) => classifyKnowledgeEvent(event, input.tenantContext))
   };
 }
