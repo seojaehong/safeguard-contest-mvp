@@ -1,0 +1,31 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/claw-tools-phase-a-materialization.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-product-materialization
+
+ ❯ tests/claw-tools-phase-a-materialization.test.ts (8 tests | 2 failed) 26ms
+     × materializes canonical and registry alias task ''높은 곳 작업'' through the same matcher path 3ms
+     × materializes canonical and registry alias task ''차량계·기계 인접작업'' through the same matcher path 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/claw-tools-phase-a-materialization.test.ts > Claw Phase A product handlers > materializes canonical and registry alias task ''높은 곳 작업'' through the same matcher path
+ FAIL  tests/claw-tools-phase-a-materialization.test.ts > Claw Phase A product handlers > materializes canonical and registry alias task ''차량계·기계 인접작업'' through the same matcher path
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ tests/claw-tools-phase-a-materialization.test.ts:159:40
+    157|     });
+    158|
+    159|     expect(mocks.querySafetyKnowledge).toHaveBeenCalledTimes(1);
+       |                                        ^
+    160|     expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith(task);
+    161|     expect(result).toMatchObject({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+   Start at  21:48:34
+   Duration  1.15s (transform 386ms, setup 0ms, import 515ms, tests 26ms, environment 0ms)

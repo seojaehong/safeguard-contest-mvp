@@ -23,6 +23,8 @@ The path is emitted in this order:
 
 Review-required candidates never populate `currentControls`; they use `현장 확인 필요`, place the candidate Control in `additionalControls`, and use `needsReview`. Reapplying the same product projection is idempotent by stable key.
 
+Plain MCP and Claw generation now pass the original task text to the evidence-chain registry matcher. The three canonical tasks and the registry aliases `높은 곳 작업`, `차량계·기계 인접작업`, and `전기작업` therefore use the same materialization path. Reviewed generation uses the canonical task returned by the matched product only for the downstream diagnostic QA label.
+
 ## Chain audit
 
 | Chain | SIF/Accident | Mapped KOSHA | Articles | Controls | Document rows | Verified rows |
@@ -38,17 +40,27 @@ The obligation classifier still supports `statutory_mandate`, `technical_guidanc
 
 Materialized output is resealed with the existing generation-evidence timestamp and current HMAC secret. The JSON evidence summary stores and restores `phaseAProduct`, so reopen verification uses the same payload. A passing diagnostic QA result cannot override Phase A status: reviewed output exposes `phaseAReviewStatus.verdict=검토 필요`, `qaAuthority=diagnostic_only`, and pending human confirmation.
 
+The plain MCP route now invokes an injectable handler with a tenant-aware workpack repository. The behavior test uses an in-memory implementation, not a live database or a static source scan, and verifies exact insert count and fields, exact organization/site read scope, HMAC reopen, zero foreign-tenant inserts, and blocked foreign-tenant reads.
+
 ## Verification
 
 - RED baseline: missing product materialization boundary, exit 1.
 - RED handler: reviewed and plain handlers made zero ontology calls.
 - RED integrity: post-processing invalidated generation evidence.
-- GREEN focused suite: 10 test files, 136 tests, exit 0.
+- RED registry aliases: `높은 곳 작업` and `차량계·기계 인접작업` made zero matcher calls, 2 failed tests, exit 1.
+- RED MCP persistence boundary: no injectable MCP docpack handler/repository module existed, exit 1.
+- GREEN focused suite: 11 test files, 147 tests, exit 0.
 - GREEN TypeScript strict typecheck: exit 0.
-- Remaining RED tests: 0.
+
+The repository-wide suite is not green and is reported separately from the focused product status. `npm.cmd test` exited 1: 143 test files total, 134 passed, 4 failed, and 5 skipped; 1435 tests total, 1420 passed, 1 failed, and 14 skipped. The non-green causes were two Next dev startup failures caused by a corrupt webpack cache and missing `.next/prerender-manifest.json`, one browser cleanup hook timeout, and one stale frontend browser-evidence `sourceIdentity` mismatch. No claim is made that the overall suite has zero remaining failures.
 
 Evidence logs:
 
 - `red-product-materialization.log`
+- `red-product-handler.log`
+- `red-generation-evidence.log`
+- `red-alias-materialization.log`
+- `red-mcp-persistence.log`
 - `green-focused-tests.log`
 - `green-typecheck.log`
+- `full-suite.log`
