@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -134,10 +136,12 @@ function verifiedKoshaReference(overrides: Partial<SafetyReferenceItem> = {}): S
   });
   const version = item.title.match(/[A-Z](?:-[A-Z])?-\d+(?:-\d+)?-\d{4}/u)?.[0] || `KOSHA-${item.id}-2026`;
   const body = overrides.body ?? item.summary;
+  const officialUrl = "https://portal.kosha.or.kr/archive/resources/tech-support/search/all";
 
   return {
     ...item,
     body,
+    source_url: officialUrl,
     evidence_role: "supporting",
     kosha_guide: {
       referenceId: item.id,
@@ -148,7 +152,14 @@ function verifiedKoshaReference(overrides: Partial<SafetyReferenceItem> = {}): S
       bodyKind: "native",
       anchors: [{ page: 1, excerpt: body.slice(0, 240) }],
       evidenceRef: `KOSHA 근거 ${item.id} p.1: ${item.summary}`,
-      directEligible: true
+      directEligible: true,
+      officialUrl,
+      officialFileId: `fixture-${item.id}`,
+      publicationDate: "2026-01-30",
+      officialVersion: version,
+      officialStatus: "current",
+      pdfSha256: "b".repeat(64),
+      bodySha256: createHash("sha256").update(body).digest("hex")
     }
   };
 }

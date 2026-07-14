@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { describe, expect, it, vi } from "vitest";
 
 import type { ClawChatEvent } from "@/lib/agent-loop";
@@ -53,6 +55,7 @@ function sifReference(): SafetyReferenceItem {
 
 function verifiedKoshaReference(): SafetyReferenceItem {
   const body = "오늘 작업 전 작업발판, 난간, 안전대 상태를 점검합니다.";
+  const officialUrl = "https://portal.kosha.or.kr/archive/resources/tech-support/search/all";
   return {
     ...sifReference(),
     id: "kosha-guide-1",
@@ -61,6 +64,7 @@ function verifiedKoshaReference(): SafetyReferenceItem {
     title: "G-67-2011 오늘 작업 위험 점검 기술지침",
     summary: "외벽 작업의 추락 예방 점검 지침",
     body,
+    source_url: officialUrl,
     kosha_guide: {
       referenceId: "kosha-guide-1",
       stableDocumentKey: "G-67",
@@ -71,6 +75,13 @@ function verifiedKoshaReference(): SafetyReferenceItem {
       anchors: [{ page: 1, excerpt: body }],
       evidenceRef: "KOSHA G-67-2011 p.1",
       directEligible: true,
+      officialUrl,
+      officialFileId: "fixture-kosha-guide-1",
+      publicationDate: "2011-01-01",
+      officialVersion: "G-67-2011",
+      officialStatus: "current",
+      pdfSha256: "b".repeat(64),
+      bodySha256: createHash("sha256").update(body).digest("hex"),
     },
   };
 }
