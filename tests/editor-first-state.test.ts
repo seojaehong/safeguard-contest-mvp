@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { buildStoredCurrentWorkpack, parseStoredCurrentWorkpack } from "@/lib/current-workpack";
+import {
+  buildStoredCurrentWorkpack,
+  parseStoredCurrentWorkpack,
+  type CurrentDispatchSnapshot,
+  type CurrentWorkerSnapshot
+} from "@/lib/current-workpack";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
 
 describe("editor-first draft identity", () => {
@@ -26,11 +31,56 @@ describe("editor-first draft identity", () => {
     if (!reopened) throw new Error("Stored workpack should reopen");
     const edited = structuredClone(reopened.data);
     edited.deliverables.tbmBriefing += "\n사용자 편집";
+    const workerSnapshot: CurrentWorkerSnapshot = {
+      savedAt: "2026-07-14T02:00:00.000Z",
+      source: "workspace",
+      workers: [{
+        id: "worker-1",
+        displayName: "기존 작업자",
+        role: "도장공",
+        joinedAt: "2026-07-01",
+        experienceLevel: "숙련",
+        experienceSummary: "기존 배치",
+        nationality: "대한민국",
+        languageCode: "ko",
+        languageLabel: "한국어",
+        isNewWorker: false,
+        isForeignWorker: false,
+        trainingStatus: "이수",
+        trainingSummary: "기존 교육",
+      }],
+      selectedWorkerIds: ["worker-1"],
+    };
+    const dispatchSnapshot: CurrentDispatchSnapshot = {
+      savedAt: "2026-07-14T02:00:00.000Z",
+      source: "workspace",
+      recipientSuggestions: [{
+        label: "기존 작업자",
+        value: "masked@example.com",
+        channel: "email",
+        languageCode: "ko",
+        languageLabel: "한국어",
+      }],
+      targetWorkers: [{
+        displayName: "기존 작업자",
+        role: "도장공",
+        nationality: "대한민국",
+        languageCode: "ko",
+        languageLabel: "한국어",
+        trainingStatus: "이수",
+      }],
+    };
     const resaved = buildStoredCurrentWorkpack(edited, {
-      generationFingerprint: reopened.generationFingerprint
+      generationFingerprint: reopened.generationFingerprint,
+      workerSnapshot,
+      dispatchSnapshot,
     });
-    expect(parseStoredCurrentWorkpack(JSON.stringify(resaved))?.generationFingerprint)
-      .toBe(firstStored.generationFingerprint);
+    const reparsed = parseStoredCurrentWorkpack(JSON.stringify(resaved));
+
+    expect(reparsed?.generationFingerprint).not.toBe(firstStored.generationFingerprint);
+    expect(reparsed?.generationFingerprint).toBe(buildStoredCurrentWorkpack(edited).generationFingerprint);
+    expect(reparsed?.workerSnapshot).toBeUndefined();
+    expect(reparsed?.dispatchSnapshot).toBeUndefined();
   });
 
   it("preserves workPermitDraft edits in the canonical current workpack snapshot", () => {

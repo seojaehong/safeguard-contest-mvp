@@ -1,0 +1,30 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/editor-first-state.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/editor-first-state.test.ts (4 tests | 1 failed) 26ms
+     × keeps the generation fingerprint stable when only volatile quality time changes 17ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/editor-first-state.test.ts > editor-first draft identity > keeps the generation fingerprint stable when only volatile quality time changes
+AssertionError: expected 'dda69a31' not to be 'dda69a31' // Object.is equality
+ ❯ tests/editor-first-state.test.ts:80:49
+     78|     const reparsed = parseStoredCurrentWorkpack(JSON.stringify(resaved…
+     79|
+     80|     expect(reparsed?.generationFingerprint).not.toBe(firstStored.gener…
+       |                                                 ^
+     81|     expect(reparsed?.generationFingerprint).toBe(buildStoredCurrentWor…
+     82|     expect(reparsed?.workerSnapshot).toBeUndefined();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  17:10:22
+   Duration  834ms (transform 187ms, setup 0ms, import 235ms, tests 26ms, environment 0ms)
+

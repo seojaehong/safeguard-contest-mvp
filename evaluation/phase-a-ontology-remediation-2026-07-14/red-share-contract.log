@@ -1,0 +1,37 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/phase-a-share-authority-contract.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-share-authority-contract.test.ts (6 tests | 1 failed) 14ms
+     × stays pending until the next freshly reviewed Share remediation head arrives 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/phase-a-share-authority-contract.test.ts > Phase A and Share v2 joint authority contract > stays pending until the next freshly reviewed Share remediation head arrives
+AssertionError: expected '7141baac3e0abca146ef6c110093c1c064376…' to be null
+
+- Expected:
+null
+
++ Received:
+"7141baac3e0abca146ef6c110093c1c0643760a2"
+
+ ❯ tests/phase-a-share-authority-contract.test.ts:147:49
+    145|     expect(PHASE_A_SHARE_CONTRACT_REVIEW_HEAD).toBe("22de1180d69263f7c…
+    146|     expect(PHASE_A_SHARE_CONTRACT_BASE_PRODUCT_HEAD).toBe("fc2bd1783fc…
+    147|     expect(PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD).toBeNull();
+       |                                                 ^
+    148|     expect(PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD).not.toBe("7141baac3e0a…
+    149|     expect(PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD).not.toBe(REJECTED_SHAR…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  17:10:30
+   Duration  673ms (transform 78ms, setup 0ms, import 105ms, tests 14ms, environment 0ms)
+

@@ -15,6 +15,8 @@ const SESSION_ID = "44ac6cc7-f4b3-4f39-aa73-07cc9d76d5fb";
 const REVISION = "2026-07-14T04:00:00.000Z";
 const CANONICAL_REVISION = "a".repeat(64);
 const PLAN_DIGEST = `sha256:${"b".repeat(64)}`;
+const REJECTED_SHARE_PRODUCT_HEAD = "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4";
+const REJECTED_SHARE_MERGE_TREE_OID = "3e09ffbddecccf6bfe5e2a458fd3105d6bc563d9";
 
 const confirmation: Extract<PhaseAReview["humanConfirmation"], { status: "confirmed" }> = {
   required: true,
@@ -139,15 +141,19 @@ function assess(overrides: {
 }
 
 describe("Phase A and Share v2 joint authority contract", () => {
-  it("is bound to the exact Share review and product heads", () => {
+  it("stays pending until the next freshly reviewed Share remediation head arrives", () => {
     expect(PHASE_A_SHARE_CONTRACT_REVIEW_HEAD).toBe("22de1180d69263f7c08ac0ed0cfda0894e2db7f5");
     expect(PHASE_A_SHARE_CONTRACT_BASE_PRODUCT_HEAD).toBe("fc2bd1783fcc413981306f689d67bb6c659a985e");
-    expect(PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD).toBe("7141baac3e0abca146ef6c110093c1c0643760a2");
+    expect(PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD).toBeNull();
+    expect(PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD).not.toBe("7141baac3e0abca146ef6c110093c1c0643760a2");
+    expect(PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD).not.toBe(REJECTED_SHARE_PRODUCT_HEAD);
+    expect(REJECTED_SHARE_MERGE_TREE_OID).toMatch(/^[a-f0-9]{40}$/);
     expect(PHASE_A_SHARE_SEMANTIC_CONFLICT_PATHS).toEqual([
       "app/api/workpacks/[id]/route.ts",
       "components/FieldOperationsWorkspace.tsx",
       "components/SafeGuardCommandCenter.tsx",
       "lib/workpack-commercial-store.ts",
+      "tests/helpers/isolated-next-browser-harness.ts",
       "tests/workpack-generation-evidence-route.test.ts",
       "tests/workpack-share-authority-routes.test.ts",
     ]);

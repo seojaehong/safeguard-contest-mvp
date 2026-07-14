@@ -706,6 +706,130 @@ describe("Phase A product remediation browser contract", () => {
     await page.close();
   }, 120_000);
 
+  it("rejects a delayed local-restore response after logout or account switch even when abort is ignored", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const localConfirmed = buildConfirmedFixture();
+    const lateServerConfirmed: AskResponse = {
+      ...localConfirmed,
+      status: { ...localConfirmed.status, summary: "LATE_ACCOUNT_SWITCH_RESTORE_MUST_NOT_COMMIT" },
+    };
+    const lateServerAuthority = buildFixtureAuthority(lateServerConfirmed, CONFIRMED_REVISION);
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await seedAuthenticatedSession(page);
+    await page.addInitScript(({ expectedOrigin, storageKey, storedWorkpack, workpackId }) => {
+      if (window.location.origin !== expectedOrigin) return;
+      window.localStorage.setItem("safeclaw.aiMode", "template");
+      window.localStorage.setItem(storageKey, storedWorkpack);
+      const nativeFetch = window.fetch.bind(window);
+      window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+        const target = typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url;
+        if (target.includes(`/api/workpacks/${workpackId}`)) {
+          return nativeFetch(input, { ...init, signal: undefined });
+        }
+        return nativeFetch(input, init);
+      };
+    }, {
+      expectedOrigin: baseUrl,
+      storageKey: CURRENT_WORKPACK_STORAGE_KEY,
+      workpackId: WORKPACK_ID,
+      storedWorkpack: JSON.stringify(buildStoredCurrentWorkpack(localConfirmed, {
+        generationFingerprint: buildWorkpackGenerationFingerprint(localConfirmed),
+      })),
+    });
+    await page.route("**/api/weather?**", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, weather: null }),
+      });
+    });
+    await page.route("**/api/agent/context", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          sites: [{
+            id: "33333333-3333-4333-8333-333333333333",
+            name: "성수 현장",
+            organizationId: "22222222-2222-4222-8222-222222222222",
+          }],
+        }),
+      });
+    });
+    let markRestoreStarted = (): void => undefined;
+    const restoreStarted = new Promise<void>((resolve) => { markRestoreStarted = resolve; });
+    let releaseRestore = (): void => undefined;
+    const restoreGate = new Promise<void>((resolve) => { releaseRestore = resolve; });
+    let markRestoreCompleted = (): void => undefined;
+    const restoreCompleted = new Promise<void>((resolve) => { markRestoreCompleted = resolve; });
+    await page.route(`**/api/workpacks/${WORKPACK_ID}`, async (route) => {
+      markRestoreStarted();
+      await restoreGate;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          configured: true,
+          canReopen: true,
+          workpack: {
+            id: WORKPACK_ID,
+            updatedAt: CONFIRMED_REVISION,
+            reopenData: lateServerConfirmed,
+          },
+          authority: lateServerAuthority,
+          blockers: [],
+          message: "서버 작업팩 재검증 완료",
+        }),
+      });
+      markRestoreCompleted();
+    });
+
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "domcontentloaded" });
+    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await restoreStarted;
+    await page.evaluate((storageKey) => {
+      const rawSession = window.localStorage.getItem(storageKey);
+      if (!rawSession) throw new Error("expected seeded auth session");
+      const parsedSession: unknown = JSON.parse(rawSession);
+      if (typeof parsedSession !== "object" || parsedSession === null || Array.isArray(parsedSession)) {
+        throw new Error("expected auth session object");
+      }
+      const record = parsedSession as Record<string, unknown>;
+      const user = typeof record.user === "object" && record.user !== null && !Array.isArray(record.user)
+        ? record.user as Record<string, unknown>
+        : {};
+      window.localStorage.setItem(storageKey, JSON.stringify({
+        ...record,
+        access_token: "phase-a-product-switched-session",
+        refresh_token: "phase-a-product-switched-refresh-token",
+        user: {
+          ...user,
+          id: "phase-a-other-reviewer",
+          email: "other-reviewer@example.com",
+        },
+      }));
+    }, AUTH_STORAGE_KEY);
+
+    releaseRestore();
+    await restoreCompleted;
+    await page.waitForTimeout(100);
+
+    const currentAfterLateRestore = await page.evaluate((storageKey) => (
+      window.localStorage.getItem(storageKey)
+    ), CURRENT_WORKPACK_STORAGE_KEY);
+    expect(currentAfterLateRestore).not.toContain("LATE_ACCOUNT_SWITCH_RESTORE_MUST_NOT_COMMIT");
+    const connectionStatus = page.locator(".result-ribbon article", { hasText: "연결 상태" });
+    await expect.poll(async () => await connectionStatus.locator("strong").textContent()).toContain("편집 후 재검수 필요");
+    const shareButton = page.getByLabel("작업공간 메뉴").getByRole("button", { name: /공유/ });
+    expect(await shareButton.isDisabled()).toBe(true);
+    await page.close();
+  }, 120_000);
+
   it("calls the production confirmation route, retries a bound 409, and applies only the server workpack", async () => {
     if (!browser) throw new Error("Browser was not started");
     const pending = buildPendingFixture();
