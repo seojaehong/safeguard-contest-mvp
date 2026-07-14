@@ -74,7 +74,7 @@ function readAuthContext(context: BrokerRequestContext): McpAuthContext {
     siteId: context.siteId,
     orgId: context.organizationId,
     scopes: ["tools:read"],
-    source: "db",
+    source: "broker",
     tokenId: null,
   };
 }

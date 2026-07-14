@@ -11,6 +11,7 @@ import {
 import {
   isReadOnlyMcpTool,
 } from "@/lib/mcp-auth";
+import type { DbHarnessPacket } from "@/lib/db-harness";
 import {
   createSafeClawScopedMcpReadExecutor,
   isSafeClawScopedMcpReadExecutor,
@@ -27,9 +28,15 @@ export type HermesPlannerInput = {
   authority: EngineAuthority;
   context: BrokerRequestContext;
   prompt: string;
-  emitText: (text: string) => void;
+  evidencePacket: DbHarnessPacket;
+  emitText: (output: HermesPlannerTextOutput) => void;
   signal: AbortSignal;
   requestReadTool: (intent: HermesReadToolIntent) => Promise<unknown>;
+};
+
+export type HermesPlannerTextOutput = {
+  text: string;
+  evidencePacket: DbHarnessPacket;
 };
 
 export type HermesPlanner = (input: HermesPlannerInput) => Promise<void>;
@@ -61,6 +68,27 @@ function isSafeClawHermesComposition(value: unknown): value is SafeClawHermesCom
     );
 }
 
+function readEvidencePacket(result: unknown): DbHarnessPacket {
+  if (typeof result !== "object" || result === null) {
+    throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+  }
+  const candidate = result as { engine?: unknown; packet?: unknown };
+  if (candidate.engine !== "safeclaw-db-harness"
+    || typeof candidate.packet !== "object"
+    || candidate.packet === null) {
+    throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+  }
+  const packet = candidate.packet as Partial<DbHarnessPacket>;
+  if (packet.mode !== "db_harness_first"
+    || packet.generationContract?.llmRole !== "naturalize_only"
+    || packet.generationContract.evidenceAuthority !== "db_harness"
+    || packet.generationContract.fallbackChainAllowed !== false
+    || packet.generationContract.genericProseSubstitutionAllowed !== false) {
+    throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+  }
+  return packet as DbHarnessPacket;
+}
+
 export type ExperimentalHermesAdapterDependencies = {
   env: EnvLike;
   composition: SafeClawHermesComposition;
@@ -90,15 +118,38 @@ export function createExperimentalHermesAdapter(
     },
     async run(input): Promise<void> {
       assertEnabled();
+      let evidencePacket: DbHarnessPacket;
+      try {
+        const harnessResult = await dependencies.composition.readExecutor.execute({
+          context: input.context,
+          toolName: "run_safeclaw_harness_agent",
+          input: { question: input.prompt },
+          signal: input.signal,
+        });
+        evidencePacket = readEvidencePacket(harnessResult);
+      } catch (error) {
+        if (error instanceof BrokerError) throw error;
+        throw new BrokerError("ENGINE_EXECUTION_FAILED", 500, error);
+      }
       await dependencies.composition.planner({
         contractVersion: ENGINE_ADAPTER_CONTRACT_VERSION,
         authority: SAFECLAW_ENGINE_AUTHORITY,
         context: input.context,
         prompt: input.prompt,
-        emitText: (text) => input.emit({ kind: "text-delta", text }),
+        evidencePacket,
+        emitText: (output) => {
+          if (typeof output !== "object"
+            || output === null
+            || output.evidencePacket !== evidencePacket
+            || typeof output.text !== "string") {
+            throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+          }
+          input.emit({ kind: "text-delta", text: output.text });
+        },
         signal: input.signal,
         async requestReadTool(intent): Promise<unknown> {
-          if (!isReadOnlyMcpTool(intent.toolName)) {
+          if (intent.toolName === "run_safeclaw_harness_agent"
+            || !isReadOnlyMcpTool(intent.toolName)) {
             throw new BrokerError("ENGINE_TOOL_FORBIDDEN", 403);
           }
           return dependencies.composition.readExecutor.execute({

@@ -94,7 +94,7 @@ export async function executeClawTool(
           source: authContext.source,
           siteId: authContext.siteId,
           orgId: authContext.orgId,
-          tokenBound: Boolean(authContext.siteId),
+          tokenBound: Boolean(authContext.tokenId),
         } : undefined,
       });
     }

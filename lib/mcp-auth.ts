@@ -20,7 +20,7 @@ export { MCP_TOOL_NAMES } from "@/lib/mcp-tool-contract.mjs";
 
 const log = createLogger("mcp-auth");
 
-export type McpAuthSource = "db" | "env";
+export type McpAuthSource = "db" | "env" | "broker";
 
 /** MCP 도구 핸들러에 전달되는 인증 컨텍스트. 평문 토큰을 포함하지 않는다. */
 export interface McpAuthContext {
@@ -181,7 +181,7 @@ export function computeEnablement(input: { hasEnvTokens: boolean; hasSupabase: b
 export function asAuthContext(value: unknown): McpAuthContext | null {
   if (!value || typeof value !== "object") return null;
   const v = value as Record<string, unknown>;
-  if (v.source !== "db" && v.source !== "env") return null;
+  if (v.source !== "db" && v.source !== "env" && v.source !== "broker") return null;
   if (!Array.isArray(v.scopes)) return null;
   return {
     siteId: typeof v.siteId === "string" ? v.siteId : null,
