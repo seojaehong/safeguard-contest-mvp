@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "productSha": "d9c8781410df37189d0312d870a52bcc58bf0c2f",
+  "productTree": "15b44ad46e604fcda1883bad4073a45c2e335546",
+  "entries": [
+    {
+      "path": "app/globals.css",
+      "sha256": "a540e760c44dc0d579df6f85837357c5e977e7e7c5cb3117ad6e3fe65dd7ce8a",
+      "bytes": 555741
+    },
+    {
+      "path": "components/SafeGuardCommandCenter.tsx",
+      "sha256": "ab5bea7efdc2633872ddba651395090b0fa8e5fc4d0ef20bd3437bc3bc2d9136",
+      "bytes": 116662
+    },
+    {
+      "path": "components/WorkpackEditor.module.css",
+      "sha256": "27db4f7e5c02632ef51a23bf9a4cf1c4a6ad85cc6c3156ababb6213613090f48",
+      "bytes": 20439
+    },
+    {
+      "path": "components/WorkpackEditor.tsx",
+      "sha256": "b721b5d4df2b4aeb6aa549bd5ba48a15eab0a3e6471d82b4a47568024460b103",
+      "bytes": 147041
+    },
+    {
+      "path": "components/workpack-editor-structure.ts",
+      "sha256": "6279f3418962012137ab3a89bed94a897d1bd2fb85264ac26b60a22f0b22f091",
+      "bytes": 9371
+    },
+    {
+      "path": "tests/documents-editor-layout.test.ts",
+      "sha256": "6bfcc2cb2145cff5386241d0441a5383ac29b0059ccf522df234684c83b0afc2",
+      "bytes": 52260
+    },
+    {
+      "path": "tests/frontend-workbench-visual-contract.test.ts",
+      "sha256": "35d9002616011137f48863ab20281b7ae5eed8243c6fc9f1b47f1d8b191fd515",
+      "bytes": 11225
+    },
+    {
+      "path": "tests/north-star-document-ux.test.ts",
+      "sha256": "80246241b49c6a3676f9659c4d9f0c150c9026d58bc50a61368f83b64494777c",
+      "bytes": 10556
+    },
+    {
+      "path": "tests/workpack-editor-structured-sections.test.ts",
+      "sha256": "0381911127b620d4e8be6879ce7216540d5e0e815c75403bab2526bca455b7b0",
+      "bytes": 4264
+    },
+    {
+      "path": "tests/workspace-layout-regression.test.ts",
+      "sha256": "f7bf7e82426ba0d8b97bfe3a83ed9b2271796f4374db0a261e985bb06f5758f8",
+      "bytes": 101785
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/browser-metrics.json",
+      "sha256": "da74e47f46699fd99a6b9278baa530a3498708a4ee72ae49773191be40eeb492",
+      "bytes": 2200
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/browser.log",
+      "sha256": "5c5d7709933c4023eb734e62fb310ef684ff53d97bfeff24b30999cc6e82046e",
+      "bytes": 374
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/build.log",
+      "sha256": "a25bf166abf36dfb6370b9b2f1498a52e4077e4695d80ba2c91c07ffdb4f5e63",
+      "bytes": 6025
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/documents-editor-regression.log",
+      "sha256": "bdc6bfd7885716b1d959942bebdf60cd3f23a1cd2f0767aa2116bf68650dfa71",
+      "bytes": 379
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/lint.log",
+      "sha256": "d057813dda0ac38c849f6f4882eb2b123df2d0163e45fbeb6702def300bcd463",
+      "bytes": 623
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/report.json",
+      "sha256": "17975c3690819dcd0fac680d1a949687f30aea063852a55ac9865180822c109a",
+      "bytes": 2239
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/report.md",
+      "sha256": "1a49377b550e890874596473c771182a55d565b2805a03bc96b012d9275c42d2",
+      "bytes": 4833
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/typecheck.log",
+      "sha256": "823ed857eea92ed170f2ba390bc949894d32cfb52e32b4e2f6ee74768eaf3bde",
+      "bytes": 90
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/unit.log",
+      "sha256": "5cf588fed848472fff8d2735c4e5ef1ca6db54c0cc8b1e0446fd4720a173e08e",
+      "bytes": 507
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/workspace-document-regression.log",
+      "sha256": "0eadbfcbb30ac28aa5f79895382e8d9fa74d715f69ce0beb09b1439e6b71a51c",
+      "bytes": 1577
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/workspace-night-isolated.log",
+      "sha256": "2ccadbe08bd77178fe6b8ecd81893c837f20613834acfa7ff233c0434d64dd5c",
+      "bytes": 418
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/desktop-day-editor.png",
+      "sha256": "940797856345847a9e813213564db9bbd043d99719f2821ac08419e47d316112",
+      "bytes": 170690
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/desktop-night-editor.png",
+      "sha256": "fd618d5e07a274427263cb3c2a72de4ff0ac4f56c7d4aaa198eef98676393402",
+      "bytes": 148712
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/mobile-day-editor.png",
+      "sha256": "9d94eee157c65cf0b9965c4cc24f1944cedf7e1bc31990305d747f808b103e8f",
+      "bytes": 63105
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/mobile-night-editor.png",
+      "sha256": "b01ee5cadc4470f8a5170ef4059fc08102d0f563c0d35b68adef765d53a519aa",
+      "bytes": 52465
+    }
+  ]
+}
