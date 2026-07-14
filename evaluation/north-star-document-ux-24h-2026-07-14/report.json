@@ -50,9 +50,11 @@
     { "name": "documents_editor_browser_roundtrip_fallback", "passed": 22, "failed": 0, "durationSeconds": 154.79, "exitCode": 0 },
     { "name": "north_star_production_viewport_matrix", "passed": 4, "failed": 0, "durationSeconds": 32.49, "exitCode": 0 },
     { "name": "strict_typecheck", "exitCode": 0 },
-    { "name": "production_build", "staticPages": 27, "exitCode": 0 },
+    { "name": "production_build_final_log", "artifact": "remediation/build-final.log", "staticPages": 27, "exitCode": 0 },
     { "name": "product_diff_check", "outputLines": 0, "exitCode": 0 },
-    { "name": "build_log_trailing_whitespace", "lines": 0, "exitCode": 0 }
+    { "name": "production_build_final_log_trailing_whitespace", "artifact": "remediation/build-final.log", "lines": 0, "exitCode": 0 },
+    { "name": "legacy_build_log_hygiene", "artifact": "build.log", "lines": 0, "exitCode": 0 },
+    { "name": "full_candidate_range_diff_check", "base": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60", "artifact": "remediation/full-range-diff-check-final.log", "outputLines": 0, "exitCode": 0 }
   ],
   "sourceAudit": {
     "productFileCount": 8,
@@ -63,12 +65,13 @@
   },
   "evidenceHygiene": {
     "greenNamedFailingLogs": 0,
-    "failedIntermediateLogCount": 7,
+    "failedIntermediateLogCount": 8,
     "failedIntermediateLogs": [
       "remediation/red-document-schemas.log",
       "remediation/red-export-roundtrip.log",
       "remediation/red-mobile-interactions.log",
       "remediation/red-production-viewport-contract.log",
+      "remediation/red-full-range-diff-check.log",
       "remediation/red-intermediate-browser-document-schemas.log",
       "remediation/red-intermediate-focused-browser.log",
       "remediation/red-intermediate-focused-unit.log"

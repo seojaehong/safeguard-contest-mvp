@@ -19,6 +19,8 @@
   "runtimeProductDiffFromEvidenceHead": [],
   "runtimeProductDiffCount": 0,
   "shareDiff": [],
+  "diffCheckScope": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60...HEAD",
+  "diffCheckArtifact": "remediation/full-range-diff-check-final.log",
   "diffCheckErrorCount": 0,
   "diffCheckOutput": [],
   "diffCheckExitCode": 0,
