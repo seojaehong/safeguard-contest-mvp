@@ -3,12 +3,21 @@ import { describe, expect, test } from "vitest";
 import { buildDocpackResult } from "@/lib/mcp-tools";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import {
+  attachGenerationEvidence,
+  verifyAskResponseGenerationEvidence,
+} from "@/lib/generation-evidence";
+import {
   buildPhaseAProductMaterialization,
   materializePhaseAProductDocuments,
 } from "@/lib/ontology/product-materialization";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
+import type { AskResponse } from "@/lib/types";
+import {
+  buildReopenData,
+  buildWorkpackEvidenceSummary,
+} from "@/lib/workpack-store";
 
 const publishedGraph = assembleGraph(
   SEED_NODES.filter((node) => node.review_state === "published"),
@@ -106,11 +115,14 @@ describe("Phase A product materialization", () => {
           expect(document).toContain(citedUid);
         }
       }
-      expect(response.structured?.riskAssessmentRows.slice(-controlCount)).toHaveLength(controlCount);
+      const materializedRiskRows = response.structured?.riskAssessmentRows.slice(-controlCount) ?? [];
+      expect(materializedRiskRows).toHaveLength(controlCount);
+      expect(materializedRiskRows.every((row) => row.verificationStatus === "needsReview")).toBe(true);
+      expect(materializedRiskRows.every((row) => row.currentControls === "현장 확인 필요")).toBe(true);
       expect(
-        response.structured?.riskAssessmentRows
-          .slice(-controlCount)
-          .every((row) => row.verificationStatus === "needsReview"),
+        materializedRiskRows.every((row) =>
+          product.controls.some((control) => row.additionalControls.includes(control.label)),
+        ),
       ).toBe(true);
       expect(response.structured?.riskAssessmentValidation.ok).toBe(true);
     },
@@ -154,5 +166,49 @@ describe("Phase A product materialization", () => {
     expect(twice.deliverables.riskAssessmentDraft).toBe(once.deliverables.riskAssessmentDraft);
     expect(twice.deliverables.tbmBriefing).toBe(once.deliverables.tbmBriefing);
     expect(twice.structured?.riskAssessmentRows).toEqual(once.structured?.riskAssessmentRows);
+  });
+
+  test("reseals generation evidence and survives evidence-summary reopen", () => {
+    const secret = "phase-a-materialization-secret";
+    const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "지게차 상하차");
+    expect(knowledge.found).toBe(true);
+    if (!knowledge.found || !knowledge.phaseAProduct) {
+      throw new Error("expected entrapment Phase A product evidence");
+    }
+    const base = buildMockAskResponse(
+      "지게차 상하차",
+      mockSearchResults.slice(0, 3),
+      "mock",
+      "Phase A generation evidence test",
+    );
+    const sealable: AskResponse = {
+      ...base,
+      dbHarness: {
+        packet: {},
+      } as NonNullable<AskResponse["dbHarness"]>,
+    };
+    const sealed = attachGenerationEvidence(sealable, {
+      secret,
+      generatedAt: "2026-07-14T12:00:00.000Z",
+    });
+
+    const materialized = materializePhaseAProductDocuments(sealed, knowledge.phaseAProduct, {
+      generationEvidenceSecret: secret,
+    });
+    const verification = verifyAskResponseGenerationEvidence(materialized, secret);
+    expect(verification.ok).toBe(true);
+    if (!verification.ok) throw new Error(verification.message);
+
+    const reopened = buildReopenData({
+      question: materialized.question,
+      scenario: materialized.scenario,
+      deliverables: materialized.deliverables,
+      evidenceSummary: buildWorkpackEvidenceSummary(materialized, verification.snapshot),
+      status: materialized.status,
+    });
+
+    expect(reopened.blockers).toEqual([]);
+    expect(reopened.data?.phaseAProduct).toEqual(knowledge.phaseAProduct);
+    expect(reopened.data && verifyAskResponseGenerationEvidence(reopened.data, secret).ok).toBe(true);
   });
 });

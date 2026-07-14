@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/phase-a-product-materialization.test.ts tests/claw-tools-phase-a-materialization.test.ts tests/ontology-evidence-chains.test.ts tests/ontology-query.test.ts tests/ontology-knowledge-tool.test.ts tests/mcp-tools.test.ts tests/mcp-route-scope-contract.test.ts tests/workpack-store.test.ts tests/workpack-ontology-qa.test.ts tests/agent-loop.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-product-materialization
+
+
+ Test Files  10 passed (10)
+      Tests  136 passed (136)
+   Start at  21:19:02
+   Duration  10.36s (transform 16.31s, setup 0ms, import 22.01s, tests 1.04s, environment 2ms)

@@ -469,6 +469,22 @@ function aggregateGuidanceStatus(guidance: readonly KoshaGuidanceRecord[]): Evid
   return { reviewState: "verified", resolution: "resolved" };
 }
 
+function aggregateSifStatus(sifEvidence: readonly SifEvidenceRecord[]): EvidenceReviewStatus {
+  if (
+    sifEvidence.length === 0 ||
+    sifEvidence.some(
+      (source) =>
+        source.resolution !== "resolved" ||
+        (source.reviewState !== "verified" && source.reviewState !== "published"),
+    )
+  ) {
+    return { reviewState: "draft", resolution: "unresolved" };
+  }
+  return sifEvidence.every((source) => source.reviewState === "published")
+    ? { reviewState: "published", resolution: "resolved" }
+    : { reviewState: "verified", resolution: "resolved" };
+}
+
 export function resolveEvidenceChain(
   graph: OntologyGraph,
   input: string,
@@ -632,6 +648,7 @@ export function resolveEvidenceChain(
   );
   const reviewOnlyEvidence = matched.definition.reviewOnlyEvidence.map((source) => ({ ...source }));
   const guidanceStatus = aggregateGuidanceStatus(guidance);
+  const sifStatus = aggregateSifStatus(hazardPriority);
 
   const pack: EvidenceChainPack = {
     contractVersion: EVIDENCE_CHAIN_CONTRACT_VERSION,
@@ -712,7 +729,7 @@ export function resolveEvidenceChain(
   };
   pack.materialization = materialize(matched.definition, controls, hazardPriority);
 
-  if (guidanceStatus.resolution === "unresolved") {
+  if (sifStatus.resolution === "unresolved" || guidanceStatus.resolution === "unresolved") {
     return {
       resolved: false,
       published: false,
@@ -720,7 +737,7 @@ export function resolveEvidenceChain(
       inferenceState: "review_required",
       reason: "evidence_chain_review_required",
       message:
-        "published 그래프 경로는 확인되었으나 KOSHA production/local provenance bridge 또는 corpus gate가 미해결이어서 조립된 evidence chain을 게시하지 않습니다.",
+        "published 그래프 경로는 확인되었으나 SIF 또는 KOSHA production provenance가 draft/unresolved 상태여서 조립된 evidence chain을 게시하지 않습니다.",
       pack,
     };
   }

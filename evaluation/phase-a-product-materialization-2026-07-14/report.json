@@ -1,0 +1,70 @@
+{
+  "schema_version": "phase-a-product-materialization-audit/v1",
+  "baseline_sha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
+  "branch": "fix/phase-a-product-materialization",
+  "audit": {
+    "chains": [
+      {
+        "chain_id": "work-at-height-fall",
+        "task": "고소작업",
+        "hazard": "추락",
+        "active_sif_accidents": 2,
+        "mapped_kosha_guidance": 3,
+        "mandated_by_articles": 3,
+        "controls": 3,
+        "document_rows": 6,
+        "verified_document_rows": 0
+      },
+      {
+        "chain_id": "vehicle-machinery-entrapment",
+        "task": "지게차 상하차",
+        "hazard": "끼임",
+        "active_sif_accidents": 2,
+        "mapped_kosha_guidance": 0,
+        "mandated_by_articles": 1,
+        "controls": 1,
+        "document_rows": 2,
+        "verified_document_rows": 0
+      },
+      {
+        "chain_id": "electrical-work-electrocution",
+        "task": "전기 작업",
+        "hazard": "감전",
+        "active_sif_accidents": 3,
+        "mapped_kosha_guidance": 5,
+        "mandated_by_articles": 5,
+        "controls": 5,
+        "document_rows": 10,
+        "verified_document_rows": 0
+      }
+    ],
+    "totals": {
+      "chains": 3,
+      "active_sif_accidents": 7,
+      "mapped_kosha_guidance": 8,
+      "mandated_by_articles": 9,
+      "controls": 9,
+      "document_rows": 18,
+      "verified_document_rows": 0
+    }
+  },
+  "authority": {
+    "current_state": "review_required",
+    "reason": "Active SIF accident and KOSHA guidance provenance remains draft or unresolved.",
+    "effective_document_classification": "review_required",
+    "human_confirmation_required": true,
+    "human_confirmation_status": "pending"
+  },
+  "verification": {
+    "focused_test_files": 10,
+    "focused_tests": 136,
+    "focused_tests_exit_code": 0,
+    "typecheck_exit_code": 0,
+    "remaining_red_tests": 0
+  },
+  "constraints": {
+    "share_authority_files_changed": 0,
+    "database_migrations_changed": 0,
+    "package_or_lockfiles_changed": 0
+  }
+}

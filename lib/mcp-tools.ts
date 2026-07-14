@@ -16,6 +16,10 @@ import {
 } from "./db-harness";
 import type { QaReviewResult } from "./ontology/qa-review";
 import {
+  buildPhaseAProductMaterialization,
+  type PhaseAProductMaterialization,
+} from "./ontology/product-materialization";
+import {
   splitEvidenceChainPack,
   type ActiveEvidenceChainPack,
   type EvidenceChainDiagnostics,
@@ -95,6 +99,7 @@ export type DocpackResult = {
   scenario: AskResponse["scenario"];
   mode: AskResponse["mode"];
   evidenceLabels?: Record<string, SmsaEvidenceLabel>;
+  phaseAProduct?: PhaseAProductMaterialization;
   documents: Record<string, DocpackDocumentPreview | string>;
   fullDocumentsNote: string;
 };
@@ -105,6 +110,14 @@ export type ReviewedDocpackResult = {
   reviewTask: string;
   docpack: DocpackResult;
   qa: QaReviewResult;
+  qaAuthority?: "diagnostic_only";
+  phaseAReviewStatus?: {
+    verdict: "검토 필요";
+    verified: false;
+    authorityState: PhaseAProductMaterialization["authorityState"];
+    reason: string;
+    humanConfirmation: PhaseAProductMaterialization["humanConfirmation"];
+  };
   openClawUsageNote: string;
 };
 
@@ -184,6 +197,9 @@ export function buildDocpackResult(response: AskResponse, includeFull = false): 
   if (response.evidenceLabels) {
     result.evidenceLabels = response.evidenceLabels;
   }
+  if (response.phaseAProduct) {
+    result.phaseAProduct = response.phaseAProduct;
+  }
   return result;
 }
 
@@ -197,7 +213,7 @@ export function buildReviewedDocpackResult(
   reviewTask: string,
   includeFull = false
 ): ReviewedDocpackResult {
-  return {
+  const result: ReviewedDocpackResult = {
     engine: "safeclaw-runAsk",
     qualityPipeline: ["generate_safety_docpack", "qa_review_docpack"],
     reviewTask,
@@ -206,6 +222,22 @@ export function buildReviewedDocpackResult(
     openClawUsageNote:
       "이 응답은 SafeClaw 문서 엔진(/api/ask runAsk) 산출물을 QA 검수 계층으로 다시 확인한 결과입니다. OpenClaw는 이 페이로드를 최종 답변의 근거로 사용하세요.",
   };
+  if (response.phaseAProduct) {
+    result.qaAuthority = "diagnostic_only";
+    result.phaseAReviewStatus = {
+      verdict: "검토 필요",
+      verified: false,
+      authorityState: response.phaseAProduct.authorityState,
+      reason:
+        response.phaseAProduct.authorityState === "review_required"
+          ? "Phase A SIF/KOSHA 근거 또는 provenance가 draft/unresolved 상태입니다."
+          : "Phase A 근거 연결은 검증되었지만 사람 확인이 아직 완료되지 않았습니다.",
+      humanConfirmation: response.phaseAProduct.humanConfirmation,
+    };
+    result.openClawUsageNote =
+      "이 응답은 SafeClaw 문서 엔진 산출물과 Phase A provenance를 함께 제공합니다. QA 결과는 진단용이며 사람 확인이 완료되기 전에는 최종 근거로 사용하지 마세요.";
+  }
+  return result;
 }
 
 // ── run_safeclaw_harness_agent ────────────────────────────────────────────
@@ -569,6 +601,7 @@ export type SafetyKnowledgeFound = {
   evidenceContract: ActiveEvidenceChainPack | null;
   evidenceDiagnostics: EvidenceChainDiagnostics | null;
   evidenceChainState: "resolved" | "review_required" | "unverified" | "not_registered" | "not_evaluated";
+  phaseAProduct: PhaseAProductMaterialization | null;
 };
 
 export type SafetyKnowledgeNotFound = {
@@ -578,6 +611,7 @@ export type SafetyKnowledgeNotFound = {
   evidenceContract: null;
   evidenceDiagnostics: null;
   evidenceChainState: "review_required" | "unverified" | "not_registered" | "not_evaluated";
+  phaseAProduct: null;
 };
 
 export type SafetyKnowledgeResult = SafetyKnowledgeFound | SafetyKnowledgeNotFound;
@@ -624,6 +658,7 @@ export function buildSafetyKnowledgeResult(
       evidenceContract: null,
       evidenceDiagnostics: null,
       evidenceChainState: notFoundEvidenceState,
+      phaseAProduct: null,
     };
   }
   const evidencePack = evidenceResolution && "pack" in evidenceResolution
@@ -647,5 +682,9 @@ export function buildSafetyKnowledgeResult(
     evidenceContract: evidencePack?.activePack ?? null,
     evidenceDiagnostics: evidencePack?.diagnostics ?? null,
     evidenceChainState,
+    phaseAProduct: buildPhaseAProductMaterialization({
+      evidenceChainState,
+      evidencePack: evidencePack?.activePack ?? null,
+    }),
   };
 }

@@ -1,0 +1,7 @@
+Command: npm.cmd test -- tests/phase-a-product-materialization.test.ts
+Exit code: 1
+
+Test Files  1 failed (1)
+Tests       1 failed, 5 passed (6)
+
+The generation-evidence verification returned false after deterministic document materialization. The existing envelope still described the pre-materialization response payload.
