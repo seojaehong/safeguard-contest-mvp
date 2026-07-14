@@ -29,6 +29,16 @@ const viewportCases: ViewportCase[] = [
 const metricRows: Array<Record<string, unknown>> = [];
 const evaluationDirectory = path.join(process.cwd(), "evaluation", "north-star-document-ux-24h-2026-07-14");
 
+type ViewportGeometry = {
+  clippedControls: string[];
+  fixedOrStickyElements: string[];
+  horizontalOverflow: number;
+  interactionOverlaps: string[];
+  nestedScrollContainers: string[];
+  overlayOverlaps: string[];
+  tooSmallTouchTargets: string[];
+};
+
 async function openGeneratedWorkspace(page: Page, theme: Theme) {
   const sample = buildSampleWorkpack();
   await page.addInitScript(() => {
@@ -59,7 +69,8 @@ describe("North Star document cockpit and editor UX", () => {
     harness = await startIsolatedNextBrowserHarness({
       slug: "north-star-document-ux",
       initialPath: "/workspace",
-      portSalt: 5921
+      portSalt: 5921,
+      mode: "prod"
     });
     baseUrl = harness.baseUrl;
     browser = harness.browser;
@@ -87,6 +98,7 @@ describe("North Star document cockpit and editor UX", () => {
 
   it.each(viewportCases)("keeps $label review and editing surfaces focused", async ({ width, height, theme, label }) => {
     if (!browser) throw new Error("Browser was not started");
+    expect(harness?.mode).toBe("prod");
     const page = await browser.newPage({ viewport: { width, height } });
     await openGeneratedWorkspace(page, theme);
 
@@ -150,7 +162,7 @@ describe("North Star document cockpit and editor UX", () => {
     await editorDrawer.locator(":scope > summary").click();
     await page.locator('[data-testid="editor-evidence-panel"] .knowledge-link').waitFor({ state: "visible" });
 
-    const editorMetrics = await page.evaluate((mobile) => {
+    const editorMetrics = await page.evaluate(() => {
       const surface = document.querySelector<HTMLElement>(".document-editor-surface");
       const body = document.querySelector<HTMLElement>('[data-testid="editor-document-body"]');
       const structured = document.querySelector<HTMLElement>('[data-testid="document-structured-editor"]');
@@ -159,7 +171,7 @@ describe("North Star document cockpit and editor UX", () => {
       const bodyRect = body.getBoundingClientRect();
       const isInsideClosedDetails = (element: HTMLElement) => {
         let parent = element.parentElement;
-        while (parent && parent !== surface) {
+        while (parent) {
           if (parent instanceof HTMLDetailsElement && !parent.open) {
             const summary = parent.querySelector(":scope > summary");
             if (!summary?.contains(element)) return true;
@@ -168,31 +180,39 @@ describe("North Star document cockpit and editor UX", () => {
         }
         return false;
       };
-      const visibleTouchTargets = Array.from(
-        surface.querySelectorAll<HTMLElement>(
-          'button, summary, select, a[href], input:not([type="hidden"]), textarea'
-        )
-      ).filter((element) => (
+      const isVisible = (element: HTMLElement) => {
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return !isInsideClosedDetails(element)
+          && element.getClientRects().length > 0
+          && style.display !== "none"
+          && style.visibility !== "hidden"
+          && Number.parseFloat(style.opacity) > 0
+          && rect.right > 0
+          && rect.left < window.innerWidth
+          && rect.bottom > 0
+          && rect.top < window.innerHeight;
+      };
+      const visibleTouchTargets = Array.from(document.querySelectorAll<HTMLElement>(
+        'button, summary, select, a[href], input:not([type="hidden"]), textarea, [role="button"], [tabindex]:not([tabindex="-1"])'
+      )).filter((element) => (
         !isInsideClosedDetails(element)
-        && element.getClientRects().length > 0
-        && getComputedStyle(element).display !== "none"
-        && getComputedStyle(element).visibility !== "hidden"
+        && isVisible(element)
       ));
       const targetLabel = (element: HTMLElement) => {
-        const text = (element.textContent || element.getAttribute("aria-label") || element.getAttribute("href") || "")
+        const text = (element.getAttribute("aria-label") || element.textContent || element.getAttribute("href") || "")
           .trim()
           .replace(/\s+/gu, " ")
           .slice(0, 40);
-        return `${element.tagName.toLowerCase()}:${text}`;
+        const testId = element.getAttribute("data-testid");
+        return `${element.tagName.toLowerCase()}${testId ? `[${testId}]` : ""}:${text}`;
       };
-      const tooSmallTouchTargets = mobile
-        ? visibleTouchTargets
-          .filter((element) => {
-            const rect = element.getBoundingClientRect();
-            return rect.width < 44 || rect.height < 44;
-          })
-          .map(targetLabel)
-        : [];
+      const tooSmallTouchTargets = visibleTouchTargets
+        .filter((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.width < 44 || rect.height < 44;
+        })
+        .map(targetLabel);
       const findOverlapPairs = (elements: HTMLElement[]) => {
         const pairs: string[] = [];
         elements.forEach((first, firstIndex) => {
@@ -209,44 +229,77 @@ describe("North Star document cockpit and editor UX", () => {
         });
         return pairs;
       };
-      const interactionOverlaps = mobile ? findOverlapPairs(visibleTouchTargets) : [];
-      const structuralTargets = Array.from(surface.querySelectorAll<HTMLElement>(
-        '.document-toolbar, [data-testid="editor-document-body"], [data-testid="document-structured-editor"], [data-testid="editor-provenance-drawer"]'
-      ));
-      const positionedTargets = Array.from(surface.querySelectorAll<HTMLElement>("*"))
+      const positionedTargets = Array.from(document.querySelectorAll<HTMLElement>("body *"))
         .filter((element) => {
           const position = getComputedStyle(element).position;
-          return (position === "fixed" || position === "sticky") && element.getClientRects().length > 0;
+          return (position === "fixed" || position === "sticky") && isVisible(element);
         });
-      const layoutOverlaps = mobile
-        ? findOverlapPairs(Array.from(new Set([...structuralTargets, ...positionedTargets])))
-        : [];
+      const interactionOverlaps = findOverlapPairs(visibleTouchTargets);
+      const overlayOverlaps = positionedTargets.flatMap((overlay) => visibleTouchTargets
+        .filter((control) => !overlay.contains(control) && !control.contains(overlay))
+        .filter((control) => {
+          const overlayRect = overlay.getBoundingClientRect();
+          const controlRect = control.getBoundingClientRect();
+          const overlapWidth = Math.min(overlayRect.right, controlRect.right) - Math.max(overlayRect.left, controlRect.left);
+          const overlapHeight = Math.min(overlayRect.bottom, controlRect.bottom) - Math.max(overlayRect.top, controlRect.top);
+          return overlapWidth > 1 && overlapHeight > 1;
+        })
+        .map((control) => `${targetLabel(overlay)} <> ${targetLabel(control)}`));
+      const clippedControls = visibleTouchTargets.filter((element) => {
+        const rect = element.getBoundingClientRect();
+        if (rect.left < -1 || rect.right > window.innerWidth + 1) return true;
+        let ancestor = element.parentElement;
+        while (ancestor && ancestor !== document.body) {
+          const style = getComputedStyle(ancestor);
+          if (/(?:hidden|clip)/u.test(`${style.overflowX} ${style.overflowY}`)) {
+            const ancestorRect = ancestor.getBoundingClientRect();
+            if (
+              rect.left < ancestorRect.left - 1
+              || rect.right > ancestorRect.right + 1
+              || rect.top < ancestorRect.top - 1
+              || rect.bottom > ancestorRect.bottom + 1
+            ) return true;
+          }
+          ancestor = ancestor.parentElement;
+        }
+        return false;
+      }).map(targetLabel);
       const sectionTextareas = Array.from(structured.querySelectorAll<HTMLElement>(".document-section-textarea"));
       const sectionOverlaps = sectionTextareas.slice(1).filter((element, index) => {
         const previous = sectionTextareas[index];
         return previous.getBoundingClientRect().bottom > element.getBoundingClientRect().top + 0.5;
       }).length;
-      const nestedScrollCount = Array.from(surface.querySelectorAll<HTMLElement>("*"))
+      const nestedScrollContainers = Array.from(document.querySelectorAll<HTMLElement>("body *"))
         .filter((element) => {
           const style = getComputedStyle(element);
-          return !isInsideClosedDetails(element)
+          return isVisible(element)
             && /^(?:auto|scroll)$/u.test(style.overflowY)
             && element.scrollHeight > element.clientHeight + 1;
         })
-        .length;
+        .map(targetLabel);
+      const viewportGeometry: ViewportGeometry = {
+        clippedControls,
+        fixedOrStickyElements: positionedTargets.map(targetLabel),
+        horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
+        interactionOverlaps,
+        nestedScrollContainers,
+        overlayOverlaps,
+        tooSmallTouchTargets
+      };
       return {
         viewportWidth: window.innerWidth,
         viewportHeight: window.innerHeight,
         scrollWidth: document.documentElement.scrollWidth,
         bodyOffset: Math.round(bodyRect.top - surfaceRect.top),
-        nestedScrollCount: mobile ? nestedScrollCount : 0,
-        tooSmallTouchTargets,
-        interactionOverlaps,
-        layoutOverlaps,
+        overlapPolicy: {
+          documentedExcludedPairs: [],
+          ignoredNonPairs: ["ancestor-descendant", "closed-details-content", "outside-current-viewport"]
+        },
+        viewportGeometry,
         sectionOverlaps,
         sectionCount: sectionTextareas.length
       };
-    }, width === 391);
+    });
 
     const metricRow = { label, theme, width, height, review: reviewMetrics, editor: editorMetrics };
     metricRows.push(metricRow);
@@ -260,11 +313,13 @@ describe("North Star document cockpit and editor UX", () => {
     expect(reviewMetrics.scrollWidth).toBeLessThanOrEqual(width + 1);
     expect(reviewMetrics.nestedScrollCount).toBe(0);
     expect(editorMetrics.scrollWidth).toBeLessThanOrEqual(width + 1);
-    expect(editorMetrics.nestedScrollCount).toBe(0);
+    expect(editorMetrics.viewportGeometry.horizontalOverflow).toBe(0);
+    expect(editorMetrics.viewportGeometry.nestedScrollContainers).toEqual([]);
     expect(editorMetrics.bodyOffset).toBeLessThanOrEqual(width === 391 ? 230 : 300);
-    expect(editorMetrics.tooSmallTouchTargets).toEqual([]);
-    expect(editorMetrics.interactionOverlaps).toEqual([]);
-    expect(editorMetrics.layoutOverlaps).toEqual([]);
+    expect(editorMetrics.viewportGeometry.tooSmallTouchTargets).toEqual([]);
+    expect(editorMetrics.viewportGeometry.clippedControls).toEqual([]);
+    expect(editorMetrics.viewportGeometry.interactionOverlaps).toEqual([]);
+    expect(editorMetrics.viewportGeometry.overlayOverlaps).toEqual([]);
     expect(editorMetrics.sectionOverlaps).toBe(0);
   }, 90_000);
 });

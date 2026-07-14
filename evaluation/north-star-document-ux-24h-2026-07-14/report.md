@@ -24,10 +24,17 @@ environment file changed. Main integration remains on hold for independent revie
 - All 12 document profiles own at least three unique fallback sections. Actual sample
   transmission and field-message bodies render four meaningful sections each; an
   empty work permit renders four empty, editable permit sections.
-- Mobile interaction measurement opens the provenance drawer and audits visible
-  buttons, summaries, selects, links, inputs, checkboxes, and textareas. Pairwise
-  interaction and structural overlap checks include the editor header, body, drawer,
-  and product-owned fixed/sticky descendants.
+- The North Star matrix now starts `next start` from the production build. It cannot
+  pass against the default development harness, so Next's development overlay is not
+  part of the measured page.
+- Desktop and mobile interaction measurement opens the provenance drawer and audits
+  every visible viewport-wide button, summary, select, link, input, textarea, role
+  button, and focusable element. It also inventories viewport-wide fixed/sticky
+  elements and checks their geometric intersections with controls.
+- The same viewport-wide pass records horizontal overflow, visible nested scroll
+  containers, clipped controls, overlapping controls, and targets below 44px. No
+  overlap pair is allowlisted. Ancestor/descendant geometry, closed details content,
+  and elements outside the current viewport are documented as non-pairs.
 - The knowledge DB link now has a 44px minimum hit area. Cockpit compression,
   provenance drawers, Day/Night behavior, and the raw-source fallback remain intact.
 
@@ -47,30 +54,37 @@ environment file changed. Main integration remains on hold for independent revie
 5. Browser harness RED: the first focused cases targeted controls hidden at the
    opposite breakpoint. GREEN uses the visible mobile select and desktop tab without
    weakening any content or geometry assertion.
+6. Production viewport RED: all four rows failed because the old North Star matrix
+   reported harness mode `dev`. GREEN requires `prod` and measures the full visible
+   document instead of `.document-editor-surface` descendants only.
 
-Raw RED and GREEN logs are retained under `remediation/`.
+Raw RED and GREEN logs are retained under `remediation/`. Seven failed intermediate
+logs are explicitly RED-named and inventoried in `report.json`; no failing log has a
+GREEN filename.
 
 ## Verification
 
 - Focused unit/route/static contracts: `5 files`, `33/33`, exit `0`.
-- Full `/documents` browser regression: `22/22`, exit `0`, `111.92s`.
-- North Star Day/Night geometry matrix: `4/4`, exit `0`, `35.25s`.
+- Full `/documents` browser roundtrip/fallback regression: `22/22`, exit `0`,
+  `154.79s`.
+- North Star production Day/Night viewport matrix: `4/4`, exit `0`, `32.49s`.
 - Strict TypeScript: `tsc --noEmit --incremental false`, exit `0`.
 - Production build bound to the product SHA/tree: compiled, type checked, static pages
   `27/27`, exit `0`.
-- `git diff --check` for the product commit: exit `0`, no output.
+- `git diff --check`: exit `0`, no output.
 - `build.log` trailing-whitespace lines: `0`.
-- Product-file diff after commit: `0`; Share diff: `0`.
+- Runtime product diff from evidence HEAD `5668483`: `0`; evidence test diff: `1`;
+  Share diff: `0`.
 - Final worktree-owned Node/Next/Vitest process count at audit: `0`.
 
 ## Browser geometry
 
-| Row | Width | Nested scroll | Editor offset | Small targets | Interaction overlap | Layout overlap |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| desktop-day | 1440/1440 | 0 | 73px | 0 | 0 | 0 |
-| desktop-night | 1440/1440 | 0 | 93px | 0 | 0 | 0 |
-| mobile-day | 391/391 | 0 | 194px | 0 | 0 | 0 |
-| mobile-night | 391/391 | 0 | 198px | 0 | 0 | 0 |
+| Row | Width | Nested scroll | Fixed/sticky | Clipped | Small targets | Control overlap | Overlay overlap |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| desktop-day | 1440/1440 | 0 | 0 | 0 | 0 | 0 | 0 |
+| desktop-night | 1440/1440 | 0 | 0 | 0 | 0 | 0 | 0 |
+| mobile-day | 391/391 | 0 | 0 | 0 | 0 | 0 | 0 |
+| mobile-night | 391/391 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 All rows retain drawer height `50px` and section overlap count `0`. Exact values are
 in `browser-metrics.json`; reviewed Day/Night screenshots remain under `screenshots/`.
@@ -78,11 +92,11 @@ in `browser-metrics.json`; reviewed Day/Night screenshots remain under `screensh
 ## Evidence
 
 - `remediation/red-*.log` and matching GREEN logs
-- `remediation/focused-unit-green.log`
-- `remediation/documents-browser.log`
-- `remediation/browser-matrix.log`
-- `remediation/typecheck.log`
-- `remediation/build.log`
+- `remediation/focused-33-final.log`
+- `remediation/browser-roundtrip-fallback-final.log`
+- `remediation/production-viewport-matrix-final.log`
+- `remediation/typecheck-final.log`
+- `remediation/build-final.log`
 - `remediation/source-audit.json`
 - `browser-metrics.json` and four Day/Night screenshots
 - `artifact-hashes.json` with SHA-256 and byte size

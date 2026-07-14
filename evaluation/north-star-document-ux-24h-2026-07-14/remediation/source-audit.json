@@ -13,8 +13,13 @@
     "tests/workpack-editor-structured-sections.test.ts"
   ],
   "productFileCount": 8,
-  "remainingProductDiffAfterCommit": [],
+  "evidenceRemediationFiles": [
+    "tests/north-star-document-ux.test.ts"
+  ],
+  "runtimeProductDiffFromEvidenceHead": [],
+  "runtimeProductDiffCount": 0,
   "shareDiff": [],
+  "diffCheckErrorCount": 0,
   "diffCheckOutput": [],
   "diffCheckExitCode": 0,
   "buildLogTrailingWhitespaceLines": 0,
