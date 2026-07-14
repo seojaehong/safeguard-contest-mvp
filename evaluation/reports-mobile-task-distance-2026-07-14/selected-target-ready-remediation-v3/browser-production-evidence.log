@@ -1,0 +1,18 @@
+COMMAND=SAFECLAW_HARNESS_MODE=prod SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE=1 npm.cmd test -- tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1
+PRODUCT_SHA=8c19aeb81a5f3d0d84a5cc915bda9ea4511b140c
+BUILD_ID=V7sYEJmXts1AcgoAygczj
+GENERATED_AT=2026-07-14T00:21:15.273Z
+
+> safeclaw@0.1.0 test
+> vitest run tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/reports-mobile-task-distance
+
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  09:21:18
+   Duration  113.95s (transform 572ms, setup 0ms, import 2.12s, tests 110.77s, environment 0ms)
+
+EXIT_CODE=0
