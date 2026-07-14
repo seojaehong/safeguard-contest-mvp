@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/knowledge-governance.test.ts tests/knowledge-regenerate-route.test.ts tests/knowledge-governance-ui-contract.test.ts tests/knowledge-page-layout.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/northstar-24h-knowledge-round
+
+
+ Test Files  4 passed (4)
+      Tests  24 passed (24)
+   Start at  21:37:24
+   Duration  38.63s (transform 515ms, setup 0ms, import 1.28s, tests 36.64s, environment 1ms)
+EXIT_CODE: 0

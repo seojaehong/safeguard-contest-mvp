@@ -44,9 +44,19 @@ The product contract has four explicit states:
 `POST /api/knowledge/regenerate` is now stateless. It returns
 `storageMode: "stateless_candidate"`, `savedRunId: null`, and a versioned candidate
 DTO with `dbMutationAllowed`, `dbMutationPerformed`, and `publishAllowed` all set
-to `false`. The route has no Supabase import and no write call. `GET
+to `false`. Missing, non-array, or empty `rawEvents` fail closed before generation,
+and every accepted request must carry an explicit organization/site tenant context.
+Candidate v2 provenance binds that context to a SHA-256 event snapshot reference
+and a SHA-256 payload digest. Only bounded allowlisted review metadata is returned;
+raw event titles, URLs, and private payload fields are excluded from both the LLM
+prompt and the API response. `GET
 /api/knowledge/governance` and the `/knowledge` workspace surface expose the same
 shared stage and authority contract.
+
+The POST handler receives a mutation gateway as a dependency. Production injects
+a fail-closed gateway whose write method throws, while the stateless candidate
+path never invokes it. Tests execute the real handler with an observable gateway
+and require zero write calls, replacing source-text scanning as the no-write proof.
 
 The existing authenticated `/api/knowledge/ingest` path remains product-owned and
 may persist raw events and draft run records under its current RLS policy. It is
@@ -69,9 +79,10 @@ only when it contains an explicit discriminator:
 ## Deferred Migration Proposal
 
 A production review queue will eventually need reviewer identity, decision and
-review timestamps, immutable source-record references, candidate version and
+review timestamps, database-owned source-row references, candidate version and
 idempotency key, approved ontology node/edge identifiers, tenant-promotion scope,
-and rollback reference. Those fields should be introduced by a separately
+and rollback reference. Candidate v2's content-addressed snapshot reference does
+not replace those persisted audit fields. They should be introduced by a separately
 approved migration and RLS review. Until then, the UI remains read-only and no
 publish endpoint is added.
 
@@ -81,6 +92,8 @@ publish endpoint is added.
   tenant state, or publication.
 - SIF, KOSHA, law, organization history, and site history remain distinguishable
   in both the API contract and the workspace UI.
+- Candidate review can verify a bounded event snapshot without receiving sensitive
+  raw event text.
 - Existing callers that expected `regenerate` to save a run must move persistence
   to a future human-review workflow; there is no in-repository runtime caller in
   the current authoritative base.

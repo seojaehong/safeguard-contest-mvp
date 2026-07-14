@@ -18,6 +18,11 @@ const lawEvent: KnowledgeRawEvent = {
   reflectedDocuments: ["위험성평가표"]
 };
 
+const tenantContext = {
+  organizationId: "org-knowledge-1",
+  siteId: "site-knowledge-1"
+};
+
 describe("knowledge governance contract", () => {
   it("keeps the promotion path explicit and blocks machine publication", () => {
     expect(KNOWLEDGE_PROMOTION_STAGES.map((stage) => stage.id)).toEqual([
@@ -84,10 +89,11 @@ describe("knowledge governance contract", () => {
   });
 
   it("classifies existing raw-event DTOs without elevating a candidate's authority", () => {
-    expect(classifyKnowledgeEvent(lawEvent)).toMatchObject({
+    expect(classifyKnowledgeEvent(lawEvent, tenantContext)).toMatchObject({
       authorityId: "law",
       authority: "statutory_source",
-      scope: "public_reference"
+      scope: "public_reference",
+      tenantContext
     });
 
     const candidate = buildKnowledgeCandidate({
@@ -95,7 +101,8 @@ describe("knowledge governance contract", () => {
       rawEvents: [lawEvent],
       matchedHazardIds: ["hazard-fall"],
       generatedText: "검토용 초안",
-      providerLabel: "Hermes"
+      providerLabel: "Hermes",
+      tenantContext
     });
 
     expect(candidate).toMatchObject({
@@ -111,10 +118,38 @@ describe("knowledge governance contract", () => {
     });
     expect(candidate.provenance).toHaveLength(1);
     expect(candidate.provenance[0]).toMatchObject({
-      sourceId: "law-42",
+      eventReference: {
+        sourceId: "law-42",
+        digestAlgorithm: "sha256"
+      },
       authorityId: "law",
-      scope: "public_reference"
+      scope: "public_reference",
+      tenantContext
     });
+  });
+
+  it("refuses to build a candidate without raw event provenance", () => {
+    expect(() => buildKnowledgeCandidate({
+      question: "추락 위험 통제대책을 검토해줘",
+      rawEvents: [],
+      matchedHazardIds: ["hazard-fall"],
+      generatedText: "검토용 초안",
+      providerLabel: "Hermes",
+      tenantContext
+    })).toThrow("At least one raw event is required to build a knowledge candidate");
+  });
+
+  it("uses a deterministic event snapshot digest that changes with raw content", () => {
+    const first = classifyKnowledgeEvent(lawEvent, tenantContext);
+    const repeated = classifyKnowledgeEvent({ ...lawEvent }, tenantContext);
+    const changed = classifyKnowledgeEvent({
+      ...lawEvent,
+      payload: { article: "43" }
+    }, tenantContext);
+
+    expect(repeated.eventReference.digest).toBe(first.eventReference.digest);
+    expect(changed.eventReference.digest).not.toBe(first.eventReference.digest);
+    expect(changed.payloadEvidence.digest).not.toBe(first.payloadEvidence.digest);
   });
 
   it("requires explicit provenance metadata before calling an event SIF or tenant memory", () => {
@@ -143,22 +178,22 @@ describe("knowledge governance contract", () => {
       payload: { provenanceScope: "organization" }
     };
 
-    expect(classifyKnowledgeEvent(genericAccident)).toMatchObject({
+    expect(classifyKnowledgeEvent(genericAccident, tenantContext)).toMatchObject({
       authorityId: "external_context",
       authority: "incident_control_evidence",
       scope: "public_reference"
     });
-    expect(classifyKnowledgeEvent(explicitSif)).toMatchObject({
+    expect(classifyKnowledgeEvent(explicitSif, tenantContext)).toMatchObject({
       authorityId: "sif",
       authority: "incident_control_evidence",
       scope: "public_reference"
     });
-    expect(classifyKnowledgeEvent(unscopedManual)).toMatchObject({
+    expect(classifyKnowledgeEvent(unscopedManual, tenantContext)).toMatchObject({
       authorityId: "external_context",
       authority: "operation_memory",
       scope: "event_context"
     });
-    expect(classifyKnowledgeEvent(organizationMemory)).toMatchObject({
+    expect(classifyKnowledgeEvent(organizationMemory, tenantContext)).toMatchObject({
       authorityId: "organization_history",
       authority: "operation_memory",
       scope: "organization_private"
