@@ -19,6 +19,7 @@
 - Final mobile browser pass at 390x844: horizontal overflow 0, controls below 44px 0, primary actions 1, and a 12px separation between the message preview and send actions.
 - Vietnamese preview: localized heading and eight message lines rendered, with 0 residual Korean metadata labels (`현장`, `작업`, `핵심 위험`, `필수 조치`, `안전공지`).
 - The mobile preview heading was shortened and stacked so it no longer collapses into narrow vertical words.
+- The stale launch-CTA and visual-gap tests were aligned to the direct Share route: route contract 1/1 passed and visual/share contracts 14/14 passed.
 - Screenshot: `output/playwright/share-screen-submit-hotfix-2026-07-14/mobile-vietnamese-final.png`.
 
 ## Honest boundary

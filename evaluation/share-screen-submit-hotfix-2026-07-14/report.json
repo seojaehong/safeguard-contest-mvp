@@ -10,6 +10,9 @@
     "focusedFiles": 2,
     "focusedTests": 7,
     "focusedStatus": "pass",
+    "shareClientTests": 27,
+    "routeContractTests": 1,
+    "visualAndShareContractTests": 14,
     "typecheck": "pass",
     "staticAudit": {
       "status": "pass",
