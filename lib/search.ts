@@ -344,6 +344,11 @@ function includesRiskAssessmentDocument(item: SafetyReferenceItem): boolean {
 
 const MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW = 2;
 
+function isSafetyReferenceRiskParentEligible(item: SafetyReferenceItem): boolean {
+  if (item.item_type === "sif-case") return true;
+  return item.evidence_role === "direct" && isSafetyReferenceDirectEligible(item);
+}
+
 function getSupportingKoshaEvidenceRef(item: SafetyReferenceItem): string {
   if (!isKoshaSupportingCitationEligible(item)) return "";
   if (item.kosha_guide?.evidenceRef) return item.kosha_guide.evidenceRef;
@@ -386,6 +391,7 @@ export function buildSafetyReferenceRiskRows(
   ].filter(Boolean).join(" ");
   const eligibleReferences = references
     .filter(isSafetyReferenceRiskEligible)
+    .filter(isSafetyReferenceRiskParentEligible)
     .filter(includesRiskAssessmentDocument)
     .filter((item) => item.title || item.summary || item.controls.length);
   const supportingKoshaReferences = references.filter((item) =>
