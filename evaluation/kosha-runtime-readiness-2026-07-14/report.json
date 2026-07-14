@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "safeclaw-kosha-runtime-readiness-diagnosis/v1",
+  "generatedAt": "2026-07-14T23:05:39+09:00",
+  "authoritativeBaseSha": "a5ed356c28ebe5f7e19aee2bf65f9c8313dcc157",
+  "branch": "fix/kosha-runtime-readiness-20260714",
+  "liveReproduction": {
+    "statusHttp": 200,
+    "status": "ready",
+    "items": 9920,
+    "technicalTotal": 1040,
+    "technicalSupportRegulations": 237,
+    "technicalGuidelines": 803,
+    "catalogSearchOk": true,
+    "query": "전기",
+    "regulationResults": 0,
+    "guidelineResults": 0,
+    "excludedRemoteRegulations": 9,
+    "excludedRemoteGuidelines": 12,
+    "localCorpusStatus": "unconfigured"
+  },
+  "rootCause": {
+    "statusIgnoredLocalCorpusGate": true,
+    "runtimeVariable": "KOSHA_GUIDE_CORPUS_DIR",
+    "trackedDeployableSnapshot": false,
+    "availableLocalSnapshotBytes": 79572326,
+    "availableLocalSnapshotLaunchReady": false
+  },
+  "fix": {
+    "statusUsesSearchCorpusGate": true,
+    "unconfiguredHttpStatus": 503,
+    "blockedHttpStatus": 503,
+    "absolutePathExposed": false,
+    "remoteUnverifiedFallbackEnabled": false
+  },
+  "verification": {
+    "focusedStatusTestsPassed": 3,
+    "focusedKoshaTestsPassed": 43,
+    "typecheck": "passed",
+    "build": "passed",
+    "fullSuite": {
+      "testFilesPassed": 139,
+      "testsPassed": 1483,
+      "testFilesFailed": 5,
+      "testsFailed": 6,
+      "failureBoundary": "existing frontend browser harness timeouts and dirty-worktree source identity mismatch"
+    }
+  },
+  "mutations": {
+    "database": false,
+    "vercelEnvironment": false,
+    "productionDeployment": false
+  }
+}
