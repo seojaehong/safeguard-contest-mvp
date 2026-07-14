@@ -1,0 +1,27 @@
+[product-sha] 3162b4fe5e7ea32f139ff66bffa7835b14e29bd4
+[product-tree] 7caa7de486db7e53e5b15fa5c18234360908594a
+[suite-isolation] share_test_processes_before=0
+[wall-clock-timeout-seconds] 300
+[started-at] 2026-07-14T15:01:48.7139666+09:00
+
+
+> safeclaw@0.1.0 audit:frontend-consistency
+> node ./scripts/frontend_consistency_audit.mjs
+
+{
+  "outputPath": "evaluation\\frontend-audit-runner-port-v2-2026-07-11\\static-audit.json",
+  "status": "pass",
+  "counts": {
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "cssLines": 20521,
+    "importantDeclarations": 0
+  },
+  "coverageIssues": 0,
+  "violationCount": 0
+}
+
+
+[timeout-triggered] false
+[elapsed-seconds] 4.914
+[explicit-exit-code] 0

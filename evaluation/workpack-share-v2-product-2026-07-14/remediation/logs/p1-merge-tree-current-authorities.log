@@ -1,0 +1,52 @@
+[share-product] 3162b4fe5e7ea32f139ff66bffa7835b14e29bd4
+[share-tree] 7caa7de486db7e53e5b15fa5c18234360908594a
+[authoritative-main] 920c7f360688352156de4854b4957a9f2f1f0e43
+[authoritative-main-tree] 7e45e4f856d8c6e1a6b6c4e00956bd190a2c6e92
+[ontology-product] ed90a95dad3a28d6171758c52ac03acba83733fd
+[ontology-product-tree] 315c753db35faf229daf49a447c2568d138a185a
+[ontology-evidence] 2aa8aa9136a344671d50d8a815c33df8aeb40178
+[main-share-parent-order] authoritative-main share-product
+[main-share-exit-code] 0
+[main-share-output]
+0685b69a45c47b5c9545e0969b8ceaeb18122aae
+[ontology-share-parent-order] ontology-product share-product
+[ontology-share-exit-code] 1
+[ontology-share-output]
+7fe39999ffa8828ee0c202ef30da36641afc6e05
+100644 4b9c96555d60ca526e186178534f70e7c79064c4 1	app/api/workpacks/[id]/route.ts
+100644 5290ff3fd320a61abed2074d1df455e8d6315003 2	app/api/workpacks/[id]/route.ts
+100644 1075abe1d77d276b552b3944bd717a2c84911cc7 3	app/api/workpacks/[id]/route.ts
+100644 5194cc86ccbff2eb4fc29fc4d880fcaf84adefee 1	components/FieldOperationsWorkspace.tsx
+100644 7d071c23a2820aaed94f5041c323edf0a76f8181 2	components/FieldOperationsWorkspace.tsx
+100644 7a16ffa83d7250d11c0092cdbb7ffb3dfdb1a380 3	components/FieldOperationsWorkspace.tsx
+100644 41ebdf803e0ba5e991df0c15a8022823e1f0c543 1	components/SafeGuardCommandCenter.tsx
+100644 2c2dea738b785a411b61989b7d328c80a498fb39 2	components/SafeGuardCommandCenter.tsx
+100644 9922a4e5c2eb1c0a2ae19518518df29750b32ae9 3	components/SafeGuardCommandCenter.tsx
+100644 5d1113c75090cbb322064bd4961873e90574d34f 1	lib/workpack-commercial-store.ts
+100644 f4ff6b409c4f28c309e59c892d1df3b7ee1cbe02 2	lib/workpack-commercial-store.ts
+100644 28e3e9e8ebe174d2fa6f473fd46e8c4f4bdfc43c 3	lib/workpack-commercial-store.ts
+100644 660b5ff315f958300140e978f89cd5c40c726761 1	tests/helpers/isolated-next-browser-harness.ts
+100644 23ef718e69cff466a4ededb4812115b82397f1e2 2	tests/helpers/isolated-next-browser-harness.ts
+100644 2e6497119901dc5ce0d68be55bd61d1785b8abf7 3	tests/helpers/isolated-next-browser-harness.ts
+100644 16e26f9ae7c6e66a4fa442171aa2a5c9c154a6df 1	tests/workpack-generation-evidence-route.test.ts
+100644 e6b04d3b157fcc9c6e0ad747e077bce4351d3487 2	tests/workpack-generation-evidence-route.test.ts
+100644 b17639c106dc9e128d5ac311b6d7df1bd32c7ca6 3	tests/workpack-generation-evidence-route.test.ts
+100644 3a85bd29b65eb74154f39e2f92bdfdc664ddb4d8 1	tests/workpack-share-authority-routes.test.ts
+100644 7eab082e71482c9cea67f3d463db46e081d1bf1f 2	tests/workpack-share-authority-routes.test.ts
+100644 0149164993fd8c988fe0095cd22a650b195ffb15 3	tests/workpack-share-authority-routes.test.ts
+
+Auto-merging app/api/workpacks/[id]/route.ts
+CONFLICT (content): Merge conflict in app/api/workpacks/[id]/route.ts
+Auto-merging components/CurrentWorkpackModules.tsx
+Auto-merging components/FieldOperationsWorkspace.tsx
+CONFLICT (content): Merge conflict in components/FieldOperationsWorkspace.tsx
+Auto-merging components/SafeGuardCommandCenter.tsx
+CONFLICT (content): Merge conflict in components/SafeGuardCommandCenter.tsx
+Auto-merging lib/workpack-commercial-store.ts
+CONFLICT (content): Merge conflict in lib/workpack-commercial-store.ts
+Auto-merging tests/helpers/isolated-next-browser-harness.ts
+CONFLICT (content): Merge conflict in tests/helpers/isolated-next-browser-harness.ts
+Auto-merging tests/workpack-generation-evidence-route.test.ts
+CONFLICT (content): Merge conflict in tests/workpack-generation-evidence-route.test.ts
+Auto-merging tests/workpack-share-authority-routes.test.ts
+CONFLICT (content): Merge conflict in tests/workpack-share-authority-routes.test.ts

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-source-binding/v2",
+  "manifestId": "workpack-share-v2-p1-remediation-2026-07-14",
+  "product": {
+    "commitRef": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4^{commit}",
+    "commit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+    "parent": "7141baac3e0abca146ef6c110093c1c0643760a2",
+    "tree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+    "requestScopeCommit": "7141baac3e0abca146ef6c110093c1c0643760a2",
+    "requestScopeParent": "22de1180d69263f7c08ac0ed0cfda0894e2db7f5",
+    "requestScopeTree": "643e18dfadad0f3072e04cd6cebbe29cc802fd70",
+    "browserTestBlob": "56262284d2243d797d8e55d277bc3201ca4a2d08",
+    "harnessHelperBlob": "2e6497119901dc5ce0d68be55bd61d1785b8abf7",
+    "harnessTestBlob": "10b197abf4a7c50855688e6e1d925d7f13dd65ec",
+    "remoteBranchRef": "refs/heads/feat/workpack-share-v2-product"
+  },
+  "integration": {
+    "authorityRef": "920c7f360688352156de4854b4957a9f2f1f0e43^{commit}",
+    "commit": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "tree": "7e45e4f856d8c6e1a6b6c4e00956bd190a2c6e92",
+    "mergeBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "trackingRef": "refs/remotes/origin/feat/phase-a-evidence-integration"
+  },
+  "ontology": {
+    "productAuthorityRef": "ed90a95dad3a28d6171758c52ac03acba83733fd^{commit}",
+    "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "productTree": "315c753db35faf229daf49a447c2568d138a185a",
+    "mergeBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "evidenceAuthorityRef": "2aa8aa9136a344671d50d8a815c33df8aeb40178^{commit}",
+    "evidenceCommit": "2aa8aa9136a344671d50d8a815c33df8aeb40178",
+    "evidenceTree": "ba2162d3845c4407aff62e34c303e702834c520a",
+    "evidenceParent": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "evidenceTrackingRef": "refs/remotes/origin/fix/phase-a-ontology-target-ready"
+  },
+  "historicalEvidence": {
+    "commit": "22de1180d69263f7c08ac0ed0cfda0894e2db7f5",
+    "path": "evaluation/workpack-share-v2-product-2026-07-14/remediation/contract-evidence.json",
+    "blob": "eb8a61ceaaa3f95a7e3453f0e6bba6f458953a08"
+  }
+}

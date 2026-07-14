@@ -1,0 +1,27 @@
+[baseline-product-sha] 7141baac3e0abca146ef6c110093c1c0643760a2
+[source-state] precommit-harness-green-worktree
+[wall-clock-timeout-seconds] 180
+[started-at] 2026-07-14T14:50:21.6754906+09:00
+
+[stdout]
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-browser-harness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  14:50:24
+   Duration  23.45s (transform 63ms, setup 0ms, import 595ms, tests 22.22s, environment 0ms)
+
+
+[stderr]
+
+[timeout-triggered] false
+[process-tree-at-timeout] none
+[finished-at] 2026-07-14T14:50:47.9493446+09:00
+[elapsed-seconds] 26.274
+[explicit-exit-code] 0

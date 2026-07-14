@@ -1,0 +1,39 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-browser.test.ts -t day-desktop:sending:normal_100 --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+[share-browser-product-sha] 22de1180d69263f7c08ac0ed0cfda0894e2db7f5
+[share-browser-product-tree] bca14063ff834ab00f8fb960c532ff0fb5fb3502
+ ❯ tests/workpack-share-v2-browser.test.ts (130 tests | 1 failed | 129 skipped) 45345ms
+     × day-desktop:sending:normal_100 31432ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100
+TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+Call log:
+  - waiting for locator('[data-share-root][data-share-state=\'workpack_revalidation\']') to be visible
+
+ ❯ waitForShareState tests/workpack-share-v2-browser.test.ts:613:72
+    611|
+    612| async function waitForShareState(page: Page, state: string, timeoutMs …
+    613|   await page.locator(`[data-share-root][data-share-state='${state}']`)…
+       |                                                                        ^
+    614|     state: "visible",
+    615|     timeout: timeoutMs
+ ❯ verifyInFlightScopeIsolation tests/workpack-share-v2-browser.test.ts:1741:11
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:1880:7
+ ❯ tests/workpack-share-v2-browser.test.ts:1997:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 129 skipped (130)
+   Start at  13:54:12
+   Duration  46.80s (transform 334ms, setup 0ms, import 801ms, tests 45.34s, environment 0ms)
+
+[explicit-exit] 1

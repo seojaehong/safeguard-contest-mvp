@@ -1,0 +1,4134 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-browser-metrics/v1",
+  "amendmentId": "workpack-share-v2-product-2026-07-14",
+  "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+  "sourceIdentity": {
+    "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+    "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+    "browserTestBlob": "56262284d2243d797d8e55d277bc3201ca4a2d08"
+  },
+  "generatedAt": "2026-07-14T06:23:53.559Z",
+  "status": "complete",
+  "census": {
+    "formula": "4 environments * 16 fixtures * 2 scale modes",
+    "expectedCaseCount": 128,
+    "executedCaseCount": 128,
+    "unexecutedCaseCount": 0,
+    "uniqueExecutedCaseCount": 128,
+    "normal100Count": 64,
+    "owningRootText200Count": 64
+  },
+  "authority": {
+    "desktopViewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "mobileViewport": {
+      "width": 390,
+      "height": 844
+    },
+    "rootSelector": "[data-share-root]",
+    "rootAttribute": "data-share-text-scale",
+    "requiredRootMutationCount": 1,
+    "requiredDescendantStyleMutationCount": 0,
+    "requiredDirectLeafInlineMutationCount": 0
+  },
+  "rows": [
+    {
+      "caseId": "day-desktop:empty:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "empty",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "no_recipients",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:empty:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "empty",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "no_recipients",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 118,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:selected:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "selected",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "selected",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:selected:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "selected",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "selected",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:channel_unavailable:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "channel_unavailable",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:channel_unavailable:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "channel_unavailable",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 128,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:review_required:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "review_required",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "review_required",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 10,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:review_required:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "review_required",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "review_required",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 10,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:workpack_revalidation:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "workpack_revalidation",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "workpack_revalidation",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:workpack_revalidation:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "workpack_revalidation",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "workpack_revalidation",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:logged_out:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "logged_out",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "logged_out",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:logged_out:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "logged_out",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "logged_out",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:blocked:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "blocked",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:blocked:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "blocked",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:ready:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "ready",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "ready",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 24,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:ready:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "ready",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "ready",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 24,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:sending:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "sending",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "sending",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 4,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:sending:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "sending",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "sending",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:result_accepted:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "result_accepted",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "success",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:result_accepted:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "result_accepted",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "success",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 178,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:result_partial:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "result_partial",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "partial",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:result_partial:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "result_partial",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "partial",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 184,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:fail_session:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "fail_session",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:fail_session:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "fail_session",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:fail_dispatch:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "fail_dispatch",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:fail_dispatch:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "fail_dispatch",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 178,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:fail_dispatch_unpersisted:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "fail_dispatch_unpersisted",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:fail_dispatch_unpersisted:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "fail_dispatch_unpersisted",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:offline:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "offline",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "offline",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:offline:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "offline",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "offline",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-desktop:stale:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "stale",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "stale",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 4,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-desktop:stale:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-desktop",
+      "fixtureId": "stale",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "stale",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 4,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:empty:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "empty",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "no_recipients",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:empty:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "empty",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "no_recipients",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 118,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:selected:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "selected",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "selected",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:selected:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "selected",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "selected",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:channel_unavailable:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "channel_unavailable",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:channel_unavailable:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "channel_unavailable",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 128,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:review_required:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "review_required",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "review_required",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 10,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:review_required:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "review_required",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "review_required",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 10,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:workpack_revalidation:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "workpack_revalidation",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "workpack_revalidation",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:workpack_revalidation:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "workpack_revalidation",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "workpack_revalidation",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:logged_out:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "logged_out",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "logged_out",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:logged_out:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "logged_out",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "logged_out",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:blocked:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "blocked",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:blocked:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "blocked",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:ready:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "ready",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "ready",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 24,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:ready:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "ready",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "ready",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 24,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:sending:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "sending",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "sending",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:sending:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "sending",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "sending",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:result_accepted:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "result_accepted",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "success",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:result_accepted:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "result_accepted",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "success",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 178,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:result_partial:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "result_partial",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "partial",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:result_partial:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "result_partial",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "partial",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 184,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:fail_session:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "fail_session",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:fail_session:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "fail_session",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:fail_dispatch:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "fail_dispatch",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:fail_dispatch:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "fail_dispatch",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 178,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:fail_dispatch_unpersisted:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "fail_dispatch_unpersisted",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:fail_dispatch_unpersisted:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "fail_dispatch_unpersisted",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:offline:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "offline",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "offline",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:offline:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "offline",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "offline",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-desktop:stale:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "stale",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "stale",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 4,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-desktop:stale:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-desktop",
+      "fixtureId": "stale",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "expectedState": "stale",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 4,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:empty:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "empty",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "no_recipients",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:empty:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "empty",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "no_recipients",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 118,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:selected:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "selected",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "selected",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:selected:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "selected",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "selected",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:channel_unavailable:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "channel_unavailable",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:channel_unavailable:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "channel_unavailable",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 128,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:review_required:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "review_required",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "review_required",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 10,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:review_required:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "review_required",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "review_required",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 10,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:workpack_revalidation:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "workpack_revalidation",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "workpack_revalidation",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:workpack_revalidation:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "workpack_revalidation",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "workpack_revalidation",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:logged_out:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "logged_out",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "logged_out",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:logged_out:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "logged_out",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "logged_out",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:blocked:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "blocked",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:blocked:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "blocked",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:ready:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "ready",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "ready",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 24,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:ready:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "ready",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "ready",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 24,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:sending:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "sending",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "sending",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:sending:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "sending",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "sending",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:result_accepted:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "result_accepted",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "success",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:result_accepted:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "result_accepted",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "success",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 178,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:result_partial:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "result_partial",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "partial",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:result_partial:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "result_partial",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "partial",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 184,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:fail_session:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "fail_session",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:fail_session:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "fail_session",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:fail_dispatch:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "fail_dispatch",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:fail_dispatch:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "fail_dispatch",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 178,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:fail_dispatch_unpersisted:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "fail_dispatch_unpersisted",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:fail_dispatch_unpersisted:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "fail_dispatch_unpersisted",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:offline:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "offline",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "offline",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:offline:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "offline",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "offline",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "day-mobile:stale:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "stale",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "stale",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 4,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "day-mobile:stale:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "day-mobile",
+      "fixtureId": "stale",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "stale",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 4,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:empty:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "empty",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "no_recipients",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:empty:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "empty",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "no_recipients",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 118,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:selected:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "selected",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "selected",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:selected:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "selected",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "selected",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:channel_unavailable:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "channel_unavailable",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:channel_unavailable:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "channel_unavailable",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 128,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:review_required:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "review_required",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "review_required",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 10,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:review_required:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "review_required",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "review_required",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 10,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:workpack_revalidation:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "workpack_revalidation",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "workpack_revalidation",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:workpack_revalidation:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "workpack_revalidation",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "workpack_revalidation",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:logged_out:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "logged_out",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "logged_out",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:logged_out:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "logged_out",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "logged_out",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:blocked:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "blocked",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:blocked:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "blocked",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "blocked",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:ready:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "ready",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "ready",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 24,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:ready:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "ready",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "ready",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 24,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:sending:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "sending",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "sending",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:sending:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "sending",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "sending",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:result_accepted:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "result_accepted",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "success",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:result_accepted:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "result_accepted",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "success",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 178,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:result_partial:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "result_partial",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "partial",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:result_partial:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "result_partial",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "partial",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 184,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:fail_session:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "fail_session",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:fail_session:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "fail_session",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:fail_dispatch:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "fail_dispatch",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:fail_dispatch:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "fail_dispatch",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 178,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:fail_dispatch_unpersisted:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "fail_dispatch_unpersisted",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:fail_dispatch_unpersisted:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "fail_dispatch_unpersisted",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "fail",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 160,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:offline:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "offline",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "offline",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:offline:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "offline",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "offline",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 0,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    },
+    {
+      "caseId": "night-mobile:stale:normal_100",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "stale",
+      "scaleModeId": "normal_100",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "stale",
+      "freshDomRuns": 1,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 4,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": null
+    },
+    {
+      "caseId": "night-mobile:stale:owning_root_text_200",
+      "contractAmendmentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "environmentId": "night-mobile",
+      "fixtureId": "stale",
+      "scaleModeId": "owning_root_text_200",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedState": "stale",
+      "freshDomRuns": 2,
+      "languageAuthorityChecks": 0,
+      "reviewVariantChecks": 0,
+      "staleVariantChecks": 4,
+      "scopeRaceChecks": 0,
+      "geometry": {
+        "maximumHorizontalOverflow": 0,
+        "maximumPanelOverflow": 0,
+        "touchTargetFailureCount": 0,
+        "overlapFailureCount": 0,
+        "nestedScrollFailureCount": 0,
+        "clippedTextFailureCount": 0
+      },
+      "rootScale": {
+        "rootAttributeMutationCount": 1,
+        "descendantStyleMutationCount": 0,
+        "directLeafInlineMutationCount": 0,
+        "pseudoElementInspectionCount": 126,
+        "pseudoFailureCount": 0,
+        "mediaQueryStable": true,
+        "containerQueryStable": true
+      }
+    }
+  ]
+}

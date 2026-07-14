@@ -1,0 +1,30 @@
+[product-sha] 7141baac3e0abca146ef6c110093c1c0643760a2
+[product-tree] 643e18dfadad0f3072e04cd6cebbe29cc802fd70
+[scenario] day-desktop:sending:normal_100
+[wall-clock-timeout-seconds] 240
+[started-at] 2026-07-14T14:44:50.7017536+09:00
+
+[stdout]
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-browser.test.ts -t day-desktop:sending:normal_100 --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+[share-browser-product-sha] 7141baac3e0abca146ef6c110093c1c0643760a2
+[share-browser-product-tree] 643e18dfadad0f3072e04cd6cebbe29cc802fd70
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 129 skipped (130)
+   Start at  14:44:53
+   Duration  38.11s (transform 421ms, setup 0ms, import 946ms, tests 36.50s, environment 0ms)
+
+
+[stderr]
+
+[timeout-triggered] false
+[process-tree-at-timeout] none
+[finished-at] 2026-07-14T14:45:31.2556907+09:00
+[elapsed-seconds] 40.554
+[explicit-exit-code] 0

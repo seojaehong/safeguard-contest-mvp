@@ -1,0 +1,15 @@
+[expected-authoritative-main] 920c7f360688352156de4854b4957a9f2f1f0e43
+[expected-ontology-product] ed90a95dad3a28d6171758c52ac03acba83733fd
+[expected-ontology-evidence] 2aa8aa9136a344671d50d8a815c33df8aeb40178
+[expected-share-product] 3162b4fe5e7ea32f139ff66bffa7835b14e29bd4
+[refreshed-at] 2026-07-14T15:49:45.7775634+09:00
+[fetch-output]
+From https://github.com/seojaehong/safeguard-contest-mvp
+ * branch            feat/phase-a-evidence-integration -> FETCH_HEAD
+ * branch            fix/phase-a-ontology-target-ready -> FETCH_HEAD
+ * branch            feat/workpack-share-v2-product -> FETCH_HEAD
+[fetch-exit-code] 0
+[authoritative-main-after-fetch] 920c7f360688352156de4854b4957a9f2f1f0e43
+[ontology-evidence-after-fetch] 2aa8aa9136a344671d50d8a815c33df8aeb40178
+[ontology-evidence-parent] ed90a95dad3a28d6171758c52ac03acba83733fd
+[share-remote-after-fetch] 3162b4fe5e7ea32f139ff66bffa7835b14e29bd4

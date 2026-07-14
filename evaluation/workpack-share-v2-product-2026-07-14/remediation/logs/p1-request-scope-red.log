@@ -1,0 +1,42 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-browser.test.ts -t day-desktop:sending:normal_100 --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+[share-browser-product-sha] 22de1180d69263f7c08ac0ed0cfda0894e2db7f5
+[share-browser-product-tree] bca14063ff834ab00f8fb960c532ff0fb5fb3502
+ ❯ tests/workpack-share-v2-browser.test.ts (130 tests | 1 failed | 129 skipped) 21121ms
+     × day-desktop:sending:normal_100 9956ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ verifyInFlightScopeIsolation tests/workpack-share-v2-browser.test.ts:1715:63
+    1713|     await sessionPage.controller.releaseSessionSuccess();
+    1714|     await expectNoStaleOutcome(sessionPage.page, "review_required");
+    1715|     expect(sessionPage.controller.probe.dispatchRequestCount).toBe(0);
+       |                                                               ^
+    1716|   } finally {
+    1717|     await closeSharePage(sessionPage);
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:1880:7
+ ❯ tests/workpack-share-v2-browser.test.ts:1997:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 129 skipped (130)
+   Start at  13:51:07
+   Duration  22.38s (transform 275ms, setup 0ms, import 695ms, tests 21.12s, environment 0ms)
+
+[explicit-exit] 1

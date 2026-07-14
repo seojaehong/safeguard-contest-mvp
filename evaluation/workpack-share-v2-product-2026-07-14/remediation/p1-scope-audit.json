@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-p1-scope-audit/v2",
+  "productCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+  "productParent": "7141baac3e0abca146ef6c110093c1c0643760a2",
+  "remediationBase": "22de1180d69263f7c08ac0ed0cfda0894e2db7f5",
+  "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+  "changedFileCount": 7,
+  "changedFiles": [
+    "components/WorkflowSharePanel.tsx",
+    "components/WorkflowSharePolicy.ts",
+    "tests/fixtures/workpack-share-v2.ts",
+    "tests/helpers/isolated-next-browser-harness.ts",
+    "tests/workflow-share-panel-behavior.test.ts",
+    "tests/workpack-share-v2-browser-harness.test.ts",
+    "tests/workpack-share-v2-browser.test.ts"
+  ],
+  "strictAnyHitCount": 0,
+  "strictAnyHits": [],
+  "forbiddenPathCount": 0,
+  "forbiddenPaths": [],
+  "ontologyOrKoshaFileCount": 0,
+  "ontologyOrKoshaFiles": [],
+  "dbSchemaMigrationFileCount": 0,
+  "dbSchemaMigrationFiles": [],
+  "scopeExcludedGeneratedFileCount": 17,
+  "historicalMetricsRestoredCount": 1,
+  "status": "pass"
+}

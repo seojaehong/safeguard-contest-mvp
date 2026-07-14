@@ -1,0 +1,209 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-p1-ontology-conflict-contract/v3",
+  "shareProduct": {
+    "commit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+    "tree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+    "requestScopeCommit": "7141baac3e0abca146ef6c110093c1c0643760a2"
+  },
+  "authoritativeMain": {
+    "commit": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "tree": "7e45e4f856d8c6e1a6b6c4e00956bd190a2c6e92",
+    "mergeTreeExitCode": 0,
+    "mergeTreeResultTree": "0685b69a45c47b5c9545e0969b8ceaeb18122aae",
+    "pathOverlapCount": 0
+  },
+  "ontology": {
+    "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "productTree": "315c753db35faf229daf49a447c2568d138a185a",
+    "evidenceCommit": "2aa8aa9136a344671d50d8a815c33df8aeb40178",
+    "evidenceTree": "ba2162d3845c4407aff62e34c303e702834c520a",
+    "evidenceParent": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "mergeBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5"
+  },
+  "requestScopeReconciliation": {
+    "shareCommit": "7141baac3e0abca146ef6c110093c1c0643760a2",
+    "mergeTreeExitCode": 1,
+    "mergeTreeResultTree": "20fabcbb8c0ea8c889ef53224d5e33eeffd15734",
+    "contentConflictCount": 6,
+    "contentConflictFiles": [
+      "app/api/workpacks/[id]/route.ts",
+      "components/FieldOperationsWorkspace.tsx",
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/workpack-commercial-store.ts",
+      "tests/workpack-generation-evidence-route.test.ts",
+      "tests/workpack-share-authority-routes.test.ts"
+    ]
+  },
+  "finalMergeTree": {
+    "parentOrder": [
+      "ontology_product",
+      "share_product"
+    ],
+    "exitCode": 1,
+    "resultTree": "7fe39999ffa8828ee0c202ef30da36641afc6e05",
+    "contentConflictCount": 7,
+    "contentConflictFiles": [
+      "app/api/workpacks/[id]/route.ts",
+      "components/FieldOperationsWorkspace.tsx",
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/workpack-commercial-store.ts",
+      "tests/helpers/isolated-next-browser-harness.ts",
+      "tests/workpack-generation-evidence-route.test.ts",
+      "tests/workpack-share-authority-routes.test.ts"
+    ],
+    "autoMergedSemanticReviewFiles": [
+      "components/CurrentWorkpackModules.tsx"
+    ],
+    "logPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/logs/p1-merge-tree-current-authorities.log"
+  },
+  "overlap": {
+    "pathCount": 8,
+    "paths": [
+      {
+        "path": "app/api/workpacks/[id]/route.ts",
+        "mergeDisposition": "content_conflict",
+        "shareSymbols": [
+          "shareLocalization",
+          "verifyAskResponseGenerationEvidence",
+          "resolveReviewedLocalizationAuthority"
+        ],
+        "ontologySymbols": [
+          "buildPhaseAWorkpackAuthority",
+          "buildPhaseAWorkpackIdempotencyBindingFromSeal",
+          "phaseAWorkpackIdempotencyBindingsEqual"
+        ]
+      },
+      {
+        "path": "components/CurrentWorkpackModules.tsx",
+        "mergeDisposition": "auto_merge_semantic_review",
+        "shareSymbols": [
+          "CurrentDispatchModule",
+          "WorkflowSharePanel"
+        ],
+        "ontologySymbols": [
+          "buildPhaseAReviewUiState",
+          "applyPhaseADocumentAuthorityMarker",
+          "CurrentEvidenceModule"
+        ]
+      },
+      {
+        "path": "components/FieldOperationsWorkspace.tsx",
+        "mergeDisposition": "content_conflict",
+        "shareSymbols": [
+          "WorkflowSharePanel",
+          "selectedWorkerKeys",
+          "requiresRevalidation",
+          "workspaceTheme"
+        ],
+        "ontologySymbols": [
+          "PhaseAConfirmationBinding",
+          "saveCurrentWorkpackForPhaseA",
+          "confirmCurrentPhaseAWorkpack",
+          "createBoundRequestGate"
+        ]
+      },
+      {
+        "path": "components/SafeGuardCommandCenter.tsx",
+        "mergeDisposition": "content_conflict",
+        "shareSymbols": [
+          "initialReturnStep",
+          "initialLanguage",
+          "replaceWorkspaceLocation",
+          "workspacePage=share"
+        ],
+        "ontologySymbols": [
+          "applyServerConfirmedWorkpack",
+          "assessExactWorkpackConfirmation"
+        ]
+      },
+      {
+        "path": "lib/workpack-commercial-store.ts",
+        "mergeDisposition": "content_conflict",
+        "shareSymbols": [
+          "WorkpackOperationContext.updatedAt",
+          "WorkpackOperationContext.evidenceSummary",
+          "ActiveOwnedShareSession.dispatchBinding",
+          "loadActiveOwnedShareSession"
+        ],
+        "ontologySymbols": [
+          "WorkpackOperationContext.revision",
+          "assessStoredWorkpackShareAuthority(expectedWorkpackId)",
+          "assessExactWorkpackConfirmation"
+        ]
+      },
+      {
+        "path": "tests/helpers/isolated-next-browser-harness.ts",
+        "mergeDisposition": "content_conflict",
+        "shareSymbols": [
+          "taskkill status verification",
+          "ChildProcess close wait"
+        ],
+        "ontologySymbols": [
+          "ChildProcess exit wait",
+          "Windows rmSync retries",
+          "safeclaw-test-server.cjs runner"
+        ]
+      },
+      {
+        "path": "tests/workpack-generation-evidence-route.test.ts",
+        "mergeDisposition": "content_conflict",
+        "shareSymbols": [
+          "reviewed localization route authority tests",
+          "Vietnamese localization residue tests"
+        ],
+        "ontologySymbols": [
+          "deterministic Phase A workpack authority tests",
+          "idempotent reopen tests"
+        ]
+      },
+      {
+        "path": "tests/workpack-share-authority-routes.test.ts",
+        "mergeDisposition": "content_conflict",
+        "shareSymbols": [
+          "dispatch access_policy CAS route tests",
+          "provider receipt persistence tests"
+        ],
+        "ontologySymbols": [
+          "exact-row authority fail-close tests",
+          "Phase A confirmation revision CAS route tests"
+        ]
+      }
+    ]
+  },
+  "requiredResolution": {
+    "shareAuthorityFields": [
+      "canonicalWorkpackRevision"
+    ],
+    "ontologyWorkpackOperationContextFields": [
+      "revision",
+      "updatedAt",
+      "evidenceSummary"
+    ],
+    "revisionDomains": "Share canonicalWorkpackRevision remains a SHA-256 content hash. Ontology revision and updatedAt remain the same RFC3339 workpacks.updated_at CAS value. Neither domain may substitute for or be merged into the other.",
+    "ontologyServerAuthority": "Preserve deterministic workpack ID, exact authenticated row, generation seal, user, organization, site, and server-confirmed Phase A authority checks.",
+    "evidenceSummaryOverlay": "Preserve the full raw evidence_summary object and overlay canonical confirmation fields without deleting unknown reviewedLocalizationEnvelopes, dispatch, localization, or other keys.",
+    "localizationEnvelopeHandling": "Unknown localization envelope keys survive; stale reviewedLocalizationEnvelopes are revalidated against current row authority and never trusted blindly.",
+    "localizationReviewInvalidation": "Any localization review that updates workpacks.updated_at invalidates Phase A authority and the Share request scope; reread the authenticated row before continuing.",
+    "confirmationCas": "Preserve workpacks.updated_at compare-and-swap, strictly newer updated_at, confirmationId replay/conflict handling, and no last-write-wins fallback.",
+    "shareRequestScope": "Preserve request identity/version guards so accepted, partial, failed, session, provider, and log outcomes from an old workpack, target, channel, or authority scope cannot update the current UI.",
+    "dispatchCas": "Preserve workpack_share_sessions.access_policy transitions ready-to-reserved-to-recorded-or-uncertain with equality on the previously read session updated_at.",
+    "shareWorkspaceState": "Final semantic merge retains initialWorkpackId, initialWorkpackAuthority, requiresRevalidation, theme/workspaceTheme, validated Share URL state, and request-scope identity/version guards.",
+    "harnessTeardown": "Combine taskkill status/error verification and process close semantics with ontology exit waiting, temp-directory retries, and the file-based Next runner; teardown must fail closed and leave zero Share processes.",
+    "testResolution": "Retain actual route authority/CAS tests, Phase A exact-row tests, in-flight Share scope race tests, localization completeness tests, and harness teardown regression tests."
+  },
+  "prohibitedResolution": [
+    "Substituting Share canonicalWorkpackRevision for ontology revision/updatedAt or vice versa",
+    "Dropping revision, updatedAt, canonicalWorkpackRevision, or evidenceSummary",
+    "Replacing raw evidence_summary instead of overlaying canonical confirmation fields",
+    "Dropping unknown reviewedLocalizationEnvelopes, dispatch, localization, or other evidence_summary keys",
+    "Trusting stale localization envelopes without current-row revalidation",
+    "Retaining Phase A authority or Share request scope after localization review changes workpacks.updated_at",
+    "Dropping initialWorkpackId, initialWorkpackAuthority, requiresRevalidation, theme, Share URL state, or request-scope guards",
+    "Replacing confirmation or dispatch CAS with last-write-wins",
+    "Applying an old Share outcome after request scope changes",
+    "Silently ignoring browser harness process termination failure",
+    "Treating a clean main merge-tree or auto-merge as semantic approval",
+    "Resolving ontology conflicts on the Share branch"
+  ],
+  "integrationStatus": "HOLD_FRESH_REVIEWS_AND_SEMANTIC_CONFLICT_RESOLUTION"
+}

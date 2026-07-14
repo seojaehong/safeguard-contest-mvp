@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-p1-integration-adoption/v2",
+  "product": {
+    "branch": "feat/workpack-share-v2-product",
+    "exactBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "requestScopeCommit": "7141baac3e0abca146ef6c110093c1c0643760a2",
+    "harnessCommit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+    "commit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+    "tree": "7caa7de486db7e53e5b15fa5c18234360908594a"
+  },
+  "authoritativeMain": {
+    "authorityRef": "920c7f360688352156de4854b4957a9f2f1f0e43^{commit}",
+    "commit": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "tree": "7e45e4f856d8c6e1a6b6c4e00956bd190a2c6e92",
+    "mergeBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "mergeTreeParentOrder": [
+      "authoritative_main",
+      "share_product"
+    ],
+    "mergeTreeExitCode": 0,
+    "mergeTreeResultTree": "0685b69a45c47b5c9545e0969b8ceaeb18122aae",
+    "pathOverlapCount": 0,
+    "koshaPathOverlapCount": 0,
+    "mechanicallyClean": true,
+    "directIntegrationReadinessClaimed": false
+  },
+  "series": [
+    {
+      "commit": "08e6a825180482b6f9cb251fae6f29fb76bd527f",
+      "subject": "feat: bind Share dispatch to server authority",
+      "gitCherry": "+",
+      "adoptionAction": "product_candidate"
+    },
+    {
+      "commit": "4aed97940472d874b65008fd880b21c4e178d173",
+      "subject": "feat: simplify the Share delivery flow",
+      "gitCherry": "+",
+      "adoptionAction": "product_candidate"
+    },
+    {
+      "commit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "subject": "docs: amend Share browser authority",
+      "gitCherry": "+",
+      "adoptionAction": "contract_authority"
+    },
+    {
+      "commit": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+      "subject": "fix: harden Share browser delivery",
+      "gitCherry": "+",
+      "adoptionAction": "product_candidate"
+    },
+    {
+      "commit": "0befdc1799b419d7b379cbbbf10d7e2320cd7d46",
+      "subject": "chore: record Share v2 product evidence",
+      "gitCherry": "+",
+      "adoptionAction": "evidence_only"
+    },
+    {
+      "commit": "bec9dd71f2a249bc184abea477e911afd10845ca",
+      "subject": "fix: harden Share v2 dispatch authority",
+      "gitCherry": "+",
+      "adoptionAction": "product_candidate"
+    },
+    {
+      "commit": "fc2bd1783fcc413981306f689d67bb6c659a985e",
+      "subject": "fix: preserve Share stale recovery state",
+      "gitCherry": "+",
+      "adoptionAction": "product_candidate"
+    },
+    {
+      "commit": "22de1180d69263f7c08ac0ed0cfda0894e2db7f5",
+      "subject": "chore: record Share v2 remediation evidence",
+      "gitCherry": "+",
+      "adoptionAction": "evidence_only"
+    },
+    {
+      "commit": "7141baac3e0abca146ef6c110093c1c0643760a2",
+      "subject": "fix: guard Share outcomes by request scope",
+      "gitCherry": "+",
+      "adoptionAction": "product_candidate"
+    },
+    {
+      "commit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "subject": "fix: verify Share browser harness teardown",
+      "gitCherry": "+",
+      "adoptionAction": "test_harness_candidate"
+    }
+  ],
+  "ontology": {
+    "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "productTree": "315c753db35faf229daf49a447c2568d138a185a",
+    "evidenceCommit": "2aa8aa9136a344671d50d8a815c33df8aeb40178",
+    "evidenceTree": "ba2162d3845c4407aff62e34c303e702834c520a",
+    "evidenceParent": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+    "mergeBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "mergeTreeParentOrder": [
+      "ontology_product",
+      "share_product"
+    ],
+    "mergeTreeExitCode": 1,
+    "mergeTreeResultTree": "7fe39999ffa8828ee0c202ef30da36641afc6e05",
+    "pathOverlapCount": 8,
+    "contentConflictCount": 7,
+    "semanticReviewPathCount": 8,
+    "conflictContractPath": "evaluation/workpack-share-v2-product-2026-07-14/remediation/p1-ontology-conflict-contract.json"
+  },
+  "integrationOrder": [
+    "Obtain fresh independent reviews for final Share product 3162b4fe5e7ea32f139ff66bffa7835b14e29bd4 and ontology product ed90a95dad3a28d6171758c52ac03acba83733fd.",
+    "Selectively adopt product_candidate, contract_authority, and test_harness_candidate commits onto authoritative main 920c7f360688352156de4854b4957a9f2f1f0e43; retain evidence_only commits as review records.",
+    "Semantically resolve all eight ontology overlap paths and seven content conflicts while preserving both authority and CAS contracts.",
+    "Run combined route, typecheck, build, static, and browser gates on the integrated tree before approval."
+  ],
+  "status": "HOLD_FRESH_REVIEWS_AND_SEMANTIC_CONFLICT_RESOLUTION"
+}

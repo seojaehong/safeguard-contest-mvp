@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-p1-product-census/v2",
+  "finalProduct": {
+    "commit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+    "parent": "7141baac3e0abca146ef6c110093c1c0643760a2",
+    "tree": "7caa7de486db7e53e5b15fa5c18234360908594a"
+  },
+  "commits": [
+    {
+      "kind": "request_scope_product",
+      "commit": "7141baac3e0abca146ef6c110093c1c0643760a2",
+      "parent": "22de1180d69263f7c08ac0ed0cfda0894e2db7f5",
+      "tree": "643e18dfadad0f3072e04cd6cebbe29cc802fd70",
+      "changedFileCount": 5,
+      "addedFileCount": 0,
+      "modifiedFileCount": 5,
+      "deletedFileCount": 0,
+      "insertions": 440,
+      "deletions": 81,
+      "files": [
+        {
+          "status": "M",
+          "path": "components/WorkflowSharePanel.tsx",
+          "gitBlob": "980abf8c29a4abbba51c20d9d5661dfcb2cd31eb"
+        },
+        {
+          "status": "M",
+          "path": "components/WorkflowSharePolicy.ts",
+          "gitBlob": "ae9f31c77198a73b8c0318c6339375e091154107"
+        },
+        {
+          "status": "M",
+          "path": "tests/fixtures/workpack-share-v2.ts",
+          "gitBlob": "c4b6d07db7a3401a300ce5f460a0516076526533"
+        },
+        {
+          "status": "M",
+          "path": "tests/workflow-share-panel-behavior.test.ts",
+          "gitBlob": "8e4e4c2bb78717c657ee46594bfe5dda11dde10a"
+        },
+        {
+          "status": "M",
+          "path": "tests/workpack-share-v2-browser.test.ts",
+          "gitBlob": "56262284d2243d797d8e55d277bc3201ca4a2d08"
+        }
+      ]
+    },
+    {
+      "kind": "browser_harness_product",
+      "commit": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+      "parent": "7141baac3e0abca146ef6c110093c1c0643760a2",
+      "tree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+      "changedFileCount": 2,
+      "addedFileCount": 1,
+      "modifiedFileCount": 1,
+      "deletedFileCount": 0,
+      "insertions": 63,
+      "deletions": 1,
+      "files": [
+        {
+          "status": "M",
+          "path": "tests/helpers/isolated-next-browser-harness.ts",
+          "gitBlob": "2e6497119901dc5ce0d68be55bd61d1785b8abf7"
+        },
+        {
+          "status": "A",
+          "path": "tests/workpack-share-v2-browser-harness.test.ts",
+          "gitBlob": "10b197abf4a7c50855688e6e1d925d7f13dd65ec"
+        }
+      ]
+    }
+  ],
+  "combined": {
+    "fromExclusive": "22de1180d69263f7c08ac0ed0cfda0894e2db7f5",
+    "toInclusive": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+    "changedFileCount": 7,
+    "addedFileCount": 1,
+    "modifiedFileCount": 6,
+    "deletedFileCount": 0,
+    "insertions": 503,
+    "deletions": 82,
+    "files": [
+      "components/WorkflowSharePanel.tsx",
+      "components/WorkflowSharePolicy.ts",
+      "tests/fixtures/workpack-share-v2.ts",
+      "tests/helpers/isolated-next-browser-harness.ts",
+      "tests/workflow-share-panel-behavior.test.ts",
+      "tests/workpack-share-v2-browser-harness.test.ts",
+      "tests/workpack-share-v2-browser.test.ts"
+    ]
+  },
+  "forbiddenPathCount": 0,
+  "strictAnyHitCount": 0,
+  "status": "pass"
+}

@@ -1,0 +1,13 @@
+[product-sha] 3162b4fe5e7ea32f139ff66bffa7835b14e29bd4
+[product-tree] 7caa7de486db7e53e5b15fa5c18234360908594a
+[wall-clock-timeout-seconds] 300
+[started-at] 2026-07-14T15:56:44.5285319+09:00
+
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+[timeout-triggered] false
+[share-test-processes-after] 0
+[elapsed-seconds] 13.385
+[explicit-exit-code] 0

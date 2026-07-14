@@ -5,20 +5,8 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const REPO_ROOT = path.resolve(__dirname, "../../..");
-const EVIDENCE_PATH = path.join(__dirname, "contract-evidence.json");
-const PRODUCT = "fc2bd1783fcc413981306f689d67bb6c659a985e";
-const PRODUCT_PARENT = "bec9dd71f2a249bc184abea477e911afd10845ca";
-const PRODUCT_TREE = "7ce7fee2d80967f02d32b80e110067f581e1c07b";
-const REMEDIATION_PARENT = "0befdc1799b419d7b379cbbbf10d7e2320cd7d46";
-const EXACT_BASE = "f45bba17bcce0d8ebb2690f82d014dbe42ae8191";
-const REJECTED_PRODUCT = "bec9dd71f2a249bc184abea477e911afd10845ca";
-const REJECTED_TREE = "7bf80b0c99f43c1e71adff00274d035a0bc61fcd";
-const CURRENT_INTEGRATION = "67d2c9e28e7278c58f46b46c2512c7133d88d1d3";
-const PREVIOUS_INTEGRATION = "ea7aa7223a056c884d5b0ba55563d602af328451";
-const ONTOLOGY = "ff093fae30c331816f0068f9075b91b151d05813";
-const ONTOLOGY_BASE = "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5";
-const BROWSER_BLOB = "840dbcea9708e7670297b4dddc46a7f3398eb42f";
-const REMOTE_REF = "refs/heads/feat/workpack-share-v2-product";
+const EVIDENCE_PATH = path.join(__dirname, "p1-evidence.json");
+const BINDING_ARGUMENT = "--binding-manifest";
 const attackModes = new Set([
   "missing_amendment",
   "stale_product_sha",
@@ -28,13 +16,35 @@ const attackModes = new Set([
   "legacy_391",
   "per_node_mutation",
   "contaminated_pass",
+  "hang_reclassified",
   "stale_current_main",
+  "stale_main_tree",
   "kosha_overlap",
   "ontology_cas_omission",
   "log_hash_tamper",
   "missing_incident",
+  "missing_harness_red",
   "stale_browser_blob",
-  "red_reclassified"
+  "stale_harness_blob",
+  "red_reclassified",
+  "harness_red_reclassified",
+  "missing_binding_manifest",
+  "stale_binding_product",
+  "stale_binding_integration",
+  "stale_binding_ontology_product",
+  "stale_binding_ontology_evidence",
+  "missing_authority_ref",
+  "wrong_authority_ref",
+  "missing_ontology_authority_ref",
+  "wrong_ontology_authority_ref",
+  "unknown_binding_key",
+  "stale_evidence_binding_hash",
+  "stale_scope_race_count",
+  "revision_domain_conflation",
+  "evidence_summary_overlay_omission",
+  "stale_localization_trust",
+  "localization_scope_invalidation_omission",
+  "share_workspace_state_omission"
 ]);
 
 function readJson(filePath) {
@@ -62,37 +72,132 @@ function git(args, expectedStatus = 0) {
 function assertKeys(value, keys, label) {
   assert.equal(typeof value, "object", `${label} must be an object`);
   assert.notEqual(value, null, `${label} must not be null`);
+  assert.equal(Array.isArray(value), false, `${label} must not be an array`);
   assert.deepEqual(Object.keys(value).sort(), [...keys].sort(), `${label} has a missing or unknown key`);
 }
 
-function validateClosedSchema(evidence) {
+function assertSha(value, label) {
+  assert.equal(typeof value, "string", `${label} must be a string`);
+  assert.match(value, /^[0-9a-f]{40}$/u, `${label} must be an exact SHA`);
+}
+
+function assertSha256(value, label) {
+  assert.equal(typeof value, "string", `${label} must be a string`);
+  assert.match(value, /^[0-9a-f]{64}$/u, `${label} must be a SHA-256 digest`);
+}
+
+function lines(value) {
+  return value.split(/\r?\n/u).filter(Boolean);
+}
+
+function pathOverlap(left, right) {
+  const rightSet = new Set(right);
+  return left.filter((item) => rightSet.has(item)).sort();
+}
+
+function validateBindingSchema(binding) {
+  assertKeys(binding, [
+    "schemaVersion", "manifestId", "product", "integration", "ontology", "historicalEvidence"
+  ], "binding");
+  assertKeys(binding.product, [
+    "commitRef", "commit", "parent", "tree", "requestScopeCommit", "requestScopeParent",
+    "requestScopeTree", "browserTestBlob", "harnessHelperBlob", "harnessTestBlob", "remoteBranchRef"
+  ], "binding.product");
+  assertKeys(binding.integration, [
+    "authorityRef", "commit", "tree", "mergeBase", "trackingRef"
+  ], "binding.integration");
+  assertKeys(binding.ontology, [
+    "productAuthorityRef", "productCommit", "productTree", "mergeBase", "evidenceAuthorityRef",
+    "evidenceCommit", "evidenceTree", "evidenceParent", "evidenceTrackingRef"
+  ], "binding.ontology");
+  assertKeys(binding.historicalEvidence, ["commit", "path", "blob"], "binding.historicalEvidence");
+  assert.equal(binding.schemaVersion, "safeclaw-workpack-share-v2-source-binding/v2");
+  assert.equal(binding.manifestId, "workpack-share-v2-p1-remediation-2026-07-14");
+  for (const [label, value] of [
+    ["product.commit", binding.product.commit],
+    ["product.parent", binding.product.parent],
+    ["product.tree", binding.product.tree],
+    ["product.requestScopeCommit", binding.product.requestScopeCommit],
+    ["product.requestScopeParent", binding.product.requestScopeParent],
+    ["product.requestScopeTree", binding.product.requestScopeTree],
+    ["product.browserTestBlob", binding.product.browserTestBlob],
+    ["product.harnessHelperBlob", binding.product.harnessHelperBlob],
+    ["product.harnessTestBlob", binding.product.harnessTestBlob],
+    ["integration.commit", binding.integration.commit],
+    ["integration.tree", binding.integration.tree],
+    ["integration.mergeBase", binding.integration.mergeBase],
+    ["ontology.productCommit", binding.ontology.productCommit],
+    ["ontology.productTree", binding.ontology.productTree],
+    ["ontology.mergeBase", binding.ontology.mergeBase],
+    ["ontology.evidenceCommit", binding.ontology.evidenceCommit],
+    ["ontology.evidenceTree", binding.ontology.evidenceTree],
+    ["ontology.evidenceParent", binding.ontology.evidenceParent],
+    ["historicalEvidence.commit", binding.historicalEvidence.commit],
+    ["historicalEvidence.blob", binding.historicalEvidence.blob]
+  ]) assertSha(value, label);
+  assert.equal(binding.product.commitRef, `${binding.product.commit}^{commit}`);
+  assert.equal(binding.product.parent, binding.product.requestScopeCommit);
+  assert.equal(binding.integration.authorityRef, `${binding.integration.commit}^{commit}`);
+  assert.equal(binding.ontology.productAuthorityRef, `${binding.ontology.productCommit}^{commit}`);
+  assert.equal(binding.ontology.evidenceAuthorityRef, `${binding.ontology.evidenceCommit}^{commit}`);
+  assert.equal(binding.ontology.evidenceParent, binding.ontology.productCommit);
+  assert.equal(binding.product.remoteBranchRef, "refs/heads/feat/workpack-share-v2-product");
+  assert.equal(binding.integration.trackingRef, "refs/remotes/origin/feat/phase-a-evidence-integration");
+  assert.equal(binding.ontology.evidenceTrackingRef, "refs/remotes/origin/fix/phase-a-ontology-target-ready");
+}
+
+function validateEvidenceSchema(evidence) {
   assertKeys(evidence, [
-    "schemaVersion", "evidenceId", "status", "amendment", "sourceIdentity", "productCensus",
-    "redRun", "isolationIncident", "verification", "browser", "serverAuthority", "integration",
-    "generatedArtifacts", "reviewBoundary", "artifacts"
+    "schemaVersion", "evidenceId", "status", "sourceBinding", "sourceIdentity", "authorities",
+    "historicalEvidence", "tdd", "verification", "browser", "productCensus", "integration",
+    "generatedArtifacts", "scopeAudit", "reviewBoundary", "artifacts"
   ], "evidence");
-  assertKeys(evidence.amendment, ["amendmentId", "commit", "parentCommit", "validatorPath"], "amendment");
+  assertKeys(evidence.sourceBinding, ["path", "sha256"], "sourceBinding");
   assertKeys(evidence.sourceIdentity, [
-    "exactBase", "remediationParent", "rejectedProductCommit", "rejectedProductTree", "productCommit",
-    "productParent", "productTree", "browserTestBlob", "remoteRef", "remoteShaAtProductPush"
+    "productCommit", "productParent", "productTree", "requestScopeCommit", "requestScopeParent",
+    "browserTestBlob", "harnessHelperBlob", "harnessTestBlob", "remoteBranchRef"
   ], "sourceIdentity");
-  assertKeys(evidence.productCensus, [
-    "path", "sha256", "wholeSeriesCommitCount", "wholeSeriesChangedFileCount", "wholeSeriesAddedFileCount",
-    "wholeSeriesModifiedFileCount", "remediationChangedFileCount", "remediationAddedFileCount",
-    "remediationModifiedFileCount", "browserFixChangedFileCount"
-  ], "productCensus");
-  assertKeys(evidence.redRun, [
-    "logPath", "logSha256", "metricsPath", "metricsSha256", "classificationPath", "classificationSha256",
-    "exitCode", "runnerTestsPassed", "runnerTestsFailed", "runnerTestCount", "matrixRowsExecuted",
-    "matrixRowsUnexecuted", "durationSeconds", "productCauseCount", "browserExpectationCauseCount"
-  ], "redRun");
-  assertKeys(evidence.isolationIncident, [
-    "path", "sha256", "contaminatedRunCount", "contaminatedRunsCountedAsPass",
-    "currentShareTestProcessCount", "processLogPath", "processLogSha256"
-  ], "isolationIncident");
+  assertKeys(evidence.authorities, ["main", "ontology"], "authorities");
+  assertKeys(evidence.authorities.main, [
+    "commit", "tree", "mergeBase", "mergeTreeExitCode", "mergeTreeResultTree", "pathOverlapCount"
+  ], "authorities.main");
+  assertKeys(evidence.authorities.ontology, [
+    "productCommit", "productTree", "evidenceCommit", "evidenceTree", "evidenceParent", "mergeBase",
+    "mergeTreeExitCode", "mergeTreeResultTree", "pathOverlapCount", "contentConflictCount"
+  ], "authorities.ontology");
+  assertKeys(evidence.historicalEvidence, ["commit", "path", "blob"], "historicalEvidence");
+  assertKeys(evidence.tdd, [
+    "requestScopeRed", "harnessRed", "excludedRuns", "harnessGreen", "finalGreen"
+  ], "tdd");
+  assertKeys(evidence.tdd.requestScopeRed, [
+    "logPath", "logSha256", "baselineCommit", "baselineTree", "sourceState", "exitCode",
+    "runnerTestsFailed", "runnerTestsSkipped", "expectedDispatchRequestCount", "actualDispatchRequestCount"
+  ], "tdd.requestScopeRed");
+  assertKeys(evidence.tdd.harnessRed, [
+    "logPath", "logSha256", "baselineProductCommit", "baselineProductTree", "sourceState", "exitCode",
+    "testFilesFailed", "testsFailed", "failureMessage"
+  ], "tdd.harnessRed");
+  assertKeys(evidence.tdd.excludedRuns, [
+    "count", "countedAsPass", "paths", "hangIncidentPath", "hangIncidentSha256",
+    "hangDisposition", "hangEvidenceExitCode"
+  ], "tdd.excludedRuns");
+  assertKeys(evidence.tdd.harnessGreen, [
+    "logPath", "logSha256", "exitCode", "singleScenarioRuns"
+  ], "tdd.harnessGreen");
+  assertKeys(evidence.tdd.finalGreen, [
+    "browserLogPath", "browserLogSha256", "metricsPath", "metricsSha256", "scopeRaceChecks"
+  ], "tdd.finalGreen");
+  assert.equal(Array.isArray(evidence.tdd.excludedRuns.paths), true);
+  assert.equal(Array.isArray(evidence.tdd.harnessGreen.singleScenarioRuns), true);
+  for (const [index, item] of evidence.tdd.harnessGreen.singleScenarioRuns.entries()) {
+    assertKeys(item, [
+      "logPath", "logSha256", "wallClockTimeoutSeconds", "exitCode", "shareTestProcessesAfter"
+    ], `tdd.harnessGreen.singleScenarioRuns[${index}]`);
+  }
   assertKeys(evidence.verification, ["unit", "typecheck", "staticAudit", "build", "browser"], "verification");
   assertKeys(evidence.verification.unit, [
-    "command", "logPath", "logSha256", "exitCode", "testFilesPassed", "testsPassed", "testsSkipped", "durationSeconds"
+    "command", "logPath", "logSha256", "exitCode", "testFilesPassed", "testsPassed", "testsSkipped",
+    "durationSeconds", "shareTestProcessesAfter"
   ], "verification.unit");
   assertKeys(evidence.verification.typecheck, ["command", "logPath", "logSha256", "exitCode"], "verification.typecheck");
   assertKeys(evidence.verification.staticAudit, [
@@ -102,433 +207,551 @@ function validateClosedSchema(evidence) {
     "command", "logPath", "logSha256", "exitCode", "nextVersion", "staticPagesGenerated"
   ], "verification.build");
   assertKeys(evidence.verification.browser, [
-    "command", "logPath", "logSha256", "exitCode", "runnerTestsPassed", "durationSeconds"
+    "command", "logPath", "logSha256", "exitCode", "runnerTestsPassed", "durationSeconds",
+    "wallClockSeconds", "wallClockTimeoutSeconds", "timeoutTriggered", "shareTestProcessesAfter"
   ], "verification.browser");
   assertKeys(evidence.browser, [
-    "metricsPath", "metricsSha256", "matrixRowsExpected", "matrixRowsExecuted", "matrixRowsUnexecuted",
-    "uniqueMatrixRows", "mobile390x844Rows", "legacy391Rows", "owningRootText200Rows",
+    "matrixRowsExpected", "matrixRowsExecuted", "matrixRowsUnexecuted", "uniqueMatrixRows",
+    "mobile390x844Rows", "legacy391Rows", "owningRootText200Rows", "scopeRaceCheckCount",
     "rootAttributeMutationMaximum", "descendantInlineMutationTotal", "directLeafInlineMutationTotal",
     "pseudoFailureCount", "maximumHorizontalOverflowCssPx", "maximumPanelOverflowCssPx",
-    "touchTargetFailureCount", "overlapFailureCount", "nestedScrollFailureCount", "clippedTextFailureCount",
-    "languageAuthorityCheckCount", "reviewVariantCheckCount", "staleBindingVariantCheckCount"
+    "touchTargetFailureCount", "overlapFailureCount", "nestedScrollFailureCount", "clippedTextFailureCount"
   ], "browser");
-  assertKeys(evidence.serverAuthority, [
-    "channelResolverRequestField", "actualRouteClientContractTested", "browserMockDelegatesTypedContract",
-    "acceptedAndPartialRequireConfiguredProvider", "unconfiguredProviderState", "unconfiguredProviderCalled",
-    "providerReceiptStrictlyParsed", "durableIdempotencyStore", "durableIdempotencyCasColumn",
-    "workflowRouteOwnsDispatchLogPersistence", "clientAuthoredDispatchLogsRejected", "noDatabaseMigration",
-    "externalCapabilityBlocker"
-  ], "serverAuthority");
+  assertKeys(evidence.productCensus, [
+    "path", "sha256", "requestScopeChangedFileCount", "harnessChangedFileCount", "combinedChangedFileCount"
+  ], "productCensus");
   assertKeys(evidence.integration, [
-    "currentIntegrationHead", "previousIntegrationHead", "currentMergeTreeExitCode", "currentMergeTreeResultTree",
-    "currentMainPathOverlapCount", "koshaDeltaPathCount", "koshaPathOverlapCount", "wholeSeriesGitCherryPlusCount",
-    "ontologyCandidate", "ontologyMergeBase", "ontologyPathOverlapCount", "ontologyContentConflictCount",
-    "preservesRevision", "preservesUpdatedAt", "preservesEvidenceSummary", "preservesConfirmationCas",
-    "preservesDispatchCas", "directIntegrationReadinessClaimed", "semanticConflictReviewRequired",
-    "adoptionPath", "adoptionSha256", "conflictContractPath", "conflictContractSha256"
+    "adoptionPath", "adoptionSha256", "mergeTreeLogPath", "mergeTreeLogSha256", "cherryLogPath",
+    "cherryLogSha256", "pathOverlapLogPath", "pathOverlapLogSha256", "seriesPath", "seriesSha256",
+    "seriesGitCherryPlusCount", "currentMainPathOverlapCount", "koshaPathOverlapCount", "ontologyContractPath",
+    "ontologyContractSha256", "ontologyPathOverlapCount", "ontologyContentConflictCount", "preservesRevision",
+    "preservesUpdatedAt", "preservesEvidenceSummary", "preservesDistinctRevisionDomains",
+    "preservesRawEvidenceSummaryOverlay", "revalidatesStaleLocalizationEnvelopes",
+    "invalidatesAuthorityOnLocalizationReview", "preservesShareWorkspaceState", "preservesConfirmationCas",
+    "preservesDispatchCas", "preservesRequestScopeGuard", "preservesHarnessTeardown",
+    "directIntegrationReadinessClaimed", "semanticConflictReviewRequired"
   ], "integration");
   assertKeys(evidence.generatedArtifacts, [
-    "restorationPath", "restorationSha256", "trackedPngFileCount", "mismatchCount", "includedInProductCommitCount"
+    "path", "sha256", "scopeExcludedFileCount", "trackedStaticAuditFileCount", "trackedPngFileCount",
+    "historicalMetricFileCount", "mismatchCount", "includedInProductCommitCount"
   ], "generatedArtifacts");
+  assertKeys(evidence.scopeAudit, [
+    "path", "sha256", "strictAnyHitCount", "forbiddenPathCount", "ontologyOrKoshaFileCount",
+    "dbSchemaMigrationFileCount"
+  ], "scopeAudit");
   assertKeys(evidence.reviewBoundary, [
-    "freshIndependentReviewRequired", "freshIndependentReviewStatus", "selfApproved", "integratedIntoMain", "completionClaim"
+    "freshShareIndependentReviewRequired", "freshShareIndependentReviewStatus",
+    "freshOntologyIndependentReviewRequired", "freshOntologyIndependentReviewStatus", "selfApproved",
+    "integratedIntoMain", "hold", "completionClaim"
   ], "reviewBoundary");
-  assert.equal(Array.isArray(evidence.artifacts), true, "artifacts must be an array");
+  assert.equal(Array.isArray(evidence.artifacts), true);
   for (const [index, artifact] of evidence.artifacts.entries()) {
     assertKeys(artifact, ["path", "sha256"], `artifacts[${index}]`);
   }
+  assert.equal(evidence.schemaVersion, "safeclaw-workpack-share-v2-p1-evidence/v2");
+  assert.equal(evidence.evidenceId, "workpack-share-v2-p1-remediation-2026-07-14");
+  assert.equal(evidence.status, "HOLD_FRESH_INDEPENDENT_REVIEWS");
 }
 
-function validateManifest(evidence) {
-  validateClosedSchema(evidence);
-  assert.equal(evidence.schemaVersion, "safeclaw-workpack-share-v2-remediation-evidence/v1");
-  assert.equal(evidence.evidenceId, "workpack-share-v2-remediation-2026-07-14");
-  assert.equal(evidence.status, "IMPLEMENTATION_EVIDENCE_COMPLETE_REVIEW_PENDING");
-  assert.equal(evidence.amendment.commit, "e2f16da5efd09e393a459b5efd0a9e51d9f6a558");
-  assert.equal(evidence.sourceIdentity.exactBase, EXACT_BASE);
-  assert.equal(evidence.sourceIdentity.remediationParent, REMEDIATION_PARENT);
-  assert.equal(evidence.sourceIdentity.rejectedProductCommit, REJECTED_PRODUCT);
-  assert.equal(evidence.sourceIdentity.rejectedProductTree, REJECTED_TREE);
-  assert.equal(evidence.sourceIdentity.productCommit, PRODUCT);
-  assert.equal(evidence.sourceIdentity.productParent, PRODUCT_PARENT);
-  assert.equal(evidence.sourceIdentity.productTree, PRODUCT_TREE);
-  assert.equal(evidence.sourceIdentity.browserTestBlob, BROWSER_BLOB);
-  assert.equal(evidence.sourceIdentity.remoteRef, REMOTE_REF);
-  assert.equal(evidence.sourceIdentity.remoteShaAtProductPush, PRODUCT);
-  assert.deepEqual({
-    wholeSeriesCommitCount: evidence.productCensus.wholeSeriesCommitCount,
-    wholeSeriesChangedFileCount: evidence.productCensus.wholeSeriesChangedFileCount,
-    wholeSeriesAddedFileCount: evidence.productCensus.wholeSeriesAddedFileCount,
-    wholeSeriesModifiedFileCount: evidence.productCensus.wholeSeriesModifiedFileCount,
-    remediationChangedFileCount: evidence.productCensus.remediationChangedFileCount,
-    remediationAddedFileCount: evidence.productCensus.remediationAddedFileCount,
-    remediationModifiedFileCount: evidence.productCensus.remediationModifiedFileCount,
-    browserFixChangedFileCount: evidence.productCensus.browserFixChangedFileCount
-  }, {
-    wholeSeriesCommitCount: 7,
-    wholeSeriesChangedFileCount: 78,
-    wholeSeriesAddedFileCount: 53,
-    wholeSeriesModifiedFileCount: 25,
-    remediationChangedFileCount: 24,
-    remediationAddedFileCount: 6,
-    remediationModifiedFileCount: 18,
-    browserFixChangedFileCount: 2
+function validateBindingEvidence(binding, evidence, bindingPath, bindingHash) {
+  assert.equal(evidence.sourceBinding.path, path.relative(REPO_ROOT, bindingPath).replace(/\\/gu, "/"));
+  assert.equal(evidence.sourceBinding.sha256, bindingHash);
+  assert.deepEqual(evidence.sourceIdentity, {
+    productCommit: binding.product.commit,
+    productParent: binding.product.parent,
+    productTree: binding.product.tree,
+    requestScopeCommit: binding.product.requestScopeCommit,
+    requestScopeParent: binding.product.requestScopeParent,
+    browserTestBlob: binding.product.browserTestBlob,
+    harnessHelperBlob: binding.product.harnessHelperBlob,
+    harnessTestBlob: binding.product.harnessTestBlob,
+    remoteBranchRef: binding.product.remoteBranchRef
   });
-  assert.deepEqual({
-    exitCode: evidence.redRun.exitCode,
-    passed: evidence.redRun.runnerTestsPassed,
-    failed: evidence.redRun.runnerTestsFailed,
-    total: evidence.redRun.runnerTestCount,
-    executed: evidence.redRun.matrixRowsExecuted,
-    unexecuted: evidence.redRun.matrixRowsUnexecuted,
-    productCauses: evidence.redRun.productCauseCount,
-    expectationCauses: evidence.redRun.browserExpectationCauseCount
-  }, { exitCode: 1, passed: 113, failed: 17, total: 130, executed: 111, unexecuted: 17, productCauses: 8, expectationCauses: 9 });
-  assert.equal(evidence.isolationIncident.contaminatedRunCount, 2);
-  assert.equal(evidence.isolationIncident.contaminatedRunsCountedAsPass, 0);
-  assert.equal(evidence.isolationIncident.currentShareTestProcessCount, 0);
-  assert.equal(evidence.browser.matrixRowsExpected, 128);
-  assert.equal(evidence.browser.matrixRowsExecuted, 128);
-  assert.equal(evidence.browser.matrixRowsUnexecuted, 0);
-  assert.equal(evidence.browser.uniqueMatrixRows, 128);
-  assert.equal(evidence.browser.mobile390x844Rows, 64);
-  assert.equal(evidence.browser.legacy391Rows, 0);
-  assert.equal(evidence.browser.owningRootText200Rows, 64);
-  assert.equal(evidence.browser.rootAttributeMutationMaximum, 1);
-  assert.equal(evidence.browser.descendantInlineMutationTotal, 0);
-  assert.equal(evidence.browser.directLeafInlineMutationTotal, 0);
-  for (const field of [
-    "pseudoFailureCount", "maximumHorizontalOverflowCssPx", "maximumPanelOverflowCssPx", "touchTargetFailureCount",
-    "overlapFailureCount", "nestedScrollFailureCount", "clippedTextFailureCount"
-  ]) assert.equal(evidence.browser[field], 0, `${field} must remain zero`);
-  assert.equal(evidence.serverAuthority.channelResolverRequestField, "requestedChannels");
-  assert.equal(evidence.serverAuthority.actualRouteClientContractTested, true);
-  assert.equal(evidence.serverAuthority.browserMockDelegatesTypedContract, true);
-  assert.equal(evidence.serverAuthority.acceptedAndPartialRequireConfiguredProvider, true);
-  assert.equal(evidence.serverAuthority.unconfiguredProviderState, "blocked");
-  assert.equal(evidence.serverAuthority.unconfiguredProviderCalled, false);
-  assert.equal(evidence.serverAuthority.providerReceiptStrictlyParsed, true);
-  assert.equal(evidence.serverAuthority.workflowRouteOwnsDispatchLogPersistence, true);
-  assert.equal(evidence.serverAuthority.clientAuthoredDispatchLogsRejected, true);
-  assert.equal(evidence.serverAuthority.noDatabaseMigration, true);
-  assert.equal(evidence.integration.currentIntegrationHead, CURRENT_INTEGRATION);
-  assert.equal(evidence.integration.previousIntegrationHead, PREVIOUS_INTEGRATION);
-  assert.equal(evidence.integration.currentMergeTreeExitCode, 0);
-  assert.equal(evidence.integration.currentMergeTreeResultTree, "d370929311230df359aad787905fefbc6b018b34");
-  assert.equal(evidence.integration.currentMainPathOverlapCount, 0);
-  assert.equal(evidence.integration.koshaDeltaPathCount, 26);
-  assert.equal(evidence.integration.koshaPathOverlapCount, 0);
-  assert.equal(evidence.integration.wholeSeriesGitCherryPlusCount, 7);
-  assert.equal(evidence.integration.ontologyCandidate, ONTOLOGY);
-  assert.equal(evidence.integration.ontologyMergeBase, ONTOLOGY_BASE);
-  assert.equal(evidence.integration.ontologyPathOverlapCount, 5);
-  assert.equal(evidence.integration.ontologyContentConflictCount, 3);
-  for (const field of ["preservesRevision", "preservesUpdatedAt", "preservesEvidenceSummary", "preservesConfirmationCas", "preservesDispatchCas"]) {
-    assert.equal(evidence.integration[field], true, `${field} must be preserved`);
-  }
-  assert.equal(evidence.integration.directIntegrationReadinessClaimed, false);
-  assert.equal(evidence.integration.semanticConflictReviewRequired, true);
-  assert.deepEqual(evidence.generatedArtifacts, {
-    restorationPath: "evaluation/workpack-share-v2-product-2026-07-14/remediation/generated-artifact-restoration.json",
-    restorationSha256: "ba5286d2d9bfd0d411dd38a35df8792348227a32c2f47e429dd5835e5ae423ce",
-    trackedPngFileCount: 16,
-    mismatchCount: 0,
-    includedInProductCommitCount: 0
+  assert.deepEqual(evidence.authorities, {
+    main: {
+      commit: binding.integration.commit,
+      tree: binding.integration.tree,
+      mergeBase: binding.integration.mergeBase,
+      mergeTreeExitCode: 0,
+      mergeTreeResultTree: evidence.authorities.main.mergeTreeResultTree,
+      pathOverlapCount: 0
+    },
+    ontology: {
+      productCommit: binding.ontology.productCommit,
+      productTree: binding.ontology.productTree,
+      evidenceCommit: binding.ontology.evidenceCommit,
+      evidenceTree: binding.ontology.evidenceTree,
+      evidenceParent: binding.ontology.evidenceParent,
+      mergeBase: binding.ontology.mergeBase,
+      mergeTreeExitCode: 1,
+      mergeTreeResultTree: evidence.authorities.ontology.mergeTreeResultTree,
+      pathOverlapCount: 8,
+      contentConflictCount: 7
+    }
   });
-  assert.deepEqual(evidence.reviewBoundary, {
-    freshIndependentReviewRequired: true,
-    freshIndependentReviewStatus: "pending",
-    selfApproved: false,
-    integratedIntoMain: false,
-    completionClaim: "implementation_evidence_complete_review_pending"
-  });
+  assert.deepEqual(evidence.historicalEvidence, binding.historicalEvidence);
 }
 
 function validateArtifactHashes(evidence) {
-  const paths = new Set();
+  const artifactPaths = new Set();
   for (const artifact of evidence.artifacts) {
-    assert.equal(paths.has(artifact.path), false, `duplicate artifact ${artifact.path}`);
-    paths.add(artifact.path);
+    assert.equal(artifactPaths.has(artifact.path), false, `duplicate artifact ${artifact.path}`);
+    artifactPaths.add(artifact.path);
     const fullPath = path.join(REPO_ROOT, artifact.path);
     assert.equal(fs.existsSync(fullPath), true, `missing artifact ${artifact.path}`);
     assert.equal(sha256(fullPath), artifact.sha256, `artifact hash mismatch ${artifact.path}`);
   }
-  for (const item of [
+  for (const [artifactPath, digest] of [
+    [evidence.sourceBinding.path, evidence.sourceBinding.sha256],
+    [evidence.tdd.requestScopeRed.logPath, evidence.tdd.requestScopeRed.logSha256],
+    [evidence.tdd.harnessRed.logPath, evidence.tdd.harnessRed.logSha256],
+    [evidence.tdd.excludedRuns.hangIncidentPath, evidence.tdd.excludedRuns.hangIncidentSha256],
+    [evidence.tdd.harnessGreen.logPath, evidence.tdd.harnessGreen.logSha256],
+    [evidence.tdd.finalGreen.browserLogPath, evidence.tdd.finalGreen.browserLogSha256],
+    [evidence.tdd.finalGreen.metricsPath, evidence.tdd.finalGreen.metricsSha256],
     [evidence.productCensus.path, evidence.productCensus.sha256],
-    [evidence.redRun.logPath, evidence.redRun.logSha256],
-    [evidence.redRun.metricsPath, evidence.redRun.metricsSha256],
-    [evidence.redRun.classificationPath, evidence.redRun.classificationSha256],
-    [evidence.isolationIncident.path, evidence.isolationIncident.sha256],
-    [evidence.isolationIncident.processLogPath, evidence.isolationIncident.processLogSha256],
-    [evidence.browser.metricsPath, evidence.browser.metricsSha256],
     [evidence.integration.adoptionPath, evidence.integration.adoptionSha256],
-    [evidence.integration.conflictContractPath, evidence.integration.conflictContractSha256]
+    [evidence.integration.mergeTreeLogPath, evidence.integration.mergeTreeLogSha256],
+    [evidence.integration.cherryLogPath, evidence.integration.cherryLogSha256],
+    [evidence.integration.pathOverlapLogPath, evidence.integration.pathOverlapLogSha256],
+    [evidence.integration.seriesPath, evidence.integration.seriesSha256],
+    [evidence.integration.ontologyContractPath, evidence.integration.ontologyContractSha256],
+    [evidence.generatedArtifacts.path, evidence.generatedArtifacts.sha256],
+    [evidence.scopeAudit.path, evidence.scopeAudit.sha256]
   ]) {
-    assert.equal(paths.has(item[0]), true, `${item[0]} missing from artifacts`);
-    assert.equal(sha256(path.join(REPO_ROOT, item[0])), item[1]);
+    assert.equal(artifactPaths.has(artifactPath), true, `${artifactPath} missing from artifacts`);
+    assert.equal(sha256(path.join(REPO_ROOT, artifactPath)), digest, `${artifactPath} reference hash mismatch`);
+  }
+  for (const run of evidence.tdd.harnessGreen.singleScenarioRuns) {
+    assert.equal(artifactPaths.has(run.logPath), true, `${run.logPath} missing from artifacts`);
+    assert.equal(sha256(path.join(REPO_ROOT, run.logPath)), run.logSha256);
   }
 }
 
-function validateGitBinding(evidence) {
-  assert.equal(git(["rev-parse", `${PRODUCT}^{commit}`]), PRODUCT);
-  assert.equal(git(["rev-parse", `${PRODUCT}^{tree}`]), PRODUCT_TREE);
-  assert.equal(git(["rev-parse", `${PRODUCT}^`]), PRODUCT_PARENT);
-  assert.equal(git(["rev-parse", `${REJECTED_PRODUCT}^{tree}`]), REJECTED_TREE);
-  assert.equal(git(["rev-parse", `${PRODUCT}:tests/workpack-share-v2-browser.test.ts`]), BROWSER_BLOB);
-  assert.equal(git(["merge-base", PRODUCT, CURRENT_INTEGRATION]), EXACT_BASE);
-  assert.equal(git(["merge-base", PRODUCT, ONTOLOGY]), ONTOLOGY_BASE);
-  assert.equal(git(["rev-parse", "origin/feat/phase-a-evidence-integration"]), CURRENT_INTEGRATION);
-  assert.equal(git(["rev-parse", "origin/fix/phase-a-ontology-target-ready"]), ONTOLOGY);
+function validateGitBinding(binding, evidence) {
+  const product = binding.product.commit;
+  const main = binding.integration.commit;
+  const ontology = binding.ontology.productCommit;
+  assert.equal(git(["rev-parse", binding.product.commitRef]), product);
+  assert.equal(git(["rev-parse", `${product}^{tree}`]), binding.product.tree);
+  assert.equal(git(["rev-parse", `${product}^`]), binding.product.parent);
+  assert.equal(git(["rev-parse", `${binding.product.requestScopeCommit}^{tree}`]), binding.product.requestScopeTree);
+  assert.equal(git(["rev-parse", `${binding.product.requestScopeCommit}^`]), binding.product.requestScopeParent);
+  assert.equal(git(["rev-parse", `${product}:tests/workpack-share-v2-browser.test.ts`]), binding.product.browserTestBlob);
+  assert.equal(git(["rev-parse", `${product}:tests/helpers/isolated-next-browser-harness.ts`]), binding.product.harnessHelperBlob);
+  assert.equal(git(["rev-parse", `${product}:tests/workpack-share-v2-browser-harness.test.ts`]), binding.product.harnessTestBlob);
+  assert.equal(git(["rev-parse", binding.integration.authorityRef]), main);
+  assert.equal(git(["rev-parse", `${main}^{tree}`]), binding.integration.tree);
+  assert.equal(git(["rev-parse", binding.integration.trackingRef]), main, "authoritative main tracking ref moved");
+  assert.equal(git(["merge-base", main, product]), binding.integration.mergeBase);
+  assert.equal(git(["rev-parse", binding.ontology.productAuthorityRef]), ontology);
+  assert.equal(git(["rev-parse", `${ontology}^{tree}`]), binding.ontology.productTree);
+  assert.equal(git(["rev-parse", binding.ontology.evidenceAuthorityRef]), binding.ontology.evidenceCommit);
+  assert.equal(git(["rev-parse", `${binding.ontology.evidenceCommit}^{tree}`]), binding.ontology.evidenceTree);
+  assert.equal(git(["rev-parse", `${binding.ontology.evidenceCommit}^`]), binding.ontology.evidenceParent);
+  assert.equal(git(["rev-parse", binding.ontology.evidenceTrackingRef]), binding.ontology.evidenceCommit, "ontology evidence tracking ref moved");
+  assert.equal(git(["merge-base", ontology, product]), binding.ontology.mergeBase);
+  assert.equal(git(["rev-parse", `${binding.historicalEvidence.commit}:${binding.historicalEvidence.path}`]), binding.historicalEvidence.blob);
 
-  const remoteRows = git(["ls-remote", "--heads", "origin", REMOTE_REF]).split(/\r?\n/u).filter(Boolean);
+  const remoteRows = lines(git(["ls-remote", "--heads", "origin", binding.product.remoteBranchRef]));
   assert.equal(remoteRows.length, 1, "Share remote ref missing or ambiguous");
   const remoteSha = remoteRows[0].split(/\s+/u)[0];
-  assert.equal(git(["merge-base", "--is-ancestor", PRODUCT, remoteSha]), "");
+  assert.equal(git(["merge-base", "--is-ancestor", product, remoteSha]), "");
 
-  const series = git(["rev-list", "--reverse", "--ancestry-path", `${EXACT_BASE}..${PRODUCT}`]).split(/\r?\n/u).filter(Boolean);
-  assert.equal(series.length, 7);
-  const cherry = git(["cherry", "-v", CURRENT_INTEGRATION, PRODUCT, EXACT_BASE]).split(/\r?\n/u).filter(Boolean);
-  assert.equal(cherry.length, 7);
-  assert.equal(cherry.every((line) => line.startsWith("+ ")), true, "current integration unexpectedly adopted a Share patch");
+  const adoption = readJson(path.join(REPO_ROOT, evidence.integration.adoptionPath));
+  assert.equal(adoption.schemaVersion, "safeclaw-workpack-share-v2-p1-integration-adoption/v2");
+  assert.equal(adoption.product.commit, product);
+  assert.equal(adoption.product.tree, binding.product.tree);
+  assert.equal(adoption.authoritativeMain.authorityRef, binding.integration.authorityRef);
+  assert.equal(adoption.authoritativeMain.commit, main);
+  assert.equal(adoption.authoritativeMain.tree, binding.integration.tree);
+  assert.equal(adoption.ontology.productCommit, ontology);
+  assert.equal(adoption.ontology.evidenceCommit, binding.ontology.evidenceCommit);
+  assert.equal(adoption.status, "HOLD_FRESH_REVIEWS_AND_SEMANTIC_CONFLICT_RESOLUTION");
 
-  const mainMerge = run("git", ["merge-tree", "--write-tree", PRODUCT, CURRENT_INTEGRATION]);
+  const series = lines(git(["rev-list", "--reverse", "--ancestry-path", `${binding.integration.mergeBase}..${product}`]));
+  assert.equal(series.length, 10);
+  assert.deepEqual(adoption.series.map((item) => item.commit), series);
+  const cherry = lines(git(["cherry", "-v", main, product, binding.integration.mergeBase]));
+  assert.equal(cherry.length, series.length);
+  assert.equal(cherry.every((line) => line.startsWith("+ ")), true, "authoritative main unexpectedly adopted a Share patch");
+  assert.equal(evidence.integration.seriesGitCherryPlusCount, cherry.length);
+
+  const mainMerge = run("git", ["merge-tree", "--write-tree", main, product]);
   assert.equal(mainMerge.status, 0, mainMerge.stderr);
-  assert.equal(mainMerge.stdout.trim(), "d370929311230df359aad787905fefbc6b018b34");
-  const ontologyMerge = run("git", ["merge-tree", "--write-tree", PRODUCT, ONTOLOGY]);
+  assert.equal(mainMerge.stdout.trim(), adoption.authoritativeMain.mergeTreeResultTree);
+  assert.equal(mainMerge.stdout.trim(), evidence.authorities.main.mergeTreeResultTree);
+  const shareMainPaths = lines(git(["diff", "--name-only", `${binding.integration.mergeBase}..${product}`]));
+  const mainPaths = lines(git(["diff", "--name-only", `${binding.integration.mergeBase}..${main}`]));
+  const mainOverlap = pathOverlap(shareMainPaths, mainPaths);
+  assert.deepEqual(mainOverlap, []);
+  assert.equal(evidence.integration.currentMainPathOverlapCount, 0);
+  assert.equal(evidence.integration.koshaPathOverlapCount, 0);
+
+  const ontologyMerge = run("git", ["merge-tree", "--write-tree", ontology, product]);
   assert.equal(ontologyMerge.status, 1, "ontology merge-tree must remain review-blocked");
-  for (const conflictPath of [
+  const ontologyOutput = lines(ontologyMerge.stdout);
+  assert.equal(ontologyOutput[0], evidence.authorities.ontology.mergeTreeResultTree);
+  const actualConflictFiles = ontologyOutput
+    .filter((line) => line.startsWith("CONFLICT (content): Merge conflict in "))
+    .map((line) => line.replace("CONFLICT (content): Merge conflict in ", ""));
+  const expectedConflictFiles = [
+    "app/api/workpacks/[id]/route.ts",
     "components/FieldOperationsWorkspace.tsx",
+    "components/SafeGuardCommandCenter.tsx",
     "lib/workpack-commercial-store.ts",
+    "tests/helpers/isolated-next-browser-harness.ts",
+    "tests/workpack-generation-evidence-route.test.ts",
     "tests/workpack-share-authority-routes.test.ts"
-  ]) assert.equal(ontologyMerge.stdout.includes(`CONFLICT (content): Merge conflict in ${conflictPath}`), true, conflictPath);
+  ];
+  assert.deepEqual(actualConflictFiles, expectedConflictFiles);
+  const shareOntologyPaths = lines(git(["diff", "--name-only", `${binding.ontology.mergeBase}..${product}`]));
+  const ontologyPaths = lines(git(["diff", "--name-only", `${binding.ontology.mergeBase}..${ontology}`]));
+  const ontologyOverlap = pathOverlap(shareOntologyPaths, ontologyPaths);
+  assert.deepEqual(ontologyOverlap, [
+    "app/api/workpacks/[id]/route.ts",
+    "components/CurrentWorkpackModules.tsx",
+    "components/FieldOperationsWorkspace.tsx",
+    "components/SafeGuardCommandCenter.tsx",
+    "lib/workpack-commercial-store.ts",
+    "tests/helpers/isolated-next-browser-harness.ts",
+    "tests/workpack-generation-evidence-route.test.ts",
+    "tests/workpack-share-authority-routes.test.ts"
+  ]);
+  assert.equal(evidence.integration.ontologyPathOverlapCount, ontologyOverlap.length);
+  assert.equal(evidence.integration.ontologyContentConflictCount, actualConflictFiles.length);
 
-  const sharePaths = new Set(git(["diff", "--name-only", `${EXACT_BASE}..${PRODUCT}`]).split(/\r?\n/u).filter(Boolean));
-  const mainPaths = git(["diff", "--name-only", `${EXACT_BASE}..${CURRENT_INTEGRATION}`]).split(/\r?\n/u).filter(Boolean);
-  assert.equal(mainPaths.filter((file) => sharePaths.has(file)).length, 0);
-  const koshaPaths = git(["diff", "--name-only", `${PREVIOUS_INTEGRATION}..${CURRENT_INTEGRATION}`]).split(/\r?\n/u).filter(Boolean);
-  assert.equal(koshaPaths.length, 26);
-  assert.equal(koshaPaths.filter((file) => sharePaths.has(file)).length, 0);
-  const remediationStoreDiff = run("git", ["diff", "--quiet", `${REMEDIATION_PARENT}..${PRODUCT}`, "--", "lib/workpack-commercial-store.ts"]);
-  assert.equal(remediationStoreDiff.status, 0, "remediation branch altered ontology-owned commercial store");
-
-  const amendmentValidator = run(process.execPath, [path.join(REPO_ROOT, evidence.amendment.validatorPath)]);
-  assert.equal(amendmentValidator.status, 0, amendmentValidator.stderr);
-  assert.equal(amendmentValidator.stdout.includes("contract-amendment-valid"), true);
+  const conflict = readJson(path.join(REPO_ROOT, evidence.integration.ontologyContractPath));
+  assertKeys(conflict, [
+    "schemaVersion", "shareProduct", "authoritativeMain", "ontology", "requestScopeReconciliation",
+    "finalMergeTree", "overlap", "requiredResolution", "prohibitedResolution", "integrationStatus"
+  ], "ontologyConflictContract");
+  assert.equal(conflict.schemaVersion, "safeclaw-workpack-share-v2-p1-ontology-conflict-contract/v3");
+  assert.equal(conflict.shareProduct.commit, product);
+  assert.equal(conflict.authoritativeMain.commit, main);
+  assert.equal(conflict.authoritativeMain.mergeTreeResultTree, mainMerge.stdout.trim());
+  assert.equal(conflict.ontology.productCommit, ontology);
+  assert.equal(conflict.ontology.evidenceCommit, binding.ontology.evidenceCommit);
+  assert.equal(conflict.finalMergeTree.resultTree, ontologyOutput[0]);
+  assert.deepEqual(conflict.finalMergeTree.contentConflictFiles, expectedConflictFiles);
+  assert.equal(conflict.overlap.pathCount, 8);
+  assertKeys(conflict.requiredResolution, [
+    "shareAuthorityFields", "ontologyWorkpackOperationContextFields", "revisionDomains",
+    "ontologyServerAuthority", "evidenceSummaryOverlay", "localizationEnvelopeHandling",
+    "localizationReviewInvalidation", "confirmationCas", "shareRequestScope", "dispatchCas",
+    "shareWorkspaceState", "harnessTeardown", "testResolution"
+  ], "ontologyConflictContract.requiredResolution");
+  assert.deepEqual(conflict.requiredResolution.shareAuthorityFields, ["canonicalWorkpackRevision"]);
+  assert.deepEqual(
+    conflict.requiredResolution.ontologyWorkpackOperationContextFields,
+    ["revision", "updatedAt", "evidenceSummary"]
+  );
+  assert.match(conflict.requiredResolution.revisionDomains, /SHA-256 content hash/u);
+  assert.match(conflict.requiredResolution.revisionDomains, /RFC3339 workpacks\.updated_at CAS value/u);
+  assert.match(conflict.requiredResolution.revisionDomains, /Neither domain may substitute/u);
+  assert.match(conflict.requiredResolution.evidenceSummaryOverlay, /full raw evidence_summary object/u);
+  assert.match(conflict.requiredResolution.evidenceSummaryOverlay, /reviewedLocalizationEnvelopes, dispatch, localization/u);
+  assert.match(conflict.requiredResolution.localizationEnvelopeHandling, /stale reviewedLocalizationEnvelopes are revalidated/u);
+  assert.match(conflict.requiredResolution.localizationReviewInvalidation, /invalidates Phase A authority and the Share request scope/u);
+  assert.match(conflict.requiredResolution.localizationReviewInvalidation, /reread the authenticated row/u);
+  for (const token of [
+    "initialWorkpackId", "initialWorkpackAuthority", "requiresRevalidation", "theme/workspaceTheme",
+    "validated Share URL state", "request-scope identity/version guards"
+  ]) assert.equal(conflict.requiredResolution.shareWorkspaceState.includes(token), true, `missing ${token}`);
+  assert.equal(conflict.integrationStatus, "HOLD_FRESH_REVIEWS_AND_SEMANTIC_CONFLICT_RESOLUTION");
+  for (const field of [
+    "preservesRevision", "preservesUpdatedAt", "preservesEvidenceSummary", "preservesDistinctRevisionDomains",
+    "preservesRawEvidenceSummaryOverlay", "revalidatesStaleLocalizationEnvelopes",
+    "invalidatesAuthorityOnLocalizationReview", "preservesShareWorkspaceState", "preservesConfirmationCas",
+    "preservesDispatchCas", "preservesRequestScopeGuard", "preservesHarnessTeardown"
+  ]) assert.equal(evidence.integration[field], true, `${field} must be preserved`);
+  assert.equal(evidence.integration.directIntegrationReadinessClaimed, false);
+  assert.equal(evidence.integration.semanticConflictReviewRequired, true);
+  assert.equal(run("git", [
+    "diff", "--quiet", `${binding.product.requestScopeParent}..${product}`, "--", "lib/workpack-commercial-store.ts"
+  ]).status, 0, "P1 remediation changed ontology-owned commercial store");
 }
 
-function validateProductCensus(evidence) {
+function validateProductCensus(binding, evidence) {
   const census = readJson(path.join(REPO_ROOT, evidence.productCensus.path));
-  assert.equal(census.schemaVersion, "safeclaw-workpack-share-v2-remediation-changed-file-census/v1");
-  assert.equal(census.productCommit, PRODUCT);
-  assert.equal(census.productTree, PRODUCT_TREE);
-  assert.equal(census.exactBase, EXACT_BASE);
-  assert.equal(census.remediationParent, REMEDIATION_PARENT);
-  assert.equal(census.wholeSeries.changedFileCount, 78);
-  assert.equal(census.wholeSeries.addedFileCount, 53);
-  assert.equal(census.wholeSeries.modifiedFileCount, 25);
-  assert.equal(census.wholeSeries.deletedFileCount, 0);
-  assert.equal(census.wholeSeries.files.length, 78);
-  assert.equal(census.remediation.changedFileCount, 24);
-  assert.equal(census.remediation.files.length, 24);
-  assert.equal(census.browserFixCommit.changedFileCount, 2);
-  assert.deepEqual(census.browserFixCommit.files.map((item) => item.path).sort(), [
-    "components/WorkflowSharePanel.tsx",
-    "tests/workpack-share-v2-browser.test.ts"
-  ]);
-  for (const section of [census.wholeSeries, census.remediation, census.authorityCommit, census.browserFixCommit]) {
-    assert.equal(new Set(section.files.map((item) => item.path)).size, section.files.length);
-    for (const item of section.files) {
-      assert.equal(item.status === "A" || item.status === "M", true);
-      assert.equal(git(["rev-parse", `${PRODUCT}:${item.path}`]), item.gitBlob, item.path);
+  assert.equal(census.schemaVersion, "safeclaw-workpack-share-v2-p1-product-census/v2");
+  assert.deepEqual(census.finalProduct, {
+    commit: binding.product.commit,
+    parent: binding.product.parent,
+    tree: binding.product.tree
+  });
+  assert.equal(census.commits.length, 2);
+  assert.equal(census.commits[0].commit, binding.product.requestScopeCommit);
+  assert.equal(census.commits[0].parent, binding.product.requestScopeParent);
+  assert.equal(census.commits[0].changedFileCount, 5);
+  assert.equal(census.commits[1].commit, binding.product.commit);
+  assert.equal(census.commits[1].parent, binding.product.parent);
+  assert.equal(census.commits[1].changedFileCount, 2);
+  for (const candidate of census.commits) {
+    const actualPaths = lines(git(["diff", "--name-only", `${candidate.parent}..${candidate.commit}`]));
+    assert.equal(actualPaths.length, candidate.changedFileCount);
+    assert.deepEqual(candidate.files.map((item) => item.path), actualPaths);
+    for (const item of candidate.files) {
+      assert.equal(git(["rev-parse", `${candidate.commit}:${item.path}`]), item.gitBlob, item.path);
     }
   }
-  assert.equal(census.remediation.files.some((item) => item.path === "lib/workpack-commercial-store.ts"), false);
+  const combinedPaths = lines(git(["diff", "--name-only", `${census.combined.fromExclusive}..${census.combined.toInclusive}`]));
+  assert.equal(census.combined.toInclusive, binding.product.commit);
+  assert.equal(census.combined.changedFileCount, 7);
+  assert.deepEqual(census.combined.files, combinedPaths);
+  assert.equal(census.forbiddenPathCount, 0);
+  assert.equal(census.strictAnyHitCount, 0);
+  assert.equal(census.status, "pass");
+  assert.equal(evidence.productCensus.requestScopeChangedFileCount, 5);
+  assert.equal(evidence.productCensus.harnessChangedFileCount, 2);
+  assert.equal(evidence.productCensus.combinedChangedFileCount, 7);
 }
 
-function validateRedAndIsolation(evidence) {
-  const redLog = fs.readFileSync(path.join(REPO_ROOT, evidence.redRun.logPath), "utf8");
-  assert.equal(redLog.includes("Tests  17 failed | 113 passed (130)"), true);
-  assert.equal(redLog.includes("Duration  1260.09s"), true);
-  assert.equal(redLog.includes("[explicit-exit-code] 1"), true);
-  const redMetrics = readJson(path.join(REPO_ROOT, evidence.redRun.metricsPath));
-  assert.equal(redMetrics.sourceIdentity.productCommit, REJECTED_PRODUCT);
-  assert.equal(redMetrics.sourceIdentity.productTree, REJECTED_TREE);
-  assert.equal(redMetrics.status, "partial");
-  assert.equal(redMetrics.census.executedCaseCount, 111);
-  assert.equal(redMetrics.census.unexecutedCaseCount, 17);
-  const classification = readJson(path.join(REPO_ROOT, evidence.redRun.classificationPath));
-  assert.equal(classification.rows.length, 17);
-  assert.equal(new Set(classification.rows.map((row) => row.caseId)).size, 17);
-  const groups = Object.fromEntries(classification.groups.map((group) => [group.category, group.count]));
-  assert.deepEqual(groups, {
-    async_persistence_settlement_contract: 1,
-    navigation_settlement_contract: 8,
-    product_state_transition: 8
-  });
-  assert.equal(classification.rows.filter((row) => row.responsibility === "product").length, 8);
-  assert.equal(classification.rows.filter((row) => row.responsibility === "browser_test_expectation").length, 9);
+function validateTdd(evidence) {
+  const requestRed = fs.readFileSync(path.join(REPO_ROOT, evidence.tdd.requestScopeRed.logPath), "utf8");
+  assert.equal(evidence.tdd.requestScopeRed.sourceState, "precommit_test_worktree");
+  assert.equal(evidence.tdd.requestScopeRed.exitCode, 1);
+  assert.equal(evidence.tdd.requestScopeRed.expectedDispatchRequestCount, 0);
+  assert.equal(evidence.tdd.requestScopeRed.actualDispatchRequestCount, 1);
+  assert.equal(requestRed.includes("Tests  1 failed | 129 skipped (130)"), true);
+  assert.equal(requestRed.includes("AssertionError: expected 1 to be +0"), true);
+  assert.equal(requestRed.includes("[explicit-exit] 1"), true);
 
-  const incident = readJson(path.join(REPO_ROOT, evidence.isolationIncident.path));
-  assert.equal(incident.status, "resolved_contaminated_results_invalid");
-  assert.equal(incident.observedConcurrentRuns.length, 2);
-  assert.equal(incident.observedConcurrentRuns.every((item) => item.validEvidence === false), true);
-  assert.equal(incident.evidencePolicy.contaminatedRunsCountedAsPass, 0);
-  assert.equal(incident.cleanup.shareTestProcessesAfterCleanup, 0);
-  assert.equal(incident.cleanup.shareTempNextProcessesAfterCleanup, 0);
-  const processLog = fs.readFileSync(path.join(REPO_ROOT, evidence.isolationIncident.processLogPath), "utf8");
-  assert.equal(processLog.includes("share_test_process_count=0"), true);
-  assert.equal(processLog.includes("share_vitest_process_count=0"), true);
-  assert.equal(processLog.includes("share_next_process_count=0"), true);
-  assert.equal(processLog.includes("explicit_exit_code=0"), true);
+  const harnessRed = fs.readFileSync(path.join(REPO_ROOT, evidence.tdd.harnessRed.logPath), "utf8");
+  assert.equal(evidence.tdd.harnessRed.sourceState, "precommit-harness-test-worktree");
+  assert.equal(evidence.tdd.harnessRed.exitCode, 1);
+  assert.equal(harnessRed.includes("promise resolved \"undefined\" instead of rejecting"), true);
+  assert.equal(harnessRed.includes("Tests  1 failed (1)"), true);
+  assert.equal(harnessRed.includes("[explicit-exit-code] 1"), true);
+
+  assert.equal(evidence.tdd.excludedRuns.countedAsPass, 0);
+  assert.equal(evidence.tdd.excludedRuns.count, evidence.tdd.excludedRuns.paths.length);
+  const hang = fs.readFileSync(path.join(REPO_ROOT, evidence.tdd.excludedRuns.hangIncidentPath), "utf8");
+  assert.equal(evidence.tdd.excludedRuns.hangDisposition, "INVALID_TEARDOWN_HANG");
+  assert.equal(evidence.tdd.excludedRuns.hangEvidenceExitCode, 124);
+  assert.equal(hang.includes("[hang-audit-status] INVALID_TEARDOWN_HANG"), true);
+  assert.equal(hang.includes("[hang-process-ids] pwsh=25592 vitest=29976 worker=39156 next_harness=24768"), true);
+  assert.equal(hang.includes("[bounded-run-explicit-exit-code] 124"), true);
+
+  const harnessGreen = fs.readFileSync(path.join(REPO_ROOT, evidence.tdd.harnessGreen.logPath), "utf8");
+  assert.equal(evidence.tdd.harnessGreen.exitCode, 0);
+  assert.equal(harnessGreen.includes("Tests  1 passed (1)"), true);
+  assert.equal(harnessGreen.includes("[explicit-exit-code] 0"), true);
+  for (const scenario of evidence.tdd.harnessGreen.singleScenarioRuns) {
+    const log = fs.readFileSync(path.join(REPO_ROOT, scenario.logPath), "utf8");
+    assert.equal(scenario.wallClockTimeoutSeconds, 180);
+    assert.equal(scenario.exitCode, 0);
+    assert.equal(scenario.shareTestProcessesAfter, 0);
+    assert.equal(log.includes("Tests  1 passed | 129 skipped (130)"), true);
+    assert.equal(log.includes("[share-test-processes-after] 0"), true);
+    assert.equal(log.includes("[explicit-exit-code] 0"), true);
+  }
+  assert.equal(evidence.tdd.finalGreen.scopeRaceChecks, 4);
 }
 
-function validateVerification(evidence) {
+function validateVerification(binding, evidence) {
   for (const check of Object.values(evidence.verification)) {
     const log = fs.readFileSync(path.join(REPO_ROOT, check.logPath), "utf8");
     assert.equal(check.exitCode, 0);
-    assert.equal(log.includes(`[product-sha] ${PRODUCT}`), true, check.logPath);
-    assert.equal(log.includes(`[product-tree] ${PRODUCT_TREE}`), true, check.logPath);
+    assert.equal(log.includes(`[product-sha] ${binding.product.commit}`), true, check.logPath);
+    assert.equal(log.includes(`[product-tree] ${binding.product.tree}`), true, check.logPath);
     assert.equal(log.includes("[explicit-exit-code] 0"), true, check.logPath);
   }
   const unit = fs.readFileSync(path.join(REPO_ROOT, evidence.verification.unit.logPath), "utf8");
-  assert.equal(unit.includes("Test Files  22 passed (22)"), true);
-  assert.equal(unit.includes("Tests  230 passed | 128 skipped (358)"), true);
+  assert.equal(unit.includes(`Test Files  ${evidence.verification.unit.testFilesPassed} passed (${evidence.verification.unit.testFilesPassed})`), true);
+  assert.equal(unit.includes(`Tests  ${evidence.verification.unit.testsPassed} passed | ${evidence.verification.unit.testsSkipped} skipped`), true);
+  assert.equal(unit.includes("[share-test-processes-after] 0"), true);
   const staticAudit = fs.readFileSync(path.join(REPO_ROOT, evidence.verification.staticAudit.logPath), "utf8");
   assert.equal(staticAudit.includes('"violationCount": 0'), true);
   assert.equal(staticAudit.includes('"coverageIssues": 0'), true);
+  assert.equal(staticAudit.includes('"importantDeclarations": 0'), true);
   const build = fs.readFileSync(path.join(REPO_ROOT, evidence.verification.build.logPath), "utf8");
-  assert.equal(build.includes("Next.js 15.5.20"), true);
-  assert.equal(build.includes("Generating static pages (27/27)"), true);
+  assert.equal(build.includes(`Next.js ${evidence.verification.build.nextVersion}`), true);
+  assert.equal(build.includes(`Generating static pages (${evidence.verification.build.staticPagesGenerated}/${evidence.verification.build.staticPagesGenerated})`), true);
   const browser = fs.readFileSync(path.join(REPO_ROOT, evidence.verification.browser.logPath), "utf8");
-  assert.equal(browser.includes("Tests  130 passed (130)"), true);
-  assert.equal(browser.includes("Duration  1290.02s"), true);
+  assert.equal(browser.includes(`Tests  ${evidence.verification.browser.runnerTestsPassed} passed (${evidence.verification.browser.runnerTestsPassed})`), true);
+  assert.equal(browser.includes("[timeout-triggered] false"), true);
+  assert.equal(browser.includes("[vitest-process-exit-code] 0"), true);
+  assert.equal(browser.includes("[share-test-processes-after] 0"), true);
+  assert.equal(evidence.verification.browser.timeoutTriggered, false);
+  assert.equal(evidence.verification.browser.shareTestProcessesAfter, 0);
 }
 
-function validateBrowserMetrics(evidence) {
-  const metrics = readJson(path.join(REPO_ROOT, evidence.browser.metricsPath));
+function validateBrowserMetrics(binding, evidence) {
+  const metrics = readJson(path.join(REPO_ROOT, evidence.tdd.finalGreen.metricsPath));
   assert.equal(metrics.schemaVersion, "safeclaw-workpack-share-v2-browser-metrics/v1");
-  assert.equal(metrics.contractAmendmentCommit, evidence.amendment.commit);
   assert.deepEqual(metrics.sourceIdentity, {
-    productCommit: PRODUCT,
-    productTree: PRODUCT_TREE,
-    browserTestBlob: BROWSER_BLOB
+    productCommit: binding.product.commit,
+    productTree: binding.product.tree,
+    browserTestBlob: binding.product.browserTestBlob
   });
   assert.equal(metrics.status, "complete");
-  assert.deepEqual(metrics.census, {
-    formula: "4 environments * 16 fixtures * 2 scale modes",
-    expectedCaseCount: 128,
-    executedCaseCount: 128,
-    unexecutedCaseCount: 0,
-    uniqueExecutedCaseCount: 128,
-    normal100Count: 64,
-    owningRootText200Count: 64
-  });
+  assert.equal(metrics.census.expectedCaseCount, 128);
+  assert.equal(metrics.census.executedCaseCount, 128);
+  assert.equal(metrics.census.unexecutedCaseCount, 0);
   assert.deepEqual(metrics.authority.mobileViewport, { width: 390, height: 844 });
-  assert.equal(metrics.authority.rootSelector, "[data-share-root]");
-  assert.equal(metrics.authority.rootAttribute, "data-share-text-scale");
   assert.equal(metrics.authority.requiredRootMutationCount, 1);
   assert.equal(metrics.authority.requiredDescendantStyleMutationCount, 0);
   assert.equal(metrics.authority.requiredDirectLeafInlineMutationCount, 0);
   assert.equal(metrics.rows.length, 128);
   assert.equal(new Set(metrics.rows.map((row) => row.caseId)).size, 128);
-
   let mobile390 = 0;
   let root200 = 0;
-  let languageChecks = 0;
-  let reviewChecks = 0;
-  let staleChecks = 0;
+  let scopeRaceChecks = 0;
   for (const row of metrics.rows) {
-    assert.equal(row.productCommit, PRODUCT);
-    assert.equal(row.productTree, PRODUCT_TREE);
-    assert.equal(row.viewport.width === 391, false, row.caseId);
+    assert.equal(row.productCommit, binding.product.commit);
+    assert.equal(row.productTree, binding.product.tree);
+    assert.notEqual(row.viewport.width, 391, row.caseId);
     if (row.environmentId.endsWith("-mobile")) {
       assert.deepEqual(row.viewport, { width: 390, height: 844 }, row.caseId);
       mobile390 += 1;
     }
     if (row.scaleModeId === "owning_root_text_200") {
       root200 += 1;
-      assert.equal(row.freshDomRuns, 2, row.caseId);
       assert.equal(row.rootScale.rootAttributeMutationCount, 1, row.caseId);
       assert.equal(row.rootScale.descendantStyleMutationCount, 0, row.caseId);
       assert.equal(row.rootScale.directLeafInlineMutationCount, 0, row.caseId);
-      assert.equal(row.rootScale.pseudoElementInspectionCount > 0, true, row.caseId);
       assert.equal(row.rootScale.pseudoFailureCount, 0, row.caseId);
-      assert.equal(row.rootScale.mediaQueryStable, true, row.caseId);
-      assert.equal(row.rootScale.containerQueryStable, true, row.caseId);
     } else {
       assert.equal(row.scaleModeId, "normal_100", row.caseId);
-      assert.equal(row.freshDomRuns, 1, row.caseId);
       assert.equal(row.rootScale, null, row.caseId);
     }
     for (const field of [
       "maximumHorizontalOverflow", "maximumPanelOverflow", "touchTargetFailureCount", "overlapFailureCount",
       "nestedScrollFailureCount", "clippedTextFailureCount"
     ]) assert.equal(row.geometry[field], 0, `${row.caseId}:${field}`);
-    languageChecks += row.languageAuthorityChecks;
-    reviewChecks += row.reviewVariantChecks;
-    staleChecks += row.staleVariantChecks;
+    scopeRaceChecks += row.scopeRaceChecks;
   }
   assert.equal(mobile390, 64);
   assert.equal(root200, 64);
-  assert.equal(languageChecks, 192);
-  assert.equal(reviewChecks, 80);
-  assert.equal(staleChecks, 32);
-
-  const css = git(["show", `${PRODUCT}:components/WorkflowSharePanel.module.css`]);
-  assert.equal(/max-height|overflow-y/iu.test(css), false, "Share preview reintroduced nested scrolling");
-  const browserSource = git(["show", `${PRODUCT}:tests/workpack-share-v2-browser.test.ts`]);
-  assert.equal(/skipNested|excludeNested|nestedScrollAllowlist/iu.test(browserSource), false);
+  assert.equal(scopeRaceChecks, 4);
+  assert.equal(metrics.rows.find((row) => row.caseId === "day-desktop:sending:normal_100").scopeRaceChecks, 4);
+  assert.equal(evidence.browser.mobile390x844Rows, 64);
+  assert.equal(evidence.browser.legacy391Rows, 0);
+  assert.equal(evidence.browser.owningRootText200Rows, 64);
+  assert.equal(evidence.browser.scopeRaceCheckCount, 4);
+  assert.equal(evidence.tdd.finalGreen.scopeRaceChecks, 4);
+  assert.equal(evidence.browser.descendantInlineMutationTotal, 0);
+  assert.equal(evidence.browser.directLeafInlineMutationTotal, 0);
+  for (const field of [
+    "pseudoFailureCount", "maximumHorizontalOverflowCssPx", "maximumPanelOverflowCssPx",
+    "touchTargetFailureCount", "overlapFailureCount", "nestedScrollFailureCount", "clippedTextFailureCount"
+  ]) assert.equal(evidence.browser[field], 0, `${field} must remain zero`);
 }
 
-function validateServerAuthoritySource() {
-  const route = git(["show", `${PRODUCT}:app/api/workflow/dispatch/route.ts`]);
+function validateProductSource(binding) {
+  const panel = git(["show", `${binding.product.commit}:components/WorkflowSharePanel.tsx`]);
   for (const token of [
-    "provider_adapter_unavailable", "providerCalled: false", "compareAndSwapDispatchGate", "dispatch_evidence_unpersisted",
+    "buildWorkflowShareRequestScopeKey", "sendRequestLifecycleRef", "isCurrentRequest", "requestChannels",
+    "if (!isCurrentRequest()) return", "if (isCurrentRequest()) setSending(false)"
+  ]) assert.equal(panel.includes(token), true, `Share panel missing ${token}`);
+  assert.equal(panel.includes("disabled={sending}"), false, "channel scope cannot change while dispatch is in flight");
+  const route = git(["show", `${binding.product.commit}:app/api/workflow/dispatch/route.ts`]);
+  for (const token of [
+    "provider_adapter_unavailable", "providerCalled: false", "compareAndSwapDispatchGate",
     "server-dispatch-receipt/v1", ".from(\"dispatch_logs\").insert", ".eq(\"updated_at\", row.updatedAt)"
   ]) assert.equal(route.includes(token), true, `dispatch route missing ${token}`);
-  const provider = git(["show", `${PRODUCT}:lib/workflow-dispatch-provider.ts`]);
-  assert.equal(provider.includes('providerStatus: "live"'), true);
-  assert.equal(provider.includes("strict JSON response required"), true);
-  const client = git(["show", `${PRODUCT}:lib/workflow-share-client.ts`]);
-  assert.equal(client.includes("requestedChannels: request.requestedChannels"), true);
-  assert.equal(client.includes("전파 응답의 서버 receipt binding이 올바르지 않습니다."), true);
-  const dispatchLogs = git(["show", `${PRODUCT}:app/api/dispatch-logs/route.ts`]);
-  assert.equal(dispatchLogs.includes('reasonCode: "server_dispatch_receipt_required"'), true);
-  assert.equal(dispatchLogs.includes("전파 이력은 workflow dispatch 라우트가 검증된 서버 receipt와 함께 저장합니다."), true);
+  const helper = git(["show", `${binding.product.commit}:tests/helpers/isolated-next-browser-harness.ts`]);
+  for (const token of [
+    "result.error || result.status !== 0", "Windows taskkill failed", "server.once(\"close\"",
+    "Browser harness PID ${processId} close"
+  ]) assert.equal(helper.includes(token), true, `browser harness missing ${token}`);
+  const harnessTest = git(["show", `${binding.product.commit}:tests/workpack-share-v2-browser-harness.test.ts`]);
+  assert.equal(harnessTest.includes("rejects teardown when Windows process-tree termination is not verified"), true);
 }
 
-function validateGeneratedArtifactRestoration(evidence) {
-  const restoration = readJson(path.join(REPO_ROOT, evidence.generatedArtifacts.restorationPath));
-  assert.equal(restoration.productCommit, PRODUCT);
-  assert.equal(restoration.productParent, PRODUCT_PARENT);
-  assert.equal(restoration.fileCount, 16);
-  assert.equal(restoration.mismatchCount, 0);
-  assert.equal(restoration.parentHeadWorktreeHashesEqual, true);
-  for (const item of restoration.files) {
-    assert.equal(item.allEqual, true, item.path);
-    assert.equal(git(["rev-parse", `${PRODUCT_PARENT}:${item.path}`]), item.parentBlob);
-    assert.equal(git(["rev-parse", `${PRODUCT}:${item.path}`]), item.headBlob);
-    assert.equal(git(["hash-object", "--", item.path]), item.worktreeBlob);
+function validateGeneratedAndScope(binding, evidence) {
+  const restoration = readJson(path.join(REPO_ROOT, evidence.generatedArtifacts.path));
+  assert.equal(restoration.schemaVersion, "safeclaw-workpack-share-v2-generated-restoration/v2");
+  assert.equal(restoration.productCommit, binding.product.commit);
+  assert.equal(restoration.productParent, binding.product.parent);
+  assert.equal(restoration.scopeExcluded.classification, "scope-excluded generated changes");
+  assert.equal(restoration.scopeExcluded.fileCount, 17);
+  assert.equal(restoration.scopeExcluded.trackedStaticAuditFileCount, 1);
+  assert.equal(restoration.scopeExcluded.trackedPngFileCount, 16);
+  assert.equal(restoration.scopeExcluded.includedInProductCommitCount, 0);
+  assert.equal(restoration.scopeExcluded.mismatchCount, 0);
+  assert.equal(restoration.scopeExcluded.parentHeadWorktreeHashesEqual, true);
+  assert.equal(restoration.historicalEvidenceRestoration.fileCount, 1);
+  assert.equal(restoration.historicalEvidenceRestoration.mismatchCount, 0);
+  for (const group of [restoration.scopeExcluded, restoration.historicalEvidenceRestoration]) {
+    for (const item of group.files) {
+      assert.equal(item.allEqual, true, item.path);
+      assert.equal(git(["rev-parse", `${binding.product.parent}:${item.path}`]), item.parentBlob);
+      assert.equal(git(["rev-parse", `${binding.product.commit}:${item.path}`]), item.headBlob);
+      assert.equal(git(["hash-object", "--", item.path]), item.worktreeBlob);
+    }
   }
+  assert.equal(evidence.generatedArtifacts.scopeExcludedFileCount, 17);
+  assert.equal(evidence.generatedArtifacts.trackedStaticAuditFileCount, 1);
+  assert.equal(evidence.generatedArtifacts.trackedPngFileCount, 16);
+  assert.equal(evidence.generatedArtifacts.historicalMetricFileCount, 1);
+  assert.equal(evidence.generatedArtifacts.mismatchCount, 0);
+  assert.equal(evidence.generatedArtifacts.includedInProductCommitCount, 0);
+
+  const scope = readJson(path.join(REPO_ROOT, evidence.scopeAudit.path));
+  assert.equal(scope.schemaVersion, "safeclaw-workpack-share-v2-p1-scope-audit/v2");
+  assert.equal(scope.productCommit, binding.product.commit);
+  assert.equal(scope.productParent, binding.product.parent);
+  assert.equal(scope.strictAnyHitCount, 0);
+  assert.equal(scope.forbiddenPathCount, 0);
+  assert.equal(scope.ontologyOrKoshaFileCount, 0);
+  assert.equal(scope.dbSchemaMigrationFileCount, 0);
+  assert.equal(scope.scopeExcludedGeneratedFileCount, 17);
+  assert.equal(scope.historicalMetricsRestoredCount, 1);
+  assert.equal(scope.status, "pass");
 }
 
-function applyAttack(evidence, attack) {
-  if (attack === null) return;
-  if (attack === "missing_amendment") delete evidence.amendment;
-  if (attack === "stale_product_sha") evidence.sourceIdentity.productCommit = REJECTED_PRODUCT;
-  if (attack === "stale_product_tree") evidence.sourceIdentity.productTree = REJECTED_TREE;
+function applyAttack(evidence, binding, attack) {
+  if (attack === null || attack === "missing_binding_manifest") return;
+  if (attack === "missing_amendment") delete evidence.historicalEvidence;
+  if (attack === "stale_product_sha") evidence.sourceIdentity.productCommit = binding.product.parent;
+  if (attack === "stale_product_tree") evidence.sourceIdentity.productTree = "0".repeat(40);
   if (attack === "precommit_source") evidence.sourceIdentity.productCommit = "precommit_worktree";
   if (attack === "unknown_key") evidence.browser.unknownMetric = 0;
   if (attack === "legacy_391") evidence.browser.legacy391Rows = 1;
   if (attack === "per_node_mutation") evidence.browser.descendantInlineMutationTotal = 1;
-  if (attack === "contaminated_pass") evidence.isolationIncident.contaminatedRunsCountedAsPass = 1;
-  if (attack === "stale_current_main") evidence.integration.currentIntegrationHead = PREVIOUS_INTEGRATION;
+  if (attack === "contaminated_pass") evidence.tdd.excludedRuns.countedAsPass = 1;
+  if (attack === "hang_reclassified") evidence.tdd.excludedRuns.hangDisposition = "PASS";
+  if (attack === "stale_current_main") evidence.authorities.main.commit = binding.integration.mergeBase;
+  if (attack === "stale_main_tree") evidence.authorities.main.tree = "0".repeat(40);
   if (attack === "kosha_overlap") evidence.integration.koshaPathOverlapCount = 1;
   if (attack === "ontology_cas_omission") evidence.integration.preservesConfirmationCas = false;
   if (attack === "log_hash_tamper") evidence.artifacts[0].sha256 = "0".repeat(64);
-  if (attack === "missing_incident") delete evidence.isolationIncident;
-  if (attack === "stale_browser_blob") evidence.sourceIdentity.browserTestBlob = "94e5698054226fda901dd991572438ca72044397";
-  if (attack === "red_reclassified") evidence.redRun.productCauseCount = 0;
+  if (attack === "missing_incident") delete evidence.tdd.excludedRuns;
+  if (attack === "missing_harness_red") delete evidence.tdd.harnessRed;
+  if (attack === "stale_browser_blob") evidence.sourceIdentity.browserTestBlob = "0".repeat(40);
+  if (attack === "stale_harness_blob") evidence.sourceIdentity.harnessHelperBlob = "0".repeat(40);
+  if (attack === "red_reclassified") evidence.tdd.requestScopeRed.actualDispatchRequestCount = 0;
+  if (attack === "harness_red_reclassified") evidence.tdd.harnessRed.exitCode = 0;
+  if (attack === "stale_binding_product") {
+    binding.product.commit = binding.product.parent;
+    binding.product.commitRef = `${binding.product.parent}^{commit}`;
+  }
+  if (attack === "stale_binding_integration") {
+    binding.integration.commit = binding.integration.mergeBase;
+    binding.integration.authorityRef = `${binding.integration.mergeBase}^{commit}`;
+  }
+  if (attack === "stale_binding_ontology_product") {
+    binding.ontology.productCommit = binding.ontology.mergeBase;
+    binding.ontology.productAuthorityRef = `${binding.ontology.mergeBase}^{commit}`;
+  }
+  if (attack === "stale_binding_ontology_evidence") {
+    binding.ontology.evidenceCommit = binding.ontology.productCommit;
+    binding.ontology.evidenceAuthorityRef = `${binding.ontology.productCommit}^{commit}`;
+  }
+  if (attack === "missing_authority_ref") delete binding.integration.authorityRef;
+  if (attack === "wrong_authority_ref") binding.integration.authorityRef = "HEAD^{commit}";
+  if (attack === "missing_ontology_authority_ref") delete binding.ontology.productAuthorityRef;
+  if (attack === "wrong_ontology_authority_ref") binding.ontology.productAuthorityRef = "HEAD^{commit}";
+  if (attack === "unknown_binding_key") binding.integration.unknownRef = "refs/heads/main";
+  if (attack === "stale_evidence_binding_hash") evidence.sourceBinding.sha256 = "0".repeat(64);
+  if (attack === "stale_scope_race_count") evidence.browser.scopeRaceCheckCount = 0;
+  if (attack === "revision_domain_conflation") evidence.integration.preservesDistinctRevisionDomains = false;
+  if (attack === "evidence_summary_overlay_omission") evidence.integration.preservesRawEvidenceSummaryOverlay = false;
+  if (attack === "stale_localization_trust") evidence.integration.revalidatesStaleLocalizationEnvelopes = false;
+  if (attack === "localization_scope_invalidation_omission") evidence.integration.invalidatesAuthorityOnLocalizationReview = false;
+  if (attack === "share_workspace_state_omission") evidence.integration.preservesShareWorkspaceState = false;
 }
 
 function main() {
@@ -539,28 +762,55 @@ function main() {
     process.stderr.write(`[remediation-evidence-invalid-attack] ${attack}\n`);
     process.exit(2);
   }
-  const evidence = readJson(EVIDENCE_PATH);
-  applyAttack(evidence, attack);
   try {
-    validateManifest(evidence);
+    const bindingIndex = arguments_.indexOf(BINDING_ARGUMENT);
+    if (bindingIndex < 0 || !arguments_[bindingIndex + 1]) {
+      throw new Error(`${BINDING_ARGUMENT} is required`);
+    }
+    const bindingPath = path.resolve(REPO_ROOT, arguments_[bindingIndex + 1]);
+    const relativeBindingPath = path.relative(REPO_ROOT, bindingPath);
+    assert.equal(relativeBindingPath.startsWith(".."), false, "binding manifest must be inside the repository");
+    assert.equal(fs.existsSync(bindingPath), true, "binding manifest is missing");
+    const bindingHash = sha256(bindingPath);
+    const binding = readJson(bindingPath);
+    const evidence = readJson(EVIDENCE_PATH);
+    applyAttack(evidence, binding, attack);
+    validateBindingSchema(binding);
+    validateEvidenceSchema(evidence);
+    validateBindingEvidence(binding, evidence, bindingPath, bindingHash);
     validateArtifactHashes(evidence);
-    validateGitBinding(evidence);
-    validateProductCensus(evidence);
-    validateRedAndIsolation(evidence);
-    validateVerification(evidence);
-    validateBrowserMetrics(evidence);
-    validateServerAuthoritySource();
-    validateGeneratedArtifactRestoration(evidence);
+    validateGitBinding(binding, evidence);
+    validateProductCensus(binding, evidence);
+    validateTdd(evidence);
+    validateVerification(binding, evidence);
+    validateBrowserMetrics(binding, evidence);
+    validateProductSource(binding);
+    validateGeneratedAndScope(binding, evidence);
+    assert.deepEqual(evidence.reviewBoundary, {
+      freshShareIndependentReviewRequired: true,
+      freshShareIndependentReviewStatus: "pending",
+      freshOntologyIndependentReviewRequired: true,
+      freshOntologyIndependentReviewStatus: "pending",
+      selfApproved: false,
+      integratedIntoMain: false,
+      hold: true,
+      completionClaim: "implementation_evidence_complete_hold_for_fresh_reviews"
+    });
     process.stdout.write(`${JSON.stringify({
-      status: "remediation-evidence-valid",
-      productCommit: PRODUCT,
-      productTree: PRODUCT_TREE,
-      currentIntegrationHead: CURRENT_INTEGRATION,
-      browserRunnerTests: 130,
-      browserRowsExecuted: 128,
-      browserRowsUnexecuted: 0,
-      koshaPathOverlapCount: 0,
-      independentReview: "pending"
+      status: "remediation-evidence-valid-hold",
+      productCommit: binding.product.commit,
+      productTree: binding.product.tree,
+      authoritativeMain: binding.integration.commit,
+      ontologyProduct: binding.ontology.productCommit,
+      ontologyEvidence: binding.ontology.evidenceCommit,
+      mainShareMergeTree: evidence.authorities.main.mergeTreeResultTree,
+      ontologyShareConflictCount: evidence.authorities.ontology.contentConflictCount,
+      browserRunnerTests: evidence.verification.browser.runnerTestsPassed,
+      browserRowsExecuted: evidence.browser.matrixRowsExecuted,
+      scopeRaceChecks: evidence.browser.scopeRaceCheckCount,
+      shareProcessesAfter: evidence.verification.browser.shareTestProcessesAfter,
+      independentReview: "pending",
+      hold: true
     })}\n`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

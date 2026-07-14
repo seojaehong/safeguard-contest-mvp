@@ -1,0 +1,36 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-browser.test.ts -t day-desktop:sending:normal_100 --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+[share-browser-product-sha] 22de1180d69263f7c08ac0ed0cfda0894e2db7f5
+[share-browser-product-tree] bca14063ff834ab00f8fb960c532ff0fb5fb3502
+ ❯ tests/workpack-share-v2-browser.test.ts (130 tests | 1 failed | 129 skipped) 85355ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100
+Error: Timed out waiting for Share v2 probe: workpack-race authority refresh
+ ❯ waitForProbe tests/workpack-share-v2-browser.test.ts:629:9
+    627|     await new Promise((resolve) => setTimeout(resolve, 50));
+    628|   }
+    629|   throw new Error(`Timed out waiting for Share v2 probe: ${label}`);
+       |         ^
+    630| }
+    631|
+ ❯ verifyInFlightScopeIsolation tests/workpack-share-v2-browser.test.ts:1742:5
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:1886:7
+ ❯ tests/workpack-share-v2-browser.test.ts:2003:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+     × day-desktop:sending:normal_100 50237ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 129 skipped (130)
+   Start at  13:56:33
+   Duration  87.94s (transform 564ms, setup 0ms, import 1.57s, tests 85.35s, environment 0ms)
+
+[explicit-exit] 1
