@@ -8,6 +8,16 @@ import { basename, isAbsolute, relative, resolve, sep } from "node:path";
 export type KoshaGuideCorpusItemType = "technical-guideline" | "technical-support-regulation";
 export type KoshaGuideOfflineRetrievalMode = "local-tag" | "local-ranked" | "local-hybrid";
 
+const VERIFIED_SUBSET_CONTRACT = {
+  sourceSnapshotId: "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+  scopeId: "technical-support-regulation-current-native",
+  sourceInventoryCount: 1040,
+  candidateCount: 234,
+  outOfScopeCount: 806,
+  selection: "technical-support-regulation+current-unverified+success+native"
+} as const;
+const PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256: readonly string[] = Object.freeze([]);
+
 export type KoshaGuideCorpusAnchor = {
   page: number;
   excerpt: string;
@@ -100,6 +110,7 @@ export type KoshaGuideCorpusLookup = {
   testHooks?: {
     afterPathChecked?: (path: string) => Promise<void> | void;
     afterStreamChunk?: (path: string, bytesRead: number) => Promise<void> | void;
+    trustedOfficialMetadataSha256?: readonly string[];
   };
 };
 
@@ -119,6 +130,12 @@ type ManifestSnapshot = {
   reproducibilityHash: string;
   sourceIdentitySha256: string;
   generationPolicySha256: string;
+  computedGenerationPolicySha256: string;
+  sourceSnapshotId: string;
+  selection: string;
+  officialMetadataSha256: string | null;
+  generatorSourceSha256: string;
+  trustedMetadataRegistrySha256: string;
   hashes: { items: string; chunks: string; failures: string };
   counts: {
     inventory: number;
@@ -449,6 +466,21 @@ function normalizeText(value: string): string {
   return value.normalize("NFKC").replace(/\s+/gu, " ").trim();
 }
 
+function canonicalJson(value: unknown): string {
+  if (value === null || typeof value === "string" || typeof value === "boolean") {
+    return JSON.stringify(value);
+  }
+  if (typeof value === "number" && Number.isFinite(value)) return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (isRecord(value)) {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
+      .join(",")}}`;
+  }
+  throw new CorpusGateError("identity:canonical-json");
+}
+
 function parseCurrent(value: unknown): CurrentSnapshot | null {
   if (!isRecord(value) || value.schema_version !== "safeclaw-kosha-body-current/v1") return null;
   const manifest = isRecord(value.manifest) ? value.manifest : null;
@@ -473,15 +505,26 @@ function parseManifest(value: unknown): ManifestSnapshot | null {
   const counts = isRecord(value.counts) ? value.counts : null;
   const hashes = isRecord(value.output_hashes) ? value.output_hashes : null;
   const identity = isRecord(value.source_identity) ? value.source_identity : null;
+  const generationPolicy = isRecord(value.generation_policy) ? value.generation_policy : null;
   const reviewedOcrCandidates = parseReviewedOcrCandidateBindings(value.generation_policy);
   const launchGate = parseLaunchGate(value.launch_gate);
   const coverageScope = parseCoverageScope(value.coverage_scope);
-  if (!counts || !hashes || !identity || !reviewedOcrCandidates || !launchGate || !coverageScope) return null;
+  if (!counts || !hashes || !identity || !generationPolicy || !reviewedOcrCandidates || !launchGate || !coverageScope) return null;
+  const officialMetadataSha256 = generationPolicy.official_metadata_sha256 === null
+    ? null
+    : readCanonicalSha256(generationPolicy.official_metadata_sha256);
+  if (generationPolicy.official_metadata_sha256 !== null && !officialMetadataSha256) return null;
   const parsed: ManifestSnapshot = {
     snapshotId: readString(value.snapshot_id),
     reproducibilityHash: readString(value.reproducibility_hash).toLowerCase(),
     sourceIdentitySha256: readString(identity.identity_sha256).toLowerCase(),
     generationPolicySha256: readString(value.generation_policy_sha256).toLowerCase(),
+    computedGenerationPolicySha256: sha256(canonicalJson(generationPolicy)),
+    sourceSnapshotId: readString(generationPolicy.source_snapshot_id),
+    selection: readString(generationPolicy.selection),
+    officialMetadataSha256,
+    generatorSourceSha256: readString(generationPolicy.generator_source_sha256).toLowerCase(),
+    trustedMetadataRegistrySha256: readString(generationPolicy.trusted_metadata_registry_sha256).toLowerCase(),
     hashes: {
       items: readString(hashes["items.jsonl"]).toLowerCase(),
       chunks: readString(hashes["chunks.jsonl"]).toLowerCase(),
@@ -498,7 +541,14 @@ function parseManifest(value: unknown): ManifestSnapshot | null {
     coverageScope
   };
   if (!parsed.snapshotId || Object.values(parsed.counts).some((count) => count < 0)) return null;
-  if (![parsed.reproducibilityHash, parsed.sourceIdentitySha256, parsed.generationPolicySha256, ...Object.values(parsed.hashes)].every(isSha256)) return null;
+  if (![
+    parsed.reproducibilityHash,
+    parsed.sourceIdentitySha256,
+    parsed.generationPolicySha256,
+    parsed.generatorSourceSha256,
+    parsed.trustedMetadataRegistrySha256,
+    ...Object.values(parsed.hashes)
+  ].every(isSha256)) return null;
   return parsed;
 }
 
@@ -770,6 +820,25 @@ function validateSnapshot(current: CurrentSnapshot, manifest: ManifestSnapshot):
   if (current.snapshotId !== manifest.snapshotId || current.reproducibilityHash !== manifest.reproducibilityHash) throw new CorpusGateError("identity:snapshot");
   if (current.sourceIdentitySha256 !== manifest.sourceIdentitySha256) throw new CorpusGateError("identity:source");
   if (current.generationPolicySha256 !== manifest.generationPolicySha256) throw new CorpusGateError("identity:policy");
+  if (manifest.computedGenerationPolicySha256 !== manifest.generationPolicySha256) {
+    throw new CorpusGateError("identity:policy-content");
+  }
+  const identityPayload = {
+    generator_source_sha256: manifest.generatorSourceSha256,
+    generation_policy_sha256: manifest.generationPolicySha256,
+    official_metadata_sha256: manifest.officialMetadataSha256,
+    output_hashes: {
+      "chunks.jsonl": manifest.hashes.chunks,
+      "failures.jsonl": manifest.hashes.failures,
+      "items.jsonl": manifest.hashes.items
+    },
+    source_identity_sha256: manifest.sourceIdentitySha256,
+    source_snapshot_id: manifest.sourceSnapshotId,
+    trusted_metadata_registry_sha256: manifest.trustedMetadataRegistrySha256
+  };
+  if (sha256(canonicalJson(identityPayload)) !== manifest.snapshotId) {
+    throw new CorpusGateError("identity:snapshot-content");
+  }
 }
 
 function validateReviewedOcrBindings(
@@ -812,7 +881,12 @@ function validateReviewedOcrBindings(
   }
 }
 
-async function loadUncached(rootDir: string, current: CurrentSnapshot, hooks?: KoshaGuideCorpusLookup["testHooks"]): Promise<KoshaGuideCorpusLoadResult> {
+async function loadUncached(
+  rootDir: string,
+  current: CurrentSnapshot,
+  hooks: KoshaGuideCorpusLookup["testHooks"] | undefined,
+  trustedOfficialMetadataSha256: readonly string[]
+): Promise<KoshaGuideCorpusLoadResult> {
   uncachedLoads += 1;
   try {
     const manifestFile = await readJsonFile(rootDir, current.manifestPath, LIMITS.manifest, parseManifest, hooks);
@@ -869,6 +943,26 @@ async function loadUncached(rootDir: string, current: CurrentSnapshot, hooks?: K
       throw new CorpusGateError("gate:provenance-incomplete");
     }
     if (
+      manifest.sourceSnapshotId !== VERIFIED_SUBSET_CONTRACT.sourceSnapshotId
+      || manifest.selection !== VERIFIED_SUBSET_CONTRACT.selection
+      || coverage.scopeId !== VERIFIED_SUBSET_CONTRACT.scopeId
+      || coverage.sourceInventoryCount !== VERIFIED_SUBSET_CONTRACT.sourceInventoryCount
+      || coverage.candidateCount !== VERIFIED_SUBSET_CONTRACT.candidateCount
+      || coverage.outOfScopeCount !== VERIFIED_SUBSET_CONTRACT.outOfScopeCount
+      || coverage.itemTypes.length !== 1
+      || coverage.itemTypes[0] !== "technical-support-regulation"
+    ) {
+      throw new CorpusGateError("gate:scope-contract");
+    }
+    if (
+      !manifest.officialMetadataSha256
+      || !trustedOfficialMetadataSha256.every(isSha256)
+      || manifest.trustedMetadataRegistrySha256 !== sha256(JSON.stringify([...trustedOfficialMetadataSha256].sort()))
+      || !trustedOfficialMetadataSha256.includes(manifest.officialMetadataSha256)
+    ) {
+      throw new CorpusGateError("gate:untrusted-official-metadata");
+    }
+    if (
       gate.failureCount !== manifest.counts.failureLedger
       || coverage.acceptedCount !== records.length
       || coverage.rejectedCount !== failuresFile.rows.length
@@ -909,10 +1003,12 @@ export async function loadKoshaGuideCorpus(options: KoshaGuideCorpusLookup = {})
     rootDir = await realpath(resolve(configuredRoot));
     const currentFile = await readJsonFile(rootDir, "current.json", LIMITS.current, parseCurrent, options.testHooks);
     const current = currentFile.value;
-    const key = `${rootDir}|${current.snapshotId}|${current.manifestSha256}`;
+    const trustedMetadata = options.testHooks?.trustedOfficialMetadataSha256
+      ?? PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256;
+    const key = `${rootDir}|${current.snapshotId}|${current.manifestSha256}|${sha256(JSON.stringify([...trustedMetadata].sort()))}`;
     const cached = loadCache.get(key);
     if (cached) return cached;
-    const promise = loadUncached(rootDir, current, options.testHooks);
+    const promise = loadUncached(rootDir, current, options.testHooks, trustedMetadata);
     loadCache.set(key, promise);
     return await promise;
   } catch (error) {

@@ -14,6 +14,13 @@ from urllib.parse import urlparse
 
 JsonObject = dict[str, Any]
 SHA256_PATTERN_LENGTH = 64
+PINNED_SOURCE_SNAPSHOT_ID = "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282"
+PINNED_SCOPE_ID = "technical-support-regulation-current-native"
+PINNED_SELECTION = "technical-support-regulation+current-unverified+success+native"
+PINNED_SOURCE_INVENTORY_COUNT = 1040
+PINNED_CANDIDATE_COUNT = 234
+PINNED_OUT_OF_SCOPE_COUNT = 806
+PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256: frozenset[str] = frozenset()
 
 
 class SubsetBuildError(RuntimeError):
@@ -170,7 +177,12 @@ def is_iso_date(value: object) -> bool:
         return False
 
 
-def candidate_rejection(item: JsonObject, official: JsonObject | None) -> str | None:
+def candidate_rejection(
+    item: JsonObject,
+    official: JsonObject | None,
+    *,
+    metadata_trusted: bool,
+) -> str | None:
     body = item.get("body")
     body_hash = item.get("normalized_text_sha256")
     raw_hash = item.get("raw_sha256")
@@ -185,6 +197,8 @@ def candidate_rejection(item: JsonObject, official: JsonObject | None) -> str | 
         return "pdf-hash-missing"
     if official is None:
         return "official-metadata-missing"
+    if not metadata_trusted:
+        return "official-metadata-untrusted"
     required = (
         is_official_url(official.get("official_url")),
         isinstance(official.get("official_file_id"), str) and bool(official["official_file_id"].strip()),
@@ -220,15 +234,49 @@ def write_text(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8", newline="\n")
 
 
+def generator_source_sha256() -> str:
+    return sha256_bytes(Path(__file__).read_bytes())
+
+
+def registry_sha256(values: frozenset[str]) -> str:
+    canonical = json.dumps(sorted(values), separators=(",", ":"))
+    return sha256_text(canonical)
+
+
+def write_immutable_snapshot(snapshot_dir: Path, artifacts: dict[str, str]) -> None:
+    if snapshot_dir.exists():
+        for name, expected_text in artifacts.items():
+            path = snapshot_dir / name
+            try:
+                actual_bytes = path.read_bytes()
+            except OSError as error:
+                raise SubsetBuildError(f"snapshot-output-missing:{name}") from error
+            if actual_bytes != expected_text.encode("utf-8"):
+                raise SubsetBuildError(f"snapshot-output-mismatch:{name}")
+        return
+    snapshot_dir.mkdir(parents=True, exist_ok=False)
+    for name, text in artifacts.items():
+        write_text(snapshot_dir / name, text)
+
+
 def build_verified_subset(
     *,
     source_root: Path,
     output_root: Path,
-    official_metadata_path: Path | None,
+    _test_only_official_metadata_path: Path | None = None,
+    _test_only_trusted_official_metadata_sha256: frozenset[str] | None = None,
 ) -> JsonObject:
     started_at = datetime.now(timezone.utc)
     source = load_source_snapshot(source_root)
-    metadata, metadata_sha256 = official_metadata_index(official_metadata_path)
+    metadata, metadata_sha256 = official_metadata_index(_test_only_official_metadata_path)
+    trusted_metadata_sha256 = (
+        _test_only_trusted_official_metadata_sha256
+        if _test_only_trusted_official_metadata_sha256 is not None
+        else PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256
+    )
+    if not all(is_sha256(value) for value in trusted_metadata_sha256):
+        raise SubsetBuildError("invalid-trusted-metadata-registry")
+    metadata_trusted = metadata_sha256 is not None and metadata_sha256 in trusted_metadata_sha256
     chunks_by_item: dict[str, list[JsonObject]] = {}
     for chunk in source.chunks:
         item_id = chunk.get("item_id")
@@ -239,6 +287,13 @@ def build_verified_subset(
         chunks_by_item.setdefault(item_id, []).append(chunk)
 
     candidates = [item for item in source.items if is_candidate(item)]
+    if (
+        source.snapshot_id != PINNED_SOURCE_SNAPSHOT_ID
+        or len(source.items) != PINNED_SOURCE_INVENTORY_COUNT
+        or len(candidates) != PINNED_CANDIDATE_COUNT
+        or len(source.items) - len(candidates) != PINNED_OUT_OF_SCOPE_COUNT
+    ):
+        raise SubsetBuildError("source-contract-mismatch")
     accepted: list[JsonObject] = []
     accepted_ids: set[str] = set()
     rejects: list[JsonObject] = []
@@ -246,7 +301,7 @@ def build_verified_subset(
         item_id = require_string(item.get("item_id"), "item_id")
         stable_key = require_string(item.get("stable_key"), f"stable_key:{item_id}")
         official = metadata.get(stable_key)
-        rejection = candidate_rejection(item, official)
+        rejection = candidate_rejection(item, official, metadata_trusted=metadata_trusted)
         if rejection is not None:
             rejects.append({
                 "schema_version": "safeclaw-kosha-body-corpus/v2",
@@ -314,25 +369,18 @@ def build_verified_subset(
         blockers.append("partial-coverage")
     if metadata_sha256 is None:
         blockers.append("official-metadata-artifact-missing")
+    elif not metadata_trusted:
+        blockers.append("official-metadata-untrusted")
 
-    identity_payload = {
-        "source_snapshot_id": source.snapshot_id,
-        "official_metadata_sha256": metadata_sha256,
-        "coverage_scope": "technical-support-regulation-current-native",
-        "output_hashes": output_hashes,
-    }
-    snapshot_id = sha256_text(json.dumps(identity_payload, sort_keys=True, separators=(",", ":")))
-    snapshot_path = Path("snapshots") / snapshot_id
-    snapshot_dir = output_root / snapshot_path
-    write_text(snapshot_dir / "items.jsonl", items_text)
-    write_text(snapshot_dir / "chunks.jsonl", chunks_text)
-    write_text(snapshot_dir / "failures.jsonl", failures_text)
-
+    generator_sha256 = generator_source_sha256()
+    trusted_registry_sha256 = registry_sha256(trusted_metadata_sha256)
     generation_policy = {
         "schema_version": "safeclaw-kosha-verified-subset-policy/v1",
         "source_snapshot_id": source.snapshot_id,
         "official_metadata_sha256": metadata_sha256,
-        "selection": "technical-support-regulation+current-unverified+success+native",
+        "trusted_metadata_registry_sha256": trusted_registry_sha256,
+        "generator_source_sha256": generator_sha256,
+        "selection": PINNED_SELECTION,
         "required_provenance": [
             "official_url",
             "official_file_id",
@@ -346,6 +394,18 @@ def build_verified_subset(
     generation_policy_sha256 = sha256_text(
         json.dumps(generation_policy, sort_keys=True, separators=(",", ":"))
     )
+    identity_payload = {
+        "generator_source_sha256": generator_sha256,
+        "generation_policy_sha256": generation_policy_sha256,
+        "source_snapshot_id": source.snapshot_id,
+        "source_identity_sha256": source.source_identity_sha256,
+        "trusted_metadata_registry_sha256": trusted_registry_sha256,
+        "official_metadata_sha256": metadata_sha256,
+        "output_hashes": output_hashes,
+    }
+    snapshot_id = sha256_text(json.dumps(identity_payload, sort_keys=True, separators=(",", ":")))
+    snapshot_path = Path("snapshots") / snapshot_id
+    snapshot_dir = output_root / snapshot_path
     manifest: JsonObject = {
         "schema_version": "safeclaw-kosha-verified-subset/v1",
         "snapshot_id": snapshot_id,
@@ -368,7 +428,7 @@ def build_verified_subset(
             "blockers": blockers,
         },
         "coverage_scope": {
-            "scope_id": "technical-support-regulation-current-native",
+            "scope_id": PINNED_SCOPE_ID,
             "source_inventory_count": source_inventory_count,
             "candidate_count": candidate_count,
             "accepted_count": accepted_count,
@@ -401,7 +461,12 @@ def build_verified_subset(
         "reproducibility_hash": snapshot_id,
     }
     manifest_text = json.dumps(manifest, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    write_text(snapshot_dir / "manifest.json", manifest_text)
+    write_immutable_snapshot(snapshot_dir, {
+        "items.jsonl": items_text,
+        "chunks.jsonl": chunks_text,
+        "failures.jsonl": failures_text,
+        "manifest.json": manifest_text,
+    })
     current: JsonObject = {
         "schema_version": "safeclaw-kosha-body-current/v1",
         "snapshot_path": snapshot_path.as_posix(),
@@ -439,7 +504,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--output-root", type=Path, required=True)
-    parser.add_argument("--official-metadata", type=Path)
     parser.add_argument("--report", type=Path)
     return parser.parse_args(argv)
 
@@ -450,7 +514,6 @@ def main(argv: list[str] | None = None) -> int:
         report = build_verified_subset(
             source_root=args.source_root,
             output_root=args.output_root,
-            official_metadata_path=args.official_metadata,
         )
         report_text = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True)
         if args.report is not None:

@@ -1,2 +1,2 @@
-api/safety-reference/search: route_js_bytes=7423 traced_files=55 traced_bytes=1217181 subset_traced=false
-api/ask: route_js_bytes=11190 traced_files=71 traced_bytes=2889041 subset_traced=false
+api/safety-reference/search: route_js_bytes=7423 traced_files=55 traced_bytes=1219504 subset_traced=false
+api/ask: route_js_bytes=11190 traced_files=71 traced_bytes=2891364 subset_traced=false
