@@ -2291,12 +2291,29 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
     const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
     const foreignWorkerTransmissionText = aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput);
+    const groundingDiagnostics = deliverablesResult?.diagnostics.grounding;
+    const fallbackMaterialization = JSON.stringify({
+      deliverables: baseDeliverables,
+      structuredRiskRows,
+      tbmRiskLinks
+    });
+    const hasRejectedDeliverableGroup = deliverablesResult?.diagnostics.groupResults.some((group) => (
+      group.status === "rejected"
+    )) === true;
+    const groundingFallbackMissing = groundingDiagnostics && hasRejectedDeliverableGroup
+      ? groundingDiagnostics.criticalControls
+        .filter((control) => !fallbackMaterialization.includes(control))
+        .map((control) => `grounded-generation fallback missing critical control: ${control}`)
+      : [];
     const internalDbHarnessPacket = buildDbHarnessPacket({
       question,
       references: safetyReference.items,
       improvements: harnessMemory.improvements,
       workpackMemory: harnessMemory.workpackMemory,
-      ontologyMissing: structuredRiskIssues.map((issue) => `${String(issue.field)}: ${issue.message}`),
+      ontologyMissing: [
+        ...structuredRiskIssues.map((issue) => `${String(issue.field)}: ${issue.message}`),
+        ...groundingFallbackMissing
+      ],
       retrieval: {
         errorCode: safetyReference.errorCode,
         mode: safetyReference.retrievalMode,

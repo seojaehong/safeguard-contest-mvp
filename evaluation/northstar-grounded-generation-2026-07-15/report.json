@@ -2,21 +2,26 @@
   "date": "2026-07-15",
   "branch": "fix/northstar-grounded-generation-20260715",
   "base": "dc608c8",
+  "remediatedCandidate": "875dfe1fdfd015cc56fc4a779b1c2502bbd5051f",
   "scope": "general /api/ask full-mode deliverable generation",
   "result": "pass",
   "contract": {
     "version": "grounded-generation-v1",
     "immutable": true,
-    "sourceIdentity": "sha256",
+    "sourceIdentity": "sha256-canonical-all-behavior-fields",
     "sourceKinds": ["direct", "sif", "kosha", "law"],
+    "referenceMatching": "typed-canonical-exact-and-kind-aware-token-exact",
+    "controlFieldMatching": "schema-specific",
     "unknownReferencePolicy": "reject_group_and_review_required",
     "unknownControlPolicy": "reject_group_and_review_required",
-    "fallbackPreserved": true
+    "fallbackPreserved": true,
+    "fallbackMissingControlPolicy": "surface_in_db_harness_missingEvidence_as_review_required"
   },
   "tdd": {
-    "intentionalRedRuns": 4,
+    "intentionalRedRuns": 6,
+    "intentionalRedCases": 8,
     "finalTestFilesPassed": 4,
-    "finalTestsPassed": 58,
+    "finalTestsPassed": 62,
     "finalTestsFailed": 0
   },
   "verification": [
@@ -30,7 +35,7 @@
       "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts",
       "exitCode": 0,
       "testFilesPassed": 4,
-      "testsPassed": 58,
+      "testsPassed": 62,
       "testsFailed": 0
     },
     {
