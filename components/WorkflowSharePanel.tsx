@@ -4,11 +4,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "@/components/WorkflowSharePanel.module.css";
 import {
+  buildWorkflowShareRequestScopeKey,
+  buildWorkflowShareTargetSignature,
   resolveShareProductPresentation,
   type ShareProductAuthorityStatus,
   type ShareProductChannelStatus,
   type ShareProductOutcome
 } from "@/components/WorkflowSharePolicy";
+import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
 import { parseSupportedLanguageCode, type SupportedLanguageCode } from "@/lib/foreign-worker";
 import type { AskResponse } from "@/lib/types";
 import type { WorkpackReadiness } from "@/lib/workpack-readiness";
@@ -47,6 +50,12 @@ type AuthorityViewState = {
 type ChannelViewState = {
   status: ShareProductChannelStatus;
   resolution: AuthenticatedChannelResolution | null;
+};
+
+type SendRequestLifecycle = {
+  version: number;
+  scopeKey: string;
+  authToken: string | undefined;
 };
 
 const CHANNEL_OPTIONS: Array<{
@@ -169,6 +178,14 @@ export function WorkflowSharePanel({
   const channelGroupRef = useRef<HTMLFieldSetElement>(null);
   const canShare = readiness?.canShare ?? true;
   const generationEvidenceSignature = data.generationEvidence?.signature || "";
+  const workpackContentFingerprint = useMemo(
+    () => buildWorkpackGenerationFingerprint(data),
+    [data]
+  );
+  const targetSignature = useMemo(
+    () => buildWorkflowShareTargetSignature(targetWorkers),
+    [targetWorkers]
+  );
   const authorityRequestWorkers = useMemo(() => (
     targetWorkers.map((worker, index) => ({
       externalKey: selectedWorkerKeys[index] || "",
@@ -179,8 +196,59 @@ export function WorkflowSharePanel({
   const authorityScope = useMemo(() => JSON.stringify({
     workpackId,
     generationEvidenceSignature,
+    workpackContentFingerprint,
+    targetSignature,
     workers: authorityRequestWorkers
-  }), [authorityRequestWorkers, generationEvidenceSignature, workpackId]);
+  }), [
+    authorityRequestWorkers,
+    generationEvidenceSignature,
+    targetSignature,
+    workpackContentFingerprint,
+    workpackId
+  ]);
+  const sendRequestScopeKey = useMemo(() => buildWorkflowShareRequestScopeKey({
+    authorityScope,
+    eligible: !requiresRevalidation
+      && canShare
+      && online
+      && targetWorkers.length > 0
+      && Boolean(authToken),
+    operatorNote: note.trim(),
+    authority: authorityView.authority,
+    selectedChannels,
+    channelResolution: channelView.resolution
+  }), [
+    authToken,
+    authorityScope,
+    authorityView.authority,
+    canShare,
+    channelView.resolution,
+    note,
+    online,
+    requiresRevalidation,
+    selectedChannels,
+    targetWorkers.length
+  ]);
+  const sendRequestLifecycleRef = useRef<SendRequestLifecycle>({
+    version: 0,
+    scopeKey: sendRequestScopeKey,
+    authToken
+  });
+  const currentSendLifecycle = sendRequestLifecycleRef.current;
+  if (
+    currentSendLifecycle.scopeKey !== sendRequestScopeKey
+    || currentSendLifecycle.authToken !== authToken
+  ) {
+    sendRequestLifecycleRef.current = {
+      version: currentSendLifecycle.version + 1,
+      scopeKey: sendRequestScopeKey,
+      authToken
+    };
+  }
+
+  useEffect(() => {
+    setSending(false);
+  }, [authToken, sendRequestScopeKey]);
 
   useEffect(() => {
     const updateOnline = () => setOnline(window.navigator.onLine);
@@ -322,7 +390,6 @@ export function WorkflowSharePanel({
     : "선택 안 함";
 
   function toggleChannel(channel: WorkflowShareChannel) {
-    if (sending) return;
     setSelectedChannels((current) => uniqueChannels(
       current.includes(channel)
         ? current.filter((item) => item !== channel)
@@ -393,6 +460,21 @@ export function WorkflowSharePanel({
       || !channelResolution
       || !channelResolution.ready
     ) return;
+    const lifecycle = sendRequestLifecycleRef.current;
+    const requestLifecycle: SendRequestLifecycle = {
+      version: lifecycle.version + 1,
+      scopeKey: lifecycle.scopeKey,
+      authToken: lifecycle.authToken
+    };
+    sendRequestLifecycleRef.current = requestLifecycle;
+    const requestChannels = [...selectedChannels];
+    const requestNote = note.trim();
+    const isCurrentRequest = (): boolean => {
+      const current = sendRequestLifecycleRef.current;
+      return current.version === requestLifecycle.version
+        && current.scopeKey === requestLifecycle.scopeKey
+        && current.authToken === requestLifecycle.authToken;
+    };
     setSending(true);
     setOutcome(null);
     setStaleReason(null);
@@ -403,17 +485,19 @@ export function WorkflowSharePanel({
           authToken,
           workpackId: authority.workpackId,
           workerIds: authority.workerIds,
-          channels: selectedChannels,
+          channels: requestChannels,
           canonicalWorkpackRevision: authority.canonicalWorkpackRevision,
           availabilityToken: channelResolution.availabilityToken
         });
       } catch (error) {
+        if (!isCurrentRequest()) return;
         console.error("Share session creation failed", error);
         if (!applyServerError(error)) {
           setOutcome({ stage: "session_failed", logIds: [] });
         }
         return;
       }
+      if (!isCurrentRequest()) return;
 
       let result: WorkflowDispatchResult;
       try {
@@ -422,22 +506,24 @@ export function WorkflowSharePanel({
           workpackId: authority.workpackId,
           shareSessionId: session.shareSessionId,
           idempotencyKey: session.dispatchIdempotencyKey,
-          channels: selectedChannels,
-          operatorNote: note.trim()
+          channels: requestChannels,
+          operatorNote: requestNote
         });
       } catch (error) {
+        if (!isCurrentRequest()) return;
         console.error("Share dispatch failed", error);
         if (!applyServerError(error)) {
           setOutcome({ stage: "dispatch_failed", logIds: [] });
         }
         return;
       }
+      if (!isCurrentRequest()) return;
 
       const stage = classifyDispatchOutcome(result);
       const channelOutcomes = buildChannelOutcomes(result);
       setOutcome({ stage, logIds: result.logIds || [], channelOutcomes });
     } finally {
-      setSending(false);
+      if (isCurrentRequest()) setSending(false);
     }
   }
 
@@ -526,7 +612,6 @@ export function WorkflowSharePanel({
                   type="checkbox"
                   checked={selectedChannels.includes(option.channel)}
                   onChange={() => toggleChannel(option.channel)}
-                  disabled={sending}
                 />
                 <span><strong>{option.label}</strong><small>{option.detail}</small></span>
               </label>

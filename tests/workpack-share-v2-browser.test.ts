@@ -68,6 +68,7 @@ type DispatchMode = "accepted" | "partial" | "failed" | "stale";
 type DispatchLogMode = "success" | "failure" | "saved-count-only";
 
 const BROWSER_IDEMPOTENCY_KEY = "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef";
+const SCOPE_RACE_WORKPACK_ID = "10000000-0000-4000-8000-000000000106";
 
 type ShareScenario = {
   response: AskResponse;
@@ -79,14 +80,18 @@ type ShareScenario = {
   channelMode: ChannelMode;
   sessionMode: SessionMode;
   dispatchMode: DispatchMode;
+  deferDispatch: boolean;
   dispatchLogMode: DispatchLogMode;
   staleReasonCode: string;
+  workspaceSaveWorkpackId: string | null;
 };
 
 type ShareNetworkController = {
   probe: ShareNetworkProbe;
   releaseChannelUnavailable: () => Promise<void>;
   releaseSessionFailure: () => Promise<void>;
+  releaseSessionSuccess: () => Promise<void>;
+  releaseDispatch: () => Promise<void>;
 };
 
 type OpenSharePage = {
@@ -184,6 +189,7 @@ type BrowserCaseMetric = {
   languageAuthorityChecks: number;
   reviewVariantChecks: number;
   staleVariantChecks: number;
+  scopeRaceChecks: number;
   geometry: {
     maximumHorizontalOverflow: number;
     maximumPanelOverflow: number;
@@ -275,8 +281,10 @@ function buildScenario(fixtureId: ShareFixtureId): ShareScenario {
       : fixtureId === "fail_dispatch"
         ? "failed"
         : "accepted",
+    deferDispatch: false,
     dispatchLogMode: fixtureId === "fail_dispatch_unpersisted" ? "failure" : "success",
-    staleReasonCode: "workpack_revision_or_digest_changed"
+    staleReasonCode: "workpack_revision_or_digest_changed",
+    workspaceSaveWorkpackId: null
   };
 }
 
@@ -293,6 +301,78 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
   };
   let deferredChannelRoute: Route | null = null;
   let deferredSessionRoute: Route | null = null;
+  let deferredDispatchRoute: { route: Route; body: JsonRecord } | null = null;
+
+  const fulfillSessionSuccess = async (route: Route): Promise<void> => {
+    await fulfillJson(route, {
+      ok: true,
+      shareSessionId: SHARE_SESSION_ID,
+      dispatchIdempotencyKey: BROWSER_IDEMPOTENCY_KEY,
+      expiresAt: "2099-07-14T00:00:00.000Z",
+      message: "공유 세션을 만들었습니다."
+    });
+  };
+
+  const fulfillDispatchResult = async (route: Route, body: JsonRecord): Promise<void> => {
+    const channels = Array.isArray(body.channels)
+      ? body.channels.filter((channel): channel is string => typeof channel === "string")
+      : [];
+    const channelResults = channels.map((channel, index) => ({
+      channel,
+      provider: "n8n-relay",
+      status: scenario.dispatchMode === "accepted"
+        ? "sent"
+        : scenario.dispatchMode === "partial"
+          ? index === 0 ? "sent" : "failed"
+          : "failed",
+      message: scenario.dispatchMode === "accepted" ? "accepted" : "provider result requires review"
+    }));
+    if (scenario.dispatchLogMode === "failure") {
+      await fulfillJson(route, {
+        ok: false,
+        configured: true,
+        state: "uncertain",
+        reasonCode: "dispatch_evidence_unpersisted",
+        providerCalled: true,
+        duplicateRisk: true,
+        idempotencySupported: true,
+        idempotencyKey: body.idempotencyKey,
+        message: "Server dispatch evidence persistence failed."
+      }, 500);
+      return;
+    }
+    const sentCount = channelResults.filter((result) => result.status === "sent").length;
+    const outcome = sentCount === channelResults.length ? "accepted" : sentCount > 0 ? "partial" : "failed";
+    const logIds = channels.map((_channel, index) => dispatchLogId(index));
+    const localization = isRecord(scenario.shareLocalization) ? scenario.shareLocalization : {};
+    await fulfillJson(route, {
+      ok: outcome === "accepted" || outcome === "partial",
+      configured: true,
+      state: "recorded",
+      outcome,
+      message: scenario.dispatchMode === "accepted" ? "전송 요청을 접수했습니다." : "전송 결과 확인 필요",
+      workflowRunId: "share-v2-workflow-run",
+      providerStatus: "live",
+      providerCalled: true,
+      duplicateRisk: false,
+      idempotencySupported: true,
+      idempotencyKey: body.idempotencyKey,
+      channelResults,
+      logIds,
+      receipt: {
+        version: "server-dispatch-receipt/v1",
+        receiptId: "55555555-5555-4555-8555-555555555555",
+        shareSessionId: SHARE_SESSION_ID,
+        idempotencyKey: body.idempotencyKey,
+        workpackId: SHARE_WORKPACK_ID,
+        canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
+        outcome,
+        workflowRunId: "share-v2-workflow-run",
+        logIds,
+        recordedAt: "2026-07-14T01:00:00.000Z"
+      }
+    });
+  };
 
   await page.route(`${SHARE_SUPABASE_URL}/auth/v1/**`, async (route) => {
     if (route.request().url().includes("/token")) {
@@ -326,10 +406,31 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
       });
       return;
     }
-    if (url.pathname === `/api/workpacks/${SHARE_WORKPACK_ID}` && method === "GET") {
+    if (url.pathname === "/api/workpacks" && method === "POST" && scenario.workspaceSaveWorkpackId) {
+      await fulfillJson(route, {
+        ok: true,
+        configured: true,
+        workpackId: scenario.workspaceSaveWorkpackId,
+        message: "작업공간 문서팩을 저장했습니다."
+      });
+      return;
+    }
+    const workpackDetailMatch = url.pathname.match(/^\/api\/workpacks\/([0-9a-f-]+)$/u);
+    if (workpackDetailMatch && method === "GET") {
+      const requestedWorkpackId = workpackDetailMatch[1];
+      if (
+        requestedWorkpackId !== SHARE_WORKPACK_ID
+        && requestedWorkpackId !== scenario.workspaceSaveWorkpackId
+      ) {
+        await fulfillJson(route, { ok: false, message: "Unknown workpack fixture" }, 404);
+        return;
+      }
       await fulfillJson(route, buildWorkpackDetailFixture({
         response: scenario.response,
-        shareLocalization: scenario.shareLocalization
+        workpackId: requestedWorkpackId,
+        ...(requestedWorkpackId === SHARE_WORKPACK_ID
+          ? { shareLocalization: scenario.shareLocalization }
+          : {})
       }));
       return;
     }
@@ -348,7 +449,28 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
     }
     if (url.pathname === "/api/workers" && method !== "GET") {
       probe.workerMutationCount += 1;
+      if (method === "POST" && scenario.workspaceSaveWorkpackId) {
+        await fulfillJson(route, {
+          ok: true,
+          configured: true,
+          workerMap: Object.fromEntries(scenario.workers.map((worker, index) => [
+            worker.id,
+            serverWorkerId(index)
+          ])),
+          message: "작업자 명단을 저장했습니다."
+        });
+        return;
+      }
       await fulfillJson(route, { ok: false, message: "Worker mutation is forbidden in Share." }, 409);
+      return;
+    }
+    if (url.pathname === "/api/education-records" && method === "POST" && scenario.workspaceSaveWorkpackId) {
+      await fulfillJson(route, {
+        ok: true,
+        configured: true,
+        savedCount: scenario.workers.length,
+        message: "교육 기록을 저장했습니다."
+      });
       return;
     }
     if (url.pathname === "/api/settings/channels/resolve" && method === "POST") {
@@ -378,7 +500,7 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
         ok: true,
         version: "channel-availability/v1",
         ready: !unavailable,
-        workpackId: SHARE_WORKPACK_ID,
+        workpackId: requestDto.workpackId,
         canonicalWorkpackRevision: body.canonicalWorkpackRevision,
         requestedChannels,
         availabilityToken: SHARE_AVAILABILITY_TOKEN,
@@ -401,13 +523,7 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
         await fulfillJson(route, { ok: false, message: "초대 세션 생성 실패" }, 503);
         return;
       }
-      await fulfillJson(route, {
-        ok: true,
-        shareSessionId: SHARE_SESSION_ID,
-        dispatchIdempotencyKey: BROWSER_IDEMPOTENCY_KEY,
-        expiresAt: "2099-07-14T00:00:00.000Z",
-        message: "공유 세션을 만들었습니다."
-      });
+      await fulfillSessionSuccess(route);
       return;
     }
     if (url.pathname === "/api/workflow/dispatch" && method === "POST") {
@@ -422,64 +538,11 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
         return;
       }
       probe.providerDispatchCount += 1;
-      const channels = Array.isArray(body.channels)
-        ? body.channels.filter((channel): channel is string => typeof channel === "string")
-        : [];
-      const channelResults = channels.map((channel, index) => ({
-        channel,
-        provider: "n8n-relay",
-        status: scenario.dispatchMode === "accepted"
-          ? "sent"
-          : scenario.dispatchMode === "partial"
-            ? index === 0 ? "sent" : "failed"
-            : "failed",
-        message: scenario.dispatchMode === "accepted" ? "accepted" : "provider result requires review"
-      }));
-      if (scenario.dispatchLogMode === "failure") {
-        await fulfillJson(route, {
-          ok: false,
-          configured: true,
-          state: "uncertain",
-          reasonCode: "dispatch_evidence_unpersisted",
-          providerCalled: true,
-          duplicateRisk: true,
-          idempotencySupported: true,
-          idempotencyKey: body.idempotencyKey,
-          message: "Server dispatch evidence persistence failed."
-        }, 500);
+      if (scenario.deferDispatch) {
+        deferredDispatchRoute = { route, body };
         return;
       }
-      const sentCount = channelResults.filter((result) => result.status === "sent").length;
-      const outcome = sentCount === channelResults.length ? "accepted" : sentCount > 0 ? "partial" : "failed";
-      const logIds = channels.map((_channel, index) => dispatchLogId(index));
-      const localization = isRecord(scenario.shareLocalization) ? scenario.shareLocalization : {};
-      await fulfillJson(route, {
-        ok: outcome === "accepted" || outcome === "partial",
-        configured: true,
-        state: "recorded",
-        outcome,
-        message: scenario.dispatchMode === "accepted" ? "전송 요청을 접수했습니다." : "전송 결과 확인 필요",
-        workflowRunId: "share-v2-workflow-run",
-        providerStatus: "live",
-        providerCalled: true,
-        duplicateRisk: false,
-        idempotencySupported: true,
-        idempotencyKey: body.idempotencyKey,
-        channelResults,
-        logIds,
-        receipt: {
-          version: "server-dispatch-receipt/v1",
-          receiptId: "55555555-5555-4555-8555-555555555555",
-          shareSessionId: SHARE_SESSION_ID,
-          idempotencyKey: body.idempotencyKey,
-          workpackId: SHARE_WORKPACK_ID,
-          canonicalWorkpackRevision: localization.canonicalWorkpackRevision,
-          outcome,
-          workflowRunId: "share-v2-workflow-run",
-          logIds,
-          recordedAt: "2026-07-14T01:00:00.000Z"
-        }
-      });
+      await fulfillDispatchResult(route, body);
       return;
     }
     if (url.pathname === "/api/dispatch-logs" && method === "POST") {
@@ -525,6 +588,18 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
       const route = deferredSessionRoute;
       deferredSessionRoute = null;
       await fulfillJson(route, { ok: false, message: "Deferred session closed by test" }, 503);
+    },
+    releaseSessionSuccess: async () => {
+      if (!deferredSessionRoute) throw new Error("No deferred session route is waiting");
+      const route = deferredSessionRoute;
+      deferredSessionRoute = null;
+      await fulfillSessionSuccess(route);
+    },
+    releaseDispatch: async () => {
+      if (!deferredDispatchRoute) throw new Error("No deferred dispatch route is waiting");
+      const deferred = deferredDispatchRoute;
+      deferredDispatchRoute = null;
+      await fulfillDispatchResult(deferred.route, deferred.body);
     }
   };
 }
@@ -1640,6 +1715,111 @@ async function closeSharePage(opened: OpenSharePage): Promise<void> {
   await opened.context.close();
 }
 
+async function openEditableSharePage(
+  environment: ShareEnvironment,
+  scenario: ShareScenario
+): Promise<OpenSharePage> {
+  const opened = await openSharePage(
+    environment,
+    scenario,
+    `/workspace?step=document&document=riskAssessmentDraft&theme=${environment.theme}`,
+    false
+  );
+  await opened.page.locator(".document-textarea").first().waitFor({ state: "visible", timeout: 30_000 });
+  const operations = opened.page.locator("details.editor-operations-disclosure");
+  await operations.locator("summary").click();
+  await opened.page.locator("[data-share-root]").waitFor({ state: "visible", timeout: 30_000 });
+  await waitForShareState(opened.page, "ready");
+  return opened;
+}
+
+async function expectNoStaleOutcome(page: Page, expectedState: string): Promise<void> {
+  await page.waitForTimeout(250);
+  expect(await page.locator("[data-share-root]").getAttribute("data-share-state")).toBe(expectedState);
+  expect(await page.locator("[data-share-result]").count()).toBe(0);
+  const text = await page.locator("[data-share-root]").innerText();
+  expect(text).not.toContain("전송 요청 접수");
+  expect(text).not.toContain("일부 채널 확인 필요");
+  expect(text).not.toContain("전송 결과 확인 필요");
+}
+
+async function verifyInFlightScopeIsolation(environment: ShareEnvironment): Promise<number> {
+  const changeTargetLanguage = async (page: Page, workerName: string): Promise<void> => {
+    const workerEditor = page.locator(`[aria-label='${workerName} 기본정보 편집']`);
+    await workerEditor.locator("select").nth(2).selectOption("th");
+  };
+
+  const sessionScenario = buildScenario("sending");
+  const sessionPage = await openEditableSharePage(environment, sessionScenario);
+  try {
+    await sessionPage.page.locator("[data-share-primary]").click();
+    await waitForProbe(() => sessionPage.controller.probe.sessionRequestCount === 1, "scope-race session request");
+    await changeTargetLanguage(sessionPage.page, sessionScenario.workers[0].displayName);
+    await sessionPage.controller.releaseSessionSuccess();
+    await expectNoStaleOutcome(sessionPage.page, "review_required");
+    expect(sessionPage.controller.probe.dispatchRequestCount).toBe(0);
+  } finally {
+    await closeSharePage(sessionPage);
+  }
+
+  const targetScenario = buildScenario("result_accepted");
+  targetScenario.deferDispatch = true;
+  const targetPage = await openEditableSharePage(environment, targetScenario);
+  try {
+    await targetPage.page.locator("[data-share-primary]").click();
+    await waitForProbe(() => targetPage.controller.probe.dispatchRequestCount === 1, "target-race dispatch request");
+    await changeTargetLanguage(targetPage.page, targetScenario.workers[0].displayName);
+    await targetPage.controller.releaseDispatch();
+    await expectNoStaleOutcome(targetPage.page, "review_required");
+  } finally {
+    await closeSharePage(targetPage);
+  }
+
+  const workpackScenario = buildScenario("result_partial");
+  workpackScenario.deferDispatch = true;
+  workpackScenario.workspaceSaveWorkpackId = SCOPE_RACE_WORKPACK_ID;
+  const workpackPage = await openEditableSharePage(environment, workpackScenario);
+  try {
+    await workpackPage.page.locator("[data-share-primary]").click();
+    await waitForProbe(() => workpackPage.controller.probe.dispatchRequestCount === 1, "workpack-race dispatch request");
+    const channelRequestsBeforeSave = workpackPage.controller.probe.channelRequestCount;
+    await workpackPage.page.getByRole("button", { name: "작업공간 저장", exact: true }).click();
+    await waitForProbe(
+      () => workpackPage.controller.probe.channelRequestCount > channelRequestsBeforeSave,
+      "workpack-race authority refresh",
+      10_000
+    );
+    await waitForShareState(workpackPage.page, "ready", 10_000);
+    await workpackPage.controller.releaseDispatch();
+    await expectNoStaleOutcome(workpackPage.page, "ready");
+  } finally {
+    await closeSharePage(workpackPage);
+  }
+
+  const channelScenario = buildScenario("fail_dispatch");
+  channelScenario.deferDispatch = true;
+  const channelPage = await openEditableSharePage(environment, channelScenario);
+  try {
+    await channelPage.page.locator("[data-share-primary]").click();
+    await waitForProbe(() => channelPage.controller.probe.dispatchRequestCount === 1, "channel-race dispatch request");
+    const channelInputs = channelPage.page.locator("[data-share-owner='channels'] input[type='checkbox']");
+    expect(await channelInputs.nth(2).isDisabled()).toBe(false);
+    const channelRequestsBeforeChange = channelPage.controller.probe.channelRequestCount;
+    await channelInputs.nth(2).check();
+    await waitForProbe(
+      () => channelPage.controller.probe.channelRequestCount > channelRequestsBeforeChange,
+      "channel-race authority refresh"
+    );
+    await waitForShareState(channelPage.page, "ready", 10_000);
+    await channelPage.controller.releaseDispatch();
+    await expectNoStaleOutcome(channelPage.page, "ready");
+  } finally {
+    await closeSharePage(channelPage);
+  }
+
+  return 4;
+}
+
 function maximum(values: number[]): number {
   return values.length ? Math.max(...values) : 0;
 }
@@ -1745,6 +1925,11 @@ async function executeBrowserCase(
   const staleVariantChecks = fixtureId === "stale"
     ? await verifyStaleBindingVariants(environment)
     : 0;
+  const scopeRaceChecks = environment.id === "day-desktop"
+    && fixtureId === "sending"
+    && scaleMode === "normal_100"
+    ? await verifyInFlightScopeIsolation(environment)
+    : 0;
 
   browserCaseMetrics.push({
     caseId: shareCaseId(environment, fixtureId, scaleMode),
@@ -1760,6 +1945,7 @@ async function executeBrowserCase(
     languageAuthorityChecks,
     reviewVariantChecks,
     staleVariantChecks,
+    scopeRaceChecks,
     geometry: {
       maximumHorizontalOverflow: maximum(geometries.map((metrics) => metrics.horizontalOverflow)),
       maximumPanelOverflow: maximum(geometries.map((metrics) => metrics.panelOverflow)),

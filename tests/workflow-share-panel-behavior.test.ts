@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildShareEvidenceSummary,
   buildWorkflowShareEvidenceScopeKey,
+  buildWorkflowShareRequestScopeKey,
   buildWorkflowShareTargetSignature,
   classifyWorkflowDispatchPresentation,
   createWorkflowShareEvidenceState,
@@ -13,6 +14,48 @@ import {
 } from "@/components/WorkflowSharePolicy";
 
 describe("workflow share panel behavior", () => {
+  it("changes the async request identity for target, workpack authority, and channel scope", () => {
+    const base = {
+      authorityScope: "workpack-a:target-a",
+      eligible: true,
+      operatorNote: "",
+      authority: {
+        workpackId: "workpack-a",
+        canonicalWorkpackRevision: "revision-a",
+        workerIds: ["worker-a"]
+      },
+      selectedChannels: ["email", "sms"],
+      channelResolution: {
+        ready: true,
+        workpackId: "workpack-a",
+        canonicalWorkpackRevision: "revision-a",
+        requestedChannels: ["email", "sms"],
+        availabilityToken: "availability-a",
+        expiresAt: "2099-07-14T00:00:00.000Z"
+      }
+    } as const;
+    const baseKey = buildWorkflowShareRequestScopeKey(base);
+
+    expect(buildWorkflowShareRequestScopeKey({
+      ...base,
+      authorityScope: "workpack-a:target-b"
+    })).not.toBe(baseKey);
+    expect(buildWorkflowShareRequestScopeKey({
+      ...base,
+      authority: { ...base.authority, canonicalWorkpackRevision: "revision-b" }
+    })).not.toBe(baseKey);
+    expect(buildWorkflowShareRequestScopeKey({
+      ...base,
+      selectedChannels: ["email"],
+      channelResolution: {
+        ...base.channelResolution,
+        requestedChannels: ["email"],
+        availabilityToken: "availability-b"
+      }
+    })).not.toBe(baseKey);
+    expect(buildWorkflowShareRequestScopeKey(base)).toBe(baseKey);
+  });
+
   it("clears result, session, and log evidence when the target or workpack scope changes", () => {
     const targetSignature = buildWorkflowShareTargetSignature([{
       displayName: "Worker One",

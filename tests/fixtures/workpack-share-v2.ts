@@ -507,13 +507,14 @@ export function buildStoredShareWorkpack(input: {
 }
 
 export function buildReviewedShareEnvelopes(
-  response: AskResponse
+  response: AskResponse,
+  workpackId = SHARE_WORKPACK_ID
 ): Partial<Record<SupportedLanguageCode, ReviewedLocalizationEnvelope>> {
   return SUPPORTED_LANGUAGE_CODES.reduce<Partial<Record<SupportedLanguageCode, ReviewedLocalizationEnvelope>>>(
     (result, locale, index) => {
       if (locale === "ko") return result;
       result[locale] = buildReviewedLocalizationEnvelope({
-        workpackId: SHARE_WORKPACK_ID,
+        workpackId,
         response,
         artifact: {
           artifactId: `share-v2-${locale}`,
@@ -540,15 +541,15 @@ export function buildReviewedShareEnvelopes(
   );
 }
 
-export function buildShareLocalizationAuthority(response: AskResponse): {
+export function buildShareLocalizationAuthority(response: AskResponse, workpackId = SHARE_WORKPACK_ID): {
   ok: true;
   canonicalWorkpackRevision: string;
   normalizedWorkpackDigest: string;
   reviewedEnvelopes: Partial<Record<SupportedLanguageCode, ReviewedLocalizationEnvelope>>;
 } {
-  const envelopes = buildReviewedShareEnvelopes(response);
+  const envelopes = buildReviewedShareEnvelopes(response, workpackId);
   const authority = resolveReviewedLocalizationAuthority({
-    workpackId: SHARE_WORKPACK_ID,
+    workpackId,
     response,
     reviewedEnvelopes: envelopes,
     recipients: [],
@@ -568,13 +569,15 @@ export function buildShareLocalizationAuthority(response: AskResponse): {
 export function buildWorkpackDetailFixture(input: {
   response: AskResponse;
   shareLocalization?: unknown;
+  workpackId?: string;
 }): Record<string, unknown> {
+  const workpackId = input.workpackId || SHARE_WORKPACK_ID;
   return {
     ok: true,
     configured: true,
     canReopen: true,
     workpack: {
-      id: SHARE_WORKPACK_ID,
+      id: workpackId,
       question: input.response.question,
       scenario: input.response.scenario,
       deliverables: input.response.deliverables,
@@ -585,7 +588,7 @@ export function buildWorkpackDetailFixture(input: {
       updatedAt: "2026-07-14T00:00:00.000Z",
       reopenData: input.response
     },
-    shareLocalization: input.shareLocalization ?? buildShareLocalizationAuthority(input.response),
+    shareLocalization: input.shareLocalization ?? buildShareLocalizationAuthority(input.response, workpackId),
     blockers: [],
     message: "저장된 문서팩 상세를 불러왔습니다."
   };

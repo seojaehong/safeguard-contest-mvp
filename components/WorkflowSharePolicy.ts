@@ -80,6 +80,26 @@ export type WorkflowShareEvidenceAction =
   | { type: "set_session"; scopeKey: string; shareSessionId: string }
   | { type: "set_log"; scopeKey: string; logSaveState: WorkflowShareLogSaveState };
 
+export type WorkflowShareRequestScopeInput = {
+  authorityScope: string;
+  eligible: boolean;
+  operatorNote: string;
+  authority: null | {
+    workpackId: string;
+    canonicalWorkpackRevision: string;
+    workerIds: readonly string[];
+  };
+  selectedChannels: readonly string[];
+  channelResolution: null | {
+    ready: boolean;
+    workpackId: string;
+    canonicalWorkpackRevision: string;
+    requestedChannels: readonly string[];
+    availabilityToken: string;
+    expiresAt: string;
+  };
+};
+
 type WorkflowShareTargetSignatureInput = {
   displayName: string;
   role: string;
@@ -148,6 +168,28 @@ export function buildWorkflowShareEvidenceScopeKey(input: {
     workpackId: input.workpackId || "unsaved",
     targetSignature: input.targetSignature,
     workerIds: [...input.workerIds]
+  });
+}
+
+export function buildWorkflowShareRequestScopeKey(input: WorkflowShareRequestScopeInput): string {
+  return JSON.stringify({
+    authorityScope: input.authorityScope,
+    eligible: input.eligible,
+    operatorNote: input.operatorNote,
+    authority: input.authority ? {
+      workpackId: input.authority.workpackId,
+      canonicalWorkpackRevision: input.authority.canonicalWorkpackRevision,
+      workerIds: [...input.authority.workerIds]
+    } : null,
+    selectedChannels: [...input.selectedChannels],
+    channelResolution: input.channelResolution ? {
+      ready: input.channelResolution.ready,
+      workpackId: input.channelResolution.workpackId,
+      canonicalWorkpackRevision: input.channelResolution.canonicalWorkpackRevision,
+      requestedChannels: [...input.channelResolution.requestedChannels],
+      availabilityToken: input.channelResolution.availabilityToken,
+      expiresAt: input.channelResolution.expiresAt
+    } : null
   });
 }
 
