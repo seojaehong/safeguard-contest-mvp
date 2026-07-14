@@ -132,6 +132,14 @@ function deepFreeze<T>(value: T): DeepReadonly<T> {
   return value as DeepReadonly<T>;
 }
 
+function isRecursivelyFrozen(value: unknown, seen = new WeakSet<object>()): boolean {
+  if (typeof value !== "object" || value === null) return true;
+  if (!Object.isFrozen(value)) return false;
+  if (seen.has(value)) return true;
+  seen.add(value);
+  return Object.values(value).every((child) => isRecursivelyFrozen(child, seen));
+}
+
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value === "string" || typeof value === "boolean") {
     return JSON.stringify(value);
@@ -294,6 +302,8 @@ export function createExperimentalHermesAdapter(
           if (typeof output !== "object"
             || output === null
             || !isRecord(output.evidencePacket)
+            || output.evidencePacket === evidencePacket
+            || !isRecursivelyFrozen(output.evidencePacket)
             || typeof output.text !== "string") {
             throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
           }
