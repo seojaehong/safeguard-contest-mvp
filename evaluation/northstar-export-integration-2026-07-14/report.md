@@ -7,10 +7,10 @@
 
 ## Candidate product commits
 
-- `9556963`: user-visible interface copy localization
-- `8282d1a`: operational status copy localization
-- `c78271f`: report photo comparison copy localization
-- `7cdea4e`: report comparison copy localization
+- `b7040ad`: user-visible interface copy localization
+- `9b5368c`: operational status copy localization
+- `4005ef6`: report photo comparison copy localization
+- `a4abb6e`: report comparison copy localization
 
 The stale evidence-only commit `b6e3221` is not an ancestor of this clean branch and is deliberately excluded from the integration candidate.
 

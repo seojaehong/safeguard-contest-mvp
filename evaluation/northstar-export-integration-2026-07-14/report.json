@@ -5,10 +5,10 @@
   "databaseChanged": false,
   "schemaChanged": false,
   "candidateProductCommits": [
-    "9556963",
-    "8282d1a",
-    "c78271f",
-    "7cdea4e"
+    "b7040ad",
+    "9b5368c",
+    "4005ef6",
+    "a4abb6e"
   ],
   "excludedCommits": [
     "b6e3221"
