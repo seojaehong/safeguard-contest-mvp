@@ -214,6 +214,37 @@ describe("current-base runAsk retrieval provenance", () => {
     );
   }, 30_000);
 
+  it("keeps KOSHA-only runAsk output review-required without independent action controls", async () => {
+    const koshaOnlyControl = "EXCLUDED_RUNASK_KOSHA_ONLY_CONTROL";
+    const koshaOnly = retrievalReference("verified-kosha-only", "local-ranked");
+    koshaOnly.item_type = "technical-guideline";
+    koshaOnly.title = "KOSHA 단독 지게차 기술지침";
+    koshaOnly.summary = "직접 근거 없이 KOSHA 기술지침만 검색된 상태";
+    koshaOnly.controls = [koshaOnlyControl];
+    koshaOnly.primary_documents = ["위험성평가표", "TBM 브리핑", "TBM 기록"];
+    mocks.searchSafetyReferences.mockImplementation(async (options: { query: string; itemType?: string }) => {
+      if (options.itemType === "technical-guideline") {
+        return searchResult("local-ranked", [koshaOnly], options.query);
+      }
+      return searchResult("unconfigured", [], options.query);
+    });
+
+    const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "enhanced" });
+    const actionSection = response.answer.split("2) 오늘 문서에 먼저 반영할 조치")[1]?.split("3) 보강 필요")[0] ?? "";
+    const riskRowsText = (response.structured?.riskAssessmentRows || [])
+      .map((row) => [row.hazard, row.currentControls, row.additionalControls, ...row.evidenceRefs].join(" "))
+      .join("\n");
+
+    expect(response.dbHarness?.summary.ontologyStatus).toBe("review_required");
+    expect(response.dbHarness?.summary.directEvidence).toBe(0);
+    expect(response.dbHarness?.summary.sifCases).toBe(0);
+    expect(response.answer).toContain("보강 필요");
+    expect(response.answer).toContain("기술 보조지침 후보");
+    expect(actionSection).not.toContain(koshaOnlyControl);
+    expect(response.practicalPoints.join("\n")).not.toContain(koshaOnlyControl);
+    expect(riskRowsText).not.toContain(koshaOnlyControl);
+  }, 30_000);
+
   it("selects a verified current KOSHA citation even after five unverified matches", async () => {
     const sharedTitle = "D-C-13 지게차 보행자 동선 충돌 기술지침";
     const verifiedTitle = "VERIFIED_CURRENT_AFTER_FIVE KOSHA 기술지침";

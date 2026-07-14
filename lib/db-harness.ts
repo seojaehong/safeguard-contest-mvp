@@ -185,6 +185,11 @@ const REQUIRED_DOCUMENTS = ["위험성평가표", "TBM 브리핑", "TBM 기록"]
 const MAX_KOSHA_PROMPT_EXCERPT_CHARS = 720;
 const MAX_KOSHA_PROMPT_REFERENCES = 4;
 
+function isDbHarnessParentEvidence(item: SafetyReferenceItem): boolean {
+  if (item.item_type === "sif-case") return true;
+  return item.evidence_role === "direct" && isSafetyReferenceDirectEligible(item);
+}
+
 function includesDocument(item: SafetyReferenceItem, document: string) {
   return item.primary_documents.includes(document) || item.reflected_documents?.includes(document);
 }
@@ -192,7 +197,7 @@ function includesDocument(item: SafetyReferenceItem, document: string) {
 function uniqueDocuments(items: SafetyReferenceItem[], improvements: HarnessImprovement[]) {
   const documents = new Set<string>();
   for (const item of items) {
-    if (isKoshaTechnicalReference(item) || !isSafetyReferenceDirectEligible(item)) continue;
+    if (!isDbHarnessParentEvidence(item)) continue;
     item.primary_documents.forEach((document) => documents.add(document));
     item.reflected_documents?.forEach((document) => documents.add(document));
   }
@@ -213,9 +218,7 @@ function buildDocumentCoverage(input: {
     if (input.directEvidence.some((item) => includesDocument(item, document))) evidenceTypes.push("directEvidence");
     if (input.sifCases.some((item) => includesDocument(item, document))) evidenceTypes.push("sifCase");
     if (input.supportingEvidence.some((item) => (
-      !isKoshaTechnicalReference(item)
-        && isSafetyReferenceDirectEligible(item)
-        && includesDocument(item, document)
+      item.item_type === "sif-case" && includesDocument(item, document)
     ))) evidenceTypes.push("supportingEvidence");
     if (input.improvements.some((item) => item.reflectedDocuments.includes(document))) evidenceTypes.push("improvementMemory");
     return {
@@ -640,7 +643,10 @@ function boundKoshaPromptExcerpt(value: string): string {
   return Array.from(normalized).slice(0, MAX_KOSHA_PROMPT_EXCERPT_CHARS).join("").trim();
 }
 
-function buildVerifiedKoshaPromptLines(items: readonly SafetyReferenceItem[]): string[] {
+function buildVerifiedKoshaPromptLines(
+  items: readonly SafetyReferenceItem[],
+  options: { parentEvidenceReady: boolean } = { parentEvidenceReady: true }
+): string[] {
   const unique = new Map<string, SafetyReferenceItem>();
 
   for (const item of items) {
@@ -660,7 +666,7 @@ function buildVerifiedKoshaPromptLines(items: readonly SafetyReferenceItem[]): s
     if (!decision || !metadata || !item.body) return "";
 
     const payload = {
-      role: "technical_guidance_only",
+      role: options.parentEvidenceReady ? "technical_guidance_only" : "technical_guidance_candidate",
       uid: boundKoshaPromptValue(item.id, 120),
       title: boundKoshaPromptValue(getSafetyReferenceDisplayTitle(item), 180),
       version: boundKoshaPromptValue(metadata.currentVersion, 80),
@@ -674,7 +680,8 @@ function buildVerifiedKoshaPromptLines(items: readonly SafetyReferenceItem[]): s
       },
       reviewState: metadata.reviewState,
       lifecycle: metadata.lifecycle,
-      reviewRequired: decision.reviewRequired,
+      reviewRequired: decision.reviewRequired || !options.parentEvidenceReady,
+      parentEvidenceReady: options.parentEvidenceReady,
       bodyExcerpt: boundKoshaPromptExcerpt(item.body)
     };
     return `KOSHA_SUPPORTING_BODY_JSON: ${JSON.stringify(payload)}`;
@@ -682,10 +689,11 @@ function buildVerifiedKoshaPromptLines(items: readonly SafetyReferenceItem[]): s
 }
 
 export function buildHarnessPromptContext(packet: DbHarnessPacket) {
+  const koshaParentReady = hasKoshaSupportingParent(packet);
   const evidenceLines = [
     ...packet.sifCases.map((item) => `SIF: ${getSafetyReferenceDisplayTitle(item)} -> ${deriveSafetyReferenceOperationalView(item).controls.slice(0, 2).join(" / ")}`),
     ...packet.directEvidence.map((item) => `공식자료: ${getSafetyReferenceDisplayTitle(item)} -> ${item.primary_documents.join(", ")}`),
-    ...buildVerifiedKoshaPromptLines(packet.supportingEvidence),
+    ...buildVerifiedKoshaPromptLines(packet.supportingEvidence, { parentEvidenceReady: koshaParentReady }),
     ...packet.improvementMemory.map((item) => [
       `개선이력: ${item.hazardLabel} -> ${item.improvementText}`,
       item.visionStatus ? `visionStatus: ${item.visionStatus}` : "",
@@ -767,8 +775,18 @@ function evidenceTitles(items: SafetyReferenceItem[], limit: number) {
   return uniqueNonEmpty(items.map(getSafetyReferenceDisplayTitle), limit);
 }
 
+function hasKoshaSupportingParent(packet: DbHarnessPacket): boolean {
+  return packet.directEvidence.length > 0 || packet.sifCases.length > 0;
+}
+
+function verifiedKoshaSupportingEvidence(packet: DbHarnessPacket): SafetyReferenceItem[] {
+  return packet.supportingEvidence.filter(isKoshaSupportingCitationEligible);
+}
+
 function controlCandidates(packet: DbHarnessPacket) {
-  const verifiedKosha = packet.supportingEvidence.filter(isKoshaSupportingCitationEligible);
+  const verifiedKosha = hasKoshaSupportingParent(packet)
+    ? verifiedKoshaSupportingEvidence(packet)
+    : [];
   return uniqueNonEmpty([
     ...packet.sifCases.flatMap((item) => deriveSafetyReferenceOperationalView(item).controls.slice(0, 2)),
     ...packet.directEvidence.flatMap((item) => deriveSafetyReferenceOperationalView(item).controls.slice(0, 2)),
@@ -779,14 +797,17 @@ function controlCandidates(packet: DbHarnessPacket) {
 }
 
 export function buildDbHarnessAnswer(packet: DbHarnessPacket) {
+  const koshaParentReady = hasKoshaSupportingParent(packet);
   const directTitles = evidenceTitles(packet.directEvidence, 3);
   const sifTitles = evidenceTitles(packet.sifCases, 3);
-  const koshaTitles = evidenceTitles(
-    packet.supportingEvidence.filter(isKoshaSupportingCitationEligible),
-    3
-  );
+  const verifiedKoshaTitles = evidenceTitles(verifiedKoshaSupportingEvidence(packet), 3);
+  const koshaTitles = koshaParentReady ? verifiedKoshaTitles : [];
+  const koshaCandidateTitles = koshaParentReady ? [] : verifiedKoshaTitles;
   const controls = controlCandidates(packet);
   const missing = uniqueNonEmpty(packet.ontologyChecklist.missing, 5);
+  const candidateLines = koshaCandidateTitles.length
+    ? [`- 기술 보조지침 후보(근거 부족): ${koshaCandidateTitles.join(" / ")}`]
+    : [];
   const memoryLines = uniqueNonEmpty([
     ...packet.improvementMemory.map((item) => `${item.hazardLabel}: ${item.improvementText}`),
     ...packet.workpackMemory.map((item) => `${item.generatedAt}: ${item.statusLabel}`)
@@ -798,10 +819,15 @@ export function buildDbHarnessAnswer(packet: DbHarnessPacket) {
       "- DB 하네스가 사용할 직접 근거, SIF 사례, 개선 이력을 아직 찾지 못했습니다.",
       "",
       "2) 오늘 문서에 먼저 반영할 조치",
-      "- 위험성평가표, TBM 브리핑, TBM 기록에 같은 위험요인과 확인조치를 연결하세요.",
+      koshaCandidateTitles.length
+        ? "- SIF 사례 또는 직접 근거가 확인되기 전에는 KOSHA 기술지침의 조치를 문서에 먼저 반영하지 마세요."
+        : "- 위험성평가표, TBM 브리핑, TBM 기록에 같은 위험요인과 확인조치를 연결하세요.",
       "",
       "3) 보강 필요",
-      "- 공식자료, SIF 유사사례, 현장 개선 이력을 확인한 뒤 문서팩에 반영하세요."
+      [
+        ...candidateLines,
+        "- 공식자료, SIF 유사사례, 현장 개선 이력을 확인한 뒤 문서팩에 반영하세요."
+      ].join("\n")
     ].join("\n");
   }
 
@@ -820,9 +846,12 @@ export function buildDbHarnessAnswer(packet: DbHarnessPacket) {
       : "- 위험성평가표, TBM 브리핑, TBM 기록에 같은 위험요인과 확인조치를 연결하세요.",
     "",
     "3) 보강 필요",
-    missing.length
-      ? missing.map((item) => `- ${item}`).join("\n")
-      : "- 필수 3종 문서에 반영할 근거가 준비됐습니다."
+    [
+      ...candidateLines,
+      ...(missing.length
+        ? missing.map((item) => `- ${item}`)
+        : ["- 필수 3종 문서에 반영할 근거가 준비됐습니다."])
+    ].join("\n")
   ].join("\n");
 }
 
