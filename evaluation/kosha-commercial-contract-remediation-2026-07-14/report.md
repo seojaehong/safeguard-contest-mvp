@@ -7,6 +7,24 @@
 - Integration status: blocked until a fresh independent reviewer accepts this series.
 - No integration, self-approval, deployment, build, or full-suite claim is made.
 
+## V7 Mixed Query P1 Remediation Addendum
+
+- Bound input HEAD: `9d37024371d815fbdcd373de1cd6ab2876aa9b97`.
+- Intentional RED tests/log commit: `cc171cbccabfa0c8dd2e31d2f8ed6f9007d8ade0`.
+- Product GREEN commit: `90092bcece5a5e2121b652a4e63b1031ab0f6545`.
+- Finding remediated: mixed query families such as forklift collision plus electrical shock no longer collapse to an unrestricted empty family set. Query hazard families are classified as `none`, `single`, or `multiple`, and multiple keeps the full family set. Direct evidence now passes only when its canonical family explicitly overlaps a non-empty query family set.
+- Public-surface assertion: the hostile third-family fire direct evidence is absent from the public packet, prompt context, answer, practical points, risk rows, MCP packet, and MCP payload serialization.
+- Preserved behavior: existing mixed-reference KOSHA parent blocking, single-family positives, integrity-blocked KOSHA, KOSHA technical-guidance-only, `naturalize_only`, and SIF -> KOSHA -> law separation remain covered by the focused regression gates.
+- Scope: product code changed only `lib/db-harness.ts`; no DB, schema, migration, data, package, or lockfile change.
+
+| V7 Gate | Result | Log |
+| --- | ---: | --- |
+| Intentional RED mixed-query third-family leak | 2 failed, 78 passed | `red-v7-mixed-query-third-family.log` |
+| Hostile mixed-query plus MCP GREEN | 80 passed | `green-v7-mixed-query-third-family.log` |
+| Focused regression | 56 passed, 20 skipped | `green-v7-focused-regression.log` |
+| MCP regression | 28 passed, 2 skipped | `green-v7-mcp-regression.log` |
+| Strict TypeScript typecheck | passed | `green-v7-typecheck.log` |
+
 ## Commit Identity And Ancestry
 
 - Branch: `fix/kosha-commercial-contract-remediation`
