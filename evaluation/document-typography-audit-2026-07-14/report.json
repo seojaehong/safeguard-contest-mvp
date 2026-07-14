@@ -1,65 +1,42 @@
 {
-  "authoritativeBase": "785f328e2804ba472a1d659d83ef4c3c89acf342",
-  "branch": "fix/document-typography-audit-20260714",
+  "schemaVersion": 2,
   "status": "pass",
+  "authoritativeBase": "785f328e2804ba472a1d659d83ef4c3c89acf342",
+  "productCommit": "4989f1ecc33cc7e6bf574590f9b8fce86442c8f4",
+  "sourceIdentity": "e99e8204105a1ab4f50270636acff0c9958ae9e712f29521c3c5c84dd6413afe",
+  "branch": "fix/document-typography-audit-20260714",
+  "evidenceCommitRole": "This report is carried by an evidence-only child commit of the product commit.",
+  "productFilesChangedByEvidenceCommit": 0,
+  "verificationSummary": "evaluation/document-typography-audit-2026-07-14/verification-summary.json",
+  "staticAudit": {
+    "artifact": "evaluation/document-typography-audit-2026-07-14/static-audit-final.json",
+    "sourceSha": "4989f1ecc33cc7e6bf574590f9b8fce86442c8f4",
+    "sourceIdentity": "e99e8204105a1ab4f50270636acff0c9958ae9e712f29521c3c5c84dd6413afe",
+    "exitCode": 0,
+    "violationCount": 0,
+    "coverageIssues": 0
+  },
   "focusedRed": {
+    "sourceSha": "785f328e2804ba472a1d659d83ef4c3c89acf342",
+    "sourceIdentity": "7dd8590219b5d229e048cf62932e1ac65dbb2474c6a23de62180bbe1cfe849ba",
+    "exitCode": 1,
     "failedFiles": 4,
     "failedTests": 4,
     "passedTests": 26
   },
   "focusedGreen": {
+    "sourceSha": "4989f1ecc33cc7e6bf574590f9b8fce86442c8f4",
+    "sourceIdentity": "e99e8204105a1ab4f50270636acff0c9958ae9e712f29521c3c5c84dd6413afe",
+    "exitCode": 0,
     "passedFiles": 4,
     "passedTests": 30,
     "failedTests": 0
   },
-  "preBuildNorthStar": {
-    "buildIdPresent": false,
-    "skippedFiles": 1,
-    "skippedTests": 4,
-    "reason": "missing .next/BUILD_ID; run npm.cmd run build first"
-  },
-  "build": {
-    "status": "pass",
-    "staticPages": 28
-  },
-  "postBuildNorthStar": {
-    "passedFiles": 1,
-    "passedTests": 4,
-    "failedTests": 0,
-    "viewportCases": 4,
-    "summaryHeightPx": 50,
-    "geometryFindingCount": 0
-  },
-  "frontendAudit": {
-    "status": "pass",
-    "violationCount": 0,
-    "coverageIssues": 0,
-    "pageFiles": 32,
-    "componentFiles": 23,
-    "cssLines": 20967
-  },
   "typecheck": {
-    "status": "pass"
+    "exitCode": 0
   },
-  "fullTestBeforeBuild": {
-    "passedFiles": 135,
-    "skippedFiles": 6,
-    "failedFiles": 9,
-    "passedTests": 1442,
-    "skippedTests": 43,
-    "failedTests": 5,
-    "knownOutOfScope": [
-      "stale frontend route source identity",
-      "dirty working-tree provenance guards",
-      "fresh-worktree dependency and temporary pnpm virtual-store setup"
-    ]
-  },
-  "logs": [
-    "evaluation/document-typography-audit-2026-07-14/full-test-before-build.log",
-    "evaluation/document-typography-audit-2026-07-14/north-star-before-build.log",
-    "evaluation/document-typography-audit-2026-07-14/typecheck.log",
-    "evaluation/document-typography-audit-2026-07-14/frontend-audit.log",
-    "evaluation/document-typography-audit-2026-07-14/build.log",
-    "evaluation/document-typography-audit-2026-07-14/north-star-after-build.log"
-  ]
+  "productDiffCheck": {
+    "exitCode": 0,
+    "range": "785f328e2804ba472a1d659d83ef4c3c89acf342..4989f1ecc33cc7e6bf574590f9b8fce86442c8f4"
+  }
 }
