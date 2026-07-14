@@ -250,7 +250,25 @@ function buildServerConfirmedWorkpack(pending: AskResponse): AskResponse {
 }
 
 async function seedAuthenticatedSession(page: Page): Promise<void> {
-  await page.addInitScript(({ expectedOrigin, storageKey, token }) => {
+  await page.addInitScript(({ expectedOrigin, storageKey, token, runtimePublicEnv }) => {
+    if (runtimePublicEnv) {
+      const processValue = Reflect.get(globalThis, "process");
+      const processRecord = typeof processValue === "object" && processValue !== null
+        ? processValue as unknown as Record<string, unknown>
+        : {};
+      const environmentValue = Reflect.get(processRecord, "env");
+      const environmentRecord = typeof environmentValue === "object" && environmentValue !== null
+        ? environmentValue as Record<string, unknown>
+        : {};
+      Reflect.set(globalThis, "process", {
+        ...processRecord,
+        env: {
+          ...environmentRecord,
+          NEXT_PUBLIC_SUPABASE_URL: runtimePublicEnv.url,
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: runtimePublicEnv.anonKey,
+        },
+      });
+    }
     if (window.location.origin !== expectedOrigin) return;
     window.localStorage.setItem(storageKey, JSON.stringify({
       access_token: token,
@@ -268,7 +286,14 @@ async function seedAuthenticatedSession(page: Page): Promise<void> {
         created_at: "2026-07-14T00:00:00.000Z",
       },
     }));
-  }, { expectedOrigin: baseUrl, storageKey: AUTH_STORAGE_KEY, token: AUTH_TOKEN });
+  }, {
+    expectedOrigin: baseUrl,
+    storageKey: AUTH_STORAGE_KEY,
+    token: AUTH_TOKEN,
+    runtimePublicEnv: BROWSER_HARNESS_MODE === "prod"
+      ? { url: SUPABASE_URL, anonKey: "phase-a-product-anon-key" }
+      : null,
+  });
 }
 
 async function prepareWorkspace(
@@ -381,6 +406,35 @@ async function installSaveRoutes(page: Page): Promise<{
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({ ok: true, message: "교육 이력 저장 완료", savedCount: 1 }),
+    });
+  });
+  await page.route("**/api/workpacks/*/share-sessions", async (route) => {
+    if (route.request().method() !== "GET") {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ok: true, configured: true, sessions: [], confirmations: [] }),
+    });
+  });
+  await page.route("**/api/workpacks/*/operation-graph", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: false,
+        configured: true,
+        message: "브라우저 fixture는 로컬 operation graph를 사용합니다.",
+      }),
+    });
+  });
+  await page.route("**/api/dispatch-logs?**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ok: true, configured: true, logs: [], message: "전송 이력 없음" }),
     });
   });
   return {
@@ -953,10 +1007,14 @@ describe("Phase A product remediation browser contract", () => {
     const page = await browser.newPage({ viewport: { width, height } });
     const consoleErrors: string[] = [];
     const pageErrors: string[] = [];
+    const failedResponses: string[] = [];
     page.on("console", (message) => {
       if (message.type() === "error") consoleErrors.push(message.text());
     });
     page.on("pageerror", (error) => pageErrors.push(error.stack ?? error.message));
+    page.on("response", (response) => {
+      if (response.status() >= 400) failedResponses.push(`${response.status()} ${response.url()}`);
+    });
     await installSaveRoutes(page);
     const fixture = buildPendingFixture();
     await prepareWorkspace(page, fixture, { theme, authenticated: true });
@@ -1029,6 +1087,7 @@ describe("Phase A product remediation browser contract", () => {
         nextIssueBadgeCount,
       };
     });
+    await page.waitForTimeout(250);
 
     expect(metrics.horizontalOverflow).toBe(0);
     expect(metrics.panelWithinViewport).toBe(true);
@@ -1040,6 +1099,7 @@ describe("Phase A product remediation browser contract", () => {
     expect(metrics.eyebrowContrast).toBeGreaterThanOrEqual(4.5);
     expect(metrics.nextIssueBadgeCount).toBe(0);
     expect(pageErrors).toEqual([]);
+    expect(failedResponses).toEqual([]);
     expect(consoleErrors).toEqual([]);
 
     if (EVIDENCE_DIRECTORY) {
@@ -1054,6 +1114,7 @@ describe("Phase A product remediation browser contract", () => {
         generationFingerprint: buildWorkpackGenerationFingerprint(fixture),
         consoleErrors,
         pageErrors,
+        failedResponses,
         ...metrics,
       });
     }

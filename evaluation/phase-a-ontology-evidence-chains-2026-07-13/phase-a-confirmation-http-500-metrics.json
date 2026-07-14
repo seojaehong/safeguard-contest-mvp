@@ -1,0 +1,12 @@
+{
+  "harnessMode": "prod",
+  "failureMode": "http-500",
+  "loadingDisabled": false,
+  "retryEnabled": true,
+  "localConfirmationCount": 0,
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ],
+  "applicationConsoleErrors": [],
+  "pageErrors": []
+}

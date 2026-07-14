@@ -1,0 +1,12 @@
+{
+  "harnessMode": "prod",
+  "failureMode": "network-abort",
+  "loadingDisabled": false,
+  "retryEnabled": true,
+  "localConfirmationCount": 0,
+  "consoleErrors": [
+    "Failed to load resource: net::ERR_FAILED"
+  ],
+  "applicationConsoleErrors": [],
+  "pageErrors": []
+}

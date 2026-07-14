@@ -1,0 +1,10 @@
+{
+  "harnessMode": "prod",
+  "failureMode": "delayed",
+  "loadingDisabled": true,
+  "retryEnabled": false,
+  "localConfirmationCount": 0,
+  "consoleErrors": [],
+  "applicationConsoleErrors": [],
+  "pageErrors": []
+}

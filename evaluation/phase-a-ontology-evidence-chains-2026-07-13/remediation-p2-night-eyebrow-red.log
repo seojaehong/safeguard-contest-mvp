@@ -1,0 +1,35 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-product-remediation-browser.test.ts -t keeps the .* confirmation action accessible --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts (13 tests | 2 failed | 9 skipped) 34508ms
+     × keeps the 'night' 'desktop' confirmation action accessible without overflow or overlap 4744ms
+     × keeps the 'night' 'mobile' confirmation action accessible without overflow or overlap 4360ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > keeps the 'night' 'desktop' confirmation action accessible without overflow or overlap
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > keeps the 'night' 'mobile' confirmation action accessible without overflow or overlap
+AssertionError: expected 'rgb(20, 23, 26)' to be 'rgb(139, 141, 252)' // Object.is equality
+
+Expected: "rgb(139, 141, 252)"
+Received: "rgb(20, 23, 26)"
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts:1036:34
+    1034|     expect(metrics.clippedTextCount).toBe(0);
+    1035|     expect(metrics.primaryActionCount).toBe(1);
+    1036|     expect(metrics.eyebrowColor).toBe(theme === "night" ? "rgb(139, 14…
+       |                                  ^
+    1037|     expect(metrics.eyebrowContrast).toBeGreaterThanOrEqual(4.5);
+    1038|     expect(metrics.nextIssueBadgeCount).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed | 9 skipped (13)
+   Start at  10:43:04
+   Duration  35.90s (transform 321ms, setup 0ms, import 849ms, tests 34.51s, environment 0ms)

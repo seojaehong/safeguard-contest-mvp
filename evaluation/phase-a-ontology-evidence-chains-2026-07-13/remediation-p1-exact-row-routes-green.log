@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/workpack-share-authority.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  2 passed (2)
+      Tests  17 passed (17)
+   Start at  10:45:44
+   Duration  1.75s (transform 332ms, setup 0ms, import 499ms, tests 107ms, environment 0ms)

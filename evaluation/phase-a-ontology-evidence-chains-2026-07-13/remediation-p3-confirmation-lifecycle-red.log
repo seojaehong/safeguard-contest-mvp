@@ -1,0 +1,96 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-product-remediation-browser.test.ts -t handles .* confirmation responses without local authority --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts (13 tests | 3 failed | 10 skipped) 29604ms
+     × handles 'delayed' confirmation responses without local authority 7935ms
+     × handles 'http-500' confirmation responses without local authority 5637ms
+     × handles 'network-abort' confirmation responses without local authority 4349ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > handles 'delayed' confirmation responses without local authority
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > handles 'http-500' confirmation responses without local authority
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > handles 'network-abort' confirmation responses without local authority
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
++
++ - A server/client branch `if (typeof window !== 'undefined')`.
++ - Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
++ - Date formatting in a user's locale which doesn't match the server.
++ - External changing data without sending a snapshot of it along with the HTML.
++ - Invalid HTML tag nesting.
++
++ It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
++
++ https://react.dev/link/hydration-mismatch
++
++   ...
++     <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
++       <RedirectBoundary>
++         <RedirectErrorBoundary router={{...}}>
++           <InnerLayoutRouter url=\"/workspace...\" tree={[...]} cacheNode={{lazyData:null, ...}} segmentPath={[...]}>
++             <SegmentViewNode type=\"page\" pagePath=\"workspace/...\">
++               <SegmentTrieNode>
++               <WorkspacePage>
++                 <SafeGuardCommandCenter examples={[...]} initialScenarioId=\"seoul-cons...\" initialQuestion=\"\" ...>
++                   <main className=\"command-ce...\">
++                     <header>
++                     <section className=\"command-vi...\" id=\"command\">
++                       <aside>
++                       <section className=\"command-ma...\">
++                         <section className=\"workspace-...\" id=\"workspace-...\">
++                           <div>
++                           <form className=\"command-co...\" onSubmit={function submit}>
++                             <div>
++                             <textarea>
++                             <p>
++                             <div className=\"input-comp...\" aria-label=\"현장 입력 첨부\">
++                               <label>
++                               <div>
++                               <span className=\"composer-mode-label\" aria-label=\"현재 문서 생성 방식\">
++ +                               빠른 생성
++ -                               강화 모드
++                               ...
++                             ...
++                           ...
++             ...
++           ...
++
++     at throwOnHydrationMismatch (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:4506:11)
++     at prepareToHydrateHostInstance (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:4602:21)
++     at completeWork (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:11635:15)
++     at runWithFiberInDEV (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:872:30)
++     at completeUnitOfWork (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:15863:19)
++     at performUnitOfWork (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:15744:11)
++     at workLoopConcurrentByScheduler (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:15721:9)
++     at renderRootConcurrent (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:15696:15)
++     at performWorkOnRoot (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:14990:13)
++     at performWorkOnRootViaSchedulerTask (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:16816:7)
++     at MessagePort.performWorkUntilDeadline (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/scheduler/cjs/scheduler.development.js:45:48)",
++ ]
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts:925:24
+    923|       !/Failed to load resource|net::ERR_FAILED/i.test(message)
+    924|     ));
+    925|     expect(pageErrors).toEqual([]);
+       |                        ^
+    926|     expect(applicationConsoleErrors).toEqual([]);
+    927|     if (EVIDENCE_DIRECTORY) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 10 skipped (13)
+   Start at  10:34:46
+   Duration  31.34s (transform 438ms, setup 0ms, import 1.08s, tests 29.60s, environment 0ms)

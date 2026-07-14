@@ -1,0 +1,48 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-product-remediation-browser.test.ts -t handles .* confirmation responses --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts (13 tests | 1 failed | 10 skipped) 30448ms
+     × handles 'network-abort' confirmation responses without local authority 4297ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > handles 'network-abort' confirmation responses without local authority
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "phase a confirmation request failed TypeError: Failed to fetch
++     at confirmCurrentPhaseAWorkpack (webpack-internal:///(app-pages-browser)/./components/FieldOperationsWorkspace.tsx:2335:36)
++     at onClick (webpack-internal:///(app-pages-browser)/./components/FieldOperationsWorkspace.tsx:2739:59)
++     at executeDispatch (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:16971:9)
++     at runWithFiberInDEV (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:872:30)
++     at processDispatchQueue (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:17021:19)
++     at eval (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:17622:9)
++     at batchedUpdates$1 (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:3312:40)
++     at dispatchEventForPluginEventSystem (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:17175:7)
++     at dispatchEvent (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:21358:11)
++     at dispatchDiscreteEvent (webpack-internal:///(app-pages-browser)/../../../../dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:21326:11)",
++ ]
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts:926:38
+    924|     ));
+    925|     expect(pageErrors).toEqual([]);
+    926|     expect(applicationConsoleErrors).toEqual([]);
+       |                                      ^
+    927|     if (EVIDENCE_DIRECTORY) {
+    928|       writeEvidenceJson(`phase-a-confirmation-${failureMode}-metrics.j…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed | 10 skipped (13)
+   Start at  10:38:25
+   Duration  31.77s (transform 280ms, setup 0ms, import 714ms, tests 30.45s, environment 0ms)

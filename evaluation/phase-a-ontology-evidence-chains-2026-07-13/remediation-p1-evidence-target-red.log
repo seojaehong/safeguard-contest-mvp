@@ -1,0 +1,192 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-evidence-target-authority.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-evidence-target-authority.test.ts (3 tests | 3 failed) 26ms
+     × pins every current target field to the authoritative integration target 8ms
+     × classifies rejected targets without claiming integration completion 13ms
+     × detects a stale current target attack 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/phase-a-evidence-target-authority.test.ts > Phase A evidence target authority > pins every current target field to the authoritative integration target
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "$.source.currentTargetWithEditorPair=\"b3762867d380f20faee2a83a17354dc61557ce12\"",
++ ]
+
+ ❯ tests/phase-a-evidence-target-authority.test.ts:80:52
+     78|     const manifest = readJson("evidence-manifest.json");
+     79|
+     80|     expect(collectCurrentTargetViolations(report)).toEqual([]);
+       |                                                    ^
+     81|     expect(collectCurrentTargetViolations(manifest)).toEqual([]);
+     82|     expect(readTargetHistory(report, "source")).toEqual(EXPECTED_TARGE…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/phase-a-evidence-target-authority.test.ts > Phase A evidence target authority > classifies rejected targets without claiming integration completion
+AssertionError: expected '# SafeClaw Phase A ontology remediati…' to contain 'Authoritative current target: `f45bba…'
+
+- Expected
++ Received
+
+- Authoritative current target: `f45bba17bcce0d8ebb2690f82d014dbe42ae8191`
++ # SafeClaw Phase A ontology remediation evidence
++
++ - Generated: `2026-07-14T08:41:03.4432161+09:00`
++ - Status: `FINAL_GATE_RED_PENDING_FRESH_REVIEW`
++ - Branch: `fix/phase-a-ontology-target-ready`
++ - Second independent REJECT base: `888ad1c16b17b88b16bd0163deffbf7ebde740e1`
++ - Product commits: `fd573630afe72977deec7debe58649a850101fbd`, `fae7cbd139efecad00cf192b0788db2bd2f4e4cc`
++ - Final product SHA: `fae7cbd139efecad00cf192b0788db2bd2f4e4cc`
++ - Final product tree: `7fe278d9b72ac436789a5b47e45d36a96fe30220`
++ - Evidence child binding: the evidence commit must have the final product SHA as its single parent; its own SHA is intentionally not embedded here.
++ - Integration: not performed
++ - Launch readiness: `false`
++ - DB, schema, migration, data, seed, package, and lock changes: none
++
++ ## Findings Closed
++
++ ### Stale local authority after edit
++
++ `WorkpackEditor` now keeps the generation source stable without pinning stale current authority. Any user edit immediately makes `effectivePhaseAReview` pending, removes confirmed authority markers from all local document values, and drives TXT, JSON, HTML, CSV, XLS, and TSV through the same authority-safe values. The browser contract performs a real edit, downloads all six formats, remounts the editor, and verifies that no output contains `법령 근거: 연결됨` or `공식자료 확인 완료`.
++
++ The top connection card now follows shared readiness. The fresh edit screenshot shows `편집 후 재검수 필요`; the editor body and authority marker show pending language only.
++
++ ### Production confirmation transition
++
++ The authenticated editor surface now has one primary `Phase A 확인 저장` action. It is enabled only after the current workpack is persisted with matching generation fingerprint, generation-evidence version/time, Phase A chain/plan, workpack ID, user, and access-token session binding.
++
++ The caller uses `POST /api/workpacks/[id]/phase-a-confirmation`. It handles saving, loading, 401 expiry, 409 conflict, server-issued confirmation-ID retry, network/server error, and success. A successful response is accepted only after the full server workpack, confirmed review, workpack/chain/plan/session binding, and generation-evidence envelope are validated. The parent current-workpack state and browser storage are then replaced with that server result. No local or fake confirmation path exists.
++
++ ### MCP role-separated materialization
++
++ Public planned targets now publish:
++
++ - `hazardPriorityRelation: evidencedBy`
++ - `hazardPriorityCitedUids` for SIF IDs only
++ - `controlGuidanceCitedUids` for eligible KOSHA guidance
++ - `controlMandateCitedUids` for eligible current-law mandate evidence
++ - `controlRequiredCitedUids` and narrowed legacy `requiredCitedUids`
++ - `requiredCitedUidsSemantics: control_required_only_excludes_sif`
++
++ Tests cover `statutory_mandate`, `technical_guidance_only`, `statutory_mandate_with_guidance`, and `review_required`. SIF IDs are excluded from every Control-required and legacy required list.
++
++ ## Fresh Browser Evidence
++
++ The product browser suite passed `7/7` in a sequential isolated Next dev harness. It covers edit-to-pending, six local exports, remount, authenticated save, real production-route request shape, bound 409 retry, server-result adoption, missing auth, expired 401, and four visual combinations.
++
++ | Theme | Viewport | Horizontal overflow | Copy/action overlap | Clipped text | Control height | Primary actions |
++ |---|---:|---:|---|---:|---:|---:|
++ | Day | 1440 x 900 | 0 | false | 0 | 45px | 1 |
++ | Night | 1440 x 900 | 0 | false | 0 | 45px | 1 |
++ | Day | 390 x 844 | 0 | false | 0 | 45px | 1 |
++ | Night | 390 x 844 | 0 | false | 0 | 45px | 1 |
++
++ Local export evidence covers `txt`, `json`, `html`, `csv`, `xls`, and `tsv`: stale connected-authority count `0`, stale confirmed-authority count `0`. The JSON field `editedSentinelPresent` is false because the literal sentinel is not retained by every derived tabular representation; it is not an authority PASS signal. The browser assertion separately proves the edited/remounted text and pending authority state.
++
++ Fresh screenshots and metrics:
++
++ ```text
++ phase-a-edit-pending-export-day-desktop.png
++ phase-a-confirmation-day-desktop.png
++ phase-a-confirmation-night-desktop.png
++ phase-a-confirmation-day-mobile.png
++ phase-a-confirmation-night-mobile.png
++ phase-a-local-export-status.json
++ phase-a-confirmation-*-metrics.json
++ ```
++
++ All five screenshots were visually inspected after generation. No incoherent overlap, clipping, or stale confirmed authority was observed on the focused surfaces.
++
++ ## TDD And Verification
++
++ | Gate | Result | Artifact |
++ |---|---|---|
++ | Initial unit RED | 2 files, 6 failed, 34 passed | `product-remediation-unit-red.log` |
++ | Initial browser RED | 2 failed, 5 skipped | `product-remediation-browser-red.log` |
++ | Focused visual RED | 1 failed, 6 skipped | `product-remediation-visual-red.log` |
++ | Exact remediation unit GREEN | 2 files, 40 passed | `product-remediation-unit-green.log` |
++ | Representative grounding/export/confirmation GREEN | 14 files, 218 passed | `product-remediation-representative-green.log` |
++ | Full product browser GREEN | 1 file, 7 passed | `product-remediation-browser-green.log` |
++ | Focused visual GREEN | 1 passed, 6 skipped | `product-remediation-visual-green.log` |
++ | Isolated browser harness regression | 1 file, 3 passed | verified before final visual-only follow-up; full final browser run also exercised the same harness |
++ | Strict TypeScript | PASS | `product-remediation-typecheck.log` |
++ | Target merge-tree | both exit 0 | `product-remediation-merge-tree.log` |
++ | `git diff --check` | PASS | `product-remediation-diff-check.log` |
++
++ No production build was run. The browser evidence used the isolated Next dev harness, so a second build was unnecessary.
++
++ ## Target Verification
++
++ - `f45bba17bcce0d8ebb2690f82d014dbe42ae8191 + product` merge-tree: `550d63f5218fba2ea3f701fb6f7d183b9282f408`
++ - Current target `b3762867d380f20faee2a83a17354dc61557ce12 + product` merge-tree: `2f206e71acbc8ff97f66eb1a19bc7c5495b8e746`
++ - `b376286` is `f45bba1` plus editor-spec commits `99b1af5` and `b376286`.
++ - Both commands exited `0`. No merge, rebase, ref update, or history rewrite was performed. Later integration remains a regular merge.
++
++ ## Retained Reviewed Invariants
++
++ - PDF typed font boundary and non-font rethrow remain covered.
++ - CAS confirmation still yields one winner, explicit conflict, idempotent bound retry, and evidence/session binding.
++ - Authority order remains `SIF -> KOSHA guidance -> current law validation`.
++ - SIF remains hazard priority only; KOSHA remains guidance; current law validates mandates.
++ - `naturalize_only`, full materialization coverage, and existing ontology contracts remain covered.
++ - No DB, schema, migration, data, seed, package, or lock file changed.
++
++ ## Reviewed History Preserved
++
++ - Original Phase A base: `02295b5a7d2b068eb5ea560f4cc9a34392fd7c21`
++ - Preserved reviewed source: `9539f04896698f548bd01e33ff24ab70415bc68e`
++ - Earlier rejected product/evidence: `35283baaf3aad4e14fa20da4df803b4cc3c046f2` / `f613f5d73118bb81e6199a5ff057e850b3859692`
++ - Earlier remediation product/evidence: `31767959b5904afbab77ab5ee36f24da6d15b1c8` / `888ad1c16b17b88b16bd0163deffbf7ebde740e1`
++
++ ## Gate
++
++ The global static/108 audit is explicitly deferred to the final integrated HEAD. The old 108 audit identity carries no PASS claim for this product SHA. Final gate remains RED pending that integrated audit and a fresh independent review. This report is evidence, not self-approval.
++
+
+ ❯ tests/phase-a-evidence-target-authority.test.ts:89:20
+     87|     const report = fs.readFileSync(path.join(EVIDENCE_DIRECTORY, "repo…
+     88|
+     89|     expect(report).toContain(`Authoritative current target: \`${AUTHOR…
+       |                    ^
+     90|     expect(report).toContain(`\`${HISTORICAL_REJECTED_TARGET}\`: histo…
+     91|     expect(report).toContain(`\`${V4_REJECTED_TARGET}\`: rejected/pend…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/phase-a-evidence-target-authority.test.ts > Phase A evidence target authority > detects a stale current target attack
+AssertionError: expected [ …(2) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+  [
+    "$.source.currentMainTarget=\"b3762867d380f20faee2a83a17354dc61557ce12\"",
++   "$.source.currentTargetWithEditorPair=\"b3762867d380f20faee2a83a17354dc61557ce12\"",
+  ]
+
+ ❯ tests/phase-a-evidence-target-authority.test.ts:102:54
+    100|     source.currentMainTarget = HISTORICAL_REJECTED_TARGET;
+    101|
+    102|     expect(collectCurrentTargetViolations(attacked)).toEqual([
+       |                                                      ^
+    103|       `$.source.currentMainTarget=${JSON.stringify(HISTORICAL_REJECTED…
+    104|     ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  10:53:44
+   Duration  664ms (transform 26ms, setup 0ms, import 42ms, tests 26ms, environment 0ms)

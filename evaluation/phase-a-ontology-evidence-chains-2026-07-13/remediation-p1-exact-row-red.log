@@ -1,0 +1,36 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/workpack-share-authority.test.ts -t rejects row B when its valid sealed confirmation is bound to row A --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/workpack-share-authority.test.ts (9 tests | 1 failed | 8 skipped) 27ms
+     × rejects row B when its valid sealed confirmation is bound to row A 25ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-authority.test.ts > server-only workpack share authority > rejects row B when its valid sealed confirmation is bound to row A
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/workpack-share-authority.test.ts:196:39
+    194|     }, WORKPACK_B);
+    195|
+    196|     expect(result.readiness.canShare).toBe(false);
+       |                                       ^
+    197|     expect(result.readiness.reasons).toContain("사람 확인이 현재 서버 workpack …
+    198|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 skipped (9)
+   Start at  10:23:08
+   Duration  1.19s (transform 333ms, setup 0ms, import 520ms, tests 27ms, environment 0ms)

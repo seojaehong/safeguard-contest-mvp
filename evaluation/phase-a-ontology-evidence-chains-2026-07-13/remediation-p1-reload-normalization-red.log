@@ -1,0 +1,36 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-product-remediation-browser.test.ts -t retries only W1 downstream storage after education fails|blocks workpack insertion --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts (10 tests | 1 failed | 7 skipped) 34299ms
+     × retries only W1 downstream storage after education fails 13420ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > retries only W1 downstream storage after education fails
+AssertionError: expected 2 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts:583:36
+    581|     )).toBe(true);
+    582|
+    583|     expect.soft(workpackPostCount).toBe(1);
+       |                                    ^
+    584|     expect.soft(educationPostCount).toBe(2);
+    585|     expect.soft(pendingAfterFailure ?? "").toContain(WORKPACK_ID);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed | 7 skipped (10)
+   Start at  10:27:07
+   Duration  35.56s (transform 287ms, setup 0ms, import 711ms, tests 34.30s, environment 0ms)

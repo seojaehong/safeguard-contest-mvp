@@ -1,11 +1,14 @@
 {
-  "harnessMode": "dev",
+  "harnessMode": "prod",
   "theme": "day",
   "viewport": {
     "width": 1440,
     "height": 900
   },
   "generationFingerprint": "3dc19f43",
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedResponses": [],
   "horizontalOverflow": 0,
   "panelWithinViewport": true,
   "copyActionOverlap": false,
@@ -13,5 +16,9 @@
     45
   ],
   "clippedTextCount": 0,
-  "primaryActionCount": 1
+  "primaryActionCount": 1,
+  "eyebrowColor": "rgb(20, 23, 26)",
+  "panelBackgroundColor": "rgb(255, 255, 255)",
+  "eyebrowContrast": 17.99,
+  "nextIssueBadgeCount": 0
 }

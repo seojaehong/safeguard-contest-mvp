@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/ontology-evidence-chains.test.ts tests/ontology-production-handler.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-tools-ontology-grounding.test.ts tests/ontology-sif-resolution-gate.test.ts tests/mcp-tools.test.ts tests/workpack-readiness.test.ts tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts tests/phase-a-document-authority.test.ts tests/editor-export-integrity.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  14 passed (14)
+      Tests  218 passed (218)
+   Start at  10:49:47
+   Duration  17.50s (transform 1.24s, setup 0ms, import 6.40s, tests 2.73s, environment 1ms)

@@ -1,191 +1,265 @@
 {
   "phase": "A",
-  "generatedAt": "2026-07-14T08:41:03.4432161+09:00",
-  "status": "FINAL_GATE_RED_PENDING_FRESH_REVIEW",
+  "generatedAt": "2026-07-14T11:09:19.3623894+09:00",
+  "status": "CANDIDATE_HOLD_PENDING_FRESH_REVIEW_AND_INTEGRATED_STATIC_108",
   "launchReadiness": false,
   "integratedToMain": false,
   "selfApproved": false,
   "branch": "fix/phase-a-ontology-target-ready",
   "source": {
-    "secondIndependentRejectBase": "888ad1c16b17b88b16bd0163deffbf7ebde740e1",
-    "originalPhaseABase": "02295b5a7d2b068eb5ea560f4cc9a34392fd7c21",
-    "preservedReviewedSource": "9539f04896698f548bd01e33ff24ab70415bc68e",
     "currentMainTarget": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
-    "editorSpecPair": [
-      "99b1af5385e0b5eaa9ff479761ecea944f0958ab",
-      "b3762867d380f20faee2a83a17354dc61557ce12"
-    ],
-    "currentTargetWithEditorPair": "b3762867d380f20faee2a83a17354dc61557ce12"
-  },
-  "product": {
-    "commits": [
+    "currentTargetWithEditorPair": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "targetHistory": [
       {
-        "sha": "fd573630afe72977deec7debe58649a850101fbd",
-        "subject": "fix: close phase a product confirmation gaps"
+        "sha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+        "status": "authoritative-current"
       },
       {
-        "sha": "fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
-        "subject": "fix: clear stale phase a editor authority"
+        "sha": "b3762867d380f20faee2a83a17354dc61557ce12",
+        "status": "historical-rejected"
+      },
+      {
+        "sha": "cc9f5af297950b73b53a9ab4018bdc143830c499",
+        "status": "rejected-pending-unintegrated"
       }
-    ],
-    "finalCommit": "fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
-    "finalTree": "7fe278d9b72ac436789a5b47e45d36a96fe30220",
-    "parent": "888ad1c16b17b88b16bd0163deffbf7ebde740e1",
-    "uniqueFileCount": 12,
+    ]
+  },
+  "product": {
+    "commit": "cc5ba41f96c486e87445efba470c668b36107e4f",
+    "tree": "faa5c4a3ff6ea7540efc14f68668b9ef16dba9e2",
+    "parent": "e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4",
+    "subject": "fix: enforce exact Phase A workpack authority",
     "files": [
-      "app/api/workpacks/[id]/phase-a-confirmation/route.ts",
       "app/globals.css",
       "components/FieldOperationsWorkspace.tsx",
       "components/SafeGuardCommandCenter.tsx",
-      "components/WorkpackEditor.tsx",
-      "lib/mcp-tools.ts",
-      "tests/helpers/isolated-next-browser-harness.ts",
-      "tests/isolated-next-browser-harness.test.ts",
-      "tests/mcp-tools.test.ts",
-      "tests/phase-a-confirmation-route.test.ts",
-      "tests/phase-a-document-authority.test.ts",
-      "tests/phase-a-product-remediation-browser.test.ts"
+      "lib/workpack-authority.ts",
+      "lib/workpack-commercial-store.ts",
+      "tests/phase-a-product-remediation-browser.test.ts",
+      "tests/workpack-share-authority-routes.test.ts",
+      "tests/workpack-share-authority.test.ts"
     ]
   },
   "remediation": {
-    "localAuthorityInvalidation": {
-      "dirtyEditClearsEffectiveReviewSynchronously": true,
-      "visibleEditorAuthorityNormalizedToPending": true,
-      "currentDataUsesLiveWorkspaceData": true,
-      "generatedInitializationMutatesSealedParent": false,
-      "formats": ["txt", "json", "html", "csv", "xls", "tsv"],
-      "remountCovered": true
+    "singleWorkpackSave": {
+      "workerMappingValidatedBeforeWorkpackInsert": true,
+      "serverReturnedIdPersistedBeforeDownstreamEducation": true,
+      "pendingBindingIncludesWorkpackIdAndWorkerMap": true,
+      "sameLogicalRetrySkipsWorkpackPost": true,
+      "reloadRetryCovered": true,
+      "incompleteWorkpackExposedAsShareReady": false,
+      "emptySelectionWorkpackPostCount": 0,
+      "missingMappingWorkpackPostCount": 0,
+      "educationFailureLogicalRetryWorkpackPostCount": 1,
+      "shareSessionBeforeCompletionCount": 0,
+      "dispatchProviderBeforeCompletionCount": 0
     },
-    "productConfirmation": {
-      "productionRoute": "/api/workpacks/[id]/phase-a-confirmation",
-      "productionCallerAdded": true,
-      "localConfirmationFallback": false,
-      "onePrimaryAction": true,
-      "persistedWorkpackRequired": true,
-      "generationFingerprintBound": true,
-      "generationEvidenceBound": true,
-      "planChainBound": true,
-      "sessionBound": true,
-      "auth401FailClosed": true,
-      "conflict409BoundRetry": true,
-      "serverWorkpackAdopted": true
+    "exactRowAuthority": {
+      "expectedServerRowIdRequired": true,
+      "humanConfirmationExactEqualityRequired": true,
+      "rowBWithRowAConfirmationCanShare": false,
+      "rowBShareSessionInsertCount": 0,
+      "rowBDispatchProviderCount": 0,
+      "confirmedASecondWorkpackPostCountAfterReloadAndShare": 0,
+      "workerMappingResolvedWithoutCloningA": true,
+      "editInvalidatesSavedAndPendingAuthority": true
     },
-    "mcpMaterialization": {
-      "hazardPriorityRelation": "evidencedBy",
-      "sifRole": "hazard_priority_only",
-      "controlGuidanceRole": "eligible_kosha_guidance",
-      "controlMandateRole": "eligible_current_law",
-      "legacyRequiredSemantics": "control_required_only_excludes_sif",
-      "classificationsCovered": [
-        "statutory_mandate",
-        "technical_guidance_only",
-        "statutory_mandate_with_guidance",
-        "review_required"
-      ]
+    "evidenceAuthority": {
+      "targetExactValidator": true,
+      "staleCurrentAttackCovered": true,
+      "authoritativeTarget": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+      "integrationCompletionClaimed": false
+    },
+    "browserLifecycle": {
+      "hydrationMismatchRemoved": true,
+      "delayedLoadingDisabled": true,
+      "http500RetryEnabled": true,
+      "networkAbortRetryEnabled": true,
+      "localConfirmationCreatedOnFailure": false,
+      "nightEyebrowScoped": true
     }
   },
   "tdd": {
-    "unitRed": {
-      "command": "npm.cmd test -- --run tests/mcp-tools.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
-      "filesFailed": 2,
-      "testsFailed": 6,
-      "testsPassed": 34,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-unit-red.log"
-    },
-    "browserRed": {
-      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts -t invalidates confirmed authority|calls the production confirmation route --maxWorkers=1 --no-file-parallelism",
-      "testsFailed": 2,
-      "testsSkipped": 5,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-browser-red.log"
-    },
-    "visualRed": {
-      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts -t invalidates confirmed authority --maxWorkers=1 --no-file-parallelism",
-      "testsFailed": 1,
-      "testsSkipped": 6,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-visual-red.log"
-    },
-    "unitGreen": {
-      "command": "npm.cmd test -- --run tests/mcp-tools.test.ts tests/phase-a-confirmation-route.test.ts --maxWorkers=1 --no-file-parallelism",
-      "filesPassed": 2,
-      "testsPassed": 40,
-      "testsFailed": 0,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-unit-green.log"
-    },
-    "visualGreen": {
-      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts -t invalidates confirmed authority --maxWorkers=1 --no-file-parallelism",
-      "testsPassed": 1,
-      "testsSkipped": 6,
-      "testsFailed": 0,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-visual-green.log"
-    }
+    "red": [
+      {
+        "gate": "single-workpack downstream retry",
+        "testsFailed": 1,
+        "log": "remediation-p1-single-workpack-red.log"
+      },
+      {
+        "gate": "pending binding reload",
+        "testsFailed": 1,
+        "log": "remediation-p1-reload-red.log"
+      },
+      {
+        "gate": "pending binding normalization",
+        "testsFailed": 1,
+        "log": "remediation-p1-reload-normalization-red.log"
+      },
+      {
+        "gate": "exact server row authority",
+        "testsFailed": 1,
+        "log": "remediation-p1-exact-row-red.log"
+      },
+      {
+        "gate": "night eyebrow computed color",
+        "testsFailed": 2,
+        "log": "remediation-p2-night-eyebrow-red.log"
+      },
+      {
+        "gate": "confirmation hydration lifecycle",
+        "testsFailed": 3,
+        "log": "remediation-p3-confirmation-lifecycle-red.log"
+      },
+      {
+        "gate": "network abort application console error",
+        "testsFailed": 1,
+        "log": "remediation-p3-confirmation-network-red.log"
+      },
+      {
+        "gate": "evidence current target authority",
+        "testsFailed": 3,
+        "log": "remediation-p1-evidence-target-red.log"
+      },
+      {
+        "gate": "production background response collection",
+        "testsFailed": 1,
+        "log": "remediation-production-background-red.log"
+      }
+    ],
+    "green": [
+      {
+        "gate": "single-workpack invariants",
+        "testsPassed": 3,
+        "log": "remediation-p1-save-invariants-green.log"
+      },
+      {
+        "gate": "exact row unit and routes",
+        "filesPassed": 2,
+        "testsPassed": 17,
+        "log": "remediation-p1-exact-row-routes-green.log"
+      },
+      {
+        "gate": "A confirmation reload to Share",
+        "testsPassed": 1,
+        "log": "remediation-p1-a-share-restore-green.log"
+      },
+      {
+        "gate": "confirmation delayed, 500, abort",
+        "testsPassed": 3,
+        "log": "remediation-p3-confirmation-lifecycle-green.log"
+      },
+      {
+        "gate": "Day and Night computed color and geometry",
+        "testsPassed": 4,
+        "log": "remediation-p2-night-eyebrow-green.log"
+      },
+      {
+        "gate": "representative existing suite",
+        "filesPassed": 14,
+        "testsPassed": 218,
+        "log": "remediation-representative-green.log"
+      },
+      {
+        "gate": "development browser suite",
+        "testsPassed": 13,
+        "log": "remediation-browser-dev-green.log"
+      },
+      {
+        "gate": "production browser suite",
+        "testsPassed": 13,
+        "log": "remediation-browser-production-green.log"
+      }
+    ]
   },
   "verification": {
-    "representative": {
-      "command": "npm.cmd test -- --run tests/ontology-evidence-chains.test.ts tests/ontology-production-handler.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-tools-ontology-grounding.test.ts tests/ontology-sif-resolution-gate.test.ts tests/mcp-tools.test.ts tests/workpack-readiness.test.ts tests/phase-a-server-confirmation.test.ts tests/phase-a-confirmation-route.test.ts tests/phase-a-document-authority.test.ts tests/editor-export-integrity.test.ts tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts --maxWorkers=1 --no-file-parallelism",
-      "filesPassed": 14,
-      "testsPassed": 218,
-      "testsFailed": 0,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-representative-green.log"
-    },
-    "browser": {
-      "command": "npm.cmd test -- --run tests/phase-a-product-remediation-browser.test.ts --maxWorkers=1 --no-file-parallelism",
-      "filesPassed": 1,
-      "testsPassed": 7,
-      "testsFailed": 0,
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-browser-green.log"
-    },
     "strictTypecheck": {
-      "command": "npm.cmd run typecheck",
-      "status": "passed",
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-typecheck.log"
+      "status": "green",
+      "log": "remediation-typecheck-final.log"
     },
-    "mergeTree": {
-      "f45Product": {
-        "command": "git merge-tree --write-tree f45bba17bcce0d8ebb2690f82d014dbe42ae8191 fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
-        "exitCode": 0,
-        "tree": "550d63f5218fba2ea3f701fb6f7d183b9282f408"
+    "productionBuild": {
+      "status": "green",
+      "nextVersion": "15.5.20",
+      "staticPagesGenerated": 27,
+      "preBuildOtherProcessCount": 0,
+      "postBuildProcessCount": 0,
+      "runCount": 1,
+      "log": "remediation-production-build.log"
+    },
+    "browserHarness": "prod",
+    "browserViews": [
+      {
+        "theme": "day",
+        "viewport": "1440x900",
+        "eyebrowColor": "rgb(20, 23, 26)",
+        "contrast": 17.99,
+        "horizontalOverflow": 0,
+        "copyActionOverlap": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedResponses": 0,
+        "nextIssueBadgeCount": 0
       },
-      "f45EditorPairProduct": {
-        "command": "git merge-tree --write-tree b3762867d380f20faee2a83a17354dc61557ce12 fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
-        "exitCode": 0,
-        "tree": "2f206e71acbc8ff97f66eb1a19bc7c5495b8e746"
+      {
+        "theme": "night",
+        "viewport": "1440x900",
+        "eyebrowColor": "rgb(139, 141, 252)",
+        "contrast": 6.63,
+        "horizontalOverflow": 0,
+        "copyActionOverlap": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedResponses": 0,
+        "nextIssueBadgeCount": 0
       },
-      "log": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/product-remediation-merge-tree.log"
-    },
-    "strictNoAny": true,
-    "buildRun": false
-  },
-  "browserEvidence": {
-    "harnessMode": "dev",
-    "localExports": {
-      "formats": ["txt", "json", "html", "csv", "xls", "tsv"],
-      "staleConnectedAuthorityCount": 0,
-      "staleConfirmedAuthorityCount": 0,
-      "editedSentinelPresentInEveryDerivedFormat": false,
-      "sentinelNote": "The literal edit sentinel is not preserved by every derived tabular representation. Remount/edit state and pending authority are asserted separately."
-    },
-    "views": [
-      { "theme": "day", "viewport": { "width": 1440, "height": 900 }, "horizontalOverflow": 0, "panelWithinViewport": true, "copyActionOverlap": false, "minimumControlHeight": 45, "clippedTextCount": 0, "primaryActionCount": 1 },
-      { "theme": "night", "viewport": { "width": 1440, "height": 900 }, "horizontalOverflow": 0, "panelWithinViewport": true, "copyActionOverlap": false, "minimumControlHeight": 45, "clippedTextCount": 0, "primaryActionCount": 1 },
-      { "theme": "day", "viewport": { "width": 390, "height": 844 }, "horizontalOverflow": 0, "panelWithinViewport": true, "copyActionOverlap": false, "minimumControlHeight": 45, "clippedTextCount": 0, "primaryActionCount": 1 },
-      { "theme": "night", "viewport": { "width": 390, "height": 844 }, "horizontalOverflow": 0, "panelWithinViewport": true, "copyActionOverlap": false, "minimumControlHeight": 45, "clippedTextCount": 0, "primaryActionCount": 1 }
+      {
+        "theme": "day",
+        "viewport": "390x844",
+        "eyebrowColor": "rgb(20, 23, 26)",
+        "contrast": 17.99,
+        "horizontalOverflow": 0,
+        "copyActionOverlap": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedResponses": 0,
+        "nextIssueBadgeCount": 0
+      },
+      {
+        "theme": "night",
+        "viewport": "390x844",
+        "eyebrowColor": "rgb(139, 141, 252)",
+        "contrast": 6.63,
+        "horizontalOverflow": 0,
+        "copyActionOverlap": false,
+        "consoleErrors": 0,
+        "pageErrors": 0,
+        "failedResponses": 0,
+        "nextIssueBadgeCount": 0
+      }
     ],
-    "screenshotsVisuallyInspected": 5
-  },
-  "retainedPass": [
-    "PDF typed font boundary",
-    "PDF non-font rethrow",
-    "CAS one winner and explicit conflict",
-    "idempotent confirmation retry",
-    "evidence and session binding",
-    "SIF -> KOSHA guidance -> current law validation",
-    "naturalize_only"
-  ],
-  "history": {
-    "earlierRejectedProduct": "35283baaf3aad4e14fa20da4df803b4cc3c046f2",
-    "earlierRejectedEvidence": "f613f5d73118bb81e6199a5ff057e850b3859692",
-    "earlierRemediationProduct": "31767959b5904afbab77ab5ee36f24da6d15b1c8",
-    "earlierRemediationEvidence": "888ad1c16b17b88b16bd0163deffbf7ebde740e1"
+    "confirmationFailures": [
+      {
+        "mode": "delayed",
+        "loadingDisabled": true,
+        "localConfirmationCount": 0,
+        "applicationConsoleErrors": 0,
+        "pageErrors": 0
+      },
+      {
+        "mode": "http-500",
+        "retryEnabled": true,
+        "localConfirmationCount": 0,
+        "applicationConsoleErrors": 0,
+        "pageErrors": 0
+      },
+      {
+        "mode": "network-abort",
+        "retryEnabled": true,
+        "localConfirmationCount": 0,
+        "applicationConsoleErrors": 0,
+        "pageErrors": 0
+      }
+    ]
   },
   "constraints": {
     "dbChanged": false,
@@ -194,17 +268,20 @@
     "dataChanged": false,
     "seedChanged": false,
     "packageOrLockChanged": false,
-    "rebaseOrHistoryRewrite": false,
-    "buildRun": false
+    "workflowSharePanelChanged": false,
+    "liveDbOrApiMutationRun": false
   },
-  "evidence": {
-    "manifest": "evaluation/phase-a-ontology-evidence-chains-2026-07-13/evidence-manifest.json",
-    "evidenceCommitSelfHashIncluded": false,
-    "binding": "The evidence child must have fae7cbd139efecad00cf192b0788db2bd2f4e4cc as its single parent. Its resulting SHA is recorded externally after commit creation."
-  },
+  "residual": [
+    "Pending W1 binding is local browser persistence, not server idempotency. Clearing storage or retrying from another browser after W1 creation can lose the binding and may create another row.",
+    "No live DB or provider mutation gate was run. Route and browser evidence use controlled fixtures.",
+    "The authoritative integration target has not incorporated this branch.",
+    "The global static/108 audit remains deferred until the final integrated HEAD.",
+    "Fresh independent review is still required."
+  ],
   "deferred": {
-    "globalStatic108Audit": "Deferred to final integrated HEAD",
-    "passClaimForOld108Identity": false
+    "globalStatic108Audit": "RED_DEFERRED_TO_FINAL_INTEGRATED_HEAD",
+    "oldStatic108IdentityAccepted": false,
+    "freshIndependentReview": "required"
   },
-  "reviewGate": "FINAL_GATE_RED. Fresh independent review and final integrated static/108 audit are required."
+  "reviewGate": "CANDIDATE_HOLD. No integration-complete or launch-ready claim is made."
 }

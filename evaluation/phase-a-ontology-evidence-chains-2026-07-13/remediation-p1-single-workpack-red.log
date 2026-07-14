@@ -1,0 +1,79 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-product-remediation-browser.test.ts -t retries only W1 downstream storage after education fails --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts (8 tests | 1 failed | 7 skipped) 31599ms
+     × retries only W1 downstream storage after education fails 12897ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > retries only W1 downstream storage after education fails
+AssertionError: expected 2 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts:580:36
+    578|     )).toBe(true);
+    579|
+    580|     expect.soft(workpackPostCount).toBe(1);
+       |                                    ^
+    581|     expect.soft(educationPostCount).toBe(2);
+    582|     expect.soft(pendingAfterFailure).toContain(WORKPACK_ID);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > retries only W1 downstream storage after education fails
+AssertionError: the given combination of arguments (null and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string
+ ❯ tests/phase-a-product-remediation-browser.test.ts:582:38
+    580|     expect.soft(workpackPostCount).toBe(1);
+    581|     expect.soft(educationPostCount).toBe(2);
+    582|     expect.soft(pendingAfterFailure).toContain(WORKPACK_ID);
+       |                                      ^
+    583|     expect.soft(pendingAfterFailure).toContain("worker-supervisor-1");
+    584|     expect.soft(shareSessionPostCount).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > retries only W1 downstream storage after education fails
+AssertionError: the given combination of arguments (null and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string
+ ❯ tests/phase-a-product-remediation-browser.test.ts:583:38
+    581|     expect.soft(educationPostCount).toBe(2);
+    582|     expect.soft(pendingAfterFailure).toContain(WORKPACK_ID);
+    583|     expect.soft(pendingAfterFailure).toContain("worker-supervisor-1");
+       |                                      ^
+    584|     expect.soft(shareSessionPostCount).toBe(0);
+    585|     expect.soft(dispatchPostCount).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/phase-a-product-remediation-browser.test.ts > Phase A product remediation browser contract > retries only W1 downstream storage after education fails
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/phase-a-product-remediation-browser.test.ts:584:40
+    582|     expect.soft(pendingAfterFailure).toContain(WORKPACK_ID);
+    583|     expect.soft(pendingAfterFailure).toContain("worker-supervisor-1");
+    584|     expect.soft(shareSessionPostCount).toBe(0);
+       |                                        ^
+    585|     expect.soft(dispatchPostCount).toBe(0);
+    586|     expect(await page.evaluate(() => (
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  10:11:18
+   Duration  33.24s (transform 325ms, setup 0ms, import 1.03s, tests 31.60s, environment 0ms)
