@@ -19,6 +19,7 @@ import {
   createProductionEngineAdapter,
   type ProductionEngineAdapterDependencies,
 } from "@/lib/openclaw-broker-route";
+import { isToolFreeOpenClawAgentPolicy } from "@/lib/openclaw-hermes-runtime";
 
 const context: BrokerRequestContext = {
   userId: "user-1",
@@ -30,6 +31,13 @@ const context: BrokerRequestContext = {
 const localPocEnv = {
   SAFECLAW_ENGINE_MODE: "experimental-hermes",
   SAFECLAW_HERMES_LOCAL_POC: "1",
+};
+
+const boundLocalPocEnv = {
+  ...localPocEnv,
+  OPENCLAW_LOCAL: "1",
+  SAFECLAW_HERMES_BOUND_ORGANIZATION_ID: context.organizationId,
+  SAFECLAW_HERMES_BOUND_SITE_ID: context.siteId,
 };
 
 const executeClawTool = clawTools.executeClawTool;
@@ -69,9 +77,16 @@ function verifiedKoshaReference(): SafetyReferenceItem {
       referenceId: "kosha-guide-1",
       stableDocumentKey: "G-67",
       version: "G-67-2011",
+      officialVersion: "G-67-2011",
+      officialStatus: "current",
       quality: "accepted",
       lifecycle: "current",
       bodyKind: "native",
+      bodySha256: "a".repeat(64),
+      pdfSha256: "b".repeat(64),
+      officialUrl: "https://www.kosha.or.kr/kosha/data/guidance.do",
+      officialFileId: "kosha-g-67-2011",
+      publicationDate: "2011-12-01",
       anchors: [{ page: 1, excerpt: body }],
       evidenceRef: "KOSHA G-67-2011 p.1",
       directEligible: true,
@@ -770,6 +785,92 @@ describe("experimental Hermes EngineAdapter", () => {
       id: "experimental-hermes",
       runtime: "hermes",
       contractVersion: "engine-adapter/v1",
+    });
+  });
+  it("selects the OpenClaw Hermes runtime from the production env-only boundary", () => {
+    const engine = createProductionEngineAdapter(boundLocalPocEnv);
+
+    expect(engine).toMatchObject({
+      id: "experimental-hermes",
+      runtime: "hermes",
+      authority: { humanConfirmationRequired: true },
+    });
+  });
+
+  it("fails closed before runtime auth when the bound site does not match", async () => {
+    const assertOAuth = vi.fn(async () => ({
+      ok: true as const,
+      provider: "openai" as const,
+      authProvider: "openai/oauth" as const,
+      model: "openai/gpt-5.5",
+      checkedAt: "2026-07-15T00:00:00.000Z",
+      message: "OpenClaw OpenAI OAuth profile is usable.",
+    }));
+    const engine = createProductionEngineAdapter(boundLocalPocEnv, {
+      openClawHermes: {
+        runtimeCapability: async () => true,
+        verifyToolFreeAgent: async () => true,
+        assertOAuth,
+        runChat: async () => undefined,
+      },
+    });
+
+    await expect(engine.checkAvailability({ ...context, siteId: "site-2" }))
+      .rejects.toMatchObject({ code: "ENGINE_SITE_BINDING_UNPROVEN" });
+    expect(assertOAuth).not.toHaveBeenCalled();
+  });
+
+  it("requires an exact tool-free OpenClaw agent policy", () => {
+    expect(isToolFreeOpenClawAgentPolicy(JSON.stringify([
+      { id: "main", tools: { allow: [], deny: ["*"] } },
+    ]), "main")).toBe(true);
+
+    for (const unsafePolicy of [
+      [{ id: "main", tools: { deny: ["*"] } }],
+      [{ id: "main", tools: { allow: ["read"], deny: ["*"] } }],
+      [{ id: "main", tools: { allow: [], deny: ["exec"] } }],
+      [{ id: "other", tools: { allow: [], deny: ["*"] } }],
+    ]) {
+      expect(isToolFreeOpenClawAgentPolicy(JSON.stringify(unsafePolicy), "main")).toBe(false);
+    }
+    expect(isToolFreeOpenClawAgentPolicy("not-json", "main")).toBe(false);
+  });
+
+  it("preloads Harness evidence before OpenClaw naturalization", async () => {
+    const prompts: string[] = [];
+    const events: ClawChatEvent[] = [];
+    const executeSpy = mockHarnessPreload();
+    const engine = createProductionEngineAdapter(boundLocalPocEnv, {
+      openClawHermes: {
+        runtimeCapability: async () => true,
+        verifyToolFreeAgent: async () => true,
+        assertOAuth: async (config) => ({
+          ok: true,
+          provider: "openai",
+          authProvider: "openai/oauth",
+          model: config.model,
+          checkedAt: "2026-07-15T00:00:00.000Z",
+          message: "OpenClaw OpenAI OAuth profile is usable.",
+        }),
+        runChat: async ({ prompt, emit }) => {
+          prompts.push(prompt);
+          emit({ kind: "text-delta", text: "고정된 근거만 자연스럽게 설명합니다." });
+        },
+      },
+    });
+
+    try {
+      await engine.run(runInput((event) => events.push(event)));
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(prompts).toHaveLength(1);
+    expect(prompts[0]).toContain("naturalize_only");
+    expect(prompts[0]).toContain('"engine":"safeclaw-db-harness"');
+    expect(events).toContainEqual({
+      kind: "text-delta",
+      text: "고정된 근거만 자연스럽게 설명합니다.",
     });
   });
 

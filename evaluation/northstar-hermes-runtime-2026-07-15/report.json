@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-07-15",
+  "baseSha": "dc608c8d7f7f854270669e05789cad88816d0f43",
+  "branch": "fix/northstar-hermes-runtime-20260715",
+  "scope": "/api/agent/chat OpenClaw-backed Hermes EngineAdapter wiring",
+  "tdd": {
+    "red": {
+      "command": "npm.cmd test -- --run tests/hermes-engine-adapter.test.ts",
+      "exitCode": 1,
+      "testFiles": 1,
+      "tests": 33,
+      "passed": 20,
+      "failed": 13,
+      "newExpectedFailures": 3
+    },
+    "green": {
+      "command": "npm.cmd test -- --run tests/hermes-engine-adapter.test.ts tests/openclaw-chat.test.ts tests/claw-chat-route.test.ts tests/engine-adapter.test.ts --reporter=dot",
+      "exitCode": 0,
+      "testFiles": 4,
+      "tests": 79,
+      "passed": 79,
+      "failed": 0
+    }
+  },
+  "verification": [
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "framework": "Next.js 15.5.20",
+      "routePresent": "/api/agent/chat"
+    },
+    {
+      "command": "npm.cmd test -- --run tests/product-module-shell.test.ts tests/reports-download-center.test.ts tests/reports-wave1-publish-support.test.ts --maxWorkers=1 --reporter=dot",
+      "exitCode": 0,
+      "testFiles": 3,
+      "tests": 25,
+      "passed": 25,
+      "failed": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "fullRegression": {
+    "command": "npm.cmd test -- --run --reporter=dot",
+    "exitCode": 1,
+    "testFilesPassed": 142,
+    "testFilesSkipped": 6,
+    "testFilesFailed": 5,
+    "testsPassed": 1541,
+    "testsSkipped": 22,
+    "testsFailed": 11,
+    "knownFailureGroups": {
+      "koshaProvenanceFixtures": 9,
+      "staleFrontendEvidenceIdentity": 1,
+      "parallelLoadTimeout": 1,
+      "preBuildBrowserSuiteFailures": 2
+    },
+    "browserRetryPassed": true
+  },
+  "invariants": {
+    "failClosedSiteBinding": true,
+    "toolFreeOpenClawAgentRequired": true,
+    "openAiOAuthOnlyRequired": true,
+    "evidenceHarnessPreloaded": true,
+    "llmRole": "naturalize_only",
+    "canMutate": false,
+    "canPublish": false,
+    "humanConfirmationRequired": true,
+    "vertexAnthropicFallbackChanged": false
+  },
+  "runtimeReady": false,
+  "runtimeBlockers": [
+    "Installed OpenClaw CLI 2026.6.5 rejects config written by 2026.6.11.",
+    "The safeclaw profile has no explicit agents.list tool-free agent entry.",
+    "Organization and site binding environment values are not configured for this verification.",
+    "Local Hermes execution remains disabled on Vercel.",
+    "No live answer was executed because attestation prerequisites fail closed."
+  ]
+}
