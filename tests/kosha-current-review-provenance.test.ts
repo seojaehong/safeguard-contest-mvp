@@ -44,6 +44,7 @@ describe("current-base KOSHA provenance review regressions", () => {
       source_id: "kosha-guide-offline:forklift-local",
       item_type: "technical-guideline",
       title: "지게차 보행자 동선 분리 KOSHA 지침",
+      body: "지게차와 보행자 동선을 분리한다.",
       evidence_role: "supporting",
       retrieval_source: "local-ranked",
       kosha_guide: {

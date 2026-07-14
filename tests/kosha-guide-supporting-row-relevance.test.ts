@@ -31,6 +31,7 @@ function supporting(
     ...reference(id, "supporting"),
     ...overrides,
     id,
+    body: overrides.body ?? overrides.summary ?? "지게차와 보행자 통행 동선을 분리한다.",
     evidence_role: "supporting",
     retrieval_source: "local-ranked",
     kosha_guide: {
