@@ -26,3 +26,17 @@
 ## Boundary
 
 The rejected Share authority restoration branch was not integrated. This patch changes only the existing stable panel presentation and scoped CSS.
+
+## Live production verification
+
+- Product source: `28dbdc2`
+- Production: `https://www.safeclaw.kr/workspace?scenario=seoul-construction-windy`
+- Vercel deployment: `EFif9uejqC4GzchVcgb4EhYXFnw9`
+- Viewport: `390x844`
+- Share heading: `문서팩 보내기`
+- Selected preview: `베트남어 · Tiếng Việt`
+- Korean metadata prefixes in the foreign preview: none
+- Horizontal overflow: none
+- Interactive overlap: none
+- Visible controls below 44px: none
+- Default-collapsed secondary details: 3

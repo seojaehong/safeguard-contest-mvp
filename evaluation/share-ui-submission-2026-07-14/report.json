@@ -28,5 +28,18 @@
       "languageOptions": 11
     }
   },
-  "excludedCandidate": "workpack-share-v2-authority-restoration"
+  "excludedCandidate": "workpack-share-v2-authority-restoration",
+  "liveProduction": {
+    "productSourceSha": "28dbdc2852c992f194dbfc17b14b69e9d5d8bb17",
+    "deploymentId": "EFif9uejqC4GzchVcgb4EhYXFnw9",
+    "url": "https://www.safeclaw.kr/workspace?scenario=seoul-construction-windy",
+    "viewport": "390x844",
+    "shareHeading": "문서팩 보내기",
+    "selectedLanguage": "베트남어 · Tiếng Việt",
+    "koreanMetadataPrefixCount": 0,
+    "horizontalOverflow": 0,
+    "interactiveOverlap": 0,
+    "visibleControlsBelow44Px": 0,
+    "collapsedSecondaryDetails": 3
+  }
 }
