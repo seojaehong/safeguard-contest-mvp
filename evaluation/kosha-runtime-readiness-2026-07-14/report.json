@@ -1,6 +1,6 @@
 {
-  "schemaVersion": "safeclaw-kosha-runtime-readiness-diagnosis/v1",
-  "generatedAt": "2026-07-14T23:05:39+09:00",
+  "schemaVersion": "safeclaw-kosha-runtime-readiness-diagnosis/v2",
+  "generatedAt": "2026-07-14T23:26:52+09:00",
   "authoritativeBaseSha": "a5ed356c28ebe5f7e19aee2bf65f9c8313dcc157",
   "branch": "fix/kosha-runtime-readiness-20260714",
   "liveReproduction": {
@@ -27,23 +27,32 @@
   },
   "fix": {
     "statusUsesSearchCorpusGate": true,
+    "allNonReadyTopLevelStatus": "degraded",
+    "readyCondition": "catalog.ok && localCorpus.status === \"ready\"",
     "unconfiguredHttpStatus": 503,
     "blockedHttpStatus": 503,
     "absolutePathExposed": false,
     "remoteUnverifiedFallbackEnabled": false
   },
   "verification": {
-    "focusedStatusTestsPassed": 3,
-    "focusedKoshaTestsPassed": 43,
-    "typecheck": "passed",
-    "build": "passed",
-    "fullSuite": {
-      "testFilesPassed": 139,
-      "testsPassed": 1483,
-      "testFilesFailed": 5,
-      "testsFailed": 6,
-      "failureBoundary": "existing frontend browser harness timeouts and dirty-worktree source identity mismatch"
-    }
+    "focusedKosha": {
+      "command": "npm.cmd test -- tests/safety-reference-status-route.test.ts tests/kosha-grounding-fail-closed.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-offline-harness-expanded.test.ts",
+      "log": "evaluation/kosha-runtime-readiness-2026-07-14/focused-tests.log",
+      "testFilesPassed": 4,
+      "testsPassed": 44,
+      "exitCode": 0
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "log": "evaluation/kosha-runtime-readiness-2026-07-14/typecheck.log",
+      "exitCode": 0
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "log": "evaluation/kosha-runtime-readiness-2026-07-14/build.log",
+      "exitCode": 0
+    },
+    "fullSuiteFreshRun": "not-run"
   },
   "mutations": {
     "database": false,

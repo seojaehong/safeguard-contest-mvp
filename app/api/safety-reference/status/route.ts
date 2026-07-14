@@ -10,11 +10,7 @@ export async function GET() {
     loadKoshaGuideCorpus()
   ]);
   const searchReady = catalog.ok && localCorpus.status === "ready";
-  const status = searchReady
-    ? "ready"
-    : catalog.status === "unconfigured"
-      ? "unconfigured"
-      : "degraded";
+  const status = searchReady ? "ready" : "degraded";
   const localCorpusStatus = localCorpus.status === "ready"
     ? {
         status: localCorpus.status,
