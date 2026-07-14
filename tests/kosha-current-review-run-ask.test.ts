@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import type { AiDeliverables, AiDeliverablesDiagnostics, GenerateAllOptions } from "@/lib/ai-deliverables";
 import { runAsk } from "@/lib/search";
 import type { SafetyReferenceItem, SafetyReferenceSearchResult } from "@/lib/safety-reference-catalog";
 import type { SearchResult } from "@/lib/types";
@@ -95,6 +96,46 @@ function searchResult(
   };
 }
 
+function providerResult(deliverables: AiDeliverables = {}) {
+  const diagnostics: AiDeliverablesDiagnostics = {
+    geminiAvailable: true,
+    providerAvailable: true,
+    configuredProvider: "vertex",
+    groupResults: [],
+    filledKeys: Object.keys(deliverables),
+    trace: {
+      attempted: true,
+      provider: "vertex",
+      modelPerDocument: {},
+      fallbackUsed: false
+    }
+  };
+  return { deliverables, diagnostics };
+}
+
+function configureKoshaOnlySearch() {
+  const control = "EXCLUDED_RUNASK_KOSHA_ONLY_CONTROL";
+  const body = "EXCLUDED_RUNASK_KOSHA_ONLY_BODY";
+  const reference = retrievalReference("verified-kosha-only", "local-ranked");
+  reference.item_type = "technical-guideline";
+  reference.title = "KOSHA 단독 지게차 기술지침";
+  reference.summary = "직접 근거 없이 KOSHA 기술지침만 검색된 상태";
+  reference.body = body;
+  reference.controls = [control];
+  reference.primary_documents = ["위험성평가표", "TBM 브리핑", "TBM 기록"];
+  reference.kosha_guide = {
+    ...reference.kosha_guide!,
+    evidenceRef: `KOSHA 근거 p.1: ${control}`
+  };
+  mocks.searchSafetyReferences.mockImplementation(async (options: { query: string; itemType?: string }) => {
+    if (options.itemType === "technical-guideline") {
+      return searchResult("local-ranked", [reference], options.query);
+    }
+    return searchResult("unconfigured", [], options.query);
+  });
+  return { body, control, reference };
+}
+
 describe("current-base runAsk retrieval provenance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -110,6 +151,7 @@ describe("current-base runAsk retrieval provenance", () => {
       ),
       trace: { provider: "mock", model: null, fallbackUsed: false }
     }));
+    mocks.generateAllDeliverablesWithDiagnostics.mockResolvedValue(providerResult());
   });
 
   afterEach(() => {
@@ -214,35 +256,58 @@ describe("current-base runAsk retrieval provenance", () => {
     );
   }, 30_000);
 
-  it("keeps KOSHA-only runAsk output review-required without independent action controls", async () => {
-    const koshaOnlyControl = "EXCLUDED_RUNASK_KOSHA_ONLY_CONTROL";
-    const koshaOnly = retrievalReference("verified-kosha-only", "local-ranked");
-    koshaOnly.item_type = "technical-guideline";
-    koshaOnly.title = "KOSHA 단독 지게차 기술지침";
-    koshaOnly.summary = "직접 근거 없이 KOSHA 기술지침만 검색된 상태";
-    koshaOnly.controls = [koshaOnlyControl];
-    koshaOnly.primary_documents = ["위험성평가표", "TBM 브리핑", "TBM 기록"];
-    mocks.searchSafetyReferences.mockImplementation(async (options: { query: string; itemType?: string }) => {
-      if (options.itemType === "technical-guideline") {
-        return searchResult("local-ranked", [koshaOnly], options.query);
-      }
-      return searchResult("unconfigured", [], options.query);
+  it("keeps parentless KOSHA outside provider-required citations and generated document bodies", async () => {
+    const fixture = configureKoshaOnlySearch();
+    mocks.generateAllDeliverablesWithDiagnostics.mockImplementation(async (input: GenerateAllOptions) => {
+      const requiredTitles = (input.koshaPrimaryRefs || []).map((reference) => reference.title);
+      return providerResult({
+        riskAssessmentDraft: `PROVIDER_REQUIRED_KOSHA_CITATIONS\n${requiredTitles.join("\n")}`
+      });
     });
 
-    const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "enhanced" });
+    const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
+    const generationInputs = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.map(([input]) => (
+      input as GenerateAllOptions
+    ));
+
+    expect(mocks.generateAllDeliverablesWithDiagnostics).toHaveBeenCalledTimes(1);
+    expect(generationInputs.every((input) => (input.koshaPrimaryRefs || []).length === 0)).toBe(true);
+    expect(generationInputs.every((input) => (input.koshaLines || []).some((line) => (
+      line.includes("검토필요") && line.includes("parent-evidence-missing")
+    )))).toBe(true);
+    expect(generationInputs.map((input) => input.dbHarnessContext || "").join("\n")).not.toContain(fixture.body);
+    expect(generationInputs.flatMap((input) => input.koshaLines || []).join("\n")).not.toContain(fixture.control);
+    expect(response.deliverables.riskAssessmentDraft).not.toContain(fixture.reference.title);
+    expect(response.deliverables.riskAssessmentDraft).not.toContain(fixture.body);
+    expect(response.deliverables.riskAssessmentDraft).not.toContain(fixture.control);
+  }, 30_000);
+
+  it("omits structured risk rows and TBM links for a KOSHA-only full-mode packet", async () => {
+    configureKoshaOnlySearch();
+
+    const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
+
+    expect(response.structured?.riskAssessmentRows).toEqual([]);
+    expect(response.structured?.tbmRiskLinks).toEqual([]);
+    expect(response.structured?.riskAssessmentValidation.ok).toBe(false);
+  }, 30_000);
+
+  it("omits immediate actions and control surfaces for a KOSHA-only full-mode packet", async () => {
+    const fixture = configureKoshaOnlySearch();
+
+    const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
     const actionSection = response.answer.split("2) 오늘 문서에 먼저 반영할 조치")[1]?.split("3) 보강 필요")[0] ?? "";
-    const riskRowsText = (response.structured?.riskAssessmentRows || [])
-      .map((row) => [row.hazard, row.currentControls, row.additionalControls, ...row.evidenceRefs].join(" "))
-      .join("\n");
+    const surfacedKosha = response.externalData.safetyReference?.items.find((item) => item.id === fixture.reference.id);
 
     expect(response.dbHarness?.summary.ontologyStatus).toBe("review_required");
     expect(response.dbHarness?.summary.directEvidence).toBe(0);
     expect(response.dbHarness?.summary.sifCases).toBe(0);
     expect(response.answer).toContain("보강 필요");
     expect(response.answer).toContain("기술 보조지침 후보");
-    expect(actionSection).not.toContain(koshaOnlyControl);
-    expect(response.practicalPoints.join("\n")).not.toContain(koshaOnlyControl);
-    expect(riskRowsText).not.toContain(koshaOnlyControl);
+    expect(actionSection.trim()).toBe("- 확정된 오늘 조치 없음: SIF 사례 또는 직접 근거를 먼저 확인하세요.");
+    expect(response.riskSummary.immediateActions).toEqual([]);
+    expect(response.practicalPoints.some((point) => point.startsWith("문서 반영 전 확인:"))).toBe(false);
+    expect(surfacedKosha?.controls).toEqual([]);
   }, 30_000);
 
   it("selects a verified current KOSHA citation even after five unverified matches", async () => {
@@ -260,9 +325,10 @@ describe("current-base runAsk retrieval provenance", () => {
     const verified = retrievalReference("verified-current-after-five", "local-ranked");
     verified.title = verifiedTitle;
     verified.primary_documents = ["위험성평가표", "VERIFIED_DOCUMENT"];
+    const directParent = retrievalReference("verified-current-direct-parent", "ranked");
     mocks.searchSafetyReferences.mockResolvedValue(searchResult(
       "hybrid-local-supabase",
-      [...unverified, verified]
+      [...unverified, verified, directParent]
     ));
 
     await runAsk("D-C-13 지게차 보행자 동선 충돌", { aiMode: "full" });
@@ -280,9 +346,10 @@ describe("current-base runAsk retrieval provenance", () => {
     const second = retrievalReference("verified-same-controls-b", "local-ranked");
     first.title = "VERIFIED_KOSHA_DOCUMENT_A";
     second.title = "VERIFIED_KOSHA_DOCUMENT_B";
+    const directParent = retrievalReference("verified-documents-direct-parent", "ranked");
     mocks.searchSafetyReferences.mockResolvedValue(searchResult(
-      "local-ranked",
-      [first, second]
+      "hybrid-local-supabase",
+      [first, second, directParent]
     ));
 
     await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
