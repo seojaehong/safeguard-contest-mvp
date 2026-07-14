@@ -19,6 +19,7 @@ import {
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
+import { formatDispatchProviderStatus } from "@/lib/web-safe-presentation";
 import { applyWorkpackDeliverablesChange } from "@/lib/workpack-readiness";
 import {
   buildDefaultWorkers,
@@ -1531,7 +1532,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
             )}
             {serverArchive.dispatchLogs.length ? serverArchive.dispatchLogs.slice(0, 6).map((log) => (
               <article key={log.id}>
-                <strong>{log.channel} · {log.providerStatus || "상태 확인"}</strong>
+                <strong>{log.channel} · {formatDispatchProviderStatus(log.providerStatus)}</strong>
                 <code>{log.workflowRunId || log.provider || "dispatch_logs"}</code>
                 <p>{log.targetLabel || "수신자"} · {log.siteName} · {new Date(log.createdAt).toLocaleString("ko-KR")}{log.failureReason ? ` · ${log.failureReason}` : ""}</p>
               </article>

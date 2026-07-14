@@ -2,7 +2,7 @@
 
 - Generated: 2026-07-14
 - Base: `01ba1c9`
-- Branch: `feat/northstar-export-integration`
+- Branch: `feat/northstar-export-integration-clean`
 - Database/schema changes: none
 
 ## Candidate product commits
@@ -12,17 +12,20 @@
 - `c78271f`: report photo comparison copy localization
 - `7cdea4e`: report comparison copy localization
 
-The stale evidence-only commit `b6e3221` is deliberately excluded from the main integration candidate.
+The stale evidence-only commit `b6e3221` is not an ancestor of this clean branch and is deliberately excluded from the integration candidate.
 
 ## Verification
 
 - Focused tests: 3 files, 56 tests passed
 - Focused rerun after current presentation-boundary reconciliation: 2 files, 46 tests passed
 - Strict TypeScript typecheck: passed
+- Independent-review remediation rerun: 3 files, 27 tests passed
+- Raw dispatch provider status now passes through the shared Korean presentation formatter
+- `b6e3221` ancestry check: not an ancestor of this branch
 - Database mutation: not performed
 - Schema migration: not performed
 
-Raw logs are stored next to this report. Product integration remains pending fresh independent review.
+Raw logs are stored next to this report. Product integration remains pending fresh independent re-review.
 
 ## Scope boundary
 
