@@ -161,17 +161,17 @@ export default async function KnowledgePage() {
       <div className={styles.page} data-knowledge-surface>
         <section className={`knowledge-status-grid ${styles.overview}`} aria-label="지식 DB 상태">
           <article className={styles.overviewItem}>
-            <span className={styles.kicker}>Built-in Wiki</span>
+            <span className={styles.kicker}>내장 지식 베이스</span>
             <h2>{hazardEntries.length}개 위험요인 · {formEntries.length}개 서식</h2>
             <p>기본 위험요인과 서식 기준을 내장 위키로 관리하고, 현장 문서 보완 때 짧은 근거 요약만 보여줍니다.</p>
           </article>
           <article className={styles.overviewItem}>
-            <span className={styles.kicker}>Runtime Knowledge</span>
+            <span className={styles.kicker}>운영 지식</span>
             <h2>원본 이벤트 · 후보 · 사람 검토</h2>
-            <p>AI 출력은 미게시 후보로 분리하고, 사람이 검토한 published ontology만 확정 지식으로 사용합니다.</p>
+            <p>AI 출력은 미게시 후보로 분리하고, 사람이 검토해 게시한 온톨로지만 확정 지식으로 사용합니다.</p>
           </article>
           <article className={styles.overviewItem}>
-            <span className={styles.kicker}>Knowledge Catalog</span>
+            <span className={styles.kicker}>지식 카탈로그</span>
             <h2>{stats.items.toLocaleString("ko-KR")}개 항목 · {stats.sources.toLocaleString("ko-KR")}개 출처</h2>
             <p>{stats.message}</p>
           </article>
@@ -184,11 +184,11 @@ export default async function KnowledgePage() {
         >
           <header className={styles.sectionHeader}>
             <div>
-              <span className={styles.kicker}>Promotion Contract</span>
+              <span className={styles.kicker}>지식 승격 규칙</span>
               <h2 id="knowledge-governance-heading">지식 승격 흐름</h2>
             </div>
             <p>
-              knowledge_events의 원본성과 출처를 유지한 채 후보, 사람 검토, published ontology를
+              원본 지식 이벤트의 내용과 출처를 유지한 채 후보, 사람 검토, 게시된 온톨로지를
               서로 다른 상태로 관리합니다.
             </p>
           </header>
@@ -218,7 +218,7 @@ export default async function KnowledgePage() {
 
           <div className={styles.authorityMap} data-knowledge-authority-map="true">
             <header className={styles.authorityMapHeader}>
-              <span className={styles.kicker}>Authority &amp; Provenance</span>
+              <span className={styles.kicker}>권위와 출처</span>
               <h3>근거별 권위와 적용 범위</h3>
             </header>
             <ul className={styles.authorityTable} aria-label="지식 근거별 권위와 적용 범위">
@@ -251,7 +251,7 @@ export default async function KnowledgePage() {
         <section className={styles.section} aria-labelledby="technical-support-heading">
           <header className={styles.sectionHeader}>
             <div>
-              <span className={styles.kicker}>KOSHA Technical Support</span>
+              <span className={styles.kicker}>KOSHA 기술 지원</span>
               <h2 id="technical-support-heading">문서 반영용 KOSHA 기술 지원 자료</h2>
             </div>
             <p>
@@ -312,7 +312,7 @@ export default async function KnowledgePage() {
         <section className={styles.section} aria-labelledby="reference-library-heading">
           <header className={styles.sectionHeader}>
             <div>
-              <span className={styles.kicker}>KOSHA Reference Library</span>
+              <span className={styles.kicker}>KOSHA 참고 자료실</span>
               <h2 id="reference-library-heading">참고 자료실 (PDF)</h2>
             </div>
             <p>위험성평가·안전보건진단 작성 시 본문 옆에 펼쳐 참고하세요.</p>
@@ -356,7 +356,7 @@ export default async function KnowledgePage() {
         <section className={styles.section} aria-labelledby="wiki-index-heading">
           <header className={styles.sectionHeader}>
             <div>
-              <span className={styles.kicker}>Index</span>
+              <span className={styles.kicker}>색인</span>
               <h2 id="wiki-index-heading">위키 인덱스</h2>
             </div>
             <p>위험요인/서식 위키의 전체 목차입니다. 화면 기본 흐름에서는 근거 행과 반영 위치를 먼저 확인합니다.</p>
@@ -370,7 +370,7 @@ export default async function KnowledgePage() {
         <section className={styles.wikiGrid} aria-label="내장 위키">
           <article className={styles.wikiColumn}>
             <header className={styles.compactHeader}>
-              <span className={styles.kicker}>Hazards</span>
+              <span className={styles.kicker}>위험요인</span>
               <h2>위험요인 위키</h2>
             </header>
             <ul className={styles.wikiList}>
@@ -386,7 +386,7 @@ export default async function KnowledgePage() {
           </article>
           <article className={styles.wikiColumn}>
             <header className={styles.compactHeader}>
-              <span className={styles.kicker}>Forms</span>
+              <span className={styles.kicker}>서식</span>
               <h2>서식 위키</h2>
             </header>
             <ul className={styles.wikiList}>
@@ -405,7 +405,7 @@ export default async function KnowledgePage() {
         <section className={styles.section} aria-labelledby="schema-heading">
           <header className={styles.sectionHeader}>
             <div>
-              <span className={styles.kicker}>Schema</span>
+              <span className={styles.kicker}>스키마</span>
               <h2 id="schema-heading">LLM 재생성 스키마</h2>
             </div>
             <p>재생성 스키마는 개발/운영 확인용입니다. 현장 문서에는 roleLabel, shortSummary, documentReflectionLabel만 반영합니다.</p>

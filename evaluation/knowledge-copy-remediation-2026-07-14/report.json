@@ -1,0 +1,19 @@
+{
+  "scope": "knowledge-copy-remediation",
+  "date": "2026-07-14",
+  "productFiles": [
+    "app/knowledge/page.tsx"
+  ],
+  "verification": {
+    "testFiles": 4,
+    "tests": 21,
+    "testsStatus": "pass",
+    "typecheck": "pass",
+    "diffCheck": "pass"
+  },
+  "behaviorBoundary": {
+    "knowledgeGovernanceChanged": false,
+    "provenanceChanged": false,
+    "databaseChanged": false
+  }
+}
