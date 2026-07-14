@@ -10,19 +10,16 @@ import {
 } from "@/lib/engine-adapter";
 import {
   isReadOnlyMcpTool,
-  type McpToolName,
 } from "@/lib/mcp-auth";
+import {
+  createSafeClawScopedMcpReadExecutor,
+  isSafeClawScopedMcpReadExecutor,
+  type SafeClawScopedMcpReadExecutor,
+} from "@/lib/safeclaw-mcp-read-executor";
 
 export type HermesReadToolIntent = {
   toolName: string;
   input: unknown;
-};
-
-export type HermesReadToolExecution = {
-  context: BrokerRequestContext;
-  toolName: McpToolName;
-  input: unknown;
-  signal: AbortSignal;
 };
 
 export type HermesPlannerInput = {
@@ -36,17 +33,46 @@ export type HermesPlannerInput = {
 };
 
 export type HermesPlanner = (input: HermesPlannerInput) => Promise<void>;
-export type HermesReadToolExecutor = (execution: HermesReadToolExecution) => Promise<unknown>;
+
+const SAFECLAW_HERMES_COMPOSITION = Symbol("safeclaw-hermes-composition");
+
+export type SafeClawHermesComposition = {
+  readonly planner: HermesPlanner;
+  readonly readExecutor: SafeClawScopedMcpReadExecutor;
+  readonly [SAFECLAW_HERMES_COMPOSITION]: true;
+};
+
+export function createSafeClawHermesComposition(
+  planner: HermesPlanner,
+): SafeClawHermesComposition {
+  return Object.freeze({
+    planner,
+    readExecutor: createSafeClawScopedMcpReadExecutor(),
+    [SAFECLAW_HERMES_COMPOSITION]: true as const,
+  });
+}
+
+function isSafeClawHermesComposition(value: unknown): value is SafeClawHermesComposition {
+  return typeof value === "object"
+    && value !== null
+    && (value as { [SAFECLAW_HERMES_COMPOSITION]?: unknown })[SAFECLAW_HERMES_COMPOSITION] === true
+    && isSafeClawScopedMcpReadExecutor(
+      (value as { readExecutor?: unknown }).readExecutor,
+    );
+}
 
 export type ExperimentalHermesAdapterDependencies = {
   env: EnvLike;
-  planner: HermesPlanner;
-  executeReadTool: HermesReadToolExecutor;
+  composition: SafeClawHermesComposition;
 };
 
 export function createExperimentalHermesAdapter(
   dependencies: ExperimentalHermesAdapterDependencies,
 ): EngineAdapter {
+  if (!isSafeClawHermesComposition(dependencies.composition)) {
+    throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+  }
+
   function assertEnabled(): void {
     if (resolveEngineMode(dependencies.env) !== "experimental-hermes") {
       throw new BrokerError("ENGINE_UNAVAILABLE", 503);
@@ -64,7 +90,7 @@ export function createExperimentalHermesAdapter(
     },
     async run(input): Promise<void> {
       assertEnabled();
-      await dependencies.planner({
+      await dependencies.composition.planner({
         contractVersion: ENGINE_ADAPTER_CONTRACT_VERSION,
         authority: SAFECLAW_ENGINE_AUTHORITY,
         context: input.context,
@@ -75,7 +101,7 @@ export function createExperimentalHermesAdapter(
           if (!isReadOnlyMcpTool(intent.toolName)) {
             throw new BrokerError("ENGINE_TOOL_FORBIDDEN", 403);
           }
-          return dependencies.executeReadTool({
+          return dependencies.composition.readExecutor.execute({
             context: input.context,
             toolName: intent.toolName,
             input: intent.input,
