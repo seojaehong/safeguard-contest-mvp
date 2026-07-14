@@ -1,0 +1,42 @@
+{
+  "date": "2026-07-14",
+  "status": "integrated_verified",
+  "approvedSourceHead": "700ff632625119dcdd1d4f26d4ba7a8a142996c5",
+  "integratedHeadBeforeEvidenceCommit": "70629e9",
+  "independentReview": {
+    "spec": "pass",
+    "codeQuality": "pass",
+    "findings": { "p0": 0, "p1": 0, "p2": 0, "p3": 0 }
+  },
+  "authority": {
+    "systemOfRecord": "safeclaw-mcp-db-harness",
+    "adapterMode": "isolated-experimental-local-poc",
+    "vercelEnabled": false,
+    "readOnlyTools": true,
+    "canPublish": false,
+    "canMutate": false,
+    "humanConfirmationRequired": true
+  },
+  "attestation": {
+    "requiresGroundedSif": true,
+    "requiresVerifiedCurrentKosha": true,
+    "requiresReadyOntology": true,
+    "requiresDistinctRecursivelyFrozenOutputPacket": true,
+    "digest": "sha256-canonical-json",
+    "failedRetrievalPlannerCalls": 0
+  },
+  "verification": {
+    "filesPassed": 15,
+    "testsPassed": 242,
+    "typecheck": "pass",
+    "candidateBuild": "pass",
+    "candidateStaticPages": 27,
+    "finalIntegratedBuildPending": true
+  },
+  "mutations": {
+    "database": false,
+    "schema": false,
+    "data": false,
+    "environment": false
+  }
+}
