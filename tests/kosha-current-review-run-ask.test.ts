@@ -961,6 +961,48 @@ describe("current-base runAsk retrieval provenance", () => {
     expect(generationInputs.every((input) => Object.isFrozen(input.groundingPacket))).toBe(true);
   }, 30_000);
 
+  it("surfaces every critical packet control that a rejected group fallback does not materialize", async () => {
+    const direct = retrievalReference("grounding-fallback-direct", "ranked");
+    const kosha = retrievalReference("grounding-fallback-kosha", "local-ranked");
+    kosha.controls = ["GROUNDING_KOSHA_CRITICAL_CONTROL 후진 경보 확인"];
+    mocks.searchSafetyReferences.mockResolvedValue(searchResult("hybrid-local-supabase", [kosha, direct]));
+    let capturedCriticalControls: string[] = [];
+    mocks.generateAllDeliverablesWithDiagnostics.mockImplementation(async (input: GenerateAllOptions) => {
+      const packet = input.groundingPacket!;
+      const criticalControls = packet.sources.flatMap((source) => source.controls);
+      capturedCriticalControls = criticalControls;
+      return {
+        deliverables: {},
+        diagnostics: {
+          ...providerResult().diagnostics,
+          groupResults: [{ group: "structuredRiskRows", status: "rejected", reason: "provider unavailable" }],
+          grounding: {
+            status: "grounded",
+            sourceIdentity: packet.sourceIdentity,
+            rejectedGroups: [],
+            violations: [],
+            criticalControls
+          }
+        }
+      };
+    });
+
+    const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
+    const materialized = JSON.stringify({
+      deliverables: response.deliverables,
+      structured: response.structured
+    });
+    const missing = response.dbHarness?.summary.missingEvidence || [];
+
+    expect(capturedCriticalControls.length).toBeGreaterThan(0);
+    for (const control of capturedCriticalControls) {
+      expect(materialized.includes(control) || missing.some((item) => item.includes(control))).toBe(true);
+    }
+    if (capturedCriticalControls.some((control) => !materialized.includes(control))) {
+      expect(response.dbHarness?.summary.ontologyStatus).toBe("review_required");
+    }
+  }, 30_000);
+
   it("keeps distinct verified KOSHA documents with identical operational controls", async () => {
     const first = retrievalReference("verified-same-controls-a", "local-ranked");
     const second = retrievalReference("verified-same-controls-b", "local-ranked");

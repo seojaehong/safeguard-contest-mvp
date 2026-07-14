@@ -42,6 +42,10 @@ function uniqueStrings(values: readonly (string | null | undefined)[]): string[]
   return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
 }
 
+function compareCanonical(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 function safetySource(
   item: SafetyReferenceItem,
   kind: GroundedGenerationSource["kind"],
@@ -108,17 +112,33 @@ export function buildGroundedGenerationPacket(input: {
     });
   const law = input.legalCandidates.map(legalSource);
   const sources = [...direct, ...sif, ...kosha, ...law];
-  const identityPayload = JSON.stringify(sources.map((source) => ({
-    referenceKey: source.referenceKey,
-    sourceId: source.sourceId,
-    controls: source.controls
-  })));
+  const status = input.dbHarnessPacket.ontologyChecklist.status === "ready" && sources.length > 0
+    ? "ready"
+    : "review_required";
+  const identityPayload = JSON.stringify({
+    version: "grounded-generation-v1",
+    status,
+    llmRole: "naturalize_only",
+    sources: sources
+      .map((source) => ({
+        referenceKey: source.referenceKey,
+        kind: source.kind,
+        sourceId: source.sourceId,
+        title: source.title,
+        summary: source.summary,
+        aliases: [...source.aliases].sort(compareCanonical),
+        controls: [...source.controls].sort(compareCanonical)
+      }))
+      .sort((left, right) => (
+        compareCanonical(left.referenceKey, right.referenceKey)
+        || compareCanonical(left.kind, right.kind)
+        || compareCanonical(left.sourceId, right.sourceId)
+      ))
+  });
   const packet: GroundedGenerationPacket = {
     version: "grounded-generation-v1",
     sourceIdentity: createHash("sha256").update(identityPayload).digest("hex"),
-    status: input.dbHarnessPacket.ontologyChecklist.status === "ready" && sources.length > 0
-      ? "ready"
-      : "review_required",
+    status,
     llmRole: "naturalize_only",
     sources
   };
@@ -131,27 +151,98 @@ function normalize(value: string): string {
 
 function sourceMatchesReference(source: GroundedGenerationSource, reference: string): boolean {
   const normalizedReference = normalize(reference);
-  return source.aliases.some((alias) => {
-    const normalizedAlias = normalize(alias);
-    return normalizedAlias === normalizedReference
-      || normalizedReference.includes(normalizedAlias)
-      || normalizedAlias.includes(normalizedReference);
-  });
+  const typedReference = /^(DB|SIF|KOSHA|LAW):/i.test(reference.trim());
+  if (typedReference) return normalize(source.referenceKey) === normalizedReference;
+  return source.aliases.some((alias) => normalize(alias) === normalizedReference);
 }
 
 function matchingSources(packet: GroundedGenerationPacket, reference: string): readonly GroundedGenerationSource[] {
   return packet.sources.filter((source) => sourceMatchesReference(source, reference));
 }
 
-const CONTROL_FIELDS = ["currentControls", "additionalControls", "safetyMeasure", "control", "action"] as const;
 const KOSHA_REFERENCE_RE = /\b[A-Z](?:-[A-Z])?-\d{1,4}(?:-\d{4})?\b/g;
 const LAW_REFERENCE_RE = /제\d+조(?:의\d+)?/g;
 
-function collectExplicitReferences(value: string): string[] {
-  return uniqueStrings([
-    ...(value.match(KOSHA_REFERENCE_RE) || []),
-    ...(value.match(LAW_REFERENCE_RE) || [])
-  ]);
+type ExplicitReference = { kind: "kosha" | "law"; value: string };
+
+function collectExplicitReferences(value: string): ExplicitReference[] {
+  return [
+    ...(value.match(KOSHA_REFERENCE_RE) || []).map((match) => ({ kind: "kosha" as const, value: match })),
+    ...(value.match(LAW_REFERENCE_RE) || []).map((match) => ({ kind: "law" as const, value: match }))
+  ];
+}
+
+function sourceHasExplicitReference(source: GroundedGenerationSource, reference: ExplicitReference): boolean {
+  if (source.kind !== reference.kind) return false;
+  const sourceText = [source.referenceKey, source.title, source.summary, ...source.aliases].join("\n");
+  return collectExplicitReferences(sourceText).some((candidate) => (
+    candidate.kind === reference.kind && normalize(candidate.value) === normalize(reference.value)
+  ));
+}
+
+function validateControlObject(
+  record: Record<string, unknown>,
+  fields: readonly string[],
+  packet: GroundedGenerationPacket,
+  path: string,
+  violations: GroundingViolation[]
+): void {
+  const evidenceRefs = Array.isArray(record.evidenceRefs)
+    ? record.evidenceRefs.filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    : [];
+  const controlSources = evidenceRefs
+    .flatMap((reference) => matchingSources(packet, reference))
+    .filter((source) => source.controls.length > 0);
+  for (const field of fields) {
+    const controlValue = record[field];
+    if (typeof controlValue !== "string" || controlValue.trim().length === 0) continue;
+    if (controlSources.length === 0) {
+      violations.push({ code: "control_provenance_missing", path: `${path}.${field}`, value: controlValue });
+      continue;
+    }
+    const normalizedClaim = normalize(controlValue);
+    const matchesPacketControl = controlSources.some((source) => source.controls.some((control) => {
+      const normalizedControl = normalize(control);
+      return normalizedClaim === normalizedControl || normalizedClaim.includes(normalizedControl);
+    }));
+    if (!matchesPacketControl) {
+      violations.push({ code: "control_claim_not_in_packet", path: `${path}.${field}`, value: controlValue });
+    }
+  }
+}
+
+function validateSchemaControls(
+  output: Record<string, unknown>,
+  packet: GroundedGenerationPacket,
+  violations: GroundingViolation[]
+): void {
+  const validateArray = (container: unknown, fields: readonly string[], path: string): void => {
+    if (!Array.isArray(container)) return;
+    container.forEach((item, index) => {
+      if (item && typeof item === "object" && !Array.isArray(item)) {
+        validateControlObject(item as Record<string, unknown>, fields, packet, `${path}[${index}]`, violations);
+      }
+    });
+  };
+  validateArray(output.structuredRiskRows, ["currentControls", "additionalControls"], "$.structuredRiskRows");
+  validateArray(output.tbmRiskLinks, ["control"], "$.tbmRiskLinks");
+
+  const workPlan = output.workPlanStructured;
+  if (workPlan && typeof workPlan === "object" && !Array.isArray(workPlan)) {
+    validateArray((workPlan as Record<string, unknown>).workSteps, ["safetyMeasure"], "$.workPlanStructured.workSteps");
+  }
+  const tbmBriefing = output.tbmBriefingStructured;
+  if (tbmBriefing && typeof tbmBriefing === "object" && !Array.isArray(tbmBriefing)) {
+    validateArray((tbmBriefing as Record<string, unknown>).measures, ["action"], "$.tbmBriefingStructured.measures");
+  }
+  const permit = output.permitInspectionStructured;
+  if (permit && typeof permit === "object" && !Array.isArray(permit)) {
+    validateArray((permit as Record<string, unknown>).conditions, ["action"], "$.permitInspectionStructured.conditions");
+  }
+  const tbmLog = output.tbmLogStructured;
+  if (tbmLog && typeof tbmLog === "object" && !Array.isArray(tbmLog)) {
+    validateArray((tbmLog as Record<string, unknown>).unaddressedItems, ["plannedAction"], "$.tbmLogStructured.unaddressedItems");
+  }
 }
 
 function validateNode(
@@ -162,8 +253,8 @@ function validateNode(
 ): void {
   if (typeof node === "string") {
     for (const reference of collectExplicitReferences(node)) {
-      if (matchingSources(packet, reference).length === 0) {
-        violations.push({ code: "unknown_reference", path, value: reference });
+      if (!packet.sources.some((source) => sourceHasExplicitReference(source, reference))) {
+        violations.push({ code: "unknown_reference", path, value: reference.value });
       }
     }
     return;
@@ -178,38 +269,9 @@ function validateNode(
   const evidenceRefs = Array.isArray(record.evidenceRefs)
     ? record.evidenceRefs.filter((value): value is string => typeof value === "string" && value.trim().length > 0)
     : [];
-  const resolvedSources = evidenceRefs.flatMap((reference) => matchingSources(packet, reference));
   for (const reference of evidenceRefs) {
     if (matchingSources(packet, reference).length === 0) {
       violations.push({ code: "unknown_reference", path: `${path}.evidenceRefs`, value: reference });
-    }
-  }
-
-  const controlSources = resolvedSources.filter((source) => source.controls.length > 0);
-  for (const controlField of CONTROL_FIELDS) {
-    const controlValue = record[controlField];
-    if (typeof controlValue !== "string" || controlValue.trim().length === 0) continue;
-    if (controlSources.length === 0) {
-      violations.push({
-        code: "control_provenance_missing",
-        path: `${path}.${controlField}`,
-        value: controlValue
-      });
-      continue;
-    }
-    const normalizedClaim = normalize(controlValue);
-    const matchesPacketControl = controlSources.some((source) => source.controls.some((control) => {
-      const normalizedControl = normalize(control);
-      return normalizedClaim === normalizedControl
-        || normalizedClaim.includes(normalizedControl)
-        || normalizedControl.includes(normalizedClaim);
-    }));
-    if (!matchesPacketControl) {
-      violations.push({
-        code: "control_claim_not_in_packet",
-        path: `${path}.${controlField}`,
-        value: controlValue
-      });
     }
   }
 
@@ -225,6 +287,9 @@ export function validateGroundedGenerationOutput(
 ): GroundedGenerationValidation {
   const violations: GroundingViolation[] = [];
   validateNode(output, packet, "$", violations);
+  if (output && typeof output === "object" && !Array.isArray(output)) {
+    validateSchemaControls(output as Record<string, unknown>, packet, violations);
+  }
   return deepFreeze({
     status: packet.status === "ready" && violations.length === 0 ? "grounded" : "review_required",
     violations

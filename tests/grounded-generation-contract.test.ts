@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import type { DbHarnessPacket } from "@/lib/db-harness";
 import {
   buildGroundedGenerationPacket,
-  validateGroundedGenerationOutput
+  validateGroundedGenerationOutput,
+  type GroundedGenerationPacket
 } from "@/lib/grounded-generation-contract";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import type { SearchResult } from "@/lib/types";
@@ -136,6 +137,16 @@ const legalCandidates: SearchResult[] = [{
   sourceUrl: "https://law.go.kr"
 }];
 
+function frozenPacket(sources: GroundedGenerationPacket["sources"]): GroundedGenerationPacket {
+  return Object.freeze({
+    version: "grounded-generation-v1",
+    sourceIdentity: "collision-fixture",
+    status: "ready",
+    llmRole: "naturalize_only",
+    sources: Object.freeze([...sources])
+  });
+}
+
 describe("grounded generation contract", () => {
   it("builds and deeply freezes one packet from eligible runtime evidence", () => {
     const packet = buildGroundedGenerationPacket({
@@ -248,5 +259,99 @@ describe("grounded generation contract", () => {
       code: "unknown_reference",
       value: "제39조"
     }));
+  });
+
+  it("uses kind-aware exact canonical tokens instead of bidirectional substring matches", () => {
+    const packet = frozenPacket([
+      {
+        referenceKey: "SIF:sif-1-extra",
+        kind: "sif",
+        sourceId: "sif-1-extra",
+        title: "제38조와 무관한 SIF",
+        summary: "충돌 fixture",
+        aliases: ["SIF:sif-1-extra", "sif-1-extra", "제38조"],
+        controls: ["고정된 통제"]
+      },
+      {
+        referenceKey: "KOSHA:C-123",
+        kind: "kosha",
+        sourceId: "kosha-c-123",
+        title: "KOSHA GUIDE C-123",
+        summary: "충돌 fixture",
+        aliases: ["KOSHA:C-123", "C-123"],
+        controls: ["고정된 KOSHA 통제"]
+      },
+      {
+        referenceKey: "LAW:law-38-2",
+        kind: "law",
+        sourceId: "law-38-2",
+        title: "산업안전보건법 제38조의2",
+        summary: "충돌 fixture",
+        aliases: ["LAW:law-38-2", "산업안전보건법 제38조의2"],
+        controls: []
+      }
+    ]);
+    const result = validateGroundedGenerationOutput({
+      evidenceRefs: ["SIF:sif-1"],
+      riskAssessmentDraft: "제38조 및 KOSHA C-12를 근거로 한다."
+    }, packet);
+
+    expect(result.status).toBe("review_required");
+    expect(result.violations).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "unknown_reference", value: "SIF:sif-1" }),
+      expect.objectContaining({ code: "unknown_reference", value: "제38조" }),
+      expect.objectContaining({ code: "unknown_reference", value: "C-12" })
+    ]));
+  });
+
+  it("does not treat workSteps action as a control field", () => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    const result = validateGroundedGenerationOutput({
+      workPlanStructured: {
+        workSteps: [{
+          action: "작업구역으로 자재를 이동한다.",
+          safetyMeasure: "개구부 덮개를 고정하고 표지를 설치한다.",
+          evidenceRefs: ["SIF:sif-1"]
+        }]
+      }
+    }, packet);
+
+    expect(result).toEqual({ status: "grounded", violations: [] });
+  });
+
+  it("hashes all behavior fields in canonical source order", () => {
+    const baselineHarness = harnessPacket();
+    const baseline = buildGroundedGenerationPacket({
+      dbHarnessPacket: baselineHarness,
+      legalCandidates: [legalCandidates[0], { ...legalCandidates[0], id: "law-29", title: "산업안전보건법 제29조" }],
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    const reordered = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates: [{ ...legalCandidates[0], id: "law-29", title: "산업안전보건법 제29조" }, legalCandidates[0]],
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    const changedHarness = harnessPacket();
+    changedHarness.sifCases[0] = { ...changedHarness.sifCases[0], title: "변경된 SIF 제목" };
+    const changedTitle = buildGroundedGenerationPacket({
+      dbHarnessPacket: changedHarness,
+      legalCandidates: [legalCandidates[0], { ...legalCandidates[0], id: "law-29", title: "산업안전보건법 제29조" }],
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    const reviewHarness = harnessPacket();
+    reviewHarness.ontologyChecklist = { status: "review_required", missing: ["fixture"] };
+    const changedStatus = buildGroundedGenerationPacket({
+      dbHarnessPacket: reviewHarness,
+      legalCandidates: [legalCandidates[0], { ...legalCandidates[0], id: "law-29", title: "산업안전보건법 제29조" }],
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+
+    expect(reordered.sourceIdentity).toBe(baseline.sourceIdentity);
+    expect(changedTitle.sourceIdentity).not.toBe(baseline.sourceIdentity);
+    expect(changedStatus.sourceIdentity).not.toBe(baseline.sourceIdentity);
   });
 });
