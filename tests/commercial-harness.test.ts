@@ -4,6 +4,7 @@ import {
   buildDbHarnessAnswer,
   buildDbHarnessPacket,
   buildDbHarnessPracticalPoints,
+  buildPublicDbHarnessPacket,
   buildDbHarnessSurfaceContract,
   buildHarnessPromptContext,
   hasRelevantKoshaParent,
@@ -150,6 +151,93 @@ function verifiedKoshaReference(overrides: Partial<SafetyReferenceItem> = {}): S
       directEligible: true
     }
   };
+}
+
+const V5_FALSE_PARENT_KOSHA_MARKERS = {
+  summary: "V5_FALSE_PARENT_KOSHA_SUMMARY",
+  body: "V5_FALSE_PARENT_KOSHA_BODY",
+  control: "V5_FALSE_PARENT_KOSHA_CONTROL",
+  action: "V5_FALSE_PARENT_KOSHA_ACTION",
+  evidenceRef: "V5_FALSE_PARENT_KOSHA_EVIDENCE_REF"
+} as const;
+
+function v5CollisionGuide(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenceItem {
+  return verifiedKoshaReference({
+    id: "kosha-v5-forklift-pedestrian-collision-guide",
+    category: "운반하역",
+    subcategory: "지게차",
+    title: "KOSHA 지게차 보행자 충돌 예방 기술지침",
+    summary: `${V5_FALSE_PARENT_KOSHA_MARKERS.summary} 지게차와 보행자의 이동 동선을 분리한다.`,
+    body: V5_FALSE_PARENT_KOSHA_MARKERS.body,
+    keywords: ["지게차", "보행자", "동선", "충돌"],
+    risk_tags: ["충돌"],
+    controls: [
+      V5_FALSE_PARENT_KOSHA_MARKERS.control,
+      V5_FALSE_PARENT_KOSHA_MARKERS.action
+    ],
+    ...overrides
+  });
+}
+
+function v5DirectParent(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenceItem {
+  return reference({
+    id: "direct-v5-parent",
+    source_id: "official-machinery-catalog",
+    item_type: "machinery",
+    category: "운반하역",
+    subcategory: "지게차",
+    title: "지게차 직접 근거",
+    summary: "지게차 작업 직접 근거",
+    keywords: ["지게차"],
+    risk_tags: [],
+    controls: ["작업 전 현장 확인"],
+    evidence_role: "direct",
+    ...overrides
+  });
+}
+
+function v5BroadTokenFireParent(): SafetyReferenceItem {
+  return v5DirectParent({
+    id: "direct-v5-lpg-forklift-pedestrian-fire",
+    title: "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
+    summary: "보행자 통행구역의 LPG 지게차 연료 누출 가스가 점화되어 화재가 발생할 수 있다.",
+    keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
+    risk_tags: [],
+    controls: ["연료 밸브 차단과 점화원 통제"]
+  });
+}
+
+function v5SameEquipmentSlipParent(): SafetyReferenceItem {
+  return v5DirectParent({
+    id: "direct-v5-forklift-pedestrian-slip",
+    title: "지게차 보행자 통행구역 미끄러짐 직접 근거",
+    summary: "지게차 상하차 구역의 바닥 오염으로 보행자가 미끄러질 수 있다.",
+    keywords: ["지게차", "보행자", "통행구역", "바닥", "미끄러짐"],
+    risk_tags: ["미끄러짐"],
+    controls: ["바닥 오염 제거와 미끄럼 방지 조치"]
+  });
+}
+
+function v5ConflictingFireCollisionTagParent(): SafetyReferenceItem {
+  return v5DirectParent({
+    id: "direct-v5-conflicting-fire-collision-tag",
+    title: "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
+    summary: "LPG 지게차 연료 누출 가스가 점화되어 화재가 발생할 수 있다.",
+    keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
+    risk_tags: ["충돌"],
+    controls: ["연료 누출 확인과 점화원 격리"]
+  });
+}
+
+function v5VehicleCollisionParent(): SafetyReferenceItem {
+  return v5DirectParent({
+    id: "direct-v5-vehicle-collision",
+    title: "지게차 후진 중 보행자 충돌 직접 근거",
+    summary: "지게차 운행경로에 보행자가 진입해 차량 충돌이 발생할 수 있다.",
+    keywords: ["지게차", "보행자", "후진", "충돌"],
+    risk_tags: ["차량 충돌"],
+    controls: ["후진 경보와 유도자 배치"]
+  });
 }
 
 function archiveSifReference(): SafetyReferenceItem {
@@ -750,6 +838,50 @@ describe("DB harness packet", () => {
 
     expect(hasRelevantKoshaParent(collisionGuide, [collisionParent])).toBe(true);
   });
+
+  it.each([
+    ["broad-token LPG forklift pedestrian fire", v5BroadTokenFireParent, false],
+    ["same-equipment pedestrian slip", v5SameEquipmentSlipParent, false],
+    ["fire narrative with conflicting collision tag", v5ConflictingFireCollisionTagParent, false],
+    ["true vehicle collision alias", v5VehicleCollisionParent, true]
+  ] as const)(
+    "v5 classifies %s parenthood with the hazard-family gate",
+    (_label, parentFactory, expected) => {
+      expect(hasRelevantKoshaParent(v5CollisionGuide(), [parentFactory()])).toBe(expected);
+    }
+  );
+
+  it.each([
+    ["broad-token LPG forklift pedestrian fire", v5BroadTokenFireParent],
+    ["same-equipment pedestrian slip", v5SameEquipmentSlipParent],
+    ["fire narrative with conflicting collision tag", v5ConflictingFireCollisionTagParent]
+  ] as const)(
+    "v5 keeps false-parent KOSHA content out of public harness surfaces for %s",
+    (_label, parentFactory) => {
+      const packet = buildPublicDbHarnessPacket(buildDbHarnessPacket({
+        question: "지게차 보행자 통행구역 충돌 위험",
+        references: [v5CollisionGuide(), parentFactory()]
+      }));
+      const publicKosha = packet.supportingEvidence.find((item) =>
+        item.id === "kosha-v5-forklift-pedestrian-collision-guide"
+      );
+      const serializedPublicSurfaces = JSON.stringify({
+        packet,
+        answer: buildDbHarnessAnswer(packet),
+        practicalPoints: buildDbHarnessPracticalPoints(packet)
+      });
+
+      expect(publicKosha?.summary).toBe("");
+      expect(publicKosha?.body).toBeUndefined();
+      expect(publicKosha?.controls).toEqual([]);
+      expect(publicKosha?.keywords).toEqual([]);
+      expect(publicKosha?.risk_tags).toEqual([]);
+      expect(publicKosha?.kosha_guide?.evidenceRef).toBeNull();
+      for (const marker of Object.values(V5_FALSE_PARENT_KOSHA_MARKERS)) {
+        expect(serializedPublicSurfaces).not.toContain(marker);
+      }
+    }
+  );
 
   it("keeps fire controls and energy isolation in the bounded DB harness surface", () => {
     const maintenanceFire = reference({
