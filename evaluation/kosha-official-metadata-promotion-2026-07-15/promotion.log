@@ -1,0 +1,13 @@
+generated_at=2026-07-14T16:41:52.051681+00:00
+source_snapshot_id=976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282
+snapshot_id=b13a4e39e045d7446cc4d2d597efbf82bb1d71f9c7815fa44ebf9f8b84f40a01
+network_timeout_seconds=20.0
+network_retries=1
+candidates=234
+official_rows=1039
+verified=212
+failures=22
+failure_counts=official-pdf-hash-mismatch=22
+page_shards=13
+launch_ready=false
+trusted_registry_populated=false
