@@ -217,7 +217,7 @@ export type HarnessAgentSearchSummary = Pick<
 };
 
 export type HarnessAgentAuthSummary = {
-  source: "db" | "env" | "none";
+  source: "db" | "env" | "broker" | "none";
   siteId: string | null;
   orgId: string | null;
   tokenBound: boolean;

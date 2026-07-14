@@ -39,13 +39,22 @@ and OpenAI paths remain in place.
   is registered by `registerScopedTool`, invoked with broker-derived
   `tools:read` site/org context, and returned through the same scope
   interceptor used by the MCP route.
-- Hermes receives tenant context, prompt, cancellation, text-only streaming, and a
-  read-only tool-intent callback. It receives no Supabase client, MCP token,
-  write callback, or publish callback.
+- Before planner execution, the adapter invokes `run_safeclaw_harness_agent`
+  exactly once and validates its `db_harness_first` naturalization contract.
+  Retrieval or contract validation failure prevents planner invocation and
+  output. The planner receives the validated packet as preloaded input.
+- Planner text must return the exact preloaded packet identity with the text.
+  Missing or substituted packets fail closed before a text event is emitted.
+- Hermes receives broker-authenticated tenant context, prompt, cancellation,
+  packet-attested text streaming, and a read-only tool-intent callback. It
+  receives no Supabase client, MCP token, write callback, or publish callback.
 - Unknown tools, `generate_reviewed_safety_docpack`, and
   `generate_safety_docpack` fail before the executor.
-- `run_safeclaw_harness_agent` remains a valid read path and receives the
-  authenticated organization/site/user context through the executor request.
+- `run_safeclaw_harness_agent` is reserved for the mandatory adapter preload;
+  planner-requested re-entry fails before the executor.
+- Harness auth attribution records broker-authenticated organization/site
+  scope. It is not token-bound, and no user identity propagation is claimed
+  because user identity is not passed into the MCP auth context.
 - Engine authority declares no mutation or publish authority and requires human
   confirmation.
 
@@ -61,7 +70,7 @@ and OpenAI paths remain in place.
 
 ## Verification
 
-### P2/P3 RED Evidence
+### Prior P2/P3 RED Evidence
 
 1. Arbitrary executor injection:
 
@@ -78,16 +87,34 @@ and OpenAI paths remain in place.
    present, but auth was `source=none`, `siteId=null`, `orgId=null`, and
    `tokenBound=false`.
 
+### Fresh Review RED Evidence at `cb11ad11`
+
+1. Mandatory preload order: planner received no `evidencePacket`; 1 failed and
+   9 skipped.
+2. Harness retrieval failure: raw executor error escaped instead of a broker
+   failure; 1 failed and 10 skipped.
+3. Output packet gate: planner text without packet proof resolved and emitted;
+   1 failed and 11 skipped.
+4. Auth attribution: result claimed `source=db` and `tokenBound=true` instead
+   of broker-authenticated site/org scope; 1 failed and 12 skipped.
+5. Harness re-entry: planner could request a second harness call; 1 failed and
+   13 skipped.
+
+Each case was run independently with the matching test title in
+`tests/hermes-engine-adapter.test.ts` before its implementation change. The
+final test file has 14 passing behavior tests.
+
 ### P2/P3 Final GREEN Evidence
 
 | Check | Reproducible command | Exit | Result |
 | --- | --- | ---: | --- |
-| Focused tests | `npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism` | 0 | 12 files passed; 179 tests passed; 0 failed; 19.27 s |
+| Focused tests | `npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism` | 0 | 12 files passed; 183 tests passed; 0 failed; 35.75 s |
 | TypeScript strict | `npm.cmd run typecheck` | 0 | `tsc --noEmit --incremental false` passed |
-| Production build | `npm.cmd run build` | 0 | Next.js 15.5.20; compiled in 10.5 s; static pages 27/27 |
+| Production build | `npm.cmd run build` | 0 | Next.js 15.5.20; compiled in 17.4 s; static pages 27/27 |
 
-The tracked `audit.md` and `report.json` are self-contained evidence. They do
-not cite gitignored or untracked log files.
+Tracked command output is in `focused-final.txt`, `typecheck-final.txt`, and
+`build-final.txt` beside this audit. The evidence does not cite gitignored or
+untracked log files.
 
 ### Prior Full-Suite Context
 

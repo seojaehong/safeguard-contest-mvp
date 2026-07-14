@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-14T22:00:56+09:00",
+  "generatedAt": "2026-07-14T22:40:16.7514542+09:00",
   "authoritativeBaseSha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
   "branch": "feat/hermes-engine-adapter-24h-20260714",
   "scope": {
-    "productionFilesChanged": 5,
+    "productionFilesChanged": 10,
     "testFilesChanged": 5,
     "adrFilesChanged": 1,
     "databaseFilesChanged": 0,
@@ -12,15 +12,22 @@
     "dataFilesChanged": 0
   },
   "tdd": {
-    "redCasesObserved": 6,
-    "greenCasesResolved": 6,
+    "redCasesObserved": 13,
+    "greenCasesResolved": 13,
     "cases": [
       "explicit local Hermes mode gate",
       "versioned authority metadata",
       "MCP known/read-only tool classification",
       "Hermes adapter module",
       "production composition dependency gate",
-      "text-only planner event surface"
+      "text-only planner event surface",
+      "arbitrary executor runtime rejection",
+      "scoped Harness composition",
+      "mandatory Evidence Harness preload order",
+      "Harness retrieval fail-closed planner gate",
+      "packet-attested planner text output",
+      "broker-authenticated site/org attribution",
+      "adapter-reserved Harness invocation"
     ]
   },
   "verification": {
@@ -34,9 +41,9 @@
     "focusedFinal": {
       "status": "passed",
       "testFilesPassed": 12,
-      "testsPassed": 179,
+      "testsPassed": 183,
       "testsFailed": 0,
-      "durationSeconds": 19.27,
+      "durationSeconds": 35.75,
       "exitCode": 0
     },
     "typecheckFinal": {
@@ -79,7 +86,7 @@
       "command": "npm.cmd run build",
       "exitCode": 0,
       "nextVersion": "15.5.20",
-      "compileSeconds": 10.5,
+      "compileSeconds": 17.4,
       "staticPagesGenerated": 27,
       "staticPagesExpected": 27
     }
@@ -141,27 +148,75 @@
         "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism",
         "exitCode": 0,
         "testFilesPassed": 12,
-        "testsPassed": 179,
+        "testsPassed": 183,
         "testsFailed": 0,
-        "durationSeconds": 19.27
+        "durationSeconds": 35.75,
+        "log": "evaluation/hermes-engine-adapter-24h-20260714/focused-final.txt"
       },
       {
         "name": "typecheckFinal",
         "command": "npm.cmd run typecheck",
-        "exitCode": 0
+        "exitCode": 0,
+        "log": "evaluation/hermes-engine-adapter-24h-20260714/typecheck-final.txt"
       },
       {
         "name": "buildFinal",
         "command": "npm.cmd run build",
         "exitCode": 0,
-        "staticPages": "27/27"
+        "compileSeconds": 17.4,
+        "staticPages": "27/27",
+        "log": "evaluation/hermes-engine-adapter-24h-20260714/build-final.txt"
       }
     ],
     "trackedEvidence": [
       "evaluation/hermes-engine-adapter-24h-20260714/audit.md",
-      "evaluation/hermes-engine-adapter-24h-20260714/report.json"
+      "evaluation/hermes-engine-adapter-24h-20260714/report.json",
+      "evaluation/hermes-engine-adapter-24h-20260714/focused-final.txt",
+      "evaluation/hermes-engine-adapter-24h-20260714/typecheck-final.txt",
+      "evaluation/hermes-engine-adapter-24h-20260714/build-final.txt"
     ],
     "gitignoredOrUntrackedLogsReferenced": 0
+  },
+  "freshReviewRemediation": {
+    "baseSha": "cb11ad11d64ff4f4f32cb4cafabe003fa8f24ea7",
+    "redGreen": [
+      {
+        "id": "mandatory-harness-preload-order",
+        "red": "planner started without a preloaded evidence packet",
+        "green": "adapter invokes and validates run_safeclaw_harness_agent exactly before planner"
+      },
+      {
+        "id": "harness-retrieval-fail-closed",
+        "red": "raw retrieval error escaped",
+        "green": "ENGINE_EXECUTION_FAILED prevents planner invocation and output"
+      },
+      {
+        "id": "packet-attested-planner-output",
+        "red": "planner emitted text without packet proof",
+        "green": "missing or substituted packet identity fails before text emission"
+      },
+      {
+        "id": "broker-auth-attribution",
+        "red": "broker scope was labeled db and token-bound",
+        "green": "source is broker with site/org scope, tokenBound false, and no user propagation claim"
+      },
+      {
+        "id": "adapter-reserved-harness",
+        "red": "planner could invoke the Harness a second time",
+        "green": "planner Harness intent fails with ENGINE_TOOL_FORBIDDEN before executor"
+      }
+    ],
+    "productionFileCountBasis": {
+      "diffBase": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
+      "count": 10,
+      "excluded": ["docs", "evaluation", "tests"]
+    },
+    "authAttribution": {
+      "source": "broker",
+      "siteOrgAuthenticated": true,
+      "tokenBound": false,
+      "userIdentityPropagatedToMcpContext": false
+    }
   },
   "securityBoundary": {
     "contractVersion": "engine-adapter/v1",

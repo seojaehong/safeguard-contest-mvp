@@ -255,7 +255,7 @@ function registerTools(server: McpServer): void {
             source: authContext?.source || "none",
             siteId: authContext?.siteId || null,
             orgId: authContext?.orgId || null,
-            tokenBound: Boolean(authContext?.siteId),
+            tokenBound: Boolean(authContext?.tokenId),
           },
         });
 
