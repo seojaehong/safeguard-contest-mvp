@@ -163,6 +163,20 @@ describe("Reports Wave 1 static design contract", () => {
     expect([...css.matchAll(/!important/gu)]).toHaveLength(0);
   });
 
+  it("preserves the shared 15px root and body baseline without a persistent split", () => {
+    const css = fs.readFileSync(cssPath, "utf8");
+    const standaloneGlobalFontRules = cssRules(css).filter((rule) => (
+      rule.selectors.length === 1
+      && ["html", "body"].includes(rule.selectors[0])
+      && /(?:^|;)\s*font-size\s*:/u.test(rule.body)
+    ));
+
+    expect(declarationsFor(css, ":root")["--text-body"]).toBe("15px");
+    expect(declarationsFor(css, "html")["font-size"]).toBe("var(--text-body)");
+    expect(declarationsFor(css, "body")["font-size"]).toBe("var(--text-body)");
+    expect(standaloneGlobalFontRules).toEqual([]);
+  });
+
   it("preserves shared final-launch Reports rules below the route override", () => {
     const css = fs.readFileSync(cssPath, "utf8");
     const mixedDocumentRules = cssRules(css).filter((rule) =>
@@ -179,11 +193,15 @@ describe("Reports Wave 1 static design contract", () => {
   it("uses the canonical Reports typography and interaction tuples", () => {
     const css = fs.readFileSync(cssPath, "utf8");
     const evidenceTest = fs.readFileSync(evidenceTestPath, "utf8");
-    const owningRootMutation = [
-      "document.documentElement.style",
-      'fontSize = "200%"'
-    ].join(".");
+    const scalingFunctionStart = evidenceTest.indexOf("\nasync function applyRootTextScaling");
+    const scalingFunctionEnd = evidenceTest.indexOf("\nasync function startReportsHarness", scalingFunctionStart);
+    const scalingFunction = evidenceTest.slice(scalingFunctionStart, scalingFunctionEnd);
+    const typographyAssignments = [...scalingFunction.matchAll(
+      /[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\.style\.(?:fontSize|lineHeight)\s*=/gu
+    )].map((match) => match[0].replace(/\s*=$/u, " ="));
     const scope = '.safeclaw-module-shell[data-module-route="/reports"]';
+    const reportsLayer = css.slice(css.indexOf("/* Reports: canonical route layer"));
+    const reportsBaseCss = reportsLayer.slice(0, reportsLayer.indexOf("@media (max-width: 900px)"));
     const roles = {
       [`${scope} .safeclaw-report-facts strong`]: ["var(--text-caption)", "600", "var(--leading-caption)"],
       [`${scope} .safeclaw-report-facts span`]: ["var(--text-body)", "500", "var(--leading-body)"],
@@ -197,23 +215,28 @@ describe("Reports Wave 1 static design contract", () => {
       [`${scope} .safeclaw-download-note`]: ["var(--text-caption)", "600", "var(--leading-caption)"]
     } as const;
 
-    expect(declarationsFor(css, scope)).toMatchObject({
+    expect(declarationsFor(reportsBaseCss, scope)).toMatchObject({
       "font-size": "var(--text-body)",
       "line-height": "var(--leading-body)",
-      "--text-body-lg": "1.0625rem",
-      "--text-body": "0.9375rem",
-      "--text-support": "0.875rem",
-      "--text-control": "0.875rem",
-      "--text-table": "0.8125rem",
-      "--text-caption": "0.75rem",
-      "--text-hud": "0.6875rem",
+      "--text-display": "4.8rem",
+      "--text-page-title": "2.666667rem",
+      "--text-section-title": "1.866667rem",
+      "--text-component-title": "1.333333rem",
+      "--text-body-lg": "1.133333rem",
+      "--text-body": "1rem",
+      "--text-support": "0.933333rem",
+      "--text-control": "0.933333rem",
+      "--text-table": "0.866667rem",
+      "--text-caption": "0.8rem",
+      "--text-hud": "0.733333rem",
       "--leading-control": "1.428571",
       "--leading-table": "1.538462",
       "--leading-caption": "1.5",
       "--leading-hud": "1.454545"
     });
-    expect(evidenceTest).not.toMatch(/snapshot\.element\.style\.(?:fontSize|lineHeight)/u);
-    expect(evidenceTest).toContain(owningRootMutation);
+    expect(typographyAssignments).toEqual(["document.documentElement.style.fontSize ="]);
+    expect(scalingFunction).toContain("const requestedRootFontSize = rootFontSizeBefore * 2;");
+    expect(scalingFunction).toContain("document.documentElement.style.fontSize = `${requestedRootFontSize}px`;");
 
     for (const [selector, [size, weight, lineHeight]] of Object.entries(roles)) {
       expect(declarationsFor(css, selector), selector).toMatchObject({
@@ -422,6 +445,22 @@ type InteractiveTargetMatrixRow = InteractiveTargetInventory & {
   viewport: Viewport;
 };
 
+type DimensionOverflowObservation = {
+  descriptor: string;
+  clientWidthPx: number;
+  scrollWidthPx: number;
+  horizontalDeltaPx: number;
+  clientHeightPx: number;
+  scrollHeightPx: number;
+  verticalDeltaPx: number;
+  tolerancePx: number;
+  overflowX: string;
+  overflowY: string;
+  horizontalClipped: boolean;
+  verticalClipped: boolean;
+  classification: "actual-clipping" | "non-clipping-visible-overflow";
+};
+
 const interactiveTargetMatrixRows: InteractiveTargetMatrixRow[] = [];
 
 function recordInteractiveTargetRow(
@@ -600,8 +639,15 @@ async function applyRootTextScaling(page: Page): Promise<{
   toolsFirstInDom: boolean;
   previewFollowsTools: boolean;
   scaleFailures: string[];
-  dimensionOverflowObservations: string[];
-  dimensionClippingFailures: string[];
+  dimensionClippingPredicate: {
+    units: string;
+    tolerancePx: number;
+    observationRule: string;
+    clippingRule: string;
+    selectorAllowlistCount: number;
+  };
+  dimensionOverflowObservations: DimensionOverflowObservation[];
+  dimensionClippingFailures: DimensionOverflowObservation[];
   ancestorClippingFailures: string[];
   overlapFailures: string[];
   nestedScrollFailures: string[];
@@ -749,7 +795,8 @@ async function applyRootTextScaling(page: Page): Promise<{
     const beforeDocumentHeight = document.documentElement.scrollHeight;
     const beforeWorkbenchHeight = workbench.getBoundingClientRect().height;
 
-    document.documentElement.style.fontSize = "200%";
+    const requestedRootFontSize = rootFontSizeBefore * 2;
+    document.documentElement.style.fontSize = `${requestedRootFontSize}px`;
 
     const rootFontSizeAfter = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
     const afterFontSize = Number.parseFloat(getComputedStyle(representative).fontSize);
@@ -785,30 +832,38 @@ async function applyRootTextScaling(page: Page): Promise<{
 
     const targetElements = Array.from(new Set(interactiveElements));
     const dimensionElements = Array.from(new Set([...textElements, ...targetElements])).filter(visible);
-    const dimensionOverflowObservations = dimensionElements.flatMap((element) => {
-      if (element.clientWidth <= 0 || element.clientHeight <= 0) return [];
-      const horizontal = element.scrollWidth > element.clientWidth + 1;
-      const vertical = element.scrollHeight > element.clientHeight + 1;
-      if (!horizontal && !vertical) return [];
-      const style = getComputedStyle(element);
-      return [
-        `${descriptor(element)} client=${element.clientWidth}x${element.clientHeight} scroll=${element.scrollWidth}x${element.scrollHeight}`
-          + ` font=${style.fontSize}/${style.lineHeight} overflow=${style.overflowX}/${style.overflowY}`
-      ];
-    });
-    const dimensionClippingFailures = dimensionElements.flatMap((element) => {
+    const dimensionTolerancePx = 1;
+    const dimensionOverflowObservations: DimensionOverflowObservation[] = dimensionElements.flatMap((element) => {
       if (element.clientWidth <= 0 || element.clientHeight <= 0) return [];
       const style = getComputedStyle(element);
-      const horizontal = element.scrollWidth > element.clientWidth + 1
-        && ["hidden", "clip"].includes(style.overflowX);
-      const vertical = element.scrollHeight > element.clientHeight + 1
-        && ["hidden", "clip"].includes(style.overflowY);
-      if (!horizontal && !vertical) return [];
-      return [
-        `${descriptor(element)} client=${element.clientWidth}x${element.clientHeight} scroll=${element.scrollWidth}x${element.scrollHeight}`
-          + ` font=${style.fontSize}/${style.lineHeight} overflow=${style.overflowX}/${style.overflowY}`
-      ];
+      const horizontalDeltaPx = element.scrollWidth - element.clientWidth;
+      const verticalDeltaPx = element.scrollHeight - element.clientHeight;
+      const horizontalObserved = horizontalDeltaPx > dimensionTolerancePx;
+      const verticalObserved = verticalDeltaPx > dimensionTolerancePx;
+      if (!horizontalObserved && !verticalObserved) return [];
+      const horizontalClipped = horizontalObserved && ["hidden", "clip"].includes(style.overflowX);
+      const verticalClipped = verticalObserved && ["hidden", "clip"].includes(style.overflowY);
+      return [{
+        descriptor: descriptor(element),
+        clientWidthPx: element.clientWidth,
+        scrollWidthPx: element.scrollWidth,
+        horizontalDeltaPx,
+        clientHeightPx: element.clientHeight,
+        scrollHeightPx: element.scrollHeight,
+        verticalDeltaPx,
+        tolerancePx: dimensionTolerancePx,
+        overflowX: style.overflowX,
+        overflowY: style.overflowY,
+        horizontalClipped,
+        verticalClipped,
+        classification: horizontalClipped || verticalClipped
+          ? "actual-clipping" as const
+          : "non-clipping-visible-overflow" as const
+      }];
     });
+    const dimensionClippingFailures = dimensionOverflowObservations.filter((observation) => (
+      observation.horizontalClipped || observation.verticalClipped
+    ));
 
     let ancestorPairs = 0;
     const ancestorClippingFailures: string[] = [];
@@ -934,7 +989,7 @@ async function applyRootTextScaling(page: Page): Promise<{
     return {
       mechanism: {
         owner: "document.documentElement",
-        executedValue: "font-size: 200%",
+        executedValue: `font-size: ${document.documentElement.style.fontSize}`,
         browserZoomExecuted: false,
         limitation: "Executed Chromium CSS root text scaling only; no browser UI page-zoom behavior is claimed."
       },
@@ -987,6 +1042,13 @@ async function applyRootTextScaling(page: Page): Promise<{
         tools && preview && tools.compareDocumentPosition(preview) & Node.DOCUMENT_POSITION_FOLLOWING
       ),
       scaleFailures,
+      dimensionClippingPredicate: {
+        units: "integer CSS pixels from HTMLElement client and scroll dimensions",
+        tolerancePx: dimensionTolerancePx,
+        observationRule: "scroll dimension minus client dimension is greater than tolerance on either axis",
+        clippingRule: "an observed axis is actual clipping only when computed overflow on that axis is hidden or clip",
+        selectorAllowlistCount: 0
+      },
       dimensionOverflowObservations,
       dimensionClippingFailures,
       ancestorClippingFailures,
@@ -1089,6 +1151,7 @@ describe("Reports Wave 1 browser design contract", () => {
     if (!browser) throw new Error("Browser was not started");
     const evidence: Array<Record<string, unknown>> = [];
     const reflowViolations: string[] = [];
+    let clippingPredicateProbe: Record<string, unknown> | null = null;
     for (const scenario of [
       { theme: "day" as const, label: "mobile", width: 390, height: 844 },
       { theme: "night" as const, label: "mobile", width: 390, height: 844 },
@@ -1280,13 +1343,15 @@ describe("Reports Wave 1 browser design contract", () => {
           if (!condition) reflowViolations.push(`${scenarioId}: ${message}`);
         };
         requireReflow(zoomMetrics.mechanism.owner === "document.documentElement", "text scaling owner was not documentElement");
-        requireReflow(zoomMetrics.mechanism.executedValue === "font-size: 200%", "unexpected root text scaling value");
+        requireReflow(zoomMetrics.mechanism.executedValue === "font-size: 30px", "unexpected root text scaling value");
         requireReflow(!zoomMetrics.mechanism.browserZoomExecuted, "browser zoom was claimed without execution");
         requireReflow(
           zoomMetrics.mechanism.limitation.includes("no browser UI page-zoom behavior is claimed"),
           "text scaling limitation was not recorded"
         );
-        requireReflow(zoomMetrics.rootFontSize.growthRatio >= 1.99, "document root font did not grow 2x");
+        requireReflow(zoomMetrics.rootFontSize.before === 15, `document root baseline=${zoomMetrics.rootFontSize.before}px`);
+        requireReflow(zoomMetrics.rootFontSize.after === 30, `document root result=${zoomMetrics.rootFontSize.after}px`);
+        requireReflow(zoomMetrics.rootFontSize.growthRatio === 2, "document root font did not grow exactly 2x");
         requireReflow(
           zoomMetrics.descendantInlineTypographyMutations.length === 0,
           `descendant inline typography mutations=${zoomMetrics.descendantInlineTypographyMutations.join(", ")}`
@@ -1320,6 +1385,24 @@ describe("Reports Wave 1 browser design contract", () => {
         requireReflow(zoomMetrics.horizontalOverflow === 0, `viewport horizontal overflow=${zoomMetrics.horizontalOverflow}`);
         requireReflow(zoomMetrics.toolsFirstInDom, "workbench tools are not first in DOM order");
         requireReflow(zoomMetrics.previewFollowsTools, "report preview does not follow tools in DOM order");
+        requireReflow(zoomMetrics.dimensionClippingPredicate.tolerancePx === 1, "unexpected clipping tolerance");
+        requireReflow(
+          zoomMetrics.dimensionClippingPredicate.selectorAllowlistCount === 0,
+          "dimension clipping used a selector allowlist"
+        );
+        requireReflow(
+          zoomMetrics.dimensionOverflowObservations.length === (scenario.label === "mobile" ? 6 : 7),
+          `dimension overflow observations=${zoomMetrics.dimensionOverflowObservations.length}`
+        );
+        requireReflow(
+          zoomMetrics.dimensionOverflowObservations.every((observation) => (
+            observation.tolerancePx === 1
+            && observation.classification === "non-clipping-visible-overflow"
+            && !observation.horizontalClipped
+            && !observation.verticalClipped
+          )),
+          "a clean dimension observation was not classified as non-clipping visible overflow"
+        );
         for (const [category, failures] of [
           ["scale", zoomMetrics.scaleFailures],
           ["dimension-clipping", zoomMetrics.dimensionClippingFailures],
@@ -1329,7 +1412,10 @@ describe("Reports Wave 1 browser design contract", () => {
           ["fixed-sticky-occlusion", zoomMetrics.fixedStickyOcclusionFailures],
           ["fixed-sticky-viewport", zoomMetrics.fixedStickyViewportFailures]
         ] as const) {
-          for (const failure of failures) reflowViolations.push(`${scenarioId}: ${category}: ${failure}`);
+          for (const failure of failures) {
+            const detail = typeof failure === "string" ? failure : JSON.stringify(failure);
+            reflowViolations.push(`${scenarioId}: ${category}: ${detail}`);
+          }
         }
         requireReflow(zoomMetrics.inspected.ancestorPairs > 0, "no ancestor pairs were inspected");
         requireReflow(zoomMetrics.inspected.rectanglePairs > 0, "no rectangle pairs were inspected");
@@ -1380,8 +1466,65 @@ describe("Reports Wave 1 browser design contract", () => {
         await page.close();
       }
     }
+    const clippingProbePage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    try {
+      await prepareDownloadReadyFixture(clippingProbePage, "day");
+      await clippingProbePage.evaluate(() => {
+        const root = document.querySelector<HTMLElement>(
+          ".safeclaw-module-shell[data-module-route='/reports']"
+        );
+        if (!root) throw new Error("Reports shell was not rendered for the clipping probe");
+        const probeStyle = document.createElement("style");
+        probeStyle.textContent = [
+          ".safeclaw-reports-two-pixel-clip-probe {",
+          "  display: block;",
+          "  width: 240px;",
+          "  height: 20px;",
+          "  font-size: 15px;",
+          "  line-height: 22px;",
+          "  overflow: hidden;",
+          "}"
+        ].join("\n");
+        document.head.append(probeStyle);
+        const probe = document.createElement("span");
+        probe.className = "safeclaw-reports-two-pixel-clip-probe";
+        probe.textContent = "2px clipping probe";
+        root.append(probe);
+      });
+      const probeMetrics = await applyRootTextScaling(clippingProbePage);
+      const findProbeRecord = (value: unknown): boolean => {
+        if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+        return String((value as Record<string, unknown>).descriptor).includes("2px clipping probe");
+      };
+      const observation = probeMetrics.dimensionOverflowObservations.find(findProbeRecord);
+      const failure = probeMetrics.dimensionClippingFailures.find(findProbeRecord);
+      expect(observation, JSON.stringify(probeMetrics.dimensionOverflowObservations, null, 2)).toBeDefined();
+      expect(failure, JSON.stringify(probeMetrics.dimensionClippingFailures, null, 2)).toBeDefined();
+      const observationRecord = asRecord(observation, "2px clipping observation");
+      const failureRecord = asRecord(failure, "2px clipping failure");
+      expect(observationRecord).toMatchObject({
+        clientHeightPx: 20,
+        scrollHeightPx: 22,
+        verticalDeltaPx: 2,
+        tolerancePx: 1,
+        overflowY: "hidden",
+        verticalClipped: true
+      });
+      expect(failureRecord).toEqual(observationRecord);
+      clippingPredicateProbe = {
+        injectedClipPx: 2,
+        expectedTolerancePx: 1,
+        observation: observationRecord,
+        failure: failureRecord
+      };
+    } finally {
+      await clippingProbePage.close();
+    }
     if (process.env.SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE === "1") {
-      writeEvidenceJson("reports-download-ready-task-distance-metrics.json", { scenarios: evidence });
+      writeEvidenceJson("reports-download-ready-task-distance-metrics.json", {
+        scenarios: evidence,
+        clippingPredicateProbe
+      });
     }
     expect(reflowViolations, JSON.stringify(reflowViolations, null, 2)).toEqual([]);
   }, 240_000);
