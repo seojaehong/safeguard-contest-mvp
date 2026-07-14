@@ -1,6 +1,6 @@
 {
   "task": "web-safe-presentation-localization",
-  "generatedAt": "2026-07-14T14:19:59+09:00",
+  "generatedAt": "2026-07-14T14:37:59+09:00",
   "status": "pass",
   "releaseReadiness": false,
   "branch": "feat/phase-a-evidence-integration",
@@ -49,7 +49,7 @@
       "detail": "tsc --noEmit --incremental false"
     },
     {
-      "command": "npm.cmd test -- tests/sif-embedding-gate-status.test.ts --maxWorkers=1 --no-file-parallelism -t matches the cross-platform base machine fixture hash outside Markdown",
+      "command": "npm.cmd test -- tests/sif-embedding-gate-status.test.ts --maxWorkers=1 --no-file-parallelism",
       "status": "pass",
       "detail": "5 tests passed under LANG=C and LANG=ko_KR.UTF-8"
     }
@@ -61,9 +61,9 @@
     ],
     "redFailures": [
       "localeCompare produced a locale-dependent canonical key order",
-      "filesystem path separators and a checkout-line-ending-derived migration fingerprint remained embedded in the canonical fixture"
+      "a checkout-line-ending-derived migration fingerprint remained embedded in the approval summary"
     ],
-    "fix": "canonical machine-fixture keys use lexical ordering and normalize only filesystem-derived path, byte-size, SHA, and embedded approval-fingerprint fields",
+    "fix": "canonical machine-fixture keys use lexical ordering, normalize filesystem-derived byte-size, SHA, and embedded approval-fingerprint fields, and defensively normalize path separators",
     "canonicalHash": "f1fefacf29a64968543595754c3ebcab2b7288def75359f9d294051824e89451",
     "machinePayloadChanged": false
   },

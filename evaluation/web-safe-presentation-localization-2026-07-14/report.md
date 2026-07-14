@@ -1,6 +1,6 @@
 # Web-safe presentation localization integration
 
-Generated: 2026-07-14T13:44:00+09:00
+Generated: 2026-07-14T14:37:59+09:00
 
 ## Result
 
@@ -42,7 +42,7 @@ Independent review: **PASS**, with no P0-P2 findings. The sole P3 finding was st
 
 ## Cross-platform fixture remediation
 
-CI run `29306989527` exposed a test-only locale dependency: the complete machine fixture used `localeCompare` to order keys. Run `29307617385` then exposed the remaining operating-system dependency: file path separators and the migration file hash embedded inside the approval summary still varied after checkout line-ending conversion. The machine payload itself was not changed.
+CI run `29306989527` exposed a test-only locale dependency: the complete machine fixture used `localeCompare` to order keys. Run `29307617385` then exposed the remaining operating-system dependency: the migration file hash embedded inside the approval summary varied after checkout line-ending conversion. Path-separator normalization was added as a defensive cross-platform contract and was not the observed cause of that CI hash. The machine payload itself was not changed.
 
 Commit `ac3b0f65b55695ec5f43de9a91683b0f8a58e5cf` (tree `20e9eca2b02f22ebb84254750af7581fa9873011`) now uses locale-independent lexical key ordering and normalizes only filesystem-derived path, byte-size, SHA, and embedded approval-fingerprint fields. The stable canonical hash is `f1fefacf29a64968543595754c3ebcab2b7288def75359f9d294051824e89451`.
 
