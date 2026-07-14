@@ -1107,11 +1107,15 @@ function isTechnicalKoshaCompressed(item: CompressedSafetyReference): boolean {
   return item.kind === "kosha-support-regulation" || item.kind === "kosha-guideline";
 }
 
-function isVerifiedCurrentKoshaCompressed(item: CompressedSafetyReference): boolean {
+function isAcceptedCurrentKoshaCompressed(item: CompressedSafetyReference): boolean {
   return isTechnicalKoshaCompressed(item)
-    && item.directEligible === true
     && item.quality === "accepted"
-    && item.lifecycle === "current"
+    && item.lifecycle === "current";
+}
+
+function isVerifiedCurrentKoshaCompressed(item: CompressedSafetyReference): boolean {
+  return isAcceptedCurrentKoshaCompressed(item)
+    && item.directEligible === true
     && item.groundingReason === "verified-current";
 }
 
@@ -1149,7 +1153,7 @@ function formatSafetyReferencePromptLine(
   options: { parentEvidenceReady: boolean }
 ): string {
   const parentMissing = isTechnicalKoshaCompressed(item)
-    && isVerifiedCurrentKoshaCompressed(item)
+    && isAcceptedCurrentKoshaCompressed(item)
     && !options.parentEvidenceReady;
   if (isTechnicalKoshaCompressed(item) && (!isVerifiedCurrentKoshaCompressed(item) || parentMissing)) {
     const reason = parentMissing ? "parent-evidence-missing" : item.groundingReason || "metadata-absent";
@@ -1188,7 +1192,7 @@ function formatSafetyReferenceAppendix(
     blocks.push("");
     blocks.push("[KOSHA 기술지침/기술지원규정 검토 필요]");
     for (const item of koshaReviewRequired) {
-      const parentMissing = isVerifiedCurrentKoshaCompressed(item)
+      const parentMissing = isAcceptedCurrentKoshaCompressed(item)
         && !options.parentEvidenceReadyIds.has(item.id);
       blocks.push(
         `- ${item.kindLabel}: ${item.title} / reason=${parentMissing ? "parent-evidence-missing" : item.groundingReason || "metadata-absent"} / quality=${item.quality || "review_required"} / lifecycle=${item.lifecycle || "unknown"} / SIF·직접 근거 확인 전 본문·통제문구·필수 인용에 사용하지 않음`
@@ -1906,8 +1910,13 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             const dbHarnessPacket = buildPublicDbHarnessPacket(internalDbHarnessPacket);
             const koshaParentEvidenceReadyIdsEarly = buildKoshaParentEvidenceReadyIds(dbHarnessPacket);
             const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
-            const compressed = compressSafetyReferenceMatches(safeRefItems, 5);
-            const koshaPrimaryRefsEarly = buildRequiredKoshaCitations(safeRefItems, {
+            const publicSafeRefItems = [
+              ...dbHarnessPacket.directEvidence,
+              ...dbHarnessPacket.sifCases,
+              ...dbHarnessPacket.supportingEvidence
+            ];
+            const compressed = compressSafetyReferenceMatches(publicSafeRefItems, 5);
+            const koshaPrimaryRefsEarly = buildRequiredKoshaCitations(publicSafeRefItems, {
               parentEvidenceReadyIds: koshaParentEvidenceReadyIdsEarly
             });
             const koshaLinesEarly = [
@@ -2097,6 +2106,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       isKoshaTechnicalReference(item)
       && !koshaParentEvidenceReadyIds.has(item.id)
     ));
+    const publicEvidenceItems = [
+      ...dbHarnessEvidencePacket.directEvidence,
+      ...dbHarnessEvidencePacket.sifCases,
+      ...dbHarnessEvidencePacket.supportingEvidence
+    ];
     const citations = allResults[8].status === "fulfilled" ? allResults[8].value : (
       log.warn("citationsPromise failed", safeFailureContext((allResults[8] as PromiseRejectedResult).reason)),
       mockSearchResults.slice(0, 4)
@@ -2167,7 +2181,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const trainingLinesCtx = training.recommendations.slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.institution} | ${r.fitLabel || ""}`);
     // Compress catalog hits before prompting; unverified technical KOSHA rows keep
     // only an honest review-state marker and never expose their body or control text.
-    const safetyReferenceCompressed = compressSafetyReferenceMatches(safetyReference.items, 5);
+    const safetyReferenceCompressed = compressSafetyReferenceMatches(publicEvidenceItems, 5);
     const safetyReferenceAppendix = formatSafetyReferenceAppendix(
       safetyReferenceCompressed.filter(
         (item) => !isTechnicalKoshaCompressed(item) || koshaParentEvidenceReadyIds.has(item.id)
@@ -2214,7 +2228,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const harnessStructuredRiskRows = generatedStructuredRiskRows.length
       || parentlessKoshaReviewRequired
       ? []
-      : buildSafetyReferenceRiskRows(response, safetyReference.items, weather.summary, question);
+      : buildSafetyReferenceRiskRows(response, publicEvidenceItems, weather.summary, question);
     const fallbackStructuredRiskRows = generatedStructuredRiskRows.length
       ? []
       : harnessStructuredRiskRows.length
@@ -2288,6 +2302,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const dbHarnessSummary = summarizeDbHarnessPacket(dbHarnessPacket);
     const dbHarnessAnswer = buildDbHarnessAnswer(dbHarnessPacket);
     const dbHarnessPracticalPoints = buildDbHarnessPracticalPoints(dbHarnessPacket);
+    const publicSafetyReferenceItems = [
+      ...dbHarnessPacket.directEvidence,
+      ...dbHarnessPacket.sifCases,
+      ...dbHarnessPacket.supportingEvidence
+    ];
     const upstreamDeliverablesExecutionTrace = deliverablesResult?.diagnostics.trace ?? {
       attempted: false,
       provider: null,
@@ -2344,12 +2363,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               : "unconfigured",
           ...(safetyReference.errorCode ? { errorCode: safetyReference.errorCode } : {}),
           query: safetyReference.query,
-          count: safetyReference.count,
-          totalItems: safetyReference.items.length,
+          count: publicSafetyReferenceItems.length,
+          totalItems: publicSafetyReferenceItems.length,
           retrievalMode: safetyReference.retrievalMode,
           vectorSearch: safetyReference.vectorSearch,
           message: safetyReference.message,
-          items: safetyReference.items.slice(0, 8).map((item) => (
+          items: publicSafetyReferenceItems.slice(0, 8).map((item) => (
             buildSafetyReferenceSurfaceItem(item, safetyReference.retrievalMode, {
               parentEvidenceReady: !isKoshaTechnicalReference(item)
                 || koshaParentEvidenceReadyIds.has(item.id)
