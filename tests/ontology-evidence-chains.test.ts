@@ -122,6 +122,36 @@ describe("Phase A canonical evidence-chain registry", () => {
       question: "전기작업을 수행하지 않음",
       chainId: "electrical-work-electrocution" as const,
     },
+    {
+      task: "고소작업",
+      question: "미확정인 고소작업을 수행합니다",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "고소작업을 진행할지 검토",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "고소작업은 아직 결정되지 않음",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "하지 않는 고소작업을 위한 문서팩",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "취소된 고소작업을 수행합니다",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "고소작업을 수행할 예정으로 작업계획서와 장비 상태 및 인원 배치를 모두 확인했지만 최종적으로 하지 않음",
+      chainId: "work-at-height-fall" as const,
+    },
   ])("rejects negated, uncertain, and lexical-collision intent: '$question'", ({
     task,
     question,
