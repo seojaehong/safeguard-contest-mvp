@@ -1,0 +1,51 @@
+TDD RED - pre-fix mutation replay
+head=d77205bb498080ac02b9f506d72bd44648f4a660
+command=python evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py --self-test
+exitCode=1
+---
+PASS packet
+checks.total=1820
+checks.references=1242
+checks.markdown=72
+findings.total=10 severity=P0:0,P1:3,P2:4,P3:3
+boundaries.application=22 boundaries.total=24 rls.enabled=20 rls.missing=2 force=0 policies=20 tenant=13
+service_routes.total=21 direct=19 broker=2 public_api=6 public_pages=5 public_http=11
+negative_cases=14 expected_denials=56 executed=0
+attack.stale-finding-count=REJECTED errors=1
+attack.stale-policy-count-with-mutated-audit=ACCEPTED_UNEXPECTEDLY errors=0
+attack.missing-approval-flag=REJECTED errors=1
+attack.deleted-required-db-approval-action=ACCEPTED_UNEXPECTEDLY errors=0
+attack.accidental-migration-path=REJECTED errors=2
+attack.undeclared-output-path=ACCEPTED_UNEXPECTEDLY errors=0
+attack.create-policy-pseudocode=REJECTED errors=1
+attack.drop-table-pseudocode=ACCEPTED_UNEXPECTEDLY errors=0
+attack.base-revision-mutation=ACCEPTED_UNEXPECTEDLY errors=0
+attacks.total=9 rejected=4
+
+TDD RED - expanded independent-review replay
+head=d77205bb498080ac02b9f506d72bd44648f4a660
+command=python evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py --self-test
+exitCode=1
+---
+PASS packet
+checks.total=1820
+checks.references=1242
+checks.markdown=72
+findings.total=10 severity=P0:0,P1:3,P2:4,P3:3
+boundaries.application=22 boundaries.total=24 rls.enabled=20 rls.missing=2 force=0 policies=20 tenant=13
+service_routes.total=21 direct=19 broker=2 public_api=6 public_pages=5 public_http=11
+negative_cases=14 expected_denials=56 executed=0
+attack.stale-finding-count=REJECTED errors=1
+attack.stale-policy-count-with-mutated-audit=ACCEPTED_UNEXPECTEDLY errors=0
+attack.missing-approval-flag=REJECTED errors=1
+attack.deleted-required-db-approval-action=ACCEPTED_UNEXPECTEDLY errors=0
+attack.accidental-migration-path=REJECTED errors=2
+attack.undeclared-output-path=ACCEPTED_UNEXPECTEDLY errors=0
+attack.create-policy-pseudocode=REJECTED errors=1
+attack.drop-table-pseudocode=ACCEPTED_UNEXPECTEDLY errors=0
+attack.base-revision-mutation=ACCEPTED_UNEXPECTEDLY errors=0
+attack.asymmetric-finding-batch-map=ACCEPTED_UNEXPECTEDLY errors=0
+attack.workflow-dispatch-dispatch-logs-misclassification=ACCEPTED_UNEXPECTEDLY errors=0
+attack.hazard-get-service-role-misclassification=ACCEPTED_UNEXPECTEDLY errors=0
+attack.missing-b-to-a-negative-direction=ACCEPTED_UNEXPECTEDLY errors=0
+attacks.total=13 rejected=4

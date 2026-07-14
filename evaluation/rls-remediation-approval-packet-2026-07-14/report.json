@@ -6,15 +6,19 @@
     "currentDecision": "HOLD",
     "launchReadiness": false,
     "reason": "The audit specification is internally consistent, but no authenticated tenant A/B denial assertion has been executed and the open P1/P2/P3 findings are not remediated.",
+    "implementationAllowedByThisPacket": false,
     "implementationClaimed": false,
     "runtimeIsolationClaimed": false
   },
   "source": {
     "packetBaseRevision": "2684cb99de944aa9f54d143f2ae40b4ad6104f02",
     "auditArtifact": "evaluation/supabase-rls-audit-2026-07-14/report.json",
-    "auditMarkdown": "evaluation/supabase-rls-audit-2026-07-14/report.md",
+    "auditArtifactGitBlob": "7ad1dd2d27be946a2f84b0fc57c25246c0f47b00",
     "auditedProductRevision": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "evidenceRootRevision": "d77205bb498080ac02b9f506d72bd44648f4a660",
+    "externalIntegrationRevision": "ea7aa7223a056c884d5b0ba55563d602af328451",
     "productSourceDeltaToPacketBase": "none for app, lib, and supabase",
+    "evidenceDescendantPolicy": "HEAD must equal or descend from the evidence root and change only the immutable packet output set.",
     "evidenceMode": "read-only source and preserved redacted audit artifacts",
     "liveRefreshPerformedForPacket": false
   },
@@ -25,14 +29,14 @@
     "noNetworkDataMutation": true,
     "noLiveCredentials": true,
     "allowedWritePrefixes": [
-      "evaluation/rls-remediation-approval-packet-2026-07-14/",
-      "docs/rls-remediation-approval-packet-2026-07-14.md"
+      "evaluation/rls-remediation-approval-packet-2026-07-14/"
     ],
     "producedPaths": [
+      "evaluation/rls-remediation-approval-packet-2026-07-14/logs/tdd-red.log",
+      "evaluation/rls-remediation-approval-packet-2026-07-14/logs/validator.log",
       "evaluation/rls-remediation-approval-packet-2026-07-14/report.json",
       "evaluation/rls-remediation-approval-packet-2026-07-14/report.md",
-      "evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py",
-      "evaluation/rls-remediation-approval-packet-2026-07-14/logs/validator.log"
+      "evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py"
     ],
     "forbiddenImplementationPrefixes": [
       "supabase/",
@@ -97,7 +101,7 @@
       "Storage object policies and path isolation were tested.",
       "Any finding was fixed."
     ],
-    "launchPassRequires": "Approved remediation batches, staging-first rehearsal, post-change data-integrity parity, all 56 negative assertions executed as denials, required positive controls, scoped service-role route checks, storage decision evidence, rollback rehearsal, and a fresh launch-gate review."
+    "launchPassRequires": "Approved remediation batches, staging-first rehearsal, post-change data-integrity parity, all 112 symmetric negative assertions executed as denials, all 28 matrix same-tenant positive controls, scoped service-role route checks, storage decision evidence, rollback rehearsal, and a fresh launch-gate review."
   },
   "roleModel": {
     "authenticated": {
@@ -202,7 +206,7 @@
       "id": "BND-DISPATCH",
       "name": "dispatch",
       "tables": ["dispatch_logs"],
-      "routes": ["/api/dispatch-logs", "/api/workflow/dispatch"],
+      "routes": ["/api/dispatch-logs"],
       "observed": "The row policy accepts a null organization branch, and the authenticated service-role route accepts an external workpackId without re-owning it.",
       "proposedInvariant": "Tenant dispatch rows always have an owned organization and any site/workpack relation resolves inside that organization; global operator events use a separate boundary.",
       "evidence": [
@@ -282,7 +286,7 @@
         "primary": "Supabase database security owner",
         "support": ["Data classification owner", "Application security reviewer"]
       },
-      "batchIds": ["A"],
+      "batchIds": ["A", "E"],
       "status": "open-not-remediated"
     },
     {
@@ -295,11 +299,6 @@
           "httpPath": "/api/dispatch-logs",
           "methods": ["GET", "POST"],
           "sourceRef": "app/api/dispatch-logs/route.ts:41-208"
-        },
-        {
-          "httpPath": "/api/workflow/dispatch",
-          "methods": ["POST"],
-          "sourceRef": "app/api/workflow/dispatch/route.ts:218-306"
         }
       ],
       "evidence": [
@@ -320,7 +319,7 @@
         "primary": "Supabase database security owner",
         "support": ["Dispatch API owner", "Operations data owner"]
       },
-      "batchIds": ["A", "B"],
+      "batchIds": ["A", "B", "E"],
       "status": "open-not-remediated"
     },
     {
@@ -397,7 +396,7 @@
         "primary": "Backend tenant-authorization owner",
         "support": ["Supabase database security owner", "Commercial workpack owner", "Dispatch owner"]
       },
-      "batchIds": ["B", "E"],
+      "batchIds": ["B", "D", "E"],
       "status": "open-not-remediated"
     },
     {
@@ -606,7 +605,7 @@
         "primary": "Supabase database security owner",
         "support": ["Platform operations owner", "Application security reviewer"]
       },
-      "batchIds": ["A", "C"],
+      "batchIds": ["A", "C", "E"],
       "status": "open-not-remediated"
     },
     {
@@ -747,7 +746,7 @@
   ],
   "actionsNotRequiringAdditionalApprovalForThisPacket": [
     "Read repository source and preserved redacted audit artifacts.",
-    "Write report.json, report.md, and the local validator inside the approved evaluation directory.",
+    "Write report.json, report.md, the local validator, and validator evidence logs inside the approved evaluation directory.",
     "Run the local validator, its mutation-based attack cases, git diff scope checks, and local secret-pattern scans.",
     "Commit and push the documentation-only branch after pull --rebase."
   ],
@@ -978,7 +977,15 @@
       {"path": "app/api/workers/route.ts", "httpPath": "/api/workers", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/workers/route.ts:7-80"},
       {"path": "app/api/workpacks/route.ts", "httpPath": "/api/workpacks", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/workpacks/route.ts:26-229"},
       {"path": "app/api/workpacks/[id]/route.ts", "httpPath": "/api/workpacks/[id]", "methods": ["GET"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/route.ts:11-81"},
-      {"path": "app/api/workflow/dispatch/route.ts", "httpPath": "/api/workflow/dispatch", "methods": ["POST"], "kind": "direct", "sourceRef": "app/api/workflow/dispatch/route.ts:218-306"},
+      {
+        "path": "app/api/workflow/dispatch/route.ts",
+        "httpPath": "/api/workflow/dispatch",
+        "methods": ["POST"],
+        "kind": "direct",
+        "sourceRef": "app/api/workflow/dispatch/route.ts:218-310",
+        "accessedTables": ["workpacks", "workpack_share_sessions"],
+        "accessSemantics": "POST authenticates the caller, loads the caller-owned workpack operation context, and validates the active owned share session; it does not access dispatch_logs."
+      },
       {"path": "app/api/workpacks/[id]/share-sessions/route.ts", "httpPath": "/api/workpacks/[id]/share-sessions", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/share-sessions/route.ts:23-154"},
       {"path": "app/api/workpacks/[id]/read-confirmations/route.ts", "httpPath": "/api/workpacks/[id]/read-confirmations", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/read-confirmations/route.ts:21-145"},
       {"path": "app/api/workpacks/[id]/improvements/route.ts", "httpPath": "/api/workpacks/[id]/improvements", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/improvements/route.ts:176-338"},
@@ -986,7 +993,22 @@
       {"path": "app/api/workpacks/[id]/learning-export/route.ts", "httpPath": "/api/workpacks/[id]/learning-export", "methods": ["GET"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/learning-export/route.ts:99-141"},
       {"path": "app/api/knowledge/ingest/route.ts", "httpPath": "/api/knowledge/ingest", "methods": ["POST"], "kind": "direct", "sourceRef": "app/api/knowledge/ingest/route.ts:15-96"},
       {"path": "app/api/knowledge/regenerate/route.ts", "httpPath": "/api/knowledge/regenerate", "methods": ["POST"], "kind": "direct", "sourceRef": "app/api/knowledge/regenerate/route.ts:59-131"},
-      {"path": "app/api/input-photos/hazard-analysis/route.ts", "httpPath": "/api/input-photos/hazard-analysis", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/input-photos/hazard-analysis/route.ts:46-54"},
+      {
+        "path": "app/api/input-photos/hazard-analysis/route.ts",
+        "httpPath": "/api/input-photos/hazard-analysis",
+        "methods": ["POST"],
+        "kind": "direct",
+        "sourceRef": "app/api/input-photos/hazard-analysis/route.ts:50-68",
+        "accessedTables": [],
+        "accessSemantics": "POST creates the privileged client only for caller authentication before photo analysis.",
+        "publicReadiness": {
+          "method": "GET",
+          "sourceRef": "app/api/input-photos/hazard-analysis/route.ts:46-48",
+          "usesServiceRole": false,
+          "requiresAuthentication": false,
+          "accessSemantics": "GET is a public provider-readiness response and does not create a privileged client or require authentication."
+        }
+      },
       {"path": "app/api/mcp/[transport]/route.ts", "httpPath": "/api/mcp/[transport]", "methods": ["GET", "POST", "DELETE"], "kind": "direct", "sourceRef": "app/api/mcp/[transport]/route.ts:483-543"},
       {"path": "app/api/mcp-tokens/route.ts", "httpPath": "/api/mcp-tokens", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/mcp-tokens/route.ts:68-253"},
       {"path": "app/api/mcp-tokens/[id]/route.ts", "httpPath": "/api/mcp-tokens/[id]", "methods": ["PATCH", "DELETE"], "kind": "direct", "sourceRef": "app/api/mcp-tokens/[id]/route.ts:49-116"},
@@ -1037,178 +1059,200 @@
         "requiredOutcome": "All cross-tenant commands deny and all intended same-tenant/public positive controls remain available."
       }
     },
+    "directionCases": [
+      {"id": "A-to-B", "actor": "authenticatedA", "ownTenant": "organization A and site A", "foreignTenant": "organization B and site B"},
+      {"id": "B-to-A", "actor": "authenticatedB", "ownTenant": "organization B and site B", "foreignTenant": "organization A and site A"}
+    ],
     "negativeMatrix": [
       {
         "boundary": "organizations",
-        "actor": "authenticatedA",
-        "target": "organization B row",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "The organization row owned by {foreignTenant}.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Attempt to create or change owner_id to user B while acting as user A.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Read the organization in {ownTenant} and create a correctly owned child site.",
+        "withCheckCase": "Attempt to create or change owner_id to the foreign actor.",
         "preSourceRisk": "Owner predicate is the primary boundary; no separate relationship case.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "sites",
-        "actor": "authenticatedA",
-        "target": "site B row or a new site under organization B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "A site row or new site under {foreignTenant}.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Attempt to insert or move a site to organization B.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a site under {ownTenant}.",
+        "withCheckCase": "Attempt to insert or move a site to the foreign organization.",
         "preSourceRisk": "No secondary tenant relation beyond organization ownership.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "workers",
-        "actor": "authenticatedA",
-        "target": "worker B or organization-A worker carrying site B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "A worker in {foreignTenant}, or an own-organization worker carrying the foreign site.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Use organization A with site_id from site B.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a worker whose organization and site are both in {ownTenant}.",
+        "withCheckCase": "Keep the actor-owned organization but use the foreign site_id.",
         "preSourceRisk": "The current policy checks organization only and does not prove site agreement.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "workpacks",
-        "actor": "authenticatedA",
-        "target": "workpack B or organization-A workpack carrying site B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "A workpack in {foreignTenant}, or an own-organization workpack carrying the foreign site or actor attribution.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Use organization A with site_id from site B and separately attempt created_by user B.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a workpack whose organization, site, and actor are in {ownTenant}.",
+        "withCheckCase": "Keep the own organization while using a foreign site_id or created_by actor.",
         "preSourceRisk": "The current policy checks organization only; created_by is attribution, not ownership.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "education_records",
-        "actor": "authenticatedA",
-        "target": "organization-A row linked to workpack B or worker B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization row linked to a workpack, worker, or site in {foreignTenant}.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Use organization A with site B, workpack B, or worker B in each separate mutation.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Insert the required education record using only relationships in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, or worker relation separately.",
         "preSourceRisk": "The current policy and service-role insert do not re-own every related ID.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "dispatch_logs",
-        "actor": "authenticatedA",
-        "target": "null-organization row, tenant-B row, or organization-A row linked to workpack B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "A null-organization row, a row in {foreignTenant}, or an own-organization row linked to a foreign workpack or site.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Attempt null organization_id and organization A with site B or workpack B.",
-        "preSourceRisk": "The source policy accepts the null branch after command reachability and the POST route does not re-own workpackId.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Insert and read required dispatch history using only non-null relationships in {ownTenant}.",
+        "withCheckCase": "Attempt null organization_id and each foreign workpack or site relation.",
+        "preSourceRisk": "The source policy accepts the null branch after command reachability and the dispatch-log POST route does not re-own workpackId.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "daily_entries",
-        "actor": "authenticatedA",
-        "target": "organization-A row linked to site B or workpack B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization daily entry linked to a site, workpack, or actor in {foreignTenant}.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Use organization A with site B/workpack B and separately created_by user B.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Insert and read required daily history using only relationships in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, or created_by relation separately.",
         "preSourceRisk": "The current policy checks organization only and allows all commands after privilege reachability.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "knowledge_events",
-        "actor": "authenticatedA",
-        "target": "organization-A row linked to daily entry B or workpack B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization event linked to a site, daily entry, workpack, or actor in {foreignTenant}.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Use organization A with site B, daily_entry_id B, workpack B, or created_by user B.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Insert and read required event history using only relationships in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, daily entry, workpack, or created_by relation separately.",
         "preSourceRisk": "The current policy checks organization only and allows all commands after privilege reachability.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "knowledge_regeneration_runs",
-        "actor": "authenticatedA",
-        "target": "organization-A run linked to tenant-B or nonexistent source rows",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization run linked to scalar or raw-event rows in {foreignTenant}, including nonexistent source IDs.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Use site B, daily entry B, workpack B, created_by user B, or any raw_event_ids element from B/nonexistent.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read the required run using a complete source set in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign scalar relation, actor, or raw_event_ids element separately.",
         "preSourceRisk": "The current policy checks organization only and raw_event_ids has no row-level relationship enforcement.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "workpack_share_sessions",
-        "actor": "authenticatedA",
-        "target": "organization-A share session linked to workpack B or recipient worker B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization share session linked to a workpack, site, actor, or recipient in {foreignTenant}.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Use site B, workpack B, created_by user B, or a tenant-B recipient snapshot.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a share session whose workpack, site, actor, and recipients are in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, actor, or recipient separately.",
         "preSourceRisk": "The current policy checks organization only; privileged child reads use workpack_id alone.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "workpack_read_confirmations",
-        "actor": "authenticatedA",
-        "target": "organization-A confirmation linked to share session B or worker B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization confirmation linked to a share session, worker, workpack, or site in {foreignTenant}.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Use site B, workpack B, share_session_id B, or worker_id B.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a required confirmation using only relationships in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, share-session, or worker relation separately.",
         "preSourceRisk": "The current policy checks organization only and grants all command shapes after privilege reachability.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "workpack_improvements",
-        "actor": "authenticatedA",
-        "target": "organization-A improvement linked to workpack B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization improvement linked to a workpack, site, creator, or approver in {foreignTenant}.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Use site B, workpack B, created_by user B, or approved_by user B.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a required improvement using only relationships in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, created_by, or approved_by relation separately.",
         "preSourceRisk": "The current policy checks organization only; MCP and child queries can filter by site/workpack without organization.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "workpack_improvement_photos",
-        "actor": "authenticatedA",
-        "target": "organization-A photo linked to improvement B or workpack B",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization photo linked to an improvement, workpack, actor, or object prefix in {foreignTenant}.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "Use site B, workpack B, improvement_id B, created_by user B, or a B-prefixed object path.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read required photo metadata whose relations and object prefix agree with {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, improvement, actor, or object prefix separately.",
         "preSourceRisk": "The current row policy checks organization only; live storage object enforcement was not inspected.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       },
       {
         "boundary": "storage.objects",
-        "actor": "authenticatedA",
-        "target": "tenant-B object or a forged organizations/{B} prefix",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An object in {foreignTenant}, a forged foreign prefix, or metadata and path that disagree across tenants.",
         "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
-        "expectedOutcomePerCommand": "deny",
-        "withCheckCase": "List/read B, upload or overwrite B, move A to B, delete B, and create metadata/path tenant disagreement.",
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Use the approved service route for an object whose path and metadata both agree with {ownTenant}.",
+        "withCheckCase": "List, read, write, move, or delete the foreign object and test metadata/path disagreement.",
         "preSourceRisk": "Live policies, grants, ownership, direct-client reachability, and path checks are unverified.",
         "preExecutionStatus": "not_executed",
         "postExecutionStatus": "not_executed"
       }
     ],
     "negativeAssertionAccounting": {
-      "uniqueCases": 14,
-      "commandsPerCase": 4,
-      "uniqueAssertions": 56,
-      "preExecutionsPlanned": 56,
-      "postExecutionsPlanned": 56,
+      "uniqueBoundaryCases": 14,
+      "directionsPerCase": 2,
+      "commandsPerDirection": 4,
+      "negativeAssertions": 112,
+      "sameTenantPositiveControlsPerDirection": 1,
+      "sameTenantPositiveAssertions": 28,
+      "matrixAssertionsPerPhase": 140,
+      "preExecutionsPlanned": 140,
+      "postExecutionsPlanned": 140,
       "executedByPacket": 0
     },
     "sameTenantPositiveControls": [
-      {"id": "POS-ORG", "actor": "authenticatedA", "operation": "Read organization A and create a correctly owned site A child.", "postExpected": "allow", "status": "not_executed"},
-      {"id": "POS-WORKPACK", "actor": "authenticatedA", "operation": "Create/read an organization-A workpack at site A and retain required fields.", "postExpected": "allow", "status": "not_executed"},
-      {"id": "POS-HISTORY", "actor": "authenticatedA", "operation": "Insert an organization-A education/dispatch/history row with only A relationships; direct UPDATE/DELETE follows the approved command matrix.", "postExpected": "allow required command and deny disallowed history mutation", "status": "not_executed"},
-      {"id": "POS-SHARE", "actor": "authenticatedA", "operation": "Create/read an A-scoped share session and confirmation for worker A.", "postExpected": "allow", "status": "not_executed"},
-      {"id": "POS-MCP", "actor": "staging service route", "operation": "Issue an A-scoped token and read only site A/org A memory.", "postExpected": "allow scoped result", "status": "not_executed"},
-      {"id": "POS-PUBLIC", "actor": "anon", "operation": "Read deliberate safety catalog fields and a fully published/cited ontology subgraph.", "postExpected": "allow sanitized public result", "status": "not_executed"},
-      {"id": "POS-STORAGE", "actor": "authenticatedA via approved service route", "operation": "Upload/read/delete an A object whose metadata and generated prefix agree.", "postExpected": "allow without exposing credentials", "status": "not_executed"}
+      {"id": "POS-ORG", "directionIds": ["A-to-B", "B-to-A"], "operation": "Read each actor's own organization and create a correctly owned child site.", "postExpected": "allow", "status": "not_executed"},
+      {"id": "POS-WORKPACK", "directionIds": ["A-to-B", "B-to-A"], "operation": "Create and read each actor's own-tenant workpack and retain required fields.", "postExpected": "allow", "status": "not_executed"},
+      {"id": "POS-HISTORY", "directionIds": ["A-to-B", "B-to-A"], "operation": "Insert each actor's own-tenant education, dispatch, and history rows; direct history mutation follows the approved command matrix.", "postExpected": "allow required command and deny disallowed history mutation", "status": "not_executed"},
+      {"id": "POS-SHARE", "directionIds": ["A-to-B", "B-to-A"], "operation": "Create and read each actor's own-tenant share session and worker confirmation.", "postExpected": "allow", "status": "not_executed"},
+      {"id": "POS-MCP", "directionIds": ["A-to-B", "B-to-A"], "operation": "Issue independently scoped A and B tokens and read only the matching site and organization memory.", "postExpected": "allow scoped result", "status": "not_executed"},
+      {"id": "POS-PUBLIC", "directionIds": ["anon-public"], "operation": "Read deliberate safety catalog fields and a fully published and cited ontology subgraph.", "postExpected": "allow sanitized public result", "status": "not_executed"},
+      {"id": "POS-STORAGE", "directionIds": ["A-to-B", "B-to-A"], "operation": "Upload, read, and delete independent A and B objects whose metadata and generated prefixes agree.", "postExpected": "allow without exposing credentials", "status": "not_executed"}
     ],
     "withCheckFocusedCases": [
       "INSERT a row with organization A and each foreign site/workpack/worker/share/improvement relation one at a time.",
@@ -1309,7 +1353,7 @@
       "A": [
         "Restore the captured policy, role target, privilege, function, and authorization metadata as one reviewed staging rollback unit.",
         "Prefer fail-closed access during diagnosis; do not broadly reopen direct client access merely to restore availability.",
-        "Rerun public positive controls and the 56 negative assertions after rollback."
+        "Rerun the 112 symmetric negative assertions and 28 matrix positive controls after rollback."
       ],
       "B": [
         "Redeploy the prior application commit without changing database state.",
@@ -1335,8 +1379,8 @@
       "Batch A and Batch B staging rehearsals pass with unchanged non-fixture data integrity.",
       "Batch C has a documented per-table decision and owner-path evidence, even if the decision is to defer FORCE.",
       "Batch D has a selected access model and verified cross-tenant storage denial evidence.",
-      "All 14 negative cases and 56 command assertions are executed post-change and deny.",
-      "Same-tenant positive controls, explicit new-row checks, service-role route cases, and all 11 public surfaces meet their postconditions.",
+      "All 14 boundary cases are executed in both directions for 112 post-change foreign-tenant command denials.",
+      "All 28 matrix same-tenant positive controls, explicit new-row checks, service-role route cases, and all 11 public surfaces meet their postconditions.",
       "Rollback and reapply are rehearsed in staging with no silent row or object loss.",
       "Telemetry contains no secrets and no stop signal is present.",
       "A fresh approval records target revision, staging evidence, production window, rollback owner, and go/no-go decision."
@@ -1349,22 +1393,82 @@
     "runtimeClaimsExcluded": ["database enforcement", "live grants", "cross-tenant isolation", "storage isolation", "finding closure"],
     "mechanicalChecks": [
       "Parse report.json.",
-      "Compare all preserved audit counts and flags with the source audit report.",
+      "Load the authoritative audit from the pinned base commit and require its exact Git blob and full immutable count object.",
+      "Require the audited product revision, packet base, evidence root, descendant HEAD, and product-source zero-delta contract.",
+      "Compare the actual Git changed-path set with the five immutable evaluation-only packet outputs.",
       "Compare all 10 finding IDs, severities, titles, tables, and evidence references with the source audit report.",
-      "Require exploit prerequisites, false-positive caveats, remediation owners, and approval batch mappings for every finding.",
-      "Validate every packet source reference exists and its line range is in bounds.",
+      "Require exploit prerequisites, false-positive caveats, remediation owners, exact approvals, and bidirectional finding-to-batch mappings.",
+      "Validate the exact 43-file cited source set and every line range against the pinned product commit.",
       "Verify 13 tenant command rows and explicit SELECT, INSERT, UPDATE, DELETE, and new-row-check semantics.",
-      "Verify 21 tenant/admin service-role routes split 19 direct and 2 broker-mediated, plus 6 public APIs and 5 public server pages.",
-      "Verify the 14-case matrix expands to 56 expected denials and remains executed zero.",
+      "Verify 21 tenant/admin service-role routes split 19 direct and 2 broker-mediated, including workflow dispatch and hazard-analysis method semantics, plus 6 public APIs and 5 public server pages.",
+      "Preserve the audit seed at 14 cases and 56 expected denials while requiring the packet matrix to expand to 112 symmetric denials and 28 same-tenant controls; all remain executed zero.",
       "Verify report.md contains the same findings, counts, approvals, and no-execution statement.",
-      "Reject executable migration text in report.json or report.md."
+      "Reject executable DDL, DML, privilege, transaction, procedural, and psql statement forms in report or pseudocode material while accepting quoted explanatory prose."
     ],
     "attackCases": [
-      {"id": "stale-counts", "mutation": "Change the finding total while leaving source audit truth unchanged.", "expectedValidatorResult": "reject"},
-      {"id": "missing-approval", "mutation": "Remove the explicit approval field from Batch A.", "expectedValidatorResult": "reject"},
+      {"id": "stale-finding-count", "mutation": "Change the finding total while leaving immutable audit truth unchanged.", "expectedValidatorResult": "reject"},
+      {"id": "stale-policy-count-with-mutated-audit", "mutation": "Change the policy count in both packet and mutable audit copies.", "expectedValidatorResult": "reject"},
+      {"id": "missing-approval-flag", "mutation": "Remove the explicit approval field from Batch A.", "expectedValidatorResult": "reject"},
+      {"id": "deleted-required-db-approval-action", "mutation": "Delete one immutable database approval action.", "expectedValidatorResult": "reject"},
       {"id": "accidental-migration-path", "mutation": "Add a produced path under supabase/migrations.", "expectedValidatorResult": "reject"},
-      {"id": "executable-sql", "mutation": "Inject executable policy text into the packet.", "expectedValidatorResult": "reject"}
+      {"id": "undeclared-output-path", "mutation": "Add an output inside the allowed prefix but outside the immutable path set.", "expectedValidatorResult": "reject"},
+      {"id": "create-policy-pseudocode", "mutation": "Inject an executable policy statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "drop-table-pseudocode", "mutation": "Inject a destructive table-removal statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "alter-table-pseudocode", "mutation": "Inject an executable table-alteration statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "truncate-table-pseudocode", "mutation": "Inject an executable table-truncation statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "delete-from-pseudocode", "mutation": "Inject an executable row-deletion statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "insert-into-pseudocode", "mutation": "Inject an executable row-insertion statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "update-set-pseudocode", "mutation": "Inject an executable row-update statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "grant-pseudocode", "mutation": "Inject an executable privilege-grant statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "revoke-pseudocode", "mutation": "Inject an executable privilege-revocation statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "do-block-pseudocode", "mutation": "Inject an executable procedural block into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "psql-include-pseudocode", "mutation": "Inject a psql include command into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "with-delete-pseudocode", "mutation": "Inject a data-modifying common-table-expression statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "markdown-bullet-drop-table", "mutation": "Inject an unquoted destructive statement as a Markdown list item.", "expectedValidatorResult": "reject"},
+      {"id": "base-revision-mutation", "mutation": "Replace the packet base revision.", "expectedValidatorResult": "reject"},
+      {"id": "asymmetric-finding-batch-map", "mutation": "Remove a finding from only the batch side of the exact map.", "expectedValidatorResult": "reject"},
+      {"id": "workflow-dispatch-dispatch-logs-misclassification", "mutation": "Attach workflow dispatch to the dispatch_logs boundary or finding.", "expectedValidatorResult": "reject"},
+      {"id": "hazard-get-service-role-misclassification", "mutation": "Treat hazard-analysis GET as a service-role method.", "expectedValidatorResult": "reject"},
+      {"id": "missing-b-to-a-negative-direction", "mutation": "Remove B-to-A from one negative matrix case.", "expectedValidatorResult": "reject"},
+      {"id": "missing-b-to-a-positive-control", "mutation": "Remove B-to-A from one same-tenant positive control.", "expectedValidatorResult": "reject"}
     ],
+    "controlCases": [
+      {"id": "quoted-sql-explanatory-prose", "mutation": "Append a quoted explanatory SQL phrase without an executable statement.", "expectedValidatorResult": "accept"}
+    ],
+    "tddRedEvidence": {
+      "log": "evaluation/rls-remediation-approval-packet-2026-07-14/logs/tdd-red.log",
+      "head": "d77205bb498080ac02b9f506d72bd44648f4a660",
+      "exitCode": 1,
+      "attacksTotal": 13,
+      "rejected": 4,
+      "acceptedUnexpectedly": 9,
+      "exactResults": [
+        "attack.stale-finding-count=REJECTED errors=1",
+        "attack.stale-policy-count-with-mutated-audit=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.missing-approval-flag=REJECTED errors=1",
+        "attack.deleted-required-db-approval-action=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.accidental-migration-path=REJECTED errors=2",
+        "attack.undeclared-output-path=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.create-policy-pseudocode=REJECTED errors=1",
+        "attack.drop-table-pseudocode=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.base-revision-mutation=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.asymmetric-finding-batch-map=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.workflow-dispatch-dispatch-logs-misclassification=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.hazard-get-service-role-misclassification=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.missing-b-to-a-negative-direction=ACCEPTED_UNEXPECTEDLY errors=0"
+      ]
+    },
+    "latestValidatedResult": {
+      "command": "python -B evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py --self-test",
+      "exitCode": 0,
+      "baseline": "PASS",
+      "attacksTotal": 25,
+      "attacksRejected": 25,
+      "controlsTotal": 1,
+      "controlsAccepted": 1,
+      "runtimeClaimsMade": false,
+      "launchReadiness": false
+    },
     "allowedVerification": ["local validator", "git diff and scope scan", "local secret-pattern scan"],
     "statusSource": "See validator.log after execution; this report does not pre-claim a validator result."
   }

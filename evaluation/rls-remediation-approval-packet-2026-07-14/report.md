@@ -3,15 +3,18 @@
 - 기준일: 2026-07-14
 - 패킷 기준 커밋: `2684cb99de944aa9f54d143f2ae40b4ad6104f02`
 - 감사 원본: `evaluation/supabase-rls-audit-2026-07-14/report.json`
+- 감사 Git blob: `7ad1dd2d27be946a2f84b0fc57c25246c0f47b00`
 - 감사 대상 제품 커밋: `f45bba17bcce0d8ebb2690f82d014dbe42ae8191`
+- Evidence root: `d77205bb498080ac02b9f506d72bd44648f4a660`; 이 커밋 또는 packet-only descendant만 허용한다.
 - 현재 결정: **HOLD**
 - `launchReadiness=false`
 - `noMutation=true`
+- `implementationAllowedByThisPacket=false`
 - 이 문서는 승인 전용이다. 구현, migration SQL, DB·스토리지 변경, live credential 사용, live 검증을 포함하지 않는다.
 
 ## 1. 승인 요약
 
-현재 감사 산출물은 내부 수치와 참조를 일관되게 보존했지만 launch PASS는 아니다. 열려 있는 finding은 10건이고 분포는 `P0/P1/P2/P3=0/3/4/3`이다. 인증된 조직 A/B 사용자로 실행한 tenant isolation 검사는 없으며, 14개 음성 케이스에서 기대하는 56개 거부 assertion 중 실행된 것은 0개다.
+현재 감사 산출물은 내부 수치와 참조를 일관되게 보존했지만 launch PASS는 아니다. 열려 있는 finding은 10건이고 분포는 `P0/P1/P2/P3=0/3/4/3`이다. 감사 원본은 14개 단방향 seed와 56개 기대 거부를 보존한다. 이 승인 패킷의 실행 계획은 각 boundary를 A-to-B와 B-to-A로 펼쳐 112개 foreign-tenant 거부와 28개 same-tenant positive control을 요구하며, 실행된 것은 0개다.
 
 가장 작은 안전 단위는 다음과 같다.
 
@@ -21,7 +24,7 @@
 4. **D Storage**: service-route-only 또는 direct-client 모델을 먼저 선택하고, path·metadata·tenant 일치를 staging에서 검증한다.
 5. **E live 교차 tenant 검사**: 비운영 staging에만 A/B fixture를 만들고 pre/post 동일 행렬을 실행한다.
 
-이 패킷 작성, 로컬 validator, diff/scope scan, secret-pattern scan, 문서 커밋·push에는 추가 승인이 필요하지 않다. A-E 구현 시작, DB 정책·권한·함수·FORCE 변경, route 코드 변경, staging/production fixture 또는 object 변경, live credential 사용에는 명시 승인이 필요하다. B가 route-only로 유지되면 DB 안전 게이트는 아니지만, 현재 지시는 packet-only이므로 별도 구현 지시가 있어야 한다.
+이 패킷 작성, 로컬 validator, diff/scope scan, secret-pattern scan, evaluation 로그, 문서 커밋·push에는 추가 승인이 필요하지 않다. A-E 구현 시작, DB 정책·권한·함수·FORCE 변경, route 코드 변경, staging/production fixture 또는 object 변경, live credential 사용에는 명시 승인이 필요하다. B가 route-only로 유지되면 DB 안전 게이트는 아니지만, 현재 지시는 packet-only이므로 별도 구현 지시가 있어야 한다.
 
 ## 2. 보존된 감사 사실
 
@@ -43,7 +46,7 @@
 | Expected deny assertions | 56 |
 | Executed deny assertions | 0 |
 
-감사 원본은 read-only source audit와 보존된 redacted HEAD 관찰을 포함한다. 이번 패킷은 원본을 다시 실행하지 않았다. 감사 대상 커밋과 패킷 base 사이의 `app/`, `lib/`, `supabase/` diff는 비어 있어 이 패킷은 동일 제품 소스를 참조한다.
+감사 원본은 read-only source audit와 보존된 redacted HEAD 관찰을 포함한다. 이번 패킷은 원본을 다시 실행하지 않았다. 감사 원본은 base 커밋의 Git blob에서 읽고, 감사 대상 제품 커밋과 패킷 base 사이의 `app/`, `lib/`, `supabase/` diff가 비어 있는지 검증한다. 감사 seed accounting은 `14 x 4 = 56`이고, packet 실행 계획 accounting은 별도로 확장한다.
 
 ## 3. Audit SPEC PASS와 launch PASS가 다른 이유
 
@@ -62,7 +65,7 @@ Audit SPEC PASS는 감사 문서 validator가 다음을 확인했다는 뜻이�
 - `storage.objects`의 정책, grant, object owner, direct-client reachability가 확인됐다.
 - finding이 하나라도 수정됐다.
 
-따라서 **Audit SPEC PASS != launch PASS**다. launch PASS는 A/B/D 승인 변경 후 staging evidence, 56개 실제 거부, positive control, data-integrity parity, rollback rehearsal까지 있어야 한다.
+따라서 **Audit SPEC PASS != launch PASS**다. launch PASS는 A/B/D 승인 변경 후 staging evidence, 112개 양방향 실제 거부, 28개 same-tenant positive control, data-integrity parity, rollback rehearsal까지 있어야 한다.
 
 ## 4. 역할과 신뢰 경계
 
@@ -95,17 +98,19 @@ Audit SPEC PASS는 감사 문서 validator가 다음을 확인했다는 뜻이�
 - Exploit prerequisites: 해당 role에 object command privilege가 있고 relation이 API surface에서 reachable이며 유의미한 row가 있어야 한다.
 - False-positive caveats: HEAD는 anon SELECT reachability와 zero rows만 관찰했다. row body, mutation privilege, effective grant source는 확인하지 않았다. Policy 부재 자체가 command privilege를 주는 것은 아니다.
 - Owner: Supabase database security owner. Data classification owner와 application security reviewer가 지원한다.
-- Batch: A
+- Batches: A, E
 
 ### P1-02: `dispatch_logs` has a role-agnostic global-null CRUD branch
 
 - Table: `dispatch_logs`
-- Routes: `/api/dispatch-logs` GET/POST (`app/api/dispatch-logs/route.ts:41-208`), `/api/workflow/dispatch` POST (`app/api/workflow/dispatch/route.ts:218-306`)
+- Routes: `/api/dispatch-logs` GET/POST (`app/api/dispatch-logs/route.ts:41-208`)
+- Route correction: `/api/workflow/dispatch` validates the caller-owned workpack and active owned share session and does not access `dispatch_logs`; it is not evidence for P1-02.
+- Boundary correction: `BND-DISPATCH` maps only to `/api/dispatch-logs`; `/api/workflow/dispatch` remains a separate owned-workpack/share-session authorization surface.
 - Evidence: `supabase/migrations/002_workspace_productization.sql:76-90`, `supabase/migrations/002_workspace_productization.sql:183-200`
 - Exploit prerequisites: direct attempt에는 object privilege가 필요하고, service route attempt에는 인증된 route reachability가 필요하다. null tenant row 또는 허용되는 입력과 사용할 수 있는 관련 ID가 있어야 한다.
 - False-positive caveats: service-role 6 rows와 anon zero rows는 관찰했지만 null row 존재와 mutation privilege는 확인하지 않았다. Policy 분기는 object privilege를 대신하지 않는다.
 - Owner: Supabase database security owner. Dispatch API owner와 operations data owner가 지원한다.
-- Batches: A, B
+- Batches: A, B, E
 
 ### P1-03: Tenant policies do not enforce same-organization relationships and service-role child queries trust them
 
@@ -115,7 +120,7 @@ Audit SPEC PASS는 감사 문서 validator가 다음을 확인했다는 뜻이�
 - Exploit prerequisites: foreign valid UUID를 알고, caller-owned organization과 foreign relation을 결합한 row가 받아들여지거나 이미 존재하며, privileged child query가 그 row를 포함해야 한다. Direct table attempt는 object privilege가 필요하다. Dispatch route는 client DB INSERT privilege가 없어도 service role로 쓰지만 usable foreign workpack UUID가 필요하다.
 - False-positive caveats: foreign UUID knowledge, mismatch acceptance, cross-tenant response inclusion을 재현하지 않았다. 일부 route는 owned parent를 이미 확인하며, 문제는 child relation/filter의 추가 tenant 조건 부재다.
 - Owner: Backend tenant-authorization owner. Database security, commercial workpack, dispatch owner가 지원한다.
-- Batches: B, E
+- Batches: B, D, E
 
 ### P2-01: History-like tenant tables receive unrestricted owner UPDATE and DELETE
 
@@ -164,7 +169,7 @@ Audit SPEC PASS는 감사 문서 validator가 다음을 확인했다는 뜻이�
 - Exploit prerequisites: broader role에 object privilege가 있거나 table-owner equivalent SQL path가 있어야 한다. Dispatch null case에는 reachable null row가 필요하다.
 - False-positive caveats: unauthenticated null identity는 일반 owner predicate에서 false다. FORCE는 `service_role` BYPASSRLS를 막지 않는다. Live role, owner, grant, FORCE는 확인하지 않았다.
 - Owner: Supabase database security owner. Platform operations와 application security reviewer가 지원한다.
-- Batches: A, C
+- Batches: A, C, E
 
 ### P3-02: Service-only RPC intent is not reflected in grants or function hardening
 
@@ -241,7 +246,7 @@ Operator/public 의미는 다음과 같다.
 | direct | `/api/workers` | GET, POST | `app/api/workers/route.ts:7-80` |
 | direct | `/api/workpacks` | GET, POST | `app/api/workpacks/route.ts:26-229` |
 | direct | `/api/workpacks/[id]` | GET | `app/api/workpacks/[id]/route.ts:11-81` |
-| direct | `/api/workflow/dispatch` | POST | `app/api/workflow/dispatch/route.ts:218-306` |
+| direct | `/api/workflow/dispatch` | POST | `app/api/workflow/dispatch/route.ts:218-310` |
 | direct | `/api/workpacks/[id]/share-sessions` | GET, POST | `app/api/workpacks/[id]/share-sessions/route.ts:23-154` |
 | direct | `/api/workpacks/[id]/read-confirmations` | GET, POST | `app/api/workpacks/[id]/read-confirmations/route.ts:21-145` |
 | direct | `/api/workpacks/[id]/improvements` | GET, POST | `app/api/workpacks/[id]/improvements/route.ts:176-338` |
@@ -249,7 +254,7 @@ Operator/public 의미는 다음과 같다.
 | direct | `/api/workpacks/[id]/learning-export` | GET | `app/api/workpacks/[id]/learning-export/route.ts:99-141` |
 | direct | `/api/knowledge/ingest` | POST | `app/api/knowledge/ingest/route.ts:15-96` |
 | direct | `/api/knowledge/regenerate` | POST | `app/api/knowledge/regenerate/route.ts:59-131` |
-| direct | `/api/input-photos/hazard-analysis` | GET, POST | `app/api/input-photos/hazard-analysis/route.ts:46-54` |
+| direct | `/api/input-photos/hazard-analysis` | POST | `app/api/input-photos/hazard-analysis/route.ts:50-68` |
 | direct | `/api/mcp/[transport]` | GET, POST, DELETE | `app/api/mcp/[transport]/route.ts:483-543` |
 | direct | `/api/mcp-tokens` | GET, POST | `app/api/mcp-tokens/route.ts:68-253` |
 | direct | `/api/mcp-tokens/[id]` | PATCH, DELETE | `app/api/mcp-tokens/[id]/route.ts:49-116` |
@@ -257,7 +262,9 @@ Operator/public 의미는 다음과 같다.
 | broker-mediated | `/api/agent/context` | GET | `app/api/agent/context/route.ts:1-9` |
 | broker-mediated | `/api/agent/chat` | POST | `app/api/agent/chat/route.ts:1-8` |
 
-각 route의 postcondition은 같다. 인증이 없거나 broker identity가 유효하지 않으면 privileged client 사용 전에 deny한다. Tenant A identity가 tenant B의 org/site/workpack/worker/share/improvement/token/object ID를 넣으면 존재 여부를 노출하지 않고 deny한다. Tenant A의 정상 ID는 product-required behavior를 유지한다. 이 21 route case는 아직 실행하지 않았다.
+`/api/workflow/dispatch` POST는 caller-owned workpack operation context와 active owned share session을 검증하며 `dispatch_logs`를 읽거나 쓰지 않는다. `/api/input-photos/hazard-analysis`에서 GET is public readiness; service-role authentication applies to POST only. GET 근거는 `app/api/input-photos/hazard-analysis/route.ts:46-48`, POST 인증 근거는 `app/api/input-photos/hazard-analysis/route.ts:50-68`이다.
+
+각 service-role route의 postcondition은 같다. 인증이 없거나 broker identity가 유효하지 않으면 privileged client 사용 전에 deny한다. Tenant A identity가 tenant B의 org/site/workpack/worker/share/improvement/token/object ID를 넣으면 존재 여부를 노출하지 않고 deny한다. Tenant A의 정상 ID는 product-required behavior를 유지한다. 이 21 route case는 아직 실행하지 않았다.
 
 ### Public/global HTTP surfaces: 11
 
@@ -288,35 +295,40 @@ Operator/public 의미는 다음과 같다.
 
 ### Cross-tenant negative matrix
 
-각 row는 SELECT, INSERT, UPDATE, DELETE 네 명령을 각각 하나의 assertion으로 센다. `14 x 4 = 56`이며 기대 결과는 모두 deny다.
+| Direction | Actor | Own tenant | Foreign tenant |
+|---|---|---|---|
+| A-to-B | `authenticatedA` | organization A / site A | organization B / site B |
+| B-to-A | `authenticatedB` | organization B / site B | organization A / site A |
 
-| Boundary | A가 시도할 B target / WITH CHECK case | Pre source risk | Post expected | Status |
+감사 원본의 단방향 inventory는 `14 x 4 = 56`으로 보존한다. 실행 계획은 각 boundary를 두 방향으로 펼쳐 `14 x 2 x 4 = 112` foreign-tenant deny assertions를 만든다. 각 boundary/direction에는 own-tenant control 하나가 있어 `same-tenant positive controls=28`이고, phase별 matrix 총계는 140이다. 모두 `not_executed`다.
+
+| Boundary | 각 actor가 시도할 foreign target / WITH CHECK case | Pre source risk | Post expected | Status |
 |---|---|---|---|---|
-| `organizations` | organization B, owner_id를 user B로 생성/변경 | owner가 auth predicate | 네 command deny | pre/post `not_executed` |
-| `sites` | site B 또는 org B 아래 새 site | organization ownership boundary | 네 command deny | pre/post `not_executed` |
-| `workers` | worker B, org A + site B | site agreement 미검사 | 네 command deny | pre/post `not_executed` |
-| `workpacks` | workpack B, org A + site B, created_by B | org만 검사, attribution 별도 | 네 command deny | pre/post `not_executed` |
-| `education_records` | org A + workpack B/worker B/site B | related IDs 재소유권 미검사 | 네 command deny | pre/post `not_executed` |
-| `dispatch_logs` | null org, tenant B, org A + workpack B/site B | null branch와 external workpackId | 네 command deny | pre/post `not_executed` |
-| `daily_entries` | org A + site B/workpack B/created_by B | org만 검사, FOR ALL | 네 command deny | pre/post `not_executed` |
-| `knowledge_events` | org A + daily entry B/workpack B/site B | org만 검사, FOR ALL | 네 command deny | pre/post `not_executed` |
-| `knowledge_regeneration_runs` | org A + B scalar relation 또는 B/nonexistent raw event | array relation 미강제 | 네 command deny | pre/post `not_executed` |
-| `workpack_share_sessions` | org A + workpack B/recipient B/site B | child read가 workpack only | 네 command deny | pre/post `not_executed` |
-| `workpack_read_confirmations` | org A + share B/worker B/workpack B | org만 검사, FOR ALL | 네 command deny | pre/post `not_executed` |
-| `workpack_improvements` | org A + workpack B/site B/actor B | child/MCP query 추가 scope 필요 | 네 command deny | pre/post `not_executed` |
-| `workpack_improvement_photos` | org A + improvement B/workpack B/B prefix | storage live enforcement 미확인 | 네 command deny | pre/post `not_executed` |
-| `storage.objects` | B list/read/write/delete, forged B prefix, metadata mismatch | policy/grant/owner/reachability 미확인 | 네 command deny | pre/post `not_executed` |
+| `organizations` | foreign organization row, foreign owner_id | owner가 auth predicate | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `sites` | foreign site 또는 foreign organization 아래 새 site | organization ownership boundary | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `workers` | foreign worker, own organization + foreign site | site agreement 미검사 | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `workpacks` | foreign workpack, own organization + foreign site/actor | organization만 검사, attribution 별도 | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `education_records` | own organization + foreign workpack/worker/site | related IDs 재소유권 미검사 | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `dispatch_logs` | null organization, foreign row, own organization + foreign workpack/site | null branch와 external workpackId | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `daily_entries` | own organization + foreign site/workpack/actor | organization만 검사, FOR ALL | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `knowledge_events` | own organization + foreign daily entry/workpack/site | organization만 검사, FOR ALL | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `knowledge_regeneration_runs` | own organization + foreign scalar relation 또는 foreign/nonexistent raw event | array relation 미강제 | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `workpack_share_sessions` | own organization + foreign workpack/recipient/site | child read가 workpack only | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `workpack_read_confirmations` | own organization + foreign share/worker/workpack | organization만 검사, FOR ALL | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `workpack_improvements` | own organization + foreign workpack/site/actor | child/MCP query 추가 scope 필요 | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `workpack_improvement_photos` | own organization + foreign improvement/workpack/object prefix | storage live enforcement 미확인 | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
+| `storage.objects` | foreign list/read/write/delete, forged prefix, metadata mismatch | policy/grant/owner/reachability 미확인 | 양방향 네 command deny + own control preserve | pre/post `not_executed` |
 
 ### WITH CHECK 집중 cases
 
-1. Organization A와 foreign site/workpack/worker/share/improvement를 하나씩 결합해 INSERT한다.
-2. 정상 A row의 organization을 B로 바꾸는 UPDATE를 시도한다.
-3. Organization은 A로 유지하고 related ID만 B로 바꾸는 UPDATE를 시도한다.
-4. 신뢰하기로 승인된 `created_by`/`approved_by`를 user B로 바꾼다.
+1. Actor의 own organization과 foreign site/workpack/worker/share/improvement를 하나씩 결합해 INSERT한다.
+2. 정상 own row의 organization을 foreign organization으로 바꾸는 UPDATE를 시도한다.
+3. Organization은 own으로 유지하고 related ID만 foreign으로 바꾸는 UPDATE를 시도한다.
+4. 신뢰하기로 승인된 `created_by`/`approved_by`를 foreign actor로 바꾼다.
 5. `dispatch_logs.organization_id`를 null로 INSERT/UPDATE한다.
 6. Empty provenance 또는 unpublished endpoint를 가진 ontology row를 published 상태로 전환한다.
 7. MCP scope를 null, orphan, 또는 site/org mismatch로 만든다.
-8. Storage object path와 metadata tenant를 다르게 만들거나 A object를 B prefix로 move한다.
+8. Storage object path와 metadata tenant를 다르게 만들거나 own object를 foreign prefix로 move한다.
 
 ### Role, service-role, public positive/negative controls
 
@@ -383,7 +395,7 @@ Launch PASS 최소 조건은 다음과 같다.
 - A/B staging rehearsal과 non-fixture data parity가 통과한다.
 - C는 enable/defer를 포함한 table별 결정과 owner-path evidence가 있다.
 - D access model과 storage cross-tenant denial evidence가 있다.
-- 14 cases, 56 command assertions가 post에서 실제 실행되어 모두 deny다.
+- 14 boundary cases를 A-to-B/B-to-A로 펼친 112 command assertions가 post에서 실제 실행되어 모두 deny이고, 28개 own-tenant matrix control이 보존된다.
 - Same-tenant positive controls, new-row checks, 21 service-role routes, 11 public surfaces가 postcondition을 만족한다.
 - Rollback/reapply가 silent row/object loss 없이 staging에서 반복된다.
 - Fresh approval에 target revision, evidence, production window, rollback owner, go/no-go가 기록된다.
@@ -396,16 +408,39 @@ Validator: `evaluation/rls-remediation-approval-packet-2026-07-14/validate_packe
 
 Execution log: `evaluation/rls-remediation-approval-packet-2026-07-14/logs/validator.log`
 
+TDD RED log: `evaluation/rls-remediation-approval-packet-2026-07-14/logs/tdd-red.log`
+
 Validator는 다음만 검증한다.
 
-- `report.json` parse와 감사 원본 count/flag parity
+- 감사 원본을 base Git blob에서 읽고 전체 immutable count object를 비교
+- 감사 제품 commit, packet base, evidence root, descendant HEAD, 제품 source zero-delta
+- Base부터 evidence descendant까지 실제 Git changed path가 evaluation-only 5개 output과 정확히 일치
 - 10 finding의 ID/severity/title/table/evidence exact parity
-- Finding별 prerequisite, caveat, owner, batch mapping 존재
-- Source reference file과 line bounds
+- Finding별 prerequisite, caveat, owner, required approval, finding/batch exact bidirectional set
+- 고정된 43개 Git source path set과 line bounds
 - 13 tenant CRUD/new-row-check semantics
-- Service-role 21 = direct 19 + broker 2, public 11 = API 6 + page 5
-- Negative 14 x 4 = 56, executed 0
+- Service-role 21 = direct 19 + broker 2, public 11 = API 6 + page 5, 두 route의 method/access 의미
+- Immutable audit seed 14 x 4 = 56, executed 0
+- Symmetric packet matrix 14 x 2 x 4 = 112 foreign denies + 28 same-tenant controls, executed 0
 - Markdown parity와 no-execution 문구
-- Packet에 executable migration text가 없는지
+- Report/pseudocode에 executable DDL/DML/privilege/transaction/procedural/psql statement가 없는지
 
-Self-test는 stale counts, missing approval, accidental migration path, executable SQL injection 네 변형을 각각 reject해야 PASS다. 이 validator PASS도 runtime isolation 또는 finding closure를 의미하지 않는다.
+Pre-fix candidate `d77205bb498080ac02b9f506d72bd44648f4a660`에서 expanded RED replay는 exit 1이었다. 13 attacks 중 4개만 reject되고 9개가 잘못 accept됐다. 정확한 결과는 다음과 같다.
+
+- `attack.stale-finding-count=REJECTED errors=1`
+- `attack.stale-policy-count-with-mutated-audit=ACCEPTED_UNEXPECTEDLY errors=0`
+- `attack.missing-approval-flag=REJECTED errors=1`
+- `attack.deleted-required-db-approval-action=ACCEPTED_UNEXPECTEDLY errors=0`
+- `attack.accidental-migration-path=REJECTED errors=2`
+- `attack.undeclared-output-path=ACCEPTED_UNEXPECTEDLY errors=0`
+- `attack.create-policy-pseudocode=REJECTED errors=1`
+- `attack.drop-table-pseudocode=ACCEPTED_UNEXPECTEDLY errors=0`
+- `attack.base-revision-mutation=ACCEPTED_UNEXPECTEDLY errors=0`
+- `attack.asymmetric-finding-batch-map=ACCEPTED_UNEXPECTEDLY errors=0`
+- `attack.workflow-dispatch-dispatch-logs-misclassification=ACCEPTED_UNEXPECTEDLY errors=0`
+- `attack.hazard-get-service-role-misclassification=ACCEPTED_UNEXPECTEDLY errors=0`
+- `attack.missing-b-to-a-negative-direction=ACCEPTED_UNEXPECTEDLY errors=0`
+
+Expanded self-test는 위 취약점, B-to-A positive-control 삭제, JSON/Markdown DDL/DML/privilege/procedural/psql 변이를 포함한 25 attacks를 모두 reject하고, quoted explanatory SQL prose control 1개를 accept해야 PASS다. 이 validator PASS도 runtime isolation, DB enforcement, finding closure, 또는 launch readiness를 의미하지 않는다.
+
+Latest local result: baseline `PASS`, attacks rejected `25/25`, explanatory-prose control accepted `1/1`, exit code 0. 실행 출력은 `evaluation/rls-remediation-approval-packet-2026-07-14/logs/validator.log`에 보존한다. `launchReadiness=false`는 변하지 않는다.

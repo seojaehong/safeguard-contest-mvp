@@ -1,13 +1,46 @@
+RLS remediation approval packet validator
+validatedDate=2026-07-14
+command=python -B evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py --self-test
+exitCode=0
+---
 PASS packet
-checks.total=1820
-checks.references=1242
-checks.markdown=72
+checks.total=4005
+checks.references=588
+checks.markdown=79
+git.base=2684cb99de944aa9f54d143f2ae40b4ad6104f02
+git.product=f45bba17bcce0d8ebb2690f82d014dbe42ae8191
+git.evidence_root=d77205bb498080ac02b9f506d72bd44648f4a660
+git.evidence_head=d77205bb498080ac02b9f506d72bd44648f4a660
+git.changed_paths=5 product_delta_paths=0
 findings.total=10 severity=P0:0,P1:3,P2:4,P3:3
 boundaries.application=22 boundaries.total=24 rls.enabled=20 rls.missing=2 force=0 policies=20 tenant=13
 service_routes.total=21 direct=19 broker=2 public_api=6 public_pages=5 public_http=11
-negative_cases=14 expected_denials=56 executed=0
-attack.stale-counts=REJECTED errors=1
-attack.missing-approval=REJECTED errors=1
-attack.accidental-migration-path=REJECTED errors=2
-attack.executable-sql=REJECTED errors=1
-attacks.total=4 rejected=4
+audit_negative_cases=14 audit_expected_denials=56 executed=0
+symmetric_negative_assertions=112 same_tenant_positive_controls=28 matrix_assertions_per_phase=140 executed=0
+attack.stale-finding-count=REJECTED errors=1
+attack.stale-policy-count-with-mutated-audit=REJECTED errors=1
+attack.missing-approval-flag=REJECTED errors=1
+attack.deleted-required-db-approval-action=REJECTED errors=1
+attack.accidental-migration-path=REJECTED errors=3
+attack.undeclared-output-path=REJECTED errors=1
+attack.create-policy-pseudocode=REJECTED errors=1
+attack.drop-table-pseudocode=REJECTED errors=1
+attack.alter-table-pseudocode=REJECTED errors=1
+attack.truncate-table-pseudocode=REJECTED errors=1
+attack.delete-from-pseudocode=REJECTED errors=1
+attack.insert-into-pseudocode=REJECTED errors=1
+attack.update-set-pseudocode=REJECTED errors=1
+attack.grant-pseudocode=REJECTED errors=1
+attack.revoke-pseudocode=REJECTED errors=1
+attack.do-block-pseudocode=REJECTED errors=1
+attack.psql-include-pseudocode=REJECTED errors=1
+attack.with-delete-pseudocode=REJECTED errors=1
+attack.markdown-bullet-drop-table=REJECTED errors=1
+attack.base-revision-mutation=REJECTED errors=1
+attack.asymmetric-finding-batch-map=REJECTED errors=2
+attack.workflow-dispatch-dispatch-logs-misclassification=REJECTED errors=2
+attack.hazard-get-service-role-misclassification=REJECTED errors=1
+attack.missing-b-to-a-negative-direction=REJECTED errors=3
+attack.missing-b-to-a-positive-control=REJECTED errors=1
+control.quoted-sql-explanatory-prose=ACCEPTED errors=0
+attacks.total=25 rejected=25 controls.total=1 accepted=1
