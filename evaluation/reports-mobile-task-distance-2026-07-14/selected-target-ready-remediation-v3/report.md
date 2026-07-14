@@ -16,6 +16,22 @@ This selected v3 child does not self-approve the product. The prior `selected-ta
 
 The shared `html, body` rule is byte-equal to the pre-`c9d094b` rule. Both exact block hashes are `2fd4e725405b4e13d67afda2c89b5f7bed92528ed6054eae9b93a2625121a556`. There is no persistent `html { font-size: 100% }` split. Reports keeps its scalable rem tokens inside the Reports route selector, recalibrated against the restored 15px root.
 
+## Evidence scope and hygiene
+
+`product.changedFiles` is scoped only to the runtime-remediation commit range. Its exact enumeration command is `git diff --name-only 57a0d57ae38e56656fbbd1b31a1368cf8276c6fe..8c19aeb81a5f3d0d84a5cc915bda9ea4511b140c`, which returns two paths: one code path and one test path, with no evaluation path. It is not the full integration path inventory.
+
+The full frozen integration inventory compares authority commit `f45bba17bcce0d8ebb2690f82d014dbe42ae8191` with merged tree `8ec5761f395a2c26ad3b8d26fcf08e8254a3dd53` using `git diff --name-only f45bba17bcce0d8ebb2690f82d014dbe42ae8191 8ec5761f395a2c26ad3b8d26fcf08e8254a3dd53`. A fail-closed PowerShell classifier assigns `tests/**` to tests, `evaluation/**` to evaluation, and every remaining path to code. The recomputed result is `PASS total=89 code=3 tests=3 evaluation=83`; the normalized full path-list SHA-256 is `ecc4e158cd350bcbd2931dd67333af68ad92a886c2ef0263d19d498783f06fa8`.
+
+The bounded hygiene commands and observed results are:
+
+- `Get-Content -Raw 'evaluation/reports-mobile-task-distance-2026-07-14/selected-target-ready-remediation-v3/report.json' | ConvertFrom-Json | Out-Null` -> exit 0.
+- `git diff --check f45bba17bcce0d8ebb2690f82d014dbe42ae8191..HEAD` -> exit 0 with no output.
+- `git diff --quiet f2a77c8ed217cb8d3d7e265beb13df059f8ea28f..HEAD -- app/globals.css components/ReportsDownloadCenter.tsx lib/reporting-downloads.ts` -> exit 0; all three runtime blob OIDs equal the approved candidate.
+- `git diff --name-only f2a77c8ed217cb8d3d7e265beb13df059f8ea28f..HEAD` -> exactly the four evaluation files listed in `evidenceHygiene.candidateScopeGuard`; no runtime, product, test, package, forbidden artifact, or secret-bearing path is present.
+- An added-line scan for private-key markers and assigned API key, token, secret, or password values returns zero matches.
+
+These checks clarify evidence scope only. They do not change or extend any product acceptance claim.
+
 ## TDD closure
 
 - `red-global-contract.log` records the old root value failing the shared 15px contract.
