@@ -6,6 +6,7 @@ import json
 import re
 import subprocess
 import sys
+import tempfile
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -18,7 +19,8 @@ EXPECTED_BRANCH = "docs/rls-remediation-approval-packet-2026-07-14"
 AUTHORITATIVE_BASE_REVISION = "2684cb99de944aa9f54d143f2ae40b4ad6104f02"
 AUDITED_PRODUCT_REVISION = "f45bba17bcce0d8ebb2690f82d014dbe42ae8191"
 EVIDENCE_ROOT_REVISION = "d77205bb498080ac02b9f506d72bd44648f4a660"
-EXTERNAL_INTEGRATION_REVISION = "ea7aa7223a056c884d5b0ba55563d602af328451"
+SECOND_REVIEW_INPUT_REVISION = "cd1d608b89871ad4a14bf2185e762d6bc967dea3"
+EXTERNAL_INTEGRATION_REVISION = "67d2c9e28e7278c58f46b46c2512c7133d88d1d3"
 AUDIT_RELATIVE_PATH = "evaluation/supabase-rls-audit-2026-07-14/report.json"
 AUDIT_GIT_BLOB = "7ad1dd2d27be946a2f84b0fc57c25246c0f47b00"
 
@@ -32,6 +34,21 @@ EXPECTED_PACKET_PATHS = (
     f"{PACKET_RELATIVE_DIR}/logs/tdd-red.log",
     *EXPECTED_CANDIDATE_ROOT_PATHS,
 )
+EXPECTED_INTEGRATION_MAPPING: JsonDict = {
+    "authorityRevision": EXTERNAL_INTEGRATION_REVISION,
+    "mappedPacketRevision": SECOND_REVIEW_INPUT_REVISION,
+    "mergeBaseRevision": AUTHORITATIVE_BASE_REVISION,
+    "integrationChangedPathCount": 168,
+    "packetChangedPaths": list(EXPECTED_PACKET_PATHS),
+    "overlapPaths": [],
+    "mergeTreeCommand": (
+        f"git merge-tree {AUTHORITATIVE_BASE_REVISION} HEAD "
+        f"{EXTERNAL_INTEGRATION_REVISION}"
+    ),
+    "mergeTreeExitCode": 0,
+    "mergeTreeConflictMarkers": 0,
+    "disposition": "review-only non-overlap; not merged by this packet",
+}
 EXPECTED_REQUIRED_APPROVAL_ACTIONS = (
     "Any database policy, role, privilege, function, constraint, or FORCE state change.",
     "Any route, server library, or test implementation beyond this packet.",
@@ -227,12 +244,46 @@ EXPECTED_ATTACK_IDS = (
     "psql-include-pseudocode",
     "with-delete-pseudocode",
     "markdown-bullet-drop-table",
+    "sql-comment-create-block",
+    "sql-comment-create-line",
+    "sql-comment-drop-block",
+    "sql-comment-drop-line",
+    "sql-comment-cte-delete-block",
+    "sql-comment-cte-delete-line",
+    "sql-comment-cte-update-block",
+    "sql-comment-cte-update-line",
+    "sql-comment-cte-insert-block",
+    "sql-comment-cte-insert-line",
+    "sql-comment-alter-block",
+    "sql-comment-alter-line",
+    "sql-comment-truncate-block",
+    "sql-comment-truncate-line",
+    "sql-comment-grant-block",
+    "sql-comment-grant-line",
+    "sql-comment-revoke-block",
+    "sql-comment-revoke-line",
+    "sql-comment-do-block",
+    "sql-comment-do-line",
+    "sql-comment-psql-include-block",
+    "sql-comment-psql-include-line",
     "base-revision-mutation",
     "asymmetric-finding-batch-map",
     "workflow-dispatch-dispatch-logs-misclassification",
     "hazard-get-service-role-misclassification",
     "missing-b-to-a-negative-direction",
     "missing-b-to-a-positive-control",
+    "secret-raw-unquoted-assignment-report-json",
+    "secret-openai-prefix-report-md",
+    "secret-supabase-prefix-validator-source",
+    "secret-bearer-validator-log",
+    "secret-jwt-tdd-red-log",
+    "secret-private-key-validator-source",
+    "secret-project-service-role-validator-log",
+)
+EXPECTED_CONTROL_IDS = (
+    "quoted-sql-explanatory-prose",
+    "quoted-commented-sql-explanatory-prose",
+    "safe-secret-placeholders",
 )
 EXPECTED_TDD_RED_RESULTS = (
     "attack.stale-finding-count=REJECTED errors=1",
@@ -248,6 +299,37 @@ EXPECTED_TDD_RED_RESULTS = (
     "attack.workflow-dispatch-dispatch-logs-misclassification=ACCEPTED_UNEXPECTEDLY errors=0",
     "attack.hazard-get-service-role-misclassification=ACCEPTED_UNEXPECTEDLY errors=0",
     "attack.missing-b-to-a-negative-direction=ACCEPTED_UNEXPECTEDLY errors=0",
+)
+EXPECTED_SECOND_REVIEW_RED_RESULTS = (
+    "attack.sql-comment-create-block=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-create-line=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-drop-block=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-drop-line=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-cte-delete-block=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-cte-delete-line=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-cte-update-block=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-cte-update-line=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-cte-insert-block=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-cte-insert-line=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-alter-block=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-alter-line=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-truncate-block=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-truncate-line=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-grant-block=REJECTED errors=1",
+    "attack.sql-comment-grant-line=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-revoke-block=REJECTED errors=1",
+    "attack.sql-comment-revoke-line=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-do-block=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-do-line=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-psql-include-block=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.sql-comment-psql-include-line=REJECTED errors=1",
+    "attack.secret-raw-unquoted-assignment-report-json=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.secret-openai-prefix-report-md=REJECTED errors=1",
+    "attack.secret-supabase-prefix-validator-source=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.secret-bearer-validator-log=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.secret-jwt-tdd-red-log=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.secret-private-key-validator-source=ACCEPTED_UNEXPECTEDLY errors=0",
+    "attack.secret-project-service-role-validator-log=ACCEPTED_UNEXPECTEDLY errors=0",
 )
 EXPECTED_CITED_SOURCE_PATHS = frozenset(
     {
@@ -319,8 +401,8 @@ SQL_STATEMENT_PATTERN = re.compile(
       | insert\s+into\b
       | update\s+(?:only\s+)?[A-Za-z_\"][A-Za-z0-9_$\.\"]*\s+set\b
       | merge\s+into\b
-      | with\b[^;\r\n]{0,1000}\b(?:delete\s+from|insert\s+into|
-            update\s+(?:only\s+)?[A-Za-z_\"][A-Za-z0-9_$\.\"]*\s+set|merge\s+into)\b
+       | with\b[^;]{0,2000}?\b(?:delete\s+from|insert\s+into|
+             update\s+(?:only\s+)?[A-Za-z_\"][A-Za-z0-9_$\.\"]*\s+set|merge\s+into)\b
       | grant\s+[^;\r\n]+\s+(?:on|to)\b
       | revoke\s+[^;\r\n]+\s+(?:on|from)\b
       | comment\s+on\b
@@ -342,13 +424,78 @@ SQL_STATEMENT_PATTERN = re.compile(
     """,
     re.IGNORECASE | re.MULTILINE | re.VERBOSE,
 )
-SECRET_PATTERNS = [
-    re.compile(r"\bsk-[A-Za-z0-9_-]{20,}\b"),
-    re.compile(r"\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b"),
-    re.compile(
-        r"(?i)\b(?:SUPABASE_SERVICE_ROLE_KEY|SUPABASE_ANON_KEY)\b\s*[:=]\s*['\"][^'\"]+['\"]"
+DOLLAR_QUOTE_PATTERN = re.compile(r"\$(?:[A-Za-z_][A-Za-z0-9_]*)?\$")
+SECRET_ASSIGNMENT_PATTERN = re.compile(
+    r"""
+    \b(?P<name>
+        [A-Za-z][A-Za-z0-9_.-]*
+        (?:
+            api[_-]?key
+          | service[_-]?role[_-]?(?:key|token|secret)
+          | access[_-]?token
+          | private[_-]?key
+          | password
+          | secret
+          | token
+          | key
+        )
+    )\b
+    \s*[:=]\s*
+    (?P<value>
+        \$\{[A-Za-z_][A-Za-z0-9_]*\}
+      | "(?:\\.|[^"\r\n])*"
+      | '(?:\\.|[^'\r\n])*'
+      | [^\s,;\]}"'\r\n]+
+    )
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+SECRET_TOKEN_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    (
+        "openai-key-prefix",
+        re.compile(r"\bsk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{20,}\b"),
     ),
-]
+    (
+        "supabase-secret-prefix",
+        re.compile(r"\bsb_secret_[A-Za-z0-9_-]{20,}\b", re.IGNORECASE),
+    ),
+    (
+        "supabase-access-token-prefix",
+        re.compile(r"\bsbp_[A-Za-z0-9_-]{20,}\b", re.IGNORECASE),
+    ),
+    (
+        "bearer-token",
+        re.compile(r"\bbearer\s+[A-Za-z0-9._~+/=-]{16,}\b", re.IGNORECASE),
+    ),
+    (
+        "jwt",
+        re.compile(
+            r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b"
+        ),
+    ),
+    (
+        "private-key-block",
+        re.compile(
+            r"-----BEGIN\s+(?:(?:RSA|EC|OPENSSH|DSA)\s+)?PRIVATE\s+KEY-----",
+            re.IGNORECASE,
+        ),
+    ),
+)
+SAFE_SECRET_PLACEHOLDERS = frozenset(
+    {
+        "<redacted>",
+        "[redacted]",
+        "redacted",
+        "placeholder",
+        "example",
+        "example-only",
+        "changeme",
+        "not-set",
+        "none",
+        "null",
+        "***",
+    }
+)
 
 
 @dataclass
@@ -377,6 +524,12 @@ class GitEvidence:
     committed_paths: tuple[str, ...]
     working_paths: tuple[str, ...]
     product_delta_paths: tuple[str, ...]
+    integration_revision: str
+    integration_merge_base: str
+    integration_changed_paths: tuple[str, ...]
+    integration_overlap_paths: tuple[str, ...]
+    integration_merge_tree_exit_code: int
+    integration_merge_tree_conflict_markers: tuple[str, ...]
     source_line_counts: dict[str, int]
 
 
@@ -408,6 +561,46 @@ def run_git(
             f"git {' '.join(args)} exited {completed.returncode}: {detail}"
         )
     return completed
+
+
+def run_git_bytes(
+    repo_root: Path,
+    args: list[str],
+    accepted_codes: tuple[int, ...] = (0,),
+) -> subprocess.CompletedProcess[bytes]:
+    try:
+        completed = subprocess.run(
+            ["git", *args],
+            cwd=repo_root,
+            capture_output=True,
+            text=False,
+            timeout=20,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        raise GitEvidenceError(f"git {' '.join(args)} failed to run: {error}") from error
+    if completed.returncode not in accepted_codes:
+        detail = completed.stderr.decode("utf-8", errors="replace").strip()
+        raise GitEvidenceError(
+            f"git {' '.join(args)} exited {completed.returncode}: "
+            f"{detail or 'no git diagnostic'}"
+        )
+    return completed
+
+
+def find_merge_tree_conflict_markers(raw_output: bytes) -> tuple[str, ...]:
+    conflict_labels = {b"changed in both", b"added in both", b"removed in both"}
+    markers: list[str] = []
+    for raw_line in raw_output.splitlines():
+        line = raw_line.strip()
+        if (
+            line in conflict_labels
+            or line.startswith(b"CONFLICT")
+            or b"<<<<<<<" in line
+            or b">>>>>>>" in line
+        ):
+            markers.append(line.decode("utf-8", errors="replace"))
+    return tuple(markers)
 
 
 def git_text(repo_root: Path, args: list[str]) -> str:
@@ -465,6 +658,9 @@ def load_git_evidence(repo_root: Path) -> tuple[GitEvidence, JsonDict]:
     product_revision = git_text(
         repo_root, ["rev-parse", f"{AUDITED_PRODUCT_REVISION}^{{commit}}"]
     ).strip()
+    integration_revision = git_text(
+        repo_root, ["rev-parse", f"{EXTERNAL_INTEGRATION_REVISION}^{{commit}}"]
+    ).strip()
     if base_revision != AUTHORITATIVE_BASE_REVISION:
         raise GitEvidenceError(f"authoritative base resolved unexpectedly: {base_revision}")
     if evidence_root_revision != EVIDENCE_ROOT_REVISION:
@@ -473,6 +669,10 @@ def load_git_evidence(repo_root: Path) -> tuple[GitEvidence, JsonDict]:
         )
     if product_revision != AUDITED_PRODUCT_REVISION:
         raise GitEvidenceError(f"audited product resolved unexpectedly: {product_revision}")
+    if integration_revision != EXTERNAL_INTEGRATION_REVISION:
+        raise GitEvidenceError(
+            f"external integration resolved unexpectedly: {integration_revision}"
+        )
 
     require_git_ancestor(repo_root, AUTHORITATIVE_BASE_REVISION, EVIDENCE_ROOT_REVISION)
     require_git_ancestor(repo_root, EVIDENCE_ROOT_REVISION, head_revision)
@@ -495,6 +695,34 @@ def load_git_evidence(repo_root: Path) -> tuple[GitEvidence, JsonDict]:
     product_delta_paths = git_paths(
         repo_root,
         ["diff", "--name-only", f"{AUDITED_PRODUCT_REVISION}..{AUTHORITATIVE_BASE_REVISION}", "--", "app", "lib", "supabase"],
+    )
+    integration_merge_base = git_text(
+        repo_root,
+        ["merge-base", head_revision, EXTERNAL_INTEGRATION_REVISION],
+    ).strip()
+    integration_changed_paths = git_paths(
+        repo_root,
+        [
+            "diff",
+            "--name-only",
+            f"{integration_merge_base}..{EXTERNAL_INTEGRATION_REVISION}",
+            "--",
+        ],
+    )
+    integration_overlap_paths = tuple(
+        sorted(set(EXPECTED_PACKET_PATHS) & set(integration_changed_paths))
+    )
+    merge_tree = run_git_bytes(
+        repo_root,
+        [
+            "merge-tree",
+            integration_merge_base,
+            head_revision,
+            EXTERNAL_INTEGRATION_REVISION,
+        ],
+    )
+    integration_merge_tree_conflict_markers = find_merge_tree_conflict_markers(
+        merge_tree.stdout
     )
     unstaged_paths = git_paths(repo_root, ["diff", "--name-only", "--"])
     staged_paths = git_paths(repo_root, ["diff", "--cached", "--name-only", "--"])
@@ -536,6 +764,12 @@ def load_git_evidence(repo_root: Path) -> tuple[GitEvidence, JsonDict]:
             committed_paths=committed_paths,
             working_paths=working_paths,
             product_delta_paths=product_delta_paths,
+            integration_revision=integration_revision,
+            integration_merge_base=integration_merge_base,
+            integration_changed_paths=integration_changed_paths,
+            integration_overlap_paths=integration_overlap_paths,
+            integration_merge_tree_exit_code=merge_tree.returncode,
+            integration_merge_tree_conflict_markers=integration_merge_tree_conflict_markers,
             source_line_counts=source_line_counts,
         ),
         audit,
@@ -650,6 +884,30 @@ def validate_git_contract(
     )
     result.check(not git_evidence.product_delta_paths, "audited product changed before packet base")
     result.check(
+        git_evidence.integration_revision == EXTERNAL_INTEGRATION_REVISION,
+        "integration authority revision mismatch",
+    )
+    result.check(
+        git_evidence.integration_merge_base == AUTHORITATIVE_BASE_REVISION,
+        "integration merge-base mismatch",
+    )
+    result.check(
+        len(git_evidence.integration_changed_paths) == 168,
+        "integration changed-path count mismatch",
+    )
+    result.check(
+        not git_evidence.integration_overlap_paths,
+        f"integration overlaps packet paths: {git_evidence.integration_overlap_paths}",
+    )
+    result.check(
+        git_evidence.integration_merge_tree_exit_code == 0,
+        "integration merge-tree command failed",
+    )
+    result.check(
+        not git_evidence.integration_merge_tree_conflict_markers,
+        "integration merge-tree reported conflict markers",
+    )
+    result.check(
         set(git_evidence.committed_paths).issubset(EXPECTED_PACKET_PATHS),
         "evidence descendant contains an undeclared committed path",
     )
@@ -688,6 +946,10 @@ def validate_git_contract(
     }
     for key, expected in expected_source_fields.items():
         result.check(source.get(key) == expected, f"source contract drift: {key}")
+    result.check(
+        as_dict(packet.get("integrationMapping")) == EXPECTED_INTEGRATION_MAPPING,
+        "integration mapping contract drift",
+    )
 
 
 def validate_audit_truth(packet: JsonDict, audit: JsonDict, result: ValidationResult) -> None:
@@ -1200,10 +1462,9 @@ def validate_validation_contract(
         "validation attack expected result drift",
     )
     result.check(
-        len(controls) == 1
-        and controls[0].get("id") == "quoted-sql-explanatory-prose"
-        and controls[0].get("expectedValidatorResult") == "accept",
-        "quoted explanatory prose control drift",
+        tuple(str(item.get("id")) for item in controls) == EXPECTED_CONTROL_IDS
+        and all(item.get("expectedValidatorResult") == "accept" for item in controls),
+        "validation control case set drift",
     )
 
     red = as_dict(contract.get("tddRedEvidence"))
@@ -1221,15 +1482,39 @@ def validate_validation_contract(
         "TDD RED exact result set drift",
     )
 
+    second_red = as_dict(contract.get("secondReviewTddRedEvidence"))
+    result.check(
+        second_red.get("log") == f"{PACKET_RELATIVE_DIR}/logs/tdd-red.log",
+        "second-review TDD RED log path drift",
+    )
+    result.check(
+        second_red.get("head") == SECOND_REVIEW_INPUT_REVISION,
+        "second-review TDD RED head drift",
+    )
+    result.check(second_red.get("exitCode") == 1, "second-review TDD RED exit code drift")
+    result.check(second_red.get("attacksTotal") == 29, "second-review TDD RED attack count drift")
+    result.check(second_red.get("rejected") == 4, "second-review TDD RED rejected count drift")
+    result.check(
+        second_red.get("acceptedUnexpectedly") == 25,
+        "second-review TDD RED false-green count drift",
+    )
+    result.check(second_red.get("controlsTotal") == 2, "second-review control count drift")
+    result.check(second_red.get("controlsAccepted") == 2, "second-review control result drift")
+    result.check(
+        tuple(as_string_list(second_red.get("exactResults")))
+        == EXPECTED_SECOND_REVIEW_RED_RESULTS,
+        "second-review TDD RED exact result set drift",
+    )
+
     latest = as_dict(contract.get("latestValidatedResult"))
     expected_latest: dict[str, object] = {
         "command": f"python -B {PACKET_RELATIVE_DIR}/validate_packet.py --self-test",
         "exitCode": 0,
         "baseline": "PASS",
-        "attacksTotal": 25,
-        "attacksRejected": 25,
-        "controlsTotal": 1,
-        "controlsAccepted": 1,
+        "attacksTotal": 54,
+        "attacksRejected": 54,
+        "controlsTotal": 3,
+        "controlsAccepted": 3,
         "runtimeClaimsMade": False,
         "launchReadiness": False,
     }
@@ -1246,9 +1531,22 @@ def validate_validation_contract(
             expected_line in red_log,
             f"TDD RED log missing exact result: {expected_line}",
         )
+    for expected_line in EXPECTED_SECOND_REVIEW_RED_RESULTS:
+        result.check(
+            expected_line in red_log,
+            f"second-review TDD RED log missing exact result: {expected_line}",
+        )
     result.check(
         "attacks.total=13 rejected=4" in red_log,
         "TDD RED aggregate result missing",
+    )
+    result.check(
+        "newAttacks.total=29 rejected=4 acceptedUnexpectedly=25" in red_log,
+        "second-review TDD RED aggregate result missing",
+    )
+    result.check(
+        "newControls.total=2 accepted=2" in red_log,
+        "second-review TDD RED control result missing",
     )
 
 
@@ -1318,10 +1616,137 @@ def markdown_sql_candidates(markdown: str) -> Iterator[str]:
                     yield candidate
 
 
+def normalize_sql_comments(value: str) -> tuple[str, bool]:
+    output: list[str] = []
+    index = 0
+    block_depth = 0
+    quote: str | None = None
+    dollar_tag: str | None = None
+
+    while index < len(value):
+        if block_depth > 0:
+            if value.startswith("/*", index):
+                block_depth += 1
+                index += 2
+                continue
+            if value.startswith("*/", index):
+                block_depth -= 1
+                index += 2
+                if block_depth == 0:
+                    output.append(" ")
+                continue
+            if value[index] in "\r\n":
+                output.append(value[index])
+            index += 1
+            continue
+
+        if dollar_tag is not None:
+            if value.startswith(dollar_tag, index):
+                output.append(dollar_tag)
+                index += len(dollar_tag)
+                dollar_tag = None
+            else:
+                output.append(value[index])
+                index += 1
+            continue
+
+        if quote is not None:
+            character = value[index]
+            output.append(character)
+            index += 1
+            if character == "\\" and index < len(value):
+                output.append(value[index])
+                index += 1
+                continue
+            if character == quote:
+                if index < len(value) and value[index] == quote:
+                    output.append(value[index])
+                    index += 1
+                else:
+                    quote = None
+            continue
+
+        if value.startswith("--", index):
+            output.append(" ")
+            index += 2
+            while index < len(value) and value[index] not in "\r\n":
+                index += 1
+            continue
+        if value.startswith("/*", index):
+            output.append(" ")
+            block_depth = 1
+            index += 2
+            continue
+
+        character = value[index]
+        if character in {"'", '"'}:
+            quote = character
+            output.append(character)
+            index += 1
+            continue
+        if character == "$":
+            match = DOLLAR_QUOTE_PATTERN.match(value, index)
+            if match is not None:
+                dollar_tag = match.group(0)
+                output.append(dollar_tag)
+                index = match.end()
+                continue
+        output.append(character)
+        index += 1
+
+    return "".join(output), block_depth > 0
+
+
+def is_safe_secret_placeholder(raw_value: str) -> bool:
+    value = raw_value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        value = value[1:-1].strip()
+    lowered = value.lower()
+    if lowered in SAFE_SECRET_PLACEHOLDERS:
+        return True
+    if re.fullmatch(r"\$\{[A-Za-z_][A-Za-z0-9_]*\}", value) is not None:
+        return True
+    if re.fullmatch(r"\$env:[A-Za-z_][A-Za-z0-9_]*", value, re.IGNORECASE) is not None:
+        return True
+    return re.fullmatch(r"(?:process\.env\.|os\.environ\[)[A-Za-z_][A-Za-z0-9_]*\]?", value) is not None
+
+
+def find_secret_rule_ids(value: str) -> set[str]:
+    rule_ids: set[str] = set()
+    for match in SECRET_ASSIGNMENT_PATTERN.finditer(value):
+        if not is_safe_secret_placeholder(match.group("value")):
+            rule_ids.add("credential-assignment")
+    for rule_id, pattern in SECRET_TOKEN_PATTERNS:
+        if pattern.search(value) is not None:
+            rule_ids.add(rule_id)
+    return rule_ids
+
+
+def read_packet_texts(packet_dir: Path, result: ValidationResult) -> dict[str, str]:
+    packet_texts: dict[str, str] = {}
+    prefix = f"{PACKET_RELATIVE_DIR}/"
+    for packet_path in EXPECTED_PACKET_PATHS:
+        if not packet_path.startswith(prefix):
+            result.check(False, f"secret scan path outside packet prefix: {packet_path}")
+            continue
+        relative_path = packet_path.removeprefix(prefix)
+        try:
+            packet_texts[packet_path] = (packet_dir / relative_path).read_text(
+                encoding="utf-8-sig"
+            )
+        except (OSError, UnicodeError) as error:
+            result.check(
+                False,
+                f"secret scan could not read declared packet path {packet_path}: {error}",
+            )
+    return packet_texts
+
+
 def validate_forbidden_content(
     packet: JsonDict,
     json_text: str,
     markdown: str,
+    packet_dir: Path,
     result: ValidationResult,
 ) -> None:
     for value_path, value in iter_string_values(packet):
@@ -1329,34 +1754,47 @@ def validate_forbidden_content(
             SQL_FENCE_PATTERN.search(value) is None,
             f"SQL fence detected in JSON value: {value_path}",
         )
+        normalized, unterminated = normalize_sql_comments(value)
+        result.check(not unterminated, f"unterminated SQL block comment in JSON value: {value_path}")
         result.check(
-            SQL_STATEMENT_PATTERN.search(value) is None,
+            SQL_STATEMENT_PATTERN.search(normalized) is None,
             f"executable SQL statement detected in JSON value: {value_path}",
         )
     result.check(
         SQL_FENCE_PATTERN.search(markdown) is None,
         "SQL fence detected in Markdown",
     )
+    normalized_markdown, markdown_unterminated = normalize_sql_comments(markdown)
     result.check(
-        SQL_STATEMENT_PATTERN.search(markdown) is None,
+        not markdown_unterminated,
+        "unterminated SQL block comment in Markdown",
+    )
+    result.check(
+        SQL_STATEMENT_PATTERN.search(normalized_markdown) is None,
         "executable SQL statement detected in Markdown",
     )
     markdown_statement = next(
         (
             candidate
             for candidate in markdown_sql_candidates(markdown)
-            if SQL_STATEMENT_PATTERN.search(candidate) is not None
+            if SQL_STATEMENT_PATTERN.search(normalize_sql_comments(candidate)[0]) is not None
         ),
         None,
     )
     result.check(
         markdown_statement is None,
-        f"executable SQL statement detected in Markdown structure: {markdown_statement}",
+        "executable SQL statement detected in Markdown structure",
     )
 
-    combined = f"{json_text}\n{markdown}"
-    for pattern in SECRET_PATTERNS:
-        result.check(pattern.search(combined) is None, f"secret-like content detected: {pattern.pattern}")
+    packet_texts = read_packet_texts(packet_dir, result)
+    packet_texts[f"{PACKET_RELATIVE_DIR}/report.json"] = json_text
+    packet_texts[f"{PACKET_RELATIVE_DIR}/report.md"] = markdown
+    for packet_path, text in packet_texts.items():
+        for rule_id in sorted(find_secret_rule_ids(text)):
+            result.check(
+                False,
+                f"secret-like content detected in {packet_path}: {rule_id}",
+            )
 
 
 def validate_packet(
@@ -1379,7 +1817,7 @@ def validate_packet(
     validate_rollout(packet, result)
     validate_validation_contract(packet, packet_dir, result)
     validate_markdown(packet, markdown, result)
-    validate_forbidden_content(packet, json_text, markdown, result)
+    validate_forbidden_content(packet, json_text, markdown, packet_dir, result)
 
     json_references = collect_references(packet)
     markdown_references = MARKDOWN_REFERENCE_PATTERN.findall(markdown)
@@ -1518,6 +1956,54 @@ def run_attack_cases(
         )
     )
 
+    comment_sql_attacks = (
+        ("sql-comment-create-block", "CREATE /*review*/ TABLE protected_rows (id integer);"),
+        ("sql-comment-create-line", "CREATE --review\n TABLE protected_rows (id integer);"),
+        ("sql-comment-drop-block", "DROP /*review*/ TABLE protected_rows;"),
+        ("sql-comment-drop-line", "DROP --review\n TABLE protected_rows;"),
+        (
+            "sql-comment-cte-delete-block",
+            "WITH doomed AS (SELECT id FROM protected_rows) /*review*/ DELETE /*review*/ FROM protected_rows;",
+        ),
+        (
+            "sql-comment-cte-delete-line",
+            "WITH doomed AS (SELECT id FROM protected_rows) --review\n DELETE --review\n FROM protected_rows;",
+        ),
+        (
+            "sql-comment-cte-update-block",
+            "WITH owned AS (SELECT id FROM protected_rows) /*review*/ UPDATE /*review*/ protected_rows SET owner_id = NULL;",
+        ),
+        (
+            "sql-comment-cte-update-line",
+            "WITH owned AS (SELECT id FROM protected_rows) --review\n UPDATE --review\n protected_rows SET owner_id = NULL;",
+        ),
+        (
+            "sql-comment-cte-insert-block",
+            "WITH source AS (SELECT 1 AS id) /*review*/ INSERT /*review*/ INTO protected_rows (id) SELECT id FROM source;",
+        ),
+        (
+            "sql-comment-cte-insert-line",
+            "WITH source AS (SELECT 1 AS id) --review\n INSERT --review\n INTO protected_rows (id) SELECT id FROM source;",
+        ),
+        ("sql-comment-alter-block", "ALTER /*review*/ TABLE protected_rows DISABLE ROW LEVEL SECURITY;"),
+        ("sql-comment-alter-line", "ALTER --review\n TABLE protected_rows DISABLE ROW LEVEL SECURITY;"),
+        ("sql-comment-truncate-block", "TRUNCATE /*review*/ TABLE protected_rows;"),
+        ("sql-comment-truncate-line", "TRUNCATE --review\n TABLE protected_rows;"),
+        ("sql-comment-grant-block", "GRANT /*review*/ SELECT ON protected_rows TO anon;"),
+        ("sql-comment-grant-line", "GRANT --review\n SELECT ON protected_rows TO anon;"),
+        ("sql-comment-revoke-block", "REVOKE /*review*/ SELECT ON protected_rows FROM authenticated;"),
+        ("sql-comment-revoke-line", "REVOKE --review\n SELECT ON protected_rows FROM authenticated;"),
+        ("sql-comment-do-block", "DO /*review*/ $$ BEGIN RAISE NOTICE 'review'; END $$;"),
+        ("sql-comment-do-line", "DO --review\n $$ BEGIN RAISE NOTICE 'review'; END $$;"),
+        ("sql-comment-psql-include-block", "/*review*/ \\include dangerous.sql"),
+        ("sql-comment-psql-include-line", "--review\n\\ir dangerous.sql"),
+    )
+    for attack_id, payload in comment_sql_attacks:
+        sql_mutant = copy.deepcopy(packet)
+        sql_semantics = as_dict(sql_mutant.get("proposedPolicySemantics"))
+        sql_semantics["attackPayload"] = payload
+        test_cases.append((attack_id, sql_mutant, audit, markdown, True))
+
     base_revision_mutation = copy.deepcopy(packet)
     as_dict(base_revision_mutation.get("source"))[
         "packetBaseRevision"
@@ -1643,6 +2129,20 @@ def run_attack_cases(
         ("quoted-sql-explanatory-prose", copy.deepcopy(packet), audit, quoted_prose, False)
     )
 
+    quoted_commented_prose = (
+        f"{markdown}\n\n- \"CREATE /* quoted example */ TABLE protected_rows;\" is "
+        "quoted explanatory prose, not executable material.\n"
+    )
+    test_cases.append(
+        (
+            "quoted-commented-sql-explanatory-prose",
+            copy.deepcopy(packet),
+            audit,
+            quoted_commented_prose,
+            False,
+        )
+    )
+
     attack_count = 0
     control_count = 0
     for case_id, mutant, mutant_audit, mutant_markdown, should_reject in test_cases:
@@ -1667,6 +2167,112 @@ def run_attack_cases(
             state = "REJECTED_UNEXPECTEDLY" if rejected else "ACCEPTED"
             prefix = "control"
         outputs.append(f"{prefix}.{case_id}={state} errors={len(attack_result.errors)}")
+
+    synthetic_value = "synthetic-" + ("A" * 40)
+    openai_prefix = "s" + "k-proj-" + ("B" * 40)
+    supabase_prefix = "sb_" + "secret_" + ("C" * 40)
+    jwt_value = "ey" + "J" + ("D" * 24) + "." + ("E" * 32) + "." + ("F" * 32)
+    pem_payload = "-----BEGIN " + "PRIVATE KEY-----\n" + ("G" * 48) + "\n-----END " + "PRIVATE KEY-----"
+    file_cases: list[tuple[str, dict[str, str], bool]] = [
+        (
+            "secret-raw-unquoted-assignment-report-json",
+            {"report.json": "SUPABASE_" + "SERVICE_ROLE_KEY" + "=" + synthetic_value},
+            True,
+        ),
+        (
+            "secret-openai-prefix-report-md",
+            {"report.md": openai_prefix},
+            True,
+        ),
+        (
+            "secret-supabase-prefix-validator-source",
+            {"validate_packet.py": supabase_prefix},
+            True,
+        ),
+        (
+            "secret-bearer-validator-log",
+            {"logs/validator.log": "Author" + "ization: Bearer " + synthetic_value},
+            True,
+        ),
+        (
+            "secret-jwt-tdd-red-log",
+            {"logs/tdd-red.log": jwt_value},
+            True,
+        ),
+        (
+            "secret-private-key-validator-source",
+            {"validate_packet.py": pem_payload},
+            True,
+        ),
+        (
+            "secret-project-service-role-validator-log",
+            {"logs/validator.log": "project_" + "service_role_key" + "=" + synthetic_value},
+            True,
+        ),
+        (
+            "safe-secret-placeholders",
+            {
+                "report.json": "SUPABASE_" + "SERVICE_ROLE_KEY" + "=<redacted>",
+                "report.md": "Author" + "ization: Bearer [REDACTED]",
+                "validate_packet.py": "project_" + "service_role_key" + "=${SUPABASE_SERVICE_ROLE_KEY}",
+                "logs/tdd-red.log": "OPENAI_" + "API_KEY" + "=placeholder",
+                "logs/validator.log": "SUPABASE_" + "ACCESS_TOKEN" + "=example-only",
+            },
+            False,
+        ),
+    ]
+    packet_filenames = (
+        "report.json",
+        "report.md",
+        "validate_packet.py",
+        "logs/validator.log",
+        "logs/tdd-red.log",
+    )
+    for case_id, path_payloads, should_reject in file_cases:
+        with tempfile.TemporaryDirectory(prefix="self-test-", dir=packet_dir) as temp_raw:
+            temp_dir = Path(temp_raw)
+            for filename in packet_filenames:
+                source_path = packet_dir / filename
+                target_path = temp_dir / filename
+                target_path.parent.mkdir(parents=True, exist_ok=True)
+                target_path.write_bytes(source_path.read_bytes())
+
+            file_mutant = copy.deepcopy(packet)
+            file_markdown = markdown
+            for filename, payload in path_payloads.items():
+                if filename == "report.json":
+                    file_mutant["selfTestSecretPayload"] = payload
+                elif filename == "report.md":
+                    file_markdown = f"{file_markdown}\n\n{payload}\n"
+                else:
+                    target_path = temp_dir / filename
+                    original = target_path.read_text(encoding="utf-8-sig")
+                    target_path.write_text(f"{original}\n{payload}\n", encoding="utf-8")
+
+            file_text = json.dumps(file_mutant, ensure_ascii=False, indent=2)
+            (temp_dir / "report.json").write_text(file_text, encoding="utf-8")
+            (temp_dir / "report.md").write_text(file_markdown, encoding="utf-8")
+            file_result = validate_packet(
+                file_mutant,
+                audit,
+                file_text,
+                file_markdown,
+                temp_dir,
+                git_evidence,
+            )
+
+        rejected = len(file_result.errors) > 0
+        expected = rejected if should_reject else not rejected
+        all_expected = all_expected and expected
+        if should_reject:
+            attack_count += 1
+            state = "REJECTED" if rejected else "ACCEPTED_UNEXPECTEDLY"
+            prefix = "attack"
+        else:
+            control_count += 1
+            state = "REJECTED_UNEXPECTEDLY" if rejected else "ACCEPTED"
+            prefix = "control"
+        outputs.append(f"{prefix}.{case_id}={state} errors={len(file_result.errors)}")
 
     return outputs, all_expected, attack_count, control_count
 
@@ -1713,6 +2319,13 @@ def main() -> int:
     print(f"git.evidence_root={EVIDENCE_ROOT_REVISION}")
     print(f"git.evidence_head={git_evidence.head_revision}")
     print(f"git.changed_paths={len(EXPECTED_PACKET_PATHS)} product_delta_paths=0")
+    print(f"git.integration={git_evidence.integration_revision}")
+    print(
+        f"git.integration_merge_base={git_evidence.integration_merge_base} "
+        f"integration_changed_paths={len(git_evidence.integration_changed_paths)} "
+        f"overlap_paths={len(git_evidence.integration_overlap_paths)} "
+        f"merge_tree_conflicts={len(git_evidence.integration_merge_tree_conflict_markers)}"
+    )
     print("findings.total=10 severity=P0:0,P1:3,P2:4,P3:3")
     print("boundaries.application=22 boundaries.total=24 rls.enabled=20 rls.missing=2 force=0 policies=20 tenant=13")
     print("service_routes.total=21 direct=19 broker=2 public_api=6 public_pages=5 public_http=11")

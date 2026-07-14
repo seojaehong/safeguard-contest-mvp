@@ -4,14 +4,16 @@ command=python -B evaluation/rls-remediation-approval-packet-2026-07-14/validate
 exitCode=0
 ---
 PASS packet
-checks.total=4005
+checks.total=5814
 checks.references=588
 checks.markdown=79
 git.base=2684cb99de944aa9f54d143f2ae40b4ad6104f02
 git.product=f45bba17bcce0d8ebb2690f82d014dbe42ae8191
 git.evidence_root=d77205bb498080ac02b9f506d72bd44648f4a660
-git.evidence_head=d77205bb498080ac02b9f506d72bd44648f4a660
+git.evidence_head=cd1d608b89871ad4a14bf2185e762d6bc967dea3
 git.changed_paths=5 product_delta_paths=0
+git.integration=67d2c9e28e7278c58f46b46c2512c7133d88d1d3
+git.integration_merge_base=2684cb99de944aa9f54d143f2ae40b4ad6104f02 integration_changed_paths=168 overlap_paths=0 merge_tree_conflicts=0
 findings.total=10 severity=P0:0,P1:3,P2:4,P3:3
 boundaries.application=22 boundaries.total=24 rls.enabled=20 rls.missing=2 force=0 policies=20 tenant=13
 service_routes.total=21 direct=19 broker=2 public_api=6 public_pages=5 public_http=11
@@ -36,6 +38,28 @@ attack.do-block-pseudocode=REJECTED errors=1
 attack.psql-include-pseudocode=REJECTED errors=1
 attack.with-delete-pseudocode=REJECTED errors=1
 attack.markdown-bullet-drop-table=REJECTED errors=1
+attack.sql-comment-create-block=REJECTED errors=1
+attack.sql-comment-create-line=REJECTED errors=1
+attack.sql-comment-drop-block=REJECTED errors=1
+attack.sql-comment-drop-line=REJECTED errors=1
+attack.sql-comment-cte-delete-block=REJECTED errors=1
+attack.sql-comment-cte-delete-line=REJECTED errors=1
+attack.sql-comment-cte-update-block=REJECTED errors=1
+attack.sql-comment-cte-update-line=REJECTED errors=1
+attack.sql-comment-cte-insert-block=REJECTED errors=1
+attack.sql-comment-cte-insert-line=REJECTED errors=1
+attack.sql-comment-alter-block=REJECTED errors=1
+attack.sql-comment-alter-line=REJECTED errors=1
+attack.sql-comment-truncate-block=REJECTED errors=1
+attack.sql-comment-truncate-line=REJECTED errors=1
+attack.sql-comment-grant-block=REJECTED errors=1
+attack.sql-comment-grant-line=REJECTED errors=1
+attack.sql-comment-revoke-block=REJECTED errors=1
+attack.sql-comment-revoke-line=REJECTED errors=1
+attack.sql-comment-do-block=REJECTED errors=1
+attack.sql-comment-do-line=REJECTED errors=1
+attack.sql-comment-psql-include-block=REJECTED errors=1
+attack.sql-comment-psql-include-line=REJECTED errors=1
 attack.base-revision-mutation=REJECTED errors=1
 attack.asymmetric-finding-batch-map=REJECTED errors=2
 attack.workflow-dispatch-dispatch-logs-misclassification=REJECTED errors=2
@@ -43,4 +67,13 @@ attack.hazard-get-service-role-misclassification=REJECTED errors=1
 attack.missing-b-to-a-negative-direction=REJECTED errors=3
 attack.missing-b-to-a-positive-control=REJECTED errors=1
 control.quoted-sql-explanatory-prose=ACCEPTED errors=0
-attacks.total=25 rejected=25 controls.total=1 accepted=1
+control.quoted-commented-sql-explanatory-prose=ACCEPTED errors=0
+attack.secret-raw-unquoted-assignment-report-json=REJECTED errors=1
+attack.secret-openai-prefix-report-md=REJECTED errors=1
+attack.secret-supabase-prefix-validator-source=REJECTED errors=1
+attack.secret-bearer-validator-log=REJECTED errors=1
+attack.secret-jwt-tdd-red-log=REJECTED errors=1
+attack.secret-private-key-validator-source=REJECTED errors=1
+attack.secret-project-service-role-validator-log=REJECTED errors=1
+control.safe-secret-placeholders=ACCEPTED errors=0
+attacks.total=54 rejected=54 controls.total=3 accepted=3

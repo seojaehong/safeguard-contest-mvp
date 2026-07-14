@@ -49,3 +49,45 @@ attack.workflow-dispatch-dispatch-logs-misclassification=ACCEPTED_UNEXPECTEDLY e
 attack.hazard-get-service-role-misclassification=ACCEPTED_UNEXPECTEDLY errors=0
 attack.missing-b-to-a-negative-direction=ACCEPTED_UNEXPECTEDLY errors=0
 attacks.total=13 rejected=4
+
+TDD RED - SQL comment and all-path secret review replay
+head=cd1d608b89871ad4a14bf2185e762d6bc967dea3
+command=python -B evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py --self-test
+exitCode=1
+---
+PASS packet
+checks.total=4005
+attack.sql-comment-create-block=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-create-line=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-drop-block=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-drop-line=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-cte-delete-block=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-cte-delete-line=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-cte-update-block=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-cte-update-line=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-cte-insert-block=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-cte-insert-line=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-alter-block=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-alter-line=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-truncate-block=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-truncate-line=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-grant-block=REJECTED errors=1
+attack.sql-comment-grant-line=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-revoke-block=REJECTED errors=1
+attack.sql-comment-revoke-line=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-do-block=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-do-line=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-psql-include-block=ACCEPTED_UNEXPECTEDLY errors=0
+attack.sql-comment-psql-include-line=REJECTED errors=1
+attack.secret-raw-unquoted-assignment-report-json=ACCEPTED_UNEXPECTEDLY errors=0
+attack.secret-openai-prefix-report-md=REJECTED errors=1
+attack.secret-supabase-prefix-validator-source=ACCEPTED_UNEXPECTEDLY errors=0
+attack.secret-bearer-validator-log=ACCEPTED_UNEXPECTEDLY errors=0
+attack.secret-jwt-tdd-red-log=ACCEPTED_UNEXPECTEDLY errors=0
+attack.secret-private-key-validator-source=ACCEPTED_UNEXPECTEDLY errors=0
+attack.secret-project-service-role-validator-log=ACCEPTED_UNEXPECTEDLY errors=0
+control.quoted-commented-sql-explanatory-prose=ACCEPTED errors=0
+control.safe-secret-placeholders=ACCEPTED errors=0
+newAttacks.total=29 rejected=4 acceptedUnexpectedly=25
+newControls.total=2 accepted=2
+fullSelfTest.attacks.total=54 rejected=29 controls.total=3 accepted=3

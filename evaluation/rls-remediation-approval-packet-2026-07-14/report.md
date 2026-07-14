@@ -6,6 +6,8 @@
 - 감사 Git blob: `7ad1dd2d27be946a2f84b0fc57c25246c0f47b00`
 - 감사 대상 제품 커밋: `f45bba17bcce0d8ebb2690f82d014dbe42ae8191`
 - Evidence root: `d77205bb498080ac02b9f506d72bd44648f4a660`; 이 커밋 또는 packet-only descendant만 허용한다.
+- 현재 integration authority: `67d2c9e28e7278c58f46b46c2512c7133d88d1d3`; merge base는 `2684cb99de944aa9f54d143f2ae40b4ad6104f02`다.
+- Integration mapping: authority 변경 168경로, packet 변경 5경로, overlap 0경로, `git merge-tree` exit 0 및 conflict marker 0이다. 이 패킷은 해당 authority를 merge하지 않는다.
 - 현재 결정: **HOLD**
 - `launchReadiness=false`
 - `noMutation=true`
@@ -413,7 +415,8 @@ TDD RED log: `evaluation/rls-remediation-approval-packet-2026-07-14/logs/tdd-red
 Validator는 다음만 검증한다.
 
 - 감사 원본을 base Git blob에서 읽고 전체 immutable count object를 비교
-- 감사 제품 commit, packet base, evidence root, descendant HEAD, 제품 source zero-delta
+- 감사 제품 commit, packet base, evidence root, descendant HEAD, 제품 source zero-delta, pinned integration authority
+- Integration authority의 168-path delta, packet 5-path delta, overlap 0, merge-tree conflict marker 0을 Git에서 재계산
 - Base부터 evidence descendant까지 실제 Git changed path가 evaluation-only 5개 output과 정확히 일치
 - 10 finding의 ID/severity/title/table/evidence exact parity
 - Finding별 prerequisite, caveat, owner, required approval, finding/batch exact bidirectional set
@@ -423,7 +426,8 @@ Validator는 다음만 검증한다.
 - Immutable audit seed 14 x 4 = 56, executed 0
 - Symmetric packet matrix 14 x 2 x 4 = 112 foreign denies + 28 same-tenant controls, executed 0
 - Markdown parity와 no-execution 문구
-- Report/pseudocode에 executable DDL/DML/privilege/transaction/procedural/psql statement가 없는지
+- Single/double/dollar quote를 보존하는 tokenizer로 SQL block/line comment를 제거한 뒤 report/pseudocode의 executable DDL/DML/privilege/transaction/procedural/psql statement를 차단
+- 선언된 5개 packet path 전체에서 raw assignment, key prefix, Bearer, JWT, private-key block, project service-role 형태를 검사하되 값은 오류나 로그에 출력하지 않음
 
 Pre-fix candidate `d77205bb498080ac02b9f506d72bd44648f4a660`에서 expanded RED replay는 exit 1이었다. 13 attacks 중 4개만 reject되고 9개가 잘못 accept됐다. 정확한 결과는 다음과 같다.
 
@@ -441,6 +445,8 @@ Pre-fix candidate `d77205bb498080ac02b9f506d72bd44648f4a660`에서 expanded RED 
 - `attack.hazard-get-service-role-misclassification=ACCEPTED_UNEXPECTEDLY errors=0`
 - `attack.missing-b-to-a-negative-direction=ACCEPTED_UNEXPECTEDLY errors=0`
 
-Expanded self-test는 위 취약점, B-to-A positive-control 삭제, JSON/Markdown DDL/DML/privilege/procedural/psql 변이를 포함한 25 attacks를 모두 reject하고, quoted explanatory SQL prose control 1개를 accept해야 PASS다. 이 validator PASS도 runtime isolation, DB enforcement, finding closure, 또는 launch readiness를 의미하지 않는다.
+두 번째 independent review 입력 `cd1d608b89871ad4a14bf2185e762d6bc967dea3`의 RED replay도 exit 1이었다. 새 attacks 29개 중 4개만 reject되고 25개가 잘못 accept됐다. SQL-comment 변이 22개는 3개 reject/19개 false-green, all-path secret 변이 7개는 1개 reject/6개 false-green이었다. Quoted-comment SQL과 safe-placeholder controls 2개는 모두 accept됐다. 29개 exact result는 `report.json`과 TDD RED log에 보존한다.
 
-Latest local result: baseline `PASS`, attacks rejected `25/25`, explanatory-prose control accepted `1/1`, exit code 0. 실행 출력은 `evaluation/rls-remediation-approval-packet-2026-07-14/logs/validator.log`에 보존한다. `launchReadiness=false`는 변하지 않는다.
+Expanded self-test는 기존 25개와 새 29개를 합친 attacks 54개를 모두 reject하고, quoted SQL prose, quoted commented SQL prose, safe secret placeholders controls 3개를 모두 accept해야 PASS다. 이 validator PASS도 runtime isolation, DB enforcement, finding closure, 또는 launch readiness를 의미하지 않는다.
+
+Latest local result: baseline `PASS`, attacks rejected `54/54`, controls accepted `3/3`, exit code 0. 실행 출력은 `evaluation/rls-remediation-approval-packet-2026-07-14/logs/validator.log`에 보존한다. `launchReadiness=false`는 변하지 않는다.
