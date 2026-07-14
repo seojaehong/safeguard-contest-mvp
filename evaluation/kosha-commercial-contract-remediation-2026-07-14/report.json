@@ -113,9 +113,29 @@
   "historicalEvidenceCorrection": {
     "log": "integrated-kosha-group-d.log",
     "classification": "historical_self_recorded_not_independently_immutable",
-    "firstCommittedAt": "049debe47cf6d18e923bb5c91e5fafd8d07c885b",
-    "windowsWorktreeByteSha256": "7f0c0ae1905a62bbaf3b74973e0c62e58eee78d776539008ed6c6b630bbed008",
-    "gitBlobSha256": "37c357e368a1ca95dde836e1a021c44a02d8381250c1312b5f643c2c9f9e012d",
+    "currentBytesFirstAppearAt": "2a2326951b4b2d030af11f4615f7cf6b9bafa334",
+    "incorrectAttributionWithdrawn": "049debe47cf6d18e923bb5c91e5fafd8d07c885b",
+    "history": [
+      {
+        "commit": "049debe47cf6d18e923bb5c91e5fafd8d07c885b",
+        "gitBlobSha1": "8836b0bbb1a2914d8d59a5b568e7b5ed3dab6594",
+        "resultSummary": "129 passed / 1 failed"
+      },
+      {
+        "commit": "29ae8372",
+        "resultSummary": "modified to 130 passed"
+      },
+      {
+        "commit": "2a2326951b4b2d030af11f4615f7cf6b9bafa334",
+        "gitBlobSha1": "cabd4989af7bc0fb7147f343c2aad79f926b662c",
+        "resultSummary": "modified to current 129 passed / 1 failed"
+      },
+      {
+        "commit": "08f6d6edc168c9a83cb6aac0eca151f45b783131",
+        "gitBlobSha1": "cabd4989af7bc0fb7147f343c2aad79f926b662c",
+        "resultSummary": "retains the 2a232695 blob"
+      }
+    ],
     "priorImmutableClaimWithdrawn": true
   },
   "scopeIntegrity": {
