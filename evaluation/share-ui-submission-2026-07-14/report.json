@@ -19,7 +19,14 @@
     "typecheck": "pass",
     "productionBuild": "pass",
     "staticPages": 27,
-    "diffCheck": "pass"
+    "diffCheck": "pass",
+    "browser": {
+      "desktop": "pass",
+      "mobile": "pass",
+      "horizontalOverflow": 0,
+      "interactiveOverlap": 0,
+      "languageOptions": 11
+    }
   },
   "excludedCandidate": "workpack-share-v2-authority-restoration"
 }

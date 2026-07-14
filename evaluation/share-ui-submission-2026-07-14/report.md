@@ -20,6 +20,8 @@
 - Strict TypeScript typecheck: passed.
 - Production build: passed, 27 static pages generated.
 - Diff check: passed.
+- Local production browser: desktop and mobile Share surfaces rendered without horizontal overflow or interactive overlap.
+- Language selector: manager preview plus 10 configured foreign-language previews.
 
 ## Boundary
 

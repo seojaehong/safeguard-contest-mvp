@@ -14506,6 +14506,10 @@ body:has(.safeclaw-landing) :is(
   min-height: 44px;
 }
 
+.share-panel.workflow-panel :is(.button, summary) {
+  min-height: 44px;
+}
+
 .share-form-card-head,
 .recipient-section-head {
   display: flex;
