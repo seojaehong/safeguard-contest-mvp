@@ -40,6 +40,7 @@ type WorkflowSharePanelProps = {
   workpackId?: string | null;
   readiness?: WorkpackReadiness;
   requiresRevalidation?: boolean;
+  authorityRequestVersion?: number;
   workspaceTheme?: WorkspaceTheme;
   onAuthorityVerified?: (identity: WorkflowShareAuthorityIdentity) => void;
 };
@@ -160,6 +161,7 @@ export function WorkflowSharePanel({
   workpackId = null,
   readiness,
   requiresRevalidation = false,
+  authorityRequestVersion = 0,
   workspaceTheme = "day",
   onAuthorityVerified
 }: WorkflowSharePanelProps) {
@@ -203,6 +205,7 @@ export function WorkflowSharePanel({
   ), [selectedWorkerKeys, targetWorkers]);
   const authorityScope = useMemo(() => JSON.stringify({
     workpackId,
+    authorityRequestVersion,
     generationEvidenceSignature,
     workpackContentFingerprint,
     workpackContentBinding,
@@ -210,6 +213,7 @@ export function WorkflowSharePanel({
     workers: authorityRequestWorkers
   }), [
     authorityRequestWorkers,
+    authorityRequestVersion,
     generationEvidenceSignature,
     targetSignature,
     workpackContentBinding,
@@ -319,7 +323,8 @@ export function WorkflowSharePanel({
       setPreviewLanguage(result.recipientLocales[0] || "ko");
       onAuthorityVerified?.({
         workpackId: result.workpackId,
-        contentBinding: workpackContentBinding
+        contentBinding: workpackContentBinding,
+        requestVersion: authorityRequestVersion
       });
     }).catch((error: unknown) => {
       if (cancelled) return;
@@ -331,6 +336,7 @@ export function WorkflowSharePanel({
     };
   }, [
     authToken,
+    authorityRequestVersion,
     authorityRequestWorkers,
     authorityScope,
     canShare,

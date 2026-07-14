@@ -1069,6 +1069,8 @@ export function SafeGuardCommandCenter({
   const [data, setData] = useState<AskResponse | null>(null);
   const shareContentBindingRef = useRef("");
   shareContentBindingRef.current = data ? buildWorkflowShareContentBinding(data) : "";
+  const shareAuthorityVersionRef = useRef(0);
+  const [shareAuthorityVersion, setShareAuthorityVersion] = useState(0);
   const [generationFingerprint, setGenerationFingerprint] = useState<string | null>(null);
   const [requiresRevalidation, setRequiresRevalidation] = useState(false);
   const [message, setMessage] = useState("");
@@ -1209,6 +1211,8 @@ export function SafeGuardCommandCenter({
     change: WorkpackDeliverablesChange
   ) => {
     if (change.requiresRevalidation) {
+      shareAuthorityVersionRef.current += 1;
+      setShareAuthorityVersion(shareAuthorityVersionRef.current);
       setRequiresRevalidation(true);
       setSavedWorkpackId(null);
     }
@@ -1227,8 +1231,10 @@ export function SafeGuardCommandCenter({
   }, []);
 
   const handleShareAuthorityVerified = useCallback((identity: WorkflowShareAuthorityIdentity) => {
+    if (identity.requestVersion !== shareAuthorityVersionRef.current) return;
     if (identity.contentBinding !== shareContentBindingRef.current) return;
     setSavedWorkpackId(identity.workpackId);
+    setRequiresRevalidation(false);
   }, []);
 
   function persistCurrentWorkpack(payload: AskResponse, fingerprint: string) {
@@ -1639,6 +1645,8 @@ export function SafeGuardCommandCenter({
 
   function applyGeneratedPayload(payload: AskResponse) {
     const fingerprint = buildGenerationEvidenceFingerprint(payload);
+    shareAuthorityVersionRef.current += 1;
+    setShareAuthorityVersion(shareAuthorityVersionRef.current);
     shareContentBindingRef.current = buildWorkflowShareContentBinding(payload);
     persistCurrentWorkpack(payload, fingerprint);
     setGenerationFingerprint(fingerprint);
@@ -1740,6 +1748,8 @@ export function SafeGuardCommandCenter({
 
     setSelectedExampleId(null);
     setQuestion(stored.data.question);
+    shareAuthorityVersionRef.current += 1;
+    setShareAuthorityVersion(shareAuthorityVersionRef.current);
     shareContentBindingRef.current = buildWorkflowShareContentBinding(stored.data);
     setData(stored.data);
     setGenerationFingerprint(stored.generationFingerprint);
@@ -2441,6 +2451,7 @@ export function SafeGuardCommandCenter({
                 requestedDocumentKey={requestedDocumentKey}
                 readiness={workpackReadiness || undefined}
                 requiresRevalidation={requiresRevalidation}
+                authorityRequestVersion={shareAuthorityVersion}
                 onDeliverablesChange={handleWorkpackDeliverablesChange}
                 onShareAuthorityVerified={handleShareAuthorityVerified}
                 surface="editor"
@@ -2458,6 +2469,7 @@ export function SafeGuardCommandCenter({
                   generationFingerprint={generationFingerprint || undefined}
                   readiness={workpackReadiness || undefined}
                   requiresRevalidation={requiresRevalidation}
+                  authorityRequestVersion={shareAuthorityVersion}
                   workspaceTheme={activeWorkspaceTheme}
                   onDeliverablesChange={handleWorkpackDeliverablesChange}
                   onShareAuthorityVerified={handleShareAuthorityVerified}
@@ -2489,6 +2501,7 @@ export function SafeGuardCommandCenter({
                   data={data}
                   generationFingerprint={generationFingerprint || undefined}
                   readiness={workpackReadiness || undefined}
+                  authorityRequestVersion={shareAuthorityVersion}
                   onDeliverablesChange={handleWorkpackDeliverablesChange}
                   onShareAuthorityVerified={handleShareAuthorityVerified}
                   surface="share"

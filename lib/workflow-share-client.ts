@@ -54,6 +54,7 @@ export type AuthenticatedShareAuthority = {
 export type WorkflowShareAuthorityIdentity = {
   workpackId: string;
   contentBinding: string;
+  requestVersion: number;
 };
 
 export type AuthenticatedChannelResolution = {

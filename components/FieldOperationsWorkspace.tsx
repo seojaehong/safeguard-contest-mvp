@@ -845,6 +845,7 @@ export function FieldOperationsWorkspace({
   requestedDocumentKey,
   readiness,
   requiresRevalidation = false,
+  authorityRequestVersion = 0,
   workspaceTheme = "day",
   onDeliverablesChange,
   onShareAuthorityVerified,
@@ -856,6 +857,7 @@ export function FieldOperationsWorkspace({
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
   requiresRevalidation?: boolean;
+  authorityRequestVersion?: number;
   workspaceTheme?: WorkspaceTheme;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
   onShareAuthorityVerified?: (identity: WorkflowShareAuthorityIdentity) => void;
@@ -1062,10 +1064,11 @@ export function FieldOperationsWorkspace({
     }
   }, []);
   const handleShareAuthorityVerified = useCallback((identity: WorkflowShareAuthorityIdentity) => {
+    if (identity.requestVersion !== authorityRequestVersion) return;
     if (identity.contentBinding !== buildWorkflowShareContentBinding(dataRef.current)) return;
     setSavedWorkpackId(identity.workpackId);
     onShareAuthorityVerified?.(identity);
-  }, [onShareAuthorityVerified]);
+  }, [authorityRequestVersion, onShareAuthorityVerified]);
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
     ["PLAN", "계획", `${workspaceData.citations.length}건 근거 · 위험성평가·작업계획`],
@@ -1253,6 +1256,7 @@ export function FieldOperationsWorkspace({
           workpackId={savedWorkpackId}
           readiness={readiness}
           requiresRevalidation={requiresRevalidation}
+          authorityRequestVersion={authorityRequestVersion}
           workspaceTheme={workspaceTheme}
           onAuthorityVerified={handleShareAuthorityVerified}
         />
@@ -1286,6 +1290,7 @@ export function FieldOperationsWorkspace({
         workpackId={savedWorkpackId}
         readiness={readiness}
         requiresRevalidation={requiresRevalidation}
+        authorityRequestVersion={authorityRequestVersion}
         workspaceTheme={workspaceTheme}
         onAuthorityVerified={handleShareAuthorityVerified}
       />
