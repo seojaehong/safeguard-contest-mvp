@@ -15,4 +15,3 @@
 - Result: 4 files, 21 tests passed.
 - Strict TypeScript typecheck passed.
 - `git diff --check` passed.
-
