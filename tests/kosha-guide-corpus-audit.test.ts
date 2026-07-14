@@ -1889,16 +1889,42 @@ describe("KOSHA GUIDE retrieval-to-document evidence", () => {
   it("surfaces task-specific KOSHA evidence only through the branch actually executed", () => {
     const branch = "rest" as const;
     const items = [
-        reference({ retrieval_source: branch }),
+        reference({
+          body: "도료와 유기용제 증기 체류를 막도록 환기하고 점화원을 통제한다.",
+          retrieval_source: branch,
+          kosha_guide: {
+            referenceId: "technical-support-09-0009-b-e-17",
+            stableDocumentKey: "B-E-17",
+            version: "B-E-17-2026",
+            quality: "accepted",
+            lifecycle: "current",
+            bodyKind: "native",
+            anchors: [{ page: 1, excerpt: "도료와 유기용제 증기 환기" }],
+            evidenceRef: "KOSHA 근거 B-E-17-2026 p.1: 도료와 유기용제 증기 환기",
+            directEligible: true
+          }
+        }),
         reference({
           id: "technical-support-01-0065-d-c-13",
           category: "건설안전분야",
           title: "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
           summary: "외벽 도장 보수공사의 비계, 추락방지, 작업발판 안전 기준",
+          body: "작업발판과 안전난간 상태를 확인하고 안전대를 체결한다.",
           keywords: ["외벽도장", "비계", "추락"],
           risk_tags: ["추락", "비계"],
           controls: ["작업발판·난간·개구부 상태 확인", "안전대 체결 및 작업반경 출입통제"],
-          retrieval_source: branch
+          retrieval_source: branch,
+          kosha_guide: {
+            referenceId: "technical-support-01-0065-d-c-13",
+            stableDocumentKey: "D-C-13",
+            version: "D-C-13-2026",
+            quality: "accepted",
+            lifecycle: "current",
+            bodyKind: "native",
+            anchors: [{ page: 1, excerpt: "작업발판 상태와 안전대 체결 확인" }],
+            evidenceRef: "KOSHA 근거 D-C-13-2026 p.1: 작업발판 상태와 안전대 체결 확인",
+            directEligible: true
+          }
         }),
         reference({
           id: "unrelated-electrostatic",
@@ -1921,10 +1947,11 @@ describe("KOSHA GUIDE retrieval-to-document evidence", () => {
     expect(result.failures).toEqual([]);
     expect(result.executionStatus).toBe("tested");
     expect(result.retrievalSources).toEqual([branch]);
-    expect(result.promptContext).toContain("공식자료: B-E-17-2026");
-    expect(result.promptContext).toContain("공식자료: D-C-13-2026");
-    expect(result.answer).toMatch(/도료|유기용제/);
-    expect(result.answer).toMatch(/작업발판|안전대/);
+    expect(result.promptContext).toContain("KOSHA_SUPPORTING_BODY_JSON");
+    expect(result.promptContext).toContain("B-E-17-2026");
+    expect(result.promptContext).toContain("D-C-13-2026");
+    expect(result.promptContext).toMatch(/도료|유기용제/);
+    expect(result.promptContext).toMatch(/작업발판|안전대/);
     expect(result.answer).not.toContain("정전도장기");
     expect(result.documentReflections.every((item) => item.documents.includes("위험성평가표"))).toBe(true);
     expect(result.documentReflections.every((item) => item.label.includes("위험성평가표"))).toBe(true);

@@ -9,12 +9,16 @@ import {
   deriveSafetyReferenceOperationalView,
   deriveSafetyReferenceRetrievalModeFromItems,
   filterAndRankSafetyReferencesByQuery,
+  getKoshaGroundingDecision,
   getSafetyReferenceDisplayTitle,
   hasStrongSafetyReferenceRowOverlap,
+  isKoshaSupportingCitationEligible,
+  isKoshaTechnicalReference,
   isSafetyReferenceDirectEligible,
   isSafetyReferenceRiskEligible,
   SAFETY_REFERENCE_SEARCH_FAILURE_CODE,
   SAFETY_REFERENCE_SEARCH_FAILURE_MESSAGE,
+  type KoshaGroundingReason,
   type SafetyReferenceItem,
   type SafetyReferenceRetrievalMode,
   type SafetyReferenceSearchResult
@@ -340,6 +344,18 @@ function includesRiskAssessmentDocument(item: SafetyReferenceItem): boolean {
 
 const MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW = 2;
 
+function getSupportingKoshaEvidenceRef(item: SafetyReferenceItem): string {
+  if (!isKoshaSupportingCitationEligible(item)) return "";
+  if (item.kosha_guide?.evidenceRef) return item.kosha_guide.evidenceRef;
+  const grounding = getKoshaGroundingDecision(item);
+  const metadata = grounding?.metadata;
+  if (!metadata) return "";
+  return compactRiskCell(
+    `KOSHA 기술 보조지침 ${metadata.currentVersion}: ${getSafetyReferenceDisplayTitle(item)} · ${metadata.provenance}`,
+    240
+  );
+}
+
 export function buildSafetyReferenceRiskRows(
   response: AskResponse,
   references: readonly SafetyReferenceItem[],
@@ -361,8 +377,7 @@ export function buildSafetyReferenceRiskRows(
     .filter((item) => item.title || item.summary || item.controls.length);
   const supportingKoshaReferences = references.filter((item) =>
     item.evidence_role === "supporting"
-      && Boolean(item.kosha_guide?.evidenceRef)
-      && isSafetyReferenceDirectEligible(item)
+      && Boolean(getSupportingKoshaEvidenceRef(item))
   );
   const rankedEligibleReferences = filterAndRankSafetyReferencesByQuery(
     rankQuery,
@@ -390,7 +405,7 @@ export function buildSafetyReferenceRiskRows(
       `${rankQuery} ${displayTitle} ${hazard} ${control}`,
       supportingKoshaReferences.filter((supporting) => hasStrongSafetyReferenceRowOverlap(item, supporting)),
       supportingKoshaReferences.length
-    ).map((supporting) => supporting.kosha_guide?.evidenceRef)
+    ).map(getSupportingKoshaEvidenceRef)
       .filter((ref): ref is string => Boolean(ref))))
         .slice(0, MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW)
       : [];
@@ -934,6 +949,7 @@ type CompressedSafetyReference = {
   quality?: "accepted" | "review_required";
   lifecycle?: "current" | "stale" | "retired";
   directEligible?: boolean;
+  groundingReason?: KoshaGroundingReason;
 };
 
 function classifySafetyReferenceKind(itemType: string | undefined): { kind: CompressedSafetyReference["kind"]; kindLabel: string } {
@@ -965,6 +981,9 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
   for (const item of items) {
     const displayTitle = getSafetyReferenceDisplayTitle(item);
     const operationalView = deriveSafetyReferenceOperationalView(item);
+    const grounding = getKoshaGroundingDecision(item);
+    const isTechnicalKosha = isKoshaTechnicalReference(item);
+    const groundingLifecycle = grounding?.metadata?.lifecycle;
     const operationalControls = operationalView.controls.slice(0, 2);
     const evidenceCore = operationalControls.slice(0, 1).join(", ");
     const dedupeKey = `${operationalView.hazard}|${operationalControls.join("|")}|${(item.primary_documents || []).join("|")}`;
@@ -972,7 +991,11 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
     seen.add(dedupeKey);
     const documents = (item.primary_documents || []).filter(Boolean).slice(0, 3);
     const evidenceShort = evidenceCore.replace(/\s+/g, " ").trim().slice(0, 80);
-    const sentenceBase = `${operationalView.hazard}: ${operationalControls.join(" / ")}`.replace(/\s+/g, " ").trim();
+    const sentenceBase = isTechnicalKosha
+      ? grounding?.status === "verified_current"
+        ? "검증된 현행 KOSHA 본문 발췌를 기술적 보조지침으로 대조"
+        : "검증 전 KOSHA 본문과 통제문구를 사용하지 않음"
+      : `${operationalView.hazard}: ${operationalControls.join(" / ")}`.replace(/\s+/g, " ").trim();
     const documentSentence = `${sentenceBase}.`;
     const { kind, kindLabel } = classifySafetyReferenceKind(item.item_type);
     out.push({
@@ -983,9 +1006,14 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
       documentSentence: documentSentence.slice(0, 200),
       kind,
       kindLabel,
-      quality: item.kosha_guide?.quality,
-      lifecycle: item.kosha_guide?.lifecycle,
-      directEligible: item.kosha_guide?.directEligible
+      quality: item.kosha_guide?.quality ?? (isTechnicalKosha
+        ? grounding?.status === "verified_current" ? "accepted" : "review_required"
+        : undefined),
+      lifecycle: item.kosha_guide?.lifecycle ?? (groundingLifecycle === "unresolved" ? undefined : groundingLifecycle),
+      directEligible: isTechnicalKosha
+        ? grounding?.mandatoryCitationEligible === true
+        : item.kosha_guide?.directEligible,
+      groundingReason: grounding?.reason
     });
     if (out.length >= limit) break;
   }
@@ -997,7 +1025,12 @@ export function buildSafetyReferenceSurfaceItem(
   retrievalMode?: SafetyReferenceRetrievalMode
 ) {
   const operationalView = deriveSafetyReferenceOperationalView(item);
-  const controls = operationalView.controls.slice(0, 2);
+  const grounding = getKoshaGroundingDecision(item);
+  const groundingLifecycle = grounding?.metadata?.lifecycle;
+  const unverifiedTechnicalKosha = isKoshaTechnicalReference(item) && !grounding?.supportingCitationEligible;
+  const controls = unverifiedTechnicalKosha
+    ? ["검증된 현행 원문과 provenance 확인 전 본문·통제문구 미사용"]
+    : operationalView.controls.slice(0, 2);
   const displayTitle = getSafetyReferenceDisplayTitle(item);
   return {
     rawTitle: item.title,
@@ -1005,37 +1038,87 @@ export function buildSafetyReferenceSurfaceItem(
     itemType: item.item_type,
     title: displayTitle,
     displayTitle,
-    displaySummary: item.display_summary,
-    shortSummary: item.display_summary || `${operationalView.hazard} · ${controls.join(" · ")}`,
+    displaySummary: unverifiedTechnicalKosha ? undefined : item.display_summary,
+    shortSummary: unverifiedTechnicalKosha
+      ? `검토 필요 · ${controls[0]}`
+      : item.display_summary || `${operationalView.hazard} · ${controls.join(" · ")}`,
     primaryDocuments: item.primary_documents || [],
     controls,
     evidenceRoleLabel: item.evidence_role_label,
     evidenceRole: item.evidence_role,
     sourceKindLabel: item.source_kind_label,
     operationSignalLabel: controls[0] ? `문서와 TBM에 ${controls[0]} 반영` : item.operation_signal_label,
-    stableDocumentKey: item.kosha_guide?.stableDocumentKey,
-    anchor: item.kosha_guide?.anchors[0],
+    stableDocumentKey: item.kosha_guide?.stableDocumentKey ?? grounding?.metadata?.stableDocumentKey,
+    anchor: unverifiedTechnicalKosha ? undefined : item.kosha_guide?.anchors[0],
     retrievalSource: item.retrieval_source,
     retrievalMode,
-    quality: item.kosha_guide?.quality,
-    lifecycle: item.kosha_guide?.lifecycle,
-    directEligible: item.kosha_guide?.directEligible,
-    reviewRequired: operationalView.reviewRequired
+    quality: item.kosha_guide?.quality ?? (grounding
+      ? grounding.status === "verified_current" ? "accepted" : "review_required"
+      : undefined),
+    lifecycle: item.kosha_guide?.lifecycle ?? (groundingLifecycle === "unresolved" ? undefined : groundingLifecycle),
+    directEligible: isKoshaTechnicalReference(item) ? false : item.kosha_guide?.directEligible,
+    supportingCitationEligible: grounding?.supportingCitationEligible,
+    groundingReason: grounding?.reason,
+    reviewRequired: grounding?.reviewRequired ?? operationalView.reviewRequired
   };
+}
+
+function isTechnicalKoshaCompressed(item: CompressedSafetyReference): boolean {
+  return item.kind === "kosha-support-regulation" || item.kind === "kosha-guideline";
+}
+
+function isVerifiedCurrentKoshaCompressed(item: CompressedSafetyReference): boolean {
+  return isTechnicalKoshaCompressed(item)
+    && item.directEligible === true
+    && item.quality === "accepted"
+    && item.lifecycle === "current"
+    && item.groundingReason === "verified-current";
+}
+
+function buildRequiredKoshaCitations(items: readonly SafetyReferenceItem[]) {
+  const uniqueVerified = new Map<string, SafetyReferenceItem>();
+  for (const item of items) {
+    const decision = getKoshaGroundingDecision(item);
+    const metadata = decision?.metadata;
+    if (
+      !isKoshaTechnicalReference(item)
+      || decision?.status !== "verified_current"
+      || decision.mandatoryCitationEligible !== true
+      || !metadata
+    ) {
+      continue;
+    }
+    const key = `${metadata.stableDocumentKey}|${metadata.currentVersion}`;
+    if (!uniqueVerified.has(key)) uniqueVerified.set(key, item);
+  }
+
+  return compressSafetyReferenceMatches([...uniqueVerified.values()], 4)
+    .filter(isVerifiedCurrentKoshaCompressed)
+    .map((item) => ({
+      kindLabel: item.kindLabel,
+      title: item.title,
+      sentence: item.documentSentence
+    }));
+}
+
+function formatSafetyReferencePromptLine(item: CompressedSafetyReference, index: number): string {
+  if (isTechnicalKoshaCompressed(item) && !isVerifiedCurrentKoshaCompressed(item)) {
+    return `${index}. [${item.kindLabel}] ${item.title} | 검토필요 reason=${item.groundingReason || "metadata-absent"} | 검증 전 본문·통제문구 미사용`;
+  }
+  const status = isTechnicalKoshaCompressed(item) ? "검증된 현행 기술 보조지침" : "확정근거";
+  return `${index}. [${item.kindLabel}] ${item.title} | ${status} | 반영: ${item.reflectsDocuments.join("·") || "-"} | ${item.documentSentence}`;
 }
 
 function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): string {
   if (!items.length) return "";
-  // Surface KOSHA 기술지침/기술지원규정 as a separate, prominent block above
-  // the generic 내부 안전지식 DB block.
-  const koshaItems = items.filter((item) => item.kind === "kosha-support-regulation" || item.kind === "kosha-guideline");
-  const koshaPrimary = koshaItems.filter((item) => item.directEligible !== false && item.quality !== "review_required");
-  const koshaReviewRequired = koshaItems.filter((item) => item.directEligible === false || item.quality === "review_required");
-  const others = items.filter((item) => item.kind !== "kosha-support-regulation" && item.kind !== "kosha-guideline");
+  const koshaItems = items.filter(isTechnicalKoshaCompressed);
+  const koshaPrimary = koshaItems.filter(isVerifiedCurrentKoshaCompressed);
+  const koshaReviewRequired = koshaItems.filter((item) => !isVerifiedCurrentKoshaCompressed(item));
+  const others = items.filter((item) => !isTechnicalKoshaCompressed(item));
   const blocks: string[] = [];
   if (koshaPrimary.length) {
     blocks.push("");
-    blocks.push("[KOSHA 기술지침/기술지원규정 직접 인용]");
+    blocks.push("[KOSHA 기술지침/기술지원규정 검증된 보조 인용]");
     for (const item of koshaPrimary) {
       blocks.push(
         `- ${item.kindLabel}: ${item.title} / 반영 위치: ${item.reflectsDocuments.join(" / ") || "현장 확인 필요"} / 문서 문장: ${item.documentSentence}`
@@ -1047,7 +1130,7 @@ function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): stri
     blocks.push("[KOSHA 기술지침/기술지원규정 검토 필요]");
     for (const item of koshaReviewRequired) {
       blocks.push(
-        `- ${item.kindLabel}: ${item.title} / quality=${item.quality || "review_required"} / lifecycle=${item.lifecycle || "stale"} / 현행 여부 검토 전 직접 근거로 사용하지 않음`
+        `- ${item.kindLabel}: ${item.title} / reason=${item.groundingReason || "metadata-absent"} / quality=${item.quality || "review_required"} / lifecycle=${item.lifecycle || "unknown"} / 검증 전 본문·통제문구·필수 인용에 사용하지 않음`
       );
     }
   }
@@ -1760,13 +1843,13 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             });
             const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
             const compressed = compressSafetyReferenceMatches(safeRefItems, 5);
-            const koshaPrimaryRefsEarly = compressed
-              .filter((c) => c.kind === "kosha-support-regulation" || c.kind === "kosha-guideline")
-              .slice(0, 4)
-              .map((c) => ({ kindLabel: c.kindLabel, title: c.title, sentence: c.documentSentence }));
+            const koshaPrimaryRefsEarly = buildRequiredKoshaCitations(safeRefItems);
             const koshaLinesEarly = [
               ...(ksha?.references ?? []).slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.url}`),
-              ...compressed.slice(0, 5).map((c, i) => `${Math.min(5, (ksha?.references ?? []).length) + i + 1}. [${c.kindLabel}] ${c.title} | 반영: ${c.reflectsDocuments.join("·") || "-"} | ${c.documentSentence}`)
+              ...compressed.slice(0, 5).map((item, index) => formatSafetyReferencePromptLine(
+                item,
+                Math.min(5, (ksha?.references ?? []).length) + index + 1
+              ))
             ].slice(0, 12);
             const trainingLinesEarly = (trng?.recommendations ?? []).slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.institution} | ${r.fitLabel || ""}`);
             const accidentLinesEarly = (acc?.cases ?? []).slice(0, 5).map((c, i) => `${i + 1}. ${c.title} | ${c.preventionPoint}`);
@@ -1997,28 +2080,18 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // appendices below still apply on top of whichever body source we choose.
     const accidentLines = accidentCases.cases.slice(0, 5).map((c, i) => `${i + 1}. ${c.title} | ${c.preventionPoint}`);
     const trainingLinesCtx = training.recommendations.slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.institution} | ${r.fitLabel || ""}`);
-    // Track D: 9,920-row catalog → compress top hits to a "문서 반영 문장" form
-    // before feeding the AI / appending to documents. Raw dumps were rejected per
-    // review (would balloon the AI context and turn safety drafts into evidence dumps).
+    // Compress catalog hits before prompting; unverified technical KOSHA rows keep
+    // only an honest review-state marker and never expose their body or control text.
     const safetyReferenceCompressed = compressSafetyReferenceMatches(safetyReference.items, 5);
     const safetyReferenceAppendix = formatSafetyReferenceAppendix(safetyReferenceCompressed);
-    // KOSHA 기술지침/기술지원규정 are flagged for mandatory in-body citation by the AI.
-    const koshaPrimaryRefs = safetyReferenceCompressed
-      .filter((c) => (
-        (c.kind === "kosha-support-regulation" || c.kind === "kosha-guideline")
-        && c.directEligible !== false
-        && c.quality !== "review_required"
-      ))
-      .slice(0, 4)
-      .map((c) => ({
-        kindLabel: c.kindLabel,
-        title: c.title,
-        sentence: c.documentSentence
-      }));
+    const koshaPrimaryRefs = buildRequiredKoshaCitations(safetyReference.items);
     // For the AI prompt context, give a short summary form (not the appendix verbatim).
     const koshaLinesCtx = [
       ...kosha.references.slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.url}`),
-      ...safetyReferenceCompressed.slice(0, 5).map((c, i) => `${kosha.references.slice(0, 5).length + i + 1}. [${c.kindLabel}] ${c.title} | ${c.quality === "review_required" || c.directEligible === false ? `검토필요 quality=${c.quality || "review_required"} lifecycle=${c.lifecycle || "stale"}` : "확정근거"} | 반영: ${c.reflectsDocuments.join("·") || "-"} | ${c.documentSentence}`)
+      ...safetyReferenceCompressed.slice(0, 5).map((item, index) => formatSafetyReferencePromptLine(
+        item,
+        kosha.references.slice(0, 5).length + index + 1
+      ))
     ].slice(0, 12);
 
     // Fix 6 continued: consume deliverables from the parallel Promise (allResults[9]).

@@ -1,5 +1,56 @@
 import { createLogger } from "@/lib/logger";
 
+export type KoshaGroundingReason =
+  | "verified-current"
+  | "metadata-absent"
+  | "body-empty"
+  | "provenance-unresolved"
+  | "review-unverified"
+  | "lifecycle-not-current"
+  | "current-version-mismatch"
+  | "body-kind-unverified"
+  | "body-integrity-unverified"
+  | "body-integrity-mismatch"
+  | "local-corpus-integrity-failed"
+  | "local-corpus-unavailable";
+
+export type KoshaGroundingMetadata = {
+  uid: string;
+  stableDocumentKey: string;
+  version: string;
+  currentVersion: string;
+  lifecycle: "current" | "stale" | "retired" | "unresolved";
+  reviewState: string;
+  bodyKind: "native" | "unknown";
+  bodySha256: string | null;
+  officialUrl: string | null;
+  officialFileId: string | null;
+  publishedAt: string | null;
+  provenance: string;
+};
+
+export type KoshaGroundingDecision = {
+  status: "verified_current" | "review_required" | "blocked";
+  reason: KoshaGroundingReason;
+  source: "local-corpus" | "remote-payload" | "local-gate";
+  reviewRequired: boolean;
+  directEvidenceEligible: false;
+  supportingCitationEligible: boolean;
+  mandatoryCitationEligible: boolean;
+  riskRowEligible: false;
+  promptExcerptEligible: boolean;
+  metadata: KoshaGroundingMetadata | null;
+};
+
+export type KoshaGroundingSearchDecision = {
+  status: "ready" | "review_required" | "blocked" | "not_applicable";
+  reason: KoshaGroundingReason | "not-applicable";
+  localCorpusStatus: "ready" | "blocked" | "unconfigured" | "not_applicable";
+  acceptedCount: number;
+  reviewRequiredCount: number;
+  excludedCount: number;
+};
+
 export type SafetyReferenceItem = {
   id: string;
   source_id: string;
@@ -25,6 +76,9 @@ export type SafetyReferenceItem = {
   display_summary?: string;
   retrieval_source?: "rest" | "ranked" | "vector" | "hybrid" | "local-tag" | "local-ranked" | "local-hybrid";
   vector_similarity?: number;
+  payload?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  kosha_grounding?: KoshaGroundingDecision;
   kosha_guide?: {
     referenceId: string;
     stableDocumentKey: string;
@@ -91,6 +145,7 @@ export type SafetyReferenceSearchResult = {
   items: SafetyReferenceItem[];
   retrievalMode: SafetyReferenceRetrievalMode;
   vectorSearch: SafetyReferenceVectorStatus;
+  koshaGrounding?: KoshaGroundingSearchDecision;
   message: string;
 };
 
@@ -152,10 +207,12 @@ const SELECT_FIELDS = [
   "subcategory",
   "title",
   "summary",
+  "body",
   "keywords",
   "risk_tags",
   "primary_documents",
-  "controls"
+  "controls",
+  "payload"
 ].join(",");
 
 function getSupabaseConfig(): SupabaseConfig | null {
@@ -261,12 +318,307 @@ function isReferenceItem(value: unknown): value is SafetyReferenceItem {
   );
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function metadataRecords(item: SafetyReferenceItem): Record<string, unknown>[] {
+  const records: Record<string, unknown>[] = [];
+  const append = (value: unknown): void => {
+    if (!isRecord(value)) return;
+    records.push(value);
+    if (isRecord(value.metadata)) records.push(value.metadata);
+    if (isRecord(value.provenance)) records.push(value.provenance);
+  };
+  append(item.payload);
+  append(item.metadata);
+  return records;
+}
+
+function readMetadataString(records: readonly Record<string, unknown>[], keys: readonly string[]): string {
+  for (const record of records) {
+    for (const key of keys) {
+      const value = record[key];
+      if (typeof value === "string" && value.trim()) return value.trim();
+      if (typeof value === "number" && Number.isFinite(value)) return String(value);
+    }
+  }
+  return "";
+}
+
+function readMetadataBoolean(records: readonly Record<string, unknown>[], keys: readonly string[]): boolean | undefined {
+  for (const record of records) {
+    for (const key of keys) {
+      const value = record[key];
+      if (typeof value === "boolean") return value;
+    }
+  }
+  return undefined;
+}
+
+function normalizeKoshaLifecycle(value: string): KoshaGroundingMetadata["lifecycle"] {
+  const normalized = value.trim().toLowerCase();
+  if (["current", "active", "현행", "0"].includes(normalized)) return "current";
+  if (["retired", "withdrawn", "폐지", "1"].includes(normalized)) return "retired";
+  if (["stale", "outdated", "구버전"].includes(normalized)) return "stale";
+  return "unresolved";
+}
+
+function normalizeKoshaVersion(value: string): string {
+  return value.toUpperCase().replace(/\s+/gu, "").trim();
+}
+
+function extractKoshaVersion(title: string): string {
+  const normalized = normalizeKoshaVersion(title);
+  return normalized.match(/[A-Z](?:-[A-Z])?-\d+(?:-\d+)?-\d{4}/u)?.[0] || "";
+}
+
+function isVerifiedReviewState(value: string): boolean {
+  return ["verified", "published", "accepted"].includes(value.trim().toLowerCase());
+}
+
+function isOfficialKoshaUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    return url.protocol === "https:" && (hostname === "kosha.or.kr" || hostname.endsWith(".kosha.or.kr"));
+  } catch {
+    return false;
+  }
+}
+
+function normalizeBodyForHash(value: string): string {
+  return value.replace(/\r\n?/gu, "\n");
+}
+
+async function sha256Text(value: string): Promise<string | null> {
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) return null;
+  const digest = await subtle.digest("SHA-256", new TextEncoder().encode(normalizeBodyForHash(value)));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function reviewRequiredKoshaDecision(
+  source: KoshaGroundingDecision["source"],
+  reason: Exclude<KoshaGroundingReason, "verified-current">,
+  metadata: KoshaGroundingMetadata | null = null
+): KoshaGroundingDecision {
+  return {
+    status: reason === "local-corpus-integrity-failed" || reason === "local-corpus-unavailable"
+      ? "blocked"
+      : "review_required",
+    reason,
+    source,
+    reviewRequired: true,
+    directEvidenceEligible: false,
+    supportingCitationEligible: false,
+    mandatoryCitationEligible: false,
+    riskRowEligible: false,
+    promptExcerptEligible: false,
+    metadata
+  };
+}
+
+function verifiedKoshaDecision(
+  source: "local-corpus" | "remote-payload",
+  metadata: KoshaGroundingMetadata
+): KoshaGroundingDecision {
+  return {
+    status: "verified_current",
+    reason: "verified-current",
+    source,
+    reviewRequired: false,
+    directEvidenceEligible: false,
+    supportingCitationEligible: true,
+    mandatoryCitationEligible: true,
+    riskRowEligible: false,
+    promptExcerptEligible: true,
+    metadata
+  };
+}
+
+function localKoshaMetadata(item: SafetyReferenceItem): KoshaGroundingMetadata | null {
+  const guide = item.kosha_guide;
+  if (!guide) return null;
+  return {
+    uid: guide.referenceId,
+    stableDocumentKey: guide.stableDocumentKey,
+    version: guide.version,
+    currentVersion: guide.version,
+    lifecycle: guide.lifecycle,
+    reviewState: guide.quality === "accepted" ? "verified" : "review_required",
+    bodyKind: guide.bodyKind,
+    bodySha256: null,
+    officialUrl: item.source_url || null,
+    officialFileId: null,
+    publishedAt: null,
+    provenance: guide.evidenceRef || `local-corpus:${guide.referenceId}`
+  };
+}
+
+export function getKoshaGroundingDecision(item: SafetyReferenceItem): KoshaGroundingDecision | null {
+  if (!isKoshaTechnicalReference(item)) return null;
+  if (item.kosha_grounding) return item.kosha_grounding;
+  const guide = item.kosha_guide;
+  if (!guide) return reviewRequiredKoshaDecision("remote-payload", "metadata-absent");
+  const metadata = localKoshaMetadata(item);
+  if (!(item.body || "").trim()) return reviewRequiredKoshaDecision("local-corpus", "body-empty", metadata);
+  if (guide.lifecycle !== "current") {
+    return reviewRequiredKoshaDecision("local-corpus", "lifecycle-not-current", metadata);
+  }
+  if (guide.quality !== "accepted") {
+    return reviewRequiredKoshaDecision("local-corpus", "review-unverified", metadata);
+  }
+  if (guide.bodyKind !== "native") {
+    return reviewRequiredKoshaDecision("local-corpus", "body-kind-unverified", metadata);
+  }
+  if (!guide.directEligible || !guide.anchors.length || !guide.evidenceRef || !metadata) {
+    return reviewRequiredKoshaDecision("local-corpus", "provenance-unresolved", metadata);
+  }
+  return verifiedKoshaDecision("local-corpus", metadata);
+}
+
+async function buildRemoteKoshaGroundingDecision(item: SafetyReferenceItem): Promise<KoshaGroundingDecision> {
+  const body = item.body || "";
+  if (!body.trim()) return reviewRequiredKoshaDecision("remote-payload", "body-empty");
+  const records = metadataRecords(item);
+  if (!records.some((record) => Object.keys(record).length > 0)) {
+    return reviewRequiredKoshaDecision("remote-payload", "metadata-absent");
+  }
+
+  const uid = readMetadataString(records, ["reference_item_id", "referenceItemId", "uid"]) || item.id;
+  const stableDocumentKey = readMetadataString(records, ["stable_document_key", "stableDocumentKey", "stable_key"]);
+  const version = readMetadataString(records, ["version", "version_code", "versionKey", "version_key"])
+    || extractKoshaVersion(item.title);
+  const currentVersion = readMetadataString(records, [
+    "official_version_code",
+    "officialVersionCode",
+    "current_version",
+    "currentVersion"
+  ]);
+  const lifecycle = normalizeKoshaLifecycle(readMetadataString(records, [
+    "official_status",
+    "officialStatus",
+    "lifecycle",
+    "state",
+    "status",
+    "techGdlnSttsSeCdSt"
+  ]));
+  const reviewState = readMetadataString(records, ["review_state", "reviewState", "quality"]);
+  const bodyKindValue = readMetadataString(records, ["body_kind", "bodyKind", "extraction_method", "extractionMethod"])
+    .toLowerCase();
+  const bodyKind: KoshaGroundingMetadata["bodyKind"] = bodyKindValue === "native"
+    || bodyKindValue === "native-pdf"
+    || bodyKindValue === "native_pdf"
+    ? "native"
+    : "unknown";
+  const bodySha256 = readMetadataString(records, [
+    "body_sha256",
+    "bodySha256",
+    "normalized_text_sha256",
+    "normalizedTextSha256",
+    "text_sha256",
+    "textSha256"
+  ]).toLowerCase();
+  const officialUrl = readMetadataString(records, [
+    "official_url",
+    "officialUrl",
+    "official_download_url",
+    "officialDownloadUrl",
+    "source_url",
+    "sourceUrl",
+    "download_url",
+    "downloadUrl"
+  ]) || item.source_url || "";
+  const officialFileId = readMetadataString(records, [
+    "official_file_id",
+    "officialFileId",
+    "techGdlnOrgnlAtcflNo"
+  ]);
+  const publishedAt = readMetadataString(records, [
+    "official_published_at",
+    "officialPublishedAt",
+    "published_at",
+    "publishedAt",
+    "techGdlnOfancYmd"
+  ]);
+  const humanConfirmed = readMetadataBoolean(records, ["human_confirmed", "humanConfirmed"]);
+  const tampered = readMetadataBoolean(records, ["tampered", "integrity_tampered", "integrityTampered"]);
+
+  if (lifecycle !== "current") {
+    return reviewRequiredKoshaDecision("remote-payload", "lifecycle-not-current");
+  }
+  if (!isVerifiedReviewState(reviewState) || humanConfirmed === false) {
+    return reviewRequiredKoshaDecision("remote-payload", "review-unverified");
+  }
+  if (!version || !currentVersion || normalizeKoshaVersion(version) !== normalizeKoshaVersion(currentVersion)) {
+    return reviewRequiredKoshaDecision("remote-payload", "current-version-mismatch");
+  }
+  if (bodyKind !== "native") {
+    return reviewRequiredKoshaDecision("remote-payload", "body-kind-unverified");
+  }
+  if (
+    !stableDocumentKey
+    || !isOfficialKoshaUrl(officialUrl)
+    || !officialFileId
+    || !publishedAt
+    || Number.isNaN(Date.parse(publishedAt))
+  ) {
+    return reviewRequiredKoshaDecision("remote-payload", "provenance-unresolved");
+  }
+  if (!/^[a-f0-9]{64}$/u.test(bodySha256)) {
+    return reviewRequiredKoshaDecision("remote-payload", "body-integrity-unverified");
+  }
+  const actualBodySha256 = await sha256Text(body);
+  if (!actualBodySha256) {
+    return reviewRequiredKoshaDecision("remote-payload", "body-integrity-unverified");
+  }
+  if (tampered === true || actualBodySha256 !== bodySha256) {
+    return reviewRequiredKoshaDecision("remote-payload", "body-integrity-mismatch");
+  }
+
+  const metadata: KoshaGroundingMetadata = {
+    uid,
+    stableDocumentKey,
+    version,
+    currentVersion,
+    lifecycle,
+    reviewState,
+    bodyKind,
+    bodySha256,
+    officialUrl,
+    officialFileId,
+    publishedAt,
+    provenance: `${officialUrl}#file=${encodeURIComponent(officialFileId)}`
+  };
+  return verifiedKoshaDecision("remote-payload", metadata);
+}
+
+async function normalizeRemoteReferenceItem(value: unknown): Promise<SafetyReferenceItem | null> {
+  if (!isReferenceItem(value)) return null;
+  const raw = value as SafetyReferenceItem;
+  const item: SafetyReferenceItem = {
+    ...raw,
+    kosha_guide: undefined,
+    kosha_grounding: undefined
+  };
+  if (!isKoshaTechnicalReference(item)) return normalizeReferenceItem(item);
+  const decision = await buildRemoteKoshaGroundingDecision(item);
+  return normalizeReferenceItem({
+    ...item,
+    evidence_role: "supporting",
+    source_url: decision.metadata?.officialUrl || item.source_url || null,
+    kosha_grounding: decision
+  });
+}
+
 function normalizeReferenceItem(item: SafetyReferenceItem): SafetyReferenceItem {
   const evidenceRole = deriveEvidenceRole(item);
   const reflectedDocuments = item.reflected_documents?.length ? item.reflected_documents : item.primary_documents;
   const displayTitle = deriveSifDisplayTitle(item);
   const displaySummary = deriveSifDisplaySummary(item);
   const operationalMetadata = buildSafetyReferenceOperationalMetadata(item);
+  const koshaGrounding = getKoshaGroundingDecision(item);
   return {
     ...item,
     source_url: item.source_url || null,
@@ -275,6 +627,7 @@ function normalizeReferenceItem(item: SafetyReferenceItem): SafetyReferenceItem 
     ...operationalMetadata,
     evidence_role_label: evidenceRole === "direct" ? "문서 문구 직접 근거" : "현장 판단 보조 근거",
     source_kind_label: buildSourceKindLabel(item.item_type),
+    ...(koshaGrounding ? { kosha_grounding: koshaGrounding } : {}),
     ...(displayTitle ? { display_title: displayTitle } : {}),
     ...(displaySummary ? { display_summary: displaySummary } : {})
   };
@@ -491,13 +844,17 @@ function genericOperationalView(item: SafetyReferenceItem): SafetyReferenceOpera
 }
 
 export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem): SafetyReferenceOperationalView {
-  if (!isSafetyReferenceDirectEligible(item)) {
-    const controls = item.controls.map((control) => control.trim()).filter(Boolean);
+  const technicalKosha = isKoshaTechnicalReference(item);
+  const explicitKoshaDecision = technicalKosha && (item.kosha_grounding || item.kosha_guide)
+    ? getKoshaGroundingDecision(item)
+    : null;
+  if (
+    (explicitKoshaDecision && !explicitKoshaDecision.supportingCitationEligible)
+    || (!technicalKosha && !isSafetyReferenceDirectEligible(item))
+  ) {
     return {
       hazard: `검토 필요: ${compactText(getSafetyReferenceDisplayTitle(item), 64)} 근거 상태 미확정`,
-      controls: controls.length
-        ? controls
-        : ["근거 원문과 현행 여부를 검토한 뒤 현장 통제대책으로 확정"],
+      controls: ["검증된 현행 원문과 provenance를 확인한 뒤 기술적 보조지침으로 사용"],
       reviewRequired: true
     };
   }
@@ -1527,34 +1884,92 @@ export function buildSafetyReferenceOperationalMetadata(item: SafetyReferenceIte
 function deriveEvidenceRole(
   item: Pick<SafetyReferenceItem, "item_type" | "source_id" | "evidence_role" | "kosha_guide">
 ): "direct" | "supporting" {
+  if (isKoshaTechnicalReference(item)) return "supporting";
   if (item.kosha_guide) return "supporting";
   if (item.evidence_role) return item.evidence_role;
   const directTypes = new Set([
     "construction-process",
     "machinery",
-    "risk-manual",
-    "technical-guideline",
-    "technical-support-regulation"
+    "risk-manual"
   ]);
   if (directTypes.has(item.item_type)) return "direct";
   if (item.source_id.includes("law") || item.source_id.includes("regulation")) return "direct";
   return "supporting";
 }
 
+export function isKoshaTechnicalReference(
+  item: Pick<SafetyReferenceItem, "item_type">
+): boolean {
+  return item.item_type === "technical-guideline" || item.item_type === "technical-support-regulation";
+}
+
 export function isSafetyReferenceRiskEligible(item: SafetyReferenceItem): boolean {
+  if (isKoshaTechnicalReference(item)) return false;
   return !item.kosha_guide;
 }
 
 export function isSafetyReferenceDirectEligible(
-  item: Pick<SafetyReferenceItem, "kosha_guide">
+  item: Pick<SafetyReferenceItem, "item_type" | "kosha_guide">
 ): boolean {
-  const guide = item.kosha_guide;
-  if (!guide) return true;
-  return guide.quality === "accepted"
-    && guide.lifecycle === "current"
-    && guide.bodyKind === "native"
-    && guide.anchors.length > 0
-    && guide.directEligible;
+  return !isKoshaTechnicalReference(item) && !item.kosha_guide;
+}
+
+export function isKoshaSupportingCitationEligible(item: SafetyReferenceItem): boolean {
+  return getKoshaGroundingDecision(item)?.supportingCitationEligible === true;
+}
+
+export function summarizeKoshaGrounding(input: {
+  items: readonly SafetyReferenceItem[];
+  localCorpusStatus?: KoshaGroundingSearchDecision["localCorpusStatus"];
+  excludedCount?: number;
+  blockedReason?: "local-corpus-integrity-failed" | "local-corpus-unavailable";
+}): KoshaGroundingSearchDecision {
+  const decisions = input.items
+    .filter(isKoshaTechnicalReference)
+    .map(getKoshaGroundingDecision)
+    .filter((decision): decision is KoshaGroundingDecision => decision !== null);
+  const acceptedCount = decisions.filter((decision) => decision.status === "verified_current").length;
+  const reviewRequired = decisions.filter((decision) => decision.status !== "verified_current");
+  const excludedCount = input.excludedCount || 0;
+  const localCorpusStatus = input.localCorpusStatus || "not_applicable";
+  if (input.blockedReason) {
+    return {
+      status: "blocked",
+      reason: input.blockedReason,
+      localCorpusStatus,
+      acceptedCount,
+      reviewRequiredCount: reviewRequired.length,
+      excludedCount
+    };
+  }
+  if (reviewRequired.length) {
+    return {
+      status: "review_required",
+      reason: reviewRequired[0]?.reason || "metadata-absent",
+      localCorpusStatus,
+      acceptedCount,
+      reviewRequiredCount: reviewRequired.length,
+      excludedCount
+    };
+  }
+  if (acceptedCount) {
+    return {
+      status: "ready",
+      reason: "verified-current",
+      localCorpusStatus,
+      acceptedCount,
+      reviewRequiredCount: 0,
+      excludedCount
+    };
+  }
+  return {
+    status: "not_applicable",
+    reason: "not-applicable",
+    localCorpusStatus,
+    acceptedCount: 0,
+    reviewRequiredCount: 0,
+    excludedCount
+  };
 }
 
 function compactText(value: string, maxLength = 96): string {
@@ -2054,7 +2469,8 @@ async function fetchReferenceItems(config: SupabaseConfig, params: URLSearchPara
     };
   }
   const data = (await response.json()) as unknown;
-  const items = Array.isArray(data) ? data.filter(isReferenceItem).map(normalizeReferenceItem) : [];
+  const parsed = Array.isArray(data) ? await Promise.all(data.map(normalizeRemoteReferenceItem)) : [];
+  const items = parsed.filter((item): item is SafetyReferenceItem => item !== null);
   return {
     ok: true,
     status: response.status,
@@ -2118,7 +2534,8 @@ async function fetchRankedReferences(
     };
   }
   const data = (await response.json()) as unknown;
-  const items = Array.isArray(data) ? data.filter(isReferenceItem).map(normalizeReferenceItem) : [];
+  const parsed = Array.isArray(data) ? await Promise.all(data.map(normalizeRemoteReferenceItem)) : [];
+  const items = parsed.filter((item): item is SafetyReferenceItem => item !== null);
   return {
     ok: true,
     status: response.status,
@@ -2131,11 +2548,12 @@ function readVectorSimilarity(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
-function normalizeVectorReferenceRow(value: unknown): SafetyReferenceItem | null {
-  if (!isReferenceItem(value)) return null;
+async function normalizeVectorReferenceRow(value: unknown): Promise<SafetyReferenceItem | null> {
+  const normalized = await normalizeRemoteReferenceItem(value);
+  if (!normalized) return null;
   const record = value as Record<string, unknown>;
   return withRetrievalSource(
-    normalizeReferenceItem(value),
+    normalized,
     "vector",
     readVectorSimilarity(record.vector_similarity)
   );
@@ -2307,9 +2725,8 @@ async function fetchVectorReferences(
   }
 
   const data = (await response.json()) as unknown;
-  const items = Array.isArray(data)
-    ? data.map(normalizeVectorReferenceRow).filter((item): item is SafetyReferenceItem => item !== null)
-    : [];
+  const parsed = Array.isArray(data) ? await Promise.all(data.map(normalizeVectorReferenceRow)) : [];
+  const items = parsed.filter((item): item is SafetyReferenceItem => item !== null);
   return {
     status: {
       ...runtime.status,
@@ -2424,6 +2841,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
         items: filtered,
         retrievalMode: vector.items.length > 0 ? "hybrid-vector-rpc" : "ranked-rpc",
         vectorSearch,
+        koshaGrounding: summarizeKoshaGrounding({ items: filtered }),
         message: vector.items.length > 0
           ? "Supabase 안전 지식 DB vector+ranked 하이브리드 결과를 사용했습니다."
           : "Supabase 안전 지식 DB ranked RPC 결과를 사용했습니다."
@@ -2499,6 +2917,7 @@ export async function searchSafetyReferences(options: SafetyReferenceSearchOptio
     items: items.slice(0, limit),
     retrievalMode: "rest-ilike",
     vectorSearch,
+    koshaGrounding: summarizeKoshaGrounding({ items: items.slice(0, limit) }),
     message: "Supabase 안전 지식 DB에서 참고자료를 조회했습니다."
   };
 }
@@ -2508,7 +2927,7 @@ function filterByEvidenceRole(
   evidenceRole: "direct" | "supporting" | undefined
 ): SafetyReferenceItem[] {
   if (!evidenceRole) return items;
-  return items.filter((item) => item.evidence_role === evidenceRole);
+  return items.filter((item) => deriveEvidenceRole(item) === evidenceRole);
 }
 
 async function readItemTypeCounts(config: SupabaseConfig): Promise<Array<{ itemType: string; count: number }>> {

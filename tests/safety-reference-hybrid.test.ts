@@ -22,7 +22,7 @@ function reference(id: string, role: "direct" | "supporting" = "direct"): Safety
   return {
     id,
     source_id: "kosha-sif",
-    item_type: role === "supporting" ? "sif-case" : "technical-guideline",
+    item_type: role === "supporting" ? "sif-case" : "machinery",
     category: "건설",
     subcategory: null,
     title: `${id} 외벽 도장 위험`,
