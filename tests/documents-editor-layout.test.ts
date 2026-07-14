@@ -215,7 +215,8 @@ describe("documents editor layout", () => {
     await expect.poll(() => writtenCount.textContent()).toBe("9/9종");
 
     await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
-    await page.getByRole("textbox", { name: "위험성평가표 편집" }).fill("");
+    await page.getByRole("button", { name: "원문" }).click();
+    await page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" }).fill("");
 
     await expect.poll(() => writtenCount.textContent()).toBe("8/9종");
   }, 90_000);
@@ -230,7 +231,8 @@ describe("documents editor layout", () => {
     await expect.poll(() => writtenCount.textContent()).toBe("9/9종");
 
     await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
-    const editor = page.getByRole("textbox", { name: "위험성평가표 편집" });
+    await page.getByRole("button", { name: "원문" }).click();
+    const editor = page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" });
     await editor.fill("");
 
     await expect.poll(() => writtenCount.textContent()).toBe("8/9종");
@@ -258,14 +260,15 @@ describe("documents editor layout", () => {
       const documentBody = document.querySelector('[data-testid="editor-document-body"]');
       const secondaryTools = document.querySelector('[data-testid="editor-secondary-tools"]');
       const textarea = document.querySelector<HTMLTextAreaElement>('.document-textarea[aria-label="위험성평가표 편집"]');
-      const evidencePanel = document.querySelector<HTMLDetailsElement>('[data-testid="editor-evidence-panel"]');
-      const qualityPanel = document.querySelector<HTMLDetailsElement>('[data-testid="editor-quality-panel"]');
-      const graphPanel = document.querySelector<HTMLDetailsElement>('[data-testid="editor-graph-panel"]');
+      const provenanceDrawer = document.querySelector<HTMLDetailsElement>('[data-testid="editor-provenance-drawer"]');
+      const evidencePanel = document.querySelector<HTMLElement>('[data-testid="editor-evidence-panel"]');
+      const qualityPanel = document.querySelector<HTMLElement>('[data-testid="editor-quality-panel"]');
+      const graphPanel = document.querySelector<HTMLElement>('[data-testid="editor-graph-panel"]');
       const exportPanel = document.querySelector<HTMLDetailsElement>('[data-testid="editor-export-panel"]');
       const previewPanel = document.querySelector<HTMLDetailsElement>('.submission-preview-panel');
       const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
       const topbar = document.querySelector(".safeclaw-module-nav");
-      if (!shell || !documentBody || !secondaryTools || !textarea || !evidencePanel || !qualityPanel || !graphPanel || !exportPanel || !previewPanel || !documentSelect || !topbar) {
+      if (!shell || !documentBody || !secondaryTools || !textarea || !provenanceDrawer || !evidencePanel || !qualityPanel || !graphPanel || !exportPanel || !previewPanel || !documentSelect || !topbar) {
         throw new Error("Missing editor-first workspace contract target");
       }
 
@@ -281,9 +284,14 @@ describe("documents editor layout", () => {
         textareaLength: textarea.value.length,
         selectedDocument: documentSelect.value,
         documentCount: documentSelect.options.length,
-        evidenceOpen: evidencePanel.open,
-        qualityOpen: qualityPanel.open,
-        graphOpen: graphPanel.open,
+        provenanceOpen: provenanceDrawer.open,
+        provenanceSummary: provenanceDrawer.querySelector(":scope > summary")?.textContent?.trim(),
+        evidenceTag: evidencePanel.tagName,
+        qualityTag: qualityPanel.tagName,
+        graphTag: graphPanel.tagName,
+        evidenceOwned: provenanceDrawer.contains(evidencePanel),
+        qualityOwned: provenanceDrawer.contains(qualityPanel),
+        graphOwned: provenanceDrawer.contains(graphPanel),
         exportOpen: exportPanel.open,
         previewOpen: previewPanel.open
       };
@@ -297,9 +305,10 @@ describe("documents editor layout", () => {
     expect(contract.bodyTop).toBeGreaterThanOrEqual(contract.topbarBottom + 8);
     expect(contract.bodyTop).toBeLessThanOrEqual(contract.topbarBottom + 96);
     expect(contract.bodyTop).toBeLessThan(contract.toolsTop);
-    expect(contract.evidenceOpen).toBe(false);
-    expect(contract.qualityOpen).toBe(false);
-    expect(contract.graphOpen).toBe(false);
+    expect(contract.provenanceOpen).toBe(false);
+    expect(contract.provenanceSummary).toMatch(/^근거 \d+건 · 확인 필요 \d+건$/u);
+    expect([contract.evidenceTag, contract.qualityTag, contract.graphTag]).toEqual(["SECTION", "SECTION", "SECTION"]);
+    expect([contract.evidenceOwned, contract.qualityOwned, contract.graphOwned]).toEqual([true, true, true]);
     expect(contract.exportOpen).toBe(false);
     expect(contract.previewOpen).toBe(false);
   }, 90_000);
@@ -796,9 +805,7 @@ describe("documents editor layout", () => {
 
     const documentSelect = page.locator('select[aria-label="편집 문서 선택"]');
     await documentSelect.selectOption("tbmBriefing");
-    await page.locator('[data-testid="editor-evidence-panel"] > summary').click();
-    await page.locator('[data-testid="editor-quality-panel"] > summary').click();
-    await page.locator('[data-testid="editor-graph-panel"] > summary').click();
+    await page.locator('[data-testid="editor-provenance-drawer"] > summary').click();
     await page.locator('[data-testid="editor-export-panel"] > summary').click();
 
     const metrics = await page.evaluate(() => {

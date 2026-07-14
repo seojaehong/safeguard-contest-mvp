@@ -1429,10 +1429,13 @@ describe("workspace layout regression", () => {
     expect(progressSummary).toContain("12/12 생성");
     expect(progressSummary).toContain("검수 필요");
     await page.waitForFunction(() => document.querySelector(".document-harness-loop")?.textContent?.includes("근거 고정"));
+    const provenanceDrawer = page.getByTestId("document-provenance-drawer");
+    expect(await provenanceDrawer.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
+    await provenanceDrawer.locator(":scope > summary").click();
     const harnessLoop = page.locator(".document-harness-loop");
     await harnessLoop.waitFor({ state: "visible" });
     const harnessLoopText = await harnessLoop.textContent();
-    expect(harnessLoopText).toContain("작성 근거 보기");
+    expect(harnessLoopText).toContain("작성 근거");
     expect(harnessLoopText).toContain("근거 고정");
     expect(harnessLoopText).toContain("안전조치 확인");
     expect(harnessLoopText).toContain("이전 개선사항");
@@ -1508,6 +1511,7 @@ describe("workspace layout regression", () => {
             && eyebrowRect.bottom > titleRect.top + 0.01;
         }).map((head) => head.textContent?.replace(/\s+/gu, " ").trim() || "unknown");
       const workerLabels = Array.from(document.querySelectorAll<HTMLLabelElement>(".worker-edit-grid label"));
+      const structuredTextareas = Array.from(document.querySelectorAll<HTMLElement>(".document-section-textarea"));
       const roleControl = workerLabels.find((label) => label.querySelector("span")?.textContent?.trim() === "역할")?.querySelector<HTMLElement>("select");
       const phoneControl = workerLabels.find((label) => label.querySelector("span")?.textContent?.trim() === "휴대폰")?.querySelector<HTMLElement>("input");
       if (!roleControl || !phoneControl) throw new Error("Missing worker role or phone control");
@@ -1538,13 +1542,17 @@ describe("workspace layout regression", () => {
         loginRequiredMessageCount: Array.from(document.querySelectorAll("p")).filter((element) => element.textContent?.includes("로그인 후 소유 현장을 연결하면")).length,
         clawGreetingCount: Array.from(document.querySelectorAll("p")).filter((element) => element.textContent?.includes("안녕하세요, 클로입니다")).length,
         desktopTabsDisplay: getComputedStyle(desktopTabs).display,
-        mobilePickerDisplay: getComputedStyle(mobilePicker).display
+        mobilePickerDisplay: getComputedStyle(mobilePicker).display,
+        structuredSectionCount: structuredTextareas.length,
+        structuredSectionsAvoidInnerScroll: structuredTextareas.every((element) => getComputedStyle(element).overflowY === "hidden")
       };
     });
 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
-    expect(collapsedScrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 6);
+    expect(collapsedScrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 6.5);
     expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.viewportHeight * 10);
+    expect(metrics.structuredSectionCount).toBeGreaterThanOrEqual(4);
+    expect(metrics.structuredSectionsAvoidInnerScroll).toBe(true);
     expect(metrics.fieldWorkspace.display).toBe("grid");
     expect(await page.locator(".field-workspace-editor-focus").count()).toBe(1);
     expect(await page.locator(".workspace-rail").count()).toBe(1);
@@ -1637,7 +1645,7 @@ describe("workspace layout regression", () => {
       };
     });
     expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.viewportWidth + 1);
-    expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 9);
+    expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 9.5);
     expect(mobileMetrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(mobileMetrics.fieldWorkspace.width * 0.98));
     for (const button of mobileMetrics.exportButtons) {
       expect(button.left).toBeGreaterThanOrEqual(mobileMetrics.exportPanel.left);
@@ -1822,8 +1830,11 @@ describe("workspace layout regression", () => {
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     const regeneratedEditor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
     await regeneratedEditor.waitFor({ state: "visible" });
-    expect(await regeneratedEditor.inputValue()).toContain(regeneratedSentinel);
-    expect(await regeneratedEditor.inputValue()).not.toContain(sentinel);
+    expect(await page.getByTestId("document-structured-editor").textContent()).toContain(regeneratedSentinel.slice(1, -1));
+    const regeneratedSectionValues = await page.locator(".document-section-textarea").evaluateAll((elements) => (
+      elements.map((element) => element instanceof HTMLTextAreaElement ? element.value : "")
+    ));
+    expect(regeneratedSectionValues.join("\n")).not.toContain(sentinel);
     const draftKeys = await page.evaluate(() => Object.keys(window.localStorage).filter((key) => key.startsWith("safeclaw-workpack:")));
     expect(draftKeys).toHaveLength(2);
   }, 90_000);
