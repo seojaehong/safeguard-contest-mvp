@@ -15,4 +15,3 @@ startedAt=2026-07-14T21:38:26.1451670+09:00
       Tests  28 passed | 2 skipped (30)
    Start at  21:38:32
    Duration  2.56s (transform 996ms, setup 0ms, import 1.15s, tests 54ms, environment 0ms)
-
