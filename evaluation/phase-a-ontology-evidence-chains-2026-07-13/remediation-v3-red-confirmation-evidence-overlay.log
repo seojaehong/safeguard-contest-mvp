@@ -1,0 +1,21 @@
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-confirmation-route.test.ts -t ignores client identity --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ FAIL  tests/phase-a-confirmation-route.test.ts > Phase A confirmation route > ignores client identity/time, persists a server-bound confirmation, and rejects mismatched replay
+AssertionError: expected persisted evidence_summary to match the full raw object.
+
+Missing keys:
+- reviewedLocalizationEnvelopes.vi.canonicalWorkpackRevision
+- reviewedLocalizationEnvelopes.vi.review.futurePolicy
+- reviewedLocalizationEnvelopes.vi.dispatch.futureChannelHints
+- dispatch.cas and dispatch.futureDeliveryPolicy
+- localization.futureLocalePolicy.unknownNested
+- futureShareEnvelope.nested.unknownKeys
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 skipped (3)
+   Duration  1.07s
+
+RED rationale: confirmation reconstructed a known AskResponse subset and discarded future Share, localization, and dispatch evidence keys.

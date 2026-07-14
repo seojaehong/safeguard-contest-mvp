@@ -1,22 +1,68 @@
-# Phase A authority remediation evidence
+# Phase A ontology/workpack authority remediation evidence
 
-- Status: `HOLD_FRESH_WHOLE_SERIES_REVIEW_REQUIRED`
+- Status: `HOLD_FRESH_INDEPENDENT_REVIEW_REQUIRED`
 - Branch: `fix/phase-a-ontology-target-ready`
-- Remediation product: `ed90a95dad3a28d6171758c52ac03acba83733fd`
-- Product tree: `315c753db35faf229daf49a447c2568d138a185a`
+- Product commit: `5dba6964e2e2089683a926a39edb1bb8896aa99d`
+- Product tree: `6bf7ff2d1d98d08ab6494000348c7c27c124f2ab`
+- Source base: `2aa8aa9136a344671d50d8a815c33df8aeb40178`
 - Main/Share semantic merge: not performed
-- DB/schema/migration/data/package/lock mutation: none
+- DB/schema/migration/data/package/lock changes: none
 
-## Review series
+## Product series
 
-The inherited 19-commit product series is `102ff66b67cc40ff16386c61a221d3815b142e1b..cc5ba41f96c486e87445efba470c668b36107e4f`; every exact SHA is listed in `report.json` and `evidence-manifest.json`. Its prior evidence child is `ff093fae30c331816f0068f9075b91b151d05813`.
+1. `8f290b2fd0bddd391548285c41462bd0ec0b782a` - harden authenticated workpack scope, restore authority, connected export, and confirmation persistence
+2. `5dba6964e2e2089683a926a39edb1bb8896aa99d` - bind the evidence gate to current Share head `3162b4f`
 
-The remediation product series is:
+The product changes 16 files from the clean pushed source base. This evidence child must have the final product commit as its direct parent. It does not integrate either target and does not approve the product.
 
-1. `1f9784f4087e240b009c232868e5cd387a55dd48` - harden Phase A workpack authority
-2. `ed90a95dad3a28d6171758c52ac03acba83733fd` - bind current-main and Share semantic adoption conflicts
+## Closed findings
 
-This evidence must be a direct child of the second product commit. A fresh independent review must assess the whole inherited and remediation series. No earlier HOLD is converted into approval here.
+### Authenticated deterministic scope
+
+- Workpack identity now hashes the authenticated user, exact organization ID, exact site ID, and complete generation seal.
+- A supplied organization/site pair is accepted only after both rows are verified under the authenticated owner. Partial, malformed, foreign, and site-only selections fail closed with `409`; unauthenticated requests remain `401`.
+- First-use fallback rows use deterministic organization/site UUIDs and primary-key race arbitration. The same user, scope, and seal converges across concurrent requests; different valid organizations/sites produce distinct workpack IDs.
+- No arbitrary body scope is trusted and no schema or migration was introduced.
+
+### Local restore revalidation
+
+- Document edits and example/job changes abort the active local-restore revalidation gate and clear saved server authority.
+- The browser contract deliberately ignores `AbortSignal`, releases a valid server response after an edit, and proves that the response cannot call `setData`, overwrite local storage, or revive server authority.
+
+### Connected export
+
+- Every connected export click performs a new authenticated GET for the exact server row.
+- Export requires unchanged workpack ID, RFC3339 `workpacks.updated_at` revision, generation seal, and idempotency binding. Changed, malformed, unavailable, aborted, or stale responses do not create a download.
+- Export content and filename are rebuilt from the click-time server row, never from the cached `server_verified` snapshot.
+
+### Confirmation evidence preservation
+
+- Confirmation keeps the complete raw `evidence_summary` and overlays only `answer`, `phaseAReview`, `qualityContract`, `generationEvidence`, `generationEvidenceSnapshot`, and `workpackAuthorityBinding` under the existing `workpacks.updated_at` compare-and-set.
+- Unknown and future nested `reviewedLocalizationEnvelopes`, localization, dispatch, and Share keys survive exactly.
+- Share `canonicalWorkpackRevision` remains a SHA-256 content hash. It is never substituted with ontology `revision`/`updatedAt`, which remain RFC3339 `workpacks.updated_at` authority.
+- A localization review that changes `workpacks.updated_at` invalidates prior Phase A authority/request scope and requires an exact row reread. Preserved stale envelopes are data to revalidate, not authority to trust.
+- Confirmation CAS remains `workpacks.updated_at`; dispatch CAS remains `workpack_share_sessions.updated_at`.
+
+## Preserved contracts
+
+The remediation preserves SIF -> KOSHA Guide -> law ordering, `naturalize_only`, statutory mandate versus guidance separation, generation seal verification, exact server authority, confirmation CAS, report authority, and honest HOLD evidence. It does not alter Share URL state, Share request scope, `initialWorkpackId`, `initialWorkpackAuthority`, `initialRequiresRevalidation`, or theme ownership.
+
+## Verification
+
+All commands below ran sequentially at product commit `5dba6964e2e2089683a926a39edb1bb8896aa99d`; no concurrent Next builds were started.
+
+| Gate | Result | Evidence |
+| --- | --- | --- |
+| Focused route/unit authority | 3 files, 28/28 passed | `remediation-v3-final-focused-unit.log` |
+| Delayed local restore browser | 1 focused test passed, 12 skipped | `remediation-v3-final-focused-local-restore-browser.log` |
+| Connected export changed/stale browser | 1 focused test passed, 9 skipped | `remediation-v3-final-focused-connected-export-browser.log` |
+| Existing focused matrix | 19 files, 264/264 passed | `remediation-v3-final-focused-19-files.log` |
+| Phase A lifecycle browser | 1 file, 13/13 passed | `remediation-v3-final-lifecycle-13.log` |
+| Reports browser | 1 file, 10/10 passed | `remediation-v3-final-reports-10.log` |
+| Strict TypeScript | passed | `remediation-v3-final-typecheck.log` |
+| Diff/forbidden identity | 16 changed files, diff-check 0, forbidden paths 0 | `remediation-v3-final-diff-forbidden-identity.log` |
+
+RED and GREEN logs for all four findings are included as separate artifacts. Runtime identity is Node `v24.12.0`, npm `11.6.2`, Next `15.5.20`, TypeScript `5.9.3`, and Vitest `4.1.10`.
 
 ## Target authority
 
@@ -31,46 +77,22 @@ Minimum authority ancestor: `67d2c9e28e7278c58f46b46c2512c7133d88d1d3`
 - `b3762867d380f20faee2a83a17354dc61557ce12`: historical rejected
 - `cc9f5af297950b73b53a9ab4018bdc143830c499`: rejected/pending-unintegrated
 
-Current-main reconciliation is HOLD on `tests/reports-download-center.test.ts`. Read-only `git merge-tree --write-tree` produced diagnostic tree `d4c141c1fd1d0e6013f8cee27fff016d13357815`; it did not modify this worktree.
+Current-main reconciliation is HOLD on `tests/reports-download-center.test.ts`. Read-only `git merge-tree --write-tree` produced diagnostic tree `47f6c8e18c6f5cd959157f2d9c355e4eb23622d0` and did not modify the worktree.
 
-The diagnostic tree preserves target-owned `lib/db-harness.ts`, `lib/safety-reference-catalog.ts`, and `lib/safety-reference-catalog-server.ts` byte-for-byte. Its auto-merged `lib/search.ts` retains safe per-source rejection logging and verified-current technical guidance. The tree also retains integrity-blocked aggregate behavior, SIF -> KOSHA -> law order, `naturalize_only`, mandate/guidance separation, and exact `PhaseAGenerationGrounding`.
+## Share semantic adoption
 
-## Closed P1 authority gaps
-
-- All generation, save, confirmation, revalidation, improvement-save, and report-loading operations use a request epoch, owned `AbortController`, and post-response current-binding check. Editing or a second generation invalidates prior work; textarea/example actions cannot reset generating state.
-- The server derives one authenticated creator-plus-generation UUID and inserts it against the existing `workpacks.id` primary key. Concurrent tabs/devices converge through atomic PK arbitration. A `23505` response reopens only an exact creator/org/site/scope/generation/HMAC binding; every mismatch or collision fails closed.
-- Local JSON restore/export is always `local_only_unverified`. Connected UI/export requires exact server row ID, revision/updatedAt, generation seal, and authority revalidation.
-- Search rejection is no longer silent. The repository logger records only the safe source label and error type.
-
-No DB approval blocker remains for this implementation because it uses the existing UUID primary key and evidence-summary binding without changing schema. No live Supabase mutation was run, so the report does not claim live-DB verification.
-
-## Verification
-
-| Gate | Result | Evidence |
-| --- | --- | --- |
-| Phase A browser lifecycle | 1 file, 13/13 passed at `1f9784f`; final delta is contract/docs/evidence gate only | `remediation-v2-green-phase-a-browser-lifecycle-final.log` |
-| Reports browser | 1 file, 10/10 passed at `1f9784f` | `remediation-v2-green-reports-browser.log` |
-| Focused non-browser | 19 files, 264/264 passed; final delta only changes the evidence gate | `remediation-v2-focused-non-browser-product-final.log` |
-| Strict TypeScript | passed at `ed90a95` | `remediation-v2-typecheck-product-final.log` |
-| Diff/forbidden/identity | 23 changed files, diff-check 0, forbidden paths 0, ancestry 0 | `remediation-v2-diff-forbidden-identity-final.log` |
-| Full suite | deferred to post-semantic-integration final HEAD | not run by explicit speed-priority instruction |
-| Production build | deferred to post-semantic-integration final HEAD | not run while Share/KOSHA matrices were active |
-
-Runtime identity: Node `v24.12.0`, npm `11.6.2`, Next `15.5.20`, TypeScript `5.9.3`, Vitest `4.1.10`. `package.json` and `package-lock.json` are unchanged.
-
-## Share semantic adoption contract
-
-Share v2 baseline `22de1180d69263f7c08ac0ed0cfda0894e2db7f5` and request-scope remediation `7141baac3e0abca146ef6c110093c1c0643760a2` remain under review. Read-only reconciliation against Phase A reports these six content conflicts:
+Share v2 baseline `22de1180d69263f7c08ac0ed0cfda0894e2db7f5`, request-scope remediation `7141baac3e0abca146ef6c110093c1c0643760a2`, and browser teardown remediation `3162b4fe5e7ea32f139ff66bffa7835b14e29bd4` remain under review. Read-only reconciliation produced diagnostic tree `3e09ffbddecccf6bfe5e2a458fd3105d6bc563d9` with seven content conflicts:
 
 1. `app/api/workpacks/[id]/route.ts`
 2. `components/FieldOperationsWorkspace.tsx`
 3. `components/SafeGuardCommandCenter.tsx`
 4. `lib/workpack-commercial-store.ts`
-5. `tests/workpack-generation-evidence-route.test.ts`
-6. `tests/workpack-share-authority-routes.test.ts`
+5. `tests/helpers/isolated-next-browser-harness.ts`
+6. `tests/workpack-generation-evidence-route.test.ts`
+7. `tests/workpack-share-authority-routes.test.ts`
 
-Main must resolve those files only after both fresh reviews. Preserve Phase A server authority, `revision`, `updatedAt`, complete `evidenceSummary`, generation seal, and exact confirmation compare-and-set. Preserve Share's request-scope stale-response guard, `dispatchBinding`, and dispatch compare-and-set. Build one exact server-row snapshot; any row revision, evidence summary, confirmation, generation, request scope, or dispatch binding drift invalidates the joint authority and blocks connected export/session/dispatch.
+Future semantic integration must preserve Phase A server authority, full raw evidence summary, RFC3339 row revision, generation seal, and confirmation compare-and-set. It must also preserve Share URL/request-scope state, the request-scope stale-response guard, SHA-256 `canonicalWorkpackRevision`, `reviewedLocalizationEnvelopes`, `dispatchBinding`, and dispatch compare-and-set. Any localization update to `workpacks.updated_at` requires a row reread before confirmation, connected export, session, or dispatch.
 
-## Gate
+## Verdict
 
-Verdict: `HOLD`. Fresh independent whole-series review is required. The final semantic integration HEAD must resolve the documented conflicts, rerun the combined full suite and production build, and regenerate both merge-tree identities before any readiness claim.
+`HOLD`. Fresh independent review of the complete product series is required. No integration or self-approval was performed.

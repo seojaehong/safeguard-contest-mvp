@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/command-center-request-lifecycle.test.ts tests/command-center-phase-a-review.test.ts tests/phase-a-citation-authority.test.ts tests/phase-a-confirmation-route.test.ts tests/phase-a-server-confirmation.test.ts tests/phase-a-share-authority-contract.test.ts tests/phase-a-document-authority.test.ts tests/reporting-downloads.test.ts tests/reports-download-center.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-store.test.ts tests/workpack-readiness.test.ts tests/ontology-evidence-chains.test.ts tests/workpack-ontology-qa.test.ts tests/generation-evidence.test.ts tests/ask-generation-evidence-routes.test.ts tests/generation-evidence-operation-routes.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  19 passed (19)
+      Tests  264 passed (264)
+   Start at  16:25:34
+   Duration  59.13s (transform 1.25s, setup 0ms, import 3.72s, tests 44.40s, environment 2ms)

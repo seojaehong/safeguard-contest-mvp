@@ -1,42 +1,20 @@
 {
-  "schemaVersion": 4,
-  "generatedAt": "2026-07-14T14:48:27.6144106+09:00",
-  "status": "HOLD_FRESH_WHOLE_SERIES_REVIEW_REQUIRED",
+  "schemaVersion": 5,
+  "generatedAt": "2026-07-14T07:32:15.561Z",
+  "status": "HOLD_FRESH_INDEPENDENT_REVIEW_REQUIRED",
   "branch": "fix/phase-a-ontology-target-ready",
   "source": {
     "authorityRef": "refs/remotes/origin/feat/phase-a-evidence-integration",
     "minimumAuthority": "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
     "currentMainTarget": "920c7f360688352156de4854b4957a9f2f1f0e43",
     "authorityTree": "7e45e4f856d8c6e1a6b6c4e00956bd190a2c6e92",
-    "inheritedSeriesBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
-    "inheritedProductSeries": [
-      "102ff66b67cc40ff16386c61a221d3815b142e1b",
-      "d9cd92daff08b3a261fdeaa9293eeeb995bac089",
-      "7afd363d5288e05b582491e98a33eeda5d4b7398",
-      "1a16a3177bc10ea0861bfbd6d2e09b475068a3d1",
-      "f4b07e4663758e20bca0c9b143da8b2f8680ab2a",
-      "835ff56a07b925270dcea215044d995f984a0cf2",
-      "d2f55c30dc643cc66adfa169755e5dd6db58bd08",
-      "0b821fef29311d0cd9b265c7c7021f663b82390d",
-      "a4134fea9fa81043db03083ac080f55df9715681",
-      "017333f5fbbe79f064be25d0937db0896293905d",
-      "36eb8c7925b5826e1c7e88bba1dc0246cc46b8a2",
-      "35283baaf3aad4e14fa20da4df803b4cc3c046f2",
-      "f613f5d73118bb81e6199a5ff057e850b3859692",
-      "31767959b5904afbab77ab5ee36f24da6d15b1c8",
-      "888ad1c16b17b88b16bd0163deffbf7ebde740e1",
-      "fd573630afe72977deec7debe58649a850101fbd",
-      "fae7cbd139efecad00cf192b0788db2bd2f4e4cc",
-      "e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4",
-      "cc5ba41f96c486e87445efba470c668b36107e4f"
-    ],
-    "priorEvidenceCommit": "ff093fae30c331816f0068f9075b91b151d05813",
+    "sourceBase": "2aa8aa9136a344671d50d8a815c33df8aeb40178",
     "remediationProductSeries": [
-      "1f9784f4087e240b009c232868e5cd387a55dd48",
-      "ed90a95dad3a28d6171758c52ac03acba83733fd"
+      "8f290b2fd0bddd391548285c41462bd0ec0b782a",
+      "5dba6964e2e2089683a926a39edb1bb8896aa99d"
     ],
-    "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
-    "productTree": "315c753db35faf229daf49a447c2568d138a185a",
+    "productCommit": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
+    "productTree": "6bf7ff2d1d98d08ab6494000348c7c27c124f2ab",
     "targetHistory": [
       {
         "sha": "920c7f360688352156de4854b4957a9f2f1f0e43",
@@ -57,106 +35,140 @@
     ]
   },
   "verification": {
-    "focusedNonBrowser": {
+    "focusedUnit": {
       "status": "passed",
-      "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+      "productCommit": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
+      "testFiles": 3,
+      "tests": 28,
+      "log": "remediation-v3-final-focused-unit.log"
+    },
+    "delayedLocalRestoreBrowser": {
+      "status": "passed",
+      "productCommit": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
+      "tests": 1,
+      "skipped": 12,
+      "log": "remediation-v3-final-focused-local-restore-browser.log"
+    },
+    "connectedExportBrowser": {
+      "status": "passed",
+      "productCommit": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
+      "tests": 1,
+      "skipped": 9,
+      "log": "remediation-v3-final-focused-connected-export-browser.log"
+    },
+    "focusedMatrix": {
+      "status": "passed",
+      "productCommit": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
       "testFiles": 19,
       "tests": 264,
-      "log": "remediation-v2-focused-non-browser-product-final.log"
+      "log": "remediation-v3-final-focused-19-files.log"
     },
     "phaseABrowserLifecycle": {
       "status": "passed",
-      "executedProductCheckpoint": "1f9784f4087e240b009c232868e5cd387a55dd48",
+      "productCommit": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
       "testFiles": 1,
       "tests": 13,
-      "finalProductDelta": "typed Share adoption constants, documentation, and evidence gate only",
-      "log": "remediation-v2-green-phase-a-browser-lifecycle-final.log"
+      "log": "remediation-v3-final-lifecycle-13.log"
     },
     "reportsBrowser": {
       "status": "passed",
-      "executedProductCheckpoint": "1f9784f4087e240b009c232868e5cd387a55dd48",
+      "productCommit": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
       "testFiles": 1,
       "tests": 10,
-      "log": "remediation-v2-green-reports-browser.log"
+      "log": "remediation-v3-final-reports-10.log"
     },
     "strictTypecheck": {
       "status": "passed",
-      "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
+      "productCommit": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
       "command": "npm.cmd run typecheck",
-      "log": "remediation-v2-typecheck-product-final.log"
+      "log": "remediation-v3-final-typecheck.log"
     },
     "diffAndIdentity": {
       "status": "passed",
-      "changedFiles": 23,
+      "changedFiles": 16,
       "diffCheckExit": 0,
       "forbiddenPathCount": 0,
-      "minimumAuthorityAncestorExit": 0,
-      "log": "remediation-v2-diff-forbidden-identity-final.log"
-    },
-    "fullSuite": {
-      "status": "deferred_post_semantic_integration",
-      "reason": "Share and KOSHA worktree matrices were active; the user directed this gate to the final semantic integration HEAD."
-    },
-    "productionBuild": {
-      "status": "deferred_post_semantic_integration",
-      "reason": "No overlapping build was started while Share and KOSHA worktree verification was active."
+      "log": "remediation-v3-final-diff-forbidden-identity.log"
     }
   },
   "authorityRemediation": {
-    "staleAsync": "Generation, save, confirmation, revalidation, improvement-save, and report loading use bound request epochs, AbortController ownership, and post-response current-binding checks.",
-    "serverCreateOrReopen": "The authenticated creator plus full verified generation seal derives one server-owned UUID. The existing workpacks UUID primary key arbitrates concurrent tabs/devices atomically; 23505 reopens only an exact creator, organization, site, scope digest, generation seal, and HMAC-authorized row, otherwise it fails closed.",
-    "reloadAndExport": "Browser-local JSON is local_only_unverified. Connected UI and export require exact server row ID, revision/updatedAt, generation seal, and authority binding revalidation.",
-    "ontology": "SIF -> KOSHA -> law order, naturalize_only, statutory mandate versus technical guidance, and exact PhaseAGenerationGrounding remain preserved.",
-    "searchRejection": "Every rejected generation source is logged through the repository logger with source label and error type only; raw responses and secrets are excluded."
+    "authenticatedScopeIdentity": {
+      "status": "closed_red_green",
+      "identity": [
+        "authenticated_user_id",
+        "organization_id",
+        "site_id",
+        "generation_seal"
+      ],
+      "foreignScopeStatus": 409,
+      "partialScopeStatus": 409,
+      "unauthenticatedStatus": 401,
+      "redLog": "remediation-v3-red-authenticated-scope-identity.log",
+      "greenLog": "remediation-v3-green-authenticated-scope-identity.log"
+    },
+    "localRestoreRevalidation": {
+      "status": "closed_red_green",
+      "lateResponseCanCommit": false,
+      "editInvalidatesAuthority": true,
+      "jobChangeInvalidatesAuthority": true,
+      "redLog": "remediation-v3-red-local-restore-edit-race.log",
+      "greenLog": "remediation-v3-green-local-restore-edit-race.log"
+    },
+    "connectedExport": {
+      "status": "closed_red_green",
+      "clickTimeServerReread": true,
+      "cachedServerSnapshotExported": false,
+      "changedOrStaleResponseDownloads": 0,
+      "redLog": "remediation-v3-red-connected-export-revalidation.log",
+      "greenLog": "remediation-v3-green-connected-export-revalidation.log"
+    },
+    "confirmationEvidenceOverlay": {
+      "status": "closed_red_green",
+      "rawEvidenceSummaryPreserved": true,
+      "unknownNestedKeysPreserved": true,
+      "confirmationCas": "workpacks.updated_at",
+      "dispatchCas": "workpack_share_sessions.updated_at",
+      "canonicalWorkpackRevisionKind": "sha256_content_hash",
+      "ontologyRevisionKind": "rfc3339_workpacks_updated_at",
+      "redLog": "remediation-v3-red-confirmation-evidence-overlay.log",
+      "greenLog": "remediation-v3-green-confirmation-evidence-overlay.log"
+    }
   },
   "database": {
     "schemaChanged": false,
-    "migrationChanged": false,
+    "migrationAdded": false,
     "dataChanged": false,
-    "liveMutationExecuted": false,
-    "existingAuthorityPrimitive": "workpacks.id uuid primary key",
-    "dbApprovalBlocker": null,
-    "residual": "Live Supabase concurrency was not mutated in this review run; route and concurrent-insert behavior is covered by focused tests."
+    "liveMutationRun": false
   },
   "targetReconciliation": {
     "status": "content-conflict-hold",
     "semanticMergePerformed": false,
     "targetCommit": "920c7f360688352156de4854b4957a9f2f1f0e43",
-    "productCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
-    "diagnosticTreeOid": "d4c141c1fd1d0e6013f8cee27fff016d13357815",
+    "targetTree": "7e45e4f856d8c6e1a6b6c4e00956bd190a2c6e92",
+    "productCommit": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
+    "diagnosticTreeOid": "47f6c8e18c6f5cd959157f2d9c355e4eb23622d0",
     "conflictPaths": [
       "tests/reports-download-center.test.ts"
-    ],
-    "koshaPreservationLog": "remediation-v2-kosha-diagnostic-preservation.log"
+    ]
   },
   "shareAdoption": {
     "status": "content-conflict-hold",
     "semanticMergePerformed": false,
     "reviewHead": "22de1180d69263f7c08ac0ed0cfda0894e2db7f5",
     "baseProductHead": "fc2bd1783fcc413981306f689d67bb6c659a985e",
-    "productHead": "7141baac3e0abca146ef6c110093c1c0643760a2",
-    "phaseAProductCommit": "ed90a95dad3a28d6171758c52ac03acba83733fd",
-    "diagnosticTreeOid": "945d7ba696dd0a312d462773800fa4b4fe2bcfc9",
+    "requestScopeHead": "7141baac3e0abca146ef6c110093c1c0643760a2",
+    "productHead": "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4",
+    "productTree": "7caa7de486db7e53e5b15fa5c18234360908594a",
+    "phaseAProductCommit": "5dba6964e2e2089683a926a39edb1bb8896aa99d",
+    "diagnosticTreeOid": "3e09ffbddecccf6bfe5e2a458fd3105d6bc563d9",
     "conflictPaths": [
       "app/api/workpacks/[id]/route.ts",
       "components/FieldOperationsWorkspace.tsx",
       "components/SafeGuardCommandCenter.tsx",
       "lib/workpack-commercial-store.ts",
+      "tests/helpers/isolated-next-browser-harness.ts",
       "tests/workpack-generation-evidence-route.test.ts",
       "tests/workpack-share-authority-routes.test.ts"
-    ],
-    "preservePhaseA": [
-      "server row authority",
-      "revision and updatedAt",
-      "complete evidenceSummary",
-      "generation seal",
-      "exact confirmation compare-and-set"
-    ],
-    "preserveShare": [
-      "request-scope stale-response guard",
-      "updatedAt and complete evidenceSummary",
-      "dispatchBinding",
-      "dispatch compare-and-set"
     ]
   },
   "runtimeIdentity": {
@@ -164,19 +176,12 @@
     "npm": "11.6.2",
     "next": "15.5.20",
     "typescript": "5.9.3",
-    "vitest": "4.1.10",
-    "packageJsonBlob": "92f8d7c7dd8d235d979c36eb4b21438f0cbe9e28",
-    "packageLockBlob": "3c5b5dda0a81b4ece4423140015b02a2158cd3f3"
+    "vitest": "4.1.10"
   },
   "review": {
     "verdict": "HOLD",
-    "freshIndependentWholeSeriesReviewRequired": true,
-    "integrationAllowed": false,
-    "postIntegrationGates": [
-      "resolve the one current-main conflict and six Share conflicts by semantic composition",
-      "run the combined full suite",
-      "run one production build",
-      "recompute target and Share merge-tree identities"
-    ]
+    "integrationPerformed": false,
+    "selfApproved": false,
+    "freshIndependentReviewRequired": true
   }
 }

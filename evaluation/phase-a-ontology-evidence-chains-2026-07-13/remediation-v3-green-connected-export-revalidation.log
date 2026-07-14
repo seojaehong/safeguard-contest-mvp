@@ -1,0 +1,10 @@
+> safeclaw@0.1.0 test
+> vitest run --run tests/reports-download-center.test.ts -t revalidates the exact server row --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 9 skipped (10)
+   Duration  18.55s
+
+GREEN contract: export click performs a second authenticated exact-row GET, rejects a changed RFC3339 workpacks.updated_at authority without downloading, and ignores a delayed response after report scope changes even when fetch does not honor AbortSignal.

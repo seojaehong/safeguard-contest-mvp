@@ -1,0 +1,10 @@
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-confirmation-route.test.ts -t ignores client identity --maxWorkers=1 --no-file-parallelism
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 2 skipped (3)
+   Duration  987ms
+
+GREEN contract: confirmation preserves the complete raw evidence_summary, including unknown nested Share/localization/dispatch keys and the SHA-256 canonicalWorkpackRevision, while overlaying only confirmation-owned fields under the RFC3339 workpacks.updated_at CAS.

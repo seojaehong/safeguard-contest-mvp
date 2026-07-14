@@ -1,0 +1,18 @@
+command=git merge-tree --write-tree 920c7f360688352156de4854b4957a9f2f1f0e43 5dba6964e2e2089683a926a39edb1bb8896aa99d
+targetTree=7e45e4f856d8c6e1a6b6c4e00956bd190a2c6e92
+productTree=6bf7ff2d1d98d08ab6494000348c7c27c124f2ab
+47f6c8e18c6f5cd959157f2d9c355e4eb23622d0
+100644 37d92b5312546c449537d88c38b074e8230942c5 1	tests/reports-download-center.test.ts
+100644 8561425da2139584daf3b77efd97ffe3794aedf8 2	tests/reports-download-center.test.ts
+100644 43d8e6c559a557319ae8d9ee205125702c22ecae 3	tests/reports-download-center.test.ts
+
+Auto-merging app/globals.css
+Auto-merging components/ReportsDownloadCenter.tsx
+Auto-merging lib/reporting-downloads.ts
+Auto-merging lib/search.ts
+Auto-merging tests/reporting-downloads.test.ts
+Auto-merging tests/reports-download-center.test.ts
+CONFLICT (content): Merge conflict in tests/reports-download-center.test.ts
+exitCode=1
+semanticMergePerformed=false
+verdict=HOLD

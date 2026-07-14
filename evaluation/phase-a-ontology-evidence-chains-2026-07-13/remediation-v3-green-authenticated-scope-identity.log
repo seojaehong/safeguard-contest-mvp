@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/workpack-generation-evidence-route.test.ts -t converges within each authenticated scope|denies foreign or site-only scope|atomically reopens --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed | 13 skipped (16)
+   Start at  15:54:36
+   Duration  1.05s (transform 328ms, setup 0ms, import 349ms, tests 154ms, environment 0ms)

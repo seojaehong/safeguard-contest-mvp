@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/phase-a-product-remediation-browser.test.ts -t invalidates delayed local-restore authority --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 12 skipped (13)
+   Start at  15:58:19
+   Duration  22.62s (transform 360ms, setup 0ms, import 845ms, tests 21.20s, environment 0ms)

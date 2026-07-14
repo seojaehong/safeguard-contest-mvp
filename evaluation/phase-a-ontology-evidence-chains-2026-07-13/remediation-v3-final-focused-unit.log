@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/workpack-generation-evidence-route.test.ts tests/phase-a-confirmation-route.test.ts tests/openclaw-broker-ui-context.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  3 passed (3)
+      Tests  28 passed (28)
+   Start at  16:24:14
+   Duration  2.90s (transform 572ms, setup 0ms, import 707ms, tests 451ms, environment 0ms)

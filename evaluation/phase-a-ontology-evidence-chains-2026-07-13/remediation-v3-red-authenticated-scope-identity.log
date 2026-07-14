@@ -1,0 +1,29 @@
+
+> safeclaw@0.1.0 test
+> vitest run --run tests/workpack-generation-evidence-route.test.ts -t converges within each authenticated scope --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+ ❯ tests/workpack-generation-evidence-route.test.ts (16 tests | 1 failed | 15 skipped) 148ms
+     × converges within each authenticated scope and separates the same user and seal across organizations and sites 147ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-generation-evidence-route.test.ts > workpack generation evidence save gate > converges within each authenticated scope and separates the same user and seal across organizations and sites
+AssertionError: expected '080d6cd6-64c0-8dca-8a6c-1cb719d3ecd2' not to be '080d6cd6-64c0-8dca-8a6c-1cb719d3ecd2' // Object.is equality
+ ❯ tests/workpack-generation-evidence-route.test.ts:266:42
+    264|     expect(firstCreated.workpackId).toBe(firstReopened.workpackId);
+    265|     expect(secondCreated.workpackId).toBe(secondReopened.workpackId);
+    266|     expect(secondCreated.workpackId).not.toBe(firstCreated.workpackId);
+       |                                          ^
+    267|     expect(mocks.resolveAuthenticatedWorkspaceContext).toHaveBeenCalle…
+    268|       expect.anything(),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  15:52:20
+   Duration  1.17s (transform 402ms, setup 0ms, import 442ms, tests 148ms, environment 0ms)
