@@ -138,6 +138,8 @@ describe("user-visible Korean copy contract", () => {
 
     const currentWorkpack = read("components/CurrentWorkpackModules.tsx");
     expect(currentWorkpack).toContain("providerStatus");
+    expect(currentWorkpack).toContain("formatDispatchProviderStatus(log.providerStatus)");
+    expect(currentWorkpack).not.toContain('log.providerStatus || "상태 확인"');
     expect(read("app/ontology/page.tsx")).toContain("/api/workpacks/[id]/operation-graph");
   });
 

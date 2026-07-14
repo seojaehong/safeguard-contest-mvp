@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-07-14T13:30:00+09:00",
   "baseSha": "01ba1c9",
-  "branch": "feat/northstar-export-integration",
+  "branch": "feat/northstar-export-integration-clean",
   "databaseChanged": false,
   "schemaChanged": false,
   "candidateProductCommits": [
@@ -18,7 +18,10 @@
     "focusedTestsPassed": 56,
     "reconciledTestFiles": 2,
     "reconciledTestsPassed": 46,
+    "reviewRemediationTestFiles": 3,
+    "reviewRemediationTestsPassed": 27,
     "typecheck": "pass"
   },
-  "integrationStatus": "pending-independent-review"
+  "staleEvidenceCommitIsAncestor": false,
+  "integrationStatus": "pending-independent-rereview"
 }
