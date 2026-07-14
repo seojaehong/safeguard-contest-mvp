@@ -58,7 +58,7 @@ environment file changed. Main integration remains on hold for independent revie
    reported harness mode `dev`. GREEN requires `prod` and measures the full visible
    document instead of `.document-editor-surface` descendants only.
 
-Raw RED and GREEN logs are retained under `remediation/`. Seven failed intermediate
+Raw RED and GREEN logs are retained under `remediation/`. Eight failed intermediate
 logs are explicitly RED-named and inventoried in `report.json`; no failing log has a
 GREEN filename.
 
@@ -69,10 +69,12 @@ GREEN filename.
   `154.79s`.
 - North Star production Day/Night viewport matrix: `4/4`, exit `0`, `32.49s`.
 - Strict TypeScript: `tsc --noEmit --incremental false`, exit `0`.
-- Production build bound to the product SHA/tree: compiled, type checked, static pages
-  `27/27`, exit `0`.
-- `git diff --check`: exit `0`, no output.
-- `build.log` trailing-whitespace lines: `0`.
+- Production build evidence is `remediation/build-final.log`: compiled, type checked,
+  static pages `27/27`, exit `0`.
+- `git diff --check 01ba1c924e5ab19803bdb86527fce9eccfc1ab60...HEAD`:
+  exit `0`, no output; recorded in `remediation/full-range-diff-check-final.log`.
+- `remediation/build-final.log` trailing-whitespace lines: `0`. The legacy root
+  `build.log` is also normalized to `0` trailing-whitespace lines.
 - Runtime product diff from evidence HEAD `5668483`: `0`; evidence test diff: `1`;
   Share diff: `0`.
 - Final worktree-owned Node/Next/Vitest process count at audit: `0`.
@@ -97,6 +99,8 @@ in `browser-metrics.json`; reviewed Day/Night screenshots remain under `screensh
 - `remediation/production-viewport-matrix-final.log`
 - `remediation/typecheck-final.log`
 - `remediation/build-final.log`
+- `remediation/red-full-range-diff-check.log`
+- `remediation/full-range-diff-check-final.log`
 - `remediation/source-audit.json`
 - `browser-metrics.json` and four Day/Night screenshots
 - `artifact-hashes.json` with SHA-256 and byte size

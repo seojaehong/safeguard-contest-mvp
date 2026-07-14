@@ -30,8 +30,8 @@
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/build.log",
-      "sha256": "a25bf166abf36dfb6370b9b2f1498a52e4077e4695d80ba2c91c07ffdb4f5e63",
-      "bytes": 6025
+      "sha256": "36e35ed0a9a103bfe02f944479a586eec3763b337eb5e5275635d4ffb521932d",
+      "bytes": 6019
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/documents-editor-regression.log",
@@ -84,6 +84,11 @@
       "bytes": 539
     },
     {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/full-range-diff-check-final.log",
+      "sha256": "4fc67f6345e900ad674243c5006b751982421c8a4370f1ec3515771d19f1b275",
+      "bytes": 114
+    },
+    {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/green-browser-document-schemas.log",
       "sha256": "5403b7b3072a70cafd9e3e7d6c686a87c99356db8052ceda7280206e994555fd",
       "bytes": 430
@@ -129,6 +134,11 @@
       "bytes": 8142
     },
     {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/red-full-range-diff-check.log",
+      "sha256": "e0cd149b2aaa66720475177390660d9f3f2598ecf289e7892a6b673914a0ba87",
+      "bytes": 438
+    },
+    {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/red-intermediate-browser-document-schemas.log",
       "sha256": "07e7bf84ca7346f0b597c243ce78d68b0fcefe849de72e39a33275fbaa052ac9",
       "bytes": 1498
@@ -155,8 +165,8 @@
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/source-audit.json",
-      "sha256": "c94e16d83cfe1778ef28de6bd8781578ca3200ba3adc76b6a9ba5d1b0648a45c",
-      "bytes": 968
+      "sha256": "3a48f8f66dfb8dcde6dfc5242a5814d0a46ebf7cc9608b00361bb9b586fd7f5a",
+      "bytes": 1109
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/typecheck-final.log",
@@ -170,13 +180,13 @@
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/report.json",
-      "sha256": "8b2896804c225dce86c1a6e2a6cc1d24c7c18cb961f39bcff1f63bc3e44fbc24",
-      "bytes": 3053
+      "sha256": "718a6e158be5f4262283cf526d362e11c0921f04f486a4142bead98c292a2153",
+      "bytes": 3506
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/report.md",
-      "sha256": "44c7f7c8960f3164a9df3d4280bff998ee9f340ca60386a5b971482715f5ecb9",
-      "bytes": 5602
+      "sha256": "f816c41098c2b02f1253e585161a2273170c497d1af974c298df6091537b8db3",
+      "bytes": 5915
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/desktop-day-editor.png",
