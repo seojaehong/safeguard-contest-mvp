@@ -354,7 +354,13 @@ export function WorkflowSharePanel({
       setChannelView({ status: "empty", resolution: null });
       return;
     }
-    if (!authToken || !online || authorityView.status !== "ready" || !authorityView.authority) {
+    if (
+      requiresRevalidation
+      || !authToken
+      || !online
+      || authorityView.status !== "ready"
+      || !authorityView.authority
+    ) {
       setChannelView({ status: "idle", resolution: null });
       return;
     }
@@ -381,7 +387,7 @@ export function WorkflowSharePanel({
     return () => {
       cancelled = true;
     };
-  }, [authToken, authorityView, online, refreshKey, selectedChannels]);
+  }, [authToken, authorityView, online, refreshKey, requiresRevalidation, selectedChannels]);
 
   const presentation = resolveShareProductPresentation({
     theme: workspaceTheme,

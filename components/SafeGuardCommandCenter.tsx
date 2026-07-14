@@ -1229,7 +1229,6 @@ export function SafeGuardCommandCenter({
   const handleShareAuthorityVerified = useCallback((identity: WorkflowShareAuthorityIdentity) => {
     if (identity.contentBinding !== shareContentBindingRef.current) return;
     setSavedWorkpackId(identity.workpackId);
-    setRequiresRevalidation(false);
   }, []);
 
   function persistCurrentWorkpack(payload: AskResponse, fingerprint: string) {
