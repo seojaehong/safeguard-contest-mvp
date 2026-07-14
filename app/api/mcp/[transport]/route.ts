@@ -27,14 +27,15 @@ import {
   createSupabaseMcpWorkpackRepository,
   saveMcpDocpackWorkpack,
 } from "@/lib/workpack-store";
-import { createGenerateSafetyDocpackHandler } from "@/lib/mcp-docpack-handler";
+import {
+  createGenerateReviewedSafetyDocpackHandler,
+  createGenerateSafetyDocpackHandler,
+} from "@/lib/mcp-docpack-handler";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "@/lib/sif-embedding-corpus";
 import type { HarnessImprovement, HarnessWorkpackMemory } from "@/lib/db-harness";
 import { querySafetyKnowledge } from "@/lib/ontology/knowledge-tool";
-import { materializePhaseAProductDocuments } from "@/lib/ontology/product-materialization";
-import { isEvidenceChainTaskBoundToQuestion } from "@/lib/ontology/evidence-chain";
 import { reviewDocpack } from "@/lib/ontology/qa-review-tool";
 import {
   isMcpEnabled,
@@ -46,10 +47,8 @@ import {
   buildAccidentCasesResult,
   buildEvidenceMappingResult,
   buildHarnessAgentResult,
-  buildReviewedDocpackResult,
   buildSanitizeContactsResult,
   buildWeatherResult,
-  resolveReviewTaskLabel,
   summarizeHarnessSearch,
   toToolResult,
   validateCitations,
@@ -67,6 +66,30 @@ const generateSafetyDocpackHandler = createGenerateSafetyDocpackHandler({
   getWorkpackRepository: () => {
     const client = createSupabaseAdminClient();
     return client ? createSupabaseMcpWorkpackRepository(client) : null;
+  },
+  getGenerationEvidenceSecret: () => process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+});
+
+const generateReviewedSafetyDocpackHandler = createGenerateReviewedSafetyDocpackHandler({
+  defaultMode: "full",
+  generateResponse: (question, mode) => runAsk(question, { aiMode: mode }),
+  queryKnowledge: querySafetyKnowledge,
+  reviewResponse: reviewDocpack,
+  persistResponse: async (authContext, response) => {
+    const client = createSupabaseAdminClient();
+    if (client) {
+      return saveMcpDocpackWorkpack(
+        client,
+        { siteId: authContext.siteId, orgId: authContext.orgId },
+        response,
+      );
+    }
+    return {
+      siteId: authContext.siteId,
+      orgId: authContext.orgId,
+      workpackId: null,
+      saved: false,
+    };
   },
   getGenerationEvidenceSecret: () => process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
 });
@@ -301,47 +324,10 @@ function registerTools(server: McpServer): void {
       },
     },
     async ({ question, task, mode, includeFull }, authContext) => {
-        const [generatedResponse, knowledge] = await Promise.all([
-          runAsk(question, { aiMode: mode ?? "full" }),
-          querySafetyKnowledge(task),
-        ]);
-        const reviewTask = knowledge.phaseAProduct?.task.label
-          ?? resolveReviewTaskLabel(task, question);
-        const response = knowledge.found && knowledge.phaseAProduct
-          && isEvidenceChainTaskBoundToQuestion(task, question, knowledge.phaseAProduct.chainId)
-          ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
-              generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
-            })
-          : generatedResponse;
-        const qaSource =
-          response.deliverables.riskAssessmentDraft ||
-          response.deliverables.tbmBriefing ||
-          response.deliverables.workPlanDraft ||
-          response.deliverables.safetyEducationRecordDraft ||
-          "";
-        const qa = await reviewDocpack(reviewTask, qaSource);
-        const result = buildReviewedDocpackResult(response, qa, reviewTask, includeFull ?? false) as Record<string, unknown>;
-
-        if (authContext?.siteId) {
-          const client = createSupabaseAdminClient();
-          if (client) {
-            const attribution = await saveMcpDocpackWorkpack(
-              client,
-              { siteId: authContext.siteId, orgId: authContext.orgId },
-              response
-            );
-            result.attribution = attribution;
-          } else {
-            result.attribution = {
-              siteId: authContext.siteId,
-              orgId: authContext.orgId,
-              workpackId: null,
-              saved: false,
-            };
-          }
-        }
-
-        return toToolResult(result);
+      return generateReviewedSafetyDocpackHandler(
+        { question, task, mode, includeFull },
+        authContext,
+      );
     }
   );
 

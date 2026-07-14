@@ -343,18 +343,87 @@ export function isEvidenceChainTaskBoundToQuestion(
   const requested = findDefinition(requestedTask);
   if (!requested || requested.definition.chainId !== expectedChainId) return false;
 
-  const normalizedQuestion = normalizeLabel(question);
-  if (!normalizedQuestion) return false;
-
-  const mentionedChainIds = new Set<EvidenceChainDefinition["chainId"]>();
+  const mentions: Array<{
+    chainId: EvidenceChainDefinition["chainId"];
+    label: string;
+    start: number;
+    end: number;
+  }> = [];
   for (const definition of EVIDENCE_CHAIN_REGISTRY) {
     const labels = [definition.canonicalTaskLabel, ...definition.aliases];
-    if (labels.some((label) => normalizedQuestion.includes(normalizeLabel(label)))) {
-      mentionedChainIds.add(definition.chainId);
+    for (const label of labels) {
+      for (const range of findTaskLabelRanges(question, label)) {
+        mentions.push({ chainId: definition.chainId, label, ...range });
+      }
     }
   }
 
-  return mentionedChainIds.size === 1 && mentionedChainIds.has(expectedChainId);
+  const mentionedChainIds = new Set(mentions.map((mention) => mention.chainId));
+  if (mentionedChainIds.size !== 1 || !mentionedChainIds.has(expectedChainId)) return false;
+
+  const expectedMentions = mentions.filter((mention) => mention.chainId === expectedChainId);
+  if (expectedMentions.some((mention) => hasUnsupportedTaskIntent(question, mention.end))) {
+    return false;
+  }
+  return expectedMentions.some((mention) => hasPositiveTaskIntent(question, mention));
+}
+
+const TASK_LABEL_PARTICLES = "은|는|이|가|을|를|과|와|도|만|의|에|에서|으로|로|부터|까지|여부";
+const TASK_NEGATION_PATTERN =
+  /(?:하지\s*않|안\s*(?:함|하|할|하는|합니다)|제외|배제|금지|취소|중단|중지|미수행|아님|아닌)/u;
+const TASK_UNCERTAINTY_PATTERN =
+  /(?:미확정|미정|불확실|확인\s*(?:전|필요)|검토\s*중|논의\s*중)/u;
+const TASK_POSITIVE_PATTERN = new RegExp(
+  `^\\s*(?:(?:${TASK_LABEL_PARTICLES})\\s*)?` +
+    "(?:위한|수행|실시|진행|예정|계획|준비|착수|시작|계속|중(?=$|\\s|[.,!?])|중이다|중입니다|" +
+    "한다|합니다|문서팩|관련\\s*(?:문서|문서팩))",
+  "u",
+);
+const TASK_POSITIVE_PREFIX_PATTERN =
+  /(?:수행할|실시할|진행할|예정된|계획된|준비한)\s*$/u;
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function findTaskLabelRanges(
+  question: string,
+  label: string,
+): Array<{ start: number; end: number }> {
+  const labelPattern = label
+    .normalize("NFC")
+    .trim()
+    .split(/\s+/u)
+    .map(escapeRegex)
+    .join("\\s+");
+  if (!labelPattern) return [];
+
+  const pattern = new RegExp(
+    `(^|[^가-힣A-Za-z0-9])(${labelPattern})(?=$|[^가-힣A-Za-z0-9]|(?:${TASK_LABEL_PARTICLES}))`,
+    "gu",
+  );
+  return Array.from(question.normalize("NFC").matchAll(pattern), (match) => {
+    const prefixLength = match[1]?.length ?? 0;
+    const matchedLabel = match[2] ?? "";
+    const start = (match.index ?? 0) + prefixLength;
+    return { start, end: start + matchedLabel.length };
+  });
+}
+
+function hasUnsupportedTaskIntent(question: string, mentionEnd: number): boolean {
+  const suffix = question.slice(mentionEnd, mentionEnd + 32);
+  return TASK_NEGATION_PATTERN.test(suffix) || TASK_UNCERTAINTY_PATTERN.test(suffix);
+}
+
+function hasPositiveTaskIntent(
+  question: string,
+  mention: { label: string; start: number; end: number },
+): boolean {
+  if (normalizeLabel(question) === normalizeLabel(mention.label)) return true;
+  const suffix = question.slice(mention.end, mention.end + 24);
+  if (TASK_POSITIVE_PATTERN.test(suffix)) return true;
+  const prefix = question.slice(Math.max(0, mention.start - 16), mention.start);
+  return TASK_POSITIVE_PREFIX_PATTERN.test(prefix);
 }
 
 function publishedRuntimeGraph(graph: OntologyGraph): Pick<OntologyGraph, "nodes" | "edges"> {

@@ -2,11 +2,15 @@ import { describe, expect, test } from "vitest";
 
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import type { McpAuthContext } from "@/lib/mcp-auth";
-import { createGenerateSafetyDocpackHandler } from "@/lib/mcp-docpack-handler";
+import {
+  createGenerateReviewedSafetyDocpackHandler,
+  createGenerateSafetyDocpackHandler,
+} from "@/lib/mcp-docpack-handler";
 import type { McpToolResult } from "@/lib/mcp-tools";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
+import type { QaReviewFound } from "@/lib/ontology/qa-review";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 import type { AskResponse } from "@/lib/types";
 import {
@@ -92,7 +96,64 @@ function createHandler(repository: InMemoryMcpWorkpackRepository) {
   });
 }
 
+function createReviewedHandler() {
+  return createGenerateReviewedSafetyDocpackHandler({
+    defaultMode: "full",
+    generateResponse: async (question) => makeSealedResponse(question),
+    queryKnowledge: async (query) => buildPublishedSafetyKnowledge(publishedGraph, query),
+    reviewResponse: async (task): Promise<QaReviewFound> => ({
+      reviewable: true,
+      task,
+      covered: { hazards: [], controls: [], articles: [] },
+      missing: { hazards: [], controls: [], articles: [] },
+      coverageRate: 1,
+      verdict: "통과",
+      advisory: "검수 고지",
+    }),
+    persistResponse: async () => null,
+    getGenerationEvidenceSecret: () => SECRET,
+  });
+}
+
 describe("MCP Phase A product persistence behavior", () => {
+  test.each([
+    { task: "고소작업", question: "고소작업은 하지 않고 배관 작업 수행" },
+    { task: "고소작업", question: "고소작업 여부가 아직 미확정" },
+    { task: "전기작업", question: "비전기작업 문서팩" },
+  ])("keeps the reviewed MCP route fail-closed for '$question'", async ({ task, question }) => {
+    const result = await createReviewedHandler()(
+      { question, task, mode: "template", includeFull: true },
+      TENANT_CONTEXT,
+    );
+    const payload = parseToolPayload(result);
+    const docpack = payload.docpack;
+    if (typeof docpack !== "object" || docpack === null || Array.isArray(docpack)) {
+      throw new Error("Expected an MCP reviewed docpack payload.");
+    }
+
+    expect(docpack).not.toHaveProperty("phaseAProduct");
+    expect(payload).not.toHaveProperty("phaseAReviewStatus");
+  });
+
+  test("keeps a canonical question and alias task valid through the reviewed MCP route", async () => {
+    const result = await createReviewedHandler()(
+      {
+        question: "외벽 고소작업을 위한 문서팩",
+        task: "높은 곳 작업",
+        mode: "template",
+        includeFull: true,
+      },
+      TENANT_CONTEXT,
+    );
+
+    expect(parseToolPayload(result)).toMatchObject({
+      reviewTask: "고소작업",
+      docpack: {
+        phaseAProduct: { chainId: "work-at-height-fall" },
+      },
+    });
+  });
+
   test.each([
     { task: "고소작업", chainId: "work-at-height-fall" },
     { task: "높은 곳 작업", chainId: "work-at-height-fall" },

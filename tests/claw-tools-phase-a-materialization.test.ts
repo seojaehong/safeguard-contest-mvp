@@ -154,6 +154,44 @@ describe("Claw Phase A product handlers", () => {
     expect(result).not.toHaveProperty("phaseAReviewStatus");
   });
 
+  test.each([
+    {
+      task: "고소작업",
+      question: "고소작업은 하지 않고 배관 작업 수행",
+      knowledgeTask: "고소작업",
+    },
+    {
+      task: "고소작업",
+      question: "고소작업 여부가 아직 미확정",
+      knowledgeTask: "고소작업",
+    },
+    {
+      task: "전기작업",
+      question: "비전기작업 문서팩",
+      knowledgeTask: "전기작업",
+    },
+  ])("does not materialize reviewed provenance for unsupported intent: '$question'", async ({
+    task,
+    question,
+    knowledgeTask,
+  }) => {
+    mocks.querySafetyKnowledge.mockResolvedValue(
+      buildPublishedSafetyKnowledge(publishedGraph, knowledgeTask),
+    );
+
+    const result = await executeClawTool("generate_reviewed_safety_docpack", {
+      question,
+      task,
+      mode: "template",
+      includeFull: true,
+    });
+    requireRecord(result);
+    requireRecord(result.docpack);
+
+    expect(result.docpack).not.toHaveProperty("phaseAProduct");
+    expect(result).not.toHaveProperty("phaseAReviewStatus");
+  });
+
   test("keeps reviewed Phase A provenance for a canonical question and alias task", async () => {
     mocks.querySafetyKnowledge.mockResolvedValue(
       buildPublishedSafetyKnowledge(publishedGraph, "높은 곳 작업"),
