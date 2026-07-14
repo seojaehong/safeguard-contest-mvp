@@ -11,6 +11,22 @@ import {
   buildOpenClawOauthLoginCommand,
   buildOpenClawProbeCommand,
 } from "@/lib/mcp-connect";
+import {
+  buildPhotoFlowPresentation,
+  formatPhotoFileValidationMode,
+  formatPhotoInputLimit,
+  formatPhotoVisionStatus,
+  formatSifApprovalDecisionForPresentation,
+  formatSifApprovalStepStatusForPresentation,
+  formatSifArtifactLabelForPresentation,
+  formatSifChecklistStatusForPresentation,
+  formatSifGateIdForPresentation,
+  formatSifPreflightLabelForPresentation,
+  formatSifRuntimeStatusForPresentation,
+  formatSifTextForPresentation,
+  readPhotoVisionPresentationPayload,
+  type PhotoVisionPresentationPayload
+} from "@/lib/web-safe-presentation";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -267,143 +283,6 @@ type SifEmbeddingGateStatusResponse = {
   };
 };
 
-type PhotoVisionReadinessResponse = {
-  ok: boolean;
-  status: "ready" | "unconfigured";
-  provider: "openai";
-  model: string;
-  apiKeyPresent: boolean;
-  timeoutMs: number;
-  maxInputPhotos: number;
-  maxBytesPerPhoto: number;
-  maxTotalPhotoBytes: number;
-  maxRequestBytes: number;
-  fileValidation: {
-    mode: "signature_only";
-    decodesPixels: false;
-    signatureBytes: 12;
-    description: string;
-  };
-  hazardAnalysisEndpoint: "/api/input-photos/hazard-analysis";
-  hazardAnalysisMethod: "POST multipart/form-data";
-  improvementEndpointPattern: "/api/workpacks/[id]/improvements";
-  acceptedOnly: true;
-  beforeAfterSupported: true;
-  ocrSupported: true;
-  exportTargets: string[];
-  flow: {
-    step: string;
-    label: string;
-    detail: string;
-  }[];
-  message: string;
-};
-
-type SifGateId = SifEmbeddingGateStatusResponse["operatorGate"]["gateId"];
-
-const SIF_GATE_LABELS: Readonly<Record<SifGateId, string>> = {
-  "apply-sif-only-migration": "SIF 전용 마이그레이션 적용",
-  "prepare-runtime-env": "운영 환경 준비",
-  "approve-embedding-generation": "임베딩 생성 승인",
-  "approve-upload": "업로드 승인",
-  "enable-vector-search": "벡터 검색 활성화",
-  "disable-vector-flag": "벡터 검색 플래그 비활성화",
-  complete: "완료"
-};
-
-const SIF_RUNTIME_STATUS_LABELS: Readonly<Record<string, string>> = {
-  "migration-required": "마이그레이션 필요",
-  "verified_without_db_mutation": "DB 변경 없이 검증됨",
-  "not-run": "미실행",
-  unknown: "상태 확인 필요",
-  unavailable: "사용할 수 없음",
-  ready: "준비됨",
-  complete: "완료",
-  blocked: "차단됨",
-  ok: "정상",
-  error: "오류"
-};
-
-const PHOTO_FILE_VALIDATION_MODE_LABELS: Readonly<Record<string, string>> = {
-  "signature_only": "파일 시그니처 확인"
-};
-
-const PHOTO_FLOW_STEP_LABELS: Readonly<Record<string, string>> = {
-  attach: "1단계",
-  analyze: "2단계",
-  ground: "3단계",
-  review: "4단계",
-  export: "5단계"
-};
-
-const PHOTO_FLOW_LABELS: Readonly<Record<string, string>> = {
-  attach: "현장 사진 첨부",
-  analyze: "사진 분석/OCR 후보 도출",
-  ground: "DB/MCP 근거 확정",
-  review: "사용자 채택·기각",
-  export: "운영 메모리 보존"
-};
-
-const OPERATOR_CHECKLIST_STATUS_LABELS: Readonly<Record<string, string>> = {
-  done: "완료",
-  blocked: "차단",
-  required: "필요"
-};
-
-const APPROVAL_STEP_STATUS_LABELS: Readonly<Record<string, string>> = {
-  done: "완료",
-  ready: "가능",
-  blocked: "대기",
-  waiting: "승인 전"
-};
-
-function formatSifGateId(gateId: string): string {
-  return SIF_GATE_LABELS[gateId as SifGateId] ?? "상태 확인 필요";
-}
-
-function formatSifRuntimeStatus(status: string): string {
-  return SIF_RUNTIME_STATUS_LABELS[status] ?? "상태 확인 필요";
-}
-
-function formatPhotoFileValidationMode(mode: string): string {
-  return PHOTO_FILE_VALIDATION_MODE_LABELS[mode] ?? "분류 검토 필요";
-}
-
-function formatPhotoFlowStep(step: string): string {
-  return PHOTO_FLOW_STEP_LABELS[step] ?? "분류 검토 필요";
-}
-
-function formatPhotoFlowLabel(step: string): string {
-  return PHOTO_FLOW_LABELS[step] ?? "분류 검토 필요";
-}
-
-function formatPhotoFlowDetail(step: string, maxInputPhotos: number): string {
-  const details: Readonly<Record<string, string>> = {
-    attach: `입력 화면의 첨부 기능에서 최대 ${maxInputPhotos.toLocaleString("ko-KR")}장까지 받습니다.`,
-    analyze: "OpenAI Responses API가 관찰 내용과 추론을 분리한 위험 후보만 구조화합니다.",
-    ground: "SafeClaw DB/MCP 하네스가 후보별 근거 출처 ID와 현장 통제를 확정하거나 근거 부족으로 잠급니다.",
-    review: "하네스가 확정한 후보를 사용자가 채택하거나 기각하고, 채택한 항목만 개선 메모리에 들어갑니다.",
-    export: "채택된 후보와 개선 전/개선 후 사항은 MD/JSONL 내보내기 파일과 다음 DB 하네스 입력에 보존됩니다."
-  };
-  return details[step] ?? "분류 검토 필요";
-}
-
-function formatPhotoVisionStatus(status: string): string {
-  if (status === "ready") return "사진 분석/OCR 실행 환경이 준비되어 있습니다.";
-  if (status === "unconfigured") {
-    return "OPENAI_API_KEY가 없어 사진은 첨부·저장되지만 사진 분석/OCR은 보류됩니다.";
-  }
-  return "상태 확인 필요";
-}
-
-function formatOperatorChecklistStatus(status: string): string {
-  return OPERATOR_CHECKLIST_STATUS_LABELS[status] ?? "상태 확인 필요";
-}
-
-function formatApprovalStepStatus(status: string): string {
-  return APPROVAL_STEP_STATUS_LABELS[status] ?? "상태 확인 필요";
-}
-
 const tabs: { id: AiConnectTab; label: string; body: string }[] = [
   {
     id: "harness",
@@ -472,7 +351,7 @@ export function AiConnectPanel() {
   const [nextTokenCursor, setNextTokenCursor] = useState<string | null>(null);
   const [sifGate, setSifGate] = useState<SifEmbeddingGateStatusResponse | null>(null);
   const [sifGateMessage, setSifGateMessage] = useState("");
-  const [photoVision, setPhotoVision] = useState<PhotoVisionReadinessResponse | null>(null);
+  const [photoVision, setPhotoVision] = useState<PhotoVisionPresentationPayload | null>(null);
   const [photoVisionMessage, setPhotoVisionMessage] = useState("");
 
   useEffect(() => {
@@ -535,8 +414,14 @@ export function AiConnectPanel() {
   useEffect(() => {
     fetch("/api/input-photos/hazard-analysis")
       .then(async (response) => {
-        const payload = await response.json() as PhotoVisionReadinessResponse;
-        setPhotoVision(payload);
+        const payload: unknown = await response.json();
+        const presentation = readPhotoVisionPresentationPayload(payload);
+        if (!presentation) {
+          console.warn("photo vision readiness payload was not an object");
+          setPhotoVisionMessage("사진 분석/OCR 준비 응답 형식을 확인해야 합니다.");
+          return;
+        }
+        setPhotoVision(presentation);
         if (!response.ok) setPhotoVisionMessage("사진 분석/OCR 준비 상태를 확인해야 합니다.");
       })
       .catch((error: unknown) => {
@@ -548,6 +433,10 @@ export function AiConnectPanel() {
   const commandText = useMemo(() => (
     oneTimeToken ? commandForTab(activeTab, oneTimeToken) : ""
   ), [activeTab, oneTimeToken]);
+  const photoFlow = useMemo(
+    () => photoVision ? buildPhotoFlowPresentation(photoVision.flow, photoVision.maxInputPhotos) : [],
+    [photoVision]
+  );
 
   async function issueToken() {
     if (!session?.access_token) return;
@@ -720,7 +609,7 @@ export function AiConnectPanel() {
           </strong>
         </div>
         <p>
-          {sifGate?.message || sifGateMessage || "SIF 코퍼스, 배치 목록, 승인 플래그 상태를 확인하고 있습니다."}
+          {sifGate ? formatSifTextForPresentation(sifGate.message) : sifGateMessage || "SIF 코퍼스, 배치 목록, 승인 플래그 상태를 확인하고 있습니다."}
         </p>
         {sifGate ? (
           <>
@@ -745,9 +634,9 @@ export function AiConnectPanel() {
             <div className="ai-connect-sif-state-grid">
               <article className={`ai-connect-sif-verdict ${sifGate.readinessVerdict.state}`}>
                 <span>현재 결론</span>
-                <strong>{sifGate.readinessVerdict.label}</strong>
-                <p>{sifGate.readinessVerdict.answer}</p>
-                <small>{sifGate.readinessVerdict.nextAction}</small>
+                <strong>{formatSifTextForPresentation(sifGate.readinessVerdict.label)}</strong>
+                <p>{formatSifTextForPresentation(sifGate.readinessVerdict.answer)}</p>
+                <small>{formatSifTextForPresentation(sifGate.readinessVerdict.nextAction)}</small>
               </article>
               <article>
                 <strong>품질 게이트</strong>
@@ -771,39 +660,39 @@ export function AiConnectPanel() {
               </article>
               <article>
                 <strong>SIF 학습/임베딩</strong>
-                <p>{sifGate.learningLifecycle.answer}</p>
+                <p>{formatSifTextForPresentation(sifGate.learningLifecycle.answer)}</p>
                 <small>
-                  {sifGate.learningLifecycle.label} · 파인튜닝 {sifGate.learningLifecycle.modelFineTuningPerformed ? "실행" : "미실행"}
+                  {formatSifTextForPresentation(sifGate.learningLifecycle.label)} · 파인튜닝 {sifGate.learningLifecycle.modelFineTuningPerformed ? "실행" : "미실행"}
                 </small>
               </article>
               <article>
                 <strong>소규모 검증 임베딩</strong>
-                <p>{sifGate.canary.answer}</p>
+                <p>{formatSifTextForPresentation(sifGate.canary.answer)}</p>
                 <small>
                   {sifGate.canary.embeddedCount.toLocaleString("ko-KR")} / {sifGate.canary.corpusCount.toLocaleString("ko-KR")}건 · DB 업로드 {sifGate.canary.dbMutationPerformed ? "있음" : "없음"}
                 </small>
               </article>
               <article>
                 <strong>벡터 검색</strong>
-                <p>{sifGate.vectorGuard.label} · {sifGate.runtime.vectorFeatureFlagEnabled ? "기능 플래그 켜짐" : "기능 플래그 꺼짐"}</p>
+                <p>{formatSifTextForPresentation(sifGate.vectorGuard.label)} · {sifGate.runtime.vectorFeatureFlagEnabled ? "기능 플래그 켜짐" : "기능 플래그 꺼짐"}</p>
               </article>
             </div>
             <div className={`ai-connect-sif-vector-guard ${sifGate.vectorGuard.status}`}>
               <div>
-                <strong>{sifGate.vectorGuard.label}</strong>
+                <strong>{formatSifTextForPresentation(sifGate.vectorGuard.label)}</strong>
                 <span>
                   업로드 {sifGate.vectorGuard.uploadedCount.toLocaleString("ko-KR")} / {sifGate.vectorGuard.requiredUploadCount.toLocaleString("ko-KR")}건
                 </span>
               </div>
-              <p>{sifGate.vectorGuard.message}</p>
+              <p>{formatSifTextForPresentation(sifGate.vectorGuard.message)}</p>
             </div>
             <div className={`ai-connect-sif-next-gate ${sifGate.nextApprovalGate.status}`}>
               <div>
                 <span>다음 승인</span>
-                <strong>{sifGate.nextApprovalGate.label}</strong>
+                <strong>{formatSifGateIdForPresentation(sifGate.nextApprovalGate.id)}</strong>
               </div>
-              <p>{sifGate.nextApprovalGate.detail}</p>
-              <small>{sifGate.nextApprovalGate.action}</small>
+              <p>{formatSifTextForPresentation(sifGate.nextApprovalGate.detail)}</p>
+              <small>{formatSifTextForPresentation(sifGate.nextApprovalGate.action)}</small>
               {sifGate.nextApprovalGate.artifactPath ? (
                 <code>{sifGate.nextApprovalGate.artifactPath}</code>
               ) : null}
@@ -818,9 +707,9 @@ export function AiConnectPanel() {
             <div className={`ai-connect-sif-operator-gate ${sifGate.operatorGate.status}`}>
               <div>
                 <span>운영자 승인 단계</span>
-                <strong>{sifGate.operatorGate.title}</strong>
+                <strong>{formatSifTextForPresentation(sifGate.operatorGate.title)}</strong>
               </div>
-              <p>{sifGate.operatorGate.approvalQuestion}</p>
+              <p>{formatSifTextForPresentation(sifGate.operatorGate.approvalQuestion)}</p>
               <dl>
                 <div>
                   <dt>마이그레이션</dt>
@@ -834,12 +723,12 @@ export function AiConnectPanel() {
                 </div>
                 <div>
                   <dt>승인 단계</dt>
-                  <dd>{formatSifGateId(sifGate.operatorGate.gateId)}</dd>
+                  <dd>{formatSifGateIdForPresentation(sifGate.operatorGate.gateId)}</dd>
                 </div>
                 <div>
                   <dt>검증 결과</dt>
                   <dd>
-                    {formatSifRuntimeStatus(sifGate.postMigrationVerification.status)} · {sifGate.postMigrationVerification.uploadedCount.toLocaleString("ko-KR")} / {sifGate.postMigrationVerification.expectedCorpusCount.toLocaleString("ko-KR")}건
+                    {formatSifRuntimeStatusForPresentation(sifGate.postMigrationVerification.status)} · {sifGate.postMigrationVerification.uploadedCount.toLocaleString("ko-KR")} / {sifGate.postMigrationVerification.expectedCorpusCount.toLocaleString("ko-KR")}건
                   </dd>
                 </div>
               </dl>
@@ -847,28 +736,32 @@ export function AiConnectPanel() {
                 <section>
                   <span>승인 전 가능</span>
                   <ul>
-                    {sifGate.operatorGate.allowedBeforeApproval.map((item) => <li key={item}>{item}</li>)}
+                    {sifGate.operatorGate.allowedBeforeApproval.map((item) => (
+                      <li key={item}>{formatSifTextForPresentation(item)}</li>
+                    ))}
                   </ul>
                 </section>
                 <section>
                   <span>승인 전 금지</span>
                   <ul>
-                    {sifGate.operatorGate.forbiddenBeforeApproval.map((item) => <li key={item}>{item}</li>)}
+                    {sifGate.operatorGate.forbiddenBeforeApproval.map((item) => (
+                      <li key={item}>{formatSifTextForPresentation(item)}</li>
+                    ))}
                   </ul>
                 </section>
               </div>
               <ol className="ai-connect-sif-operator-checklist">
                 {sifGate.operatorGate.checklist.map((item) => (
                   <li key={item.id} className={item.status}>
-                    <span>{formatOperatorChecklistStatus(item.status)}</span>
+                    <span>{formatSifChecklistStatusForPresentation(item.status)}</span>
                     <div>
-                      <strong>{item.label}</strong>
-                      <p>{item.evidence}</p>
+                      <strong>{formatSifTextForPresentation(item.label)}</strong>
+                      <p>{formatSifTextForPresentation(item.evidence)}</p>
                     </div>
                   </li>
                 ))}
               </ol>
-              <small>{sifGate.operatorGate.nonApprovalFallback}</small>
+              <small>{formatSifTextForPresentation(sifGate.operatorGate.nonApprovalFallback)}</small>
             </div>
             <div className="ai-connect-sif-approval-packet">
               <div>
@@ -878,26 +771,26 @@ export function AiConnectPanel() {
               <div className="ai-connect-sif-fingerprint">
                 <span>승인 지문</span>
                 <code>{sifGate.approvalPacket.approvalFingerprint}</code>
-                <p>corpus hash, SIF-only migration SQL hash, 모델/차원/수량을 묶어 승인 대상 파일을 고정합니다.</p>
+                <p>코퍼스 해시, SIF 전용 마이그레이션 SQL 해시, 모델/차원/수량을 묶어 승인 대상 파일을 고정합니다.</p>
               </div>
               <ol>
                 {sifGate.approvalPacket.decisions.map((decision, index) => (
-                  <li key={`${decision}-${index}`}>{decision}</li>
+                  <li key={`${decision}-${index}`}>{formatSifApprovalDecisionForPresentation(decision)}</li>
                 ))}
               </ol>
               <div className="ai-connect-sif-artifact-grid" aria-label="SIF 승인 산출물">
                 {sifGate.approvalPacket.requiredArtifacts.map((artifact) => (
                   <article key={artifact.path}>
-                    <strong>{artifact.label}</strong>
+                    <strong>{formatSifArtifactLabelForPresentation(artifact.label)}</strong>
                     <code>{artifact.path}</code>
-                    <p>{artifact.role}</p>
+                    <p>{formatSifTextForPresentation(artifact.role)}</p>
                   </article>
                 ))}
               </div>
               <div className="ai-connect-sif-artifact-grid" aria-label="SIF 산출물 무결성">
                 {sifGate.approvalPacket.artifactIntegrity.map((artifact) => (
                   <article key={`${artifact.label}-${artifact.path}`}>
-                    <strong>{artifact.label}</strong>
+                    <strong>{formatSifArtifactLabelForPresentation(artifact.label)}</strong>
                     <code>{artifact.sha256 || artifact.contentHash || "해시 미기록"}</code>
                     <p>
                       {artifact.exists ? "파일 확인" : "파일 누락"} · {artifact.byteSize.toLocaleString("ko-KR")}바이트
@@ -910,8 +803,8 @@ export function AiConnectPanel() {
                 {sifGate.approvalPacket.safetyLocks.map((lock) => (
                   <article key={lock.label} className={lock.locked ? "locked" : "open"}>
                     <span>{lock.locked ? "잠금" : "확인 필요"}</span>
-                    <strong>{lock.label}</strong>
-                    <p>{lock.detail}</p>
+                    <strong>{formatSifTextForPresentation(lock.label)}</strong>
+                    <p>{formatSifTextForPresentation(lock.detail)}</p>
                   </article>
                 ))}
               </div>
@@ -919,10 +812,10 @@ export function AiConnectPanel() {
             <ol className="ai-connect-sif-approval-steps" aria-label="SIF 임베딩 승인 순서">
               {sifGate.approvalSteps.map((step) => (
                 <li key={step.id} className={step.status}>
-                  <span>{formatApprovalStepStatus(step.status)}</span>
+                  <span>{formatSifApprovalStepStatusForPresentation(step.status)}</span>
                   <div>
-                    <strong>{step.label}</strong>
-                    <p>{step.detail}</p>
+                    <strong>{formatSifTextForPresentation(step.label)}</strong>
+                    <p>{formatSifTextForPresentation(step.detail)}</p>
                   </div>
                 </li>
               ))}
@@ -941,7 +834,7 @@ export function AiConnectPanel() {
                   <li key={check.id} className={check.passed ? "passed" : "failed"}>
                     <span>{check.passed ? "통과" : "확인"}</span>
                     <div>
-                      <strong>{check.label}</strong>
+                      <strong>{formatSifPreflightLabelForPresentation(check.id, check.label)}</strong>
                       <p>{check.evidenceSummary}</p>
                     </div>
                   </li>
@@ -949,7 +842,7 @@ export function AiConnectPanel() {
               </ul>
             </details>
             <p className="muted">
-              운영 DB 점검: {formatSifRuntimeStatus(sifGate.runtimeDbProbe.status)} · 테이블 {sifGate.runtimeDbProbe.tableReady ? "준비됨" : "없음"} · RPC {sifGate.runtimeDbProbe.rpcReady ? "준비됨" : "없음"}
+              운영 DB 점검: {formatSifRuntimeStatusForPresentation(sifGate.runtimeDbProbe.status)} · 테이블 {sifGate.runtimeDbProbe.tableReady ? "준비됨" : "없음"} · RPC {sifGate.runtimeDbProbe.rpcReady ? "준비됨" : "없음"}
             </p>
             <p className="muted">근거 파일: {sifGate.artifacts.reportPath} · {sifGate.artifacts.manifestPath}</p>
           </>
@@ -974,7 +867,7 @@ export function AiConnectPanel() {
             <dl className="ai-connect-sif-metrics">
               <div>
                 <dt>첨부 한도</dt>
-                <dd>{photoVision.maxInputPhotos.toLocaleString("ko-KR")}장</dd>
+                <dd>{formatPhotoInputLimit(photoVision.maxInputPhotos)}</dd>
               </div>
               <div>
                 <dt>모델</dt>
@@ -986,7 +879,7 @@ export function AiConnectPanel() {
               </div>
               <div>
                 <dt>파일 검증</dt>
-                <dd>{formatPhotoFileValidationMode(photoVision.fileValidation.mode)}</dd>
+                <dd>{formatPhotoFileValidationMode(photoVision.fileValidationMode)}</dd>
               </div>
               <div>
                 <dt>저장 기준</dt>
@@ -994,11 +887,11 @@ export function AiConnectPanel() {
               </div>
             </dl>
             <div className="ai-connect-vision-flow" aria-label="사진 분석/OCR 하네스 흐름">
-              {photoVision.flow.map((item) => (
-                <article key={item.step}>
-                  <span>{formatPhotoFlowStep(item.step)}</span>
-                  <strong>{formatPhotoFlowLabel(item.step)}</strong>
-                  <p>{formatPhotoFlowDetail(item.step, photoVision.maxInputPhotos)}</p>
+              {photoFlow.map((item) => (
+                <article key={item.key}>
+                  <span>{item.step}</span>
+                  <strong>{item.label}</strong>
+                  <p>{item.detail}</p>
                 </article>
               ))}
             </div>
@@ -1011,7 +904,7 @@ export function AiConnectPanel() {
             </div>
             <p className="muted">
               개선 전/개선 후 사진은 {photoVision.improvementEndpointPattern}에서 사진 분석/OCR 데이터로 저장되고,
-              {photoVision.exportTargets.join(" · ")}에 보존됩니다.
+              {photoVision.exportTargets.length ? photoVision.exportTargets.join(" · ") : "보존 위치 확인 필요"}에 보존됩니다.
             </p>
           </>
         ) : null}

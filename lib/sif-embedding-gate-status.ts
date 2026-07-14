@@ -29,70 +29,6 @@ type SifNextApprovalGateId =
   | "disable-vector-flag"
   | "complete";
 
-const SIF_GATE_PRESENTATION_LABELS: Readonly<Record<SifNextApprovalGateId, string>> = {
-  "apply-sif-only-migration": "SIF 전용 마이그레이션 적용",
-  "prepare-runtime-env": "운영 환경 준비",
-  "approve-embedding-generation": "임베딩 생성 승인",
-  "approve-upload": "업로드 승인",
-  "enable-vector-search": "벡터 검색 활성화",
-  "disable-vector-flag": "벡터 검색 플래그 비활성화",
-  complete: "완료"
-};
-
-const SIF_RUNTIME_PRESENTATION_LABELS: Readonly<Record<string, string>> = {
-  "migration-required": "마이그레이션 필요",
-  "verified_without_db_mutation": "DB 변경 없이 검증됨",
-  "not-run": "미실행",
-  unknown: "상태 확인 필요",
-  unavailable: "사용할 수 없음",
-  ready: "준비됨",
-  complete: "완료",
-  blocked: "차단됨",
-  ok: "정상",
-  error: "오류"
-};
-
-const SIF_CANARY_MODE_PRESENTATION_LABELS: Readonly<Record<string, string>> = {
-  "embed-only": "임베딩만 생성",
-  "corpus-only": "코퍼스만 준비",
-  "upload-only": "업로드만 수행",
-  full: "전체 실행",
-  "not-run": "미실행"
-};
-
-const SIF_OPERATOR_GATE_PRESENTATION_LABELS: Readonly<Record<string, string>> = {
-  "approval-request-open": "승인 요청 열림",
-  blocked: "차단됨",
-  "ready-to-execute": "실행 준비됨",
-  complete: "완료"
-};
-
-const SIF_CHECKLIST_STATUS_PRESENTATION_LABELS: Readonly<Record<string, string>> = {
-  done: "완료",
-  required: "확인 필요",
-  blocked: "차단됨"
-};
-
-export function formatSifGateIdForPresentation(gateId: string): string {
-  return SIF_GATE_PRESENTATION_LABELS[gateId as SifNextApprovalGateId] ?? "상태 확인 필요";
-}
-
-export function formatSifRuntimeStatusForPresentation(status: string): string {
-  return SIF_RUNTIME_PRESENTATION_LABELS[status] ?? "상태 확인 필요";
-}
-
-export function formatSifCanaryModeForPresentation(mode: string): string {
-  return SIF_CANARY_MODE_PRESENTATION_LABELS[mode] ?? "분류 검토 필요";
-}
-
-export function formatSifOperatorGateStatusForPresentation(status: string): string {
-  return SIF_OPERATOR_GATE_PRESENTATION_LABELS[status] ?? "상태 확인 필요";
-}
-
-export function formatSifChecklistStatusForPresentation(status: string): string {
-  return SIF_CHECKLIST_STATUS_PRESENTATION_LABELS[status] ?? "상태 확인 필요";
-}
-
 export type SifEmbeddingOperatorGate = {
   status: "approval-request-open" | "blocked" | "ready-to-execute" | "complete";
   gateId: SifNextApprovalGateId;
@@ -326,36 +262,18 @@ function hasEnv(env: Record<string, string | undefined>, key: string) {
 function checkLabelFor(id: string) {
   const labels: Record<string, string> = {
     sif_source_count: "SIF 원본과 코퍼스 수량 확인",
-    manifest_matches_report: "배치 목록과 보고서 일치",
+    manifest_matches_report: "배치 manifest와 보고서 일치",
     corpus_jsonl_matches_report: "JSONL 코퍼스 라인 수 확인",
     corpus_quality_gate: "빈 텍스트/관리대책/중복 품질 게이트",
     no_embedding_generated_yet: "승인 전 임베딩 미생성",
     embedding_requires_explicit_cost_approval_flag: "임베딩 비용 승인 플래그 필요",
     upload_requires_explicit_approval_flag: "업로드 승인 플래그 필요",
-    migration_contains_embedding_table_rpc_index: "마이그레이션에 테이블/RPC/인덱스 포함",
+    migration_contains_embedding_table_rpc_index: "migration에 table/RPC/index 포함",
     migration_keeps_embeddings_server_side: "임베딩은 서버 측에서만 조회",
-    migration_scope_is_sif_embedding_only: "SIF 전용 마이그레이션 범위 확인",
-    vector_feature_flag_stays_off_until_upload_verified: "업로드 검증 전 벡터 기능 플래그 잠금"
+    migration_scope_is_sif_embedding_only: "SIF-only migration 범위 확인",
+    vector_feature_flag_stays_off_until_upload_verified: "업로드 검증 전 vector flag 잠금"
   };
-  return labels[id] || "분류 검토 필요";
-}
-
-function approvalDecisionLabel(decision: string) {
-  const labels: Readonly<Record<string, string>> = {
-    "Approve and apply the SIF-only embedding migration, or explicitly choose the broader 010_commercial_operations.sql gate.":
-      "SIF 전용 임베딩 마이그레이션 적용을 승인하거나 010_commercial_operations.sql 범위를 명시적으로 선택합니다.",
-    "Confirm OPENAI_API_KEY and Supabase service role are available in the execution environment.":
-      "실행 환경에서 OPENAI_API_KEY와 Supabase 서비스 역할을 사용할 수 있는지 확인합니다.",
-    "Run embedding generation only with --embed --approved-embedding.":
-      "임베딩 생성은 --embed --approved-embedding 승인 플래그로만 실행합니다.",
-    "Run embedding upload only with --embed --approved-embedding --upload --approved-upload.":
-      "임베딩 업로드는 --embed --approved-embedding --upload --approved-upload 승인 플래그로만 실행합니다.",
-    "Verify uploaded row count equals 6032 before enabling SAFETY_REFERENCE_VECTOR_SEARCH=1.":
-      "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화 전에 업로드 행 수가 6,032건인지 확인합니다.",
-    "Enable runtime vector retrieval after RPC smoke test passes.":
-      "RPC 연결 점검을 통과한 뒤 운영 벡터 검색을 활성화합니다."
-  };
-  return labels[decision] ?? "분류 검토 필요";
+  return labels[id] || id;
 }
 
 function summarizeEvidence(evidence: Record<string, unknown>) {
@@ -440,8 +358,8 @@ function buildVectorGuard(
   if (vectorFeatureFlagEnabled && !uploadVerified) {
     return {
       status: "blocked",
-      label: "벡터 검색 차단",
-      message: "업로드 수량 검증 전 SAFETY_REFERENCE_VECTOR_SEARCH=1이 감지됐습니다. 기능 플래그를 끄고 행 수/RPC 연결 점검 후 다시 켜야 합니다.",
+      label: "Vector 검색 차단",
+      message: "업로드 수량 검증 전 SAFETY_REFERENCE_VECTOR_SEARCH=1이 감지됐습니다. flag를 끄고 row count/RPC smoke test 후 다시 켜야 합니다.",
       flagEnabled: true,
       uploadVerified,
       uploadedCount,
@@ -451,8 +369,8 @@ function buildVectorGuard(
   if (vectorFeatureFlagEnabled && uploadVerified) {
     return {
       status: "active",
-      label: "벡터 검색 활성",
-      message: "업로드 수량이 코퍼스와 일치해 운영 벡터 검색을 사용할 수 있는 상태입니다.",
+      label: "Vector 검색 활성",
+      message: "업로드 수량이 코퍼스와 일치해 runtime vector 검색을 사용할 수 있는 상태입니다.",
       flagEnabled: true,
       uploadVerified,
       uploadedCount,
@@ -462,8 +380,8 @@ function buildVectorGuard(
   if (uploadVerified) {
     return {
       status: "ready",
-      label: "벡터 검색 활성 대기",
-      message: "업로드 검증이 끝났습니다. RPC 연결 점검 후 기능 플래그를 켤 수 있습니다.",
+      label: "Vector 검색 활성 대기",
+      message: "업로드 검증이 끝났습니다. RPC smoke test 후 feature flag를 켤 수 있습니다.",
       flagEnabled: false,
       uploadVerified,
       uploadedCount,
@@ -472,8 +390,8 @@ function buildVectorGuard(
   }
   return {
     status: "locked",
-    label: "벡터 검색 잠금",
-    message: "임베딩 생성과 DB 업로드가 승인 전 보류되어 있으므로 벡터 검색은 꺼진 상태를 유지합니다.",
+    label: "Vector 검색 잠금",
+    message: "임베딩 생성과 DB 업로드가 승인 전 보류되어 있으므로 vector 검색은 꺼진 상태를 유지합니다.",
     flagEnabled: false,
     uploadVerified,
     uploadedCount,
@@ -500,10 +418,10 @@ function buildApprovalSteps(
   return [
     {
       id: "migration",
-      label: "1. SIF 전용 DB 마이그레이션 승인",
+      label: "1. SIF-only DB migration 승인",
       status: migrationStatus,
       detail: migrationStatus === "done"
-        ? "운영 DB에서 safety_reference_embeddings 테이블과 match RPC를 확인했습니다."
+        ? "운영 DB에서 safety_reference_embeddings table과 match RPC를 확인했습니다."
         : `${migrationPath} 적용 승인이 먼저 필요합니다. 임베딩 생성/업로드보다 앞선 단계입니다.`
     },
     {
@@ -511,18 +429,18 @@ function buildApprovalSteps(
       label: "2. 임베딩 생성 승인",
       status: tableReady && rpcReady && runtimeReady ? "waiting" : "blocked",
       detail: tableReady && rpcReady
-        ? "비용이 발생하는 단계라 --approved-embedding 플래그 없이는 실행하지 않습니다."
-        : "DB 마이그레이션 적용과 운영 키 확인 후 진행합니다."
+        ? "비용이 발생하는 단계라 --approved-embedding flag 없이는 실행하지 않습니다."
+        : "DB migration 적용과 runtime key 확인 후 진행합니다."
     },
     {
       id: "upload",
-      label: "3. 업로드와 행 수 검증",
+      label: "3. 업로드와 row count 검증",
       status: uploadStatus,
-      detail: vectorGuard.uploadVerified ? "업로드 수량이 코퍼스와 일치합니다." : "업로드 후 코퍼스 수량과 DB 행 수가 같아야 합니다."
+      detail: vectorGuard.uploadVerified ? "업로드 수량이 코퍼스와 일치합니다." : "업로드 후 코퍼스 수량과 DB row count가 같아야 합니다."
     },
     {
       id: "vector",
-      label: "4. 벡터 검색 기능 플래그",
+      label: "4. Vector 검색 flag",
       status: vectorStatus,
       detail: vectorGuard.message
     }
@@ -533,12 +451,9 @@ function buildRuntimeDbProbeStatus(): SifEmbeddingGateStatus["runtimeDbProbe"] {
   const probe = asRecord(runtimeProbeJson);
   const table = asRecord(probe.safetyReferenceEmbeddings);
   const rpc = asRecord(probe.matchRpc);
-  const status = readString(probe, "status", "unknown");
   return {
-    status,
-    message: status === "migration-required"
-      ? "SIF 임베딩 테이블과 RPC가 준비되지 않았습니다. 승인된 마이그레이션을 적용한 뒤 업로드해야 합니다."
-      : `${formatSifRuntimeStatusForPresentation(status)}: 운영 DB 점검 결과를 확인해야 합니다.`,
+    status: readString(probe, "status", "unknown"),
+    message: readString(probe, "message", "SIF runtime DB probe 결과를 확인해야 합니다."),
     tableReady: readBoolean(table, "ok"),
     rpcReady: readBoolean(rpc, "ok"),
     checkedAt: readString(probe, "generatedAt")
@@ -557,10 +472,10 @@ function buildCanaryStatus(): SifEmbeddingGateStatus["canary"] {
   const embeddingDimensions = readNumber(report, "embeddingDimensions", 1536);
   return {
     performed,
-    label: performed ? "소규모 검증 임베딩 완료 · 업로드 전" : "소규모 검증 임베딩 미실행",
+    label: performed ? "Canary 임베딩 완료 · 업로드 전" : "Canary 임베딩 미실행",
     answer: performed
-      ? `${embeddedCount.toLocaleString("ko-KR")}건 소규모 검증 임베딩 벡터를 생성해 모델·차원·텍스트 품질을 확인했고, DB 업로드는 수행하지 않았습니다.`
-      : "승인 전 소규모 검증 임베딩 산출물이 없습니다.",
+      ? `${embeddedCount.toLocaleString("ko-KR")}건 canary 임베딩 벡터를 생성해 모델·차원·텍스트 품질을 확인했고, DB 업로드는 수행하지 않았습니다.`
+      : "승인 전 canary 임베딩 검증 산출물이 없습니다.",
     reportPath: CANARY_REPORT_PATH,
     vectorsPath: performed ? vectorsPath : null,
     corpusCount,
@@ -573,28 +488,28 @@ function buildCanaryStatus(): SifEmbeddingGateStatus["canary"] {
     dbMutationPerformed: uploadedCount > 0,
     artifactIntegrity: [
       readFileIntegrity({
-        label: "소규모 검증 보고서",
+        label: "Canary report",
         path: CANARY_REPORT_PATH,
         role: "소량 임베딩 실행 결과와 DB 업로드 보류 상태를 확인합니다.",
         sha256Enabled: true
       }),
       readFileIntegrity({
-        label: "소규모 검증 배치 목록",
+        label: "Canary manifest",
         path: CANARY_MANIFEST_PATH,
-        role: "소규모 검증 배치 수량과 코퍼스 해시를 확인합니다.",
+        role: "canary 배치 수량과 corpus hash를 확인합니다.",
         sha256Enabled: true,
         contentHash: corpusHash,
         recordCount: corpusCount
       }),
       readFileIntegrity({
-        label: "소규모 검증 코퍼스",
+        label: "Canary corpus",
         path: CANARY_CORPUS_PATH,
-        role: "소규모 검증 임베딩 입력 텍스트를 검토합니다.",
+        role: "canary 임베딩 입력 텍스트를 검토합니다.",
         contentHash: corpusHash,
         recordCount: corpusCount
       }),
       readFileIntegrity({
-        label: "소규모 검증 벡터",
+        label: "Canary vectors",
         path: vectorsPath || CANARY_VECTORS_PATH,
         role: "승인 전 소량 벡터 생성이 정상 동작했는지 확인합니다.",
         sha256Enabled: true,
@@ -609,20 +524,17 @@ function buildPostMigrationVerification(): SifEmbeddingPostMigrationVerification
   const embeddings = asRecord(report.safetyReferenceEmbeddings);
   const matchRpc = asRecord(report.matchRpc);
   const featureFlag = asRecord(report.featureFlag);
-  const status = readString(report, "status", "not-run");
   return {
     reportPath: POST_MIGRATION_VERIFY_PATH,
     ok: readBoolean(report, "ok"),
-    status,
+    status: readString(report, "status", "not-run"),
     expectedCorpusCount: readNumber(report, "expectedCorpusCount"),
     uploadedCount: readNumber(embeddings, "count"),
     tableReady: readBoolean(embeddings, "ok"),
     rpcReady: readBoolean(matchRpc, "ok"),
     vectorFeatureFlagEnabled: readBoolean(featureFlag, "vectorSearchEnabled"),
     failedCheckIds: readStringArray(report, "failedCheckIds"),
-    nextAction: status === "migration-required"
-      ? "승인된 SIF 전용 마이그레이션을 적용한 뒤 업로드 검증을 실행해야 합니다."
-      : `${formatSifRuntimeStatusForPresentation(status)} 상태를 확인한 뒤 마이그레이션 후 검증을 다시 실행해야 합니다.`,
+    nextAction: readString(report, "nextAction", "post-migration verifier를 다시 실행해야 합니다."),
     dbMutationPerformed: readBoolean(report, "dbMutationPerformed")
   };
 }
@@ -640,20 +552,20 @@ function buildNextApprovalGate(input: {
   if (input.vectorGuard.status === "blocked") {
     return {
       id: "disable-vector-flag",
-      label: "벡터 검색 기능 플래그 끄기",
+      label: "Vector feature flag 끄기",
       status: "blocked",
-      detail: "업로드 검증 전 SAFETY_REFERENCE_VECTOR_SEARCH=1이 켜져 있어 운영 벡터 검색을 차단했습니다.",
-      action: "SAFETY_REFERENCE_VECTOR_SEARCH를 끄고 운영 DB 점검을 다시 확인합니다."
+      detail: "업로드 검증 전 SAFETY_REFERENCE_VECTOR_SEARCH=1이 켜져 있어 runtime vector 검색을 차단했습니다.",
+      action: "SAFETY_REFERENCE_VECTOR_SEARCH를 끄고 runtime probe를 다시 확인합니다."
     };
   }
 
   if (!input.runtimeDbProbe.tableReady || !input.runtimeDbProbe.rpcReady) {
     return {
       id: "apply-sif-only-migration",
-      label: "SIF 전용 DB 마이그레이션 승인",
+      label: "SIF-only DB migration 승인",
       status: "waiting",
-      detail: "운영 DB에 safety_reference_embeddings 테이블 또는 match_safety_reference_embeddings RPC가 없어 업로드 전 마이그레이션 승인이 먼저 필요합니다.",
-      action: "SIF 전용 마이그레이션 SQL을 승인 후 적용합니다.",
+      detail: "운영 DB에 safety_reference_embeddings table 또는 match_safety_reference_embeddings RPC가 없어 업로드 전 migration 승인이 먼저 필요합니다.",
+      action: "SIF-only migration SQL을 승인 후 적용합니다.",
       artifactPath: input.migrationPath
     };
   }
@@ -663,8 +575,8 @@ function buildNextApprovalGate(input: {
       id: "prepare-runtime-env",
       label: "임베딩 실행 환경 확인",
       status: "blocked",
-      detail: "DB 운영 표면은 준비됐지만 OpenAI 키 또는 Supabase 서비스 역할 확인이 필요합니다.",
-      action: "OPENAI_API_KEY, Supabase URL, 서비스 역할을 확인한 뒤 임베딩 생성 승인을 진행합니다."
+      detail: "DB runtime 표면은 준비됐지만 OpenAI key 또는 Supabase service role 확인이 필요합니다.",
+      action: "OPENAI_API_KEY, Supabase URL, service role을 확인한 뒤 임베딩 생성 승인을 진행합니다."
     };
   }
 
@@ -673,7 +585,7 @@ function buildNextApprovalGate(input: {
       id: "approve-embedding-generation",
       label: "임베딩 생성 비용 승인",
       status: "waiting",
-      detail: "코퍼스와 DB 운영 표면이 준비됐습니다. 비용 발생 단계이므로 명시 승인 후에만 실행합니다.",
+      detail: "코퍼스와 DB runtime 표면이 준비됐습니다. 비용 발생 단계이므로 명시 승인 후에만 실행합니다.",
       action: "임베딩 생성과 업로드 명령을 승인합니다.",
       command: input.commandHeldUntilApproval
     };
@@ -684,8 +596,8 @@ function buildNextApprovalGate(input: {
       id: "approve-upload",
       label: "임베딩 업로드 승인",
       status: "waiting",
-      detail: "임베딩 벡터가 생성됐지만 DB 행 수 검증이 끝나지 않았습니다.",
-      action: "업로드 승인 플래그로 DB upsert 후 행 수를 검증합니다.",
+      detail: "임베딩 벡터가 생성됐지만 DB row count 검증이 끝나지 않았습니다.",
+      action: "업로드 승인 플래그로 DB upsert 후 row count를 검증합니다.",
       command: input.commandHeldUntilApproval
     };
   }
@@ -693,18 +605,18 @@ function buildNextApprovalGate(input: {
   if (input.vectorGuard.status === "ready") {
     return {
       id: "enable-vector-search",
-      label: "벡터 검색 활성 승인",
+      label: "Vector 검색 활성 승인",
       status: "ready",
-      detail: "업로드 수량 검증이 끝났습니다. RPC 연결 점검 후 기능 플래그를 켤 수 있습니다.",
-      action: "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화 전 연결 점검을 실행합니다."
+      detail: "업로드 수량 검증이 끝났습니다. RPC smoke test 후 feature flag를 켤 수 있습니다.",
+      action: "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화 전 smoke test를 실행합니다."
     };
   }
 
   return {
     id: "complete",
-    label: "SIF 벡터 승인 단계 완료",
+    label: "SIF vector gate 완료",
     status: "done",
-    detail: "SIF 벡터 검색 승인 단계가 완료된 상태입니다.",
+    detail: "SIF vector retrieval 승인 게이트가 완료된 상태입니다.",
     action: "운영 모니터링과 품질 검수를 유지합니다."
   };
 }
@@ -724,8 +636,8 @@ function buildReadinessVerdict(input: {
   if (input.vectorGuard.status === "blocked") {
     return {
       state: "blocked",
-      label: "벡터 기능 플래그 차단",
-      answer: "업로드 검증 전 벡터 검색 기능 플래그가 켜져 있어 승인 단계가 차단된 상태입니다.",
+      label: "Vector flag 차단",
+      answer: "업로드 검증 전 vector 검색 flag가 켜져 있어 승인 게이트가 차단된 상태입니다.",
       nextAction: input.nextApprovalGate.action,
       embeddingAlreadyRun,
       dbUploadAlreadyRun
@@ -735,8 +647,8 @@ function buildReadinessVerdict(input: {
   if (input.vectorGuard.status === "active") {
     return {
       state: "vector-active",
-      label: "SIF 벡터 검색 활성",
-      answer: "SIF 임베딩 생성, DB 업로드, 벡터 검색 활성화가 모두 끝난 상태입니다.",
+      label: "SIF vector 검색 활성",
+      answer: "SIF 임베딩 생성, DB 업로드, vector 검색 활성화가 모두 끝난 상태입니다.",
       nextAction: input.nextApprovalGate.action,
       embeddingAlreadyRun,
       dbUploadAlreadyRun
@@ -746,8 +658,8 @@ function buildReadinessVerdict(input: {
   if (input.vectorGuard.status === "ready") {
     return {
       state: "vector-activation-ready",
-      label: "벡터 활성 승인 대기",
-      answer: "SIF 임베딩과 DB 업로드는 검증됐고, 벡터 검색 기능 플래그 활성 승인만 남았습니다.",
+      label: "Vector 활성 승인 대기",
+      answer: "SIF 임베딩과 DB 업로드는 검증됐고, vector 검색 flag 활성 승인만 남았습니다.",
       nextAction: input.nextApprovalGate.action,
       embeddingAlreadyRun,
       dbUploadAlreadyRun
@@ -769,7 +681,7 @@ function buildReadinessVerdict(input: {
     return {
       state: "runtime-env-required",
       label: "실행 환경 확인 필요",
-      answer: "DB 표면은 준비됐지만 OpenAI 키 또는 Supabase 서비스 역할 확인 전이라 임베딩 실행을 보류합니다.",
+      answer: "DB 표면은 준비됐지만 OpenAI key 또는 Supabase service role 확인 전이라 임베딩 실행을 보류합니다.",
       nextAction: input.nextApprovalGate.action,
       embeddingAlreadyRun,
       dbUploadAlreadyRun
@@ -790,7 +702,7 @@ function buildReadinessVerdict(input: {
   return {
     state: "upload-awaits-approval",
     label: "DB 업로드 승인 대기",
-    answer: "SIF 임베딩 벡터는 생성됐지만 DB 업로드와 행 수 검증이 아직 끝나지 않았습니다.",
+    answer: "SIF 임베딩 벡터는 생성됐지만 DB 업로드와 row count 검증이 아직 끝나지 않았습니다.",
     nextAction: input.nextApprovalGate.action,
     embeddingAlreadyRun,
     dbUploadAlreadyRun
@@ -818,11 +730,11 @@ function buildLearningLifecycle(input: {
           ? "코퍼스 준비 · 임베딩 전"
           : "코퍼스 점검 필요";
   const answer = vectorSearchUsable
-    ? "SIF 코퍼스 임베딩, DB 업로드, 벡터 검색 활성화가 끝났습니다."
+    ? "SIF 코퍼스 임베딩, DB 업로드, vector 검색 활성화가 끝났습니다."
     : dbUploadVerified
-      ? "SIF 임베딩 DB 행 수는 검증됐고, 벡터 검색 기능 플래그 활성 승인만 남았습니다."
+      ? "SIF 임베딩 DB row count는 검증됐고, vector 검색 flag 활성 승인만 남았습니다."
       : fullEmbeddingGenerated
-        ? "SIF 임베딩 벡터는 생성됐지만 운영 DB 업로드와 행 수 검증은 아직입니다."
+        ? "SIF 임베딩 벡터는 생성됐지만 운영 DB 업로드와 row count 검증은 아직입니다."
         : input.corpusReady
           ? "SIF 자료는 재생성 가능한 코퍼스로 준비됐지만, 모델 파인튜닝도 전체 임베딩 생성도 아직 실행하지 않았습니다."
           : "SIF 코퍼스 품질 게이트를 먼저 다시 통과해야 합니다.";
@@ -852,7 +764,7 @@ function buildOperatorGate(input: {
   uploadedCount: number;
   commandHeldUntilApproval: string;
 }): SifEmbeddingOperatorGate {
-  const migrationArtifact = input.approvalPacket.artifactIntegrity.find((artifact) => artifact.label === "SIF 전용 마이그레이션");
+  const migrationArtifact = input.approvalPacket.artifactIntegrity.find((artifact) => artifact.label === "SIF-only migration");
   const status: SifEmbeddingOperatorGate["status"] =
     input.nextApprovalGate.status === "blocked"
       ? "blocked"
@@ -867,17 +779,17 @@ function buildOperatorGate(input: {
     status,
     gateId: input.nextApprovalGate.id,
     title: status === "approval-request-open"
-      ? "다음 승인 단계가 열려 있습니다."
+      ? "다음 승인 게이트가 열려 있습니다."
       : input.nextApprovalGate.label,
     approvalQuestion: input.nextApprovalGate.id === "apply-sif-only-migration"
-      ? "SIF 전용 마이그레이션 SQL을 운영 DB에 적용해도 되는지 승인해야 합니다."
+      ? "SIF-only migration SQL을 운영 DB에 적용해도 되는지 승인해야 합니다."
       : input.nextApprovalGate.action,
     evidenceSummary: [
       `전체 SIF 코퍼스 ${input.corpusCount.toLocaleString("ko-KR")}건은 고정됐고 전체 임베딩 생성은 ${input.embeddedCount.toLocaleString("ko-KR")}건입니다.`,
-      `소규모 검증은 ${input.canary.embeddedCount.toLocaleString("ko-KR")}건 ${formatSifCanaryModeForPresentation(input.canary.mode)} 방식으로 확인했고 DB 업로드는 ${input.canary.uploadedCount.toLocaleString("ko-KR")}건입니다.`,
-      `운영 DB 점검은 ${formatSifRuntimeStatusForPresentation(input.runtimeDbProbe.status)}이며 테이블 ${input.runtimeDbProbe.tableReady ? "준비됨" : "없음"}, RPC ${input.runtimeDbProbe.rpcReady ? "준비됨" : "없음"}입니다.`,
-      `마이그레이션 후 검증은 ${formatSifRuntimeStatusForPresentation(input.postMigrationVerification.status)}이며 업로드 ${input.postMigrationVerification.uploadedCount.toLocaleString("ko-KR")} / ${input.postMigrationVerification.expectedCorpusCount.toLocaleString("ko-KR")}건을 보고합니다.`,
-      `승인 지문 ${input.approvalPacket.approvalFingerprint}로 코퍼스 해시, 모델/차원, 마이그레이션 SQL을 고정합니다.`
+      `Canary는 ${input.canary.embeddedCount.toLocaleString("ko-KR")}건 embed-only로 확인했고 DB 업로드는 ${input.canary.uploadedCount.toLocaleString("ko-KR")}건입니다.`,
+      `Runtime DB probe는 ${input.runtimeDbProbe.status}이며 table ${input.runtimeDbProbe.tableReady ? "ready" : "missing"}, RPC ${input.runtimeDbProbe.rpcReady ? "ready" : "missing"}입니다.`,
+      `Post-migration verifier는 ${input.postMigrationVerification.status}이며 업로드 ${input.postMigrationVerification.uploadedCount.toLocaleString("ko-KR")} / ${input.postMigrationVerification.expectedCorpusCount.toLocaleString("ko-KR")}건을 보고합니다.`,
+      `승인 지문 ${input.approvalPacket.approvalFingerprint}로 corpus hash, 모델/차원, migration SQL을 고정합니다.`
     ],
     migrationArtifact: {
       path: migrationArtifact?.path || input.nextApprovalGate.artifactPath || "",
@@ -892,12 +804,12 @@ function buildOperatorGate(input: {
       vectorsPath: input.canary.vectorsPath
     },
     allowedBeforeApproval: [
-      "승인 패킷과 마이그레이션 SQL 변경 내용 검토",
-      "운영 DB 점검 재실행",
-      "코퍼스/배치 목록/해시 재검증"
+      "승인 패킷과 migration SQL diff 검토",
+      "runtime DB probe 재실행",
+      "코퍼스/manifest/hash 재검증"
     ],
     forbiddenBeforeApproval: [
-      "운영 DB 마이그레이션 적용",
+      "운영 DB migration 적용",
       "전체 SIF 임베딩 생성",
       "safety_reference_embeddings 업로드",
       "SAFETY_REFERENCE_VECTOR_SEARCH=1 활성화"
@@ -905,19 +817,19 @@ function buildOperatorGate(input: {
     checklist: [
       {
         id: "preflight",
-        label: "사전 점검 통과",
+        label: "Preflight 통과",
         status: input.approvalPacket.safetyLocks.every((lock) => lock.locked) ? "done" : "required",
         evidence: "승인 전 DB 변경, 전체 임베딩 생성, 업로드가 모두 보류 상태입니다."
       },
       {
         id: "canary",
-        label: "소규모 검증 임베딩 확인",
+        label: "Canary embed-only 확인",
         status: input.canary.performed && !input.canary.dbMutationPerformed ? "done" : "required",
         evidence: input.canary.answer
       },
       {
         id: "migration-runtime",
-        label: "운영 DB 마이그레이션 필요성 확인",
+        label: "운영 DB migration 필요성 확인",
         status: migrationReady ? "done" : "required",
         evidence: input.runtimeDbProbe.message
       },
@@ -929,25 +841,25 @@ function buildOperatorGate(input: {
       },
       {
         id: "post-migration-verifier",
-        label: "마이그레이션 후 검증 준비",
+        label: "Post-migration verifier 준비",
         status: input.postMigrationVerification.dbMutationPerformed ? "blocked" : "done",
-        evidence: `${input.postMigrationVerification.reportPath} · 현재 ${formatSifRuntimeStatusForPresentation(input.postMigrationVerification.status)}`
+        evidence: `${input.postMigrationVerification.reportPath} · 현재 ${input.postMigrationVerification.status}`
       }
     ],
     postApprovalSequence: [
-      "승인된 SIF 전용 마이그레이션을 운영 DB에 적용합니다.",
-      "운영 DB 점검으로 테이블/RPC 준비 상태를 다시 확인합니다.",
+      "승인된 SIF-only migration을 운영 DB에 적용합니다.",
+      "runtime probe로 table/RPC readiness를 다시 확인합니다.",
       "--embed --approved-embedding으로 전체 임베딩 생성을 승인 실행합니다.",
-      "--upload --approved-upload으로 DB upsert 후 행 수를 검증합니다.",
-      "마이그레이션 후 검증으로 행 수, 메타데이터 표본, RPC 연결을 확인합니다.",
-      "RPC 연결 점검 통과 후에만 SAFETY_REFERENCE_VECTOR_SEARCH=1을 켭니다."
+      "--upload --approved-upload으로 DB upsert 후 row count를 검증합니다.",
+      "post-migration verifier로 row count, metadata sample, RPC smoke를 검증합니다.",
+      "RPC smoke test 통과 후에만 SAFETY_REFERENCE_VECTOR_SEARCH=1을 켭니다."
     ],
     heldCommands: [
       input.commandHeldUntilApproval,
       "npm.cmd run knowledge:sif-embedding-runtime-probe -- --output evaluation/sif-embedding-gate/runtime-db-probe.json",
       "npm.cmd run knowledge:sif-embedding-post-migration-verify -- --output evaluation/sif-embedding-gate/post-migration-verify.json"
     ],
-    nonApprovalFallback: "승인이 없으면 기존 safety_reference_items 기반 REST/순위 검색 경로를 유지하고 벡터 검색은 계속 꺼둡니다."
+    nonApprovalFallback: "승인이 없으면 기존 safety_reference_items 기반 REST/ranked 검색 경로를 유지하고 vector retrieval은 계속 꺼둡니다."
   };
 }
 
@@ -967,14 +879,14 @@ function buildApprovalPacket(input: {
   const manifest = asRecord(manifestJson);
   const requiredArtifacts = [
     {
-      label: "사전 점검 보고서",
+      label: "Preflight report",
       path: input.artifacts.reportPath,
       role: "코퍼스 수량, 품질 게이트, 승인 보류 상태를 확인합니다."
     },
     {
-      label: "배치 목록",
+      label: "Batch manifest",
       path: input.artifacts.manifestPath,
-      role: "임베딩 배치 수량과 코퍼스 해시를 고정합니다."
+      role: "임베딩 배치 수량과 corpus hash를 고정합니다."
     },
     {
       label: "SIF corpus JSONL",
@@ -982,9 +894,9 @@ function buildApprovalPacket(input: {
       role: "임베딩 입력 원문과 SIF 레코드 매핑을 검토합니다."
     },
     {
-      label: "SIF 전용 마이그레이션",
+      label: "SIF-only migration",
       path: input.artifacts.migrationPath,
-      role: "운영 DB에 필요한 테이블, RPC, 인덱스 범위만 승인합니다."
+      role: "운영 DB에 필요한 table, RPC, index 범위만 승인합니다."
     }
   ];
   const artifactIntegrity = [
@@ -1009,7 +921,7 @@ function buildApprovalPacket(input: {
       sha256Enabled: true
     })
   ];
-  const migrationSha256 = artifactIntegrity.find((artifact) => artifact.label === "SIF 전용 마이그레이션")?.sha256;
+  const migrationSha256 = artifactIntegrity.find((artifact) => artifact.label === "SIF-only migration")?.sha256;
 
   return {
     scope: "sif_embedding_next_approval_gate",
@@ -1045,7 +957,7 @@ function buildApprovalPacket(input: {
         detail: input.uploaded ? "DB 업로드 이력이 있습니다." : "DB upsert는 승인 전 보류 상태입니다."
       },
       {
-        label: "벡터 검색 잠금",
+        label: "Vector 검색 잠금",
         locked: input.vectorGuard.status !== "active",
         detail: input.vectorGuard.message
       }
@@ -1096,7 +1008,7 @@ export function getSifEmbeddingGateStatus(
     "commandHeldUntilApproval",
     "npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload"
   );
-  const nextApprovalDecisions = readStringArray(preflight, "nextApprovalDecisions").map(approvalDecisionLabel);
+  const nextApprovalDecisions = readStringArray(preflight, "nextApprovalDecisions");
   const preflightChecks = readRecordArray(preflight, "checks").map((check) => {
     const id = readString(check, "id", "unknown_check");
     return {
@@ -1154,10 +1066,10 @@ export function getSifEmbeddingGateStatus(
     ok: overallOk,
     stage: overallOk ? "ready-for-approval" : "degraded",
     message: overallOk
-      ? "SIF 코퍼스와 배치 목록은 준비됐고, 임베딩 생성과 DB 업로드는 승인 전 보류 상태입니다."
+      ? "SIF 코퍼스와 배치 manifest는 준비됐고, 임베딩 생성과 DB 업로드는 승인 전 보류 상태입니다."
       : vectorGuard.status === "blocked"
         ? vectorGuard.message
-        : "SIF 임베딩 승인 단계 점검이 필요합니다.",
+        : "SIF 임베딩 승인 게이트 점검이 필요합니다.",
     generatedAt: readString(preflight, "generatedAt", readString(report, "completedAt")),
     approvalHeld,
     dbMutationPerformed,

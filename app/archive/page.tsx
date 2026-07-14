@@ -9,6 +9,15 @@ import {
   parseStoredCurrentWorkpack,
   type StoredCurrentWorkpack
 } from "@/lib/current-workpack";
+import {
+  formatArchiveStatus,
+  formatDispatchChannel,
+  formatDispatchFailureReason,
+  formatDispatchLanguage,
+  formatDispatchProvider,
+  formatDispatchProviderStatus,
+  formatWorkflowRunId
+} from "@/lib/web-safe-presentation";
 
 type ArchiveStatus = "checking" | "ready" | "partial" | "empty" | "login-required" | "unconfigured" | "error";
 
@@ -47,92 +56,6 @@ type ArchiveState = {
   workpacks: ArchiveWorkpack[];
   dispatchLogs: ArchiveDispatchLog[];
 };
-
-const ARCHIVE_STATUS_LABELS: Readonly<Record<ArchiveStatus, string>> = {
-  checking: "확인 중",
-  ready: "준비됨",
-  partial: "일부 확인",
-  empty: "기록 없음",
-  "login-required": "로그인 필요",
-  unconfigured: "연결 설정 필요",
-  error: "오류"
-};
-
-const DISPATCH_PROVIDER_STATUS_LABELS: Readonly<Record<string, string>> = {
-  "sent": "전송 완료",
-  delivered: "전달 완료",
-  accepted: "접수 완료",
-  queued: "전송 대기",
-  pending: "전송 대기",
-  partial: "일부 전송",
-  unconfigured: "서비스 설정 필요",
-  rejected: "요청 거절",
-  failed: "전송 실패",
-  error: "전송 오류",
-  fixture: "점검용 전송",
-  "validation-only": "검증만 수행",
-  "idempotency-unsupported": "중복 방지 확인 필요",
-  "provider-response-uncertain": "전송 결과 확인 필요"
-};
-
-const DISPATCH_PROVIDER_LABELS: Readonly<Record<string, string>> = {
-  "n8n": "전송 자동화",
-  "safe-fixture": "점검용 전송 서비스",
-  "solapi-alimtalk": "알림톡 전송 서비스",
-  twilio: "문자 전송 서비스",
-  sendgrid: "이메일 전송 서비스",
-  "latest-sms": "문자 전송 서비스"
-};
-
-const DISPATCH_CHANNEL_LABELS: Readonly<Record<string, string>> = {
-  email: "이메일",
-  sms: "문자",
-  kakao: "카카오 알림톡",
-  alimtalk: "카카오 알림톡",
-  band: "밴드",
-  slack: "협업 채널",
-  discord: "협업 채널"
-};
-
-const DISPATCH_LANGUAGE_LABELS: Readonly<Record<string, string>> = {
-  ko: "한국어",
-  en: "영어",
-  vi: "베트남어",
-  zh: "중국어",
-  ja: "일본어",
-  th: "태국어"
-};
-
-function formatArchiveStatus(status: string): string {
-  return ARCHIVE_STATUS_LABELS[status as ArchiveStatus] ?? "상태 확인 필요";
-}
-
-function formatDispatchProviderStatus(status: string | null): string {
-  if (!status) return "결과 확인 필요";
-  return DISPATCH_PROVIDER_STATUS_LABELS[status] ?? "상태 확인 필요";
-}
-
-function formatDispatchProvider(provider: string | null): string {
-  if (!provider) return "전송 서비스 미기록";
-  return DISPATCH_PROVIDER_LABELS[provider] ?? "분류 검토 필요";
-}
-
-function formatDispatchChannel(channel: string): string {
-  return DISPATCH_CHANNEL_LABELS[channel] ?? "분류 검토 필요";
-}
-
-function formatDispatchLanguage(languageCode: string | null): string {
-  if (!languageCode) return "언어 미기록";
-  return DISPATCH_LANGUAGE_LABELS[languageCode] ?? "분류 검토 필요";
-}
-
-function formatDispatchFailureReason(failureReason: string | null): string {
-  return failureReason ? "실패 사유 확인 필요" : "";
-}
-
-function formatWorkflowRunId(workflowRunId: string | null): string {
-  return workflowRunId ? `실행 ID ${workflowRunId}` : "실행 기록 없음";
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

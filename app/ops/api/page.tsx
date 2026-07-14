@@ -2,18 +2,9 @@ import Link from "next/link";
 import { getLatestDryrunSnapshot } from "@/lib/dryrun-status";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
+import { toDryrunPresentationSnapshot } from "@/lib/web-safe-presentation";
 
 export const dynamic = "force-dynamic";
-
-const DRYRUN_QUALITY_NOTE_LABELS: Readonly<Record<string, string>> = {
-  "All document dry-run cases returned output, but quality may still be generic.":
-    "모든 문서 생성 점검이 응답을 반환했지만, 내용은 추가 검토가 필요합니다."
-};
-
-function formatDryrunQualityNote(note: string | null | undefined): string {
-  if (!note) return "최근 점검 결과가 없습니다.";
-  return DRYRUN_QUALITY_NOTE_LABELS[note.trim()] ?? "상태 확인 필요";
-}
 
 // Internal operations dashboard — not for search engines.
 export const metadata = {
@@ -21,7 +12,12 @@ export const metadata = {
 };
 
 export default async function ApiOperationsPage() {
-  const snapshot = getLatestDryrunSnapshot();
+  let snapshot: ReturnType<typeof toDryrunPresentationSnapshot> = null;
+  try {
+    snapshot = toDryrunPresentationSnapshot(getLatestDryrunSnapshot());
+  } catch (error: unknown) {
+    console.error("API operations dry-run snapshot presentation read failed", error);
+  }
   const safetyDb = await getSafetyReferenceStats();
 
   return (
@@ -42,7 +38,7 @@ export default async function ApiOperationsPage() {
       </section>
       <section className="safeclaw-module-panel">
         <span>운영 점검</span>
-        <h2>{formatDryrunQualityNote(snapshot?.qualityNote)}</h2>
+        <h2>{snapshot?.qualityNote || "최근 점검 결과가 없습니다."}</h2>
         <p>이 화면은 제출·운영용 요약만 보여줍니다. 원문 JSON, 내부 엔드포인트, 적재 경로는 관리자 검증 산출물에서만 확인합니다.</p>
       </section>
       <section className="safeclaw-module-grid four">

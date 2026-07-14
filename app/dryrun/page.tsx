@@ -1,18 +1,9 @@
 import Link from "next/link";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { getLatestDryrunReport, getLatestDryrunSnapshot } from "@/lib/dryrun-status";
+import { toDryrunPresentationSnapshot } from "@/lib/web-safe-presentation";
 
 export const dynamic = "force-dynamic";
-
-const DRYRUN_QUALITY_NOTE_LABELS: Readonly<Record<string, string>> = {
-  "All document dry-run cases returned output, but quality may still be generic.":
-    "모든 문서 생성 점검이 응답을 반환했지만, 내용은 추가 검토가 필요합니다."
-};
-
-function formatDryrunQualityNote(note: string | null | undefined): string {
-  if (!note) return "최근 점검 결과가 없습니다.";
-  return DRYRUN_QUALITY_NOTE_LABELS[note.trim()] ?? "상태 확인 필요";
-}
 
 // Internal QA / dry-run log — not for search engines.
 export const metadata = {
@@ -29,7 +20,12 @@ export default async function DryrunPage({
     throw new Error("SafeClaw deterministic frontend audit error boundary probe");
   }
 
-  const snapshot = getLatestDryrunSnapshot();
+  let snapshot: ReturnType<typeof toDryrunPresentationSnapshot> = null;
+  try {
+    snapshot = toDryrunPresentationSnapshot(getLatestDryrunSnapshot());
+  } catch (error: unknown) {
+    console.error("dry-run snapshot presentation read failed", error);
+  }
   const report = getLatestDryrunReport();
 
   return (
@@ -50,7 +46,7 @@ export default async function DryrunPage({
             <article><span>평균 응답</span><strong>{snapshot.avgMs}밀리초</strong></article>
             <article><span>P95</span><strong>{snapshot.p95Ms}밀리초</strong></article>
           </div>
-          <h2>{formatDryrunQualityNote(snapshot.qualityNote)}</h2>
+          <h2>{snapshot.qualityNote}</h2>
           <p>
             요약: <code>{snapshot.summaryPath}</code><br />
             보고서: <code>{snapshot.reportPath}</code>

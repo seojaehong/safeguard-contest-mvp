@@ -1,11 +1,15 @@
 import {
+  formatSifApprovalDecisionForPresentation,
+  formatSifArtifactLabelForPresentation,
   formatSifCanaryModeForPresentation,
   formatSifChecklistStatusForPresentation,
   formatSifGateIdForPresentation,
   formatSifOperatorGateStatusForPresentation,
+  formatSifPreflightLabelForPresentation,
   formatSifRuntimeStatusForPresentation,
-  type SifEmbeddingGateStatus
-} from "@/lib/sif-embedding-gate-status";
+  formatSifTextForPresentation
+} from "@/lib/web-safe-presentation";
+import type { SifEmbeddingGateStatus } from "@/lib/sif-embedding-gate-status";
 import { MAX_INPUT_HAZARD_PHOTO_FILES } from "@/lib/operation-improvements";
 
 export type SifEmbeddingApprovalPacket = {
@@ -41,12 +45,14 @@ function boolText(value: boolean) {
 }
 
 function decisionLines(status: SifEmbeddingGateStatus) {
-  return status.approvalPacket.decisions.map((decision, index) => `${index + 1}. ${decision}`);
+  return status.approvalPacket.decisions.map((decision, index) => (
+    `${index + 1}. ${formatSifApprovalDecisionForPresentation(decision)}`
+  ));
 }
 
 function artifactLines(status: SifEmbeddingGateStatus) {
   return status.approvalPacket.requiredArtifacts.map((artifact) => (
-    `- ${artifact.label}: \`${artifact.path}\` (${artifact.role})`
+    `- ${formatSifArtifactLabelForPresentation(artifact.label)}: \`${artifact.path}\` (${formatSifTextForPresentation(artifact.role)})`
   ));
 }
 
@@ -58,25 +64,25 @@ function integrityLines(status: SifEmbeddingGateStatus) {
         ? `contentHash=${artifact.contentHash}`
         : "hash=not-recorded";
     const recordCount = typeof artifact.recordCount === "number" ? `, records=${artifact.recordCount.toLocaleString("ko-KR")}` : "";
-    return `- ${artifact.label}: ${artifact.exists ? "present" : "missing"}, bytes=${artifact.byteSize.toLocaleString("ko-KR")}, ${hash}${recordCount}`;
+    return `- ${formatSifArtifactLabelForPresentation(artifact.label)}: ${artifact.exists ? "present" : "missing"}, bytes=${artifact.byteSize.toLocaleString("ko-KR")}, ${hash}${recordCount}`;
   });
 }
 
 function safetyLockLines(status: SifEmbeddingGateStatus) {
   return status.approvalPacket.safetyLocks.map((lock) => (
-    `- ${lock.label}: ${lock.locked ? "locked" : "review"} - ${lock.detail}`
+    `- ${formatSifTextForPresentation(lock.label)}: ${lock.locked ? "locked" : "review"} - ${formatSifTextForPresentation(lock.detail)}`
   ));
 }
 
 function preflightLines(status: SifEmbeddingGateStatus) {
   return status.preflightChecks.map((check) => (
-    `- ${check.passed ? "pass" : "review"}: ${check.label} (${check.evidenceSummary})`
+    `- ${check.passed ? "pass" : "review"}: ${formatSifPreflightLabelForPresentation(check.id, check.label)} (${check.evidenceSummary})`
   ));
 }
 
 function operatorChecklistLines(status: SifEmbeddingGateStatus) {
   return status.operatorGate.checklist.map((item) => (
-    `- ${formatSifChecklistStatusForPresentation(item.status)}: ${item.label} (${item.evidence})`
+    `- ${formatSifChecklistStatusForPresentation(item.status)}: ${formatSifTextForPresentation(item.label)} (${formatSifTextForPresentation(item.evidence)})`
   ));
 }
 
@@ -98,9 +104,9 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     "",
     "## Current State",
     "",
-    `- Verdict: ${status.readinessVerdict.label}`,
-    `- Answer: ${status.readinessVerdict.answer}`,
-    `- Next action: ${status.nextApprovalGate.action}`,
+    `- Verdict: ${formatSifTextForPresentation(status.readinessVerdict.label)}`,
+    `- Answer: ${formatSifTextForPresentation(status.readinessVerdict.answer)}`,
+    `- Next action: ${formatSifTextForPresentation(status.nextApprovalGate.action)}`,
     `- DB mutation performed: ${boolText(status.dbMutationPerformed)}`,
     `- Full embedding generated: ${boolText(status.learningLifecycle.fullEmbeddingGenerated)}`,
     `- DB upload verified: ${boolText(status.learningLifecycle.dbUploadVerified)}`,
@@ -110,21 +116,21 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     "## Operator Gate Runbook",
     "",
     `- Status: ${formatSifOperatorGateStatusForPresentation(status.operatorGate.status)}`,
-    `- Approval question: ${status.operatorGate.approvalQuestion}`,
+    `- Approval question: ${formatSifTextForPresentation(status.operatorGate.approvalQuestion)}`,
     `- Migration artifact: \`${status.operatorGate.migrationArtifact.path}\``,
     `- Migration sha256: ${status.operatorGate.migrationArtifact.sha256 || "not-recorded"}`,
     "",
     "Evidence:",
     "",
-    ...status.operatorGate.evidenceSummary.map((item) => `- ${item}`),
+    ...status.operatorGate.evidenceSummary.map((item) => `- ${formatSifTextForPresentation(item)}`),
     "",
     "Allowed before approval:",
     "",
-    ...status.operatorGate.allowedBeforeApproval.map((item) => `- ${item}`),
+    ...status.operatorGate.allowedBeforeApproval.map((item) => `- ${formatSifTextForPresentation(item)}`),
     "",
     "Forbidden before approval:",
     "",
-    ...status.operatorGate.forbiddenBeforeApproval.map((item) => `- ${item}`),
+    ...status.operatorGate.forbiddenBeforeApproval.map((item) => `- ${formatSifTextForPresentation(item)}`),
     "",
     "Checklist:",
     "",
@@ -132,9 +138,9 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     "",
     "After approval:",
     "",
-    ...status.operatorGate.postApprovalSequence.map((item, index) => `${index + 1}. ${item}`),
+    ...status.operatorGate.postApprovalSequence.map((item, index) => `${index + 1}. ${formatSifTextForPresentation(item)}`),
     "",
-    `Non-approval fallback: ${status.operatorGate.nonApprovalFallback}`,
+    `Non-approval fallback: ${formatSifTextForPresentation(status.operatorGate.nonApprovalFallback)}`,
     "",
     "## Post-Migration Verification",
     "",
@@ -146,12 +152,12 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     `- RPC ready: ${boolText(status.postMigrationVerification.rpcReady)}`,
     `- Vector flag: ${status.postMigrationVerification.vectorFeatureFlagEnabled ? "on" : "off"}`,
     `- Failed checks: ${status.postMigrationVerification.failedCheckIds.join(", ") || "none"}`,
-    `- Next action: ${status.postMigrationVerification.nextAction}`,
+    `- Next action: ${formatSifTextForPresentation(status.postMigrationVerification.nextAction)}`,
     "",
     "## Canary Embedding Evidence",
     "",
-    `- Status: ${status.canary.label}`,
-    `- Answer: ${status.canary.answer}`,
+    `- Status: ${formatSifTextForPresentation(status.canary.label)}`,
+    `- Answer: ${formatSifTextForPresentation(status.canary.answer)}`,
     `- Corpus count: ${status.canary.corpusCount.toLocaleString("ko-KR")}`,
     `- Embedded count: ${status.canary.embeddedCount.toLocaleString("ko-KR")}`,
     `- Uploaded count: ${status.canary.uploadedCount.toLocaleString("ko-KR")}`,
@@ -186,7 +192,7 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     "",
     ...safetyLockLines(status),
     "",
-    "## 사전 점검",
+    "## Preflight Checks",
     "",
     ...preflightLines(status),
     "",
@@ -195,14 +201,14 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     `- Status: ${formatSifRuntimeStatusForPresentation(status.runtimeDbProbe.status)}`,
     `- Table ready: ${boolText(status.runtimeDbProbe.tableReady)}`,
     `- RPC ready: ${boolText(status.runtimeDbProbe.rpcReady)}`,
-    `- Message: ${status.runtimeDbProbe.message}`,
+    `- Message: ${formatSifTextForPresentation(status.runtimeDbProbe.message)}`,
     "",
-    "## 사진 분석/OCR 하네스 경로",
+    "## Vision/OCR Harness Path",
     "",
     `- Initial field photos: multipart \`photos\` to \`${relatedHarness.visionEndpoint}\`, up to ${relatedHarness.maxInputPhotos} files`,
     "- Photo hazards are reviewable candidates, not final facts.",
     "- Only user-accepted candidates enter the DB harness improvement memory.",
-    `- 개선 전/개선 후 개선사항: \`${relatedHarness.improvementEndpointPattern}\`에 사진 분석/OCR 데이터를 저장합니다.`,
+    `- Before/After improvements: \`${relatedHarness.improvementEndpointPattern}\`에 사진 분석/OCR 데이터를 저장합니다.`,
     "- OCR text, detected hazards, observed improvement, source photo names, and reflected documents are exported to the workpack learning corpus.",
     "",
     "## Held Command",
