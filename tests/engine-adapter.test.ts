@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { ClawChatEvent } from "@/lib/agent-loop";
 import {
   BrokerError,
+  ENGINE_ADAPTER_CONTRACT_VERSION,
+  SAFECLAW_ENGINE_AUTHORITY,
   createGuardedEngineAdapter,
   createUnavailableEngineAdapter,
   resolveEngineMode,
@@ -15,6 +17,12 @@ const context: BrokerRequestContext = {
   organizationId: "org-1",
   siteId: "site-1",
   site: { siteName: "성수 현장", region: null, briefingQuestion: null },
+};
+
+const testMetadata = {
+  contractVersion: ENGINE_ADAPTER_CONTRACT_VERSION,
+  runtime: "unavailable" as const,
+  authority: SAFECLAW_ENGINE_AUTHORITY,
 };
 
 function deferred(): { promise: Promise<void>; resolve: () => void } {
@@ -41,8 +49,42 @@ describe("engine adapter policy", () => {
     expect(resolveEngineMode({ SAFECLAW_ENGINE_MODE: "local-openclaw" })).toBe("local-openclaw");
   });
 
+  it("enables Hermes only as an explicit local experimental path", () => {
+    expect(resolveEngineMode({ SAFECLAW_ENGINE_MODE: "experimental-hermes" })).toBe("disabled");
+    expect(resolveEngineMode({
+      SAFECLAW_ENGINE_MODE: "experimental-hermes",
+      SAFECLAW_HERMES_LOCAL_POC: "1",
+    })).toBe("experimental-hermes");
+    expect(resolveEngineMode({
+      SAFECLAW_ENGINE_MODE: "experimental-hermes",
+      SAFECLAW_HERMES_LOCAL_POC: "1",
+      VERCEL: "1",
+    })).toBe("disabled");
+  });
+
   it("exposes no executable capabilities until an enforcing sidecar exists", () => {
     expect(createUnavailableEngineAdapter().capabilities).toEqual([]);
+  });
+
+  it("publishes the versioned SafeClaw authority boundary on every adapter", () => {
+    const engine = createUnavailableEngineAdapter();
+
+    expect(engine).toMatchObject({
+      contractVersion: "engine-adapter/v1",
+      runtime: "unavailable",
+      authority: {
+        systemOfRecord: "safeclaw-mcp-db-harness",
+        toolExecutionBoundary: "safeclaw-mcp-interceptor",
+        canMutate: false,
+        canPublish: false,
+        humanConfirmationRequired: true,
+      },
+    });
+    expect(createGuardedEngineAdapter(engine)).toMatchObject({
+      contractVersion: "engine-adapter/v1",
+      runtime: "unavailable",
+      authority: engine.authority,
+    });
   });
 
   it("uses a stable fail-closed unavailable adapter", async () => {
@@ -62,6 +104,7 @@ describe("engine adapter policy", () => {
     const first = deferred();
     const base: EngineAdapter = {
       id: "blocking",
+      ...testMetadata,
       capabilities: [],
       checkAvailability: async () => undefined,
       run: vi.fn(async () => first.promise),
@@ -79,6 +122,7 @@ describe("engine adapter policy", () => {
     let calls = 0;
     const base: EngineAdapter = {
       id: "timeout",
+      ...testMetadata,
       capabilities: [],
       checkAvailability: async () => undefined,
       run: vi.fn(async ({ signal }) => {
@@ -102,6 +146,7 @@ describe("engine adapter policy", () => {
     let preflightCalls = 0;
     const base: EngineAdapter = {
       id: "preflight-blocking",
+      ...testMetadata,
       capabilities: [],
       checkAvailability: async () => {
         preflightCalls += 1;
@@ -133,6 +178,7 @@ describe("engine adapter policy", () => {
     let observedSignal: AbortSignal | undefined;
     const base: EngineAdapter = {
       id: "preflight-abort-aware",
+      ...testMetadata,
       capabilities: [],
       checkAvailability: async (_context, signal) => {
         if (!signal) throw new Error("missing preflight signal");
@@ -162,6 +208,7 @@ describe("engine adapter policy", () => {
     let abortObserved = false;
     const base: EngineAdapter = {
       id: "close-aware",
+      ...testMetadata,
       capabilities: [],
       checkAvailability: async () => undefined,
       run: async ({ signal }) => {

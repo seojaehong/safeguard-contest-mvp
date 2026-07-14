@@ -1,11 +1,14 @@
 # ADR 0001: SafeClaw Core and Agent Runtime Boundary
 
 Date: 2026-07-09
+Last updated: 2026-07-14
 
 ## Status
 
-Accepted for the current commercial workbench plan. The Phase 4 target in this
-ADR is directional: it is not implemented or approved for production today.
+Accepted for the current commercial workbench plan. A narrow versioned
+`EngineAdapter` experimental slice is implemented for local evaluation. The
+Phase 4 production target remains directional and is not approved for customer
+traffic.
 
 ## Context
 
@@ -48,8 +51,37 @@ changes the planner implementation, not the product system of record.
 
 Hermes never owns product facts and never writes directly to Supabase/Postgres.
 That invariant applies during the PoC, after any future promotion, and during
-failover. No current deployment or active-plan milestone is claimed to have
-implemented this target.
+failover. The local experimental slice does not satisfy the Phase 4 promotion
+gate and does not change the production runtime decision.
+
+## Implemented Experimental Slice (2026-07-14)
+
+The first contract is `engine-adapter/v1`. It intentionally covers only the
+minimum boundary needed for a local Hermes evaluation:
+
+- Hermes is selected only by `SAFECLAW_ENGINE_MODE=experimental-hermes` with
+  `SAFECLAW_HERMES_LOCAL_POC=1`, and is disabled on Vercel.
+- The production chat composition supplies no Hermes planner or tool executor,
+  so setting environment flags alone still resolves to the unavailable
+  adapter.
+- Hermes receives a text-only streaming callback and a read-tool-intent
+  callback. It receives no Supabase client, MCP token, mutation callback, or
+  publish callback.
+- Tool names are checked against the SafeClaw MCP contract. Unknown tools and
+  both document-generation tools are denied before the injected SafeClaw-owned
+  executor can run.
+- The adapter declares SafeClaw MCP/DB Harness as the system of record, the MCP
+  interceptor as the tool execution boundary, no mutation or publish
+  authority, and required human confirmation.
+- `ai-provider-policy.ts` is unchanged. Vertex, Anthropic, and OpenAI model
+  selection/fallback remain model-provider concerns; Hermes and OpenClaw stay
+  engine-runtime choices.
+
+The representative OpenAI OAuth profile is a local operator proof of concept
+only. Customer traffic must not reuse that identity. Project service-account
+or workload-identity authentication, secret rotation, tenant-bound service
+authorization, and worker deployment are follow-up design and implementation
+work. This slice adds no database migration, schema, or data mutation.
 
 ## Why Hermes Core Migration Is Deferred
 

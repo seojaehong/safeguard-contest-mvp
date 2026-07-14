@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T21:34:38+09:00",
+  "authoritativeBaseSha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
+  "branch": "feat/hermes-engine-adapter-24h-20260714",
+  "scope": {
+    "productionFilesChanged": 5,
+    "testFilesChanged": 5,
+    "adrFilesChanged": 1,
+    "databaseFilesChanged": 0,
+    "schemaFilesChanged": 0,
+    "dataFilesChanged": 0
+  },
+  "tdd": {
+    "redCasesObserved": 6,
+    "greenCasesResolved": 6,
+    "cases": [
+      "explicit local Hermes mode gate",
+      "versioned authority metadata",
+      "MCP known/read-only tool classification",
+      "Hermes adapter module",
+      "production composition dependency gate",
+      "text-only planner event surface"
+    ]
+  },
+  "verification": {
+    "baseline": {
+      "status": "passed",
+      "testFilesPassed": 7,
+      "testsPassed": 98,
+      "testsFailed": 0,
+      "durationSeconds": 7.72
+    },
+    "focusedFinal": {
+      "status": "passed",
+      "testFilesPassed": 12,
+      "testsPassed": 176,
+      "testsFailed": 0,
+      "durationSeconds": 15.02
+    },
+    "typecheckFinal": {
+      "status": "passed",
+      "command": "npm.cmd run typecheck"
+    },
+    "fullSuite": {
+      "status": "failed",
+      "testFilesTotal": 141,
+      "testFilesPassed": 134,
+      "testFilesFailed": 2,
+      "testFilesSkipped": 5,
+      "testsTotal": 1427,
+      "testsPassed": 1418,
+      "testsFailed": 2,
+      "testsSkipped": 7,
+      "durationSeconds": 1230.81,
+      "failures": [
+        {
+          "test": "frontend-route-coverage source identity reconciliation",
+          "classification": "pre-existing authoritative evidence mismatch",
+          "checkedInIdentityPrefix": "cf3acf32",
+          "currentIdentityPrefix": "9eab4b0b"
+        },
+        {
+          "test": "documents editor save status announcement",
+          "classification": "browser timing failure",
+          "isolatedRerun": {
+            "status": "passed",
+            "testsPassed": 1,
+            "testsSkipped": 19,
+            "durationSeconds": 28.62
+          }
+        }
+      ]
+    },
+    "build": {
+      "status": "not_run",
+      "reason": "This round requested tests and evaluation."
+    }
+  },
+  "securityBoundary": {
+    "contractVersion": "engine-adapter/v1",
+    "systemOfRecord": "safeclaw-mcp-db-harness",
+    "toolExecutionBoundary": "safeclaw-mcp-interceptor",
+    "hermesCanMutate": false,
+    "hermesCanPublish": false,
+    "humanConfirmationRequired": true,
+    "customerTrafficServiceAuthImplemented": false,
+    "representativeLocalOAuthPocOnly": true
+  }
+}

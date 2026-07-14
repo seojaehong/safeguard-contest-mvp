@@ -45,6 +45,7 @@ const DEFAULT_SCOPES = ["tools:*"] as const;
 
 export type McpToolName = (typeof MCP_TOOL_NAMES)[number];
 
+const MCP_TOOL_NAME_SET: ReadonlySet<string> = new Set(MCP_TOOL_NAMES);
 const READ_TOOL_NAMES: ReadonlySet<McpToolName> = new Set([
   "run_safeclaw_harness_agent",
   "get_weather_signals",
@@ -121,6 +122,14 @@ export function isMcpToolAllowed(
   if (scopes.includes("tools:*") || scopes.includes(`tools:${toolName}`)) return true;
   if (scopes.includes("tools:read") && READ_TOOL_NAMES.has(toolName)) return true;
   return scopes.includes("tools:write") && WRITE_TOOL_NAMES.has(toolName);
+}
+
+export function isMcpToolName(value: unknown): value is McpToolName {
+  return typeof value === "string" && MCP_TOOL_NAME_SET.has(value);
+}
+
+export function isReadOnlyMcpTool(value: unknown): value is McpToolName {
+  return isMcpToolName(value) && READ_TOOL_NAMES.has(value);
 }
 
 export function requireMcpToolScope(
