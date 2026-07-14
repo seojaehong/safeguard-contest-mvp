@@ -768,17 +768,23 @@ function evidenceTitles(items: SafetyReferenceItem[], limit: number) {
 }
 
 function controlCandidates(packet: DbHarnessPacket) {
+  const verifiedKosha = packet.supportingEvidence.filter(isKoshaSupportingCitationEligible);
   return uniqueNonEmpty([
     ...packet.sifCases.flatMap((item) => deriveSafetyReferenceOperationalView(item).controls.slice(0, 2)),
     ...packet.directEvidence.flatMap((item) => deriveSafetyReferenceOperationalView(item).controls.slice(0, 2)),
     ...packet.improvementMemory.map((item) => item.improvementText),
-    ...packet.improvementMemory.flatMap((item) => item.detectedHazards || [])
+    ...packet.improvementMemory.flatMap((item) => item.detectedHazards || []),
+    ...verifiedKosha.flatMap((item) => deriveSafetyReferenceOperationalView(item).controls.slice(0, 2))
   ], 6);
 }
 
 export function buildDbHarnessAnswer(packet: DbHarnessPacket) {
   const directTitles = evidenceTitles(packet.directEvidence, 3);
   const sifTitles = evidenceTitles(packet.sifCases, 3);
+  const koshaTitles = evidenceTitles(
+    packet.supportingEvidence.filter(isKoshaSupportingCitationEligible),
+    3
+  );
   const controls = controlCandidates(packet);
   const missing = uniqueNonEmpty(packet.ontologyChecklist.missing, 5);
   const memoryLines = uniqueNonEmpty([
@@ -786,7 +792,7 @@ export function buildDbHarnessAnswer(packet: DbHarnessPacket) {
     ...packet.workpackMemory.map((item) => `${item.generatedAt}: ${item.statusLabel}`)
   ], 4);
 
-  if (!directTitles.length && !sifTitles.length && !controls.length) {
+  if (!directTitles.length && !sifTitles.length && !koshaTitles.length && !controls.length) {
     return [
       "1) 하네스 판단",
       "- DB 하네스가 사용할 직접 근거, SIF 사례, 개선 이력을 아직 찾지 못했습니다.",
@@ -804,6 +810,7 @@ export function buildDbHarnessAnswer(packet: DbHarnessPacket) {
     [
       directTitles.length ? `- 직접 근거: ${directTitles.join(" / ")}` : "",
       sifTitles.length ? `- SIF 유사사례: ${sifTitles.join(" / ")}` : "",
+      koshaTitles.length ? `- KOSHA 기술 보조지침: ${koshaTitles.join(" / ")}` : "",
       memoryLines.length ? `- 작업·개선 이력: ${memoryLines.join(" / ")}` : ""
     ].filter(Boolean).join("\n"),
     "",

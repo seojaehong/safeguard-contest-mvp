@@ -356,6 +356,19 @@ function getSupportingKoshaEvidenceRef(item: SafetyReferenceItem): string {
   );
 }
 
+function hasConflictingExplicitRiskTags(
+  primary: SafetyReferenceItem,
+  supporting: SafetyReferenceItem
+): boolean {
+  const normalizeTags = (tags: readonly string[]): Set<string> => new Set(
+    tags.flatMap((tag) => tag.split(/[·,/]+/u)).map((tag) => tag.trim()).filter(Boolean)
+  );
+  const primaryTags = normalizeTags(primary.risk_tags);
+  const supportingTags = normalizeTags(supporting.risk_tags);
+  if (!primaryTags.size || !supportingTags.size) return false;
+  return ![...primaryTags].some((tag) => supportingTags.has(tag));
+}
+
 export function buildSafetyReferenceRiskRows(
   response: AskResponse,
   references: readonly SafetyReferenceItem[],
@@ -400,15 +413,16 @@ export function buildSafetyReferenceRiskRows(
     const dedupeKey = `${hazard}|${control}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
-    const supportingEvidenceRefs = item.evidence_role === "direct"
-      ? Array.from(new Set(filterAndRankSafetyReferencesByQuery(
+    const supportingEvidenceRefs = Array.from(new Set(filterAndRankSafetyReferencesByQuery(
       `${rankQuery} ${displayTitle} ${hazard} ${control}`,
-      supportingKoshaReferences.filter((supporting) => hasStrongSafetyReferenceRowOverlap(item, supporting)),
+      supportingKoshaReferences.filter((supporting) => (
+        hasStrongSafetyReferenceRowOverlap(item, supporting)
+        && !hasConflictingExplicitRiskTags(item, supporting)
+      )),
       supportingKoshaReferences.length
     ).map(getSupportingKoshaEvidenceRef)
       .filter((ref): ref is string => Boolean(ref))))
-        .slice(0, MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW)
-      : [];
+      .slice(0, MAX_SUPPORTING_KOSHA_REFS_PER_RISK_ROW);
     const evidenceRefs = [
       item.evidence_role === "direct" ? "DB 하네스 직접근거" : "DB 하네스 보조근거",
       item.source_kind_label || item.item_type || "safety_reference_items",

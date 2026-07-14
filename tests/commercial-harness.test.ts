@@ -32,7 +32,7 @@ describe("safety term normalization", () => {
   });
 
   it("keeps raw reference provenance immutable while exposing operational controls to the UI", () => {
-    const rawReference = reference({
+    const rawReference = verifiedKoshaReference({
       id: "d-c-13-surface",
       item_type: "technical-support-regulation",
       title: "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
@@ -121,6 +121,33 @@ function reference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenc
     controls: ["작업발판·난간 확인", "안전대 체결"],
     evidence_role: "supporting",
     ...overrides
+  };
+}
+
+function verifiedKoshaReference(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenceItem {
+  const item = reference({
+    item_type: "technical-guideline",
+    ...overrides,
+    evidence_role: "supporting"
+  });
+  const version = item.title.match(/[A-Z](?:-[A-Z])?-\d+(?:-\d+)?-\d{4}/u)?.[0] || `KOSHA-${item.id}-2026`;
+  const body = overrides.body ?? item.summary;
+
+  return {
+    ...item,
+    body,
+    evidence_role: "supporting",
+    kosha_guide: {
+      referenceId: item.id,
+      stableDocumentKey: version.replace(/-\d{4}$/u, ""),
+      version,
+      quality: "accepted",
+      lifecycle: "current",
+      bodyKind: "native",
+      anchors: [{ page: 1, excerpt: body.slice(0, 240) }],
+      evidenceRef: `KOSHA 근거 ${item.id} p.1: ${item.summary}`,
+      directEligible: true
+    }
   };
 }
 
@@ -362,10 +389,9 @@ describe("DB harness packet", () => {
       question: "성수동 외벽 도장 작업",
       references: [
         reference({ retrieval_source: "hybrid", vector_similarity: 0.82 }),
-        reference({
+        verifiedKoshaReference({
           id: "guide-1",
           item_type: "technical-guideline",
-          evidence_role: "direct",
           retrieval_source: "ranked",
           title: "KOSHA 외벽 도장 지침"
         })
@@ -394,14 +420,16 @@ describe("DB harness packet", () => {
       reason: "ready"
     });
     expect(packet.retrievalContract.sourceCounts).toMatchObject({
-      directEvidence: 1,
+      directEvidence: 0,
       sifCases: 1,
-      supportingEvidence: 1,
+      supportingEvidence: 2,
       hybrid: 1,
       ranked: 1
     });
     expect(promptContext).toContain("검색 경로: hybrid-vector-rpc / vector=ready");
     expect(promptContext).toContain("hybrid 1, vector 0, ranked 1");
+    expect(promptContext).toContain("KOSHA_SUPPORTING_BODY_JSON");
+    expect(promptContext).toContain("KOSHA 외벽 도장 지침");
   });
 
   it("marks missing SIF as review-required", () => {
@@ -516,10 +544,9 @@ describe("DB harness packet", () => {
       question: "성수동 외벽 도장 작업",
       references: [
         reference(),
-        reference({
+        verifiedKoshaReference({
           id: "guide-1",
           item_type: "technical-guideline",
-          evidence_role: "direct",
           title: "KOSHA 외벽 도장 추락 예방 지침",
           controls: ["작업발판 사전 점검", "하부 출입 통제"]
         })
@@ -538,9 +565,11 @@ describe("DB harness packet", () => {
     const points = buildDbHarnessPracticalPoints(packet);
 
     expect(answer).toContain("1) 하네스 판단");
-    expect(answer).toContain("직접 근거: KOSHA 외벽 도장 추락 예방 지침");
+    expect(answer).toContain("KOSHA 기술 보조지침: KOSHA 외벽 도장 추락 예방 지침");
+    expect(answer).not.toContain("직접 근거: KOSHA 외벽 도장 추락 예방 지침");
     expect(answer).toContain("SIF 유사사례: 외벽 도장 중 추락 사례");
     expect(answer).toContain("작업 전 난간 보강 사진 확인");
+    expect(answer).toContain("작업발판 사전 점검");
     expect(answer).not.toContain("일반 AI 답변");
     expect(answer).not.toMatch(/fallback|OPENAI_API_KEY|timeout|AI_MODE/i);
     expect(points[0]).toContain("문서 반영 전 확인");
@@ -710,8 +739,9 @@ describe("runAsk DB harness mode", () => {
     );
     const rows = buildSafetyReferenceRiskRows(response, [
       reference({
-        id: "kosha-direct-1",
-        item_type: "technical-guideline",
+        id: "process-direct-1",
+        source_id: "official-construction-process",
+        item_type: "construction-process",
         category: "추락",
         subcategory: "이동식 비계",
         title: "이동식 비계 작업발판·난간 점검 지침",
@@ -730,7 +760,7 @@ describe("runAsk DB harness mode", () => {
         evidence_role: "supporting",
         retrieval_source: "hybrid"
       }),
-      reference({
+      verifiedKoshaReference({
         id: "generic-kosha-1",
         item_type: "technical-guideline",
         category: "산업안전일반분야",
@@ -758,15 +788,15 @@ describe("runAsk DB harness mode", () => {
     expect(rows.some((row) => row.evidenceRefs?.includes("외벽 도장 중 이동식 비계 추락 사례"))).toBe(true);
     expect(rows.every((row) => !/^[A-Z]-[A-Z]-\d{1,4}-\d{4}/.test(row.hazard))).toBe(true);
     expect(rows.every((row) => !/기술지원규정|기술지침/.test(row.hazard))).toBe(true);
-    const exteriorCleaningRow = rows.find((row) => row.evidenceRefs.includes("G-67-2011 건물 외벽 청소 작업에 관한 기술지침"));
-    expect(exteriorCleaningRow?.hazard).toMatch(/외벽.*추락|추락.*외벽/);
-    expect(`${exteriorCleaningRow?.currentControls} ${exteriorCleaningRow?.additionalControls}`).toMatch(/안전대|작업로프|구명줄|난간|추락/);
-    expect(exteriorCleaningRow?.hazard).not.toContain("유해·위험요인 미확인");
+    expect(rows.some((row) => row.evidenceRefs.some((ref) => (
+      ref.startsWith("KOSHA 근거 generic-kosha-1")
+    )))).toBe(true);
+    expect(rows.some((row) => row.evidenceRefs.includes("G-67-2011 건물 외벽 청소 작업에 관한 기술지침"))).toBe(false);
     expect(rows.every((row) => !/위험.*관련 위험/.test(row.hazard))).toBe(true);
   });
 
   it("aligns B-E-17 paint evidence to fire and explosion controls without changing raw provenance", () => {
-    const paintReference = reference({
+    const paintReference = verifiedKoshaReference({
       id: "b-e-17-paint",
       source_id: "kosha-technical-support-regulations-2025",
       item_type: "technical-support-regulation",
@@ -777,26 +807,31 @@ describe("runAsk DB harness mode", () => {
       keywords: ["도장", "도료", "유기용제"],
       risk_tags: ["화재", "폭발"],
       controls: ["가동부 방호덮개 설치", "정비 전 전원 차단 및 잠금표지"],
-      evidence_role: "direct",
       retrieval_source: "ranked"
     });
     const rawControls = [...paintReference.controls];
     const response = buildMockAskResponse("도장 공정 화재·폭발", mockSearchResults, "mock", "테스트");
     const rows = buildSafetyReferenceRiskRows(response, [paintReference], "실내 작업", "도장 공정 화재 폭발 유기용제");
-    const row = rows.find((candidate) => candidate.evidenceRefs.includes(paintReference.title));
-    const controls = `${row?.currentControls} ${row?.additionalControls}`;
+    const surface = buildSafetyReferenceSurfaceItem(paintReference);
+    const controls = surface.controls.join(" ");
+    const promptContext = buildHarnessPromptContext(buildDbHarnessPacket({
+      question: "도장 공정 화재 폭발 유기용제",
+      references: [paintReference]
+    }));
 
-    expect(row?.hazard).toMatch(/도장.*화재·폭발|화재·폭발.*도장/);
     expect(controls).toMatch(/도료|유기용제|환기/);
     expect(controls).toMatch(/점화원|화기|방폭|MSDS|보호구|소화기/);
     expect(controls).not.toContain("가동부 방호덮개");
+    expect(promptContext).not.toMatch(/가동부 방호덮개|정비 전 전원 차단/);
     expect(controls.trim()).not.toBe("정비 전 전원 차단 및 잠금표지");
+    expect(surface.supportingCitationEligible).toBe(true);
+    expect(surface.directEligible).toBe(false);
+    expect(rows).toEqual([]);
     expect(paintReference.controls).toEqual(rawControls);
-    expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
   });
 
   it("aligns B-E-20 electrostatic coating evidence to grounding and explosion controls", () => {
-    const electrostaticReference = reference({
+    const electrostaticReference = verifiedKoshaReference({
       id: "b-e-20-electrostatic",
       source_id: "kosha-technical-support-regulations-2025",
       item_type: "technical-support-regulation",
@@ -807,20 +842,19 @@ describe("runAsk DB harness mode", () => {
       keywords: ["정전도장", "정전기", "접지"],
       risk_tags: ["화재", "폭발"],
       controls: ["가동부 방호덮개 설치", "정비 전 전원 차단 및 잠금표지"],
-      evidence_role: "direct",
       retrieval_source: "ranked"
     });
     const response = buildMockAskResponse("정전도장기 화재·폭발", mockSearchResults, "mock", "테스트");
     const rows = buildSafetyReferenceRiskRows(response, [electrostaticReference], "실내 작업", "정전도장 정전기 접지 화재 폭발");
-    const row = rows.find((candidate) => candidate.evidenceRefs.includes(electrostaticReference.title));
-    const controls = `${row?.currentControls} ${row?.additionalControls}`;
+    const surface = buildSafetyReferenceSurfaceItem(electrostaticReference);
+    const controls = surface.controls.join(" ");
 
-    expect(row?.hazard).toMatch(/정전도장|정전기/);
-    expect(row?.hazard).toMatch(/화재·폭발|폭발|화재/);
     expect(controls).toMatch(/접지|정전기 제거/);
     expect(controls).toMatch(/방폭|환기|점화원|화기/);
     expect(controls).not.toContain("가동부 방호덮개");
-    expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
+    expect(surface.supportingCitationEligible).toBe(true);
+    expect(surface.directEligible).toBe(false);
+    expect(rows).toEqual([]);
   });
 
   it("keeps the canonical exterior-painting workpack free of machinery and electrostatic false positives", () => {
@@ -831,7 +865,7 @@ describe("runAsk DB harness mode", () => {
     ].join(" ");
     const response = buildMockAskResponse(question, mockSearchResults, "mock", "테스트");
     const references = [
-      reference({
+      verifiedKoshaReference({
         id: "d-c-13-exterior-painting",
         source_id: "kosha-technical-support-regulations-2025",
         item_type: "technical-support-regulation",
@@ -847,10 +881,9 @@ describe("runAsk DB harness mode", () => {
           "가동부 방호덮개와 비상정지장치 확인",
           "정비 전 전원 차단 및 잠금표지"
         ],
-        evidence_role: "direct",
         retrieval_source: "rest"
       }),
-      reference({
+      verifiedKoshaReference({
         id: "b-e-17-paint-fire",
         source_id: "kosha-technical-support-regulations-2025",
         item_type: "technical-support-regulation",
@@ -861,7 +894,6 @@ describe("runAsk DB harness mode", () => {
         keywords: ["도장", "도료", "유기용제"],
         risk_tags: ["화재", "폭발"],
         controls: ["가동부 방호덮개와 비상정지장치 확인", "정비 전 전원 차단 및 잠금표지"],
-        evidence_role: "direct",
         retrieval_source: "rest"
       }),
       reference({
@@ -889,8 +921,23 @@ describe("runAsk DB harness mode", () => {
         retrieval_source: "rest"
       }),
       reference({
+        id: "paint-solvent-direct",
+        source_id: "official-risk-manual",
+        item_type: "risk-manual",
+        category: "도장",
+        subcategory: "유기용제",
+        title: "외벽 도장 유기용제 화재·폭발 직접 근거",
+        summary: "도료와 유기용제 증기가 체류하면 점화원에 의해 화재·폭발할 수 있다.",
+        keywords: ["도장", "도료", "유기용제", "화재", "폭발"],
+        risk_tags: ["화재·폭발"],
+        controls: ["도료·유기용제 용기 밀폐 및 환기", "점화원 제거, 소화기 배치 및 MSDS 보호구 확인"],
+        evidence_role: "direct",
+        retrieval_source: "rest"
+      }),
+      reference({
         id: "forklift-traffic",
-        item_type: "technical-guideline",
+        source_id: "official-machinery-catalog",
+        item_type: "machinery",
         category: "운반하역",
         subcategory: "지게차",
         title: "지게차와 보행자 교차 동선 충돌 예방 기준",
@@ -910,6 +957,8 @@ describe("runAsk DB harness mode", () => {
       row.additionalControls,
       ...row.evidenceRefs
     ].join(" ")).join("\n");
+    const fallRow = rows.find((row) => row.evidenceRefs.includes("외벽 도장 중 이동식 비계 추락 사례"));
+    const paintRow = rows.find((row) => row.evidenceRefs.includes("외벽 도장 유기용제 화재·폭발 직접 근거"));
     const links = buildTbmRiskLinks(rows, "오후 강풍 예보");
     const packet = buildDbHarnessPacket({ question, references });
     const packetText = [
@@ -923,6 +972,12 @@ describe("runAsk DB harness mode", () => {
     expect(rowText).toMatch(/강풍|돌풍/);
     expect(rowText).toMatch(/지게차.*동선|동선.*지게차/);
     expect(rowText).toMatch(/도료|유기용제/);
+    expect(rowText).toContain("KOSHA 근거 d-c-13-exterior-painting");
+    expect(rowText).toContain("KOSHA 근거 b-e-17-paint-fire");
+    expect(fallRow?.evidenceRefs.some((ref) => ref.startsWith("KOSHA 근거 d-c-13-exterior-painting"))).toBe(true);
+    expect(fallRow?.evidenceRefs.some((ref) => ref.startsWith("KOSHA 근거 b-e-17-paint-fire"))).toBe(false);
+    expect(paintRow?.evidenceRefs.some((ref) => ref.startsWith("KOSHA 근거 b-e-17-paint-fire"))).toBe(true);
+    expect(paintRow?.evidenceRefs.some((ref) => ref.startsWith("KOSHA 근거 d-c-13-exterior-painting"))).toBe(false);
     expect(rowText).not.toMatch(/기계 가동부|방호덮개|정비 중 불시기동/);
     expect(rowText).not.toMatch(/정전도장|정전도장기|피도장물 접지/);
     expect(links.some((link) => /지게차.*동선|동선.*지게차/.test(`${link.hazard} ${link.control}`))).toBe(true);
@@ -933,7 +988,7 @@ describe("runAsk DB harness mode", () => {
   });
 
   it("aligns G-67 exterior cleaning evidence and carries the same controls and refs into TBM links", () => {
-    const exteriorReference = reference({
+    const exteriorReference = verifiedKoshaReference({
       id: "g-67-exterior-cleaning",
       source_id: "kosha-technical-guidelines",
       item_type: "technical-guideline",
@@ -944,17 +999,31 @@ describe("runAsk DB harness mode", () => {
       keywords: ["건물 외벽", "청소", "로프"],
       risk_tags: [],
       controls: ["작업 전 유해·위험요인 확인", "관리감독자 확인 후 작업 시작"],
+      retrieval_source: "ranked"
+    });
+    const directReference = reference({
+      id: "exterior-cleaning-direct",
+      source_id: "official-construction-process",
+      item_type: "construction-process",
+      category: "외벽 청소",
+      subcategory: "로프 작업",
+      title: "건물 외벽 로프 청소 추락 직접 근거",
+      summary: "건물 외벽 로프 청소 중 작업대와 구명줄 상태 미확인으로 추락할 수 있다.",
+      keywords: ["건물 외벽", "청소", "로프", "추락"],
+      risk_tags: ["추락"],
+      controls: ["작업로프·안전대·구명줄 상태 확인", "작업발판·난간 확인 및 하부 출입 통제"],
       evidence_role: "direct",
       retrieval_source: "ranked"
     });
     const response = buildMockAskResponse("건물 외벽 청소", mockSearchResults, "mock", "테스트");
-    const rows = buildSafetyReferenceRiskRows(response, [exteriorReference], "맑음", "건물 외벽 청소 로프 추락");
-    const row = rows.find((candidate) => candidate.evidenceRefs.includes(exteriorReference.title));
+    const rows = buildSafetyReferenceRiskRows(response, [directReference, exteriorReference], "맑음", "건물 외벽 청소 로프 추락");
+    const row = rows.find((candidate) => candidate.evidenceRefs.includes(directReference.title));
     const controls = `${row?.currentControls} ${row?.additionalControls}`;
 
     expect(row?.hazard).toMatch(/외벽.*추락|추락.*외벽/);
     expect(row?.hazard).not.toContain("유해·위험요인 미확인");
     expect(controls).toMatch(/작업로프|안전대|구명줄|작업발판|난간|하부 출입 통제/);
+    expect(row?.evidenceRefs.some((ref) => ref.startsWith("KOSHA 근거 g-67-exterior-cleaning"))).toBe(true);
     expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
 
     expect(row).toBeDefined();
@@ -1017,8 +1086,8 @@ describe("runAsk DB harness mode", () => {
     expect(`${machineryRow?.currentControls} ${machineryRow?.additionalControls}`).toMatch(/방호덮개/);
     expect(`${machineryRow?.currentControls} ${machineryRow?.additionalControls}`).toMatch(/비상정지/);
     expect(`${machineryRow?.currentControls} ${machineryRow?.additionalControls}`).toMatch(/잠금표지|LOTO/);
-    expect(genericRow?.verificationStatus).toBe("needsReview");
-    expect(genericRow?.hazard).toMatch(/검토 필요|미확정/);
+    expect(genericRow).toBeUndefined();
+    expect(rows.map((row) => row.evidenceRefs.join(" ")).join(" ")).not.toContain(genericReference.title);
     expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
   });
 
