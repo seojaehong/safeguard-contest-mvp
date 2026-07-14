@@ -41,7 +41,7 @@ const defaultProductionBuildManifestPath = path.join(
 const reportsTaskDistanceEvidenceRelativeDir = path.join(
   "evaluation",
   "reports-mobile-task-distance-2026-07-14",
-  "selected-target-ready-remediation-v2"
+  "selected-target-ready-remediation-v3"
 );
 const photoApprovalLabel = "개선 전/개선 후 사진 포함 승인";
 
