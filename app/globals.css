@@ -14166,7 +14166,7 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .document-workbench .document-preview-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.34fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
 }
 
@@ -14275,6 +14275,107 @@ body:has(.safeclaw-landing) :is(
   border: 1px solid var(--workspace-rule);
   border-radius: var(--radius-soft);
   background: var(--workspace-surface-2);
+}
+
+.command-center-shell .document-provenance-drawer,
+.command-center-shell .document-editor-context {
+  min-width: 0;
+  overflow: clip;
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--radius-soft);
+  background: var(--workspace-surface-2);
+}
+
+.command-center-shell .document-provenance-drawer > summary,
+.command-center-shell .document-editor-context > summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  list-style: none;
+  color: var(--workspace-ink);
+  padding: 10px 14px;
+  font-size: var(--text-table);
+  font-weight: 650;
+  line-height: var(--leading-table);
+}
+
+.command-center-shell .document-provenance-drawer > summary::-webkit-details-marker,
+.command-center-shell .document-editor-context > summary::-webkit-details-marker {
+  display: none;
+}
+
+.command-center-shell .document-provenance-drawer > summary::after,
+.command-center-shell .document-editor-context > summary::after {
+  color: var(--workspace-subtle);
+  content: "+";
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+}
+
+.command-center-shell .document-provenance-drawer[open] > summary::after,
+.command-center-shell .document-editor-context[open] > summary::after {
+  content: "-";
+}
+
+.command-center-shell .document-provenance-drawer-body,
+.command-center-shell .document-editor-context-body {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  border-top: 1px solid var(--workspace-rule);
+  padding: 12px;
+}
+
+.command-center-shell .document-provenance-evidence {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.command-center-shell .document-provenance-evidence article {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--radius-soft);
+  background: var(--workspace-surface-1);
+  padding: 12px;
+}
+
+.command-center-shell .document-provenance-evidence article > span,
+.command-center-shell .document-provenance-evidence article > em {
+  color: var(--workspace-subtle);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--leading-hud);
+}
+
+.command-center-shell .document-provenance-evidence article > strong {
+  color: var(--workspace-ink);
+  font-size: var(--text-table);
+  font-weight: 650;
+  line-height: var(--leading-table);
+}
+
+.command-center-shell .document-provenance-evidence article > small {
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: var(--leading-longform);
+}
+
+.command-center-shell .document-provenance-evidence article > a {
+  width: fit-content;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--workspace-accent-hover);
+  font-size: var(--text-caption);
+  font-weight: 700;
 }
 
 .command-center-shell .document-check-details summary {
@@ -18126,6 +18227,10 @@ body:has(.safeclaw-landing) :is(
   min-height: 460px;
 }
 
+.command-center-shell.workspace-theme-day .field-workspace .document-section-textarea {
+  min-height: 0;
+}
+
 .command-center-shell.workspace-theme-day .field-workspace :is(.document-textarea, .remediation-textarea):focus {
   border-color: var(--workspace-accent);
   box-shadow: 0 0 0 3px rgba(108, 111, 247, 0.18);
@@ -18309,6 +18414,10 @@ body:has(.safeclaw-landing) :is(
 
 .safeclaw-module-shell.module-variant-document .document-textarea {
   min-height: 460px;
+}
+
+.safeclaw-module-shell.module-variant-document .document-section-textarea {
+  min-height: 0;
 }
 
 .safeclaw-module-shell.module-variant-document .document-textarea:focus,
@@ -18577,7 +18686,7 @@ body:has(.safeclaw-landing) :is(
 /* Document focus mode keeps review and editing as separate workspace surfaces. */
 .command-center-shell .document-editor-surface {
   display: grid;
-  gap: 20px;
+  gap: 12px;
   width: min(1180px, 100%);
   margin: 0 auto;
 }
@@ -18588,7 +18697,7 @@ body:has(.safeclaw-landing) :is(
   justify-content: space-between;
   gap: 16px;
   border-bottom: 1px solid var(--workspace-rule);
-  padding-bottom: 16px;
+  padding-bottom: 10px;
 }
 
 .command-center-shell .document-editor-surface-head > div {
@@ -18689,6 +18798,10 @@ body:has(.safeclaw-landing) :is(
   min-height: 460px;
 }
 
+.command-center-shell.workspace-theme-night .field-workspace .document-section-textarea {
+  min-height: 0;
+}
+
 .command-center-shell.workspace-theme-night .field-workspace :is(.document-textarea, .remediation-textarea):focus {
   border-color: var(--workspace-accent);
   box-shadow: 0 0 0 3px rgba(108, 111, 247, 0.24);
@@ -18718,8 +18831,28 @@ body:has(.safeclaw-landing) :is(
 
 @media (max-width: 720px) {
   .command-center-shell .document-editor-surface-head {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .command-center-shell .document-editor-surface-head > div .eyebrow {
+    display: none;
+  }
+
+  .command-center-shell .document-editor-surface-head .button {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+
+  .command-center-shell .document-provenance-evidence {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .command-center-shell .document-workbench .document-preview-pane pre {
+    min-height: 300px;
+    max-height: none;
+    overflow: visible;
   }
 }
 

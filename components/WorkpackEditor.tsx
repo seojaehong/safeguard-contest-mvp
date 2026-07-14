@@ -10,25 +10,19 @@ import {
   type RubricEvaluationItem
 } from "@/lib/safety-document-rubric";
 import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
+import {
+  buildStructuredDocumentSections,
+  isMetaSection,
+  replaceStructuredDocumentSection,
+  type DocumentKey
+} from "./workpack-editor-structure";
 import styles from "./WorkpackEditor.module.css";
 
 declare global {
   var measureTextWidth: ((font: string, text: string) => number) | undefined;
 }
 
-export type DocumentKey =
-  | "workpackSummaryDraft"
-  | "riskAssessmentDraft"
-  | "workPlanDraft"
-  | "workPermitDraft"
-  | "tbmBriefing"
-  | "tbmLogDraft"
-  | "safetyEducationRecordDraft"
-  | "emergencyResponseDraft"
-  | "photoEvidenceDraft"
-  | "foreignWorkerBriefing"
-  | "foreignWorkerTransmission"
-  | "kakaoMessage";
+export type { DocumentKey } from "./workpack-editor-structure";
 
 export type WorkpackDocumentValues = Record<DocumentKey, string>;
 
@@ -533,6 +527,7 @@ function withSubmitReadiness(title: string, body: string, data: AskResponse) {
     `근거 반영: ${references || "공식 근거 확인 필요"}`,
     "증빙: 사진/영상 증빙, 참석자 서명, 개선조치 전후 기록",
     "",
+    "[제출 본문]",
     body
   ].join("\n");
 }
@@ -1170,50 +1165,6 @@ function buildHtml(
   ${buildSafetyFormMarkup(title, rows, scenario, profile, data, riskRows)}
 </body>
 </html>`;
-}
-
-// Sections that are decoration / connection-status / RAG metadata, NOT real form rows.
-// Excluded from the .xlsx / .hwp body table to keep the official form clean.
-const META_SECTION_PATTERNS = [
-  /^연결 상태/,
-  /^KOSHA 기술지침\/기술지원규정 직접 인용/,
-  /^내부 안전지식 DB 반영/,
-  /^근거 요약/,
-  /^문서 반영$/,
-  /^문서 반영:/,
-  /^법령 근거 요약/,
-  /^KOSHA 보강/,
-  /^추천 후속 교육/,
-  /^KOSHA 교육포털 연계/,
-  /^교육 적합성 확인/,
-  /^옥외 (폭염|위험|작업)/,
-  /^위험성평가·기상/,
-  /^TBM 필수 반영 체크/,
-  /^외국인 근로자 (공지|안내)/,
-  /^유사 재해사례/,
-  /^기상 신호/,
-  /^서식 구조/,
-  /^서식 상태/,
-  /^서식상태$/,
-  /^안전 기초 지식/,
-  /^라이브 보강/,
-  // Added 2026-05-07 after 가온테크 .xlsx/.hwp 검수 — 본문 표 안에 들어가던 잡음.
-  /^공식 서식 기준 보강/,
-  /^반영 근거(:|: )/,
-  /^반영 근거$/,
-  /^중대재해 예방 관리체계 점검/,
-  /^필수 확인 항목$/,
-  /^섹션 요약$/,
-  /^본문 표$/,
-  /^제출상태/,
-  /^원본 재현 한계/,
-  /^안전보건진단 가이드/,
-  /^위험성평가 이행·점검/,
-  /^TBM 메인 가이드/
-];
-
-function isMetaSection(section: string) {
-  return META_SECTION_PATTERNS.some((pattern) => pattern.test(section));
 }
 
 // First-line meta keys that show up as `key: value` even outside a meta section.
@@ -1943,6 +1894,7 @@ export function WorkpackEditor({
   const [imageStatus, setImageStatus] = useState<"idle" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
+  const [editorMode, setEditorMode] = useState<"structured" | "source">("structured");
   const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null);
   const [saveStatusLabel, setSaveStatusLabel] = useState("자동 저장");
   const [saveAnnouncement, setSaveAnnouncement] = useState("");
@@ -1961,6 +1913,10 @@ export function WorkpackEditor({
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
   const selectedText = values[selected.key];
+  const structuredDocument = useMemo(
+    () => buildStructuredDocumentSections(selected.key, selectedText),
+    [selected.key, selectedText]
+  );
   const selectedHasIntentionalEmptyPermitDraft = selected.key === "workPermitDraft"
     && selectedText === ""
     && (
@@ -2059,6 +2015,10 @@ export function WorkpackEditor({
 
   useEffect(() => {
     onSelectedDocumentChangeRef.current?.(selected.key);
+  }, [selected.key]);
+
+  useEffect(() => {
+    setEditorMode("structured");
   }, [selected.key]);
 
   useEffect(() => () => {
@@ -2167,6 +2127,21 @@ export function WorkpackEditor({
     setValues((current) => ({ ...current, [selected.key]: value }));
     setDirtyDocumentKeys((current) => current.includes(selected.key) ? current : [...current, selected.key]);
     setLastEditedAt(new Date());
+  }
+
+  function updateStructuredSection(sectionId: string, value: string) {
+    const section = structuredDocument.body.find((item) => item.id === sectionId);
+    if (!section) {
+      console.error("structured document section is unavailable", { sectionId, documentKey: selected.key });
+      setSaveStatusLabel("저장 실패");
+      return;
+    }
+    try {
+      updateValue(replaceStructuredDocumentSection(selectedText, section, value));
+    } catch (error) {
+      console.error("structured document section update failed", error);
+      setSaveStatusLabel("저장 실패");
+    }
   }
 
   function selectDocumentTab(index: number) {
@@ -2635,28 +2610,83 @@ export function WorkpackEditor({
             </p>
           ) : null}
 
-          <textarea
-            ref={textareaRef}
-            className="document-textarea"
-            value={selectedText}
-            onChange={(event) => updateValue(event.target.value)}
-            aria-label={`${selected.title} 편집`}
-          />
+          <div className={styles.editorModeBar}>
+            <div>
+              <span className="eyebrow">문서 유형</span>
+              <strong>{structuredDocument.profile.label}</strong>
+            </div>
+            <div className={styles.editorModeControl} role="group" aria-label="본문 편집 방식">
+              <button
+                type="button"
+                aria-pressed={editorMode === "structured"}
+                onClick={() => setEditorMode("structured")}
+              >
+                구조화
+              </button>
+              <button
+                type="button"
+                aria-pressed={editorMode === "source"}
+                onClick={() => setEditorMode("source")}
+              >
+                원문
+              </button>
+            </div>
+          </div>
+
+          {editorMode === "structured" ? (
+            <div
+              className={styles.structuredEditor}
+              data-testid="document-structured-editor"
+              data-editor-kind={structuredDocument.profile.kind}
+            >
+              {structuredDocument.body.map((section, index) => {
+                const inputId = `document-section-${selected.key}-${index}`;
+                const lineCount = Math.max(4, section.value.split(/\r?\n/u).length + 1);
+                return (
+                  <section key={section.id} className={styles.documentSection} data-section-kind="body">
+                    <label htmlFor={inputId}>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      <strong>{section.label}</strong>
+                    </label>
+                    <textarea
+                      id={inputId}
+                      ref={index === 0 ? textareaRef : undefined}
+                      className={`document-textarea document-section-textarea ${styles.sectionTextarea}`}
+                      value={section.value}
+                      rows={lineCount}
+                      onChange={(event) => updateStructuredSection(section.id, event.target.value)}
+                      aria-label={index === 0 ? `${selected.title} 편집` : `${selected.title} ${section.label} 편집`}
+                    />
+                  </section>
+                );
+              })}
+            </div>
+          ) : (
+            <textarea
+              ref={textareaRef}
+              className={`document-textarea document-source-textarea ${styles.sourceTextarea}`}
+              value={selectedText}
+              rows={Math.max(12, selectedText.split(/\r?\n/u).length + 1)}
+              onChange={(event) => updateValue(event.target.value)}
+              aria-label={`${selected.title} 전체 원문 편집`}
+            />
+          )}
           <p className={`muted small ${styles.documentFootnote}`}>
             발주처 원본 양식, 직인, 결재선은 제출 전 확인 대상입니다.
           </p>
         </div>
 
         <div className={styles.secondaryTools} data-testid="editor-secondary-tools" aria-label="문서 보조 도구">
-          <details className={styles.utilityPanel} data-testid="editor-evidence-panel">
+          <details className={styles.utilityPanel} data-testid="editor-provenance-drawer">
             <summary className={styles.utilitySummary}>
               <span>
-                <b>근거</b>
-                <small>{selectedEvidenceLabel?.article || "법령, KOSHA, 현장 데이터"}</small>
+                <b>
+                  근거 {evidenceStats.reduce((sum, item) => sum + item.value, 0).toLocaleString("ko-KR")}건 · 확인 필요 {selectedQualityIssues.toLocaleString("ko-KR")}건
+                </b>
               </span>
-              <em>{evidenceStats.reduce((sum, item) => sum + item.value, 0).toLocaleString("ko-KR")}건</em>
             </summary>
-            <div className={styles.utilityContent}>
+            <div className={`${styles.utilityContent} ${styles.provenanceContent}`}>
+            <section className={styles.provenanceSection} data-testid="editor-evidence-panel">
               <div className={styles.sectionHeading}>
                 <div>
                   <span className="eyebrow">생성 근거</span>
@@ -2698,17 +2728,9 @@ export function WorkpackEditor({
                   {selectedCoverage.evidenceTypes.length ? ` · ${selectedCoverage.evidenceTypes.join(" · ")}` : ""}
                 </p>
               ) : null}
-            </div>
-          </details>
+            </section>
 
-          <details className={styles.utilityPanel} data-testid="editor-quality-panel">
-            <summary className={styles.utilitySummary}>
-              <span>
-                <b>품질 점검</b>
-                <small>{selected.title} 점검과 AI 보완</small>
-              </span>
-              <em>{selectedQualityIssues ? `${selectedQualityIssues}개 확인` : "반영 완료"}</em>
-            </summary>
+          <section className={styles.provenanceSection} data-testid="editor-quality-panel">
             <div className={`${styles.utilityContent} ${styles.qualityContent}`}>
               <div className={styles.sectionHeading}>
                 <div>
@@ -2821,17 +2843,16 @@ export function WorkpackEditor({
                 </div>
               </div>
             </div>
-          </details>
+          </section>
 
-          <details className={styles.utilityPanel} data-testid="editor-graph-panel">
-            <summary className={styles.utilitySummary}>
-              <span>
-                <b>문서 연결 그래프</b>
-                <small>현장 입력에서 제출본까지</small>
-              </span>
-              <em>4단계</em>
-            </summary>
+          <section className={styles.provenanceSection} data-testid="editor-graph-panel">
             <div className={styles.utilityContent}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className="eyebrow">문서 연결</span>
+                  <strong>현장 입력에서 제출본까지</strong>
+                </div>
+              </div>
               <ol className={styles.lineageGraph} aria-label={`${selected.title} 생성 연결`}>
                 {[
                   { label: "현장 입력", value: data.scenario.workSummary },
@@ -2845,6 +2866,35 @@ export function WorkpackEditor({
                   </li>
                 ))}
               </ol>
+            </div>
+          </section>
+
+          <section
+            className={styles.provenanceSection}
+            data-testid="editor-provenance-appendices"
+            aria-label="원문에서 분리한 근거 부록"
+          >
+            <div className={styles.utilityContent}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className="eyebrow">근거 부록</span>
+                  <strong>제출 본문과 분리해 보존한 원문</strong>
+                </div>
+              </div>
+              {structuredDocument.appendices.length ? (
+                <div className={styles.appendixList}>
+                  {structuredDocument.appendices.map((section) => (
+                    <article key={section.id}>
+                      <strong>{section.label}</strong>
+                      <pre>{section.value || "내용 없음"}</pre>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="muted small">현재 문서에는 분리된 근거 부록이 없습니다.</p>
+              )}
+            </div>
+          </section>
             </div>
           </details>
 

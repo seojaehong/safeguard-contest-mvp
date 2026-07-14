@@ -36,7 +36,7 @@ describe("workbench visual contract", () => {
     expect(commandCenter).toContain("workbench-theme-toggle");
     expect(commandCenter).toContain("workbench-primary-action");
     expect(commandCenter).toContain("workbench-document-rail");
-    expect(commandCenter).toContain("workbench-evidence-rail");
+    expect(commandCenter).toContain("document-provenance-drawer");
     expect(commandCenter).toContain("workbench-loading-state");
     expect(commandCenter).toContain("workbench-disabled-state");
     expect(fieldWorkspace).toContain("workbench-root");

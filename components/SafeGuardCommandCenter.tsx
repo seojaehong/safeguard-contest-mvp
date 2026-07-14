@@ -1734,9 +1734,14 @@ export function SafeGuardCommandCenter({
   const selectedDocumentBody = data ? (data.deliverables as Record<string, unknown>)[selectedOutputItem.key] : "";
   const readinessRail = buildReadinessRail(data, state, liveWeather, isWeatherLoading);
   const generationStages = buildGenerationStages(data, state);
-  const hasReviewWarnings = workpackReadiness ? !workpackReadiness.canShare : workpackHasReviewWarnings(data);
   const documentHarnessLoop = buildDocumentHarnessLoop(data, workpackReadiness);
   const documentEvidence = selectedDocumentEvidence(data, selectedOutputItem.key);
+  const documentEvidenceCount = documentEvidence.length;
+  const documentReviewCount = [
+    ...generationStages,
+    ...documentHarnessLoop,
+    ...documentEvidence
+  ].filter((item) => item.tone !== "ready").length;
   const supportingDocumentItems = outputItems.filter((item) => !primaryDocumentKeys.has(item.key));
   const coreDocumentsReady = Boolean(data && focusDocumentItems.every((item) => {
     const body = (data.deliverables as Record<string, unknown>)[item.key];
@@ -2142,48 +2147,67 @@ export function SafeGuardCommandCenter({
                 </div>
               </div>
             ) : null}
-            <details className="document-check-details" open={busy || hasReviewWarnings}>
-              <summary>
-                <span>제출 전 점검 흐름</span>
-                <strong>{busy ? "진행 중" : data ? hasReviewWarnings ? "검수 필요" : "완료" : "생성 후 확인"}</strong>
-              </summary>
-              <div className="document-review-status-strip" aria-label="문서 검수 상태">
-                {generationStages.map((stage) => (
-                  <article key={stage.label} className={readinessClass(stage.tone)}>
-                    <span>{stage.label}</span>
-                    <strong>{stageStatusCopy(stage.tone, state)}</strong>
-                  </article>
-                ))}
-              </div>
-              <div
-                className={`inline-progress document-review-meter workbench-loading-state ${busy ? "animated" : ""} ${generationProgress.indeterminate ? "indeterminate" : ""}`}
-                aria-label={`문서 작성 진행 ${generationProgress.primary}`}
-              >
-                <progress
-                  value={generationProgress.indeterminate ? undefined : currentDocProgress}
-                  max={totalDocumentCount}
-                />
-              </div>
-            </details>
-            <details className="document-harness-loop">
-              <summary className="document-harness-loop-head">
-                <span>작성 근거 보기</span>
-                <strong>{data ? "법령·안전조치 확인" : "생성 후 확인"}</strong>
-              </summary>
-              <div className="document-harness-loop-grid">
-                {documentHarnessLoop.map((item) => (
-                  <article key={item.key} className={readinessClass(item.tone)}>
-                    <span>{item.label}</span>
-                    <strong>{item.status}</strong>
-                    <small>{item.detail}</small>
-                  </article>
-                ))}
+            <details
+              className="document-provenance-drawer"
+              data-testid="document-provenance-drawer"
+              open={busy}
+            >
+              <summary>근거 {documentEvidenceCount}건 · 확인 필요 {documentReviewCount}건</summary>
+              <div className="document-provenance-drawer-body">
+                <section aria-label="문서 검수 상태">
+                  <div className="document-review-status-strip">
+                    {generationStages.map((stage) => (
+                      <article key={stage.label} className={readinessClass(stage.tone)}>
+                        <span>{stage.label}</span>
+                        <strong>{stageStatusCopy(stage.tone, state)}</strong>
+                      </article>
+                    ))}
+                  </div>
+                  <div
+                    className={`inline-progress document-review-meter workbench-loading-state ${busy ? "animated" : ""} ${generationProgress.indeterminate ? "indeterminate" : ""}`}
+                    aria-label={`문서 작성 진행 ${generationProgress.primary}`}
+                  >
+                    <progress
+                      value={generationProgress.indeterminate ? undefined : currentDocProgress}
+                      max={totalDocumentCount}
+                    />
+                  </div>
+                </section>
+                <section className="document-harness-loop" aria-label="작성 근거">
+                  <div className="document-harness-loop-head">
+                    <span>작성 근거</span>
+                    <strong>{data ? "법령·안전조치 확인" : "생성 후 확인"}</strong>
+                  </div>
+                  <div className="document-harness-loop-grid">
+                    {documentHarnessLoop.map((item) => (
+                      <article key={item.key} className={readinessClass(item.tone)}>
+                        <span>{item.label}</span>
+                        <strong>{item.status}</strong>
+                        <small>{item.detail}</small>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+                <section className="document-provenance-evidence" aria-label="선택 문서 인용 근거">
+                  {documentEvidence.map((item) => (
+                    <article key={item.label} className={readinessClass(item.tone)}>
+                      <span>{item.label}</span>
+                      <strong>{item.value}</strong>
+                      <small>{item.detail}</small>
+                      <em>{item.meta}</em>
+                      {item.href ? (
+                        <a href={item.href} target="_blank" rel="noreferrer">
+                          원문 열기
+                        </a>
+                      ) : null}
+                    </article>
+                  ))}
+                </section>
               </div>
             </details>
             <div className="document-viewer-shell">
               <div className="document-viewer-list workbench-document-rail" aria-label="문서 목록">
-                {focusDocumentItems.map((item, index) => {
-                  const evidenceLabel = data?.evidenceLabels?.[item.key];
+                {focusDocumentItems.map((item) => {
                   const selected = item.key === selectedOutputItem.key;
                   return (
                     <button
@@ -2193,9 +2217,8 @@ export function SafeGuardCommandCenter({
                       onClick={() => setRequestedDocumentKey(item.key)}
                       aria-pressed={selected}
                     >
-                      <span>핵심 · {String(index + 1).padStart(2, "0")}</span>
+                      <span>{selected ? "선택" : "핵심 문서"}</span>
                       <strong>{item.title}</strong>
-                      <small>{evidenceLabel ? formatEvidenceBadge(evidenceLabel.article) : "안전조치 검수"}</small>
                     </button>
                   );
                 })}
@@ -2220,14 +2243,6 @@ export function SafeGuardCommandCenter({
                       </div>
                     ) : null}
                   </div>
-                  {data?.evidenceLabels?.[selectedOutputItem.key] ? (
-                    <span
-                      className="doc-card-evidence-badge"
-                      title={`${data.evidenceLabels[selectedOutputItem.key].article} — ${data.evidenceLabels[selectedOutputItem.key].purpose}${data.evidenceLabels[selectedOutputItem.key].related ? ` (병기: ${data.evidenceLabels[selectedOutputItem.key].related})` : ""}`}
-                    >
-                      {formatEvidenceBadge(data.evidenceLabels[selectedOutputItem.key].article)}
-                    </span>
-                  ) : null}
                   <pre>
                     {typeof selectedDocumentBody === "string" && selectedDocumentBody
                       ? selectedDocumentBody.slice(0, 1200)
@@ -2242,25 +2257,6 @@ export function SafeGuardCommandCenter({
                     공유 단계로 이동
                   </button>
                 </article>
-                <aside className="document-evidence-panel workbench-evidence-rail" aria-label="선택 문서 인용 근거">
-                  <div className="compact-head">
-                    <span className="eyebrow">인용 근거</span>
-                    <strong>{selectedOutputItem.title}</strong>
-                  </div>
-                  {documentEvidence.map((item) => (
-                    <article key={item.label} className={readinessClass(item.tone)}>
-                      <span>{item.label}</span>
-                      <strong>{item.value}</strong>
-                      <small>{item.detail}</small>
-                      <em>{item.meta}</em>
-                      {item.href ? (
-                        <a href={item.href} target="_blank" rel="noreferrer">
-                          원문 열기
-                        </a>
-                      ) : null}
-                    </article>
-                  ))}
-                </aside>
               </div>
             </div>
             <details className="document-work-history" open={busy}>
@@ -2305,37 +2301,6 @@ export function SafeGuardCommandCenter({
                   문서 검토로 돌아가기
                 </button>
               </div>
-              <section className="result-ribbon" aria-label="생성 결과 요약">
-                <article>
-                  <span>위험도</span>
-                  <strong className={`risk-badge ${riskToneClass(data.riskSummary.riskLevel)}`}>위험도 {data.riskSummary.riskLevel}</strong>
-                </article>
-                <article>
-                  <span>핵심 위험</span>
-                  <strong>{data.riskSummary.topRisk}</strong>
-                </article>
-                <article>
-                  <span>연결 상태</span>
-                  <strong>{data.status.summary}</strong>
-                  <small className="muted">{workpackReadiness && !workpackReadiness.canShare ? workpackReadiness.summary : statusDetailCopy(state)}</small>
-                </article>
-              </section>
-              <section className="action-strip">
-                {data.riskSummary.immediateActions.map((item, index) => (
-                  <article key={item} className="action-tile">
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <strong>{item}</strong>
-                    <label className="action-check">
-                      <input
-                        type="checkbox"
-                        checked={checkedActions[index] || false}
-                        onChange={(event) => setCheckedActions((current) => current.map((checked, itemIndex) => itemIndex === index ? event.target.checked : checked))}
-                      />
-                      확인 완료
-                    </label>
-                  </article>
-                ))}
-              </section>
               <FieldOperationsWorkspace
                 data={data}
                 generationFingerprint={generationFingerprint || undefined}
@@ -2345,6 +2310,42 @@ export function SafeGuardCommandCenter({
                 onDeliverablesChange={handleWorkpackDeliverablesChange}
                 surface="editor"
               />
+              <details className="document-editor-context">
+                <summary>현장 판단과 확인 항목</summary>
+                <div className="document-editor-context-body">
+                  <section className="result-ribbon" aria-label="생성 결과 요약">
+                    <article>
+                      <span>위험도</span>
+                      <strong className={`risk-badge ${riskToneClass(data.riskSummary.riskLevel)}`}>위험도 {data.riskSummary.riskLevel}</strong>
+                    </article>
+                    <article>
+                      <span>핵심 위험</span>
+                      <strong>{data.riskSummary.topRisk}</strong>
+                    </article>
+                    <article>
+                      <span>연결 상태</span>
+                      <strong>{data.status.summary}</strong>
+                      <small className="muted">{workpackReadiness && !workpackReadiness.canShare ? workpackReadiness.summary : statusDetailCopy(state)}</small>
+                    </article>
+                  </section>
+                  <section className="action-strip">
+                    {data.riskSummary.immediateActions.map((item, index) => (
+                      <article key={item} className="action-tile">
+                        <span>{String(index + 1).padStart(2, "0")}</span>
+                        <strong>{item}</strong>
+                        <label className="action-check">
+                          <input
+                            type="checkbox"
+                            checked={checkedActions[index] || false}
+                            onChange={(event) => setCheckedActions((current) => current.map((checked, itemIndex) => itemIndex === index ? event.target.checked : checked))}
+                          />
+                          확인 완료
+                        </label>
+                      </article>
+                    ))}
+                  </section>
+                </div>
+              </details>
             </section>
           ) : null}
             </section>
