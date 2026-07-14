@@ -70,12 +70,27 @@ type CapturedGenerationSource<Value> =
   | { available: true; value: Value }
   | { available: false; value: null };
 
+type PhaseAGenerationSourceLabel =
+  | "law-search"
+  | "weather"
+  | "training"
+  | "kosha-education"
+  | "kosha-technical-guidance"
+  | "kosha-openapi"
+  | "accident-cases"
+  | "sif-safety-reference";
+
 async function captureGenerationSource<Value>(
+  sourceLabel: PhaseAGenerationSourceLabel,
   promise: Promise<Value>,
 ): Promise<CapturedGenerationSource<Value>> {
   try {
     return { available: true, value: await promise };
-  } catch {
+  } catch (error) {
+    log.warn("phase a generation source rejected", {
+      sourceLabel,
+      ...safeFailureContext(error),
+    });
     return { available: false, value: null };
   }
 }
@@ -1799,14 +1814,14 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 
     const earlyScenario = inferScenario(question);
     const phaseAGenerationSnapshotBundlePromise = Promise.all([
-      captureGenerationSource(rawCitationsBasePromise),
-      captureGenerationSource(weatherPromise),
-      captureGenerationSource(trainingPromise),
-      captureGenerationSource(koshaEducationPromise),
-      captureGenerationSource(koshaPromise),
-      captureGenerationSource(koshaOpenApiPromise),
-      captureGenerationSource(accidentCasesPromise),
-      captureGenerationSource(safetyReferencePromise),
+      captureGenerationSource("law-search", rawCitationsBasePromise),
+      captureGenerationSource("weather", weatherPromise),
+      captureGenerationSource("training", trainingPromise),
+      captureGenerationSource("kosha-education", koshaEducationPromise),
+      captureGenerationSource("kosha-technical-guidance", koshaPromise),
+      captureGenerationSource("kosha-openapi", koshaOpenApiPromise),
+      captureGenerationSource("accident-cases", accidentCasesPromise),
+      captureGenerationSource("sif-safety-reference", safetyReferencePromise),
     ]).then(([
       legalSearch,
       weather,

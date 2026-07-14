@@ -15,6 +15,7 @@ import {
   verifyAskResponseGenerationEvidence,
 } from "@/lib/generation-evidence";
 import { createLogger } from "@/lib/logger";
+import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import {
   createSupabaseAdminClient,
   getWorkspaceUser,
@@ -22,7 +23,12 @@ import {
   type WorkspaceDatabase,
 } from "@/lib/supabase-admin";
 import { loadOwnedWorkpackOperationContext } from "@/lib/workpack-commercial-store";
-import { buildWorkpackEvidenceSummary } from "@/lib/workpack-store";
+import {
+  buildPhaseAWorkpackAuthority,
+  buildPhaseAWorkpackIdempotencyBindingFromSeal,
+  buildWorkpackEvidenceSummary,
+  phaseAWorkpackIdempotencyBindingsEqual,
+} from "@/lib/workpack-store";
 import type { AskResponse } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +57,7 @@ type RouteContext = {
 type ConfirmationRequest = {
   chainId: PhaseAPlanBinding["chainId"];
   planDigest: string;
+  revision: string;
   confirmationId?: string;
 };
 
@@ -59,16 +66,26 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function parseConfirmationRequest(value: unknown): ConfirmationRequest | null {
-  if (!isRecord(value) || typeof value.chainId !== "string" || typeof value.planDigest !== "string") {
+  if (
+    !isRecord(value)
+    || typeof value.chainId !== "string"
+    || typeof value.planDigest !== "string"
+    || !isRfc3339OffsetTimestamp(value.revision)
+  ) {
     return null;
   }
   const chainId = EVIDENCE_CHAIN_REGISTRY.find((item) => item.chainId === value.chainId)?.chainId ?? null;
   if (!chainId || !PLAN_DIGEST_PATTERN.test(value.planDigest)) return null;
   if (typeof value.confirmationId !== "undefined") {
     if (typeof value.confirmationId !== "string" || !UUID_PATTERN.test(value.confirmationId)) return null;
-    return { chainId, planDigest: value.planDigest, confirmationId: value.confirmationId };
+    return {
+      chainId,
+      planDigest: value.planDigest,
+      revision: value.revision,
+      confirmationId: value.confirmationId,
+    };
   }
-  return { chainId, planDigest: value.planDigest };
+  return { chainId, planDigest: value.planDigest, revision: value.revision };
 }
 
 function confirmedDocuments(
@@ -169,6 +186,33 @@ export async function POST(request: NextRequest, context: RouteContext) {
       headers: { "cache-control": "no-store" },
     });
   }
+  const currentConfirmation = stored.phaseAReview.humanConfirmation;
+  const exactRetryCandidate = currentConfirmation.status === "confirmed"
+    && parsed.confirmationId === currentConfirmation.confirmationId;
+  if (parsed.revision !== owned.context.revision && !exactRetryCandidate) {
+    return revisionConflictResponse();
+  }
+  const authorityBinding = owned.context.authorityBinding;
+  const expectedAuthorityBinding = authorityBinding && owned.context.createdBy === user.id
+    ? buildPhaseAWorkpackIdempotencyBindingFromSeal({
+        organizationId: owned.context.organizationId,
+        siteId: owned.context.siteId,
+        userId: user.id,
+        generationSealAtCreate: authorityBinding.generationSealAtCreate,
+      })
+    : null;
+  if (
+    !authorityBinding
+    || !expectedAuthorityBinding
+    || authorityBinding.deterministicId !== owned.context.workpackId
+    || !phaseAWorkpackIdempotencyBindingsEqual(authorityBinding, expectedAuthorityBinding)
+  ) {
+    return NextResponse.json({
+      ok: false,
+      code: "phase_a_confirmation_workpack_authority_invalid",
+      message: "서버 작업팩의 사용자·조직·현장·생성 봉인 바인딩을 확인할 수 없습니다.",
+    }, { status: 409, headers: { "cache-control": "no-store" } });
+  }
 
   try {
     const wasAlreadyConfirmed = stored.phaseAReview.humanConfirmation.status === "confirmed";
@@ -183,6 +227,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
       createConfirmationId: randomUUID,
     });
     if (wasAlreadyConfirmed) {
+      const authority = buildPhaseAWorkpackAuthority({
+        workpackId: owned.context.workpackId,
+        revision: owned.context.revision,
+        response: stored,
+        idempotency: authorityBinding,
+      });
       return NextResponse.json({
         ok: true,
         confirmationId: confirmedReview.humanConfirmation.status === "confirmed"
@@ -190,6 +240,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
           : null,
         phaseAReview: confirmedReview,
         workpack: stored,
+        authority,
         message: "기존 Phase A 확인을 멱등하게 재사용했습니다.",
       }, { headers: { "cache-control": "no-store" } });
     }
@@ -224,13 +275,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const evidenceSummary = buildWorkpackEvidenceSummary(
       resealed,
       resealedVerification.snapshot,
+      authorityBinding,
     );
+    const persistedRevision = nextWorkpackRevision(owned.context.revision, confirmationNow);
     const update: WorkspaceDatabase["public"]["Tables"]["workpacks"]["Update"] = {
       deliverables: toJson(resealed.deliverables),
       evidence_summary: toJson(evidenceSummary),
       quality_contract: toJson(resealed.qualityContract ?? {}),
       status: toJson(resealed.status),
-      updated_at: nextWorkpackRevision(owned.context.revision, confirmationNow),
+      updated_at: persistedRevision,
     };
     const { data: persisted, error } = await client
       .from("workpacks")
@@ -238,7 +291,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       .eq("id", owned.context.workpackId)
       .eq("organization_id", owned.context.organizationId)
       .eq("updated_at", owned.context.revision)
-      .select("id")
+      .select("id,updated_at")
       .maybeSingle();
     if (error) {
       log.error("persist_failed", {
@@ -287,6 +340,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return revisionConflictResponse();
     }
 
+    const authority = buildPhaseAWorkpackAuthority({
+      workpackId: owned.context.workpackId,
+      revision: persisted.updated_at || persistedRevision,
+      response: resealed,
+      idempotency: authorityBinding,
+    });
     return NextResponse.json({
       ok: true,
       confirmationId: confirmedReview.humanConfirmation.status === "confirmed"
@@ -294,6 +353,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         : null,
       phaseAReview: confirmedReview,
       workpack: resealed,
+      authority,
       message: "Phase A 근거와 문서 반영 실적 확인을 저장했습니다.",
     }, { headers: { "cache-control": "no-store" } });
   } catch (error) {

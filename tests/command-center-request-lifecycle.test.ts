@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -5,9 +7,120 @@ import {
   runInputHazardPhotoAnalysis,
   type InputHazardPhotoAnalysisState
 } from "@/lib/operation-improvements";
-import { createLatestOnlyRequestGate } from "@/lib/request-version-guard";
+import {
+  createBoundRequestGate,
+  createLatestOnlyRequestGate,
+  isAbortError,
+} from "@/lib/request-version-guard";
 
 describe("command center request lifecycle", () => {
+  it("invalidates an in-flight generation when its input binding is edited", () => {
+    const gate = createBoundRequestGate<string>();
+    const generation = gate.begin("question:scaffold-a");
+
+    gate.abortCurrent();
+
+    expect(generation.signal.aborted).toBe(true);
+    expect(gate.canCommit(generation, "question:scaffold-b")).toBe(false);
+  });
+
+  it("lets only the second generation commit after the first response is delayed", () => {
+    const gate = createBoundRequestGate<string>();
+    const first = gate.begin("question:first");
+    const second = gate.begin("question:second");
+
+    expect(first.signal.aborted).toBe(true);
+    expect(gate.canCommit(first, "question:second")).toBe(false);
+    expect(gate.canCommit(second, "question:second")).toBe(true);
+  });
+
+  it("ignores a delayed HTTP 500 from an obsolete save binding", async () => {
+    const gate = createBoundRequestGate<string>();
+    const first = gate.begin("generation:first");
+    const second = gate.begin("generation:second");
+    const mutate = vi.fn();
+
+    await Promise.resolve({ ok: false, status: 500 }).then((response) => {
+      if (gate.canCommit(first, "generation:second")) mutate(response.status);
+    });
+
+    expect(first.signal.aborted).toBe(true);
+    expect(gate.canCommit(second, "generation:second")).toBe(true);
+    expect(mutate).not.toHaveBeenCalled();
+  });
+
+  it("does not mutate current state after an aborted request rejects", async () => {
+    const gate = createBoundRequestGate<string>();
+    const request = gate.begin("generation:first");
+    const mutate = vi.fn();
+    gate.abortCurrent();
+    const abortError = new DOMException("aborted", "AbortError");
+
+    await Promise.reject(abortError).catch(() => {
+      if (gate.canCommit(request, "generation:first")) mutate();
+    });
+
+    expect(request.signal.aborted).toBe(true);
+    expect(mutate).not.toHaveBeenCalled();
+  });
+
+  it("rejects an old confirmation response after a new workpack binding", async () => {
+    const gate = createBoundRequestGate<string>();
+    const oldConfirmation = gate.begin("workpack:a@revision:1");
+    const currentConfirmation = gate.begin("workpack:b@revision:1");
+    const applyConfirmedWorkpack = vi.fn();
+
+    await Promise.resolve({ workpackId: "a" }).then((payload) => {
+      if (gate.canCommit(oldConfirmation, "workpack:b@revision:1")) {
+        applyConfirmedWorkpack(payload);
+      }
+    });
+
+    expect(oldConfirmation.signal.aborted).toBe(true);
+    expect(gate.canCommit(currentConfirmation, "workpack:b@revision:1")).toBe(true);
+    expect(applyConfirmedWorkpack).not.toHaveBeenCalled();
+  });
+
+  it("rejects a delayed server-report response after an explicit local selection", async () => {
+    const gate = createBoundRequestGate<string>();
+    const serverLoad = gate.begin("server:a:1");
+    const applyServerAuthority = vi.fn();
+
+    gate.abortCurrent();
+    await Promise.resolve({ authority: "server:a" }).then((payload) => {
+      if (gate.canCommit(serverLoad, "browser_local:2")) applyServerAuthority(payload);
+    });
+
+    expect(serverLoad.signal.aborted).toBe(true);
+    expect(applyServerAuthority).not.toHaveBeenCalled();
+  });
+
+  it("wires save and confirmation fetches to bound request ownership", () => {
+    const source = readFileSync(resolve(process.cwd(), "components/FieldOperationsWorkspace.tsx"), "utf8");
+    const commandCenter = readFileSync(resolve(process.cwd(), "components/SafeGuardCommandCenter.tsx"), "utf8");
+    const reports = readFileSync(resolve(process.cwd(), "components/ReportsDownloadCenter.tsx"), "utf8");
+
+    expect(source).toContain("saveRequestGateRef");
+    expect(source).toContain("confirmationRequestGateRef");
+    expect(source).toContain("signal: request.signal");
+    expect(source).toContain("canCommitWorkspaceRequest(request)");
+    expect(source).toContain("canCommitConfirmationRequest(request)");
+    expect(source).toContain("reusableServerSaved");
+    expect(commandCenter).toContain("generationRequestGateRef.current.abortCurrent()");
+    expect(commandCenter).toContain("workpackRevalidationGateRef.current.abortCurrent()");
+    expect(commandCenter).toContain('current === "saving" ? "idle" : current');
+    expect(commandCenter).toContain('data.phaseAReview?.humanConfirmation.status === "confirmed"');
+    expect(reports).toContain("loadRequestGateRef");
+    expect(reports).toContain("canCommitLoadRequest(request)");
+    expect(reports).toContain('invalidateLoadRequest("browser_local")');
+  });
+
+  it("recognizes cross-runtime AbortError objects without depending on Error inheritance", () => {
+    expect(isAbortError(new DOMException("aborted", "AbortError"))).toBe(true);
+    expect(isAbortError({ name: "AbortError" })).toBe(true);
+    expect(isAbortError({ name: "TimeoutError" })).toBe(false);
+  });
+
   it("aborts the previous photo-analysis request when a newer 1-10 photo set starts", () => {
     const gate = createLatestOnlyRequestGate();
 

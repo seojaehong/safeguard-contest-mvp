@@ -1,10 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { WorkspaceDatabase, WorkspaceUser } from "@/lib/supabase-admin";
 import type { AskResponse } from "@/lib/types";
+import { isRecord } from "@/lib/workspace-api";
 import { assessWorkpackReadiness, type WorkpackReadiness } from "@/lib/workpack-readiness";
 import { buildReopenData, type ReopenWorkpackInput } from "@/lib/workpack-store";
 import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
-import { assessExactWorkpackConfirmation } from "@/lib/workpack-authority";
+import {
+  assessExactWorkpackConfirmation,
+  parsePhaseAWorkpackIdempotencyBinding,
+  type PhaseAWorkpackIdempotencyBinding,
+} from "@/lib/workpack-authority";
 import {
   buildServerShareRecipients,
   parseShareSessionRecipients,
@@ -89,6 +94,8 @@ export type WorkpackOperationContext = {
   question: string;
   generatedAt: string;
   revision: string;
+  createdBy: string | null;
+  authorityBinding: PhaseAWorkpackIdempotencyBinding | null;
   shareAuthority: StoredWorkpackShareAuthority;
 };
 
@@ -223,7 +230,7 @@ export async function loadOwnedWorkpackOperationContext(
 
   const { data: workpack, error: workpackError } = await client
     .from("workpacks")
-    .select("id,organization_id,site_id,question,scenario,deliverables,evidence_summary,status,created_at,updated_at")
+    .select("id,organization_id,site_id,created_by,question,scenario,deliverables,evidence_summary,status,created_at,updated_at")
     .eq("id", workpackId)
     .in("organization_id", organizationIds)
     .maybeSingle();
@@ -254,6 +261,12 @@ export async function loadOwnedWorkpackOperationContext(
       question: workpack.question,
       generatedAt: workpack.created_at,
       revision: workpack.updated_at,
+      createdBy: workpack.created_by,
+      authorityBinding: parsePhaseAWorkpackIdempotencyBinding(
+        isRecord(workpack.evidence_summary)
+          ? workpack.evidence_summary.workpackAuthorityBinding
+          : null,
+      ),
       shareAuthority: assessStoredWorkpackShareAuthority({
         question: workpack.question,
         scenario: workpack.scenario,

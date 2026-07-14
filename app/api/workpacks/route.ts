@@ -4,7 +4,15 @@ import { documentKeysFromDeliverables } from "@/lib/evidence-file";
 import type { AskResponse } from "@/lib/types";
 import { isRecord, parseScenarioContext } from "@/lib/workspace-api";
 import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
-import { buildWorkpackEvidenceSummary, buildWorkpackInsertPayload } from "@/lib/workpack-store";
+import {
+  buildPhaseAWorkpackAuthority,
+  buildPhaseAWorkpackIdempotencyBinding,
+  buildReopenData,
+  buildWorkpackEvidenceSummary,
+  buildWorkpackInsertPayload,
+  phaseAWorkpackIdempotencyBindingsEqual,
+} from "@/lib/workpack-store";
+import { parsePhaseAWorkpackIdempotencyBinding } from "@/lib/workpack-authority";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +29,10 @@ function readAskResponse(value: unknown): AskResponse | null {
     return null;
   }
   return value as AskResponse;
+}
+
+function databaseErrorCode(error: unknown): string | null {
+  return isRecord(error) && typeof error.code === "string" ? error.code : null;
 }
 
 export async function GET(request: NextRequest) {
@@ -201,30 +213,151 @@ export async function POST(request: NextRequest) {
   const question = verification.snapshot.question;
   const scenario = verification.snapshot.scenario;
   const deliverables = askResponse.deliverables;
-  const evidenceSummary = buildWorkpackEvidenceSummary(askResponse, verification.snapshot);
   const status = askResponse.status;
+  if (askResponse.phaseAReview?.humanConfirmation.status === "confirmed") {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      workpackId: null,
+      code: "confirmed_workpack_authority_required",
+      message: "확인 완료 작업팩은 새 행으로 저장할 수 없습니다. 정확한 서버 작업팩 ID를 다시 검증해 재개해야 합니다.",
+    }, { status: 409, headers: { "cache-control": "no-store" } });
+  }
   const context = await ensureWorkspaceContext(client, user, parseScenarioContext(scenario));
+  const idempotency = buildPhaseAWorkpackIdempotencyBinding({
+    organizationId: context.organizationId,
+    siteId: context.siteId,
+    userId: user.id,
+    response: askResponse,
+  });
+  const workpackId = idempotency.deterministicId;
+  const authoritativeEvidenceSummary = buildWorkpackEvidenceSummary(
+    askResponse,
+    verification.snapshot,
+    idempotency,
+  );
 
   const { data, error } = await client
     .from("workpacks")
     .insert(buildWorkpackInsertPayload({
+      id: workpackId,
       organizationId: context.organizationId,
       siteId: context.siteId,
       question,
       scenario,
       deliverables,
-      evidenceSummary,
+      evidenceSummary: authoritativeEvidenceSummary,
       workerSummary: body.workerSummary || {},
       status,
       createdBy: user.id
     }))
-    .select("id")
+    .select("id,organization_id,site_id,created_by,question,scenario,deliverables,evidence_summary,status,created_at,updated_at")
     .single();
 
   if (error) {
-    console.error("workpack save failed", error);
-    return NextResponse.json({ ok: false, configured: true, workpackId: null, message: "문서팩 저장에 실패했습니다." }, { status: 500 });
+    if (databaseErrorCode(error) !== "23505") {
+      console.error("workpack save failed", { errorCode: databaseErrorCode(error) || "unknown" });
+      return NextResponse.json({ ok: false, configured: true, workpackId: null, message: "문서팩 저장에 실패했습니다." }, { status: 500 });
+    }
+
+    const { data: existing, error: existingError } = await client
+      .from("workpacks")
+      .select("id,organization_id,site_id,created_by,question,scenario,deliverables,evidence_summary,status,created_at,updated_at")
+      .eq("id", workpackId)
+      .maybeSingle();
+    if (existingError) {
+      console.error("workpack idempotent reopen failed", {
+        errorCode: databaseErrorCode(existingError) || "unknown",
+      });
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        workpackId: null,
+        code: "workpack_idempotency_lookup_failed",
+        message: "기존 작업팩 재개 여부를 확인하지 못했습니다.",
+      }, { status: 500 });
+    }
+
+    const existingEvidenceSummary = existing && isRecord(existing.evidence_summary)
+      ? existing.evidence_summary
+      : null;
+    const existingIdempotency = parsePhaseAWorkpackIdempotencyBinding(
+      existingEvidenceSummary?.workpackAuthorityBinding,
+    );
+    const ownedExactScope = Boolean(
+      existing
+      && existing.id === workpackId
+      && existing.organization_id === context.organizationId
+      && existing.site_id === context.siteId
+      && existing.created_by === user.id
+    );
+    if (!existing || !ownedExactScope || !existingIdempotency || !phaseAWorkpackIdempotencyBindingsEqual(existingIdempotency, idempotency)) {
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        workpackId: null,
+        code: "workpack_idempotency_collision",
+        message: "서버 작업팩 ID 충돌을 안전하게 재개할 수 없어 저장을 차단했습니다.",
+      }, { status: 409 });
+    }
+
+    const reopened = buildReopenData({
+      question: existing.question,
+      scenario: existing.scenario,
+      deliverables: existing.deliverables,
+      evidenceSummary: existing.evidence_summary,
+      status: existing.status,
+    });
+    const reopenedVerification = reopened.data
+      ? verifyAskResponseGenerationEvidence(reopened.data, process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET)
+      : null;
+    if (!reopened.data || !reopenedVerification?.ok) {
+      const secretMissing = reopenedVerification?.ok === false
+        && reopenedVerification.code === "secret_unconfigured";
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        workpackId: null,
+        code: secretMissing
+          ? "generation_evidence_secret_unconfigured"
+          : "workpack_idempotency_reopen_unverified",
+        message: secretMissing
+          ? reopenedVerification.message
+          : "기존 작업팩의 서버 생성 봉인을 재검증하지 못해 재개를 차단했습니다.",
+      }, { status: secretMissing ? 503 : 409 });
+    }
+    const authority = buildPhaseAWorkpackAuthority({
+      workpackId,
+      revision: existing.updated_at,
+      response: reopened.data,
+      idempotency: existingIdempotency,
+    });
+    return NextResponse.json({
+      ok: true,
+      configured: true,
+      workpackId,
+      created: false,
+      reopened: true,
+      authority,
+      workpack: reopened.data,
+      message: "기존 서버 작업팩과 생성 봉인을 재검증해 같은 작업을 재개했습니다.",
+    }, { headers: { "cache-control": "no-store" } });
   }
 
-  return NextResponse.json({ ok: true, configured: true, workpackId: data.id, message: "문서팩과 작업 배치 요약을 저장했습니다." });
+  const authority = buildPhaseAWorkpackAuthority({
+    workpackId: data.id,
+    revision: data.updated_at,
+    response: askResponse,
+    idempotency,
+  });
+  return NextResponse.json({
+    ok: true,
+    configured: true,
+    workpackId: data.id,
+    created: true,
+    reopened: false,
+    authority,
+    workpack: askResponse,
+    message: "문서팩과 작업 배치 요약을 저장했습니다.",
+  }, { headers: { "cache-control": "no-store" } });
 }

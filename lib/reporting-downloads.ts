@@ -8,6 +8,14 @@ import type {
 } from "@/lib/operation-improvement-history";
 import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import type { RiskAssessmentRow, RiskLevel } from "@/lib/risk-assessment-schema";
+import {
+  inspectServerVerifiedWorkpackPayload,
+  parsePhaseAWorkpackAuthority,
+  phaseAWorkpackGenerationSealsEqual,
+  readPhaseAWorkpackGenerationSeal,
+  type PhaseAWorkpackAuthority,
+  type ServerVerifiedWorkpack,
+} from "@/lib/workpack-authority";
 
 export type ReportPeriod = "daily" | "weekly" | "monthly" | "custom";
 
@@ -26,8 +34,11 @@ export type ReportSourceMode = "browser_local" | "server_saved" | "sample";
 
 export type ReportSourceMetadata = {
   mode: ReportSourceMode;
-  scope: "current_browser" | "server_workpack" | "sample_preview";
+  scope: "current_browser_unverified" | "server_workpack" | "sample_preview";
+  authorityStatus: "local_only_unverified" | "server_verified" | "sample_only";
   workpackId?: string;
+  workpackRevision?: string;
+  generationSealSignature?: string;
   workpackSavedAt: string;
   workpackGeneratedAt?: string;
   riskRowTimeBasis: "workpack_saved_at";
@@ -35,14 +46,11 @@ export type ReportSourceMetadata = {
 };
 
 export type ReportProvenancePresentation = {
-  label: "샘플 데이터" | "브라우저 최근 작업팩" | "서버 저장 작업팩";
-  savedTimeLabel: "미리보기 준비" | "브라우저 저장" | "서버 저장";
+  label: "샘플 데이터" | "브라우저 로컬 작업팩(미검증)" | "서버 검증 작업팩";
+  savedTimeLabel: "미리보기 준비" | "로컬 저장" | "서버 저장";
 };
 
-export type ServerReportWorkpack = {
-  id: string;
-  workpack: StoredCurrentWorkpack;
-};
+export type ServerReportWorkpack = ServerVerifiedWorkpack;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -214,22 +222,14 @@ export function inspectServerReportWorkpackPayload(
   payload: unknown,
   requestedId: string
 ): ServerReportWorkpack | null {
-  if (!isRecord(payload) || payload.canReopen !== true || !isRecord(payload.workpack)) return null;
-  const serverWorkpack = payload.workpack;
-  const id = typeof serverWorkpack.id === "string" ? serverWorkpack.id : "";
-  if (!id || id !== requestedId || !isServerAskResponse(serverWorkpack.reopenData)) return null;
-
-  const savedAt = [serverWorkpack.updatedAt, serverWorkpack.createdAt].find((value) => (
-    typeof value === "string" && isRfc3339OffsetTimestamp(value)
-  ));
-  if (typeof savedAt !== "string") return null;
-
-  const inspected = inspectStoredCurrentWorkpack(JSON.stringify({
-    savedAt,
-    source: "workspace",
-    data: serverWorkpack.reopenData
-  }));
-  return inspected.status === "valid" ? { id, workpack: inspected.workpack } : null;
+  if (
+    !isRecord(payload)
+    || !isRecord(payload.workpack)
+    || !isServerAskResponse(payload.workpack.reopenData)
+  ) {
+    return null;
+  }
+  return inspectServerVerifiedWorkpackPayload(payload, requestedId);
 }
 
 export type ReportImprovementStatus = OperationImprovementStatus;
@@ -362,9 +362,9 @@ export function resolveReportProvenancePresentation(
     return { label: "샘플 데이터", savedTimeLabel: "미리보기 준비" };
   }
   if (source.mode === "server_saved") {
-    return { label: "서버 저장 작업팩", savedTimeLabel: "서버 저장" };
+    return { label: "서버 검증 작업팩", savedTimeLabel: "서버 저장" };
   }
-  return { label: "브라우저 최근 작업팩", savedTimeLabel: "브라우저 저장" };
+  return { label: "브라우저 로컬 작업팩(미검증)", savedTimeLabel: "로컬 저장" };
 }
 
 export function toggleReportPhotoApproval(
@@ -762,7 +762,7 @@ function buildNotes(
       ? "이 리포트는 샘플 미리보기 데이터로 생성되며 실제 현장 전체 범위를 나타내지 않습니다."
       : source.scope === "server_workpack"
         ? "이 리포트는 서버에 저장된 해당 작업팩만 기준으로 생성됩니다."
-        : "이 리포트는 현재 브라우저의 최신 작업팩과 저장된 개선사항 후보만 기준으로 생성됩니다.",
+        : "이 리포트는 서버 권위로 검증되지 않은 현재 브라우저의 로컬 작업팩과 개선사항 후보만 기준으로 생성됩니다.",
     "위험행의 기간 포함 여부는 행별 생성시각이 아닌 작업팩 저장시각을 기준으로 판단합니다.",
     "Before/After 사진은 이 화면에서 포함 승인한 항목만 다운로드 산출물에 기록됩니다."
   ];
@@ -784,6 +784,7 @@ export function buildReportSnapshot(input: {
   photoApprovals?: readonly ReportPhotoApproval[];
   sourceMode?: ReportSourceMode;
   sourceWorkpackId?: string;
+  sourceAuthority?: PhaseAWorkpackAuthority;
   now?: Date;
 }): ReportSnapshot {
   if (!isRfc3339OffsetTimestamp(input.workpack.savedAt)) {
@@ -794,6 +795,34 @@ export function buildReportSnapshot(input: {
   const filters = normalizeFilters(input.filters);
   const data = input.workpack.data;
   const sourceMode = input.sourceMode || "browser_local";
+  const parsedSourceAuthority = sourceMode === "server_saved"
+    ? parsePhaseAWorkpackAuthority(input.sourceAuthority)
+    : null;
+  const currentGenerationEvidence = data.generationEvidence;
+  const currentGenerationSeal = currentGenerationEvidence
+    ? readPhaseAWorkpackGenerationSeal({
+        version: currentGenerationEvidence.version,
+        algorithm: currentGenerationEvidence.algorithm,
+        signature: currentGenerationEvidence.signature,
+        generatedAt: currentGenerationEvidence.snapshot.generatedAt,
+        responseContentDigest: currentGenerationEvidence.snapshot.responseContentDigest,
+      })
+    : null;
+  if (
+    sourceMode === "server_saved"
+    && (
+      !parsedSourceAuthority
+      || parsedSourceAuthority.workpackId !== input.sourceWorkpackId
+      || parsedSourceAuthority.updatedAt !== input.workpack.savedAt
+      || !currentGenerationSeal
+      || !phaseAWorkpackGenerationSealsEqual(
+        parsedSourceAuthority.generationSeal,
+        currentGenerationSeal,
+      )
+    )
+  ) {
+    throw new Error("서버 작업팩 ID, revision, generation seal 권위를 확인해야 리포트를 내보낼 수 있습니다.");
+  }
   const generatedAtCandidates = [
     data.generationEvidence?.snapshot.generatedAt,
     data.qualityContract?.generatedAt
@@ -807,9 +836,18 @@ export function buildReportSnapshot(input: {
       ? "sample_preview"
       : sourceMode === "server_saved"
         ? "server_workpack"
-        : "current_browser",
+        : "current_browser_unverified",
+    authorityStatus: sourceMode === "sample"
+      ? "sample_only"
+      : sourceMode === "server_saved"
+        ? "server_verified"
+        : "local_only_unverified",
     ...(sourceMode === "server_saved" && input.sourceWorkpackId
-      ? { workpackId: input.sourceWorkpackId }
+      ? {
+          workpackId: input.sourceWorkpackId,
+          workpackRevision: parsedSourceAuthority?.revision,
+          generationSealSignature: parsedSourceAuthority?.generationSeal.signature,
+        }
       : {}),
     workpackSavedAt: input.workpack.savedAt,
     ...(workpackGeneratedAt ? { workpackGeneratedAt } : {}),
@@ -818,7 +856,13 @@ export function buildReportSnapshot(input: {
       ? ["sample_data_only", "not_full_operational_history", "risk_rows_share_workpack_timestamp"]
       : sourceMode === "server_saved"
         ? ["server_saved_workpack_only", "not_full_operational_history", "risk_rows_share_workpack_timestamp"]
-        : ["current_browser_only", "not_full_operational_history", "risk_rows_share_workpack_timestamp"]
+        : [
+            "local_only_unverified",
+            "not_server_authority",
+            "authority_claims_blocked",
+            "not_full_operational_history",
+            "risk_rows_share_workpack_timestamp",
+          ]
   };
   const allRiskRows = isWithinPeriod(input.workpack.savedAt, input.period, now, dateRange)
     ? data.structured?.riskAssessmentRows.length
@@ -950,7 +994,10 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "승인사진",
     "데이터범위",
     "데이터모드",
+    "권위상태",
     "작업팩ID",
+    "작업팩Revision",
+    "생성봉인서명",
     "작업팩저장시각",
     "작업팩생성시각",
     "위험행시간기준",
@@ -972,7 +1019,10 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "",
     snapshot.source.scope,
     snapshot.source.mode,
+    snapshot.source.authorityStatus,
     snapshot.source.workpackId || "",
+    snapshot.source.workpackRevision || "",
+    snapshot.source.generationSealSignature || "",
     snapshot.source.workpackSavedAt,
     snapshot.source.workpackGeneratedAt || "",
     snapshot.source.riskRowTimeBasis,
@@ -994,7 +1044,10 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     "",
     snapshot.source.scope,
     snapshot.source.mode,
+    snapshot.source.authorityStatus,
     snapshot.source.workpackId || "",
+    snapshot.source.workpackRevision || "",
+    snapshot.source.generationSealSignature || "",
     snapshot.source.workpackSavedAt,
     snapshot.source.workpackGeneratedAt || "",
     snapshot.source.riskRowTimeBasis,
@@ -1016,7 +1069,10 @@ export function buildReportCsv(snapshot: ReportSnapshot) {
     item.photoNames.join(" · "),
     snapshot.source.scope,
     snapshot.source.mode,
+    snapshot.source.authorityStatus,
     snapshot.source.workpackId || "",
+    snapshot.source.workpackRevision || "",
+    snapshot.source.generationSealSignature || "",
     snapshot.source.workpackSavedAt,
     snapshot.source.workpackGeneratedAt || "",
     snapshot.source.riskRowTimeBasis,
@@ -1057,7 +1113,10 @@ export function buildReportMarkdown(snapshot: ReportSnapshot) {
     "",
     `- scope: ${snapshot.source.scope}`,
     `- mode: ${snapshot.source.mode}`,
+    `- authorityStatus: ${snapshot.source.authorityStatus}`,
     ...(snapshot.source.workpackId ? [`- workpackId: ${snapshot.source.workpackId}`] : []),
+    ...(snapshot.source.workpackRevision ? [`- workpackRevision: ${snapshot.source.workpackRevision}`] : []),
+    ...(snapshot.source.generationSealSignature ? [`- generationSealSignature: ${snapshot.source.generationSealSignature}`] : []),
     `- workpackSavedAt: ${snapshot.source.workpackSavedAt}`,
     `- workpackGeneratedAt: ${snapshot.source.workpackGeneratedAt || "unavailable"}`,
     `- riskRowTimeBasis: ${snapshot.source.riskRowTimeBasis}`,
@@ -1151,7 +1210,12 @@ function buildLearningEvents(snapshot: ReportSnapshot): ReportLearningEvent[] {
     {
       ...base,
       eventType: "governance",
-      payload: REPORT_LEARNING_GOVERNANCE
+      payload: {
+        ...REPORT_LEARNING_GOVERNANCE,
+        authority: snapshot.source.authorityStatus === "server_verified"
+          ? REPORT_LEARNING_GOVERNANCE.authority
+          : "unverified_local_candidate",
+      }
     },
     {
       ...base,
@@ -1250,7 +1314,10 @@ export function buildReportLearningMarkdown(snapshot: ReportSnapshot) {
     `- workSummary: ${snapshot.scenario.workSummary}`,
     `- sourceScope: ${snapshot.source.scope}`,
     `- sourceMode: ${snapshot.source.mode}`,
+    `- sourceAuthorityStatus: ${snapshot.source.authorityStatus}`,
     ...(snapshot.source.workpackId ? [`- workpackId: ${snapshot.source.workpackId}`] : []),
+    ...(snapshot.source.workpackRevision ? [`- workpackRevision: ${snapshot.source.workpackRevision}`] : []),
+    ...(snapshot.source.generationSealSignature ? [`- generationSealSignature: ${snapshot.source.generationSealSignature}`] : []),
     `- workpackSavedAt: ${snapshot.source.workpackSavedAt}`,
     `- workpackGeneratedAt: ${snapshot.source.workpackGeneratedAt || "unavailable"}`,
     `- riskRowTimeBasis: ${snapshot.source.riskRowTimeBasis}`,
@@ -1259,7 +1326,7 @@ export function buildReportLearningMarkdown(snapshot: ReportSnapshot) {
     "## 운영 메모리 계약",
     "",
     `- scope: ${REPORT_LEARNING_GOVERNANCE.memoryScope}`,
-    `- authority: ${REPORT_LEARNING_GOVERNANCE.authority}`,
+    `- authority: ${snapshot.source.authorityStatus === "server_verified" ? REPORT_LEARNING_GOVERNANCE.authority : "unverified_local_candidate"}`,
     `- promotionStatus: ${REPORT_LEARNING_GOVERNANCE.promotionStatus}`,
     `- runtimeAuthority: ${REPORT_LEARNING_GOVERNANCE.runtimeAuthority ? "yes" : "no"}`,
     `- modelFineTuning: ${REPORT_LEARNING_GOVERNANCE.modelFineTuning ? "yes" : "no"}`,

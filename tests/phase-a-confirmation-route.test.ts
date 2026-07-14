@@ -6,11 +6,17 @@ import { attachGenerationEvidence, verifyAskResponseGenerationEvidence } from "@
 import { buildMockAskResponse } from "@/lib/mock-data";
 import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
 import { attachQualityContract } from "@/lib/quality-contract";
-import { buildReopenData } from "@/lib/workpack-store";
+import {
+  buildPhaseAWorkpackIdempotencyBinding,
+  buildReopenData,
+} from "@/lib/workpack-store";
 import type { AskResponse } from "@/lib/types";
 
 const SECRET = "phase-a-confirmation-route-secret";
-const WORKPACK_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const USER_ID = "11111111-1111-4111-8111-111111111111";
+const ORGANIZATION_ID = "22222222-2222-4222-8222-222222222222";
+const SITE_ID = "33333333-3333-4333-8333-333333333333";
+const INITIAL_REVISION = "2026-07-13T18:00:00.000Z";
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
   getWorkspaceUser: vi.fn(),
@@ -87,21 +93,32 @@ function responseReadyForConfirmation(): AskResponse {
   });
 }
 
+const AUTHORITY_BINDING = buildPhaseAWorkpackIdempotencyBinding({
+  organizationId: ORGANIZATION_ID,
+  siteId: SITE_ID,
+  userId: USER_ID,
+  response: responseReadyForConfirmation(),
+});
+const WORKPACK_ID = AUTHORITY_BINDING.deterministicId;
+
 function request(body: unknown, token = "authenticated-session-token"): NextRequest {
+  const requestBody = typeof body === "object" && body !== null && !Array.isArray(body)
+    ? { revision: INITIAL_REVISION, ...body }
+    : body;
   return new NextRequest(`http://localhost/api/workpacks/${WORKPACK_ID}/phase-a-confirmation`, {
     method: "POST",
     headers: {
       authorization: `Bearer ${token}`,
       "content-type": "application/json",
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(requestBody),
   });
 }
 
 function makeUpdateClient(onCommit?: (payload: Record<string, unknown>) => void) {
   let updateCount = 0;
   let updated: Record<string, unknown> | null = null;
-  let revision = "2026-07-13T18:00:00.000Z";
+  let revision = INITIAL_REVISION;
   return {
     client: {
       from(table: string) {
@@ -116,7 +133,7 @@ function makeUpdateClient(onCommit?: (payload: Record<string, unknown>) => void)
               if (typeof nextRevision !== "string") throw new Error("expected updated_at revision");
               revision = nextRevision;
               onCommit?.(payload);
-              return { data: { id: WORKPACK_ID }, error: null };
+              return { data: { id: WORKPACK_ID, updated_at: revision }, error: null };
             };
             const query = {
               eq(column: string, value: unknown) {
@@ -144,12 +161,14 @@ function ownedContext(stored: AskResponse, revision: string) {
   return {
     ok: true as const,
     context: {
-      organizationId: "org-1",
-      siteId: "site-1",
+      organizationId: ORGANIZATION_ID,
+      siteId: SITE_ID,
       workpackId: WORKPACK_ID,
       question: stored.question,
       generatedAt: "2026-07-13T18:00:00.000Z",
       revision,
+      createdBy: USER_ID,
+      authorityBinding: AUTHORITY_BINDING,
       shareAuthority: {
         workpack: stored,
         readiness: { canShare: false, status: "blocked" as const, summary: "확인 대기", reasons: [] },
@@ -161,7 +180,7 @@ function ownedContext(stored: AskResponse, revision: string) {
 describe("Phase A confirmation route", () => {
   beforeEach(() => {
     process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET = SECRET;
-    mocks.getWorkspaceUser.mockResolvedValue({ id: "user-1", email: "reviewer@example.com" });
+    mocks.getWorkspaceUser.mockResolvedValue({ id: USER_ID, email: "reviewer@example.com" });
   });
 
   afterEach(() => {
@@ -201,7 +220,7 @@ describe("Phase A confirmation route", () => {
       workpackId: WORKPACK_ID,
       reviewer: {
         principalType: "authenticated_workspace_user",
-        userId: "user-1",
+        userId: USER_ID,
         sessionFingerprint: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
       },
       chainId: binding.chainId,
@@ -311,5 +330,31 @@ describe("Phase A confirmation route", () => {
       confirmationId: success?.confirmationId,
     });
     expect(fake.updateCount()).toBe(1);
+  });
+
+  it("rejects an old confirmation ID after a newer pending row binding", async () => {
+    const stored = responseReadyForConfirmation();
+    const fake = makeUpdateClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue(
+      ownedContext(stored, "2026-07-13T19:00:00.000Z"),
+    );
+    const binding = stored.phaseAReview?.planBinding;
+    if (!binding) throw new Error("expected plan binding");
+    const { POST } = await import("@/app/api/workpacks/[id]/phase-a-confirmation/route");
+
+    const response = await POST(request({
+      chainId: binding.chainId,
+      planDigest: binding.planDigest,
+      confirmationId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+    }), { params: Promise.resolve({ id: WORKPACK_ID }) });
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      ok: false,
+      code: "phase_a_confirmation_revision_conflict",
+    });
+    expect(fake.updateCount()).toBe(0);
   });
 });

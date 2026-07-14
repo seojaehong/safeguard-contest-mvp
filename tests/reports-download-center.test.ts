@@ -13,8 +13,12 @@ import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
   type OperationImprovement
 } from "@/lib/operation-improvement-history";
+import { buildDbHarnessPacket } from "@/lib/db-harness";
+import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import { toggleReportPhotoApproval } from "@/lib/reporting-downloads";
 import { attachQualityContract } from "@/lib/quality-contract";
+import type { AskResponse } from "@/lib/types";
+import type { PhaseAWorkpackAuthority } from "@/lib/workpack-authority";
 
 const improvement: OperationImprovement = {
   id: "improvement-1",
@@ -59,6 +63,7 @@ const baseUrl = `http://127.0.0.1:${port}`;
 const testSupabaseUrl = "https://reports-test.supabase.co";
 const testSupabaseAuthStorageKey = "sb-reports-test-auth-token";
 const testAccessToken = "reports-test-access-token";
+const reportAuthoritySecret = "reports-download-center-authority-secret";
 let server: ChildProcessWithoutNullStreams | null = null;
 let browser: Browser | null = null;
 const serverOutput: string[] = [];
@@ -149,15 +154,48 @@ async function installLocalWorkpack(
   });
 }
 
+function attachReportServerGenerationEvidence(
+  response: AskResponse,
+  generatedAt: string
+): AskResponse {
+  const packet = buildDbHarnessPacket({ question: response.question, references: [] });
+  return attachGenerationEvidence({
+    ...response,
+    dbHarness: {
+      packet,
+      promptContext: "report server authority fixture",
+      summary: {
+        mode: packet.mode,
+        llmRole: packet.generationContract.llmRole,
+        llmOutputScope: packet.generationContract.llmOutputScope,
+        evidenceAuthority: packet.generationContract.evidenceAuthority,
+        providerRetryScope: packet.generationContract.providerRetryScope,
+        fallbackChainAllowed: packet.generationContract.fallbackChainAllowed,
+        genericProseSubstitutionAllowed: packet.generationContract.genericProseSubstitutionAllowed,
+        missingEvidencePolicy: packet.generationContract.missingEvidencePolicy,
+        directEvidence: packet.directEvidence.length,
+        sifCases: packet.sifCases.length,
+        supportingEvidence: packet.supportingEvidence.length,
+        improvementMemory: packet.improvementMemory.length,
+        workpackMemory: packet.workpackMemory.length,
+        missingEvidence: packet.generationContract.missingEvidence,
+        documentCoverage: packet.generationContract.documentCoverage,
+        retrievalContract: packet.retrievalContract,
+        ontologyStatus: packet.ontologyChecklist.status,
+      },
+    },
+  }, { secret: reportAuthoritySecret, generatedAt });
+}
+
 async function expectBlockedServerState(page: Page, workpackId: string): Promise<void> {
   const errorState = page.getByLabel("서버 작업팩 오류 상태");
   await errorState.waitFor({ state: "visible", timeout: 5_000 });
   expect(await errorState.getByRole("heading", { name: "서버 저장 작업팩을 열지 못했습니다." }).count()).toBe(1);
   const provenance = errorState.getByLabel("요청한 서버 작업팩 출처");
-  expect(await provenance.getByText("서버 저장 작업팩", { exact: true }).count()).toBe(1);
+  expect(await provenance.getByText("요청한 서버 작업팩(검증 전)", { exact: true }).count()).toBe(1);
   expect(await provenance.getByText(workpackId, { exact: true }).count()).toBe(1);
   expect(await page.getByLabel("작업문서형 리포트").count()).toBe(0);
-  expect(await page.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(0);
+  expect(await page.getByText("브라우저 로컬 작업팩(미검증)", { exact: true }).count()).toBe(0);
 
   const exportButtons = errorState.getByLabel("리포트 다운로드").getByRole("button");
   expect(await exportButtons.count()).toBe(5);
@@ -245,8 +283,8 @@ describe("reports download center remount behavior", () => {
       await page.goto(`${baseUrl}/reports`, { waitUntil: "networkidle" });
       const headerProvenance = page.getByLabel("리포트 헤더 데이터 출처");
       const stickyProvenance = page.getByLabel("고정 리포트 데이터 출처");
-      expect(await headerProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
-      expect(await stickyProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
+      expect(await headerProvenance.getByText("브라우저 로컬 작업팩(미검증)", { exact: true }).count()).toBe(1);
+      expect(await stickyProvenance.getByText("브라우저 로컬 작업팩(미검증)", { exact: true }).count()).toBe(1);
       expect(await stickyProvenance.locator('time[datetime="2026-07-10T08:00:00.000Z"]').count()).toBe(1);
       expect(await stickyProvenance.locator(`time[datetime="${generatedAt}"]`).count()).toBe(1);
 
@@ -276,12 +314,36 @@ describe("reports download center remount behavior", () => {
     if (!browser) throw new Error("Browser was not started");
     const serverSavedAt = "2026-07-10T09:15:00.000Z";
     const workpackGeneratedAt = "2026-07-10T09:00:00.000Z";
-    const reopenData = attachQualityContract(buildMockAskResponse(
+    const serverWorkpackId = "6b29fc40-ca47-4f9e-98e7-6f4493f9d20a";
+    const reopenData = attachReportServerGenerationEvidence(attachQualityContract(buildMockAskResponse(
       "서버 저장 문서팩 리포트",
       mockSearchResults.slice(0, 2),
       "live",
       "server report provenance test"
-    ), workpackGeneratedAt);
+    ), workpackGeneratedAt), workpackGeneratedAt);
+    if (!reopenData.generationEvidence) {
+      throw new Error("Report authority fixture must include generation evidence");
+    }
+    const generationSeal = {
+      version: reopenData.generationEvidence.version,
+      algorithm: reopenData.generationEvidence.algorithm,
+      signature: reopenData.generationEvidence.signature,
+      generatedAt: reopenData.generationEvidence.snapshot.generatedAt,
+      responseContentDigest: reopenData.generationEvidence.snapshot.responseContentDigest,
+    };
+    const authority: PhaseAWorkpackAuthority = {
+      version: "safeclaw-workpack-authority/v1",
+      workpackId: serverWorkpackId,
+      revision: serverSavedAt,
+      updatedAt: serverSavedAt,
+      generationSeal,
+      idempotency: {
+        version: "safeclaw-workpack-idempotency/v1",
+        deterministicId: serverWorkpackId,
+        scopeDigest: `sha256:${"a".repeat(64)}`,
+        generationSealAtCreate: generationSeal,
+      },
+    };
     const context = await browser.newContext();
     await context.addInitScript(({ expectedOrigin, authStorageKey, accessToken }) => {
       if (window.location.origin !== expectedOrigin) return;
@@ -298,7 +360,7 @@ describe("reports download center remount behavior", () => {
     });
     const page = await context.newPage();
     let authorizationHeader = "";
-    await page.route("**/api/workpacks/server-report-1", async (route) => {
+    await page.route(`**/api/workpacks/${serverWorkpackId}`, async (route) => {
       authorizationHeader = route.request().headers().authorization || "";
       await route.fulfill({
         status: 200,
@@ -308,11 +370,12 @@ describe("reports download center remount behavior", () => {
           configured: true,
           canReopen: true,
           workpack: {
-            id: "server-report-1",
+            id: serverWorkpackId,
             createdAt: "2026-07-10T09:05:00.000Z",
             updatedAt: serverSavedAt,
             reopenData
           },
+          authority,
           blockers: [],
           message: "저장된 문서팩 상세를 불러왔습니다."
         })
@@ -320,13 +383,13 @@ describe("reports download center remount behavior", () => {
     });
 
     try {
-      await page.goto(`${baseUrl}/reports?workpackId=server-report-1`, { waitUntil: "networkidle" });
+      await page.goto(`${baseUrl}/reports?workpackId=${serverWorkpackId}`, { waitUntil: "networkidle" });
 
       const headerProvenance = page.getByLabel("리포트 헤더 데이터 출처");
       const stickyProvenance = page.getByLabel("고정 리포트 데이터 출처");
       expect(authorizationHeader).toBe(`Bearer ${testAccessToken}`);
-      expect(await headerProvenance.getByText("서버 저장 작업팩", { exact: true }).count()).toBe(1);
-      expect(await stickyProvenance.getByText("서버 저장 작업팩", { exact: true }).count()).toBe(1);
+      expect(await headerProvenance.getByText("서버 검증 작업팩", { exact: true }).count()).toBe(1);
+      expect(await stickyProvenance.getByText("서버 검증 작업팩", { exact: true }).count()).toBe(1);
       expect(await stickyProvenance.locator(`time[datetime="${serverSavedAt}"]`).count()).toBe(1);
       expect(await stickyProvenance.locator(`time[datetime="${workpackGeneratedAt}"]`).count()).toBe(1);
     } finally {
@@ -348,13 +411,13 @@ describe("reports download center remount behavior", () => {
 
       await expectBlockedServerState(page, "server-no-session");
       expect(await page.getByText(localMarker, { exact: true }).count()).toBe(0);
-      const switchButton = page.getByRole("button", { name: "브라우저 최근 작업팩으로 전환" });
+      const switchButton = page.getByRole("button", { name: "브라우저 로컬 작업팩(미검증)으로 전환" });
       expect(await switchButton.count()).toBe(1);
 
       await switchButton.click();
       const browserProvenance = page.getByLabel("고정 리포트 데이터 출처");
       await browserProvenance.waitFor({ state: "visible" });
-      expect(await browserProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
+      expect(await browserProvenance.getByText("브라우저 로컬 작업팩(미검증)", { exact: true }).count()).toBe(1);
       expect(await page.getByText(localMarker, { exact: true }).count()).toBeGreaterThan(0);
       expect(await page.getByLabel("서버 작업팩 오류 상태").count()).toBe(0);
       await page.locator('[aria-label="다운로드 준비 상태"][data-download-readiness="ready"]').waitFor({
@@ -390,7 +453,7 @@ describe("reports download center remount behavior", () => {
 
       await expectBlockedServerState(page, id);
       expect(await page.getByText(message, { exact: true }).count()).toBe(1);
-      expect(await page.getByRole("button", { name: "브라우저 최근 작업팩으로 전환" }).count()).toBe(0);
+      expect(await page.getByRole("button", { name: "브라우저 로컬 작업팩(미검증)으로 전환" }).count()).toBe(0);
     } finally {
       await context.close();
     }
@@ -431,7 +494,7 @@ describe("reports download center remount behavior", () => {
       await page.goto(`${baseUrl}/reports?workpackId=server-malformed`, { waitUntil: "networkidle" });
 
       await expectBlockedServerState(page, "server-malformed");
-      expect(await page.getByRole("button", { name: "브라우저 최근 작업팩으로 전환" }).count()).toBe(0);
+      expect(await page.getByRole("button", { name: "브라우저 로컬 작업팩(미검증)으로 전환" }).count()).toBe(0);
       expect(pageErrors).toEqual([]);
     } finally {
       await context.close();

@@ -100,6 +100,19 @@ function read(relativePath: string): string {
 }
 
 describe("Phase A citation authority UI", () => {
+  it("logs every rejected generation source without leaking the rejected value", () => {
+    const source = read("lib/search.ts");
+    const capture = source.match(/async function captureGenerationSource[\s\S]*?\r?\n}\r?\n/)?.[0] ?? "";
+
+    expect(capture).toContain("sourceLabel: PhaseAGenerationSourceLabel");
+    expect(capture).toContain("catch (error)");
+    expect(capture).toContain('log.warn("phase a generation source rejected"');
+    expect(capture).toContain("...safeFailureContext(error)");
+    expect(capture).not.toContain("error,");
+    expect(source).toContain('captureGenerationSource("kosha-technical-guidance", koshaPromise)');
+    expect(source).toContain('captureGenerationSource("sif-safety-reference", safetyReferencePromise)');
+  });
+
   it.each([
     ["pending", pendingReview],
     ["missing", undefined],
@@ -257,9 +270,9 @@ describe("Phase A citation authority UI", () => {
     expect(currentModules).toContain("phaseAState.evidenceHeading");
     expect(currentModules).toMatch(/<WorkpackEditor\s+data=\{current\.data\}/);
     expect(workpackEditor).toContain(
-      "workpackSummaryDraft: data.deliverables.workpackSummaryDraft",
+      "workpackSummaryDraft: generationData.deliverables.workpackSummaryDraft",
     );
-    expect(workpackEditor).toContain("buildPhaseAReviewUiState(data.phaseAReview)");
+    expect(workpackEditor).toContain("buildPhaseAReviewUiState(effectivePhaseAReview)");
     expect(workpackEditor).toContain("phaseAState.evidenceHeading");
     expect(workpackEditor).toContain("phaseAState.directEvidenceLabel");
     expect(workpackEditor).toContain("phaseAState.connectionLabel");

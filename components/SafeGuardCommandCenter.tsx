@@ -35,7 +35,12 @@ import {
   type HazardPhotoGenerationCandidate,
   type InputHazardPhotoAnalysisState
 } from "@/lib/operation-improvements";
-import { createLatestOnlyRequestGate } from "@/lib/request-version-guard";
+import {
+  createBoundRequestGate,
+  createLatestOnlyRequestGate,
+  isAbortError,
+  type BoundRequestHandle
+} from "@/lib/request-version-guard";
 import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
   operationImprovementToHarnessImprovement,
@@ -54,7 +59,14 @@ import {
 } from "@/lib/workspace-pages";
 import { buildGenerationProgressState } from "@/lib/workspace-generation-progress";
 import { buildPhaseAReviewUiState } from "@/lib/phase-a-review";
-import { assessExactWorkpackConfirmation } from "@/lib/workpack-authority";
+import {
+  assessExactWorkpackConfirmation,
+  inspectServerVerifiedWorkpackMutationPayload,
+  inspectServerVerifiedWorkpackPayload,
+  phaseAWorkpackGenerationSealsEqual,
+  readPhaseAWorkpackGenerationSeal,
+  type PhaseAWorkpackAuthority,
+} from "@/lib/workpack-authority";
 import {
   applyWorkpackDeliverablesChange,
   assessWorkpackReadiness,
@@ -73,6 +85,12 @@ type WorkspaceTheme = "night" | "day";
 type DocumentSurfaceMode = "review" | "editor";
 
 type GenerationState = "idle" | "generating" | "ready" | "error";
+
+type GenerationRequestBinding = {
+  requestEpoch: number;
+  question: string;
+  aiMode: "template" | "enhanced" | "full";
+};
 
 type WorkflowStep = {
   key: WorkspacePage;
@@ -1077,11 +1095,30 @@ export function SafeGuardCommandCenter({
   const [dismissedInputHazardCandidateKeys, setDismissedInputHazardCandidateKeys] = useState<string[]>([]);
   const inputHazardPhotosRef = useRef<LocalPhoto[]>([]);
   const inputHazardPhotoRequestGateRef = useRef(createLatestOnlyRequestGate());
+  const generationRequestGateRef = useRef(createBoundRequestGate<GenerationRequestBinding>());
+  const generationRequestBindingRef = useRef<GenerationRequestBinding | null>(null);
+  const generationRequestEpochRef = useRef(0);
+  const workpackRevalidationGateRef = useRef(createBoundRequestGate<string>());
+  const improvementSaveRequestGateRef = useRef(createBoundRequestGate<string>());
+  const improvementSaveBindingRef = useRef("");
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
+  const [savedWorkpackAuthority, setSavedWorkpackAuthority] = useState<PhaseAWorkpackAuthority | null>(null);
   const [improvementSaveState, setImprovementSaveState] = useState<ImprovementSaveState>("idle");
   const [activeWorkspaceTheme, setActiveWorkspaceTheme] = useState<WorkspaceTheme>(workspaceTheme);
   const [aiMode, setAiMode] = useState<"template" | "enhanced" | "full">("enhanced");
   const [aiModeStorageReady, setAiModeStorageReady] = useState(false);
+  const improvementSaveBinding = JSON.stringify({
+    generationFingerprint,
+    currentFingerprint: data ? buildGenerationEvidenceFingerprint(data) : null,
+    improvementText,
+    beforePhotoName: beforePhoto?.name ?? null,
+    afterPhotoName: afterPhoto?.name ?? null,
+  });
+  improvementSaveBindingRef.current = improvementSaveBinding;
+  useEffect(() => {
+    improvementSaveRequestGateRef.current.abortCurrent();
+    setImprovementSaveState((current) => current === "saving" ? "idle" : current);
+  }, [improvementSaveBinding]);
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem("safeclaw.aiMode");
@@ -1117,6 +1154,10 @@ export function SafeGuardCommandCenter({
 
   useEffect(() => () => {
     inputHazardPhotoRequestGateRef.current.abortCurrent();
+    generationRequestBindingRef.current = null;
+    generationRequestGateRef.current.abortCurrent();
+    workpackRevalidationGateRef.current.abortCurrent();
+    improvementSaveRequestGateRef.current.abortCurrent();
     inputHazardPhotosRef.current.forEach((photo) => URL.revokeObjectURL(photo.url));
   }, []);
 
@@ -1159,8 +1200,10 @@ export function SafeGuardCommandCenter({
     change: WorkpackDeliverablesChange
   ) => {
     if (change.requiresRevalidation) {
+      improvementSaveRequestGateRef.current.abortCurrent();
       setRequiresRevalidation(true);
       setSavedWorkpackId(null);
+      setSavedWorkpackAuthority(null);
     }
     setData((current) => {
       if (!current) return current;
@@ -1183,20 +1226,22 @@ export function SafeGuardCommandCenter({
     }
   }
 
-  function applyServerConfirmedWorkpack(payload: AskResponse) {
+  function applyServerConfirmedWorkpack(payload: AskResponse, authority: PhaseAWorkpackAuthority) {
     const fingerprint = buildGenerationEvidenceFingerprint(payload);
-    const confirmation = payload.phaseAReview?.humanConfirmation;
+    const exactConfirmation = assessExactWorkpackConfirmation(payload.phaseAReview, authority.workpackId);
     persistCurrentWorkpack(payload, fingerprint);
     setGenerationFingerprint(fingerprint);
     setData(payload);
     setRequiresRevalidation(false);
-    setSavedWorkpackId(confirmation?.status === "confirmed" ? confirmation.workpackId : null);
+    setSavedWorkpackId(exactConfirmation.ok ? authority.workpackId : null);
+    setSavedWorkpackAuthority(exactConfirmation.ok ? authority : null);
     setMessage("서버 확인이 완료된 현재 작업팩과 생성 근거 봉인을 반영했습니다.");
   }
 
   function attachImprovementPhoto(kind: "before" | "after", fileList: FileList | null) {
     const file = fileList?.[0];
     if (!file) return;
+    improvementSaveRequestGateRef.current.abortCurrent();
     const url = URL.createObjectURL(file);
     const nextPhoto = { name: file.name, url, file };
     if (kind === "before") {
@@ -1353,26 +1398,73 @@ export function SafeGuardCommandCenter({
     });
   }
 
-  async function ensureSavedWorkpackId(): Promise<WorkpackSaveResult> {
-    if (savedWorkpackId) {
-      return { ok: true, configured: true, workpackId: savedWorkpackId, message: "이미 저장된 문서팩을 사용합니다." };
-    }
+  function canCommitImprovementRequest(request: BoundRequestHandle<string>): boolean {
+    return improvementSaveRequestGateRef.current.canCommit(
+      request,
+      improvementSaveBindingRef.current,
+    );
+  }
+
+  async function ensureSavedWorkpackId(
+    request: BoundRequestHandle<string>,
+  ): Promise<WorkpackSaveResult> {
     if (!data) {
       return { ok: false, configured: false, workpackId: null, message: "문서팩 생성 후 DB 개선사항 저장을 사용할 수 있습니다." };
+    }
+    const currentEvidence = data.generationEvidence;
+    const expectedGenerationSealAtCreate = currentEvidence
+      ? readPhaseAWorkpackGenerationSeal({
+          version: currentEvidence.version,
+          algorithm: currentEvidence.algorithm,
+          signature: currentEvidence.signature,
+          generatedAt: currentEvidence.snapshot.generatedAt,
+          responseContentDigest: currentEvidence.snapshot.responseContentDigest,
+        })
+      : null;
+    if (!expectedGenerationSealAtCreate) {
+      return { ok: false, configured: true, workpackId: null, message: "서버 생성 봉인이 없어 작업팩 저장을 차단했습니다." };
+    }
+    if (
+      savedWorkpackId
+      && savedWorkpackAuthority?.workpackId === savedWorkpackId
+      && phaseAWorkpackGenerationSealsEqual(
+        savedWorkpackAuthority.generationSeal,
+        expectedGenerationSealAtCreate,
+      )
+    ) {
+      return { ok: true, configured: true, workpackId: savedWorkpackId, message: "이미 저장된 문서팩을 사용합니다." };
+    }
+    if (data.phaseAReview?.humanConfirmation.status === "confirmed") {
+      return {
+        ok: false,
+        configured: true,
+        workpackId: null,
+        message: "확인 완료 작업팩은 정확한 서버 행 재검증 전에는 다시 저장할 수 없습니다.",
+      };
+    }
+    const accessToken = await readWorkspaceAccessToken();
+    if (!canCommitImprovementRequest(request)) {
+      return { ok: false, configured: true, workpackId: null, message: "저장 요청이 새 작업 상태로 대체되었습니다." };
+    }
+    if (!accessToken) {
+      return { ok: false, configured: true, workpackId: null, message: "관리자 로그인 후 서버 작업팩을 저장할 수 있습니다." };
     }
 
     const response = await fetch("/api/workpacks", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "authorization": `Bearer ${accessToken}`,
+        "content-type": "application/json",
+      },
       body: JSON.stringify({
         data,
-        question: data.question,
-        scenario: data.scenario,
-        deliverables: data.deliverables,
-        status: data.status
-      })
+      }),
+      signal: request.signal,
     });
     const parsed = (await response.json().catch((): unknown => ({}))) as unknown;
+    if (!canCommitImprovementRequest(request)) {
+      return { ok: false, configured: true, workpackId: null, message: "저장 요청이 새 작업 상태로 대체되었습니다." };
+    }
     if (!response.ok || typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
       return {
         ok: false,
@@ -1383,23 +1475,41 @@ export function SafeGuardCommandCenter({
     }
 
     const record = parsed as Record<string, unknown>;
-    const workpackId = typeof record.workpackId === "string" ? record.workpackId : null;
-    const ok = record.ok === true && Boolean(workpackId);
-    if (ok && workpackId) {
-      setSavedWorkpackId(workpackId);
+    const server = inspectServerVerifiedWorkpackMutationPayload(record);
+    const exactCreationSeal = server && phaseAWorkpackGenerationSealsEqual(
+      server.authority.idempotency.generationSealAtCreate,
+      expectedGenerationSealAtCreate,
+    );
+    if (!server || !exactCreationSeal) {
+      return {
+        ok: false,
+        configured: true,
+        workpackId: null,
+        message: "서버 작업팩의 ID, revision 또는 generation seal을 검증하지 못했습니다.",
+      };
+    }
+    const workpackId = server.id;
+    setSavedWorkpackId(workpackId);
+    setSavedWorkpackAuthority(server.authority);
+    const serverFingerprint = buildGenerationEvidenceFingerprint(server.workpack.data);
+    if (serverFingerprint !== buildGenerationEvidenceFingerprint(data)) {
+      persistCurrentWorkpack(server.workpack.data, serverFingerprint);
+      setData(server.workpack.data);
+      setGenerationFingerprint(serverFingerprint);
+      setRequiresRevalidation(false);
     }
     return {
-      ok,
+      ok: true,
       configured: typeof record.configured === "boolean" ? record.configured : undefined,
       workpackId,
-      message: readApiMessage(record, ok ? "문서팩을 저장했습니다." : "문서팩 저장에 실패했습니다.")
+      message: readApiMessage(record, "문서팩을 저장했습니다.")
     };
   }
 
   async function saveImprovementToApi(input: {
     workpackId: string;
     text: string;
-  }): Promise<ImprovementApiResult> {
+  }, signal: AbortSignal): Promise<ImprovementApiResult> {
     const form = new FormData();
     form.set("taskLabel", fieldBrief.workSummary);
     form.set("hazardLabel", data?.riskSummary.topRisk || "현장 개선사항");
@@ -1410,7 +1520,8 @@ export function SafeGuardCommandCenter({
 
     const response = await fetch(`/api/workpacks/${encodeURIComponent(input.workpackId)}/improvements`, {
       method: "POST",
-      body: form
+      body: form,
+      signal,
     });
     const parsed = (await response.json().catch((): unknown => ({}))) as unknown;
     if (!response.ok || typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
@@ -1455,6 +1566,7 @@ export function SafeGuardCommandCenter({
       setMessage("오늘 작업 개선사항을 입력하거나 Before/After 사진을 첨부해 주세요.");
       return;
     }
+    const request = improvementSaveRequestGateRef.current.begin(improvementSaveBindingRef.current);
     setImprovementSaveState("saving");
 
     let storageMode: OperationImprovement["storageMode"] = "local";
@@ -1480,12 +1592,23 @@ export function SafeGuardCommandCenter({
     let saveMessage = "로컬 후보로 보관했습니다.";
 
     try {
-      const workpackSave = await ensureSavedWorkpackId();
+      const workpackSave = await ensureSavedWorkpackId(request);
+      if (!canCommitImprovementRequest(request)) {
+        improvementSaveRequestGateRef.current.finish(request);
+        return;
+      }
       if (!workpackSave.ok || !workpackSave.workpackId) {
         saveMessage = workpackSave.message;
       } else {
         workpackId = workpackSave.workpackId;
-        const improvementSave = await saveImprovementToApi({ workpackId: workpackSave.workpackId, text });
+        const improvementSave = await saveImprovementToApi(
+          { workpackId: workpackSave.workpackId, text },
+          request.signal,
+        );
+        if (!canCommitImprovementRequest(request)) {
+          improvementSaveRequestGateRef.current.finish(request);
+          return;
+        }
         saveMessage = improvementSave.message;
         if (improvementSave.ok && improvementSave.improvementId) {
           storageMode = "db";
@@ -1512,8 +1635,16 @@ export function SafeGuardCommandCenter({
         }
       }
     } catch (error) {
+      if (!canCommitImprovementRequest(request) || isAbortError(error)) {
+        improvementSaveRequestGateRef.current.finish(request);
+        return;
+      }
       console.warn("safeclaw improvement API save failed", error);
       saveMessage = error instanceof Error ? error.message : "DB 저장 연결이 보류되어 로컬 후보로 보관합니다.";
+    }
+    if (!canCommitImprovementRequest(request)) {
+      improvementSaveRequestGateRef.current.finish(request);
+      return;
     }
 
     const associationCandidates = (data?.structured?.riskAssessmentRows || []).filter((row) => (
@@ -1574,13 +1705,19 @@ export function SafeGuardCommandCenter({
     setMessage(storageMode === "db"
       ? saveMessage
       : `오늘 작업 개선사항을 로컬 후보로 보관했습니다. ${saveMessage}`);
+    improvementSaveRequestGateRef.current.finish(request);
   }
 
-  async function fetchViaLegacyEndpoint(trimmed: string, harnessMemory: HarnessMemoryInput): Promise<AskResponse> {
+  async function fetchViaLegacyEndpoint(
+    trimmed: string,
+    harnessMemory: HarnessMemoryInput,
+    signal: AbortSignal
+  ): Promise<AskResponse> {
     const response = await fetch("/api/ask", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ question: trimmed, aiMode, harnessMemory })
+      body: JSON.stringify({ question: trimmed, aiMode, harnessMemory }),
+      signal
     });
     if (!response.ok) {
       throw new Error(`문서팩 생성 요청 실패: HTTP ${response.status}`);
@@ -1588,13 +1725,26 @@ export function SafeGuardCommandCenter({
     return (await response.json()) as AskResponse;
   }
 
-  function applyGeneratedPayload(payload: AskResponse) {
+  function canCommitGeneration(request: BoundRequestHandle<GenerationRequestBinding>): boolean {
+    const currentBinding = generationRequestBindingRef.current;
+    return currentBinding !== null
+      && generationRequestGateRef.current.canCommit(request, currentBinding);
+  }
+
+  function applyGeneratedPayload(
+    payload: AskResponse,
+    request: BoundRequestHandle<GenerationRequestBinding>
+  ) {
+    if (!canCommitGeneration(request)) return;
     const fingerprint = buildGenerationEvidenceFingerprint(payload);
     persistCurrentWorkpack(payload, fingerprint);
     setGenerationFingerprint(fingerprint);
     setData(payload);
     setRequiresRevalidation(false);
     setSavedWorkpackId(null);
+    setSavedWorkpackAuthority(null);
+    workpackRevalidationGateRef.current.abortCurrent();
+    improvementSaveRequestGateRef.current.abortCurrent();
     setImprovementSaveState("idle");
     setCheckedActions(payload.riskSummary.immediateActions.map(() => false));
     setState("ready");
@@ -1610,6 +1760,19 @@ export function SafeGuardCommandCenter({
       return;
     }
 
+    generationRequestEpochRef.current += 1;
+    const binding: GenerationRequestBinding = {
+      requestEpoch: generationRequestEpochRef.current,
+      question: trimmed,
+      aiMode
+    };
+    generationRequestBindingRef.current = binding;
+    const request = generationRequestGateRef.current.begin(binding);
+    workpackRevalidationGateRef.current.abortCurrent();
+    improvementSaveRequestGateRef.current.abortCurrent();
+    setSavedWorkpackId(null);
+    setSavedWorkpackAuthority(null);
+
     setState("generating");
     setDocumentSurfaceMode("review");
     setWorkspacePage(nextWorkspacePageAfterGenerate());
@@ -1621,23 +1784,28 @@ export function SafeGuardCommandCenter({
     // scope, so keep it on the plain /api/ask path — simpler, no console needed.
     if (aiMode === "template") {
       try {
-        const payload = await fetchViaLegacyEndpoint(trimmed, harnessMemory);
-        applyGeneratedPayload(payload);
+        const payload = await fetchViaLegacyEndpoint(trimmed, harnessMemory, request.signal);
+        applyGeneratedPayload(payload, request);
       } catch (error) {
+        if (!canCommitGeneration(request) || isAbortError(error)) return;
         console.error("workpack generation failed", error);
         setState("error");
         setWorkspacePage(nextWorkspacePageAfterGenerationError());
         setMessage("문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
+      } finally {
+        generationRequestGateRef.current.finish(request);
       }
       return;
     }
 
     try {
       const payload = (await fetchAskStream({ question: trimmed, aiMode, harnessMemory }, (event) => {
+        if (!canCommitGeneration(request)) return;
         setConsoleLines((current) => nextConsoleLines(current, event));
-      })) as AskResponse;
-      applyGeneratedPayload(payload);
+      }, request.signal)) as AskResponse;
+      applyGeneratedPayload(payload, request);
     } catch (streamError) {
+      if (!canCommitGeneration(request) || isAbortError(streamError)) return;
       // Stream fetch failed (non-200, network error, or ended without a final
       // event) — fall back to the existing non-streaming path. Existing
       // behavior/state contract must be preserved 100% on fallback.
@@ -1651,14 +1819,17 @@ export function SafeGuardCommandCenter({
         }
       ]);
       try {
-        const payload = await fetchViaLegacyEndpoint(trimmed, harnessMemory);
-        applyGeneratedPayload(payload);
+        const payload = await fetchViaLegacyEndpoint(trimmed, harnessMemory, request.signal);
+        applyGeneratedPayload(payload, request);
       } catch (error) {
+        if (!canCommitGeneration(request) || isAbortError(error)) return;
         console.error("workpack generation failed", error);
         setState("error");
         setWorkspacePage(nextWorkspacePageAfterGenerationError());
         setMessage("문서팩 생성 중 연결을 확인해야 합니다. 잠시 후 다시 시도해 주세요.");
       }
+    } finally {
+      generationRequestGateRef.current.finish(request);
     }
   }
 
@@ -1668,12 +1839,18 @@ export function SafeGuardCommandCenter({
   }
 
   function selectExample(example: FieldExample) {
+    if (state === "generating") return;
+    generationRequestBindingRef.current = null;
+    generationRequestGateRef.current.abortCurrent();
     setSelectedExampleId(example.id);
     setQuestion(example.question);
     setData(null);
     setGenerationFingerprint(null);
     setRequiresRevalidation(false);
     setSavedWorkpackId(null);
+    setSavedWorkpackAuthority(null);
+    workpackRevalidationGateRef.current.abortCurrent();
+    improvementSaveRequestGateRef.current.abortCurrent();
     setImprovementSaveState("idle");
     setLiveWeather(null);
     setState("idle");
@@ -1691,17 +1868,67 @@ export function SafeGuardCommandCenter({
     setQuestion(stored.data.question);
     setData(stored.data);
     setGenerationFingerprint(stored.generationFingerprint);
+    setSavedWorkpackId(null);
+    setSavedWorkpackAuthority(null);
+    setRequiresRevalidation(true);
     const restoredConfirmation = stored.data.phaseAReview?.humanConfirmation;
-    const restoredWorkpackId = restoredConfirmation?.status === "confirmed"
+    const candidateWorkpackId = restoredConfirmation?.status === "confirmed"
       && assessExactWorkpackConfirmation(stored.data.phaseAReview, restoredConfirmation.workpackId).ok
       ? restoredConfirmation.workpackId
       : null;
-    setSavedWorkpackId(restoredWorkpackId);
-    setRequiresRevalidation(false);
     setState("ready");
     setDocumentSurfaceMode("review");
     setWorkspacePage("document");
-    setMessage("브라우저에 저장된 최근 작업팩을 이어서 열었습니다. 새 작업은 입력 메뉴에서 시작하세요.");
+    setMessage(candidateWorkpackId
+      ? "브라우저 로컬 작업팩을 미검증 상태로 열었습니다. 서버 행과 생성 봉인을 다시 확인하고 있습니다."
+      : "브라우저 로컬 작업팩을 미검증 상태로 열었습니다. 서버 권위 연결과 공유는 차단됩니다.");
+    if (!candidateWorkpackId) return;
+
+    const requestBinding = `${candidateWorkpackId}:${stored.generationFingerprint}`;
+    const request = workpackRevalidationGateRef.current.begin(requestBinding);
+    void (async () => {
+      try {
+        const accessToken = await readWorkspaceAccessToken();
+        if (!workpackRevalidationGateRef.current.canCommit(request, requestBinding)) return;
+        if (!accessToken) {
+          setMessage("브라우저 로컬 작업팩은 미검증 상태입니다. 관리자 로그인 후 서버 권위를 다시 확인할 수 있습니다.");
+          return;
+        }
+        const response = await fetch(`/api/workpacks/${encodeURIComponent(candidateWorkpackId)}`, {
+          headers: { authorization: `Bearer ${accessToken}` },
+          signal: request.signal,
+        });
+        const payload: unknown = await response.json().catch((): unknown => ({}));
+        if (!workpackRevalidationGateRef.current.canCommit(request, requestBinding)) return;
+        if (!response.ok) {
+          throw new Error(readApiMessage(payload, `서버 작업팩 재검증 실패: HTTP ${response.status}`));
+        }
+        const verified = inspectServerVerifiedWorkpackPayload(payload, candidateWorkpackId);
+        if (!verified || !assessExactWorkpackConfirmation(verified.workpack.data.phaseAReview, verified.id).ok) {
+          throw new Error("서버 행 ID, revision, 생성 봉인 또는 정확한 Phase A 확인이 일치하지 않습니다.");
+        }
+        if (!workpackRevalidationGateRef.current.canCommit(request, requestBinding)) return;
+        const serverFingerprint = buildGenerationEvidenceFingerprint(verified.workpack.data);
+        persistCurrentWorkpack(verified.workpack.data, serverFingerprint);
+        setQuestion(verified.workpack.data.question);
+        setData(verified.workpack.data);
+        setGenerationFingerprint(serverFingerprint);
+        setSavedWorkpackId(verified.id);
+        setSavedWorkpackAuthority(verified.authority);
+        setRequiresRevalidation(false);
+        setMessage("서버 행 ID, revision, 생성 봉인과 정확한 Phase A 확인을 재검증했습니다.");
+      } catch (error) {
+        if (!workpackRevalidationGateRef.current.canCommit(request, requestBinding) || isAbortError(error)) return;
+        console.warn("local workpack server revalidation failed", error);
+        setSavedWorkpackId(null);
+        setSavedWorkpackAuthority(null);
+        setRequiresRevalidation(true);
+        setMessage("브라우저 로컬 작업팩은 미검증 상태입니다. 서버 권위 연결과 공유·권위 내보내기는 차단됩니다.");
+      } finally {
+        workpackRevalidationGateRef.current.finish(request);
+      }
+    })();
+    return () => workpackRevalidationGateRef.current.abortCurrent();
   }, [autoGenerate]);
 
   useEffect(() => {
@@ -1790,7 +2017,10 @@ export function SafeGuardCommandCenter({
   const shareTargetSnapshotLabel = data
     ? `${fieldBrief.workerCount} 작업자 + 관리자`
     : "문서 생성 후 참여자 확인";
-  const shareStorageLabel = savedWorkpackId
+  const serverAuthorityConnected = Boolean(
+    savedWorkpackId && savedWorkpackAuthority?.workpackId === savedWorkpackId,
+  );
+  const shareStorageLabel = serverAuthorityConnected
     ? "DB 이력 연결"
     : data
       ? "로그인하면 안전하게 저장"
@@ -1919,15 +2149,25 @@ export function SafeGuardCommandCenter({
               className="textarea command-console-input"
               value={question}
               onChange={(event) => {
+                if (state === "generating") return;
                 const nextQuestion = event.target.value;
+                generationRequestBindingRef.current = null;
+                generationRequestGateRef.current.abortCurrent();
+                workpackRevalidationGateRef.current.abortCurrent();
+                improvementSaveRequestGateRef.current.abortCurrent();
                 setQuestion(nextQuestion);
                 if (!nextQuestion.trim()) {
                   setSelectedExampleId(null);
                 }
                 setData(null);
+                setGenerationFingerprint(null);
+                setSavedWorkpackId(null);
+                setSavedWorkpackAuthority(null);
+                setRequiresRevalidation(false);
                 setState("idle");
                 setWorkspacePage("input");
               }}
+              disabled={busy}
               maxLength={inputLimit}
               placeholder=""
               aria-describedby="field-command-tips"
@@ -2119,7 +2359,9 @@ export function SafeGuardCommandCenter({
                 <button
                   type="button"
                   className="button secondary"
+                  disabled={busy}
                   onClick={() => {
+                    if (state === "generating") return;
                     if (question !== selectedExample.question && !window.confirm("현재 입력한 내용을 예시 문장으로 되돌릴까요?")) {
                       return;
                     }
@@ -2143,6 +2385,7 @@ export function SafeGuardCommandCenter({
                   key={example.id}
                   type="button"
                   className={`quick-chip ${example.id === selectedExampleId ? "active" : ""}`}
+                  disabled={busy}
                   onClick={() => selectExample(example)}
                   aria-pressed={example.id === selectedExampleId}
                 >
@@ -2384,6 +2627,7 @@ export function SafeGuardCommandCenter({
                 requestedDocumentKey={requestedDocumentKey}
                 readiness={workpackReadiness || undefined}
                 initialWorkpackId={savedWorkpackId}
+                initialWorkpackAuthority={savedWorkpackAuthority}
                 onDeliverablesChange={handleWorkpackDeliverablesChange}
                 onWorkpackStateChange={applyServerConfirmedWorkpack}
                 surface="editor"
@@ -2416,6 +2660,7 @@ export function SafeGuardCommandCenter({
                   generationFingerprint={generationFingerprint || undefined}
                   readiness={workpackReadiness || undefined}
                   initialWorkpackId={savedWorkpackId}
+                  initialWorkpackAuthority={savedWorkpackAuthority}
                   onDeliverablesChange={handleWorkpackDeliverablesChange}
                   onWorkpackStateChange={applyServerConfirmedWorkpack}
                   surface="share"
@@ -2478,13 +2723,13 @@ export function SafeGuardCommandCenter({
                   <strong>
                     {improvementSaveState === "saving"
                       ? "저장 중"
-                      : savedWorkpackId
+                      : serverAuthorityConnected
                         ? "서버에 저장됨"
                         : data
                           ? "로그인하면 안전하게 저장"
                           : "기기에 임시 저장"}
                   </strong>
-                  <small>{savedWorkpackId ? "사진과 분석 결과를 함께 보관" : "로그인하면 서버에 안전하게 저장"}</small>
+                  <small>{serverAuthorityConnected ? "사진과 분석 결과를 함께 보관" : "로그인하면 서버에 안전하게 저장"}</small>
                 </aside>
               </div>
               <div className="operation-capture-layout">
@@ -2516,7 +2761,10 @@ export function SafeGuardCommandCenter({
                   <textarea
                     id="operation-improvement-input"
                     value={improvementText}
-                    onChange={(event) => setImprovementText(event.target.value)}
+                    onChange={(event) => {
+                      improvementSaveRequestGateRef.current.abortCurrent();
+                      setImprovementText(event.target.value);
+                    }}
                     placeholder="예: 강풍 예보 시 이동식 비계 상부 작업 전 난간·아웃트리거 재점검을 TBM 질문에 추가"
                   />
                   {photoAnalysisCandidate ? (

@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
-import { buildReopenData } from "@/lib/workpack-store";
+import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
+import { isRecord } from "@/lib/workspace-api";
+import { parsePhaseAWorkpackIdempotencyBinding } from "@/lib/workpack-authority";
+import {
+  buildPhaseAWorkpackAuthority,
+  buildPhaseAWorkpackIdempotencyBindingFromSeal,
+  buildReopenData,
+  phaseAWorkpackIdempotencyBindingsEqual,
+} from "@/lib/workpack-store";
 
 export const dynamic = "force-dynamic";
 
@@ -76,7 +84,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
   const { data: workpack, error: workpackError } = await client
     .from("workpacks")
-    .select("id,organization_id,site_id,question,scenario,deliverables,evidence_summary,worker_summary,status,created_at,updated_at")
+    .select("id,organization_id,site_id,created_by,question,scenario,deliverables,evidence_summary,worker_summary,status,created_at,updated_at")
     .eq("id", id)
     .in("organization_id", organizationIds)
     .maybeSingle();
@@ -111,11 +119,60 @@ export async function GET(request: NextRequest, context: RouteContext) {
     evidenceSummary: workpack.evidence_summary,
     status: workpack.status
   });
+  const storedEvidenceSummary = isRecord(workpack.evidence_summary)
+    ? workpack.evidence_summary
+    : null;
+  const storedIdempotency = parsePhaseAWorkpackIdempotencyBinding(
+    storedEvidenceSummary?.workpackAuthorityBinding,
+  );
+  const verification = reopen.data
+    ? verifyAskResponseGenerationEvidence(
+        reopen.data,
+        process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+      )
+    : null;
+  const expectedIdempotency = storedIdempotency && workpack.created_by === user.id
+    ? buildPhaseAWorkpackIdempotencyBindingFromSeal({
+        organizationId: workpack.organization_id,
+        siteId: workpack.site_id,
+        userId: user.id,
+        generationSealAtCreate: storedIdempotency.generationSealAtCreate,
+      })
+    : null;
+  const exactServerAuthority = Boolean(
+    reopen.data
+    && verification?.ok
+    && storedIdempotency
+    && expectedIdempotency
+    && workpack.id === storedIdempotency.deterministicId
+    && phaseAWorkpackIdempotencyBindingsEqual(storedIdempotency, expectedIdempotency)
+  );
+  const authority = exactServerAuthority && reopen.data && storedIdempotency
+    ? buildPhaseAWorkpackAuthority({
+        workpackId: workpack.id,
+        revision: workpack.updated_at,
+        response: reopen.data,
+        idempotency: storedIdempotency,
+      })
+    : null;
+  const blockers = [...reopen.blockers];
+  if (!storedIdempotency) {
+    blockers.push("서버 workpack 행에 결정적 생성 바인딩이 없어 권위 연결을 확인할 수 없습니다.");
+  } else if (!expectedIdempotency || !phaseAWorkpackIdempotencyBindingsEqual(storedIdempotency, expectedIdempotency)) {
+    blockers.push("서버 workpack 행의 사용자·조직·현장 생성 바인딩이 현재 권한 범위와 일치하지 않습니다.");
+  }
+  if (verification?.ok === false) {
+    blockers.push(`서버 generation seal 재검증 실패: ${verification.message}`);
+  }
+  if (reopen.data && verification?.ok && storedIdempotency && workpack.id !== storedIdempotency.deterministicId) {
+    blockers.push("서버 workpack ID가 저장된 결정적 생성 바인딩과 일치하지 않습니다.");
+  }
 
   return NextResponse.json({
-    ok: true,
+    ok: exactServerAuthority,
     configured: true,
-    canReopen: Boolean(reopen.data),
+    canReopen: exactServerAuthority,
+    authority,
     workpack: {
       id: workpack.id,
       question: workpack.question,
@@ -126,11 +183,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
       status: workpack.status,
       createdAt: workpack.created_at,
       updatedAt: workpack.updated_at,
-      reopenData: reopen.data
+      reopenData: exactServerAuthority ? reopen.data : null
     },
-    blockers: reopen.blockers,
-    message: reopen.data
-      ? "저장된 문서팩 상세를 불러왔습니다."
-      : "저장된 문서팩은 조회됐지만 현재 저장 형식만으로는 문서팩 화면을 완전히 복원할 수 없습니다."
+    blockers,
+    message: exactServerAuthority
+      ? "서버 행 ID, revision, 생성 봉인을 재검증해 저장된 문서팩을 불러왔습니다."
+      : "저장된 문서팩은 조회됐지만 서버 권위 바인딩을 재검증하지 못해 연결과 내보내기를 차단했습니다."
+  }, {
+    status: verification?.ok === false && verification.code === "secret_unconfigured" ? 503 : 200,
+    headers: { "cache-control": "no-store" },
   });
 }

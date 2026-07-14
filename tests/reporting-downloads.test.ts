@@ -23,6 +23,14 @@ import type { OperationImprovement } from "@/lib/operation-improvement-history";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import { attachQualityContract } from "@/lib/quality-contract";
+import { buildDbHarnessPacket } from "@/lib/db-harness";
+import { attachGenerationEvidence } from "@/lib/generation-evidence";
+import {
+  buildPhaseAWorkpackAuthority,
+  buildPhaseAWorkpackIdempotencyBinding,
+} from "@/lib/workpack-store";
+
+const REPORT_SECRET = "report-server-authority-secret";
 
 const riskRow: RiskAssessmentRow = {
   location: "서울 성수동",
@@ -92,6 +100,55 @@ function makeWorkpack(riskRows: RiskAssessmentRow[] = [riskRow]) {
   return {
     ...workpack,
     savedAt: "2026-07-08T08:00:00.000Z"
+  };
+}
+
+function makeServerFixture(generatedAt = "2026-07-08T07:45:00.000Z") {
+  const workpack = makeWorkpack();
+  const packet = buildDbHarnessPacket({ question: workpack.data.question, references: [] });
+  const sealed = attachGenerationEvidence({
+    ...attachQualityContract(workpack.data, generatedAt),
+    dbHarness: {
+      packet,
+      promptContext: "report server authority fixture",
+      summary: {
+        mode: packet.mode,
+        llmRole: packet.generationContract.llmRole,
+        llmOutputScope: packet.generationContract.llmOutputScope,
+        evidenceAuthority: packet.generationContract.evidenceAuthority,
+        providerRetryScope: packet.generationContract.providerRetryScope,
+        fallbackChainAllowed: packet.generationContract.fallbackChainAllowed,
+        genericProseSubstitutionAllowed: packet.generationContract.genericProseSubstitutionAllowed,
+        missingEvidencePolicy: packet.generationContract.missingEvidencePolicy,
+        directEvidence: packet.directEvidence.length,
+        sifCases: packet.sifCases.length,
+        supportingEvidence: packet.supportingEvidence.length,
+        improvementMemory: packet.improvementMemory.length,
+        workpackMemory: packet.workpackMemory.length,
+        missingEvidence: packet.generationContract.missingEvidence,
+        documentCoverage: packet.generationContract.documentCoverage,
+        retrievalContract: packet.retrievalContract,
+        ontologyStatus: packet.ontologyChecklist.status,
+      },
+    },
+  }, { secret: REPORT_SECRET, generatedAt });
+  const idempotency = buildPhaseAWorkpackIdempotencyBinding({
+    organizationId: "22222222-2222-4222-8222-222222222222",
+    siteId: "33333333-3333-4333-8333-333333333333",
+    userId: "11111111-1111-4111-8111-111111111111",
+    response: sealed,
+  });
+  const revision = "2026-07-08T08:00:00.000Z";
+  const authority = buildPhaseAWorkpackAuthority({
+    workpackId: idempotency.deterministicId,
+    revision,
+    response: sealed,
+    idempotency,
+  });
+  return {
+    id: authority.workpackId,
+    authority,
+    workpack: { ...workpack, data: sealed, savedAt: revision },
   };
 }
 
@@ -736,12 +793,14 @@ describe("reporting downloads", () => {
       sourceMode: "browser_local",
       now: new Date("2026-07-08T12:00:00.000Z")
     });
+    const serverFixture = makeServerFixture(generatedAt);
     const serverSnapshot = buildReportSnapshot({
-      workpack: generatedWorkpack,
+      workpack: serverFixture.workpack,
       improvements: [],
       period: "weekly",
       sourceMode: "server_saved",
-      sourceWorkpackId: "server-workpack-1",
+      sourceWorkpackId: serverFixture.id,
+      sourceAuthority: serverFixture.authority,
       now: new Date("2026-07-08T12:00:00.000Z")
     });
     const sampleSnapshot = buildReportSnapshot({
@@ -754,13 +813,16 @@ describe("reporting downloads", () => {
 
     expect(localSnapshot.source).toMatchObject({
       mode: "browser_local",
-      scope: "current_browser",
+      scope: "current_browser_unverified",
+      authorityStatus: "local_only_unverified",
       workpackGeneratedAt: generatedAt
     });
     expect(serverSnapshot.source).toMatchObject({
       mode: "server_saved",
       scope: "server_workpack",
-      workpackId: "server-workpack-1",
+      authorityStatus: "server_verified",
+      workpackId: serverFixture.id,
+      workpackRevision: serverFixture.authority.revision,
       workpackGeneratedAt: generatedAt
     });
     expect(sampleSnapshot.source).toMatchObject({
@@ -770,7 +832,7 @@ describe("reporting downloads", () => {
     });
     expect(sampleSnapshot.source.riskRowTimeBasis).toBe("workpack_saved_at");
     for (const [snapshot, scope, limitation] of [
-      [localSnapshot, "current_browser", "current_browser_only"],
+      [localSnapshot, "current_browser_unverified", "local_only_unverified"],
       [serverSnapshot, "server_workpack", "server_saved_workpack_only"],
       [sampleSnapshot, "sample_preview", "sample_data_only"]
     ] as const) {
@@ -791,38 +853,40 @@ describe("reporting downloads", () => {
   });
 
   it("validates a server reopen payload before fingerprinting it", () => {
-    const workpack = makeWorkpack();
+    const fixture = makeServerFixture();
     const validPayload = {
+      ok: true,
       canReopen: true,
+      authority: fixture.authority,
       workpack: {
-        id: "server-workpack-validated",
+        id: fixture.id,
         createdAt: "2026-07-08T07:55:00.000Z",
         updatedAt: "2026-07-08T08:00:00.000Z",
-        reopenData: workpack.data
+        reopenData: fixture.workpack.data
       }
     };
 
-    const parsed = inspectServerReportWorkpackPayload(validPayload, "server-workpack-validated");
+    const parsed = inspectServerReportWorkpackPayload(validPayload, fixture.id);
     expect(parsed).toMatchObject({
-      id: "server-workpack-validated",
+      id: fixture.id,
       workpack: {
         savedAt: "2026-07-08T08:00:00.000Z",
-        data: { question: workpack.data.question }
+        data: { question: fixture.workpack.data.question }
       }
     });
 
     const malformedCandidates: unknown[] = [
-      { ...workpack.data, citations: [null] },
-      { ...workpack.data, practicalPoints: ["valid", null] },
-      { ...workpack.data, scenario: { ...workpack.data.scenario, workSummary: 42 } },
-      { ...workpack.data, deliverables: { ...workpack.data.deliverables, riskAssessmentDraft: null } },
-      { ...workpack.data, externalData: [] },
-      { ...workpack.data, riskSummary: { ...workpack.data.riskSummary, immediateActions: "legacy" } },
-      { ...workpack.data, status: { ...workpack.data.status, summary: 42 } },
+      { ...fixture.workpack.data, citations: [null] },
+      { ...fixture.workpack.data, practicalPoints: ["valid", null] },
+      { ...fixture.workpack.data, scenario: { ...fixture.workpack.data.scenario, workSummary: 42 } },
+      { ...fixture.workpack.data, deliverables: { ...fixture.workpack.data.deliverables, riskAssessmentDraft: null } },
+      { ...fixture.workpack.data, externalData: [] },
+      { ...fixture.workpack.data, riskSummary: { ...fixture.workpack.data.riskSummary, immediateActions: "legacy" } },
+      { ...fixture.workpack.data, status: { ...fixture.workpack.data.status, summary: 42 } },
       {
-        ...workpack.data,
+        ...fixture.workpack.data,
         structured: {
-          ...workpack.data.structured,
+          ...fixture.workpack.data.structured,
           riskAssessmentRows: [{ ...riskRow, evidenceRefs: ["valid", null] }]
         }
       }
@@ -834,13 +898,34 @@ describe("reporting downloads", () => {
       };
       expect(() => inspectServerReportWorkpackPayload(
         malformedPayload,
-        "server-workpack-validated"
+        fixture.id
       )).not.toThrow();
       expect(inspectServerReportWorkpackPayload(
         malformedPayload,
-        "server-workpack-validated"
+        fixture.id
       )).toBeNull();
     }
+  });
+
+  it("blocks a forged server authority object whose generation seal is not the workpack seal", () => {
+    const fixture = makeServerFixture();
+    const forgedAuthority = {
+      ...fixture.authority,
+      generationSeal: {
+        ...fixture.authority.generationSeal,
+        signature: "Z".repeat(43),
+      },
+    };
+
+    expect(() => buildReportSnapshot({
+      workpack: fixture.workpack,
+      improvements: [],
+      period: "weekly",
+      sourceMode: "server_saved",
+      sourceWorkpackId: fixture.id,
+      sourceAuthority: forgedAuthority,
+      now: new Date("2026-07-08T12:00:00.000Z"),
+    })).toThrow(/generation seal 권위/);
   });
 
   it("strips caller-provided authoritative improvements from every sample export", () => {
@@ -900,7 +985,8 @@ describe("reporting downloads", () => {
     expect(snapshot.riskRows).toEqual([]);
     expect(snapshot.improvements).toEqual([]);
     expect(csv).toContain("current_browser");
-    expect(csv).toContain("current_browser_only");
+    expect(csv).toContain("local_only_unverified");
+    expect(csv).toContain("authority_claims_blocked");
     expect(csv).toContain("workpack_saved_at");
     expect(csv).toContain(snapshot.source.workpackSavedAt);
   });
@@ -986,7 +1072,7 @@ describe("reporting downloads", () => {
       sourceLabel: "Before/After 사진"
     });
     expect(events.find((event) => event.eventType === "governance")?.payload).toMatchObject({
-      authority: "operator_review_corpus",
+      authority: "unverified_local_candidate",
       runtimeAuthority: false,
       modelFineTuning: false
     });
@@ -1004,7 +1090,7 @@ describe("reporting downloads", () => {
 
     expect(markdown).toContain("운영 코퍼스");
     expect(markdown).toContain("## 운영 메모리 계약");
-    expect(markdown).toContain("authority: operator_review_corpus");
+    expect(markdown).toContain("authority: unverified_local_candidate");
     expect(markdown).toContain("재생성 가능한 코퍼스");
     expect(markdown).toContain("## 개선 이벤트");
     expect(markdown).toContain("Before/After 사진");

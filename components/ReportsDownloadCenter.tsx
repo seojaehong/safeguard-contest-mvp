@@ -2,7 +2,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   buildStoredCurrentWorkpack,
@@ -37,6 +37,8 @@ import {
   type ReportViewState
 } from "@/lib/reporting-downloads";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import type { PhaseAWorkpackAuthority } from "@/lib/workpack-authority";
+import { createBoundRequestGate, type BoundRequestHandle } from "@/lib/request-version-guard";
 
 const periodOptions: Array<{ value: ReportPeriod; label: string; detail: string }> = [
   { value: "daily", label: "오늘", detail: "당일" },
@@ -294,6 +296,10 @@ function ReportProvenanceFacts({
       {snapshot.source.workpackId ? (
         <p><strong>서버 문서팩</strong><span>{snapshot.source.workpackId}</span></p>
       ) : null}
+      <p><strong>권위 상태</strong><span>{snapshot.source.authorityStatus}</span></p>
+      {snapshot.source.workpackRevision ? (
+        <p><strong>서버 revision</strong><span>{snapshot.source.workpackRevision}</span></p>
+      ) : null}
     </div>
   );
 }
@@ -305,7 +311,7 @@ function RequestedServerProvenance({ workpackId }: { workpackId: string }) {
       aria-label="요청한 서버 작업팩 출처"
       data-report-source-mode="server_saved"
     >
-      <p><strong>데이터 출처</strong><span>서버 저장 작업팩</span></p>
+      <p><strong>데이터 출처</strong><span>요청한 서버 작업팩(검증 전)</span></p>
       <p><strong>서버 문서팩</strong><span>{workpackId}</span></p>
     </div>
   );
@@ -625,12 +631,26 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
   const [improvements, setImprovements] = useState<OperationImprovement[]>([]);
   const [sourceMode, setSourceMode] = useState<ReportSourceMode>("browser_local");
   const [sourceWorkpackId, setSourceWorkpackId] = useState<string | undefined>();
+  const [sourceAuthority, setSourceAuthority] = useState<PhaseAWorkpackAuthority | undefined>();
   const [loadError, setLoadError] = useState<string | null>(null);
   const [missingCurrent, setMissingCurrent] = useState(false);
   const [loading, setLoading] = useState(true);
   const [localSwitchCandidate, setLocalSwitchCandidate] = useState<LocalWorkpackCandidate | null>(null);
   const [downloadState, setDownloadState] = useState<DownloadState>(INITIAL_DOWNLOAD_STATE);
+  const loadRequestGateRef = useRef(createBoundRequestGate<string>());
+  const loadRequestBindingRef = useRef("");
+  const loadRequestEpochRef = useRef(0);
   const usingSample = sourceMode === "sample";
+
+  function canCommitLoadRequest(request: BoundRequestHandle<string>): boolean {
+    return loadRequestGateRef.current.canCommit(request, loadRequestBindingRef.current);
+  }
+
+  function invalidateLoadRequest(selection: string) {
+    loadRequestEpochRef.current += 1;
+    loadRequestBindingRef.current = `${selection}:${loadRequestEpochRef.current}`;
+    loadRequestGateRef.current.abortCurrent();
+  }
 
   function loadLocalState() {
     setPhotoApprovals([]);
@@ -642,6 +662,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
       setImprovements(localImprovements);
       setSourceMode("browser_local");
       setSourceWorkpackId(undefined);
+      setSourceAuthority(undefined);
       setLocalSwitchCandidate(null);
       if (current.status === "ready") {
         setWorkpack(current.workpack);
@@ -668,9 +689,14 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
     }
   }
 
-  async function loadRequestedState(signal?: AbortSignal) {
+  async function loadRequestedState() {
+    loadRequestEpochRef.current += 1;
+    const requestBinding = `${serverWorkpackId ?? "browser_local"}:${loadRequestEpochRef.current}`;
+    loadRequestBindingRef.current = requestBinding;
+    const request = loadRequestGateRef.current.begin(requestBinding);
     if (!serverWorkpackId) {
-      loadLocalState();
+      if (canCommitLoadRequest(request)) loadLocalState();
+      loadRequestGateRef.current.finish(request);
       return;
     }
 
@@ -678,6 +704,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
     setWorkpack(null);
     setSourceMode("server_saved");
     setSourceWorkpackId(serverWorkpackId);
+    setSourceAuthority(undefined);
     setLoadError(null);
     setMissingCurrent(false);
     setPhotoApprovals([]);
@@ -698,35 +725,41 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
     setLocalSwitchCandidate(candidate);
 
     try {
-      const server = await fetchServerReportWorkpack(serverWorkpackId, signal);
-      if (signal?.aborted) return;
+      const server = await fetchServerReportWorkpack(serverWorkpackId, request.signal);
+      if (!canCommitLoadRequest(request)) return;
       setWorkpack(server.workpack);
       setImprovements(localImprovements);
       setSourceMode("server_saved");
       setSourceWorkpackId(server.id);
+      setSourceAuthority(server.authority);
       setLocalSwitchCandidate(null);
       setLoading(false);
     } catch (error) {
-      if (signal?.aborted) return;
+      if (!canCommitLoadRequest(request)) return;
       console.error("server report workpack load failed", error);
       setWorkpack(null);
       setImprovements(localImprovements);
       setSourceMode("server_saved");
       setSourceWorkpackId(serverWorkpackId);
+      setSourceAuthority(undefined);
       setLoadError(errorMessage(error));
       setMissingCurrent(false);
       setLocalSwitchCandidate(candidate);
       setLoading(false);
+    } finally {
+      loadRequestGateRef.current.finish(request);
     }
   }
 
   function switchToLocalWorkpack() {
     if (!localSwitchCandidate) return;
+    invalidateLoadRequest("browser_local");
     setPhotoApprovals([]);
     setWorkpack(localSwitchCandidate.workpack);
     setImprovements(localSwitchCandidate.improvements);
     setSourceMode("browser_local");
     setSourceWorkpackId(undefined);
+    setSourceAuthority(undefined);
     setLoadError(null);
     setMissingCurrent(false);
     setLocalSwitchCandidate(null);
@@ -735,10 +768,12 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
   }
 
   function loadSamplePreview() {
+    invalidateLoadRequest("sample");
     setPhotoApprovals([]);
     setWorkpack(buildStoredCurrentWorkpack(buildSampleWorkpack()));
     setSourceMode("sample");
     setSourceWorkpackId(undefined);
+    setSourceAuthority(undefined);
     setMissingCurrent(false);
     setLoadError(null);
     setLocalSwitchCandidate(null);
@@ -747,9 +782,8 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
   }
 
   useEffect(() => {
-    const controller = new AbortController();
-    void loadRequestedState(controller.signal);
-    return () => controller.abort();
+    void loadRequestedState();
+    return () => invalidateLoadRequest("unmounted");
   }, [serverWorkpackId]);
 
   const preservedHistory = useMemo(
@@ -770,14 +804,15 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
           filters,
           photoApprovals,
           sourceMode,
-          sourceWorkpackId
+          sourceWorkpackId,
+          sourceAuthority,
         }),
         error: null
       };
     } catch (error) {
       return { snapshot: null, error: errorMessage(error) };
     }
-  }, [dateRange, filters, period, photoApprovals, preservedHistory, sourceMode, sourceWorkpackId, workpack]);
+  }, [dateRange, filters, period, photoApprovals, preservedHistory, sourceAuthority, sourceMode, sourceWorkpackId, workpack]);
   const snapshot = reportResult.snapshot;
   const viewState = resolveReportViewState(snapshot, reportResult.error || loadError);
   const facets = snapshot?.facets || EMPTY_REPORT_FACETS;
@@ -833,7 +868,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
             </button>
             {localSwitchCandidate ? (
               <button type="button" className="button secondary" onClick={switchToLocalWorkpack}>
-                브라우저 최근 작업팩으로 전환
+                브라우저 로컬 작업팩(미검증)으로 전환
               </button>
             ) : null}
           </div>

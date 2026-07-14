@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { Browser, Page } from "playwright";
+import type { Browser, Locator, Page } from "playwright";
 
 import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
@@ -11,6 +11,12 @@ import { buildSampleWorkpack } from "@/lib/sample-workpack";
 import { buildCanonicalPhaseAPlanBinding } from "@/lib/ontology/evidence-chain";
 import { applyPhaseADocumentAuthorityMarker } from "@/lib/phase-a-review";
 import type { AskResponse, PhaseAReview } from "@/lib/types";
+import {
+  PHASE_A_WORKPACK_AUTHORITY_VERSION,
+  PHASE_A_WORKPACK_IDEMPOTENCY_VERSION,
+  type PhaseAWorkpackAuthority,
+  type PhaseAWorkpackGenerationSeal,
+} from "@/lib/workpack-authority";
 import {
   startIsolatedNextBrowserHarness,
   type IsolatedNextBrowserHarness,
@@ -21,6 +27,9 @@ const CONFIRMATION_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const AUTH_TOKEN = "phase-a-product-reviewer-session";
 const SUPABASE_URL = "https://phase-a-product-fixture.supabase.co";
 const AUTH_STORAGE_KEY = "sb-phase-a-product-fixture-auth-token";
+const SAVED_REVISION = "2026-07-14T00:01:00.000Z";
+const CONFIRMED_REVISION = "2026-07-14T00:02:00.000Z";
+const WORKPACK_SCOPE_DIGEST = `sha256:${"c".repeat(64)}`;
 const EVIDENCE_DIRECTORY = process.env.PHASE_A_BROWSER_EVIDENCE_DIR?.trim()
   ? path.resolve(process.env.PHASE_A_BROWSER_EVIDENCE_DIR)
   : null;
@@ -97,12 +106,44 @@ function withGenerationEvidence(response: AskResponse, signatureCharacter: "a" |
         scenario: response.scenario,
         dbHarnessPacket,
         generationTrace: response.generationTrace,
-        responseContentDigest: `sha256:${signatureCharacter.repeat(64)}`,
+        responseContentDigest: `sha256:${signatureCharacter.repeat(43)}`,
         generatedAt: "2026-07-14T00:00:00.000Z",
       },
-      signature: signatureCharacter.repeat(64),
+      signature: signatureCharacter.repeat(43),
     },
     generationEvidenceError: undefined,
+  };
+}
+
+function readFixtureGenerationSeal(response: AskResponse): PhaseAWorkpackGenerationSeal {
+  const evidence = response.generationEvidence;
+  if (!evidence) throw new Error("expected fixture generation evidence");
+  return {
+    version: evidence.version,
+    algorithm: evidence.algorithm,
+    signature: evidence.signature,
+    generatedAt: evidence.snapshot.generatedAt,
+    responseContentDigest: evidence.snapshot.responseContentDigest,
+  };
+}
+
+function buildFixtureAuthority(
+  response: AskResponse,
+  revision: string,
+  generationAtCreate: AskResponse = response,
+): PhaseAWorkpackAuthority {
+  return {
+    version: PHASE_A_WORKPACK_AUTHORITY_VERSION,
+    workpackId: WORKPACK_ID,
+    revision,
+    updatedAt: revision,
+    generationSeal: readFixtureGenerationSeal(response),
+    idempotency: {
+      version: PHASE_A_WORKPACK_IDEMPOTENCY_VERSION,
+      deterministicId: WORKPACK_ID,
+      scopeDigest: WORKPACK_SCOPE_DIGEST,
+      generationSealAtCreate: readFixtureGenerationSeal(generationAtCreate),
+    },
   };
 }
 
@@ -349,8 +390,18 @@ async function prepareWorkspace(
   }
 }
 
+async function clickRemountingButton(locator: Locator): Promise<void> {
+  await locator.waitFor({ state: "visible" });
+  await locator.evaluate((element) => {
+    if (!(element instanceof HTMLButtonElement)) throw new Error("expected button control");
+    window.setTimeout(() => (element as HTMLButtonElement).click(), 0);
+  });
+}
+
 async function openEditor(page: Page): Promise<void> {
-  await page.locator(".doc-card-actions button", { hasText: "편집" }).first().click();
+  await clickRemountingButton(
+    page.locator(".doc-card-actions button", { hasText: "편집" }).first(),
+  );
   await page.locator(".document-textarea").waitFor({ state: "visible" });
 }
 
@@ -363,7 +414,7 @@ async function downloadText(page: Page, buttonName: string): Promise<string> {
   return fs.readFileSync(downloadPath, "utf8");
 }
 
-async function installSaveRoutes(page: Page): Promise<{
+async function installSaveRoutes(page: Page, workpack = buildPendingFixture()): Promise<{
   workerPostCount: () => number;
   workpackPostCount: () => number;
   educationPostCount: () => number;
@@ -371,6 +422,7 @@ async function installSaveRoutes(page: Page): Promise<{
   let workerPostCount = 0;
   let workpackPostCount = 0;
   let educationPostCount = 0;
+  const authority = buildFixtureAuthority(workpack, SAVED_REVISION);
   await page.route("**/api/workers", async (route) => {
     workerPostCount += 1;
     const requestBody = route.request().postDataJSON() as unknown;
@@ -397,7 +449,16 @@ async function installSaveRoutes(page: Page): Promise<{
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({ ok: true, message: "문서팩 저장 완료", workpackId: WORKPACK_ID }),
+      body: JSON.stringify({
+        ok: true,
+        configured: true,
+        message: "문서팩 저장 완료",
+        workpackId: WORKPACK_ID,
+        created: true,
+        reopened: false,
+        authority,
+        workpack,
+      }),
     });
   });
   await page.route("**/api/education-records", async (route) => {
@@ -547,8 +608,14 @@ describe("Phase A product remediation browser contract", () => {
     if (!browser) throw new Error("Browser was not started");
     const pending = buildPendingFixture();
     const serverConfirmed = buildServerConfirmedWorkpack(pending);
+    const savedAuthority = buildFixtureAuthority(pending, SAVED_REVISION);
+    const confirmedAuthority = buildFixtureAuthority(
+      serverConfirmed,
+      CONFIRMED_REVISION,
+      pending,
+    );
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    const saveRouteCounts = await installSaveRoutes(page);
+    const saveRouteCounts = await installSaveRoutes(page, pending);
     const confirmationBodies: Array<Record<string, unknown>> = [];
     const authorizationHeaders: string[] = [];
     const shareSessionBodies: Array<Record<string, unknown>> = [];
@@ -627,7 +694,30 @@ describe("Phase A product remediation browser contract", () => {
           confirmationId: CONFIRMATION_ID,
           phaseAReview: serverConfirmed.phaseAReview,
           workpack: serverConfirmed,
+          authority: confirmedAuthority,
           message: "Phase A 근거와 문서 반영 실적 확인을 저장했습니다.",
+        }),
+      });
+    });
+    await page.route(`**/api/workpacks/${WORKPACK_ID}`, async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.fallback();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          configured: true,
+          canReopen: true,
+          workpack: {
+            id: WORKPACK_ID,
+            updatedAt: CONFIRMED_REVISION,
+            reopenData: serverConfirmed,
+          },
+          authority: confirmedAuthority,
+          message: "서버 작업팩 재검증 완료",
         }),
       });
     });
@@ -642,22 +732,34 @@ describe("Phase A product remediation browser contract", () => {
     if (await saveButton.count() !== 1) {
       throw new Error(`phase a save action unavailable: ${await confirmation.innerText()}`);
     }
-    await saveButton.click();
-    await expect.poll(async () => await confirmButton.isEnabled()).toBe(true);
+    await clickRemountingButton(saveButton);
+    try {
+      await expect.poll(async () => await confirmButton.isEnabled()).toBe(true);
+    } catch (error) {
+      throw new Error(
+        `phase a save did not bind server authority\n${await confirmation.innerText()}\n`
+        + `workpacks=${saveRouteCounts.workpackPostCount()} workers=${saveRouteCounts.workerPostCount()} education=${saveRouteCounts.educationPostCount()}`,
+        { cause: error },
+      );
+    }
 
-    await confirmButton.click();
+    await clickRemountingButton(confirmButton);
     await expect.poll(async () => await confirmation.textContent()).toContain("다른 요청이 먼저 확인을 저장했습니다");
     const retryButton = confirmation.getByRole("button", { name: "서버 확인 다시 시도" });
-    await retryButton.click();
+    await clickRemountingButton(retryButton);
     await expect.poll(async () => await confirmation.textContent()).toContain("확인 완료");
 
     expect(confirmationBodies).toHaveLength(2);
     expect(confirmationBodies[0]).toMatchObject({
       chainId: pending.phaseAReview?.planBinding?.chainId,
       planDigest: pending.phaseAReview?.planBinding?.planDigest,
+      revision: savedAuthority.revision,
     });
     expect(confirmationBodies[0]).not.toHaveProperty("confirmationId");
-    expect(confirmationBodies[1]).toMatchObject({ confirmationId: CONFIRMATION_ID });
+    expect(confirmationBodies[1]).toMatchObject({
+      confirmationId: CONFIRMATION_ID,
+      revision: savedAuthority.revision,
+    });
     expect(authorizationHeaders).toEqual([`Bearer ${AUTH_TOKEN}`, `Bearer ${AUTH_TOKEN}`]);
     expect(await page.locator(".phase-a-authority-marker").first().textContent()).toContain("법령 근거: 연결됨");
     const currentWorkpack = await page.evaluate(() => window.localStorage.getItem("safeclaw.currentWorkpack.v1"));
@@ -678,7 +780,7 @@ describe("Phase A product remediation browser contract", () => {
 
     expect(saveRouteCounts.workpackPostCount()).toBe(1);
     expect(saveRouteCounts.workerPostCount()).toBe(2);
-    expect(saveRouteCounts.educationPostCount()).toBe(1);
+    expect(saveRouteCounts.educationPostCount()).toBe(2);
     expect(shareSessionBodies).toHaveLength(1);
     expect(shareSessionBodies[0]).toMatchObject({
       recipients: [
@@ -689,8 +791,10 @@ describe("Phase A product remediation browser contract", () => {
     await page.close();
   }, 120_000);
 
-  it("retries only W1 downstream storage after education fails", async () => {
+  it("reopens the same server W1 authority before retrying education storage", async () => {
     if (!browser) throw new Error("Browser was not started");
+    const pending = buildPendingFixture();
+    const savedAuthority = buildFixtureAuthority(pending, SAVED_REVISION);
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     let workpackPostCount = 0;
     let educationPostCount = 0;
@@ -722,7 +826,16 @@ describe("Phase A product remediation browser contract", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ ok: true, message: "문서팩 저장 완료", workpackId: WORKPACK_ID }),
+        body: JSON.stringify({
+          ok: true,
+          configured: true,
+          message: "문서팩 저장 완료",
+          workpackId: WORKPACK_ID,
+          created: workpackPostCount === 1,
+          reopened: workpackPostCount > 1,
+          authority: savedAuthority,
+          workpack: pending,
+        }),
       });
     });
     await page.route("**/api/education-records", async (route) => {
@@ -744,10 +857,12 @@ describe("Phase A product remediation browser contract", () => {
       await route.abort();
     });
 
-    await prepareWorkspace(page, buildPendingFixture(), { authenticated: true });
+    await prepareWorkspace(page, pending, { authenticated: true });
     await openEditor(page);
     const confirmation = page.getByLabel("Phase A 근거 확인");
-    await confirmation.getByRole("button", { name: "현재 작업팩 저장" }).click();
+    await clickRemountingButton(
+      confirmation.getByRole("button", { name: "현재 작업팩 저장" }),
+    );
     await expect.poll(async () => await confirmation.textContent()).toContain("교육 확인 이력 저장에 실패했습니다");
     const pendingAfterFailure = await page.evaluate(() => (
       window.localStorage.getItem("safeclaw.pendingWorkpackSave.v1")
@@ -760,12 +875,14 @@ describe("Phase A product remediation browser contract", () => {
     await page.reload({ waitUntil: "networkidle" });
     await openEditor(page);
     const reloadedConfirmation = page.getByLabel("Phase A 근거 확인");
-    await reloadedConfirmation.getByRole("button", { name: "현재 작업팩 저장" }).click();
+    await clickRemountingButton(
+      reloadedConfirmation.getByRole("button", { name: "현재 작업팩 저장" }),
+    );
     await expect.poll(async () => (
       await reloadedConfirmation.getByRole("button", { name: "Phase A 확인 저장" }).isEnabled()
     )).toBe(true);
 
-    expect.soft(workpackPostCount).toBe(1);
+    expect.soft(workpackPostCount).toBe(2);
     expect.soft(educationPostCount).toBe(2);
     expect.soft(pendingAfterFailure ?? "").toContain(WORKPACK_ID);
     expect.soft(pendingAfterFailure ?? "").toContain("worker-supervisor-1");
@@ -844,7 +961,9 @@ describe("Phase A product remediation browser contract", () => {
     }
 
     const confirmation = page.getByLabel("Phase A 근거 확인");
-    await confirmation.getByRole("button", { name: "현재 작업팩 저장" }).click();
+    await clickRemountingButton(
+      confirmation.getByRole("button", { name: "현재 작업팩 저장" }),
+    );
     await expect.poll(async () => await confirmation.textContent()).toContain(
       emptySelection ? "작업자를 한 명 이상 선택" : "서버 저장 ID를 찾지 못했습니다",
     );
@@ -886,10 +1005,12 @@ describe("Phase A product remediation browser contract", () => {
     await prepareWorkspace(expired, buildPendingFixture(), { authenticated: true });
     await openEditor(expired);
     const expiredPanel = expired.getByLabel("Phase A 근거 확인");
-    await expiredPanel.getByRole("button", { name: "현재 작업팩 저장" }).click();
+    await clickRemountingButton(
+      expiredPanel.getByRole("button", { name: "현재 작업팩 저장" }),
+    );
     const expiredConfirmButton = expiredPanel.getByRole("button", { name: "Phase A 확인 저장" });
     await expect.poll(async () => await expiredConfirmButton.isEnabled()).toBe(true);
-    await expiredConfirmButton.click();
+    await clickRemountingButton(expiredConfirmButton);
     await expect.poll(async () => await expiredPanel.textContent()).toContain("로그인 세션이 만료되었습니다");
     expect(await expiredConfirmButton.isDisabled()).toBe(true);
     await expired.close();
@@ -903,6 +1024,11 @@ describe("Phase A product remediation browser contract", () => {
     if (!browser) throw new Error("Browser was not started");
     const pending = buildPendingFixture();
     const serverConfirmed = buildServerConfirmedWorkpack(pending);
+    const confirmedAuthority = buildFixtureAuthority(
+      serverConfirmed,
+      CONFIRMED_REVISION,
+      pending,
+    );
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const consoleErrors: string[] = [];
     const pageErrors: string[] = [];
@@ -910,7 +1036,7 @@ describe("Phase A product remediation browser contract", () => {
       if (message.type() === "error") consoleErrors.push(message.text());
     });
     page.on("pageerror", (error) => pageErrors.push(error.stack ?? error.message));
-    await installSaveRoutes(page);
+    await installSaveRoutes(page, pending);
 
     let releaseDelayedResponse = (): void => {};
     const delayedResponseGate = new Promise<void>((resolve) => {
@@ -938,6 +1064,7 @@ describe("Phase A product remediation browser contract", () => {
           confirmationId: CONFIRMATION_ID,
           phaseAReview: serverConfirmed.phaseAReview,
           workpack: serverConfirmed,
+          authority: confirmedAuthority,
           message: "Phase A 확인 완료",
         }),
       });
@@ -946,10 +1073,12 @@ describe("Phase A product remediation browser contract", () => {
     await prepareWorkspace(page, pending, { authenticated: true });
     await openEditor(page);
     const confirmation = page.getByLabel("Phase A 근거 확인");
-    await confirmation.getByRole("button", { name: "현재 작업팩 저장" }).click();
+    await clickRemountingButton(
+      confirmation.getByRole("button", { name: "현재 작업팩 저장" }),
+    );
     const confirmButton = confirmation.getByRole("button", { name: "Phase A 확인 저장" });
     await expect.poll(async () => await confirmButton.isEnabled()).toBe(true);
-    await confirmButton.click();
+    await clickRemountingButton(confirmButton);
 
     let loadingDisabled = false;
     let retryEnabled = false;
@@ -1020,7 +1149,9 @@ describe("Phase A product remediation browser contract", () => {
     await prepareWorkspace(page, fixture, { theme, authenticated: true });
     await openEditor(page);
     const confirmation = page.getByLabel("Phase A 근거 확인");
-    await confirmation.getByRole("button", { name: "현재 작업팩 저장" }).click();
+    await clickRemountingButton(
+      confirmation.getByRole("button", { name: "현재 작업팩 저장" }),
+    );
     const confirmButton = confirmation.getByRole("button", { name: "Phase A 확인 저장" });
     await expect.poll(async () => await confirmButton.isEnabled()).toBe(true);
 

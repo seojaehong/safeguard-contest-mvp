@@ -10,6 +10,17 @@ export type LatestOnlyRequestGate = {
   abortCurrent: () => void;
 };
 
+export type BoundRequestHandle<Binding> = LatestOnlyRequestHandle & {
+  binding: Binding;
+};
+
+export type BoundRequestGate<Binding> = {
+  begin: (binding: Binding) => BoundRequestHandle<Binding>;
+  canCommit: (handle: BoundRequestHandle<Binding>, currentBinding: Binding) => boolean;
+  finish: (handle: BoundRequestHandle<Binding>) => void;
+  abortCurrent: () => void;
+};
+
 export function createLatestOnlyRequestGate(): LatestOnlyRequestGate {
   let currentRequestId = 0;
   let currentController: AbortController | null = null;
@@ -35,4 +46,44 @@ export function createLatestOnlyRequestGate(): LatestOnlyRequestGate {
       currentController = null;
     }
   };
+}
+
+export function createBoundRequestGate<Binding>(): BoundRequestGate<Binding> {
+  let currentRequestId = 0;
+  let currentController: AbortController | null = null;
+
+  return {
+    begin(binding) {
+      currentController?.abort();
+      currentRequestId += 1;
+      currentController = new AbortController();
+      return {
+        requestId: currentRequestId,
+        signal: currentController.signal,
+        binding
+      };
+    },
+    canCommit(handle, currentBinding) {
+      return handle.requestId === currentRequestId
+        && currentController !== null
+        && handle.signal === currentController.signal
+        && !currentController.signal.aborted
+        && Object.is(handle.binding, currentBinding);
+    },
+    finish(handle) {
+      if (handle.requestId === currentRequestId && handle.signal === currentController?.signal) {
+        currentController = null;
+      }
+    },
+    abortCurrent() {
+      currentController?.abort();
+      currentController = null;
+    }
+  };
+}
+
+export function isAbortError(error: unknown): boolean {
+  return typeof error === "object"
+    && error !== null
+    && Reflect.get(error, "name") === "AbortError";
 }

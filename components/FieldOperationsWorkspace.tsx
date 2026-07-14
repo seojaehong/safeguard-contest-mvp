@@ -41,11 +41,21 @@ import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/w
 import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
 import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
 import {
+  createBoundRequestGate,
+  isAbortError,
+  type BoundRequestHandle,
+} from "@/lib/request-version-guard";
+import {
   assessExactWorkpackConfirmation,
   createPendingWorkpackSaveBinding,
+  inspectServerVerifiedWorkpackPayload,
+  parsePhaseAWorkpackAuthority,
   parsePendingWorkpackSaveBinding,
   pendingWorkpackSaveMatches,
   PENDING_WORKPACK_SAVE_STORAGE_KEY,
+  readPhaseAWorkpackGenerationSeal,
+  type PhaseAWorkpackAuthority,
+  type PhaseAWorkpackGenerationSeal,
   type PendingWorkpackSaveBinding,
   type WorkpackSaveLogicalContext,
 } from "@/lib/workpack-authority";
@@ -69,6 +79,10 @@ type SaveResponse = {
   workpackId?: string | null;
   workerMap?: Record<string, string>;
   savedCount?: number;
+  authority?: unknown;
+  workpack?: unknown;
+  created?: boolean;
+  reopened?: boolean;
 };
 
 type StorageStatusLabel = "비회원 임시 저장" | "관리자 로그인 필요" | "관리자 이력 저장 완료" | "저장 실패";
@@ -86,6 +100,8 @@ type WorkspaceSaveSnapshot = {
   savedAt: string | null;
   savedCount: number;
   workerMap: Record<string, string>;
+  authority: PhaseAWorkpackAuthority | null;
+  superseded?: boolean;
 };
 
 type ClawContextResponse = { sites?: ClawSiteOption[] };
@@ -100,10 +116,9 @@ type PhaseAConfirmationStatus =
   | "success";
 
 type PhaseAConfirmationBinding = {
-  workpackId: string;
+  authority: PhaseAWorkpackAuthority;
   generationFingerprint: string;
-  generationEvidenceVersion: string;
-  generationEvidenceGeneratedAt: string;
+  generationSeal: PhaseAWorkpackGenerationSeal;
   question: string;
   chainId: PhaseAPlanBinding["chainId"];
   planDigest: string;
@@ -111,34 +126,39 @@ type PhaseAConfirmationBinding = {
   sessionUserId: string;
 };
 
-type GenerationEvidenceUiBinding = {
-  version: string;
-  generatedAt: string;
-};
-
 const PHASE_A_UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const PHASE_A_SIGNATURE_PATTERN = /^[a-f0-9]{64}$/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function readGenerationEvidenceUiBinding(data: AskResponse): GenerationEvidenceUiBinding | null {
+function readGenerationEvidenceUiBinding(data: AskResponse): PhaseAWorkpackGenerationSeal | null {
   const evidence: unknown = data.generationEvidence;
-  if (!isRecord(evidence) || evidence.version !== "safeclaw-generation-evidence/v1") return null;
-  if (evidence.algorithm !== "HMAC-SHA256" || typeof evidence.signature !== "string") return null;
-  if (!PHASE_A_SIGNATURE_PATTERN.test(evidence.signature) || !isRecord(evidence.snapshot)) return null;
+  if (!isRecord(evidence) || !isRecord(evidence.snapshot)) return null;
   if (
-    typeof evidence.snapshot.generatedAt !== "string" ||
     typeof evidence.snapshot.question !== "string" ||
     evidence.snapshot.question !== data.question
   ) {
     return null;
   }
-  return {
+  return readPhaseAWorkpackGenerationSeal({
     version: evidence.version,
-    generatedAt: evidence.snapshot.generatedAt
-  };
+    algorithm: evidence.algorithm,
+    signature: evidence.signature,
+    generatedAt: evidence.snapshot.generatedAt,
+    responseContentDigest: evidence.snapshot.responseContentDigest,
+  });
+}
+
+function generationSealsMatch(
+  actual: PhaseAWorkpackGenerationSeal,
+  expected: PhaseAWorkpackGenerationSeal,
+): boolean {
+  return actual.version === expected.version
+    && actual.algorithm === expected.algorithm
+    && actual.signature === expected.signature
+    && actual.generatedAt === expected.generatedAt
+    && actual.responseContentDigest === expected.responseContentDigest;
 }
 
 async function readApiRecord(response: Response): Promise<Record<string, unknown>> {
@@ -163,11 +183,47 @@ async function buildBrowserSessionFingerprint(accessToken: string): Promise<stri
   return `sha256:${hex}`;
 }
 
+function parseApiWorkpack(value: unknown): AskResponse | null {
+  if (!isRecord(value)) return null;
+  const stored = parseStoredCurrentWorkpack(JSON.stringify({
+    savedAt: new Date().toISOString(),
+    source: "workspace",
+    generationFingerprint: "server-verified",
+    data: value,
+  }));
+  return stored?.data ?? null;
+}
+
+function parseServerSavedWorkpack(
+  payload: SaveResponse,
+  expectedGenerationSealAtCreate: PhaseAWorkpackGenerationSeal,
+): { workpack: AskResponse; authority: PhaseAWorkpackAuthority } | null {
+  const authority = parsePhaseAWorkpackAuthority(payload.authority);
+  const workpack = parseApiWorkpack(payload.workpack);
+  const currentSeal = workpack ? readGenerationEvidenceUiBinding(workpack) : null;
+  if (
+    payload.ok !== true
+    || typeof payload.workpackId !== "string"
+    || payload.workpackId !== authority?.workpackId
+    || !workpack
+    || !authority
+    || !currentSeal
+    || !generationSealsMatch(currentSeal, authority.generationSeal)
+    || !generationSealsMatch(
+      authority.idempotency.generationSealAtCreate,
+      expectedGenerationSealAtCreate,
+    )
+  ) {
+    return null;
+  }
+  return { workpack, authority };
+}
+
 async function parseServerConfirmedWorkpack(
   payload: Record<string, unknown>,
   binding: PhaseAConfirmationBinding,
   expectedConfirmationId?: string
-): Promise<AskResponse | null> {
+): Promise<{ workpack: AskResponse; authority: PhaseAWorkpackAuthority } | null> {
   if (
     payload.ok !== true ||
     typeof payload.confirmationId !== "string" ||
@@ -178,14 +234,9 @@ async function parseServerConfirmedWorkpack(
   }
   if (expectedConfirmationId && payload.confirmationId !== expectedConfirmationId) return null;
 
-  const stored = parseStoredCurrentWorkpack(JSON.stringify({
-    savedAt: new Date().toISOString(),
-    source: "workspace",
-    generationFingerprint: "server-confirmed",
-    data: payload.workpack
-  }));
-  if (!stored) return null;
-  const workpack = stored.data;
+  const workpack = parseApiWorkpack(payload.workpack);
+  const authority = parsePhaseAWorkpackAuthority(payload.authority);
+  if (!workpack || !authority) return null;
   const review = parsePhaseAReview(workpack.phaseAReview);
   const evidenceBinding = readGenerationEvidenceUiBinding(workpack);
   if (!review || !evidenceBinding || review.humanConfirmation.status !== "confirmed") return null;
@@ -193,18 +244,27 @@ async function parseServerConfirmedWorkpack(
   const sessionFingerprint = await buildBrowserSessionFingerprint(binding.sessionAccessToken);
   if (
     confirmation.confirmationId !== payload.confirmationId ||
-    confirmation.workpackId !== binding.workpackId ||
+    confirmation.workpackId !== binding.authority.workpackId ||
     confirmation.chainId !== binding.chainId ||
     confirmation.planDigest !== binding.planDigest ||
     confirmation.reviewer.userId !== binding.sessionUserId ||
     confirmation.reviewer.sessionFingerprint !== sessionFingerprint ||
     workpack.question !== binding.question ||
-    evidenceBinding.version !== binding.generationEvidenceVersion ||
-    evidenceBinding.generatedAt !== binding.generationEvidenceGeneratedAt
+    evidenceBinding.generatedAt !== binding.generationSeal.generatedAt ||
+    authority.workpackId !== binding.authority.workpackId ||
+    authority.idempotency.version !== binding.authority.idempotency.version ||
+    authority.idempotency.deterministicId !== binding.authority.idempotency.deterministicId ||
+    authority.idempotency.scopeDigest !== binding.authority.idempotency.scopeDigest ||
+    !generationSealsMatch(
+      authority.idempotency.generationSealAtCreate,
+      binding.authority.idempotency.generationSealAtCreate,
+    ) ||
+    Date.parse(authority.revision) < Date.parse(binding.authority.revision) ||
+    !generationSealsMatch(evidenceBinding, authority.generationSeal)
   ) {
     return null;
   }
-  return { ...workpack, phaseAReview: review };
+  return { workpack: { ...workpack, phaseAReview: review }, authority };
 }
 
 function resolveInitialWorkerState(data: AskResponse, generationFingerprint?: string): InitialWorkerState {
@@ -352,39 +412,6 @@ function updateWorkerNationality(worker: WorkerProfile, nationality: string): Wo
     ...worker,
     nationality,
     isForeignWorker: nationality !== "대한민국" && nationality !== "확인 필요"
-  };
-}
-
-function buildEvidenceSummary(data: AskResponse) {
-  return {
-    citations: data.citations.slice(0, 6).map((item) => ({
-      type: item.type,
-      title: item.title,
-      sourceLabel: item.sourceLabel,
-      sourceSystem: item.sourceSystem
-    })),
-    externalData: {
-      weather: data.externalData.weather.mode,
-      training: data.externalData.training.mode,
-      koshaEducation: data.externalData.koshaEducation.mode,
-      kosha: data.externalData.kosha.mode,
-      accidentCases: data.externalData.accidentCases.mode,
-      safetyReference: data.externalData.safetyReference
-        ? {
-            mode: data.externalData.safetyReference.mode,
-            retrievalMode: data.externalData.safetyReference.retrievalMode,
-            items: data.externalData.safetyReference.items.slice(0, 6).map((item) => ({
-              id: item.id,
-              title: item.displayTitle || item.title,
-              rawTitle: item.rawTitle,
-              itemType: item.itemType,
-              primaryDocuments: item.primaryDocuments,
-              controls: item.controls,
-              shortSummary: item.displaySummary || item.shortSummary
-            }))
-          }
-        : undefined
-    }
   };
 }
 
@@ -974,6 +1001,7 @@ export function FieldOperationsWorkspace({
   requestedDocumentKey,
   readiness,
   initialWorkpackId = null,
+  initialWorkpackAuthority = null,
   onDeliverablesChange,
   onWorkpackStateChange,
   surface = "full"
@@ -984,8 +1012,9 @@ export function FieldOperationsWorkspace({
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
   initialWorkpackId?: string | null;
+  initialWorkpackAuthority?: PhaseAWorkpackAuthority | null;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
-  onWorkpackStateChange?: (data: AskResponse) => void;
+  onWorkpackStateChange?: (data: AskResponse, authority: PhaseAWorkpackAuthority) => void;
   surface?: "full" | "share" | "editor";
 }) {
   const [initialWorkerState] = useState(() => resolveInitialWorkerState(data, generationFingerprint));
@@ -994,7 +1023,12 @@ export function FieldOperationsWorkspace({
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
   const onWorkpackStateChangeRef = useRef(onWorkpackStateChange);
   const lastEditorValuesRef = useRef<WorkpackDocumentValues | null>(null);
+  const saveRequestGateRef = useRef(createBoundRequestGate<string>());
+  const confirmationRequestGateRef = useRef(createBoundRequestGate<string>());
+  const currentOperationBindingRef = useRef("");
+  const requestInvalidationEpochRef = useRef(0);
   const [session, setSession] = useState<Session | null>(null);
+  const sessionRef = useRef<Session | null>(null);
   const activeClawAuthToken = session?.access_token;
   const [clawContextState, setClawContextState] = useState<ClawContextViewState>({
     authToken: null,
@@ -1014,6 +1048,7 @@ export function FieldOperationsWorkspace({
   const [workers, setWorkers] = useState<WorkerProfile[]>(initialWorkerState.workers);
   const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(initialWorkerState.selectedWorkerIds);
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
+  const [savedWorkpackAuthority, setSavedWorkpackAuthority] = useState<PhaseAWorkpackAuthority | null>(null);
   const [savedWorkerMap, setSavedWorkerMap] = useState<Record<string, string>>({});
   const [pendingWorkpackSave, setPendingWorkpackSave] = useState<PendingWorkpackSaveBinding | null>(() => (
     typeof window === "undefined"
@@ -1031,7 +1066,8 @@ export function FieldOperationsWorkspace({
     workpackId: null,
     savedAt: null,
     savedCount: 0,
-    workerMap: {}
+    workerMap: {},
+    authority: null,
   });
 
   useEffect(() => {
@@ -1123,24 +1159,85 @@ export function FieldOperationsWorkspace({
   const phaseAReadyForConfirmation = Boolean(
     parsedPhaseAReview && isPhaseAReviewReadyForConfirmation(parsedPhaseAReview)
   );
-  const restoredConfirmedWorkpackId = initialWorkpackId
+  const restoredConfirmedWorkpackAuthority = initialWorkpackId
+    && initialWorkpackAuthority
+    && initialWorkpackAuthority.workpackId === initialWorkpackId
+    && generationEvidenceBinding
+    && generationSealsMatch(initialWorkpackAuthority.generationSeal, generationEvidenceBinding)
     && assessExactWorkpackConfirmation(parsedPhaseAReview ?? undefined, initialWorkpackId).ok
-    ? initialWorkpackId
+    ? initialWorkpackAuthority
     : null;
+  const restoredConfirmedWorkpackId = restoredConfirmedWorkpackAuthority?.workpackId ?? null;
   const effectiveSavedWorkpackId = savedWorkpackId ?? restoredConfirmedWorkpackId;
+  const effectiveSavedWorkpackAuthority = savedWorkpackAuthority ?? restoredConfirmedWorkpackAuthority;
   const confirmationBindingIsCurrent = Boolean(
     phaseAConfirmationBinding &&
-    savedWorkpackId === phaseAConfirmationBinding.workpackId &&
+    savedWorkpackId === phaseAConfirmationBinding.authority.workpackId &&
+    savedWorkpackAuthority?.revision === phaseAConfirmationBinding.authority.revision &&
     generationFingerprint === phaseAConfirmationBinding.generationFingerprint &&
     currentGenerationFingerprint === phaseAConfirmationBinding.generationFingerprint &&
-    generationEvidenceBinding?.version === phaseAConfirmationBinding.generationEvidenceVersion &&
-    generationEvidenceBinding.generatedAt === phaseAConfirmationBinding.generationEvidenceGeneratedAt &&
+    generationEvidenceBinding &&
+    generationSealsMatch(generationEvidenceBinding, phaseAConfirmationBinding.generationSeal) &&
     workspaceData.question === phaseAConfirmationBinding.question &&
     phaseAPlanBinding?.chainId === phaseAConfirmationBinding.chainId &&
     phaseAPlanBinding.planDigest === phaseAConfirmationBinding.planDigest &&
     session?.access_token === phaseAConfirmationBinding.sessionAccessToken &&
     session.user.id === phaseAConfirmationBinding.sessionUserId
   );
+  const workpackOperationBinding = useMemo(() => JSON.stringify({
+    generationFingerprint: generationFingerprint ?? null,
+    currentGenerationFingerprint,
+    generationSeal: generationEvidenceBinding,
+    question: workspaceData.question,
+    planBinding: phaseAPlanBinding,
+    sessionUserId: session?.user.id ?? null,
+    sessionAccessToken: session?.access_token ?? null,
+    workers,
+    selectedWorkerIds,
+  }), [
+    currentGenerationFingerprint,
+    generationEvidenceBinding,
+    generationFingerprint,
+    phaseAPlanBinding,
+    selectedWorkerIds,
+    session?.access_token,
+    session?.user.id,
+    workers,
+    workspaceData.question,
+  ]);
+  currentOperationBindingRef.current = workpackOperationBinding;
+
+  useEffect(() => {
+    saveRequestGateRef.current.abortCurrent();
+    confirmationRequestGateRef.current.abortCurrent();
+    setPhaseAConfirmationStatus((current) => (
+      current === "saving" || current === "confirming" ? "idle" : current
+    ));
+  }, [workpackOperationBinding]);
+
+  useEffect(() => () => {
+    saveRequestGateRef.current.abortCurrent();
+    confirmationRequestGateRef.current.abortCurrent();
+  }, []);
+
+  const invalidateWorkspaceRequests = useCallback(() => {
+    requestInvalidationEpochRef.current += 1;
+    currentOperationBindingRef.current = `invalidated:${requestInvalidationEpochRef.current}`;
+    saveRequestGateRef.current.abortCurrent();
+    confirmationRequestGateRef.current.abortCurrent();
+  }, []);
+  const applySession = useCallback((nextSession: Session | null) => {
+    const current = sessionRef.current;
+    if (
+      current?.access_token === nextSession?.access_token
+      && current?.user.id === nextSession?.user.id
+    ) {
+      return;
+    }
+    sessionRef.current = nextSession;
+    invalidateWorkspaceRequests();
+    setSession(nextSession);
+  }, [invalidateWorkspaceRequests]);
   const selectedWorkers = useMemo(
     () => workers.filter((worker) => selectedWorkerIds.includes(worker.id)),
     [selectedWorkerIds, workers]
@@ -1188,16 +1285,16 @@ export function FieldOperationsWorkspace({
     if (!client) return;
 
     client.auth.getSession().then(({ data: sessionData }) => {
-      setSession(sessionData.session);
+      applySession(sessionData.session);
     }).catch((error: unknown) => {
       console.warn("supabase share session load failed", error);
     });
 
     const { data: listener } = client.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
+      applySession(nextSession);
     });
     return () => listener.subscription.unsubscribe();
-  }, [surface]);
+  }, [applySession, surface]);
 
   useEffect(() => {
     dataRef.current = data;
@@ -1210,7 +1307,7 @@ export function FieldOperationsWorkspace({
   useEffect(() => {
     setEditedDeliverables(null);
     lastEditorValuesRef.current = null;
-  }, [generationFingerprint]);
+  }, [generationFingerprint, invalidateWorkspaceRequests]);
 
   const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => {
     const previousValues = lastEditorValuesRef.current;
@@ -1222,7 +1319,9 @@ export function FieldOperationsWorkspace({
       return documentKeys.every((key) => currentDocuments[key] === values[key]) ? current : values;
     });
     if (change.requiresRevalidation) {
+      invalidateWorkspaceRequests();
       setSavedWorkpackId(null);
+      setSavedWorkpackAuthority(null);
       setSavedWorkerMap({});
       clearPendingWorkpackSave();
       setPhaseAConfirmationBinding(null);
@@ -1236,7 +1335,8 @@ export function FieldOperationsWorkspace({
         workpackId: null,
         savedAt: null,
         savedCount: 0,
-        workerMap: {}
+        workerMap: {},
+        authority: null,
       });
     }
     onDeliverablesChangeRef.current?.(values, change);
@@ -1265,14 +1365,27 @@ export function FieldOperationsWorkspace({
     ["ISO", "운영체계", "법규·문서관리·감사추적"]
   ] as const;
 
-  async function postJson<TResponse>(url: string, body: unknown): Promise<TResponse> {
+  function canCommitWorkspaceRequest(request: BoundRequestHandle<string>): boolean {
+    return saveRequestGateRef.current.canCommit(request, currentOperationBindingRef.current);
+  }
+
+  function canCommitConfirmationRequest(request: BoundRequestHandle<string>): boolean {
+    return confirmationRequestGateRef.current.canCommit(request, currentOperationBindingRef.current);
+  }
+
+  async function postJson<TResponse>(
+    url: string,
+    body: unknown,
+    signal: AbortSignal,
+  ): Promise<TResponse> {
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "authorization": `Bearer ${session?.access_token || ""}`,
         "content-type": "application/json"
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      signal,
     });
     return await response.json() as TResponse;
   }
@@ -1305,11 +1418,14 @@ export function FieldOperationsWorkspace({
     };
   }
 
-  async function resolveCurrentWorkerMap(): Promise<SaveResponse> {
+  async function resolveCurrentWorkerMap(request: BoundRequestHandle<string>): Promise<SaveResponse> {
     const workerResponse = await postJson<SaveResponse>("/api/workers", {
       scenario: workspaceData.scenario,
       workers,
-    });
+    }, request.signal);
+    if (!canCommitWorkspaceRequest(request)) {
+      return { ok: false, configured: true, message: "저장 요청이 새 작업 상태로 대체되었습니다." };
+    }
     if (!workerResponse.ok) return workerResponse;
     const workerMap = workerResponse.workerMap || {};
     try {
@@ -1326,7 +1442,21 @@ export function FieldOperationsWorkspace({
     return { ...workerResponse, workerMap };
   }
 
-  function setStorageFailure(message: string, partial = pendingWorkpackSave) {
+  function supersededSaveSnapshot(): WorkspaceSaveSnapshot {
+    return {
+      ...storageSnapshot,
+      ok: false,
+      message: "저장 요청이 새 작업 상태로 대체되었습니다.",
+      superseded: true,
+    };
+  }
+
+  function setStorageFailure(
+    message: string,
+    partial = pendingWorkpackSave,
+    request?: BoundRequestHandle<string>,
+  ) {
+    if (request && !canCommitWorkspaceRequest(request)) return supersededSaveSnapshot();
     const snapshot: WorkspaceSaveSnapshot = {
       ok: false,
       label: "저장 실패",
@@ -1334,7 +1464,8 @@ export function FieldOperationsWorkspace({
       workpackId: partial?.workpackId ?? effectiveSavedWorkpackId,
       savedAt: null,
       savedCount: 0,
-      workerMap: partial?.workerMap ?? savedWorkerMap
+      workerMap: partial?.workerMap ?? savedWorkerMap,
+      authority: effectiveSavedWorkpackAuthority,
     };
     setStorageSnapshot(snapshot);
     return snapshot;
@@ -1349,7 +1480,8 @@ export function FieldOperationsWorkspace({
         workpackId: effectiveSavedWorkpackId,
         savedAt: null,
         savedCount: 0,
-        workerMap: savedWorkerMap
+        workerMap: savedWorkerMap,
+        authority: effectiveSavedWorkpackAuthority,
       };
       setStorageSnapshot(snapshot);
       return snapshot;
@@ -1362,6 +1494,12 @@ export function FieldOperationsWorkspace({
     if (!logicalContext) {
       return setStorageFailure("현재 생성본의 저장 바인딩을 확인할 수 없습니다. 문서를 다시 생성해 주세요.", null);
     }
+    if (!generationEvidenceBinding) {
+      return setStorageFailure("현재 생성본의 서버 생성 봉인을 확인할 수 없습니다. 문서를 다시 생성해 주세요.", null);
+    }
+
+    const request = saveRequestGateRef.current.begin(currentOperationBindingRef.current);
+    confirmationRequestGateRef.current.abortCurrent();
 
     try {
       let partial = pendingWorkpackSave;
@@ -1375,40 +1513,95 @@ export function FieldOperationsWorkspace({
         partial = null;
       }
 
-      let workpackMessage = "기존 미완료 작업팩을 사용합니다.";
-      let workerMessage = "기존 작업자 매핑을 사용합니다.";
-      if (!partial) {
-        const workerResponse = await resolveCurrentWorkerMap();
-        if (!workerResponse.ok) return setStorageFailure(workerResponse.message, null);
-        const workerMap = workerResponse.workerMap || {};
-        workerMessage = workerResponse.message;
-
-        const workpackResponse = await postJson<SaveResponse>("/api/workpacks", {
-          data: workspaceData,
-          question: workspaceData.question,
-          scenario: workspaceData.scenario,
-          deliverables: workspaceData.deliverables,
-          evidenceSummary: buildEvidenceSummary(workspaceData),
-          workerSummary: {
-            ...summarizeWorkers(selectedWorkers),
-            selectedWorkers: buildWorkerDispatchTargets(selectedWorkers)
-          },
-          status: workspaceData.status
-        });
-        if (!workpackResponse.ok || !workpackResponse.workpackId) {
-          return setStorageFailure(workpackResponse.message, null);
-        }
-        workpackMessage = workpackResponse.message;
-        partial = createPendingWorkpackSaveBinding({
-          context: logicalContext,
-          workpackId: workpackResponse.workpackId,
-          workerMap,
-        });
-        persistPendingWorkpackSave(partial);
+      const reusableAuthorityCandidate = effectiveSavedWorkpackId
+        && effectiveSavedWorkpackAuthority?.workpackId === effectiveSavedWorkpackId
+        && generationSealsMatch(effectiveSavedWorkpackAuthority.generationSeal, generationEvidenceBinding)
+        ? effectiveSavedWorkpackAuthority
+        : null;
+      const confirmedWorkspace = parsedPhaseAReview?.humanConfirmation.status === "confirmed";
+      if (confirmedWorkspace && !reusableAuthorityCandidate) {
+        return setStorageFailure(
+          "확인 완료 작업팩은 정확한 서버 행 authority를 다시 검증해야 저장을 계속할 수 있습니다.",
+          null,
+          request,
+        );
       }
 
-      const workerMap = partial.workerMap;
-      const workpackId = partial.workpackId;
+      let workpackMessage = "현재 서버 작업팩의 ID, revision, 생성 봉인을 재사용했습니다.";
+      let reusableServerSaved: { workpack: AskResponse; authority: PhaseAWorkpackAuthority } | null = null;
+      if (confirmedWorkspace && reusableAuthorityCandidate) {
+        const response = await fetch(
+          `/api/workpacks/${encodeURIComponent(reusableAuthorityCandidate.workpackId)}`,
+          {
+            headers: { authorization: `Bearer ${session.access_token}` },
+            signal: request.signal,
+          },
+        );
+        if (!canCommitWorkspaceRequest(request)) return supersededSaveSnapshot();
+        const payload = await readApiRecord(response);
+        if (!canCommitWorkspaceRequest(request)) return supersededSaveSnapshot();
+        const verified = response.ok
+          ? inspectServerVerifiedWorkpackPayload(payload, reusableAuthorityCandidate.workpackId)
+          : null;
+        if (
+          !verified
+          || !assessExactWorkpackConfirmation(verified.workpack.data.phaseAReview, verified.id).ok
+          || verified.authority.idempotency.scopeDigest !== reusableAuthorityCandidate.idempotency.scopeDigest
+          || !generationSealsMatch(
+            verified.authority.idempotency.generationSealAtCreate,
+            reusableAuthorityCandidate.idempotency.generationSealAtCreate,
+          )
+        ) {
+          return setStorageFailure(
+            "확인 완료 작업팩의 서버 ID, revision, 생성 봉인 또는 정확한 확인을 재검증하지 못했습니다.",
+            null,
+            request,
+          );
+        }
+        reusableServerSaved = {
+          workpack: verified.workpack.data,
+          authority: verified.authority,
+        };
+        workpackMessage = "확인 완료 서버 작업팩의 ID, revision, 생성 봉인을 다시 검증했습니다.";
+      }
+
+      const workerResponse = await resolveCurrentWorkerMap(request);
+      if (!canCommitWorkspaceRequest(request)) return supersededSaveSnapshot();
+      if (!workerResponse.ok) return setStorageFailure(workerResponse.message, null, request);
+      const workerMap = workerResponse.workerMap || {};
+
+      let serverSaved = reusableServerSaved;
+      if (!serverSaved) {
+        const workpackResponse = await postJson<SaveResponse>("/api/workpacks", {
+          data: workspaceData,
+          workerSummary: {
+            ...summarizeWorkers(selectedWorkers),
+            selectedWorkers: buildWorkerDispatchTargets(selectedWorkers),
+          },
+        }, request.signal);
+        if (!canCommitWorkspaceRequest(request)) return supersededSaveSnapshot();
+        if (!workpackResponse.ok || !workpackResponse.workpackId) {
+          return setStorageFailure(workpackResponse.message, null, request);
+        }
+        serverSaved = parseServerSavedWorkpack(workpackResponse, generationEvidenceBinding);
+        if (!serverSaved) {
+          console.error("workpack save response authority validation failed");
+          return setStorageFailure(
+            "서버 작업팩의 ID, revision 또는 생성 봉인을 검증하지 못했습니다.",
+            null,
+            request,
+          );
+        }
+        workpackMessage = workpackResponse.message;
+      }
+      partial = createPendingWorkpackSaveBinding({
+        context: logicalContext,
+        workpackId: serverSaved.authority.workpackId,
+        workerMap,
+      });
+      persistPendingWorkpackSave(partial);
+
+      const workpackId = serverSaved.authority.workpackId;
 
       const selectedEducationRecords = educationRecords.filter((record) => (
         selectedWorkers.some((worker) => worker.id === record.workerId)
@@ -1419,78 +1612,89 @@ export function FieldOperationsWorkspace({
         workerMap,
         workers,
         records: selectedEducationRecords
-      });
-      if (!educationResponse.ok) return setStorageFailure(educationResponse.message, partial);
+      }, request.signal);
+      if (!canCommitWorkspaceRequest(request)) return supersededSaveSnapshot();
+      if (!educationResponse.ok) return setStorageFailure(educationResponse.message, partial, request);
 
       setSavedWorkpackId(workpackId);
+      setSavedWorkpackAuthority(serverSaved.authority);
       setSavedWorkerMap(workerMap);
       clearPendingWorkpackSave();
+      const serverReview = parsePhaseAReview(serverSaved.workpack.phaseAReview);
+      const serverGenerationSeal = readGenerationEvidenceUiBinding(serverSaved.workpack);
+      const serverFingerprint = buildWorkpackGenerationFingerprint(serverSaved.workpack);
       if (
-        phaseAReadyForConfirmation &&
-        phaseAPlanBinding &&
-        generationBindingMatches &&
+        serverReview &&
+        isPhaseAReviewReadyForConfirmation(serverReview) &&
+        serverReview.planBinding &&
+        serverFingerprint === generationFingerprint &&
         generationFingerprint &&
-        generationEvidenceBinding
+        serverGenerationSeal
       ) {
         setPhaseAConfirmationBinding({
-          workpackId,
+          authority: serverSaved.authority,
           generationFingerprint,
-          generationEvidenceVersion: generationEvidenceBinding.version,
-          generationEvidenceGeneratedAt: generationEvidenceBinding.generatedAt,
-          question: workspaceData.question,
-          chainId: phaseAPlanBinding.chainId,
-          planDigest: phaseAPlanBinding.planDigest,
+          generationSeal: serverGenerationSeal,
+          question: serverSaved.workpack.question,
+          chainId: serverReview.planBinding.chainId,
+          planDigest: serverReview.planBinding.planDigest,
           sessionAccessToken: session.access_token,
-          sessionUserId: session.user.id
+          sessionUserId: session.user.id,
         });
         setPhaseAConfirmationRetryId(null);
         setPhaseAConfirmationMessage("현재 생성 근거와 계획에 묶인 작업팩을 저장했습니다. 서버 확인을 진행할 수 있습니다.");
       } else {
         setPhaseAConfirmationBinding(null);
+        if (assessExactWorkpackConfirmation(serverReview ?? undefined, workpackId).ok) {
+          setPhaseAConfirmationStatus("success");
+          setPhaseAConfirmationMessage("기존 서버 작업팩의 Phase A 확인과 생성 봉인을 재검증해 다시 열었습니다.");
+        }
       }
 
       const savedCount = 1 + workers.length + (educationResponse.savedCount || selectedEducationRecords.length);
       const snapshot: WorkspaceSaveSnapshot = {
         ok: true,
         label: "관리자 이력 저장 완료",
-        message: `${workpackMessage} ${workerMessage} ${educationResponse.message}`,
+        message: `${workpackMessage} ${workerResponse.message} ${educationResponse.message}`,
         workpackId,
-        savedAt: new Date().toISOString(),
+        savedAt: serverSaved.authority.updatedAt,
         savedCount,
-        workerMap
+        workerMap,
+        authority: serverSaved.authority,
       };
       setStorageSnapshot(snapshot);
+      if (serverFingerprint !== currentGenerationFingerprint) {
+        dataRef.current = serverSaved.workpack;
+        setEditedDeliverables(null);
+        lastEditorValuesRef.current = null;
+        onWorkpackStateChangeRef.current?.(serverSaved.workpack, serverSaved.authority);
+      }
       return snapshot;
     } catch (error) {
+      if (!canCommitWorkspaceRequest(request) || isAbortError(error)) {
+        return supersededSaveSnapshot();
+      }
       console.error("workspace save failed", error);
-      return setStorageFailure("작업공간 저장 중 오류가 발생했습니다. Supabase 설정과 로그인 상태를 확인해 주세요.");
+      return setStorageFailure(
+        "작업공간 저장 중 오류가 발생했습니다. Supabase 설정과 로그인 상태를 확인해 주세요.",
+        undefined,
+        request,
+      );
+    } finally {
+      saveRequestGateRef.current.finish(request);
     }
   }
 
   async function ensureWorkpackSaved() {
-    if (effectiveSavedWorkpackId && selectedWorkerIds.every((workerId) => Boolean(savedWorkerMap[workerId]))) {
+    if (
+      effectiveSavedWorkpackId
+      && effectiveSavedWorkpackAuthority?.workpackId === effectiveSavedWorkpackId
+      && selectedWorkerIds.every((workerId) => Boolean(savedWorkerMap[workerId]))
+    ) {
       return {
         workpackId: effectiveSavedWorkpackId,
         workerIds: resolveSavedWorkerIds(savedWorkerMap, selectedWorkerIds)
       };
-    }
-    if (restoredConfirmedWorkpackId) {
-      try {
-        const workerResponse = await resolveCurrentWorkerMap();
-        if (!workerResponse.ok) {
-          setStorageFailure(workerResponse.message, null);
-          return null;
-        }
-        const workerMap = workerResponse.workerMap || {};
-        const workerIds = resolveSavedWorkerIds(workerMap, selectedWorkerIds);
-        setSavedWorkpackId(restoredConfirmedWorkpackId);
-        setSavedWorkerMap(workerMap);
-        return { workpackId: restoredConfirmedWorkpackId, workerIds };
-      } catch (error) {
-        console.warn("confirmed workpack worker mapping resolution failed", error);
-        setStorageFailure("현재 작업팩의 서버 작업자 매핑을 확인하지 못했습니다.", null);
-        return null;
-      }
     }
     const snapshot = await saveWorkspaceToSupabase();
     if (!snapshot.ok || !snapshot.workpackId) return null;
@@ -1513,7 +1717,9 @@ export function FieldOperationsWorkspace({
     }
     setPhaseAConfirmationStatus("saving");
     setPhaseAConfirmationMessage("현재 생성 근거와 계획을 서버 작업팩에 저장하고 있습니다.");
+    const requestBinding = currentOperationBindingRef.current;
     const snapshot = await saveWorkspaceToSupabase();
+    if (snapshot.superseded || currentOperationBindingRef.current !== requestBinding) return;
     if (!snapshot.ok || !snapshot.workpackId) {
       setPhaseAConfirmationStatus("error");
       setPhaseAConfirmationMessage(snapshot.message);
@@ -1537,11 +1743,13 @@ export function FieldOperationsWorkspace({
       return;
     }
 
+    const request = confirmationRequestGateRef.current.begin(currentOperationBindingRef.current);
+    const retryConfirmationId = phaseAConfirmationRetryId;
     setPhaseAConfirmationStatus("confirming");
     setPhaseAConfirmationMessage("서버에서 인증 세션과 작업팩 근거를 확인하고 있습니다.");
     try {
       const response = await fetch(
-        `/api/workpacks/${encodeURIComponent(binding.workpackId)}/phase-a-confirmation`,
+        `/api/workpacks/${encodeURIComponent(binding.authority.workpackId)}/phase-a-confirmation`,
         {
           method: "POST",
           headers: {
@@ -1551,17 +1759,22 @@ export function FieldOperationsWorkspace({
           body: JSON.stringify({
             chainId: binding.chainId,
             planDigest: binding.planDigest,
-            ...(phaseAConfirmationRetryId ? { confirmationId: phaseAConfirmationRetryId } : {})
-          })
+            revision: binding.authority.revision,
+            ...(retryConfirmationId ? { confirmationId: retryConfirmationId } : {})
+          }),
+          signal: request.signal,
         }
       );
+      if (!canCommitConfirmationRequest(request)) return;
       const payload = await readApiRecord(response);
+      if (!canCommitConfirmationRequest(request)) return;
       const responseMessage = typeof payload.message === "string"
         ? payload.message
         : "Phase A 확인 요청을 처리하지 못했습니다.";
 
       if (response.status === 401) {
         setSavedWorkpackId(null);
+        setSavedWorkpackAuthority(null);
         setSavedWorkerMap({});
         setPhaseAConfirmationBinding(null);
         setPhaseAConfirmationRetryId(null);
@@ -1581,6 +1794,7 @@ export function FieldOperationsWorkspace({
           return;
         }
         setSavedWorkpackId(null);
+        setSavedWorkpackAuthority(null);
         setSavedWorkerMap({});
         setPhaseAConfirmationBinding(null);
         setPhaseAConfirmationRetryId(null);
@@ -1595,34 +1809,48 @@ export function FieldOperationsWorkspace({
         return;
       }
 
-      const confirmedWorkpack = await parseServerConfirmedWorkpack(
+      const confirmed = await parseServerConfirmedWorkpack(
         payload,
         binding,
-        phaseAConfirmationRetryId ?? undefined
+        retryConfirmationId ?? undefined
       );
-      if (!confirmedWorkpack) {
+      if (!canCommitConfirmationRequest(request)) return;
+      if (!confirmed) {
         console.error("phase a confirmation response binding validation failed");
         setPhaseAConfirmationStatus("error");
         setPhaseAConfirmationMessage("서버 확인 결과의 작업팩 또는 바인딩을 검증하지 못했습니다. 현재 작업팩을 다시 저장해 주세요.");
         return;
       }
 
-      dataRef.current = confirmedWorkpack;
+      dataRef.current = confirmed.workpack;
       setEditedDeliverables(null);
       lastEditorValuesRef.current = null;
+      setSavedWorkpackId(confirmed.authority.workpackId);
+      setSavedWorkpackAuthority(confirmed.authority);
       setPhaseAConfirmationBinding(null);
       setPhaseAConfirmationRetryId(null);
       setPhaseAConfirmationStatus("success");
       setPhaseAConfirmationMessage("서버 확인 완료. 서버가 반환한 작업팩과 근거 봉인을 현재 상태에 반영했습니다.");
-      onWorkpackStateChangeRef.current?.(confirmedWorkpack);
+      setStorageSnapshot((current) => ({
+        ...current,
+        ok: true,
+        workpackId: confirmed.authority.workpackId,
+        savedAt: confirmed.authority.updatedAt,
+        authority: confirmed.authority,
+      }));
+      onWorkpackStateChangeRef.current?.(confirmed.workpack, confirmed.authority);
     } catch (error) {
+      if (!canCommitConfirmationRequest(request) || isAbortError(error)) return;
       console.warn("phase a confirmation request failed", error);
       setPhaseAConfirmationStatus("error");
       setPhaseAConfirmationMessage("서버 확인 요청 중 오류가 발생했습니다. 연결을 확인한 뒤 다시 시도해 주세요.");
+    } finally {
+      confirmationRequestGateRef.current.finish(request);
     }
   }
 
   function toggleWorker(id: string) {
+    invalidateWorkspaceRequests();
     startTransition(() => {
       setSelectedWorkerIds((current) => (
         current.includes(id)
@@ -1633,10 +1861,12 @@ export function FieldOperationsWorkspace({
   }
 
   function updateWorker(worker: WorkerProfile) {
+    invalidateWorkspaceRequests();
     setWorkers((current) => current.map((item) => item.id === worker.id ? worker : item));
   }
 
   function addWorker(draft: WorkerDraft) {
+    invalidateWorkspaceRequests();
     const id = `worker-${Date.now()}`;
     const nextWorker: WorkerProfile = {
       id,
@@ -1764,7 +1994,11 @@ export function FieldOperationsWorkspace({
         onSiteChange={selectClawSite}
         contextStatus={clawContextStatus}
       />
-      <AdminAccessPanel session={session} storageSnapshot={storageSnapshot} onSessionChange={setSession} />
+      <AdminAccessPanel
+        session={session}
+        storageSnapshot={storageSnapshot}
+        onSessionChange={applySession}
+      />
       <WorkerEducationPanel
         workers={workers}
         selectedWorkerIds={selectedWorkerIds}

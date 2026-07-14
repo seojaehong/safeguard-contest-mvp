@@ -2,6 +2,7 @@
 // app/api/workpacks POST(사람 세션 기반)와 app/api/briefing/run(cron, 이메일 소유자 기반)이
 // 저장 방식을 공유하도록 ensureWorkspaceContext + insert 패턴을 재사용한다.
 
+import { createHash } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   ensureWorkspaceContext,
@@ -11,6 +12,14 @@ import {
 import type { AskResponse, GenerationEvidenceSnapshot } from "@/lib/types";
 import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
 import { parsePhaseAReview } from "@/lib/phase-a-review";
+import {
+  PHASE_A_WORKPACK_AUTHORITY_VERSION,
+  PHASE_A_WORKPACK_IDEMPOTENCY_VERSION,
+  readPhaseAWorkpackGenerationSeal,
+  type PhaseAWorkpackAuthority,
+  type PhaseAWorkpackGenerationSeal,
+  type PhaseAWorkpackIdempotencyBinding,
+} from "@/lib/workpack-authority";
 
 type WorkpackInsert = WorkspaceDatabase["public"]["Tables"]["workpacks"]["Insert"];
 
@@ -45,6 +54,7 @@ export type WorkpackEvidenceSummary = {
   generationTrace?: AskResponse["generationTrace"];
   generationEvidence?: AskResponse["generationEvidence"];
   generationEvidenceSnapshot?: GenerationEvidenceSnapshot;
+  workpackAuthorityBinding?: PhaseAWorkpackIdempotencyBinding;
 };
 
 export type ReopenWorkpackInput = {
@@ -71,9 +81,109 @@ function readJsonObject(value: unknown): Record<string, unknown> | null {
   return isRecord(value) ? value : null;
 }
 
+function deterministicUuidFromSha256(digest: Buffer): string {
+  const bytes = Buffer.from(digest.subarray(0, 16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x80;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = bytes.toString("hex");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+export function workpackGenerationSeal(response: AskResponse): PhaseAWorkpackGenerationSeal | null {
+  const envelope = response.generationEvidence;
+  if (!envelope) return null;
+  return readPhaseAWorkpackGenerationSeal({
+    version: envelope.version,
+    algorithm: envelope.algorithm,
+    signature: envelope.signature,
+    generatedAt: envelope.snapshot.generatedAt,
+    responseContentDigest: envelope.snapshot.responseContentDigest,
+  });
+}
+
+export function buildPhaseAWorkpackIdempotencyBinding(input: {
+  organizationId: string;
+  siteId: string | null;
+  userId: string;
+  response: AskResponse;
+}): PhaseAWorkpackIdempotencyBinding {
+  const generationSealAtCreate = workpackGenerationSeal(input.response);
+  if (!generationSealAtCreate) {
+    throw new Error("verified generation seal is required for deterministic workpack identity");
+  }
+  return buildPhaseAWorkpackIdempotencyBindingFromSeal({
+    organizationId: input.organizationId,
+    siteId: input.siteId,
+    userId: input.userId,
+    generationSealAtCreate,
+  });
+}
+
+export function buildPhaseAWorkpackIdempotencyBindingFromSeal(input: {
+  organizationId: string;
+  siteId: string | null;
+  userId: string;
+  generationSealAtCreate: PhaseAWorkpackGenerationSeal;
+}): PhaseAWorkpackIdempotencyBinding {
+  // Context row IDs can race on first use; creator plus the full server seal is stable across tabs and devices.
+  const digest = createHash("sha256")
+    .update(JSON.stringify([
+      PHASE_A_WORKPACK_IDEMPOTENCY_VERSION,
+      "creator_generation",
+      input.userId,
+      input.generationSealAtCreate.version,
+      input.generationSealAtCreate.algorithm,
+      input.generationSealAtCreate.signature,
+      input.generationSealAtCreate.generatedAt,
+      input.generationSealAtCreate.responseContentDigest,
+    ]), "utf8")
+    .digest();
+  return {
+    version: PHASE_A_WORKPACK_IDEMPOTENCY_VERSION,
+    deterministicId: deterministicUuidFromSha256(digest),
+    scopeDigest: `sha256:${digest.toString("hex")}`,
+    generationSealAtCreate: input.generationSealAtCreate,
+  };
+}
+
+export function buildPhaseAWorkpackAuthority(input: {
+  workpackId: string;
+  revision: string;
+  response: AskResponse;
+  idempotency: PhaseAWorkpackIdempotencyBinding;
+}): PhaseAWorkpackAuthority {
+  const generationSeal = workpackGenerationSeal(input.response);
+  if (!generationSeal || input.idempotency.deterministicId !== input.workpackId) {
+    throw new Error("verified workpack authority inputs are required");
+  }
+  return {
+    version: PHASE_A_WORKPACK_AUTHORITY_VERSION,
+    workpackId: input.workpackId,
+    revision: input.revision,
+    updatedAt: input.revision,
+    generationSeal,
+    idempotency: input.idempotency,
+  };
+}
+
+export function phaseAWorkpackIdempotencyBindingsEqual(
+  actual: PhaseAWorkpackIdempotencyBinding,
+  expected: PhaseAWorkpackIdempotencyBinding,
+): boolean {
+  return actual.version === expected.version
+    && actual.deterministicId === expected.deterministicId
+    && actual.scopeDigest === expected.scopeDigest
+    && actual.generationSealAtCreate.version === expected.generationSealAtCreate.version
+    && actual.generationSealAtCreate.algorithm === expected.generationSealAtCreate.algorithm
+    && actual.generationSealAtCreate.signature === expected.generationSealAtCreate.signature
+    && actual.generationSealAtCreate.generatedAt === expected.generationSealAtCreate.generatedAt
+    && actual.generationSealAtCreate.responseContentDigest === expected.generationSealAtCreate.responseContentDigest;
+}
+
 export function buildWorkpackEvidenceSummary(
   response: AskResponse,
-  generationEvidenceSnapshot?: GenerationEvidenceSnapshot
+  generationEvidenceSnapshot?: GenerationEvidenceSnapshot,
+  workpackAuthorityBinding?: PhaseAWorkpackIdempotencyBinding,
 ): WorkpackEvidenceSummary {
   return {
     answer: response.answer,
@@ -92,7 +202,8 @@ export function buildWorkpackEvidenceSummary(
     dbHarness: response.dbHarness,
     generationTrace: response.generationTrace,
     generationEvidence: generationEvidenceSnapshot ? response.generationEvidence : undefined,
-    generationEvidenceSnapshot
+    generationEvidenceSnapshot,
+    workpackAuthorityBinding,
   };
 }
 
@@ -107,6 +218,7 @@ export function buildSelectedWorkpackEvidenceSummary(input: {
 }
 
 export function buildWorkpackInsertPayload(input: {
+  id?: string;
   organizationId: string;
   siteId: string | null;
   question: string;
@@ -118,6 +230,7 @@ export function buildWorkpackInsertPayload(input: {
   createdBy: string | null;
 }): WorkpackInsert {
   return {
+    ...(input.id ? { id: input.id } : {}),
     organization_id: input.organizationId,
     site_id: input.siteId,
     question: input.question,
