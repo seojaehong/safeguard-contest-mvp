@@ -1,0 +1,39 @@
+{
+  "date": "2026-07-14",
+  "status": "integrated_verified",
+  "integratedHeadBeforeEvidenceCommit": "8827db7",
+  "sourceCommits": [
+    "d9c8781",
+    "98dfe7a",
+    "9bda288",
+    "5668483",
+    "9015901",
+    "08ba2cd"
+  ],
+  "independentReview": {
+    "spec": "pass",
+    "codeQuality": "pass",
+    "findings": {
+      "p0": 0,
+      "p1": 0,
+      "p2": 0,
+      "p3": 0
+    }
+  },
+  "verification": {
+    "combinedFocused": {
+      "filesPassed": 10,
+      "testsPassed": 109,
+      "testsSkipped": 5
+    },
+    "productionBrowser": {
+      "filesPassed": 1,
+      "testsPassed": 4
+    },
+    "typecheck": "pass",
+    "build": "pass",
+    "staticPages": 28
+  },
+  "databaseChanges": false,
+  "finalFrontendAuditPending": true
+}
