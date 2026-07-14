@@ -44,7 +44,7 @@ describe("SIF embedding approval packet", () => {
     expect(packet.fileName).toBe("safeclaw-sif-embedding-approval-apply-sif-only-migration.md");
     expect(packet.approvalFingerprint).toHaveLength(64);
     expect(packet.artifactIntegrity).toHaveLength(4);
-    expect(packet.artifactIntegrity.find((artifact) => artifact.label === "SIF 전용 마이그레이션")?.sha256).toHaveLength(64);
+    expect(packet.artifactIntegrity.find((artifact) => artifact.label === "SIF-only migration")?.sha256).toHaveLength(64);
     expect(packet.requiredArtifacts.map((artifact) => artifact.path)).toContain(
       "evaluation/sif-embedding-gate/sif-embedding-only-migration.sql"
     );
@@ -67,7 +67,7 @@ describe("SIF embedding approval packet", () => {
     expect(packet.markdown).toContain("Approval fingerprint:");
     expect(packet.markdown).toContain("## Artifact Integrity");
     expect(packet.markdown).toContain("SIF 전용 마이그레이션: present");
-    expect(packet.markdown).toContain("## 사전 점검");
+    expect(packet.markdown).toContain("## Preflight Checks");
     expect(packet.markdown).toContain("Do not run before the required approval gate passes.");
     expect(packet.markdown).toContain("npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload");
   });
@@ -94,7 +94,8 @@ describe("SIF embedding approval packet", () => {
     expect(packet.markdown).toContain("/api/input-photos/hazard-analysis");
     expect(packet.markdown).toContain("up to 10 files");
     expect(packet.markdown).toContain("Only user-accepted candidates enter the DB harness improvement memory.");
-    expect(packet.markdown).toContain("## 사진 분석/OCR 하네스 경로");
-    expect(packet.markdown).toContain("개선 전/개선 후 개선사항");
+    expect(packet.markdown).toContain("## Vision/OCR Harness Path");
+    expect(packet.markdown).toContain("Before/After improvements:");
+    expect(packet.markdown).toContain("사진 분석/OCR 데이터를 저장합니다.");
   });
 });
