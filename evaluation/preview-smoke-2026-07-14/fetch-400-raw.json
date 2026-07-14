@@ -1,0 +1,106 @@
+{
+  "generatedAt": "2026-07-14T08:14:33.415Z",
+  "purpose": "Mechanically attribute provisional preview-root Fetch 400 responses",
+  "scope": "12 read-only navigations matching the smoke matrix; no form submission, upload, send, or DB action",
+  "attemptCount": 12,
+  "attemptsWithFailedResponses": 0,
+  "totalFailedResponses": 0,
+  "attempts": [
+    {
+      "id": "workspace-desktop-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "startedAt": "2026-07-14T08:14:24.072Z",
+      "finishedAt": "2026-07-14T08:14:24.666Z",
+      "failedResponses": []
+    },
+    {
+      "id": "workspace-desktop-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "startedAt": "2026-07-14T08:14:24.743Z",
+      "finishedAt": "2026-07-14T08:14:25.489Z",
+      "failedResponses": []
+    },
+    {
+      "id": "documents-desktop-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=day",
+      "startedAt": "2026-07-14T08:14:25.577Z",
+      "finishedAt": "2026-07-14T08:14:26.435Z",
+      "failedResponses": []
+    },
+    {
+      "id": "documents-desktop-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=night",
+      "startedAt": "2026-07-14T08:14:26.527Z",
+      "finishedAt": "2026-07-14T08:14:27.316Z",
+      "failedResponses": []
+    },
+    {
+      "id": "reports-desktop-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "startedAt": "2026-07-14T08:14:27.393Z",
+      "finishedAt": "2026-07-14T08:14:28.077Z",
+      "failedResponses": []
+    },
+    {
+      "id": "reports-desktop-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+      "startedAt": "2026-07-14T08:14:28.155Z",
+      "finishedAt": "2026-07-14T08:14:28.763Z",
+      "failedResponses": []
+    },
+    {
+      "id": "workspace-mobile-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "startedAt": "2026-07-14T08:14:28.868Z",
+      "finishedAt": "2026-07-14T08:14:29.555Z",
+      "failedResponses": []
+    },
+    {
+      "id": "workspace-mobile-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "startedAt": "2026-07-14T08:14:29.643Z",
+      "finishedAt": "2026-07-14T08:14:30.256Z",
+      "failedResponses": []
+    },
+    {
+      "id": "documents-mobile-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=day",
+      "startedAt": "2026-07-14T08:14:30.335Z",
+      "finishedAt": "2026-07-14T08:14:30.961Z",
+      "failedResponses": []
+    },
+    {
+      "id": "documents-mobile-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=night",
+      "startedAt": "2026-07-14T08:14:31.041Z",
+      "finishedAt": "2026-07-14T08:14:31.975Z",
+      "failedResponses": []
+    },
+    {
+      "id": "reports-mobile-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "startedAt": "2026-07-14T08:14:32.051Z",
+      "finishedAt": "2026-07-14T08:14:32.700Z",
+      "failedResponses": []
+    },
+    {
+      "id": "reports-mobile-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+      "startedAt": "2026-07-14T08:14:32.778Z",
+      "finishedAt": "2026-07-14T08:14:33.381Z",
+      "failedResponses": []
+    }
+  ]
+}

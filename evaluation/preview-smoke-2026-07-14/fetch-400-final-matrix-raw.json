@@ -1,0 +1,2063 @@
+{
+  "generatedAt": "2026-07-14T08:17:51.931Z",
+  "purpose": "Final 12-row initiator-aware network/error capture",
+  "rowCount": 12,
+  "rows": [
+    {
+      "id": "workspace-desktop-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "failedResponses": [
+        {
+          "requestId": "52496.4356",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    },
+    {
+      "id": "workspace-desktop-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "failedResponses": [
+        {
+          "requestId": "52496.5176",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    },
+    {
+      "id": "documents-desktop-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=day",
+      "failedResponses": [
+        {
+          "requestId": "52496.5399",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=day",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    },
+    {
+      "id": "documents-desktop-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=night",
+      "failedResponses": [
+        {
+          "requestId": "52496.5660",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=night",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    },
+    {
+      "id": "reports-desktop-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "failedResponses": [
+        {
+          "requestId": "52496.5891",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    },
+    {
+      "id": "reports-desktop-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+      "failedResponses": [],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [],
+      "networkFailures": []
+    },
+    {
+      "id": "workspace-mobile-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "failedResponses": [
+        {
+          "requestId": "52496.6347",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    },
+    {
+      "id": "workspace-mobile-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "failedResponses": [
+        {
+          "requestId": "52496.6570",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    },
+    {
+      "id": "documents-mobile-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=day",
+      "failedResponses": [
+        {
+          "requestId": "52496.6795",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=day",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    },
+    {
+      "id": "documents-mobile-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=night",
+      "failedResponses": [
+        {
+          "requestId": "52496.7022",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/documents?theme=night",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    },
+    {
+      "id": "reports-mobile-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "failedResponses": [
+        {
+          "requestId": "52496.7242",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    },
+    {
+      "id": "reports-mobile-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+      "failedResponses": [
+        {
+          "requestId": "52496.7464",
+          "response": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "mimeType": "",
+            "protocol": "h2"
+          },
+          "resourceType": "Fetch",
+          "request": {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "method": "OPTIONS",
+            "hasPostData": false,
+            "postDataLength": 0,
+            "headerNames": [
+              "Referer",
+              "User-Agent",
+              "sec-ch-ua",
+              "sec-ch-ua-mobile",
+              "sec-ch-ua-platform"
+            ]
+          },
+          "documentURL": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+          "initiator": {
+            "stack": {
+              "callFrames": [
+                {
+                  "columnNumber": 70260,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55442,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55324,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 70507,
+                  "functionName": "v",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 69729,
+                  "functionName": "p",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 39153,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 1205,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 57050,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 68397,
+                  "functionName": "",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55181,
+                  "functionName": "r",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                },
+                {
+                  "columnNumber": 55383,
+                  "functionName": "s",
+                  "lineNumber": 1,
+                  "scriptId": "307",
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            },
+            "type": "script"
+          },
+          "requestEventSource": {
+            "tabId": 222147423
+          },
+          "responseEventSource": {
+            "tabId": 222147423
+          },
+          "classification": "vercel-toolbar-or-auth",
+          "stackUrls": [
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js",
+            "https://vercel.live/_next-live/feedback/feedback.js"
+          ]
+        }
+      ],
+      "runtimeExceptions": [],
+      "consoleErrors": [],
+      "logErrors": [
+        {
+          "level": "error",
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+        }
+      ],
+      "networkFailures": []
+    }
+  ]
+}

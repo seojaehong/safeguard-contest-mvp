@@ -1,0 +1,238 @@
+{
+  "generatedAt": "2026-07-14T08:17:20.870Z",
+  "sourceArtifact": "provisional report.json before mechanical reconciliation",
+  "affectedRowCount": 7,
+  "rows": [
+    {
+      "id": "workspace-desktop-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "routeStatus": 200,
+      "errors": {
+        "runtimeExceptions": [],
+        "consoleErrors": [],
+        "logErrors": [
+          {
+            "level": "error",
+            "text": "Failed to load resource: the server responded with a status of 400 ()",
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+          }
+        ],
+        "networkFailures": [],
+        "failedResponses": [
+          {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "type": "Fetch",
+            "mimeType": "",
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          }
+        ]
+      },
+      "classification": "unresolved",
+      "reason": "Provisional capture did not include Network.requestWillBeSent initiator data."
+    },
+    {
+      "id": "workspace-desktop-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "routeStatus": 200,
+      "errors": {
+        "runtimeExceptions": [],
+        "consoleErrors": [],
+        "logErrors": [
+          {
+            "level": "error",
+            "text": "Failed to load resource: the server responded with a status of 400 ()",
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+          }
+        ],
+        "networkFailures": [],
+        "failedResponses": [
+          {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "type": "Fetch",
+            "mimeType": "",
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          }
+        ]
+      },
+      "classification": "unresolved",
+      "reason": "Provisional capture did not include Network.requestWillBeSent initiator data."
+    },
+    {
+      "id": "reports-desktop-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "routeStatus": 200,
+      "errors": {
+        "runtimeExceptions": [],
+        "consoleErrors": [],
+        "logErrors": [
+          {
+            "level": "error",
+            "text": "Failed to load resource: the server responded with a status of 400 ()",
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+          }
+        ],
+        "networkFailures": [],
+        "failedResponses": [
+          {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "type": "Fetch",
+            "mimeType": "",
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          }
+        ]
+      },
+      "classification": "unresolved",
+      "reason": "Provisional capture did not include Network.requestWillBeSent initiator data."
+    },
+    {
+      "id": "reports-desktop-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=night",
+      "routeStatus": 200,
+      "errors": {
+        "runtimeExceptions": [],
+        "consoleErrors": [],
+        "logErrors": [
+          {
+            "level": "error",
+            "text": "Failed to load resource: the server responded with a status of 400 ()",
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+          }
+        ],
+        "networkFailures": [],
+        "failedResponses": [
+          {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "type": "Fetch",
+            "mimeType": "",
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          }
+        ]
+      },
+      "classification": "unresolved",
+      "reason": "Provisional capture did not include Network.requestWillBeSent initiator data."
+    },
+    {
+      "id": "workspace-mobile-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=day",
+      "routeStatus": 200,
+      "errors": {
+        "runtimeExceptions": [],
+        "consoleErrors": [],
+        "logErrors": [
+          {
+            "level": "error",
+            "text": "Failed to load resource: the server responded with a status of 400 ()",
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+          },
+          {
+            "level": "error",
+            "text": "Failed to load resource: the server responded with a status of 400 ()",
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+          }
+        ],
+        "networkFailures": [],
+        "failedResponses": [
+          {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "type": "Fetch",
+            "mimeType": "",
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          },
+          {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "type": "Fetch",
+            "mimeType": "",
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          }
+        ]
+      },
+      "classification": "unresolved",
+      "reason": "Provisional capture did not include Network.requestWillBeSent initiator data."
+    },
+    {
+      "id": "workspace-mobile-night",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/workspace?theme=night",
+      "routeStatus": 200,
+      "errors": {
+        "runtimeExceptions": [],
+        "consoleErrors": [],
+        "logErrors": [
+          {
+            "level": "error",
+            "text": "Failed to load resource: the server responded with a status of 400 ()",
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+          }
+        ],
+        "networkFailures": [],
+        "failedResponses": [
+          {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "type": "Fetch",
+            "mimeType": "",
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          }
+        ]
+      },
+      "classification": "unresolved",
+      "reason": "Provisional capture did not include Network.requestWillBeSent initiator data."
+    },
+    {
+      "id": "reports-mobile-day",
+      "requestedUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "finalUrl": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/reports?theme=day",
+      "routeStatus": 200,
+      "errors": {
+        "runtimeExceptions": [],
+        "consoleErrors": [],
+        "logErrors": [
+          {
+            "level": "error",
+            "text": "Failed to load resource: the server responded with a status of 400 ()",
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/"
+          }
+        ],
+        "networkFailures": [],
+        "failedResponses": [
+          {
+            "url": "https://safeguard-contest-mvp-git-feat-phas-44f988-seojaehongs-projects.vercel.app/",
+            "status": 400,
+            "statusText": "",
+            "type": "Fetch",
+            "mimeType": "",
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          }
+        ]
+      },
+      "classification": "unresolved",
+      "reason": "Provisional capture did not include Network.requestWillBeSent initiator data."
+    }
+  ]
+}
