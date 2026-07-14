@@ -161,6 +161,12 @@ const V5_FALSE_PARENT_KOSHA_MARKERS = {
   evidenceRef: "V5_FALSE_PARENT_KOSHA_EVIDENCE_REF"
 } as const;
 
+const V5_QUERY_UNRELATED_DIRECT_MARKERS = {
+  summary: "V5_QUERY_UNRELATED_DIRECT_SUMMARY",
+  control: "V5_QUERY_UNRELATED_DIRECT_CONTROL",
+  document: "V5_QUERY_UNRELATED_DIRECT_DOCUMENT"
+} as const;
+
 function v5CollisionGuide(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenceItem {
   return verifiedKoshaReference({
     id: "kosha-v5-forklift-pedestrian-collision-guide",
@@ -226,6 +232,29 @@ function v5ConflictingFireCollisionTagParent(): SafetyReferenceItem {
     keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
     risk_tags: ["충돌"],
     controls: ["연료 누출 확인과 점화원 격리"]
+  });
+}
+
+function v5MixedScaffoldEquipmentCollisionParent(): SafetyReferenceItem {
+  return v5DirectParent({
+    id: "direct-v5-mixed-scaffold-equipment-collision",
+    title: "비계 설비 장비 반입 동선 충돌 직접 근거",
+    summary: "비계 해체 구역의 설비 장비 반입 동선에서 작업자가 부딪힘. 작업발판과 난간 미확인에 따른 추락도 함께 검토 필요.",
+    keywords: ["비계", "설비", "장비", "동선", "충돌", "추락"],
+    risk_tags: ["충돌", "추락"],
+    controls: ["비계 주변 설비 장비 반입 동선 통제", "작업발판과 난간 상태 확인"]
+  });
+}
+
+function v5QueryUnrelatedDirectEvidence(): SafetyReferenceItem {
+  return v5DirectParent({
+    id: "direct-v5-query-unrelated-fire",
+    title: "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
+    summary: `${V5_QUERY_UNRELATED_DIRECT_MARKERS.summary} 연료 누출 가스가 점화되어 화재가 발생할 수 있다.`,
+    keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
+    risk_tags: ["화재"],
+    primary_documents: ["위험성평가표", "TBM 브리핑", V5_QUERY_UNRELATED_DIRECT_MARKERS.document],
+    controls: [V5_QUERY_UNRELATED_DIRECT_MARKERS.control, "연료 밸브 차단과 점화원 통제"]
   });
 }
 
@@ -843,6 +872,7 @@ describe("DB harness packet", () => {
     ["broad-token LPG forklift pedestrian fire", v5BroadTokenFireParent, false],
     ["same-equipment pedestrian slip", v5SameEquipmentSlipParent, false],
     ["fire narrative with conflicting collision tag", v5ConflictingFireCollisionTagParent, false],
+    ["mixed scaffold/equipment collision", v5MixedScaffoldEquipmentCollisionParent, false],
     ["true vehicle collision alias", v5VehicleCollisionParent, true]
   ] as const)(
     "v5 classifies %s parenthood with the hazard-family gate",
@@ -854,7 +884,8 @@ describe("DB harness packet", () => {
   it.each([
     ["broad-token LPG forklift pedestrian fire", v5BroadTokenFireParent],
     ["same-equipment pedestrian slip", v5SameEquipmentSlipParent],
-    ["fire narrative with conflicting collision tag", v5ConflictingFireCollisionTagParent]
+    ["fire narrative with conflicting collision tag", v5ConflictingFireCollisionTagParent],
+    ["mixed scaffold/equipment collision", v5MixedScaffoldEquipmentCollisionParent]
   ] as const)(
     "v5 keeps false-parent KOSHA content out of public harness surfaces for %s",
     (_label, parentFactory) => {
@@ -882,6 +913,28 @@ describe("DB harness packet", () => {
       }
     }
   );
+
+  it("v5 removes query-hazard-unrelated direct evidence before public packet and prompt surfaces", () => {
+    const unrelatedDirect = v5QueryUnrelatedDirectEvidence();
+    const packet = buildPublicDbHarnessPacket(buildDbHarnessPacket({
+      question: "지게차 보행자 통행구역 충돌 위험",
+      references: [v5CollisionGuide(), unrelatedDirect]
+    }));
+    const serializedSurfaces = JSON.stringify({
+      packet,
+      promptContext: buildHarnessPromptContext(packet),
+      answer: buildDbHarnessAnswer(packet),
+      practicalPoints: buildDbHarnessPracticalPoints(packet)
+    });
+
+    expect(packet.directEvidence).toEqual([]);
+    expect(packet.ontologyChecklist.status).toBe("review_required");
+    expect(packet.supportingEvidence.find((item) => item.id === unrelatedDirect.id)).toBeUndefined();
+    expect(buildHarnessPromptContext(packet)).toContain('"parentEvidenceReady":false');
+    for (const marker of Object.values(V5_QUERY_UNRELATED_DIRECT_MARKERS)) {
+      expect(serializedSurfaces).not.toContain(marker);
+    }
+  });
 
   it("keeps fire controls and energy isolation in the bounded DB harness surface", () => {
     const maintenanceFire = reference({

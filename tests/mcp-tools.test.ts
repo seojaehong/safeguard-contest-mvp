@@ -329,6 +329,71 @@ describe("buildHarnessAgentResult", () => {
       expect(serializedMcpPayload).not.toContain(marker);
     }
   });
+
+  it("v5 removes query-hazard-unrelated direct evidence before MCP payload and prompt serialization", () => {
+    const directMarkers = {
+      summary: "V5_MCP_UNRELATED_DIRECT_SUMMARY",
+      control: "V5_MCP_UNRELATED_DIRECT_CONTROL",
+      document: "V5_MCP_UNRELATED_DIRECT_DOCUMENT"
+    } as const;
+    const collisionGuide = {
+      id: "mcp-v5-direct-filter-collision-guide",
+      source_id: "kosha-guide-offline:mcp-v5-direct-filter-collision-guide",
+      item_type: "technical-guideline",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "KOSHA 지게차 보행자 충돌 예방 기술지침",
+      summary: "지게차와 보행자의 이동 동선을 분리한다.",
+      body: "검증된 현행 KOSHA 지침 본문: 지게차 동선과 보행 동선을 분리한다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      controls: ["후진 경보와 유도자 배치"],
+      evidence_role: "supporting",
+      retrieval_source: "local-ranked",
+      kosha_guide: {
+        referenceId: "mcp-v5-direct-filter-collision-guide",
+        stableDocumentKey: "MCP-V5-DIRECT-FILTER-COLLISION",
+        version: "MCP-V5-DIRECT-FILTER-COLLISION-2026",
+        quality: "accepted",
+        lifecycle: "current",
+        bodyKind: "native",
+        anchors: [{ page: 1, excerpt: "지게차 동선 분리" }],
+        evidenceRef: "KOSHA 근거 mcp-v5-direct-filter-collision-guide p.1: 지게차 동선 분리",
+        directEligible: true
+      }
+    } satisfies SafetyReferenceItem;
+    const unrelatedDirect = {
+      id: "mcp-v5-query-unrelated-fire-direct",
+      source_id: "official-machinery-catalog",
+      item_type: "machinery",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
+      summary: `${directMarkers.summary} 연료 누출 가스가 점화되어 화재가 발생할 수 있다.`,
+      keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
+      risk_tags: ["화재"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", directMarkers.document],
+      controls: [directMarkers.control, "연료 밸브 차단과 점화원 통제"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    } satisfies SafetyReferenceItem;
+    const result = buildHarnessAgentResult({
+      question: "지게차 보행자 통행구역 충돌 위험",
+      references: [collisionGuide, unrelatedDirect],
+      referenceSearch: []
+    });
+    const serializedPacket = JSON.stringify(result.packet);
+    const serializedMcpPayload = toToolResult(result).content[0]?.text || "";
+
+    expect(result.packet.directEvidence).toEqual([]);
+    expect(result.promptContext).toContain('"parentEvidenceReady":false');
+    for (const marker of Object.values(directMarkers)) {
+      expect(serializedPacket).not.toContain(marker);
+      expect(result.promptContext).not.toContain(marker);
+      expect(serializedMcpPayload).not.toContain(marker);
+    }
+  });
 });
 
 describe("resolveReviewTaskLabel", () => {

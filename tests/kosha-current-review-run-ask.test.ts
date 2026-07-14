@@ -303,6 +303,50 @@ function configureV5BroadTokenFalseParentSearch(): KoshaOnlyFixture {
   return { action, body, control, evidenceRef, hazard, reference };
 }
 
+function configureV5QueryUnrelatedDirectEvidenceSearch() {
+  const directMarkers = {
+    summary: "V5_RUNASK_UNRELATED_DIRECT_SUMMARY",
+    control: "V5_RUNASK_UNRELATED_DIRECT_CONTROL",
+    document: "V5_RUNASK_UNRELATED_DIRECT_DOCUMENT"
+  } as const;
+  const reference = retrievalReference("v5-direct-filter-kosha-guide", "local-ranked");
+  reference.item_type = "technical-guideline";
+  reference.title = "KOSHA 지게차 보행자 충돌 예방 기술지침";
+  reference.summary = "지게차와 보행자의 이동 동선을 분리한다.";
+  reference.body = "검증된 현행 KOSHA 지침 본문: 지게차 동선과 보행 동선을 분리한다.";
+  reference.keywords = ["지게차", "보행자", "동선", "충돌"];
+  reference.risk_tags = ["충돌"];
+  reference.controls = ["후진 경보와 유도자 배치"];
+  reference.primary_documents = ["위험성평가표", "TBM 브리핑", "TBM 기록"];
+  reference.kosha_guide = {
+    ...reference.kosha_guide!,
+    stableDocumentKey: "V5-RUNASK-DIRECT-FILTER-KOSHA",
+    version: "V5-RUNASK-DIRECT-FILTER-KOSHA-2026",
+    evidenceRef: "KOSHA 근거 v5-direct-filter-kosha-guide p.1: 지게차 동선 분리"
+  };
+
+  const unrelatedDirect = retrievalReference("v5-query-unrelated-fire-direct", "ranked");
+  unrelatedDirect.item_type = "machinery";
+  unrelatedDirect.category = "운반하역";
+  unrelatedDirect.subcategory = "지게차";
+  unrelatedDirect.title = "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거";
+  unrelatedDirect.summary = `${directMarkers.summary} 연료 누출 가스가 점화되어 화재가 발생할 수 있다.`;
+  unrelatedDirect.body = undefined;
+  unrelatedDirect.keywords = ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"];
+  unrelatedDirect.risk_tags = ["화재"];
+  unrelatedDirect.primary_documents = ["위험성평가표", "TBM 브리핑", directMarkers.document];
+  unrelatedDirect.controls = [directMarkers.control, "연료 밸브 차단과 점화원 통제"];
+  unrelatedDirect.evidence_role = "direct";
+  unrelatedDirect.kosha_guide = undefined;
+
+  mocks.searchSafetyReferences.mockResolvedValue(searchResult(
+    "hybrid-local-supabase",
+    [reference, unrelatedDirect],
+    "지게차 보행자 통행구역 충돌 위험"
+  ));
+  return { directMarkers, reference, unrelatedDirect };
+}
+
 describe("current-base runAsk retrieval provenance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -694,6 +738,40 @@ describe("current-base runAsk retrieval provenance", () => {
         expect(serializedPrompt).not.toContain(forbidden);
         expect(serializedCitations).not.toContain(forbidden);
         expect(serializedResponse).not.toContain(forbidden);
+      }
+    },
+    30_000
+  );
+
+  it.each(["enhanced", "full"] satisfies AiMode[])(
+    "v5 removes query-hazard-unrelated direct evidence before model prompt and response surfaces in %s mode",
+    async (aiMode) => {
+      const fixture = configureV5QueryUnrelatedDirectEvidenceSearch();
+
+      const response = await runAsk("지게차 보행자 통행구역 충돌 위험", { aiMode });
+      const generationInputs = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.map(([input]) => (
+        input as GenerateAllOptions
+      ));
+      const serializedPrompt = JSON.stringify({
+        dbHarness: response.dbHarness?.promptContext,
+        generationInputs
+      });
+      const serializedCitations = JSON.stringify({
+        citations: response.citations,
+        safetyReferences: response.externalData.safetyReference?.items
+      });
+      const serializedResponse = JSON.stringify(response);
+
+      expect(response.dbHarness?.summary.directEvidence).toBe(0);
+      expect(response.dbHarness?.packet.directEvidence).toEqual([]);
+      expect(response.dbHarness?.promptContext).toContain('"parentEvidenceReady":false');
+      expect(response.externalData.safetyReference?.items.some((item) => (
+        item.id === fixture.unrelatedDirect.id
+      ))).toBe(false);
+      for (const marker of Object.values(fixture.directMarkers)) {
+        expect(serializedPrompt).not.toContain(marker);
+        expect(serializedCitations).not.toContain(marker);
+        expect(serializedResponse).not.toContain(marker);
       }
     },
     30_000
