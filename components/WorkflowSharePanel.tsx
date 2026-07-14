@@ -1290,21 +1290,23 @@ export function WorkflowSharePanel({
         </div>
       </section>
 
-      <div className="command-actions">
-        {!authToken ? (
-          <a href="/login" className="button command-primary workbench-primary-action">{primaryLabel}</a>
-        ) : (
-          <button
-            type="button"
-            className="button command-primary workbench-primary-action"
-            onClick={() => setIsConfirming(true)}
-            disabled={primaryDisabled}
-          >
-            {primaryLabel}
-          </button>
-        )}
-        <button type="button" className="button secondary" onClick={copyMessage}>메시지 복사</button>
-      </div>
+      {!isConfirming ? (
+        <div className="command-actions">
+          {!authToken ? (
+            <a href="/login" className="button command-primary workbench-primary-action">{primaryLabel}</a>
+          ) : (
+            <button
+              type="button"
+              className="button command-primary workbench-primary-action"
+              onClick={() => setIsConfirming(true)}
+              disabled={primaryDisabled}
+            >
+              {primaryLabel}
+            </button>
+          )}
+          <button type="button" className="button secondary" onClick={copyMessage}>메시지 복사</button>
+        </div>
+      ) : null}
 
       {isConfirming ? (
         <div className="dispatch-confirm-panel workbench-share-confirmation" role="dialog" aria-modal="false" aria-label="현장 전파 전 확인">

@@ -38,4 +38,9 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 전송본 미리보기`');
     expect(sharePanel).not.toContain("외국인 근로자 전송본 ·");
   });
+
+  it("keeps only the confirmation action visible during the send confirmation step", () => {
+    expect(sharePanel).toMatch(/\{!isConfirming \? \(\s*<div className="command-actions">/);
+    expect(sharePanel).toMatch(/\{isConfirming \? \(\s*<div className="dispatch-confirm-panel/);
+  });
 });
