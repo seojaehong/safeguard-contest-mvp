@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/editor-first-state.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  17:14:20
+   Duration  846ms (transform 145ms, setup 0ms, import 183ms, tests 22ms, environment 0ms)
+

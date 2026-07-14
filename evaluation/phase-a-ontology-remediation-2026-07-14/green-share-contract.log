@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/phase-a-share-authority-contract.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  17:14:27
+   Duration  619ms (transform 84ms, setup 0ms, import 116ms, tests 7ms, environment 0ms)
+

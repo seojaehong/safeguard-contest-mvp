@@ -230,15 +230,19 @@ function parseStoredCurrentWorkpackValue(parsed: Record<string, unknown>): Store
     };
   }
 
+  const currentFingerprint = buildWorkpackGenerationFingerprint(data as AskResponse);
+  const storedFingerprint = readString(parsed.generationFingerprint);
+  const fingerprintMatchesCurrent = !storedFingerprint || storedFingerprint === currentFingerprint;
+
   return {
     status: "valid",
     workpack: {
       savedAt: parsed.savedAt,
       source: "workspace",
-      generationFingerprint: readString(parsed.generationFingerprint) || buildWorkpackGenerationFingerprint(data as AskResponse),
+      generationFingerprint: fingerprintMatchesCurrent ? (storedFingerprint || currentFingerprint) : currentFingerprint,
       data: data as AskResponse,
-      workerSnapshot: parseWorkerSnapshot(parsed.workerSnapshot),
-      dispatchSnapshot: parseDispatchSnapshot(parsed.dispatchSnapshot)
+      workerSnapshot: fingerprintMatchesCurrent ? parseWorkerSnapshot(parsed.workerSnapshot) : undefined,
+      dispatchSnapshot: fingerprintMatchesCurrent ? parseDispatchSnapshot(parsed.dispatchSnapshot) : undefined
     }
   };
 }
@@ -276,12 +280,15 @@ export function buildStoredCurrentWorkpack(
     generationFingerprint?: string;
   } = {}
 ): StoredCurrentWorkpack {
+  const currentFingerprint = buildWorkpackGenerationFingerprint(data);
+  const storedFingerprint = snapshots.generationFingerprint || "";
+  const fingerprintMatchesCurrent = !storedFingerprint || storedFingerprint === currentFingerprint;
   return {
     savedAt: new Date().toISOString(),
     source: "workspace",
-    generationFingerprint: snapshots.generationFingerprint || buildWorkpackGenerationFingerprint(data),
+    generationFingerprint: fingerprintMatchesCurrent ? (storedFingerprint || currentFingerprint) : currentFingerprint,
     data,
-    workerSnapshot: snapshots.workerSnapshot,
-    dispatchSnapshot: snapshots.dispatchSnapshot
+    workerSnapshot: fingerprintMatchesCurrent ? snapshots.workerSnapshot : undefined,
+    dispatchSnapshot: fingerprintMatchesCurrent ? snapshots.dispatchSnapshot : undefined
   };
 }

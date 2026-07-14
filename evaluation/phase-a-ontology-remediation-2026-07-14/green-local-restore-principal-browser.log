@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/phase-a-product-remediation-browser.test.ts -t rejects a delayed local-restore response after logout
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 13 skipped (14)
+   Start at  17:18:40
+   Duration  22.61s (transform 306ms, setup 0ms, import 830ms, tests 21.24s, environment 0ms)
+

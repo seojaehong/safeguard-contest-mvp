@@ -1,0 +1,5 @@
+warning: in the working copy of 'components/SafeGuardCommandCenter.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/current-workpack.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/phase-a-share-authority-contract.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/supabase-admin.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/phase-a-product-remediation-browser.test.ts', LF will be replaced by CRLF the next time Git touches it

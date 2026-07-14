@@ -156,7 +156,76 @@ type InputHazardPhotoAnalysis = InputHazardPhotoAnalysisState<InputHazardCandida
 
 let workspaceAuthClient: ReturnType<typeof createClient> | null = null;
 
+type WorkspaceBrowserSessionBinding = {
+  accessToken: string;
+  principalFingerprint: string;
+};
+
+type WorkspaceScopeSelection = {
+  organizationId: string;
+  siteId: string;
+};
+
+type WorkspaceScopeResolution =
+  | { ok: true; workspaceScope: WorkspaceScopeSelection }
+  | { ok: false; message: string };
+
+function hashSessionIdentity(value: string): string {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+function readRecordString(value: Record<string, unknown>, key: string): string {
+  return typeof value[key] === "string" ? value[key] : "";
+}
+
+function supabaseAuthStorageKey(url: string): string | null {
+  try {
+    const projectRef = new URL(url).hostname.split(".")[0] || "";
+    return projectRef ? `sb-${projectRef}-auth-token` : null;
+  } catch (error) {
+    console.warn("workspace auth storage key resolution failed", error);
+    return null;
+  }
+}
+
+function readStoredWorkspaceSessionBinding(): WorkspaceBrowserSessionBinding | null {
+  if (typeof window === "undefined") return null;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return null;
+  const storageKey = supabaseAuthStorageKey(url);
+  if (!storageKey) return null;
+  try {
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return null;
+    const record = parsed as Record<string, unknown>;
+    const accessToken = readRecordString(record, "access_token");
+    if (!accessToken) return null;
+    const expiresAt = typeof record.expires_at === "number" ? record.expires_at : null;
+    if (expiresAt && Date.now() >= expiresAt * 1000) return null;
+    const user = typeof record.user === "object" && record.user !== null && !Array.isArray(record.user)
+      ? record.user as Record<string, unknown>
+      : {};
+    const userId = readRecordString(user, "id") || "unknown-user";
+    return {
+      accessToken,
+      principalFingerprint: hashSessionIdentity(`${userId}:${accessToken}`),
+    };
+  } catch (error) {
+    console.warn("workspace auth storage parse failed", error);
+    return null;
+  }
+}
+
 async function readWorkspaceAccessToken(): Promise<string | null> {
+  const stored = readStoredWorkspaceSessionBinding();
+  if (stored) return stored.accessToken;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
@@ -171,6 +240,71 @@ async function readWorkspaceAccessToken(): Promise<string | null> {
   } catch (error) {
     console.error("workspace photo analysis session read failed", error);
     return null;
+  }
+}
+
+async function readWorkspaceSessionBinding(): Promise<WorkspaceBrowserSessionBinding | null> {
+  const stored = readStoredWorkspaceSessionBinding();
+  if (stored) return stored;
+  const accessToken = await readWorkspaceAccessToken();
+  return accessToken
+    ? {
+        accessToken,
+        principalFingerprint: hashSessionIdentity(`unknown-user:${accessToken}`),
+      }
+    : null;
+}
+
+function parseWorkspaceScopeFromAgentContext(payload: unknown): WorkspaceScopeResolution {
+  const record = typeof payload === "object" && payload !== null && !Array.isArray(payload)
+    ? payload as Record<string, unknown>
+    : {};
+  const sites = Array.isArray(record.sites)
+    ? record.sites.flatMap((site): WorkspaceScopeSelection[] => {
+        if (typeof site !== "object" || site === null || Array.isArray(site)) return [];
+        const siteRecord = site as Record<string, unknown>;
+        const siteId = readRecordString(siteRecord, "id");
+        const organizationId = readRecordString(siteRecord, "organizationId");
+        return siteId && organizationId ? [{ organizationId, siteId }] : [];
+      })
+    : [];
+  if (sites.length === 1) return { ok: true, workspaceScope: sites[0] };
+  if (!sites.length) {
+    return {
+      ok: false,
+      message: "관리자 계정에 연결된 조직과 현장을 확인한 뒤 작업팩을 저장할 수 있습니다.",
+    };
+  }
+  return {
+    ok: false,
+    message: "여러 현장이 연결되어 있어 저장할 조직과 현장을 명시적으로 선택해야 합니다.",
+  };
+}
+
+async function resolveCommandCenterWorkspaceScope(
+  accessToken: string,
+  signal: AbortSignal,
+): Promise<WorkspaceScopeResolution> {
+  try {
+    const response = await fetch("/api/agent/context", {
+      headers: { authorization: `Bearer ${accessToken}` },
+      signal,
+    });
+    const payload: unknown = await response.json().catch((): unknown => ({}));
+    if (!response.ok) {
+      return {
+        ok: false,
+        message: readApiMessage(payload, `조직과 현장 범위를 확인하지 못했습니다: HTTP ${response.status}`),
+      };
+    }
+    return parseWorkspaceScopeFromAgentContext(payload);
+  } catch (error) {
+    if (isAbortError(error)) throw error;
+    console.warn("workspace scope resolution failed", error);
+    return {
+      ok: false,
+      message: "조직과 현장 범위를 확인하지 못해 작업팩 저장을 차단했습니다.",
+    };
   }
 }
 
@@ -1450,6 +1584,13 @@ export function SafeGuardCommandCenter({
     if (!accessToken) {
       return { ok: false, configured: true, workpackId: null, message: "관리자 로그인 후 서버 작업팩을 저장할 수 있습니다." };
     }
+    const workspaceScope = await resolveCommandCenterWorkspaceScope(accessToken, request.signal);
+    if (!canCommitImprovementRequest(request)) {
+      return { ok: false, configured: true, workpackId: null, message: "저장 요청이 새 작업 상태로 대체되었습니다." };
+    }
+    if (!workspaceScope.ok) {
+      return { ok: false, configured: true, workpackId: null, message: workspaceScope.message };
+    }
 
     const response = await fetch("/api/workpacks", {
       method: "POST",
@@ -1459,6 +1600,7 @@ export function SafeGuardCommandCenter({
       },
       body: JSON.stringify({
         data,
+        workspaceScope: workspaceScope.workspaceScope,
       }),
       signal: request.signal,
     });
@@ -1885,18 +2027,22 @@ export function SafeGuardCommandCenter({
       : "브라우저 로컬 작업팩을 미검증 상태로 열었습니다. 서버 권위 연결과 공유는 차단됩니다.");
     if (!candidateWorkpackId) return;
 
-    const requestBinding = `${candidateWorkpackId}:${stored.generationFingerprint}`;
-    const request = workpackRevalidationGateRef.current.begin(requestBinding);
+    let request: BoundRequestHandle<string> | null = null;
     void (async () => {
       try {
-        const accessToken = await readWorkspaceAccessToken();
-        if (!workpackRevalidationGateRef.current.canCommit(request, requestBinding)) return;
-        if (!accessToken) {
+        const session = await readWorkspaceSessionBinding();
+        if (!session) {
           setMessage("브라우저 로컬 작업팩은 미검증 상태입니다. 관리자 로그인 후 서버 권위를 다시 확인할 수 있습니다.");
           return;
         }
+        const requestBinding = [
+          candidateWorkpackId,
+          stored.generationFingerprint,
+          session.principalFingerprint,
+        ].join(":");
+        request = workpackRevalidationGateRef.current.begin(requestBinding);
         const response = await fetch(`/api/workpacks/${encodeURIComponent(candidateWorkpackId)}`, {
-          headers: { authorization: `Bearer ${accessToken}` },
+          headers: { authorization: `Bearer ${session.accessToken}` },
           signal: request.signal,
         });
         const payload: unknown = await response.json().catch((): unknown => ({}));
@@ -1907,6 +2053,15 @@ export function SafeGuardCommandCenter({
         const verified = inspectServerVerifiedWorkpackPayload(payload, candidateWorkpackId);
         if (!verified || !assessExactWorkpackConfirmation(verified.workpack.data.phaseAReview, verified.id).ok) {
           throw new Error("서버 행 ID, revision, 생성 봉인 또는 정확한 Phase A 확인이 일치하지 않습니다.");
+        }
+        const currentSession = await readWorkspaceSessionBinding();
+        if (!currentSession || currentSession.principalFingerprint !== session.principalFingerprint) {
+          workpackRevalidationGateRef.current.abortCurrent();
+          setSavedWorkpackId(null);
+          setSavedWorkpackAuthority(null);
+          setRequiresRevalidation(true);
+          setMessage("관리자 세션이 변경되어 브라우저 로컬 작업팩의 서버 권위 재검증을 폐기했습니다.");
+          return;
         }
         if (!workpackRevalidationGateRef.current.canCommit(request, requestBinding)) return;
         const serverFingerprint = buildGenerationEvidenceFingerprint(verified.workpack.data);
@@ -1919,14 +2074,14 @@ export function SafeGuardCommandCenter({
         setRequiresRevalidation(false);
         setMessage("서버 행 ID, revision, 생성 봉인과 정확한 Phase A 확인을 재검증했습니다.");
       } catch (error) {
-        if (!workpackRevalidationGateRef.current.canCommit(request, requestBinding) || isAbortError(error)) return;
+        if (!request || !workpackRevalidationGateRef.current.canCommit(request, request.binding) || isAbortError(error)) return;
         console.warn("local workpack server revalidation failed", error);
         setSavedWorkpackId(null);
         setSavedWorkpackAuthority(null);
         setRequiresRevalidation(true);
         setMessage("브라우저 로컬 작업팩은 미검증 상태입니다. 서버 권위 연결과 공유·권위 내보내기는 차단됩니다.");
       } finally {
-        workpackRevalidationGateRef.current.finish(request);
+        if (request) workpackRevalidationGateRef.current.finish(request);
       }
     })();
     return () => workpackRevalidationGateRef.current.abortCurrent();

@@ -594,6 +594,7 @@ export class WorkspaceContextResolutionError extends Error {
   constructor(
     readonly code:
       | "workspace_scope_incomplete"
+      | "workspace_scope_required"
       | "workspace_scope_invalid"
       | "workspace_scope_forbidden"
       | "workspace_scope_ambiguous",
@@ -665,8 +666,13 @@ function databaseErrorCode(error: unknown): string | null {
   return isRecord(error) && typeof error.code === "string" ? error.code : null;
 }
 
-function parseWorkspaceScopeSelection(value: unknown): WorkspaceScopeSelection | null {
-  if (typeof value === "undefined" || value === null) return null;
+function parseWorkspaceScopeSelection(value: unknown): WorkspaceScopeSelection {
+  if (typeof value === "undefined" || value === null) {
+    throw new WorkspaceContextResolutionError(
+      "workspace_scope_required",
+      "조직과 현장을 직접 선택해야 작업팩을 저장할 수 있습니다.",
+    );
+  }
   if (!isRecord(value)) {
     throw new WorkspaceContextResolutionError(
       "workspace_scope_invalid",
@@ -694,10 +700,9 @@ export async function resolveAuthenticatedWorkspaceContext(
   client: SupabaseClient<WorkspaceDatabase>,
   user: WorkspaceUser,
   requestedScope: unknown,
-  fallback: { companyName?: string; siteName?: string; companyType?: string; region?: string },
+  _fallback: { companyName?: string; siteName?: string; companyType?: string; region?: string },
 ): Promise<WorkspaceContext> {
   const selection = parseWorkspaceScopeSelection(requestedScope);
-  if (!selection) return ensureWorkspaceContext(client, user, fallback);
 
   const { data: organization, error: organizationError } = await client
     .from("organizations")

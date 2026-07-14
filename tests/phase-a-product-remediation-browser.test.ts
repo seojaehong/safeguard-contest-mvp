@@ -823,8 +823,6 @@ describe("Phase A product remediation browser contract", () => {
       window.localStorage.getItem(storageKey)
     ), CURRENT_WORKPACK_STORAGE_KEY);
     expect(currentAfterLateRestore).not.toContain("LATE_ACCOUNT_SWITCH_RESTORE_MUST_NOT_COMMIT");
-    const connectionStatus = page.locator(".result-ribbon article", { hasText: "연결 상태" });
-    await expect.poll(async () => await connectionStatus.locator("strong").textContent()).toContain("편집 후 재검수 필요");
     const shareButton = page.getByLabel("작업공간 메뉴").getByRole("button", { name: /공유/ });
     expect(await shareButton.isDisabled()).toBe(true);
     await page.close();

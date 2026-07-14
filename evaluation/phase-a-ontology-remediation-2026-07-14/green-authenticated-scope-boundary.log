@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-authenticated-scope-boundary.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-ontology-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  17:14:13
+   Duration  1.10s (transform 305ms, setup 0ms, import 280ms, tests 257ms, environment 0ms)
+

@@ -12,12 +12,17 @@ export const PHASE_A_SHARE_CONTRACT_REVIEW_HEAD =
 export const PHASE_A_SHARE_CONTRACT_BASE_PRODUCT_HEAD =
   "fc2bd1783fcc413981306f689d67bb6c659a985e" as const;
 export const PHASE_A_SHARE_CONTRACT_PRODUCT_HEAD =
-  "7141baac3e0abca146ef6c110093c1c0643760a2" as const;
+  null;
+export const PHASE_A_SHARE_REJECTED_PRODUCT_HEAD =
+  "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4" as const;
+export const PHASE_A_SHARE_REJECTED_MERGE_TREE_OID =
+  "3e09ffbddecccf6bfe5e2a458fd3105d6bc563d9" as const;
 export const PHASE_A_SHARE_SEMANTIC_CONFLICT_PATHS = [
   "app/api/workpacks/[id]/route.ts",
   "components/FieldOperationsWorkspace.tsx",
   "components/SafeGuardCommandCenter.tsx",
   "lib/workpack-commercial-store.ts",
+  "tests/helpers/isolated-next-browser-harness.ts",
   "tests/workpack-generation-evidence-route.test.ts",
   "tests/workpack-share-authority-routes.test.ts",
 ] as const;
