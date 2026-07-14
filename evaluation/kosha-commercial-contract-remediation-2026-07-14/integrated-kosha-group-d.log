@@ -1,0 +1,43 @@
+COMMAND=npm.cmd test -- tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/kosha-guide-corpus-audit.test.ts --maxWorkers=1 --no-file-parallelism
+HEAD=3a74107e3d8363f437815b877533f7342fd02c45
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/kosha-guide-corpus-audit.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts (110 tests | 1 failed) 22763ms
+     × surfaces task-specific KOSHA evidence only through the branch actually executed 17ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE retrieval-to-document evidence > surfaces task-specific KOSHA evidence only through the branch actually executed
+AssertionError: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "prompt-missing-title:technical-support-09-0009-b-e-17",
++   "prompt-missing-title:technical-support-01-0065-d-c-13",
++ ]
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:1947:29
+    1945|       }, items, branch);
+    1946|
+    1947|     expect(result.failures).toEqual([]);
+       |                             ^
+    1948|     expect(result.executionStatus).toBe("tested");
+    1949|     expect(result.retrievalSources).toEqual([branch]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 129 passed (130)
+   Start at  14:00:39
+   Duration  26.53s (transform 859ms, setup 0ms, import 1.82s, tests 22.93s, environment 0ms)
+
+EXIT_CODE=1

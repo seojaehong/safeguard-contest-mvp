@@ -1,0 +1,16 @@
+COMMAND=npm.cmd test -- tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness.test.ts --maxWorkers=1 --no-file-parallelism
+HEAD=3a74107e3d8363f437815b877533f7342fd02c45
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  4 passed (4)
+      Tests  22 passed (22)
+   Start at  14:00:18
+   Duration  12.54s (transform 904ms, setup 0ms, import 2.21s, tests 7.77s, environment 1ms)
+
+EXIT_CODE=0

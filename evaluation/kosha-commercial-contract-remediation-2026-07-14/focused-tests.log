@@ -1,0 +1,16 @@
+COMMAND=npm.cmd test -- tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts
+HEAD=3a74107e3d8363f437815b877533f7342fd02c45
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts
+
+
+ RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  2 passed (2)
+      Tests  40 passed (40)
+   Start at  13:59:40
+   Duration  7.92s (transform 927ms, setup 0ms, import 1.91s, tests 9.78s, environment 0ms)
+
+EXIT_CODE=0
