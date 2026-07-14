@@ -48,9 +48,14 @@ and OpenAI paths remain in place.
   recursively freezes, canonicalizes, and SHA-256 attests the validated packet
   before planner execution. Retrieval, shape, grounding, or question failure
   prevents planner invocation and output.
-- Planner text must return packet content whose digest equals the attested
-  digest. Object identity is irrelevant; same-content clones pass, while
-  mutation, partial content, or a different question fails before text emit.
+- Planner text must return a separate packet object whose digest equals the
+  attested digest and whose root, nested objects, and nested arrays are all
+  frozen. The planner input object itself, mutable clones, root-only frozen
+  clones, mutation, partial content, and different questions fail before emit.
+- Adapter-level integration tests mock only `searchSafetyReferences`; the real
+  `executeClawTool`, `buildHarnessAgentResult`, scoped executor, and adapter
+  validator accept grounded production packets and block empty/failed search
+  shapes before planner execution.
 - Hermes receives broker-authenticated tenant context, prompt, cancellation,
   packet-attested text streaming, and a read-only tool-intent callback. It
   receives no Supabase client, MCP token, write callback, or publish callback.
@@ -130,13 +135,30 @@ KOSHA grounding, different-question output, and same-content clone acceptance.
 The final Hermes test file has 24 passing tests, including trimmed-prompt
 normalization.
 
+### Fresh Review RED Evidence at `2b169de`
+
+The next independent review rejected `2b169de` at P2/P3. Two isolated RED
+executions were observed before implementation:
+
+1. Planner resubmitted the exact input packet object and emitted text; 1 failed
+   and 24 skipped.
+2. Planner submitted a mutable `structuredClone` with the same digest and
+   emitted text; 1 failed and 24 skipped.
+
+GREEN coverage additionally proves that root-only freezing is insufficient,
+recursive freezing includes nested arrays and nested evidence objects, and a
+recursively frozen separate object with the attested digest is accepted. Three
+adapter-level production-path tests execute the real Harness builder: grounded
+searches call planner once, while empty and failed searches call planner zero
+times. The final Hermes test file has 30 passing tests.
+
 ### P2/P3 Final GREEN Evidence
 
 | Check | Reproducible command | Exit | Result |
 | --- | --- | ---: | --- |
-| Focused tests | `npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism` | 0 | 12 files passed; 193 tests passed; 0 failed; 20.73 s |
+| Focused tests | `npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism` | 0 | 12 files passed; 199 tests passed; 0 failed; 24.46 s |
 | TypeScript strict | `npm.cmd run typecheck` | 0 | `tsc --noEmit --incremental false` passed |
-| Production build | `npm.cmd run build` | 0 | Next.js 15.5.20; compiled in 14.4 s; static pages 27/27 |
+| Production build | `npm.cmd run build` | 0 | Next.js 15.5.20; compiled in 22.4 s; static pages 27/27 |
 
 Tracked command output is in `focused-final.txt`, `typecheck-final.txt`, and
 `build-final.txt` beside this audit. The evidence does not cite gitignored or

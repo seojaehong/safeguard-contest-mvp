@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-14T23:08:00.6414138+09:00",
+  "generatedAt": "2026-07-14T23:26:36.2939555+09:00",
   "authoritativeBaseSha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
   "branch": "feat/hermes-engine-adapter-24h-20260714",
   "scope": {
@@ -12,8 +12,8 @@
     "dataFilesChanged": 0
   },
   "tdd": {
-    "redCasesObserved": 18,
-    "greenCasesResolved": 18,
+    "redCasesObserved": 20,
+    "greenCasesResolved": 20,
     "cases": [
       "explicit local Hermes mode gate",
       "versioned authority metadata",
@@ -32,7 +32,9 @@
       "required search lane success",
       "current prompt question binding",
       "immutable packet content digest",
-      "nested retrieval status validation"
+      "nested retrieval status validation",
+      "planner input packet resubmission rejection",
+      "recursive frozen output packet proof"
     ]
   },
   "verification": {
@@ -46,9 +48,9 @@
     "focusedFinal": {
       "status": "passed",
       "testFilesPassed": 12,
-      "testsPassed": 193,
+      "testsPassed": 199,
       "testsFailed": 0,
-      "durationSeconds": 20.73,
+      "durationSeconds": 24.46,
       "exitCode": 0
     },
     "typecheckFinal": {
@@ -91,7 +93,7 @@
       "command": "npm.cmd run build",
       "exitCode": 0,
       "nextVersion": "15.5.20",
-      "compileSeconds": 14.4,
+      "compileSeconds": 22.4,
       "staticPagesGenerated": 27,
       "staticPagesExpected": 27
     }
@@ -153,9 +155,9 @@
         "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism",
         "exitCode": 0,
         "testFilesPassed": 12,
-        "testsPassed": 193,
+        "testsPassed": 199,
         "testsFailed": 0,
-        "durationSeconds": 20.73,
+        "durationSeconds": 24.46,
         "log": "evaluation/hermes-engine-adapter-24h-20260714/focused-final.txt"
       },
       {
@@ -168,7 +170,7 @@
         "name": "buildFinal",
         "command": "npm.cmd run build",
         "exitCode": 0,
-        "compileSeconds": 14.4,
+        "compileSeconds": 22.4,
         "staticPages": "27/27",
         "log": "evaluation/hermes-engine-adapter-24h-20260714/build-final.txt"
       }
@@ -277,8 +279,53 @@
         "preload other question",
         "same-object mutation",
         "output other question",
-        "same-content clone acceptance",
+        "same-content clone acceptance at this checkpoint; mutable clone gap was rejected by the next review",
         "trimmed current prompt binding"
+      ]
+    },
+    "productionFileCount": 10,
+    "authoritativeIntegrationPerformed": false
+  },
+  "outputFreezeAndProductionPathReview": {
+    "baseSha": "2b169de7163673ada9d6750909551cae9e468a64",
+    "reviewVerdict": "rejected",
+    "findingCounts": { "P2": 1, "P3": 1 },
+    "observedRedCases": [
+      {
+        "id": "planner-input-packet-resubmission",
+        "result": "1 failed, 24 skipped; exact planner input object was accepted"
+      },
+      {
+        "id": "mutable-structured-clone",
+        "result": "1 failed, 24 skipped; mutable same-content clone was accepted"
+      }
+    ],
+    "outputPacketContract": {
+      "requiresSeparateObject": true,
+      "requiresRecursiveFreeze": true,
+      "rootOnlyFreezeAccepted": false,
+      "mutableStructuredCloneAccepted": false,
+      "acceptanceComparison": "SHA-256 attested content digest plus normalized question binding"
+    },
+    "adapterLevelProductionPath": {
+      "path": "executeClawTool -> buildHarnessAgentResult",
+      "mockedBoundary": "searchSafetyReferences only",
+      "buildHarnessAgentResultMocked": false,
+      "groundedProductionPacketPlannerCalls": 1,
+      "emptySearchPlannerCalls": 0,
+      "failedSearchPlannerCalls": 0
+    },
+    "behaviorTests": {
+      "hermesFilePassed": 30,
+      "covers": [
+        "exact planner input object rejection",
+        "mutable structured clone rejection",
+        "root-only frozen packet rejection",
+        "recursively frozen separate packet acceptance",
+        "nested evidence array freeze proof",
+        "real Harness builder grounded packet acceptance",
+        "real Harness builder empty search fail-closed",
+        "real Harness builder failed search fail-closed"
       ]
     },
     "productionFileCount": 10,
