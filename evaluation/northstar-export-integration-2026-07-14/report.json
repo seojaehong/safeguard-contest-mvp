@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-07-14T13:30:00+09:00",
+  "baseSha": "01ba1c9",
+  "branch": "feat/northstar-export-integration",
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "candidateProductCommits": [
+    "9556963",
+    "8282d1a",
+    "c78271f",
+    "7cdea4e"
+  ],
+  "excludedCommits": [
+    "b6e3221"
+  ],
+  "verification": {
+    "focusedTestFiles": 3,
+    "focusedTestsPassed": 56,
+    "reconciledTestFiles": 2,
+    "reconciledTestsPassed": 46,
+    "typecheck": "pass"
+  },
+  "integrationStatus": "pending-independent-review"
+}

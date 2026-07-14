@@ -107,11 +107,12 @@ describe("user-visible Korean copy contract", () => {
 
   it("maps raw SIF gate identifiers and statuses only at the render boundary", () => {
     const source = read("components/AiConnectPanel.tsx");
-    expect(source).toContain('"apply-sif-only-migration": "SIF 전용 마이그레이션 적용"');
-    expect(source).toContain('"migration-required": "마이그레이션 필요"');
-    expect(source).toContain("formatSifGateId(sifGate.operatorGate.gateId)");
-    expect(source).toContain("formatSifRuntimeStatus(sifGate.postMigrationVerification.status)");
-    expect(source).toContain("formatSifRuntimeStatus(sifGate.runtimeDbProbe.status)");
+    const presentation = read("lib/web-safe-presentation.ts");
+    expect(presentation).toContain('"apply-sif-only-migration": "SIF 전용 마이그레이션 적용"');
+    expect(presentation).toContain('"migration-required": "마이그레이션 필요"');
+    expect(source).toContain("formatSifGateIdForPresentation(sifGate.operatorGate.gateId)");
+    expect(source).toContain("formatSifRuntimeStatusForPresentation(sifGate.postMigrationVerification.status)");
+    expect(source).toContain("formatSifRuntimeStatusForPresentation(sifGate.runtimeDbProbe.status)");
     expect(source).not.toContain("<dd>{sifGate.operatorGate.gateId}</dd>");
     expect(source).not.toContain("{sifGate.postMigrationVerification.status} ·");
     expect(source).not.toContain("운영 DB 점검: {sifGate.runtimeDbProbe.status}");
@@ -145,7 +146,7 @@ describe("user-visible Korean copy contract", () => {
     const center = read("components/ReportsDownloadCenter.tsx");
     expect(page).toContain("위험성평가 개선 전/개선 후");
     expect(center).toContain("위험 개선 전/개선 후");
-    expect(center).toContain("개선 전/개선 후 사진만 포함");
+    expect(center).toContain("개선 전/개선 후 사진 포함 승인 항목만");
     expect(center).toContain("개선 전/개선 후 사진 포함 승인");
   });
 });
