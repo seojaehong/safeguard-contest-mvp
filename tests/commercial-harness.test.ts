@@ -167,6 +167,13 @@ const V5_QUERY_UNRELATED_DIRECT_MARKERS = {
   document: "V5_QUERY_UNRELATED_DIRECT_DOCUMENT"
 } as const;
 
+const V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_MARKERS = {
+  title: "V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_TITLE",
+  summary: "V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_SUMMARY",
+  control: "V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_CONTROL",
+  document: "V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_DOCUMENT"
+} as const;
+
 function v5CollisionGuide(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenceItem {
   return verifiedKoshaReference({
     id: "kosha-v5-forklift-pedestrian-collision-guide",
@@ -255,6 +262,18 @@ function v5QueryUnrelatedDirectEvidence(): SafetyReferenceItem {
     risk_tags: ["화재"],
     primary_documents: ["위험성평가표", "TBM 브리핑", V5_QUERY_UNRELATED_DIRECT_MARKERS.document],
     controls: [V5_QUERY_UNRELATED_DIRECT_MARKERS.control, "연료 밸브 차단과 점화원 통제"]
+  });
+}
+
+function v6MixedQueryThirdFamilyFireDirectEvidence(): SafetyReferenceItem {
+  return v5DirectParent({
+    id: "direct-v6-mixed-query-third-family-fire",
+    title: `${V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_MARKERS.title} LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거`,
+    summary: `${V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_MARKERS.summary} 보행자 통행구역의 LPG 지게차 연료 누출 가스가 점화되어 화재가 발생할 수 있다.`,
+    keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
+    risk_tags: ["화재"],
+    primary_documents: ["위험성평가표", "TBM 브리핑", V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_MARKERS.document],
+    controls: [V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_MARKERS.control, "연료 밸브 차단과 점화원 통제"]
   });
 }
 
@@ -933,6 +952,46 @@ describe("DB harness packet", () => {
     expect(buildHarnessPromptContext(packet)).toContain('"parentEvidenceReady":false');
     for (const marker of Object.values(V5_QUERY_UNRELATED_DIRECT_MARKERS)) {
       expect(serializedSurfaces).not.toContain(marker);
+    }
+  });
+
+  it("v6 blocks third-family direct evidence from mixed-query packet, prompt, answer, and risk rows", () => {
+    const unrelatedFireDirect = v6MixedQueryThirdFamilyFireDirectEvidence();
+    const packet = buildPublicDbHarnessPacket(buildDbHarnessPacket({
+      question: "지게차 보행자 충돌과 배전반 감전 위험을 검토해줘",
+      references: [v5CollisionGuide(), unrelatedFireDirect]
+    }));
+    const response = buildMockAskResponse(
+      "지게차 보행자 충돌과 배전반 감전",
+      mockSearchResults,
+      "mock",
+      "테스트"
+    );
+    const riskRows = buildSafetyReferenceRiskRows(
+      response,
+      [
+        ...packet.directEvidence,
+        ...packet.sifCases,
+        ...packet.supportingEvidence
+      ],
+      "실내 작업",
+      packet.question
+    );
+    const serializedPublicSurfaces = JSON.stringify({
+      packet,
+      promptContext: buildHarnessPromptContext(packet),
+      answer: buildDbHarnessAnswer(packet),
+      practicalPoints: buildDbHarnessPracticalPoints(packet),
+      riskRows
+    });
+
+    expect(packet.directEvidence).toEqual([]);
+    expect(packet.ontologyChecklist.status).toBe("review_required");
+    expect(packet.supportingEvidence.find((item) => item.id === unrelatedFireDirect.id)).toBeUndefined();
+    expect(riskRows).toEqual([]);
+    expect(buildHarnessPromptContext(packet)).toContain('"parentEvidenceReady":false');
+    for (const marker of Object.values(V6_MIXED_QUERY_THIRD_FAMILY_DIRECT_MARKERS)) {
+      expect(serializedPublicSurfaces).not.toContain(marker);
     }
   });
 
