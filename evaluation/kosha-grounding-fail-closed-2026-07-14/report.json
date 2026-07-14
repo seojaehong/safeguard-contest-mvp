@@ -106,6 +106,26 @@
     "mapping": "Merge the three source commits in listed order onto ea7aa7223a056c884d5b0ba55563d602af328451; virtual merge-tree is conflict-free.",
     "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/integration-evidence.log"
   },
+  "appliedIntegration": {
+    "productHead": "271d934574212ed1eee922cd8180acba8aca6496",
+    "mappedCommits": [
+      "ab451d31b095576cc2854e9a3743365d24bd39e0",
+      "8f0688ca8096c667deeaab5d7ba9f6b120d32ca3",
+      "265168fa7ce034ad946adb66145592cd7a781116",
+      "271d934574212ed1eee922cd8180acba8aca6496"
+    ],
+    "focusedTests": {
+      "status": "passed",
+      "files": 11,
+      "tests": 213,
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-focused-tests.log"
+    },
+    "strictTypecheck": {
+      "status": "passed",
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/integrated-typecheck.log"
+    },
+    "fullSuiteBuildAnd108DeferredToFinalProductHead": true
+  },
   "readinessClaims": {
     "full1039CurrentCorpusReady": false,
     "databaseLiveReady": false,

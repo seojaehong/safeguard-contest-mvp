@@ -41,6 +41,15 @@
 - 정확한 적용 순서는 위 세 source commit을 `ea7aa72` 위에 순서대로 merge 또는 cherry-pick하는 것이다. 상세 경로와 commit mapping은 `integration-evidence.log`에 있다.
 - final frontend sourceIdentity/108 evidence는 재생성하지 않았다.
 
+## Applied Integration Verification
+
+- 제품 통합 HEAD: `271d934574212ed1eee922cd8180acba8aca6496`.
+- 통합 커밋 매핑: `ab451d31b095576cc2854e9a3743365d24bd39e0` → `8f0688ca8096c667deeaab5d7ba9f6b120d32ca3` → `265168fa7ce034ad946adb66145592cd7a781116` → `271d934574212ed1eee922cd8180acba8aca6496`.
+- 통합 HEAD 집중 테스트: 11 files, 213 tests passed. `integrated-focused-tests.log`.
+- 통합 HEAD strict typecheck: passed. `integrated-typecheck.log`.
+- 이 검증은 source worktree 로그를 재사용하지 않고 `feat/phase-a-evidence-integration`에서 새로 실행했다.
+- final full suite, production build, frontend sourceIdentity/108 브라우저 행렬은 다른 제품 후보 통합이 끝난 최종 HEAD에서 실행한다.
+
 ## Scope Integrity
 
 DB, schema, migration, data, corpus import, embeddings, package/lock, env, components/UI를 변경하지 않았다. 정상 build 외에 frontend browser/108 증거 실행도 하지 않았다.
