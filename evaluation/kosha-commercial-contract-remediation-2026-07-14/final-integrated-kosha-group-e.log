@@ -1,9 +1,10 @@
-verification=integrated-kosha-group-e
-productSha=f74c5972a4c776bfc9e1a924d3bf50ce55b503a2
-productTree=99e161f1ca4880c5470e694df9fd02b8230c29cd
+verification=final-integrated-kosha-group-e
+verificationSeries=f74c5972a4c776bfc9e1a924d3bf50ce55b503a2+5919d58bbf7de1027f4b4118d5ec997fd4865f9f
+finalProductSha=5919d58bbf7de1027f4b4118d5ec997fd4865f9f
+finalProductTree=6f2ed6684543f696101bd88150d44c77acd1ab6a
 authoritativeMain=920c7f360688352156de4854b4957a9f2f1f0e43
 command=npm.cmd test -- tests/commercial-harness.test.ts tests/safety-reference-relevance.test.ts tests/safety-reference-hybrid.test.ts --maxWorkers=1 --no-file-parallelism
-startedAt=2026-07-14T15:37:29.6694872+09:00
+startedAt=2026-07-14T15:47:02.3026554+09:00
 
 > safeclaw@0.1.0 test
 > vitest run tests/commercial-harness.test.ts tests/safety-reference-relevance.test.ts tests/safety-reference-hybrid.test.ts --maxWorkers=1 --no-file-parallelism
@@ -14,9 +15,9 @@ startedAt=2026-07-14T15:37:29.6694872+09:00
 
  Test Files  3 passed (3)
       Tests  84 passed (84)
-   Start at  15:37:31
-   Duration  8.07s (transform 719ms, setup 0ms, import 1.24s, tests 5.10s, environment 0ms)
+   Start at  15:47:04
+   Duration  7.61s (transform 732ms, setup 0ms, import 1.26s, tests 4.56s, environment 0ms)
 
-endedAt=2026-07-14T15:37:39.9071614+09:00
-elapsedSeconds=10.238
+endedAt=2026-07-14T15:47:12.0859948+09:00
+elapsedSeconds=9.783
 exitCode=0

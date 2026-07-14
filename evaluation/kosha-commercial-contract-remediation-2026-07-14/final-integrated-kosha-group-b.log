@@ -1,10 +1,9 @@
-phase=product-verification-v3
-group=B
-head=f74c5972a4c776bfc9e1a924d3bf50ce55b503a2
-tree=99e161f1ca4880c5470e694df9fd02b8230c29cd
+verification=final-integrated-kosha-group-b
+finalProductSha=5919d58bbf7de1027f4b4118d5ec997fd4865f9f
+finalProductTree=6f2ed6684543f696101bd88150d44c77acd1ab6a
 authoritativeMain=920c7f360688352156de4854b4957a9f2f1f0e43
-startedAt=2026-07-14T15:31:16.2436784+09:00
 command=npm.cmd test -- tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T15:44:26.0888703+09:00
 
 > safeclaw@0.1.0 test
 > vitest run tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts --maxWorkers=1 --no-file-parallelism
@@ -15,8 +14,9 @@ command=npm.cmd test -- tests/kosha-grounding-fail-closed.test.ts tests/kosha-cu
 
  Test Files  2 passed (2)
       Tests  26 passed (26)
-   Start at  15:31:18
-   Duration  18.77s (transform 694ms, setup 0ms, import 1.57s, tests 16.04s, environment 0ms)
+   Start at  15:44:28
+   Duration  19.58s (transform 741ms, setup 0ms, import 1.65s, tests 16.81s, environment 0ms)
 
-elapsedSeconds=20.725
+endedAt=2026-07-14T15:44:47.7863807+09:00
+elapsedSeconds=21.698
 exitCode=0
