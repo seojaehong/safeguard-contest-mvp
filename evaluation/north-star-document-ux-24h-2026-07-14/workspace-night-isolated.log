@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workspace-layout-regression.test.ts -t Night document editor
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 23 skipped (24)
+   Start at  21:41:58
+   Duration  31.81s (transform 439ms, setup 0ms, import 1.11s, tests 29.93s, environment 0ms)
+
+EXPLICIT_EXIT_CODE=0
