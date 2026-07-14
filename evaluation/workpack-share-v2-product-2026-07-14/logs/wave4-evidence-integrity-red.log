@@ -1,0 +1,203 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-product-evidence.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+ ❯ tests/workpack-share-v2-product-evidence.test.ts (12 tests | 5 failed) 5588ms
+     × accepts only browser evidence bound to the committed amendment 487ms
+     × rejects the stale_product_remote_sha evidence attack fail-closed 455ms
+     × rejects the changed_file_census_tampered evidence attack fail-closed 511ms
+     × rejects the verification_log_hash_tampered evidence attack fail-closed 473ms
+     × rejects the restoration_mismatch_reintroduced evidence attack fail-closed 503ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-product-evidence.test.ts > Share v2 product evidence contract > accepts only browser evidence bound to the committed amendment
+AssertionError: [product-evidence-invalid] evidence keys: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
+    'amendment',
+    'authorityObservations',
+    'browserRun',
+    'census',
+    'evidenceId',
++   'generatedArtifactRestoration',
++   'productCommit',
+    'reviewBoundary',
+    'schemaVersion',
+    'status',
++   'verificationChecks'
+  ]
+
+: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/workpack-share-v2-product-evidence.test.ts:38:42
+     36|     const result = runValidator();
+     37|
+     38|     expect(result.status, result.stderr).toBe(0);
+       |                                          ^
+     39|     expect(result.stdout).toContain("product-evidence-valid");
+     40|     expect(result.stdout).toContain('"executedCaseCount":128');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/workpack-share-v2-product-evidence.test.ts > Share v2 product evidence contract > rejects the stale_product_remote_sha evidence attack fail-closed
+AssertionError: expected 'C:\Users\iceam\dev\safeguard-contest-…' to contain '[product-evidence-rejected:stale_prod…'
+
+- Expected
++ Received
+
+- [product-evidence-rejected:stale_product_remote_sha]
++ C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:390
++     throw new Error(`unsupported arguments: ${arguments_.join(" ")}`);
++     ^
++
++ Error: unsupported arguments: --attack stale_product_remote_sha
++     at parseArguments (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:390:11)
++     at main (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:396:22)
++     at Object.<anonymous> (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:431:1)
++     at Module._compile (node:internal/modules/cjs/loader:1761:14)
++     at Object..js (node:internal/modules/cjs/loader:1893:10)
++     at Module.load (node:internal/modules/cjs/loader:1481:32)
++     at Module._load (node:internal/modules/cjs/loader:1300:12)
++     at TracingChannel.traceSync (node:diagnostics_channel:328:14)
++     at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
++     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
++
++ Node.js v24.12.0
++
+
+ ❯ tests/workpack-share-v2-product-evidence.test.ts:48:27
+     46|
+     47|     expect(result.status).toBe(1);
+     48|     expect(result.stderr).toContain(`[product-evidence-rejected:${atta…
+       |                           ^
+     49|     expect(result.stdout).not.toContain("product-evidence-valid");
+     50|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/workpack-share-v2-product-evidence.test.ts > Share v2 product evidence contract > rejects the changed_file_census_tampered evidence attack fail-closed
+AssertionError: expected 'C:\Users\iceam\dev\safeguard-contest-…' to contain '[product-evidence-rejected:changed_fi…'
+
+- Expected
++ Received
+
+- [product-evidence-rejected:changed_file_census_tampered]
++ C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:390
++     throw new Error(`unsupported arguments: ${arguments_.join(" ")}`);
++     ^
++
++ Error: unsupported arguments: --attack changed_file_census_tampered
++     at parseArguments (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:390:11)
++     at main (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:396:22)
++     at Object.<anonymous> (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:431:1)
++     at Module._compile (node:internal/modules/cjs/loader:1761:14)
++     at Object..js (node:internal/modules/cjs/loader:1893:10)
++     at Module.load (node:internal/modules/cjs/loader:1481:32)
++     at Module._load (node:internal/modules/cjs/loader:1300:12)
++     at TracingChannel.traceSync (node:diagnostics_channel:328:14)
++     at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
++     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
++
++ Node.js v24.12.0
++
+
+ ❯ tests/workpack-share-v2-product-evidence.test.ts:48:27
+     46|
+     47|     expect(result.status).toBe(1);
+     48|     expect(result.stderr).toContain(`[product-evidence-rejected:${atta…
+       |                           ^
+     49|     expect(result.stdout).not.toContain("product-evidence-valid");
+     50|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/workpack-share-v2-product-evidence.test.ts > Share v2 product evidence contract > rejects the verification_log_hash_tampered evidence attack fail-closed
+AssertionError: expected 'C:\Users\iceam\dev\safeguard-contest-…' to contain '[product-evidence-rejected:verificati…'
+
+- Expected
++ Received
+
+- [product-evidence-rejected:verification_log_hash_tampered]
++ C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:390
++     throw new Error(`unsupported arguments: ${arguments_.join(" ")}`);
++     ^
++
++ Error: unsupported arguments: --attack verification_log_hash_tampered
++     at parseArguments (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:390:11)
++     at main (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:396:22)
++     at Object.<anonymous> (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:431:1)
++     at Module._compile (node:internal/modules/cjs/loader:1761:14)
++     at Object..js (node:internal/modules/cjs/loader:1893:10)
++     at Module.load (node:internal/modules/cjs/loader:1481:32)
++     at Module._load (node:internal/modules/cjs/loader:1300:12)
++     at TracingChannel.traceSync (node:diagnostics_channel:328:14)
++     at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
++     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
++
++ Node.js v24.12.0
++
+
+ ❯ tests/workpack-share-v2-product-evidence.test.ts:48:27
+     46|
+     47|     expect(result.status).toBe(1);
+     48|     expect(result.stderr).toContain(`[product-evidence-rejected:${atta…
+       |                           ^
+     49|     expect(result.stdout).not.toContain("product-evidence-valid");
+     50|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/workpack-share-v2-product-evidence.test.ts > Share v2 product evidence contract > rejects the restoration_mismatch_reintroduced evidence attack fail-closed
+AssertionError: expected 'C:\Users\iceam\dev\safeguard-contest-…' to contain '[product-evidence-rejected:restoratio…'
+
+- Expected
++ Received
+
+- [product-evidence-rejected:restoration_mismatch_reintroduced]
++ C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:390
++     throw new Error(`unsupported arguments: ${arguments_.join(" ")}`);
++     ^
++
++ Error: unsupported arguments: --attack restoration_mismatch_reintroduced
++     at parseArguments (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:390:11)
++     at main (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:396:22)
++     at Object.<anonymous> (C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\workpack-share-v2-product\evaluation\workpack-share-v2-product-2026-07-14\validate-product-evidence.cjs:431:1)
++     at Module._compile (node:internal/modules/cjs/loader:1761:14)
++     at Object..js (node:internal/modules/cjs/loader:1893:10)
++     at Module.load (node:internal/modules/cjs/loader:1481:32)
++     at Module._load (node:internal/modules/cjs/loader:1300:12)
++     at TracingChannel.traceSync (node:diagnostics_channel:328:14)
++     at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
++     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
++
++ Node.js v24.12.0
++
+
+ ❯ tests/workpack-share-v2-product-evidence.test.ts:48:27
+     46|
+     47|     expect(result.status).toBe(1);
+     48|     expect(result.stderr).toContain(`[product-evidence-rejected:${atta…
+       |                           ^
+     49|     expect(result.stdout).not.toContain("product-evidence-valid");
+     50|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 7 passed (12)
+   Start at  10:11:20
+   Duration  6.37s (transform 39ms, setup 0ms, import 66ms, tests 5.59s, environment 0ms)
+
+[evidence-exit-code] 1

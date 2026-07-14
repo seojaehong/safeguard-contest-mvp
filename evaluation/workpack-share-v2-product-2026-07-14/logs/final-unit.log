@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-server-config.test.ts tests/reviewed-localization-envelope.test.ts tests/reviewed-localization-route.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/foreign-worker-languages.test.ts tests/workpack-commercial.test.ts tests/channel-availability.test.ts tests/channel-availability-route.test.ts tests/dispatch-logs-route.test.ts tests/workpack-share-authority-routes.test.ts tests/workspace-pages.test.ts tests/workflow-share-client.test.ts tests/workflow-share-panel-behavior.test.ts tests/workspace-workers.test.ts tests/frontend-shared-surfaces.test.ts tests/product-module-shell.test.ts tests/documents-editor-layout.test.ts tests/workpack-share-v2-contract-amendment.test.ts tests/workpack-share-v2-product-evidence.test.ts tests/workpack-share-v2-browser.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+
+ Test Files  21 passed (21)
+      Tests  173 passed | 128 skipped (301)
+   Start at  09:53:08
+   Duration  208.00s (transform 923ms, setup 0ms, import 3.48s, tests 192.20s, environment 2ms)
+
+[evidence-exit-code] 0

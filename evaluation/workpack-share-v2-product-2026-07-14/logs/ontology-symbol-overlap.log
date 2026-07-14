@@ -1,0 +1,193 @@
+[product-exact-base] f45bba17bcce0d8ebb2690f82d014dbe42ae8191
+[product] fae7059e588c5b571cf4fb5918884cd8c5ef1365
+[ontology] e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4
+
+=== components/CurrentWorkpackModules.tsx : PRODUCT ===
+@@ -1342 +1341,0 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
+=== components/CurrentWorkpackModules.tsx : ONTOLOGY ===
+@@ -20,0 +21,5 @@ import {
+@@ -609 +614,3 @@ function buildDerivedDocumentText(data: AskResponse, key: DocumentKey) {
+@@ -612 +619,4 @@ function buildDerivedDocumentText(data: AskResponse, key: DocumentKey) {
+@@ -653 +663 @@ function normalizeEvidenceSummary(summary: string) {
+-function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
++function buildEvidenceCards(data: AskResponse, phaseAState: PhaseAReviewUiState): EvidenceCard[] {
+@@ -660 +670 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
+@@ -672 +682 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
+@@ -683 +693 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
+@@ -698 +708 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
+@@ -713 +723,3 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
+@@ -725 +737 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
+@@ -730,11 +742,16 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
+-  const knowledgeCards = (data.externalData.safetyKnowledge?.matches || []).map((item): EvidenceCard => ({
++  const knowledgeCards = (data.externalData.safetyKnowledge?.matches || []).map((item): EvidenceCard => {
+@@ -745 +762,9 @@ function buildEvidenceCards(data: AskResponse): EvidenceCard[] {
+-function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard[] }) {
++function EvidenceCardList({
+@@ -764 +789,5 @@ function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard
+@@ -985 +1014,2 @@ export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
+-  const evidenceCards = buildEvidenceCards(current.data);
++  const phaseAState = buildPhaseAReviewUiState(current.data.phaseAReview);
++  const evidenceCards = buildEvidenceCards(current.data, phaseAState);
+@@ -994,5 +1024,7 @@ export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
+@@ -1001 +1033 @@ export function CurrentEvidenceModule({ sample }: { sample: AskResponse }) {
+
+=== components/FieldOperationsWorkspace.tsx : PRODUCT ===
+@@ -35,0 +36 @@ import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
+@@ -841,0 +843,2 @@ export function FieldOperationsWorkspace({
+@@ -849,0 +853,2 @@ export function FieldOperationsWorkspace({
+@@ -1231 +1235,0 @@ export function FieldOperationsWorkspace({
+@@ -1232,0 +1237 @@ export function FieldOperationsWorkspace({
+@@ -1235,2 +1239,0 @@ export function FieldOperationsWorkspace({
+@@ -1237,0 +1241,2 @@ export function FieldOperationsWorkspace({
+@@ -1263 +1267,0 @@ export function FieldOperationsWorkspace({
+@@ -1264,0 +1269 @@ export function FieldOperationsWorkspace({
+@@ -1267,2 +1271,0 @@ export function FieldOperationsWorkspace({
+@@ -1269,0 +1273,2 @@ export function FieldOperationsWorkspace({
+=== components/FieldOperationsWorkspace.tsx : ONTOLOGY ===
+@@ -24,0 +25 @@ import {
+@@ -30,0 +32,6 @@ import {
+@@ -76,0 +84,117 @@ type ClawContextResponse = { sites?: ClawSiteOption[] };
++type PhaseAConfirmationStatus =
++type PhaseAConfirmationBinding = {
++type GenerationEvidenceUiBinding = {
++const PHASE_A_UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
++const PHASE_A_SIGNATURE_PATTERN = /^[a-f0-9]{64}$/;
++function isRecord(value: unknown): value is Record<string, unknown> {
++function readGenerationEvidenceUiBinding(data: AskResponse): GenerationEvidenceUiBinding | null {
++  const evidence: unknown = data.generationEvidence;
++  const digest = await globalThis.crypto.subtle.digest(
++  const hex = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
++  const stored = parseStoredCurrentWorkpack(JSON.stringify({
++  const workpack = stored.data;
++  const review = parsePhaseAReview(workpack.phaseAReview);
++  const evidenceBinding = readGenerationEvidenceUiBinding(workpack);
++  const confirmation = review.humanConfirmation;
++  const sessionFingerprint = await buildBrowserSessionFingerprint(binding.sessionAccessToken);
+@@ -571,0 +696 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
++  const phaseAState = buildPhaseAReviewUiState(data.phaseAReview);
+@@ -583,2 +708,2 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
+@@ -609 +734 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
+@@ -628 +753 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
+@@ -842,0 +968 @@ export function FieldOperationsWorkspace({
+@@ -850,0 +977 @@ export function FieldOperationsWorkspace({
+@@ -855 +981,0 @@ export function FieldOperationsWorkspace({
+-  const editorDataRef = useRef(data);
+@@ -857,0 +984 @@ export function FieldOperationsWorkspace({
++  const onWorkpackStateChangeRef = useRef(onWorkpackStateChange);
+@@ -879,0 +1007,4 @@ export function FieldOperationsWorkspace({
++  const [phaseAConfirmationBinding, setPhaseAConfirmationBinding] = useState<PhaseAConfirmationBinding | null>(null);
++  const [phaseAConfirmationStatus, setPhaseAConfirmationStatus] = useState<PhaseAConfirmationStatus>("idle");
++  const [phaseAConfirmationMessage, setPhaseAConfirmationMessage] = useState("");
++  const [phaseAConfirmationRetryId, setPhaseAConfirmationRetryId] = useState<string | null>(null);
+@@ -959,0 +1091,32 @@ export function FieldOperationsWorkspace({
++  const parsedPhaseAReview = useMemo(
++  const phaseAPlanBinding = parsedPhaseAReview?.planBinding ?? null;
++  const generationEvidenceBinding = useMemo(
++  const currentGenerationFingerprint = useMemo(
++  const generationBindingMatches = Boolean(
++  const phaseAReadyForConfirmation = Boolean(
++  const confirmationBindingIsCurrent = Boolean(
+@@ -1019,0 +1183 @@ export function FieldOperationsWorkspace({
+@@ -1022 +1186,6 @@ export function FieldOperationsWorkspace({
+@@ -1032,0 +1202,17 @@ export function FieldOperationsWorkspace({
+@@ -1049 +1235 @@ export function FieldOperationsWorkspace({
+@@ -1125,2 +1310,0 @@ export function FieldOperationsWorkspace({
+@@ -1139,0 +1324,26 @@ export function FieldOperationsWorkspace({
+@@ -1172,0 +1383,122 @@ export function FieldOperationsWorkspace({
+@@ -1225,0 +1558,63 @@ export function FieldOperationsWorkspace({
++  const phaseAUiState = buildPhaseAReviewUiState(parsedPhaseAReview ?? undefined);
++  const phaseAAlreadyConfirmed = parsedPhaseAReview?.humanConfirmation.status === "confirmed";
++  const phaseAConfirmationBusy = phaseAConfirmationStatus === "saving" || phaseAConfirmationStatus === "confirming";
++  const showPhaseASaveAction = Boolean(
++  const phaseAConfirmButtonLabel = phaseAConfirmationStatus === "conflict"
++  const phaseAConfirmDisabled = phaseAConfirmationBusy ||
+@@ -1297 +1692 @@ export function FieldOperationsWorkspace({
+@@ -1302,0 +1698,32 @@ export function FieldOperationsWorkspace({
+
+=== components/SafeGuardCommandCenter.tsx : PRODUCT ===
+@@ -51,0 +52 @@ import {
+@@ -53 +54,2 @@ import {
+@@ -54,0 +57 @@ import {
+@@ -67,0 +71,5 @@ type SafeGuardCommandCenterProps = {
+@@ -70 +77,0 @@ type SafeGuardCommandCenterProps = {
+-type WorkspaceTheme = "night" | "day";
+@@ -74,0 +82,4 @@ type GenerationState = "idle" | "generating" | "ready" | "error";
++function shouldRenderLegacyShareSurface(): boolean {
+@@ -1039 +1050,6 @@ export function SafeGuardCommandCenter({
+@@ -1056,2 +1072,4 @@ export function SafeGuardCommandCenter({
+-  const [workspacePage, setWorkspacePage] = useState<WorkspacePage>("input");
+-  const [documentSurfaceMode, setDocumentSurfaceMode] = useState<DocumentSurfaceMode>("review");
++  const [workspacePage, setWorkspacePage] = useState<WorkspacePage>(initialWorkspacePage);
++  const [documentSurfaceMode, setDocumentSurfaceMode] = useState<DocumentSurfaceMode>(
+@@ -1059 +1077,2 @@ export function SafeGuardCommandCenter({
+-  const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>("riskAssessmentDraft");
++  const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey>(initialDocumentKey || "riskAssessmentDraft");
++  const [requestedLanguage, setRequestedLanguage] = useState<SupportedLanguageCode | null>(initialLanguage);
+@@ -1105,0 +1125,29 @@ export function SafeGuardCommandCenter({
++  function replaceWorkspaceLocation(input: {
++  function changeWorkspaceTheme(theme: WorkspaceTheme) {
+@@ -1121,0 +1170 @@ export function SafeGuardCommandCenter({
+@@ -1126,0 +1176 @@ export function SafeGuardCommandCenter({
+@@ -1128,0 +1179 @@ export function SafeGuardCommandCenter({
+@@ -1134,0 +1186,8 @@ export function SafeGuardCommandCenter({
+@@ -1135,0 +1195 @@ export function SafeGuardCommandCenter({
+@@ -1665,4 +1725,16 @@ export function SafeGuardCommandCenter({
+@@ -1791 +1863 @@ export function SafeGuardCommandCenter({
+@@ -1799 +1871 @@ export function SafeGuardCommandCenter({
+@@ -2305 +2377 @@ export function SafeGuardCommandCenter({
+@@ -2353,0 +2426,16 @@ export function SafeGuardCommandCenter({
+=== components/SafeGuardCommandCenter.tsx : ONTOLOGY ===
+@@ -55,0 +56 @@ import { buildGenerationProgressState } from "@/lib/workspace-generation-progres
+@@ -452,0 +454 @@ function workpackHasReviewWarnings(data: AskResponse | null) {
++  const phaseAReview = buildPhaseAReviewUiState(data.phaseAReview);
+@@ -457 +459 @@ function workpackHasReviewWarnings(data: AskResponse | null) {
+@@ -472,0 +475 @@ function buildReadinessRail(
++  const phaseAReview = buildPhaseAReviewUiState(data?.phaseAReview);
+@@ -496,5 +499,3 @@ function buildReadinessRail(
+@@ -502,3 +503 @@ function buildReadinessRail(
+@@ -528 +527,2 @@ function buildGenerationStages(data: AskResponse | null, state: GenerationState)
+-  const qualityReady = data?.qualityContract?.overall === "ready";
++  const phaseAReview = buildPhaseAReviewUiState(data?.phaseAReview);
++  const qualityReady = data?.qualityContract?.overall === "ready" && phaseAReview.authoritative;
+@@ -551 +551,3 @@ function buildGenerationStages(data: AskResponse | null, state: GenerationState)
+@@ -608,0 +611 @@ function buildDocumentHarnessLoop(
++  const phaseAReview = buildPhaseAReviewUiState(data.phaseAReview);
+@@ -630,4 +633,2 @@ function buildDocumentHarnessLoop(
+@@ -636,3 +637,3 @@ function buildDocumentHarnessLoop(
+@@ -698,0 +700 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
++  const phaseAReview = buildPhaseAReviewUiState(data.phaseAReview);
+@@ -743 +745 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
+@@ -747,7 +749,11 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
+@@ -770 +776 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
+@@ -772,3 +778,5 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
+@@ -803,2 +811,2 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
+@@ -808 +816 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
+@@ -810 +818 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
+@@ -818,2 +826,2 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
+@@ -1144 +1152,4 @@ export function SafeGuardCommandCenter({
+@@ -1165,0 +1177,11 @@ export function SafeGuardCommandCenter({
++  function applyServerConfirmedWorkpack(payload: AskResponse) {
+@@ -2319,2 +2341,6 @@ export function SafeGuardCommandCenter({
+@@ -2345,0 +2372 @@ export function SafeGuardCommandCenter({
+@@ -2375,0 +2403 @@ export function SafeGuardCommandCenter({
+
+=== lib/workpack-commercial-store.ts : PRODUCT ===
+@@ -12,0 +13 @@ import {
+@@ -70,0 +72,2 @@ export type WorkpackOperationContext = {
+@@ -75,0 +79,2 @@ export type ActiveOwnedShareSession = {
+@@ -76,0 +82 @@ export type ActiveOwnedShareSession = {
+@@ -78,0 +85,2 @@ export type ActiveOwnedShareSession = {
+@@ -120 +128 @@ export async function loadActiveOwnedShareSession(
+@@ -153,0 +162,6 @@ export async function loadActiveOwnedShareSession(
++  const accessPolicy = typeof data.access_policy === "object"
++  const dispatchBinding = parseShareDispatchBinding(accessPolicy?.dispatchBinding);
+@@ -158,0 +173,2 @@ export async function loadActiveOwnedShareSession(
+@@ -159,0 +176 @@ export async function loadActiveOwnedShareSession(
+@@ -161 +178,3 @@ export async function loadActiveOwnedShareSession(
+@@ -205 +224 @@ export async function loadOwnedWorkpackOperationContext(
+@@ -234,0 +254,2 @@ export async function loadOwnedWorkpackOperationContext(
+=== lib/workpack-commercial-store.ts : ONTOLOGY ===
+@@ -70,0 +71 @@ export type WorkpackOperationContext = {
+@@ -205 +206 @@ export async function loadOwnedWorkpackOperationContext(
+@@ -234,0 +236 @@ export async function loadOwnedWorkpackOperationContext(
+[evidence-exit-code] 0

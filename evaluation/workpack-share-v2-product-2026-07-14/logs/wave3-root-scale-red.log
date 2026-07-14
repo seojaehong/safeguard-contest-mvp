@@ -1,0 +1,37 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-browser.test.ts -t day-mobile:ready:computed_text_200 --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+ ❯ tests/workpack-share-v2-browser.test.ts (19 tests | 1 failed | 18 skipped) 23571ms
+     × day-mobile:ready:computed_text_200 uses two fresh clean production DOMs 6661ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser tracer > day-mobile:ready:computed_text_200 uses two fresh clean production DOMs
+AssertionError: expected null to be '100' // Object.is equality
+
+- Expected:
+"100"
+
++ Received:
+null
+
+ ❯ expectRootTextScaleContract tests/workpack-share-v2-browser.test.ts:844:39
+    842| function expectRootTextScaleContract(metrics: RootTextScaleMetrics, vi…
+    843|   expect(metrics.baselineCapturedBeforeMutation).toBe(true);
+    844|   expect(metrics.rootAttributeBefore).toBe("100");
+       |                                       ^
+    845|   expect(metrics.rootAttributeAfter).toBe("200");
+    846|   expect(auditTextScaleDelivery(metrics)).toEqual({ ok: true, reasons:…
+ ❯ tests/workpack-share-v2-browser.test.ts:1173:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 18 skipped (19)
+   Start at  08:29:11
+   Duration  25.39s (transform 359ms, setup 0ms, import 1.11s, tests 23.57s, environment 0ms)

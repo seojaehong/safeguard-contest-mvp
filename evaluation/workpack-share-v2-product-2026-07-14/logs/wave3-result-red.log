@@ -1,0 +1,37 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-browser.test.ts -t day-desktop:result_accepted:normal_100 --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+ ❯ tests/workpack-share-v2-browser.test.ts (19 tests | 1 failed | 18 skipped) 24954ms
+     × day-desktop:result_accepted:normal_100 exercises the production state 7162ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser tracer > day-desktop:result_accepted:normal_100 exercises the production state
+AssertionError: expected +0 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ executeFixtureBehavior tests/workpack-share-v2-browser.test.ts:1107:97
+    1105|     expect((await page.locator("[data-share-root]").innerText())).toCo…
+    1106|     expect((await page.locator("[data-share-root]").innerText())).not.…
+    1107|     expect(await page.locator("[data-share-channel-outcome][data-outco…
+       |                                                                                                 ^
+    1108|     expect(await page.locator("[data-share-result][data-share-log-ids]…
+    1109|       .toBe(`${dispatchLogId(0)},${dispatchLogId(1)}`);
+ ❯ tests/workpack-share-v2-browser.test.ts:1185:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 18 skipped (19)
+   Start at  08:33:50
+   Duration  26.92s (transform 437ms, setup 0ms, import 1.15s, tests 24.95s, environment 0ms)

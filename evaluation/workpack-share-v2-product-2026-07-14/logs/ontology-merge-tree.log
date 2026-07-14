@@ -1,0 +1,15 @@
+[product] fae7059e588c5b571cf4fb5918884cd8c5ef1365
+[ontology] e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4
+[merge-base] f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5
+[command] git merge-tree --write-tree fae7059e588c5b571cf4fb5918884cd8c5ef1365 e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4
+ce72d72f067034944ab41eb1017c2ba0df5b5d23
+100644 5d1113c75090cbb322064bd4961873e90574d34f 1	lib/workpack-commercial-store.ts
+100644 28e3e9e8ebe174d2fa6f473fd46e8c4f4bdfc43c 2	lib/workpack-commercial-store.ts
+100644 bfa3ca6c5f908f067a2f3f172a250a95abbfd750 3	lib/workpack-commercial-store.ts
+
+Auto-merging components/CurrentWorkpackModules.tsx
+Auto-merging components/FieldOperationsWorkspace.tsx
+Auto-merging components/SafeGuardCommandCenter.tsx
+Auto-merging lib/workpack-commercial-store.ts
+CONFLICT (content): Merge conflict in lib/workpack-commercial-store.ts
+[exit-code] 1

@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-share-v2-browser.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+
+ Test Files  1 passed (1)
+      Tests  130 passed (130)
+   Start at  09:20:21
+   Duration  1545.46s (transform 1.28s, setup 0ms, import 2.65s, tests 1541.30s, environment 0ms)
+
+[evidence-exit-code] 0

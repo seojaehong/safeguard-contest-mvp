@@ -1,0 +1,19 @@
+[product-exact-base] f45bba17bcce0d8ebb2690f82d014dbe42ae8191
+[actual-merge-base] f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5
+[product] fae7059e588c5b571cf4fb5918884cd8c5ef1365
+[ontology] e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4
+[exact-base-product-file-count] 42
+[exact-base-ontology-snapshot-delta-count] 114
+[exact-base-intersection-count] 4
+components/CurrentWorkpackModules.tsx
+components/FieldOperationsWorkspace.tsx
+components/SafeGuardCommandCenter.tsx
+lib/workpack-commercial-store.ts
+[merge-base-product-file-count] 46
+[merge-base-ontology-file-count] 110
+[merge-base-intersection-count] 4
+components/CurrentWorkpackModules.tsx
+components/FieldOperationsWorkspace.tsx
+components/SafeGuardCommandCenter.tsx
+lib/workpack-commercial-store.ts
+[evidence-exit-code] 0

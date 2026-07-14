@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "safeclaw-share-ontology-merge-tree/v1",
+  "status": "CONFLICT_REQUIRES_MAIN_RESOLUTION",
+  "productExactBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+  "actualMergeBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+  "productHead": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+  "shareServerAuthorityCommit": "08e6a825180482b6f9cb251fae6f29fb76bd527f",
+  "ontologyRemoteRef": "refs/remotes/origin/fix/phase-a-ontology-target-ready",
+  "ontologyHead": "e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4",
+  "mergeTree": {
+    "command": "git merge-tree --write-tree fae7059e588c5b571cf4fb5918884cd8c5ef1365 e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4",
+    "exitCode": 1,
+    "tree": "ce72d72f067034944ab41eb1017c2ba0df5b5d23",
+    "autoMergedFiles": [
+      "components/CurrentWorkpackModules.tsx",
+      "components/FieldOperationsWorkspace.tsx",
+      "components/SafeGuardCommandCenter.tsx"
+    ],
+    "conflictedFiles": [
+      "lib/workpack-commercial-store.ts"
+    ]
+  },
+  "changedFileOverlap": {
+    "exactBaseProductFileCount": 42,
+    "exactBaseOntologySnapshotDeltaCount": 114,
+    "actualMergeBaseProductFileCount": 46,
+    "actualMergeBaseOntologyFileCount": 110,
+    "intersectionCount": 4,
+    "files": [
+      "components/CurrentWorkpackModules.tsx",
+      "components/FieldOperationsWorkspace.tsx",
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/workpack-commercial-store.ts"
+    ]
+  },
+  "symbolOverlap": [
+    {
+      "file": "components/CurrentWorkpackModules.tsx",
+      "shareSymbols": [
+        "CurrentDispatchModule"
+      ],
+      "ontologySymbols": [
+        "buildEvidenceCards",
+        "EvidenceCardList",
+        "CurrentEvidenceModule"
+      ],
+      "mergeResult": "auto_merged",
+      "semanticBoundary": "different exported modules"
+    },
+    {
+      "file": "components/FieldOperationsWorkspace.tsx",
+      "shareSymbols": [
+        "FieldOperationsWorkspace share recipient and route state"
+      ],
+      "ontologySymbols": [
+        "FieldOperationsWorkspace phase A confirmation binding and CAS UI state"
+      ],
+      "mergeResult": "auto_merged",
+      "semanticBoundary": "same component, non-conflicting state and handlers"
+    },
+    {
+      "file": "components/SafeGuardCommandCenter.tsx",
+      "shareSymbols": [
+        "SafeGuardCommandCenter Share route, document, language, and return state"
+      ],
+      "ontologySymbols": [
+        "SafeGuardCommandCenter phase A authority and server-confirmed workpack state"
+      ],
+      "mergeResult": "auto_merged",
+      "semanticBoundary": "same component, non-conflicting state and handlers"
+    },
+    {
+      "file": "lib/workpack-commercial-store.ts",
+      "shareSymbols": [
+        "WorkpackOperationContext.updatedAt",
+        "WorkpackOperationContext.evidenceSummary",
+        "ActiveOwnedShareSession",
+        "loadActiveOwnedShareSession",
+        "loadOwnedWorkpackOperationContext"
+      ],
+      "ontologySymbols": [
+        "WorkpackOperationContext.revision",
+        "loadOwnedWorkpackOperationContext"
+      ],
+      "mergeResult": "content_conflict",
+      "conflictHunks": [
+        "WorkpackOperationContext maps updated_at as updatedAt plus evidenceSummary versus revision",
+        "loadOwnedWorkpackOperationContext maps workpack.updated_at as updatedAt plus evidenceSummary versus revision"
+      ],
+      "resolutionBoundary": "Main must preserve ontology revision and confirmation CAS semantics while retaining Share dispatch binding and reviewed-localization evidence; this branch does not resolve the conflict."
+    }
+  ],
+  "confirmationAuthority": {
+    "ontologyOwnedRoute": "app/api/workpacks/[id]/phase-a-confirmation/route.ts",
+    "shareChangedOntologyOwnedRoute": false,
+    "shareResolvedConfirmationConflict": false,
+    "casOrUpdatedAtBehaviorOverwritten": false
+  },
+  "logs": [
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/ontology-fetch.log",
+      "sha256": "daf5ecaf2ea02a403cb80e8b64e906fc65f76ab1ee92726418a2bb73fe6b05d4"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/ontology-merge-tree.log",
+      "sha256": "b9b17c277e6e3531cb315ae39a5a6f446feb249480b8278fdb89b4e3babdc92d"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/ontology-file-overlap.log",
+      "sha256": "092c691364866add1ef465c00ef2d8196b23bd1d4a1340b12aa19003cd2abca7"
+    },
+    {
+      "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/ontology-symbol-overlap.log",
+      "sha256": "d1229012d50bd6c12abd4041d1490adc6ad339491f75219bc41848dff3815289"
+    }
+  ]
+}

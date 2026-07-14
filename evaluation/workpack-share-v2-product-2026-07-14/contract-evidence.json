@@ -1,0 +1,172 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-contract-evidence/v1",
+  "evidenceId": "workpack-share-v2-product-browser-2026-07-14",
+  "status": "BROWSER_EVIDENCE_COMPLETE_REVIEW_PENDING",
+  "amendment": {
+    "amendmentId": "workpack-share-v2-product-2026-07-14",
+    "commit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+    "parentCommit": "4aed97940472d874b65008fd880b21c4e178d173",
+    "files": [
+      {
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/contract-amendment.json",
+        "gitBlob": "0718c65b71cfacef316709199e88c9c7fba5c345"
+      },
+      {
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/contract-amendment.md",
+        "gitBlob": "e7538f29acd75fbd0e44de280f7f84579be89876"
+      },
+      {
+        "path": "evaluation/workpack-share-v2-product-2026-07-14/validate-contract-amendment.cjs",
+        "gitBlob": "35ab4cc288175d50417fb5c50e5770fdf8bd280b"
+      },
+      {
+        "path": "tests/workpack-share-v2-contract-amendment.test.ts",
+        "gitBlob": "4149f0fac42cccbe5ce6c5a7b1e14e1d7c2529f4"
+      }
+    ]
+  },
+  "productCommit": {
+    "commit": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+    "parentCommit": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+    "remoteRef": "refs/heads/feat/workpack-share-v2-product",
+    "remoteShaAtProductPush": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+    "remoteMatchedProductCommitAtProductPush": true,
+    "currentRemoteMayAdvanceByEvidenceCommit": true,
+    "changedFileCount": 5,
+    "changedFileCensusPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/product-changed-files.json",
+    "changedFileCensusSha256": "7cde4344c685de46f9fd765186190193d3d42a8c40095296069da8ca23045299",
+    "files": [
+      {
+        "path": "components/WorkflowSharePanel.module.css",
+        "gitBlob": "7e86049b1155c6c651396fb58decd138583b7830"
+      },
+      {
+        "path": "components/WorkflowSharePanel.tsx",
+        "gitBlob": "c26cbf09b1bc830a5f4695993cbeae926446f0b3"
+      },
+      {
+        "path": "components/WorkflowSharePolicy.ts",
+        "gitBlob": "647ac09ceeaf8d81b8e0ca628ed0131d0c640b1b"
+      },
+      {
+        "path": "tests/fixtures/workpack-share-v2.ts",
+        "gitBlob": "7567a9ba16d2ca0a507ef08a0390a1e8870d5553"
+      },
+      {
+        "path": "tests/workpack-share-v2-browser.test.ts",
+        "gitBlob": "ab1cfbf1506526c04fb0843ad340133b68357714"
+      }
+    ]
+  },
+  "browserRun": {
+    "command": "$env:WORKPACK_SHARE_V2_BROWSER='1'; npm.cmd test -- tests/workpack-share-v2-browser.test.ts --maxWorkers=1 --no-file-parallelism",
+    "testFile": "tests/workpack-share-v2-browser.test.ts",
+    "metricsPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/browser-metrics.json",
+    "metricsSha256": "83844c30856e8aabae28b23f3db805ba60338fcf9010227dcabe758bd996c131",
+    "logPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-browser.log",
+    "logSha256": "451425132ca58be2f5887acbd10f1afb0ef6be8b67a00c2a463fa6d1a16b7104",
+    "runnerTestsPassed": 130,
+    "browserRowsExecuted": 128,
+    "browserRowsUnexecuted": 0,
+    "durationSeconds": 1545.46
+  },
+  "census": {
+    "formula": "4 environments * 16 fixtures * 2 scale modes",
+    "environmentCount": 4,
+    "fixtureCount": 16,
+    "scaleModeCount": 2,
+    "exactCaseCount": 128,
+    "normal100Count": 64,
+    "owningRootText200Count": 64,
+    "mobile390x844Count": 64,
+    "legacy391Count": 0,
+    "uniqueCaseCount": 128
+  },
+  "authorityObservations": {
+    "rootAttributeMutationMaximum": 1,
+    "descendantStyleMutationMaximum": 0,
+    "directLeafInlineMutationMaximum": 0,
+    "pseudoFailureCount": 0,
+    "maximumHorizontalOverflowCssPx": 0,
+    "maximumPanelOverflowCssPx": 0,
+    "touchTargetFailureCount": 0,
+    "overlapFailureCount": 0,
+    "nestedScrollFailureCount": 0,
+    "clippedTextFailureCount": 0,
+    "languageAuthorityCheckCount": 192,
+    "reviewVariantCheckCount": 80,
+    "staleBindingVariantCheckCount": 32
+  },
+  "verificationChecks": [
+    {
+      "id": "focused_regression",
+      "command": "npm.cmd test -- tests/workpack-share-server-config.test.ts tests/reviewed-localization-envelope.test.ts tests/reviewed-localization-route.test.ts tests/workpack-generation-evidence-route.test.ts tests/workpack-share-authority.test.ts tests/foreign-worker-languages.test.ts tests/workpack-commercial.test.ts tests/channel-availability.test.ts tests/channel-availability-route.test.ts tests/dispatch-logs-route.test.ts tests/workpack-share-authority-routes.test.ts tests/workspace-pages.test.ts tests/workflow-share-client.test.ts tests/workflow-share-panel-behavior.test.ts tests/workspace-workers.test.ts tests/frontend-shared-surfaces.test.ts tests/product-module-shell.test.ts tests/documents-editor-layout.test.ts tests/workpack-share-v2-contract-amendment.test.ts tests/workpack-share-v2-product-evidence.test.ts tests/workpack-share-v2-browser.test.ts --maxWorkers=1 --no-file-parallelism",
+      "status": "pass",
+      "exitCode": 0,
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-unit.log",
+      "logSha256": "9282b4a70a333e09292a75eeaac0fbdd588eba73f7a48573f210ed800b195191"
+    },
+    {
+      "id": "strict_typecheck",
+      "command": "npm.cmd run typecheck",
+      "status": "pass",
+      "exitCode": 0,
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-typecheck.log",
+      "logSha256": "8d5084cdc8c6cf2df972583ee0cc28c49331cc4dd9293112763bd5a66ab97ef5"
+    },
+    {
+      "id": "production_build",
+      "command": "npm.cmd run build",
+      "status": "pass",
+      "exitCode": 0,
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-build.log",
+      "logSha256": "0d455c0eba59e1ac946f0e5d29a786303c3401c7db59aa5ec6ad06888a0acc45"
+    },
+    {
+      "id": "frontend_consistency",
+      "command": "npm.cmd run audit:frontend-consistency",
+      "status": "pass",
+      "exitCode": 0,
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-frontend-audit.log",
+      "logSha256": "3afa70156c95a01ea53626004dda5e29001d95af876e864f120b606f4c127e44"
+    },
+    {
+      "id": "product_diff_check",
+      "command": "git diff --cached --check",
+      "status": "pass",
+      "exitCode": 0,
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-product-diff-check.log",
+      "logSha256": "eaeabd49e626fb3cadd60b4fdff4dd6ab3c66f1f7590363a073abf76bea21051"
+    },
+    {
+      "id": "product_secret_scan",
+      "command": "PowerShell staged-added-lines high-confidence secret scan",
+      "status": "pass",
+      "exitCode": 0,
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/final-product-secret-scan.json",
+      "logSha256": "f18016fd41701dd556d03782c1fac1f2c4e9b74e1ff4886e2535a7af01ac29b4"
+    },
+    {
+      "id": "product_pull_rebase",
+      "command": "git pull --rebase origin feat/phase-a-evidence-integration",
+      "status": "pass",
+      "exitCode": 0,
+      "logPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/product-pull-rebase.log",
+      "logSha256": "eb4bf026473e26fd786765b913261b84f299ebd5142ffb8baa0f30069924541c"
+    }
+  ],
+  "generatedArtifactRestoration": {
+    "path": "evaluation/workpack-share-v2-product-2026-07-14/logs/generated-artifact-restoration.json",
+    "sha256": "998aa6869faf6e086c6456c6943e98109afcb13d8ca5ae310f5b57c42211bdd0",
+    "fileCount": 16,
+    "mismatchCount": 0,
+    "parentHeadWorktreeHashesEqual": true
+  },
+  "reviewBoundary": {
+    "freshIndependentReviewRequired": true,
+    "freshIndependentReviewStatus": "pending",
+    "selfApproved": false,
+    "integratedIntoMain": false,
+    "completionClaim": "implementation_evidence_complete_review_pending"
+  }
+}

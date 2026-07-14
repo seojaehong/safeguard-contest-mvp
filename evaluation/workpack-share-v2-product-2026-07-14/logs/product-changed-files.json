@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "safeclaw-changed-file-census/v1",
+  "commit": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+  "parent": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+  "changedFileCount": 5,
+  "files": [
+    {
+      "path": "components/WorkflowSharePanel.module.css",
+      "gitBlob": "7e86049b1155c6c651396fb58decd138583b7830"
+    },
+    {
+      "path": "components/WorkflowSharePanel.tsx",
+      "gitBlob": "c26cbf09b1bc830a5f4695993cbeae926446f0b3"
+    },
+    {
+      "path": "components/WorkflowSharePolicy.ts",
+      "gitBlob": "647ac09ceeaf8d81b8e0ca628ed0131d0c640b1b"
+    },
+    {
+      "path": "tests/fixtures/workpack-share-v2.ts",
+      "gitBlob": "7567a9ba16d2ca0a507ef08a0390a1e8870d5553"
+    },
+    {
+      "path": "tests/workpack-share-v2-browser.test.ts",
+      "gitBlob": "ab1cfbf1506526c04fb0843ad340133b68357714"
+    }
+  ]
+}

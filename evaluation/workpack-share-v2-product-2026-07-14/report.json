@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "safeclaw-workpack-share-v2-product-report/v1",
+  "reportId": "workpack-share-v2-product-2026-07-14",
+  "generatedAt": "2026-07-14T10:29:59.9247498+09:00",
+  "status": "IMPLEMENTATION_EVIDENCE_COMPLETE_REVIEW_PENDING",
+  "branch": "feat/workpack-share-v2-product",
+  "commits": {
+    "exactBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "serverAuthority": "08e6a825180482b6f9cb251fae6f29fb76bd527f",
+    "deliveryFlow": "4aed97940472d874b65008fd880b21c4e178d173",
+    "contractAmendment": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+    "browserProduct": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+    "evidenceCommitParent": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+    "evidenceCommitSelfShaRecordedAfterCommit": true
+  },
+  "remoteProductObservation": {
+    "ref": "refs/heads/feat/workpack-share-v2-product",
+    "shaAtProductPush": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+    "matchedProductCommit": true,
+    "evidenceCommitMayAdvanceRef": true
+  },
+  "contractAmendment": {
+    "status": "AUTHORITATIVE_ADDITIVE_ERRATUM",
+    "originalFilesRewritten": false,
+    "selectedMobileViewport": {
+      "width": 390,
+      "height": 844
+    },
+    "owningRootScaleCount": 1,
+    "descendantInlineMutationCount": 0,
+    "directLeafInlineMutationCount": 0,
+    "legacy391ActiveCount": 0,
+    "recomputedCaseCount": 128
+  },
+  "browser": {
+    "runnerTestsExpected": 130,
+    "runnerTestsPassed": 130,
+    "matrixRowsExpected": 128,
+    "matrixRowsExecuted": 128,
+    "matrixRowsUnexecuted": 0,
+    "uniqueMatrixRows": 128,
+    "normal100Rows": 64,
+    "owningRootText200Rows": 64,
+    "mobile390x844Rows": 64,
+    "legacy391Rows": 0,
+    "durationSeconds": 1545.46,
+    "geometry": {
+      "maximumHorizontalOverflowCssPx": 0,
+      "maximumPanelOverflowCssPx": 0,
+      "touchTargetFailureCount": 0,
+      "overlapFailureCount": 0,
+      "nestedScrollFailureCount": 0,
+      "clippedTextFailureCount": 0
+    },
+    "authority": {
+      "rootAttributeMutationMaximum": 1,
+      "descendantStyleMutationMaximum": 0,
+      "directLeafInlineMutationMaximum": 0,
+      "pseudoFailureCount": 0,
+      "languageAuthorityCheckCount": 192,
+      "reviewVariantCheckCount": 80,
+      "staleBindingVariantCheckCount": 32
+    }
+  },
+  "verification": {
+    "focusedRegression": {
+      "testFilesPassed": 21,
+      "testsPassed": 173,
+      "browserRowsIntentionallySkippedInUnitMode": 128,
+      "status": "pass"
+    },
+    "evidenceValidator": {
+      "testsPassed": 12,
+      "attackTestsPassed": 11,
+      "status": "pass"
+    },
+    "strictTypecheck": "pass",
+    "productionBuild": {
+      "status": "pass",
+      "nextVersion": "15.5.20",
+      "staticPagesGenerated": 27
+    },
+    "frontendConsistency": {
+      "status": "pass",
+      "violationCount": 0,
+      "coverageIssueCount": 0,
+      "importantDeclarationCount": 0
+    },
+    "productDiffCheck": "pass",
+    "productSecretScan": {
+      "status": "pass",
+      "stagedFileCount": 5,
+      "patternCount": 5,
+      "hitCount": 0
+    },
+    "evidenceDiffCheck": "pass",
+    "evidenceSecretScan": {
+      "status": "pass",
+      "patternCount": 5,
+      "hitCount": 0
+    }
+  },
+  "changedFileCensus": {
+    "implementationRange": {
+      "fromExclusive": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+      "toInclusive": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+      "fileCount": 42,
+      "addedFileCount": 17,
+      "modifiedFileCount": 25,
+      "insertions": 8772,
+      "deletions": 1447
+    },
+    "browserProductCommit": {
+      "commit": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+      "parent": "e2f16da5efd09e393a459b5efd0a9e51d9f6a558",
+      "fileCount": 5,
+      "files": [
+        "components/WorkflowSharePanel.module.css",
+        "components/WorkflowSharePanel.tsx",
+        "components/WorkflowSharePolicy.ts",
+        "tests/fixtures/workpack-share-v2.ts",
+        "tests/workpack-share-v2-browser.test.ts"
+      ]
+    },
+    "evidenceCommit": {
+      "expectedParent": "fae7059e588c5b571cf4fb5918884cd8c5ef1365",
+      "stagedFileCount": 30,
+      "generatedTrackedPngCount": 0,
+      "censusPath": "evaluation/workpack-share-v2-product-2026-07-14/logs/evidence-staged-files.json"
+    },
+    "generatedTrackedPngsIncludedInProductCommit": 0
+  },
+  "generatedArtifactRestoration": {
+    "directory": "output/playwright/2026-07-10/module-shell-hardening",
+    "restoredTrackedFileCount": 16,
+    "mismatchCount": 0,
+    "parentProductWorktreeBlobsEqual": true
+  },
+  "ontologyCoordination": {
+    "ontologyHead": "e3c2a7ec081fd0eaef921a820233e63c4b9a9ff4",
+    "productExactBase": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "actualMergeBase": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "fileOverlapCount": 4,
+    "autoMergedFileCount": 3,
+    "contentConflictCount": 1,
+    "contentConflictFile": "lib/workpack-commercial-store.ts",
+    "conflictedSymbols": [
+      "WorkpackOperationContext",
+      "loadOwnedWorkpackOperationContext"
+    ],
+    "shareConfirmationCasOrUpdatedAtBehaviorOverwritten": false,
+    "mainResolutionRequired": true
+  },
+  "artifactHashes": {
+    "contractEvidenceSha256": "adb5aa54ba157831151d549b07471f5a79db478f2b35a682d5b439a2b49ea80d",
+    "contractEvidenceValidatorSha256": "83ecca2dcad6e77350432d06c9f37f354c6a76ab6f5b1f536027a7b84f86a694",
+    "contractEvidenceTestSha256": "b51dcdedda76e91e9abee19c72653e5be3d4d640101fb3cd1addbcc399d0ca04",
+    "browserMetricsSha256": "83844c30856e8aabae28b23f3db805ba60338fcf9010227dcabe758bd996c131",
+    "browserLogSha256": "451425132ca58be2f5887acbd10f1afb0ef6be8b67a00c2a463fa6d1a16b7104",
+    "focusedRegressionLogSha256": "9282b4a70a333e09292a75eeaac0fbdd588eba73f7a48573f210ed800b195191",
+    "evidenceValidatorLogSha256": "9a778d63bc1b9c143c29235c7823761b6cb5c8aa2c292f855f35c8df0e97bf7c",
+    "typecheckLogSha256": "8d5084cdc8c6cf2df972583ee0cc28c49331cc4dd9293112763bd5a66ab97ef5",
+    "buildLogSha256": "0d455c0eba59e1ac946f0e5d29a786303c3401c7db59aa5ec6ad06888a0acc45",
+    "frontendAuditLogSha256": "3afa70156c95a01ea53626004dda5e29001d95af876e864f120b606f4c127e44",
+    "productDiffCheckLogSha256": "eaeabd49e626fb3cadd60b4fdff4dd6ab3c66f1f7590363a073abf76bea21051",
+    "productSecretScanSha256": "f18016fd41701dd556d03782c1fac1f2c4e9b74e1ff4886e2535a7af01ac29b4",
+    "productChangedFileCensusSha256": "7cde4344c685de46f9fd765186190193d3d42a8c40095296069da8ca23045299",
+    "generatedArtifactRestorationSha256": "998aa6869faf6e086c6456c6943e98109afcb13d8ca5ae310f5b57c42211bdd0",
+    "ontologyMergeTreeJsonSha256": "ff61d96b278c04edc42c329ec9620a2a87d18fcc836f71e9d26bcaffd7712aa9"
+  },
+  "reviewBoundary": {
+    "freshIndependentReviewRequired": true,
+    "freshIndependentReviewStatus": "pending",
+    "selfApproved": false,
+    "integratedIntoMain": false
+  }
+}
