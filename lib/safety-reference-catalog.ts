@@ -45,6 +45,7 @@ export type KoshaGroundingDecision = {
 export type KoshaGroundingSearchDecision = {
   status: "ready" | "review_required" | "blocked" | "not_applicable";
   reason: KoshaGroundingReason | "not-applicable";
+  localGateReason: "local-corpus-integrity-failed" | "local-corpus-unavailable" | null;
   localCorpusStatus: "ready" | "blocked" | "unconfigured" | "not_applicable";
   acceptedCount: number;
   reviewRequiredCount: number;
@@ -1932,20 +1933,12 @@ export function summarizeKoshaGrounding(input: {
   const reviewRequired = decisions.filter((decision) => decision.status !== "verified_current");
   const excludedCount = input.excludedCount || 0;
   const localCorpusStatus = input.localCorpusStatus || "not_applicable";
-  if (input.blockedReason) {
-    return {
-      status: "blocked",
-      reason: input.blockedReason,
-      localCorpusStatus,
-      acceptedCount,
-      reviewRequiredCount: reviewRequired.length,
-      excludedCount
-    };
-  }
+  const localGateReason = input.blockedReason || null;
   if (reviewRequired.length) {
     return {
       status: "review_required",
       reason: reviewRequired[0]?.reason || "metadata-absent",
+      localGateReason,
       localCorpusStatus,
       acceptedCount,
       reviewRequiredCount: reviewRequired.length,
@@ -1956,8 +1949,20 @@ export function summarizeKoshaGrounding(input: {
     return {
       status: "ready",
       reason: "verified-current",
+      localGateReason,
       localCorpusStatus,
       acceptedCount,
+      reviewRequiredCount: 0,
+      excludedCount
+    };
+  }
+  if (input.blockedReason) {
+    return {
+      status: "blocked",
+      reason: input.blockedReason,
+      localGateReason,
+      localCorpusStatus,
+      acceptedCount: 0,
       reviewRequiredCount: 0,
       excludedCount
     };
@@ -1965,6 +1970,7 @@ export function summarizeKoshaGrounding(input: {
   return {
     status: "not_applicable",
     reason: "not-applicable",
+    localGateReason,
     localCorpusStatus,
     acceptedCount: 0,
     reviewRequiredCount: 0,

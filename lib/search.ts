@@ -1092,13 +1092,11 @@ function buildRequiredKoshaCitations(items: readonly SafetyReferenceItem[]) {
     if (!uniqueVerified.has(key)) uniqueVerified.set(key, item);
   }
 
-  return compressSafetyReferenceMatches([...uniqueVerified.values()], 4)
-    .filter(isVerifiedCurrentKoshaCompressed)
-    .map((item) => ({
-      kindLabel: item.kindLabel,
-      title: item.title,
-      sentence: item.documentSentence
-    }));
+  return [...uniqueVerified.values()].slice(0, 4).map((item) => ({
+    kindLabel: classifySafetyReferenceKind(item.item_type).kindLabel,
+    title: getSafetyReferenceDisplayTitle(item),
+    sentence: "검증된 현행 KOSHA 본문 발췌를 기술적 보조지침으로 대조."
+  }));
 }
 
 function formatSafetyReferencePromptLine(item: CompressedSafetyReference, index: number): string {
