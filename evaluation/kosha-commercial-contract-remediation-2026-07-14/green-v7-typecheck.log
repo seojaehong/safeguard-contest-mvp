@@ -6,4 +6,3 @@ startedAt=2026-07-14T21:38:44.8487444+09:00
 
 > safeclaw@0.1.0 typecheck
 > tsc --noEmit --incremental false
-
