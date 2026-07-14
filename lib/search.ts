@@ -4,14 +4,13 @@ import { enhanceLegalEvidenceMappings, generateAnswer, type AnswerGenerationResu
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
-import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverables, type AiMode } from "./ai-deliverables";
+import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
 import {
   deriveSafetyReferenceOperationalView,
   deriveSafetyReferenceRetrievalModeFromItems,
   filterAndRankSafetyReferencesByQuery,
   getKoshaGroundingDecision,
   getSafetyReferenceDisplayTitle,
-  hasStrongSafetyReferenceRowOverlap,
   isKoshaSupportingCitationEligible,
   isKoshaTechnicalReference,
   isSafetyReferenceDirectEligible,
@@ -54,49 +53,16 @@ import {
 
 const log = createLogger("search");
 
-function selectParentlessKoshaResponseDeliverables(
-  deliverables: AskResponse["deliverables"]
+function buildParentlessKoshaReviewDeliverables(
+  question: string,
+  citations: AskResponse["citations"]
 ): AskResponse["deliverables"] {
-  return {
-    workpackSummaryDraft: deliverables.workpackSummaryDraft,
-    riskAssessmentDraft: deliverables.riskAssessmentDraft,
-    workPlanDraft: deliverables.workPlanDraft,
-    ...(deliverables.workPermitDraft !== undefined ? { workPermitDraft: deliverables.workPermitDraft } : {}),
-    tbmBriefing: deliverables.tbmBriefing,
-    tbmLogDraft: deliverables.tbmLogDraft,
-    safetyEducationRecordDraft: deliverables.safetyEducationRecordDraft,
-    emergencyResponseDraft: deliverables.emergencyResponseDraft,
-    photoEvidenceDraft: deliverables.photoEvidenceDraft,
-    foreignWorkerBriefing: deliverables.foreignWorkerBriefing,
-    foreignWorkerTransmission: deliverables.foreignWorkerTransmission,
-    foreignWorkerLanguages: deliverables.foreignWorkerLanguages,
-    safetyEducationPoints: deliverables.safetyEducationPoints,
-    tbmQuestions: deliverables.tbmQuestions,
-    kakaoMessage: deliverables.kakaoMessage
-  };
-}
-
-function selectParentlessKoshaAiDeliverables(deliverables: AiDeliverables): AiDeliverables {
-  return {
-    ...(deliverables.workpackSummaryDraft !== undefined ? { workpackSummaryDraft: deliverables.workpackSummaryDraft } : {}),
-    ...(deliverables.riskAssessmentDraft !== undefined ? { riskAssessmentDraft: deliverables.riskAssessmentDraft } : {}),
-    ...(deliverables.workPlanDraft !== undefined ? { workPlanDraft: deliverables.workPlanDraft } : {}),
-    ...(deliverables.tbmBriefing !== undefined ? { tbmBriefing: deliverables.tbmBriefing } : {}),
-    ...(deliverables.tbmLogDraft !== undefined ? { tbmLogDraft: deliverables.tbmLogDraft } : {}),
-    ...(deliverables.safetyEducationRecordDraft !== undefined
-      ? { safetyEducationRecordDraft: deliverables.safetyEducationRecordDraft }
-      : {}),
-    ...(deliverables.emergencyResponseDraft !== undefined ? { emergencyResponseDraft: deliverables.emergencyResponseDraft } : {}),
-    ...(deliverables.photoEvidenceDraft !== undefined ? { photoEvidenceDraft: deliverables.photoEvidenceDraft } : {}),
-    ...(deliverables.foreignWorkerBriefing !== undefined ? { foreignWorkerBriefing: deliverables.foreignWorkerBriefing } : {}),
-    ...(deliverables.foreignWorkerTransmission !== undefined
-      ? { foreignWorkerTransmission: deliverables.foreignWorkerTransmission }
-      : {}),
-    ...(deliverables.foreignWorkerLanguages !== undefined ? { foreignWorkerLanguages: deliverables.foreignWorkerLanguages } : {}),
-    ...(deliverables.safetyEducationPoints !== undefined ? { safetyEducationPoints: deliverables.safetyEducationPoints } : {}),
-    ...(deliverables.tbmQuestions !== undefined ? { tbmQuestions: deliverables.tbmQuestions } : {}),
-    ...(deliverables.kakaoMessage !== undefined ? { kakaoMessage: deliverables.kakaoMessage } : {})
-  };
+  return buildMockAskResponse(
+    question,
+    citations,
+    "mock",
+    "KOSHA 기술 보조지침은 SIF 사례 또는 직접 근거 확인 전 검토가 필요합니다."
+  ).deliverables;
 }
 
 function safeFailureContext(error: unknown): { errorType: string } {
@@ -408,19 +374,6 @@ function getSupportingKoshaEvidenceRef(item: SafetyReferenceItem): string {
   );
 }
 
-function hasConflictingExplicitRiskTags(
-  primary: SafetyReferenceItem,
-  supporting: SafetyReferenceItem
-): boolean {
-  const normalizeTags = (tags: readonly string[]): Set<string> => new Set(
-    tags.flatMap((tag) => tag.split(/[·,/]+/u)).map((tag) => tag.trim()).filter(Boolean)
-  );
-  const primaryTags = normalizeTags(primary.risk_tags);
-  const supportingTags = normalizeTags(supporting.risk_tags);
-  if (!primaryTags.size || !supportingTags.size) return false;
-  return ![...primaryTags].some((tag) => supportingTags.has(tag));
-}
-
 function buildKoshaParentEvidenceReadyIds(packet: DbHarnessPacket): Set<string> {
   const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
   return new Set(packet.supportingEvidence
@@ -477,8 +430,7 @@ export function buildSafetyReferenceRiskRows(
     const supportingEvidenceRefs = Array.from(new Set(filterAndRankSafetyReferencesByQuery(
       `${rankQuery} ${displayTitle} ${hazard} ${control}`,
       supportingKoshaReferences.filter((supporting) => (
-        hasStrongSafetyReferenceRowOverlap(item, supporting)
-        && !hasConflictingExplicitRiskTags(item, supporting)
+        hasRelevantKoshaParent(supporting, [item])
       )),
       supportingKoshaReferences.length
     ).map(getSupportingKoshaEvidenceRef)
@@ -2213,9 +2165,14 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // Compress catalog hits before prompting; unverified technical KOSHA rows keep
     // only an honest review-state marker and never expose their body or control text.
     const safetyReferenceCompressed = compressSafetyReferenceMatches(safetyReference.items, 5);
-    const safetyReferenceAppendix = formatSafetyReferenceAppendix(safetyReferenceCompressed, {
-      parentEvidenceReadyIds: koshaParentEvidenceReadyIds
-    });
+    const safetyReferenceAppendix = formatSafetyReferenceAppendix(
+      safetyReferenceCompressed.filter(
+        (item) => !isTechnicalKoshaCompressed(item) || koshaParentEvidenceReadyIds.has(item.id)
+      ),
+      {
+        parentEvidenceReadyIds: koshaParentEvidenceReadyIds
+      }
+    );
 
     // Fix 6 continued: consume deliverables from the parallel Promise (allResults[9]).
     let aiBodies: Awaited<ReturnType<typeof generateAllDeliverables>> = {};
@@ -2225,20 +2182,20 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         aiModeAppliedDetail = "AI_MODE=enhanced (DB 하네스 row-first: 위험성평가 row 확정, TBM 구조 deterministic 조립)";
       } else if (deliverablesResult) {
         const { deliverables, diagnostics } = deliverablesResult;
-        aiBodies = parentlessKoshaReviewRequired
-          ? selectParentlessKoshaAiDeliverables(deliverables)
-          : deliverables;
+        aiBodies = parentlessKoshaReviewRequired ? {} : deliverables;
         const filled = Object.keys(aiBodies);
         const groupBrief = diagnostics.groupResults
           .map((g) => `${g.group}=${g.status === "fulfilled" ? "ok" : "fallback"}`)
           .join(" ");
-        aiModeAppliedDetail = `AI_MODE=${aiMode} (AI 본문 ${filled.length}개 채움: ${filled.join(", ") || "없음"}) [${groupBrief}]`;
+        aiModeAppliedDetail = parentlessKoshaReviewRequired
+          ? `AI_MODE=${aiMode} (SIF/direct parent 없음: 제공자 본문 폐기, deterministic 검토 baseline 사용) [${groupBrief}]`
+          : `AI_MODE=${aiMode} (AI 본문 ${filled.length}개 채움: ${filled.join(", ") || "없음"}) [${groupBrief}]`;
       } else {
         aiModeAppliedDetail = `AI_MODE=${aiMode} 문서 생성기 미응답 → 하네스 템플릿 보강`;
       }
     }
     const responseDeliverables = parentlessKoshaReviewRequired
-      ? selectParentlessKoshaResponseDeliverables(response.deliverables)
+      ? buildParentlessKoshaReviewDeliverables(question, citations)
       : response.deliverables;
     const baseDeliverables = {
       ...responseDeliverables,
@@ -2327,12 +2284,19 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const dbHarnessAnswer = buildDbHarnessAnswer(dbHarnessPacket);
     const dbHarnessPracticalPoints = buildDbHarnessPracticalPoints(dbHarnessPacket);
     const publicDbHarnessPacket = buildPublicDbHarnessPacket(dbHarnessPacket);
-    const deliverablesExecutionTrace = deliverablesResult?.diagnostics.trace ?? {
+    const upstreamDeliverablesExecutionTrace = deliverablesResult?.diagnostics.trace ?? {
       attempted: false,
       provider: null,
       modelPerDocument: {},
       fallbackUsed: false
     };
+    const deliverablesExecutionTrace = parentlessKoshaReviewRequired
+      ? {
+          ...upstreamDeliverablesExecutionTrace,
+          provider: null,
+          modelPerDocument: {}
+        }
+      : upstreamDeliverablesExecutionTrace;
     const generationTrace: GenerationTrace = {
       traceId,
       askMode: aiMode,
