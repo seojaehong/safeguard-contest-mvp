@@ -1,0 +1,33 @@
+{
+  "round": "northstar-24h-llm-wiki-knowledge",
+  "date": "2026-07-14",
+  "baseSha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
+  "branch": "feat/northstar-24h-knowledge-round",
+  "contract": {
+    "changedFiles": 14,
+    "promotionStages": 4,
+    "authorityLanes": 6,
+    "newApiRoutes": 1,
+    "statelessCandidateRoutes": 1,
+    "schemaChanges": 0,
+    "migrationFiles": 0,
+    "databaseMutationsExecuted": 0,
+    "publishControlsAdded": 0
+  },
+  "verification": {
+    "focusedTestFiles": 4,
+    "focusedTestsPassed": 15,
+    "focusedTestsFailed": 0,
+    "typecheck": "passed",
+    "browserViewports": [
+      "1440x900",
+      "390x844"
+    ],
+    "mutationControlsFound": 0
+  },
+  "database": {
+    "schemaChanged": false,
+    "migrationApplied": false,
+    "dataChanged": false
+  }
+}
