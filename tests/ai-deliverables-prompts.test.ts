@@ -34,6 +34,12 @@ describe("persona", () => {
     expect(persona()).toContain("위험요인은 DB 하네스·근거 후보 안에서 구체화");
     expect(persona()).toContain("근거 밖 새 위험요인은 만들지 말고");
   });
+
+  it("limits legal citations to candidates in the immutable packet", () => {
+    expect(persona()).toContain("불변 생성 근거 패킷에 제공된 후보만 인용");
+    expect(persona()).toContain("후보가 없으면 조문 번호를 만들지 않는다");
+    expect(persona()).not.toContain("제38조·제39조");
+  });
 });
 
 describe("contextBlock", () => {
