@@ -1,4 +1,11 @@
-import type { SifEmbeddingGateStatus } from "@/lib/sif-embedding-gate-status";
+import {
+  formatSifCanaryModeForPresentation,
+  formatSifChecklistStatusForPresentation,
+  formatSifGateIdForPresentation,
+  formatSifOperatorGateStatusForPresentation,
+  formatSifRuntimeStatusForPresentation,
+  type SifEmbeddingGateStatus
+} from "@/lib/sif-embedding-gate-status";
 import { MAX_INPUT_HAZARD_PHOTO_FILES } from "@/lib/operation-improvements";
 
 export type SifEmbeddingApprovalPacket = {
@@ -69,7 +76,7 @@ function preflightLines(status: SifEmbeddingGateStatus) {
 
 function operatorChecklistLines(status: SifEmbeddingGateStatus) {
   return status.operatorGate.checklist.map((item) => (
-    `- ${item.status}: ${item.label} (${item.evidence})`
+    `- ${formatSifChecklistStatusForPresentation(item.status)}: ${item.label} (${item.evidence})`
   ));
 }
 
@@ -87,7 +94,7 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     "# SIF Embedding Approval Packet",
     "",
     `Generated: ${generatedAt}`,
-    `Gate: ${status.nextApprovalGate.id}`,
+    `Gate: ${formatSifGateIdForPresentation(status.nextApprovalGate.id)}`,
     "",
     "## Current State",
     "",
@@ -102,7 +109,7 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     "",
     "## Operator Gate Runbook",
     "",
-    `- Status: ${status.operatorGate.status}`,
+    `- Status: ${formatSifOperatorGateStatusForPresentation(status.operatorGate.status)}`,
     `- Approval question: ${status.operatorGate.approvalQuestion}`,
     `- Migration artifact: \`${status.operatorGate.migrationArtifact.path}\``,
     `- Migration sha256: ${status.operatorGate.migrationArtifact.sha256 || "not-recorded"}`,
@@ -132,7 +139,7 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     "## Post-Migration Verification",
     "",
     `- Report: \`${status.postMigrationVerification.reportPath}\``,
-    `- Status: ${status.postMigrationVerification.status}`,
+    `- Status: ${formatSifRuntimeStatusForPresentation(status.postMigrationVerification.status)}`,
     `- OK: ${boolText(status.postMigrationVerification.ok)}`,
     `- Uploaded rows: ${status.postMigrationVerification.uploadedCount.toLocaleString("ko-KR")} / ${status.postMigrationVerification.expectedCorpusCount.toLocaleString("ko-KR")}`,
     `- Table ready: ${boolText(status.postMigrationVerification.tableReady)}`,
@@ -148,7 +155,7 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     `- Corpus count: ${status.canary.corpusCount.toLocaleString("ko-KR")}`,
     `- Embedded count: ${status.canary.embeddedCount.toLocaleString("ko-KR")}`,
     `- Uploaded count: ${status.canary.uploadedCount.toLocaleString("ko-KR")}`,
-    `- Mode: ${status.canary.mode}`,
+    `- Mode: ${formatSifCanaryModeForPresentation(status.canary.mode)}`,
     `- Report: \`${status.canary.reportPath}\``,
     `- Vectors: ${status.canary.vectorsPath ? `\`${status.canary.vectorsPath}\`` : "none"}`,
     "",
@@ -179,23 +186,23 @@ export function buildSifEmbeddingApprovalPacket(status: SifEmbeddingGateStatus):
     "",
     ...safetyLockLines(status),
     "",
-    "## Preflight Checks",
+    "## 사전 점검",
     "",
     ...preflightLines(status),
     "",
     "## Runtime DB Probe",
     "",
-    `- Status: ${status.runtimeDbProbe.status}`,
+    `- Status: ${formatSifRuntimeStatusForPresentation(status.runtimeDbProbe.status)}`,
     `- Table ready: ${boolText(status.runtimeDbProbe.tableReady)}`,
     `- RPC ready: ${boolText(status.runtimeDbProbe.rpcReady)}`,
     `- Message: ${status.runtimeDbProbe.message}`,
     "",
-    "## Vision/OCR Harness Path",
+    "## 사진 분석/OCR 하네스 경로",
     "",
     `- Initial field photos: multipart \`photos\` to \`${relatedHarness.visionEndpoint}\`, up to ${relatedHarness.maxInputPhotos} files`,
     "- Photo hazards are reviewable candidates, not final facts.",
     "- Only user-accepted candidates enter the DB harness improvement memory.",
-    `- Before/After improvements: \`${relatedHarness.improvementEndpointPattern}\` with vision/OCR payload`,
+    `- 개선 전/개선 후 개선사항: \`${relatedHarness.improvementEndpointPattern}\`에 사진 분석/OCR 데이터를 저장합니다.`,
     "- OCR text, detected hazards, observed improvement, source photo names, and reflected documents are exported to the workpack learning corpus.",
     "",
     "## Held Command",
