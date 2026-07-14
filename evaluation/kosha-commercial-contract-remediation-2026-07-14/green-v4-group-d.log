@@ -1,0 +1,22 @@
+verification=green-v4-group-d
+productCommit=e0a67f6e1953d421e58549666d1d44402435dfeb
+baselineContract=exclude v4-prefixed regression tests
+command=npm.cmd test -- tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/kosha-guide-corpus-audit.test.ts -t "^(?!.*v4 )" --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T16:43:28.3024691+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/kosha-guide-corpus-audit.test.ts -t ^(?!.*v4 ) --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  3 passed (3)
+      Tests  130 passed (130)
+   Start at  16:43:30
+   Duration  20.34s (transform 825ms, setup 0ms, import 1.98s, tests 16.57s, environment 0ms)
+
+
+finishedAt=2026-07-14T16:43:50.7965166+09:00
+exitCode=0

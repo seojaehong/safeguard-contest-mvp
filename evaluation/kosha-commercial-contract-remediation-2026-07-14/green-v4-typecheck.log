@@ -1,0 +1,13 @@
+verification=green-v4-typecheck
+productCommit=e0a67f6e1953d421e58549666d1d44402435dfeb
+strict=true
+command=npm.cmd run typecheck
+startedAt=2026-07-14T16:44:26.8859761+09:00
+
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+
+finishedAt=2026-07-14T16:44:39.8809691+09:00
+exitCode=0
