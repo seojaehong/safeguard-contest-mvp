@@ -5,6 +5,7 @@ import { assembleGraph, type OntologyGraph } from "@/lib/ontology/graph-store";
 import {
   classifyControlObligation,
   confirmNaturalizedEvidenceChain,
+  isEvidenceChainTaskBoundToQuestion,
   naturalizeEvidenceChain,
   recordNaturalizedEvidenceChainQuality,
   resolveEvidenceChain,
@@ -64,6 +65,37 @@ const publishedSif: ControlEvidenceSource = {
 };
 
 describe("Phase A canonical evidence-chain registry", () => {
+  test("binds provenance only to one explicit canonical or alias task in the question", () => {
+    expect(
+      isEvidenceChainTaskBoundToQuestion(
+        "높은 곳 작업",
+        "외벽 고소 작업을 위한 문서팩",
+        "work-at-height-fall",
+      ),
+    ).toBe(true);
+    expect(
+      isEvidenceChainTaskBoundToQuestion(
+        "고소작업",
+        "전기 설비 작업을 위한 문서팩",
+        "work-at-height-fall",
+      ),
+    ).toBe(false);
+    expect(
+      isEvidenceChainTaskBoundToQuestion(
+        "높은 곳 작업",
+        "높은 곳 작업과 전기 작업을 함께 수행",
+        "work-at-height-fall",
+      ),
+    ).toBe(false);
+    expect(
+      isEvidenceChainTaskBoundToQuestion(
+        "일반 작업",
+        "추락 위험이 있는 작업을 위한 문서팩",
+        "work-at-height-fall",
+      ),
+    ).toBe(false);
+  });
+
   test("preserves the existing seven node kinds and seven edge relations", () => {
     expect(NODE_KINDS).toHaveLength(7);
     expect(EDGE_RELS).toHaveLength(7);

@@ -34,6 +34,7 @@ import { isEmbeddableSifReferenceItem } from "@/lib/sif-embedding-corpus";
 import type { HarnessImprovement, HarnessWorkpackMemory } from "@/lib/db-harness";
 import { querySafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import { materializePhaseAProductDocuments } from "@/lib/ontology/product-materialization";
+import { isEvidenceChainTaskBoundToQuestion } from "@/lib/ontology/evidence-chain";
 import { reviewDocpack } from "@/lib/ontology/qa-review-tool";
 import {
   isMcpEnabled,
@@ -307,6 +308,7 @@ function registerTools(server: McpServer): void {
         const reviewTask = knowledge.phaseAProduct?.task.label
           ?? resolveReviewTaskLabel(task, question);
         const response = knowledge.found && knowledge.phaseAProduct
+          && isEvidenceChainTaskBoundToQuestion(task, question, knowledge.phaseAProduct.chainId)
           ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
               generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
             })

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "northstar-task-binding-evaluation/v1",
+  "date": "2026-07-15",
+  "branch": "fix/northstar-task-binding-20260715",
+  "authoritativeBase": "dc608c8d7f7f854270669e05789cad88816d0f43",
+  "scope": "reviewed-docpack-phase-a-task-question-binding",
+  "tdd": {
+    "red": {
+      "command": "npm.cmd test -- tests/claw-tools-phase-a-materialization.test.ts",
+      "testFiles": 1,
+      "tests": 11,
+      "passed": 9,
+      "failed": 2,
+      "exitCode": 1
+    },
+    "green": {
+      "command": "npm.cmd test -- tests/claw-tools-phase-a-materialization.test.ts tests/ontology-evidence-chains.test.ts",
+      "testFiles": 2,
+      "tests": 57,
+      "passed": 57,
+      "failed": 0,
+      "exitCode": 0
+    }
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "strict": true,
+    "exitCode": 0
+  },
+  "diffCheck": {
+    "command": "git diff --check",
+    "exitCode": 0
+  },
+  "binding": {
+    "registryOwned": true,
+    "canonicalAliasesAllowed": true,
+    "singleExplicitQuestionMatchRequired": true,
+    "llmInferenceAllowed": false,
+    "unrelatedTaskProvenanceAllowed": false,
+    "ambiguousQuestionProvenanceAllowed": false
+  },
+  "preserved": {
+    "reviewedDocpackGeneration": true,
+    "qaReview": true,
+    "naturalizeOnly": true
+  },
+  "mutations": {
+    "database": false,
+    "schema": false,
+    "migration": false,
+    "environment": false
+  }
+}
