@@ -42,9 +42,11 @@ Independent review: **PASS**, with no P0-P2 findings. The sole P3 finding was st
 
 ## Cross-platform fixture remediation
 
-CI run `29306989527` exposed a second, test-only failure: the complete machine fixture used `localeCompare` to order keys, so its hash depended on the runner locale. The machine payload itself was not changed. Canonical key ordering now uses a locale-independent lexical comparison and fixes the cross-platform hash at `0bd6c6f5790210bb9ffa89e24cdf6c847344a9cf27974cd31e5f91c65e620f00`.
+CI run `29306989527` exposed a test-only locale dependency: the complete machine fixture used `localeCompare` to order keys. Run `29307617385` then exposed the remaining operating-system dependency: file path separators and the migration file hash embedded inside the approval summary still varied after checkout line-ending conversion. The machine payload itself was not changed.
 
-The exact hash test passed under both `LANG=C` and `LANG=ko_KR.UTF-8`, and the full focused localization group remained **4 files / 20 tests PASS**.
+Commit `ac3b0f65b55695ec5f43de9a91683b0f8a58e5cf` (tree `20e9eca2b02f22ebb84254750af7581fa9873011`) now uses locale-independent lexical key ordering and normalizes only filesystem-derived path, byte-size, SHA, and embedded approval-fingerprint fields. The stable canonical hash is `f1fefacf29a64968543595754c3ebcab2b7288def75359f9d294051824e89451`.
+
+The complete SIF gate test passed **5/5** under both `LANG=C` and `LANG=ko_KR.UTF-8`; the full focused localization group passed **4 files / 21 tests**, and strict typecheck passed. Logs: `sif-machine-fixture-lang-c.log`, `sif-machine-fixture-lang-ko.log`, `sif-machine-fixture-full-focused.log`, and `sif-machine-fixture-typecheck.log`.
 
 ## Deferred final gates
 

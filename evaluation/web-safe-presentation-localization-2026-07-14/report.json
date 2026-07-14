@@ -1,12 +1,14 @@
 {
   "task": "web-safe-presentation-localization",
-  "generatedAt": "2026-07-14T13:44:00+09:00",
+  "generatedAt": "2026-07-14T14:19:59+09:00",
   "status": "pass",
   "releaseReadiness": false,
   "branch": "feat/phase-a-evidence-integration",
   "baseCommit": "e1e3c02056f8e77cdb1bf38fd13dd6a34620754b",
   "integratedHead": "7909861273ce995f3e093e74a369475103f9087e",
   "integratedTree": "610006c001645b21517b372b71301571b0a577f7",
+  "validationHead": "ac3b0f65b55695ec5f43de9a91683b0f8a58e5cf",
+  "validationTree": "20e9eca2b02f22ebb84254750af7581fa9873011",
   "sourceCommits": [
     "c1a9e04f50dfed50ee6beda08c447b1ceba48675",
     "d00a0cf9ff499d264cd9a7200c9df9d57d635f06",
@@ -28,7 +30,7 @@
   "counts": {
     "productionFiles": 6,
     "focusedTestFiles": 4,
-    "focusedTestsPassed": 20,
+    "focusedTestsPassed": 21,
     "focusedTestsFailed": 0,
     "independentFindingsP0": 0,
     "independentFindingsP1": 0,
@@ -39,7 +41,7 @@
     {
       "command": "npm.cmd test -- tests/web-safe-presentation-localization.test.ts tests/sif-embedding-gate-status.test.ts tests/sif-embedding-approval-packet.test.ts tests/ai-connect-design-contract.test.ts --maxWorkers=1 --no-file-parallelism",
       "status": "pass",
-      "detail": "4 files, 20 tests"
+      "detail": "4 files, 21 tests at ac3b0f65b55695ec5f43de9a91683b0f8a58e5cf"
     },
     {
       "command": "npm.cmd run typecheck",
@@ -49,14 +51,20 @@
     {
       "command": "npm.cmd test -- tests/sif-embedding-gate-status.test.ts --maxWorkers=1 --no-file-parallelism -t matches the cross-platform base machine fixture hash outside Markdown",
       "status": "pass",
-      "detail": "passed under LANG=C and LANG=ko_KR.UTF-8"
+      "detail": "5 tests passed under LANG=C and LANG=ko_KR.UTF-8"
     }
   ],
   "ciRemediation": {
-    "redRun": "29306989527",
-    "redFailure": "localeCompare produced a platform-dependent canonical key order for the complete machine fixture hash",
-    "fix": "canonical machine-fixture keys now use locale-independent lexical ordering",
-    "canonicalHash": "0bd6c6f5790210bb9ffa89e24cdf6c847344a9cf27974cd31e5f91c65e620f00",
+    "redRuns": [
+      "29306989527",
+      "29307617385"
+    ],
+    "redFailures": [
+      "localeCompare produced a locale-dependent canonical key order",
+      "filesystem path separators and a checkout-line-ending-derived migration fingerprint remained embedded in the canonical fixture"
+    ],
+    "fix": "canonical machine-fixture keys use lexical ordering and normalize only filesystem-derived path, byte-size, SHA, and embedded approval-fingerprint fields",
+    "canonicalHash": "f1fefacf29a64968543595754c3ebcab2b7288def75359f9d294051824e89451",
     "machinePayloadChanged": false
   },
   "independentReview": {
