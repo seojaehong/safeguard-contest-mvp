@@ -11,13 +11,14 @@ const V4_REJECTED_TARGET = "cc9f5af297950b73b53a9ab4018bdc143830c499";
 const SUPERSEDED_AUTHORITY_TARGET = "f45bba17bcce0d8ebb2690f82d014dbe42ae8191";
 const SHARE_REVIEW_HEAD = "22de1180d69263f7c08ac0ed0cfda0894e2db7f5";
 const SHARE_BASE_PRODUCT_HEAD = "fc2bd1783fcc413981306f689d67bb6c659a985e";
-const SHARE_PRODUCT_HEAD = "7141baac3e0abca146ef6c110093c1c0643760a2";
+const SHARE_PRODUCT_HEAD = "3162b4fe5e7ea32f139ff66bffa7835b14e29bd4";
 const EXPECTED_MAIN_CONFLICT_PATHS = ["tests/reports-download-center.test.ts"];
 const EXPECTED_SHARE_CONFLICT_PATHS = [
   "app/api/workpacks/[id]/route.ts",
   "components/FieldOperationsWorkspace.tsx",
   "components/SafeGuardCommandCenter.tsx",
   "lib/workpack-commercial-store.ts",
+  "tests/helpers/isolated-next-browser-harness.ts",
   "tests/workpack-generation-evidence-route.test.ts",
   "tests/workpack-share-authority-routes.test.ts",
 ];
@@ -257,7 +258,7 @@ describe("Phase A evidence target authority", () => {
     expect(gitIsAncestor(AUTHORITATIVE_TARGET, productCommit)).toBe(false);
   });
 
-  it("records the six-file Share semantic adoption HOLD at remediation head 7141baa", () => {
+  it("records the seven-file Share semantic adoption HOLD at current head 3162b4f", () => {
     const manifest = readJson("evidence-manifest.json");
     const binding = requireRecord(manifest, "binding");
     const productCommit = readString(binding, "productCommit");
@@ -324,7 +325,7 @@ describe("Phase A evidence target authority", () => {
       "Current-main reconciliation is HOLD on `tests/reports-download-center.test.ts`",
     );
     expect(report).toContain(
-      "Share v2 baseline `22de1180d69263f7c08ac0ed0cfda0894e2db7f5` and request-scope remediation `7141baac3e0abca146ef6c110093c1c0643760a2` remain under review",
+      "Share v2 baseline `22de1180d69263f7c08ac0ed0cfda0894e2db7f5`, request-scope remediation `7141baac3e0abca146ef6c110093c1c0643760a2`, and browser teardown remediation `3162b4fe5e7ea32f139ff66bffa7835b14e29bd4` remain under review",
     );
     for (const conflictPath of EXPECTED_SHARE_CONFLICT_PATHS) {
       expect(report).toContain(`\`${conflictPath}\``);
