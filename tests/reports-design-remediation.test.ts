@@ -1544,6 +1544,11 @@ describe("Reports Wave 1 browser design contract", () => {
     expect(sampleTargets.horizontalOverflow).toBe(0);
     expect(sampleTargets.overlapFailures).toEqual([]);
     expect(sampleTargets.nestedScrollFailures).toEqual([]);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+    const contentTopFromPageTop = await page.locator(".safeclaw-module-content > *").first().evaluate(
+      (element) => Math.round(element.getBoundingClientRect().top)
+    );
 
     const controls = page.locator(".safeclaw-report-period-control");
     const selected = controls.filter({ hasText: "주간" }).first();
