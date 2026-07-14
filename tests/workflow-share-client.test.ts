@@ -268,19 +268,21 @@ describe("workflow share component wiring", () => {
     expect(source).toContain("useReducer(");
     expect(source).toContain('type: "scope_changed"');
     expect(source).toContain("buildProviderDispatchIdempotencyKey");
-    expect(source).toContain("resolveShareLanguagePresentation");
-    expect(source).toContain("buildShareEvidenceSummary");
+    expect(source).not.toContain("buildShareEvidenceSummary");
     expect(source).not.toContain("4개 기록 분리");
-    expect(source).toContain("<textarea");
+    expect(source).not.toContain("전달 메모 추가");
     expect(source).toContain('id="workflow-language-select"');
     expect(source).toContain("language.nativeLabel");
+    expect(source).toContain("data-share-preview");
+    expect(source).toContain("data-share-primary");
     expect(source).not.toContain('`현장: ${data.scenario.siteName}`');
     expect(source).not.toContain('`작업: ${data.scenario.workSummary}`');
     expect(source).not.toContain('`핵심 위험: ${data.riskSummary.topRisk}`');
     expect(css).toContain("container-type: inline-size");
     expect(css).toContain("@container (max-width: 560px)");
     expect(css).toContain(":global(.channel-grid)");
-    expect(css).toContain("grid-template-columns: repeat(2, minmax(0, 1fr))");
+    expect(css).toContain("grid-template-columns: 1fr");
+    expect(css).toContain("min-height: 48px");
   });
 
 });
