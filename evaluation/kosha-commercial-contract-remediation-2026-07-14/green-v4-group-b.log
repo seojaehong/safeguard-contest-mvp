@@ -1,0 +1,22 @@
+verification=green-v4-group-b
+productCommit=e0a67f6e1953d421e58549666d1d44402435dfeb
+baselineContract=exclude v4-prefixed regression tests
+command=npm.cmd test -- tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts -t "^(?!.*v4 )" --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T16:42:37.8840212+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts -t ^(?!.*v4 ) --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  2 passed (2)
+      Tests  26 passed | 3 skipped (29)
+   Start at  16:42:40
+   Duration  21.09s (transform 587ms, setup 0ms, import 1.42s, tests 18.55s, environment 0ms)
+
+
+finishedAt=2026-07-14T16:43:01.2154905+09:00
+exitCode=0

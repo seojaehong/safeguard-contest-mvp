@@ -1,0 +1,22 @@
+verification=baseline-v4-focused55
+productCommit=e0a67f6e1953d421e58549666d1d44402435dfeb
+baselineContract=exclude v4-prefixed regression tests
+command=npm.cmd test -- tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts -t "^(?!.*v4 )" --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T16:41:42.5378633+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts -t ^(?!.*v4 ) --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  2 passed (2)
+      Tests  55 passed | 6 skipped (61)
+   Start at  16:41:44
+   Duration  22.30s (transform 753ms, setup 0ms, import 1.67s, tests 19.48s, environment 0ms)
+
+
+finishedAt=2026-07-14T16:42:07.1595893+09:00
+exitCode=0

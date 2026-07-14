@@ -1,118 +1,144 @@
 {
-  "version": 3,
+  "version": 4,
   "date": "2026-07-14",
   "branch": "fix/kosha-commercial-contract-remediation",
-  "startingHead": "29ae8372a709824acc244dcc772d55dbf0710d81",
-  "authoritativeMain": "920c7f360688352156de4854b4957a9f2f1f0e43",
-  "verificationSeries": {
-    "productCommit": "f74c5972a4c776bfc9e1a924d3bf50ce55b503a2",
-    "productTree": "99e161f1ca4880c5470e694df9fd02b8230c29cd",
-    "contractTestCommit": "5919d58bbf7de1027f4b4118d5ec997fd4865f9f",
-    "finalTree": "6f2ed6684543f696101bd88150d44c77acd1ab6a",
-    "display": "f74c5972a4c776bfc9e1a924d3bf50ce55b503a2+5919d58bbf7de1027f4b4118d5ec997fd4865f9f"
+  "status": {
+    "localFocusedGates": "green",
+    "independentReview": "pending",
+    "integration": "blocked_pending_fresh_independent_review",
+    "selfApproved": false
   },
-  "red": [
-    {
-      "phase": "provider_structured_surfaces",
-      "failed": 2,
-      "log": "red-v3-provider-structured-surfaces.log",
-      "exitCode": 1
+  "commits": {
+    "baseline": "2a2326951b4b2d030af11f4615f7cf6b9bafa334",
+    "red": "2b3144f72f51baf9ee4808fd7ba804078ce43d23",
+    "product": "e0a67f6e1953d421e58549666d1d44402435dfeb",
+    "productTree": "6e17fb552ce34c6a07e981c917b1e01c8616506d",
+    "authoritativeMain": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "evidence": {
+      "sha": null,
+      "resolution": "git log -1 --format=%H -- evaluation/kosha-commercial-contract-remediation-2026-07-14/report.json"
     },
-    {
-      "phase": "parentless_prompt_identity",
-      "failed": 2,
-      "log": "red-v3-parentless-prompt-identity.log",
-      "exitCode": 1
-    },
-    {
-      "phase": "unrelated_parent",
-      "failed": 2,
-      "log": "red-v3-unrelated-parent.log",
-      "exitCode": 1
-    },
-    {
-      "phase": "serialized_parentless_surface",
-      "failed": 4,
-      "log": "red-v3-serialized-parentless-surface.log",
-      "exitCode": 1
-    },
-    {
-      "phase": "initial_group_d_contract_conflict",
-      "productCommit": "f74c5972a4c776bfc9e1a924d3bf50ce55b503a2",
-      "passed": 129,
-      "failed": 1,
-      "total": 130,
-      "failure": "tests/kosha-guide-corpus-audit.test.ts:1954",
-      "classification": "invalid_parentless_prompt_action_assertion",
-      "log": "integrated-kosha-group-d.log",
-      "logSha256": "7f0c0ae1905a62bbaf3b74973e0c62e58eee78d776539008ed6c6b630bbed008",
-      "exitCode": 1
-    }
-  ],
-  "productVerification": {
-    "commit": "f74c5972a4c776bfc9e1a924d3bf50ce55b503a2",
-    "focused": 55,
-    "groups": {
-      "B": { "passed": 26, "failed": 0 },
-      "C": { "passed": 22, "failed": 0 },
-      "D": { "passed": 129, "failed": 1 },
-      "E": { "passed": 84, "failed": 0 }
-    },
-    "groupedTotal": { "files": 12, "passed": 261, "failed": 1, "total": 262 },
-    "typecheckPassed": true,
-    "scopeDiffPassed": true,
-    "allTwelveFilesPassed": false
+    "ancestry": [
+      "2a2326951b4b2d030af11f4615f7cf6b9bafa334",
+      "2b3144f72f51baf9ee4808fd7ba804078ce43d23",
+      "e0a67f6e1953d421e58549666d1d44402435dfeb",
+      "evidence_commit_containing_this_report"
+    ]
   },
-  "contractAlignment": {
-    "commit": "5919d58bbf7de1027f4b4118d5ec997fd4865f9f",
-    "changedFiles": ["tests/kosha-guide-corpus-audit.test.ts"],
-    "sourceControlCoveragePreserved": true,
-    "parentlessPromptIdentityOnly": true,
-    "targeted": { "passed": 1, "skipped": 109, "log": "green-v3-corpus-parentless-contract.log" },
-    "groupDGreen": { "passed": 130, "failed": 0, "log": "integrated-kosha-group-d-green.log" }
+  "redBeforeGreen": {
+    "commit": "2b3144f72f51baf9ee4808fd7ba804078ce43d23",
+    "expectedFailingBranchCommit": true,
+    "result": {
+      "exitCode": 1,
+      "filesFailed": 3,
+      "attacksFailed": 5,
+      "positiveControlsPassed": 2,
+      "skipped": 81
+    },
+    "log": "red-v4-independent-review.log",
+    "worktreeByteSha256": "58b35e8b2fc4db316992db84516c601fcccec038ca0caafb70466ba0ca4236ef",
+    "gitBlobSha256": "4e93f3012dc59df6f3cc2b0d73a335696208e98974690feeec55aba9a9faa9ed"
   },
-  "finalVerification": {
-    "series": "f74c5972a4c776bfc9e1a924d3bf50ce55b503a2+5919d58bbf7de1027f4b4118d5ec997fd4865f9f",
-    "focused": { "files": 2, "passed": 55, "log": "final-focused-tests.log" },
-    "groups": [
-      { "name": "B", "files": 2, "passed": 26, "log": "final-integrated-kosha-group-b.log" },
-      { "name": "C", "files": 4, "passed": 22, "log": "final-integrated-kosha-group-c.log" },
-      { "name": "D", "files": 3, "passed": 130, "log": "integrated-kosha-group-d-green.log" },
-      { "name": "E", "files": 3, "passed": 84, "log": "final-integrated-kosha-group-e.log" }
-    ],
-    "groupedTotal": { "files": 12, "passed": 262, "failed": 0, "log": "full-12-file-tests.log" },
-    "typecheck": { "strict": true, "passed": true, "log": "final-typecheck.log" },
-    "diffCheck": { "passed": true, "addedAnyMatches": 0, "log": "diff-check.log" }
+  "intermediateProductRegression": {
+    "candidate": "f90562cfeabe2610cf3faee255480b1c16680274",
+    "inFinalAncestry": false,
+    "classification": "historical_self_recorded_local_transcript",
+    "focusedPassed": 54,
+    "focusedFailed": 1,
+    "log": "baseline-v4-focused55-first-product-red.log"
   },
   "contracts": {
-    "parentReadiness": "per_kosha_relevant_sif_or_non_kosha_direct_parent",
-    "koshaOnlyWithoutRelevantParent": "identity_only_review_required_without_risk_rows_tbm_controls_actions_or_evidence_refs",
+    "rowRelevance": "strong_overlap_plus_recognized_hazard_family_intersection",
+    "canonicalHazardVariantsAligned": true,
+    "emptyTagsBypassConflictingSemantics": false,
+    "parentlessProviderNarrativesTrusted": false,
+    "parentlessResponseSource": "deterministic_pre_provider_baseline",
+    "mcpPacket": "public_sanitized_packet",
     "evidenceOrder": ["SIF", "KOSHA", "law"],
-    "naturalizeOnlyPreserved": true,
-    "mandateGuidanceSeparationPreserved": true
+    "koshaGuidanceOnly": true,
+    "naturalizeOnlyPreserved": true
+  },
+  "verification": {
+    "sequential": true,
+    "focusedAttacks": {
+      "passed": 7,
+      "skipped": 81,
+      "log": "green-v4-focused-attacks.log"
+    },
+    "mcpTools": {
+      "passed": 27,
+      "log": "green-v4-mcp-tools.log"
+    },
+    "existingFocused": {
+      "passed": 55,
+      "skippedV4": 6,
+      "log": "baseline-v4-focused55.log"
+    },
+    "groups": [
+      { "name": "B", "files": 2, "passed": 26, "skippedV4": 3, "log": "green-v4-group-b.log" },
+      { "name": "C", "files": 4, "passed": 22, "skippedV4": 0, "log": "green-v4-group-c.log" },
+      { "name": "D", "files": 3, "passed": 130, "skippedV4": 0, "log": "green-v4-group-d.log" },
+      { "name": "E", "files": 3, "passed": 84, "skippedV4": 3, "log": "green-v4-group-e.log" }
+    ],
+    "existingGroupAggregate": {
+      "uniqueFiles": 12,
+      "passed": 262,
+      "failed": 0
+    },
+    "typecheck": {
+      "strict": true,
+      "passed": true,
+      "log": "green-v4-typecheck.log"
+    },
+    "diffCheck": {
+      "passed": true,
+      "scopeMismatchCount": 0,
+      "addedAnyMatchCount": 0,
+      "trackedProductWorktreeChangeCount": 0,
+      "log": "green-v4-diff-check.log"
+    }
+  },
+  "mainComparison": {
+    "mergeBase": "3a74107e3d8363f437815b877533f7342fd02c45",
+    "mainChangedPathCount": 3,
+    "v4RedProductChangedPathCount": 8,
+    "v4MainOverlapCount": 0,
+    "preEvidenceProductBranchChangedPathCount": 37,
+    "branchMainOverlapCount": 0,
+    "mergeTreeExitCode": 0,
+    "mergeTree": "be4b872a66eddab705c9415417ba0933be3c8f54",
+    "log": "green-v4-merge-tree-main-overlap.log",
+    "integrationApproval": false
+  },
+  "historicalEvidenceCorrection": {
+    "log": "integrated-kosha-group-d.log",
+    "classification": "historical_self_recorded_not_independently_immutable",
+    "firstCommittedAt": "049debe47cf6d18e923bb5c91e5fafd8d07c885b",
+    "windowsWorktreeByteSha256": "7f0c0ae1905a62bbaf3b74973e0c62e58eee78d776539008ed6c6b630bbed008",
+    "gitBlobSha256": "37c357e368a1ca95dde836e1a021c44a02d8381250c1312b5f643c2c9f9e012d",
+    "priorImmutableClaimWithdrawn": true
   },
   "scopeIntegrity": {
-    "productChangedFiles": [
-      "lib/db-harness.ts",
-      "lib/search.ts",
+    "redFiles": [
+      "evaluation/kosha-commercial-contract-remediation-2026-07-14/red-v4-evidence.json",
+      "evaluation/kosha-commercial-contract-remediation-2026-07-14/red-v4-independent-review.log",
       "tests/commercial-harness.test.ts",
-      "tests/kosha-current-review-run-ask.test.ts"
+      "tests/kosha-current-review-run-ask.test.ts",
+      "tests/mcp-tools.test.ts"
     ],
-    "separatelyAuthorizedContractTestFile": "tests/kosha-guide-corpus-audit.test.ts",
+    "productFiles": [
+      "lib/db-harness.ts",
+      "lib/mcp-tools.ts",
+      "lib/search.ts"
+    ],
     "evidenceDirectory": "evaluation/kosha-commercial-contract-remediation-2026-07-14",
-    "dbSchemaMigrationDataChanged": false,
-    "packageOrLockChanged": false
+    "integrityManifest": "evidence-integrity-v4.log",
+    "forbiddenChanges": 0
   },
-  "independentReview": {
-    "status": "pending",
-    "owner": "main",
-    "failedToolInvocation": {
-      "log": "independent-review-v3.log",
-      "exitCode": 1,
-      "reason": "invalid local Codex service_tier config"
-    },
-    "acceptedAsSuccessEvidence": false
-  },
-  "integrationGate": "pending_fresh_independent_review_do_not_integrate",
-  "notRun": ["full_repository_test_suite", "production_deployment"]
+  "notRun": [
+    "build",
+    "full_repository_test_suite",
+    "production_deployment",
+    "integration"
+  ]
 }
