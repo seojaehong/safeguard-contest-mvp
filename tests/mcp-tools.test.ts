@@ -201,6 +201,62 @@ describe("buildHarnessAgentResult", () => {
     expect(result.packet.retrievalContract.sourceCounts.hybrid).toBe(1);
     expect(result.promptContext).toContain("검색 경로: hybrid-vector-rpc / vector=ready");
   });
+
+  it("v4 returns a sanitized parentless KOSHA packet across the complete MCP payload", () => {
+    const markers = {
+      summary: "V4_MCP_PARENTLESS_SUMMARY",
+      body: "V4_MCP_PARENTLESS_BODY",
+      control: "V4_MCP_PARENTLESS_CONTROL",
+      action: "V4_MCP_PARENTLESS_ACTION",
+      evidenceRef: "V4_MCP_PARENTLESS_EVIDENCE_REF"
+    };
+    const result = buildHarnessAgentResult({
+      question: "지게차 보행자 충돌",
+      references: [{
+        id: "mcp-parentless-kosha-v4",
+        source_id: "kosha-guide-offline:mcp-parentless-kosha-v4",
+        item_type: "technical-guideline",
+        category: "운반하역",
+        subcategory: "지게차",
+        title: "KOSHA 지게차 보행자 충돌 기술지침",
+        summary: `${markers.summary} ${markers.action}`,
+        body: markers.body,
+        keywords: ["지게차", "보행자", "충돌"],
+        risk_tags: ["충돌"],
+        primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+        controls: [markers.control, markers.action],
+        evidence_role: "supporting",
+        retrieval_source: "local-ranked",
+        kosha_guide: {
+          referenceId: "mcp-parentless-kosha-v4",
+          stableDocumentKey: "MCP-PARENTLESS-V4",
+          version: "MCP-PARENTLESS-V4-2026",
+          quality: "accepted",
+          lifecycle: "current",
+          bodyKind: "native",
+          anchors: [{ page: 1, excerpt: markers.action }],
+          evidenceRef: markers.evidenceRef,
+          directEligible: true
+        }
+      }],
+      referenceSearch: []
+    });
+    const serializedPacket = JSON.stringify(result.packet);
+    const serializedMcpPayload = toToolResult(result).content[0]?.text || "";
+
+    const supporting = result.packet.supportingEvidence[0];
+    expect(supporting?.summary).toBe("");
+    expect(supporting?.body).toBeUndefined();
+    expect(supporting?.controls).toEqual([]);
+    expect(supporting?.keywords).toEqual([]);
+    expect(supporting?.risk_tags).toEqual([]);
+    expect(supporting?.kosha_guide?.evidenceRef).toBeNull();
+    for (const marker of Object.values(markers)) {
+      expect(serializedPacket.includes(marker)).toBe(false);
+      expect(result.promptContext.includes(marker)).toBe(false);
+      expect(serializedMcpPayload.includes(marker)).toBe(false);
+    }
+  });
 });
 
 describe("resolveReviewTaskLabel", () => {
