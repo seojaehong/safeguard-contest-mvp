@@ -482,17 +482,10 @@ body {
   color: var(--ink);
   background: var(--sc-paper);
   font-family: var(--font-product);
+  font-size: var(--text-body);
   font-weight: 500;
   line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
-}
-
-html {
-  font-size: 100%;
-}
-
-body {
-  font-size: var(--text-body);
 }
 
 a { color: inherit; text-decoration: none; }
@@ -19887,17 +19880,17 @@ body:has(.safeclaw-landing) :is(
 
 /* Reports: canonical route layer after the shared C7, Documents, and W5 typography layers. */
 .safeclaw-module-shell[data-module-route="/reports"] {
-  --text-display: 4.5rem;
-  --text-page-title: 2.5rem;
-  --text-section-title: 1.75rem;
-  --text-component-title: 1.25rem;
-  --text-body-lg: 1.0625rem;
-  --text-body: 0.9375rem;
-  --text-support: 0.875rem;
-  --text-control: 0.875rem;
-  --text-table: 0.8125rem;
-  --text-caption: 0.75rem;
-  --text-hud: 0.6875rem;
+  --text-display: 4.8rem;
+  --text-page-title: 2.666667rem;
+  --text-section-title: 1.866667rem;
+  --text-component-title: 1.333333rem;
+  --text-body-lg: 1.133333rem;
+  --text-body: 1rem;
+  --text-support: 0.933333rem;
+  --text-control: 0.933333rem;
+  --text-table: 0.866667rem;
+  --text-caption: 0.8rem;
+  --text-hud: 0.733333rem;
   --leading-display: 1.15;
   --leading-page-title: 1.15;
   --leading-section-title: 1.25;
@@ -20404,8 +20397,8 @@ body:has(.safeclaw-landing) :is(
 
 @media (max-width: 900px) {
   .safeclaw-module-shell[data-module-route="/reports"] {
-    --text-page-title: 2rem;
-    --text-section-title: 1.5rem;
+    --text-page-title: 2.133333rem;
+    --text-section-title: 1.6rem;
   }
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-header {
