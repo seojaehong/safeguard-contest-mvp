@@ -21,7 +21,7 @@ On 2026-07-14, the production status endpoint returned HTTP 200 with `status=rea
 
 ## Fix
 
-The status route now loads the same local corpus gate used by search. It returns HTTP 503 with `status=degraded`, `searchReady=false`, and a sanitized `localCorpus` state when the corpus is unconfigured or integrity-blocked. It returns HTTP 200/ready only when both the Supabase catalog and local corpus are ready. Absolute corpus paths are never returned.
+The status route now loads the same local corpus gate used by search. Every non-ready combination returns HTTP 503 with top-level `status=degraded` and `searchReady=false`, including when both the catalog and local corpus are unconfigured. It returns HTTP 200/ready only when `catalog.ok && localCorpus.status === "ready"`. The underlying `configured` and sanitized `localCorpus.status` fields preserve the cause without exposing absolute corpus paths.
 
 ## Required runtime shape
 
@@ -34,11 +34,11 @@ No Vercel environment value was read, printed, changed, or committed.
 
 ## Verification
 
-- Focused route TDD: 3 passed
-- KOSHA focused regression: 4 files, 43 passed
-- TypeScript: passed
-- Next.js production build: passed
-- Full Vitest suite: 139 files and 1,483 tests passed; 5 files / 6 tests failed in existing frontend browser/source-identity audits due timeouts and dirty-worktree identity mismatch
+- Focused KOSHA command: `npm.cmd test -- tests/safety-reference-status-route.test.ts tests/kosha-grounding-fail-closed.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-offline-harness-expanded.test.ts`
+- Focused KOSHA result: 4 files, 44 tests passed, exit 0; log: `evaluation/kosha-runtime-readiness-2026-07-14/focused-tests.log`
+- TypeScript command: `npm.cmd run typecheck`; exit 0; log: `evaluation/kosha-runtime-readiness-2026-07-14/typecheck.log`
+- Production build command: `npm.cmd run build`; exit 0; log: `evaluation/kosha-runtime-readiness-2026-07-14/build.log`
+- Full suite: not rerun for this remediation; no full-suite pass/fail count is claimed
 
 ## Runtime boundary
 

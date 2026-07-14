@@ -63,6 +63,37 @@ describe("safety-reference status route", () => {
     expect(payload.message).toContain("KOSHA 로컬 코퍼스가 설정되지 않아 검색 준비 상태가 아닙니다");
   });
 
+  it("reports degraded when both the catalog and local KOSHA corpus are unconfigured", async () => {
+    mocks.getSafetyReferenceStats.mockResolvedValue({
+      ...readyCatalogStats,
+      ok: false,
+      configured: false,
+      status: "unconfigured",
+      catalogSearchOk: false,
+      message: "Supabase catalog unconfigured"
+    });
+    mocks.loadKoshaGuideCorpus.mockResolvedValue({
+      status: "unconfigured",
+      rootDir: null,
+      failures: []
+    });
+
+    const response = await GET();
+    const payload = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(payload).toMatchObject({
+      ok: false,
+      status: "degraded",
+      searchReady: false,
+      configured: false,
+      localCorpus: {
+        status: "unconfigured",
+        failures: []
+      }
+    });
+  });
+
   it("reports ready only when the verified local KOSHA snapshot is loaded", async () => {
     mocks.loadKoshaGuideCorpus.mockResolvedValue({
       status: "ready",
