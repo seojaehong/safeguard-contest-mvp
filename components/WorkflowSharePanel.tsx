@@ -130,6 +130,20 @@ function buildDispatchLogs(input: {
   });
 }
 
+function buildChannelOutcomes(result: WorkflowDispatchResult): NonNullable<ShareProductOutcome["channelOutcomes"]> {
+  return (result.channelResults || []).flatMap((item): NonNullable<ShareProductOutcome["channelOutcomes"]> => {
+    if (!item.channel) return [];
+    const channelLabel = CHANNEL_OPTIONS.find((option) => option.channel === item.channel)?.label || item.channel;
+    const outcome = item.status === "sent" ? "accepted" : item.status === "failed" ? "failed" : "unknown";
+    return [{
+      channel: item.channel,
+      label: channelLabel,
+      outcome,
+      message: outcome === "accepted" ? "접수" : outcome === "failed" ? "실패" : "확인 필요"
+    }];
+  });
+}
+
 function reasonCodeFromError(error: unknown): string | null {
   return error instanceof WorkflowShareRequestError ? error.reasonCode : null;
 }
@@ -430,6 +444,7 @@ export function WorkflowSharePanel({
       }
 
       const stage = classifyDispatchOutcome(result);
+      const channelOutcomes = buildChannelOutcomes(result);
       const logs = buildDispatchLogs({
         result,
         targetCount: targetWorkers.length,
@@ -437,7 +452,11 @@ export function WorkflowSharePanel({
         idempotencyKey
       });
       if (!logs.length) {
-        setOutcome({ stage: stage === "accepted" ? "log_unpersisted" : stage, logIds: [] });
+        setOutcome({
+          stage: stage === "accepted" ? "log_unpersisted" : stage,
+          logIds: [],
+          channelOutcomes
+        });
         return;
       }
       try {
@@ -446,10 +465,10 @@ export function WorkflowSharePanel({
           workpackId: authority.workpackId,
           logs
         });
-        setOutcome({ stage, logIds: saved.logIds });
+        setOutcome({ stage, logIds: saved.logIds, channelOutcomes });
       } catch (error) {
         console.error("Share dispatch log persistence failed", error);
-        setOutcome({ stage: "log_unpersisted", logIds: [] });
+        setOutcome({ stage: "log_unpersisted", logIds: [], channelOutcomes });
       }
     } finally {
       setSending(false);
@@ -475,6 +494,7 @@ export function WorkflowSharePanel({
       data-share-root
       data-share-owner="share"
       data-share-state={presentation.state}
+      data-share-text-scale="100"
     >
       <header className={styles.header} data-share-owner="pack-status">
         <div>
@@ -547,6 +567,28 @@ export function WorkflowSharePanel({
                 .join(" · ")}
             </p>
           ) : null}
+          {outcome?.channelOutcomes?.length ? (
+            <div
+              className={styles.channelOutcomePanel}
+              data-share-result
+              data-share-log-ids={outcome.logIds.join(",")}
+            >
+              <strong>채널 요청 결과</strong>
+              <ul aria-label="채널 전송 요청 결과">
+                {outcome.channelOutcomes.map((item) => (
+                  <li
+                    key={item.channel}
+                    data-share-channel-outcome
+                    data-channel={item.channel}
+                    data-outcome={item.outcome}
+                  >
+                    <span>{item.label}</span>
+                    <strong>{item.message}</strong>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </section>
 
         <section className={styles.section} aria-labelledby="share-language-heading" data-share-owner="language-preview">
@@ -570,16 +612,20 @@ export function WorkflowSharePanel({
               ))}
             </select>
           </label>
-          <div
-            className={styles.preview}
-            data-share-preview
-            data-share-region="preview"
-            data-share-scroll-region="preview"
-            data-share-owner="localized-preview"
-            lang={previewLanguage}
-          >
-            <PreviewSurface preview={preview} />
-          </div>
+          {presentation.state !== "stale" ? (
+            <div
+              className={styles.preview}
+              data-share-preview
+              data-share-region="preview"
+              data-share-scroll-region="preview"
+              data-share-owner="localized-preview"
+              lang={previewLanguage}
+            >
+              <PreviewSurface preview={preview} />
+            </div>
+          ) : (
+            <p className={styles.previewWithheld}>변경된 문서팩을 다시 확인하면 미리보기를 새로 불러옵니다.</p>
+          )}
         </section>
 
         <section className={styles.section} aria-labelledby="share-note-heading" data-share-owner="memo">

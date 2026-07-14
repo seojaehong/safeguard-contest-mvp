@@ -564,6 +564,12 @@ export type ShareProductChannelStatus = "idle" | "empty" | "loading" | "ready" |
 export type ShareProductOutcome = {
   stage: "accepted" | "partial" | "session_failed" | "dispatch_failed" | "log_unpersisted" | "unknown";
   logIds: string[];
+  channelOutcomes?: Array<{
+    channel: string;
+    label: string;
+    outcome: "accepted" | "failed" | "unknown";
+    message: string;
+  }>;
 };
 
 export type ShareProductPresentation = {
