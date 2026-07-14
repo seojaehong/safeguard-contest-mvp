@@ -1,7 +1,14 @@
-COMMAND=git diff --check
-HEAD=3a74107e3d8363f437815b877533f7342fd02c45
-warning: in the working copy of 'lib/db-harness.ts', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'lib/search.ts', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'tests/commercial-harness.test.ts', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'tests/kosha-current-review-run-ask.test.ts', LF will be replaced by CRLF the next time Git touches it
-EXIT_CODE=0
+phase=product-verification
+head=7e7910ac475a1e726013f748f73717e380b3657e
+tree=4c02eb011138234930d39c7aa29c1c24c690add7
+parent=049debe47cf6d18e923bb5c91e5fafd8d07c885b
+startedAt=2026-07-14T14:46:09.3500988+09:00
+command=git diff --check HEAD^ HEAD -- lib/db-harness.ts lib/search.ts tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts
+changedFilesBegin
+lib/db-harness.ts
+lib/search.ts
+tests/commercial-harness.test.ts
+tests/kosha-current-review-run-ask.test.ts
+changedFilesEnd
+elapsedSeconds=0.188
+exitCode=0

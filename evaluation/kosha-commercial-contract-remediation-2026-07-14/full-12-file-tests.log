@@ -1,0 +1,13 @@
+phase=product-verification-aggregate
+head=7e7910ac475a1e726013f748f73717e380b3657e
+tree=4c02eb011138234930d39c7aa29c1c24c690add7
+executionStrategy=4 bounded serial Vitest groups; the single-process attempt did not emit a completion footer
+groupB=integrated-kosha-group-b.log;files=2;tests=16;exitCode=0
+groupC=integrated-kosha-group-c.log;files=4;tests=22;exitCode=0
+groupD=integrated-kosha-group-d.log;files=3;tests=130;exitCode=0
+groupE=integrated-kosha-group-e.log;files=3;tests=82;exitCode=0
+totalFiles=12
+totalTests=250
+minimumRequiredTests=247
+status=PASS
+exitCode=0

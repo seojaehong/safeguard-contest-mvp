@@ -1,0 +1,14 @@
+phase=product-state-before-evidence
+branch=fix/kosha-commercial-contract-remediation
+head=7e7910ac475a1e726013f748f73717e380b3657e
+tree=4c02eb011138234930d39c7aa29c1c24c690add7
+parent=049debe47cf6d18e923bb5c91e5fafd8d07c885b
+statusBegin
+## fix/kosha-commercial-contract-remediation...origin/fix/kosha-commercial-contract-remediation [ahead 1]
+statusEnd
+productChangedFilesBegin
+lib/db-harness.ts
+lib/search.ts
+tests/commercial-harness.test.ts
+tests/kosha-current-review-run-ask.test.ts
+productChangedFilesEnd
