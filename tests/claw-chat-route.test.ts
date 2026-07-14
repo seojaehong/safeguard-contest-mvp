@@ -5,6 +5,8 @@ import { createAgentChatPost } from "@/lib/openclaw-broker-route";
 import type { ClawChatEvent } from "@/lib/agent-loop";
 import {
   BrokerError,
+  ENGINE_ADAPTER_CONTRACT_VERSION,
+  SAFECLAW_ENGINE_AUTHORITY,
   type BrokerRequestContext,
   type EngineAdapter,
 } from "@/lib/engine-adapter";
@@ -49,6 +51,9 @@ function request(input: {
 function adapter(overrides: Partial<EngineAdapter> = {}): EngineAdapter {
   return {
     id: "test-engine",
+    contractVersion: ENGINE_ADAPTER_CONTRACT_VERSION,
+    runtime: "unavailable",
+    authority: SAFECLAW_ENGINE_AUTHORITY,
     capabilities: [],
     checkAvailability: vi.fn(async () => undefined),
     run: vi.fn(async ({ emit }) => {

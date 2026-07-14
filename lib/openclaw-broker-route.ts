@@ -23,6 +23,10 @@ import {
   createLocalOpenClawAdapter,
   buildOpenClawChatPrompt,
 } from "@/lib/openclaw-chat";
+import {
+  createExperimentalHermesAdapter,
+  type ExperimentalHermesAdapterDependencies,
+} from "@/lib/hermes-engine-adapter";
 import type { ResolveBrokerContext } from "@/lib/openclaw-broker-auth";
 
 const log = createLogger("api/agent/chat");
@@ -31,6 +35,10 @@ export type AgentChatRouteDependencies = {
   engine: EngineAdapter;
   preAuthLimiter?: ReturnType<typeof createRateLimiter>;
   authenticatedLimiter?: ReturnType<typeof createRateLimiter>;
+};
+
+export type ProductionEngineAdapterDependencies = {
+  experimentalHermes?: Omit<ExperimentalHermesAdapterDependencies, "env">;
 };
 
 function jsonError(error: BrokerError): Response {
@@ -53,16 +61,27 @@ function enforceAuthenticatedRateLimit(userId: string, limiter: ReturnType<typeo
   );
 }
 
-export function createProductionEngineAdapter(env: EnvLike): EngineAdapter {
+export function createProductionEngineAdapter(
+  env: EnvLike,
+  dependencies: ProductionEngineAdapterDependencies = {},
+): EngineAdapter {
   const mode = resolveEngineMode(env);
-  const base = mode === "local-openclaw"
-    ? createLocalOpenClawAdapter({
-        env,
-        // Until a local attestation sidecar proves the profile credential's
-        // mcp_tokens site/org binding, production local execution stays closed.
-        verifySiteBinding: async () => false,
-      })
-    : createUnavailableEngineAdapter();
+  let base: EngineAdapter;
+  if (mode === "local-openclaw") {
+    base = createLocalOpenClawAdapter({
+      env,
+      // Until a local attestation sidecar proves the profile credential's
+      // mcp_tokens site/org binding, production local execution stays closed.
+      verifySiteBinding: async () => false,
+    });
+  } else if (mode === "experimental-hermes" && dependencies.experimentalHermes) {
+    base = createExperimentalHermesAdapter({
+      env,
+      ...dependencies.experimentalHermes,
+    });
+  } else {
+    base = createUnavailableEngineAdapter();
+  }
   const maxConcurrent = Number.parseInt(env.OPENCLAW_MAX_CONCURRENT ?? "", 10);
   const timeoutMs = Number.parseInt(env.OPENCLAW_CHAT_TIMEOUT_MS ?? "", 10);
   return createGuardedEngineAdapter(base, { maxConcurrent, timeoutMs });

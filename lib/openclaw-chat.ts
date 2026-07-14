@@ -6,6 +6,8 @@ import path from "node:path";
 import type { ClawChatEvent, ClawHistoryMessage } from "./agent-loop";
 import {
   BrokerError,
+  ENGINE_ADAPTER_CONTRACT_VERSION,
+  SAFECLAW_ENGINE_AUTHORITY,
   resolveEngineMode,
   type BrokerRequestContext,
   type EngineAdapter,
@@ -483,6 +485,9 @@ export function createLocalOpenClawAdapter(
 
   return {
     id: "local-openclaw",
+    contractVersion: ENGINE_ADAPTER_CONTRACT_VERSION,
+    runtime: "openclaw",
+    authority: SAFECLAW_ENGINE_AUTHORITY,
     capabilities: [],
     async checkAvailability(context, signal): Promise<void> {
       await assertRunnableContext(context, signal);
