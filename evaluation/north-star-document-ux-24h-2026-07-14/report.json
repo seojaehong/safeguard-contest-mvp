@@ -1,11 +1,12 @@
 {
-  "schemaVersion": 1,
-  "status": "pass_for_branch_review_hold_main",
+  "schemaVersion": 2,
+  "status": "pass_for_fresh_branch_review_hold_main",
   "authority": {
     "baseSha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
-    "productSha": "d9c8781410df37189d0312d870a52bcc58bf0c2f",
-    "productTree": "15b44ad46e604fcda1883bad4073a45c2e335546",
-    "productParent": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60"
+    "previousEvidenceSha": "98dfe7aee1fc397b40c2042a8c6ded4bb97133f9",
+    "productSha": "9bda2882b2ae9f97be7357bf56ab2d21dce6d7e6",
+    "productTree": "fb601e77cb693b8dfbdff6981e3904c3f4a82316",
+    "productParent": "98dfe7aee1fc397b40c2042a8c6ded4bb97133f9"
   },
   "scope": {
     "documentUxOnly": true,
@@ -16,83 +17,42 @@
   },
   "product": {
     "documentProfiles": 12,
-    "singleProvenanceDrawer": true,
-    "rawSourceFallback": true,
-    "legacyDraftPromotionMarker": "[제출 본문]"
+    "minimumFallbackSectionsPerProfile": 3,
+    "schemaFirstEditedRows": true,
+    "staleStructuredValuesRenderedAfterEdit": false,
+    "manualEditAppendixRendered": false,
+    "editedRowTruncation": false,
+    "actualBinaryRoundTripRows": 27,
+    "knowledgeLinkMinimumHitArea": 44
   },
   "browser": {
     "expectedRows": 4,
     "passedRows": 4,
     "exitCode": 0,
-    "viewports": [
-      "1440x900",
-      "391x844"
-    ],
-    "themes": [
-      "day",
-      "night"
-    ],
+    "viewports": ["1440x900", "391x844"],
+    "themes": ["day", "night"],
     "horizontalOverflowRows": 0,
     "visibleNestedScrollRows": 0,
     "smallTouchTargetRows": 0,
-    "overlapRows": 0,
-    "mobileEditorOffsets": {
-      "day": 194,
-      "night": 198
-    }
+    "interactionOverlapRows": 0,
+    "layoutOverlapRows": 0,
+    "sectionOverlapRows": 0,
+    "mobileEditorOffsets": { "day": 194, "night": 198 }
   },
   "gates": [
-    {
-      "name": "focused_unit_and_static",
-      "files": 4,
-      "passed": 20,
-      "failed": 0,
-      "exitCode": 0
-    },
-    {
-      "name": "documents_editor_browser",
-      "passed": 20,
-      "failed": 0,
-      "exitCode": 0
-    },
-    {
-      "name": "north_star_browser",
-      "passed": 4,
-      "failed": 0,
-      "exitCode": 0
-    },
-    {
-      "name": "workspace_document_combined",
-      "passed": 2,
-      "failed": 1,
-      "exitCode": 1,
-      "note": "Night setup timed out waiting for preview; failure log retained"
-    },
-    {
-      "name": "workspace_night_isolated_retry",
-      "passed": 1,
-      "failed": 0,
-      "exitCode": 0
-    },
-    {
-      "name": "strict_typecheck",
-      "exitCode": 0
-    },
-    {
-      "name": "production_build",
-      "staticPages": 27,
-      "exitCode": 0
-    },
-    {
-      "name": "lint",
-      "exitCode": 1,
-      "blocked": true,
-      "note": "next lint opened the repository ESLint setup prompt"
-    }
+    { "name": "focused_unit_route_static", "files": 5, "passed": 33, "failed": 0, "exitCode": 0 },
+    { "name": "documents_editor_browser", "passed": 22, "failed": 0, "durationSeconds": 111.92, "exitCode": 0 },
+    { "name": "north_star_browser", "passed": 4, "failed": 0, "durationSeconds": 35.25, "exitCode": 0 },
+    { "name": "strict_typecheck", "exitCode": 0 },
+    { "name": "production_build", "staticPages": 27, "exitCode": 0 },
+    { "name": "product_diff_check", "outputLines": 0, "exitCode": 0 },
+    { "name": "build_log_trailing_whitespace", "lines": 0, "exitCode": 0 }
   ],
-  "processAudit": {
-    "worktreeProcesses": 0,
-    "activeNextBuildsBeforeBuild": 0
+  "sourceAudit": {
+    "productFileCount": 8,
+    "remainingProductDiffAfterCommit": 0,
+    "shareDiffFiles": 0,
+    "worktreeVitestNextProcesses": 0
   },
   "review": {
     "independentReviewComplete": false,
