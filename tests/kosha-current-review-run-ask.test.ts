@@ -5,7 +5,7 @@ import type { AiDeliverables, AiDeliverablesDiagnostics, AiMode, GenerateAllOpti
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { runAsk } from "@/lib/search";
 import type { SafetyReferenceItem, SafetyReferenceSearchResult } from "@/lib/safety-reference-catalog";
-import type { SearchResult, TbmRiskLink } from "@/lib/types";
+import type { AskResponse, SearchResult, TbmRiskLink } from "@/lib/types";
 
 const mocks = vi.hoisted(() => ({
   enhanceLegalEvidenceMappings: vi.fn(),
@@ -154,6 +154,83 @@ function providerActionSurface(fixture: KoshaOnlyFixture): ProviderActionSurface
   return {
     structuredRiskRows: [riskRow],
     tbmRiskLinks: [tbmRiskLink]
+  };
+}
+
+const RESPONSE_NARRATIVE_SURFACES = [
+  "workpackSummaryDraft",
+  "riskAssessmentDraft",
+  "workPlanDraft",
+  "workPermitDraft",
+  "tbmBriefing",
+  "tbmLogDraft",
+  "safetyEducationRecordDraft",
+  "emergencyResponseDraft",
+  "photoEvidenceDraft",
+  "foreignWorkerBriefing",
+  "foreignWorkerTransmission",
+  "foreignWorkerLanguages",
+  "safetyEducationPoints",
+  "tbmQuestions",
+  "kakaoMessage"
+] as const;
+
+const AI_NARRATIVE_SURFACES = RESPONSE_NARRATIVE_SURFACES.filter((key) => key !== "workPermitDraft");
+
+function providerNarrativeMarker(prefix: string, surface: string): string {
+  return `V4_${prefix}_${surface}`;
+}
+
+function providerNarrativeMarkers(prefix: string, surfaces: readonly string[]): string[] {
+  return surfaces.map((surface) => providerNarrativeMarker(prefix, surface));
+}
+
+function providerNarrativeDeliverables(prefix: string): AiDeliverables {
+  return {
+    workpackSummaryDraft: providerNarrativeMarker(prefix, "workpackSummaryDraft"),
+    riskAssessmentDraft: providerNarrativeMarker(prefix, "riskAssessmentDraft"),
+    workPlanDraft: providerNarrativeMarker(prefix, "workPlanDraft"),
+    tbmBriefing: providerNarrativeMarker(prefix, "tbmBriefing"),
+    tbmLogDraft: providerNarrativeMarker(prefix, "tbmLogDraft"),
+    safetyEducationRecordDraft: providerNarrativeMarker(prefix, "safetyEducationRecordDraft"),
+    emergencyResponseDraft: providerNarrativeMarker(prefix, "emergencyResponseDraft"),
+    photoEvidenceDraft: providerNarrativeMarker(prefix, "photoEvidenceDraft"),
+    foreignWorkerBriefing: providerNarrativeMarker(prefix, "foreignWorkerBriefing"),
+    foreignWorkerTransmission: providerNarrativeMarker(prefix, "foreignWorkerTransmission"),
+    foreignWorkerLanguages: [providerNarrativeMarker(prefix, "foreignWorkerLanguages")],
+    safetyEducationPoints: [providerNarrativeMarker(prefix, "safetyEducationPoints")],
+    tbmQuestions: [providerNarrativeMarker(prefix, "tbmQuestions")],
+    kakaoMessage: providerNarrativeMarker(prefix, "kakaoMessage")
+  };
+}
+
+function withProviderNarrativeAttack(response: AskResponse, prefix: string): AskResponse {
+  return {
+    ...response,
+    deliverables: {
+      ...response.deliverables,
+      workpackSummaryDraft: providerNarrativeMarker(prefix, "workpackSummaryDraft"),
+      riskAssessmentDraft: providerNarrativeMarker(prefix, "riskAssessmentDraft"),
+      workPlanDraft: providerNarrativeMarker(prefix, "workPlanDraft"),
+      workPermitDraft: providerNarrativeMarker(prefix, "workPermitDraft"),
+      tbmBriefing: providerNarrativeMarker(prefix, "tbmBriefing"),
+      tbmLogDraft: providerNarrativeMarker(prefix, "tbmLogDraft"),
+      safetyEducationRecordDraft: providerNarrativeMarker(prefix, "safetyEducationRecordDraft"),
+      emergencyResponseDraft: providerNarrativeMarker(prefix, "emergencyResponseDraft"),
+      photoEvidenceDraft: providerNarrativeMarker(prefix, "photoEvidenceDraft"),
+      foreignWorkerBriefing: providerNarrativeMarker(prefix, "foreignWorkerBriefing"),
+      foreignWorkerTransmission: providerNarrativeMarker(prefix, "foreignWorkerTransmission"),
+      foreignWorkerLanguages: [{
+        code: "v4",
+        label: providerNarrativeMarker(prefix, "foreignWorkerLanguages"),
+        nativeLabel: providerNarrativeMarker(prefix, "foreignWorkerLanguages"),
+        rationale: providerNarrativeMarker(prefix, "foreignWorkerLanguages"),
+        lines: [providerNarrativeMarker(prefix, "foreignWorkerLanguages")]
+      }],
+      safetyEducationPoints: [providerNarrativeMarker(prefix, "safetyEducationPoints")],
+      tbmQuestions: [providerNarrativeMarker(prefix, "tbmQuestions")],
+      kakaoMessage: providerNarrativeMarker(prefix, "kakaoMessage")
+    }
   };
 }
 
@@ -327,6 +404,84 @@ describe("current-base runAsk retrieval provenance", () => {
     expect(response.deliverables.riskAssessmentDraft).not.toContain(fixture.reference.title);
     expect(response.deliverables.riskAssessmentDraft).not.toContain(fixture.body);
     expect(response.deliverables.riskAssessmentDraft).not.toContain(fixture.control);
+  }, 30_000);
+
+  it.each(["enhanced", "full"] satisfies AiMode[])(
+    "v4 discards every provider-authored narrative surface for parentless KOSHA in %s mode",
+    async (aiMode) => {
+      configureKoshaOnlySearch();
+      const answerPrefix = `ANSWER_${aiMode.toUpperCase()}`;
+      const deliverablesPrefix = `DELIVERABLES_${aiMode.toUpperCase()}`;
+      mocks.generateAnswer.mockImplementation(async (question: string, citations: SearchResult[]) => ({
+        response: withProviderNarrativeAttack(
+          buildMockAskResponse(
+            question,
+            citations.length ? citations : mockSearchResults.slice(0, 2),
+            "mock",
+            "provider narrative attack"
+          ),
+          answerPrefix
+        ),
+        trace: { provider: "mock", model: null, fallbackUsed: false }
+      }));
+      mocks.generateAllDeliverablesWithDiagnostics.mockResolvedValue(providerResult(
+        providerNarrativeDeliverables(deliverablesPrefix)
+      ));
+
+      const response = await runAsk("지게차 보행자 동선 충돌", { aiMode });
+      const serializedResponse = JSON.stringify(response);
+      const providerMarkers = [
+        ...providerNarrativeMarkers(answerPrefix, RESPONSE_NARRATIVE_SURFACES),
+        ...providerNarrativeMarkers(deliverablesPrefix, AI_NARRATIVE_SURFACES)
+      ];
+
+      expect(response.dbHarness?.summary.ontologyStatus).toBe("review_required");
+      expect(response.deliverables.riskAssessmentDraft.length).toBeGreaterThan(0);
+      expect(response.deliverables.workPlanDraft.length).toBeGreaterThan(0);
+      expect(response.deliverables.tbmBriefing.length).toBeGreaterThan(0);
+      for (const marker of providerMarkers) {
+        expect(serializedResponse.includes(marker)).toBe(false);
+      }
+    },
+    30_000
+  );
+
+  it("v4 preserves provider narratives when no parentless KOSHA review is required", async () => {
+    const directReference = retrievalReference("non-kosha-direct-v4", "ranked");
+    const answerPrefix = "SAFE_ANSWER";
+    const deliverablesPrefix = "SAFE_DELIVERABLES";
+    mocks.searchSafetyReferences.mockResolvedValue(searchResult("ranked-rpc", [directReference]));
+    mocks.generateAnswer.mockImplementation(async (question: string, citations: SearchResult[]) => ({
+      response: withProviderNarrativeAttack(
+        buildMockAskResponse(
+          question,
+          citations.length ? citations : mockSearchResults.slice(0, 2),
+          "mock",
+          "safe provider narrative control"
+        ),
+        answerPrefix
+      ),
+      trace: { provider: "mock", model: null, fallbackUsed: false }
+    }));
+    mocks.generateAllDeliverablesWithDiagnostics.mockResolvedValue(providerResult(
+      providerNarrativeDeliverables(deliverablesPrefix)
+    ));
+
+    const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
+
+    expect(response.dbHarness?.summary.directEvidence).toBeGreaterThan(0);
+    expect(response.deliverables.riskAssessmentDraft).toContain(
+      providerNarrativeMarker(deliverablesPrefix, "riskAssessmentDraft")
+    );
+    expect(response.deliverables.workPlanDraft).toContain(
+      providerNarrativeMarker(deliverablesPrefix, "workPlanDraft")
+    );
+    expect(response.deliverables.tbmBriefing).toContain(
+      providerNarrativeMarker(deliverablesPrefix, "tbmBriefing")
+    );
+    expect(response.deliverables.workPermitDraft).toContain(
+      providerNarrativeMarker(answerPrefix, "workPermitDraft")
+    );
   }, 30_000);
 
   it.each(["enhanced", "full"] satisfies AiMode[])(

@@ -1,0 +1,108 @@
+phase=red-v4-independent-review
+baselineHead=2a2326951b4b2d030af11f4615f7cf6b9bafa334
+authoritativeMain=920c7f360688352156de4854b4957a9f2f1f0e43
+command=npm.cmd test -- tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts tests/mcp-tools.test.ts -t "v4 " --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T16:29:36.1360176+09:00
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts tests/mcp-tools.test.ts -t v4  --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+ ❯ tests/kosha-current-review-run-ask.test.ts (22 tests | 2 failed | 19 skipped) 2768ms
+     × v4 discards every provider-authored narrative surface for parentless KOSHA in enhanced mode 1139ms
+     × v4 discards every provider-authored narrative surface for parentless KOSHA in full mode 827ms
+ ❯ tests/mcp-tools.test.ts (27 tests | 1 failed | 26 skipped) 14ms
+     × v4 returns a sanitized parentless KOSHA packet across the complete MCP payload 13ms
+ ❯ tests/commercial-harness.test.ts (39 tests | 2 failed | 36 skipped) 15ms
+     × v4 rejects a collision guide parent whose empty tags hide forklift fuel-system fire semantics 12ms
+     × v4 aligns canonical collision and vehicle-collision hazard tags 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/commercial-harness.test.ts > DB harness packet > v4 rejects a collision guide parent whose empty tags hide forklift fuel-system fire semantics
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/commercial-harness.test.ts:695:66
+    693|     });
+    694|
+    695|     expect(hasRelevantKoshaParent(collisionGuide, [fireParent])).toBe(…
+       |                                                                  ^
+    696|   });
+    697|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/commercial-harness.test.ts > DB harness packet > v4 aligns canonical collision and vehicle-collision hazard tags
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/commercial-harness.test.ts:723:71
+    721|     });
+    722|
+    723|     expect(hasRelevantKoshaParent(collisionGuide, [collisionParent])).…
+       |                                                                       ^
+    724|   });
+    725|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/kosha-current-review-run-ask.test.ts > current-base runAsk retrieval provenance > v4 discards every provider-authored narrative surface for parentless KOSHA in enhanced mode
+ FAIL  tests/kosha-current-review-run-ask.test.ts > current-base runAsk retrieval provenance > v4 discards every provider-authored narrative surface for parentless KOSHA in full mode
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/kosha-current-review-run-ask.test.ts:443:53
+    441|       expect(response.deliverables.tbmBriefing.length).toBeGreaterThan…
+    442|       for (const marker of providerMarkers) {
+    443|         expect(serializedResponse.includes(marker)).toBe(false);
+       |                                                     ^
+    444|       }
+    445|     },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/mcp-tools.test.ts > buildHarnessAgentResult > v4 returns a sanitized parentless KOSHA packet across the complete MCP payload
+AssertionError: expected 'V4_MCP_PARENTLESS_SUMMARY V4_MCP_PARE…' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ V4_MCP_PARENTLESS_SUMMARY V4_MCP_PARENTLESS_ACTION
+
+ ❯ tests/mcp-tools.test.ts:248:33
+    246|
+    247|     const supporting = result.packet.supportingEvidence[0];
+    248|     expect(supporting?.summary).toBe("");
+       |                                 ^
+    249|     expect(supporting?.body).toBeUndefined();
+    250|     expect(supporting?.controls).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  5 failed | 2 passed | 81 skipped (88)
+   Start at  16:29:38
+   Duration  6.21s (transform 697ms, setup 0ms, import 1.67s, tests 2.80s, environment 0ms)
+
+endedAt=2026-07-14T16:29:44.6336708+09:00
+elapsedSeconds=8.498
+exitCode=1

@@ -6,6 +6,7 @@ import {
   buildDbHarnessPracticalPoints,
   buildDbHarnessSurfaceContract,
   buildHarnessPromptContext,
+  hasRelevantKoshaParent,
   hasDocumentCoverage,
   parseHarnessMemoryInput
 } from "@/lib/db-harness";
@@ -665,6 +666,90 @@ describe("DB harness packet", () => {
       expect(promptContext).not.toContain(semanticSummary);
     }
   );
+
+  it("v4 rejects a collision guide parent whose empty tags hide forklift fuel-system fire semantics", () => {
+    const collisionGuide = verifiedKoshaReference({
+      id: "kosha-forklift-collision-guide-v4",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "KOSHA 지게차 보행자 충돌 예방 기술지침",
+      summary: "지게차와 보행자의 이동 동선을 분리한다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      controls: ["지게차 운행경로와 보행자 통행 동선 분리"]
+    });
+    const fireParent = reference({
+      id: "direct-lpg-forklift-fire-v4",
+      source_id: "official-machinery-catalog",
+      item_type: "machinery",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "LPG 지게차 연료계통 정비 화재 직접 근거",
+      summary: "LPG 지게차 연료계통 정비 중 누출 가스가 점화되어 화재가 발생할 수 있다.",
+      keywords: ["LPG", "지게차", "연료계통", "정비", "화재"],
+      risk_tags: [],
+      controls: ["연료 밸브 차단과 잔류 가스 환기"],
+      evidence_role: "direct"
+    });
+
+    expect(hasRelevantKoshaParent(collisionGuide, [fireParent])).toBe(false);
+  });
+
+  it("v4 aligns canonical collision and vehicle-collision hazard tags", () => {
+    const collisionGuide = verifiedKoshaReference({
+      id: "kosha-forklift-collision-canonical-v4",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "KOSHA 지게차 보행자 충돌 예방 기술지침",
+      summary: "지게차와 보행자의 이동 동선을 분리한다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      controls: ["지게차 운행경로와 보행자 통행 동선 분리"]
+    });
+    const collisionParent = reference({
+      id: "direct-forklift-vehicle-collision-v4",
+      source_id: "official-machinery-catalog",
+      item_type: "machinery",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "지게차와 보행자 충돌 직접 근거",
+      summary: "지게차 운행경로에 보행자가 진입해 차량 충돌이 발생할 수 있다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["차량 충돌"],
+      controls: ["지게차 운행경로와 보행자 통행 동선 분리"],
+      evidence_role: "direct"
+    });
+
+    expect(hasRelevantKoshaParent(collisionGuide, [collisionParent])).toBe(true);
+  });
+
+  it("v4 keeps an exact same-hazard forklift collision parent eligible", () => {
+    const collisionGuide = verifiedKoshaReference({
+      id: "kosha-forklift-collision-positive-v4",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "KOSHA 지게차 보행자 충돌 예방 기술지침",
+      summary: "지게차와 보행자의 이동 동선을 분리한다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      controls: ["지게차 운행경로와 보행자 통행 동선 분리"]
+    });
+    const collisionParent = reference({
+      id: "direct-forklift-collision-positive-v4",
+      source_id: "official-machinery-catalog",
+      item_type: "machinery",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "지게차 후진 중 보행자 충돌 직접 근거",
+      summary: "지게차 후진 경로에 보행자가 진입해 충돌할 수 있다.",
+      keywords: ["지게차", "보행자", "후진", "충돌"],
+      risk_tags: ["충돌"],
+      controls: ["후진 경보와 유도자 배치"],
+      evidence_role: "direct"
+    });
+
+    expect(hasRelevantKoshaParent(collisionGuide, [collisionParent])).toBe(true);
+  });
 
   it("keeps fire controls and energy isolation in the bounded DB harness surface", () => {
     const maintenanceFire = reference({
