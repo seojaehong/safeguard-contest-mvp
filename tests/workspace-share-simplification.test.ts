@@ -21,15 +21,24 @@ describe("workspace share simplification", () => {
     expect(sharePage).not.toContain("operation-ontology-panel");
   });
 
-  it("shows one compact confirmation summary without the four-card evidence ledger", () => {
-    expect(sharePanel).toContain("오늘 대상");
-    expect(sharePanel).toContain("채널");
-    expect(sharePanel).toContain("언어 미리보기");
-    expect(sharePanel).toContain("메시지 미리보기");
+  it("keeps only the four-step delivery sequence on the default surface", () => {
+    const targets = sharePanel.indexOf("오늘 대상");
+    const channels = sharePanel.indexOf('id="workflow-channel-heading"');
+    const language = sharePanel.indexOf('id="workflow-language-heading"');
+    const preview = sharePanel.indexOf('data-share-preview');
+
+    expect(targets).toBeGreaterThan(-1);
+    expect(channels).toBeGreaterThan(targets);
+    expect(language).toBeGreaterThan(channels);
+    expect(preview).toBeGreaterThan(language);
     expect(sharePanel).not.toContain("share-delivery-summary");
     expect(sharePanel).not.toContain("다음 행동 · {channel.nextAction}");
     expect(sharePanel).not.toContain('className="dispatch-evidence-ledger"');
     expect(sharePanel).not.toContain("관리자 표시와 분리");
+    expect(sharePanel).not.toContain("전달 메모 추가");
+    expect(sharePanel).not.toContain("저장 및 전송 기록");
+    expect(sharePanel).not.toContain("메시지 복사");
+    expect(sharePanel).not.toContain("전체 메시지 원문");
     expect(sharePanel).toContain('href="/login"');
   });
 
@@ -39,8 +48,10 @@ describe("workspace share simplification", () => {
     expect(sharePanel).not.toContain("외국인 근로자 전송본 ·");
   });
 
-  it("keeps only the confirmation action visible during the send confirmation step", () => {
-    expect(sharePanel).toMatch(/\{!isConfirming \? \(\s*<div className="command-actions">/);
-    expect(sharePanel).toMatch(/\{isConfirming \? \(\s*<div className="dispatch-confirm-panel/);
+  it("exposes exactly one direct primary send action", () => {
+    expect(sharePanel.match(/data-share-primary/g)).toHaveLength(2);
+    expect(sharePanel).toContain("onClick={dispatchWorkflow}");
+    expect(sharePanel).not.toContain("setIsConfirming");
+    expect(sharePanel).not.toContain("dispatch-confirm-panel");
   });
 });

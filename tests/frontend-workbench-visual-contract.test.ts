@@ -41,7 +41,9 @@ describe("workbench visual contract", () => {
     expect(commandCenter).toContain("workbench-disabled-state");
     expect(fieldWorkspace).toContain("workbench-root");
     expect(fieldWorkspace).toContain("workbench-evidence-rail");
-    expect(share).toContain("workbench-share-confirmation");
+    expect(share).toContain("data-share-root");
+    expect(share).toContain("data-share-primary");
+    expect(share).not.toContain("workbench-share-confirmation");
     expect(reports).toContain("workbench-report-filters");
     expect(reports).toContain("workbench-empty-state");
     expect(agent).toContain("workbench-loading-state");
@@ -145,7 +147,6 @@ describe("workbench visual contract", () => {
     const expectedRules = [
       ["workbench-document-rail", "padding: var(--space-6)", "gap: var(--space-4)"],
       ["workbench-evidence-rail", "gap: var(--space-4)", "border-radius: var(--radius-panel)"],
-      ["workbench-share-confirmation", "padding: var(--space-6)", "border-radius: var(--radius-panel)"],
       ["workbench-report-filters", "gap: var(--space-2)", "min-height: var(--control-height)"],
       ["workbench-empty-state", "padding: var(--space-6)", "border-radius: var(--radius-panel)"],
       ["workbench-loading-state", "font-size: var(--text-caption)", "line-height: var(--leading-caption)"]
