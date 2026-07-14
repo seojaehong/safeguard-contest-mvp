@@ -620,8 +620,15 @@ describe("workspace layout regression", () => {
 
     await input.fill("");
 
+    const pseudoContent = await input.evaluate((element) => ({
+      after: getComputedStyle(element, "::after").content,
+      before: getComputedStyle(element, "::before").content
+    }));
+
     expect(await input.inputValue()).toBe("");
     expect(await input.getAttribute("placeholder")).toBe("");
+    expect(pseudoContent.before).toBe("none");
+    expect(pseudoContent.after).toBe("none");
     expect(await page.getByRole("button", { name: "예시로 되돌리기" }).count()).toBe(0);
     expect(await page.locator(".workspace-current-brief").count()).toBe(0);
     expect(await page.locator(".workspace-source-status").count()).toBe(0);

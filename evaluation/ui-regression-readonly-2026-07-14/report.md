@@ -10,6 +10,8 @@ The later web-presentation integration does not touch the workspace component or
 
 Focused regression command on the current integration worktree: **1 file / 3 tests PASS** with 21 unrelated tests skipped. Log: `focused-tests.log`.
 
+The clear-input contract now also asserts that `::before` and `::after` both resolve to `none`. The dedicated rerun passed: **1 file / 1 test PASS**, 23 unrelated tests skipped. Log: `pseudo-content-contract.log`.
+
 ## desktop-day
 - selectedExample: 인천 물류 · 우천 · 숙련자 중심
 - loaded textarea: y=424.59, h=152, scrollHeight=150, valueLength=123, placeholder="", before=none, after=none

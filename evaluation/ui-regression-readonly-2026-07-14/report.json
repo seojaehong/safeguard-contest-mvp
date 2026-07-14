@@ -10,13 +10,23 @@
     "desktopRailMainAlignment": "pass",
     "mobileStackBoundary": "pass"
   },
-  "verification": {
-    "command": "npm.cmd test -- tests/workspace-layout-regression.test.ts --maxWorkers=1 --no-file-parallelism -t untouched workspace|removes stale example|filled workspace rail",
-    "testFilesPassed": 1,
-    "testsPassed": 3,
-    "testsSkipped": 21,
-    "log": "focused-tests.log"
-  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests/workspace-layout-regression.test.ts --maxWorkers=1 --no-file-parallelism -t untouched workspace|removes stale example|filled workspace rail",
+      "testFilesPassed": 1,
+      "testsPassed": 3,
+      "testsSkipped": 21,
+      "log": "focused-tests.log"
+    },
+    {
+      "command": "npm.cmd test -- tests/workspace-layout-regression.test.ts --maxWorkers=1 --no-file-parallelism -t removes stale example affordances after clearing the input",
+      "testFilesPassed": 1,
+      "testsPassed": 1,
+      "testsSkipped": 23,
+      "assertionsAdded": ["textarea ::before content is none", "textarea ::after content is none"],
+      "log": "pseudo-content-contract.log"
+    }
+  ],
   "cases": [
     {
       "case": {
