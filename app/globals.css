@@ -14670,7 +14670,7 @@ body:has(.safeclaw-landing) :is(
 
 .share-panel.workflow-panel .button,
 .command-center-shell .operation-ontology-panel .button {
-  min-height: 38px;
+  min-height: 44px;
   border-color: var(--share-primary);
   border-radius: 4px;
   background: var(--share-primary);
