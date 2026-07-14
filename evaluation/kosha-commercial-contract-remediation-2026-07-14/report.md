@@ -80,7 +80,7 @@ These are conflict and path-overlap observations only. They do not approve integ
 
 ## Historical Evidence Correction
 
-The v3 report's description of `integrated-kosha-group-d.log` as an "immutable log" is withdrawn. The file is a historical self-recorded command transcript. Its Windows worktree bytes are preserved in Git from commit `049debe47cf6d18e923bb5c91e5fafd8d07c885b`, with SHA-256 `7f0c0ae1905a62bbaf3b74973e0c62e58eee78d776539008ed6c6b630bbed008`; the normalized Git blob hash is recorded in the v4 manifest. No independent runner, signed attestation, or external immutable capture was established. It must not be treated as independently immutable evidence.
+The v3 report's description of `integrated-kosha-group-d.log` as an "immutable log" is withdrawn. The file is a historical self-recorded command transcript. The current bytes first appear at commit `2a2326951b4b2d030af11f4615f7cf6b9bafa334`, not `049debe47cf6d18e923bb5c91e5fafd8d07c885b`. History: `049debe4` has Git blob `8836b0bbb1a2914d8d59a5b568e7b5ed3dab6594` with 129 passed / 1 failed; `29ae8372` modifies the transcript to 130 passed; `2a232695` modifies it to the current 129 passed / 1 failed Git blob `cabd4989af7bc0fb7147f343c2aad79f926b662c`; `08f6d6ed` retains the `2a232695` blob. No independent runner, signed attestation, or external immutable capture was established. It remains self-recorded and must not be treated as independently immutable evidence.
 
 ## Scope Integrity
 
