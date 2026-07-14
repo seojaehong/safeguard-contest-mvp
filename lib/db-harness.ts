@@ -305,7 +305,7 @@ export function buildDbHarnessPacket(input: {
 }): DbHarnessPacket {
   const improvements = input.improvements || [];
   const workpackMemory = input.workpackMemory || [];
-  const queryHazardFamilies = canonicalKoshaHazardFamiliesFromText(input.question);
+  const queryHazardFamilies = classifyKoshaQueryHazardFamilies(input.question);
   const references = input.references
     .filter((item) => isSafetyReferenceCompatibleWithQuery(input.question, item))
     .filter((item) => isDirectEvidenceCompatibleWithQueryHazard(item, queryHazardFamilies))
@@ -649,6 +649,11 @@ type KoshaHazardFamily =
   | "noise"
   | "slip_or_trip";
 
+type KoshaQueryHazardFamilies = {
+  state: "none" | "single" | "multiple";
+  families: ReadonlySet<KoshaHazardFamily>;
+};
+
 const KOSHA_HAZARD_FAMILY_PATTERNS: ReadonlyArray<{
   family: KoshaHazardFamily;
   pattern: RegExp;
@@ -678,9 +683,12 @@ function koshaHazardFamiliesFromText(text: string): Set<KoshaHazardFamily> {
     .map(({ family }) => family));
 }
 
-function canonicalKoshaHazardFamiliesFromText(text: string): Set<KoshaHazardFamily> {
+function classifyKoshaQueryHazardFamilies(text: string): KoshaQueryHazardFamilies {
   const families = koshaHazardFamiliesFromText(text);
-  return families.size === 1 ? families : new Set<KoshaHazardFamily>();
+  return {
+    state: families.size === 0 ? "none" : families.size === 1 ? "single" : "multiple",
+    families
+  };
 }
 
 function intersectKoshaHazardFamilies(
@@ -728,13 +736,13 @@ function isRawDirectEvidenceCandidate(item: SafetyReferenceItem): boolean {
 
 function isDirectEvidenceCompatibleWithQueryHazard(
   item: SafetyReferenceItem,
-  queryHazardFamilies: ReadonlySet<KoshaHazardFamily>
+  queryHazardFamilies: KoshaQueryHazardFamilies
 ): boolean {
   if (!isRawDirectEvidenceCandidate(item)) return true;
-  if (!queryHazardFamilies.size) return true;
+  if (queryHazardFamilies.state === "none") return true;
   const itemFamilies = canonicalKoshaHazardFamilies(item, { includeOperationalHazard: false });
   if (!itemFamilies.size) return false;
-  return [...queryHazardFamilies].some((family) => itemFamilies.has(family));
+  return [...queryHazardFamilies.families].some((family) => itemFamilies.has(family));
 }
 
 function hasCompatibleKoshaHazardFamily(
