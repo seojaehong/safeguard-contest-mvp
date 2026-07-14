@@ -1,1 +1,2 @@
 evaluation/kosha-verified-subset-*/subset/**/*.jsonl text eol=lf
+evaluation/kosha-official-metadata-promotion-*/snapshots/**/*.jsonl text eol=lf
