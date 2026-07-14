@@ -9,8 +9,11 @@ import {
 } from "@/lib/engine-adapter";
 import {
   createSafeClawHermesComposition,
+  HERMES_OUTPUT_ATTESTATION_VERSION,
+  type HermesPlannerTextOutput,
   type SafeClawHermesComposition,
 } from "@/lib/hermes-engine-adapter";
+import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
   assertOpenClawOpenAiOAuth,
   hasLocalOpenClawCapability,
@@ -34,6 +37,7 @@ export type OpenClawHermesRuntimeDependencies = {
   verifyToolFreeAgent?: VerifyToolFreeAgent;
   assertOAuth?: AssertOpenClawOpenAiOAuth;
   runChat?: typeof runOpenClawChat;
+  testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -123,21 +127,36 @@ function frozenClone<T>(value: T): T {
 
 function naturalizationPrompt(input: {
   prompt: string;
-  evidencePacket: unknown;
+  evidenceDigest: string;
+  evidenceClaims: unknown;
 }): string {
   return [
     "[SafeClaw Hermes runtime contract]",
     "Role: naturalize_only.",
-    "Use only the fixed Evidence Harness packet below.",
+    "Select only claim and citation IDs from the allowlist below.",
     "Do not call tools, add evidence, change decisions, mutate data, publish, or imply human confirmation.",
-    "Return natural-language text only.",
+    `Return JSON only: {\"schemaVersion\":\"${HERMES_OUTPUT_ATTESTATION_VERSION}\",\"evidenceDigest\":\"...\",\"claims\":[{\"claimId\":\"...\",\"citationIds\":[\"...\"]}]}.`,
+    "Every selected claim must include only its listed citation IDs. Do not return prose.",
     "",
     "[User request]",
     input.prompt,
     "",
-    "[Attested Evidence Harness packet]",
-    JSON.stringify({ engine: "safeclaw-db-harness", packet: input.evidencePacket }),
+    "[Attested claim allowlist]",
+    JSON.stringify({ evidenceDigest: input.evidenceDigest, claims: input.evidenceClaims }),
   ].join("\n");
+}
+
+function parsePlannerAttestation(text: string): HermesPlannerTextOutput["attestation"] {
+  let value: unknown;
+  try {
+    value = JSON.parse(text);
+  } catch {
+    throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+  }
+  if (!isRecord(value)) {
+    throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+  }
+  return value as HermesPlannerTextOutput["attestation"];
 }
 
 export function createOpenClawHermesComposition(
@@ -182,7 +201,8 @@ export function createOpenClawHermesComposition(
       config,
       prompt: naturalizationPrompt({
         prompt: input.prompt,
-        evidencePacket: input.evidencePacket,
+        evidenceDigest: input.evidenceDigest,
+        evidenceClaims: input.evidenceClaims,
       }),
       emit: (event: ClawChatEvent) => {
         if (event.kind !== "text-delta") {
@@ -194,8 +214,11 @@ export function createOpenClawHermesComposition(
     });
     if (!text.trim()) throw new BrokerError("ENGINE_EXECUTION_FAILED", 500);
     input.emitText({
-      text,
       evidencePacket: frozenClone(input.evidencePacket),
+      attestation: parsePlannerAttestation(text),
     });
-  }, { attestRuntime });
+  }, {
+    attestRuntime,
+    testOnlyTrustedKoshaReference: dependencies.testOnlyTrustedKoshaReference,
+  });
 }
