@@ -1042,15 +1042,22 @@ function compressSafetyReferenceMatches(items: SafetyReferenceItem[], limit = 5)
 
 export function buildSafetyReferenceSurfaceItem(
   item: SafetyReferenceItem,
-  retrievalMode?: SafetyReferenceRetrievalMode
+  retrievalMode?: SafetyReferenceRetrievalMode,
+  options: { parentEvidenceReady?: boolean } = {}
 ) {
   const operationalView = deriveSafetyReferenceOperationalView(item);
   const grounding = getKoshaGroundingDecision(item);
   const groundingLifecycle = grounding?.metadata?.lifecycle;
-  const unverifiedTechnicalKosha = isKoshaTechnicalReference(item) && !grounding?.supportingCitationEligible;
-  const controls = unverifiedTechnicalKosha
-    ? ["검증된 현행 원문과 provenance 확인 전 본문·통제문구 미사용"]
-    : operationalView.controls.slice(0, 2);
+  const technicalKosha = isKoshaTechnicalReference(item);
+  const parentEvidenceReady = options.parentEvidenceReady ?? true;
+  const unverifiedTechnicalKosha = technicalKosha && !grounding?.supportingCitationEligible;
+  const parentlessTechnicalKosha = technicalKosha && !parentEvidenceReady;
+  const blockedTechnicalKosha = unverifiedTechnicalKosha || parentlessTechnicalKosha;
+  const controls = parentlessTechnicalKosha
+    ? []
+    : unverifiedTechnicalKosha
+      ? ["검증된 현행 원문과 provenance 확인 전 본문·통제문구 미사용"]
+      : operationalView.controls.slice(0, 2);
   const displayTitle = getSafetyReferenceDisplayTitle(item);
   return {
     rawTitle: item.title,
@@ -1058,28 +1065,34 @@ export function buildSafetyReferenceSurfaceItem(
     itemType: item.item_type,
     title: displayTitle,
     displayTitle,
-    displaySummary: unverifiedTechnicalKosha ? undefined : item.display_summary,
-    shortSummary: unverifiedTechnicalKosha
-      ? `검토 필요 · ${controls[0]}`
+    displaySummary: blockedTechnicalKosha ? undefined : item.display_summary,
+    shortSummary: blockedTechnicalKosha
+      ? parentlessTechnicalKosha
+        ? "검토 필요 · SIF 사례 또는 직접 근거 확인 전 KOSHA 통제문구 미사용"
+        : `검토 필요 · ${controls[0]}`
       : item.display_summary || `${operationalView.hazard} · ${controls.join(" · ")}`,
     primaryDocuments: item.primary_documents || [],
     controls,
     evidenceRoleLabel: item.evidence_role_label,
     evidenceRole: item.evidence_role,
     sourceKindLabel: item.source_kind_label,
-    operationSignalLabel: controls[0] ? `문서와 TBM에 ${controls[0]} 반영` : item.operation_signal_label,
+    operationSignalLabel: parentlessTechnicalKosha
+      ? "SIF 사례 또는 직접 근거 확인 후 기술 보조지침 검토"
+      : controls[0]
+        ? `문서와 TBM에 ${controls[0]} 반영`
+        : item.operation_signal_label,
     stableDocumentKey: item.kosha_guide?.stableDocumentKey ?? grounding?.metadata?.stableDocumentKey,
-    anchor: unverifiedTechnicalKosha ? undefined : item.kosha_guide?.anchors[0],
+    anchor: blockedTechnicalKosha ? undefined : item.kosha_guide?.anchors[0],
     retrievalSource: item.retrieval_source,
     retrievalMode,
     quality: item.kosha_guide?.quality ?? (grounding
       ? grounding.status === "verified_current" ? "accepted" : "review_required"
       : undefined),
     lifecycle: item.kosha_guide?.lifecycle ?? (groundingLifecycle === "unresolved" ? undefined : groundingLifecycle),
-    directEligible: isKoshaTechnicalReference(item) ? false : item.kosha_guide?.directEligible,
-    supportingCitationEligible: grounding?.supportingCitationEligible,
+    directEligible: technicalKosha ? false : item.kosha_guide?.directEligible,
+    supportingCitationEligible: grounding?.supportingCitationEligible === true && parentEvidenceReady,
     groundingReason: grounding?.reason,
-    reviewRequired: grounding?.reviewRequired ?? operationalView.reviewRequired
+    reviewRequired: blockedTechnicalKosha || (grounding?.reviewRequired ?? operationalView.reviewRequired)
   };
 }
 
@@ -1095,7 +1108,11 @@ function isVerifiedCurrentKoshaCompressed(item: CompressedSafetyReference): bool
     && item.groundingReason === "verified-current";
 }
 
-function buildRequiredKoshaCitations(items: readonly SafetyReferenceItem[]) {
+function buildRequiredKoshaCitations(
+  items: readonly SafetyReferenceItem[],
+  options: { parentEvidenceReady: boolean }
+) {
+  if (!options.parentEvidenceReady) return [];
   const uniqueVerified = new Map<string, SafetyReferenceItem>();
   for (const item of items) {
     const decision = getKoshaGroundingDecision(item);
@@ -1119,19 +1136,34 @@ function buildRequiredKoshaCitations(items: readonly SafetyReferenceItem[]) {
   }));
 }
 
-function formatSafetyReferencePromptLine(item: CompressedSafetyReference, index: number): string {
-  if (isTechnicalKoshaCompressed(item) && !isVerifiedCurrentKoshaCompressed(item)) {
-    return `${index}. [${item.kindLabel}] ${item.title} | 검토필요 reason=${item.groundingReason || "metadata-absent"} | 검증 전 본문·통제문구 미사용`;
+function formatSafetyReferencePromptLine(
+  item: CompressedSafetyReference,
+  index: number,
+  options: { parentEvidenceReady: boolean }
+): string {
+  const parentMissing = isTechnicalKoshaCompressed(item)
+    && isVerifiedCurrentKoshaCompressed(item)
+    && !options.parentEvidenceReady;
+  if (isTechnicalKoshaCompressed(item) && (!isVerifiedCurrentKoshaCompressed(item) || parentMissing)) {
+    const reason = parentMissing ? "parent-evidence-missing" : item.groundingReason || "metadata-absent";
+    return `${index}. [${item.kindLabel}] ${item.title} | 검토필요 reason=${reason} | SIF/직접 근거 확인 전 본문·통제문구·필수 인용 미사용`;
   }
   const status = isTechnicalKoshaCompressed(item) ? "검증된 현행 기술 보조지침" : "확정근거";
   return `${index}. [${item.kindLabel}] ${item.title} | ${status} | 반영: ${item.reflectsDocuments.join("·") || "-"} | ${item.documentSentence}`;
 }
 
-function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): string {
+function formatSafetyReferenceAppendix(
+  items: CompressedSafetyReference[],
+  options: { parentEvidenceReady: boolean }
+): string {
   if (!items.length) return "";
   const koshaItems = items.filter(isTechnicalKoshaCompressed);
-  const koshaPrimary = koshaItems.filter(isVerifiedCurrentKoshaCompressed);
-  const koshaReviewRequired = koshaItems.filter((item) => !isVerifiedCurrentKoshaCompressed(item));
+  const koshaPrimary = options.parentEvidenceReady
+    ? koshaItems.filter(isVerifiedCurrentKoshaCompressed)
+    : [];
+  const koshaReviewRequired = koshaItems.filter((item) => (
+    !isVerifiedCurrentKoshaCompressed(item) || !options.parentEvidenceReady
+  ));
   const others = items.filter((item) => !isTechnicalKoshaCompressed(item));
   const blocks: string[] = [];
   if (koshaPrimary.length) {
@@ -1147,8 +1179,9 @@ function formatSafetyReferenceAppendix(items: CompressedSafetyReference[]): stri
     blocks.push("");
     blocks.push("[KOSHA 기술지침/기술지원규정 검토 필요]");
     for (const item of koshaReviewRequired) {
+      const parentMissing = isVerifiedCurrentKoshaCompressed(item) && !options.parentEvidenceReady;
       blocks.push(
-        `- ${item.kindLabel}: ${item.title} / reason=${item.groundingReason || "metadata-absent"} / quality=${item.quality || "review_required"} / lifecycle=${item.lifecycle || "unknown"} / 검증 전 본문·통제문구·필수 인용에 사용하지 않음`
+        `- ${item.kindLabel}: ${item.title} / reason=${parentMissing ? "parent-evidence-missing" : item.groundingReason || "metadata-absent"} / quality=${item.quality || "review_required"} / lifecycle=${item.lifecycle || "unknown"} / SIF·직접 근거 확인 전 본문·통제문구·필수 인용에 사용하지 않음`
       );
     }
   }
@@ -1859,14 +1892,19 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
                   }
                 : undefined
             });
+            const koshaParentEvidenceReadyEarly = dbHarnessPacket.directEvidence.length > 0
+              || dbHarnessPacket.sifCases.length > 0;
             const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
             const compressed = compressSafetyReferenceMatches(safeRefItems, 5);
-            const koshaPrimaryRefsEarly = buildRequiredKoshaCitations(safeRefItems);
+            const koshaPrimaryRefsEarly = buildRequiredKoshaCitations(safeRefItems, {
+              parentEvidenceReady: koshaParentEvidenceReadyEarly
+            });
             const koshaLinesEarly = [
               ...(ksha?.references ?? []).slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.url}`),
               ...compressed.slice(0, 5).map((item, index) => formatSafetyReferencePromptLine(
                 item,
-                Math.min(5, (ksha?.references ?? []).length) + index + 1
+                Math.min(5, (ksha?.references ?? []).length) + index + 1,
+                { parentEvidenceReady: koshaParentEvidenceReadyEarly }
               ))
             ].slice(0, 12);
             const trainingLinesEarly = (trng?.recommendations ?? []).slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.institution} | ${r.fitLabel || ""}`);
@@ -2030,6 +2068,22 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       log.warn("safetyReferencePromise failed", safeFailureContext((allResults[7] as PromiseRejectedResult).reason)),
       safetyReferenceFallback
     );
+    const dbHarnessEvidencePacket = buildDbHarnessPacket({
+      question,
+      references: safetyReference.items,
+      improvements: harnessMemory.improvements,
+      workpackMemory: harnessMemory.workpackMemory,
+      retrieval: {
+        errorCode: safetyReference.errorCode,
+        mode: safetyReference.retrievalMode,
+        vectorSearch: safetyReference.vectorSearch,
+        message: safetyReference.message
+      }
+    });
+    const koshaParentEvidenceReady = dbHarnessEvidencePacket.directEvidence.length > 0
+      || dbHarnessEvidencePacket.sifCases.length > 0;
+    const parentlessKoshaReviewRequired = !koshaParentEvidenceReady
+      && dbHarnessEvidencePacket.supportingEvidence.some(isKoshaTechnicalReference);
     const citations = allResults[8].status === "fulfilled" ? allResults[8].value : (
       log.warn("citationsPromise failed", safeFailureContext((allResults[8] as PromiseRejectedResult).reason)),
       mockSearchResults.slice(0, 4)
@@ -2101,16 +2155,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     // Compress catalog hits before prompting; unverified technical KOSHA rows keep
     // only an honest review-state marker and never expose their body or control text.
     const safetyReferenceCompressed = compressSafetyReferenceMatches(safetyReference.items, 5);
-    const safetyReferenceAppendix = formatSafetyReferenceAppendix(safetyReferenceCompressed);
-    const koshaPrimaryRefs = buildRequiredKoshaCitations(safetyReference.items);
-    // For the AI prompt context, give a short summary form (not the appendix verbatim).
-    const koshaLinesCtx = [
-      ...kosha.references.slice(0, 5).map((r, i) => `${i + 1}. ${r.title} | ${r.url}`),
-      ...safetyReferenceCompressed.slice(0, 5).map((item, index) => formatSafetyReferencePromptLine(
-        item,
-        kosha.references.slice(0, 5).length + index + 1
-      ))
-    ].slice(0, 12);
+    const safetyReferenceAppendix = formatSafetyReferenceAppendix(safetyReferenceCompressed, {
+      parentEvidenceReady: koshaParentEvidenceReady
+    });
 
     // Fix 6 continued: consume deliverables from the parallel Promise (allResults[9]).
     let aiBodies: Awaited<ReturnType<typeof generateAllDeliverables>> = {};
@@ -2137,7 +2184,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       )))
     };
     const generatedStructuredRiskValidation = normalizeAndValidateRiskAssessmentRows(aiBodies.structuredRiskRows || []);
-    const generatedStructuredRiskRows = generatedStructuredRiskValidation.rows;
+    const generatedStructuredRiskRows = parentlessKoshaReviewRequired
+      ? []
+      : generatedStructuredRiskValidation.rows;
     const photoSeedRiskRows = buildPhotoHazardRiskRows(response, harnessMemory.improvements);
     const harnessStructuredRiskRows = generatedStructuredRiskRows.length
       ? []
@@ -2146,7 +2195,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       ? []
       : harnessStructuredRiskRows.length
         ? harnessStructuredRiskRows
-        : buildFallbackRiskAssessmentRows(response, weather.summary);
+        : parentlessKoshaReviewRequired
+          ? []
+          : buildFallbackRiskAssessmentRows(response, weather.summary);
     const baseStructuredRiskRows = generatedStructuredRiskRows.length
       ? generatedStructuredRiskRows
       : fallbackStructuredRiskRows;
@@ -2161,10 +2212,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         status: structuredRiskRows.length && !structuredRiskIssues.length ? "ok" : "fail"
       });
     }
-    const structuredRiskSourceDetail = generatedStructuredRiskRows.length
-      ? `structured rows=AI${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`
-      : `structured rows=${harnessStructuredRiskRows.length ? "DB harness deterministic" : "deterministic baseline"}${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`;
-    const generatedTbmRiskLinks = aiBodies.tbmRiskLinks || [];
+    const structuredRiskSourceDetail = parentlessKoshaReviewRequired
+      ? `structured rows=review required (SIF/direct parent 없음)${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`
+      : generatedStructuredRiskRows.length
+        ? `structured rows=AI${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`
+        : `structured rows=${harnessStructuredRiskRows.length ? "DB harness deterministic" : "deterministic baseline"}${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`;
+    const generatedTbmRiskLinks = parentlessKoshaReviewRequired ? [] : aiBodies.tbmRiskLinks || [];
     const photoSeedRiskStartIndex = baseStructuredRiskRows.length;
     const photoSeedTbmRiskLinks = acceptedPhotoSeedRiskRows.length
       ? buildTbmRiskLinks(acceptedPhotoSeedRiskRows, weather.summary)
@@ -2173,9 +2226,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const tbmRiskLinks = generatedTbmRiskLinks.length
       ? [...generatedTbmRiskLinks, ...photoSeedTbmRiskLinks]
       : buildTbmRiskLinks(structuredRiskRows, weather.summary);
-    const tbmRiskSourceDetail = generatedTbmRiskLinks.length
-      ? `TBM-risk links=AI${photoSeedTbmRiskLinks.length ? ` + photo seed links ${photoSeedTbmRiskLinks.length}` : ""}`
-      : `TBM-risk links=${harnessStructuredRiskRows.length ? "DB harness deterministic" : "deterministic baseline"}`;
+    const tbmRiskSourceDetail = parentlessKoshaReviewRequired
+      ? "TBM-risk links=review required (SIF/direct parent 없음)"
+      : generatedTbmRiskLinks.length
+        ? `TBM-risk links=AI${photoSeedTbmRiskLinks.length ? ` + photo seed links ${photoSeedTbmRiskLinks.length}` : ""}`
+        : `TBM-risk links=${harnessStructuredRiskRows.length ? "DB harness deterministic" : "deterministic baseline"}`;
     const deterministicTbmBriefingStructured = aiMode === "enhanced" && structuredRiskRows.length
       ? buildTbmBriefingStructuredFromRiskRows(response.scenario, structuredRiskRows, weather.summary)
       : null;
@@ -2228,6 +2283,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 
     const enriched: AskResponse = {
       ...response,
+      riskSummary: parentlessKoshaReviewRequired
+        ? { ...response.riskSummary, immediateActions: [] }
+        : response.riskSummary,
       generationMode: aiMode,
       generationTrace,
       answer: [
@@ -2260,7 +2318,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           vectorSearch: safetyReference.vectorSearch,
           message: safetyReference.message,
           items: safetyReference.items.slice(0, 8).map((item) => (
-            buildSafetyReferenceSurfaceItem(item, safetyReference.retrievalMode)
+            buildSafetyReferenceSurfaceItem(item, safetyReference.retrievalMode, {
+              parentEvidenceReady: koshaParentEvidenceReady
+            })
           ))
         },
         safetyKnowledge: {

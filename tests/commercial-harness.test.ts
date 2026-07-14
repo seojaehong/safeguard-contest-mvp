@@ -603,9 +603,39 @@ describe("DB harness packet", () => {
     expect(answer).toContain("SIF 유사사례");
     expect(answer).toContain("기술 보조지침 후보");
     expect(answer).toContain(koshaOnly.title);
-    expect(actionSection).not.toContain(koshaOnlyControl);
+    expect(actionSection.trim()).toBe("- 확정된 오늘 조치 없음: SIF 사례 또는 직접 근거를 먼저 확인하세요.");
+    expect(points.some((point) => point.startsWith("문서 반영 전 확인:"))).toBe(false);
     expect(points.join("\n")).not.toContain(koshaOnlyControl);
     expect(points).toContain("위험성평가표 근거 보강 후 전파");
+  });
+
+  it("keeps KOSHA-only body text outside the provider prompt until parent evidence exists", () => {
+    const koshaOnlyControl = "EXCLUDED_KOSHA_ONLY_PROMPT_CONTROL";
+    const koshaOnlyBody = "EXCLUDED_KOSHA_ONLY_PROMPT_BODY";
+    const koshaOnly = verifiedKoshaReference({
+      id: "kosha-only-prompt-guide",
+      item_type: "technical-guideline",
+      title: "KOSHA 단독 prompt 기술지침",
+      summary: "직접 근거 없이 기술지침만 검색된 상태",
+      body: koshaOnlyBody,
+      keywords: ["단독", "기술지침"],
+      risk_tags: ["추락"],
+      controls: [koshaOnlyControl]
+    });
+    koshaOnly.kosha_guide = {
+      ...koshaOnly.kosha_guide!,
+      evidenceRef: `KOSHA 근거 p.1: ${koshaOnlyControl}`
+    };
+    const promptContext = buildHarnessPromptContext(buildDbHarnessPacket({
+      question: "외벽 도장 추락",
+      references: [koshaOnly]
+    }));
+
+    expect(promptContext).toContain('"role":"technical_guidance_candidate"');
+    expect(promptContext).toContain('"parentEvidenceReady":false');
+    expect(promptContext).not.toContain('"bodyExcerpt"');
+    expect(promptContext).not.toContain(koshaOnlyBody);
+    expect(promptContext).not.toContain(koshaOnlyControl);
   });
 
   it("keeps fire controls and energy isolation in the bounded DB harness surface", () => {
