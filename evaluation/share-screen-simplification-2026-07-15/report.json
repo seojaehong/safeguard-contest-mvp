@@ -34,5 +34,23 @@
     "language-preview",
     "message-preview",
     "primary-send-action"
-  ]
+  ],
+  "production": {
+    "integratedProductCommit": "143140f",
+    "url": "https://www.safeclaw.kr/workspace?theme=day",
+    "verified": true,
+    "shareRootCount": 1,
+    "targetSectionCount": 1,
+    "channelSectionCount": 1,
+    "languageSectionCount": 1,
+    "previewCount": 1,
+    "primaryActionCount": 1,
+    "removedSurfaceCounts": {
+      "noteEditor": 0,
+      "historyLedger": 0,
+      "copyAction": 0,
+      "rawMessageDisclosure": 0
+    },
+    "horizontalOverflow": 0
+  }
 }
