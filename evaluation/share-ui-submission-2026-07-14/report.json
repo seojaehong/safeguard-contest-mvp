@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-07-14T08:50:00.000Z",
+  "scope": "share-ui-presentation-only",
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "authorityBehaviorChanged": false,
+  "changedSurfaces": [
+    "share-header",
+    "recipient-summary",
+    "channel-selection",
+    "language-preview-selector",
+    "collapsed-delivery-note",
+    "collapsed-record-detail"
+  ],
+  "verification": {
+    "focusedTestFiles": 2,
+    "focusedTestsPassed": 29,
+    "typecheck": "pass",
+    "productionBuild": "pass",
+    "staticPages": 27,
+    "diffCheck": "pass"
+  },
+  "excludedCandidate": "workpack-share-v2-authority-restoration"
+}

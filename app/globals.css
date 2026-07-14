@@ -14443,6 +14443,10 @@ body:has(.safeclaw-landing) :is(
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.share-delivery-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .acknowledgment-ledger,
 .operation-evidence-summary {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -14481,6 +14485,25 @@ body:has(.safeclaw-landing) :is(
 
 .share-recipient-card {
   grid-column: 1 / -1;
+}
+
+.share-form-shell > details,
+.share-record-detail {
+  grid-column: 1 / -1;
+}
+
+.share-form-shell > details > summary,
+.share-record-detail > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--share-muted);
+  font-weight: 600;
+}
+
+.share-panel.workflow-panel select.input {
+  min-height: 44px;
 }
 
 .share-form-card-head,
