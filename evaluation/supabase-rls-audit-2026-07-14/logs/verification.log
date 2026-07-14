@@ -1,55 +1,56 @@
-verificationStartedAt=2026-07-13T23:56:33.562Z
-mode=read-only
-noMutation=true
+verificationStartedAt=2026-07-14T00:40:18.9185420Z
+mode=read-only-artifact-parity
+currentVerificationNetworkCalls=0
+currentVerificationDbMutations=0
 PASS report.json parses
-PASS report source/base SHA equals audited revision f45bba17bcce0d8ebb2690f82d014dbe42ae8191
-PASS audited source SHA is an ancestor of the audit-artifact worktree HEAD
 PASS launchReadiness is boolean false
-PASS top-level noMutation is boolean true
-PASS all report mutation flags are false
+PASS top-level and audit noMutation are boolean true
+PASS all report DB/schema/data mutation flags are false
+PASS report source/base SHA equals audited revision
+PASS audited source SHA is an ancestor of the artifact worktree HEAD
 PASS elapsed timing fields are finalized and internally consistent
-PASS final report and preserved probe syntax statuses are passed
-PASS migration counts are 9 files and 760 lines
-PASS inventory counts are 24 boundaries and 22 application tables
-PASS tenant-scoped application table count is 13
+PASS report launch-gate and preserved probe syntax statuses remain passed
+PASS migration census is 9 files and 760 actual source lines
+PASS inventory is 24 boundaries, 22 application tables, 13 tenant application tables
 PASS RLS enabled/missing/FORCE counts are 20/2/0
 PASS policy counts are 20 total, 13 FOR ALL, 7 SELECT-only, 0 explicit role
-PASS finding counts are P0/P1/P2/P3 0/3/4/3
-PASS negative matrix has 14 cases, 0 executed, 56 expected denies
-PASS tenant/admin service-role API counts are 21 = 19 direct + 2 broker-mediated
-PASS preserved probe counts are 44 = 30/4/10 with zero verified assertions
-PASS all 10 finding titles match Markdown exactly
-PASS P1-03 records no client DB INSERT requirement for the route attempt
-PASS P1-03 records external UUID knowledge and cross-tenant inclusion as unproven
-PASS P2-03 records no reproduced cross-tenant memory read
-PASS P3-03 records no current violating row proven
-PASS Markdown reports the finalized elapsed values
+PASS tenant/admin service-role API census is 21 = 19 direct + 2 broker-mediated
+PASS finding counts are P0/P1/P2/P3 0/3/4/3 and total 10
+PASS staticEvidenceStatus exactly encodes machine-readable total 10
+PASS all 10 finding titles match Markdown character-for-character
+PASS Markdown states the 10-title and 0/3/4/3 finding contract
+PASS P1-03 retains client-INSERT and unproven external-UUID caveats
+PASS P2-03 retains no-reproduced-cross-tenant-read caveat
+PASS P3-03 retains no-current-violating-row caveat
+PASS Markdown reports finalized elapsed values
 PASS all 136 JSON source evidence references resolve in range
 PASS all 176 Markdown full/shorthand source citations resolve in range
-PASS all 14 static census source references resolve in range
-PASS public service-role counts are 6 API + 5 pages = 11 HTTP surfaces
-PASS report service-role inventory enumerates the exact 6 API files and 5 page files
-PASS completeness validator enumerates all 11 public HTTP paths
-PASS all 6 public API source files contain their service-role-backed helper calls
-PASS all 5 public page source files contain their service-role-backed helper calls
+PASS all 14 static server-page census references resolve in range
+PASS static-audit census matches report counts and recalculated reference totals
+PASS static-audit retains read-only, noMutation=true, launchReadiness=false, remediationApplied=false
+PASS public static census is exact at 6 API + 5 server pages = 11 HTTP surfaces
+PASS launch-gate census enumerates the exact 11 public HTTP paths
 PASS getSafetyReferenceStats reaches service-role REST countRows
-PASS Markdown table explicitly lists all 11 surfaces and evidence for all 5 pages
-PASS static audit log records the exact 6+5=11 census
-PASS static audit log records recalculated reference counts
-PASS audited product, migration, and test source is unchanged
-PASS typecheck and focused-test reuse has explicit unchanged-product provenance
-PASS preserved focused-test log records 10 files and 82 tests passed
-PASS preserved strict typecheck success log is present
+PASS negative matrix remains 14 cases, 0 executed, 56 expected denies
+PASS preserved read-only probe remains 44 HEAD = 30/4/10 with zero verified assertions
+PASS all four preserved probe artifacts have mutationPerformed=false
+PASS four probe artifacts contain no URL, host, key, body, exception, or auth field
+PASS active audit artifacts contain zero stale finding-total expressions
+PASS the sole stale expression is preserved only in the required historical RED log
 PASS probe source passes node --check
 PASS probe source contains HEAD only and no mutating call pattern
-PASS all four probe artifacts have mutationPerformed=false
-PASS all four probe artifacts store no URL, host, key, body, exception, or auth field
-PASS audit artifacts contain no JWT, project host, key assignment, or bearer secret pattern
-PASS working changes are confined to 4 files within the exact five-file audit allowlist
-PASS focused-tests.log remains unchanged
-PASS no production code, migration, DB/schema/data, or secret file is changed
-PASS restored node_modules remains gitignored
-PASS audit contract remains noMutation=true, launchReadiness=false, remediationApplied=false
+PASS preserved typecheck and focused-test logs are byte-unchanged from HEAD
+PASS report keeps typecheck and focused tests marked as not rerun for remediation
+typecheckCurrentRun=not-executed
+focusedTestsCurrentRun=not-executed
+preservedTypecheckLogSha256=37854612fb774a6ba3402ac753b779958e8790609b47f1bc0d288e324806ac3b
+preservedFocusedTestsLogSha256=a8833ee9d5a0fe964496537f5d7451f83cf21365be7ae7b87d3400986bfa9b49
+PASS app/lib/tests/supabase product and schema paths are unchanged
+PASS node_modules remains gitignored
+PASS pre-log tracked diff contains only report.json
+PASS all three intended changed files are confined to the requested evaluation directory
+PASS exact RED reproduction log exists
+PASS audit artifact secret scan found zero JWT, Supabase host/key assignment, or bearer token values
 jsonEvidenceReferenceCount=136
 markdownSourceCitationCount=176
 staticCensusSourceReferenceCount=14
@@ -60,5 +61,15 @@ publicGlobalServiceRoleApiRoutes=6
 publicGlobalServiceRoleServerPageSurfaces=5
 publicGlobalServiceRoleHttpSurfaces=11
 expectedCrossTenantDenyAssertions=56
+findingCounts=P0:0,P1:3,P2:4,P3:3
+findingTotal=10
+activeStaleExpressionCount=0
+historicalRedStaleExpressionCount=1
+changedFileCount=3
+changedFile1=evaluation/supabase-rls-audit-2026-07-14/logs/parity-red.log
+changedFile2=evaluation/supabase-rls-audit-2026-07-14/logs/verification.log
+changedFile3=evaluation/supabase-rls-audit-2026-07-14/report.json
+forbiddenPathChangeCount=0
+secretPatternMatchCount=0
 verificationFailures=0
-verificationFinishedAt=2026-07-13T23:56:34.995Z
+verificationFinishedAt=2026-07-14T00:45:30.8272908Z

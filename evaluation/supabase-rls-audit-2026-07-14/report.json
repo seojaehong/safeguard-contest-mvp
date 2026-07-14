@@ -1181,7 +1181,7 @@
     },
     "grantInterpretation": "HEAD observed SELECT endpoint behavior only. It did not inspect direct, inherited, or default GRANT catalog entries and did not test INSERT, UPDATE, DELETE, or EXECUTE privileges.",
     "interpretation": "Static source evidence is complete at the requested SHA, but live tenant enforcement is not verified. The fresh selected-target probe exposed SELECT endpoints for 17 application tables while five migration-010 endpoints returned 404. No authenticated A/B cross-tenant assertion or mutating privilege test was executed.",
-    "staticEvidenceStatus": "complete-at-source-sha-with-nine-open-findings",
+    "staticEvidenceStatus": "complete-at-source-sha-with-10-open-findings",
     "actualLiveReadOnlyProbeStatus": "executed-blocked-partial-surface-observed",
     "authenticatedCrossTenantStatus": "not-executed-no-isolated-tenant-a-b-fixtures",
     "artifacts": [
