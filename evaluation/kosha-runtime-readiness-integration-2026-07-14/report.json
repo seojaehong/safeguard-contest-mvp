@@ -1,0 +1,33 @@
+{
+  "date": "2026-07-14",
+  "status": "integrated_verified",
+  "approvedSourceHead": "91df2c40e09cc19c559e8a556970de3dc633ec11",
+  "integratedHeadBeforeEvidenceCommit": "18f3722",
+  "independentReview": {
+    "spec": "pass",
+    "codeQuality": "pass",
+    "findings": { "p0": 0, "p1": 0, "p2": 0, "p3": 0 }
+  },
+  "runtimeContract": {
+    "readyCondition": "catalog.ok && localCorpus.status === ready",
+    "readyHttpStatus": 200,
+    "nonReadyStatus": "degraded",
+    "nonReadyHttpStatus": 503,
+    "pathExposed": false,
+    "unverifiedRemoteFallback": false
+  },
+  "verification": {
+    "filesPassed": 4,
+    "testsPassed": 44,
+    "typecheck": "pass",
+    "candidateBuild": "pass"
+  },
+  "productionSearchReady": false,
+  "verifiedSubsetWorkstreamPending": true,
+  "mutations": {
+    "database": false,
+    "schema": false,
+    "data": false,
+    "vercelEnvironment": false
+  }
+}
