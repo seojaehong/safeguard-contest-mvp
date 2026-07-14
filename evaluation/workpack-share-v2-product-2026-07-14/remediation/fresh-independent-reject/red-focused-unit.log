@@ -1,0 +1,246 @@
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+ ✓ tests/channel-availability.test.ts > server channel availability > binds all three channels, recipients, revision, and normalized server identity into a short-lived token 6ms
+ ✓ tests/channel-availability.test.ts > server channel availability > marks fixture mode unavailable instead of presenting validation as delivery readiness 1ms
+ ✓ tests/channel-availability.test.ts > server channel availability > invalidates a prior token after binding key ID, revision, and secret rotation 1ms
+ ✓ tests/channel-availability.test.ts > server channel availability > fails closed when a selected channel has missing contact information 1ms
+ ✓ tests/channel-availability.test.ts > server channel availability > marks live dispatch unavailable when persistent idempotency is unsupported 1ms
+ × tests/channel-availability.test.ts > server channel availability > keeps Kakao-only readiness blocked when its actual relay adapter is unavailable 10ms
+   → expected true to be false // Object.is equality
+ × tests/channel-availability.test.ts > server channel availability > does not mark a mixed selection ready when Kakao lacks the shared dispatch adapter 7ms
+   → expected [ { channel: 'email', …(6) }, …(1) ] to deeply equal [ ObjectContaining{…}, …(1) ]
+ ✓ tests/channel-availability.test.ts > server channel availability > binds a server-created session to exact workpack, recipient, channel, and locale identities 2ms
+ ✓ tests/channel-availability.test.ts > server channel availability > rejects a created session before provider dispatch after channel configuration rotation 1ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > resolves selected local worker keys to the real saved worker UUIDs 89ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > creates a share session with real worker UUIDs and Bearer auth 33ms
+stderr | tests/workflow-share-client.test.ts > authenticated workflow share client > surfaces server errors and malformed success responses explicitly
+workflow share response parse failed SyntaxError: Unexpected token 'g', "gateway unavailable" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at parseJSONFromBytes (node:internal/deps/undici/undici:6433:19)
+    at successSteps (node:internal/deps/undici/undici:6414:27)
+    at readAllBytes (node:internal/deps/undici/undici:5380:13)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > dispatches only server authority identifiers, channels, and operator note 3ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > throws the typed fail-closed provider blocker instead of treating it as delivery 3ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > preserves an uncertain provider response as a typed HTTP error 1ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > surfaces server errors and malformed success responses explicitly 5ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > does not treat fixture or validation-only dispatch as real provider confirmation 1ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > loads current server workpack and worker authority without mutating the roster 3ms
+ × tests/workflow-share-client.test.ts > authenticated workflow share client > denies an edited local draft when only an older server pack shares its question and generation signature 11ms
+   → expected { ok: false, …(2) } to deeply equal { ok: false, …(1) }
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > fails closed when a supported translation is incomplete or retains Korean metadata 1ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > rejects forged receipt session in a recorded dispatch response 2ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > rejects client-authored provider in a recorded dispatch response 1ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > rejects missing durable log identity in a recorded dispatch response 1ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > rejects conflicting receipt outcome in a recorded dispatch response 1ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > rejects false provider call claim in a recorded dispatch response 1ms
+ ✓ tests/workflow-share-client.test.ts > authenticated workflow share client > resolves channels with the shared requestedChannels DTO and exposes no client log writer 2ms
+ ✓ tests/workflow-share-client.test.ts > workflow share component wiring > passes local worker keys only as read-only server lookup inputs on Share 1ms
+ ✓ tests/workflow-share-client.test.ts > workflow share component wiring > adapts dense share controls to the panel width instead of only the viewport 2ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > classifies admin-bearer confirmation rows as admin_marked and excludes them from worker totals 12ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > parses expires_at and the persisted workerSnapshot without substituting target data 1ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > does not select any historical session without valid authority and a current target 1ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > shows an exact authority session as history but marks missing expiry as non-reusable 1ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > rejects reuse for public scope 0ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > rejects reuse for anonymous access 0ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > rejects reuse for editor recipient 0ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > rejects reuse for expired session 0ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > rejects reuse for missing expiry 1ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > rejects reuse for missing worker snapshot 0ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > rejects reuse for different recipient snapshot 0ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > reuses only a permission-ready, unexpired, exact-recipient viewer session 1ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > uses the persisted workerSnapshot language instead of the current target language 1ms
+ ✓ tests/workflow-share-client.test.ts > workflow share session policy > rejects a non-UUID authority workpack ID 1ms
+ ✓ tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > changes the async request identity for target, workpack authority, and channel scope 3ms
+ ✓ tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > clears result, session, and log evidence when the target or workpack scope changes 1ms
+ ✓ tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > uses current target languages when a historical session will not be reused 1ms
+ ✓ tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > separates saved evidence, planned records, uncertain logs, and unsupported worker acknowledgements 0ms
+ ✓ tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > marks partial and unconfigured channel aggregates as incomplete problem states 1ms
+ ✓ tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > applies revalidation before generic blocked, offline, target, and auth states 1ms
+ ✓ tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > routes an empty target and invalid locale to the workers owner without interpolating locale 1ms
+ ✓ tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > routes a supported incomplete translation to the validated document owner 0ms
+ × tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > keeps a channel blocker concise without owning setup navigation 9ms
+   → expected { state: 'blocked', …(3) } to match object { state: 'blocked', …(3) }
+ × tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > keeps exactly one state-specific primary through ready, sending, session failure, and persisted result 5ms
+   → expected { state: 'success', …(3) } to match object { state: 'success', …(3) }
+ ✓ tests/workpack-share-authority-routes.test.ts > share session route authority > ignores forged recipient fields and persists only the server worker snapshot 105ms
+stderr | tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > marks the durable gate uncertain and returns no success when provider receipt validation fails
+configured workflow provider dispatch failed Error: provider receipt unavailable
+    at C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product/tests/workpack-share-authority-routes.test.ts:622:64
+    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)
+    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:64
+
+stderr | tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > never returns accepted when server dispatch evidence insertion fails
+server dispatch evidence insert failed { message: 'insert failed' }
+
+ ✓ tests/workpack-share-authority-routes.test.ts > share session route authority > does not persist a Kakao share session when the actual dispatch adapter is unavailable 2ms
+ ✓ tests/workpack-share-authority-routes.test.ts > share session route authority > stops before provider dispatch when the persisted session binding is stale 43ms
+ ✓ tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > returns a client-accepted result only through the actual recorded route receipt 3ms
+ ✓ tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > atomically reserves the server gate and returns only server-persisted receipt evidence 3ms
+ ✓ tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > returns a real partial outcome only after provider evidence, server logs, and final CAS 2ms
+ ✓ tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > marks the durable gate uncertain and returns no success when provider receipt validation fails 7ms
+ ✓ tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > never returns accepted when server dispatch evidence insertion fails 2ms
+ ✓ tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > rejects client-forged workpack and recipients fields 1ms
+ ✓ tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > fails closed before provider dispatch when the configured live adapter is unavailable 1ms
+ ✓ tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > keeps fixture validation blocked and never describes it as delivery 1ms
+ ✓ tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > rejects a forged server idempotency key before reservation, provider, or logs 2ms
+ ✓ tests/workpack-share-authority-routes.test.ts > workflow dispatch route authority > rejects a replayed reservation without a second provider call or log 1ms
+ ✓ tests/workpack-share-authority-routes.test.ts > read confirmation route authority > returns the existing confirmation id without inserting a duplicate 19ms
+ ✓ tests/workpack-share-authority-routes.test.ts > read confirmation route authority > uses the snapshotted session worker instead of client confirmation fields 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/channel-availability.test.ts > server channel availability > keeps Kakao-only readiness blocked when its actual relay adapter is unavailable
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/channel-availability.test.ts:190:30
+    188|     expect(resolution.ok).toBe(true);
+    189|     if (!resolution.ok) throw new Error("Kakao adapter readiness must …
+    190|     expect(resolution.ready).toBe(false);
+       |                              ^
+    191|     expect(resolution.channels).toEqual([expect.objectContaining({
+    192|       channel: "kakao",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/channel-availability.test.ts > server channel availability > does not mark a mixed selection ready when Kakao lacks the shared dispatch adapter
+AssertionError: expected [ { channel: 'email', …(6) }, …(1) ] to deeply equal [ ObjectContaining{…}, …(1) ]
+
+- Expected
++ Received
+
+@@ -7,10 +7,14 @@
+      "ownerRoute": "/settings",
+      "reasonCode": "relay_unconfigured",
+      "recipientCount": 1,
+    },
+    {
+-     "available": false,
++     "approved": true,
++     "available": true,
+      "channel": "kakao",
+-     "reasonCode": "relay_unconfigured",
++     "configured": true,
++     "ownerRoute": "/settings",
++     "reasonCode": "available",
++     "recipientCount": 1,
+    },
+  ]
+
+ ❯ tests/channel-availability.test.ts:211:33
+    209|     if (!resolution.ok) throw new Error("mixed adapter readiness must …
+    210|     expect(resolution.ready).toBe(false);
+    211|     expect(resolution.channels).toEqual([
+       |                                 ^
+    212|       expect.objectContaining({ channel: "email", available: false, re…
+    213|       expect.objectContaining({ channel: "kakao", available: false, re…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/workflow-share-client.test.ts > authenticated workflow share client > denies an edited local draft when only an older server pack shares its question and generation signature
+AssertionError: expected { ok: false, …(2) } to deeply equal { ok: false, …(1) }
+
+- Expected
++ Received
+
+  {
+    "ok": false,
+-   "reasonCode": "workpack_not_saved",
++   "reasonCode": "translation_incomplete",
++   "validatedSupportedCode": "ko",
+  }
+
+ ❯ tests/workflow-share-client.test.ts:466:20
+    464|     });
+    465|
+    466|     expect(result).toEqual({ ok: false, reasonCode: "workpack_not_save…
+       |                    ^
+    467|     expect(requests.some((input) => input.startsWith("/api/workers?"))…
+    468|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > keeps a channel blocker concise without owning setup navigation
+AssertionError: expected { state: 'blocked', …(3) } to match object { state: 'blocked', …(3) }
+
+- Expected
++ Received
+
+  {
+-   "detail": "선택한 채널은 현재 전송할 수 없습니다.",
+-   "headline": "선택한 채널 전송 불가",
+-   "primary": null,
++   "detail": "현재 제품에는 이 채널 설정을 변경하는 운영 화면이 연결되지 않았습니다.",
++   "headline": "채널 연결 준비 필요",
++   "primary": {
++     "action": "recheck",
++     "disabled": true,
++     "kind": "button",
++     "label": "채널 연결 대기",
++   },
+    "state": "blocked",
+  }
+
+ ❯ tests/workflow-share-panel-behavior.test.ts:344:26
+    342|     });
+    343|
+    344|     expect(presentation).toMatchObject({
+       |                          ^
+    345|       state: "blocked",
+    346|       headline: "선택한 채널 전송 불가",
+
+ Test Files  3 failed | 1 passed (4)
+      Tests  5 failed | 61 passed (66)
+   Start at  16:54:06
+   Duration  1.87s (transform 658ms, setup 0ms, import 746ms, tests 433ms, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/workflow-share-panel-behavior.test.ts > workflow share panel behavior > keeps exactly one state-specific primary through ready, sending, session failure, and persisted result
+AssertionError: expected { state: 'success', …(3) } to match object { state: 'success', …(3) }
+
+- Expected
++ Received
+
+  {
+-   "detail": "선택한 채널이 전송 요청을 접수했습니다.",
++   "detail": "선택한 채널이 전송 요청을 접수했습니다. 전달 여부는 전파 이력에서 확인합니다.",
+    "headline": "전송 요청 접수",
+-   "primary": null,
++   "primary": {
++     "disabled": false,
++     "href": "/dispatch",
++     "kind": "link",
++     "label": "전파 이력 확인",
++   },
+    "state": "success",
+  }
+
+ ❯ tests/workflow-share-panel-behavior.test.ts:385:9
+    383|       sending: false,
+    384|       outcome: { stage: "accepted", logIds: ["77777777-7777-4777-8777-…
+    385|     })).toMatchObject({
+       |         ^
+    386|       state: "success",
+    387|       headline: "전송 요청 접수",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+[explicit-exit-code] 1

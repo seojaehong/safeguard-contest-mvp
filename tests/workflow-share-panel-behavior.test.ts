@@ -326,7 +326,7 @@ describe("workflow share panel behavior", () => {
     });
   });
 
-  it("keeps an unimplemented channel settings owner as an honest disabled blocker", () => {
+  it("keeps a channel blocker concise without owning setup navigation", () => {
     const presentation = resolveShareProductPresentation({
       theme: "day",
       sending: false,
@@ -343,13 +343,11 @@ describe("workflow share panel behavior", () => {
 
     expect(presentation).toMatchObject({
       state: "blocked",
-      primary: {
-        kind: "button",
-        label: "채널 연결 대기",
-        disabled: true
-      }
+      headline: "선택한 채널 전송 불가",
+      detail: "선택한 채널은 현재 전송할 수 없습니다.",
+      primary: null
     });
-    expect(presentation.primary.href).toBeUndefined();
+    expect(JSON.stringify(presentation)).not.toMatch(/채널 설정|운영 화면|설정 화면/iu);
   });
 
   it("keeps exactly one state-specific primary through ready, sending, session failure, and persisted result", () => {
@@ -386,7 +384,14 @@ describe("workflow share panel behavior", () => {
       outcome: { stage: "accepted", logIds: ["77777777-7777-4777-8777-777777777777"] }
     })).toMatchObject({
       state: "success",
-      primary: { kind: "link", label: "전파 이력 확인", href: "/dispatch" }
+      headline: "전송 요청 접수",
+      detail: "선택한 채널이 전송 요청을 접수했습니다.",
+      primary: null
     });
+    expect(JSON.stringify(resolveShareProductPresentation({
+      ...base,
+      sending: false,
+      outcome: { stage: "partial", logIds: ["77777777-7777-4777-8777-777777777777"] }
+    }))).not.toMatch(/전파 이력|채널 설정/iu);
   });
 });

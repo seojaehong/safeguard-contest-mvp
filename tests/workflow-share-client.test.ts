@@ -400,6 +400,73 @@ describe("authenticated workflow share client", () => {
     expect(requests.every((item) => !item.init.method || item.init.method === "GET")).toBe(true);
   });
 
+  it("denies an edited local draft when only an older server pack shares its question and generation signature", async () => {
+    const { loadAuthenticatedShareAuthority } = await loadClient();
+    const requests: string[] = [];
+    const fetcher = vi.fn(async (input: string) => {
+      requests.push(input);
+      if (input === "/api/workpacks?limit=50") {
+        return Response.json({
+          ok: true,
+          workpacks: [{ id: WORKPACK_ID, question: "성수동 외벽 도장" }]
+        });
+      }
+      if (input === `/api/workpacks/${WORKPACK_ID}`) {
+        return Response.json({
+          ok: true,
+          workpack: {
+            id: WORKPACK_ID,
+            reopenData: {
+              question: "성수동 외벽 도장",
+              generationEvidence: { signature: "generation-signature-1" },
+              scenario: { companyName: "SafeClaw Pilot", siteName: "성수 현장" },
+              riskSummary: { topRisk: "추락" },
+              deliverables: { riskAssessmentDraft: "서버에 저장된 이전 검토본" }
+            }
+          },
+          shareLocalization: {
+            ok: true,
+            canonicalWorkpackRevision: CANONICAL_REVISION,
+            reviewedEnvelopes: {}
+          }
+        });
+      }
+      if (input.startsWith("/api/workers?")) {
+        return Response.json({
+          ok: true,
+          workers: [{
+            id: WORKER_ID,
+            external_key: "worker-local-a",
+            display_name: "Nguyen Van A",
+            language_code: "ko"
+          }]
+        });
+      }
+      throw new Error(`Unexpected request ${input}`);
+    });
+
+    const result = await loadAuthenticatedShareAuthority(fetcher, {
+      authToken: "access-token",
+      knownWorkpackId: null,
+      question: "성수동 외벽 도장",
+      generationEvidenceSignature: "generation-signature-1",
+      expectedContentBinding: "edited-current-content-binding",
+      scenario: {
+        companyName: "SafeClaw Pilot",
+        siteName: "성수 현장",
+        companyType: "건설업"
+      },
+      selectedWorkers: [{
+        externalKey: "worker-local-a",
+        displayName: "Nguyen Van A",
+        languageCode: "ko"
+      }]
+    });
+
+    expect(result).toEqual({ ok: false, reasonCode: "workpack_not_saved" });
+    expect(requests.some((input) => input.startsWith("/api/workers?"))).toBe(false);
+  });
+
   it("fails closed when a supported translation is incomplete or retains Korean metadata", async () => {
     const { parseAuthenticatedWorkpackShareAuthority } = await loadClient();
     const result = parseAuthenticatedWorkpackShareAuthority({

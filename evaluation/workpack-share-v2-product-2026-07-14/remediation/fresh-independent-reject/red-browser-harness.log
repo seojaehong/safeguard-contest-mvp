@@ -1,0 +1,56 @@
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+ × tests/workpack-share-v2-browser-harness.test.ts > Share browser harness teardown > retries after an actual first taskkill failure and verifies the process tree and port are gone 13935ms
+   → promise rejected "Error: EPERM, Permission denied: \\?\C:\U… { …(4) }" instead of resolving
+ × tests/workpack-share-v2-browser-harness.test.ts > Share browser harness teardown > keeps teardown retryable after a bounded termination timeout and then cleans up 13807ms
+   → expected [Function] to throw error matching /termination.*not verified|taskkill.…/iu but got 'EPERM, Permission denied: \\?\C:\User…'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser-harness.test.ts > Share browser harness teardown > retries after an actual first taskkill failure and verifies the process tree and port are gone
+AssertionError: promise rejected "Error: EPERM, Permission denied: \\?\C:\U… { …(4) }" instead of resolving
+ ❯ tests/workpack-share-v2-browser-harness.test.ts:69:35
+     67|     taskkillFailure.processIds = [];
+     68|     try {
+     69|       await expect(harness.stop()).resolves.toBeUndefined();
+       |                                   ^
+     70|       expect(taskkillFailure.invocationCount).toBe(2);
+     71|       await expect(fetch(harness.baseUrl)).rejects.toThrow();
+
+Caused by: Error: EPERM, Permission denied: \\?\C:\Users\iceam\AppData\Local\Temp\safeclaw-next-workpack-share-v2-teardown-vNwLJt '\\?\C:\Users\iceam\AppData\Local\Temp\safeclaw-next-workpack-share-v2-teardown-vNwLJt'
+ ❯ cleanupTemporaryDirectory tests/helpers/isolated-next-browser-harness.ts:160:8
+ ❯ Object.stop tests/helpers/isolated-next-browser-harness.ts:316:19
+ ❯ tests/workpack-share-v2-browser-harness.test.ts:69:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { errno: 1, code: 'EPERM', path: '\\?\C:\Users\iceam\AppData\Local\Temp\safeclaw-next-workpack-share-v2-teardown-vNwLJt', syscall: 'rm' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/workpack-share-v2-browser-harness.test.ts > Share browser harness teardown > keeps teardown retryable after a bounded termination timeout and then cleans up
+AssertionError: expected [Function] to throw error matching /termination.*not verified|taskkill.…/iu but got 'EPERM, Permission denied: \\?\C:\User…'
+
+- Expected:
+/termination.*not verified|taskkill.*failed/iu
+
++ Received:
+"EPERM, Permission denied: \\\\?\\C:\\Users\\iceam\\AppData\\Local\\Temp\\safeclaw-next-workpack-share-v2-teardown-timeout-TxTN35 '\\\\?\\C:\\Users\\iceam\\AppData\\Local\\Temp\\safeclaw-next-workpack-share-v2-teardown-timeout-TxTN35'"
+
+ ❯ tests/workpack-share-v2-browser-harness.test.ts:92:35
+     90|     taskkillFailure.processIds = [];
+     91|     try {
+     92|       await expect(harness.stop()).rejects.toThrow(/termination.*not v…
+       |                                   ^
+     93|       expect(taskkillFailure.invocationCount).toBeGreaterThanOrEqual(2…
+     94|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  16:54:29
+   Duration  28.68s (transform 51ms, setup 0ms, import 409ms, tests 27.74s, environment 0ms)
+
+
+[explicit-exit-code] 1

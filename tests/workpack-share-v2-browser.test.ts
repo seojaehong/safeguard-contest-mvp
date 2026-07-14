@@ -60,6 +60,7 @@ type ShareNetworkProbe = {
   providerDispatchCount: number;
   dispatchLogRequestCount: number;
   channelRequestCount: number;
+  workpackDetailRequestCount: number;
 };
 
 type ChannelMode = "ready" | "unavailable" | "deferred" | "stale";
@@ -84,6 +85,7 @@ type ShareScenario = {
   dispatchLogMode: DispatchLogMode;
   staleReasonCode: string;
   workspaceSaveWorkpackId: string | null;
+  deferWorkpackDetail: boolean;
 };
 
 type ShareNetworkController = {
@@ -92,6 +94,7 @@ type ShareNetworkController = {
   releaseSessionFailure: () => Promise<void>;
   releaseSessionSuccess: () => Promise<void>;
   releaseDispatch: () => Promise<void>;
+  releaseWorkpackDetail: () => Promise<void>;
 };
 
 type OpenSharePage = {
@@ -284,7 +287,8 @@ function buildScenario(fixtureId: ShareFixtureId): ShareScenario {
     deferDispatch: false,
     dispatchLogMode: fixtureId === "fail_dispatch_unpersisted" ? "failure" : "success",
     staleReasonCode: "workpack_revision_or_digest_changed",
-    workspaceSaveWorkpackId: null
+    workspaceSaveWorkpackId: null,
+    deferWorkpackDetail: false
   };
 }
 
@@ -297,11 +301,13 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
     dispatchRequestCount: 0,
     providerDispatchCount: 0,
     dispatchLogRequestCount: 0,
-    channelRequestCount: 0
+    channelRequestCount: 0,
+    workpackDetailRequestCount: 0
   };
   let deferredChannelRoute: Route | null = null;
   let deferredSessionRoute: Route | null = null;
   let deferredDispatchRoute: { route: Route; body: JsonRecord } | null = null;
+  let deferredWorkpackDetailRoute: { route: Route; workpackId: string } | null = null;
 
   const fulfillSessionSuccess = async (route: Route): Promise<void> => {
     await fulfillJson(route, {
@@ -418,11 +424,17 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
     const workpackDetailMatch = url.pathname.match(/^\/api\/workpacks\/([0-9a-f-]+)$/u);
     if (workpackDetailMatch && method === "GET") {
       const requestedWorkpackId = workpackDetailMatch[1];
+      probe.workpackDetailRequestCount += 1;
       if (
         requestedWorkpackId !== SHARE_WORKPACK_ID
         && requestedWorkpackId !== scenario.workspaceSaveWorkpackId
       ) {
         await fulfillJson(route, { ok: false, message: "Unknown workpack fixture" }, 404);
+        return;
+      }
+      if (scenario.deferWorkpackDetail) {
+        scenario.deferWorkpackDetail = false;
+        deferredWorkpackDetailRoute = { route, workpackId: requestedWorkpackId };
         return;
       }
       await fulfillJson(route, buildWorkpackDetailFixture({
@@ -600,6 +612,18 @@ async function installNetworkFixtures(page: Page, scenario: ShareScenario): Prom
       const deferred = deferredDispatchRoute;
       deferredDispatchRoute = null;
       await fulfillDispatchResult(deferred.route, deferred.body);
+    },
+    releaseWorkpackDetail: async () => {
+      if (!deferredWorkpackDetailRoute) return;
+      const deferred = deferredWorkpackDetailRoute;
+      deferredWorkpackDetailRoute = null;
+      await fulfillJson(deferred.route, buildWorkpackDetailFixture({
+        response: scenario.response,
+        workpackId: deferred.workpackId,
+        ...(deferred.workpackId === SHARE_WORKPACK_ID
+          ? { shareLocalization: scenario.shareLocalization }
+          : {})
+      }));
     }
   };
 }
@@ -734,13 +758,13 @@ function expectRequestOrder(probe: ShareNetworkProbe): void {
 }
 
 async function expectCommonProductSurface(page: Page): Promise<void> {
-  expect(await page.locator("[data-share-primary]").count()).toBe(1);
+  expect(await page.locator("[data-share-primary]").count()).toBeLessThanOrEqual(1);
   expect(await page.locator("[data-share-title]").count()).toBe(1);
   expect(await page.locator("[data-share-preview]").count()).toBeLessThanOrEqual(1);
   expect(await page.locator("select").count()).toBe(1);
   expect(await page.locator("select option").count()).toBe(12);
   const text = await page.locator("[data-share-root]").innerText();
-  expect(text).not.toMatch(/Before\/After|개선 기록|열람 확인|공유 설정 보기|열람 권한/iu);
+  expect(text).not.toMatch(/Before\/After|개선 기록|열람 확인|공유 설정 보기|열람 권한|전파 이력 확인|채널 설정|운영 화면/iu);
   expect(text).not.toMatch(/[⚠🧱🌬🚧]/u);
   expect(await page.getByText("로그인하고 전송", { exact: true }).count()).toBeLessThanOrEqual(1);
 }
@@ -1422,15 +1446,17 @@ async function verifyStaleBindingVariants(environment: ShareEnvironment): Promis
       expect(opened.controller.probe.providerDispatchCount, variant.reasonCode).toBe(0);
       expect(opened.controller.probe.dispatchLogRequestCount, variant.reasonCode).toBe(0);
       expect(await opened.page.locator("[data-share-preview]").count(), variant.reasonCode).toBe(0);
-      const href = await primaryHref(opened.page);
       if (variant.owner === "worker") {
+        const href = await primaryHref(opened.page);
         const ownerUrl = new URL(href!, "https://share-v2.test");
         expect(ownerUrl.pathname, variant.reasonCode).toBe("/workers");
         expect(ownerUrl.searchParams.get("focus"), variant.reasonCode).toBe("language");
       } else if (variant.owner === "settings") {
-        expect(href, variant.reasonCode).toBeNull();
-        expect(await opened.page.locator("[data-share-primary]").isDisabled(), variant.reasonCode).toBe(true);
+        expect(await opened.page.locator("[data-share-primary]").count(), variant.reasonCode).toBe(0);
+        expect(await opened.page.locator("[data-share-root]").innerText(), variant.reasonCode)
+          .not.toMatch(/채널 설정|운영 화면|설정 화면/iu);
       } else {
+        const href = await primaryHref(opened.page);
         const ownerUrl = new URL(href!, "https://share-v2.test");
         expect(ownerUrl.pathname, variant.reasonCode).toBe("/workspace");
         expect(ownerUrl.searchParams.get("step"), variant.reasonCode).toBe("document");
@@ -1548,9 +1574,8 @@ async function executeFixtureBehavior(
     expect(controller.probe.sessionRequestCount).toBe(0);
     await controller.releaseChannelUnavailable();
     await waitForShareState(page, "blocked");
-    expect(await primaryLabel(page)).toBe("채널 연결 대기");
-    expect(await primaryHref(page)).toBeNull();
-    expect(await page.locator("[data-share-primary]").isDisabled()).toBe(true);
+    expect(await page.locator("[data-share-primary]").count()).toBe(0);
+    expect(await page.locator("[data-share-root]").innerText()).not.toMatch(/채널 설정|운영 화면|설정 화면/iu);
     expect(controller.probe.sessionRequestCount).toBe(0);
     return { ...opened, expectedState: "blocked", finalize };
   }
@@ -1679,9 +1704,9 @@ async function executeFixtureBehavior(
     ? "success"
     : fixtureId === "result_partial" ? "partial" : "fail";
   await waitForShareState(page, persistedOutcomeState);
-  await page.locator("a[href='/dispatch']").waitFor({ state: "visible", timeout: 30_000 });
-  expect(await page.locator("a[href='/dispatch']").count()).toBe(1);
-  expect(await primaryLabel(page)).toBe("전파 이력 확인");
+  expect(await page.locator("a[href='/dispatch']").count()).toBe(0);
+  expect(await page.locator("[data-share-primary]").count()).toBe(0);
+  expect(await page.locator("[data-share-root]").innerText()).not.toMatch(/전파 이력 확인|채널 설정/iu);
 
   if (fixtureId === "result_accepted") {
     await waitForShareState(page, "success");
@@ -1712,6 +1737,7 @@ async function executeFixtureBehavior(
 
 async function closeSharePage(opened: OpenSharePage): Promise<void> {
   await opened.controller.releaseSessionFailure();
+  await opened.controller.releaseWorkpackDetail();
   await opened.context.close();
 }
 
@@ -1817,7 +1843,69 @@ async function verifyInFlightScopeIsolation(environment: ShareEnvironment): Prom
     await closeSharePage(channelPage);
   }
 
-  return 4;
+  const restoreScenario = buildScenario("ready");
+  const restorePage = await openEditableSharePage(environment, restoreScenario);
+  try {
+    const initialFingerprint = await restorePage.page.evaluate((storageKey) => {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) return null;
+      const parsed: unknown = JSON.parse(raw);
+      return typeof parsed === "object"
+        && parsed !== null
+        && "generationFingerprint" in parsed
+        && typeof parsed.generationFingerprint === "string"
+        ? parsed.generationFingerprint
+        : null;
+    }, CURRENT_WORKPACK_STORAGE_KEY);
+    const editor = restorePage.page.locator(".document-textarea").first();
+    const localEditMarker = "Share v2 delayed local restore edit";
+    await editor.fill(`${await editor.inputValue()}\n${localEditMarker}`);
+    await restorePage.page.waitForFunction(({ storageKey, marker }) => {
+      const raw = window.localStorage.getItem(storageKey);
+      return Boolean(raw?.includes(marker));
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, marker: localEditMarker });
+    const editedFingerprint = await restorePage.page.evaluate((storageKey) => {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) return null;
+      const parsed: unknown = JSON.parse(raw);
+      return typeof parsed === "object"
+        && parsed !== null
+        && "generationFingerprint" in parsed
+        && typeof parsed.generationFingerprint === "string"
+        ? parsed.generationFingerprint
+        : null;
+    }, CURRENT_WORKPACK_STORAGE_KEY);
+    expect.soft(editedFingerprint).not.toBe(initialFingerprint);
+
+    const detailRequestsBeforeRestore = restorePage.controller.probe.workpackDetailRequestCount;
+    const channelRequestsBeforeRestore = restorePage.controller.probe.channelRequestCount;
+    restoreScenario.deferWorkpackDetail = true;
+    if (!harness) throw new Error("Share v2 browser harness was not started");
+    await restorePage.page.goto(
+      `${harness.baseUrl}/workspace?step=share&theme=${environment.theme}`,
+      { waitUntil: "domcontentloaded" }
+    );
+    await restorePage.page.locator("[data-share-root]").waitFor({ state: "visible", timeout: 30_000 });
+    await waitForProbe(
+      () => restorePage.controller.probe.workpackDetailRequestCount > detailRequestsBeforeRestore,
+      "delayed local restore authority request"
+    );
+    expect.soft(await restorePage.page.locator("[data-share-root]").getAttribute("data-share-state"))
+      .toBe("workpack_revalidation");
+    expect.soft(await restorePage.page.locator("[data-share-preview]").count()).toBe(0);
+
+    await restorePage.controller.releaseWorkpackDetail();
+    await restorePage.page.waitForTimeout(500);
+    expect(await restorePage.page.locator("[data-share-root]").getAttribute("data-share-state"))
+      .toBe("workpack_revalidation");
+    expect(restorePage.controller.probe.channelRequestCount).toBe(channelRequestsBeforeRestore);
+    expect(restorePage.controller.probe.sessionRequestCount).toBe(0);
+    expect(restorePage.controller.probe.dispatchRequestCount).toBe(0);
+  } finally {
+    await closeSharePage(restorePage);
+  }
+
+  return 5;
 }
 
 function maximum(values: number[]): number {

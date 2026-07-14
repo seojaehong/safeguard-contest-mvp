@@ -176,6 +176,44 @@ describe("server channel availability", () => {
     expect(resolution.channels.every((channel) => channel.reasonCode === "idempotency_unsupported")).toBe(true);
   });
 
+  it("keeps Kakao-only readiness blocked when its actual relay adapter is unavailable", () => {
+    const resolution = resolveServerChannelAvailability(input({
+      requestedChannels: ["kakao"]
+    }, {
+      relayEndpoint: null,
+      relayConfigured: false,
+      providerCredential: null
+    }));
+
+    expect(resolution.ok).toBe(true);
+    if (!resolution.ok) throw new Error("Kakao adapter readiness must resolve to an explicit blocked result");
+    expect(resolution.ready).toBe(false);
+    expect(resolution.channels).toEqual([expect.objectContaining({
+      channel: "kakao",
+      configured: false,
+      available: false,
+      reasonCode: "relay_unconfigured"
+    })]);
+  });
+
+  it("does not mark a mixed selection ready when Kakao lacks the shared dispatch adapter", () => {
+    const resolution = resolveServerChannelAvailability(input({
+      requestedChannels: ["email", "kakao"]
+    }, {
+      relayEndpoint: null,
+      relayConfigured: false,
+      providerCredential: null
+    }));
+
+    expect(resolution.ok).toBe(true);
+    if (!resolution.ok) throw new Error("mixed adapter readiness must resolve to an explicit blocked result");
+    expect(resolution.ready).toBe(false);
+    expect(resolution.channels).toEqual([
+      expect.objectContaining({ channel: "email", available: false, reasonCode: "relay_unconfigured" }),
+      expect.objectContaining({ channel: "kakao", available: false, reasonCode: "relay_unconfigured" })
+    ]);
+  });
+
   it("binds a server-created session to exact workpack, recipient, channel, and locale identities", () => {
     const resolution = resolveServerChannelAvailability(input());
     if (!resolution.ok) throw new Error("fixture channels must resolve");

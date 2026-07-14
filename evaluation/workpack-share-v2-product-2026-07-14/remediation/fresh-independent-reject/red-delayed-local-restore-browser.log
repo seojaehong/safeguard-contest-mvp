@@ -1,0 +1,199 @@
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workpack-share-v2-product
+
+[share-browser-product-sha] fb5f08ffe3d028dd7c1dbcc48a5ef05e6a70b466
+[share-browser-product-tree] 58b19a8591d65122ff757fc9dd38772a6fd01f67
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 browser matrix census > materializes every authoritative browser case
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 browser matrix census > rejects synthetic descendant font mutation as a text scaling delivery
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:empty:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:empty:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:selected:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:selected:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:channel_unavailable:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:channel_unavailable:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:review_required:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:review_required:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:workpack_revalidation:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:workpack_revalidation:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:logged_out:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:logged_out:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:blocked:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:blocked:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:ready:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:ready:owning_root_text_200
+ × tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100 29974ms
+   → expected '371e1a69' not to be '371e1a69' // Object.is equality
+   → expected 'selected' to be 'workpack_revalidation' // Object.is equality
+   → expected 'ready' to be 'workpack_revalidation' // Object.is equality
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:result_accepted:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:result_accepted:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:result_partial:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:result_partial:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:fail_session:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:fail_session:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:fail_dispatch:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:fail_dispatch:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:fail_dispatch_unpersisted:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:fail_dispatch_unpersisted:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:offline:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:offline:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:stale:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:stale:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:empty:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:empty:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:selected:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:selected:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:channel_unavailable:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:channel_unavailable:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:review_required:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:review_required:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:workpack_revalidation:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:workpack_revalidation:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:logged_out:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:logged_out:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:blocked:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:blocked:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:ready:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:ready:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:sending:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:sending:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:result_accepted:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:result_accepted:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:result_partial:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:result_partial:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:fail_session:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:fail_session:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:fail_dispatch:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:fail_dispatch:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:fail_dispatch_unpersisted:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:fail_dispatch_unpersisted:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:offline:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:offline:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:stale:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-desktop:stale:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:empty:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:empty:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:selected:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:selected:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:channel_unavailable:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:channel_unavailable:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:review_required:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:review_required:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:workpack_revalidation:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:workpack_revalidation:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:logged_out:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:logged_out:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:blocked:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:blocked:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:ready:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:ready:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:sending:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:sending:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:result_accepted:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:result_accepted:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:result_partial:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:result_partial:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:fail_session:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:fail_session:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:fail_dispatch:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:fail_dispatch:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:fail_dispatch_unpersisted:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:fail_dispatch_unpersisted:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:offline:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:offline:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:stale:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-mobile:stale:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:empty:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:empty:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:selected:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:selected:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:channel_unavailable:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:channel_unavailable:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:review_required:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:review_required:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:workpack_revalidation:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:workpack_revalidation:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:logged_out:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:logged_out:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:blocked:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:blocked:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:ready:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:ready:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:sending:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:sending:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:result_accepted:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:result_accepted:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:result_partial:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:result_partial:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:fail_session:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:fail_session:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:fail_dispatch:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:fail_dispatch:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:fail_dispatch_unpersisted:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:fail_dispatch_unpersisted:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:offline:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:offline:owning_root_text_200
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:stale:normal_100
+ ↓ tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > night-mobile:stale:owning_root_text_200
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100
+AssertionError: expected '371e1a69' not to be '371e1a69' // Object.is equality
+ ❯ verifyInFlightScopeIsolation tests/workpack-share-v2-browser.test.ts:1878:40
+    1876|         : null;
+    1877|     }, CURRENT_WORKPACK_STORAGE_KEY);
+    1878|     expect.soft(editedFingerprint).not.toBe(initialFingerprint);
+       |                                        ^
+    1879|
+    1880|     const detailRequestsBeforeRestore = restorePage.controller.probe.w…
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:2019:7
+ ❯ tests/workpack-share-v2-browser.test.ts:2136:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100
+AssertionError: expected 'selected' to be 'workpack_revalidation' // Object.is equality
+
+Expected: "workpack_revalidation"
+Received: "selected"
+
+ ❯ verifyInFlightScopeIsolation tests/workpack-share-v2-browser.test.ts:1894:8
+    1892|     );
+    1893|     expect.soft(await restorePage.page.locator("[data-share-root]").ge…
+    1894|       .toBe("workpack_revalidation");
+       |        ^
+    1895|     expect.soft(await restorePage.page.locator("[data-share-preview]")…
+    1896|
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:2019:7
+ ❯ tests/workpack-share-v2-browser.test.ts:2136:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/workpack-share-v2-browser.test.ts > Workpack Share v2 real browser matrix > day-desktop:sending:normal_100
+AssertionError: expected 'ready' to be 'workpack_revalidation' // Object.is equality
+
+Expected: "workpack_revalidation"
+Received: "ready"
+
+ ❯ verifyInFlightScopeIsolation tests/workpack-share-v2-browser.test.ts:1900:8
+    1898|     await restorePage.page.waitForTimeout(500);
+    1899|     expect(await restorePage.page.locator("[data-share-root]").getAttr…
+    1900|       .toBe("workpack_revalidation");
+       |        ^
+    1901|     expect(restorePage.controller.probe.channelRequestCount).toBe(chan…
+    1902|     expect(restorePage.controller.probe.sessionRequestCount).toBe(0);
+ ❯ executeBrowserCase tests/workpack-share-v2-browser.test.ts:2019:7
+ ❯ tests/workpack-share-v2-browser.test.ts:2136:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 129 skipped (130)
+   Start at  16:55:57
+   Duration  41.44s (transform 334ms, setup 0ms, import 711ms, tests 40.22s, environment 0ms)
+
+
+[explicit-exit-code] 1

@@ -435,6 +435,42 @@ describe("share session route authority", () => {
     }, 1, Date.now())).toEqual({ reusable: true });
   });
 
+  it("does not persist a Kakao share session when the actual dispatch adapter is unavailable", async () => {
+    const fake = makeShareInsertClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.verifyChannelAvailabilityToken.mockReturnValueOnce({
+      ok: true,
+      resolution: {
+        ...channelResolution,
+        requestedChannels: ["kakao"],
+        channels: [{
+          channel: "kakao",
+          configured: false,
+          approved: true,
+          available: false,
+          recipientCount: 1,
+          reasonCode: "relay_unconfigured",
+          ownerRoute: "/settings"
+        }],
+        ready: false
+      }
+    });
+    const { POST } = await import("@/app/api/workpacks/[id]/share-sessions/route");
+
+    const response = await POST(jsonRequest(`/api/workpacks/${WORKPACK_ID}/share-sessions`, {
+      recipients: [WORKER_ID],
+      channels: ["kakao"],
+      canonicalWorkpackRevision: "a".repeat(64),
+      availabilityToken: "signed-token"
+    }), { params: Promise.resolve({ id: WORKPACK_ID }) });
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({ ok: false, reasonCode: "channel_unavailable" });
+    expect(fake.inserted()).toBeNull();
+    expect(mocks.buildShareDispatchBinding).not.toHaveBeenCalled();
+  });
+
   it("stops before provider dispatch when the persisted session binding is stale", async () => {
     const fake = makeDispatchAuthorityClient();
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
