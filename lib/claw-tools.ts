@@ -20,6 +20,7 @@ import {
   type WeatherSignalLike,
 } from "./mcp-tools";
 import { querySafetyKnowledge } from "./ontology/knowledge-tool";
+import { materializePhaseAProductDocuments } from "./ontology/product-materialization";
 import { reviewDocpack } from "./ontology/qa-review-tool";
 import type { SafetyReferenceItem } from "./safety-reference-catalog";
 import { searchSafetyReferences } from "./safety-reference-catalog-server";
@@ -107,7 +108,15 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
       const task = resolveReviewTaskLabel(asString(input, "task"), question);
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
-      const response = await runAsk(question, { aiMode: mode });
+      const [generatedResponse, knowledge] = await Promise.all([
+        runAsk(question, { aiMode: mode }),
+        querySafetyKnowledge(task),
+      ]);
+      const response = knowledge.found && knowledge.phaseAProduct
+        ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
+            generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+          })
+        : generatedResponse;
       const qa = await reviewDocpack(task, selectQaDocumentText(response));
       return buildReviewedDocpackResult(response, qa, task, includeFull);
     }
@@ -115,7 +124,16 @@ export async function executeClawTool(name: string, input: unknown): Promise<unk
       const question = asString(input, "question");
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
-      const response = await runAsk(question, { aiMode: mode });
+      const task = resolveReviewTaskLabel("", question);
+      const [generatedResponse, knowledge] = await Promise.all([
+        runAsk(question, { aiMode: mode }),
+        task ? querySafetyKnowledge(task) : Promise.resolve(null),
+      ]);
+      const response = knowledge?.found && knowledge.phaseAProduct
+        ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
+            generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+          })
+        : generatedResponse;
       return buildDocpackResult(response, includeFull);
     }
     case "get_evidence_mapping": {

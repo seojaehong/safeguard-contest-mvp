@@ -38,6 +38,7 @@ export type WorkpackEvidenceSummary = {
   qualityContract?: AskResponse["qualityContract"];
   ontologyQa?: AskResponse["ontologyQa"];
   evidenceLabels?: AskResponse["evidenceLabels"];
+  phaseAProduct?: AskResponse["phaseAProduct"];
   structured?: AskResponse["structured"];
   dbHarness?: AskResponse["dbHarness"];
   generationTrace?: AskResponse["generationTrace"];
@@ -85,6 +86,7 @@ export function buildWorkpackEvidenceSummary(
     qualityContract: response.qualityContract,
     ontologyQa: response.ontologyQa,
     evidenceLabels: response.evidenceLabels,
+    phaseAProduct: response.phaseAProduct,
     structured: response.structured,
     dbHarness: response.dbHarness,
     generationTrace: response.generationTrace,
@@ -158,6 +160,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
   const qualityContract = readJsonObject(evidence.qualityContract);
   const ontologyQa = readJsonObject(evidence.ontologyQa);
   const evidenceLabels = readJsonObject(evidence.evidenceLabels);
+  const phaseAProduct = readJsonObject(evidence.phaseAProduct);
   const structured = readJsonObject(evidence.structured);
   const dbHarness = readJsonObject(evidence.dbHarness);
   const generationEvidence = readJsonObject(evidence.generationEvidence);
@@ -182,6 +185,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
       deliverables: deliverables as AskResponse["deliverables"],
       structured: structured ? structured as AskResponse["structured"] : undefined,
       evidenceLabels: evidenceLabels ? evidenceLabels as AskResponse["evidenceLabels"] : undefined,
+      phaseAProduct: phaseAProduct ? phaseAProduct as AskResponse["phaseAProduct"] : undefined,
       ontologyQa: ontologyQa ? ontologyQa as AskResponse["ontologyQa"] : undefined,
       qualityContract: qualityContract ? qualityContract as AskResponse["qualityContract"] : undefined,
       dbHarness: dbHarness ? dbHarness as AskResponse["dbHarness"] : undefined,

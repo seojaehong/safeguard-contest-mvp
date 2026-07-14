@@ -29,6 +29,7 @@ import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "@/lib/sif-embedding-corpus";
 import type { HarnessImprovement, HarnessWorkpackMemory } from "@/lib/db-harness";
 import { querySafetyKnowledge } from "@/lib/ontology/knowledge-tool";
+import { materializePhaseAProductDocuments } from "@/lib/ontology/product-materialization";
 import { reviewDocpack } from "@/lib/ontology/qa-review-tool";
 import {
   isMcpEnabled,
@@ -286,7 +287,15 @@ function registerTools(server: McpServer): void {
     },
     async ({ question, task, mode, includeFull }, authContext) => {
         const reviewTask = resolveReviewTaskLabel(task, question);
-        const response = await runAsk(question, { aiMode: mode ?? "full" });
+        const [generatedResponse, knowledge] = await Promise.all([
+          runAsk(question, { aiMode: mode ?? "full" }),
+          querySafetyKnowledge(reviewTask),
+        ]);
+        const response = knowledge.found && knowledge.phaseAProduct
+          ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
+              generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+            })
+          : generatedResponse;
         const qaSource =
           response.deliverables.riskAssessmentDraft ||
           response.deliverables.tbmBriefing ||
@@ -338,7 +347,16 @@ function registerTools(server: McpServer): void {
       },
     },
     async ({ question, mode, includeFull }, authContext) => {
-        const response = await runAsk(question, { aiMode: mode ?? "full" });
+        const reviewTask = resolveReviewTaskLabel("", question);
+        const [generatedResponse, knowledge] = await Promise.all([
+          runAsk(question, { aiMode: mode ?? "full" }),
+          reviewTask ? querySafetyKnowledge(reviewTask) : Promise.resolve(null),
+        ]);
+        const response = knowledge?.found && knowledge.phaseAProduct
+          ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
+              generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+            })
+          : generatedResponse;
         const result = buildDocpackResult(response, includeFull ?? false) as Record<string, unknown>;
 
         // 테넌트 귀속: 토큰에 siteId가 있으면 결과 workpack을 해당 사이트로 저장 시도하고,

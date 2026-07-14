@@ -1,0 +1,7 @@
+Command: npm.cmd test -- tests/claw-tools-phase-a-materialization.test.ts
+Exit code: 1
+
+Test Files  1 failed (1)
+Tests       2 failed (2)
+
+Both reviewed and plain product-handler tests failed because querySafetyKnowledge had zero calls. The baseline handlers called runAsk and built docpack results without the Phase A retrieval boundary.
