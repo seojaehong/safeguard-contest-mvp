@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "status": "pass_bounded_final_audit_pending",
+  "sourceParent": "684f87bbc521924ba12a1d433ef346df03b726f1",
+  "changedFiles": [
+    "app/globals.css"
+  ],
+  "red": {
+    "githubRun": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/29299380661",
+    "ciFilesFailed": 6,
+    "localFilesFailed": 6,
+    "localTestsFailed": 6,
+    "localTestsPassed": 65,
+    "findings": [
+      "reports root typography tuple omitted font-weight and letter-spacing",
+      "reports preview summary used the control tuple instead of the support tuple",
+      "reports mobile content started 6px beyond the module distance contract",
+      "checked-in browser evidence sourceIdentity was stale after integration"
+    ]
+  },
+  "green": {
+    "focusedFiles": 5,
+    "focusedTests": 34,
+    "focusedFailures": 0,
+    "staticAudit": {
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "violations": 0,
+      "coverageIssues": 0,
+      "importantDeclarations": 0
+    },
+    "strictTypecheck": "pass",
+    "diffCheck": "pass"
+  },
+  "changes": [
+    {
+      "selector": ".safeclaw-module-shell[data-module-route=\"/reports\"]",
+      "result": "complete body typography tuple"
+    },
+    {
+      "selector": ".safeclaw-module-shell[data-module-route=\"/reports\"] .safeclaw-report-preview > summary",
+      "result": "canonical support typography tuple"
+    },
+    {
+      "selector": "@media (max-width: 900px) reports decision header/action",
+      "result": "mobile content and sample report distance within contract"
+    }
+  ],
+  "openGate": {
+    "frontendRouteCoverage": "fail_closed_until_final_product_head",
+    "reason": "Static and 108-row browser evidence must be regenerated once after all product integrations."
+  }
+}

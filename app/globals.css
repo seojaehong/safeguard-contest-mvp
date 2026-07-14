@@ -19906,6 +19906,8 @@ body:has(.safeclaw-landing) :is(
   --tracking-section-title: 0;
   --tracking-body: 0;
   font-size: var(--text-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   line-height: var(--leading-body);
 }
 
@@ -20351,8 +20353,8 @@ body:has(.safeclaw-landing) :is(
   align-items: center;
   padding: var(--space-3) var(--space-4);
   color: var(--workspace-ink);
-  font-size: var(--text-control);
-  font-weight: 600;
+  font-size: var(--text-support);
+  font-weight: 500;
   line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
   cursor: pointer;
@@ -20403,7 +20405,7 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-header {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: var(--space-2);
   }
 
   .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-page-decision-action {
@@ -20412,7 +20414,7 @@ body:has(.safeclaw-landing) :is(
     gap: var(--space-3);
     border-top: 1px solid var(--workspace-rule);
     border-left: 0;
-    padding-top: var(--space-3);
+    padding-top: var(--space-1);
     padding-left: 0;
   }
 
