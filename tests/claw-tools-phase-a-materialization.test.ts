@@ -170,6 +170,36 @@ describe("Claw Phase A product handlers", () => {
       question: "비전기작업 문서팩",
       knowledgeTask: "전기작업",
     },
+    {
+      task: "고소작업",
+      question: "미확정인 고소작업을 수행합니다",
+      knowledgeTask: "고소작업",
+    },
+    {
+      task: "고소작업",
+      question: "고소작업을 진행할지 검토",
+      knowledgeTask: "고소작업",
+    },
+    {
+      task: "고소작업",
+      question: "고소작업은 아직 결정되지 않음",
+      knowledgeTask: "고소작업",
+    },
+    {
+      task: "고소작업",
+      question: "하지 않는 고소작업을 위한 문서팩",
+      knowledgeTask: "고소작업",
+    },
+    {
+      task: "고소작업",
+      question: "취소된 고소작업을 수행합니다",
+      knowledgeTask: "고소작업",
+    },
+    {
+      task: "고소작업",
+      question: "고소작업을 수행할 예정으로 작업계획서와 장비 상태 및 인원 배치를 모두 확인했지만 최종적으로 하지 않음",
+      knowledgeTask: "고소작업",
+    },
   ])("does not materialize reviewed provenance for unsupported intent: '$question'", async ({
     task,
     question,

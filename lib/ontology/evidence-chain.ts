@@ -342,6 +342,7 @@ export function isEvidenceChainTaskBoundToQuestion(
 ): boolean {
   const requested = findDefinition(requestedTask);
   if (!requested || requested.definition.chainId !== expectedChainId) return false;
+  const normalizedQuestion = question.normalize("NFC");
 
   const mentions: Array<{
     chainId: EvidenceChainDefinition["chainId"];
@@ -352,7 +353,7 @@ export function isEvidenceChainTaskBoundToQuestion(
   for (const definition of EVIDENCE_CHAIN_REGISTRY) {
     const labels = [definition.canonicalTaskLabel, ...definition.aliases];
     for (const label of labels) {
-      for (const range of findTaskLabelRanges(question, label)) {
+      for (const range of findTaskLabelRanges(normalizedQuestion, label)) {
         mentions.push({ chainId: definition.chainId, label, ...range });
       }
     }
@@ -362,17 +363,18 @@ export function isEvidenceChainTaskBoundToQuestion(
   if (mentionedChainIds.size !== 1 || !mentionedChainIds.has(expectedChainId)) return false;
 
   const expectedMentions = mentions.filter((mention) => mention.chainId === expectedChainId);
-  if (expectedMentions.some((mention) => hasUnsupportedTaskIntent(question, mention.end))) {
+  if (expectedMentions.some((mention) => hasUnsupportedTaskIntent(normalizedQuestion, mention))) {
     return false;
   }
-  return expectedMentions.some((mention) => hasPositiveTaskIntent(question, mention));
+  return expectedMentions.some((mention) => hasPositiveTaskIntent(normalizedQuestion, mention));
 }
 
 const TASK_LABEL_PARTICLES = "은|는|이|가|을|를|과|와|도|만|의|에|에서|으로|로|부터|까지|여부";
 const TASK_NEGATION_PATTERN =
-  /(?:하지\s*않|안\s*(?:함|하|할|하는|합니다)|제외|배제|금지|취소|중단|중지|미수행|아님|아닌)/u;
+  /(?:하지\s*않|안\s*(?:함|하|할|하는|합니다)|제외|배제|금지|취소|중단|중지|미수행|아님|아닌|결정되지\s*않|확정되지\s*않)/u;
 const TASK_UNCERTAINTY_PATTERN =
-  /(?:미확정|미정|불확실|확인\s*(?:전|필요)|검토\s*중|논의\s*중)/u;
+  /(?:미확정|미정|불확실|확인\s*(?:전|필요)|검토\s*중|논의\s*중|(?:수행|실시|진행|착수|시작)할지\s*(?:검토|논의|확인)?|아직\s*(?:결정|확정)되지\s*않|(?:결정|확정)\s*(?:전|보류))/u;
+const TASK_CLAUSE_BOUNDARY_PATTERN = /[.!?;。！？\n\r]/u;
 const TASK_POSITIVE_PATTERN = new RegExp(
   `^\\s*(?:(?:${TASK_LABEL_PARTICLES})\\s*)?` +
     "(?:위한|수행|실시|진행|예정|계획|준비|착수|시작|계속|중(?=$|\\s|[.,!?])|중이다|중입니다|" +
@@ -410,9 +412,28 @@ function findTaskLabelRanges(
   });
 }
 
-function hasUnsupportedTaskIntent(question: string, mentionEnd: number): boolean {
-  const suffix = question.slice(mentionEnd, mentionEnd + 32);
-  return TASK_NEGATION_PATTERN.test(suffix) || TASK_UNCERTAINTY_PATTERN.test(suffix);
+function hasUnsupportedTaskIntent(
+  question: string,
+  mention: { start: number; end: number },
+): boolean {
+  let clauseStart = mention.start;
+  while (
+    clauseStart > 0
+    && !TASK_CLAUSE_BOUNDARY_PATTERN.test(question.charAt(clauseStart - 1))
+  ) {
+    clauseStart -= 1;
+  }
+
+  let clauseEnd = mention.end;
+  while (
+    clauseEnd < question.length
+    && !TASK_CLAUSE_BOUNDARY_PATTERN.test(question.charAt(clauseEnd))
+  ) {
+    clauseEnd += 1;
+  }
+
+  const clause = question.slice(clauseStart, clauseEnd);
+  return TASK_NEGATION_PATTERN.test(clause) || TASK_UNCERTAINTY_PATTERN.test(clause);
 }
 
 function hasPositiveTaskIntent(

@@ -98,5 +98,49 @@
       "exitCode": 0
     },
     "mcpRouteHandlerRegression": true
+  },
+  "fullClauseRemediation": {
+    "reviewedCommit": "871aecbd3e24056f3118c3c128c7d152670f4dc0",
+    "intentBoundary": {
+      "fullSentenceClause": true,
+      "prefixAndSuffixEvaluated": true,
+      "remoteNegationRejected": true,
+      "cancellationRejected": true,
+      "uncertaintyRejected": true,
+      "generalNlpOrLlm": false
+    },
+    "red": [
+      {
+        "command": "npm.cmd test -- tests/ontology-evidence-chains.test.ts tests/claw-tools-phase-a-materialization.test.ts",
+        "testFiles": 2,
+        "tests": 80,
+        "passed": 70,
+        "failed": 10,
+        "exitCode": 1
+      },
+      {
+        "command": "npm.cmd test -- tests/mcp-reviewed-route-task-binding.test.ts",
+        "testFiles": 1,
+        "tests": 7,
+        "passed": 0,
+        "failed": 7,
+        "exitCode": 1,
+        "failure": "registerTools is not a function"
+      }
+    ],
+    "green": {
+      "command": "npm.cmd test -- tests/mcp-reviewed-route-task-binding.test.ts tests/mcp-product-materialization-persistence.test.ts tests/claw-tools-phase-a-materialization.test.ts tests/ontology-evidence-chains.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-auth.test.ts",
+      "testFiles": 6,
+      "tests": 130,
+      "passed": 130,
+      "failed": 0,
+      "exitCode": 0
+    },
+    "strictTypecheck": {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0
+    },
+    "nextRouteRegistrationRegression": true,
+    "httpTransportRoundTrip": false
   }
 }

@@ -248,7 +248,7 @@ async function loadHarnessImprovementMemory(
   }
 }
 
-function registerTools(server: McpServer): void {
+export function registerTools(server: McpServer): void {
   registerScopedTool(server,
     "run_safeclaw_harness_agent",
     {

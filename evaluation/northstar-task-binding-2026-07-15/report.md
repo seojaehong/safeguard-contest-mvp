@@ -98,3 +98,45 @@ npm.cmd run typecheck
 ```
 
 Result: 5 files passed, 111 tests passed, 0 failed; strict TypeScript typecheck passed.
+
+## Full-Clause Intent Remediation
+
+Fresh review of commit `871aecbd3e24056f3118c3c128c7d152670f4dc0` found that the 32-character suffix window did not cover prefix or remote unsupported intent. The matcher now evaluates the complete deterministic sentence clause containing each registered task span. Negation, cancellation, unresolved decisions, and action-under-review wording anywhere before or after the span take precedence over positive action wording.
+
+Covered regressions include:
+
+- `미확정인 고소작업을 수행합니다`
+- `고소작업을 진행할지 검토`
+- `고소작업은 아직 결정되지 않음`
+- `하지 않는 고소작업을 위한 문서팩`
+- `취소된 고소작업을 수행합니다`
+- a negation more than 32 characters after the task span
+
+The parser uses only code-owned task aliases, lexical boundaries, sentence delimiters, and fixed intent patterns. It does not call an LLM or infer an unregistered synonym. A valid canonical question with the registered `높은 곳 작업` alias remains eligible.
+
+Full-clause RED command:
+
+```text
+npm.cmd test -- tests/ontology-evidence-chains.test.ts tests/claw-tools-phase-a-materialization.test.ts
+```
+
+Result before production changes: 2 files executed, 80 tests total, 70 passed, 10 failed. Five newly added bypass cases failed on each surface; `고소작업은 아직 결정되지 않음` was already fail-closed because it had no positive action.
+
+Next MCP route registration RED command:
+
+```text
+npm.cmd test -- tests/mcp-reviewed-route-task-binding.test.ts
+```
+
+Result before exposing the existing route registration entry point: 1 file executed, 7 tests total, 0 passed, 7 failed with `registerTools is not a function`.
+
+Fresh final verification:
+
+```text
+npm.cmd test -- tests/mcp-reviewed-route-task-binding.test.ts tests/mcp-product-materialization-persistence.test.ts tests/claw-tools-phase-a-materialization.test.ts tests/ontology-evidence-chains.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-auth.test.ts
+npm.cmd run typecheck
+```
+
+Result: 6 files passed, 130 tests passed, 0 failed; strict TypeScript typecheck passed.
+
+The route regression invokes the real `registerTools` registration, central scoped-tool authorization wrapper, and production reviewed-docpack handler. The MCP adapter is mocked, so this verifies Next route registration behavior rather than an HTTP JSON-RPC network round trip. No database, schema, migration, environment, or `naturalize_only` behavior changed.
