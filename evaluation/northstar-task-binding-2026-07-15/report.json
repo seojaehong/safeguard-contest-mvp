@@ -49,5 +49,54 @@
     "schema": false,
     "migration": false,
     "environment": false
+  },
+  "followUpRemediation": {
+    "reviewedCommit": "6d1bdff25bbb440464eb3b9379850b5941a862e1",
+    "intentBoundary": {
+      "lexicalBoundaryRequired": true,
+      "nearbyPositiveActionRequired": true,
+      "nearbyNegationRejected": true,
+      "nearbyUncertaintyRejected": true,
+      "generalNlpOrLlm": false
+    },
+    "red": [
+      {
+        "command": "npm.cmd test -- tests/claw-tools-phase-a-materialization.test.ts tests/ontology-evidence-chains.test.ts",
+        "testFiles": 2,
+        "tests": 63,
+        "passed": 57,
+        "failed": 6,
+        "exitCode": 1
+      },
+      {
+        "command": "npm.cmd test -- tests/mcp-product-materialization-persistence.test.ts",
+        "testFiles": 1,
+        "tests": 10,
+        "passed": 6,
+        "failed": 4,
+        "exitCode": 1
+      },
+      {
+        "command": "npm.cmd test -- tests/ontology-evidence-chains.test.ts",
+        "testFiles": 1,
+        "tests": 54,
+        "passed": 52,
+        "failed": 2,
+        "exitCode": 1
+      }
+    ],
+    "green": {
+      "command": "npm.cmd test -- tests/mcp-product-materialization-persistence.test.ts tests/claw-tools-phase-a-materialization.test.ts tests/ontology-evidence-chains.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-auth.test.ts",
+      "testFiles": 5,
+      "tests": 111,
+      "passed": 111,
+      "failed": 0,
+      "exitCode": 0
+    },
+    "strictTypecheck": {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0
+    },
+    "mcpRouteHandlerRegression": true
   }
 }
