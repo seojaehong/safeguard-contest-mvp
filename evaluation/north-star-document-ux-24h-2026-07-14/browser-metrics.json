@@ -19,10 +19,23 @@
         "viewportHeight": 900,
         "scrollWidth": 1440,
         "bodyOffset": 73,
-        "nestedScrollCount": 0,
-        "tooSmallTouchTargets": [],
-        "interactionOverlaps": [],
-        "layoutOverlaps": [],
+        "overlapPolicy": {
+          "documentedExcludedPairs": [],
+          "ignoredNonPairs": [
+            "ancestor-descendant",
+            "closed-details-content",
+            "outside-current-viewport"
+          ]
+        },
+        "viewportGeometry": {
+          "clippedControls": [],
+          "fixedOrStickyElements": [],
+          "horizontalOverflow": 0,
+          "interactionOverlaps": [],
+          "nestedScrollContainers": [],
+          "overlayOverlaps": [],
+          "tooSmallTouchTargets": []
+        },
         "sectionOverlaps": 0,
         "sectionCount": 7
       }
@@ -43,10 +56,23 @@
         "viewportHeight": 900,
         "scrollWidth": 1440,
         "bodyOffset": 93,
-        "nestedScrollCount": 0,
-        "tooSmallTouchTargets": [],
-        "interactionOverlaps": [],
-        "layoutOverlaps": [],
+        "overlapPolicy": {
+          "documentedExcludedPairs": [],
+          "ignoredNonPairs": [
+            "ancestor-descendant",
+            "closed-details-content",
+            "outside-current-viewport"
+          ]
+        },
+        "viewportGeometry": {
+          "clippedControls": [],
+          "fixedOrStickyElements": [],
+          "horizontalOverflow": 0,
+          "interactionOverlaps": [],
+          "nestedScrollContainers": [],
+          "overlayOverlaps": [],
+          "tooSmallTouchTargets": []
+        },
         "sectionOverlaps": 0,
         "sectionCount": 7
       }
@@ -67,10 +93,23 @@
         "viewportHeight": 844,
         "scrollWidth": 391,
         "bodyOffset": 194,
-        "nestedScrollCount": 0,
-        "tooSmallTouchTargets": [],
-        "interactionOverlaps": [],
-        "layoutOverlaps": [],
+        "overlapPolicy": {
+          "documentedExcludedPairs": [],
+          "ignoredNonPairs": [
+            "ancestor-descendant",
+            "closed-details-content",
+            "outside-current-viewport"
+          ]
+        },
+        "viewportGeometry": {
+          "clippedControls": [],
+          "fixedOrStickyElements": [],
+          "horizontalOverflow": 0,
+          "interactionOverlaps": [],
+          "nestedScrollContainers": [],
+          "overlayOverlaps": [],
+          "tooSmallTouchTargets": []
+        },
         "sectionOverlaps": 0,
         "sectionCount": 7
       }
@@ -91,10 +130,23 @@
         "viewportHeight": 844,
         "scrollWidth": 391,
         "bodyOffset": 198,
-        "nestedScrollCount": 0,
-        "tooSmallTouchTargets": [],
-        "interactionOverlaps": [],
-        "layoutOverlaps": [],
+        "overlapPolicy": {
+          "documentedExcludedPairs": [],
+          "ignoredNonPairs": [
+            "ancestor-descendant",
+            "closed-details-content",
+            "outside-current-viewport"
+          ]
+        },
+        "viewportGeometry": {
+          "clippedControls": [],
+          "fixedOrStickyElements": [],
+          "horizontalOverflow": 0,
+          "interactionOverlaps": [],
+          "nestedScrollContainers": [],
+          "overlayOverlaps": [],
+          "tooSmallTouchTargets": []
+        },
         "sectionOverlaps": 0,
         "sectionCount": 7
       }

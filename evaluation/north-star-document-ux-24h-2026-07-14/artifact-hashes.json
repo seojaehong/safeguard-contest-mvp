@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "productSha": "9bda2882b2ae9f97be7357bf56ab2d21dce6d7e6",
   "productTree": "fb601e77cb693b8dfbdff6981e3904c3f4a82316",
   "entries": [
@@ -9,19 +9,19 @@
       "bytes": 9634
     },
     {
-      "path": "components/workpack-editor-structure.ts",
-      "sha256": "f0980423b104e880af6d2d4ea0ece56cdd83a60650ada29ac83ef719a9c28b26",
-      "bytes": 14695
-    },
-    {
       "path": "components/WorkpackEditor.module.css",
       "sha256": "d4369f4d2b59ea222ebb4421c0e9dab35fd7b66bca24471a12ea1bf4865056f6",
       "bytes": 20479
     },
     {
+      "path": "components/workpack-editor-structure.ts",
+      "sha256": "f0980423b104e880af6d2d4ea0ece56cdd83a60650ada29ac83ef719a9c28b26",
+      "bytes": 14695
+    },
+    {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/browser-metrics.json",
-      "sha256": "6dd1870d3c0c94201883991ed05cc15f6e6a203bd20134e5c4253c2d3fed0948",
-      "bytes": 2563
+      "sha256": "842bf88921d23b375c41dde956faf077f565c0b73aa3a5cd068da5bd172e3cd3",
+      "bytes": 4044
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/browser.log",
@@ -44,14 +44,19 @@
       "bytes": 623
     },
     {
-      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/browser-document-schemas.log",
-      "sha256": "07e7bf84ca7346f0b597c243ce78d68b0fcefe849de72e39a33275fbaa052ac9",
-      "bytes": 1498
-    },
-    {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/browser-matrix.log",
       "sha256": "5985772cf7e56e788cee57726b8112277162b830c19aad428109e0856c93bc73",
       "bytes": 374
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/browser-roundtrip-fallback-final.log",
+      "sha256": "e1aab4a17c7858c79d9f70d76703abfcfe66c82c8b9b3fb9ba6fad04f8e9ff72",
+      "bytes": 379
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/build-final.log",
+      "sha256": "6b1c1c5bc558a130a9c8007c0c275cb637c0ad36d75cf92a99eadb0d302b88d4",
+      "bytes": 5925
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/build.log",
@@ -59,19 +64,24 @@
       "bytes": 6131
     },
     {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/diff-check-final.log",
+      "sha256": "920c249a608a10bd9f692cb4169920136811417220e7f85546f8d674194cbb96",
+      "bytes": 44
+    },
+    {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/documents-browser.log",
       "sha256": "7af173ab81476d597d2c998ae89aa0bffeb4872ede76c34fa8f84a0d207745db",
       "bytes": 379
     },
     {
-      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/focused-unit-green.log",
-      "sha256": "3b3918f381460c9b004bedf285259185b56f4e3c58add4e351233c3ed288f917",
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/focused-33-final.log",
+      "sha256": "f2cda8b0514d1bdc6e832bb1752182d839cecf3788c9fead9721c350eb1a03f9",
       "bytes": 539
     },
     {
-      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/focused-unit.log",
-      "sha256": "49c5e9f2fb7d5068c8feadb0362ef4a3376ee61339e781113ccb0351b6b7bcab",
-      "bytes": 3313
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/focused-unit-green.log",
+      "sha256": "3b3918f381460c9b004bedf285259185b56f4e3c58add4e351233c3ed288f917",
+      "bytes": 539
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/green-browser-document-schemas.log",
@@ -94,14 +104,19 @@
       "bytes": 373
     },
     {
-      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/green-focused-browser.log",
-      "sha256": "02e8c55c1ea0a2ed956c925459a2b5283188bae0fbce1b04684bdfea58c08633",
-      "bytes": 2262
-    },
-    {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/green-mobile-interactions.log",
       "sha256": "f556be707119966eb8133f3e1a1b6739223195069884d3cd2aab2b3d7e651cd3",
       "bytes": 400
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/green-production-viewport-contract.log",
+      "sha256": "e08b65088269531b159019f6d9434047b02edc866ae424e63d35cdb99ac92b81",
+      "bytes": 342
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/production-viewport-matrix-final.log",
+      "sha256": "7d94368fd5b71f0c07134da7464be2c5ad075742cb008e4f491cc4f1fda42671",
+      "bytes": 374
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/red-document-schemas.log",
@@ -114,14 +129,39 @@
       "bytes": 8142
     },
     {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/red-intermediate-browser-document-schemas.log",
+      "sha256": "07e7bf84ca7346f0b597c243ce78d68b0fcefe849de72e39a33275fbaa052ac9",
+      "bytes": 1498
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/red-intermediate-focused-browser.log",
+      "sha256": "02e8c55c1ea0a2ed956c925459a2b5283188bae0fbce1b04684bdfea58c08633",
+      "bytes": 2262
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/red-intermediate-focused-unit.log",
+      "sha256": "49c5e9f2fb7d5068c8feadb0362ef4a3376ee61339e781113ccb0351b6b7bcab",
+      "bytes": 3313
+    },
+    {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/red-mobile-interactions.log",
       "sha256": "10450541105ab9d2dc1dbbb14cefbe1437f403ff8a83a61fce6bf5d4d4b4d622",
       "bytes": 1999
     },
     {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/red-production-viewport-contract.log",
+      "sha256": "5ca18270bfec62f7e93211f0b89885c49fefec9e49ed6862ab564512560d00b5",
+      "bytes": 1946
+    },
+    {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/source-audit.json",
-      "sha256": "e5751f7552410fe05b46c88da058a413cd4e20528a1363a602f4804c0927c89a",
-      "bytes": 831
+      "sha256": "c94e16d83cfe1778ef28de6bd8781578ca3200ba3adc76b6a9ba5d1b0648a45c",
+      "bytes": 968
+    },
+    {
+      "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/typecheck-final.log",
+      "sha256": "823ed857eea92ed170f2ba390bc949894d32cfb52e32b4e2f6ee74768eaf3bde",
+      "bytes": 90
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/remediation/typecheck.log",
@@ -130,33 +170,33 @@
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/report.json",
-      "sha256": "101b740879e25d3df4b92b01c83520ca6bd29cd4aac257ae18ffb31812374ee1",
-      "bytes": 2232
+      "sha256": "8b2896804c225dce86c1a6e2a6cc1d24c7c18cb961f39bcff1f63bc3e44fbc24",
+      "bytes": 3053
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/report.md",
-      "sha256": "69760a8bf46bb8e7002f41074cd5611e845b2708203d792e8d1587222a723984",
-      "bytes": 4612
+      "sha256": "44c7f7c8960f3164a9df3d4280bff998ee9f340ca60386a5b971482715f5ecb9",
+      "bytes": 5602
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/desktop-day-editor.png",
-      "sha256": "e38c462a910655c3f0a4e4cc2216e67b59e97ac608d25c79524fd0503c5fb31b",
-      "bytes": 69491
+      "sha256": "19b7d91d61433e02fd0efea1f56a96ffe31aa73535b053e4fb94df6dabb387e0",
+      "bytes": 65147
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/desktop-night-editor.png",
-      "sha256": "f2c25183fe0b7b543ac0f722dae9b7ba8d804828053bf63a9c47a3483fafb0d1",
-      "bytes": 61524
+      "sha256": "656c6026dc2f2fb5c95d2ba1d7c79e8dfdd2cb2c1530e87929375195584986c2",
+      "bytes": 58141
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/mobile-day-editor.png",
-      "sha256": "8479f8b5deb16329e942fadbc7a5ca0bc80f3c45a376159eb628d6524d68e1cb",
-      "bytes": 56883
+      "sha256": "08552bb94c49c4e0b5200c06588fab2cd48daf3878ef3191ff1974676b6351ef",
+      "bytes": 53959
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/mobile-night-editor.png",
-      "sha256": "d2bbbebced7a6b6c48b30f2d4477decec1ee0e0fe0d7ab1154d129b65386d109",
-      "bytes": 50084
+      "sha256": "c73f30f82a360733812cfa3472cea2ee39978ba71ef5fd750f092583f32f0cd9",
+      "bytes": 47567
     },
     {
       "path": "evaluation/north-star-document-ux-24h-2026-07-14/typecheck.log",
@@ -195,8 +235,8 @@
     },
     {
       "path": "tests/north-star-document-ux.test.ts",
-      "sha256": "a35884ec351e0a76ce112276ec56f3438ef262bedc65ca9475e9c55792e05829",
-      "bytes": 12852
+      "sha256": "bbb98eebf07e4d0a97599fbb880b7ff35d1d41c4c0913896f3eb42ba7af5819d",
+      "bytes": 15462
     },
     {
       "path": "tests/workpack-editor-structured-sections.test.ts",
