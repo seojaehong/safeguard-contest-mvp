@@ -39,20 +39,40 @@ type DeepReadonly<T> = T extends (...args: never[]) => unknown
 
 export type ImmutableEvidencePacket = DeepReadonly<DbHarnessPacket>;
 
+export const HERMES_OUTPUT_ATTESTATION_VERSION = "hermes-output-attestation/v1" as const;
+
+export type HermesEvidenceClaim = {
+  claimId: string;
+  text: string;
+  citations: readonly {
+    citationId: string;
+    label: string;
+  }[];
+};
+
 export type HermesPlannerInput = {
   contractVersion: typeof ENGINE_ADAPTER_CONTRACT_VERSION;
   authority: EngineAuthority;
   context: BrokerRequestContext;
   prompt: string;
   evidencePacket: ImmutableEvidencePacket;
+  evidenceDigest: string;
+  evidenceClaims: readonly HermesEvidenceClaim[];
   emitText: (output: HermesPlannerTextOutput) => void;
   signal: AbortSignal;
   requestReadTool: (intent: HermesReadToolIntent) => Promise<unknown>;
 };
 
 export type HermesPlannerTextOutput = {
-  text: string;
   evidencePacket: ImmutableEvidencePacket;
+  attestation: {
+    schemaVersion: typeof HERMES_OUTPUT_ATTESTATION_VERSION;
+    evidenceDigest: string;
+    claims: readonly {
+      claimId: string;
+      citationIds: readonly string[];
+    }[];
+  };
 };
 
 export type HermesPlanner = (input: HermesPlannerInput) => Promise<void>;
@@ -68,17 +88,22 @@ export type SafeClawHermesComposition = {
   readonly planner: HermesPlanner;
   readonly readExecutor: SafeClawScopedMcpReadExecutor;
   readonly attestRuntime?: HermesRuntimeAttestation;
+  readonly testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
   readonly [SAFECLAW_HERMES_COMPOSITION]: true;
 };
 
 export function createSafeClawHermesComposition(
   planner: HermesPlanner,
-  options: { attestRuntime?: HermesRuntimeAttestation } = {},
+  options: {
+    attestRuntime?: HermesRuntimeAttestation;
+    testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
+  } = {},
 ): SafeClawHermesComposition {
   return Object.freeze({
     planner,
     readExecutor: createSafeClawScopedMcpReadExecutor(),
     attestRuntime: options.attestRuntime,
+    testOnlyTrustedKoshaReference: options.testOnlyTrustedKoshaReference,
     [SAFECLAW_HERMES_COMPOSITION]: true as const,
   });
 }
@@ -96,10 +121,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isGroundedKoshaReference(value: unknown): boolean {
+function isGroundedKoshaReference(
+  value: unknown,
+  testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
+): boolean {
   return isRecord(value)
     && typeof value.item_type === "string"
-    && isKoshaSupportingCitationEligible(value as SafetyReferenceItem);
+    && isKoshaSupportingCitationEligible(value as SafetyReferenceItem)
+    && (testOnlyTrustedKoshaReference?.(value as SafetyReferenceItem) ?? true);
 }
 
 function isSuccessfulRequiredSearch(
@@ -167,7 +196,80 @@ function digestEvidencePacket(packet: unknown): string {
   return createHash("sha256").update(canonicalJson(packet), "utf8").digest("hex");
 }
 
-function readEvidencePacket(result: unknown, expectedQuestion: string): DbHarnessPacket {
+function buildEvidenceClaims(packet: DbHarnessPacket): readonly HermesEvidenceClaim[] {
+  const claims = new Map<string, HermesEvidenceClaim>();
+  const references = [
+    ...packet.directEvidence,
+    ...packet.sifCases,
+    ...packet.supportingEvidence,
+  ];
+  for (const reference of references) {
+    const label = reference.kosha_guide?.evidenceRef?.trim() || reference.title.trim();
+    if (!label) continue;
+    const citationId = `citation:${createHash("sha256")
+      .update(canonicalJson({ id: reference.id, label }), "utf8")
+      .digest("hex")}`;
+    for (const control of reference.controls) {
+      const text = control.trim();
+      if (!text) continue;
+      const claimId = `claim:${createHash("sha256")
+          .update(canonicalJson({ citationId, text }), "utf8")
+          .digest("hex")}`;
+      claims.set(claimId, {
+        claimId,
+        text,
+        citations: [{ citationId, label }],
+      });
+    }
+  }
+  return deepFreeze([...claims.values()]);
+}
+
+function renderAttestedClaims(
+  output: HermesPlannerTextOutput,
+  evidenceDigest: string,
+  evidenceClaims: readonly HermesEvidenceClaim[],
+): string {
+  const attestation = output.attestation;
+  if (!isRecord(attestation)
+    || attestation.schemaVersion !== HERMES_OUTPUT_ATTESTATION_VERSION
+    || attestation.evidenceDigest !== evidenceDigest
+    || !Array.isArray(attestation.claims)
+    || attestation.claims.length === 0) {
+    throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+  }
+  const allowlist = new Map(evidenceClaims.map((claim) => [claim.claimId, claim]));
+  const rendered: string[] = [];
+  const seenClaims = new Set<string>();
+  for (const selected of attestation.claims) {
+    if (!isRecord(selected)
+      || typeof selected.claimId !== "string"
+      || seenClaims.has(selected.claimId)
+      || !Array.isArray(selected.citationIds)
+      || selected.citationIds.length === 0
+      || selected.citationIds.some((id) => typeof id !== "string")) {
+      throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+    }
+    const claim = allowlist.get(selected.claimId);
+    const allowedCitations = new Map(claim?.citations.map((citation) => [citation.citationId, citation]));
+    if (!claim
+      || new Set(selected.citationIds).size !== selected.citationIds.length
+      || selected.citationIds.some((id) => !allowedCitations.has(id))) {
+      throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+    }
+    seenClaims.add(selected.claimId);
+    rendered.push(`${claim.text} [${selected.citationIds
+      .map((id) => allowedCitations.get(id)?.label)
+      .join(", ")}]`);
+  }
+  return rendered.join("\n");
+}
+
+function readEvidencePacket(
+  result: unknown,
+  expectedQuestion: string,
+  testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
+): DbHarnessPacket {
   if (!isRecord(result)) {
     throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
   }
@@ -230,7 +332,9 @@ function readEvidencePacket(result: unknown, expectedQuestion: string): DbHarnes
     || sourceCounts.supportingEvidence !== supportingEvidence.length
     || sifCases.length === 0
     || !sifCases.some((item) => isRecord(item) && item.item_type === "sif-case")
-    || !supportingEvidence.some(isGroundedKoshaReference)
+    || !supportingEvidence.some((item) => (
+      isGroundedKoshaReference(item, testOnlyTrustedKoshaReference)
+    ))
     || ontology.status !== "ready"
     || ontology.missing.length !== 0
     || generation.requiredDocuments.length === 0
@@ -288,6 +392,7 @@ export function createExperimentalHermesAdapter(
       await dependencies.composition.attestRuntime?.(input.context, input.signal);
       let evidencePacket: ImmutableEvidencePacket;
       let evidenceDigest: string;
+      let evidenceClaims: readonly HermesEvidenceClaim[];
       try {
         const harnessResult = await dependencies.composition.readExecutor.execute({
           context: input.context,
@@ -295,9 +400,14 @@ export function createExperimentalHermesAdapter(
           input: { question: input.prompt },
           signal: input.signal,
         });
-        const validatedPacket = readEvidencePacket(harnessResult, normalizePrompt(input.prompt));
+        const validatedPacket = readEvidencePacket(
+          harnessResult,
+          normalizePrompt(input.prompt),
+          dependencies.composition.testOnlyTrustedKoshaReference,
+        );
         evidencePacket = deepFreeze(structuredClone(validatedPacket));
         evidenceDigest = digestEvidencePacket(evidencePacket);
+        evidenceClaims = buildEvidenceClaims(validatedPacket);
       } catch (error) {
         if (error instanceof BrokerError) throw error;
         throw new BrokerError("ENGINE_EXECUTION_FAILED", 500, error);
@@ -308,13 +418,14 @@ export function createExperimentalHermesAdapter(
         context: input.context,
         prompt: input.prompt,
         evidencePacket,
+        evidenceDigest,
+        evidenceClaims,
         emitText: (output) => {
           if (typeof output !== "object"
             || output === null
             || !isRecord(output.evidencePacket)
             || output.evidencePacket === evidencePacket
-            || !isRecursivelyFrozen(output.evidencePacket)
-            || typeof output.text !== "string") {
+            || !isRecursivelyFrozen(output.evidencePacket)) {
             throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
           }
           const expectedQuestion = normalizePrompt(input.prompt);
@@ -323,7 +434,10 @@ export function createExperimentalHermesAdapter(
             || digestEvidencePacket(output.evidencePacket) !== evidenceDigest) {
             throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
           }
-          input.emit({ kind: "text-delta", text: output.text });
+          input.emit({
+            kind: "text-delta",
+            text: renderAttestedClaims(output, evidenceDigest, evidenceClaims),
+          });
         },
         signal: input.signal,
         async requestReadTool(intent): Promise<unknown> {

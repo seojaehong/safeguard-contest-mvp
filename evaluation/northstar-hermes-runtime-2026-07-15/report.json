@@ -1,25 +1,24 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "date": "2026-07-15",
+  "reviewedCandidateSha": "223cca10f97f9f5f5bd05cc6dcf3568539eb4ceb",
   "baseSha": "dc608c8d7f7f854270669e05789cad88816d0f43",
   "branch": "fix/northstar-hermes-runtime-20260715",
-  "scope": "/api/agent/chat OpenClaw-backed Hermes EngineAdapter wiring",
+  "scope": "/api/agent/chat Hermes structured output and KOSHA test trust remediation",
   "tdd": {
     "red": {
-      "command": "npm.cmd test -- --run tests/hermes-engine-adapter.test.ts",
+      "command": "npm.cmd test -- --run tests/hermes-engine-adapter.test.ts -t \"rejects arbitrary OpenClaw text\" --reporter=dot",
       "exitCode": 1,
-      "testFiles": 1,
-      "tests": 33,
-      "passed": 20,
-      "failed": 13,
-      "newExpectedFailures": 3
+      "selectedTests": 1,
+      "failed": 1,
+      "reason": "arbitrary OpenClaw text resolved without structured claim attestation"
     },
     "green": {
       "command": "npm.cmd test -- --run tests/hermes-engine-adapter.test.ts tests/openclaw-chat.test.ts tests/claw-chat-route.test.ts tests/engine-adapter.test.ts --reporter=dot",
       "exitCode": 0,
       "testFiles": 4,
-      "tests": 79,
-      "passed": 79,
+      "tests": 86,
+      "passed": 86,
       "failed": 0
     }
   },
@@ -32,37 +31,32 @@
       "command": "npm.cmd run build",
       "exitCode": 0,
       "framework": "Next.js 15.5.20",
-      "routePresent": "/api/agent/chat"
-    },
-    {
-      "command": "npm.cmd test -- --run tests/product-module-shell.test.ts tests/reports-download-center.test.ts tests/reports-wave1-publish-support.test.ts --maxWorkers=1 --reporter=dot",
-      "exitCode": 0,
-      "testFiles": 3,
-      "tests": 25,
-      "passed": 25,
-      "failed": 0
+      "buildId": "-sLfhxzNcmE3d5_RwKvvB"
     },
     {
       "command": "git diff --check",
       "exitCode": 0
     }
   ],
-  "fullRegression": {
-    "command": "npm.cmd test -- --run --reporter=dot",
-    "exitCode": 1,
-    "testFilesPassed": 142,
-    "testFilesSkipped": 6,
-    "testFilesFailed": 5,
-    "testsPassed": 1541,
-    "testsSkipped": 22,
-    "testsFailed": 11,
-    "knownFailureGroups": {
-      "koshaProvenanceFixtures": 9,
-      "staleFrontendEvidenceIdentity": 1,
-      "parallelLoadTimeout": 1,
-      "preBuildBrowserSuiteFailures": 2
-    },
-    "browserRetryPassed": true
+  "attestation": {
+    "schemaVersion": "hermes-output-attestation/v1",
+    "packetDigestBound": true,
+    "claimAllowlistBound": true,
+    "citationAllowlistBound": true,
+    "applicationRendersPacketText": true,
+    "arbitraryPlannerProseAccepted": false,
+    "unknownAttestationPolicy": "fail_closed"
+  },
+  "koshaFixture": {
+    "boundary": "test_only_injected_trust",
+    "stableDocumentKey": "D-C-13",
+    "version": "D-C-13-2026",
+    "officialFileId": "CTC2026012914371557826167",
+    "bodySha256": "ea8bb93a3e03a40873222ab385d257e1a5946cb4d28e5c65951353731b0a5919",
+    "pdfSha256": "790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179",
+    "negativeTests": ["body", "pdfSha256", "officialFileId"],
+    "productionTrustRegistryPopulated": false,
+    "productionReadyClaim": false
   },
   "invariants": {
     "failClosedSiteBinding": true,
@@ -77,9 +71,10 @@
   },
   "runtimeReady": false,
   "runtimeBlockers": [
+    "Production KOSHA trusted official metadata registry is empty.",
     "Installed OpenClaw CLI 2026.6.5 rejects config written by 2026.6.11.",
     "The safeclaw profile has no explicit agents.list tool-free agent entry.",
-    "Organization and site binding environment values are not configured for this verification.",
+    "Organization and site binding environment values are not configured for live verification.",
     "Local Hermes execution remains disabled on Vercel.",
     "No live answer was executed because attestation prerequisites fail closed."
   ]
