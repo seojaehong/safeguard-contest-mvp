@@ -10,6 +10,7 @@ import {
   deriveSafetyReferenceOperationalView,
   getKoshaGroundingDecision,
   getSafetyReferenceDisplayTitle,
+  hasStrongSafetyReferenceRowOverlap,
   isKoshaSupportingCitationEligible,
   isKoshaTechnicalReference,
   isSafetyReferenceDirectEligible,
@@ -628,6 +629,82 @@ export function parseHarnessMemoryInput(value: unknown): Required<HarnessMemoryI
 
 const MAX_KOSHA_PROMPT_METADATA_CHARS = 240;
 
+function hasConflictingExplicitRiskTags(
+  parent: SafetyReferenceItem,
+  supporting: SafetyReferenceItem
+): boolean {
+  const normalizeTags = (tags: readonly string[]): Set<string> => new Set(
+    tags.flatMap((tag) => tag.split(/[·,/]+/u)).map((tag) => tag.trim()).filter(Boolean)
+  );
+  const parentTags = normalizeTags(parent.risk_tags);
+  const supportingTags = normalizeTags(supporting.risk_tags);
+  if (!parentTags.size || !supportingTags.size) return false;
+  return ![...parentTags].some((tag) => supportingTags.has(tag));
+}
+
+function isKoshaParentCandidate(item: SafetyReferenceItem): boolean {
+  if (isKoshaTechnicalReference(item)) return false;
+  if (item.item_type === "sif-case") return true;
+  return item.evidence_role === "direct" && isSafetyReferenceDirectEligible(item);
+}
+
+export function hasRelevantKoshaParent(
+  koshaReference: SafetyReferenceItem,
+  candidates: readonly SafetyReferenceItem[]
+): boolean {
+  if (!isKoshaTechnicalReference(koshaReference)) return false;
+  return candidates.some((candidate) => (
+    isKoshaParentCandidate(candidate)
+    && hasStrongSafetyReferenceRowOverlap(candidate, koshaReference)
+    && !hasConflictingExplicitRiskTags(candidate, koshaReference)
+  ));
+}
+
+function buildParentlessKoshaIdentity(item: SafetyReferenceItem): SafetyReferenceItem {
+  const guide = item.kosha_guide;
+  return {
+    id: item.id,
+    source_id: item.source_id,
+    item_type: item.item_type,
+    category: null,
+    subcategory: null,
+    title: getSafetyReferenceDisplayTitle(item),
+    summary: "",
+    keywords: [],
+    risk_tags: [],
+    primary_documents: [],
+    controls: [],
+    ...(item.source_url !== undefined ? { source_url: item.source_url } : {}),
+    evidence_role: "supporting",
+    ...(item.retrieval_source !== undefined ? { retrieval_source: item.retrieval_source } : {}),
+    ...(guide ? {
+      kosha_guide: {
+        referenceId: guide.referenceId,
+        stableDocumentKey: guide.stableDocumentKey,
+        version: guide.version,
+        quality: guide.quality,
+        lifecycle: guide.lifecycle,
+        bodyKind: guide.bodyKind,
+        anchors: [],
+        evidenceRef: null,
+        directEligible: false
+      }
+    } : {})
+  };
+}
+
+export function buildPublicDbHarnessPacket(packet: DbHarnessPacket): DbHarnessPacket {
+  const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
+  return {
+    ...packet,
+    supportingEvidence: packet.supportingEvidence.map((item) => (
+      isKoshaTechnicalReference(item) && !hasRelevantKoshaParent(item, parentCandidates)
+        ? buildParentlessKoshaIdentity(item)
+        : item
+    ))
+  };
+}
+
 function boundKoshaPromptValue(value: string, maxChars: number): string {
   const singleLine = value
     .replace(/[\u0000-\u001f\u007f\u2028\u2029]+/gu, " ")
@@ -643,17 +720,9 @@ function boundKoshaPromptExcerpt(value: string): string {
   return Array.from(normalized).slice(0, MAX_KOSHA_PROMPT_EXCERPT_CHARS).join("").trim();
 }
 
-function buildKoshaCandidateTopicSummary(item: SafetyReferenceItem): string {
-  const summary = boundKoshaPromptValue(item.display_summary || item.summary, 180);
-  if (!summary || /한다(?:\.|$)|하세요|하라|확인|설치|체결|통제|중지|측정|배치|적용|제거|차단|점검|준수|실시|금지|확보|분리/u.test(summary)) {
-    return "";
-  }
-  return summary;
-}
-
 function buildVerifiedKoshaPromptLines(
   items: readonly SafetyReferenceItem[],
-  options: { parentEvidenceReady: boolean } = { parentEvidenceReady: true }
+  options: { parentCandidates: readonly SafetyReferenceItem[] }
 ): string[] {
   const unique = new Map<string, SafetyReferenceItem>();
 
@@ -672,18 +741,16 @@ function buildVerifiedKoshaPromptLines(
     const decision = getKoshaGroundingDecision(item);
     const metadata = decision?.metadata;
     if (!decision || !metadata || !item.body) return "";
+    const parentEvidenceReady = hasRelevantKoshaParent(item, options.parentCandidates);
 
-    const candidateTopicSummary = options.parentEvidenceReady
-      ? ""
-      : buildKoshaCandidateTopicSummary(item);
     const payload = {
-      role: options.parentEvidenceReady ? "technical_guidance_only" : "technical_guidance_candidate",
+      role: parentEvidenceReady ? "technical_guidance_only" : "technical_guidance_candidate",
       uid: boundKoshaPromptValue(item.id, 120),
       title: boundKoshaPromptValue(getSafetyReferenceDisplayTitle(item), 180),
       version: boundKoshaPromptValue(metadata.currentVersion, 80),
       provenance: {
         source: decision.source,
-        ...(options.parentEvidenceReady
+        ...(parentEvidenceReady
           ? { reference: boundKoshaPromptValue(metadata.provenance, MAX_KOSHA_PROMPT_METADATA_CHARS) }
           : {}),
         officialUrl: boundKoshaPromptValue(metadata.officialUrl || "", MAX_KOSHA_PROMPT_METADATA_CHARS),
@@ -693,21 +760,20 @@ function buildVerifiedKoshaPromptLines(
       },
       reviewState: metadata.reviewState,
       lifecycle: metadata.lifecycle,
-      reviewRequired: decision.reviewRequired || !options.parentEvidenceReady,
-      parentEvidenceReady: options.parentEvidenceReady,
-      ...(candidateTopicSummary ? { topicSummary: candidateTopicSummary } : {}),
-      ...(options.parentEvidenceReady ? { bodyExcerpt: boundKoshaPromptExcerpt(item.body) } : {})
+      reviewRequired: decision.reviewRequired || !parentEvidenceReady,
+      parentEvidenceReady,
+      ...(parentEvidenceReady ? { bodyExcerpt: boundKoshaPromptExcerpt(item.body) } : {})
     };
     return `KOSHA_SUPPORTING_BODY_JSON: ${JSON.stringify(payload)}`;
   }).filter(Boolean);
 }
 
 export function buildHarnessPromptContext(packet: DbHarnessPacket) {
-  const koshaParentReady = hasKoshaSupportingParent(packet);
+  const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
   const evidenceLines = [
     ...packet.sifCases.map((item) => `SIF: ${getSafetyReferenceDisplayTitle(item)} -> ${deriveSafetyReferenceOperationalView(item).controls.slice(0, 2).join(" / ")}`),
     ...packet.directEvidence.map((item) => `공식자료: ${getSafetyReferenceDisplayTitle(item)} -> ${item.primary_documents.join(", ")}`),
-    ...buildVerifiedKoshaPromptLines(packet.supportingEvidence, { parentEvidenceReady: koshaParentReady }),
+    ...buildVerifiedKoshaPromptLines(packet.supportingEvidence, { parentCandidates }),
     ...packet.improvementMemory.map((item) => [
       `개선이력: ${item.hazardLabel} -> ${item.improvementText}`,
       item.visionStatus ? `visionStatus: ${item.visionStatus}` : "",
@@ -789,18 +855,28 @@ function evidenceTitles(items: SafetyReferenceItem[], limit: number) {
   return uniqueNonEmpty(items.map(getSafetyReferenceDisplayTitle), limit);
 }
 
-function hasKoshaSupportingParent(packet: DbHarnessPacket): boolean {
-  return packet.directEvidence.length > 0 || packet.sifCases.length > 0;
+function koshaParentCandidates(packet: DbHarnessPacket): SafetyReferenceItem[] {
+  return [...packet.sifCases, ...packet.directEvidence];
 }
 
 function verifiedKoshaSupportingEvidence(packet: DbHarnessPacket): SafetyReferenceItem[] {
-  return packet.supportingEvidence.filter(isKoshaSupportingCitationEligible);
+  const parentCandidates = koshaParentCandidates(packet);
+  return packet.supportingEvidence.filter((item) => (
+    isKoshaSupportingCitationEligible(item)
+    && hasRelevantKoshaParent(item, parentCandidates)
+  ));
+}
+
+function parentlessVerifiedKoshaEvidence(packet: DbHarnessPacket): SafetyReferenceItem[] {
+  const parentCandidates = koshaParentCandidates(packet);
+  return packet.supportingEvidence.filter((item) => (
+    isKoshaSupportingCitationEligible(item)
+    && !hasRelevantKoshaParent(item, parentCandidates)
+  ));
 }
 
 function controlCandidates(packet: DbHarnessPacket) {
-  const verifiedKosha = hasKoshaSupportingParent(packet)
-    ? verifiedKoshaSupportingEvidence(packet)
-    : [];
+  const verifiedKosha = verifiedKoshaSupportingEvidence(packet);
   return uniqueNonEmpty([
     ...packet.sifCases.flatMap((item) => deriveSafetyReferenceOperationalView(item).controls.slice(0, 2)),
     ...packet.directEvidence.flatMap((item) => deriveSafetyReferenceOperationalView(item).controls.slice(0, 2)),
@@ -811,12 +887,11 @@ function controlCandidates(packet: DbHarnessPacket) {
 }
 
 export function buildDbHarnessAnswer(packet: DbHarnessPacket) {
-  const koshaParentReady = hasKoshaSupportingParent(packet);
   const directTitles = evidenceTitles(packet.directEvidence, 3);
   const sifTitles = evidenceTitles(packet.sifCases, 3);
   const verifiedKoshaTitles = evidenceTitles(verifiedKoshaSupportingEvidence(packet), 3);
-  const koshaTitles = koshaParentReady ? verifiedKoshaTitles : [];
-  const koshaCandidateTitles = koshaParentReady ? [] : verifiedKoshaTitles;
+  const koshaTitles = verifiedKoshaTitles;
+  const koshaCandidateTitles = evidenceTitles(parentlessVerifiedKoshaEvidence(packet), 3);
   const controls = controlCandidates(packet);
   const missing = uniqueNonEmpty(packet.ontologyChecklist.missing, 5);
   const candidateLines = koshaCandidateTitles.length

@@ -638,6 +638,34 @@ describe("DB harness packet", () => {
     expect(promptContext).not.toContain(koshaOnlyControl);
   });
 
+  it.each([
+    ["safety-belt", "안전대 착용"],
+    ["watcher", "감시인 지정"]
+  ] as const)(
+    "keeps parentless KOSHA candidate metadata non-semantic for %s",
+    (fixtureId, semanticSummary) => {
+      const koshaOnly = verifiedKoshaReference({
+        id: `kosha-candidate-${fixtureId}`,
+        item_type: "technical-guideline",
+        title: "KOSHA parentless identity fixture",
+        summary: semanticSummary,
+        body: `KOSHA body ${semanticSummary}`,
+        keywords: ["parentless", "identity"],
+        risk_tags: ["추락"],
+        controls: [`KOSHA control ${semanticSummary}`]
+      });
+      const promptContext = buildHarnessPromptContext(buildDbHarnessPacket({
+        question: "외벽 추락 위험",
+        references: [koshaOnly]
+      }));
+
+      expect(promptContext).toContain('"role":"technical_guidance_candidate"');
+      expect(promptContext).toContain('"parentEvidenceReady":false');
+      expect(promptContext).not.toContain('"topicSummary"');
+      expect(promptContext).not.toContain(semanticSummary);
+    }
+  );
+
   it("keeps fire controls and energy isolation in the bounded DB harness surface", () => {
     const maintenanceFire = reference({
       id: "sif-forklift-maintenance-fire-packet",
