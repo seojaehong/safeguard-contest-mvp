@@ -1,0 +1,26 @@
+FETCH_EXIT=0
+fatal: couldn't find remote ref fix/kosha-grounding-fail-closed-2026-07-14
+PULL_REBASE_EXIT=1
+REMOTE_BRANCH_PRESENT=False
+remote:
+remote: Create a pull request for 'fix/kosha-grounding-fail-closed-2026-07-14' on GitHub by visiting:
+remote:      https://github.com/seojaehong/safeguard-contest-mvp/pull/new/fix/kosha-grounding-fail-closed-2026-07-14
+remote:
+branch 'fix/kosha-grounding-fail-closed-2026-07-14' set up to track 'origin/fix/kosha-grounding-fail-closed-2026-07-14'.
+To https://github.com/seojaehong/safeguard-contest-mvp.git
+ * [new branch]      HEAD -> fix/kosha-grounding-fail-closed-2026-07-14
+INITIAL_PUSH_EXIT=0
+
+=== FOLLOW-UP SYNC ===
+Current branch fix/kosha-grounding-fail-closed-2026-07-14 is up to date.
+FOLLOWUP_PULL_REBASE_EXIT=0
+To https://github.com/seojaehong/safeguard-contest-mvp.git
+   dc8de1e..fd09aab  fix/kosha-grounding-fail-closed-2026-07-14 -> fix/kosha-grounding-fail-closed-2026-07-14
+FOLLOWUP_PUSH_EXIT=0
+
+=== P2 SYNC ===
+Current branch fix/kosha-grounding-fail-closed-2026-07-14 is up to date.
+P2_PULL_REBASE_EXIT=0
+To https://github.com/seojaehong/safeguard-contest-mvp.git
+   fd09aab..4d6b903  fix/kosha-grounding-fail-closed-2026-07-14 -> fix/kosha-grounding-fail-closed-2026-07-14
+P2_PUSH_EXIT=0

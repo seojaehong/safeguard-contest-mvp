@@ -1,0 +1,33 @@
+timestamp=2026-07-14T12:21:29.3344738+09:00
+base=684f87bbc521924ba12a1d433ef346df03b726f1
+diffCheck=passed
+sourceOwnership=passed count=10
+sourcePath=lib/db-harness.ts
+sourcePath=lib/safety-reference-catalog-server.ts
+sourcePath=lib/safety-reference-catalog.ts
+sourcePath=lib/search.ts
+sourcePath=tests/kosha-current-review-provenance.test.ts
+sourcePath=tests/kosha-current-review-run-ask.test.ts
+sourcePath=tests/kosha-grounding-fail-closed.test.ts
+sourcePath=tests/kosha-guide-corpus-audit.test.ts
+sourcePath=tests/kosha-guide-supporting-row-relevance.test.ts
+sourcePath=tests/safety-reference-hybrid.test.ts
+forbiddenScopeScan=passed
+reportJsonParse=passed
+artifactPresence=passed count=13
+secretScan=passed patterns=4
+secretScanNote=token-boundary patterns avoid risk-* filename false positives in the review transcript
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/report.json bytes=4771
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/report.md bytes=3995
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/integration-evidence.log bytes=1606
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/git-sync.log bytes=1253
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/red-focused-tests.log bytes=7528
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/final-review-red-tests.log bytes=2884
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/p2-integrity-block-red-test.log bytes=1722
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/p2-integrity-block-green-test.log bytes=465
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/p2-final-focused-tests.log bytes=802
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/p2-final-typecheck.log bytes=76
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/p2-diff-check.log bytes=270
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/build.log bytes=5922
+artifact=evaluation/kosha-grounding-fail-closed-2026-07-14/independent-review-post-p2.log bytes=470310
+scanVerdict=passed

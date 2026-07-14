@@ -1,0 +1,3 @@
+warning: in the working copy of 'lib/safety-reference-catalog.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/kosha-grounding-fail-closed.test.ts', LF will be replaced by CRLF the next time Git touches it
+EXIT_CODE=0

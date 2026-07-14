@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T12:18:45.9714509+09:00",
+  "task": "bounded-kosha-grounding-fail-closed",
+  "branch": "fix/kosha-grounding-fail-closed-2026-07-14",
+  "launchReadiness": false,
+  "source": {
+    "base": "684f87bbc521924ba12a1d433ef346df03b726f1",
+    "authoritativeMain": "ea7aa7223a056c884d5b0ba55563d602af328451",
+    "commits": [
+      "dc8de1ec43953526ed42d60467f6dd192e5670e3",
+      "fd09aab617b3e183d652516687eca1ea23cfad56",
+      "4d6b9037547cf6e290949c81d931f2c2acc5ce72"
+    ],
+    "head": "4d6b9037547cf6e290949c81d931f2c2acc5ce72",
+    "remoteHeadAtSourceValidation": "4d6b9037547cf6e290949c81d931f2c2acc5ce72"
+  },
+  "scope": {
+    "ownedLibraries": [
+      "lib/safety-reference-catalog.ts",
+      "lib/safety-reference-catalog-server.ts",
+      "lib/search.ts",
+      "lib/db-harness.ts"
+    ],
+    "databaseOrSchemaChanged": false,
+    "migrationChanged": false,
+    "dataOrCorpusChanged": false,
+    "embeddingsChanged": false,
+    "packageOrLockChanged": false,
+    "environmentChanged": false,
+    "componentsOrUiChanged": false,
+    "frontendSourceIdentity108Regenerated": false
+  },
+  "behavior": {
+    "unverifiedRemoteKoshaDirectEvidence": false,
+    "unverifiedRemoteKoshaMandatoryCitation": false,
+    "unverifiedRemoteKoshaRiskRow": false,
+    "verifiedCurrentKoshaRole": "technical_guidance_only",
+    "localIntegrityFailureAggregate": "blocked",
+    "localUnavailableWithVerifiedRemote": "ready_with_local_gate_reason",
+    "nonKoshaDirectEvidencePreserved": true,
+    "llmRole": "naturalize_only"
+  },
+  "tdd": {
+    "initialRed": {
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/red-focused-tests.log",
+      "exitCode": 1
+    },
+    "independentReviewRed": {
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/final-review-red-tests.log",
+      "exitCode": 1
+    },
+    "integrityBlockedVerifiedRemoteRed": {
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/p2-integrity-block-red-test.log",
+      "exitCode": 1
+    },
+    "integrityBlockedVerifiedRemoteGreen": {
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/p2-integrity-block-green-test.log",
+      "exitCode": 0
+    }
+  },
+  "verification": {
+    "focusedTests": {
+      "status": "passed",
+      "files": 11,
+      "tests": 213,
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/p2-final-focused-tests.log"
+    },
+    "strictTypecheck": {
+      "status": "passed",
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/p2-final-typecheck.log"
+    },
+    "normalBuild": {
+      "status": "passed_before_final_review_fixes",
+      "runs": 1,
+      "rerun": false,
+      "rerunReason": "One normal build per worktree was allowed; final fixes were verified by focused tests and strict typecheck.",
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/build.log"
+    },
+    "diffCheck": {
+      "status": "passed",
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/p2-diff-check.log"
+    },
+    "secretScan": {
+      "status": "passed",
+      "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/final-scans.log"
+    }
+  },
+  "independentReview": {
+    "freshReadOnlyReReview": "passed_no_actionable_findings",
+    "severity": "none",
+    "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/independent-review-post-p2.log",
+    "runtimeTestsRunByReviewer": false,
+    "runtimeTestNote": "The independent reviewer was read-only and its test command was blocked; repository-owned focused tests and strict typecheck passed separately.",
+    "lastActionableFinding": "integrity-blocked local corpus plus retained verified remote row must keep aggregate status blocked",
+    "remediatedBy": "4d6b9037547cf6e290949c81d931f2c2acc5ce72"
+  },
+  "integration": {
+    "baseToMainMergeBase": "684f87bbc521924ba12a1d433ef346df03b726f1",
+    "baseToSourceMergeBase": "684f87bbc521924ba12a1d433ef346df03b726f1",
+    "mainChangedPathCount": 3,
+    "sourceChangedPathCount": 10,
+    "pathOverlapCount": 0,
+    "mergeTreeExitCode": 0,
+    "mergeTree": "d0a87665aaf976057f6a3b72df62b9f8c7c4da99",
+    "mapping": "Merge the three source commits in listed order onto ea7aa7223a056c884d5b0ba55563d602af328451; virtual merge-tree is conflict-free.",
+    "log": "evaluation/kosha-grounding-fail-closed-2026-07-14/integration-evidence.log"
+  },
+  "readinessClaims": {
+    "full1039CurrentCorpusReady": false,
+    "databaseLiveReady": false,
+    "rankedRpcReady": false,
+    "embeddingsReady": false
+  },
+  "remainingBlockers": {
+    "versionMismatches": 7,
+    "retired": 1,
+    "databaseEmptyBody": 818,
+    "nonSourceSummaries": 822,
+    "bE3HumanConfirmed": false,
+    "rankedRpcReady": false,
+    "liveReady": false,
+    "embeddingReady": false
+  }
+}

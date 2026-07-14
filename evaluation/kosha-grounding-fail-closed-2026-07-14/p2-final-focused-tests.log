@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-supporting-row-relevance.test.ts tests/kosha-guide-corpus-audit.test.ts tests/safety-reference-relevance.test.ts tests/safety-reference-hybrid.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-grounding-fail-closed
+
+
+ Test Files  11 passed (11)
+      Tests  213 passed (213)
+   Start at  12:07:47
+   Duration  39.77s (transform 7.86s, setup 0ms, import 14.56s, tests 56.79s, environment 2ms)
+
+EXIT_CODE=0

@@ -1,0 +1,31 @@
+BASE=684f87bbc521924ba12a1d433ef346df03b726f1
+AUTHORITATIVE_MAIN=ea7aa7223a056c884d5b0ba55563d602af328451
+SOURCE_HEAD=4d6b9037547cf6e290949c81d931f2c2acc5ce72
+BASE_TO_MAIN_MERGE_BASE=684f87bbc521924ba12a1d433ef346df03b726f1
+BASE_TO_SOURCE_MERGE_BASE=684f87bbc521924ba12a1d433ef346df03b726f1
+MAIN_CHANGED_PATHS=3
+MAIN_PATH=app/globals.css
+MAIN_PATH=evaluation/reports-integration-contract-hotfix-2026-07-14/report.json
+MAIN_PATH=evaluation/reports-integration-contract-hotfix-2026-07-14/report.md
+SOURCE_CHANGED_PATHS=10
+SOURCE_PATH=lib/db-harness.ts
+SOURCE_PATH=lib/safety-reference-catalog-server.ts
+SOURCE_PATH=lib/safety-reference-catalog.ts
+SOURCE_PATH=lib/search.ts
+SOURCE_PATH=tests/kosha-current-review-provenance.test.ts
+SOURCE_PATH=tests/kosha-current-review-run-ask.test.ts
+SOURCE_PATH=tests/kosha-grounding-fail-closed.test.ts
+SOURCE_PATH=tests/kosha-guide-corpus-audit.test.ts
+SOURCE_PATH=tests/kosha-guide-supporting-row-relevance.test.ts
+SOURCE_PATH=tests/safety-reference-hybrid.test.ts
+PATH_OVERLAP_COUNT=0
+=== MERGE_TREE ===
+d0a87665aaf976057f6a3b72df62b9f8c7c4da99
+MERGE_TREE_EXIT=0
+MERGE_TREE_SHA=d0a87665aaf976057f6a3b72df62b9f8c7c4da99
+=== SOURCE_COMMITS ===
+SOURCE_COMMIT=dc8de1ec43953526ed42d60467f6dd192e5670e3 fix: fail closed unverified KOSHA grounding
+SOURCE_COMMIT=fd09aab617b3e183d652516687eca1ea23cfad56 fix: preserve verified KOSHA grounding decisions
+SOURCE_COMMIT=4d6b9037547cf6e290949c81d931f2c2acc5ce72 fix: keep integrity-blocked KOSHA aggregate closed
+=== MAIN_COMMITS ===
+MAIN_COMMIT=ea7aa7223a056c884d5b0ba55563d602af328451 fix: restore reports integration contracts
