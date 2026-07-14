@@ -478,6 +478,8 @@
 
 .sectionHeading :global(.knowledge-link) {
   flex: 0 0 auto;
+  min-height: 44px;
+  align-items: center;
   border-radius: var(--radius-soft);
   background: var(--workspace-surface-2);
   color: var(--workspace-accent-text);

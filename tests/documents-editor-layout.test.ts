@@ -78,6 +78,80 @@ describe("documents editor layout", () => {
     await Promise.all(browser.contexts().map((context) => context.close()));
   }, 30_000);
 
+  it("renders actual message samples and an empty permit with document-specific structured sections", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 391, height: 844 } });
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPermitDraft = "";
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+
+    const cases = [
+      {
+        key: "foreignWorkerTransmission",
+        labels: ["공지 기본 정보", "쉬운 한국어", "다국어 안내", "관리자 확인"]
+      },
+      {
+        key: "kakaoMessage",
+        labels: ["현장·작업", "핵심 위험", "필수 조치", "시작 전 확인"]
+      },
+      {
+        key: "workPermitDraft",
+        labels: ["허가 기본 정보", "작업 전 허가조건", "격리·보호구 확인", "작업 종료 확인"]
+      }
+    ];
+
+    for (const documentCase of cases) {
+      await page.locator('select[aria-label="편집 문서 선택"]').selectOption(documentCase.key);
+      const editor = page.getByTestId("document-structured-editor");
+      await editor.waitFor({ state: "visible" });
+      await expect.poll(() => editor.locator('[data-section-kind="body"] label strong').allTextContents())
+        .toEqual(documentCase.labels);
+      expect(await editor.locator(".document-section-textarea").count()).toBe(documentCase.labels.length);
+    }
+  }, 90_000);
+
+  it("round-trips a structured editor change into canonical XLSX rows without stale payload or truncation", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPlanStructured = {
+      workOverview: {
+        workName: "STALE_BROWSER_STRUCTURED_WORK_NAME",
+        description: "STALE_BROWSER_STRUCTURED_DESCRIPTION",
+        workerCount: sample.scenario.workerCount,
+        location: sample.scenario.siteName,
+        condition: sample.scenario.weatherNote,
+        equipment: []
+      },
+      workSteps: [],
+      stopCriteria: [],
+      emergencyResponse: { contacts: [], evacRoute: "현장 확인", firstAid: "현장 확인" },
+      approvers: { author: "작성자", reviewer: "검토자", approver: "승인자" }
+    };
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    await page.getByRole("tab", { name: /작업계획서/u }).click();
+    const editedLines = Array.from({ length: 27 }, (_, index) => `- UI_CANONICAL_ROW_${index}`).join("\n");
+    await page.getByTestId("document-structured-editor").locator(".document-section-textarea").first().fill(editedLines);
+
+    const { payload, workbook } = await exportSelectedXlsx(page);
+    const workbookText = readWorkbookText(workbook);
+
+    expect(payload).toMatchObject({ mode: "workPlanStructured", edited: true });
+    expect(workbookText).toContain("UI_CANONICAL_ROW_0");
+    expect(workbookText).toContain("UI_CANONICAL_ROW_26");
+    expect(workbookText).not.toContain("STALE_BROWSER_STRUCTURED_WORK_NAME");
+    expect(workbookText).not.toContain("STALE_BROWSER_STRUCTURED_DESCRIPTION");
+    expect(workbookText).not.toContain("사용자 편집 반영");
+  }, 90_000);
+
   it("keeps the document editor in the same light workbench system", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
