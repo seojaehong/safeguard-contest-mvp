@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { AskResponse } from "@/lib/types";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
+import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { OFFICIAL_CONTACTS } from "@/lib/safety-contacts";
 import {
   buildAccidentCasesResult,
@@ -255,6 +256,77 @@ describe("buildHarnessAgentResult", () => {
       expect(serializedPacket.includes(marker)).toBe(false);
       expect(result.promptContext.includes(marker)).toBe(false);
       expect(serializedMcpPayload.includes(marker)).toBe(false);
+    }
+  });
+
+  it("v5 rejects broad-token false parents before MCP payload and prompt serialization", () => {
+    const markers = {
+      summary: "V5_MCP_FALSE_PARENT_SUMMARY",
+      body: "V5_MCP_FALSE_PARENT_BODY",
+      control: "V5_MCP_FALSE_PARENT_CONTROL",
+      action: "V5_MCP_FALSE_PARENT_ACTION",
+      evidenceRef: "V5_MCP_FALSE_PARENT_EVIDENCE_REF"
+    } as const;
+    const collisionGuide = {
+      id: "mcp-v5-forklift-collision-guide",
+      source_id: "kosha-guide-offline:mcp-v5-forklift-collision-guide",
+      item_type: "technical-guideline",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "KOSHA 지게차 보행자 충돌 예방 기술지침",
+      summary: `${markers.summary} ${markers.action}`,
+      body: markers.body,
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      controls: [markers.control, markers.action],
+      evidence_role: "supporting",
+      retrieval_source: "local-ranked",
+      kosha_guide: {
+        referenceId: "mcp-v5-forklift-collision-guide",
+        stableDocumentKey: "MCP-V5-FORKLIFT-COLLISION",
+        version: "MCP-V5-FORKLIFT-COLLISION-2026",
+        quality: "accepted",
+        lifecycle: "current",
+        bodyKind: "native",
+        anchors: [{ page: 1, excerpt: markers.action }],
+        evidenceRef: markers.evidenceRef,
+        directEligible: true
+      }
+    } satisfies SafetyReferenceItem;
+    const broadFireParent = {
+      id: "mcp-v5-broad-token-fire-parent",
+      source_id: "official-machinery-catalog",
+      item_type: "machinery",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
+      summary: "보행자 통행구역의 LPG 지게차 연료 누출 가스가 점화되어 화재가 발생할 수 있다.",
+      keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
+      risk_tags: [],
+      primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      controls: ["연료 밸브 차단과 점화원 통제"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    } satisfies SafetyReferenceItem;
+    const result = buildHarnessAgentResult({
+      question: "지게차 보행자 통행구역 충돌 위험",
+      references: [collisionGuide, broadFireParent],
+      referenceSearch: []
+    });
+    const supporting = result.packet.supportingEvidence.find((item) => item.id === collisionGuide.id);
+    const serializedPacket = JSON.stringify(result.packet);
+    const serializedMcpPayload = toToolResult(result).content[0]?.text || "";
+
+    expect(supporting?.summary).toBe("");
+    expect(supporting?.body).toBeUndefined();
+    expect(supporting?.controls).toEqual([]);
+    expect(supporting?.kosha_guide?.evidenceRef).toBeNull();
+    expect(result.promptContext).toContain('"parentEvidenceReady":false');
+    for (const marker of Object.values(markers)) {
+      expect(serializedPacket).not.toContain(marker);
+      expect(result.promptContext).not.toContain(marker);
+      expect(serializedMcpPayload).not.toContain(marker);
     }
   });
 });

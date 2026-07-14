@@ -260,6 +260,49 @@ function configureKoshaOnlySearch() {
   return { action, body, control, evidenceRef, hazard, reference };
 }
 
+function configureV5BroadTokenFalseParentSearch(): KoshaOnlyFixture {
+  const control = "V5_RUNASK_FALSE_PARENT_KOSHA_CONTROL";
+  const body = "V5_RUNASK_FALSE_PARENT_KOSHA_BODY";
+  const action = "V5_RUNASK_FALSE_PARENT_KOSHA_ACTION";
+  const evidenceRef = "V5_RUNASK_FALSE_PARENT_KOSHA_EVIDENCE_REF";
+  const hazard = "V5_RUNASK_FALSE_PARENT_KOSHA_HAZARD";
+  const reference = retrievalReference("v5-broad-token-kosha-guide", "local-ranked");
+  reference.item_type = "technical-guideline";
+  reference.title = "KOSHA 지게차 보행자 충돌 예방 기술지침";
+  reference.summary = `${action} 지게차와 보행자의 이동 동선을 분리한다.`;
+  reference.body = body;
+  reference.keywords = ["지게차", "보행자", "동선", "충돌"];
+  reference.risk_tags = ["충돌"];
+  reference.controls = [control, action];
+  reference.primary_documents = ["위험성평가표", "TBM 브리핑", "TBM 기록"];
+  reference.kosha_guide = {
+    ...reference.kosha_guide!,
+    stableDocumentKey: "V5-BROAD-TOKEN-KOSHA",
+    version: "V5-BROAD-TOKEN-KOSHA-2026",
+    evidenceRef
+  };
+
+  const falseParent = retrievalReference("v5-lpg-forklift-pedestrian-fire-parent", "ranked");
+  falseParent.item_type = "machinery";
+  falseParent.category = "운반하역";
+  falseParent.subcategory = "지게차";
+  falseParent.title = "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거";
+  falseParent.summary = "보행자 통행구역의 LPG 지게차 연료 누출 가스가 점화되어 화재가 발생할 수 있다.";
+  falseParent.body = undefined;
+  falseParent.keywords = ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"];
+  falseParent.risk_tags = [];
+  falseParent.controls = ["연료 밸브 차단과 점화원 통제"];
+  falseParent.evidence_role = "direct";
+  falseParent.kosha_guide = undefined;
+
+  mocks.searchSafetyReferences.mockResolvedValue(searchResult(
+    "hybrid-local-supabase",
+    [reference, falseParent],
+    "지게차 보행자 통행구역 충돌 위험"
+  ));
+  return { action, body, control, evidenceRef, hazard, reference };
+}
+
 describe("current-base runAsk retrieval provenance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -591,6 +634,67 @@ describe("current-base runAsk retrieval provenance", () => {
           ? surfacedKosha.supportingCitationEligible
           : undefined
       ).toBe(false);
+    },
+    30_000
+  );
+
+  it.each(["enhanced", "full"] satisfies AiMode[])(
+    "v5 keeps broad-token fire parents from unlocking KOSHA action surfaces in %s mode",
+    async (aiMode) => {
+      const fixture = configureV5BroadTokenFalseParentSearch();
+      const attack = providerActionSurface(fixture);
+      mocks.generateAnswer.mockImplementation(async (question: string, citations: SearchResult[]) => {
+        const response = buildMockAskResponse(
+          question,
+          citations.length ? citations : mockSearchResults.slice(0, 2),
+          "mock",
+          "v5 broad-token false parent action-surface attack"
+        );
+        response.deliverables = { ...response.deliverables, ...attack };
+        return {
+          response,
+          trace: { provider: "mock", model: null, fallbackUsed: false }
+        };
+      });
+      mocks.generateAllDeliverablesWithDiagnostics.mockResolvedValue(providerResult(attack));
+
+      const response = await runAsk("지게차 보행자 통행구역 충돌 위험", { aiMode });
+      const generationInputs = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.map(([input]) => (
+        input as GenerateAllOptions
+      ));
+      const serializedPrompt = JSON.stringify({
+        dbHarness: response.dbHarness?.promptContext,
+        generationInputs
+      });
+      const serializedCitations = JSON.stringify({
+        citations: response.citations,
+        safetyReferences: response.externalData.safetyReference?.items
+      });
+      const serializedResponse = JSON.stringify(response);
+      const surfacedKosha = response.externalData.safetyReference?.items.find((item) =>
+        item.id === fixture.reference.id
+      );
+
+      expect(response.dbHarness?.promptContext).toContain('"parentEvidenceReady":false');
+      expect(response.structured?.riskAssessmentRows).toEqual([]);
+      expect(response.structured?.tbmRiskLinks).toEqual([]);
+      expect(surfacedKosha?.controls).toEqual([]);
+      expect(
+        surfacedKosha && "supportingCitationEligible" in surfacedKosha
+          ? surfacedKosha.supportingCitationEligible
+          : undefined
+      ).toBe(false);
+      for (const forbidden of [
+        fixture.hazard,
+        fixture.action,
+        fixture.body,
+        fixture.control,
+        fixture.evidenceRef
+      ]) {
+        expect(serializedPrompt).not.toContain(forbidden);
+        expect(serializedCitations).not.toContain(forbidden);
+        expect(serializedResponse).not.toContain(forbidden);
+      }
     },
     30_000
   );
