@@ -90,6 +90,13 @@ export type SafetyReferenceItem = {
     anchors: Array<{ page: number; excerpt: string }>;
     evidenceRef: string | null;
     directEligible: boolean;
+    officialUrl?: string;
+    officialFileId?: string;
+    publicationDate?: string;
+    officialVersion?: string;
+    officialStatus?: "current";
+    pdfSha256?: string;
+    bodySha256?: string;
   };
 };
 
@@ -445,14 +452,14 @@ function localKoshaMetadata(item: SafetyReferenceItem): KoshaGroundingMetadata |
     uid: guide.referenceId,
     stableDocumentKey: guide.stableDocumentKey,
     version: guide.version,
-    currentVersion: guide.version,
+    currentVersion: guide.officialVersion || "",
     lifecycle: guide.lifecycle,
     reviewState: guide.quality === "accepted" ? "verified" : "review_required",
     bodyKind: guide.bodyKind,
-    bodySha256: null,
-    officialUrl: item.source_url || null,
-    officialFileId: null,
-    publishedAt: null,
+    bodySha256: guide.bodySha256 || null,
+    officialUrl: guide.officialUrl || item.source_url || null,
+    officialFileId: guide.officialFileId || null,
+    publishedAt: guide.publicationDate || null,
     provenance: guide.evidenceRef || `local-corpus:${guide.referenceId}`
   };
 }
@@ -473,7 +480,24 @@ export function getKoshaGroundingDecision(item: SafetyReferenceItem): KoshaGroun
   if (guide.bodyKind !== "native") {
     return reviewRequiredKoshaDecision("local-corpus", "body-kind-unverified", metadata);
   }
-  if (!guide.directEligible || !guide.anchors.length || !guide.evidenceRef || !metadata) {
+  if (
+    !guide.directEligible
+    || !guide.anchors.length
+    || !guide.evidenceRef
+    || !metadata
+    || !metadata.officialUrl
+    || !isOfficialKoshaUrl(metadata.officialUrl)
+    || !metadata.officialFileId
+    || !metadata.publishedAt
+    || Number.isNaN(Date.parse(metadata.publishedAt))
+    || !metadata.currentVersion
+    || normalizeKoshaVersion(metadata.version) !== normalizeKoshaVersion(metadata.currentVersion)
+    || guide.officialStatus !== "current"
+    || !metadata.bodySha256
+    || !/^[a-f0-9]{64}$/u.test(metadata.bodySha256)
+    || !guide.pdfSha256
+    || !/^[a-f0-9]{64}$/u.test(guide.pdfSha256)
+  ) {
     return reviewRequiredKoshaDecision("local-corpus", "provenance-unresolved", metadata);
   }
   return verifiedKoshaDecision("local-corpus", metadata);

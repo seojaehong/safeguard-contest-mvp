@@ -201,16 +201,10 @@ afterEach(() => {
 });
 
 describe("KOSHA v3 offline harness on current architecture", () => {
-  it.skipIf(!existsSync(ACTUAL_KOSHA_ROOT))("loads the read-only actual v3 artifact with bounded snake_case JSONL", async () => {
+  it.skipIf(!existsSync(ACTUAL_KOSHA_ROOT))("blocks the legacy v3 artifact without a verified launch gate", async () => {
     const loaded = await loadKoshaGuideCorpus({ rootDir: ACTUAL_KOSHA_ROOT });
-    expect(loaded.status === "blocked" ? loaded.failures.join(", ") : loaded.status).toBe("ready");
-    if (loaded.status !== "ready") return;
-    expect(loaded.inventoryCount).toBe(1040);
-    expect(loaded.itemCount).toBe(1039);
-    expect(loaded.chunkCount).toBe(20520);
-    expect(loaded.failureCount).toBe(1);
-    expect(loaded.records[0]?.referenceId).toMatch(/^kosha-/u);
-    expect(loaded.records[0] && isKoshaGuideDirectEvidenceAccepted(loaded.records[0])).toBe(false);
+    expect(loaded.status).toBe("blocked");
+    expect(loaded.status === "blocked" && loaded.failures).toContain("schema:manifest.json");
   }, 20_000);
 
   it("caches by current and manifest identity, then invalidates on snapshot switch", async () => {
@@ -331,35 +325,14 @@ describe("KOSHA v3 offline harness on current architecture", () => {
     expect(loaded.records.every(isKoshaGuideDirectEvidenceAccepted)).toBe(true);
   });
 
-  it("searches reviewed OCR as supporting-only without direct or mandate eligibility", async () => {
+  it("blocks reviewed OCR from the current-native verified subset", async () => {
     const { rootDir, itemId, body } = createReviewedOcrSnapshot();
     writeReviewedOcrManifestBindings(rootDir, [reviewedOcrBinding(itemId)]);
 
     const loaded = await loadKoshaGuideCorpus({ rootDir });
-    expect(loaded.status).toBe("ready");
-    if (loaded.status !== "ready") return;
-    expect(loaded.records[0]?.nativeBody).toBe(body);
-    expect(loaded.records[0]?.bodyKind).toBe("unknown");
-    expect(loaded.records[0]?.quality).toBe("review_required");
-    expect(loaded.records[0] && isKoshaGuideDirectEvidenceAccepted(loaded.records[0])).toBe(false);
-    const localSearch = searchKoshaGuideCorpus(loaded, "고소작업대 전도 방지", 3);
-    expect(localSearch.items).toHaveLength(1);
-    expect(localSearch.items[0]?.directEligible).toBe(false);
-    expect(localSearch.items[0]?.evidenceRef).toBeNull();
-
-    const result = await withNoSupabase(() => searchSafetyReferences({
-      query: "고소작업대 전도 방지",
-      limit: 3,
-      offlineCorpus: { rootDir }
-    }));
-    expect(result.items).toHaveLength(1);
-    expect(result.items[0]?.body).toBe(body);
-    expect(result.items[0]?.evidence_role).toBe("supporting");
-    expect(result.items[0]?.kosha_guide?.bodyKind).toBe("unknown");
-    expect(result.items[0]?.kosha_guide?.directEligible).toBe(false);
-    expect(result.items[0]?.kosha_guide?.evidenceRef).toBeNull();
-    const response = buildMockAskResponse("고소작업대 전도 방지", mockSearchResults, "mock", "test");
-    expect(buildSafetyReferenceRiskRows(response, result.items, "맑음", "고소작업대 전도 방지")).toEqual([]);
+    expect(body).toContain("고소작업대");
+    expect(loaded.status).toBe("blocked");
+    expect(loaded.status === "blocked" && loaded.failures).toContain("gate:provenance-incomplete");
   });
 
   it("requires one matching manifest candidate binding for every reviewed OCR item", async () => {
