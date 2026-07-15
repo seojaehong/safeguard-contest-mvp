@@ -67,6 +67,7 @@
   --sc-steel-060: #f4f5f6;
   --sc-paper: #faf9f5;
   --sc-hazard-yellow: #ffd400;
+  --sc-hazard-text: #665100;
   --sc-warning: #ff8a00;
   --sc-danger: #d92d20;
   --sc-ok: #067647;
@@ -818,7 +819,7 @@ ul {
 }
 
 .safeclaw-core-card span {
-  color: var(--sc-hazard-yellow);
+  color: var(--sc-hazard-text);
   font-family: var(--font-hud);
   font-size: var(--text-body-lg);
   font-weight: 500;
@@ -13590,7 +13591,7 @@ body:has(.safeclaw-landing) :is(
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: #a4aab4;
+  color: var(--workspace-muted);
   padding: 0;
   text-decoration: underline;
   text-decoration-color: rgba(164, 170, 180, 0.45);
@@ -13600,7 +13601,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .advanced-settings:not([open]) summary::after,
 .command-center-shell .quick-scenario-chips:not([open]) summary::after {
   float: none;
-  color: #a4aab4;
+  color: var(--workspace-muted);
 }
 
 .command-center-shell .advanced-settings[open],
@@ -16410,7 +16411,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-module-primary {
   border-color: var(--module-primary-border, var(--workspace-accent));
   background: var(--module-primary-background, var(--workspace-accent));
-  color: var(--module-primary-color, #ffffff);
+  color: var(--module-primary-color, var(--workspace-ink));
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-current-workpack a {
+  color: var(--workspace-accent-text);
 }
 
 .safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .doc-tab, .template-card, .safeclaw-module-chrome-button)):hover,

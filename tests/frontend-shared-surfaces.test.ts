@@ -144,6 +144,30 @@ describe("shared shell hooks and accessibility", () => {
 describe("canonical shared surface styles", () => {
   const css = read("app/globals.css");
 
+  it("keeps yellow actions and light-surface accent labels readable", () => {
+    expect(declarationsForExactSelector(css, ".safeclaw-core-card span")).toMatchObject({
+      color: "var(--sc-hazard-text)",
+    });
+    expect(
+      declarationsForExactSelector(
+        css,
+        ".safeclaw-module-shell.module-variant-document .safeclaw-current-workpack a",
+      ),
+    ).toMatchObject({ color: "var(--workspace-accent-text)" });
+    expect(
+      declarationsForExactSelector(
+        css,
+        ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary",
+      ),
+    ).toMatchObject({ color: "var(--module-primary-color, var(--workspace-ink))" });
+    expect(
+      declarationsForExactSelector(
+        css,
+        ".command-center-shell .advanced-settings:not([open]) summary",
+      ),
+    ).toMatchObject({ color: "var(--workspace-muted)" });
+  });
+
   it("defines the shared special state with canonical panel geometry", () => {
     const rule = declarationsForExactSelector(css, ".special-state");
 
