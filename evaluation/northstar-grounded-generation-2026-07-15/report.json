@@ -1,18 +1,21 @@
 {
   "date": "2026-07-15",
-  "branch": "fix/northstar-grounded-generation-20260715",
-  "startingHead": "cdf53d8b028bf776cee93256c7ee49acc428f77e",
+  "branch": "fix/northstar-grounded-current-20260715",
+  "startingHead": "cb43e4d10416150577cfe88179cdced5f4a23e94",
+  "replayedCommits": ["875dfe1", "f473be6", "68010bb", "cdf53d8", "7f568c1"],
   "scope": "independent grounded-generation findings and intermittent editor-focus suite diagnosis",
   "result": "pass",
   "closedFindings": [
     "canonical citation-only control suffix",
     "runAsk outer-failure response review surface preserves sourceIdentity and criticalControls",
-    "deterministic duplicate source-key ordering and deduplication"
+    "deterministic duplicate source-key ordering and deduplication",
+    "narrative actionable controls fail closed when absent from the immutable packet"
   ],
   "contract": {
     "citationSuffix": "one canonical KOSHA or law token per parenthesized suffix group; arbitrary prose rejected",
     "outerFailureReviewSurface": "AskResponse.groundingReview rendered by AnswerPanel",
-    "duplicateSourceKeys": "canonical representative plus sorted unique aliases and controls"
+    "duplicateSourceKeys": "canonical representative plus sorted unique aliases and controls",
+    "narrativeControls": "actionable control sentences must match an immutable packet control; unsupported prose is review_required"
   },
   "editorFocusDiagnosis": {
     "focusAssertionFailures": 0,
@@ -39,7 +42,7 @@
     {
       "command": "npm.cmd test -- tests/grounded-generation-contract.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts --reporter=dot",
       "testFilesPassed": 4,
-      "testsPassed": 69,
+      "testsPassed": 70,
       "testsFailed": 0
     },
     {

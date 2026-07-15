@@ -358,6 +358,7 @@ export function contextBlock(ctx: GenContext) {
     "",
     "[불변 생성 근거 패킷]",
     "referenceKey와 통제문구는 아래 패킷에 있는 값만 사용한다. 구조화 출력의 evidenceRefs에는 referenceKey를 그대로 기록한다.",
+    "자유 텍스트의 실행 조치는 패킷 controls 문구를 한 문장에 하나씩 그대로 사용한다. 합치기·의역·새 조치 추가는 금지한다.",
     "패킷 밖 인용·통제 provenance는 출력하지 말고 '현장 확인 필요'로 둔다.",
     groundingPacket,
     "",
