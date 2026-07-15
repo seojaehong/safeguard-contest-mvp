@@ -1,28 +1,35 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "date": "2026-07-15",
-  "reviewedCandidateSha": "223cca10f97f9f5f5bd05cc6dcf3568539eb4ceb",
+  "productCandidateSha": "d0b7517",
   "baseSha": "dc608c8d7f7f854270669e05789cad88816d0f43",
   "branch": "fix/northstar-hermes-runtime-20260715",
-  "scope": "/api/agent/chat Hermes structured output and KOSHA test trust remediation",
-  "tdd": {
-    "red": {
-      "command": "npm.cmd test -- --run tests/hermes-engine-adapter.test.ts -t \"rejects arbitrary OpenClaw text\" --reporter=dot",
-      "exitCode": 1,
-      "selectedTests": 1,
-      "failed": 1,
-      "reason": "arbitrary OpenClaw text resolved without structured claim attestation"
-    },
-    "green": {
-      "command": "npm.cmd test -- --run tests/hermes-engine-adapter.test.ts tests/openclaw-chat.test.ts tests/claw-chat-route.test.ts tests/engine-adapter.test.ts --reporter=dot",
-      "exitCode": 0,
-      "testFiles": 4,
-      "tests": 86,
-      "passed": 86,
-      "failed": 0
-    }
+  "scope": "/api/agent/chat claim-level Hermes evidence eligibility",
+  "result": "pass_pending_independent_review",
+  "attestation": {
+    "packetDigestBound": true,
+    "claimAllowlistBound": true,
+    "citationAllowlistBound": true,
+    "directEligibilityRequired": true,
+    "sifAuthorityLabel": "risk_priority_evidence",
+    "koshaSupportingEligibilityRequired": true,
+    "reviewRequiredClaimsSelectable": false,
+    "unknownAttestationPolicy": "fail_closed"
+  },
+  "koshaFixture": {
+    "boundary": "test_only_recovered_unverified_fixture",
+    "version": "D-C-13-2026",
+    "productionTrustRegistryPopulated": false,
+    "productionReadyClaim": false
   },
   "verification": [
+    {
+      "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/openclaw-chat.test.ts",
+      "testFiles": 2,
+      "tests": 60,
+      "passed": 60,
+      "failed": 0
+    },
     {
       "command": "npm.cmd run typecheck",
       "exitCode": 0
@@ -30,52 +37,20 @@
     {
       "command": "npm.cmd run build",
       "exitCode": 0,
-      "framework": "Next.js 15.5.20",
-      "buildId": "-sLfhxzNcmE3d5_RwKvvB"
+      "pages": 28,
+      "buildId": "YYu1fJ33HzzNu7_6SIvbO"
     },
     {
       "command": "git diff --check",
       "exitCode": 0
     }
   ],
-  "attestation": {
-    "schemaVersion": "hermes-output-attestation/v1",
-    "packetDigestBound": true,
-    "claimAllowlistBound": true,
-    "citationAllowlistBound": true,
-    "applicationRendersPacketText": true,
-    "arbitraryPlannerProseAccepted": false,
-    "unknownAttestationPolicy": "fail_closed"
-  },
-  "koshaFixture": {
-    "boundary": "test_only_injected_trust",
-    "stableDocumentKey": "D-C-13",
-    "version": "D-C-13-2026",
-    "officialFileId": "CTC2026012914371557826167",
-    "bodySha256": "ea8bb93a3e03a40873222ab385d257e1a5946cb4d28e5c65951353731b0a5919",
-    "pdfSha256": "790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179",
-    "negativeTests": ["body", "pdfSha256", "officialFileId"],
-    "productionTrustRegistryPopulated": false,
-    "productionReadyClaim": false
-  },
-  "invariants": {
-    "failClosedSiteBinding": true,
-    "toolFreeOpenClawAgentRequired": true,
-    "openAiOAuthOnlyRequired": true,
-    "evidenceHarnessPreloaded": true,
-    "llmRole": "naturalize_only",
-    "canMutate": false,
-    "canPublish": false,
-    "humanConfirmationRequired": true,
-    "vertexAnthropicFallbackChanged": false
-  },
   "runtimeReady": false,
   "runtimeBlockers": [
     "Production KOSHA trusted official metadata registry is empty.",
-    "Installed OpenClaw CLI 2026.6.5 rejects config written by 2026.6.11.",
-    "The safeclaw profile has no explicit agents.list tool-free agent entry.",
-    "Organization and site binding environment values are not configured for live verification.",
-    "Local Hermes execution remains disabled on Vercel.",
-    "No live answer was executed because attestation prerequisites fail closed."
+    "Installed OpenClaw CLI 2026.6.5 is behind config writer 2026.6.11.",
+    "The safeclaw profile has no explicit agents.list tool-free entry.",
+    "Organization and site binding environment values are not configured for live execution.",
+    "Local Hermes execution remains disabled on Vercel."
   ]
 }
