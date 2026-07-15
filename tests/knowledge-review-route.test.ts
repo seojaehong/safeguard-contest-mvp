@@ -1,0 +1,618 @@
+import { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as knowledgeReview from "@/lib/knowledge-review";
+
+const mocks = vi.hoisted(() => ({
+  createSupabaseAdminClient: vi.fn(),
+  getWorkspaceUser: vi.fn()
+}));
+
+type QueryCall = {
+  table: string;
+  operation: string;
+  args: unknown[];
+};
+
+type QueryResult = {
+  data: unknown;
+  error: Error | null;
+};
+
+type DatabaseRows = Record<string, Array<Record<string, unknown>>>;
+
+function makeReadClient(
+  overrides: Partial<DatabaseRows> = {},
+  errors: Partial<Record<string, Error>> = {}
+) {
+  const calls: QueryCall[] = [];
+  const rows: DatabaseRows = {
+    organizations: [{ id: "org-owned", owner_id: "reviewer-1" }],
+    sites: [{ id: "site-1", organization_id: "org-owned" }],
+    knowledge_events: [{
+      id: "event-1",
+      organization_id: "org-owned",
+      site_id: "site-1",
+      source: "manual",
+      source_id: "manual-1",
+      captured_at: "2026-07-15T00:00:00.000Z",
+      title: "현장 검토 이벤트",
+      url: "https://private.example/token-secret",
+      payload: { workerNote: "raw-secret" },
+      related_hazard_ids: ["hazard-fall"],
+      reflected_documents: ["위험성평가표"],
+      review_status: "pending_review",
+      created_at: "2026-07-15T00:01:00.000Z"
+    }],
+    knowledge_regeneration_runs: [{
+      id: "run-1",
+      organization_id: "org-owned",
+      site_id: "site-1",
+      question: "추락 위험 검토",
+      raw_event_ids: ["event-1"],
+      generated_output: { candidate: "검토 초안" },
+      provider: "vertex",
+      status: "review_required",
+      created_at: "2026-07-15T00:02:00.000Z"
+    }],
+    ...overrides
+  };
+
+  return {
+    calls,
+    client: {
+      from(table: string) {
+        const filters: Array<(row: Record<string, unknown>) => boolean> = [];
+        const query = {
+          select(...args: unknown[]) { calls.push({ table, operation: "select", args }); return query; },
+          eq(column: string, value: unknown) {
+            const args = [column, value];
+            calls.push({ table, operation: "eq", args });
+            filters.push((row) => row[column] === value);
+            return query;
+          },
+          in(column: string, values: unknown[]) {
+            const args = [column, values];
+            calls.push({ table, operation: "in", args });
+            filters.push((row) => values.includes(row[column]));
+            return query;
+          },
+          order(...args: unknown[]) { calls.push({ table, operation: "order", args }); return query; },
+          then(resolve: (value: QueryResult) => unknown) {
+            const data = (rows[table] ?? []).filter((row) => filters.every((filter) => filter(row)));
+            return Promise.resolve({ data, error: errors[table] ?? null }).then(resolve);
+          }
+        };
+        return query;
+      }
+    }
+  };
+}
+
+vi.mock("@/lib/supabase-admin", () => ({
+  createSupabaseAdminClient: mocks.createSupabaseAdminClient,
+  getWorkspaceUser: mocks.getWorkspaceUser
+}));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.createSupabaseAdminClient.mockReturnValue(null);
+});
+
+describe("knowledge review route fail-closed setup", () => {
+  it.each(["GET", "POST"])("returns 503 for %s when Supabase is not configured", async (method) => {
+    const route = await import("@/app/api/knowledge/review/route");
+    const request = new NextRequest("http://localhost/api/knowledge/review", {
+      method,
+      headers: { "content-type": "application/json" },
+      ...(method === "POST"
+        ? { body: JSON.stringify({ runId: "run-1", action: "approve_candidate" }) }
+        : {})
+    });
+
+    const response = method === "GET"
+      ? await route.GET(request)
+      : await route.POST(request);
+    const payload = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(payload).toMatchObject({
+      ok: false,
+      configured: false,
+      atomic: false
+    });
+    expect(mocks.getWorkspaceUser).not.toHaveBeenCalled();
+  });
+
+  it.each(["GET", "POST"])("returns 401 for unauthenticated %s requests", async (method) => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.getWorkspaceUser.mockResolvedValue(null);
+    const route = await import("@/app/api/knowledge/review/route");
+    const request = new NextRequest("http://localhost/api/knowledge/review", {
+      method,
+      headers: { "content-type": "application/json" },
+      ...(method === "POST"
+        ? { body: JSON.stringify({ runId: "run-1", action: "approve_candidate" }) }
+        : {})
+    });
+
+    const response = method === "GET"
+      ? await route.GET(request)
+      : await route.POST(request);
+
+    expect(response.status).toBe(401);
+  });
+
+  it.each(["publish", "publish_public", "migrate"])("rejects the unsupported %s action", async (action) => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
+    const { POST } = await import("@/app/api/knowledge/review/route");
+
+    const response = await POST(new NextRequest("http://localhost/api/knowledge/review", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: "Bearer test-token"
+      },
+      body: JSON.stringify({ runId: "run-1", action })
+    }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(payload).toMatchObject({
+      ok: false,
+      code: "invalid_review_action",
+      atomic: false,
+      compensationRequired: false
+    });
+  });
+});
+
+describe("knowledge review GET", () => {
+  it("returns only the owned review inbox without raw event payloads", async () => {
+    const fake = makeReadClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: "reviewer@example.com" });
+    const { GET } = await import("@/app/api/knowledge/review/route");
+
+    const response = await GET(new NextRequest("http://localhost/api/knowledge/review", {
+      headers: { authorization: "Bearer test-token" }
+    }));
+    const payload = await response.json();
+    const serialized = JSON.stringify(payload);
+
+    expect(response.status).toBe(200);
+    expect(payload).toMatchObject({
+      ok: true,
+      configured: true,
+      tenantBoundary: {
+        ownerUserId: "reviewer-1",
+        organizationIds: ["org-owned"],
+        rawEventPayloadIncluded: false
+      },
+      queue: [{
+        run: {
+          id: "run-1",
+          organizationId: "org-owned",
+          siteId: "site-1",
+          status: "review_required"
+        },
+        events: [{
+          id: "event-1",
+          organizationId: "org-owned",
+          siteId: "site-1",
+          reviewStatus: "pending_review"
+        }]
+      }],
+      dropped: {
+        runCount: 0,
+        eventCount: 0,
+        reasons: []
+      }
+    });
+    expect(serialized).not.toContain("raw-secret");
+    expect(serialized).not.toContain("token-secret");
+    expect(fake.calls).toContainEqual({
+      table: "organizations",
+      operation: "eq",
+      args: ["owner_id", "reviewer-1"]
+    });
+    expect(fake.calls).toContainEqual({
+      table: "knowledge_events",
+      operation: "in",
+      args: ["organization_id", ["org-owned"]]
+    });
+    expect(fake.calls).toContainEqual({
+      table: "knowledge_events",
+      operation: "eq",
+      args: ["review_status", "pending_review"]
+    });
+    expect(fake.calls).toContainEqual({
+      table: "knowledge_regeneration_runs",
+      operation: "in",
+      args: ["status", ["draft", "generated", "review_required"]]
+    });
+  });
+
+  it("drops invalid relations and generated output without exposing their contents", async () => {
+    const fake = makeReadClient({
+      knowledge_events: [
+        {
+          id: "event-valid",
+          organization_id: "org-owned",
+          site_id: "site-1",
+          source: "manual",
+          source_id: "valid",
+          captured_at: "2026-07-15T00:00:00.000Z",
+          title: "유효 이벤트",
+          related_hazard_ids: [],
+          reflected_documents: [],
+          review_status: "pending_review",
+          created_at: "2026-07-15T00:00:00.000Z"
+        },
+        {
+          id: "event-cross-site",
+          organization_id: "org-owned",
+          site_id: "site-2",
+          source: "manual",
+          source_id: "cross-site",
+          captured_at: "2026-07-15T00:00:00.000Z",
+          title: "다른 현장 이벤트",
+          related_hazard_ids: [],
+          reflected_documents: [],
+          review_status: "pending_review",
+          created_at: "2026-07-15T00:00:00.000Z"
+        },
+        {
+          id: "event-invalid-output",
+          organization_id: "org-owned",
+          site_id: "site-1",
+          source: "manual",
+          source_id: "invalid-output",
+          captured_at: "2026-07-15T00:00:00.000Z",
+          title: "비정상 output 이벤트",
+          related_hazard_ids: [],
+          reflected_documents: [],
+          review_status: "pending_review",
+          created_at: "2026-07-15T00:00:00.000Z"
+        }
+      ],
+      knowledge_regeneration_runs: [
+        {
+          id: "run-valid",
+          organization_id: "org-owned",
+          site_id: "site-1",
+          question: "유효 run",
+          raw_event_ids: ["event-valid"],
+          generated_output: { candidate: "safe-candidate" },
+          provider: "vertex",
+          status: "review_required",
+          created_at: "2026-07-15T00:00:00.000Z"
+        },
+        {
+          id: "run-missing-event",
+          organization_id: "org-owned",
+          site_id: "site-1",
+          question: "누락 run",
+          raw_event_ids: ["event-missing"],
+          generated_output: { candidate: "missing-event-secret" },
+          provider: "vertex",
+          status: "generated",
+          created_at: "2026-07-15T00:00:00.000Z"
+        },
+        {
+          id: "run-cross-site",
+          organization_id: "org-owned",
+          site_id: "site-1",
+          question: "교차 현장 run",
+          raw_event_ids: ["event-cross-site"],
+          generated_output: { candidate: "cross-site-secret" },
+          provider: "vertex",
+          status: "review_required",
+          created_at: "2026-07-15T00:00:00.000Z"
+        },
+        {
+          id: "run-invalid-output",
+          organization_id: "org-owned",
+          site_id: "site-1",
+          question: "비정상 output run",
+          raw_event_ids: ["event-invalid-output"],
+          generated_output: "invalid-output-secret",
+          provider: "vertex",
+          status: "draft",
+          created_at: "2026-07-15T00:00:00.000Z"
+        }
+      ]
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
+    const { GET } = await import("@/app/api/knowledge/review/route");
+
+    const response = await GET(new NextRequest("http://localhost/api/knowledge/review", {
+      headers: { authorization: "Bearer test-token" }
+    }));
+    const payload = await response.json();
+    const serialized = JSON.stringify(payload);
+
+    expect(response.status).toBe(200);
+    expect(payload.queue).toHaveLength(1);
+    expect(payload.queue[0].run.id).toBe("run-valid");
+    expect(payload.dropped).toEqual({
+      runCount: 3,
+      eventCount: 2,
+      reasons: [
+        { runId: "run-missing-event", reason: "raw_event_missing_or_not_pending" },
+        { runId: "run-cross-site", reason: "tenant_mismatch" },
+        { runId: "run-invalid-output", reason: "generated_output_invalid" }
+      ]
+    });
+    expect(serialized).not.toContain("missing-event-secret");
+    expect(serialized).not.toContain("cross-site-secret");
+    expect(serialized).not.toContain("invalid-output-secret");
+  });
+
+  it("drops every actionable run that shares a pending raw event", async () => {
+    const sharedEvent = {
+      id: "event-shared",
+      organization_id: "org-owned",
+      site_id: "site-1",
+      source: "manual",
+      source_id: "shared",
+      captured_at: "2026-07-15T00:00:00.000Z",
+      title: "공유 이벤트",
+      related_hazard_ids: [],
+      reflected_documents: [],
+      review_status: "pending_review",
+      created_at: "2026-07-15T00:00:00.000Z"
+    };
+    const fake = makeReadClient({
+      knowledge_events: [sharedEvent],
+      knowledge_regeneration_runs: ["run-shared-a", "run-shared-b"].map((id, index) => ({
+        id,
+        organization_id: "org-owned",
+        site_id: "site-1",
+        question: id,
+        raw_event_ids: ["event-shared"],
+        generated_output: index === 0 ? { candidate: `${id}-private-output` } : "invalid-private-output",
+        provider: "vertex",
+        status: "review_required",
+        created_at: "2026-07-15T00:00:00.000Z"
+      }))
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
+    const { GET } = await import("@/app/api/knowledge/review/route");
+
+    const response = await GET(new NextRequest("http://localhost/api/knowledge/review", {
+      headers: { authorization: "Bearer test-token" }
+    }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.queue).toEqual([]);
+    expect(payload.dropped).toEqual({
+      runCount: 2,
+      eventCount: 1,
+      reasons: [
+        { runId: "run-shared-a", reason: "shared_event_conflict" },
+        { runId: "run-shared-b", reason: "shared_event_conflict" }
+      ]
+    });
+    expect(JSON.stringify(payload)).not.toContain("private-output");
+  });
+
+  it("does not hide an actionable run when another site references its event", async () => {
+    const sharedEvent = {
+      id: "event-site-1",
+      organization_id: "org-owned",
+      site_id: "site-1",
+      source: "manual",
+      source_id: "shared-across-sites",
+      captured_at: "2026-07-15T00:00:00.000Z",
+      title: "현장 1 이벤트",
+      related_hazard_ids: [],
+      reflected_documents: [],
+      review_status: "pending_review",
+      created_at: "2026-07-15T00:00:00.000Z"
+    };
+    const fake = makeReadClient({
+      sites: [
+        { id: "site-1", organization_id: "org-owned" },
+        { id: "site-2", organization_id: "org-owned" }
+      ],
+      knowledge_events: [sharedEvent],
+      knowledge_regeneration_runs: [
+        {
+          id: "run-valid-site-1",
+          organization_id: "org-owned",
+          site_id: "site-1",
+          question: "정상 후보",
+          raw_event_ids: [sharedEvent.id],
+          generated_output: { candidate: "site-1-output" },
+          provider: "vertex",
+          status: "review_required",
+          created_at: "2026-07-15T00:00:00.000Z"
+        },
+        {
+          id: "run-invalid-site-2",
+          organization_id: "org-owned",
+          site_id: "site-2",
+          question: "다른 현장의 잘못된 참조",
+          raw_event_ids: [sharedEvent.id],
+          generated_output: { candidate: "site-2-output" },
+          provider: "vertex",
+          status: "review_required",
+          created_at: "2026-07-15T00:00:00.000Z"
+        }
+      ]
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
+    const { GET } = await import("@/app/api/knowledge/review/route");
+
+    const response = await GET(new NextRequest("http://localhost/api/knowledge/review", {
+      headers: { authorization: "Bearer test-token" }
+    }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.queue.map((item: { run: { id: string } }) => item.run.id)).toEqual(["run-valid-site-1"]);
+    expect(payload.dropped.reasons).toContainEqual({
+      runId: "run-invalid-site-2",
+      reason: "tenant_mismatch"
+    });
+    expect(payload.dropped.reasons).not.toContainEqual({
+      runId: "run-valid-site-1",
+      reason: "shared_event_conflict"
+    });
+  });
+
+  it("drops runs whose non-null site is missing or belongs to another organization", async () => {
+    const event = (id: string, siteId: string) => ({
+      id,
+      organization_id: "org-owned",
+      site_id: siteId,
+      source: "manual",
+      source_id: id,
+      captured_at: "2026-07-15T00:00:00.000Z",
+      title: id,
+      related_hazard_ids: [],
+      reflected_documents: [],
+      review_status: "pending_review",
+      created_at: "2026-07-15T00:00:00.000Z"
+    });
+    const run = (id: string, siteId: string, eventId: string) => ({
+      id,
+      organization_id: "org-owned",
+      site_id: siteId,
+      question: id,
+      raw_event_ids: [eventId],
+      generated_output: { candidate: id },
+      provider: "vertex",
+      status: "review_required",
+      created_at: "2026-07-15T00:00:00.000Z"
+    });
+    const fake = makeReadClient({
+      organizations: [
+        { id: "org-owned", owner_id: "reviewer-1" },
+        { id: "org-foreign", owner_id: "foreign-owner" }
+      ],
+      sites: [
+        { id: "site-1", organization_id: "org-owned" },
+        { id: "site-foreign", organization_id: "org-foreign" }
+      ],
+      knowledge_events: [
+        event("event-valid", "site-1"),
+        event("event-foreign-site", "site-foreign"),
+        event("event-missing-site", "site-missing")
+      ],
+      knowledge_regeneration_runs: [
+        run("run-valid", "site-1", "event-valid"),
+        run("run-foreign-site", "site-foreign", "event-foreign-site"),
+        run("run-missing-site", "site-missing", "event-missing-site")
+      ]
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
+    const { GET } = await import("@/app/api/knowledge/review/route");
+
+    const response = await GET(new NextRequest("http://localhost/api/knowledge/review", {
+      headers: { authorization: "Bearer test-token" }
+    }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.queue.map((item: { run: { id: string } }) => item.run.id)).toEqual(["run-valid"]);
+    expect(payload.dropped).toEqual({
+      runCount: 2,
+      eventCount: 2,
+      reasons: [
+        { runId: "run-foreign-site", reason: "site_tenant_mismatch" },
+        { runId: "run-missing-site", reason: "site_tenant_mismatch" }
+      ]
+    });
+    expect(fake.calls).toContainEqual({
+      table: "sites",
+      operation: "in",
+      args: ["id", ["site-1", "site-foreign", "site-missing"]]
+    });
+  });
+
+  it("fails the entire queue closed when the batched site query fails", async () => {
+    const fake = makeReadClient({}, { sites: new Error("site lookup unavailable") });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { GET } = await import("@/app/api/knowledge/review/route");
+
+    const response = await GET(new NextRequest("http://localhost/api/knowledge/review", {
+      headers: { authorization: "Bearer test-token" }
+    }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload).toMatchObject({
+      ok: false,
+      atomic: false,
+      compensationRequired: false
+    });
+    expect(payload.queue).toBeUndefined();
+    consoleSpy.mockRestore();
+  });
+});
+
+describe("knowledge review POST failure disclosure", () => {
+  it("returns 500 with compensationRequired after a run-only partial update", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: "reviewer@example.com" });
+    const applySpy = vi.spyOn(knowledgeReview, "applyKnowledgeReviewAction").mockRejectedValue(
+      new knowledgeReview.KnowledgeReviewError({
+        status: 500,
+        code: "review_event_update_failed",
+        message: "run은 갱신됐지만 원본 이벤트 상태 저장이 완료되지 않았습니다.",
+        compensationRequired: true,
+        updates: {
+          runUpdated: true,
+          eventsUpdated: false,
+          eventsUpdatedCount: 1,
+          eventsTotal: 2
+        }
+      })
+    );
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { POST } = await import("@/app/api/knowledge/review/route");
+
+    const response = await POST(new NextRequest("http://localhost/api/knowledge/review", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: "Bearer test-token"
+      },
+      body: JSON.stringify({ runId: "run-1", action: "approve_candidate" })
+    }));
+    const payload = await response.json();
+
+    expect(response.status).toBe(500);
+    expect(payload).toMatchObject({
+      ok: false,
+      code: "review_event_update_failed",
+      atomic: false,
+      compensationRequired: true,
+      updates: {
+        runUpdated: true,
+        eventsUpdated: false,
+        eventsUpdatedCount: 1,
+        eventsTotal: 2
+      }
+    });
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "knowledge review action failed",
+      expect.objectContaining({
+        code: "review_event_update_failed",
+        compensationRequired: true
+      })
+    );
+
+    applySpy.mockRestore();
+    consoleSpy.mockRestore();
+  });
+});
