@@ -1,3 +1,7 @@
+
+> safeclaw@0.1.0 audit:frontend-runtime
+> node ./scripts/frontend_audit_runtime_probe.mjs --mode audit
+
 {
   "schemaVersion": 1,
   "generatedAt": "2026-07-15T07:40:22.635Z",
