@@ -1,0 +1,23 @@
+# Grounded Generation P1 Remediation
+
+## Scope
+
+- Starting HEAD: `ec3f6bef6380774efda7e2b04e4ad38dd5aad239`
+- Branch: `fix/northstar-grounded-current-20260715`
+- No database schema, migration, data mutation, package manifest, or lockfile change
+
+## Contract
+
+1. `현장 확인 필요` is accepted only when whitespace normalization makes the entire field equal to that sentinel.
+2. A mixed value such as `현장 확인 필요 후 안전대를 체결한다.` cannot bypass packet grounding.
+3. Short Korean nominal instructions such as `안전대 체결`, `출입 제한`, `설비 격리`, `전원 잠금`, `통제선 마련`, `유도자 유도`, and `감시인 감시` must resolve to the immutable packet.
+4. Nominal detection is structural and does not depend on a finite action-verb list.
+5. Declarative descriptive prose remains allowed.
+
+## TDD Evidence
+
+- Initial focused RED: 29 passed, 2 failed. Both structured and narrative mixed-sentinel cases were incorrectly accepted.
+- Final contract suite: 1 file, 39 tests passed.
+- Generation focused suite: 4 files, 94 tests passed.
+- Strict TypeScript typecheck: passed.
+- `git diff --check`: passed.

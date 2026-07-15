@@ -182,6 +182,10 @@ function normalize(value: string): string {
   return value.replace(/\s+/g, " ").trim().toLocaleLowerCase("ko-KR");
 }
 
+function isFieldVerificationSentinel(value: string): boolean {
+  return normalize(value) === "현장 확인 필요";
+}
+
 function sourceMatchesReference(source: GroundedGenerationSource, reference: string): boolean {
   const normalizedReference = normalize(reference);
   const typedReference = /^(DB|SIF|KOSHA|LAW):/i.test(reference.trim());
@@ -251,6 +255,7 @@ function validateControlObject(
   for (const field of fields) {
     const controlValue = record[field];
     if (typeof controlValue !== "string" || controlValue.trim().length === 0) continue;
+    if (isFieldVerificationSentinel(controlValue)) continue;
     if (controlSources.length === 0) {
       violations.push({ code: "control_provenance_missing", path: `${path}.${field}`, value: controlValue });
       continue;
@@ -276,7 +281,7 @@ function validateUnreferencedControlValue(
   path: string,
   violations: GroundingViolation[]
 ): void {
-  if (typeof value !== "string" || value.trim().length === 0 || value.includes("현장 확인 필요")) return;
+  if (typeof value !== "string" || value.trim().length === 0 || isFieldVerificationSentinel(value)) return;
   const controlSources = packet.sources.filter((source) => source.controls.length > 0);
   const grounded = controlSources.some((source) => source.controls.some((control) => (
     controlClaimMatches(value, control, controlSources)
@@ -382,10 +387,22 @@ const NARRATIVE_CONTROL_FIELDS = new Set([
 
 const DESCRIPTIVE_SENTENCE_END_RE = /(?:입니다|이다|있습니다|있다|없습니다|없다|같습니다|같다|높습니다|높다|낮습니다|낮다)[.!?]?$/;
 const ACTIONABLE_SENTENCE_END_RE = /(?:다|것|하세요|하십시오|금지|중지)[.!?]?$/;
+const NOMINAL_CLAUSE_TOKEN_RE = /^[가-힣A-Za-z0-9·()/-]+$/;
+
+function isInstructionShapedNominalClause(value: string): boolean {
+  const clause = value.replace(/[.!?]+$/, "").trim();
+  if (!clause || /^(?:\[.*\]|\(.*\))$/.test(clause) || /[:：]$/.test(clause)) return false;
+  const tokens = clause.split(/\s+/);
+  return tokens.length >= 2
+    && tokens.length <= 4
+    && clause.length <= 30
+    && tokens.every((token) => NOMINAL_CLAUSE_TOKEN_RE.test(token));
+}
 
 function isActionableNarrativeSentence(value: string): boolean {
   const sentence = value.trim();
-  return !DESCRIPTIVE_SENTENCE_END_RE.test(sentence) && ACTIONABLE_SENTENCE_END_RE.test(sentence);
+  return !DESCRIPTIVE_SENTENCE_END_RE.test(sentence)
+    && (ACTIONABLE_SENTENCE_END_RE.test(sentence) || isInstructionShapedNominalClause(sentence));
 }
 
 function narrativeSentences(value: string): string[] {
@@ -414,7 +431,7 @@ function validateNarrativeControls(
       const grounded = controlSources.some((source) => source.controls.some((control) => (
         controlClaimMatches(claim, control, controlSources)
       )));
-      if (!grounded && isActionableNarrativeSentence(sentence) && !sentence.includes("현장 확인 필요")) {
+      if (!grounded && isActionableNarrativeSentence(claim) && !isFieldVerificationSentinel(claim)) {
         violations.push({ code: "control_claim_not_in_packet", path: `$.${field}`, value: sentence });
       }
     }
