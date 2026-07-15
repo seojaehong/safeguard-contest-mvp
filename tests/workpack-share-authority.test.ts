@@ -107,7 +107,7 @@ describe("server-only workpack share authority", () => {
     });
 
     expect(result.readiness.canShare).toBe(false);
-    expect(result.readiness.reasons).toContain("DB 하네스 근거 보강 필요");
+    expect(result.readiness.reasons).toContain("검증 근거 보강 필요");
   });
 
   it("rejects empty, duplicate, malformed, unknown, and foreign recipient ids", () => {

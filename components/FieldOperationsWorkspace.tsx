@@ -689,9 +689,9 @@ function WorkpackHistoryPanel({
       anchor.remove();
       URL.revokeObjectURL(url);
       if (format === "jsonl") {
-        setDownloadMessage("JSONL 운영 메모리를 내려받았습니다.");
+        setDownloadMessage("재사용 검토 데이터를 내려받았습니다.");
       } else if (format === "obsidian") {
-        setDownloadMessage("Obsidian용 작업 그래프 Markdown을 내려받았습니다.");
+        setDownloadMessage("연결형 작업 메모를 내려받았습니다.");
       } else {
         setDownloadMessage("Markdown 개선 메모리를 내려받았습니다.");
       }
@@ -725,7 +725,7 @@ function WorkpackHistoryPanel({
           onClick={() => downloadLearningExport("markdown")}
           disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
         >
-          {downloadingFormat === "markdown" ? "내려받는 중" : "작업 이력 MD"}
+          {downloadingFormat === "markdown" ? "내려받는 중" : "작업 이력 문서"}
         </button>
         <button
           type="button"
@@ -733,7 +733,7 @@ function WorkpackHistoryPanel({
           onClick={() => downloadLearningExport("jsonl")}
           disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
         >
-          {downloadingFormat === "jsonl" ? "내려받는 중" : "하네스 JSONL"}
+          {downloadingFormat === "jsonl" ? "내려받는 중" : "재사용 검토 데이터"}
         </button>
         <button
           type="button"
@@ -741,7 +741,7 @@ function WorkpackHistoryPanel({
           onClick={() => downloadLearningExport("obsidian")}
           disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
         >
-          {downloadingFormat === "obsidian" ? "내려받는 중" : "Obsidian MD"}
+          {downloadingFormat === "obsidian" ? "내려받는 중" : "연결형 작업 메모"}
         </button>
       </div>
       <p className="muted small">
@@ -777,7 +777,7 @@ function WorkspaceOperationGraphPanel({
   useEffect(() => {
     if (!authToken || !workpackId) {
       setServerGraph(null);
-      setGraphMessage("저장 전에는 현재 생성 결과와 DB 하네스 패킷으로 작업 이력 그래프를 임시 구성합니다.");
+      setGraphMessage("저장 전에는 현재 생성 결과와 검증 근거로 작업 이력 그래프를 임시 구성합니다.");
       return;
     }
 
@@ -797,7 +797,7 @@ function WorkspaceOperationGraphPanel({
       setServerGraph(payload.graph);
       setGraphMessage(typeof payload.source === "object"
         ? "저장된 작업팩, 개선사항, 열람 확인 이력을 Supabase에서 다시 구성했습니다."
-        : "현재 생성 결과와 DB 하네스 패킷으로 작업 이력 그래프를 구성했습니다."
+        : "현재 생성 결과와 검증 근거로 작업 이력 그래프를 구성했습니다."
       );
     }).catch((error: unknown) => {
       if (cancelled) return;
@@ -824,7 +824,7 @@ function WorkspaceOperationGraphPanel({
       className="workspace-operation-memory"
       description={(
         <>
-          오늘 문서팩이 사용한 DB 하네스 근거, 유사 과거 작업, 위험요인, 감소대책, 사진 개선사항, 열람 확인을 한 화면에서 연결합니다.{" "}
+          오늘 문서팩이 사용한 검증 근거, 유사 과거 작업, 위험요인, 감소대책, 사진 개선사항, 열람 확인을 한 화면에서 연결합니다.{" "}
           {ackMessage}
         </>
       )}

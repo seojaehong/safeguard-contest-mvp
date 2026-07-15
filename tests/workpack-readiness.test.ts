@@ -139,8 +139,8 @@ describe("workpack readiness", () => {
     expect(readiness.status).toBe("blocked");
     expect(readiness.summary).toBe("공유 전 보완 필요");
     expect(readiness.reasons.join(" / ")).toContain("안전조치 검수 미통과");
-    expect(readiness.reasons.join(" / ")).toContain("품질 계약 보완 필요");
-    expect(readiness.reasons.join(" / ")).toContain("DB 하네스 근거 보강 필요");
+    expect(readiness.reasons.join(" / ")).toContain("품질 검수 보완 필요");
+    expect(readiness.reasons.join(" / ")).toContain("검증 근거 보강 필요");
     expect(readiness.reasons.join(" / ")).toContain("결재·서명 placeholder 확인 필요");
   });
 
@@ -161,7 +161,7 @@ describe("workpack readiness", () => {
     const readiness = assessWorkpackReadiness(response);
 
     expect(readiness.canShare).toBe(false);
-    expect(readiness.reasons).toContain("품질 계약 확인 필요");
+    expect(readiness.reasons).toContain("품질 검수 확인 필요");
     expect(readiness.reasons).toContain("안전조치 검수 정보 확인 필요");
   });
 
