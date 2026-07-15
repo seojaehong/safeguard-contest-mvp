@@ -82,6 +82,21 @@ describe("Claw Phase A product handlers", () => {
     });
 
     expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith("고소작업");
+    expect(mocks.querySafetyKnowledge.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.runAsk.mock.invocationCallOrder[0] ?? 0,
+    );
+    expect(mocks.runAsk).toHaveBeenCalledWith(
+      "외벽 고소 작업을 위한 문서팩",
+      expect.objectContaining({
+        aiMode: "template",
+        phaseAGrounding: expect.objectContaining({
+          groundingStatus: "review_required",
+          generationPolicy: expect.objectContaining({ llmRole: "naturalize_only" }),
+        }),
+      }),
+    );
+    const reviewedOptions = mocks.runAsk.mock.calls[0]?.[1] as Record<string, unknown> | undefined;
+    expect(Object.isFrozen(reviewedOptions?.phaseAGrounding)).toBe(true);
     expect(mocks.reviewDocpack).toHaveBeenCalledWith(
       "고소작업",
       expect.stringContaining("work-at-height-fall:risk-assessment:fall-work-platform"),
@@ -260,6 +275,19 @@ describe("Claw Phase A product handlers", () => {
     });
 
     expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith("전기작업");
+    expect(mocks.querySafetyKnowledge.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.runAsk.mock.invocationCallOrder[0] ?? 0,
+    );
+    expect(mocks.runAsk).toHaveBeenCalledWith(
+      "전기작업",
+      expect.objectContaining({
+        aiMode: "template",
+        phaseAGrounding: expect.objectContaining({
+          groundingStatus: "review_required",
+          evidencePack: expect.objectContaining({ chainId: "electrical-work-electrocution" }),
+        }),
+      }),
+    );
     expect(result).toMatchObject({
       phaseAProduct: {
         chainId: "electrical-work-electrocution",
@@ -331,5 +359,24 @@ describe("Claw Phase A product handlers", () => {
       },
     });
     expect(result).not.toHaveProperty("phaseAProduct");
+    expect(mocks.runAsk).toHaveBeenCalledWith(
+      "일반 정리 작업 문서팩",
+      { aiMode: "template" },
+    );
+  });
+
+  test.each([
+    "generate_safety_docpack",
+    "generate_reviewed_safety_docpack",
+  ] as const)("surfaces %s knowledge rejection without calling the provider", async (toolName) => {
+    const knowledgeError = new Error("Claw knowledge unavailable");
+    mocks.querySafetyKnowledge.mockRejectedValue(knowledgeError);
+    const input = toolName === "generate_reviewed_safety_docpack"
+      ? { question: "고소작업 문서팩", task: "고소작업", mode: "template" }
+      : { question: "고소작업", mode: "template" };
+
+    await expect(executeClawTool(toolName, input)).rejects.toBe(knowledgeError);
+    expect(mocks.runAsk).not.toHaveBeenCalled();
+    expect(mocks.reviewDocpack).not.toHaveBeenCalled();
   });
 });

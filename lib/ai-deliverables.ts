@@ -48,6 +48,11 @@ import { generateWithAnthropic } from "@/lib/anthropic-client";
 import { generateWithVertex } from "@/lib/vertex/client";
 import { createLogger } from "@/lib/logger";
 import { safeEmit, type OnAskProgress } from "@/lib/ask-progress";
+import {
+  buildPhaseAGenerationPrompt,
+  validatePhaseAStructuredCitationOutput,
+  type PhaseAGenerationGrounding,
+} from "@/lib/ontology/evidence-chain";
 
 const log = createLogger("ai-deliverables");
 
@@ -127,6 +132,8 @@ type GenContext = {
   dbHarnessContext?: string;
   /** Immutable runtime allowlist used by both the prompt and output gate. */
   groundingPacket?: GroundedGenerationPacket;
+  /** Fixed Phase A ontology evidence selected before provider generation. */
+  phaseAGrounding?: PhaseAGenerationGrounding;
   /** KST (Asia/Seoul) calendar date of this generation run — YYYY-MM-DD. */
   workDate: string;
 };
@@ -294,8 +301,9 @@ export function safeParseJson<T = unknown>(raw: string): T | null {
   }
 }
 
-export function persona() {
+export function persona(phaseAGrounding?: PhaseAGenerationGrounding) {
   return [
+    ...(phaseAGrounding ? [buildPhaseAGenerationPrompt(phaseAGrounding), ""] : []),
     "당신은 한국 산업안전기사 자격을 갖춘 5년 차 현장 안전관리자다.",
     "사용자의 작업 시나리오를 받아 위험성평가·작업계획·TBM·안전보건교육·비상대응 등 산업안전 문서팩 본문을 작성한다.",
     "원칙:",
@@ -386,7 +394,7 @@ export function contextBlock(ctx: GenContext) {
 
 function riskAssessmentSinglePrompt(ctx: GenContext) {
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "위험성평가표(초안)를 작성하고 다음 JSON 형식으로만 반환하라.",
     "[기본정보] [1.사전준비] [2.유해·위험요인 파악] (4M 표시) [3.위험성 결정] (가능성/중대성/등급) [4.감소대책 수립 및 실행] [5.공유·교육] [6.조치 확인] 섹션 포함.",
@@ -404,7 +412,7 @@ function riskAssessmentSinglePrompt(ctx: GenContext) {
 // 정해진 행/열 레이아웃에 그대로 채운다.
 function workPlanStructuredPrompt(ctx: GenContext) {
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "한국 산업안전 표준 작업계획서의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
     "산문/장문 금지. 각 필드는 셀에 들어갈 짧은 문구(80자 이내) 단위로 작성. 위험요인·감소대책은 시나리오 특화. KOSHA 자료가 있으면 safetyMeasure 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식으로 1줄 포함.",
@@ -447,7 +455,7 @@ function workPlanStructuredPrompt(ctx: GenContext) {
 // TBM 브리핑 schema-first. workPlan과 동일하게 산문 대신 셀 객체 직접 반환.
 function tbmBriefingStructuredPrompt(ctx: GenContext) {
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "한국 산업안전 표준 TBM 브리핑의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
     "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazards/measures는 시나리오 특화 4M 분류. KOSHA 자료가 있으면 measures.action 안에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
@@ -489,7 +497,7 @@ function tbmBriefingStructuredPrompt(ctx: GenContext) {
 // Schema-first TBM 일지 (사후 기록). tbmBriefing(사전)과 분리된 export.
 function tbmLogStructuredPrompt(ctx: GenContext) {
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "한국 산업안전 표준 TBM 일지(사후 기록)의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
     "산문/장문 금지. 각 필드는 1줄 단위 짧은 문구. hazardsDiscussed/safetyEducation은 실제 진행한 내용 기준. unaddressedItems는 미조치 항목(없으면 빈 배열).",
@@ -550,7 +558,7 @@ function tbmLogStructuredPrompt(ctx: GenContext) {
 
 function tbmLogSinglePrompt(ctx: GenContext) {
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "TBM 일지(초안)를 작성하고 다음 JSON 형식으로만 반환하라.",
     "결재/공종/일자/근로자 확인사항/금일 작업/금일 위험요인/일일 안전교육/참석자명단/인원집계/미조치 및 사진증빙 섹션 포함. 길이 1500~3500자.",
@@ -564,7 +572,7 @@ function tbmLogSinglePrompt(ctx: GenContext) {
 // 안전보건교육 기록 schema-first.
 function educationRecordStructuredPrompt(ctx: GenContext) {
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "한국 산업안전 표준 안전보건교육 기록의 셀 단위 데이터를 다음 JSON 스키마로 정확히 채워 반환하라.",
     "산문/장문 금지. curriculum 각 항목의 lawCitation은 산업안전보건법/시행규칙/시행령 조항 명시. KOSHA 자료가 있으면 keyPoints 항목 끝에 \"(KOSHA 지침 X-XX-YYYY — 짧은 인용)\" 형식 포함.",
@@ -601,7 +609,7 @@ function educationRecordStructuredPrompt(ctx: GenContext) {
 
 function safetyEducationSinglePrompt(ctx: GenContext) {
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "안전보건교육 기록 초안 + 강조사항 5개를 작성하고 다음 JSON 형식으로만 반환하라.",
     "safetyEducationRecordDraft: 교육명/구분/일시/장소/대상/실시자/확인자/교육내용(법령조항 명시)/이해확인방법/TBM 연계/후속 교육 추천. 길이 1500~3500자.",
@@ -616,7 +624,7 @@ function safetyEducationSinglePrompt(ctx: GenContext) {
 function structuredRiskRowsPrompt(ctx: GenContext) {
   const rowSchema = FORM_SCHEMA_REGISTRY.riskAssessment.rowSchema;
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "위험성평가표 렌더러가 바로 사용할 수 있는 JSON rows만 반환하라.",
     "산문, 마크다운, 설명, 코드 fence 금지. 최상위 객체는 반드시 {\"rows\":[...]} 형태.",
@@ -656,7 +664,7 @@ function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
     evidenceRefs: row.evidenceRefs
   }));
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "위험성평가 rows를 TBM에서 바로 확인할 수 있는 연결 질문 JSON으로 변환하라.",
     "산문, 마크다운, 설명, 코드 fence 금지. 최상위 객체는 반드시 {\"tbmRiskLinks\":[...]} 형태.",
@@ -706,7 +714,7 @@ function emergencyContactRules() {
 
 export function freeFormPrompt(ctx: GenContext) {
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "다음 4개의 자유 텍스트 본문을 모두 작성하고 JSON 객체로 반환하라:",
     "  - workpackSummaryDraft: 점검결과 요약(초안). 현장명/작업조건/핵심 위험/즉시 조치/연결 상태를 첫 장으로 정리. 600자 내외.",
@@ -730,7 +738,7 @@ export function freeFormPrompt(ctx: GenContext) {
 
 export function foreignWorkerPrompt(ctx: GenContext) {
   return [
-    persona(),
+    persona(ctx.phaseAGrounding),
     "",
     "외국인 근로자용 안내문 2종을 작성하고 JSON 객체로 반환하라.",
     "반드시 세 키(foreignWorkerBriefing, foreignWorkerTransmission, foreignWorkerLanguages)를 모두 포함한 하나의 JSON 객체만 출력하라. JSON 앞뒤에 코드펜스·설명·후기 등 어떤 텍스트도 붙이지 마라.",
@@ -798,6 +806,8 @@ export type GenerateAllOptions = {
   dbHarnessContext?: string;
   /** Runtime-built immutable allowlist for references and structured control provenance. */
   groundingPacket?: GroundedGenerationPacket;
+  /** Phase A evidence pack selected and frozen before provider generation. */
+  phaseAGrounding?: PhaseAGenerationGrounding;
   /**
    * Which call groups to run.
    * - "full" (default): all tabular + free + foreign -> broad document pack AI generation
@@ -828,6 +838,7 @@ function buildContext(opts: GenerateAllOptions): GenContext {
     koshaPrimaryRefs: opts.koshaPrimaryRefs || [],
     dbHarnessContext: opts.dbHarnessContext,
     groundingPacket: opts.groundingPacket,
+    phaseAGrounding: opts.phaseAGrounding,
     workDate: formatWorkDate(new Date())
   };
 }
@@ -1308,6 +1319,16 @@ export async function generateAllDeliverablesWithDiagnostics(
   const groundingViolations: NonNullable<AiDeliverablesDiagnostics["grounding"]>["violations"] = [];
 
   const rejectForGrounding = (name: string, value: Partial<AiDeliverables>): boolean => {
+    if (opts.phaseAGrounding) {
+      const phaseAValidation = validatePhaseAStructuredCitationOutput(value, opts.phaseAGrounding);
+      if (phaseAValidation.status === "review_required") {
+        rejectedGroundingGroups.push(name);
+        for (const documentKey of DELIVERABLE_GROUP_DOCUMENT_KEYS[name] || []) {
+          modelPerDocument[documentKey] = deterministicDocumentTrace(true);
+        }
+        return true;
+      }
+    }
     if (!opts.groundingPacket) return false;
     const validation = validateGroundedGenerationOutput(value, opts.groundingPacket);
     if (validation.status === "grounded") return false;

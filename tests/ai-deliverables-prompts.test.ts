@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { contextBlock, foreignWorkerPrompt, freeFormPrompt, parseForeign, parseFree, persona } from "@/lib/ai-deliverables";
 import { ACCIDENT_REPORT_TEMPLATE } from "@/lib/safety-contacts";
+import { buildPhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
 
 const baseCtx = {
   question: "질문",
@@ -39,6 +40,20 @@ describe("persona", () => {
     expect(persona()).toContain("불변 생성 근거 패킷에 제공된 후보만 인용");
     expect(persona()).toContain("후보가 없으면 조문 번호를 만들지 않는다");
     expect(persona()).not.toContain("제38조·제39조");
+  });
+
+  it("places Phase A grounding before the deliverable persona", () => {
+    const grounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_registered",
+      evidencePack: null,
+    });
+    const prompt = persona(grounding);
+
+    expect(prompt).toContain("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>");
+    expect(prompt.indexOf("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>")).toBeLessThan(
+      prompt.indexOf("당신은 한국 산업안전기사"),
+    );
+    expect(prompt).toContain('"groundingStatus":"missing"');
   });
 });
 
