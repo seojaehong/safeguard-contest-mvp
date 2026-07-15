@@ -1,6 +1,12 @@
 {
   "artifact": "public-mcp-tenant-memory-hook-2026-07-16",
-  "status": "passed_pending_final_re_review",
+  "status": "integrated_independent_review_passed",
+  "integrationCommit": "ee96509ccf53cd884dc2300e40b40ce25783a90b",
+  "independentReview": {
+    "spec": "PASS",
+    "codeQuality": "PASS",
+    "findings": 0
+  },
   "databaseMutationPerformed": false,
   "legacyRawMemoryQueryRemoved": true,
   "tenantMemoryAdapter": "loadTenantHarnessMemoryForMcp",

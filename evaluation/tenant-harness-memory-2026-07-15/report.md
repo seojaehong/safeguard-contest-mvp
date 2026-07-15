@@ -5,9 +5,9 @@
 - Review date: `2026-07-16`
 - Branch: `feat/tenant-harness-memory-20260715`
 - Scoped claw runtime: **PASS**
-- Public MCP integration: **SPEC_PENDING**
-- Public `app/api/mcp` implementation modified: **no**
-- Commit/push: **not performed by request**
+- Public MCP integration: **INTEGRATED** (`ee96509`)
+- Public `app/api/mcp` implementation modified downstream: **yes** (`ee96509`)
+- Source and integration commits: **pushed**
 
 ## Fixed Contract
 
@@ -53,4 +53,4 @@ Logs:
 
 ## Public MCP Boundary
 
-`PUBLIC_MCP_TENANT_MEMORY_HOOK_STATUS` is explicitly `SPEC_PENDING`. Phase A still owns the public `app/api/mcp/[transport]/implementation.ts` integration. This worktree does not claim that path is integrated or probe-verified; its legacy raw arguments are ignored by `buildHarnessAgentResult`, preventing them from entering the returned runtime payload until Phase A adopts the structured adapter.
+The original scoped memory commit did not modify the public MCP route. The downstream integration at `ee96509` removed the legacy raw DB reads from `app/api/mcp/[transport]/implementation.ts`, calls `loadTenantHarnessMemoryForMcp`, and sets `PUBLIC_MCP_TENANT_MEMORY_HOOK_STATUS` to `INTEGRATED`. The final independent review found no raw text, OCR, photo-analysis, name, phone, or email path in the public MCP payload. The integrated focused gate passed `6` files and `62` tests with strict typecheck.
