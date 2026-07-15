@@ -1049,6 +1049,8 @@ export function SafeGuardCommandCenter({
   const [generationFingerprint, setGenerationFingerprint] = useState<string | null>(null);
   const [requiresRevalidation, setRequiresRevalidation] = useState(false);
   const [message, setMessage] = useState("");
+  const [inputError, setInputError] = useState("");
+  const commandInputRef = useRef<HTMLTextAreaElement>(null);
   const [state, setState] = useState<GenerationState>("idle");
   const [checkedActions, setCheckedActions] = useState<boolean[]>([]);
   const [liveWeather, setLiveWeather] = useState<WeatherBrief | null>(null);
@@ -1575,10 +1577,14 @@ export function SafeGuardCommandCenter({
   async function generateWorkpack(nextQuestion = question) {
     const trimmed = buildGenerationQuestionWithPhotoAnalysis(nextQuestion).trim();
     if (!trimmed) {
-      setMessage("현장 상황을 입력해 주세요.");
+      const errorMessage = "현장 상황을 입력해 주세요.";
+      setInputError(errorMessage);
+      setMessage(errorMessage);
+      commandInputRef.current?.focus();
       return;
     }
 
+    setInputError("");
     setState("generating");
     setDocumentSurfaceMode("review");
     setWorkspacePage(nextWorkspacePageAfterGenerate());
@@ -1883,12 +1889,14 @@ export function SafeGuardCommandCenter({
               <span className={inputWarning ? "counter warning" : "counter"}>{question.length}/{inputLimit}자</span>
             </div>
             <textarea
+              ref={commandInputRef}
               id="field-command-input"
               className="textarea command-console-input"
               value={question}
               onChange={(event) => {
                 const nextQuestion = event.target.value;
                 setQuestion(nextQuestion);
+                setInputError("");
                 if (!nextQuestion.trim()) {
                   setSelectedExampleId(null);
                 }
@@ -1898,11 +1906,17 @@ export function SafeGuardCommandCenter({
               }}
               maxLength={inputLimit}
               placeholder=""
-              aria-describedby="field-command-tips"
+              aria-describedby={inputError ? "field-command-tips field-command-error" : "field-command-tips"}
+              aria-invalid={Boolean(inputError)}
             />
             <p className="input-helper" id="field-command-tips">
               작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 최대 {MAX_INPUT_HAZARD_PHOTO_FILES}장 첨부하세요.
             </p>
+            {inputError ? (
+              <p className="input-helper input-helper-error" id="field-command-error" role="alert">
+                {inputError}
+              </p>
+            ) : null}
             <div className="input-composer-tray" aria-label="현장 입력 첨부">
               <label className="composer-attach-button" aria-label="현장 사진 첨부">
                 <input
