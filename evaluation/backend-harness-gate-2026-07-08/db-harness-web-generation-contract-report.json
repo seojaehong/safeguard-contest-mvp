@@ -1,0 +1,46 @@
+{
+  "date": "2026-07-09",
+  "scope": "web_runAsk_db_harness_generation_contract",
+  "status": "verified_in_code_and_tests",
+  "goal": "Expose and enforce DB-harness-first generation in the web /api/ask path, not only MCP/OpenClaw tools.",
+  "changes": {
+    "askResponseDbHarness": true,
+    "qualityContractDbHarness": true,
+    "aiPromptDbHarnessContext": true,
+    "llmRole": "naturalize_only",
+    "fallbackChainAllowed": false,
+    "requiredDocuments": [
+      "위험성평가표",
+      "TBM 브리핑",
+      "TBM 기록"
+    ]
+  },
+  "files": {
+    "packetBuilder": "lib/db-harness.ts",
+    "webRouteAssembly": "lib/search.ts",
+    "promptContext": "lib/ai-deliverables.ts",
+    "responseTypes": "lib/types.ts",
+    "qualityContract": "lib/quality-contract.ts"
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests/quality-contract.test.ts tests/ai-deliverables-prompts.test.ts tests/commercial-harness.test.ts tests/run-ask-mode.test.ts",
+      "filesPassed": 4,
+      "testsPassed": 26
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "passed": true
+    }
+  },
+  "notes": [
+    "The enhanced/full web generation path now builds a DB harness packet from safety_reference_items before AI deliverable prompts are generated.",
+    "The prompt context includes a DB harness contract section that tells the LLM to naturalize fixed evidence only.",
+    "The final AskResponse exposes dbHarness.packet, dbHarness.promptContext, and dbHarness.summary so UI and saved workpacks can distinguish DB harness generation from a plain LLM response.",
+    "Template mode remains a no-external-call demo mode and is intentionally marked blocked in qualityContract.dbHarness."
+  ]
+}

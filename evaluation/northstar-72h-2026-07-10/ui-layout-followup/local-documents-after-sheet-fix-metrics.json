@@ -1,0 +1,47 @@
+{
+  "sheetExportPanel": {
+    "top": 1164.9375,
+    "bottom": 2792.609375,
+    "left": 297,
+    "right": 555,
+    "width": 258,
+    "height": 1627.671875,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(23, 25, 29)"
+  },
+  "editor": {
+    "top": -149.890625,
+    "bottom": 2813.609375,
+    "left": 592,
+    "right": 1416,
+    "width": 824,
+    "height": 2963.5,
+    "background": "rgb(255, 255, 255)",
+    "color": "rgb(23, 25, 29)"
+  },
+  "activeTab": {
+    "top": 12.6875,
+    "bottom": 98.375,
+    "left": 297,
+    "right": 555,
+    "width": 258,
+    "height": 85.6875,
+    "background": "rgb(245, 246, 248)",
+    "color": "rgb(23, 25, 29)"
+  },
+  "textarea": {
+    "top": 136.5625,
+    "bottom": 596.5625,
+    "left": 613,
+    "right": 1395,
+    "width": 782,
+    "height": 460,
+    "background": "rgb(255, 255, 255)",
+    "color": "rgb(23, 25, 29)"
+  },
+  "scrollWidth": 1440,
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  }
+}

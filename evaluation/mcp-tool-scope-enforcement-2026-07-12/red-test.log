@@ -1,0 +1,296 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/mcp-scope-red-proof
+
+ ❯ tests/mcp-token-service.test.ts (19 tests | 2 failed) 65ms
+     × issues explicit SafeClaw tool scopes instead of a future-expanding wildcard 4ms
+     × keeps the operator CLI on the same explicit tool contract 15ms
+ ❯ tests/mcp-tools.test.ts (25 tests | 1 failed) 52ms
+     × toToolError preserves a stable public code without exposing extra fields 16ms
+ ❯ tests/mcp-auth.test.ts (23 tests | 7 failed) 28ms
+     × fails closed for malformed or empty DB scope values 10ms
+     × keeps only known scopes, trims them, and removes duplicates 2ms
+     × allows explicit tool scopes and the legacy operator wildcard 1ms
+     × maps read and write roles to their bounded tool sets 1ms
+     × fails closed when auth context or an allowed scope is missing 0ms
+     × defines one stable unique name for every exposed SafeClaw MCP tool 0ms
+     × nulls missing site/org and normalizes bad scopes 2ms
+ ❯ tests/mcp-route-scope-contract.test.ts (1 test | 1 failed) 9ms
+     × authorizes every registered tool before its handler performs work 7ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/mcp-auth.test.ts > normalizeScopes > fails closed for malformed or empty DB scope values
+AssertionError: expected [ 'tools:*' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "tools:*",
++ ]
+
+ ❯ tests/mcp-auth.test.ts:59:35
+     57|
+     58|   it("fails closed for malformed or empty DB scope values", () => {
+     59|     expect(normalizeScopes(null)).toEqual([]);
+       |                                   ^
+     60|     expect(normalizeScopes([])).toEqual([]);
+     61|     expect(normalizeScopes([1, 2])).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  tests/mcp-auth.test.ts > normalizeScopes > keeps only known scopes, trims them, and removes duplicates
+AssertionError: expected [ ' tools:get_weather_signals ', …(3) ] to deeply equal [ 'tools:get_weather_signals', …(1) ]
+
+- Expected
++ Received
+
+  [
++   " tools:get_weather_signals ",
++   "tools:unknown_future_tool",
+    "tools:get_weather_signals",
+    "tools:read",
+  ]
+
+ ❯ tests/mcp-auth.test.ts:71:9
+     69|       "tools:get_weather_signals",
+     70|       "tools:read",
+     71|     ])).toEqual(["tools:get_weather_signals", "tools:read"]);
+       |         ^
+     72|   });
+     73| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  tests/mcp-auth.test.ts > MCP tool scope enforcement > allows explicit tool scopes and the legacy operator wildcard
+TypeError: isMcpToolAllowed is not a function
+ ❯ tests/mcp-auth.test.ts:85:12
+     83|
+     84|   it("allows explicit tool scopes and the legacy operator wildcard", (…
+     85|     expect(isMcpToolAllowed(context(["tools:get_weather_signals"]), "g…
+       |            ^
+     86|     expect(isMcpToolAllowed(context(["tools:get_weather_signals"]), "g…
+     87|     expect(isMcpToolAllowed(context(["tools:*"]), "generate_safety_doc…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  tests/mcp-auth.test.ts > MCP tool scope enforcement > maps read and write roles to their bounded tool sets
+TypeError: isMcpToolAllowed is not a function
+ ❯ tests/mcp-auth.test.ts:91:12
+     89|
+     90|   it("maps read and write roles to their bounded tool sets", () => {
+     91|     expect(isMcpToolAllowed(context(["tools:read"]), "query_safety_kno…
+       |            ^
+     92|     expect(isMcpToolAllowed(context(["tools:read"]), "generate_reviewe…
+     93|     expect(isMcpToolAllowed(context(["tools:write"]), "generate_review…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  tests/mcp-auth.test.ts > MCP tool scope enforcement > fails closed when auth context or an allowed scope is missing
+TypeError: isMcpToolAllowed is not a function
+ ❯ tests/mcp-auth.test.ts:98:12
+     96|
+     97|   it("fails closed when auth context or an allowed scope is missing", …
+     98|     expect(isMcpToolAllowed(null, "get_weather_signals")).toBe(false);
+       |            ^
+     99|     expect(isMcpToolAllowed(context([]), "get_weather_signals")).toBe(…
+    100|     expect(() => requireMcpToolScope(null, "get_weather_signals")).toT…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  tests/mcp-auth.test.ts > MCP tool scope enforcement > defines one stable unique name for every exposed SafeClaw MCP tool
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ tests/mcp-auth.test.ts:107:62
+    105|
+    106|   it("defines one stable unique name for every exposed SafeClaw MCP to…
+    107|     expect(new Set(MCP_TOOL_NAMES).size).toBe(MCP_TOOL_NAMES.length);
+       |                                                              ^
+    108|     expect(MCP_TOOL_NAMES).toEqual([
+    109|       "run_safeclaw_harness_agent",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+ FAIL  tests/mcp-auth.test.ts > buildDbContext > nulls missing site/org and normalizes bad scopes
+AssertionError: expected { siteId: null, orgId: null, …(3) } to deeply equal { siteId: null, orgId: null, …(3) }
+
+- Expected
++ Received
+
+  {
+    "orgId": null,
+-   "scopes": [],
++   "scopes": [
++     "tools:*",
++   ],
+    "siteId": null,
+    "source": "db",
+    "tokenId": "t",
+  }
+
+ ❯ tests/mcp-auth.test.ts:150:17
+    148|   it("nulls missing site/org and normalizes bad scopes", () => {
+    149|     const ctx = buildDbContext({ id: "t", site_id: null, org_id: null,…
+    150|     expect(ctx).toEqual({ siteId: null, orgId: null, scopes: [], sourc…
+       |                 ^
+    151|   });
+    152| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
+
+ FAIL  tests/mcp-route-scope-contract.test.ts > MCP route scope contract > authorizes every registered tool before its handler performs work
+TypeError: MCP_TOOL_NAMES is not iterable
+ ❯ tests/mcp-route-scope-contract.test.ts:16:63
+     14|     );
+     15|
+     16|     expect(registrations.map(({ name }) => name)).toEqual([...MCP_TOOL…
+       |                                                               ^
+     17|
+     18|     for (const [index, registration] of registrations.entries()) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯
+
+ FAIL  tests/mcp-token-service.test.ts > buildMcpTokenInsert > issues explicit SafeClaw tool scopes instead of a future-expanding wildcard
+TypeError: Cannot read properties of undefined (reading 'map')
+ ❯ tests/mcp-token-service.test.ts:66:55
+     64|
+     65|   it("issues explicit SafeClaw tool scopes instead of a future-expandi…
+     66|     expect(DEFAULT_MCP_SCOPES).toEqual(MCP_TOOL_NAMES.map((toolName) =…
+       |                                                       ^
+     67|     expect(DEFAULT_MCP_SCOPES).not.toContain("tools:*");
+     68|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/11]⎯
+
+ FAIL  tests/mcp-token-service.test.ts > buildMcpTokenInsert > keeps the operator CLI on the same explicit tool contract
+AssertionError: expected '// SafeClaw MCP 테넌트 토큰 발급 스크립트.\r\n//…' to contain 'import { MCP_TOOL_SCOPES } from "../l…'
+
+- Expected
++ Received
+
+- import { MCP_TOOL_SCOPES } from "../lib/mcp-tool-contract.mjs";
++ // SafeClaw MCP 테넌트 토큰 발급 스크립트.
++ //
++ // 랜덤 Bearer 토큰을 생성해 sha256 해시만 Supabase mcp_tokens에 저장하고,
++ // 평문 토큰은 stdout에 딱 한 번 출력한다(평문은 DB·로그·파일 어디에도 남기지 않는다).
++ // 서비스 롤 키가 필요하다(mcp_tokens는 RLS로 service_role 전용).
++ //
++ // 사용법:
++ //   node scripts/issue-mcp-token.mjs "<label>" ["<site name>"]
++ //   예) node scripts/issue-mcp-token.mjs "부평 파일럿 - 안전관리자" "부평공장"
++ //   - <site name> 생략 시 사이트 미귀속(조직/사이트 null) 토큰이 발급된다.
++ //
++ // 환경변수(.env.local 자동 로드): SUPABASE_URL(또는 NEXT_PUBLIC_SUPABASE_URL),
++ //   SUPABASE_SERVICE_ROLE_KEY.
++
++ import { createHash, randomBytes } from "node:crypto";
++ import path from "node:path";
++ import { createClient } from "@supabase/supabase-js";
++
++ try {
++   process.loadEnvFile(path.join(process.cwd(), ".env.local"));
++ } catch {
++   // .env.local이 없어도 환경변수가 이미 있으면 진행한다.
++ }
++
++ function fail(message) {
++   console.error(message);
++   process.exit(1);
++ }
++
++ const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
++ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
++ const label = process.argv[2];
++ const siteName = process.argv[3];
++
++ if (!supabaseUrl) fail("Missing SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL.");
++ if (!serviceRoleKey) fail("Missing SUPABASE_SERVICE_ROLE_KEY (service role required for mcp_tokens).");
++ if (!label) fail('Usage: node scripts/issue-mcp-token.mjs "<label>" ["<site name>"]');
++
++ const client = createClient(supabaseUrl, serviceRoleKey, {
++   auth: { persistSession: false, autoRefreshToken: false },
++ });
++
++ // 사이트 지정 시 site_id + organization_id 해석.
++ let siteId = null;
++ let orgId = null;
++ if (siteName) {
++   const { data: sites, error } = await client
++     .from("sites")
++     .select("id, name, organization_id")
++     .eq("name", siteName);
++   if (error) fail(`Site lookup failed: ${error.message}`);
++   if (!sites || sites.length === 0) fail(`Site not found: "${siteName}"`);
++   if (sites.length > 1) fail(`Multiple sites named "${siteName}" — disambiguate manually.`);
++   siteId = sites[0].id;
++   orgId = sites[0].organization_id;
++ }
++
++ // 랜덤 토큰(평문). base64url 32바이트 + 접두사. 해시만 저장한다.
++ const token = `sclaw_${randomBytes(32).toString("base64url")}`;
++ const tokenHash = createHash("sha256").update(token.trim(), "utf8").digest("hex");
++
++ const { data, error } = await client
++   .from("mcp_tokens")
++   .insert({
++     token_hash: tokenHash,
++     label,
++     site_id: siteId,
++     org_id: orgId,
++     scopes: ["tools:*"],
++   })
++   .select("id")
++   .single();
++
++ if (error) fail(`Token insert failed: ${error.message}`);
++
++ // 안내는 stderr, 평문 토큰은 stdout에 단 한 번만.
++ console.error(
++   `Issued MCP token id=${data.id} label=${JSON.stringify(label)} site=${
++     siteName ? JSON.stringify(siteName) : "(none)"
++   }`
++ );
++ console.error("Plaintext token below — copy it now, it is NOT recoverable:");
++ console.log(token);
++
+
+ ❯ tests/mcp-token-service.test.ts:73:20
+     71|     const script = readFileSync(join(process.cwd(), "scripts/issue-mcp…
+     72|
+     73|     expect(script).toContain('import { MCP_TOOL_SCOPES } from "../lib/…
+       |                    ^
+     74|     expect(script).toContain("scopes: [...MCP_TOOL_SCOPES]");
+     75|     expect(script).not.toContain('scopes: ["tools:*"]');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/11]⎯
+
+ FAIL  tests/mcp-tools.test.ts > tool result helpers > toToolError preserves a stable public code without exposing extra fields
+AssertionError: expected { error: '도구 권한이 없습니다.' } to deeply equal { code: 'MCP_TOOL_FORBIDDEN', …(1) }
+
+- Expected
++ Received
+
+  {
+-   "code": "MCP_TOOL_FORBIDDEN",
+    "error": "도구 권한이 없습니다.",
+  }
+
+ ❯ tests/mcp-tools.test.ts:375:21
+    373|     const payload = JSON.parse(toToolError(error).content[0].text) as …
+    374|
+    375|     expect(payload).toEqual({ code: "MCP_TOOL_FORBIDDEN", error: "도구 권…
+       |                     ^
+    376|     expect(payload).not.toHaveProperty("secret");
+    377|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/11]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  11 failed | 57 passed (68)
+   Start at  16:34:07
+   Duration  4.53s (transform 373ms, setup 0ms, import 889ms, tests 153ms, environment 1ms)

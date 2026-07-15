@@ -73,10 +73,12 @@ describe("attachProgressListeners", () => {
     ]);
   });
 
-  test("emits start then fail (with detail) when a promise rejects", async () => {
+  test("emits a stable safe failure through SSE when a promise rejects with PII and a secret", async () => {
     const events: AskProgressEvent[] = [];
     const onProgress = (e: AskProgressEvent) => events.push(e);
-    const rejected = Promise.reject(new Error("boom"));
+    const rejected = Promise.reject(
+      new Error("boom resident=900101-1234567 Authorization=Bearer secret-token")
+    );
 
     attachProgressListeners([{ stage: "kosha", promise: rejected }], onProgress);
 
@@ -84,8 +86,18 @@ describe("attachProgressListeners", () => {
     await Promise.resolve();
     expect(events).toEqual([
       { kind: "stage", stage: "kosha", status: "start" },
-      { kind: "stage", stage: "kosha", status: "fail", detail: "boom" }
+      {
+        kind: "stage",
+        stage: "kosha",
+        status: "fail",
+        code: "ask_stage_failed",
+        detail: "이 단계를 완료하지 못했습니다. 다음 단계는 계속 진행합니다."
+      }
     ]);
+    const sse = events.map(formatSseEvent).join("");
+    expect(sse).not.toContain("900101-1234567");
+    expect(sse).not.toContain("secret-token");
+    expect(sse).not.toContain("boom");
   });
 
   test("handles a mixed batch independent of settlement order", async () => {
@@ -118,7 +130,8 @@ describe("attachProgressListeners", () => {
       kind: "stage",
       stage: "b",
       status: "fail",
-      detail: "string reason"
+      code: "ask_stage_failed",
+      detail: "이 단계를 완료하지 못했습니다. 다음 단계는 계속 진행합니다."
     });
   });
 

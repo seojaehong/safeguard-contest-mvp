@@ -1,18 +1,38 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from "react";
 import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { ClawChat } from "@/components/ClawChat";
+import {
+  createClawContextRequestSession,
+  reportClawContextLoadFailure,
+  resolveClawContextViewState,
+  type ClawContextRequestSession,
+  type ClawContextSiteOption as ClawSiteOption,
+  type ClawContextStatus,
+  type ClawContextViewState,
+} from "@/lib/claw-chat-session";
+import { OperationMemoryGraphViewer } from "@/components/OperationMemoryPreview";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
-import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
+import {
+  WorkpackEditor,
+  type DocumentKey,
+  type WorkpackDeliverablesChange,
+  type WorkpackDocumentValues
+} from "@/components/WorkpackEditor";
 import {
   buildStoredCurrentWorkpack,
   CURRENT_WORKPACK_STORAGE_KEY,
+  parseStoredCurrentWorkpack,
   type CurrentDispatchSnapshot,
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
+import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
+import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/workpack-readiness";
+import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
+import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
 import {
   buildDefaultWorkers,
   buildEducationRecordDrafts,
@@ -37,6 +57,11 @@ type SaveResponse = {
 
 type StorageStatusLabel = "비회원 임시 저장" | "관리자 로그인 필요" | "관리자 이력 저장 완료" | "저장 실패";
 
+type InitialWorkerState = {
+  workers: WorkerProfile[];
+  selectedWorkerIds: string[];
+};
+
 type WorkspaceSaveSnapshot = {
   ok: boolean;
   label: StorageStatusLabel;
@@ -44,6 +69,44 @@ type WorkspaceSaveSnapshot = {
   workpackId: string | null;
   savedAt: string | null;
   savedCount: number;
+  workerMap: Record<string, string>;
+};
+
+type ClawContextResponse = { sites?: ClawSiteOption[] };
+
+function resolveInitialWorkerState(data: AskResponse, generationFingerprint?: string): InitialWorkerState {
+  const fallbackWorkers = buildDefaultWorkers(data);
+  const fallback = {
+    workers: fallbackWorkers,
+    selectedWorkerIds: fallbackWorkers.map((worker) => worker.id)
+  };
+  if (typeof window === "undefined") return fallback;
+
+  const stored = parseStoredCurrentWorkpack(window.localStorage.getItem(CURRENT_WORKPACK_STORAGE_KEY));
+  const sameGeneration = stored && generationFingerprint
+    ? stored.generationFingerprint === generationFingerprint
+    : stored?.data.question === data.question;
+  if (!stored?.workerSnapshot || !sameGeneration) return fallback;
+
+  return {
+    workers: stored.workerSnapshot.workers,
+    selectedWorkerIds: stored.workerSnapshot.selectedWorkerIds
+  };
+}
+
+type LearningExportFormat = "markdown" | "jsonl" | "obsidian";
+
+type OperationGraphResponse = {
+  ok: boolean;
+  configured: boolean;
+  graph?: OperationMemoryGraph;
+  source?: {
+    referenceCount: number;
+    improvementCount: number;
+    confirmationCount: number;
+    retrievalMode: string;
+  } | "unconfigured";
+  message?: string;
 };
 
 type WorkerDraft = {
@@ -78,6 +141,19 @@ const languageOptions: LanguageOption[] = [
   { code: "id", label: "인도네시아어" },
   { code: "ne", label: "네팔어" }
 ];
+
+function readDownloadFileName(disposition: string | null, fallback: string): string {
+  if (!disposition) return fallback;
+  const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  if (encoded) {
+    try {
+      return decodeURIComponent(encoded);
+    } catch (error) {
+      console.warn("learning export filename decode failed", error);
+    }
+  }
+  return disposition.match(/filename="?([^";]+)"?/i)?.[1] || fallback;
+}
 
 let supabaseBrowserClient: SupabaseClient | null = null;
 
@@ -159,7 +235,22 @@ function buildEvidenceSummary(data: AskResponse) {
       training: data.externalData.training.mode,
       koshaEducation: data.externalData.koshaEducation.mode,
       kosha: data.externalData.kosha.mode,
-      accidentCases: data.externalData.accidentCases.mode
+      accidentCases: data.externalData.accidentCases.mode,
+      safetyReference: data.externalData.safetyReference
+        ? {
+            mode: data.externalData.safetyReference.mode,
+            retrievalMode: data.externalData.safetyReference.retrievalMode,
+            items: data.externalData.safetyReference.items.slice(0, 6).map((item) => ({
+              id: item.id,
+              title: item.displayTitle || item.title,
+              rawTitle: item.rawTitle,
+              itemType: item.itemType,
+              primaryDocuments: item.primaryDocuments,
+              controls: item.controls,
+              shortSummary: item.displaySummary || item.shortSummary
+            }))
+          }
+        : undefined
     }
   };
 }
@@ -480,12 +571,13 @@ function WorkerEducationPanel({
 function EvidenceImpactPanel({ data }: { data: AskResponse }) {
   const koshaReferences = data.externalData.kosha.references.slice(0, 3);
   const accidentCases = data.externalData.accidentCases.cases.slice(0, 2);
-  const hasEvidenceImpact = koshaReferences.length > 0 || accidentCases.length > 0;
+  const safetyReferences = data.externalData.safetyReference?.items.slice(0, 3) || [];
+  const hasEvidenceImpact = koshaReferences.length > 0 || accidentCases.length > 0 || safetyReferences.length > 0;
   const officialFallbackUrl = "https://www.kosha.or.kr/kosha/data/guidance.do";
   const safeExternalUrl = (url?: string) => (url && /^https?:\/\//.test(url) ? url : officialFallbackUrl);
 
   return (
-    <section className="evidence-impact-grid" id="references">
+    <section className="evidence-impact-grid workbench-evidence-rail" id="references">
       <article className="workspace-panel card">
         <div className="compact-head">
           <span className="eyebrow">근거</span>
@@ -518,6 +610,13 @@ function EvidenceImpactPanel({ data }: { data: AskResponse }) {
               <small>{item.preventionPoint}</small>
             </a>
           ))}
+          {safetyReferences.map((item) => (
+            <div key={item.id} className="impact-card">
+              <strong>{item.displayTitle || item.title}</strong>
+              <span>{item.sourceKindLabel || "안전 지식 DB"} · {(item.primaryDocuments || ["위험성평가표"]).join(", ")}</span>
+              <small>{item.displaySummary || item.shortSummary || item.controls.slice(0, 2).join(", ")}</small>
+            </div>
+          ))}
           {!hasEvidenceImpact ? (
             <div className="impact-empty-state">
               <strong>공식자료 반영 대기</strong>
@@ -541,6 +640,8 @@ function WorkpackHistoryPanel({
   onSaveWorkspace: () => Promise<WorkspaceSaveSnapshot>;
 }) {
   const [isSaving, setIsSaving] = useState(false);
+  const [downloadingFormat, setDownloadingFormat] = useState<LearningExportFormat | null>(null);
+  const [downloadMessage, setDownloadMessage] = useState("");
 
   async function saveWorkspace() {
     setIsSaving(true);
@@ -550,6 +651,55 @@ function WorkpackHistoryPanel({
       console.error("workspace save failed", error);
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function downloadLearningExport(format: LearningExportFormat) {
+    if (!session || !storageSnapshot.workpackId) {
+      setDownloadMessage("관리자 로그인 후 작업공간을 저장하면 현장 개선 메모리를 내려받을 수 있습니다.");
+      return;
+    }
+
+    setDownloadingFormat(format);
+    setDownloadMessage("");
+    try {
+      const response = await fetch(`/api/workpacks/${encodeURIComponent(storageSnapshot.workpackId)}/learning-export?format=${format}`, {
+        headers: { authorization: `Bearer ${session.access_token}` }
+      });
+      if (!response.ok) {
+        const payload: unknown = await response.json().catch((): unknown => null);
+        const message = typeof payload === "object" && payload !== null && "message" in payload && typeof payload.message === "string"
+          ? payload.message
+          : "현장 개선 메모리 다운로드에 실패했습니다.";
+        throw new Error(message);
+      }
+
+      const blob = await response.blob();
+      const extension = format === "jsonl" ? "jsonl" : "md";
+      const fileName = readDownloadFileName(
+        response.headers.get("content-disposition"),
+        `safeclaw-${storageSnapshot.workpackId}-learning.${extension}`
+      );
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = fileName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      if (format === "jsonl") {
+        setDownloadMessage("JSONL 운영 메모리를 내려받았습니다.");
+      } else if (format === "obsidian") {
+        setDownloadMessage("Obsidian용 작업 그래프 Markdown을 내려받았습니다.");
+      } else {
+        setDownloadMessage("Markdown 개선 메모리를 내려받았습니다.");
+      }
+    } catch (error) {
+      console.error("learning export download failed", error);
+      setDownloadMessage(error instanceof Error ? error.message : "현장 개선 메모리 다운로드 중 오류가 발생했습니다.");
+    } finally {
+      setDownloadingFormat(null);
     }
   }
 
@@ -568,32 +718,240 @@ function WorkpackHistoryPanel({
       <button type="button" className="button full-button" onClick={saveWorkspace} disabled={isSaving}>
         {isSaving ? "저장 중" : session ? "작업공간 저장" : "관리자 로그인 후 저장"}
       </button>
+      <div className="learning-export-actions" aria-label="현장 개선 메모리 다운로드">
+        <button
+          type="button"
+          className="button secondary"
+          onClick={() => downloadLearningExport("markdown")}
+          disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
+        >
+          {downloadingFormat === "markdown" ? "내려받는 중" : "작업 이력 MD"}
+        </button>
+        <button
+          type="button"
+          className="button secondary"
+          onClick={() => downloadLearningExport("jsonl")}
+          disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
+        >
+          {downloadingFormat === "jsonl" ? "내려받는 중" : "하네스 JSONL"}
+        </button>
+        <button
+          type="button"
+          className="button secondary"
+          onClick={() => downloadLearningExport("obsidian")}
+          disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
+        >
+          {downloadingFormat === "obsidian" ? "내려받는 중" : "Obsidian MD"}
+        </button>
+      </div>
+      <p className="muted small">
+        저장된 작업팩만 다운로드됩니다. 개선사항, 근거 검색 출처, 열람 확인 이력을 관리자 검토용 운영 메모리 후보로 보관합니다.
+      </p>
+      {downloadMessage ? <p className="muted small">{downloadMessage}</p> : null}
     </article>
+  );
+}
+
+function WorkspaceOperationGraphPanel({
+  data,
+  session,
+  storageSnapshot
+}: {
+  data: AskResponse;
+  session: Session | null;
+  storageSnapshot: WorkspaceSaveSnapshot;
+}) {
+  const [generatedAt] = useState(() => new Date().toISOString());
+  const [serverGraph, setServerGraph] = useState<OperationMemoryGraph | null>(null);
+  const [graphMessage, setGraphMessage] = useState("");
+  const authToken = session?.access_token || "";
+  const workpackId = storageSnapshot.workpackId;
+  const localGraph = useMemo(
+    () => buildWorkspaceOperationMemoryGraph(data, {
+      workpackId,
+      generatedAt
+    }),
+    [data, generatedAt, workpackId]
+  );
+
+  useEffect(() => {
+    if (!authToken || !workpackId) {
+      setServerGraph(null);
+      setGraphMessage("저장 전에는 현재 생성 결과와 DB 하네스 패킷으로 작업 이력 그래프를 임시 구성합니다.");
+      return;
+    }
+
+    let cancelled = false;
+    fetch(`/api/workpacks/${encodeURIComponent(workpackId)}/operation-graph`, {
+      headers: { authorization: `Bearer ${authToken}` }
+    }).then(async (response) => {
+      const payload = await response.json().catch((): OperationGraphResponse => ({
+        ok: false,
+        configured: false,
+        message: "작업 이력 그래프 응답을 읽지 못했습니다."
+      })) as OperationGraphResponse;
+      if (!response.ok || !payload.ok || !payload.graph) {
+        throw new Error(payload.message || "저장된 작업 이력 그래프를 불러오지 못했습니다.");
+      }
+      if (cancelled) return;
+      setServerGraph(payload.graph);
+      setGraphMessage(typeof payload.source === "object"
+        ? "저장된 작업팩, 개선사항, 열람 확인 이력을 Supabase에서 다시 구성했습니다."
+        : "현재 생성 결과와 DB 하네스 패킷으로 작업 이력 그래프를 구성했습니다."
+      );
+    }).catch((error: unknown) => {
+      if (cancelled) return;
+      console.warn("workspace operation graph load failed", error);
+      setServerGraph(null);
+      setGraphMessage("저장 그래프 조회가 불안정해 현재 생성 결과 기준으로 표시합니다.");
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authToken, workpackId]);
+
+  const graph = serverGraph || localGraph;
+  const ackMessage = graph.summary.ackCount
+    ? `열람 확인 ${graph.summary.ackCount}건이 Ack 노드로 연결됐습니다.`
+    : "공유 후 작업자가 확인하면 Ack 노드가 채워집니다.";
+
+  return (
+    <OperationMemoryGraphViewer
+      graph={graph}
+      eyebrow="Operation Ontology"
+      title="작업 이력 그래프"
+      className="workspace-operation-memory"
+      description={(
+        <>
+          오늘 문서팩이 사용한 DB 하네스 근거, 유사 과거 작업, 위험요인, 감소대책, 사진 개선사항, 열람 확인을 한 화면에서 연결합니다.{" "}
+          {ackMessage}
+        </>
+      )}
+      statusMessage={graphMessage}
+    />
   );
 }
 
 export function FieldOperationsWorkspace({
   data,
+  generationFingerprint,
   editorFocusToken = 0,
-  requestedDocumentKey
+  requestedDocumentKey,
+  readiness,
+  onDeliverablesChange,
+  surface = "full"
 }: {
   data: AskResponse;
+  generationFingerprint?: string;
   editorFocusToken?: number;
   requestedDocumentKey?: DocumentKey;
+  readiness?: WorkpackReadiness;
+  onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
+  surface?: "full" | "share" | "editor";
 }) {
+  const [initialWorkerState] = useState(() => resolveInitialWorkerState(data, generationFingerprint));
   const [editedDeliverables, setEditedDeliverables] = useState<WorkpackDocumentValues | null>(null);
+  const editorDataRef = useRef(data);
+  const dataRef = useRef(data);
+  const onDeliverablesChangeRef = useRef(onDeliverablesChange);
+  const lastEditorValuesRef = useRef<WorkpackDocumentValues | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [workers, setWorkers] = useState<WorkerProfile[]>(() => buildDefaultWorkers(data));
-  const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(() => buildDefaultWorkers(data).map((worker) => worker.id));
+  const activeClawAuthToken = session?.access_token;
+  const [clawContextState, setClawContextState] = useState<ClawContextViewState>({
+    authToken: null,
+    siteOptions: [],
+    selectedSiteId: null,
+    status: "login-required",
+  });
+  const clawContextRequestSessionRef = useRef<ClawContextRequestSession | null>(null);
+  if (!clawContextRequestSessionRef.current) {
+    clawContextRequestSessionRef.current = createClawContextRequestSession();
+  }
+  const clawContextRequestSession = clawContextRequestSessionRef.current;
+  const activeClawContext = resolveClawContextViewState(activeClawAuthToken, clawContextState);
+  const clawSiteOptions = activeClawContext.siteOptions;
+  const selectedClawSiteId = activeClawContext.selectedSiteId;
+  const clawContextStatus: ClawContextStatus = activeClawContext.status;
+  const [workers, setWorkers] = useState<WorkerProfile[]>(initialWorkerState.workers);
+  const [selectedWorkerIds, setSelectedWorkerIds] = useState<string[]>(initialWorkerState.selectedWorkerIds);
   const [savedWorkpackId, setSavedWorkpackId] = useState<string | null>(null);
+  const [savedWorkerMap, setSavedWorkerMap] = useState<Record<string, string>>({});
   const [storageSnapshot, setStorageSnapshot] = useState<WorkspaceSaveSnapshot>({
     ok: false,
     label: "비회원 임시 저장",
     message: "문서 편집 내용은 이 브라우저에 임시 저장됩니다. 관리자 로그인 후 이력을 저장할 수 있습니다.",
     workpackId: null,
     savedAt: null,
-    savedCount: 0
+    savedCount: 0,
+    workerMap: {}
   });
+
+  useEffect(() => {
+    const token = activeClawAuthToken;
+    if (!token) {
+      setClawContextState({
+        authToken: null,
+        siteOptions: [],
+        selectedSiteId: null,
+        status: "login-required",
+      });
+      return;
+    }
+
+    const contextRequest = clawContextRequestSession.begin(token);
+    setClawContextState({
+      authToken: token,
+      siteOptions: [],
+      selectedSiteId: null,
+      status: "loading",
+    });
+    fetch("/api/agent/context", {
+      headers: { authorization: `Bearer ${token}` },
+      signal: contextRequest.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`agent context request failed (${response.status})`);
+        return await response.json() as ClawContextResponse;
+      })
+      .then((payload) => {
+        const sites = Array.isArray(payload.sites)
+          ? payload.sites.filter((site): site is ClawSiteOption => (
+            typeof site?.id === "string" && typeof site.name === "string"
+          ))
+          : [];
+        clawContextRequestSession.commit(contextRequest, () => {
+          setClawContextState({
+            authToken: token,
+            siteOptions: sites,
+            selectedSiteId: sites[0]?.id ?? null,
+            status: sites.length > 0 ? "ready" : "unavailable",
+          });
+        });
+      })
+      .catch(() => {
+        if (contextRequest.signal.aborted) return;
+        clawContextRequestSession.commit(contextRequest, () => {
+          reportClawContextLoadFailure();
+          setClawContextState({
+            authToken: token,
+            siteOptions: [],
+            selectedSiteId: null,
+            status: "unavailable",
+          });
+        });
+      });
+
+    return () => clawContextRequestSession.cancel(contextRequest);
+  }, [activeClawAuthToken, clawContextRequestSession]);
+  useEffect(() => () => clawContextRequestSession.dispose(), [clawContextRequestSession]);
+
+  const selectClawSite = useCallback((siteId: string) => {
+    setClawContextState((current) => {
+      const active = resolveClawContextViewState(activeClawAuthToken, current);
+      return { ...active, selectedSiteId: siteId };
+    });
+  }, [activeClawAuthToken]);
   const workspaceData = useMemo<AskResponse>(() => (
     editedDeliverables
       ? { ...data, deliverables: { ...data.deliverables, ...editedDeliverables } }
@@ -615,6 +973,15 @@ export function FieldOperationsWorkspace({
     () => buildWorkerDispatchTargets(selectedWorkers),
     [selectedWorkers]
   );
+  const savedWorkerIds = useMemo(() => {
+    if (!savedWorkpackId || !selectedWorkerIds.length) return [];
+    try {
+      return resolveSavedWorkerIds(savedWorkerMap, selectedWorkerIds);
+    } catch (error) {
+      console.error("saved worker UUID resolution failed", error);
+      return [];
+    }
+  }, [savedWorkerMap, savedWorkpackId, selectedWorkerIds]);
   const workerSnapshot = useMemo<CurrentWorkerSnapshot>(() => ({
     savedAt: new Date().toISOString(),
     source: "workspace",
@@ -627,25 +994,59 @@ export function FieldOperationsWorkspace({
     recipientSuggestions,
     targetWorkers
   }), [recipientSuggestions, targetWorkers]);
-  const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues) => {
-    setEditedDeliverables(values);
+  const workerSnapshotRef = useRef(workerSnapshot);
+  const dispatchSnapshotRef = useRef(dispatchSnapshot);
+
+  useEffect(() => {
+    if (surface !== "share") return;
+    const client = getSupabaseBrowserClient();
+    if (!client) return;
+
+    client.auth.getSession().then(({ data: sessionData }) => {
+      setSession(sessionData.session);
+    }).catch((error: unknown) => {
+      console.warn("supabase share session load failed", error);
+    });
+
+    const { data: listener } = client.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, [surface]);
+
+  useEffect(() => {
+    dataRef.current = data;
+    onDeliverablesChangeRef.current = onDeliverablesChange;
+    workerSnapshotRef.current = workerSnapshot;
+    dispatchSnapshotRef.current = dispatchSnapshot;
+  }, [data, dispatchSnapshot, onDeliverablesChange, workerSnapshot]);
+
+  const handleDeliverablesChange = useCallback((values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => {
+    const previousValues = lastEditorValuesRef.current;
+    const documentKeys = Object.keys(values) as DocumentKey[];
+    if (previousValues && documentKeys.every((key) => previousValues[key] === values[key])) return;
+    lastEditorValuesRef.current = values;
+    setEditedDeliverables((current) => {
+      const currentDocuments: Partial<Record<DocumentKey, string>> = current ?? dataRef.current.deliverables;
+      return documentKeys.every((key) => currentDocuments[key] === values[key]) ? current : values;
+    });
+    onDeliverablesChangeRef.current?.(values, change);
     if (typeof window === "undefined") return;
-    const nextData: AskResponse = {
-      ...data,
-      deliverables: {
-        ...data.deliverables,
-        ...values
-      }
-    };
+    const currentData = dataRef.current;
+    const nextData = applyWorkpackDeliverablesChange(currentData, values, change);
     try {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
-        JSON.stringify(buildStoredCurrentWorkpack(nextData, { workerSnapshot, dispatchSnapshot }))
+        JSON.stringify(buildStoredCurrentWorkpack(nextData, {
+          generationFingerprint,
+          workerSnapshot: workerSnapshotRef.current,
+          dispatchSnapshot: dispatchSnapshotRef.current
+        }))
       );
     } catch (error) {
       console.warn("safeclaw current workpack update failed", error);
     }
-  }, [data, dispatchSnapshot, workerSnapshot]);
+  }, []);
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
     ["PLAN", "계획", `${workspaceData.citations.length}건 근거 · 위험성평가·작업계획`],
@@ -674,7 +1075,8 @@ export function FieldOperationsWorkspace({
       message,
       workpackId: savedWorkpackId,
       savedAt: null,
-      savedCount: 0
+      savedCount: 0,
+      workerMap: savedWorkerMap
     };
     setStorageSnapshot(snapshot);
     return snapshot;
@@ -688,7 +1090,8 @@ export function FieldOperationsWorkspace({
         message: "관리자 로그인 후 문서팩, 작업자, 교육 확인, 전파 이력을 저장할 수 있습니다.",
         workpackId: savedWorkpackId,
         savedAt: null,
-        savedCount: 0
+        savedCount: 0,
+        workerMap: savedWorkerMap
       };
       setStorageSnapshot(snapshot);
       return snapshot;
@@ -717,13 +1120,18 @@ export function FieldOperationsWorkspace({
         return setStorageFailure(workpackResponse.message);
       }
 
+      const workerMap = workerResponse.workerMap || {};
+      resolveSavedWorkerIds(workerMap, selectedWorkerIds);
+      setSavedWorkpackId(workpackResponse.workpackId);
+      setSavedWorkerMap(workerMap);
+
       const selectedEducationRecords = educationRecords.filter((record) => (
         selectedWorkers.some((worker) => worker.id === record.workerId)
       ));
       const educationResponse = await postJson<SaveResponse>("/api/education-records", {
         scenario: workspaceData.scenario,
         workpackId: workpackResponse.workpackId,
-        workerMap: workerResponse.workerMap || {},
+        workerMap,
         workers,
         records: selectedEducationRecords
       });
@@ -736,9 +1144,9 @@ export function FieldOperationsWorkspace({
         message: `${workpackResponse.message} ${workerResponse.message} ${educationResponse.message}`,
         workpackId: workpackResponse.workpackId,
         savedAt: new Date().toISOString(),
-        savedCount
+        savedCount,
+        workerMap
       };
-      setSavedWorkpackId(workpackResponse.workpackId);
       setStorageSnapshot(snapshot);
       return snapshot;
     } catch (error) {
@@ -748,9 +1156,18 @@ export function FieldOperationsWorkspace({
   }
 
   async function ensureWorkpackSaved() {
-    if (savedWorkpackId) return savedWorkpackId;
+    if (savedWorkpackId) {
+      return {
+        workpackId: savedWorkpackId,
+        workerIds: resolveSavedWorkerIds(savedWorkerMap, selectedWorkerIds)
+      };
+    }
     const snapshot = await saveWorkspaceToSupabase();
-    return snapshot.workpackId;
+    if (!snapshot.ok || !snapshot.workpackId) return null;
+    return {
+      workpackId: snapshot.workpackId,
+      workerIds: resolveSavedWorkerIds(snapshot.workerMap, selectedWorkerIds)
+    };
   }
 
   function toggleWorker(id: string) {
@@ -795,15 +1212,72 @@ export function FieldOperationsWorkspace({
     try {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
-        JSON.stringify(buildStoredCurrentWorkpack(workspaceData, { workerSnapshot, dispatchSnapshot }))
+        JSON.stringify(buildStoredCurrentWorkpack(workspaceData, {
+          generationFingerprint,
+          workerSnapshot,
+          dispatchSnapshot
+        }))
       );
     } catch (error) {
       console.warn("safeclaw current workpack snapshot update failed", error);
     }
-  }, [dispatchSnapshot, workerSnapshot, workspaceData]);
+  }, [dispatchSnapshot, generationFingerprint, workerSnapshot, workspaceData]);
+
+  if (surface === "share") {
+    return (
+      <section className="field-workspace field-workspace-share-only workbench-root">
+        <WorkflowSharePanel
+          data={workspaceData}
+          recipientSuggestions={recipientSuggestions}
+          targetWorkers={targetWorkers}
+          authToken={session?.access_token}
+          workpackId={savedWorkpackId}
+          workerIds={savedWorkerIds}
+          ensureWorkpackSaved={ensureWorkpackSaved}
+          readiness={readiness}
+        />
+      </section>
+    );
+  }
+
+  const workspaceSide = (
+    <aside className="workspace-side" id="workers">
+      <ClawChat
+        authToken={session?.access_token}
+        siteOptions={clawSiteOptions}
+        selectedSiteId={selectedClawSiteId}
+        onSiteChange={selectClawSite}
+        contextStatus={clawContextStatus}
+      />
+      <AdminAccessPanel session={session} storageSnapshot={storageSnapshot} onSessionChange={setSession} />
+      <WorkerEducationPanel
+        workers={workers}
+        selectedWorkerIds={selectedWorkerIds}
+        educationRecords={educationRecords}
+        onToggleWorker={toggleWorker}
+        onUpdateWorker={updateWorker}
+        onAddWorker={addWorker}
+      />
+      <WorkflowSharePanel
+        data={workspaceData}
+        recipientSuggestions={recipientSuggestions}
+        targetWorkers={targetWorkers}
+        authToken={session?.access_token}
+        workpackId={savedWorkpackId}
+        workerIds={savedWorkerIds}
+        ensureWorkpackSaved={ensureWorkpackSaved}
+        readiness={readiness}
+      />
+      <WorkpackHistoryPanel
+        session={session}
+        storageSnapshot={storageSnapshot}
+        onSaveWorkspace={saveWorkspaceToSupabase}
+      />
+    </aside>
+  );
 
   return (
-    <section className="field-workspace" id="workpack">
+    <section className={`field-workspace${surface === "editor" ? " field-workspace-editor-focus" : ""} workbench-root`} id="workpack">
       <aside className="workspace-rail card" aria-label="SafeClaw 파일럿 체크리스트">
         <div className="compact-head">
           <span className="eyebrow">운영 체크</span>
@@ -818,41 +1292,31 @@ export function FieldOperationsWorkspace({
         ))}
       </aside>
 
-      <main className="workspace-canvas">
+      <div className="workspace-canvas">
         <WorkpackEditor
-          data={data}
+          data={editorDataRef.current}
+          generationFingerprint={generationFingerprint}
           focusToken={editorFocusToken}
           requestedDocumentKey={requestedDocumentKey}
           onDeliverablesChange={handleDeliverablesChange}
         />
         <EvidenceImpactPanel data={workspaceData} />
-      </main>
-
-      <aside className="workspace-side" id="workers">
-        <ClawChat authToken={session?.access_token} />
-        <AdminAccessPanel session={session} storageSnapshot={storageSnapshot} onSessionChange={setSession} />
-        <WorkerEducationPanel
-          workers={workers}
-          selectedWorkerIds={selectedWorkerIds}
-          educationRecords={educationRecords}
-          onToggleWorker={toggleWorker}
-          onUpdateWorker={updateWorker}
-          onAddWorker={addWorker}
-        />
-        <WorkflowSharePanel
+        <WorkspaceOperationGraphPanel
           data={workspaceData}
-          recipientSuggestions={recipientSuggestions}
-          targetWorkers={targetWorkers}
-          authToken={session?.access_token}
-          workpackId={savedWorkpackId}
-          ensureWorkpackSaved={ensureWorkpackSaved}
-        />
-        <WorkpackHistoryPanel
           session={session}
           storageSnapshot={storageSnapshot}
-          onSaveWorkspace={saveWorkspaceToSupabase}
         />
-      </aside>
+      </div>
+
+      {surface === "editor" ? (
+        <details className="editor-operations-disclosure">
+          <summary>
+            <span>운영 도구</span>
+            <strong>작업자·교육·전파·이력 관리</strong>
+          </summary>
+          {workspaceSide}
+        </details>
+      ) : workspaceSide}
     </section>
   );
 }

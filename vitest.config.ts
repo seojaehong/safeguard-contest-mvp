@@ -5,10 +5,16 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
+      "server-only": path.resolve(__dirname, "tests/stubs/server-only.ts"),
     },
   },
   test: {
     include: ["tests/**/*.test.ts"],
     environment: "node",
+    server: {
+      deps: {
+        external: [/live_harness_quality_probe\.mjs$/],
+      },
+    },
   },
 });

@@ -1,0 +1,42 @@
+{
+  "base": "24c19c17cc8c932a333fdae8785426218e57ae15",
+  "red": "7730b9d033fadd1cd4bef57dcd2e3be8ca596055",
+  "product": "c62162df2368234146c353d713fc3d1d26eff88b",
+  "remediationDelta": {
+    "fileCount": 16,
+    "insertions": 639,
+    "deletions": 34,
+    "files": [
+      "evaluation/kosha-offline-current-remediation-2026-07-12-24c19c1/red.log",
+      "lib/db-harness.ts",
+      "lib/operation-improvements.ts",
+      "lib/photo-vision-analysis.ts",
+      "lib/safety-reference-catalog-server.ts",
+      "lib/safety-reference-catalog.ts",
+      "lib/search.ts",
+      "lib/types.ts",
+      "lib/workpack-learning-export.ts",
+      "tests/kosha-current-review-lifecycle.test.ts",
+      "tests/kosha-current-review-photo-storage.test.ts",
+      "tests/kosha-current-review-provenance.test.ts",
+      "tests/kosha-current-review-run-ask.test.ts",
+      "tests/kosha-guide-offline-harness-expanded.test.ts",
+      "tests/kosha-guide-supporting-row-relevance.test.ts",
+      "tests/photo-vision-analysis.test.ts"
+    ]
+  },
+  "integrity": {
+    "forbiddenChangeCount": 0,
+    "clientCorpusImportViolationCount": 0,
+    "serverWrapperImportCount": 4,
+    "databaseSchemaEnvMigrationPythonChanges": 0,
+    "externalCorpusImportChanges": 0
+  },
+  "preserved": {
+    "frontendLaunchDiffExitCode": 0,
+    "scenarioProtocolDiffExitCode": 0,
+    "runtimeProtocolConsumerCount": 0,
+    "remoteProtocolWired": false,
+    "remoteDemoReady": false
+  }
+}

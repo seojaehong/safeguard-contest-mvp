@@ -1,0 +1,6 @@
+2026-07-13T08:14:25.192Z KOSHA GUIDE audit started
+readOnly=true dbMutationPerformed=false uploadPerformed=false
+mode=production-local-bridge requestMethod=GET
+productionRows=1 localItem=kosha-60492776122f8b433994fc10 chunks=0
+report=evaluation/kosha-production-local-bridge-2026-07-13/report.json
+elapsedSeconds=17.543

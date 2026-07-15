@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/font-family-production-matrix.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-typography-wave3
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  10:31:51
+   Duration  29.38s (transform 71ms, setup 0ms, import 739ms, tests 27.79s, environment 0ms)
+

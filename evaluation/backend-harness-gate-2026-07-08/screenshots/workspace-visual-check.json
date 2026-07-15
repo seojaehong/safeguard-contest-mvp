@@ -1,0 +1,186 @@
+[
+  {
+    "name": "workspace-desktop-day",
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\backend-harness-gate-2026-07-08\\screenshots\\workspace-desktop-day.png",
+    "metrics": {
+      "themeClass": "command-center-shell workspace-theme-day workspace-theme-field",
+      "scrollY": 0,
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "topbar": {
+        "top": 20,
+        "bottom": 80,
+        "left": 40,
+        "right": 1400,
+        "height": 60
+      },
+      "sideNav": {
+        "top": 92,
+        "bottom": 1095,
+        "left": 40,
+        "right": 304,
+        "height": 1003
+      },
+      "input": {
+        "top": 411,
+        "bottom": 575,
+        "left": 457,
+        "right": 1263,
+        "height": 164
+      },
+      "h1": {
+        "top": 258,
+        "bottom": 321,
+        "left": 460,
+        "right": 1140,
+        "height": 63
+      },
+      "main": {
+        "top": 92,
+        "bottom": 1362,
+        "left": 320,
+        "right": 1400,
+        "height": 1270
+      },
+      "viewportHeight": 1000
+    }
+  },
+  {
+    "name": "workspace-mobile-day",
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\backend-harness-gate-2026-07-08\\screenshots\\workspace-mobile-day.png",
+    "metrics": {
+      "themeClass": "command-center-shell workspace-theme-day workspace-theme-field",
+      "scrollY": 0,
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "topbar": {
+        "top": 20,
+        "bottom": 114,
+        "left": 12,
+        "right": 378,
+        "height": 94
+      },
+      "sideNav": {
+        "top": 126,
+        "bottom": 252,
+        "left": 12,
+        "right": 378,
+        "height": 126
+      },
+      "input": {
+        "top": 512,
+        "bottom": 676,
+        "left": 49,
+        "right": 341,
+        "height": 164
+      },
+      "h1": {
+        "top": 342,
+        "bottom": 422,
+        "left": 49,
+        "right": 341,
+        "height": 80
+      },
+      "main": {
+        "top": 264,
+        "bottom": 1807,
+        "left": 12,
+        "right": 378,
+        "height": 1543
+      },
+      "viewportHeight": 844
+    }
+  },
+  {
+    "name": "workspace-desktop-night",
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\backend-harness-gate-2026-07-08\\screenshots\\workspace-desktop-night.png",
+    "metrics": {
+      "themeClass": "command-center-shell workspace-theme-night",
+      "scrollY": 0,
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "topbar": {
+        "top": 20,
+        "bottom": 80,
+        "left": 80,
+        "right": 1360,
+        "height": 60
+      },
+      "sideNav": {
+        "top": 93,
+        "bottom": 1001,
+        "left": 81,
+        "right": 323,
+        "height": 908
+      },
+      "input": {
+        "top": 399,
+        "bottom": 551,
+        "left": 461,
+        "right": 1221,
+        "height": 152
+      },
+      "h1": {
+        "top": 262,
+        "bottom": 309,
+        "left": 461,
+        "right": 1081,
+        "height": 47
+      },
+      "main": {
+        "top": 93,
+        "bottom": 1220,
+        "left": 323,
+        "right": 1359,
+        "height": 1127
+      },
+      "viewportHeight": 1000
+    }
+  },
+  {
+    "name": "workspace-desktop-night-scrolled",
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\backend-harness-gate-2026-07-08\\screenshots\\workspace-desktop-night-scrolled.png",
+    "metrics": {
+      "themeClass": "command-center-shell workspace-theme-night",
+      "scrollY": 242,
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "topbar": {
+        "top": -222,
+        "bottom": -162,
+        "left": 80,
+        "right": 1360,
+        "height": 60
+      },
+      "sideNav": {
+        "top": -149,
+        "bottom": 706,
+        "left": 81,
+        "right": 323,
+        "height": 855
+      },
+      "input": {
+        "top": 117,
+        "bottom": 269,
+        "left": 461,
+        "right": 1221,
+        "height": 152
+      },
+      "h1": {
+        "top": -19,
+        "bottom": 28,
+        "left": 461,
+        "right": 1081,
+        "height": 47
+      },
+      "main": {
+        "top": -149,
+        "bottom": 939,
+        "left": 323,
+        "right": 1359,
+        "height": 1088
+      },
+      "viewportHeight": 720
+    }
+  }
+]

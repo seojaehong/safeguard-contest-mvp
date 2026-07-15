@@ -1,0 +1,7 @@
+[audit-command] npm.cmd run typecheck
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+[audit-exit-code] 0
+[audit-completion] typecheck-complete

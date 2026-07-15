@@ -1,0 +1,18 @@
+command=npm.cmd test -- tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-corpus-audit.test.ts
+startedAt=2026-07-13T17:08:32.1084369Z
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-corpus-audit.test.ts
+
+
+ RUN  v4.1.9 <repo-root>
+
+
+ Test Files  2 passed (2)
+      Tests  124 passed (124)
+   Start at  02:08:34
+   Duration  40.84s (transform 978ms, setup 0ms, import 1.87s, tests 44.52s, environment 0ms)
+
+wallElapsedSeconds=43.388
+exitCode=0

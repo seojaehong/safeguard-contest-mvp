@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-07-09T10:36:18.305Z",
+  "scope": "sif_embedding_runtime_db_probe",
+  "dbMutationPerformed": false,
+  "model": "text-embedding-3-small",
+  "dimensions": 1536,
+  "envFilesLoaded": [
+    ".env.local"
+  ],
+  "configured": true,
+  "safetyReferenceItems": {
+    "ok": true,
+    "status": 206,
+    "count": 6033,
+    "error": null
+  },
+  "safetyReferenceEmbeddings": {
+    "ok": false,
+    "status": 404,
+    "count": null,
+    "error": "{\"code\":\"PGRST205\",\"details\":null,\"hint\":\"Perhaps you meant the table 'public.safety_reference_items'\",\"message\":\"Could not find the table 'public.safety_reference_embeddings' in the schema cache\"}"
+  },
+  "matchRpc": {
+    "ok": false,
+    "status": 404,
+    "rowCount": null,
+    "model": "text-embedding-3-small",
+    "error": "{\"code\":\"PGRST202\",\"details\":\"Searched for the function public.match_safety_reference_embeddings with parameters item_type_filter, match_count, query_embedding or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache.\",\"hint\":\"Perhaps you meant to call the function public.search_safety_references_ranked\",\"message\":\"Could not find the function public.match_safety_reference_embeddings(item_type_filter, match_count, query_embedding) in the schema cache\"}"
+  },
+  "featureFlag": {
+    "vectorSearchEnabled": false
+  },
+  "status": "migration-required",
+  "message": "SIF embedding table/RPC is not ready on the target DB. Apply approved migration before upload."
+}

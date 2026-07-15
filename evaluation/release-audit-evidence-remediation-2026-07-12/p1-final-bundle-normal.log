@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-12T22:47:20.680Z",
+  "mode": "normal",
+  "buildDirectory": "<local-user-root>\\dev\\safeguard-contest-mvp\\<worktree-root>\\release-audit-evidence-remediation\\.next",
+  "buildId": "XwZEPt1aBUgLTFDh1AvjG",
+  "sourceSha": "7a132c04d9ef6f28689a02e8e1f4e81d2edc8885",
+  "sourceIdentity": "c14b2350a6f98c92ce71cbc9ab6cfbd96552e712c755d444f6fb84f83e8324c3",
+  "buildIdentity": "aa4f8b988f34c4173e275816a4c66d0d32b556333dc7ad1479e173f7f9889a92",
+  "chunkCount": 98,
+  "markerCount": 0,
+  "markerFiles": [],
+  "status": "pass"
+}

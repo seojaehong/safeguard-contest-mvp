@@ -1,18 +1,22 @@
 # SIF Embedding / Harness Approval Gate
 
 생성 시각: 2026-07-08 17:27 KST
+최신 재검증: 2026-07-09 19:23 KST
 
 ## 판정
 
 SIF 임베딩 과정은 “지나간 것”이 아니라 **업로드 전 승인 게이트에 진입한 상태**다.
 
+현재 결론: **코퍼스 준비 · 임베딩 미실행**.
+
 - 완료: `safety_reference_items`의 SIF 6,033건 전수 조회
 - 완료: 스프레드시트 헤더 1건 제외
 - 완료: 임베딩 코퍼스 6,032건 생성
 - 완료: 빈 embedding text, 관리대책 누락, 문서반영 누락, 중복 contentHash 검출 0건
-- 미실행: OpenAI embedding 생성
+- 미실행: 전체 6,032건 OpenAI embedding 생성
 - 미실행: `safety_reference_embeddings` DB 업로드
-- 미실행: migration 적용
+- 미실행: SIF-only migration 적용
+- 다음 승인 대상: `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql`
 
 ## 현재 증거
 
@@ -27,6 +31,7 @@ npm.cmd run knowledge:sif-embedding-corpus
 - `evaluation/sif-embedding-gate/report.json`
 - `evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl`
 - `evaluation/sif-embedding-gate/sif-embedding-corpus.md`
+- `evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json`
 
 핵심 수치:
 
@@ -37,13 +42,29 @@ npm.cmd run knowledge:sif-embedding-corpus
 - missingPrimaryDocumentsCount: 0
 - emptyEmbeddingTextCount: 0
 - duplicateContentHashCount: 0
+- embeddingModel: `text-embedding-3-small`
+- embeddingDimensions: 1,536
+- batchSize: 100
+- batchCount: 61
+- corpusHash: `2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e`
+
+## Batch Manifest
+
+`sif-embedding-batch-manifest.json`은 실제 embedding 생성/업로드 전 승인자가 확인할 고정 manifest다.
+
+- 전체 6,032개 코퍼스를 100개 단위 61개 batch로 나눴다.
+- 각 batch는 `batchId`, index 범위, reference item id 목록, batch content hash를 가진다.
+- manifest 자체의 `approvalGate.dbMutationPerformed`는 `false`다.
+- 따라서 현재 단계는 DB 변경이 아니라 “무엇을 임베딩할지 고정한 승인 대기 상태”다.
 
 ## Upload Safety Gate
 
-`scripts/prepare_sif_embedding_corpus.mjs`는 이제 `--upload`만으로 DB mutation을 실행하지 않는다. 실제 업로드에는 아래 둘이 모두 필요하다.
+`scripts/prepare_sif_embedding_corpus.mjs`는 `--upload`만으로 DB mutation을 실행하지 않는다. 실제 업로드에는 아래 둘이 모두 필요하다.
 
 - DB migration 승인 및 적용
 - `--upload --approved-upload`
+
+또한 `--batch-size`로 OpenAI embedding 생성과 Supabase upsert를 batch 단위로 나눠 실행한다. 기본값은 100이다.
 
 검증 명령:
 
@@ -55,6 +76,71 @@ npm.cmd run knowledge:sif-embedding-corpus -- --limit 2 --upload --output-dir ev
 
 - uploadedCount: 0
 - uploadError: `--upload requires explicit --approved-upload after DB migration approval`
+
+## Next Gate Preflight
+
+생성 시각: 2026-07-09 19:23 KST
+
+명령:
+
+```powershell
+npm.cmd run knowledge:sif-embedding-preflight -- --require-execution-env --output evaluation/sif-embedding-gate/approval-preflight-report.json
+```
+
+산출물:
+
+- `evaluation/sif-embedding-gate/approval-preflight-report.json`
+
+판정:
+
+- corpus/manifest/report 일치: 통과
+- JSONL line count와 corpusCount 일치: 통과
+- 빈 embedding text, 관리대책 누락, 문서반영 누락, 중복 contentHash: 0건
+- 업로드 승인 플래그 가드: 통과
+- `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql`의 `safety_reference_embeddings`, HNSW index, `match_safety_reference_embeddings` RPC 계약: 통과
+- RLS: `safety_reference_embeddings` public select는 `using (false)`로 차단
+- migration scope: SIF embedding table/RPC/index만 포함, share session/read confirmation/improvement/report/export job schema 제외
+- DB mutation: 미실행
+- OpenAI embedding 생성: 미실행
+- Supabase upload: 미실행
+
+현재 실행 환경:
+
+- Supabase URL/service role: 있음
+- `OPENAI_API_KEY`: 있음
+- `SAFETY_REFERENCE_VECTOR_SEARCH=1`: 꺼짐
+- 따라서 승인 후 실제 embedding 생성/업로드를 실행할 수 있는 로컬 환경은 준비되어 있다.
+- 그러나 승인 전 command 실행은 보류한다.
+
+## Runtime DB Probe
+
+생성 시각: 2026-07-09 19:23 KST
+
+명령:
+
+```powershell
+npm.cmd run knowledge:sif-embedding-runtime-probe -- --output evaluation/sif-embedding-gate/runtime-db-probe.json
+```
+
+판정:
+
+- `safety_reference_items`: 조회 성공, SIF 6,033건
+- `safety_reference_embeddings`: 404, table 없음
+- `match_safety_reference_embeddings`: 404, RPC 없음
+- status: `migration-required`
+- DB mutation: 미실행
+
+따라서 지금 승인할 대상은 임베딩 생성/업로드가 아니라 **SIF-only DB migration**이다.
+
+다음 승인 결정:
+
+- `evaluation/sif-embedding-gate/sif-embedding-only-migration.sql` 승인 및 적용
+- 또는 명시적으로 더 넓은 `010_commercial_operations.sql` 적용을 선택
+- 실행 환경의 `OPENAI_API_KEY`와 Supabase service role 유지
+- 승인 후에만 `--embed --approved-embedding` 실행
+- DB migration과 row count 검증 후에만 `--upload --approved-upload` 실행
+- 업로드 후 `npm.cmd run knowledge:sif-embedding-post-migration-verify -- --output evaluation/sif-embedding-gate/post-migration-verify.json` 실행
+- post-migration verifier에서 table/RPC, metadata sample, 업로드 row count 6,032건이 확인된 뒤 `SAFETY_REFERENCE_VECTOR_SEARCH=1` 활성화
 
 ## Vision/OCR 연결 상태
 
@@ -96,7 +182,7 @@ Before/After 개선 사진은 `app/api/workpacks/[id]/improvements/route.ts`에�
 승인 전에는 실행하지 않는다.
 
 ```powershell
-npm.cmd run knowledge:sif-embedding-corpus -- --embed --upload --approved-upload
+npm.cmd run knowledge:sif-embedding-corpus -- --embed --approved-embedding --upload --approved-upload
 ```
 
 이 명령은 migration 적용, `OPENAI_API_KEY`, Supabase service role 설정이 모두 확인된 뒤에만 실행한다.

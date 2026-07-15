@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-07-09T11:34:49.324Z",
+  "readinessHttp": 200,
+  "status": "ready",
+  "ok": true,
+  "provider": "openai",
+  "model": "gpt-4.1-mini",
+  "apiKeyPresent": true,
+  "maxInputPhotos": 10,
+  "acceptedOnly": true,
+  "beforeAfterSupported": true,
+  "ocrSupported": true,
+  "flowSteps": [
+    "attach",
+    "analyze",
+    "accept",
+    "export"
+  ],
+  "exportTargets": [
+    "위험성평가표",
+    "TBM 브리핑",
+    "TBM 기록",
+    "사진/증빙",
+    "작업 이력 MD",
+    "하네스 JSONL"
+  ],
+  "postGuardHttp": 400,
+  "postGuardMessage": "현장 사진 분석은 multipart/form-data 요청만 지원합니다."
+}

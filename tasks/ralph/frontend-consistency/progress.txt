@@ -1,0 +1,74 @@
+## 2026-07-12 W4 start
+- Base: authoritative backend 4c2a35e; remote parity confirmed.
+- Current audit: RED 2,368; font-size 192, line-height 235, tracking 128, tuple 612, mixed-role 5, selector-role 57, important 737.
+- Learned: font-family-token is closed at 0, but full consistency and the 108-row audit are not complete.
+- Next: write the final-cascade document heading contract first and observe RED before CSS changes.
+
+## 2026-07-12 W4 complete
+- Changed: final-cascade semantic tokens for rendered sample-report workdoc h2/h3; contract and production matrix tests.
+- Verified: contract 2/2, strict typecheck, normal build 27/27, sample report Day/Night at 1440/390 with overflow 0.
+- Static: honest RED 2,368 -> 2,362; selector-role 57 -> 51; tuple 612 and important 737 unchanged; coverage 0.
+- Review: SPEC PASS / CODE QUALITY PASS, P0-P3 none for 4c2a35e..3ff6ed4.
+- Learned: `.safeclaw-module-hero` is legacy CSS with no TSX renderer; do not claim it as a visible browser target.
+- Next: W5 mixed typography role separation, then AI-connect/ontology typography clusters.
+
+## 2026-07-12 W5 implementation
+- Base: authoritative backend 7def9dd.
+- RED: mixed-role contract found exactly five caption/HUD and control/support grouped rules.
+- Changed: split those rules and applied canonical caption, HUD, control, support, and table-header tuples.
+- Static: honest RED 2,362 -> 2,354; mixed-role 5 -> 0; line-height 235 -> 232; tuple 612 and important 737 unchanged.
+- Verified: W5 contract 1/1, strict typecheck, normal build 27/27, production workspace/document role matrix 1/1 PASS.
+- Known unrelated RED: existing frontend-design-contract stops at `.command-primary` legacy 14px/560/0 tuple; preserved for a later wave.
+- Next: source-bound evidence and independent review.
+
+## 2026-07-12 W5 review remediation
+- Review: REJECT P1 responsive role regrouping at 1440x320; P2 browser omitted leading/tracking tuple evidence.
+- RED: expanded production matrix observed caption 18.6px leading from a later day/compact override.
+- Fixed: final specificity-aware Day/Night role rules now override every legacy responsive branch; matrix asserts size, weight, leading, tracking and font family where applicable.
+- Verified: standard Day/Night, short-height 1440x320 Day/Night, live Documents table, and 390px overflow matrix PASS.
+- Next: regenerate source-bound evidence and request fresh independent re-review.
+
+## 2026-07-12 W5 complete
+- Fresh re-review: SPEC PASS / CODE QUALITY PASS, P0-P3 none for 7def9dd..01857b2.
+- Confirmed: final cascade follows all short-height overrides and preserves Day/Night specificity.
+- Confirmed: production evidence covers size, weight, leading, tracking, role font family, and overflow.
+- Next: selectively integrate onto authoritative c4a11c6 and regenerate destination evidence.
+
+## 2026-07-12 W6 complete
+- Source series: 59d056f/b6a8437, reviewer fixes 5aea3a9/a6e6432 and a7f21cc/55eceaf.
+- Static: honest RED 2,354 -> 2,307; typography-tuple 612 -> 576; font-size-tier 192 -> 181; coverage 0.
+- Verified: focused contract, strict typecheck, build 27/27, `/ontology` and restored `/workspace` Day/Night x 1440/390/short-height matrix.
+- Browser evidence covers every actually rendered scoped support/HUD/component-title/caption/table family with full tuples, real conditional relations, hover opacity transition, geometry, and overflow.
+- Third independent review: SPEC PASS / CODE QUALITY PASS, P0-P3 none for 6a5d57c..55eceaf.
+- Known separate W7 RED: scaled desktop composer bottom +12px and mobile submit +10px beyond viewport; do not mask with typography changes.
+- Next: integrate W6 onto current authoritative backend, then execute W7 viewport TDD.
+
+## 2026-07-12 W7 complete
+- RED: desktop 1638x510 composer 514px > 502px limit; mobile 390x844 submit 806px > 796px limit; expanded matrix also found Day 1440x500 502px > 492px limit.
+- Fixed: selector-scoped responsive page padding and composer margin only; no hiding, clipping, transforms, scaling, control-size reduction, or assertion loosening.
+- GREEN: desktop composer 492px <= 502px; mobile submit 796px <= 796px.
+- Verified: workspace suite 20, strict typecheck, build 27/27, production Day/Night x seven viewports 14/14, controls nonzero/visible/enabled, overflow 0.
+- Static: honest RED 2,307, coverage 0, exact delta 0 and important 737 unchanged.
+- Independent review after P3 documentation correction 0b4e6f4: SPEC PASS / CODE QUALITY PASS, P0-P3 none.
+- Next: integrate W7 onto current authoritative backend, then resume static typography/shape debt waves.
+
+## 2026-07-12 W8 complete
+- Recomputed RED: AI selector ownership was 180, not stale 177 (tuple45, size42, line14, tracking6, important41, radius27, gradient5).
+- Source series: 1f116f1, reviewer remediation a3b3d90, exact-parser hardening 3e23004; evidence 1ccb373.
+- Static: honest RED 2,307 -> 2,127; AI-owned residual 0; coverage 0.
+- Verified: authenticated Day/Night x 1440/390/short-height, stable unauth Day/Night desktop/390, 61 rendered selector families, semantic states/hover, six contrast surfaces, columns, controls, radii, overflow.
+- Regression: font/W4-W6/W7 contracts, W7 layout 18, typecheck, build 27/27 all PASS.
+- Fresh review after five product P2 fixes and exact-parser P2 fix: SPEC PASS / CODE QUALITY PASS, P0-P3 none.
+- Next: integrate W8 onto current authoritative backend, then continue global radius/important/decorative/selector debt.
+
+## 2026-07-12 FINAL complete
+- Latest current-head audit first exposed an honest RED at 24c19c1: 106/108 rows, two failed rows, four findings.
+- TDD restored generated document title/section tracking from 0/0 to -0.533333px/-0.186667px with three selector-only WorkpackEditor lines; globals, PDF/export, runner, package, and backend contracts stayed untouched.
+- The global-error RED was traced to an audit bundle with marker 0 after incremental normal-build reuse. A path-verified clean audit build produced marker 1; the normal clean build produced marker 0.
+- Destination static: violations 0, important 0, coverage 0, 32 pages, 23 components.
+- Destination browser: actual 108/108, failed 0, findings 0, recovered 0, screenshots 108.
+- Full browser-safe serial suite: 120 files PASS + 5 skipped, 1,124 tests PASS + 7 skipped; independent reviewer reproduced the same result.
+- Strict typecheck and both 27/27 production builds PASS.
+- Independent review: SPEC PASS / CODE QUALITY+EVIDENCE PASS, P0-P3 0.
+- Authoritative mapped series: 06cebe9, 70b025a, 5dad0ef; destination evidence 0901d2a. Protected screenshots 16 mismatch 0.
+- Completion evidence: evaluation/frontend-final-gate-current-2026-07-12/report.md/json and integration-5dad0ef/report.md/json.

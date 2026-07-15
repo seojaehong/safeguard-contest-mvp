@@ -1,0 +1,13 @@
+phase=evidence-integrity-v6
+head=c30e0991956e37bcde8d4ff306ce75ea1ffa1ecb
+generatedAt=2026-07-14T21:14:14.2536998+09:00
+
+7f4eb3e983316aa5cb8243d61957c1cd2d1fee8c01a85db02878d80e97510f65  evaluation\kosha-commercial-contract-remediation-2026-07-14\red-v6-fresh-p1.log
+09337e59afcf0592cfbffedde41ec1f527f1a2ac59ce9f0931143553ce7b8ae7  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v6-fresh-p1.log
+45fc1be41cf7af08228b911a059501b9b453b677ca24053f95b539640c67b1fc  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v6-focused55.log
+f9ceaece7daa91f8a5ddc4cf5e55b4cfb68c5cdc3e7b16bf6e6d95217bf3792e  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v6-prior-v4.log
+a40c9b28cbb91edde2a6f9b5ad34c039c228756da3439da21d590c4b70aab7d7  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v6-mcp27.log
+0614ffd9a8032f00c0526efde84695b502290d2341f9cb6255d0e8862295634f  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v6-typecheck.log
+c4485f1472199ead8a3e9e8fd3e63cab36c2b73c4fdc5351386cb5f1d5dd86db  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v6-build.log
+abe75222fbc09947c182c667cc4bd03654bfa56714a2e13f0324b27fd7c86b4a  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v6-diff-scope.log
+ed21a3a4dbc1163165cb5950878161707379f2a339947bac98955ec5132237b9  evaluation\kosha-commercial-contract-remediation-2026-07-14\report-v6-fresh-p1.md

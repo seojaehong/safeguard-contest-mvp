@@ -1,18 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient, type Session } from "@supabase/supabase-js";
 import { CitationList } from "@/components/CitationList";
 import { WorkflowSharePanel } from "@/components/WorkflowSharePanel";
-import { WorkpackEditor, type DocumentKey, type WorkpackDocumentValues } from "@/components/WorkpackEditor";
+import {
+  WorkpackEditor,
+  type DocumentKey,
+  type WorkpackDeliverablesChange,
+  type WorkpackDocumentValues
+} from "@/components/WorkpackEditor";
 import {
   buildStoredCurrentWorkpack,
+  buildWorkpackGenerationFingerprint,
   CURRENT_WORKPACK_STORAGE_KEY,
   parseStoredCurrentWorkpack,
   type CurrentDispatchSnapshot,
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
+import { formatDispatchProviderStatus } from "@/lib/web-safe-presentation";
+import { applyWorkpackDeliverablesChange } from "@/lib/workpack-readiness";
 import {
   buildDefaultWorkers,
   buildEducationRecordDrafts,
@@ -32,6 +40,7 @@ type CurrentWorkpackSnapshot = {
   data: AskResponse;
   isCurrent: boolean;
   savedAt: string | null;
+  generationFingerprint: string;
   workerSnapshot?: CurrentWorkerSnapshot;
   dispatchSnapshot?: CurrentDispatchSnapshot;
 };
@@ -113,7 +122,7 @@ const launchDocuments: LaunchDocument[] = [
   {
     key: "foreignWorkerTransmission",
     title: "외국인 전송본",
-    tier: "핵심",
+    tier: "제출",
     owner: "현장 전파",
     description: "언어별 짧은 공지와 관리자 확인 문구를 씁니다."
   },
@@ -134,7 +143,7 @@ const launchDocuments: LaunchDocument[] = [
   {
     key: "tbmLogDraft",
     title: "TBM 기록",
-    tier: "제출",
+    tier: "핵심",
     owner: "기록 보관",
     description: "참석자, 보호구, 미조치 위험요인을 확인합니다."
   },
@@ -408,7 +417,8 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
   const [state, setState] = useState<CurrentWorkpackSnapshot>({
     data: sample,
     isCurrent: false,
-    savedAt: null
+    savedAt: null,
+    generationFingerprint: buildWorkpackGenerationFingerprint(sample)
   });
   const [reopenMessage, setReopenMessage] = useState<string | null>(null);
   const [reopenStatus, setReopenStatus] = useState<"idle" | "loading" | "ready" | "blocked">("idle");
@@ -420,6 +430,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
         data: stored.data,
         isCurrent: true,
         savedAt: stored.savedAt,
+        generationFingerprint: stored.generationFingerprint,
         workerSnapshot: stored.workerSnapshot,
         dispatchSnapshot: stored.dispatchSnapshot
       });
@@ -465,10 +476,11 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
           setState({
             data: reopenData,
             isCurrent: true,
-            savedAt: nextStored.savedAt
+            savedAt: nextStored.savedAt,
+            generationFingerprint: nextStored.generationFingerprint
           });
           setReopenStatus("ready");
-          setReopenMessage("서버 아카이브의 저장 문서팩을 현재 문서 화면으로 복원했습니다. 문서와 근거 요약은 현재 작업으로 저장됐고, 작업자·전파 snapshot은 저장된 항목이 있을 때만 별도 화면에서 이어집니다.");
+          setReopenMessage("서버 아카이브의 저장 문서팩을 현재 문서 화면으로 복원했습니다. 문서와 근거 요약은 현재 작업으로 저장됐고, 작업자·전파 저장본은 저장된 항목이 있을 때만 별도 화면에서 이어집니다.");
         }
       } catch (error) {
         console.error("server workpack reopen failed", error);
@@ -489,8 +501,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
     setState((current) => ({
       ...current,
       data: nextData,
-      isCurrent: true,
-      savedAt: new Date().toISOString()
+      savedAt: current.isCurrent ? new Date().toISOString() : current.savedAt
     }));
   }, []);
 
@@ -505,6 +516,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(nextState.data, {
+          generationFingerprint: nextState.generationFingerprint,
           workerSnapshot,
           dispatchSnapshot: nextState.dispatchSnapshot
         }))
@@ -524,6 +536,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(nextState.data, {
+          generationFingerprint: nextState.generationFingerprint,
           workerSnapshot: nextState.workerSnapshot,
           dispatchSnapshot
         }))
@@ -582,7 +595,6 @@ function CurrentWorkpackBanner({ isCurrent, savedAt }: { isCurrent: boolean; sav
           ? `작업공간에서 생성한 최신 문서팩을 사용합니다${formatSavedAt(savedAt) ? ` · ${formatSavedAt(savedAt)}` : ""}.`
           : "아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다."}
       </strong>
-      <a href="/workspace">작업공간에서 새로 생성</a>
     </section>
   );
 }
@@ -593,12 +605,9 @@ function excerpt(text: string, maxLength = 190) {
   return `${normalized.slice(0, maxLength).trim()}...`;
 }
 
-function hasDeliverableKey(key: DocumentKey): key is DeliverableDocumentKey {
-  return key !== "workPermitDraft";
-}
-
 function buildDerivedDocumentText(data: AskResponse, key: DocumentKey) {
-  if (hasDeliverableKey(key)) return data.deliverables[key];
+  const storedDraft = data.deliverables[key];
+  if (typeof storedDraft === "string" && storedDraft.trim()) return storedDraft;
 
   const actions = data.riskSummary.immediateActions.slice(0, 2).join(" / ");
   return `허가대상 작업: ${data.scenario.workSummary}. 핵심위험: ${data.riskSummary.topRisk}. 작업 전 허가조건: ${actions}`;
@@ -607,15 +616,16 @@ function buildDerivedDocumentText(data: AskResponse, key: DocumentKey) {
 function buildDeliverablePatch(values: WorkpackDocumentValues) {
   const patch: Partial<AskResponse["deliverables"]> = {};
   (Object.keys(values) as DocumentKey[]).forEach((key) => {
-    if (hasDeliverableKey(key)) {
-      patch[key] = values[key];
-    }
+    patch[key] = values[key];
   });
   return patch;
 }
 
-function countDocuments(data: AskResponse) {
-  return Object.values(data.deliverables).filter((value) => typeof value === "string" && value.trim()).length;
+function countLaunchDocuments(data: AskResponse) {
+  return launchDocuments.filter((item) => {
+    const documentText = data.deliverables[item.key];
+    return typeof documentText === "string" && Boolean(documentText.trim());
+  }).length;
 }
 
 function countEvidence(data: AskResponse) {
@@ -765,17 +775,89 @@ function EvidenceCardList({ title, cards }: { title: string; cards: EvidenceCard
   );
 }
 
-function DocumentCockpit({ data, onSelectDocument }: { data: AskResponse; onSelectDocument: (key: DocumentKey) => void }) {
+function DocumentCockpit({
+  data,
+  selectedDocumentKey,
+  onSelectDocument
+}: {
+  data: AskResponse;
+  selectedDocumentKey?: DocumentKey;
+  onSelectDocument: (key: DocumentKey) => void;
+}) {
   const primaryDocuments = launchDocuments.filter((item) => item.tier === "핵심");
+  const remainingDocuments = launchDocuments.filter((item) => item.tier !== "핵심");
+  const readyDocumentCount = countLaunchDocuments(data);
 
   return (
     <section className="safeclaw-document-cockpit" aria-label="문서팩 운영 요약">
+      <section className="safeclaw-mobile-document-priority" data-testid="mobile-core-document-launcher">
+        <span>오늘 문서</span>
+        <h2>핵심 3종</h2>
+        <div className="safeclaw-mobile-core-list">
+          {primaryDocuments.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              data-document-key={item.key}
+              aria-pressed={selectedDocumentKey === item.key}
+              onClick={() => onSelectDocument(item.key)}
+            >
+              {item.title}
+            </button>
+          ))}
+        </div>
+
+        <details className="safeclaw-mobile-document-details" data-testid="mobile-document-details">
+          <summary>문서 {launchDocuments.length}종 · 제출 정보</summary>
+          <div className="safeclaw-mobile-remaining-list">
+            {remainingDocuments.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                data-document-key={item.key}
+                aria-pressed={selectedDocumentKey === item.key}
+                onClick={() => onSelectDocument(item.key)}
+              >
+                <small>{item.tier} · {item.owner}</small>
+                <strong>{item.title}</strong>
+              </button>
+            ))}
+          </div>
+          <div className="safeclaw-mobile-primary-preview" data-testid="mobile-primary-preview">
+            {primaryDocuments.map((item) => (
+              <div key={item.key}>
+                <strong>{item.title}</strong>
+                <p>{excerpt(buildDerivedDocumentText(data, item.key), 96)}</p>
+              </div>
+            ))}
+          </div>
+          <dl className="safeclaw-mobile-submission-facts" data-testid="mobile-submission-facts">
+            <div>
+              <dt>작성</dt>
+              <dd>{readyDocumentCount}/{launchDocuments.length}종</dd>
+            </div>
+            <div>
+              <dt>근거</dt>
+              <dd>{countEvidence(data)}건</dd>
+            </div>
+            <div>
+              <dt>출력</dt>
+              <dd>PDF · XLS · HWPX</dd>
+            </div>
+          </dl>
+          <div className="safeclaw-mobile-detail-actions">
+            <a href="/evidence">문서 근거</a>
+            <a href="/dispatch">현장 전파</a>
+          </div>
+        </details>
+      </section>
+
       <aside className="safeclaw-doc-index">
         <span>문서 인덱스</span>
-        <h2>3종 핵심. 6종 제출.</h2>
+        <h2>3종 핵심. 6종 추가.</h2>
         <div className="safeclaw-doc-index-list">
           {launchDocuments.map((item, index) => (
-            <button key={item.key} type="button" onClick={() => onSelectDocument(item.key)}>
+            <button key={item.key} type="button" data-document-key={item.key} onClick={() => onSelectDocument(item.key)}>
               <small>{String(index + 1).padStart(2, "0")} · {item.tier}</small>
               <strong>{item.title}</strong>
               <em>{item.owner}</em>
@@ -801,7 +883,7 @@ function DocumentCockpit({ data, onSelectDocument }: { data: AskResponse; onSele
 
       <aside className="safeclaw-doc-export">
         <span>제출 준비</span>
-        <h2>{countDocuments(data)}종 작성.</h2>
+        <h2>{readyDocumentCount}/{launchDocuments.length}종 작성.</h2>
         <dl>
           <div>
             <dt>위험도</dt>
@@ -825,31 +907,40 @@ function DocumentCockpit({ data, onSelectDocument }: { data: AskResponse; onSele
 
 export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
   const current = useCurrentWorkpack(sample);
+  const currentRef = useRef(current);
   const [focusToken, setFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey | undefined>();
-  const updateCurrentDeliverables = useCallback((values: WorkpackDocumentValues) => {
-    if (!current.isCurrent || typeof window === "undefined") return;
+  const [selectedDocumentKey, setSelectedDocumentKey] = useState<DocumentKey>("workpackSummaryDraft");
+  useEffect(() => {
+    currentRef.current = current;
+  }, [current]);
 
-    const nextData: AskResponse = {
-      ...current.data,
-      deliverables: {
-        ...current.data.deliverables,
-        ...buildDeliverablePatch(values)
-      }
-    };
+  const updateCurrentDeliverables = useCallback((values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => {
+    const snapshot = currentRef.current;
+    if (typeof window === "undefined") return;
 
-    window.localStorage.setItem(
-      CURRENT_WORKPACK_STORAGE_KEY,
-      JSON.stringify(buildStoredCurrentWorkpack(nextData, {
-        workerSnapshot: current.workerSnapshot,
-        dispatchSnapshot: current.dispatchSnapshot
-      }))
-    );
-    current.updateData(nextData);
-  }, [current.data, current.dispatchSnapshot, current.isCurrent, current.workerSnapshot]);
+    const patch = buildDeliverablePatch(values);
+    const documentKeys = Object.keys(patch) as DeliverableDocumentKey[];
+    if (documentKeys.every((key) => snapshot.data.deliverables[key] === patch[key])) return;
+
+    const nextData = applyWorkpackDeliverablesChange(snapshot.data, patch, change);
+
+    if (snapshot.isCurrent) {
+      window.localStorage.setItem(
+        CURRENT_WORKPACK_STORAGE_KEY,
+        JSON.stringify(buildStoredCurrentWorkpack(nextData, {
+          generationFingerprint: snapshot.generationFingerprint,
+          workerSnapshot: snapshot.workerSnapshot,
+          dispatchSnapshot: snapshot.dispatchSnapshot
+        }))
+      );
+    }
+    snapshot.updateData(nextData);
+  }, []);
 
   function selectDocument(key: DocumentKey) {
     setRequestedDocumentKey(key);
+    setSelectedDocumentKey(key);
     setFocusToken((value) => value + 1);
   }
 
@@ -873,11 +964,17 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
           ) : null}
         </section>
       ) : null}
-      <DocumentCockpit data={current.data} onSelectDocument={selectDocument} />
+      <DocumentCockpit
+        data={current.data}
+        selectedDocumentKey={selectedDocumentKey}
+        onSelectDocument={selectDocument}
+      />
       <WorkpackEditor
         data={current.data}
+        generationFingerprint={current.generationFingerprint}
         focusToken={focusToken}
         requestedDocumentKey={requestedDocumentKey}
+        onSelectedDocumentChange={setSelectedDocumentKey}
         onDeliverablesChange={updateCurrentDeliverables}
       />
     </>
@@ -923,7 +1020,7 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
   });
   const records = buildEducationRecordDrafts(editableWorkers, current.data.scenario.workSummary);
   const summary = summarizeWorkers(editableWorkers);
-  const workerSourceLabel = current.workerSnapshot ? "현재 작업공간 snapshot" : current.isCurrent ? "현재 문서팩에서 기본 추정" : "기본 예시";
+  const workerSourceLabel = current.workerSnapshot ? "현재 작업공간 저장본" : current.isCurrent ? "현재 문서팩에서 기본 추정" : "기본 예시";
   const draftLanguagePreview = buildDraftLanguagePreview(draft, current.data);
 
   useEffect(() => {
@@ -1188,7 +1285,7 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
         </div>
         <div className="worker-language-preview" aria-live="polite">
           <div>
-            <span className="eyebrow">Language preview</span>
+            <span className="eyebrow">언어 미리보기</span>
             <strong>{draftLanguagePreview.title}</strong>
           </div>
           <ul>
@@ -1234,7 +1331,7 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
   const targetWorkers = current.dispatchSnapshot?.targetWorkers.length
     ? filterRealDispatchTargets(current.dispatchSnapshot.targetWorkers)
     : recipientSuggestions.length ? filterRealDispatchTargets(buildWorkerDispatchTargets(workers)) : [];
-  const dispatchSourceLabel = current.dispatchSnapshot ? "작업공간 전파 snapshot" : current.workerSnapshot ? "작업자 snapshot에서 재계산" : "기본 예시 기반";
+  const dispatchSourceLabel = current.dispatchSnapshot ? "작업공간 전파 저장본" : current.workerSnapshot ? "작업자 저장본에서 재계산" : "기본 예시 기반";
 
   return (
     <>
@@ -1257,7 +1354,7 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
         <article className="safeclaw-module-panel">
           <span>제출 기준 채널</span>
           <h2>메일·문자 우선.</h2>
-          <p>전송 전 수신자, 채널, 언어, 메시지 미리보기를 확인한 뒤 provider 결과를 채널별로 표시합니다. 현재 대상 기준: {dispatchSourceLabel}.</p>
+          <p>전송 전 수신자, 채널, 언어, 메시지 미리보기를 확인한 뒤 전송 서비스 결과를 채널별로 표시합니다. 현재 대상 기준: {dispatchSourceLabel}.</p>
           {!recipientSuggestions.length ? (
             <p className="export-error">기본 예시 연락처는 실발송 대상에서 제외했습니다. 수신자를 직접 입력해야 전송할 수 있습니다.</p>
           ) : null}
@@ -1287,7 +1384,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
   const savedLabel = current.isCurrent ? formatSavedAt(current.savedAt) : "";
   const hasWorkerSnapshot = Boolean(current.workerSnapshot);
   const hasDispatchSnapshot = Boolean(current.dispatchSnapshot);
-  const browserArchiveLabel = current.isCurrent ? "브라우저 current snapshot" : "브라우저 snapshot 없음";
+  const browserArchiveLabel = current.isCurrent ? "브라우저 최신 저장본" : "브라우저 저장본 없음";
   const supabaseLoginAvailable = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   async function loadServerArchive() {
@@ -1399,7 +1496,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
             <p>관리자 로그인 세션이 있으면 Supabase에 저장된 문서팩과 전파 이력을 같은 화면에서 불러옵니다.</p>
           </article>
         </div>
-        <p className="muted small">전파 대상 기준: {hasDispatchSnapshot ? `작업공간 전파 snapshot ${dispatchTargets.length}명` : "전파 snapshot 없음, 현재 작업자 명단에서 재계산"} · 갱신 시각: {savedLabel || "대기"}.</p>
+        <p className="muted small">전파 대상 기준: {hasDispatchSnapshot ? `작업공간 전파 저장본 ${dispatchTargets.length}명` : "전파 저장본 없음, 현재 작업자 명단에서 재계산"} · 갱신 시각: {savedLabel || "대기"}.</p>
         <p className="export-error">로컬 스냅샷과 서버 이력은 구분합니다. 제출 증빙은 관리자 로그인 후 저장된 서버 이력만 사용하세요.</p>
       </section>
       </>
@@ -1435,7 +1532,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
             )}
             {serverArchive.dispatchLogs.length ? serverArchive.dispatchLogs.slice(0, 6).map((log) => (
               <article key={log.id}>
-                <strong>{log.channel} · {log.providerStatus || "상태 확인"}</strong>
+                <strong>{log.channel} · {formatDispatchProviderStatus(log.providerStatus)}</strong>
                 <code>{log.workflowRunId || log.provider || "dispatch_logs"}</code>
                 <p>{log.targetLabel || "수신자"} · {log.siteName} · {new Date(log.createdAt).toLocaleString("ko-KR")}{log.failureReason ? ` · ${log.failureReason}` : ""}</p>
               </article>

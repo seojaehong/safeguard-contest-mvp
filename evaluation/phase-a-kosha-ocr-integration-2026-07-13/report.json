@@ -1,0 +1,98 @@
+{
+  "schemaVersion": "safeclaw-phase-a-kosha-ocr-integration/v1",
+  "verifiedAt": "2026-07-13T09:18:54.3312328Z",
+  "branch": "feat/phase-a-release-integration-v2",
+  "integrationHead": "5496f7b",
+  "integratedCommits": {
+    "reviewedOcrSnapshotGate": "16329fe",
+    "reviewedOcrRuntimeGate": "0c01365",
+    "productionLocalBridgeAudit": "5496f7b"
+  },
+  "verification": {
+    "pythonOcrBoundary": {
+      "command": "python -m unittest scripts.tests.test_snapshot_kosha_guide_corpus scripts.tests.test_recover_kosha_ocr_boundary",
+      "tests": 59,
+      "passed": 59,
+      "failed": 0
+    },
+    "koshaTypeScript": {
+      "files": 5,
+      "tests": 103,
+      "passed": 103,
+      "failed": 0
+    },
+    "knowledgeLayoutFocused": {
+      "runs": 2,
+      "testsPerRun": 4,
+      "passedPerRun": 4,
+      "failedPerRun": 0
+    },
+    "fullSuite": {
+      "command": "npm.cmd test -- --maxWorkers=1 --no-file-parallelism",
+      "filesPassed": 132,
+      "filesSkipped": 5,
+      "testsPassed": 1323,
+      "testsSkipped": 7,
+      "failed": 0,
+      "durationSeconds": 1247.79
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "pass",
+      "staticPagesGenerated": 27
+    }
+  },
+  "redGreenEvidence": [
+    {
+      "failure": "CRLF-sensitive source extraction in KOSHA bridge contract test",
+      "red": "102 passed, 1 failed",
+      "remediation": "marker-index source extraction independent of line endings",
+      "green": "103 passed"
+    },
+    {
+      "failure": "knowledge layout browser teardown exceeded the default 10 second hook timeout",
+      "red": "1323 product tests passed but 1 suite failed in afterAll",
+      "remediation": "explicit 30 second teardown contract matching existing browser suites",
+      "green": "focused 4/4 twice and full suite 1323/1323"
+    }
+  ],
+  "productionWorkspace": {
+    "evidence": "../workspace-production-hotfix-verification-2026-07-13/report.json",
+    "deploymentId": "dpl_B8cgx7SG6Q2jwAMcgECP1x3Q5krd",
+    "alias": "https://www.safeclaw.kr",
+    "clearedInputCharacters": 0,
+    "visibleExampleSentenceCount": 0,
+    "filledTopDeltaPx": 0,
+    "filledBottomDeltaPx": 0,
+    "clearedTopDeltaPx": 0,
+    "clearedBottomDeltaPx": 0,
+    "horizontalOverflow": false,
+    "verdict": "pass"
+  },
+  "productionLocalBridge": {
+    "evidence": "../kosha-production-local-bridge-2026-07-13/report.json",
+    "readOnly": true,
+    "itemCount": 1,
+    "successCount": 1,
+    "failureCount": 0,
+    "chunkCount": 0,
+    "humanConfirmation": "pending",
+    "deploymentIdentityProven": false,
+    "dbMutationPerformed": false
+  },
+  "release": {
+    "launchReadiness": false,
+    "blockingReasons": [
+      "The OCR candidate remains draft and has not been human-confirmed or imported.",
+      "The production bridge currently resolves zero authoritative chunks for the boundary item.",
+      "Production deployment identity is not proven by the read-only bridge.",
+      "The existing Supabase RLS audit remains RED and no schema mutation was approved."
+    ]
+  },
+  "dbMutationPerformed": false,
+  "verdict": "integration_verified_release_blocked"
+}

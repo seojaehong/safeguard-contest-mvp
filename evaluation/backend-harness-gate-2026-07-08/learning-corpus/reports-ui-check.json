@@ -1,0 +1,13 @@
+{
+  "url": "http://127.0.0.1:3028/reports",
+  "buttons": [
+    "개선 리포트 MD",
+    "분류 CSV",
+    "원본 JSON",
+    "운영 코퍼스 MD",
+    "운영 코퍼스 JSONL"
+  ],
+  "hasCorpusMarkdown": true,
+  "hasCorpusJsonl": true,
+  "hasHorizontalOverflow": false
+}

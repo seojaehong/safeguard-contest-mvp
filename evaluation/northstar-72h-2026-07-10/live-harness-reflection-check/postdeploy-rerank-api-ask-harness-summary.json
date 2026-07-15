@@ -1,0 +1,144 @@
+{
+  "checkedAt": "2026-07-10T05:27:22.172Z",
+  "elapsedMs": 25986,
+  "deployment": "https://safeguard-contest-neroaj60w-seojaehongs-projects.vercel.app",
+  "alias": "https://www.safeclaw.kr",
+  "httpStatus": 200,
+  "mode": "live",
+  "generationMode": "enhanced",
+  "qualityOverall": "ready",
+  "dbHarnessQualityStatus": "ready",
+  "ontologyVerdict": "통과",
+  "safetyReferenceMessage": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 3건, SIF 유사사례 3건, 일반 카탈로그 5건, 작업특화 rerank 적용)",
+  "retrievalMode": "rest-ilike",
+  "vectorReady": false,
+  "firstSafetyTitles": [
+    {
+      "id": "sif-아카이브-제조업등-01919",
+      "itemType": "sif-case",
+      "title": "1919 / 기타의사업 / 시설관리및사업지원서비스업",
+      "pumpSpecific": true
+    },
+    {
+      "id": "sif-아카이브-제조업등-01920",
+      "itemType": "sif-case",
+      "title": "1920 / 기타의사업 / 시설관리및사업지원서비스업",
+      "pumpSpecific": true
+    },
+    {
+      "id": "sif-아카이브-제조업등-01921",
+      "itemType": "sif-case",
+      "title": "1921 / 기타의사업 / 시설관리및사업지원서비스업",
+      "pumpSpecific": false
+    },
+    {
+      "id": "machinery-0297",
+      "itemType": "machinery",
+      "title": "297 · 기타의사업 · 시설관리및사업지원서비스업 · 위생및유사서비스업",
+      "pumpSpecific": true
+    },
+    {
+      "id": "machinery-0209",
+      "itemType": "machinery",
+      "title": "209 · 기타의사업 · 시설관리및사업지원서비스업 · 위생및유사서비스업",
+      "pumpSpecific": true
+    }
+  ],
+  "firstSafetyItemPumpSpecific": true,
+  "firstSafetyItemIsBroadSupportOnly": false,
+  "directEvidence": 7,
+  "sifCases": 3,
+  "supportingEvidence": 3,
+  "firstDirectEvidence": [
+    {
+      "itemType": "machinery",
+      "title": "297 · 기타의사업 · 시설관리및사업지원서비스업 · 위생및유사서비스업",
+      "pumpSpecific": false
+    },
+    {
+      "itemType": "machinery",
+      "title": "209 · 기타의사업 · 시설관리및사업지원서비스업 · 위생및유사서비스업",
+      "pumpSpecific": false
+    },
+    {
+      "itemType": "machinery",
+      "title": "238 · 기타의사업 · 시설관리및사업지원서비스업 · 건물등의종합관리사업",
+      "pumpSpecific": false
+    }
+  ],
+  "firstSifCases": [
+    {
+      "title": "1919 / 기타의사업 / 시설관리및사업지원서비스업",
+      "pumpSpecific": false
+    },
+    {
+      "title": "1920 / 기타의사업 / 시설관리및사업지원서비스업",
+      "pumpSpecific": false
+    },
+    {
+      "title": "1921 / 기타의사업 / 시설관리및사업지원서비스업",
+      "pumpSpecific": false
+    }
+  ],
+  "improvementMemory": 1,
+  "workpackMemory": 1,
+  "riskRowCount": 6,
+  "tbmRiskLinkCount": 6,
+  "firstRiskRows": [
+    {
+      "hazard": "가동부 방호덮개와 비상정지장치 미확인 관련 위험",
+      "currentControls": "가동부 방호덮개와 비상정지장치 확인",
+      "additionalControls": "정비 전 전원 차단 및 잠금표지",
+      "evidenceRefs": [
+        "DB 하네스 보조근거",
+        "고위험요인 사례",
+        "1919 / 기타의사업 / 시설관리및사업지원서비스업",
+        "검색: rest"
+      ],
+      "pumpSpecific": true
+    },
+    {
+      "hazard": "추락 위험: 작업발판·난간·개구부 미확인",
+      "currentControls": "작업발판·난간·개구부 상태 확인",
+      "additionalControls": "안전대 체결 및 작업반경 출입통제",
+      "evidenceRefs": [
+        "DB 하네스 보조근거",
+        "고위험요인 사례",
+        "1921 / 기타의사업 / 시설관리및사업지원서비스업",
+        "검색: rest"
+      ],
+      "pumpSpecific": false
+    },
+    {
+      "hazard": "작업발판·난간·개구부 미확인 관련 위험",
+      "currentControls": "작업발판·난간·개구부 상태 확인",
+      "additionalControls": "안전대 체결 및 작업반경 출입통제",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "장비 위험 기준",
+        "238 · 기타의사업 · 시설관리및사업지원서비스업 · 건물등의종합관리사업",
+        "검색: rest"
+      ],
+      "pumpSpecific": false
+    },
+    {
+      "hazard": "유해·위험요인 미확인",
+      "currentControls": "작업 전 유해·위험요인 확인",
+      "additionalControls": "관리감독자 확인 후 작업 시작",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "C-108-2017 건설현장 용접용단 안전보건작업 기술지침",
+        "검색: rest"
+      ],
+      "pumpSpecific": false
+    }
+  ],
+  "firstRiskRowPumpSpecific": true,
+  "containsPumpScenario": true,
+  "containsCeilingLeakTemplate": false,
+  "internalTermsPresent": false,
+  "riskDraftHasImprovement": true,
+  "tbmHasImprovement": true,
+  "tbmLogHasImprovement": true
+}

@@ -1,0 +1,30 @@
+{
+  "path": "/settings/ai-connect",
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "scrollWidth": 1440,
+  "horizontalOverflow": false,
+  "primaryCount": 6,
+  "secondaryCount": 1,
+  "primary": [
+    "01작업공간입력 · 생성",
+    "02문서위험성평가 · TBM",
+    "03리포트주간 · 월간",
+    "04근거DB · 온톨로지",
+    "05이력증빙 · 파일",
+    "06설정AI · 현장"
+  ],
+  "secondary": [
+    "01내 AI 연결"
+  ],
+  "activePrimary": [
+    "06설정AI · 현장"
+  ],
+  "activeSecondary": [
+    "01내 AI 연결"
+  ],
+  "primaryColumns": "227px",
+  "secondaryColumns": "227px"
+}

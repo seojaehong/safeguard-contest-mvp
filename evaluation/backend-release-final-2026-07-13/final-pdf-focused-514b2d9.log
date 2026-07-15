@@ -1,0 +1,15 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/pdf-font-failure.test.ts tests/pdf-korean-font-integration.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 <repo>
+
+
+ Test Files  2 passed (2)
+      Tests  22 passed (22)
+   Start at  14:45:11
+   Duration  5.19s (transform 207ms, setup 0ms, import 1.66s, tests 2.05s, environment 0ms)
+
+
+EXIT_CODE=0

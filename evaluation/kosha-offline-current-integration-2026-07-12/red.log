@@ -1,0 +1,78 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-offline-harness.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness-expanded.test.ts tests/kosha-guide-supporting-row-relevance.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration
+
+ ❯ tests/kosha-guide-offline-harness.test.ts (0 test)
+ ❯ tests/kosha-guide-offline-harness-expanded.test.ts (0 test)
+ ❯ tests/kosha-guide-supporting-row-relevance.test.ts (1 test | 1 failed) 46ms
+     × removes generic matches, deduplicates evidence refs, and caps each direct row at two 44ms
+ ❯ tests/kosha-guide-provenance-gate.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-guide-offline-harness-expanded.test.ts [ tests/kosha-guide-offline-harness-expanded.test.ts ]
+Error: Cannot find package '@/lib/kosha-guide-corpus' imported from C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration/tests/kosha-guide-offline-harness-expanded.test.ts
+ ❯ tests/kosha-guide-offline-harness-expanded.test.ts:6:1
+      4|
+      5| import { buildDbHarnessPacket } from "@/lib/db-harness";
+      6| import { loadKoshaGuideCorpus, resetKoshaGuideCorpusCacheForTests } fr…
+       | ^
+      7| import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-da…
+      8| import { buildSafetyReferenceRiskRows } from "@/lib/search";
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/kosha-guide-offline-harness.test.ts [ tests/kosha-guide-offline-harness.test.ts ]
+Error: Cannot find package '@/lib/kosha-guide-corpus' imported from C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration/tests/kosha-guide-offline-harness.test.ts
+ ❯ tests/kosha-guide-offline-harness.test.ts:15:1
+     13| import { afterEach, describe, expect, it, vi } from "vitest";
+     14|
+     15| import {
+       | ^
+     16|   getKoshaGuideCorpusCacheStatsForTests,
+     17|   isKoshaGuideDirectEvidenceAccepted,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/kosha-guide-provenance-gate.test.ts [ tests/kosha-guide-provenance-gate.test.ts ]
+Error: Cannot find package '@/lib/kosha-guide-corpus' imported from C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-offline-current-integration/tests/kosha-guide-provenance-gate.test.ts
+ ❯ tests/kosha-guide-provenance-gate.test.ts:5:1
+      3| import { describe, expect, it } from "vitest";
+      4|
+      5| import { loadKoshaGuideCorpus } from "@/lib/kosha-guide-corpus";
+       | ^
+      6| import { ACTUAL_KOSHA_ROOT } from "@/tests/helpers/kosha-offline-fixtu…
+      7|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-guide-supporting-row-relevance.test.ts > KOSHA row-specific supporting evidence > removes generic matches, deduplicates evidence refs, and caps each direct row at two
+AssertionError: expected [] to have a length of 2 but got +0
+
+- Expected
++ Received
+
+- 2
++ 0
+
+ ❯ tests/kosha-guide-supporting-row-relevance.test.ts:86:28
+     84|     const supportingRefs = directRow?.evidenceRefs.filter((ref) => ref…
+     85|     expect(directRow).toBeDefined();
+     86|     expect(supportingRefs).toHaveLength(2);
+       |                            ^
+     87|     expect(supportingRefs).toContain(primaryRef);
+     88|     expect(new Set(supportingRefs).size).toBe(supportingRefs.length);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  1 failed (1)
+   Start at  12:09:27
+   Duration  5.42s (transform 1.06s, setup 0ms, import 1.85s, tests 46ms, environment 0ms)

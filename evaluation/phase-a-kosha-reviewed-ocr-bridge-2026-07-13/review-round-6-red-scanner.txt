@@ -1,0 +1,119 @@
+status=EXPECTED_RED
+command=npm.cmd test -- tests/kosha-guide-corpus-audit.test.ts -t "UTF-8 leak.png|binary PNG|invalid UTF-8 even|arbitrary .* absolute path|sensitive digest labels|public identifiers"
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-corpus-audit.test.ts -t UTF-8 leak.png|binary PNG|invalid UTF-8 even|arbitrary .* absolute path|sensitive digest labels|public identifiers
+
+
+ RUN  v4.1.9 <repo-root>
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts (111 tests | 7 failed | 103 skipped) 41ms
+     × treats a UTF-8 leak.png artifact as text and scans its contents 16ms
+     × skips bytes only when a binary PNG signature is positively identified 5ms
+     × fails closed for invalid UTF-8 even when the extension looks binary 4ms
+     × detects an arbitrary drive absolute path 6ms
+     × detects an arbitrary unc absolute path 3ms
+     × detects an arbitrary posix absolute path 2ms
+     × detects sensitive digest labels without treating the digest as public 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > treats a UTF-8 leak.png artifact as text and scans its contents
+AssertionError: expected null not to be null
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2079:22
+    2077|     );
+    2078|
+    2079|     expect(text).not.toBeNull();
+       |                      ^
+    2080|     expect(scanKoshaEvaluationArtifactText({
+    2081|       artifactPath,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > skips bytes only when a binary PNG signature is positively identified
+Error: kosha-evaluation-artifact-invalid-utf8:diagram.data
+ ❯ decodeKoshaEvaluationArtifactText lib/kosha-guide-corpus-audit.ts:113:11
+    111|     return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    112|   } catch {
+    113|     throw new Error(`kosha-evaluation-artifact-invalid-utf8:${artifact…
+       |           ^
+    114|   }
+    115| }
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2093:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > fails closed for invalid UTF-8 even when the extension looks binary
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2103:8
+    2101|       "unknown.png",
+    2102|       Uint8Array.from([0xc3, 0x28])
+    2103|     )).toThrowError("kosha-evaluation-artifact-invalid-utf8:unknown.pn…
+       |        ^
+    2104|   });
+    2105|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects an arbitrary drive absolute path
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects an arbitrary unc absolute path
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects an arbitrary posix absolute path
+AssertionError: expected [] to deep equally contain { artifactPath: 'report.txt', …(2) }
+
+- Expected:
+{
+  "artifactPath": "report.txt",
+  "code": "absolute-local-path",
+  "detail": "local-path",
+}
+
++ Received:
+[]
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2116:9
+    2114|       repositoryRoots: [],
+    2115|       configuredSecrets: {}
+    2116|     })).toContainEqual({
+       |         ^
+    2117|       artifactPath: "report.txt",
+    2118|       code: "absolute-local-path",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA reviewed OCR remediation evidence > detects sensitive digest labels without treating the digest as public
+AssertionError: expected [] to deep equally contain { artifactPath: 'report.txt', …(2) }
+
+- Expected:
+{
+  "artifactPath": "report.txt",
+  "code": "sensitive-digest-label",
+  "detail": "secret_sha256",
+}
+
++ Received:
+[]
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts:2129:9
+    2127|       repositoryRoots: [],
+    2128|       configuredSecrets: {}
+    2129|     })).toContainEqual({
+       |         ^
+    2130|       artifactPath: "report.txt",
+    2131|       code: "sensitive-digest-label",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 1 passed | 103 skipped (111)
+   Start at  01:49:00
+   Duration  1.49s (transform 339ms, setup 0ms, import 432ms, tests 41ms, environment 0ms)
+
+exitCode=1

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient, ensureWorkspaceContext, getWorkspaceUser } from "@/lib/supabase-admin";
 import { documentKeysFromDeliverables } from "@/lib/evidence-file";
 import type { AskResponse } from "@/lib/types";
-import { isRecord, parseScenarioContext, readString } from "@/lib/workspace-api";
-import { buildSelectedWorkpackEvidenceSummary, buildWorkpackInsertPayload } from "@/lib/workpack-store";
+import { isRecord, parseScenarioContext } from "@/lib/workspace-api";
+import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
+import { buildWorkpackEvidenceSummary, buildWorkpackInsertPayload } from "@/lib/workpack-store";
 
 export const dynamic = "force-dynamic";
 
@@ -170,14 +171,38 @@ export async function POST(request: NextRequest) {
   const parsed = await request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
   const askResponse = readAskResponse(body.data);
-  const question = readString(body.question, askResponse?.question || "현장 작업 문서팩");
-  const scenario = isRecord(body.scenario) ? body.scenario : askResponse?.scenario || {};
-  const deliverables = askResponse?.deliverables || body.deliverables || {};
-  const evidenceSummary = buildSelectedWorkpackEvidenceSummary({
+  if (!askResponse) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      workpackId: null,
+      code: "generation_evidence_unsealed",
+      message: "봉인된 서버 생성 결과 전체가 필요합니다. 다시 생성한 뒤 저장해 주세요."
+    }, { status: 400 });
+  }
+
+  const verification = verifyAskResponseGenerationEvidence(
     askResponse,
-    providedEvidenceSummary: body.evidenceSummary
-  });
-  const status = askResponse?.status || body.status || {};
+    process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET
+  );
+  if (!verification.ok) {
+    const secretMissing = verification.code === "secret_unconfigured";
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      workpackId: null,
+      code: secretMissing
+        ? "generation_evidence_secret_unconfigured"
+        : `generation_evidence_${verification.code}`,
+      message: verification.message
+    }, { status: secretMissing ? 503 : 400 });
+  }
+
+  const question = verification.snapshot.question;
+  const scenario = verification.snapshot.scenario;
+  const deliverables = askResponse.deliverables;
+  const evidenceSummary = buildWorkpackEvidenceSummary(askResponse, verification.snapshot);
+  const status = askResponse.status;
   const context = await ensureWorkspaceContext(client, user, parseScenarioContext(scenario));
 
   const { data, error } = await client

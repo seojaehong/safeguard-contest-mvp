@@ -29,12 +29,42 @@ describe("persona", () => {
     expect(persona()).toMatch(/현장 확인 필요/);
     expect(persona()).toMatch(/김철수/);
   });
+
+  it("keeps hazard discovery inside the DB harness evidence packet", () => {
+    expect(persona()).toContain("위험요인은 DB 하네스·근거 후보 안에서 구체화");
+    expect(persona()).toContain("근거 밖 새 위험요인은 만들지 말고");
+  });
 });
 
 describe("contextBlock", () => {
   it("includes the injected work date in the 현장 시나리오 block", () => {
     const block = contextBlock(baseCtx);
     expect(block).toMatch(/작업일자: 2026-07-02/);
+  });
+
+  it("includes the DB harness contract when provided", () => {
+    const block = contextBlock({
+      ...baseCtx,
+      dbHarnessContext: "역할: LLM은 DB harness가 고정한 근거를 문장화만 한다."
+    });
+
+    expect(block).toContain("[DB 하네스 계약]");
+    expect(block).toContain("문장화만 한다");
+  });
+
+  it("keeps provider retries subordinate to the DB harness evidence contract", () => {
+    const block = contextBlock({
+      ...baseCtx,
+      dbHarnessContext: [
+        "역할: LLM은 DB harness가 고정한 근거를 문장화만 한다.",
+        "근거 권위: safety_reference_items, SIF 사례, 작업 개선 이력 DB 하네스가 원천이다.",
+        "제공자 재시도: 모델/제공자 재시도는 문장화 실패 복구에만 허용하며 새 근거·새 위험요인을 추가할 수 없다."
+      ].join("\n")
+    });
+
+    expect(block).toContain("근거 권위: safety_reference_items");
+    expect(block).toContain("문장화 실패 복구에만 허용");
+    expect(block).toContain("새 근거·새 위험요인을 추가할 수 없다");
   });
 });
 

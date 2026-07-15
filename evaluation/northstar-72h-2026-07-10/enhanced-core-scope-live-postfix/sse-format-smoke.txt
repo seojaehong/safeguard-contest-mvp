@@ -1,0 +1,52 @@
+status=200
+content-type=text/event-stream
+
+data: {"kind":"stage","stage":"weather","status":"start"}
+
+data: {"kind":"stage","stage":"training","status":"start"}
+
+data: {"kind":"stage","stage":"koshaEducation","status":"start"}
+
+data: {"kind":"stage","stage":"kosha","status":"start"}
+
+data: {"kind":"stage","stage":"koshaOpenApi","status":"start"}
+
+data: {"kind":"stage","stage":"accidentCases","status":"start"}
+
+data: {"kind":"stage","stage":"response","status":"start"}
+
+data: {"kind":"stage","stage":"safetyReference","status":"start"}
+
+data: {"kind":"stage","stage":"citations","status":"start"}
+
+data: {"kind":"stage","stage":"deliverables","status":"start"}
+
+data: {"kind":"stage","stage":"training","status":"ok"}
+
+data: {"kind":"stage","stage":"koshaEducation","status":"ok"}
+
+data: {"kind":"stage","stage":"kosha","status":"ok"}
+
+data: {"kind":"stage","stage":"weather","status":"ok"}
+
+data: {"kind":"stage","stage":"safetyReference","status":"ok"}
+
+data: {"kind":"stage","stage":"koshaOpenApi","status":"ok"}
+
+data: {"kind":"stage","stage":"accidentCases","status":"ok"}
+
+data: {"kind":"stage","stage":"response","status":"ok"}
+
+data: {"kind":"stage","stage":"citations","status":"ok"}
+
+data: {"kind":"doc","name":"riskAssessment","status":"ok"}
+
+data: {"kind":"doc","name":"tbmBriefingStructured","status":"ok"}
+
+data: {"kind":"doc","name":"tbmLogStructured","status":"ok"}
+
+data: {"kind":"doc","name":"structuredRiskRows","status":"ok"}
+
+data: {"kind":"stage","stage":"deliverables","status":"ok"}
+
+data: {"kind":"final","payload":{"question":"ping","answer":"1) 하네스 판단\n- 직접 근거: B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정 / B-M-18-2026 배관 수명관리 기술지원규정 / 149 · 제조업 · 전기기계기구·정밀기구·전자제품제조업 · 전자관또는반도체소자제조업\n\n2) 오늘 문서에 먼저 반영할 조치\n- 가동부 방호덮개와 비상정지장치 확인\n- 정비 전 전원 차단 및 잠금표지\n- 작업 전 산소·유해가스 농도 측정\n- 감시인 배치 및 구조장비 확보\n- MSDS 확인 및 적정 보호구 착용\n- 환기와 누출 대응 물품 비치\n\n3) 보강 필요\n- SIF 유사사례\n\n[기상 신호] 단시간 흐림, 빗방울, 기온 24℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)\n\n[교육 연계] [스킬업] 산업안전기사 필기 1편 (현장 적합)\n\n[KOSHA 보강] KOSHA 위험성평가 사업안내 (공식 링크 확인)\n\n[유사 재해사례] 벨트 슬링이 파단되어 인양물에 맞음: 작업 전 위험요인 공유, 보호구 착용, 작업중지 기준 확인을 예방 포인트로 적용합니다.","practicalPoints":["문서 반영 전 확인: 가동부 방호덮개와 비상정지장치 확인","문서 반영 전 확인: 정비 전 전원 차단 및 잠금표지","문서 반영 전 확인: 작업 전 산소·유해가스 농도 측정","문서 반영 전 확인: 감시인 배치 및 구조장비 확보","문서 반영 전 확인: MSDS 확인 및 적정 보호구 착용","문서 반영 전 확인: 환기와 누출 대응 물품 비치","위험성평가표에 같은 위험요인·조치·확인자를 연결","TBM 브리핑에 같은 위험요인·조치·확인자를 연결"],"citations":[{"id":"lawgo-law-260055","type":"law","title":"개발도상국 산림을 통한 온실가스 배출 감축 및 탄소 축적 증진 지원에 관한 법률 시행령","summary":"산림청 · 대통령령 · 공포 20240206","citation":"대통령령 · 공포 20240206","sourceLabel":"Law.go 법령","sourceSystem":"lawgo","sourceUrl":"https://www.law.go.kr/lsInfoP.do?lsiSeq=260055","tags":["대통령령","산림청","Law.go"]},{"id":"lawgo-law-237883","type":"law","title":"국제연합 평화유지활동 참여에 관한 법률","summary":"외교부 · 법률 · 공포 20211221","citation":"법률 · 공포 20211221","sourceLabel":"Law.go 법령","sourceSystem":"lawgo","sourceUrl":"https://www.law.go.kr/lsInfoP.do?lsiSeq=237883","tags":["법률","외교부","Law.go"]},{"id":"lawgo-law-282945","type":"law","title":"기후변화대응 기술개발 촉진법 시행령","summary":"과학기술정보통신부 · 대통령령 · 공포 20260127","citation":"대통령령 · 공포 20260127","sourceLabel":"Law.go 법령","sourceSystem":"lawgo","sourceUrl":"https://www.law.go.kr/lsInfoP.do?lsiSeq=282945","tags":["대통령령","과학기술정보통신부","Law.go"]},{"id":"lawgo-law-280135","type":"law","title":"역세권의 개발 및 이용에 관한 법률","summary":"국토교통부 · 법률 · 공포 20251202","citation":"법률 · 공포 20251202","sourceLabel":"Law.go 법령","sourceSystem":"lawgo","sourceUrl":"https://www.law.go.kr/lsInfoP.do?lsiSeq=280135","tags":["법률","국토교통부","Law.go"]},{"id":"lawgo-prec-351378","type":"precedent","title":"세무조사를 거친 이후에야 비로소 탈루사실이 확인되는 것은 중요한 자료로 보기 어려움","summary":"서울행정법원-2022-구합-72946 · 선고 2023.10.19","citation":"서울행정법원-2022-구합-72946","sourceLabel":"Law.go 판례","sourceSystem":"lawgo","sourceUrl":"https://www.law.go.kr/DRF/lawService.do?OC=iceamericano9&amp;target=prec&amp;ID=351378&amp;type=HTML&amp;mobileYn=","tags":["Law.go"]},{"id":"lawgo-prec-221959","type":"precedent","title":"자본시장과금융투자업에관한법률위반[이른바 스캘핑(scalping) 행위가 자본시장법위반죄로 

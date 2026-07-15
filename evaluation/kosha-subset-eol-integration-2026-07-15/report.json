@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "1e7b9eb",
+  "integratedKoshaCommits": ["e2020ca", "b5dbeb0"],
+  "initialFailure": {
+    "code": "hash:outputs",
+    "expectedFailuresSha256": "9ec1feefe9306f65529c3221382a1f7847f9a167c7a35a806504727b8384c7fe",
+    "crlfWorkingCopySha256": "98d9813c46301124b7ec0f72330637083c820b74a1457c25dbfbc0c407fc5620"
+  },
+  "cleanCheckout": {
+    "worktree": "kosha-eol-verification-20260715",
+    "indexEol": "lf",
+    "worktreeEol": "lf",
+    "attribute": "text eol=lf",
+    "actualFailuresSha256": "9ec1feefe9306f65529c3221382a1f7847f9a167c7a35a806504727b8384c7fe"
+  },
+  "verification": {
+    "testFiles": 11,
+    "testsPassed": 196,
+    "testsFailed": 0,
+    "exitCode": 0
+  },
+  "readiness": {
+    "accepted": 0,
+    "rejected": 234,
+    "launchReady": false
+  },
+  "dbMutationPerformed": false,
+  "environmentChanged": false,
+  "migrationPerformed": false
+}

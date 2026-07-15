@@ -1,0 +1,23 @@
+[audit-command] npm.cmd run audit:frontend-bundle -- --mode audit
+
+> safeclaw@0.1.0 audit:frontend-bundle
+> node ./scripts/frontend_audit_bundle_contract.mjs --mode audit
+
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-12T23:30:25.870Z",
+  "mode": "audit",
+  "buildDirectory": ".next",
+  "buildId": "45f_hWm4AcaxgWePQUOHL",
+  "sourceSha": "d690bbaebad3ed059d194328437e707481f55eee",
+  "sourceIdentity": "cedd849bcf6c4124aada5c243069a808e8d5a5b83a34a9953fcd70fa30175978",
+  "buildIdentity": "b1a0676813dd99aad7fd2cc45539ab146af2df17d974aeb4b60075e1b878d423",
+  "chunkCount": 98,
+  "markerCount": 1,
+  "markerFiles": [
+    "static/chunks/app/layout-7ae2bac85119b475.js"
+  ],
+  "status": "pass"
+}
+[audit-exit-code] 0
+[audit-completion] audit-bundle-contract-complete

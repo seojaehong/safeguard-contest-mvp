@@ -1,0 +1,250 @@
+{
+  "input_pdf": "evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-draw-text-control.pdf",
+  "input_bytes": 10724,
+  "dpi": 144,
+  "renderers": {
+    "pymupdf": [
+      {
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/normalized-subset-control-pymupdf-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 12309,
+        "dark_fraction": 0.006142338170422563,
+        "bbox": [
+          85,
+          70,
+          559,
+          426
+        ],
+        "active_row_count": 149,
+        "line_bands": [
+          {
+            "top": 70,
+            "bottom": 107,
+            "height": 38,
+            "dark_pixels": 3818,
+            "x_min": 86,
+            "x_max": 302,
+            "width": 217
+          },
+          {
+            "top": 147,
+            "bottom": 165,
+            "height": 19,
+            "dark_pixels": 1577,
+            "x_min": 85,
+            "x_max": 354,
+            "width": 270
+          },
+          {
+            "top": 207,
+            "bottom": 225,
+            "height": 19,
+            "dark_pixels": 828,
+            "x_min": 85,
+            "x_max": 221,
+            "width": 137
+          },
+          {
+            "top": 247,
+            "bottom": 265,
+            "height": 19,
+            "dark_pixels": 786,
+            "x_min": 85,
+            "x_max": 220,
+            "width": 136
+          },
+          {
+            "top": 287,
+            "bottom": 305,
+            "height": 19,
+            "dark_pixels": 1047,
+            "x_min": 85,
+            "x_max": 249,
+            "width": 165
+          },
+          {
+            "top": 347,
+            "bottom": 365,
+            "height": 19,
+            "dark_pixels": 1673,
+            "x_min": 85,
+            "x_max": 352,
+            "width": 268
+          },
+          {
+            "top": 410,
+            "bottom": 425,
+            "height": 16,
+            "dark_pixels": 2573,
+            "x_min": 85,
+            "x_max": 559,
+            "width": 475
+          }
+        ]
+      }
+    ],
+    "pdfium": [
+      {
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/normalized-subset-control-pdfium-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 13184,
+        "dark_fraction": 0.006578973632208228,
+        "bbox": [
+          85,
+          70,
+          559,
+          426
+        ],
+        "active_row_count": 150,
+        "line_bands": [
+          {
+            "top": 70,
+            "bottom": 107,
+            "height": 38,
+            "dark_pixels": 3911,
+            "x_min": 85,
+            "x_max": 303,
+            "width": 219
+          },
+          {
+            "top": 147,
+            "bottom": 165,
+            "height": 19,
+            "dark_pixels": 1741,
+            "x_min": 85,
+            "x_max": 354,
+            "width": 270
+          },
+          {
+            "top": 207,
+            "bottom": 225,
+            "height": 19,
+            "dark_pixels": 883,
+            "x_min": 85,
+            "x_max": 221,
+            "width": 137
+          },
+          {
+            "top": 247,
+            "bottom": 265,
+            "height": 19,
+            "dark_pixels": 883,
+            "x_min": 85,
+            "x_max": 220,
+            "width": 136
+          },
+          {
+            "top": 287,
+            "bottom": 305,
+            "height": 19,
+            "dark_pixels": 1178,
+            "x_min": 85,
+            "x_max": 249,
+            "width": 165
+          },
+          {
+            "top": 347,
+            "bottom": 365,
+            "height": 19,
+            "dark_pixels": 1798,
+            "x_min": 85,
+            "x_max": 352,
+            "width": 268
+          },
+          {
+            "top": 410,
+            "bottom": 426,
+            "height": 17,
+            "dark_pixels": 2790,
+            "x_min": 85,
+            "x_max": 559,
+            "width": 475
+          }
+        ]
+      }
+    ],
+    "poppler": [
+      {
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/normalized-subset-control-poppler-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 12298,
+        "dark_fraction": 0.006136849038902972,
+        "bbox": [
+          85,
+          70,
+          559,
+          426
+        ],
+        "active_row_count": 150,
+        "line_bands": [
+          {
+            "top": 70,
+            "bottom": 107,
+            "height": 38,
+            "dark_pixels": 3821,
+            "x_min": 86,
+            "x_max": 302,
+            "width": 217
+          },
+          {
+            "top": 147,
+            "bottom": 165,
+            "height": 19,
+            "dark_pixels": 1552,
+            "x_min": 85,
+            "x_max": 354,
+            "width": 270
+          },
+          {
+            "top": 207,
+            "bottom": 225,
+            "height": 19,
+            "dark_pixels": 819,
+            "x_min": 85,
+            "x_max": 221,
+            "width": 137
+          },
+          {
+            "top": 247,
+            "bottom": 265,
+            "height": 19,
+            "dark_pixels": 790,
+            "x_min": 85,
+            "x_max": 219,
+            "width": 135
+          },
+          {
+            "top": 287,
+            "bottom": 305,
+            "height": 19,
+            "dark_pixels": 1067,
+            "x_min": 85,
+            "x_max": 249,
+            "width": 165
+          },
+          {
+            "top": 347,
+            "bottom": 365,
+            "height": 19,
+            "dark_pixels": 1647,
+            "x_min": 85,
+            "x_max": 352,
+            "width": 268
+          },
+          {
+            "top": 410,
+            "bottom": 426,
+            "height": 17,
+            "dark_pixels": 2602,
+            "x_min": 85,
+            "x_max": 559,
+            "width": 475
+          }
+        ]
+      }
+    ]
+  }
+}

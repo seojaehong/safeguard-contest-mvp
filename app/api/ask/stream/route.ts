@@ -5,6 +5,8 @@ import { createRateLimiter } from "@/lib/rate-limit";
 import { enforceRateLimit } from "@/lib/api-guard";
 import { formatSseEvent, type AskProgressEvent } from "@/lib/ask-progress";
 import { createLogger } from "@/lib/logger";
+import { parseHarnessMemoryInput } from "@/lib/db-harness";
+import { attachGenerationEvidence } from "@/lib/generation-evidence";
 
 // Task D-2a: streaming twin of /api/ask (app/api/ask/route.ts is untouched — demo
 // stability). Same request body, but responds with an SSE stream of stage/doc progress
@@ -16,14 +18,20 @@ const log = createLogger("api/ask/stream");
 const ALLOWED_MODES: AiMode[] = ["template", "enhanced", "full"];
 const limiter = createRateLimiter({ limit: 10, windowMs: 60_000 });
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 export async function POST(request: NextRequest) {
   const limited = enforceRateLimit(request, limiter);
   if (limited) return limited;
 
-  const body = await request.json().catch(() => ({}));
-  const question = typeof body.question === "string" ? body.question : "산업안전 실무 질문";
-  const requestedMode = typeof body.aiMode === "string" ? (body.aiMode as AiMode) : undefined;
+  const body: unknown = await request.json().catch(() => ({}));
+  const record = isRecord(body) ? body : {};
+  const question = typeof record.question === "string" ? record.question : "산업안전 실무 질문";
+  const requestedMode = typeof record.aiMode === "string" ? (record.aiMode as AiMode) : undefined;
   const aiMode = requestedMode && ALLOWED_MODES.includes(requestedMode) ? requestedMode : undefined;
+  const harnessMemory = parseHarnessMemoryInput(record.harnessMemory);
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -33,16 +41,23 @@ export async function POST(request: NextRequest) {
           controller.enqueue(encoder.encode(formatSseEvent(event)));
         } catch (error) {
           // Connection likely closed client-side; nothing further to do.
-          log.warn("SSE enqueue failed (client likely disconnected)", error);
+          log.warn("SSE enqueue failed (client likely disconnected)", {
+            errorType: error instanceof Error ? error.name : typeof error
+          });
         }
       };
       try {
-        const payload = await runAsk(question, { aiMode, onProgress: emit });
-        emit({ kind: "final", payload });
+        const payload = await runAsk(question, { aiMode, harnessMemory, onProgress: emit });
+        const sealed = attachGenerationEvidence(payload, {
+          secret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+          generatedAt: new Date().toISOString()
+        });
+        emit({ kind: "final", payload: sealed });
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        log.error("runAsk failed in stream route", error);
-        emit({ kind: "error", message });
+        log.error("runAsk failed in stream route", {
+          errorType: error instanceof Error ? error.name : typeof error
+        });
+        emit({ kind: "error", message: "요청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요." });
       } finally {
         controller.close();
       }

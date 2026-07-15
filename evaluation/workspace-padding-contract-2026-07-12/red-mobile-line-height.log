@@ -1,0 +1,47 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workspace-input-css-contract.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workspace-padding-contract-fix
+
+ ❯ tests/workspace-input-css-contract.test.ts (3 tests | 1 failed) 17ms
+     × keeps the seven responsive textarea blocks on the approved W7 padding and readability matrix 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workspace-input-css-contract.test.ts > workspace input CSS contract > keeps the seven responsive textarea blocks on the approved W7 padding and readability matrix
+AssertionError: expected [ [ 'box-sizing: border-box' ], …(6) ] to deeply equal [ [ 'box-sizing: border-box' ], …(6) ]
+
+- Expected
++ Received
+
+@@ -34,10 +34,10 @@
+    ],
+    [
+      "min-height: 142px",
+      "padding: 16px",
+      "font-size: var(--text-body)",
+-     "line-height: 1.68",
++     "line-height: var(--leading-body-lg)",
+      "font-weight: 500",
+      "letter-spacing: var(--tracking-body)",
+    ],
+  ]
+
+ ❯ tests/workspace-input-css-contract.test.ts:52:28
+     50|     );
+     51|
+     52|     expect(textareaBlocks).toEqual([
+       |                            ^
+     53|       ["box-sizing: border-box"],
+     54|       ["display: block", "min-height: 152px", "padding: 22px 24px", "o…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  18:43:19
+   Duration  746ms (transform 28ms, setup 0ms, import 54ms, tests 17ms, environment 0ms)
+

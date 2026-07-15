@@ -1,0 +1,18 @@
+phase=green-v5-prior-v4-attacks
+head=2cf5c6722c2956ddad79810c7da419e419e6c662
+command=npm.cmd test -- tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts tests/mcp-tools.test.ts -t "v4 " --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T17:35:48.3137438+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts tests/mcp-tools.test.ts -t v4  --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  3 passed (3)
+      Tests  7 passed | 91 skipped (98)
+   Start at  17:35:50
+   Duration  5.85s (transform 704ms, setup 0ms, import 1.63s, tests 2.66s, environment 0ms)
+

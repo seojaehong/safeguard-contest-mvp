@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-13T05:00:14.693Z",
+  "sourceSha": "b321f0c881b475a517f2c16db801baed36b36692",
+  "sourceIdentity": "19d22053053834f20405a879b6dd82e3bf0c8a346d8973bb7befcf6235a4d69b",
+  "verificationStatus": "pass",
+  "launchReadiness": "blocked",
+  "checks": {
+    "sourceShaMatches": true,
+    "sourceIdentityMatches": true,
+    "reportSeparatesVerificationAndLaunch": true,
+    "workspaceEmptyStateClosed": true,
+    "workspaceRailGeometryClosed": true,
+    "staticAuditPass": true,
+    "normalBundlePass": true,
+    "auditBundlePass": true,
+    "browserAuditPass": true,
+    "fullSuitePass": true,
+    "typecheckPass": true,
+    "postTestBuildPass": true,
+    "pdfFocusedPass": true,
+    "harnessRaceFocusedPass": true,
+    "directPdfResponsePass": true,
+    "requestHashMatches": true,
+    "responseHashMatches": true,
+    "pdfPaginationPass": true,
+    "pdfSourcesMerged": true,
+    "pdfRenderNonblank": true,
+    "nftPass": true,
+    "protectedScreenshotChangesExcluded": true
+  },
+  "failedChecks": [],
+  "protectedScreenshotChangesInSourceRange": [],
+  "artifacts": {
+    "request": "evaluation/backend-release-final-2026-07-13/final-direct-post-b321f0c-request.json",
+    "response": "evaluation/backend-release-final-2026-07-13/final-direct-post-b321f0c.pdf",
+    "render": "evaluation/backend-release-final-2026-07-13/final-direct-post-b321f0c-render.json",
+    "nft": "evaluation/backend-release-final-2026-07-13/final-pdf-nft-b321f0c.json"
+  }
+}

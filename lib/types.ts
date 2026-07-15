@@ -1,6 +1,8 @@
 import type { RiskAssessmentRow, RiskAssessmentValidationIssue } from "./risk-assessment-schema";
 import type { SmsaEvidenceLabel } from "./smsa-mapping";
 import type { QaReviewResult } from "./ontology/qa-review";
+import type { DbHarnessPacket } from "./db-harness";
+import type { PhaseAProductMaterialization } from "./ontology/product-materialization";
 
 export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
@@ -47,6 +49,24 @@ export type QualityContract = {
   persistence: {
     status: QualityContractStatus;
     requiresLogin: boolean;
+    detail: string;
+  };
+  dbHarness: {
+    status: QualityContractStatus;
+    mode?: DbHarnessPacket["mode"];
+    llmRole?: DbHarnessPacket["generationContract"]["llmRole"];
+    llmOutputScope?: DbHarnessPacket["generationContract"]["llmOutputScope"];
+    evidenceAuthority?: DbHarnessPacket["generationContract"]["evidenceAuthority"];
+    providerRetryScope?: DbHarnessPacket["generationContract"]["providerRetryScope"];
+    fallbackChainAllowed?: DbHarnessPacket["generationContract"]["fallbackChainAllowed"];
+    genericProseSubstitutionAllowed?: DbHarnessPacket["generationContract"]["genericProseSubstitutionAllowed"];
+    missingEvidencePolicy?: DbHarnessPacket["generationContract"]["missingEvidencePolicy"];
+    directEvidenceCount: number;
+    sifCaseCount: number;
+    supportingEvidenceCount: number;
+    retrievalContract?: DbHarnessPacket["retrievalContract"];
+    missingEvidence: string[];
+    documentCoverage: DbHarnessPacket["generationContract"]["documentCoverage"];
     detail: string;
   };
 };
@@ -294,6 +314,67 @@ export type DetailRecord = {
   tags?: string[];
 };
 
+export type AskScenario = {
+  siteName: string;
+  companyName: string;
+  companyType: string;
+  workSummary: string;
+  workerCount: number;
+  weatherNote: string;
+};
+
+export type GenerationAnswerTrace = {
+  provider: "openai" | "vertex" | "mock" | "safeclaw";
+  model: string | null;
+  composition?: "provider" | "safeclaw_db_harness";
+  upstream?: {
+    provider: "openai" | "vertex" | "mock";
+    model: string | null;
+    fallbackUsed: boolean;
+    usedInFinal: boolean;
+  };
+};
+
+export type GenerationDeliverableModelTrace = {
+  provider: "anthropic" | "vertex" | "safeclaw";
+  model: string | null;
+  source?: "provider" | "deterministic";
+  fallbackUsed?: boolean;
+};
+
+export type GenerationTrace = {
+  traceId: string;
+  askMode: "template" | "enhanced" | "full";
+  answer: GenerationAnswerTrace;
+  deliverables: {
+    attempted: boolean;
+    provider: "anthropic" | "vertex" | "safeclaw" | "mixed" | null;
+    modelPerDocument: Record<string, GenerationDeliverableModelTrace>;
+  };
+  fallbackUsed: boolean;
+};
+
+export type GenerationEvidenceSnapshot = {
+  question: string;
+  scenario: AskScenario;
+  dbHarnessPacket: DbHarnessPacket;
+  generationTrace?: GenerationTrace;
+  responseContentDigest: string;
+  generatedAt: string;
+};
+
+export type GenerationEvidenceEnvelope = {
+  version: "safeclaw-generation-evidence/v1";
+  algorithm: "HMAC-SHA256";
+  snapshot: GenerationEvidenceSnapshot;
+  signature: string;
+};
+
+export type GenerationEvidenceError = {
+  code: "secret_unconfigured" | "db_harness_missing";
+  message: string;
+};
+
 export type AskResponse = {
   question: string;
   answer: string;
@@ -309,15 +390,9 @@ export type AskResponse = {
       summary: string;
     };
   };
+  generationMode?: "template" | "enhanced" | "full";
   mode: "mock" | "live" | "fallback";
-  scenario: {
-    siteName: string;
-    companyName: string;
-    companyType: string;
-    workSummary: string;
-    workerCount: number;
-    weatherNote: string;
-  };
+  scenario: AskScenario;
   externalData: {
     weather: {
       source: "kma";
@@ -442,20 +517,60 @@ export type AskResponse = {
     safetyReference?: {
       source: "safety-reference-catalog";
       mode: "live" | "fallback" | "unconfigured";
+      errorCode?: "safety_reference_search_failed";
       query: string;
       count: number;
       totalItems: number;
+      retrievalMode?:
+        | "unconfigured"
+        | "rest-ilike"
+        | "ranked-rpc"
+        | "hybrid-vector-rpc"
+        | "hybrid-local-supabase"
+        | "local-tag"
+        | "local-ranked"
+        | "local-hybrid";
+      vectorSearch?: {
+        enabled: boolean;
+        attempted: boolean;
+        ok: boolean;
+        errorCode?: "safety_reference_vector_failed";
+        reason: string;
+        count: number;
+        model: string;
+        message: string;
+      };
       message: string;
       items: Array<{
         id: string;
         itemType: string;
         title: string;
+        rawTitle?: string;
+        displayTitle?: string;
+        displaySummary?: string;
         shortSummary?: string;
         primaryDocuments: string[];
         controls: string[];
         evidenceRoleLabel?: string;
+        evidenceRole?: "direct" | "supporting";
         sourceKindLabel?: string;
         operationSignalLabel?: string;
+        stableDocumentKey?: string;
+        anchor?: { page: number; excerpt: string };
+        retrievalSource?: "rest" | "ranked" | "vector" | "hybrid" | "local-tag" | "local-ranked" | "local-hybrid";
+        retrievalMode?:
+          | "unconfigured"
+          | "rest-ilike"
+          | "ranked-rpc"
+          | "hybrid-vector-rpc"
+          | "hybrid-local-supabase"
+          | "local-tag"
+          | "local-ranked"
+          | "local-hybrid";
+        quality?: "accepted" | "review_required";
+        lifecycle?: "current" | "stale" | "retired";
+        directEligible?: boolean;
+        reviewRequired?: boolean;
       }>;
     };
   };
@@ -469,6 +584,7 @@ export type AskResponse = {
     workpackSummaryDraft: string;
     riskAssessmentDraft: string;
     workPlanDraft: string;
+    workPermitDraft?: string;
     /**
      * Structured 작업계획서. AI가 산문(workPlanDraft) 대신 표 양식의 셀 단위 데이터를
      * 직접 반환하도록 했을 때 채워진다. 존재하면 xlsx/pdf 렌더러는 산문 파싱
@@ -511,12 +627,40 @@ export type AskResponse = {
    * Phase 0 프리뷰 — lib/smsa-mapping.ts 참고.
    */
   evidenceLabels?: Record<string, SmsaEvidenceLabel>;
+  /** Phase A ontology evidence projected into retrieval and document rows. */
+  phaseAProduct?: PhaseAProductMaterialization;
   ontologyQa?: {
     reviewTask: string;
     result: QaReviewResult;
     sourceDocumentKeys: string[];
     detail: string;
   };
+  dbHarness?: {
+    packet: DbHarnessPacket;
+    promptContext: string;
+    summary: {
+      mode: DbHarnessPacket["mode"];
+      llmRole: DbHarnessPacket["generationContract"]["llmRole"];
+      llmOutputScope: DbHarnessPacket["generationContract"]["llmOutputScope"];
+      evidenceAuthority: DbHarnessPacket["generationContract"]["evidenceAuthority"];
+      providerRetryScope: DbHarnessPacket["generationContract"]["providerRetryScope"];
+      fallbackChainAllowed: DbHarnessPacket["generationContract"]["fallbackChainAllowed"];
+      genericProseSubstitutionAllowed: DbHarnessPacket["generationContract"]["genericProseSubstitutionAllowed"];
+      missingEvidencePolicy: DbHarnessPacket["generationContract"]["missingEvidencePolicy"];
+      directEvidence: number;
+      sifCases: number;
+      supportingEvidence: number;
+      improvementMemory: number;
+      workpackMemory: number;
+      missingEvidence: string[];
+      documentCoverage: DbHarnessPacket["generationContract"]["documentCoverage"];
+      retrievalContract: DbHarnessPacket["retrievalContract"];
+      ontologyStatus: DbHarnessPacket["ontologyChecklist"]["status"];
+    };
+  };
+  generationTrace?: GenerationTrace;
+  generationEvidence?: GenerationEvidenceEnvelope;
+  generationEvidenceError?: GenerationEvidenceError;
   qualityContract?: QualityContract;
   status: {
     lawgo: IntegrationMode;

@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import type { Route } from "next";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { getModuleNavModel } from "@/lib/module-navigation";
 
 type ModuleStatus = "live" | "partial" | "planned";
+type ModuleTheme = "day" | "night";
 
 const statusLabel: Record<ModuleStatus, string> = {
   live: "바로 사용",
@@ -22,29 +26,40 @@ type SafeClawModuleShellProps = {
   variant?: "default" | "document";
 };
 
-// Sidebar nav per design handoff v1.0 §10.3 — originally 11 items in 3 groups.
-// 리포트 센터는 현재 작업팩을 내려받는 운영 화면이고, "작업자 안내"는 외부 모바일
-// 뷰(/worker)이라 사이드바 메뉴에서 분리 (가이드 §10.2 누락 항목 명시).
-const moduleNav = [
-  // 운영 — 로그인 직후 첫 화면 + 한 줄 입력 + 문서 편집 + 리포트
-  { href: "/home", code: "01", label: "대시보드", group: "운영" },
-  { href: "/workspace", code: "02", label: "작업공간", group: "운영" },
-  { href: "/documents", code: "03", label: "문서팩", group: "운영" },
-  { href: "/reports", code: "04", label: "리포트", group: "운영" },
-  // 실행 (4) — 근거 / 작업자 / 전파 / TBM
-  { href: "/evidence", code: "05", label: "근거 라이브러리", group: "실행" },
-  { href: "/workers", code: "06", label: "작업자 · 교육", group: "실행" },
-  { href: "/dispatch", code: "07", label: "현장 전파", group: "실행" },
-  { href: "/tbm", code: "08", label: "TBM 모드", group: "실행" },
-  // 시스템 (7) — 이력 / 방어 파일 / 지식 / 온톨로지 / API / AI 연결 / 설정
-  { href: "/archive", code: "09", label: "이력 · 아카이브", group: "시스템" },
-  { href: "/evidence-file", code: "10", label: "경영책임자 방어 파일", group: "시스템" },
-  { href: "/knowledge", code: "11", label: "지식 DB", group: "시스템" },
-  { href: "/ontology", code: "12", label: "온톨로지", group: "시스템" },
-  { href: "/ops/api", code: "13", label: "API 연결", group: "시스템" },
-  { href: "/settings/ai-connect", code: "14", label: "내 AI 연결", group: "시스템" },
-  { href: "/settings", code: "15", label: "설정", group: "시스템" }
-] as const;
+type PageDecisionHeaderProps = Pick<
+  SafeClawModuleShellProps,
+  "eyebrow" | "title" | "description" | "mappedTo" | "actions"
+> & {
+  command: { href: string; label: string };
+};
+
+function PageDecisionHeader({
+  eyebrow,
+  title,
+  description,
+  mappedTo,
+  actions,
+  command
+}: PageDecisionHeaderProps) {
+  return (
+    <header className="safeclaw-page-decision-header safeclaw-module-header" data-testid="page-decision-header">
+      <div className="safeclaw-page-decision-copy">
+        <span className="safeclaw-module-eyebrow">{eyebrow}</span>
+        <h1 className="safeclaw-module-title">{title}</h1>
+        <p className="safeclaw-module-description">{description}</p>
+      </div>
+      <aside className="safeclaw-page-decision-action" aria-label="현재 모듈 결정">
+        <div>
+          <span>업무 범위</span>
+          <strong>{mappedTo}</strong>
+        </div>
+        <div className="safeclaw-module-principal-command" data-principal-command>
+          {actions ?? <Link href={command.href as Route}>{command.label}</Link>}
+        </div>
+      </aside>
+    </header>
+  );
+}
 
 export function SafeClawModuleShell({
   eyebrow,
@@ -55,69 +70,139 @@ export function SafeClawModuleShell({
   children,
   actions,
   activeHref,
-  variant = "default"
+  variant = "document"
 }: SafeClawModuleShellProps) {
-  const groupedNav = moduleNav.reduce<Record<string, typeof moduleNav[number][]>>((acc, item) => {
-    acc[item.group] = acc[item.group] || [];
-    acc[item.group].push(item);
-    return acc;
-  }, {});
+  const navModel = getModuleNavModel(activeHref);
+  const [theme, setTheme] = useState<ModuleTheme>("day");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const queryTheme = new URLSearchParams(window.location.search).get("theme");
+    const savedTheme = window.localStorage.getItem("safeclaw.moduleTheme");
+    const nextTheme = queryTheme === "night" || queryTheme === "day"
+      ? queryTheme
+      : savedTheme === "night"
+        ? "night"
+        : "day";
+    setTheme(nextTheme);
+    setIsReady(true);
+  }, []);
+
+  function updateTheme(nextTheme: ModuleTheme) {
+    setTheme(nextTheme);
+    window.localStorage.setItem("safeclaw.moduleTheme", nextTheme);
+    const url = new URL(window.location.href);
+    url.searchParams.set("theme", nextTheme);
+    window.history.replaceState(window.history.state, "", url);
+  }
 
   return (
-    <main className={`safeclaw-module-shell module-variant-${variant}`}>
-      <aside className="safeclaw-module-rail" aria-label="SafeClaw 제품 메뉴">
-        <Link href="/" className="safeclaw-module-brand" aria-label="SafeClaw 홈">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/ClawMark-Inverse.svg" alt="" width={28} height={28} />
-          <strong>safeclaw/<em>os</em></strong>
-        </Link>
-        <p>FIELD OS</p>
-        <nav aria-label="SafeClaw 운영 메뉴">
-          {Object.entries(groupedNav).map(([group, items]) => (
-            <section key={group}>
-              <h2>{group}</h2>
-              {items.map((item) => (
+    <div
+      className={`safeclaw-module-shell module-variant-${variant}`}
+      data-theme={theme}
+      data-ready={isReady}
+      data-module-route={activeHref}
+    >
+      <a className="safeclaw-skip-link" href="#safeclaw-module-main">
+        본문으로 건너뛰기
+      </a>
+      <aside key={`module-rail-${theme}`} className="safeclaw-module-rail" aria-label="SafeClaw 제품 메뉴">
+        <div className="safeclaw-module-rail-head">
+          <Link href="/" className="safeclaw-module-brand" aria-label="SafeClaw 홈">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/ClawMark.svg" alt="" width={28} height={28} />
+            <strong>SafeClaw</strong>
+          </Link>
+          <button
+            type="button"
+            className="safeclaw-module-menu-button safeclaw-module-chrome-button"
+            aria-controls="safeclaw-module-navigation"
+            aria-expanded={mobileNavOpen}
+            onClick={() => setMobileNavOpen((isOpen) => !isOpen)}
+          >
+            메뉴
+          </button>
+        </div>
+        <p>현장 안전 문서팩</p>
+        <nav
+          id="safeclaw-module-navigation"
+          className={`safeclaw-module-navigation${mobileNavOpen ? " open" : ""}`}
+          aria-label="SafeClaw 운영 메뉴"
+        >
+          <section className="safeclaw-module-primary-nav">
+            <h2>주요 메뉴</h2>
+            {navModel.primaryItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href as Route}
+                className={item.isActive ? "active" : ""}
+                aria-current={item.isActive ? "page" : undefined}
+              >
+                <span>{item.code}</span>
+                <strong>{item.label}</strong>
+                <small>{item.hint}</small>
+              </Link>
+            ))}
+          </section>
+          {navModel.secondaryItems.length ? (
+            <section className="safeclaw-module-secondary-nav">
+              <h2>{navModel.activeSection.label} 관련</h2>
+              {navModel.secondaryItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href as Route}
-                  className={activeHref === item.href ? "active" : ""}
+                  className={item.isActive ? "active" : ""}
+                  aria-current={item.isActive ? "page" : undefined}
                 >
                   <span>{item.code}</span>
                   <strong>{item.label}</strong>
                 </Link>
               ))}
             </section>
-          ))}
+          ) : null}
         </nav>
       </aside>
 
-      <section className="safeclaw-module-main">
-        <header className="safeclaw-module-nav">
+      <main id="safeclaw-module-main" className="safeclaw-module-main" tabIndex={-1}>
+        <header key={`module-nav-${theme}`} className="safeclaw-module-nav">
           <span><i /> SITE 기본 현장</span>
           <span>API <b>Law.go</b> · <b>KOSHA</b> · 기상청</span>
           <span className={`safeclaw-module-status ${status}`}>
             {status === "live" ? <i className="sc-blink sc-blink--good" aria-hidden="true" /> : null}
             {statusLabel[status]}
           </span>
-          <Link href="/workspace" className="safeclaw-module-primary">작업 시작</Link>
+          <div className="safeclaw-module-theme-toggle" role="group" aria-label="화면 테마">
+            <button
+              type="button"
+              className={`safeclaw-module-chrome-button${theme === "day" ? " active" : ""}`}
+              aria-pressed={theme === "day"}
+              onClick={() => updateTheme("day")}
+            >
+              Day
+            </button>
+            <button
+              type="button"
+              className={`safeclaw-module-chrome-button${theme === "night" ? " active" : ""}`}
+              aria-pressed={theme === "night"}
+              onClick={() => updateTheme("night")}
+            >
+              Night
+            </button>
+          </div>
         </header>
 
-        {/* 시그니처 패턴 3/4: HudCorners — 모듈 페이지마다 1개 hero 프레임에만 적용. */}
-        <section className={`safeclaw-module-hero ${variant === "document" ? "document" : ""} hud-corners`}>
-          <div>
-            <span className="safeclaw-module-eyebrow">{eyebrow}</span>
-            <h1>{title}</h1>
-            <p>{description}</p>
-          </div>
-          <aside>
-            <span>업무 범위</span>
-            <strong>{mappedTo}</strong>
-            {actions ? <div className="safeclaw-module-actions">{actions}</div> : null}
-          </aside>
-        </section>
+        <PageDecisionHeader
+          eyebrow={eyebrow}
+          title={title}
+          description={description}
+          mappedTo={mappedTo}
+          actions={actions}
+          command={navModel.principalCommand}
+        />
 
-        {children}
-      </section>
-    </main>
+        <div className="safeclaw-module-content">{children}</div>
+      </main>
+    </div>
   );
 }

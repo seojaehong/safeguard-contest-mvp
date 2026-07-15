@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/scenario-inference.test.ts tests/accident-cases.test.ts tests/briefing.test.ts tests/workpack-generation-evidence-route.test.ts tests/generation-evidence.test.ts tests/workpack-readiness.test.ts tests/engine-adapter.test.ts tests/remote-engine-protocol.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/backend-harness-gate
+
+
+ Test Files  8 passed (8)
+      Tests  145 passed (145)
+   Start at  16:57:55
+   Duration  6.07s (transform 500ms, setup 0ms, import 808ms, tests 335ms, environment 1ms)

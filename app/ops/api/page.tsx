@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getLatestDryrunSnapshot } from "@/lib/dryrun-status";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
+import { toDryrunPresentationSnapshot } from "@/lib/web-safe-presentation";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,12 @@ export const metadata = {
 };
 
 export default async function ApiOperationsPage() {
-  const snapshot = getLatestDryrunSnapshot();
+  let snapshot: ReturnType<typeof toDryrunPresentationSnapshot> = null;
+  try {
+    snapshot = toDryrunPresentationSnapshot(getLatestDryrunSnapshot());
+  } catch (error: unknown) {
+    console.error("API operations dry-run snapshot presentation read failed", error);
+  }
   const safetyDb = await getSafetyReferenceStats();
 
   return (
@@ -25,14 +31,14 @@ export default async function ApiOperationsPage() {
       actions={<Link href="/knowledge">지식 DB 보기</Link>}
     >
       <section className="safeclaw-module-grid four">
-        <article><span>Run</span><strong>{snapshot?.runId || "대기"}</strong></article>
+        <article><span>실행 ID</span><strong>{snapshot?.runId || "대기"}</strong></article>
         <article><span>성공</span><strong>{snapshot ? `${snapshot.okCount}/${snapshot.totalRuns}` : "미확인"}</strong></article>
-        <article><span>평균</span><strong>{snapshot ? `${snapshot.avgMs}ms` : "미확인"}</strong></article>
-        <article><span>P95</span><strong>{snapshot ? `${snapshot.p95Ms}ms` : "미확인"}</strong></article>
+        <article><span>평균</span><strong>{snapshot ? `${snapshot.avgMs}밀리초` : "미확인"}</strong></article>
+        <article><span>P95</span><strong>{snapshot ? `${snapshot.p95Ms}밀리초` : "미확인"}</strong></article>
       </section>
       <section className="safeclaw-module-panel">
         <span>운영 점검</span>
-        <h2>{snapshot?.qualityNote?.replaceAll("드라이런", "점검") || "최근 점검 결과가 없습니다."}</h2>
+        <h2>{snapshot?.qualityNote || "최근 점검 결과가 없습니다."}</h2>
         <p>이 화면은 제출·운영용 요약만 보여줍니다. 원문 JSON, 내부 엔드포인트, 적재 경로는 관리자 검증 산출물에서만 확인합니다.</p>
       </section>
       <section className="safeclaw-module-grid four">

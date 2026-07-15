@@ -1,0 +1,200 @@
+{
+  "deployedUrl": "https://safeguard-contest-mhvd5pp48-seojaehongs-projects.vercel.app",
+  "aliasUrl": "https://www.safeclaw.kr",
+  "checkedAt": "2026-07-09T16:10:06.978Z",
+  "workspaceMetrics": {
+    "url": "https://www.safeclaw.kr/workspace?theme=day",
+    "viewport": {
+      "width": 1024,
+      "height": 430,
+      "scrollWidth": 1024,
+      "bodyHeight": 936
+    },
+    "topbar": {
+      "top": 8,
+      "bottom": 68.140625,
+      "left": 16,
+      "right": 1008,
+      "width": 992,
+      "height": 60.140625,
+      "overflowY": "visible",
+      "background": "rgba(255, 255, 255, 0.88)",
+      "color": "rgb(23, 25, 29)"
+    },
+    "viewportRect": {
+      "top": 96.140625,
+      "bottom": 872.03125,
+      "left": 16,
+      "right": 1008,
+      "width": 992,
+      "height": 775.890625,
+      "overflowY": "visible",
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(23, 25, 29)"
+    },
+    "sideNav": {
+      "top": 96.140625,
+      "bottom": 422.140625,
+      "left": 16,
+      "right": 268,
+      "width": 252,
+      "height": 326,
+      "overflowY": "auto",
+      "background": "rgba(255, 255, 255, 0.9)",
+      "color": "rgb(23, 25, 29)"
+    },
+    "main": {
+      "top": 96.140625,
+      "bottom": 872.03125,
+      "left": 280,
+      "right": 1008,
+      "width": 728,
+      "height": 775.890625,
+      "overflowY": "visible",
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(23, 25, 29)"
+    },
+    "heading": {
+      "top": 140.140625,
+      "bottom": 187.453125,
+      "left": 321.953125,
+      "right": 961.953125,
+      "width": 640,
+      "height": 47.3125,
+      "overflowY": "visible",
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(17, 19, 24)"
+    },
+    "textarea": {
+      "top": 261.953125,
+      "bottom": 379.953125,
+      "left": 321.953125,
+      "right": 966.046875,
+      "width": 644.09375,
+      "height": 118,
+      "overflowY": "auto",
+      "background": "rgba(255, 255, 255, 0.94)",
+      "color": "rgb(23, 25, 29)"
+    },
+    "helper": {
+      "top": 395.953125,
+      "bottom": 413.953125,
+      "left": 321.953125,
+      "right": 966.046875,
+      "width": 644.09375,
+      "height": 18,
+      "overflowY": "visible",
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(89, 97, 109)"
+    }
+  },
+  "documentMetrics": {
+    "url": "https://www.safeclaw.kr/documents",
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "bodyHeight": 4684
+    },
+    "shell": {
+      "top": -149.890625,
+      "bottom": 2813.609375,
+      "left": 276,
+      "right": 1416,
+      "width": 1140,
+      "height": 2963.5,
+      "display": "grid",
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(23, 25, 29)",
+      "borderRadius": "0px",
+      "overflowX": "visible"
+    },
+    "sidebar": {
+      "top": -149.890625,
+      "bottom": 2813.609375,
+      "left": 276,
+      "right": 576,
+      "width": 300,
+      "height": 2963.5,
+      "display": "grid",
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(23, 25, 29)",
+      "borderRadius": "10px",
+      "overflowX": "visible"
+    },
+    "editor": {
+      "top": -149.890625,
+      "bottom": 2813.609375,
+      "left": 592,
+      "right": 1416,
+      "width": 824,
+      "height": 2963.5,
+      "display": "grid",
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(23, 25, 29)",
+      "borderRadius": "10px",
+      "overflowX": "visible"
+    },
+    "sheetExportPanel": {
+      "top": 1164.9375,
+      "bottom": 2792.609375,
+      "left": 297,
+      "right": 555,
+      "width": 258,
+      "height": 1627.671875,
+      "display": "grid",
+      "background": "rgba(0, 0, 0, 0)",
+      "color": "rgb(23, 25, 29)",
+      "borderRadius": "0px",
+      "overflowX": "visible"
+    },
+    "activeTab": {
+      "top": 12.6875,
+      "bottom": 98.375,
+      "left": 297,
+      "right": 555,
+      "width": 258,
+      "height": 85.6875,
+      "display": "grid",
+      "background": "rgb(245, 246, 248)",
+      "color": "rgb(23, 25, 29)",
+      "borderRadius": "9px",
+      "overflowX": "visible"
+    },
+    "textarea": {
+      "top": 136.5625,
+      "bottom": 596.5625,
+      "left": 613,
+      "right": 1395,
+      "width": 782,
+      "height": 460,
+      "display": "block",
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(23, 25, 29)",
+      "borderRadius": "10px",
+      "overflowX": "auto"
+    },
+    "preview": {
+      "top": 964.5,
+      "bottom": 2019.65625,
+      "left": 628,
+      "right": 1380,
+      "width": 752,
+      "height": 1055.15625,
+      "display": "block",
+      "background": "rgb(255, 255, 255)",
+      "color": "rgb(23, 25, 29)",
+      "borderRadius": "9px",
+      "overflowX": "auto"
+    }
+  },
+  "checks": {
+    "workspaceNoHorizontalOverflow": true,
+    "workspaceTopbarAboveViewport": true,
+    "workspaceComposerNoOverlap": true,
+    "documentsNoHorizontalOverflow": true,
+    "documentsEditorLight": true,
+    "documentsSheetPanelCleared": true,
+    "documentsPreviewContained": true
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "path": "/trust",
+  "viewport": {
+    "width": 390,
+    "height": 1200
+  },
+  "title": "신뢰와 근거 | SafeClaw",
+  "scrollWidth": 390,
+  "clientWidth": 390,
+  "horizontalOverflow": false,
+  "hasModuleShell": true,
+  "hasLegacyShell": false,
+  "hasInternalDiagnostics": false,
+  "h1FontSize": "34px",
+  "h1LetterSpacing": "normal",
+  "primaryCount": 6,
+  "secondaryCount": 1,
+  "activePrimary": [
+    "01작업공간입력 · 생성"
+  ],
+  "primary": [
+    "01작업공간입력 · 생성",
+    "02문서위험성평가 · TBM",
+    "03리포트주간 · 월간",
+    "04근거DB · 온톨로지",
+    "05이력증빙 · 파일",
+    "06설정AI · 현장"
+  ],
+  "secondary": [
+    "01대시보드"
+  ]
+}

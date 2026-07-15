@@ -1,0 +1,6 @@
+pdf=evaluation/release-pdf-render-remediation-2026-07-12/red-route.pdf
+pages=1
+font=/NotoSansKR-Regular-7098480789 bytes=15415 glyphs=118 loca_format=0 parse_errors=80
+error:unpack requires a buffer of 15 bytes
+font=/NotoSansKR-Bold-9742682568 bytes=2521 glyphs=17 loca_format=0 parse_errors=12
+error:unpack requires a buffer of 45 bytes

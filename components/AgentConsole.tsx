@@ -15,7 +15,7 @@ const MAX_VISIBLE_LINES = 18;
 function statusIcon(status: AgentConsoleLineStatus): string {
   if (status === "ok") return "✓";
   if (status === "warn") return "!";
-  if (status === "fail") return "✗";
+  if (status === "fail") return "!";
   if (status === "active") return "▸";
   return "·";
 }
@@ -45,7 +45,7 @@ export function AgentConsole({ lines, active }: AgentConsoleProps) {
 
   return (
     <details
-      className={`agent-console ${active ? "agent-console-active" : ""}`}
+      className={`agent-console ${active ? "agent-console-active workbench-loading-state" : ""}`}
       open={open}
       aria-label="작업 이력"
     >

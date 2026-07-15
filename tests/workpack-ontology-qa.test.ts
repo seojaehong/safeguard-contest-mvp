@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import { resolveReviewTaskLabel } from "@/lib/mcp-tools";
 import {
+  applyOntologyQaRemediation,
   attachOntologyQaResult,
   attachWebOntologyQa,
   buildOntologyQaSource
@@ -24,7 +25,34 @@ const qaPass: QaReviewFound = {
   advisory: "검수 고지"
 };
 
+const qaMissing: QaReviewFound = {
+  reviewable: true,
+  task: "밀폐공간 작업",
+  covered: { hazards: ["산소결핍 질식"], controls: ["적정공기 유지 환기"], articles: [] },
+  missing: {
+    hazards: ["유해가스 중독"],
+    controls: [
+      {
+        control: "감시인 외부 배치 및 연락설비",
+        articles: ["기준규칙 제623조(감시인의 배치 등)"]
+      },
+      {
+        control: "대피용 기구(공기호흡기·사다리·섬유로프) 비치",
+        articles: ["기준규칙 제625조(대피용 기구의 비치)"]
+      }
+    ],
+    articles: ["기준규칙 제623조(감시인의 배치 등)"]
+  },
+  coverageRate: 0.5,
+  verdict: "보완 권장",
+  advisory: "검수 고지"
+};
+
 describe("web workpack ontology QA", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("builds a QA source from the generated workpack documents", () => {
     const response = buildMockAskResponse("서울 현장 고소 작업", mockSearchResults.slice(0, 2), "mock", "test");
     const source = buildOntologyQaSource(response);
@@ -55,5 +83,70 @@ describe("web workpack ontology QA", () => {
     expect(reviewed.ontologyQa?.reviewTask).toBe("용접");
     expect(reviewed.ontologyQa?.detail).toContain("안전조치 검수");
     expect(reviewed.ontologyQa?.detail).not.toContain("riskAssessmentDraft");
+  });
+
+  it("remediates missing ontology controls into documents before rereview", async () => {
+    vi.mocked(reviewDocpack)
+      .mockResolvedValueOnce(qaMissing)
+      .mockResolvedValueOnce({
+        ...qaPass,
+        task: "밀폐공간 작업",
+        covered: {
+          hazards: ["산소결핍 질식", "유해가스 중독"],
+          controls: ["적정공기 유지 환기", "감시인 외부 배치 및 연락설비", "대피용 기구(공기호흡기·사다리·섬유로프) 비치"],
+          articles: []
+        },
+        missing: { hazards: [], controls: [], articles: [] }
+      });
+    const response = buildMockAskResponse("부산 지하 기계실 밀폐공간 작업", mockSearchResults.slice(0, 2), "live", "test");
+    const reviewed = await attachWebOntologyQa(response, "부산 지하 기계실 밀폐공간 작업");
+
+    expect(reviewDocpack).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(reviewDocpack).mock.calls[1]?.[1]).toContain("감시인 외부 배치 및 연락설비");
+    expect(vi.mocked(reviewDocpack).mock.calls[1]?.[1]).toContain("대피용 기구(공기호흡기·사다리·섬유로프) 비치");
+    expect(reviewed.deliverables.riskAssessmentDraft).toContain("[온톨로지 QA 보완 반영 - 위험성평가]");
+    expect(reviewed.deliverables.tbmBriefing).toContain("작업 전 확인: 감시인 외부 배치 및 연락설비");
+    expect(reviewed.ontologyQa?.result.reviewable && reviewed.ontologyQa.result.verdict).toBe("통과");
+  });
+
+  it("does not mutate the source response when applying ontology remediation", () => {
+    const response = buildMockAskResponse("부산 지하 기계실 밀폐공간 작업", mockSearchResults.slice(0, 2), "live", "test");
+    const remediated = applyOntologyQaRemediation(response, "밀폐공간 작업", qaMissing);
+
+    expect(response.deliverables.riskAssessmentDraft).not.toContain("감시인 외부 배치 및 연락설비");
+    expect(remediated.deliverables.riskAssessmentDraft).toContain("감시인 외부 배치 및 연락설비");
+    expect(remediated.deliverables.emergencyResponseDraft).toContain("대피용 기구(공기호흡기·사다리·섬유로프) 비치");
+  });
+
+  it("keeps ontology QA exception PII and secrets out of result detail and structured logs", async () => {
+    const privateFailure = "resident=900101-1234567 Authorization=Bearer ontology-secret";
+    vi.mocked(reviewDocpack).mockRejectedValueOnce(new Error(privateFailure));
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const response = buildMockAskResponse(
+      "부산 지하 기계실 밀폐공간 작업",
+      mockSearchResults.slice(0, 2),
+      "live",
+      "test"
+    );
+
+    const reviewed = await attachWebOntologyQa(response, "부산 지하 기계실 밀폐공간 작업");
+
+    expect(reviewed.ontologyQa).toMatchObject({
+      detail: "안전조치 검수를 완료하지 못했습니다. 검수 상태를 확인한 뒤 전송하세요.",
+      result: {
+        reviewable: false,
+        errorCode: "ontology_qa_failed",
+        message: "안전조치 검수를 완료하지 못했습니다. 검수 상태를 확인한 뒤 전송하세요."
+      }
+    });
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('"event":"ontology_qa_failed"'));
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('"errorType":"Error"'));
+
+    const publicSurface = JSON.stringify(reviewed.ontologyQa);
+    const internalLogs = JSON.stringify(warnSpy.mock.calls);
+    expect(publicSurface).not.toContain("900101-1234567");
+    expect(publicSurface).not.toContain("ontology-secret");
+    expect(internalLogs).not.toContain("900101-1234567");
+    expect(internalLogs).not.toContain("ontology-secret");
   });
 });

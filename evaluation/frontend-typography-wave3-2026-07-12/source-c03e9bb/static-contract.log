@@ -1,0 +1,13 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/font-family-token-contract.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-typography-wave3
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  10:32:31
+   Duration  813ms (transform 40ms, setup 0ms, import 74ms, tests 9ms, environment 0ms)
+

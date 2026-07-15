@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-12T09:04:07.615Z",
+  "mode": "normal",
+  "buildDirectory": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\frontend-final-gate-current\\.next",
+  "buildId": "3Ry7VJQVR9DIJdvmNm01X",
+  "sourceSha": "92eea81f3c550cc3f110711221a1e4251e1533e8",
+  "sourceIdentity": "744def91438308d520f313de96cb0a491ac67441272e734afa6ef400b4679c0d",
+  "buildIdentity": "ed252b6ac1bce401bee2bd64fe8be6916d566d58512461e672b85ae475948e01",
+  "chunkCount": 98,
+  "markerCount": 0,
+  "markerFiles": [],
+  "status": "pass"
+}

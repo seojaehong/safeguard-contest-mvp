@@ -1,0 +1,15 @@
+command=python -m unittest scripts.tests.test_recover_kosha_ocr_boundary scripts.tests.test_snapshot_kosha_guide_corpus
+startedAt=2026-07-13T17:08:12.0189955Z
+
+...................invalid pdf header: b'not a'
+EOF marker not found
+............invalid pdf header: b'not a'
+EOF marker not found
+.................................
+----------------------------------------------------------------------
+Ran 64 tests in 10.647s
+
+OK
+
+wallElapsedSeconds=12.439
+exitCode=0

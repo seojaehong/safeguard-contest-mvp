@@ -354,30 +354,128 @@ function inferWorkerCount(question: string) {
   return allCounts.length ? Math.max(...allCounts) : 5;
 }
 
-// Place-name tokens that appear as region/site prefixes in this app's own
-// scenario data (see fieldScenarioProfiles siteNames and inferSiteName rules
-// below), plus the top-level administrative regions. A bare mention of one
-// of these must never be mistaken for a company name.
-const knownLocationTokens =
-  /^(서울|인천|경기|부산|대구|광주|대전|울산|세종|성수동|성수|남동공단|안산|해운대|하남산단|달서구)/;
+const topLevelRegionTokens = new Set([
+  "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기",
+  "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"
+]);
+
+type SpecificLocationRule = {
+  aliases: string[][];
+  locationPrefix: string;
+  siteName: string;
+};
+
+const knownSpecificLocationRules: SpecificLocationRule[] = [
+  {
+    aliases: [["서울", "성수동"], ["서울성수동"], ["성수동"]],
+    locationPrefix: "서울 성수동",
+    siteName: "서울 성수동 근린생활시설 현장"
+  },
+  {
+    aliases: [["인천", "남동공단"], ["인천남동공단"], ["남동공단"]],
+    locationPrefix: "인천 남동공단",
+    siteName: "인천 남동공단 물류센터"
+  },
+  {
+    aliases: [["경기", "안산"], ["경기안산"], ["안산"]],
+    locationPrefix: "경기 안산",
+    siteName: "경기 안산 제조공장"
+  },
+  {
+    aliases: [["부산", "해운대"], ["부산해운대"], ["해운대"]],
+    locationPrefix: "부산 해운대",
+    siteName: "부산 해운대 시설관리 현장"
+  },
+  {
+    aliases: [["광주", "하남산단"], ["광주하남산단"], ["하남산단"]],
+    locationPrefix: "광주 하남산단",
+    siteName: "광주 하남산단 청소 현장"
+  },
+  {
+    aliases: [["대구", "달서구"], ["대구달서구"], ["달서구"]],
+    locationPrefix: "대구 달서구",
+    siteName: "대구 달서구 창고 현장"
+  }
+];
+
+const knownStandaloneLocationTokens = new Set([
+  ...topLevelRegionTokens,
+  "성수동", "성수", "서울성수동", "남동공단", "인천남동공단", "안산", "경기안산",
+  "해운대", "부산해운대", "하남산단", "광주하남산단", "달서구", "대구달서구"
+]);
+
+const nonCompanyLeadTokens = new Set(["오늘", "작업", "현장"]);
+
+function normalizeStandaloneToken(token: string) {
+  return token.replace(/^[^가-힣A-Za-z0-9]+|[^가-힣A-Za-z0-9]+$/g, "");
+}
+
+function tokenizeStandaloneTerms(question: string) {
+  return question
+    .split(/\s+/)
+    .map(normalizeStandaloneToken)
+    .filter((token) => token.length > 0);
+}
+
+function containsTokenSequence(tokens: string[], sequence: string[]) {
+  return tokens.some((_, startIndex) =>
+    sequence.every((token, offset) => tokens[startIndex + offset] === token)
+  );
+}
+
+function findSpecificLocationRule(question: string) {
+  const tokens = tokenizeStandaloneTerms(question);
+  return knownSpecificLocationRules.find((rule) =>
+    rule.aliases.some((alias) => containsTokenSequence(tokens, alias))
+  );
+}
+
+const workDescriptorCompanyNames = /^(?:굴착|보수|굴착보수|열수송관굴착|도로굴착보수)공사$/;
+
+function isWorkDescriptorCompanyName(candidate: string) {
+  return workDescriptorCompanyNames.test(candidate.replace(/\s+/g, ""));
+}
 
 function inferCompanyName(question: string) {
   const trimmed = question.trim();
-  const companyMatch = trimmed.match(/([가-힣A-Za-z0-9]+(?:테크인씨|테크이엔씨|엔지니어링|주식회사|건설|산업|전기|설비|이엔씨|테크|관리|로지스|메탈|창고|시설|기업|공사|㈜))/);
-  if (companyMatch) return companyMatch[1].replace(/^㈜/, "").trim();
+  const companyMatches = trimmed.matchAll(/([가-힣A-Za-z0-9]+(?:테크인씨|테크이엔씨|엔지니어링|주식회사|건설|산업|전기|설비|이엔씨|테크|관리|로지스|메탈|창고|시설|기업|공사|㈜))/g);
+  for (const companyMatch of companyMatches) {
+    const candidate = companyMatch[1].replace(/^㈜/, "").trim();
+    if (!isWorkDescriptorCompanyName(candidate)) return candidate;
+  }
 
-  const firstToken = trimmed.split(/\s+/)[0];
+  const firstToken = normalizeStandaloneToken(trimmed.split(/\s+/)[0] || "");
   const looksLikeBarePlaceName =
     firstToken &&
-    (knownLocationTokens.test(firstToken) || /(서울|인천|경기|부산|대구|광주|대전|울산|오늘|작업|현장)/.test(firstToken));
-  if (firstToken && !looksLikeBarePlaceName) {
+    (knownStandaloneLocationTokens.has(firstToken) || nonCompanyLeadTokens.has(firstToken));
+  if (firstToken && !looksLikeBarePlaceName && !isWorkDescriptorCompanyName(firstToken)) {
     return firstToken.replace(/[,.]$/, "");
   }
 
   return "현장 업체";
 }
 
+const excavationWorkIdentityPatterns = [
+  /(?:굴착|터파기)\s*(?:공사|작업)/,
+  /굴착\s+보수\s+작업/
+];
+
+function hasExcavationWorkIdentity(question: string) {
+  return excavationWorkIdentityPatterns.some((pattern) => pattern.test(question));
+}
+
+function inferKnownLocationPrefix(question: string) {
+  const specificLocation = findSpecificLocationRule(question);
+  if (specificLocation) return specificLocation.locationPrefix;
+
+  return tokenizeStandaloneTerms(question).find((token) => topLevelRegionTokens.has(token)) || null;
+}
+
 function inferCustomWorkName(question: string) {
+  if (hasExcavationWorkIdentity(question)) return "열수송관 굴착공사";
+  if (/배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question)) {
+    return "지하 기계실 배수펌프 점검";
+  }
   if (/누수|비가\s*새|천장/.test(question)) return "천장 누수 유지보수 작업";
   if (/점검|정비|유지보수/.test(question)) return "비정형 유지보수 작업";
   if (/화기|용접|절단/.test(question)) return "화기작업";
@@ -387,8 +485,14 @@ function inferCustomWorkName(question: string) {
 
 function inferSpecialContext(question: string): string[] {
   const notes: string[] = [];
-  if (/외국인/.test(question)) notes.push("외국인 근로자 포함 — 쉬운 한국어와 다국어 안내로 이해 여부를 확인");
-  if (/신규/.test(question)) notes.push("신규 작업자 포함 — 작업중지 기준과 보호구 착용을 별도 복창 확인");
+  const foreignWorkerCount = question.match(/외국인\s*(?:근로자|작업자)?\s*(\d+)\s*명/)?.[1];
+  const newWorkerCount = question.match(/신규\s*(?:투입자|근로자|작업자)?\s*(\d+)\s*명/)?.[1];
+  if (/외국인/.test(question)) {
+    notes.push(`${foreignWorkerCount ? `외국인 근로자 ${foreignWorkerCount}명 포함` : "외국인 근로자 포함"} — 쉬운 한국어와 다국어 안내로 이해 여부를 확인`);
+  }
+  if (/신규/.test(question)) {
+    notes.push(`${newWorkerCount ? `신규 투입자 ${newWorkerCount}명 포함` : "신규 작업자 포함"} — 작업중지 기준과 보호구 착용을 별도 복창 확인`);
+  }
   if (/화재감시자/.test(question)) notes.push("화재감시자 지정 — 화기작업 중 불티 비산과 가연물 상태를 상시 확인");
   if (/우천|젖음|비|강수/.test(question)) notes.push("우천·젖은 바닥 조건 — 미끄럼과 보행/장비 동선 분리 확인");
   if (/강풍|돌풍/.test(question)) notes.push("강풍 조건 — 작업중지 기준과 대피 위치를 작업 전 공유");
@@ -396,26 +500,66 @@ function inferSpecialContext(question: string): string[] {
 }
 
 function inferSiteName(question: string, fallback: string) {
-  const siteRules: Array<[RegExp, string]> = [
-    [/서울\s*성수동|성수동/, "서울 성수동 근린생활시설 현장"],
-    [/인천\s*남동공단|남동공단/, "인천 남동공단 물류센터"],
-    [/경기\s*안산|안산/, "경기 안산 제조공장"],
-    [/부산\s*해운대|해운대/, "부산 해운대 시설관리 현장"],
-    [/광주\s*하남산단|하남산단/, "광주 하남산단 청소 현장"],
-    [/대구\s*달서구|달서구/, "대구 달서구 창고 현장"]
-  ];
+  if (hasExcavationWorkIdentity(question)) return fallback;
 
-  const matchedRule = siteRules.find(([pattern]) => pattern.test(question));
-  if (matchedRule) return matchedRule[1];
+  const matchedRule = findSpecificLocationRule(question);
+  if (matchedRule) return matchedRule.siteName;
   return fallback;
+}
+
+function buildExcavationScenarioProfile(question: string, companyName: string): ScenarioProfile {
+  const locationPrefix = inferKnownLocationPrefix(question);
+  const sitePrefix = locationPrefix || (companyName !== "현장 업체" ? companyName : "");
+
+  return {
+    id: "construction-excavation",
+    companyName,
+    companyType: "건설업",
+    siteName: `${sitePrefix ? `${sitePrefix} ` : ""}열수송관 굴착공사 현장`,
+    workName: "열수송관 굴착공사",
+    processName: "지하 매설물 확인, 굴착기 굴착, 이동식 크레인 양중, 토사 적치와 굴착면 통제",
+    weatherNote: "옥외 굴착 조건, 굴착면 붕괴·매설물 접촉·중장비 작업반경 확인 필요",
+    riskLevel: "상",
+    topRisk: "굴착면 붕괴로 작업자가 매몰되거나 굴착기·이동식 크레인이 지하 매설물과 작업자를 접촉할 위험",
+    hazards: [
+      "굴착면 붕괴와 토사 유입으로 인한 매몰",
+      "도면·탐사·시험굴착 미흡으로 인한 지하 매설물 파손",
+      "굴착기 회전반경 또는 이동식 크레인 양중 구역에서 충돌·낙하"
+    ],
+    actions: [
+      "매설물 도면 확인과 탐사 후 시험굴착으로 위치를 표시하고 관리 주체와 작업 허가를 확인",
+      "굴착 깊이와 지반 상태에 맞는 굴착면 기울기·흙막이·토사 이격거리를 확보하고 출입을 통제",
+      "굴착기와 이동식 크레인 작업반경을 분리하고 신호수·아웃트리거·인양 경로를 작업 전 확인"
+    ],
+    educationName: "열수송관 굴착공사 전 붕괴·매설물·중장비 충돌 예방 교육",
+    educationTargets: "굴착 작업자, 굴착기·이동식 크레인 운전자, 신호수, 신규·외국인 근로자",
+    questions: [
+      "매설물 도면·탐사·시험굴착 결과와 굴착 허가를 누가 최종 확인했는가?",
+      "굴착면 붕괴 징후와 즉시 대피·작업중지 기준을 전원이 알고 있는가?",
+      "굴착기·크레인 작업반경과 신호수 위치, 작업자 대기구역을 분리했는가?"
+    ],
+    educationPoints: [
+      "매설물 위치 확인과 시험굴착 완료 전 기계굴착 금지",
+      "균열·토사 흘러내림·용수 발생 시 즉시 작업중지 후 굴착면 밖으로 대피",
+      "중장비 작업반경 출입 금지와 신호수 단일 지시체계 준수"
+    ],
+    keywords: ["굴착", "터파기", "열수송관", "매설물", "굴착기", "크레인"]
+  };
 }
 
 function buildCustomScenarioProfile(question: string): ScenarioProfile {
   const companyName = inferCompanyName(question);
+  if (hasExcavationWorkIdentity(question)) return buildExcavationScenarioProfile(question, companyName);
+
+  const isPumpConfinedSpace = /배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question);
   const isLeakMaintenance = /누수|비가\s*새|천장/.test(question);
   const workName = inferCustomWorkName(question);
-  const companyType = isLeakMaintenance ? "시설관리·유지보수" : "현장 유지보수";
-  const siteName = `${companyName} ${isLeakMaintenance ? "천장 누수 유지보수 현장" : "비정형 작업 현장"}`;
+  const companyType = isPumpConfinedSpace
+    ? "시설관리·기계설비 점검"
+    : isLeakMaintenance
+      ? "시설관리·유지보수"
+      : "현장 유지보수";
+  const siteName = `${companyName} ${isPumpConfinedSpace ? "지하 기계실 배수펌프 점검 현장" : isLeakMaintenance ? "천장 누수 유지보수 현장" : "비정형 작업 현장"}`;
 
   return {
     id: "custom-maintenance",
@@ -423,17 +567,29 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
     companyType,
     siteName,
     workName,
-    processName: isLeakMaintenance
+    processName: isPumpConfinedSpace
+      ? "밀폐공간 진입 전 환기·산소농도 측정, 배수펌프 전원 차단·LOTO, 누수 바닥 보양 후 점검"
+      : isLeakMaintenance
       ? "누수 부위 확인, 전기·천장재 상태 점검, 보양 후 천장 유지보수"
       : "작업 전 현장 확인, 위험구역 통제, 비정형 유지보수 수행",
-    weatherNote: isLeakMaintenance
+    weatherNote: isPumpConfinedSpace
+      ? "지하 기계실 밀폐공간 조건, 산소·유해가스 농도와 환기 상태 확인 필요"
+      : isLeakMaintenance
       ? "실내 누수 조건, 젖은 바닥·전기설비 접촉 가능성 확인 필요"
       : "현장 조건 미지정, 작업 전 실제 환경 확인 필요",
     riskLevel: "상",
-    topRisk: isLeakMaintenance
+    topRisk: isPumpConfinedSpace
+      ? "지하 기계실 배수펌프 점검 중 산소결핍·유해가스 노출, 불시기동 끼임, 누수 바닥 미끄러짐 위험"
+      : isLeakMaintenance
       ? "천장 누수 유지보수 중 고소작업 추락, 젖은 바닥 미끄러짐, 누전·감전, 천장재 낙하 위험"
       : "비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
-    hazards: isLeakMaintenance
+    hazards: isPumpConfinedSpace
+      ? [
+          "밀폐공간 진입 전 환기·산소농도 측정 미흡으로 인한 질식",
+          "배수펌프 전원 차단·LOTO 미흡으로 인한 불시기동 끼임·감전",
+          "누수 바닥과 배수 불량으로 인한 미끄러짐·전도"
+        ]
+      : isLeakMaintenance
       ? [
           "천장 누수 부위 확인 중 사다리·작업발판에서 추락",
           "누수로 젖은 바닥에서 미끄러짐·전도",
@@ -444,7 +600,13 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "작업구역 통제 미흡으로 인한 충돌·끼임",
           "2인 1조 감시·비상연락 미흡으로 인한 구조 지연"
         ],
-    actions: isLeakMaintenance
+    actions: isPumpConfinedSpace
+      ? [
+          "진입 전 강제환기 후 산소·유해가스 농도를 측정하고 감시인을 외부에 배치",
+          "배수펌프 전원을 차단·검전하고 잠금표지(LOTO)를 부착한 뒤 점검 착수",
+          "누수부 임시 배수로와 미끄럼 방지 매트 상태를 확인하고 젖은 구역을 출입통제"
+        ]
+      : isLeakMaintenance
       ? [
           "작업 전 전원 차단·검전, 누수 차단, 젖은 바닥 보양과 출입통제 실시",
           "사다리 대신 안정된 작업발판을 우선 사용하고 2인 1조 감시자를 지정",
@@ -455,9 +617,17 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "2인 1조 역할을 작업자와 감시자로 분리하고 비상연락 수단을 확인",
           "작업구역 출입통제, 보호구 착용, 장비·공구 상태를 작업 전 확인"
         ],
-    educationName: isLeakMaintenance ? "천장 누수 유지보수 작업 전 감전·추락 예방 교육" : "비정형 유지보수 작업 전 안전교육",
+    educationName: isPumpConfinedSpace
+      ? "지하 기계실 배수펌프 점검 전 밀폐공간·LOTO 안전교육"
+      : isLeakMaintenance ? "천장 누수 유지보수 작업 전 감전·추락 예방 교육" : "비정형 유지보수 작업 전 안전교육",
     educationTargets: "작업자 2인, 작업반장, 관리감독자",
-    questions: isLeakMaintenance
+    questions: isPumpConfinedSpace
+      ? [
+          "진입 전 환기와 산소·유해가스 농도 측정값을 누가 확인했는가?",
+          "배수펌프 전원 차단·검전·잠금표지(LOTO)를 작업 전 완료했는가?",
+          "외부 감시인, 연락수단, 구조장비 위치를 전원이 알고 있는가?"
+        ]
+      : isLeakMaintenance
       ? [
           "누수 부위 주변 전원 차단과 검전을 누가 확인했는가?",
           "작업발판, 미끄럼 방지, 천장재 낙하구역 통제를 작업 전 완료했는가?",
@@ -468,7 +638,13 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "2인 1조의 작업자·감시자 역할과 비상연락 절차를 전원이 이해했는가?",
           "작업구역 출입통제와 보호구 착용 상태를 작업 전 확인했는가?"
         ],
-    educationPoints: isLeakMaintenance
+    educationPoints: isPumpConfinedSpace
+      ? [
+          "밀폐공간 진입 전 환기와 산소·유해가스 농도 측정값 확인",
+          "배수펌프 전원 차단·검전·잠금표지(LOTO) 완료 전 설비 접근 금지",
+          "외부 감시인은 작업자 상태, 연락두절, 가스 경보, 미끄럼 위험을 계속 확인"
+        ]
+      : isLeakMaintenance
       ? [
           "전원 차단·검전 전에는 천장 누수 부위와 전기설비에 접근하지 않기",
           "젖은 바닥과 천장재 낙하구역은 즉시 통제하고 안정된 작업발판 사용",
@@ -502,6 +678,8 @@ const explicitIndustryNounRules: Array<[RegExp, string]> = [
   [/창고/, "warehouse-heat"]
 ];
 
+const profileContextOnlyKeywords = new Set(["외국인", "신규", "고령", "숙련"]);
+
 function pickExplicitIndustryProfile(question: string) {
   const matchedRule = explicitIndustryNounRules.find(([pattern]) => pattern.test(question));
   if (!matchedRule) return null;
@@ -511,7 +689,7 @@ function pickExplicitIndustryProfile(question: string) {
 function pickScenarioProfile(question: string) {
   const normalized = question.trim().toLowerCase();
 
-  if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question)) {
+  if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question) || hasExcavationWorkIdentity(question)) {
     return buildCustomScenarioProfile(question);
   }
 
@@ -520,7 +698,10 @@ function pickScenarioProfile(question: string) {
 
   const scored = fieldScenarioProfiles.map((profile) => ({
     profile,
-    score: profile.keywords.reduce((acc, keyword) => acc + (normalized.includes(keyword.toLowerCase()) ? 1 : 0), 0)
+    score: profile.keywords.reduce(
+      (acc, keyword) => acc + (!profileContextOnlyKeywords.has(keyword) && normalized.includes(keyword.toLowerCase()) ? 1 : 0),
+      0
+    )
   }));
 
   scored.sort((a, b) => b.score - a.score);

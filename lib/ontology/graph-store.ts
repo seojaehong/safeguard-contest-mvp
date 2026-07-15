@@ -52,7 +52,7 @@ export type UpsertResult = {
 };
 
 export const ADVISORY_NOTICE =
-  "본 그래프는 노무사 감수를 거친 안전 온톨로지 조회 결과이며 참고용입니다. 법적 판단은 원문 법령과 전문가 확인을 거쳐야 합니다.";
+  "본 그래프는 전문가 검토를 거친 안전 온톨로지 조회 결과이며 참고용입니다. 법적 판단은 원문 법령과 현장 확인을 거쳐야 합니다.";
 
 type SupabaseConfig = {
   url: string;

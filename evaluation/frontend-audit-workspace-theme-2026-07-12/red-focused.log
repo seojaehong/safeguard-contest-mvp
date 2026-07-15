@@ -1,0 +1,103 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/frontend-route-coverage.test.ts -t unloaded-font mutations|explicit Day and Night workspace audit routes --maxWorkers=1 --no-file-parallelism --reporter=verbose
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme
+
+ ↓ tests/frontend-route-coverage.test.ts > frontend route classification > discovers every page and assigns each route to exactly one family
+ ↓ tests/frontend-route-coverage.test.ts > frontend route classification > gives every rendered route a semantic title and its canonical surface hook
+ ↓ tests/frontend-route-coverage.test.ts > frontend route classification > verifies every delegated route still renders its declared surface owner
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > reconciles the complete route, theme, special-state, and generated-surface evidence
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > proves actual named framework boundaries and numerical rendered contracts
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > keeps total reconciliation correct when one failed row has multiple findings
+file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/[eval1]:1
+import * as audit from "file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/scripts/frontend_consistency_browser_audit.mjs"; console.log(JSON.stringify(audit.workspaceThemeRequestedPath('Day')));
+                                                                                                                                                                                                     ^
+
+TypeError: audit.workspaceThemeRequestedPath is not a function
+    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/[eval1]:1:198
+
+Node.js v24.12.0
+ × tests/frontend-route-coverage.test.ts > browser evidence reconciliation > rejects independent exact typography and unloaded-font mutations 6186ms
+   → {"workspaceTheme":"Day"}: expected [] to not deeply equal []
+ × tests/frontend-route-coverage.test.ts > browser evidence reconciliation > builds explicit Day and Night workspace audit routes 906ms
+   → Command failed: C:\Program Files\nodejs\node.exe --input-type=module --eval import * as audit from "file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/scripts/frontend_consistency_browser_audit.mjs"; console.log(JSON.stringify(audit.workspaceThemeRequestedPath('Day')));
+file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/[eval1]:1
+import * as audit from "file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/scripts/frontend_consistency_browser_audit.mjs"; console.log(JSON.stringify(audit.workspaceThemeRequestedPath('Day')));
+                                                                                                                                                                                                     ^
+
+TypeError: audit.workspaceThemeRequestedPath is not a function
+    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/[eval1]:1:198
+
+Node.js v24.12.0
+
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > rejects a product font leaking into any generated-document role
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > retains unrelated boundary and hydration errors
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > rejects unexpected HTTP status and final URL mutations
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > keeps the normal-production audit query inert and reports structured gates
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > connects the launch share CTA to the real customer-facing send panel
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > renders knowledge Markdown as compact semantic prose, lists, and links
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > filters isolated punctuation artifacts from legal body sections
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses one semantic page title followed by semantic sections in app/law/[id]/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses one semantic page title followed by semantic sections in app/precedent/[id]/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses one semantic page title followed by semantic sections in app/interpretation/[id]/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > binds legal prose and preformatted bodies to the long-form reading contract
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses semantic section and result headings on ask and search surfaces
+ ↓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section headings and the landing family hook in app/why/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section headings and the landing family hook in app/trust/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section headings and the landing family hook in app/roadmap/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section and card headings throughout the demo
+ ↓ tests/frontend-route-coverage.test.ts > module route section hierarchy > promotes knowledge and settings section labels to semantic headings
+ ↓ tests/frontend-route-coverage.test.ts > module route section hierarchy > keeps landing, preview, and ontology sections sequential
+ ↓ tests/frontend-route-coverage.test.ts > module route section hierarchy > uses named canonical spacing hooks instead of inline layout styles on the dry-run route
+ ↓ tests/frontend-route-coverage.test.ts > module route section hierarchy > binds route-family body, card, control, V2, demo, and legacy geometry to exact selectors
+ ↓ tests/frontend-route-coverage.test.ts > module route section hierarchy > binds landing and ordinary module internals to canonical roles and spacing
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/frontend-route-coverage.test.ts > browser evidence reconciliation > rejects independent exact typography and unloaded-font mutations
+AssertionError: {"workspaceTheme":"Day"}: expected [] to not deeply equal []
+
+Compared values have no visual difference.
+
+ ❯ tests/frontend-route-coverage.test.ts:479:90
+    477|       { workspaceTheme: "Day" },
+    478|     ]) {
+    479|       expect(probe({ ...validRow, ...mutation }).findings, JSON.string…
+       |                                                                                          ^
+    480|     }
+    481|   }, 30_000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/frontend-route-coverage.test.ts > browser evidence reconciliation > builds explicit Day and Night workspace audit routes
+Error: Command failed: C:\Program Files\nodejs\node.exe --input-type=module --eval import * as audit from "file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/scripts/frontend_consistency_browser_audit.mjs"; console.log(JSON.stringify(audit.workspaceThemeRequestedPath('Day')));
+file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/[eval1]:1
+import * as audit from "file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/scripts/frontend_consistency_browser_audit.mjs"; console.log(JSON.stringify(audit.workspaceThemeRequestedPath('Day')));
+                                                                                                                                                                                                     ^
+
+TypeError: audit.workspaceThemeRequestedPath is not a function
+    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/[eval1]:1:198
+
+Node.js v24.12.0
+
+ ❯ [eval1]:1:198
+ ❯ runBrowserContractProbe tests/frontend-route-coverage.test.ts:15:21
+     13|   const moduleUrl = pathToFileURL(path.join(root, "scripts/frontend_co…
+     14|   const source = `import * as audit from ${JSON.stringify(moduleUrl)};…
+     15|   return JSON.parse(execFileSync(process.execPath, ["--input-type=modu…
+       |                     ^
+     16| }
+     17|
+ ❯ tests/frontend-route-coverage.test.ts:484:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { status: 1, signal: null, output: [ null, '', 'file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/[eval1]:1\r\nimport * as audit from "file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/scripts/frontend_consistency_browser_audit.mjs"; console.log(JSON.stringify(audit.workspaceThemeRequestedPath(\'Day\')));\r\n                                                                                                                                                                                                     ^\r\n\r\nTypeError: audit.workspaceThemeRequestedPath is not a function\r\n    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/[eval1]:1:198\r\n\r\nNode.js v24.12.0\r\n' ], pid: 57252, stdout: '', stderr: 'file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/[eval1]:1\r\nimport * as audit from "file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/scripts/frontend_consistency_browser_audit.mjs"; console.log(JSON.stringify(audit.workspaceThemeRequestedPath(\'Day\')));\r\n                                                                                                                                                                                                     ^\r\n\r\nTypeError: audit.workspaceThemeRequestedPath is not a function\r\n    at file:///C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme/[eval1]:1:198\r\n\r\nNode.js v24.12.0\r\n' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 27 skipped (29)
+   Start at  23:58:07
+   Duration  7.92s (transform 98ms, setup 0ms, import 136ms, tests 7.09s, environment 0ms)

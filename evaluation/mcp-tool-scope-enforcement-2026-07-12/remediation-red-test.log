@@ -1,0 +1,149 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/mcp-auth.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/mcp-tool-scope-enforcement
+
+ ❯ tests/mcp-tools.test.ts (26 tests | 3 failed) 39ms
+     × toToolError maps Error and non-Error to isError content 9ms
+     × toToolError fixes authorization output without exposing internal fields 2ms
+     × toToolError hides transport and Supabase-like internal exception details 1ms
+ ❯ tests/mcp-auth.test.ts (23 tests | 1 failed) 24ms
+     × denies the entire array when one entry is malformed or unknown 10ms
+ ❯ tests/mcp-route-scope-contract.test.ts (3 tests | 2 failed) 49ms
+     × routes every literal registered tool through the central scoped wrapper 44ms
+     × makes authorization the wrapper callback's first executable work and logs internal errors 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/mcp-auth.test.ts > normalizeScopes > denies the entire array when one entry is malformed or unknown
+AssertionError: expected [ 'tools:write' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "tools:write",
++ ]
+
+ ❯ tests/mcp-auth.test.ts:70:49
+     68|
+     69|   it("denies the entire array when one entry is malformed or unknown",…
+     70|     expect(normalizeScopes(["tools:write", 1])).toEqual([]);
+       |                                                 ^
+     71|     expect(normalizeScopes(["tools:read", "tools:unknown_future_tool"]…
+     72|     expect(normalizeScopes(["tools:read", "   "])).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/mcp-route-scope-contract.test.ts > MCP route scope contract > routes every literal registered tool through the central scoped wrapper
+AssertionError: expected 10 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 10
+
+ ❯ tests/mcp-route-scope-contract.test.ts:109:46
+    107|     const analysis = analyzeRouteRegistrations(route);
+    108|
+    109|     expect(analysis.directRegisterToolCalls).toBe(0);
+       |                                              ^
+    110|     expect(analysis.nonLiteralScopedToolCalls).toBe(0);
+    111|     expect(analysis.scopedToolNames).toEqual([...MCP_TOOL_NAMES]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/mcp-route-scope-contract.test.ts > MCP route scope contract > makes authorization the wrapper callback's first executable work and logs internal errors
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/mcp-route-scope-contract.test.ts:118:59
+    116|     const wrapperSource = existsSync(wrapperPath) ? readFileSync(wrapp…
+    117|
+    118|     expect(wrapperGuardsBeforeWorkAndLogs(wrapperSource)).toBe(true);
+       |                                                           ^
+    119|   });
+    120|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/mcp-tools.test.ts > tool result helpers > toToolError maps Error and non-Error to isError content
+AssertionError: expected { error: 'boom' } to deeply equal { …(2) }
+
+- Expected
++ Received
+
+  {
+-   "code": "MCP_TOOL_INTERNAL_ERROR",
+-   "error": "도구 실행 중 오류가 발생했습니다.",
++   "error": "boom",
+  }
+
+ ❯ tests/mcp-tools.test.ts:362:51
+    360|     const fromError = toToolError(new Error("boom"));
+    361|     expect(fromError.isError).toBe(true);
+    362|     expect(JSON.parse(fromError.content[0].text)).toEqual({
+       |                                                   ^
+    363|       code: "MCP_TOOL_INTERNAL_ERROR",
+    364|       error: "도구 실행 중 오류가 발생했습니다.",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/mcp-tools.test.ts > tool result helpers > toToolError fixes authorization output without exposing internal fields
+AssertionError: expected { code: 'MCP_TOOL_FORBIDDEN', …(1) } to deeply equal { code: 'MCP_TOOL_FORBIDDEN', …(1) }
+
+- Expected
++ Received
+
+  {
+    "code": "MCP_TOOL_FORBIDDEN",
+-   "error": "도구 권한이 없습니다.",
++   "error": "scope details for tenant-secret",
+  }
+
+ ❯ tests/mcp-tools.test.ts:381:21
+    379|     const payload = JSON.parse(toToolError(error).content[0].text) as …
+    380|
+    381|     expect(payload).toEqual({ code: "MCP_TOOL_FORBIDDEN", error: "도구 권…
+       |                     ^
+    382|     expect(payload).not.toHaveProperty("secret");
+    383|     expect(toToolError(error).content[0].text).not.toContain("tenant-s…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  tests/mcp-tools.test.ts > tool result helpers > toToolError hides transport and Supabase-like internal exception details
+AssertionError: expected { Object (error) } to deeply equal { …(2) }
+
+- Expected
++ Received
+
+  {
+-   "code": "MCP_TOOL_INTERNAL_ERROR",
+-   "error": "도구 실행 중 오류가 발생했습니다.",
++   "error": "Supabase response: {\"message\":\"JWT secret leaked\",\"details\":\"private-row\"}",
+  }
+
+ ❯ tests/mcp-tools.test.ts:393:36
+    391|     const serialized = toToolError(internal).content[0].text;
+    392|
+    393|     expect(JSON.parse(serialized)).toEqual({
+       |                                    ^
+    394|       code: "MCP_TOOL_INTERNAL_ERROR",
+    395|       error: "도구 실행 중 오류가 발생했습니다.",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  3 failed | 1 passed (4)
+      Tests  6 failed | 65 passed (71)
+   Start at  16:59:38
+   Duration  4.27s (transform 440ms, setup 0ms, import 1.30s, tests 141ms, environment 0ms)

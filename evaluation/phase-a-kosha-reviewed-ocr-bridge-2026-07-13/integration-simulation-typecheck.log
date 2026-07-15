@@ -1,0 +1,13 @@
+integrationTargetSha=77d86416116b91809e1e0508c72564e06c8c31bc
+candidateParentSha=c75acc06e3b4cc64f4a23e2f2ba46da62f65278f
+simulatedHeadSha=5b61eb2e30cc5487fb9d4716b439e8c0a3e1cdbd
+command=npm.cmd run typecheck
+cwd=.
+startedAt=2026-07-13T17:05:41.2237807Z
+
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+wallElapsedSeconds=23.912
+exitCode=0

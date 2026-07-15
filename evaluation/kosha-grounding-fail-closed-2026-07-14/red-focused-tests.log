@@ -1,0 +1,187 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts
+
+
+ RUN  v4.1.9 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-grounding-fail-closed
+
+ ❯ tests/kosha-grounding-fail-closed.test.ts (4 tests | 4 failed) 62ms
+     × parses only core REST columns and classifies adversarial remote KOSHA rows 36ms
+     × keeps naturalize-only KOSHA excerpts verified, bounded, escaped, deduplicated, and role-separated 8ms
+     × fails closed when an integrity-blocked local corpus is paired with metadata-less remote KOSHA 14ms
+     × fails closed when the local corpus is unavailable without affecting non-KOSHA rows 3ms
+ ❯ tests/kosha-current-review-run-ask.test.ts (4 tests | 1 failed) 4877ms
+     × does not promote metadata-less remote KOSHA into required body citations 855ms
+stderr | tests/kosha-current-review-run-ask.test.ts > current-base runAsk retrieval provenance > does not promote metadata-less remote KOSHA into required body citations
+[search] deliverablesPromise setup failed {"errorType":"TypeError"}
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/kosha-current-review-run-ask.test.ts > current-base runAsk retrieval provenance > does not promote metadata-less remote KOSHA into required body citations
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/kosha-current-review-run-ask.test.ts:218:92
+    216|       koshaPrimaryRefs?: Array<{ title: string }>;
+    217|     });
+    218|     expect(generationInputs.every((input) => (input.koshaPrimaryRefs |…
+       |                                                                                            ^
+    219|     expect(generationInputs.flatMap((input) => input.koshaLines || [])…
+    220|       "EXCLUDED_KOSHA_CONTROL"
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/kosha-grounding-fail-closed.test.ts > bounded KOSHA grounding fail-closed > parses only core REST columns and classifies adversarial remote KOSHA rows
+AssertionError: expected [ Array(11) ] to deeply equal ArrayContaining ["body", "payload"]
+
+- Expected
++ Received
+
+- ArrayContaining [
+-   "body",
+-   "payload",
++ [
++   "id",
++   "source_id",
++   "item_type",
++   "category",
++   "subcategory",
++   "title",
++   "summary",
++   "keywords",
++   "risk_tags",
++   "primary_documents",
++   "controls",
+  ]
+
+ ❯ tests/kosha-grounding-fail-closed.test.ts:233:31
+    231|
+    232|     expect(result.ok).toBe(true);
+    233|     expect(select.split(",")).toEqual(expect.arrayContaining(["body", …
+       |                               ^
+    234|     expect(select).not.toMatch(/source_url|metadata|official_status|cu…
+    235|     expect(result.items.every((item) => item.evidence_role === "suppor…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/kosha-grounding-fail-closed.test.ts > bounded KOSHA grounding fail-closed > keeps naturalize-only KOSHA excerpts verified, bounded, escaped, deduplicated, and role-separated
+AssertionError: expected [ 'machinery-direct', …(8) ] to deeply equal [ 'machinery-direct' ]
+
+- Expected
++ Received
+
+  [
+    "machinery-direct",
++   "old-version",
++   "metadata-absent",
++   "retired",
++   "unresolved",
++   "tampered",
++   "draft",
++   "verified-current",
++   "verified-current-duplicate",
+  ]
+
+ ❯ tests/kosha-grounding-fail-closed.test.ts:323:58
+    321|     const koshaJsonLines = prompt.split("\n").filter((line) => line.st…
+    322|
+    323|     expect(packet.directEvidence.map((item) => item.id)).toEqual([dire…
+       |                                                          ^
+    324|     expect(packet.sifCases.map((item) => item.id)).toEqual([sif.id]);
+    325|     expect(koshaJsonLines).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/kosha-grounding-fail-closed.test.ts > bounded KOSHA grounding fail-closed > fails closed when an integrity-blocked local corpus is paired with metadata-less remote KOSHA
+AssertionError: expected [ { …(22) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "body": "UNVERIFIED_REMOTE_TEXT_MUST_NOT_LEAK",
++     "category": "운반하역",
++     "controls": [
++       "이동식 비계 작업발판·안전난간·바퀴 잠금·아웃트리거 상태 확인",
++       "안전대 체결, 하부 출입통제 및 강풍 시 작업중지 기준 적용",
++     ],
++     "document_reflection_label": "위험성평가표 · TBM 브리핑 · TBM 기록에 이동식 비계 작업발판·안전난간·바퀴 잠금·아웃트리거 상태 확인",
++     "evidence_role": "direct",
++     "evidence_role_label": "문서 문구 직접 근거",
++     "id": "metadata-less-remote",
++     "item_type": "technical-guideline",
++     "keywords": [
++       "지게차",
++       "보행자",
++       "동선",
++     ],
++     "operation_signal_label": "문서와 TBM에 이동식 비계 작업발판·안전난간·바퀴 잠금·아웃트리거 상태 확인 반영",
++     "primary_documents": [
++       "위험성평가표",
++       "TBM 브리핑",
++       "TBM 기록",
++     ],
++     "reflected_documents": [
++       "위험성평가표",
++       "TBM 브리핑",
++       "TBM 기록",
++     ],
++     "retrieval_source": "ranked",
++     "risk_tags": [
++       "충돌",
++     ],
++     "short_summary": "외벽 도장 중 이동식 비계 작업발판·난간 미확인으로 인한 추락·전도 위험 · 이동식 비계 작업발판·안전난간·바퀴 잠금·아웃트리거 상태 확인 · 안전대 체결, 하부 출입통제 및 강풍 시 작업중지 기준 적용",
++     "source_id": "kosha-technical-support-regulations-2025",
++     "source_kind_label": "KOSHA 공식자료",
++     "source_url": null,
++     "subcategory": "지게차",
++     "summary": "지게차 보행자 동선 분리 기술지침",
++     "title": "D-C-13-2026 지게차 보행자 동선 분리 기술지침",
++     "vector_similarity": undefined,
++   },
++ ]
+
+ ❯ tests/kosha-grounding-fail-closed.test.ts:392:26
+    390|
+    391|     expect(result.ok).toBe(true);
+    392|     expect(result.items).toEqual([]);
+       |                          ^
+    393|     expect(result.count).toBe(0);
+    394|     expect(result.message).toMatch(/KOSHA.*무결성|무결성.*KOSHA/u);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/kosha-grounding-fail-closed.test.ts > bounded KOSHA grounding fail-closed > fails closed when the local corpus is unavailable without affecting non-KOSHA rows
+AssertionError: expected [ 'remote-machinery-direct', …(1) ] to deeply equal [ 'remote-machinery-direct' ]
+
+- Expected
++ Received
+
+  [
+    "remote-machinery-direct",
++   "metadata-less-remote",
+  ]
+
+ ❯ tests/kosha-grounding-fail-closed.test.ts:428:49
+    426|     }) as SafetyReferenceSearchResult & GroundingSearchProjection;
+    427|
+    428|     expect(result.items.map((item) => item.id)).toEqual([remoteDirect.…
+       |                                                 ^
+    429|     expect(result.koshaGrounding).toMatchObject({
+    430|       status: "blocked",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  5 failed | 3 passed (8)
+   Start at  11:01:12
+   Duration  6.56s (transform 836ms, setup 0ms, import 1.73s, tests 4.94s, environment 0ms)

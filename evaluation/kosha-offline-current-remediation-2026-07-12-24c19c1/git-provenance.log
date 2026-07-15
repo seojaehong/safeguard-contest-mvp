@@ -1,0 +1,59 @@
+BASE=24c19c17cc8c932a333fdae8785426218e57ae15
+RED=7730b9d033fadd1cd4bef57dcd2e3be8ca596055
+PRODUCT=c62162df2368234146c353d713fc3d1d26eff88b
+REMOTE_BACKEND=24c19c17cc8c932a333fdae8785426218e57ae15
+REMOTE_FEATURE_BEFORE=70f233cbbba597257a4a99406c87c0860249bc2e
+MERGE_BASE=24c19c17cc8c932a333fdae8785426218e57ae15
+RUNTIME_REPORT=evaluation/backend-scenario-protocol-integration-2026-07-12/report.json
+39:    "runtimeProtocolConsumerCount": 0,
+51:    "remoteProtocolWired": false,
+52:    "remoteDemoReady": false
+COMMAND: git diff --check 24c19c17cc8c932a333fdae8785426218e57ae15
+warning: in the working copy of 'evaluation/kosha-offline-current-integration-rebase-2026-07-12-31a44c0-v2/report.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/kosha-offline-current-remediation-2026-07-12-e040ce0/red.log', LF will be replaced by CRLF the next time Git touches it
+DIFF_CHECK_EXIT_CODE=0
+COMMAND: git diff --name-status 24c19c17cc8c932a333fdae8785426218e57ae15...c62162d
+M	app/api/mcp/[transport]/route.ts
+M	app/api/safety-reference/search/route.ts
+M	app/api/workpack/remediate/route.ts
+M	app/api/workpacks/[id]/operation-graph/route.ts
+A	evaluation/kosha-offline-current-integration-2026-07-12/build-process-before.json
+A	evaluation/kosha-offline-current-integration-2026-07-12/build.log
+A	evaluation/kosha-offline-current-integration-2026-07-12/diff-audit.json
+A	evaluation/kosha-offline-current-integration-2026-07-12/diff-check.log
+A	evaluation/kosha-offline-current-integration-2026-07-12/external-v3-hashes.json
+A	evaluation/kosha-offline-current-integration-2026-07-12/git-sync.log
+A	evaluation/kosha-offline-current-integration-2026-07-12/red.log
+A	evaluation/kosha-offline-current-integration-2026-07-12/report.json
+A	evaluation/kosha-offline-current-integration-2026-07-12/report.md
+A	evaluation/kosha-offline-current-integration-2026-07-12/typecheck.log
+A	evaluation/kosha-offline-current-integration-2026-07-12/verification.log
+A	evaluation/kosha-offline-current-integration-rebase-2026-07-12-31a44c0-v2/build-process-before.json
+A	evaluation/kosha-offline-current-integration-rebase-2026-07-12-31a44c0-v2/diff-audit.json
+A	evaluation/kosha-offline-current-integration-rebase-2026-07-12-31a44c0-v2/external-v3-hashes-before.json
+A	evaluation/kosha-offline-current-integration-rebase-2026-07-12-31a44c0-v2/external-v3-hashes.json
+A	evaluation/kosha-offline-current-integration-rebase-2026-07-12-31a44c0-v2/git-sync.json
+A	evaluation/kosha-offline-current-integration-rebase-2026-07-12-31a44c0-v2/report.json
+A	evaluation/kosha-offline-current-integration-rebase-2026-07-12-31a44c0-v2/report.md
+A	evaluation/kosha-offline-current-remediation-2026-07-12-e040ce0/red.log
+M	lib/claw-tools.ts
+M	lib/db-harness.ts
+A	lib/kosha-guide-corpus.ts
+M	lib/mcp-tools.ts
+M	lib/operation-improvements.ts
+M	lib/photo-vision-analysis.ts
+A	lib/safety-reference-catalog-server.ts
+M	lib/safety-reference-catalog.ts
+M	lib/search.ts
+M	lib/types.ts
+M	lib/workpack-learning-export.ts
+A	tests/helpers/kosha-offline-fixture.ts
+A	tests/kosha-current-review-lifecycle.test.ts
+A	tests/kosha-current-review-photo-storage.test.ts
+A	tests/kosha-current-review-provenance.test.ts
+A	tests/kosha-current-review-run-ask.test.ts
+A	tests/kosha-guide-offline-harness-expanded.test.ts
+A	tests/kosha-guide-offline-harness.test.ts
+A	tests/kosha-guide-provenance-gate.test.ts
+A	tests/kosha-guide-supporting-row-relevance.test.ts
+M	tests/photo-vision-analysis.test.ts

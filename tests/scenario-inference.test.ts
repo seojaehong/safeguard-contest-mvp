@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { inferScenario } from "@/lib/mock-data";
+import { buildMockAskResponse, inferScenario } from "@/lib/mock-data";
 
 describe("inferScenario", () => {
   it("classifies an explicit '제조공장' site as 제조업, not 물류업, even when action verbs like 상하차 co-occur", () => {
@@ -30,5 +30,112 @@ describe("inferScenario", () => {
   it("preserves an explicitly named company from the question", () => {
     const scenario = inferScenario("그린메탈 공장에서 용접 작업, 작업자 5명");
     expect(scenario.companyName).toBe("그린메탈");
+  });
+
+  it("keeps an excavation job out of a profile matched only by worker attributes", () => {
+    const question =
+      "도시가스공사 열수송관 굴착공사. 작업자 7명, 외국인 근로자 2명, 신규 투입자 1명, 이동식 크레인과 굴착기 사용, 매설물 확인 필요. 오늘 작업 전 문서팩을 만들어줘.";
+    const scenario = inferScenario(question);
+    const response = buildMockAskResponse(question, [], "mock", "test");
+
+    expect(scenario.companyName).toBe("도시가스공사");
+    expect(scenario.companyType).toBe("건설업");
+    expect(scenario.siteName).toContain("굴착");
+    expect(scenario.workerCount).toBe(7);
+    expect(scenario.specialContext.join(" ")).toContain("외국인 근로자 2명");
+    expect(scenario.specialContext.join(" ")).toContain("신규 투입자 1명");
+    expect(scenario.siteName).not.toContain("광주 하남산단");
+    expect(scenario.profile.workName).toContain("굴착");
+    expect(scenario.profile.hazards.join(" ")).toMatch(/붕괴|매몰/);
+    expect(scenario.profile.hazards.join(" ")).toContain("매설물");
+    expect(scenario.weatherNote).not.toContain("화학물질");
+    expect(response.deliverables.riskAssessmentDraft).toContain("굴착면 붕괴");
+    expect(response.deliverables.riskAssessmentDraft).not.toContain("화학세제");
+    expect(JSON.stringify(response.externalData.accidentCases)).not.toMatch(/화학|세척|세제/);
+  });
+
+  it.each([
+    "굴착기 정비 작업",
+    "열수송관 밸브 점검 작업"
+  ])("keeps equipment or service maintenance outside excavation: %s", (question) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.profile.id).toBe("custom-maintenance");
+    expect(scenario.profile.workName).not.toContain("굴착공사");
+  });
+
+  it.each([
+    "열수송관 굴착공사",
+    "굴착 작업",
+    "도로 굴착 보수 작업",
+    "터파기 작업"
+  ])("selects excavation only from excavation work identity: %s", (question) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.profile.id).toBe("construction-excavation");
+    expect(scenario.profile.workName).toContain("굴착");
+  });
+
+  it.each([
+    "굴착공사 작업자 5명",
+    "보수공사 배수펌프 점검 작업"
+  ])("does not infer a work descriptor as the company name: %s", (question) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.companyName).not.toMatch(/^(굴착|보수)공사$/);
+  });
+
+  it("preserves a top-level region in an excavation site name", () => {
+    const scenario = inferScenario("세종 열수송관 굴착공사");
+
+    expect(scenario.siteName).toContain("세종");
+    expect(scenario.siteName).toContain("굴착");
+  });
+
+  it.each([
+    ["안산건설 굴착 작업", "안산건설"],
+    ["하남산단관리 굴착 작업", "하남산단관리"],
+    ["강원상사 굴착 작업", "강원상사"],
+    ["제주개발 굴착 작업", "제주개발"]
+  ])("does not infer an embedded region from a company token: %s", (question, companyName) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.companyName).toBe(companyName);
+    expect(scenario.siteName).toBe(`${companyName} 열수송관 굴착공사 현장`);
+  });
+
+  it.each([
+    ["안산 굴착 작업", "경기 안산"],
+    ["광주 하남산단 굴착 작업", "광주 하남산단"],
+    ["강원 굴착 작업", "강원"],
+    ["제주 굴착 작업", "제주"],
+    ["세종 굴착 작업", "세종"]
+  ])("preserves a standalone excavation location: %s", (question, location) => {
+    const scenario = inferScenario(question);
+
+    expect(scenario.companyName).toBe("현장 업체");
+    expect(scenario.siteName).toBe(`${location} 열수송관 굴착공사 현장`);
+  });
+
+  it("does not let the canonical Gwangju cleaning location overwrite excavation identity", () => {
+    const excavation = inferScenario("광주 하남산단 열수송관 굴착공사");
+    const cleaning = inferScenario("클린온 광주 하남산단 공장 바닥 세척 작업. 화학세제 사용.");
+
+    expect(excavation.companyName).not.toBe("굴착공사");
+    expect(excavation.siteName).toContain("광주 하남산단");
+    expect(excavation.siteName).toContain("굴착");
+    expect(excavation.siteName).not.toMatch(/^굴착공사/);
+    expect(excavation.siteName).not.toContain("청소");
+    expect(cleaning.siteName).toBe("광주 하남산단 청소 현장");
+  });
+
+  it("still selects the chemical-cleaning profile from work identity terms", () => {
+    const scenario = inferScenario(
+      "클린온 공장 바닥 세척 작업. 외국인 근로자 3명, 화학세제 사용과 환기 제한, 미끄럼 위험."
+    );
+
+    expect(scenario.profile.id).toBe("cleaning-chemical");
+    expect(scenario.companyType).toBe("서비스업");
+    expect(scenario.profile.hazards.join(" ")).toContain("화학세제");
   });
 });

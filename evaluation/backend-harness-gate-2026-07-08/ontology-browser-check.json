@@ -1,0 +1,9 @@
+{
+  "title": "SafeClaw | 안전 문서팩 생성",
+  "graphNodes": 32,
+  "graphEdges": 27,
+  "listRows": 166,
+  "hasFallback": false,
+  "hasEmpty": false,
+  "body": "safeclaw/os\n\nFIELD OS\n\n운영\n01\n대시보드\n02\n작업공간\n03\n문서팩\n04\n리포트\n실행\n05\n근거 라이브러리\n06\n작업자 · 교육\n07\n현장 전파\n08\nTBM 모드\n시스템\n09\n이력 · 아카이브\n10\n경영책임자 방어 파일\n11\n지식 DB\n12\n온톨로지\n13\nAPI 연결\n14\n내 AI 연결\n15\n설정\n SITE 기본 현장\nAPI Law.go · KOSHA · 기상청\n바로 사용\n작업 시작\n운영 온톨로지\n작업 이력 그래프.\n\n작업, 위험요인, 조치, 법령, 문서 반영 위치를 리스트와 hover card로 확인합니다.\n\n업무 범위\n166개 노드 · 169개 관계\nGraph JSON\nNODES\n166개\n\nTask, Hazard, Control, Article, Document를 published 범위에서만 표시합니다.\n\nEDGES\n169개\n\n관계가 끊긴 edge와 출처 없는 항목은 조립 단계에서 제외됩니다.\n\nGATE\n0개 제외\n\n근거 없는 draft/uncited 항목은 사용자 근거처럼 노출하지 않습니다.\n\nGRAPH ONTOLOGY\n작업 이력 그래프 맵\n\npublished 노드 중 연결도가 높은 항목을 먼저 배치합니다. 노드에 마우스를 올리면 관련 위험요인, 조치, 법령, 문서 관계가 hover card로 표시됩니다.\n\nHAZARD\n추락\n12 links\n위험요인\n추락\n\n근거 1개 · 연결 10개\n\n조치\n개구부·단부 안전난간·덮개 설치\n조치\n규격 안전난간 설치\n조치\n안전대·구명밧줄·송기마스크 착용\n조치\n안전대 부착설비(지지로프) 설치\nHAZARD\n감전(직접·간접 접촉)\n7 links\n위험요인\n감전("
+}

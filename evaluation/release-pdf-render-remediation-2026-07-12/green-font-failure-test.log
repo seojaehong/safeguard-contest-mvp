@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/pdf-font-failure.test.ts
+
+
+ RUN  v4.1.10 .
+
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  07:52:33
+   Duration  2.16s (transform 169ms, setup 0ms, import 935ms, tests 363ms, environment 0ms)

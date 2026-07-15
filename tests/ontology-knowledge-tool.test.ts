@@ -3,7 +3,11 @@ import { describe, expect, test } from "vitest";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import { queryKnowledge, matchHazardNodes, listTaskLabels } from "@/lib/ontology/query";
 import { SEED_NODES, SEED_EDGES } from "@/lib/ontology/seed/core-triples";
-import { buildSafetyKnowledgeResult, ONTOLOGY_PROVENANCE } from "@/lib/mcp-tools";
+import {
+  buildSafetyKnowledgeResult,
+  CORE_ONTOLOGY_PROVENANCE,
+  ONTOLOGY_PROVENANCE,
+} from "@/lib/mcp-tools";
 
 // published 게이트 재현: published 부분그래프만으로 조회한다(draft 미노출 불변식).
 const graph = assembleGraph(
@@ -57,6 +61,8 @@ describe("buildSafetyKnowledgeResult — 도구 페이로드 정형화", () => {
     if (!payload.found) throw new Error("unreachable");
     expect(payload.provenance).toBe(ONTOLOGY_PROVENANCE);
     expect(payload.provenance).toBe("법제처 검증 시드 v1");
+    expect(payload.coreProvenance).toBe(CORE_ONTOLOGY_PROVENANCE);
+    expect(payload.coreProvenance).toBe("법제처 검증 시드 v1");
     expect(payload.task).toBe("밀폐공간 작업");
     // articles: 조번호(article_no) + 제목(label) 병기
     const a619 = payload.articles.find((a) => a.articleNo === "619");

@@ -1,0 +1,15 @@
+
+> safeclaw@0.1.0 test
+> vitest run --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 <repo>
+
+
+ Test Files  132 passed | 5 skipped (137)
+      Tests  1282 passed | 7 skipped (1289)
+   Start at  14:27:05
+   Duration  893.81s (transform 5.28s, setup 0ms, import 27.43s, tests 776.78s, environment 15ms)
+
+
+EXIT_CODE=0

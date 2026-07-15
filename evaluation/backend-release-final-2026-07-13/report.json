@@ -1,0 +1,150 @@
+{
+  "verificationStatus": "pass",
+  "launchReadiness": "blocked",
+  "launchBlockers": [
+    "RLS audit findings require an approved migration and authenticated cross-tenant verification.",
+    "Phase A ontology production provenance bridge remains unresolved."
+  ],
+  "sourceSha": "514b2d9a3c884c1a18ecf725285dde0e8a95b6cd",
+  "sourceIdentity": "cf3acf32f236a5c6ecdca5cf0b244ef16bd36c1ff8ecfa6b063e522a2ed723ac",
+  "branch": "feat/backend-release-integration-v2",
+  "verificationDate": "2026-07-13",
+  "workspaceRegression": {
+    "emptyInputLength": 0,
+    "emptyPlaceholder": "",
+    "emptyRestoreButtonCount": 0,
+    "emptyAutoTagRowCount": 0,
+    "emptyCurrentBriefCount": 0,
+    "emptySourceStatusCount": 0,
+    "filledBottomDeltaPx": 0,
+    "clearedBottomDeltaPx": 0,
+    "independentSidebarScroll": false,
+    "horizontalOverflow": false
+  },
+  "verification": {
+    "fullSuite": {
+      "filesPassed": 132,
+      "filesSkipped": 5,
+      "testsPassed": 1282,
+      "testsSkipped": 7,
+      "durationSeconds": 893.81,
+      "status": "pass"
+    },
+    "typecheck": "pass",
+    "pdfFocused": {
+      "filesPassed": 2,
+      "testsPassed": 22,
+      "status": "pass"
+    },
+    "isolatedHarnessFocused": {
+      "filesPassed": 1,
+      "testsPassed": 3,
+      "status": "pass"
+    },
+    "staticAudit": {
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violations": 0,
+      "status": "pass"
+    },
+    "builds": {
+      "normalPages": 27,
+      "normalBuildId": "GZHsLnN8pBcRAUWz5FMu1",
+      "normalMarkerCount": 0,
+      "auditPages": 27,
+      "auditBuildId": "KWLW3gxAjtwayCo6QPlnx",
+      "auditMarkerCount": 1,
+      "postTestNormalPages": 27,
+      "postTestNormalMarkerCount": 0,
+      "status": "pass"
+    },
+    "browserAudit": {
+      "routeRows": 96,
+      "workspaceThemeRows": 6,
+      "specialSurfaceRows": 4,
+      "generatedSurfaceRows": 2,
+      "successes": 108,
+      "failedRows": 0,
+      "findings": 0,
+      "recoveredRows": 0,
+      "status": "pass"
+    },
+    "forbiddenPathMatches": 0
+  },
+  "pdf": {
+    "statusCode": 200,
+    "contentType": "application/pdf",
+    "cacheControl": "no-store",
+    "byteLength": 20507,
+    "underOneMiB": true,
+    "pages": 2,
+    "renderWidth": 1190,
+    "renderHeight": 1684,
+    "firstPageNonwhitePixels": 108261,
+    "lastPageNonwhitePixels": 74114,
+    "extractedTextLength": 2616,
+    "containsKoreanTitle": true,
+    "containsRiskSentinel": true,
+    "containsTbmSentinel": true,
+    "containsTbmDetail": true,
+    "containsRiskLinkLabel": true,
+    "containsTbmDeliveryLabel": true,
+    "containsApproval": true,
+    "containsDisclaimer": true,
+    "riskRows": 32,
+    "tbmRows": 32,
+    "nftFiles": 57,
+    "nftRegular": 1,
+    "nftBold": 1,
+    "nftLicense": 1,
+    "requestArtifact": "final-direct-post-514b2d9-request.json",
+    "requestSha256": "f09c47a8d9c87de205003d92bc0697d3bc36326dc6a23eaf54567e2eba91e40e",
+    "responseSha256": "1d04fb925db9c43e00808126be172d85784162d101dee432f600e74ee2c6b014",
+    "resourceBudgets": {
+      "requestBytes": 262144,
+      "inputRows": 128,
+      "stringCharacters": 4000,
+      "renderLines": 512,
+      "pdfPages": 8,
+      "overLimitStatusCode": 413,
+      "overLimitCode": "PDF_EXPORT_LIMIT_EXCEEDED"
+    }
+  },
+  "browserHarness": {
+    "portBindAttempts": 8,
+    "retriesEaddrinuse": true,
+    "retriesEacces": true,
+    "raceRegressionPassed": true
+  },
+  "frontendIdentity": {
+    "lineEndingsNormalized": true,
+    "windowsLinuxStable": true
+  },
+  "ontology": {
+    "canonicalChains": 3,
+    "controls": 9,
+    "sifReferences": 7,
+    "koshaProductionDocuments": 9,
+    "koshaLocalChunks": 13,
+    "activeGuidanceChunks": 8,
+    "reviewOnlyGuidanceChunks": 5,
+    "controlMappings": 11,
+    "lawArticles": 9,
+    "materializationTargets": 18,
+    "resolved": false,
+    "published": false,
+    "graphPublicationState": "published",
+    "inferenceState": "review_required",
+    "reviewOnlyActiveEvidenceExcluded": true,
+    "failedQualityInvalidatesConfirmation": true
+  },
+  "boundaries": {
+    "databaseChanged": false,
+    "schemaChanged": false,
+    "migrationAdded": false,
+    "ontologyPublished": false,
+    "phaseBImplemented": false,
+    "protectedScreenshotsCommitted": false
+  }
+}

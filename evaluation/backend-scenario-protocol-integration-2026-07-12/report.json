@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-12T08:01:30.9796971Z",
+  "status": "integrated_verified",
+  "baseSha": "18db10d4730e4ebf93c9da440c951809142d6259",
+  "verifiedSourceHead": "7c9beccd031100d3848f74826744313dfcbb0872",
+  "evidenceCommit": "e040ce0dad0d74c9f7a068fa5a0e5c6a2ff4771b",
+  "verifiedAfterUpstreamRebase": true,
+  "sources": {
+    "scenario": "1235c080239589fe3923e3b84641e12e29fcbddf",
+    "protocol": "363093ab06dffe887d4aa6189cadf55b8d5c4171"
+  },
+  "independentReview": {
+    "scenario": "SPEC PASS; CODE PASS; P0-P2 findings 0; P3 timestamp metadata corrected during integration",
+    "protocol": "SPEC PASS; CODE PASS; P0-P3 findings 0"
+  },
+  "verification": {
+    "focused": {
+      "command": "npm.cmd test -- tests/scenario-inference.test.ts tests/accident-cases.test.ts tests/briefing.test.ts tests/workpack-generation-evidence-route.test.ts tests/generation-evidence.test.ts tests/workpack-readiness.test.ts tests/engine-adapter.test.ts tests/remote-engine-protocol.test.ts --maxWorkers=1 --no-file-parallelism",
+      "testFilesPassed": 8,
+      "testsPassed": 145,
+      "testsFailed": 0,
+      "exitCode": 0,
+      "log": "evaluation/backend-scenario-protocol-integration-2026-07-12/focused-tests.log"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "log": "evaluation/backend-scenario-protocol-integration-2026-07-12/typecheck.log"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "staticPages": "27/27",
+      "buildId": "zHyoQsKPAo422u4SgiukW",
+      "log": "evaluation/backend-scenario-protocol-integration-2026-07-12/build.log"
+    },
+    "diffCheckExitCode": 0,
+    "runtimeProtocolConsumerCount": 0,
+    "changedFileCount": 34,
+    "databaseMigrationChanges": 0,
+    "environmentChanges": 0
+  },
+  "screenshotProtection": {
+    "trackedFiles": 16,
+    "hashes": "evaluation/backend-scenario-protocol-integration-2026-07-12/protected-screenshot-hashes.json",
+    "restorationRequiredAfterPush": false,
+    "restoredHashMismatches": 0
+  },
+  "runtime": {
+    "remoteProtocolWired": false,
+    "remoteDemoReady": false
+  }
+}

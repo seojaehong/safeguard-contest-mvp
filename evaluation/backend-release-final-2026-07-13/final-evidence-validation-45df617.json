@@ -1,0 +1,21 @@
+{
+  "sourceSha": "45df617d6eced74bc5e9673104aa306338612ce6",
+  "sourceIdentity": "a60ccb87120cc4f5f516543a442e4601b63691f084fd515a6c93087402be5fdb",
+  "status": "pass",
+  "checks": {
+    "sourceSha": true,
+    "sourceIdentity": true,
+    "sourceProvenance": true,
+    "staticPass": true,
+    "bundleNormal": true,
+    "bundleAudit": true,
+    "browserRows": true,
+    "fullSuite": true,
+    "directPdf": true,
+    "renderedPdf": true,
+    "pdfNft": true,
+    "protectedBoundary": true
+  },
+  "failed": [],
+  "protectedDirtyCount": 16
+}

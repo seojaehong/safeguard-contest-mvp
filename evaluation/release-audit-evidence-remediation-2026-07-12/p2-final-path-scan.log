@@ -1,0 +1,13 @@
+[audit-command] byte scan of complete committed evidence ranges
+{
+  "scope": [
+    "evaluation/frontend-audit-runner-port-v2-2026-07-11",
+    "evaluation/release-audit-evidence-remediation-2026-07-12"
+  ],
+  "filesScanned": 169,
+  "forbiddenPathMatches": 0,
+  "offenders": [],
+  "status": "pass"
+}
+[audit-exit-code] 0
+[audit-completion] committed-evidence-path-scan-complete

@@ -1,0 +1,2 @@
+COMMAND=git diff --check 18db10d..7c9beccd031100d3848f74826744313dfcbb0872
+EXIT_CODE=0

@@ -1,0 +1,65 @@
+{
+  "artifact": "phase-a-hermes-adr",
+  "date": "2026-07-13",
+  "status": "verified",
+  "scope": {
+    "architectureOnly": true,
+    "codeOrProviderImplementation": false,
+    "databaseChanges": false,
+    "liveHermesProofClaimed": false
+  },
+  "decisions": [
+    {
+      "id": "ADR-PA-001",
+      "name": "product_fact_and_effect_authority",
+      "result": "safeclaw_mcp_db_evidence_harness_remains_authoritative"
+    },
+    {
+      "id": "ADR-PA-002",
+      "name": "isolated_versioned_engine_adapter",
+      "result": "runtime_is_a_future_promotion_architecture_path_isolated_from_core_and_provider_policy_and_phase_a_authorizes_no_runtime_experiment"
+    },
+    {
+      "id": "ADR-PA-003",
+      "name": "evidence_and_obligation_boundary",
+      "result": "sif_then_kosha_then_current_law_with_separate_obligation_classification"
+    },
+    {
+      "id": "ADR-PA-004",
+      "name": "grounded_generation_provider_and_human_gates",
+      "result": "naturalize_only_provider_fallback_confirmation_and_publication_gates_remain"
+    },
+    {
+      "id": "ADR-PA-005",
+      "name": "oauth_experiment_and_service_auth",
+      "result": "representative_gpt_oauth_poc_is_phase_b_step_6_only_after_entry_gate_and_separate_explicit_approval_with_service_auth_for_commercial_traffic"
+    }
+  ],
+  "verification": [
+    {
+      "check": "json_syntax",
+      "status": "passed",
+      "evidence": "5 decisions and 5 verification entries parsed with PowerShell ConvertFrom-Json"
+    },
+    {
+      "check": "markdown_local_links",
+      "status": "passed",
+      "evidence": "28 total local Markdown links counted mechanically across the ADR and Phase B plan: 28 in the ADR and 0 in the Phase B plan"
+    },
+    {
+      "check": "phase_b_execution_gate",
+      "status": "passed",
+      "evidence": "Both the ADR and Phase B plan require delivery step 6, Phase B entry-gate acceptance of the Phase A closeout, and separate explicit approval before a representative GPT OAuth proof of concept"
+    },
+    {
+      "check": "owned_path_only_diff",
+      "status": "passed",
+      "evidence": "git diff --name-only 02295b5 listed exactly the four assigned files"
+    },
+    {
+      "check": "git_diff_check",
+      "status": "passed",
+      "evidence": "git diff --check 02295b5 and git diff --check 02295b5..HEAD exited 0 for the worktree and committed range"
+    }
+  ]
+}

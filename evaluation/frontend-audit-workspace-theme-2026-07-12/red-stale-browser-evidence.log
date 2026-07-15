@@ -1,0 +1,64 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/frontend-route-coverage.test.ts -t reconciles the complete route --maxWorkers=1 --no-file-parallelism --reporter=verbose
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/frontend-audit-workspace-theme
+
+ ↓ tests/frontend-route-coverage.test.ts > frontend route classification > discovers every page and assigns each route to exactly one family
+ ↓ tests/frontend-route-coverage.test.ts > frontend route classification > gives every rendered route a semantic title and its canonical surface hook
+ ↓ tests/frontend-route-coverage.test.ts > frontend route classification > verifies every delegated route still renders its declared surface owner
+ × tests/frontend-route-coverage.test.ts > browser evidence reconciliation > reconciles the complete route, theme, special-state, and generated-surface evidence 17ms
+   → workspace Day desktop-1440 rendered theme: expected undefined to be 'Day' // Object.is equality
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > proves actual named framework boundaries and numerical rendered contracts
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > keeps total reconciliation correct when one failed row has multiple findings
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > rejects independent exact typography and unloaded-font mutations
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > builds explicit Day and Night workspace audit routes
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > rejects a product font leaking into any generated-document role
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > retains unrelated boundary and hydration errors
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > rejects unexpected HTTP status and final URL mutations
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > keeps the normal-production audit query inert and reports structured gates
+ ↓ tests/frontend-route-coverage.test.ts > browser evidence reconciliation > connects the launch share CTA to the real customer-facing send panel
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > renders knowledge Markdown as compact semantic prose, lists, and links
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > filters isolated punctuation artifacts from legal body sections
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses one semantic page title followed by semantic sections in app/law/[id]/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses one semantic page title followed by semantic sections in app/precedent/[id]/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses one semantic page title followed by semantic sections in app/interpretation/[id]/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > binds legal prose and preformatted bodies to the long-form reading contract
+ ↓ tests/frontend-route-coverage.test.ts > knowledge and legal route hierarchy > uses semantic section and result headings on ask and search surfaces
+ ↓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section headings and the landing family hook in app/why/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section headings and the landing family hook in app/trust/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section headings and the landing family hook in app/roadmap/page.tsx
+ ↓ tests/frontend-route-coverage.test.ts > informational and demo route hierarchy > uses semantic section and card headings throughout the demo
+ ↓ tests/frontend-route-coverage.test.ts > module route section hierarchy > promotes knowledge and settings section labels to semantic headings
+ ↓ tests/frontend-route-coverage.test.ts > module route section hierarchy > keeps landing, preview, and ontology sections sequential
+ ↓ tests/frontend-route-coverage.test.ts > module route section hierarchy > uses named canonical spacing hooks instead of inline layout styles on the dry-run route
+ ↓ tests/frontend-route-coverage.test.ts > module route section hierarchy > binds route-family body, card, control, V2, demo, and legacy geometry to exact selectors
+ ↓ tests/frontend-route-coverage.test.ts > module route section hierarchy > binds landing and ordinary module internals to canonical roles and spacing
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/frontend-route-coverage.test.ts > browser evidence reconciliation > reconciles the complete route, theme, special-state, and generated-surface evidence
+AssertionError: workspace Day desktop-1440 rendered theme: expected undefined to be 'Day' // Object.is equality
+
+- Expected:
+"Day"
+
++ Received:
+undefined
+
+ ❯ tests/frontend-route-coverage.test.ts:388:86
+    386|           `theme=${theme.toLowerCase()}`,
+    387|         );
+    388|         expect(row?.workspaceTheme, `workspace ${theme} ${viewport} re…
+       |                                                                                      ^
+    389|       }
+    390|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 28 skipped (29)
+   Start at  23:59:42
+   Duration  771ms (transform 78ms, setup 0ms, import 109ms, tests 20ms, environment 0ms)

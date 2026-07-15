@@ -1,0 +1,11 @@
+> safeclaw@0.1.0 test
+> vitest run tests/frontend-route-coverage.test.ts -t browser evidence reconciliation
+
+
+ RUN  v4.1.10 <local-user-root>/dev/safeguard-contest-mvp/<worktree-root>/release-audit-evidence-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  17 passed | 19 skipped (36)
+   Start at  07:56:28
+   Duration  44.99s (transform 103ms, setup 0ms, import 140ms, tests 44.16s, environment 0ms)

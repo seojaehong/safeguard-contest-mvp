@@ -429,10 +429,10 @@ export function selectFallbackAccidentCases(question: string): AccidentCase[] {
     }
   ];
 
-  if (["지게차", "물류", "상하차"].some((keyword) => lower.includes(keyword))) return [fallback[1], fallback[0], fallback[3]];
+  if (["세척", "화학", "청소"].some((keyword) => lower.includes(keyword))) return [fallback[3], fallback[1], fallback[0]];
+  if (["지게차", "물류", "상하차"].some((keyword) => lower.includes(keyword))) return [fallback[1], fallback[0], fallback[4]];
   if (["용접", "절단", "화기", "제조"].some((keyword) => lower.includes(keyword))) return [fallback[2], fallback[0], fallback[4]];
-  if (["세척", "화학", "청소", "외국인"].some((keyword) => lower.includes(keyword))) return [fallback[3], fallback[1], fallback[0]];
-  if (["기계실", "감전", "지하", "시설"].some((keyword) => lower.includes(keyword))) return [fallback[4], fallback[3], fallback[1]];
+  if (["기계실", "감전", "지하", "시설"].some((keyword) => lower.includes(keyword))) return [fallback[4], fallback[1], fallback[0]];
   return [fallback[0], fallback[1], fallback[2]];
 }
 

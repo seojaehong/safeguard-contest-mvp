@@ -1,0 +1,38 @@
+{
+  "date": "2026-07-09",
+  "status": "published_graph_list_and_obsidian_map_ready",
+  "langGraphRequiredNow": false,
+  "habermasMachineRequiredNow": false,
+  "reasoning": "The immediate product need is a readable, provenance-gated ontology surface. Agent orchestration can come later after DB harness and approved graph promotion are stable.",
+  "surfaces": {
+    "listView": true,
+    "hoverCards": true,
+    "obsidianMapView": true,
+    "graphJson": "/api/ontology/graph"
+  },
+  "implementation": {
+    "page": "app/ontology/page.tsx",
+    "model": "lib/ontology/visualization.ts",
+    "styles": "app/globals.css",
+    "dataSource": "loadGraph('published')",
+    "mapNodeLimit": 32,
+    "mapEdgeLimit": 72,
+    "layout": "deterministic top-degree radial layout"
+  },
+  "provenanceGate": {
+    "publishedOnly": true,
+    "dropsUncitedNodes": true,
+    "dropsUncitedEdges": true,
+    "dropsDanglingEdges": true
+  },
+  "verification": {
+    "tests": "npm.cmd test -- tests/ontology-visualization.test.ts tests/ontology-graph-store.test.ts tests/ontology-query.test.ts tests/ontology-knowledge-tool.test.ts",
+    "typecheck": "npm.cmd run typecheck",
+    "build": "npm.cmd run build",
+    "browserScreenshot": "evaluation/backend-harness-gate-2026-07-08/screenshots/ontology-desktop.png",
+    "browserCheck": "evaluation/backend-harness-gate-2026-07-08/ontology-browser-check.json",
+    "renderedGraphNodes": 32,
+    "renderedGraphEdges": 27,
+    "renderedListRows": 166
+  }
+}

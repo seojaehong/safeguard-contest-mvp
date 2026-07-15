@@ -1,0 +1,186 @@
+{
+  "generatedAt": "2026-07-08T14:31:05.685Z",
+  "target": "https://www.safeclaw.kr",
+  "aiMode": "enhanced",
+  "elapsedMs": 75264,
+  "ask": {
+    "status": 200,
+    "ok": true,
+    "mode": "live",
+    "safetyReference": {
+      "mode": "live",
+      "count": 8,
+      "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 3건, 일반 카탈로그 5건)",
+      "items": [
+        {
+          "id": "technical-support-01-0065-d-c-13-2026-외벽도장보수공사에-안전작업에-관한-기술지원규정",
+          "itemType": "technical-support-regulation",
+          "title": "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+          "evidenceRole": "문서 문구 직접 근거",
+          "sourceKind": "KOSHA 공식자료",
+          "primaryDocuments": [
+            "점검결과 요약",
+            "위험성평가표",
+            "작업계획서",
+            "TBM 브리핑",
+            "TBM 기록",
+            "안전보건교육 기록"
+          ],
+          "controls": [
+            "작업발판·난간·개구부 상태 확인",
+            "안전대 체결 및 작업반경 출입통제",
+            "가동부 방호덮개와 비상정지장치 확인",
+            "정비 전 전원 차단 및 잠금표지",
+            "MSDS 확인 및 적정 보호구 착용",
+            "환기와 누출 대응 물품 비치"
+          ]
+        },
+        {
+          "id": "technical-support-09-0009-b-e-17-2026-도장-공정에서의-화재-폭발위험방지에-관한-기술지원규정",
+          "itemType": "technical-support-regulation",
+          "title": "B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+          "evidenceRole": "문서 문구 직접 근거",
+          "sourceKind": "KOSHA 공식자료",
+          "primaryDocuments": [
+            "점검결과 요약",
+            "위험성평가표",
+            "작업계획서",
+            "TBM 브리핑",
+            "TBM 기록",
+            "안전보건교육 기록",
+            "사진/증빙",
+            "비상대응 절차"
+          ],
+          "controls": [
+            "가동부 방호덮개와 비상정지장치 확인",
+            "정비 전 전원 차단 및 잠금표지",
+            "작업 전 산소·유해가스 농도 측정",
+            "감시인 배치 및 구조장비 확보"
+          ]
+        },
+        {
+          "id": "technical-support-09-0013-b-e-20-2026-정전도장기-제작-및-설치에-관한-기술지원규정",
+          "itemType": "technical-support-regulation",
+          "title": "B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+          "evidenceRole": "문서 문구 직접 근거",
+          "sourceKind": "KOSHA 공식자료",
+          "primaryDocuments": [
+            "점검결과 요약",
+            "위험성평가표",
+            "작업계획서",
+            "TBM 브리핑",
+            "TBM 기록",
+            "안전보건교육 기록",
+            "사진/증빙",
+            "비상대응 절차"
+          ],
+          "controls": [
+            "가동부 방호덮개와 비상정지장치 확인",
+            "정비 전 전원 차단 및 잠금표지"
+          ]
+        },
+        {
+          "id": "technical-support-06-0064-g-67-2011-건물-외벽-청소-작업에-관한-기술지침",
+          "itemType": "technical-guideline",
+          "title": "G-67-2011 건물 외벽 청소 작업에 관한 기술지침",
+          "evidenceRole": "문서 문구 직접 근거",
+          "sourceKind": "KOSHA 공식자료",
+          "primaryDocuments": [
+            "점검결과 요약",
+            "위험성평가표",
+            "작업계획서"
+          ],
+          "controls": [
+            "작업 전 유해·위험요인 확인",
+            "관리감독자 확인 후 작업 시작"
+          ]
+        },
+        {
+          "id": "technical-support-06-0033-g-117-2014-선박내부에서-도장작업-시-안전에-관한-기술-지침",
+          "itemType": "technical-guideline",
+          "title": "G-117-2014 선박내부에서 도장작업 시 안전에 관한 기술 지침",
+          "evidenceRole": "문서 문구 직접 근거",
+          "sourceKind": "KOSHA 공식자료",
+          "primaryDocuments": [
+            "점검결과 요약",
+            "위험성평가표",
+            "작업계획서"
+          ],
+          "controls": [
+            "작업 전 유해·위험요인 확인",
+            "관리감독자 확인 후 작업 시작"
+          ]
+        },
+        {
+          "id": "technical-support-02-0123-m-77-2011-자동차-부분-분무도장-작업에-관한-안전기술지침",
+          "itemType": "technical-guideline",
+          "title": "M-77-2011 자동차 부분 분무도장 작업에 관한 안전기술지침",
+          "evidenceRole": "문서 문구 직접 근거",
+          "sourceKind": "KOSHA 공식자료",
+          "primaryDocuments": [
+            "점검결과 요약",
+            "위험성평가표",
+            "작업계획서"
+          ],
+          "controls": [
+            "작업 전 유해·위험요인 확인",
+            "관리감독자 확인 후 작업 시작"
+          ]
+        },
+        {
+          "id": "sif-아카이브-건설업-01039",
+          "itemType": "sif-case",
+          "title": "1038 / 4. 마감공사 / 4.2 방수 작업",
+          "evidenceRole": "현장 판단 보조 근거",
+          "sourceKind": "고위험요인 사례",
+          "primaryDocuments": [
+            "점검결과 요약",
+            "위험성평가표",
+            "작업계획서",
+            "사진/증빙",
+            "비상대응 절차"
+          ],
+          "controls": [
+            "작업발판·난간·개구부 상태 확인",
+            "안전대 체결 및 작업반경 출입통제",
+            "가동부 방호덮개와 비상정지장치 확인",
+            "정비 전 전원 차단 및 잠금표지"
+          ]
+        },
+        {
+          "id": "sif-아카이브-건설업-01063",
+          "itemType": "sif-case",
+          "title": "1062 / 4. 마감공사 / 4.3 석재 및 타일 작업",
+          "evidenceRole": "현장 판단 보조 근거",
+          "sourceKind": "고위험요인 사례",
+          "primaryDocuments": [
+            "점검결과 요약",
+            "위험성평가표",
+            "작업계획서",
+            "사진/증빙",
+            "비상대응 절차"
+          ],
+          "controls": [
+            "가동부 방호덮개와 비상정지장치 확인",
+            "정비 전 전원 차단 및 잠금표지",
+            "보행자 동선과 장비 동선 분리",
+            "신호수 배치 및 후진 경보 확인"
+          ]
+        }
+      ]
+    },
+    "resultSignals": {
+      "riskIncludesSafetyReferenceAppendix": false,
+      "tbmIncludesSafetyReferenceAppendix": false,
+      "riskIncludesKoshaOrSifTerms": true,
+      "tbmIncludesKoshaOrSifTerms": true
+    },
+    "deliverableLengths": {
+      "riskAssessmentDraft": 2515,
+      "tbmBriefing": 2007,
+      "tbmLogDraft": 2274,
+      "safetyEducationRecordDraft": 2235
+    },
+    "statusDetail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260708 2200) / 기상청 초단기예보 호출 성공 (서울, base 20260708 2230) / 기상청 단기예보 호출 성공 (서울, base 20260708 2300) / 기상청 기상특보 조회 성공 (전국, 202607082300) / 기상청 영향예보 조회 성공 (곡성군남부, 보건(일반인)) / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0 / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 4건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 4건, 검증 이슈 2건 (structured rows=AI) / TBM-risk 연결 4건 (TBM-risk links=AI) / AI_MODE=enhanced (Gemini 본문 11개 채움: riskAssessmentDraft, workPlanStructured, tbmBriefingStructured, tbmQuestions, tbmLogStructured, tbmLogDraft, educationRecordStructured, safetyEducationPoints, structuredRiskRows, structuredRiskRowsValidationIssues, tbmRiskLinks) [riskAssessment=ok workPlanStructured=ok tbmBriefingStructured=ok tbmLogStructured=ok tbmLog=ok educationRecordStructured=ok structuredRiskRows=ok free=fail(skipped (enhanced)) foreign=fail(skipped (enhanced)) tbmRiskLinks=ok]"
+  }
+}

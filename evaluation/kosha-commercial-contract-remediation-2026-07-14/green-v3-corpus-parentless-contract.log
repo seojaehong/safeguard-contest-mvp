@@ -1,0 +1,23 @@
+verification=green-v3-corpus-parentless-contract
+baseProductSha=f74c5972a4c776bfc9e1a924d3bf50ce55b503a2
+baseProductTree=99e161f1ca4880c5470e694df9fd02b8230c29cd
+testWorktreeChange=tests/kosha-guide-corpus-audit.test.ts
+redEvidence=integrated-kosha-group-d.log
+command=npm.cmd test -- tests/kosha-guide-corpus-audit.test.ts -t "keeps task controls in source evidence while a parentless prompt exposes identity only" --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T15:42:33.2477667+09:00
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-corpus-audit.test.ts -t keeps task controls in source evidence while a parentless prompt exposes identity only --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 109 skipped (110)
+   Start at  15:42:35
+   Duration  885ms (transform 187ms, setup 0ms, import 242ms, tests 28ms, environment 0ms)
+
+endedAt=2026-07-14T15:42:36.6882530+09:00
+elapsedSeconds=3.44
+exitCode=0

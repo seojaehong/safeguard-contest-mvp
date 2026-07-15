@@ -1,0 +1,14 @@
+generatedAt=2026-07-14T00:34:42.7510310+09:00
+readOnly=true dbMutationPerformed=false networkRequestPerformed=false launchReadiness=false
+staleSnapshot.exitCode=1
+staleSnapshot.fatal_type=Error
+staleSnapshot.fatal_code=kosha-bridge-manifest-source-identity-mismatch
+staleSnapshot.credentialCheckReached=false
+staleSnapshot.snapshotIntegrityVerifiedBeforeFetchRecorded=false
+staleSnapshot.elapsedSeconds=14.892
+fixedSnapshot.exitCode=1
+fixedSnapshot.fatal_type=Error
+fixedSnapshot.fatal_code=supabase-read-credentials-unavailable
+fixedSnapshot.credentialCheckReached=true
+fixedSnapshot.snapshotIntegrityVerifiedBeforeFetchRecorded=false
+fixedSnapshot.elapsedSeconds=13.538

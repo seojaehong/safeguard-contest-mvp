@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 3,
+  "generatedAt": "2026-07-13T05:49:00.000Z",
+  "verificationStatus": "pass",
+  "launchReadiness": "not_evaluated_here",
+  "supersedes": {
+    "generatedAt": "2026-07-11T22:25:00+09:00",
+    "verdict": "blocked",
+    "staticViolations": 2444,
+    "browserAudit": "not_run"
+  },
+  "sourceSha": "514b2d9a3c884c1a18ecf725285dde0e8a95b6cd",
+  "sourceIdentity": "cf3acf32f236a5c6ecdca5cf0b244ef16bd36c1ff8ecfa6b063e522a2ed723ac",
+  "lineEndingsNormalized": true,
+  "staticAudit": {
+    "status": "pass",
+    "pageFiles": 32,
+    "productComponentFiles": 23,
+    "coverageIssues": 0,
+    "violations": 0,
+    "importantDeclarations": 0,
+    "artifact": "static-audit.json"
+  },
+  "builds": {
+    "normal": {
+      "status": "pass",
+      "staticPages": 27,
+      "buildId": "GZHsLnN8pBcRAUWz5FMu1",
+      "chunkCount": 98,
+      "markerCount": 0,
+      "artifact": "bundle-normal.json"
+    },
+    "audit": {
+      "status": "pass",
+      "staticPages": 27,
+      "buildId": "KWLW3gxAjtwayCo6QPlnx",
+      "chunkCount": 98,
+      "markerCount": 1,
+      "markerFile": "static/chunks/app/layout-4a08a2eec725a6bc.js",
+      "artifact": "bundle-audit.json"
+    }
+  },
+  "browserAudit": {
+    "status": "pass",
+    "routeRows": 96,
+    "workspaceThemeRows": 6,
+    "specialSurfaceRows": 4,
+    "generatedSurfaceRows": 2,
+    "successes": 108,
+    "failedRows": 0,
+    "findings": 0,
+    "recoveredRows": 0,
+    "screenshots": 108,
+    "artifact": "browser-report.json"
+  },
+  "evidenceOnlyDescendantContract": {
+    "testsPassed": 3,
+    "status": "pass"
+  },
+  "fullSuite": {
+    "filesPassed": 132,
+    "testsPassed": 1282,
+    "status": "pass"
+  },
+  "databaseChanged": false,
+  "schemaChanged": false
+}

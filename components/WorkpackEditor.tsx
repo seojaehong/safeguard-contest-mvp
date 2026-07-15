@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { AskResponse, type PermitInspectionStructured } from "@/lib/types";
 import {
   evaluatePublicSafetyRubric,
@@ -9,26 +9,27 @@ import {
   type RubricDocumentKey,
   type RubricEvaluationItem
 } from "@/lib/safety-document-rubric";
+import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
+import {
+  buildStructuredDocumentSections,
+  isMetaSection,
+  replaceStructuredDocumentSection,
+  type DocumentKey
+} from "./workpack-editor-structure";
+import styles from "./WorkpackEditor.module.css";
 
 declare global {
   var measureTextWidth: ((font: string, text: string) => number) | undefined;
 }
 
-export type DocumentKey =
-  | "workpackSummaryDraft"
-  | "riskAssessmentDraft"
-  | "workPlanDraft"
-  | "workPermitDraft"
-  | "tbmBriefing"
-  | "tbmLogDraft"
-  | "safetyEducationRecordDraft"
-  | "emergencyResponseDraft"
-  | "photoEvidenceDraft"
-  | "foreignWorkerBriefing"
-  | "foreignWorkerTransmission"
-  | "kakaoMessage";
+export type { DocumentKey } from "./workpack-editor-structure";
 
 export type WorkpackDocumentValues = Record<DocumentKey, string>;
+
+export type WorkpackDeliverablesChange = {
+  source: "generated" | "stored-draft" | "user-edit";
+  requiresRevalidation: boolean;
+};
 
 const rubricDocumentKeys: RubricDocumentKey[] = [
   "workpackSummaryDraft",
@@ -223,8 +224,24 @@ const documentMeta: EditableDocument[] = [
   }
 ];
 
+function documentTabId(key: DocumentKey) {
+  return `workpack-document-tab-${key}`;
+}
+
+const documentCoverageLabels: Partial<Record<DocumentKey, string>> = {
+  riskAssessmentDraft: "위험성평가표",
+  tbmBriefing: "TBM 브리핑",
+  tbmLogDraft: "TBM 기록"
+};
+
 function sanitizeFileName(value: string) {
   return value.replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, "-").slice(0, 80) || "safeclaw";
+}
+
+const SAVE_ANNOUNCEMENT_DELAY_MS = 450;
+
+export function buildGenerationEvidenceFingerprint(data: AskResponse) {
+  return buildWorkpackGenerationFingerprint(data);
 }
 
 function downloadBlob(blob: Blob, fileName: string) {
@@ -273,6 +290,19 @@ function findRows(rows: SheetRow[], patterns: string[], fallbackCount = 3) {
 function compactContent(row: SheetRow | undefined, fallback: string) {
   if (!row) return fallback;
   return row.content || row.item || fallback;
+}
+
+function previewRowItem(row: SheetRow, fallback: string) {
+  const item = row.item.trim();
+  if (item && !/^\d+[-\s]*$/.test(item)) return item;
+
+  const content = compactContent(row, fallback).replace(/\s+/g, " ").trim();
+  const firstClause = content
+    .split(/[.。]/)[0]
+    .split(/[,(（]/)[0]
+    .trim();
+  const label = firstClause || content || item || fallback;
+  return label.length > 34 ? `${label.slice(0, 34)}...` : label;
 }
 
 function buildTbmBridgeRows(data: AskResponse, riskRows: SheetRow[]) {
@@ -344,6 +374,15 @@ function buildPermitDraft(data: AskResponse) {
     "미조치사항 및 후속조치:",
     "종료 확인자:"
   ].join("\n");
+}
+
+function resolveInitialWorkPermitDraft(data: AskResponse) {
+  if (data.deliverables.workPermitDraft === "") return "";
+  return withSubmitReadiness(
+    "허가서/첨부 안전작업허가 확인서",
+    data.deliverables.workPermitDraft ?? buildPermitDraft(data),
+    data
+  );
 }
 
 function inferPermitType(data: AskResponse): PermitInspectionStructured["basicInfo"]["permitType"] {
@@ -471,10 +510,14 @@ function buildPermitInspectionStructured(data: AskResponse): PermitInspectionStr
 }
 
 function withSubmitReadiness(title: string, body: string, data: AskResponse) {
+  const readinessLabel = `서식상태: 준제출형 - ${title} 제출 필수 항목을 반영한 현장 검토용입니다.`;
+  if (body.includes(readinessLabel) && body.includes("[필수 확인 항목]")) {
+    return body;
+  }
   const references = data.externalData.kosha.references.map((item) => item.title).join(" / ");
   return [
     "[제출상태]",
-    `서식상태: 준제출형 - ${title} 제출 필수 항목을 반영한 현장 검토용입니다.`,
+    readinessLabel,
     "원본 재현 한계: 발주처 지정 직인, 허가번호, 결재선, 표 병합 레이아웃은 제출 전 원본 양식으로 확인 필요",
     "",
     "[필수 확인 항목]",
@@ -484,6 +527,7 @@ function withSubmitReadiness(title: string, body: string, data: AskResponse) {
     `근거 반영: ${references || "공식 근거 확인 필요"}`,
     "증빙: 사진/영상 증빙, 참석자 서명, 개선조치 전후 기록",
     "",
+    "[제출 본문]",
     body
   ].join("\n");
 }
@@ -574,67 +618,87 @@ function getSafetyFormProfile(key: DocumentKey): SafetyFormProfile {
 
 function formCss(pageMargin = "36px") {
   return `
-    body { margin: 0; background: #ece7dc; color: #161b22; font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; }
-    .safety-form-page { max-width: 1080px; margin: ${pageMargin} auto; background: #fffdf8; border: 2px solid #161b22; box-shadow: 8px 8px 0 rgba(22, 27, 34, 0.12); }
-    .form-head { display: grid; grid-template-columns: 1fr 240px; border-bottom: 2px solid #161b22; }
+    body { margin: 0; background: #fafafb; color: #1a1b1e; font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
+    .safety-form-page { max-width: 1080px; margin: ${pageMargin} auto; background: #ffffff; border: 1px solid #e6e8eb; border-radius: 12px; box-shadow: none; overflow: hidden; }
+    .form-head { display: grid; grid-template-columns: 1fr 240px; border-bottom: 1px solid #e6e8eb; }
     .form-title { padding: 20px 24px; }
-    .form-title span { display: inline-block; margin-bottom: 8px; color: #21594f; font-size: 12px; font-weight: 900; letter-spacing: 0.12em; }
-    .form-title h1 { margin: 0; font-size: 28px; letter-spacing: -0.02em; }
-    .form-title p { margin: 8px 0 0; color: #4c5665; font-size: 13px; }
-    .approval-grid { display: grid; grid-template-columns: repeat(var(--approval-count, 3), 1fr); border-left: 2px solid #161b22; }
-    .approval-cell { display: grid; grid-template-rows: 34px 1fr; min-height: 108px; border-left: 1px solid #161b22; text-align: center; }
+    .form-title span { display: inline-block; margin-bottom: 8px; color: #5c6169; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
+    .form-title h1 { margin: 0; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
+    .form-title p { margin: 8px 0 0; color: #5c6169; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
+    .approval-grid { display: grid; grid-template-columns: repeat(var(--approval-count, 3), 1fr); border-left: 1px solid #e6e8eb; }
+    .approval-cell { display: grid; grid-template-rows: 34px 1fr; min-height: 108px; border-left: 1px solid #e6e8eb; text-align: center; }
     .approval-cell:first-child { border-left: 0; }
-    .approval-cell b { display: grid; place-items: center; background: #f2ead9; border-bottom: 1px solid #161b22; font-size: 12px; }
-    .approval-cell em { display: grid; place-items: end center; padding-bottom: 12px; color: #707887; font-size: 12px; font-style: normal; }
-    .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #161b22; }
-    .meta-item { min-height: 58px; border-right: 1px solid #161b22; }
+    .approval-cell b { display: grid; place-items: center; background: #f4f5f7; border-bottom: 1px solid #e6e8eb; font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; }
+    .approval-cell em { display: grid; place-items: end center; padding-bottom: 12px; color: #8a8f98; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; font-style: normal; }
+    .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #e6e8eb; }
+    .meta-item { min-height: 58px; border-right: 1px solid #e6e8eb; }
     .meta-item:last-child { border-right: 0; }
-    .meta-item b { display: block; padding: 7px 10px; background: #21594f; color: #ffffff; font-size: 11px; }
-    .meta-item span { display: block; padding: 10px; font-size: 13px; line-height: 1.35; }
-    .check-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 2px solid #161b22; }
-    .check-grid div { padding: 10px; border-right: 1px solid #161b22; font-size: 12px; font-weight: 800; }
+    .meta-item b { display: block; padding: 7px 10px; background: #f4f5f7; color: #5c6169; font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; }
+    .meta-item span { display: block; padding: 10px; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
+    .check-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid #e6e8eb; }
+    .check-grid div { padding: 10px; border-right: 1px solid #e6e8eb; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; }
     .check-grid div:last-child { border-right: 0; }
     .section-block { padding: 18px 22px 4px; }
-    .section-label { display: inline-flex; align-items: center; min-height: 30px; margin-bottom: 8px; padding: 5px 12px; background: #161b22; color: #fffdf8; font-size: 13px; font-weight: 900; }
+    .section-label { display: inline-flex; align-items: center; min-height: 30px; margin-bottom: 10px; padding: 5px 12px; border: 1px solid #e6e8eb; border-radius: 8px; background: #f4f5f7; color: #1a1b1e; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 16px; }
-    th, td { border: 1px solid #161b22; padding: 9px 10px; vertical-align: top; word-break: keep-all; line-height: 1.48; }
-    th { background: #f2ead9; font-size: 12px; text-align: center; }
-    td { font-size: 12px; }
+    th, td { border: 1px solid #e6e8eb; padding: 9px 10px; vertical-align: top; word-break: keep-all; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+    th { background: #f4f5f7; color: #1a1b1e; font-weight: 700; text-align: center; }
     .center { text-align: center; }
-    .check-cell { text-align: center; color: #5e6677; font-weight: 800; }
-    .signature-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 10px 22px 22px; border: 1px solid #161b22; }
-    .signature-grid div { min-height: 62px; padding: 9px 10px; border-right: 1px solid #161b22; font-size: 12px; }
+    .check-cell { text-align: center; color: #5c6169; font-weight: 700; }
+    .signature-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 10px 22px 22px; border: 1px solid #e6e8eb; border-radius: 8px; overflow: hidden; }
+    .signature-grid div { min-height: 62px; padding: 9px 10px; border-right: 1px solid #e6e8eb; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; }
     .signature-grid div:last-child { border-right: 0; }
     .signature-grid b { display: block; margin-bottom: 18px; }
-    .form-note { margin: 0 22px 22px; color: #596373; font-size: 12px; }
-    .section-help { margin: 0 0 10px; color: #596373; font-size: 12px; line-height: 1.5; }
-    .mini-table th { background: #21594f; color: #fffdf8; }
-    .form-layout-risk .form-title span, .form-layout-risk .meta-item b, .form-layout-risk .mini-table th { background: #7a2e25; }
-    .form-layout-risk .section-label { background: #7a2e25; }
-    .form-layout-risk .check-grid div { background: #fff2ef; }
-    .form-layout-workPlan .form-title span, .form-layout-workPlan .meta-item b, .form-layout-workPlan .mini-table th { background: #1f4d7a; }
-    .form-layout-workPlan .section-label { background: #1f4d7a; }
-    .form-layout-workPlan .check-grid div { background: #edf5ff; }
-    .form-layout-permit .form-title span, .form-layout-permit .meta-item b, .form-layout-permit .mini-table th { background: #6f4b16; }
-    .form-layout-permit .section-label { background: #6f4b16; }
-    .form-layout-permit .check-grid div { background: #fff7df; }
-    .form-layout-tbmBriefing .form-title span, .form-layout-tbmBriefing .meta-item b, .form-layout-tbmBriefing .mini-table th,
-    .form-layout-tbmLog .form-title span, .form-layout-tbmLog .meta-item b, .form-layout-tbmLog .mini-table th { background: #285f45; }
-    .form-layout-tbmBriefing .section-label, .form-layout-tbmLog .section-label { background: #285f45; }
-    .form-layout-tbmBriefing .check-grid div, .form-layout-tbmLog .check-grid div { background: #edf8ef; }
-    .form-lineage { margin: 0; padding: 10px 22px; border-bottom: 2px solid #161b22; background: #fff8d8; color: #394150; font-size: 12px; font-weight: 800; }
-    .risk-table th, .risk-table td { font-size: 11px; padding: 7px 6px; }
+    .form-note { margin: 0 22px 22px; color: #5c6169; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
+    .section-help { margin: 0 0 10px; color: #5c6169; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
+    .mini-table th { background: #f4f5f7; color: #1a1b1e; }
+    .form-layout-risk .form-title span,
+    .form-layout-workPlan .form-title span,
+    .form-layout-permit .form-title span,
+    .form-layout-tbmBriefing .form-title span,
+    .form-layout-tbmLog .form-title span { color: #6c6ff7; background: transparent; }
+    .form-layout-risk .check-grid div { background: #fff8f7; }
+    .form-layout-workPlan .check-grid div { background: #f8f9ff; }
+    .form-layout-permit .check-grid div { background: #fffaf0; }
+    .form-layout-tbmBriefing .meta-item b, .form-layout-tbmBriefing .mini-table th,
+    .form-layout-tbmLog .meta-item b, .form-layout-tbmLog .mini-table th { background: #f4f5f7; color: #1a1b1e; }
+    .form-layout-tbmBriefing .check-grid div, .form-layout-tbmLog .check-grid div { background: #f8fbf9; }
+    .form-lineage { margin: 0; padding: 10px 22px; border-bottom: 1px solid #e6e8eb; background: #f8f9fb; color: #5c6169; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
+    .risk-table th, .risk-table td { padding: 7px 6px; }
     .risk-level-high { background: #ffe3df; font-weight: 900; color: #a83224; }
     .permit-check td:nth-child(2), .permit-check td:nth-child(3) { text-align: center; font-weight: 900; }
     .attendee-table td { height: 42px; }
-    .tbm-daily-table th, .tbm-daily-table td { font-size: 11px; padding: 6px 5px; }
-    .tbm-check-list td:first-child { width: 28%; font-weight: 900; background: #f7f1e6; }
+    .tbm-daily-table th, .tbm-daily-table td { padding: 6px 5px; }
+    .tbm-check-list td:first-child { width: 28%; font-weight: 800; background: #f8f9fb; }
     .tbm-two-column td { min-height: 92px; }
-    .tbm-attendance th, .tbm-attendance td { text-align: center; font-size: 10px; padding: 5px 4px; }
+    .tbm-attendance th, .tbm-attendance td { text-align: center; padding: 5px 4px; }
     .tbm-attendance td:nth-child(3), .tbm-attendance td:nth-child(9) { text-align: left; }
-    @media print { body { background: #ffffff; } .safety-form-page { margin: 0; box-shadow: none; max-width: none; } }
+    @media print { body { background: #ffffff; } .safety-form-page { margin: 0; box-shadow: none; max-width: none; border-radius: 0; } }
   `;
 }
+
+const documentPreviewCss = `
+  .document-print-typography { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
+  .document-print-typography .safety-form-preview-head strong { font-family: inherit; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
+  .document-print-typography .safety-form-bridge h3,
+  .document-print-typography .safety-form-section-stack h3 { font-family: inherit; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; }
+  .document-print-typography .safety-form-meta-grid span { font-family: inherit; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
+  .document-print-typography th,
+  .document-print-typography td { font-family: inherit; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+  .document-print-typography th { font-weight: 700; }
+  .document-print-typography .safety-form-preview-head small,
+  .document-print-typography .safety-form-preview-head span { font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; font-family: inherit; }
+  .document-print-typography .approval-preview b { font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
+  .document-print-typography .approval-preview em { font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; font-family: inherit; }
+  .document-print-typography .safety-form-meta-grid b { font-size: 8.5pt; font-weight: 700; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
+  .document-print-typography .safety-form-check-row span { font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
+  .document-print-typography .safety-form-signatures span { font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-family: inherit; }
+  .safeclaw-module-shell.module-variant-document .document-editor .submission-preview-panel .safety-form-preview.document-print-typography .safety-form-preview-head strong { letter-spacing: -0.02em; }
+  .safeclaw-module-shell.module-variant-document .document-editor .submission-preview-panel .safety-form-preview.document-print-typography .safety-form-bridge h3,
+  .safeclaw-module-shell.module-variant-document .document-editor .submission-preview-panel .safety-form-preview.document-print-typography .safety-form-section-stack h3 { letter-spacing: -0.01em; }
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-content .document-print-typography .safety-form-preview-head small,
+  .safeclaw-module-shell.module-variant-document .safeclaw-module-content .document-print-typography .safety-form-preview-head span { line-height: 11pt; }
+`;
 
 function buildGenericSections(rows: SheetRow[], profile: SafetyFormProfile) {
   return groupRowsBySection(rows).map((group) => `
@@ -642,7 +706,7 @@ function buildGenericSections(rows: SheetRow[], profile: SafetyFormProfile) {
       <div class="section-label">${escapeHtml(group.section)}</div>
       <table>
         <colgroup><col style="width: 7%;" /><col style="width: 21%;" /><col style="width: 52%;" /><col style="width: 20%;" /></colgroup>
-        <thead><tr><th>No.</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인/담당</th></tr></thead>
+        <thead><tr><th>번호</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인/담당</th></tr></thead>
         <tbody>
           ${group.rows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td class="check-cell">□ 확인<br />담당: ______</td></tr>`).join("")}
         </tbody>
@@ -745,7 +809,7 @@ function buildWorkPlanSections(rows: SheetRow[], scenario: AskResponse["scenario
       <div class="section-label">2. 세부 작업순서</div>
       <table>
         <colgroup><col style="width: 8%;" /><col style="width: 24%;" /><col style="width: 38%;" /><col style="width: 16%;" /><col style="width: 14%;" /></colgroup>
-        <thead><tr><th>No.</th><th>세부작업</th><th>작업방법/안전관리대책</th><th>담당</th><th>확인</th></tr></thead>
+        <thead><tr><th>번호</th><th>세부작업</th><th>작업방법/안전관리대책</th><th>담당</th><th>확인</th></tr></thead>
         <tbody>
           ${sequenceRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td>작업반장</td><td>□</td></tr>`).join("")}
         </tbody>
@@ -847,7 +911,7 @@ function buildEducationSections(rows: SheetRow[], scenario: AskResponse["scenari
       <div class="section-label">2. 교육 내용 및 이해 확인</div>
       <table>
         <colgroup><col style="width: 8%;" /><col style="width: 24%;" /><col style="width: 38%;" /><col style="width: 15%;" /><col style="width: 15%;" /></colgroup>
-        <thead><tr><th>No.</th><th>교육 항목</th><th>주요 내용</th><th>확인 방법</th><th>추가교육</th></tr></thead>
+        <thead><tr><th>번호</th><th>교육 항목</th><th>주요 내용</th><th>확인 방법</th><th>추가교육</th></tr></thead>
         <tbody>
           ${educationRows.map((row, index) => `<tr><td class="center">${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(row.content)}</td><td>□ 질문 □ 복창 □ 서명</td><td>□ 필요 □ 불필요</td></tr>`).join("")}
         </tbody>
@@ -856,7 +920,7 @@ function buildEducationSections(rows: SheetRow[], scenario: AskResponse["scenari
     <section class="section-block">
       <div class="section-label">3. 교육 참석자 확인</div>
       <table class="attendee-table">
-        <thead><tr><th>No.</th><th>성명</th><th>소속</th><th>역할/직종</th><th>언어</th><th>서명</th></tr></thead>
+        <thead><tr><th>번호</th><th>성명</th><th>소속</th><th>역할/직종</th><th>언어</th><th>서명</th></tr></thead>
         <tbody>
           ${Array.from({ length: Math.max(4, Math.min(10, scenario.workerCount)) }, (_, index) => `<tr><td class="center">${index + 1}</td><td></td><td></td><td></td><td>한국어</td><td></td></tr>`).join("")}
         </tbody>
@@ -924,7 +988,7 @@ function buildTbmLogSections(rows: SheetRow[], scenario: AskResponse["scenario"]
           <col style="width: 5%;" /><col style="width: 9%;" /><col style="width: 14%;" /><col style="width: 6%;" /><col style="width: 6%;" /><col style="width: 10%;" />
           <col style="width: 5%;" /><col style="width: 9%;" /><col style="width: 14%;" /><col style="width: 6%;" /><col style="width: 6%;" /><col style="width: 10%;" />
         </colgroup>
-        <thead><tr><th>NO</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th><th>NO</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th></tr></thead>
+        <thead><tr><th>연번</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th><th>연번</th><th>직종</th><th>성명</th><th>오전</th><th>오후</th><th>비고</th></tr></thead>
         <tbody>
           ${attendanceRows}
         </tbody>
@@ -966,7 +1030,7 @@ function buildTbmBriefingSections(rows: SheetRow[], scenario: AskResponse["scena
       <div class="section-label">2. 위험성평가 기반 TBM 전달</div>
       <table>
         <colgroup><col style="width: 7%;" /><col style="width: 28%;" /><col style="width: 24%;" /><col style="width: 16%;" /><col style="width: 17%;" /><col style="width: 8%;" /></colgroup>
-        <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>기상/환경 반영</th><th>출처 연결</th><th>작업중지 기준</th><th>복창</th></tr></thead>
+        <thead><tr><th>번호</th><th>주요 유해·위험요인</th><th>기상/환경 반영</th><th>출처 연결</th><th>작업중지 기준</th><th>복창</th></tr></thead>
         <tbody>
           ${bridgeRows.map((row, index) => `<tr>
             <td class="center">${index + 1}</td>
@@ -1005,7 +1069,7 @@ function buildTbmWeatherRiskBridge(data: AskResponse, riskRows: SheetRow[]) {
       <div class="section-label">위험성평가·기상 API 반영</div>
       <table>
         <colgroup><col style="width: 7%;" /><col style="width: 27%;" /><col style="width: 26%;" /><col style="width: 16%;" /><col style="width: 24%;" /></colgroup>
-        <thead><tr><th>No.</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>출처 연결</th><th>TBM 전달 문구</th></tr></thead>
+        <thead><tr><th>번호</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>출처 연결</th><th>TBM 전달 문구</th></tr></thead>
         <tbody>
           ${bridgeRows.map((row, index) => `<tr>
             <td class="center">${index + 1}</td>
@@ -1103,50 +1167,6 @@ function buildHtml(
 </html>`;
 }
 
-// Sections that are decoration / connection-status / RAG metadata, NOT real form rows.
-// Excluded from the .xlsx / .hwp body table to keep the official form clean.
-const META_SECTION_PATTERNS = [
-  /^연결 상태/,
-  /^KOSHA 기술지침\/기술지원규정 직접 인용/,
-  /^내부 안전지식 DB 반영/,
-  /^근거 요약/,
-  /^문서 반영$/,
-  /^문서 반영:/,
-  /^법령 근거 요약/,
-  /^KOSHA 보강/,
-  /^추천 후속 교육/,
-  /^KOSHA 교육포털 연계/,
-  /^교육 적합성 확인/,
-  /^옥외 (폭염|위험|작업)/,
-  /^위험성평가·기상/,
-  /^TBM 필수 반영 체크/,
-  /^외국인 근로자 (공지|안내)/,
-  /^유사 재해사례/,
-  /^기상 신호/,
-  /^서식 구조/,
-  /^서식 상태/,
-  /^서식상태$/,
-  /^안전 기초 지식/,
-  /^라이브 보강/,
-  // Added 2026-05-07 after 가온테크 .xlsx/.hwp 검수 — 본문 표 안에 들어가던 잡음.
-  /^공식 서식 기준 보강/,
-  /^반영 근거(:|: )/,
-  /^반영 근거$/,
-  /^중대재해 예방 관리체계 점검/,
-  /^필수 확인 항목$/,
-  /^섹션 요약$/,
-  /^본문 표$/,
-  /^제출상태/,
-  /^원본 재현 한계/,
-  /^안전보건진단 가이드/,
-  /^위험성평가 이행·점검/,
-  /^TBM 메인 가이드/
-];
-
-function isMetaSection(section: string) {
-  return META_SECTION_PATTERNS.some((pattern) => pattern.test(section));
-}
-
 // First-line meta keys that show up as `key: value` even outside a meta section.
 const META_KEY_PATTERNS = [
   /^서식상태$/,
@@ -1237,13 +1257,6 @@ function parseSheetRows(title: string, body: string): SheetRow[] {
     if (bullet) {
       rows.push({ document: title, section, item: String(itemNumber), content: bullet[1].trim() });
       itemNumber += 1;
-      return;
-    }
-
-    // Drop full-sentence lines that look like notice/policy text (those that don't fit
-    // any [section]/key:val/numbered/bullet pattern). They were noise rows in the
-    // earlier output (e.g., "준제출형 - 작업계획서 제출 필수 항목을 반영한 현장 검토용입니다.").
-    if (/^[가-힯].{20,}[다요\.]$/.test(line)) {
       return;
     }
 
@@ -1362,21 +1375,21 @@ function buildExcelHtml(
   </xml>
   <![endif]-->
   <style>
-    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; color: #17201d; }
+    body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color: #17201d; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
     .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 14px; }
-    .cover h1 { margin: 0 0 8px; font-size: 22px; }
-    .cover p { margin: 0; color: #5e6677; }
+    .cover h1 { margin: 0 0 8px; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
+    .cover p { margin: 0; color: #5e6677; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
     .meta-grid td { background: #fffdf8; }
     .meta-grid .label { background: #21594f; color: #ffffff; font-weight: 700; text-align: center; width: 16%; }
-    table { border-collapse: collapse; width: 100%; table-layout: fixed; font-family: "Malgun Gothic", sans-serif; margin-bottom: 14px; }
-    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; word-break: keep-all; }
+    table { border-collapse: collapse; width: 100%; table-layout: fixed; font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; margin-bottom: 14px; }
+    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; mso-number-format:"\\@"; word-break: keep-all; }
     th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
     .summary th { background: #6f4b26; }
-    .section-row td { background: #e8f1ed; color: #1f4d43; font-weight: 700; font-size: 14px; border-top: 2px solid #1f4d43; }
+    .section-row td { background: #e8f1ed; color: #1f4d43; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; border-top: 2px solid #1f4d43; }
     .center { text-align: center; width: 42px; }
     .check-cell { text-align: center; color: #6f4b26; width: 90px; }
     .confirm td, .approval td { text-align: center; font-weight: 700; }
-    .note { color: #5e6677; font-size: 12px; margin-top: 10px; }
+    .note { color: #5e6677; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -1398,7 +1411,7 @@ function buildExcelHtml(
   </table>
   <table>
     <colgroup><col style="width: 6%;" /><col style="width: 22%;" /><col style="width: 52%;" /><col style="width: 10%;" /><col style="width: 10%;" /></colgroup>
-    <thead><tr><th>No.</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인</th><th>담당</th></tr></thead>
+    <thead><tr><th>번호</th><th>${escapeHtml(profile.primaryColumn)}</th><th>${escapeHtml(profile.actionColumn)}</th><th>확인</th><th>담당</th></tr></thead>
     <tbody>${tableRows}</tbody>
   </table>
   <table class="approval"><tbody><tr>${approvalRows}<td>보관 위치<br /><br />______</td></tr></tbody></table>
@@ -1427,13 +1440,13 @@ function buildLaunchWorkbookHtml(title: string, rows: SheetRow[]) {
   <meta charset="utf-8" />
   <title>${escapeHtml(title)}</title>
   <style>
-    body { font-family: "Malgun Gothic", "Noto Sans KR", sans-serif; color: #17201d; }
+    body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color: #17201d; font-size: 10pt; font-weight: 400; line-height: 15pt; letter-spacing: 0; }
     .cover { border: 2px solid #1f4d43; background: #e8f1ed; padding: 18px; margin-bottom: 16px; }
-    .cover h1 { margin: 0 0 8px; font-size: 24px; }
-    .cover p { margin: 0; color: #5e6677; }
-    h2 { margin: 24px 0 8px; color: #21594f; border-left: 5px solid #21594f; padding-left: 9px; }
+    .cover h1 { margin: 0 0 8px; font-size: 20pt; font-weight: 700; line-height: 24pt; letter-spacing: -0.02em; }
+    .cover p { margin: 0; color: #5e6677; font-size: 8pt; font-weight: 400; line-height: 11pt; letter-spacing: 0; }
+    h2 { margin: 24px 0 8px; color: #21594f; border-left: 5px solid #21594f; padding-left: 9px; font-size: 14pt; font-weight: 700; line-height: 18pt; letter-spacing: -0.01em; }
     table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-bottom: 18px; }
-    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; mso-number-format:"\\@"; word-break: keep-all; }
+    th, td { border: 1px solid #9aa4b2; padding: 8px; vertical-align: top; font-size: 8.5pt; font-weight: 400; line-height: 12pt; letter-spacing: 0; font-variant-numeric: tabular-nums; mso-number-format:"\\@"; word-break: keep-all; }
     th { background: #1f4d43; color: #ffffff; font-weight: 700; text-align: center; }
     td:nth-child(1) { width: 18%; }
     td:nth-child(2) { width: 20%; }
@@ -1605,22 +1618,46 @@ function buildCombinedText(values: Record<DocumentKey, string>) {
   ].join("\n\n---\n\n");
 }
 
-function parseStoredValues(raw: string | null, fallback: Record<DocumentKey, string>) {
-  if (!raw) return fallback;
+type StoredEditorDraft = {
+  version: 1;
+  values: WorkpackDocumentValues;
+  dirtyKeys: DocumentKey[];
+};
+
+function isDocumentKey(value: unknown): value is DocumentKey {
+  return typeof value === "string" && documentMeta.some((item) => item.key === value);
+}
+
+function parseDocumentValues(value: unknown, fallback: WorkpackDocumentValues): WorkpackDocumentValues {
+  const record = readObject(value) || {};
+  return documentMeta.reduce<WorkpackDocumentValues>((acc, item) => {
+    const documentValue = record[item.key];
+    acc[item.key] = typeof documentValue === "string" ? documentValue : fallback[item.key];
+    return acc;
+  }, { ...fallback });
+}
+
+function parseStoredDraft(raw: string | null, fallback: WorkpackDocumentValues): StoredEditorDraft {
+  if (!raw) return { version: 1, values: fallback, dirtyKeys: [] };
 
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return fallback;
+    const record = readObject(parsed);
+    if (!record) return { version: 1, values: fallback, dirtyKeys: [] };
 
-    const record = parsed as Partial<Record<DocumentKey, unknown>>;
-    return documentMeta.reduce<Record<DocumentKey, string>>((acc, item) => {
-      const value = record[item.key];
-      acc[item.key] = typeof value === "string" ? value : fallback[item.key];
+    const parsedValues = parseDocumentValues(record.values || record, fallback);
+    const storedDirtyKeys = Array.isArray(record.dirtyKeys)
+      ? record.dirtyKeys.filter(isDocumentKey)
+      : documentMeta.filter((item) => parsedValues[item.key] !== fallback[item.key]).map((item) => item.key);
+    const dirtyKeys = [...new Set(storedDirtyKeys)];
+    const values = dirtyKeys.reduce<WorkpackDocumentValues>((acc, key) => {
+      acc[key] = parsedValues[key];
       return acc;
     }, { ...fallback });
+    return { version: 1, values, dirtyKeys };
   } catch (error) {
     console.warn("workpack local draft parse failed", error);
-    return fallback;
+    return { version: 1, values: fallback, dirtyKeys: [] };
   }
 }
 
@@ -1708,14 +1745,15 @@ function SafetyDocumentPreview({
     ? { primary: "유해·위험요인", action: "재해형태 / 감소대책", confirm: "등급 / 담당" }
     : profile.layout === "workPlan"
       ? { primary: "작업순서/대상", action: "작업방법 / 안전관리대책", confirm: "확인자" }
-      : profile.layout === "permit"
+    : profile.layout === "permit"
         ? { primary: "허가 항목", action: "허가조건 / 첨부서류", confirm: "적합/보완" }
         : profile.layout === "tbmBriefing" || profile.layout === "tbmLog"
-          ? { primary: "공유 항목", action: "전달 내용 / 작업중지 기준", confirm: "복창/서명" }
+          ? { primary: "전달 항목", action: "전달 내용 / 작업중지 기준", confirm: "복창/서명" }
           : { primary: profile.primaryColumn, action: profile.actionColumn, confirm: "확인/담당" };
 
   return (
-    <div className="safety-form-preview" aria-label={`${title} 서식 미리보기`}>
+    <div className="safety-form-preview document-print-typography" aria-label={`${title} 서식 미리보기`}>
+      <style>{documentPreviewCss}</style>
       <div className="safety-form-preview-head">
         <div>
           <span>{profile.code}</span>
@@ -1749,7 +1787,7 @@ function SafetyDocumentPreview({
             <table>
               <thead>
                 <tr>
-                  <th>No.</th>
+                  <th>번호</th>
                   <th>주요 유해·위험요인</th>
                   <th>오늘 기상/환경 신호</th>
                   <th>출처 연결</th>
@@ -1779,7 +1817,7 @@ function SafetyDocumentPreview({
               <table>
                 <thead>
                   <tr>
-                    <th>No.</th>
+                    <th>번호</th>
                     <th>{tableLabels.primary}</th>
                     <th>{tableLabels.action}</th>
                     <th>{tableLabels.confirm}</th>
@@ -1789,7 +1827,7 @@ function SafetyDocumentPreview({
                   {group.rows.slice(0, 4).map((row, index) => (
                     <tr key={`${group.section}-${row.item}-${index}`}>
                       <td>{index + 1}</td>
-                      <td>{row.item}</td>
+                      <td>{previewRowItem(row, tableLabels.primary)}</td>
                       <td>{row.content}</td>
                       <td>□ 확인<br />담당: ___</td>
                     </tr>
@@ -1812,21 +1850,25 @@ function SafetyDocumentPreview({
 
 export function WorkpackEditor({
   data,
+  generationFingerprint,
   focusToken = 0,
   requestedDocumentKey,
+  onSelectedDocumentChange,
   onDeliverablesChange
 }: {
   data: AskResponse;
+  generationFingerprint?: string;
   focusToken?: number;
   requestedDocumentKey?: DocumentKey;
-  onDeliverablesChange?: (values: WorkpackDocumentValues) => void;
+  onSelectedDocumentChange?: (key: DocumentKey) => void;
+  onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
 }) {
   const initialValues = useMemo<WorkpackDocumentValues>(
     () => ({
       workpackSummaryDraft: data.deliverables.workpackSummaryDraft,
       riskAssessmentDraft: withSubmitReadiness("위험성평가표", data.deliverables.riskAssessmentDraft, data),
       workPlanDraft: withSubmitReadiness("작업계획서", data.deliverables.workPlanDraft, data),
-      workPermitDraft: withSubmitReadiness("허가서/첨부 안전작업허가 확인서", buildPermitDraft(data), data),
+      workPermitDraft: resolveInitialWorkPermitDraft(data),
       tbmBriefing: withSubmitReadiness("TBM 브리핑", data.deliverables.tbmBriefing, data),
       tbmLogDraft: withSubmitReadiness("TBM 일지", data.deliverables.tbmLogDraft, data),
       safetyEducationRecordDraft: withSubmitReadiness("안전교육", data.deliverables.safetyEducationRecordDraft, data),
@@ -1839,26 +1881,51 @@ export function WorkpackEditor({
     [data]
   );
   const storageKey = useMemo(
-    () => `safeclaw-workpack:${data.scenario.companyName}:${data.scenario.siteName}:${data.question}`,
-    [data.question, data.scenario.companyName, data.scenario.siteName]
+    () => `safeclaw-workpack:${data.scenario.companyName}:${data.scenario.siteName}:${data.question}:${generationFingerprint || buildGenerationEvidenceFingerprint(data)}`,
+    [data, generationFingerprint]
   );
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
+  const [dirtyDocumentKeys, setDirtyDocumentKeys] = useState<DocumentKey[]>([]);
+  const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [xlsxStatus, setXlsxStatus] = useState<"idle" | "building" | "error">("idle");
   const [hwpStatus, setHwpStatus] = useState<"idle" | "building" | "error">("idle");
   const [imageStatus, setImageStatus] = useState<"idle" | "error">("idle");
   const [sheetStatus, setSheetStatus] = useState<"idle" | "copied" | "error">("idle");
   const [templateKind, setTemplateKind] = useState<TemplateKind>("sheet");
+  const [editorMode, setEditorMode] = useState<"structured" | "source">("structured");
   const [lastEditedAt, setLastEditedAt] = useState<Date | null>(null);
+  const [saveStatusLabel, setSaveStatusLabel] = useState("자동 저장");
+  const [saveAnnouncement, setSaveAnnouncement] = useState("");
   const [showFocusCue, setShowFocusCue] = useState(false);
   const [remediationDrafts, setRemediationDrafts] = useState<Record<string, RemediationDraft>>({});
   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
-  const editorRef = useRef<HTMLDivElement | null>(null);
+  const documentBodyRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const onDeliverablesChangeRef = useRef(onDeliverablesChange);
+  const onSelectedDocumentChangeRef = useRef(onSelectedDocumentChange);
+  const saveAnnouncementTimerRef = useRef<number | null>(null);
+  const pendingChangeRef = useRef<WorkpackDeliverablesChange>({
+    source: "generated",
+    requiresRevalidation: false
+  });
   const selected = documentMeta.find((item) => item.key === selectedKey) || documentMeta[0];
   const selectedTemplate = templatePresets.find((preset) => preset.kind === templateKind) || templatePresets[0];
   const selectedText = values[selected.key];
+  const structuredDocument = useMemo(
+    () => buildStructuredDocumentSections(selected.key, selectedText),
+    [selected.key, selectedText]
+  );
+  const selectedHasIntentionalEmptyPermitDraft = selected.key === "workPermitDraft"
+    && selectedText === ""
+    && (
+      Object.prototype.hasOwnProperty.call(data.deliverables, "workPermitDraft")
+      || dirtyDocumentKeys.includes("workPermitDraft")
+    );
+  const selectedUsesEditedText = dirtyDocumentKeys.includes(selected.key)
+    || selectedText !== initialValues[selected.key]
+    || selectedHasIntentionalEmptyPermitDraft;
   const baseName = sanitizeFileName(`${data.scenario.companyName}-${selected.fileBase}`);
   const selectedRows = buildRowsForDocument(selected, values);
   const riskAssessmentMeta = documentMeta.find((item) => item.key === "riskAssessmentDraft") || documentMeta[1];
@@ -1870,19 +1937,164 @@ export function WorkpackEditor({
     if (!isRubricDocumentKey(key)) return [];
     return rubricEvaluation.items.filter((item) => item.documents.includes(key));
   }, [rubricEvaluation.items, selected.key]);
+  const selectedQualityIssues = selectedRubricItems.filter((item) => item.status !== "fulfilled").length;
+  const totalQualityIssues = rubricEvaluation.summary.total - rubricEvaluation.summary.fulfilled;
+  const selectedEvidenceLabel = data.evidenceLabels?.[selected.key];
+  const harnessSummary = data.dbHarness?.summary;
+  const harnessPacket = data.dbHarness?.packet;
+  const selectedCoverage = useMemo(() => {
+    const coverageLabel = documentCoverageLabels[selected.key];
+    if (!coverageLabel || !harnessSummary) return null;
+    return harnessSummary.documentCoverage.find((item) => item.document === coverageLabel) || null;
+  }, [harnessSummary, selected.key]);
+  const evidenceHighlights = useMemo(() => {
+    const references = [
+      ...(harnessPacket?.directEvidence || []).map((item) => ({
+        id: `direct-${item.id}`,
+        badge: item.evidence_role_label || "직접 근거",
+        title: item.display_title || item.title,
+        summary: item.display_summary || item.short_summary || item.summary,
+        href: item.source_url || null
+      })),
+      ...(harnessPacket?.sifCases || []).map((item) => ({
+        id: `sif-${item.id}`,
+        badge: item.source_kind_label || "SIF 사례",
+        title: item.display_title || item.title,
+        summary: item.display_summary || item.short_summary || item.summary,
+        href: item.source_url || null
+      })),
+      ...(harnessPacket?.supportingEvidence || []).map((item) => ({
+        id: `support-${item.id}`,
+        badge: item.evidence_role_label || "보조 근거",
+        title: item.display_title || item.title,
+        summary: item.display_summary || item.short_summary || item.summary,
+        href: item.source_url || null
+      }))
+    ];
+
+    if (references.length) return references.slice(0, 4);
+    return data.citations.slice(0, 4).map((citation) => ({
+      id: citation.id,
+      badge: citation.sourceLabel,
+      title: citation.title,
+      summary: citation.citation || citation.summary,
+      href: citation.sourceUrl || null
+    }));
+  }, [data.citations, harnessPacket]);
+  const evidenceStats = useMemo(() => {
+    const directEvidenceCount = harnessSummary?.directEvidence ?? 0;
+    const sifCaseCount = harnessSummary?.sifCases ?? 0;
+    const supportingEvidenceCount = harnessSummary?.supportingEvidence ?? 0;
+
+    return [
+      {
+        label: "직접 근거",
+        value: directEvidenceCount,
+        description: selectedEvidenceLabel?.article || "문서 라벨 미지정"
+      },
+      {
+        label: "유사사례",
+        value: sifCaseCount,
+        description: harnessSummary ? "DB 하네스 기준" : "현재 페이지 기준"
+      },
+      {
+        label: "인용/보조",
+        value: harnessSummary ? supportingEvidenceCount + data.citations.length : data.citations.length,
+        description: `${data.citations.length.toLocaleString("ko-KR")}건 화면 인용`
+      }
+    ];
+  }, [data.citations.length, harnessSummary, selectedEvidenceLabel]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      setValues(initialValues);
-      onDeliverablesChange?.(initialValues);
+    onDeliverablesChangeRef.current = onDeliverablesChange;
+  }, [onDeliverablesChange]);
+
+  useEffect(() => {
+    onSelectedDocumentChangeRef.current = onSelectedDocumentChange;
+  }, [onSelectedDocumentChange]);
+
+  useEffect(() => {
+    onSelectedDocumentChangeRef.current?.(selected.key);
+  }, [selected.key]);
+
+  useEffect(() => {
+    setEditorMode("structured");
+  }, [selected.key]);
+
+  useEffect(() => () => {
+    if (saveAnnouncementTimerRef.current) {
+      window.clearTimeout(saveAnnouncementTimerRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (hydratedStorageKey === storageKey) return;
+
+    setHydratedStorageKey(null);
+    const stored = parseStoredDraft(window.localStorage.getItem(storageKey), initialValues);
+    const restoredDraft = stored.dirtyKeys.length > 0;
+    pendingChangeRef.current = {
+      source: restoredDraft ? "stored-draft" : "generated",
+      requiresRevalidation: restoredDraft
+    };
+    setValues(stored.values);
+    setDirtyDocumentKeys(stored.dirtyKeys);
+    setLastEditedAt(null);
+    if (saveAnnouncementTimerRef.current) {
+      window.clearTimeout(saveAnnouncementTimerRef.current);
+    }
+    if (restoredDraft) {
+      setSaveStatusLabel("저장본 복원됨");
+      setSaveAnnouncement("저장된 편집본을 복원했습니다.");
+    } else {
+      setSaveStatusLabel("자동 저장");
+      setSaveAnnouncement("");
+    }
+    setHydratedStorageKey(storageKey);
+  }, [hydratedStorageKey, initialValues, storageKey]);
+
+  useEffect(() => {
+    if (hydratedStorageKey !== storageKey) return;
+    if (typeof window !== "undefined") {
+      try {
+        const storedDraft: StoredEditorDraft = {
+          version: 1,
+          values,
+          dirtyKeys: dirtyDocumentKeys
+        };
+        window.localStorage.setItem(storageKey, JSON.stringify(storedDraft));
+      } catch (error) {
+        console.warn("workpack local draft save failed", error);
+        setSaveStatusLabel("저장 실패");
+        setSaveAnnouncement("편집 내용 저장에 실패했습니다.");
+      }
+    }
+    onDeliverablesChangeRef.current?.(values, pendingChangeRef.current);
+    if (saveAnnouncementTimerRef.current) {
+      window.clearTimeout(saveAnnouncementTimerRef.current);
+    }
+    if (pendingChangeRef.current.source === "stored-draft") {
+      setSaveStatusLabel("저장본 복원됨");
       return;
     }
-
-    const stored = parseStoredValues(window.localStorage.getItem(storageKey), initialValues);
-    setValues(stored);
-    onDeliverablesChange?.(stored);
-    setLastEditedAt(null);
-  }, [initialValues, onDeliverablesChange, storageKey]);
+    if (dirtyDocumentKeys.length > 0) {
+      const savedAt = lastEditedAt;
+      setSaveStatusLabel("저장 중...");
+      setSaveAnnouncement("");
+      saveAnnouncementTimerRef.current = window.setTimeout(() => {
+        const timeLabel = (savedAt || new Date()).toLocaleTimeString("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+        setSaveStatusLabel(`저장됨 ${timeLabel}`);
+        setSaveAnnouncement(`저장됨 ${timeLabel}`);
+      }, SAVE_ANNOUNCEMENT_DELAY_MS);
+      return;
+    }
+    setSaveStatusLabel("자동 저장");
+    setSaveAnnouncement("");
+  }, [dirtyDocumentKeys, hydratedStorageKey, lastEditedAt, storageKey, values]);
 
   useEffect(() => {
     if (!focusToken) return;
@@ -1891,29 +2103,69 @@ export function WorkpackEditor({
       setSelectedKey(requestedDocumentKey);
     }
     setShowFocusCue(true);
-    editorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 360);
+    const root = document.documentElement;
+    const previousScrollBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    documentBodyRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
+    root.style.scrollBehavior = previousScrollBehavior;
+    const focusFrame = window.requestAnimationFrame(() => {
+      textareaRef.current?.focus({ preventScroll: true });
+    });
+    const focusTimer = window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 120);
+    const backupFocusTimer = window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 320);
     const timer = window.setTimeout(() => setShowFocusCue(false), 2200);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.clearTimeout(focusTimer);
+      window.clearTimeout(backupFocusTimer);
+      window.clearTimeout(timer);
+    };
   }, [focusToken, requestedDocumentKey]);
 
-  function saveLocalDraft(nextValues: WorkpackDocumentValues) {
-    if (typeof window === "undefined") return;
+  function updateValue(value: string) {
+    pendingChangeRef.current = { source: "user-edit", requiresRevalidation: true };
+    setValues((current) => ({ ...current, [selected.key]: value }));
+    setDirtyDocumentKeys((current) => current.includes(selected.key) ? current : [...current, selected.key]);
+    setLastEditedAt(new Date());
+  }
+
+  function updateStructuredSection(sectionId: string, value: string) {
+    const section = structuredDocument.body.find((item) => item.id === sectionId);
+    if (!section) {
+      console.error("structured document section is unavailable", { sectionId, documentKey: selected.key });
+      setSaveStatusLabel("저장 실패");
+      return;
+    }
     try {
-      window.localStorage.setItem(storageKey, JSON.stringify(nextValues));
+      updateValue(replaceStructuredDocumentSection(selectedText, section, value));
     } catch (error) {
-      console.warn("workpack local draft save failed", error);
+      console.error("structured document section update failed", error);
+      setSaveStatusLabel("저장 실패");
     }
   }
 
-  function updateValue(value: string) {
-    setValues((current) => {
-      const nextValues = { ...current, [selected.key]: value };
-      saveLocalDraft(nextValues);
-      onDeliverablesChange?.(nextValues);
-      return nextValues;
-    });
-    setLastEditedAt(new Date());
+  function selectDocumentTab(index: number) {
+    const nextDocument = documentMeta[index];
+    if (!nextDocument) return;
+    setSelectedKey(nextDocument.key);
+    document.getElementById(documentTabId(nextDocument.key))?.focus();
+  }
+
+  function handleDocumentTabKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
+    let nextIndex: number | null = null;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (index + 1) % documentMeta.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (index - 1 + documentMeta.length) % documentMeta.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = documentMeta.length - 1;
+    }
+
+    if (nextIndex === null) return;
+    event.preventDefault();
+    selectDocumentTab(nextIndex);
   }
 
   function updateRemediationDraft(itemId: string, text: string) {
@@ -1940,7 +2192,7 @@ export function WorkpackEditor({
       delete next[itemId];
       return next;
     });
-    window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 120);
+    window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 80);
   }
 
   async function requestRemediation(item: RubricEvaluationItem) {
@@ -2036,7 +2288,7 @@ export function WorkpackEditor({
       if (selected.key === "workPlanDraft" && dl?.workPlanStructured) {
         structuredMode = "workPlanStructured";
         structuredPayload = dl.workPlanStructured;
-      } else if (selected.key === "workPermitDraft") {
+      } else if (selected.key === "workPermitDraft" && !selectedHasIntentionalEmptyPermitDraft) {
         structuredMode = "permitInspectionStructured";
         structuredPayload = dl?.permitInspectionStructured || buildPermitInspectionStructured(data);
       } else if (selected.key === "tbmBriefing" && dl?.tbmBriefingStructured) {
@@ -2052,16 +2304,19 @@ export function WorkpackEditor({
       const requestBody = structuredMode
         ? {
             mode: structuredMode,
+            edited: selectedUsesEditedText,
             scenario: data.scenario,
-            structured: structuredPayload
+            structured: structuredPayload,
+            rows: selectedRows
           }
         : {
             mode: "single",
+            edited: selectedUsesEditedText,
             title: selected.title,
             rows: selectedRows,
             profile: selectedFormProfile,
             scenario: data.scenario,
-            riskAssessmentRows: data.structured?.riskAssessmentRows
+            riskAssessmentRows: selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
           };
       const response = await fetch("/api/export/xlsx", {
         method: "POST",
@@ -2087,11 +2342,12 @@ export function WorkpackEditor({
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
+          edited: selectedUsesEditedText,
           title: selected.title,
           rows: selectedRows,
           profile: selectedFormProfile,
           scenario: data.scenario,
-          riskAssessmentRows: data.structured?.riskAssessmentRows
+          riskAssessmentRows: selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
         })
       });
       if (!response.ok) {
@@ -2118,7 +2374,7 @@ export function WorkpackEditor({
     setImageStatus("idle");
     const markup = buildSafetyFormMarkup(selected.title, selectedRows, data.scenario, selectedFormProfile, data, riskAssessmentRows);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1754">
-      <rect width="100%" height="100%" fill="#ece7dc"/>
+      <rect width="100%" height="100%" fill="#fafafb"/>
       <foreignObject x="34" y="34" width="1172" height="1686">
         <div xmlns="http://www.w3.org/1999/xhtml">
           <style>${formCss("0")}</style>
@@ -2134,7 +2390,7 @@ export function WorkpackEditor({
       canvas.height = 1754;
       const context = canvas.getContext("2d");
       if (!context) return;
-      context.fillStyle = "#fffaf1";
+      context.fillStyle = "#fafafb";
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(image, 0, 0);
       canvas.toBlob((blob) => {
@@ -2269,288 +2525,532 @@ export function WorkpackEditor({
   }
 
   return (
-    <section className="workpack-shell" id="workpack">
-      <div className="workpack-sidebar card list">
-          <div>
-          <div className="eyebrow">SafeClaw 문서팩</div>
-          <div className="h2">오늘 문서팩</div>
-          <p className="muted">현장에서 바로 수정하고 내려받을 수 있는 작업 전 산출물입니다.</p>
+    <section
+      className={`workpack-shell ${styles.workspace}`}
+      id="workpack"
+      data-testid="workpack-editor-workspace"
+    >
+      <aside className={`workpack-sidebar card list ${styles.navigator}`} aria-label="문서팩 문서 목록">
+        <div className={styles.navigatorHeader}>
+          <div className="eyebrow">문서팩</div>
+          <div className="h2">오늘 문서</div>
+          <p className="muted">{documentMeta.length.toLocaleString("ko-KR")}개 문서 · 브라우저 자동 저장</p>
         </div>
-        <div className="doc-tab-list">
-          {documentMeta.map((item) => (
+
+        <label className={styles.mobileDocumentPicker}>
+          <span>편집 문서</span>
+          <select
+            aria-label="편집 문서 선택"
+            value={selected.key}
+            onChange={(event) => setSelectedKey(event.target.value as DocumentKey)}
+          >
+            {documentMeta.map((item) => (
+              <option key={item.key} value={item.key}>{item.title}</option>
+            ))}
+          </select>
+        </label>
+
+        <div className={`doc-tab-list ${styles.documentTabs}`} role="tablist" aria-label="편집 문서 선택">
+          {documentMeta.map((item, index) => (
             <button
               key={item.key}
+              id={documentTabId(item.key)}
               type="button"
+              role="tab"
               className={`doc-tab ${item.key === selected.key ? "active" : ""}`}
               onClick={() => setSelectedKey(item.key)}
+              onKeyDown={(event) => handleDocumentTabKeyDown(event, index)}
+              aria-selected={item.key === selected.key}
+              aria-controls="workpack-document-body"
+              tabIndex={item.key === selected.key ? 0 : -1}
             >
+              <span className={styles.documentIndex}>{String(index + 1).padStart(2, "0")}</span>
               <strong>{item.title}</strong>
-              <span>{item.description}</span>
+              <span className={styles.documentDescription}>{item.description}</span>
             </button>
           ))}
         </div>
-        <div className="sheet-export-panel">
-          <div className="template-picker" aria-label="서식 템플릿 선택">
-            {templatePresets.map((preset) => (
-              <button
-                key={preset.kind}
-                type="button"
-                className={`template-card ${preset.kind === templateKind ? "active" : ""}`}
-                onClick={() => setTemplateKind(preset.kind)}
-                aria-label={`${preset.label} 서식 선택`}
-                aria-pressed={preset.kind === templateKind}
-              >
-                <strong>{preset.label}</strong>
-                <span>{preset.description}</span>
-              </button>
-            ))}
-          </div>
-          <div className={`template-preview template-${templateKind}`} aria-live="polite">
-            <span>{selectedTemplate.label} 미리보기</span>
-            <strong>{selectedTemplate.previewTitle}</strong>
-            <ul>
-              {selectedTemplate.previewBullets.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-          <details className="customer-template-panel">
-            <summary>사업장 서식 매핑 준비</summary>
-            <div className="customer-template-copy">
-              <strong>지금은 SafeClaw 표준 제출형으로 출력합니다.</strong>
-              <p>
-                고객사 원본 XLSX/HWPX 서식은 온보딩 때 업로드하고, 아래 공통 필드를 한 번 매핑한 뒤
-                같은 현장에서 반복 렌더링하는 흐름으로 확장합니다. 자동 덮어쓰기는 하지 않고 제출 전
-                사용자가 확인합니다.
-              </p>
-            </div>
-            <div className="customer-template-stage" aria-label="사업장 서식 적용 단계">
-              <article>
-                <span>01</span>
-                <strong>원본 서식 수집</strong>
-                <p>사업장 위험성평가표, 작업계획서, TBM, 교육일지 원본을 등록합니다.</p>
-              </article>
-              <article>
-                <span>02</span>
-                <strong>필드 매핑</strong>
-                <p>현장명, 작업명, 위험요인, 감소대책, 결재란을 SafeClaw 문서팩과 연결합니다.</p>
-              </article>
-              <article>
-                <span>03</span>
-                <strong>검수 후 반복 출력</strong>
-                <p>검수된 서식만 고객사 제출본으로 쓰고, 원본 셀 단위 복제는 별도 QA로 잠급니다.</p>
-              </article>
-            </div>
-            <div className="customer-template-field-grid" aria-label="고객사 서식 매핑 필드">
-              {customerTemplateFields.map((field) => (
-                <article key={field.key}>
-                  <span>{field.label}</span>
-                  <strong>{field.mapsTo}</strong>
-                  <p>{field.appliesTo}</p>
-                </article>
-              ))}
-            </div>
-          </details>
-          <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
-          <p className="muted small">
-            출력 방식: PDF는 브라우저 인쇄/저장 화면, XLS는 HTML 호환 파일, HWPX는 rhwp 제출형 초안입니다.
-          </p>
-          <details className="advanced-downloads">
-            <summary>전체 다운로드</summary>
-            <div className="advanced-download-grid">
-              <button type="button" className="button secondary" onClick={downloadAll}>전체 TXT</button>
-              <button type="button" className="button secondary" onClick={downloadAllCsv}>전체 CSV</button>
-              <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
-            </div>
-          </details>
-          <div className="sheets-action-box">
-            <button type="button" className="button" onClick={copySheetsTsv}>새 Google Sheets 열기 + 표 복사</button>
-            <button type="button" className="button secondary" onClick={downloadSheetsTsv}>Sheets용 TSV 다운로드</button>
-            <p className="muted small">Google API/OAuth 없이 자동 입력은 하지 않습니다. 새 시트가 열리면 A1 셀에 붙여넣거나 TSV를 업로드해 사용하세요.</p>
-          </div>
-          {sheetStatus === "copied" ? <p className="muted small">표 데이터를 복사했습니다. 열린 Google Sheets의 A1 셀에 Ctrl+V로 붙여넣어 주세요.</p> : null}
-          {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패해 TSV 파일을 내려받았습니다. Google Sheets에서 파일 가져오기로 업로드해 주세요.</p> : null}
-          <a className="knowledge-link" href="/knowledge">LLM 위키·지식 DB 확인</a>
-          <div className="rubric-panel" aria-label="제출 전 점검">
-            <div className="compact-head">
-              <span className="eyebrow">제출 전 점검</span>
-              <strong>점검 진행</strong>
-            </div>
-            <p className="muted small">
-              공통 안전서류와 법령 기반 필수 확인을 먼저 보고, 공공기관 제출 품질 항목은 보강 대상으로 분리합니다.
-            </p>
-            <div className="rubric-meter" aria-hidden="true">
-              <span style={{ width: `${(rubricEvaluation.summary.fulfilled / rubricEvaluation.summary.total) * 100}%` }} />
-            </div>
-            <div className="rubric-stack">
-              {rubricEvaluation.items.slice(0, 6).map((item) => (
-                <div key={item.id} className={`rubric-item ${item.status}`}>
-                  <span>{rubricCategoryLabel(item.category)}</span>
-                  <strong>{item.title}</strong>
-                  <em>{rubricStatusLabel(item.status)}</em>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      </aside>
 
-      <div className={`card document-editor ${showFocusCue ? "editor-focus-cue" : ""}`} ref={editorRef}>
-        <div className="document-toolbar">
-          <div>
-            <div className="eyebrow">편집 문서</div>
-            <div className="h2">{selected.title}</div>
-            <p className="muted">{selected.description}</p>
-            <p className="editor-status" aria-live="polite">
-              자동저장됨(이 브라우저) · 이력 저장은 관리자 로그인 후 · {selectedText.length.toLocaleString("ko-KR")}자
-              {lastEditedAt ? ` · 마지막 수정 ${lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}` : ""}
-            </p>
-            <p className="muted small">
-              제출형 출력은 표 양식(Excel .xlsx · 한글 .hwp)을 우선 권장합니다. PDF는 브라우저 인쇄/저장, .hwpx는 텍스트 초안이며 발주처 지정 원본 양식과 직인·결재선은 제출 전 확인해 주세요.
-            </p>
-          </div>
-          <div className="download-bar">
-            <button type="button" className="button" onClick={() => void downloadXlsx()} disabled={xlsxStatus === "building"} title="OOXML 정식 .xlsx 양식 (시트/헤더/표/서명란)">
-              {xlsxStatus === "building" ? "Excel 생성 중" : "Excel 표 양식(.xlsx)"}
-            </button>
-            <button type="button" className="button" onClick={() => void downloadHwp()} disabled={hwpStatus === "building"} title="한컴 native .hwp 표 양식 (격자 표 + 셀)">
-              {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
-            </button>
-            <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
-            <details className="advanced-downloads inline">
-              <summary>베타 형식</summary>
-              <div className="advanced-download-grid">
-                <button type="button" className="button secondary" onClick={downloadHwpx} disabled={hwpxStatus === "building"} title="rhwp 텍스트 기반 HWPX 초안 (표 미지원)">
-                  {hwpxStatus === "building" ? "HWPX 생성 중" : ".hwpx 텍스트 초안"}
-                </button>
-                <button type="button" className="button secondary" onClick={downloadXls} title="구버전 호환 HTML 기반 .xls (Excel 보안 경고 가능)">XLS(legacy)</button>
-                <button type="button" className="button secondary" onClick={downloadDoc} title="Word 또는 한글에서 열 수 있는 보고서형 문서">DOC</button>
-                <button type="button" className="button secondary" onClick={downloadText} title="메신저·메일 본문에 붙여넣기 쉬운 순수 텍스트">TXT</button>
-                <button type="button" className="button secondary" onClick={downloadJson} title="외부 시스템 연동과 자동화용 구조화 데이터">JSON</button>
-                <button type="button" className="button secondary" onClick={downloadCsv} title="엑셀·구글시트 업로드용 행 데이터">CSV</button>
-                <button type="button" className="button secondary" onClick={downloadHtml} title="웹 게시·브라우저 인쇄용 문서">HTML</button>
-                <button type="button" className="button secondary" onClick={downloadJpg} title="단톡방 이미지 공유와 현장 게시용 이미지">JPG</button>
-              </div>
-            </details>
-          </div>
-        </div>
-        {xlsxStatus === "error" ? (
-          <p className="export-error">Excel(.xlsx) 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 PDF/XLS(legacy)를 사용해 주세요.</p>
-        ) : null}
-        {hwpStatus === "error" ? (
-          <p className="export-error">한글 표(.hwp) 생성 중 오류가 발생했습니다. .hwpx 텍스트 초안 또는 PDF를 사용해 주세요.</p>
-        ) : null}
-        {hwpxStatus === "error" ? (
-          <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>
-        ) : null}
-        {imageStatus === "error" ? (
-          <p className="export-error">JPG 변환 중 오류가 발생했습니다. HTML 또는 PDF 저장/인쇄를 먼저 사용해 주세요.</p>
-        ) : null}
-        {showFocusCue ? (
-          <p className="editor-focus-message" aria-live="polite">
-            편집 영역입니다. 내용을 수정하면 이 브라우저에 자동 저장되고, PDF(브라우저 인쇄)·XLS(HTML 호환)·HWPX 제출형 초안으로 출력할 수 있습니다.
-          </p>
-        ) : null}
-        <SafetyDocumentPreview
-          title={selected.title}
-          rows={selectedRows}
-          scenario={data.scenario}
-          profile={selectedFormProfile}
-          data={data}
-          riskRows={riskAssessmentRows}
-        />
-        <div className="selected-rubric-strip" aria-label={`${selected.title} 제출 전 점검`}>
-          {selectedRubricItems.length ? selectedRubricItems.map((item) => {
-            const draft = remediationDrafts[item.id];
-            return (
-              <div key={item.id} className={`selected-rubric-item ${item.status}`}>
-                <span>{rubricCategoryLabel(item.category)}</span>
-                <strong>{item.title}</strong>
-                <small>{rubricStatusLabel(item.status)} · {item.status === "fulfilled" ? "현재 문서에 반영되어 있습니다." : item.improvementAction}</small>
-                {item.status !== "fulfilled" ? (
-                  <div className="remediation-actions">
-                    <button
-                      type="button"
-                      className="button secondary"
-                      onClick={() => requestRemediation(item)}
-                      disabled={remediationLoadingId === item.id}
-                    >
-                      {remediationLoadingId === item.id ? "보완 생성 중" : "보완 문구 생성"}
-                    </button>
-                  </div>
-                ) : null}
-                {draft ? (
-                  <div className={`remediation-draft ${draft.status}`}>
-                    <div className="compact-head">
-                      <span className="eyebrow">AI 보완 제안</span>
-                      <strong>{draft.status === "ready" ? "편집 후 삽입 가능" : "생성 확인 필요"}</strong>
-                    </div>
-                    <textarea
-                      className="remediation-textarea"
-                      value={draft.text}
-                      onChange={(event) => updateRemediationDraft(item.id, event.target.value)}
-                      aria-label={`${item.title} 보완 제안 편집`}
-                    />
-                    <p className="muted small">
-                      {draft.providerLabel ? `${draft.providerLabel} · ` : ""}
-                      {draft.policyNote || draft.message}
-                    </p>
-                    {draft.catalogStatus && !draft.catalogStatus.ok ? (
-                      <p className="export-error">
-                        지식 DB 근거는 점검 필요 상태입니다. {draft.catalogStatus.message}
-                      </p>
-                    ) : null}
-                    {draft.sources.length ? (
-                      <div className="remediation-sources">
-                        {draft.sources.map((source) => (
-                          <a key={`${item.id}-${source.title}`} href={source.url} target="_blank" rel="noreferrer">
-                            <span>{source.roleLabel || (source.sourceType === "catalog" ? "지식 DB" : "기본 근거")}</span>
-                            {source.agency} · {source.title}
-                            {source.reflectionLabel ? <small>{source.reflectionLabel}</small> : null}
-                          </a>
-                        ))}
-                      </div>
-                    ) : null}
-                    <div className="remediation-actions">
-                      <button
-                        type="button"
-                        className="button"
-                        onClick={() => insertRemediationDraft(item.id)}
-                        disabled={draft.status !== "ready" || !draft.text.trim()}
-                      >
-                        문서에 삽입
-                      </button>
-                      <button
-                        type="button"
-                        className="button secondary"
-                        onClick={() => setRemediationDrafts((current) => {
-                          const next = { ...current };
-                          delete next[item.id];
-                          return next;
-                        })}
-                      >
-                        닫기
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            );
-          }) : (
-            <div className="selected-rubric-item fulfilled">
-              <span>현장 운영 추천</span>
-              <strong>문서별 직접 점검 항목 없음</strong>
-              <small>전체 문서팩 점검 패널에서 공통 보강 항목을 확인하세요.</small>
+      <div className={`card document-editor ${styles.editor} ${showFocusCue ? "editor-focus-cue" : ""}`}>
+        <div
+          className={styles.documentBody}
+          id="workpack-document-body"
+          data-testid="editor-document-body"
+          role="tabpanel"
+          aria-labelledby={documentTabId(selected.key)}
+          ref={documentBodyRef}
+        >
+          <header className={`document-toolbar ${styles.documentHeader}`}>
+            <div className={styles.documentHeading}>
+              <div className="eyebrow">문서 본문</div>
+              <div className="h2">{selected.title}</div>
+              <p className="muted">{selected.description}</p>
             </div>
+            <div className={`editor-document-meta ${styles.documentMeta}`}>
+              <span className={`editor-save-state ${styles.saveState}`}>{saveStatusLabel}</span>
+              <span>{selectedText.length.toLocaleString("ko-KR")}자</span>
+              {lastEditedAt ? (
+                <span>수정 {lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>
+              ) : null}
+              <span
+                data-testid="editor-save-status"
+                role="status"
+                aria-live="polite"
+                className={styles.visuallyHidden}
+              >
+                {saveAnnouncement}
+              </span>
+            </div>
+          </header>
+
+          {showFocusCue ? (
+            <p className={`editor-focus-message ${styles.focusMessage}`}>
+              {selected.title} 본문 편집을 시작합니다.
+            </p>
+          ) : null}
+
+          <div className={styles.editorModeBar}>
+            <div>
+              <span className="eyebrow">문서 유형</span>
+              <strong>{structuredDocument.profile.label}</strong>
+            </div>
+            <div className={styles.editorModeControl} role="group" aria-label="본문 편집 방식">
+              <button
+                type="button"
+                aria-pressed={editorMode === "structured"}
+                onClick={() => setEditorMode("structured")}
+              >
+                구조화
+              </button>
+              <button
+                type="button"
+                aria-pressed={editorMode === "source"}
+                onClick={() => setEditorMode("source")}
+              >
+                원문
+              </button>
+            </div>
+          </div>
+
+          {editorMode === "structured" ? (
+            <div
+              className={styles.structuredEditor}
+              data-testid="document-structured-editor"
+              data-editor-kind={structuredDocument.profile.kind}
+            >
+              {structuredDocument.body.map((section, index) => {
+                const inputId = `document-section-${selected.key}-${index}`;
+                const lineCount = Math.max(4, section.value.split(/\r?\n/u).length + 1);
+                return (
+                  <section key={section.id} className={styles.documentSection} data-section-kind="body">
+                    <label htmlFor={inputId}>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      <strong>{section.label}</strong>
+                    </label>
+                    <textarea
+                      id={inputId}
+                      ref={index === 0 ? textareaRef : undefined}
+                      className={`document-textarea document-section-textarea ${styles.sectionTextarea}`}
+                      value={section.value}
+                      rows={lineCount}
+                      onChange={(event) => updateStructuredSection(section.id, event.target.value)}
+                      aria-label={index === 0 ? `${selected.title} 편집` : `${selected.title} ${section.label} 편집`}
+                    />
+                  </section>
+                );
+              })}
+            </div>
+          ) : (
+            <textarea
+              ref={textareaRef}
+              className={`document-textarea document-source-textarea ${styles.sourceTextarea}`}
+              value={selectedText}
+              rows={Math.max(12, selectedText.split(/\r?\n/u).length + 1)}
+              onChange={(event) => updateValue(event.target.value)}
+              aria-label={`${selected.title} 전체 원문 편집`}
+            />
           )}
+          <p className={`muted small ${styles.documentFootnote}`}>
+            발주처 원본 양식, 직인, 결재선은 제출 전 확인 대상입니다.
+          </p>
         </div>
-        <textarea
-          ref={textareaRef}
-          className="document-textarea"
-          value={selectedText}
-          onChange={(event) => updateValue(event.target.value)}
-          aria-label={`${selected.title} 편집`}
-        />
+
+        <div className={styles.secondaryTools} data-testid="editor-secondary-tools" aria-label="문서 보조 도구">
+          <details className={styles.utilityPanel} data-testid="editor-provenance-drawer">
+            <summary className={styles.utilitySummary}>
+              <span>
+                <b>
+                  근거 {evidenceStats.reduce((sum, item) => sum + item.value, 0).toLocaleString("ko-KR")}건 · 확인 필요 {selectedQualityIssues.toLocaleString("ko-KR")}건
+                </b>
+              </span>
+            </summary>
+            <div className={`${styles.utilityContent} ${styles.provenanceContent}`}>
+            <section className={styles.provenanceSection} data-testid="editor-evidence-panel">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className="eyebrow">생성 근거</span>
+                  <strong>{selected.title}에 연결된 근거</strong>
+                </div>
+                <a className="knowledge-link" href="/knowledge">지식 DB</a>
+              </div>
+              <div className="rubric-stack">
+                {evidenceStats.map((item) => (
+                  <div key={item.label} className="rubric-item fulfilled">
+                    <span>{item.label}</span>
+                    <strong>{item.value.toLocaleString("ko-KR")}건</strong>
+                    <em>{item.description}</em>
+                  </div>
+                ))}
+              </div>
+              {evidenceHighlights.length ? (
+                <div className={styles.evidenceList}>
+                  {evidenceHighlights.map((item) => item.href ? (
+                    <a key={item.id} href={item.href} target="_blank" rel="noreferrer">
+                      <span>{item.badge}</span>
+                      <strong>{item.title}</strong>
+                      <small>{item.summary}</small>
+                    </a>
+                  ) : (
+                    <article key={item.id}>
+                      <span>{item.badge}</span>
+                      <strong>{item.title}</strong>
+                      <small>{item.summary}</small>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="muted small">연결된 출처가 없습니다. 제출 전 근거 확인이 필요합니다.</p>
+              )}
+              {selectedCoverage ? (
+                <p className="muted small">
+                  {selectedCoverage.document} 커버리지: {selectedCoverage.covered ? "연결됨" : "보강 필요"}
+                  {selectedCoverage.evidenceTypes.length ? ` · ${selectedCoverage.evidenceTypes.join(" · ")}` : ""}
+                </p>
+              ) : null}
+            </section>
+
+          <section className={styles.provenanceSection} data-testid="editor-quality-panel">
+            <div className={`${styles.utilityContent} ${styles.qualityContent}`}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className="eyebrow">현재 문서</span>
+                  <strong>{selected.title} 제출 전 점검</strong>
+                </div>
+              </div>
+              <div className="selected-rubric-strip" aria-label={`${selected.title} 제출 전 점검`}>
+                {selectedRubricItems.length ? selectedRubricItems.map((item) => {
+                  const draft = remediationDrafts[item.id];
+                  return (
+                    <div key={item.id} className={`selected-rubric-item ${item.status}`}>
+                      <span>{rubricCategoryLabel(item.category)}</span>
+                      <strong>{item.title}</strong>
+                      <small>{rubricStatusLabel(item.status)} · {item.status === "fulfilled" ? "현재 문서에 반영되어 있습니다." : item.improvementAction}</small>
+                      {item.status !== "fulfilled" ? (
+                        <div className="remediation-actions">
+                          <button
+                            type="button"
+                            className="button secondary"
+                            onClick={() => requestRemediation(item)}
+                            disabled={remediationLoadingId === item.id}
+                          >
+                            {remediationLoadingId === item.id ? "보완 생성 중" : "보완 문구 생성"}
+                          </button>
+                        </div>
+                      ) : null}
+                      {draft ? (
+                        <div className={`remediation-draft ${draft.status}`}>
+                          <div className="compact-head">
+                            <span className="eyebrow">AI 보완 제안</span>
+                            <strong>{draft.status === "ready" ? "편집 후 삽입 가능" : "생성 확인 필요"}</strong>
+                          </div>
+                          <textarea
+                            className="remediation-textarea"
+                            value={draft.text}
+                            onChange={(event) => updateRemediationDraft(item.id, event.target.value)}
+                            aria-label={`${item.title} 보완 제안 편집`}
+                          />
+                          <p className="muted small">
+                            {draft.providerLabel ? `${draft.providerLabel} · ` : ""}
+                            {draft.policyNote || draft.message}
+                          </p>
+                          {draft.catalogStatus && !draft.catalogStatus.ok ? (
+                            <p className="export-error">
+                              지식 DB 근거는 점검 필요 상태입니다. {draft.catalogStatus.message}
+                            </p>
+                          ) : null}
+                          {draft.sources.length ? (
+                            <div className="remediation-sources">
+                              {draft.sources.map((source) => (
+                                <a key={`${item.id}-${source.title}`} href={source.url} target="_blank" rel="noreferrer">
+                                  <span>{source.roleLabel || (source.sourceType === "catalog" ? "지식 DB" : "기본 근거")}</span>
+                                  {source.agency} · {source.title}
+                                  {source.reflectionLabel ? <small>{source.reflectionLabel}</small> : null}
+                                </a>
+                              ))}
+                            </div>
+                          ) : null}
+                          <div className="remediation-actions">
+                            <button
+                              type="button"
+                              className="button"
+                              onClick={() => insertRemediationDraft(item.id)}
+                              disabled={draft.status !== "ready" || !draft.text.trim()}
+                            >
+                              문서에 삽입
+                            </button>
+                            <button
+                              type="button"
+                              className="button secondary"
+                              onClick={() => setRemediationDrafts((current) => {
+                                const next = { ...current };
+                                delete next[item.id];
+                                return next;
+                              })}
+                            >
+                              닫기
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                }) : (
+                  <div className="selected-rubric-item fulfilled">
+                    <span>현장 운영 추천</span>
+                    <strong>문서별 직접 점검 항목 없음</strong>
+                    <small>전체 문서팩 점검에서 공통 보강 항목을 확인할 수 있습니다.</small>
+                  </div>
+                )}
+              </div>
+
+              <div className="rubric-panel" aria-label="전체 문서팩 제출 전 점검">
+                <div className="compact-head">
+                  <span className="eyebrow">전체 문서팩</span>
+                  <strong>{totalQualityIssues ? `${totalQualityIssues}개 보강 대상` : "점검 완료"}</strong>
+                </div>
+                <div className="rubric-meter" aria-hidden="true">
+                  <span style={{ width: `${(rubricEvaluation.summary.fulfilled / rubricEvaluation.summary.total) * 100}%` }} />
+                </div>
+                <div className="rubric-stack">
+                  {rubricEvaluation.items.slice(0, 6).map((item) => (
+                    <div key={item.id} className={`rubric-item ${item.status}`}>
+                      <span>{rubricCategoryLabel(item.category)}</span>
+                      <strong>{item.title}</strong>
+                      <em>{rubricStatusLabel(item.status)}</em>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className={styles.provenanceSection} data-testid="editor-graph-panel">
+            <div className={styles.utilityContent}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className="eyebrow">문서 연결</span>
+                  <strong>현장 입력에서 제출본까지</strong>
+                </div>
+              </div>
+              <ol className={styles.lineageGraph} aria-label={`${selected.title} 생성 연결`}>
+                {[
+                  { label: "현장 입력", value: data.scenario.workSummary },
+                  { label: "핵심 위험", value: data.riskSummary.topRisk },
+                  { label: "현재 문서", value: selected.title },
+                  { label: "제출본", value: "PDF · XLSX · HWP" }
+                ].map((node) => (
+                  <li key={node.label}>
+                    <span>{node.label}</span>
+                    <strong>{node.value}</strong>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
+
+          <section
+            className={styles.provenanceSection}
+            data-testid="editor-provenance-appendices"
+            aria-label="원문에서 분리한 근거 부록"
+          >
+            <div className={styles.utilityContent}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <span className="eyebrow">근거 부록</span>
+                  <strong>제출 본문과 분리해 보존한 원문</strong>
+                </div>
+              </div>
+              {structuredDocument.appendices.length ? (
+                <div className={styles.appendixList}>
+                  {structuredDocument.appendices.map((section) => (
+                    <article key={section.id}>
+                      <strong>{section.label}</strong>
+                      <pre>{section.value || "내용 없음"}</pre>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="muted small">현재 문서에는 분리된 근거 부록이 없습니다.</p>
+              )}
+            </div>
+          </section>
+            </div>
+          </details>
+
+          <details className={styles.utilityPanel} data-testid="editor-export-panel">
+            <summary className={styles.utilitySummary}>
+              <span>
+                <b>내보내기</b>
+                <small>정식 제출본과 호환 형식</small>
+              </span>
+              <em>PDF · XLSX · HWP</em>
+            </summary>
+            <div className={`${styles.utilityContent} ${styles.exportContent}`}>
+              <div className={`download-bar ${styles.primaryExports}`}>
+                <button type="button" className="button" onClick={() => void downloadXlsx()} disabled={xlsxStatus === "building"} title="OOXML 정식 .xlsx 양식 (시트/헤더/표/서명란)">
+                  {xlsxStatus === "building" ? "Excel 생성 중" : "Excel 표 양식(.xlsx)"}
+                </button>
+                <button type="button" className="button" onClick={() => void downloadHwp()} disabled={hwpStatus === "building"} title="한컴 native .hwp 표 양식 (격자 표 + 셀)">
+                  {hwpStatus === "building" ? "한글 표 생성 중" : "한글 표 양식(.hwp)"}
+                </button>
+                <button type="button" className="button secondary" onClick={() => void printPdf()}>PDF(브라우저 인쇄)</button>
+                <details className="advanced-downloads inline">
+                  <summary>베타 형식</summary>
+                  <div className="advanced-download-grid">
+                    <button type="button" className="button secondary" onClick={downloadHwpx} disabled={hwpxStatus === "building"} title="rhwp 텍스트 기반 HWPX 초안 (표 미지원)">
+                      {hwpxStatus === "building" ? "HWPX 생성 중" : ".hwpx 텍스트 초안"}
+                    </button>
+                    <button type="button" className="button secondary" onClick={downloadXls} title="구버전 호환 HTML 기반 .xls (Excel 보안 경고 가능)">XLS(구형 호환)</button>
+                    <button type="button" className="button secondary" onClick={downloadDoc} title="Word 또는 한글에서 열 수 있는 보고서형 문서">DOC</button>
+                    <button type="button" className="button secondary" onClick={downloadText} title="메신저·메일 본문에 붙여넣기 쉬운 순수 텍스트">TXT</button>
+                    <button type="button" className="button secondary" onClick={downloadJson} title="외부 시스템 연동과 자동화용 구조화 데이터">JSON</button>
+                    <button type="button" className="button secondary" onClick={downloadCsv} title="엑셀·구글시트 업로드용 행 데이터">CSV</button>
+                    <button type="button" className="button secondary" onClick={downloadHtml} title="웹 게시·브라우저 인쇄용 문서">HTML</button>
+                    <button type="button" className="button secondary" onClick={downloadJpg} title="단톡방 이미지 공유와 현장 게시용 이미지">JPG</button>
+                  </div>
+                </details>
+              </div>
+
+              {xlsxStatus === "error" ? (
+                <p className="export-error">Excel(.xlsx) 생성 중 오류가 발생했습니다. 잠시 후 다시 시도하거나 PDF 또는 구형 호환 XLS를 사용해 주세요.</p>
+              ) : null}
+              {hwpStatus === "error" ? (
+                <p className="export-error">한글 표(.hwp) 생성 중 오류가 발생했습니다. .hwpx 텍스트 초안 또는 PDF를 사용해 주세요.</p>
+              ) : null}
+              {hwpxStatus === "error" ? (
+                <p className="export-error">HWPX 생성 중 오류가 발생했습니다. TXT 또는 HTML로 먼저 내려받아 주세요.</p>
+              ) : null}
+              {imageStatus === "error" ? (
+                <p className="export-error">JPG 변환 중 오류가 발생했습니다. HTML 또는 PDF 저장/인쇄를 먼저 사용해 주세요.</p>
+              ) : null}
+
+              <div className={`sheet-export-panel ${styles.exportWorkbench}`}>
+                <div className="template-picker" aria-label="서식 템플릿 선택">
+                  {templatePresets.map((preset) => (
+                    <button
+                      key={preset.kind}
+                      type="button"
+                      className={`template-card ${preset.kind === templateKind ? "active" : ""}`}
+                      onClick={() => setTemplateKind(preset.kind)}
+                      aria-label={`${preset.label} 서식 선택`}
+                      aria-pressed={preset.kind === templateKind}
+                    >
+                      <strong>{preset.label}</strong>
+                      <span>{preset.description}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className={`template-preview template-${templateKind}`} aria-live="polite">
+                  <span>{selectedTemplate.label} 미리보기</span>
+                  <strong>{selectedTemplate.previewTitle}</strong>
+                  <ul>
+                    {selectedTemplate.previewBullets.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <details className="customer-template-panel">
+                  <summary>사업장 서식 매핑 준비</summary>
+                  <div className="customer-template-copy">
+                    <strong>지금은 SafeClaw 표준 제출형으로 출력합니다.</strong>
+                    <p>
+                      고객사 원본 XLSX/HWPX 서식은 온보딩 때 업로드하고, 아래 공통 필드를 한 번 매핑한 뒤
+                      같은 현장에서 반복 렌더링하는 흐름으로 확장합니다. 자동 덮어쓰기는 하지 않고 제출 전
+                      사용자가 확인합니다.
+                    </p>
+                  </div>
+                  <div className="customer-template-stage" aria-label="사업장 서식 적용 단계">
+                    <article>
+                      <span>01</span>
+                      <strong>원본 서식 수집</strong>
+                      <p>사업장 위험성평가표, 작업계획서, TBM, 교육일지 원본을 등록합니다.</p>
+                    </article>
+                    <article>
+                      <span>02</span>
+                      <strong>필드 매핑</strong>
+                      <p>현장명, 작업명, 위험요인, 감소대책, 결재란을 SafeClaw 문서팩과 연결합니다.</p>
+                    </article>
+                    <article>
+                      <span>03</span>
+                      <strong>검수 후 반복 출력</strong>
+                      <p>검수된 서식만 고객사 제출본으로 쓰고, 원본 셀 단위 복제는 별도 QA로 잠급니다.</p>
+                    </article>
+                  </div>
+                  <div className="customer-template-field-grid" aria-label="고객사 서식 매핑 필드">
+                    {customerTemplateFields.map((field) => (
+                      <article key={field.key}>
+                        <span>{field.label}</span>
+                        <strong>{field.mapsTo}</strong>
+                        <p>{field.appliesTo}</p>
+                      </article>
+                    ))}
+                  </div>
+                </details>
+                <button type="button" className="button" onClick={downloadTemplate}>선택 서식 다운로드</button>
+                <p className="muted small">
+                  PDF는 브라우저 인쇄/저장, XLS는 HTML 호환 파일, HWPX는 rhwp 제출형 초안입니다.
+                </p>
+                <details className="advanced-downloads">
+                  <summary>전체 문서팩 다운로드</summary>
+                  <div className="advanced-download-grid">
+                    <button type="button" className="button secondary" onClick={downloadAll}>전체 TXT</button>
+                    <button type="button" className="button secondary" onClick={downloadAllCsv}>전체 CSV</button>
+                    <button type="button" className="button secondary" onClick={downloadAllXls}>전체 XLS</button>
+                  </div>
+                </details>
+                <div className="sheets-action-box">
+                  <button type="button" className="button" onClick={copySheetsTsv}>새 Google Sheets 열기 + 표 복사</button>
+                  <button type="button" className="button secondary" onClick={downloadSheetsTsv}>Sheets용 TSV 다운로드</button>
+                  <p className="muted small">Google API/OAuth 없이 자동 입력은 하지 않습니다. 새 시트가 열리면 A1 셀에 붙여넣거나 TSV를 업로드해 사용하세요.</p>
+                </div>
+                {sheetStatus === "copied" ? <p className="muted small">표 데이터를 복사했습니다. 열린 Google Sheets의 A1 셀에 Ctrl+V로 붙여넣어 주세요.</p> : null}
+                {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패해 TSV 파일을 내려받았습니다. Google Sheets에서 파일 가져오기로 업로드해 주세요.</p> : null}
+              </div>
+            </div>
+          </details>
+
+          <details className={`submission-preview-panel ${styles.utilityPanel}`}>
+            <summary className={styles.utilitySummary}>
+              <span>
+                <b>제출 양식 미리보기</b>
+                <small>표, 결재선, 인쇄 레이아웃</small>
+              </span>
+              <em>인쇄물</em>
+            </summary>
+            <div className={styles.utilityContent}>
+              <p className="muted small">다운로드와 출력에 사용되는 제출형 표 서식입니다.</p>
+              <SafetyDocumentPreview
+                title={selected.title}
+                rows={selectedRows}
+                scenario={data.scenario}
+                profile={selectedFormProfile}
+                data={data}
+                riskRows={riskAssessmentRows}
+              />
+            </div>
+          </details>
+        </div>
       </div>
     </section>
   );

@@ -1,0 +1,144 @@
+{
+  "date": "2026-07-12",
+  "branch": "feat/remote-openclaw-protocol",
+  "base": "31a44c0d972c46a47c94ad387eeeff39528d1be9",
+  "originalApprovedBase": "3b0edfe48c29e603f3156440362fca9304ef4d1a",
+  "approvedSourceFinal": "1ad409f6a2f896b333777b8ab950a613178de21d",
+  "rebasedProtocolFinal": "0c3cbe246a208306e62913907ac3ff33f744750c",
+  "phase": 1,
+  "scope": "pure signed remote engine protocol only",
+  "securityReviewDisposition": "third independent review SPEC PASS and CODE PASS; P0-P3 findings 0",
+  "runtimeWiringAdded": false,
+  "runtimeChanged": false,
+  "remoteDemoReady": false,
+  "schemaChanges": 0,
+  "dataMutations": 0,
+  "environmentChanges": 0,
+  "limits": {
+    "maxBodyUtf8Bytes": 16384,
+    "maxRawHeaderLines": 32,
+    "maxNormalizedHeaderEntries": 32,
+    "maxHeaderAggregateUtf8Bytes": 8192,
+    "maxFutureSkewMs": 60000,
+    "maxTtlMs": 300000,
+    "maxJsonDepth": 64
+  },
+  "headerInputContract": {
+    "rawTuples": "pre-fold line count and aggregate bytes enforced",
+    "headers": "folded unique normalized entry count and aggregate bytes enforced; original line count unavailable",
+    "record": "normalized enumerable entry count enforced; explicit array values counted individually",
+    "transportRawLinePreflightRequiredBeforeHeadersConstruction": true
+  },
+  "unicodePolicy": {
+    "implementation": "portable UTF-16 code-unit scanner",
+    "rawBodyCheckedBeforeUtf8Encoding": true,
+    "signerFieldsCheckedBeforeSerialization": true,
+    "decodedEnvelopeChecked": true,
+    "validSurrogatePairsAccepted": true,
+    "stableErrorCode": "PROTOCOL_UNICODE_INVALID"
+  },
+  "policyDefaults": {
+    "undefinedUsesDefault": true,
+    "nullRejected": true,
+    "nonFiniteRejected": true,
+    "nonPositiveRejected": true,
+    "aboveHardLimitRejected": true
+  },
+  "cryptography": {
+    "bodyHash": "SHA-256",
+    "signature": "HMAC-SHA256",
+    "signatureComparison": "timingSafeEqual over exact 32-byte digests",
+    "fixedKnownAnswerVector": true,
+    "keySlots": ["current", "next"],
+    "collidingKeyIdsRejected": true
+  },
+  "stableErrorCodes": [
+    "PROTOCOL_HEADER_MISSING",
+    "PROTOCOL_HEADER_MALFORMED",
+    "PROTOCOL_HEADER_DUPLICATE",
+    "PROTOCOL_HEADERS_TOO_LARGE",
+    "PROTOCOL_VERSION_UNSUPPORTED",
+    "PROTOCOL_KEY_UNKNOWN",
+    "PROTOCOL_KEYRING_INVALID",
+    "PROTOCOL_POLICY_INVALID",
+    "PROTOCOL_BODY_MALFORMED",
+    "PROTOCOL_BODY_DUPLICATE_MEMBER",
+    "PROTOCOL_BODY_TOO_LARGE",
+    "PROTOCOL_BODY_TAMPERED",
+    "PROTOCOL_UNICODE_INVALID",
+    "PROTOCOL_METHOD_INVALID",
+    "PROTOCOL_PATH_INVALID",
+    "PROTOCOL_METHOD_MISMATCH",
+    "PROTOCOL_PATH_MISMATCH",
+    "PROTOCOL_AUDIENCE_MISMATCH",
+    "PROTOCOL_ISSUED_AT_FUTURE",
+    "PROTOCOL_EXPIRED",
+    "PROTOCOL_TTL_TOO_LONG",
+    "PROTOCOL_BODY_HASH_INVALID",
+    "PROTOCOL_SIGNATURE_INVALID"
+  ],
+  "tdd": {
+    "red": {
+      "productionParentCommit": "c3fa528fbd2ac90e07c67e9d63c9d636ab04fc3c",
+      "testOnlyCommit": "6086418e832243d10d63ceacd2b409c7fbb75ed9",
+      "testOnlyTree": "277f480d25b9b60ac246794796da1c43855f50e4",
+      "command": "npm.cmd test -- tests/remote-engine-protocol.test.ts",
+      "exitCode": 1,
+      "passed": 56,
+      "failed": 4,
+      "total": 60,
+      "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/red-security-review.stdout.log",
+      "rawLogGitBlob": "63c8936b04f21df31a1a12f5313102650e1dfa26",
+      "provenance": "evaluation/remote-openclaw-protocol-2026-07-12/red-security-review.provenance.json"
+    },
+    "green": {
+      "command": "npm.cmd test -- tests/remote-engine-protocol.test.ts",
+      "files": 1,
+      "passed": 60,
+      "failed": 0,
+      "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/green-security-review.stdout.log",
+      "rawLogGitBlob": "5d3895959292072f485e71e9844b09e00e01538b"
+    }
+  },
+  "verification": {
+    "relatedTests": {
+      "command": "npm.cmd test -- tests/engine-adapter.test.ts tests/remote-engine-protocol.test.ts",
+      "files": 2,
+      "passed": 69,
+      "failed": 0,
+      "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/related-engine-tests.stdout.log",
+      "rawLogGitBlob": "44b947c558e09261226fcc97c527d40df767c7d6"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "passed",
+      "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/typecheck-security-review.stdout.log",
+      "rawLogGitBlob": "b60052d6022e1d3c1b1ddc772e194ff4e4de384b"
+    },
+    "build27": {
+      "command": "npm.cmd run build",
+      "status": "passed",
+      "staticPages": 27,
+      "sequentialRuns": 1,
+      "rawLog": "evaluation/remote-openclaw-protocol-2026-07-12/build-security-review.stdout.log",
+      "rawLogGitBlob": "cfc986957177f579c463423d881185b8e7a66fd9",
+      "globalNextBuildProcessesBeforeStart": 0
+    },
+    "diffCheck": "passed",
+    "diffChangedFiles": 11,
+    "runtimeWiringSearchMatches": 0,
+    "runtimeImportCallRefs": 0,
+    "fullSuite": "not run"
+  },
+  "reviewHandoff": {
+    "thirdIndependentReview": "SPEC PASS; CODE PASS; P0-P3 findings 0",
+    "nonceReplayClaimed": false,
+    "remoteDemoReadyClaimed": false
+  },
+  "openRisks": [
+    "durable atomic nonce replay storage is required before runtime dispatch",
+    "key provisioning and operational rotation are outside Phase 1",
+    "transport adapters using WHATWG Headers must preflight raw line count before folding when that limit is required",
+    "transport, sidecar enforcement, and end-to-end remote execution are not implemented"
+  ]
+}

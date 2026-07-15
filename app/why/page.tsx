@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 
 export const metadata: Metadata = {
   title: "왜 SafeClaw인가 | SafeClaw",
@@ -23,40 +24,29 @@ const apiCards = [
 
 export default function WhyPage() {
   return (
-    <main className="v2-shell">
-      <header className="v2-nav">
-        <Link href="/" className="brand-lockup" aria-label="SafeClaw 홈">
-          <span className="brand-mark">S</span>
-          <span><strong>SafeClaw</strong><small>차별성</small></span>
-        </Link>
-        <nav>
-          <Link href="/workspace">작업공간</Link>
-          <Link href="/preview">핵심 3종</Link>
-          <Link href="/trust">신뢰</Link>
-          <Link href="/roadmap">로드맵</Link>
-        </nav>
-      </header>
-
-      <section className="v2-hero card">
-        <span className="eyebrow">왜 SafeClaw인가</span>
-        <h1>검색기나 템플릿이 아니라, 현장 실행 문서팩을 만드는 작업공간입니다.</h1>
-        <p>SafeClaw의 차별성은 공공데이터를 보여주는 데서 끝나지 않고, 그 근거를 위험성평가표, TBM, 교육기록, 전파 메시지의 문장으로 연결하는 데 있습니다.</p>
-      </section>
-
-      <section className="api-pulse-showcase">
+    <SafeClawModuleShell
+      eyebrow="차별성"
+      title="왜 SafeClaw인가."
+      description="검색기나 템플릿이 아니라, 근거를 위험성평가표, TBM, 교육기록, 전파 메시지의 문장으로 연결하는 작업공간입니다."
+      status="live"
+      mappedTo="근거 연결 · 실행 문서 · 현장 전파"
+      activeHref="/why"
+      actions={<Link href="/workspace">작업공간 열기</Link>}
+    >
+      <section className="safeclaw-module-grid four api-pulse-showcase">
         {apiCards.map(([title, body]) => (
-          <article key={title} className="card api-proof-card">
+          <article key={title} className="api-proof-card">
             <i aria-hidden="true" />
-            <strong>{title}</strong>
+            <h2>{title}</h2>
             <p>{body}</p>
           </article>
         ))}
       </section>
 
-      <section className="card comparison-card">
+      <section className="safeclaw-module-panel comparison-card">
         <div className="compact-head">
           <span className="eyebrow">비교</span>
-          <strong>대안별 차이</strong>
+          <h2>대안별 차이</h2>
         </div>
         <div className="comparison-table" role="table" aria-label="대안별 기능 비교">
           <div className="comparison-head" role="row">
@@ -74,10 +64,10 @@ export default function WhyPage() {
         </div>
       </section>
 
-      <section className="v2-link-band card">
-        <strong>차별성을 실제 작업 흐름에서 확인하려면</strong>
+      <section className="safeclaw-module-panel v2-link-band">
+        <h2>차별성을 실제 작업 흐름에서 확인하려면</h2>
         <Link className="button" href="/workspace">작업공간 열기</Link>
       </section>
-    </main>
+    </SafeClawModuleShell>
   );
 }

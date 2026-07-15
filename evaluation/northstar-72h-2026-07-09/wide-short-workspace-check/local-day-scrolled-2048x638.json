@@ -1,0 +1,66 @@
+{
+  "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\wide-short-workspace-check\\local-day-scrolled-2048x638.png",
+  "metrics": {
+    "scrollY": 260,
+    "topbar": {
+      "top": -248,
+      "bottom": -188,
+      "left": 344,
+      "right": 1704,
+      "width": 1360,
+      "height": 60,
+      "position": "relative",
+      "zIndex": "2"
+    },
+    "viewport": {
+      "top": -156,
+      "bottom": 1043,
+      "left": 344,
+      "right": 1704,
+      "width": 1360,
+      "height": 1199,
+      "position": "relative",
+      "zIndex": "1"
+    },
+    "sideNav": {
+      "top": -156,
+      "bottom": 897,
+      "left": 344,
+      "right": 608,
+      "width": 264,
+      "height": 1053,
+      "position": "relative",
+      "zIndex": "1"
+    },
+    "main": {
+      "top": -156,
+      "bottom": 1043,
+      "left": 624,
+      "right": 1704,
+      "width": 1080,
+      "height": 1199,
+      "position": "relative",
+      "zIndex": "0"
+    },
+    "heading": {
+      "top": 10,
+      "bottom": 86,
+      "left": 764,
+      "right": 1544,
+      "width": 780,
+      "height": 76,
+      "position": "static",
+      "zIndex": "auto"
+    },
+    "textarea": {
+      "top": 201,
+      "bottom": 365,
+      "left": 761,
+      "right": 1567,
+      "width": 806,
+      "height": 164,
+      "position": "static",
+      "zIndex": "auto"
+    }
+  }
+}

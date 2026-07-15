@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/pdf-korean-font-integration.test.ts
+
+
+ RUN  v4.1.10 .
+
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  07:53:37
+   Duration  4.00s (transform 223ms, setup 0ms, import 1.43s, tests 1.71s, environment 0ms)

@@ -1,0 +1,15 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/isolated-next-browser-harness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 <repo>
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  14:45:29
+   Duration  81.86s (transform 64ms, setup 0ms, import 701ms, tests 80.51s, environment 0ms)
+
+
+EXIT_CODE=0

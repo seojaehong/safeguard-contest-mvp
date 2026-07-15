@@ -1,0 +1,48 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/documents-editor-layout.test.ts -t document-specific structured sections|round-trips a structured editor
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+ ❯ tests/documents-editor-layout.test.ts (22 tests | 1 failed | 20 skipped) 58237ms
+     × round-trips a structured editor change into canonical XLSX rows without stale payload or truncation 33257ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/documents-editor-layout.test.ts > documents editor layout > round-trips a structured editor change into canonical XLSX rows without stale payload or truncation
+TimeoutError: locator.selectOption: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('select[aria-label="편집 문서 선택"]')
+    - locator resolved to <select aria-label="편집 문서 선택">…</select>
+  - attempting select option action
+    2 × waiting for element to be visible and enabled
+      - element is not visible
+    - retrying select option action
+    - waiting 20ms
+    2 × waiting for element to be visible and enabled
+      - element is not visible
+    - retrying select option action
+      - waiting 100ms
+    58 × waiting for element to be visible and enabled
+       - element is not visible
+     - retrying select option action
+       - waiting 500ms
+
+ ❯ tests/documents-editor-layout.test.ts:140:57
+    138|     }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.st…
+    139|     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle"…
+    140|     await page.locator('select[aria-label="편집 문서 선택"]').selectOption("…
+       |                                                         ^
+    141|     const editedLines = Array.from({ length: 27 }, (_, index) => `- UI…
+    142|     await page.getByTestId("document-structured-editor").locator(".doc…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed | 20 skipped (22)
+   Start at  22:08:56
+   Duration  60.02s (transform 201ms, setup 0ms, import 1.16s, tests 58.24s, environment 0ms)
+
+EXPLICIT_EXIT_CODE=1

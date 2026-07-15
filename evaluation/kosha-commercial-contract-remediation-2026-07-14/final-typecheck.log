@@ -1,0 +1,14 @@
+verification=final-typecheck
+verificationSeries=f74c5972a4c776bfc9e1a924d3bf50ce55b503a2+5919d58bbf7de1027f4b4118d5ec997fd4865f9f
+finalProductSha=5919d58bbf7de1027f4b4118d5ec997fd4865f9f
+finalProductTree=6f2ed6684543f696101bd88150d44c77acd1ab6a
+authoritativeMain=920c7f360688352156de4854b4957a9f2f1f0e43
+command=npm.cmd run typecheck
+startedAt=2026-07-14T15:47:30.3063279+09:00
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+endedAt=2026-07-14T15:47:42.8220955+09:00
+elapsedSeconds=12.516
+exitCode=0

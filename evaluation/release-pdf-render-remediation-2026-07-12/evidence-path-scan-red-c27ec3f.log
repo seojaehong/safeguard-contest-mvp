@@ -1,0 +1,16 @@
+baseline=c27ec3f645936bae4f21c2b8e09c12d435b548ec
+test=keeps committed PDF evidence free of local absolute paths
+expected=[]
+actual_count=11
+actual=evaluation/release-pdf-render-remediation-2026-07-12/focused-pdf-tests.log
+actual=evaluation/release-pdf-render-remediation-2026-07-12/green-font-failure-test.log
+actual=evaluation/release-pdf-render-remediation-2026-07-12/green-visual-regression-test.log
+actual=evaluation/release-pdf-render-remediation-2026-07-12/red-existing-tests.log
+actual=evaluation/release-pdf-render-remediation-2026-07-12/red-visual-regression-test.log
+actual=evaluation/release-pdf-render-remediation-2026-07-12/report.json
+actual=evaluation/release-pdf-render-remediation-2026-07-12/report.md
+actual=evaluation/release-pdf-render-remediation-2026-07-12/green-rendered/green-route-visual-metrics.json
+actual=evaluation/release-pdf-render-remediation-2026-07-12/normalized-subset-control-rendered/normalized-subset-control-visual-metrics.json
+actual=evaluation/release-pdf-render-remediation-2026-07-12/red-rendered/red-route-visual-metrics.json
+actual=evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/subset-control-visual-metrics.json
+result=RED

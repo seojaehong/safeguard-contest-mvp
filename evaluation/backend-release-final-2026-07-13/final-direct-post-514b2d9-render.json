@@ -1,0 +1,33 @@
+{
+  "sourcePdfSha256": "1d04fb925db9c43e00808126be172d85784162d101dee432f600e74ee2c6b014",
+  "pages": 2,
+  "extractedTextLength": 2616,
+  "containsKoreanTitle": true,
+  "containsRiskSentinel": true,
+  "containsTbmSentinel": true,
+  "containsTbmDetail": true,
+  "containsRiskLinkLabel": true,
+  "containsTbmDeliveryLabel": true,
+  "finalPageContainsApproval": true,
+  "finalPageContainsDisclaimer": true,
+  "pageMetrics": [
+    {
+      "pageNumber": 1,
+      "label": "first",
+      "width": 1190,
+      "height": 1684,
+      "nonwhitePixels": 108261,
+      "pngPath": "evaluation/backend-release-final-2026-07-13/final-direct-post-514b2d9-first.png",
+      "pngSha256": "de2810970d17cd4864c6401c4e0f6f6135fa078e160b92aa6f5084ed4522af8e"
+    },
+    {
+      "pageNumber": 2,
+      "label": "last",
+      "width": 1190,
+      "height": 1684,
+      "nonwhitePixels": 74114,
+      "pngPath": "evaluation/backend-release-final-2026-07-13/final-direct-post-514b2d9-last.png",
+      "pngSha256": "5e5b44bf57cbbdfcf38503bfd6602ec166194a04245bdd0d1fc3f46f3cdcd292"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-07-08T14:35:54.8958161Z",
+  "structuredDeliverables": {
+    "defaultAnthropicModel": "claude-sonnet-5",
+    "providerFlag": "AI_DELIVERABLES_PROVIDER=claude 또는 anthropic",
+    "requiredSecret": "ANTHROPIC_API_KEY",
+    "modelOverride": "ANTHROPIC_MODEL=claude-opus-4-8",
+    "overrideAcceptedByPolicy": true,
+    "fallbackBehavior": "Anthropic key missing or provider failure falls back to Vertex deliverables path.",
+    "heavyDocsUseFastModel": [
+      "foreign",
+      "free"
+    ]
+  },
+  "currentEnvironment": {
+    "worktreeEnvExists": false,
+    "mainEnvAnthropicApiKeySet": false,
+    "mainEnvAiProviderSet": false,
+    "mainEnvAnthropicModelSet": false,
+    "canLiveSmokeOpusFromThisEnv": false,
+    "reason": "현재 확인된 로컬 env에는 ANTHROPIC_API_KEY/AI_DELIVERABLES_PROVIDER/ANTHROPIC_MODEL 설정이 없어 실제 Opus 호출 smoke는 수행하지 않았다."
+  },
+  "clawChat": {
+    "provider": "openclaw",
+    "profile": "safeclaw",
+    "agent": "main",
+    "usesOpenAiOauthViaOpenClaw": true,
+    "anthropicModelOverrideApplies": false,
+    "implication": "Claw chat now uses the OpenClaw safeclaw profile and its OpenAI OAuth runtime by default. Anthropic/Opus remains a structured deliverables provider option, not the Claw chat default."
+  },
+  "qualityExpectation": {
+    "likelyDifference": "위험성평가/TBM 같은 structured docs에서는 더 긴 추론과 문장 품질 차이가 날 수 있다.",
+    "notGuaranteed": "근거 고정 품질은 모델보다 DB harness/evidence packet 품질에 더 좌우된다.",
+    "demoRisk": "Opus 계열은 지연시간과 API 지원 여부 확인이 필요하므로 시연 전 동일 입력 1회 smoke가 필요하다."
+  }
+}

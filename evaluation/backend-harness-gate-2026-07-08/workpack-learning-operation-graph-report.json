@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-07-09T01:27:45+09:00",
+  "scope": "Workpack MD/JSONL learning memory export",
+  "decision": "Daily work memory files now include the same operation graph contract used by the ontology API, so a markdown/jsonl export can preserve the relationship between workpack, evidence, hazard, control, photo improvement, and read acknowledgement.",
+  "implementation": {
+    "learningExport": "lib/workpack-learning-export.ts",
+    "operationGraphBuilder": "lib/ontology/operation-memory.ts",
+    "markdownSection": "## 운영 그래프",
+    "jsonlEventType": "operation_graph",
+    "schemaMigration": false,
+    "dbMutation": false
+  },
+  "preservedSignals": {
+    "references": true,
+    "improvements": true,
+    "photoVisionStatus": true,
+    "visionOcrText": true,
+    "readConfirmations": true,
+    "operationGraphNodesAndEdges": true
+  },
+  "verification": {
+    "tests": "npm.cmd test -- tests\\commercial-harness.test.ts tests\\ontology-operation-memory.test.ts tests\\operation-improvement-history.test.ts",
+    "testResult": "3 files passed, 11 tests passed",
+    "typecheck": "npm.cmd run typecheck",
+    "build": "npm.cmd run build",
+    "result": "passed",
+    "note": "A parallel typecheck/build run hit transient .next/types file regeneration. Re-running typecheck alone after build passed."
+  }
+}

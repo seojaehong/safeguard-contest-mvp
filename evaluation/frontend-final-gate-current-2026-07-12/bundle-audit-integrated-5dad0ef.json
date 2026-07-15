@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-12T09:22:32.799Z",
+  "mode": "audit",
+  "buildDirectory": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\.next",
+  "buildId": "bX_ZVxMmMxRjS00iFEsHA",
+  "sourceSha": "5dad0ef502beada45eeddb13efc76fbb68e82a5e",
+  "sourceIdentity": "892f5df4fb5b92ed216f81b1ba44dc8622d37e72fcd6bab782c14f00f2702d47",
+  "buildIdentity": "a3f7b99778b65c9f8a8772a23ab92748c3799405ba01b580a24cdb63e2c2de17",
+  "chunkCount": 98,
+  "markerCount": 1,
+  "markerFiles": [
+    "static/chunks/app/layout-ed2f30a114f12555.js"
+  ],
+  "status": "pass"
+}

@@ -1,0 +1,15 @@
+HEAD=da0550d60b324e68ed67e87319636681aaaa13c8
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-evidence-integration
+
+
+ Test Files  4 passed (4)
+      Tests  22 passed (22)
+   Start at  13:24:48
+   Duration  10.28s (transform 579ms, setup 0ms, import 1.67s, tests 6.31s, environment 0ms)
+
+EXIT_CODE=0

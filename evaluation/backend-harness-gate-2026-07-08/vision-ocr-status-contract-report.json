@@ -1,0 +1,80 @@
+{
+  "checkedAt": "2026-07-09T01:48:30+09:00",
+  "scope": "Before/After improvement photo vision OCR contract",
+  "decision": "Before/After photos are stored as workpack improvement candidates, while actual vision/OCR execution is represented separately by status and analysisMode so the product does not overclaim analysis when OpenAI vision is unconfigured or failed.",
+  "runtimeContract": {
+    "apiRoute": "/api/workpacks/[id]/improvements",
+    "storageBucket": "safeclaw-improvement-photos",
+    "improvementTable": "workpack_improvements",
+    "photoTable": "workpack_improvement_photos",
+    "schemaMigrationChanged": false,
+    "analysisPayloadFields": [
+      "status",
+      "analysisMode",
+      "photoPairAttached",
+      "userLabel",
+      "provider",
+      "model",
+      "summary",
+      "detectedHazards",
+      "observedImprovement",
+      "ocrText",
+      "reflectedDocuments",
+      "errorMessage",
+      "exportable"
+    ],
+    "analysisModes": {
+      "vision_ocr": "Before/After photo pair was analyzed by OpenAI vision/OCR.",
+      "photo_pair_unanalyzed": "Before/After photo pair was saved, but vision/OCR is unconfigured or failed.",
+      "manual_text": "Manual improvement text without a complete Before/After photo pair."
+    }
+  },
+  "productCopyGuard": {
+    "previousRisk": "The UI could read as if vision/OCR always completed whenever photos were attached.",
+    "newBehavior": "Workspace copy and saved local history now show the vision/OCR status label separately from DB/photo storage.",
+    "noLegalOverclaim": true
+  },
+  "learningAndOntology": {
+    "learningExportIncludes": [
+      "visionStatus",
+      "analysisMode",
+      "photoPairAttached",
+      "visionUserLabel",
+      "visionSummary",
+      "detectedHazards",
+      "observedImprovement",
+      "ocrText",
+      "visionErrorMessage"
+    ],
+    "dbHarnessPromptIncludes": [
+      "visionStatus",
+      "analysisMode",
+      "photoPair",
+      "visionLabel",
+      "detected",
+      "observed",
+      "ocr"
+    ],
+    "operationGraphImprovementMetaIncludes": [
+      "sourceType",
+      "visionStatus",
+      "analysisMode",
+      "photoPairAttached",
+      "visionLabel",
+      "visionModel"
+    ]
+  },
+  "verification": {
+    "tests": "npm.cmd test -- tests\\photo-vision-analysis.test.ts tests\\commercial-harness.test.ts tests\\operation-improvement-history.test.ts tests\\ontology-operation-memory.test.ts tests\\workpack-commercial.test.ts",
+    "testFilesPassed": 5,
+    "testsPassed": 21,
+    "typecheck": "npm.cmd run typecheck",
+    "build": "npm.cmd run build",
+    "result": "passed"
+  },
+  "notes": [
+    "No DB schema changes or data mutations were performed.",
+    "OpenAI vision uses OPENAI_API_KEY only for the photo analysis route; missing keys produce an unconfigured status instead of a silent failure.",
+    "Photo pair storage and vision/OCR analysis are now separate product concepts."
+  ]
+}

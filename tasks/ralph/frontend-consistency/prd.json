@@ -1,0 +1,98 @@
+{
+  "feature": "frontend consistency completion",
+  "branchName": "feature/backend-harness-gate",
+  "qualityChecks": [
+    "npm.cmd test -- tests/document-typography-token-contract.test.ts",
+    "node scripts/frontend_consistency_audit.mjs",
+    "npm.cmd run typecheck",
+    "npm.cmd run build"
+  ],
+  "userStories": [
+    {
+      "id": "W4",
+      "title": "Canonical document heading typography",
+      "priority": 1,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Work document h2 resolves to page-title tokens and section h3 resolves to section-title tokens",
+        "Desktop and 390px production browser checks show no overflow",
+        "Static violations decrease without parser, allowlist, coverage, Reports behavior, package, or backend contract changes"
+      ],
+      "files": [
+        "app/globals.css",
+        "tests/document-typography-token-contract.test.ts",
+        "tests/document-typography-production-matrix.test.ts"
+      ]
+    },
+    {
+      "id": "W5",
+      "title": "Split mixed typography roles",
+      "priority": 2,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "All five mixed-typography-role findings are resolved by semantic selector separation",
+        "Computed browser typography remains role-correct"
+      ],
+      "files": ["app/globals.css", "tests"]
+    },
+    {
+      "id": "W6",
+      "title": "Ontology and operation-memory typography roles",
+      "priority": 3,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Every ontology-* and operation-memory-* text selector uses one canonical semantic typography tuple",
+        "Production /ontology Day/Night at desktop, 390px, and short-height viewport verifies computed size, weight, leading, tracking, role font, and overflow",
+        "Shared OperationMemoryPreview usage on /workspace has no geometry or typography regression",
+        "Static findings decrease without parser, allowlist, coverage, Reports, package, or backend-contract changes"
+      ],
+      "files": ["app/globals.css", "tests", "evaluation/frontend-ontology-typography-wave6-2026-07-12"]
+    },
+    {
+      "id": "W7",
+      "title": "Workspace viewport geometry blockers",
+      "priority": 4,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Scaled desktop composer bottom stays within the production viewport",
+        "Mobile submit control stays within the 390px production viewport",
+        "Day, Night, short-height desktop, and 390px geometry regressions pass without hiding content"
+      ],
+      "files": ["app/globals.css", "tests/workspace-layout-regression.test.ts"]
+    },
+    {
+      "id": "W8",
+      "title": "AI connect complete route design contract",
+      "priority": 5,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "All AI-connect-owned typography, radius, important, and decorative-gradient findings are eliminated without audit exemptions",
+        "Base and document-variant cascades resolve to the same semantic contract",
+        "Authenticated and stable unauthenticated production states are both verified at Day/Night desktop, 390px, and short-height",
+        "Code, textarea, semantic state colors, controls, and responsive columns remain readable and usable with overflow zero"
+      ],
+      "files": ["app/globals.css", "tests", "evaluation/frontend-ai-connect-design-wave8-2026-07-12"]
+    },
+    {
+      "id": "FINAL",
+      "title": "Prove complete frontend consistency",
+      "priority": 99,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Static audit violations are exactly zero with coverage issues zero",
+        "Actual 108-row production audit has failed rows zero and findings zero",
+        "Full tests, strict typecheck, normal and audit builds pass"
+      ],
+      "files": [
+        "evaluation/frontend-audit-runner-port-v2-2026-07-11",
+        "evaluation/frontend-final-gate-current-2026-07-12"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "checkedAt": "2026-07-09T01:43:00+09:00",
+  "scope": "/api/agent/chat Claw chat routing",
+  "decision": "Claw chat is pinned to OpenClaw safeclaw profile with an OpenAI model and now performs a runtime OpenAI OAuth status gate before running the agent.",
+  "runtimeContract": {
+    "route": "/api/agent/chat",
+    "openClawProfile": "safeclaw",
+    "openClawAgent": "main",
+    "requiredAuthProvider": "openai/oauth",
+    "defaultModel": "openai/gpt-5.5",
+    "nonOpenAiModelOverridesRejected": true,
+    "legacyAnthropicProviderFlagIgnored": true,
+    "anthropicEnvironmentKeyIgnoredByRoute": true,
+    "runtimeOauthStatusGate": true,
+    "openAiApiKeyOnlyStatusRejected": true
+  },
+  "localProfileProbe": {
+    "command": "openclaw --profile safeclaw models status --json",
+    "defaultModel": "openai/gpt-5.5",
+    "openAiOauthUsable": true,
+    "accountDetailsRedacted": true,
+    "secretValuesRecorded": false,
+    "versionSkewObserved": "Config was written by 2026.6.11 while command binary reported 2026.6.5; routing still reported OpenAI OAuth usable."
+  },
+  "routeGuard": {
+    "statusCommand": "openclaw --profile safeclaw models status --json",
+    "acceptedConditions": [
+      "requested chat model starts with openai/",
+      "OpenClaw status has an effective OpenAI OAuth profile",
+      "OpenAI profile count has oauth > 0 and apiKey = 0",
+      "OpenAI runtime auth route is usable"
+    ],
+    "clientErrorPolicy": "Do not expose raw OpenClaw status output, account labels, env values, or token details to the browser."
+  },
+  "verification": {
+    "tests": [
+      "npm.cmd test -- tests\\openclaw-chat.test.ts tests\\claw-chat-route.test.ts"
+    ],
+    "typecheck": "npm.cmd run typecheck",
+    "build": "npm.cmd run build",
+    "result": "passed",
+    "testFilesPassed": 2,
+    "testsPassed": 8
+  },
+  "notes": [
+    "Vercel ANTHROPIC_API_KEY can remain for other generation paths, but /api/agent/chat does not consume it.",
+    "If the OpenClaw profile auth drifts, the route now fails before agent execution and asks for the safeclaw profile OAuth/MCP setup to be checked.",
+    "The status parser accepts OpenClaw warning text before JSON but only stores a redacted pass/fail contract."
+  ]
+}

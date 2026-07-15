@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 2,
+  "status": "pass",
+  "generatedAt": "2026-07-13",
+  "branch": "fix/release-reports-red-remediation",
+  "baseSha": "a1dbedb64e177a4909584274eaad87484aa732f4",
+  "rootCause": {
+    "classification": "expired_weekly_fixture",
+    "productFailOpen": false,
+    "detail": "The fixed local-workpack savedAt fell outside the active KST weekly report range."
+  },
+  "reviewRemediation": {
+    "boundaryFlakeClosed": true,
+    "browserClock": "2026-07-09T12:00:00+09:00",
+    "workpackSavedAtUsesSameInstant": true,
+    "arbitrarySleepAdded": false,
+    "conditionWait": "data-download-readiness=ready"
+  },
+  "verification": {
+    "boundaryRed": {
+      "exitCode": 1,
+      "expectedFailure": "ready selector timed out with mismatched timestamp"
+    },
+    "boundaryGreen": {
+      "files": 1,
+      "passed": 1,
+      "skipped": 9,
+      "failed": 0
+    },
+    "reportingTests": {
+      "files": 4,
+      "passed": 71,
+      "failed": 0
+    },
+    "strictTypecheck": {
+      "status": "pass",
+      "exitCode": 0
+    }
+  },
+  "failClosed": {
+    "initialNoSessionBlocked": true,
+    "http401Blocked": true,
+    "http404Blocked": true,
+    "malformedPayloadBlocked": true,
+    "optimisticExportsAdded": false,
+    "productionFilesChanged": 0
+  },
+  "logs": [
+    "week-boundary-red.log",
+    "week-boundary-green.log",
+    "main-focused-review.log",
+    "reporting-tests-review-remediation.log",
+    "typecheck-review-remediation.log"
+  ]
+}

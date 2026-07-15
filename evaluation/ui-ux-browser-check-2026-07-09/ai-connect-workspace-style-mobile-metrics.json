@@ -1,0 +1,19 @@
+{
+  "path": "/settings/ai-connect",
+  "viewport": {
+    "width": 390,
+    "height": 1000
+  },
+  "scrollWidth": 390,
+  "horizontalOverflow": false,
+  "hasSifGate": true,
+  "hasVectorGuard": true,
+  "tabsColumns": "390px",
+  "tabBackground": "rgba(108, 111, 247, 0.12)",
+  "activeTabBackground": "rgba(108, 111, 247, 0.12)",
+  "tabMinHeight": "auto",
+  "h1FontSize": "46px",
+  "noYellowTabFill": true,
+  "activeTabNotFullAccent": true,
+  "vectorGuardClass": "ai-connect-sif-vector-guard locked"
+}

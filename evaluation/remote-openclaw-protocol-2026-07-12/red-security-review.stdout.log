@@ -1,0 +1,65 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/remote-engine-protocol.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/remote-openclaw-protocol
+
+ ❯ tests/remote-engine-protocol.test.ts (60 tests | 4 failed) 82ms
+     × rejects runtime null instead of applying the maxFutureSkewMs default 6ms
+     × rejects runtime null instead of applying the maxTtlMs default 1ms
+     × rejects lone surrogates before distinct bodies can share UTF-8 hash and HMAC bytes 1ms
+     × accepts raw header tuples within the pre-fold line limit and rejects excess or duplicates 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects runtime null instead of applying the maxFutureSkewMs default
+ FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects runtime null instead of applying the maxTtlMs default
+AssertionError: expected undefined to be an instance of RemoteEngineProtocolError
+ ❯ expectCode tests/remote-engine-protocol.test.ts:116:18
+    114|     thrown = error;
+    115|   }
+    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
+       |                  ^
+    117|   expect(thrown).toMatchObject({ code });
+    118| }
+ ❯ tests/remote-engine-protocol.test.ts:242:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > rejects lone surrogates before distinct bodies can share UTF-8 hash and HMAC bytes
+AssertionError: expected undefined to be an instance of RemoteEngineProtocolError
+ ❯ expectCode tests/remote-engine-protocol.test.ts:116:18
+    114|     thrown = error;
+    115|   }
+    116|   expect(thrown).toBeInstanceOf(RemoteEngineProtocolError);
+       |                  ^
+    117|   expect(thrown).toMatchObject({ code });
+    118| }
+ ❯ tests/remote-engine-protocol.test.ts:288:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/remote-engine-protocol.test.ts > remote engine signed protocol v1 > accepts raw header tuples within the pre-fold line limit and rejects excess or duplicates
+RemoteEngineProtocolError: PROTOCOL_HEADERS_TOO_LARGE
+ ❯ fail lib/remote-engine-protocol.ts:128:9
+    126|
+    127| function fail(code: RemoteEngineProtocolErrorCode): never {
+    128|   throw new RemoteEngineProtocolError(code);
+       |         ^
+    129| }
+    130|
+ ❯ collect lib/remote-engine-protocol.ts:324:7
+ ❯ collectHeaders lib/remote-engine-protocol.ts:343:39
+ ❯ verifyRemoteEngineRequest lib/remote-engine-protocol.ts:514:19
+ ❯ verify tests/remote-engine-protocol.test.ts:97:10
+ ❯ tests/remote-engine-protocol.test.ts:321:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 56 passed (60)
+   Start at  13:14:15
+   Duration  915ms (transform 81ms, setup 0ms, import 125ms, tests 82ms, environment 0ms)
+

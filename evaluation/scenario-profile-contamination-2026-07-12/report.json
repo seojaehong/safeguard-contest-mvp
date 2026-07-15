@@ -1,0 +1,101 @@
+{
+  "generatedAt": "2026-07-12T07:52:07.6552428Z",
+  "status": "current_base_verified",
+  "freshReviewRequired": false,
+  "approval": {
+    "scope": "scenario-profile-contamination only",
+    "sourceProductSha": "dd25e4f18e5db9ea7beed710fe9b2cd1ffa964d5",
+    "evidenceSha": "fc0f3c6f53968b6cb3158d6c3e12ed3e7ee9c50e",
+    "bindingSha": "32f763f9b463435f3c33056ab7203d47beaf415b",
+    "independentReview": "SPEC PASS/CODE PASS",
+    "p0ThroughP3Findings": 0
+  },
+  "currentBase": {
+    "branch": "origin/feature/backend-harness-gate",
+    "sha": "31a44c0d972c46a47c94ad387eeeff39528d1be9"
+  },
+  "testedSource": {
+    "branch": "fix/scenario-profile-contamination",
+    "sha": "3e7eab3c5265c5f21fc6acd0e27872f8cc83bdb6",
+    "tree": "3d981358a98c12163461a4816cdb12e3f205077b",
+    "baseIsAncestor": true,
+    "rebaseResult": "approved nine-commit branch rebased without conflicts"
+  },
+  "scope": {
+    "changedSourceFiles": [
+      "lib/accident-cases.ts",
+      "lib/mock-data.ts",
+      "tests/accident-cases.test.ts",
+      "tests/scenario-inference.test.ts"
+    ],
+    "database": false,
+    "schema": false,
+    "environment": false,
+    "backendIntegration": false,
+    "unrelatedEdits": false
+  },
+  "behaviorContracts": {
+    "mixedCleaningPriority": {
+      "logisticsCleaning": "chemical-cleaning",
+      "facilityCleaning": "chemical-cleaning",
+      "pureLogistics": "no chemical-cleaning leakage",
+      "pureFacility": "no chemical-cleaning leakage"
+    },
+    "launchInput": {
+      "workerCount": 7,
+      "specialContextContains": [
+        "외국인 근로자 2명",
+        "신규 투입자 1명"
+      ]
+    }
+  },
+  "verification": {
+    "focused": {
+      "testFiles": 6,
+      "expectedTests": 76,
+      "actualTests": 76,
+      "testsPassed": 76,
+      "testsFailed": 0,
+      "exitCode": 0,
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-base-focused-3e7eab3.log"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-base-typecheck-3e7eab3.log"
+    },
+    "diffCheck": {
+      "command": "git diff --check 31a44c0d972c46a47c94ad387eeeff39528d1be9...3e7eab3c5265c5f21fc6acd0e27872f8cc83bdb6",
+      "whitespaceFailures": 0,
+      "exitCode": 0,
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-base-diff-check-3e7eab3.log"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "invocationsThisTurn": 1,
+      "globalNextBuildProcessCountBefore": 0,
+      "waitSamples": 0,
+      "compile": "Compiled successfully in 22.1s",
+      "staticPagesGenerated": "27/27",
+      "globalNextBuildProcessCountAfter": 0,
+      "exitCode": 0,
+      "log": "evaluation/scenario-profile-contamination-2026-07-12/current-base-build-3e7eab3.log"
+    }
+  },
+  "evidenceHygiene": {
+    "removedStaleCurrentLogs": 4,
+    "currentBaseLogs": [
+      "evaluation/scenario-profile-contamination-2026-07-12/current-base-focused-3e7eab3.log",
+      "evaluation/scenario-profile-contamination-2026-07-12/current-base-typecheck-3e7eab3.log",
+      "evaluation/scenario-profile-contamination-2026-07-12/current-base-diff-check-3e7eab3.log",
+      "evaluation/scenario-profile-contamination-2026-07-12/current-base-build-3e7eab3.log"
+    ],
+    "historicalTddLogs": [
+      "evaluation/scenario-profile-contamination-2026-07-12/red-mixed-cleaning-priority.log",
+      "evaluation/scenario-profile-contamination-2026-07-12/green-mixed-cleaning-priority.log",
+      "evaluation/scenario-profile-contamination-2026-07-12/red-launch-subgroup-facts.log",
+      "evaluation/scenario-profile-contamination-2026-07-12/green-launch-subgroup-facts.log"
+    ],
+    "staleCurrentPassLogsRemaining": 0
+  }
+}

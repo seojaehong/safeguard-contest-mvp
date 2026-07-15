@@ -1,0 +1,6 @@
+baseline=c27ec3f645936bae4f21c2b8e09c12d435b548ec
+test=logs and rethrows non-font embed failures without using the font error contract
+injection=PDFDocument.prototype.embedFont rejects with deterministic PDF embed reference failure
+expected=POST rejects with the original error and logs PDF export failed
+actual=POST resolved Response status=500 error=PDF_FONT_ASSET_UNAVAILABLE
+result=RED

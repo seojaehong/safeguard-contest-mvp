@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 3,
+  "runtimeProductSha": "8c19aeb81a5f3d0d84a5cc915bda9ea4511b140c",
+  "evidenceHarnessSha": "02e8cd129efbeb4e3fc9fcc2617ee409a3ca9c05",
+  "algorithm": "sha256 over committed blob bytes at evidenceHarnessSha",
+  "files": [
+    {
+      "file": "app/globals.css",
+      "gitBlobOid": "b8a303b437459eec4604cbbb10ac8dc3ac5e608a",
+      "sha256": "83e228144af49c22d0854e0137bef4938cfc4c82567fa807f72849bf16ea513e",
+      "bytes": 530725
+    },
+    {
+      "file": "components/ReportsDownloadCenter.tsx",
+      "gitBlobOid": "7f338d2efb6aad9fabc344cec62b323a3728c6e2",
+      "sha256": "d81c25654d5d1bb64e5cc24282719414bb0442b4d83e2b2a0b53ef9ae033e5db",
+      "bytes": 41755
+    },
+    {
+      "file": "lib/reporting-downloads.ts",
+      "gitBlobOid": "7b6bea68e2c35278c31fa10a8209300db0b381eb",
+      "sha256": "1c4e664281b0ad57aefb41fb541f9e170f0eea5a2a71320928f60600d4672b33",
+      "bytes": 46528
+    },
+    {
+      "file": "tests/reporting-downloads.test.ts",
+      "gitBlobOid": "f318f92a2e0b949fad42447c209098059dd75b01",
+      "sha256": "b92fb262a66a18085b14e6eca51286be05c321e6fab046b2236867dc5785816d",
+      "bytes": 39954
+    },
+    {
+      "file": "tests/reports-design-remediation.test.ts",
+      "gitBlobOid": "fc24ac1ad18b472e6c493b7096abba00bb4c1da1",
+      "sha256": "e672b644b22f8926fe4ce8093b13489090fe6e1569391ac52f3ea24f40a61238",
+      "bytes": 89843
+    },
+    {
+      "file": "tests/reports-download-center.test.ts",
+      "gitBlobOid": "8561425da2139584daf3b77efd97ffe3794aedf8",
+      "sha256": "7d20b49a03ecc66fd9f4d366df270b2b7ff5b4c8ecdba7a1a016e2a60248411b",
+      "bytes": 24223
+    }
+  ]
+}

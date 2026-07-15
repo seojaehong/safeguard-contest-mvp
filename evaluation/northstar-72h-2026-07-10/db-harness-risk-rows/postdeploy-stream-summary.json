@@ -1,0 +1,180 @@
+{
+  "commit": "a0d7b39",
+  "endpoint": "https://www.safeclaw.kr/api/ask/stream?verify=a0d7b39-db-rows",
+  "status": 200,
+  "ok": true,
+  "elapsedMs": 21402,
+  "eventCount": 22,
+  "finalFound": true,
+  "mode": "live",
+  "generationMode": "enhanced",
+  "statusDetail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260710 0400) / 기상청 초단기예보 호출 성공 (서울, base 20260710 0430) / 기상청 단기예보 호출 성공 (서울, base 20260710 0500) / 기상청 기상특보 조회 성공 (전국, 202607100355) / 기상청 영향예보 연결 점검 필요: NO_DATA / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: NO_DATA totalCount 0 / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 4건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=DB harness deterministic) / TBM-risk 연결 5건 (TBM-risk links=DB harness deterministic) / TBM structured=deterministic from risk rows / AI_MODE=enhanced (DB 하네스 row-first: 위험성평가 row 확정, TBM 구조 deterministic 조립)",
+  "rowStatusIsDbHarness": true,
+  "rowStatusIsBaseline": false,
+  "tbmRiskLinksDbHarness": true,
+  "validation": {
+    "ok": true,
+    "issueCount": 0,
+    "issues": []
+  },
+  "dbHarness": {
+    "directEvidence": 6,
+    "sifCases": 2,
+    "supportingEvidence": 2,
+    "ontologyStatus": "ready",
+    "missingEvidence": [],
+    "retrievalMode": "rest-ilike",
+    "sourceCounts": {
+      "directEvidence": 6,
+      "sifCases": 2,
+      "supportingEvidence": 2,
+      "rest": 8,
+      "ranked": 0,
+      "vector": 0,
+      "hybrid": 0
+    }
+  },
+  "rowCount": 5,
+  "firstRows": [
+    {
+      "hazard": "추락 위험: D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+      "currentControls": "작업발판·난간·개구부 상태 확인",
+      "additionalControls": "안전대 체결 및 작업반경 출입통제",
+      "due": "현장 확인",
+      "verificationDate": "현장 확인",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "화재 위험: B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+      "currentControls": "가동부 방호덮개와 비상정지장치 확인",
+      "additionalControls": "정비 전 전원 차단 및 잠금표지",
+      "due": "현장 확인",
+      "verificationDate": "현장 확인",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "전도 위험: B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+      "currentControls": "가동부 방호덮개와 비상정지장치 확인",
+      "additionalControls": "정비 전 전원 차단 및 잠금표지",
+      "due": "현장 확인",
+      "verificationDate": "현장 확인",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "산업안전일반분야·기술지침 관련 위험: G-67-2011 건물 외벽 청소 작업에 관한 기술지침",
+      "currentControls": "작업 전 유해·위험요인 확인",
+      "additionalControls": "관리감독자 확인 후 작업 시작",
+      "due": "현장 확인",
+      "verificationDate": "현장 확인",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "G-67-2011 건물 외벽 청소 작업에 관한 기술지침",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+      "currentControls": "작업 전 장비 상태, 작업구역, 보호구 착용 상태를 확인합니다.",
+      "additionalControls": "작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검",
+      "due": "현장 확인",
+      "verificationDate": "현장 확인",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "산업안전보건법",
+        "KOSHA 위험성평가",
+        "문서팩 입력 조건"
+      ]
+    }
+  ],
+  "tbmLinks": [
+    {
+      "riskRowIndex": 0,
+      "hazard": "추락 위험: D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+      "owner": "작업반장",
+      "confirmQuestion": "추락 위험: D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정 위험에 대해 안전대 체결 및 작업반경 출입통제 조치를 이해하고 작업 전 확인했습니까?",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "riskRowIndex": 1,
+      "hazard": "화재 위험: B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+      "owner": "작업반장",
+      "confirmQuestion": "화재 위험: B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정 위험에 대해 정비 전 전원 차단 및 잠금표지 조치를 이해하고 작업 전 확인했습니까?",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "riskRowIndex": 2,
+      "hazard": "전도 위험: B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+      "owner": "작업반장",
+      "confirmQuestion": "전도 위험: B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정 위험에 대해 정비 전 전원 차단 및 잠금표지 조치를 이해하고 작업 전 확인했습니까?",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "riskRowIndex": 3,
+      "hazard": "산업안전일반분야·기술지침 관련 위험: G-67-2011 건물 외벽 청소 작업에 관한 기술지침",
+      "owner": "작업반장",
+      "confirmQuestion": "산업안전일반분야·기술지침 관련 위험: G-67-2011 건물 외벽 청소 작업에 관한 기술지침 위험에 대해 관리감독자 확인 후 작업 시작 조치를 이해하고 작업 전 확인했습니까?",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "G-67-2011 건물 외벽 청소 작업에 관한 기술지침",
+        "검색: rest"
+      ]
+    },
+    {
+      "riskRowIndex": 4,
+      "hazard": "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+      "owner": "작업반장",
+      "confirmQuestion": "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험 위험에 대해 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 조치를 이해하고 작업 전 확인했습니까?",
+      "evidenceRefs": [
+        "산업안전보건법",
+        "KOSHA 위험성평가",
+        "문서팩 입력 조건"
+      ]
+    }
+  ],
+  "checks": {
+    "finalFound": true,
+    "rowCountAtLeastFive": true,
+    "validationIssueCountZero": true,
+    "validationOk": true,
+    "dbHarnessStatus": true,
+    "firstRowHasDbHarnessEvidence": true,
+    "firstRowDueSchemaValid": true,
+    "tbmLinksPreserved": true
+  }
+}

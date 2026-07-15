@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readSafetyReferenceLimit, searchSafetyReferences } from "@/lib/safety-reference-catalog";
+import { readSafetyReferenceLimit } from "@/lib/safety-reference-catalog";
+import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 
 export const dynamic = "force-dynamic";
 

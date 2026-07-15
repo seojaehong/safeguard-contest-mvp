@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-07-08T22:25:08.414Z",
+  "source": "safety_reference_items:item_type=sif-case",
+  "embeddingModel": "text-embedding-3-small",
+  "embeddingDimensions": 1536,
+  "recordCount": 3,
+  "batchSize": 100,
+  "batchCount": 1,
+  "corpusHash": "2fa69e852c140bf6e33585af99dd0de727b8e755929be4b885b3a63e23b2a243",
+  "batches": [
+    {
+      "batchId": "sif-embed-0001",
+      "startIndex": 0,
+      "endIndexExclusive": 3,
+      "recordCount": 3,
+      "referenceItemIds": [
+        "sif-아카이브-건설업-00002",
+        "sif-아카이브-건설업-00003",
+        "sif-아카이브-건설업-00004"
+      ],
+      "contentHash": "e4e6d323b8e04ffcdb11fef8ec45a0ce8ddab633ad8e26343cabc5d4a57abc53"
+    }
+  ],
+  "approvalGate": {
+    "dbMutationPerformed": false,
+    "requiresMigrationApproval": true,
+    "requiresEmbeddingCostApproval": true,
+    "requiresApprovedUploadFlag": true
+  }
+}

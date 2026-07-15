@@ -1,0 +1,27 @@
+{
+  "name": "share-page-mobile-final",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "mobile": true,
+  "metrics": {
+    "hasSharePage": true,
+    "hasDraftCandidateCopy": true,
+    "hasWorkerSnapshotCopy": true,
+    "hasOldStorageIdWaiting": false,
+    "scrollWidth": 390,
+    "viewportWidth": 390,
+    "noHorizontalScroll": true,
+    "sectionWidths": [
+      298,
+      298,
+      298,
+      298
+    ],
+    "widthThreshold": 280,
+    "gridTemplateColumns": "298px",
+    "sectionsComfortable": true
+  },
+  "consoleMessages": []
+}

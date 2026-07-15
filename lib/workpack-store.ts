@@ -8,7 +8,8 @@ import {
   toJson,
   type WorkspaceDatabase
 } from "@/lib/supabase-admin";
-import type { AskResponse } from "@/lib/types";
+import type { AskResponse, GenerationEvidenceSnapshot } from "@/lib/types";
+import { verifyAskResponseGenerationEvidence } from "@/lib/generation-evidence";
 
 type WorkpackInsert = WorkspaceDatabase["public"]["Tables"]["workpacks"]["Insert"];
 
@@ -25,18 +26,66 @@ export type McpDocpackAttribution = {
   saved: boolean;
 };
 
+export type McpWorkpackInsert = {
+  organizationId: string;
+  siteId: string;
+  question: string;
+  scenario: unknown;
+  deliverables: unknown;
+  evidenceSummary: unknown;
+  status: unknown;
+  createdBy: null;
+};
+
+export type McpStoredWorkpack = McpWorkpackInsert & {
+  id: string;
+};
+
+export type McpWorkpackTenantRead = {
+  workpackId: string;
+  organizationId: string;
+  siteId: string;
+};
+
+export interface McpWorkpackRepository {
+  findSiteOrganizationId(siteId: string): Promise<string | null>;
+  insertWorkpack(input: McpWorkpackInsert): Promise<{ id: string } | null>;
+  findWorkpackForTenant(input: McpWorkpackTenantRead): Promise<McpStoredWorkpack | null>;
+}
+
+export type McpDocpackReopenResult = {
+  ok: true;
+  workpackId: string;
+  response: AskResponse;
+} | {
+  ok: false;
+  code:
+    | "scope_missing"
+    | "tenant_mismatch_or_not_found"
+    | "stored_payload_invalid"
+    | "generation_evidence_invalid"
+    | "repository_error";
+  blockers: string[];
+};
+
 export type WorkpackEvidenceSummary = {
   answer: string;
   practicalPoints: string[];
   citations: AskResponse["citations"];
   sourceMix: AskResponse["sourceMix"] | null;
+  generationMode?: AskResponse["generationMode"];
   mode: AskResponse["mode"];
   externalData: AskResponse["externalData"];
   riskSummary: AskResponse["riskSummary"];
   qualityContract?: AskResponse["qualityContract"];
   ontologyQa?: AskResponse["ontologyQa"];
   evidenceLabels?: AskResponse["evidenceLabels"];
+  phaseAProduct?: AskResponse["phaseAProduct"];
   structured?: AskResponse["structured"];
+  dbHarness?: AskResponse["dbHarness"];
+  generationTrace?: AskResponse["generationTrace"];
+  generationEvidence?: AskResponse["generationEvidence"];
+  generationEvidenceSnapshot?: GenerationEvidenceSnapshot;
 };
 
 export type ReopenWorkpackInput = {
@@ -63,19 +112,28 @@ function readJsonObject(value: unknown): Record<string, unknown> | null {
   return isRecord(value) ? value : null;
 }
 
-export function buildWorkpackEvidenceSummary(response: AskResponse): WorkpackEvidenceSummary {
+export function buildWorkpackEvidenceSummary(
+  response: AskResponse,
+  generationEvidenceSnapshot?: GenerationEvidenceSnapshot
+): WorkpackEvidenceSummary {
   return {
     answer: response.answer,
     practicalPoints: response.practicalPoints,
     citations: response.citations,
     sourceMix: response.sourceMix || null,
+    generationMode: response.generationMode,
     mode: response.mode,
     externalData: response.externalData,
     riskSummary: response.riskSummary,
     qualityContract: response.qualityContract,
     ontologyQa: response.ontologyQa,
     evidenceLabels: response.evidenceLabels,
-    structured: response.structured
+    phaseAProduct: response.phaseAProduct,
+    structured: response.structured,
+    dbHarness: response.dbHarness,
+    generationTrace: response.generationTrace,
+    generationEvidence: generationEvidenceSnapshot ? response.generationEvidence : undefined,
+    generationEvidenceSnapshot
   };
 }
 
@@ -136,10 +194,23 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
   const mode = evidence.mode === "live" || evidence.mode === "fallback" || evidence.mode === "mock"
     ? evidence.mode
     : "fallback";
+  const generationMode = evidence.generationMode === "template"
+    || evidence.generationMode === "enhanced"
+    || evidence.generationMode === "full"
+    ? evidence.generationMode
+    : undefined;
   const qualityContract = readJsonObject(evidence.qualityContract);
   const ontologyQa = readJsonObject(evidence.ontologyQa);
   const evidenceLabels = readJsonObject(evidence.evidenceLabels);
+  const phaseAProduct = readJsonObject(evidence.phaseAProduct);
   const structured = readJsonObject(evidence.structured);
+  const dbHarness = readJsonObject(evidence.dbHarness);
+  const generationEvidence = readJsonObject(evidence.generationEvidence);
+  const generationEvidenceSnapshot = generationEvidence
+    ? readJsonObject(generationEvidence.snapshot)
+    : null;
+  const generationTrace = readJsonObject(evidence.generationTrace)
+    || (generationEvidenceSnapshot ? readJsonObject(generationEvidenceSnapshot.generationTrace) : null);
 
   return {
     data: {
@@ -148,6 +219,7 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
       practicalPoints: readStringArray(evidence.practicalPoints),
       citations: Array.isArray(evidence.citations) ? evidence.citations as AskResponse["citations"] : [],
       sourceMix: isRecord(evidence.sourceMix) ? evidence.sourceMix as AskResponse["sourceMix"] : undefined,
+      generationMode,
       mode,
       scenario: scenario as AskResponse["scenario"],
       externalData: externalData as AskResponse["externalData"],
@@ -155,8 +227,14 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
       deliverables: deliverables as AskResponse["deliverables"],
       structured: structured ? structured as AskResponse["structured"] : undefined,
       evidenceLabels: evidenceLabels ? evidenceLabels as AskResponse["evidenceLabels"] : undefined,
+      phaseAProduct: phaseAProduct ? phaseAProduct as AskResponse["phaseAProduct"] : undefined,
       ontologyQa: ontologyQa ? ontologyQa as AskResponse["ontologyQa"] : undefined,
       qualityContract: qualityContract ? qualityContract as AskResponse["qualityContract"] : undefined,
+      dbHarness: dbHarness ? dbHarness as AskResponse["dbHarness"] : undefined,
+      generationTrace: generationTrace ? generationTrace as AskResponse["generationTrace"] : undefined,
+      generationEvidence: generationEvidence
+        ? generationEvidence as AskResponse["generationEvidence"]
+        : undefined,
       status: status as AskResponse["status"]
     },
     blockers: []
@@ -170,10 +248,73 @@ export function buildReopenData(input: ReopenWorkpackInput): { data: AskResponse
  * 어떤 이유로든 저장이 무리면(사이트 미지정/조직 조회 실패/insert 실패) saved=false로 degrade —
  * 호출부는 meta의 site_id 기록으로 폴백한다. saveAskResponseAsWorkpack(이메일 경로)은 건드리지 않는다.
  */
-export async function saveMcpDocpackWorkpack(
-  client: SupabaseClient<WorkspaceDatabase>,
+export function createSupabaseMcpWorkpackRepository(
+  client: SupabaseClient<WorkspaceDatabase>
+): McpWorkpackRepository {
+  return {
+    async findSiteOrganizationId(siteId) {
+      const { data, error } = await client
+        .from("sites")
+        .select("organization_id")
+        .eq("id", siteId)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.organization_id ?? null;
+    },
+    async insertWorkpack(input) {
+      const { data, error } = await client
+        .from("workpacks")
+        .insert(buildWorkpackInsertPayload({
+          organizationId: input.organizationId,
+          siteId: input.siteId,
+          question: input.question,
+          scenario: input.scenario,
+          deliverables: input.deliverables,
+          evidenceSummary: input.evidenceSummary,
+          status: input.status,
+          createdBy: input.createdBy,
+        }))
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data ? { id: data.id } : null;
+    },
+    async findWorkpackForTenant(input) {
+      const { data, error } = await client
+        .from("workpacks")
+        .select("id,organization_id,site_id,question,scenario,deliverables,evidence_summary,status,created_by")
+        .eq("id", input.workpackId)
+        .eq("organization_id", input.organizationId)
+        .eq("site_id", input.siteId)
+        .maybeSingle();
+      if (error) throw error;
+      if (
+        !data
+        || data.organization_id !== input.organizationId
+        || data.site_id !== input.siteId
+      ) {
+        return null;
+      }
+      return {
+        id: data.id,
+        organizationId: data.organization_id,
+        siteId: data.site_id,
+        question: data.question,
+        scenario: data.scenario,
+        deliverables: data.deliverables,
+        evidenceSummary: data.evidence_summary,
+        status: data.status,
+        createdBy: null,
+      };
+    },
+  };
+}
+
+export async function saveMcpDocpackWorkpackWithRepository(
+  repository: McpWorkpackRepository,
   context: { siteId: string | null; orgId: string | null },
-  response: AskResponse
+  response: AskResponse,
+  generationEvidenceSecret: string | undefined
 ): Promise<McpDocpackAttribution> {
   const base: McpDocpackAttribution = {
     siteId: context.siteId,
@@ -184,47 +325,133 @@ export async function saveMcpDocpackWorkpack(
 
   if (!context.siteId) return base;
 
+  const verification = verifyAskResponseGenerationEvidence(
+    response,
+    generationEvidenceSecret
+  );
+  if (!verification.ok) {
+    console.warn("mcp docpack workpack save blocked by generation evidence", {
+      code: verification.code,
+      message: verification.message
+    });
+    return base;
+  }
+
   let organizationId = context.orgId;
   try {
-    const { data: site, error: siteError } = await client
-      .from("sites")
-      .select("organization_id")
-      .eq("id", context.siteId)
-      .maybeSingle();
-    if (siteError || !site) return base;
+    const siteOrganizationId = await repository.findSiteOrganizationId(context.siteId);
+    if (!siteOrganizationId) return base;
 
-    if (organizationId && organizationId !== site.organization_id) {
+    if (organizationId && organizationId !== siteOrganizationId) {
       console.warn("mcp docpack workpack save skipped: site/org mismatch", {
         siteId: context.siteId,
         tokenOrgId: organizationId,
-        siteOrgId: site.organization_id
+        siteOrgId: siteOrganizationId
       });
       return { ...base, orgId: organizationId };
     }
 
-    organizationId = site.organization_id;
-    const evidenceSummary = buildWorkpackEvidenceSummary(response);
+    organizationId = siteOrganizationId;
+    const evidenceSummary = buildWorkpackEvidenceSummary(response, verification.snapshot);
+    const inserted = await repository.insertWorkpack({
+      organizationId,
+      siteId: context.siteId,
+      question: response.question,
+      scenario: response.scenario,
+      deliverables: response.deliverables,
+      evidenceSummary,
+      status: response.status,
+      createdBy: null,
+    });
 
-    const { data, error } = await client
-      .from("workpacks")
-      .insert(buildWorkpackInsertPayload({
-        organizationId,
-        siteId: context.siteId,
-        question: response.question,
-        scenario: response.scenario,
-        deliverables: response.deliverables,
-        evidenceSummary,
-        status: response.status,
-        createdBy: null
-      }))
-      .select("id")
-      .single();
-
-    if (error || !data) return { ...base, orgId: organizationId };
-    return { siteId: context.siteId, orgId: organizationId, workpackId: data.id, saved: true };
+    if (!inserted) return { ...base, orgId: organizationId };
+    return {
+      siteId: context.siteId,
+      orgId: organizationId,
+      workpackId: inserted.id,
+      saved: true,
+    };
   } catch (error) {
     console.error("mcp docpack workpack save failed", error);
     return { ...base, orgId: organizationId };
+  }
+}
+
+export async function saveMcpDocpackWorkpack(
+  client: SupabaseClient<WorkspaceDatabase>,
+  context: { siteId: string | null; orgId: string | null },
+  response: AskResponse
+): Promise<McpDocpackAttribution> {
+  return saveMcpDocpackWorkpackWithRepository(
+    createSupabaseMcpWorkpackRepository(client),
+    context,
+    response,
+    process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET
+  );
+}
+
+export async function reopenMcpDocpackWorkpackWithRepository(
+  repository: McpWorkpackRepository,
+  context: { workpackId: string; siteId: string | null; orgId: string | null },
+  generationEvidenceSecret: string | undefined
+): Promise<McpDocpackReopenResult> {
+  if (!context.siteId || !context.orgId) {
+    return {
+      ok: false,
+      code: "scope_missing",
+      blockers: ["MCP workpack reopen requires explicit organization and site scope."],
+    };
+  }
+
+  try {
+    const stored = await repository.findWorkpackForTenant({
+      workpackId: context.workpackId,
+      organizationId: context.orgId,
+      siteId: context.siteId,
+    });
+    if (!stored) {
+      return {
+        ok: false,
+        code: "tenant_mismatch_or_not_found",
+        blockers: ["The workpack does not exist in the authenticated organization and site scope."],
+      };
+    }
+
+    const reopened = buildReopenData({
+      question: stored.question,
+      scenario: stored.scenario,
+      deliverables: stored.deliverables,
+      evidenceSummary: stored.evidenceSummary,
+      status: stored.status,
+    });
+    if (!reopened.data) {
+      return {
+        ok: false,
+        code: "stored_payload_invalid",
+        blockers: reopened.blockers,
+      };
+    }
+
+    const verification = verifyAskResponseGenerationEvidence(
+      reopened.data,
+      generationEvidenceSecret
+    );
+    if (!verification.ok) {
+      return {
+        ok: false,
+        code: "generation_evidence_invalid",
+        blockers: [verification.message],
+      };
+    }
+
+    return { ok: true, workpackId: stored.id, response: reopened.data };
+  } catch (error) {
+    console.error("mcp docpack workpack reopen failed", error);
+    return {
+      ok: false,
+      code: "repository_error",
+      blockers: ["The MCP workpack repository could not be read."],
+    };
   }
 }
 
@@ -267,6 +494,22 @@ export async function saveAskResponseAsWorkpack(
   siteName: string,
   response: AskResponse
 ): Promise<SaveWorkpackResult> {
+  const verification = verifyAskResponseGenerationEvidence(
+    response,
+    process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET
+  );
+  if (!verification.ok) {
+    console.warn("briefing workpack save blocked by generation evidence", {
+      code: verification.code,
+      message: verification.message
+    });
+    return {
+      ok: false,
+      workpackId: null,
+      message: `생성 근거 검증 실패: ${verification.message}`
+    };
+  }
+
   let userId: string | null;
   try {
     userId = await findUserIdByEmail(client, ownerEmail);
@@ -284,7 +527,7 @@ export async function saveAskResponseAsWorkpack(
     companyName: siteName
   });
 
-  const evidenceSummary = buildWorkpackEvidenceSummary(response);
+  const evidenceSummary = buildWorkpackEvidenceSummary(response, verification.snapshot);
 
   const { data, error } = await client
     .from("workpacks")

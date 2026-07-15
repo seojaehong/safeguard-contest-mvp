@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-11T14:25:00.000Z",
+  "baseUrl": "http://127.0.0.1:3021",
+  "buildId": "MVWMaosATWmDNyIm1URTO",
+  "listenerPid": 62456,
+  "worktreeVerified": true,
+  "listenerStoppedAfterProbe": true,
+  "discardedAttempts": [
+    "Port 3011 belonged to frontend-consistency-audit and was not accepted.",
+    "The app/error self-throw design remained on the ordinary error boundary and was rejected."
+  ],
+  "rows": [
+    {
+      "boundary": "error",
+      "status": 500,
+      "finalUrl": "http://127.0.0.1:3021/dryrun?__auditBoundary=error",
+      "selector": "[data-audit-boundary=\"error\"]",
+      "count": 1,
+      "heading": "일시적인 오류가 발생했습니다",
+      "deterministicConsoleMarker": true
+    },
+    {
+      "boundary": "global-error",
+      "status": 500,
+      "finalUrl": "http://127.0.0.1:3021/dryrun?__auditBoundary=global-error",
+      "selector": "[data-audit-boundary=\"global-error\"]",
+      "count": 1,
+      "heading": "서비스에 일시적인 문제가 발생했습니다",
+      "deterministicConsoleMarker": true
+    }
+  ],
+  "status": "pass"
+}

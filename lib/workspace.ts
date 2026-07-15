@@ -78,7 +78,7 @@ export function buildDefaultWorkers(data: AskResponse): WorkerProfile[] {
   const baseWorkers: WorkerProfile[] = [
     {
       id: "worker-supervisor-1",
-      displayName: "관리자 A",
+      displayName: "현장관리자",
       role: "현장관리자",
       joinedAt: "2026-04-01",
       experienceLevel: "숙련",
@@ -90,12 +90,11 @@ export function buildDefaultWorkers(data: AskResponse): WorkerProfile[] {
       isForeignWorker: false,
       trainingStatus: "이수",
       trainingSummary: "정기 안전보건교육 이수, TBM 진행 가능",
-      phone: "01000000001",
-      email: "supervisor@safeguard.local"
+      phone: ""
     },
     {
       id: "worker-new-1",
-      displayName: "신규 작업자 B",
+      displayName: "신규 작업자",
       role: "작업자",
       joinedAt: "2026-04-22",
       experienceLevel: "신규",
@@ -117,7 +116,7 @@ export function buildDefaultWorkers(data: AskResponse): WorkerProfile[] {
     ...baseWorkers,
     {
       id: "worker-foreign-1",
-      displayName: "외국인 작업자 C",
+      displayName: "다국어 작업자",
       role: "작업자",
       joinedAt: "2026-04-18",
       experienceLevel: "중간",
@@ -182,6 +181,35 @@ export function buildWorkerDispatchTargets(workers: WorkerProfile[]): WorkerDisp
     phoneMasked: maskPhone(worker.phone),
     emailMasked: maskEmail(worker.email)
   }));
+}
+
+export function buildDisplayTargetWorkers(data: AskResponse, targetWorkers: WorkerDispatchTarget[]) {
+  if (targetWorkers.length) return targetWorkers;
+
+  const workerCount = Math.max(1, data.scenario.workerCount || 1);
+  return [
+    {
+      displayName: "현장관리자",
+      role: "관리자",
+      nationality: "대한민국",
+      languageCode: "ko",
+      languageLabel: "한국어",
+      trainingStatus: "확인 필요" as const
+    },
+    {
+      displayName: `작업자 그룹 ${workerCount}명`,
+      role: "작업자",
+      nationality: "현장 확인",
+      languageCode: "ko",
+      languageLabel: "한국어",
+      trainingStatus: "확인 필요" as const
+    }
+  ];
+}
+
+export function formatDisplayTargetCount(data: AskResponse, targetWorkers: WorkerDispatchTarget[]) {
+  if (targetWorkers.length) return `${targetWorkers.length}명`;
+  return `${Math.max(1, data.scenario.workerCount || 1)}명 기준`;
 }
 
 export function summarizeWorkers(workers: WorkerProfile[]) {

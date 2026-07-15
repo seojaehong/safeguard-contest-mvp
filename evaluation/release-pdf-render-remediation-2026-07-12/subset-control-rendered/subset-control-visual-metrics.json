@@ -1,0 +1,376 @@
+{
+  "input_pdf": "evaluation/release-pdf-render-remediation-2026-07-12/subset-draw-text-control.pdf",
+  "input_bytes": 10709,
+  "dpi": 144,
+  "renderers": {
+    "pymupdf": [
+      {
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/subset-control-pymupdf-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 1929,
+        "dark_fraction": 0.0009625940637537676,
+        "bbox": [
+          85,
+          148,
+          524,
+          425
+        ],
+        "active_row_count": 62,
+        "line_bands": [
+          {
+            "top": 148,
+            "bottom": 164,
+            "height": 17,
+            "dark_pixels": 508,
+            "x_min": 85,
+            "x_max": 271,
+            "width": 187
+          },
+          {
+            "top": 208,
+            "bottom": 221,
+            "height": 14,
+            "dark_pixels": 235,
+            "x_min": 168,
+            "x_max": 202,
+            "width": 35
+          },
+          {
+            "top": 224,
+            "bottom": 224,
+            "height": 1,
+            "dark_pixels": 18,
+            "x_min": 171,
+            "x_max": 202,
+            "width": 32
+          },
+          {
+            "top": 288,
+            "bottom": 289,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 217,
+            "x_max": 231,
+            "width": 15
+          },
+          {
+            "top": 292,
+            "bottom": 293,
+            "height": 2,
+            "dark_pixels": 19,
+            "x_min": 220,
+            "x_max": 231,
+            "width": 12
+          },
+          {
+            "top": 295,
+            "bottom": 296,
+            "height": 2,
+            "dark_pixels": 17,
+            "x_min": 217,
+            "x_max": 231,
+            "width": 15
+          },
+          {
+            "top": 299,
+            "bottom": 300,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 220,
+            "x_max": 231,
+            "width": 12
+          },
+          {
+            "top": 304,
+            "bottom": 305,
+            "height": 2,
+            "dark_pixels": 23,
+            "x_min": 220,
+            "x_max": 231,
+            "width": 12
+          },
+          {
+            "top": 349,
+            "bottom": 350,
+            "height": 2,
+            "dark_pixels": 27,
+            "x_min": 279,
+            "x_max": 292,
+            "width": 14
+          },
+          {
+            "top": 355,
+            "bottom": 355,
+            "height": 1,
+            "dark_pixels": 10,
+            "x_min": 279,
+            "x_max": 292,
+            "width": 14
+          },
+          {
+            "top": 358,
+            "bottom": 359,
+            "height": 2,
+            "dark_pixels": 34,
+            "x_min": 277,
+            "x_max": 293,
+            "width": 17
+          },
+          {
+            "top": 410,
+            "bottom": 424,
+            "height": 15,
+            "dark_pixels": 889,
+            "x_min": 124,
+            "x_max": 524,
+            "width": 401
+          }
+        ]
+      }
+    ],
+    "pdfium": [
+      {
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/subset-control-pdfium-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 2085,
+        "dark_fraction": 0.0010404399289406974,
+        "bbox": [
+          85,
+          148,
+          524,
+          425
+        ],
+        "active_row_count": 66,
+        "line_bands": [
+          {
+            "top": 148,
+            "bottom": 164,
+            "height": 17,
+            "dark_pixels": 539,
+            "x_min": 85,
+            "x_max": 271,
+            "width": 187
+          },
+          {
+            "top": 208,
+            "bottom": 221,
+            "height": 14,
+            "dark_pixels": 240,
+            "x_min": 168,
+            "x_max": 202,
+            "width": 35
+          },
+          {
+            "top": 223,
+            "bottom": 224,
+            "height": 2,
+            "dark_pixels": 35,
+            "x_min": 170,
+            "x_max": 202,
+            "width": 33
+          },
+          {
+            "top": 288,
+            "bottom": 289,
+            "height": 2,
+            "dark_pixels": 26,
+            "x_min": 217,
+            "x_max": 231,
+            "width": 15
+          },
+          {
+            "top": 292,
+            "bottom": 296,
+            "height": 5,
+            "dark_pixels": 47,
+            "x_min": 216,
+            "x_max": 231,
+            "width": 16
+          },
+          {
+            "top": 299,
+            "bottom": 300,
+            "height": 2,
+            "dark_pixels": 26,
+            "x_min": 219,
+            "x_max": 231,
+            "width": 13
+          },
+          {
+            "top": 304,
+            "bottom": 305,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 219,
+            "x_max": 231,
+            "width": 13
+          },
+          {
+            "top": 349,
+            "bottom": 350,
+            "height": 2,
+            "dark_pixels": 26,
+            "x_min": 279,
+            "x_max": 291,
+            "width": 13
+          },
+          {
+            "top": 354,
+            "bottom": 356,
+            "height": 3,
+            "dark_pixels": 28,
+            "x_min": 278,
+            "x_max": 292,
+            "width": 15
+          },
+          {
+            "top": 358,
+            "bottom": 359,
+            "height": 2,
+            "dark_pixels": 34,
+            "x_min": 277,
+            "x_max": 293,
+            "width": 17
+          },
+          {
+            "top": 410,
+            "bottom": 424,
+            "height": 15,
+            "dark_pixels": 967,
+            "x_min": 124,
+            "x_max": 524,
+            "width": 401
+          }
+        ]
+      }
+    ],
+    "poppler": [
+      {
+        "path": "evaluation/release-pdf-render-remediation-2026-07-12/subset-control-rendered/subset-control-poppler-page-1.png",
+        "width": 1190,
+        "height": 1684,
+        "dark_pixels": 1945,
+        "dark_fraction": 0.0009705782550549912,
+        "bbox": [
+          85,
+          148,
+          524,
+          425
+        ],
+        "active_row_count": 62,
+        "line_bands": [
+          {
+            "top": 148,
+            "bottom": 164,
+            "height": 17,
+            "dark_pixels": 510,
+            "x_min": 85,
+            "x_max": 271,
+            "width": 187
+          },
+          {
+            "top": 208,
+            "bottom": 221,
+            "height": 14,
+            "dark_pixels": 235,
+            "x_min": 168,
+            "x_max": 202,
+            "width": 35
+          },
+          {
+            "top": 224,
+            "bottom": 224,
+            "height": 1,
+            "dark_pixels": 18,
+            "x_min": 170,
+            "x_max": 202,
+            "width": 33
+          },
+          {
+            "top": 288,
+            "bottom": 289,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 216,
+            "x_max": 230,
+            "width": 15
+          },
+          {
+            "top": 292,
+            "bottom": 293,
+            "height": 2,
+            "dark_pixels": 17,
+            "x_min": 220,
+            "x_max": 230,
+            "width": 11
+          },
+          {
+            "top": 295,
+            "bottom": 296,
+            "height": 2,
+            "dark_pixels": 17,
+            "x_min": 216,
+            "x_max": 230,
+            "width": 15
+          },
+          {
+            "top": 299,
+            "bottom": 300,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 219,
+            "x_max": 230,
+            "width": 12
+          },
+          {
+            "top": 304,
+            "bottom": 305,
+            "height": 2,
+            "dark_pixels": 24,
+            "x_min": 219,
+            "x_max": 230,
+            "width": 12
+          },
+          {
+            "top": 349,
+            "bottom": 350,
+            "height": 2,
+            "dark_pixels": 27,
+            "x_min": 278,
+            "x_max": 291,
+            "width": 14
+          },
+          {
+            "top": 355,
+            "bottom": 355,
+            "height": 1,
+            "dark_pixels": 10,
+            "x_min": 278,
+            "x_max": 291,
+            "width": 14
+          },
+          {
+            "top": 358,
+            "bottom": 359,
+            "height": 2,
+            "dark_pixels": 33,
+            "x_min": 277,
+            "x_max": 293,
+            "width": 17
+          },
+          {
+            "top": 410,
+            "bottom": 424,
+            "height": 15,
+            "dark_pixels": 905,
+            "x_min": 124,
+            "x_max": 524,
+            "width": 401
+          }
+        ]
+      }
+    ]
+  }
+}

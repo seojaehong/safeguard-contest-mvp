@@ -1,0 +1,30 @@
+{
+  "productSha": "9bda2882b2ae9f97be7357bf56ab2d21dce6d7e6",
+  "productTree": "fb601e77cb693b8dfbdff6981e3904c3f4a82316",
+  "productParent": "98dfe7aee1fc397b40c2042a8c6ded4bb97133f9",
+  "productFiles": [
+    "app/api/export/xlsx/route.ts",
+    "components/WorkpackEditor.module.css",
+    "components/workpack-editor-structure.ts",
+    "lib/xlsx-builder.ts",
+    "tests/documents-editor-layout.test.ts",
+    "tests/editor-export-integrity.test.ts",
+    "tests/north-star-document-ux.test.ts",
+    "tests/workpack-editor-structured-sections.test.ts"
+  ],
+  "productFileCount": 8,
+  "evidenceRemediationFiles": [
+    "tests/north-star-document-ux.test.ts"
+  ],
+  "runtimeProductDiffFromEvidenceHead": [],
+  "runtimeProductDiffCount": 0,
+  "shareDiff": [],
+  "diffCheckScope": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60...HEAD",
+  "diffCheckArtifact": "remediation/full-range-diff-check-final.log",
+  "diffCheckErrorCount": 0,
+  "diffCheckOutput": [],
+  "diffCheckExitCode": 0,
+  "buildLogTrailingWhitespaceLines": 0,
+  "worktreeVitestNextProcesses": [],
+  "worktreeVitestNextProcessCount": 0
+}

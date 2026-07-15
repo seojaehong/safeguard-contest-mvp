@@ -1,0 +1,223 @@
+{
+  "version": 7,
+  "date": "2026-07-14",
+  "branch": "fix/kosha-commercial-contract-remediation",
+  "status": {
+    "localFocusedGates": "green",
+    "independentReview": "pending",
+    "integration": "blocked_pending_fresh_independent_review",
+    "selfApproved": false
+  },
+  "commits": {
+    "baseline": "2a2326951b4b2d030af11f4615f7cf6b9bafa334",
+    "red": "2b3144f72f51baf9ee4808fd7ba804078ce43d23",
+    "product": "e0a67f6e1953d421e58549666d1d44402435dfeb",
+    "productTree": "6e17fb552ce34c6a07e981c917b1e01c8616506d",
+    "authoritativeMain": "920c7f360688352156de4854b4957a9f2f1f0e43",
+    "evidence": {
+      "sha": null,
+      "resolution": "git log -1 --format=%H -- evaluation/kosha-commercial-contract-remediation-2026-07-14/report.json"
+    },
+    "ancestry": [
+      "2a2326951b4b2d030af11f4615f7cf6b9bafa334",
+      "2b3144f72f51baf9ee4808fd7ba804078ce43d23",
+      "e0a67f6e1953d421e58549666d1d44402435dfeb",
+      "evidence_commit_containing_this_report"
+    ]
+  },
+  "redBeforeGreen": {
+    "commit": "2b3144f72f51baf9ee4808fd7ba804078ce43d23",
+    "expectedFailingBranchCommit": true,
+    "result": {
+      "exitCode": 1,
+      "filesFailed": 3,
+      "attacksFailed": 5,
+      "positiveControlsPassed": 2,
+      "skipped": 81
+    },
+    "log": "red-v4-independent-review.log",
+    "worktreeByteSha256": "58b35e8b2fc4db316992db84516c601fcccec038ca0caafb70466ba0ca4236ef",
+    "gitBlobSha256": "4e93f3012dc59df6f3cc2b0d73a335696208e98974690feeec55aba9a9faa9ed"
+  },
+  "v7MixedQueryP1Remediation": {
+    "boundInputHead": "9d37024371d815fbdcd373de1cd6ab2876aa9b97",
+    "redCommit": "cc171cbccabfa0c8dd2e31d2f8ed6f9007d8ade0",
+    "productCommit": "90092bcece5a5e2121b652a4e63b1031ab0f6545",
+    "finding": "canonical query hazard families collapsed none and multiple to an empty set, then treated empty as unrestricted, allowing third-family fire direct evidence for a mixed collision/electrical query",
+    "remediation": {
+      "queryFamilyState": ["none", "single", "multiple"],
+      "multipleQueryFamiliesPreserved": true,
+      "directEvidenceRule": "non-empty query family sets require explicit overlap with the direct evidence canonical hazard family",
+      "thirdFamilyBlockedPublicSurfaces": [
+        "public_packet",
+        "mcp_packet",
+        "model_prompt",
+        "answer",
+        "practical_points",
+        "risk_rows",
+        "serialized_mcp_payload"
+      ]
+    },
+    "verification": {
+      "red": {
+        "exitCode": 1,
+        "failedTests": 2,
+        "passedTests": 78,
+        "log": "red-v7-mixed-query-third-family.log"
+      },
+      "greenHostileAndMcp": {
+        "passed": 80,
+        "log": "green-v7-mixed-query-third-family.log"
+      },
+      "focusedRegression": {
+        "passed": 56,
+        "skipped": 20,
+        "log": "green-v7-focused-regression.log"
+      },
+      "mcpRegression": {
+        "passed": 28,
+        "skipped": 2,
+        "log": "green-v7-mcp-regression.log"
+      },
+      "typecheck": {
+        "passed": true,
+        "log": "green-v7-typecheck.log"
+      }
+    },
+    "preserved": {
+      "mixedReferenceParentBlocked": true,
+      "singleFamilyPositive": true,
+      "integrityBlockedKosha": true,
+      "koshaTechnicalGuidanceOnly": true,
+      "naturalizeOnly": true,
+      "evidenceOrder": ["SIF", "KOSHA", "law"]
+    },
+    "scope": {
+      "productFiles": ["lib/db-harness.ts"],
+      "testFiles": ["tests/commercial-harness.test.ts", "tests/mcp-tools.test.ts"],
+      "forbiddenChanges": 0
+    }
+  },
+  "intermediateProductRegression": {
+    "candidate": "f90562cfeabe2610cf3faee255480b1c16680274",
+    "inFinalAncestry": false,
+    "classification": "historical_self_recorded_local_transcript",
+    "focusedPassed": 54,
+    "focusedFailed": 1,
+    "log": "baseline-v4-focused55-first-product-red.log"
+  },
+  "contracts": {
+    "rowRelevance": "strong_overlap_plus_recognized_hazard_family_intersection",
+    "canonicalHazardVariantsAligned": true,
+    "emptyTagsBypassConflictingSemantics": false,
+    "parentlessProviderNarrativesTrusted": false,
+    "parentlessResponseSource": "deterministic_pre_provider_baseline",
+    "mcpPacket": "public_sanitized_packet",
+    "evidenceOrder": ["SIF", "KOSHA", "law"],
+    "koshaGuidanceOnly": true,
+    "naturalizeOnlyPreserved": true
+  },
+  "verification": {
+    "sequential": true,
+    "focusedAttacks": {
+      "passed": 7,
+      "skipped": 81,
+      "log": "green-v4-focused-attacks.log"
+    },
+    "mcpTools": {
+      "passed": 27,
+      "log": "green-v4-mcp-tools.log"
+    },
+    "existingFocused": {
+      "passed": 55,
+      "skippedV4": 6,
+      "log": "baseline-v4-focused55.log"
+    },
+    "groups": [
+      { "name": "B", "files": 2, "passed": 26, "skippedV4": 3, "log": "green-v4-group-b.log" },
+      { "name": "C", "files": 4, "passed": 22, "skippedV4": 0, "log": "green-v4-group-c.log" },
+      { "name": "D", "files": 3, "passed": 130, "skippedV4": 0, "log": "green-v4-group-d.log" },
+      { "name": "E", "files": 3, "passed": 84, "skippedV4": 3, "log": "green-v4-group-e.log" }
+    ],
+    "existingGroupAggregate": {
+      "uniqueFiles": 12,
+      "passed": 262,
+      "failed": 0
+    },
+    "typecheck": {
+      "strict": true,
+      "passed": true,
+      "log": "green-v4-typecheck.log"
+    },
+    "diffCheck": {
+      "passed": true,
+      "scopeMismatchCount": 0,
+      "addedAnyMatchCount": 0,
+      "trackedProductWorktreeChangeCount": 0,
+      "log": "green-v4-diff-check.log"
+    }
+  },
+  "mainComparison": {
+    "mergeBase": "3a74107e3d8363f437815b877533f7342fd02c45",
+    "mainChangedPathCount": 3,
+    "v4RedProductChangedPathCount": 8,
+    "v4MainOverlapCount": 0,
+    "preEvidenceProductBranchChangedPathCount": 37,
+    "branchMainOverlapCount": 0,
+    "mergeTreeExitCode": 0,
+    "mergeTree": "be4b872a66eddab705c9415417ba0933be3c8f54",
+    "log": "green-v4-merge-tree-main-overlap.log",
+    "integrationApproval": false
+  },
+  "historicalEvidenceCorrection": {
+    "log": "integrated-kosha-group-d.log",
+    "classification": "historical_self_recorded_not_independently_immutable",
+    "currentBytesFirstAppearAt": "2a2326951b4b2d030af11f4615f7cf6b9bafa334",
+    "incorrectAttributionWithdrawn": "049debe47cf6d18e923bb5c91e5fafd8d07c885b",
+    "history": [
+      {
+        "commit": "049debe47cf6d18e923bb5c91e5fafd8d07c885b",
+        "gitBlobSha1": "8836b0bbb1a2914d8d59a5b568e7b5ed3dab6594",
+        "resultSummary": "129 passed / 1 failed"
+      },
+      {
+        "commit": "29ae8372",
+        "resultSummary": "modified to 130 passed"
+      },
+      {
+        "commit": "2a2326951b4b2d030af11f4615f7cf6b9bafa334",
+        "gitBlobSha1": "cabd4989af7bc0fb7147f343c2aad79f926b662c",
+        "resultSummary": "modified to current 129 passed / 1 failed"
+      },
+      {
+        "commit": "08f6d6edc168c9a83cb6aac0eca151f45b783131",
+        "gitBlobSha1": "cabd4989af7bc0fb7147f343c2aad79f926b662c",
+        "resultSummary": "retains the 2a232695 blob"
+      }
+    ],
+    "priorImmutableClaimWithdrawn": true
+  },
+  "scopeIntegrity": {
+    "redFiles": [
+      "evaluation/kosha-commercial-contract-remediation-2026-07-14/red-v4-evidence.json",
+      "evaluation/kosha-commercial-contract-remediation-2026-07-14/red-v4-independent-review.log",
+      "tests/commercial-harness.test.ts",
+      "tests/kosha-current-review-run-ask.test.ts",
+      "tests/mcp-tools.test.ts"
+    ],
+    "productFiles": [
+      "lib/db-harness.ts",
+      "lib/mcp-tools.ts",
+      "lib/search.ts"
+    ],
+    "evidenceDirectory": "evaluation/kosha-commercial-contract-remediation-2026-07-14",
+    "integrityManifest": "evidence-integrity-v4.log",
+    "forbiddenChanges": 0
+  },
+  "notRun": [
+    "build",
+    "full_repository_test_suite",
+    "production_deployment",
+    "integration"
+  ]
+}

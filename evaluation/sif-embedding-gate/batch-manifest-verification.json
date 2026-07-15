@@ -1,0 +1,50 @@
+{
+  "date": "2026-07-09",
+  "scope": "sif_embedding_batch_manifest_approval_gate",
+  "status": "verified_without_db_mutation",
+  "artifacts": {
+    "report": "evaluation/sif-embedding-gate/report.json",
+    "corpusJsonl": "evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl",
+    "corpusPreview": "evaluation/sif-embedding-gate/sif-embedding-corpus.md",
+    "batchManifest": "evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json",
+    "approvalNote": "evaluation/sif-embedding-gate/next-approval-gate.md"
+  },
+  "sifCorpus": {
+    "itemCount": 6033,
+    "skippedCount": 1,
+    "corpusCount": 6032,
+    "embeddingModel": "text-embedding-3-small",
+    "embeddingDimensions": 1536,
+    "batchSize": 100,
+    "batchCount": 61,
+    "corpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
+    "embeddedCount": 0,
+    "uploadedCount": 0,
+    "dbMutationPerformed": false
+  },
+  "verification": {
+    "jsonValidation": {
+      "command": "node -e \"for (const f of ['evaluation/sif-embedding-gate/report.json','evaluation/sif-embedding-gate/sif-embedding-batch-manifest.json','evaluation/backend-harness-gate-2026-07-08/report.json']) { JSON.parse(require('fs').readFileSync(f,'utf8')); } console.log('json ok')\"",
+      "passed": true
+    },
+    "focusedTests": {
+      "command": "npm.cmd test -- tests/commercial-harness.test.ts tests/safety-reference-hybrid.test.ts tests/commercial-migration.test.ts tests/quality-contract.test.ts tests/ai-deliverables-prompts.test.ts",
+      "filesPassed": 5,
+      "testsPassed": 30
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "passed": true
+    }
+  },
+  "nextGate": {
+    "requiresDbMigrationApproval": true,
+    "requiresEmbeddingCostApproval": true,
+    "requiresApprovedUploadFlag": true,
+    "commandHeldUntilApproval": "npm.cmd run knowledge:sif-embedding-corpus -- --embed --upload --approved-upload"
+  }
+}

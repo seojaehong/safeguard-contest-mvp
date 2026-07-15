@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { AskResponse, SearchResult } from "./types";
+import type { AskResponse, SearchResult } from "./types";
 import { buildMockAskResponse } from "./mock-data";
 import { generateWithVertex } from "./vertex/client";
 import { resolvePositiveIntEnv } from "@/lib/ai-deliverables-policy";
@@ -19,6 +19,31 @@ const geminiFallbackModels = (process.env.GEMINI_FALLBACK_MODELS || "gemini-2.5-
 const RESPONSE_TIMEOUT_MS = resolvePositiveIntEnv(process.env.OPENAI_TIMEOUT_MS, 20_000);
 const GEMINI_TIMEOUT_MS = Number.parseInt(process.env.GEMINI_TIMEOUT_MS || "25000", 10);
 const RETRY_DELAY_MS = 500;
+
+function safeGenerationFailureContext(error: unknown): { errorType: string; timeout: boolean } {
+  return {
+    errorType: error instanceof Error ? error.name : typeof error,
+    timeout: error instanceof Error && /timeout/i.test(error.message)
+  };
+}
+
+type ProviderGenerationResult = {
+  answer: string;
+  providerLabel: string;
+  policyNote: string;
+  provider: "openai" | "vertex";
+  model: string;
+  fallbackUsed: boolean;
+};
+
+export type AnswerGenerationResult = {
+  response: AskResponse;
+  trace: {
+    provider: "openai" | "vertex" | "mock";
+    model: string | null;
+    fallbackUsed: boolean;
+  };
+};
 
 function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
@@ -59,7 +84,7 @@ async function withRetry<T>(runner: () => Promise<T>, attempts: number, label: s
   throw lastError instanceof Error ? lastError : new Error(`${label} failed`);
 }
 
-async function generateWithOpenAI(prompt: string) {
+async function generateWithOpenAI(prompt: string): Promise<ProviderGenerationResult> {
   if (!openAiApiKey) {
     throw new Error("OPENAI_API_KEY is not set");
   }
@@ -82,11 +107,14 @@ async function generateWithOpenAI(prompt: string) {
   return {
     answer: response.output_text || "답변을 생성하지 못했습니다.",
     providerLabel: "OpenAI",
-    policyNote: `OpenAI 응답은 timeout ${RESPONSE_TIMEOUT_MS}ms, retry 없음, 실패 시 graceful fallback 정책을 따릅니다.`
+    policyNote: `OpenAI 응답은 timeout ${RESPONSE_TIMEOUT_MS}ms, retry 없음, 실패 시 graceful fallback 정책을 따릅니다.`,
+    provider: "openai",
+    model: openAiModel,
+    fallbackUsed: false
   };
 }
 
-async function generateWithGeminiModel(prompt: string, model: string) {
+async function generateWithGeminiModel(prompt: string, model: string): Promise<ProviderGenerationResult> {
   // generateWithVertex handles its own timeout internally (Promise.race).
   // 1 attempt only — retry doubles wall time, which defeats the timeout budget.
   const answer = await withRetry(
@@ -98,20 +126,24 @@ async function generateWithGeminiModel(prompt: string, model: string) {
   return {
     answer,
     providerLabel: `Gemini via Vertex (${model})`,
-    policyNote: `Vertex AI 응답은 timeout ${GEMINI_TIMEOUT_MS}ms, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다.`
+    policyNote: `Vertex AI 응답은 timeout ${GEMINI_TIMEOUT_MS}ms, 1회 retry, 실패 시 graceful fallback 정책을 따릅니다.`,
+    provider: "vertex",
+    model,
+    fallbackUsed: false
   };
 }
 
-async function generateWithGemini(prompt: string) {
+async function generateWithGemini(prompt: string): Promise<ProviderGenerationResult> {
   const models = [...new Set([geminiModel, ...geminiFallbackModels])];
   let lastError: unknown;
 
-  for (const model of models) {
+  for (const [index, model] of models.entries()) {
     try {
-      return await generateWithGeminiModel(prompt, model);
+      const result = await generateWithGeminiModel(prompt, model);
+      return { ...result, fallbackUsed: index > 0 };
     } catch (error) {
       lastError = error;
-      log.error(`Gemini model failed: ${model}`, error);
+      log.error(`Gemini model failed: ${model}`, safeGenerationFailureContext(error));
       // Skip fallback models on timeout — they are unlikely to respond faster.
       if (error instanceof Error && /timeout/i.test(error.message)) break;
     }
@@ -198,7 +230,7 @@ function parseCitationMappings(text: string): CitationMapping[] {
       })
       .filter((item): item is CitationMapping => Boolean(item));
   } catch (error) {
-    log.error("Failed to parse Gemini citation mapping JSON", error);
+    log.error("Failed to parse Gemini citation mapping JSON", safeGenerationFailureContext(error));
     return [];
   }
 }
@@ -232,9 +264,12 @@ export async function enhanceLegalEvidenceMappings(question: string, citations: 
 
   const prompt = buildCitationMappingPrompt(question, citations);
   const response = isVertexConfigured()
-    ? await generateWithGemini(prompt).catch((error) => {
+      ? await generateWithGemini(prompt).catch((error) => {
         if (!openAiApiKey) throw error;
-        log.error("Vertex AI legal evidence mapping failed; falling back to OpenAI", error);
+        log.error(
+          "Vertex AI legal evidence mapping failed; falling back to OpenAI",
+          safeGenerationFailureContext(error)
+        );
         return generateWithOpenAI(prompt);
       })
     : await generateWithOpenAI(prompt);
@@ -260,14 +295,27 @@ export async function enhanceLegalEvidenceMappings(question: string, citations: 
     });
 }
 
-export async function generateAnswer(question: string, citations: SearchResult[]): Promise<AskResponse> {
+export async function generateAnswer(
+  question: string,
+  citations: SearchResult[],
+  options: { traceId: string }
+): Promise<AnswerGenerationResult> {
   if (!isVertexConfigured() && !openAiApiKey) {
-    return buildMockAskResponse(
-      question,
-      citations,
-      "mock",
-      "AI 제공자 키가 없어 규정 기반 문서팩으로 구성했습니다."
-    );
+    const trace = { provider: "mock", model: null, fallbackUsed: false } as const;
+    log.info("safeclaw_answer_trace", {
+      event: "safeclaw_answer_trace",
+      traceId: options.traceId,
+      ...trace
+    });
+    return {
+      response: buildMockAskResponse(
+        question,
+        citations,
+        "mock",
+        "AI 제공자 키가 없어 규정 기반 문서팩으로 구성했습니다."
+      ),
+      trace
+    };
   }
 
   const prompt = buildPrompt(question, citations);
@@ -275,8 +323,8 @@ export async function generateAnswer(question: string, citations: SearchResult[]
   const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {
         if (!openAiApiKey) throw error;
-        log.error("Vertex AI model chain failed; falling back to OpenAI", error);
-        return generateWithOpenAI(prompt);
+        log.error("Vertex AI model chain failed; falling back to OpenAI", safeGenerationFailureContext(error));
+        return generateWithOpenAI(prompt).then((fallback) => ({ ...fallback, fallbackUsed: true }));
       })
     : await generateWithOpenAI(prompt);
 
@@ -286,15 +334,28 @@ export async function generateAnswer(question: string, citations: SearchResult[]
     "live",
     `Law.go와 ${response.providerLabel} 응답을 결합했습니다.`
   );
+  const trace = {
+    provider: response.provider,
+    model: response.model,
+    fallbackUsed: response.fallbackUsed
+  };
+  log.info("safeclaw_answer_trace", {
+    event: "safeclaw_answer_trace",
+    traceId: options.traceId,
+    ...trace
+  });
   return {
-    ...live,
-    answer: response.answer,
-    status: {
-      ...live.status,
-      lawgo: "live" as const,
-      ai: "live" as const,
-      policyNote: response.policyNote
-    }
+    response: {
+      ...live,
+      answer: response.answer,
+      status: {
+        ...live.status,
+        lawgo: "live" as const,
+        ai: "live" as const,
+        policyNote: response.policyNote
+      }
+    },
+    trace
   };
 }
 
@@ -311,7 +372,10 @@ export async function generateKnowledgeText(prompt: string) {
   const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {
         if (!openAiApiKey) throw error;
-        log.error("Vertex AI knowledge generation failed; falling back to OpenAI", error);
+        log.error(
+          "Vertex AI knowledge generation failed; falling back to OpenAI",
+          safeGenerationFailureContext(error)
+        );
         return generateWithOpenAI(prompt);
       })
     : await generateWithOpenAI(prompt);

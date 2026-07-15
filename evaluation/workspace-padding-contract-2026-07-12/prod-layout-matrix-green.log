@@ -1,0 +1,48 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workspace-layout-regression.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/workspace-padding-contract-fix
+
+ ❯ tests/workspace-layout-regression.test.ts (21 tests | 1 failed) 80790ms
+     × preserves the exact Day and Night textarea cascade at every responsive band 8970ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workspace-layout-regression.test.ts > workspace layout regression > preserves the exact Day and Night textarea cascade at every responsive band
+AssertionError: day 1638x510: expected { shellTheme: 'day', …(10) } to match object { shellTheme: 'day', …(9) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+@@ -1,9 +1,9 @@
+  {
+    "display": "block",
+-   "fontSize": 15,
+-   "minHeight": 124,
++   "fontSize": 13,
++   "minHeight": 118,
+    "overflowY": "auto",
+    "paddingBottom": 18,
+    "paddingLeft": 18,
+    "paddingRight": 18,
+    "paddingTop": 18,
+
+ ❯ tests/workspace-layout-regression.test.ts:96:74
+     94|         });
+     95|
+     96|         expect(metrics, `${theme} ${scenario.width}x${scenario.height}…
+       |                                                                          ^
+     97|           shellTheme: theme,
+     98|           display: "block",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 passed (21)
+   Start at  18:24:17
+   Duration  82.08s (transform 248ms, setup 0ms, import 625ms, tests 80.79s, environment 0ms)
+

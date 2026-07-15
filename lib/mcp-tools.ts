@@ -10,16 +10,33 @@ import type { AccidentCase } from "./types";
 import {
   buildDbHarnessPacket,
   buildHarnessPromptContext,
+  buildPublicDbHarnessPacket,
   type HarnessImprovement,
   type HarnessWorkpackMemory,
 } from "./db-harness";
 import type { QaReviewResult } from "./ontology/qa-review";
+import {
+  buildPhaseAProductMaterialization,
+  type PhaseAProductMaterialization,
+} from "./ontology/product-materialization";
+import {
+  splitEvidenceChainPack,
+  type ActiveEvidenceChainPack,
+  type EvidenceChainDiagnostics,
+  type EvidenceChainResolution,
+} from "./ontology/evidence-chain";
 import { gateCitations } from "./law-citation-gate";
 import { sanitizeContacts, OFFICIAL_CONTACTS } from "./safety-contacts";
 import { getEvidenceLabel, SMSA_ARTICLE_MAP, type SmsaEvidenceLabel } from "./smsa-mapping";
 import type { KnowledgeResult } from "./ontology/query";
 import type { OntologyNode } from "./ontology/schema";
-import type { SafetyReferenceItem, SafetyReferenceSearchResult } from "./safety-reference-catalog";
+import type {
+  SafetyReferenceItem,
+  SafetyReferenceRetrievalMode,
+  SafetyReferenceSearchResult,
+  SafetyReferenceVectorStatus
+} from "./safety-reference-catalog";
+import { deriveSafetyReferenceRetrievalModeFromItems } from "./safety-reference-catalog";
 
 /** MCP 도구가 반환하는 CallToolResult의 최소 형태 (SDK 타입과 호환). */
 export type McpToolResult = {
@@ -34,9 +51,17 @@ export function toToolResult(payload: unknown): McpToolResult {
 
 /** 도구 실행 실패를 MCP 오류 응답(isError)으로 매핑한다. */
 export function toToolError(error: unknown): McpToolResult {
-  const message = error instanceof Error ? error.message : String(error);
+  const rawCode = typeof error === "object" && error !== null && "code" in error
+    ? (error as { code?: unknown }).code
+    : undefined;
+  const payload = rawCode === "MCP_TOOL_FORBIDDEN"
+    ? { code: "MCP_TOOL_FORBIDDEN", error: "도구 권한이 없습니다." }
+    : { code: "MCP_TOOL_INTERNAL_ERROR", error: "도구 실행 중 오류가 발생했습니다." };
   return {
-    content: [{ type: "text", text: JSON.stringify({ error: message }, null, 2) }],
+    content: [{
+      type: "text",
+      text: JSON.stringify(payload, null, 2),
+    }],
     isError: true,
   };
 }
@@ -74,6 +99,7 @@ export type DocpackResult = {
   scenario: AskResponse["scenario"];
   mode: AskResponse["mode"];
   evidenceLabels?: Record<string, SmsaEvidenceLabel>;
+  phaseAProduct?: PhaseAProductMaterialization;
   documents: Record<string, DocpackDocumentPreview | string>;
   fullDocumentsNote: string;
 };
@@ -84,6 +110,14 @@ export type ReviewedDocpackResult = {
   reviewTask: string;
   docpack: DocpackResult;
   qa: QaReviewResult;
+  qaAuthority?: "diagnostic_only";
+  phaseAReviewStatus?: {
+    verdict: "검토 필요";
+    verified: false;
+    authorityState: PhaseAProductMaterialization["authorityState"];
+    reason: string;
+    humanConfirmation: PhaseAProductMaterialization["humanConfirmation"];
+  };
   openClawUsageNote: string;
 };
 
@@ -163,6 +197,9 @@ export function buildDocpackResult(response: AskResponse, includeFull = false): 
   if (response.evidenceLabels) {
     result.evidenceLabels = response.evidenceLabels;
   }
+  if (response.phaseAProduct) {
+    result.phaseAProduct = response.phaseAProduct;
+  }
   return result;
 }
 
@@ -176,7 +213,7 @@ export function buildReviewedDocpackResult(
   reviewTask: string,
   includeFull = false
 ): ReviewedDocpackResult {
-  return {
+  const result: ReviewedDocpackResult = {
     engine: "safeclaw-runAsk",
     qualityPipeline: ["generate_safety_docpack", "qa_review_docpack"],
     reviewTask,
@@ -185,19 +222,35 @@ export function buildReviewedDocpackResult(
     openClawUsageNote:
       "이 응답은 SafeClaw 문서 엔진(/api/ask runAsk) 산출물을 QA 검수 계층으로 다시 확인한 결과입니다. OpenClaw는 이 페이로드를 최종 답변의 근거로 사용하세요.",
   };
+  if (response.phaseAProduct) {
+    result.qaAuthority = "diagnostic_only";
+    result.phaseAReviewStatus = {
+      verdict: "검토 필요",
+      verified: false,
+      authorityState: response.phaseAProduct.authorityState,
+      reason:
+        response.phaseAProduct.authorityState === "review_required"
+          ? "Phase A SIF/KOSHA 근거 또는 provenance가 draft/unresolved 상태입니다."
+          : "Phase A 근거 연결은 검증되었지만 사람 확인이 아직 완료되지 않았습니다.",
+      humanConfirmation: response.phaseAProduct.humanConfirmation,
+    };
+    result.openClawUsageNote =
+      "이 응답은 SafeClaw 문서 엔진 산출물과 Phase A provenance를 함께 제공합니다. QA 결과는 진단용이며 사람 확인이 완료되기 전에는 최종 근거로 사용하지 마세요.";
+  }
+  return result;
 }
 
 // ── run_safeclaw_harness_agent ────────────────────────────────────────────
 
 export type HarnessAgentSearchSummary = Pick<
   SafetyReferenceSearchResult,
-  "ok" | "configured" | "query" | "count" | "message"
+  "ok" | "configured" | "query" | "count" | "retrievalMode" | "vectorSearch" | "message"
 > & {
   source: "direct_evidence" | "sif_cases" | "supporting_evidence";
 };
 
 export type HarnessAgentAuthSummary = {
-  source: "db" | "env" | "none";
+  source: "db" | "env" | "broker" | "none";
   siteId: string | null;
   orgId: string | null;
   tokenBound: boolean;
@@ -212,7 +265,7 @@ export type HarnessAgentResult = {
     "load_improvement_memory",
     "build_db_harness_packet"
   ];
-  packet: ReturnType<typeof buildDbHarnessPacket>;
+  packet: ReturnType<typeof buildPublicDbHarnessPacket>;
   promptContext: string;
   referenceSearch: HarnessAgentSearchSummary[];
   auth: HarnessAgentAuthSummary;
@@ -229,8 +282,24 @@ export function summarizeHarnessSearch(
     configured: result.configured,
     query: result.query,
     count: result.count,
+    retrievalMode: result.retrievalMode,
+    vectorSearch: result.vectorSearch,
     message: result.message,
   };
+}
+
+function combineAttemptedHarnessRetrievalMode(searches: HarnessAgentSearchSummary[]): SafetyReferenceRetrievalMode {
+  if (searches.some((item) => item.retrievalMode === "hybrid-vector-rpc")) return "hybrid-vector-rpc";
+  if (searches.some((item) => item.retrievalMode === "ranked-rpc")) return "ranked-rpc";
+  if (searches.some((item) => item.retrievalMode === "rest-ilike")) return "rest-ilike";
+  return "unconfigured";
+}
+
+function combineHarnessVectorStatus(searches: HarnessAgentSearchSummary[]): SafetyReferenceVectorStatus | undefined {
+  return searches.find((item) => item.vectorSearch.ok)?.vectorSearch ||
+    searches.find((item) => item.vectorSearch.attempted)?.vectorSearch ||
+    searches.find((item) => item.vectorSearch.enabled)?.vectorSearch ||
+    searches[0]?.vectorSearch;
 }
 
 export function buildHarnessAgentResult(input: {
@@ -241,12 +310,21 @@ export function buildHarnessAgentResult(input: {
   referenceSearch: HarnessAgentSearchSummary[];
   auth?: HarnessAgentAuthSummary;
 }): HarnessAgentResult {
-  const packet = buildDbHarnessPacket({
+  const internalPacket = buildDbHarnessPacket({
     question: input.question,
     references: input.references,
     improvements: input.improvements,
     workpackMemory: input.workpackMemory,
+    retrieval: {
+      mode: deriveSafetyReferenceRetrievalModeFromItems(
+        input.references,
+        combineAttemptedHarnessRetrievalMode(input.referenceSearch)
+      ),
+      vectorSearch: combineHarnessVectorStatus(input.referenceSearch),
+      message: input.referenceSearch.map((item) => `${item.source}: ${item.message}`).join(" / ")
+    }
   });
+  const packet = buildPublicDbHarnessPacket(internalPacket);
 
   return {
     agentKind: "safeclaw_harness_engineering_agent",
@@ -489,8 +567,9 @@ export function buildEvidenceMappingResult(docType?: string): EvidenceMappingRes
 
 // ── query_safety_knowledge ────────────────────────────────────────────────
 
-/** 안전 지식 그래프 조회 결과의 출처 표기(고정 문자열). */
+/** 기존 query_safety_knowledge provenance 필드의 호환용 고정 값. */
 export const ONTOLOGY_PROVENANCE = "법제처 검증 시드 v1";
+export const CORE_ONTOLOGY_PROVENANCE = "법제처 검증 시드 v1";
 
 export type KnowledgeArticleView = {
   label: string;
@@ -518,12 +597,21 @@ export type SafetyKnowledgeFound = {
   duties: string[];
   dutiesNote: string;
   provenance: string;
+  coreProvenance: string;
+  evidenceContract: ActiveEvidenceChainPack | null;
+  evidenceDiagnostics: EvidenceChainDiagnostics | null;
+  evidenceChainState: "resolved" | "review_required" | "unverified" | "not_registered" | "not_evaluated";
+  phaseAProduct: PhaseAProductMaterialization | null;
 };
 
 export type SafetyKnowledgeNotFound = {
   found: false;
   message: string;
   registeredTasks: string[];
+  evidenceContract: null;
+  evidenceDiagnostics: null;
+  evidenceChainState: "review_required" | "unverified" | "not_registered" | "not_evaluated";
+  phaseAProduct: null;
 };
 
 export type SafetyKnowledgeResult = SafetyKnowledgeFound | SafetyKnowledgeNotFound;
@@ -543,15 +631,39 @@ function articleView(node: OntologyNode): KnowledgeArticleView {
 export function buildSafetyKnowledgeResult(
   query: string,
   result: KnowledgeResult | null,
-  registeredTasks: string[]
+  registeredTasks: string[],
+  evidenceResolution?: EvidenceChainResolution,
 ): SafetyKnowledgeResult {
+  const evidenceChainState = evidenceResolution
+    ? evidenceResolution.inferenceState === "review_required"
+      ? "review_required"
+      : evidenceResolution.resolved
+        ? "resolved"
+      : evidenceResolution.reason === "not_registered"
+        ? "not_registered"
+        : "unverified"
+    : "not_evaluated";
   if (!result) {
+    const notFoundEvidenceState =
+      evidenceChainState === "resolved" || evidenceChainState === "review_required"
+        ? "unverified"
+        : evidenceChainState;
     return {
       found: false,
-      message: `'${query}'은(는) 등록된 작업유형·위험요인이 아닙니다. 아래 등록된 작업유형 중 하나로 다시 조회하거나, 검증된 조문 없이 답할 때는 validate_safety_citations로 자체 검증하세요.`,
+      message:
+        evidenceResolution && !evidenceResolution.resolved && evidenceResolution.reason !== "not_registered"
+          ? evidenceResolution.message
+          : `'${query}'은(는) 등록된 작업유형·위험요인이 아닙니다. 아래 등록된 작업유형 중 하나로 다시 조회하거나, 검증된 조문 없이 답할 때는 validate_safety_citations로 자체 검증하세요.`,
       registeredTasks,
+      evidenceContract: null,
+      evidenceDiagnostics: null,
+      evidenceChainState: notFoundEvidenceState,
+      phaseAProduct: null,
     };
   }
+  const evidencePack = evidenceResolution && "pack" in evidenceResolution
+    ? splitEvidenceChainPack(evidenceResolution.pack)
+    : null;
   return {
     found: true,
     matchedBy: result.matchedBy,
@@ -566,5 +678,13 @@ export function buildSafetyKnowledgeResult(
     duties: result.duties.map((d) => d.label),
     dutiesNote: DUTIES_NOTE,
     provenance: ONTOLOGY_PROVENANCE,
+    coreProvenance: CORE_ONTOLOGY_PROVENANCE,
+    evidenceContract: evidencePack?.activePack ?? null,
+    evidenceDiagnostics: evidencePack?.diagnostics ?? null,
+    evidenceChainState,
+    phaseAProduct: buildPhaseAProductMaterialization({
+      evidenceChainState,
+      evidencePack: evidencePack?.activePack ?? null,
+    }),
   };
 }

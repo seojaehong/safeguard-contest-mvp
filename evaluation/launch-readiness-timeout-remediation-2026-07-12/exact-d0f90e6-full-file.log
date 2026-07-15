@@ -1,0 +1,16 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/launch-readiness-audit.test.ts --maxWorkers=1 --no-file-parallelism --reporter=verbose
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/launch-readiness-timeout-remediation
+
+ ✓ tests/launch-readiness-audit.test.ts > launch readiness audit process lifecycle > flushes one summary, writes one valid report, and exits zero 1021ms
+ ✓ tests/launch-readiness-audit.test.ts > launch readiness audit process lifecycle > keeps the HTTP failure report and exits one after flushing its summary 1190ms
+ ✓ tests/launch-readiness-audit.test.ts > launch readiness audit process lifecycle > removes stale output and exits one when the request times out 1927ms
+ ✓ tests/launch-readiness-audit.test.ts > launch readiness audit process lifecycle > preserves HTTP semantics for a malformed successful response 836ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  23:18:28
+   Duration  6.27s (transform 65ms, setup 0ms, import 155ms, tests 4.98s, environment 0ms)

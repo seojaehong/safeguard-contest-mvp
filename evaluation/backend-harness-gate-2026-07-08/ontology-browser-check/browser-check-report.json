@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-07-08T16:52:02.929Z",
+  "url": "http://localhost:3037/ontology",
+  "results": [
+    {
+      "name": "desktop-ontology",
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "metrics": {
+        "title": true,
+        "operationPoints": 7,
+        "publishedPoints": 32,
+        "operationRows": 7,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "bodyTextLength": 22528
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "name": "mobile-ontology",
+      "viewport": {
+        "width": 390,
+        "height": 980
+      },
+      "metrics": {
+        "title": true,
+        "operationPoints": 7,
+        "publishedPoints": 32,
+        "operationRows": 7,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "bodyTextLength": 22528
+      },
+      "horizontalOverflow": false
+    }
+  ]
+}

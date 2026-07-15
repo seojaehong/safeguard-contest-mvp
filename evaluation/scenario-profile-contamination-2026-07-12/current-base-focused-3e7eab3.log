@@ -1,0 +1,25 @@
+STATUS=current-base
+EVIDENCE_KIND=FOCUSED_TEST
+CWD=C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\scenario-profile-contamination
+BASE_SHA=31a44c0d972c46a47c94ad387eeeff39528d1be9
+SOURCE_SHA=3e7eab3c5265c5f21fc6acd0e27872f8cc83bdb6
+SOURCE_TREE=3d981358a98c12163461a4816cdb12e3f205077b
+COMMAND=npm.cmd test -- tests/scenario-inference.test.ts tests/accident-cases.test.ts tests/briefing.test.ts tests/workpack-generation-evidence-route.test.ts tests/generation-evidence.test.ts tests/workpack-readiness.test.ts --maxWorkers=1 --no-file-parallelism
+STARTED_AT_UTC=2026-07-12T07:34:50.9279621Z
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/scenario-inference.test.ts tests/accident-cases.test.ts tests/briefing.test.ts tests/workpack-generation-evidence-route.test.ts tests/generation-evidence.test.ts tests/workpack-readiness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/scenario-profile-contamination
+
+
+ Test Files  6 passed (6)
+      Tests  76 passed (76)
+   Start at  16:34:54
+   Duration  4.53s (transform 439ms, setup 0ms, import 659ms, tests 299ms, environment 1ms)
+
+
+FINISHED_AT_UTC=2026-07-12T07:34:59.0755094Z
+EXIT_CODE=0

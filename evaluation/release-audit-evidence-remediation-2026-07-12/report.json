@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 3,
+  "generatedAt": "2026-07-13T08:40:46.2623755+09:00",
+  "branch": "fix/release-audit-evidence-remediation",
+  "reviewBaseSha": "03358b8398bd859d25c84de11609a09c214c74c3",
+  "sourceSha": "d690bbaebad3ed059d194328437e707481f55eee",
+  "sourceIdentity": "cedd849bcf6c4124aada5c243069a808e8d5a5b83a34a9953fcd70fa30175978",
+  "status": "pass",
+  "identityCoverage": {
+    "sharedImplementation": "scripts/frontend_audit_source_identity.mjs",
+    "allAppTsxIncluded": true,
+    "appTsxCount": 37,
+    "requiredBoundaryFiles": [
+      "app/layout.tsx",
+      "app/error.tsx",
+      "app/global-error.tsx",
+      "app/not-found.tsx",
+      "app/workspace/loading.tsx"
+    ],
+    "mutationChangesIdentity": true,
+    "mutationInvalidatesPrerequisite": true
+  },
+  "rowContract": {
+    "routes": 32,
+    "viewports": 3,
+    "routeRows": 96,
+    "workspaceThemeRows": 6,
+    "specialSurfaceRows": 4,
+    "generatedSurfaceRows": 2,
+    "totalRows": 108
+  },
+  "testSummary": {
+    "itemCount": 22,
+    "successCount": 22,
+    "failureCount": 0,
+    "testFiles": 2,
+    "status": "pass"
+  },
+  "checks": [
+    {
+      "name": "typecheck",
+      "status": "pass",
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "completionMarker": "typecheck-complete",
+      "log": "p2-final-typecheck.log"
+    },
+    {
+      "name": "static-prerequisite",
+      "status": "pass",
+      "command": "npm.cmd run audit:frontend-consistency",
+      "exitCode": 0,
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violations": 0,
+      "sourceSha": "d690bbaebad3ed059d194328437e707481f55eee",
+      "sourceIdentity": "cedd849bcf6c4124aada5c243069a808e8d5a5b83a34a9953fcd70fa30175978",
+      "log": "p2-final-static-audit.log"
+    },
+    {
+      "name": "normal-build-bundle-contract",
+      "status": "pass",
+      "command": "npm.cmd run build && npm.cmd run audit:frontend-bundle -- --mode normal",
+      "exitCode": 0,
+      "staticPages": 27,
+      "buildDirectory": ".next",
+      "buildId": "tAHQvEbkuJVTVAZzXRQ_L",
+      "buildIdentity": "abce21776cb34d256b53693a5f9ade22a1fbc6af4c20ed5e1986566f88faa323",
+      "chunkCount": 98,
+      "markerCount": 0,
+      "sourceSha": "d690bbaebad3ed059d194328437e707481f55eee",
+      "sourceIdentity": "cedd849bcf6c4124aada5c243069a808e8d5a5b83a34a9953fcd70fa30175978",
+      "report": "../frontend-audit-runner-port-v2-2026-07-11/bundle-normal.json",
+      "buildLog": "p2-final-build-normal.log",
+      "contractLog": "p2-final-bundle-normal.log"
+    },
+    {
+      "name": "audit-build-bundle-contract",
+      "status": "pass",
+      "command": "SAFECLAW_FRONTEND_AUDIT=1 npm.cmd run build && npm.cmd run audit:frontend-bundle -- --mode audit",
+      "exitCode": 0,
+      "staticPages": 27,
+      "buildDirectory": ".next",
+      "buildId": "45f_hWm4AcaxgWePQUOHL",
+      "buildIdentity": "b1a0676813dd99aad7fd2cc45539ab146af2df17d974aeb4b60075e1b878d423",
+      "chunkCount": 98,
+      "markerCount": 1,
+      "sourceSha": "d690bbaebad3ed059d194328437e707481f55eee",
+      "sourceIdentity": "cedd849bcf6c4124aada5c243069a808e8d5a5b83a34a9953fcd70fa30175978",
+      "report": "../frontend-audit-runner-port-v2-2026-07-11/bundle-audit.json",
+      "buildLog": "p2-final-build-audit.log",
+      "contractLog": "p2-final-bundle-audit.log"
+    },
+    {
+      "name": "full-browser-audit",
+      "status": "pass",
+      "command": "node ./scripts/frontend_consistency_browser_audit.mjs",
+      "exitCode": 0,
+      "completionMarker": "browser-audit-108-complete",
+      "rows": 108,
+      "successes": 108,
+      "failedRows": 0,
+      "findings": 0,
+      "recoveredRows": 0,
+      "elapsedMs": 115346,
+      "sourceSha": "d690bbaebad3ed059d194328437e707481f55eee",
+      "sourceIdentity": "cedd849bcf6c4124aada5c243069a808e8d5a5b83a34a9953fcd70fa30175978",
+      "report": "../frontend-audit-runner-port-v2-2026-07-11/browser-report.json",
+      "log": "p2-final-browser-108.log"
+    },
+    {
+      "name": "bundle-contract-tests",
+      "status": "pass",
+      "command": "npm.cmd test -- tests/frontend-audit-bundle-contract.test.ts --maxWorkers=1 --no-file-parallelism",
+      "exitCode": 0,
+      "completionMarker": "bundle-contract-tests-complete",
+      "testFiles": 1,
+      "tests": 5,
+      "log": "p2-final-bundle-tests.log"
+    },
+    {
+      "name": "browser-evidence-reconciliation-tests",
+      "status": "pass",
+      "command": "npm.cmd test -- tests/frontend-route-coverage.test.ts --maxWorkers=1 --no-file-parallelism -t browser evidence reconciliation",
+      "exitCode": 0,
+      "completionMarker": "browser-evidence-reconciliation-tests-complete",
+      "testFiles": 1,
+      "tests": 17,
+      "log": "p2-final-focused-tests.log"
+    },
+    {
+      "name": "committed-evidence-path-scan",
+      "status": "pass",
+      "scope": [
+        "evaluation/frontend-audit-runner-port-v2-2026-07-11",
+        "evaluation/release-audit-evidence-remediation-2026-07-12"
+      ],
+      "filesScanned": 169,
+      "forbiddenPathMatches": 0,
+      "exitCode": 0,
+      "completionMarker": "committed-evidence-path-scan-complete",
+      "log": "p2-final-path-scan.log"
+    }
+  ],
+  "buildSummary": {
+    "canonicalBuilds": 2,
+    "successfulCanonicalBuilds": 2,
+    "staticPagesPerBuild": 27,
+    "rejectedPreflightAttempts": 1
+  },
+  "loadingRow": {
+    "boundaryMarker": "loading",
+    "fallbackKind": "deterministic-audit-probe",
+    "visiblePrimaryContent": "작업 화면을 준비하고 있습니다",
+    "visibleOutsideBoundary": false,
+    "screenshotWidth": 1440,
+    "screenshotHeight": 1000,
+    "screenshotSha256": "66ad25859ff30d2c947c78cabf97fc565306e569e6fbd208d08f0ba89cd4479c",
+    "actualFileHashMatches": true,
+    "resolvedWorkspaceDigestMatches": 0,
+    "claimsProductionTransitionTiming": false
+  },
+  "canonicalEvidence": {
+    "browserReportSchemaVersion": 3,
+    "sourceShaMatchesStaticPrerequisite": true,
+    "sourceIdentityMatchesStaticAndBundles": true,
+    "rowContractExplicit": true,
+    "rawEvidenceRegenerated": true,
+    "buildDirectoryIsSafe": true
+  },
+  "auditTrail": {
+    "staleNormalBuildCacheRejected": true,
+    "staleNormalBuildMarkerCount": 1,
+    "staleNormalBuildLog": "p2-stale-cache-normal-bundle-fail.log",
+    "authoritativeSourceSha": "d690bbaebad3ed059d194328437e707481f55eee",
+    "historicalRunnerPortReportPreserved": true
+  },
+  "forbiddenSurfacesModified": []
+}

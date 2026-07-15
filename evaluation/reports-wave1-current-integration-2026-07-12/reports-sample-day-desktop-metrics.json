@@ -1,0 +1,89 @@
+{
+  "harnessMode": "prod",
+  "theme": "day",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "selectedBackground": "rgb(233, 235, 239)",
+  "hoverBackground": "rgb(244, 245, 247)",
+  "focusOutline": "rgb(245, 197, 24)",
+  "horizontalOverflow": 0,
+  "controlHeights": [
+    62,
+    62,
+    62,
+    62
+  ],
+  "controlRadii": [
+    "8px",
+    "8px",
+    "8px",
+    "8px"
+  ],
+  "accentText": "rgb(102, 81, 0)",
+  "heroColumnCount": 2,
+  "heroCtaHeight": 44,
+  "heroCtaRadius": "8px",
+  "heroCtaBackground": "rgb(245, 197, 24)",
+  "heroCtaColor": "rgb(8, 9, 11)",
+  "heroCtaClipped": false,
+  "heroMetaCtaOverlap": false,
+  "tuples": {
+    "factLabel": [
+      "12px",
+      "600",
+      "18px",
+      "normal"
+    ],
+    "factValue": [
+      "15px",
+      "500",
+      "24px",
+      "normal"
+    ],
+    "note": [
+      "15px",
+      "500",
+      "24px",
+      "normal"
+    ],
+    "tableHeader": [
+      "12px",
+      "700",
+      "18px",
+      "normal"
+    ],
+    "tableBody": [
+      "13px",
+      "500",
+      "20px",
+      "normal"
+    ],
+    "groupLabel": [
+      "12px",
+      "600",
+      "18px",
+      "normal"
+    ],
+    "groupBody": [
+      "15px",
+      "500",
+      "24px",
+      "normal"
+    ],
+    "groupMeta": [
+      "14px",
+      "500",
+      "22.4px",
+      "normal"
+    ],
+    "control": [
+      "14px",
+      "500",
+      "22.4px",
+      "normal"
+    ]
+  },
+  "overlapCount": 0
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "7def9dddb222204b81376eadca7a4e28cf2ce909",
+  "productSha": "a9c250f2335842c5ff62d81f865adae8cb1d960c",
+  "sourceSha": "4f8400cefb7feb3da44bd6fcbf95cec2549c0c5c",
+  "initialReview": { "spec": "reject", "codeQuality": "reject", "findings": ["P1 responsive cascade", "P2 incomplete tuple assertions"] },
+  "status": "remediated-awaiting-rereview-full-audit-red",
+  "staticAudit": { "status": "fail", "violations": 2354, "mixedTypographyRole": 0, "lineHeightTier": 232, "typographyTuple": 612, "importantDeclarations": 737, "coverageIssues": 0 },
+  "verification": {
+    "contract": { "files": 1, "tests": 1, "status": "pass" },
+    "typecheck": "pass",
+    "build": { "staticPages": 27, "status": "pass" },
+    "productionBrowser": { "files": 1, "tests": 1, "standardThemeCases": 2, "shortHeightThemeCases": 2, "documentTable": true, "mobileOverflowRoutes": 2, "status": "pass" },
+    "audit108Rows": "not-run-static-prerequisite-red"
+  }
+}

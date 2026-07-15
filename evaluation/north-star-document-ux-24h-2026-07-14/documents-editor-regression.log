@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/documents-editor-layout.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+
+ Test Files  1 passed (1)
+      Tests  20 passed (20)
+   Start at  21:36:56
+   Duration  180.73s (transform 157ms, setup 0ms, import 1.14s, tests 179.00s, environment 0ms)
+
+EXPLICIT_EXIT_CODE=0

@@ -1,0 +1,87 @@
+Fresh lock-based verification, 2026-07-11
+Worktree: C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\next-security-update
+
+PRE-REPAIR REPRODUCTION
+
+$ PowerShell damaged Next install inventory
+NextVersion      : 15.5.20
+DeclarationCount : 511
+TotalFiles       : 5617
+[exit 0]
+
+$ npm.cmd pack next@15.5.20 --dry-run --json (file-list summary)
+Package                  : next@15.5.20
+ExpectedDeclarationCount : 1424
+ExpectedFileCount        : 7270
+[exit 0]
+
+$ npm.cmd run typecheck
+tests/sitemap.test.ts(25,31): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+tests/sitemap.test.ts(36,31): error TS7006: Parameter 'entry' implicitly has an 'any' type.
+[nonzero; two TS7006 diagnostics]
+
+POST-REPAIR VERIFICATION
+
+$ npm.cmd ci
+added 373 packages, and audited 374 packages in 1m
+5 moderate severity vulnerabilities
+[exit 0]
+
+$ PowerShell Next install inventory after npm.cmd ci
+NextVersion      : 15.5.20
+DeclarationCount : 1424
+TotalFiles       : 7270
+[exit 0]
+
+$ npm.cmd ls --omit=dev next react react-dom --depth=0
+safeclaw@0.1.0 C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\next-security-update
+|-- next@15.5.20
+|-- react-dom@19.0.0
+`-- react@19.0.0
+[exit 0]
+
+$ npm.cmd run typecheck
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+[exit 0]
+
+$ npm.cmd test -- tests/module-shell-navigation.test.ts --reporter=verbose
+Test Files  1 passed (1)
+Tests       5 passed (5)
+Duration    1.30s
+[exit 0]
+
+$ npm.cmd test -- tests/reports-download-center.test.ts tests/reporting-downloads.test.ts --pool=forks --maxWorkers=1 --reporter=verbose
+Test Files  2 passed (2)
+Tests       49 passed (49)
+Duration    68.65s
+[exit 0]
+
+$ npm.cmd test -- tests/pdf-korean-font-integration.test.ts tests/pdf-font-failure.test.ts --pool=forks --maxWorkers=1 --reporter=verbose
+Test Files  2 passed (2)
+Tests       11 passed (11)
+Duration    9.31s
+[exit 0]
+
+$ npm.cmd run build
+> next build
+Next.js 15.5.20
+Compiled successfully in 20.8s
+Generating static pages (27/27)
+[exit 0]
+
+$ npm.cmd audit --omit=dev --json
+vulnerabilities:
+  exceljs  moderate  direct=true   via=uuid
+  gaxios   moderate  direct=false  via=uuid
+  next     moderate  direct=true   via=postcss
+  postcss  moderate  direct=false  range=<8.5.10
+  uuid     moderate  direct=false  range=<11.1.1
+metadata: info=0 low=0 moderate=5 high=0 critical=0 total=5
+[exit 1: npm audit reports remaining moderate findings; high-severity gate passed]
+
+$ npm.cmd ls --omit=dev next postcss exceljs uuid gaxios
+exceljs@4.4.0 -> uuid@8.3.2
+gaxios@6.7.1 -> uuid@9.0.1
+next@15.5.20 -> postcss@8.4.31
+[exit 0]

@@ -1,0 +1,10 @@
+{
+  "status": 200,
+  "contentType": "application/pdf",
+  "contentDisposition": "attachment; filename=\"safeclaw-document.pdf\"; filename*=UTF-8''SafeClaw-%ED%98%84%EC%9E%A5-%EC%9E%91%EC%97%85-%EC%A0%84-%EC%95%88%EC%A0%84%ED%9A%8C%EC%9D%98-%EA%B8%B0%EB%A1%9D.pdf",
+  "cacheControl": "no-store",
+  "byteLength": 16276,
+  "underOneMiB": true,
+  "pdfMagic": "%PDF-",
+  "bodyPrefix": null
+}

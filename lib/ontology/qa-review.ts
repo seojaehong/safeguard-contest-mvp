@@ -51,6 +51,7 @@ export type QaReviewFound = {
 
 export type QaReviewNotFound = {
   reviewable: false;
+  errorCode?: "ontology_qa_failed";
   message: string;
   registeredTasks: string[];
 };

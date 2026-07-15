@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "7def9dddb222204b81376eadca7a4e28cf2ce909",
+  "sourceSha": "a9c250f2335842c5ff62d81f865adae8cb1d960c",
+  "status": "bounded-pass-full-audit-red",
+  "staticAudit": {
+    "status": "fail",
+    "violations": 2354,
+    "mixedTypographyRoleBefore": 5,
+    "mixedTypographyRoleAfter": 0,
+    "lineHeightTierBefore": 235,
+    "lineHeightTierAfter": 232,
+    "typographyTuple": 612,
+    "importantDeclarations": 737,
+    "coverageIssues": 0
+  },
+  "verification": {
+    "contract": { "files": 1, "tests": 1, "status": "pass" },
+    "typecheck": "pass",
+    "build": { "staticPages": 27, "status": "pass" },
+    "productionBrowser": { "files": 1, "tests": 1, "status": "pass", "horizontalOverflow": 0 },
+    "knownUnrelatedRed": ".command-primary legacy tuple",
+    "audit108Rows": "not-run-static-prerequisite-red"
+  }
+}

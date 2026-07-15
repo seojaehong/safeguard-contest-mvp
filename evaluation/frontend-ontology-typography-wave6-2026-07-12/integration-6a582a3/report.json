@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "backendBaseSha": "3b0edfe48c29e603f3156440362fca9304ef4d1a",
+  "integratedSourceSha": "6a582a3",
+  "review": { "spec": "pass", "codeQuality": "pass", "findings": 0 },
+  "verification": {
+    "staticAudit": { "status": "fail", "violations": 2307, "typographyTuple": 576, "fontSizeTier": 181, "important": 737, "coverageIssues": 0 },
+    "contract": { "files": 1, "tests": 1, "status": "pass" },
+    "typecheck": "pass",
+    "build": { "staticPages": 27, "status": "pass" },
+    "productionBrowser": { "files": 1, "tests": 1, "routeThemeViewportCases": 12, "status": "pass" },
+    "audit108Rows": "not-run-static-prerequisite-red"
+  },
+  "openViewportBlockers": { "desktopComposerBottomPixels": 12, "mobileSubmitBottomPixels": 10 }
+}

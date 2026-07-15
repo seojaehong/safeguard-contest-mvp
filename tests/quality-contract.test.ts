@@ -4,8 +4,27 @@ import { attachQualityContract, buildQualityContract } from "@/lib/quality-contr
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import type { AskResponse, TbmBriefingStructured, TbmLogStructured, WorkPlanStructured } from "@/lib/types";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
+import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
+import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 
 const question = "세이프건설 서울 현장 고소 작업 위험성평가와 TBM을 만들어줘.";
+
+const harnessReferences: SafetyReferenceItem[] = [
+  {
+    id: "sif-fall",
+    source_id: "sif",
+    item_type: "sif-case",
+    category: "건설",
+    subcategory: "고소작업",
+    title: "고소 작업 추락 SIF 사례",
+    summary: "작업대 난간 미확인으로 추락 위험이 발생한 사례",
+    keywords: ["고소", "추락"],
+    risk_tags: ["추락"],
+    primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+    controls: ["난간 확인", "안전대 착용", "하부 통제"],
+    evidence_role: "direct"
+  }
+];
 
 const riskRow: RiskAssessmentRow = {
   location: "서울 현장",
@@ -126,6 +145,10 @@ const tbmLogStructured: TbmLogStructured = {
 
 function makeLiveStructuredResponse(): AskResponse {
   const base = buildMockAskResponse(question, mockSearchResults.slice(0, 3), "live", "테스트");
+  const packet = buildDbHarnessPacket({
+    question,
+    references: harnessReferences
+  });
 
   return {
     ...base,
@@ -181,6 +204,29 @@ function makeLiveStructuredResponse(): AskResponse {
         issues: []
       }
     },
+    dbHarness: {
+      packet,
+      promptContext: buildHarnessPromptContext(packet),
+      summary: {
+        mode: packet.mode,
+        llmRole: packet.generationContract.llmRole,
+        llmOutputScope: packet.generationContract.llmOutputScope,
+        evidenceAuthority: packet.generationContract.evidenceAuthority,
+        providerRetryScope: packet.generationContract.providerRetryScope,
+        fallbackChainAllowed: packet.generationContract.fallbackChainAllowed,
+        genericProseSubstitutionAllowed: packet.generationContract.genericProseSubstitutionAllowed,
+        missingEvidencePolicy: packet.generationContract.missingEvidencePolicy,
+        directEvidence: packet.directEvidence.length,
+        sifCases: packet.sifCases.length,
+        supportingEvidence: packet.supportingEvidence.length,
+        improvementMemory: packet.improvementMemory.length,
+        workpackMemory: packet.workpackMemory.length,
+        missingEvidence: packet.generationContract.missingEvidence,
+        documentCoverage: packet.generationContract.documentCoverage,
+        retrievalContract: packet.retrievalContract,
+        ontologyStatus: packet.ontologyChecklist.status
+      }
+    },
     status: {
       ...base.status,
       lawgo: "live",
@@ -201,8 +247,10 @@ describe("qualityContract", () => {
     expect(response.qualityContract?.evidence.mappedCount).toBe(response.qualityContract?.evidence.requiredCount);
     expect(response.qualityContract?.ontology.status).toBe("degraded");
     expect(response.qualityContract?.structured.status).toBe("blocked");
+    expect(response.qualityContract?.dbHarness.status).toBe("blocked");
     expect(response.qualityContract?.structured.detail).not.toContain("fallback");
     expect(response.qualityContract?.items.map((item) => item.label)).toContain("문서 구조 검수");
+    expect(response.qualityContract?.items.map((item) => item.label)).toContain("DB 하네스 계약");
   });
 
   it("marks live ontology, evidence, structured, and persistence readiness as ready", () => {
@@ -213,7 +261,57 @@ describe("qualityContract", () => {
     expect(contract.ontology.matchCount).toBe(1);
     expect(contract.evidence.mappedCount).toBe(contract.evidence.requiredCount);
     expect(contract.structured.readyCount).toBe(contract.structured.requiredCount);
+    expect(contract.dbHarness.status).toBe("ready");
+    expect(contract.dbHarness.llmRole).toBe("naturalize_only");
+    expect(contract.dbHarness.llmOutputScope).toBe("rewrite_fixed_evidence_only");
+    expect(contract.dbHarness.evidenceAuthority).toBe("db_harness");
+    expect(contract.dbHarness.providerRetryScope).toBe("naturalization_retry_only");
+    expect(contract.dbHarness.fallbackChainAllowed).toBe(false);
+    expect(contract.dbHarness.genericProseSubstitutionAllowed).toBe(false);
+    expect(contract.dbHarness.missingEvidencePolicy).toBe("surface_review_required");
+    expect(contract.dbHarness.retrievalContract?.source).toBe("safety_reference_items");
+    expect(contract.dbHarness.documentCoverage.every((item) => item.covered)).toBe(true);
     expect(contract.persistence.status).toBe("ready");
+  });
+
+  it("does not mark the DB harness ready when required SIF evidence is missing", () => {
+    const response = makeLiveStructuredResponse();
+    response.dbHarness = {
+      ...response.dbHarness!,
+      summary: {
+        ...response.dbHarness!.summary,
+        sifCases: 0,
+        missingEvidence: ["SIF 유사사례"],
+        ontologyStatus: "review_required"
+      }
+    };
+
+    const contract = buildQualityContract(response, "2026-07-08T00:00:00.000Z");
+
+    expect(contract.overall).toBe("degraded");
+    expect(contract.dbHarness.status).toBe("degraded");
+    expect(contract.dbHarness.missingEvidence).toContain("SIF 유사사례");
+    expect(contract.dbHarness.detail).toContain("SIF 유사사례");
+  });
+
+  it("uses the core 3-structure contract for enhanced generation", () => {
+    const response = makeLiveStructuredResponse();
+    const deliverables = { ...response.deliverables };
+    delete deliverables.workPlanStructured;
+
+    const contract = buildQualityContract(
+      {
+        ...response,
+        generationMode: "enhanced",
+        deliverables
+      },
+      "2026-07-08T00:00:00.000Z"
+    );
+
+    expect(contract.overall).toBe("ready");
+    expect(contract.structured.status).toBe("ready");
+    expect(contract.structured.readyCount).toBe(3);
+    expect(contract.structured.requiredCount).toBe(3);
   });
 
   it("attaches the contract without mutating the source response", () => {

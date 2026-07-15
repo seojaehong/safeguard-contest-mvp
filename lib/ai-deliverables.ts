@@ -19,6 +19,8 @@ import type {
   TbmBriefingStructured,
   TbmLogStructured,
   EducationRecordStructured,
+  GenerationDeliverableModelTrace,
+  GenerationTrace,
   PermitInspectionStructured,
   TbmRiskLink
 } from "@/lib/types";
@@ -43,6 +45,22 @@ import { safeEmit, type OnAskProgress } from "@/lib/ask-progress";
 
 const log = createLogger("ai-deliverables");
 
+type DeliverablesProviderCallTrace = {
+  provider: "anthropic" | "vertex";
+  model: string;
+  fallbackUsed: boolean;
+};
+
+type DeliverablesProviderCallResult = {
+  text: string;
+  trace: DeliverablesProviderCallTrace;
+};
+
+type CallAndParseOptions = {
+  traceId?: string;
+  onTrace?: (document: string, trace: DeliverablesProviderCallTrace, outputKeys: string[]) => void;
+};
+
 const providerDecision = resolveDeliverablesProvider({
   anthropicApiKey: process.env.ANTHROPIC_API_KEY,
   providerFlag: process.env.AI_DELIVERABLES_PROVIDER,
@@ -64,6 +82,22 @@ function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
 }
 
+function configuredDeliverablesProvider(): "anthropic" | "vertex" | null {
+  if (providerDecision.provider === "anthropic" && providerDecision.model) return "anthropic";
+  return isVertexConfigured() ? "vertex" : null;
+}
+
+function isDeliverablesProviderConfigured(): boolean {
+  return configuredDeliverablesProvider() !== null;
+}
+
+function safeProviderFailureContext(error: unknown): { errorType: string; timeout: boolean } {
+  return {
+    errorType: error instanceof Error ? error.name : typeof error,
+    timeout: isTimeoutError(error)
+  };
+}
+
 type Scenario = {
   companyName: string;
   companyType?: string;
@@ -83,23 +117,40 @@ type GenContext = {
   accidentLines: string[];
   /** Top KOSHA 기술지침/기술지원규정 references that MUST be cited in body. */
   koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
+  /** DB harness packet contract: LLM may naturalize fixed evidence only. */
+  dbHarnessContext?: string;
   /** KST (Asia/Seoul) calendar date of this generation run — YYYY-MM-DD. */
   workDate: string;
 };
 
-async function callGemini(prompt: string, budget: DocBudget, label: string): Promise<string> {
+async function callGemini(
+  prompt: string,
+  budget: DocBudget,
+  label: string
+): Promise<DeliverablesProviderCallResult> {
   // Optional demo/pilot route: Claude first, Vertex chain as the runtime fallback.
   let anthropicFailed = false;
   if (providerDecision.provider === "anthropic" && providerDecision.model) {
     const anthropicModel = resolveAnthropicModelForDoc(label, providerDecision.model);
     try {
-      return await generateWithAnthropic(anthropicModel, prompt, {
+      const text = await generateWithAnthropic(anthropicModel, prompt, {
         maxOutputTokens: budget.maxOutputTokens,
         timeoutMs: budget.timeoutMs,
       });
+      return {
+        text,
+        trace: {
+          provider: "anthropic",
+          model: anthropicModel,
+          fallbackUsed: false
+        }
+      };
     } catch (error) {
       anthropicFailed = true;
-      log.error(`Anthropic deliverables (${anthropicModel}) failed; falling back to Vertex`, error);
+      log.error(
+        `Anthropic deliverables (${anthropicModel}) failed; falling back to Vertex`,
+        safeProviderFailureContext(error)
+      );
     }
   }
   if (!isVertexConfigured()) throw new Error("Vertex AI not configured (GOOGLE_APPLICATION_CREDENTIALS_JSON / GCP_PROJECT_ID missing)");
@@ -110,7 +161,7 @@ async function callGemini(prompt: string, budget: DocBudget, label: string): Pro
     : planModelAttempts(geminiModel, geminiFallbackModels, budget.timeoutMs, budget.fallbackTimeoutCapMs);
   let lastError: unknown;
 
-  for (const { model, timeoutMs } of attempts) {
+  for (const [index, { model, timeoutMs }] of attempts.entries()) {
     try {
       // generateWithVertex handles timeout internally via Promise.race.
       // Standard docs (1,500-3,500자): 8,192 output tokens.
@@ -124,10 +175,17 @@ async function callGemini(prompt: string, budget: DocBudget, label: string): Pro
         },
         timeoutMs,
       });
-      return text;
+      return {
+        text,
+        trace: {
+          provider: "vertex",
+          model,
+          fallbackUsed: anthropicFailed || index > 0
+        }
+      };
     } catch (error) {
       lastError = error;
-      log.error(`Vertex AI deliverables (${model}) failed`, error);
+      log.error(`Vertex AI deliverables (${model}) failed`, safeProviderFailureContext(error));
       // A timeout on the primary no longer aborts the chain: the fallback
       // model still gets one short capped attempt (see planModelAttempts).
     }
@@ -149,7 +207,8 @@ function isTimeoutError(error: unknown): boolean {
 async function callAndParse<T>(
   prompt: string,
   parser: (raw: string) => T | null,
-  label: string
+  label: string,
+  options: CallAndParseOptions = {}
 ): Promise<T> {
   const budget = resolveDocBudget(label, GEMINI_TIMEOUT_MS);
   // Heavy docs run 90-135s per attempt — a parse-retry would blow the request
@@ -158,16 +217,30 @@ async function callAndParse<T>(
   let lastError: unknown;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      const raw = await callGemini(prompt, budget, label);
-      const parsed = parser(raw);
-      if (parsed) return parsed;
-      lastError = new Error(`json parse failed (raw len=${raw.length})`);
-      const head = raw.slice(0, 200).replace(/\n/g, "\\n");
-      const tail = raw.slice(-200).replace(/\n/g, "\\n");
-      log.error(`[AI ${label}] attempt ${attempt} parse failed. head=${head} ... tail=${tail}`);
+      const generated = await callGemini(prompt, budget, label);
+      const parsed = parser(generated.text);
+      if (parsed) {
+        const outputKeys = typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+          ? Object.keys(parsed as Record<string, unknown>)
+          : [];
+        options.onTrace?.(label, generated.trace, outputKeys);
+        if (options.traceId) {
+          log.info("safeclaw_deliverables_trace", {
+            event: "safeclaw_deliverables_trace",
+            traceId: options.traceId,
+            document: label,
+            ...generated.trace
+          });
+        }
+        return parsed;
+      }
+      lastError = new Error(`json parse failed (raw len=${generated.text.length})`);
+      log.error(`[AI ${label}] attempt ${attempt} parse failed`, {
+        rawLength: generated.text.length
+      });
     } catch (error) {
       lastError = error;
-      log.error(`[AI ${label}] attempt ${attempt} call failed:`, error);
+      log.error(`[AI ${label}] attempt ${attempt} call failed`, safeProviderFailureContext(error));
       // Don't waste time retrying if we already hit the timeout budget.
       if (isTimeoutError(error)) break;
     }
@@ -219,7 +292,7 @@ export function persona() {
     "사용자의 작업 시나리오를 받아 위험성평가·작업계획·TBM·안전보건교육·비상대응 등 산업안전 문서팩 본문을 작성한다.",
     "원칙:",
     "  1) 산업안전보건법 제38조·제39조와 시행규칙·시행령의 구체적인 조항을 가능한 한 인용한다.",
-    "  2) 위험요인은 시나리오 특성에 맞춰 새롭게 발굴한다. 일반론(\"안전을 지키세요\") 금지.",
+    "  2) 위험요인은 DB 하네스·근거 후보 안에서 구체화한다. 근거 밖 새 위험요인은 만들지 말고 '현장 확인 필요'로 표기한다. 일반론(\"안전을 지키세요\") 금지.",
     "  3) 4M(Man·Machine·Media·Management) 분류로 위험요인을 정리한다.",
     "  4) 위험도는 가능성×중대성 매트릭스로 상/중/하 결정 + 판단근거를 1문장으로.",
     "  5) 감소대책은 즉시 실행 가능한 행동 단위로 적는다.",
@@ -237,6 +310,7 @@ export function contextBlock(ctx: GenContext) {
   const training = ctx.trainingLines.length ? ctx.trainingLines.join("\n") : "(연계 교육 후보 없음)";
   const kosha = ctx.koshaLines.length ? ctx.koshaLines.join("\n") : "(KOSHA 보강 자료 없음)";
   const accidents = ctx.accidentLines.length ? ctx.accidentLines.join("\n") : "(유사 재해사례 없음)";
+  const dbHarness = ctx.dbHarnessContext?.trim() || "(DB 하네스 패킷 없음)";
   const koshaPrimaryBlock = ctx.koshaPrimaryRefs && ctx.koshaPrimaryRefs.length
     ? [
         "",
@@ -260,6 +334,9 @@ export function contextBlock(ctx: GenContext) {
     `작업 요약: ${ctx.scenario.workSummary}`,
     `작업 인원: ${ctx.scenario.workerCount}명`,
     `기상/조건: ${ctx.scenario.weatherNote}`,
+    "",
+    "[DB 하네스 계약]",
+    dbHarness,
     "",
     "[법령·해석례·판례 근거 후보]",
     cites,
@@ -693,14 +770,18 @@ export type GenerateAllOptions = {
   accidentLines?: string[];
   /** Top KOSHA 기술지침/기술지원규정 references the AI must cite in body. */
   koshaPrimaryRefs?: Array<{ kindLabel: string; title: string; sentence: string }>;
+  /** DB harness packet prompt context. When present, generation must stay inside this evidence packet. */
+  dbHarnessContext?: string;
   /**
    * Which call groups to run.
-   * - "full" (default): tabular + free + foreign  → 14 deliverables AI-generated
-   * - "enhanced": tabular only → 5 표 양식 deliverables only (others remain template)
+   * - "full" (default): all tabular + free + foreign -> broad document pack AI generation
+   * - "enhanced": core risk/TBM groups only -> non-core documents remain deterministic
    */
   scope?: "full" | "enhanced";
   /** Task D-2a: per-doc progress callback for the SSE console. Defaults to no-op. */
   onProgress?: OnAskProgress;
+  /** Correlates provider/model evidence across per-document calls and the ask response. */
+  traceId?: string;
 };
 
 function buildContext(opts: GenerateAllOptions): GenContext {
@@ -719,6 +800,7 @@ function buildContext(opts: GenerateAllOptions): GenContext {
     koshaLines: opts.koshaLines || [],
     accidentLines: opts.accidentLines || [],
     koshaPrimaryRefs: opts.koshaPrimaryRefs || [],
+    dbHarnessContext: opts.dbHarnessContext,
     workDate: formatWorkDate(new Date())
   };
 }
@@ -740,7 +822,7 @@ export function parseWorkPlanStructured(raw: string): Partial<AiDeliverables> | 
   const s = j?.workPlanStructured;
   if (!s || typeof s !== "object") return null;
   if (!s.workOverview || typeof s.workOverview.workName !== "string") return null;
-  if (!Array.isArray(s.workSteps) || s.workSteps.length < 3) return null;
+  if (!Array.isArray(s.workSteps) || s.workSteps.length < 3 || !s.workSteps.every(isRecord)) return null;
   if (!Array.isArray(s.stopCriteria) || s.stopCriteria.length < 2) return null;
   if (!s.emergencyResponse || !Array.isArray(s.emergencyResponse.contacts)) return null;
   if (!s.approvers) return null;
@@ -754,7 +836,7 @@ export function parseTbmBriefingStructured(raw: string): Partial<AiDeliverables>
   if (!s.meta || typeof s.meta.dateTime !== "string") return null;
   if (!s.todayWork || typeof s.todayWork.name !== "string") return null;
   if (!Array.isArray(s.hazards) || s.hazards.length < 2) return null;
-  if (!Array.isArray(s.measures) || s.measures.length < 2) return null;
+  if (!Array.isArray(s.measures) || s.measures.length < 2 || !s.measures.every(isRecord)) return null;
   if (!Array.isArray(s.stopCriteria) || s.stopCriteria.length < 2) return null;
   if (!Array.isArray(s.confirmTopics) || s.confirmTopics.length < 3) return null;
   // hazardRef is 1-based and references s.hazards (same object, count known here) —
@@ -783,7 +865,7 @@ export function parseTbmLogStructured(raw: string): Partial<AiDeliverables> | nu
   if (!s.attendance || typeof s.attendance.confirmationMethod !== "string") return null;
   if (!s.todayWork || typeof s.todayWork.name !== "string") return null;
   if (!Array.isArray(s.workerConfirmations) || s.workerConfirmations.length < 3) return null;
-  if (!Array.isArray(s.hazardsDiscussed) || s.hazardsDiscussed.length < 2) return null;
+  if (!Array.isArray(s.hazardsDiscussed) || s.hazardsDiscussed.length < 2 || !s.hazardsDiscussed.every(isRecord)) return null;
   if (!s.safetyEducation || typeof s.safetyEducation.topic !== "string") return null;
   if (!Array.isArray(s.safetyEducation.keyPoints) || s.safetyEducation.keyPoints.length < 2) return null;
   if (!Array.isArray(s.unaddressedItems)) return null; // 빈 배열 허용
@@ -796,7 +878,7 @@ export function parseEducationRecordStructured(raw: string): Partial<AiDeliverab
   const s = j?.educationRecordStructured;
   if (!s || typeof s !== "object") return null;
   if (typeof s.educationName !== "string" || s.educationName.length === 0) return null;
-  if (!Array.isArray(s.curriculum) || s.curriculum.length < 2) return null;
+  if (!Array.isArray(s.curriculum) || s.curriculum.length < 2 || !s.curriculum.every(isRecord)) return null;
   if (typeof s.understandingCheck !== "string") return null;
   // curriculum[].lawCitation is model-authored free text (e.g. "산업안전보건법 제29조")
   // and is exactly the hallucination surface the citation gate exists for — gate it
@@ -867,16 +949,21 @@ function parseTbmRiskLinks(raw: string, rows: RiskAssessmentRow[]): Partial<AiDe
   return links.length ? { tbmRiskLinks: links.slice(0, 6) } : null;
 }
 
-async function generateTbmRiskLinks(ctx: GenContext, rows: RiskAssessmentRow[]): Promise<Partial<AiDeliverables>> {
+async function generateTbmRiskLinks(
+  ctx: GenContext,
+  rows: RiskAssessmentRow[],
+  traceOptions?: CallAndParseOptions
+): Promise<Partial<AiDeliverables>> {
   if (!rows.length) return { tbmRiskLinks: [] };
   try {
     return await callAndParse(
       tbmRiskLinksPrompt(ctx, rows),
       (raw) => parseTbmRiskLinks(raw, rows),
-      "tbmRiskLinks"
+      "tbmRiskLinks",
+      traceOptions
     );
   } catch (error) {
-    log.error("[AI tbmRiskLinks] falling back to []", error);
+    log.error("[AI tbmRiskLinks] falling back to []", safeProviderFailureContext(error));
     return { tbmRiskLinks: [] };
   }
 }
@@ -964,89 +1051,211 @@ const TABULAR_SPECS = [
   { name: "educationRecordStructured", buildPrompt: educationRecordStructuredPrompt, parse: parseEducationRecordStructured }
 ] as const;
 
+const DELIVERABLE_GROUP_DOCUMENT_KEYS: Record<string, readonly string[]> = {
+  riskAssessment: ["riskAssessmentDraft"],
+  workPlanStructured: ["workPlanStructured"],
+  tbmBriefingStructured: ["tbmBriefingStructured", "tbmQuestions"],
+  tbmLogStructured: ["tbmLogStructured"],
+  tbmLog: ["tbmLogDraft"],
+  educationRecordStructured: ["educationRecordStructured", "safetyEducationPoints"],
+  structuredRiskRows: ["structuredRiskRows"],
+  free: ["workpackSummaryDraft", "emergencyResponseDraft", "photoEvidenceDraft", "kakaoMessage"],
+  foreign: ["foreignWorkerBriefing", "foreignWorkerTransmission"],
+  tbmRiskLinks: ["tbmRiskLinks"]
+};
+
+const FULL_AI_DOCUMENT_KEYS = [...new Set(Object.values(DELIVERABLE_GROUP_DOCUMENT_KEYS).flat())];
+
+function deterministicDocumentTrace(fallbackUsed: boolean): GenerationDeliverableModelTrace {
+  return {
+    provider: "safeclaw",
+    model: null,
+    source: "deterministic",
+    fallbackUsed
+  };
+}
+
+const ENHANCED_CORE_SPEC_NAMES = new Set<string>();
+
+export function listAiDeliverableGroupsForScope(scope: "full" | "enhanced" = "full"): string[] {
+  const tabularNames = TABULAR_SPECS
+    .filter((spec) => scope === "full" || ENHANCED_CORE_SPEC_NAMES.has(spec.name))
+    .map((spec) => spec.name);
+  return scope === "full"
+    ? [...tabularNames, "structuredRiskRows", "free", "foreign", "tbmRiskLinks"]
+    : tabularNames;
+}
+
+function tabularSpecsForScope(scope: "full" | "enhanced") {
+  return TABULAR_SPECS.filter((spec) => scope === "full" || ENHANCED_CORE_SPEC_NAMES.has(spec.name));
+}
+
 export async function generateAllDeliverables(opts: GenerateAllOptions): Promise<AiDeliverables> {
-  if (!isVertexConfigured()) return {};
+  if (!isDeliverablesProviderConfigured()) return {};
   const ctx = buildContext(opts);
   const scope = opts.scope || "full";
 
-  // 7-way parallel: 5 tabular per-doc + 1 free + 1 foreign (free/foreign skipped on enhanced).
-  const tabularPromises = TABULAR_SPECS.map((spec) =>
+  // Full: broad pack. Enhanced: no AI doc groups; the DB harness builds rows deterministically.
+  const tabularPromises = tabularSpecsForScope(scope).map((spec) =>
     callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name)
   );
-  const structuredRiskRowsPromise = callAndParse(
-    structuredRiskRowsPrompt(ctx),
-    parseStructuredRiskRows,
-    "structuredRiskRows"
-  );
-  const freePromise = scope === "full"
-    ? callAndParse(freeFormPrompt(ctx), parseFree, "free")
-    : Promise.reject(new Error("skipped (enhanced scope)"));
-  const foreignPromise = scope === "full"
-    ? callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign")
-    : Promise.reject(new Error("skipped (enhanced scope)"));
-
-  const settled = await Promise.allSettled([
-    ...tabularPromises,
-    structuredRiskRowsPromise,
-    freePromise,
-    foreignPromise
-  ]);
+  const structuredRiskRowsPromise = scope === "full"
+    ? callAndParse(
+        structuredRiskRowsPrompt(ctx),
+        parseStructuredRiskRows,
+        "structuredRiskRows"
+      )
+    : null;
+  const activePromises = scope === "full"
+    ? [
+        ...tabularPromises,
+        structuredRiskRowsPromise,
+        callAndParse(freeFormPrompt(ctx), parseFree, "free"),
+        callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign")
+      ].filter((promise): promise is Promise<Partial<AiDeliverables>> => Boolean(promise))
+    : tabularPromises;
+  const settled = await Promise.allSettled(activePromises);
 
   const out: AiDeliverables = {};
   for (const s of settled) {
     if (s.status === "fulfilled") Object.assign(out, s.value);
   }
   applyRiskRowClamp(out);
-  Object.assign(out, await generateTbmRiskLinks(ctx, out.structuredRiskRows || []));
+  if (scope === "full") {
+    Object.assign(out, await generateTbmRiskLinks(ctx, out.structuredRiskRows || []));
+  }
   return out;
 }
 
+const DELIVERABLE_GENERATION_FAILURE_CODE = "deliverable_generation_failed" as const;
+const DELIVERABLE_GENERATION_FAILURE_MESSAGE = "문서 생성 단계를 완료하지 못했습니다.";
+
 export type AiDeliverablesDiagnostics = {
   geminiAvailable: boolean;
+  providerAvailable: boolean;
+  configuredProvider: "anthropic" | "vertex" | null;
   // group: per-doc name (riskAssessment / workPlan / tbmBriefing / tbmLog / safetyEducation / free / foreign).
-  groupResults: Array<{ group: string; status: "fulfilled" | "rejected"; reason?: string }>;
+  groupResults: Array<{
+    group: string;
+    status: "fulfilled" | "rejected";
+    errorCode?: typeof DELIVERABLE_GENERATION_FAILURE_CODE;
+    reason?: string;
+  }>;
   filledKeys: string[];
+  trace: GenerationTrace["deliverables"] & { fallbackUsed: boolean };
 };
+
+function summarizeDeliverablesProvider(
+  modelPerDocument: Record<string, GenerationDeliverableModelTrace>
+): GenerationTrace["deliverables"]["provider"] {
+  const providers = new Set(Object.values(modelPerDocument).map((item) => item.provider));
+  if (providers.size === 0) return null;
+  if (providers.size > 1) return "mixed";
+  return providers.values().next().value ?? null;
+}
+
+export function buildFailedDeliverablesDiagnostics(input: {
+  attempted: boolean;
+  fallbackUsed: boolean;
+}): AiDeliverablesDiagnostics {
+  const configuredProvider = configuredDeliverablesProvider();
+  const modelPerDocument = input.fallbackUsed
+    ? Object.fromEntries(FULL_AI_DOCUMENT_KEYS.map((key) => [key, deterministicDocumentTrace(true)]))
+    : {};
+  return {
+    geminiAvailable: isVertexConfigured(),
+    providerAvailable: configuredProvider !== null,
+    configuredProvider,
+    groupResults: input.fallbackUsed
+      ? [{ group: "deliverablesPipeline", status: "rejected", reason: "provider pipeline unavailable" }]
+      : [],
+    filledKeys: [],
+    trace: {
+      attempted: input.attempted,
+      provider: summarizeDeliverablesProvider(modelPerDocument),
+      modelPerDocument,
+      fallbackUsed: input.fallbackUsed
+    }
+  };
+}
 
 export async function generateAllDeliverablesWithDiagnostics(
   opts: GenerateAllOptions
 ): Promise<{ deliverables: AiDeliverables; diagnostics: AiDeliverablesDiagnostics }> {
-  if (!isVertexConfigured()) {
+  const configuredProvider = configuredDeliverablesProvider();
+  if (!configuredProvider) {
     return {
       deliverables: {},
-      diagnostics: { geminiAvailable: false, groupResults: [], filledKeys: [] }
+      diagnostics: {
+        geminiAvailable: isVertexConfigured(),
+        providerAvailable: false,
+        configuredProvider: null,
+        groupResults: [],
+        filledKeys: [],
+        trace: {
+          attempted: false,
+          provider: null,
+          modelPerDocument: {},
+          fallbackUsed: false
+        }
+      }
     };
   }
   const ctx = buildContext(opts);
   const scope = opts.scope || "full";
   const onProgress = opts.onProgress;
+  const modelPerDocument: Record<string, GenerationDeliverableModelTrace> = {};
+  const activeGroupNames = [
+    ...tabularSpecsForScope(scope).map((spec) => spec.name),
+    ...(scope === "full" ? ["structuredRiskRows", "free", "foreign", "tbmRiskLinks"] : [])
+  ];
+  activeGroupNames.forEach((group) => {
+    for (const documentKey of DELIVERABLE_GROUP_DOCUMENT_KEYS[group] || []) {
+      modelPerDocument[documentKey] = deterministicDocumentTrace(true);
+    }
+  });
+  const traceOptions: CallAndParseOptions = {
+    traceId: opts.traceId,
+    onTrace: (document, trace, outputKeys) => {
+      const expectedKeys = new Set(DELIVERABLE_GROUP_DOCUMENT_KEYS[document] || []);
+      outputKeys.filter((key) => expectedKeys.has(key)).forEach((key) => {
+        modelPerDocument[key] = {
+          provider: trace.provider,
+          model: trace.model,
+          source: "provider",
+          fallbackUsed: trace.fallbackUsed
+        };
+      });
+    }
+  };
 
   const allSpecs: Array<{ name: string; promise: Promise<Partial<AiDeliverables>> }> = [
-    ...TABULAR_SPECS.map((spec) => ({
+    ...tabularSpecsForScope(scope).map((spec) => ({
       name: spec.name,
-      promise: callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name) as Promise<Partial<AiDeliverables>>
-    })),
-    {
-      name: "structuredRiskRows",
-      promise: callAndParse(
-        structuredRiskRowsPrompt(ctx),
-        parseStructuredRiskRows,
-        "structuredRiskRows"
-      ) as Promise<Partial<AiDeliverables>>
-    },
-    {
-      name: "free",
-      promise: scope === "full"
-        ? (callAndParse(freeFormPrompt(ctx), parseFree, "free") as Promise<Partial<AiDeliverables>>)
-        : Promise.reject(new Error("skipped (enhanced)"))
-    },
-    {
-      name: "foreign",
-      promise: scope === "full"
-        ? (callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign") as Promise<Partial<AiDeliverables>>)
-        : Promise.reject(new Error("skipped (enhanced)"))
-    }
+      promise: callAndParse(spec.buildPrompt(ctx), spec.parse, spec.name, traceOptions) as Promise<Partial<AiDeliverables>>
+    }))
   ];
+  if (scope === "full") {
+    allSpecs.push(
+      {
+        name: "structuredRiskRows",
+        promise: callAndParse(
+          structuredRiskRowsPrompt(ctx),
+          parseStructuredRiskRows,
+          "structuredRiskRows",
+          traceOptions
+        ) as Promise<Partial<AiDeliverables>>
+      },
+      {
+        name: "free",
+        promise: callAndParse(freeFormPrompt(ctx), parseFree, "free", traceOptions) as Promise<Partial<AiDeliverables>>
+      },
+      {
+        name: "foreign",
+        promise: callAndParse(foreignWorkerPrompt(ctx), parseForeign, "foreign", traceOptions) as Promise<Partial<AiDeliverables>>
+      }
+    );
+  }
 
   const settled = await Promise.allSettled(allSpecs.map((s) => s.promise));
   const out: AiDeliverables = {};
@@ -1062,29 +1271,41 @@ export async function generateAllDeliverablesWithDiagnostics(
       groupResults.push({
         group: name,
         status: "rejected",
-        reason: s.reason instanceof Error ? s.reason.message : String(s.reason)
+        errorCode: DELIVERABLE_GENERATION_FAILURE_CODE,
+        reason: DELIVERABLE_GENERATION_FAILURE_MESSAGE
       });
       safeEmit(onProgress, { kind: "doc", name, status: "fail" });
     }
   });
 
   applyRiskRowClamp(out);
-  const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || []);
-  Object.assign(out, tbmRiskLinksResult);
-  const tbmRiskLinksOk = (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0;
-  groupResults.push({
-    group: "tbmRiskLinks",
-    status: tbmRiskLinksOk ? "fulfilled" : "rejected",
-    reason: tbmRiskLinksOk ? undefined : "empty or skipped"
-  });
-  safeEmit(onProgress, { kind: "doc", name: "tbmRiskLinks", status: tbmRiskLinksOk ? "ok" : "fail" });
+  if (scope === "full") {
+    const tbmRiskLinksResult = await generateTbmRiskLinks(ctx, out.structuredRiskRows || [], traceOptions);
+    Object.assign(out, tbmRiskLinksResult);
+    const tbmRiskLinksOk = (tbmRiskLinksResult.tbmRiskLinks?.length || 0) > 0;
+    groupResults.push({
+      group: "tbmRiskLinks",
+      status: tbmRiskLinksOk ? "fulfilled" : "rejected",
+      reason: tbmRiskLinksOk ? undefined : "empty or skipped"
+    });
+    safeEmit(onProgress, { kind: "doc", name: "tbmRiskLinks", status: tbmRiskLinksOk ? "ok" : "fail" });
+  }
 
   return {
     deliverables: out,
     diagnostics: {
-      geminiAvailable: true,
+      geminiAvailable: isVertexConfigured(),
+      providerAvailable: true,
+      configuredProvider,
       groupResults,
-      filledKeys: Object.keys(out)
+      filledKeys: Object.keys(out),
+      trace: {
+        attempted: allSpecs.length > 0,
+        provider: summarizeDeliverablesProvider(modelPerDocument),
+        modelPerDocument,
+        fallbackUsed: Object.values(modelPerDocument).some((item) => item.fallbackUsed === true)
+          || groupResults.some((result) => result.status === "rejected")
+      }
     }
   };
 }

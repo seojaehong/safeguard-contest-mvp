@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-07-09T10:45:18.0415988Z",
+  "url": "http://127.0.0.1:4317/workspace?theme=day",
+  "screenshot": "evaluation/ui-ux-browser-check-2026-07-09/workspace-typography-noto-kr-day.png",
+  "headline": {
+    "text": "오늘 작업은 무엇인가요?",
+    "fontFamily": "\"Noto Sans KR\", Pretendard, \"Noto Sans\", system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "fontWeight": "900",
+    "fontSize": "44px",
+    "lineHeight": "50.16px",
+    "letterSpacing": "normal",
+    "width": 780,
+    "height": 50
+  },
+  "result": "workspace headline uses loaded Noto Sans KR at 900 weight"
+}

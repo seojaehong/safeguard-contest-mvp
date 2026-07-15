@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-07-13T11:04:28.9866816+09:00",
+  "branch": "fix/ontology-evidence-invariant-gate",
+  "status": "pass",
+  "scope": {
+    "databaseChanged": false,
+    "schemaChanged": false,
+    "migrationChanged": false,
+    "dataMutated": false
+  },
+  "findings": [
+    {
+      "id": "review-only-sif-active-evidence",
+      "status": "fixed",
+      "referenceItemId": "sif-아카이브-건설업-01985",
+      "activeCitationExcluded": true,
+      "naturalizerFixedPackExcluded": true,
+      "mcpEvidenceContractExcluded": true,
+      "diagnosticsRetained": true
+    },
+    {
+      "id": "confirmed-quality-failed-transition",
+      "status": "fixed",
+      "transition": "confirmed_passed -> pending_failed",
+      "confirmedFailedStateAllowed": false
+    }
+  ],
+  "contractsPreserved": {
+    "authorityHierarchy": [
+      "sif:hazard_priority_only",
+      "kosha:technical_guidance_only",
+      "law:mandatedBy"
+    ],
+    "llmRole": "naturalize_only",
+    "providerFallback": "preserve_current_provider_fallback",
+    "chains": [
+      "work-at-height-fall",
+      "vehicle-machinery-entrapment",
+      "electrical-work-electrocution"
+    ]
+  },
+  "tdd": {
+    "red": {
+      "command": "npm.cmd test -- tests/ontology-evidence-chains.test.ts",
+      "passed": 41,
+      "failed": 4,
+      "expectedFailure": true
+    },
+    "green": {
+      "command": "npm.cmd test -- tests/ontology-evidence-chains.test.ts",
+      "passed": 45,
+      "failed": 0
+    }
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests/ontology-evidence-chains.test.ts tests/mcp-tools.test.ts",
+      "status": "pass",
+      "testFilesPassed": 2,
+      "testsPassed": 71,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass"
+    }
+  ],
+  "changedFiles": [
+    "lib/ontology/evidence-chain.ts",
+    "lib/mcp-tools.ts",
+    "tests/ontology-evidence-chains.test.ts",
+    "evaluation/ontology-evidence-invariant-gate-2026-07-13/report.md",
+    "evaluation/ontology-evidence-invariant-gate-2026-07-13/report.json"
+  ]
+}

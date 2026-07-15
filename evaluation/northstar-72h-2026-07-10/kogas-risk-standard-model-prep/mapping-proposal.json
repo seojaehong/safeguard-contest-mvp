@@ -1,0 +1,662 @@
+{
+  "root_source_id": "kogas-risk-standard-models-20240909",
+  "archive_path": "C:\\Users\\iceam\\Downloads\\한국가스공사_KOGAS 위험성평가 표준모델_20240909.zip",
+  "published_at": "2024-09-09",
+  "field_mapping": {
+    "safety_reference_sources": {
+      "id": "kogas-risk-standard-models-20240909::<archive-member-path>",
+      "source_group": "kogas-risk-standard-model",
+      "source_type": "workbook",
+      "agency": "한국가스공사",
+      "title": "workbook title or process name",
+      "source_path": "<archive-path>::<archive-member-path>",
+      "origin_url": null,
+      "file_format": "xls | xlsx",
+      "published_at": "2024-09-09",
+      "metadata": {
+        "rootSourceId": "kogas-risk-standard-models-20240909",
+        "memberPath": "<archive-member-path>",
+        "topLevelScope": "<top folder>",
+        "sheetCount": "<int>",
+        "mainSheetName": "<sheet name>",
+        "candidateRowCount": "<int>",
+        "parser": "openpyxl/xlrd"
+      }
+    },
+    "safety_reference_items": {
+      "risk-standard-model": {
+        "id": "source_id#model",
+        "source_id": "child workbook source id",
+        "item_type": "risk-standard-model",
+        "category": "top-level scope",
+        "subcategory": "process_name",
+        "title": "workbook title",
+        "summary": "workbook-level summary",
+        "body": "sheet names + preview tasks/hazards",
+        "keywords": "scope + process + preview tasks",
+        "risk_tags": "aggregated hazard tags",
+        "primary_documents": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "작업계획서"
+        ],
+        "controls": "representative additional controls",
+        "payload": {
+          "archiveMemberPath": "<archive-member-path>",
+          "candidateRowCount": "<int>",
+          "sampleRowIds": [
+            "source_id#row-0001"
+          ]
+        }
+      },
+      "risk-standard-row": {
+        "id": "source_id#row-0001",
+        "source_id": "child workbook source id",
+        "item_type": "risk-standard-row",
+        "category": "task or hazard category",
+        "subcategory": "hazard category or cause",
+        "title": "process / task / hazard",
+        "summary": "task + hazard + additional controls",
+        "body": "normalized row fields",
+        "keywords": "scope + process + task + category + cause",
+        "risk_tags": "keyword tags from row text",
+        "primary_documents": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "작업계획서"
+        ],
+        "controls": "current + additional controls",
+        "payload": {
+          "rowIndex1Based": "<int>",
+          "sheetName": "<sheet name>",
+          "carryForward": {
+            "task": "<bool>",
+            "hazardCategory": "<bool>",
+            "hazardCause": "<bool>"
+          },
+          "rawCells": {
+            "column_1": "<text>"
+          }
+        }
+      }
+    }
+  },
+  "counts": {
+    "parsed_sources": 69,
+    "risk_standard_models": 69,
+    "risk_standard_rows": 3101,
+    "skipped_members": 2
+  },
+  "preview": {
+    "sources": [
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+        "source_group": "kogas-risk-standard-model",
+        "source_type": "workbook",
+        "agency": "한국가스공사",
+        "title": "미화작업(실내)",
+        "source_path": "C:\\Users\\iceam\\Downloads\\한국가스공사_KOGAS 위험성평가 표준모델_20240909.zip::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+        "origin_url": null,
+        "file_format": "xls",
+        "published_at": "2024-09-09",
+        "metadata": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archivePath": "C:\\Users\\iceam\\Downloads\\한국가스공사_KOGAS 위험성평가 표준모델_20240909.zip",
+          "memberPath": "1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+          "fileSize": 306688,
+          "topLevelScope": "1. 본사",
+          "sheetCount": 2,
+          "sheetNames": [
+            "00000000",
+            "위험성평가(KRAS)"
+          ],
+          "mainSheetName": "위험성평가(KRAS)",
+          "processName": "미화작업(실내)",
+          "candidateRowCount": 17,
+          "parser": "openpyxl/xlrd",
+          "offlinePreparedAt": "2026-07-09T22:57:48.374037+00:00"
+        }
+      },
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls",
+        "source_group": "kogas-risk-standard-model",
+        "source_type": "workbook",
+        "agency": "한국가스공사",
+        "title": "사이버 보안관제 위탁운영 용역",
+        "source_path": "C:\\Users\\iceam\\Downloads\\한국가스공사_KOGAS 위험성평가 표준모델_20240909.zip::1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls",
+        "origin_url": null,
+        "file_format": "xls",
+        "published_at": "2024-09-09",
+        "metadata": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archivePath": "C:\\Users\\iceam\\Downloads\\한국가스공사_KOGAS 위험성평가 표준모델_20240909.zip",
+          "memberPath": "1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls",
+          "fileSize": 278528,
+          "topLevelScope": "1. 본사",
+          "sheetCount": 2,
+          "sheetNames": [
+            "00000000",
+            "위험성평가(KRAS)"
+          ],
+          "mainSheetName": "위험성평가(KRAS)",
+          "processName": "사이버 보안관제 위탁운영 용역",
+          "candidateRowCount": 14,
+          "parser": "openpyxl/xlrd",
+          "offlinePreparedAt": "2026-07-09T22:57:48.388736+00:00"
+        }
+      },
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-11 위험성평가 표준모델(통근버스).xls",
+        "source_group": "kogas-risk-standard-model",
+        "source_type": "workbook",
+        "agency": "한국가스공사",
+        "title": "통근버스",
+        "source_path": "C:\\Users\\iceam\\Downloads\\한국가스공사_KOGAS 위험성평가 표준모델_20240909.zip::1. 본사/본사-11 위험성평가 표준모델(통근버스).xls",
+        "origin_url": null,
+        "file_format": "xls",
+        "published_at": "2024-09-09",
+        "metadata": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archivePath": "C:\\Users\\iceam\\Downloads\\한국가스공사_KOGAS 위험성평가 표준모델_20240909.zip",
+          "memberPath": "1. 본사/본사-11 위험성평가 표준모델(통근버스).xls",
+          "fileSize": 278528,
+          "topLevelScope": "1. 본사",
+          "sheetCount": 2,
+          "sheetNames": [
+            "00000000",
+            "위험성평가(KRAS)"
+          ],
+          "mainSheetName": "위험성평가(KRAS)",
+          "processName": "통근버스",
+          "candidateRowCount": 13,
+          "parser": "openpyxl/xlrd",
+          "offlinePreparedAt": "2026-07-09T22:57:48.402426+00:00"
+        }
+      }
+    ],
+    "risk_standard_models": [
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#model",
+        "source_id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+        "item_type": "risk-standard-model",
+        "category": "1. 본사",
+        "subcategory": "미화작업(실내)",
+        "title": "미화작업(실내)",
+        "summary": "미화작업(실내) 표준모델. 17개 위험성평가 행, 2개 시트, 메인 시트 위험성평가(KRAS).",
+        "body": "member_path: 1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls\nprocess_name: 미화작업(실내)\nsheet_names: 00000000, 위험성평가(KRAS)\npreview_tasks: 점검 준비, 복도 및 계단 청소 (빗자루 및 대걸레), 손걸레 세탁, 유리창 청소, 화장실청소, 스티커 제거\npreview_hazards: 계단 이동시 부주의로 인한 발목 접질림, 장시간 반복작업으로 인한 요통 위험, 계단 이동시 부주의로 인한 넘어짐, 어두운 장소의 청소 작업시 바닥 확인이 어려워 넘어짐, 바닥 물기로 인한 넘어짐, 먼지 흡입에 따른 질병유발",
+        "keywords": [
+          "1. 본사",
+          "미화작업(실내)",
+          "점검 준비",
+          "복도 및 계단 청소 (빗자루 및 대걸레)",
+          "손걸레 세탁",
+          "유리창 청소"
+        ],
+        "risk_tags": [
+          "넘어짐",
+          "화학",
+          "추락",
+          "전도",
+          "베임",
+          "끼임",
+          "부딪힘"
+        ],
+        "primary_documents": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "작업계획서"
+        ],
+        "controls": [
+          "1. 작업장 정리정돈 2. 자재운반시 2인 1조 작업",
+          "1. 경량 빗자루 사용 2. 주기적 스트레칭 시행",
+          "1. 개인보호구 착용 2. 난간대 이용 계단 이동 3. 올라가는 방향으로 청소",
+          "1. 75럭스 이상의 조명 설치",
+          "1. 바닥부 물기 제거 철저 2. 계단부 미끄럼방지패드 설치",
+          "1. 방진마스크 착용",
+          "1. 고무장갑 착용 2. 친환경 세제 사용",
+          "1. 전도방지대 사다리 사용 2. 2인 1조 작업"
+        ],
+        "payload": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archiveMemberPath": "1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+          "sheetNames": [
+            "00000000",
+            "위험성평가(KRAS)"
+          ],
+          "mainSheetName": "위험성평가(KRAS)",
+          "candidateRowCount": 17,
+          "sampleRowIds": [
+            "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#row-0001",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#row-0002",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#row-0003",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#row-0004",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#row-0005"
+          ]
+        }
+      },
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls#model",
+        "source_id": "kogas-risk-standard-models-20240909::1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls",
+        "item_type": "risk-standard-model",
+        "category": "1. 본사",
+        "subcategory": "사이버 보안관제 위탁운영 용역",
+        "title": "사이버 보안관제 위탁운영 용역",
+        "summary": "사이버 보안관제 위탁운영 용역 표준모델. 14개 위험성평가 행, 2개 시트, 메인 시트 위험성평가(KRAS).",
+        "body": "member_path: 1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls\nprocess_name: 사이버 보안관제 위탁운영 용역\nsheet_names: 00000000, 위험성평가(KRAS)\npreview_tasks: 사옥내 이동, 사무용 자동화기기 사용, 사무용품 사용, 보안관제 업무, 교대근무\npreview_hazards: 전기선 등에 걸려 넘어짐, 미끄러운 바닥으로 인한 넘어짐, 출입구나 모퉁이에서의 근무자 충돌 사고 위험, 계단 이동중 넘어짐 또는 추락 발생, 문서 세단기 끼임사고 발생, 전자기기 누전으로 감전",
+        "keywords": [
+          "1. 본사",
+          "사이버 보안관제 위탁운영 용역",
+          "사옥내 이동",
+          "사무용 자동화기기 사용",
+          "사무용품 사용",
+          "보안관제 업무"
+        ],
+        "risk_tags": [
+          "넘어짐",
+          "충돌",
+          "추락",
+          "끼임",
+          "감전",
+          "화재",
+          "화학",
+          "절단",
+          "베임",
+          "밀폐",
+          "차량"
+        ],
+        "primary_documents": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "작업계획서"
+        ],
+        "controls": [
+          "ㅇ 외부 노출 케이블 정리정돈 ㅇ 전방주시 철저",
+          "ㅇ 주기적 바닥 청소 실시 ㅇ 우천 시 매트 또는 발걸레 비치",
+          "ㅇ 전방주시 철저 ㅇ 실내에서 천천히 이동",
+          "ㅇ 전방주시 철저 ㅇ 계단에 미끄럼 방지 조치 시행 ㅇ 계단실 충분한 조도 확보",
+          "ㅇ 문서 세단기 사용방법 및 주의사항 숙지 ㅇ 폐지 회수시 전원차단을 반드시 확인할 것 ㅇ 문서 세단기 끼임주의 표지 부착",
+          "ㅇ 접지극 설치된 콘센트 사용 ㅇ 젖은 손으로 스위치 조작금지",
+          "ㅇ 사무실 내 소화기 비치 ㅇ 사옥내 소방설비 주기적 점검을 통한 최적상태 유지",
+          "ㅇ 베임 방지장갑 착용 및 사용시 주의 ㅇ 두꺼운 종이 여러장 절단시 1~2장씩 분리 후 절단 ㅇ 커터 칼 사용시 길게 빼서 사용 금지"
+        ],
+        "payload": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archiveMemberPath": "1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls",
+          "sheetNames": [
+            "00000000",
+            "위험성평가(KRAS)"
+          ],
+          "mainSheetName": "위험성평가(KRAS)",
+          "candidateRowCount": 14,
+          "sampleRowIds": [
+            "kogas-risk-standard-models-20240909::1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls#row-0001",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls#row-0002",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls#row-0003",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls#row-0004",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-10 위험성평가 표준모델(사이버 보안관제 위탁운영 용역).xls#row-0005"
+          ]
+        }
+      },
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-11 위험성평가 표준모델(통근버스).xls#model",
+        "source_id": "kogas-risk-standard-models-20240909::1. 본사/본사-11 위험성평가 표준모델(통근버스).xls",
+        "item_type": "risk-standard-model",
+        "category": "1. 본사",
+        "subcategory": "통근버스",
+        "title": "통근버스",
+        "summary": "통근버스 표준모델. 13개 위험성평가 행, 2개 시트, 메인 시트 위험성평가(KRAS).",
+        "body": "member_path: 1. 본사/본사-11 위험성평가 표준모델(통근버스).xls\nprocess_name: 통근버스\nsheet_names: 00000000, 위험성평가(KRAS)\npreview_tasks: 차량승하차, 차량운전, 차량점검, 차량정지, 기타\npreview_hazards: 차량내 미끄러운 바닥, 계단으로 인한 넘어짐, 과속 등 교통법규위반으로 인한 사고 발생 위험, 야간운행 중 졸음운전으로 인한 사고 발생 위험, 운전중 백미러 및 좌석 위치 조정으로 인한 사고 발생, 급작스러운 출발·정지로 승객 넘어짐 사고 발생 위험, 운전중 타이어 파손으로 전복사고 발생",
+        "keywords": [
+          "1. 본사",
+          "통근버스",
+          "차량승하차",
+          "차량운전",
+          "차량점검",
+          "차량정지"
+        ],
+        "risk_tags": [
+          "넘어짐",
+          "차량",
+          "끼임"
+        ],
+        "primary_documents": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "작업계획서"
+        ],
+        "controls": [
+          "ㅇ 주기적 차량 물기제거 ㅇ 버스 계단 미끄럼 방지 패드 부착 ㅇ 자량 완전 정차 후 승하차 실시",
+          "ㅇ 방어운전 실시 ㅇ 주행중 교통안전수칙 및 법규준수",
+          "ㅇ 졸음발생시 안전한 장소(휴게소 등) 정차 및 충분한 휴식 후 운전 재개",
+          "ㅇ 운행전 백미러 및 좌석 조정 ㅇ 운전중 전방주시 철저",
+          "ㅇ 급출발·정지 방지를 위한 운전자 교육 실시 ㅇ 차량 완전 정차 후 승·하차",
+          "ㅇ 운행전 타이어 상태 점검",
+          "ㅇ 운행전 와이퍼 작동상태 확인",
+          "ㅇ 운행전 운전석 계기판 경고등 상태 확인"
+        ],
+        "payload": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archiveMemberPath": "1. 본사/본사-11 위험성평가 표준모델(통근버스).xls",
+          "sheetNames": [
+            "00000000",
+            "위험성평가(KRAS)"
+          ],
+          "mainSheetName": "위험성평가(KRAS)",
+          "candidateRowCount": 13,
+          "sampleRowIds": [
+            "kogas-risk-standard-models-20240909::1. 본사/본사-11 위험성평가 표준모델(통근버스).xls#row-0001",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-11 위험성평가 표준모델(통근버스).xls#row-0002",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-11 위험성평가 표준모델(통근버스).xls#row-0003",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-11 위험성평가 표준모델(통근버스).xls#row-0004",
+            "kogas-risk-standard-models-20240909::1. 본사/본사-11 위험성평가 표준모델(통근버스).xls#row-0005"
+          ]
+        }
+      }
+    ],
+    "risk_standard_rows": [
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#row-0001",
+        "source_id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+        "item_type": "risk-standard-row",
+        "category": "점검 준비",
+        "subcategory": "작업환경요인",
+        "title": "미화작업(실내) / 점검 준비 / 계단 이동시 부주의로 인한 발목 접질림",
+        "summary": "점검 준비 / 계단 이동시 부주의로 인한 발목 접질림 / 1. 작업장 정리정돈 2. 자재운반시 2인 1조 작업",
+        "body": "process_name: 미화작업(실내)\ntask: 점검 준비\nhazard_category: 작업환경요인\nhazard_detail: 계단 이동시 부주의로 인한 발목 접질림\nadditional_controls: 1. 작업장 정리정돈 2. 자재운반시 2인 1조 작업",
+        "keywords": [
+          "1. 본사",
+          "미화작업(실내)",
+          "점검 준비",
+          "작업환경요인"
+        ],
+        "risk_tags": [],
+        "primary_documents": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "작업계획서"
+        ],
+        "controls": [
+          "1. 작업장 정리정돈 2. 자재운반시 2인 1조 작업"
+        ],
+        "payload": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archiveMemberPath": "1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+          "sheetName": "위험성평가(KRAS)",
+          "processName": "미화작업(실내)",
+          "task": "점검 준비",
+          "hazardCategory": "작업환경요인",
+          "hazardCause": "",
+          "hazardDetail": "계단 이동시 부주의로 인한 발목 접질림",
+          "legalBasis": "",
+          "currentControls": "",
+          "additionalControls": "1. 작업장 정리정돈 2. 자재운반시 2인 1조 작업",
+          "currentRisk": {
+            "likelihood": "",
+            "severity": "",
+            "score": ""
+          },
+          "postRiskLevel": "",
+          "owner": "",
+          "dueDate": "",
+          "completionDate": "",
+          "rowIndex1Based": 6,
+          "carryForward": {
+            "task": false,
+            "hazardCategory": false,
+            "hazardCause": false
+          },
+          "rawCells": {
+            "column_1": "점검 준비",
+            "column_2": "작업환경요인",
+            "column_3": "계단 이동시 부주의로 인한 발목 접질림",
+            "column_8": "1. 작업장 정리정돈 2. 자재운반시 2인 1조 작업",
+            "column_17": "D (1)",
+            "column_18": "Ⅱ",
+            "column_19": "Ⅱ",
+            "column_20": "Ⅰ",
+            "column_21": "Ⅰ",
+            "column_22": "Ⅰ",
+            "column_27": "매우낮음 (1)",
+            "column_28": "5.0"
+          }
+        }
+      },
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#row-0002",
+        "source_id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+        "item_type": "risk-standard-row",
+        "category": "복도 및 계단 청소 (빗자루 및 대걸레)",
+        "subcategory": "작업특성요인",
+        "title": "미화작업(실내) / 복도 및 계단 청소 (빗자루 및 대걸레) / 장시간 반복작업으로 인한 요통 위험",
+        "summary": "복도 및 계단 청소 (빗자루 및 대걸레) / 장시간 반복작업으로 인한 요통 위험 / 1. 경량 빗자루 사용 2. 주기적 스트레칭 시행",
+        "body": "process_name: 미화작업(실내)\ntask: 복도 및 계단 청소 (빗자루 및 대걸레)\nhazard_category: 작업특성요인\nhazard_detail: 장시간 반복작업으로 인한 요통 위험\nadditional_controls: 1. 경량 빗자루 사용 2. 주기적 스트레칭 시행",
+        "keywords": [
+          "1. 본사",
+          "미화작업(실내)",
+          "복도 및 계단 청소 (빗자루 및 대걸레)",
+          "작업특성요인"
+        ],
+        "risk_tags": [],
+        "primary_documents": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "작업계획서"
+        ],
+        "controls": [
+          "1. 경량 빗자루 사용 2. 주기적 스트레칭 시행"
+        ],
+        "payload": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archiveMemberPath": "1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+          "sheetName": "위험성평가(KRAS)",
+          "processName": "미화작업(실내)",
+          "task": "복도 및 계단 청소 (빗자루 및 대걸레)",
+          "hazardCategory": "작업특성요인",
+          "hazardCause": "",
+          "hazardDetail": "장시간 반복작업으로 인한 요통 위험",
+          "legalBasis": "",
+          "currentControls": "",
+          "additionalControls": "1. 경량 빗자루 사용 2. 주기적 스트레칭 시행",
+          "currentRisk": {
+            "likelihood": "",
+            "severity": "",
+            "score": ""
+          },
+          "postRiskLevel": "",
+          "owner": "",
+          "dueDate": "",
+          "completionDate": "",
+          "rowIndex1Based": 7,
+          "carryForward": {
+            "task": false,
+            "hazardCategory": false,
+            "hazardCause": false
+          },
+          "rawCells": {
+            "column_1": "복도 및 계단 청소 (빗자루 및 대걸레)",
+            "column_2": "작업특성요인",
+            "column_3": "장시간 반복작업으로 인한 요통 위험",
+            "column_8": "1. 경량 빗자루 사용 2. 주기적 스트레칭 시행"
+          }
+        }
+      },
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#row-0003",
+        "source_id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+        "item_type": "risk-standard-row",
+        "category": "복도 및 계단 청소 (빗자루 및 대걸레)",
+        "subcategory": "작업특성요인",
+        "title": "미화작업(실내) / 복도 및 계단 청소 (빗자루 및 대걸레) / 계단 이동시 부주의로 인한 넘어짐",
+        "summary": "복도 및 계단 청소 (빗자루 및 대걸레) / 계단 이동시 부주의로 인한 넘어짐 / 1. 개인보호구 착용 2. 난간대 이용 계단 이동 3. 올라가는 방향으로 청소",
+        "body": "process_name: 미화작업(실내)\ntask: 복도 및 계단 청소 (빗자루 및 대걸레)\nhazard_category: 작업특성요인\nhazard_detail: 계단 이동시 부주의로 인한 넘어짐\nadditional_controls: 1. 개인보호구 착용 2. 난간대 이용 계단 이동 3. 올라가는 방향으로 청소",
+        "keywords": [
+          "1. 본사",
+          "미화작업(실내)",
+          "복도 및 계단 청소 (빗자루 및 대걸레)",
+          "작업특성요인"
+        ],
+        "risk_tags": [
+          "넘어짐"
+        ],
+        "primary_documents": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "작업계획서"
+        ],
+        "controls": [
+          "1. 개인보호구 착용 2. 난간대 이용 계단 이동 3. 올라가는 방향으로 청소"
+        ],
+        "payload": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archiveMemberPath": "1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+          "sheetName": "위험성평가(KRAS)",
+          "processName": "미화작업(실내)",
+          "task": "복도 및 계단 청소 (빗자루 및 대걸레)",
+          "hazardCategory": "작업특성요인",
+          "hazardCause": "",
+          "hazardDetail": "계단 이동시 부주의로 인한 넘어짐",
+          "legalBasis": "",
+          "currentControls": "",
+          "additionalControls": "1. 개인보호구 착용 2. 난간대 이용 계단 이동 3. 올라가는 방향으로 청소",
+          "currentRisk": {
+            "likelihood": "",
+            "severity": "",
+            "score": ""
+          },
+          "postRiskLevel": "",
+          "owner": "",
+          "dueDate": "",
+          "completionDate": "",
+          "rowIndex1Based": 8,
+          "carryForward": {
+            "task": true,
+            "hazardCategory": true,
+            "hazardCause": false
+          },
+          "rawCells": {
+            "column_3": "계단 이동시 부주의로 인한 넘어짐",
+            "column_8": "1. 개인보호구 착용 2. 난간대 이용 계단 이동 3. 올라가는 방향으로 청소"
+          }
+        }
+      },
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#row-0004",
+        "source_id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+        "item_type": "risk-standard-row",
+        "category": "복도 및 계단 청소 (빗자루 및 대걸레)",
+        "subcategory": "작업특성요인",
+        "title": "미화작업(실내) / 복도 및 계단 청소 (빗자루 및 대걸레) / 어두운 장소의 청소 작업시 바닥 확인이 어려워 넘어짐",
+        "summary": "복도 및 계단 청소 (빗자루 및 대걸레) / 어두운 장소의 청소 작업시 바닥 확인이 어려워 넘어짐 / 1. 75럭스 이상의 조명 설치",
+        "body": "process_name: 미화작업(실내)\ntask: 복도 및 계단 청소 (빗자루 및 대걸레)\nhazard_category: 작업특성요인\nhazard_detail: 어두운 장소의 청소 작업시 바닥 확인이 어려워 넘어짐\nadditional_controls: 1. 75럭스 이상의 조명 설치",
+        "keywords": [
+          "1. 본사",
+          "미화작업(실내)",
+          "복도 및 계단 청소 (빗자루 및 대걸레)",
+          "작업특성요인"
+        ],
+        "risk_tags": [
+          "넘어짐"
+        ],
+        "primary_documents": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "작업계획서"
+        ],
+        "controls": [
+          "1. 75럭스 이상의 조명 설치"
+        ],
+        "payload": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archiveMemberPath": "1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+          "sheetName": "위험성평가(KRAS)",
+          "processName": "미화작업(실내)",
+          "task": "복도 및 계단 청소 (빗자루 및 대걸레)",
+          "hazardCategory": "작업특성요인",
+          "hazardCause": "",
+          "hazardDetail": "어두운 장소의 청소 작업시 바닥 확인이 어려워 넘어짐",
+          "legalBasis": "",
+          "currentControls": "",
+          "additionalControls": "1. 75럭스 이상의 조명 설치",
+          "currentRisk": {
+            "likelihood": "",
+            "severity": "",
+            "score": ""
+          },
+          "postRiskLevel": "",
+          "owner": "",
+          "dueDate": "",
+          "completionDate": "",
+          "rowIndex1Based": 9,
+          "carryForward": {
+            "task": true,
+            "hazardCategory": true,
+            "hazardCause": false
+          },
+          "rawCells": {
+            "column_3": "어두운 장소의 청소 작업시 바닥 확인이 어려워 넘어짐",
+            "column_8": "1. 75럭스 이상의 조명 설치"
+          }
+        }
+      },
+      {
+        "id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls#row-0005",
+        "source_id": "kogas-risk-standard-models-20240909::1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+        "item_type": "risk-standard-row",
+        "category": "복도 및 계단 청소 (빗자루 및 대걸레)",
+        "subcategory": "작업특성요인",
+        "title": "미화작업(실내) / 복도 및 계단 청소 (빗자루 및 대걸레) / 바닥 물기로 인한 넘어짐",
+        "summary": "복도 및 계단 청소 (빗자루 및 대걸레) / 바닥 물기로 인한 넘어짐 / 1. 바닥부 물기 제거 철저 2. 계단부 미끄럼방지패드 설치",
+        "body": "process_name: 미화작업(실내)\ntask: 복도 및 계단 청소 (빗자루 및 대걸레)\nhazard_category: 작업특성요인\nhazard_detail: 바닥 물기로 인한 넘어짐\nadditional_controls: 1. 바닥부 물기 제거 철저 2. 계단부 미끄럼방지패드 설치",
+        "keywords": [
+          "1. 본사",
+          "미화작업(실내)",
+          "복도 및 계단 청소 (빗자루 및 대걸레)",
+          "작업특성요인"
+        ],
+        "risk_tags": [
+          "넘어짐"
+        ],
+        "primary_documents": [
+          "위험성평가표",
+          "TBM 브리핑",
+          "작업계획서"
+        ],
+        "controls": [
+          "1. 바닥부 물기 제거 철저 2. 계단부 미끄럼방지패드 설치"
+        ],
+        "payload": {
+          "rootSourceId": "kogas-risk-standard-models-20240909",
+          "archiveMemberPath": "1. 본사/본사-1 위험성평가 표준모델_미화작업(실내)_r1.xls",
+          "sheetName": "위험성평가(KRAS)",
+          "processName": "미화작업(실내)",
+          "task": "복도 및 계단 청소 (빗자루 및 대걸레)",
+          "hazardCategory": "작업특성요인",
+          "hazardCause": "",
+          "hazardDetail": "바닥 물기로 인한 넘어짐",
+          "legalBasis": "",
+          "currentControls": "",
+          "additionalControls": "1. 바닥부 물기 제거 철저 2. 계단부 미끄럼방지패드 설치",
+          "currentRisk": {
+            "likelihood": "",
+            "severity": "",
+            "score": ""
+          },
+          "postRiskLevel": "",
+          "owner": "",
+          "dueDate": "",
+          "completionDate": "",
+          "rowIndex1Based": 10,
+          "carryForward": {
+            "task": true,
+            "hazardCategory": true,
+            "hazardCause": false
+          },
+          "rawCells": {
+            "column_3": "바닥 물기로 인한 넘어짐",
+            "column_8": "1. 바닥부 물기 제거 철저 2. 계단부 미끄럼방지패드 설치"
+          }
+        }
+      }
+    ]
+  }
+}

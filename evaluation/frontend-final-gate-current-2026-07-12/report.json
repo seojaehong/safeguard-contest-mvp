@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "92eea81f3c550cc3f110711221a1e4251e1533e8",
+  "baseSha": "24c19c17cc8c932a333fdae8785426218e57ae15",
+  "status": "pass",
+  "staticAudit": {
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "cssLines": 19781,
+    "importantDeclarations": 0,
+    "coverageIssues": 0,
+    "violations": 0
+  },
+  "browserAudit": {
+    "routes": 32,
+    "routeRows": 96,
+    "workspaceThemeRows": 6,
+    "specialSurfaceRows": 4,
+    "generatedSurfaceRows": 2,
+    "screenshots": 108,
+    "successes": 108,
+    "failedRows": 0,
+    "findings": 0,
+    "recoveredRows": 0
+  },
+  "documentTypography": {
+    "titleLetterSpacing": "-0.533333px",
+    "sectionLetterSpacing": "-0.186667px"
+  },
+  "tests": {
+    "filesPassed": 120,
+    "filesSkipped": 5,
+    "testsPassed": 1124,
+    "testsSkipped": 7,
+    "failures": 0,
+    "command": "npx.cmd vitest run --maxWorkers=1 --no-file-parallelism"
+  },
+  "typecheck": "pass",
+  "build": {
+    "auditPages": 27,
+    "auditMarkerCount": 1,
+    "normalPages": 27,
+    "normalMarkerCount": 0
+  }
+}

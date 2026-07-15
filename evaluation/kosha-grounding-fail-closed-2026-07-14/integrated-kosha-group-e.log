@@ -1,0 +1,15 @@
+HEAD=da0550d60b324e68ed67e87319636681aaaa13c8
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/safety-reference-relevance.test.ts tests/safety-reference-hybrid.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-evidence-integration
+
+
+ Test Files  3 passed (3)
+      Tests  79 passed (79)
+   Start at  13:25:50
+   Duration  9.13s (transform 702ms, setup 0ms, import 1.19s, tests 6.12s, environment 0ms)
+
+EXIT_CODE=0

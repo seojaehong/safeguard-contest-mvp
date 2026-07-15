@@ -1,0 +1,65 @@
+{
+  "commit": "a0d7b39",
+  "url": "https://www.safeclaw.kr/workspace?theme=day&verify=a0d7b39-share-1783629532719",
+  "metrics": {
+    "viewportWidth": 1440,
+    "scrollWidth": 1440,
+    "shareTextSnippets": {
+      "scope": true,
+      "recipients": true,
+      "ack": true,
+      "storedEvidence": true,
+      "blocked": false,
+      "ready": true
+    },
+    "sharePage": {
+      "top": -3,
+      "bottom": 914,
+      "left": 377,
+      "right": 1343,
+      "width": 966,
+      "height": 917,
+      "display": "grid",
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "color": "rgb(23, 25, 29)",
+      "borderRadius": 0,
+      "borderTopWidth": 0
+    },
+    "warning": null,
+    "grid": {
+      "top": 14,
+      "bottom": 340,
+      "left": 631,
+      "right": 1326,
+      "width": 695,
+      "height": 326,
+      "display": "grid",
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "color": "rgb(26, 27, 30)",
+      "borderRadius": 0,
+      "borderTopWidth": 0
+    },
+    "sharePanel": {
+      "top": -3,
+      "bottom": 914,
+      "left": 377,
+      "right": 1343,
+      "width": 966,
+      "height": 917,
+      "display": "grid",
+      "backgroundColor": "rgb(255, 255, 255)",
+      "color": "rgb(26, 27, 30)",
+      "borderRadius": 14,
+      "borderTopWidth": 1
+    }
+  },
+  "checks": {
+    "noHorizontalScroll": true,
+    "sharePageVisible": true,
+    "shareScopeVisible": true,
+    "recipientsVisible": true,
+    "acknowledgmentVisible": true,
+    "storedEvidenceVisible": true,
+    "shareStateVisible": true
+  }
+}

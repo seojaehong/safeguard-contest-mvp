@@ -48,6 +48,46 @@ describe("workspace page navigation", () => {
     });
   });
 
+  it("lets users inspect share blockers while keeping actual dispatch gated", () => {
+    const gate = canOpenWorkspacePage({
+      targetPage: "share",
+      hasWorkpack: true,
+      isGenerating: false,
+      canShare: false
+    });
+
+    expect(gate.allowed).toBe(true);
+    expect(gate.reason).toBe("공유 화면에서 보완 항목을 확인할 수 있습니다. 실제 전송은 계속 차단됩니다.");
+  });
+
+  it("marks share as blocked instead of pending when readiness gates fail", () => {
+    expect(
+      buildWorkspaceStepStatuses({
+        currentPage: "document",
+        hasWorkpack: true,
+        isGenerating: false,
+        canShare: false
+      })
+    ).toEqual({
+      input: "done",
+      document: "active",
+      share: "blocked"
+    });
+
+    expect(
+      buildWorkspaceStepStatuses({
+        currentPage: "share",
+        hasWorkpack: true,
+        isGenerating: false,
+        canShare: false
+      })
+    ).toEqual({
+      input: "done",
+      document: "blocked",
+      share: "active"
+    });
+  });
+
   it("returns users to input after generation fails so they can revise or retry", () => {
     expect(nextWorkspacePageAfterGenerationError()).toBe("input");
   });

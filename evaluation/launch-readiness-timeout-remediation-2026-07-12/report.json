@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "762ba8508202347a238b54846866e3d8125cc361",
+  "testedProductSha": "d0f90e6423941eb1cd1b9abc0da34490403b2c71",
+  "status": "pass_pending_integrated_full_suite",
+  "red": {
+    "testFilesPassed": 130,
+    "testFilesFailed": 1,
+    "testFilesSkipped": 5,
+    "testsPassed": 1208,
+    "testsFailed": 1,
+    "testsSkipped": 7,
+    "failedCase": "removes stale output and exits one when the request times out",
+    "observedRequests": 0,
+    "fixtureTimeoutMs": 75
+  },
+  "change": {
+    "fixtureTimeoutMs": 1000,
+    "childDeadlineMs": 5000,
+    "productRuntimeFilesChanged": 0
+  },
+  "green": {
+    "launchReadinessTestsPassed": 4,
+    "launchReadinessTestsFailed": 0,
+    "exactTimeoutRepeatsPassed": 5,
+    "exactTimeoutRepeatsFailed": 0,
+    "typecheck": "pass",
+    "diffCheck": "pass"
+  },
+  "deferred": [
+    "integrated full serial suite",
+    "build",
+    "browser audit"
+  ],
+  "artifacts": [
+    "exact-d0f90e6-full-file.log",
+    "exact-d0f90e6-timeout-repeat-5.log",
+    "exact-d0f90e6-typecheck.log"
+  ]
+}

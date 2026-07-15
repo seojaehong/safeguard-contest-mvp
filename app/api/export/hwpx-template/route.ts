@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         route: "/api/export/hwpx-template",
         methods: ["GET"],
         message:
-          "GET ?kind=<template>&companyName=<your-company> to download an official HWPX template with companyName substituted.",
+          "GET ?kind=<template>&companyName=<사업장명>으로 사업장명이 반영된 HWPX 양식을 내려받습니다.",
         templates: listAvailableTemplates()
       },
       { headers: { "cache-control": "no-store" } }
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
   if (!isValidTemplateKind(kind)) {
     return NextResponse.json(
-      { ok: false, error: `Unknown template kind: ${kind}`, valid: Object.keys(TEMPLATE_LABELS) },
+      { ok: false, error: `지원하지 않는 양식 종류입니다: ${kind}`, valid: Object.keys(TEMPLATE_LABELS) },
       { status: 400 }
     );
   }
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "template build failed" },
+      { ok: false, error: error instanceof Error ? error.message : "HWPX 양식을 만들지 못했습니다." },
       { status: 500 }
     );
   }

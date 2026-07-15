@@ -1,0 +1,277 @@
+{
+  "elapsedMs": 12996,
+  "mode": "live",
+  "status": {
+    "lawgo": "fallback",
+    "ai": "live",
+    "weather": "fallback",
+    "work24": "fallback",
+    "kosha": "live",
+    "summary": "연결됨",
+    "detail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: fallback / DATA_GO_KR_SERVICE_KEY 또는 PUBLIC_DATA_API_KEY가 없어 기상청 예보 연결을 확인해야 합니다. / WORK24_AUTH_KEY가 없어 고용24 사업주훈련 연결을 확인해야 합니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 26개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 6건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 세부 OpenAPI 연결을 확인해야 합니다. / DATA_GO_KR_SERVICE_KEY가 없어 KOSHA 국내재해사례 연결을 확인해야 합니다. / 지식 DB 매칭 3건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=deterministic fallback) / TBM-risk 연결 5건 (TBM-risk links=deterministic fallback) / AI_MODE=enhanced (Gemini 본문 0개 채움: 없음) []",
+    "policyNote": "OpenAI 응답은 timeout 20000ms, retry 없음, 실패 시 graceful fallback 정책을 따릅니다."
+  },
+  "quality": {
+    "overall": "degraded",
+    "summary": "통합 루프 4/6개 항목만 준비됐습니다. 보완 항목을 먼저 확인하세요.",
+    "items": [
+      {
+        "key": "fallback",
+        "label": "실시간 근거",
+        "status": "degraded",
+        "detail": "4개 근거 경로는 보조 자료 기준으로 표시됩니다. 전파 전 원문 확인을 권장합니다."
+      },
+      {
+        "key": "ontology",
+        "label": "안전조치 검수",
+        "status": "ready",
+        "detail": "밀폐공간 작업 작업의 필수 안전조치가 문서팩에 반영됐습니다."
+      },
+      {
+        "key": "evidence",
+        "label": "증빙 매핑",
+        "status": "ready",
+        "detail": "필수 문서 7/7종이 시행령 제4조 증빙 라벨에 연결됐습니다."
+      },
+      {
+        "key": "structured",
+        "label": "문서 구조 검수",
+        "status": "degraded",
+        "detail": "필수 구조화 산출물 1/4종이 준비됐습니다. 나머지는 기본 문서 형식으로 보완됐습니다."
+      },
+      {
+        "key": "dbHarness",
+        "label": "DB 하네스 계약",
+        "status": "ready",
+        "detail": "DB 근거 9건을 고정했고, 필수 문서 3/3종을 하네스가 커버했습니다."
+      },
+      {
+        "key": "persistence",
+        "label": "DB 저장 준비",
+        "status": "ready",
+        "detail": "문서팩 본문과 증빙 요약이 있어 관리자 로그인 후 서버 저장할 수 있습니다."
+      }
+    ],
+    "dbHarness": {
+      "status": "ready",
+      "mode": "db_harness_first",
+      "llmRole": "naturalize_only",
+      "llmOutputScope": "rewrite_fixed_evidence_only",
+      "evidenceAuthority": "db_harness",
+      "providerRetryScope": "naturalization_retry_only",
+      "fallbackChainAllowed": false,
+      "genericProseSubstitutionAllowed": false,
+      "missingEvidencePolicy": "surface_review_required",
+      "directEvidenceCount": 6,
+      "sifCaseCount": 1,
+      "supportingEvidenceCount": 2,
+      "retrievalContract": {
+        "source": "safety_reference_items",
+        "mode": "rest-ilike",
+        "vector": {
+          "enabled": false,
+          "attempted": false,
+          "ready": false,
+          "reason": "disabled",
+          "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+        },
+        "sourceCounts": {
+          "directEvidence": 6,
+          "sifCases": 1,
+          "supportingEvidence": 2,
+          "rest": 8,
+          "ranked": 0,
+          "vector": 0,
+          "hybrid": 0
+        },
+        "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 3건, 일반 카탈로그 5건)"
+      },
+      "missingEvidence": [],
+      "documentCoverage": [
+        {
+          "document": "위험성평가표",
+          "covered": true,
+          "evidenceTypes": [
+            "directEvidence",
+            "sifCase",
+            "supportingEvidence",
+            "improvementMemory"
+          ]
+        },
+        {
+          "document": "TBM 브리핑",
+          "covered": true,
+          "evidenceTypes": [
+            "directEvidence",
+            "improvementMemory"
+          ]
+        },
+        {
+          "document": "TBM 기록",
+          "covered": true,
+          "evidenceTypes": [
+            "directEvidence",
+            "improvementMemory"
+          ]
+        }
+      ],
+      "detail": "DB 근거 9건을 고정했고, 필수 문서 3/3종을 하네스가 커버했습니다."
+    },
+    "ontology": {
+      "status": "ready",
+      "matchCount": 3,
+      "reviewTask": "밀폐공간 작업",
+      "verdict": "통과",
+      "missingControlCount": 0,
+      "detail": "밀폐공간 작업 작업의 필수 안전조치가 문서팩에 반영됐습니다."
+    },
+    "structured": {
+      "status": "degraded",
+      "readyCount": 1,
+      "requiredCount": 4,
+      "detail": "필수 구조화 산출물 1/4종이 준비됐습니다. 나머지는 기본 문서 형식으로 보완됐습니다."
+    }
+  },
+  "dbHarness": {
+    "mode": "db_harness_first",
+    "llmRole": "naturalize_only",
+    "evidenceAuthority": "db_harness",
+    "retrieval": {
+      "source": "safety_reference_items",
+      "mode": "rest-ilike",
+      "vector": {
+        "enabled": false,
+        "attempted": false,
+        "ready": false,
+        "reason": "disabled",
+        "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+      },
+      "sourceCounts": {
+        "directEvidence": 6,
+        "sifCases": 1,
+        "supportingEvidence": 2,
+        "rest": 8,
+        "ranked": 0,
+        "vector": 0,
+        "hybrid": 0
+      },
+      "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 3건, 일반 카탈로그 5건)"
+    },
+    "counts": {
+      "directEvidence": 6,
+      "sifCases": 1,
+      "supportingEvidence": 2,
+      "improvementMemory": 1,
+      "workpackMemory": 1
+    },
+    "missingEvidence": [],
+    "ontologyStatus": "ready",
+    "documentCoverage": [
+      {
+        "document": "위험성평가표",
+        "covered": true,
+        "evidenceTypes": [
+          "directEvidence",
+          "sifCase",
+          "supportingEvidence",
+          "improvementMemory"
+        ]
+      },
+      {
+        "document": "TBM 브리핑",
+        "covered": true,
+        "evidenceTypes": [
+          "directEvidence",
+          "improvementMemory"
+        ]
+      },
+      {
+        "document": "TBM 기록",
+        "covered": true,
+        "evidenceTypes": [
+          "directEvidence",
+          "improvementMemory"
+        ]
+      }
+    ],
+    "promptContextIncludesImprovement": true
+  },
+  "ontologyQa": {
+    "reviewTask": "밀폐공간 작업",
+    "result": {
+      "reviewable": true,
+      "task": "밀폐공간 작업",
+      "covered": {
+        "hazards": [
+          "가연성가스 화재·폭발",
+          "산소결핍 질식",
+          "유해가스 중독"
+        ],
+        "controls": [
+          "감시인 외부 배치 및 연락설비",
+          "관계자 외 출입금지 표지 게시",
+          "대피용 기구(공기호흡기·사다리·섬유로프) 비치",
+          "밀폐공간 작업 프로그램 수립·시행",
+          "입·퇴장 시 인원 점검",
+          "작업 전·중 산소 및 유해가스 농도 측정·평가",
+          "적정공기 유지 환기"
+        ],
+        "articles": [
+          "기준규칙 제619조(밀폐공간 작업 프로그램의 수립·시행)",
+          "기준규칙 제619조의2(산소 및 유해가스 농도의 측정 및 기록 등)",
+          "기준규칙 제620조(환기 등)",
+          "기준규칙 제621조(인원의 점검)",
+          "기준규칙 제622조(출입의 금지)",
+          "기준규칙 제623조(감시인의 배치 등)",
+          "기준규칙 제625조(대피용 기구의 비치)"
+        ]
+      },
+      "missing": {
+        "hazards": [],
+        "controls": [],
+        "articles": []
+      },
+      "coverageRate": 1,
+      "verdict": "통과",
+      "advisory": "이 검수는 온톨로지 시드 기준이며 현장 여건 확인을 대체하지 않습니다"
+    },
+    "sourceDocumentKeys": [
+      "riskAssessmentDraft",
+      "workPlanDraft",
+      "tbmBriefing",
+      "tbmLogDraft",
+      "safetyEducationRecordDraft",
+      "emergencyResponseDraft"
+    ],
+    "detail": "안전조치 검수 통과: 위험성평가표, 작업계획서, TBM 브리핑, TBM 기록, 안전보건교육 기록, 비상대응 절차 문서를 확인했습니다."
+  },
+  "structured": {
+    "riskRows": 5,
+    "riskValidation": {
+      "ok": true,
+      "issueCount": 0,
+      "issues": []
+    },
+    "tbmLinks": 5,
+    "hasImprovementRiskRow": false
+  },
+  "remediationReflected": {
+    "riskAssessmentDraft": true,
+    "tbmBriefing": true,
+    "tbmLogDraft": true,
+    "emergencyResponseDraft": true
+  },
+  "improvementReflected": {
+    "answer": true,
+    "riskAssessmentDraft": true,
+    "tbmBriefing": true,
+    "tbmLogDraft": true
+  },
+  "excerpts": {
+    "answer": "1) 하네스 판단\n- 직접 근거: B-M-34-2026 크레인 안전작업에 관한 기술지원규정 / E-G-3-2025 영상표시단말기를 사용하는 사무환경 관리에 관한 기술지원규정 / E-G-5-2025 직무스트레스로 인한 건강장해 예방을 위한 업종별, 직종별 기술지원규정\n- SIF 유사사례: 103 / 제조업 / 화학및고무제품제조업\n- 작업·개선 이력: 누수 바닥 미끄럼 및 밀폐공간 산소결핍: 전회 작업 후 누수부 임시 배수로를 설치하고 통행 구간 미끄럼 방지 매트를 추가했다. 오늘 TBM에서 배수로 막힘 여부와 산소농도 측정 기록을 다시 확인한다. / 2026-07-02T09:00:00.000Z: 누수부 임시 배수로 설치 후 재점검 필요\n\n2) 오늘 문서에 먼저 반영할 조치\n- 가동부 방호덮개와 비상정지장치 확인\n- 정비 전 전원 차단 및 잠금표지\n- MSDS 확인 및 적정 보호구 착용\n- 환기와 누출 대응 물품 비치\n- 작업 전 유해·위험요인 확인\n- 관리감독자 확인 후 작업 시작\n\n3) 보강 필요\n- 필수 3종 문서에 반영할 근거가 준비됐습니다.\n\n[기상 신호] 기상청 서비스 키가 없어 현장 기상 주의 문구를 보수적으로 적용합니다.\n\n[KOSHA 보강] KOSHA 위험성평가 사업안내 (공식 링크 확인)\n\n[유사 재해사례] 지하 기계실 점검 중 감전·미끄럼 재해사례: 차단·잠금표시, 절연 보호구, 2인 1조, 누수구역 표시와 배수 확인을 작업 전 조치합니다.",
+    "riskAssessmentDraft": "와 산소농도 측정 기록을 다시 확인한다. (개선 이력)\n- 유사 작업 이력: 2026-07-02T09:00:00.000Z 유사 작업: 부산 해운대 지하 기계실 누수 보수 및 배수펌프 점검 / 상태 누수부 임시 배수로 설치 후 재점검 필요\n\n[온톨로지 QA 보완 반영 - 위험성평가]\n- 검수 보완 작업: 밀폐공간 작업\n- 누락 위험요인 확인: 가연성가스 화재·폭발\n- 누락 위험요인 확인: 산소결핍 질식\n- 필수 안전조치 반영: 감시인 외부 배치 및 연락설비 (기준규칙 제623조(감시인의 배치 등))\n- 필수 안전조치 반영: 관계자 외 출입금지 표지 게시 (기준규칙 제622조(출입의 금지))\n- 필수 안전조치 반영: 대피용 기구(공기호흡기·사다리·섬유로프) 비치 (기준규칙 제625조(대피용 기구의 비치))\n- 관련 조문 확인: 기준규칙 제619조(밀폐공간 작업 프로그램의 수립·시행)\n- 관련 조문 확인: 기준규칙 제619조의2(산소 및 유해가스 농도의 측정 및 기록 등)\n- 관련 조문 확인: 기준규칙 제620조(환기 등)\n- 관련 조문 확인: 기준규칙 제621조(인원의 점검)\n- 관련 조문 확인: 기준규칙 제622조(출입의 금지)\n- 관련 조문 확인: 기준규칙 제623조(감시인의 배치 등)\n- 현장 여건에 맞는 담당자·확인시각·측정값은 전파 전 관리자가 확인합니다.",
+    "tbmBriefing": " 배수로를 설치하고 통행 구간 미끄럼 방지 매트를 추가했다. 오늘 TBM에서 배수로 막힘 여부와 산소농도 측정 기록을 다시 확인한다. (개선 이력)\n- 이전 작업 재확인: 2026-07-02T09:00:00.000Z 유사 작업: 부산 해운대 지하 기계실 누수 보수 및 배수펌프 점검 / 상태 누수부 임시 배수로 설치 후 재점검 필요\n\n[온톨로지 QA 보완 반영 - TBM]\n- 검수 보완 전달: 밀폐공간 작업\n- 작업 전 확인: 감시인 외부 배치 및 연락설비 (기준규칙 제623조(감시인의 배치 등))\n- 작업 전 확인: 관계자 외 출입금지 표지 게시 (기준규칙 제622조(출입의 금지))\n- 작업 전 확인: 대피용 기구(공기호흡기·사다리·섬유로프) 비치 (기준규칙 제625조(대피용 기구의 비치))\n- 작업자 질문: 가연성가스 화재·폭발 위험을 확인했습니까?\n- 작업자 질문: 산소결핍 질식 위험을 확인했습니까?",
+    "tbmLogDraft": "배수로를 설치하고 통행 구간 미끄럼 방지 매트를 추가했다. 오늘 TBM에서 배수로 막힘 여부와 산소농도 측정 기록을 다시 확인한다. (개선 이력)\n- 이전 작업 재확인: 2026-07-02T09:00:00.000Z 유사 작업: 부산 해운대 지하 기계실 누수 보수 및 배수펌프 점검 / 상태 누수부 임시 배수로 설치 후 재점검 필요\n\n[온톨로지 QA 보완 반영 - TBM 기록]\n- 검수 보완 확인: 밀폐공간 작업\n- 확인 항목: 감시인 외부 배치 및 연락설비 (기준규칙 제623조(감시인의 배치 등)) / 담당자 확인 필요\n- 확인 항목: 관계자 외 출입금지 표지 게시 (기준규칙 제622조(출입의 금지)) / 담당자 확인 필요\n- 확인 항목: 대피용 기구(공기호흡기·사다리·섬유로프) 비치 (기준규칙 제625조(대피용 기구의 비치)) / 담당자 확인 필요",
+    "emergencyResponseDraft": "을 작업 전 확인과 재발방지 조치에 반영합니다.\n\n[온톨로지 QA 보완 반영 - 비상대응]\n- 검수 보완 작업: 밀폐공간 작업\n- 누락 위험요인 확인: 가연성가스 화재·폭발\n- 누락 위험요인 확인: 산소결핍 질식\n- 필수 안전조치 반영: 감시인 외부 배치 및 연락설비 (기준규칙 제623조(감시인의 배치 등))\n- 필수 안전조치 반영: 관계자 외 출입금지 표지 게시 (기준규칙 제622조(출입의 금지))\n- 필수 안전조치 반영: 대피용 기구(공기호흡기·사다리·섬유로프) 비치 (기준규칙 제625조(대피용 기구의 비치))\n- 관련 조문 확인: 기준규칙 제619조(밀폐공간 작업 프로그램의 수립·시행)\n- 관련 조문 확인: 기준규칙 제619조의2(산소 및 유해가스 농도의 측정 및 기록 등)\n- 관련 조문 확인: 기준규칙 제620조(환기 등)\n- 관련 조문 확인: 기준규칙 제621조(인원의 점검)\n- 관련 조문 확인: 기준규칙 제622조(출입의 금지)\n- 관련 조문 확인: 기준규칙 제623조(감시인의 배치 등)\n- 현장 여건에 맞는 담당자·확인시각·측정값은 전파 전 관리자가 확인합니다."
+  }
+}

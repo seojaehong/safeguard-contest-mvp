@@ -1,0 +1,4 @@
+2026-07-13T15:31:55.159Z KOSHA GUIDE audit started
+readOnly=true dbMutationPerformed=false uploadPerformed=false
+fatal_type=Error
+fatal_code=kosha-bridge-manifest-source-identity-mismatch

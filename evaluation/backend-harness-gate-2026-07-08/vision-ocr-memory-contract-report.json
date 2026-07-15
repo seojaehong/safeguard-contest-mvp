@@ -1,0 +1,50 @@
+{
+  "date": "2026-07-09",
+  "scope": "before_after_vision_ocr_to_memory_contract",
+  "status": "verified_without_live_openai_or_db_write",
+  "flow": [
+    "workspace before/after photos",
+    "POST /api/workpacks/:id/improvements",
+    "analyzeImprovementPhotos",
+    "workpack_improvements.analysis_payload",
+    "learning export markdown/jsonl",
+    "DB harness improvementMemory prompt context"
+  ],
+  "preservedFields": [
+    "summary",
+    "detectedHazards",
+    "observedImprovement",
+    "ocrText",
+    "reflectedDocuments"
+  ],
+  "code": {
+    "visionAdapter": "lib/photo-vision-analysis.ts",
+    "improvementRoute": "app/api/workpacks/[id]/improvements/route.ts",
+    "learningExportRoute": "app/api/workpacks/[id]/learning-export/route.ts",
+    "learningExportBuilder": "lib/workpack-learning-export.ts",
+    "harnessPacket": "lib/db-harness.ts",
+    "workspaceUi": "components/SafeGuardCommandCenter.tsx"
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests/photo-vision-analysis.test.ts tests/commercial-harness.test.ts tests/operation-improvement-history.test.ts tests/workpack-commercial.test.ts tests/reporting-downloads.test.ts",
+      "filesPassed": 5,
+      "testsPassed": 20
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "passed": true
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "passed": true
+    },
+    "liveOpenAiVisionCalled": false,
+    "dbWriteExecuted": false
+  },
+  "notes": [
+    "The API response and analysis_payload now include reflectedDocuments alongside summary, hazards, observed improvement, and OCR text.",
+    "Learning export markdown/jsonl preserves detectedHazards and observedImprovement, not only summary/OCR.",
+    "DB harness prompt context can reuse observed photo improvements as improvementMemory when passed into buildDbHarnessPacket."
+  ]
+}

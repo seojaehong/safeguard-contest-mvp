@@ -1,0 +1,121 @@
+{
+  "feature": "SafeClaw Northstar 72h",
+  "branchName": "feature/backend-harness-gate",
+  "northstar": "DB/SIF/Vision/Ontology/Learning이 실제 위험성평가와 TBM 결과를 바꾸고, 공유 가능 여부까지 통제하는 상업제품 수준 workbench",
+  "qualityChecks": [
+    "npm.cmd test -- tests/workpack-readiness.test.ts tests/commercial-harness.test.ts tests/quality-contract.test.ts tests/operation-improvements.test.ts tests/photo-vision-analysis.test.ts",
+    "npm.cmd run typecheck",
+    "npm.cmd run build",
+    "browser desktop /workspace",
+    "browser mobile /workspace"
+  ],
+  "userStories": [
+    {
+      "id": "N1",
+      "title": "Separate generated workpack from share-ready workpack",
+      "priority": 1,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Generated documents can still show review-required when DB harness, ontology, quality, or placeholder checks are not ready.",
+        "Share UI receives a user-facing disabled reason instead of treating 12/12 documents as ready.",
+        "Focused unit test proves warning workpacks are blocked from normal dispatch."
+      ],
+      "files": [
+        "lib/workpack-readiness.ts",
+        "tests/workpack-readiness.test.ts",
+        "components/SafeGuardCommandCenter.tsx",
+        "components/WorkflowSharePanel.tsx"
+      ]
+    },
+    {
+      "id": "N2",
+      "title": "Make DB harness output visible in generated deliverables",
+      "priority": 2,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Accepted photo/improvement memory appears inside risk assessment, TBM briefing, TBM log, and photo evidence drafts.",
+        "Provider fallback/template paths remain DB-harness-first and do not leak generic fallback prose.",
+        "Focused test proves document body changes when harnessMemory includes an improvement."
+      ],
+      "files": [
+        "lib/search.ts",
+        "tests/commercial-harness.test.ts"
+      ]
+    },
+    {
+      "id": "N3",
+      "title": "Prepare SIF embedding approval gate without mutating DB",
+      "priority": 3,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Approval packet states record counts, corpus hash, migration requirement, and no DB mutation performed.",
+        "Operator report explains that actual embedding upload is not done until explicit approval.",
+        "Existing SIF embedding tests pass."
+      ],
+      "files": [
+        "lib/sif-embedding-corpus.ts",
+        "scripts",
+        "evaluation/backend-harness-gate-2026-07-08/sif-embedding-gate"
+      ]
+    },
+    {
+      "id": "N4",
+      "title": "Turn photo Vision/OCR candidates into deterministic safety rows",
+      "priority": 4,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Accepted input photo candidates create deterministic hazard/control seed rows before LLM prose.",
+        "Before/After improvement photos are exportable to md/jsonl learning files.",
+        "Focused tests cover photo candidate acceptance and learning export."
+      ],
+      "files": [
+        "lib/operation-improvements.ts",
+        "components/SafeGuardCommandCenter.tsx",
+        "tests/operation-improvements.test.ts",
+        "tests/photo-vision-analysis.test.ts"
+      ]
+    },
+    {
+      "id": "N5",
+      "title": "Expose operating ontology as list and hover-card graph",
+      "priority": 5,
+      "status": "done",
+      "passes": true,
+      "acceptance": [
+        "Workspace shows Workpack -> Hazard -> Control -> Improvement -> Evidence -> Ack relationships in user language.",
+        "List view and hover-card graph work without Hermes or LangGraph core replacement.",
+        "Browser check captures desktop and mobile ontology surfaces."
+      ],
+      "files": [
+        "components/OperationMemoryPreview.tsx",
+        "components/FieldOperationsWorkspace.tsx",
+        "lib/workspace-operation-graph.ts",
+        "lib/ontology/operation-memory.ts",
+        "lib/ontology/operation-memory-visualization.ts",
+        "lib/workpack-learning-export.ts",
+        "evaluation/northstar-72h-2026-07-09/ontology-browser-check"
+      ]
+    },
+    {
+      "id": "N6",
+      "title": "Unify every product page under the workspace design language",
+      "priority": 6,
+      "status": "todo",
+      "passes": false,
+      "acceptance": [
+        "Workspace typography feels more grounded on the first screen.",
+        "Non-workspace product pages stop using the old marketing-heavy design guide where it conflicts with the workspace.",
+        "Browser screenshots prove desktop and mobile readability."
+      ],
+      "files": [
+        "app/globals.css",
+        "app",
+        "components"
+      ]
+    }
+  ]
+}

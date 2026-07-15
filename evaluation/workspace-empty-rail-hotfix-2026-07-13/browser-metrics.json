@@ -1,0 +1,45 @@
+{
+  "url": "http://127.0.0.1:3044/workspace?scenario=seoul-construction-windy&theme=day",
+  "filled": {
+    "inputValueLength": 120,
+    "inputPlaceholder": "",
+    "restoreButtonCount": 1,
+    "currentBriefCount": 1,
+    "sourceStatusCount": 1,
+    "sideTop": 117.046875,
+    "sideBottom": 848.984375,
+    "sideHeight": 731.9375,
+    "mainTop": 117.046875,
+    "mainBottom": 848.984375,
+    "mainHeight": 731.9375,
+    "bottomDelta": 0,
+    "sideOverflowY": "visible",
+    "sideHasIndependentScroll": false,
+    "viewport": {
+      "width": 1560,
+      "height": 700
+    },
+    "documentScrollWidth": 1560
+  },
+  "cleared": {
+    "inputValueLength": 0,
+    "inputPlaceholder": "",
+    "restoreButtonCount": 0,
+    "currentBriefCount": 0,
+    "sourceStatusCount": 0,
+    "sideTop": 117.046875,
+    "sideBottom": 788.984375,
+    "sideHeight": 671.9375,
+    "mainTop": 117.046875,
+    "mainBottom": 788.984375,
+    "mainHeight": 671.9375,
+    "bottomDelta": 0,
+    "sideOverflowY": "visible",
+    "sideHasIndependentScroll": false,
+    "viewport": {
+      "width": 1560,
+      "height": 700
+    },
+    "documentScrollWidth": 1560
+  }
+}

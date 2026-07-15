@@ -14,10 +14,13 @@
 import { createHash } from "node:crypto";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { createLogger } from "@/lib/logger";
+import { MCP_TOOL_NAMES } from "@/lib/mcp-tool-contract.mjs";
+
+export { MCP_TOOL_NAMES } from "@/lib/mcp-tool-contract.mjs";
 
 const log = createLogger("mcp-auth");
 
-export type McpAuthSource = "db" | "env";
+export type McpAuthSource = "db" | "env" | "broker";
 
 /** MCP 도구 핸들러에 전달되는 인증 컨텍스트. 평문 토큰을 포함하지 않는다. */
 export interface McpAuthContext {
@@ -39,6 +42,40 @@ export interface McpTokenRow {
 }
 
 const DEFAULT_SCOPES = ["tools:*"] as const;
+
+export type McpToolName = (typeof MCP_TOOL_NAMES)[number];
+
+const MCP_TOOL_NAME_SET: ReadonlySet<string> = new Set(MCP_TOOL_NAMES);
+const READ_TOOL_NAMES: ReadonlySet<McpToolName> = new Set([
+  "run_safeclaw_harness_agent",
+  "get_weather_signals",
+  "validate_safety_citations",
+  "sanitize_emergency_contacts",
+  "search_accident_cases",
+  "get_evidence_mapping",
+  "query_safety_knowledge",
+  "qa_review_docpack",
+]);
+const WRITE_TOOL_NAMES: ReadonlySet<McpToolName> = new Set([
+  "generate_reviewed_safety_docpack",
+  "generate_safety_docpack",
+]);
+const KNOWN_MCP_SCOPES = new Set<string>([
+  ...DEFAULT_SCOPES,
+  "tools:read",
+  "tools:write",
+  ...MCP_TOOL_NAMES.map((toolName) => `tools:${toolName}`),
+]);
+const MAX_SCOPE_LENGTH = 128;
+
+export class McpToolScopeError extends Error {
+  readonly code = "MCP_TOOL_FORBIDDEN";
+
+  constructor() {
+    super("이 토큰은 해당 도구를 사용할 수 없습니다.");
+    this.name = "McpToolScopeError";
+  }
+}
 
 // ── 순수부 (vitest 대상) ────────────────────────────────────────────────────
 
@@ -63,12 +100,44 @@ export function matchesLegacyToken(token: string, legacyTokens: Set<string>): bo
   return legacyTokens.has(token.trim());
 }
 
-/** scopes 컬럼(jsonb)을 문자열 배열로 정규화한다. 형태가 어긋나면 기본값. */
+/** scopes 컬럼(jsonb)을 알려진 권한만 남겨 정규화한다. 형태가 어긋나면 권한 없음. */
 export function normalizeScopes(value: unknown): string[] {
-  if (Array.isArray(value) && value.every((s) => typeof s === "string") && value.length > 0) {
-    return value as string[];
+  if (!Array.isArray(value) || value.length === 0) return [];
+  const normalized: string[] = [];
+  for (const item of value) {
+    if (typeof item !== "string") return [];
+    const scope = item.trim();
+    if (!scope || scope.length > MAX_SCOPE_LENGTH || !KNOWN_MCP_SCOPES.has(scope)) return [];
+    if (!normalized.includes(scope)) normalized.push(scope);
   }
-  return [...DEFAULT_SCOPES];
+  return normalized;
+}
+
+export function isMcpToolAllowed(
+  context: McpAuthContext | null | undefined,
+  toolName: McpToolName,
+): boolean {
+  if (!context) return false;
+  const scopes = normalizeScopes(context.scopes);
+  if (scopes.includes("tools:*") || scopes.includes(`tools:${toolName}`)) return true;
+  if (scopes.includes("tools:read") && READ_TOOL_NAMES.has(toolName)) return true;
+  return scopes.includes("tools:write") && WRITE_TOOL_NAMES.has(toolName);
+}
+
+export function isMcpToolName(value: unknown): value is McpToolName {
+  return typeof value === "string" && MCP_TOOL_NAME_SET.has(value);
+}
+
+export function isReadOnlyMcpTool(value: unknown): value is McpToolName {
+  return isMcpToolName(value) && READ_TOOL_NAMES.has(value);
+}
+
+export function requireMcpToolScope(
+  context: McpAuthContext | null | undefined,
+  toolName: McpToolName,
+): McpAuthContext {
+  if (!context || !isMcpToolAllowed(context, toolName)) throw new McpToolScopeError();
+  return context;
 }
 
 /** mcp_tokens 행 → 컨텍스트. 행이 없거나 disabled면 null(=DB 매칭 실패). */
@@ -112,12 +181,12 @@ export function computeEnablement(input: { hasEnvTokens: boolean; hasSupabase: b
 export function asAuthContext(value: unknown): McpAuthContext | null {
   if (!value || typeof value !== "object") return null;
   const v = value as Record<string, unknown>;
-  if (v.source !== "db" && v.source !== "env") return null;
+  if (v.source !== "db" && v.source !== "env" && v.source !== "broker") return null;
   if (!Array.isArray(v.scopes)) return null;
   return {
     siteId: typeof v.siteId === "string" ? v.siteId : null,
     orgId: typeof v.orgId === "string" ? v.orgId : null,
-    scopes: v.scopes.filter((s): s is string => typeof s === "string"),
+    scopes: normalizeScopes(v.scopes),
     source: v.source,
     tokenId: typeof v.tokenId === "string" ? v.tokenId : null,
   };

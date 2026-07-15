@@ -1,0 +1,30 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/knowledge-regenerate-route.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/northstar-24h-knowledge-round
+
+ ❯ tests/knowledge-regenerate-route.test.ts (10 tests | 1 failed) 108ms
+     × executes zero mutation gateway writes while returning a candidate 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/knowledge-regenerate-route.test.ts > knowledge candidate API > executes zero mutation gateway writes while returning a candidate
+TypeError: createKnowledgeCandidatePostHandler is not a function
+ ❯ tests/knowledge-regenerate-route.test.ts:85:18
+     83|       "@/app/api/knowledge/regenerate/route"
+     84|     );
+     85|     const post = createKnowledgeCandidatePostHandler({
+       |                  ^
+     86|       generateText: vi.mocked(generateKnowledgeText),
+     87|       mutationGateway: { write: mutationWrite }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  21:33:27
+   Duration  856ms (transform 131ms, setup 0ms, import 159ms, tests 108ms, environment 0ms)
+EXIT_CODE: 1

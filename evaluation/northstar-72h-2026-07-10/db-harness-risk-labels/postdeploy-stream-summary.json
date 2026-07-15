@@ -1,0 +1,239 @@
+{
+  "generatedAt": "2026-07-09T21:22:44.253Z",
+  "startedAt": "2026-07-09T21:22:23.901Z",
+  "endpoint": "https://www.safeclaw.kr/api/ask/stream?verify=a310e4b-risk-labels-final",
+  "deployedCommit": "a310e4b",
+  "status": 200,
+  "checks": {
+    "httpOk": true,
+    "finalFound": true,
+    "rowCountAtLeastFive": true,
+    "validationIssueCountZero": true,
+    "qualityOverallReady": true,
+    "dbHarnessReady": true,
+    "dbHarnessFirst": true,
+    "llmNaturalizeOnly": true,
+    "noOfficialCodeHazardPrefix": true,
+    "noTechnicalTitleInFirstHazards": true,
+    "noRedundantRelatedRisk": true,
+    "firstRowsKeepEvidenceTitles": true,
+    "tbmQuestionsNoDoubleRisk": true
+  },
+  "firstRows": [
+    {
+      "hazard": "추락 위험: 작업발판·난간·개구부 미확인",
+      "currentControls": "작업발판·난간·개구부 상태 확인",
+      "additionalControls": "안전대 체결 및 작업반경 출입통제",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "화재 위험: 가동부 방호덮개와 비상정지장치 미확인",
+      "currentControls": "가동부 방호덮개와 비상정지장치 확인",
+      "additionalControls": "정비 전 전원 차단 및 잠금표지",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "B-E-17-2026 도장 공정에서의 화재·폭발위험방지에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "전도 위험: 가동부 방호덮개와 비상정지장치 미확인",
+      "currentControls": "가동부 방호덮개와 비상정지장치 확인",
+      "additionalControls": "정비 전 전원 차단 및 잠금표지",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "B-E-20-2026 정전도장기 제작 및 설치에 관한 기술지원규정",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "유해·위험요인 미확인",
+      "currentControls": "작업 전 유해·위험요인 확인",
+      "additionalControls": "관리감독자 확인 후 작업 시작",
+      "evidenceRefs": [
+        "DB 하네스 직접근거",
+        "KOSHA 공식자료",
+        "G-67-2011 건물 외벽 청소 작업에 관한 기술지침",
+        "검색: rest"
+      ]
+    },
+    {
+      "hazard": "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+      "currentControls": "작업 전 장비 상태, 작업구역, 보호구 착용 상태를 확인합니다.",
+      "additionalControls": "작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검",
+      "evidenceRefs": [
+        "산업안전보건법",
+        "KOSHA 위험성평가",
+        "문서팩 입력 조건"
+      ]
+    }
+  ],
+  "tbmQuestions": [
+    "추락 위험: 작업발판·난간·개구부 미확인에 대해 안전대 체결 및 작업반경 출입통제 조치를 이해하고 작업 전 확인했습니까?",
+    "화재 위험: 가동부 방호덮개와 비상정지장치 미확인에 대해 정비 전 전원 차단 및 잠금표지 조치를 이해하고 작업 전 확인했습니까?",
+    "전도 위험: 가동부 방호덮개와 비상정지장치 미확인에 대해 정비 전 전원 차단 및 잠금표지 조치를 이해하고 작업 전 확인했습니까?",
+    "유해·위험요인 미확인에 대해 관리감독자 확인 후 작업 시작 조치를 이해하고 작업 전 확인했습니까?",
+    "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험에 대해 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 조치를 이해하고 작업 전 확인했습니까?"
+  ],
+  "qualityContract": {
+    "overall": "ready",
+    "summary": "실시간 근거, 온톨로지, 증빙, 구조화 산출물이 통합 준비 상태입니다.",
+    "dbHarness": {
+      "status": "ready",
+      "mode": "db_harness_first",
+      "llmRole": "naturalize_only",
+      "llmOutputScope": "rewrite_fixed_evidence_only",
+      "evidenceAuthority": "db_harness",
+      "providerRetryScope": "naturalization_retry_only",
+      "fallbackChainAllowed": false,
+      "genericProseSubstitutionAllowed": false,
+      "missingEvidencePolicy": "surface_review_required",
+      "directEvidenceCount": 6,
+      "sifCaseCount": 2,
+      "supportingEvidenceCount": 2,
+      "retrievalContract": {
+        "source": "safety_reference_items",
+        "mode": "rest-ilike",
+        "vector": {
+          "enabled": false,
+          "attempted": false,
+          "ready": false,
+          "reason": "disabled",
+          "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+        },
+        "sourceCounts": {
+          "directEvidence": 6,
+          "sifCases": 2,
+          "supportingEvidence": 2,
+          "rest": 8,
+          "ranked": 0,
+          "vector": 0,
+          "hybrid": 0
+        },
+        "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 3건, 일반 카탈로그 4건)"
+      },
+      "missingEvidence": [],
+      "documentCoverage": [
+        {
+          "document": "위험성평가표",
+          "covered": true,
+          "evidenceTypes": [
+            "directEvidence",
+            "sifCase",
+            "supportingEvidence"
+          ]
+        },
+        {
+          "document": "TBM 브리핑",
+          "covered": true,
+          "evidenceTypes": [
+            "directEvidence"
+          ]
+        },
+        {
+          "document": "TBM 기록",
+          "covered": true,
+          "evidenceTypes": [
+            "directEvidence"
+          ]
+        }
+      ],
+      "detail": "DB 근거 10건을 고정했고, 필수 문서 3/3종을 하네스가 커버했습니다."
+    },
+    "validationIssues": []
+  },
+  "dbHarnessSummary": {
+    "mode": "db_harness_first",
+    "llmRole": "naturalize_only",
+    "llmOutputScope": "rewrite_fixed_evidence_only",
+    "evidenceAuthority": "db_harness",
+    "providerRetryScope": "naturalization_retry_only",
+    "fallbackChainAllowed": false,
+    "genericProseSubstitutionAllowed": false,
+    "missingEvidencePolicy": "surface_review_required",
+    "directEvidence": 6,
+    "sifCases": 2,
+    "supportingEvidence": 2,
+    "improvementMemory": 0,
+    "workpackMemory": 0,
+    "missingEvidence": [],
+    "documentCoverage": [
+      {
+        "document": "위험성평가표",
+        "covered": true,
+        "evidenceTypes": [
+          "directEvidence",
+          "sifCase",
+          "supportingEvidence"
+        ]
+      },
+      {
+        "document": "TBM 브리핑",
+        "covered": true,
+        "evidenceTypes": [
+          "directEvidence"
+        ]
+      },
+      {
+        "document": "TBM 기록",
+        "covered": true,
+        "evidenceTypes": [
+          "directEvidence"
+        ]
+      }
+    ],
+    "retrievalContract": {
+      "source": "safety_reference_items",
+      "mode": "rest-ilike",
+      "vector": {
+        "enabled": false,
+        "attempted": false,
+        "ready": false,
+        "reason": "disabled",
+        "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+      },
+      "sourceCounts": {
+        "directEvidence": 6,
+        "sifCases": 2,
+        "supportingEvidence": 2,
+        "rest": 8,
+        "ranked": 0,
+        "vector": 0,
+        "hybrid": 0
+      },
+      "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 3건, 일반 카탈로그 4건)"
+    },
+    "ontologyStatus": "ready"
+  },
+  "eventCount": 22,
+  "finalKeys": [
+    "kind",
+    "payload"
+  ],
+  "payloadKeys": [
+    "question",
+    "answer",
+    "practicalPoints",
+    "citations",
+    "sourceMix",
+    "mode",
+    "scenario",
+    "externalData",
+    "riskSummary",
+    "deliverables",
+    "evidenceLabels",
+    "status",
+    "qualityContract",
+    "generationMode",
+    "structured",
+    "dbHarness",
+    "ontologyQa"
+  ]
+}

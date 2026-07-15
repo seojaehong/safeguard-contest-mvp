@@ -1,7 +1,7 @@
 node_modules/
 .next/
+.next-browser-tests/
 .env.local
-package-lock.json
 *.tsbuildinfo
 logs/dryrun-api/
 logs/dryrun-documents/

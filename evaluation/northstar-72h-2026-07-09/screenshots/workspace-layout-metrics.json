@@ -1,0 +1,230 @@
+[
+  {
+    "name": "day-desktop",
+    "theme": "day",
+    "width": 1600,
+    "height": 820,
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\screenshots\\workspace-day-desktop.png",
+    "metrics": {
+      "topbar": {
+        "top": 20,
+        "right": 1480,
+        "bottom": 80,
+        "left": 120,
+        "width": 1360,
+        "height": 60
+      },
+      "viewport": {
+        "top": 104,
+        "right": 1480,
+        "bottom": 1303,
+        "left": 120,
+        "width": 1360,
+        "height": 1199
+      },
+      "sideNav": {
+        "top": 104,
+        "right": 384,
+        "bottom": 1157,
+        "left": 120,
+        "width": 264,
+        "height": 1053
+      },
+      "main": {
+        "top": 104,
+        "right": 1480,
+        "bottom": 1303,
+        "left": 400,
+        "width": 1080,
+        "height": 1199
+      },
+      "heading": {
+        "top": 270,
+        "right": 1320,
+        "bottom": 346,
+        "left": 540,
+        "width": 780,
+        "height": 76
+      },
+      "textarea": {
+        "top": 461,
+        "right": 1343,
+        "bottom": 625,
+        "left": 537,
+        "width": 806,
+        "height": 164
+      }
+    }
+  },
+  {
+    "name": "night-desktop",
+    "theme": "night",
+    "width": 1600,
+    "height": 820,
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\screenshots\\workspace-night-desktop.png",
+    "metrics": {
+      "topbar": {
+        "top": 20,
+        "right": 1440,
+        "bottom": 80,
+        "left": 160,
+        "width": 1280,
+        "height": 60
+      },
+      "viewport": {
+        "top": 104,
+        "right": 1440,
+        "bottom": 1199,
+        "left": 160,
+        "width": 1280,
+        "height": 1094
+      },
+      "sideNav": {
+        "top": 105,
+        "right": 403,
+        "bottom": 1090,
+        "left": 161,
+        "width": 242,
+        "height": 985
+      },
+      "main": {
+        "top": 105,
+        "right": 1439,
+        "bottom": 1198,
+        "left": 403,
+        "width": 1036,
+        "height": 1092
+      },
+      "heading": {
+        "top": 249,
+        "right": 1301,
+        "bottom": 325,
+        "left": 541,
+        "width": 760,
+        "height": 76
+      },
+      "textarea": {
+        "top": 440,
+        "right": 1301,
+        "bottom": 592,
+        "left": 541,
+        "width": 760,
+        "height": 152
+      }
+    }
+  },
+  {
+    "name": "day-mobile",
+    "theme": "day",
+    "width": 390,
+    "height": 844,
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\screenshots\\workspace-day-mobile.png",
+    "metrics": {
+      "topbar": {
+        "top": 20,
+        "right": 378,
+        "bottom": 114,
+        "left": 12,
+        "width": 366,
+        "height": 94
+      },
+      "viewport": {
+        "top": 138,
+        "right": 378,
+        "bottom": 1665,
+        "left": 12,
+        "width": 366,
+        "height": 1527
+      },
+      "sideNav": {
+        "top": 138,
+        "right": 378,
+        "bottom": 268,
+        "left": 12,
+        "width": 366,
+        "height": 130
+      },
+      "main": {
+        "top": 280,
+        "right": 378,
+        "bottom": 1665,
+        "left": 12,
+        "width": 366,
+        "height": 1385
+      },
+      "heading": {
+        "top": 358,
+        "right": 341,
+        "bottom": 442,
+        "left": 49,
+        "width": 292,
+        "height": 85
+      },
+      "textarea": {
+        "top": 557,
+        "right": 341,
+        "bottom": 721,
+        "left": 49,
+        "width": 292,
+        "height": 164
+      }
+    }
+  },
+  {
+    "name": "night-mobile",
+    "theme": "night",
+    "width": 390,
+    "height": 844,
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\evaluation\\northstar-72h-2026-07-09\\screenshots\\workspace-night-mobile.png",
+    "metrics": {
+      "topbar": {
+        "top": 20,
+        "right": 380,
+        "bottom": 114,
+        "left": 10,
+        "width": 370,
+        "height": 94
+      },
+      "viewport": {
+        "top": 138,
+        "right": 380,
+        "bottom": 1540,
+        "left": 10,
+        "width": 370,
+        "height": 1403
+      },
+      "sideNav": {
+        "top": 139,
+        "right": 379,
+        "bottom": 234,
+        "left": 11,
+        "width": 368,
+        "height": 95
+      },
+      "main": {
+        "top": 234,
+        "right": 379,
+        "bottom": 1539,
+        "left": 11,
+        "width": 368,
+        "height": 1306
+      },
+      "heading": {
+        "top": 350,
+        "right": 363,
+        "bottom": 435,
+        "left": 27,
+        "width": 336,
+        "height": 85
+      },
+      "textarea": {
+        "top": 546,
+        "right": 363,
+        "bottom": 698,
+        "left": 27,
+        "width": 336,
+        "height": 152
+      }
+    }
+  }
+]

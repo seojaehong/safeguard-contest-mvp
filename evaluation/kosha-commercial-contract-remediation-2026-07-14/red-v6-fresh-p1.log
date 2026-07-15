@@ -1,0 +1,195 @@
+phase=red-v6-fresh-p1
+head=f0b9162f3a9fc85ff2812f52203ff659674bc9ad
+command=npm.cmd test -- tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts tests/mcp-tools.test.ts -t "v5 " --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T20:57:27.7195309+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts tests/mcp-tools.test.ts -t v5  --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+ ❯ tests/kosha-current-review-run-ask.test.ts (26 tests | 2 failed | 22 skipped) 4082ms
+     × v5 removes query-hazard-unrelated direct evidence before model prompt and response surfaces in enhanced mode 840ms
+     × v5 removes query-hazard-unrelated direct evidence before model prompt and response surfaces in full mode 724ms
+ ❯ tests/commercial-harness.test.ts (49 tests | 3 failed | 39 skipped) 50ms
+     × v5 classifies mixed scaffold/equipment collision parenthood with the hazard-family gate 13ms
+     × v5 keeps false-parent KOSHA content out of public harness surfaces for mixed scaffold/equipment collision 2ms
+     × v5 removes query-hazard-unrelated direct evidence before public packet and prompt surfaces 6ms
+ ❯ tests/mcp-tools.test.ts (29 tests | 1 failed | 27 skipped) 37ms
+     × v5 removes query-hazard-unrelated direct evidence before MCP payload and prompt serialization 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/commercial-harness.test.ts > DB harness packet > v5 classifies mixed scaffold/equipment collision parenthood with the hazard-family gate
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/commercial-harness.test.ts:880:77
+    878|     "v5 classifies %s parenthood with the hazard-family gate",
+    879|     (_label, parentFactory, expected) => {
+    880|       expect(hasRelevantKoshaParent(v5CollisionGuide(), [parentFactory…
+       |                                                                             ^
+    881|     }
+    882|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/commercial-harness.test.ts > DB harness packet > v5 keeps false-parent KOSHA content out of public harness surfaces for mixed scaffold/equipment collision
+AssertionError: expected 'V5_FALSE_PARENT_KOSHA_SUMMARY 지게차와 보행…' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ V5_FALSE_PARENT_KOSHA_SUMMARY 지게차와 보행자의 이동 동선을 분리한다.
+
+ ❯ tests/commercial-harness.test.ts:905:36
+    903|       });
+    904|
+    905|       expect(publicKosha?.summary).toBe("");
+       |                                    ^
+    906|       expect(publicKosha?.body).toBeUndefined();
+    907|       expect(publicKosha?.controls).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/commercial-harness.test.ts > DB harness packet > v5 removes query-hazard-unrelated direct evidence before public packet and prompt surfaces
+AssertionError: expected [ { …(16) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "body": "재해개요: 작업발판과 난간 상태 미확인으로 추락 위험이 확인됨. 위험성 감소대책: 작업발판·난간 확인.",
++     "category": "운반하역",
++     "controls": [
++       "지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
++       "교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인",
++     ],
++     "document_reflection_label": "위험성평가표 · TBM 브리핑 · V5_QUERY_UNRELATED_DIRECT_DOCUMENT에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
++     "evidence_role": "direct",
++     "id": "direct-v5-query-unrelated-fire",
++     "item_type": "machinery",
++     "keywords": [
++       "LPG",
++       "지게차",
++       "보행자",
++       "통행구역",
++       "연료누출",
++       "화재",
++     ],
++     "operation_signal_label": "문서와 TBM에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 반영",
++     "primary_documents": [
++       "위험성평가표",
++       "TBM 브리핑",
++       "V5_QUERY_UNRELATED_DIRECT_DOCUMENT",
++     ],
++     "risk_tags": [
++       "화재",
++     ],
++     "short_summary": "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험 · 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 · 교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인",
++     "source_id": "official-machinery-catalog",
++     "subcategory": "지게차",
++     "summary": "V5_QUERY_UNRELATED_DIRECT_SUMMARY 연료 누출 가스가 점화되어 화재가 발생할 수 있다.",
++     "title": "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
++   },
++ ]
+
+ ❯ tests/commercial-harness.test.ts:930:35
+    928|     });
+    929|
+    930|     expect(packet.directEvidence).toEqual([]);
+       |                                   ^
+    931|     expect(packet.ontologyChecklist.status).toBe("review_required");
+    932|     expect(packet.supportingEvidence.find((item) => item.id === unrela…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/kosha-current-review-run-ask.test.ts > current-base runAsk retrieval provenance > v5 removes query-hazard-unrelated direct evidence before model prompt and response surfaces in enhanced mode
+ FAIL  tests/kosha-current-review-run-ask.test.ts > current-base runAsk retrieval provenance > v5 removes query-hazard-unrelated direct evidence before model prompt and response surfaces in full mode
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/kosha-current-review-run-ask.test.ts:765:58
+    763|       const serializedResponse = JSON.stringify(response);
+    764|
+    765|       expect(response.dbHarness?.summary.directEvidence).toBe(0);
+       |                                                          ^
+    766|       expect(response.dbHarness?.packet.directEvidence).toEqual([]);
+    767|       expect(response.dbHarness?.promptContext).toContain('"parentEvid…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/mcp-tools.test.ts > buildHarnessAgentResult > v5 removes query-hazard-unrelated direct evidence before MCP payload and prompt serialization
+AssertionError: expected [ { …(16) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "category": "운반하역",
++     "controls": [
++       "지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
++       "교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인",
++     ],
++     "document_reflection_label": "위험성평가표 · TBM 브리핑 · V5_MCP_UNRELATED_DIRECT_DOCUMENT에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리",
++     "evidence_role": "direct",
++     "id": "mcp-v5-query-unrelated-fire-direct",
++     "item_type": "machinery",
++     "keywords": [
++       "LPG",
++       "지게차",
++       "보행자",
++       "통행구역",
++       "연료누출",
++       "화재",
++     ],
++     "operation_signal_label": "문서와 TBM에 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 반영",
++     "primary_documents": [
++       "위험성평가표",
++       "TBM 브리핑",
++       "V5_MCP_UNRELATED_DIRECT_DOCUMENT",
++     ],
++     "retrieval_source": "ranked",
++     "risk_tags": [
++       "화재",
++     ],
++     "short_summary": "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험 · 지게차 동선과 보행 동선을 바닥표시·차단시설로 분리 · 교차·후진 구간 신호수 배치 및 후진 경보·접근통제 확인",
++     "source_id": "official-machinery-catalog",
++     "subcategory": "지게차",
++     "summary": "V5_MCP_UNRELATED_DIRECT_SUMMARY 연료 누출 가스가 점화되어 화재가 발생할 수 있다.",
++     "title": "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
++   },
++ ]
+
+ ❯ tests/mcp-tools.test.ts:389:42
+    387|     const serializedMcpPayload = toToolResult(result).content[0]?.text…
+    388|
+    389|     expect(result.packet.directEvidence).toEqual([]);
+       |                                          ^
+    390|     expect(result.promptContext).toContain('"parentEvidenceReady":fals…
+    391|     for (const marker of Object.values(directMarkers)) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  6 failed | 10 passed | 88 skipped (104)
+   Start at  20:57:31
+   Duration  10.29s (transform 1.37s, setup 0ms, import 3.57s, tests 4.17s, environment 1ms)
+

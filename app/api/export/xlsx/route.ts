@@ -119,6 +119,15 @@ function parseRiskRowsFromBody(body: Record<string, unknown>) {
   return [];
 }
 
+function structuredFallbackTitle(mode: string) {
+  if (mode === "workPlanStructured") return "작업계획서";
+  if (mode === "permitInspectionStructured") return "안전작업허가 확인서";
+  if (mode === "tbmBriefingStructured") return "TBM 브리핑";
+  if (mode === "tbmLogStructured") return "TBM 일지";
+  if (mode === "educationRecordStructured") return "안전보건교육 기록";
+  return "SafeClaw 안전 문서";
+}
+
 export async function GET() {
   return NextResponse.json(
     {
@@ -165,28 +174,31 @@ export async function POST(request: NextRequest) {
           { status: 400, headers: { "cache-control": "no-store" } }
         );
       }
+      const editedRows = body.edited === true
+        ? parseRows(body.rows, structuredFallbackTitle(mode))
+        : undefined;
 
       if (mode === "workPlanStructured") {
-        const buffer = await buildWorkPlanStructuredXlsx(scenario, body.structured);
+        const buffer = await buildWorkPlanStructuredXlsx(scenario, body.structured, { editedRows });
         return xlsxResponse(buffer, `${scenario.companyName}-작업계획서`, "safeclaw-work-plan");
       }
 
       if (mode === "permitInspectionStructured") {
-        const buffer = await buildPermitInspectionStructuredXlsx(scenario, body.structured);
+        const buffer = await buildPermitInspectionStructuredXlsx(scenario, body.structured, { editedRows });
         return xlsxResponse(buffer, `${scenario.companyName}-안전작업허가-확인서`, "safeclaw-work-permit");
       }
 
       if (mode === "tbmBriefingStructured") {
-        const buffer = await buildTbmBriefingStructuredXlsx(scenario, body.structured);
+        const buffer = await buildTbmBriefingStructuredXlsx(scenario, body.structured, { editedRows });
         return xlsxResponse(buffer, `${scenario.companyName}-TBM-브리핑`, "safeclaw-tbm-briefing");
       }
 
       if (mode === "tbmLogStructured") {
-        const buffer = await buildTbmLogStructuredXlsx(scenario, body.structured);
+        const buffer = await buildTbmLogStructuredXlsx(scenario, body.structured, { editedRows });
         return xlsxResponse(buffer, `${scenario.companyName}-TBM-일지`, "safeclaw-tbm-log");
       }
 
-      const buffer = await buildEducationRecordStructuredXlsx(scenario, body.structured);
+      const buffer = await buildEducationRecordStructuredXlsx(scenario, body.structured, { editedRows });
       return xlsxResponse(buffer, `${scenario.companyName}-안전보건교육-기록`, "safeclaw-education-record");
     }
 
@@ -201,7 +213,7 @@ export async function POST(request: NextRequest) {
             title,
             rows: parseRows(d.rows, title),
             profile: parseProfile(d.profile),
-            structuredRiskRows: parseRiskRowsFromBody(d)
+            structuredRiskRows: d.edited === true ? [] : parseRiskRowsFromBody(d)
           };
         })
         .filter((d): d is {
@@ -217,7 +229,7 @@ export async function POST(request: NextRequest) {
     const title = readString(body.title, "SafeClaw 안전 문서");
     const rows = parseRows(body.rows, title);
     const profile = parseProfile(body.profile);
-    const structuredRiskRows = parseRiskRowsFromBody(body);
+    const structuredRiskRows = body.edited === true ? [] : parseRiskRowsFromBody(body);
     const buffer = await buildXlsxForDocument({ title, rows, profile, scenario, structuredRiskRows });
     return xlsxResponse(buffer, `${scenario.companyName}-${title}`, "safeclaw-document");
   } catch (error) {

@@ -95,6 +95,35 @@ function compactText(value: string, maxLength = 96): string {
   return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
+const documentLabelByKey: Record<string, string> = {
+  riskAssessment: "위험성평가표",
+  riskAssessmentDraft: "위험성평가표",
+  structuredRiskRows: "위험성평가표",
+  workPlan: "작업계획서",
+  workPlanDraft: "작업계획서",
+  workpackSummary: "작업 요약",
+  workpackSummaryDraft: "작업 요약",
+  tbmBriefing: "TBM 브리핑",
+  tbmBriefingStructured: "TBM 브리핑",
+  tbmLog: "TBM 기록",
+  tbmLogDraft: "TBM 기록",
+  tbmLogStructured: "TBM 기록",
+  safetyEducation: "안전보건교육",
+  safetyEducationRecord: "안전보건교육 기록",
+  safetyEducationRecordDraft: "안전보건교육 기록",
+  emergencyResponse: "비상대응 절차",
+  emergencyResponseDraft: "비상대응 절차",
+  photoEvidence: "사진 증빙",
+  photoEvidenceDraft: "사진 증빙",
+  kakaoMessage: "현장 전파 메시지",
+  foreignWorkerBriefing: "외국인 근로자 안내문",
+  foreignWorkerTransmission: "외국인 근로자 전파문"
+};
+
+function documentLabel(documentKey: string): string {
+  return documentLabelByKey[documentKey] || documentKey;
+}
+
 function buildKnowledgeSummary(hazard: SafetyKnowledgeHazard, sources: SafetyKnowledgeSource[]): string {
   const controls = hazard.controls.slice(0, 2).join(" · ");
   const sourceHint = sources[0]?.summary || sources[0]?.title || hazard.title;
@@ -102,7 +131,7 @@ function buildKnowledgeSummary(hazard: SafetyKnowledgeHazard, sources: SafetyKno
 }
 
 function buildKnowledgeReflectionLabel(hazard: SafetyKnowledgeHazard): string {
-  const documents = hazard.primaryDocuments.slice(0, 3).join(" · ") || "문서 보완 후보";
+  const documents = hazard.primaryDocuments.slice(0, 3).map(documentLabel).join(" · ") || "문서 보완 후보";
   const action = hazard.controls[0] ? compactText(hazard.controls[0], 48) : "작업 전 확인 항목";
   return `${documents}에 ${action}`;
 }

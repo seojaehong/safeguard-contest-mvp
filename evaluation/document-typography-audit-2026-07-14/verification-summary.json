@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T14:53:41.994Z",
+  "authoritativeBase": "785f328e2804ba472a1d659d83ef4c3c89acf342",
+  "productCommit": "4989f1ecc33cc7e6bf574590f9b8fce86442c8f4",
+  "productSourceIdentity": "e99e8204105a1ab4f50270636acff0c9958ae9e712f29521c3c5c84dd6413afe",
+  "evidenceCommitRole": "evidence-only child commit of productCommit",
+  "checks": [
+    {
+      "id": "parent-static-audit-red",
+      "command": "$env:OUTPUT_PATH = Join-Path $env:TEMP 'document-typography-red-static-audit.json'; node scripts/frontend_consistency_audit.mjs",
+      "cwdSourceSha": "785f328e2804ba472a1d659d83ef4c3c89acf342",
+      "sourceIdentity": "7dd8590219b5d229e048cf62932e1ac65dbb2474c6a23de62180bbe1cfe849ba",
+      "exitCode": 1,
+      "status": "fail",
+      "counts": {
+        "violationCount": 6,
+        "coverageIssues": 0,
+        "pageFiles": 32,
+        "componentFiles": 23,
+        "cssLines": 20949
+      }
+    },
+    {
+      "id": "parent-focused-red",
+      "command": "npm.cmd test -- tests/ai-connect-design-contract.test.ts tests/frontend-design-contract.test.ts tests/mixed-typography-role-contract.test.ts tests/ontology-typography-role-contract.test.ts --maxWorkers=1 --no-file-parallelism",
+      "cwdSourceSha": "785f328e2804ba472a1d659d83ef4c3c89acf342",
+      "sourceIdentity": "7dd8590219b5d229e048cf62932e1ac65dbb2474c6a23de62180bbe1cfe849ba",
+      "exitCode": 1,
+      "status": "fail",
+      "counts": {
+        "totalFiles": 4,
+        "failedFiles": 4,
+        "totalTests": 30,
+        "failedTests": 4,
+        "passedTests": 26
+      }
+    },
+    {
+      "id": "product-static-audit-green",
+      "command": "$env:OUTPUT_PATH = 'evaluation/document-typography-audit-2026-07-14/static-audit-final.json'; node scripts/frontend_consistency_audit.mjs",
+      "cwdSourceSha": "4989f1ecc33cc7e6bf574590f9b8fce86442c8f4",
+      "sourceIdentity": "e99e8204105a1ab4f50270636acff0c9958ae9e712f29521c3c5c84dd6413afe",
+      "exitCode": 0,
+      "status": "pass",
+      "counts": {
+        "violationCount": 0,
+        "coverageIssues": 0,
+        "pageFiles": 32,
+        "componentFiles": 23,
+        "cssLines": 20967
+      }
+    },
+    {
+      "id": "product-focused-green",
+      "command": "npm.cmd test -- tests/ai-connect-design-contract.test.ts tests/frontend-design-contract.test.ts tests/mixed-typography-role-contract.test.ts tests/ontology-typography-role-contract.test.ts --maxWorkers=1 --no-file-parallelism",
+      "cwdSourceSha": "4989f1ecc33cc7e6bf574590f9b8fce86442c8f4",
+      "sourceIdentity": "e99e8204105a1ab4f50270636acff0c9958ae9e712f29521c3c5c84dd6413afe",
+      "exitCode": 0,
+      "status": "pass",
+      "counts": {
+        "totalFiles": 4,
+        "passedFiles": 4,
+        "totalTests": 30,
+        "passedTests": 30,
+        "failedTests": 0
+      }
+    },
+    {
+      "id": "product-strict-typecheck",
+      "command": "npm.cmd run typecheck",
+      "cwdSourceSha": "4989f1ecc33cc7e6bf574590f9b8fce86442c8f4",
+      "sourceIdentity": "e99e8204105a1ab4f50270636acff0c9958ae9e712f29521c3c5c84dd6413afe",
+      "exitCode": 0,
+      "status": "pass"
+    },
+    {
+      "id": "product-diff-check",
+      "command": "git diff --check 785f328e2804ba472a1d659d83ef4c3c89acf342..4989f1ecc33cc7e6bf574590f9b8fce86442c8f4",
+      "cwdSourceSha": "4989f1ecc33cc7e6bf574590f9b8fce86442c8f4",
+      "sourceIdentity": "e99e8204105a1ab4f50270636acff0c9958ae9e712f29521c3c5c84dd6413afe",
+      "exitCode": 0,
+      "status": "pass"
+    }
+  ]
+}

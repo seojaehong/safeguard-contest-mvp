@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "924e497cce1af4cfd8642c98cb754991050da3b1",
+  "testedSha": "6174d27",
+  "status": "pass_with_external_css_gate",
+  "productSourceChanges": 0,
+  "changedTestInfrastructureFiles": 3,
+  "reviewRemediation": {
+    "browserRuntimeAssertion": "closed",
+    "boundedDiagnostics": "closed",
+    "pageCleanup": "closed",
+    "runtimeAssetCopy": "replaced_with_links"
+  },
+  "checks": {
+    "isolatedHarness": { "files": 1, "passed": 2, "failed": 0 },
+    "parallelModuleDesktop": { "selected": 1, "passed": 1, "failed": 0 },
+    "typecheck": "pass",
+    "diffCheck": "pass"
+  },
+  "remainingExternalGate": {
+    "route": "/reports",
+    "viewportWidth": 390,
+    "observedContentTop": 410,
+    "maximumContentTop": 387,
+    "owner": "frontend-static-contract-v2"
+  },
+  "evidencePath": "evaluation/module-shell-harness-remediation-2026-07-12/exact-6174d27-evidence.json"
+}

@@ -1,17 +1,19 @@
 export type WorkspacePage = "input" | "document" | "share";
 
-export type WorkspaceStepStatus = "done" | "active" | "pending" | "locked";
+export type WorkspaceStepStatus = "done" | "active" | "pending" | "locked" | "blocked";
 
 type PageGateInput = {
   targetPage: WorkspacePage;
   hasWorkpack: boolean;
   isGenerating: boolean;
+  canShare?: boolean;
 };
 
 type StepStatusInput = {
   currentPage: WorkspacePage;
   hasWorkpack: boolean;
   isGenerating: boolean;
+  canShare?: boolean;
 };
 
 export function nextWorkspacePageAfterGenerate(): WorkspacePage {
@@ -30,7 +32,9 @@ export function canOpenWorkspacePage(input: PageGateInput): { allowed: boolean; 
     return { allowed: true };
   }
   if (input.targetPage === "share" && input.hasWorkpack) {
-    return { allowed: true };
+    return input.canShare === false
+      ? { allowed: true, reason: "공유 화면에서 보완 항목을 확인할 수 있습니다. 실제 전송은 계속 차단됩니다." }
+      : { allowed: true };
   }
   return {
     allowed: false,
@@ -40,11 +44,15 @@ export function canOpenWorkspacePage(input: PageGateInput): { allowed: boolean; 
 
 export function buildWorkspaceStepStatuses(input: StepStatusInput): Record<WorkspacePage, WorkspaceStepStatus> {
   const hasDocumentStage = input.hasWorkpack || input.isGenerating;
+  const canShare = input.canShare ?? input.hasWorkpack;
+  const shareStatus: WorkspaceStepStatus = input.hasWorkpack
+    ? canShare ? "pending" : "blocked"
+    : "locked";
 
   if (input.currentPage === "share" && input.hasWorkpack) {
     return {
       input: "done",
-      document: "done",
+      document: canShare ? "done" : "blocked",
       share: "active"
     };
   }
@@ -53,13 +61,13 @@ export function buildWorkspaceStepStatuses(input: StepStatusInput): Record<Works
     return {
       input: "done",
       document: "active",
-      share: input.hasWorkpack ? "pending" : "locked"
+      share: shareStatus
     };
   }
 
   return {
     input: "active",
     document: hasDocumentStage ? "pending" : "locked",
-    share: input.hasWorkpack ? "pending" : "locked"
+    share: shareStatus
   };
 }

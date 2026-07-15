@@ -1,0 +1,56 @@
+{
+  "date": "2026-07-11",
+  "baselineCommit": "cab4a19",
+  "viewport": {
+    "mobile": {
+      "width": 390,
+      "height": 844
+    },
+    "desktop": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "baseline": {
+    "mobileCockpitTop": 540,
+    "mobileCockpitHeight": 2585,
+    "mobileEditorTop": 3141,
+    "horizontalOverflow": 0
+  },
+  "updated": {
+    "day": {
+      "mobileLauncherTop": 472,
+      "mobileLauncherHeight": 302,
+      "mobileEditorTop": 789,
+      "documentBodyFocusTop": 58,
+      "horizontalOverflow": 0,
+      "coreButtonHeights": [44, 44, 44]
+    },
+    "night": {
+      "mobileLauncherTop": 472,
+      "mobileLauncherHeight": 302,
+      "mobileEditorTop": 789,
+      "documentBodyFocusTop": 58,
+      "horizontalOverflow": 0,
+      "coreButtonHeights": [44, 44, 44]
+    },
+    "desktop": {
+      "cockpitTop": 302,
+      "columns": [280, 574, 300],
+      "indexActions": 9,
+      "corePreviews": 3,
+      "horizontalOverflow": 0
+    }
+  },
+  "verification": {
+    "focusedTestsPassed": 3,
+    "documentLayoutTestsPassed": 20,
+    "emptyDocumentCountContract": "9/9 to 8/9",
+    "sampleDraftReload": "8/9 restored without current-workpack promotion",
+    "editorSelectionSync": "passed",
+    "typecheck": "passed",
+    "build": "passed",
+    "staticPagesGenerated": 27,
+    "databaseMutation": false
+  }
+}
