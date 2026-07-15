@@ -12,12 +12,9 @@
     "apiContractChanged": false
   },
   "tdd": {
-    "initialRedClaim": "superseded because command output was not retained",
-    "reviewRedCommand": "npm.cmd test -- tests/knowledge-page-layout.test.ts",
-    "reviewRedFilesFailed": 1,
-    "reviewRedTestsFailed": 1,
-    "reviewRedTestsPassed": 6,
-    "reviewRedReason": "rendered schema pre did not contain the Korean field labels",
+    "reviewFinding": "static and diff review identified that the browser assertion inspected the whole schema section",
+    "remediation": "runtime assertion now inspects the rendered pre and uses an explicit machine-label presentation fixture",
+    "preRemediationExecutionArtifactClaimed": false,
     "focusedFiles": 2,
     "focusedTests": 14,
     "focusedPassed": 14,
