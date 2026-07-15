@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "safeclaw-evaluation/v1",
+  "evaluatedAt": "2026-07-15T21:06:00+09:00",
+  "parentCandidateSha": "52861c24eff21208b5ee542c4112026e8ba26322",
+  "branch": "fix/exact-trusted-kosha-grounding-20260715",
+  "status": "implementation-verified",
+  "independentReview": "pending",
+  "scope": {
+    "databaseMutation": false,
+    "databaseMigration": false,
+    "authority": "technical_guidance_only",
+    "pdfCommitted": false,
+    "broadCorpusCommitted": false
+  },
+  "asset": {
+    "path": "data/safety-knowledge/exact-kosha/d-c-13-2026.json",
+    "bytes": 48671,
+    "normalizedCharacters": 19058,
+    "bodySha256": "ea8bb93a3e03a40873222ab385d257e1a5946cb4d28e5c65951353731b0a5919",
+    "pdfSha256": "790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179",
+    "officialFileId": "CTC2026012914371557826167"
+  },
+  "verification": {
+    "focused": { "files": 6, "tests": 162, "passed": 162, "failed": 0 },
+    "typecheck": "pass",
+    "build": { "status": "pass", "pages": 28 },
+    "nft": { "status": "pass", "serverTraceCount": 16, "pdfEntriesInSearchRoute": 0 },
+    "packageLockDiff": 0,
+    "diffCheck": "pass"
+  },
+  "closedReviewFindings": [
+    "all pinned metadata required",
+    "payload and metadata conflicts rejected",
+    "general KOSHA excluded when local corpus is unavailable",
+    "deletion, conflict, and partial-body mutation tests",
+    "deployable exact official body fallback",
+    "server-only Node crypto boundary"
+  ]
+}

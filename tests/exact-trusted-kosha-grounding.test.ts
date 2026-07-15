@@ -1,4 +1,7 @@
 import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
@@ -19,7 +22,11 @@ import {
   isSafetyReferenceRiskEligible,
   type SafetyReferenceItem,
 } from "@/lib/safety-reference-catalog";
-import { isRemoteReferenceRetainedByLocalKoshaGate } from "@/lib/safety-reference-catalog-server";
+import {
+  loadBundledExactKoshaReference,
+  isRemoteReferenceRetainedByLocalKoshaGate,
+  mergeBundledExactKoshaFallback,
+} from "@/lib/safety-reference-catalog-server";
 
 const QUESTION = [
   "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업.",
@@ -45,6 +52,7 @@ const TRUST_PIN: ExactKoshaTrustPin = Object.freeze({
   stableDocumentKey: "D-C-13",
   version: "D-C-13-2026",
   bodySha256: sha256(TRUSTED_BODY),
+  pdfSha256: "790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179",
   officialUrl: "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1",
   officialFileId: "CTC2026012914371557826167",
   publishedAt: "2026-01-30",
@@ -69,6 +77,22 @@ function trustedKosha(overrides: Partial<SafetyReferenceItem> = {}): SafetyRefer
     ],
     evidence_role: "supporting",
     retrieval_source: "rest",
+    payload: {
+      reference_item_id: TRUST_PIN.itemId,
+      stable_document_key: TRUST_PIN.stableDocumentKey,
+      version: TRUST_PIN.version,
+      official_version_code: TRUST_PIN.version,
+      body_sha256: TRUST_PIN.bodySha256,
+      pdf_sha256: TRUST_PIN.pdfSha256,
+      official_url: TRUST_PIN.officialUrl,
+      official_file_id: TRUST_PIN.officialFileId,
+      official_published_at: TRUST_PIN.publishedAt,
+      official_status: "current",
+      review_state: "published",
+      body_kind: "native",
+      human_confirmed: true,
+      tampered: false,
+    },
     ...overrides,
   };
 }
@@ -99,6 +123,35 @@ function withExactDecision(item: SafetyReferenceItem): SafetyReferenceItem {
 }
 
 describe("exact-trusted KOSHA grounding", () => {
+  it("ships the immutable official D-C-13 normalized body without the PDF", () => {
+    const assetPath = join(
+      process.cwd(),
+      "data",
+      "safety-knowledge",
+      "exact-kosha",
+      "d-c-13-2026.json",
+    );
+    const asset = JSON.parse(readFileSync(assetPath, "utf8")) as {
+      body: string;
+      bodySha256: string;
+      normalizedCharCount: number;
+      pdfSha256: string;
+      officialUrl: string;
+    };
+
+    expect(asset.normalizedCharCount).toBe(19_058);
+    expect(asset.body).toHaveLength(asset.normalizedCharCount);
+    expect(sha256(asset.body)).toBe("ea8bb93a3e03a40873222ab385d257e1a5946cb4d28e5c65951353731b0a5919");
+    expect(asset.bodySha256).toBe(sha256(asset.body));
+    expect(asset.pdfSha256).toBe("790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179");
+    expect(asset.officialUrl).toBe(TRUST_PIN.officialUrl);
+    expect(assetPath.toLowerCase()).not.toMatch(/\.pdf$/u);
+
+    const nextConfig = readFileSync(join(process.cwd(), "next.config.mjs"), "utf8");
+    expect(nextConfig).toContain("data/safety-knowledge/exact-kosha/d-c-13-2026.json");
+    expect(nextConfig).toContain("outputFileTracingIncludes");
+  });
+
   it("matches only the exact production identity and official metadata pin", () => {
     expect(matchesExactKoshaTrustPin(trustedKosha(), TRUST_PIN)).toBe(true);
 
@@ -130,6 +183,44 @@ describe("exact-trusted KOSHA grounding", () => {
     }
   });
 
+  it("rejects missing pinned metadata and conflicting payload records", () => {
+    const requiredFields = [
+      "reference_item_id",
+      "stable_document_key",
+      "version",
+      "official_version_code",
+      "body_sha256",
+      "pdf_sha256",
+      "official_url",
+      "official_file_id",
+      "official_published_at",
+    ] as const;
+
+    for (const field of requiredFields) {
+      const payload = { ...(trustedKosha().payload ?? {}) };
+      delete payload[field];
+      expect(matchesExactKoshaTrustPin(trustedKosha({ payload }), TRUST_PIN), field).toBe(false);
+    }
+
+    expect(matchesExactKoshaTrustPin(trustedKosha({
+      metadata: {
+        stable_document_key: "D-C-7",
+      },
+    }), TRUST_PIN)).toBe(false);
+    expect(matchesExactKoshaTrustPin(trustedKosha({
+      metadata: {
+        human_confirmed: false,
+      },
+    }), TRUST_PIN)).toBe(false);
+    expect(matchesExactKoshaTrustPin(trustedKosha({
+      body: TRUSTED_BODY.slice(0, 30),
+      payload: {
+        ...(trustedKosha().payload ?? {}),
+        body_sha256: sha256(TRUSTED_BODY.slice(0, 30)),
+      },
+    }), TRUST_PIN)).toBe(false);
+  });
+
   it("promotes only the exact pin to technical guidance direct/risk eligibility", () => {
     const exact = withExactDecision(trustedKosha());
     const decision = getKoshaGroundingDecision(exact);
@@ -149,7 +240,7 @@ describe("exact-trusted KOSHA grounding", () => {
     });
     expect(isSafetyReferenceDirectEligible(exact)).toBe(true);
     expect(isSafetyReferenceRiskEligible(exact)).toBe(true);
-    expect(isRemoteReferenceRetainedByLocalKoshaGate(exact)).toBe(true);
+    expect(isRemoteReferenceRetainedByLocalKoshaGate(exact)).toBe(false);
   });
 
   it("deduplicates SIF and exact KOSHA buckets while covering both TBM documents", () => {
@@ -248,12 +339,92 @@ describe("exact-trusted KOSHA grounding", () => {
     expect(packet.supportingEvidence.map((item) => item.id)).toEqual([general.id, dC7.id]);
     expect(isSafetyReferenceDirectEligible(general)).toBe(false);
     expect(isSafetyReferenceRiskEligible(general)).toBe(false);
-    expect(isRemoteReferenceRetainedByLocalKoshaGate(general)).toBe(true);
+    expect(isRemoteReferenceRetainedByLocalKoshaGate(general)).toBe(false);
     expect(isRemoteReferenceRetainedByLocalKoshaGate(dC7)).toBe(false);
     expect(buildExactTrustedKoshaGroundingDecision(dC7, [TRUST_PIN])).toBeNull();
     expect(getKoshaGroundingDecision(dC7)).toMatchObject({
       status: "review_required",
       reviewRequired: true,
     });
+  });
+
+  it("loads the bundled exact item and fails closed when it is deleted or mutated", async () => {
+    const assetPath = join(
+      process.cwd(),
+      "data",
+      "safety-knowledge",
+      "exact-kosha",
+      "d-c-13-2026.json",
+    );
+    const loaded = await loadBundledExactKoshaReference(assetPath);
+    expect(loaded.status).toBe("ready");
+    if (loaded.status !== "ready") throw new Error("expected exact bundle to be ready");
+    expect(loaded.item.body).toHaveLength(19_058);
+    expect(isSafetyReferenceDirectEligible(loaded.item)).toBe(true);
+    expect(isRemoteReferenceRetainedByLocalKoshaGate(loaded.item)).toBe(true);
+    expect(getKoshaGroundingDecision(loaded.item)).toMatchObject({
+      source: "production-registry",
+      mandatoryCitationEligible: true,
+    });
+
+    const fixtureDir = mkdtempSync(join(tmpdir(), "safeclaw-exact-kosha-"));
+    try {
+      const missing = await loadBundledExactKoshaReference(join(fixtureDir, "deleted.json"));
+      expect(missing).toMatchObject({ status: "blocked", reason: "asset-unavailable" });
+
+      const mutatedPath = join(fixtureDir, "mutated.json");
+      const mutated = JSON.parse(readFileSync(assetPath, "utf8")) as Record<string, unknown>;
+      mutated.body = `${String(mutated.body).slice(0, 2_582)} partial`;
+      writeFileSync(mutatedPath, JSON.stringify(mutated), "utf8");
+      const rejected = await loadBundledExactKoshaReference(mutatedPath);
+      expect(rejected).toMatchObject({ status: "blocked", reason: "asset-integrity-failed" });
+    } finally {
+      rmSync(fixtureDir, { force: true, recursive: true });
+    }
+  });
+
+  it("replaces a live partial DB row with the exact bundle without retaining general KOSHA", async () => {
+    const loaded = await loadBundledExactKoshaReference();
+    if (loaded.status !== "ready") throw new Error("expected exact bundle to be ready");
+    const partialDb = {
+      ...loaded.item,
+      body: loaded.item.body?.slice(0, 2_582),
+      kosha_grounding: undefined,
+    };
+    const general = trustedKosha({
+      id: "general-supporting-kosha",
+      source_id: "kosha-technical-guidelines",
+      title: "일반 KOSHA 보조지침",
+      body: "일반 보조지침",
+    });
+
+    const selected = mergeBundledExactKoshaFallback({
+      query: QUESTION,
+      remoteItems: [partialDb, general, sif("sif-live")],
+      bundledItem: loaded.item,
+      localGateActive: true,
+      limit: 12,
+    });
+    expect(selected.map((item) => item.id)).toEqual([loaded.item.id, "sif-live"]);
+    expect(selected[0]?.body).toHaveLength(19_058);
+
+    const exactDb = { ...loaded.item, retrieval_source: "rest" as const };
+    const exactPreferred = mergeBundledExactKoshaFallback({
+      query: QUESTION,
+      remoteItems: [exactDb],
+      bundledItem: loaded.item,
+      localGateActive: true,
+      limit: 12,
+    });
+    expect(exactPreferred[0]).toBe(exactDb);
+
+    const irrelevant = mergeBundledExactKoshaFallback({
+      query: "밀폐공간 산소농도 측정",
+      remoteItems: [sif("sif-live")],
+      bundledItem: loaded.item,
+      localGateActive: true,
+      limit: 12,
+    });
+    expect(irrelevant.map((item) => item.id)).toEqual(["sif-live"]);
   });
 });

@@ -13,6 +13,7 @@ export type ExactKoshaTrustPin = Readonly<{
   stableDocumentKey: string;
   version: string;
   bodySha256: string;
+  pdfSha256: string;
   officialUrl: string;
   officialFileId: string;
   publishedAt: string;
@@ -27,6 +28,7 @@ const PRODUCTION_TRUSTED_KOSHA_REFERENCES: readonly ExactKoshaTrustPin[] = Objec
     stableDocumentKey: "D-C-13",
     version: "D-C-13-2026",
     bodySha256: "ea8bb93a3e03a40873222ab385d257e1a5946cb4d28e5c65951353731b0a5919",
+    pdfSha256: "790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179",
     officialUrl: "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1",
     officialFileId: "CTC2026012914371557826167",
     publishedAt: "2026-01-30",
@@ -41,34 +43,41 @@ function metadataRecords(item: SafetyReferenceItem): readonly Record<string, unk
   return [item.payload, item.metadata].filter(isRecord);
 }
 
-function readString(
+function readStrings(
   records: readonly Record<string, unknown>[],
   keys: readonly string[],
-): string | null {
+): readonly string[] {
+  const values: string[] = [];
   for (const record of records) {
     for (const key of keys) {
       const value = record[key];
-      if (typeof value === "string" && value.trim()) return value.trim();
+      if (typeof value === "string" && value.trim()) values.push(value.trim());
     }
   }
-  return null;
+  return values;
 }
 
-function readBoolean(
+function readBooleans(
   records: readonly Record<string, unknown>[],
   keys: readonly string[],
-): boolean | null {
+): readonly boolean[] {
+  const values: boolean[] = [];
   for (const record of records) {
     for (const key of keys) {
       const value = record[key];
-      if (typeof value === "boolean") return value;
+      if (typeof value === "boolean") values.push(value);
     }
   }
-  return null;
+  return values;
 }
 
-function matchesOptional(value: string | null, expected: string): boolean {
-  return value === null || value === expected;
+function matchesRequiredPinnedValue(
+  records: readonly Record<string, unknown>[],
+  keys: readonly string[],
+  expected: string,
+): boolean {
+  const values = readStrings(records, keys);
+  return values.length > 0 && values.every((value) => value === expected);
 }
 
 function metadataDoesNotContradictPin(
@@ -76,15 +85,17 @@ function metadataDoesNotContradictPin(
   pin: ExactKoshaTrustPin,
 ): boolean {
   const records = metadataRecords(item);
-  const lifecycle = readString(records, ["official_status", "officialStatus", "lifecycle", "state", "status"]);
-  const reviewState = readString(records, ["review_state", "reviewState", "quality"]);
-  const bodyKind = readString(records, ["body_kind", "bodyKind", "extraction_method", "extractionMethod"]);
-  const humanConfirmed = readBoolean(records, ["human_confirmed", "humanConfirmed"]);
-  const tampered = readBoolean(records, ["tampered", "integrity_tampered", "integrityTampered"]);
-  if (lifecycle !== null && lifecycle.toLowerCase() !== "current") return false;
-  if (reviewState !== null && !["verified", "published", "accepted"].includes(reviewState.toLowerCase())) return false;
-  if (bodyKind !== null && !["native", "native-pdf", "native_pdf"].includes(bodyKind.toLowerCase())) return false;
-  if (humanConfirmed === false || tampered === true) return false;
+  if (!records.length) return false;
+  const lifecycle = readStrings(records, ["official_status", "officialStatus", "lifecycle", "state", "status"]);
+  const reviewState = readStrings(records, ["review_state", "reviewState", "quality"]);
+  const bodyKind = readStrings(records, ["body_kind", "bodyKind", "extraction_method", "extractionMethod"]);
+  const humanConfirmed = readBooleans(records, ["human_confirmed", "humanConfirmed"]);
+  const tampered = readBooleans(records, ["tampered", "integrity_tampered", "integrityTampered"]);
+  if (!lifecycle.length || lifecycle.some((value) => value.toLowerCase() !== "current")) return false;
+  if (!reviewState.length || reviewState.some((value) => !["verified", "published", "accepted"].includes(value.toLowerCase()))) return false;
+  if (!bodyKind.length || bodyKind.some((value) => !["native", "native-pdf", "native_pdf"].includes(value.toLowerCase()))) return false;
+  if (!humanConfirmed.length || humanConfirmed.some((value) => value !== true)) return false;
+  if (!tampered.length || tampered.some((value) => value !== false)) return false;
 
   const grounding = item.kosha_grounding;
   if (grounding && grounding.reason !== "metadata-absent") {
@@ -115,6 +126,7 @@ function metadataDoesNotContradictPin(
     || guide.bodyKind !== "native"
     || guide.directEligible !== true
     || guide.bodySha256 !== pin.bodySha256
+    || guide.pdfSha256 !== pin.pdfSha256
     || guide.officialUrl !== pin.officialUrl
     || guide.officialFileId !== pin.officialFileId
     || guide.publicationDate !== pin.publishedAt
@@ -122,29 +134,41 @@ function metadataDoesNotContradictPin(
     return false;
   }
 
-  return matchesOptional(
-    readString(records, ["reference_item_id", "referenceItemId", "uid"]),
+  return matchesRequiredPinnedValue(
+    records,
+    ["reference_item_id", "referenceItemId", "uid"],
     pin.itemId,
-  ) && matchesOptional(
-    readString(records, ["stable_document_key", "stableDocumentKey", "stable_key"]),
+  ) && matchesRequiredPinnedValue(
+    records,
+    ["stable_document_key", "stableDocumentKey", "stable_key"],
     pin.stableDocumentKey,
-  ) && matchesOptional(
-    readString(records, ["version", "version_code", "versionKey", "version_key"]),
+  ) && matchesRequiredPinnedValue(
+    records,
+    ["version", "version_code", "versionKey", "version_key"],
     pin.version,
-  ) && matchesOptional(
-    readString(records, ["official_version_code", "officialVersionCode", "current_version", "currentVersion"]),
+  ) && matchesRequiredPinnedValue(
+    records,
+    ["official_version_code", "officialVersionCode", "current_version", "currentVersion"],
     pin.version,
-  ) && matchesOptional(
-    readString(records, ["body_sha256", "bodySha256", "normalized_text_sha256", "normalizedTextSha256"]),
+  ) && matchesRequiredPinnedValue(
+    records,
+    ["body_sha256", "bodySha256", "normalized_text_sha256", "normalizedTextSha256"],
     pin.bodySha256,
-  ) && matchesOptional(
-    readString(records, ["official_url", "officialUrl", "official_download_url", "officialDownloadUrl"]),
+  ) && matchesRequiredPinnedValue(
+    records,
+    ["pdf_sha256", "pdfSha256", "raw_sha256", "rawSha256"],
+    pin.pdfSha256,
+  ) && matchesRequiredPinnedValue(
+    records,
+    ["official_url", "officialUrl", "official_download_url", "officialDownloadUrl"],
     pin.officialUrl,
-  ) && matchesOptional(
-    readString(records, ["official_file_id", "officialFileId", "techGdlnOrgnlAtcflNo"]),
+  ) && matchesRequiredPinnedValue(
+    records,
+    ["official_file_id", "officialFileId", "techGdlnOrgnlAtcflNo"],
     pin.officialFileId,
-  ) && matchesOptional(
-    readString(records, ["official_published_at", "officialPublishedAt", "published_at", "publishedAt"]),
+  ) && matchesRequiredPinnedValue(
+    records,
+    ["official_published_at", "officialPublishedAt", "published_at", "publishedAt"],
     pin.publishedAt,
   );
 }

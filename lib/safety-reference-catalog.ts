@@ -1,5 +1,4 @@
 import { createLogger } from "@/lib/logger";
-import { buildExactTrustedKoshaGroundingDecision } from "@/lib/production-kosha-trust";
 
 export type KoshaGroundingReason =
   | "verified-current"
@@ -467,8 +466,6 @@ function localKoshaMetadata(item: SafetyReferenceItem): KoshaGroundingMetadata |
 
 export function getKoshaGroundingDecision(item: SafetyReferenceItem): KoshaGroundingDecision | null {
   if (!isKoshaTechnicalReference(item)) return null;
-  const exactTrusted = buildExactTrustedKoshaGroundingDecision(item);
-  if (exactTrusted) return exactTrusted;
   if (item.kosha_grounding) return item.kosha_grounding;
   const guide = item.kosha_guide;
   if (!guide) return reviewRequiredKoshaDecision("remote-payload", "metadata-absent");
@@ -507,8 +504,6 @@ export function getKoshaGroundingDecision(item: SafetyReferenceItem): KoshaGroun
 }
 
 async function buildRemoteKoshaGroundingDecision(item: SafetyReferenceItem): Promise<KoshaGroundingDecision> {
-  const exactTrusted = buildExactTrustedKoshaGroundingDecision(item);
-  if (exactTrusted) return exactTrusted;
   const body = item.body || "";
   if (!body.trim()) return reviewRequiredKoshaDecision("remote-payload", "body-empty");
   const records = metadataRecords(item);

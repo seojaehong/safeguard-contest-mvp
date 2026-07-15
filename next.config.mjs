@@ -20,6 +20,9 @@ const buildDate = (() => {
 const nextConfig = {
   typedRoutes: true,
   outputFileTracingRoot: projectRoot,
+  outputFileTracingIncludes: {
+    "/*": ["./data/safety-knowledge/exact-kosha/d-c-13-2026.json"]
+  },
   env: {
     NEXT_PUBLIC_BUILD_DATE: buildDate
   },
