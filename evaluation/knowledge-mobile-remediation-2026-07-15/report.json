@@ -17,6 +17,15 @@
     "relatedTestsPassed": 18,
     "vitestVersion": "4.1.10",
     "strictTypecheck": "pass",
+    "freshP1Remediation": {
+      "redError": "TS2339",
+      "affectedCallbacks": 2,
+      "narrowedType": "HTMLDetailsElement",
+      "usesAny": false,
+      "focusedTestFiles": 2,
+      "focusedTestsPassed": 11,
+      "strictTypecheck": "pass"
+    },
     "diffCheck": "pass",
     "dependencySync": {
       "command": "npm.cmd install",

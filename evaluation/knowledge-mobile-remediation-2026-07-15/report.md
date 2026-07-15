@@ -27,6 +27,13 @@ The repository renders the route from `app/knowledge/page.tsx`; the requested `K
 - Package source integrity: `package.json` and `package-lock.json` SHA-256 values were unchanged before and after install; source diff is empty.
 - Range diff check: `git diff --check a00e99d91ec5d04d9efbda29e369b04904fd5b49..HEAD` passes after removing the report EOF blank line.
 
+### Fresh Independent Review P1 Remediation
+
+- RED: strict typecheck reproduced `TS2339` at both disclosure-state callbacks because Playwright exposed `HTMLElement | SVGElement`.
+- GREEN: each callback now requires `HTMLDetailsElement` with an explicit fail-fast error before reading `.open`; no `any` is used.
+- Focused browser contract: 2 files, 11 tests passed.
+- Strict TypeScript: passed after the narrowing change.
+
 Commands:
 
 ```powershell
