@@ -26,20 +26,20 @@ export type OntologyNeighborhood = {
 
 const DISPLAY_SLOTS = [
   { x: 50, y: 50 },
-  { x: 15, y: 18 },
-  { x: 50, y: 18 },
-  { x: 85, y: 18 },
-  { x: 15, y: 50 },
-  { x: 85, y: 50 },
-  { x: 15, y: 82 },
-  { x: 50, y: 82 },
-  { x: 85, y: 82 },
-  { x: 32, y: 34 },
-  { x: 68, y: 34 },
-  { x: 32, y: 66 },
-  { x: 68, y: 66 },
-  { x: 5, y: 50 },
-  { x: 95, y: 50 }
+  { x: 10, y: 16 },
+  { x: 30, y: 16 },
+  { x: 50, y: 16 },
+  { x: 70, y: 16 },
+  { x: 90, y: 16 },
+  { x: 10, y: 50 },
+  { x: 30, y: 50 },
+  { x: 70, y: 50 },
+  { x: 90, y: 50 },
+  { x: 10, y: 84 },
+  { x: 30, y: 84 },
+  { x: 50, y: 84 },
+  { x: 70, y: 84 },
+  { x: 90, y: 84 }
 ] as const;
 
 function compareNode(a: OntologyListItem, b: OntologyListItem) {
