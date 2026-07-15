@@ -17,15 +17,21 @@
 
 ## TDD Evidence
 
-### RED
+### Review remediation RED
 
-The two new governance contract cases failed before the page change because the read-only status and localized display boundary did not exist.
+The initial report did not retain auditable RED output, so that claim is superseded by this review remediation run. The browser assertion was narrowed from the whole schema section to the rendered `<pre>` element.
+
+- Command: `npm.cmd test -- tests/knowledge-page-layout.test.ts`
+- Result: 1 file failed, 1 test failed and 6 passed
+- Expected failure: rendered `<pre>` did not contain `문서 역할`; the output showed only the localized raw schema body
+- Production change after RED: feed the three machine field names through the existing presentation helper before rendering the `<pre>`
 
 ### GREEN
 
 - Command: `npm.cmd test -- tests/knowledge-governance-ui-contract.test.ts tests/knowledge-page-layout.test.ts`
 - Result: 2 files, 14 tests passed
-- Browser coverage: 390px Day view, governance status, expanded schema presentation
+- Browser coverage: 390px Day view, governance status, expanded schema `<pre>` presentation
+- Regression boundary: `roleLabel`, `shortSummary`, and `documentReflectionLabel` are absent from the rendered `<pre>` while all three Korean labels are present
 
 ## Release Gates
 

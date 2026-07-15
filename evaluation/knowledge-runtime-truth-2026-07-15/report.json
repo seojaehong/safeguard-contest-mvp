@@ -12,10 +12,17 @@
     "apiContractChanged": false
   },
   "tdd": {
-    "redCases": 2,
+    "initialRedClaim": "superseded because command output was not retained",
+    "reviewRedCommand": "npm.cmd test -- tests/knowledge-page-layout.test.ts",
+    "reviewRedFilesFailed": 1,
+    "reviewRedTestsFailed": 1,
+    "reviewRedTestsPassed": 6,
+    "reviewRedReason": "rendered schema pre did not contain the Korean field labels",
     "focusedFiles": 2,
     "focusedTests": 14,
-    "focusedPassed": 14
+    "focusedPassed": 14,
+    "renderedPreMachineLabels": 0,
+    "renderedPreKoreanLabels": 3
   },
   "verification": {
     "strictTypecheck": "pass",

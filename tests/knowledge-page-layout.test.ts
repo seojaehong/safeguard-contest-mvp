@@ -303,17 +303,18 @@ describe("knowledge page decision layout", () => {
     const schemaSection = page.locator('[aria-labelledby="schema-heading"]');
     await schemaSection.locator("summary").click();
     const schemaText = await schemaSection.textContent();
+    const schemaPreText = await schemaSection.locator("pre").textContent();
     expect(schemaText).toContain("문서화 항목 안내");
-    expect(schemaText).toContain("문서 역할");
-    expect(schemaText).toContain("짧은 요약");
-    expect(schemaText).toContain("문서 반영 위치");
+    expect(schemaPreText).toContain("문서 역할");
+    expect(schemaPreText).toContain("짧은 요약");
+    expect(schemaPreText).toContain("문서 반영 위치");
     for (const internalLabel of [
       "LLM 재생성 스키마",
       "roleLabel",
       "shortSummary",
       "documentReflectionLabel"
     ]) {
-      expect(schemaText, `exposes ${internalLabel}`).not.toContain(internalLabel);
+      expect(schemaPreText, `schema pre exposes ${internalLabel}`).not.toContain(internalLabel);
     }
 
     await page.close();
