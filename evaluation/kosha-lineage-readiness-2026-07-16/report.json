@@ -1,0 +1,25 @@
+{
+  "artifact": "kosha-lineage-readiness-2026-07-16",
+  "verdict": "not_ready_for_production_wide_trust",
+  "databaseMutationPerformed": false,
+  "networkRefetchPerformed": false,
+  "populations": {
+    "historicalTechnicalCorpus": 1040,
+    "technicalGuidelines": 803,
+    "technicalSupportRegulations": 237,
+    "verifiedPromotionCandidates": 234,
+    "productionTrustPins": 1
+  },
+  "trackedSnapshotCanBeValidated": true,
+  "trackedRepositoryCanRecreateFinalBodies": false,
+  "productionRegistryExpansionAllowed": false,
+  "requiredNextGate": [
+    "external_snapshot_hash_match",
+    "compact_234_item_ledger",
+    "official_pdf_hash_verification",
+    "pinned_extractor_body_hash_verification",
+    "read_only_db_comparison",
+    "per_item_human_review_receipt",
+    "bounded_vercel_trace"
+  ]
+}
