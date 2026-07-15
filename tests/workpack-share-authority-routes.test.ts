@@ -287,10 +287,10 @@ describe("workflow dispatch route authority", () => {
   });
 
   it("builds the provider payload with the exact validated selected message", async () => {
-    const { buildDispatchWebhookPayload } = await import("@/app/api/workflow/dispatch/route");
+    const { buildWorkflowDispatchWebhookPayload } = await import("@/lib/workflow-share-client");
     const message = "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.";
 
-    expect(buildDispatchWebhookPayload({
+    expect(buildWorkflowDispatchWebhookPayload({
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["sms"],
       recipients: [serverRecipient.workerSnapshot],

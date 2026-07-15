@@ -5,8 +5,8 @@ import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } f
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 import { validateDispatchContacts, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
 import {
-  validateWorkflowDispatchMessage,
-  type WorkflowDispatchMessageTarget
+  buildWorkflowDispatchWebhookPayload,
+  validateWorkflowDispatchMessage
 } from "@/lib/workflow-share-client";
 import {
   loadActiveOwnedShareSession,
@@ -18,6 +18,7 @@ export const dynamic = "force-dynamic";
 const limiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
 
 type WorkflowChannel = "email" | "sms" | "kakao" | "band";
+type ActiveWorkflowChannel = Exclude<WorkflowChannel, "band">;
 
 type WorkflowRequest = {
   workpackId?: string;
@@ -60,7 +61,7 @@ type WorkflowSummary = {
   skipped: number;
 };
 
-const ACTIVE_CHANNELS: WorkflowChannel[] = ["email", "sms", "kakao"];
+const ACTIVE_CHANNELS: ActiveWorkflowChannel[] = ["email", "sms", "kakao"];
 const LOCKED_CHANNELS: WorkflowChannel[] = ["band"];
 const PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED = false;
 const PROVIDER_IDEMPOTENCY_KEY_PATTERN = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
@@ -87,10 +88,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function parseChannels(value: unknown): WorkflowChannel[] {
+function parseChannels(value: unknown): ActiveWorkflowChannel[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is WorkflowChannel => (
-    typeof item === "string" && ACTIVE_CHANNELS.includes(item as WorkflowChannel)
+  return value.filter((item): item is ActiveWorkflowChannel => (
+    typeof item === "string" && ACTIVE_CHANNELS.includes(item as ActiveWorkflowChannel)
   ));
 }
 
@@ -129,7 +130,7 @@ function normalizeChannelResults(value: unknown, requestedChannels: WorkflowChan
     for (const item of value) {
       if (!isRecord(item)) continue;
       const channel = item.channel;
-      if (typeof channel !== "string" || !ACTIVE_CHANNELS.includes(channel as WorkflowChannel)) continue;
+      if (typeof channel !== "string" || !ACTIVE_CHANNELS.includes(channel as ActiveWorkflowChannel)) continue;
       byChannel.set(channel as WorkflowChannel, {
         channel: channel as WorkflowChannel,
         provider: typeof item.provider === "string" ? item.provider : "n8n",
@@ -219,32 +220,6 @@ function buildPreflightChannelResults(channels: WorkflowChannel[], webhookConfig
 
 function isPreflightBlocked(channel: WorkflowChannel, preflightResults: WorkflowChannelResult[]) {
   return preflightResults.some((item) => item.channel === channel && item.status === "unconfigured");
-}
-
-type DispatchWebhookPayloadInput = {
-  idempotencyKey: string;
-  channels: WorkflowChannel[];
-  recipients: Array<Record<string, unknown>>;
-  operatorNote: string;
-  messageTarget: WorkflowDispatchMessageTarget;
-  message: string;
-  workpack: unknown;
-  sentAt?: string;
-};
-
-export function buildDispatchWebhookPayload(input: DispatchWebhookPayloadInput) {
-  validateWorkflowDispatchMessage(input);
-  return {
-    event: "safeguard.workpack.dispatch" as const,
-    idempotencyKey: input.idempotencyKey,
-    sentAt: input.sentAt || new Date().toISOString(),
-    channels: input.channels,
-    recipients: input.recipients,
-    operatorNote: input.operatorNote,
-    messageTarget: input.messageTarget,
-    message: input.message,
-    workpack: input.workpack
-  };
 }
 
 export async function POST(request: NextRequest) {
@@ -427,7 +402,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const payload = buildDispatchWebhookPayload({
+  const payload = buildWorkflowDispatchWebhookPayload({
     idempotencyKey,
     channels: dispatchChannels,
     recipients,

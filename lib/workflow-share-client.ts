@@ -103,6 +103,32 @@ export function validateWorkflowDispatchMessage(input: {
   }
 }
 
+type WorkflowDispatchWebhookPayloadInput = {
+  idempotencyKey: string;
+  channels: WorkflowShareChannel[];
+  recipients: Array<Record<string, unknown>>;
+  operatorNote: string;
+  messageTarget: WorkflowDispatchMessageTarget;
+  message: string;
+  workpack: unknown;
+  sentAt?: string;
+};
+
+export function buildWorkflowDispatchWebhookPayload(input: WorkflowDispatchWebhookPayloadInput) {
+  validateWorkflowDispatchMessage(input);
+  return {
+    event: "safeguard.workpack.dispatch" as const,
+    idempotencyKey: input.idempotencyKey,
+    sentAt: input.sentAt || new Date().toISOString(),
+    channels: input.channels,
+    recipients: input.recipients,
+    operatorNote: input.operatorNote,
+    messageTarget: input.messageTarget,
+    message: input.message,
+    workpack: input.workpack
+  };
+}
+
 function parseChannelResults(value: unknown): WorkflowDispatchChannelResult[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const results = value.filter(isRecord).map((item) => ({

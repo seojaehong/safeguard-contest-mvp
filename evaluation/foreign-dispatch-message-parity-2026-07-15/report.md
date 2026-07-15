@@ -32,8 +32,16 @@ GREEN after implementation:
   - 5 files, 50 tests passed
 - `npm.cmd run typecheck`
   - passed with strict TypeScript, no emitted files
+- `npm.cmd run build`
+  - passed, Next.js generated 28 static pages and accepted the App Router route export boundary
 - `git diff --check`
   - passed; Windows line-ending warnings only
+
+Regression caught after the first push:
+
+- Next App Router rejected a custom helper export from `app/api/workflow/dispatch/route.ts`.
+- The helper and its type moved to `lib/workflow-share-client.ts`; the route now exports only supported route symbols.
+- A test imports the payload builder from the non-route module and the production build verifies the route contract.
 
 ## Security And Authority Preservation
 
