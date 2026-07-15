@@ -37,7 +37,7 @@ export type OpenClawHermesRuntimeDependencies = {
   verifyToolFreeAgent?: VerifyToolFreeAgent;
   assertOAuth?: AssertOpenClawOpenAiOAuth;
   runChat?: typeof runOpenClawChat;
-  testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
+  trustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -219,6 +219,6 @@ export function createOpenClawHermesComposition(
     });
   }, {
     attestRuntime,
-    testOnlyTrustedKoshaReference: dependencies.testOnlyTrustedKoshaReference,
+    trustedKoshaReference: dependencies.trustedKoshaReference,
   });
 }

@@ -89,7 +89,7 @@ export type SafeClawHermesComposition = {
   readonly planner: HermesPlanner;
   readonly readExecutor: SafeClawScopedMcpReadExecutor;
   readonly attestRuntime?: HermesRuntimeAttestation;
-  readonly testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
+  readonly trustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
   readonly [SAFECLAW_HERMES_COMPOSITION]: true;
 };
 
@@ -97,14 +97,14 @@ export function createSafeClawHermesComposition(
   planner: HermesPlanner,
   options: {
     attestRuntime?: HermesRuntimeAttestation;
-    testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
+    trustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
   } = {},
 ): SafeClawHermesComposition {
   return Object.freeze({
     planner,
     readExecutor: createSafeClawScopedMcpReadExecutor(),
     attestRuntime: options.attestRuntime,
-    testOnlyTrustedKoshaReference: options.testOnlyTrustedKoshaReference,
+    trustedKoshaReference: options.trustedKoshaReference,
     [SAFECLAW_HERMES_COMPOSITION]: true as const,
   });
 }
@@ -124,12 +124,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isGroundedKoshaReference(
   value: unknown,
-  testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
+  trustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
 ): boolean {
   return isRecord(value)
     && typeof value.item_type === "string"
     && isKoshaSupportingCitationEligible(value as SafetyReferenceItem)
-    && (testOnlyTrustedKoshaReference?.(value as SafetyReferenceItem) ?? false);
+    && (trustedKoshaReference?.(value as SafetyReferenceItem) ?? false);
 }
 
 function isSuccessfulRequiredSearch(
@@ -204,7 +204,7 @@ type EligibleClaimReference = Readonly<{
 
 function buildEvidenceClaims(
   packet: DbHarnessPacket,
-  testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
+  trustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
 ): readonly HermesEvidenceClaim[] {
   const claims = new Map<string, HermesEvidenceClaim>();
   const references: EligibleClaimReference[] = [
@@ -215,7 +215,7 @@ function buildEvidenceClaims(
       .filter((item) => item.item_type === "sif-case")
       .map((item) => ({ item, authorityLabel: "SIF 사례 근거(위험 우선순위)" })),
     ...packet.supportingEvidence
-      .filter((item) => isGroundedKoshaReference(item, testOnlyTrustedKoshaReference))
+      .filter((item) => isGroundedKoshaReference(item, trustedKoshaReference))
       .map((item) => ({ item, authorityLabel: "KOSHA 실행지침" })),
   ];
   for (const { item: reference, authorityLabel } of references) {
@@ -284,7 +284,7 @@ function renderAttestedClaims(
 function readEvidencePacket(
   result: unknown,
   expectedQuestion: string,
-  testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
+  trustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
 ): DbHarnessPacket {
   if (!isRecord(result)) {
     throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
@@ -349,7 +349,7 @@ function readEvidencePacket(
     || sifCases.length === 0
     || !sifCases.some((item) => isRecord(item) && item.item_type === "sif-case")
     || !supportingEvidence.some((item) => (
-      isGroundedKoshaReference(item, testOnlyTrustedKoshaReference)
+      isGroundedKoshaReference(item, trustedKoshaReference)
     ))
     || ontology.status !== "ready"
     || ontology.missing.length !== 0
@@ -419,13 +419,13 @@ export function createExperimentalHermesAdapter(
         const validatedPacket = readEvidencePacket(
           harnessResult,
           normalizePrompt(input.prompt),
-          dependencies.composition.testOnlyTrustedKoshaReference,
+          dependencies.composition.trustedKoshaReference,
         );
         evidencePacket = deepFreeze(structuredClone(validatedPacket));
         evidenceDigest = digestEvidencePacket(evidencePacket);
         evidenceClaims = buildEvidenceClaims(
           validatedPacket,
-          dependencies.composition.testOnlyTrustedKoshaReference,
+          dependencies.composition.trustedKoshaReference,
         );
         if (evidenceClaims.length === 0) {
           throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);

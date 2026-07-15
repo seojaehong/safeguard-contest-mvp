@@ -8,6 +8,7 @@ import type {
   SafetyReferenceItem,
   SafetyReferenceSearchResult,
 } from "@/lib/safety-reference-catalog";
+import { isProductionTrustedKoshaReference } from "@/lib/safety-reference-catalog";
 import * as safetyReferenceServer from "@/lib/safety-reference-catalog-server";
 import {
   createExperimentalHermesAdapter,
@@ -114,7 +115,7 @@ function isTestOnlyRecoveredKoshaFixture(item: SafetyReferenceItem): boolean {
 
 function createSafeClawHermesComposition(planner: HermesPlanner) {
   return createHermesComposition(planner, {
-    testOnlyTrustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
+    trustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
   });
 }
 
@@ -1129,7 +1130,7 @@ describe("experimental Hermes EngineAdapter", () => {
       openClawHermes: {
         runtimeCapability: async () => true,
         verifyToolFreeAgent: async () => true,
-        testOnlyTrustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
+        trustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
         assertOAuth: async (config) => ({
           ok: true,
           provider: "openai",
@@ -1161,14 +1162,14 @@ describe("experimental Hermes EngineAdapter", () => {
     expect(events).toEqual([]);
   });
 
-  it("renders only packet allowlisted claims from structured OpenClaw attestation", async () => {
+  it("runs the production composition with an approved current KOSHA reference", async () => {
     const events: ClawChatEvent[] = [];
     const executeSpy = mockHarnessPreload();
     const engine = createProductionEngineAdapter(boundLocalPocEnv, {
       openClawHermes: {
         runtimeCapability: async () => true,
         verifyToolFreeAgent: async () => true,
-        testOnlyTrustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
+        trustedKoshaReference: isProductionTrustedKoshaReference,
         assertOAuth: async (config) => ({
           ok: true,
           provider: "openai",
@@ -1194,6 +1195,53 @@ describe("experimental Hermes EngineAdapter", () => {
       text: "작업발판·안전난간·개구부 상태 확인 [SIF 사례 근거(위험 우선순위): 오늘 작업 위험 점검 SIF 추락 사례]",
     }]);
   });
+
+  it.each(["unknown", "untrusted"] as const)(
+    "rejects %s KOSHA references at the production composition boundary",
+    async (variant) => {
+      const kosha = recoveredKoshaReference();
+      if (!kosha.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
+      if (variant === "unknown") kosha.kosha_guide.stableDocumentKey = "UNKNOWN-13";
+      if (variant === "untrusted") kosha.kosha_guide.quality = "review_required";
+      const packet = buildDbHarnessPacket({
+        question: "오늘 작업 위험을 점검해줘",
+        references: [sifReference(), kosha],
+        retrieval: { mode: "ranked-rpc", message: `${variant} KOSHA reference` },
+      });
+      const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+        ...groundedHarnessResult(),
+        packet,
+      });
+      const runChat = vi.fn(async () => undefined);
+      const engine = createProductionEngineAdapter(boundLocalPocEnv, {
+        openClawHermes: {
+          runtimeCapability: async () => true,
+          verifyToolFreeAgent: async () => true,
+          trustedKoshaReference: isProductionTrustedKoshaReference,
+          assertOAuth: async (config) => ({
+            ok: true,
+            provider: "openai",
+            authProvider: "openai/oauth",
+            model: config.model,
+            checkedAt: "2026-07-15T00:00:00.000Z",
+            message: "OpenClaw OpenAI OAuth profile is usable.",
+          }),
+          runChat,
+        },
+      });
+
+      try {
+        await expect(engine.run(runInput())).rejects.toMatchObject({
+          code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+          status: 503,
+        });
+      } finally {
+        executeSpy.mockRestore();
+      }
+
+      expect(runChat).not.toHaveBeenCalled();
+    },
+  );
 
   it("identifies itself as a versioned engine with no mutation or publish authority", () => {
     const engine = createExperimentalHermesAdapter({
