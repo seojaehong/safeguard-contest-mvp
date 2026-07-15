@@ -1,14 +1,36 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-07-14T16:28:30.339Z",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-15T08:00:04.515Z",
   "mode": "normal",
   "buildDirectory": ".next",
-  "buildId": "lhHKavs2FAoAofR0VKw2X",
-  "sourceSha": "1ef6aae442ff1e68658e82a3567b487d91a2ff2b",
-  "sourceIdentity": "64bb5f413b8c4d8817954bd769ecb629387da95914f75af1bd6c5e8f609257db",
-  "buildIdentity": "e9659e2c12174686b7106161041713f0e5e5e3dfa4ecd9d084f435ab9971ae74",
-  "chunkCount": 100,
+  "buildId": "PLkZM2bQFEHlcbViiUuQp",
+  "sourceSha": "94cae0c0e9d5d6e0906e95ad27f2e1c2c7abda81",
+  "sourceIdentity": "1dd41311a1063b69e3b774f999fe8a004a8eb88c60d26160512144d58752ba29",
+  "buildIdentity": "de7a5b266e2dd4b2bdb39b3a397b0fa284347719a34e4f774d1a859fbd5b883c",
+  "chunkCount": 289,
+  "staticChunkCount": 100,
+  "serverChunkCount": 189,
   "markerCount": 0,
   "markerFiles": [],
+  "markers": {
+    "global": {
+      "staticCount": 0,
+      "serverCount": 0,
+      "totalCount": 0,
+      "files": []
+    },
+    "appError": {
+      "staticCount": 0,
+      "serverCount": 0,
+      "totalCount": 0,
+      "files": []
+    },
+    "appErrorConfirmation": {
+      "staticCount": 0,
+      "serverCount": 0,
+      "totalCount": 0,
+      "files": []
+    }
+  },
   "status": "pass"
 }

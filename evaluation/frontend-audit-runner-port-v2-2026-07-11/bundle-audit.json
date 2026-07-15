@@ -1,16 +1,54 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-07-14T16:24:28.115Z",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-15T08:03:02.615Z",
   "mode": "audit",
   "buildDirectory": ".next",
-  "buildId": "xMfO-lQ84WBQVNLMRNhpY",
-  "sourceSha": "1ef6aae442ff1e68658e82a3567b487d91a2ff2b",
-  "sourceIdentity": "64bb5f413b8c4d8817954bd769ecb629387da95914f75af1bd6c5e8f609257db",
-  "buildIdentity": "b63c0f06f8888a56ff8bc75fa1a83e2e1a4e6356b2f4b70397cb058b490e22ef",
-  "chunkCount": 100,
+  "buildId": "AOFWTOYUqatUZofnRpILs",
+  "sourceSha": "94cae0c0e9d5d6e0906e95ad27f2e1c2c7abda81",
+  "sourceIdentity": "1dd41311a1063b69e3b774f999fe8a004a8eb88c60d26160512144d58752ba29",
+  "buildIdentity": "d9cc244791aec69562c02c0b37654af177f01c58ce026f4c55fd403198f03337",
+  "chunkCount": 289,
+  "staticChunkCount": 100,
+  "serverChunkCount": 189,
   "markerCount": 1,
   "markerFiles": [
-    "static/chunks/app/layout-6284237563c54ed7.js"
+    "static/chunks/app/layout-572767ba4e328087.js"
   ],
+  "markers": {
+    "global": {
+      "staticCount": 1,
+      "serverCount": 10,
+      "totalCount": 11,
+      "files": [
+        "static/chunks/app/layout-572767ba4e328087.js",
+        "server/app/auth/callback/page.js",
+        "server/app/demo/page.js",
+        "server/app/interpretation/[id]/page.js",
+        "server/app/law/[id]/page.js",
+        "server/app/login/page.js",
+        "server/app/precedent/[id]/page.js",
+        "server/app/prototype/page.js",
+        "server/app/_not-found/page.js",
+        "server/chunks/7657.js",
+        "server/chunks/8373.js"
+      ]
+    },
+    "appError": {
+      "staticCount": 0,
+      "serverCount": 1,
+      "totalCount": 1,
+      "files": [
+        "server/app/dryrun/page.js"
+      ]
+    },
+    "appErrorConfirmation": {
+      "staticCount": 1,
+      "serverCount": 0,
+      "totalCount": 1,
+      "files": [
+        "static/chunks/app/error-3b628c7d871febd0.js"
+      ]
+    }
+  },
   "status": "pass"
 }
