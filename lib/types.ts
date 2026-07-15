@@ -664,6 +664,12 @@ export type AskResponse = {
     status: "review_required";
     sourceIdentity: string;
     criticalControls: string[];
+    rejectedGroups: string[];
+    violations: Array<{
+      group: string;
+      code: "unknown_reference" | "control_provenance_missing" | "control_claim_not_in_packet";
+      path: string;
+    }>;
   };
   generationTrace?: GenerationTrace;
   generationEvidence?: GenerationEvidenceEnvelope;

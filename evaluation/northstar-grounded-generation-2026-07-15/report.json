@@ -9,7 +9,9 @@
     "canonical citation-only control suffix",
     "runAsk outer-failure response review surface preserves sourceIdentity and criticalControls",
     "deterministic duplicate source-key ordering and deduplication",
-    "narrative actionable controls fail closed when absent from the immutable packet"
+    "narrative actionable controls fail closed when absent from the immutable packet",
+    "structured stop-work emergency education permit and worker-confirmation controls are packet-bound",
+    "rejected groups and violation paths reach a Korean human-confirmation surface"
   ],
   "contract": {
     "citationSuffix": "one canonical KOSHA or law token per parenthesized suffix group; arbitrary prose rejected",
@@ -42,7 +44,7 @@
     {
       "command": "npm.cmd test -- tests/grounded-generation-contract.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts --reporter=dot",
       "testFilesPassed": 4,
-      "testsPassed": 70,
+      "testsPassed": 84,
       "testsFailed": 0
     },
     {

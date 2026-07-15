@@ -14,6 +14,8 @@
 2. `runAsk` now preserves `sourceIdentity` and every packet `criticalControl` on `AskResponse.groundingReview` after an outer pipeline failure. `AnswerPanel` renders that review surface.
 3. Duplicate source keys are deterministically deduplicated. Scalar fields come from the canonical representative; aliases and controls are canonically merged and deduplicated.
 4. Actionable control sentences in narrative drafts are checked against packet controls even when they carry no KOSHA or law token. Unsupported installation, isolation, PPE, stop-work, and similar instructions fail closed as `control_claim_not_in_packet`.
+5. The second independent review expanded the gate beyond verb keywords: instruction-shaped narrative sentences and every structured control field used by work plans, TBM, education, permits, and emergency response now resolve to an immutable packet control or fail closed.
+6. `groundingReview` now carries rejected document groups and issue paths through `runAsk`; `AnswerPanel` renders Korean document, field, and remediation labels for human confirmation.
 
 ## Editor-focus diagnosis
 
@@ -26,7 +28,7 @@ The editor-focus assertion passed in every reproduction run. The intermittent su
 
 ## Verification
 
-- Grounding and generation focused suite: 4 files, 70 tests passed.
+- Grounding and generation focused suite: 4 files, 84 tests passed.
 - Isolated browser harness suite: 1 file, 3 tests passed.
 - Final editor-focus repetition: 3 runs passed, 21 unrelated tests skipped per run, 0 cleanup failures.
 - Strict TypeScript typecheck: passed after lock-respecting dependency sync; package and lockfile diff remained empty.

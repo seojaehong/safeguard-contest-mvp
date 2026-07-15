@@ -77,7 +77,9 @@ function buildGroundingReview(
   return {
     status: "review_required",
     sourceIdentity: grounding.sourceIdentity,
-    criticalControls: [...grounding.criticalControls]
+    criticalControls: [...grounding.criticalControls],
+    rejectedGroups: [...grounding.rejectedGroups],
+    violations: grounding.violations.map((violation) => ({ ...violation }))
   };
 }
 
