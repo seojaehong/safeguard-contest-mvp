@@ -75,7 +75,7 @@ function downloadTextFile(fileName: string, contentType: string, content: string
 
 export function OperationMemoryGraphViewer({
   graph,
-  eyebrow = "Operation Graph",
+  eyebrow = "작업 이력 연결",
   title,
   description,
   actions,
@@ -307,7 +307,7 @@ export function OperationMemoryPreview() {
       setDownloadMessage("연결형 작업 메모를 내려받았습니다.");
       return;
     }
-    setDownloadMessage("작업 개선 메모리 Markdown을 내려받았습니다.");
+    setDownloadMessage("작업 개선 메모리 문서를 내려받았습니다.");
   }
 
   return (

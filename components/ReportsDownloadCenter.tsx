@@ -83,7 +83,7 @@ const INITIAL_DOWNLOAD_STATE: DownloadState = {
 const reportExportLabels = [
   "개선사항 포함 문서",
   "공정·작업 분류 CSV",
-  "전체 기록 파일",
+  "현재 조회 결과 데이터",
   "재사용 검토 문서",
   "재사용 검토 데이터"
 ] as const;
@@ -399,7 +399,7 @@ function DownloadActions({
             buildContent: () => buildReportJson(snapshot)
           })}
         >
-          전체 기록 파일
+          현재 조회 결과 데이터
         </button>
         <p className="safeclaw-download-note">
           아래 파일은 승인 전 지식 후보입니다. 사용자 근거처럼 바로 노출하지 않습니다.

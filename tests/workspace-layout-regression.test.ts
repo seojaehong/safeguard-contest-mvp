@@ -384,9 +384,16 @@ describe("workspace layout regression", () => {
     await page.locator(".workspace-document-page").waitFor({ state: "visible" });
     expect(await page.locator(".workspace-top-title strong").textContent()).toBe("문서");
     expect(await page.locator(".workspace-current-brief strong").textContent()).toContain(stored.data.scenario.workSummary);
+    await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "공유" }).click();
+    const sharePage = page.locator(".workspace-share-page");
+    await sharePage.waitFor({ state: "visible" });
+    expect(await sharePage.innerText()).not.toMatch(/\b(?:Markdown|Supabase|API|JSON)\b|Operation Ontology|Operation Graph/u);
+    await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "문서" }).click();
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
-    await page.locator(".field-workspace").waitFor({ state: "visible" });
-    expect(await page.locator(".field-workspace").textContent()).toContain("복원 작업자");
+    const fieldWorkspace = page.locator(".field-workspace");
+    await fieldWorkspace.waitFor({ state: "visible" });
+    expect(await fieldWorkspace.textContent()).toContain("복원 작업자");
+    expect(await fieldWorkspace.innerText()).not.toMatch(/\b(?:Markdown|Supabase|API|JSON)\b|Operation Ontology|Operation Graph/u);
     expect(await page.locator(".workspace-input-page").count()).toBe(0);
   }, 90_000);
 

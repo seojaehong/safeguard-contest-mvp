@@ -78,6 +78,15 @@ describe("documents editor layout", () => {
     await Promise.all(browser.contexts().map((context) => context.close()));
   }, 30_000);
 
+  it("keeps operational format labels out of the default rendered document surface", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+
+    const visibleText = await page.locator("body").innerText();
+    expect(visibleText).not.toMatch(/\b(?:Markdown|Supabase|API|JSON)\b|Operation Ontology|Operation Graph/u);
+  }, 90_000);
+
   it("renders actual message samples and an empty permit with document-specific structured sections", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 391, height: 844 } });
