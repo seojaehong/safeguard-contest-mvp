@@ -20,6 +20,12 @@
 - Landing pipeline labels use `--sc-hazard-text` while yellow remains available for fills and borders.
 - Collapsed advanced/example actions use `--workspace-muted`.
 
+Calculated replacement ratios:
+
+- `#665100` on white: `7.66:1`.
+- `#17191d` on `#f5c518`: `10.80:1`.
+- `#5c6169` on `#fafafb`: `5.98:1`.
+
 ## Verification
 
 - TDD RED: `tests/frontend-shared-surfaces.test.ts` failed on the original yellow landing label.
