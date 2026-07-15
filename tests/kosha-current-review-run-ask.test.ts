@@ -393,6 +393,61 @@ describe("current-base runAsk retrieval provenance", () => {
     );
   }, 30_000);
 
+  it("fails closed in runAsk when the answer provider rejects a Phase A request", async () => {
+    const direct = retrievalReference("phase-a-answer-failure-direct", "ranked");
+    mocks.searchSafetyReferences.mockResolvedValue(searchResult("ranked-rpc", [direct]));
+    mocks.generateAnswer.mockRejectedValue(new Error("forced Phase A provider failure"));
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_registered",
+      evidencePack: null,
+    });
+
+    const response = await runAsk("고소작업", { aiMode: "enhanced", phaseAGrounding });
+
+    expect(response.answer).toBe([
+      "핵심 판단: 현장 확인 필요",
+      "즉시 조치: 현장 확인 필요",
+      "실무 체크포인트: 현장 확인 필요",
+    ].join("\n"));
+    const canonicalText = response.answer;
+    const proseDeliverables = [
+      response.deliverables.workpackSummaryDraft,
+      response.deliverables.riskAssessmentDraft,
+      response.deliverables.workPlanDraft,
+      response.deliverables.tbmBriefing,
+      response.deliverables.tbmLogDraft,
+      response.deliverables.safetyEducationRecordDraft,
+      response.deliverables.emergencyResponseDraft,
+      response.deliverables.photoEvidenceDraft,
+      response.deliverables.foreignWorkerBriefing,
+      response.deliverables.foreignWorkerTransmission,
+      response.deliverables.kakaoMessage,
+    ];
+    expect(proseDeliverables.every((value) => value === canonicalText)).toBe(true);
+    expect(JSON.stringify(response.deliverables)).not.toContain(direct.title);
+    expect(JSON.stringify(response.deliverables)).not.toContain("기상청");
+    expect(JSON.stringify(response.deliverables)).not.toContain("KOSHA 보강");
+    expect(JSON.stringify(response.deliverables)).not.toContain("외국인 근로자 공지");
+    expect(response.riskSummary).toEqual({
+      title: "현장 확인 필요",
+      riskLevel: "현장 확인 필요",
+      topRisk: "현장 확인 필요",
+      immediateActions: ["현장 확인 필요"],
+    });
+    expect(response.practicalPoints).toEqual(["현장 확인 필요"]);
+    expect(JSON.stringify({
+      riskSummary: response.riskSummary,
+      practicalPoints: response.practicalPoints,
+    })).not.toContain(direct.title);
+    expect(response.generationTrace?.answer.provider).toBe("safeclaw");
+    expect(response.generationTrace?.fallbackUsed).toBe(true);
+    expect(response.structured?.riskAssessmentRows).toEqual([]);
+    expect(response.deliverables.workPlanStructured).toBeUndefined();
+    expect(response.deliverables.tbmBriefingStructured).toBeUndefined();
+    expect(response.deliverables.tbmLogStructured).toBeUndefined();
+    expect(response.deliverables.educationRecordStructured).toBeUndefined();
+  }, 30_000);
+
   it("propagates final local-ranked items through runAsk and the DB packet", async () => {
     mocks.searchSafetyReferences.mockResolvedValue(searchResult(
       "local-ranked",

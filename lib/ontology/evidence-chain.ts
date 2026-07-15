@@ -263,7 +263,7 @@ export type DeepReadonly<Value> = Value extends (...args: never[]) => unknown
 
 type PhaseAGenerationGroundingShape = {
   evidenceChainState: EvidenceChainState;
-  groundingStatus: "resolved" | "review_required" | "missing";
+  groundingStatus: "review_required" | "missing";
   evidencePack: ActiveEvidenceChainPack | null;
   allowedContent: {
     facts: Array<{
@@ -277,7 +277,7 @@ type PhaseAGenerationGroundingShape = {
       label: string;
       applicabilityCondition: string;
       obligationClassification: ObligationClassification;
-      usage: "naturalize" | "review_required_only";
+      usage: "review_required_only";
     }>;
   };
   allowedCitedUids: string[];
@@ -289,20 +289,20 @@ type PhaseAGenerationGroundingShape = {
     evidenceTrust: "untrusted_json";
     citationPolicy: "exact_allowlist_only";
     unsupportedFactPolicy: "현장 확인 필요";
-    outputStatus: "grounded_draft" | "review_required_draft" | "missing_evidence_draft";
+    outputStatus: "review_required_draft" | "missing_evidence_draft";
   };
 };
 
 export type PhaseAGenerationGrounding = DeepReadonly<PhaseAGenerationGroundingShape>;
 
 export type PhaseAStructuredCitationViolation = Readonly<{
-  code: "unknown_phase_a_citation";
+  code: "unknown_phase_a_citation" | "unsupported_phase_a_fact";
   path: string;
   value: string;
 }>;
 
 export type PhaseAStructuredCitationValidation = Readonly<{
-  status: "grounded" | "review_required";
+  status: "review_required";
   violations: readonly PhaseAStructuredCitationViolation[];
 }>;
 
@@ -374,75 +374,6 @@ function listPhaseAGenerationEvidence(
   ];
 }
 
-function isAllowedGenerationEvidence(
-  evidence: PhaseAGenerationEvidence,
-  pack: ActiveEvidenceChainPack,
-): boolean {
-  if (
-    evidence.resolution !== "resolved"
-    || (evidence.reviewState !== "verified" && evidence.reviewState !== "published")
-  ) {
-    return false;
-  }
-  if (evidence.sourceRole === "hazard_priority_only") return true;
-  const control = pack.controls.find((candidate) => candidate.controlId === evidence.controlId);
-  if (!control || control.obligation.classification === "review_required") return false;
-  if (evidence.sourceRole === "kosha_technical_guidance") {
-    return (
-      evidence.koshaProvenance !== undefined
-      && control.guidanceStatus === "verified"
-      && !control.guidanceReviewRequired
-      && (
-        control.obligation.classification === "technical_guidance_only"
-        || control.obligation.classification === "statutory_mandate_with_guidance"
-      )
-    );
-  }
-  return (
-    evidence.reviewState === "published"
-    && (
-      control.obligation.classification === "statutory_mandate"
-      || control.obligation.classification === "statutory_mandate_with_guidance"
-    )
-  );
-}
-
-function isResolvedGenerationPack(pack: ActiveEvidenceChainPack): boolean {
-  if (
-    pack.pipeline.llmRole !== "naturalize_only"
-    || !pack.pipeline.fixedPackImmutable
-    || pack.provenance.guidanceOverlay.resolution !== "resolved"
-  ) {
-    return false;
-  }
-  if (!pack.hazardPriority.length || !pack.hazardPriority.every((source) => (
-    source.resolution === "resolved"
-    && (source.reviewState === "verified" || source.reviewState === "published")
-  ))) {
-    return false;
-  }
-  return pack.controls.every((control) => {
-    if (control.obligation.classification === "review_required") return false;
-    if (!control.lawEvidence.every((source) => (
-      source.reviewState === "published" && source.resolution === "resolved"
-    ))) {
-      return false;
-    }
-    if (!control.guidanceEvidence.length) {
-      return control.obligation.classification === "statutory_mandate";
-    }
-    return (
-      control.guidanceStatus === "verified"
-      && !control.guidanceReviewRequired
-      && control.guidanceEvidence.every((source) => (
-        source.resolution === "resolved"
-        && (source.reviewState === "verified" || source.reviewState === "published")
-        && readKoshaProvenance(source) !== null
-      ))
-    );
-  });
-}
-
 export function buildPhaseAGenerationGrounding(input: {
   evidenceChainState: EvidenceChainState;
   evidencePack: ActiveEvidenceChainPack | null;
@@ -450,23 +381,13 @@ export function buildPhaseAGenerationGrounding(input: {
   const clonedPack = input.evidencePack
     ? immutableClone(input.evidencePack)
     : null;
-  const canResolve = input.evidenceChainState === "resolved"
-    && clonedPack !== null
-    && isResolvedGenerationPack(clonedPack);
   const allEvidence = clonedPack ? listPhaseAGenerationEvidence(clonedPack) : [];
-  const allowedEvidence = canResolve
-    ? allEvidence.filter((evidence) => isAllowedGenerationEvidence(evidence, clonedPack))
-    : [];
-  const allowedKeys = new Set(allowedEvidence.map((evidence) => (
-    `${evidence.sourceRole}|${evidence.controlId ?? ""}|${evidence.citedUid}`
-  )));
-  const groundingStatus = canResolve
-    ? "resolved"
-    : clonedPack
-      ? "review_required"
-      : "missing";
+  const allowedEvidence: PhaseAGenerationEvidence[] = [];
+  const groundingStatus = clonedPack ? "review_required" : "missing";
   const grounding: PhaseAGenerationGroundingShape = {
-    evidenceChainState: input.evidenceChainState,
+    evidenceChainState: clonedPack || input.evidenceChainState === "resolved"
+      ? "review_required"
+      : input.evidenceChainState,
     groundingStatus,
     evidencePack: clonedPack,
     allowedContent: {
@@ -490,26 +411,20 @@ export function buildPhaseAGenerationGrounding(input: {
         controlId: control.controlId,
         label: control.label,
         applicabilityCondition: control.applicabilityCondition,
-        obligationClassification: canResolve
-          ? control.obligation.classification
-          : "review_required",
-        usage: canResolve ? "naturalize" : "review_required_only",
+        obligationClassification: "review_required",
+        usage: "review_required_only",
       })) ?? [],
     },
     allowedCitedUids: [...new Set(allowedEvidence.map((evidence) => evidence.citedUid))],
     allowedEvidence,
-    reviewRequiredEvidence: allEvidence.filter((evidence) => !allowedKeys.has(
-      `${evidence.sourceRole}|${evidence.controlId ?? ""}|${evidence.citedUid}`,
-    )),
+    reviewRequiredEvidence: allEvidence,
     generationPolicy: {
       llmRole: "naturalize_only",
       fixedPackImmutable: true,
       evidenceTrust: "untrusted_json",
       citationPolicy: "exact_allowlist_only",
       unsupportedFactPolicy: "현장 확인 필요",
-      outputStatus: groundingStatus === "resolved"
-        ? "grounded_draft"
-        : groundingStatus === "review_required"
+      outputStatus: groundingStatus === "review_required"
           ? "review_required_draft"
           : "missing_evidence_draft",
     },
@@ -518,44 +433,42 @@ export function buildPhaseAGenerationGrounding(input: {
   return grounding as PhaseAGenerationGrounding;
 }
 
-export function isPhaseACitationAllowed(
-  grounding: PhaseAGenerationGrounding,
-  citedUid: string,
-): boolean {
-  return citedUid.length > 0 && grounding.allowedCitedUids.includes(citedUid);
+function isPhaseAV1ReviewGrounding(grounding: PhaseAGenerationGrounding): boolean {
+  const expectedOutputStatus = grounding.groundingStatus === "review_required"
+    ? "review_required_draft"
+    : "missing_evidence_draft";
+  return grounding.evidenceChainState !== "resolved"
+    && grounding.allowedCitedUids.length === 0
+    && grounding.allowedEvidence.length === 0
+    && grounding.allowedContent.controls.every((control) => (
+      control.usage === "review_required_only"
+      && control.obligationClassification === "review_required"
+    ))
+    && grounding.generationPolicy.outputStatus === expectedOutputStatus;
 }
 
 export function validatePhaseAStructuredCitationOutput(
   output: unknown,
   grounding: PhaseAGenerationGrounding,
 ): PhaseAStructuredCitationValidation {
-  const allowed = new Set(grounding.allowedCitedUids);
-  const allowedLaw = new Set(grounding.allowedEvidence
-    .filter((evidence) => evidence.sourceRole === "current_law_mandate")
-    .map((evidence) => evidence.citedUid));
-  const allowedKosha = new Set(grounding.allowedEvidence
-    .filter((evidence) => evidence.sourceRole === "kosha_technical_guidance")
-    .map((evidence) => evidence.citedUid));
+  const allowed = new Set<string>();
+  const allowedLaw = new Set<string>();
+  const allowedKosha = new Set<string>();
   const allowedLawArticles = new Set<string>();
   const allowedKoshaCodes = new Set<string>();
-  for (const control of grounding.evidencePack?.controls ?? []) {
-    for (const evidence of control.lawEvidence) {
-      if (!allowedLaw.has(evidence.citedUid)) continue;
-      const role = lawCitationRole(evidence.citedUid) ?? lawCitationRole(evidence.title);
-      if (role) allowedLawArticles.add(`${role}:${evidence.articleNo}`);
-    }
-    for (const evidence of control.guidanceEvidence) {
-      if (!allowedKosha.has(evidence.citedUid)) continue;
-      allowedKoshaCodes.add(evidence.guideCode.toUpperCase());
-      const version = readString(evidence as unknown as Record<string, unknown>, "version");
-      if (version) allowedKoshaCodes.add(version.toUpperCase());
-    }
-  }
   const violations: PhaseAStructuredCitationViolation[] = [];
 
-  const reject = (path: string, value: string): void => {
-    violations.push({ code: "unknown_phase_a_citation", path, value });
+  const reject = (
+    path: string,
+    value: string,
+    code: PhaseAStructuredCitationViolation["code"] = "unknown_phase_a_citation",
+  ): void => {
+    violations.push({ code, path, value });
   };
+
+  if (!isPhaseAV1ReviewGrounding(grounding)) {
+    reject("phaseAGrounding", "invalid_phase_a_v1_grounding", "unsupported_phase_a_fact");
+  }
   const inspect = (value: unknown, path: string, key: string | null): void => {
     if (key === "evidenceRefs" && Array.isArray(value)) {
       value.forEach((reference, index) => {
@@ -617,10 +530,241 @@ export function validatePhaseAStructuredCitationOutput(
   };
 
   inspect(output, "", null);
+  validatePhaseASemanticClaims(output, reject);
   return {
-    status: violations.length === 0 ? "grounded" : "review_required",
+    status: "review_required",
     violations,
   };
+}
+
+const PHASE_A_UNSTRUCTURED_OUTPUT_KEYS = new Set([
+  "answer",
+  "riskAssessmentDraft",
+  "tbmLogDraft",
+  "workpackSummaryDraft",
+  "emergencyResponseDraft",
+  "photoEvidenceDraft",
+  "foreignWorkerBriefing",
+  "foreignWorkerTransmission",
+  "kakaoMessage",
+]);
+
+function validatePhaseASemanticClaims(
+  output: unknown,
+  reject: (
+    path: string,
+    value: string,
+    code: PhaseAStructuredCitationViolation["code"],
+  ) => void,
+): void {
+  if (typeof output !== "object" || output === null || Array.isArray(output)) return;
+  const record = output as Record<string, unknown>;
+
+  for (const key of PHASE_A_UNSTRUCTURED_OUTPUT_KEYS) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) {
+      reject(key, value, "unsupported_phase_a_fact");
+    }
+  }
+
+  const readRecord = (value: unknown): Record<string, unknown> | null => (
+    typeof value === "object" && value !== null && !Array.isArray(value)
+      ? value as Record<string, unknown>
+      : null
+  );
+  const validateBinding = (claim: Record<string, unknown>, path: string): void => {
+    const controlId = typeof claim.controlId === "string" ? claim.controlId.trim() : "";
+    reject(`${path}.controlId`, controlId, "unsupported_phase_a_fact");
+    const evidenceRefs = Array.isArray(claim.evidenceRefs)
+      ? claim.evidenceRefs.filter((reference): reference is string => typeof reference === "string")
+      : [];
+    reject(`${path}.evidenceRefs`, evidenceRefs.join(", "), "unsupported_phase_a_fact");
+  };
+  const validateHazard = (claim: Record<string, unknown>, field: string, path: string): void => {
+    validateBinding(claim, path);
+    const value = typeof claim[field] === "string" ? claim[field].trim() : "";
+    reject(`${path}.${field}`, value, "unsupported_phase_a_fact");
+  };
+  const validateControl = (claim: Record<string, unknown>, field: string, path: string): void => {
+    validateBinding(claim, path);
+    const value = typeof claim[field] === "string" ? claim[field].trim() : "";
+    reject(`${path}.${field}`, value, "unsupported_phase_a_fact");
+  };
+  const validateControlList = (claim: Record<string, unknown>, field: string, path: string): void => {
+    validateBinding(claim, path);
+    const values = Array.isArray(claim[field]) ? claim[field] : [];
+    values.forEach((value, index) => {
+      const text = typeof value === "string" ? value.trim() : "";
+      reject(`${path}.${field}[${index}]`, text, "unsupported_phase_a_fact");
+    });
+  };
+  const forEachRecord = (
+    value: unknown,
+    visit: (item: Record<string, unknown>, index: number) => void,
+  ): void => {
+    if (!Array.isArray(value)) return;
+    value.forEach((item, index) => {
+      const itemRecord = readRecord(item);
+      if (itemRecord) visit(itemRecord, index);
+    });
+  };
+  const rejectStringField = (source: Record<string, unknown>, field: string, path: string): void => {
+    const value = typeof source[field] === "string" ? source[field].trim() : "";
+    if (value) reject(`${path}.${field}`, value, "unsupported_phase_a_fact");
+  };
+  const rejectStringList = (value: unknown, path: string): void => {
+    if (!Array.isArray(value)) return;
+    value.forEach((item, index) => {
+      if (typeof item === "string" && item.trim()) {
+        reject(`${path}[${index}]`, item.trim(), "unsupported_phase_a_fact");
+      }
+    });
+  };
+
+  forEachRecord(record.structuredRiskRows, (row, index) => {
+    const path = `structuredRiskRows[${index}]`;
+    validateBinding(row, path);
+    const hazard = typeof row.hazard === "string" ? row.hazard.trim() : "";
+    reject(`${path}.hazard`, hazard, "unsupported_phase_a_fact");
+    for (const field of ["currentControls", "additionalControls"] as const) {
+      const value = typeof row[field] === "string" ? row[field].trim() : "";
+      if (value === "현장 확인 필요") continue;
+      reject(`${path}.${field}`, value, "unsupported_phase_a_fact");
+    }
+    for (const field of ["equipment", "verification", "whyLikelihood", "whySeverity"] as const) {
+      const value = typeof row[field] === "string" ? row[field].trim() : "";
+      if (value && value !== "현장 확인 필요") {
+        reject(`${path}.${field}`, value, "unsupported_phase_a_fact");
+      }
+    }
+    for (const field of ["likelihood", "severity", "riskLevel"] as const) {
+      if (row[field] !== undefined) {
+        reject(`${path}.${field}`, String(row[field]), "unsupported_phase_a_fact");
+      }
+    }
+  });
+
+  const workPlan = readRecord(record.workPlanStructured);
+  forEachRecord(workPlan?.workSteps, (step, index) => {
+    const path = `workPlanStructured.workSteps[${index}]`;
+    validateControl(step, "safetyMeasure", path);
+    rejectStringField(step, "action", path);
+    rejectStringField(step, "equipment", path);
+    rejectStringField(step, "verification", path);
+  });
+  rejectStringList(workPlan?.stopCriteria, "workPlanStructured.stopCriteria");
+  const workOverview = readRecord(workPlan?.workOverview);
+  if (workOverview) {
+    rejectStringField(workOverview, "workName", "workPlanStructured.workOverview");
+    rejectStringField(workOverview, "description", "workPlanStructured.workOverview");
+    rejectStringField(workOverview, "condition", "workPlanStructured.workOverview");
+    rejectStringList(workOverview.equipment, "workPlanStructured.workOverview.equipment");
+  }
+  const emergencyResponse = readRecord(workPlan?.emergencyResponse);
+  if (emergencyResponse) {
+    rejectStringField(emergencyResponse, "firstAid", "workPlanStructured.emergencyResponse");
+  }
+  const briefing = readRecord(record.tbmBriefingStructured);
+  const briefingWork = readRecord(briefing?.todayWork);
+  if (briefingWork) {
+    rejectStringField(briefingWork, "name", "tbmBriefingStructured.todayWork");
+    rejectStringList(briefingWork.equipment, "tbmBriefingStructured.todayWork.equipment");
+  }
+  forEachRecord(briefing?.hazards, (hazard, index) => {
+    validateHazard(hazard, "description", `tbmBriefingStructured.hazards[${index}]`);
+  });
+  forEachRecord(briefing?.measures, (measure, index) => {
+    validateControl(measure, "action", `tbmBriefingStructured.measures[${index}]`);
+  });
+  rejectStringList(briefing?.stopCriteria, "tbmBriefingStructured.stopCriteria");
+  rejectStringList(briefing?.confirmTopics, "tbmBriefingStructured.confirmTopics");
+  rejectStringList(record.tbmQuestions, "tbmQuestions");
+  const log = readRecord(record.tbmLogStructured);
+  const loggedWork = readRecord(log?.todayWork);
+  if (loggedWork) {
+    rejectStringField(loggedWork, "name", "tbmLogStructured.todayWork");
+    rejectStringList(loggedWork.equipment, "tbmLogStructured.todayWork.equipment");
+  }
+  forEachRecord(log?.hazardsDiscussed, (hazard, index) => {
+    validateHazard(hazard, "description", `tbmLogStructured.hazardsDiscussed[${index}]`);
+  });
+  forEachRecord(log?.unaddressedItems, (item, index) => {
+    const path = `tbmLogStructured.unaddressedItems[${index}]`;
+    validateControl(item, "plannedAction", path);
+    rejectStringField(item, "item", path);
+  });
+  rejectStringList(log?.workerConfirmations, "tbmLogStructured.workerConfirmations");
+  const safetyEducation = readRecord(log?.safetyEducation);
+  if (safetyEducation && Array.isArray(safetyEducation.keyPoints)) {
+    validateControlList(safetyEducation, "keyPoints", "tbmLogStructured.safetyEducation");
+  }
+  if (safetyEducation) {
+    rejectStringField(safetyEducation, "topic", "tbmLogStructured.safetyEducation");
+    rejectStringField(safetyEducation, "materials", "tbmLogStructured.safetyEducation");
+  }
+  const education = readRecord(record.educationRecordStructured);
+  if (education) {
+    for (const field of [
+      "educationName",
+      "understandingCheck",
+      "tbmLink",
+      "followupRecommendation",
+    ]) {
+      rejectStringField(education, field, "educationRecordStructured");
+    }
+  }
+  forEachRecord(education?.curriculum, (item, index) => {
+    rejectStringField(item, "topic", `educationRecordStructured.curriculum[${index}]`);
+    if (Array.isArray(item.keyPoints)) {
+      validateControlList(item, "keyPoints", `educationRecordStructured.curriculum[${index}]`);
+    }
+  });
+  forEachRecord(record.tbmRiskLinks, (link, index) => {
+    const path = `tbmRiskLinks[${index}]`;
+    validateBinding(link, path);
+    const riskRowIndex = link.riskRowIndex;
+    const riskRows = Array.isArray(record.structuredRiskRows) ? record.structuredRiskRows : [];
+    const referencedRow = typeof riskRowIndex === "number"
+      && Number.isInteger(riskRowIndex)
+      && riskRowIndex >= 0
+      && riskRowIndex < riskRows.length
+      ? readRecord(riskRows[riskRowIndex])
+      : null;
+    if (!referencedRow) {
+      reject(`${path}.riskRowIndex`, String(riskRowIndex ?? ""), "unsupported_phase_a_fact");
+    }
+    const hazard = typeof link.hazard === "string" ? link.hazard.trim() : "";
+    reject(`${path}.hazard`, hazard, "unsupported_phase_a_fact");
+    const referencedHazard = typeof referencedRow?.hazard === "string"
+      ? referencedRow.hazard.trim()
+      : "";
+    if (referencedRow && normalizeLabel(hazard) !== normalizeLabel(referencedHazard)) {
+      reject(`${path}.hazard`, hazard, "unsupported_phase_a_fact");
+    }
+    const referencedControlId = typeof referencedRow?.controlId === "string"
+      ? referencedRow.controlId.trim()
+      : "";
+    const linkControlId = typeof link.controlId === "string" ? link.controlId.trim() : "";
+    if (referencedRow && linkControlId !== referencedControlId) {
+      reject(`${path}.controlId`, linkControlId, "unsupported_phase_a_fact");
+    }
+    const controlText = typeof link.control === "string" ? link.control.trim() : "";
+    reject(`${path}.control`, controlText, "unsupported_phase_a_fact");
+    for (const field of ["weatherSignal", "confirmQuestion", "verification"] as const) {
+      const value = typeof link[field] === "string" ? link[field].trim() : "";
+      if (value && value !== "현장 확인 필요") {
+        reject(`${path}.${field}`, value, "unsupported_phase_a_fact");
+      }
+    }
+  });
+}
+
+export function buildPhaseACanonicalAnswer(_grounding: PhaseAGenerationGrounding): string {
+  return [
+    "핵심 판단: 현장 확인 필요",
+    "즉시 조치: 현장 확인 필요",
+    "실무 체크포인트: 현장 확인 필요",
+  ].join("\n");
 }
 
 type LawCitationRole = "act" | "enforcement_rule" | "safety_rule";
@@ -1340,7 +1484,8 @@ export function splitEvidenceChainPack(fixedPack: EvidenceChainPack): {
   activePack: ActiveEvidenceChainPack;
   diagnostics: EvidenceChainDiagnostics;
 } {
-  const { reviewOnlyEvidence, reviewOnlyGuidance, ...activePack } = fixedPack;
+  const { reviewOnlyEvidence, reviewOnlyGuidance, ...activePackValue } = fixedPack;
+  const activePack = immutableClone(activePackValue);
   return {
     activePack,
     diagnostics: { reviewOnlyEvidence, reviewOnlyGuidance },

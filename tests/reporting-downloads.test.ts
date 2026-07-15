@@ -23,6 +23,7 @@ import type { OperationImprovement } from "@/lib/operation-improvement-history";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import { attachQualityContract } from "@/lib/quality-contract";
+import type { AskResponse } from "@/lib/types";
 
 const riskRow: RiskAssessmentRow = {
   location: "서울 성수동",
@@ -163,6 +164,32 @@ function buildMixedSnapshot(filters: Record<string, string>) {
 }
 
 describe("reporting downloads", () => {
+  it("does not convert an unresolved Phase A summary into a low-risk fallback row", () => {
+    const workpack = makeWorkpack([]);
+    const unresolvedRiskLevel: AskResponse["riskSummary"]["riskLevel"] = "현장 확인 필요";
+    const unresolvedWorkpack = {
+      ...workpack,
+      data: {
+        ...workpack.data,
+        riskSummary: {
+          title: "현장 확인 필요",
+          riskLevel: unresolvedRiskLevel,
+          topRisk: "현장 확인 필요",
+          immediateActions: ["현장 확인 필요"],
+        },
+      },
+    };
+
+    expect(inspectStoredCurrentWorkpack(JSON.stringify(unresolvedWorkpack)).status).toBe("valid");
+    const snapshot = buildReportSnapshot({
+      workpack: unresolvedWorkpack,
+      improvements: [],
+      period: "weekly",
+      now: new Date("2026-07-08T12:00:00.000Z"),
+    });
+    expect(snapshot.riskRows).toEqual([]);
+  });
+
   it("rejects invalid workpack savedAt values and excludes invalid direct improvement timestamps", () => {
     const workpack = makeWorkpack();
     for (const savedAt of ["2026-02-30T00:00:00Z", "2026-07-08T08:00:00"]) {
@@ -841,6 +868,59 @@ describe("reporting downloads", () => {
         "server-workpack-validated"
       )).toBeNull();
     }
+  });
+
+  it.each([
+    { label: "number", controlId: 42 },
+    { label: "object", controlId: { id: "fall-control" } },
+    { label: "empty", controlId: "" },
+    { label: "whitespace", controlId: "   " },
+  ])("rejects persisted risk row controlId when it is $label", ({ controlId }) => {
+    const workpack = makeWorkpack();
+    const payload = {
+      canReopen: true,
+      workpack: {
+        id: "server-workpack-control-id",
+        createdAt: "2026-07-08T07:55:00.000Z",
+        updatedAt: "2026-07-08T08:00:00.000Z",
+        reopenData: {
+          ...workpack.data,
+          structured: {
+            ...workpack.data.structured,
+            riskAssessmentRows: [{ ...riskRow, controlId }],
+          },
+        },
+      },
+    };
+
+    expect(inspectServerReportWorkpackPayload(payload, "server-workpack-control-id")).toBeNull();
+  });
+
+  it.each([
+    { label: "absent", row: riskRow },
+    { label: "nonempty", row: { ...riskRow, controlId: "fall-work-platform" } },
+  ])("accepts persisted risk row controlId when it is $label", ({ row }) => {
+    const workpack = makeWorkpack();
+    const payload = {
+      canReopen: true,
+      workpack: {
+        id: "server-workpack-valid-control-id",
+        createdAt: "2026-07-08T07:55:00.000Z",
+        updatedAt: "2026-07-08T08:00:00.000Z",
+        reopenData: {
+          ...workpack.data,
+          structured: {
+            ...workpack.data.structured,
+            riskAssessmentRows: [row],
+          },
+        },
+      },
+    };
+
+    expect(inspectServerReportWorkpackPayload(
+      payload,
+      "server-workpack-valid-control-id",
+    )).not.toBeNull();
   });
 
   it("strips caller-provided authoritative improvements from every sample export", () => {

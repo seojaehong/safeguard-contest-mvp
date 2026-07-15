@@ -150,7 +150,10 @@ describe("Next MCP route reviewed task binding", () => {
     expect(parseToolPayload(result)).toMatchObject({
       reviewTask: "고소작업",
       docpack: {
-        phaseAProduct: { chainId: "work-at-height-fall" },
+        phaseAProduct: {
+          chainId: null,
+          provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
+        },
       },
     });
   });

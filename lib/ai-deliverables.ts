@@ -640,13 +640,14 @@ function structuredRiskRowsPrompt(ctx: GenContext) {
     "  - due는 YYYY-MM-DD 또는 \"현장 확인\"만 허용한다.",
     "  - verificationDate는 YYYY-MM-DD 또는 \"현장 확인\"만 허용하고, verificationStatus는 planned/done/needsReview 중 하나다.",
     "  - evidenceRefs는 법령, KOSHA, 재해사례, 지식 DB 후보 중 해당 행을 뒷받침하는 짧은 근거 문자열 배열이다.",
+    "  - Phase A 패킷이 있으면 hazard와 additionalControls는 canonical 문구를 그대로 쓰고 controlId와 해당 control의 allowed evidenceRefs를 함께 채운다.",
     "  - whyLikelihood와 whySeverity는 수치 판단 근거를 각각 한 문장으로 적는다.",
     "",
     "행 JSON schema:",
     JSON.stringify(rowSchema, null, 2),
     "",
     "응답 예시 형태:",
-    `{"rows":[{"location":"string","process":"string","task":"string","equipment":"string","hazard":"string","fourM":"Man","accidentType":"fall","currentControls":"string","likelihood":3,"severity":4,"riskLevel":"high","additionalControls":"string","owner":"string","due":"현장 확인","verification":"string","verificationStatus":"planned","verificationDate":"현장 확인","verificationChecker":"string","whyLikelihood":"string","whySeverity":"string","evidenceRefs":["string"]}]}`,
+    `{"rows":[{"controlId":"string (Phase A 패킷이 있으면 allowedContent.controls의 값)","location":"string","process":"string","task":"string","equipment":"string","hazard":"string","fourM":"Man","accidentType":"fall","currentControls":"string","likelihood":3,"severity":4,"riskLevel":"high","additionalControls":"string","owner":"string","due":"현장 확인","verification":"string","verificationStatus":"planned","verificationDate":"현장 확인","verificationChecker":"string","whyLikelihood":"string","whySeverity":"string","evidenceRefs":["string"]}]}`,
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -655,6 +656,7 @@ function structuredRiskRowsPrompt(ctx: GenContext) {
 function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
   const compactRows = rows.slice(0, 7).map((row, index) => ({
     riskRowIndex: index,
+    controlId: row.controlId,
     hazard: row.hazard,
     currentControls: row.currentControls,
     additionalControls: row.additionalControls,
@@ -683,6 +685,7 @@ function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {
   "tbmRiskLinks": [
     {
       "riskRowIndex": 0,
+      "controlId": "string (Phase A에서는 연결 row의 controlId)",
       "hazard": "string",
       "control": "string",
       "weatherSignal": "string",
@@ -970,8 +973,12 @@ function parseTbmRiskLinks(raw: string, rows: RiskAssessmentRow[]): Partial<AiDe
     const evidenceRefs = Array.isArray(evidenceRefsValue)
       ? evidenceRefsValue.filter((ref): ref is string => typeof ref === "string" && ref.trim().length > 0).map((ref) => ref.trim())
       : row.evidenceRefs || [];
+    const controlId = typeof value.controlId === "string" && value.controlId.trim()
+      ? value.controlId.trim()
+      : row.controlId;
 
     links.push({
+      ...(controlId ? { controlId } : {}),
       riskRowIndex,
       hazard: row.hazard,
       control,

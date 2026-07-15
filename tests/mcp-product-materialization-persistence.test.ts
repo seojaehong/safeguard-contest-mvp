@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import type { McpAuthContext } from "@/lib/mcp-auth";
@@ -9,7 +9,10 @@ import {
 import type { McpToolResult } from "@/lib/mcp-tools";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import { assembleGraph } from "@/lib/ontology/graph-store";
-import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
+import {
+  buildPublishedSafetyKnowledge,
+  querySafetyKnowledge,
+} from "@/lib/ontology/knowledge-tool";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 import type { AskResponse } from "@/lib/types";
@@ -116,6 +119,59 @@ function createReviewedHandler() {
 }
 
 describe("MCP Phase A product persistence behavior", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  test("keeps the actual loader and resolver path review-required through persist and reopen", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://resolver-origin.test");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "resolver-origin-key");
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      const rows = url.includes("safety_ontology_nodes")
+        ? SEED_NODES.filter((node) => node.review_state === "published")
+        : SEED_EDGES.filter((edge) => edge.review_state === "published");
+      return new Response(JSON.stringify(rows), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }));
+    const repository = new InMemoryMcpWorkpackRepository();
+    const handler = createGenerateSafetyDocpackHandler({
+      defaultMode: "full",
+      generateResponse: async (question) => makeSealedResponse(question),
+      queryKnowledge: querySafetyKnowledge,
+      getWorkpackRepository: () => repository,
+      getGenerationEvidenceSecret: () => SECRET,
+    });
+
+    const result = await handler(
+      { question: "고소작업", mode: "template", includeFull: true },
+      TENANT_CONTEXT,
+    );
+    expect(parseToolPayload(result)).toMatchObject({
+      phaseAProduct: {
+        authorityState: "review_required",
+        verifiedDocumentRows: [],
+        humanConfirmation: { required: true, status: "pending" },
+      },
+      attribution: { saved: true, workpackId: "workpack-1" },
+    });
+
+    const reopened = await reopenMcpDocpackWorkpackWithRepository(
+      repository,
+      { workpackId: "workpack-1", siteId: "site-a", orgId: "org-a" },
+      SECRET,
+    );
+    if (!reopened.ok) throw new Error("expected resolver-originated workpack reopen");
+    expect(reopened.response.structured?.riskAssessmentRows ?? []).toEqual([]);
+    const serialized = JSON.stringify(reopened.response.structured) ?? "";
+    expect(serialized).not.toContain('"riskLevel":"high"');
+    expect(serialized).not.toContain('"likelihood":3');
+    expect(serialized).not.toContain('"severity":4');
+  });
+
   test.each([
     { task: "고소작업", question: "고소작업은 하지 않고 배관 작업 수행" },
     { task: "고소작업", question: "고소작업 여부가 아직 미확정" },
@@ -149,7 +205,10 @@ describe("MCP Phase A product persistence behavior", () => {
     expect(parseToolPayload(result)).toMatchObject({
       reviewTask: "고소작업",
       docpack: {
-        phaseAProduct: { chainId: "work-at-height-fall" },
+        phaseAProduct: {
+          chainId: null,
+          provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
+        },
       },
     });
   });
@@ -172,9 +231,10 @@ describe("MCP Phase A product persistence behavior", () => {
 
     expect(parseToolPayload(result)).toMatchObject({
       phaseAProduct: {
-        chainId,
+        chainId: null,
         authorityState: "review_required",
         humanConfirmation: { required: true, status: "pending" },
+        provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
       },
       attribution: {
         siteId: "site-a",
@@ -183,6 +243,7 @@ describe("MCP Phase A product persistence behavior", () => {
         saved: true,
       },
     });
+    expect(JSON.stringify(parseToolPayload(result))).not.toContain(`${chainId}:`);
     expect(repository.inserts).toHaveLength(1);
     expect(repository.inserts[0]).toMatchObject({
       organizationId: "org-a",
@@ -221,11 +282,17 @@ describe("MCP Phase A product persistence behavior", () => {
       workpackId: "workpack-1",
       response: {
         phaseAProduct: {
-          chainId: "vehicle-machinery-entrapment",
+          chainId: null,
           authorityState: "review_required",
         },
       },
     });
+    if (!reopened.ok) throw new Error("expected reopened Phase A workpack");
+    expect(reopened.response.structured?.riskAssessmentRows ?? []).toEqual([]);
+    const serialized = JSON.stringify(reopened.response.structured) ?? "";
+    expect(serialized).not.toContain('"riskLevel":"high"');
+    expect(serialized).not.toContain('"likelihood":3');
+    expect(serialized).not.toContain('"severity":4');
     expect(repository.reads).toEqual([
       { workpackId: "workpack-1", siteId: "site-a", organizationId: "org-a" },
     ]);
@@ -235,7 +302,7 @@ describe("MCP Phase A product persistence behavior", () => {
       { ...TENANT_CONTEXT, orgId: "org-foreign", tokenId: "token-foreign" },
     );
     expect(parseToolPayload(foreignResult)).toMatchObject({
-      phaseAProduct: { chainId: "work-at-height-fall" },
+      phaseAProduct: { chainId: null },
       attribution: { saved: false, workpackId: null },
     });
     expect(repository.inserts).toHaveLength(1);

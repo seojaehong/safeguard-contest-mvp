@@ -5,6 +5,7 @@ import { generateWithVertex } from "./vertex/client";
 import { resolvePositiveIntEnv } from "@/lib/ai-deliverables-policy";
 import { createLogger } from "@/lib/logger";
 import {
+  buildPhaseACanonicalAnswer,
   buildPhaseAGenerationPrompt,
   type PhaseAGenerationGrounding,
 } from "@/lib/ontology/evidence-chain";
@@ -48,6 +49,15 @@ export type AnswerGenerationResult = {
     fallbackUsed: boolean;
   };
 };
+
+export function applyPhaseAAnswerBoundary(
+  response: AskResponse,
+  grounding?: PhaseAGenerationGrounding,
+): AskResponse {
+  return grounding
+    ? { ...response, answer: buildPhaseACanonicalAnswer(grounding) }
+    : response;
+}
 
 function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
@@ -326,12 +336,12 @@ export async function generateAnswer(
       ...trace
     });
     return {
-      response: buildMockAskResponse(
+      response: applyPhaseAAnswerBoundary(buildMockAskResponse(
         question,
         citations,
         "mock",
         "AI 제공자 키가 없어 규정 기반 문서팩으로 구성했습니다."
-      ),
+      ), options.phaseAGrounding),
       trace
     };
   }
@@ -363,7 +373,7 @@ export async function generateAnswer(
     ...trace
   });
   return {
-    response: {
+    response: applyPhaseAAnswerBoundary({
       ...live,
       answer: response.answer,
       status: {
@@ -372,7 +382,7 @@ export async function generateAnswer(
         ai: "live" as const,
         policyNote: response.policyNote
       }
-    },
+    }, options.phaseAGrounding),
     trace
   };
 }

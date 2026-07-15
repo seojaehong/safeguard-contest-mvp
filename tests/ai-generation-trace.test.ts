@@ -96,6 +96,49 @@ describe("answer generation trace", () => {
     expect(request?.input).toContain('"groundingStatus":"missing"');
   });
 
+  test("blocks provider-authored hazard and control prose at the Phase A answer boundary", async () => {
+    const providerClaim = "고정 패킷에 없는 신규 붕괴 위험 때문에 드론 감시원을 배치한다.";
+    mocks.openAiCreate.mockResolvedValue({ output_text: providerClaim });
+    const { generateAnswer } = await import("@/lib/ai");
+    const { buildPhaseAGenerationGrounding } = await import("@/lib/ontology/evidence-chain");
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_registered",
+      evidencePack: null,
+    });
+
+    const result = await generateAnswer("일반 작업", [], {
+      traceId: "trace-phase-a-output-boundary",
+      phaseAGrounding,
+    });
+
+    expect(result.response.answer).not.toContain(providerClaim);
+    expect(result.response.answer).toContain("현장 확인 필요");
+  });
+
+  test("fails closed to the canonical Phase A answer when no provider is configured", async () => {
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+    delete process.env.GCP_PROJECT_ID;
+    const { generateAnswer } = await import("@/lib/ai");
+    const { buildPhaseAGenerationGrounding } = await import("@/lib/ontology/evidence-chain");
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_registered",
+      evidencePack: null,
+    });
+
+    const result = await generateAnswer("일반 작업", [], {
+      traceId: "trace-phase-a-no-provider",
+      phaseAGrounding,
+    });
+
+    expect(result.response.answer).toBe([
+      "핵심 판단: 현장 확인 필요",
+      "즉시 조치: 현장 확인 필요",
+      "실무 체크포인트: 현장 확인 필요",
+    ].join("\n"));
+    expect(result.trace.provider).toBe("mock");
+  });
+
   test("passes the same Phase A grounding into legal evidence mapping generation", async () => {
     const { enhanceLegalEvidenceMappings } = await import("@/lib/ai");
     const { buildPhaseAGenerationGrounding } = await import("@/lib/ontology/evidence-chain");

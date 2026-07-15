@@ -280,6 +280,7 @@ export type PermitInspectionStructured = {
 };
 
 export type TbmRiskLink = {
+  controlId?: string;
   riskRowIndex: number;
   hazard: string;
   control: string;
@@ -578,7 +579,7 @@ export type AskResponse = {
   };
   riskSummary: {
     title: string;
-    riskLevel: "상" | "중" | "하";
+    riskLevel: "상" | "중" | "하" | "현장 확인 필요";
     topRisk: string;
     immediateActions: string[];
   };

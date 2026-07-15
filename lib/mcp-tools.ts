@@ -833,7 +833,6 @@ export function buildSafetyKnowledgeResult(
     evidenceDiagnostics: evidencePack?.diagnostics ?? null,
     evidenceChainState,
     phaseAProduct: buildPhaseAProductMaterialization({
-      evidenceChainState,
       evidencePack: evidencePack?.activePack ?? null,
     }),
   };
