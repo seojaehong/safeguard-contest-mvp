@@ -27,6 +27,8 @@ import type { SafetyReferenceItem } from "./safety-reference-catalog";
 import { searchSafetyReferences } from "./safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "./sif-embedding-corpus";
 import type { McpAuthContext } from "./mcp-auth";
+import { createSupabaseAdminClient } from "./supabase-admin";
+import { loadTenantHarnessMemoryForMcp } from "./tenant-harness-memory";
 
 function asString(input: unknown, key: string): string {
   const value = (input as Record<string, unknown> | null)?.[key];
@@ -74,10 +76,11 @@ export async function executeClawTool(
   switch (name) {
     case "run_safeclaw_harness_agent": {
       const question = asString(input, "question");
-      const [direct, sif, supporting] = await Promise.all([
+      const [direct, sif, supporting, memory] = await Promise.all([
         searchSafetyReferences({ query: question, limit: 6, evidenceRole: "direct" }),
         searchSafetyReferences({ query: question, limit: 6, itemType: "sif-case" }),
         searchSafetyReferences({ query: question, limit: 6, evidenceRole: "supporting" }),
+        loadTenantHarnessMemoryForMcp(authContext, createSupabaseAdminClient),
       ]);
       return buildHarnessAgentResult({
         question,
@@ -91,6 +94,8 @@ export async function executeClawTool(
           summarizeHarnessSearch("sif_cases", sif),
           summarizeHarnessSearch("supporting_evidence", supporting),
         ],
+        tenantMemory: memory,
+        memoryStages: memory.stages,
         auth: authContext ? {
           source: authContext.source,
           siteId: authContext.siteId,

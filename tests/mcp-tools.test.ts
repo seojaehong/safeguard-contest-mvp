@@ -121,6 +121,43 @@ describe("buildReviewedDocpackResult", () => {
 });
 
 describe("buildHarnessAgentResult", () => {
+  it("ignores SPEC_PENDING legacy memory arguments instead of serializing raw tenant text", () => {
+    const result = buildHarnessAgentResult({
+      question: "외벽 도장",
+      references: [],
+      improvements: [{
+        id: "imp-legacy",
+        taskLabel: "홍길동",
+        hazardLabel: "010-1234-5678",
+        improvementText: "hong@example.com으로 사진 전달",
+        reflectedDocuments: ["위험성평가표"],
+        sourceType: "manual",
+      }],
+      workpackMemory: [{
+        id: "wp-legacy",
+        question: "홍길동 010-1234-5678 hong@example.com",
+        generatedAt: "2026-07-15T03:00:00Z",
+        reflectedDocuments: ["위험성평가표"],
+        statusLabel: "저장된 작업팩",
+      }],
+      referenceSearch: [],
+    });
+    const serialized = JSON.stringify(result);
+
+    expect(result.tenantMemoryDigest).toEqual({
+      provenancePolicy: "approved_or_reflected_only",
+      workpacks: [],
+      improvements: [],
+    });
+    expect(result.packet.workpackMemory).toEqual([]);
+    expect(result.packet.improvementMemory).toEqual([]);
+    expect(serialized).not.toMatch(/홍길동|010-1234-5678|hong@example\.com/);
+    expect(result.qualityPipelineStatus).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: "load_workpack_memory", status: "skipped", attempted: false }),
+      expect.objectContaining({ name: "load_improvement_memory", status: "skipped", attempted: false }),
+    ]));
+  });
+
   it("separates the DB harness agent from general document generation", () => {
     const result = buildHarnessAgentResult({
       question: "성수동 외벽 도장 작업",
@@ -139,13 +176,19 @@ describe("buildHarnessAgentResult", () => {
         controls: ["난간 보강"],
         evidence_role: "supporting",
       }],
-      workpackMemory: [{
+      tenantMemory: { workpackMemory: [{
         id: "wp-1",
-        question: "지난 외벽 도장 작업",
         generatedAt: "2026-07-01T09:00:00.000Z",
+        provenanceImprovementIds: ["imp-1"],
         reflectedDocuments: ["위험성평가표"],
-        statusLabel: "저장된 작업팩",
-      }],
+      }], improvements: [{
+        id: "imp-1",
+        workpackId: "wp-1",
+        reviewStatus: "approved",
+        reflectedDocuments: ["위험성평가표"],
+        sourceType: "manual",
+        reviewedAt: "2026-07-01T09:00:00.000Z",
+      }] },
       referenceSearch: [],
       auth: { source: "db", siteId: "site-1", orgId: "org-1", tokenBound: true },
     });
@@ -155,7 +198,8 @@ describe("buildHarnessAgentResult", () => {
     expect(result.packet.generationContract.llmRole).toBe("naturalize_only");
     expect(result.packet.generationContract.fallbackChainAllowed).toBe(false);
     expect(result.packet.retrievalContract.mode).toBe("unconfigured");
-    expect(result.promptContext).toContain("작업이력");
+    expect(result.tenantMemoryDigest.workpacks).toHaveLength(1);
+    expect(result.packet.workpackMemory).toEqual([]);
     expect(result.openClawUsageNote).toContain("OpenClaw");
   });
 
