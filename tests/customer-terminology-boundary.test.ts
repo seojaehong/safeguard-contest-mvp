@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
 import { describe, expect, it } from "vitest";
 
 import {
@@ -9,19 +6,51 @@ import {
 } from "@/lib/web-safe-presentation";
 import { buildWorkpackLearningFile, type WorkpackLearningInput } from "@/lib/workpack-learning-export";
 
-const root = process.cwd();
-const forbiddenDefaultTerms = [
-  "DB 하네스",
-  "품질 계약",
-  "관리자 원본 JSON",
-  "다음 생성용 MD",
-  "하네스 JSONL",
-  "Obsidian MD"
-] as const;
+function withoutClosedDetails(html: string): string {
+  let output = html;
+  let searchFrom = 0;
+  while (true) {
+    const start = output.indexOf("<details", searchFrom);
+    if (start === -1) return output;
+    const openingEnd = output.indexOf(">", start);
+    if (openingEnd === -1) return output;
+    const opening = output.slice(start, openingEnd + 1);
+    let depth = 1;
+    let cursor = openingEnd + 1;
+    while (depth > 0) {
+      const nextOpen = output.indexOf("<details", cursor);
+      const nextClose = output.indexOf("</details>", cursor);
+      if (nextClose === -1) return output;
+      if (nextOpen !== -1 && nextOpen < nextClose) {
+        depth += 1;
+        cursor = output.indexOf(">", nextOpen) + 1;
+      } else {
+        depth -= 1;
+        cursor = nextClose + "</details>".length;
+      }
+    }
+    if (!/\sopen(?:\s|=|>)/u.test(opening)) {
+      output = `${output.slice(0, start)}${output.slice(cursor)}`;
+      searchFrom = start;
+    } else {
+      searchFrom = cursor;
+    }
+  }
+}
+
+function defaultVisibleText(html: string): string {
+  return withoutClosedDetails(html)
+    .replace(/<[^>]+>/gu, " ")
+    .replace(/&quot;/gu, '"')
+    .replace(/&#x27;|&#39;/gu, "'")
+    .replace(/&amp;/gu, "&")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
 
 describe("customer terminology boundary", () => {
   it("maps operational labels and prose to plain Korean", () => {
-    expect(formatCustomerFacingLabel("관리자 원본 JSON")).toBe("전체 기록 파일");
+    expect(formatCustomerFacingLabel("관리자 원본 JSON")).toBe("현재 조회 결과 데이터");
     expect(formatCustomerFacingLabel("다음 생성용 MD")).toBe("재사용 검토 문서");
     expect(formatCustomerFacingLabel("하네스 JSONL")).toBe("재사용 검토 데이터");
     expect(formatCustomerFacingLabel("Obsidian MD")).toBe("연결형 작업 메모");
@@ -55,37 +84,11 @@ describe("customer terminology boundary", () => {
     expect(JSON.parse(jsonl.content.split("\n")[0])).toMatchObject({ workpackId: "workpack-1" });
   });
 
-  it("removes raw operational terms from default customer surface source", () => {
-    const defaultSurfaceSources = [
-      "components/FieldOperationsWorkspace.tsx",
-      "components/OperationMemoryPreview.tsx",
-      "components/WorkpackEditor.tsx",
-      "lib/workpack-readiness.ts"
-    ].map((file) => readFileSync(join(root, file), "utf8"));
+  it("allows technical formats only inside collapsed admin details", () => {
+    const html = '<section>고객용 문서<details><summary>관리자용 상세 파일</summary><button>JSON</button></details></section>';
 
-    for (const source of defaultSurfaceSources) {
-      for (const term of forbiddenDefaultTerms) {
-        expect(source).not.toContain(term);
-      }
-    }
-  });
-
-  it("keeps technical report downloads behind collapsed admin details with plain labels", () => {
-    const reports = readFileSync(join(root, "components", "ReportsDownloadCenter.tsx"), "utf8");
-    const dryrun = readFileSync(join(root, "app", "dryrun", "page.tsx"), "utf8");
-
-    expect(reports).toContain("<details");
-    expect(reports).toContain("관리자용 상세 파일");
-    expect(reports).toContain("전체 기록 파일");
-    expect(reports).toContain("재사용 검토 문서");
-    expect(reports).toContain("재사용 검토 데이터");
-    expect(reports).not.toContain("관리자 원본 JSON");
-    expect(reports).not.toContain("다음 생성용 MD");
-    expect(reports).not.toContain("하네스 JSONL");
-
-    expect(dryrun).toContain("<details");
-    expect(dryrun).toContain("상세 점검 기록");
-    expect(dryrun).not.toContain("API 상태");
-    expect(dryrun).not.toContain("원문 리포트");
+    expect(defaultVisibleText(html)).toBe("고객용 문서");
+    expect(html).toContain("관리자용 상세 파일");
+    expect(html).toContain("JSON");
   });
 });

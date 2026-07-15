@@ -298,7 +298,7 @@ function AdminAccessPanel({
       setMessage("관리자 로그인 링크를 보냈습니다. 메일함에서 확인해 주세요.");
     } catch (error) {
       console.error("supabase otp send failed", error);
-      setMessage("로그인 링크 발송에 실패했습니다. Supabase Auth 설정을 확인해 주세요.");
+      setMessage("로그인 링크 발송에 실패했습니다. 관리자 로그인 설정을 확인해 주세요.");
     } finally {
       setIsSending(false);
     }
@@ -693,7 +693,7 @@ function WorkpackHistoryPanel({
       } else if (format === "obsidian") {
         setDownloadMessage("연결형 작업 메모를 내려받았습니다.");
       } else {
-        setDownloadMessage("Markdown 개선 메모리를 내려받았습니다.");
+        setDownloadMessage("개선 메모리 문서를 내려받았습니다.");
       }
     } catch (error) {
       console.error("learning export download failed", error);
@@ -796,7 +796,7 @@ function WorkspaceOperationGraphPanel({
       if (cancelled) return;
       setServerGraph(payload.graph);
       setGraphMessage(typeof payload.source === "object"
-        ? "저장된 작업팩, 개선사항, 열람 확인 이력을 Supabase에서 다시 구성했습니다."
+        ? "저장된 작업팩, 개선사항, 열람 확인 이력을 서버 기록에서 다시 구성했습니다."
         : "현재 생성 결과와 검증 근거로 작업 이력 그래프를 구성했습니다."
       );
     }).catch((error: unknown) => {
@@ -819,7 +819,7 @@ function WorkspaceOperationGraphPanel({
   return (
     <OperationMemoryGraphViewer
       graph={graph}
-      eyebrow="Operation Ontology"
+      eyebrow="작업 근거 연결"
       title="작업 이력 그래프"
       className="workspace-operation-memory"
       description={(
@@ -1151,7 +1151,7 @@ export function FieldOperationsWorkspace({
       return snapshot;
     } catch (error) {
       console.error("workspace save failed", error);
-      return setStorageFailure("작업공간 저장 중 오류가 발생했습니다. Supabase 설정과 로그인 상태를 확인해 주세요.");
+      return setStorageFailure("작업공간 저장 중 오류가 발생했습니다. 서버 저장 설정과 로그인 상태를 확인해 주세요.");
     }
   }
 

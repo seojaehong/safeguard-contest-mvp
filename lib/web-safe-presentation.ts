@@ -283,7 +283,7 @@ const DRYRUN_QUALITY_NOTE_LABELS: LabelMap = {
 };
 
 const CUSTOMER_FACING_LABELS: LabelMap = {
-  "관리자 원본 JSON": "전체 기록 파일",
+  "관리자 원본 JSON": "현재 조회 결과 데이터",
   "다음 생성용 MD": "재사용 검토 문서",
   "하네스 JSONL": "재사용 검토 데이터",
   "Obsidian MD": "연결형 작업 메모"
