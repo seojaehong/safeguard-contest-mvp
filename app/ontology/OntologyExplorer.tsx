@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { OntologyVisualizationModel } from "@/lib/ontology/visualization";
 import { KIND_KO, type NodeKind } from "@/lib/ontology/schema";
 import { buildOntologyNeighborhood } from "./ontology-neighborhood";
@@ -101,6 +101,9 @@ export function OntologyExplorer({
   const [visibleListCount, setVisibleListCount] = useState(18);
   const [expanded, setExpanded] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState(model.focusNodeId || model.list[0]?.id || "");
+  const expandButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const source = useMemo(() => ({ nodes: model.list, related: model.hoverCards }), [model]);
   const neighborhood = useMemo(
@@ -124,17 +127,54 @@ export function OntologyExplorer({
         : nodeDegree(b) - nodeDegree(a) || a.label.localeCompare(b.label, "ko"));
   }, [kind, model.list, query, sort]);
 
+  useEffect(() => {
+    if (!expanded) return;
+    closeButtonRef.current?.focus();
+
+    function handleDialogKeyDown(event: KeyboardEvent) {
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setExpanded(false);
+        window.requestAnimationFrame(() => expandButtonRef.current?.focus());
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = [...dialog.querySelectorAll<HTMLElement>("button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex='-1'])")]
+        .filter((element) => element.getClientRects().length > 0);
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleDialogKeyDown);
+    return () => document.removeEventListener("keydown", handleDialogKeyDown);
+  }, [expanded]);
+
   function selectNode(nodeId: string) {
     setSelectedNodeId(nodeId);
+  }
+
+  function closeExpandedGraph() {
+    setExpanded(false);
+    window.requestAnimationFrame(() => expandButtonRef.current?.focus());
   }
 
   return (
     <div className={styles.root} data-testid="ontology-explorer-root">
       <section className={styles.summaryGrid} aria-label="온톨로지 상태 요약">
-        <article><span>검증 노드</span><strong>{totalNodes.toLocaleString("ko-KR")}</strong><small>published 범위</small></article>
-        <article><span>검증 관계</span><strong>{totalEdges.toLocaleString("ko-KR")}</strong><small>출처 연결 유지</small></article>
+        <article><span>검증된 안전지식</span><strong>{totalNodes.toLocaleString("ko-KR")}</strong><small>검증 완료 범위</small></article>
+        <article><span>검증된 연결</span><strong>{totalEdges.toLocaleString("ko-KR")}</strong><small>출처 연결 유지</small></article>
         <article><span>근거 차단</span><strong>{droppedCount.toLocaleString("ko-KR")}</strong><small>무출처 항목 제외</small></article>
-        {isSeedFallback ? <article><span>대체본</span><strong>{seedCount.toLocaleString("ko-KR")}</strong><small>내장 시드 읽기 전용</small></article> : null}
+        {isSeedFallback ? <article><span>대체자료</span><strong>{seedCount.toLocaleString("ko-KR")}</strong><small>내장 검증자료 읽기 전용</small></article> : null}
       </section>
 
       <section className={styles.loopStrip} aria-label="작업팩 개선 루프">
@@ -148,18 +188,18 @@ export function OntologyExplorer({
         <header className={styles.explorerHeader}>
           <div>
             <span>관계 탐색</span>
-            <h2 id="ontology-explorer-title">선택 노드 중심 안전지식</h2>
+            <h2 id="ontology-explorer-title">선택 항목 중심 안전지식</h2>
             <p>전체 그래프 대신 선택한 항목과 직접 연결된 근거만 표시합니다.</p>
           </div>
           <div className={styles.depthControl} aria-label="관계 탐색 깊이">
-            <button type="button" aria-pressed={depth === 1} onClick={() => setDepth(1)}>1홉</button>
-            <button type="button" aria-pressed={depth === 2} onClick={() => setDepth(2)}>2홉</button>
+            <button type="button" aria-pressed={depth === 1} onClick={() => setDepth(1)}>직접 관계</button>
+            <button type="button" aria-pressed={depth === 2} onClick={() => setDepth(2)}>확장 관계</button>
           </div>
         </header>
 
         <div className={styles.toolbar}>
           <label className={styles.searchField}>
-            <span>노드 검색</span>
+            <span>안전지식 검색</span>
             <input
               type="search"
               value={query}
@@ -185,11 +225,11 @@ export function OntologyExplorer({
 
         <div className={styles.selectionSummary}>
           <div>
-            <span>{selectedItem ? KIND_KO[selectedItem.kind] : "선택 노드"}</span>
-            <strong>{selectedItem?.label || "노드를 선택하세요"}</strong>
-            <small>표시 {neighborhood.nodes.length}개 · 관계 {neighborhood.edges.length}개 · 전체 데이터 {totalNodes}개 보존</small>
+            <span>{selectedItem ? KIND_KO[selectedItem.kind] : "선택 항목"}</span>
+            <strong>{selectedItem?.label || "항목을 선택하세요"}</strong>
+            <small>관련 항목 {neighborhood.nodes.length}개 · 연결 {neighborhood.edges.length}개 · 전체 안전지식 {totalNodes}개 보존</small>
           </div>
-          <button type="button" className={styles.expandButton} onClick={() => setExpanded(true)}>그래프 전체 화면</button>
+          <button ref={expandButtonRef} type="button" className={styles.expandButton} onClick={() => setExpanded(true)}>그래프 전체 화면</button>
         </div>
 
         <div className={styles.desktopGraph}>
@@ -199,7 +239,7 @@ export function OntologyExplorer({
             <button type="button" title="확대" aria-label="그래프 확대" onClick={() => setZoom((value) => Math.min(1.2, value + 0.1))}>+</button>
           </div>
           <GraphCanvas neighborhood={neighborhood} selectedNodeId={selectedNodeId} zoom={zoom} onSelect={selectNode} />
-          <div className={styles.legend} aria-label="노드 유형 범례">
+          <div className={styles.legend} aria-label="안전지식 유형 안내">
             {kinds.map((item) => <span key={item} data-kind={item}>{KIND_KO[item]}</span>)}
           </div>
         </div>
@@ -256,8 +296,8 @@ export function OntologyExplorer({
       </details>
 
       {expanded ? (
-        <section className={styles.graphDialog} role="dialog" aria-modal="true" aria-label="온톨로지 그래프 전체 화면">
-          <header><strong>{selectedItem?.label || "관계 그래프"}</strong><button type="button" onClick={() => setExpanded(false)}>닫기</button></header>
+        <section ref={dialogRef} className={styles.graphDialog} role="dialog" aria-modal="true" aria-label="온톨로지 그래프 전체 화면">
+          <header><strong>{selectedItem?.label || "관계 그래프"}</strong><button ref={closeButtonRef} type="button" onClick={closeExpandedGraph}>닫기</button></header>
           <div className={styles.dialogScroller}>
             <GraphCanvas neighborhood={neighborhood} selectedNodeId={selectedNodeId} zoom={zoom} onSelect={selectNode} />
           </div>

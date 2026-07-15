@@ -1,10 +1,17 @@
 .root {
-  --ontology-ink: #17191d;
-  --ontology-muted: #555b65;
-  --ontology-line: #d9dde4;
-  --ontology-surface: #ffffff;
-  --ontology-canvas: #f4f5f7;
-  --ontology-accent: #725b00;
+  --ontology-ink: var(--workspace-ink);
+  --ontology-muted: var(--workspace-muted);
+  --ontology-line: var(--workspace-rule);
+  --ontology-surface: var(--workspace-surface-1);
+  --ontology-canvas: var(--workspace-surface-2);
+  --ontology-accent: var(--workspace-accent-text);
+  --ontology-card: var(--sc-paper);
+  --ontology-card-ink: var(--sc-steel-950);
+  --ontology-card-muted: var(--sc-steel-650);
+  --ontology-card-border: var(--sc-steel-300);
+  --ontology-graph-canvas: var(--sc-steel-060);
+  --ontology-selected: color-mix(in srgb, var(--sc-hazard-yellow) 18%, var(--sc-paper));
+  --ontology-focus-ring: color-mix(in srgb, var(--workspace-accent) 55%, transparent);
   display: grid;
   gap: 24px;
   color: var(--ontology-ink);
@@ -15,16 +22,7 @@
 }
 
 .emptyPanel h2 { margin: 8px 0; font-size: 22px; line-height: 30px; }
-.emptyPanel p { margin: 0; color: var(--ink-muted, #555b65); font-size: 14px; line-height: 22px; }
-
-:global(.safeclaw-module-shell[data-theme="night"]) .root {
-  --ontology-ink: #f5f6f8;
-  --ontology-muted: #b7bdc7;
-  --ontology-line: #353a43;
-  --ontology-surface: #17191d;
-  --ontology-canvas: #f4f5f7;
-  --ontology-accent: #f5c518;
-}
+.emptyPanel p { margin: 0; color: var(--workspace-muted); font-size: 14px; line-height: 22px; }
 
 .summaryGrid {
   display: grid;
@@ -161,9 +159,9 @@
 
 .depthControl button[aria-pressed="true"],
 .expandButton {
-  border-color: #f5c518;
-  background: #f5c518;
-  color: #17191d;
+  border-color: var(--sc-hazard-yellow);
+  background: var(--sc-hazard-yellow);
+  color: var(--sc-steel-950);
 }
 
 .toolbar {
@@ -198,7 +196,7 @@
 .rawExports summary:focus-visible,
 .rawExports a:focus-visible,
 .graphDialog button:focus-visible {
-  outline: 3px solid rgba(245, 197, 24, 0.55);
+  outline: 3px solid var(--ontology-focus-ring);
   outline-offset: 2px;
 }
 
@@ -208,14 +206,14 @@
   padding: 16px;
   border: 1px solid var(--ontology-line);
   border-radius: 12px;
-  background: var(--ontology-canvas);
-  color: #17191d;
+  background: var(--ontology-graph-canvas);
+  color: var(--ontology-card-ink);
 }
 
 .selectionSummary > div { display: grid; gap: 3px; min-width: 0; }
 .selectionSummary strong { overflow-wrap: anywhere; font-size: 17px; line-height: 26px; }
 .selectionSummary span,
-.selectionSummary small { color: #555b65; }
+.selectionSummary small { color: var(--ontology-card-muted); }
 
 .desktopGraph { display: block; margin-top: 16px; }
 .graphTools { justify-content: flex-end; margin-bottom: 8px; }
@@ -223,9 +221,9 @@
 
 .graphViewport {
   overflow: auto;
-  border: 1px solid #c9ced6;
+  border: 1px solid var(--ontology-card-border);
   border-radius: 12px;
-  background: var(--ontology-canvas);
+  background: var(--ontology-graph-canvas);
 }
 
 .graphCanvas {
@@ -240,8 +238,8 @@
 .graphCanvas svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .edge,
 .activeEdge { vector-effect: non-scaling-stroke; stroke-width: 0.28; }
-.edge { stroke: #8c949f; opacity: 0.58; }
-.activeEdge { stroke: #725b00; stroke-width: 0.5; opacity: 0.95; }
+.edge { stroke: var(--ontology-card-muted); opacity: 0.58; }
+.activeEdge { stroke: var(--sc-hazard-text); stroke-width: 0.5; opacity: 0.95; }
 
 .graphNode {
   position: absolute;
@@ -251,20 +249,20 @@
   min-height: 76px;
   padding: 10px 12px;
   transform: translate(-50%, -50%);
-  border: 1px solid #aeb5bf;
+  border: 1px solid var(--ontology-card-border);
   border-radius: 10px;
-  background: #ffffff;
-  color: #17191d;
+  background: var(--ontology-card);
+  color: var(--ontology-card-ink);
   text-align: left;
-  box-shadow: 0 1px 0 rgba(23, 25, 29, 0.08);
+  box-shadow: var(--shadow);
   cursor: pointer;
 }
 
-.graphNode:hover { border-color: #725b00; }
-.graphNode span { color: #555b65; }
+.graphNode:hover { border-color: var(--sc-hazard-text); }
+.graphNode span { color: var(--ontology-card-muted); }
 .graphNode strong { overflow-wrap: anywhere; font-size: 13px; line-height: 19px; white-space: normal; }
-.graphNode small { color: #555b65; }
-.selectedNode { border: 2px solid #725b00; background: #fff7d6; }
+.graphNode small { color: var(--ontology-card-muted); }
+.selectedNode { border: 2px solid var(--sc-hazard-text); background: var(--ontology-selected); }
 
 .legend {
   display: flex;
@@ -310,7 +308,7 @@
 
 .nodeGrid strong,
 .mobileRelations strong { overflow-wrap: anywhere; font-size: 14px; line-height: 22px; }
-.nodeGrid .activeListNode { border: 2px solid #f5c518; background: color-mix(in srgb, #f5c518 11%, var(--ontology-surface)); }
+.nodeGrid .activeListNode { border: 2px solid var(--workspace-accent); background: color-mix(in srgb, var(--workspace-accent) 11%, var(--ontology-surface)); }
 .moreButton { display: block; margin: 16px auto 0; }
 
 .rawExports { padding: 0 16px; }
@@ -331,29 +329,29 @@
   inset: 16px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  border: 1px solid #c9ced6;
+  border: 1px solid var(--ontology-card-border);
   border-radius: 14px;
-  background: #ffffff;
-  color: #17191d;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+  background: var(--ontology-card);
+  color: var(--ontology-card-ink);
+  box-shadow: var(--shadow);
 }
 
-.graphDialog > header { align-items: center; padding: 12px 16px; border-bottom: 1px solid #d9dde4; }
-.graphDialog button { border: 1px solid #c9ced6; border-radius: 8px; background: #ffffff; color: #17191d; padding: 0 14px; }
-.dialogScroller { min-height: 0; overflow: auto; padding: 16px; background: #eef0f3; }
+.graphDialog > header { align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--ontology-card-border); }
+.graphDialog button { border: 1px solid var(--ontology-card-border); border-radius: 8px; background: var(--ontology-card); color: var(--ontology-card-ink); padding: 0 14px; }
+.dialogScroller { min-height: 0; overflow: auto; padding: 16px; background: var(--ontology-graph-canvas); }
 .dialogScroller .graphViewport { min-width: 920px; }
 
 /* The module shell colors generic buttons by theme. Ontology controls keep their semantic surfaces. */
 :global(.safeclaw-module-shell[data-theme]) .root .graphNode {
-  border-color: #aeb5bf;
-  background: #ffffff;
-  color: #17191d;
+  border-color: var(--ontology-card-border);
+  background: var(--ontology-card);
+  color: var(--ontology-card-ink);
 }
 
 :global(.safeclaw-module-shell[data-theme]) .root .selectedNode {
-  border-color: #725b00;
-  background: #fff7d6;
-  color: #17191d;
+  border-color: var(--sc-hazard-text);
+  background: var(--ontology-selected);
+  color: var(--ontology-card-ink);
 }
 
 :global(.safeclaw-module-shell[data-theme]) .root .nodeGrid button,
@@ -373,9 +371,9 @@
 
 :global(.safeclaw-module-shell[data-theme]) .root .depthControl button[aria-pressed="true"],
 :global(.safeclaw-module-shell[data-theme]) .root .expandButton {
-  border-color: #f5c518;
-  background: #f5c518;
-  color: #17191d;
+  border-color: var(--sc-hazard-yellow);
+  background: var(--sc-hazard-yellow);
+  color: var(--sc-steel-950);
 }
 
 @media (max-width: 900px) {
