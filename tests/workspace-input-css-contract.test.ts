@@ -20,6 +20,23 @@ function workspaceSubmissionGuardCss(): string {
 }
 
 describe("workspace input CSS contract", () => {
+  it("keeps every workspace composer action at the 44px touch target", () => {
+    const css = workspaceCss();
+    const actionBlocks = Array.from(
+      css.matchAll(
+        /([^{}]*\.(?:composer-attach-button|composer-submit-button)[^{}]*)\{([^{}]*)\}/g,
+      ),
+    ).filter((match) => /min-height\s*:/u.test(match[2]));
+
+    expect(actionBlocks.length).toBeGreaterThanOrEqual(4);
+
+    for (const [, selectors, declarations] of actionBlocks) {
+      const minHeight = declarations.match(/min-height\s*:\s*([^;]+)/u)?.[1].trim();
+
+      expect(minHeight, selectors.trim()).toMatch(/^(?:44px|var\(--control-height\))$/u);
+    }
+  });
+
   it("keeps the responsive textarea cascade free of important overrides", () => {
     const guardCss = workspaceSubmissionGuardCss();
     const textareaBlocks = Array.from(

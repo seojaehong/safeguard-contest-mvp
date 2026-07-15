@@ -1,0 +1,27 @@
+{
+  "date": "2026-07-15",
+  "baseCommit": "5249be5e6c36c15d1f3359aab8e0f65868574e8c",
+  "scope": "workspace composer touch targets",
+  "schemaMigration": false,
+  "dataMutation": false,
+  "visualDirectionChanged": false,
+  "before": {
+    "attachmentMinHeight": 36,
+    "submitMinHeight": 38,
+    "ultraShortOverrideMinHeight": 32
+  },
+  "after": {
+    "attachmentMinHeightToken": "--control-height",
+    "submitMinHeightToken": "--control-height",
+    "resolvedMinHeight": 44
+  },
+  "verification": {
+    "testFiles": 2,
+    "passed": 28,
+    "skipped": 1,
+    "failed": 0,
+    "typecheck": "passed",
+    "packageLockDiff": false,
+    "diffCheck": "passed"
+  }
+}

@@ -13076,7 +13076,7 @@ body:has(.safeclaw-landing) :is(
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 36px;
+  min-height: var(--control-height);
   border: 1px solid var(--workspace-rule);
   border-radius: var(--r-lg);
   background: var(--workspace-surface-2);
@@ -13160,7 +13160,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .composer-submit-button {
-  min-height: 38px;
+  min-height: var(--control-height);
   margin-left: auto;
   border-radius: var(--r-lg);
   padding: 8px 16px;
@@ -18132,7 +18132,7 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .composer-attach-button,
   .command-center-shell.workspace-theme-day .composer-attach-button {
-    min-height: 32px;
+    min-height: var(--control-height);
     padding: 4px 8px;
   }
 
@@ -18148,7 +18148,7 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .composer-submit-button,
   .command-center-shell.workspace-theme-day .composer-submit-button {
-    min-height: 32px;
+    min-height: var(--control-height);
     padding: 8px 12px;
   }
 }
