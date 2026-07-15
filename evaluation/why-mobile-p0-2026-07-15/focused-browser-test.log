@@ -1,0 +1,28 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/why-mobile-layout.test.ts --reporter=verbose
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/why-mobile-p0
+
+stdout | tests/why-mobile-layout.test.ts > why comparison layout > renders readable stacked comparison cards without horizontal overflow in day mode
+WHY_MOBILE_AUDIT {"viewport":"390x844","theme":"day","tableTag":"TABLE","columnHeaderCount":5,"rowHeaderCount":5,"documentOverflow":0,"outsideViewport":[],"unreadableText":[],"undersizedControls":[],"rowCount":5,"tableWidth":332,"rowWidths":[332,332,332,332,332],"firstRowDisplay":"grid","visibleLabels":["\"SafeClaw\"","\"안전관리 SaaS\"","\"한글·엑셀 양식\"","\"일반 AI\"","\"SafeClaw\"","\"안전관리 SaaS\"","\"한글·엑셀 양식\"","\"일반 AI\"","\"SafeClaw\"","\"안전관리 SaaS\"","\"한글·엑셀 양식\"","\"일반 AI\"","\"SafeClaw\"","\"안전관리 SaaS\"","\"한글·엑셀 양식\"","\"일반 AI\"","\"SafeClaw\"","\"안전관리 SaaS\"","\"한글·엑셀 양식\"","\"일반 AI\""]}
+
+ ✓ tests/why-mobile-layout.test.ts > why comparison layout > renders readable stacked comparison cards without horizontal overflow in day mode 10547ms
+stdout | tests/why-mobile-layout.test.ts > why comparison layout > renders readable stacked comparison cards without horizontal overflow in night mode
+WHY_MOBILE_AUDIT {"viewport":"390x844","theme":"night","tableTag":"TABLE","columnHeaderCount":5,"rowHeaderCount":5,"documentOverflow":0,"outsideViewport":[],"unreadableText":[],"undersizedControls":[],"rowCount":5,"tableWidth":332,"rowWidths":[332,332,332,332,332],"firstRowDisplay":"grid","visibleLabels":["\"SafeClaw\"","\"안전관리 SaaS\"","\"한글·엑셀 양식\"","\"일반 AI\"","\"SafeClaw\"","\"안전관리 SaaS\"","\"한글·엑셀 양식\"","\"일반 AI\"","\"SafeClaw\"","\"안전관리 SaaS\"","\"한글·엑셀 양식\"","\"일반 AI\"","\"SafeClaw\"","\"안전관리 SaaS\"","\"한글·엑셀 양식\"","\"일반 AI\"","\"SafeClaw\"","\"안전관리 SaaS\"","\"한글·엑셀 양식\"","\"일반 AI\""]}
+
+ ✓ tests/why-mobile-layout.test.ts > why comparison layout > renders readable stacked comparison cards without horizontal overflow in night mode 4576ms
+stdout | tests/why-mobile-layout.test.ts > why comparison layout > preserves the five-column comparison table on desktop in day mode
+WHY_DESKTOP_AUDIT {"viewport":"1440x900","theme":"day","headColumns":5,"rowColumns":5,"headDisplay":"grid","rowDisplay":"grid","tableWidth":1104,"documentOverflow":0}
+
+ ✓ tests/why-mobile-layout.test.ts > why comparison layout > preserves the five-column comparison table on desktop in day mode 4505ms
+stdout | tests/why-mobile-layout.test.ts > why comparison layout > preserves the five-column comparison table on desktop in night mode
+WHY_DESKTOP_AUDIT {"viewport":"1440x900","theme":"night","headColumns":5,"rowColumns":5,"headDisplay":"grid","rowDisplay":"grid","tableWidth":1104,"documentOverflow":0}
+
+ ✓ tests/why-mobile-layout.test.ts > why comparison layout > preserves the five-column comparison table on desktop in night mode 4268ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  11:39:24
+   Duration  53.77s (transform 141ms, setup 0ms, import 1.19s, tests 51.30s, environment 0ms)
