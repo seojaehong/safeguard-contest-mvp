@@ -390,10 +390,15 @@ function getSupportingKoshaEvidenceRef(item: SafetyReferenceItem): string {
 
 function buildKoshaParentEvidenceReadyIds(packet: DbHarnessPacket): Set<string> {
   const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
-  return new Set(packet.supportingEvidence
+  const exactDirectIds = packet.directEvidence
+    .filter(isKoshaTechnicalReference)
+    .filter(isSafetyReferenceDirectEligible)
+    .map((item) => item.id);
+  const parentReadySupportingIds = packet.supportingEvidence
     .filter(isKoshaTechnicalReference)
     .filter((item) => hasRelevantKoshaParent(item, parentCandidates))
-    .map((item) => item.id));
+    .map((item) => item.id);
+  return new Set([...exactDirectIds, ...parentReadySupportingIds]);
 }
 
 export function buildSafetyReferenceRiskRows(

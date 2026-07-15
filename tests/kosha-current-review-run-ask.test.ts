@@ -5,6 +5,7 @@ import type { AiDeliverables, AiDeliverablesDiagnostics, AiMode, GenerateAllOpti
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { runAsk } from "@/lib/search";
 import type { SafetyReferenceItem, SafetyReferenceSearchResult } from "@/lib/safety-reference-catalog";
+import { loadBundledExactKoshaReference } from "@/lib/safety-reference-catalog-server";
 import type { AskResponse, SearchResult, TbmRiskLink } from "@/lib/types";
 
 const mocks = vi.hoisted(() => ({
@@ -959,6 +960,35 @@ describe("current-base runAsk retrieval provenance", () => {
       source.kind === "kosha" && source.sourceId === verified.source_id
     )))).toBe(true);
     expect(generationInputs.every((input) => Object.isFrozen(input.groundingPacket))).toBe(true);
+  }, 30_000);
+
+  it("wires exact trusted D-C-13 direct evidence into the runAsk grounding packet", async () => {
+    const bundled = await loadBundledExactKoshaReference();
+    if (bundled.status !== "ready") throw new Error("expected exact D-C-13 bundle fixture");
+    mocks.searchSafetyReferences.mockResolvedValue(searchResult(
+      "local-ranked",
+      [bundled.item],
+      "외벽 도장 작업발판 안전난간"
+    ));
+    let capturedPacket: GenerateAllOptions["groundingPacket"];
+    mocks.generateAllDeliverablesWithDiagnostics.mockImplementation(async (input: GenerateAllOptions) => {
+      capturedPacket = input.groundingPacket;
+      return providerResult();
+    });
+
+    const response = await runAsk("외벽 도장 작업발판 안전난간", { aiMode: "full" });
+    const directControls = response.dbHarness?.packet.directEvidence.find((item) => (
+      item.id === bundled.item.id
+    ))?.controls ?? [];
+    const groundedControls = capturedPacket?.sources.flatMap((source) => source.controls) ?? [];
+
+    expect(response.dbHarness?.packet.directEvidence.map((item) => item.id)).toContain(bundled.item.id);
+    expect(directControls.length).toBeGreaterThan(0);
+    expect(capturedPacket?.sources).toContainEqual(expect.objectContaining({
+      kind: "kosha",
+      sourceId: bundled.item.source_id
+    }));
+    expect(groundedControls).toEqual(expect.arrayContaining(directControls));
   }, 30_000);
 
   it("surfaces every critical packet control that a rejected group fallback does not materialize", async () => {
