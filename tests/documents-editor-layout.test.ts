@@ -12,6 +12,7 @@ import {
 let baseUrl = "";
 let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
+const DEFAULT_VISIBLE_OPERATIONAL_LABELS = /\b(?:Markdown|Supabase|API|JSON)\b|Operation Ontology|Operation Graph|DB 하네스|품질 계약/u;
 
 type XlsxLoadBuffer = Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0];
 
@@ -84,7 +85,8 @@ describe("documents editor layout", () => {
     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
 
     const visibleText = await page.locator("body").innerText();
-    expect(visibleText).not.toMatch(/\b(?:Markdown|Supabase|API|JSON)\b|Operation Ontology|Operation Graph/u);
+    expect("DB 하네스 · 품질 계약").toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
+    expect(visibleText).not.toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
   }, 90_000);
 
   it("renders actual message samples and an empty permit with document-specific structured sections", async () => {
