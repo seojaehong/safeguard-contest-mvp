@@ -58,6 +58,7 @@ import {
   assessWorkpackReadiness,
   type WorkpackReadiness
 } from "@/lib/workpack-readiness";
+import { formatCustomerFacingLabel, formatCustomerFacingText } from "@/lib/web-safe-presentation";
 
 type SafeGuardCommandCenterProps = {
   examples: FieldExample[];
@@ -780,20 +781,20 @@ function selectedDocumentEvidence(data: AskResponse | null, key: DocumentKey): D
     const harnessSurface = buildDbHarnessSurfaceContract(harnessPacket);
     const memoryCount = harnessSummary.improvementMemory + harnessSummary.workpackMemory;
     items.push({
-      label: harnessSurface.label,
+      label: formatCustomerFacingLabel(harnessSurface.label),
       value: memoryCount
         ? `개선 ${harnessSummary.improvementMemory} · 작업 ${harnessSummary.workpackMemory}`
-        : harnessSurface.headline,
+        : formatCustomerFacingText(harnessSurface.headline),
       detail: documentImprovement
         ? `${documentImprovement.hazardLabel}: ${documentImprovement.improvementText}`
         : documentWorkpackMemory
           ? `${documentWorkpackMemory.generatedAt} · ${documentWorkpackMemory.question}`
           : documentCoverage?.covered
-            ? `${documentCoverage.document} 하네스 근거가 연결됐습니다.`
-            : harnessSurface.detail,
+            ? `${documentCoverage.document} 검증 근거가 연결됐습니다.`
+            : formatCustomerFacingText(harnessSurface.detail),
       meta: documentCoverage?.covered
         ? `문서 커버됨 · ${documentCoverage.evidenceTypes.join("/")}`
-        : harnessSurface.meta,
+        : formatCustomerFacingText(harnessSurface.meta),
       tone: harnessSurface.status === "locked" && documentCoverage?.covered !== false ? "ready" : "warn"
     });
   }

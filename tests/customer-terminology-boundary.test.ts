@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   formatCustomerFacingLabel,
@@ -49,6 +51,29 @@ function defaultVisibleText(html: string): string {
 }
 
 describe("customer terminology boundary", () => {
+  it("keeps harness implementation names out of default product copy", () => {
+    const root = process.cwd();
+    const aiConnect = readFileSync(join(root, "components/AiConnectPanel.tsx"), "utf8");
+    const workspace = readFileSync(join(root, "components/SafeGuardCommandCenter.tsx"), "utf8");
+    const answerDisplay = readFileSync(join(root, "lib/answer-panel-display.ts"), "utf8");
+
+    for (const visibleImplementationCopy of [
+      'label: "Harness Agent"',
+      '? "Harness Agent" : "연결 토큰"',
+      '"내 OAuth + SafeClaw 하네스를 분리해 붙입니다."',
+      '"DB 하네스: 직접 근거'
+    ]) {
+      expect(`${aiConnect}\n${answerDisplay}`).not.toContain(visibleImplementationCopy);
+    }
+    expect(aiConnect).toContain('label: "근거 고정"');
+    expect(aiConnect).toContain('{ label: "SafeClaw Harness Agent" }');
+    expect(aiConnect).toContain("formatCustomerFacingLabel(token.label)");
+    expect(aiConnect).toContain("SIF·KOSHA·작업 이력을 먼저 확인");
+    expect(workspace).toContain("formatCustomerFacingLabel(harnessSurface.label)");
+    expect(workspace).not.toContain("하네스 근거가 연결됐습니다");
+    expect(answerDisplay).toContain("검증 근거: 직접 근거");
+  });
+
   it("maps operational labels and prose to plain Korean", () => {
     expect(formatCustomerFacingLabel("관리자 원본 JSON")).toBe("현재 조회 결과 데이터");
     expect(formatCustomerFacingLabel("다음 생성용 MD")).toBe("재사용 검토 문서");

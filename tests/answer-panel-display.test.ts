@@ -72,7 +72,7 @@ describe("answer panel display copy", () => {
 
     expect(notes).toContain("법령 근거: 연결됨");
     expect(notes).toContain("기상 신호: 보조 근거로 표시");
-    expect(notes).toContain("DB 하네스: 직접 근거 3건 · SIF 사례 2건");
+    expect(notes).toContain("검증 근거: 직접 근거 3건 · SIF 사례 2건");
     expect(notes).not.toMatch(/fallback|OPENAI_API_KEY|timeout|AI_MODE/i);
   });
 });

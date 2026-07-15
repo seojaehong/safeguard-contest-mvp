@@ -13,6 +13,7 @@ import {
 } from "@/lib/mcp-connect";
 import {
   buildPhotoFlowPresentation,
+  formatCustomerFacingLabel,
   formatPhotoFileValidationMode,
   formatPhotoInputLimit,
   formatPhotoVisionStatus,
@@ -286,8 +287,8 @@ type SifEmbeddingGateStatusResponse = {
 const tabs: { id: AiConnectTab; label: string; body: string }[] = [
   {
     id: "harness",
-    label: "Harness Agent",
-    body: "내 OpenAI OAuth로 OpenClaw를 쓰되 SafeClaw DB 근거 패킷만 먼저 호출합니다.",
+    label: "근거 고정",
+    body: "OpenClaw가 SafeClaw의 검증 근거를 먼저 확인하도록 연결합니다.",
   },
   {
     id: "openclaw",
@@ -555,11 +556,11 @@ export function AiConnectPanel() {
       </section>
 
       <section className="safeclaw-module-panel ai-connect-command">
-        <span>{activeTab === "harness" ? "Harness Agent" : "연결 토큰"}</span>
-        <h2>{activeTab === "harness" ? "내 OAuth + SafeClaw 하네스를 분리해 붙입니다." : "내 AI에 SafeClaw 도구를 붙입니다."}</h2>
+        <span>{activeTab === "harness" ? "근거 고정" : "연결 토큰"}</span>
+        <h2>{activeTab === "harness" ? "내 OAuth와 SafeClaw 검증 근거를 분리해 연결합니다." : "내 AI에 SafeClaw 도구를 붙입니다."}</h2>
         <p>
           {activeTab === "harness"
-            ? "OpenClaw의 모델 사용은 내 OpenAI OAuth 프로필이 담당하고, SafeClaw 데이터 접근은 이 MCP 토큰이 담당합니다. 시연 중에는 run_safeclaw_harness_agent 도구가 DB 근거를 먼저 고정합니다."
+            ? "OpenClaw의 모델 사용은 내 OpenAI OAuth 프로필이 담당하고, SafeClaw 데이터 접근은 이 연결 토큰이 담당합니다. 작업을 시작하면 SIF·KOSHA·작업 이력을 먼저 확인한 뒤 문서를 작성합니다."
             : "토큰은 발급 직후 한 번만 표시됩니다. 화면을 떠난 뒤에는 기존 토큰을 다시 볼 수 없고, 새로 발급하거나 기존 토큰을 끌 수 있습니다."}
         </p>
         <div className="ai-connect-actions">
@@ -920,7 +921,7 @@ export function AiConnectPanel() {
           {tokens.length ? tokens.map((token) => (
             <article key={token.id}>
               <div>
-                <strong>{token.label}</strong>
+                <strong>{formatCustomerFacingLabel(token.label)}</strong>
                 <p>{token.siteName} · 최근 사용 {formatDate(token.lastUsedAt)}</p>
               </div>
               <span className={token.disabled ? "off" : "on"}>{token.disabled ? "꺼짐" : "사용 가능"}</span>

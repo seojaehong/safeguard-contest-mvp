@@ -283,6 +283,8 @@ const DRYRUN_QUALITY_NOTE_LABELS: LabelMap = {
 };
 
 const CUSTOMER_FACING_LABELS: LabelMap = {
+  "SafeClaw Harness Agent": "SafeClaw 근거 고정",
+  "DB 하네스 계약": "검증 근거",
   "관리자 원본 JSON": "현재 조회 결과 데이터",
   "다음 생성용 MD": "재사용 검토 문서",
   "하네스 JSONL": "재사용 검토 데이터",

@@ -105,7 +105,7 @@ export function buildAnswerPanelStatusNotes(data: AnswerPanelPublicStatusInput) 
 
   if (data.dbHarness) {
     const summary = data.dbHarness.summary;
-    notes.push(`DB 하네스: 직접 근거 ${summary.directEvidence}건 · SIF 사례 ${summary.sifCases}건`);
+    notes.push(`검증 근거: 직접 근거 ${summary.directEvidence}건 · SIF 사례 ${summary.sifCases}건`);
   }
 
   if (data.qualityContract) {
