@@ -694,17 +694,60 @@ describe("documents editor layout", () => {
     ratios.forEach(({ text, ratio }) => expect(ratio, text).toBeGreaterThanOrEqual(4.5));
   }, 90_000);
 
-  it("keeps the primary Day document export action at AA text contrast", async () => {
+  it.each(["day", "night"] as const)(
+    "keeps the primary %s document export action at AA text contrast",
+    async (theme) => {
+      if (!browser) throw new Error("Browser was not started");
+      const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+      await page.goto(`${baseUrl}/documents?theme=${theme}`, { waitUntil: "networkidle" });
+
+      const colors = await page.locator(".safeclaw-doc-export a:first-of-type").evaluate((element) => {
+        const style = getComputedStyle(element);
+        return { foreground: style.color, background: style.backgroundColor };
+      });
+
+      expect(computedContrastRatio(colors.foreground, colors.background), theme).toBeGreaterThanOrEqual(4.5);
+    },
+    90_000,
+  );
+
+  it("renders every landing light-grid label at AA text contrast", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await page.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
 
-    const colors = await page.locator(".safeclaw-doc-export a:first-of-type").evaluate((element) => {
-      const style = getComputedStyle(element);
-      return { foreground: style.color, background: style.backgroundColor };
-    });
+    const grids = [
+      [".safeclaw-pipeline-grid", 5],
+      [".safeclaw-proof-matrix", 6],
+      [".safeclaw-language-matrix", 10],
+      [".safeclaw-module-map", 8],
+    ] as const;
 
-    expect(computedContrastRatio(colors.foreground, colors.background)).toBeGreaterThanOrEqual(4.5);
+    for (const [selector, expectedLabels] of grids) {
+      const labels = page.locator(`${selector} > * > span`);
+      await expect.poll(() => labels.count(), { message: selector }).toBe(expectedLabels);
+      const colors = await labels.evaluateAll((elements) => elements.map((element) => {
+        const foreground = getComputedStyle(element).color;
+        let surface: Element | null = element.parentElement;
+        let background = "";
+        while (surface) {
+          const candidate = getComputedStyle(surface).backgroundColor;
+          const channels = candidate.match(/[\d.]+/gu)?.map(Number) ?? [];
+          const alpha = channels.length >= 4 ? channels[3] : 1;
+          if (alpha === 1) {
+            background = candidate;
+            break;
+          }
+          surface = surface.parentElement;
+        }
+        if (!background) throw new Error(`Missing painted background for ${element.textContent ?? "landing label"}`);
+        return { foreground, background, text: element.textContent?.trim() || "" };
+      }));
+
+      colors.forEach(({ foreground, background, text }) => {
+        expect(computedContrastRatio(foreground, background), `${selector} ${text}`).toBeGreaterThanOrEqual(4.5);
+      });
+    }
   }, 90_000);
 
   it("supports roving keyboard navigation across document tabs", async () => {

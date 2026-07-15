@@ -1,7 +1,15 @@
 {
   "schemaVersion": 1,
   "date": "2026-07-15",
-  "status": "pass",
+  "status": "pass_after_independent_review_remediation",
+  "independentReview": {
+    "initialVerdict": "reject",
+    "findings": [
+      "night-document-primary-export-contrast",
+      "landing-rendered-composition-proof"
+    ],
+    "followupVerdict": "pass"
+  },
   "branch": "fix/final-contrast-p0-20260715",
   "baseSha": "79e48daec4add10706068dd6a5705c4f5ca7d5f9",
   "scope": {
@@ -11,17 +19,22 @@
       ".safeclaw-language-matrix span",
       ".safeclaw-module-map span"
     ],
-    "documentSelector": ".safeclaw-module-shell.module-variant-document .safeclaw-doc-export a:first-of-type",
+    "documentSelectors": [
+      ".safeclaw-module-shell.module-variant-document .safeclaw-doc-export a:first-of-type",
+      ".safeclaw-module-shell.module-variant-document[data-theme=\"night\"] .safeclaw-doc-export a:first-of-type"
+    ],
     "excludedAreasTouched": []
   },
   "tdd": {
     "red": {
       "sharedSelectorActual": "var(--os-yellow)",
-      "documentComputedContrastRatio": 1.6301581137025196
+      "initialDocumentComputedContrastRatio": 1.6301581137025196,
+      "followupNightComputedContrastRatio": 3.756268146727018
     },
     "green": {
       "sharedSurfaceTestsPassed": 16,
-      "documentBrowserTestsPassed": 1
+      "focusedBrowserTestsPassed": 3,
+      "renderedLandingLabelCounts": [5, 6, 10, 8]
     }
   },
   "contrast": [
@@ -40,17 +53,26 @@
       "ratio": 10.796102113121005,
       "minimum": 4.5,
       "status": "pass"
+    },
+    {
+      "surface": "night-document-primary-export",
+      "foreground": "#010102",
+      "background": "#6c6ff7",
+      "ratio": 5.2205054939482896,
+      "minimum": 4.5,
+      "status": "pass"
     }
   ],
   "verification": {
     "focusedSharedTests": "pass",
-    "focusedDocumentBrowserProbe": "pass",
+    "focusedDocumentThemeBrowserProbes": "pass",
+    "renderedLandingDomContrastProbe": "pass",
     "strictTypecheck": "pass",
     "staticAudit": {
       "status": "pass",
       "pageFiles": 32,
       "componentFiles": 23,
-      "cssLines": 20991,
+      "cssLines": 20995,
       "coverageIssues": 0,
       "violations": 0
     },
