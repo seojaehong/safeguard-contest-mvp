@@ -1,0 +1,60 @@
+{
+  "artifact": "knowledge-review-inbox-2026-07-15",
+  "reviewDate": "2026-07-16",
+  "specSelfVerdict": "PASS",
+  "codeSelfVerdict": "PASS",
+  "databaseMigrationAdded": false,
+  "publishPerformed": false,
+  "ontologyMigrationPerformed": false,
+  "commitPerformed": false,
+  "pushPerformed": false,
+  "findings": {
+    "getRelationValidation": "remediated",
+    "eventLevelScopeReceipt": "remediated",
+    "getPostSharedEventScopeParity": "remediated",
+    "filteredRaceMocks": "remediated",
+    "untrackedDiffEvidence": "remediated"
+  },
+  "focusedTests": {
+    "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts tests/knowledge-review-route.test.ts",
+    "testFilesPassed": 2,
+    "testsPassed": 26,
+    "testsFailed": 0
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "status": "GREEN",
+    "errors": 0
+  },
+  "dependencyInstall": {
+    "command": "npm.cmd install",
+    "status": "completed",
+    "manifestDiffCommand": "git diff --exit-code -- package.json package-lock.json",
+    "manifestDiffExitCode": 0
+  },
+  "untrackedDiffCheck": {
+    "commandPattern": "git -c core.autocrlf=false diff --no-index --check -- NUL <file>",
+    "filesChecked": 6,
+    "expectedDiffExitCode": 1,
+    "whitespaceErrors": 0
+  },
+  "partialFailureContract": {
+    "atomic": false,
+    "compensationRequired": true,
+    "httpStatus": 500,
+    "progressFields": [
+      "runUpdated",
+      "eventsUpdated",
+      "eventsUpdatedCount",
+      "eventsTotal"
+    ]
+  },
+  "changedFiles": [
+    "lib/knowledge-review.ts",
+    "app/api/knowledge/review/route.ts",
+    "tests/knowledge-review-actions.test.ts",
+    "tests/knowledge-review-route.test.ts",
+    "evaluation/knowledge-review-inbox-2026-07-15/report.md",
+    "evaluation/knowledge-review-inbox-2026-07-15/report.json"
+  ]
+}
