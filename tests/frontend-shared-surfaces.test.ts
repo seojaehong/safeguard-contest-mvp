@@ -148,12 +148,28 @@ describe("canonical shared surface styles", () => {
     expect(declarationsForExactSelector(css, ".safeclaw-core-card span")).toMatchObject({
       color: "var(--sc-hazard-text)",
     });
+    for (const selector of [
+      ".safeclaw-pipeline-grid span",
+      ".safeclaw-proof-matrix span",
+      ".safeclaw-language-matrix span",
+      ".safeclaw-module-map span",
+    ]) {
+      expect(declarationsForExactSelector(css, selector), selector).toMatchObject({
+        color: "var(--sc-hazard-text)",
+      });
+    }
     expect(
       declarationsForExactSelector(
         css,
         ".safeclaw-module-shell.module-variant-document .safeclaw-current-workpack a",
       ),
     ).toMatchObject({ color: "var(--workspace-accent-text)" });
+    expect(
+      declarationsForExactSelector(
+        css,
+        ".safeclaw-module-shell.module-variant-document .safeclaw-doc-export a:first-of-type",
+      ),
+    ).toMatchObject({ color: "var(--workspace-ink)" });
     expect(
       declarationsForExactSelector(
         css,

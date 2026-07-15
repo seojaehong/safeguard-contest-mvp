@@ -1529,7 +1529,7 @@ ul {
 .safeclaw-module-map span {
   display: block;
   margin-bottom: 24px;
-  color: var(--os-yellow);
+  color: var(--sc-hazard-text);
   font-family: var(--font-hud);
   font-size: var(--text-body);
   font-weight: 500;
@@ -17678,7 +17678,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-doc-export a:first-of-type {
   border-color: var(--workspace-accent);
   background: var(--workspace-accent);
-  color: #ffffff;
+  color: var(--workspace-ink);
 }
 
 @media (max-width: 900px) {
