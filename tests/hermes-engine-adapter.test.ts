@@ -65,7 +65,7 @@ function sifReference(): SafetyReferenceItem {
   };
 }
 
-function verifiedKoshaReference(): SafetyReferenceItem {
+function recoveredKoshaReference(): SafetyReferenceItem {
   const body = "외벽도장보수공사 작업 전 작업발판, 난간, 개구부와 안전대 상태를 확인합니다.";
   return {
     ...sifReference(),
@@ -97,26 +97,26 @@ function verifiedKoshaReference(): SafetyReferenceItem {
   };
 }
 
-const pinnedTrustedKosha = verifiedKoshaReference();
+const pinnedRecoveredKoshaFixture = recoveredKoshaReference();
 
-function isTestOnlyPinnedTrustedKosha(item: SafetyReferenceItem): boolean {
-  return item.id === pinnedTrustedKosha.id
-    && item.title === pinnedTrustedKosha.title
-    && item.body === pinnedTrustedKosha.body
-    && item.source_url === pinnedTrustedKosha.source_url
-    && item.kosha_guide?.stableDocumentKey === pinnedTrustedKosha.kosha_guide?.stableDocumentKey
-    && item.kosha_guide?.version === pinnedTrustedKosha.kosha_guide?.version
-    && item.kosha_guide?.officialVersion === pinnedTrustedKosha.kosha_guide?.officialVersion
-    && item.kosha_guide?.bodySha256 === pinnedTrustedKosha.kosha_guide?.bodySha256
-    && item.kosha_guide?.pdfSha256 === pinnedTrustedKosha.kosha_guide?.pdfSha256
-    && item.kosha_guide?.officialFileId === pinnedTrustedKosha.kosha_guide?.officialFileId
-    && item.kosha_guide?.officialUrl === pinnedTrustedKosha.kosha_guide?.officialUrl
-    && item.kosha_guide?.publicationDate === pinnedTrustedKosha.kosha_guide?.publicationDate;
+function isTestOnlyRecoveredKoshaFixture(item: SafetyReferenceItem): boolean {
+  return item.id === pinnedRecoveredKoshaFixture.id
+    && item.title === pinnedRecoveredKoshaFixture.title
+    && item.body === pinnedRecoveredKoshaFixture.body
+    && item.source_url === pinnedRecoveredKoshaFixture.source_url
+    && item.kosha_guide?.stableDocumentKey === pinnedRecoveredKoshaFixture.kosha_guide?.stableDocumentKey
+    && item.kosha_guide?.version === pinnedRecoveredKoshaFixture.kosha_guide?.version
+    && item.kosha_guide?.officialVersion === pinnedRecoveredKoshaFixture.kosha_guide?.officialVersion
+    && item.kosha_guide?.bodySha256 === pinnedRecoveredKoshaFixture.kosha_guide?.bodySha256
+    && item.kosha_guide?.pdfSha256 === pinnedRecoveredKoshaFixture.kosha_guide?.pdfSha256
+    && item.kosha_guide?.officialFileId === pinnedRecoveredKoshaFixture.kosha_guide?.officialFileId
+    && item.kosha_guide?.officialUrl === pinnedRecoveredKoshaFixture.kosha_guide?.officialUrl
+    && item.kosha_guide?.publicationDate === pinnedRecoveredKoshaFixture.kosha_guide?.publicationDate;
 }
 
 function createSafeClawHermesComposition(planner: HermesPlanner) {
   return createHermesComposition(planner, {
-    testOnlyTrustedKoshaReference: isTestOnlyPinnedTrustedKosha,
+    testOnlyTrustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
   });
 }
 
@@ -166,7 +166,7 @@ function structuredPlannerResponse(prompt: string): string {
 function groundedHarnessResult(question = "오늘 작업 위험을 점검해줘") {
   const packet = buildDbHarnessPacket({
     question,
-    references: [sifReference(), verifiedKoshaReference()],
+    references: [sifReference(), recoveredKoshaReference()],
     retrieval: { mode: "ranked-rpc", message: "required evidence resolved" },
   });
   return {
@@ -294,7 +294,7 @@ describe("experimental Hermes EngineAdapter", () => {
           return searchResult(options.query, [sifReference()]);
         }
         if (options.evidenceRole === "supporting") {
-          return searchResult(options.query, [verifiedKoshaReference()]);
+          return searchResult(options.query, [recoveredKoshaReference()]);
         }
         return searchResult(options.query, []);
       },
@@ -322,6 +322,46 @@ describe("experimental Hermes EngineAdapter", () => {
 
     expect(searchCalls).toBe(3);
     expect(plannerCalls).toBe(1);
+  });
+
+  it("excludes review-required KOSHA controls from a mixed evidence claim allowlist", async () => {
+    const mixedResult = structuredClone(groundedHarnessResult());
+    const reviewRequired = recoveredKoshaReference();
+    reviewRequired.id = "kosha-review-required";
+    reviewRequired.title = "검토 필요 KOSHA 항목";
+    reviewRequired.controls = ["검증되지 않은 임의 통제조치"];
+    if (!reviewRequired.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
+    reviewRequired.kosha_guide.quality = "review_required";
+    reviewRequired.kosha_guide.directEligible = false;
+    reviewRequired.kosha_guide.evidenceRef = "KOSHA 미검증 근거";
+    mixedResult.packet.supportingEvidence.push(reviewRequired);
+    mixedResult.packet.retrievalContract.sourceCounts.supportingEvidence += 1;
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValue(mixedResult);
+    let inspectedClaims = 0;
+    const events: ClawChatEvent[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async (input) => {
+        inspectedClaims += 1;
+        expect(input.evidenceClaims.map((claim) => claim.text)).not.toContain(
+          "검증되지 않은 임의 통제조치",
+        );
+        expect(input.evidenceClaims.some((claim) => (
+          claim.citations.some((citation) => citation.label.startsWith("KOSHA 실행지침:"))
+        ))).toBe(true);
+        input.emitText(attestedOutput(input));
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(inspectedClaims).toBe(1);
+    expect(events).toHaveLength(1);
+    expect(JSON.stringify(events)).not.toContain("검증되지 않은 임의 통제조치");
   });
 
   it.each([
@@ -576,7 +616,7 @@ describe("experimental Hermes EngineAdapter", () => {
   });
 
   it("fails closed before planner when KOSHA evidence is unresolved", async () => {
-    const unresolvedKosha = verifiedKoshaReference();
+    const unresolvedKosha = recoveredKoshaReference();
     if (!unresolvedKosha.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
     unresolvedKosha.kosha_guide.quality = "review_required";
     const packet = buildDbHarnessPacket({
@@ -611,7 +651,7 @@ describe("experimental Hermes EngineAdapter", () => {
   it.each(["body", "pdfSha256", "officialFileId"] as const)(
     "rejects a pinned test-only KOSHA fixture with a %s mismatch",
     async (field) => {
-      const mismatchedKosha = verifiedKoshaReference();
+      const mismatchedKosha = recoveredKoshaReference();
       if (!mismatchedKosha.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
       if (field === "body") mismatchedKosha.body = `${mismatchedKosha.body} 변조`;
       if (field === "pdfSha256") mismatchedKosha.kosha_guide.pdfSha256 = "0".repeat(64);
@@ -983,7 +1023,7 @@ describe("experimental Hermes EngineAdapter", () => {
       openClawHermes: {
         runtimeCapability: async () => true,
         verifyToolFreeAgent: async () => true,
-        testOnlyTrustedKoshaReference: isTestOnlyPinnedTrustedKosha,
+        testOnlyTrustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
         assertOAuth: async (config) => ({
           ok: true,
           provider: "openai",
@@ -1022,7 +1062,7 @@ describe("experimental Hermes EngineAdapter", () => {
       openClawHermes: {
         runtimeCapability: async () => true,
         verifyToolFreeAgent: async () => true,
-        testOnlyTrustedKoshaReference: isTestOnlyPinnedTrustedKosha,
+        testOnlyTrustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
         assertOAuth: async (config) => ({
           ok: true,
           provider: "openai",
@@ -1045,7 +1085,7 @@ describe("experimental Hermes EngineAdapter", () => {
 
     expect(events).toEqual([{
       kind: "text-delta",
-      text: "작업발판·안전난간·개구부 상태 확인 [오늘 작업 위험 점검 SIF 추락 사례]",
+      text: "작업발판·안전난간·개구부 상태 확인 [SIF 사례 근거(위험 우선순위): 오늘 작업 위험 점검 SIF 추락 사례]",
     }]);
   });
 

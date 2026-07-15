@@ -16,6 +16,7 @@ import {
 import type { DbHarnessPacket } from "@/lib/db-harness";
 import {
   isKoshaSupportingCitationEligible,
+  isSafetyReferenceDirectEligible,
   type SafetyReferenceItem,
 } from "@/lib/safety-reference-catalog";
 import {
@@ -196,15 +197,30 @@ function digestEvidencePacket(packet: unknown): string {
   return createHash("sha256").update(canonicalJson(packet), "utf8").digest("hex");
 }
 
-function buildEvidenceClaims(packet: DbHarnessPacket): readonly HermesEvidenceClaim[] {
+type EligibleClaimReference = Readonly<{
+  item: SafetyReferenceItem;
+  authorityLabel: string;
+}>;
+
+function buildEvidenceClaims(
+  packet: DbHarnessPacket,
+  testOnlyTrustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
+): readonly HermesEvidenceClaim[] {
   const claims = new Map<string, HermesEvidenceClaim>();
-  const references = [
-    ...packet.directEvidence,
-    ...packet.sifCases,
-    ...packet.supportingEvidence,
+  const references: EligibleClaimReference[] = [
+    ...packet.directEvidence
+      .filter(isSafetyReferenceDirectEligible)
+      .map((item) => ({ item, authorityLabel: "직접 근거" })),
+    ...packet.sifCases
+      .filter((item) => item.item_type === "sif-case")
+      .map((item) => ({ item, authorityLabel: "SIF 사례 근거(위험 우선순위)" })),
+    ...packet.supportingEvidence
+      .filter((item) => isGroundedKoshaReference(item, testOnlyTrustedKoshaReference))
+      .map((item) => ({ item, authorityLabel: "KOSHA 실행지침" })),
   ];
-  for (const reference of references) {
-    const label = reference.kosha_guide?.evidenceRef?.trim() || reference.title.trim();
+  for (const { item: reference, authorityLabel } of references) {
+    const sourceLabel = reference.kosha_guide?.evidenceRef?.trim() || reference.title.trim();
+    const label = sourceLabel ? `${authorityLabel}: ${sourceLabel}` : "";
     if (!label) continue;
     const citationId = `citation:${createHash("sha256")
       .update(canonicalJson({ id: reference.id, label }), "utf8")
@@ -407,7 +423,13 @@ export function createExperimentalHermesAdapter(
         );
         evidencePacket = deepFreeze(structuredClone(validatedPacket));
         evidenceDigest = digestEvidencePacket(evidencePacket);
-        evidenceClaims = buildEvidenceClaims(validatedPacket);
+        evidenceClaims = buildEvidenceClaims(
+          validatedPacket,
+          dependencies.composition.testOnlyTrustedKoshaReference,
+        );
+        if (evidenceClaims.length === 0) {
+          throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+        }
       } catch (error) {
         if (error instanceof BrokerError) throw error;
         throw new BrokerError("ENGINE_EXECUTION_FAILED", 500, error);
