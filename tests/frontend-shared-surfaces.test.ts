@@ -173,6 +173,12 @@ describe("canonical shared surface styles", () => {
     expect(
       declarationsForExactSelector(
         css,
+        '.safeclaw-module-shell.module-variant-document[data-theme="night"] .safeclaw-doc-export a:first-of-type',
+      ),
+    ).toMatchObject({ color: "var(--workspace-canvas)" });
+    expect(
+      declarationsForExactSelector(
+        css,
         ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary",
       ),
     ).toMatchObject({ color: "var(--module-primary-color, var(--workspace-ink))" });

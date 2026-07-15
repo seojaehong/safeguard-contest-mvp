@@ -17681,6 +17681,10 @@ body:has(.safeclaw-landing) :is(
   color: var(--workspace-ink);
 }
 
+.safeclaw-module-shell.module-variant-document[data-theme="night"] .safeclaw-doc-export a:first-of-type {
+  color: var(--workspace-canvas);
+}
+
 @media (max-width: 900px) {
   .safeclaw-module-shell.module-variant-document .safeclaw-document-cockpit {
     grid-template-columns: 1fr;
