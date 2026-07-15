@@ -17,7 +17,7 @@
 - The existing unrelated body-missing boundary remains in the full corpus; it is outside the 234 current-native promotion set.
 - Two operational retries are retained in logs: a Windows long-path failure before snapshot publication and a read-handle fsync failure before any replacement.
 
-## Evidence portability P1
+## Evidence portability P1 + P2 remediation
 
 - Status: **pass**
 - Ledger: `evaluation/kosha-official-body-recovery-2026-07-15/portability-ledger.json`
@@ -25,8 +25,10 @@
 - Records / external blobs / source ZIP identities: `22 / 22 / 7`
 - External bundle: `output/kep1/bundle` (37387427 bytes, Git excluded)
 - Missing local bundle: fail closed with exit `2`
-- Official refetch: opt-in only, timeout `20s`, retry `1`
-- Verification: `23` Python tests, `120` focused Vitest tests, typecheck and diff-check passed
+- Official refetch: opt-in only, `https` only, exact host allowlist `portal.kosha.or.kr`, timeout `20s`, retry `1`
+- Redirects are subject to the same scheme and host policy before they are followed.
+- Stable-key download candidates are resolved and must remain beneath `downloads_root.resolve()` before any file read; traversal fails closed.
+- Verification: `24` Python tests, `120` focused Vitest tests, typecheck and diff-check passed
 
 ### Verify
 

@@ -9,6 +9,7 @@ import uuid
 from pathlib import Path, PurePosixPath
 from typing import Callable, Iterable
 from urllib import error, request
+from urllib.parse import urlsplit
 
 
 JsonObject = dict[str, object]
@@ -18,10 +19,44 @@ DEFAULT_TIMEOUT_SECONDS = 20.0
 DEFAULT_RETRIES = 1
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 WINDOWS_ABSOLUTE_PATH_PATTERN = re.compile(r"^[A-Za-z]:[\\/]")
+OFFICIAL_KOSHA_HOSTS = frozenset({"portal.kosha.or.kr"})
 
 
 class PortabilityError(RuntimeError):
     pass
+
+
+def _validate_official_refetch_url(url: object) -> str:
+    if not isinstance(url, str) or not url:
+        raise PortabilityError("official-refetch-url-forbidden")
+    try:
+        parsed = urlsplit(url)
+        port = parsed.port
+    except ValueError as exc:
+        raise PortabilityError("official-refetch-url-forbidden") from exc
+    if (
+        parsed.scheme != "https"
+        or parsed.hostname not in OFFICIAL_KOSHA_HOSTS
+        or parsed.username is not None
+        or parsed.password is not None
+        or port not in (None, 443)
+    ):
+        raise PortabilityError("official-refetch-url-forbidden")
+    return url
+
+
+class _OfficialRedirectHandler(request.HTTPRedirectHandler):
+    def redirect_request(
+        self,
+        req: request.Request,
+        fp: object,
+        code: int,
+        msg: str,
+        headers: object,
+        newurl: str,
+    ) -> request.Request | None:
+        _validate_official_refetch_url(newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 def canonical_json(value: object) -> str:
@@ -266,11 +301,13 @@ class OfficialFetcher:
         self.retries = retries
 
     def fetch(self, url: str) -> bytes:
+        safe_url = _validate_official_refetch_url(url)
+        opener = request.build_opener(_OfficialRedirectHandler())
         last_error: Exception | None = None
         for attempt in range(self.retries + 1):
             try:
-                with request.urlopen(
-                    request.Request(url, method="GET"), timeout=self.timeout_seconds
+                with opener.open(
+                    request.Request(safe_url, method="GET"), timeout=self.timeout_seconds
                 ) as response:
                     return response.read()
             except (error.HTTPError, error.URLError, TimeoutError) as exc:
@@ -317,7 +354,8 @@ def rehydrate_bundle(
             _atomic_copy(source, destination)
             copied_count += 1
         elif allow_official_refetch:
-            payload = fetch(str(record["official_url"]))
+            official_url = _validate_official_refetch_url(record.get("official_url"))
+            payload = fetch(official_url)
             if sha256_bytes(payload) != expected_sha256:
                 raise PortabilityError(f"official-refetch-hash-mismatch:{record.get('stable_key')}")
             _atomic_write_bytes(destination, payload)

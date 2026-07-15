@@ -1,9 +1,9 @@
 {
   "schema_version": "safeclaw-kosha-evidence-portability-verification/v1",
-  "generated_at": "2026-07-15T02:07:29.532150+00:00",
+  "generated_at": "2026-07-15T02:42:21.7759838Z",
   "status": "pass",
   "all_passed": true,
-  "check_count": 14,
+  "check_count": 17,
   "failed_check_count": 0,
   "ledger_sha256": "b2ade4323cddecc0a50dab98f944f0781dc09885c8bdece4c1a6c0ea2010d0ef",
   "record_count": 22,
@@ -18,8 +18,17 @@
     "local_copied_count": 22,
     "official_refetch_policy": {
       "enabled_by_default": false,
+      "scheme": "https",
+      "allowed_hosts": [
+        "portal.kosha.or.kr"
+      ],
       "timeout_seconds": 20.0,
       "retries": 1
+    },
+    "download_path_policy": {
+      "stable_key_candidate_resolved": true,
+      "downloads_root_containment_required": true,
+      "traversal_fail_closed": true
     },
     "missing_bundle_exit_code": 2
   },
@@ -58,7 +67,10 @@
     "launch_gate_preserved": true,
     "missing_bundle_fail_closed_exit_code": true,
     "network_policy_bounded": true,
-    "python_focused_tests_23_passed": true,
+    "official_refetch_https_only": true,
+    "official_refetch_host_allowlist": true,
+    "download_candidate_containment": true,
+    "python_focused_tests_24_passed": true,
     "npm_focused_tests_120_passed": true,
     "strict_typecheck_passed": true,
     "owned_scope_diff_check_passed": true
@@ -70,7 +82,7 @@
   },
   "test_results": {
     "python_focused": {
-      "passed": 23,
+      "passed": 24,
       "failed": 0,
       "log": "portability-python-focused-tests.log"
     },
@@ -78,7 +90,11 @@
       "passed": 120,
       "failed": 0,
       "files": 3,
-      "log": "portability-npm-focused-tests.log"
+      "logs": [
+        "portability-npm-focused-tests.log",
+        "portability-npm-provenance-tests.log",
+        "portability-npm-subset-tests.log"
+      ]
     },
     "typecheck": {
       "exit_code": 0,

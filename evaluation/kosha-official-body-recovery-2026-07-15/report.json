@@ -1,6 +1,6 @@
 {
   "schema_version": "safeclaw-kosha-official-body-recovery-report/v1",
-  "generated_at": "2026-07-15T02:07:29.532150+00:00",
+  "generated_at": "2026-07-15T02:42:21.7759838Z",
   "status": "pass",
   "launch_ready": true,
   "source": {
@@ -73,8 +73,17 @@
     "missing_bundle_fail_closed": true,
     "official_refetch": {
       "opt_in_only": true,
+      "scheme": "https",
+      "allowed_hosts": [
+        "portal.kosha.or.kr"
+      ],
       "timeout_seconds": 20.0,
       "retries": 1
+    },
+    "download_path_policy": {
+      "stable_key_candidate_resolved": true,
+      "downloads_root_containment_required": true,
+      "traversal_fail_closed": true
     },
     "commands": {
       "verify": "python scripts/verify_kosha_evidence_ledger.py --ledger evaluation/kosha-official-body-recovery-2026-07-15/portability-ledger.json --bundle-root output/kep1/bundle --corpus-root output/kobr26/corpus --promotion-root output/kobr26/promotion",
@@ -82,9 +91,9 @@
       "rehydrate_official": "python scripts/rehydrate_kosha_evidence_bundle.py --ledger evaluation/kosha-official-body-recovery-2026-07-15/portability-ledger.json --source-bundle-root output/missing-bundle --output-bundle-root output/kep1-refetched/bundle --allow-official-refetch"
     },
     "verification": {
-      "check_count": 14,
+      "check_count": 17,
       "failed_check_count": 0,
-      "python_tests_passed": 23,
+      "python_tests_passed": 24,
       "npm_tests_passed": 120,
       "typecheck_exit_code": 0,
       "diff_check_exit_code": 0
