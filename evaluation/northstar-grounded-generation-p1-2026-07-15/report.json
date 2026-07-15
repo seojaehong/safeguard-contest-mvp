@@ -1,0 +1,50 @@
+{
+  "date": "2026-07-15",
+  "branch": "fix/northstar-grounded-current-20260715",
+  "startingHead": "ec3f6bef6380774efda7e2b04e4ad38dd5aad239",
+  "scope": "P1 grounded-generation sentinel and Korean nominal-instruction remediation",
+  "result": "pass",
+  "red": {
+    "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts",
+    "testsPassed": 29,
+    "testsFailed": 2,
+    "failures": [
+      "structured mixed sentinel and unsupported action was accepted",
+      "narrative mixed sentinel and unsupported action was accepted"
+    ]
+  },
+  "contract": {
+    "sentinel": "현장 확인 필요 is accepted only when the whitespace-normalized whole field equals the sentinel",
+    "nominalInstructions": "short instruction-shaped nominal clauses are grounded without a finite verb allowlist",
+    "descriptiveProse": "declarative descriptive sentences remain allowed"
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts",
+      "testFilesPassed": 1,
+      "testsPassed": 39,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts --reporter=dot",
+      "testFilesPassed": 4,
+      "testsPassed": 94,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "excludedChanges": [
+    "database schema",
+    "migration",
+    "data mutation",
+    "package manifest",
+    "lockfile"
+  ]
+}

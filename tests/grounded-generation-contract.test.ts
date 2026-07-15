@@ -377,6 +377,25 @@ describe("grounded generation contract", () => {
       .toMatchObject({ status: "review_required" });
   });
 
+  it.each([
+    "안전대 체결",
+    "출입 제한",
+    "설비 격리",
+    "전원 잠금",
+    "통제선 마련",
+    "유도자 유도",
+    "감시인 감시"
+  ])("fails closed on an unsupported nominal instruction: %s", (instruction) => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+
+    expect(validateGroundedGenerationOutput({ riskAssessmentDraft: instruction }, packet))
+      .toMatchObject({ status: "review_required" });
+  });
+
   it("allows descriptive narrative that is not an instruction", () => {
     const packet = buildGroundedGenerationPacket({
       dbHarnessPacket: harnessPacket(),
@@ -385,8 +404,48 @@ describe("grounded generation contract", () => {
     });
 
     expect(validateGroundedGenerationOutput({
-      riskAssessmentDraft: "A-1 구역에서 사용하는 장비는 크레인입니다."
+      riskAssessmentDraft: "A-1 구역에서 사용하는 장비는 크레인입니다. 안전난간이 설치되어 있습니다."
     }, packet)).toEqual({ status: "grounded", violations: [] });
+  });
+
+  it("allows the normalized field-verification sentinel as the whole control value", () => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+
+    expect(validateGroundedGenerationOutput({
+      workPlanStructured: { stopCriteria: ["  현장   확인 필요  "] },
+      riskAssessmentDraft: "  현장   확인 필요  "
+    }, packet)).toEqual({ status: "grounded", violations: [] });
+  });
+
+  it.each([
+    [
+      "structured field",
+      { workPlanStructured: { stopCriteria: ["현장 확인 필요 후 안전대를 체결한다."] } },
+      "$.workPlanStructured.stopCriteria[0]"
+    ],
+    [
+      "narrative field",
+      { riskAssessmentDraft: "현장 확인 필요 후 안전대를 체결한다." },
+      "$.riskAssessmentDraft"
+    ]
+  ])("rejects unsupported action mixed with the field-verification sentinel: %s", (_label, output, path) => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+
+    const result = validateGroundedGenerationOutput(output, packet);
+
+    expect(result.status).toBe("review_required");
+    expect(result.violations).toContainEqual(expect.objectContaining({
+      code: "control_claim_not_in_packet",
+      path
+    }));
   });
 
   it("flags a bare article citation that is absent from legal candidates", () => {
