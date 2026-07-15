@@ -94,7 +94,11 @@
       "newBlankLinesAtEof": 5
     },
     "followUpRangeCheck": {
-      "status": "pending_candidate_commit"
+      "candidateCommit": "4349d80",
+      "command": "git diff --check f580f5cfb61c8c41156ef1f70fd0259c4288ac02..4349d80",
+      "status": "pass",
+      "exitCode": 0,
+      "evidence": "logs/follow-up-range-check.log"
     }
   }
 }
