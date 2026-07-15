@@ -1,7 +1,7 @@
 # KOSHA Official Metadata Promotion
 
 - Source snapshot: `976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282`
-- Promotion snapshot: `9180a236b91b820379cd2fa02b1942b8ea688c840d77f2be2de4c43c1ce4ede1`
+- Promotion snapshot: `c10572ee3531d9c66ca455265bf0d599f5eae5b01b8113daaa71ad5f9012a129`
 - Candidates: `234`
 - Official rows collected: `1039`
 - Verified: `212`

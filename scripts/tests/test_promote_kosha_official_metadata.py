@@ -30,11 +30,9 @@ def write_jsonl(path: Path, rows: list[JsonObject]) -> str:
     return text
 
 
-def write_source(root: Path, documents: list[tuple[str, bytes, str]]) -> None:
-    snapshot_id = "1" * 64
-    snapshot_path = Path("snapshots") / snapshot_id
-    snapshot_dir = root / snapshot_path
-    snapshot_dir.mkdir(parents=True)
+def write_source(root: Path, documents: list[tuple[str, bytes, str]]) -> str:
+    staging_dir = root / "staging"
+    staging_dir.mkdir(parents=True)
     items: list[JsonObject] = []
     chunks: list[JsonObject] = []
     for index, (version, pdf_bytes, body) in enumerate(documents):
@@ -61,18 +59,57 @@ def write_source(root: Path, documents: list[tuple[str, bytes, str]]) -> None:
             "chunk_sha256": sha256(body),
             "text": body,
         })
-    items_text = write_jsonl(snapshot_dir / "items.jsonl", items)
-    chunks_text = write_jsonl(snapshot_dir / "chunks.jsonl", chunks)
-    failures_text = write_jsonl(snapshot_dir / "failures.jsonl", [])
+    items_text = write_jsonl(staging_dir / "items.jsonl", items)
+    chunks_text = write_jsonl(staging_dir / "chunks.jsonl", chunks)
+    failures_text = write_jsonl(staging_dir / "failures.jsonl", [])
+    source_identity_material: JsonObject = {"fixture": "official-metadata-promotion"}
+    source_identity = {
+        **source_identity_material,
+        "identity_sha256": sha256(json.dumps(
+            source_identity_material,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )),
+    }
+    generation_policy: JsonObject = {"fixture_policy": "native-body-only"}
+    generation_policy_sha256 = sha256(json.dumps(
+        generation_policy,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ))
+    output_hashes = {
+        "items.jsonl": sha256(items_text),
+        "chunks.jsonl": sha256(chunks_text),
+        "failures.jsonl": sha256(failures_text),
+    }
+    reproducibility_material: JsonObject = {
+        "schema_version": "safeclaw-kosha-body-corpus/v2",
+        "source_identity_sha256": source_identity["identity_sha256"],
+        "generation_policy_sha256": generation_policy_sha256,
+        "output_hashes": output_hashes,
+    }
+    snapshot_id = sha256(json.dumps(
+        reproducibility_material,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ))
+    snapshot_path = Path("snapshots") / snapshot_id
+    snapshot_dir = root / snapshot_path
+    snapshot_dir.mkdir(parents=True)
+    for name in ("items.jsonl", "chunks.jsonl", "failures.jsonl"):
+        (staging_dir / name).replace(snapshot_dir / name)
+    staging_dir.rmdir()
     manifest: JsonObject = {
+        "schema_version": "safeclaw-kosha-body-corpus/v2",
         "snapshot_id": snapshot_id,
-        "source_identity": {"identity_sha256": "2" * 64},
-        "generation_policy_sha256": "3" * 64,
-        "output_hashes": {
-            "items.jsonl": sha256(items_text),
-            "chunks.jsonl": sha256(chunks_text),
-            "failures.jsonl": sha256(failures_text),
-        },
+        "source_identity": source_identity,
+        "generation_policy": generation_policy,
+        "generation_policy_sha256": generation_policy_sha256,
+        "output_hashes": output_hashes,
+        "reproducibility_hash": snapshot_id,
     }
     manifest_text = json.dumps(manifest, sort_keys=True, separators=(",", ":"))
     (snapshot_dir / "manifest.json").write_text(manifest_text, encoding="utf-8", newline="\n")
@@ -90,6 +127,12 @@ def write_source(root: Path, documents: list[tuple[str, bytes, str]]) -> None:
         encoding="utf-8",
         newline="\n",
     )
+    return snapshot_id
+
+
+def read_source_snapshot_id(root: Path) -> str:
+    current = json.loads((root / "current.json").read_text(encoding="utf-8"))
+    return str(current["snapshot_id"])
 
 
 class FakeTransport:
@@ -130,11 +173,17 @@ class FakeHttpResponse:
         return self.payload
 
 
-def official_row(version: str, file_id: str, file_seq: int, published: str) -> JsonObject:
+def official_row(
+    version: str,
+    file_id: str,
+    file_seq: int,
+    published: str,
+    category: str = "B",
+) -> JsonObject:
     return {
         "techGdlnNo": version,
         "techGdlnNm": f"{version} 기술지원규정",
-        "techGdlnCtgryCd": "B",
+        "techGdlnCtgryCd": category,
         "techGdlnFldSeCd": "BE",
         "techGdlnSttsSeCdSt": "제정",
         "techGdlnOfancYmd": published,
@@ -161,7 +210,7 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
                 output_root=output,
                 categories=("B",),
                 expected_candidate_count=len(source_documents),
-                expected_source_snapshot_id="1" * 64,
+                expected_source_snapshot_id=read_source_snapshot_id(source),
             ),
             FakeTransport(pages, downloads),
         )
@@ -207,7 +256,7 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
                     categories=("B",),
                     rows_per_page=1,
                     expected_candidate_count=2,
-                    expected_source_snapshot_id="1" * 64,
+                    expected_source_snapshot_id=read_source_snapshot_id(source),
                 ),
                 transport,
             )
@@ -253,7 +302,7 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
                     output_root=output,
                     categories=("B",),
                     expected_candidate_count=1,
-                    expected_source_snapshot_id="1" * 64,
+                    expected_source_snapshot_id=read_source_snapshot_id(source),
                 ),
                 FakeTransport(pages, {official_url: pdf_bytes}),
             )
@@ -306,7 +355,9 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
                 categories=("B",),
                 rows_per_page=100,
                 expected_candidate_count=1,
-                expected_source_snapshot_id="1" * 64,
+                expected_source_snapshot_id=read_source_snapshot_id(source),
+                reuse_page_cache=True,
+                cache_max_age_seconds=3600.0,
             )
             first_transport = FakeTransport(pages, {url: pdf_bytes})
             first = promote_kosha_official_metadata.run_promotion(config, first_transport)
@@ -316,6 +367,63 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
             self.assertEqual(first_transport.requested_pages, [1])
             self.assertEqual(second_transport.requested_pages, [])
             self.assertEqual(first["snapshot_id"], second["snapshot_id"])
+
+    def test_default_collection_refreshes_instead_of_reusing_stale_cache(self) -> None:
+        pdf_bytes = b"official-pdf"
+        changed_pdf = b"changed-official-pdf"
+        url = "https://portal.kosha.or.kr/openapi/v1/file/down/FILE-A/1"
+        pages = {1: {"result": "success", "payload": {
+            "totalCount": 1,
+            "list": [official_row("B-E-10-2026", "FILE-A", 1, "20260130")],
+        }}}
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source"
+            output = root / "output"
+            source.mkdir()
+            write_source(source, [("B-E-10-2026", pdf_bytes, "검증 본문")])
+            config = promote_kosha_official_metadata.PromotionConfig(
+                source_root=source,
+                output_root=output,
+                categories=("B",),
+                expected_candidate_count=1,
+                expected_source_snapshot_id=read_source_snapshot_id(source),
+            )
+            first_transport = FakeTransport(pages, {url: pdf_bytes})
+            self.assertTrue(promote_kosha_official_metadata.run_promotion(config, first_transport)["launch_ready"])
+            second_transport = FakeTransport(pages, {url: changed_pdf})
+            second = promote_kosha_official_metadata.run_promotion(config, second_transport)
+
+            self.assertEqual(second_transport.requested_pages, [1])
+            self.assertFalse(second["launch_ready"])
+            self.assertEqual(second["failure_counts"], {"official-pdf-hash-mismatch": 1})
+
+    def test_rejects_official_row_from_the_wrong_category(self) -> None:
+        pdf_bytes = b"official-pdf"
+        url = "https://portal.kosha.or.kr/openapi/v1/file/down/FILE-A/1"
+        pages = {1: {"result": "success", "payload": {
+            "totalCount": 1,
+            "list": [official_row("B-E-10-2026", "FILE-A", 1, "20260130", category="B")],
+        }}}
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source"
+            output = root / "output"
+            source.mkdir()
+            write_source(source, [("B-E-10-2026", pdf_bytes, "검증 본문")])
+            report = promote_kosha_official_metadata.run_promotion(
+                promote_kosha_official_metadata.PromotionConfig(
+                    source_root=source,
+                    output_root=output,
+                    categories=("A",),
+                    expected_candidate_count=1,
+                    expected_source_snapshot_id=read_source_snapshot_id(source),
+                ),
+                FakeTransport(pages, {url: pdf_bytes}),
+            )
+
+            self.assertFalse(report["launch_ready"])
+            self.assertEqual(report["failure_counts"].get("official-row-category-mismatch"), 1)
 
     def test_records_download_failure_and_finishes_fail_closed(self) -> None:
         pages = {1: {"result": "success", "payload": {
@@ -335,7 +443,7 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
                     output_root=output,
                     categories=("B",),
                     expected_candidate_count=1,
-                    expected_source_snapshot_id="1" * 64,
+                    expected_source_snapshot_id=read_source_snapshot_id(source),
                 ),
                 FakeTransport(pages, {}),
             )
@@ -368,7 +476,54 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
                         output_root=output,
                         categories=("B",),
                         expected_candidate_count=1,
-                        expected_source_snapshot_id="1" * 64,
+                        expected_source_snapshot_id=read_source_snapshot_id(source),
+                    ),
+                    FakeTransport({}, {}),
+                )
+
+    def test_rejects_self_declared_source_identity_that_does_not_recompute(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source"
+            output = root / "output"
+            source.mkdir()
+            write_source(source, [("B-E-10-2026", b"local-pdf", "검증 본문")])
+            current = json.loads((source / "current.json").read_text(encoding="utf-8"))
+            manifest_path = source / current["manifest"]["path"]
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["source_identity"]["fixture"] = "tampered"
+            source_material = {
+                key: value
+                for key, value in manifest["source_identity"].items()
+                if key != "identity_sha256"
+            }
+            manifest["source_identity"]["identity_sha256"] = sha256(json.dumps(
+                source_material,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            ))
+            manifest_text = json.dumps(manifest, sort_keys=True, separators=(",", ":"))
+            manifest_path.write_text(manifest_text, encoding="utf-8", newline="\n")
+            current["manifest"]["sha256"] = sha256(manifest_text)
+            current["manifest"]["size_bytes"] = len(manifest_text.encode("utf-8"))
+            (source / "current.json").write_text(
+                json.dumps(current, sort_keys=True, separators=(",", ":")),
+                encoding="utf-8",
+                newline="\n",
+            )
+
+            with self.assertRaisesRegex(
+                promote_kosha_official_metadata.PromotionError,
+                "source-reproducibility-identity-mismatch",
+            ):
+                promote_kosha_official_metadata.run_promotion(
+                    promote_kosha_official_metadata.PromotionConfig(
+                        source_root=source,
+                        output_root=output,
+                        categories=("B",),
+                        expected_candidate_count=1,
+                        expected_source_snapshot_id=read_source_snapshot_id(source),
                     ),
                     FakeTransport({}, {}),
                 )
@@ -393,7 +548,7 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
                     output_root=output,
                     categories=("B",),
                     expected_candidate_count=1,
-                    expected_source_snapshot_id="1" * 64,
+                    expected_source_snapshot_id=read_source_snapshot_id(source),
                 ),
                 FakeTransport(pages, {url: pdf_bytes}),
             )
@@ -414,7 +569,7 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
                     output_root=output,
                     categories=("B",),
                     expected_candidate_count=1,
-                    expected_source_snapshot_id="1" * 64,
+                    expected_source_snapshot_id=read_source_snapshot_id(source),
                 ),
                 FailingPageTransport({}, {}),
             )
@@ -521,7 +676,9 @@ class PromoteKoshaOfficialMetadataTests(unittest.TestCase):
                 output_root=output,
                 categories=("B",),
                 expected_candidate_count=1,
-                expected_source_snapshot_id="1" * 64,
+                expected_source_snapshot_id=read_source_snapshot_id(source),
+                reuse_page_cache=True,
+                cache_max_age_seconds=3600.0,
             )
             first = promote_kosha_official_metadata.run_promotion(
                 config,
