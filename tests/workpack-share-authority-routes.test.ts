@@ -234,7 +234,9 @@ describe("workflow dispatch route authority", () => {
       shareSessionId: SESSION_ID,
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["email", "sms"],
-      operatorNote: "server authority"
+      operatorNote: "server authority",
+      messageTarget: "manager",
+      message: "작업 전 안전수칙을 확인해 주세요."
     }));
     const body = await response.json() as {
       duplicateRisk?: boolean;
@@ -263,7 +265,9 @@ describe("workflow dispatch route authority", () => {
       shareSessionId: SESSION_ID,
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["email"],
-      operatorNote: "fixture validation"
+      operatorNote: "fixture validation",
+      messageTarget: "foreign:vi",
+      message: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
     }));
     const body = await response.json() as {
       providerStatus?: string;
@@ -279,6 +283,54 @@ describe("workflow dispatch route authority", () => {
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       providerCalled: false
     });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("builds the provider payload with the exact validated selected message", async () => {
+    const { buildDispatchWebhookPayload } = await import("@/app/api/workflow/dispatch/route");
+    const message = "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.";
+
+    expect(buildDispatchWebhookPayload({
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      recipients: [serverRecipient.workerSnapshot],
+      operatorNote: "TBM 후 확인",
+      messageTarget: "foreign:vi",
+      message,
+      workpack: serverWorkpack,
+      sentAt: "2026-07-15T00:00:00.000Z"
+    })).toMatchObject({
+      event: "safeguard.workpack.dispatch",
+      messageTarget: "foreign:vi",
+      message,
+      recipients: [serverRecipient.workerSnapshot]
+    });
+  });
+
+  it("rejects internal diagnostics and oversized selected messages before relay", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+    const baseBody = {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageTarget: "foreign:vi"
+    };
+
+    const internalResponse = await POST(jsonRequest("/api/workflow/dispatch", {
+      ...baseBody,
+      message: "DB 하네스 내부 진단"
+    }));
+    expect(internalResponse.status).toBe(400);
+
+    const oversizedResponse = await POST(jsonRequest("/api/workflow/dispatch", {
+      ...baseBody,
+      message: "x".repeat(4_001)
+    }));
+    expect(oversizedResponse.status).toBe(400);
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 });

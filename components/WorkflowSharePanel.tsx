@@ -922,7 +922,9 @@ export function WorkflowSharePanel({
         shareSessionId: activeShareSessionId,
         idempotencyKey: providerIdempotencyKey,
         channels: activeChannels,
-        operatorNote: ""
+        operatorNote: "",
+        messageTarget: selectedMessageTarget,
+        message: selectedMessage
       });
       updateDispatchEvidence({
         type: "set_result",

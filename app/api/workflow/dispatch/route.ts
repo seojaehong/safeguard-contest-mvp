@@ -5,6 +5,10 @@ import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } f
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 import { validateDispatchContacts, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
 import {
+  validateWorkflowDispatchMessage,
+  type WorkflowDispatchMessageTarget
+} from "@/lib/workflow-share-client";
+import {
   loadActiveOwnedShareSession,
   loadOwnedWorkpackOperationContext
 } from "@/lib/workpack-commercial-store";
@@ -21,6 +25,8 @@ type WorkflowRequest = {
   idempotencyKey?: string;
   channels?: WorkflowChannel[];
   operatorNote?: string;
+  messageTarget?: string;
+  message?: string;
 };
 
 type WorkflowSuccessResponse = {
@@ -215,6 +221,32 @@ function isPreflightBlocked(channel: WorkflowChannel, preflightResults: Workflow
   return preflightResults.some((item) => item.channel === channel && item.status === "unconfigured");
 }
 
+type DispatchWebhookPayloadInput = {
+  idempotencyKey: string;
+  channels: WorkflowChannel[];
+  recipients: Array<Record<string, unknown>>;
+  operatorNote: string;
+  messageTarget: WorkflowDispatchMessageTarget;
+  message: string;
+  workpack: unknown;
+  sentAt?: string;
+};
+
+export function buildDispatchWebhookPayload(input: DispatchWebhookPayloadInput) {
+  validateWorkflowDispatchMessage(input);
+  return {
+    event: "safeguard.workpack.dispatch" as const,
+    idempotencyKey: input.idempotencyKey,
+    sentAt: input.sentAt || new Date().toISOString(),
+    channels: input.channels,
+    recipients: input.recipients,
+    operatorNote: input.operatorNote,
+    messageTarget: input.messageTarget,
+    message: input.message,
+    workpack: input.workpack
+  };
+}
+
 export async function POST(request: NextRequest) {
   const limited = enforceRateLimit(request, limiter);
   if (limited) return limited;
@@ -236,7 +268,15 @@ export async function POST(request: NextRequest) {
   const channels = parseChannels(body.channels);
   const lockedChannels = parseLockedChannels(body.channels);
   const unsupportedChannels = parseUnsupportedChannels(body.channels);
-  const allowedFields = new Set(["workpackId", "shareSessionId", "idempotencyKey", "channels", "operatorNote"]);
+  const allowedFields = new Set([
+    "workpackId",
+    "shareSessionId",
+    "idempotencyKey",
+    "channels",
+    "operatorNote",
+    "messageTarget",
+    "message"
+  ]);
   const rejectedFields = Object.keys(body).filter((key) => !allowedFields.has(key));
 
   if (rejectedFields.length) {
@@ -244,7 +284,7 @@ export async function POST(request: NextRequest) {
       ok: false,
       configured: Boolean(webhookConfig.url && webhookConfig.token),
       rejectedFields,
-      message: "전파 요청에는 workpackId, shareSessionId, channels, operatorNote만 사용할 수 있습니다."
+      message: "전파 요청에는 서버 권한 식별자, 채널, 대상 언어, 검증된 메시지만 사용할 수 있습니다."
     }, { status: 400 });
   }
 
@@ -269,11 +309,24 @@ export async function POST(request: NextRequest) {
   const workpackId = typeof body.workpackId === "string" ? body.workpackId.trim() : "";
   const shareSessionId = typeof body.shareSessionId === "string" ? body.shareSessionId.trim() : "";
   const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim() : "";
+  const dispatchMessage = {
+    messageTarget: typeof body.messageTarget === "string" ? body.messageTarget : "",
+    message: typeof body.message === "string" ? body.message : ""
+  };
   if (!workpackId || !shareSessionId || !PROVIDER_IDEMPOTENCY_KEY_PATTERN.test(idempotencyKey) || channels.length === 0) {
     return NextResponse.json({
       ok: false,
       configured: Boolean(webhookConfig.url && webhookConfig.token),
       message: "작업팩, 공유 세션, provider idempotency key, 전파 채널을 확인해 주세요."
+    }, { status: 400 });
+  }
+  try {
+    validateWorkflowDispatchMessage(dispatchMessage);
+  } catch (error) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      message: error instanceof Error ? error.message : "전송 메시지를 확인해 주세요."
     }, { status: 400 });
   }
 
@@ -374,15 +427,15 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const payload = {
-    event: "safeguard.workpack.dispatch",
+  const payload = buildDispatchWebhookPayload({
     idempotencyKey,
-    sentAt: new Date().toISOString(),
     channels: dispatchChannels,
     recipients,
     operatorNote: typeof body.operatorNote === "string" ? body.operatorNote : "",
+    messageTarget: dispatchMessage.messageTarget,
+    message: dispatchMessage.message,
     workpack: owned.context.shareAuthority.workpack
-  };
+  });
 
   try {
     const workflowResponse = isLiveDispatchEnabled()

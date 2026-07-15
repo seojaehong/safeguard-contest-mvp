@@ -1,4 +1,5 @@
 export type WorkflowShareChannel = "email" | "sms" | "kakao";
+export type WorkflowDispatchMessageTarget = "manager" | `foreign:${string}`;
 
 export type WorkflowDispatchChannelResult = {
   channel?: string;
@@ -36,10 +37,15 @@ type DispatchRequest = {
   idempotencyKey: string;
   channels: WorkflowShareChannel[];
   operatorNote: string;
+  messageTarget: WorkflowDispatchMessageTarget;
+  message: string;
 };
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const providerIdempotencyKeyPattern = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
+const foreignMessageTargetPattern = /^foreign:[a-z]{2,3}(?:-[A-Z]{2})?$/;
+const internalMessagePattern = /(?:qualityContract|ontologyQa|directEvidence|DB\s*하네스|하네스\s*JSONL)/i;
+const dispatchMessageMaxLength = 4_000;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -73,6 +79,28 @@ function buildHeaders(authToken: string): Record<string, string> {
 
 function buildHttpError(body: Record<string, unknown>, response: Response, fallback: string): Error {
   return new Error(`${readString(body.message) || fallback} (HTTP ${response.status})`);
+}
+
+export function validateWorkflowDispatchMessage(input: {
+  messageTarget: string;
+  message: string;
+}): asserts input is {
+  messageTarget: WorkflowDispatchMessageTarget;
+  message: string;
+} {
+  if (input.messageTarget !== "manager" && !foreignMessageTargetPattern.test(input.messageTarget)) {
+    throw new Error("전송 메시지 대상 언어 코드가 올바르지 않습니다.");
+  }
+  if (!input.message.trim()) throw new Error("전송할 메시지 본문이 필요합니다.");
+  if (input.message.length > dispatchMessageMaxLength) {
+    throw new Error("전송 메시지는 4,000자 이하여야 합니다.");
+  }
+  if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(input.message)) {
+    throw new Error("전송 메시지에 허용되지 않는 제어 문자가 있습니다.");
+  }
+  if (internalMessagePattern.test(input.message)) {
+    throw new Error("전송 메시지에 내부 검수 정보가 포함되어 있습니다.");
+  }
 }
 
 function parseChannelResults(value: unknown): WorkflowDispatchChannelResult[] | undefined {
@@ -160,6 +188,7 @@ export async function dispatchAuthenticatedShareSession(
     throw new Error("provider 전송 idempotency key가 올바르지 않습니다.");
   }
   if (!request.channels.length) throw new Error("전파 채널을 하나 이상 선택해 주세요.");
+  validateWorkflowDispatchMessage(request);
 
   const response = await fetcher("/api/workflow/dispatch", {
     method: "POST",
@@ -169,7 +198,9 @@ export async function dispatchAuthenticatedShareSession(
       shareSessionId: request.shareSessionId,
       idempotencyKey: request.idempotencyKey,
       channels: request.channels,
-      operatorNote: request.operatorNote
+      operatorNote: request.operatorNote,
+      messageTarget: request.messageTarget,
+      message: request.message
     })
   });
   const body = await readResponseBody(response);
