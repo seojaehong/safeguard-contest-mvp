@@ -470,7 +470,7 @@ function tbmBriefingStructuredPrompt(ctx: GenContext) {
       { "category": "Man|Machine|Media|Management", "description": "string (위험요인, 60자 이내)" }
     ],
     "measures": [
-      { "hazardRef": 1, "action": "string (안전대책, 80자 이내. KOSHA 인용 가능)", "owner": "string" }
+      { "hazardRef": 1, "action": "string (안전대책, 80자 이내. KOSHA 인용 가능)", "owner": "string", "evidenceRefs": ["string"] }
     ],
     "stopCriteria": ["string (작업중지 기준 1줄)"],
     "confirmTopics": ["string (마무리 확인질문)"],
@@ -479,7 +479,7 @@ function tbmBriefingStructuredPrompt(ctx: GenContext) {
   "tbmQuestions": ["string","string","string","string","string"]
 }`,
     "",
-    "필수: hazards 4-6개 / measures 4-6개 / stopCriteria 3-5개 / confirmTopics 5개 / tbmQuestions 5개. measures.hazardRef는 hazards 배열 인덱스(1부터, 0이나 hazards.length 초과 금지). 모든 string은 \\n 없이 한 줄.",
+    "필수: hazards 4-6개 / measures 4-6개 / stopCriteria 3-5개 / confirmTopics 5개 / tbmQuestions 5개. measures.hazardRef는 hazards 배열 인덱스(1부터, 0이나 hazards.length 초과 금지). 각 measure의 evidenceRefs에는 불변 근거 패킷 referenceKey를 그대로 넣는다. 모든 string은 \\n 없이 한 줄.",
     "",
     contextBlock(ctx)
   ].join("\n");
@@ -527,7 +527,7 @@ function tbmLogStructuredPrompt(ctx: GenContext) {
       "materials": "string (사용 자료/근거, 예: KOSHA Guide C-12-2024)"
     },
     "unaddressedItems": [
-      { "item": "string", "plannedAction": "string", "owner": "string", "dueDate": "YYYY-MM-DD 또는 현장 확인" }
+      { "item": "string", "plannedAction": "string", "owner": "string", "dueDate": "YYYY-MM-DD 또는 현장 확인", "evidenceRefs": ["string"] }
     ],
     "photoEvidence": {
       "captureLocations": ["string (촬영 위치)"],
@@ -1190,6 +1190,7 @@ function summarizeDeliverablesProvider(
 export function buildFailedDeliverablesDiagnostics(input: {
   attempted: boolean;
   fallbackUsed: boolean;
+  groundingPacket?: GroundedGenerationPacket | null;
 }): AiDeliverablesDiagnostics {
   const configuredProvider = configuredDeliverablesProvider();
   const modelPerDocument = input.fallbackUsed
@@ -1203,6 +1204,15 @@ export function buildFailedDeliverablesDiagnostics(input: {
       ? [{ group: "deliverablesPipeline", status: "rejected", reason: "provider pipeline unavailable" }]
       : [],
     filledKeys: [],
+    grounding: input.groundingPacket ? {
+      status: "review_required",
+      sourceIdentity: input.groundingPacket.sourceIdentity,
+      rejectedGroups: input.fallbackUsed ? ["deliverablesPipeline"] : [],
+      violations: [],
+      criticalControls: [...new Set(
+        input.groundingPacket.sources.flatMap((source) => source.controls)
+      )].sort()
+    } : undefined,
     trace: {
       attempted: input.attempted,
       provider: summarizeDeliverablesProvider(modelPerDocument),

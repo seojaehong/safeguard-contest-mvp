@@ -381,6 +381,37 @@ describe("deliverables generation trace", () => {
     });
   });
 
+  test("preserves critical controls when the provider pipeline fails", async () => {
+    const { buildFailedDeliverablesDiagnostics } = await import("@/lib/ai-deliverables");
+    const controlPacket: GroundedGenerationPacket = Object.freeze({
+      ...groundingPacket,
+      sourceIdentity: "failed-pipeline-packet",
+      sources: Object.freeze([Object.freeze({
+        referenceKey: "SIF:sif-fall",
+        kind: "sif" as const,
+        sourceId: "sif-fall",
+        title: "추락 사례",
+        summary: "개구부 추락 위험",
+        aliases: Object.freeze(["SIF:sif-fall"]),
+        controls: Object.freeze(["개구부 덮개를 고정한다."])
+      })])
+    });
+
+    const diagnostics = buildFailedDeliverablesDiagnostics({
+      attempted: true,
+      fallbackUsed: true,
+      groundingPacket: controlPacket
+    });
+
+    expect(diagnostics.grounding).toEqual({
+      status: "review_required",
+      sourceIdentity: "failed-pipeline-packet",
+      rejectedGroups: ["deliverablesPipeline"],
+      violations: [],
+      criticalControls: ["개구부 덮개를 고정한다."]
+    });
+  });
+
   test("preserves a valid generated document whose citation resolves to the packet", async () => {
     mocks.anthropicGenerate.mockImplementation(async (_model: string, prompt: string) => {
       if (prompt.includes('"riskAssessmentDraft"')) {

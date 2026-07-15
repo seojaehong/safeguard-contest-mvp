@@ -1685,7 +1685,7 @@ describe("workspace layout regression", () => {
         equipment: ["이동식 비계"]
       },
       hazards: [{ category: "Machine", description: "생성 시점 구조화 위험요인" }],
-      measures: [{ hazardRef: 1, action: "생성 시점 구조화 안전대책", owner: "관리감독자" }],
+      measures: [{ hazardRef: 1, action: "생성 시점 구조화 안전대책", owner: "관리감독자", evidenceRefs: ["KOSHA 지침"] }],
       stopCriteria: ["강풍 시 작업중지"],
       confirmTopics: ["작업중지 기준 확인"],
       photoEvidenceLocation: "현장 안전 폴더"

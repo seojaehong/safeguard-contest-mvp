@@ -154,6 +154,7 @@ export type TbmBriefingStructured = {
     hazardRef: number;         // hazards 배열의 인덱스 (1부터)
     action: string;            // 안전대책 (80자 이내, KOSHA 인용 가능)
     owner: string;             // 담당자
+    evidenceRefs: string[];    // 연결 근거 패킷 referenceKey
   }>;
   stopCriteria: string[];      // 작업중지 기준 (3-5개)
   confirmTopics: string[];     // 마무리 확인질문 (5개)
@@ -200,6 +201,7 @@ export type TbmLogStructured = {
     plannedAction: string;
     owner: string;
     dueDate: string;             // YYYY-MM-DD 또는 "현장 확인"
+    evidenceRefs: string[];      // 연결 근거 패킷 referenceKey
   }>;
   photoEvidence: {               // 사진증빙
     captureLocations: string[];  // 촬영 위치 (예: ["1층 작업장 동측", "장비실"])
