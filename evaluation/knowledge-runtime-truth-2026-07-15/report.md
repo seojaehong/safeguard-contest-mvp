@@ -15,18 +15,13 @@
 - `roleLabel`, `shortSummary`, and `documentReflectionLabel` are localized at the display boundary as `문서 역할`, `짧은 요약`, and `문서 반영 위치`.
 - Raw source files and machine contracts remain unchanged.
 
-## TDD Evidence
+## Review Finding And Remediation
 
-### Review remediation RED
+Independent review identified a false-green contract gap by static and diff review: the browser assertion inspected the whole schema section, so explanatory copy could satisfy the check without proving the rendered `<pre>` was localized.
 
-The initial report did not retain auditable RED output, so that claim is superseded by this review remediation run. The browser assertion was narrowed from the whole schema section to the rendered `<pre>` element.
+The remediation narrows the runtime assertion to the `<pre>` element and feeds the three machine field names through the presentation helper. No preserved pre-remediation execution artifact or RED command output is claimed.
 
-- Command: `npm.cmd test -- tests/knowledge-page-layout.test.ts`
-- Result: 1 file failed, 1 test failed and 6 passed
-- Expected failure: rendered `<pre>` did not contain `문서 역할`; the output showed only the localized raw schema body
-- Production change after RED: feed the three machine field names through the existing presentation helper before rendering the `<pre>`
-
-### GREEN
+## Verified GREEN
 
 - Command: `npm.cmd test -- tests/knowledge-governance-ui-contract.test.ts tests/knowledge-page-layout.test.ts`
 - Result: 2 files, 14 tests passed
