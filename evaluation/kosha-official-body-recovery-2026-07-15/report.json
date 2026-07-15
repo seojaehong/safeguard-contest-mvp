@@ -1,0 +1,63 @@
+{
+  "schema_version": "safeclaw-kosha-official-body-recovery-report/v1",
+  "generated_at": "2026-07-15T01:47:29.194436+00:00",
+  "status": "pass",
+  "launch_ready": true,
+  "source": {
+    "original_archive_count": 10,
+    "extracted_member_count": 1040,
+    "repacked_archive_count": 10,
+    "official_pdf_replacement_count": 22
+  },
+  "corpus": {
+    "snapshot_id": "935340ef3f74078c36168666650164c43511daced84efa3eda849833ad8d6844",
+    "manifest_sha256": "ab77251d0c95ce81d86470f1dbe19cdc18778dc5f6b32cde1b2d4f77bc427ab8",
+    "inventory": 1040,
+    "completed": 1040,
+    "success": 1039,
+    "hard_failure": 0,
+    "boundary": 1
+  },
+  "promotion": {
+    "snapshot_id": "d9f5935188984d1fbf6f5378e588e607ee0a2c225796dbc0ba166f4e7a26d5c6",
+    "manifest_sha256": "b97819793903973ffce61a3b00abfa7961fc2ffa1944d9d68dc848ad7e835806",
+    "candidates": 234,
+    "verified": 234,
+    "failures": 0,
+    "launch_ready": true,
+    "official_metadata_sha256": "1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f"
+  },
+  "verification": {
+    "check_count": 11,
+    "failed_check_count": 0,
+    "all_passed": true
+  },
+  "boundaries": {
+    "old_source_overwritten": false,
+    "old_corpus_overwritten": false,
+    "db_mutation_performed": false,
+    "schema_mutation_performed": false,
+    "trusted_registry_populated": false
+  },
+  "operational_failures": [
+    {
+      "stage": "snapshot-long-path",
+      "code": "windows-max-path",
+      "evidence_log": "snapshot.log",
+      "effect": "no snapshot published; rerun through short drive mapping"
+    },
+    {
+      "stage": "replacement-prepare-first-attempt",
+      "code": "windows-read-handle-fsync",
+      "evidence_log": "official-download-replacement.log",
+      "effect": "zero targets replaced before verified resume"
+    }
+  ],
+  "artifacts": {
+    "failure_map": "failure-map.json",
+    "extraction_manifest": "extraction-manifest.json",
+    "replacement_manifest": "official-download-replacement-manifest.json",
+    "repack_manifest": "repack-manifest.json",
+    "verification": "verification.json"
+  }
+}

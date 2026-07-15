@@ -1,0 +1,263 @@
+{
+  "schema_version": "safeclaw-kosha-official-download-replacement/v1",
+  "network_policy": {
+    "timeout_seconds": 20.0,
+    "retries": 1
+  },
+  "network_download_attempt": {
+    "requested_count": 22,
+    "downloaded_verified_count": 22
+  },
+  "resume_note": "reused verified downloads after Windows read-handle fsync error before replacements",
+  "transaction_policy": "verify-all-and-prepare-all-before-any-replacement",
+  "requested_count": 22,
+  "downloaded_verified_count": 22,
+  "replacement_count": 22,
+  "failure_count": 0,
+  "failures": [],
+  "records": [
+    {
+      "stable_key": "A-G-11",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/FL00021380051/3",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\A-G-11.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\산업안전일반분야\\A-G-11-2025 용접방화포등의 성능 및 설치기준에 관한 기술지원규정.pdf",
+      "prior_sha256": "0ce413e1348827fb23f67ef104dabf8bbaa1cc6c3ed29d09f0422e3b331f4811",
+      "official_sha256": "4f04f447a7443d947c79698835735ddcbc5fb308f33532ab5960da959c121b6a",
+      "size_bytes": 347540,
+      "status": "replaced-and-verified",
+      "post_sha256": "4f04f447a7443d947c79698835735ddcbc5fb308f33532ab5960da959c121b6a"
+    },
+    {
+      "stable_key": "A-G-15",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012909391077692640/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\A-G-15.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\산업안전일반분야\\A-G-15-2026 중소규모 사업장 비상조치계획 작성에 관한 기술지원규정.pdf",
+      "prior_sha256": "da7c875ed9776d9bbf4a702197b714261877772e89139f56c2a4fa9c39010360",
+      "official_sha256": "71715efb34bf516fecd43414c8d547bb2ccbcbfe1fb256de8ac5804499c66478",
+      "size_bytes": 6228205,
+      "status": "replaced-and-verified",
+      "post_sha256": "71715efb34bf516fecd43414c8d547bb2ccbcbfe1fb256de8ac5804499c66478"
+    },
+    {
+      "stable_key": "A-G-16",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012909404490917129/1",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\A-G-16.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\산업안전일반분야\\A-G-16-2026 작업장 조명기구의 선정, 설치 및 정비에 관한 기술지원규정.pdf",
+      "prior_sha256": "150cf98659fe1d94f062ce11a67ef4cf30e76f1d21d6477ca6f3ab55fec7e1c9",
+      "official_sha256": "4c82f2084dd7fbafb8d2dfab5857089d9ff63bad77b6ac721cce44b120a89085",
+      "size_bytes": 501832,
+      "status": "replaced-and-verified",
+      "post_sha256": "4c82f2084dd7fbafb8d2dfab5857089d9ff63bad77b6ac721cce44b120a89085"
+    },
+    {
+      "stable_key": "A-G-2",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/FL00021379789/3",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\A-G-2.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\산업안전일반분야\\A-G-2-2025 작업장 내 통로(경사로, 계단, 발판사다리) 선정 및 설치에 관한 기술지원규정.pdf",
+      "prior_sha256": "a5acc11aad7e6383f1f3f3b7dacf702476ec207b1fb86fc6ff5bdb68fc411dad",
+      "official_sha256": "8335704c3759ddb91c7b32ce410e353311f3819e7f03bc5598155a88b66abe3b",
+      "size_bytes": 3639475,
+      "status": "replaced-and-verified",
+      "post_sha256": "8335704c3759ddb91c7b32ce410e353311f3819e7f03bc5598155a88b66abe3b"
+    },
+    {
+      "stable_key": "A-R-1",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012910085865122652/3",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\A-R-1.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\리스크관리분야\\A-R-1-2026 자율안전보건체계 구축 및 운영에 관한 기술지원규정.pdf",
+      "prior_sha256": "0f2ad8c5d0530af08f76b35d0492bf9a5e854e1952b4649962dc80a00cc18469",
+      "official_sha256": "892b0b47220a3e9812c8e3ec558411159f910058fd34e8374639cb22a0ea8eee",
+      "size_bytes": 10745565,
+      "status": "replaced-and-verified",
+      "post_sha256": "892b0b47220a3e9812c8e3ec558411159f910058fd34e8374639cb22a0ea8eee"
+    },
+    {
+      "stable_key": "B-E-4",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2025072909370496489409/1",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\B-E-4.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\전기안전분야\\B-E-4-2025 전기기기의 코드 접속기구에 관한 기술지원규정.pdf",
+      "prior_sha256": "fb65f2b6c645fc1481d0c40f8f67046fd3767e878577b20c7bbac87b45d16346",
+      "official_sha256": "76376f81243af462a97231e3523359d844b1231704d42e7e697834efeddfd026",
+      "size_bytes": 367238,
+      "status": "replaced-and-verified",
+      "post_sha256": "76376f81243af462a97231e3523359d844b1231704d42e7e697834efeddfd026"
+    },
+    {
+      "stable_key": "B-E-5",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/FL00021380504/3",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\B-E-5.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\전기안전분야\\B-E-5-2025 비상전원의 선정 및 설치에 관한 기술지원규정.pdf",
+      "prior_sha256": "ed2d9359d8b18225b9012c939f924ff22c8d7ac68af9993d51d739a8d80d9691",
+      "official_sha256": "749eb2f0b9ec74e90d5e967855e9a03fedf2bc372fa46c10c72a2bbf2f64ecd6",
+      "size_bytes": 537056,
+      "status": "replaced-and-verified",
+      "post_sha256": "749eb2f0b9ec74e90d5e967855e9a03fedf2bc372fa46c10c72a2bbf2f64ecd6"
+    },
+    {
+      "stable_key": "B-M-18",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012911004826786519/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\B-M-18.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\기계안전분야\\B-M-18-2026 배관 수명관리 기술지원규정.pdf",
+      "prior_sha256": "bba86e5fec1792b8ae31dc7bc73f2f960c4865f921581fb54f6b9b459dd0bd37",
+      "official_sha256": "0a9ad60dc773d5d809f758925be812cf42cfc53f7bd9d0fe62b2b34afda44009",
+      "size_bytes": 1065082,
+      "status": "replaced-and-verified",
+      "post_sha256": "0a9ad60dc773d5d809f758925be812cf42cfc53f7bd9d0fe62b2b34afda44009"
+    },
+    {
+      "stable_key": "B-M-25",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012911192551670615/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\B-M-25.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\기계안전분야\\B-M-25-2026 에너지 차단장치의 잠금·표지에 관한 기술지원규정.pdf",
+      "prior_sha256": "707a32e7048562061e74ac41a24d308919521e60b2a1169724a495fbfc33a272",
+      "official_sha256": "fe3f013f4106c22893011031dcf79c0628583fbbc2b083ba8873dab9268d4c00",
+      "size_bytes": 362381,
+      "status": "replaced-and-verified",
+      "post_sha256": "fe3f013f4106c22893011031dcf79c0628583fbbc2b083ba8873dab9268d4c00"
+    },
+    {
+      "stable_key": "B-M-33",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012911325090174901/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\B-M-33.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\기계안전분야\\B-M-33-2026 컨베이어의 안전에 관한 기술지원규정.pdf",
+      "prior_sha256": "12406b2d4e54c76478bdf109738ced41cfe2cb4e522b3e6ce30b9ae431685524",
+      "official_sha256": "477d019cc5c1d1d4bf6f15d7b5bc9f07d508465a0798ff8fc6660a9e53a72151",
+      "size_bytes": 756880,
+      "status": "replaced-and-verified",
+      "post_sha256": "477d019cc5c1d1d4bf6f15d7b5bc9f07d508465a0798ff8fc6660a9e53a72151"
+    },
+    {
+      "stable_key": "B-M-36",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012913122091663976/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\B-M-36.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\기계안전분야\\B-M-36-2026 프레스 위험방지에 관한 기술지원규정.pdf",
+      "prior_sha256": "584cc78c8e1604a81501bc5cc3847eaf0763651a592ef967f6da004b69dc3afd",
+      "official_sha256": "4c3af05442cfff67e081793c0693eac9f6beb639a8c650b21258ba6214533e9e",
+      "size_bytes": 1286842,
+      "status": "replaced-and-verified",
+      "post_sha256": "4c3af05442cfff67e081793c0693eac9f6beb639a8c650b21258ba6214533e9e"
+    },
+    {
+      "stable_key": "C-C-12",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012915481776582257/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\C-C-12.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\화학안전분야\\C-C-12-2026 공정배관계장도(P&ID) 작성에 관한 기술지원규정.pdf",
+      "prior_sha256": "0887d42f72751e4ae846e9dc8f91e3d46989be842d6921ef85bacf4ee941d56e",
+      "official_sha256": "fd9cdcc7803b04168589c1cdb007ccbd4ef995d3c856ef9640ca63ae28163f48",
+      "size_bytes": 1909656,
+      "status": "replaced-and-verified",
+      "post_sha256": "fd9cdcc7803b04168589c1cdb007ccbd4ef995d3c856ef9640ca63ae28163f48"
+    },
+    {
+      "stable_key": "C-C-16",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012915515810755562/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\C-C-16.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\화학안전분야\\C-C-16-2026 세안설비 등의 성능 및 설치에 관한 기술지원규정.pdf",
+      "prior_sha256": "1dc987ed025ca843dce030f8ac440092393bf0946f03b2a170d41e37268edfaa",
+      "official_sha256": "ecac3c2832f4f98e79f1adf520af277440187b077e7701976ff3e7098ed0e3e5",
+      "size_bytes": 491225,
+      "status": "replaced-and-verified",
+      "post_sha256": "ecac3c2832f4f98e79f1adf520af277440187b077e7701976ff3e7098ed0e3e5"
+    },
+    {
+      "stable_key": "C-C-18",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012915525312300670/3",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\C-C-18.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\화학안전분야\\C-C-18-2026 플레어시스템의 설계·설치 및 운전에 관한 기술지원규정.pdf",
+      "prior_sha256": "0b9219849681358a4d36c84a3d31ba8c863368ef62ddad1600b64e80ac04b9d9",
+      "official_sha256": "a53ee60e4989377de75e739e9166b96b850047458563b989a9339b816dacb798",
+      "size_bytes": 1145390,
+      "status": "replaced-and-verified",
+      "post_sha256": "a53ee60e4989377de75e739e9166b96b850047458563b989a9339b816dacb798"
+    },
+    {
+      "stable_key": "C-C-45",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012916090067937890/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\C-C-45.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\화학안전분야\\C-C-45-2026 작업자 실수분석 기법에 관한 기술지원규정.pdf",
+      "prior_sha256": "285e370572ba7a24ffda71e154cc94e04c6d37743bdaeb428563fc8fceffdc36",
+      "official_sha256": "91311caa06760ced28de1fba77ac3272ba7d30c4438573872701509fb610abf1",
+      "size_bytes": 511335,
+      "status": "replaced-and-verified",
+      "post_sha256": "91311caa06760ced28de1fba77ac3272ba7d30c4438573872701509fb610abf1"
+    },
+    {
+      "stable_key": "C-C-46",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012916092356935683/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\C-C-46.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\화학안전분야\\C-C-46-2026 화학물질폭로영향지수(CEI) 산정에 관한 기술지원규정.pdf",
+      "prior_sha256": "5ca92ae7ba26faf24fee08899d9f9d76ab865b45c3de2d29b0baaf78bdd10c7d",
+      "official_sha256": "a12cc9e8d8ca6a9e136dc9a01314af8e98ab43d64285087265e1e3c2fc62733e",
+      "size_bytes": 806883,
+      "status": "replaced-and-verified",
+      "post_sha256": "a12cc9e8d8ca6a9e136dc9a01314af8e98ab43d64285087265e1e3c2fc62733e"
+    },
+    {
+      "stable_key": "C-C-49",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012916110491082899/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\C-C-49.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\화학안전분야\\C-C-49-2026 안전작업허가에 관한 기술지원규정.pdf",
+      "prior_sha256": "0669a9c762f326262e30bb130637dcba259c6df8add82165ca58e4f536ccbee9",
+      "official_sha256": "95980e251af1faab2254d420fe743ac5fad6c947347e40443e542b7df5cc3440",
+      "size_bytes": 593039,
+      "status": "replaced-and-verified",
+      "post_sha256": "95980e251af1faab2254d420fe743ac5fad6c947347e40443e542b7df5cc3440"
+    },
+    {
+      "stable_key": "C-C-67",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012916194591033768/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\C-C-67.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\화학안전분야\\C-C-67-2026 작업위험성평가에 관한 기술지원규정.pdf",
+      "prior_sha256": "a617acc25d216df90d09393f6c62179f9fc576c39f91109c7becabd88c7fb887",
+      "official_sha256": "58197701a337352022e9b19b822f47281467945d76e83501d7cb3c7d152e6318",
+      "size_bytes": 925205,
+      "status": "replaced-and-verified",
+      "post_sha256": "58197701a337352022e9b19b822f47281467945d76e83501d7cb3c7d152e6318"
+    },
+    {
+      "stable_key": "C-C-74",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012916234243460165/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\C-C-74.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\화학안전분야\\C-C-74-2026 사고시나리오에 따른 비상대응계획 작성에 관한 기술지원규정.pdf",
+      "prior_sha256": "9fcd18ae4b6e0c31b1682ea8c3eda74ad07535cb694f336b2e36fb51121213fe",
+      "official_sha256": "e162652b66f59f98ce3b202647529e95f685894e453e90fa44dffc3ea6c0e9ae",
+      "size_bytes": 408726,
+      "status": "replaced-and-verified",
+      "post_sha256": "e162652b66f59f98ce3b202647529e95f685894e453e90fa44dffc3ea6c0e9ae"
+    },
+    {
+      "stable_key": "C-C-90",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012916341450552946/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\C-C-90.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\화학안전분야\\C-C-90-2026 안전밸브 등의 배출용량 산정 및 설치 등에 관한 기술지원규정.pdf",
+      "prior_sha256": "a1e49bd4222889b4f035661de7c142f500bf1580cfb1298ce3ef59b3aced18ce",
+      "official_sha256": "f8b9946a48c278d195d2ecaeed5ab852d6d35753c06c2564d0cc6b2e9efdfcf1",
+      "size_bytes": 957304,
+      "status": "replaced-and-verified",
+      "post_sha256": "f8b9946a48c278d195d2ecaeed5ab852d6d35753c06c2564d0cc6b2e9efdfcf1"
+    },
+    {
+      "stable_key": "D-C-7",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914243912403149/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\D-C-7.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\건설안전분야\\D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정.pdf",
+      "prior_sha256": "b447e1c9cec9a2aba74c7a835f6f26afe7ba5ecaf149296a543d1994b79ec821",
+      "official_sha256": "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3",
+      "size_bytes": 2802919,
+      "status": "replaced-and-verified",
+      "post_sha256": "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3"
+    },
+    {
+      "stable_key": "E-G-21",
+      "official_url": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914565797454971/2",
+      "download_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\official-downloads\\E-G-21.pdf",
+      "target_path": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\산업보건일반분야\\E-G-21-2026 산업환기설비에 관한 기술지원규정.pdf",
+      "prior_sha256": "b3912886bd35aae287341df93333c8dd95752433aff9e9ab4af982bfb22810d2",
+      "official_sha256": "609c530358ac6ad2795283f8e4fe1ccb91b5923112d82a3f7569167abc8b11bb",
+      "size_bytes": 997649,
+      "status": "replaced-and-verified",
+      "post_sha256": "609c530358ac6ad2795283f8e4fe1ccb91b5923112d82a3f7569167abc8b11bb"
+    }
+  ],
+  "launch_ready_for_snapshot": true
+}
