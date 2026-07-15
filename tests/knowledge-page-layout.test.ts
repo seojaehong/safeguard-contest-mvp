@@ -195,16 +195,23 @@ describe("knowledge page decision layout", () => {
     ] as const) {
       const page = await browser.newPage({ viewport });
       await page.goto(`${baseUrl}/knowledge?theme=day`, { waitUntil: "domcontentloaded" });
-      await page.locator('[data-knowledge-list="reference-library"]').waitFor();
-      await page.locator('[data-knowledge-list="reference-library"] details').first().click();
+      if (viewport.name === "mobile") {
+        const referencesTab = page.getByRole("tab", { name: "참고자료" });
+        await referencesTab.click();
+        await expect.poll(() => referencesTab.getAttribute("aria-selected")).toBe("true");
+      }
+      const referenceLibrary = page.locator('[data-knowledge-list="reference-library"]');
+      await expect.poll(() => referenceLibrary.isVisible(), { message: viewport.name }).toBe(true);
+      await referenceLibrary.locator("details").first().click();
 
       const metrics = await page.evaluate(() => {
         const list = document.querySelector('[data-knowledge-list="reference-library"]');
-        const rows = [...document.querySelectorAll<HTMLElement>("[data-knowledge-row]")];
-        const summaries = [...document.querySelectorAll<HTMLElement>("[data-knowledge-summary]")];
-        if (!list || rows.length === 0 || summaries.length === 0) {
+        if (!list) {
           throw new Error("Missing knowledge layout targets");
         }
+        const rows = [...list.querySelectorAll<HTMLElement>("[data-knowledge-row]")];
+        const summaries = [...list.querySelectorAll<HTMLElement>("[data-knowledge-summary]")];
+        if (rows.length === 0 || summaries.length === 0) throw new Error("Missing knowledge rows");
         const firstRowStyle = getComputedStyle(rows[0]);
         const radii = [...document.querySelectorAll<HTMLElement>("[data-knowledge-surface] *")]
           .map((element) => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0);
@@ -239,6 +246,9 @@ describe("knowledge page decision layout", () => {
     ] as const) {
       const page = await browser.newPage({ viewport });
       await page.goto(`${baseUrl}/knowledge?theme=day`, { waitUntil: "domcontentloaded" });
+      if (viewport.name === "mobile") {
+        await page.getByRole("tab", { name: "검토 흐름" }).click();
+      }
       const flow = page.locator('[data-knowledge-governance-flow="true"]');
       await flow.waitFor();
 
@@ -294,12 +304,14 @@ describe("knowledge page decision layout", () => {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await page.goto(`${baseUrl}/knowledge?theme=day`, { waitUntil: "domcontentloaded" });
 
+    await page.getByRole("tab", { name: "검토 흐름" }).click();
     const governance = page.locator('[data-knowledge-governance-flow="true"]');
     await governance.waitFor();
     const governanceText = await governance.textContent();
     expect(governanceText).toContain("읽기 전용 화면");
     expect(governanceText).toContain("검토와 게시 기능은 아직 연결 전");
 
+    await page.getByRole("tab", { name: "진단" }).click();
     const schemaSection = page.locator('[aria-labelledby="schema-heading"]');
     await schemaSection.locator("summary").click();
     const schemaText = await schemaSection.textContent();
@@ -325,9 +337,11 @@ describe("knowledge page decision layout", () => {
 
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await page.goto(`${baseUrl}/knowledge?theme=night`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("tab", { name: "기술 지원" }).click();
     await page.locator('[data-knowledge-list="technical-support"]').waitFor();
 
-    const details = page.locator("[data-knowledge-row] details");
+    const technicalList = page.locator('[data-knowledge-list="technical-support"]');
+    const details = technicalList.locator("[data-knowledge-row] details");
     for (let index = 0; index < await details.count(); index += 1) {
       const detail = details.nth(index);
       const summary = detail.locator("summary");
@@ -348,8 +362,8 @@ describe("knowledge page decision layout", () => {
 
     const metrics = await page.evaluate(() => {
       const interactiveElements = [
-        ...document.querySelectorAll<HTMLElement>("[data-knowledge-row] details > summary"),
-        ...document.querySelectorAll<HTMLElement>("[data-knowledge-row] details a")
+        ...document.querySelectorAll<HTMLElement>('[data-knowledge-list="technical-support"] [data-knowledge-row] details > summary'),
+        ...document.querySelectorAll<HTMLElement>('[data-knowledge-list="technical-support"] [data-knowledge-row] details a')
       ];
       const targets = interactiveElements
         .filter((element) => {
@@ -361,7 +375,7 @@ describe("knowledge page decision layout", () => {
           return {
           label: element.textContent?.trim() || element.tagName,
             href: element instanceof HTMLAnchorElement ? element.getAttribute("href") : null,
-            detailIndex: [...document.querySelectorAll("[data-knowledge-row] details")]
+            detailIndex: [...document.querySelectorAll('[data-knowledge-list="technical-support"] [data-knowledge-row] details')]
               .indexOf(element.closest("details") as HTMLDetailsElement),
             left: rectangle.left,
             right: rectangle.right,

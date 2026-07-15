@@ -10,6 +10,7 @@ import type {
   KnowledgePromotionStageId
 } from "@/lib/knowledge-governance";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
+import { KnowledgeSectionNavigator } from "./KnowledgeSectionNavigator";
 import styles from "./KnowledgePage.module.css";
 
 type WikiEntry = {
@@ -247,7 +248,19 @@ export default async function KnowledgePage() {
       activeHref="/knowledge"
     >
       <div className={styles.page} data-knowledge-surface>
-        <section className={`knowledge-status-grid ${styles.overview}`} aria-label="지식 DB 상태">
+        <KnowledgeSectionNavigator>
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-today"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-today"
+          data-knowledge-panel="today"
+        >
+        <section
+          className={`knowledge-status-grid ${styles.overview}`}
+          id="knowledge-today"
+          aria-label="오늘의 지식 DB 상태"
+        >
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>내장 지식 베이스</span>
             <h2>{hazardEntries.length}개 위험요인 · {formEntries.length}개 서식</h2>
@@ -265,6 +278,22 @@ export default async function KnowledgePage() {
           </article>
         </section>
 
+        <aside className={styles.searchAction} aria-label="핵심 지식 검색">
+          <div>
+            <span className={styles.kicker}>오늘 할 일</span>
+            <strong>작업과 위험요인으로 필요한 근거를 먼저 찾으세요.</strong>
+          </div>
+          <a href="/search">근거 검색</a>
+        </aside>
+        </div>
+
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-governance"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-governance"
+          data-knowledge-panel="governance"
+        >
         <section
           className={`${styles.section} ${styles.governanceSection}`}
           aria-labelledby="knowledge-governance-heading"
@@ -335,7 +364,15 @@ export default async function KnowledgePage() {
             </ul>
           </div>
         </section>
+        </div>
 
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-technical"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-technical"
+          data-knowledge-panel="technical"
+        >
         <section className={styles.section} aria-labelledby="technical-support-heading">
           <header className={styles.sectionHeader}>
             <div>
@@ -396,7 +433,15 @@ export default async function KnowledgePage() {
           </ul>
           {/* data-knowledge-list-end="technical-support" */}
         </section>
+        </div>
 
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-references"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-references"
+          data-knowledge-panel="references"
+        >
         <section className={styles.section} aria-labelledby="reference-library-heading">
           <header className={styles.sectionHeader}>
             <div>
@@ -440,7 +485,15 @@ export default async function KnowledgePage() {
           </ul>
           {/* data-knowledge-list-end="reference-library" */}
         </section>
+        </div>
 
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-wiki"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-wiki"
+          data-knowledge-panel="wiki"
+        >
         <section className={styles.section} aria-labelledby="wiki-index-heading">
           <header className={styles.sectionHeader}>
             <div>
@@ -489,7 +542,15 @@ export default async function KnowledgePage() {
             </ul>
           </article>
         </section>
+        </div>
 
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-diagnostics"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-diagnostics"
+          data-knowledge-panel="diagnostics"
+        >
         <section className={styles.section} aria-labelledby="schema-heading">
           <header className={styles.sectionHeader}>
             <div>
@@ -503,6 +564,8 @@ export default async function KnowledgePage() {
             <pre>{schemaDisplayMarkdown}</pre>
           </details>
         </section>
+        </div>
+        </KnowledgeSectionNavigator>
       </div>
     </SafeClawModuleShell>
   );
