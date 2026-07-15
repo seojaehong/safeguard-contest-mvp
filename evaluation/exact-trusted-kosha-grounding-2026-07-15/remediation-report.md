@@ -2,7 +2,7 @@
 
 ## Scope
 
-- Parent candidate: `52861c24eff21208b5ee542c4112026e8ba26322`
+- Superseded candidate: `44ffa57f6b08f1a4b5622e8a88b5c41134d9902c`
 - Branch: `fix/exact-trusted-kosha-grounding-20260715`
 - Database migration or mutation: none
 - Authority: `technical_guidance_only`; no law or statutory-mandate promotion
@@ -16,11 +16,15 @@ When the local KOSHA corpus is unavailable or blocked, only a production exact-t
 
 The current 2,582-character Supabase D-C-13 body is never trusted. For relevant exterior-wall painting/repair queries, it is replaced at the server search boundary by the immutable bundled official normalized body. If the database later supplies the exact pinned body, the database row wins and the bundle is not duplicated.
 
+The exact gate remains active when the public search API supplies `sourceId`, `riskTag`, or `evidenceRole`. Filters are preserved: the bundle is included only when its source, risk tag, item type, and semantic evidence role satisfy the request. The exact trust decision makes D-C-13 eligible for `direct`; it is not duplicated in `supporting`. General or partial KOSHA rows never inherit that promotion.
+
+Query matching is bounded to exterior-wall work token groups. It accepts contextual variants such as exterior-wall paint, apartment suspended-scaffold/rope work, and gondola exterior-wall work. Generic paint storage, rope training/purchase, and unrelated gondola inspection do not activate the bundle.
+
 ## Official body asset
 
 - Path: `data/safety-knowledge/exact-kosha/d-c-13-2026.json`
 - Normalized body: 19,058 characters
-- UTF-8 JSON size: 48,671 bytes
+- Tracked UTF-8 JSON size: 48,670 bytes
 - Body SHA-256: `ea8bb93a3e03a40873222ab385d257e1a5946cb4d28e5c65951353731b0a5919`
 - Official PDF SHA-256: `790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179`
 - Official URL: `https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1`
@@ -29,13 +33,13 @@ The current 2,582-character Supabase D-C-13 body is never trusted. For relevant 
 
 ## TDD and regression evidence
 
-- RED: missing bundle and optional metadata acceptance produced 2 failures.
-- RED: missing loader and broad general-KOSHA retention produced 2 failures.
-- RED: conflicting boolean metadata was accepted and produced 1 failure.
-- Focused final: 6 files / 162 tests passed.
+- Prior RED: missing bundle, optional metadata, broad general-KOSHA retention, and conflicting metadata were rejected by the first remediation suite.
+- Fresh RED: public `sourceId`/`riskTag` bypass and missing bounded synonym coverage produced 3 failures.
+- Fresh RED: `evidenceRole=direct` omitted the exact direct-eligible bundle and produced 1 failure.
+- Focused final: 6 files / 166 tests passed.
 - Strict typecheck: passed after `npm.cmd install`; `package.json` and `package-lock.json` diff remained empty.
 - Normal production build: 28/28 pages generated.
-- NFT trace: the safety-reference search route includes the D-C-13 JSON; PDF entries are zero. Sixteen server traces include the bounded JSON.
+- NFT trace: `.next/server/app/api/safety-reference/search/route.js.nft.json` includes the D-C-13 JSON and contains zero PDF entries. This build produced 77 NFT files and 75 included the globally traced asset; the total is observed evidence, not a stable contract.
 - Diff check: passed; no new TypeScript `any`.
 
 Focused command:
@@ -46,4 +50,4 @@ npm.cmd test -- tests/kosha-grounding-fail-closed.test.ts tests/commercial-harne
 
 ## Verdict
 
-Implementation verification passes for the bounded remediation. This report supersedes the rejected PASS claim for `52861c24`. Live preview verification remains a post-integration gate and is not claimed here.
+Implementation verification passes for this bounded remediation. This report supersedes the rejected claims for `52861c24` and `44ffa57`; independent re-review and live preview verification remain post-commit gates and are not claimed here.

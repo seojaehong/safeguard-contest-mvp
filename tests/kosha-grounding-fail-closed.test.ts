@@ -3,6 +3,7 @@ import { appendFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { NextRequest } from "next/server";
 
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
@@ -19,6 +20,7 @@ import {
   searchSafetyReferences as searchServerSafetyReferences,
 } from "@/lib/safety-reference-catalog-server";
 import { resetKoshaGuideCorpusCacheForTests } from "@/lib/kosha-guide-corpus";
+import { GET as searchSafetyReferenceRoute } from "@/app/api/safety-reference/search/route";
 import {
   cleanupKoshaFixtures,
   createKoshaFixture
@@ -138,6 +140,47 @@ function nonKoshaReference(overrides: Partial<SafetyReferenceItem> = {}): Safety
     retrieval_source: "ranked",
     ...overrides
   };
+}
+
+async function exactBundleWithPartialAndGeneralRows(): Promise<{
+  bundled: SafetyReferenceItem;
+  partialRow: SafetyReferenceItem;
+  generalRow: Record<string, unknown>;
+}> {
+  const bundled = await loadBundledExactKoshaReference();
+  if (bundled.status !== "ready") throw new Error("expected exact bundle fixture");
+  const partialBody = bundled.item.body?.slice(0, 2_582) ?? "";
+  const partialRow: SafetyReferenceItem = {
+    ...bundled.item,
+    body: partialBody,
+    kosha_grounding: undefined,
+    kosha_guide: undefined,
+    payload: {
+      ...(bundled.item.payload ?? {}),
+      body_sha256: sha256(partialBody),
+    },
+  };
+  const generalBody = `${VERIFIED_BODY_PREFIX}: 일반 KOSHA 행은 exact trust 경계를 통과하지 못한다.`;
+  const generalRow = referenceRow(
+    "general-verified-kosha",
+    generalBody,
+    verifiedPayload("general-verified-kosha", generalBody),
+  );
+  return { bundled: bundled.item, partialRow, generalRow };
+}
+
+function mockRankedReferenceRows(rows: readonly unknown[]): void {
+  vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {
+    const url = String(input);
+    if (url.includes("/rpc/search_safety_references_ranked")
+      || url.includes("/rest/v1/safety_reference_items")) {
+      return new Response(JSON.stringify(rows), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    throw new Error(`Unexpected fetch URL: ${url}`);
+  }));
 }
 
 async function searchRemoteRows(rows: Record<string, unknown>[]): Promise<{
@@ -625,5 +668,92 @@ describe("bounded KOSHA grounding fail-closed", () => {
       localCorpusStatus: "unconfigured",
     });
     expect(result.message).toMatch(/불변 번들.*partial DB 본문을 대체/u);
+  });
+
+  it("keeps the exact gate active for a matching public sourceId filter", async () => {
+    vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const { bundled, partialRow, generalRow } = await exactBundleWithPartialAndGeneralRows();
+    mockRankedReferenceRows([partialRow, generalRow]);
+
+    const request = new NextRequest(new URL(
+      `/api/safety-reference/search?q=${encodeURIComponent("아파트 외벽 페인트 작업")}`
+        + `&sourceId=${encodeURIComponent(bundled.source_id)}`,
+      "https://safeclaw.test",
+    ));
+    const response = await searchSafetyReferenceRoute(request);
+    const result = await response.json() as SafetyReferenceSearchResult & GroundingSearchProjection;
+
+    expect(response.status).toBe(200);
+    expect(result.items.map((item) => item.id)).toEqual([bundled.id]);
+    expect(result.items[0]?.body).toHaveLength(19_058);
+    expect(result.items.some((item) => item.id === "general-verified-kosha")).toBe(false);
+    expect(result.koshaGrounding).toMatchObject({
+      localCorpusStatus: "unconfigured",
+      acceptedCount: 1,
+      excludedCount: 2,
+    });
+  });
+
+  it("preserves sourceId and riskTag filters without admitting partial or general KOSHA", async () => {
+    vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const { bundled, partialRow, generalRow } = await exactBundleWithPartialAndGeneralRows();
+    mockRankedReferenceRows([partialRow, generalRow]);
+
+    const matching = await searchServerSafetyReferences({
+      query: "곤돌라 외벽 보수",
+      sourceId: bundled.source_id,
+      riskTag: "추락",
+      limit: 5,
+      offlineCorpus: { rootDir: null, env: { KOSHA_GUIDE_CORPUS_DIR: undefined } },
+    });
+    expect(matching.items.map((item) => item.id)).toEqual([bundled.id]);
+
+    const sourceMismatch = await searchServerSafetyReferences({
+      query: "곤돌라 외벽 보수",
+      sourceId: "another-official-source",
+      limit: 5,
+      offlineCorpus: { rootDir: null, env: { KOSHA_GUIDE_CORPUS_DIR: undefined } },
+    });
+    expect(sourceMismatch.items).toEqual([]);
+
+    const riskMismatchRequest = new NextRequest(new URL(
+      `/api/safety-reference/search?q=${encodeURIComponent("곤돌라 외벽 보수")}&riskTag=${encodeURIComponent("충돌")}`,
+      "https://safeclaw.test",
+    ));
+    const riskMismatchResponse = await searchSafetyReferenceRoute(riskMismatchRequest);
+    const riskMismatch = await riskMismatchResponse.json() as SafetyReferenceSearchResult;
+    expect(riskMismatch.items).toEqual([]);
+  });
+
+  it("maps the exact trusted bundle to the public direct role without promoting general KOSHA", async () => {
+    vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const { bundled, partialRow, generalRow } = await exactBundleWithPartialAndGeneralRows();
+    mockRankedReferenceRows([partialRow, generalRow]);
+
+    const directRequest = new NextRequest(new URL(
+      `/api/safety-reference/search?q=${encodeURIComponent("아파트 달비계 로프 작업")}&evidenceRole=direct`,
+      "https://safeclaw.test",
+    ));
+    const directResponse = await searchSafetyReferenceRoute(directRequest);
+    const direct = await directResponse.json() as SafetyReferenceSearchResult;
+    expect(direct.items.map((item) => item.id)).toEqual([bundled.id]);
+    expect(direct.items.some((item) => item.id === "general-verified-kosha")).toBe(false);
+
+    const supportingRequest = new NextRequest(new URL(
+      `/api/safety-reference/search?q=${encodeURIComponent("아파트 달비계 로프 작업")}&evidenceRole=supporting`,
+      "https://safeclaw.test",
+    ));
+    const supportingResponse = await searchSafetyReferenceRoute(supportingRequest);
+    const supporting = await supportingResponse.json() as SafetyReferenceSearchResult;
+    expect(supporting.items).toEqual([]);
   });
 });
