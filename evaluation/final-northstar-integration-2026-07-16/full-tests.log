@@ -1,0 +1,33 @@
+
+> safeclaw@0.1.0 test
+> vitest run --maxWorkers=1 --fileParallelism=false
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/northstar-clean-integration-20260715
+
+ ❯ tests/frontend-route-coverage.test.ts (38 tests | 1 failed) 19692ms
+     × reconciles the complete route, theme, special-state, and generated-surface evidence 540ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/frontend-route-coverage.test.ts > browser evidence reconciliation > reconciles the complete route, theme, special-state, and generated-surface evidence
+AssertionError: expected '2a46cc2f63ddaaba48cb6ea9b8fbc1388d2ee…' to be 'f7401c6cebe9d1a137fdf2b382c921f5e23a0…' // Object.is equality
+
+Expected: "f7401c6cebe9d1a137fdf2b382c921f5e23a011060ff3d03e3d182c1ea92a8a2"
+Received: "2a46cc2f63ddaaba48cb6ea9b8fbc1388d2ee0f36cf319d34a51163d1e5c74c6"
+
+ ❯ tests/frontend-route-coverage.test.ts:694:35
+    692|     expect(report.sourceSha).toMatch(/^[0-9a-f]{40}$/u);
+    693|     expect(report.sourceIdentity).toMatch(/^[0-9a-f]{64}$/u);
+    694|     expect(report.sourceIdentity).toBe(currentSource.sourceIdentity);
+       |                                   ^
+    695|     expect(report.sourceSha).toBe(staticAudit.sourceSha);
+    696|     expect(report.sourceIdentity).toBe(staticAudit.sourceIdentity);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 161 passed | 8 skipped (170)
+      Tests  1 failed | 1803 passed | 14 skipped (1818)
+   Start at  05:09:59
+   Duration  783.31s (transform 3.79s, setup 0ms, import 26.65s, tests 723.11s, environment 13ms)

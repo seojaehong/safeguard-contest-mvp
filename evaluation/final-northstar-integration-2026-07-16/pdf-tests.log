@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/pdf-korean-font-integration.test.ts tests/pdf-font-failure.test.ts --maxWorkers=1 --fileParallelism=false
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/northstar-clean-integration-20260715
+
+
+ Test Files  2 passed (2)
+      Tests  23 passed (23)
+   Start at  05:33:39
+   Duration  3.11s (transform 148ms, setup 0ms, import 1.23s, tests 1.41s, environment 0ms)

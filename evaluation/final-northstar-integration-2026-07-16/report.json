@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-07-16T05:33:00+09:00",
+  "sourceSha": "ee96509ccf53cd884dc2300e40b40ce25783a90b",
+  "sourceIdentity": "f7401c6cebe9d1a137fdf2b382c921f5e23a011060ff3d03e3d182c1ea92a8a2",
+  "databaseMutationPerformed": false,
+  "fullSerialSuite": {
+    "filesTotal": 170,
+    "filesPassed": 161,
+    "filesSkipped": 8,
+    "filesFailed": 1,
+    "testsTotal": 1818,
+    "testsPassed": 1803,
+    "testsSkipped": 14,
+    "testsFailed": 1,
+    "failureClassification": "stale_browser_evidence_source_identity"
+  },
+  "staleEvidenceClosure": {
+    "staticAuditRegenerated": true,
+    "browserAuditRegenerated": true,
+    "focusedFiles": 1,
+    "focusedTests": 38,
+    "status": "pass"
+  },
+  "gates": {
+    "contrastAndLayoutTests": { "files": 2, "tests": 42, "status": "pass" },
+    "phaseAGroundingTests": { "files": 12, "tests": 214, "status": "pass" },
+    "publicMcpTenantMemoryTests": { "files": 6, "tests": 62, "status": "pass" },
+    "knowledgeAndTenantTests": { "files": 5, "tests": 74, "status": "pass" },
+    "typecheck": "pass",
+    "auditBuild": { "staticPages": 28, "status": "pass" },
+    "productionBuild": { "staticPages": 28, "status": "pass" },
+    "pdfTests": { "files": 2, "tests": 23, "status": "pass" },
+    "pdfNftAssets": {
+      "count": 3,
+      "names": ["NotoSansKR-Regular.ttf", "NotoSansKR-Bold.ttf", "NotoSansKR-OFL.txt"],
+      "status": "pass"
+    }
+  },
+  "staticAudit": {
+    "status": "pass",
+    "pages": 32,
+    "productComponents": 23,
+    "coverageIssues": 0,
+    "violations": 0,
+    "importantDeclarations": 0
+  },
+  "browserAudit": {
+    "routes": 32,
+    "routeRows": 96,
+    "workspaceThemeRows": 6,
+    "specialSurfaceRows": 4,
+    "generatedSurfaceRows": 2,
+    "screenshots": 108,
+    "successes": 108,
+    "failedRows": 0,
+    "recoveredRows": 0,
+    "findingCount": 0,
+    "failures": 0
+  },
+  "remainingGates": [
+    "KOSHA 234 candidate final bodies are unavailable from tracked Git assets",
+    "Supabase RLS launchReadiness remains false",
+    "remote CI, Vercel preview, and live production mapping require post-push verification"
+  ]
+}

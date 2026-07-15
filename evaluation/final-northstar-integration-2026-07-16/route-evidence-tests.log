@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/frontend-route-coverage.test.ts --maxWorkers=1 --fileParallelism=false
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/northstar-clean-integration-20260715
+
+
+ Test Files  1 passed (1)
+      Tests  38 passed (38)
+   Start at  05:33:17
+   Duration  20.76s (transform 80ms, setup 0ms, import 110ms, tests 20.41s, environment 0ms)
