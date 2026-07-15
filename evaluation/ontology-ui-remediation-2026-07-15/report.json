@@ -2,7 +2,7 @@
   "status": "pass",
   "sourceBase": "b48a618",
   "branch": "fix/northstar-ontology-ui-20260715",
-  "candidateCommit": "f270124",
+  "candidateCommit": "8f6330912069208c13e7304893e3c99290b24c07",
   "scope": [
     "app/ontology/**",
     "tests/ontology-ui-remediation.test.ts",
@@ -17,23 +17,36 @@
   },
   "tests": {
     "focusedFiles": 8,
-    "focusedTests": 47,
+    "focusedTests": 49,
     "browserFiles": 1,
     "browserTests": 1,
     "typecheck": "pass",
     "productionBuild": "pass",
-    "staticGenerationUnits": 28
+    "staticGenerationUnits": 28,
+    "staticAudit": {
+      "status": "pass",
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violationCount": 0
+    },
+    "rawCssColorLiterals": 0
   },
   "browser": {
     "variants": 4,
     "failedVariants": 0,
-    "maximumDisplayedNodes": 13,
+    "maximumDisplayedNodes": 15,
     "overlapPairs": 0,
     "horizontalOverflow": 0,
     "minimumControlHeight": 44,
-    "minimumDesktopNodeContrast": 16.37,
+    "minimumDesktopNodeContrast": 16.01,
     "mobileDefault": "relation_cards",
-    "mobileExpandedGraph": "pass"
+    "mobileExpandedGraph": "pass",
+    "mobileExpandedGraphNodes": 15,
+    "dialogInitialFocus": "pass",
+    "dialogFocusTrap": "pass",
+    "dialogEscapeClose": "pass",
+    "dialogFocusRestore": "pass"
   },
   "integration": {
     "integratedToMain": false,
