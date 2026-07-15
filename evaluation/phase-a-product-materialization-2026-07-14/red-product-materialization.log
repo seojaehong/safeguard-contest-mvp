@@ -1,0 +1,16 @@
+Command: npm.cmd test -- tests/phase-a-product-materialization.test.ts
+Exit code: 1
+
+> safeclaw@0.1.0 test
+> vitest run tests/phase-a-product-materialization.test.ts
+
+RUN v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-product-materialization
+
+FAIL tests/phase-a-product-materialization.test.ts
+Error: Cannot find package '@/lib/ontology/product-materialization' imported from tests/phase-a-product-materialization.test.ts
+
+Test Files  1 failed (1)
+Tests       no tests
+Duration    1.54s
+
+Expected RED: the product materialization boundary and its retrieval/document projection do not exist at baseline 01ba1c924e5ab19803bdb86527fce9eccfc1ab60.

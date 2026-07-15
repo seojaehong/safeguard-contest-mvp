@@ -17,6 +17,289 @@ export const KOSHA_GUIDE_OFFICIAL_DOWNLOAD_BASE = "https://portal.kosha.or.kr/op
 export const KOSHA_AUDIT_REQUEST_TIMEOUT_MS = 20_000;
 export const KOSHA_AUDIT_REQUEST_RETRIES = 1;
 
+const KOSHA_BRIDGE_CANDIDATE_EXACT_PATHS = new Set([
+  "data/safety-knowledge/kosha-body-corpus.schema.json",
+  "lib/kosha-guide-corpus-audit.ts",
+  "lib/kosha-guide-corpus.ts",
+  "scripts/audit_kosha_guides.mjs",
+  "scripts/recover_kosha_ocr_boundary.py",
+  "scripts/snapshot_kosha_guide_corpus.py",
+  "scripts/tests/test_recover_kosha_ocr_boundary.py",
+  "scripts/tests/test_snapshot_kosha_guide_corpus.py",
+  "tests/kosha-guide-corpus-audit.test.ts",
+  "tests/kosha-guide-offline-harness.test.ts"
+]);
+const KOSHA_BRIDGE_EVALUATION_PREFIX =
+  "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/";
+
+const KOSHA_EVALUATION_BINARY_SIGNATURES: readonly {
+  mimeType: string;
+  signature: readonly number[];
+}[] = [
+  { mimeType: "image/png", signature: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] },
+  { mimeType: "image/jpeg", signature: [0xff, 0xd8, 0xff] },
+  { mimeType: "image/gif", signature: [0x47, 0x49, 0x46, 0x38, 0x37, 0x61] },
+  { mimeType: "image/gif", signature: [0x47, 0x49, 0x46, 0x38, 0x39, 0x61] },
+  { mimeType: "application/pdf", signature: [0x25, 0x50, 0x44, 0x46, 0x2d] },
+  { mimeType: "application/zip", signature: [0x50, 0x4b, 0x03, 0x04] },
+  { mimeType: "application/zip", signature: [0x50, 0x4b, 0x05, 0x06] },
+  { mimeType: "application/gzip", signature: [0x1f, 0x8b] },
+  { mimeType: "application/x-7z-compressed", signature: [0x37, 0x7a, 0xbc, 0xaf, 0x27, 0x1c] },
+  { mimeType: "application/x-ole-storage", signature: [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1] },
+  { mimeType: "font/woff", signature: [0x77, 0x4f, 0x46, 0x46] },
+  { mimeType: "font/woff2", signature: [0x77, 0x4f, 0x46, 0x32] },
+  { mimeType: "font/ttf", signature: [0x00, 0x01, 0x00, 0x00] },
+  { mimeType: "image/x-icon", signature: [0x00, 0x00, 0x01, 0x00] }
+];
+
+const KOSHA_EVALUATION_SAFE_DIGEST_LABELS = new Set([
+  "body_sha256",
+  "candidateattestationsha256",
+  "candidatecontentsha256",
+  "candidatefilesha256",
+  "current_sha256",
+  "currentsha256",
+  "entry_manifest_sha256",
+  "entrymanifestsha256",
+  "generationpolicysha256",
+  "identity_sha256",
+  "manifest_sha256",
+  "manifestsha256",
+  "provenance_identity_sha256",
+  "raw_sha256",
+  "recomputedgenerationpolicysha256",
+  "recomputedsourceidentitysha256",
+  "recomputedsnapshotid",
+  "recorder_sha256",
+  "recordersha256",
+  "reproducibility_hash",
+  "resume_log_sha256",
+  "resumelogsha256",
+  "sha256",
+  "snapshot_script_sha256",
+  "snapshotid",
+  "snapshotscriptsha256",
+  "sourceidentitysha256"
+]);
+
+export type KoshaEvaluationArtifactViolation = {
+  artifactPath: string;
+  code:
+    | "absolute-local-path"
+    | "configured-secret-value"
+    | "credential-assignment"
+    | "raw-hmac-value"
+    | "sensitive-digest-label"
+    | "token-pattern";
+  detail: string;
+};
+
+export type KoshaEvaluationArtifactScanInput = {
+  artifactPath: string;
+  text: string;
+  repositoryRoots: readonly string[];
+  configuredSecrets: Readonly<Record<string, string | undefined>>;
+};
+
+function normalizeCandidatePath(path: string): string {
+  return path.replaceAll("\\", "/");
+}
+
+export function assertKoshaBridgeCandidatePaths(paths: readonly string[]): void {
+  for (const originalPath of paths) {
+    const path = normalizeCandidatePath(originalPath);
+    const invalidShape =
+      path.length === 0 ||
+      path.startsWith("/") ||
+      /^[A-Za-z]:\//u.test(path) ||
+      path.split("/").includes("..");
+    const allowed =
+      KOSHA_BRIDGE_CANDIDATE_EXACT_PATHS.has(path) ||
+      path.startsWith(KOSHA_BRIDGE_EVALUATION_PREFIX);
+    if (invalidShape || !allowed) {
+      throw new Error(`kosha-bridge-candidate-path-out-of-scope:${path}`);
+    }
+  }
+}
+
+function startsWithBytes(bytes: Uint8Array, signature: readonly number[]): boolean {
+  return signature.length <= bytes.length && signature.every((value, index) => bytes[index] === value);
+}
+
+function identifyKoshaEvaluationBinaryMimeType(bytes: Uint8Array): string | null {
+  const directMatch = KOSHA_EVALUATION_BINARY_SIGNATURES.find(({ signature }) =>
+    startsWithBytes(bytes, signature)
+  );
+  if (directMatch) return directMatch.mimeType;
+  const riffWebp =
+    startsWithBytes(bytes, [0x52, 0x49, 0x46, 0x46]) &&
+    bytes.length >= 12 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50;
+  return riffWebp ? "image/webp" : null;
+}
+
+export function decodeKoshaEvaluationArtifactText(
+  artifactPath: string,
+  bytes: Uint8Array
+): string | null {
+  let decoded: string;
+  try {
+    decoded = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    if (identifyKoshaEvaluationBinaryMimeType(bytes)) return null;
+    throw new Error(`kosha-evaluation-artifact-invalid-utf8:${artifactPath}`);
+  }
+  if (identifyKoshaEvaluationBinaryMimeType(bytes)) return null;
+  if (decoded.includes("\u0000")) {
+    throw new Error(`kosha-evaluation-artifact-invalid-utf8:${artifactPath}`);
+  }
+  return decoded;
+}
+
+function normalizedPathText(value: string): string {
+  return value
+    .replaceAll("\\\\", "//")
+    .replaceAll("\\/", "/")
+    .replaceAll("\\", "/")
+    .toLowerCase();
+}
+
+function containsUncPath(value: string): boolean {
+  const separatorCode = 92;
+  const allowedPrefix = new Set([" ", "\t", "\r", "\n", "\"", "'", "(", "=", ":", ","]);
+  const segmentCharacter = (character: string): boolean => /[A-Za-z0-9._$-]/u.test(character);
+  for (let index = 0; index + 1 < value.length; index += 1) {
+    if (value.charCodeAt(index) !== separatorCode || value.charCodeAt(index + 1) !== separatorCode) {
+      continue;
+    }
+    if (index > 0 && !allowedPrefix.has(value[index - 1] || "")) continue;
+    let cursor = index + 2;
+    while (value.charCodeAt(cursor) === separatorCode) cursor += 1;
+    const serverStart = cursor;
+    while (cursor < value.length && segmentCharacter(value[cursor] || "")) cursor += 1;
+    if (cursor === serverStart || value.charCodeAt(cursor) !== separatorCode) continue;
+    while (value.charCodeAt(cursor) === separatorCode) cursor += 1;
+    const shareStart = cursor;
+    while (cursor < value.length && segmentCharacter(value[cursor] || "")) cursor += 1;
+    if (cursor > shareStart) return true;
+  }
+  return false;
+}
+
+function addEvaluationViolation(
+  violations: KoshaEvaluationArtifactViolation[],
+  violation: KoshaEvaluationArtifactViolation
+): void {
+  const duplicate = violations.some((candidate) =>
+    candidate.code === violation.code && candidate.detail === violation.detail
+  );
+  if (!duplicate) violations.push(violation);
+}
+
+export function scanKoshaEvaluationArtifactText(
+  input: KoshaEvaluationArtifactScanInput
+): KoshaEvaluationArtifactViolation[] {
+  const violations: KoshaEvaluationArtifactViolation[] = [];
+  const normalizedText = normalizedPathText(input.text);
+  const drivePath = /(?:^|[\s"'(=])(?:file:\/{2,})?[a-z]:\/+[^\s"'<>]+/iu;
+  const posixPath = /(?:^|[\s"'(=])\/(?:builds|etc|exports|github|home|mnt|opt|private|root|runner|srv|tmp|users|var|volumes|workspace|workspaces)\/+[^\s"'<>]+/iu;
+  const repositoryPathPresent = input.repositoryRoots.some((root) => {
+    const normalizedRoot = normalizedPathText(root).replace(/\/+$/u, "");
+    return normalizedRoot.length > 2 && normalizedText.includes(normalizedRoot);
+  });
+  if (
+    drivePath.test(normalizedText) ||
+    containsUncPath(input.text) ||
+    posixPath.test(normalizedText) ||
+    repositoryPathPresent
+  ) {
+    addEvaluationViolation(violations, {
+      artifactPath: input.artifactPath,
+      code: "absolute-local-path",
+      detail: "local-path"
+    });
+  }
+
+  const tokenPatterns: readonly RegExp[] = [
+    /\bsk-(?:proj-)?[A-Za-z0-9_-]{16,}\b/gu,
+    /\bsb_secret_[A-Za-z0-9_-]{16,}\b/gu,
+    /\bBearer\s+[A-Za-z0-9._~+/=-]{16,}\b/giu,
+    /\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/gu
+  ];
+  if (tokenPatterns.some((pattern) => pattern.test(input.text))) {
+    addEvaluationViolation(violations, {
+      artifactPath: input.artifactPath,
+      code: "token-pattern",
+      detail: "token"
+    });
+  }
+
+  const safeAssignmentValues = new Set([
+    "absent",
+    "false",
+    "null",
+    "present",
+    "redacted",
+    "true",
+    "undefined"
+  ]);
+  const credentialAssignmentPattern = /\b([A-Za-z][A-Za-z0-9_]*(?:api_key|service_role_key|anon_key|hmac_key|access_token|auth_token|password|secret|token))\b["']?\s*[:=]\s*["']?([^\s"',}\]]+)/giu;
+  for (const match of input.text.matchAll(credentialAssignmentPattern)) {
+    const value = match[2]?.replace(/[;.]$/u, "") || "";
+    const normalizedValue = value.toLowerCase();
+    const placeholder = value.startsWith("<") || value.startsWith("${");
+    if (value.length >= 8 && !placeholder && !safeAssignmentValues.has(normalizedValue)) {
+      addEvaluationViolation(violations, {
+        artifactPath: input.artifactPath,
+        code: "credential-assignment",
+        detail: match[1] || "credential"
+      });
+    }
+  }
+
+  const hmacPattern = /\b(?:signature_hmac_sha256|review_hmac|hmac(?:_key|_sha256)?)\b["']?\s*[:,=]\s*["']?([A-Fa-f0-9]{64}|[A-Za-z0-9+/]{40,}={0,2})\b/giu;
+  if (hmacPattern.test(input.text)) {
+    addEvaluationViolation(violations, {
+      artifactPath: input.artifactPath,
+      code: "raw-hmac-value",
+      detail: "hmac"
+    });
+  }
+
+  const digestLabelPattern = /\b([A-Za-z][A-Za-z0-9_-]*(?:sha256|digest|hash))\b["']?\s*[:,=]\s*["']?([A-Fa-f0-9]{64}|[A-Za-z0-9+/]{40,}={0,2})\b/giu;
+  for (const match of input.text.matchAll(digestLabelPattern)) {
+    const label = match[1] || "digest";
+    const normalizedLabel = label.toLowerCase();
+    const compactLabel = normalizedLabel.replaceAll("-", "").replaceAll("_", "");
+    const explicitlySafe =
+      KOSHA_EVALUATION_SAFE_DIGEST_LABELS.has(normalizedLabel) ||
+      KOSHA_EVALUATION_SAFE_DIGEST_LABELS.has(compactLabel);
+    const sensitive = /secret|hmac|token|credential|password|apikey|servicerole/u.test(compactLabel);
+    if (sensitive && !explicitlySafe) {
+      addEvaluationViolation(violations, {
+        artifactPath: input.artifactPath,
+        code: "sensitive-digest-label",
+        detail: label
+      });
+    }
+  }
+
+  for (const [name, value] of Object.entries(input.configuredSecrets)) {
+    if (value && value.length >= 8 && input.text.includes(value)) {
+      addEvaluationViolation(violations, {
+        artifactPath: input.artifactPath,
+        code: "configured-secret-value",
+        detail: name
+      });
+    }
+  }
+
+  return violations;
+}
+
 export type KoshaJsonResponse = {
   ok: boolean;
   status: number;
@@ -342,28 +625,45 @@ export type KoshaVisibleStatus = KoshaSupabaseVisibleExpectation & {
 };
 
 export type KoshaBridgeSnapshotIntegrity = {
+  currentSchemaVersion: string;
   currentSnapshotId: string;
   currentReproducibilityHash: string;
+  currentSourceIdentitySha256: string;
+  currentGenerationPolicySha256: string;
+  manifestSchemaVersion: string;
   manifestSnapshotId: string;
   manifestReproducibilityHash: string;
+  manifestSourceIdentity: unknown;
+  manifestSourceIdentitySha256: string;
+  manifestGenerationPolicy: unknown;
+  manifestGenerationPolicySha256: string;
   currentManifestSha256: string;
   manifestFileSha256: string;
   manifestItemsSha256: string;
   itemsFileSha256: string;
   manifestChunksSha256: string;
   chunksFileSha256: string;
+  manifestOutputHashes: unknown;
+  snapshotOutputHashes: unknown;
+};
+
+export type KoshaReviewedCandidateBridgeInput = {
+  candidateBytes: Uint8Array;
+  candidateFileSha256: string;
+  candidateContentSha256: string;
+  candidateAttestationSha256: string;
 };
 
 export type KoshaProductionLocalBridgeInput = {
   productionRows: unknown[];
   localItems: unknown[];
   localChunks: unknown[];
-  reviewedCandidates?: unknown[];
+  reviewedCandidates?: KoshaReviewedCandidateBridgeInput[];
   snapshot: KoshaBridgeSnapshotIntegrity;
 };
 
-export type KoshaProductionLocalBridgeCandidate = {
-  schemaVersion: "safeclaw-kosha-production-local-bridge-candidate/v1";
+export type KoshaProductionLocalBridgeCandidateIdentity = {
+  schemaVersion: "safeclaw-kosha-production-local-bridge-candidate/v2";
   production: {
     id: string;
     sourceId: string;
@@ -375,7 +675,9 @@ export type KoshaProductionLocalBridgeCandidate = {
     rawSha256: string;
     itemSha256: string;
   };
-  reviewedCandidateContentSha256: string | null;
+  candidateFileSha256: string | null;
+  candidateContentSha256: string | null;
+  candidateAttestationSha256: string | null;
   chunks: Array<{
     chunkId: string;
     sha256: string;
@@ -385,6 +687,11 @@ export type KoshaProductionLocalBridgeCandidate = {
   humanConfirmation: "pending";
   readOnly: true;
   dbMutationPerformed: false;
+  launchReadiness: false;
+};
+
+export type KoshaProductionLocalBridgeCandidate = KoshaProductionLocalBridgeCandidateIdentity & {
+  reproducibilityHash: string;
 };
 
 export const KOSHA_GUIDE_REFRESH_PLAN = {
@@ -431,7 +738,115 @@ function isSha256(value: string): boolean {
   return /^[0-9a-f]{64}$/u.test(value);
 }
 
-function assertKoshaBridgeSnapshotIntegrity(snapshot: KoshaBridgeSnapshotIntegrity): void {
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => canonicalJson(item)).join(",")}]`;
+  }
+  if (isRecord(value)) {
+    return `{${Object.keys(value)
+      .sort(codepointCompare)
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
+      .join(",")}}`;
+  }
+  const encoded = JSON.stringify(value);
+  if (encoded === undefined) throw new Error("kosha-bridge-candidate-content-invalid");
+  return encoded;
+}
+
+function corpusBodySha256(value: unknown): string {
+  const body = typeof value === "string" ? value : "";
+  return createHash("sha256")
+    .update(body.normalize("NFKC").replace(/\s+/gu, " ").trim())
+    .digest("hex");
+}
+
+const KOSHA_BODY_CURRENT_SCHEMA_VERSION = "safeclaw-kosha-body-current/v1";
+const KOSHA_BODY_CORPUS_SCHEMA_VERSION = "safeclaw-kosha-body-corpus/v2";
+const KOSHA_SNAPSHOT_OUTPUT_FILES = [
+  "items.jsonl",
+  "chunks.jsonl",
+  "failures.jsonl",
+  "checkpoint.json"
+] as const;
+
+function canonicalSha256(value: unknown): string {
+  return createHash("sha256").update(canonicalJson(value)).digest("hex");
+}
+
+function readSnapshotOutputHashes(value: unknown, label: "manifest" | "snapshot"): Record<string, string> {
+  if (!isRecord(value)) throw new Error(`kosha-bridge-${label}-output-hashes-invalid`);
+  const expectedKeys = [...KOSHA_SNAPSHOT_OUTPUT_FILES].sort(codepointCompare);
+  const actualKeys = Object.keys(value).sort(codepointCompare);
+  if (
+    actualKeys.length !== expectedKeys.length ||
+    actualKeys.some((key, index) => key !== expectedKeys[index])
+  ) {
+    throw new Error(`kosha-bridge-${label}-output-hash-set-mismatch`);
+  }
+  const outputHashes: Record<string, string> = {};
+  for (const name of KOSHA_SNAPSHOT_OUTPUT_FILES) {
+    const digest = readString(value[name]);
+    if (!isSha256(digest)) {
+      throw new Error(`kosha-bridge-${label}-output-hash-invalid:${name}`);
+    }
+    outputHashes[name] = digest;
+  }
+  return outputHashes;
+}
+
+export function verifyKoshaBridgeSnapshotIntegrity(
+  snapshot: KoshaBridgeSnapshotIntegrity
+): void {
+  if (snapshot.currentSchemaVersion !== KOSHA_BODY_CURRENT_SCHEMA_VERSION) {
+    throw new Error("kosha-bridge-current-schema-version-mismatch");
+  }
+  if (snapshot.manifestSchemaVersion !== KOSHA_BODY_CORPUS_SCHEMA_VERSION) {
+    throw new Error("kosha-bridge-manifest-schema-version-mismatch");
+  }
+  if (!isRecord(snapshot.manifestSourceIdentity)) {
+    throw new Error("kosha-bridge-manifest-source-identity-mismatch");
+  }
+  const sourceIdentityMaterial = Object.fromEntries(
+    Object.entries(snapshot.manifestSourceIdentity).filter(([key]) => key !== "identity_sha256")
+  );
+  const recomputedSourceIdentitySha256 = canonicalSha256(sourceIdentityMaterial);
+  const embeddedSourceIdentitySha256 = readString(
+    snapshot.manifestSourceIdentity.identity_sha256
+  );
+  if (
+    !isSha256(snapshot.manifestSourceIdentitySha256) ||
+    !isSha256(embeddedSourceIdentitySha256) ||
+    snapshot.manifestSourceIdentitySha256 !== embeddedSourceIdentitySha256 ||
+    snapshot.manifestSourceIdentitySha256 !== recomputedSourceIdentitySha256
+  ) {
+    throw new Error("kosha-bridge-manifest-source-identity-mismatch");
+  }
+  if (
+    !isSha256(snapshot.currentSourceIdentitySha256) ||
+    snapshot.currentSourceIdentitySha256 !== recomputedSourceIdentitySha256
+  ) {
+    throw new Error("kosha-bridge-source-identity-mismatch");
+  }
+
+  if (!isRecord(snapshot.manifestGenerationPolicy)) {
+    throw new Error("kosha-bridge-manifest-generation-policy-hash-mismatch");
+  }
+  const recomputedGenerationPolicySha256 = canonicalSha256(
+    snapshot.manifestGenerationPolicy
+  );
+  if (
+    !isSha256(snapshot.manifestGenerationPolicySha256) ||
+    snapshot.manifestGenerationPolicySha256 !== recomputedGenerationPolicySha256
+  ) {
+    throw new Error("kosha-bridge-manifest-generation-policy-hash-mismatch");
+  }
+  if (
+    !isSha256(snapshot.currentGenerationPolicySha256) ||
+    snapshot.currentGenerationPolicySha256 !== recomputedGenerationPolicySha256
+  ) {
+    throw new Error("kosha-bridge-generation-policy-identity-mismatch");
+  }
+
   const snapshotIds = [
     snapshot.currentSnapshotId,
     snapshot.currentReproducibilityHash,
@@ -462,12 +877,135 @@ function assertKoshaBridgeSnapshotIntegrity(snapshot: KoshaBridgeSnapshotIntegri
   ) {
     throw new Error("kosha-bridge-chunks-hash-mismatch");
   }
+
+  const manifestOutputHashes = readSnapshotOutputHashes(
+    snapshot.manifestOutputHashes,
+    "manifest"
+  );
+  const snapshotOutputHashes = readSnapshotOutputHashes(
+    snapshot.snapshotOutputHashes,
+    "snapshot"
+  );
+  for (const name of KOSHA_SNAPSHOT_OUTPUT_FILES) {
+    if (manifestOutputHashes[name] !== snapshotOutputHashes[name]) {
+      throw new Error(`kosha-bridge-output-hash-mismatch:${name}`);
+    }
+  }
+  if (
+    manifestOutputHashes["items.jsonl"] !== snapshot.manifestItemsSha256 ||
+    snapshotOutputHashes["items.jsonl"] !== snapshot.itemsFileSha256
+  ) {
+    throw new Error("kosha-bridge-items-hash-mismatch");
+  }
+  if (
+    manifestOutputHashes["chunks.jsonl"] !== snapshot.manifestChunksSha256 ||
+    snapshotOutputHashes["chunks.jsonl"] !== snapshot.chunksFileSha256
+  ) {
+    throw new Error("kosha-bridge-chunks-hash-mismatch");
+  }
+
+  const recomputedReproducibilityHash = canonicalSha256({
+    schema_version: snapshot.manifestSchemaVersion,
+    source_identity_sha256: recomputedSourceIdentitySha256,
+    generation_policy_sha256: recomputedGenerationPolicySha256,
+    output_hashes: snapshotOutputHashes
+  });
+  if (snapshotIds[0] !== recomputedReproducibilityHash) {
+    throw new Error("kosha-bridge-reproducibility-hash-mismatch");
+  }
+}
+
+type InspectedKoshaReviewedCandidate = {
+  payload: Record<string, unknown>;
+  review: Record<string, unknown>;
+  candidateFileSha256: string;
+  candidateContentSha256: string;
+  candidateAttestationSha256: string;
+};
+
+function inspectKoshaReviewedCandidateBytes(
+  candidateBytes: Uint8Array
+): InspectedKoshaReviewedCandidate {
+  if (!(candidateBytes instanceof Uint8Array) || candidateBytes.byteLength === 0) {
+    throw new Error("kosha-bridge-reviewed-candidate-bytes-invalid");
+  }
+  const candidateFileSha256 = createHash("sha256").update(candidateBytes).digest("hex");
+  let parsed: unknown;
+  try {
+    const candidateJson = new TextDecoder("utf-8", { fatal: true }).decode(candidateBytes);
+    parsed = JSON.parse(candidateJson) as unknown;
+  } catch (error) {
+    throw new Error("kosha-bridge-reviewed-candidate-json-invalid", { cause: error });
+  }
+  if (!isRecord(parsed)) throw new Error("kosha-bridge-reviewed-candidate-json-invalid");
+  if (!isRecord(parsed.review)) throw new Error("kosha-bridge-reviewed-candidate-review-invalid");
+  const immutableContent = Object.fromEntries(
+    Object.entries(parsed).filter(([key]) => key !== "review")
+  );
+  return {
+    payload: parsed,
+    review: parsed.review,
+    candidateFileSha256,
+    candidateContentSha256: canonicalSha256(immutableContent),
+    candidateAttestationSha256: canonicalSha256(parsed.review)
+  };
+}
+
+export function prepareKoshaReviewedCandidateBridgeInput(
+  candidateBytes: Uint8Array
+): KoshaReviewedCandidateBridgeInput {
+  const inspected = inspectKoshaReviewedCandidateBytes(candidateBytes);
+  return {
+    candidateBytes: Uint8Array.from(candidateBytes),
+    candidateFileSha256: inspected.candidateFileSha256,
+    candidateContentSha256: inspected.candidateContentSha256,
+    candidateAttestationSha256: inspected.candidateAttestationSha256
+  };
+}
+
+function verifyKoshaReviewedCandidateBridgeInput(
+  input: KoshaReviewedCandidateBridgeInput
+): InspectedKoshaReviewedCandidate {
+  const inspected = inspectKoshaReviewedCandidateBytes(input.candidateBytes);
+  if (!isSha256(input.candidateFileSha256)) {
+    throw new Error("kosha-bridge-reviewed-candidate-file-hash-invalid");
+  }
+  if (input.candidateFileSha256 !== inspected.candidateFileSha256) {
+    throw new Error("kosha-bridge-reviewed-candidate-file-hash-mismatch");
+  }
+  if (!isSha256(input.candidateContentSha256)) {
+    throw new Error("kosha-bridge-reviewed-candidate-content-hash-invalid");
+  }
+  if (input.candidateContentSha256 !== inspected.candidateContentSha256) {
+    throw new Error("kosha-bridge-reviewed-candidate-content-hash-mismatch");
+  }
+  if (!isSha256(input.candidateAttestationSha256)) {
+    throw new Error("kosha-bridge-reviewed-candidate-attestation-hash-invalid");
+  }
+  if (input.candidateAttestationSha256 !== inspected.candidateAttestationSha256) {
+    throw new Error("kosha-bridge-reviewed-candidate-attestation-hash-mismatch");
+  }
+  const declaredContentSha256 = readString(inspected.review.content_sha256);
+  if (declaredContentSha256 && !isSha256(declaredContentSha256)) {
+    throw new Error("kosha-bridge-reviewed-candidate-content-hash-invalid");
+  }
+  if (declaredContentSha256 && declaredContentSha256 !== inspected.candidateContentSha256) {
+    throw new Error("kosha-bridge-reviewed-candidate-content-hash-mismatch");
+  }
+  if (
+    inspected.review.state === "verified" &&
+    inspected.review.human_confirmed === true &&
+    !declaredContentSha256
+  ) {
+    throw new Error("kosha-bridge-reviewed-candidate-content-hash-invalid");
+  }
+  return inspected;
 }
 
 export function buildKoshaProductionLocalBridgeCandidate(
   input: KoshaProductionLocalBridgeInput
 ): KoshaProductionLocalBridgeCandidate {
-  assertKoshaBridgeSnapshotIntegrity(input.snapshot);
+  verifyKoshaBridgeSnapshotIntegrity(input.snapshot);
   if (input.productionRows.length !== 1) {
     throw new Error(`kosha-bridge-production-match-count:${input.productionRows.length}`);
   }
@@ -498,6 +1036,9 @@ export function buildKoshaProductionLocalBridgeCandidate(
   if (!itemId) throw new Error("kosha-bridge-local-item-id-missing");
   if (!isSha256(rawSha256)) throw new Error("kosha-bridge-local-raw-hash-invalid");
   if (!isSha256(itemSha256)) throw new Error("kosha-bridge-local-item-hash-invalid");
+  if (corpusBodySha256(localItem.body) !== itemSha256) {
+    throw new Error("kosha-bridge-local-item-hash-mismatch");
+  }
 
   const chunks: KoshaProductionLocalBridgeCandidate["chunks"] = [];
   const allChunkIds = new Set<string>();
@@ -519,6 +1060,11 @@ export function buildKoshaProductionLocalBridgeCandidate(
     }
     const sha256 = readString(chunk.chunk_sha256).toLowerCase();
     if (!isSha256(sha256)) throw new Error(`kosha-bridge-chunk-hash-invalid:${chunkId}`);
+    const chunkText = typeof chunk.text === "string" ? chunk.text : "";
+    const chunkContentSha256 = createHash("sha256").update(chunkText).digest("hex");
+    if (!chunkText || chunkContentSha256 !== sha256) {
+      throw new Error(`kosha-bridge-chunk-content-hash-mismatch:${chunkId}`);
+    }
     const pageStart = readNonNegativeInteger(chunk.page_start) ?? 0;
     const pageEnd = readNonNegativeInteger(chunk.page_end) ?? 0;
     if (pageStart < 1 || pageEnd < pageStart) {
@@ -532,32 +1078,24 @@ export function buildKoshaProductionLocalBridgeCandidate(
     codepointCompare(left.chunkId, right.chunkId)
   );
 
-  const matchingReviewedCandidates = (input.reviewedCandidates || []).filter((candidate) =>
-    isRecord(candidate) && isRecord(candidate.source) && candidate.source.item_id === itemId
+  const reviewedCandidates = (input.reviewedCandidates || []).map((candidate) =>
+    verifyKoshaReviewedCandidateBridgeInput(candidate)
+  );
+  const matchingReviewedCandidates = reviewedCandidates.filter((candidate) =>
+    isRecord(candidate.payload.source) && candidate.payload.source.item_id === itemId
   );
   if (matchingReviewedCandidates.length > 1) {
     throw new Error(`kosha-bridge-reviewed-candidate-match-count:${matchingReviewedCandidates.length}`);
   }
   const reviewedCandidate = matchingReviewedCandidates[0];
-  const reviewedSource = isRecord(reviewedCandidate) && isRecord(reviewedCandidate.source)
-    ? reviewedCandidate.source
+  const reviewedSource = reviewedCandidate && isRecord(reviewedCandidate.payload.source)
+    ? reviewedCandidate.payload.source
     : null;
   if (reviewedSource && readString(reviewedSource.raw_sha256).toLowerCase() !== rawSha256) {
     throw new Error("kosha-bridge-reviewed-candidate-raw-hash-mismatch");
   }
-  const review = isRecord(reviewedCandidate) && isRecord(reviewedCandidate.review)
-    ? reviewedCandidate.review
-    : null;
-  let reviewedCandidateContentSha256: string | null = null;
-  if (review?.state === "verified" && review.human_confirmed === true) {
-    reviewedCandidateContentSha256 = readString(review.content_sha256).toLowerCase();
-    if (!isSha256(reviewedCandidateContentSha256)) {
-      throw new Error("kosha-bridge-reviewed-candidate-content-hash-invalid");
-    }
-  }
-
-  return {
-    schemaVersion: "safeclaw-kosha-production-local-bridge-candidate/v1",
+  const candidateIdentity: KoshaProductionLocalBridgeCandidateIdentity = {
+    schemaVersion: "safeclaw-kosha-production-local-bridge-candidate/v2",
     production: {
       id: productionId,
       sourceId: productionSourceId,
@@ -569,11 +1107,18 @@ export function buildKoshaProductionLocalBridgeCandidate(
       rawSha256,
       itemSha256
     },
-    reviewedCandidateContentSha256,
+    candidateFileSha256: reviewedCandidate?.candidateFileSha256 ?? null,
+    candidateContentSha256: reviewedCandidate?.candidateContentSha256 ?? null,
+    candidateAttestationSha256: reviewedCandidate?.candidateAttestationSha256 ?? null,
     chunks,
     humanConfirmation: "pending",
     readOnly: true,
-    dbMutationPerformed: false
+    dbMutationPerformed: false,
+    launchReadiness: false
+  };
+  return {
+    ...candidateIdentity,
+    reproducibilityHash: canonicalSha256(candidateIdentity)
   };
 }
 

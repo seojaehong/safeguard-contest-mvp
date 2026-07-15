@@ -7,7 +7,8 @@
     { "$ref": "#/$defs/chunk" },
     { "$ref": "#/$defs/failure" },
     { "$ref": "#/$defs/current" },
-    { "$ref": "#/$defs/manifest" }
+    { "$ref": "#/$defs/manifest" },
+    { "$ref": "#/$defs/verifiedSubsetManifest" }
   ],
   "$defs": {
     "sha256": {
@@ -78,6 +79,31 @@
         "official_api_url": { "type": ["string", "null"] },
         "official_download_url": { "type": ["string", "null"] },
         "official_download_boundary": { "type": "string" }
+      }
+    },
+    "verifiedOfficialProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "official_url",
+        "official_file_id",
+        "publication_date",
+        "official_version",
+        "official_status",
+        "pdf_sha256",
+        "body_sha256"
+      ],
+      "properties": {
+        "official_url": {
+          "type": "string",
+          "pattern": "^https://(?:[A-Za-z0-9-]+\\.)*kosha\\.or\\.kr(?:/|$)"
+        },
+        "official_file_id": { "type": "string", "minLength": 1 },
+        "publication_date": { "type": "string", "format": "date" },
+        "official_version": { "type": "string", "minLength": 1 },
+        "official_status": { "const": "current" },
+        "pdf_sha256": { "$ref": "#/$defs/sha256" },
+        "body_sha256": { "$ref": "#/$defs/sha256" }
       }
     },
     "reviewedOcrPageProvenance": {
@@ -189,6 +215,7 @@
         "raw_duplicate_of": { "type": ["string", "null"] },
         "text_duplicate_of": { "type": ["string", "null"] },
         "provenance": { "$ref": "#/$defs/itemProvenance" },
+        "official_provenance": { "$ref": "#/$defs/verifiedOfficialProvenance" },
         "reviewed_ocr_provenance": { "$ref": "#/$defs/reviewedOcrProvenance" }
       },
       "allOf": [
@@ -377,10 +404,17 @@
     "reviewedOcrCandidatePolicy": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["item_id", "candidate_sha256"],
+      "required": [
+        "item_id",
+        "candidate_sha256",
+        "content_sha256",
+        "attestation_sha256"
+      ],
       "properties": {
         "item_id": { "type": "string", "minLength": 1 },
-        "candidate_sha256": { "$ref": "#/$defs/sha256" }
+        "candidate_sha256": { "$ref": "#/$defs/sha256" },
+        "content_sha256": { "$ref": "#/$defs/sha256" },
+        "attestation_sha256": { "$ref": "#/$defs/sha256" }
       }
     },
     "generationPolicy": {
@@ -535,6 +569,149 @@
         "official_provenance": { "$ref": "#/$defs/officialProvenance" },
         "counts": { "$ref": "#/$defs/counts" },
         "output_hashes": { "$ref": "#/$defs/outputHashes" },
+        "reproducibility": { "$ref": "#/$defs/reproducibility" },
+        "reproducibility_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "verifiedSubsetSourceIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity_sha256", "parent_snapshot_id"],
+      "properties": {
+        "identity_sha256": { "$ref": "#/$defs/sha256" },
+        "parent_snapshot_id": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "verifiedSubsetPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "source_snapshot_id",
+        "official_metadata_sha256",
+        "trusted_metadata_registry_sha256",
+        "generator_source_sha256",
+        "selection",
+        "required_provenance"
+      ],
+      "properties": {
+        "schema_version": { "const": "safeclaw-kosha-verified-subset-policy/v1" },
+        "source_snapshot_id": { "$ref": "#/$defs/sha256" },
+        "official_metadata_sha256": {
+          "oneOf": [
+            { "$ref": "#/$defs/sha256" },
+            { "type": "null" }
+          ]
+        },
+        "trusted_metadata_registry_sha256": { "$ref": "#/$defs/sha256" },
+        "generator_source_sha256": { "$ref": "#/$defs/sha256" },
+        "selection": { "const": "technical-support-regulation+current-unverified+success+native" },
+        "required_provenance": {
+          "type": "array",
+          "minItems": 7,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "verifiedSubsetLaunchGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "launch_ready",
+        "failure_count",
+        "partial_coverage",
+        "provenance_complete",
+        "blockers"
+      ],
+      "properties": {
+        "launch_ready": { "type": "boolean" },
+        "failure_count": { "$ref": "#/$defs/countValue" },
+        "partial_coverage": { "type": "boolean" },
+        "provenance_complete": { "type": "boolean" },
+        "blockers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "verifiedSubsetCoverageScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope_id",
+        "source_inventory_count",
+        "candidate_count",
+        "accepted_count",
+        "rejected_count",
+        "out_of_scope_count",
+        "item_types",
+        "official_statuses",
+        "body_kinds",
+        "complete"
+      ],
+      "properties": {
+        "scope_id": { "const": "technical-support-regulation-current-native" },
+        "source_inventory_count": { "$ref": "#/$defs/countValue" },
+        "candidate_count": { "$ref": "#/$defs/countValue" },
+        "accepted_count": { "$ref": "#/$defs/countValue" },
+        "rejected_count": { "$ref": "#/$defs/countValue" },
+        "out_of_scope_count": { "$ref": "#/$defs/countValue" },
+        "item_types": {
+          "const": ["technical-support-regulation"]
+        },
+        "official_statuses": { "const": ["current"] },
+        "body_kinds": { "const": ["native"] },
+        "complete": { "type": "boolean" }
+      }
+    },
+    "verifiedSubsetOutputHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items.jsonl", "chunks.jsonl", "failures.jsonl"],
+      "properties": {
+        "items.jsonl": { "$ref": "#/$defs/sha256" },
+        "chunks.jsonl": { "$ref": "#/$defs/sha256" },
+        "failures.jsonl": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "verifiedSubsetManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "snapshot_id",
+        "read_only_source",
+        "offline",
+        "db_mutation_performed",
+        "network_calls_performed",
+        "ocr_performed",
+        "source_identity",
+        "generation_policy",
+        "generation_policy_sha256",
+        "launch_gate",
+        "coverage_scope",
+        "counts",
+        "output_hashes",
+        "reproducibility",
+        "reproducibility_hash"
+      ],
+      "properties": {
+        "schema_version": { "const": "safeclaw-kosha-verified-subset/v1" },
+        "snapshot_id": { "$ref": "#/$defs/sha256" },
+        "read_only_source": { "const": true },
+        "offline": { "const": true },
+        "db_mutation_performed": { "const": false },
+        "network_calls_performed": { "const": false },
+        "ocr_performed": { "const": false },
+        "source_identity": { "$ref": "#/$defs/verifiedSubsetSourceIdentity" },
+        "generation_policy": { "$ref": "#/$defs/verifiedSubsetPolicy" },
+        "generation_policy_sha256": { "$ref": "#/$defs/sha256" },
+        "launch_gate": { "$ref": "#/$defs/verifiedSubsetLaunchGate" },
+        "coverage_scope": { "$ref": "#/$defs/verifiedSubsetCoverageScope" },
+        "counts": { "$ref": "#/$defs/counts" },
+        "output_hashes": { "$ref": "#/$defs/verifiedSubsetOutputHashes" },
         "reproducibility": { "$ref": "#/$defs/reproducibility" },
         "reproducibility_hash": { "$ref": "#/$defs/sha256" }
       }

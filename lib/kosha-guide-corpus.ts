@@ -8,6 +8,16 @@ import { basename, isAbsolute, relative, resolve, sep } from "node:path";
 export type KoshaGuideCorpusItemType = "technical-guideline" | "technical-support-regulation";
 export type KoshaGuideOfflineRetrievalMode = "local-tag" | "local-ranked" | "local-hybrid";
 
+const VERIFIED_SUBSET_CONTRACT = {
+  sourceSnapshotId: "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+  scopeId: "technical-support-regulation-current-native",
+  sourceInventoryCount: 1040,
+  candidateCount: 234,
+  outOfScopeCount: 806,
+  selection: "technical-support-regulation+current-unverified+success+native"
+} as const;
+const PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256: readonly string[] = Object.freeze([]);
+
 export type KoshaGuideCorpusAnchor = {
   page: number;
   excerpt: string;
@@ -30,6 +40,12 @@ export type KoshaGuideCorpusRecord = {
     lifecycle: "current" | "stale" | "retired";
     chunkId: string;
     bodyHash: string;
+    officialUrl: string;
+    officialFileId: string;
+    publicationDate: string;
+    officialVersion: string;
+    officialStatus: "current";
+    pdfHash: string;
   };
   tags: {
     keywords: string[];
@@ -65,8 +81,22 @@ export type KoshaGuideCorpusReady = {
   itemCount: number;
   chunkCount: number;
   failureCount: number;
+  coverageScope: KoshaGuideCoverageScope;
   records: KoshaGuideCorpusRecord[];
   indexedRecords: IndexedRecord[];
+};
+
+export type KoshaGuideCoverageScope = {
+  scopeId: string;
+  sourceInventoryCount: number;
+  candidateCount: number;
+  acceptedCount: number;
+  rejectedCount: number;
+  outOfScopeCount: number;
+  itemTypes: KoshaGuideCorpusItemType[];
+  officialStatuses: ["current"];
+  bodyKinds: ["native"];
+  complete: boolean;
 };
 
 export type KoshaGuideCorpusLoadResult =
@@ -80,6 +110,7 @@ export type KoshaGuideCorpusLookup = {
   testHooks?: {
     afterPathChecked?: (path: string) => Promise<void> | void;
     afterStreamChunk?: (path: string, bytesRead: number) => Promise<void> | void;
+    trustedOfficialMetadataSha256?: readonly string[];
   };
 };
 
@@ -99,6 +130,12 @@ type ManifestSnapshot = {
   reproducibilityHash: string;
   sourceIdentitySha256: string;
   generationPolicySha256: string;
+  computedGenerationPolicySha256: string;
+  sourceSnapshotId: string;
+  selection: string;
+  officialMetadataSha256: string | null;
+  generatorSourceSha256: string;
+  trustedMetadataRegistrySha256: string;
   hashes: { items: string; chunks: string; failures: string };
   counts: {
     inventory: number;
@@ -107,11 +144,21 @@ type ManifestSnapshot = {
     failureLedger: number;
   };
   reviewedOcrCandidates: ReviewedOcrCandidateBinding[];
+  launchGate: {
+    launchReady: boolean;
+    failureCount: number;
+    partialCoverage: boolean;
+    provenanceComplete: boolean;
+    blockers: string[];
+  };
+  coverageScope: KoshaGuideCoverageScope;
 };
 
 type ReviewedOcrCandidateBinding = {
   itemId: string;
   candidateSha256: string;
+  contentSha256: string;
+  attestationSha256: string;
 };
 
 type RawItem = {
@@ -128,6 +175,18 @@ type RawItem = {
   extractionStatus: string;
   bodyOrigin: "native" | "human-reviewed-ocr";
   reviewedOcrCandidateSha256: string | null;
+  reviewedOcrContentSha256: string | null;
+  reviewedOcrAttestationSha256: string | null;
+  rawSha256: string;
+  officialProvenance: {
+    officialUrl: string;
+    officialFileId: string;
+    publicationDate: string;
+    officialVersion: string;
+    officialStatus: "current";
+    pdfSha256: string;
+    bodySha256: string;
+  } | null;
 };
 
 type RawChunk = {
@@ -213,7 +272,124 @@ function isRfc3339(value: string): boolean {
   return day >= 1 && day <= new Date(Date.UTC(year, month, 0)).getUTCDate();
 }
 
-function parseReviewedOcrProvenance(value: unknown): { candidateSha256: string } | null {
+function isIsoDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/u.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return month >= 1 && month <= 12 && day >= 1 && day <= new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function isOfficialKoshaUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    return url.protocol === "https:" && (hostname === "kosha.or.kr" || hostname.endsWith(".kosha.or.kr"));
+  } catch {
+    return false;
+  }
+}
+
+function parseLaunchGate(value: unknown): ManifestSnapshot["launchGate"] | null {
+  if (!isRecord(value)) return null;
+  const failureCount = readInteger(value.failure_count);
+  const blockers = Array.isArray(value.blockers) && value.blockers.every((item) => typeof item === "string")
+    ? value.blockers
+    : null;
+  if (
+    typeof value.launch_ready !== "boolean"
+    || failureCount === null
+    || typeof value.partial_coverage !== "boolean"
+    || typeof value.provenance_complete !== "boolean"
+    || !blockers
+  ) return null;
+  return {
+    launchReady: value.launch_ready,
+    failureCount,
+    partialCoverage: value.partial_coverage,
+    provenanceComplete: value.provenance_complete,
+    blockers
+  };
+}
+
+function parseCoverageScope(value: unknown): KoshaGuideCoverageScope | null {
+  if (!isRecord(value)) return null;
+  const sourceInventoryCount = readInteger(value.source_inventory_count);
+  const candidateCount = readInteger(value.candidate_count);
+  const acceptedCount = readInteger(value.accepted_count);
+  const rejectedCount = readInteger(value.rejected_count);
+  const outOfScopeCount = readInteger(value.out_of_scope_count);
+  const itemTypes = value.item_types;
+  const officialStatuses = value.official_statuses;
+  const bodyKinds = value.body_kinds;
+  if (
+    !readCanonicalIdentifier(value.scope_id)
+    || sourceInventoryCount === null
+    || candidateCount === null
+    || acceptedCount === null
+    || rejectedCount === null
+    || outOfScopeCount === null
+    || !Array.isArray(itemTypes)
+    || itemTypes.length === 0
+    || !itemTypes.every((item) => item === "technical-guideline" || item === "technical-support-regulation")
+    || !Array.isArray(officialStatuses)
+    || officialStatuses.length !== 1
+    || officialStatuses[0] !== "current"
+    || !Array.isArray(bodyKinds)
+    || bodyKinds.length !== 1
+    || bodyKinds[0] !== "native"
+    || typeof value.complete !== "boolean"
+  ) return null;
+  return {
+    scopeId: value.scope_id as string,
+    sourceInventoryCount,
+    candidateCount,
+    acceptedCount,
+    rejectedCount,
+    outOfScopeCount,
+    itemTypes: itemTypes as KoshaGuideCorpusItemType[],
+    officialStatuses: ["current"],
+    bodyKinds: ["native"],
+    complete: value.complete
+  };
+}
+
+function parseOfficialProvenance(value: unknown): RawItem["officialProvenance"] {
+  if (!isRecord(value)) return null;
+  const officialUrl = readCanonicalIdentifier(value.official_url);
+  const officialFileId = readCanonicalIdentifier(value.official_file_id);
+  const publicationDate = readCanonicalIdentifier(value.publication_date);
+  const officialVersion = readCanonicalIdentifier(value.official_version);
+  const pdfSha256 = readCanonicalSha256(value.pdf_sha256);
+  const bodySha256 = readCanonicalSha256(value.body_sha256);
+  if (
+    !officialUrl
+    || !isOfficialKoshaUrl(officialUrl)
+    || !officialFileId
+    || !publicationDate
+    || !isIsoDate(publicationDate)
+    || !officialVersion
+    || value.official_status !== "current"
+    || !pdfSha256
+    || !bodySha256
+  ) return null;
+  return {
+    officialUrl,
+    officialFileId,
+    publicationDate,
+    officialVersion,
+    officialStatus: "current",
+    pdfSha256,
+    bodySha256
+  };
+}
+
+function parseReviewedOcrProvenance(value: unknown): {
+  candidateSha256: string;
+  contentSha256: string;
+  attestationSha256: string;
+} | null {
   if (!isRecord(value) || !hasExactKeys(value, [
     "candidate_sha256",
     "content_sha256",
@@ -251,7 +427,11 @@ function parseReviewedOcrProvenance(value: unknown): { candidateSha256: string }
       && readCanonicalIdentifier(page.model) !== null;
   });
   const candidateSha256 = readCanonicalSha256(value.candidate_sha256);
-  return validPages && candidateSha256 ? { candidateSha256 } : null;
+  const contentSha256 = readCanonicalSha256(value.content_sha256);
+  const attestationSha256 = readCanonicalSha256(value.attestation_sha256);
+  return validPages && candidateSha256 && contentSha256 && attestationSha256
+    ? { candidateSha256, contentSha256, attestationSha256 }
+    : null;
 }
 
 function parseReviewedOcrCandidateBindings(generationPolicy: unknown): ReviewedOcrCandidateBinding[] | null {
@@ -262,11 +442,18 @@ function parseReviewedOcrCandidateBindings(generationPolicy: unknown): ReviewedO
   if (!Array.isArray(declared) || !declared.length) return null;
   const bindings: ReviewedOcrCandidateBinding[] = [];
   for (const value of declared) {
-    if (!isRecord(value) || !hasExactKeys(value, ["item_id", "candidate_sha256"])) return null;
+    if (!isRecord(value) || !hasExactKeys(value, [
+      "item_id",
+      "candidate_sha256",
+      "content_sha256",
+      "attestation_sha256"
+    ])) return null;
     const itemId = readCanonicalIdentifier(value.item_id);
     const candidateSha256 = readCanonicalSha256(value.candidate_sha256);
-    if (!itemId || !candidateSha256) return null;
-    bindings.push({ itemId, candidateSha256 });
+    const contentSha256 = readCanonicalSha256(value.content_sha256);
+    const attestationSha256 = readCanonicalSha256(value.attestation_sha256);
+    if (!itemId || !candidateSha256 || !contentSha256 || !attestationSha256) return null;
+    bindings.push({ itemId, candidateSha256, contentSha256, attestationSha256 });
   }
   return bindings;
 }
@@ -277,6 +464,21 @@ function sha256(value: Uint8Array | string): string {
 
 function normalizeText(value: string): string {
   return value.normalize("NFKC").replace(/\s+/gu, " ").trim();
+}
+
+function canonicalJson(value: unknown): string {
+  if (value === null || typeof value === "string" || typeof value === "boolean") {
+    return JSON.stringify(value);
+  }
+  if (typeof value === "number" && Number.isFinite(value)) return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (isRecord(value)) {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
+      .join(",")}}`;
+  }
+  throw new CorpusGateError("identity:canonical-json");
 }
 
 function parseCurrent(value: unknown): CurrentSnapshot | null {
@@ -299,17 +501,30 @@ function parseCurrent(value: unknown): CurrentSnapshot | null {
 }
 
 function parseManifest(value: unknown): ManifestSnapshot | null {
-  if (!isRecord(value) || value.schema_version !== "safeclaw-kosha-body-corpus/v2") return null;
+  if (!isRecord(value) || value.schema_version !== "safeclaw-kosha-verified-subset/v1") return null;
   const counts = isRecord(value.counts) ? value.counts : null;
   const hashes = isRecord(value.output_hashes) ? value.output_hashes : null;
   const identity = isRecord(value.source_identity) ? value.source_identity : null;
+  const generationPolicy = isRecord(value.generation_policy) ? value.generation_policy : null;
   const reviewedOcrCandidates = parseReviewedOcrCandidateBindings(value.generation_policy);
-  if (!counts || !hashes || !identity || !reviewedOcrCandidates) return null;
+  const launchGate = parseLaunchGate(value.launch_gate);
+  const coverageScope = parseCoverageScope(value.coverage_scope);
+  if (!counts || !hashes || !identity || !generationPolicy || !reviewedOcrCandidates || !launchGate || !coverageScope) return null;
+  const officialMetadataSha256 = generationPolicy.official_metadata_sha256 === null
+    ? null
+    : readCanonicalSha256(generationPolicy.official_metadata_sha256);
+  if (generationPolicy.official_metadata_sha256 !== null && !officialMetadataSha256) return null;
   const parsed: ManifestSnapshot = {
     snapshotId: readString(value.snapshot_id),
     reproducibilityHash: readString(value.reproducibility_hash).toLowerCase(),
     sourceIdentitySha256: readString(identity.identity_sha256).toLowerCase(),
     generationPolicySha256: readString(value.generation_policy_sha256).toLowerCase(),
+    computedGenerationPolicySha256: sha256(canonicalJson(generationPolicy)),
+    sourceSnapshotId: readString(generationPolicy.source_snapshot_id),
+    selection: readString(generationPolicy.selection),
+    officialMetadataSha256,
+    generatorSourceSha256: readString(generationPolicy.generator_source_sha256).toLowerCase(),
+    trustedMetadataRegistrySha256: readString(generationPolicy.trusted_metadata_registry_sha256).toLowerCase(),
     hashes: {
       items: readString(hashes["items.jsonl"]).toLowerCase(),
       chunks: readString(hashes["chunks.jsonl"]).toLowerCase(),
@@ -321,10 +536,19 @@ function parseManifest(value: unknown): ManifestSnapshot | null {
       chunks: readInteger(counts.chunks) ?? -1,
       failureLedger: readInteger(counts.failure_ledger) ?? -1
     },
-    reviewedOcrCandidates
+    reviewedOcrCandidates,
+    launchGate,
+    coverageScope
   };
   if (!parsed.snapshotId || Object.values(parsed.counts).some((count) => count < 0)) return null;
-  if (![parsed.reproducibilityHash, parsed.sourceIdentitySha256, parsed.generationPolicySha256, ...Object.values(parsed.hashes)].every(isSha256)) return null;
+  if (![
+    parsed.reproducibilityHash,
+    parsed.sourceIdentitySha256,
+    parsed.generationPolicySha256,
+    parsed.generatorSourceSha256,
+    parsed.trustedMetadataRegistrySha256,
+    ...Object.values(parsed.hashes)
+  ].every(isSha256)) return null;
   return parsed;
 }
 
@@ -334,6 +558,8 @@ function parseItem(value: unknown): RawItem | null {
   if (itemType !== "technical-guideline" && itemType !== "technical-support-regulation") return null;
   let bodyOrigin: RawItem["bodyOrigin"];
   let reviewedOcrCandidateSha256: string | null = null;
+  let reviewedOcrContentSha256: string | null = null;
+  let reviewedOcrAttestationSha256: string | null = null;
   if (value.body_origin === undefined && value.reviewed_ocr_provenance === undefined) {
     bodyOrigin = "native";
   } else {
@@ -342,8 +568,11 @@ function parseItem(value: unknown): RawItem | null {
     if (!provenance) return null;
     bodyOrigin = "human-reviewed-ocr";
     reviewedOcrCandidateSha256 = provenance.candidateSha256;
+    reviewedOcrContentSha256 = provenance.contentSha256;
+    reviewedOcrAttestationSha256 = provenance.attestationSha256;
   }
   const body = readRawString(value.body) ?? "";
+  const officialProvenance = parseOfficialProvenance(value.official_provenance);
   const parsed: RawItem = {
     itemId: readString(value.item_id),
     itemType,
@@ -357,7 +586,11 @@ function parseItem(value: unknown): RawItem | null {
     sourceKey: readString(value.source_key),
     extractionStatus: readString(value.extraction_status),
     bodyOrigin,
-    reviewedOcrCandidateSha256
+    reviewedOcrCandidateSha256,
+    reviewedOcrContentSha256,
+    reviewedOcrAttestationSha256,
+    rawSha256: readString(value.raw_sha256).toLowerCase(),
+    officialProvenance
   };
   if (!parsed.itemId || !parsed.title || !parsed.category || !parsed.state || !parsed.stableKey || !parsed.versionKey || !parsed.sourceKey || !parsed.extractionStatus || !isSha256(parsed.bodyHash)) return null;
   if (parsed.bodyOrigin === "human-reviewed-ocr") {
@@ -365,6 +598,7 @@ function parseItem(value: unknown): RawItem | null {
     const normalizedBody = normalizeText(parsed.body);
     if (!normalizedBody || sha256(normalizedBody) !== parsed.bodyHash) return null;
   }
+  if (!isSha256(parsed.rawSha256)) return null;
   return parsed;
 }
 
@@ -525,6 +759,12 @@ function tokens(value: string): string[] {
 function buildRecord(item: RawItem, chunks: RawChunk[], snapshotId: string): KoshaGuideCorpusRecord {
   const normalizedBody = normalizeText(item.body);
   const validBody = Boolean(normalizedBody) && sha256(normalizedBody) === item.bodyHash;
+  const official = item.officialProvenance;
+  const validOfficialProvenance = official !== null
+    && official.officialStatus === "current"
+    && official.officialVersion === item.versionKey
+    && official.pdfSha256 === item.rawSha256
+    && official.bodySha256 === item.bodyHash;
   const anchors = chunks.slice(0, 8).map((chunk) => ({
     page: chunk.pageStart,
     excerpt: normalizeText(chunk.text).slice(0, 220)
@@ -535,7 +775,11 @@ function buildRecord(item: RawItem, chunks: RawChunk[], snapshotId: string): Kos
     .slice(0, 2)
     .map((sentence) => sentence.slice(0, 180));
   const lifecycle = item.state === "current" ? "current" : item.state === "retired" ? "retired" : "stale";
-  const quality = validBody && anchors.length > 0 && lifecycle === "current"
+  const quality = validBody
+    && item.bodyOrigin === "native"
+    && anchors.length > 0
+    && lifecycle === "current"
+    && validOfficialProvenance
     ? "accepted"
     : "review_required";
   return {
@@ -554,7 +798,13 @@ function buildRecord(item: RawItem, chunks: RawChunk[], snapshotId: string): Kos
       generatedAt: "",
       lifecycle,
       chunkId: anchors.length ? chunks[0]?.chunkId ?? "" : "",
-      bodyHash: item.bodyHash
+      bodyHash: item.bodyHash,
+      officialUrl: official?.officialUrl ?? "",
+      officialFileId: official?.officialFileId ?? "",
+      publicationDate: official?.publicationDate ?? "",
+      officialVersion: official?.officialVersion ?? "",
+      officialStatus: "current",
+      pdfHash: official?.pdfSha256 ?? ""
     },
     tags: {
       keywords: tokens(`${item.title} ${item.category}`).slice(0, 24),
@@ -570,6 +820,25 @@ function validateSnapshot(current: CurrentSnapshot, manifest: ManifestSnapshot):
   if (current.snapshotId !== manifest.snapshotId || current.reproducibilityHash !== manifest.reproducibilityHash) throw new CorpusGateError("identity:snapshot");
   if (current.sourceIdentitySha256 !== manifest.sourceIdentitySha256) throw new CorpusGateError("identity:source");
   if (current.generationPolicySha256 !== manifest.generationPolicySha256) throw new CorpusGateError("identity:policy");
+  if (manifest.computedGenerationPolicySha256 !== manifest.generationPolicySha256) {
+    throw new CorpusGateError("identity:policy-content");
+  }
+  const identityPayload = {
+    generator_source_sha256: manifest.generatorSourceSha256,
+    generation_policy_sha256: manifest.generationPolicySha256,
+    official_metadata_sha256: manifest.officialMetadataSha256,
+    output_hashes: {
+      "chunks.jsonl": manifest.hashes.chunks,
+      "failures.jsonl": manifest.hashes.failures,
+      "items.jsonl": manifest.hashes.items
+    },
+    source_identity_sha256: manifest.sourceIdentitySha256,
+    source_snapshot_id: manifest.sourceSnapshotId,
+    trusted_metadata_registry_sha256: manifest.trustedMetadataRegistrySha256
+  };
+  if (sha256(canonicalJson(identityPayload)) !== manifest.snapshotId) {
+    throw new CorpusGateError("identity:snapshot-content");
+  }
 }
 
 function validateReviewedOcrBindings(
@@ -598,6 +867,12 @@ function validateReviewedOcrBindings(
     if (binding.candidateSha256 !== item.reviewedOcrCandidateSha256) {
       throw new CorpusGateError(`ocr:binding:mismatch:${item.itemId}`);
     }
+    if (
+      binding.contentSha256 !== item.reviewedOcrContentSha256 ||
+      binding.attestationSha256 !== item.reviewedOcrAttestationSha256
+    ) {
+      throw new CorpusGateError(`ocr:binding:provenance-mismatch:${item.itemId}`);
+    }
     if (failedIds.has(item.itemId)) throw new CorpusGateError(`ocr:item:failed:${item.itemId}`);
     const chunks = chunksByItem.get(item.itemId) ?? [];
     if (!chunks.some((chunk) => Boolean(normalizeText(chunk.text)))) {
@@ -606,7 +881,12 @@ function validateReviewedOcrBindings(
   }
 }
 
-async function loadUncached(rootDir: string, current: CurrentSnapshot, hooks?: KoshaGuideCorpusLookup["testHooks"]): Promise<KoshaGuideCorpusLoadResult> {
+async function loadUncached(
+  rootDir: string,
+  current: CurrentSnapshot,
+  hooks: KoshaGuideCorpusLookup["testHooks"] | undefined,
+  trustedOfficialMetadataSha256: readonly string[]
+): Promise<KoshaGuideCorpusLoadResult> {
   uncachedLoads += 1;
   try {
     const manifestFile = await readJsonFile(rootDir, current.manifestPath, LIMITS.manifest, parseManifest, hooks);
@@ -642,8 +922,55 @@ async function loadUncached(rootDir: string, current: CurrentSnapshot, hooks?: K
     const records = [...items.values()]
       .filter((item) => !failedIds.has(item.itemId))
       .map((item) => buildRecord(item, chunksByItem.get(item.itemId) ?? [], current.snapshotId));
-    if (manifest.counts.inventory !== items.size || manifest.counts.success !== records.length || manifest.counts.chunks !== chunksFile.rows.length || manifest.counts.failureLedger !== failuresFile.rows.length) {
+    if (
+      manifest.counts.inventory !== items.size + failuresFile.rows.length
+      || manifest.counts.success !== records.length
+      || manifest.counts.chunks !== chunksFile.rows.length
+      || manifest.counts.failureLedger !== failuresFile.rows.length
+    ) {
       throw new CorpusGateError("count:manifest");
+    }
+    const gate = manifest.launchGate;
+    const coverage = manifest.coverageScope;
+    if (!gate.launchReady) throw new CorpusGateError("gate:launch-not-ready");
+    if (gate.failureCount > 0 || failuresFile.rows.length > 0 || coverage.rejectedCount > 0) {
+      throw new CorpusGateError("gate:failures");
+    }
+    if (gate.partialCoverage || !coverage.complete || coverage.acceptedCount !== coverage.candidateCount) {
+      throw new CorpusGateError("gate:partial-coverage");
+    }
+    if (!gate.provenanceComplete || records.some((record) => record.quality !== "accepted")) {
+      throw new CorpusGateError("gate:provenance-incomplete");
+    }
+    if (
+      manifest.sourceSnapshotId !== VERIFIED_SUBSET_CONTRACT.sourceSnapshotId
+      || manifest.selection !== VERIFIED_SUBSET_CONTRACT.selection
+      || coverage.scopeId !== VERIFIED_SUBSET_CONTRACT.scopeId
+      || coverage.sourceInventoryCount !== VERIFIED_SUBSET_CONTRACT.sourceInventoryCount
+      || coverage.candidateCount !== VERIFIED_SUBSET_CONTRACT.candidateCount
+      || coverage.outOfScopeCount !== VERIFIED_SUBSET_CONTRACT.outOfScopeCount
+      || coverage.itemTypes.length !== 1
+      || coverage.itemTypes[0] !== "technical-support-regulation"
+    ) {
+      throw new CorpusGateError("gate:scope-contract");
+    }
+    if (
+      !manifest.officialMetadataSha256
+      || !trustedOfficialMetadataSha256.every(isSha256)
+      || manifest.trustedMetadataRegistrySha256 !== sha256(JSON.stringify([...trustedOfficialMetadataSha256].sort()))
+      || !trustedOfficialMetadataSha256.includes(manifest.officialMetadataSha256)
+    ) {
+      throw new CorpusGateError("gate:untrusted-official-metadata");
+    }
+    if (
+      gate.failureCount !== manifest.counts.failureLedger
+      || coverage.acceptedCount !== records.length
+      || coverage.rejectedCount !== failuresFile.rows.length
+      || coverage.candidateCount !== coverage.acceptedCount + coverage.rejectedCount
+      || coverage.sourceInventoryCount !== coverage.candidateCount + coverage.outOfScopeCount
+      || records.some((record) => !coverage.itemTypes.includes(record.itemType))
+    ) {
+      throw new CorpusGateError("gate:count-mismatch");
     }
     return {
       status: "ready",
@@ -654,6 +981,7 @@ async function loadUncached(rootDir: string, current: CurrentSnapshot, hooks?: K
       itemCount: records.length,
       chunkCount: chunksFile.rows.length,
       failureCount: failuresFile.rows.length,
+      coverageScope: coverage,
       records,
       indexedRecords: records.map((record) => ({
         record,
@@ -675,10 +1003,12 @@ export async function loadKoshaGuideCorpus(options: KoshaGuideCorpusLookup = {})
     rootDir = await realpath(resolve(configuredRoot));
     const currentFile = await readJsonFile(rootDir, "current.json", LIMITS.current, parseCurrent, options.testHooks);
     const current = currentFile.value;
-    const key = `${rootDir}|${current.snapshotId}|${current.manifestSha256}`;
+    const trustedMetadata = options.testHooks?.trustedOfficialMetadataSha256
+      ?? PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256;
+    const key = `${rootDir}|${current.snapshotId}|${current.manifestSha256}|${sha256(JSON.stringify([...trustedMetadata].sort()))}`;
     const cached = loadCache.get(key);
     if (cached) return cached;
-    const promise = loadUncached(rootDir, current, options.testHooks);
+    const promise = loadUncached(rootDir, current, options.testHooks, trustedMetadata);
     loadCache.set(key, promise);
     return await promise;
   } catch (error) {
@@ -688,10 +1018,21 @@ export async function loadKoshaGuideCorpus(options: KoshaGuideCorpusLookup = {})
 }
 
 function directEligible(record: KoshaGuideCorpusRecord): boolean {
-  return record.quality === "accepted" && record.bodyKind === "native" && record.provenance.lifecycle === "current" && record.anchors.length > 0;
+  return record.quality === "accepted"
+    && record.bodyKind === "native"
+    && record.provenance.lifecycle === "current"
+    && record.anchors.length > 0
+    && isOfficialKoshaUrl(record.provenance.officialUrl)
+    && Boolean(record.provenance.officialFileId)
+    && isIsoDate(record.provenance.publicationDate)
+    && record.provenance.officialStatus === "current"
+    && record.provenance.officialVersion === record.version
+    && isSha256(record.provenance.pdfHash)
+    && isSha256(record.provenance.bodyHash);
 }
 
 function evidenceRef(record: KoshaGuideCorpusRecord): string | null {
+  if (record.bodyKind === "unknown") return null;
   const anchor = record.anchors[0];
   if (!anchor) return null;
   return `KOSHA 근거 ${record.version} p.${anchor.page}: ${anchor.excerpt}`;

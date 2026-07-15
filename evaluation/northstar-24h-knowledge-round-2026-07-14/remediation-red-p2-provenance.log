@@ -1,0 +1,47 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/knowledge-regenerate-route.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/northstar-24h-knowledge-round
+
+ ❯ tests/knowledge-regenerate-route.test.ts (10 tests | 1 failed) 106ms
+     × returns tenant-bound immutable provenance without exposing sensitive raw event text 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/knowledge-regenerate-route.test.ts > knowledge candidate API > returns tenant-bound immutable provenance without exposing sensitive raw event text
+AssertionError: expected { …(15) } to match object { …(5) }
+(11 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "authority": "none",
+-   "contractVersion": "knowledge-candidate.v2",
++   "contractVersion": "knowledge-candidate.v1",
+    "publicationState": "unpublished",
+    "publishAllowed": false,
+-   "tenantContext": {
+-     "organizationId": "org-knowledge-1",
+-     "siteId": "site-knowledge-1",
+-   },
+  }
+
+ ❯ tests/knowledge-regenerate-route.test.ts:177:31
+    175|
+    176|     expect(response.status).toBe(200);
+    177|     expect(payload.candidate).toMatchObject({
+       |                               ^
+    178|       contractVersion: "knowledge-candidate.v2",
+    179|       tenantContext: {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  21:30:39
+   Duration  784ms (transform 121ms, setup 0ms, import 140ms, tests 106ms, environment 0ms)
+EXIT_CODE: 1

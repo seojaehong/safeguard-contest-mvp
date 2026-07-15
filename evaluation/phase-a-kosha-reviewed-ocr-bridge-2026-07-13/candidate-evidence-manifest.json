@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "safeclaw-kosha-bridge-candidate-evidence/v1",
+  "status": "HOLD_PENDING_FRESH_REVIEW",
+  "integrationTargetSha": "77d86416116b91809e1e0508c72564e06c8c31bc",
+  "productCandidateSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+  "evidenceCommit": {
+    "parentCandidateSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+    "selfShaEmbedded": false,
+    "scope": "evaluation-only"
+  },
+  "candidateSeries": [
+    "38cbc9176453368237d85cb56903f782f9c09823",
+    "8e3b42492135799536913af9d1d6427256ad2ae4",
+    "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+    "c7261b7d632e1778f3280f059d1e122308817635",
+    "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f"
+  ],
+  "candidateApplyCommand": {
+    "executable": "git",
+    "args": [
+      "cherry-pick",
+      "38cbc9176453368237d85cb56903f782f9c09823",
+      "8e3b42492135799536913af9d1d6427256ad2ae4",
+      "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+      "c7261b7d632e1778f3280f059d1e122308817635",
+      "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f"
+    ]
+  },
+  "candidateScope": {
+    "baseExclusiveSha": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+    "commitCount": 5,
+    "fileCount": 31,
+    "outOfScopeCount": 0,
+    "validatorCommand": {
+      "executable": "node",
+      "args": [
+        "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/validate-kosha-bridge-evidence.mjs",
+        "--integration-target",
+        "77d86416116b91809e1e0508c72564e06c8c31bc",
+        "--candidate-sha",
+        "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+        "--commit",
+        "38cbc9176453368237d85cb56903f782f9c09823",
+        "--commit",
+        "8e3b42492135799536913af9d1d6427256ad2ae4",
+        "--commit",
+        "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+        "--commit",
+        "c7261b7d632e1778f3280f059d1e122308817635",
+        "--commit",
+        "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+        "--target-existing-path",
+        "app/api/export/hwp/route.ts",
+        "--target-existing-path",
+        "lib/xlsx-builder.ts",
+        "--target-existing-path",
+        "tests/xlsx-export-route.test.ts",
+        "--report",
+        "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/report.json",
+        "--artifact-root",
+        "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13"
+      ]
+    }
+  },
+  "productCommitFiles": [
+    "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/validate-kosha-bridge-evidence.mjs",
+    "lib/kosha-guide-corpus-audit.ts",
+    "tests/kosha-guide-corpus-audit.test.ts"
+  ],
+  "evidenceArtifacts": {
+    "textHashCanonicalization": "utf8-crlf-to-lf",
+    "report": {
+      "path": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/report.json",
+      "canonicalLfSha256": "0d809ee9775bc9cc2b78295aa11975ac682256d267b551d38dd15ead705ad6dd"
+    },
+    "candidateRegression": {
+      "path": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/candidate-regression.json",
+      "canonicalLfSha256": "eaa1f1d9e0112974974e9353d60e3d7fe58ef60a7a7b0a87c6061650a43ea18e"
+    },
+    "zeroWorkResumeCommand": {
+      "path": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/zero-work-resume-command.json",
+      "canonicalLfSha256": "7eb318503292d66a90d679bdc89b0032404559f2bae071f387aede329ef68575"
+    },
+    "integrationSimulation": {
+      "path": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/integration-simulation.json",
+      "canonicalLfSha256": "e43e18e9c1b32b9f9fa3dc5bfabe6084b35dab91338c5fdd61b006bed89258a8"
+    },
+    "finalPythonLog": {
+      "path": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-python.log",
+      "canonicalLfSha256": "6f5ce064f42bac7cdb2a159b24e4320dd37a17dc5efdfd80e196fba6090f7f60"
+    },
+    "finalTypeScriptLog": {
+      "path": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typescript.log",
+      "canonicalLfSha256": "617bd231548b0430cff76e098caf5917f943f87559338fee442f5396b0fb22ab"
+    },
+    "finalOntologyLog": {
+      "path": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-ontology-regression.log",
+      "canonicalLfSha256": "5d18b1609a2d112e4ed9e664bed145fa525e8137164105535fce1aa8a071d295"
+    },
+    "finalTypecheckLog": {
+      "path": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typecheck.log",
+      "canonicalLfSha256": "016359ec698e15e7d08ddd9d9f5653bc0365ae3744480e3e5f02b2653e1f3d6b"
+    }
+  },
+  "verifiedTruth": {
+    "inventoryCount": 1040,
+    "nativeSuccessCount": 1039,
+    "boundaryCount": 1,
+    "chunkCount": 20520,
+    "candidateReviewState": "draft",
+    "candidateHumanConfirmed": false,
+    "candidateRenderDpi": 180,
+    "candidateChunkCount": 0,
+    "candidateImportCount": 0,
+    "zeroWorkResumeProcessedCount": 0,
+    "zeroWorkResumeOutputBytesUnchanged": true,
+    "testCount": 233,
+    "passedCount": 233,
+    "failedCount": 0
+  },
+  "productionGetPerformed": false,
+  "networkMutationPerformed": false,
+  "dbMutationPerformed": false,
+  "schemaMutationPerformed": false,
+  "migrationPerformed": false,
+  "dataMutationPerformed": false,
+  "packageOrLockMutationPerformed": false,
+  "corpusImportPerformed": false,
+  "launchReadiness": false
+}

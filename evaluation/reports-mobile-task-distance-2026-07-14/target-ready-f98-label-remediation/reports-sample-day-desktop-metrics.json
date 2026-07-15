@@ -1,0 +1,313 @@
+{
+  "productCandidateSha": "7e008f5dbd22b314f65b930a9f58e27348c6ecfa",
+  "buildId": "pNU-_XAjWCrBdfZybiYJA",
+  "generatedAt": "2026-07-13T20:48:35.475Z",
+  "measurementCommandIdentity": "SAFECLAW_HARNESS_MODE=prod SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE=1 npm.cmd test -- tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 (target-ready final evidence confirmation; log=evaluation/reports-mobile-task-distance-2026-07-14/target-ready-f98-label-remediation/reports-design-remediation-final.log)",
+  "harnessMode": "prod",
+  "theme": "day",
+  "viewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "interactiveTargets": {
+    "state": "sample-report-default",
+    "targets": [
+      {
+        "descriptor": "0:a[SafeClaw 홈]",
+        "selector": "a[aria-label=\"SafeClaw 홈\"]",
+        "disabled": false,
+        "height": 44,
+        "width": 93.56
+      },
+      {
+        "descriptor": "1:button[메뉴]",
+        "selector": "button.safeclaw-module-menu-button.safeclaw-module-chrome-button",
+        "disabled": false,
+        "height": 44,
+        "width": 44
+      },
+      {
+        "descriptor": "2:a[01작업공간입력 · 생성]",
+        "selector": "a:interactive(2)",
+        "disabled": false,
+        "height": 52,
+        "width": 203
+      },
+      {
+        "descriptor": "3:a[02문서위험성평가 · TBM]",
+        "selector": "a:interactive(3)",
+        "disabled": false,
+        "height": 52,
+        "width": 203
+      },
+      {
+        "descriptor": "4:a[03리포트주간 · 월간]",
+        "selector": "a.active",
+        "disabled": false,
+        "height": 52,
+        "width": 203
+      },
+      {
+        "descriptor": "5:a[04근거DB · 온톨로지]",
+        "selector": "a:interactive(5)",
+        "disabled": false,
+        "height": 52,
+        "width": 203
+      },
+      {
+        "descriptor": "6:a[05이력증빙 · 파일]",
+        "selector": "a:interactive(6)",
+        "disabled": false,
+        "height": 52,
+        "width": 203
+      },
+      {
+        "descriptor": "7:a[06설정AI · 현장]",
+        "selector": "a:interactive(7)",
+        "disabled": false,
+        "height": 52,
+        "width": 203
+      },
+      {
+        "descriptor": "8:button[Day]",
+        "selector": "button.safeclaw-module-chrome-button.active",
+        "disabled": false,
+        "height": 44,
+        "width": 47.98
+      },
+      {
+        "descriptor": "9:button[Night]",
+        "selector": "button.safeclaw-module-chrome-button",
+        "disabled": false,
+        "height": 44,
+        "width": 47.98
+      },
+      {
+        "descriptor": "10:a[작업공간에서 개선 추가]",
+        "selector": "a:interactive(10)",
+        "disabled": false,
+        "height": 44,
+        "width": 151.13
+      },
+      {
+        "descriptor": "11:button[다시 불러오기]",
+        "selector": "button.button.secondary",
+        "disabled": false,
+        "height": 46,
+        "width": 115.2
+      },
+      {
+        "descriptor": "12:button[오늘당일]",
+        "selector": "button.safeclaw-report-period-control",
+        "disabled": false,
+        "height": 62.39,
+        "width": 318
+      },
+      {
+        "descriptor": "13:button[주간이번 주]",
+        "selector": "button.safeclaw-report-period-control",
+        "disabled": false,
+        "height": 62.39,
+        "width": 318
+      },
+      {
+        "descriptor": "14:button[월간이번 달]",
+        "selector": "button.safeclaw-report-period-control",
+        "disabled": false,
+        "height": 62.39,
+        "width": 318
+      },
+      {
+        "descriptor": "15:button[사용자직접 선택]",
+        "selector": "button.safeclaw-report-period-control",
+        "disabled": false,
+        "height": 62.39,
+        "width": 318
+      },
+      {
+        "descriptor": "16:select[공정 필터]",
+        "selector": "select[aria-label=\"공정 필터\"]",
+        "disabled": false,
+        "height": 44,
+        "width": 182
+      },
+      {
+        "descriptor": "17:select[작업 필터]",
+        "selector": "select[aria-label=\"작업 필터\"]",
+        "disabled": false,
+        "height": 44,
+        "width": 182
+      },
+      {
+        "descriptor": "18:select[위험등급 필터]",
+        "selector": "select[aria-label=\"위험등급 필터\"]",
+        "disabled": false,
+        "height": 44,
+        "width": 182
+      },
+      {
+        "descriptor": "19:select[개선상태 필터]",
+        "selector": "select[aria-label=\"개선상태 필터\"]",
+        "disabled": false,
+        "height": 44,
+        "width": 182
+      },
+      {
+        "descriptor": "20:select[현장 필터]",
+        "selector": "select[aria-label=\"현장 필터\"]",
+        "disabled": false,
+        "height": 44,
+        "width": 182
+      },
+      {
+        "descriptor": "21:select[담당자 필터]",
+        "selector": "select[aria-label=\"담당자 필터\"]",
+        "disabled": false,
+        "height": 44,
+        "width": 182
+      },
+      {
+        "descriptor": "22:button[필터 초기화]",
+        "selector": "button.button.secondary",
+        "disabled": true,
+        "height": 46,
+        "width": 102.33
+      },
+      {
+        "descriptor": "23:button[개선사항 포함 MD]",
+        "selector": "button.button",
+        "disabled": true,
+        "height": 46,
+        "width": 318
+      },
+      {
+        "descriptor": "24:button[공정·작업 분류 CSV]",
+        "selector": "button.button.secondary",
+        "disabled": true,
+        "height": 46,
+        "width": 318
+      },
+      {
+        "descriptor": "25:button[관리자 원본 JSON]",
+        "selector": "button.button.secondary",
+        "disabled": true,
+        "height": 46,
+        "width": 318
+      },
+      {
+        "descriptor": "26:button[다음 생성용 MD]",
+        "selector": "button.button.secondary",
+        "disabled": true,
+        "height": 46,
+        "width": 318
+      },
+      {
+        "descriptor": "27:button[하네스 JSONL]",
+        "selector": "button.button.secondary",
+        "disabled": true,
+        "height": 46,
+        "width": 318
+      },
+      {
+        "descriptor": "28:summary[추가 리포트 정보]",
+        "selector": "summary:interactive(28)",
+        "disabled": false,
+        "height": 44,
+        "width": 358
+      },
+      {
+        "descriptor": "29:summary[리포트 본문 미리보기]",
+        "selector": "summary:interactive(29)",
+        "disabled": false,
+        "height": 46.39,
+        "width": 774
+      }
+    ],
+    "undersized": [],
+    "horizontalOverflow": 0,
+    "overlapFailures": [],
+    "nestedScrollFailures": []
+  },
+  "selectedBackground": "rgb(233, 235, 239)",
+  "hoverBackground": "rgb(244, 245, 247)",
+  "focusOutline": "rgb(245, 197, 24)",
+  "horizontalOverflow": 0,
+  "controlHeights": [
+    62,
+    62,
+    62,
+    62
+  ],
+  "controlRadii": [
+    "8px",
+    "8px",
+    "8px",
+    "8px"
+  ],
+  "accentText": "rgb(102, 81, 0)",
+  "heroColumnCount": 2,
+  "heroCtaHeight": 44,
+  "heroCtaRadius": "8px",
+  "heroCtaBackground": "rgb(245, 197, 24)",
+  "heroCtaColor": "rgb(8, 9, 11)",
+  "heroCtaClipped": false,
+  "contentTop": 246,
+  "heroMetaCtaOverlap": false,
+  "tuples": {
+    "factLabel": [
+      "12px",
+      "600",
+      "18px",
+      "normal"
+    ],
+    "factValue": [
+      "15px",
+      "500",
+      "24px",
+      "normal"
+    ],
+    "note": [
+      "15px",
+      "500",
+      "24px",
+      "normal"
+    ],
+    "tableHeader": [
+      "12px",
+      "700",
+      "18px",
+      "normal"
+    ],
+    "tableBody": [
+      "13px",
+      "500",
+      "20px",
+      "normal"
+    ],
+    "groupLabel": [
+      "12px",
+      "600",
+      "18px",
+      "normal"
+    ],
+    "groupBody": [
+      "15px",
+      "500",
+      "24px",
+      "normal"
+    ],
+    "groupMeta": [
+      "14px",
+      "500",
+      "22.4px",
+      "normal"
+    ],
+    "control": [
+      "14px",
+      "500",
+      "22.4px",
+      "normal"
+    ]
+  },
+  "overlapCount": 0
+}

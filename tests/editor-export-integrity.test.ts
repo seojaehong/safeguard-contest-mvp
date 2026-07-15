@@ -82,4 +82,65 @@ describe("editor export integrity", () => {
     expect(rendered).toContain(sentinel);
     expect(rendered).not.toContain("STALE_STRUCTURED_RISK_ROW");
   });
+
+  it("replaces stale schema-first fields with every edited row in the actual XLSX binary", async () => {
+    const editedRows = Array.from({ length: 27 }, (_, index) => ({
+      document: "작업계획서",
+      section: index === 0 ? "작업개요" : "작업단계 및 안전조치",
+      item: index === 0 ? "작업명" : `편집 작업 ${index}`,
+      content: index === 0 ? "CANONICAL_EDITED_WORK_NAME" : `CANONICAL_EDITED_ROW_${index}`
+    }));
+    const request = new NextRequest("http://localhost/api/export/xlsx", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        mode: "workPlanStructured",
+        edited: true,
+        scenario: {
+          companyName: "세이프건설",
+          companyType: "건설업",
+          siteName: "성수동 현장",
+          workSummary: "외벽 도장",
+          workerCount: 5,
+          weatherNote: "강풍 주의"
+        },
+        structured: {
+          workOverview: {
+            workName: "STALE_STRUCTURED_WORK_NAME",
+            description: "STALE_STRUCTURED_DESCRIPTION",
+            workerCount: 5,
+            location: "STALE_STRUCTURED_LOCATION",
+            condition: "STALE_STRUCTURED_CONDITION",
+            equipment: ["STALE_STRUCTURED_EQUIPMENT"]
+          },
+          workSteps: [],
+          stopCriteria: [],
+          emergencyResponse: { contacts: [] },
+          approvers: {}
+        },
+        rows: editedRows
+      })
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("spreadsheetml.sheet");
+    const workbook = new ExcelJS.Workbook();
+    const workbookBytes = Buffer.from(await response.arrayBuffer());
+    await workbook.xlsx.load(workbookBytes as unknown as Parameters<typeof workbook.xlsx.load>[0]);
+    const renderedCells: string[] = [];
+    workbook.eachSheet((sheet) => {
+      sheet.eachRow((row) => {
+        row.eachCell((cell) => renderedCells.push(String(cell.text || cell.value || "")));
+      });
+    });
+    const rendered = renderedCells.join("\n");
+
+    expect(rendered).toContain("CANONICAL_EDITED_WORK_NAME");
+    expect(rendered).toContain("CANONICAL_EDITED_ROW_26");
+    expect(rendered).not.toContain("STALE_STRUCTURED_WORK_NAME");
+    expect(rendered).not.toContain("STALE_STRUCTURED_DESCRIPTION");
+    expect(rendered).not.toContain("사용자 편집 반영");
+    expect(renderedCells.filter((cell) => cell === "CANONICAL_EDITED_WORK_NAME")).toHaveLength(1);
+  });
 });

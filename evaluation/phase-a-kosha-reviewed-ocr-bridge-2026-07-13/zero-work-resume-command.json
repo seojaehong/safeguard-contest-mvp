@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "safeclaw-kosha-zero-work-resume-command/v1",
+  "status": "observed_success",
+  "operation": "zero-work-resume-validation",
+  "command": {
+    "executable": "python",
+    "executableIdentity": {
+      "name": "python.exe",
+      "sha256": "d87063e5597f257004c731b66c59c56c91038861c6877b1a3dca6b8c4e919125",
+      "version": "3.13.3"
+    },
+    "orderedArgs": [
+      "scripts/snapshot_kosha_guide_corpus.py",
+      "--source",
+      "${KOSHA_SOURCE_DIR}",
+      "--output-dir",
+      "${KOSHA_SNAPSHOT_OUTPUT_DIR}",
+      "--resume"
+    ],
+    "cwd": {
+      "base": "repository",
+      "relative": "."
+    }
+  },
+  "environment": {
+    "KOSHA_SOURCE_DIR": {
+      "present": true,
+      "valueRecorded": false
+    },
+    "KOSHA_SNAPSHOT_OUTPUT_DIR": {
+      "present": true,
+      "valueRecorded": false
+    },
+    "PYTHON_EXECUTABLE": {
+      "present": false,
+      "valueRecorded": false
+    },
+    "KOSHA_OCR_REVIEW_HMAC_KEY": {
+      "present": false,
+      "valueRecorded": false
+    }
+  },
+  "timing": {
+    "startedAt": "2026-07-13T16:11:02.797Z",
+    "endedAt": "2026-07-13T16:11:08.910Z",
+    "elapsedSeconds": 6.113,
+    "exitCode": 0
+  },
+  "inputs": {
+    "recorderSha256": "c60ff729d87a64cadb72d11486475b21b7783281f6f4836d159827b07569463c",
+    "snapshotScriptSha256": "ddc57aa391130902a0c9fb9939ebd31e7c4459100f18e28c2590605ed3564803",
+    "sourceIdentitySha256": "1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d",
+    "sourceFiles": [
+      {
+        "name": "[2025] 기술지원규정(건설안전분야).zip",
+        "sha256": "6bc83955d3a14f675240205bf8405dad30b47dcce6f9713ef3a2c2835bccce37",
+        "size": 68704730
+      },
+      {
+        "name": "[2025] 기술지원규정(기계안전분야).zip",
+        "sha256": "105df6f4f9c3f8e08b17c553e2fa682997883be03a378e47bd84705c53036bd8",
+        "size": 80841260
+      },
+      {
+        "name": "[2025] 기술지원규정(리스크관리분야).zip",
+        "sha256": "a2f10f101547447f631373c81e6572fcbc87e438b34c174586d8cfa1122e71a1",
+        "size": 15780866
+      },
+      {
+        "name": "[2025] 기술지원규정(산업독성분야).zip",
+        "sha256": "9af1ae7c479338a8b0d8e02a84cb871167063a9a86ce8e239ba47b647533cfe9",
+        "size": 13303738
+      },
+      {
+        "name": "[2025] 기술지원규정(산업보건일반분야).zip",
+        "sha256": "b6f9b447ad0c969eccf2f0aa1f3f588bb3e6782bec503df310793cd6e09d834a",
+        "size": 27086302
+      },
+      {
+        "name": "[2025] 기술지원규정(산업안전일반분야).zip",
+        "sha256": "5deb19efd56bd9e4cc41d7e708f857ee6d5666b7a60162a19681b3cd3ea50450",
+        "size": 82313762
+      },
+      {
+        "name": "[2025] 기술지원규정(산업위생분야).zip",
+        "sha256": "7d07bf1f1af8e1364fd19f3048b83ad8e649af0806c9c691b1f79d81174ef03e",
+        "size": 39517790
+      },
+      {
+        "name": "[2025] 기술지원규정(산업의학분야).zip",
+        "sha256": "dcb9af37369d4f85390585b6b7ace0d5d76ce832378848bc9f5d6e1520d14a00",
+        "size": 19741638
+      },
+      {
+        "name": "[2025] 기술지원규정(전기안전분야).zip",
+        "sha256": "5a63d9859bcc3969a07ba5b73fd6ef48744a89bc8e2a2ef16ce5ed9bc96faad1",
+        "size": 64714800
+      },
+      {
+        "name": "[2025] 기술지원규정(화학안전분야).zip",
+        "sha256": "515da9dcc786b370b373a3a711089f6dd4de74cc6c635bf5226766ad49c512ad",
+        "size": 99333447
+      }
+    ],
+    "currentSha256": "479751702c27ebeaba2da5233bddb33318dd52028bdcea4701f150990efae2a5",
+    "manifestSha256": "702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519",
+    "generationPolicySha256": "54840fedece9d4b347ad7fd88808866f7ca1b41c5a08b9c6ca47b284c9411b1f",
+    "outputHashes": {
+      "checkpoint.json": "c9a6e7288ac17db864469ec9e25c74fd6ff6495a62adf82953b9102a55c3d531",
+      "chunks.jsonl": "33733a50dc835fbf3cf3776ddeb20253da47fa50034a95035f86794303463786",
+      "failures.jsonl": "9ccdfc86c21c3c5aab65624778dfade5b6062504748d1ff162784c3e2f1242a1",
+      "items.jsonl": "17ac72ec9ba85330e9a02f77b4c68c5fc4ade1f735b432233a31f6e8b424bf78"
+    }
+  },
+  "outputs": {
+    "processedThisRun": 0,
+    "snapshotId": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+    "currentSha256": "479751702c27ebeaba2da5233bddb33318dd52028bdcea4701f150990efae2a5",
+    "manifestSha256": "702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519",
+    "outputHashes": {
+      "checkpoint.json": "c9a6e7288ac17db864469ec9e25c74fd6ff6495a62adf82953b9102a55c3d531",
+      "chunks.jsonl": "33733a50dc835fbf3cf3776ddeb20253da47fa50034a95035f86794303463786",
+      "failures.jsonl": "9ccdfc86c21c3c5aab65624778dfade5b6062504748d1ff162784c3e2f1242a1",
+      "items.jsonl": "17ac72ec9ba85330e9a02f77b4c68c5fc4ade1f735b432233a31f6e8b424bf78"
+    },
+    "resumeLogSha256": "8a065099deb9799e269c8d00bb21840af873beb2386730fccdcb4bb668ce4d29",
+    "snapshotBytesUnchanged": true
+  },
+  "historicalFullGeneration": {
+    "commandEvidence": "verified_from_actual_session_tool_call",
+    "evidence": {
+      "rolloutId": "019f5ba5-b7ef-7441-8d4b-c854d0e15532",
+      "invocationTimestamp": "2026-07-13T14:54:43.429Z",
+      "completionTimestamp": "2026-07-13T15:26:57.993Z",
+      "invocationCallId": "call_LS9whGTLuZF0ra2YBXHUKmil",
+      "completionCallId": "call_FvtDN5Fs8dPVAn9rNbezGZNX"
+    },
+    "executable": "python",
+    "orderedArgs": [
+      "scripts/snapshot_kosha_guide_corpus.py",
+      "--source",
+      "${HOME}/Downloads/기술지원규정",
+      "--output-dir",
+      "${USERPROFILE}/dev/safeclaw-local-artifacts/kosha-corpus-body-recovery-2026-07-13-fixed-v1"
+    ],
+    "cwd": {
+      "base": "repository",
+      "relative": "."
+    },
+    "elapsedSeconds": 1929.811,
+    "independentlyRerun": false
+  },
+  "networkRequestPerformed": false,
+  "productionGetPerformed": false,
+  "dbMutationPerformed": false,
+  "corpusImportPerformed": false,
+  "launchReadiness": false
+}

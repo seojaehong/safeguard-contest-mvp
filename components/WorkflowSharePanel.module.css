@@ -1,5 +1,7 @@
 .panel {
   container-type: inline-size;
+  min-width: 0;
+  overflow: visible;
 }
 
 .panel :global(.channel-card),
@@ -12,6 +14,25 @@
 .panel :global(.workflow-textarea) {
   min-height: 84px;
   resize: vertical;
+}
+
+.panel :global(.share-form-shell),
+.panel :global(.message-preview-panel) {
+  min-width: 0;
+}
+
+.panel :global(#workflow-language-select) {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+}
+
+.panel :global(.message-preview-panel) {
+  overflow-wrap: anywhere;
+}
+
+.panel [data-share-primary] {
+  min-height: 48px;
 }
 
 @container (max-width: 560px) {
@@ -28,7 +49,7 @@
   }
 
   .panel :global(.channel-grid) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .panel :global(.share-status-pill) {
@@ -36,11 +57,23 @@
     text-align: left;
   }
 
+  .panel :global(.message-preview-panel) :global(.compact-head) {
+    display: grid;
+    justify-content: stretch;
+    gap: 4px;
+  }
+
+  .panel :global(.message-preview-panel) :global(.compact-head) strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
   .panel :global(.command-actions) {
     flex-wrap: wrap;
   }
 
   .panel :global(.command-actions) :global(.button) {
-    flex: 1 1 120px;
+    width: 100%;
+    flex: 1 1 100%;
   }
 }

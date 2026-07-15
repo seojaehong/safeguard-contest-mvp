@@ -1,0 +1,34 @@
+phase=green-v6-diff-scope
+head=c30e0991956e37bcde8d4ff306ce75ea1ffa1ecb
+redCommit=32a864f
+previousCandidate=f0b9162f3a9fc85ff2812f52203ff659674bc9ad
+mainTarget=920c7f360688352156de4854b4957a9f2f1f0e43
+commands=git diff --check; no-any audit; forbidden path audit; merge-tree
+startedAt=2026-07-14T21:13:39.7434351+09:00
+
+## product diff --check
+diffCheckExitCode=0
+
+## product changed paths
+lib/db-harness.ts
+lib/search.ts
+
+## branch changed paths from previous candidate
+evaluation/kosha-commercial-contract-remediation-2026-07-14/red-v6-fresh-p1.log
+lib/db-harness.ts
+lib/search.ts
+tests/commercial-harness.test.ts
+tests/kosha-current-review-run-ask.test.ts
+tests/mcp-tools.test.ts
+
+## added any audit
+none
+anyAuditExitCode=1
+
+## forbidden path audit
+none
+forbiddenAuditExitCode=1
+
+## merge tree against main target
+mergeTreeExitCode=0
+mergeTree=a5573ce55259e2fab9da9f513ce1a22fce6e9139

@@ -1,0 +1,12 @@
+TRANSCRIPT_SOURCE=interactive command output captured before GREEN
+COMMAND=npm.cmd test -- tests/reports-design-remediation.test.ts -t "preserves the shared 15px root and body baseline without a persistent split"
+
+FAIL tests/reports-design-remediation.test.ts > Reports Wave 1 static design contract > preserves the shared 15px root and body baseline without a persistent split
+AssertionError: expected '100%' to be 'var(--text-body)'
+
+Expected: "var(--text-body)"
+Received: "100%"
+
+Test Files  1 failed (1)
+Tests       1 failed | 11 skipped (12)
+EXIT_CODE=1

@@ -29,4 +29,14 @@ describe("resolveDeliverablesProvider", () => {
     });
     expect(result).toEqual({ provider: "anthropic", model: "claude-opus-4-8" });
   });
+
+  test.each(["hermes", "openclaw"])(
+    "does not treat the %s engine runtime as a model provider",
+    (providerFlag) => {
+      expect(resolveDeliverablesProvider({
+        anthropicApiKey: "sk-ant-xxx",
+        providerFlag,
+      })).toEqual({ provider: "vertex" });
+    },
+  );
 });

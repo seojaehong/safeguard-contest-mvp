@@ -1,0 +1,41 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/north-star-document-ux.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+ ❯ tests/north-star-document-ux.test.ts (4 tests | 4 failed) 17468ms
+     × keeps 'desktop-day' review and editing surfaces focused 9ms
+     × keeps 'desktop-night' review and editing surfaces focused 3ms
+     × keeps 'mobile-day' review and editing surfaces focused 1ms
+     × keeps 'mobile-night' review and editing surfaces focused 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/north-star-document-ux.test.ts > North Star document cockpit and editor UX > keeps 'desktop-day' review and editing surfaces focused
+ FAIL  tests/north-star-document-ux.test.ts > North Star document cockpit and editor UX > keeps 'desktop-night' review and editing surfaces focused
+ FAIL  tests/north-star-document-ux.test.ts > North Star document cockpit and editor UX > keeps 'mobile-day' review and editing surfaces focused
+ FAIL  tests/north-star-document-ux.test.ts > North Star document cockpit and editor UX > keeps 'mobile-night' review and editing surfaces focused
+AssertionError: expected 'dev' to be 'prod' // Object.is equality
+
+Expected: "prod"
+Received: "dev"
+
+ ❯ tests/north-star-document-ux.test.ts:100:27
+     98|   it.each(viewportCases)("keeps $label review and editing surfaces foc…
+     99|     if (!browser) throw new Error("Browser was not started");
+    100|     expect(harness?.mode).toBe("prod");
+       |                           ^
+    101|     const page = await browser.newPage({ viewport: { width, height } }…
+    102|     await openGeneratedWorkspace(page, theme);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  22:29:17
+   Duration  18.59s (transform 139ms, setup 0ms, import 556ms, tests 17.47s, environment 0ms)
+
+\n

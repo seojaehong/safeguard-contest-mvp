@@ -1,0 +1,297 @@
+{
+  "schemaVersion": "safeclaw-phase-a-kosha-reviewed-ocr-bridge-evaluation/v5",
+  "generatedAt": "2026-07-14T02:12:40.1330448+09:00",
+  "status": "HOLD_PENDING_FRESH_REVIEW",
+  "launchReadiness": false,
+  "readOnly": true,
+  "dbMutationPerformed": false,
+  "supabaseMutationPerformed": false,
+  "apiMutationPerformed": false,
+  "schemaMutationPerformed": false,
+  "migrationPerformed": false,
+  "dataMutationPerformed": false,
+  "packageOrLockMutationPerformed": false,
+  "networkRequestPerformed": false,
+  "productionGetPerformed": false,
+  "corpusImportPerformed": false,
+  "gitScope": {
+    "integrationTargetSha": "77d86416116b91809e1e0508c72564e06c8c31bc",
+    "candidateBaseSha": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+    "candidateSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+    "evidenceParentCandidateSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+    "candidateSeries": [
+      "38cbc9176453368237d85cb56903f782f9c09823",
+      "8e3b42492135799536913af9d1d6427256ad2ae4",
+      "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+      "c7261b7d632e1778f3280f059d1e122308817635",
+      "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f"
+    ],
+    "candidateApplyCommand": {
+      "executable": "git",
+      "args": [
+        "cherry-pick",
+        "38cbc9176453368237d85cb56903f782f9c09823",
+        "8e3b42492135799536913af9d1d6427256ad2ae4",
+        "3ed9be8d14b24047a8615ce1ef08361fcd0e40aa",
+        "c7261b7d632e1778f3280f059d1e122308817635",
+        "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f"
+      ]
+    },
+    "candidateScope": {
+      "baseExclusiveSha": "d3ad86530bc786d8024206cc5b7c7db60c055278",
+      "tipInclusiveSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+      "commitCount": 5,
+      "fileCount": 31,
+      "outOfScopeCount": 0,
+      "pathAllowlistVerified": true,
+      "fileListCommand": {
+        "executable": "git",
+        "args": [
+          "diff",
+          "--name-only",
+          "d3ad86530bc786d8024206cc5b7c7db60c055278",
+          "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+          "--"
+        ]
+      }
+    },
+    "latestRemediationScope": {
+      "baseExclusiveSha": "38cbc9176453368237d85cb56903f782f9c09823",
+      "tipInclusiveSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+      "commitCount": 4,
+      "fileCount": 27
+    },
+    "productRemediationCommit": {
+      "sha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+      "fileCount": 3
+    },
+    "evidenceCommitPolicy": {
+      "referencesExactParentCandidate": true,
+      "parentCandidateSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+      "selfShaEmbedded": false,
+      "evaluationOnly": true
+    },
+    "wholesaleBranchMergeRecommended": false
+  },
+  "source": {
+    "artifactLabel": "kosha-corpus-body-recovery-2026-07-13-fixed-v1",
+    "generatorLog": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-generation.log",
+    "resumeLog": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-resume.log",
+    "generationElapsedSeconds": 1929.811,
+    "resumeValidationElapsedSeconds": 2.422,
+    "resumeCommandWallElapsedSeconds": 6.113,
+    "resumeProcessedCount": 0,
+    "resumeCommandManifest": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/zero-work-resume-command.json",
+    "historicalGenerationCommandEvidence": "verified_from_actual_session_tool_call",
+    "historicalGenerationIndependentlyRerun": false,
+    "inventoryCount": 1040,
+    "completedCount": 1040,
+    "nativeSuccessCount": 1039,
+    "boundaryCount": 1,
+    "hardFailureCount": 0,
+    "failureLedgerCount": 1,
+    "chunkCount": 20520,
+    "bodyMissingCount": 1,
+    "reviewedOcrImportCount": 0,
+    "launchReady": false,
+    "sourceIdentitySha256": "1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d",
+    "recomputedSourceIdentitySha256": "1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d",
+    "generationPolicySha256": "54840fedece9d4b347ad7fd88808866f7ca1b41c5a08b9c6ca47b284c9411b1f",
+    "recomputedGenerationPolicySha256": "54840fedece9d4b347ad7fd88808866f7ca1b41c5a08b9c6ca47b284c9411b1f",
+    "snapshotId": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+    "recomputedSnapshotId": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+    "manifestSha256": "702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519",
+    "currentSha256": "479751702c27ebeaba2da5233bddb33318dd52028bdcea4701f150990efae2a5",
+    "outputHashes": {
+      "items.jsonl": "17ac72ec9ba85330e9a02f77b4c68c5fc4ade1f735b432233a31f6e8b424bf78",
+      "chunks.jsonl": "33733a50dc835fbf3cf3776ddeb20253da47fa50034a95035f86794303463786",
+      "failures.jsonl": "9ccdfc86c21c3c5aab65624778dfade5b6062504748d1ff162784c3e2f1242a1",
+      "checkpoint.json": "c9a6e7288ac17db864469ec9e25c74fd6ff6495a62adf82953b9102a55c3d531"
+    }
+  },
+  "staleSnapshotFinding": {
+    "declaredSourceIdentitySha256": "6d13d26f5038b0cc11ec840ec3c56bfafa014b3885e97942a3f0eb8cfdb8ab0e",
+    "recomputedSourceIdentitySha256": "419fd79edb324499c10f3efce6ef08b9624f93e3102a87624d8902f14a536c3f",
+    "declaredGenerationPolicySha256": "8abedcd1e046c6d0761d959689562fa95db4136d8772935c2f29796d462a462b",
+    "recomputedGenerationPolicySha256": "8e41acbf29713715589ecbf81e803b069426ff71fd8bb3db4bf8d156dae1790a",
+    "declaredSnapshotId": "bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51",
+    "sourceOnlyRecomputedSnapshotId": "18b4b4e0483a57c479aa095fe342b19ad57d7e6bbc3594a3285bb07916e73aaf",
+    "fullyRecomputedSnapshotId": "f2f1991fda891d9606f4d3123ee350fd2886c43a7b042b23aa9ec90beca3d037",
+    "unchangedOutputHashes": [
+      "items.jsonl",
+      "chunks.jsonl",
+      "failures.jsonl"
+    ],
+    "changedOutputHashes": [
+      "checkpoint.json"
+    ],
+    "rejectedByCurrentVerifier": true
+  },
+  "reviewedCandidate": {
+    "path": "evaluation/kosha-ocr-boundary-recovery-2026-07-13/B-E-3-2025-candidate.json",
+    "itemId": "kosha-60492776122f8b433994fc10",
+    "candidateFileSha256": "5d06ba7a04329e32e8fafb30b9311f6fb2ea70e248dfcb706aaa883e3632753b",
+    "candidateContentSha256": "e18c2ae92e938f564c5dff20f9c90fb76170bf27122ec71c9f03f5531719577e",
+    "candidateAttestationSha256": "9dbb03c1ddd14dfc293b800cc4d4762244996b3cac050545d813add30d97d57d",
+    "reviewState": "draft",
+    "humanConfirmed": false,
+    "generatorPresent": true,
+    "renderDpiPresent": true,
+    "renderDpi": 180,
+    "renderDpiAuthorizesImport": false,
+    "validatorAccepted": false,
+    "validatorError": "ocr_candidate_not_human_confirmed",
+    "corpusExtractionStatus": "boundary",
+    "bodyPresent": false,
+    "chunkCount": 0,
+    "importedCount": 0,
+    "modified": false
+  },
+  "remediation": {
+    "ordinaryCiUsesBranchHistory": false,
+    "ordinaryCiUsesLocalIntegrationRef": false,
+    "candidatePathAllowlistWeakened": false,
+    "evaluationOnlyScopeValidator": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/validate-kosha-bridge-evidence.mjs",
+    "snapshotVerifiedBeforeEnvCredentialAndFetch": true,
+    "successFlagWrittenOnlyWithSuccessfulBridgeArtifact": true,
+    "semanticSourceAndPolicyCanonicalizationUnified": true,
+    "multipleDistinctReviewedCandidateItemsAllowed": true,
+    "sameItemCandidateCollisionRejected": true,
+    "duplicateCandidateAttestationRejected": true,
+    "auditFailureStackSerialized": false,
+    "artifactScanContentFirst": true,
+    "binaryArtifactExclusionRule": "positive-byte-signature-only",
+    "utf8TextSkippedByExtension": false,
+    "unreadableUnknownTextFailsClosed": true,
+    "absolutePathMatchCount": 0,
+    "rawSecretOrHmacMatchCount": 0,
+    "sensitiveDigestLabelMatchCount": 0
+  },
+  "snapshotIntegritySmoke": {
+    "resultPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/snapshot-integrity-smoke/result.json",
+    "staleSnapshotErrorCode": "kosha-bridge-manifest-source-identity-mismatch",
+    "staleCredentialCheckReached": false,
+    "staleElapsedSeconds": 14.892,
+    "fixedSnapshotErrorCode": "supabase-read-credentials-unavailable",
+    "fixedCredentialCheckReached": true,
+    "fixedElapsedSeconds": 13.538,
+    "snapshotIntegrityVerifiedBeforeFetchRecorded": false,
+    "networkRequestPerformed": false
+  },
+  "integrationSimulation": {
+    "status": "pass",
+    "resultPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/integration-simulation.json",
+    "integrationTargetSha": "77d86416116b91809e1e0508c72564e06c8c31bc",
+    "candidateParentSha": "c75acc06e3b4cc64f4a23e2f2ba46da62f65278f",
+    "seriesAppliedCleanly": true,
+    "targetExistingPathsPreserved": true,
+    "candidateFileCount": 31,
+    "outOfScopeCount": 0,
+    "testCount": 233,
+    "passedCount": 233,
+    "failedCount": 0,
+    "frameworkDurationAggregateSeconds": 55.896,
+    "verificationWallElapsedAggregateSeconds": 87.451,
+    "strictTypecheckPassed": true,
+    "diffCheckPassed": true,
+    "temporaryWorktreeRemoved": true
+  },
+  "verification": {
+    "red": {
+      "branchDependentIntegration": {
+        "testCount": 120,
+        "passedCount": 119,
+        "expectedFailureCount": 1,
+        "frameworkDurationSeconds": 41.64,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/review-round-6-red-integration.txt"
+      },
+      "contentFirstScanner": {
+        "selectedTestCount": 8,
+        "passedCount": 1,
+        "expectedFailureCount": 7,
+        "skippedCount": 103,
+        "frameworkDurationSeconds": 1.49,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/review-round-6-red-scanner.txt"
+      },
+      "reportReconciliation": {
+        "expectedFailureCount": 3,
+        "expectedFrameworkDurationSeconds": 54.603,
+        "recordedStaleFrameworkDurationSeconds": 57.345,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/review-round-6-red-report.txt"
+      }
+    },
+    "final": {
+      "pythonFocused": {
+        "testCount": 64,
+        "passedCount": 64,
+        "failedCount": 0,
+        "frameworkDurationSeconds": 10.647,
+        "commandWallElapsedSeconds": 12.439,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-python.log",
+        "canonicalLfSha256": "6f5ce064f42bac7cdb2a159b24e4320dd37a17dc5efdfd80e196fba6090f7f60"
+      },
+      "typescriptFocused": {
+        "testCount": 124,
+        "passedCount": 124,
+        "failedCount": 0,
+        "previousFocusedTestCount": 120,
+        "netAddedTestCount": 4,
+        "frameworkDurationSeconds": 40.84,
+        "commandWallElapsedSeconds": 43.388,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typescript.log",
+        "canonicalLfSha256": "617bd231548b0430cff76e098caf5917f943f87559338fee442f5396b0fb22ab"
+      },
+      "ontologyEvidenceRegression": {
+        "testCount": 45,
+        "passedCount": 45,
+        "failedCount": 0,
+        "frameworkDurationSeconds": 1.29,
+        "commandWallElapsedSeconds": 3.802,
+        "naturalizeOnlyPreserved": true,
+        "failClosedPreserved": true,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-ontology-regression.log",
+        "canonicalLfSha256": "5d18b1609a2d112e4ed9e664bed145fa525e8137164105535fce1aa8a071d295"
+      },
+      "strictTypecheck": {
+        "passed": true,
+        "commandWallElapsedSeconds": 23.181,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-typecheck.log",
+        "canonicalLfSha256": "016359ec698e15e7d08ddd9d9f5653bc0365ae3744480e3e5f02b2653e1f3d6b"
+      },
+      "pathScanner": {
+        "finalArtifactFileCount": 33,
+        "textArtifactCount": 33,
+        "binaryExcludedCount": 0,
+        "unreadableTextArtifactCount": 0,
+        "absolutePathMatchCount": 0,
+        "credentialOrTokenMatchCount": 0,
+        "rawSecretOrHmacMatchCount": 0,
+        "sensitiveDigestLabelMatchCount": 0,
+        "scope": "all task evaluation artifacts",
+        "contentFirst": true,
+        "failClosed": true
+      },
+      "gitDiffCheck": {
+        "passed": true,
+        "logPath": "evaluation/phase-a-kosha-reviewed-ocr-bridge-2026-07-13/final-diff-check.log"
+      },
+      "totals": {
+        "testCount": 233,
+        "passedCount": 233,
+        "failedCount": 0,
+        "frameworkDurationAggregateSeconds": 52.777,
+        "testCommandWallElapsedAggregateSeconds": 59.629,
+        "verificationCommandWallElapsedAggregateSeconds": 82.81
+      },
+      "textHashCanonicalization": "utf8-crlf-to-lf"
+    }
+  },
+  "concerns": [
+    "Fresh independent review is still required; no integration approval is claimed.",
+    "The B-E-3 candidate remains draft and human_confirmed=false, so validator acceptance and import remain blocked; render_dpi=180 alone does not authorize either action.",
+    "The fixed local corpus still has one native OCR boundary and B-E-3 has zero chunks and zero imported rows.",
+    "Both production/local smoke runs stopped before any GET; no fresh production or deployment identity was established.",
+    "No DB, Supabase, API, schema, migration, package, lock, candidate, or tracked corpus data mutation was performed.",
+    "This task does not make the corpus or product launch-ready."
+  ]
+}

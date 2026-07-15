@@ -19,6 +19,7 @@ import {
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
+import { formatDispatchProviderStatus } from "@/lib/web-safe-presentation";
 import { applyWorkpackDeliverablesChange } from "@/lib/workpack-readiness";
 import {
   buildDefaultWorkers,
@@ -479,7 +480,7 @@ function useCurrentWorkpack(sample: AskResponse): CurrentWorkpackState {
             generationFingerprint: nextStored.generationFingerprint
           });
           setReopenStatus("ready");
-          setReopenMessage("서버 아카이브의 저장 문서팩을 현재 문서 화면으로 복원했습니다. 문서와 근거 요약은 현재 작업으로 저장됐고, 작업자·전파 snapshot은 저장된 항목이 있을 때만 별도 화면에서 이어집니다.");
+          setReopenMessage("서버 아카이브의 저장 문서팩을 현재 문서 화면으로 복원했습니다. 문서와 근거 요약은 현재 작업으로 저장됐고, 작업자·전파 저장본은 저장된 항목이 있을 때만 별도 화면에서 이어집니다.");
         }
       } catch (error) {
         console.error("server workpack reopen failed", error);
@@ -1019,7 +1020,7 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
   });
   const records = buildEducationRecordDrafts(editableWorkers, current.data.scenario.workSummary);
   const summary = summarizeWorkers(editableWorkers);
-  const workerSourceLabel = current.workerSnapshot ? "현재 작업공간 snapshot" : current.isCurrent ? "현재 문서팩에서 기본 추정" : "기본 예시";
+  const workerSourceLabel = current.workerSnapshot ? "현재 작업공간 저장본" : current.isCurrent ? "현재 문서팩에서 기본 추정" : "기본 예시";
   const draftLanguagePreview = buildDraftLanguagePreview(draft, current.data);
 
   useEffect(() => {
@@ -1284,7 +1285,7 @@ export function CurrentWorkersModule({ sample }: { sample: AskResponse }) {
         </div>
         <div className="worker-language-preview" aria-live="polite">
           <div>
-            <span className="eyebrow">Language preview</span>
+            <span className="eyebrow">언어 미리보기</span>
             <strong>{draftLanguagePreview.title}</strong>
           </div>
           <ul>
@@ -1330,7 +1331,7 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
   const targetWorkers = current.dispatchSnapshot?.targetWorkers.length
     ? filterRealDispatchTargets(current.dispatchSnapshot.targetWorkers)
     : recipientSuggestions.length ? filterRealDispatchTargets(buildWorkerDispatchTargets(workers)) : [];
-  const dispatchSourceLabel = current.dispatchSnapshot ? "작업공간 전파 snapshot" : current.workerSnapshot ? "작업자 snapshot에서 재계산" : "기본 예시 기반";
+  const dispatchSourceLabel = current.dispatchSnapshot ? "작업공간 전파 저장본" : current.workerSnapshot ? "작업자 저장본에서 재계산" : "기본 예시 기반";
 
   return (
     <>
@@ -1353,7 +1354,7 @@ export function CurrentDispatchModule({ sample }: { sample: AskResponse }) {
         <article className="safeclaw-module-panel">
           <span>제출 기준 채널</span>
           <h2>메일·문자 우선.</h2>
-          <p>전송 전 수신자, 채널, 언어, 메시지 미리보기를 확인한 뒤 provider 결과를 채널별로 표시합니다. 현재 대상 기준: {dispatchSourceLabel}.</p>
+          <p>전송 전 수신자, 채널, 언어, 메시지 미리보기를 확인한 뒤 전송 서비스 결과를 채널별로 표시합니다. 현재 대상 기준: {dispatchSourceLabel}.</p>
           {!recipientSuggestions.length ? (
             <p className="export-error">기본 예시 연락처는 실발송 대상에서 제외했습니다. 수신자를 직접 입력해야 전송할 수 있습니다.</p>
           ) : null}
@@ -1383,7 +1384,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
   const savedLabel = current.isCurrent ? formatSavedAt(current.savedAt) : "";
   const hasWorkerSnapshot = Boolean(current.workerSnapshot);
   const hasDispatchSnapshot = Boolean(current.dispatchSnapshot);
-  const browserArchiveLabel = current.isCurrent ? "브라우저 current snapshot" : "브라우저 snapshot 없음";
+  const browserArchiveLabel = current.isCurrent ? "브라우저 최신 저장본" : "브라우저 저장본 없음";
   const supabaseLoginAvailable = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   async function loadServerArchive() {
@@ -1495,7 +1496,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
             <p>관리자 로그인 세션이 있으면 Supabase에 저장된 문서팩과 전파 이력을 같은 화면에서 불러옵니다.</p>
           </article>
         </div>
-        <p className="muted small">전파 대상 기준: {hasDispatchSnapshot ? `작업공간 전파 snapshot ${dispatchTargets.length}명` : "전파 snapshot 없음, 현재 작업자 명단에서 재계산"} · 갱신 시각: {savedLabel || "대기"}.</p>
+        <p className="muted small">전파 대상 기준: {hasDispatchSnapshot ? `작업공간 전파 저장본 ${dispatchTargets.length}명` : "전파 저장본 없음, 현재 작업자 명단에서 재계산"} · 갱신 시각: {savedLabel || "대기"}.</p>
         <p className="export-error">로컬 스냅샷과 서버 이력은 구분합니다. 제출 증빙은 관리자 로그인 후 저장된 서버 이력만 사용하세요.</p>
       </section>
       </>
@@ -1531,7 +1532,7 @@ export function CurrentArchiveModule({ sample }: { sample: AskResponse }) {
             )}
             {serverArchive.dispatchLogs.length ? serverArchive.dispatchLogs.slice(0, 6).map((log) => (
               <article key={log.id}>
-                <strong>{log.channel} · {log.providerStatus || "상태 확인"}</strong>
+                <strong>{log.channel} · {formatDispatchProviderStatus(log.providerStatus)}</strong>
                 <code>{log.workflowRunId || log.provider || "dispatch_logs"}</code>
                 <p>{log.targetLabel || "수신자"} · {log.siteName} · {new Date(log.createdAt).toLocaleString("ko-KR")}{log.failureReason ? ` · ${log.failureReason}` : ""}</p>
               </article>

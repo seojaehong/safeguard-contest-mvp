@@ -5,8 +5,6 @@ import styles from "@/components/WorkflowSharePanel.module.css";
 import type { AskResponse } from "@/lib/types";
 import type { WorkpackReadiness } from "@/lib/workpack-readiness";
 import {
-  buildDisplayTargetWorkers,
-  formatDisplayTargetCount,
   type RecipientSuggestion,
   type WorkerDispatchTarget
 } from "@/lib/workspace";
@@ -20,7 +18,6 @@ import {
   buildDispatchLogIdempotencyKey,
   buildProviderDispatchIdempotencyKey,
   buildReadConfirmationStatus,
-  buildShareEvidenceSummary,
   buildWorkflowShareEvidenceScopeKey,
   buildWorkflowShareTargetSignature,
   classifyWorkflowDispatchPresentation,
@@ -34,7 +31,6 @@ import {
   parseShareSessionRows,
   readWorkflowShareEvidenceForScope,
   reduceWorkflowShareEvidence,
-  resolveShareLanguagePresentation,
   selectAuthorityShareSession,
   selectReusableShareSession,
   summarizeReadConfirmations,
@@ -183,14 +179,6 @@ const channelOptions: Array<{
     nextAction: "승인된 발신 채널과 템플릿 연결",
     badge: "승인 확인 필요",
     enabled: true
-  },
-  {
-    key: "band",
-    label: "밴드",
-    helper: "팀 채널 운영 승인이 없어 선택 불가",
-    nextAction: "관리자 채널 승인 후 활성화",
-    badge: "설정하면 사용할 수 있어요",
-    enabled: false
   }
 ];
 const activeDispatchChannels: ActiveChannel[] = ["email", "sms", "kakao"];
@@ -493,15 +481,10 @@ function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
   if (!language) return data.deliverables.foreignWorkerTransmission;
 
   return [
-    `[SafeClaw ${language.label} 안전공지] ${data.scenario.companyName}`,
-    `현장: ${data.scenario.siteName}`,
-    `작업: ${data.scenario.workSummary}`,
-    `핵심 위험: ${data.riskSummary.topRisk}`,
+    "[SafeClaw]",
+    language.nativeLabel,
     "",
-    `${language.label}(${language.nativeLabel})`,
     ...language.lines.map((line) => `- ${line}`),
-    "",
-    "관리자 확인: 현장 통역 또는 해당 언어 가능자 확인 후 전송하세요."
   ].join("\n");
 }
 
@@ -542,8 +525,8 @@ function formatMessageTargetLabel(data: AskResponse, selectedTarget: MessageTarg
 }
 
 function formatMessagePreviewHeading(data: AskResponse, selectedTarget: MessageTarget) {
-  if (selectedTarget === "manager") return "관리자용 한국어 메시지 미리보기";
-  return `외국인 근로자 전송본 · ${formatMessageTargetLabel(data, selectedTarget)}`;
+  if (selectedTarget === "manager") return "한국어 전송본 미리보기";
+  return `${formatMessageTargetLabel(data, selectedTarget)} 전송본 미리보기`;
 }
 
 export function WorkflowSharePanel({
@@ -558,9 +541,7 @@ export function WorkflowSharePanel({
 }: WorkflowSharePanelProps) {
   const [selectedChannels, setSelectedChannels] = useState<Channel[]>(["email", "sms"]);
   const [selectedMessageTarget, setSelectedMessageTarget] = useState<MessageTarget>("manager");
-  const [note, setNote] = useState("작업 전 TBM에서 공유하고, 교육 확인 서명까지 받은 뒤 보관해 주세요.");
   const [isSending, setIsSending] = useState(false);
-  const [isConfirming, setIsConfirming] = useState(false);
   const [phase, setPhase] = useState<WorkflowSharePhase>("idle");
   const [resolvedAuthority, setResolvedAuthority] = useState<(ShareAuthority & { targetSignature: string }) | null>(null);
   const [shareRecords, setShareRecords] = useState<ShareRecordsState>(EMPTY_SHARE_RECORDS);
@@ -610,12 +591,12 @@ export function WorkflowSharePanel({
   const { result, resultSource, shareSessionId, logSaveState } = visibleDispatchEvidence;
   const targetSignatureRef = useRef(targetSignature);
   const archiveWorkpackIdRef = useRef(archiveWorkpackId);
+  const dispatchInFlightRef = useRef(false);
   targetSignatureRef.current = targetSignature;
   archiveWorkpackIdRef.current = archiveWorkpackId;
 
   useEffect(() => {
     updateDispatchEvidence({ type: "scope_changed", scopeKey: dispatchEvidenceScopeKey });
-    setIsConfirming(false);
   }, [dispatchEvidenceScopeKey]);
 
   useEffect(() => {
@@ -744,30 +725,6 @@ export function WorkflowSharePanel({
     ));
   }
 
-  async function copyMessage() {
-    try {
-      await navigator.clipboard.writeText(selectedMessage);
-      updateDispatchEvidence({
-        type: "set_result",
-        scopeKey: dispatchEvidenceScopeKey,
-        result: { ok: true, configured: true, message: "공유 메시지를 클립보드에 복사했습니다." },
-        resultSource: "copy"
-      });
-    } catch (error) {
-      console.error("field message copy failed", error);
-      updateDispatchEvidence({
-        type: "set_result",
-        scopeKey: dispatchEvidenceScopeKey,
-        result: {
-          ok: false,
-          configured: true,
-          message: "클립보드 복사에 실패했습니다. 아래 메시지를 직접 선택해 복사해 주세요."
-        },
-        resultSource: "copy"
-      });
-    }
-  }
-
   async function saveDispatchHistory(request: DispatchArchiveRequest, evidenceScopeKey: string): Promise<void> {
     if (!authToken) {
       updateDispatchEvidence({
@@ -845,6 +802,7 @@ export function WorkflowSharePanel({
   }
 
   async function dispatchWorkflow() {
+    if (dispatchInFlightRef.current) return;
     let evidenceScopeKey = dispatchEvidenceScopeKey;
     const activeChannels = selectedChannels.filter((channel): channel is ActiveChannel => (
       activeDispatchChannels.includes(channel as ActiveChannel)
@@ -860,7 +818,6 @@ export function WorkflowSharePanel({
         },
         resultSource: "dispatch"
       });
-      setIsConfirming(false);
       return;
     }
     if (!targetWorkers.length) {
@@ -870,7 +827,6 @@ export function WorkflowSharePanel({
         result: { ok: false, configured: true, message: "공유할 작업자를 한 명 이상 선택해 주세요." },
         resultSource: "dispatch"
       });
-      setIsConfirming(false);
       return;
     }
     if (!activeChannels.length) {
@@ -884,12 +840,11 @@ export function WorkflowSharePanel({
         },
         resultSource: "dispatch"
       });
-      setIsConfirming(false);
       return;
     }
 
+    dispatchInFlightRef.current = true;
     setIsSending(true);
-    setIsConfirming(false);
     updateDispatchEvidence({ type: "begin_dispatch", scopeKey: evidenceScopeKey });
     try {
       let authority = effectiveAuthority;
@@ -967,7 +922,7 @@ export function WorkflowSharePanel({
         shareSessionId: activeShareSessionId,
         idempotencyKey: providerIdempotencyKey,
         channels: activeChannels,
-        operatorNote: note
+        operatorNote: ""
       });
       updateDispatchEvidence({
         type: "set_result",
@@ -1059,25 +1014,13 @@ export function WorkflowSharePanel({
         resultSource: "dispatch"
       });
     } finally {
+      dispatchInFlightRef.current = false;
       setPhase("idle");
       setIsSending(false);
     }
   }
 
-  const channelLabel = selectedChannels.map((channel) => formatChannelName(channel)).join(", ");
   const recipientLabel = targetWorkers.length ? `${targetWorkers.length}명 초대` : "작업자 선택 필요";
-  const displayTargetWorkers = buildDisplayTargetWorkers(data, targetWorkers);
-  const targetCountLabel = formatDisplayTargetCount(data, targetWorkers);
-  const targetLabel = formatMessageTargetLabel(data, selectedMessageTarget);
-  const workerDisplayLabel = `${displayTargetWorkers.slice(0, 3).map((worker) => worker.displayName).join(", ")}${displayTargetWorkers.length > 3 ? ` 외 ${displayTargetWorkers.length - 3}명` : ""}`;
-  const languagePresentation = resolveShareLanguagePresentation({
-    session: activeSession,
-    sessionReusable: Boolean(reusableSession),
-    plannedLanguageLabels: targetWorkers.map((worker) => worker.languageLabel)
-  });
-  const languageLabel = languagePresentation.label;
-  const languageBasis = languagePresentation.basis;
-  const activeChannelLabel = channelLabel || "채널 미선택";
   const previewItems = previewLines(selectedMessage);
   const storageReady = Boolean(authToken && effectiveAuthority);
   const sessionReady = Boolean(reusableSession);
@@ -1105,6 +1048,8 @@ export function WorkflowSharePanel({
     !authToken
     || shareBlocked
     || isSending
+    || shareRecords.status === "loading"
+    || shareRecords.status === "error"
     || !selectedChannels.length
     || !targetWorkers.length
     || !canResolveAuthority
@@ -1122,6 +1067,10 @@ export function WorkflowSharePanel({
       ? "로그인하고 전송하기"
       : shareBlocked
         ? "보완 후 전송할 수 있어요"
+        : shareRecords.status === "loading"
+          ? "공유 이력 확인 중"
+          : shareRecords.status === "error"
+            ? "공유 이력 확인 필요"
         : !targetWorkers.length
           ? "작업자 선택 필요"
           : !canResolveAuthority
@@ -1129,40 +1078,13 @@ export function WorkflowSharePanel({
             : !effectiveAuthority
               ? "저장 후 전송하기"
               : "문서팩 전송하기";
-  const permissionReady = Boolean(activeSession && isShareSessionPermissionReady(activeSession));
-  const permissionLabel = activeSession
-    ? permissionReady ? "초대된 사람만" : "서버 정책 확인 필요"
-    : "기본: 초대된 사람만";
-  const permissionDetail = activeSession
-    ? permissionReady
-      ? "관리자 편집 · 작업자 열람 전용 · 공개 링크 없음"
-      : "현재 세션의 share scope와 익명 접근 정책을 확인해야 합니다."
-    : "초대된 참여자만 열람";
-  const sessionDetail = shareRecords.status === "error" || shareRecords.status === "unconfigured"
-    ? "공유 설정을 불러오지 못했습니다. 잠시 후 다시 확인해 주세요."
-    : statusModel.session.detail;
-  const dispatchDetail = dispatchRecords.status === "error" || dispatchRecords.status === "unconfigured"
-    ? "전송 이력을 불러오지 못했습니다. 잠시 후 다시 확인해 주세요."
-    : statusModel.dispatch.detail;
-  const historyHasError = shareRecords.status === "error" || dispatchRecords.status === "error";
-  const dispatchEvidenceSummary = buildShareEvidenceSummary({
-    workpackSaved: storageReady,
-    sessionSaved: Boolean(activeSession),
-    dispatchLogState: logSaveState.status === "error" || logSaveState.status === "duplicate-risk"
-      ? "uncertain"
-      : logSaveState.status === "saved" || dispatchLogCount > 0
-        ? "saved"
-        : "planned",
-    workerConfirmationSupported: false
-  });
-
   return (
-    <article className={`share-panel workflow-panel ${styles.panel}`} id="dispatch">
+    <article className={`share-panel workflow-panel ${styles.panel}`} id="dispatch" data-share-root>
       <header className="share-workflow-header">
         <div>
-          <span className="eyebrow">현장 공유</span>
-          <strong>현장 공유</strong>
-          <p>저장된 문서팩을 선택한 참여자에게 보내고 전송 결과와 열람 여부를 확인합니다.</p>
+          <span className="eyebrow">오늘 작업</span>
+          <strong>문서팩 보내기</strong>
+          <p>대상과 채널을 확인하고 작업자 언어로 안전 내용을 전달합니다.</p>
         </div>
         <div className="share-status-pill" aria-label="공유 워크플로 상태" aria-live="polite">
           <span>{shareBlocked ? "보완 필요" : sessionReady ? "공유 가능" : storageReady ? "저장 완료" : "전송 준비"}</span>
@@ -1170,33 +1092,35 @@ export function WorkflowSharePanel({
         </div>
       </header>
 
-      <div className="share-permission-grid" aria-label="공유 대상과 권한 요약">
-        <section>
-          <span>권한</span>
-          <strong>{permissionLabel}</strong>
-          <p>{permissionDetail}</p>
-        </section>
-        <section>
-          <span>대상</span>
-          <strong>{targetCountLabel}</strong>
-          <p>{workerDisplayLabel}</p>
-        </section>
-        <section>
-          <span>언어</span>
-          <strong>{languageLabel}</strong>
-          <p>{languageBasis} · 현재 미리보기 {targetLabel}</p>
-        </section>
-        <section>
-          <span>기록 상태</span>
-          <strong>{dispatchEvidenceSummary.headline}</strong>
-          <p>{dispatchEvidenceSummary.detail}</p>
-        </section>
-      </div>
-
       <div className="share-form-shell">
-        <section className="share-form-card" aria-labelledby="workflow-channel-heading">
+        <section className="share-form-card share-recipient-card" aria-labelledby="workflow-recipient-heading" data-share-owner="targets">
+          <div className="recipient-section-head">
+            <span className="share-form-step">01</span>
+            <span className="field-label" id="workflow-recipient-heading">오늘 대상</span>
+            <span>{recipientLabel}</span>
+          </div>
+          {targetWorkers.length ? (
+            <div className="recipient-chip-list" aria-label="선택된 공유 대상">
+              {targetWorkers.map((worker) => (
+                <span key={`${worker.displayName}-${worker.languageCode}`} className="recipient-chip">
+                  {worker.displayName} · {worker.languageLabel}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="muted small">오늘 작업에 참여할 작업자를 먼저 선택해 주세요.</p>
+          )}
+          {recipientSuggestions.length ? (
+            <p className="muted small">저장된 연락처로 초대된 사람에게만 열람 링크를 보냅니다.</p>
+          ) : targetWorkers.length ? (
+            <p className="muted small">선택한 참여자의 연락처를 확인해 주세요.</p>
+          ) : null}
+          <a className="button secondary" href="/workers">대상 변경</a>
+        </section>
+
+        <section className="share-form-card" aria-labelledby="workflow-channel-heading" data-share-owner="channels">
           <div className="share-form-card-head">
-            <span>01</span>
+            <span>02</span>
             <strong id="workflow-channel-heading">채널</strong>
           </div>
           <div className="channel-grid" aria-label="전파 채널 선택">
@@ -1212,109 +1136,39 @@ export function WorkflowSharePanel({
                 aria-label={`${channel.label} · ${channel.badge}. 다음 행동: ${channel.nextAction}`}
               >
                 <strong>{channel.label}</strong>
-                <span>{channel.helper}</span>
-                <span>다음 행동 · {channel.nextAction}</span>
                 {channel.badge !== "사용 가능" ? <em>{channel.badge}</em> : null}
               </button>
             ))}
           </div>
-          <p className="channel-readiness-note">
-            메일과 문자는 선택할 수 있으며, 전송 전에 참여자 연락처와 채널 설정을 확인합니다. 카카오와 밴드는 설정을 마치면 사용할 수 있어요.
-          </p>
         </section>
 
-        <section className="share-form-card" aria-labelledby="workflow-language-heading">
+        <section className="share-form-card" aria-labelledby="workflow-language-heading" data-share-owner="language-preview">
           <div className="share-form-card-head">
-            <span>02</span>
-            <strong id="workflow-language-heading">미리보기 언어</strong>
+            <span>03</span>
+            <strong id="workflow-language-heading">언어 미리보기</strong>
           </div>
-          <div className="language-picker" aria-label="공유 메시지 미리보기 언어 선택">
-            <button
-              type="button"
-              className={`language-chip ${selectedMessageTarget === "manager" ? "active" : ""}`}
-              onClick={() => setSelectedMessageTarget("manager")}
-              aria-pressed={selectedMessageTarget === "manager"}
-            >
-              관리자용 한국어
-            </button>
-            {data.deliverables.foreignWorkerLanguages.map((language) => {
-              const key = `foreign:${language.code}` as const;
-              return (
-                <button
-                  key={language.code}
-                  type="button"
-                  className={`language-chip ${selectedMessageTarget === key ? "active" : ""}`}
-                  onClick={() => setSelectedMessageTarget(key)}
-                  title={language.rationale}
-                  aria-pressed={selectedMessageTarget === key}
-                  aria-label={`${language.label} 공유 메시지 선택`}
-                >
-                  {language.label}
-                  <span>{language.nativeLabel}</span>
-                </button>
-              );
-            })}
-          </div>
+          <label className="field-label" htmlFor="workflow-language-select">전송본 확인 언어</label>
+          <select
+            id="workflow-language-select"
+            className="input"
+            value={selectedMessageTarget}
+            onChange={(event) => setSelectedMessageTarget(event.target.value as MessageTarget)}
+          >
+            <option value="manager">관리자용 한국어</option>
+            {data.deliverables.foreignWorkerLanguages.map((language) => (
+              <option key={language.code} value={`foreign:${language.code}`}>
+                {language.label} · {language.nativeLabel}
+              </option>
+            ))}
+          </select>
           <p className="channel-readiness-note">
-            미리보기는 검토·복사용입니다. 실제 전송 문구는 저장된 문서팩과 작업자 언어에 맞춰 만듭니다.
+            작업자별 저장 언어로 자동 전송하며, 여기서는 실제 전달 문구를 미리 확인합니다.
           </p>
         </section>
 
-        <section className="share-form-card share-recipient-card" aria-labelledby="workflow-recipient-heading">
-          <div className="recipient-section-head">
-            <span className="share-form-step">03</span>
-            <span className="field-label" id="workflow-recipient-heading">초대 대상</span>
-            <span>{recipientLabel}</span>
-          </div>
-          {targetWorkers.length ? (
-            <div className="recipient-chip-list" aria-label="선택된 공유 대상">
-              {targetWorkers.map((worker) => (
-                <span key={`${worker.displayName}-${worker.languageCode}`} className="recipient-chip">
-                  {worker.displayName} · {worker.languageLabel} · 열람 전용
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="muted small">선택된 작업자가 없습니다. 예시 인원은 실제 초대 대상으로 표시하지 않습니다.</p>
-          )}
-          {recipientSuggestions.length ? (
-            <div className="recipient-chip-list" aria-label="저장 전 확인할 채널 연락처">
-              {recipientSuggestions.map((recipient) => (
-                <span key={`${recipient.channel}-${recipient.value}`} className="recipient-chip">
-                  {recipient.label} · {formatChannelName(recipient.channel)} · {recipient.languageLabel}
-                </span>
-              ))}
-            </div>
-          ) : targetWorkers.length ? (
-            <p className="muted small">선택한 참여자의 연락처가 없어 해당 채널로 전송할 수 없습니다.</p>
-          ) : null}
-          <p className="muted small">
-            저장된 작업자와 연락처만 전송 대상에 포함합니다.
-          </p>
-        </section>
-
-        <section className="share-form-card" aria-labelledby="workflow-note-heading">
-          <div className="share-form-card-head">
-            <span>04</span>
-            <strong id="workflow-note-heading">전달 메모</strong>
-          </div>
-          <textarea
-            id="workflow-note"
-            className="input workflow-textarea"
-            rows={3}
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            aria-labelledby="workflow-note-heading"
-          />
-        </section>
       </div>
 
-      {!authToken ? (
-        <div className="share-inline-note">
-          <p>로그인하면 문서팩과 전송·열람 이력이 서버에 안전하게 저장됩니다.</p>
-          <a className="button secondary" href="/login">로그인</a>
-        </div>
-      ) : !archiveWorkpackId ? (
+      {authToken && !archiveWorkpackId ? (
         <p className="share-inline-note">
           전송을 확정하면 문서팩과 선택한 작업자를 먼저 안전하게 저장합니다.
         </p>
@@ -1324,41 +1178,11 @@ export function WorkflowSharePanel({
         <section className="share-readiness-warning" aria-label="공유 전 보완 항목" role="status">
           <span>전송 전 확인</span>
           <strong>{readiness?.summary || "공유 전 보완 필요"}</strong>
-          <ul>
-            {shareDisabledReasons.map((reason) => <li key={reason}>{reason}</li>)}
-          </ul>
-          <p className="share-inline-note">다음 행동 · 문서 검수, 근거, 결재 항목을 보완한 뒤 공유 준비 상태를 다시 확인하세요.</p>
+          <p className="share-inline-note">{shareDisabledReasons.join(" · ")}</p>
         </section>
       ) : null}
 
-      <section className="share-permission-grid" aria-label="실제 저장 및 공유 이력 상태" aria-live="polite">
-        <section>
-          <span>문서팩 저장</span>
-          <strong>{statusModel.storage.label}</strong>
-          <p>{statusModel.storage.detail}</p>
-          <small>다음 행동 · {statusModel.storage.nextAction}</small>
-        </section>
-        <section>
-          <span>공유 설정</span>
-          <strong>{statusModel.session.label}</strong>
-          <p>{sessionDetail}</p>
-          <small>다음 행동 · {statusModel.session.nextAction}</small>
-        </section>
-        <section>
-          <span>전송 로그</span>
-          <strong>{statusModel.dispatch.label}</strong>
-          <p>{logSaveState.status === "error" || logSaveState.status === "duplicate-risk" ? customerSafeMessage(logSaveState.message, "전송 결과 저장 상태를 확인해 주세요.") : dispatchDetail}</p>
-          <small>다음 행동 · {statusModel.dispatch.nextAction}</small>
-        </section>
-        <section>
-          <span>열람 확인</span>
-          <strong>{statusModel.acknowledgment.label}</strong>
-          <p>{shareRecords.status === "error" ? "열람 확인 이력을 불러오지 못했습니다. 잠시 후 다시 확인해 주세요." : statusModel.acknowledgment.detail}</p>
-          <small>다음 행동 · {statusModel.acknowledgment.nextAction}</small>
-        </section>
-      </section>
-
-      <section className="message-preview-panel" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)}>
+      <section className="message-preview-panel" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)} data-share-preview>
         <div className="compact-head">
           <span className="eyebrow">메시지 미리보기</span>
           <strong>{formatMessagePreviewHeading(data, selectedMessageTarget)}</strong>
@@ -1369,79 +1193,20 @@ export function WorkflowSharePanel({
       </section>
 
       <div className="command-actions">
-        {historyHasError ? (
+        {!authToken ? (
+          <a href="/login" className="button command-primary workbench-primary-action" data-share-primary>{primaryLabel}</a>
+        ) : (
           <button
             type="button"
-            className="button secondary"
-            onClick={() => setHistoryRefreshKey((current) => current + 1)}
-            disabled={isSending}
+            className="button command-primary workbench-primary-action"
+            onClick={dispatchWorkflow}
+            disabled={primaryDisabled}
+            data-share-primary
           >
-            이력 다시 조회
+            {primaryLabel}
           </button>
-        ) : null}
-        <button
-          type="button"
-          className="button command-primary workbench-primary-action"
-          onClick={() => setIsConfirming(true)}
-          disabled={primaryDisabled}
-        >
-          {primaryLabel}
-        </button>
-        <button type="button" className="button secondary" onClick={copyMessage}>메시지 복사</button>
+        )}
       </div>
-
-      {isConfirming ? (
-        <div className="dispatch-confirm-panel workbench-share-confirmation" role="dialog" aria-modal="false" aria-label="현장 전파 전 확인">
-          <div className="compact-head">
-            <span className="eyebrow">전송 전 확인</span>
-            <strong>{activeChannelLabel}</strong>
-          </div>
-          <div className="dispatch-confirm-grid">
-            <div><span>대상</span><strong>{recipientLabel}</strong></div>
-            <div><span>권한</span><strong>초대된 사람만 · 열람 전용</strong></div>
-            <div><span>언어</span><strong>{languageLabel}</strong></div>
-          </div>
-          <p className="muted small">미리보기 {targetLabel} · {languageBasis}</p>
-          <div className="dispatch-evidence-ledger" aria-label="전송 과정의 저장 확인과 기록 계획">
-            <article className={storageReady ? "ready" : "warn"}>
-              <span>문서팩 저장</span>
-              <strong>{storageReady ? "저장된 문서팩 사용" : "먼저 안전하게 저장"}</strong>
-              <small>{storageReady ? `${effectiveAuthority?.workerIds.length || 0}명의 작업자 확인` : "문서팩과 작업자 정보를 저장한 뒤 진행"}</small>
-            </article>
-            <article className={sessionReady ? "ready" : "pending"}>
-              <span>공유 설정</span>
-              <strong>{sessionReady ? "기존 공유 설정 사용" : "참여자별 공유 설정 생성"}</strong>
-              <small>선택한 작업자만 열람 가능</small>
-            </article>
-            <article className="pending">
-              <span>전송 로그</span>
-              <strong>전송 결과를 안전하게 저장</strong>
-              <small>중복 전송을 막고 결과를 안전하게 보관</small>
-            </article>
-            <article className="pending">
-              <span>열람 확인</span>
-              <strong>관리자 표시와 분리</strong>
-              <small>관리자 확인과 작업자 열람 확인을 구분해 보관</small>
-            </article>
-          </div>
-          <p className="channel-readiness-note">
-            선택 채널 · {activeChannelLabel}. 카카오는 승인·템플릿 미설정 시 해당 채널만 설정 필요로 남습니다.
-          </p>
-          {selectedMessageTarget !== "manager" ? (
-            <p className="channel-readiness-note">
-              외국어 미리보기는 검토·복사용이며 실제 전송 결과와 구분해 보관합니다.
-            </p>
-          ) : null}
-          <div className="command-actions">
-            <button type="button" className="button" onClick={dispatchWorkflow} disabled={shareBlocked || isSending}>
-              {isSending ? phaseLabel[phase] : storageReady ? "지금 전송" : "저장 후 전송"}
-            </button>
-            <button type="button" className="button secondary" onClick={() => setIsConfirming(false)} disabled={isSending}>
-              취소
-            </button>
-          </div>
-        </div>
-      ) : null}
 
       {result ? (
         <div className={resultClassName}>
@@ -1481,10 +1246,6 @@ export function WorkflowSharePanel({
         </div>
       ) : null}
 
-      <details className="message-source-detail">
-        <summary>전체 메시지 원문</summary>
-        <pre aria-label="선택한 공유 메시지 원문">{selectedMessage}</pre>
-      </details>
     </article>
   );
 }

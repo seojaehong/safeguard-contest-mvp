@@ -12,10 +12,7 @@
   display: grid;
   align-content: start;
   gap: var(--space-4);
-  max-height: calc(100dvh - 80px);
-  overflow-y: auto;
   padding: var(--space-4);
-  scrollbar-width: thin;
 }
 
 .navigatorHeader {
@@ -120,7 +117,7 @@
   display: grid;
   gap: var(--space-4);
   min-width: 0;
-  padding: clamp(var(--space-5), 3vw, var(--space-8));
+  padding: clamp(var(--space-4), 2vw, var(--space-6));
   scroll-margin-top: var(--space-16);
 }
 
@@ -202,6 +199,105 @@
   line-height: var(--leading-longform);
   letter-spacing: var(--tracking-body);
   caret-color: var(--workspace-accent);
+}
+
+.editorModeBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  border-top: 1px solid var(--workspace-rule);
+  border-bottom: 1px solid var(--workspace-rule);
+  padding: var(--space-3) 0;
+}
+
+.editorModeBar > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.editorModeBar strong {
+  color: var(--workspace-ink);
+  font-size: var(--text-table);
+  font-weight: 600;
+  line-height: var(--leading-table);
+}
+
+.editorModeControl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(72px, 1fr));
+  gap: 2px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--radius-soft);
+  background: var(--workspace-surface-2);
+  padding: 2px;
+}
+
+.editorModeControl button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--workspace-muted);
+  padding: 0 var(--space-3);
+  font: inherit;
+  font-size: var(--text-control);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.editorModeControl button[aria-pressed="true"] {
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+  box-shadow: 0 0 0 1px var(--workspace-rule-strong);
+}
+
+.structuredEditor {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.documentSection {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.documentSection > label {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--workspace-ink);
+}
+
+.documentSection > label span {
+  color: var(--workspace-subtle);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.documentSection > label strong {
+  font-size: var(--text-table);
+  font-weight: 650;
+  line-height: var(--leading-table);
+}
+
+.editor :global(.document-textarea).sectionTextarea {
+  min-height: 0;
+  max-height: none;
+  overflow-y: hidden;
+  resize: none;
+  padding: var(--space-4);
+}
+
+.editor :global(.document-textarea).sourceTextarea {
+  max-height: none;
+  overflow-y: hidden;
+  resize: none;
 }
 
 .documentFootnote {
@@ -305,6 +401,60 @@
   padding: 18px;
 }
 
+.provenanceContent {
+  gap: 0;
+  padding: 0;
+}
+
+.provenanceSection {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  padding: 18px;
+}
+
+.provenanceSection + .provenanceSection {
+  border-top: 1px solid var(--workspace-rule);
+}
+
+.provenanceSection > .utilityContent {
+  border-top: 0;
+  padding: 0;
+}
+
+.appendixList {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.appendixList article {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--radius-soft);
+  background: var(--workspace-surface-2);
+  padding: var(--space-3);
+}
+
+.appendixList article > strong {
+  color: var(--workspace-ink);
+  font-size: var(--text-table);
+  font-weight: 650;
+}
+
+.appendixList pre {
+  max-width: 100%;
+  margin: 0;
+  overflow-x: auto;
+  color: var(--workspace-muted);
+  font-family: var(--font-multilingual);
+  font-size: var(--text-caption);
+  line-height: var(--leading-longform);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .sectionHeading {
   display: flex;
   align-items: center;
@@ -328,6 +478,8 @@
 
 .sectionHeading :global(.knowledge-link) {
   flex: 0 0 auto;
+  min-height: 44px;
+  align-items: center;
   border-radius: var(--radius-soft);
   background: var(--workspace-surface-2);
   color: var(--workspace-accent-text);
@@ -483,7 +635,7 @@
 .primaryExports > button {
   width: 100%;
   min-width: 0;
-  min-height: 42px;
+  min-height: 44px;
   white-space: normal;
 }
 
@@ -522,7 +674,7 @@
 .exportContent :global(.sheets-action-box .button) {
   width: 100%;
   min-width: 0;
-  min-height: 42px;
+  min-height: 44px;
   white-space: normal;
 }
 
@@ -685,31 +837,46 @@
 
 @media (max-width: 600px) {
   .workspace {
-    width: calc(100% - var(--space-4));
-    gap: var(--space-3);
-    margin-top: var(--space-4);
+    width: 100%;
+    gap: var(--space-2);
+    margin-top: 0;
   }
 
-  .navigator,
+  .navigator {
+    padding: var(--space-3);
+  }
+
   .documentBody {
-    padding: var(--space-4);
+    gap: var(--space-3);
+    padding: var(--space-3);
   }
 
   .navigatorHeader {
-    padding-bottom: 2px;
-  }
-
-  .navigatorHeader p {
     display: none;
   }
 
-  .editor :global(.document-textarea) {
-    min-height: 520px;
-    padding: var(--space-4);
+  .editor :global(.document-source-textarea) {
+    min-height: 420px;
+    padding: var(--space-3);
     font-size: var(--text-body);
     font-weight: 500;
     line-height: var(--leading-longform);
     letter-spacing: var(--tracking-body);
+  }
+
+  .editor :global(.document-textarea).sectionTextarea {
+    min-height: 0;
+    padding: var(--space-3);
+  }
+
+  .editorModeBar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .editorModeControl {
+    width: 100%;
   }
 
   .secondaryTools {
@@ -736,6 +903,10 @@
 
   .utilityContent {
     gap: 14px;
+    padding: 12px;
+  }
+
+  .provenanceSection {
     padding: 12px;
   }
 

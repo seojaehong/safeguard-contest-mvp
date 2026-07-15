@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { AskResponse } from "@/lib/types";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
+import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { OFFICIAL_CONTACTS } from "@/lib/safety-contacts";
 import {
   buildAccidentCasesResult,
@@ -200,6 +201,264 @@ describe("buildHarnessAgentResult", () => {
     expect(result.packet.retrievalContract.vector.ready).toBe(true);
     expect(result.packet.retrievalContract.sourceCounts.hybrid).toBe(1);
     expect(result.promptContext).toContain("검색 경로: hybrid-vector-rpc / vector=ready");
+  });
+
+  it("v4 returns a sanitized parentless KOSHA packet across the complete MCP payload", () => {
+    const markers = {
+      summary: "V4_MCP_PARENTLESS_SUMMARY",
+      body: "V4_MCP_PARENTLESS_BODY",
+      control: "V4_MCP_PARENTLESS_CONTROL",
+      action: "V4_MCP_PARENTLESS_ACTION",
+      evidenceRef: "V4_MCP_PARENTLESS_EVIDENCE_REF"
+    };
+    const result = buildHarnessAgentResult({
+      question: "지게차 보행자 충돌",
+      references: [{
+        id: "mcp-parentless-kosha-v4",
+        source_id: "kosha-guide-offline:mcp-parentless-kosha-v4",
+        item_type: "technical-guideline",
+        category: "운반하역",
+        subcategory: "지게차",
+        title: "KOSHA 지게차 보행자 충돌 기술지침",
+        summary: `${markers.summary} ${markers.action}`,
+        body: markers.body,
+        keywords: ["지게차", "보행자", "충돌"],
+        risk_tags: ["충돌"],
+        primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+        controls: [markers.control, markers.action],
+        evidence_role: "supporting",
+        retrieval_source: "local-ranked",
+        kosha_guide: {
+          referenceId: "mcp-parentless-kosha-v4",
+          stableDocumentKey: "MCP-PARENTLESS-V4",
+          version: "MCP-PARENTLESS-V4-2026",
+          quality: "accepted",
+          lifecycle: "current",
+          bodyKind: "native",
+          anchors: [{ page: 1, excerpt: markers.action }],
+          evidenceRef: markers.evidenceRef,
+          directEligible: true
+        }
+      }],
+      referenceSearch: []
+    });
+    const serializedPacket = JSON.stringify(result.packet);
+    const serializedMcpPayload = toToolResult(result).content[0]?.text || "";
+
+    const supporting = result.packet.supportingEvidence[0];
+    expect(supporting?.summary).toBe("");
+    expect(supporting?.body).toBeUndefined();
+    expect(supporting?.controls).toEqual([]);
+    expect(supporting?.keywords).toEqual([]);
+    expect(supporting?.risk_tags).toEqual([]);
+    expect(supporting?.kosha_guide?.evidenceRef).toBeNull();
+    for (const marker of Object.values(markers)) {
+      expect(serializedPacket.includes(marker)).toBe(false);
+      expect(result.promptContext.includes(marker)).toBe(false);
+      expect(serializedMcpPayload.includes(marker)).toBe(false);
+    }
+  });
+
+  it("v5 rejects broad-token false parents before MCP payload and prompt serialization", () => {
+    const markers = {
+      summary: "V5_MCP_FALSE_PARENT_SUMMARY",
+      body: "V5_MCP_FALSE_PARENT_BODY",
+      control: "V5_MCP_FALSE_PARENT_CONTROL",
+      action: "V5_MCP_FALSE_PARENT_ACTION",
+      evidenceRef: "V5_MCP_FALSE_PARENT_EVIDENCE_REF"
+    } as const;
+    const collisionGuide = {
+      id: "mcp-v5-forklift-collision-guide",
+      source_id: "kosha-guide-offline:mcp-v5-forklift-collision-guide",
+      item_type: "technical-guideline",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "KOSHA 지게차 보행자 충돌 예방 기술지침",
+      summary: `${markers.summary} ${markers.action}`,
+      body: markers.body,
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      controls: [markers.control, markers.action],
+      evidence_role: "supporting",
+      retrieval_source: "local-ranked",
+      kosha_guide: {
+        referenceId: "mcp-v5-forklift-collision-guide",
+        stableDocumentKey: "MCP-V5-FORKLIFT-COLLISION",
+        version: "MCP-V5-FORKLIFT-COLLISION-2026",
+        quality: "accepted",
+        lifecycle: "current",
+        bodyKind: "native",
+        anchors: [{ page: 1, excerpt: markers.action }],
+        evidenceRef: markers.evidenceRef,
+        directEligible: true
+      }
+    } satisfies SafetyReferenceItem;
+    const broadFireParent = {
+      id: "mcp-v5-broad-token-fire-parent",
+      source_id: "official-machinery-catalog",
+      item_type: "machinery",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
+      summary: "보행자 통행구역의 LPG 지게차 연료 누출 가스가 점화되어 화재가 발생할 수 있다.",
+      keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
+      risk_tags: [],
+      primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      controls: ["연료 밸브 차단과 점화원 통제"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    } satisfies SafetyReferenceItem;
+    const result = buildHarnessAgentResult({
+      question: "지게차 보행자 통행구역 충돌 위험",
+      references: [collisionGuide, broadFireParent],
+      referenceSearch: []
+    });
+    const supporting = result.packet.supportingEvidence.find((item) => item.id === collisionGuide.id);
+    const serializedPacket = JSON.stringify(result.packet);
+    const serializedMcpPayload = toToolResult(result).content[0]?.text || "";
+
+    expect(supporting?.summary).toBe("");
+    expect(supporting?.body).toBeUndefined();
+    expect(supporting?.controls).toEqual([]);
+    expect(supporting?.kosha_guide?.evidenceRef).toBeNull();
+    expect(result.promptContext).toContain('"parentEvidenceReady":false');
+    for (const marker of Object.values(markers)) {
+      expect(serializedPacket).not.toContain(marker);
+      expect(result.promptContext).not.toContain(marker);
+      expect(serializedMcpPayload).not.toContain(marker);
+    }
+  });
+
+  it("v5 removes query-hazard-unrelated direct evidence before MCP payload and prompt serialization", () => {
+    const directMarkers = {
+      summary: "V5_MCP_UNRELATED_DIRECT_SUMMARY",
+      control: "V5_MCP_UNRELATED_DIRECT_CONTROL",
+      document: "V5_MCP_UNRELATED_DIRECT_DOCUMENT"
+    } as const;
+    const collisionGuide = {
+      id: "mcp-v5-direct-filter-collision-guide",
+      source_id: "kosha-guide-offline:mcp-v5-direct-filter-collision-guide",
+      item_type: "technical-guideline",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "KOSHA 지게차 보행자 충돌 예방 기술지침",
+      summary: "지게차와 보행자의 이동 동선을 분리한다.",
+      body: "검증된 현행 KOSHA 지침 본문: 지게차 동선과 보행 동선을 분리한다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      controls: ["후진 경보와 유도자 배치"],
+      evidence_role: "supporting",
+      retrieval_source: "local-ranked",
+      kosha_guide: {
+        referenceId: "mcp-v5-direct-filter-collision-guide",
+        stableDocumentKey: "MCP-V5-DIRECT-FILTER-COLLISION",
+        version: "MCP-V5-DIRECT-FILTER-COLLISION-2026",
+        quality: "accepted",
+        lifecycle: "current",
+        bodyKind: "native",
+        anchors: [{ page: 1, excerpt: "지게차 동선 분리" }],
+        evidenceRef: "KOSHA 근거 mcp-v5-direct-filter-collision-guide p.1: 지게차 동선 분리",
+        directEligible: true
+      }
+    } satisfies SafetyReferenceItem;
+    const unrelatedDirect = {
+      id: "mcp-v5-query-unrelated-fire-direct",
+      source_id: "official-machinery-catalog",
+      item_type: "machinery",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거",
+      summary: `${directMarkers.summary} 연료 누출 가스가 점화되어 화재가 발생할 수 있다.`,
+      keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
+      risk_tags: ["화재"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", directMarkers.document],
+      controls: [directMarkers.control, "연료 밸브 차단과 점화원 통제"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    } satisfies SafetyReferenceItem;
+    const result = buildHarnessAgentResult({
+      question: "지게차 보행자 통행구역 충돌 위험",
+      references: [collisionGuide, unrelatedDirect],
+      referenceSearch: []
+    });
+    const serializedPacket = JSON.stringify(result.packet);
+    const serializedMcpPayload = toToolResult(result).content[0]?.text || "";
+
+    expect(result.packet.directEvidence).toEqual([]);
+    expect(result.promptContext).toContain('"parentEvidenceReady":false');
+    for (const marker of Object.values(directMarkers)) {
+      expect(serializedPacket).not.toContain(marker);
+      expect(result.promptContext).not.toContain(marker);
+      expect(serializedMcpPayload).not.toContain(marker);
+    }
+  });
+
+  it("v6 removes third-family direct evidence for mixed hazard queries before MCP packet and prompt serialization", () => {
+    const directMarkers = {
+      title: "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_TITLE",
+      summary: "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_SUMMARY",
+      control: "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_CONTROL",
+      document: "V6_MCP_MIXED_QUERY_THIRD_FAMILY_DIRECT_DOCUMENT"
+    } as const;
+    const collisionGuide = {
+      id: "mcp-v6-mixed-query-collision-guide",
+      source_id: "kosha-guide-offline:mcp-v6-mixed-query-collision-guide",
+      item_type: "technical-guideline",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: "KOSHA 지게차 보행자 충돌 예방 기술지침",
+      summary: "지게차와 보행자의 이동 동선을 분리한다.",
+      body: "검증된 현행 KOSHA 지침 본문: 지게차 동선과 보행 동선을 분리한다.",
+      keywords: ["지게차", "보행자", "동선", "충돌"],
+      risk_tags: ["충돌"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      controls: ["후진 경보와 유도자 배치"],
+      evidence_role: "supporting",
+      retrieval_source: "local-ranked",
+      kosha_guide: {
+        referenceId: "mcp-v6-mixed-query-collision-guide",
+        stableDocumentKey: "MCP-V6-MIXED-QUERY-COLLISION",
+        version: "MCP-V6-MIXED-QUERY-COLLISION-2026",
+        quality: "accepted",
+        lifecycle: "current",
+        bodyKind: "native",
+        anchors: [{ page: 1, excerpt: "지게차 동선 분리" }],
+        evidenceRef: "KOSHA 근거 mcp-v6-mixed-query-collision-guide p.1: 지게차 동선 분리",
+        directEligible: true
+      }
+    } satisfies SafetyReferenceItem;
+    const thirdFamilyFireDirect = {
+      id: "mcp-v6-mixed-query-third-family-fire-direct",
+      source_id: "official-machinery-catalog",
+      item_type: "machinery",
+      category: "운반하역",
+      subcategory: "지게차",
+      title: `${directMarkers.title} LPG 지게차 보행자 통행구역 연료계통 화재 직접 근거`,
+      summary: `${directMarkers.summary} 연료 누출 가스가 점화되어 화재가 발생할 수 있다.`,
+      keywords: ["LPG", "지게차", "보행자", "통행구역", "연료누출", "화재"],
+      risk_tags: ["화재"],
+      primary_documents: ["위험성평가표", "TBM 브리핑", directMarkers.document],
+      controls: [directMarkers.control, "연료 밸브 차단과 점화원 통제"],
+      evidence_role: "direct",
+      retrieval_source: "ranked"
+    } satisfies SafetyReferenceItem;
+    const result = buildHarnessAgentResult({
+      question: "지게차 보행자 충돌과 배전반 감전 위험을 검토해줘",
+      references: [collisionGuide, thirdFamilyFireDirect],
+      referenceSearch: []
+    });
+    const serializedPacket = JSON.stringify(result.packet);
+    const serializedMcpPayload = toToolResult(result).content[0]?.text || "";
+
+    expect(result.packet.directEvidence).toEqual([]);
+    expect(result.promptContext).toContain('"parentEvidenceReady":false');
+    for (const marker of Object.values(directMarkers)) {
+      expect(serializedPacket).not.toContain(marker);
+      expect(result.promptContext).not.toContain(marker);
+      expect(serializedMcpPayload).not.toContain(marker);
+    }
   });
 });
 

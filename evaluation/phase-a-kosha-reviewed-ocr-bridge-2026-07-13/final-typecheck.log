@@ -1,0 +1,9 @@
+command=npm.cmd run typecheck
+startedAt=2026-07-13T17:11:20.0103566Z
+
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+wallElapsedSeconds=23.181
+exitCode=0

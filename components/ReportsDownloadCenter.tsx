@@ -352,7 +352,7 @@ function DownloadActions({
   return (
     <div className="safeclaw-download-actions" aria-label="리포트 다운로드">
       <p className="safeclaw-download-note">
-        승인한 Before/After 사진만 포함해 개선 리포트와 운영 메모리를 분리합니다.
+        개선 전/개선 후 사진 포함 승인 항목만 개선 리포트와 운영 메모리에 포함합니다.
       </p>
       <p
         className={downloadState.status === "error" ? "export-error" : "safeclaw-download-note"}
@@ -453,7 +453,7 @@ function ReportStatePanel({ viewState }: { viewState: ReportViewState }) {
         </div>
         <div className="safeclaw-report-notes">
           <p>우측에서 기간과 필터를 조정하면 리포트를 다시 준비합니다.</p>
-          <p>사진 파일명은 Before/After 포함 승인 전까지 산출물에 들어가지 않습니다.</p>
+          <p>사진 파일명은 개선 전/개선 후 사진 포함 승인 전까지 산출물에 들어가지 않습니다.</p>
         </div>
       </section>
     </article>
@@ -539,7 +539,7 @@ function ReportDocument({
       <section className="safeclaw-workdoc-section">
         <div className="safeclaw-workdoc-section-head">
           <span>02</span>
-          <h3>위험 As-Is/To-Be</h3>
+          <h3>위험 개선 전/개선 후</h3>
         </div>
         <div className="safeclaw-report-table" role="table" aria-label="위험성평가 리포트">
           <div role="row">
@@ -580,13 +580,15 @@ function ReportDocument({
               <p><b>개선</b>{compactText(item.toBe, 62)}</p>
               <span>{item.reflectedDocuments.join(" · ") || "반영 문서 확인"}</span>
               {item.hasPhotoPair ? (
-                <label>
+                <label className="safeclaw-report-photo-approval">
                   <input
                     type="checkbox"
+                    aria-label="개선 전/개선 후 사진 포함 승인"
                     checked={item.photoApproved}
                     onChange={() => onTogglePhotoApproval(item.id)}
                   />
-                  Before/After 사진 포함 승인
+                  <span className="safeclaw-report-photo-checkbox-visual" aria-hidden="true" />
+                  개선 전/개선 후 사진 포함 승인
                 </label>
               ) : null}
             </article>
@@ -878,18 +880,7 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
       </section>
 
       <section className="safeclaw-workdoc-shell">
-        {snapshot ? (
-          <ReportDocument snapshot={snapshot} onTogglePhotoApproval={togglePhotoApproval} />
-        ) : (
-          <ReportStatePanel viewState={viewState} />
-        )}
         <aside className="safeclaw-workdoc-rail" aria-label="작업문서 도구">
-          {snapshot ? (
-            <section>
-              <span>데이터 출처</span>
-              <ReportProvenanceFacts snapshot={snapshot} label="고정 리포트 데이터 출처" />
-            </section>
-          ) : null}
           <section>
             <span>기간</span>
             <div className="safeclaw-report-controls" aria-label="리포트 기간 선택">
@@ -1041,9 +1032,9 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
             )}
           </section>
 
-          <section>
-            <span>요약</span>
-            <div className="safeclaw-workdoc-stats">
+          <section className="safeclaw-report-core-summary-section">
+            <span>핵심 요약</span>
+            <div className="safeclaw-workdoc-stats safeclaw-report-core-summary" aria-label="리포트 핵심 요약">
               <p><strong>{snapshot?.summary.riskRows || 0}</strong><span>평가 행</span></p>
               <p><strong>{snapshot?.summary.highRiskRows || 0}</strong><span>고위험</span></p>
               <p><strong>{snapshot?.summary.improvements || 0}</strong><span>개선사항</span></p>
@@ -1052,36 +1043,54 @@ export function ReportsDownloadCenter({ serverWorkpackId }: { serverWorkpackId?:
             </div>
           </section>
 
-          {sourceMode !== "browser_local" && preservedHistory.length ? (
-            <PreservedHistorySection
-              improvements={preservedHistory}
-              excludedFrom={usingSample ? "샘플" : "서버 저장 작업팩"}
-            />
-          ) : null}
+          <details className="safeclaw-report-secondary-tools">
+            <summary>추가 리포트 정보</summary>
+            {snapshot ? (
+              <section>
+                <span>데이터 출처</span>
+                <ReportProvenanceFacts snapshot={snapshot} label="고정 리포트 데이터 출처" />
+              </section>
+            ) : null}
 
-          <section>
-            <span>근거</span>
-            <EvidenceList refs={evidenceRefs} />
-          </section>
+            {sourceMode !== "browser_local" && preservedHistory.length ? (
+              <PreservedHistorySection
+                improvements={preservedHistory}
+                excludedFrom={usingSample ? "샘플" : "서버 저장 작업팩"}
+              />
+            ) : null}
 
-          <section>
-            <span>분류</span>
-            <div className="safeclaw-report-groups">
-              <GroupList title="공정별" groups={snapshot?.groups.byProcess || []} />
-              <GroupList title="작업별" groups={snapshot?.groups.byTask || []} />
-              <GroupList title="위험등급별" groups={snapshot?.groups.byRiskLevel || []} />
-              <GroupList title="문서반영별" groups={snapshot?.groups.byDocument || []} />
-            </div>
-          </section>
+            <section>
+              <span>근거</span>
+              <EvidenceList refs={evidenceRefs} />
+            </section>
 
-          <section>
-            <span>다음</span>
-            <div className="safeclaw-workdoc-links">
-              <Link href="/documents">문서팩 편집</Link>
-              <Link href="/workspace">개선사항 추가</Link>
-            </div>
-          </section>
+            <section>
+              <span>분류</span>
+              <div className="safeclaw-report-groups">
+                <GroupList title="공정별" groups={snapshot?.groups.byProcess || []} />
+                <GroupList title="작업별" groups={snapshot?.groups.byTask || []} />
+                <GroupList title="위험등급별" groups={snapshot?.groups.byRiskLevel || []} />
+                <GroupList title="문서반영별" groups={snapshot?.groups.byDocument || []} />
+              </div>
+            </section>
+
+            <section>
+              <span>다음</span>
+              <div className="safeclaw-workdoc-links">
+                <Link href="/documents">문서팩 편집</Link>
+                <Link href="/workspace">개선사항 추가</Link>
+              </div>
+            </section>
+          </details>
         </aside>
+        {snapshot ? (
+          <details className="safeclaw-report-preview">
+            <summary>리포트 본문 미리보기</summary>
+            <ReportDocument snapshot={snapshot} onTogglePhotoApproval={togglePhotoApproval} />
+          </details>
+        ) : (
+          <ReportStatePanel viewState={viewState} />
+        )}
       </section>
     </>
   );

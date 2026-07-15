@@ -159,6 +159,23 @@ function toReportPath(path) {
   return relative(process.cwd(), path).replaceAll("\\", "/");
 }
 
+function classifyAuditFailure(error) {
+  const errorType = error instanceof Error && /^[A-Za-z][A-Za-z0-9_.-]*$/u.test(error.name)
+    ? error.name
+    : "Error";
+  const message = error instanceof Error ? error.message : "";
+  const koshaCode = message.match(/\b(kosha-[a-z0-9][a-z0-9.-]*(?::[A-Za-z0-9._-]+)*)\b/u)?.[1];
+  let errorCode = koshaCode || "audit-failure";
+  if (message === "Supabase read credentials are unavailable") {
+    errorCode = "supabase-read-credentials-unavailable";
+  } else if (message.startsWith("Supabase bridge GET failed:")) {
+    errorCode = "supabase-bridge-get-failed";
+  } else if (message.startsWith("--") || message.startsWith("Unknown argument:")) {
+    errorCode = "audit-arguments-invalid";
+  }
+  return { errorType, errorCode };
+}
+
 function sanitizeLocalSource(source) {
   if (!source || typeof source !== "object") return source;
   const metadata = source.metadata && typeof source.metadata === "object"
@@ -296,8 +313,11 @@ function readKoshaBridgeSnapshot(rootPath) {
   const manifestPath = resolveKoshaBridgeDescendant(root, resolve(snapshotDir, "manifest.json"), "manifest");
   const itemsPath = resolveKoshaBridgeDescendant(root, resolve(snapshotDir, "items.jsonl"), "items");
   const chunksPath = resolveKoshaBridgeDescendant(root, resolve(snapshotDir, "chunks.jsonl"), "chunks");
+  const failuresPath = resolveKoshaBridgeDescendant(root, resolve(snapshotDir, "failures.jsonl"), "failures");
+  const checkpointPath = resolveKoshaBridgeDescendant(root, resolve(snapshotDir, "checkpoint.json"), "checkpoint");
   const manifestBytes = readFileSync(manifestPath);
-  const manifest = JSON.parse(manifestBytes.toString("utf8"));
+  const manifestJson = new TextDecoder("utf-8", { fatal: true }).decode(manifestBytes);
+  const manifest = JSON.parse(manifestJson);
   if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
     throw new Error("KOSHA snapshot manifest must be a JSON object");
   }
@@ -306,20 +326,41 @@ function readKoshaBridgeSnapshot(rootPath) {
   }
   const itemsBytes = readFileSync(itemsPath);
   const chunksBytes = readFileSync(chunksPath);
+  const failuresBytes = readFileSync(failuresPath);
+  const checkpointBytes = readFileSync(checkpointPath);
+  const snapshotOutputHashes = {
+    "items.jsonl": hashBytes(itemsBytes),
+    "chunks.jsonl": hashBytes(chunksBytes),
+    "failures.jsonl": hashBytes(failuresBytes),
+    "checkpoint.json": hashBytes(checkpointBytes)
+  };
+  const manifestSourceIdentity = manifest.source_identity;
   return {
     localItems: readJsonLinesBytes(itemsBytes, "KOSHA items"),
     localChunks: readJsonLinesBytes(chunksBytes, "KOSHA chunks"),
     snapshot: {
+      currentSchemaVersion: current.schema_version,
       currentSnapshotId: snapshotId,
       currentReproducibilityHash: current.reproducibility_hash,
+      currentSourceIdentitySha256: current.source_identity_sha256,
+      currentGenerationPolicySha256: current.generation_policy_sha256,
+      manifestSchemaVersion: manifest.schema_version,
       manifestSnapshotId: manifest.snapshot_id,
       manifestReproducibilityHash: manifest.reproducibility_hash,
+      manifestSourceIdentity,
+      manifestSourceIdentitySha256: manifestSourceIdentity && typeof manifestSourceIdentity === "object"
+        ? manifestSourceIdentity.identity_sha256
+        : null,
+      manifestGenerationPolicy: manifest.generation_policy,
+      manifestGenerationPolicySha256: manifest.generation_policy_sha256,
       currentManifestSha256: current.manifest.sha256,
       manifestFileSha256: hashBytes(manifestBytes),
       manifestItemsSha256: manifest.output_hashes["items.jsonl"],
-      itemsFileSha256: hashBytes(itemsBytes),
+      itemsFileSha256: snapshotOutputHashes["items.jsonl"],
       manifestChunksSha256: manifest.output_hashes["chunks.jsonl"],
-      chunksFileSha256: hashBytes(chunksBytes)
+      chunksFileSha256: snapshotOutputHashes["chunks.jsonl"],
+      manifestOutputHashes: manifest.output_hashes,
+      snapshotOutputHashes
     }
   };
 }
@@ -349,7 +390,7 @@ async function fetchProductionBridgeRows(zipFile, internalPath, fetchJsonWithRet
     };
     const { response, payload } = await fetchJsonWithRetry(
       url,
-      { headers },
+      { method: "GET", headers },
       `Supabase ${credential.role} production/local bridge GET`
     );
     attempts.push({ role: credential.role, httpStatus: response.status });
@@ -374,6 +415,7 @@ function formatBridgeMarkdown(report) {
 - requestMethod: ${report.productionRead.method}
 - dbMutationPerformed: ${report.dbMutationPerformed}
 - humanConfirmation: ${report.humanConfirmation}
+- launchReadiness: ${report.launchReadiness}
 
 ## Exact tuple
 
@@ -389,9 +431,16 @@ function formatBridgeMarkdown(report) {
 - item id: \`${candidate.local.itemId}\`
 - raw SHA-256: \`${candidate.local.rawSha256}\`
 - item SHA-256: \`${candidate.local.itemSha256}\`
-- reviewed candidate content SHA-256: ${candidate.reviewedCandidateContentSha256
-    ? `\`${candidate.reviewedCandidateContentSha256}\``
+- candidate file SHA-256: ${candidate.candidateFileSha256
+    ? `\`${candidate.candidateFileSha256}\``
     : "없음"}
+- candidate content SHA-256: ${candidate.candidateContentSha256
+    ? `\`${candidate.candidateContentSha256}\``
+    : "없음"}
+- candidate attestation SHA-256: ${candidate.candidateAttestationSha256
+    ? `\`${candidate.candidateAttestationSha256}\``
+    : "없음"}
+- bridge reproducibility SHA-256: \`${candidate.reproducibilityHash}\`
 
 ## Chunks
 
@@ -418,6 +467,8 @@ async function runProductionLocalBridgeAudit({
     throw new Error("--bridge-zip-file and --bridge-internal-path are required with --bridge-only");
   }
   if (options.offline) throw new Error("--bridge-only requires a production GET");
+  const local = readKoshaBridgeSnapshot(options.localCorpusRoot);
+  audit.verifyKoshaBridgeSnapshotIntegrity(local.snapshot);
   const defaultEnvCandidates = [
     resolve(process.cwd(), ".env.local"),
     resolve(process.cwd(), "..", "..", ".env.local")
@@ -426,14 +477,13 @@ async function runProductionLocalBridgeAudit({
     ? resolve(options.envFile)
     : defaultEnvCandidates.find((candidate) => existsSync(candidate)) || null;
   const envLoaded = readEnvFile(envFile);
-  const local = readKoshaBridgeSnapshot(options.localCorpusRoot);
   const production = await fetchProductionBridgeRows(
     options.bridgeZipFile,
     options.bridgeInternalPath,
     audit.fetchKoshaJsonWithRetry
   );
   const reviewedCandidates = reviewedCandidatePath
-    ? [readJsonObject(reviewedCandidatePath, "reviewed OCR candidate")]
+    ? [audit.prepareKoshaReviewedCandidateBridgeInput(readFileSync(reviewedCandidatePath))]
     : [];
   const candidate = audit.buildKoshaProductionLocalBridgeCandidate({
     productionRows: production.rows,
@@ -449,6 +499,7 @@ async function runProductionLocalBridgeAudit({
     readOnly: true,
     humanConfirmation: "pending",
     dbMutationPerformed: false,
+    launchReadiness: false,
     item_count: 1,
     success_count: 1,
     failure_count: 0,
@@ -462,6 +513,7 @@ async function runProductionLocalBridgeAudit({
       deploymentIdentityProven: false
     },
     snapshotIntegrity: "verified",
+    snapshotIntegrityVerifiedBeforeFetch: true,
     candidate,
     environment: {
       envFileConfigured: Boolean(envFile),
@@ -474,6 +526,7 @@ async function runProductionLocalBridgeAudit({
   const markdownReference = toReportPath(markdownPath);
   const logReference = toReportPath(logPath);
   logLines.push("mode=production-local-bridge requestMethod=GET");
+  logLines.push("snapshotIntegrityVerifiedBeforeFetch=true");
   logLines.push(`productionRows=${production.rows.length} localItem=${candidate.local.itemId} chunks=${candidate.chunks.length}`);
   logLines.push(`report=${reportReference}`);
   logLines.push(`elapsedSeconds=${elapsedSeconds}`);
@@ -1082,14 +1135,19 @@ ${report.boundaries.map((item) => `- ${item}`).join("\n")}
 `;
 }
 
-const options = parseArguments(process.argv.slice(2));
+let options;
+try {
+  options = parseArguments(process.argv.slice(2));
+} catch (error) {
+  const failure = classifyAuditFailure(error);
+  console.error(`${failure.errorType}:${failure.errorCode}`);
+  process.exit(1);
+}
 if (options.help) {
   console.log(AUDIT_USAGE);
   process.exit(0);
 }
-const reviewedCandidatePath = options.bridgeOnly && options.reviewedCandidate
-  ? resolveKoshaReviewedCandidatePath(options.localCorpusRoot, options.reviewedCandidate)
-  : null;
+let reviewedCandidatePath = null;
 const started = performance.now();
 const generatedAt = new Date().toISOString();
 const outputDir = resolve(process.cwd(), options.outputDir);
@@ -1102,6 +1160,9 @@ const logLines = [`${generatedAt} KOSHA GUIDE audit started`, "readOnly=true dbM
 
 let moduleServer;
 try {
+  reviewedCandidatePath = options.bridgeOnly && options.reviewedCandidate
+    ? resolveKoshaReviewedCandidatePath(options.localCorpusRoot, options.reviewedCandidate)
+    : null;
   moduleServer = await createServer({
     root: process.cwd(),
     appType: "custom",
@@ -1758,7 +1819,7 @@ try {
   writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
   writeFileSync(markdownPath, `${formatMarkdown(report).trim()}\n`, "utf8");
   logLines.push(`checks=${verification.checkCount} failed=${verification.failedCheckCount} boundaries=${verification.boundaryCheckCount}`);
-  logLines.push(`report=${reportPath}`);
+  logLines.push(`report=${toReportPath(reportPath)}`);
   logLines.push(`elapsedSeconds=${elapsedSeconds}`);
   writeFileSync(logPath, `${logLines.join("\n")}\n`, "utf8");
 
@@ -1771,10 +1832,10 @@ try {
     elapsed_seconds: report.elapsed_seconds,
     verification,
     manifestFailures,
-    reportPath,
-    markdownPath,
-    logPath,
-    manifestCandidatePath
+    reportPath: toReportPath(reportPath),
+    markdownPath: toReportPath(markdownPath),
+    logPath: toReportPath(logPath),
+    manifestCandidatePath: toReportPath(manifestCandidatePath)
   }, null, 2));
 
   if (options.strict && (verification.failedCheckCount > 0 || manifestFailures.length > 0)) {
@@ -1782,10 +1843,11 @@ try {
   }
   }
 } catch (error) {
-  const message = error instanceof Error ? error.stack || error.message : String(error);
-  logLines.push(`fatal=${message}`);
+  const failure = classifyAuditFailure(error);
+  logLines.push(`fatal_type=${failure.errorType}`);
+  logLines.push(`fatal_code=${failure.errorCode}`);
   writeFileSync(logPath, `${logLines.join("\n")}\n`, "utf8");
-  console.error(message);
+  console.error(`${failure.errorType}:${failure.errorCode}`);
   process.exitCode = 1;
 } finally {
   if (moduleServer) await moduleServer.close();

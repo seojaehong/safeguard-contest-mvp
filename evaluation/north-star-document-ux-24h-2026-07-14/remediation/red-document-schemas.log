@@ -1,0 +1,87 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-editor-structured-sections.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+ ❯ tests/workpack-editor-structured-sections.test.ts (6 tests | 3 failed) 23ms
+     × provides a document-specific fallback section schema for all 12 documents 7ms
+     × parses actual transmission and field-message samples into meaningful fallback sections 8ms
+     × keeps an empty work permit as a multi-section schema instead of one blank body 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workpack-editor-structured-sections.test.ts > workpack editor structured sections > provides a document-specific fallback section schema for all 12 documents
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/workpack-editor-structured-sections.test.ts:46:63
+     44|     });
+     45|
+     46|     expect(schemas.every(({ labels }) => labels.length >= 3)).toBe(tru…
+       |                                                               ^
+     47|     expect(schemas.every(({ labels }) => new Set(labels).size === labe…
+     48|     expect(new Set(schemas.map(({ labels }) => labels.join("|"))).size…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/workpack-editor-structured-sections.test.ts > workpack editor structured sections > parses actual transmission and field-message samples into meaningful fallback sections
+AssertionError: expected [ '전송 기본 정보' ] to deeply equal [ Array(4) ]
+
+- Expected
++ Received
+
+  [
+-   "공지 기본 정보",
+-   "쉬운 한국어",
+-   "다국어 안내",
+-   "관리자 확인",
++   "전송 기본 정보",
+  ]
+
+ ❯ tests/workpack-editor-structured-sections.test.ts:102:63
+    100|     const message = buildStructuredDocumentSections("kakaoMessage", sa…
+    101|
+    102|     expect(transmission.body.map((section) => section.label)).toEqual([
+       |                                                               ^
+    103|       "공지 기본 정보",
+    104|       "쉬운 한국어",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/workpack-editor-structured-sections.test.ts > workpack editor structured sections > keeps an empty work permit as a multi-section schema instead of one blank body
+AssertionError: expected [ '허가 기본 정보' ] to deeply equal [ '허가 기본 정보', '작업 전 허가조건', …(2) ]
+
+- Expected
++ Received
+
+  [
+    "허가 기본 정보",
+-   "작업 전 허가조건",
+-   "격리·보호구 확인",
+-   "작업 종료 확인",
+  ]
+
+ ❯ tests/workpack-editor-structured-sections.test.ts:121:56
+    119|     const model = buildStructuredDocumentSections("workPermitDraft", "…
+    120|
+    121|     expect(model.body.map((section) => section.label)).toEqual([
+       |                                                        ^
+    122|       "허가 기본 정보",
+    123|       "작업 전 허가조건",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 3 passed (6)
+   Start at  22:01:51
+   Duration  757ms (transform 123ms, setup 0ms, import 157ms, tests 23ms, environment 0ms)
+
+EXPLICIT_EXIT_CODE=1

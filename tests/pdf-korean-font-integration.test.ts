@@ -6,6 +6,12 @@ import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 import { POST } from "@/app/api/export/pdf/route";
 import {
+  ACCIDENT_TYPE_VALUES,
+  FOUR_M_VALUES,
+  type AccidentType,
+  type FourM
+} from "@/lib/risk-assessment-schema";
+import {
   SFNT_CHECKSUM_MAGIC,
   extractFinalFontFile2Streams,
   validateSfntChecksums
@@ -23,6 +29,30 @@ const fontPaths = [
   path.join(root, "public/fonts/NotoSansKR-Bold.ttf")
 ] as const;
 const licensePath = path.join(root, "public/fonts/NotoSansKR-OFL.txt");
+
+const expectedFourMLabels = {
+  Man: "인적 요인",
+  Machine: "기계·설비 요인",
+  Media: "작업환경 요인",
+  Management: "관리 요인"
+} satisfies Readonly<Record<FourM, string>>;
+
+const expectedAccidentTypeLabels = {
+  fall: "추락",
+  slip: "미끄러짐",
+  struckBy: "맞음",
+  caughtIn: "끼임",
+  cut: "베임",
+  burn: "화상",
+  electricShock: "감전",
+  chemicalExposure: "화학물질 노출",
+  asphyxiation: "질식",
+  heatIllness: "온열질환",
+  traffic: "교통사고",
+  collapse: "붕괴",
+  fireExplosion: "화재·폭발",
+  other: "기타"
+} satisfies Readonly<Record<AccidentType, string>>;
 
 const payload = {
   title: "위험성평가표",
@@ -258,6 +288,10 @@ describe("Korean PDF font integration", () => {
     }
 
     expect(extractedPages[0]).toContain("위험성평가표");
+    extractedPages.forEach((pageText, index) => {
+      expect(pageText).toContain("위험성평가표 · 가온테크");
+      expect(pageText).toContain(`${index + 1} / ${document.numPages}쪽`);
+    });
     expect(extractedPages.at(-1)).toContain(sentinel);
     expect(extractedPages.at(-1)).toContain("작성자");
     expect(extractedPages.at(-1)).toContain("승인");
@@ -497,6 +531,7 @@ describe("Korean PDF font integration", () => {
   it("preserves canonical structured risk rows in extracted binary PDF text", async () => {
     const structuredPayload = {
       ...payload,
+      riskLevel: "low",
       rows: [],
       structuredRiskRows: [
         {
@@ -505,11 +540,25 @@ describe("Korean PDF font integration", () => {
           unitTask: "천장 배관 점검",
           hazard: "누전으로 인한 감전",
           currentControls: "분전반 전원 차단",
-          riskLevel: "상",
+          riskLevel: "high",
           additionalControls: "잠금표지 후 검전",
           owner: "작업반장",
           dueDate: "작업 전",
-          status: "조치예정"
+          status: "done"
+        },
+        {
+          unitTask: "분전반 확인",
+          hazard: "활선 접촉",
+          riskLevel: "medium",
+          additionalControls: "절연 보호구 확인",
+          status: "planned"
+        },
+        {
+          unitTask: "통로 정리",
+          hazard: "넘어짐",
+          riskLevel: "low",
+          additionalControls: "통로 장애물 제거",
+          status: "needsReview"
         }
       ]
     };
@@ -535,9 +584,67 @@ describe("Korean PDF font integration", () => {
       "분전반 전원 차단",
       "잠금표지 후 검전",
       "작업반장",
-      "작업 전"
+      "작업 전",
+      "위험수준: 하",
+      "위험성: 가능성 확인 / 중대성 확인 / 상",
+      "위험성: 가능성 확인 / 중대성 확인 / 중",
+      "위험성: 가능성 확인 / 중대성 확인 / 하",
+      "조치 완료",
+      "조치 예정"
     ]) {
-      expect(extracted).toContain(value);
+      expect(extracted.replace(/\s+/gu, "")).toContain(value.replace(/\s+/gu, ""));
+    }
+    expect(extracted.replace(/\s+/gu, "")).toContain("검토필요");
+    expect(extracted).not.toMatch(/\b(?:high|medium|low|planned|done|needsReview)\b/u);
+    await document.destroy();
+  });
+
+  it("localizes every canonical 4M and accident type enum in extracted binary PDF text", async () => {
+    const structuredRiskRows = ACCIDENT_TYPE_VALUES.map((accidentType, index) => ({
+      id: `ENUM-${index + 1}`,
+      process: "열거형 점검",
+      unitTask: `재해유형 점검 ${index + 1}`,
+      hazard: `유해위험요인 ${index + 1}`,
+      fourM: FOUR_M_VALUES[index % FOUR_M_VALUES.length],
+      accidentType,
+      currentControls: "현재 안전조치 확인",
+      riskLevel: "low",
+      additionalControls: "추가 안전조치 확인",
+      owner: "관리감독자",
+      dueDate: "작업 전",
+      status: "planned"
+    }));
+    const response = await POST(createRequestForPayload({
+      ...payload,
+      rows: [],
+      structuredRiskRows
+    }));
+
+    expect(response.status).toBe(200);
+    Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const document = await pdfjs.getDocument({
+      data: new Uint8Array(await response.arrayBuffer())
+    }).promise;
+    const extractedPages: string[] = [];
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber);
+      const textContent = await page.getTextContent();
+      extractedPages.push(textContent.items.flatMap((item) => "str" in item ? [item.str] : []).join(" "));
+    }
+    const extracted = extractedPages.join(" ");
+    const compactExtracted = extracted.replace(/\s+/gu, "");
+
+    expect(Object.keys(expectedFourMLabels)).toEqual([...FOUR_M_VALUES]);
+    expect(Object.keys(expectedAccidentTypeLabels)).toEqual([...ACCIDENT_TYPE_VALUES]);
+    for (const label of Object.values(expectedFourMLabels)) {
+      expect(compactExtracted).toContain(label.replace(/\s+/gu, ""));
+    }
+    for (const label of Object.values(expectedAccidentTypeLabels)) {
+      expect(compactExtracted).toContain(label.replace(/\s+/gu, ""));
+    }
+    for (const rawValue of [...FOUR_M_VALUES, ...ACCIDENT_TYPE_VALUES]) {
+      expect(extracted).not.toMatch(new RegExp(`\\b${rawValue}\\b`, "u"));
     }
     await document.destroy();
   });

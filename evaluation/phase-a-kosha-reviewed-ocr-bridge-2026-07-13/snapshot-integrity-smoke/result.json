@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "safeclaw-kosha-bridge-snapshot-integrity-smoke/v2",
+  "generatedAt": "2026-07-14T00:34:42.7510310+09:00",
+  "readOnly": true,
+  "networkRequestPerformed": false,
+  "dbMutationPerformed": false,
+  "launchReadiness": false,
+  "staleSnapshotMissingCredential": {
+    "declaredSnapshotId": "bb8dd542a0d8dc1ac37e330944bc24fcbfef6eea72e4afb106f96a9c19e63d51",
+    "declaredSourceIdentitySha256": "6d13d26f5038b0cc11ec840ec3c56bfafa014b3885e97942a3f0eb8cfdb8ab0e",
+    "recomputedSourceIdentitySha256": "419fd79edb324499c10f3efce6ef08b9624f93e3102a87624d8902f14a536c3f",
+    "declaredGenerationPolicySha256": "8abedcd1e046c6d0761d959689562fa95db4136d8772935c2f29796d462a462b",
+    "recomputedGenerationPolicySha256": "8e41acbf29713715589ecbf81e803b069426ff71fd8bb3db4bf8d156dae1790a",
+    "sourceOnlyRecomputedSnapshotId": "18b4b4e0483a57c479aa095fe342b19ad57d7e6bbc3594a3285bb07916e73aaf",
+    "fullyRecomputedSnapshotId": "f2f1991fda891d9606f4d3123ee350fd2886c43a7b042b23aa9ec90beca3d037",
+    "exitCode": 1,
+    "errorCode": "kosha-bridge-manifest-source-identity-mismatch",
+    "credentialCheckReached": false,
+    "snapshotIntegrityVerifiedBeforeFetchRecorded": false,
+    "elapsedSeconds": 14.892,
+    "auditLog": "snapshot-integrity-smoke/stale-final/audit.log",
+    "consoleLog": "snapshot-integrity-smoke/stale-final/console.log"
+  },
+  "fixedSnapshotMissingCredential": {
+    "snapshotId": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+    "sourceIdentitySha256": "1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d",
+    "generationPolicySha256": "54840fedece9d4b347ad7fd88808866f7ca1b41c5a08b9c6ca47b284c9411b1f",
+    "manifestSha256": "702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519",
+    "declaredAndRecomputedIdentityMatch": true,
+    "exitCode": 1,
+    "errorCode": "supabase-read-credentials-unavailable",
+    "credentialCheckReached": true,
+    "snapshotIntegrityVerifiedBeforeFetchRecorded": false,
+    "elapsedSeconds": 13.538,
+    "auditLog": "snapshot-integrity-smoke/fixed-final/audit.log",
+    "consoleLog": "snapshot-integrity-smoke/fixed-final/console.log"
+  }
+}

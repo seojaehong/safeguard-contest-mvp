@@ -20,7 +20,7 @@ export { MCP_TOOL_NAMES } from "@/lib/mcp-tool-contract.mjs";
 
 const log = createLogger("mcp-auth");
 
-export type McpAuthSource = "db" | "env";
+export type McpAuthSource = "db" | "env" | "broker";
 
 /** MCP 도구 핸들러에 전달되는 인증 컨텍스트. 평문 토큰을 포함하지 않는다. */
 export interface McpAuthContext {
@@ -45,6 +45,7 @@ const DEFAULT_SCOPES = ["tools:*"] as const;
 
 export type McpToolName = (typeof MCP_TOOL_NAMES)[number];
 
+const MCP_TOOL_NAME_SET: ReadonlySet<string> = new Set(MCP_TOOL_NAMES);
 const READ_TOOL_NAMES: ReadonlySet<McpToolName> = new Set([
   "run_safeclaw_harness_agent",
   "get_weather_signals",
@@ -123,6 +124,14 @@ export function isMcpToolAllowed(
   return scopes.includes("tools:write") && WRITE_TOOL_NAMES.has(toolName);
 }
 
+export function isMcpToolName(value: unknown): value is McpToolName {
+  return typeof value === "string" && MCP_TOOL_NAME_SET.has(value);
+}
+
+export function isReadOnlyMcpTool(value: unknown): value is McpToolName {
+  return isMcpToolName(value) && READ_TOOL_NAMES.has(value);
+}
+
 export function requireMcpToolScope(
   context: McpAuthContext | null | undefined,
   toolName: McpToolName,
@@ -172,7 +181,7 @@ export function computeEnablement(input: { hasEnvTokens: boolean; hasSupabase: b
 export function asAuthContext(value: unknown): McpAuthContext | null {
   if (!value || typeof value !== "object") return null;
   const v = value as Record<string, unknown>;
-  if (v.source !== "db" && v.source !== "env") return null;
+  if (v.source !== "db" && v.source !== "env" && v.source !== "broker") return null;
   if (!Array.isArray(v.scopes)) return null;
   return {
     siteId: typeof v.siteId === "string" ? v.siteId : null,

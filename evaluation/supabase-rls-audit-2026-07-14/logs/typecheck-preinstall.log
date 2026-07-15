@@ -1,0 +1,9 @@
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+app/api/export/pdf/route.ts(5,55): error TS2307: Cannot find module '@pdf-lib/fontkit' or its corresponding type declarations.
+app/api/export/pdf/route.ts(15,8): error TS2307: Cannot find module 'pdf-lib' or its corresponding type declarations.
+tests/helpers/pdf-font-checksum.ts(8,8): error TS2307: Cannot find module 'pdf-lib' or its corresponding type declarations.
+tests/pdf-font-failure.test.ts(3,29): error TS2307: Cannot find module 'pdf-lib' or its corresponding type declarations.
+tests/pdf-korean-font-integration.test.ts(3,21): error TS2307: Cannot find module '@pdf-lib/fontkit' or its corresponding type declarations.

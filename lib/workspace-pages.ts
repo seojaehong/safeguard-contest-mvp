@@ -31,11 +31,10 @@ export function canOpenWorkspacePage(input: PageGateInput): { allowed: boolean; 
   if (input.targetPage === "document" && (input.hasWorkpack || input.isGenerating)) {
     return { allowed: true };
   }
-  if (input.targetPage === "share" && input.hasWorkpack && input.canShare !== false) {
-    return { allowed: true };
-  }
-  if (input.targetPage === "share" && input.hasWorkpack && input.canShare === false) {
-    return { allowed: false, reason: "공유 전 검수와 보완을 완료해 주세요." };
+  if (input.targetPage === "share" && input.hasWorkpack) {
+    return input.canShare === false
+      ? { allowed: true, reason: "공유 화면에서 보완 항목을 확인할 수 있습니다. 실제 전송은 계속 차단됩니다." }
+      : { allowed: true };
   }
   return {
     allowed: false,

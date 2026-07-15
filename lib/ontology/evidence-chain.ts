@@ -331,6 +331,122 @@ function findDefinition(input: string): {
   return null;
 }
 
+/**
+ * Phase A provenance may be attached only when the requested task and the
+ * question's single explicit registry task resolve to the same canonical chain.
+ */
+export function isEvidenceChainTaskBoundToQuestion(
+  requestedTask: string,
+  question: string,
+  expectedChainId: EvidenceChainDefinition["chainId"],
+): boolean {
+  const requested = findDefinition(requestedTask);
+  if (!requested || requested.definition.chainId !== expectedChainId) return false;
+  const normalizedQuestion = question.normalize("NFC");
+
+  const mentions: Array<{
+    chainId: EvidenceChainDefinition["chainId"];
+    label: string;
+    start: number;
+    end: number;
+  }> = [];
+  for (const definition of EVIDENCE_CHAIN_REGISTRY) {
+    const labels = [definition.canonicalTaskLabel, ...definition.aliases];
+    for (const label of labels) {
+      for (const range of findTaskLabelRanges(normalizedQuestion, label)) {
+        mentions.push({ chainId: definition.chainId, label, ...range });
+      }
+    }
+  }
+
+  const mentionedChainIds = new Set(mentions.map((mention) => mention.chainId));
+  if (mentionedChainIds.size !== 1 || !mentionedChainIds.has(expectedChainId)) return false;
+
+  const expectedMentions = mentions.filter((mention) => mention.chainId === expectedChainId);
+  if (expectedMentions.some((mention) => hasUnsupportedTaskIntent(normalizedQuestion, mention))) {
+    return false;
+  }
+  return expectedMentions.some((mention) => hasPositiveTaskIntent(normalizedQuestion, mention));
+}
+
+const TASK_LABEL_PARTICLES = "은|는|이|가|을|를|과|와|도|만|의|에|에서|으로|로|부터|까지|여부";
+const TASK_NEGATION_PATTERN =
+  /(?:하지\s*않|안\s*(?:함|하|할|하는|합니다)|제외|배제|금지|취소|중단|중지|미수행|아님|아닌|결정되지\s*않|확정되지\s*않)/u;
+const TASK_UNCERTAINTY_PATTERN =
+  /(?:미확정|미정|불확실|확인\s*(?:전|필요)|검토\s*중|논의\s*중|(?:수행|실시|진행|착수|시작)할지\s*(?:검토|논의|확인)?|아직\s*(?:결정|확정)되지\s*않|(?:결정|확정)\s*(?:전|보류))/u;
+const TASK_CLAUSE_BOUNDARY_PATTERN = /[.!?;。！？\n\r]/u;
+const TASK_POSITIVE_PATTERN = new RegExp(
+  `^\\s*(?:(?:${TASK_LABEL_PARTICLES})\\s*)?` +
+    "(?:위한|수행|실시|진행|예정|계획|준비|착수|시작|계속|중(?=$|\\s|[.,!?])|중이다|중입니다|" +
+    "한다|합니다|문서팩|관련\\s*(?:문서|문서팩))",
+  "u",
+);
+const TASK_POSITIVE_PREFIX_PATTERN =
+  /(?:수행할|실시할|진행할|예정된|계획된|준비한)\s*$/u;
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function findTaskLabelRanges(
+  question: string,
+  label: string,
+): Array<{ start: number; end: number }> {
+  const labelPattern = label
+    .normalize("NFC")
+    .trim()
+    .split(/\s+/u)
+    .map(escapeRegex)
+    .join("\\s+");
+  if (!labelPattern) return [];
+
+  const pattern = new RegExp(
+    `(^|[^가-힣A-Za-z0-9])(${labelPattern})(?=$|[^가-힣A-Za-z0-9]|(?:${TASK_LABEL_PARTICLES}))`,
+    "gu",
+  );
+  return Array.from(question.normalize("NFC").matchAll(pattern), (match) => {
+    const prefixLength = match[1]?.length ?? 0;
+    const matchedLabel = match[2] ?? "";
+    const start = (match.index ?? 0) + prefixLength;
+    return { start, end: start + matchedLabel.length };
+  });
+}
+
+function hasUnsupportedTaskIntent(
+  question: string,
+  mention: { start: number; end: number },
+): boolean {
+  let clauseStart = mention.start;
+  while (
+    clauseStart > 0
+    && !TASK_CLAUSE_BOUNDARY_PATTERN.test(question.charAt(clauseStart - 1))
+  ) {
+    clauseStart -= 1;
+  }
+
+  let clauseEnd = mention.end;
+  while (
+    clauseEnd < question.length
+    && !TASK_CLAUSE_BOUNDARY_PATTERN.test(question.charAt(clauseEnd))
+  ) {
+    clauseEnd += 1;
+  }
+
+  const clause = question.slice(clauseStart, clauseEnd);
+  return TASK_NEGATION_PATTERN.test(clause) || TASK_UNCERTAINTY_PATTERN.test(clause);
+}
+
+function hasPositiveTaskIntent(
+  question: string,
+  mention: { label: string; start: number; end: number },
+): boolean {
+  if (normalizeLabel(question) === normalizeLabel(mention.label)) return true;
+  const suffix = question.slice(mention.end, mention.end + 24);
+  if (TASK_POSITIVE_PATTERN.test(suffix)) return true;
+  const prefix = question.slice(Math.max(0, mention.start - 16), mention.start);
+  return TASK_POSITIVE_PREFIX_PATTERN.test(prefix);
+}
+
 function publishedRuntimeGraph(graph: OntologyGraph): Pick<OntologyGraph, "nodes" | "edges"> {
   const nodes = graph.nodes.filter((node) => node.review_state === "published");
   const nodeIds = new Set(nodes.map((node) => node.node_id));
@@ -467,6 +583,22 @@ function aggregateGuidanceStatus(guidance: readonly KoshaGuidanceRecord[]): Evid
     return { reviewState: "published", resolution: "resolved" };
   }
   return { reviewState: "verified", resolution: "resolved" };
+}
+
+function aggregateSifStatus(sifEvidence: readonly SifEvidenceRecord[]): EvidenceReviewStatus {
+  if (
+    sifEvidence.length === 0 ||
+    sifEvidence.some(
+      (source) =>
+        source.resolution !== "resolved" ||
+        (source.reviewState !== "verified" && source.reviewState !== "published"),
+    )
+  ) {
+    return { reviewState: "draft", resolution: "unresolved" };
+  }
+  return sifEvidence.every((source) => source.reviewState === "published")
+    ? { reviewState: "published", resolution: "resolved" }
+    : { reviewState: "verified", resolution: "resolved" };
 }
 
 export function resolveEvidenceChain(
@@ -632,6 +764,7 @@ export function resolveEvidenceChain(
   );
   const reviewOnlyEvidence = matched.definition.reviewOnlyEvidence.map((source) => ({ ...source }));
   const guidanceStatus = aggregateGuidanceStatus(guidance);
+  const sifStatus = aggregateSifStatus(hazardPriority);
 
   const pack: EvidenceChainPack = {
     contractVersion: EVIDENCE_CHAIN_CONTRACT_VERSION,
@@ -712,7 +845,7 @@ export function resolveEvidenceChain(
   };
   pack.materialization = materialize(matched.definition, controls, hazardPriority);
 
-  if (guidanceStatus.resolution === "unresolved") {
+  if (sifStatus.resolution === "unresolved" || guidanceStatus.resolution === "unresolved") {
     return {
       resolved: false,
       published: false,
@@ -720,7 +853,7 @@ export function resolveEvidenceChain(
       inferenceState: "review_required",
       reason: "evidence_chain_review_required",
       message:
-        "published 그래프 경로는 확인되었으나 KOSHA production/local provenance bridge 또는 corpus gate가 미해결이어서 조립된 evidence chain을 게시하지 않습니다.",
+        "published 그래프 경로는 확인되었으나 SIF 또는 KOSHA production provenance가 draft/unresolved 상태여서 조립된 evidence chain을 게시하지 않습니다.",
       pack,
     };
   }

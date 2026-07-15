@@ -1,0 +1,96 @@
+{
+  "task": "web-safe-presentation-localization",
+  "generatedAt": "2026-07-14T14:37:59+09:00",
+  "status": "pass",
+  "releaseReadiness": false,
+  "branch": "feat/phase-a-evidence-integration",
+  "baseCommit": "e1e3c02056f8e77cdb1bf38fd13dd6a34620754b",
+  "integratedHead": "7909861273ce995f3e093e74a369475103f9087e",
+  "integratedTree": "610006c001645b21517b372b71301571b0a577f7",
+  "validationHead": "ac3b0f65b55695ec5f43de9a91683b0f8a58e5cf",
+  "validationTree": "20e9eca2b02f22ebb84254750af7581fa9873011",
+  "sourceCommits": [
+    "c1a9e04f50dfed50ee6beda08c447b1ceba48675",
+    "d00a0cf9ff499d264cd9a7200c9df9d57d635f06",
+    "db23f179225064f73b8dff4c0b35a4e3c894008d"
+  ],
+  "changedFiles": [
+    "app/archive/page.tsx",
+    "app/dryrun/page.tsx",
+    "app/ops/api/page.tsx",
+    "components/AiConnectPanel.tsx",
+    "lib/sif-embedding-approval-packet.ts",
+    "lib/web-safe-presentation.ts",
+    "tests/sif-embedding-approval-packet.test.ts",
+    "tests/sif-embedding-gate-status.test.ts",
+    "tests/web-safe-presentation-localization.test.ts",
+    "evaluation/web-safe-presentation-localization-2026-07-14/report.md",
+    "evaluation/web-safe-presentation-localization-2026-07-14/report.json"
+  ],
+  "counts": {
+    "productionFiles": 6,
+    "focusedTestFiles": 4,
+    "focusedTestsPassed": 21,
+    "focusedTestsFailed": 0,
+    "independentFindingsP0": 0,
+    "independentFindingsP1": 0,
+    "independentFindingsP2": 0,
+    "independentFindingsP3": 1
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests/web-safe-presentation-localization.test.ts tests/sif-embedding-gate-status.test.ts tests/sif-embedding-approval-packet.test.ts tests/ai-connect-design-contract.test.ts --maxWorkers=1 --no-file-parallelism",
+      "status": "pass",
+      "detail": "4 files, 21 tests at ac3b0f65b55695ec5f43de9a91683b0f8a58e5cf"
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "pass",
+      "detail": "tsc --noEmit --incremental false"
+    },
+    {
+      "command": "npm.cmd test -- tests/sif-embedding-gate-status.test.ts --maxWorkers=1 --no-file-parallelism",
+      "status": "pass",
+      "detail": "5 tests passed under LANG=C and LANG=ko_KR.UTF-8"
+    }
+  ],
+  "ciRemediation": {
+    "redRuns": [
+      "29306989527",
+      "29307617385"
+    ],
+    "redFailures": [
+      "localeCompare produced a locale-dependent canonical key order",
+      "a checkout-line-ending-derived migration fingerprint remained embedded in the approval summary"
+    ],
+    "fix": "canonical machine-fixture keys use lexical ordering, normalize filesystem-derived byte-size, SHA, and embedded approval-fingerprint fields, and defensively normalize path separators",
+    "canonicalHash": "f1fefacf29a64968543595754c3ebcab2b7288def75359f9d294051824e89451",
+    "machinePayloadChanged": false
+  },
+  "independentReview": {
+    "verdict": "pass",
+    "scope": "exact three-commit presentation boundary diff",
+    "resolvedP1": [
+      "machine JSON values remain raw",
+      "malformed values do not crash or leak object strings",
+      "tests call production packet and gate paths"
+    ],
+    "resolvedP3": "stale branch/base and changed-file claims were regenerated on the integrated head"
+  },
+  "machineContractsPreserved": [
+    "JSON and JSONL keys",
+    "gate and runtime enums",
+    "IDs and run IDs",
+    "paths and environment variables",
+    "approval packet raw fields"
+  ],
+  "knownExclusions": [
+    "final browser and manual UI verification waits for the final product head",
+    "production build waits for the final product head",
+    "frontend source identity and 108-row evidence remain intentionally stale until final product integration",
+    "DB schema, migrations, and data were not changed"
+  ],
+  "blockers": [
+    "final product-head build and browser evidence not yet regenerated"
+  ]
+}

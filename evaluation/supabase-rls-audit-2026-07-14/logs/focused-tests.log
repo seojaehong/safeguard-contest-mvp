@@ -1,0 +1,12 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-migration.test.ts tests/workpack-share-authority.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-improvement-route.test.ts tests/workpack-store.test.ts tests/mcp-token-service.test.ts tests/mcp-route-scope-contract.test.ts tests/openclaw-broker-ui-context.test.ts tests/claw-chat-route.test.ts tests/generation-evidence-operation-routes.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/supabase-rls-phase-a
+
+
+ Test Files  10 passed (10)
+      Tests  82 passed (82)
+   Start at  08:06:02
+   Duration  5.01s (transform 5.61s, setup 0ms, import 8.04s, tests 1.52s, environment 1ms)

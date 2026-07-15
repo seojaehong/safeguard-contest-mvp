@@ -1,0 +1,17 @@
+phase=green-v7-mixed-query-third-family
+head=90092bcece5a5e2121b652a4e63b1031ab0f6545
+command=npm.cmd test -- tests/commercial-harness.test.ts tests/mcp-tools.test.ts
+startedAt=2026-07-14T21:40:03.2305815+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/mcp-tools.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  2 passed (2)
+      Tests  80 passed (80)
+   Start at  21:40:06
+   Duration  8.27s (transform 1.74s, setup 0ms, import 3.07s, tests 4.72s, environment 0ms)

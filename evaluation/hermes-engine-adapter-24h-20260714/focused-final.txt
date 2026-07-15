@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/hermes-engine-adapter-24h-20260714
+
+
+ Test Files  12 passed (12)
+      Tests  199 passed (199)
+   Start at  23:22:48
+   Duration  24.46s (transform 1.58s, setup 0ms, import 4.74s, tests 11.03s, environment 1ms)
+
+EXIT_CODE=0

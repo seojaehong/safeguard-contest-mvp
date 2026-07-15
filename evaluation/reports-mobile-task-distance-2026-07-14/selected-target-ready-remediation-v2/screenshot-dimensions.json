@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "screenshotCount": 24,
+  "mobileViewport": {
+    "width": 390,
+    "height": 844
+  },
+  "desktopViewport": {
+    "width": 1440,
+    "height": 1000
+  },
+  "widthFailures": [],
+  "screenshots": [
+    {
+      "name": "reports-download-ready-day-desktop-disclosures-open.png",
+      "width": 1440,
+      "height": 3277,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-download-ready-day-desktop-text-reflow-200.png",
+      "width": 1440,
+      "height": 5100,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-download-ready-day-mobile-disclosures-open.png",
+      "width": 390,
+      "height": 6724,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-download-ready-day-mobile-text-reflow-200.png",
+      "width": 390,
+      "height": 11703,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-download-ready-night-desktop-disclosures-open.png",
+      "width": 1440,
+      "height": 3277,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-download-ready-night-desktop-text-reflow-200.png",
+      "width": 1440,
+      "height": 5100,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-download-ready-night-mobile-disclosures-open.png",
+      "width": 390,
+      "height": 6724,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-download-ready-night-mobile-text-reflow-200.png",
+      "width": 390,
+      "height": 11703,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-empty-day-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-empty-day-mobile.png",
+      "width": 390,
+      "height": 844,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-empty-night-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-empty-night-mobile.png",
+      "width": 390,
+      "height": 844,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-loading-day-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-loading-day-mobile.png",
+      "width": 390,
+      "height": 844,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-loading-night-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-loading-night-mobile.png",
+      "width": 390,
+      "height": 844,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-sample-day-desktop.png",
+      "width": 1440,
+      "height": 2093,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-sample-day-mobile.png",
+      "width": 390,
+      "height": 2305,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-sample-night-desktop.png",
+      "width": 1440,
+      "height": 2093,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-sample-night-mobile.png",
+      "width": 390,
+      "height": 2305,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-server-error-day-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-server-error-day-mobile.png",
+      "width": 390,
+      "height": 1056,
+      "viewportClass": "390x844 viewport"
+    },
+    {
+      "name": "reports-server-error-night-desktop.png",
+      "width": 1440,
+      "height": 1000,
+      "viewportClass": "1440x1000 viewport"
+    },
+    {
+      "name": "reports-server-error-night-mobile.png",
+      "width": 390,
+      "height": 1056,
+      "viewportClass": "390x844 viewport"
+    }
+  ]
+}

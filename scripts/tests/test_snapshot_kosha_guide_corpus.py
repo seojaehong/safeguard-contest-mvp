@@ -500,6 +500,12 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
                     {
                         "item_id": candidate["source"]["item_id"],
                         "candidate_sha256": hashlib.sha256(candidate_bytes).hexdigest(),
+                        "content_sha256": review["content_sha256"],
+                        "attestation_sha256": hashlib.sha256(
+                            snapshot_kosha_guide_corpus._canonical_json(review).encode(
+                                "utf-8"
+                            )
+                        ).hexdigest(),
                     }
                 ],
             )
@@ -659,6 +665,156 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
                     source,
                     output_dir,
                     reviewed_ocr_candidate_paths=[candidate_path],
+                    trusted_ocr_reviewer_ids={"corpus-reviewer"},
+                    ocr_review_hmac_key=b"r" * 32,
+                    expected_ocr_generator_sha256=current_ocr_generator_sha256(),
+                )
+
+            self.assertFalse(output_dir.exists())
+
+    def test_imports_reviewed_ocr_candidates_for_two_distinct_items(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source_dir = root / "source"
+            first_candidate_dir = root / "first-candidate"
+            second_candidate_dir = root / "second-candidate"
+            source_dir.mkdir()
+            first_candidate_dir.mkdir()
+            second_candidate_dir.mkdir()
+            first_source = source_dir / "G-4-2025 first-scanned.pdf"
+            second_source = source_dir / "G-5-2025 second-scanned.pdf"
+            first_source.write_bytes(build_pdf_bytes([""], image_pages={1}))
+            second_source.write_bytes(build_pdf_bytes([""], image_pages={1}))
+            first_candidate, first_payload = self.write_reviewed_ocr_candidate(
+                first_candidate_dir,
+                first_source,
+                ["첫 번째 검토 본문"],
+            )
+            second_candidate, second_payload = self.write_reviewed_ocr_candidate(
+                second_candidate_dir,
+                second_source,
+                ["두 번째 검토 본문"],
+            )
+            output_dir = root / "output"
+
+            summary = self.run_recovery(
+                source_dir,
+                output_dir,
+                reviewed_ocr_candidate_paths=[first_candidate, second_candidate],
+                trusted_ocr_reviewer_ids={"corpus-reviewer"},
+                ocr_review_hmac_key=b"r" * 32,
+                expected_ocr_generator_sha256=current_ocr_generator_sha256(),
+            )
+
+            items = self.read_jsonl(self.snapshot_dir(summary) / "items.jsonl")
+            manifest = json.loads(
+                (self.snapshot_dir(summary) / "manifest.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual(summary["inventory"], 2)
+            self.assertEqual(summary["success"], 2)
+            self.assertEqual(summary["boundary"], 0)
+            self.assertEqual(
+                {item["body"] for item in items},
+                {"첫 번째 검토 본문", "두 번째 검토 본문"},
+            )
+            self.assertTrue(
+                all(item["body_origin"] == "human-reviewed-ocr" for item in items)
+            )
+            self.assertEqual(
+                {
+                    row["item_id"]
+                    for row in manifest["generation_policy"][
+                        "reviewed_ocr_candidates"
+                    ]
+                },
+                {
+                    first_payload["source"]["item_id"],
+                    second_payload["source"]["item_id"],
+                },
+            )
+
+    def test_rejects_two_reviewed_ocr_candidates_for_the_same_item(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            first_candidate_dir = root / "first-candidate"
+            second_candidate_dir = root / "second-candidate"
+            first_candidate_dir.mkdir()
+            second_candidate_dir.mkdir()
+            source = root / "G-4-2025 scanned.pdf"
+            source.write_bytes(build_pdf_bytes([""], image_pages={1}))
+            first_candidate, _ = self.write_reviewed_ocr_candidate(
+                first_candidate_dir,
+                source,
+                ["첫 번째 검토 본문"],
+                reviewer_id="corpus-reviewer-a",
+            )
+            second_candidate, _ = self.write_reviewed_ocr_candidate(
+                second_candidate_dir,
+                source,
+                ["두 번째 검토 본문"],
+                reviewer_id="corpus-reviewer-b",
+            )
+            output_dir = root / "output"
+
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "duplicate reviewed OCR candidate for item",
+            ):
+                self.run_recovery(
+                    source,
+                    output_dir,
+                    reviewed_ocr_candidate_paths=[first_candidate, second_candidate],
+                    trusted_ocr_reviewer_ids={
+                        "corpus-reviewer-a",
+                        "corpus-reviewer-b",
+                    },
+                    ocr_review_hmac_key=b"r" * 32,
+                    expected_ocr_generator_sha256=current_ocr_generator_sha256(),
+                )
+
+            self.assertFalse(output_dir.exists())
+
+    def test_rejects_duplicate_reviewed_ocr_attestation_across_items(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source_dir = root / "source"
+            first_candidate_dir = root / "first-candidate"
+            second_candidate_dir = root / "second-candidate"
+            source_dir.mkdir()
+            first_candidate_dir.mkdir()
+            second_candidate_dir.mkdir()
+            first_source = source_dir / "G-4-2025 first-scanned.pdf"
+            second_source = source_dir / "G-5-2025 second-scanned.pdf"
+            first_source.write_bytes(build_pdf_bytes([""], image_pages={1}))
+            second_source.write_bytes(build_pdf_bytes([""], image_pages={1}))
+            first_candidate, first_payload = self.write_reviewed_ocr_candidate(
+                first_candidate_dir,
+                first_source,
+                ["첫 번째 검토 본문"],
+            )
+            second_candidate, second_payload = self.write_reviewed_ocr_candidate(
+                second_candidate_dir,
+                second_source,
+                ["두 번째 검토 본문"],
+            )
+            second_payload["review"] = first_payload["review"]
+            second_candidate.write_text(
+                f"{snapshot_kosha_guide_corpus._canonical_json(second_payload)}\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+            output_dir = root / "output"
+
+            with self.assertRaisesRegex(
+                RuntimeError,
+                "duplicate reviewed OCR candidate attestation",
+            ):
+                self.run_recovery(
+                    source_dir,
+                    output_dir,
+                    reviewed_ocr_candidate_paths=[first_candidate, second_candidate],
                     trusted_ocr_reviewer_ids={"corpus-reviewer"},
                     ocr_review_hmac_key=b"r" * 32,
                     expected_ocr_generator_sha256=current_ocr_generator_sha256(),
@@ -1274,6 +1430,22 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             self.assertEqual(resumed["processed_this_run"], 0)
             self.assertEqual(resumed["reproducibility_hash"], initial["reproducibility_hash"])
 
+    def test_identity_hash_normalizes_integral_floats_for_cross_runtime_canonicalization(
+        self,
+    ) -> None:
+        material = {
+            "max_compression_ratio": 100.0,
+            "nested": {"limit": 2.0, "fraction": 2.5},
+        }
+        expected_canonical = (
+            '{"max_compression_ratio":100,"nested":{"fraction":2.5,"limit":2}}'
+        )
+
+        self.assertEqual(
+            snapshot_kosha_guide_corpus._identity_sha256(material),
+            hashlib.sha256(expected_canonical.encode("utf-8")).hexdigest(),
+        )
+
     def test_native_only_policy_and_resume_match_base_contract(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -1350,7 +1522,7 @@ class KoshaBodyRecoveryTest(unittest.TestCase):
             )
             self.assertEqual(
                 manifest["generation_policy_sha256"],
-                hashlib.sha256(expected_policy_json.encode("utf-8")).hexdigest(),
+                snapshot_kosha_guide_corpus._identity_sha256(expected_policy),
             )
 
             resumed = self.run_recovery(source, output_dir, resume=True)

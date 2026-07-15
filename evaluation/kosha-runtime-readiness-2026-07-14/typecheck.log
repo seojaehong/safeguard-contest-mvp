@@ -1,0 +1,7 @@
+COMMAND: npm.cmd run typecheck
+SANITIZATION: workspace path replaced with <repo>; no secret or environment values captured
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+EXIT_CODE: 0

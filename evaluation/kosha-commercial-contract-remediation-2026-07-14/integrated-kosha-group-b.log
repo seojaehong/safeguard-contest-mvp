@@ -1,0 +1,22 @@
+phase=product-verification-v3
+group=B
+head=f74c5972a4c776bfc9e1a924d3bf50ce55b503a2
+tree=99e161f1ca4880c5470e694df9fd02b8230c29cd
+authoritativeMain=920c7f360688352156de4854b4957a9f2f1f0e43
+startedAt=2026-07-14T15:31:16.2436784+09:00
+command=npm.cmd test -- tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts --maxWorkers=1 --no-file-parallelism
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  2 passed (2)
+      Tests  26 passed (26)
+   Start at  15:31:18
+   Duration  18.77s (transform 694ms, setup 0ms, import 1.57s, tests 16.04s, environment 0ms)
+
+elapsedSeconds=20.725
+exitCode=0

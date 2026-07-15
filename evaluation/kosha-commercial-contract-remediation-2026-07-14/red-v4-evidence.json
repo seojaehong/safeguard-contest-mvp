@@ -1,0 +1,29 @@
+{
+  "version": 4,
+  "phase": "intentional_red_contract",
+  "branch": "fix/kosha-commercial-contract-remediation",
+  "baselineHead": "2a2326951b4b2d030af11f4615f7cf6b9bafa334",
+  "authoritativeMain": "920c7f360688352156de4854b4957a9f2f1f0e43",
+  "expectedFailingBranchState": true,
+  "command": "npm.cmd test -- tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts tests/mcp-tools.test.ts -t \"v4 \" --maxWorkers=1 --no-file-parallelism",
+  "result": {
+    "exitCode": 1,
+    "testFilesFailed": 3,
+    "testsFailed": 5,
+    "positiveControlsPassed": 2,
+    "testsSkipped": 81
+  },
+  "failedContracts": [
+    "empty-tag forklift fire parent must not unlock collision guidance",
+    "vehicle collision must canonicalize to collision",
+    "enhanced parentless KOSHA must discard provider narratives",
+    "full parentless KOSHA must discard provider narratives",
+    "MCP harness must return the sanitized public packet"
+  ],
+  "passingControls": [
+    "exact same-hazard forklift collision parent remains eligible",
+    "provider narratives remain available without parentless KOSHA review"
+  ],
+  "rawLog": "red-v4-independent-review.log",
+  "rawLogSha256": "58b35e8b2fc4db316992db84516c601fcccec038ca0caafb70466ba0ca4236ef"
+}

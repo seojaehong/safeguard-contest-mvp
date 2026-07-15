@@ -78,6 +78,80 @@ describe("documents editor layout", () => {
     await Promise.all(browser.contexts().map((context) => context.close()));
   }, 30_000);
 
+  it("renders actual message samples and an empty permit with document-specific structured sections", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 391, height: 844 } });
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPermitDraft = "";
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+
+    const cases = [
+      {
+        key: "foreignWorkerTransmission",
+        labels: ["공지 기본 정보", "쉬운 한국어", "다국어 안내", "관리자 확인"]
+      },
+      {
+        key: "kakaoMessage",
+        labels: ["현장·작업", "핵심 위험", "필수 조치", "시작 전 확인"]
+      },
+      {
+        key: "workPermitDraft",
+        labels: ["허가 기본 정보", "작업 전 허가조건", "격리·보호구 확인", "작업 종료 확인"]
+      }
+    ];
+
+    for (const documentCase of cases) {
+      await page.locator('select[aria-label="편집 문서 선택"]').selectOption(documentCase.key);
+      const editor = page.getByTestId("document-structured-editor");
+      await editor.waitFor({ state: "visible" });
+      await expect.poll(() => editor.locator('[data-section-kind="body"] label strong').allTextContents())
+        .toEqual(documentCase.labels);
+      expect(await editor.locator(".document-section-textarea").count()).toBe(documentCase.labels.length);
+    }
+  }, 90_000);
+
+  it("round-trips a structured editor change into canonical XLSX rows without stale payload or truncation", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sample = buildSampleWorkpack();
+    sample.deliverables.workPlanStructured = {
+      workOverview: {
+        workName: "STALE_BROWSER_STRUCTURED_WORK_NAME",
+        description: "STALE_BROWSER_STRUCTURED_DESCRIPTION",
+        workerCount: sample.scenario.workerCount,
+        location: sample.scenario.siteName,
+        condition: sample.scenario.weatherNote,
+        equipment: []
+      },
+      workSteps: [],
+      stopCriteria: [],
+      emergencyResponse: { contacts: [], evacRoute: "현장 확인", firstAid: "현장 확인" },
+      approvers: { author: "작성자", reviewer: "검토자", approver: "승인자" }
+    };
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    await page.getByRole("tab", { name: /작업계획서/u }).click();
+    const editedLines = Array.from({ length: 27 }, (_, index) => `- UI_CANONICAL_ROW_${index}`).join("\n");
+    await page.getByTestId("document-structured-editor").locator(".document-section-textarea").first().fill(editedLines);
+
+    const { payload, workbook } = await exportSelectedXlsx(page);
+    const workbookText = readWorkbookText(workbook);
+
+    expect(payload).toMatchObject({ mode: "workPlanStructured", edited: true });
+    expect(workbookText).toContain("UI_CANONICAL_ROW_0");
+    expect(workbookText).toContain("UI_CANONICAL_ROW_26");
+    expect(workbookText).not.toContain("STALE_BROWSER_STRUCTURED_WORK_NAME");
+    expect(workbookText).not.toContain("STALE_BROWSER_STRUCTURED_DESCRIPTION");
+    expect(workbookText).not.toContain("사용자 편집 반영");
+  }, 90_000);
+
   it("keeps the document editor in the same light workbench system", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -215,7 +289,8 @@ describe("documents editor layout", () => {
     await expect.poll(() => writtenCount.textContent()).toBe("9/9종");
 
     await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
-    await page.getByRole("textbox", { name: "위험성평가표 편집" }).fill("");
+    await page.getByRole("button", { name: "원문" }).click();
+    await page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" }).fill("");
 
     await expect.poll(() => writtenCount.textContent()).toBe("8/9종");
   }, 90_000);
@@ -230,7 +305,8 @@ describe("documents editor layout", () => {
     await expect.poll(() => writtenCount.textContent()).toBe("9/9종");
 
     await page.getByTestId("mobile-core-document-launcher").getByRole("button", { name: "위험성평가표" }).click();
-    const editor = page.getByRole("textbox", { name: "위험성평가표 편집" });
+    await page.getByRole("button", { name: "원문" }).click();
+    const editor = page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" });
     await editor.fill("");
 
     await expect.poll(() => writtenCount.textContent()).toBe("8/9종");
@@ -258,14 +334,15 @@ describe("documents editor layout", () => {
       const documentBody = document.querySelector('[data-testid="editor-document-body"]');
       const secondaryTools = document.querySelector('[data-testid="editor-secondary-tools"]');
       const textarea = document.querySelector<HTMLTextAreaElement>('.document-textarea[aria-label="위험성평가표 편집"]');
-      const evidencePanel = document.querySelector<HTMLDetailsElement>('[data-testid="editor-evidence-panel"]');
-      const qualityPanel = document.querySelector<HTMLDetailsElement>('[data-testid="editor-quality-panel"]');
-      const graphPanel = document.querySelector<HTMLDetailsElement>('[data-testid="editor-graph-panel"]');
+      const provenanceDrawer = document.querySelector<HTMLDetailsElement>('[data-testid="editor-provenance-drawer"]');
+      const evidencePanel = document.querySelector<HTMLElement>('[data-testid="editor-evidence-panel"]');
+      const qualityPanel = document.querySelector<HTMLElement>('[data-testid="editor-quality-panel"]');
+      const graphPanel = document.querySelector<HTMLElement>('[data-testid="editor-graph-panel"]');
       const exportPanel = document.querySelector<HTMLDetailsElement>('[data-testid="editor-export-panel"]');
       const previewPanel = document.querySelector<HTMLDetailsElement>('.submission-preview-panel');
       const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
       const topbar = document.querySelector(".safeclaw-module-nav");
-      if (!shell || !documentBody || !secondaryTools || !textarea || !evidencePanel || !qualityPanel || !graphPanel || !exportPanel || !previewPanel || !documentSelect || !topbar) {
+      if (!shell || !documentBody || !secondaryTools || !textarea || !provenanceDrawer || !evidencePanel || !qualityPanel || !graphPanel || !exportPanel || !previewPanel || !documentSelect || !topbar) {
         throw new Error("Missing editor-first workspace contract target");
       }
 
@@ -281,9 +358,14 @@ describe("documents editor layout", () => {
         textareaLength: textarea.value.length,
         selectedDocument: documentSelect.value,
         documentCount: documentSelect.options.length,
-        evidenceOpen: evidencePanel.open,
-        qualityOpen: qualityPanel.open,
-        graphOpen: graphPanel.open,
+        provenanceOpen: provenanceDrawer.open,
+        provenanceSummary: provenanceDrawer.querySelector(":scope > summary")?.textContent?.trim(),
+        evidenceTag: evidencePanel.tagName,
+        qualityTag: qualityPanel.tagName,
+        graphTag: graphPanel.tagName,
+        evidenceOwned: provenanceDrawer.contains(evidencePanel),
+        qualityOwned: provenanceDrawer.contains(qualityPanel),
+        graphOwned: provenanceDrawer.contains(graphPanel),
         exportOpen: exportPanel.open,
         previewOpen: previewPanel.open
       };
@@ -297,9 +379,10 @@ describe("documents editor layout", () => {
     expect(contract.bodyTop).toBeGreaterThanOrEqual(contract.topbarBottom + 8);
     expect(contract.bodyTop).toBeLessThanOrEqual(contract.topbarBottom + 96);
     expect(contract.bodyTop).toBeLessThan(contract.toolsTop);
-    expect(contract.evidenceOpen).toBe(false);
-    expect(contract.qualityOpen).toBe(false);
-    expect(contract.graphOpen).toBe(false);
+    expect(contract.provenanceOpen).toBe(false);
+    expect(contract.provenanceSummary).toMatch(/^근거 \d+건 · 확인 필요 \d+건$/u);
+    expect([contract.evidenceTag, contract.qualityTag, contract.graphTag]).toEqual(["SECTION", "SECTION", "SECTION"]);
+    expect([contract.evidenceOwned, contract.qualityOwned, contract.graphOwned]).toEqual([true, true, true]);
     expect(contract.exportOpen).toBe(false);
     expect(contract.previewOpen).toBe(false);
   }, 90_000);
@@ -796,9 +879,7 @@ describe("documents editor layout", () => {
 
     const documentSelect = page.locator('select[aria-label="편집 문서 선택"]');
     await documentSelect.selectOption("tbmBriefing");
-    await page.locator('[data-testid="editor-evidence-panel"] > summary').click();
-    await page.locator('[data-testid="editor-quality-panel"] > summary').click();
-    await page.locator('[data-testid="editor-graph-panel"] > summary').click();
+    await page.locator('[data-testid="editor-provenance-drawer"] > summary').click();
     await page.locator('[data-testid="editor-export-panel"] > summary').click();
 
     const metrics = await page.evaluate(() => {

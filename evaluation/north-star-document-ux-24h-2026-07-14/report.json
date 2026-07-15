@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 3,
+  "status": "pass_for_fresh_branch_review_hold_main",
+  "authority": {
+    "baseSha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
+    "previousEvidenceSha": "98dfe7aee1fc397b40c2042a8c6ded4bb97133f9",
+    "productSha": "9bda2882b2ae9f97be7357bf56ab2d21dce6d7e6",
+    "productTree": "fb601e77cb693b8dfbdff6981e3904c3f4a82316",
+    "productParent": "98dfe7aee1fc397b40c2042a8c6ded4bb97133f9"
+  },
+  "scope": {
+    "documentUxOnly": true,
+    "shareChanged": false,
+    "databaseChanged": false,
+    "packageOrLockChanged": false,
+    "mainIntegrationAllowed": false
+  },
+  "product": {
+    "documentProfiles": 12,
+    "minimumFallbackSectionsPerProfile": 3,
+    "schemaFirstEditedRows": true,
+    "staleStructuredValuesRenderedAfterEdit": false,
+    "manualEditAppendixRendered": false,
+    "editedRowTruncation": false,
+    "actualBinaryRoundTripRows": 27,
+    "knowledgeLinkMinimumHitArea": 44
+  },
+  "browser": {
+    "serverMode": "production",
+    "nextDevelopmentOverlayPossible": false,
+    "geometryScope": "visible viewport-wide document elements",
+    "expectedRows": 4,
+    "passedRows": 4,
+    "exitCode": 0,
+    "viewports": ["1440x900", "391x844"],
+    "themes": ["day", "night"],
+    "horizontalOverflowRows": 0,
+    "visibleFixedOrStickyElements": 0,
+    "visibleNestedScrollRows": 0,
+    "smallTouchTargetRows": 0,
+    "clippedControlRows": 0,
+    "interactionOverlapRows": 0,
+    "overlayOverlapRows": 0,
+    "documentedExcludedOverlapPairs": [],
+    "sectionOverlapRows": 0,
+    "mobileEditorOffsets": { "day": 194, "night": 198 }
+  },
+  "gates": [
+    { "name": "focused_unit_route_static", "files": 5, "passed": 33, "failed": 0, "exitCode": 0 },
+    { "name": "documents_editor_browser_roundtrip_fallback", "passed": 22, "failed": 0, "durationSeconds": 154.79, "exitCode": 0 },
+    { "name": "north_star_production_viewport_matrix", "passed": 4, "failed": 0, "durationSeconds": 32.49, "exitCode": 0 },
+    { "name": "strict_typecheck", "exitCode": 0 },
+    { "name": "production_build_final_log", "artifact": "remediation/build-final.log", "staticPages": 27, "exitCode": 0 },
+    { "name": "product_diff_check", "outputLines": 0, "exitCode": 0 },
+    { "name": "production_build_final_log_trailing_whitespace", "artifact": "remediation/build-final.log", "lines": 0, "exitCode": 0 },
+    { "name": "legacy_build_log_hygiene", "artifact": "build.log", "lines": 0, "exitCode": 0 },
+    { "name": "full_candidate_range_diff_check", "base": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60", "artifact": "remediation/full-range-diff-check-final.log", "outputLines": 0, "exitCode": 0 }
+  ],
+  "sourceAudit": {
+    "productFileCount": 8,
+    "evidenceTestFileCount": 1,
+    "runtimeProductDiffFromEvidenceHead": 0,
+    "shareDiffFiles": 0,
+    "worktreeVitestNextProcesses": 0
+  },
+  "evidenceHygiene": {
+    "greenNamedFailingLogs": 0,
+    "failedIntermediateLogCount": 8,
+    "failedIntermediateLogs": [
+      "remediation/red-document-schemas.log",
+      "remediation/red-export-roundtrip.log",
+      "remediation/red-mobile-interactions.log",
+      "remediation/red-production-viewport-contract.log",
+      "remediation/red-full-range-diff-check.log",
+      "remediation/red-intermediate-browser-document-schemas.log",
+      "remediation/red-intermediate-focused-browser.log",
+      "remediation/red-intermediate-focused-unit.log"
+    ]
+  },
+  "review": {
+    "independentReviewComplete": false,
+    "mainIntegration": "hold"
+  }
+}

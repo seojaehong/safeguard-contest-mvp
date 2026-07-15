@@ -31,6 +31,7 @@ function supporting(
     ...reference(id, "supporting"),
     ...overrides,
     id,
+    body: overrides.body ?? overrides.summary ?? "지게차와 보행자 통행 동선을 분리한다.",
     evidence_role: "supporting",
     retrieval_source: "local-ranked",
     kosha_guide: {
@@ -42,7 +43,14 @@ function supporting(
       bodyKind: "native",
       anchors: [{ page: 1, excerpt: overrides.summary ?? id }],
       evidenceRef,
-      directEligible: true
+      directEligible: true,
+      officialUrl: "https://portal.kosha.or.kr/archive/resources/tech-support/search/all",
+      officialFileId: `fixture-${id}`,
+      publicationDate: "2026-01-30",
+      officialVersion: "2026",
+      officialStatus: "current",
+      pdfSha256: "1".repeat(64),
+      bodySha256: "2".repeat(64)
     }
   };
 }

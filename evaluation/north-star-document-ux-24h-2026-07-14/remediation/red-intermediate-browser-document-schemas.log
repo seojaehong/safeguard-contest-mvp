@@ -1,0 +1,34 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/documents-editor-layout.test.ts -t document-specific structured sections
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+ ❯ tests/documents-editor-layout.test.ts (21 tests | 1 failed | 20 skipped) 59501ms
+     × renders actual message samples and an empty permit with document-specific structured sections 37347ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/documents-editor-layout.test.ts > documents editor layout > renders actual message samples and an empty permit with document-specific structured sections
+TimeoutError: locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for getByRole('tab', { name: /외국인 근로자 전송본/u })
+
+ ❯ tests/documents-editor-layout.test.ts:108:63
+    106|
+    107|     for (const documentCase of cases) {
+    108|       await page.getByRole("tab", { name: documentCase.tab }).click();
+       |                                                               ^
+    109|       const editor = page.getByTestId("document-structured-editor");
+    110|       await editor.waitFor({ state: "visible" });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 skipped (21)
+   Start at  22:06:19
+   Duration  61.85s (transform 277ms, setup 0ms, import 1.60s, tests 59.50s, environment 0ms)
+
+EXPLICIT_EXIT_CODE=1

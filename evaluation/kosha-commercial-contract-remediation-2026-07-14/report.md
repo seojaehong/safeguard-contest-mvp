@@ -1,0 +1,114 @@
+# KOSHA Commercial Contract Remediation v4 Evidence
+
+## Status
+
+- Local remediation status: GREEN for the requested focused gates.
+- Independent review status: pending.
+- Integration status: blocked until a fresh independent reviewer accepts this series.
+- No integration, self-approval, deployment, build, or full-suite claim is made.
+
+## V7 Mixed Query P1 Remediation Addendum
+
+- Bound input HEAD: `9d37024371d815fbdcd373de1cd6ab2876aa9b97`.
+- Intentional RED tests/log commit: `cc171cbccabfa0c8dd2e31d2f8ed6f9007d8ade0`.
+- Product GREEN commit: `90092bcece5a5e2121b652a4e63b1031ab0f6545`.
+- Finding remediated: mixed query families such as forklift collision plus electrical shock no longer collapse to an unrestricted empty family set. Query hazard families are classified as `none`, `single`, or `multiple`, and multiple keeps the full family set. Direct evidence now passes only when its canonical family explicitly overlaps a non-empty query family set.
+- Public-surface assertion: the hostile third-family fire direct evidence is absent from the public packet, prompt context, answer, practical points, risk rows, MCP packet, and MCP payload serialization.
+- Preserved behavior: existing mixed-reference KOSHA parent blocking, single-family positives, integrity-blocked KOSHA, KOSHA technical-guidance-only, `naturalize_only`, and SIF -> KOSHA -> law separation remain covered by the focused regression gates.
+- Scope: product code changed only `lib/db-harness.ts`; no DB, schema, migration, data, package, or lockfile change.
+
+| V7 Gate | Result | Log |
+| --- | ---: | --- |
+| Intentional RED mixed-query third-family leak | 2 failed, 78 passed | `red-v7-mixed-query-third-family.log` |
+| Hostile mixed-query plus MCP GREEN | 80 passed | `green-v7-mixed-query-third-family.log` |
+| Focused regression | 56 passed, 20 skipped | `green-v7-focused-regression.log` |
+| MCP regression | 28 passed, 2 skipped | `green-v7-mcp-regression.log` |
+| Strict TypeScript typecheck | passed | `green-v7-typecheck.log` |
+
+## Commit Identity And Ancestry
+
+- Branch: `fix/kosha-commercial-contract-remediation`
+- Clean pushed v3 baseline: `2a2326951b4b2d030af11f4615f7cf6b9bafa334`
+- Intentional RED contract commit: `2b3144f72f51baf9ee4808fd7ba804078ce43d23`
+- Product GREEN commit: `e0a67f6e1953d421e58549666d1d44402435dfeb`
+- Product tree: `6e17fb552ce34c6a07e981c917b1e01c8616506d`
+- Authoritative main: `920c7f360688352156de4854b4957a9f2f1f0e43`
+- Exact ancestry: `2a232695 -> 2b3144f7 -> e0a67f6e -> evidence commit containing this report`.
+
+The evidence commit SHA is intentionally not self-embedded because a commit cannot contain its own final SHA. Resolve it with `git log -1 --format=%H -- evaluation/kosha-commercial-contract-remediation-2026-07-14/report.json` after checkout.
+
+## TDD RED Before GREEN
+
+Commit `2b3144f7` adds only the v4 regression contracts and their raw RED evidence. On baseline `2a232695`, the focused command exited 1 with three failed files, five failed attacks, two passing positive controls, and 81 skipped tests. The raw transcript is `red-v4-independent-review.log`. Its RED-time Windows worktree-byte SHA-256 is `58b35e8b2fc4db316992db84516c601fcccec038ca0caafb70466ba0ca4236ef`; the normalized Git blob SHA-256 is recorded separately in `evidence-integrity-v4.log`.
+
+The first local product candidate, `f90562cf`, passed the new v4 attacks but exposed one existing focused55 regression: 54 passed and one failed. That self-recorded intermediate transcript is preserved as `baseline-v4-focused55-first-product-red.log`. The candidate was amended before push after restricting generated-document appendices to parent-ready KOSHA rows. It is not part of the final ancestry and is not presented as independently captured evidence.
+
+## Product Remediation
+
+### P1-A Row Relevance
+
+- `hasRelevantKoshaParent` now requires a deterministic recognized hazard-family intersection in addition to strong row overlap.
+- Canonical variants such as `충돌` and `차량 충돌` resolve to the same collision family.
+- Empty tags cannot bypass conflicting title, summary, category, keyword, or risk-tag semantics.
+- Shared equipment or domain text alone is insufficient when hazard families differ.
+- Same-hazard forklift collision positives and the existing corpus remain covered.
+
+### P1-B Provider Narrative
+
+- When any technical KOSHA row lacks a relevant parent, provider-authored deliverable bodies are discarded structurally.
+- The response uses the deterministic pre-provider baseline rather than retained provider narrative allowlists.
+- All attacked response and AI narrative surfaces are serialized and checked for provider markers.
+- Parentless KOSHA identity remains review-required, but its title is excluded from generated-document appendices unless parent-ready.
+- Safe non-KOSHA provider behavior remains available.
+
+### P1-C MCP Surface
+
+- `lib/mcp-tools.ts` now returns `buildPublicDbHarnessPacket(...)`, not the raw internal packet.
+- The MCP packet and prompt use the same sanitized object.
+- Unique parentless KOSHA summary, body, control, action, and evidence-reference markers are absent from packet, prompt, citations, and deliverables.
+
+`naturalize_only`, SIF -> KOSHA -> law ordering, and KOSHA guidance-only mandate separation are preserved.
+
+## Verification
+
+All commands used `--maxWorkers=1 --no-file-parallelism` and ran sequentially.
+
+| Gate | Result | Log |
+| --- | ---: | --- |
+| v4 attacks and positive controls | 7 passed, 81 skipped | `green-v4-focused-attacks.log` |
+| MCP tool file | 27 passed | `green-v4-mcp-tools.log` |
+| Existing focused contract | 55 passed, 6 skipped v4 tests | `baseline-v4-focused55.log` |
+| Existing group B | 26 passed, 3 skipped v4 tests | `green-v4-group-b.log` |
+| Existing group C | 22 passed | `green-v4-group-c.log` |
+| Existing group D | 130 passed | `green-v4-group-d.log` |
+| Existing group E | 84 passed, 3 skipped v4 tests | `green-v4-group-e.log` |
+| Existing B/C/D/E aggregate | 262 passed across 12 unique files | four group logs above |
+| Strict TypeScript typecheck | passed | `green-v4-typecheck.log` |
+| Scope, no-added-`any`, ancestry, and diff check | passed | `green-v4-diff-check.log` |
+
+## Main Overlap And Merge Tree
+
+- Merge base with authoritative main: `3a74107e3d8363f437815b877533f7342fd02c45`.
+- Authoritative main changed paths from merge base: 3.
+- v4 RED+product changed paths through `e0a67f6e`: 8; exact main-path overlap: 0.
+- Pre-evidence product branch through `e0a67f6e` changed paths from merge base: 37; exact main-path overlap: 0.
+- `git merge-tree --write-tree 920c7f... e0a67f...` exited 0 and produced tree `be4b872a66eddab705c9415417ba0933be3c8f54`.
+
+These are conflict and path-overlap observations only. They do not approve integration. Full path sets and the raw merge-tree output are in `green-v4-merge-tree-main-overlap.log`.
+
+## Historical Evidence Correction
+
+The v3 report's description of `integrated-kosha-group-d.log` as an "immutable log" is withdrawn. The file is a historical self-recorded command transcript. The current bytes first appear at commit `2a2326951b4b2d030af11f4615f7cf6b9bafa334`, not `049debe47cf6d18e923bb5c91e5fafd8d07c885b`. History: `049debe4` has Git blob `8836b0bbb1a2914d8d59a5b568e7b5ed3dab6594` with 129 passed / 1 failed; `29ae8372` modifies the transcript to 130 passed; `2a232695` modifies it to the current 129 passed / 1 failed Git blob `cabd4989af7bc0fb7147f343c2aad79f926b662c`; `08f6d6ed` retains the `2a232695` blob. No independent runner, signed attestation, or external immutable capture was established. It remains self-recorded and must not be treated as independently immutable evidence.
+
+## Scope Integrity
+
+- RED commit files: three tightly related tests and two v4 RED evidence files.
+- Product commit files: `lib/db-harness.ts`, `lib/search.ts`, and `lib/mcp-tools.ts` only.
+- Evidence commit files are confined to `evaluation/kosha-commercial-contract-remediation-2026-07-14/`.
+- No DB, schema, migration, data, package, lockfile, dependency, `.env`, build artifact, or unrelated file was changed.
+- `green-v4-diff-check.log` records zero scope mismatches, zero added `any` matches, zero tracked product worktree changes, and a clean `git diff --check`.
+- `evidence-integrity-v4.log` is a generated Git-index-blob SHA-256 manifest for the v4 reports and raw transcripts; it deliberately excludes itself.
+
+## Review Gate
+
+Fresh independent review remains required. Do not integrate or treat this report as self-approval.

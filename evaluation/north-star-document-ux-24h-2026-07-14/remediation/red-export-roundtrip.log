@@ -1,0 +1,331 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/editor-export-integrity.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+ ❯ tests/editor-export-integrity.test.ts (2 tests | 1 failed) 140ms
+     × replaces stale schema-first fields with every edited row in the actual XLSX binary 57ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/editor-export-integrity.test.ts > editor export integrity > replaces stale schema-first fields with every edited row in the actual XLSX binary
+AssertionError: expected '작업계획서\n작업계획서\n작업계획서\n작업계획서\n작업계획서\n작업…' to contain 'CANONICAL_EDITED_ROW_26'
+
+- Expected
++ Received
+
+- CANONICAL_EDITED_ROW_26
++ 작업계획서
++ 작업계획서
++ 작업계획서
++ 작업계획서
++ 작업계획서
++ 작업계획서
++ 사업장
++ 세이프건설
++ 세이프건설
++ 현장
++ 성수동 현장
++ 성수동 현장
++ 작업내용
++ 외벽 도장
++ 외벽 도장
++ 인원/조건
++ 5명 · 강풍 주의
++ 5명 · 강풍 주의
++ 작업개요
++ 작업개요
++ 작업개요
++ 작업개요
++ 작업개요
++ 작업개요
++ 작업명
++ STALE_STRUCTURED_WORK_NAME
++ STALE_STRUCTURED_WORK_NAME
++ STALE_STRUCTURED_WORK_NAME
++ STALE_STRUCTURED_WORK_NAME
++ STALE_STRUCTURED_WORK_NAME
++ 작업내용
++ STALE_STRUCTURED_DESCRIPTION
++ STALE_STRUCTURED_DESCRIPTION
++ STALE_STRUCTURED_DESCRIPTION
++ STALE_STRUCTURED_DESCRIPTION
++ STALE_STRUCTURED_DESCRIPTION
++ 작업장소
++ STALE_STRUCTURED_LOCATION
++ STALE_STRUCTURED_LOCATION
++ STALE_STRUCTURED_LOCATION
++ STALE_STRUCTURED_LOCATION
++ STALE_STRUCTURED_LOCATION
++ 작업인원
++ 5명
++ 5명
++ 5명
++ 5명
++ 5명
++ 작업조건
++ STALE_STRUCTURED_CONDITION
++ STALE_STRUCTURED_CONDITION
++ STALE_STRUCTURED_CONDITION
++ STALE_STRUCTURED_CONDITION
++ STALE_STRUCTURED_CONDITION
++ 사용장비
++ STALE_STRUCTURED_EQUIPMENT
++ STALE_STRUCTURED_EQUIPMENT
++ STALE_STRUCTURED_EQUIPMENT
++ STALE_STRUCTURED_EQUIPMENT
++ STALE_STRUCTURED_EQUIPMENT
++ 작업단계 및 안전조치
++ 작업단계 및 안전조치
++ 작업단계 및 안전조치
++ 작업단계 및 안전조치
++ 작업단계 및 안전조치
++ 작업단계 및 안전조치
++ 순번
++ 작업단계
++ 사용장비
++ 안전조치
++ 담당
++ 위험성평가#
++ 작업중지 기준
++ 작업중지 기준
++ 작업중지 기준
++ 작업중지 기준
++ 작업중지 기준
++ 작업중지 기준
++ 번호
++ 구분
++ 작업중지 기준
++ 조치
++ 담당
++ 확인
++ 비상대응
++ 비상대응
++ 비상대응
++ 비상대응
++ 비상대응
++ 비상대응
++ 번호
++ 역할
++ 연락처
++ 대응내용
++ 담당
++ 확인
++ 대피경로
++ 대피경로 확인
++ 대피경로 확인
++ 대피경로 확인
++ 대피경로 확인
++ 대피경로 확인
++ 응급조치
++ 응급조치 확인
++ 응급조치 확인
++ 응급조치 확인
++ 응급조치 확인
++ 응급조치 확인
++ 사용자 편집 반영
++ 사용자 편집 반영
++ 사용자 편집 반영
++ 사용자 편집 반영
++ 사용자 편집 반영
++ 사용자 편집 반영
++ 번호
++ 섹션
++ 편집 항목
++ 편집 내용
++ 상태
++ 비고
++ 1
++ 작업개요
++ 작업명
++ CANONICAL_EDITED_WORK_NAME
++ 반영
++ 구조화 양식 유지
++ 2
++ 작업단계 및 안전조치
++ 편집 작업 1
++ CANONICAL_EDITED_ROW_1
++ 반영
++ 구조화 양식 유지
++ 3
++ 작업단계 및 안전조치
++ 편집 작업 2
++ CANONICAL_EDITED_ROW_2
++ 반영
++ 구조화 양식 유지
++ 4
++ 작업단계 및 안전조치
++ 편집 작업 3
++ CANONICAL_EDITED_ROW_3
++ 반영
++ 구조화 양식 유지
++ 5
++ 작업단계 및 안전조치
++ 편집 작업 4
++ CANONICAL_EDITED_ROW_4
++ 반영
++ 구조화 양식 유지
++ 6
++ 작업단계 및 안전조치
++ 편집 작업 5
++ CANONICAL_EDITED_ROW_5
++ 반영
++ 구조화 양식 유지
++ 7
++ 작업단계 및 안전조치
++ 편집 작업 6
++ CANONICAL_EDITED_ROW_6
++ 반영
++ 구조화 양식 유지
++ 8
++ 작업단계 및 안전조치
++ 편집 작업 7
++ CANONICAL_EDITED_ROW_7
++ 반영
++ 구조화 양식 유지
++ 9
++ 작업단계 및 안전조치
++ 편집 작업 8
++ CANONICAL_EDITED_ROW_8
++ 반영
++ 구조화 양식 유지
++ 10
++ 작업단계 및 안전조치
++ 편집 작업 9
++ CANONICAL_EDITED_ROW_9
++ 반영
++ 구조화 양식 유지
++ 11
++ 작업단계 및 안전조치
++ 편집 작업 10
++ CANONICAL_EDITED_ROW_10
++ 반영
++ 구조화 양식 유지
++ 12
++ 작업단계 및 안전조치
++ 편집 작업 11
++ CANONICAL_EDITED_ROW_11
++ 반영
++ 구조화 양식 유지
++ 13
++ 작업단계 및 안전조치
++ 편집 작업 12
++ CANONICAL_EDITED_ROW_12
++ 반영
++ 구조화 양식 유지
++ 14
++ 작업단계 및 안전조치
++ 편집 작업 13
++ CANONICAL_EDITED_ROW_13
++ 반영
++ 구조화 양식 유지
++ 15
++ 작업단계 및 안전조치
++ 편집 작업 14
++ CANONICAL_EDITED_ROW_14
++ 반영
++ 구조화 양식 유지
++ 16
++ 작업단계 및 안전조치
++ 편집 작업 15
++ CANONICAL_EDITED_ROW_15
++ 반영
++ 구조화 양식 유지
++ 17
++ 작업단계 및 안전조치
++ 편집 작업 16
++ CANONICAL_EDITED_ROW_16
++ 반영
++ 구조화 양식 유지
++ 18
++ 작업단계 및 안전조치
++ 편집 작업 17
++ CANONICAL_EDITED_ROW_17
++ 반영
++ 구조화 양식 유지
++ 19
++ 작업단계 및 안전조치
++ 편집 작업 18
++ CANONICAL_EDITED_ROW_18
++ 반영
++ 구조화 양식 유지
++ 20
++ 작업단계 및 안전조치
++ 편집 작업 19
++ CANONICAL_EDITED_ROW_19
++ 반영
++ 구조화 양식 유지
++ 21
++ 작업단계 및 안전조치
++ 편집 작업 20
++ CANONICAL_EDITED_ROW_20
++ 반영
++ 구조화 양식 유지
++ 22
++ 작업단계 및 안전조치
++ 편집 작업 21
++ CANONICAL_EDITED_ROW_21
++ 반영
++ 구조화 양식 유지
++ 23
++ 작업단계 및 안전조치
++ 편집 작업 22
++ CANONICAL_EDITED_ROW_22
++ 반영
++ 구조화 양식 유지
++ 24
++ 작업단계 및 안전조치
++ 편집 작업 23
++ CANONICAL_EDITED_ROW_23
++ 반영
++ 구조화 양식 유지
++ …
++ 추가 편집
++ 3건
++ 추가 편집은 원문 저장본과 함께 확인하세요.
++ 메모
++
++ 확인 및 결재
++ 확인 및 결재
++ 확인 및 결재
++ 확인 및 결재
++ 확인 및 결재
++ 확인 및 결재
++ 작성자
++ 서명: ______
++ 작성자
++ 서명: ______
++ 검토자
++ 서명: ______
++ 검토자
++ 서명: ______
++ 승인자
++ 서명: ______
++ 승인자
++ 서명: ______
++ 본 작업계획서는 구조화 데이터를 엑셀(.xlsx) 양식에 반영한 문서입니다. 현장 확인 후 결재 및 서명하세요.
++ 본 작업계획서는 구조화 데이터를 엑셀(.xlsx) 양식에 반영한 문서입니다. 현장 확인 후 결재 및 서명하세요.
++ 본 작업계획서는 구조화 데이터를 엑셀(.xlsx) 양식에 반영한 문서입니다. 현장 확인 후 결재 및 서명하세요.
++ 본 작업계획서는 구조화 데이터를 엑셀(.xlsx) 양식에 반영한 문서입니다. 현장 확인 후 결재 및 서명하세요.
++ 본 작업계획서는 구조화 데이터를 엑셀(.xlsx) 양식에 반영한 문서입니다. 현장 확인 후 결재 및 서명하세요.
++ 본 작업계획서는 구조화 데이터를 엑셀(.xlsx) 양식에 반영한 문서입니다. 현장 확인 후 결재 및 서명하세요.
+
+ ❯ tests/editor-export-integrity.test.ts:140:22
+    138|
+    139|     expect(rendered).toContain("CANONICAL_EDITED_WORK_NAME");
+    140|     expect(rendered).toContain("CANONICAL_EDITED_ROW_26");
+       |                      ^
+    141|     expect(rendered).not.toContain("STALE_STRUCTURED_WORK_NAME");
+    142|     expect(rendered).not.toContain("STALE_STRUCTURED_DESCRIPTION");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  21:59:51
+   Duration  1.68s (transform 136ms, setup 0ms, import 769ms, tests 140ms, environment 0ms)
+
+EXPLICIT_EXIT_CODE=1

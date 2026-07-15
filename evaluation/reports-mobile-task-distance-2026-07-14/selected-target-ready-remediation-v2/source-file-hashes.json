@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "productSha": "c9d094b07bed2c9b48722ab9e3171da401d3ad04",
+  "algorithm": "sha256 over committed blob bytes",
+  "files": [
+    {
+      "file": "app/globals.css",
+      "gitBlobOid": "a04632ce8b6a4f82b296c92af0b357df934162fd",
+      "sha256": "1498dfa227aa90fd5bccaf3e6ab0293ad7fa950a2ec2348b970bd98fbfa9ce0e",
+      "bytes": 530738
+    },
+    {
+      "file": "components/ReportsDownloadCenter.tsx",
+      "gitBlobOid": "7f338d2efb6aad9fabc344cec62b323a3728c6e2",
+      "sha256": "d81c25654d5d1bb64e5cc24282719414bb0442b4d83e2b2a0b53ef9ae033e5db",
+      "bytes": 41755
+    },
+    {
+      "file": "lib/reporting-downloads.ts",
+      "gitBlobOid": "7b6bea68e2c35278c31fa10a8209300db0b381eb",
+      "sha256": "1c4e664281b0ad57aefb41fb541f9e170f0eea5a2a71320928f60600d4672b33",
+      "bytes": 46528
+    },
+    {
+      "file": "tests/reporting-downloads.test.ts",
+      "gitBlobOid": "f318f92a2e0b949fad42447c209098059dd75b01",
+      "sha256": "b92fb262a66a18085b14e6eca51286be05c321e6fab046b2236867dc5785816d",
+      "bytes": 39954
+    },
+    {
+      "file": "tests/reports-design-remediation.test.ts",
+      "gitBlobOid": "daff65f5541bd22ab941799ededd5a1492f33001",
+      "sha256": "50ff36849b81cf105eecb79cbdef7caabe993eb9126209d817664381f63f422e",
+      "bytes": 83033
+    },
+    {
+      "file": "tests/reports-download-center.test.ts",
+      "gitBlobOid": "8561425da2139584daf3b77efd97ffe3794aedf8",
+      "sha256": "7d20b49a03ecc66fd9f4d366df270b2b7ff5b4c8ecdba7a1a016e2a60248411b",
+      "bytes": 24223
+    }
+  ]
+}
