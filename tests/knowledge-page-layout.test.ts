@@ -299,9 +299,19 @@ describe("knowledge page decision layout", () => {
     for (let index = 0; index < await details.count(); index += 1) {
       const detail = details.nth(index);
       const summary = detail.locator("summary");
-      expect(await detail.evaluate((element) => element.open)).toBe(false);
+      expect(await detail.evaluate((element) => {
+        if (!(element instanceof HTMLDetailsElement)) {
+          throw new Error("Expected a knowledge evidence details element");
+        }
+        return element.open;
+      })).toBe(false);
       await summary.click();
-      expect(await detail.evaluate((element) => element.open)).toBe(true);
+      expect(await detail.evaluate((element) => {
+        if (!(element instanceof HTMLDetailsElement)) {
+          throw new Error("Expected a knowledge evidence details element");
+        }
+        return element.open;
+      })).toBe(true);
     }
 
     const metrics = await page.evaluate(() => {
