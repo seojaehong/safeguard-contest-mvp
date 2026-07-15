@@ -29,6 +29,12 @@ type KoshaReferenceEntry = {
 
 const KNOWLEDGE_SUMMARY_MAX_LENGTH = 150;
 
+const KNOWLEDGE_SCHEMA_PRESENTATION_LABELS = {
+  roleLabel: "문서 역할",
+  shortSummary: "짧은 요약",
+  documentReflectionLabel: "문서 반영 위치"
+} as const;
+
 const KNOWLEDGE_STAGE_PRESENTATION = {
   knowledge_event: {
     label: "원본 이벤트",
@@ -42,12 +48,12 @@ const KNOWLEDGE_STAGE_PRESENTATION = {
   },
   human_review: {
     label: "사람 검토",
-    detail: "출처, 권위, 적용 범위와 충돌 여부를 사람이 판정하는 승인 단계",
+    detail: "출처, 권위, 적용 범위와 충돌 여부를 확인하는 검토 단계 · 현재 연결 전",
     ownerLabel: "검토 책임자"
   },
   published_ontology: {
     label: "게시된 안전지식",
-    detail: "별도 승인과 감사 요건을 통과한 읽기 전용 안전지식",
+    detail: "별도 승인과 감사 요건을 통과한 읽기 전용 안전지식 · 현재 새 게시 연결 전",
     ownerLabel: "SafeClaw 공식 지식 저장소"
   }
 } satisfies Record<KnowledgePromotionStageId, {
@@ -192,6 +198,13 @@ function excerptFromMarkdown(markdown: string) {
   return normalizeKnowledgeSnippet(excerpt);
 }
 
+function localizeSchemaForPresentation(markdown: string) {
+  return Object.entries(KNOWLEDGE_SCHEMA_PRESENTATION_LABELS).reduce(
+    (localized, [machineLabel, displayLabel]) => localized.replaceAll(machineLabel, displayLabel),
+    markdown.replaceAll("LLM", "AI")
+  );
+}
+
 async function readWikiEntries(relativeDir: string) {
   const root = process.cwd();
   const dir = path.join(root, "knowledge", "wiki", relativeDir);
@@ -213,6 +226,7 @@ export default async function KnowledgePage() {
   const root = process.cwd();
   const indexMarkdown = await readText(path.join(root, "knowledge", "wiki", "index.md"));
   const schemaMarkdown = await readText(path.join(root, "knowledge", "SCHEMA.md"));
+  const schemaDisplayMarkdown = localizeSchemaForPresentation(schemaMarkdown);
   const hazardEntries = await readWikiEntries("hazards");
   const formEntries = await readWikiEntries("forms");
   const stats = await getSafetyReferenceStats();
@@ -235,8 +249,8 @@ export default async function KnowledgePage() {
           </article>
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>운영 지식</span>
-            <h2>원본 이벤트 · 후보 · 사람 검토</h2>
-            <p>AI 출력은 미게시 후보로 분리하고, 사람이 검토해 게시한 온톨로지만 확정 지식으로 사용합니다.</p>
+            <h2>원본 이벤트 · 검토 대기 · 읽기 전용</h2>
+            <p>AI가 만든 내용은 검토 전 후보로 분리됩니다. 검토와 게시 기능은 아직 연결 전입니다.</p>
           </article>
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>지식 카탈로그</span>
@@ -253,11 +267,11 @@ export default async function KnowledgePage() {
           <header className={styles.sectionHeader}>
             <div>
               <span className={styles.kicker}>지식 승격 규칙</span>
-              <h2 id="knowledge-governance-heading">지식 승격 흐름</h2>
+              <h2 id="knowledge-governance-heading">지식 검토 흐름 · 읽기 전용</h2>
             </div>
             <p>
-              원본 지식 이벤트의 내용과 출처를 유지한 채 후보, 사람 검토, 게시된 온톨로지를
-              서로 다른 상태로 관리합니다.
+              현재는 근거와 상태를 확인하는 읽기 전용 화면입니다. 후보의 출처와 적용 범위를
+              살펴볼 수 있으며, 검토와 게시 기능은 아직 연결 전입니다.
             </p>
           </header>
 
@@ -474,13 +488,13 @@ export default async function KnowledgePage() {
           <header className={styles.sectionHeader}>
             <div>
               <span className={styles.kicker}>스키마</span>
-              <h2 id="schema-heading">LLM 재생성 스키마</h2>
+              <h2 id="schema-heading">문서화 항목 안내</h2>
             </div>
-            <p>재생성 스키마는 개발/운영 확인용입니다. 현장 문서에는 roleLabel, shortSummary, documentReflectionLabel만 반영합니다.</p>
+            <p>AI 문서화에 쓰는 문서 역할, 짧은 요약, 문서 반영 위치를 확인합니다.</p>
           </header>
           <details className={styles.rawDetails}>
-            <summary>스키마 원문 펼치기</summary>
-            <pre>{schemaMarkdown}</pre>
+            <summary>운영 항목 원문 펼치기</summary>
+            <pre>{schemaDisplayMarkdown}</pre>
           </details>
         </section>
       </div>

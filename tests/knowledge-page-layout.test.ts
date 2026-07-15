@@ -288,6 +288,37 @@ describe("knowledge page decision layout", () => {
     }
   }, 90_000);
 
+  it("shows an honest read-only status and localized schema labels", async () => {
+    if (!browser) throw new Error("Browser was not started");
+
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.goto(`${baseUrl}/knowledge?theme=day`, { waitUntil: "domcontentloaded" });
+
+    const governance = page.locator('[data-knowledge-governance-flow="true"]');
+    await governance.waitFor();
+    const governanceText = await governance.textContent();
+    expect(governanceText).toContain("읽기 전용 화면");
+    expect(governanceText).toContain("검토와 게시 기능은 아직 연결 전");
+
+    const schemaSection = page.locator('[aria-labelledby="schema-heading"]');
+    await schemaSection.locator("summary").click();
+    const schemaText = await schemaSection.textContent();
+    expect(schemaText).toContain("문서화 항목 안내");
+    expect(schemaText).toContain("문서 역할");
+    expect(schemaText).toContain("짧은 요약");
+    expect(schemaText).toContain("문서 반영 위치");
+    for (const internalLabel of [
+      "LLM 재생성 스키마",
+      "roleLabel",
+      "shortSummary",
+      "documentReflectionLabel"
+    ]) {
+      expect(schemaText, `exposes ${internalLabel}`).not.toContain(internalLabel);
+    }
+
+    await page.close();
+  }, 90_000);
+
   it("keeps mobile evidence disclosures interactive, separated, and at least 44px tall", async () => {
     if (!browser) throw new Error("Browser was not started");
 

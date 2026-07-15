@@ -1,0 +1,27 @@
+{
+  "date": "2026-07-15",
+  "baseHead": "b15f24e0f8412dd5d86a5a07292427e39838410e",
+  "branch": "fix/knowledge-runtime-truth-20260715",
+  "scope": {
+    "route": "/knowledge",
+    "presentationOnly": true,
+    "databaseChanged": false,
+    "migrationChanged": false,
+    "runtimeChanged": false,
+    "koshaChanged": false,
+    "apiContractChanged": false
+  },
+  "tdd": {
+    "redCases": 2,
+    "focusedFiles": 2,
+    "focusedTests": 14,
+    "focusedPassed": 14
+  },
+  "verification": {
+    "strictTypecheck": "pass",
+    "normalBuild": "pass",
+    "staticPages": 28,
+    "browserViewport": "390x844"
+  },
+  "verdict": "pass"
+}

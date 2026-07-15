@@ -46,6 +46,23 @@ describe("knowledge governance UI contract", () => {
     expect(governanceSection).not.toContain("publish(");
   });
 
+  it("states that knowledge review and publishing are not connected yet", () => {
+    expect(pageSource).toContain("현재는 근거와 상태를 확인하는 읽기 전용 화면입니다.");
+    expect(pageSource).toContain("검토와 게시 기능은 아직 연결 전입니다.");
+    expect(pageSource).not.toContain("사람이 검토해 게시한 온톨로지만 확정 지식으로 사용합니다.");
+    expect(pageSource).not.toContain("서로 다른 상태로 관리합니다.");
+  });
+
+  it("localizes schema field names at the presentation boundary", () => {
+    expect(pageSource).toContain('roleLabel: "문서 역할"');
+    expect(pageSource).toContain('shortSummary: "짧은 요약"');
+    expect(pageSource).toContain('documentReflectionLabel: "문서 반영 위치"');
+    expect(pageSource).toContain("const schemaDisplayMarkdown");
+    expect(pageSource).toContain("<pre>{schemaDisplayMarkdown}</pre>");
+    expect(pageSource).not.toContain("<pre>{schemaMarkdown}</pre>");
+    expect(pageSource).not.toContain("<h2 id=\"schema-heading\">LLM 재생성 스키마</h2>");
+  });
+
   it("keeps the governance surface bounded and single-column on mobile", () => {
     expect(cssSource).toContain(".promotionFlow");
     expect(cssSource).toContain(".authorityTable");
