@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-07-15",
+  "status": "pass",
+  "branch": "fix/final-contrast-p0-20260715",
+  "baseSha": "79e48daec4add10706068dd6a5705c4f5ca7d5f9",
+  "scope": {
+    "landingSelectors": [
+      ".safeclaw-pipeline-grid span",
+      ".safeclaw-proof-matrix span",
+      ".safeclaw-language-matrix span",
+      ".safeclaw-module-map span"
+    ],
+    "documentSelector": ".safeclaw-module-shell.module-variant-document .safeclaw-doc-export a:first-of-type",
+    "excludedAreasTouched": []
+  },
+  "tdd": {
+    "red": {
+      "sharedSelectorActual": "var(--os-yellow)",
+      "documentComputedContrastRatio": 1.6301581137025196
+    },
+    "green": {
+      "sharedSurfaceTestsPassed": 16,
+      "documentBrowserTestsPassed": 1
+    }
+  },
+  "contrast": [
+    {
+      "surface": "landing-light-grid-labels",
+      "foreground": "#665100",
+      "background": "#ffffff",
+      "ratio": 7.658844584297905,
+      "minimum": 4.5,
+      "status": "pass"
+    },
+    {
+      "surface": "day-document-primary-export",
+      "foreground": "#17191d",
+      "background": "#f5c518",
+      "ratio": 10.796102113121005,
+      "minimum": 4.5,
+      "status": "pass"
+    }
+  ],
+  "verification": {
+    "focusedSharedTests": "pass",
+    "focusedDocumentBrowserProbe": "pass",
+    "strictTypecheck": "pass",
+    "staticAudit": {
+      "status": "pass",
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "cssLines": 20991,
+      "coverageIssues": 0,
+      "violations": 0
+    },
+    "fullBuildRun": false
+  }
+}
