@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-14T16:26:59.730Z",
+  "generatedAt": "2026-07-15T01:15:11.580Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "1ef6aae442ff1e68658e82a3567b487d91a2ff2b",
-  "sourceIdentity": "64bb5f413b8c4d8817954bd769ecb629387da95914f75af1bd6c5e8f609257db",
-  "evidenceHead": "1ef6aae442ff1e68658e82a3567b487d91a2ff2b",
+  "sourceSha": "238a011b3d0d436b5d498c415795cede61b3045e",
+  "sourceIdentity": "98b7e78a7b6984703cc20e28fe954e3bf3387189afa209aaeebb153a20915628",
+  "evidenceHead": "238a011b3d0d436b5d498c415795cede61b3045e",
   "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 32,
@@ -24,14 +24,14 @@
     "screenshots": 108,
     "successes": 108,
     "failedRows": 0,
-    "recoveredRows": 0,
+    "recoveredRows": 1,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 117029
+    "elapsedMs": 137370
   },
   "staticAudit": {
-    "sourceSha": "1ef6aae442ff1e68658e82a3567b487d91a2ff2b",
-    "sourceIdentity": "64bb5f413b8c4d8817954bd769ecb629387da95914f75af1bd6c5e8f609257db",
+    "sourceSha": "238a011b3d0d436b5d498c415795cede61b3045e",
+    "sourceIdentity": "98b7e78a7b6984703cc20e28fe954e3bf3387189afa209aaeebb153a20915628",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
@@ -52,7 +52,7 @@
       "rows": 108,
       "failedRows": 0,
       "findings": 0,
-      "recoveredRows": 0
+      "recoveredRows": 1
     }
   ],
   "serverLog": "evaluation/frontend-audit-runner-port-v2-2026-07-11/server.log",
@@ -103,7 +103,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-root-desktop-1440.jpg",
-      "screenshotSha256": "01f7bccf96cc2e71df90ea970cfa930a1fc5a3da8809792d74d4e6093a32289f",
+      "screenshotSha256": "3a13e9a90542d42b2aeec1fbfb9ae7d4bf46483d4035263a662c6d6deae35e8d",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -5604,7 +5604,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ontology-tablet-1024.jpg",
-      "screenshotSha256": "ae98ab4ae1438cc5e9a5f85023ada71837dd8e07caf1cfd9a969aead794bd17c",
+      "screenshotSha256": "24d858eb879ae44b68e0102ec4a527e80a77c98dc8534772962d1055e3ba8eb7",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -5786,15 +5786,18 @@
         "table": null,
         "note": null
       },
-      "limitation": "",
-      "fallbackKind": "none",
+      "limitation": "A sole known React 418 hydration transient recovered on one immediate isolated retry.",
+      "fallbackKind": "recovered-transient-hydration",
+      "recoveredTransientErrors": [
+        "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+      ],
       "contractChecks": {
         "passed": true,
         "headingRole": "page-title",
         "findings": []
       },
       "findings": [],
-      "result": "pass"
+      "result": "pass-with-recovered-transient"
     },
     {
       "route": "/ontology",
@@ -9258,7 +9261,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-desktop-1440.jpg",
-      "screenshotSha256": "38235d9c229bded9cdbd57af6d21fb0e20c92a1374811e25da03cddeb312f8c5",
+      "screenshotSha256": "4854ac95e6a4bcfb382cdd3850860536c0261b2e6948078fbe2df3f814e76c5f",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -9951,7 +9954,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workers-desktop-1440.jpg",
-      "screenshotSha256": "a90d83f9c776f05395a50bab62fcdac4e3dacb4bea335bdc3fa973c950d02688",
+      "screenshotSha256": "6232fb5560ee10e40adc22620e04b2e5233087418da0b5478190cf9d161c040b",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -10154,7 +10157,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workers-tablet-1024.jpg",
-      "screenshotSha256": "cdcc5640e500324bbda97715c2fd41a76e741ff47c1f6c6ffa16a3c7ec0b7315",
+      "screenshotSha256": "7e987fb46235a2077aae69907a0659e8d5a0254ff88d1f5ee26e6b6b56db1d04",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -10357,7 +10360,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workers-mobile-390.jpg",
-      "screenshotSha256": "82d278d170ebb7f22f5162291a83e3d2276dbdf6dc70a12cbabaf66ed481a9e4",
+      "screenshotSha256": "e2e1b695da62c302f7e266c1aa2813cab3bff77df66d3452eabd818aa337ab21",
       "boundaryMarker": "",
       "renderedControls": [
         {
@@ -12382,7 +12385,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/special-error.jpg",
-      "screenshotSha256": "604cba5ae0f462d3e5aadc2b2eea9c08dc8c45118e5a668464cc08a0a4816454",
+      "screenshotSha256": "6bb1803197aa52697cba8af1319cbfe63a0ace2c26e7975145d41f1ad2902d18",
       "boundaryMarker": "error",
       "renderedControls": [
         {
@@ -12532,7 +12535,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/special-loading.jpg",
-      "screenshotSha256": "66ad25859ff30d2c947c78cabf97fc565306e569e6fbd208d08f0ba89cd4479c",
+      "screenshotSha256": "524b19d8f519d627368f4d00ecbbcce0740bf426bcf058b812f065b50538392a",
       "boundaryMarker": "loading",
       "renderedControls": [],
       "keySurfaces": [
@@ -12547,7 +12550,7 @@
           ]
         }
       ],
-      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.4,20.2,33.6,33.6,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.2,20,33.9,33.9,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -13025,7 +13028,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 15. 오전 1:26:59 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 15. 오전 10:15:10 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13069,7 +13072,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "9665d69cc80095d81a9c559010690d810ac8a073692d660783d99da7d7dede0d",
+      "screenshotSha256": "9964e374a32e567584013776d4aafc60d7ff20351e390d758d21bbf71d4ae6ad",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,
