@@ -58,7 +58,10 @@ const log = createLogger("mcp-route");
 
 const generateSafetyDocpackHandler = createGenerateSafetyDocpackHandler({
   defaultMode: "full",
-  generateResponse: (question, mode) => runAsk(question, { aiMode: mode }),
+  generateResponse: (question, mode, phaseAGrounding) => runAsk(question, {
+    aiMode: mode,
+    phaseAGrounding,
+  }),
   queryKnowledge: querySafetyKnowledge,
   getWorkpackRepository: () => {
     const client = createSupabaseAdminClient();
@@ -69,7 +72,10 @@ const generateSafetyDocpackHandler = createGenerateSafetyDocpackHandler({
 
 const generateReviewedSafetyDocpackHandler = createGenerateReviewedSafetyDocpackHandler({
   defaultMode: "full",
-  generateResponse: (question, mode) => runAsk(question, { aiMode: mode }),
+  generateResponse: (question, mode, phaseAGrounding) => runAsk(question, {
+    aiMode: mode,
+    phaseAGrounding,
+  }),
   queryKnowledge: querySafetyKnowledge,
   reviewResponse: reviewDocpack,
   persistResponse: async (authContext, response) => {

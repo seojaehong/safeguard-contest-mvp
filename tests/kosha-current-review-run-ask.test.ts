@@ -4,6 +4,7 @@ import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import type { AiDeliverables, AiDeliverablesDiagnostics, AiMode, GenerateAllOptions } from "@/lib/ai-deliverables";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { runAsk } from "@/lib/search";
+import { buildPhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
 import type { SafetyReferenceItem, SafetyReferenceSearchResult } from "@/lib/safety-reference-catalog";
 import { loadBundledExactKoshaReference } from "@/lib/safety-reference-catalog-server";
 import type { AskResponse, SearchResult, TbmRiskLink } from "@/lib/types";
@@ -376,6 +377,21 @@ describe("current-base runAsk retrieval provenance", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
+
+  it("passes the identical Phase A grounding to legal evidence mapping", async () => {
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "review_required",
+      evidencePack: null,
+    });
+
+    await runAsk("고소작업", { aiMode: "enhanced", phaseAGrounding });
+
+    expect(mocks.enhanceLegalEvidenceMappings).toHaveBeenCalledWith(
+      "고소작업",
+      expect.any(Array),
+      phaseAGrounding,
+    );
+  }, 30_000);
 
   it("propagates final local-ranked items through runAsk and the DB packet", async () => {
     mocks.searchSafetyReferences.mockResolvedValue(searchResult(

@@ -8,8 +8,16 @@ import {
   type McpToolResult,
   type SafetyKnowledgeResult,
 } from "@/lib/mcp-tools";
-import { isEvidenceChainTaskBoundToQuestion } from "@/lib/ontology/evidence-chain";
-import { materializePhaseAProductDocuments } from "@/lib/ontology/product-materialization";
+import {
+  buildPhaseAGenerationGrounding,
+  isEvidenceChainTaskBoundToQuestion,
+  type ActiveEvidenceChainPack,
+  type PhaseAGenerationGrounding,
+} from "@/lib/ontology/evidence-chain";
+import {
+  buildPhaseAProductMaterialization,
+  materializePhaseAProductDocuments,
+} from "@/lib/ontology/product-materialization";
 import type { QaReviewResult } from "@/lib/ontology/qa-review";
 import type { AskResponse } from "@/lib/types";
 import {
@@ -30,7 +38,11 @@ export type GenerateSafetyDocpackHandler = (
 
 type GenerateSafetyDocpackHandlerDependencies = {
   defaultMode: AiMode;
-  generateResponse: (question: string, mode: AiMode) => Promise<AskResponse>;
+  generateResponse: (
+    question: string,
+    mode: AiMode,
+    grounding?: PhaseAGenerationGrounding,
+  ) => Promise<AskResponse>;
   queryKnowledge: (query: string) => Promise<SafetyKnowledgeResult>;
   getWorkpackRepository: () => McpWorkpackRepository | null;
   getGenerationEvidenceSecret: () => string | undefined;
@@ -41,12 +53,28 @@ export function createGenerateSafetyDocpackHandler(
 ): GenerateSafetyDocpackHandler {
   return async ({ question, mode, includeFull }, authContext) => {
     const generationEvidenceSecret = dependencies.getGenerationEvidenceSecret();
-    const [generatedResponse, knowledge] = await Promise.all([
-      dependencies.generateResponse(question, mode ?? dependencies.defaultMode),
-      dependencies.queryKnowledge(question),
-    ]);
-    const response = knowledge.found && knowledge.phaseAProduct
-      ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
+    const knowledge = await dependencies.queryKnowledge(question);
+    const grounding = knowledge.evidenceContract
+      ? buildPhaseAGenerationGrounding({
+          evidenceChainState: knowledge.evidenceChainState,
+          evidencePack: knowledge.evidenceContract,
+        })
+      : undefined;
+    const generatedResponse = await dependencies.generateResponse(
+      question,
+      mode ?? dependencies.defaultMode,
+      grounding,
+    );
+    const product = grounding ? buildPhaseAProductMaterialization({
+      evidenceChainState: grounding.groundingStatus === "resolved"
+        ? "resolved"
+        : grounding.evidencePack
+          ? "review_required"
+          : grounding.evidenceChainState,
+      evidencePack: grounding.evidencePack as ActiveEvidenceChainPack | null,
+    }) : null;
+    const response = product
+      ? materializePhaseAProductDocuments(generatedResponse, product, {
           generationEvidenceSecret,
         })
       : generatedResponse;
@@ -84,7 +112,11 @@ export type GenerateReviewedSafetyDocpackHandler = (
 
 type GenerateReviewedSafetyDocpackHandlerDependencies = {
   defaultMode: AiMode;
-  generateResponse: (question: string, mode: AiMode) => Promise<AskResponse>;
+  generateResponse: (
+    question: string,
+    mode: AiMode,
+    grounding?: PhaseAGenerationGrounding,
+  ) => Promise<AskResponse>;
   queryKnowledge: (query: string) => Promise<SafetyKnowledgeResult>;
   reviewResponse: (task: string, documentText: string) => Promise<QaReviewResult>;
   persistResponse: (
@@ -107,15 +139,33 @@ export function createGenerateReviewedSafetyDocpackHandler(
 ): GenerateReviewedSafetyDocpackHandler {
   return async ({ question, task, mode, includeFull }, authContext) => {
     const generationEvidenceSecret = dependencies.getGenerationEvidenceSecret();
-    const [generatedResponse, knowledge] = await Promise.all([
-      dependencies.generateResponse(question, mode ?? dependencies.defaultMode),
-      dependencies.queryKnowledge(task),
-    ]);
-    const reviewTask = knowledge.phaseAProduct?.task.label
+    const knowledge = await dependencies.queryKnowledge(task);
+    const taskBound = knowledge.found
+      && knowledge.evidenceContract !== null
+      && isEvidenceChainTaskBoundToQuestion(task, question, knowledge.evidenceContract.chainId);
+    const grounding = taskBound && knowledge.evidenceContract
+      ? buildPhaseAGenerationGrounding({
+          evidenceChainState: knowledge.evidenceChainState,
+          evidencePack: knowledge.evidenceContract,
+        })
+      : undefined;
+    const generatedResponse = await dependencies.generateResponse(
+      question,
+      mode ?? dependencies.defaultMode,
+      grounding,
+    );
+    const reviewTask = grounding?.evidencePack?.task.label
       ?? resolveReviewTaskLabel(task, question);
-    const response = knowledge.found && knowledge.phaseAProduct
-      && isEvidenceChainTaskBoundToQuestion(task, question, knowledge.phaseAProduct.chainId)
-      ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
+    const product = grounding ? buildPhaseAProductMaterialization({
+      evidenceChainState: grounding.groundingStatus === "resolved"
+        ? "resolved"
+        : grounding.evidencePack
+          ? "review_required"
+          : grounding.evidenceChainState,
+      evidencePack: grounding.evidencePack as ActiveEvidenceChainPack | null,
+    }) : null;
+    const response = product
+      ? materializePhaseAProductDocuments(generatedResponse, product, {
           generationEvidenceSecret,
         })
       : generatedResponse;

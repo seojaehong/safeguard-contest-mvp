@@ -20,8 +20,15 @@ import {
   type WeatherSignalLike,
 } from "./mcp-tools";
 import { querySafetyKnowledge } from "./ontology/knowledge-tool";
-import { materializePhaseAProductDocuments } from "./ontology/product-materialization";
-import { isEvidenceChainTaskBoundToQuestion } from "./ontology/evidence-chain";
+import {
+  buildPhaseAProductMaterialization,
+  materializePhaseAProductDocuments,
+} from "./ontology/product-materialization";
+import {
+  buildPhaseAGenerationGrounding,
+  isEvidenceChainTaskBoundToQuestion,
+  type ActiveEvidenceChainPack,
+} from "./ontology/evidence-chain";
 import { reviewDocpack } from "./ontology/qa-review-tool";
 import type { SafetyReferenceItem } from "./safety-reference-catalog";
 import { searchSafetyReferences } from "./safety-reference-catalog-server";
@@ -120,19 +127,36 @@ export async function executeClawTool(
       const requestedTask = asString(input, "task");
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
-      const [generatedResponse, knowledge] = await Promise.all([
-        runAsk(question, { aiMode: mode }),
-        querySafetyKnowledge(requestedTask),
-      ]);
-      const task = knowledge.phaseAProduct?.task.label
-        ?? resolveReviewTaskLabel(requestedTask, question);
-      const response = knowledge.found && knowledge.phaseAProduct
+      const knowledge = await querySafetyKnowledge(requestedTask);
+      const taskBound = knowledge.found
+        && knowledge.evidenceContract !== null
         && isEvidenceChainTaskBoundToQuestion(
           requestedTask,
           question,
-          knowledge.phaseAProduct.chainId,
-        )
-        ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
+          knowledge.evidenceContract.chainId,
+        );
+      const phaseAGrounding = taskBound && knowledge.evidenceContract
+        ? buildPhaseAGenerationGrounding({
+            evidenceChainState: knowledge.evidenceChainState,
+            evidencePack: knowledge.evidenceContract,
+          })
+        : undefined;
+      const generatedResponse = await runAsk(question, {
+        aiMode: mode,
+        ...(phaseAGrounding ? { phaseAGrounding } : {}),
+      });
+      const task = phaseAGrounding?.evidencePack?.task.label
+        ?? resolveReviewTaskLabel(requestedTask, question);
+      const product = phaseAGrounding ? buildPhaseAProductMaterialization({
+        evidenceChainState: phaseAGrounding.groundingStatus === "resolved"
+          ? "resolved"
+          : phaseAGrounding.evidencePack
+            ? "review_required"
+            : phaseAGrounding.evidenceChainState,
+        evidencePack: phaseAGrounding.evidencePack as ActiveEvidenceChainPack | null,
+      }) : null;
+      const response = product
+        ? materializePhaseAProductDocuments(generatedResponse, product, {
             generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
           })
         : generatedResponse;
@@ -143,12 +167,27 @@ export async function executeClawTool(
       const question = asString(input, "question");
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
-      const [generatedResponse, knowledge] = await Promise.all([
-        runAsk(question, { aiMode: mode }),
-        querySafetyKnowledge(question),
-      ]);
-      const response = knowledge.found && knowledge.phaseAProduct
-        ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
+      const knowledge = await querySafetyKnowledge(question);
+      const phaseAGrounding = knowledge.evidenceContract
+        ? buildPhaseAGenerationGrounding({
+            evidenceChainState: knowledge.evidenceChainState,
+            evidencePack: knowledge.evidenceContract,
+          })
+        : undefined;
+      const generatedResponse = await runAsk(question, {
+        aiMode: mode,
+        ...(phaseAGrounding ? { phaseAGrounding } : {}),
+      });
+      const product = phaseAGrounding ? buildPhaseAProductMaterialization({
+        evidenceChainState: phaseAGrounding.groundingStatus === "resolved"
+          ? "resolved"
+          : phaseAGrounding.evidencePack
+            ? "review_required"
+            : phaseAGrounding.evidenceChainState,
+        evidencePack: phaseAGrounding.evidencePack as ActiveEvidenceChainPack | null,
+      }) : null;
+      const response = product
+        ? materializePhaseAProductDocuments(generatedResponse, product, {
             generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
           })
         : generatedResponse;

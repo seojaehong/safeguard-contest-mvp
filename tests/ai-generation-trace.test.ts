@@ -74,4 +74,51 @@ describe("answer generation trace", () => {
     expect(logged).not.toContain("PII_MARKER");
     expect(logged).not.toContain("worker=Kim");
   });
+
+  test("places Phase A untrusted grounding before the answer persona", async () => {
+    const { generateAnswer } = await import("@/lib/ai");
+    const { buildPhaseAGenerationGrounding } = await import("@/lib/ontology/evidence-chain");
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_registered",
+      evidencePack: null,
+    });
+
+    await generateAnswer("일반 작업", [], {
+      traceId: "trace-phase-a-grounding",
+      phaseAGrounding,
+    });
+
+    const request = mocks.openAiCreate.mock.calls[0]?.[0] as { input?: string } | undefined;
+    expect(request?.input).toContain("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>");
+    expect(request?.input?.indexOf("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>")).toBeLessThan(
+      request?.input?.indexOf("당신은 산업안전 실무용 코파일럿이다.") ?? -1,
+    );
+    expect(request?.input).toContain('"groundingStatus":"missing"');
+  });
+
+  test("passes the same Phase A grounding into legal evidence mapping generation", async () => {
+    const { enhanceLegalEvidenceMappings } = await import("@/lib/ai");
+    const { buildPhaseAGenerationGrounding } = await import("@/lib/ontology/evidence-chain");
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "review_required",
+      evidencePack: null,
+    });
+    const citations = [{
+      id: "law-1",
+      type: "law" as const,
+      title: "산업안전보건법",
+      summary: "검토 근거",
+      sourceLabel: "법제처",
+      url: "https://law.go.kr",
+    }];
+
+    await enhanceLegalEvidenceMappings("고소작업", citations, phaseAGrounding);
+
+    const request = mocks.openAiCreate.mock.calls[0]?.[0] as { input?: string } | undefined;
+    expect(request?.input).toContain("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>");
+    expect(request?.input).toContain('"evidenceChainState":"review_required"');
+    expect(request?.input?.indexOf("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>")).toBeLessThan(
+      request?.input?.indexOf("당신은 산업안전 문서팩의 근거 매핑 편집자다.") ?? -1,
+    );
+  });
 });

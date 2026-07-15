@@ -6,6 +6,7 @@ import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverablesDiagnostics, type AiMode } from "./ai-deliverables";
 import { buildGroundedGenerationPacket, type GroundedGenerationPacket } from "./grounded-generation-contract";
+import type { PhaseAGenerationGrounding } from "./ontology/evidence-chain";
 import {
   deriveSafetyReferenceOperationalView,
   deriveSafetyReferenceRetrievalModeFromItems,
@@ -1516,6 +1517,8 @@ function normalizeAskResponseText(response: AskResponse): AskResponse {
 export type RunAskOptions = {
   aiMode?: AiMode;
   harnessMemory?: HarnessMemoryInput;
+  /** Fixed Phase A evidence selected before any answer or deliverable provider call. */
+  phaseAGrounding?: PhaseAGenerationGrounding;
   /** Task D-2a: SSE progress callback for the AI console. Defaults to no-op. */
   onProgress?: OnAskProgress;
 };
@@ -1764,7 +1767,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     );
     // enhanceLegalEvidenceMappings: optional quality pass, runs in parallel, best-effort.
     const citationsPromise = rawCitationsBasePromise.then((base) =>
-      enhanceLegalEvidenceMappings(question, base).catch((error) => {
+      enhanceLegalEvidenceMappings(question, base, options.phaseAGrounding).catch((error) => {
         log.error(
           "AI legal evidence mapping failed; using original legal evidence order",
           safeFailureContext(error)
@@ -1774,7 +1777,10 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     );
     // generateAnswer uses raw citations directly — no longer waits for enhance.
     const responsePromise = rawCitationsBasePromise.then((rawBase) =>
-      generateAnswer(question, rawBase.slice(0, 6), { traceId }).catch((error): AnswerGenerationResult => {
+      generateAnswer(question, rawBase.slice(0, 6), {
+        traceId,
+        phaseAGrounding: options.phaseAGrounding,
+      }).catch((error): AnswerGenerationResult => {
         log.error("AI response generation failed; using DB harness fallback", safeFailureContext(error));
         return {
           response: buildMockAskResponse(
@@ -1970,6 +1976,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               koshaPrimaryRefs: koshaPrimaryRefsEarly,
               dbHarnessContext,
               groundingPacket,
+              phaseAGrounding: options.phaseAGrounding,
               scope: "full",
               onProgress,
               traceId
