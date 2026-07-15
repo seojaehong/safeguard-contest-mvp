@@ -1,0 +1,40 @@
+{
+  "verifiedAt": "2026-07-16T05:41:00+09:00",
+  "sourceSha": "c2ca246a79918197ec3ff63d69b6f51ad218b5cf",
+  "vercelDeployment": "85mUWHRifZ1urXGbTwNdkkLiTwhX",
+  "previewUrl": "https://safeguard-contest-mvp-git-feat-nort-0f5618-seojaehongs-projects.vercel.app",
+  "workspaceBlankInput": {
+    "alertCount": 1,
+    "focusedElement": "field-command-input",
+    "ariaInvalid": true,
+    "status": "pass"
+  },
+  "share": {
+    "viewportWidth": 390,
+    "horizontalOverflow": 0,
+    "visibleSendCtaCount": 1,
+    "selectedLanguage": "vi",
+    "koreanMetadataLabelCount": 0,
+    "status": "pass"
+  },
+  "whyMobile": {
+    "viewportWidth": 390,
+    "horizontalOverflow": 0,
+    "outsideVisibleElements": 0,
+    "status": "pass"
+  },
+  "ontologyMobile": {
+    "viewportWidth": 390,
+    "documentWidth": 375,
+    "horizontalOverflow": 0,
+    "overlapPairs": 0,
+    "documentHeight": 4598,
+    "internalTermMatches": 0,
+    "status": "pass_with_length_followup"
+  },
+  "console": {
+    "productErrors": 0,
+    "vercelToolbarOptions400": 1
+  },
+  "verdict": "video_capture_ready_with_backend_fail_closed_followups"
+}

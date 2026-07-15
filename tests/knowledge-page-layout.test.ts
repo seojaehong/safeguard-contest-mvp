@@ -341,7 +341,19 @@ describe("knowledge page decision layout", () => {
     await page.locator('[data-knowledge-list="technical-support"]').waitFor();
 
     const technicalList = page.locator('[data-knowledge-list="technical-support"]');
-    const details = technicalList.locator("[data-knowledge-row] details");
+    let activeList = technicalList;
+    let activeListSelector = '[data-knowledge-list="technical-support"]';
+    if (await technicalList.locator("[data-knowledge-row]").count() === 0) {
+      await expect(page.locator('[data-knowledge-provenance="true"]')).toContainText(
+        /service role key가 없어|안전 지식 DB 상태 확인 중 오류/u
+      );
+      await page.getByRole("tab", { name: "참고 자료" }).click();
+      activeList = page.locator('[data-knowledge-list="reference-library"]');
+      activeListSelector = '[data-knowledge-list="reference-library"]';
+      await activeList.locator("[data-knowledge-row]").first().waitFor();
+    }
+
+    const details = activeList.locator("[data-knowledge-row] details");
     for (let index = 0; index < await details.count(); index += 1) {
       const detail = details.nth(index);
       const summary = detail.locator("summary");
@@ -360,10 +372,10 @@ describe("knowledge page decision layout", () => {
       })).toBe(true);
     }
 
-    const metrics = await page.evaluate(() => {
+    const metrics = await page.evaluate((listSelector) => {
       const interactiveElements = [
-        ...document.querySelectorAll<HTMLElement>('[data-knowledge-list="technical-support"] [data-knowledge-row] details > summary'),
-        ...document.querySelectorAll<HTMLElement>('[data-knowledge-list="technical-support"] [data-knowledge-row] details a')
+        ...document.querySelectorAll<HTMLElement>(`${listSelector} [data-knowledge-row] details > summary`),
+        ...document.querySelectorAll<HTMLElement>(`${listSelector} [data-knowledge-row] details a`)
       ];
       const targets = interactiveElements
         .filter((element) => {
@@ -375,7 +387,7 @@ describe("knowledge page decision layout", () => {
           return {
           label: element.textContent?.trim() || element.tagName,
             href: element instanceof HTMLAnchorElement ? element.getAttribute("href") : null,
-            detailIndex: [...document.querySelectorAll('[data-knowledge-list="technical-support"] [data-knowledge-row] details')]
+            detailIndex: [...document.querySelectorAll(`${listSelector} [data-knowledge-row] details`)]
               .indexOf(element.closest("details") as HTMLDetailsElement),
             left: rectangle.left,
             right: rectangle.right,
@@ -401,7 +413,7 @@ describe("knowledge page decision layout", () => {
       }
 
       return { targets, overlapPairs };
-    });
+    }, activeListSelector);
 
     expect(metrics.targets.length).toBeGreaterThan(0);
     expect(metrics.overlapPairs).toEqual([]);
