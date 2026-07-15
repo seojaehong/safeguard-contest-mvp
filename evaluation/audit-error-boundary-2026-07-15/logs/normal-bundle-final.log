@@ -1,0 +1,18 @@
+
+> safeclaw@0.1.0 audit:frontend-bundle
+> node ./scripts/frontend_audit_bundle_contract.mjs --mode normal
+
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-15T07:02:57.113Z",
+  "mode": "normal",
+  "buildDirectory": ".next",
+  "buildId": "kxYcxOPxpva6YpinIVILM",
+  "sourceSha": "79e48daec4add10706068dd6a5705c4f5ca7d5f9",
+  "sourceIdentity": "28fc56272ef81f8a3dbf8aa5cf09efa896d425dd73cc698fb8f248832da0a897",
+  "buildIdentity": "cd311d0ad4459478443d35ecff66951245f04857e4588592ad733dcafb41432d",
+  "chunkCount": 100,
+  "markerCount": 0,
+  "markerFiles": [],
+  "status": "pass"
+}

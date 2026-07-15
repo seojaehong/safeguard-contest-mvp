@@ -1,0 +1,16 @@
+
+> safeclaw@0.1.0 start
+> next start -p 3059
+
+   ▲ Next.js 15.5.20
+   - Local:        http://localhost:3059
+   - Network:      http://172.20.10.2:3059
+
+ ✓ Starting...
+ ✓ Ready in 622ms
+ ⨯ Error: SafeClaw deterministic frontend audit error boundary probe
+    at l (<worktree>\.next\server\app\dryrun\page.js:2:7888) {
+  digest: '3580406504'
+}
+Terminate batch job (Y/N)? 
+^C

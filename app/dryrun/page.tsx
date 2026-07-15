@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { getLatestDryrunReport, getLatestDryrunSnapshot } from "@/lib/dryrun-status";
 import { toDryrunPresentationSnapshot } from "@/lib/web-safe-presentation";
+import { triggerAppErrorBoundary } from "safeclaw-audit-app-error-escalation";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +17,7 @@ export default async function DryrunPage({
   searchParams: Promise<{ __auditBoundary?: string }>;
 }) {
   const query = await searchParams;
-  if (process.env.SAFECLAW_FRONTEND_AUDIT === "1" && query.__auditBoundary === "error") {
-    throw new Error("SafeClaw deterministic frontend audit error boundary probe");
-  }
+  triggerAppErrorBoundary(query.__auditBoundary);
 
   let snapshot: ReturnType<typeof toDryrunPresentationSnapshot> = null;
   try {

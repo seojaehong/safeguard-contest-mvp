@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { confirmAppErrorBoundaryProbe } from "safeclaw-audit-app-error-escalation";
 
 export default function Error({
   error,
@@ -10,10 +11,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    if (document.querySelector('[data-safeclaw-audit-enabled="true"]')
-      && new URLSearchParams(window.location.search).get("__auditBoundary") === "error") {
-      console.error("SafeClaw deterministic frontend audit error boundary probe");
-    }
+    confirmAppErrorBoundaryProbe(new URLSearchParams(window.location.search).get("__auditBoundary"));
   }, []);
 
   return (

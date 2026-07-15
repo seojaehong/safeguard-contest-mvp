@@ -23,8 +23,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const auditEnabled = process.env.SAFECLAW_FRONTEND_AUDIT === "1";
-
   return (
     <html lang="ko">
       <head>
@@ -61,7 +59,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
       </head>
       <body>
-        {auditEnabled ? <span hidden data-safeclaw-audit-enabled="true" /> : null}
         <GlobalBoundaryProbe />
         {children}
       </body>

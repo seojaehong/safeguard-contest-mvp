@@ -24,11 +24,18 @@ const nextConfig = {
     NEXT_PUBLIC_BUILD_DATE: buildDate
   },
   webpack(config) {
+    const auditEnabled = process.env.SAFECLAW_FRONTEND_AUDIT === "1";
     config.resolve.alias["safeclaw-audit-error-escalation$"] = join(
       projectRoot,
-      process.env.SAFECLAW_FRONTEND_AUDIT === "1"
+      auditEnabled
         ? "lib/frontend-audit/GlobalBoundaryProbe.audit.tsx"
         : "lib/frontend-audit/GlobalBoundaryProbe.noop.tsx"
+    );
+    config.resolve.alias["safeclaw-audit-app-error-escalation$"] = join(
+      projectRoot,
+      auditEnabled
+        ? "lib/frontend-audit/AppBoundaryProbe.audit.ts"
+        : "lib/frontend-audit/AppBoundaryProbe.noop.ts"
     );
     return config;
   },

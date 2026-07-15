@@ -6,6 +6,9 @@ import { pathToFileURL } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import { triggerAppErrorBoundary as triggerAuditAppErrorBoundary } from "@/lib/frontend-audit/AppBoundaryProbe.audit";
+import { triggerAppErrorBoundary as triggerNormalAppErrorBoundary } from "@/lib/frontend-audit/AppBoundaryProbe.noop";
+
 const root = process.cwd();
 const scanner = path.join(root, "scripts", "frontend_audit_bundle_contract.mjs");
 const marker = "SafeClaw deterministic frontend audit global boundary probe";
@@ -66,6 +69,18 @@ function containsForbiddenLocalPath(filePath: string): boolean {
 }
 
 describe("frontend audit bundle contract", () => {
+  it("selects the app error boundary probe at build time and keeps the normal probe inert", () => {
+    expect(() => triggerAuditAppErrorBoundary("error")).toThrow(
+      "SafeClaw deterministic frontend audit error boundary probe",
+    );
+    expect(() => triggerAuditAppErrorBoundary(undefined)).not.toThrow();
+    expect(() => triggerNormalAppErrorBoundary("error")).not.toThrow();
+
+    const dryrunSource = fs.readFileSync(path.join(root, "app", "dryrun", "page.tsx"), "utf8");
+    expect(dryrunSource).toContain('from "safeclaw-audit-app-error-escalation"');
+    expect(dryrunSource).not.toContain("process.env.SAFECLAW_FRONTEND_AUDIT");
+  });
+
   it("rejects audit code in normal chunks and requires it in audit chunks", () => {
     expect(runScanner("normal", ["console.log('normal');"]).status).toBe(0);
     expect(runScanner("normal", [marker]).status).not.toBe(0);

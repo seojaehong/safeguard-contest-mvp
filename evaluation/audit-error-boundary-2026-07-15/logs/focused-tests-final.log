@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/audit-error-boundary-20260715
+
+
+ Test Files  2 passed (2)
+      Tests  4 passed | 40 skipped (44)
+   Start at  16:00:10
+   Duration  9.02s (transform 107ms, setup 0ms, import 154ms, tests 7.43s, environment 0ms)
+
