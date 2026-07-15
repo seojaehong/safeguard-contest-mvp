@@ -1,8 +1,8 @@
 {
   "status": "pass",
-  "sourceBase": "cb43e4d10416150577cfe88179cdced5f4a23e94",
+  "sourceBase": "b48a618",
   "branch": "fix/northstar-ontology-ui-20260715",
-  "candidateCommit": "108c950",
+  "candidateCommit": "f270124",
   "scope": [
     "app/ontology/**",
     "tests/ontology-ui-remediation.test.ts",
