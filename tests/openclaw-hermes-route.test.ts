@@ -30,11 +30,11 @@ function approvedCurrentKoshaReference(): SafetyReferenceItem {
     subcategory: null,
     title: "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
     summary: "외벽 작업의 추락 예방 점검 지침",
-    body: "승인된 현행 KOSHA 원문 본문",
+    body: "외벽도장보수공사 작업 전 작업발판, 난간, 개구부와 안전대 상태를 확인합니다.",
     keywords: ["외벽", "도장", "추락"],
     risk_tags: ["추락"],
     primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
-    controls: ["작업발판과 안전난간 상태 확인"],
+    controls: ["작업발판, 난간, 개구부와 안전대 상태를 확인"],
     source_url: "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1",
     evidence_role: "supporting",
     retrieval_source: "rest",
@@ -73,7 +73,7 @@ describe("OpenClaw Hermes production route", () => {
     mocks.createProductionEngineAdapter.mockClear();
   });
 
-  it("injects a production KOSHA verifier that accepts approved current refs only", async () => {
+  it("injects a production KOSHA verifier that rejects metadata-only body claims", async () => {
     await import("@/app/api/agent/chat/route");
 
     const dependencies = mocks.createProductionEngineAdapter.mock.calls[0]?.[1] as {
@@ -85,7 +85,7 @@ describe("OpenClaw Hermes production route", () => {
     expect(verifier).toBeTypeOf("function");
 
     const approved = approvedCurrentKoshaReference();
-    expect(verifier?.(approved)).toBe(true);
+    expect(verifier?.(approved)).toBe(false);
 
     const unknown = structuredClone(approved);
     if (!unknown.kosha_grounding?.metadata) throw new Error("test fixture requires KOSHA metadata");

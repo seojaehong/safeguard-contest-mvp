@@ -200,7 +200,25 @@ function digestEvidencePacket(packet: unknown): string {
 type EligibleClaimReference = Readonly<{
   item: SafetyReferenceItem;
   authorityLabel: string;
+  controls: readonly string[];
 }>;
+
+function normalizeEvidenceText(value: string): string {
+  return value.normalize("NFC").replace(/\s+/gu, " ").trim();
+}
+
+function extractableKoshaClaims(item: SafetyReferenceItem): readonly string[] {
+  const body = normalizeEvidenceText(item.body ?? "");
+  if (!body) return [];
+  const candidates = [
+    ...item.controls,
+    ...(item.kosha_guide?.anchors.map((anchor) => anchor.excerpt) ?? []),
+  ];
+  return [...new Set(candidates.filter((candidate) => {
+    const extract = normalizeEvidenceText(candidate);
+    return extract.length > 0 && body.includes(extract);
+  }))];
+}
 
 function buildEvidenceClaims(
   packet: DbHarnessPacket,
@@ -210,22 +228,30 @@ function buildEvidenceClaims(
   const references: EligibleClaimReference[] = [
     ...packet.directEvidence
       .filter(isSafetyReferenceDirectEligible)
-      .map((item) => ({ item, authorityLabel: "직접 근거" })),
+      .map((item) => ({ item, authorityLabel: "직접 근거", controls: item.controls })),
     ...packet.sifCases
       .filter((item) => item.item_type === "sif-case")
-      .map((item) => ({ item, authorityLabel: "SIF 사례 근거(위험 우선순위)" })),
+      .map((item) => ({
+        item,
+        authorityLabel: "SIF 사례 근거(위험 우선순위)",
+        controls: item.controls,
+      })),
     ...packet.supportingEvidence
       .filter((item) => isGroundedKoshaReference(item, trustedKoshaReference))
-      .map((item) => ({ item, authorityLabel: "KOSHA 실행지침" })),
+      .map((item) => ({
+        item,
+        authorityLabel: "KOSHA 실행지침",
+        controls: extractableKoshaClaims(item),
+      })),
   ];
-  for (const { item: reference, authorityLabel } of references) {
+  for (const { item: reference, authorityLabel, controls } of references) {
     const sourceLabel = reference.kosha_guide?.evidenceRef?.trim() || reference.title.trim();
     const label = sourceLabel ? `${authorityLabel}: ${sourceLabel}` : "";
     if (!label) continue;
     const citationId = `citation:${createHash("sha256")
       .update(canonicalJson({ id: reference.id, label }), "utf8")
       .digest("hex")}`;
-    for (const control of reference.controls) {
+    for (const control of controls) {
       const text = control.trim();
       if (!text) continue;
       const claimId = `claim:${createHash("sha256")

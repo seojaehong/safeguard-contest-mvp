@@ -1,6 +1,6 @@
 import { createAgentChatPost, createProductionEngineAdapter } from "@/lib/openclaw-broker-route";
 import { resolveBrokerRequestContext } from "@/lib/openclaw-broker-auth";
-import { isProductionTrustedKoshaReference } from "@/lib/safety-reference-catalog";
+import { isProductionTrustedKoshaReference } from "@/lib/production-kosha-trust";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
