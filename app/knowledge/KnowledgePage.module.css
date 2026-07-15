@@ -382,7 +382,12 @@
 
 .rowDetails summary,
 .rawDetails summary {
+  display: inline-flex;
+  align-items: center;
   width: fit-content;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-2);
   cursor: pointer;
   color: var(--workspace-muted, #606873);
   font-size: var(--text-caption);
@@ -405,6 +410,11 @@
 }
 
 .detailContent a {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-2);
   color: var(--workspace-accent-text, #334155);
   font-weight: 700;
   text-underline-offset: 3px;
@@ -591,6 +601,14 @@
   .reflection,
   .rowDetails {
     grid-column: 1;
+  }
+
+  .rowDetails summary {
+    width: 100%;
+  }
+
+  .detailContent {
+    align-items: stretch;
   }
 
   .wikiGrid {

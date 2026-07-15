@@ -19,6 +19,20 @@ describe("knowledge governance UI contract", () => {
     expect(pageSource).toContain('data-knowledge-stage={stage.id}');
   });
 
+  it("keeps machine stage identifiers while presenting Korean governance labels", () => {
+    expect(pageSource).toContain("KNOWLEDGE_STAGE_PRESENTATION");
+    expect(pageSource).toContain("KNOWLEDGE_AUTHORITY_PRESENTATION");
+    expect(pageSource).toContain("NEXT_STAGE_LABELS");
+    expect(pageSource).toContain('published_ontology: "게시된 안전지식"');
+    expect(pageSource).toMatch(/hermes_llm:\s*\{[\s\S]*?label:\s*"AI 문서화 도구"/u);
+    expect(pageSource).toContain('human_review: "사람 검토"');
+    expect(pageSource).toContain('data-knowledge-stage={stage.id}');
+    expect(pageSource).toContain('data-knowledge-authority={lane.id}');
+    expect(pageSource).not.toContain("<h3>{stage.label}</h3>");
+    expect(pageSource).not.toContain('{stage.nextStage || "최종 읽기 범위"}');
+    expect(pageSource).not.toContain("<strong>{lane.label}</strong>");
+  });
+
   it("renders six distinct authority lanes without a publish control", () => {
     expect(pageSource).toContain("KNOWLEDGE_AUTHORITY_LANES");
     expect(pageSource).toContain('data-knowledge-authority-map="true"');
@@ -37,5 +51,10 @@ describe("knowledge governance UI contract", () => {
     expect(cssSource).toContain(".authorityTable");
     expect(cssSource).toContain("@media (max-width: 720px)");
     expect(cssSource).not.toMatch(/gradient\s*\(/i);
+  });
+
+  it("gives repeated knowledge disclosures and links full touch targets", () => {
+    expect(cssSource).toMatch(/\.rowDetails summary[\s\S]*?min-height:\s*44px;/u);
+    expect(cssSource).toMatch(/\.detailContent a[\s\S]*?min-height:\s*44px;/u);
   });
 });
