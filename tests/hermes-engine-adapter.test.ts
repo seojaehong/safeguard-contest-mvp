@@ -287,6 +287,38 @@ describe("experimental Hermes EngineAdapter", () => {
     expect(harnessCalls).toBe(1);
   }, 15_000);
 
+  it("accepts an exact trusted KOSHA reference from the direct bucket", async () => {
+    const harnessResult = structuredClone(groundedHarnessResult());
+    const koshaIndex = harnessResult.packet.supportingEvidence.findIndex(
+      (item) => item.id === pinnedRecoveredKoshaFixture.id,
+    );
+    const kosha = harnessResult.packet.supportingEvidence[koshaIndex];
+    if (!kosha || koshaIndex < 0) throw new Error("test fixture requires grounded KOSHA evidence");
+    harnessResult.packet.supportingEvidence.splice(koshaIndex, 1);
+    harnessResult.packet.directEvidence.push(kosha);
+    harnessResult.packet.retrievalContract.sourceCounts.supportingEvidence -= 1;
+    harnessResult.packet.retrievalContract.sourceCounts.directEvidence += 1;
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(harnessResult);
+    let plannerCalls = 0;
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async (input) => {
+        plannerCalls += 1;
+        expect(input.evidenceClaims.some((claim) => (
+          claim.citations.some((citation) => citation.label.startsWith("KOSHA 실행지침:"))
+        ))).toBe(true);
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(1);
+  });
+
   it("accepts the production executeClawTool Harness packet with controlled grounded searches", async () => {
     const searchSpy = vi.spyOn(safetyReferenceServer, "searchSafetyReferences").mockImplementation(
       async (options) => {

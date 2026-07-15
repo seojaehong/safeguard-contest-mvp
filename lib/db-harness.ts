@@ -309,19 +309,30 @@ export function buildDbHarnessPacket(input: {
   const references = input.references
     .filter((item) => isSafetyReferenceCompatibleWithQuery(input.question, item))
     .filter((item) => isDirectEvidenceCompatibleWithQueryHazard(item, queryHazardFamilies))
-    .map((item) => ({
-      ...item,
-      evidence_role: isKoshaTechnicalReference(item) || item.item_type === "sif-case"
-        ? "supporting" as const
-        : item.evidence_role,
-      ...buildSafetyReferenceOperationalMetadata(item)
-    }));
+    .map((item) => {
+      const exactDirectKosha = isKoshaTechnicalReference(item)
+        && isSafetyReferenceDirectEligible(item);
+      return {
+        ...item,
+        evidence_role: item.item_type === "sif-case"
+          ? "supporting" as const
+          : exactDirectKosha
+            ? "direct" as const
+            : isKoshaTechnicalReference(item)
+              ? "supporting" as const
+              : item.evidence_role,
+        ...buildSafetyReferenceOperationalMetadata(item)
+      };
+    });
   const directEvidence = references.filter((item) => (
     item.evidence_role === "direct" && isSafetyReferenceDirectEligible(item)
   ));
   const sifCases = references.filter((item) => item.item_type === "sif-case");
-  const directIds = new Set(directEvidence.map((item) => item.id));
-  const supportingEvidence = references.filter((item) => !directIds.has(item.id));
+  const classifiedIds = new Set([
+    ...directEvidence.map((item) => item.id),
+    ...sifCases.map((item) => item.id)
+  ]);
+  const supportingEvidence = references.filter((item) => !classifiedIds.has(item.id));
   const retrievalContract = buildRetrievalContract({
     references,
     directEvidence,
@@ -891,10 +902,14 @@ function buildVerifiedKoshaPromptLines(
 
 export function buildHarnessPromptContext(packet: DbHarnessPacket) {
   const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
+  const koshaEvidence = [...packet.directEvidence, ...packet.supportingEvidence]
+    .filter(isKoshaTechnicalReference);
   const evidenceLines = [
     ...packet.sifCases.map((item) => `SIF: ${getSafetyReferenceDisplayTitle(item)} -> ${deriveSafetyReferenceOperationalView(item).controls.slice(0, 2).join(" / ")}`),
-    ...packet.directEvidence.map((item) => `공식자료: ${getSafetyReferenceDisplayTitle(item)} -> ${item.primary_documents.join(", ")}`),
-    ...buildVerifiedKoshaPromptLines(packet.supportingEvidence, { parentCandidates }),
+    ...packet.directEvidence
+      .filter((item) => !isKoshaTechnicalReference(item))
+      .map((item) => `공식자료: ${getSafetyReferenceDisplayTitle(item)} -> ${item.primary_documents.join(", ")}`),
+    ...buildVerifiedKoshaPromptLines(koshaEvidence, { parentCandidates }),
     ...packet.improvementMemory.map((item) => [
       `개선이력: ${item.hazardLabel} -> ${item.improvementText}`,
       item.visionStatus ? `visionStatus: ${item.visionStatus}` : "",
