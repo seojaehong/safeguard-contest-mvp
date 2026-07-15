@@ -57,3 +57,17 @@ The red phase recorded the old report label and the rendered `/documents` shell 
 Static review scanned five composed customer-surface files. It found 23 technical occurrences for review: 22 internal code/export references and one allowed `JSON` button inside the collapsed `editor-export-panel`. Default-visible violations were 0, and forbidden ontology/grounded-generation/DB/schema changes were 0.
 
 Per the follow-up timebox, no full repository suite or build was run. Browser-wide integration remains assigned to the main branch.
+
+## Reviewer P1 closure
+
+The independent P1 re-review found that the rendered default-surface regular expressions did not include `DB 하네스` or `품질 계약`. Both `tests/documents-editor-layout.test.ts` and `tests/workspace-layout-regression.test.ts` now use a named default-visible terminology pattern containing those terms. The same pattern guards the actual `/documents` body, workspace share composition, and nested field-workspace `innerText()`.
+
+TDD evidence:
+
+- RED: the mutation sentinel `DB 하네스 · 품질 계약` was not matched by the prior expression in either browser test; 2 selected tests failed.
+- GREEN: workspace share/nested render passed 1 selected test with 24 unrelated tests skipped.
+- GREEN: documents default render passed 1 selected test with 22 unrelated tests skipped.
+- Terminology unit: 4 tests passed.
+- Strict typecheck: `tsc --noEmit --incremental false` passed.
+
+One combined GREEN attempt encountered a documents harness `beforeAll` startup timeout before any documents assertion ran. The documents test then passed when rerun alone. No product file was changed for this P1 closure.

@@ -17,6 +17,7 @@ let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
 const workspaceInputProductionMatrix = process.env.WORKSPACE_INPUT_PROD_MATRIX === "1" ? it : it.skip;
 const CSS_PIXEL_ADJACENCY_TOLERANCE = 0.01;
+const DEFAULT_VISIBLE_OPERATIONAL_LABELS = /\b(?:Markdown|Supabase|API|JSON)\b|Operation Ontology|Operation Graph|DB 하네스|품질 계약/u;
 
 function areCssPixelEdgesAdjacent(sideBottom: number, mainTop: number): boolean {
   return Math.abs(sideBottom - mainTop) <= CSS_PIXEL_ADJACENCY_TOLERANCE;
@@ -387,13 +388,14 @@ describe("workspace layout regression", () => {
     await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "공유" }).click();
     const sharePage = page.locator(".workspace-share-page");
     await sharePage.waitFor({ state: "visible" });
-    expect(await sharePage.innerText()).not.toMatch(/\b(?:Markdown|Supabase|API|JSON)\b|Operation Ontology|Operation Graph/u);
+    expect("DB 하네스 · 품질 계약").toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
+    expect(await sharePage.innerText()).not.toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
     await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "문서" }).click();
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     const fieldWorkspace = page.locator(".field-workspace");
     await fieldWorkspace.waitFor({ state: "visible" });
     expect(await fieldWorkspace.textContent()).toContain("복원 작업자");
-    expect(await fieldWorkspace.innerText()).not.toMatch(/\b(?:Markdown|Supabase|API|JSON)\b|Operation Ontology|Operation Graph/u);
+    expect(await fieldWorkspace.innerText()).not.toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
     expect(await page.locator(".workspace-input-page").count()).toBe(0);
   }, 90_000);
 
