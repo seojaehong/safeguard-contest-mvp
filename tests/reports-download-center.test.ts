@@ -520,9 +520,24 @@ describe("reports download center remount behavior", () => {
       expect(await page.getByText("샘플 리포트", { exact: true }).isVisible()).toBe(true);
       expect(await page.getByLabel("고정 리포트 데이터 출처").getByText("샘플 데이터", { exact: true }).count()).toBe(1);
       expect(await page.getByLabel("다운로드 준비 상태").getByText("다운로드 잠김", { exact: true }).count()).toBe(1);
-      const exportButtons = page.getByLabel("리포트 다운로드").getByRole("button");
-      expect(await exportButtons.count()).toBe(5);
-      for (const button of await exportButtons.all()) {
+      const downloadActions = page.getByLabel("리포트 다운로드");
+      const customerExportButtons = downloadActions.getByRole("button");
+      expect(await customerExportButtons.count()).toBe(2);
+      for (const button of await customerExportButtons.all()) {
+        expect(await button.isDisabled()).toBe(true);
+      }
+
+      const adminDownloads = downloadActions.locator("details.safeclaw-report-admin-downloads");
+      expect(await adminDownloads.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
+      const advancedExportButtons = adminDownloads.locator("button");
+      expect(await advancedExportButtons.count()).toBe(3);
+      for (const button of await advancedExportButtons.all()) {
+        expect(await button.isVisible()).toBe(false);
+      }
+      await adminDownloads.getByText("관리자용 상세 파일", { exact: true }).click();
+      expect(await adminDownloads.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+      for (const button of await advancedExportButtons.all()) {
+        expect(await button.isVisible()).toBe(true);
         expect(await button.isDisabled()).toBe(true);
       }
 
