@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "date": "2026-07-15",
-  "productCandidateSha": "ed4a293554b1edac0dd6c7ad7341f323d206c786",
+  "productCandidateSha": "68ddda7dc5e6ea115edc4b8d8b28454f3779ba23",
   "baseSha": "238a011b3d0d436b5d498c415795cede61b3045e",
   "branch": "fix/northstar-hermes-runtime-20260715",
   "scope": "/api/agent/chat production KOSHA trust and claim-level Hermes evidence eligibility",
@@ -15,23 +15,27 @@
     "koshaSupportingEligibilityRequired": true,
     "explicitKoshaTrustDecisionRequired": true,
     "missingKoshaTrustVerifierPolicy": "fail_closed",
+    "productionTrustRegistryInjectedAtRoute": true,
+    "approvedCurrentKoshaReferencePasses": true,
+    "unknownOrUntrustedKoshaReferencePasses": false,
     "mixedKoshaTrustClaimsFiltered": true,
     "emptyEligibleClaimAllowlistPolicy": "fail_closed",
     "reviewRequiredClaimsSelectable": false,
     "unknownAttestationPolicy": "fail_closed"
   },
-  "koshaFixture": {
-    "boundary": "test_only_recovered_unverified_fixture",
-    "version": "D-C-13-2026",
-    "productionTrustRegistryPopulated": false,
-    "productionReadyClaim": false
+  "koshaTrustRegistry": {
+    "boundary": "code_owned_production_registry",
+    "approvedCurrentReferenceCount": 1,
+    "approvedVersion": "D-C-13-2026",
+    "productionTrustRegistryPopulated": true,
+    "productionTrustPathReady": true
   },
   "verification": [
     {
-      "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/openclaw-chat.test.ts tests/openclaw-broker-ui-context.test.ts",
-      "testFiles": 3,
-      "tests": 72,
-      "passed": 72,
+      "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/openclaw-hermes-route.test.ts tests/openclaw-chat.test.ts tests/openclaw-broker-ui-context.test.ts",
+      "testFiles": 4,
+      "tests": 75,
+      "passed": 75,
       "failed": 0
     },
     {
@@ -41,8 +45,10 @@
     {
       "command": "npm.cmd run build",
       "exitCode": 0,
-      "pages": 28,
-      "buildId": "KO_kV3vRg5s3OFRrhgHYy"
+      "freshBuild": true,
+      "buildCacheRemovedBeforeRun": true,
+      "staticPagesGenerated": 28,
+      "buildId": "7V9HOhxRxy6TfamvwIBut"
     },
     {
       "command": "git diff --check",
@@ -51,7 +57,6 @@
   ],
   "runtimeReady": false,
   "runtimeBlockers": [
-    "Production KOSHA trusted official metadata registry is empty.",
     "Installed OpenClaw CLI 2026.6.5 is behind config writer 2026.6.11.",
     "The safeclaw profile has no explicit agents.list tool-free entry.",
     "Organization and site binding environment values are not configured for live execution.",
