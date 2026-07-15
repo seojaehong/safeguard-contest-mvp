@@ -244,6 +244,47 @@ describe("grounded generation contract", () => {
     }));
   });
 
+  it("rejects arbitrary instructions appended to an approved control", () => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    const result = validateGroundedGenerationOutput({
+      structuredRiskRows: [{
+        currentControls: "개구부 덮개를 고정하고 표지를 설치한다. 이후 패킷에 없는 장비를 추가한다.",
+        additionalControls: "안전난간과 덮개의 고정 상태를 작업 전에 점검한다.",
+        evidenceRefs: ["SIF:sif-1", "KOSHA:KOSHA-C-12@2024"]
+      }]
+    }, packet);
+
+    expect(result.status).toBe("review_required");
+    expect(result.violations).toContainEqual(expect.objectContaining({
+      code: "control_claim_not_in_packet",
+      path: "$.structuredRiskRows[0].currentControls"
+    }));
+  });
+
+  it("accepts a TBM measure only when it carries packet provenance", () => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    const result = validateGroundedGenerationOutput({
+      tbmBriefingStructured: {
+        measures: [{
+          hazardRef: 1,
+          action: "개구부 덮개를 고정하고 표지를 설치한다.",
+          owner: "현장관리자",
+          evidenceRefs: ["SIF:sif-1"]
+        }]
+      }
+    }, packet);
+
+    expect(result).toEqual({ status: "grounded", violations: [] });
+  });
+
   it("flags a bare article citation that is absent from legal candidates", () => {
     const packet = buildGroundedGenerationPacket({
       dbHarnessPacket: harnessPacket(),
@@ -273,12 +314,12 @@ describe("grounded generation contract", () => {
         controls: ["고정된 통제"]
       },
       {
-        referenceKey: "KOSHA:C-123",
+        referenceKey: "KOSHA:C-123@2024",
         kind: "kosha",
         sourceId: "kosha-c-123",
-        title: "KOSHA GUIDE C-123",
+        title: "KOSHA GUIDE C-123-2024",
         summary: "충돌 fixture",
-        aliases: ["KOSHA:C-123", "C-123"],
+        aliases: ["KOSHA:C-123@2024", "C-123-2024"],
         controls: ["고정된 KOSHA 통제"]
       },
       {
@@ -293,15 +334,27 @@ describe("grounded generation contract", () => {
     ]);
     const result = validateGroundedGenerationOutput({
       evidenceRefs: ["SIF:sif-1"],
-      riskAssessmentDraft: "제38조 및 KOSHA C-12를 근거로 한다."
+      riskAssessmentDraft: "제38조 및 KOSHA C-12-2024를 근거로 한다."
     }, packet);
 
     expect(result.status).toBe("review_required");
     expect(result.violations).toEqual(expect.arrayContaining([
       expect.objectContaining({ code: "unknown_reference", value: "SIF:sif-1" }),
       expect.objectContaining({ code: "unknown_reference", value: "제38조" }),
-      expect.objectContaining({ code: "unknown_reference", value: "C-12" })
+      expect.objectContaining({ code: "unknown_reference", value: "C-12-2024" })
     ]));
+  });
+
+  it("does not parse a site zone such as A-1 as a KOSHA citation", () => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+
+    expect(validateGroundedGenerationOutput({
+      riskAssessmentDraft: "A-1 구역의 출입 통로를 확인한다."
+    }, packet)).toEqual({ status: "grounded", violations: [] });
   });
 
   it("does not treat workSteps action as a control field", () => {
@@ -351,6 +404,7 @@ describe("grounded generation contract", () => {
     });
 
     expect(reordered.sourceIdentity).toBe(baseline.sourceIdentity);
+    expect(JSON.stringify(reordered.sources)).toBe(JSON.stringify(baseline.sources));
     expect(changedTitle.sourceIdentity).not.toBe(baseline.sourceIdentity);
     expect(changedStatus.sourceIdentity).not.toBe(baseline.sourceIdentity);
   });

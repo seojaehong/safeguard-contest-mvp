@@ -111,7 +111,23 @@ export function buildGroundedGenerationPacket(input: {
       return safetySource(item, "kosha", `KOSHA:${stableKey}${version ? `@${version}` : ""}`);
     });
   const law = input.legalCandidates.map(legalSource);
-  const sources = [...direct, ...sif, ...kosha, ...law];
+  const kindOrder: Readonly<Record<GroundedGenerationSource["kind"], number>> = {
+    direct: 0,
+    sif: 1,
+    kosha: 2,
+    law: 3
+  };
+  const sources = [...direct, ...sif, ...kosha, ...law]
+    .map((source) => ({
+      ...source,
+      aliases: [...source.aliases].sort(compareCanonical),
+      controls: [...source.controls].sort(compareCanonical)
+    }))
+    .sort((left, right) => (
+      kindOrder[left.kind] - kindOrder[right.kind]
+      || compareCanonical(left.referenceKey, right.referenceKey)
+      || compareCanonical(left.sourceId, right.sourceId)
+    ));
   const status = input.dbHarnessPacket.ontologyChecklist.status === "ready" && sources.length > 0
     ? "ready"
     : "review_required";
@@ -119,21 +135,15 @@ export function buildGroundedGenerationPacket(input: {
     version: "grounded-generation-v1",
     status,
     llmRole: "naturalize_only",
-    sources: sources
-      .map((source) => ({
+    sources: sources.map((source) => ({
         referenceKey: source.referenceKey,
         kind: source.kind,
         sourceId: source.sourceId,
         title: source.title,
         summary: source.summary,
-        aliases: [...source.aliases].sort(compareCanonical),
-        controls: [...source.controls].sort(compareCanonical)
+        aliases: source.aliases,
+        controls: source.controls
       }))
-      .sort((left, right) => (
-        compareCanonical(left.referenceKey, right.referenceKey)
-        || compareCanonical(left.kind, right.kind)
-        || compareCanonical(left.sourceId, right.sourceId)
-      ))
   });
   const packet: GroundedGenerationPacket = {
     version: "grounded-generation-v1",
@@ -160,7 +170,7 @@ function matchingSources(packet: GroundedGenerationPacket, reference: string): r
   return packet.sources.filter((source) => sourceMatchesReference(source, reference));
 }
 
-const KOSHA_REFERENCE_RE = /\b[A-Z](?:-[A-Z])?-\d{1,4}(?:-\d{4})?\b/g;
+const KOSHA_REFERENCE_RE = /\b[A-Z](?:-[A-Z])?-\d{1,4}-\d{4}\b/g;
 const LAW_REFERENCE_RE = /제\d+조(?:의\d+)?/g;
 
 type ExplicitReference = { kind: "kosha" | "law"; value: string };
@@ -177,6 +187,23 @@ function sourceHasExplicitReference(source: GroundedGenerationSource, reference:
   const sourceText = [source.referenceKey, source.title, source.summary, ...source.aliases].join("\n");
   return collectExplicitReferences(sourceText).some((candidate) => (
     candidate.kind === reference.kind && normalize(candidate.value) === normalize(reference.value)
+  ));
+}
+
+function controlClaimMatches(
+  claim: string,
+  control: string,
+  controlSources: readonly GroundedGenerationSource[]
+): boolean {
+  const normalizedClaim = normalize(claim);
+  const normalizedControl = normalize(control);
+  if (normalizedClaim === normalizedControl) return true;
+  if (!normalizedClaim.startsWith(normalizedControl)) return false;
+  const suffix = normalizedClaim.slice(normalizedControl.length).trim();
+  if (!/^(?:\([^()]+\)\s*)+$/.test(suffix)) return false;
+  const references = collectExplicitReferences(suffix);
+  return references.length > 0 && references.every((reference) => (
+    controlSources.some((source) => sourceHasExplicitReference(source, reference))
   ));
 }
 
@@ -200,10 +227,8 @@ function validateControlObject(
       violations.push({ code: "control_provenance_missing", path: `${path}.${field}`, value: controlValue });
       continue;
     }
-    const normalizedClaim = normalize(controlValue);
     const matchesPacketControl = controlSources.some((source) => source.controls.some((control) => {
-      const normalizedControl = normalize(control);
-      return normalizedClaim === normalizedControl || normalizedClaim.includes(normalizedControl);
+      return controlClaimMatches(controlValue, control, controlSources);
     }));
     if (!matchesPacketControl) {
       violations.push({ code: "control_claim_not_in_packet", path: `${path}.${field}`, value: controlValue });
