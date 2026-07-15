@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
+import styles from "./why.module.css";
 
 export const metadata: Metadata = {
   title: "왜 SafeClaw인가 | SafeClaw",
@@ -14,6 +15,8 @@ const comparisonRows = [
   ["TBM 실행 흐름", "질문·확인·전파", "기록 중심", "수기", "별도 정리 필요"],
   ["증빙과 이력 확장성", "로드맵 포함", "제품별 상이", "파일 관리", "별도 구축"]
 ];
+
+const comparisonColumns = ["기준", "SafeClaw", "안전관리 SaaS", "한글·엑셀 양식", "일반 AI"];
 
 const apiCards = [
   ["기상청", "현재·예보·특보 신호를 작업중지 기준과 TBM 문구에 반영합니다."],
@@ -43,24 +46,32 @@ export default function WhyPage() {
         ))}
       </section>
 
-      <section className="safeclaw-module-panel comparison-card">
+      <section className={`safeclaw-module-panel ${styles.comparisonPanel}`}>
         <div className="compact-head">
           <span className="eyebrow">비교</span>
           <h2>대안별 차이</h2>
         </div>
-        <div className="comparison-table" role="table" aria-label="대안별 기능 비교">
-          <div className="comparison-head" role="row">
-            <span>기준</span>
-            <span>SafeClaw</span>
-            <span>안전관리 SaaS</span>
-            <span>한글·엑셀 양식</span>
-            <span>일반 AI</span>
-          </div>
-          {comparisonRows.map((row) => (
-            <div key={row[0]} role="row">
-              {row.map((cell) => <span key={cell}>{cell}</span>)}
-            </div>
-          ))}
+        <div className={styles.tableFrame}>
+          <table className={styles.comparisonTable} data-why-comparison>
+            <caption className={styles.srOnly}>SafeClaw와 기존 안전 문서 작성 대안의 기능 비교</caption>
+            <thead>
+              <tr>
+                {comparisonColumns.map((column) => <th key={column} scope="col">{column}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {comparisonRows.map(([criterion, ...values]) => (
+                <tr key={criterion}>
+                  <th scope="row">{criterion}</th>
+                  {values.map((value, index) => (
+                    <td key={`${criterion}-${comparisonColumns[index + 1]}`} data-label={comparisonColumns[index + 1]}>
+                      {value}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 

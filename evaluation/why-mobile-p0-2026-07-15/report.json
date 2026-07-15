@@ -1,0 +1,81 @@
+{
+  "status": "pass",
+  "base_commit": "cb43e4d10416150577cfe88179cdced5f4a23e94",
+  "branch": "fix/why-mobile-p0-cb43e4d",
+  "scope": "/why mobile comparison P0",
+  "tdd": {
+    "red": {
+      "mobile_day_outside_viewport": 31,
+      "mobile_night_outside_viewport": 31,
+      "desktop_five_column_table_preserved": true
+    },
+    "green": {
+      "test_files_passed": 1,
+      "tests_passed": 4,
+      "tests_failed": 0
+    }
+  },
+  "browser_metrics": [
+    {
+      "viewport": "390x844",
+      "theme": "day",
+      "document_overflow_px": 0,
+      "outside_viewport_count": 0,
+      "unreadable_text_count": 0,
+      "undersized_touch_target_count": 0,
+      "semantic_table": true,
+      "column_header_count": 5,
+      "row_header_count": 5,
+      "comparison_rows": 5,
+      "comparison_width_px": 332,
+      "row_widths_px": [332, 332, 332, 332, 332]
+    },
+    {
+      "viewport": "390x844",
+      "theme": "night",
+      "document_overflow_px": 0,
+      "outside_viewport_count": 0,
+      "unreadable_text_count": 0,
+      "undersized_touch_target_count": 0,
+      "semantic_table": true,
+      "column_header_count": 5,
+      "row_header_count": 5,
+      "comparison_rows": 5,
+      "comparison_width_px": 332,
+      "row_widths_px": [332, 332, 332, 332, 332]
+    },
+    {
+      "viewport": "1440x900",
+      "theme": "day",
+      "document_overflow_px": 0,
+      "comparison_columns": 5,
+      "comparison_width_px": 1104
+    },
+    {
+      "viewport": "1440x900",
+      "theme": "night",
+      "document_overflow_px": 0,
+      "comparison_columns": 5,
+      "comparison_width_px": 1104
+    }
+  ],
+  "verification": {
+    "focused_browser_test": "pass",
+    "strict_typecheck": "pass",
+    "visual_review": "pass",
+    "frontend_route_coverage": {
+      "passed": 36,
+      "failed": 1,
+      "failure": "Existing full-browser evidence sourceIdentity does not match this branch source tree; global evidence refresh is outside /why scope."
+    }
+  },
+  "evidence": [
+    "focused-browser-test.log",
+    "typecheck.log",
+    "route-coverage-test.log",
+    "mobile-day.png",
+    "mobile-night.png",
+    "desktop-day.png",
+    "desktop-night.png"
+  ]
+}

@@ -1,0 +1,33 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/frontend-route-coverage.test.ts --reporter=dot
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/why-mobile-p0
+
+···········x·························
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/frontend-route-coverage.test.ts > browser evidence reconciliation > reconciles the complete route, theme, special-state, and generated-surface evidence
+AssertionError: expected '98b7e78a7b6984703cc20e28fe954e3bf3387…' to be '3346a91939cb91ad4eb63f4db7856104bbfb8…' // Object.is equality
+
+Expected: "3346a91939cb91ad4eb63f4db7856104bbfb8bb4730cbbb1cc78ece27b063f5b"
+Received: "98b7e78a7b6984703cc20e28fe954e3bf3387189afa209aaeebb153a20915628"
+
+ ❯ tests/frontend-route-coverage.test.ts:693:35
+    691|     expect(report.sourceSha).toMatch(/^[0-9a-f]{40}$/u);
+    692|     expect(report.sourceIdentity).toMatch(/^[0-9a-f]{64}$/u);
+    693|     expect(report.sourceIdentity).toBe(currentSource.sourceIdentity);
+       |                                   ^
+    694|     expect(report.sourceSha).toBe(staticAudit.sourceSha);
+    695|     expect(report.sourceIdentity).toBe(staticAudit.sourceIdentity);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 36 passed (37)
+   Start at  11:37:12
+   Duration  80.09s (transform 171ms, setup 0ms, import 234ms, tests 78.85s, environment 0ms)
+
