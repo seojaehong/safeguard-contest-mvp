@@ -1,0 +1,23 @@
+{
+  "artifact": "public-mcp-tenant-memory-hook-2026-07-16",
+  "status": "passed_pending_final_re_review",
+  "databaseMutationPerformed": false,
+  "legacyRawMemoryQueryRemoved": true,
+  "tenantMemoryAdapter": "loadTenantHarnessMemoryForMcp",
+  "publicHookStatus": "INTEGRATED",
+  "focusedTests": {
+    "command": "npm.cmd test -- tests/mcp-harness-tenant-memory-route.test.ts tests/tenant-harness-memory.test.ts tests/tenant-harness-memory-claw-tool.test.ts tests/mcp-tools.test.ts tests/mcp-reviewed-route-task-binding.test.ts tests/phase-a-runtime-evidence-bridge.test.ts",
+    "filesPassed": 6,
+    "testsPassed": 62,
+    "testsFailed": 0
+  },
+  "typecheck": "passed",
+  "packageManifestDiff": 0,
+  "changedFiles": [
+    "app/api/mcp/[transport]/implementation.ts",
+    "lib/tenant-harness-memory.ts",
+    "lib/mcp-tools.ts",
+    "tests/mcp-harness-tenant-memory-route.test.ts",
+    "tests/tenant-harness-memory.test.ts"
+  ]
+}

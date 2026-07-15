@@ -86,8 +86,8 @@ function makeClient(input: {
 }
 
 describe("tenant harness memory schema contract", () => {
-  it("keeps the public MCP integration hook explicitly pending for Phase A", () => {
-    expect(PUBLIC_MCP_TENANT_MEMORY_HOOK_STATUS).toBe("SPEC_PENDING");
+  it("marks the bounded public MCP tenant-memory hook as integrated", () => {
+    expect(PUBLIC_MCP_TENANT_MEMORY_HOOK_STATUS).toBe("INTEGRATED");
   });
 
   it("uses the actual approved/reflected schema statuses and never accepted", () => {

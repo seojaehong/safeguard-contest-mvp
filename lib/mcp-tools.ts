@@ -404,9 +404,9 @@ export function buildHarnessAgentResult(input: {
   question: string;
   references: SafetyReferenceItem[];
   tenantMemory?: Pick<TenantHarnessMemoryResult, "workpackMemory" | "improvements">;
-  /** SPEC_PENDING compatibility only. Raw legacy memory is intentionally ignored. */
+  /** Legacy compatibility only. Raw memory is intentionally ignored. */
   improvements?: HarnessImprovement[];
-  /** SPEC_PENDING compatibility only. Raw legacy memory is intentionally ignored. */
+  /** Legacy compatibility only. Raw memory is intentionally ignored. */
   workpackMemory?: HarnessWorkpackMemory[];
   referenceSearch: HarnessAgentSearchSummary[];
   auth?: HarnessAgentAuthSummary;

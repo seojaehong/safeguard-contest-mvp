@@ -6,7 +6,7 @@ import type { WorkspaceDatabase } from "./supabase-admin";
 
 export const TENANT_WORKPACK_LIMIT = 8;
 export const TENANT_IMPROVEMENT_LIMIT = 12;
-export const PUBLIC_MCP_TENANT_MEMORY_HOOK_STATUS = "SPEC_PENDING" as const;
+export const PUBLIC_MCP_TENANT_MEMORY_HOOK_STATUS = "INTEGRATED" as const;
 export const TENANT_REFLECTED_DOCUMENTS = [
   "위험성평가표",
   "TBM 브리핑",
@@ -346,7 +346,7 @@ export async function loadTenantHarnessMemory(
   };
 }
 
-/** Claw adapter only. Public MCP integration remains SPEC_PENDING under Phase A ownership. */
+/** Shared bounded adapter for Claw and the integrated public MCP route. */
 export async function loadTenantHarnessMemoryForMcp(
   authContext: McpAuthContext | null | undefined,
   createClient: () => SupabaseClient<WorkspaceDatabase> | null,
