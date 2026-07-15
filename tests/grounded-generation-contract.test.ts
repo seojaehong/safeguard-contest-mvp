@@ -341,6 +341,7 @@ describe("grounded generation contract", () => {
     ["TBM stop criteria", { tbmBriefingStructured: { stopCriteria: ["설비를 격리한다."] } }, "$.tbmBriefingStructured.stopCriteria[0]"],
     ["worker confirmation", { tbmLogStructured: { workerConfirmations: ["전원을 잠금한다."] } }, "$.tbmLogStructured.workerConfirmations[0]"],
     ["education key point", { educationRecordStructured: { curriculum: [{ keyPoints: ["감시인을 배치한다."] }] } }, "$.educationRecordStructured.curriculum[0].keyPoints[0]"],
+    ["education safety point", { educationRecordStructured: {}, safetyEducationPoints: ["출입을 제한한다."] }, "$.safetyEducationPoints[0]"],
     ["permit completion method", { permitInspectionStructured: { completionChecks: [{ method: "통제선을 마련한다." }] } }, "$.permitInspectionStructured.completionChecks[0].method"]
   ])("fails closed on unsupported structured control: %s", (_label, output, path) => {
     const packet = buildGroundedGenerationPacket({
@@ -394,6 +395,20 @@ describe("grounded generation contract", () => {
 
     expect(validateGroundedGenerationOutput({ riskAssessmentDraft: instruction }, packet))
       .toMatchObject({ status: "review_required" });
+  });
+
+  it.each([
+    "작업 장소 A-1 구역",
+    "사용 장비 이동식 크레인"
+  ])("allows a descriptive nominal field: %s", (description) => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+
+    expect(validateGroundedGenerationOutput({ riskAssessmentDraft: description }, packet))
+      .toEqual({ status: "grounded", violations: [] });
   });
 
   it("allows descriptive narrative that is not an instruction", () => {

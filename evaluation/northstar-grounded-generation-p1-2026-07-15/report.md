@@ -21,3 +21,14 @@
 - Generation focused suite: 4 files, 94 tests passed.
 - Strict TypeScript typecheck: passed.
 - `git diff --check`: passed.
+
+## Fresh Re-review
+
+- Starting HEAD: `467c734cb6ec178c6ec445b209a4565daab01a2d`
+- RED: the focused contract run exposed 3 behavioral failures: ungrounded `safetyEducationPoints` passed, while both descriptive nominal fields were rejected.
+- `educationRecordStructured` now activates packet validation for the sibling `safetyEducationPoints` array.
+- Two-token action-shaped nominal clauses remain fail-closed without a finite verb list. Longer `field name + descriptive value` noun fields remain allowed.
+- `workPlanStructured`, `tbmBriefingStructured`, `tbmLogStructured`, and `educationRecordStructured` paths now render concrete Korean document labels in `AnswerPanel`.
+- Focused contract and label tests: 2 files, 48 tests passed.
+- Generation focused suite: 5 files, 103 tests passed.
+- Strict TypeScript typecheck and `git diff --check`: passed.
