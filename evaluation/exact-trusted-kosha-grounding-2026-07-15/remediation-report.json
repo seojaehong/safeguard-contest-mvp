@@ -1,7 +1,8 @@
 {
   "schemaVersion": "safeclaw-evaluation/v1",
-  "evaluatedAt": "2026-07-15T21:06:00+09:00",
+  "evaluatedAt": "2026-07-15T21:28:00+09:00",
   "parentCandidateSha": "52861c24eff21208b5ee542c4112026e8ba26322",
+  "supersededCandidateSha": "44ffa57f6b08f1a4b5622e8a88b5c41134d9902c",
   "branch": "fix/exact-trusted-kosha-grounding-20260715",
   "status": "implementation-verified",
   "independentReview": "pending",
@@ -14,17 +15,25 @@
   },
   "asset": {
     "path": "data/safety-knowledge/exact-kosha/d-c-13-2026.json",
-    "bytes": 48671,
+    "bytes": 48670,
     "normalizedCharacters": 19058,
     "bodySha256": "ea8bb93a3e03a40873222ab385d257e1a5946cb4d28e5c65951353731b0a5919",
     "pdfSha256": "790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179",
     "officialFileId": "CTC2026012914371557826167"
   },
   "verification": {
-    "focused": { "files": 6, "tests": 162, "passed": 162, "failed": 0 },
+    "focused": { "files": 6, "tests": 166, "passed": 166, "failed": 0 },
     "typecheck": "pass",
     "build": { "status": "pass", "pages": 28 },
-    "nft": { "status": "pass", "serverTraceCount": 16, "pdfEntriesInSearchRoute": 0 },
+    "nft": {
+      "status": "pass",
+      "searchRoute": ".next/server/app/api/safety-reference/search/route.js.nft.json",
+      "searchRouteIncludesAsset": true,
+      "pdfEntriesInSearchRoute": 0,
+      "observedTotalNftFiles": 77,
+      "observedTracesIncludingAsset": 75,
+      "traceTotalsAreBuildDependent": true
+    },
     "packageLockDiff": 0,
     "diffCheck": "pass"
   },
@@ -34,6 +43,9 @@
     "general KOSHA excluded when local corpus is unavailable",
     "deletion, conflict, and partial-body mutation tests",
     "deployable exact official body fallback",
-    "server-only Node crypto boundary"
+    "server-only Node crypto boundary",
+    "sourceId and riskTag public filter bypass closed",
+    "bounded exterior-wall synonym groups",
+    "direct evidence role aligned with exact grounding eligibility"
   ]
 }

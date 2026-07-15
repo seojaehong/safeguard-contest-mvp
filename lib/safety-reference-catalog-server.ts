@@ -11,6 +11,7 @@ import {
 } from "@/lib/kosha-guide-corpus";
 import {
   getKoshaGroundingDecision,
+  isSafetyReferenceDirectEligible,
   isKoshaSupportingCitationEligible,
   isKoshaTechnicalReference,
   mergeLocalAndRemoteSafetyReferenceResults,
@@ -234,6 +235,10 @@ function localSnapshotAllowed(options: SafetyReferenceServerSearchOptions): bool
   return !options.sourceId && !options.riskTag && (!options.itemType || isKoshaTechnicalItemType(options.itemType));
 }
 
+function koshaTrustGateApplies(options: SafetyReferenceServerSearchOptions): boolean {
+  return !options.itemType || isKoshaTechnicalItemType(options.itemType);
+}
+
 function buildLocalItem(hit: KoshaGuideCorpusHit): SafetyReferenceItem {
   const record = hit.record;
   const summary = record.anchors[0]?.excerpt || record.nativeBody.slice(0, 220);
@@ -308,10 +313,52 @@ export function isRemoteReferenceRetainedByLocalKoshaGate(
   return !isKoshaTechnicalReference(item) || isProductionTrustedKoshaReference(item);
 }
 
+function normalizedQueryTokens(query: string): ReadonlySet<string> {
+  return new Set(query
+    .normalize("NFKC")
+    .toLocaleLowerCase("ko-KR")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim()
+    .split(/\s+/u)
+    .filter(Boolean));
+}
+
+function queryHasTerm(tokens: ReadonlySet<string>, term: string): boolean {
+  return [...tokens].some((token) => token === term || token.includes(term));
+}
+
 function exactBundleAppliesToQuery(query: string): boolean {
-  const normalized = query.normalize("NFKC").toLocaleLowerCase("ko-KR").replace(/\s+/gu, " ").trim();
-  if (!normalized.includes("외벽")) return false;
-  return ["도장", "보수", "비계", "작업발판"].some((term) => normalized.includes(term));
+  const tokens = normalizedQueryTokens(query);
+  const exteriorWall = queryHasTerm(tokens, "외벽");
+  const exteriorWork = ["도장", "페인트", "보수", "비계", "작업발판", "곤돌라"]
+    .some((term) => queryHasTerm(tokens, term));
+  if (exteriorWall && exteriorWork) return true;
+
+  const building = ["아파트", "공동주택", "건물", "건축물"]
+    .some((term) => queryHasTerm(tokens, term));
+  const suspendedScaffold = queryHasTerm(tokens, "달비계");
+  const ropeWork = queryHasTerm(tokens, "로프")
+    && ["작업", "도장", "페인트", "보수", "청소"].some((term) => queryHasTerm(tokens, term));
+  return building && (suspendedScaffold || ropeWork);
+}
+
+function normalizeFilterValue(value: string): string {
+  return value.normalize("NFKC").toLocaleLowerCase("ko-KR").replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+function exactBundleMatchesFilters(
+  item: SafetyReferenceItem,
+  filters: Pick<SafetyReferenceSearchOptions, "sourceId" | "riskTag" | "itemType" | "evidenceRole">,
+): boolean {
+  if (filters.sourceId && item.source_id !== filters.sourceId) return false;
+  if (filters.itemType && item.item_type !== filters.itemType) return false;
+  if (filters.evidenceRole === "direct" && !isSafetyReferenceDirectEligible(item)) return false;
+  if (filters.evidenceRole === "supporting" && isSafetyReferenceDirectEligible(item)) return false;
+  if (filters.riskTag) {
+    const expected = normalizeFilterValue(filters.riskTag);
+    if (!item.risk_tags.some((tag) => normalizeFilterValue(tag) === expected)) return false;
+  }
+  return true;
 }
 
 export function mergeBundledExactKoshaFallback(input: Readonly<{
@@ -320,11 +367,13 @@ export function mergeBundledExactKoshaFallback(input: Readonly<{
   bundledItem: SafetyReferenceItem;
   localGateActive: boolean;
   limit: number;
+  filters?: Pick<SafetyReferenceSearchOptions, "sourceId" | "riskTag" | "itemType" | "evidenceRole">;
 }>): SafetyReferenceItem[] {
   const gated = input.localGateActive
     ? input.remoteItems.filter(isRemoteReferenceRetainedByLocalKoshaGate)
     : [...input.remoteItems];
-  const applicable = exactBundleAppliesToQuery(input.query);
+  const applicable = exactBundleAppliesToQuery(input.query)
+    && exactBundleMatchesFilters(input.bundledItem, input.filters ?? {});
   const exactRemote = gated.find((item) => (
     item.id === input.bundledItem.id && isProductionTrustedKoshaReference(item)
   ));
@@ -348,17 +397,18 @@ export async function searchSafetyReferences(
 ): Promise<SafetyReferenceSearchResult> {
   const query = options.query.trim();
   const limit = Math.min(Math.max(options.limit || 12, 1), 50);
-  const localAllowed = localSnapshotAllowed(options);
-  const localCorpus = localAllowed
+  const localSearchAllowed = localSnapshotAllowed(options);
+  const trustGateActive = koshaTrustGateApplies(options);
+  const localCorpus = trustGateActive
     ? await loadKoshaGuideCorpus(options.offlineCorpus)
     : { status: "unconfigured" as const, rootDir: null, failures: [] as [] };
-  const localSearch = localCorpus.status === "ready"
+  const localSearch = localSearchAllowed && localCorpus.status === "ready"
     ? searchKoshaGuideCorpus(localCorpus, query, limit, options.itemType)
     : { retrievalMode: null, items: [] };
   const localItems = localSearch.items
     .filter(() => !options.evidenceRole || options.evidenceRole === "supporting")
     .map(buildLocalItem);
-  const bundledExact = localAllowed
+  const bundledExact = trustGateActive
     ? await loadBundledExactKoshaReference()
     : { status: "blocked" as const, reason: "asset-unavailable" as const, message: "bundle not applicable" };
   const remoteResult = await searchRemoteSafetyReferences(options);
@@ -367,7 +417,7 @@ export async function searchSafetyReferences(
     return exactGrounding ? { ...item, kosha_grounding: exactGrounding } : item;
   });
   const remote: SafetyReferenceSearchResult = { ...remoteResult, items: remoteItems };
-  const localGateStatus = localAllowed && localCorpus.status !== "ready"
+  const localGateStatus = trustGateActive && localCorpus.status !== "ready"
     ? localCorpus.status
     : null;
   const localGateFailures = localCorpus.status === "blocked" ? localCorpus.failures : [];
@@ -378,6 +428,7 @@ export async function searchSafetyReferences(
         bundledItem: bundledExact.item,
         localGateActive: localGateStatus !== null,
         limit,
+        filters: options,
       })
     : localGateStatus
       ? remote.items.filter(isRemoteReferenceRetainedByLocalKoshaGate)

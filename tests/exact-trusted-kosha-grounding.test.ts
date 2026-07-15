@@ -152,6 +152,43 @@ describe("exact-trusted KOSHA grounding", () => {
     expect(nextConfig).toContain("outputFileTracingIncludes");
   });
 
+  it("applies the exact bundle only to bounded exterior-wall work synonyms", async () => {
+    const bundled = await loadBundledExactKoshaReference();
+    if (bundled.status !== "ready") throw new Error("expected exact bundle fixture");
+    const positives = [
+      "아파트 외벽 페인트 작업",
+      "아파트 달비계 로프 작업",
+      "곤돌라 외벽 청소 작업",
+      "건물 외벽 도장 보수",
+    ];
+    const negatives = [
+      "실내 페인트 보관",
+      "로프 매듭 교육",
+      "곤돌라 승강장 점검",
+      "아파트 로프 구매",
+      "외벽 상태 확인",
+    ];
+
+    for (const query of positives) {
+      expect(mergeBundledExactKoshaFallback({
+        query,
+        remoteItems: [],
+        bundledItem: bundled.item,
+        localGateActive: true,
+        limit: 5,
+      }).map((item) => item.id), query).toEqual([bundled.item.id]);
+    }
+    for (const query of negatives) {
+      expect(mergeBundledExactKoshaFallback({
+        query,
+        remoteItems: [],
+        bundledItem: bundled.item,
+        localGateActive: true,
+        limit: 5,
+      }), query).toEqual([]);
+    }
+  });
+
   it("matches only the exact production identity and official metadata pin", () => {
     expect(matchesExactKoshaTrustPin(trustedKosha(), TRUST_PIN)).toBe(true);
 
