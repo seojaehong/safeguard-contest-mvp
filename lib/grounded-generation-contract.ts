@@ -298,6 +298,56 @@ function validateSchemaControls(
   }
 }
 
+const NARRATIVE_CONTROL_FIELDS = new Set([
+  "workpackSummaryDraft",
+  "riskAssessmentDraft",
+  "workPlanDraft",
+  "tbmBriefing",
+  "tbmLogDraft",
+  "safetyEducationRecordDraft",
+  "emergencyResponseDraft",
+  "photoEvidenceDraft",
+  "foreignWorkerBriefing",
+  "foreignWorkerTransmission",
+  "kakaoMessage"
+]);
+
+const ACTIONABLE_SENTENCE_RE = /(?:설치|고정|점검|차단|배치|착용|사용|금지|중지|제거|측정|확보|통제|교체|보강|작동|실시)(?:하|해|되|한|할|해야|하지|한다|하세요|하십시오)/;
+
+function narrativeSentences(value: string): string[] {
+  return (value.match(/[^.!?\n]+[.!?]?/g) || [])
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+}
+
+function stripNarrativePrefix(value: string): string {
+  return value
+    .replace(/^(?:[-*•]\s*|\d+[.)]\s*)+/, "")
+    .replace(/^(?:(?:감소대책|즉시\s*조치|안전\s*조치|통제\s*조치|조치)\s*[:：-]\s*)+/, "")
+    .trim();
+}
+
+function validateNarrativeControls(
+  output: Record<string, unknown>,
+  packet: GroundedGenerationPacket,
+  violations: GroundingViolation[]
+): void {
+  const controlSources = packet.sources.filter((source) => source.controls.length > 0);
+  for (const [field, value] of Object.entries(output)) {
+    if (!NARRATIVE_CONTROL_FIELDS.has(field) || typeof value !== "string") continue;
+    for (const sentence of narrativeSentences(value)) {
+      if (!ACTIONABLE_SENTENCE_RE.test(sentence) || sentence.includes("현장 확인 필요")) continue;
+      const claim = stripNarrativePrefix(sentence);
+      const grounded = controlSources.some((source) => source.controls.some((control) => (
+        controlClaimMatches(claim, control, controlSources)
+      )));
+      if (!grounded) {
+        violations.push({ code: "control_claim_not_in_packet", path: `$.${field}`, value: sentence });
+      }
+    }
+  }
+}
+
 function validateNode(
   node: unknown,
   packet: GroundedGenerationPacket,
@@ -341,7 +391,9 @@ export function validateGroundedGenerationOutput(
   const violations: GroundingViolation[] = [];
   validateNode(output, packet, "$", violations);
   if (output && typeof output === "object" && !Array.isArray(output)) {
-    validateSchemaControls(output as Record<string, unknown>, packet, violations);
+    const record = output as Record<string, unknown>;
+    validateSchemaControls(record, packet, violations);
+    validateNarrativeControls(record, packet, violations);
   }
   return deepFreeze({
     status: packet.status === "ready" && violations.length === 0 ? "grounded" : "review_required",

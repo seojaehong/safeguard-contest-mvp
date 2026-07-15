@@ -2,8 +2,9 @@
 
 ## Candidate
 
-- Starting HEAD: `cdf53d8b028bf776cee93256c7ee49acc428f77e`
-- Branch: `fix/northstar-grounded-generation-20260715`
+- Starting HEAD: `cb43e4d10416150577cfe88179cdced5f4a23e94`
+- Branch: `fix/northstar-grounded-current-20260715`
+- Replayed source commits: `875dfe1`, `f473be6`, `68010bb`, `cdf53d8`, `7f568c1` (exact commits only; no range merge)
 - LLM role: `naturalize_only`
 - Status: independent findings remediated; focused verification passed
 
@@ -12,6 +13,7 @@
 1. Control suffixes now accept only parenthesized canonical citation tokens. A valid KOSHA token does not authorize adjacent arbitrary prose.
 2. `runAsk` now preserves `sourceIdentity` and every packet `criticalControl` on `AskResponse.groundingReview` after an outer pipeline failure. `AnswerPanel` renders that review surface.
 3. Duplicate source keys are deterministically deduplicated. Scalar fields come from the canonical representative; aliases and controls are canonically merged and deduplicated.
+4. Actionable control sentences in narrative drafts are checked against packet controls even when they carry no KOSHA or law token. Unsupported installation, isolation, PPE, stop-work, and similar instructions fail closed as `control_claim_not_in_packet`.
 
 ## Editor-focus diagnosis
 
@@ -24,10 +26,10 @@ The editor-focus assertion passed in every reproduction run. The intermittent su
 
 ## Verification
 
-- Grounding and generation focused suite: 4 files, 69 tests passed.
+- Grounding and generation focused suite: 4 files, 70 tests passed.
 - Isolated browser harness suite: 1 file, 3 tests passed.
 - Final editor-focus repetition: 3 runs passed, 21 unrelated tests skipped per run, 0 cleanup failures.
-- Strict TypeScript typecheck: passed before final report update; rerun in final gate.
-- `git diff --check`: pending final gate after report update.
+- Strict TypeScript typecheck: passed after lock-respecting dependency sync; package and lockfile diff remained empty.
+- `git diff --check`: passed before the final report-only update and is rerun before commit.
 
 No database schema, migration, environment contract, or destructive data operation was changed.

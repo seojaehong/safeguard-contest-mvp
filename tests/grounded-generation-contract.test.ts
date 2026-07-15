@@ -314,6 +314,27 @@ describe("grounded generation contract", () => {
     expect(result).toEqual({ status: "grounded", violations: [] });
   });
 
+  it("fails closed on an unsupported actionable sentence in a narrative draft", () => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    const result = validateGroundedGenerationOutput({
+      riskAssessmentDraft: [
+        "[4.감소대책 수립 및 실행]",
+        "개구부 덮개를 고정하고 표지를 설치한다.",
+        "패킷에 없는 자동 경보기와 신규 장비를 추가 설치한다."
+      ].join("\n")
+    }, packet);
+
+    expect(result.status).toBe("review_required");
+    expect(result.violations).toContainEqual(expect.objectContaining({
+      code: "control_claim_not_in_packet",
+      path: "$.riskAssessmentDraft"
+    }));
+  });
+
   it("flags a bare article citation that is absent from legal candidates", () => {
     const packet = buildGroundedGenerationPacket({
       dbHarnessPacket: harnessPacket(),
