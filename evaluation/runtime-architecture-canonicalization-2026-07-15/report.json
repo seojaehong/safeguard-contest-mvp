@@ -1,0 +1,17 @@
+{
+  "date": "2026-07-15",
+  "scope": "architecture documentation canonicalization",
+  "schemaMigration": false,
+  "dataMutation": false,
+  "applicationCodeChanged": false,
+  "supersededDocument": "docs/ARCHITECTURE_DECISIONS.md",
+  "canonicalRecords": 5,
+  "boundaries": {
+    "systemOfRecord": "SafeClaw MCP/DB/Evidence Harness",
+    "runtimeSeam": "EngineAdapter",
+    "providerPolicySeparate": true,
+    "humanReviewRequired": true,
+    "automaticOntologyPublication": false,
+    "evidenceOrder": ["SIF", "KOSHA Guide", "current law", "site context"]
+  }
+}
