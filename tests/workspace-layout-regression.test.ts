@@ -1922,4 +1922,29 @@ describe("workspace layout regression", () => {
     expect.soft(metrics.overflowY).toBe("visible");
     expect(String(metrics.activeElementClass)).toContain("document-textarea");
   }, 90_000);
+
+  it("focuses the input and announces an error when blank generation is submitted", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    let askRequests = 0;
+    await page.route("**/api/ask**", async (route) => {
+      askRequests += 1;
+      await route.abort();
+    });
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+    await page.evaluate(() => window.localStorage.clear());
+    await page.reload({ waitUntil: "networkidle" });
+
+    const input = page.locator("#field-command-input");
+    await input.fill("");
+    await page.getByRole("button", { name: "안전 문서 생성" }).click();
+
+    const inputError = page.locator("#field-command-error");
+    await inputError.waitFor({ state: "visible" });
+    expect(await inputError.textContent()).toContain("현장 상황을 입력해 주세요.");
+    expect(await input.getAttribute("aria-invalid")).toBe("true");
+    expect(await input.evaluate((element) => document.activeElement === element)).toBe(true);
+    expect(askRequests).toBe(0);
+    await page.close();
+  }, 90_000);
 });
