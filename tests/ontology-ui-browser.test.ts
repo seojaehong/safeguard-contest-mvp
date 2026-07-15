@@ -10,10 +10,12 @@ type BrowserMetric = {
   variant: string;
   viewport: { width: number; height: number };
   horizontalOverflow: number;
+  outsideElementCount: number;
   visibleNeighborhoodNodes: number;
   overlapPairs: number;
   minimumControlHeight: number;
   minimumNodeContrast: number | null;
+  minimumNodeTextContrast: number | null;
   desktopGraphVisible: boolean;
   mobileRelationsVisible: boolean;
   expandedGraphVerified: boolean;
@@ -51,6 +53,8 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 39
   let expandedGraphVerified = false;
   let expandedGraphNodeCount = 0;
   let dialogKeyboardContract = false;
+  let expandedNodeContrasts: Array<{ foreground: number[]; background: number[] }> = [];
+  let expandedNodeTextContrasts: Array<{ foreground: number[]; background: number[] }> = [];
 
   await page.getByRole("button", { name: "확장 관계" }).click();
 
@@ -62,7 +66,36 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 39
     const dialog = page.getByRole("dialog", { name: "온톨로지 그래프 전체 화면" });
     await dialog.waitFor();
     expandedGraphVerified = await dialog.isVisible();
-    expandedGraphNodeCount = await dialog.locator('[data-testid="ontology-neighborhood-node"]').count();
+    const expandedContrasts = await dialog.locator('[data-testid="ontology-neighborhood-node"]').evaluateAll((nodes) => {
+      const visible = (element: Element) => {
+        const style = window.getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+      };
+      const parseRgb = (value: string) => {
+        const channels = (value.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+        return value.startsWith("color(srgb")
+          ? channels.map((channel) => channel * 255)
+          : channels;
+      };
+      const visibleNodes = nodes.filter(visible);
+      return {
+        visibleNodeCount: visibleNodes.length,
+        nodes: visibleNodes.map((node) => ({
+          foreground: parseRgb(window.getComputedStyle(node).color),
+          background: parseRgb(window.getComputedStyle(node).backgroundColor)
+        })),
+        text: visibleNodes.flatMap((node) => {
+          const background = parseRgb(window.getComputedStyle(node).backgroundColor);
+          return [...node.querySelectorAll<HTMLElement>('span, strong, small')]
+            .filter(visible)
+            .map((element) => ({ foreground: parseRgb(window.getComputedStyle(element).color), background }));
+        })
+      };
+    });
+    expandedGraphNodeCount = expandedContrasts.visibleNodeCount;
+    expandedNodeContrasts = expandedContrasts.nodes;
+    expandedNodeTextContrasts = expandedContrasts.text;
     expect(await page.evaluate(() => document.activeElement?.textContent?.trim())).toBe("닫기");
     await page.keyboard.press("Shift+Tab");
     const shiftTabStayedInside = await dialog.evaluate((element) => element.contains(document.activeElement));
@@ -105,30 +138,56 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 39
         ? channels.map((channel) => channel * 255)
         : channels;
     };
-    const nodeContrasts = [...document.querySelectorAll<HTMLElement>('[data-testid="ontology-neighborhood-node"]')]
+    const nodeElements = [...document.querySelectorAll<HTMLElement>('[data-testid="ontology-neighborhood-node"]')]
       .filter(visible)
-      .map((element) => {
+    const nodeContrasts = nodeElements.map((element) => {
         const style = window.getComputedStyle(element);
         return { foreground: parseRgb(style.color), background: parseRgb(style.backgroundColor) };
       });
+    const nodeTextContrasts = nodeElements.flatMap((node) => {
+      const nodeBackground = parseRgb(window.getComputedStyle(node).backgroundColor);
+      return [...node.querySelectorAll<HTMLElement>('span, strong, small')]
+        .filter(visible)
+        .map((element) => ({
+          foreground: parseRgb(window.getComputedStyle(element).color),
+          background: nodeBackground
+        }));
+    });
+    const outsideElements = [...document.querySelectorAll<HTMLElement>('[data-testid="ontology-explorer-root"] *')]
+      .filter(visible)
+      .filter((element) => {
+        const rect = element.getBoundingClientRect();
+        return rect.left < -0.5 || rect.right > window.innerWidth + 0.5;
+      });
     return {
       horizontalOverflow: Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, 0),
+      outsideElementCount: outsideElements.length,
       visibleNeighborhoodNodes: nodes.length,
       overlapPairs,
       minimumControlHeight,
-      nodeContrasts
+      nodeContrasts,
+      nodeTextContrasts
     };
   });
-  const minimumNodeContrast = geometry.nodeContrasts.length
-    ? Math.min(...geometry.nodeContrasts.map(({ foreground, background }) => contrastRatio(foreground, background)))
+  const allNodeContrasts = [...geometry.nodeContrasts, ...expandedNodeContrasts];
+  const allNodeTextContrasts = [...geometry.nodeTextContrasts, ...expandedNodeTextContrasts];
+  const minimumNodeContrast = allNodeContrasts.length
+    ? Math.min(...allNodeContrasts.map(({ foreground, background }) => contrastRatio(foreground, background)))
+    : null;
+  const minimumNodeTextContrast = allNodeTextContrasts.length
+    ? Math.min(...allNodeTextContrasts.map(({ foreground, background }) => contrastRatio(foreground, background)))
     : null;
 
   expect(geometry.horizontalOverflow).toBe(0);
+  if (width === 390) expect(geometry.outsideElementCount).toBe(0);
   expect(geometry.overlapPairs).toBe(0);
   if (width === 1440) expect(geometry.visibleNeighborhoodNodes).toBe(15);
   if (width === 390) expect(expandedGraphNodeCount).toBe(15);
   expect(geometry.minimumControlHeight).toBeGreaterThanOrEqual(44);
+  expect(minimumNodeContrast).not.toBeNull();
+  expect(minimumNodeTextContrast).not.toBeNull();
   if (minimumNodeContrast !== null) expect(minimumNodeContrast).toBeGreaterThanOrEqual(4.5);
+  if (minimumNodeTextContrast !== null) expect(minimumNodeTextContrast).toBeGreaterThanOrEqual(4.5);
 
   const variant = `${width === 390 ? "mobile" : "desktop"}-${theme}`;
   await page.screenshot({ path: path.join(artifactDirectory, `${variant}.png`), fullPage: true });
@@ -136,10 +195,12 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 39
     variant,
     viewport: { width, height },
     horizontalOverflow: geometry.horizontalOverflow,
+    outsideElementCount: geometry.outsideElementCount,
     visibleNeighborhoodNodes: geometry.visibleNeighborhoodNodes,
     overlapPairs: geometry.overlapPairs,
     minimumControlHeight: Math.round(geometry.minimumControlHeight * 100) / 100,
     minimumNodeContrast: minimumNodeContrast === null ? null : Math.round(minimumNodeContrast * 100) / 100,
+    minimumNodeTextContrast: minimumNodeTextContrast === null ? null : Math.round(minimumNodeTextContrast * 100) / 100,
     desktopGraphVisible,
     mobileRelationsVisible,
     expandedGraphVerified,

@@ -67,7 +67,11 @@ const forbiddenUserFacingCopy: Record<string, readonly string[]> = {
     "<span>Workpack</span>",
     "<span>Evidence</span>",
     "<span>Improvement</span>",
-    "<span>Ack</span>"
+    "<span>Ack</span>",
+    "그래프 JSON",
+    "JSONL",
+    "Obsidian",
+    "API 계약 보기"
   ],
   "app/knowledge/page.tsx": [
     "Built-in Wiki",
