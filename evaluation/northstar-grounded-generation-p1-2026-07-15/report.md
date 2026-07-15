@@ -32,3 +32,14 @@
 - Focused contract and label tests: 2 files, 48 tests passed.
 - Generation focused suite: 5 files, 103 tests passed.
 - Strict TypeScript typecheck and `git diff --check`: passed.
+
+## Third Re-review
+
+- Starting HEAD: `c82d3fbb9d1c081df1c9fa51f67175c7b48ba3d0`
+- RED: 7 failures covering 2 multiword nominal actions, 1 independent `safetyEducationPoints` array, and 4 actual structured rejected-group keys.
+- Nominal clauses from 2 through 6 tokens now fail closed by default. The bounded schema metadata labels `작업 장소` and `사용 장비` distinguish descriptive field values without an action-verb list.
+- `safetyEducationPoints` validation no longer depends on the `educationRecordStructured` sibling.
+- `AnswerPanel` imports and uses the tested `groundingGroupLabel` helper for `rejectedGroups`, including all 4 structured group keys.
+- Focused contract and label tests: 2 files, 54 tests passed.
+- Generation focused suite: 5 files, 109 tests passed.
+- Strict TypeScript typecheck and `git diff --check`: passed.

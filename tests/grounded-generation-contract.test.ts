@@ -341,7 +341,7 @@ describe("grounded generation contract", () => {
     ["TBM stop criteria", { tbmBriefingStructured: { stopCriteria: ["설비를 격리한다."] } }, "$.tbmBriefingStructured.stopCriteria[0]"],
     ["worker confirmation", { tbmLogStructured: { workerConfirmations: ["전원을 잠금한다."] } }, "$.tbmLogStructured.workerConfirmations[0]"],
     ["education key point", { educationRecordStructured: { curriculum: [{ keyPoints: ["감시인을 배치한다."] }] } }, "$.educationRecordStructured.curriculum[0].keyPoints[0]"],
-    ["education safety point", { educationRecordStructured: {}, safetyEducationPoints: ["출입을 제한한다."] }, "$.safetyEducationPoints[0]"],
+    ["education safety point without structured sibling", { safetyEducationPoints: ["출입을 제한한다."] }, "$.safetyEducationPoints[0]"],
     ["permit completion method", { permitInspectionStructured: { completionChecks: [{ method: "통제선을 마련한다." }] } }, "$.permitInspectionStructured.completionChecks[0].method"]
   ])("fails closed on unsupported structured control: %s", (_label, output, path) => {
     const packet = buildGroundedGenerationPacket({
@@ -385,7 +385,9 @@ describe("grounded generation contract", () => {
     "전원 잠금",
     "통제선 마련",
     "유도자 유도",
-    "감시인 감시"
+    "감시인 감시",
+    "안전대 즉시 체결",
+    "안전대 착용 상태 확인"
   ])("fails closed on an unsupported nominal instruction: %s", (instruction) => {
     const packet = buildGroundedGenerationPacket({
       dbHarnessPacket: harnessPacket(),

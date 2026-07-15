@@ -357,14 +357,14 @@ function validateSchemaControls(
       violations
     );
   }
+  validateUnreferencedControlArray(
+    output.safetyEducationPoints,
+    packet,
+    "$.safetyEducationPoints",
+    violations
+  );
   const education = recordOf(output.educationRecordStructured);
   if (education) {
-    validateUnreferencedControlArray(
-      output.safetyEducationPoints,
-      packet,
-      "$.safetyEducationPoints",
-      violations
-    );
     const curriculum = Array.isArray(education.curriculum) ? education.curriculum : [];
     curriculum.forEach((item, index) => {
       validateUnreferencedControlArray(
@@ -394,14 +394,16 @@ const NARRATIVE_CONTROL_FIELDS = new Set([
 const DESCRIPTIVE_SENTENCE_END_RE = /(?:입니다|이다|있습니다|있다|없습니다|없다|같습니다|같다|높습니다|높다|낮습니다|낮다)[.!?]?$/;
 const ACTIONABLE_SENTENCE_END_RE = /(?:다|것|하세요|하십시오|금지|중지)[.!?]?$/;
 const NOMINAL_CLAUSE_TOKEN_RE = /^[가-힣A-Za-z0-9·()/-]+$/;
+const DESCRIPTIVE_NOMINAL_FIELD_LABELS = new Set(["작업 장소", "사용 장비"]);
 
 function isInstructionShapedNominalClause(value: string): boolean {
   const clause = value.replace(/[.!?]+$/, "").trim();
   if (!clause || /^(?:\[.*\]|\(.*\))$/.test(clause) || /[:：]$/.test(clause)) return false;
   const tokens = clause.split(/\s+/);
-  return tokens.length === 2
-    && clause.length <= 30
-    && tokens.every((token) => NOMINAL_CLAUSE_TOKEN_RE.test(token));
+  if (tokens.length < 2 || tokens.length > 6 || clause.length > 30) return false;
+  if (!tokens.every((token) => NOMINAL_CLAUSE_TOKEN_RE.test(token))) return false;
+  const metadataLabel = tokens.slice(0, 2).join(" ");
+  return tokens.length < 3 || !DESCRIPTIVE_NOMINAL_FIELD_LABELS.has(metadataLabel);
 }
 
 function isActionableNarrativeSentence(value: string): boolean {
