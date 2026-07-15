@@ -43,6 +43,18 @@ def resolve_beneath(root: Path, relative: object) -> Path:
     return target
 
 
+def resolve_download_candidate(downloads_root: Path, stable_key: object) -> Path:
+    if not isinstance(stable_key, str) or not stable_key:
+        raise kosha_evidence_portability.PortabilityError("stable-key-invalid")
+    root = downloads_root.resolve()
+    candidate = (root / f"{stable_key}.pdf").resolve()
+    try:
+        candidate.relative_to(root)
+    except ValueError as exc:
+        raise kosha_evidence_portability.PortabilityError("download-path-escape") from exc
+    return candidate
+
+
 def load_manifest(root: Path) -> tuple[JsonObject, JsonObject, str]:
     current = read_object(root / "current.json")
     descriptor = current.get("manifest")
@@ -185,7 +197,7 @@ def build_ledger_artifacts(
     for record in ledger["records"]:
         if not isinstance(record, dict):
             raise kosha_evidence_portability.PortabilityError("ledger-record-invalid")
-        source = downloads_root / f"{record['stable_key']}.pdf"
+        source = resolve_download_candidate(downloads_root, record.get("stable_key"))
         if not source.is_file():
             raise kosha_evidence_portability.PortabilityError(
                 f"official-download-missing:{record['stable_key']}"

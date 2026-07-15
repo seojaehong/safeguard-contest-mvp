@@ -208,6 +208,46 @@ class KoshaEvidencePortabilityTests(unittest.TestCase):
         self.assertEqual(summary["copied_count"], 0)
         self.assertEqual(summary["refetched_count"], 1)
 
+    def test_official_refetch_rejects_non_official_origins_before_fetch(self) -> None:
+        payload = b"%PDF-1.7 portable evidence"
+        requested: list[str] = []
+
+        def fetch_bytes(url: str) -> bytes:
+            requested.append(url)
+            return payload
+
+        for unsafe_url in (
+            "file:///C:/Windows/win.ini",
+            "https://example.com/kosha.pdf",
+            "http://portal.kosha.or.kr/openapi/v1/file/down/FILE/1",
+        ):
+            record = fixture_record(payload)
+            record["official_url"] = unsafe_url
+            ledger = kosha_evidence_portability.create_ledger(
+                [record], fixture_identities()
+            )
+            with (
+                self.subTest(unsafe_url=unsafe_url),
+                tempfile.TemporaryDirectory() as temp_dir,
+            ):
+                root = Path(temp_dir)
+                ledger_path = root / "ledger.json"
+                write_ledger(ledger_path, ledger)
+
+                with self.assertRaisesRegex(
+                    kosha_evidence_portability.PortabilityError,
+                    "official-refetch-url-forbidden",
+                ):
+                    kosha_evidence_portability.rehydrate_bundle(
+                        ledger_path,
+                        root / "missing",
+                        root / "refetched",
+                        allow_official_refetch=True,
+                        fetch_bytes=fetch_bytes,
+                    )
+
+        self.assertEqual(requested, [])
+
     def test_rejects_absolute_locator_and_modified_ledger_identity(self) -> None:
         ledger = kosha_evidence_portability.create_ledger(
             [fixture_record()], fixture_identities()
@@ -321,6 +361,46 @@ class KoshaEvidencePortabilityTests(unittest.TestCase):
                         "sha256": sha256(promotion_manifest_text.encode("utf-8")),
                         "size_bytes": len(promotion_manifest_text.encode("utf-8")),
                     },
+                },
+            )
+
+            outside_download = root / "outside.pdf"
+            outside_download.write_bytes(payload)
+            traversal_record = {**record, "stable_key": "../outside"}
+            write_json(
+                failure_map,
+                {
+                    "records": [
+                        {
+                            **traversal_record,
+                            "actual_sha256": traversal_record["expected_sha256"],
+                        }
+                    ]
+                },
+            )
+            with self.assertRaisesRegex(
+                kosha_evidence_portability.PortabilityError,
+                "download-path-escape",
+            ):
+                build_kosha_evidence_ledger.build_ledger_artifacts(
+                    failure_map_path=failure_map,
+                    repack_manifest_path=repack_manifest,
+                    corpus_root=corpus_root,
+                    promotion_root=promotion_root,
+                    downloads_root=downloads_root,
+                    bundle_root=root / "traversal-bundle",
+                    ledger_path=root / "traversal-ledger.json",
+                )
+
+            write_json(
+                failure_map,
+                {
+                    "records": [
+                        {
+                            **record,
+                            "actual_sha256": record["expected_sha256"],
+                        }
+                    ]
                 },
             )
 
