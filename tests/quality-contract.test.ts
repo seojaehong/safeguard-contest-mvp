@@ -288,10 +288,10 @@ describe("qualityContract", () => {
 
     const contract = buildQualityContract(response, "2026-07-08T00:00:00.000Z");
 
-    expect(contract.overall).toBe("degraded");
-    expect(contract.dbHarness.status).toBe("degraded");
+    expect(contract.overall).toBe("blocked");
+    expect(contract.dbHarness.status).toBe("blocked");
     expect(contract.dbHarness.missingEvidence).toContain("SIF 유사사례");
-    expect(contract.dbHarness.detail).toContain("SIF 유사사례");
+    expect(contract.dbHarness.detail).toContain("고정된 DB 근거가 없어");
   });
 
   it("uses the core 3-structure contract for enhanced generation", () => {

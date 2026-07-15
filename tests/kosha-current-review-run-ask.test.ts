@@ -31,8 +31,8 @@ vi.mock("@/lib/ai-deliverables", async (importOriginal) => {
   };
 });
 
-vi.mock("@/lib/safety-reference-catalog", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@/lib/safety-reference-catalog")>();
+vi.mock("@/lib/safety-reference-catalog-server", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/safety-reference-catalog-server")>();
   return { ...original, searchSafetyReferences: mocks.searchSafetyReferences };
 });
 
@@ -412,7 +412,7 @@ describe("current-base runAsk retrieval provenance", () => {
     });
   }, 30_000);
 
-  it("excludes stale D-C-13 when the local corpus is unavailable", async () => {
+  it("preserves the server exclusion of stale D-C-13 when the local corpus is unavailable", async () => {
     const remote = retrievalReference("remote-ranked-guide", "ranked");
     const local = retrievalReference("d-c-13-current-unverified", "local-ranked");
     remote.title = "외벽 작업발판 안전난간 직접 근거";
@@ -439,7 +439,7 @@ describe("current-base runAsk retrieval provenance", () => {
         return searchResult("ranked-rpc", [remote], options.query);
       }
       if (options.itemType === "technical-guideline") {
-        return searchResult("local-ranked", [local], options.query);
+        return searchResult("unconfigured", [], options.query);
       }
       return searchResult("unconfigured", [], options.query);
     });

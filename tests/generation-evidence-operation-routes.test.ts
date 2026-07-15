@@ -183,12 +183,19 @@ describe("saved generation evidence operation routes", () => {
     expect(body.graph.nodes).not.toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "evidence:current-ref" })
     ]));
+    expect(body.graph.nodes).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: expect.stringContaining("d-c-13-2026") })
+    ]));
     expect(body.comparison).toMatchObject({
       query: "성수동 외벽 도장 작업",
       mode: "comparison_only",
       not_used_for_generation: true,
-      count: 1
+      count: 2
     });
+    expect(body.comparison.items).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "current-ref" }),
+      expect.objectContaining({ id: expect.stringContaining("d-c-13-2026") })
+    ]));
     expect(body.comparison.retrievedAt).toEqual(expect.any(String));
   });
 
