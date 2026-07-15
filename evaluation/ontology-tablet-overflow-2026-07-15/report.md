@@ -40,12 +40,18 @@ The desktop graph remains visible at 1024px. Its expanded two-hop neighborhood s
 
 ### Tablet metrics
 
-| Theme | Document overflow | Body overflow | Outside elements | Nodes | Overlaps | Minimum control | Minimum node contrast |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Day | 0px | 0px | 0 | 15 | 0 | 44px | 16.01:1 |
-| Night | 0px | 0px | 0 | 15 | 0 | 44px | 16.01:1 |
+| Theme | Document overflow | Body overflow | Outside elements | Nodes | Overlaps | Clipped nodes | Minimum control | Minimum node contrast |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Day | 0px | 0px | 0 | 15 | 0 | 0 | 44px | 16.01:1 |
+| Night | 0px | 0px | 0 | 15 | 0 | 0 | 44px | 16.01:1 |
 
 Existing 1440/390 browser coverage separately verified neighborhood maximum 15, overlap 0, AA contrast, mobile relation cards, fullscreen graph, and dialog focus trapping.
+
+## Independent review remediation
+
+The follow-up browser regression now scrolls the tablet graph into view and asserts the actual Day/Night product contract at 1024px: graph visible, 15 nodes, 0 overlap pairs, 0 clipped nodes, and minimum node contrast at least 4.5:1. The 1440/390 browser contract remains a separate gate.
+
+The original report's `git diff --check` row described the working tree check but did not disclose that the exact committed range `79e48da..f580f5c` reported five new blank lines at EOF. This follow-up normalizes every committed text evidence file in this bounded evaluation directory. The fixed candidate is checked after commit with an exact immutable range, and that result is added by an evidence-only follow-up so the report does not claim a self-referential commit hash.
 
 ## Evidence
 
@@ -60,4 +66,4 @@ Existing 1440/390 browser coverage separately verified neighborhood maximum 15, 
 - `logs/typecheck.log`
 - `logs/static-audit.log`
 - `logs/final-verification.log`
-
+- `logs/follow-up-verification.log`

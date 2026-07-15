@@ -63,6 +63,7 @@
     "documentOverflow": 0,
     "bodyOverflow": 0,
     "outsideElements": 0,
+    "clippedNodes": 0,
     "maximumDisplayedNodes": 15,
     "overlapPairs": 0,
     "minimumControlHeight": 44,
@@ -77,5 +78,23 @@
     "mobileRelationCards": "pass",
     "mobileFullscreenGraph": "pass",
     "dialogFocusTrap": "pass"
+  },
+  "independentReviewRemediation": {
+    "tabletAssertions": {
+      "themes": ["day", "night"],
+      "graphVisible": true,
+      "visibleNodes": 15,
+      "overlapPairs": 0,
+      "clippedNodes": 0,
+      "minimumNodeContrastRequired": 4.5
+    },
+    "priorRangeCheckCorrection": {
+      "range": "79e48da..f580f5c",
+      "status": "fail",
+      "newBlankLinesAtEof": 5
+    },
+    "followUpRangeCheck": {
+      "status": "pending_candidate_commit"
+    }
   }
 }
