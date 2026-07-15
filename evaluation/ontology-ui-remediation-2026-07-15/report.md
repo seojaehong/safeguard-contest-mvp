@@ -2,8 +2,8 @@
 
 ## 범위
 
-- 통합 기준 HEAD: `b48a618`
-- 제품 커밋: `8f6330912069208c13e7304893e3c99290b24c07`
+- 통합 기준 HEAD: `080450b8a8461f8e77dc3923039e8e014b187b3a`
+- 제품 커밋: `3c8ed41591109ce603776516657e8772a86d35db`
 - 전용 브랜치: `fix/northstar-ontology-ui-20260715`
 - 소유 범위: `app/ontology/**`, 온톨로지 전용 테스트, 이 평가 산출물
 - DB, 온톨로지 schema, published 데이터, retrieval 계약 변경: 없음
