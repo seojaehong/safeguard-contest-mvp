@@ -4,7 +4,7 @@ import { enhanceLegalEvidenceMappings, generateAnswer, type AnswerGenerationResu
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
-import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
+import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverablesDiagnostics, type AiMode } from "./ai-deliverables";
 import { buildGroundedGenerationPacket, type GroundedGenerationPacket } from "./grounded-generation-contract";
 import {
   deriveSafetyReferenceOperationalView,
@@ -68,6 +68,17 @@ function buildParentlessKoshaReviewDeliverables(
 
 function safeFailureContext(error: unknown): { errorType: string } {
   return { errorType: error instanceof Error ? error.name : typeof error };
+}
+
+function buildGroundingReview(
+  grounding: AiDeliverablesDiagnostics["grounding"]
+): AskResponse["groundingReview"] {
+  if (!grounding || grounding.status !== "review_required") return undefined;
+  return {
+    status: "review_required",
+    sourceIdentity: grounding.sourceIdentity,
+    criticalControls: [...grounding.criticalControls]
+  };
 }
 
 const FINAL_DELIVERABLE_TRACE_KEYS = [
@@ -2369,6 +2380,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 
     const enriched: AskResponse = {
       ...response,
+      groundingReview: buildGroundingReview(groundingDiagnostics),
       riskSummary: parentlessKoshaReviewRequired
         ? { ...response.riskSummary, immediateActions: [] }
         : response.riskSummary,
@@ -2584,6 +2596,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const finalDeliverablesTrace = finalizeDeliverablesTrace(response, failedDeliverables.trace);
     return {
       ...response,
+      groundingReview: buildGroundingReview(failedDeliverables.grounding),
       generationTrace: {
         traceId,
         askMode: aiMode,

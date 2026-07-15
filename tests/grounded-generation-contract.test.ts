@@ -265,6 +265,35 @@ describe("grounded generation contract", () => {
     }));
   });
 
+  it("accepts only a canonical citation suffix and rejects prose beside a valid KOSHA token", () => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    const canonical = validateGroundedGenerationOutput({
+      structuredRiskRows: [{
+        currentControls: "개구부 덮개를 고정하고 표지를 설치한다.",
+        additionalControls: "안전난간과 덮개의 고정 상태를 작업 전에 점검한다. (C-12-2024)",
+        evidenceRefs: ["SIF:sif-1", "KOSHA:KOSHA-C-12@2024"]
+      }]
+    }, packet);
+    const withProse = validateGroundedGenerationOutput({
+      structuredRiskRows: [{
+        currentControls: "개구부 덮개를 고정하고 표지를 설치한다.",
+        additionalControls: "안전난간과 덮개의 고정 상태를 작업 전에 점검한다. (C-12-2024) (임의 장비를 추가한다)",
+        evidenceRefs: ["SIF:sif-1", "KOSHA:KOSHA-C-12@2024"]
+      }]
+    }, packet);
+
+    expect(canonical).toEqual({ status: "grounded", violations: [] });
+    expect(withProse.status).toBe("review_required");
+    expect(withProse.violations).toContainEqual(expect.objectContaining({
+      code: "control_claim_not_in_packet",
+      path: "$.structuredRiskRows[0].additionalControls"
+    }));
+  });
+
   it("accepts a TBM measure only when it carries packet provenance", () => {
     const packet = buildGroundedGenerationPacket({
       dbHarnessPacket: harnessPacket(),
@@ -407,5 +436,48 @@ describe("grounded generation contract", () => {
     expect(JSON.stringify(reordered.sources)).toBe(JSON.stringify(baseline.sources));
     expect(changedTitle.sourceIdentity).not.toBe(baseline.sourceIdentity);
     expect(changedStatus.sourceIdentity).not.toBe(baseline.sourceIdentity);
+  });
+
+  it("canonically merges duplicate source keys with different fields", () => {
+    const first = reference({
+      id: "duplicate-sif",
+      source_id: "z-source",
+      title: "Z title",
+      summary: "Z summary",
+      controls: ["Z control"]
+    });
+    const second = reference({
+      id: "duplicate-sif",
+      source_id: "a-source",
+      title: "A title",
+      summary: "A summary",
+      controls: ["A control"]
+    });
+    const firstHarness = harnessPacket();
+    firstHarness.sifCases = [first, second];
+    const secondHarness = harnessPacket();
+    secondHarness.sifCases = [second, first];
+
+    const firstPacket = buildGroundedGenerationPacket({
+      dbHarnessPacket: firstHarness,
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    const secondPacket = buildGroundedGenerationPacket({
+      dbHarnessPacket: secondHarness,
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+    const duplicateSources = firstPacket.sources.filter((source) => source.referenceKey === "SIF:duplicate-sif");
+
+    expect(duplicateSources).toHaveLength(1);
+    expect(duplicateSources[0]).toMatchObject({
+      sourceId: "a-source",
+      title: "A title",
+      summary: "A summary",
+      controls: ["A control", "Z control"]
+    });
+    expect(secondPacket.sourceIdentity).toBe(firstPacket.sourceIdentity);
+    expect(JSON.stringify(secondPacket.sources)).toBe(JSON.stringify(firstPacket.sources));
   });
 });

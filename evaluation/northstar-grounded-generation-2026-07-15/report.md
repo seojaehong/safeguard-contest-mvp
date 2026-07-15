@@ -2,26 +2,32 @@
 
 ## Candidate
 
-- Product SHA: `68010bb`
+- Starting HEAD: `cdf53d8b028bf776cee93256c7ee49acc428f77e`
 - Branch: `fix/northstar-grounded-generation-20260715`
 - LLM role: `naturalize_only`
-- Status: focused verification passed; independent re-review pending
+- Status: independent findings remediated; focused verification passed
 
-## Closed review findings
+## Closed independent findings
 
-1. TBM measures and unaddressed actions now require packet `evidenceRefs` in the TypeScript contract and generation prompt.
-2. A pipeline-wide provider failure retains the grounding packet identity and every critical control as `review_required` diagnostics.
-3. A verified control cannot be used as a prefix for arbitrary appended instructions. Only an exact control or a suffix made solely of packet-resolved citation parentheses is accepted.
-4. Packet sources, aliases, and controls are canonically ordered before both hashing and serialization, so equal identities produce identical model evidence input.
-5. Site locations such as `A-1 구역` are no longer parsed as KOSHA citations; only complete versioned guide tokens are treated as explicit citations.
+1. Control suffixes now accept only parenthesized canonical citation tokens. A valid KOSHA token does not authorize adjacent arbitrary prose.
+2. `runAsk` now preserves `sourceIdentity` and every packet `criticalControl` on `AskResponse.groundingReview` after an outer pipeline failure. `AnswerPanel` renders that review surface.
+3. Duplicate source keys are deterministically deduplicated. Scalar fields come from the canonical representative; aliases and controls are canonically merged and deduplicated.
 
-Rejected groups still expose every absent critical control through DB harness `missingEvidence`; no fallback is labeled grounded merely because it is syntactically valid.
+## Editor-focus diagnosis
+
+The editor-focus assertion passed in every reproduction run. The intermittent suite failure occurred afterward during Windows cleanup: `taskkill` returned before the isolated Next server emitted `exit`, and immediate temporary-directory deletion raised `EPERM`.
+
+- Initial loop: 10 editor-focus assertions passed; 1 suite cleanup failure.
+- Bounded deletion retry alone: 3 editor-focus assertions passed; 1 suite cleanup failure. This was not accepted as fixed.
+- Final fix: wait up to 5 seconds for the killed process tree to exit, fail explicitly if it remains alive, then use bounded filesystem retries.
+- Final post-fix loop: 3 editor-focus assertions passed; 0 suite cleanup failures.
 
 ## Verification
 
-- Grounding and generation: 4 files, 66 tests passed
-- TBM, quality, XLSX, and workspace regressions: 4 files, 40 passed, 1 skipped
-- Strict TypeScript typecheck: passed
-- `git diff --check`: passed
+- Grounding and generation focused suite: 4 files, 69 tests passed.
+- Isolated browser harness suite: 1 file, 3 tests passed.
+- Final editor-focus repetition: 3 runs passed, 21 unrelated tests skipped per run, 0 cleanup failures.
+- Strict TypeScript typecheck: passed before final report update; rerun in final gate.
+- `git diff --check`: pending final gate after report update.
 
-No database schema, migration, environment contract, or API response schema was changed.
+No database schema, migration, environment contract, or destructive data operation was changed.
