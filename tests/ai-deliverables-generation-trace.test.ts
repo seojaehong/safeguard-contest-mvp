@@ -416,7 +416,7 @@ describe("deliverables generation trace", () => {
     mocks.anthropicGenerate.mockImplementation(async (_model: string, prompt: string) => {
       if (prompt.includes('"riskAssessmentDraft"')) {
         return JSON.stringify({
-          riskAssessmentDraft: `산업안전보건법 제38조를 근거로 안전조치를 적용한다. ${"근거 패킷을 반영한 본문 ".repeat(15)}`
+          riskAssessmentDraft: `산업안전보건법 제38조는 제공된 법령 근거입니다. ${"근거 패킷을 반영한 본문 ".repeat(15)}`
         });
       }
       throw new Error("fixture deterministic fallback");

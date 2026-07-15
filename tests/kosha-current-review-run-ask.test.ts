@@ -1019,7 +1019,9 @@ describe("current-base runAsk retrieval provenance", () => {
       expectedReview = {
         status: "review_required",
         sourceIdentity: packet.sourceIdentity,
-        criticalControls: [...new Set(packet.sources.flatMap((source) => source.controls))].sort()
+        criticalControls: [...new Set(packet.sources.flatMap((source) => source.controls))].sort(),
+        rejectedGroups: ["deliverablesPipeline"],
+        violations: []
       };
       return { deliverables: {}, diagnostics };
     });

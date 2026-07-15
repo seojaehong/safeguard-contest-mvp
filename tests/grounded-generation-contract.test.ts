@@ -335,6 +335,60 @@ describe("grounded generation contract", () => {
     }));
   });
 
+  it.each([
+    ["work plan stop criteria", { workPlanStructured: { stopCriteria: ["안전대를 체결한다."] } }, "$.workPlanStructured.stopCriteria[0]"],
+    ["work plan first aid", { workPlanStructured: { emergencyResponse: { firstAid: "출입을 제한한다." } } }, "$.workPlanStructured.emergencyResponse.firstAid"],
+    ["TBM stop criteria", { tbmBriefingStructured: { stopCriteria: ["설비를 격리한다."] } }, "$.tbmBriefingStructured.stopCriteria[0]"],
+    ["worker confirmation", { tbmLogStructured: { workerConfirmations: ["전원을 잠금한다."] } }, "$.tbmLogStructured.workerConfirmations[0]"],
+    ["education key point", { educationRecordStructured: { curriculum: [{ keyPoints: ["감시인을 배치한다."] }] } }, "$.educationRecordStructured.curriculum[0].keyPoints[0]"],
+    ["permit completion method", { permitInspectionStructured: { completionChecks: [{ method: "통제선을 마련한다." }] } }, "$.permitInspectionStructured.completionChecks[0].method"]
+  ])("fails closed on unsupported structured control: %s", (_label, output, path) => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+
+    const result = validateGroundedGenerationOutput(output, packet);
+
+    expect(result.status).toBe("review_required");
+    expect(result.violations).toContainEqual(expect.objectContaining({
+      code: "control_claim_not_in_packet",
+      path
+    }));
+  });
+
+  it.each([
+    "안전대를 체결한다.",
+    "출입을 제한한다.",
+    "설비를 격리한다.",
+    "전원을 잠금한다.",
+    "통제선을 마련한다.",
+    "유도자를 배치한다.",
+    "감시인을 둔다."
+  ])("fails closed on unsupported narrative instruction without a citation: %s", (instruction) => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+
+    expect(validateGroundedGenerationOutput({ riskAssessmentDraft: instruction }, packet))
+      .toMatchObject({ status: "review_required" });
+  });
+
+  it("allows descriptive narrative that is not an instruction", () => {
+    const packet = buildGroundedGenerationPacket({
+      dbHarnessPacket: harnessPacket(),
+      legalCandidates,
+      eligibleKoshaIds: new Set(["kosha-1"])
+    });
+
+    expect(validateGroundedGenerationOutput({
+      riskAssessmentDraft: "A-1 구역에서 사용하는 장비는 크레인입니다."
+    }, packet)).toEqual({ status: "grounded", violations: [] });
+  });
+
   it("flags a bare article citation that is absent from legal candidates", () => {
     const packet = buildGroundedGenerationPacket({
       dbHarnessPacket: harnessPacket(),
@@ -403,7 +457,7 @@ describe("grounded generation contract", () => {
     });
 
     expect(validateGroundedGenerationOutput({
-      riskAssessmentDraft: "A-1 구역의 출입 통로를 확인한다."
+      riskAssessmentDraft: "사용 장비는 A-1 구역의 크레인입니다."
     }, packet)).toEqual({ status: "grounded", violations: [] });
   });
 

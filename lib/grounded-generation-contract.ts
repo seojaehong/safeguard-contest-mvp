@@ -264,6 +264,38 @@ function validateControlObject(
   }
 }
 
+function recordOf(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function validateUnreferencedControlValue(
+  value: unknown,
+  packet: GroundedGenerationPacket,
+  path: string,
+  violations: GroundingViolation[]
+): void {
+  if (typeof value !== "string" || value.trim().length === 0 || value.includes("현장 확인 필요")) return;
+  const controlSources = packet.sources.filter((source) => source.controls.length > 0);
+  const grounded = controlSources.some((source) => source.controls.some((control) => (
+    controlClaimMatches(value, control, controlSources)
+  )));
+  if (!grounded) violations.push({ code: "control_claim_not_in_packet", path, value });
+}
+
+function validateUnreferencedControlArray(
+  value: unknown,
+  packet: GroundedGenerationPacket,
+  path: string,
+  violations: GroundingViolation[]
+): void {
+  if (!Array.isArray(value)) return;
+  value.forEach((item, index) => {
+    validateUnreferencedControlValue(item, packet, `${path}[${index}]`, violations);
+  });
+}
+
 function validateSchemaControls(
   output: Record<string, unknown>,
   packet: GroundedGenerationPacket,
@@ -280,21 +312,57 @@ function validateSchemaControls(
   validateArray(output.structuredRiskRows, ["currentControls", "additionalControls"], "$.structuredRiskRows");
   validateArray(output.tbmRiskLinks, ["control"], "$.tbmRiskLinks");
 
-  const workPlan = output.workPlanStructured;
-  if (workPlan && typeof workPlan === "object" && !Array.isArray(workPlan)) {
-    validateArray((workPlan as Record<string, unknown>).workSteps, ["safetyMeasure"], "$.workPlanStructured.workSteps");
+  const workPlan = recordOf(output.workPlanStructured);
+  if (workPlan) {
+    validateArray(workPlan.workSteps, ["safetyMeasure"], "$.workPlanStructured.workSteps");
+    validateUnreferencedControlArray(workPlan.stopCriteria, packet, "$.workPlanStructured.stopCriteria", violations);
+    validateUnreferencedControlValue(
+      recordOf(workPlan.emergencyResponse)?.firstAid,
+      packet,
+      "$.workPlanStructured.emergencyResponse.firstAid",
+      violations
+    );
   }
-  const tbmBriefing = output.tbmBriefingStructured;
-  if (tbmBriefing && typeof tbmBriefing === "object" && !Array.isArray(tbmBriefing)) {
-    validateArray((tbmBriefing as Record<string, unknown>).measures, ["action"], "$.tbmBriefingStructured.measures");
+  const tbmBriefing = recordOf(output.tbmBriefingStructured);
+  if (tbmBriefing) {
+    validateArray(tbmBriefing.measures, ["action"], "$.tbmBriefingStructured.measures");
+    validateUnreferencedControlArray(tbmBriefing.stopCriteria, packet, "$.tbmBriefingStructured.stopCriteria", violations);
   }
-  const permit = output.permitInspectionStructured;
-  if (permit && typeof permit === "object" && !Array.isArray(permit)) {
-    validateArray((permit as Record<string, unknown>).conditions, ["action"], "$.permitInspectionStructured.conditions");
+  const permit = recordOf(output.permitInspectionStructured);
+  if (permit) {
+    validateArray(permit.conditions, ["requirement", "action"], "$.permitInspectionStructured.conditions");
+    const completionChecks = Array.isArray(permit.completionChecks) ? permit.completionChecks : [];
+    completionChecks.forEach((item, index) => {
+      validateUnreferencedControlValue(
+        recordOf(item)?.method,
+        packet,
+        `$.permitInspectionStructured.completionChecks[${index}].method`,
+        violations
+      );
+    });
   }
-  const tbmLog = output.tbmLogStructured;
-  if (tbmLog && typeof tbmLog === "object" && !Array.isArray(tbmLog)) {
-    validateArray((tbmLog as Record<string, unknown>).unaddressedItems, ["plannedAction"], "$.tbmLogStructured.unaddressedItems");
+  const tbmLog = recordOf(output.tbmLogStructured);
+  if (tbmLog) {
+    validateArray(tbmLog.unaddressedItems, ["plannedAction"], "$.tbmLogStructured.unaddressedItems");
+    validateUnreferencedControlArray(tbmLog.workerConfirmations, packet, "$.tbmLogStructured.workerConfirmations", violations);
+    validateUnreferencedControlArray(
+      recordOf(tbmLog.safetyEducation)?.keyPoints,
+      packet,
+      "$.tbmLogStructured.safetyEducation.keyPoints",
+      violations
+    );
+  }
+  const education = recordOf(output.educationRecordStructured);
+  if (education) {
+    const curriculum = Array.isArray(education.curriculum) ? education.curriculum : [];
+    curriculum.forEach((item, index) => {
+      validateUnreferencedControlArray(
+        recordOf(item)?.keyPoints,
+        packet,
+        `$.educationRecordStructured.curriculum[${index}].keyPoints`,
+        violations
+      );
+    });
   }
 }
 
@@ -312,7 +380,13 @@ const NARRATIVE_CONTROL_FIELDS = new Set([
   "kakaoMessage"
 ]);
 
-const ACTIONABLE_SENTENCE_RE = /(?:설치|고정|점검|차단|배치|착용|사용|금지|중지|제거|측정|확보|통제|교체|보강|작동|실시)(?:하|해|되|한|할|해야|하지|한다|하세요|하십시오)/;
+const DESCRIPTIVE_SENTENCE_END_RE = /(?:입니다|이다|있습니다|있다|없습니다|없다|같습니다|같다|높습니다|높다|낮습니다|낮다)[.!?]?$/;
+const ACTIONABLE_SENTENCE_END_RE = /(?:다|것|하세요|하십시오|금지|중지)[.!?]?$/;
+
+function isActionableNarrativeSentence(value: string): boolean {
+  const sentence = value.trim();
+  return !DESCRIPTIVE_SENTENCE_END_RE.test(sentence) && ACTIONABLE_SENTENCE_END_RE.test(sentence);
+}
 
 function narrativeSentences(value: string): string[] {
   return (value.match(/[^.!?\n]+[.!?]?/g) || [])
@@ -336,12 +410,11 @@ function validateNarrativeControls(
   for (const [field, value] of Object.entries(output)) {
     if (!NARRATIVE_CONTROL_FIELDS.has(field) || typeof value !== "string") continue;
     for (const sentence of narrativeSentences(value)) {
-      if (!ACTIONABLE_SENTENCE_RE.test(sentence) || sentence.includes("현장 확인 필요")) continue;
       const claim = stripNarrativePrefix(sentence);
       const grounded = controlSources.some((source) => source.controls.some((control) => (
         controlClaimMatches(claim, control, controlSources)
       )));
-      if (!grounded) {
+      if (!grounded && isActionableNarrativeSentence(sentence) && !sentence.includes("현장 확인 필요")) {
         violations.push({ code: "control_claim_not_in_packet", path: `$.${field}`, value: sentence });
       }
     }
