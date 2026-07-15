@@ -349,7 +349,7 @@ describe("knowledge page decision layout", () => {
         .filter({ hasText: /데이터 연결 상태/u })
         .textContent();
       expect(provenanceText).toMatch(/service role key가 없어|안전 지식 DB 상태 확인 중 오류/u);
-      await page.getByRole("tab", { name: "참고 자료" }).click();
+      await page.getByRole("tab", { name: "참고자료" }).click();
       activeList = page.locator('[data-knowledge-list="reference-library"]');
       activeListSelector = '[data-knowledge-list="reference-library"]';
       await activeList.locator("[data-knowledge-row]").first().waitFor();
