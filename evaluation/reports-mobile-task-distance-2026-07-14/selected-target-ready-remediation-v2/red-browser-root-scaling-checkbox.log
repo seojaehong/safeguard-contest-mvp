@@ -1,0 +1,56 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/reports-design-remediation.test.ts -t keeps the mobile report workbench ahead --pool=forks --maxWorkers=1
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/reports-mobile-task-distance
+
+ ❯ tests/reports-design-remediation.test.ts (11 tests | 1 failed | 10 skipped) 19759ms
+     × keeps the mobile report workbench ahead of its long document by default 9365ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps the mobile report workbench ahead of its long document by default
+AssertionError: day-mobile-preview-only undersized targets
+[
+  {
+    "descriptor": "24:input[]",
+    "selector": "input:interactive(24)",
+    "disabled": false,
+    "height": 13,
+    "width": 13
+  }
+]: expected [ { descriptor: '24:input[]', …(4) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "descriptor": "24:input[]",
++     "disabled": false,
++     "height": 13,
++     "selector": "input:interactive(24)",
++     "width": 13,
++   },
++ ]
+
+ ❯ recordInteractiveTargetRow tests/reports-design-remediation.test.ts:440:113
+    438|   expect(interactiveTargetMatrixRows.some((row) => row.rowId === rowId…
+    439|   expect(inventory.targets.length, `${rowId} interactive inventory`).t…
+    440|   expect(inventory.undersized, `${rowId} undersized targets\n${JSON.st…
+       |                                                                                                                 ^
+    441|   expect(inventory.horizontalOverflow, `${rowId} horizontal overflow`)…
+    442|   expect(inventory.overlapFailures, `${rowId} interactive overlaps`).t…
+ ❯ tests/reports-design-remediation.test.ts:1200:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 skipped (11)
+   Start at  07:32:26
+   Duration  21.26s (transform 270ms, setup 0ms, import 918ms, tests 19.76s, environment 0ms)
+
+EXIT_CODE=1

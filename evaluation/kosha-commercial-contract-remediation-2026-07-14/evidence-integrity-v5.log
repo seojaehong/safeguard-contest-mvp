@@ -1,0 +1,14 @@
+phase=evidence-integrity-v5
+redCommit=cb74dd5
+productCommit=2cf5c6722c2956ddad79810c7da419e419e6c662
+generatedAt=2026-07-14T17:37:56.4690073+09:00
+
+619d9e7690b12b50e87f1a411790acb2472f65497fd500be1b84663325ea1a16  evaluation\kosha-commercial-contract-remediation-2026-07-14\red-v5-hostile-broad-token.log
+17d84a28b5b76aaf4fe7278891ba5184ba16698f29f4fa6249803294075febbe  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v5-hostile-broad-token.log
+be8d8429c8bf87067755e43480858c1c820fca5903cfd8b94f6c0a0bf4bda714  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v5-prior-v4-attacks.log
+8dd5fd4eac64ef84dcd1a4c91084b425568bd53fddf8b83d20a63c3257b1a5fa  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v5-mcp27.log
+4828af7c896a4c55b13a400c10ccd680916a7a98917f2f023271055e72c595f8  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v5-focused55.log
+d8ec986895f091b9e2eb160713539e93400b2d4630a3d1baefc5dbacd09f75cb  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v5-typecheck.log
+724e42172d35e448ae7e4a249952d9fdad225848cc93fb14837848107c96d97d  evaluation\kosha-commercial-contract-remediation-2026-07-14\green-v5-diff-scope.log
+b045c717f03320b9e7e19f39573a0e7c6e8ae16ed5f67cd0cec2a61147fbc4e0  evaluation\kosha-commercial-contract-remediation-2026-07-14\report.md
+55957ad8dc9cf0d1900cbb8235547a2bdc13df1702657ad21cdbbddbe9375e93  evaluation\kosha-commercial-contract-remediation-2026-07-14\report.json

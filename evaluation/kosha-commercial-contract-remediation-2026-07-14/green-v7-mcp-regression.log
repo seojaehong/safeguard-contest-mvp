@@ -1,0 +1,17 @@
+phase=green-v7-mcp-regression
+head=90092bcece5a5e2121b652a4e63b1031ab0f6545
+command=npm.cmd test -- tests/mcp-tools.test.ts -t "^(?!.*v5 )" --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T21:38:26.1451670+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/mcp-tools.test.ts -t ^(?!.*v5 ) --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  1 passed (1)
+      Tests  28 passed | 2 skipped (30)
+   Start at  21:38:32
+   Duration  2.56s (transform 996ms, setup 0ms, import 1.15s, tests 54ms, environment 0ms)

@@ -1,0 +1,31 @@
+2026-07-13 Phase A KOSHA OCR integration verification
+
+PASS python -m unittest scripts.tests.test_snapshot_kosha_guide_corpus scripts.tests.test_recover_kosha_ocr_boundary
+RESULT 59 tests passed, 0 failed
+
+RED integrated KOSHA TypeScript gate
+RESULT 5 files, 102 passed, 1 failed
+CAUSE CRLF-sensitive function extraction
+GREEN 5 files, 103 passed, 0 failed
+
+RED npm.cmd test -- --maxWorkers=1 --no-file-parallelism
+RESULT 1323 tests passed; suite failed only because knowledge-page afterAll exceeded the default 10 second timeout
+
+PASS npm.cmd test -- tests/knowledge-page-layout.test.ts --maxWorkers=1 --no-file-parallelism
+RESULT run 1: 1 file, 4 passed, 0 failed, 32.04 seconds
+RESULT run 2: 1 file, 4 passed, 0 failed, 29.42 seconds
+
+PASS npm.cmd test -- --maxWorkers=1 --no-file-parallelism
+RESULT 132 files passed, 5 skipped; 1323 tests passed, 7 skipped; 0 failed; 1247.79 seconds
+
+PASS npm.cmd run typecheck
+RESULT tsc --noEmit --incremental false exited 0
+
+PASS npm.cmd run build
+RESULT Next.js 15.5.20 compiled successfully and generated 27/27 static pages
+
+PASS public workspace browser verification
+RESULT cleared input 0/600, visible example sentence 0, filled and cleared panel deltas 0 px, no independent sidebar scroll, no horizontal overflow
+
+BLOCKED release readiness
+RESULT OCR candidate draft; zero authoritative production chunks; deployment identity unproven; existing Supabase RLS audit RED; DB mutation false

@@ -1,0 +1,7 @@
+HEAD=271d934574212ed1eee922cd8180acba8aca6496
+COMMAND=npm.cmd run typecheck
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+EXIT_CODE=0

@@ -39,7 +39,7 @@ const riskRow: RiskAssessmentRow = {
   additionalControls: "난간 보강, 바퀴 잠금, 안전대 체결 사진을 작업 전 확인",
   owner: "현장소장",
   due: "2026-07-08",
-  verification: "TBM 확인 및 Before/After 사진 기록",
+  verification: "TBM 확인 및 개선 전/개선 후 사진 기록",
   verificationStatus: "planned",
   verificationDate: "2026-07-08",
   verificationChecker: "안전관리자",
@@ -113,7 +113,7 @@ const improvements: OperationImprovement[] = [
     },
     beforePhotoName: "before-scaffold.jpg",
     afterPhotoName: "after-guardrail.jpg",
-    photoAnalysisSummary: "Before/After 사진 비교 후보",
+    photoAnalysisSummary: "개선 전/개선 후 사진 비교 후보",
     sourceType: "photo_analysis",
     visionProvider: "openai",
     visionModel: "gpt-4.1-mini",
@@ -905,7 +905,9 @@ describe("reporting downloads", () => {
     expect(csv).toContain(snapshot.source.workpackSavedAt);
   });
 
-  it("renders As-Is/To-Be markdown without external submission wording", () => {
+  it("renders Korean before-and-after markdown without external submission wording", () => {
+    const exactPhotoApprovalBoundary = "개선 전/개선 후 사진 포함 승인";
+    const legacyPhotoTerm = new RegExp(["Before", "After"].join("\\s*/\\s*"), "iu");
     const snapshot = buildReportSnapshot({
       workpack: makeWorkpack(),
       improvements,
@@ -918,10 +920,16 @@ describe("reporting downloads", () => {
       now: new Date("2026-07-08T12:00:00.000Z")
     });
     const markdown = buildReportMarkdown(snapshot);
+    const json = buildReportJson(snapshot);
 
-    expect(markdown).toContain("## 위험성평가 As-Is / To-Be");
-    expect(markdown).toContain("Before/After 사진");
+    expect(markdown).toContain("## 위험성평가 개선 전 / 개선 후");
+    expect(markdown).toContain("- 개선 전:");
+    expect(markdown).toContain("- 개선 후:");
+    expect(markdown).toContain(exactPhotoApprovalBoundary);
+    expect(json).toContain(exactPhotoApprovalBoundary);
     expect(markdown).toContain("before-scaffold.jpg");
+    expect(markdown).not.toMatch(legacyPhotoTerm);
+    expect(json).not.toMatch(legacyPhotoTerm);
     expect(markdown).not.toContain("KRAS");
     expect(markdown).not.toContain("자동 제출");
   });
@@ -936,6 +944,7 @@ describe("reporting downloads", () => {
     const csv = buildReportCsv(snapshot);
 
     expect(csv.startsWith("\uFEFF구분,현장")).toBe(true);
+    expect(csv).toContain("개선 전,개선 후");
     expect(csv).toContain("위험성평가");
     expect(csv).toContain("개선사항");
     expect(csv).toContain("난간 보강");
@@ -983,7 +992,7 @@ describe("reporting downloads", () => {
     expect(events.map((event) => event.eventType)).toContain("classification_group");
     expect(events.find((event) => event.eventType === "improvement")?.payload).toMatchObject({
       hazardLabel: "추락 위험",
-      sourceLabel: "Before/After 사진"
+      sourceLabel: "개선 전/개선 후 사진"
     });
     expect(events.find((event) => event.eventType === "governance")?.payload).toMatchObject({
       authority: "operator_review_corpus",
@@ -994,6 +1003,8 @@ describe("reporting downloads", () => {
   });
 
   it("exports a readable operation corpus markdown without fine-tuning claims", () => {
+    const exactPhotoApprovalBoundary = "개선 전/개선 후 사진 포함 승인";
+    const legacyPhotoTerm = new RegExp(["Before", "After"].join("\\s*/\\s*"), "iu");
     const snapshot = buildReportSnapshot({
       workpack: makeWorkpack(),
       improvements,
@@ -1007,7 +1018,8 @@ describe("reporting downloads", () => {
     expect(markdown).toContain("authority: operator_review_corpus");
     expect(markdown).toContain("재생성 가능한 코퍼스");
     expect(markdown).toContain("## 개선 이벤트");
-    expect(markdown).toContain("Before/After 사진");
+    expect(markdown).toContain(exactPhotoApprovalBoundary);
+    expect(markdown).not.toMatch(legacyPhotoTerm);
     expect(markdown).toContain("## 분류 인덱스");
     expect(markdown).not.toContain("파인튜닝 완료");
     expect(markdown).not.toContain("학습 완료");
@@ -1039,6 +1051,6 @@ describe("reporting downloads", () => {
       siteSignals: ["비계", "단부"],
       visionEvidence: "after-guardrail.jpg에서 난간 보강 확인"
     });
-    expect(memory.visionSummary).toContain("Before/After 사진 비교 후보");
+    expect(memory.visionSummary).toContain("개선 전/개선 후 사진 비교 후보");
   });
 });

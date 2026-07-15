@@ -1,0 +1,41 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/knowledge-regenerate-route.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/northstar-24h-knowledge-round
+
+ ❯ tests/knowledge-regenerate-route.test.ts (6 tests | 3 failed) 158ms
+     × rejects missing rawEvents without creating a candidate 129ms
+     × rejects non-array rawEvents without creating a candidate 3ms
+     × rejects empty rawEvents without creating a candidate 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/knowledge-regenerate-route.test.ts > knowledge candidate API > rejects missing rawEvents without creating a candidate
+ FAIL  tests/knowledge-regenerate-route.test.ts > knowledge candidate API > rejects non-array rawEvents without creating a candidate
+ FAIL  tests/knowledge-regenerate-route.test.ts > knowledge candidate API > rejects empty rawEvents without creating a candidate
+AssertionError: expected 200 to be 400 // Object.is equality
+
+- Expected
++ Received
+
+- 400
++ 200
+
+ ❯ tests/knowledge-regenerate-route.test.ts:38:29
+     36|     const payload = await response.json();
+     37|
+     38|     expect(response.status).toBe(400);
+       |                             ^
+     39|     expect(payload).toMatchObject({
+     40|       ok: false,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 3 passed (6)
+   Start at  21:28:37
+   Duration  1.03s (transform 175ms, setup 0ms, import 216ms, tests 158ms, environment 0ms)
+EXIT_CODE: 1

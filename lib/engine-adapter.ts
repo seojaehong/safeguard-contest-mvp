@@ -1,7 +1,27 @@
 import type { ClawChatEvent, ClawSiteProfile } from "@/lib/agent-loop";
 
-export type EngineMode = "disabled" | "local-openclaw";
+export type EngineMode = "disabled" | "local-openclaw" | "experimental-hermes";
 export type EnvLike = Record<string, string | undefined>;
+export const ENGINE_ADAPTER_CONTRACT_VERSION = "engine-adapter/v1" as const;
+
+export type EngineRuntime = "unavailable" | "openclaw" | "hermes";
+export type EngineCapability = "stream_text" | "request_read_tool";
+
+export type EngineAuthority = {
+  readonly systemOfRecord: "safeclaw-mcp-db-harness";
+  readonly toolExecutionBoundary: "safeclaw-mcp-interceptor";
+  readonly canMutate: false;
+  readonly canPublish: false;
+  readonly humanConfirmationRequired: true;
+};
+
+export const SAFECLAW_ENGINE_AUTHORITY: EngineAuthority = Object.freeze({
+  systemOfRecord: "safeclaw-mcp-db-harness",
+  toolExecutionBoundary: "safeclaw-mcp-interceptor",
+  canMutate: false,
+  canPublish: false,
+  humanConfirmationRequired: true,
+});
 
 export type BrokerRequestContext = {
   userId: string;
@@ -19,8 +39,10 @@ export type EngineRunInput = {
 
 export interface EngineAdapter {
   readonly id: string;
-  /** Execution capabilities stay empty until the sidecar enforces an attested allowlist. */
-  readonly capabilities: readonly [];
+  readonly contractVersion: typeof ENGINE_ADAPTER_CONTRACT_VERSION;
+  readonly runtime: EngineRuntime;
+  readonly authority: EngineAuthority;
+  readonly capabilities: readonly EngineCapability[];
   checkAvailability(context: BrokerRequestContext, signal?: AbortSignal): Promise<void>;
   run(input: EngineRunInput): Promise<void>;
 }
@@ -36,6 +58,7 @@ export type BrokerErrorCode =
   | "ENGINE_RUNTIME_UNAVAILABLE"
   | "ENGINE_SITE_BINDING_UNPROVEN"
   | "ENGINE_EXECUTION_ATTESTATION_UNPROVEN"
+  | "ENGINE_TOOL_FORBIDDEN"
   | "ENGINE_BUSY"
   | "ENGINE_TIMEOUT"
   | "ENGINE_EXECUTION_FAILED";
@@ -51,6 +74,7 @@ const PUBLIC_MESSAGES: Record<BrokerErrorCode, string> = {
   ENGINE_RUNTIME_UNAVAILABLE: "에이전트 실행 환경을 사용할 수 없습니다.",
   ENGINE_SITE_BINDING_UNPROVEN: "현장 연결을 확인할 수 없어 실행하지 않았습니다.",
   ENGINE_EXECUTION_ATTESTATION_UNPROVEN: "실행 권한을 확인할 수 없어 실행하지 않았습니다.",
+  ENGINE_TOOL_FORBIDDEN: "에이전트 엔진에 허용되지 않은 도구 요청입니다.",
   ENGINE_BUSY: "에이전트가 다른 요청을 처리 중입니다.",
   ENGINE_TIMEOUT: "에이전트 실행 시간이 초과되었습니다.",
   ENGINE_EXECUTION_FAILED: "에이전트 실행에 실패했습니다.",
@@ -79,6 +103,11 @@ export function resolveEngineMode(env: EnvLike): EngineMode {
   if (requested === "local-openclaw") {
     return env.VERCEL ? "disabled" : "local-openclaw";
   }
+  if (requested === "experimental-hermes") {
+    return env.VERCEL || env.SAFECLAW_HERMES_LOCAL_POC !== "1"
+      ? "disabled"
+      : "experimental-hermes";
+  }
   return "disabled";
 }
 
@@ -90,6 +119,9 @@ export function createUnavailableEngineAdapter(
   };
   return {
     id: "unavailable",
+    contractVersion: ENGINE_ADAPTER_CONTRACT_VERSION,
+    runtime: "unavailable",
+    authority: SAFECLAW_ENGINE_AUTHORITY,
     capabilities: [],
     checkAvailability: unavailable,
     run: unavailable,
@@ -144,6 +176,9 @@ export function createGuardedEngineAdapter(
 
   return {
     id: adapter.id,
+    contractVersion: adapter.contractVersion,
+    runtime: adapter.runtime,
+    authority: adapter.authority,
     capabilities: adapter.capabilities,
     checkAvailability: (context, signal) => runInSlot(
       signal,

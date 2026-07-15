@@ -1,0 +1,15 @@
+HEAD=da0550d60b324e68ed67e87319636681aaaa13c8
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-evidence-integration
+
+
+ Test Files  2 passed (2)
+      Tests  13 passed (13)
+   Start at  13:24:21
+   Duration  9.63s (transform 632ms, setup 0ms, import 1.52s, tests 6.98s, environment 0ms)
+
+EXIT_CODE=0

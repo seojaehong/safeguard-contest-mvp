@@ -1,0 +1,22 @@
+verification=final-integrated-kosha-group-c
+finalProductSha=5919d58bbf7de1027f4b4118d5ec997fd4865f9f
+finalProductTree=6f2ed6684543f696101bd88150d44c77acd1ab6a
+authoritativeMain=920c7f360688352156de4854b4957a9f2f1f0e43
+command=npm.cmd test -- tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness.test.ts --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T15:45:37.9864809+09:00
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-current-review-provenance.test.ts tests/kosha-current-review-lifecycle.test.ts tests/kosha-guide-provenance-gate.test.ts tests/kosha-guide-offline-harness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  4 passed (4)
+      Tests  22 passed (22)
+   Start at  15:45:39
+   Duration  10.25s (transform 747ms, setup 0ms, import 1.80s, tests 6.19s, environment 0ms)
+
+endedAt=2026-07-14T15:45:50.2424138+09:00
+elapsedSeconds=12.256
+exitCode=0

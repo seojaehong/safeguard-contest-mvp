@@ -1,0 +1,42 @@
+phase=green-v5-diff-scope
+head=2cf5c6722c2956ddad79810c7da419e419e6c662
+redBase=cb74dd5
+oldFinal=08f6d6edc168c9a83cb6aac0eca151f45b783131
+mainTarget=920c7f360688352156de4854b4957a9f2f1f0e43
+commands=git range-diff; git diff --check; changed path audit; no-any audit; forbidden path audit; json validation
+startedAt=2026-07-14T17:37:43.7533357+09:00
+
+## range-diff old final to product head
+ 1:  d120a92 =  1:  d120a92 fix: gate kosha guidance behind direct evidence
+ 2:  049debe =  2:  049debe chore: record kosha contract remediation evidence
+ 3:  7e7910a =  3:  7e7910a fix: enforce KOSHA parent evidence gate
+ 4:  29ae837 =  4:  29ae837 chore: record KOSHA remediation v2 evidence
+ 5:  f74c597 =  5:  f74c597 fix: harden parentless KOSHA action boundaries
+ 6:  5919d58 =  6:  5919d58 test: align parentless KOSHA corpus contract
+ 7:  2a23269 =  7:  2a23269 chore: record KOSHA remediation v3 evidence
+ 8:  2b3144f =  8:  2b3144f test: add KOSHA v4 rejection contracts
+ 9:  e0a67f6 =  9:  e0a67f6 fix: close KOSHA v4 contract gaps
+10:  08f6d6e = 10:  08f6d6e chore: record KOSHA v4 remediation evidence
+ -:  ------- > 11:  cb74dd5 test: add kosha v5 hostile parent cases
+ -:  ------- > 12:  2cf5c67 fix: harden kosha parent family matching
+rangeDiffExitCode=0
+
+## git diff --check product files
+diffCheckExitCode=0
+
+## changed paths since red commit plus uncommitted evidence edits
+evaluation/kosha-commercial-contract-remediation-2026-07-14/report.json
+evaluation/kosha-commercial-contract-remediation-2026-07-14/report.md
+lib/db-harness.ts
+lib/search.ts
+
+## added any audit
+none
+anyAuditExitCode=1
+
+## forbidden path audit
+none
+forbiddenAuditExitCode=1
+
+## report json validation
+reportJsonValid=true

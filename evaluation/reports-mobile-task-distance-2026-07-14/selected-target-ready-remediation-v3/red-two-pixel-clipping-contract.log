@@ -1,0 +1,17 @@
+TRANSCRIPT_SOURCE=interactive command output captured before GREEN
+COMMAND=npm.cmd test -- tests/reports-design-remediation.test.ts -t "keeps the mobile report workbench ahead of its long document by default"
+
+FAIL tests/reports-design-remediation.test.ts > Reports Wave 1 browser design contract > keeps the mobile report workbench ahead of its long document by default
+AssertionError: expected undefined to be defined
+
+Observed pre-GREEN string records:
+[
+  "h1.safeclaw-module-title[개선 리포트.] client=366x74 scroll=366x82 font=64px/73.6px overflow=visible/visible",
+  "span.safeclaw-reports-two-pixel-clip-probe[2px clipping probe] client=240x20 scroll=240x22 font=15px/22px overflow=hidden/hidden"
+]
+
+The old string-only result could not satisfy the required structured raw delta, tolerance, and clipped-axis contract.
+
+Test Files  1 failed (1)
+Tests       1 failed | 11 skipped (12)
+EXIT_CODE=1

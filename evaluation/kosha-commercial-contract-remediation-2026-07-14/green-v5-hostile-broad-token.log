@@ -1,0 +1,18 @@
+phase=green-v5-hostile-broad-token
+head=2cf5c6722c2956ddad79810c7da419e419e6c662
+command=npm.cmd test -- tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts tests/mcp-tools.test.ts -t "v5 " --maxWorkers=1 --no-file-parallelism
+startedAt=2026-07-14T17:35:32.0979402+09:00
+
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts tests/kosha-current-review-run-ask.test.ts tests/mcp-tools.test.ts -t v5  --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-commercial-contract-remediation
+
+
+ Test Files  3 passed (3)
+      Tests  10 passed | 88 skipped (98)
+   Start at  17:35:34
+   Duration  7.11s (transform 995ms, setup 0ms, import 2.43s, tests 2.73s, environment 0ms)
+

@@ -2,6 +2,7 @@ import type { RiskAssessmentRow, RiskAssessmentValidationIssue } from "./risk-as
 import type { SmsaEvidenceLabel } from "./smsa-mapping";
 import type { QaReviewResult } from "./ontology/qa-review";
 import type { DbHarnessPacket } from "./db-harness";
+import type { PhaseAProductMaterialization } from "./ontology/product-materialization";
 
 export type SourceType = "law" | "precedent" | "interpretation";
 export type SourceSystem = "lawgo" | "korean-law-mcp" | "mock";
@@ -626,6 +627,8 @@ export type AskResponse = {
    * Phase 0 프리뷰 — lib/smsa-mapping.ts 참고.
    */
   evidenceLabels?: Record<string, SmsaEvidenceLabel>;
+  /** Phase A ontology evidence projected into retrieval and document rows. */
+  phaseAProduct?: PhaseAProductMaterialization;
   ontologyQa?: {
     reviewTask: string;
     result: QaReviewResult;

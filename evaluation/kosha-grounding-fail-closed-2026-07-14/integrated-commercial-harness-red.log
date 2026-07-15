@@ -1,0 +1,198 @@
+HEAD=67d2c9e28e7278c58f46b46c2512c7133d88d1d3
+
+> safeclaw@0.1.0 test
+> vitest run tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-evidence-integration
+
+ ❯ tests/commercial-harness.test.ts (31 tests | 9 failed) 5552ms
+     × keeps raw reference provenance immutable while exposing operational controls to the UI 12ms
+     × carries vector retrieval status into the DB harness packet after approval 5ms
+     × builds the visible judgment summary from the DB harness packet before generic answer text 4ms
+     × turns safety reference matches into deterministic risk rows before generic baseline rows 4ms
+     × aligns B-E-17 paint evidence to fire and explosion controls without changing raw provenance 1ms
+     × aligns B-E-20 electrostatic coating evidence to grounding and explosion controls 1ms
+     × keeps the canonical exterior-painting workpack free of machinery and electrostatic false positives 3ms
+     × aligns G-67 exterior cleaning evidence and carries the same controls and refs into TBM links 1ms
+     × retains confined-space pump and actual machinery controls while generic evidence stays review-required 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/commercial-harness.test.ts > safety term normalization > keeps raw reference provenance immutable while exposing operational controls to the UI
+AssertionError: expected '검증된 현행 원문과 provenance 확인 전 본문·통제문구 미사용' to match /비계|작업발판|안전난간|안전대/
+
+- Expected:
+/비계|작업발판|안전난간|안전대/
+
++ Received:
+"검증된 현행 원문과 provenance 확인 전 본문·통제문구 미사용"
+
+ ❯ tests/commercial-harness.test.ts:50:40
+     48|     const surface = buildSafetyReferenceSurfaceItem(rawReference);
+     49|
+     50|     expect(surface.controls.join(" ")).toMatch(/비계|작업발판|안전난간|안전대/);
+       |                                        ^
+     51|     expect(surface.controls.join(" ")).not.toMatch(/방호덮개|비상정지장치|잠금표지/);
+     52|     expect(surface.shortSummary).not.toMatch(/방호덮개|비상정지장치|잠금표지/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  tests/commercial-harness.test.ts > DB harness packet > carries vector retrieval status into the DB harness packet after approval
+AssertionError: expected { directEvidence: +0, …(9) } to match object { Object (directEvidence, sifCases, ...) }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "directEvidence": 1,
++   "directEvidence": 0,
+    "hybrid": 1,
+    "ranked": 1,
+    "sifCases": 1,
+-   "supportingEvidence": 1,
++   "supportingEvidence": 2,
+  }
+
+ ❯ tests/commercial-harness.test.ts:396:51
+    394|       reason: "ready"
+    395|     });
+    396|     expect(packet.retrievalContract.sourceCounts).toMatchObject({
+       |                                                   ^
+    397|       directEvidence: 1,
+    398|       sifCases: 1,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  tests/commercial-harness.test.ts > DB harness packet > builds the visible judgment summary from the DB harness packet before generic answer text
+AssertionError: expected '1) 하네스 판단\n- SIF 유사사례: 외벽 도장 중 추락 사례\…' to contain '직접 근거: KOSHA 외벽 도장 추락 예방 지침'
+
+- Expected
++ Received
+
+- 직접 근거: KOSHA 외벽 도장 추락 예방 지침
++ 1) 하네스 판단
++ - SIF 유사사례: 외벽 도장 중 추락 사례
++ - 작업·개선 이력: 추락: 작업 전 난간 보강 사진 확인
++
++ 2) 오늘 문서에 먼저 반영할 조치
++ - 작업발판·안전난간·개구부 상태 확인
++ - 안전대 체결 및 작업반경 출입통제
++ - 작업 전 난간 보강 사진 확인
++ - 추락
++
++ 3) 보강 필요
++ - 필수 3종 문서에 반영할 근거가 준비됐습니다.
+
+ ❯ tests/commercial-harness.test.ts:541:20
+    539|
+    540|     expect(answer).toContain("1) 하네스 판단");
+    541|     expect(answer).toContain("직접 근거: KOSHA 외벽 도장 추락 예방 지침");
+       |                    ^
+    542|     expect(answer).toContain("SIF 유사사례: 외벽 도장 중 추락 사례");
+    543|     expect(answer).toContain("작업 전 난간 보강 사진 확인");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  tests/commercial-harness.test.ts > runAsk DB harness mode > turns safety reference matches into deterministic risk rows before generic baseline rows
+AssertionError: expected '고소·비계 작업 중 작업발판·단부 방호 미확인으로 인한 추락 위험' to contain '작업발판·난간·아웃트리거'
+
+Expected: "작업발판·난간·아웃트리거"
+Received: "고소·비계 작업 중 작업발판·단부 방호 미확인으로 인한 추락 위험"
+
+ ❯ tests/commercial-harness.test.ts:748:28
+    746|     expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
+    747|     expect(rows[0].hazard).toContain("추락 위험");
+    748|     expect(rows[0].hazard).toContain("작업발판·난간·아웃트리거");
+       |                            ^
+    749|     expect(rows[0].hazard).toMatch(/미점검|미확인|미이행/);
+    750|     expect(rows[0].hazard).not.toContain("이동식 비계 작업발판·난간 점검 지침");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  tests/commercial-harness.test.ts > runAsk DB harness mode > aligns B-E-17 paint evidence to fire and explosion controls without changing raw provenance
+TypeError: .toMatch() expects to receive a string, but got undefined
+ ❯ tests/commercial-harness.test.ts:789:25
+    787|     const controls = `${row?.currentControls} ${row?.additionalControl…
+    788|
+    789|     expect(row?.hazard).toMatch(/도장.*화재·폭발|화재·폭발.*도장/);
+       |                         ^
+    790|     expect(controls).toMatch(/도료|유기용제|환기/);
+    791|     expect(controls).toMatch(/점화원|화기|방폭|MSDS|보호구|소화기/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  tests/commercial-harness.test.ts > runAsk DB harness mode > aligns B-E-20 electrostatic coating evidence to grounding and explosion controls
+TypeError: .toMatch() expects to receive a string, but got undefined
+ ❯ tests/commercial-harness.test.ts:818:25
+    816|     const controls = `${row?.currentControls} ${row?.additionalControl…
+    817|
+    818|     expect(row?.hazard).toMatch(/정전도장|정전기/);
+       |                         ^
+    819|     expect(row?.hazard).toMatch(/화재·폭발|폭발|화재/);
+    820|     expect(controls).toMatch(/접지|정전기 제거/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  tests/commercial-harness.test.ts > runAsk DB harness mode > keeps the canonical exterior-painting workpack free of machinery and electrostatic false positives
+AssertionError: expected '고소·비계 작업 중 작업발판·단부 방호 미확인으로 인한 추락 위험 …' to match /지게차.*동선|동선.*지게차/
+
+- Expected:
+/지게차.*동선|동선.*지게차/
+
++ Received:
+"고소·비계 작업 중 작업발판·단부 방호 미확인으로 인한 추락 위험 작업발판·안전난간·개구부 상태 확인 안전대 체결 및 작업반경 출입통제 DB 하네스 보조근거 sif-case 외벽 도장 중 이동식 비계 추락 사례 검색: rest
+강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험 작업 전 장비 상태, 작업구역, 보호구 착용 상태를 확인합니다. 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 산업안전보건법 KOSHA 위험성평가 문서팩 입력 조건
+오후 강풍 예보에 따른 작업환경 변화 위험 기상 변화와 작업장 바닥·시야·풍속 상태를 작업 전 확인합니다. 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기 기상청 현재·예보 KOSHA 위험성평가 작업중지 기준
+장비·도구 상태 불량 또는 방호조치 미흡으로 인한 사고 위험 사용 전 외관, 고정상태, 전원·잠금·방호장치 상태를 점검합니다. 이상 발견 시 해당 장비 사용을 중지하고 대체 장비 또는 보수 후 작업합니다. KOSHA 안전작업 지침 장비 점검표 사진·증빙 기록
+신규·외국인·소수 인원 작업에서 지시 미이해 또는 단독작업으로 인한 위험 작업 전 역할, 연락체계, 보호구 착용, 이해 여부를 확인합니다. 핵심 위험 문구를 쉬운 한국어와 필요 언어로 공유하고 이해하지 못하면 작업을 시작하지 않습니다. 안전보건교육 기록 외국인 근로자 안내문 TBM 기록"
+
+ ❯ tests/commercial-harness.test.ts:924:21
+    922|     expect(rowText).toMatch(/추락|비계/);
+    923|     expect(rowText).toMatch(/강풍|돌풍/);
+    924|     expect(rowText).toMatch(/지게차.*동선|동선.*지게차/);
+       |                     ^
+    925|     expect(rowText).toMatch(/도료|유기용제/);
+    926|     expect(rowText).not.toMatch(/기계 가동부|방호덮개|정비 중 불시기동/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  tests/commercial-harness.test.ts > runAsk DB harness mode > aligns G-67 exterior cleaning evidence and carries the same controls and refs into TBM links
+TypeError: .toMatch() expects to receive a string, but got undefined
+ ❯ tests/commercial-harness.test.ts:955:25
+    953|     const controls = `${row?.currentControls} ${row?.additionalControl…
+    954|
+    955|     expect(row?.hazard).toMatch(/외벽.*추락|추락.*외벽/);
+       |                         ^
+    956|     expect(row?.hazard).not.toContain("유해·위험요인 미확인");
+    957|     expect(controls).toMatch(/작업로프|안전대|구명줄|작업발판|난간|하부 출입 통제/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  tests/commercial-harness.test.ts > runAsk DB harness mode > retains confined-space pump and actual machinery controls while generic evidence stays review-required
+AssertionError: expected undefined to be 'needsReview' // Object.is equality
+
+- Expected:
+"needsReview"
+
++ Received:
+undefined
+
+ ❯ tests/commercial-harness.test.ts:1020:44
+    1018|     expect(`${machineryRow?.currentControls} ${machineryRow?.additiona…
+    1019|     expect(`${machineryRow?.currentControls} ${machineryRow?.additiona…
+    1020|     expect(genericRow?.verificationStatus).toBe("needsReview");
+       |                                            ^
+    1021|     expect(genericRow?.hazard).toMatch(/검토 필요|미확정/);
+    1022|     expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 22 passed (31)
+   Start at  12:38:23
+   Duration  7.72s (transform 815ms, setup 0ms, import 1.50s, tests 5.55s, environment 0ms)
+
+EXIT_CODE=1

@@ -1,0 +1,155 @@
+{
+  "authorityBase": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
+  "expectedRows": 4,
+  "actualRows": 4,
+  "rows": [
+    {
+      "label": "desktop-day",
+      "theme": "day",
+      "width": 1440,
+      "height": 900,
+      "review": {
+        "viewportWidth": 1440,
+        "scrollWidth": 1440,
+        "nestedScrollCount": 0,
+        "drawerHeight": 50
+      },
+      "editor": {
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "scrollWidth": 1440,
+        "bodyOffset": 73,
+        "overlapPolicy": {
+          "documentedExcludedPairs": [],
+          "ignoredNonPairs": [
+            "ancestor-descendant",
+            "closed-details-content",
+            "outside-current-viewport"
+          ]
+        },
+        "viewportGeometry": {
+          "clippedControls": [],
+          "fixedOrStickyElements": [],
+          "horizontalOverflow": 0,
+          "interactionOverlaps": [],
+          "nestedScrollContainers": [],
+          "overlayOverlaps": [],
+          "tooSmallTouchTargets": []
+        },
+        "sectionOverlaps": 0,
+        "sectionCount": 7
+      }
+    },
+    {
+      "label": "desktop-night",
+      "theme": "night",
+      "width": 1440,
+      "height": 900,
+      "review": {
+        "viewportWidth": 1440,
+        "scrollWidth": 1440,
+        "nestedScrollCount": 0,
+        "drawerHeight": 50
+      },
+      "editor": {
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "scrollWidth": 1440,
+        "bodyOffset": 93,
+        "overlapPolicy": {
+          "documentedExcludedPairs": [],
+          "ignoredNonPairs": [
+            "ancestor-descendant",
+            "closed-details-content",
+            "outside-current-viewport"
+          ]
+        },
+        "viewportGeometry": {
+          "clippedControls": [],
+          "fixedOrStickyElements": [],
+          "horizontalOverflow": 0,
+          "interactionOverlaps": [],
+          "nestedScrollContainers": [],
+          "overlayOverlaps": [],
+          "tooSmallTouchTargets": []
+        },
+        "sectionOverlaps": 0,
+        "sectionCount": 7
+      }
+    },
+    {
+      "label": "mobile-day",
+      "theme": "day",
+      "width": 391,
+      "height": 844,
+      "review": {
+        "viewportWidth": 391,
+        "scrollWidth": 391,
+        "nestedScrollCount": 0,
+        "drawerHeight": 50
+      },
+      "editor": {
+        "viewportWidth": 391,
+        "viewportHeight": 844,
+        "scrollWidth": 391,
+        "bodyOffset": 194,
+        "overlapPolicy": {
+          "documentedExcludedPairs": [],
+          "ignoredNonPairs": [
+            "ancestor-descendant",
+            "closed-details-content",
+            "outside-current-viewport"
+          ]
+        },
+        "viewportGeometry": {
+          "clippedControls": [],
+          "fixedOrStickyElements": [],
+          "horizontalOverflow": 0,
+          "interactionOverlaps": [],
+          "nestedScrollContainers": [],
+          "overlayOverlaps": [],
+          "tooSmallTouchTargets": []
+        },
+        "sectionOverlaps": 0,
+        "sectionCount": 7
+      }
+    },
+    {
+      "label": "mobile-night",
+      "theme": "night",
+      "width": 391,
+      "height": 844,
+      "review": {
+        "viewportWidth": 391,
+        "scrollWidth": 391,
+        "nestedScrollCount": 0,
+        "drawerHeight": 50
+      },
+      "editor": {
+        "viewportWidth": 391,
+        "viewportHeight": 844,
+        "scrollWidth": 391,
+        "bodyOffset": 198,
+        "overlapPolicy": {
+          "documentedExcludedPairs": [],
+          "ignoredNonPairs": [
+            "ancestor-descendant",
+            "closed-details-content",
+            "outside-current-viewport"
+          ]
+        },
+        "viewportGeometry": {
+          "clippedControls": [],
+          "fixedOrStickyElements": [],
+          "horizontalOverflow": 0,
+          "interactionOverlaps": [],
+          "nestedScrollContainers": [],
+          "overlayOverlaps": [],
+          "tooSmallTouchTargets": []
+        },
+        "sectionOverlaps": 0,
+        "sectionCount": 7
+      }
+    }
+  ]
+}

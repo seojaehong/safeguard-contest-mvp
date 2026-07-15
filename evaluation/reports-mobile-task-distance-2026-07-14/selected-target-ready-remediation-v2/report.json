@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 2,
+  "verdict": "HOLD_PENDING_FRESH_INDEPENDENT_REVIEW",
+  "selfApproval": false,
+  "branch": "fix/reports-mobile-task-distance-target-ready",
+  "selectedDirectory": "evaluation/reports-mobile-task-distance-2026-07-14/selected-target-ready-remediation-v2",
+  "generatedAt": "2026-07-13T23:00:47.160Z",
+  "lineage": {
+    "baseSha": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "previousProductLabelSha": "7e008f5dbd22b314f65b930a9f58e27348c6ecfa",
+    "rejectedEvidenceSha": "f3871131656d5cd1d6bae3cf3a37c2a88f017dfe",
+    "productSha": "c9d094b07bed2c9b48722ab9e3171da401d3ad04"
+  },
+  "rejectedEvidence": {
+    "status": "REJECTED_STALE",
+    "directory": "evaluation/reports-mobile-task-distance-2026-07-14/target-ready-f98-label-remediation",
+    "evidenceSha": "f3871131656d5cd1d6bae3cf3a37c2a88f017dfe",
+    "mobileViewport": "391x844",
+    "reasons": [
+      "Per-node inline font-size and line-height mutation did not test product-owned scaling.",
+      "The photo-pair fixture omitted the approval checkbox and measured its label substitute.",
+      "The mobile viewport was not the required 390x844 matrix."
+    ],
+    "historyDeleted": false,
+    "selectedForReview": false
+  },
+  "product": {
+    "commit": "c9d094b07bed2c9b48722ab9e3171da401d3ad04",
+    "changedFiles": [
+      "app/globals.css",
+      "components/ReportsDownloadCenter.tsx",
+      "lib/reporting-downloads.ts",
+      "tests/reporting-downloads.test.ts",
+      "tests/reports-design-remediation.test.ts",
+      "tests/reports-download-center.test.ts"
+    ],
+    "sourceIdentityAlgorithm": "git-head-runtime-contract-blob-oids-sha256-v2",
+    "sourceIdentity": "349abee01ef929bd567e2a2c061eb592d25705122a269aefd014e2d9eaf653bd",
+    "sourceFileHashes": "source-file-hashes.json"
+  },
+  "textScaling200": {
+    "mechanismOwner": "document.documentElement",
+    "executedMechanism": "font-size: 200%",
+    "rootFontSizeBeforePx": 16,
+    "rootFontSizeAfterPx": 32,
+    "browserUiZoomExecuted": false,
+    "claimLimit": "Chromium executed CSS root text scaling. Chrome UI page zoom was not executed or claimed.",
+    "perNodeInlineTypographyMutations": 0,
+    "scenarios": [
+      {
+        "theme": "day",
+        "viewport": "390x844",
+        "visibleTextRoles": 157,
+        "visiblePseudoElementRoles": 5,
+        "scaleFailures": 0,
+        "documentHeightBeforePx": 6724,
+        "documentHeightAfterPx": 11703
+      },
+      {
+        "theme": "night",
+        "viewport": "390x844",
+        "visibleTextRoles": 157,
+        "visiblePseudoElementRoles": 5,
+        "scaleFailures": 0,
+        "documentHeightBeforePx": 6724,
+        "documentHeightAfterPx": 11703
+      },
+      {
+        "theme": "day",
+        "viewport": "1440x1000",
+        "visibleTextRoles": 186,
+        "visiblePseudoElementRoles": 0,
+        "scaleFailures": 0,
+        "documentHeightBeforePx": 3277,
+        "documentHeightAfterPx": 5100
+      },
+      {
+        "theme": "night",
+        "viewport": "1440x1000",
+        "visibleTextRoles": 186,
+        "visiblePseudoElementRoles": 0,
+        "scaleFailures": 0,
+        "documentHeightBeforePx": 3277,
+        "documentHeightAfterPx": 5100
+      }
+    ],
+    "layoutFailures": {
+      "horizontalOverflow": 0,
+      "dimensionClipping": 0,
+      "ancestorClipping": 0,
+      "overlap": 0,
+      "nestedScroll": 0,
+      "fixedStickyOcclusion": 0,
+      "fixedStickyViewport": 0
+    },
+    "metrics": "reports-download-ready-task-distance-metrics.json"
+  },
+  "photoApprovalCheckbox": {
+    "requiredLabel": "개선 전/개선 후 사진 포함 승인",
+    "fixtureIncludesPhotoPair": true,
+    "measuredElement": "input[type=checkbox]",
+    "inputWidthPx": 44,
+    "inputHeightPx": 44,
+    "labelHitAreaMinimumHeightPx": 44,
+    "matrixMeasurements": 6,
+    "dayFocusColor": "rgb(245, 197, 24)",
+    "nightFocusColor": "rgb(108, 111, 247)",
+    "focusOutlineWidth": "2px",
+    "keyboardToggleSequence": [false, true, false]
+  },
+  "viewports": {
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "matrixRows": 14,
+      "screenshots": 12
+    },
+    "desktop": {
+      "width": 1440,
+      "height": 1000,
+      "matrixRows": 12,
+      "screenshots": 12
+    },
+    "screenshotCount": 24,
+    "screenshotWidthFailures": 0,
+    "dimensions": "screenshot-dimensions.json"
+  },
+  "interactiveMatrix": {
+    "rowCount": 26,
+    "targetMeasurements": 522,
+    "minimumWidthPx": 44,
+    "minimumHeightPx": 44,
+    "undersized": 0,
+    "horizontalOverflow": 0,
+    "overlap": 0,
+    "nestedScroll": 0,
+    "stateCounts": {
+      "default": 4,
+      "secondaryOpen": 4,
+      "previewOnly": 2,
+      "bothOpen": 4,
+      "loading": 4,
+      "empty": 4,
+      "serverError": 4
+    },
+    "toolsBeforePreview": true,
+    "metrics": "reports-interactive-target-matrix.json"
+  },
+  "exactPhraseBoundaries": {
+    "requiredPhrase": "개선 전/개선 후 사진 포함 승인",
+    "uiControl": "개선 전/개선 후 사진 포함 승인",
+    "downloadNote": "개선 전/개선 후 사진 포함 승인 항목만 개선 리포트와 운영 메모리에 포함합니다.",
+    "generatedReportNote": "개선 전/개선 후 사진 포함 승인 항목만 다운로드 산출물에 기록됩니다.",
+    "generatedMemoryNote": "개선 전/개선 후 사진 포함 승인 항목만 운영 메모리에 사진 파일명을 기록합니다.",
+    "executedOutputs": [
+      "buildReportMarkdown",
+      "buildReportJson",
+      "buildReportLearningMarkdown"
+    ],
+    "legacyBeforeAfterOutputMatches": 0
+  },
+  "failClosed": {
+    "coveredBoundaries": [
+      "401",
+      "404",
+      "malformed-200",
+      "500"
+    ],
+    "serverErrorBrowserRows": 4,
+    "disabledDownloadsPerServerErrorRow": 5,
+    "localDataLeakFailures": 0
+  },
+  "build": {
+    "command": "npm.cmd run build",
+    "sequentialRunsSelected": 1,
+    "concurrentBuildProcessCount": 0,
+    "exitCode": 0,
+    "nextStaticPageGeneration": "27/27",
+    "routeTableRowCount": 71,
+    "buildId": "bKwHGqPmOnYaPWSo_ljjG",
+    "buildIdentity": "da7e35a8e26762ca3402e03ccf63f37a74d010eb5a424ccef8e04a9dd2c846c8",
+    "buildFileCount": 432,
+    "manifest": "reports-build-manifest.json",
+    "rawLog": "production-build-sequential.log"
+  },
+  "verification": {
+    "tddRedLogs": [
+      "red-report-output-boundary.log",
+      "red-root-scaling-static.log",
+      "red-browser-root-scaling-checkbox.log"
+    ],
+    "focused": {
+      "files": 3,
+      "tests": 60,
+      "failures": 0,
+      "exitCode": 0,
+      "log": "focused-60.log"
+    },
+    "behaviorExport": {
+      "files": 2,
+      "tests": 49,
+      "failures": 0,
+      "exitCode": 0,
+      "log": "behavior-export-49.log"
+    },
+    "strictTypecheck": {
+      "exitCode": 0,
+      "log": "typecheck.log"
+    },
+    "productionBrowser": {
+      "tests": 11,
+      "failures": 0,
+      "exitCode": 0,
+      "log": "browser-production-evidence.log"
+    },
+    "staticDiff": {
+      "newImportant": 0,
+      "newHex": 0,
+      "newAnyToken": 0,
+      "new391Token": 0,
+      "diffCheckExitCode": 0,
+      "log": "static-diff-contract.log"
+    }
+  },
+  "integration": {
+    "productLabelCommitSha": "7e008f5dbd22b314f65b930a9f58e27348c6ecfa",
+    "productLabelCommitIntegrated": true,
+    "webLocalizationComparedSha": "517e2c383c66e990092242dbbe6c4c0b1dbe95b2",
+    "webLocalizationCommitIntegrated": false,
+    "f45TargetSha": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "editorSpecSha": "99b1af5385e0b5eaa9ff479761ecea944f0958ab",
+    "editorEvidenceSha": "b3762867d380f20faee2a83a17354dc61557ce12",
+    "mergeTreeCommand": "git merge-tree --write-tree b3762867d380f20faee2a83a17354dc61557ce12 c9d094b07bed2c9b48722ab9e3171da401d3ad04",
+    "mergeTreeExitCode": 0,
+    "mergeTreeSha": "70d3e483ccb8f10fa340a898a6579a9117f7cf26",
+    "integrationStrategy": "Regular merge later; no rebase, cherry-pick, or reviewed-history rewrite was performed.",
+    "log": "integration-merge-tree.log"
+  },
+  "artifacts": {
+    "hashedArtifactCountExcludingManifest": 46,
+    "manifest": "artifact-manifest.json",
+    "selectedOnly": true
+  }
+}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { getLatestDryrunReport, getLatestDryrunSnapshot } from "@/lib/dryrun-status";
+import { toDryrunPresentationSnapshot } from "@/lib/web-safe-presentation";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,12 @@ export default async function DryrunPage({
     throw new Error("SafeClaw deterministic frontend audit error boundary probe");
   }
 
-  const snapshot = getLatestDryrunSnapshot();
+  let snapshot: ReturnType<typeof toDryrunPresentationSnapshot> = null;
+  try {
+    snapshot = toDryrunPresentationSnapshot(getLatestDryrunSnapshot());
+  } catch (error: unknown) {
+    console.error("dry-run snapshot presentation read failed", error);
+  }
   const report = getLatestDryrunReport();
 
   return (
@@ -35,15 +41,15 @@ export default async function DryrunPage({
       {snapshot ? (
         <section className="safeclaw-module-panel dryrun-card">
           <div className="safeclaw-module-grid four dryrun-metrics">
-            <article><span>runId</span><strong>{snapshot.runId}</strong></article>
+            <article><span>실행 ID</span><strong>{snapshot.runId}</strong></article>
             <article><span>성공</span><strong>{snapshot.okCount}/{snapshot.totalRuns}</strong></article>
-            <article><span>평균 응답</span><strong>{snapshot.avgMs}ms</strong></article>
-            <article><span>P95</span><strong>{snapshot.p95Ms}ms</strong></article>
+            <article><span>평균 응답</span><strong>{snapshot.avgMs}밀리초</strong></article>
+            <article><span>P95</span><strong>{snapshot.p95Ms}밀리초</strong></article>
           </div>
-          <h2>{snapshot.qualityNote.replaceAll("드라이런", "점검")}</h2>
+          <h2>{snapshot.qualityNote}</h2>
           <p>
-            summary: <code>{snapshot.summaryPath}</code><br />
-            report: <code>{snapshot.reportPath}</code>
+            요약: <code>{snapshot.summaryPath}</code><br />
+            보고서: <code>{snapshot.reportPath}</code>
           </p>
         </section>
       ) : null}
@@ -56,10 +62,10 @@ export default async function DryrunPage({
               <article key={item.id} className="dryrun-case-item">
                 <div className="dryrun-case-head">
                   <strong>{item.label}</strong>
-                  <span className={item.ok ? 'status-pill ok' : 'status-pill warn'}>{item.ok ? 'ok' : 'check'}</span>
+                  <span className={item.ok ? 'status-pill ok' : 'status-pill warn'}>{item.ok ? '정상' : '확인 필요'}</span>
                 </div>
-                <p className="muted small">{item.answerPreview || 'preview unavailable'}</p>
-                <p className="muted tiny">elapsed {item.elapsedMs} ms · answer {item.answerLength} chars · citations {item.citations}</p>
+                <p className="muted small">{item.answerPreview || '미리보기 없음'}</p>
+                <p className="muted tiny">소요 {item.elapsedMs}밀리초 · 답변 {item.answerLength}자 · 인용 {item.citations}건</p>
               </article>
             ))}
           </div>

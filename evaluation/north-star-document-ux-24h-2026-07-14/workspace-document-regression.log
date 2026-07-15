@@ -1,0 +1,34 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workspace-layout-regression.test.ts -t generated document edit flow|preserves the edited active document|Night document editor
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+ ❯ tests/workspace-layout-regression.test.ts (24 tests | 1 failed | 21 skipped) 85576ms
+     × keeps the Night document editor readable, scroll-safe, and focused 34179ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/workspace-layout-regression.test.ts > workspace layout regression > keeps the Night document editor readable, scroll-safe, and focused
+TimeoutError: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('.document-preview-pane') to be visible
+
+ ❯ tests/workspace-layout-regression.test.ts:1866:50
+    1864|     await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-…
+    1865|     await page.getByRole("button", { name: /안전 문서 생성/ }).click();
+    1866|     await page.locator(".document-preview-pane").waitFor({ state: "vis…
+       |                                                  ^
+    1867|     expect.soft(await page.locator(".field-workspace").count()).toBe(0…
+    1868|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed | 21 skipped (24)
+   Start at  21:40:14
+   Duration  88.13s (transform 506ms, setup 0ms, import 1.41s, tests 85.58s, environment 0ms)
+
+EXPLICIT_EXIT_CODE=1

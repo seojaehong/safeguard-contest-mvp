@@ -118,7 +118,7 @@ describe("knowledge page decision layout", () => {
       throw new Error(`Refusing to remove unexpected test dist directory: ${absoluteDistDir}`);
     }
     fs.rmSync(absoluteDistDir, { recursive: true, force: true });
-  });
+  }, 30_000);
 
   it("uses semantic KOSHA row lists with optional detail disclosures", () => {
     const technicalList = sourceBetween(
@@ -226,6 +226,54 @@ describe("knowledge page decision layout", () => {
       expect(metrics.rowsContained, viewport.name).toBe(true);
       expect(metrics.summariesContained, viewport.name).toBe(true);
       expect(metrics.listContained, viewport.name).toBe(true);
+      await page.close();
+    }
+  }, 90_000);
+
+  it("renders governed promotion and authority lanes without mutation controls", async () => {
+    if (!browser) throw new Error("Browser was not started");
+
+    for (const viewport of [
+      { name: "desktop", width: 1440, height: 900 },
+      { name: "mobile", width: 390, height: 844 }
+    ] as const) {
+      const page = await browser.newPage({ viewport });
+      await page.goto(`${baseUrl}/knowledge?theme=day`, { waitUntil: "domcontentloaded" });
+      const flow = page.locator('[data-knowledge-governance-flow="true"]');
+      await flow.waitFor();
+
+      const metrics = await flow.evaluate((section) => {
+        const stages = [...section.querySelectorAll<HTMLElement>("[data-knowledge-stage]")];
+        const authorityRows = [...section.querySelectorAll<HTMLElement>("[data-knowledge-authority]")];
+
+        return {
+          stageIds: stages.map((stage) => stage.dataset.knowledgeStage),
+          authorityIds: authorityRows.map((row) => row.dataset.knowledgeAuthority),
+          sectionContained: section.scrollWidth <= section.clientWidth + 1,
+          stagesContained: stages.every((stage) => stage.scrollWidth <= stage.clientWidth + 1),
+          authorityRowsContained: authorityRows.every((row) => row.scrollWidth <= row.clientWidth + 1),
+          mutationControls: section.querySelectorAll("button, [data-publish-action]").length
+        };
+      });
+
+      expect(metrics.stageIds, viewport.name).toEqual([
+        "knowledge_event",
+        "candidate",
+        "human_review",
+        "published_ontology"
+      ]);
+      expect(metrics.authorityIds, viewport.name).toEqual([
+        "sif",
+        "kosha",
+        "law",
+        "organization_history",
+        "site_history",
+        "hermes_llm"
+      ]);
+      expect(metrics.sectionContained, viewport.name).toBe(true);
+      expect(metrics.stagesContained, viewport.name).toBe(true);
+      expect(metrics.authorityRowsContained, viewport.name).toBe(true);
+      expect(metrics.mutationControls, viewport.name).toBe(0);
       await page.close();
     }
   }, 90_000);

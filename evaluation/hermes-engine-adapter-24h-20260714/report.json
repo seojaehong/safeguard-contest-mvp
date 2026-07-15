@@ -1,0 +1,344 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-14T23:26:36.2939555+09:00",
+  "authoritativeBaseSha": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
+  "branch": "feat/hermes-engine-adapter-24h-20260714",
+  "scope": {
+    "productionFilesChanged": 10,
+    "testFilesChanged": 5,
+    "adrFilesChanged": 1,
+    "databaseFilesChanged": 0,
+    "schemaFilesChanged": 0,
+    "dataFilesChanged": 0
+  },
+  "tdd": {
+    "redCasesObserved": 20,
+    "greenCasesResolved": 20,
+    "cases": [
+      "explicit local Hermes mode gate",
+      "versioned authority metadata",
+      "MCP known/read-only tool classification",
+      "Hermes adapter module",
+      "production composition dependency gate",
+      "text-only planner event surface",
+      "arbitrary executor runtime rejection",
+      "scoped Harness composition",
+      "mandatory Evidence Harness preload order",
+      "Harness retrieval fail-closed planner gate",
+      "packet-attested planner text output",
+      "broker-authenticated site/org attribution",
+      "adapter-reserved Harness invocation",
+      "grounded non-empty SIF and KOSHA preload",
+      "required search lane success",
+      "current prompt question binding",
+      "immutable packet content digest",
+      "nested retrieval status validation",
+      "planner input packet resubmission rejection",
+      "recursive frozen output packet proof"
+    ]
+  },
+  "verification": {
+    "baseline": {
+      "status": "passed",
+      "testFilesPassed": 7,
+      "testsPassed": 98,
+      "testsFailed": 0,
+      "durationSeconds": 7.72
+    },
+    "focusedFinal": {
+      "status": "passed",
+      "testFilesPassed": 12,
+      "testsPassed": 199,
+      "testsFailed": 0,
+      "durationSeconds": 24.46,
+      "exitCode": 0
+    },
+    "typecheckFinal": {
+      "status": "passed",
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0
+    },
+    "fullSuite": {
+      "status": "failed",
+      "testFilesTotal": 141,
+      "testFilesPassed": 134,
+      "testFilesFailed": 2,
+      "testFilesSkipped": 5,
+      "testsTotal": 1427,
+      "testsPassed": 1418,
+      "testsFailed": 2,
+      "testsSkipped": 7,
+      "durationSeconds": 1230.81,
+      "failures": [
+        {
+          "test": "frontend-route-coverage source identity reconciliation",
+          "classification": "pre-existing authoritative evidence mismatch",
+          "checkedInIdentityPrefix": "cf3acf32",
+          "currentIdentityPrefix": "9eab4b0b"
+        },
+        {
+          "test": "documents editor save status announcement",
+          "classification": "browser timing failure",
+          "isolatedRerun": {
+            "status": "passed",
+            "testsPassed": 1,
+            "testsSkipped": 19,
+            "durationSeconds": 28.62
+          }
+        }
+      ]
+    },
+    "build": {
+      "status": "passed",
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "nextVersion": "15.5.20",
+      "compileSeconds": 22.4,
+      "staticPagesGenerated": 27,
+      "staticPagesExpected": 27
+    }
+  },
+  "remediation": {
+    "baseSha": "d8ffff586c14562afcde4cb9b75824c98fdbc0af",
+    "scope": {
+      "databaseFilesChanged": 0,
+      "migrationFilesChanged": 0,
+      "schemaFilesChanged": 0,
+      "dataFilesChanged": 0
+    },
+    "redGreen": [
+      {
+        "id": "arbitrary-executor-runtime-injection",
+        "red": {
+          "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts -t \"rejects an arbitrarily injected\" --maxWorkers=1 --no-file-parallelism",
+          "exitCode": 1,
+          "testsFailed": 1,
+          "testsSkipped": 7,
+          "observed": "forged executor was accepted"
+        },
+        "green": {
+          "coveredBy": "focusedFinal",
+          "runtimeAttestationError": "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+          "typeGuard": "SafeClawHermesComposition private symbol"
+        }
+      },
+      {
+        "id": "scoped-harness-composition",
+        "red": {
+          "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts -t \"routes the Evidence Harness\" --maxWorkers=1 --no-file-parallelism",
+          "exitCode": 1,
+          "testsFailed": 1,
+          "testsSkipped": 8,
+          "observed": {
+            "authSource": "none",
+            "siteId": null,
+            "orgId": null,
+            "tokenBound": false
+          }
+        },
+        "green": {
+          "coveredBy": "focusedFinal",
+          "registration": "registerScopedTool",
+          "scope": "tools:read",
+          "tool": "run_safeclaw_harness_agent",
+          "engine": "safeclaw-db-harness",
+          "llmRole": "naturalize_only",
+          "evidenceAuthority": "db_harness",
+          "siteId": "site-1",
+          "orgId": "org-1"
+        }
+      }
+    ],
+    "reproducibleCommands": [
+      {
+        "name": "focusedFinal",
+        "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/claw-chat-route.test.ts tests/openclaw-chat.test.ts tests/agent-loop.test.ts tests/mcp-auth.test.ts tests/mcp-route-scope-contract.test.ts tests/mcp-tools.test.ts tests/commercial-harness.test.ts --maxWorkers=1 --no-file-parallelism",
+        "exitCode": 0,
+        "testFilesPassed": 12,
+        "testsPassed": 199,
+        "testsFailed": 0,
+        "durationSeconds": 24.46,
+        "log": "evaluation/hermes-engine-adapter-24h-20260714/focused-final.txt"
+      },
+      {
+        "name": "typecheckFinal",
+        "command": "npm.cmd run typecheck",
+        "exitCode": 0,
+        "log": "evaluation/hermes-engine-adapter-24h-20260714/typecheck-final.txt"
+      },
+      {
+        "name": "buildFinal",
+        "command": "npm.cmd run build",
+        "exitCode": 0,
+        "compileSeconds": 22.4,
+        "staticPages": "27/27",
+        "log": "evaluation/hermes-engine-adapter-24h-20260714/build-final.txt"
+      }
+    ],
+    "trackedEvidence": [
+      "evaluation/hermes-engine-adapter-24h-20260714/audit.md",
+      "evaluation/hermes-engine-adapter-24h-20260714/report.json",
+      "evaluation/hermes-engine-adapter-24h-20260714/focused-final.txt",
+      "evaluation/hermes-engine-adapter-24h-20260714/typecheck-final.txt",
+      "evaluation/hermes-engine-adapter-24h-20260714/build-final.txt"
+    ],
+    "gitignoredOrUntrackedLogsReferenced": 0
+  },
+  "freshReviewRemediation": {
+    "baseSha": "cb11ad11d64ff4f4f32cb4cafabe003fa8f24ea7",
+    "redGreen": [
+      {
+        "id": "mandatory-harness-preload-order",
+        "red": "planner started without a preloaded evidence packet",
+        "green": "adapter invokes and validates run_safeclaw_harness_agent exactly before planner"
+      },
+      {
+        "id": "harness-retrieval-fail-closed",
+        "red": "raw retrieval error escaped",
+        "green": "ENGINE_EXECUTION_FAILED prevents planner invocation and output"
+      },
+      {
+        "id": "packet-attested-planner-output",
+        "red": "planner emitted text without packet proof",
+        "green": "missing packet proof fails before text emission; later review replaced identity comparison with content digest"
+      },
+      {
+        "id": "broker-auth-attribution",
+        "red": "broker scope was labeled db and token-bound",
+        "green": "source is broker with site/org scope, tokenBound false, and no user propagation claim"
+      },
+      {
+        "id": "adapter-reserved-harness",
+        "red": "planner could invoke the Harness a second time",
+        "green": "planner Harness intent fails with ENGINE_TOOL_FORBIDDEN before executor"
+      }
+    ],
+    "productionFileCountBasis": {
+      "diffBase": "01ba1c924e5ab19803bdb86527fce9eccfc1ab60",
+      "count": 10,
+      "excluded": ["docs", "evaluation", "tests"]
+    },
+    "authAttribution": {
+      "source": "broker",
+      "siteOrgAuthenticated": true,
+      "tokenBound": false,
+      "userIdentityPropagatedToMcpContext": false
+    }
+  },
+  "independentReviewRemediation": {
+    "baseSha": "b5ee3de6183ebef4cfa30316dbfdfc4b330592e5",
+    "reviewVerdict": "rejected",
+    "findingCounts": { "P2": 2 },
+    "observedRedCases": [
+      {
+        "id": "empty-shaped-packet",
+        "result": "1 failed, 14 skipped; planner was called"
+      },
+      {
+        "id": "required-search-ok-false",
+        "result": "1 failed, 15 skipped; planner was called"
+      },
+      {
+        "id": "preload-other-question",
+        "result": "1 failed, 16 skipped; planner was called"
+      },
+      {
+        "id": "same-object-mutation",
+        "result": "1 failed, 17 skipped; text was emitted"
+      },
+      {
+        "id": "partial-retrieval-status",
+        "result": "1 failed, 22 skipped; planner was called"
+      }
+    ],
+    "groundingGate": {
+      "requiredSearches": ["sif_cases", "supporting_evidence"],
+      "requiresSearchOk": true,
+      "requiresConfiguredRetrieval": true,
+      "requiresNonEmptySif": true,
+      "requiresVerifiedCurrentKosha": true,
+      "requiresReadyOntology": true,
+      "requiresCompleteDocumentCoverage": true,
+      "shapedNaturalizeOnlyPacketIsSufficient": false
+    },
+    "contentAttestation": {
+      "questionBinding": "packet.question equals input.prompt.trim()",
+      "prePlannerClone": "structuredClone",
+      "immutability": "recursive Object.freeze plus DeepReadonly type",
+      "digest": "SHA-256 of key-sorted canonical JSON",
+      "outputComparison": "attested content digest, not object identity"
+    },
+    "behaviorTests": {
+      "hermesFilePassed": 24,
+      "covers": [
+        "ok false",
+        "empty packet",
+        "top-level partial packet",
+        "partial retrieval status",
+        "unresolved KOSHA",
+        "preload other question",
+        "same-object mutation",
+        "output other question",
+        "same-content clone acceptance at this checkpoint; mutable clone gap was rejected by the next review",
+        "trimmed current prompt binding"
+      ]
+    },
+    "productionFileCount": 10,
+    "authoritativeIntegrationPerformed": false
+  },
+  "outputFreezeAndProductionPathReview": {
+    "baseSha": "2b169de7163673ada9d6750909551cae9e468a64",
+    "reviewVerdict": "rejected",
+    "findingCounts": { "P2": 1, "P3": 1 },
+    "observedRedCases": [
+      {
+        "id": "planner-input-packet-resubmission",
+        "result": "1 failed, 24 skipped; exact planner input object was accepted"
+      },
+      {
+        "id": "mutable-structured-clone",
+        "result": "1 failed, 24 skipped; mutable same-content clone was accepted"
+      }
+    ],
+    "outputPacketContract": {
+      "requiresSeparateObject": true,
+      "requiresRecursiveFreeze": true,
+      "rootOnlyFreezeAccepted": false,
+      "mutableStructuredCloneAccepted": false,
+      "acceptanceComparison": "SHA-256 attested content digest plus normalized question binding"
+    },
+    "adapterLevelProductionPath": {
+      "path": "executeClawTool -> buildHarnessAgentResult",
+      "mockedBoundary": "searchSafetyReferences only",
+      "buildHarnessAgentResultMocked": false,
+      "groundedProductionPacketPlannerCalls": 1,
+      "emptySearchPlannerCalls": 0,
+      "failedSearchPlannerCalls": 0
+    },
+    "behaviorTests": {
+      "hermesFilePassed": 30,
+      "covers": [
+        "exact planner input object rejection",
+        "mutable structured clone rejection",
+        "root-only frozen packet rejection",
+        "recursively frozen separate packet acceptance",
+        "nested evidence array freeze proof",
+        "real Harness builder grounded packet acceptance",
+        "real Harness builder empty search fail-closed",
+        "real Harness builder failed search fail-closed"
+      ]
+    },
+    "productionFileCount": 10,
+    "authoritativeIntegrationPerformed": false
+  },
+  "securityBoundary": {
+    "contractVersion": "engine-adapter/v1",
+    "systemOfRecord": "safeclaw-mcp-db-harness",
+    "toolExecutionBoundary": "safeclaw-mcp-interceptor",
+    "hermesCanMutate": false,
+    "hermesCanPublish": false,
+    "humanConfirmationRequired": true,
+    "customerTrafficServiceAuthImplemented": false,
+    "representativeLocalOAuthPocOnly": true
+  }
+}

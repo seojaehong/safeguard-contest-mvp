@@ -1,0 +1,37 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/knowledge-governance.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/northstar-24h-knowledge-round
+
+ ❯ tests/knowledge-governance.test.ts (6 tests | 1 failed) 21ms
+     × refuses to build a candidate without raw event provenance 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/knowledge-governance.test.ts > knowledge governance contract > refuses to build a candidate without raw event provenance
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/knowledge-governance.test.ts:139:9
+    137|       providerLabel: "Hermes",
+    138|       tenantContext
+    139|     })).toThrow("At least one raw event is required to build a knowled…
+       |         ^
+    140|   });
+    141|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  21:32:28
+   Duration  1.11s (transform 68ms, setup 0ms, import 107ms, tests 21ms, environment 0ms)
+EXIT_CODE: 1

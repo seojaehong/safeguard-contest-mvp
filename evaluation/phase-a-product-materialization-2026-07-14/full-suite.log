@@ -1,0 +1,96 @@
+
+> safeclaw@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/phase-a-product-materialization
+
+ ❯ tests/product-module-shell.test.ts (3 tests | 3 skipped) 6725ms
+ ❯ tests/knowledge-page-layout.test.ts (4 tests | 4 skipped) 61952ms
+ ❯ tests/frontend-route-coverage.test.ts (37 tests | 1 failed) 104374ms
+     × reconciles the complete route, theme, special-state, and generated-surface evidence 2297ms
+ ❯ tests/reports-download-center.test.ts (10 tests) 116497ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/knowledge-page-layout.test.ts > knowledge page decision layout
+Error: Timed out waiting for http://127.0.0.1:35548/knowledge?theme=day
+<w> [webpack.cache.PackFileCacheStrategy] Restoring failed for CopyFilePlugin|C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\phase-a-product-materialization\node_modules\next\dist\build\polyfills\polyfill-nomodule.js from pack: Error: invalid block type
+[Error: ENOENT: no such file or directory, open 'C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\phase-a-product-materialization\.next\prerender-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\phase-a-product-materialization\\.next\\prerender-manifest.json'
+}
+
+ ❯ waitForHttp tests/knowledge-page-layout.test.ts:47:9
+     45|     await new Promise((resolve) => setTimeout(resolve, 500));
+     46|   }
+     47|   throw new Error(`Timed out waiting for ${url}\n${serverOutput.slice(…
+       |         ^
+     48| }
+     49|
+ ❯ tests/knowledge-page-layout.test.ts:108:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/product-module-shell.test.ts > product module shell
+Error: Next dev exited while waiting for http://127.0.0.1:3231/home?theme=day.
+Next dev exit code=1 signal=null
+--- latest server output ---
+<w> [webpack.cache.PackFileCacheStrategy] Restoring failed for CopyFilePlugin|C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\phase-a-product-materialization\node_modules\next\dist\build\polyfills\polyfill-nomodule.js from pack: Error: invalid block type
+[Error: ENOENT: no such file or directory, open 'C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\phase-a-product-materialization\.next\prerender-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\phase-a-product-materialization\\.next\\prerender-manifest.json'
+}
+ ❯ assertServerAlive tests/product-module-shell.test.ts:64:25
+     62|
+     63| function assertServerAlive(stage: string): void {
+     64|   if (serverExit) throw new Error(`Next dev exited while ${stage}.\n${…
+       |                         ^
+     65| }
+     66|
+ ❯ waitForHttp tests/product-module-shell.test.ts:44:5
+ ❯ tests/product-module-shell.test.ts:567:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/reports-download-center.test.ts > reports download center remount behavior
+Error: Hook timed out in 10000ms.
+If this is a long-running hook, pass a timeout value as the last argument or configure it globally with "hookTimeout".
+ ❯ tests/reports-download-center.test.ts:197:3
+    195|   }, 90_000);
+    196|
+    197|   afterAll(async () => {
+       |   ^
+    198|     await browser?.close();
+    199|     await stopServer();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/frontend-route-coverage.test.ts > browser evidence reconciliation > reconciles the complete route, theme, special-state, and generated-surface evidence
+AssertionError: expected 'cf3acf32f236a5c6ecdca5cf0b244ef16bd36…' to be '9eab4b0b8b1a839804ba998df3ecaffbcd5f8…' // Object.is equality
+
+Expected: "9eab4b0b8b1a839804ba998df3ecaffbcd5f82551c8b2a0d5fe1c3903e0c795b"
+Received: "cf3acf32f236a5c6ecdca5cf0b244ef16bd36c1ff8ecfa6b063e522a2ed723ac"
+
+ ❯ tests/frontend-route-coverage.test.ts:693:35
+    691|     expect(report.sourceSha).toMatch(/^[0-9a-f]{40}$/u);
+    692|     expect(report.sourceIdentity).toMatch(/^[0-9a-f]{64}$/u);
+    693|     expect(report.sourceIdentity).toBe(currentSource.sourceIdentity);
+       |                                   ^
+    694|     expect(report.sourceSha).toBe(staticAudit.sourceSha);
+    695|     expect(report.sourceIdentity).toBe(staticAudit.sourceIdentity);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  4 failed | 134 passed | 5 skipped (143)
+      Tests  1 failed | 1420 passed | 14 skipped (1435)
+   Start at  21:53:43
+   Duration  213.11s (transform 122.58s, setup 0ms, import 317.67s, tests 1363.71s, environment 46ms)

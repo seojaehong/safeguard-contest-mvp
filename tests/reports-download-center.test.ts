@@ -166,6 +166,17 @@ async function expectBlockedServerState(page: Page, workpackId: string): Promise
   }
 }
 
+async function openReportsDisclosure(page: Page, name: string): Promise<void> {
+  const summary = page.locator("summary").filter({ hasText: name });
+  await summary.waitFor({ state: "visible" });
+  expect((await summary.textContent())?.trim()).toBe(name);
+  const details = summary.locator("..");
+  if (!(await details.evaluate((element) => (element as HTMLDetailsElement).open))) {
+    await summary.click();
+  }
+  expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+}
+
 describe("reports download center remount behavior", () => {
   beforeAll(async () => {
     server = spawn(process.execPath, [resolveNextBin(), "dev", "--port", String(port)], {
@@ -211,6 +222,10 @@ describe("reports download center remount behavior", () => {
 
   it("resets exact-pair photo approval after a real page reload", async () => {
     if (!browser) throw new Error("Browser was not started");
+    const approvalAccessibleName = "개선 전/개선 후 사진 포함 승인";
+    const downloadApprovalNote = "개선 전/개선 후 사진 포함 승인 항목만 개선 리포트와 운영 메모리에 포함합니다.";
+    const reportApprovalNote = "개선 전/개선 후 사진 포함 승인 항목만 다운로드 산출물에 기록됩니다.";
+    const legacyPhotoTerm = new RegExp(["Before", "After"].join("\\s*/\\s*"), "iu");
     const now = new Date().toISOString();
     const generatedAt = "2026-07-10T07:45:00.000Z";
     const workpack = {
@@ -243,6 +258,8 @@ describe("reports download center remount behavior", () => {
 
     try {
       await page.goto(`${baseUrl}/reports`, { waitUntil: "networkidle" });
+      await openReportsDisclosure(page, "추가 리포트 정보");
+      await openReportsDisclosure(page, "리포트 본문 미리보기");
       const headerProvenance = page.getByLabel("리포트 헤더 데이터 출처");
       const stickyProvenance = page.getByLabel("고정 리포트 데이터 출처");
       expect(await headerProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
@@ -251,12 +268,20 @@ describe("reports download center remount behavior", () => {
       expect(await stickyProvenance.locator(`time[datetime="${generatedAt}"]`).count()).toBe(1);
 
       await page.evaluate(() => window.scrollTo(0, 900));
+      await stickyProvenance.scrollIntoViewIfNeeded();
       const stickyBox = await stickyProvenance.boundingBox();
       if (!stickyBox) throw new Error("Sticky report provenance was not rendered");
       expect(stickyBox.y).toBeGreaterThanOrEqual(0);
       expect(stickyBox.y).toBeLessThan(720);
 
-      const approval = page.getByLabel("Before/After 사진 포함 승인");
+      const downloadBoundary = page.getByLabel("리포트 다운로드");
+      expect(await downloadBoundary.getByText(downloadApprovalNote, { exact: true }).count()).toBe(1);
+      expect(await downloadBoundary.getByText(legacyPhotoTerm).count()).toBe(0);
+      const reportDocument = page.getByLabel("작업문서형 리포트");
+      expect(await reportDocument.getByText(reportApprovalNote, { exact: true }).count()).toBe(1);
+      expect(await reportDocument.getByText(legacyPhotoTerm).count()).toBe(0);
+
+      const approval = page.getByLabel(approvalAccessibleName);
       await approval.waitFor({ state: "visible" });
       expect(await approval.isChecked()).toBe(false);
 
@@ -264,7 +289,8 @@ describe("reports download center remount behavior", () => {
       expect(await approval.isChecked()).toBe(true);
 
       await page.reload({ waitUntil: "networkidle" });
-      const remountedApproval = page.getByLabel("Before/After 사진 포함 승인");
+      await openReportsDisclosure(page, "리포트 본문 미리보기");
+      const remountedApproval = page.getByLabel(approvalAccessibleName);
       await remountedApproval.waitFor({ state: "visible" });
       expect(await remountedApproval.isChecked()).toBe(false);
     } finally {
@@ -321,6 +347,8 @@ describe("reports download center remount behavior", () => {
 
     try {
       await page.goto(`${baseUrl}/reports?workpackId=server-report-1`, { waitUntil: "networkidle" });
+      await openReportsDisclosure(page, "추가 리포트 정보");
+      await openReportsDisclosure(page, "리포트 본문 미리보기");
 
       const headerProvenance = page.getByLabel("리포트 헤더 데이터 출처");
       const stickyProvenance = page.getByLabel("고정 리포트 데이터 출처");
@@ -352,6 +380,8 @@ describe("reports download center remount behavior", () => {
       expect(await switchButton.count()).toBe(1);
 
       await switchButton.click();
+      await openReportsDisclosure(page, "추가 리포트 정보");
+      await openReportsDisclosure(page, "리포트 본문 미리보기");
       const browserProvenance = page.getByLabel("고정 리포트 데이터 출처");
       await browserProvenance.waitFor({ state: "visible" });
       expect(await browserProvenance.getByText("브라우저 최근 작업팩", { exact: true }).count()).toBe(1);
@@ -484,6 +514,8 @@ describe("reports download center remount behavior", () => {
       await previewButton.waitFor({ state: "visible" });
       expect(await previewButton.isVisible()).toBe(true);
       await previewButton.click();
+      await openReportsDisclosure(page, "추가 리포트 정보");
+      await openReportsDisclosure(page, "리포트 본문 미리보기");
 
       expect(await page.getByText("샘플 리포트", { exact: true }).isVisible()).toBe(true);
       expect(await page.getByLabel("고정 리포트 데이터 출처").getByText("샘플 데이터", { exact: true }).count()).toBe(1);

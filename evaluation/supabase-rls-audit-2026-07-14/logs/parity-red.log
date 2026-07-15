@@ -1,0 +1,11 @@
+parityCheckStartedAt=2026-07-14T00:30:51.4269415Z
+check=staticEvidenceStatus-exact-finding-total-parity
+findingCounts=P0:0,P1:3,P2:4,P3:3
+findingPrioritySum=10
+findingArrayCount=10
+findingDeclaredTotal=10
+expectedStaticEvidenceStatus=complete-at-source-sha-with-10-open-findings
+actualStaticEvidenceStatus=complete-at-source-sha-with-nine-open-findings
+FAIL staticEvidenceStatus does not exactly encode the machine-readable finding total
+parityFailures=1
+parityCheckFinishedAt=2026-07-14T00:30:51.5247880Z

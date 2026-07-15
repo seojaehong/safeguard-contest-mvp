@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "verdict": "HOLD_PENDING_FRESH_REVIEW",
+  "branch": "fix/reports-mobile-task-distance-target-ready",
+  "productCandidateSha": "7e008f5dbd22b314f65b930a9f58e27348c6ecfa",
+  "buildId": "pNU-_XAjWCrBdfZybiYJA",
+  "generatedAt": "2026-07-13T20:48:35.475Z",
+  "measurementCommandIdentity": "SAFECLAW_HARNESS_MODE=prod SAFECLAW_REPORTS_TASK_DISTANCE_EVIDENCE=1 npm.cmd test -- tests/reports-design-remediation.test.ts --pool=forks --maxWorkers=1 (target-ready final evidence confirmation; log=evaluation/reports-mobile-task-distance-2026-07-14/target-ready-f98-label-remediation/reports-design-remediation-final.log)",
+  "sourceIdentity": {
+    "authoritativeBaseSha": "f98ae7d16746dfe9fedbeea892e5af7ebb56f9a5",
+    "productSourceSha": "7e008f5dbd22b314f65b930a9f58e27348c6ecfa",
+    "productSourceIdentity": "d6b2e5cb8926b58192c6f081777afcd99c9bb666860b577c8f61f8cdda287ce6",
+    "buildIdentity": "419ff641bb46d32712b82381ad1f602d54c6cd6aa0b7863a6367602d8bb13f8d",
+    "buildFileCount": 432
+  },
+  "mappedProductSeries": [
+    {
+      "originalSha": "afde1935d0664d8eafa4bfbd74a1bc1abcd5b3d5",
+      "mappedSha": "c2d13b224b3d06cf5ff8cade8f14e9ff5ac8b45",
+      "subject": "fix(reports): prioritize mobile download workbench"
+    },
+    {
+      "originalSha": "361cf2192cdd7bff37e9c1a5e7a60d9fafba0c41",
+      "mappedSha": "72b6bb4650913e0316cbca644d05502250b4690c",
+      "subject": "fix(reports): enforce reflow and touch targets"
+    },
+    {
+      "originalSha": "df509734d01c603f0a567ca2a48ab59c297232a3",
+      "mappedSha": "016a8480080febf369083bf714d351c8c0908ee9",
+      "subject": "fix(reports): harden compact shell reflow"
+    },
+    {
+      "originalSha": "0ee7e773f8c79b754d91c6670048ce86786f2f8a",
+      "mappedSha": "ce1cacc144de11f625d0db765e359ae68eac0753",
+      "subject": "fix(reports): enforce two-axis touch targets"
+    },
+    {
+      "originalSha": null,
+      "mappedSha": "7e008f5dbd22b314f65b930a9f58e27348c6ecfa",
+      "subject": "fix(reports): localize photo approval wording"
+    }
+  ],
+  "excludedEvidenceCommits": [
+    "429f0ff",
+    "b7adabf",
+    "6f7ee77",
+    "1ad9037"
+  ],
+  "labelContract": {
+    "requiredExactWording": "개선 전/개선 후 사진 포함 승인",
+    "actualUiRemountBoundaryCovered": true,
+    "downloadOutputBoundaryCovered": true,
+    "reportDocumentOutputBoundaryCovered": true,
+    "candidateSourceAndOutputResidualMatches": 0,
+    "scopeNote": "Repository-wide search still finds pre-existing English slash terminology in unrelated workspace, settings, API, and shared operation modules. No such match exists in the Reports-owned source files, Reports route entry bundle, or tested report/download outputs."
+  },
+  "tdd": {
+    "red": [
+      {
+        "contract": "actual download note and approval control retain the exact Korean wording after remount",
+        "failed": 1,
+        "skipped": 9,
+        "cause": "the required rendered download note was absent"
+      },
+      {
+        "contract": "Reports component source exposes the required wording and excludes the legacy approval token",
+        "failed": 1,
+        "skipped": 10,
+        "cause": "the required source literal was absent"
+      },
+      {
+        "contract": "generated report-document output uses the exact Korean wording",
+        "failed": 1,
+        "skipped": 9,
+        "cause": "the required report output note was absent"
+      }
+    ],
+    "green": {
+      "focusedReportsThreeFiles": "60/60",
+      "behaviorAndExport": "49/49",
+      "focusedProductionRecordedPass1": "11/11",
+      "focusedProductionFinalConfirmation": "11/11",
+      "strictTypecheck": "PASS",
+      "productionBuild": "27/27"
+    }
+  },
+  "browserMatrix": {
+    "rowCount": 26,
+    "stateCounts": {
+      "reportDefault": 4,
+      "additionalInfoOpen": 4,
+      "previewOnlyMobile": 2,
+      "bothDisclosuresOpen": 4,
+      "loading": 4,
+      "empty": 4,
+      "serverError500": 4
+    },
+    "interactiveTargetMeasurements": 522,
+    "minimumInteractiveWidth": 44,
+    "minimumInteractiveHeight": 44,
+    "undersizedTargets": 0,
+    "horizontalOverflowRows": 0,
+    "overlapRows": 0,
+    "nestedScrollRows": 0,
+    "serverErrorDisabledDownloadsPerRow": 5
+  },
+  "normalTaskDistance": [
+    {
+      "theme": "day",
+      "viewport": "391x844",
+      "rootHeight": 1689,
+      "firstEnabledDownloadTop": 936,
+      "horizontalOverflow": 0,
+      "toolsBeforePreviewInDom": true
+    },
+    {
+      "theme": "night",
+      "viewport": "391x844",
+      "rootHeight": 1689,
+      "firstEnabledDownloadTop": 936,
+      "horizontalOverflow": 0,
+      "toolsBeforePreviewInDom": true
+    },
+    {
+      "theme": "day",
+      "viewport": "1440x1000",
+      "rootHeight": 1652,
+      "firstEnabledDownloadTop": 1080,
+      "horizontalOverflow": 0,
+      "toolsBeforePreviewInDom": true
+    },
+    {
+      "theme": "night",
+      "viewport": "1440x1000",
+      "rootHeight": 1652,
+      "firstEnabledDownloadTop": 1080,
+      "horizontalOverflow": 0,
+      "toolsBeforePreviewInDom": true
+    }
+  ],
+  "textReflow200": {
+    "mechanism": "freeze every visible full-shell text/control computed font-size and line-height, then apply exactly doubled inline pixel values at deviceScaleFactor 1",
+    "baselineImmutable": true,
+    "representativeFontSize": "14px -> 28px",
+    "representativeLineHeight": "22.4px -> 44.8px",
+    "representativeHeight": "22.39px -> 44.8px",
+    "fontGrowthRatio": 2,
+    "lineHeightGrowthRatio": 2,
+    "mobileDocumentHeight": 11109,
+    "desktopDocumentHeight": 4884,
+    "wrappingOrHeightChanged": true,
+    "horizontalOverflow": 0,
+    "dimensionClippingFailures": 0,
+    "ancestorClippingFailures": 0,
+    "overlapFailures": 0,
+    "nestedScrollFailures": 0,
+    "fixedStickyFailures": 0,
+    "mobileBrandClientScroll": "115/115 x 40/40",
+    "desktopBrandClientScroll": "95/95 x 80/80"
+  },
+  "failClosed": {
+    "behaviorBoundaries": [
+      "401",
+      "404",
+      "malformed-200"
+    ],
+    "browserBoundary": "500",
+    "exportsPerBlockedState": 5,
+    "localDataLeakCount": 0,
+    "explicitLocalSwitchPreserved": true
+  },
+  "staticContracts": {
+    "importantDeclarations": 0,
+    "deadReportHeadSelectors": 0,
+    "newHexColors": 0,
+    "newAnyTypes": 0,
+    "controlRadius": "var(--radius-control) / 8px",
+    "localizationCommitIntegrated": false
+  },
+  "localizationMergeRequirement": "ReportsDownloadCenter and Reports test hunks overlap with later Web localization work. Preserve the exact label 개선 전/개선 후 사진 포함 승인 during that integration; no Web localization commit was cherry-picked here.",
+  "executionNotes": {
+    "authoritativeBuildsOnFinalProduct": 1,
+    "concurrentBuildProcesses": 0,
+    "supersededPreflightBuildsDiscarded": 1,
+    "supersededPreflightReason": "a visual check found a remaining report-output label before the final product commit was amended; its build and evidence directory were deleted and are not selected",
+    "identityPreflightFailure": "one browser invocation stopped before browser setup because a PowerShell timestamp was not canonical millisecond ISO; the timestamp was corrected and the final logged run passed 11/11",
+    "finalBrowserLog": "reports-design-remediation-final.log"
+  },
+  "freshness": {
+    "selectedDirectory": "evaluation/reports-mobile-task-distance-2026-07-14/target-ready-f98-label-remediation",
+    "staleDirectoriesSelected": false,
+    "old1adEvidenceSelected": false,
+    "old6f7EvidenceProhibited": true,
+    "artifactManifest": "artifact-manifest.json"
+  }
+}

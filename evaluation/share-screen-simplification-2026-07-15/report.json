@@ -1,0 +1,63 @@
+{
+  "baseSha": "46f97c50268946893677f823761b28c1f2266f6d",
+  "route": "/workspace",
+  "focusedTests": {
+    "files": 4,
+    "tests": 44,
+    "failures": 0
+  },
+  "typecheck": "pass",
+  "build": {
+    "status": "pass",
+    "generatedPages": 28
+  },
+  "desktop": {
+    "viewport": { "width": 1280, "height": 720 },
+    "rootWidth": 529.6,
+    "rootHeight": 1336.95,
+    "horizontalOverflow": 0,
+    "primaryActionHeight": 44
+  },
+  "mobile": {
+    "viewport": { "width": 390, "height": 844 },
+    "rootWidth": 321.6,
+    "rootHeight": 1451.45,
+    "scrollWidth": 375,
+    "clientWidth": 375,
+    "horizontalOverflow": 0,
+    "overlapCount": 0,
+    "primaryActionHeight": 44
+  },
+  "defaultSurface": [
+    "targets",
+    "channels",
+    "language-preview",
+    "message-preview",
+    "primary-send-action"
+  ],
+  "production": {
+    "integratedProductCommit": "143140f",
+    "url": "https://www.safeclaw.kr/workspace?theme=day",
+    "verified": true,
+    "shareRootCount": 1,
+    "targetSectionCount": 1,
+    "channelSectionCount": 1,
+    "languageSectionCount": 1,
+    "previewCount": 1,
+    "primaryActionCount": 1,
+    "removedSurfaceCounts": {
+      "noteEditor": 0,
+      "historyLedger": 0,
+      "copyAction": 0,
+      "rawMessageDisclosure": 0
+    },
+    "horizontalOverflow": 0
+  },
+  "postReviewSafety": {
+    "synchronousDuplicateActivationGuard": true,
+    "sessionHistoryLoadingFailClosed": true,
+    "sessionHistoryErrorFailClosed": true,
+    "focusedTests": 44,
+    "typecheck": "pass"
+  }
+}

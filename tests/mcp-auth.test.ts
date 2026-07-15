@@ -10,6 +10,8 @@ import {
   decideAuthContext,
   hashToken,
   isMcpToolAllowed,
+  isMcpToolName,
+  isReadOnlyMcpTool,
   matchesLegacyToken,
   normalizeScopes,
   parseLegacyTokens,
@@ -118,6 +120,14 @@ describe("MCP tool scope enforcement", () => {
       "query_safety_knowledge",
       "qa_review_docpack",
     ]);
+  });
+
+  it("classifies untrusted engine tool names against the MCP contract", () => {
+    expect(isMcpToolName("run_safeclaw_harness_agent")).toBe(true);
+    expect(isMcpToolName("unknown_engine_tool")).toBe(false);
+    expect(isReadOnlyMcpTool("query_safety_knowledge")).toBe(true);
+    expect(isReadOnlyMcpTool("generate_reviewed_safety_docpack")).toBe(false);
+    expect(isReadOnlyMcpTool("generate_safety_docpack")).toBe(false);
   });
 });
 

@@ -5,6 +5,7 @@ import { assembleGraph, type OntologyGraph } from "@/lib/ontology/graph-store";
 import {
   classifyControlObligation,
   confirmNaturalizedEvidenceChain,
+  isEvidenceChainTaskBoundToQuestion,
   naturalizeEvidenceChain,
   recordNaturalizedEvidenceChainQuality,
   resolveEvidenceChain,
@@ -64,6 +65,125 @@ const publishedSif: ControlEvidenceSource = {
 };
 
 describe("Phase A canonical evidence-chain registry", () => {
+  test("binds provenance only to one explicit canonical or alias task in the question", () => {
+    expect(
+      isEvidenceChainTaskBoundToQuestion(
+        "높은 곳 작업",
+        "외벽 고소 작업을 위한 문서팩",
+        "work-at-height-fall",
+      ),
+    ).toBe(true);
+    expect(
+      isEvidenceChainTaskBoundToQuestion(
+        "고소작업",
+        "전기 설비 작업을 위한 문서팩",
+        "work-at-height-fall",
+      ),
+    ).toBe(false);
+    expect(
+      isEvidenceChainTaskBoundToQuestion(
+        "높은 곳 작업",
+        "높은 곳 작업과 전기 작업을 함께 수행",
+        "work-at-height-fall",
+      ),
+    ).toBe(false);
+    expect(
+      isEvidenceChainTaskBoundToQuestion(
+        "일반 작업",
+        "추락 위험이 있는 작업을 위한 문서팩",
+        "work-at-height-fall",
+      ),
+    ).toBe(false);
+  });
+
+  test.each([
+    {
+      task: "고소작업",
+      question: "고소작업은 하지 않고 배관 작업 수행",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "고소작업 여부가 아직 미확정",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "전기작업",
+      question: "비전기작업 문서팩",
+      chainId: "electrical-work-electrocution" as const,
+    },
+    {
+      task: "고소작업",
+      question: "고소작업 수행 여부 미확정",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "전기작업",
+      question: "전기작업을 수행하지 않음",
+      chainId: "electrical-work-electrocution" as const,
+    },
+    {
+      task: "고소작업",
+      question: "미확정인 고소작업을 수행합니다",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "고소작업을 진행할지 검토",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "고소작업은 아직 결정되지 않음",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "하지 않는 고소작업을 위한 문서팩",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "취소된 고소작업을 수행합니다",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "고소작업",
+      question: "고소작업을 수행할 예정으로 작업계획서와 장비 상태 및 인원 배치를 모두 확인했지만 최종적으로 하지 않음",
+      chainId: "work-at-height-fall" as const,
+    },
+  ])("rejects negated, uncertain, and lexical-collision intent: '$question'", ({
+    task,
+    question,
+    chainId,
+  }) => {
+    expect(isEvidenceChainTaskBoundToQuestion(task, question, chainId)).toBe(false);
+  });
+
+  test.each([
+    {
+      task: "고소 작업대 작업",
+      question: "외벽 고소 작업대 작업을 위한 문서팩",
+      chainId: "work-at-height-fall" as const,
+    },
+    {
+      task: "차량계 기계 인접작업",
+      question: "차량계 기계 인접작업을 수행합니다",
+      chainId: "vehicle-machinery-entrapment" as const,
+    },
+    {
+      task: "전기 설비 작업",
+      question: "전기 설비 작업을 실시합니다",
+      chainId: "electrical-work-electrocution" as const,
+    },
+  ])("preserves registered alias and positive action intent: '$question'", ({
+    task,
+    question,
+    chainId,
+  }) => {
+    expect(isEvidenceChainTaskBoundToQuestion(task, question, chainId)).toBe(true);
+  });
+
   test("preserves the existing seven node kinds and seven edge relations", () => {
     expect(NODE_KINDS).toHaveLength(7);
     expect(EDGE_RELS).toHaveLength(7);

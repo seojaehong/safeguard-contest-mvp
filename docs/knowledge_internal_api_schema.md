@@ -97,11 +97,29 @@ Request:
 ```json
 {
   "question": "서울 성수동 외벽 도장, 이동식 비계, 강풍",
-  "rawEvents": [],
+  "tenantContext": {
+    "organizationId": "organization-id",
+    "siteId": "site-id"
+  },
+  "rawEvents": [
+    {
+      "source": "lawgo",
+      "sourceId": "law-42",
+      "capturedAt": "2026-07-14T10:00:00.000Z",
+      "title": "산업안전보건법 현행 조문",
+      "payload": { "article": "42" },
+      "relatedHazardIds": ["hazard_scaffold_fall"],
+      "reflectedDocuments": ["위험성평가표"]
+    }
+  ],
   "limit": 4,
   "generate": true
 }
 ```
+
+`rawEvents`는 하나 이상의 유효한 이벤트가 있어야 한다. 누락, 배열이 아닌
+값, 빈 배열은 후보와 AI 호출 없이 `400`으로 종료한다. `tenantContext`의
+organization/site 식별자도 모두 필요하다.
 
 Response:
 
@@ -109,8 +127,8 @@ Response:
 {
   "ok": true,
   "configured": true,
-  "storageMode": "persistent",
-  "savedRunId": "uuid",
+  "storageMode": "stateless_candidate",
+  "savedRunId": null,
   "aiReady": true,
   "generated": {
     "configured": true,
@@ -122,15 +140,51 @@ Response:
     "question": "서울 성수동 외벽 도장, 이동식 비계, 강풍",
     "matchedHazards": [],
     "templates": [],
-    "rawEvents": [],
+    "eventCount": 1,
     "aiInstruction": "Use the seed safety knowledge...",
     "storagePolicy": {
       "mode": "stateless",
       "message": "영구 누적은 Supabase migration 승인 후 활성화합니다."
     }
+  },
+  "candidate": {
+    "contractVersion": "knowledge-candidate.v2",
+    "stage": "candidate",
+    "reviewStatus": "pending_review",
+    "publicationState": "unpublished",
+    "authority": "none",
+    "tenantContext": {
+      "organizationId": "organization-id",
+      "siteId": "site-id"
+    },
+    "dbMutationAllowed": false,
+    "dbMutationPerformed": false,
+    "publishAllowed": false,
+    "provenance": [
+      {
+        "source": "lawgo",
+        "eventReference": {
+          "sourceId": "law-42",
+          "capturedAt": "2026-07-14T10:00:00.000Z",
+          "digestAlgorithm": "sha256",
+          "digest": "64-character hexadecimal digest"
+        },
+        "payloadEvidence": {
+          "digestAlgorithm": "sha256",
+          "digest": "64-character hexadecimal digest",
+          "reviewMetadata": { "article": "42" }
+        }
+      }
+    ]
   }
 }
 ```
+
+후보 provenance는 원본 payload 전체 대신 SHA-256 digest, 크기/키 수, 최대
+8개 allowlist metadata(문자열 최대 96자)만 반환한다. 원본 title, URL,
+민감 payload 값은 candidate response와 LLM prompt에 포함하지 않는다. POST
+handler의 mutation gateway는 후보 생성 경로에서 호출되지 않으며 publish
+endpoint도 추가하지 않는다.
 
 ## 원본 이벤트 스키마
 

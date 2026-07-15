@@ -926,13 +926,19 @@ describe("browser evidence reconciliation", () => {
     expect(sharePanel).not.toContain("? shareRecords.message");
     expect(sharePanel).not.toContain("${shareRecords.message}");
 
-    expect(commandCenter).toContain('document.getElementById("dispatch")?.scrollIntoView');
-    expect(commandCenter).toContain('className="share-live-workspace"');
+    expect(commandCenter).not.toContain('document.getElementById("dispatch")?.scrollIntoView');
+    expect(commandCenter).not.toContain('className="share-live-workspace"');
+    expect(commandCenter).toContain('className="workspace-step-page workspace-share-page"');
+    expect(commandCenter).toContain('surface="share"');
     expect(commandCenter).toContain("<FieldOperationsWorkspace");
-    expect(commandCenter).toContain("문서팩 전송하기");
+    expect(commandCenter).not.toContain("문서팩을 현장에 전송하세요");
     expect(commandCenter).not.toContain("onClick={() => focusWorkpackEditor(selectedOutputItem.key)}\n                disabled={!data || !workpackReadiness?.canShare}");
     expect(sharePanel).toContain('id="dispatch"');
-    expect(sharePanel).toContain("로그인하면 문서팩과 전송·열람 이력이 서버에 안전하게 저장됩니다.");
+    expect(sharePanel).toContain('href="/login"');
+    expect(sharePanel).toContain("오늘 대상");
+    expect(sharePanel).toContain("언어 미리보기");
+    expect(sharePanel).toContain("메시지 미리보기");
+    expect(sharePanel).not.toContain("로그인하면 문서팩과 전송·열람 이력이 서버에 안전하게 저장됩니다.");
   });
 });
 

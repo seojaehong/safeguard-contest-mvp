@@ -10,12 +10,16 @@ DB/schema/data mutations: **none**
 
 **Status: RED for remediation planning; live enforcement unverified.**
 
-The migrations define 22 application tables and touch one Supabase-managed table. All 13 tenant-scoped application tables enable RLS, and their owner policies provide source-level CRUD policy coverage after a role has the corresponding object command privilege. Policy coverage is not proof that a role can reach a command, and it is not sufficient to close the tenant boundary:
+**Launch readiness: false.** The machine-readable contract is the top-level JSON boolean `"launchReadiness": false`. This launch gate is explicit and separate from the RED remediation status; neither is a claim that live enforcement was tested.
+
+The migrations define 22 application tables and touch one Supabase-managed table. This review also inventories `storage.objects` as an additional managed tenant-data boundary because application routes write tenant photos there. All 13 tenant-scoped application tables enable RLS, and their owner policies provide source-level CRUD policy coverage after a role has the corresponding object command privilege. Policy coverage is not proof that a role can reach a command, and it is not sufficient to close the tenant boundary:
 
 - `query_logs` and legacy/unclassified `documents` are in the exposed `public` schema with no RLS declaration.
 - `dispatch_logs` intentionally accepts `organization_id is null`; if a role has the corresponding SELECT/INSERT/UPDATE/DELETE privilege, the `FOR ALL` policy does not reject null-organization rows.
-- Child policies check only the row's `organization_id`. They do not prove that related `site_id`, `workpack_id`, `worker_id`, `daily_entry_id`, `share_session_id`, or `improvement_id` belongs to the same organization.
+- Child policies check only the row's `organization_id`. They do not prove that related `site_id`, `workpack_id`, `worker_id`, `daily_entry_id`, each UUID in `raw_event_ids`, `share_session_id`, or `improvement_id` belongs to the same organization.
+- `created_by` and `approved_by` are actor-attribution fields, not tenant-ownership predicates. Their identity integrity is not enforced by the owner policies or an `auth.users` FK.
 - User-facing server routes use a service-role client. RLS is bypassed, so route predicates and relational integrity are the effective boundary.
+- The private `safeclaw-improvement-photos` bucket and service-role upload/remove route are source-known, but live `storage.objects` policies, GRANTs, object ownership, and path-level cross-tenant isolation are unverified.
 - The reproducible live probe made 44 HEAD requests and failed closed with 30 HTTP 200, 4 HTTP 206, and 10 HTTP 404 responses. No authenticated cross-tenant result is marked PASS.
 
 ## Scope and method
@@ -44,12 +48,14 @@ No migration was applied. No insert, update, delete, upload, token issuance, sig
 | Migration lines | 760 |
 | Application tables created | 22 |
 | Supabase-managed tables touched | 1 |
-| Total inventoried table objects | 23 |
+| Additional managed tenant-data boundaries inventoried | 1 |
+| Total inventoried table objects/boundaries | 24 |
 | Tenant-scoped application tables | 13 |
 | Public/catalog application tables | 5 |
 | Operator-only application tables | 3 |
 | Legacy/unclassified application tables | 1 |
 | Operator/platform managed tables | 1 |
+| Managed tenant-data boundaries | 1 |
 | Application tables with RLS enabled | 20 |
 | Application tables without migration RLS | 2 |
 | Application tables with FORCE RLS | 0 |
@@ -61,8 +67,10 @@ No migration was applied. No insert, update, delete, upload, token issuance, sig
 | `SECURITY DEFINER` functions | 0 |
 | Triggers | 0 |
 | Explicit GRANT/REVOKE statements | 0 |
+| Cross-tenant negative cases inventoried | 14 |
+| Cross-tenant runtime cases executed | 0 |
 
-`storage.buckets` is counted once as a managed operator object because migration 010 inserts a private bucket; it is not counted among the 22 application tables.
+`storage.buckets` is counted once as a managed operator object because migration 010 inserts a private bucket. `storage.objects` is counted separately as an application-used managed tenant-data boundary, not as a migration-created or migration-touched table. Neither is counted among the 22 application tables.
 
 ## Full table inventory
 
@@ -91,6 +99,7 @@ No migration was applied. No insert, update, delete, upload, token issuance, sig
 | `workpack_improvement_photos` | tenant | yes | no | owner via `organization_id`, `FOR ALL` | `supabase/migrations/010_commercial_operations.sql:71-86`, `:158`, `:212-227` |
 | `safety_reference_embeddings` | operator-only | yes | no | SELECT policy is `using (false)`; no write policy | `supabase/migrations/010_commercial_operations.sql:88-96`, `:159`, `:229-231` |
 | `storage.buckets` | operator/platform managed | managed outside these migrations | not assessed | private bucket insert only; no `storage.objects` policy in this migration set | `supabase/migrations/010_commercial_operations.sql:7-15` |
+| `storage.objects` | managed tenant-data boundary | live unverified | not assessed | private bucket objects use an organization-prefixed application path and service-role writes; live policies, GRANTs, ownership, and path isolation not inspected | `lib/workpack-commercial.ts:411-433`, `app/api/workpacks/[id]/improvements/route.ts:86-143`, `:146-173`, `:212-250` |
 
 ## Tenant CRUD and predicate matrix
 
@@ -112,23 +121,25 @@ If the role first has the corresponding object command privilege, `FOR ALL` supp
 | `workpack_improvements` | covered | covered | covered | covered | same owner `EXISTS` in both | row `organization_id -> organizations.owner_id` | commercial and MCP routes; `app/api/workpacks/[id]/improvements/route.ts:187-197`, `app/api/mcp/[transport]/route.ts:178-189` |
 | `workpack_improvement_photos` | covered | covered | covered | covered | same owner `EXISTS` in both | row `organization_id -> organizations.owner_id` | service-role upload and metadata insert; `app/api/workpacks/[id]/improvements/route.ts:86-143` |
 
-### Relationship consistency not enforced by RLS
+### Relationship and actor-identity consistency not enforced by RLS
 
-The owner policies validate only the row's `organization_id`. The following nullable/foreign identifiers can point outside that organization because there are no composite tenant FKs or equivalent `WITH CHECK` predicates:
+The owner policies validate only the row's `organization_id`. The tenant-relationship identifiers below can point outside that organization because there are no composite tenant FKs or equivalent `WITH CHECK` predicates. `knowledge_regeneration_runs.raw_event_ids` is a UUID array with no FK, so each referenced event's existence and organization are also unverified.
 
-| Table | Unverified related tenant identifiers |
-|---|---|
-| `workers` | `site_id` |
-| `workpacks` | `site_id` |
-| `education_records` | `site_id`, `workpack_id`, `worker_id` |
-| `dispatch_logs` | `site_id`, `workpack_id` |
-| `daily_entries` | `site_id`, `workpack_id` |
-| `knowledge_events` | `site_id`, `workpack_id`, `daily_entry_id` |
-| `knowledge_regeneration_runs` | `site_id`, `workpack_id`, `daily_entry_id` |
-| `workpack_share_sessions` | `site_id`, `workpack_id` |
-| `workpack_read_confirmations` | `site_id`, `workpack_id`, `share_session_id`, `worker_id` |
-| `workpack_improvements` | `site_id`, `workpack_id` |
-| `workpack_improvement_photos` | `site_id`, `workpack_id`, `improvement_id` |
+`organizations.owner_id` is different: it is the auth identity used by policy as the tenant-ownership anchor. By contrast, the nullable `created_by`/`approved_by` fields below are audit attribution only. They do not grant ownership, are not checked against `auth.uid()` or organization membership by RLS, and have no FK to `auth.users` in this migration set.
+
+| Table | Unverified tenant-relationship identifiers | Unverified actor-attribution identifiers |
+|---|---|---|
+| `workers` | `site_id` | none |
+| `workpacks` | `site_id` | `created_by` |
+| `education_records` | `site_id`, `workpack_id`, `worker_id` | none |
+| `dispatch_logs` | `site_id`, `workpack_id` | none |
+| `daily_entries` | `site_id`, `workpack_id` | `created_by` |
+| `knowledge_events` | `site_id`, `workpack_id`, `daily_entry_id` | `created_by` |
+| `knowledge_regeneration_runs` | `site_id`, `workpack_id`, `daily_entry_id`, each UUID in `raw_event_ids` | `created_by` |
+| `workpack_share_sessions` | `site_id`, `workpack_id` | `created_by` |
+| `workpack_read_confirmations` | `site_id`, `workpack_id`, `share_session_id`, `worker_id` | none |
+| `workpack_improvements` | `site_id`, `workpack_id` | `created_by`, `approved_by` |
+| `workpack_improvement_photos` | `site_id`, `workpack_id`, `improvement_id` | `created_by` |
 
 ## Operator, ownership, function, and FORCE concerns
 
@@ -137,7 +148,7 @@ The owner policies validate only the row's `organization_id`. The following null
 - **MCP operator table:** `mcp_tokens` intentionally has RLS with no policy (`supabase/migrations/007_mcp_tokens.sql:32-33`). Runtime reads and `last_used_at` writes use service role (`lib/mcp-auth.ts:217-238`). User-facing token routes add manual owner filters (`app/api/mcp-tokens/route.ts:98-151`, `:214-253`; `[id]/route.ts:67-89`).
 - **FORCE RLS:** none of the 20 RLS-enabled application tables uses `FORCE ROW LEVEL SECURITY`. This leaves table-owner SQL paths outside policy enforcement. FORCE would not remove service-role/BYPASSRLS exposure, so it is defense in depth rather than the primary service-layer fix.
 - **Function posture:** `match_safety_reference_embeddings` is SQL, stable, and not `SECURITY DEFINER` (`supabase/migrations/010_commercial_operations.sql:109-150`). The migration does not schema-qualify its relations, pin `search_path`, or revoke default function execution even though the comment says service-role only (`:152-153`). RLS `using (false)` on the embedding table currently blocks non-bypass rows.
-- **Storage:** the bucket is private (`supabase/migrations/010_commercial_operations.sql:7-15`), and uploads/removals use the service-role client (`app/api/workpacks/[id]/improvements/route.ts:108-113`, `:164-166`). No client `storage.objects` policy is defined in this migration set.
+- **Storage:** the bucket is private (`supabase/migrations/010_commercial_operations.sql:7-15`), uploads/removals use the service-role client (`app/api/workpacks/[id]/improvements/route.ts:108-113`, `:164-166`), and the application path starts with `organizations/{organizationId}` (`lib/workpack-commercial.ts:411-433`). A private bucket blocks public URLs but does not by itself prove tenant isolation. No `storage.objects` policy is defined in this migration set, and live policies, GRANTs, ownership, direct-client reachability, list/read behavior, and path-prefix enforcement were not inspected.
 
 ## Findings
 
@@ -145,7 +156,7 @@ The owner policies validate only the row's `organization_id`. The following null
 
 No P0 finding was proven from source or live evidence.
 
-### P1-01: Two exposed-schema tables have no RLS declaration
+### P1-01: Two legacy exposed-schema tables have no RLS declaration
 
 **Evidence:** `query_logs` and `documents` are created in `public` without a following RLS statement (`supabase/migrations/001_init.sql:1-17`). The complete migration policy scan contains no policy, GRANT, or REVOKE for either table.
 
@@ -161,7 +172,7 @@ No P0 finding was proven from source or live evidence.
 
 **Bounded remediation proposal:** make tenant dispatch rows require `organization_id`; move true operator/global events to a separate operator-only table or an explicit service-only policy; scope tenant policies to `authenticated`; split write/delete rights according to product need.
 
-### P1-03: Tenant policies do not enforce same-organization relationships, and service-role child queries trust them
+### P1-03: Tenant policies do not enforce same-organization relationships and service-role child queries trust them
 
 **Proven schema/API evidence:** child tables carry independent `organization_id` plus related IDs (`supabase/migrations/002_workspace_productization.sql:21-90`, `supabase/migrations/003_knowledge_runtime.sql:1-63`, `supabase/migrations/010_commercial_operations.sql:21-86`), while every owner `WITH CHECK` only resolves the row's `organization_id` (`supabase/migrations/002_workspace_productization.sql:132-200`, `supabase/migrations/003_knowledge_runtime.sql:77-126`, `supabase/migrations/010_commercial_operations.sql:161-227`). The schema therefore allows an `organization_id`/related-ID mismatch when ordinary FK existence checks pass. The education and dispatch APIs accept request-supplied `workpackId` and worker-map IDs without specific ownership validation of those related rows (`app/api/education-records/route.ts:31-56`, `app/api/dispatch-logs/route.ts:192-208`). Commercial reads validate the parent workpack, then query children by `workpack_id` only (`app/api/workpacks/[id]/share-sessions/route.ts:34-55`, `app/api/workpacks/[id]/read-confirmations/route.ts:32-42`, `app/api/workpacks/[id]/improvements/route.ts:187-197`).
 
@@ -177,7 +188,7 @@ No P0 finding was proven from source or live evidence.
 
 **Bounded remediation proposal:** split policies by command. Keep only required SELECT/INSERT; restrict UPDATE to explicit state transitions/columns and DELETE to a documented retention workflow or operator role.
 
-### P2-02: Ingestion-run operational metadata is public
+### P2-02: Ingestion-run operational metadata has an unrestricted SELECT row policy
 
 **Evidence:** `safety_reference_ingestion_runs` includes `report_path` and arbitrary `details` (`supabase/migrations/004_safety_reference_catalog.sql:34-45`) and has a SELECT row policy `using (true)` (`supabase/migrations/004_safety_reference_catalog.sql:70-72`). The policy does not itself grant SELECT.
 
@@ -219,25 +230,33 @@ No P0 finding was proven from source or live evidence.
 
 ## Cross-tenant negative-test matrix
 
-No tenant A/B auth tokens or credentials are present. Every runtime cell is therefore **NOT EXECUTED**, never PASS. Each case first requires the corresponding object command privilege; the matrix records the expected row-policy denial only after that reachability condition.
+No tenant A/B auth tokens or credentials are present. All 14 cases have `executionStatus = not_executed`; none is PASS or an executed denial. The four command columns record only the expected outcome (`deny`) after the corresponding object command privilege makes that command reachable.
 
-| Table | Tenant-B SELECT by tenant A | Tenant-B INSERT | Tenant-B UPDATE | Tenant-B DELETE | Additional negative case | Runtime status |
-|---|---|---|---|---|---|---|
-| `organizations` | deny | owner spoof deny | deny | deny | change `owner_id` to B | not executed: no A/B auth fixtures |
-| `sites` | deny | foreign `organization_id` deny | deny | deny | owned org plus foreign relation not applicable | not executed: no A/B auth fixtures |
-| `workers` | deny | foreign `organization_id` deny | deny | deny | owned org plus B `site_id` must deny | not executed: no A/B auth fixtures |
-| `workpacks` | deny | foreign `organization_id` deny | deny | deny | owned org plus B `site_id` must deny | not executed: no A/B auth fixtures |
-| `education_records` | deny | foreign `organization_id` deny | deny | deny | owned org plus B workpack/worker must deny | not executed: no A/B auth fixtures |
-| `dispatch_logs` | deny | foreign `organization_id` deny | deny | deny | null `organization_id` must deny; source policy currently allows | not executed: no A/B auth fixtures |
-| `daily_entries` | deny | foreign `organization_id` deny | deny | deny | owned org plus B site/workpack must deny | not executed: no A/B auth fixtures |
-| `knowledge_events` | deny | foreign `organization_id` deny | deny | deny | owned org plus B daily/workpack must deny | not executed: no A/B auth fixtures |
-| `knowledge_regeneration_runs` | deny | foreign `organization_id` deny | deny | deny | owned org plus B daily/workpack must deny | not executed: no A/B auth fixtures |
-| `workpack_share_sessions` | deny | foreign `organization_id` deny | deny | deny | owned org plus B workpack must deny | not executed: no A/B auth fixtures |
-| `workpack_read_confirmations` | deny | foreign `organization_id` deny | deny | deny | owned org plus B share/worker must deny | not executed: no A/B auth fixtures |
-| `workpack_improvements` | deny | foreign `organization_id` deny | deny | deny | owned org plus B workpack must deny | not executed: no A/B auth fixtures |
-| `workpack_improvement_photos` | deny | foreign `organization_id` deny | deny | deny | owned org plus B improvement/workpack must deny | not executed: no A/B auth fixtures |
+| Table/boundary | Expected SELECT | Expected INSERT | Expected UPDATE | Expected DELETE | Tenant-relationship negative case | Actor-identity negative case | Execution status |
+|---|---|---|---|---|---|---|---|
+| `organizations` | deny | deny | deny | deny | change `owner_id` to B must deny | not separate: `owner_id` is the ownership/auth predicate, not audit attribution | `not_executed`: no A/B auth fixtures |
+| `sites` | deny | deny | deny | deny | no secondary tenant relation | none | `not_executed`: no A/B auth fixtures |
+| `workers` | deny | deny | deny | deny | owned org plus B `site_id` must deny | none | `not_executed`: no A/B auth fixtures |
+| `workpacks` | deny | deny | deny | deny | owned org plus B `site_id` must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `education_records` | deny | deny | deny | deny | owned org plus B workpack/worker must deny | none | `not_executed`: no A/B auth fixtures |
+| `dispatch_logs` | deny | deny | deny | deny | null `organization_id` must deny; source policy currently allows | none | `not_executed`: no A/B auth fixtures |
+| `daily_entries` | deny | deny | deny | deny | owned org plus B site/workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `knowledge_events` | deny | deny | deny | deny | owned org plus B daily/workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `knowledge_regeneration_runs` | deny | deny | deny | deny | if `raw_event_ids` are trusted event references, owned org plus B daily/workpack or any B/nonexistent array element must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `workpack_share_sessions` | deny | deny | deny | deny | owned org plus B workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `workpack_read_confirmations` | deny | deny | deny | deny | owned org plus B share/worker must deny | none | `not_executed`: no A/B auth fixtures |
+| `workpack_improvements` | deny | deny | deny | deny | owned org plus B workpack must deny | B `created_by`/`approved_by` must reject if attribution is trusted; source policy does not check them | `not_executed`: no A/B auth fixtures |
+| `workpack_improvement_photos` | deny | deny | deny | deny | owned org plus B improvement/workpack must deny | B `created_by` must reject if attribution is trusted; source policy does not check it | `not_executed`: no A/B auth fixtures |
+| `storage.objects` | deny | deny | deny | deny | A token must not list/read/write/delete B's object or spoof `organizations/{B}`; metadata/object tenant IDs must agree | `unverified/not_assessed`: managed object row actor identity and object ownership were not inspected in the live catalog | `not_executed`: no A/B auth fixtures; Storage API and live catalog not probed |
 
 Operator-table negative cases are separate: after corresponding command reachability, `mcp_tokens` and `safety_reference_embeddings` policies should expose no rows to non-bypass roles and reject writes. The HEAD probe observed one service-role `mcp_tokens` row and zero anon-visible rows. `safety_reference_embeddings` returned 404 for both credentials. No mutation privilege or authenticated-user case was tested.
+
+### Managed storage boundary plan
+
+- **Known from source:** `safeclaw-improvement-photos` is configured private; the route uses the service-role client for upload/remove; generated paths are namespaced under `organizations/{organizationId}/workpacks/{workpackId}/improvements/{improvementId}`.
+- **Explicitly unverified:** live `storage.objects` RLS enablement and policy definitions, direct/inherited/default GRANTs, owner/role bypass state, direct authenticated list/download/upload/update/delete reachability, signed URL exposure, and enforcement that path tenant IDs match metadata and the caller's tenant.
+- **Approval-gated object test plan:** on a non-production target, provision isolated A/B users and objects; test own-tenant success separately from A-to-B list/read/download/upload/overwrite/move/delete and forged B-prefix attempts; verify both Storage API responses and resulting `storage.objects` rows; then test the service-role route with foreign workpack/improvement identifiers. Every cross-tenant operation must deny without revealing object existence.
+- **Conditional remediation plan:** if direct client Storage access is not intended, explicitly revoke/deny it and keep the service route as the boundary. If it is intended, add explicit bucket-scoped `storage.objects` policies and GRANTs whose path predicate derives an organization the caller owns. In either design, re-own organization/workpack/improvement identifiers before service-role operations and enforce metadata-to-object bucket/path consistency. No storage remediation is claimed applied by this audit.
 
 ## Live read-only probe
 
@@ -266,12 +285,14 @@ Operator-table negative cases are separate: after corresponding command reachabi
 
 ## Tests and typecheck
 
+- Final report launch-gate validator: passed JSON parse; verified top-level `launchReadiness` property presence, boolean type, and `false` value; compared all 9 finding titles character-for-character between Markdown and JSON; preserved inventory 24, negative cases 14, executed cases 0, expected denies 56, `storage.objects` actor status `unverified/not_assessed`, and RED finding counts P0/P1/P2/P3 = 0/3/4/2; `git diff --check` passed with only `report.md` and `report.json` changed.
 - Probe syntax: `node --check` passed.
 - Probe fail-closed test: with all Supabase variables blank and `--no-env-file`, exit 2, `blocked`, zero requests, and no secret fields stored.
 - Probe live run: exit 1 after all 44 HEAD requests, with a redacted result written.
 - Strict typecheck: not run because no application TypeScript or test file changed; the evaluation `.mjs` probe is validated by Node syntax and behavior tests.
 - Authenticated cross-tenant tests: not executed because two isolated auth fixtures are unavailable.
 - Mutating CRUD probes: not executed by design.
+- Managed Storage object tests: not executed; the live catalog and Storage API were not probed, and no upload or object mutation was performed.
 
 ## Remediation order
 
@@ -279,4 +300,5 @@ Operator-table negative cases are separate: after corresponding command reachabi
 2. Approval-gated migration plus route patch: enforce same-tenant relationships and add organization/site predicates to service-role child queries.
 3. Split history-table CRUD policies and remove public ingestion-run details.
 4. Constrain `mcp_tokens`; make role targets, FORCE decisions, function grants, and search path explicit.
-5. Provision two disposable auth fixtures and rerun the full negative matrix against a non-production target before claiming live isolation.
+5. Decide the intended `storage.objects` access model, inspect live policies/GRANTs, and apply the approval-gated object-level test/remediation plan.
+6. Provision two disposable auth fixtures and rerun the full negative matrix against a non-production target before claiming live isolation.

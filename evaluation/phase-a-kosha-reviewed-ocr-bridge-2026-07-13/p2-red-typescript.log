@@ -1,0 +1,106 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/kosha-guide-corpus-audit.test.ts
+
+
+ RUN  v4.1.10 <user-root>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
+
+ ❯ tests/kosha-guide-corpus-audit.test.ts (91 tests | 5 failed) 47597ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a source identity whose hash depends on a stale numeric JSON spelling
+AssertionError: expected [Function] to throw an error
+- Expected:
+null
++ Received:
+undefined
+ ❯ tests/kosha-guide-corpus-audit.test.ts:573:67
+    571|     });
+    572|
+    573|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    574|       "kosha-bridge-manifest-source-identity-mismatch"
+    575|     );
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE production/local bridge > rejects a generation policy hash whose identity uses stale numeric JSON spelling
+AssertionError: expected [Function] to throw an error
+- Expected:
+null
++ Received:
+undefined
+ ❯ tests/kosha-guide-corpus-audit.test.ts:601:67
+    599|     });
+    600|
+    601|     expect(() => buildKoshaProductionLocalBridgeCandidate(input)).toTh…
+       |                                                                   ^
+    602|       "kosha-bridge-manifest-generation-policy-hash-mismatch"
+    603|     );
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE read-only runner contract > rejects a tampered snapshot before checking missing production credentials
+AssertionError: expected 'Error: Supabase read credentials are …' to contain 'kosha-bridge-items-hash-mismatch'
+- Expected
++ Received
+- kosha-bridge-items-hash-mismatch
++ Error: Supabase read credentials are unavailable
++     at fetchProductionBridgeRows (<repo-url>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge/scripts/audit_kosha_guides.mjs:477:46)
++     at runProductionLocalBridgeAudit (<repo-url>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge/scripts/audit_kosha_guides.mjs:580:28)
++     at <repo-url>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge/scripts/audit_kosha_guides.mjs:1266:11
++
+ ❯ tests/kosha-guide-corpus-audit.test.ts:905:22
+    903|
+    904|       expect(result.status).not.toBe(0);
+    905|       expect(output).toContain("kosha-bridge-items-hash-mismatch");
+       |                      ^
+    906|       expect(output).not.toContain("supabase-read-credentials-unavaila…
+    907|       expect(readFileSync(join(outputRoot, "audit.log"), "utf8")).not.…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE read-only runner contract > checks a valid snapshot before reporting the missing credential blocker
+     × rejects a source identity whose hash depends on a stale numeric JSON spelling 23ms
+     × rejects a generation policy hash whose identity uses stale numeric JSON spelling 2ms
+     × rejects a tampered snapshot before checking missing production credentials 13896ms
+     × checks a valid snapshot before reporting the missing credential blocker 12930ms
+     × keeps every task evaluation log free of absolute paths and raw secrets 5ms
+AssertionError: expected 'Error: Supabase read credentials are …' to contain 'supabase-read-credentials-unavailable'
+- Expected
++ Received
+- supabase-read-credentials-unavailable
++ Error: Supabase read credentials are unavailable
++     at fetchProductionBridgeRows (<repo-url>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge/scripts/audit_kosha_guides.mjs:477:46)
++     at runProductionLocalBridgeAudit (<repo-url>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge/scripts/audit_kosha_guides.mjs:580:28)
++     at <repo-url>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge/scripts/audit_kosha_guides.mjs:1266:11
++
+ ❯ tests/kosha-guide-corpus-audit.test.ts:947:22
+    945|
+    946|       expect(result.status).not.toBe(0);
+    947|       expect(output).toContain("supabase-read-credentials-unavailable"…
+       |                      ^
+    948|       expect(output).not.toContain("kosha-bridge-items-hash-mismatch");
+    949|       expect(auditLog).not.toContain("snapshotIntegrityVerifiedBeforeF…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+ FAIL  tests/kosha-guide-corpus-audit.test.ts > KOSHA GUIDE read-only runner contract > keeps every task evaluation log free of absolute paths and raw secrets
+AssertionError: <user-root>\dev\safeguard-contest-mvp\.worktrees\phase-a-kosha-reviewed-ocr-bridge\evaluation\phase-a-kosha-reviewed-ocr-bridge-2026-07-13\final-ontology-regression.log: expected '\r\n> safeclaw@0.1.0 test\r\n> vitest…' not to match /[…/](?:Users|Documents and Settings)[\\
+- Expected:
+/[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/]/u
++ Received:
+"
+> safeclaw@0.1.0 test
+> vitest run --run tests/ontology-evidence-chains.test.ts
+ RUN  v4.1.10 <user-root>/dev/safeguard-contest-mvp/.worktrees/phase-a-kosha-reviewed-ocr-bridge
+ Test Files  1 passed (1)
+      Tests  45 passed (45)
+   Start at  23:13:30
+   Duration  1.77s (transform 472ms, setup 0ms, import 639ms, tests 66ms, environment 0ms)
+elapsed_seconds=7.376
+"
+ ❯ tests/kosha-guide-corpus-audit.test.ts:1160:33
+    1158|     for (const path of logPaths) {
+    1159|       const content = readFileSync(path, "utf8");
+    1160|       expect(content, path).not.toMatch(/[A-Za-z]:[\\/](?:Users|Docume…
+       |                                 ^
+    1161|       expect(content, path).not.toContain("<file-url>/");
+    1162|       expect(content, path).not.toMatch(/\b(?:sb_secret_|sk-(?:proj-)?…
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 86 passed (91)
+   Start at  23:47:42
+   Duration  49.48s (transform 458ms, setup 0ms, import 556ms, tests 47.60s, environment 0ms)

@@ -1,0 +1,7 @@
+CONTRACT=shared html/body 15px; no persistent split; exactly one documentElement typography assignment; exact baseline*2 px
+{"commit":"f3871131656d5cd1d6bae3cf3a37c2a88f017dfe","functionName":"applyDeterministicTextReflow","htmlComputedContract":true,"persistentSplit":false,"typographyAssignments":["snapshot.element.style.fontSize =","snapshot.element.style.lineHeight ="],"rootOnly":false,"exactDouble":false,"accepted":false}
+{"commit":"c9d094b07bed2c9b48722ab9e3171da401d3ad04","functionName":"applyRootTextScaling","htmlComputedContract":false,"persistentSplit":true,"typographyAssignments":["document.documentElement.style.fontSize ="],"rootOnly":true,"exactDouble":false,"accepted":false}
+{"commit":"02e8cd129efbeb4e3fc9fcc2617ee409a3ca9c05","functionName":"applyRootTextScaling","htmlComputedContract":true,"persistentSplit":false,"typographyAssignments":["document.documentElement.style.fontSize ="],"rootOnly":true,"exactDouble":true,"accepted":true}
+OLD_PERSISTENT_SPLIT_AND_PER_NODE_REJECTED=true
+CURRENT_ACCEPTED=true
+EXIT_CODE=0

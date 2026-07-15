@@ -1,8 +1,16 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+  statSync,
+  writeFileSync
+} from "node:fs";
 import { homedir } from "node:os";
-import { relative, resolve } from "node:path";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 
 import AdmZip from "adm-zip";
 import { createServer } from "vite";
@@ -14,6 +22,19 @@ const DEFAULT_TECHNICAL_FOLDER = process.env.KOSHA_TECHNICAL_FOLDER || resolve(h
 const DEFAULT_MANIFEST_PATH = "data/safety-knowledge/kosha-guide-audit-manifest.json";
 const DEFAULT_OUTPUT_DIR = "evaluation/kosha-guide-audit-2026-07-11";
 const OFFICIAL_CATEGORIES = ["A", "B", "C", "D", "E"];
+const AUDIT_USAGE = `Usage: node scripts/audit_kosha_guides.mjs [options]
+
+Production/local bridge options:
+  --bridge-only
+  --local-corpus-root <path>
+  --bridge-zip-file <zip-file>
+  --bridge-internal-path <internal-path>
+  --reviewed-candidate <relative-path>
+      Optional JSON file under <local-corpus-root>/reviewed-ocr-candidates.
+      absolute paths, parent traversal, and symlink escapes are rejected.
+  --output-dir <path>
+  --help
+`;
 
 const RETRIEVAL_SCENARIOS = [
   {
@@ -53,16 +74,33 @@ function parseArguments(argv) {
     outputDir: DEFAULT_OUTPUT_DIR,
     productionBase: DEFAULT_PRODUCTION_BASE,
     envFile: null,
+    localCorpusRoot: null,
+    bridgeZipFile: null,
+    bridgeInternalPath: null,
+    reviewedCandidate: null,
+    bridgeOnly: false,
     offline: false,
-    strict: false
+    strict: false,
+    help: false
   };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
-    if (argument === "--offline" || argument === "--strict") {
-      options[argument.slice(2)] = true;
+    if (["--bridge-only", "--offline", "--strict", "--help"].includes(argument)) {
+      const key = argument.slice(2).replace(/-([a-z])/gu, (_, letter) => letter.toUpperCase());
+      options[key] = true;
       continue;
     }
-    if (["--technical-folder", "--manifest", "--output-dir", "--production-base", "--env-file"].includes(argument)) {
+    if ([
+      "--technical-folder",
+      "--manifest",
+      "--output-dir",
+      "--production-base",
+      "--env-file",
+      "--local-corpus-root",
+      "--bridge-zip-file",
+      "--bridge-internal-path",
+      "--reviewed-candidate"
+    ].includes(argument)) {
       const value = argv[index + 1];
       if (!value) throw new Error(`${argument} requires a value`);
       const key = argument
@@ -121,6 +159,23 @@ function toReportPath(path) {
   return relative(process.cwd(), path).replaceAll("\\", "/");
 }
 
+function classifyAuditFailure(error) {
+  const errorType = error instanceof Error && /^[A-Za-z][A-Za-z0-9_.-]*$/u.test(error.name)
+    ? error.name
+    : "Error";
+  const message = error instanceof Error ? error.message : "";
+  const koshaCode = message.match(/\b(kosha-[a-z0-9][a-z0-9.-]*(?::[A-Za-z0-9._-]+)*)\b/u)?.[1];
+  let errorCode = koshaCode || "audit-failure";
+  if (message === "Supabase read credentials are unavailable") {
+    errorCode = "supabase-read-credentials-unavailable";
+  } else if (message.startsWith("Supabase bridge GET failed:")) {
+    errorCode = "supabase-bridge-get-failed";
+  } else if (message.startsWith("--") || message.startsWith("Unknown argument:")) {
+    errorCode = "audit-arguments-invalid";
+  }
+  return { errorType, errorCode };
+}
+
 function sanitizeLocalSource(source) {
   if (!source || typeof source !== "object") return source;
   const metadata = source.metadata && typeof source.metadata === "object"
@@ -165,6 +220,327 @@ function readEnvFile(path) {
     if (!process.env[match[1]]) process.env[match[1]] = value;
   }
   return true;
+}
+
+function hashBytes(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function readJsonObject(path, label) {
+  const value = JSON.parse(readFileSync(path, "utf8"));
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${label} must be a JSON object`);
+  }
+  return value;
+}
+
+function readJsonLinesBytes(value, label) {
+  return value
+    .toString("utf8")
+    .split(/\r?\n/gu)
+    .filter((line) => line.length > 0)
+    .map((line, index) => {
+      try {
+        return JSON.parse(line);
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        throw new Error(`${label} line ${index + 1} is invalid JSON: ${reason}`);
+      }
+    });
+}
+
+function resolveKoshaBridgeDescendant(root, path, label) {
+  const resolvedPath = resolve(root, path);
+  const relativePath = relative(root, resolvedPath);
+  if (!relativePath || relativePath === ".." || relativePath.startsWith(`..${sep}`) || isAbsolute(relativePath)) {
+    throw new Error(`kosha-bridge-path-outside-root:${label}`);
+  }
+  const realPath = realpathSync(resolvedPath);
+  const realRelativePath = relative(root, realPath);
+  if (!realRelativePath || realRelativePath === ".." || realRelativePath.startsWith(`..${sep}`) || isAbsolute(realRelativePath)) {
+    throw new Error(`kosha-bridge-path-outside-root:${label}`);
+  }
+  return realPath;
+}
+
+function resolveKoshaReviewedCandidatePath(rootPath, candidatePath) {
+  if (!rootPath) throw new Error("--local-corpus-root is required with --reviewed-candidate");
+  if (isAbsolute(candidatePath)) {
+    throw new Error("kosha-bridge-reviewed-candidate-absolute-path");
+  }
+  if (candidatePath.split(/[\\/]/u).includes("..")) {
+    throw new Error("kosha-bridge-reviewed-candidate-parent-traversal");
+  }
+  const corpusRoot = realpathSync(resolve(rootPath));
+  const approvedRoot = resolveKoshaBridgeDescendant(
+    corpusRoot,
+    "reviewed-ocr-candidates",
+    "reviewed-candidate-root"
+  );
+  const reviewedCandidatePath = resolveKoshaBridgeDescendant(
+    approvedRoot,
+    candidatePath,
+    "reviewed-candidate"
+  );
+  if (!statSync(reviewedCandidatePath).isFile()) {
+    throw new Error("kosha-bridge-reviewed-candidate-not-regular-file");
+  }
+  return reviewedCandidatePath;
+}
+
+function readKoshaBridgeSnapshot(rootPath) {
+  if (!rootPath) throw new Error("--local-corpus-root is required with --bridge-only");
+  const root = realpathSync(resolve(rootPath));
+  const currentPath = resolveKoshaBridgeDescendant(root, "current.json", "current");
+  const current = readJsonObject(currentPath, "KOSHA current pointer");
+  const snapshotId = typeof current.snapshot_id === "string" ? current.snapshot_id : "";
+  if (!/^[0-9a-f]{64}$/u.test(snapshotId)) {
+    throw new Error("kosha-bridge-current-snapshot-id-invalid");
+  }
+  const expectedSnapshotPath = `snapshots/${snapshotId}`;
+  if (current.snapshot_path !== expectedSnapshotPath) {
+    throw new Error("kosha-bridge-current-snapshot-path-mismatch");
+  }
+  if (!current.manifest || typeof current.manifest !== "object" || Array.isArray(current.manifest)) {
+    throw new Error("kosha-bridge-current-manifest-missing");
+  }
+  const expectedManifestPath = `${expectedSnapshotPath}/manifest.json`;
+  if (current.manifest.path !== expectedManifestPath) {
+    throw new Error("kosha-bridge-current-manifest-path-mismatch");
+  }
+
+  const snapshotDir = resolveKoshaBridgeDescendant(root, expectedSnapshotPath, "snapshot");
+  const manifestPath = resolveKoshaBridgeDescendant(root, resolve(snapshotDir, "manifest.json"), "manifest");
+  const itemsPath = resolveKoshaBridgeDescendant(root, resolve(snapshotDir, "items.jsonl"), "items");
+  const chunksPath = resolveKoshaBridgeDescendant(root, resolve(snapshotDir, "chunks.jsonl"), "chunks");
+  const failuresPath = resolveKoshaBridgeDescendant(root, resolve(snapshotDir, "failures.jsonl"), "failures");
+  const checkpointPath = resolveKoshaBridgeDescendant(root, resolve(snapshotDir, "checkpoint.json"), "checkpoint");
+  const manifestBytes = readFileSync(manifestPath);
+  const manifestJson = new TextDecoder("utf-8", { fatal: true }).decode(manifestBytes);
+  const manifest = JSON.parse(manifestJson);
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
+    throw new Error("KOSHA snapshot manifest must be a JSON object");
+  }
+  if (!manifest.output_hashes || typeof manifest.output_hashes !== "object") {
+    throw new Error("kosha-bridge-manifest-output-hashes-missing");
+  }
+  const itemsBytes = readFileSync(itemsPath);
+  const chunksBytes = readFileSync(chunksPath);
+  const failuresBytes = readFileSync(failuresPath);
+  const checkpointBytes = readFileSync(checkpointPath);
+  const snapshotOutputHashes = {
+    "items.jsonl": hashBytes(itemsBytes),
+    "chunks.jsonl": hashBytes(chunksBytes),
+    "failures.jsonl": hashBytes(failuresBytes),
+    "checkpoint.json": hashBytes(checkpointBytes)
+  };
+  const manifestSourceIdentity = manifest.source_identity;
+  return {
+    localItems: readJsonLinesBytes(itemsBytes, "KOSHA items"),
+    localChunks: readJsonLinesBytes(chunksBytes, "KOSHA chunks"),
+    snapshot: {
+      currentSchemaVersion: current.schema_version,
+      currentSnapshotId: snapshotId,
+      currentReproducibilityHash: current.reproducibility_hash,
+      currentSourceIdentitySha256: current.source_identity_sha256,
+      currentGenerationPolicySha256: current.generation_policy_sha256,
+      manifestSchemaVersion: manifest.schema_version,
+      manifestSnapshotId: manifest.snapshot_id,
+      manifestReproducibilityHash: manifest.reproducibility_hash,
+      manifestSourceIdentity,
+      manifestSourceIdentitySha256: manifestSourceIdentity && typeof manifestSourceIdentity === "object"
+        ? manifestSourceIdentity.identity_sha256
+        : null,
+      manifestGenerationPolicy: manifest.generation_policy,
+      manifestGenerationPolicySha256: manifest.generation_policy_sha256,
+      currentManifestSha256: current.manifest.sha256,
+      manifestFileSha256: hashBytes(manifestBytes),
+      manifestItemsSha256: manifest.output_hashes["items.jsonl"],
+      itemsFileSha256: snapshotOutputHashes["items.jsonl"],
+      manifestChunksSha256: manifest.output_hashes["chunks.jsonl"],
+      chunksFileSha256: snapshotOutputHashes["chunks.jsonl"],
+      manifestOutputHashes: manifest.output_hashes,
+      snapshotOutputHashes
+    }
+  };
+}
+
+async function fetchProductionBridgeRows(zipFile, internalPath, fetchJsonWithRetry) {
+  const baseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/$/u, "");
+  const credentials = [
+    { role: "service_role", value: process.env.SUPABASE_SERVICE_ROLE_KEY || "" },
+    { role: "anon", value: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "" }
+  ].filter((credential, index, values) =>
+    credential.value && values.findIndex((candidate) => candidate.value === credential.value) === index
+  );
+  if (!baseUrl || !credentials.length) throw new Error("Supabase read credentials are unavailable");
+
+  const url = new URL("/rest/v1/safety_reference_items", baseUrl);
+  url.searchParams.set("select", "id,source_id,payload");
+  url.searchParams.set("source_id", "eq.kosha-technical-support-regulations-2025");
+  url.searchParams.set("payload->>zipFile", `eq.${zipFile}`);
+  url.searchParams.set("payload->>internalPath", `eq.${internalPath}`);
+  url.searchParams.set("order", "id.asc");
+  url.searchParams.set("limit", "2");
+  const attempts = [];
+  for (const credential of credentials) {
+    const headers = {
+      apikey: credential.value,
+      Authorization: `Bearer ${credential.value}`
+    };
+    const { response, payload } = await fetchJsonWithRetry(
+      url,
+      { method: "GET", headers },
+      `Supabase ${credential.role} production/local bridge GET`
+    );
+    attempts.push({ role: credential.role, httpStatus: response.status });
+    if (!response.ok) continue;
+    if (!Array.isArray(payload)) throw new Error("Supabase bridge GET payload is not an array");
+    return { rows: payload, credentialRole: credential.role, httpStatus: response.status, attempts };
+  }
+  throw new Error(`Supabase bridge GET failed: ${attempts.map((item) => `${item.role}:${item.httpStatus}`).join(",")}`);
+}
+
+function formatBridgeMarkdown(report) {
+  const candidate = report.candidate;
+  const chunkRows = candidate.chunks.length
+    ? candidate.chunks.map((chunk) =>
+        `| \`${chunk.chunkId}\` | \`${chunk.sha256}\` | ${chunk.pageStart}-${chunk.pageEnd} |`
+      ).join("\n")
+    : "| 없음 | 없음 | 없음 |";
+  return `# KOSHA production/local provenance bridge
+
+- generatedAt: ${report.generatedAt}
+- readOnly: ${report.readOnly}
+- requestMethod: ${report.productionRead.method}
+- dbMutationPerformed: ${report.dbMutationPerformed}
+- humanConfirmation: ${report.humanConfirmation}
+- launchReadiness: ${report.launchReadiness}
+
+## Exact tuple
+
+- production id: \`${candidate.production.id}\`
+- production source id: \`${candidate.production.sourceId}\`
+- zipFile: \`${candidate.production.tuple.zipFile}\`
+- internalPath: \`${candidate.production.tuple.internalPath}\`
+- matching: exact tuple only; title matching was not performed
+
+## Local snapshot
+
+- snapshot id: \`${candidate.local.snapshotId}\`
+- item id: \`${candidate.local.itemId}\`
+- raw SHA-256: \`${candidate.local.rawSha256}\`
+- item SHA-256: \`${candidate.local.itemSha256}\`
+- candidate file SHA-256: ${candidate.candidateFileSha256
+    ? `\`${candidate.candidateFileSha256}\``
+    : "없음"}
+- candidate content SHA-256: ${candidate.candidateContentSha256
+    ? `\`${candidate.candidateContentSha256}\``
+    : "없음"}
+- candidate attestation SHA-256: ${candidate.candidateAttestationSha256
+    ? `\`${candidate.candidateAttestationSha256}\``
+    : "없음"}
+- bridge reproducibility SHA-256: \`${candidate.reproducibilityHash}\`
+
+## Chunks
+
+| chunk id | SHA-256 | pages |
+|---|---|---:|
+${chunkRows}
+
+이 산출물은 확인 대기 중인 읽기 전용 bridge 후보이며 DB 또는 schema를 변경하지 않았다.
+`;
+}
+
+async function runProductionLocalBridgeAudit({
+  options,
+  reviewedCandidatePath,
+  audit,
+  generatedAt,
+  started,
+  reportPath,
+  markdownPath,
+  logPath,
+  logLines
+}) {
+  if (!options.bridgeZipFile || !options.bridgeInternalPath) {
+    throw new Error("--bridge-zip-file and --bridge-internal-path are required with --bridge-only");
+  }
+  if (options.offline) throw new Error("--bridge-only requires a production GET");
+  const local = readKoshaBridgeSnapshot(options.localCorpusRoot);
+  audit.verifyKoshaBridgeSnapshotIntegrity(local.snapshot);
+  const defaultEnvCandidates = [
+    resolve(process.cwd(), ".env.local"),
+    resolve(process.cwd(), "..", "..", ".env.local")
+  ];
+  const envFile = options.envFile
+    ? resolve(options.envFile)
+    : defaultEnvCandidates.find((candidate) => existsSync(candidate)) || null;
+  const envLoaded = readEnvFile(envFile);
+  const production = await fetchProductionBridgeRows(
+    options.bridgeZipFile,
+    options.bridgeInternalPath,
+    audit.fetchKoshaJsonWithRetry
+  );
+  const reviewedCandidates = reviewedCandidatePath
+    ? [audit.prepareKoshaReviewedCandidateBridgeInput(readFileSync(reviewedCandidatePath))]
+    : [];
+  const candidate = audit.buildKoshaProductionLocalBridgeCandidate({
+    productionRows: production.rows,
+    localItems: local.localItems,
+    localChunks: local.localChunks,
+    reviewedCandidates,
+    snapshot: local.snapshot
+  });
+  const elapsedSeconds = Number(((performance.now() - started) / 1000).toFixed(3));
+  const report = {
+    schemaVersion: "safeclaw-kosha-production-local-bridge-audit/v1",
+    generatedAt,
+    readOnly: true,
+    humanConfirmation: "pending",
+    dbMutationPerformed: false,
+    launchReadiness: false,
+    item_count: 1,
+    success_count: 1,
+    failure_count: 0,
+    chunk_count: candidate.chunks.length,
+    elapsed_seconds: elapsedSeconds,
+    productionRead: {
+      method: "GET",
+      source: "env-configured-supabase",
+      httpStatus: production.httpStatus,
+      credentialRole: production.credentialRole,
+      deploymentIdentityProven: false
+    },
+    snapshotIntegrity: "verified",
+    snapshotIntegrityVerifiedBeforeFetch: true,
+    candidate,
+    environment: {
+      envFileConfigured: Boolean(envFile),
+      envFileLoaded: envLoaded
+    }
+  };
+  writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+  writeFileSync(markdownPath, `${formatBridgeMarkdown(report).trim()}\n`, "utf8");
+  const reportReference = toReportPath(reportPath);
+  const markdownReference = toReportPath(markdownPath);
+  const logReference = toReportPath(logPath);
+  logLines.push("mode=production-local-bridge requestMethod=GET");
+  logLines.push("snapshotIntegrityVerifiedBeforeFetch=true");
+  logLines.push(`productionRows=${production.rows.length} localItem=${candidate.local.itemId} chunks=${candidate.chunks.length}`);
+  logLines.push(`report=${reportReference}`);
+  logLines.push(`elapsedSeconds=${elapsedSeconds}`);
+  writeFileSync(logPath, `${logLines.join("\n")}\n`, "utf8");
+  console.log(JSON.stringify({
+    item_count: report.item_count,
+    success_count: report.success_count,
+    failure_count: report.failure_count,
+    chunk_count: report.chunk_count,
+    elapsed_seconds: report.elapsed_seconds,
+    reportPath: reportReference,
+    markdownPath: markdownReference,
+    logPath: logReference
+  }, null, 2));
 }
 
 function readLocalArchiveEntries(technicalFolder, decodeKoshaArchiveEntryName) {
@@ -759,7 +1135,19 @@ ${report.boundaries.map((item) => `- ${item}`).join("\n")}
 `;
 }
 
-const options = parseArguments(process.argv.slice(2));
+let options;
+try {
+  options = parseArguments(process.argv.slice(2));
+} catch (error) {
+  const failure = classifyAuditFailure(error);
+  console.error(`${failure.errorType}:${failure.errorCode}`);
+  process.exit(1);
+}
+if (options.help) {
+  console.log(AUDIT_USAGE);
+  process.exit(0);
+}
+let reviewedCandidatePath = null;
 const started = performance.now();
 const generatedAt = new Date().toISOString();
 const outputDir = resolve(process.cwd(), options.outputDir);
@@ -772,6 +1160,9 @@ const logLines = [`${generatedAt} KOSHA GUIDE audit started`, "readOnly=true dbM
 
 let moduleServer;
 try {
+  reviewedCandidatePath = options.bridgeOnly && options.reviewedCandidate
+    ? resolveKoshaReviewedCandidatePath(options.localCorpusRoot, options.reviewedCandidate)
+    : null;
   moduleServer = await createServer({
     root: process.cwd(),
     appType: "custom",
@@ -781,7 +1172,20 @@ try {
   });
   const audit = await moduleServer.ssrLoadModule("/lib/kosha-guide-corpus-audit.ts");
 
-  const technicalFolder = resolve(options.technicalFolder);
+  if (options.bridgeOnly) {
+    await runProductionLocalBridgeAudit({
+      options,
+      reviewedCandidatePath,
+      audit,
+      generatedAt,
+      started,
+      reportPath,
+      markdownPath,
+      logPath,
+      logLines
+    });
+  } else {
+    const technicalFolder = resolve(options.technicalFolder);
   const archiveEntries = readLocalArchiveEntries(technicalFolder, audit.decodeKoshaArchiveEntryName);
   const localArchive = audit.buildKoshaArchiveInventory(archiveEntries);
   const localParsed = readLocalParsedSnapshot(technicalFolder);
@@ -1415,7 +1819,7 @@ try {
   writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
   writeFileSync(markdownPath, `${formatMarkdown(report).trim()}\n`, "utf8");
   logLines.push(`checks=${verification.checkCount} failed=${verification.failedCheckCount} boundaries=${verification.boundaryCheckCount}`);
-  logLines.push(`report=${reportPath}`);
+  logLines.push(`report=${toReportPath(reportPath)}`);
   logLines.push(`elapsedSeconds=${elapsedSeconds}`);
   writeFileSync(logPath, `${logLines.join("\n")}\n`, "utf8");
 
@@ -1428,20 +1832,22 @@ try {
     elapsed_seconds: report.elapsed_seconds,
     verification,
     manifestFailures,
-    reportPath,
-    markdownPath,
-    logPath,
-    manifestCandidatePath
+    reportPath: toReportPath(reportPath),
+    markdownPath: toReportPath(markdownPath),
+    logPath: toReportPath(logPath),
+    manifestCandidatePath: toReportPath(manifestCandidatePath)
   }, null, 2));
 
   if (options.strict && (verification.failedCheckCount > 0 || manifestFailures.length > 0)) {
     process.exitCode = 1;
   }
+  }
 } catch (error) {
-  const message = error instanceof Error ? error.stack || error.message : String(error);
-  logLines.push(`fatal=${message}`);
+  const failure = classifyAuditFailure(error);
+  logLines.push(`fatal_type=${failure.errorType}`);
+  logLines.push(`fatal_code=${failure.errorCode}`);
   writeFileSync(logPath, `${logLines.join("\n")}\n`, "utf8");
-  console.error(message);
+  console.error(`${failure.errorType}:${failure.errorCode}`);
   process.exitCode = 1;
 } finally {
   if (moduleServer) await moduleServer.close();

@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/workpack-editor-structured-sections.test.ts tests/editor-first-state.test.ts tests/editor-export-integrity.test.ts tests/frontend-workbench-visual-contract.test.ts
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+
+ Test Files  4 passed (4)
+      Tests  20 passed (20)
+   Start at  21:42:39
+   Duration  2.27s (transform 358ms, setup 0ms, import 1.19s, tests 403ms, environment 0ms)
+
+EXPLICIT_EXIT_CODE=0

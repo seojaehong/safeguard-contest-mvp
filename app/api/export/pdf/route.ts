@@ -18,6 +18,7 @@ import {
   parseStructuredRiskAssessmentRows,
   type StructuredRiskAssessmentRow
 } from "@/lib/risk-assessment-renderer";
+import type { AccidentType, FourM } from "@/lib/risk-assessment-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -139,6 +140,60 @@ function pdfExportLimitResponse() {
 
 function readString(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function localizeRiskLevel(value: string | undefined): string {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "high") return "상";
+  if (normalized === "medium") return "중";
+  if (normalized === "low") return "하";
+  return value?.trim() || "확인";
+}
+
+function localizeVerificationStatus(value: string | undefined): string {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "planned") return "조치 예정";
+  if (normalized === "done") return "조치 완료";
+  if (normalized === "needsreview") return "검토 필요";
+  return value?.trim() || "확인";
+}
+
+const FOUR_M_LABELS = {
+  Man: "인적 요인",
+  Machine: "기계·설비 요인",
+  Media: "작업환경 요인",
+  Management: "관리 요인"
+} satisfies Readonly<Record<FourM, string>>;
+
+const ACCIDENT_TYPE_LABELS = {
+  fall: "추락",
+  slip: "미끄러짐",
+  struckBy: "맞음",
+  caughtIn: "끼임",
+  cut: "베임",
+  burn: "화상",
+  electricShock: "감전",
+  chemicalExposure: "화학물질 노출",
+  asphyxiation: "질식",
+  heatIllness: "온열질환",
+  traffic: "교통사고",
+  collapse: "붕괴",
+  fireExplosion: "화재·폭발",
+  other: "기타"
+} satisfies Readonly<Record<AccidentType, string>>;
+
+function localizeFourM(value: string | undefined): string {
+  const normalized = value?.trim();
+  return normalized && normalized in FOUR_M_LABELS
+    ? FOUR_M_LABELS[normalized as FourM]
+    : normalized || "확인";
+}
+
+function localizeAccidentType(value: string | undefined): string {
+  const normalized = value?.trim();
+  return normalized && normalized in ACCIDENT_TYPE_LABELS
+    ? ACCIDENT_TYPE_LABELS[normalized as AccidentType]
+    : normalized || "확인";
 }
 
 function readNumber(value: unknown, fallback = 0) {
@@ -269,12 +324,23 @@ function parseRiskRowsFromBody(body: Record<string, unknown>): StructuredRiskAss
 }
 
 function structuredRiskRowsToPdfRows(rows: StructuredRiskAssessmentRow[], documentTitle: string): PdfRow[] {
-  return rows.map((row) => ({
-    document: documentTitle,
-    section: row.section || "위험성평가",
-    item: row.hazard,
-    content: buildRiskAssessmentText(row)
-  }));
+  return rows.map((row) => {
+    const localizedStatus = localizeVerificationStatus(row.verificationStatus || row.status);
+    const localizedRow: StructuredRiskAssessmentRow = {
+      ...row,
+      fourM: localizeFourM(row.fourM),
+      accidentType: localizeAccidentType(row.accidentType),
+      riskLevel: localizeRiskLevel(row.riskLevel),
+      status: localizedStatus,
+      verificationStatus: localizedStatus
+    };
+    return {
+      document: documentTitle,
+      section: row.section || "위험성평가",
+      item: row.hazard,
+      content: buildRiskAssessmentText(localizedRow)
+    };
+  });
 }
 
 function groupRows(rows: PdfRow[]) {
@@ -328,9 +394,9 @@ function renderRiskAssessmentRows(rows: PdfRow[], scenario: PdfScenario, topRisk
     <section class="section">
       <h2>2. 유해·위험요인 파악 및 위험성 결정</h2>
       <table>
-        <thead><tr><th class="no">No.</th><th>단위작업</th><th>유해·위험요인</th><th>4M</th><th>재해형태</th><th>위험성</th><th>현재 안전조치</th></tr></thead>
+        <thead><tr><th class="no">연번</th><th>단위작업</th><th>유해·위험요인</th><th>4M</th><th>재해형태</th><th>위험성</th><th>현재 안전조치</th></tr></thead>
         <tbody>
-          ${hazards.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(scenario.workSummary)}</td><td>${escapeHtml(compactCell(row, topRisk || "핵심 위험 확인"))}</td><td>Man/Machine/Media/Management</td><td>추락·충돌·전도 등</td><td>상/중/하</td><td>${escapeHtml(compactCell(controls[index], "작업 전 통제대책 지정"))}</td></tr>`).join("")}
+          ${hazards.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(scenario.workSummary)}</td><td>${escapeHtml(compactCell(row, topRisk || "핵심 위험 확인"))}</td><td>인적 요인/기계·설비 요인/작업환경 요인/관리 요인</td><td>추락·충돌·전도 등</td><td>상/중/하</td><td>${escapeHtml(compactCell(controls[index], "작업 전 통제대책 지정"))}</td></tr>`).join("")}
         </tbody>
       </table>
     </section>
@@ -364,10 +430,10 @@ function renderCanonicalRiskAssessmentRows(rows: StructuredRiskAssessmentRow[], 
       <h2>2. 유해·위험요인 파악 및 감소대책</h2>
       <table>
         <thead>
-          <tr><th class="no">No.</th><th>세부작업</th><th>유해·위험요인</th><th>현재 안전보건조치</th><th>위험성</th><th>감소대책</th><th>담당/기한</th><th>확인</th></tr>
+          <tr><th class="no">연번</th><th>세부작업</th><th>유해·위험요인</th><th>현재 안전보건조치</th><th>위험성</th><th>감소대책</th><th>담당/기한</th><th>확인</th></tr>
         </thead>
         <tbody>
-          ${rows.map((row, index) => `<tr><td>${escapeHtml(row.id || String(index + 1))}</td><td>${escapeHtml(row.unitTask)}</td><td>${escapeHtml(row.hazard)}</td><td>${escapeHtml(row.currentControls || "현장 확인")}</td><td>${escapeHtml(row.riskLevel || "확인")}</td><td>${escapeHtml(row.additionalControls)}</td><td>${escapeHtml(`${row.owner || "작업반장"} / ${row.dueDate || "작업 전"}`)}</td><td>${escapeHtml(row.status || "□")}</td></tr>`).join("")}
+          ${rows.map((row, index) => `<tr><td>${escapeHtml(row.id || String(index + 1))}</td><td>${escapeHtml(row.unitTask)}</td><td>${escapeHtml(row.hazard)}</td><td>${escapeHtml(row.currentControls || "현장 확인")}</td><td>${escapeHtml(localizeRiskLevel(row.riskLevel))}</td><td>${escapeHtml(row.additionalControls)}</td><td>${escapeHtml(`${row.owner || "작업반장"} / ${row.dueDate || "작업 전"}`)}</td><td>${escapeHtml(localizeVerificationStatus(row.verificationStatus || row.status))}</td></tr>`).join("")}
         </tbody>
       </table>
     </section>
@@ -392,7 +458,7 @@ function renderWorkPlanRows(rows: PdfRow[], scenario: PdfScenario) {
     </section>
     <section class="section">
       <h2>2. 세부 작업순서 및 안전대책</h2>
-      <table><thead><tr><th class="no">No.</th><th>세부작업</th><th>작업방법</th><th>안전대책</th><th>확인</th></tr></thead><tbody>${steps.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(compactCell(row, "작업방법 확인"))}</td><td>위험성평가·TBM 반영</td><td>□</td></tr>`).join("")}</tbody></table>
+      <table><thead><tr><th class="no">연번</th><th>세부작업</th><th>작업방법</th><th>안전대책</th><th>확인</th></tr></thead><tbody>${steps.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(compactCell(row, "작업방법 확인"))}</td><td>위험성평가·TBM 반영</td><td>□</td></tr>`).join("")}</tbody></table>
     </section>
     <section class="section">
       <h2>3. 장비·인원·첨부서류</h2>
@@ -432,7 +498,7 @@ function renderTbmRows(rows: PdfRow[], scenario: PdfScenario, topRisk: string, r
     </section>
     <section class="section">
       <h2>2. 위험성평가 기반 전달사항</h2>
-      <table><thead><tr><th class="no">No.</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>출처 연결</th><th>TBM 전달 문구</th><th>복창</th></tr></thead><tbody>${risks.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(compactCell(row, topRisk || "핵심위험"))}</td><td>${escapeHtml(scenario.weatherNote)}</td><td>위험성평가표 → TBM</td><td>${escapeHtml(compactCell(tbmRows[index], "위험성평가 결과를 작업 전 공유하고 이해하지 못하면 작업을 시작하지 않습니다."))}</td><td>□</td></tr>`).join("")}</tbody></table>
+      <table><thead><tr><th class="no">연번</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>출처 연결</th><th>TBM 전달 문구</th><th>복창</th></tr></thead><tbody>${risks.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(compactCell(row, topRisk || "핵심위험"))}</td><td>${escapeHtml(scenario.weatherNote)}</td><td>위험성평가표 → TBM</td><td>${escapeHtml(compactCell(tbmRows[index], "위험성평가 결과를 작업 전 공유하고 이해하지 못하면 작업을 시작하지 않습니다."))}</td><td>□</td></tr>`).join("")}</tbody></table>
     </section>
     <section class="section">
       <h2>3. 참석자 확인</h2>
@@ -453,7 +519,7 @@ function renderEducationRows(rows: PdfRow[], scenario: PdfScenario) {
     </section>
     <section class="section">
       <h2>2. 교육 내용 및 이해 확인</h2>
-      <table><thead><tr><th class="no">No.</th><th>교육 항목</th><th>주요 내용</th><th>확인방법</th></tr></thead><tbody>${contents.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(compactCell(row, "교육 내용"))}</td><td>구두 복창·서명</td></tr>`).join("")}</tbody></table>
+      <table><thead><tr><th class="no">연번</th><th>교육 항목</th><th>주요 내용</th><th>확인방법</th></tr></thead><tbody>${contents.map((row, index) => `<tr><td>${index + 1}</td><td>${escapeHtml(row.item)}</td><td>${escapeHtml(compactCell(row, "교육 내용"))}</td><td>구두 복창·서명</td></tr>`).join("")}</tbody></table>
     </section>
     <section class="section">
       <h2>3. 교육 실시 및 보관</h2>
@@ -494,7 +560,7 @@ function renderRows(rows: PdfRow[]) {
       <table>
         <thead>
           <tr>
-            <th class="no">No.</th>
+            <th class="no">연번</th>
             <th>항목</th>
             <th>내용</th>
             <th class="check">확인</th>
@@ -662,7 +728,7 @@ function buildPdfReadyHtml(
     </section>
     <p class="kind-note">서식 구분: ${escapeHtml(kindLabels[kind])} · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다.</p>
     <section class="riskbox">
-      <b>위험수준 ${escapeHtml(riskLevel || "확인")}</b>
+      <b>위험수준 ${escapeHtml(localizeRiskLevel(riskLevel))}</b>
       <span>${escapeHtml(topRisk || "핵심 위험요인을 현장에서 최종 확인하세요.")}</span>
     </section>
     ${renderStructuredRows(kind, scenario, rows, topRisk, riskRows, structuredRiskRows)}
@@ -1018,7 +1084,7 @@ function buildPdfContentLines(
     { text: `현장: ${scenario.siteName}`, role: "body" },
     { text: `작업: ${scenario.workSummary}`, role: "body" },
     { text: `인원/기상: ${scenario.workerCount.toLocaleString("ko-KR")}명 · ${scenario.weatherNote}`, role: "body", gap: 14 },
-    { text: `위험수준: ${riskLevel || "확인"}`, role: "section" },
+    { text: `위험수준: ${localizeRiskLevel(riskLevel)}`, role: "section" },
     { text: `핵심위험: ${topRisk || "현장 최종 확인 필요"}`, role: "body", gap: 16 },
     { text: `서식 구분: ${kind === "risk" ? "위험성평가표" : kind === "workPlan" ? "작업계획서" : kind === "permit" ? "허가/점검" : kind === "tbm" ? "TBM일지" : "일반 문서"}`, role: "body", gap: 12 },
     { text: "확인 항목", role: "section", gap: 10 }
@@ -1085,13 +1151,16 @@ async function buildBinaryPdf(
       boldFontKey: page.node.newFontDictionary(boldFont.name, boldFont.ref)
     };
   };
+  const pageStates: Array<ReturnType<typeof createPage>> = [];
   let pageState = createPage();
+  pageStates.push(pageState);
   let y = PDF_PAGE_TOP;
   for (const line of lines) {
     const typography = pdfTextStyles[line.role];
     const placement = placePdfContentLine(y, line);
     if (placement.startsNewPage) {
       pageState = createPage();
+      pageStates.push(pageState);
     }
     y = placement.y;
     if (!line.text) {
@@ -1111,6 +1180,24 @@ async function buildBinaryPdf(
     );
     y -= typography.leading;
   }
+  pageStates.forEach((state, index) => {
+    const headerText = Array.from(normalizePdfText(`${title} · ${scenario.companyName}`)).slice(0, 56).join("");
+    const pageText = `${index + 1} / ${pageStates.length}쪽`;
+    state.page.pushOperators(
+      beginText(),
+      setFontAndSize(state.boldFontKey, 8),
+      setCharacterSpacing(0),
+      setTextMatrix(1, 0, 0, 1, 42, 818),
+      showText(boldFont.encodeText(headerText)),
+      endText(),
+      beginText(),
+      setFontAndSize(state.regularFontKey, 8),
+      setCharacterSpacing(0),
+      setTextMatrix(1, 0, 0, 1, 500, 24),
+      showText(regularFont.encodeText(pageText)),
+      endText()
+    );
+  });
   try {
     return Buffer.from(await pdf.save({ useObjectStreams: false }));
   } catch (error) {

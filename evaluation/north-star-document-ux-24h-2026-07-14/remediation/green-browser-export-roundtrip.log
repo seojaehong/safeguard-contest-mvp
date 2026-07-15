@@ -1,0 +1,14 @@
+
+> safeclaw@0.1.0 test
+> vitest run tests/documents-editor-layout.test.ts -t round-trips a structured editor
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/north-star-document-ux-24h
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 21 skipped (22)
+   Start at  22:10:14
+   Duration  24.81s (transform 162ms, setup 0ms, import 940ms, tests 23.31s, environment 0ms)
+
+EXPLICIT_EXIT_CODE=0

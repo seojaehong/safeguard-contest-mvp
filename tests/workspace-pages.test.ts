@@ -48,7 +48,7 @@ describe("workspace page navigation", () => {
     });
   });
 
-  it("keeps the share page locked until the workpack passes readiness", () => {
+  it("lets users inspect share blockers while keeping actual dispatch gated", () => {
     const gate = canOpenWorkspacePage({
       targetPage: "share",
       hasWorkpack: true,
@@ -56,8 +56,8 @@ describe("workspace page navigation", () => {
       canShare: false
     });
 
-    expect(gate.allowed).toBe(false);
-    expect(gate.reason).toBe("공유 전 검수와 보완을 완료해 주세요.");
+    expect(gate.allowed).toBe(true);
+    expect(gate.reason).toBe("공유 화면에서 보완 항목을 확인할 수 있습니다. 실제 전송은 계속 차단됩니다.");
   });
 
   it("marks share as blocked instead of pending when readiness gates fail", () => {

@@ -208,7 +208,7 @@ function parseToolError(result: McpToolResult): Record<string, unknown> {
 
 describe("MCP route scope contract", () => {
   it("routes every literal registered tool through the central scoped wrapper", () => {
-    const route = readFileSync(join(process.cwd(), "app/api/mcp/[transport]/route.ts"), "utf8");
+    const route = readFileSync(join(process.cwd(), "app/api/mcp/[transport]/implementation.ts"), "utf8");
     const analysis = analyzeRouteRegistrations(route);
 
     expect(analysis.canonicalImportCount).toBe(1);
