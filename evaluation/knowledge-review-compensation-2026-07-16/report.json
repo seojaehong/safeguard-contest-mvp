@@ -1,0 +1,131 @@
+{
+  "date": "2026-07-16",
+  "branch": "fix/knowledge-review-compensation",
+  "status": "ready_for_independent_rereview",
+  "commitCreated": false,
+  "pushPerformed": false,
+  "migrationCreated": false,
+  "tdd": {
+    "red": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts",
+      "failedTestCount": 8,
+      "expectedFailureObserved": true
+    },
+    "green": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts tests/knowledge-review-route.test.ts",
+      "testFileCount": 2,
+      "passedTestCount": 51,
+      "actionPassedTestCount": 37,
+      "routePassedTestCount": 14,
+      "failedTestCount": 0
+    },
+    "independentReviewRemediationRed": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts",
+      "failedTestCount": 8,
+      "expectedFailureObserved": true
+    },
+    "runOnlyRetryMetadataRed": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts",
+      "failedTestCount": 1,
+      "expectedFailureObserved": true
+    },
+    "residualRereviewRed": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts",
+      "failedTestCount": 1,
+      "passedTestCount": 23,
+      "expectedFailureObserved": true
+    },
+    "legacyCompatibilityRed": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts",
+      "failedTestCount": 4,
+      "passedTestCount": 22,
+      "expectedFailureObserved": true
+    },
+    "arbitraryLegacyReceiptRed": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts",
+      "failedTestCount": 1,
+      "passedTestCount": 25,
+      "expectedFailureObserved": true
+    },
+    "finalizedPairConflictRed": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts",
+      "failedTestCount": 1,
+      "passedTestCount": 27,
+      "expectedFailureObserved": true
+    },
+    "completedEventSafetyRed": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts",
+      "failedTestCount": 9,
+      "passedTestCount": 24,
+      "expectedFailureObserved": true
+    },
+    "finalIndependentReviewRed": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts",
+      "failedTestCount": 2,
+      "passedTestCount": 32,
+      "expectedFailureObserved": true
+    },
+    "receiptTimestampRed": {
+      "command": "npm.cmd test -- tests/knowledge-review-actions.test.ts",
+      "failedTestCount": 2,
+      "passedTestCount": 35,
+      "expectedFailureObserved": true
+    }
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "passed": true
+  },
+  "requirements": {
+    "noIncorrectPublishedStateAfterPartialFailure": true,
+    "resumesOnlyIncompleteEvents": true,
+    "resumesFinalRunWrite": true,
+    "resumesLegacyFinalizedPartialEvents": true,
+    "validatesActionableRunReceiptBeforeReuse": true,
+    "staleRunFinalizeSecondCallSucceeds": true,
+    "runOnlyRetryReportsNoEventWrite": true,
+    "reviewerChangeRejected": true,
+    "nullSiteScopePreserved": true,
+    "tamperedReceiptRejected": true,
+    "scopeOnlyTamperedReceiptRejected": true,
+    "finalizedRunIncludedInSharedEventConflictCalculation": true,
+    "finalizedLegacySharedEventConflictBlocksWrites": true,
+    "actualBaseLegacyReceiptShapeCovered": true,
+    "legacyReceiptUpgradedWithCurrentIdentity": true,
+    "partialCurrentIdentityCannotUseLegacyFallback": true,
+    "arbitraryActionableLegacyReceiptRejected": true,
+    "staleFinalMissingReceiptNormalized": true,
+    "staleFinalPublishedStateNormalized": true,
+    "normalizedRunRemainsUnpublished": true,
+    "finalizedApprovedFailedPairConflictBlocked": true,
+    "bothFinalizedRunsBlockedBeforeWrites": true,
+    "finalizedConflictRequiresPendingSharedEvent": true,
+    "finalizedConflictIndependentOfReceiptEligibility": true,
+    "crossReviewerFinalizedConflictBlocked": true,
+    "malformedFinalizedConflictBlocked": true,
+    "crossReviewerReceiptReuseStillRejected": true,
+    "completedOnlyFinalizedRowsIgnored": true,
+    "validFinalizedCompletedOnlyOverlapIgnored": true,
+    "completedEventRequiresSafeTopLevelEnvelope": true,
+    "unsafeCompletedEventNormalized": true,
+    "reviewStatusPreservedDuringEventNormalization": true,
+    "buildersForceFourSafetyFields": true,
+    "staleFinalNormalizationForcesFourSafetyFields": true,
+    "publishedCompletedEventCovered": true,
+    "trueEffectFlagsCovered": true,
+    "emptyReviewedAtRejected": true,
+    "invalidReviewedAtRejected": true,
+    "validRfc3339ReviewedAtAccepted": true,
+    "currentLegacyTimestampValidationAligned": true,
+    "tenantOrganizationSiteScopePreserved": true,
+    "idempotencyPreserved": true,
+    "successOutcomePreserved": true,
+    "strictTypeScriptNoAny": true
+  },
+  "changedFiles": [
+    "lib/knowledge-review.ts",
+    "tests/knowledge-review-actions.test.ts",
+    "evaluation/knowledge-review-compensation-2026-07-16/report.md",
+    "evaluation/knowledge-review-compensation-2026-07-16/report.json"
+  ]
+}
