@@ -1,0 +1,37 @@
+{
+  "date": "2026-07-15",
+  "baseSha": "9380be70d8b617e8f8343973276c1fafe058c733",
+  "route": "/knowledge",
+  "status": "pass",
+  "scope": {
+    "productFiles": 2,
+    "testFiles": 2,
+    "databaseChanges": 0,
+    "schemaChanges": 0
+  },
+  "verification": {
+    "redFailuresObserved": 4,
+    "focusedTestFiles": 2,
+    "focusedTestsPassed": 11,
+    "relatedTestFiles": 3,
+    "relatedTestsPassed": 18,
+    "strictTypecheck": "pass",
+    "diffCheck": "pass",
+    "productionBuild": "not_run",
+    "liveDeployment": "pending_integration"
+  },
+  "contracts": {
+    "machineIdentifiersPreserved": true,
+    "rawGovernanceLabelsHiddenAtPresentationBoundary": true,
+    "mobileTargetMinimumPx": 44,
+    "publishControlsAdded": false,
+    "contentDeleted": false
+  },
+  "deferred": [
+    {
+      "id": "knowledge-mobile-information-architecture",
+      "liveDocumentHeightPx": 8890,
+      "decision": "Evaluate a task index or progressive disclosure in a separate product pass."
+    }
+  ]
+}

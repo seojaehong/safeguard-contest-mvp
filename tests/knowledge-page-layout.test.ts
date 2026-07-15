@@ -252,6 +252,7 @@ describe("knowledge page decision layout", () => {
           sectionContained: section.scrollWidth <= section.clientWidth + 1,
           stagesContained: stages.every((stage) => stage.scrollWidth <= stage.clientWidth + 1),
           authorityRowsContained: authorityRows.every((row) => row.scrollWidth <= row.clientWidth + 1),
+          visibleText: section.textContent || "",
           mutationControls: section.querySelectorAll("button, [data-publish-action]").length
         };
       });
@@ -273,8 +274,56 @@ describe("knowledge page decision layout", () => {
       expect(metrics.sectionContained, viewport.name).toBe(true);
       expect(metrics.stagesContained, viewport.name).toBe(true);
       expect(metrics.authorityRowsContained, viewport.name).toBe(true);
+      for (const internalLabel of [
+        "Hermes / LLM",
+        "human_review",
+        "Published ontology",
+        "published_ontology",
+        "SafeClaw system of record"
+      ]) {
+        expect(metrics.visibleText, `${viewport.name} exposes ${internalLabel}`).not.toContain(internalLabel);
+      }
       expect(metrics.mutationControls, viewport.name).toBe(0);
       await page.close();
     }
+  }, 90_000);
+
+  it("keeps mobile evidence disclosures and query links at least 44px tall", async () => {
+    if (!browser) throw new Error("Browser was not started");
+
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.goto(`${baseUrl}/knowledge?theme=night`, { waitUntil: "domcontentloaded" });
+    await page.locator('[data-knowledge-list="technical-support"]').waitFor();
+
+    const details = page.locator("[data-knowledge-row] details");
+    for (let index = 0; index < await details.count(); index += 1) {
+      await details.nth(index).evaluate((element) => {
+        element.setAttribute("open", "");
+      });
+    }
+
+    const targets = await page.evaluate(() => {
+      const elements = [
+        ...document.querySelectorAll<HTMLElement>("[data-knowledge-row] details > summary"),
+        ...document.querySelectorAll<HTMLElement>("[data-knowledge-row] details a")
+      ];
+      return elements
+        .filter((element) => {
+          const style = getComputedStyle(element);
+          return style.display !== "none" && style.visibility !== "hidden";
+        })
+        .map((element) => ({
+          label: element.textContent?.trim() || element.tagName,
+          width: element.getBoundingClientRect().width,
+          height: element.getBoundingClientRect().height
+        }));
+    });
+
+    expect(targets.length).toBeGreaterThan(0);
+    for (const target of targets) {
+      expect(target.height, target.label).toBeGreaterThanOrEqual(44);
+      expect(target.width, target.label).toBeGreaterThanOrEqual(44);
+    }
+    await page.close();
   }, 90_000);
 });

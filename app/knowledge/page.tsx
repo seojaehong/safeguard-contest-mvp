@@ -5,6 +5,10 @@ import {
   KNOWLEDGE_AUTHORITY_LANES,
   KNOWLEDGE_PROMOTION_STAGES
 } from "@/lib/knowledge-governance";
+import type {
+  KnowledgeAuthorityId,
+  KnowledgePromotionStageId
+} from "@/lib/knowledge-governance";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 import styles from "./KnowledgePage.module.css";
 
@@ -24,6 +28,70 @@ type KoshaReferenceEntry = {
 };
 
 const KNOWLEDGE_SUMMARY_MAX_LENGTH = 150;
+
+const KNOWLEDGE_STAGE_PRESENTATION = {
+  knowledge_event: {
+    label: "원본 이벤트",
+    detail: "수집 시점, 출처, 원문 링크와 현장 범위를 보존한 원본 기록",
+    ownerLabel: "SafeClaw 수집"
+  },
+  candidate: {
+    label: "지식 후보",
+    detail: "AI가 출처 정보를 유지해 만든 사람 검토용 제안",
+    ownerLabel: "AI 문서화 도구"
+  },
+  human_review: {
+    label: "사람 검토",
+    detail: "출처, 권위, 적용 범위와 충돌 여부를 사람이 판정하는 승인 단계",
+    ownerLabel: "검토 책임자"
+  },
+  published_ontology: {
+    label: "게시된 안전지식",
+    detail: "별도 승인과 감사 요건을 통과한 읽기 전용 안전지식",
+    ownerLabel: "SafeClaw 공식 지식 저장소"
+  }
+} satisfies Record<KnowledgePromotionStageId, {
+  label: string;
+  detail: string;
+  ownerLabel: string;
+}>;
+
+const NEXT_STAGE_LABELS = {
+  knowledge_event: "원본 이벤트",
+  candidate: "지식 후보",
+  human_review: "사람 검토",
+  published_ontology: "게시된 안전지식"
+} satisfies Record<KnowledgePromotionStageId, string>;
+
+const KNOWLEDGE_AUTHORITY_PRESENTATION = {
+  sif: {
+    label: "SIF 재해·통제 근거",
+    provenanceRule: "중대재해 패턴과 통제 근거로 추적하며 법령 출처로 대체하지 않음"
+  },
+  kosha: {
+    label: "KOSHA 기술지침",
+    provenanceRule: "기술적 실행 방법과 통제대책 근거로 사용하며 법적 강제성과 분리"
+  },
+  law: {
+    label: "현행 법령",
+    provenanceRule: "공식 조문, 시행일과 개정 상태를 확인한 경우에만 법적 의무 근거로 사용"
+  },
+  organization_history: {
+    label: "조직 이력",
+    provenanceRule: "해당 조직의 작업팩과 개선 이력으로 제한하고 공개 참조와 섞지 않음"
+  },
+  site_history: {
+    label: "현장 이력",
+    provenanceRule: "해당 현장의 관찰과 조치 이력으로 제한하고 조직 밖 승격을 허용하지 않음"
+  },
+  hermes_llm: {
+    label: "AI 문서화 도구",
+    provenanceRule: "근거를 재작성한 후보만 만들며 DB 수정과 온톨로지 게시를 수행하지 않음"
+  }
+} satisfies Record<KnowledgeAuthorityId, {
+  label: string;
+  provenanceRule: string;
+}>;
 
 const koshaReferenceEntries: KoshaReferenceEntry[] = [
   {
@@ -200,16 +268,16 @@ export default async function KnowledgePage() {
                   <span className={styles.stageSequence}>{stage.sequence}</span>
                   <span className={styles.stageState}>{stage.stateLabel}</span>
                 </div>
-                <h3>{stage.label}</h3>
-                <p>{stage.detail}</p>
+                <h3>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].label}</h3>
+                <p>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].detail}</p>
                 <dl className={styles.stageMeta}>
                   <div>
                     <dt>소유</dt>
-                    <dd>{stage.ownerLabel}</dd>
+                    <dd>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].ownerLabel}</dd>
                   </div>
                   <div>
                     <dt>다음 상태</dt>
-                    <dd>{stage.nextStage || "최종 읽기 범위"}</dd>
+                    <dd>{stage.nextStage ? NEXT_STAGE_LABELS[stage.nextStage] : "최종 읽기 범위"}</dd>
                   </div>
                 </dl>
               </li>
@@ -225,8 +293,8 @@ export default async function KnowledgePage() {
               {KNOWLEDGE_AUTHORITY_LANES.map((lane) => (
                 <li key={lane.id} className={styles.authorityRow} data-knowledge-authority={lane.id}>
                   <div className={styles.authorityIdentity}>
-                    <strong>{lane.label}</strong>
-                    <span>{lane.provenanceRule}</span>
+                    <strong>{KNOWLEDGE_AUTHORITY_PRESENTATION[lane.id].label}</strong>
+                    <span>{KNOWLEDGE_AUTHORITY_PRESENTATION[lane.id].provenanceRule}</span>
                   </div>
                   <dl className={styles.authorityFacts}>
                     <div>
