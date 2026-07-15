@@ -2,7 +2,8 @@
 
 ## Candidate
 
-- Product SHA: `d0b7517`
+- Product SHA: `ed4a293554b1edac0dd6c7ad7341f323d206c786`
+- Production base SHA: `238a011b3d0d436b5d498c415795cede61b3045e`
 - Branch: `fix/northstar-hermes-runtime-20260715`
 - Route: `/api/agent/chat`
 - Status: focused verification passed; independent re-review pending
@@ -14,9 +15,10 @@ Hermes receives an immutable Evidence Harness packet for audit, but its selectab
 - direct claims require direct-evidence eligibility;
 - SIF claims are labeled as accident/risk-priority evidence, not a statutory mandate;
 - KOSHA claims require supporting-citation eligibility and the configured trust verifier;
+- a missing production KOSHA trust verifier is an explicit rejection, never implicit trust;
 - review-required or mismatched references remain in the audit packet but cannot become selectable claims.
 
-A mixed packet containing one accepted KOSHA guide and one review-required KOSHA item is covered by a negative test. The unverified control never enters the claim allowlist or rendered output.
+A mixed packet containing explicitly trusted and otherwise eligible but untrusted KOSHA items is covered by a negative test. Only the trusted citation enters the planner allowlist. A structurally valid packet whose eligible references yield no selectable claims also fails before planner execution.
 
 ## Fixture boundary
 
@@ -34,9 +36,9 @@ The `D-C-13-2026` fixture uses values recovered from the local corpus, but that 
 
 ## Verification
 
-- Hermes/OpenClaw focused tests: 2 files, 60 tests passed
+- Hermes/OpenClaw focused tests: 3 files, 72 tests passed
 - Strict TypeScript typecheck: passed
-- Production build: 28 pages, build ID `YYu1fJ33HzzNu7_6SIvbO`
+- Production build: 28 pages, build ID `KO_kV3vRg5s3OFRrhgHYy`
 - `git diff --check`: passed
 
 ## Runtime blockers

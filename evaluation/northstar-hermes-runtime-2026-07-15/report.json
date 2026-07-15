@@ -1,10 +1,10 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "date": "2026-07-15",
-  "productCandidateSha": "d0b7517",
-  "baseSha": "dc608c8d7f7f854270669e05789cad88816d0f43",
+  "productCandidateSha": "ed4a293554b1edac0dd6c7ad7341f323d206c786",
+  "baseSha": "238a011b3d0d436b5d498c415795cede61b3045e",
   "branch": "fix/northstar-hermes-runtime-20260715",
-  "scope": "/api/agent/chat claim-level Hermes evidence eligibility",
+  "scope": "/api/agent/chat production KOSHA trust and claim-level Hermes evidence eligibility",
   "result": "pass_pending_independent_review",
   "attestation": {
     "packetDigestBound": true,
@@ -13,6 +13,10 @@
     "directEligibilityRequired": true,
     "sifAuthorityLabel": "risk_priority_evidence",
     "koshaSupportingEligibilityRequired": true,
+    "explicitKoshaTrustDecisionRequired": true,
+    "missingKoshaTrustVerifierPolicy": "fail_closed",
+    "mixedKoshaTrustClaimsFiltered": true,
+    "emptyEligibleClaimAllowlistPolicy": "fail_closed",
     "reviewRequiredClaimsSelectable": false,
     "unknownAttestationPolicy": "fail_closed"
   },
@@ -24,10 +28,10 @@
   },
   "verification": [
     {
-      "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/openclaw-chat.test.ts",
-      "testFiles": 2,
-      "tests": 60,
-      "passed": 60,
+      "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/openclaw-chat.test.ts tests/openclaw-broker-ui-context.test.ts",
+      "testFiles": 3,
+      "tests": 72,
+      "passed": 72,
       "failed": 0
     },
     {
@@ -38,7 +42,7 @@
       "command": "npm.cmd run build",
       "exitCode": 0,
       "pages": 28,
-      "buildId": "YYu1fJ33HzzNu7_6SIvbO"
+      "buildId": "KO_kV3vRg5s3OFRrhgHYy"
     },
     {
       "command": "git diff --check",
