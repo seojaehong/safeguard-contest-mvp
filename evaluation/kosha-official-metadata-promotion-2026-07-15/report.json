@@ -51,22 +51,22 @@
       "unique_row_count": 381
     }
   ],
-  "elapsed_seconds": 77.459,
+  "elapsed_seconds": 107.99,
   "failure_count": 22,
   "failure_counts": {
     "official-pdf-hash-mismatch": 22
   },
-  "generated_at": "2026-07-14T17:01:46.503053+00:00",
+  "generated_at": "2026-07-15T00:30:30.372679+00:00",
   "item_count": 234,
   "launch_ready": false,
   "official_metadata_sha256": null,
   "official_row_count": 1039,
   "output_hashes": {
     "failures.jsonl": "e458269900cdaf17db762d79c0d0ceb93feb83b0380768b44581d9ef617ea38f",
-    "official-metadata.jsonl": "6edbf8b081c86a9d646f0128bc804e9822501120858a1cbe77010e5084da5d70"
+    "official-metadata.jsonl": "b730a50c92df9411dacaca9c522d7de8d30050830fb79df88e774fbd9738cdb9"
   },
   "page_shard_count": 13,
-  "snapshot_id": "9180a236b91b820379cd2fa02b1942b8ea688c840d77f2be2de4c43c1ce4ede1",
+  "snapshot_id": "c10572ee3531d9c66ca455265bf0d599f5eae5b01b8113daaa71ad5f9012a129",
   "source_snapshot_id": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
   "success_count": 212,
   "trusted_registry_populated": false,

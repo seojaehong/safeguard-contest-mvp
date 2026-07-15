@@ -6,7 +6,7 @@ import json
 import math
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Protocol
 from urllib import error, request
@@ -41,6 +41,8 @@ class PromotionConfig:
     expected_source_snapshot_id: str = DEFAULT_SOURCE_SNAPSHOT_ID
     timeout_seconds: float = 20.0
     retries: int = 1
+    reuse_page_cache: bool = False
+    cache_max_age_seconds: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -55,6 +57,24 @@ def sha256_bytes(value: bytes) -> str:
 
 def canonical_json(value: object) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def normalize_identity_value(value: object) -> object:
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    if isinstance(value, list):
+        return [normalize_identity_value(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            key: normalize_identity_value(nested)
+            for key, nested in value.items()
+            if isinstance(key, str)
+        }
+    return value
+
+
+def identity_sha256(value: object) -> str:
+    return sha256_bytes(canonical_json(normalize_identity_value(value)).encode("utf-8"))
 
 
 def canonical_jsonl(rows: list[JsonObject]) -> str:
@@ -106,18 +126,55 @@ def load_source_snapshot(root: Path, expected_snapshot_id: str) -> SourceSnapsho
     if len(manifest_bytes) != manifest_descriptor.get("size_bytes"):
         raise PromotionError("source-manifest-size-mismatch")
     manifest = read_object(manifest_path)
+    if manifest.get("snapshot_id") != expected_snapshot_id:
+        raise PromotionError("source-manifest-snapshot-mismatch")
+    if manifest.get("reproducibility_hash") != expected_snapshot_id:
+        raise PromotionError("source-reproducibility-hash-mismatch")
+    source_identity = manifest.get("source_identity")
+    if not isinstance(source_identity, dict):
+        raise PromotionError("source-identity-missing")
+    source_identity_material = {
+        key: value for key, value in source_identity.items() if key != "identity_sha256"
+    }
+    source_identity_sha256 = identity_sha256(source_identity_material)
+    if source_identity.get("identity_sha256") != source_identity_sha256:
+        raise PromotionError("source-identity-hash-mismatch")
+    generation_policy = manifest.get("generation_policy")
+    generation_policy_sha256 = manifest.get("generation_policy_sha256")
+    if not isinstance(generation_policy, dict) or generation_policy_sha256 != identity_sha256(
+        generation_policy
+    ):
+        raise PromotionError("source-generation-policy-hash-mismatch")
     snapshot_path = resolve_beneath(root, current.get("snapshot_path"))
+    if snapshot_path.name != expected_snapshot_id:
+        raise PromotionError("source-snapshot-path-mismatch")
     output_hashes = manifest.get("output_hashes")
     if not isinstance(output_hashes, dict):
         raise PromotionError("source-output-hashes-missing")
-    for artifact_name, error_label in (
-        ("items.jsonl", "items"),
-        ("chunks.jsonl", "chunks"),
-        ("failures.jsonl", "failures"),
-    ):
+    required_artifacts = {
+        "items.jsonl": "items",
+        "chunks.jsonl": "chunks",
+        "failures.jsonl": "failures",
+    }
+    if not required_artifacts.keys() <= output_hashes.keys():
+        raise PromotionError("source-required-output-hashes-missing")
+    for artifact_name, expected_hash in output_hashes.items():
+        if not isinstance(artifact_name, str) or Path(artifact_name).name != artifact_name:
+            raise PromotionError("source-output-name-invalid")
+        if not isinstance(expected_hash, str):
+            raise PromotionError(f"source-output-hash-invalid:{artifact_name}")
         artifact_path = snapshot_path / artifact_name
-        if sha256_bytes(artifact_path.read_bytes()) != output_hashes.get(artifact_name):
+        error_label = required_artifacts.get(artifact_name, artifact_name)
+        if not artifact_path.is_file() or sha256_bytes(artifact_path.read_bytes()) != expected_hash:
             raise PromotionError(f"source-{error_label}-hash-mismatch")
+    reproducibility_hash = sha256_bytes(canonical_json({
+        "schema_version": manifest.get("schema_version"),
+        "source_identity_sha256": source_identity_sha256,
+        "generation_policy_sha256": generation_policy_sha256,
+        "output_hashes": output_hashes,
+    }).encode("utf-8"))
+    if reproducibility_hash != expected_snapshot_id:
+        raise PromotionError("source-reproducibility-identity-mismatch")
     items_path = snapshot_path / "items.jsonl"
     items = load_jsonl(items_path)
     candidates = [
@@ -163,11 +220,20 @@ def normalize_official_row(value: object) -> JsonObject | None:
     file_id = value.get("techGdlnOrgnlAtcflNo")
     raw_sequence = value.get("techGdlnOrgnlAtcflNoSeq")
     publication_date = normalize_date(value.get("techGdlnOfancYmd"))
+    category = value.get("techGdlnCtgryCd")
     try:
         file_sequence = int(raw_sequence)
     except (TypeError, ValueError):
         return None
-    if not version or not isinstance(file_id, str) or not file_id.strip() or file_sequence < 0 or not publication_date:
+    if (
+        not version
+        or not isinstance(file_id, str)
+        or not file_id.strip()
+        or file_sequence < 0
+        or not publication_date
+        or not isinstance(category, str)
+        or not category.strip()
+    ):
         return None
     official_url = f"{OFFICIAL_DOWNLOAD_BASE}/{quote(file_id.strip(), safe='')}/{file_sequence}"
     return {
@@ -178,6 +244,7 @@ def normalize_official_row(value: object) -> JsonObject | None:
         "official_file_id": file_id.strip(),
         "official_file_sequence": file_sequence,
         "publication_date": publication_date,
+        "official_category": category.strip().upper(),
     }
 
 
@@ -196,24 +263,34 @@ def fetch_cached_page(
     }
     cache_key = sha256_bytes(canonical_json(request_identity).encode("utf-8"))
     cache_path = config.output_root / "page-cache" / f"{cache_key}.json"
-    if cache_path.exists():
+    if config.reuse_page_cache and cache_path.exists():
         envelope = read_object(cache_path)
         response = envelope.get("response")
         if envelope.get("request") != request_identity or not isinstance(response, dict):
             raise PromotionError(f"page-cache-identity-mismatch:{category}:{page}")
         if envelope.get("response_sha256") != sha256_bytes(canonical_json(response).encode("utf-8")):
             raise PromotionError(f"page-cache-hash-mismatch:{category}:{page}")
-        return response, {
-            "category": category,
-            "page": page,
-            "request_sha256": cache_key,
-            "response_sha256": envelope["response_sha256"],
-        }
+        fetched_at = envelope.get("fetched_at")
+        try:
+            fetched_at_value = datetime.fromisoformat(str(fetched_at))
+            if fetched_at_value.tzinfo is None:
+                raise ValueError("timezone required")
+            cache_deadline = fetched_at_value + timedelta(seconds=config.cache_max_age_seconds)
+        except (TypeError, ValueError):
+            cache_deadline = datetime.min.replace(tzinfo=timezone.utc)
+        if config.cache_max_age_seconds > 0 and datetime.now(timezone.utc) <= cache_deadline:
+            return response, {
+                "category": category,
+                "page": page,
+                "request_sha256": cache_key,
+                "response_sha256": envelope["response_sha256"],
+            }
     response = transport.fetch_page(category, page, config.rows_per_page)
     envelope = {
         "request": request_identity,
         "response": response,
         "response_sha256": sha256_bytes(canonical_json(response).encode("utf-8")),
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
     }
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(canonical_json(envelope), encoding="utf-8", newline="\n")
@@ -300,6 +377,14 @@ def collect_current_rows(
                 normalized = normalize_official_row(row)
                 if normalized is None:
                     failures.append({"code": "official-row-invalid", "category": category, "page": page})
+                elif normalized["official_category"] != category:
+                    failures.append({
+                        "code": "official-row-category-mismatch",
+                        "category": category,
+                        "page": page,
+                        "row_category": normalized["official_category"],
+                        "stable_key": normalized["stable_key"],
+                    })
                 else:
                     category_records.append(normalized)
                     records.append(normalized)
@@ -623,6 +708,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--timeout-seconds", type=float, default=20.0)
     parser.add_argument("--retries", type=int, default=1)
     parser.add_argument("--rows-per-page", type=int, default=100)
+    parser.add_argument("--reuse-page-cache", action="store_true")
+    parser.add_argument("--cache-max-age-seconds", type=float, default=0.0)
     return parser.parse_args(argv)
 
 
@@ -636,6 +723,8 @@ def main(argv: list[str] | None = None) -> int:
                 rows_per_page=args.rows_per_page,
                 timeout_seconds=args.timeout_seconds,
                 retries=args.retries,
+                reuse_page_cache=args.reuse_page_cache,
+                cache_max_age_seconds=args.cache_max_age_seconds,
             ),
             UrlLibTransport(timeout_seconds=args.timeout_seconds, retries=args.retries),
         )
