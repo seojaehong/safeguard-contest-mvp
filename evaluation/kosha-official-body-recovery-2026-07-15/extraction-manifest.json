@@ -1,0 +1,100 @@
+{
+  "schema_version": "safeclaw-kosha-safe-extraction/v1",
+  "source_root": "C:\\Users\\iceam\\Downloads\\기술지원규정",
+  "destination_root": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted",
+  "archive_count": 10,
+  "member_count": 1040,
+  "uncompressed_bytes": 588915330,
+  "safety_checks": [
+    "path-beneath-category",
+    "symlink-rejected",
+    "duplicate-normalized-path-rejected",
+    "member-size-limit",
+    "compression-ratio-limit",
+    "aggregate-size-limit",
+    "exclusive-create",
+    "zip-crc-read"
+  ],
+  "archives": [
+    {
+      "source_zip": "[2025] 기술지원규정(건설안전분야).zip",
+      "source_zip_sha256": "6bc83955d3a14f675240205bf8405dad30b47dcce6f9713ef3a2c2835bccce37",
+      "category": "건설안전분야",
+      "destination": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\건설안전분야",
+      "member_count": 76,
+      "uncompressed_bytes": 74280205
+    },
+    {
+      "source_zip": "[2025] 기술지원규정(기계안전분야).zip",
+      "source_zip_sha256": "105df6f4f9c3f8e08b17c553e2fa682997883be03a378e47bd84705c53036bd8",
+      "category": "기계안전분야",
+      "destination": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\기계안전분야",
+      "member_count": 138,
+      "uncompressed_bytes": 96980396
+    },
+    {
+      "source_zip": "[2025] 기술지원규정(리스크관리분야).zip",
+      "source_zip_sha256": "a2f10f101547447f631373c81e6572fcbc87e438b34c174586d8cfa1122e71a1",
+      "category": "리스크관리분야",
+      "destination": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\리스크관리분야",
+      "member_count": 31,
+      "uncompressed_bytes": 19088752
+    },
+    {
+      "source_zip": "[2025] 기술지원규정(산업독성분야).zip",
+      "source_zip_sha256": "9af1ae7c479338a8b0d8e02a84cb871167063a9a86ce8e239ba47b647533cfe9",
+      "category": "산업독성분야",
+      "destination": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\산업독성분야",
+      "member_count": 44,
+      "uncompressed_bytes": 15099646
+    },
+    {
+      "source_zip": "[2025] 기술지원규정(산업보건일반분야).zip",
+      "source_zip_sha256": "b6f9b447ad0c969eccf2f0aa1f3f588bb3e6782bec503df310793cd6e09d834a",
+      "category": "산업보건일반분야",
+      "destination": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\산업보건일반분야",
+      "member_count": 83,
+      "uncompressed_bytes": 31108432
+    },
+    {
+      "source_zip": "[2025] 기술지원규정(산업안전일반분야).zip",
+      "source_zip_sha256": "5deb19efd56bd9e4cc41d7e708f857ee6d5666b7a60162a19681b3cd3ea50450",
+      "category": "산업안전일반분야",
+      "destination": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\산업안전일반분야",
+      "member_count": 84,
+      "uncompressed_bytes": 97489934
+    },
+    {
+      "source_zip": "[2025] 기술지원규정(산업위생분야).zip",
+      "source_zip_sha256": "7d07bf1f1af8e1364fd19f3048b83ad8e649af0806c9c691b1f79d81174ef03e",
+      "category": "산업위생분야",
+      "destination": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\산업위생분야",
+      "member_count": 174,
+      "uncompressed_bytes": 43866531
+    },
+    {
+      "source_zip": "[2025] 기술지원규정(산업의학분야).zip",
+      "source_zip_sha256": "dcb9af37369d4f85390585b6b7ace0d5d76ce832378848bc9f5d6e1520d14a00",
+      "category": "산업의학분야",
+      "destination": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\산업의학분야",
+      "member_count": 81,
+      "uncompressed_bytes": 22209060
+    },
+    {
+      "source_zip": "[2025] 기술지원규정(전기안전분야).zip",
+      "source_zip_sha256": "5a63d9859bcc3969a07ba5b73fd6ef48744a89bc8e2a2ef16ce5ed9bc96faad1",
+      "category": "전기안전분야",
+      "destination": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\전기안전분야",
+      "member_count": 95,
+      "uncompressed_bytes": 77491655
+    },
+    {
+      "source_zip": "[2025] 기술지원규정(화학안전분야).zip",
+      "source_zip_sha256": "515da9dcc786b370b373a3a711089f6dd4de74cc6c635bf5226766ad49c512ad",
+      "category": "화학안전분야",
+      "destination": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\northstar-kosha-official-metadata-20260715\\output\\kosha-official-body-recovery-2026-07-15\\source\\extracted\\화학안전분야",
+      "member_count": 234,
+      "uncompressed_bytes": 111300719
+    }
+  ]
+}

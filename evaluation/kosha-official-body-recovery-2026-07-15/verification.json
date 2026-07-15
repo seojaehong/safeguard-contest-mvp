@@ -1,0 +1,104 @@
+{
+  "schema_version": "safeclaw-kosha-official-body-recovery-verification/v1",
+  "generated_at": "2026-07-15T01:47:29.194436+00:00",
+  "all_passed": true,
+  "check_count": 11,
+  "failed_check_count": 0,
+  "checks": [
+    {
+      "name": "old-source-zips-unchanged",
+      "ok": true,
+      "archive_count": 10,
+      "identity_sha256": "1db732ff3843adc12f1aa42130b82c45f4fe3497229aecd41b9be6a12fe5bc3d"
+    },
+    {
+      "name": "old-corpus-current-unchanged",
+      "ok": true,
+      "snapshot_id": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+      "expected_snapshot_id": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+      "manifest_sha256": "702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519",
+      "expected_manifest_sha256": "702202bf50155f083006155700735b6ea262932ed66117f2cd0d4795c6937519"
+    },
+    {
+      "name": "new-corpus-current-descriptor",
+      "ok": true,
+      "snapshot_id": "935340ef3f74078c36168666650164c43511daced84efa3eda849833ad8d6844",
+      "manifest_sha256": "ab77251d0c95ce81d86470f1dbe19cdc18778dc5f6b32cde1b2d4f77bc427ab8"
+    },
+    {
+      "name": "new-corpus-output-hashes",
+      "ok": true,
+      "output_hashes": {
+        "checkpoint.json": "2c67fe6553064bd78d8aeec81371af982a37d7cd98611b4c5f97345a1dda3adc",
+        "chunks.jsonl": "32799e9ce030544633420fd65f54d3312ca6e2af7971a338eec41b03e0db8629",
+        "failures.jsonl": "9ccdfc86c21c3c5aab65624778dfade5b6062504748d1ff162784c3e2f1242a1",
+        "items.jsonl": "f14015ed75cf1cd3e0a09ceee87850dd88c2fc11184d242c4f8c1c46cf419aa1"
+      }
+    },
+    {
+      "name": "new-corpus-counts",
+      "ok": true,
+      "counts": {
+        "boundary": 1,
+        "chunks": 20536,
+        "completed": 1040,
+        "failure": 0,
+        "failure_ledger": 1,
+        "inventory": 1040,
+        "ocr_candidate_items": 128,
+        "ocr_candidate_pages": 798,
+        "raw_duplicate_rows": 0,
+        "success": 1039,
+        "text_duplicate_rows": 1
+      }
+    },
+    {
+      "name": "official-pdf-hashes-propagated",
+      "ok": true,
+      "expected_count": 22,
+      "matched_count": 22
+    },
+    {
+      "name": "safe-extraction-and-replacement-counts",
+      "ok": true,
+      "extracted_archives": 10,
+      "extracted_members": 1040,
+      "replacements": 22,
+      "repacked_archives": 10
+    },
+    {
+      "name": "promotion-current-descriptor",
+      "ok": true,
+      "snapshot_id": "d9f5935188984d1fbf6f5378e588e607ee0a2c225796dbc0ba166f4e7a26d5c6",
+      "manifest_sha256": "b97819793903973ffce61a3b00abfa7961fc2ffa1944d9d68dc848ad7e835806"
+    },
+    {
+      "name": "promotion-output-hashes",
+      "ok": true,
+      "output_hashes": {
+        "failures.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "official-metadata.jsonl": "1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f"
+      }
+    },
+    {
+      "name": "promotion-launch-gate",
+      "ok": true,
+      "counts": {
+        "candidates": 234,
+        "failures": 0,
+        "official_rows": 1039,
+        "verified": 234
+      },
+      "official_metadata_lines": 234,
+      "failure_lines": 0,
+      "launch_ready": true
+    },
+    {
+      "name": "no-db-schema-environment-mutation",
+      "ok": true,
+      "db_mutation_performed": false,
+      "schema_mutation_performed": false,
+      "environment_changed": false
+    }
+  ]
+}
