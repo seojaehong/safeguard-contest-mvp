@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:frontend:normal": "node ./scripts/frontend_audit_clean_build.mjs --mode normal",
+    "build:frontend:audit": "node ./scripts/frontend_audit_clean_build.mjs --mode audit",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit --incremental false",
@@ -17,6 +19,7 @@
     "audit:output-integrity": "node ./scripts/final_output_integrity_audit.mjs",
     "audit:frontend-consistency": "node ./scripts/frontend_consistency_audit.mjs",
     "audit:frontend-bundle": "node ./scripts/frontend_audit_bundle_contract.mjs",
+    "audit:frontend-runtime": "node ./scripts/frontend_audit_runtime_probe.mjs",
     "release:closeout": "node ./scripts/final_release_closeout.mjs",
     "smoke:orchestration-download": "node ./scripts/prod_orchestration_download_smoke.mjs",
     "smoke:submission": "node ./scripts/submission_readiness_smoke.mjs",
