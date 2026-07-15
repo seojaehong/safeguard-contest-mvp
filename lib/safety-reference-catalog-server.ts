@@ -1,5 +1,8 @@
 import "server-only";
 
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+
 import {
   loadKoshaGuideCorpus,
   searchKoshaGuideCorpus,
@@ -18,10 +21,210 @@ import {
   type SafetyReferenceSearchOptions,
   type SafetyReferenceSearchResult
 } from "@/lib/safety-reference-catalog";
+import {
+  buildExactTrustedKoshaGroundingDecision,
+  isProductionTrustedKoshaReference,
+} from "@/lib/production-kosha-trust";
 
 export type SafetyReferenceServerSearchOptions = SafetyReferenceSearchOptions & {
   offlineCorpus?: KoshaGuideCorpusLookup;
 };
+
+type BundledExactKoshaAsset = Readonly<{
+  schemaVersion: string;
+  itemId: string;
+  sourceId: string;
+  itemType: string;
+  category: string;
+  title: string;
+  stableDocumentKey: string;
+  version: string;
+  normalizedCharCount: number;
+  bodySha256: string;
+  pdfSha256: string;
+  officialUrl: string;
+  officialFileId: string;
+  publishedAt: string;
+  extractionSchema: string;
+  extractionSnapshot: string;
+  body: string;
+}>;
+
+export type BundledExactKoshaLoadResult =
+  | Readonly<{ status: "ready"; item: SafetyReferenceItem }>
+  | Readonly<{
+      status: "blocked";
+      reason: "asset-unavailable" | "asset-invalid" | "asset-integrity-failed";
+      message: string;
+    }>;
+
+const DEFAULT_EXACT_KOSHA_ASSET_PATH = join(
+  process.cwd(),
+  "data",
+  "safety-knowledge",
+  "exact-kosha",
+  "d-c-13-2026.json",
+);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readAssetString(record: Record<string, unknown>, key: string): string | null {
+  const value = record[key];
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+function parseBundledExactKoshaAsset(value: unknown): BundledExactKoshaAsset | null {
+  if (!isRecord(value)) return null;
+  const stringKeys = [
+    "schemaVersion",
+    "itemId",
+    "sourceId",
+    "itemType",
+    "category",
+    "title",
+    "stableDocumentKey",
+    "version",
+    "bodySha256",
+    "pdfSha256",
+    "officialUrl",
+    "officialFileId",
+    "publishedAt",
+    "extractionSchema",
+    "extractionSnapshot",
+    "body",
+  ] as const;
+  const strings = Object.fromEntries(
+    stringKeys.map((key) => [key, readAssetString(value, key)]),
+  );
+  if (Object.values(strings).some((entry) => entry === null)) return null;
+  if (typeof value.normalizedCharCount !== "number" || !Number.isInteger(value.normalizedCharCount)) return null;
+  return {
+    schemaVersion: strings.schemaVersion as string,
+    itemId: strings.itemId as string,
+    sourceId: strings.sourceId as string,
+    itemType: strings.itemType as string,
+    category: strings.category as string,
+    title: strings.title as string,
+    stableDocumentKey: strings.stableDocumentKey as string,
+    version: strings.version as string,
+    normalizedCharCount: value.normalizedCharCount,
+    bodySha256: strings.bodySha256 as string,
+    pdfSha256: strings.pdfSha256 as string,
+    officialUrl: strings.officialUrl as string,
+    officialFileId: strings.officialFileId as string,
+    publishedAt: strings.publishedAt as string,
+    extractionSchema: strings.extractionSchema as string,
+    extractionSnapshot: strings.extractionSnapshot as string,
+    body: strings.body as string,
+  };
+}
+
+function buildBundledExactKoshaItem(asset: BundledExactKoshaAsset): SafetyReferenceItem | null {
+  if (asset.schemaVersion !== "safeclaw-exact-kosha-reference/v1"
+    || asset.extractionSchema !== "safeclaw-kosha-body-corpus/v2"
+    || asset.body.length !== asset.normalizedCharCount) {
+    return null;
+  }
+  const payload: Record<string, unknown> = {
+    reference_item_id: asset.itemId,
+    stable_document_key: asset.stableDocumentKey,
+    version: asset.version,
+    official_version_code: asset.version,
+    body_sha256: asset.bodySha256,
+    pdf_sha256: asset.pdfSha256,
+    official_url: asset.officialUrl,
+    official_file_id: asset.officialFileId,
+    official_published_at: asset.publishedAt,
+    official_status: "current",
+    review_state: "published",
+    body_kind: "native",
+    human_confirmed: true,
+    tampered: false,
+    extraction_snapshot: asset.extractionSnapshot,
+  };
+  const item: SafetyReferenceItem = {
+    id: asset.itemId,
+    source_id: asset.sourceId,
+    item_type: asset.itemType,
+    category: asset.category,
+    subcategory: "기술지원규정",
+    title: asset.title,
+    summary: "외벽도장보수공사의 작업발판, 비계, 추락 방지 및 작업 전 점검 기술지침",
+    body: asset.body,
+    keywords: ["외벽도장", "외벽 보수", "비계", "작업발판", "추락", "강풍"],
+    risk_tags: ["추락", "비계", "고소작업"],
+    primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+    controls: [
+      "작업발판과 비계의 구조 및 설치 상태를 확인한다.",
+      "추락방지설비와 개인보호구 착용 상태를 확인한다.",
+      "기상 조건과 작업중지 기준을 작업 전 공유한다.",
+    ],
+    source_url: asset.officialUrl,
+    evidence_role: "supporting",
+    retrieval_source: "local-tag",
+    payload,
+    kosha_guide: {
+      referenceId: asset.itemId,
+      stableDocumentKey: asset.stableDocumentKey,
+      version: asset.version,
+      quality: "accepted",
+      lifecycle: "current",
+      bodyKind: "native",
+      anchors: [],
+      evidenceRef: `${asset.version} 공식 정규화 본문`,
+      directEligible: true,
+      officialUrl: asset.officialUrl,
+      officialFileId: asset.officialFileId,
+      publicationDate: asset.publishedAt,
+      officialVersion: asset.version,
+      officialStatus: "current",
+      pdfSha256: asset.pdfSha256,
+      bodySha256: asset.bodySha256,
+    },
+  };
+  const grounding = buildExactTrustedKoshaGroundingDecision(item);
+  return grounding ? { ...item, kosha_grounding: grounding } : null;
+}
+
+export async function loadBundledExactKoshaReference(
+  assetPath = DEFAULT_EXACT_KOSHA_ASSET_PATH,
+): Promise<BundledExactKoshaLoadResult> {
+  let raw: string;
+  try {
+    raw = await readFile(assetPath, "utf8");
+  } catch (error) {
+    return {
+      status: "blocked",
+      reason: "asset-unavailable",
+      message: error instanceof Error ? error.message : "exact KOSHA asset read failed",
+    };
+  }
+  let value: unknown;
+  try {
+    value = JSON.parse(raw) as unknown;
+  } catch (error) {
+    return {
+      status: "blocked",
+      reason: "asset-invalid",
+      message: error instanceof Error ? error.message : "exact KOSHA asset JSON invalid",
+    };
+  }
+  const asset = parseBundledExactKoshaAsset(value);
+  if (!asset) {
+    return { status: "blocked", reason: "asset-invalid", message: "exact KOSHA asset shape invalid" };
+  }
+  const item = buildBundledExactKoshaItem(asset);
+  if (!item) {
+    return {
+      status: "blocked",
+      reason: "asset-integrity-failed",
+      message: "exact KOSHA asset does not satisfy the immutable production trust pin",
+    };
+  }
+  return { status: "ready", item };
+}
 
 function isKoshaTechnicalItemType(itemType: string): boolean {
   return itemType === "technical-guideline" || itemType === "technical-support-regulation";
@@ -102,7 +305,42 @@ function localGateMessage(
 export function isRemoteReferenceRetainedByLocalKoshaGate(
   item: SafetyReferenceItem
 ): boolean {
-  return !isKoshaTechnicalReference(item) || isKoshaSupportingCitationEligible(item);
+  return !isKoshaTechnicalReference(item) || isProductionTrustedKoshaReference(item);
+}
+
+function exactBundleAppliesToQuery(query: string): boolean {
+  const normalized = query.normalize("NFKC").toLocaleLowerCase("ko-KR").replace(/\s+/gu, " ").trim();
+  if (!normalized.includes("외벽")) return false;
+  return ["도장", "보수", "비계", "작업발판"].some((term) => normalized.includes(term));
+}
+
+export function mergeBundledExactKoshaFallback(input: Readonly<{
+  query: string;
+  remoteItems: readonly SafetyReferenceItem[];
+  bundledItem: SafetyReferenceItem;
+  localGateActive: boolean;
+  limit: number;
+}>): SafetyReferenceItem[] {
+  const gated = input.localGateActive
+    ? input.remoteItems.filter(isRemoteReferenceRetainedByLocalKoshaGate)
+    : [...input.remoteItems];
+  const applicable = exactBundleAppliesToQuery(input.query);
+  const exactRemote = gated.find((item) => (
+    item.id === input.bundledItem.id && isProductionTrustedKoshaReference(item)
+  ));
+  const retained = applicable
+    ? gated.filter((item) => item.id !== input.bundledItem.id)
+    : gated;
+  const selected = applicable ? [exactRemote ?? input.bundledItem, ...retained] : retained;
+  const deduplicated: SafetyReferenceItem[] = [];
+  const seen = new Set<string>();
+  for (const item of selected) {
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    deduplicated.push(item);
+    if (deduplicated.length >= input.limit) break;
+  }
+  return deduplicated;
 }
 
 export async function searchSafetyReferences(
@@ -120,21 +358,51 @@ export async function searchSafetyReferences(
   const localItems = localSearch.items
     .filter(() => !options.evidenceRole || options.evidenceRole === "supporting")
     .map(buildLocalItem);
-  const remote = await searchRemoteSafetyReferences(options);
+  const bundledExact = localAllowed
+    ? await loadBundledExactKoshaReference()
+    : { status: "blocked" as const, reason: "asset-unavailable" as const, message: "bundle not applicable" };
+  const remoteResult = await searchRemoteSafetyReferences(options);
+  const remoteItems = remoteResult.items.map((item) => {
+    const exactGrounding = buildExactTrustedKoshaGroundingDecision(item);
+    return exactGrounding ? { ...item, kosha_grounding: exactGrounding } : item;
+  });
+  const remote: SafetyReferenceSearchResult = { ...remoteResult, items: remoteItems };
   const localGateStatus = localAllowed && localCorpus.status !== "ready"
     ? localCorpus.status
     : null;
   const localGateFailures = localCorpus.status === "blocked" ? localCorpus.failures : [];
-  const retainedRemoteItems = localGateStatus
-    ? remote.items.filter(isRemoteReferenceRetainedByLocalKoshaGate)
-    : remote.items;
-  const excludedRemoteCount = remote.items.length - retainedRemoteItems.length;
+  const retainedRemoteItems = bundledExact.status === "ready"
+    ? mergeBundledExactKoshaFallback({
+        query,
+        remoteItems: remote.items,
+        bundledItem: bundledExact.item,
+        localGateActive: localGateStatus !== null,
+        limit,
+      })
+    : localGateStatus
+      ? remote.items.filter(isRemoteReferenceRetainedByLocalKoshaGate)
+      : remote.items;
+  const retainedOriginalRemoteCount = localGateStatus
+    ? remote.items.filter(isRemoteReferenceRetainedByLocalKoshaGate).length
+    : remote.items.length;
+  const excludedRemoteCount = remote.items.length - retainedOriginalRemoteCount;
+  const bundledFallbackUsed = bundledExact.status === "ready"
+    && retainedRemoteItems.some((item) => item === bundledExact.item);
   const retainedVerifiedRemoteCount = retainedRemoteItems.filter((item) => (
     isKoshaTechnicalReference(item) && isKoshaSupportingCitationEligible(item)
   )).length;
-  const gatedRemote: SafetyReferenceSearchResult = localGateStatus
+  const remoteWithFallback: SafetyReferenceSearchResult = bundledFallbackUsed
     ? {
         ...remote,
+        configured: true,
+        count: retainedRemoteItems.length,
+        items: retainedRemoteItems,
+        message: `${remote.message} 공식 D-C-13 불변 번들로 partial DB 본문을 대체했습니다.`.trim(),
+      }
+    : remote;
+  const gatedRemote: SafetyReferenceSearchResult = localGateStatus
+    ? {
+        ...remoteWithFallback,
         count: retainedRemoteItems.length,
         items: retainedRemoteItems,
         koshaGrounding: summarizeKoshaGrounding({
@@ -143,14 +411,14 @@ export async function searchSafetyReferences(
           excludedCount: excludedRemoteCount,
           blockedReason: localGateReason(localGateStatus)
         }),
-        message: `${remote.message} ${localGateMessage(
+        message: `${remoteWithFallback.message} ${localGateMessage(
           localGateStatus,
           localGateFailures,
           excludedRemoteCount,
           retainedVerifiedRemoteCount
         )}`.trim()
       }
-    : remote;
+    : remoteWithFallback;
 
   if (!remote.configured) {
     if (localItems.length) {
@@ -184,16 +452,16 @@ export async function searchSafetyReferences(
     return gatedRemote;
   }
   if (!remote.ok || localGateStatus) return gatedRemote;
-  if (!localItems.length) return remote;
+  if (!localItems.length) return remoteWithFallback;
 
   const merged = mergeLocalAndRemoteSafetyReferenceResults({
     localItems,
-    remoteItems: remote.items,
-    remoteRetrievalMode: remote.retrievalMode,
+    remoteItems: remoteWithFallback.items,
+    remoteRetrievalMode: remoteWithFallback.retrievalMode,
     limit
   });
   return {
-    ...remote,
+    ...remoteWithFallback,
     count: merged.items.length,
     items: merged.items,
     retrievalMode: merged.retrievalMode,
@@ -201,6 +469,6 @@ export async function searchSafetyReferences(
       items: merged.items,
       localCorpusStatus: "ready"
     }),
-    message: `KOSHA 오프라인 보조근거와 ${remote.message}`
+    message: `KOSHA 오프라인 보조근거와 ${remoteWithFallback.message}`
   };
 }

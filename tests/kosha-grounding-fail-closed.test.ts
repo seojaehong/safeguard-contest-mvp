@@ -14,7 +14,10 @@ import {
   type SafetyReferenceItem,
   type SafetyReferenceSearchResult
 } from "@/lib/safety-reference-catalog";
-import { searchSafetyReferences as searchServerSafetyReferences } from "@/lib/safety-reference-catalog-server";
+import {
+  loadBundledExactKoshaReference,
+  searchSafetyReferences as searchServerSafetyReferences,
+} from "@/lib/safety-reference-catalog-server";
 import { resetKoshaGuideCorpusCacheForTests } from "@/lib/kosha-guide-corpus";
 import {
   cleanupKoshaFixtures,
@@ -456,7 +459,7 @@ describe("bounded KOSHA grounding fail-closed", () => {
     });
   });
 
-  it("keeps the aggregate blocked when an integrity-failed local corpus retains verified remote KOSHA", async () => {
+  it("keeps the aggregate blocked and excludes general verified KOSHA when local integrity fails", async () => {
     const rootDir = createKoshaFixture({ state: "current" });
     appendFileSync(join(rootDir, "current.json"), "tampered", "utf8");
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
@@ -484,25 +487,17 @@ describe("bounded KOSHA grounding fail-closed", () => {
       limit: 5,
       offlineCorpus: { rootDir }
     }) as SafetyReferenceSearchResult & GroundingSearchProjection;
-    const retained = result.items[0];
-
-    expect(result.items.map((item) => item.id)).toEqual(["verified-remote-with-local-integrity-block"]);
-    expect(grounding(retained)).toMatchObject({
-      status: "verified_current",
-      supportingCitationEligible: true,
-      directEvidenceEligible: false,
-      riskRowEligible: false
-    });
+    expect(result.items).toEqual([]);
     expect(result.koshaGrounding).toMatchObject({
       status: "blocked",
       reason: "local-corpus-integrity-failed",
       localGateReason: "local-corpus-integrity-failed",
       localCorpusStatus: "blocked",
-      acceptedCount: 1,
+      acceptedCount: 0,
       reviewRequiredCount: 0,
-      excludedCount: 0
+      excludedCount: 1
     });
-    expect(result.message).toMatch(/무결성.*검증된 현행 원격 KOSHA 1건.*기술적 보조지침/u);
+    expect(result.message).toMatch(/무결성.*검증되지 않은 원격 KOSHA 1건 제외/u);
   });
 
   it("fails closed when the local corpus is unavailable without affecting non-KOSHA rows", async () => {
@@ -540,7 +535,7 @@ describe("bounded KOSHA grounding fail-closed", () => {
     expect(isSafetyReferenceRiskEligible(result.items[0] as SafetyReferenceItem)).toBe(true);
   });
 
-  it("keeps verified remote KOSHA supporting evidence while exposing the unavailable local gate", async () => {
+  it("excludes general verified KOSHA when the exact local trust boundary is unavailable", async () => {
     vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
@@ -568,16 +563,67 @@ describe("bounded KOSHA grounding fail-closed", () => {
       offlineCorpus: { rootDir: null, env: { KOSHA_GUIDE_CORPUS_DIR: undefined } }
     }) as SafetyReferenceSearchResult & GroundingSearchProjection;
 
-    expect(result.items.map((item) => item.id)).toEqual(["verified-remote-with-local-unavailable"]);
+    expect(result.items).toEqual([]);
     expect(result.koshaGrounding).toMatchObject({
-      status: "ready",
-      reason: "verified-current",
+      status: "blocked",
+      reason: "local-corpus-unavailable",
       localGateReason: "local-corpus-unavailable",
       localCorpusStatus: "unconfigured",
-      acceptedCount: 1,
+      acceptedCount: 0,
       reviewRequiredCount: 0,
-      excludedCount: 0
+      excludedCount: 1
     });
-    expect(result.message).toMatch(/검증된 현행 원격 KOSHA 1건.*기술적 보조지침/u);
+    expect(result.message).toMatch(/검증되지 않은 원격 KOSHA 1건 제외/u);
+  });
+
+  it("replaces the live 2,582-character D-C-13 DB row with the immutable official bundle", async () => {
+    vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const bundled = await loadBundledExactKoshaReference();
+    if (bundled.status !== "ready") throw new Error("expected exact bundle fixture");
+    const partialBody = bundled.item.body?.slice(0, 2_582) ?? "";
+    const partialRow = {
+      ...bundled.item,
+      body: partialBody,
+      kosha_grounding: undefined,
+      kosha_guide: undefined,
+      payload: {
+        ...(bundled.item.payload ?? {}),
+        body_sha256: sha256(partialBody),
+      },
+    };
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url.includes("/rpc/search_safety_references_ranked")) {
+        return new Response(JSON.stringify([partialRow]), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      throw new Error(`Unexpected fetch URL: ${url}`);
+    }));
+
+    const result = await searchServerSafetyReferences({
+      query: "서울 외벽 도장 작업, 이동식 비계와 강풍 추락 위험",
+      limit: 5,
+      offlineCorpus: { rootDir: null, env: { KOSHA_GUIDE_CORPUS_DIR: undefined } },
+    }) as SafetyReferenceSearchResult & GroundingSearchProjection;
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.id).toBe(bundled.item.id);
+    expect(result.items[0]?.body).toHaveLength(19_058);
+    expect(grounding(result.items[0])).toMatchObject({
+      status: "verified_current",
+      source: "production-registry",
+      directEvidenceEligible: true,
+    });
+    expect(result.koshaGrounding).toMatchObject({
+      acceptedCount: 1,
+      excludedCount: 1,
+      localCorpusStatus: "unconfigured",
+    });
+    expect(result.message).toMatch(/불변 번들.*partial DB 본문을 대체/u);
   });
 });

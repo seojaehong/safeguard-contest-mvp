@@ -1,5 +1,7 @@
 # Exact-trusted KOSHA grounding verification
 
+> **SUPERSEDED / REJECTED:** This report describes commit `52861c24`. Independent review rejected that commit because optional pinned metadata, broad remote-KOSHA retention, missing mutation tests, and the absence of a deployable official-body fallback left the live contract incomplete. Use `remediation-report.md` for the corrected candidate.
+
 ## Scope
 
 - Base: `b15f24e0f8412dd5d86a5a07292427e39838410e`
@@ -40,4 +42,4 @@ The focused tests reject body hash, item ID, source ID, item type, version/title
 
 ## Verdict
 
-PASS for bounded selective integration after independent review. The patch does not claim full-suite, live deployment, or database validation.
+REJECTED and superseded. Do not integrate `52861c24` without the remediation commit documented in `remediation-report.md`.
