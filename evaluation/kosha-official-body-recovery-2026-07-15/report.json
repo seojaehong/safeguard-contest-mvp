@@ -1,6 +1,6 @@
 {
   "schema_version": "safeclaw-kosha-official-body-recovery-report/v1",
-  "generated_at": "2026-07-15T01:47:29.194436+00:00",
+  "generated_at": "2026-07-15T02:07:29.532150+00:00",
   "status": "pass",
   "launch_ready": true,
   "source": {
@@ -59,5 +59,35 @@
     "replacement_manifest": "official-download-replacement-manifest.json",
     "repack_manifest": "repack-manifest.json",
     "verification": "verification.json"
+  },
+  "portability": {
+    "status": "pass",
+    "ledger": "portability-ledger.json",
+    "ledger_sha256": "b2ade4323cddecc0a50dab98f944f0781dc09885c8bdece4c1a6c0ea2010d0ef",
+    "record_count": 22,
+    "source_zip_count": 7,
+    "external_bundle_location": "output/kep1/bundle",
+    "external_bundle_blob_count": 22,
+    "external_bundle_size_bytes": 37387427,
+    "bundle_committed": false,
+    "missing_bundle_fail_closed": true,
+    "official_refetch": {
+      "opt_in_only": true,
+      "timeout_seconds": 20.0,
+      "retries": 1
+    },
+    "commands": {
+      "verify": "python scripts/verify_kosha_evidence_ledger.py --ledger evaluation/kosha-official-body-recovery-2026-07-15/portability-ledger.json --bundle-root output/kep1/bundle --corpus-root output/kobr26/corpus --promotion-root output/kobr26/promotion",
+      "rehydrate_local": "python scripts/rehydrate_kosha_evidence_bundle.py --ledger evaluation/kosha-official-body-recovery-2026-07-15/portability-ledger.json --source-bundle-root output/kep1/bundle --output-bundle-root output/kep1-rehydrated/bundle",
+      "rehydrate_official": "python scripts/rehydrate_kosha_evidence_bundle.py --ledger evaluation/kosha-official-body-recovery-2026-07-15/portability-ledger.json --source-bundle-root output/missing-bundle --output-bundle-root output/kep1-refetched/bundle --allow-official-refetch"
+    },
+    "verification": {
+      "check_count": 14,
+      "failed_check_count": 0,
+      "python_tests_passed": 23,
+      "npm_tests_passed": 120,
+      "typecheck_exit_code": 0,
+      "diff_check_exit_code": 0
+    }
   }
 }
