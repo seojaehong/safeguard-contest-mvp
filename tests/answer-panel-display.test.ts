@@ -3,11 +3,21 @@ import { describe, expect, it } from "vitest";
 import {
   buildAnswerPanelStatusNotes,
   groundingFieldLabel,
+  groundingGroupLabel,
   sanitizeAnswerForDisplay,
   type AnswerPanelPublicStatusInput
 } from "@/lib/answer-panel-display";
 
 describe("answer panel display copy", () => {
+  it.each([
+    ["workPlanStructured", "작업계획서"],
+    ["tbmBriefingStructured", "TBM 브리핑"],
+    ["tbmLogStructured", "TBM 기록"],
+    ["educationRecordStructured", "안전보건교육 기록"]
+  ])("labels the rejected group %s on the AnswerPanel display path", (group, expectedLabel) => {
+    expect(groundingGroupLabel(group)).toBe(expectedLabel);
+  });
+
   it.each([
     ["$.workPlanStructured.stopCriteria[0]", "작업계획서"],
     ["$.tbmBriefingStructured.stopCriteria[0]", "TBM 브리핑"],

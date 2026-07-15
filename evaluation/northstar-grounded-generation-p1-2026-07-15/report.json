@@ -21,6 +21,24 @@
       ]
     }
   },
+  "thirdReReview": {
+    "startingHead": "c82d3fbb9d1c081df1c9fa51f67175c7b48ba3d0",
+    "closedFindings": [
+      "multiword action-shaped nominal clauses are packet-bound",
+      "descriptive metadata labels remain allowed by structural label distinction",
+      "safetyEducationPoints are validated without an educationRecordStructured sibling",
+      "actual structured rejectedGroups keys use the AnswerPanel group-label path"
+    ],
+    "red": {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts",
+      "testsFailed": 7,
+      "failures": {
+        "multiwordNominalActions": 2,
+        "independentSafetyEducationPoints": 1,
+        "structuredRejectedGroupLabels": 4
+      }
+    }
+  },
   "red": {
     "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts",
     "testsPassed": 29,
@@ -77,6 +95,30 @@
       "command": "git diff --check",
       "exitCode": 0,
       "freshReReview": true
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts",
+      "testFilesPassed": 2,
+      "testsPassed": 54,
+      "testsFailed": 0,
+      "thirdReReview": true
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts --reporter=dot",
+      "testFilesPassed": 5,
+      "testsPassed": 109,
+      "testsFailed": 0,
+      "thirdReReview": true
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "thirdReReview": true
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "thirdReReview": true
     }
   ],
   "excludedChanges": [

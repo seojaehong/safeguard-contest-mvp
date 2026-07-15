@@ -1,33 +1,16 @@
 import {
   buildAnswerPanelStatusNotes,
   groundingFieldLabel,
+  groundingGroupLabel,
   sanitizeAnswerForDisplay
 } from "@/lib/answer-panel-display";
 import type { AskResponse } from "@/lib/types";
-
-const GROUNDING_GROUP_LABELS: Readonly<Record<string, string>> = {
-  deliverablesPipeline: "문서 생성 전체",
-  riskAssessment: "위험성평가",
-  workPlan: "작업계획서",
-  tbmBriefing: "TBM 브리핑",
-  tbmLog: "TBM 기록",
-  safetyEducation: "안전보건교육",
-  permitInspection: "안전작업허가",
-  structuredRiskRows: "위험성평가 행",
-  free: "현장 요약·비상대응",
-  foreign: "외국인 근로자 안내",
-  tbmRiskLinks: "TBM 위험 연결"
-};
 
 const GROUNDING_ISSUE_LABELS: Readonly<Record<string, string>> = {
   unknown_reference: "승인되지 않은 근거가 포함됨",
   control_provenance_missing: "조치의 연결 근거가 없음",
   control_claim_not_in_packet: "근거팩에 없는 조치가 포함됨"
 };
-
-function groundingGroupLabel(group: string): string {
-  return GROUNDING_GROUP_LABELS[group] || "안전 문서";
-}
 
 export function AnswerPanel({ data }: { data: AskResponse }) {
   const modeLabel =

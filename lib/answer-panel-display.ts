@@ -13,6 +13,24 @@ export type AnswerPanelPublicStatusInput = {
   };
 };
 
+const GROUNDING_GROUP_LABELS: Readonly<Record<string, string>> = {
+  deliverablesPipeline: "문서 생성 전체",
+  riskAssessment: "위험성평가",
+  workPlan: "작업계획서",
+  workPlanStructured: "작업계획서",
+  tbmBriefing: "TBM 브리핑",
+  tbmBriefingStructured: "TBM 브리핑",
+  tbmLog: "TBM 기록",
+  tbmLogStructured: "TBM 기록",
+  safetyEducation: "안전보건교육",
+  educationRecordStructured: "안전보건교육 기록",
+  permitInspection: "안전작업허가",
+  structuredRiskRows: "위험성평가 행",
+  free: "현장 요약·비상대응",
+  foreign: "외국인 근로자 안내",
+  tbmRiskLinks: "TBM 위험 연결"
+};
+
 const internalOperationalPattern = new RegExp([
   "OPENAI_API_KEY",
   "AI_MODE",
@@ -62,6 +80,10 @@ export function groundingFieldLabel(path: string): string {
   if (path.includes("completionChecks")) return "작업 완료 확인";
   if (path.includes("riskAssessmentDraft")) return "위험성평가 본문";
   return "안전조치 항목";
+}
+
+export function groundingGroupLabel(group: string): string {
+  return GROUNDING_GROUP_LABELS[group] || "안전 문서";
 }
 
 export function buildAnswerPanelStatusNotes(data: AnswerPanelPublicStatusInput) {
