@@ -1,0 +1,38 @@
+{
+  "source": "http://127.0.0.1:3027",
+  "generatedAt": "2026-07-15T06:25:46.948Z",
+  "metrics": [
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "theme": "day",
+      "documentOverflow": 0,
+      "bodyOverflow": 0,
+      "outsideElements": 0,
+      "visibleNeighborhoodNodes": 15,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "minimumNodeContrast": 16.01
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "theme": "night",
+      "documentOverflow": 0,
+      "bodyOverflow": 0,
+      "outsideElements": 0,
+      "visibleNeighborhoodNodes": 15,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "minimumNodeContrast": 16.01
+    }
+  ]
+}

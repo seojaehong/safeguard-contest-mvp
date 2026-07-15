@@ -1,0 +1,55 @@
+## focused ontology tests
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/ontology-tablet-overflow-20260715
+
+
+ Test Files  13 passed | 1 skipped (14)
+      Tests  136 passed | 1 skipped (137)
+   Start at  15:30:58
+   Duration  20.45s (transform 1.46s, setup 0ms, import 3.85s, tests 5.02s, environment 2ms)
+
+## tablet browser regression
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/ontology-tablet-overflow-20260715
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  15:31:22
+   Duration  25.10s (transform 40ms, setup 0ms, import 558ms, tests 23.75s, environment 0ms)
+
+## desktop and mobile ontology browser contract
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/ontology-tablet-overflow-20260715
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  15:31:52
+   Duration  23.23s (transform 70ms, setup 0ms, import 778ms, tests 21.51s, environment 0ms)
+
+## strict typecheck
+
+> safeclaw@0.1.0 typecheck
+> tsc --noEmit --incremental false
+
+## frontend static audit
+
+> safeclaw@0.1.0 audit:frontend-consistency
+> node ./scripts/frontend_consistency_audit.mjs
+
+{
+  "outputPath": "evaluation\\ontology-tablet-overflow-2026-07-15\\static-audit.json",
+  "status": "pass",
+  "counts": {
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "cssLines": 20991,
+    "importantDeclarations": 0
+  },
+  "coverageIssues": 0,
+  "violationCount": 0
+}
+## git diff check
+warning: in the working copy of 'app/ontology/OntologyWorkbench.module.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json', LF will be replaced by CRLF the next time Git touches it

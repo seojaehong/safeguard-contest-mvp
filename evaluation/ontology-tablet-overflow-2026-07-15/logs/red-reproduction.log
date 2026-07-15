@@ -1,0 +1,6 @@
+Command: npx.cmd vitest run tests/ontology-tablet-overflow.test.ts --maxWorkers=1 --no-file-parallelism
+Source HEAD: 79e48daec4add10706068dd6a5705c4f5ca7d5f9
+Viewport: 1024x768
+Result: 1 file failed, 2 tests failed
+Expected documentOverflow: 0
+Received documentOverflow: 124

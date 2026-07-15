@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/ontology-tablet-overflow-20260715
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  15:23:33
+   Duration  8.02s (transform 41ms, setup 0ms, import 577ms, tests 6.56s, environment 0ms)
+
