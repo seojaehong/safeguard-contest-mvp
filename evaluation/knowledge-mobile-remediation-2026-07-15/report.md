@@ -2,7 +2,7 @@
 
 ## Scope
 
-- Base: `9380be70d8b617e8f8343973276c1fafe058c733`
+- Base after integration-branch rebase: `a00e99d91ec5d04d9efbda29e369b04904fd5b49`
 - Route: `/knowledge`
 - Product ownership: `app/knowledge/page.tsx`, `app/knowledge/KnowledgePage.module.css`
 - DB, schema, data mutation: none
@@ -20,7 +20,7 @@ The repository renders the route from `app/knowledge/page.tsx`; the requested `K
 
 - RED: 4 expected failures reproduced the missing presentation boundary and the measured `18px` mobile targets.
 - GREEN focused run: 2 files, 11 tests passed.
-- Final related run: 3 files, 18 tests passed.
+- Final post-rebase related run: 3 files, 18 tests passed.
 - Strict TypeScript: passed with `tsc --noEmit --incremental false`.
 - Diff check: passed; line-ending notices are repository Windows normalization warnings only.
 
