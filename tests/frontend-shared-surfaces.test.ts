@@ -168,6 +168,19 @@ describe("canonical shared surface styles", () => {
     ).toMatchObject({ color: "var(--workspace-muted)" });
   });
 
+  it("shows every core document selector without a mobile horizontal rail", () => {
+    expect(
+      declarationsForExactSelector(
+        css,
+        ".command-center-shell .document-workbench .document-viewer-list",
+      ),
+    ).toMatchObject({
+      "grid-auto-flow": "row",
+      "grid-template-columns": "minmax(0, 1fr)",
+      "overflow-x": "visible",
+    });
+  });
+
   it("defines the shared special state with canonical panel geometry", () => {
     const rule = declarationsForExactSelector(css, ".special-state");
 
