@@ -5,7 +5,12 @@
   "supersededCandidateSha": "44ffa57f6b08f1a4b5622e8a88b5c41134d9902c",
   "branch": "fix/exact-trusted-kosha-grounding-20260715",
   "status": "implementation-verified",
-  "independentReview": "pending",
+  "independentReview": "pass-p0-p3-zero",
+  "integration": {
+    "sourceHead": "dd6b9e561d44169b094eb4490acb2a302b9099a0",
+    "mappedCommits": ["b60aea9", "fad0fc6", "5dbdda3"],
+    "postIntegrationVerification": "pass"
+  },
   "scope": {
     "databaseMutation": false,
     "databaseMigration": false,

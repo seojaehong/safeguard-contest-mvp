@@ -50,4 +50,6 @@ npm.cmd test -- tests/kosha-grounding-fail-closed.test.ts tests/commercial-harne
 
 ## Verdict
 
-Implementation verification passes for this bounded remediation. This report supersedes the rejected claims for `52861c24` and `44ffa57`; independent re-review and live preview verification remain post-commit gates and are not claimed here.
+Implementation verification and fresh independent re-review pass for exact source HEAD `dd6b9e56` with no P0-P3 findings. The approved series maps onto the North Star integration branch as `b60aea9` -> `fad0fc6` -> `5dbdda3`.
+
+Post-integration verification at `5dbdda3` passed the same focused 6 files / 166 tests, strict typecheck, and a sequential production build with 28/28 static pages. Live preview generation remains a post-push gate and is not claimed here.
