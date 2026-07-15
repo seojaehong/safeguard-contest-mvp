@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import {
   buildOntologyNeighborhood,
@@ -11,6 +12,34 @@ const root = path.resolve(__dirname, "..");
 
 function read(relativePath: string) {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
+}
+
+function extractVisibleJsxCopy(source: string) {
+  const sourceFile = ts.createSourceFile("OntologyExplorer.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const visibleCopy: string[] = [];
+
+  function collectDisplayExpression(node: ts.Node): void {
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+      visibleCopy.push(node.text);
+    } else if (ts.isConditionalExpression(node)) {
+      collectDisplayExpression(node.whenTrue);
+      collectDisplayExpression(node.whenFalse);
+    } else if (ts.isParenthesizedExpression(node)) {
+      collectDisplayExpression(node.expression);
+    }
+  }
+
+  function visit(node: ts.Node): void {
+    if (ts.isJsxText(node)) visibleCopy.push(node.text);
+    if (ts.isJsxAttribute(node) && node.name.getText(sourceFile) === "placeholder" && node.initializer && ts.isStringLiteral(node.initializer)) {
+      visibleCopy.push(node.initializer.text);
+    }
+    if (ts.isJsxExpression(node) && node.expression) collectDisplayExpression(node.expression);
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return visibleCopy.join(" ").replace(/\s+/g, " ").trim();
 }
 
 function buildSource(count = 24): NeighborhoodSource {
@@ -142,5 +171,12 @@ describe("ontology P0 presentation contract", () => {
     for (const customerLabel of ["검증된 안전지식", "직접 관계", "확장 관계", "대체자료"]) {
       expect(`${page}\n${explorer}`).toContain(customerLabel);
     }
+  });
+
+  it("keeps internal ontology terminology out of default visible customer copy", () => {
+    const visibleCopy = extractVisibleJsxCopy(read("app/ontology/OntologyExplorer.tsx"));
+
+    expect(visibleCopy).not.toMatch(/published|seed|시드|node|노드|hop|홉/i);
+    expect(visibleCopy).toContain("검증된 안전지식 찾기");
   });
 });

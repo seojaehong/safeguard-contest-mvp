@@ -262,7 +262,7 @@ export function OntologyExplorer({
 
       <section className={styles.directory} aria-labelledby="ontology-directory-title">
         <header>
-          <div><span>전체 목록</span><h2 id="ontology-directory-title">검증된 노드 찾기</h2></div>
+          <div><span>전체 목록</span><h2 id="ontology-directory-title">검증된 안전지식 찾기</h2></div>
           <strong>{filteredList.length.toLocaleString("ko-KR")}개</strong>
         </header>
         <div className={styles.nodeGrid}>
