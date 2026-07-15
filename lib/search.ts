@@ -5,7 +5,7 @@ import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-d
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
 import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
-import { buildGroundedGenerationPacket } from "./grounded-generation-contract";
+import { buildGroundedGenerationPacket, type GroundedGenerationPacket } from "./grounded-generation-contract";
 import {
   deriveSafetyReferenceOperationalView,
   deriveSafetyReferenceRetrievalModeFromItems,
@@ -612,7 +612,8 @@ export function buildTbmBriefingStructuredFromRiskRows(
   const measures = selectedRows.map((row, index) => ({
     hazardRef: Math.min(index + 1, safeHazards.length),
     action: compactTbmText(row.additionalControls || row.currentControls, "작업 전 안전조치 확인", 80),
-    owner: compactTbmText(row.owner, "작업반장", 30)
+    owner: compactTbmText(row.owner, "작업반장", 30),
+    evidenceRefs: [...row.evidenceRefs]
   }));
   const stopCriteria = fillTbmList(
     [
@@ -647,7 +648,8 @@ export function buildTbmBriefingStructuredFromRiskRows(
     measures: measures.length ? measures : [{
       hazardRef: 1,
       action: "작업 전 안전조치 확인",
-      owner: "작업반장"
+      owner: "작업반장",
+      evidenceRefs: []
     }],
     stopCriteria,
     confirmTopics,
@@ -682,7 +684,8 @@ export function buildTbmLogStructuredFromRiskRows(
       item: compactTbmText(row.hazard, "보완 필요 위험요인", 50),
       plannedAction: compactTbmText(row.additionalControls || row.verification, "관리감독자 확인 후 작업 재개", 70),
       owner: compactTbmText(row.owner, "작업반장", 30),
-      dueDate: row.due || "현장 확인"
+      dueDate: row.due || "현장 확인",
+      evidenceRefs: [...row.evidenceRefs]
     }));
 
   return {
@@ -1688,6 +1691,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     envDefault: process.env.AI_MODE_DEFAULT
   });
   let deliverablesAttempted = false;
+  let deliverablesGroundingPacket: GroundedGenerationPacket | null = null;
 
   // Fix 4: template fast path — no external calls, no AI, pure static output < 100ms
   if (aiMode === "template") {
@@ -1915,6 +1919,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               legalCandidates: rawBase.slice(0, 6),
               eligibleKoshaIds: koshaParentEvidenceReadyIdsEarly
             });
+            deliverablesGroundingPacket = groundingPacket;
             const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
             const publicSafeRefItems = [
               ...dbHarnessPacket.directEvidence,
@@ -1962,7 +1967,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
                 deliverables: {},
                 diagnostics: buildFailedDeliverablesDiagnostics({
                   attempted: deliverablesAttempted,
-                  fallbackUsed: true
+                  fallbackUsed: true,
+                  groundingPacket
                 })
               };
             });
@@ -1970,7 +1976,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             log.error("deliverablesPromise setup failed", safeFailureContext(error));
             return {
               deliverables: {},
-              diagnostics: buildFailedDeliverablesDiagnostics({ attempted: false, fallbackUsed: true })
+              diagnostics: buildFailedDeliverablesDiagnostics({
+                attempted: false,
+                fallbackUsed: true,
+                groundingPacket: deliverablesGroundingPacket
+              })
             };
           })
         : Promise.resolve(null);
@@ -2134,7 +2144,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
                 deliverables: {},
                 diagnostics: buildFailedDeliverablesDiagnostics({
                   attempted: deliverablesAttempted,
-                  fallbackUsed: true
+                  fallbackUsed: true,
+                  groundingPacket: deliverablesGroundingPacket
                 })
               }
             : null
@@ -2567,7 +2578,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     } as const;
     const failedDeliverables = buildFailedDeliverablesDiagnostics({
       attempted: deliverablesAttempted,
-      fallbackUsed: true
+      fallbackUsed: true,
+      groundingPacket: deliverablesGroundingPacket
     });
     const finalDeliverablesTrace = finalizeDeliverablesTrace(response, failedDeliverables.trace);
     return {
