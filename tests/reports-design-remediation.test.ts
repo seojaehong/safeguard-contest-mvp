@@ -1289,7 +1289,9 @@ describe("Reports Wave 1 browser design contract", () => {
         const reportDocument = page.getByLabel("작업문서형 리포트");
         await reportDocument.waitFor({ state: "visible" });
         expect(await reportDocument.locator("[role='row']").count()).toBeGreaterThan(1);
-        expect(await page.getByLabel("리포트 다운로드").getByRole("button").count()).toBe(5);
+        const reportDownloads = page.getByLabel("리포트 다운로드");
+        expect(await reportDownloads.getByRole("button").count()).toBe(2);
+        expect(await reportDownloads.locator("button").count()).toBe(5);
 
         const previewSummary = page.locator(".safeclaw-report-preview > summary");
         await previewSummary.focus();

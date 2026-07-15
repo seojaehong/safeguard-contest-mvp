@@ -442,7 +442,7 @@ function buildPermitInspectionStructured(data: AskResponse): PermitInspectionStr
     },
     {
       category: "기상·환경",
-      requirement: "기상/API 신호와 현장 체감 조건 확인",
+      requirement: "기상 정보와 현장 체감 조건 확인",
       action: weatherActions.join(" / ") || data.scenario.weatherNote || "기상·현장 조건 확인 후 작업 여부 결정",
       owner: "안전관리자",
       status: "확인 전",
@@ -1066,7 +1066,7 @@ function buildTbmWeatherRiskBridge(data: AskResponse, riskRows: SheetRow[]) {
   const bridgeRows = buildTbmBridgeRows(data, riskRows);
   return `
     <section class="section-block">
-      <div class="section-label">위험성평가·기상 API 반영</div>
+      <div class="section-label">위험성평가·기상 정보 반영</div>
       <table>
         <colgroup><col style="width: 7%;" /><col style="width: 27%;" /><col style="width: 26%;" /><col style="width: 16%;" /><col style="width: 24%;" /></colgroup>
         <thead><tr><th>번호</th><th>주요 유해·위험요인</th><th>오늘 기상/환경 신호</th><th>출처 연결</th><th>TBM 전달 문구</th></tr></thead>
@@ -1502,7 +1502,7 @@ function buildHwpTemplateText(
   }, {});
   const tbmBridgeLines = data && (profile.layout === "tbmBriefing" || profile.layout === "tbmLog")
     ? [
-        "[위험성평가·기상 API 반영]",
+        "[위험성평가·기상 정보 반영]",
         ...buildTbmBridgeRows(data, riskRows).flatMap((row, index) => [
           `${index + 1}. 주요 유해·위험요인: ${row.risk}`,
           `   오늘 기상/환경 신호: ${row.weather}`,
@@ -1781,8 +1781,8 @@ function SafetyDocumentPreview({
         ))}
       </div>
       {tbmBridgeRows.length ? (
-        <section className="safety-form-bridge" aria-label="위험성평가와 기상 API 반영">
-          <h3>위험성평가·기상 API 반영</h3>
+        <section className="safety-form-bridge" aria-label="위험성평가와 기상 정보 반영">
+          <h3>위험성평가·기상 정보 반영</h3>
           <div className="safety-form-table-wrap">
             <table>
               <thead>
@@ -1995,7 +1995,7 @@ export function WorkpackEditor({
       {
         label: "유사사례",
         value: sifCaseCount,
-        description: harnessSummary ? "DB 하네스 기준" : "현재 페이지 기준"
+        description: harnessSummary ? "검증 근거 기준" : "현재 페이지 기준"
       },
       {
         label: "인용/보조",
@@ -3022,7 +3022,7 @@ export function WorkpackEditor({
                 <div className="sheets-action-box">
                   <button type="button" className="button" onClick={copySheetsTsv}>새 Google Sheets 열기 + 표 복사</button>
                   <button type="button" className="button secondary" onClick={downloadSheetsTsv}>Sheets용 TSV 다운로드</button>
-                  <p className="muted small">Google API/OAuth 없이 자동 입력은 하지 않습니다. 새 시트가 열리면 A1 셀에 붙여넣거나 TSV를 업로드해 사용하세요.</p>
+                  <p className="muted small">Google 계정 연결 없이 자동 입력은 하지 않습니다. 새 시트가 열리면 A1 셀에 붙여넣거나 TSV를 업로드해 사용하세요.</p>
                 </div>
                 {sheetStatus === "copied" ? <p className="muted small">표 데이터를 복사했습니다. 열린 Google Sheets의 A1 셀에 Ctrl+V로 붙여넣어 주세요.</p> : null}
                 {sheetStatus === "error" ? <p className="export-error">클립보드 복사에 실패해 TSV 파일을 내려받았습니다. Google Sheets에서 파일 가져오기로 업로드해 주세요.</p> : null}
