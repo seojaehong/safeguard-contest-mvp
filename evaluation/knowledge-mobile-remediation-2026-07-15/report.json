@@ -15,8 +15,18 @@
     "focusedTestsPassed": 11,
     "relatedTestFiles": 3,
     "relatedTestsPassed": 18,
+    "vitestVersion": "4.1.10",
     "strictTypecheck": "pass",
     "diffCheck": "pass",
+    "dependencySync": {
+      "command": "npm.cmd install",
+      "status": "pass",
+      "pdfLibVersion": "1.17.1",
+      "fontkitVersion": "1.1.1",
+      "packageJsonHashUnchanged": true,
+      "packageLockHashUnchanged": true,
+      "packageSourceDiffFiles": 0
+    },
     "productionBuild": "not_run",
     "liveDeployment": "pending_integration"
   },
@@ -24,6 +34,10 @@
     "machineIdentifiersPreserved": true,
     "rawGovernanceLabelsHiddenAtPresentationBoundary": true,
     "mobileTargetMinimumPx": 44,
+    "disclosuresClicked": true,
+    "closedToOpenTransitionVerified": true,
+    "sameOriginKnowledgeQueryLinksVerified": true,
+    "overlappingInteractiveTargetPairs": 0,
     "publishControlsAdded": false,
     "contentDeleted": false
   },
