@@ -40,7 +40,7 @@ vi.mock("@/lib/supabase-admin", () => ({
   createSupabaseAdminClient: vi.fn(() => null),
 }));
 
-import { registerTools } from "@/app/api/mcp/[transport]/route";
+import { registerTools } from "@/app/api/mcp/[transport]/implementation";
 
 type RegisteredTool = {
   invoke: (args: unknown, extra: unknown) => Promise<McpToolResult>;
