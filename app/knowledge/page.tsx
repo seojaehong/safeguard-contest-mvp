@@ -226,7 +226,13 @@ export default async function KnowledgePage() {
   const root = process.cwd();
   const indexMarkdown = await readText(path.join(root, "knowledge", "wiki", "index.md"));
   const schemaMarkdown = await readText(path.join(root, "knowledge", "SCHEMA.md"));
-  const schemaDisplayMarkdown = localizeSchemaForPresentation(schemaMarkdown);
+  const schemaPresentationSource = [
+    "표시 항목",
+    ...Object.keys(KNOWLEDGE_SCHEMA_PRESENTATION_LABELS).map((label) => `- ${label}`),
+    "",
+    schemaMarkdown
+  ].join("\n");
+  const schemaDisplayMarkdown = localizeSchemaForPresentation(schemaPresentationSource);
   const hazardEntries = await readWikiEntries("hazards");
   const formEntries = await readWikiEntries("forms");
   const stats = await getSafetyReferenceStats();
