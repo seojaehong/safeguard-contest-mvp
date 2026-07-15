@@ -288,7 +288,7 @@ describe("knowledge page decision layout", () => {
     }
   }, 90_000);
 
-  it("keeps mobile evidence disclosures and query links at least 44px tall", async () => {
+  it("keeps mobile evidence disclosures interactive, separated, and at least 44px tall", async () => {
     if (!browser) throw new Error("Browser was not started");
 
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -297,32 +297,68 @@ describe("knowledge page decision layout", () => {
 
     const details = page.locator("[data-knowledge-row] details");
     for (let index = 0; index < await details.count(); index += 1) {
-      await details.nth(index).evaluate((element) => {
-        element.setAttribute("open", "");
-      });
+      const detail = details.nth(index);
+      const summary = detail.locator("summary");
+      expect(await detail.evaluate((element) => element.open)).toBe(false);
+      await summary.click();
+      expect(await detail.evaluate((element) => element.open)).toBe(true);
     }
 
-    const targets = await page.evaluate(() => {
-      const elements = [
+    const metrics = await page.evaluate(() => {
+      const interactiveElements = [
         ...document.querySelectorAll<HTMLElement>("[data-knowledge-row] details > summary"),
         ...document.querySelectorAll<HTMLElement>("[data-knowledge-row] details a")
       ];
-      return elements
+      const targets = interactiveElements
         .filter((element) => {
           const style = getComputedStyle(element);
           return style.display !== "none" && style.visibility !== "hidden";
         })
-        .map((element) => ({
+        .map((element) => {
+          const rectangle = element.getBoundingClientRect();
+          return {
           label: element.textContent?.trim() || element.tagName,
-          width: element.getBoundingClientRect().width,
-          height: element.getBoundingClientRect().height
-        }));
+            href: element instanceof HTMLAnchorElement ? element.getAttribute("href") : null,
+            detailIndex: [...document.querySelectorAll("[data-knowledge-row] details")]
+              .indexOf(element.closest("details") as HTMLDetailsElement),
+            left: rectangle.left,
+            right: rectangle.right,
+            top: rectangle.top,
+            bottom: rectangle.bottom,
+            width: rectangle.width,
+            height: rectangle.height
+          };
+        });
+
+      const overlapPairs: string[] = [];
+      for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
+        for (let secondIndex = firstIndex + 1; secondIndex < targets.length; secondIndex += 1) {
+          const first = targets[firstIndex];
+          const second = targets[secondIndex];
+          if (first.detailIndex !== second.detailIndex) continue;
+          const horizontalOverlap = Math.min(first.right, second.right) - Math.max(first.left, second.left);
+          const verticalOverlap = Math.min(first.bottom, second.bottom) - Math.max(first.top, second.top);
+          if (horizontalOverlap > 0.5 && verticalOverlap > 0.5) {
+            overlapPairs.push(`${first.label} / ${second.label}`);
+          }
+        }
+      }
+
+      return { targets, overlapPairs };
     });
 
-    expect(targets.length).toBeGreaterThan(0);
-    for (const target of targets) {
+    expect(metrics.targets.length).toBeGreaterThan(0);
+    expect(metrics.overlapPairs).toEqual([]);
+    for (const target of metrics.targets) {
       expect(target.height, target.label).toBeGreaterThanOrEqual(44);
       expect(target.width, target.label).toBeGreaterThanOrEqual(44);
+      if (target.label === "이 근거로 조회") {
+        expect(target.href, target.label).toMatch(/^\/knowledge\?reference=[^&]+$/u);
+        const targetUrl = new URL(target.href || "", baseUrl);
+        expect(targetUrl.origin).toBe(baseUrl);
+        expect(targetUrl.pathname).toBe("/knowledge");
+        expect(targetUrl.searchParams.get("reference")?.trim().length).toBeGreaterThan(0);
+      }
     }
     await page.close();
   }, 90_000);
