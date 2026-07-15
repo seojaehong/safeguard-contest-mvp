@@ -1,0 +1,66 @@
+{
+  "source": "http://127.0.0.1:3025",
+  "generatedAt": "2026-07-15T02:18:16.606Z",
+  "metrics": [
+    {
+      "variant": "desktop-day",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "horizontalOverflow": 0,
+      "visibleNeighborhoodNodes": 13,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.37,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "expandedGraphVerified": false
+    },
+    {
+      "variant": "mobile-day",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "horizontalOverflow": 0,
+      "visibleNeighborhoodNodes": 0,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": null,
+      "desktopGraphVisible": false,
+      "mobileRelationsVisible": true,
+      "expandedGraphVerified": true
+    },
+    {
+      "variant": "desktop-night",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "horizontalOverflow": 0,
+      "visibleNeighborhoodNodes": 13,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.37,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "expandedGraphVerified": false
+    },
+    {
+      "variant": "mobile-night",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "horizontalOverflow": 0,
+      "visibleNeighborhoodNodes": 0,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": null,
+      "desktopGraphVisible": false,
+      "mobileRelationsVisible": true,
+      "expandedGraphVerified": true
+    }
+  ]
+}

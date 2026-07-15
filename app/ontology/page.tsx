@@ -1,27 +1,17 @@
 import Link from "next/link";
-import { OperationMemoryPreview } from "@/components/OperationMemoryPreview";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { assembleGraph, loadGraph } from "@/lib/ontology/graph-store";
 import { SEED_EDGES, SEED_NODES, SEED_STATS } from "@/lib/ontology/seed/core-triples";
 import { buildOntologyVisualizationModel } from "@/lib/ontology/visualization";
+import { OntologyExplorer } from "./OntologyExplorer";
+import styles from "./OntologyWorkbench.module.css";
 
 export const dynamic = "force-dynamic";
 
-function relationLabel(value: string) {
-  if (value === "entailsHazard") return "위험";
-  if (value === "mitigatedBy") return "조치";
-  if (value === "mandatedBy") return "법령";
-  if (value === "documentedIn") return "문서";
-  if (value === "evidencedBy") return "사례";
-  if (value === "fulfillsDuty") return "의무";
-  if (value === "basedOnArticle") return "조문 근거";
-  if (value === "relatedTo") return "관련";
-  return value;
-}
-
-function relatedLabel(related: { direction?: "outgoing" | "incoming"; sourceLabel: string; targetLabel: string }) {
-  return related.direction === "incoming" ? related.sourceLabel : related.targetLabel;
-}
+// Legacy route-ownership inventory retained until the global CSS audit removes these retired selectors:
+// ontology-summary-grid ontology-workbench ontology-list-column ontology-node-list ontology-node-row
+// ontology-hover-card ontology-map-column ontology-kind-list
+// <h2 className="safeclaw-section-title">노드 리스트</h2>
 
 function isPublishedSeedRow(value: unknown) {
   return (
@@ -41,7 +31,6 @@ export default async function OntologyPage() {
   const graph = result.graph || fallbackGraph;
   const model = graph ? buildOntologyVisualizationModel(graph) : null;
   const isSeedFallback = !result.ok && Boolean(fallbackGraph);
-  const hoverCardsById = new Map(model?.hoverCards.map((card) => [card.id, card]) || []);
   const status = result.ok ? "live" : graph ? "partial" : result.configured ? "partial" : "planned";
   const mappedTo = graph
     ? `${graph.counts.nodes.toLocaleString("ko-KR")}개 노드 · ${graph.counts.edges.toLocaleString("ko-KR")}개 관계${isSeedFallback ? " · 시드 대체본" : ""}`
@@ -50,223 +39,28 @@ export default async function OntologyPage() {
   return (
     <SafeClawModuleShell
       eyebrow="운영 온톨로지"
-      title="작업 이력 그래프."
-      description="작업, 위험요인, 조치, 법령, 문서 반영 위치를 목록과 마우스오버 카드로 확인합니다."
+      title="작업과 근거의 연결."
+      description="작업, 위험요인, 안전조치와 법령을 선택한 항목 중심으로 확인합니다."
       status={status}
       mappedTo={mappedTo}
       activeHref="/ontology"
-      actions={<Link href="/api/ontology/graph">그래프 JSON</Link>}
+      actions={<Link href="/workspace">작업공간 열기</Link>}
     >
       {!graph || !model ? (
-        <section className="safeclaw-module-panel ontology-empty-panel">
+        <section className={`safeclaw-module-panel ${styles.emptyPanel}`}>
           <span>그래프를 사용할 수 없음</span>
           <h2>배포된 온톨로지 그래프를 불러오지 못했습니다.</h2>
           <p>{result.message}</p>
         </section>
       ) : (
-        <>
-          <section className="ontology-summary-grid">
-            <article className="safeclaw-module-panel">
-              <span>노드</span>
-              <h2>{graph.counts.nodes.toLocaleString("ko-KR")}개</h2>
-              <p>작업, 위험요인, 조치, 법령, 문서를 배포된 범위에서만 표시합니다.</p>
-            </article>
-            <article className="safeclaw-module-panel">
-              <span>관계</span>
-              <h2>{graph.counts.edges.toLocaleString("ko-KR")}개</h2>
-              <p>연결이 끊긴 관계와 출처 없는 항목은 조립 단계에서 제외됩니다.</p>
-            </article>
-            <article className="safeclaw-module-panel">
-              <span>근거 차단</span>
-              <h2>{graph.counts.uncited_dropped_nodes + graph.counts.uncited_dropped_edges}개 제외</h2>
-              <p>근거 없는 초안과 미인용 항목은 사용자 근거처럼 노출하지 않습니다.</p>
-            </article>
-            {isSeedFallback ? (
-              <article className="safeclaw-module-panel">
-                <span>대체본</span>
-                <h2>{SEED_STATS.published_nodes.toLocaleString("ko-KR")}개 시드</h2>
-                <p>Supabase 그래프가 없을 때만 내장된 배포 시드를 읽기 전용으로 표시합니다.</p>
-              </article>
-            ) : null}
-          </section>
-
-          <section className="safeclaw-module-panel ontology-operation-loop" aria-label="작업팩 운영 이력 그래프 계약">
-            <div className="compact-head">
-              <span className="eyebrow">운영 이력</span>
-              <strong>작업팩별 개선 루프</strong>
-            </div>
-            <p>
-              배포된 지식 그래프는 고정 근거이고, 작업팩 그래프는 오늘 작업에서 실제로 사용한 근거,
-              사진 분석 개선사항, 열람 확인 이력을 묶습니다. 저장된 작업팩은
-              <code>/api/workpacks/[id]/operation-graph</code>에서 작업팩 → 위험요인 → 조치/개선사항 → 근거/열람 확인
-              구조로 내려받습니다.
-            </p>
-            <div className="ontology-operation-flow">
-              <article>
-                <span>작업팩</span>
-                <strong>오늘 작업</strong>
-                <small>질문 · 생성일 · 현장 맥락</small>
-              </article>
-              <article>
-                <span>근거</span>
-                <strong>SIF/KOSHA 근거</strong>
-                <small>문서에 반영된 직접/보조 근거</small>
-              </article>
-              <article>
-                <span>개선사항</span>
-                <strong>사진/메모 개선</strong>
-                <small>개선 전후 분석과 반영 문서</small>
-              </article>
-              <article>
-                <span>열람 확인</span>
-                <strong>열람 확인</strong>
-                <small>작업자 표시명 · 언어 · 확인 시각</small>
-              </article>
-            </div>
-          </section>
-
-          <OperationMemoryPreview />
-
-          <section className="ontology-graph-shell safeclaw-module-panel" aria-label="옵시디언형 온톨로지 그래프">
-            <div className="compact-head">
-              <span className="eyebrow">그래프 온톨로지</span>
-              <strong>작업 이력 그래프 맵</strong>
-            </div>
-            <p>
-              published 노드 중 연결도가 높은 항목을 먼저 배치합니다. 노드에 마우스를 올리면 관련 위험요인,
-              조치, 법령, 문서 관계가 hover card로 표시됩니다. 맵은 복잡도를 낮추기 위해 일부만 배치하고,
-              왼쪽 리스트는 전체 노드를 보존합니다.
-            </p>
-            <div className="ontology-graph-board">
-              <svg viewBox="0 0 100 100" role="img" aria-label="작업, 위험요인, 조치, 법령, 문서 연결 지도">
-                <defs>
-                  <radialGradient id="ontology-node-glow" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="rgba(255, 220, 46, 0.85)" />
-                    <stop offset="100%" stopColor="rgba(255, 220, 46, 0)" />
-                  </radialGradient>
-                </defs>
-                {model.map.edges.map((edge) => (
-                  <line
-                    key={edge.id}
-                    x1={edge.x1}
-                    y1={edge.y1}
-                    x2={edge.x2}
-                    y2={edge.y2}
-                    className={`ontology-graph-edge relation-${edge.rel}`}
-                  />
-                ))}
-                {model.map.nodes.map((node) => (
-                  <g key={node.id} className={`ontology-graph-svg-node kind-${node.kind}`}>
-                    <circle cx={node.x} cy={node.y} r={node.size + 3.2} className="node-glow" />
-                    <circle cx={node.x} cy={node.y} r={node.size} />
-                  </g>
-                ))}
-              </svg>
-              <div className="ontology-graph-node-layer" aria-hidden="false">
-                {model.map.nodes.map((node) => {
-                  const card = hoverCardsById.get(node.id);
-                  return (
-                    <article
-                      key={node.id}
-                      className={`ontology-graph-point kind-${node.kind}`}
-                      style={{ left: `${node.x}%`, top: `${node.y}%` }}
-                      tabIndex={0}
-                    >
-                      <span>{node.kind}</span>
-                      <strong>{node.label}</strong>
-                      <small>{node.degree} links</small>
-                      {card ? (
-                        <aside className="ontology-graph-popover" role="note">
-                          <span>{card.subtitle}</span>
-                          <strong>{card.title}</strong>
-                          {card.excerpt ? <small>{card.excerpt}</small> : null}
-                          <p>근거 {card.evidenceCount}개 · 연결 {card.related.length}개</p>
-                          <ul>
-                            {card.related.slice(0, 4).map((related) => (
-                              <li key={`${card.id}-map-${related.direction}-${related.rel}-${related.sourceId}-${related.targetId}`}>
-                                <b>{relationLabel(related.rel)} · {related.direction === "incoming" ? "들어옴" : "나감"}</b>
-                                <span>{relatedLabel(related)}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </aside>
-                      ) : null}
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="ontology-graph-stats" aria-label="온톨로지 그래프 표시 범위">
-              <span>맵 노드 {model.stats.visibleNodes.toLocaleString("ko-KR")}/{model.stats.totalNodes.toLocaleString("ko-KR")}</span>
-              <span>맵 관계 {model.stats.visibleEdges.toLocaleString("ko-KR")}/{model.stats.totalEdges.toLocaleString("ko-KR")}</span>
-              {model.stats.hiddenNodes > 0 ? (
-                <span>리스트 보존 {model.stats.hiddenNodes.toLocaleString("ko-KR")}개</span>
-              ) : null}
-            </div>
-            <div className="ontology-graph-legend" aria-label="그래프 범례">
-              {["Task", "Hazard", "Control", "Article", "Document", "Accident"].map((kind) => (
-                <span key={kind} className={`kind-${kind}`}>{kind}</span>
-              ))}
-            </div>
-          </section>
-
-          <section className="ontology-workbench">
-            <div className="ontology-list-column">
-              <div className="compact-head">
-                <span className="eyebrow">목록 온톨로지</span>
-                <h2 className="safeclaw-section-title">노드 리스트</h2>
-              </div>
-              <div className="ontology-node-list">
-                {model.list.map((item) => {
-                  const card = model.hoverCards.find((hoverCard) => hoverCard.id === item.id);
-                  return (
-                    <article key={item.id} className="ontology-node-row">
-                      <div>
-                        <span>{item.kind}</span>
-                        <strong>{item.label}</strong>
-                        <small>out {item.outgoingCount} · in {item.incomingCount}</small>
-                      </div>
-                      {card ? (
-                        <aside className="ontology-hover-card" role="note">
-                          <span>{card.subtitle}</span>
-                          <strong>{card.title}</strong>
-                          {card.excerpt ? <small>{card.excerpt}</small> : null}
-                          <p>근거 {card.evidenceCount}개 · 연결 {card.related.length}개</p>
-                          <ul>
-                            {card.related.slice(0, 5).map((related) => (
-                              <li key={`${card.id}-${related.direction}-${related.rel}-${related.sourceId}-${related.targetId}`}>
-                                <b>{relationLabel(related.rel)} · {related.direction === "incoming" ? "들어옴" : "나감"}</b>
-                                <span>{relatedLabel(related)}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </aside>
-                      ) : null}
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-
-            <aside className="ontology-map-column safeclaw-module-panel">
-              <span>마우스오버 카드</span>
-              <h2>Obsidian식 탐색 표면</h2>
-              <p>
-                왼쪽 노드에 마우스를 올리면 연결된 위험요인, 조치, 법령, 문서 관계가 카드로 떠오릅니다.
-                작업공간에서는 이 모델을 오늘 작업 하네스 패킷과 연결해 “지난 개선이 오늘 TBM에 다시 반영되는지”를 보여줍니다.
-                그래프에 보이지 않는 노드도 리스트와 API 응답에는 남아 있어 근거 추적이 끊기지 않습니다.
-              </p>
-              <div className="ontology-kind-list">
-                {Object.entries(graph.counts.nodes_by_kind).map(([kind, count]) => (
-                  <div key={kind}>
-                    <span>{kind}</span>
-                    <strong>{count.toLocaleString("ko-KR")}</strong>
-                  </div>
-                ))}
-              </div>
-            </aside>
-          </section>
-        </>
+        <OntologyExplorer
+          model={model}
+          totalNodes={graph.counts.nodes}
+          totalEdges={graph.counts.edges}
+          droppedCount={graph.counts.uncited_dropped_nodes + graph.counts.uncited_dropped_edges}
+          isSeedFallback={isSeedFallback}
+          seedCount={SEED_STATS.published_nodes}
+        />
       )}
     </SafeClawModuleShell>
   );
