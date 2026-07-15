@@ -8,7 +8,7 @@ import type {
   SafetyReferenceItem,
   SafetyReferenceSearchResult,
 } from "@/lib/safety-reference-catalog";
-import { isProductionTrustedKoshaReference } from "@/lib/safety-reference-catalog";
+import { isProductionTrustedKoshaReference } from "@/lib/production-kosha-trust";
 import * as safetyReferenceServer from "@/lib/safety-reference-catalog-server";
 import {
   createExperimentalHermesAdapter,
@@ -74,6 +74,7 @@ function recoveredKoshaReference(): SafetyReferenceItem {
     title: "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
     summary: "외벽 작업의 추락 예방 점검 지침",
     body,
+    controls: ["작업발판, 난간, 개구부와 안전대 상태를 확인"],
     source_url: "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1",
     kosha_guide: {
       referenceId: "kosha-guide-1",
@@ -686,7 +687,7 @@ describe("experimental Hermes EngineAdapter", () => {
 
   it("allows only explicitly trusted KOSHA claims from mixed supporting evidence", async () => {
     const trustedKosha = recoveredKoshaReference();
-    trustedKosha.controls = ["신뢰된 KOSHA 조치"];
+    trustedKosha.controls = ["작업발판, 난간, 개구부와 안전대 상태를 확인"];
     const untrustedKosha = recoveredKoshaReference();
     untrustedKosha.id = "kosha-guide-untrusted";
     untrustedKosha.controls = ["미신뢰 KOSHA 조치"];
@@ -721,7 +722,44 @@ describe("experimental Hermes EngineAdapter", () => {
     expect(allowlistedLabels).not.toContain("KOSHA 실행지침: KOSHA UNTRUSTED p.1");
   });
 
-  it("rejects an otherwise valid packet when the eligible claim allowlist is empty", async () => {
+  it("allows only KOSHA controls extractable from the pinned body", async () => {
+    const kosha = recoveredKoshaReference();
+    const bodyExtract = "작업발판, 난간, 개구부와 안전대 상태를 확인";
+    const forgedControl = "메타데이터와 함께 주입한 임의 통제조치";
+    kosha.controls = [bodyExtract, forgedControl];
+    const packet = buildDbHarnessPacket({
+      question: "오늘 작업 위험을 점검해줘",
+      references: [sifReference(), kosha],
+      retrieval: { mode: "ranked-rpc", message: "forged KOSHA controls" },
+    });
+    const packetKosha = packet.supportingEvidence.find((item) => (
+      item.item_type === "technical-guideline"
+    ));
+    if (!packetKosha) throw new Error("test fixture requires KOSHA supporting evidence");
+    packetKosha.controls = [bodyExtract, forgedControl];
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...groundedHarnessResult(),
+      packet,
+    });
+    let allowlistedClaims: readonly string[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async ({ evidenceClaims }) => {
+        allowlistedClaims = evidenceClaims.map((claim) => claim.text);
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(allowlistedClaims).toContain(bodyExtract);
+    expect(allowlistedClaims).not.toContain(forgedControl);
+  });
+
+  it("uses a pinned KOSHA body anchor when metadata controls are empty", async () => {
     const sifWithoutClaims = sifReference();
     sifWithoutClaims.controls = [];
     const koshaWithoutClaims = recoveredKoshaReference();
@@ -745,21 +783,21 @@ describe("experimental Hermes EngineAdapter", () => {
     let plannerCalls = 0;
     const engine = createExperimentalHermesAdapter({
       env: localPocEnv,
-      composition: createSafeClawHermesComposition(async () => {
+      composition: createSafeClawHermesComposition(async ({ evidenceClaims }) => {
         plannerCalls += 1;
+        expect(evidenceClaims.map((claim) => claim.text)).toContain(
+          recoveredKoshaReference().body,
+        );
       }),
     });
 
     try {
-      await expect(engine.run(runInput())).rejects.toMatchObject({
-        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
-        status: 503,
-      });
+      await expect(engine.run(runInput())).resolves.toBeUndefined();
     } finally {
       executeSpy.mockRestore();
     }
 
-    expect(plannerCalls).toBe(0);
+    expect(plannerCalls).toBe(1);
   });
 
   it("blocks output when planner mutates the same attested packet object", async () => {
@@ -1162,14 +1200,14 @@ describe("experimental Hermes EngineAdapter", () => {
     expect(events).toEqual([]);
   });
 
-  it("runs the production composition with an approved current KOSHA reference", async () => {
+  it("runs the OpenClaw composition with an explicitly pinned test KOSHA reference", async () => {
     const events: ClawChatEvent[] = [];
     const executeSpy = mockHarnessPreload();
     const engine = createProductionEngineAdapter(boundLocalPocEnv, {
       openClawHermes: {
         runtimeCapability: async () => true,
         verifyToolFreeAgent: async () => true,
-        trustedKoshaReference: isProductionTrustedKoshaReference,
+        trustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
         assertOAuth: async (config) => ({
           ok: true,
           provider: "openai",
@@ -1194,6 +1232,14 @@ describe("experimental Hermes EngineAdapter", () => {
       kind: "text-delta",
       text: "작업발판·안전난간·개구부 상태 확인 [SIF 사례 근거(위험 우선순위): 오늘 작업 위험 점검 SIF 추락 사례]",
     }]);
+  });
+
+  it("rejects forged KOSHA metadata when the actual body does not match the production pin", () => {
+    const forged = recoveredKoshaReference();
+    forged.body = "공격자가 주입한 임의 본문";
+    forged.controls = ["공격자가 주입한 임의 통제조치"];
+
+    expect(isProductionTrustedKoshaReference(forged)).toBe(false);
   });
 
   it.each(["unknown", "untrusted"] as const)(

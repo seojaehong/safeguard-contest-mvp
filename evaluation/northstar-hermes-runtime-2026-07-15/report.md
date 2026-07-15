@@ -1,48 +1,49 @@
-# Northstar Hermes Runtime Remediation
+# Northstar Hermes Runtime P1 Remediation
 
 ## Candidate
 
-- Product SHA: `68ddda7dc5e6ea115edc4b8d8b28454f3779ba23`
-- Production base SHA: `238a011b3d0d436b5d498c415795cede61b3045e`
+- Implementation base SHA: `6fc00ef463a621ef03d96510b52ee1a70dea7f0c`
 - Branch: `fix/northstar-hermes-runtime-20260715`
 - Route: `/api/agent/chat`
-- Status: focused verification passed; independent re-review pending
+- Status: P1 remediation verified; independent re-review pending
 
-## Claim-level evidence boundary
+## Remediated boundary
 
-Hermes receives an immutable Evidence Harness packet for audit, but its selectable output allowlist is now built per reference:
+- The production KOSHA verifier now computes SHA-256 from the actual UTF-8 `item.body` in a server-only module.
+- Trust requires the computed digest and metadata digest to match the unchanged code-owned registry pin.
+- Metadata-only identity with an arbitrary body is rejected.
+- KOSHA planner claims come only from controls or anchor excerpts that are exact normalized extracts of the verified body.
+- Forged metadata plus arbitrary `controls` cannot enter the Hermes claim allowlist.
+- When metadata controls are empty, a verified body anchor may supply the claim; arbitrary prose is not synthesized.
 
-- direct claims require direct-evidence eligibility;
-- SIF claims are labeled as accident/risk-priority evidence, not a statutory mandate;
-- KOSHA claims require supporting-citation eligibility and the configured trust verifier;
-- a missing production KOSHA trust verifier is an explicit rejection, never implicit trust;
-- `/api/agent/chat` injects the code-owned production KOSHA registry into the OpenClaw Hermes composition;
-- review-required or mismatched references remain in the audit packet but cannot become selectable claims.
+## TDD evidence
 
-A mixed packet containing explicitly trusted and otherwise eligible but untrusted KOSHA items is covered by a negative test. Only the trusted citation enters the planner allowlist. A structurally valid packet whose eligible references yield no selectable claims also fails before planner execution.
-
-## Production registry
-
-The code-owned registry pins the approved current `D-C-13-2026` identity by stable document key, current version, body hash, official URL, official file ID, and publication date. The route test proves that this approved current identity is injected and accepted. Composition tests prove that unknown document keys and review-required references fail before OpenClaw planner execution.
+- RED: forged body with pinned metadata was accepted by the old production verifier.
+- GREEN: the same exploit is rejected after actual-body hashing.
+- RED: a forged post-Harness control entered the planner allowlist.
+- GREEN: the forged control is excluded while an extract present in the pinned body remains selectable.
 
 ## Preserved invariants
 
 - exact organization/site binding;
 - local-only, explicitly tool-free OpenClaw agent;
 - OpenAI OAuth attestation;
-- `naturalize_only` role;
+- `naturalize_only` role and immutable evidence packet attestation;
 - no mutation or publication authority;
 - human confirmation required;
-- existing Vertex/Anthropic paths unchanged.
+- existing provider selection and fallback policy unchanged.
 
 ## Verification
 
-- Hermes/OpenClaw focused tests: 4 files, 75 tests passed
-- Strict TypeScript typecheck: passed
-- Fresh production build after removing this worktree's `.next` cache: passed
-- Static generation: 28 items (`Generating static pages (28/28)`), not total route count
-- Build ID: `7V9HOhxRxy6TfamvwIBut`
-- `git diff --check`: passed
+- Focused runtime/provider tests: 6 files, 95 tests passed.
+- Strict TypeScript typecheck: passed.
+- Production build: passed; static generation completed at 28/28.
+- Build ID: `6jAB9kHRJbdawnVN1-c9e`.
+- `git diff --check`: passed.
+
+## Excluded work
+
+No DB/schema change, data mutation, deployment, or publication was performed.
 
 ## Runtime blockers
 
