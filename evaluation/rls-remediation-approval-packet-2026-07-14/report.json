@@ -1,0 +1,1567 @@
+{
+  "schemaVersion": "supabase-rls-remediation-approval-packet/v1",
+  "packetDate": "2026-07-14",
+  "packetType": "approval-only",
+  "decisionState": {
+    "currentDecision": "HOLD",
+    "launchReadiness": false,
+    "reason": "The audit specification is internally consistent, but no authenticated tenant A/B denial assertion has been executed and the open P1/P2/P3 findings are not remediated.",
+    "implementationAllowedByThisPacket": false,
+    "implementationClaimed": false,
+    "runtimeIsolationClaimed": false
+  },
+  "source": {
+    "packetBaseRevision": "2684cb99de944aa9f54d143f2ae40b4ad6104f02",
+    "auditArtifact": "evaluation/supabase-rls-audit-2026-07-14/report.json",
+    "auditArtifactGitBlob": "7ad1dd2d27be946a2f84b0fc57c25246c0f47b00",
+    "auditedProductRevision": "f45bba17bcce0d8ebb2690f82d014dbe42ae8191",
+    "evidenceRootRevision": "d77205bb498080ac02b9f506d72bd44648f4a660",
+    "externalIntegrationRevision": "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
+    "productSourceDeltaToPacketBase": "none for app, lib, and supabase",
+    "evidenceDescendantPolicy": "HEAD must equal or descend from the evidence root and change only the immutable packet output set.",
+    "evidenceMode": "read-only source and preserved redacted audit artifacts",
+    "liveRefreshPerformedForPacket": false
+  },
+  "integrationMapping": {
+    "authorityRevision": "67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
+    "mappedPacketRevision": "cd1d608b89871ad4a14bf2185e762d6bc967dea3",
+    "mergeBaseRevision": "2684cb99de944aa9f54d143f2ae40b4ad6104f02",
+    "integrationChangedPathCount": 168,
+    "packetChangedPaths": [
+      "evaluation/rls-remediation-approval-packet-2026-07-14/logs/tdd-red.log",
+      "evaluation/rls-remediation-approval-packet-2026-07-14/logs/validator.log",
+      "evaluation/rls-remediation-approval-packet-2026-07-14/report.json",
+      "evaluation/rls-remediation-approval-packet-2026-07-14/report.md",
+      "evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py"
+    ],
+    "overlapPaths": [],
+    "mergeTreeCommand": "git merge-tree 2684cb99de944aa9f54d143f2ae40b4ad6104f02 HEAD 67d2c9e28e7278c58f46b46c2512c7133d88d1d3",
+    "mergeTreeExitCode": 0,
+    "mergeTreeConflictMarkers": 0,
+    "disposition": "review-only non-overlap; not merged by this packet"
+  },
+  "scope": {
+    "noImplementation": true,
+    "noMigrationSql": true,
+    "noDatabaseMutation": true,
+    "noNetworkDataMutation": true,
+    "noLiveCredentials": true,
+    "allowedWritePrefixes": [
+      "evaluation/rls-remediation-approval-packet-2026-07-14/"
+    ],
+    "producedPaths": [
+      "evaluation/rls-remediation-approval-packet-2026-07-14/logs/tdd-red.log",
+      "evaluation/rls-remediation-approval-packet-2026-07-14/logs/validator.log",
+      "evaluation/rls-remediation-approval-packet-2026-07-14/report.json",
+      "evaluation/rls-remediation-approval-packet-2026-07-14/report.md",
+      "evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py"
+    ],
+    "forbiddenImplementationPrefixes": [
+      "supabase/",
+      "app/",
+      "lib/",
+      "components/",
+      "tests/",
+      "__tests__/"
+    ]
+  },
+  "auditTruth": {
+    "launchReadiness": false,
+    "noMutation": true,
+    "findings": {
+      "P0": 0,
+      "P1": 3,
+      "P2": 4,
+      "P3": 3,
+      "total": 10
+    },
+    "boundaries": {
+      "applicationTables": 22,
+      "managedTablesTouched": 1,
+      "additionalManagedTenantDataBoundaries": 1,
+      "total": 24
+    },
+    "rls": {
+      "enabledApplicationTables": 20,
+      "missingApplicationTables": 2,
+      "missingTableNames": [
+        "documents",
+        "query_logs"
+      ],
+      "forceEnabledApplicationTables": 0,
+      "policies": 20,
+      "policiesWithExplicitRole": 0,
+      "tenantTables": 13
+    },
+    "serviceRoleSurfaces": {
+      "tenantAdminRoutes": 21,
+      "directRoutes": 19,
+      "brokerMediatedRoutes": 2,
+      "publicGlobalApiRoutes": 6,
+      "publicServerPages": 5,
+      "publicHttpSurfaces": 11
+    },
+    "negativeMatrix": {
+      "cases": 14,
+      "commandsPerCase": 4,
+      "expectedDenyAssertions": 56,
+      "executedAssertions": 0,
+      "executionStatus": "not_executed"
+    }
+  },
+  "auditSpecPassVersusLaunchPass": {
+    "auditSpecPassMeans": "The audit report validator confirmed artifact shape, exact finding titles, counts, source references, and no-mutation markers.",
+    "auditSpecPassDoesNotMean": [
+      "RLS behavior was exercised with authenticated tenant A and tenant B identities.",
+      "The 56 expected cross-tenant denials were executed.",
+      "Effective object privileges, owners, default privileges, or FORCE state were inspected live.",
+      "Service-role routes rejected foreign organization, site, workpack, worker, share-session, improvement, or storage identifiers.",
+      "Storage object policies and path isolation were tested.",
+      "Any finding was fixed."
+    ],
+    "launchPassRequires": "Approved remediation batches, staging-first rehearsal, post-change data-integrity parity, all 112 symmetric negative assertions executed as denials, all 28 matrix same-tenant positive controls, scoped service-role route checks, storage decision evidence, rollback rehearsal, and a fresh launch-gate review."
+  },
+  "roleModel": {
+    "authenticated": {
+      "intent": "Tenant access is evaluated against a non-null auth identity and the final organization relationship for the row.",
+      "objectPrivilegePrerequisite": true,
+      "policyDoesNotGrantObjectPrivilege": true
+    },
+    "anon": {
+      "intent": "No tenant or operator data access; only deliberately public catalog and published ontology reads may be reachable.",
+      "objectPrivilegePrerequisite": true
+    },
+    "service_role": {
+      "intent": "Privileged server-only capability.",
+      "bypassesRls": true,
+      "forceRlsConstrainsServiceRole": false,
+      "requiredCompensatingControls": [
+        "Authenticate the caller before creating the privileged client.",
+        "Re-own every request-supplied resource identifier.",
+        "Filter privileged child reads and writes by organization and site in addition to parent identifiers.",
+        "Enforce same-tenant relationships with database integrity controls where approved.",
+        "Never expose live credentials or raw bearer tokens in artifacts or telemetry."
+      ]
+    }
+  },
+  "boundaryCatalog": [
+    {
+      "id": "BND-ORG",
+      "name": "organizations",
+      "tables": ["organizations"],
+      "routes": ["/api/workpacks", "/api/workers", "/api/briefing/settings"],
+      "observed": "owner_id is the RLS ownership anchor; it is nullable and has no migration foreign key to the auth identity store.",
+      "proposedInvariant": "An authenticated actor can reach an organization row only when the final row owner is that actor; owner transfer is not a generic update.",
+      "evidence": [
+        "supabase/migrations/002_workspace_productization.sql:3-9",
+        "supabase/migrations/002_workspace_productization.sql:99-113",
+        "lib/supabase-admin.ts:594-646"
+      ]
+    },
+    {
+      "id": "BND-SITE",
+      "name": "sites",
+      "tables": ["sites", "workers", "workpacks"],
+      "routes": ["/api/workers", "/api/workpacks", "/api/mcp-tokens"],
+      "observed": "Tenant policy ownership is derived through organization_id, while related site_id values are not consistently proven to belong to the same organization.",
+      "proposedInvariant": "Every non-null site reference resolves to a site in the row organization before a row is returned or accepted.",
+      "evidence": [
+        "supabase/migrations/002_workspace_productization.sql:11-57",
+        "supabase/migrations/002_workspace_productization.sql:115-164",
+        "app/api/mcp-tokens/route.ts:214-253"
+      ]
+    },
+    {
+      "id": "BND-WORKPACK",
+      "name": "workpack and children",
+      "tables": [
+        "workpacks",
+        "education_records",
+        "dispatch_logs",
+        "daily_entries",
+        "knowledge_events",
+        "knowledge_regeneration_runs",
+        "workpack_share_sessions",
+        "workpack_read_confirmations",
+        "workpack_improvements",
+        "workpack_improvement_photos"
+      ],
+      "routes": [
+        "/api/workpacks/[id]",
+        "/api/workpacks/[id]/share-sessions",
+        "/api/workpacks/[id]/read-confirmations",
+        "/api/workpacks/[id]/improvements",
+        "/api/workpacks/[id]/operation-graph",
+        "/api/workpacks/[id]/learning-export"
+      ],
+      "observed": "Several service-role child queries validate an owned workpack and then filter children only by workpack_id.",
+      "proposedInvariant": "A privileged child query includes the owned organization_id and site_id when applicable, and every supplied related identifier is re-owned before use.",
+      "evidence": [
+        "app/api/workpacks/[id]/share-sessions/route.ts:34-55",
+        "app/api/workpacks/[id]/read-confirmations/route.ts:32-42",
+        "app/api/workpacks/[id]/improvements/route.ts:176-197"
+      ]
+    },
+    {
+      "id": "BND-DOCUMENT",
+      "name": "legacy documents",
+      "tables": ["documents"],
+      "routes": [],
+      "observed": "The table contains body and citation fields, has no RLS declaration in migrations, and has no documented public or operator classification.",
+      "proposedInvariant": "Direct anon and authenticated access remains denied until a separate owner explicitly classifies and scopes this legacy table.",
+      "evidence": ["supabase/migrations/001_init.sql:8-17"]
+    },
+    {
+      "id": "BND-QUERY-LOG",
+      "name": "query logs",
+      "tables": ["query_logs"],
+      "routes": [],
+      "observed": "The table can contain sensitive query text and has no RLS declaration in migrations.",
+      "proposedInvariant": "Only an approved operator path may write or read query logs; anon and authenticated roles have no direct row access.",
+      "evidence": ["supabase/migrations/001_init.sql:1-6"]
+    },
+    {
+      "id": "BND-DISPATCH",
+      "name": "dispatch",
+      "tables": ["dispatch_logs"],
+      "routes": ["/api/dispatch-logs"],
+      "observed": "The row policy accepts a null organization branch, and the authenticated service-role route accepts an external workpackId without re-owning it.",
+      "proposedInvariant": "Tenant dispatch rows always have an owned organization and any site/workpack relation resolves inside that organization; global operator events use a separate boundary.",
+      "evidence": [
+        "supabase/migrations/002_workspace_productization.sql:76-90",
+        "supabase/migrations/002_workspace_productization.sql:183-200",
+        "app/api/dispatch-logs/route.ts:173-208"
+      ]
+    },
+    {
+      "id": "BND-MCP",
+      "name": "MCP token and memory",
+      "tables": ["mcp_tokens", "workpacks", "workpack_improvements"],
+      "routes": ["/api/mcp/[transport]", "/api/mcp-tokens", "/api/mcp-tokens/[id]"],
+      "observed": "A database token row becomes authContext siteId/orgId; memory reads filter by siteId without independently comparing orgId.",
+      "proposedInvariant": "A token has one valid scope combination, its site belongs to its organization, and every MCP memory read applies both site and organization scope.",
+      "evidence": [
+        "supabase/migrations/007_mcp_tokens.sql:14-24",
+        "lib/mcp-auth.ts:134-163",
+        "app/api/mcp/[transport]/route.ts:134-189",
+        "app/api/mcp-tokens/route.ts:214-253"
+      ]
+    },
+    {
+      "id": "BND-STORAGE",
+      "name": "managed storage objects",
+      "tables": ["storage.buckets", "storage.objects", "workpack_improvement_photos"],
+      "routes": ["/api/workpacks/[id]/improvements"],
+      "observed": "The bucket is declared private and the service-role route generates organization-prefixed paths, but live object policies, grants, ownership, and direct-client reachability were not inspected.",
+      "proposedInvariant": "An object path, metadata row, organization, workpack, and improvement all agree before upload, read, overwrite, move, or delete; foreign prefixes do not reveal object existence.",
+      "evidence": [
+        "supabase/migrations/010_commercial_operations.sql:7-15",
+        "lib/workpack-commercial.ts:411-433",
+        "app/api/workpacks/[id]/improvements/route.ts:86-173",
+        "app/api/workpacks/[id]/improvements/route.ts:212-250"
+      ]
+    },
+    {
+      "id": "BND-PUBLIC",
+      "name": "public catalog and ontology",
+      "tables": [
+        "safety_reference_sources",
+        "safety_reference_items",
+        "safety_reference_ingestion_runs",
+        "safety_ontology_nodes",
+        "safety_ontology_edges",
+        "safety_reference_embeddings"
+      ],
+      "routes": ["/api/safety-reference/search", "/api/safety-reference/status", "/api/ontology/graph"],
+      "observed": "Public reads are broader than the intended published content at the ingestion-run and ontology-edge boundaries.",
+      "proposedInvariant": "Anon sees only deliberate catalog fields and fully published, cited ontology subgraphs; operator metadata and embeddings remain server-only.",
+      "evidence": [
+        "supabase/migrations/004_safety_reference_catalog.sql:34-72",
+        "supabase/migrations/008_safety_ontology.sql:9-45",
+        "supabase/migrations/010_commercial_operations.sql:88-153"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "P1-01",
+      "severity": "P1",
+      "title": "Two legacy exposed-schema tables have no RLS declaration",
+      "tables": ["query_logs", "documents"],
+      "routes": [],
+      "evidence": ["supabase/migrations/001_init.sql:1-17"],
+      "exploitPrerequisites": [
+        "The caller role has the corresponding object command privilege.",
+        "The target relation is reachable through the selected API surface.",
+        "Sensitive or attacker-influenced rows exist for the attempted command."
+      ],
+      "falsePositiveCaveats": [
+        "A row policy is evaluated only after object privilege makes the command reachable.",
+        "The preserved HEAD observation saw anon SELECT reachability and zero rows, not row-body exposure.",
+        "Mutation privileges and the effective grant source were not inspected."
+      ],
+      "remediationOwner": {
+        "primary": "Supabase database security owner",
+        "support": ["Data classification owner", "Application security reviewer"]
+      },
+      "batchIds": ["A", "E"],
+      "status": "open-not-remediated"
+    },
+    {
+      "id": "P1-02",
+      "severity": "P1",
+      "title": "`dispatch_logs` has a role-agnostic global-null CRUD branch",
+      "tables": ["dispatch_logs"],
+      "routes": [
+        {
+          "httpPath": "/api/dispatch-logs",
+          "methods": ["GET", "POST"],
+          "sourceRef": "app/api/dispatch-logs/route.ts:41-208"
+        }
+      ],
+      "evidence": [
+        "supabase/migrations/002_workspace_productization.sql:76-90",
+        "supabase/migrations/002_workspace_productization.sql:183-200"
+      ],
+      "exploitPrerequisites": [
+        "The caller role has the object privilege for the attempted command, or reaches a service-role route that performs it.",
+        "A null-organization row is present or can be accepted.",
+        "For cross-linked records, the caller knows a usable related identifier."
+      ],
+      "falsePositiveCaveats": [
+        "The audit observed six service-role rows and zero anon-visible rows but did not inspect whether any row had a null organization.",
+        "Mutation privileges were not tested.",
+        "The policy branch alone does not grant a command privilege."
+      ],
+      "remediationOwner": {
+        "primary": "Supabase database security owner",
+        "support": ["Dispatch API owner", "Operations data owner"]
+      },
+      "batchIds": ["A", "B", "E"],
+      "status": "open-not-remediated"
+    },
+    {
+      "id": "P1-03",
+      "severity": "P1",
+      "title": "Tenant policies do not enforce same-organization relationships and service-role child queries trust them",
+      "tables": [
+        "workers",
+        "workpacks",
+        "education_records",
+        "dispatch_logs",
+        "daily_entries",
+        "knowledge_events",
+        "knowledge_regeneration_runs",
+        "workpack_share_sessions",
+        "workpack_read_confirmations",
+        "workpack_improvements",
+        "workpack_improvement_photos"
+      ],
+      "routes": [
+        {
+          "httpPath": "/api/education-records",
+          "methods": ["POST"],
+          "sourceRef": "app/api/education-records/route.ts:31-56"
+        },
+        {
+          "httpPath": "/api/dispatch-logs",
+          "methods": ["POST"],
+          "sourceRef": "app/api/dispatch-logs/route.ts:184-208"
+        },
+        {
+          "httpPath": "/api/workpacks/[id]/share-sessions",
+          "methods": ["GET", "POST"],
+          "sourceRef": "app/api/workpacks/[id]/share-sessions/route.ts:34-55"
+        },
+        {
+          "httpPath": "/api/workpacks/[id]/read-confirmations",
+          "methods": ["GET", "POST"],
+          "sourceRef": "app/api/workpacks/[id]/read-confirmations/route.ts:32-119"
+        },
+        {
+          "httpPath": "/api/workpacks/[id]/improvements",
+          "methods": ["GET", "POST"],
+          "sourceRef": "app/api/workpacks/[id]/improvements/route.ts:176-338"
+        }
+      ],
+      "evidence": [
+        "supabase/migrations/002_workspace_productization.sql:21-90",
+        "supabase/migrations/002_workspace_productization.sql:132-200",
+        "supabase/migrations/003_knowledge_runtime.sql:1-63",
+        "supabase/migrations/003_knowledge_runtime.sql:77-126",
+        "supabase/migrations/010_commercial_operations.sql:21-86",
+        "supabase/migrations/010_commercial_operations.sql:161-227",
+        "app/api/education-records/route.ts:31-56",
+        "app/api/dispatch-logs/route.ts:184-187",
+        "app/api/dispatch-logs/route.ts:192-208",
+        "app/api/workpacks/[id]/share-sessions/route.ts:34-55",
+        "app/api/workpacks/[id]/read-confirmations/route.ts:32-42",
+        "app/api/workpacks/[id]/improvements/route.ts:187-197"
+      ],
+      "exploitPrerequisites": [
+        "A foreign valid UUID is known or otherwise supplied.",
+        "A row with the caller-owned organization and a foreign related identifier is accepted or already exists.",
+        "A direct-table attempt has the corresponding object privilege, or the authenticated dispatch route uses service role on the caller's behalf.",
+        "A privileged child query includes the mismatched row in its response or downstream operation."
+      ],
+      "falsePositiveCaveats": [
+        "Foreign UUID knowledge was not proven.",
+        "No mismatched row was created and no cross-tenant response injection was reproduced.",
+        "The dispatch route does not require client database INSERT privilege, but it still requires a usable foreign workpack identifier.",
+        "Some routes already validate an owned parent; the gap is the missing same-tenant relationship or child filter."
+      ],
+      "remediationOwner": {
+        "primary": "Backend tenant-authorization owner",
+        "support": ["Supabase database security owner", "Commercial workpack owner", "Dispatch owner"]
+      },
+      "batchIds": ["B", "D", "E"],
+      "status": "open-not-remediated"
+    },
+    {
+      "id": "P2-01",
+      "severity": "P2",
+      "title": "History-like tenant tables receive unrestricted owner UPDATE and DELETE",
+      "tables": [
+        "education_records",
+        "dispatch_logs",
+        "daily_entries",
+        "knowledge_events",
+        "knowledge_regeneration_runs",
+        "workpack_read_confirmations"
+      ],
+      "routes": [
+        {
+          "httpPath": "/api/education-records",
+          "methods": ["POST"],
+          "sourceRef": "app/api/education-records/route.ts:15-56"
+        },
+        {
+          "httpPath": "/api/dispatch-logs",
+          "methods": ["GET", "POST"],
+          "sourceRef": "app/api/dispatch-logs/route.ts:41-208"
+        },
+        {
+          "httpPath": "/api/workpacks/[id]/read-confirmations",
+          "methods": ["GET", "POST"],
+          "sourceRef": "app/api/workpacks/[id]/read-confirmations/route.ts:21-145"
+        }
+      ],
+      "evidence": [
+        "supabase/migrations/002_workspace_productization.sql:166-200",
+        "supabase/migrations/003_knowledge_runtime.sql:77-126",
+        "supabase/migrations/010_commercial_operations.sql:178-193"
+      ],
+      "exploitPrerequisites": [
+        "The authenticated role has UPDATE or DELETE object privilege.",
+        "The target row satisfies the current owner predicate.",
+        "The command is reachable directly or through a future application path."
+      ],
+      "falsePositiveCaveats": [
+        "Effective UPDATE and DELETE grants were not inspected.",
+        "The current UI may not expose those commands.",
+        "No mutation was executed."
+      ],
+      "remediationOwner": {
+        "primary": "Data lifecycle owner",
+        "support": ["Supabase database security owner", "Backend API owner"]
+      },
+      "batchIds": ["A", "E"],
+      "status": "open-not-remediated"
+    },
+    {
+      "id": "P2-02",
+      "severity": "P2",
+      "title": "Ingestion-run operational metadata has an unrestricted SELECT row policy",
+      "tables": ["safety_reference_ingestion_runs"],
+      "routes": [
+        {
+          "httpPath": "/api/safety-reference/status",
+          "methods": ["GET"],
+          "sourceRef": "app/api/safety-reference/status/route.ts:6"
+        }
+      ],
+      "evidence": [
+        "supabase/migrations/004_safety_reference_catalog.sql:34-45",
+        "supabase/migrations/004_safety_reference_catalog.sql:70-72"
+      ],
+      "exploitPrerequisites": [
+        "Anon or authenticated has SELECT object privilege.",
+        "Operational report_path or details values are present.",
+        "The caller reaches the raw table or an unsanitized server response."
+      ],
+      "falsePositiveCaveats": [
+        "The policy does not itself confer the SELECT object privilege.",
+        "HEAD observed two anon-visible rows but did not retrieve row bodies.",
+        "Effective grant catalog entries were not inspected."
+      ],
+      "remediationOwner": {
+        "primary": "Safety reference operations owner",
+        "support": ["Supabase database security owner", "Public API owner"]
+      },
+      "batchIds": ["A", "E"],
+      "status": "open-not-remediated"
+    },
+    {
+      "id": "P2-03",
+      "severity": "P2",
+      "title": "`mcp_tokens` tenant binding is not schema-enforced",
+      "tables": ["mcp_tokens"],
+      "routes": [
+        {
+          "httpPath": "/api/mcp/[transport]",
+          "methods": ["GET", "POST", "DELETE"],
+          "sourceRef": "app/api/mcp/[transport]/route.ts:134-189"
+        },
+        {
+          "httpPath": "/api/mcp-tokens",
+          "methods": ["GET", "POST"],
+          "sourceRef": "app/api/mcp-tokens/route.ts:189-253"
+        },
+        {
+          "httpPath": "/api/mcp-tokens/[id]",
+          "methods": ["PATCH", "DELETE"],
+          "sourceRef": "app/api/mcp-tokens/[id]/route.ts:33-116"
+        }
+      ],
+      "evidence": [
+        "supabase/migrations/007_mcp_tokens.sql:14-24",
+        "lib/mcp-auth.ts:134-143",
+        "lib/mcp-auth.ts:155-163",
+        "app/api/mcp/[transport]/route.ts:134-146",
+        "app/api/mcp-tokens/route.ts:214-253"
+      ],
+      "exploitPrerequisites": [
+        "A privileged path creates or retains an orphaned or mismatched token row.",
+        "The token carries a valid foreign siteId into MCP resolution.",
+        "The token is presented to a memory-reading tool with an allowed scope."
+      ],
+      "falsePositiveCaveats": [
+        "The normal issuance API derives siteId and orgId from one owned workspace context.",
+        "No wrongly bound token was created.",
+        "No cross-tenant MCP memory read was reproduced."
+      ],
+      "remediationOwner": {
+        "primary": "MCP authentication owner",
+        "support": ["Supabase database security owner", "Backend tenant-authorization owner"]
+      },
+      "batchIds": ["B", "E"],
+      "status": "open-not-remediated"
+    },
+    {
+      "id": "P2-04",
+      "severity": "P2",
+      "title": "Published ontology edges do not require published endpoint nodes",
+      "tables": ["safety_ontology_edges", "safety_ontology_nodes"],
+      "routes": [
+        {
+          "httpPath": "/api/ontology/graph",
+          "methods": ["GET"],
+          "sourceRef": "app/api/ontology/graph/route.ts:10-11"
+        }
+      ],
+      "evidence": [
+        "supabase/migrations/008_safety_ontology.sql:20-29",
+        "supabase/migrations/008_safety_ontology.sql:43-45"
+      ],
+      "exploitPrerequisites": [
+        "A published edge references at least one endpoint that is not published.",
+        "The caller has SELECT object privilege.",
+        "The public path returns edge identifiers, relations, citations, or metadata."
+      ],
+      "falsePositiveCaveats": [
+        "Different service-role and anon edge counts do not prove an invalid endpoint relation.",
+        "Endpoint publication consistency was not inspected.",
+        "No violating edge was identified."
+      ],
+      "remediationOwner": {
+        "primary": "Ontology publication owner",
+        "support": ["Supabase database security owner", "Public graph API owner"]
+      },
+      "batchIds": ["A", "E"],
+      "status": "open-not-remediated"
+    },
+    {
+      "id": "P3-01",
+      "severity": "P3",
+      "title": "Tenant policies omit explicit roles and FORCE RLS",
+      "tables": [
+        "organizations",
+        "sites",
+        "workers",
+        "workpacks",
+        "education_records",
+        "dispatch_logs",
+        "daily_entries",
+        "knowledge_events",
+        "knowledge_regeneration_runs",
+        "workpack_share_sessions",
+        "workpack_read_confirmations",
+        "workpack_improvements",
+        "workpack_improvement_photos"
+      ],
+      "routes": [],
+      "evidence": [
+        "supabase/migrations/002_workspace_productization.sql:99-200",
+        "supabase/migrations/003_knowledge_runtime.sql:73-126",
+        "supabase/migrations/004_safety_reference_catalog.sql:58-72",
+        "supabase/migrations/007_mcp_tokens.sql:32-33",
+        "supabase/migrations/008_safety_ontology.sql:35-45",
+        "supabase/migrations/010_commercial_operations.sql:155-231"
+      ],
+      "exploitPrerequisites": [
+        "A broader role has the corresponding object privilege and falls inside an implicit policy target.",
+        "For table-owner risk, SQL executes as the table owner or another owner-equivalent path.",
+        "For the dispatch null branch, a reachable null-organization row exists or can be created."
+      ],
+      "falsePositiveCaveats": [
+        "Standard owner predicates evaluate false for an unauthenticated null auth identity.",
+        "Object command privilege remains a prerequisite.",
+        "FORCE does not constrain service_role BYPASSRLS.",
+        "Live roles, owners, grants, and FORCE flags were not inspected."
+      ],
+      "remediationOwner": {
+        "primary": "Supabase database security owner",
+        "support": ["Platform operations owner", "Application security reviewer"]
+      },
+      "batchIds": ["A", "C", "E"],
+      "status": "open-not-remediated"
+    },
+    {
+      "id": "P3-02",
+      "severity": "P3",
+      "title": "Service-only RPC intent is not reflected in grants or function hardening",
+      "tables": ["safety_reference_embeddings", "safety_reference_items"],
+      "routes": [
+        {
+          "httpPath": "/api/safety-reference/search",
+          "methods": ["GET"],
+          "sourceRef": "app/api/safety-reference/search/route.ts:7-18"
+        }
+      ],
+      "evidence": [
+        "supabase/migrations/010_commercial_operations.sql:109-153",
+        "supabase/migrations/010_commercial_operations.sql:229-231"
+      ],
+      "exploitPrerequisites": [
+        "A non-intended role has function execution privilege.",
+        "The RPC is reachable through the selected API surface.",
+        "Namespace resolution or object privileges expose a useful target."
+      ],
+      "falsePositiveCaveats": [
+        "Current invoker behavior means non-bypass callers still face table RLS.",
+        "The embeddings endpoint returned 404 in the preserved probe.",
+        "Effective function execution grants were not inspected."
+      ],
+      "remediationOwner": {
+        "primary": "Supabase database security owner",
+        "support": ["Safety reference search owner", "Platform operations owner"]
+      },
+      "batchIds": ["A", "E"],
+      "status": "open-not-remediated"
+    },
+    {
+      "id": "P3-03",
+      "severity": "P3",
+      "title": "Ontology publication policy does not require provenance",
+      "tables": ["safety_ontology_nodes", "safety_ontology_edges"],
+      "routes": [
+        {
+          "httpPath": "/api/ontology/graph",
+          "methods": ["GET"],
+          "sourceRef": "app/api/ontology/graph/route.ts:10-11"
+        }
+      ],
+      "evidence": [
+        "supabase/migrations/008_safety_ontology.sql:9-29",
+        "supabase/migrations/008_safety_ontology.sql:35-45",
+        "lib/ontology/graph-store.ts:73-115",
+        "lib/ontology/graph-store.ts:253-276"
+      ],
+      "exploitPrerequisites": [
+        "A service-role or equivalent bypass path writes a published row with empty provenance.",
+        "The public caller has SELECT object privilege.",
+        "The public graph path returns the violating row."
+      ],
+      "falsePositiveCaveats": [
+        "The normal application path rejects or drops empty-provenance rows.",
+        "No direct privileged write was executed.",
+        "No current published row with empty cited_uids was proven."
+      ],
+      "remediationOwner": {
+        "primary": "Ontology publication owner",
+        "support": ["Supabase database security owner", "Evidence integrity reviewer"]
+      },
+      "batchIds": ["A", "E"],
+      "status": "open-not-remediated"
+    }
+  ],
+  "approvalDecisionTable": [
+    {
+      "id": "A",
+      "title": "Policy-only RLS and command semantics",
+      "smallestSafeScope": "Close missing RLS intent for query_logs and documents; remove the dispatch null-tenant branch; target policies to explicit roles; split required SELECT, INSERT, UPDATE, and DELETE behavior with explicit new-row checks; make ingestion metadata operator-only; add ontology publication predicates without route changes.",
+      "findingIds": ["P1-01", "P1-02", "P2-01", "P2-02", "P2-04", "P3-01", "P3-02", "P3-03"],
+      "requiresExplicitUserApproval": true,
+      "hardSafetyGate": true,
+      "approvalReason": "The selected implementation would change database policies, privileges, functions, or integrity behavior and must be rehearsed as an approval-gated migration even though this packet contains no executable migration text.",
+      "implementationAllowedByThisPacket": false,
+      "dependencies": [],
+      "recommendedDecision": "APPROVE FOR STAGING DESIGN AND REHEARSAL ONLY; production remains separately gated.",
+      "rollbackUnit": "One policy-only database change set with captured pre-change policy, grant, owner, and function metadata."
+    },
+    {
+      "id": "B",
+      "title": "Tenant and service-role route scoping",
+      "smallestSafeScope": "Route and server-library changes only: re-own supplied IDs, apply organization and site filters to privileged child queries, validate dispatch workpack ownership, and require MCP site-to-organization agreement before memory access.",
+      "findingIds": ["P1-02", "P1-03", "P2-03"],
+      "requiresExplicitUserApproval": true,
+      "hardSafetyGate": false,
+      "approvalReason": "A route-only implementation is not a database hard-gate action, but the current instruction authorizes an approval packet only; an explicit follow-up selection is required before code changes.",
+      "implementationAllowedByThisPacket": false,
+      "dependencies": [],
+      "recommendedDecision": "APPROVE AS A SEPARATE CODE BATCH after owner assignments and route acceptance cases are accepted.",
+      "rollbackUnit": "One application deployment commit with no database or storage mutation."
+    },
+    {
+      "id": "C",
+      "title": "FORCE RLS tradeoff decision",
+      "smallestSafeScope": "Inventory table owners and owner-executed jobs, rehearse owner behavior in staging, and decide table by table whether FORCE is compatible; do not treat FORCE as a service-role control.",
+      "findingIds": ["P3-01"],
+      "requiresExplicitUserApproval": true,
+      "hardSafetyGate": true,
+      "approvalReason": "Changing FORCE state alters database authorization behavior and can break table-owner maintenance paths.",
+      "implementationAllowedByThisPacket": false,
+      "dependencies": ["A"],
+      "recommendedDecision": "DEFER ENABLEMENT until the owner and maintenance-path inventory is complete; keep it out of Batch A.",
+      "rollbackUnit": "Independent per-table FORCE state change set; ordinary RLS remains enabled during rollback."
+    },
+    {
+      "id": "D",
+      "title": "Managed storage boundary",
+      "smallestSafeScope": "Choose service-route-only or direct-client access, inspect staging storage policy and grant state, enforce path-to-metadata tenant agreement, and test foreign identifiers and prefixes before any production change.",
+      "findingIds": ["P1-03"],
+      "requiresExplicitUserApproval": true,
+      "hardSafetyGate": true,
+      "approvalReason": "Storage policy changes, bucket/object operations, and fixture uploads are database or network data mutations and require explicit approval.",
+      "implementationAllowedByThisPacket": false,
+      "dependencies": ["B"],
+      "recommendedDecision": "APPROVE STAGING INSPECTION PLAN; default to service-route-only unless a direct-client requirement is demonstrated.",
+      "rollbackUnit": "Storage policy snapshot plus application deployment; test objects are tracked by fixture IDs for staging-only cleanup."
+    },
+    {
+      "id": "E",
+      "title": "Live cross-tenant staging tests",
+      "smallestSafeScope": "Provision disposable organization A/B, site A/B, authenticated A/B users, tenant rows, MCP tokens, and storage objects in non-production; execute the exact pre/post matrices and remove only tagged fixtures after evidence capture.",
+      "findingIds": ["P1-01", "P1-02", "P1-03", "P2-01", "P2-02", "P2-03", "P2-04", "P3-01", "P3-02", "P3-03"],
+      "requiresExplicitUserApproval": true,
+      "hardSafetyGate": true,
+      "approvalReason": "The plan creates, updates, and deletes staging identities, rows, tokens, and objects; no production execution is authorized.",
+      "implementationAllowedByThisPacket": false,
+      "dependencies": ["A", "B", "D"],
+      "recommendedDecision": "MANDATORY BEFORE LAUNCH PASS; execute only after approving the fixture target and cleanup manifest.",
+      "rollbackUnit": "Tagged staging fixture set with an allowlisted cleanup manifest and post-cleanup count verification."
+    }
+  ],
+  "actionsNotRequiringAdditionalApprovalForThisPacket": [
+    "Read repository source and preserved redacted audit artifacts.",
+    "Write report.json, report.md, the local validator, and validator evidence logs inside the approved evaluation directory.",
+    "Run the local validator, its mutation-based attack cases, git diff scope checks, and local secret-pattern scans.",
+    "Commit and push the documentation-only branch after pull --rebase."
+  ],
+  "actionsRequiringExplicitApprovalBeforeExecution": [
+    "Any database policy, role, privilege, function, constraint, or FORCE state change.",
+    "Any route, server library, or test implementation beyond this packet.",
+    "Any staging or production identity, row, token, bucket, or object mutation.",
+    "Any live credential use or live policy/grant inspection not already represented by the preserved audit artifacts.",
+    "Any production rollout, rollback, or fixture cleanup."
+  ],
+  "proposedPolicySemantics": {
+    "pseudocodeOnly": true,
+    "executableSqlIncluded": false,
+    "legend": {
+      "rowVisibility": "The condition applied to an existing row for SELECT, UPDATE, or DELETE.",
+      "newRowCheck": "The condition applied to the proposed row for INSERT or UPDATE, equivalent to the intended WITH CHECK behavior.",
+      "deny": "No direct command is intended for this role even if an object privilege is accidentally broad.",
+      "serviceRole": "RLS is bypassed; the listed route and integrity controls are mandatory compensating controls."
+    },
+    "explicitNewRowCheckTables": [
+      "organizations",
+      "sites",
+      "workers",
+      "workpacks",
+      "education_records",
+      "dispatch_logs",
+      "daily_entries",
+      "knowledge_events",
+      "knowledge_regeneration_runs",
+      "workpack_share_sessions",
+      "workpack_read_confirmations",
+      "workpack_improvements",
+      "workpack_improvement_photos"
+    ],
+    "tenantCommandMatrix": [
+      {
+        "table": "organizations",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when actor identity is non-null and row.owner_id equals actor identity.",
+        "INSERT": "ALLOW only when new.owner_id equals actor identity.",
+        "UPDATE": "ALLOW existing owned row; new-row check keeps owner_id equal to actor identity and blocks generic owner transfer.",
+        "DELETE": "DENY direct authenticated delete; use a separately approved organization-retirement workflow.",
+        "serviceRoleBoundary": "Workspace bootstrap and owner-scoped server helpers must preserve explicit user ownership filters.",
+        "evidence": ["supabase/migrations/002_workspace_productization.sql:3-9", "supabase/migrations/002_workspace_productization.sql:106-113"]
+      },
+      {
+        "table": "sites",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when the site organization is owned by the actor.",
+        "INSERT": "ALLOW only when new.organization_id resolves to an actor-owned organization.",
+        "UPDATE": "ALLOW existing owned site; new-row check keeps the final organization actor-owned.",
+        "DELETE": "ALLOW only through the documented site-retirement command after dependent-row checks; otherwise deny.",
+        "serviceRoleBoundary": "Every site lookup includes an owned organization predicate.",
+        "evidence": ["supabase/migrations/002_workspace_productization.sql:11-19", "supabase/migrations/002_workspace_productization.sql:115-130"]
+      },
+      {
+        "table": "workers",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when row.organization_id is actor-owned.",
+        "INSERT": "ALLOW when new.organization_id is actor-owned and any new.site_id belongs to that organization.",
+        "UPDATE": "ALLOW existing owned row; new-row check repeats organization and site agreement.",
+        "DELETE": "ALLOW only through the worker lifecycle command with dependent-history handling; otherwise deny.",
+        "serviceRoleBoundary": "Worker IDs supplied for sharing or education are re-owned by organization and site before use.",
+        "evidence": ["supabase/migrations/002_workspace_productization.sql:21-42", "supabase/migrations/002_workspace_productization.sql:132-147", "app/api/workers/route.ts:7-80"]
+      },
+      {
+        "table": "workpacks",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when row.organization_id is actor-owned.",
+        "INSERT": "ALLOW when organization is actor-owned and any site belongs to that organization; created_by follows the approved attribution rule.",
+        "UPDATE": "ALLOW existing owned row; new-row check preserves organization/site agreement and trusted attribution.",
+        "DELETE": "DENY generic direct delete; use an explicit archive or retention workflow.",
+        "serviceRoleBoundary": "Load the workpack by id plus owned organization IDs, then carry organization and site into every child query.",
+        "evidence": ["supabase/migrations/002_workspace_productization.sql:44-57", "supabase/migrations/002_workspace_productization.sql:149-164", "app/api/workpacks/[id]/route.ts:11-81"]
+      },
+      {
+        "table": "education_records",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when row.organization_id is actor-owned.",
+        "INSERT": "ALLOW when organization is actor-owned and site, workpack, and worker each resolve inside that organization.",
+        "UPDATE": "DENY direct authenticated update for append-only history unless a separately reviewed correction transition is approved.",
+        "DELETE": "DENY direct authenticated delete; retention workflow only.",
+        "serviceRoleBoundary": "Re-own request workpackId and every mapped worker ID before insert.",
+        "evidence": ["supabase/migrations/002_workspace_productization.sql:59-74", "supabase/migrations/002_workspace_productization.sql:166-181", "app/api/education-records/route.ts:31-56"]
+      },
+      {
+        "table": "dispatch_logs",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW only when organization_id is non-null and actor-owned.",
+        "INSERT": "ALLOW only when organization_id is non-null and actor-owned and any site/workpack belongs to it.",
+        "UPDATE": "DENY direct authenticated update for dispatch history.",
+        "DELETE": "DENY direct authenticated delete; operator retention workflow only.",
+        "serviceRoleBoundary": "Re-own external workpackId before insert and keep global operator events outside tenant rows.",
+        "evidence": ["supabase/migrations/002_workspace_productization.sql:76-90", "supabase/migrations/002_workspace_productization.sql:183-200", "app/api/dispatch-logs/route.ts:173-208"]
+      },
+      {
+        "table": "daily_entries",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when row.organization_id is actor-owned.",
+        "INSERT": "ALLOW when organization is actor-owned and any site/workpack belongs to it; trusted created_by follows the attribution rule.",
+        "UPDATE": "DENY generic update; any correction transition must be separately scoped and audited.",
+        "DELETE": "DENY direct delete; retention workflow only.",
+        "serviceRoleBoundary": "Any future privileged path carries organization and site scope explicitly.",
+        "evidence": ["supabase/migrations/003_knowledge_runtime.sql:1-19", "supabase/migrations/003_knowledge_runtime.sql:77-92"]
+      },
+      {
+        "table": "knowledge_events",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when row.organization_id is actor-owned.",
+        "INSERT": "ALLOW when organization is actor-owned and site, workpack, and daily entry resolve inside it.",
+        "UPDATE": "DENY direct update for event history.",
+        "DELETE": "DENY direct delete; retention workflow only.",
+        "serviceRoleBoundary": "Authenticated ingest context supplies organization/site and revalidates any related row IDs.",
+        "evidence": ["supabase/migrations/003_knowledge_runtime.sql:21-44", "supabase/migrations/003_knowledge_runtime.sql:94-109", "app/api/knowledge/ingest/route.ts:35-75"]
+      },
+      {
+        "table": "knowledge_regeneration_runs",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when row.organization_id is actor-owned.",
+        "INSERT": "ALLOW when organization is actor-owned, all scalar relations match it, and every raw_event_ids element resolves inside it.",
+        "UPDATE": "DENY direct update for run history.",
+        "DELETE": "DENY direct delete; retention workflow only.",
+        "serviceRoleBoundary": "Regeneration verifies the complete source event set and final organization/site before insert.",
+        "evidence": ["supabase/migrations/003_knowledge_runtime.sql:46-64", "supabase/migrations/003_knowledge_runtime.sql:111-126", "app/api/knowledge/regenerate/route.ts:97-131"]
+      },
+      {
+        "table": "workpack_share_sessions",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when row.organization_id is actor-owned.",
+        "INSERT": "ALLOW when organization is actor-owned and workpack, site, and recipient worker IDs all resolve inside it.",
+        "UPDATE": "ALLOW only documented status and expiry transitions on an owned row; new-row check preserves all tenant relations.",
+        "DELETE": "DENY direct delete; revoke or expire instead.",
+        "serviceRoleBoundary": "Child reads filter by workpack, organization, and site; recipients are re-owned before snapshot creation.",
+        "evidence": ["supabase/migrations/010_commercial_operations.sql:21-34", "supabase/migrations/010_commercial_operations.sql:161-176", "app/api/workpacks/[id]/share-sessions/route.ts:34-55"]
+      },
+      {
+        "table": "workpack_read_confirmations",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when row.organization_id is actor-owned.",
+        "INSERT": "ALLOW when organization is actor-owned and share session, worker, workpack, and site all agree.",
+        "UPDATE": "DENY direct update for read history.",
+        "DELETE": "DENY direct delete; retention workflow only.",
+        "serviceRoleBoundary": "The active share session and recipient are re-owned and the final insert carries organization/site/workpack scope.",
+        "evidence": ["supabase/migrations/010_commercial_operations.sql:36-49", "supabase/migrations/010_commercial_operations.sql:178-193", "app/api/workpacks/[id]/read-confirmations/route.ts:57-145"]
+      },
+      {
+        "table": "workpack_improvements",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when row.organization_id is actor-owned.",
+        "INSERT": "ALLOW when organization is actor-owned and workpack/site agree; created_by follows the approved attribution rule.",
+        "UPDATE": "ALLOW only documented review-state transitions; new-row check preserves tenant relations and trusted approved_by attribution.",
+        "DELETE": "DENY generic delete; rejection or retention workflow only.",
+        "serviceRoleBoundary": "Privileged child reads filter by organization/site/workpack and MCP reads validate both token site and organization.",
+        "evidence": ["supabase/migrations/010_commercial_operations.sql:51-69", "supabase/migrations/010_commercial_operations.sql:195-210", "app/api/workpacks/[id]/improvements/route.ts:176-197"]
+      },
+      {
+        "table": "workpack_improvement_photos",
+        "roles": ["authenticated"],
+        "SELECT": "ALLOW when row.organization_id is actor-owned and metadata relations agree.",
+        "INSERT": "ALLOW only through the approved boundary when organization, site, workpack, improvement, bucket, and path agree.",
+        "UPDATE": "DENY direct metadata update; replace through a reviewed service workflow.",
+        "DELETE": "DENY direct authenticated delete when service-route-only storage is selected; authorized service cleanup only.",
+        "serviceRoleBoundary": "Re-own improvement/workpack before object operations and verify path-to-metadata agreement before upload or removal.",
+        "evidence": ["supabase/migrations/010_commercial_operations.sql:71-86", "supabase/migrations/010_commercial_operations.sql:212-227", "app/api/workpacks/[id]/improvements/route.ts:86-173"]
+      }
+    ],
+    "operatorAndPublicMatrix": [
+      {
+        "boundary": "query_logs",
+        "anon": "DENY all direct commands.",
+        "authenticated": "DENY all direct commands.",
+        "serviceRole": "Operator-only read/write path with redaction and retention; no generic public route.",
+        "newRowCheck": "Operator path accepts only the documented log shape and never stores credentials."
+      },
+      {
+        "boundary": "documents",
+        "anon": "DENY all direct commands pending classification.",
+        "authenticated": "DENY all direct commands pending classification.",
+        "serviceRole": "No runtime table path is approved by this packet.",
+        "newRowCheck": "Not applicable until the table is classified as tenant, operator, public, or retired."
+      },
+      {
+        "boundary": "safety_reference_sources and safety_reference_items",
+        "anon": "ALLOW SELECT of deliberate public catalog fields only.",
+        "authenticated": "Same public SELECT contract; no direct writes.",
+        "serviceRole": "Ingestion writes remain server-only with explicit operator ownership."
+      },
+      {
+        "boundary": "safety_reference_ingestion_runs",
+        "anon": "DENY raw table access; public status route returns a sanitized shape only.",
+        "authenticated": "DENY raw table access unless a separately approved operator role is introduced.",
+        "serviceRole": "Operator ingestion and status aggregation only."
+      },
+      {
+        "boundary": "safety_ontology_nodes and safety_ontology_edges",
+        "anon": "ALLOW SELECT only for published rows with non-empty provenance; each visible edge has published source and destination nodes.",
+        "authenticated": "Same public read contract unless a separate reviewer role is approved.",
+        "serviceRole": "Publishing workflow enforces provenance and endpoint state before making a row public."
+      },
+      {
+        "boundary": "safety_reference_embeddings and retrieval RPC",
+        "anon": "DENY table and function reachability.",
+        "authenticated": "DENY table and function reachability.",
+        "serviceRole": "Server-only invoker behavior with schema-qualified relations, fixed namespace, and explicit caller set."
+      }
+    ],
+    "mcpAndStorageSemantics": [
+      {
+        "boundary": "mcp_tokens",
+        "anon": "DENY all direct commands.",
+        "authenticated": "DENY direct table commands; use authenticated token administration routes.",
+        "serviceRole": "Require a valid site/org combination, reject orphaned or contradictory scopes, and compare both fields on memory reads.",
+        "legacyTokenCaveat": "Environment-backed legacy tokens are unscoped and must not be treated as tenant-isolation evidence."
+      },
+      {
+        "boundary": "storage.objects",
+        "anon": "DENY list, read, upload, overwrite, move, and delete.",
+        "authenticated": "Default proposal is direct deny and service-route-only access; direct access requires a separate approved path predicate design.",
+        "serviceRole": "Route re-owns organization, workpack, and improvement; generated prefix and metadata must agree before every object operation."
+      }
+    ]
+  },
+  "serviceRoleSurface": {
+    "tenantAdminRoutes": [
+      {"path": "app/api/briefing/settings/route.ts", "httpPath": "/api/briefing/settings", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/briefing/settings/route.ts:52-136"},
+      {"path": "app/api/dispatch-logs/route.ts", "httpPath": "/api/dispatch-logs", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/dispatch-logs/route.ts:41-208"},
+      {"path": "app/api/education-records/route.ts", "httpPath": "/api/education-records", "methods": ["POST"], "kind": "direct", "sourceRef": "app/api/education-records/route.ts:15-56"},
+      {"path": "app/api/workers/route.ts", "httpPath": "/api/workers", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/workers/route.ts:7-80"},
+      {"path": "app/api/workpacks/route.ts", "httpPath": "/api/workpacks", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/workpacks/route.ts:26-229"},
+      {"path": "app/api/workpacks/[id]/route.ts", "httpPath": "/api/workpacks/[id]", "methods": ["GET"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/route.ts:11-81"},
+      {
+        "path": "app/api/workflow/dispatch/route.ts",
+        "httpPath": "/api/workflow/dispatch",
+        "methods": ["POST"],
+        "kind": "direct",
+        "sourceRef": "app/api/workflow/dispatch/route.ts:218-310",
+        "accessedTables": ["workpacks", "workpack_share_sessions"],
+        "accessSemantics": "POST authenticates the caller, loads the caller-owned workpack operation context, and validates the active owned share session; it does not access dispatch_logs."
+      },
+      {"path": "app/api/workpacks/[id]/share-sessions/route.ts", "httpPath": "/api/workpacks/[id]/share-sessions", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/share-sessions/route.ts:23-154"},
+      {"path": "app/api/workpacks/[id]/read-confirmations/route.ts", "httpPath": "/api/workpacks/[id]/read-confirmations", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/read-confirmations/route.ts:21-145"},
+      {"path": "app/api/workpacks/[id]/improvements/route.ts", "httpPath": "/api/workpacks/[id]/improvements", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/improvements/route.ts:176-338"},
+      {"path": "app/api/workpacks/[id]/operation-graph/route.ts", "httpPath": "/api/workpacks/[id]/operation-graph", "methods": ["GET"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/operation-graph/route.ts:97-138"},
+      {"path": "app/api/workpacks/[id]/learning-export/route.ts", "httpPath": "/api/workpacks/[id]/learning-export", "methods": ["GET"], "kind": "direct", "sourceRef": "app/api/workpacks/[id]/learning-export/route.ts:99-141"},
+      {"path": "app/api/knowledge/ingest/route.ts", "httpPath": "/api/knowledge/ingest", "methods": ["POST"], "kind": "direct", "sourceRef": "app/api/knowledge/ingest/route.ts:15-96"},
+      {"path": "app/api/knowledge/regenerate/route.ts", "httpPath": "/api/knowledge/regenerate", "methods": ["POST"], "kind": "direct", "sourceRef": "app/api/knowledge/regenerate/route.ts:59-131"},
+      {
+        "path": "app/api/input-photos/hazard-analysis/route.ts",
+        "httpPath": "/api/input-photos/hazard-analysis",
+        "methods": ["POST"],
+        "kind": "direct",
+        "sourceRef": "app/api/input-photos/hazard-analysis/route.ts:50-68",
+        "accessedTables": [],
+        "accessSemantics": "POST creates the privileged client only for caller authentication before photo analysis.",
+        "publicReadiness": {
+          "method": "GET",
+          "sourceRef": "app/api/input-photos/hazard-analysis/route.ts:46-48",
+          "usesServiceRole": false,
+          "requiresAuthentication": false,
+          "accessSemantics": "GET is a public provider-readiness response and does not create a privileged client or require authentication."
+        }
+      },
+      {"path": "app/api/mcp/[transport]/route.ts", "httpPath": "/api/mcp/[transport]", "methods": ["GET", "POST", "DELETE"], "kind": "direct", "sourceRef": "app/api/mcp/[transport]/route.ts:483-543"},
+      {"path": "app/api/mcp-tokens/route.ts", "httpPath": "/api/mcp-tokens", "methods": ["GET", "POST"], "kind": "direct", "sourceRef": "app/api/mcp-tokens/route.ts:68-253"},
+      {"path": "app/api/mcp-tokens/[id]/route.ts", "httpPath": "/api/mcp-tokens/[id]", "methods": ["PATCH", "DELETE"], "kind": "direct", "sourceRef": "app/api/mcp-tokens/[id]/route.ts:49-116"},
+      {"path": "app/api/briefing/run/route.ts", "httpPath": "/api/briefing/run", "methods": ["GET"], "kind": "direct", "sourceRef": "app/api/briefing/run/route.ts:103-149"},
+      {"path": "app/api/agent/context/route.ts", "httpPath": "/api/agent/context", "methods": ["GET"], "kind": "broker-mediated", "sourceRef": "app/api/agent/context/route.ts:1-9"},
+      {"path": "app/api/agent/chat/route.ts", "httpPath": "/api/agent/chat", "methods": ["POST"], "kind": "broker-mediated", "sourceRef": "app/api/agent/chat/route.ts:1-8"}
+    ],
+    "routePostcondition": "For every tenant/admin route, a request carrying a foreign organization, site, workpack, worker, share-session, improvement, token, or object identifier is denied before privileged data access; denial does not reveal whether the foreign resource exists.",
+    "publicGlobalSurfaces": [
+      {"path": "app/api/safety-reference/search/route.ts", "httpPath": "/api/safety-reference/search", "kind": "api", "sourceRef": "app/api/safety-reference/search/route.ts:7-18", "postExpected": "Only deliberate public catalog fields."},
+      {"path": "app/api/safety-reference/status/route.ts", "httpPath": "/api/safety-reference/status", "kind": "api", "sourceRef": "app/api/safety-reference/status/route.ts:6", "postExpected": "Sanitized status without raw report_path or details."},
+      {"path": "app/api/ontology/graph/route.ts", "httpPath": "/api/ontology/graph", "kind": "api", "sourceRef": "app/api/ontology/graph/route.ts:10-11", "postExpected": "Published, cited subgraph with published endpoints only."},
+      {"path": "app/api/ask/route.ts", "httpPath": "/api/ask", "kind": "api", "sourceRef": "app/api/ask/route.ts:21", "postExpected": "No tenant/admin row leakage through global evidence reads."},
+      {"path": "app/api/ask/stream/route.ts", "httpPath": "/api/ask/stream", "kind": "api", "sourceRef": "app/api/ask/stream/route.ts:25", "postExpected": "Same public evidence boundary as non-streaming ask."},
+      {"path": "app/api/workpack/remediate/route.ts", "httpPath": "/api/workpack/remediate", "kind": "api", "sourceRef": "app/api/workpack/remediate/route.ts:177", "postExpected": "No cross-tenant persistence or tenant row disclosure."},
+      {"path": "app/ask/page.tsx", "httpPath": "/ask", "kind": "server-page", "sourceRef": "app/ask/page.tsx:13-14", "postExpected": "Public page preserves the global evidence boundary."},
+      {"path": "app/ontology/page.tsx", "httpPath": "/ontology", "kind": "server-page", "sourceRef": "app/ontology/page.tsx:35-36", "postExpected": "Published, cited ontology only."},
+      {"path": "app/evidence/page.tsx", "httpPath": "/evidence", "kind": "server-page", "sourceRef": "app/evidence/page.tsx:9", "postExpected": "No tenant/admin data."},
+      {"path": "app/knowledge/page.tsx", "httpPath": "/knowledge", "kind": "server-page", "sourceRef": "app/knowledge/page.tsx:140", "postExpected": "No tenant/admin data."},
+      {"path": "app/ops/api/page.tsx", "httpPath": "/ops/api", "kind": "server-page", "sourceRef": "app/ops/api/page.tsx:13", "postExpected": "No secrets, raw credentials, or tenant row bodies."}
+    ]
+  },
+  "testPlan": {
+    "executionClaim": "No test in this plan was executed by this packet.",
+    "currentExecutionStatus": "not_executed",
+    "target": "non-production staging only",
+    "fixtures": {
+      "organizationA": "org-A-fixture owned by authenticated user A",
+      "organizationB": "org-B-fixture owned by authenticated user B",
+      "siteA": "site-A-fixture belonging to organization A",
+      "siteB": "site-B-fixture belonging to organization B",
+      "authenticatedA": "user-A token with no service-role capability",
+      "authenticatedB": "user-B token with no service-role capability",
+      "anon": "project anon role without a user identity",
+      "serviceRole": "staging-only server credential held outside repository artifacts",
+      "fixtureTag": "rls-remediation-2026-07-14",
+      "credentialHandling": "Credentials are injected only at execution time, never written to report files or logs."
+    },
+    "phases": {
+      "pre": {
+        "purpose": "Capture the staging baseline immediately before a batch; source-risk notes may predict an allow, but observed results remain null until execution.",
+        "executionStatus": "not_executed",
+        "requiredEvidence": ["request identity", "command", "resource fixture ID", "redacted status", "row-count effect", "no-existence-leak result"]
+      },
+      "post": {
+        "purpose": "Repeat the identical fixtures and commands after the approved batch.",
+        "executionStatus": "not_executed",
+        "requiredOutcome": "All cross-tenant commands deny and all intended same-tenant/public positive controls remain available."
+      }
+    },
+    "directionCases": [
+      {"id": "A-to-B", "actor": "authenticatedA", "ownTenant": "organization A and site A", "foreignTenant": "organization B and site B"},
+      {"id": "B-to-A", "actor": "authenticatedB", "ownTenant": "organization B and site B", "foreignTenant": "organization A and site A"}
+    ],
+    "negativeMatrix": [
+      {
+        "boundary": "organizations",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "The organization row owned by {foreignTenant}.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Read the organization in {ownTenant} and create a correctly owned child site.",
+        "withCheckCase": "Attempt to create or change owner_id to the foreign actor.",
+        "preSourceRisk": "Owner predicate is the primary boundary; no separate relationship case.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "sites",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "A site row or new site under {foreignTenant}.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a site under {ownTenant}.",
+        "withCheckCase": "Attempt to insert or move a site to the foreign organization.",
+        "preSourceRisk": "No secondary tenant relation beyond organization ownership.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "workers",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "A worker in {foreignTenant}, or an own-organization worker carrying the foreign site.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a worker whose organization and site are both in {ownTenant}.",
+        "withCheckCase": "Keep the actor-owned organization but use the foreign site_id.",
+        "preSourceRisk": "The current policy checks organization only and does not prove site agreement.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "workpacks",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "A workpack in {foreignTenant}, or an own-organization workpack carrying the foreign site or actor attribution.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a workpack whose organization, site, and actor are in {ownTenant}.",
+        "withCheckCase": "Keep the own organization while using a foreign site_id or created_by actor.",
+        "preSourceRisk": "The current policy checks organization only; created_by is attribution, not ownership.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "education_records",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization row linked to a workpack, worker, or site in {foreignTenant}.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Insert the required education record using only relationships in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, or worker relation separately.",
+        "preSourceRisk": "The current policy and service-role insert do not re-own every related ID.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "dispatch_logs",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "A null-organization row, a row in {foreignTenant}, or an own-organization row linked to a foreign workpack or site.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Insert and read required dispatch history using only non-null relationships in {ownTenant}.",
+        "withCheckCase": "Attempt null organization_id and each foreign workpack or site relation.",
+        "preSourceRisk": "The source policy accepts the null branch after command reachability and the dispatch-log POST route does not re-own workpackId.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "daily_entries",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization daily entry linked to a site, workpack, or actor in {foreignTenant}.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Insert and read required daily history using only relationships in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, or created_by relation separately.",
+        "preSourceRisk": "The current policy checks organization only and allows all commands after privilege reachability.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "knowledge_events",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization event linked to a site, daily entry, workpack, or actor in {foreignTenant}.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Insert and read required event history using only relationships in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, daily entry, workpack, or created_by relation separately.",
+        "preSourceRisk": "The current policy checks organization only and allows all commands after privilege reachability.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "knowledge_regeneration_runs",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization run linked to scalar or raw-event rows in {foreignTenant}, including nonexistent source IDs.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read the required run using a complete source set in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign scalar relation, actor, or raw_event_ids element separately.",
+        "preSourceRisk": "The current policy checks organization only and raw_event_ids has no row-level relationship enforcement.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "workpack_share_sessions",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization share session linked to a workpack, site, actor, or recipient in {foreignTenant}.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a share session whose workpack, site, actor, and recipients are in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, actor, or recipient separately.",
+        "preSourceRisk": "The current policy checks organization only; privileged child reads use workpack_id alone.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "workpack_read_confirmations",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization confirmation linked to a share session, worker, workpack, or site in {foreignTenant}.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a required confirmation using only relationships in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, share-session, or worker relation separately.",
+        "preSourceRisk": "The current policy checks organization only and grants all command shapes after privilege reachability.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "workpack_improvements",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization improvement linked to a workpack, site, creator, or approver in {foreignTenant}.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read a required improvement using only relationships in {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, created_by, or approved_by relation separately.",
+        "preSourceRisk": "The current policy checks organization only; MCP and child queries can filter by site/workpack without organization.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "workpack_improvement_photos",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An own-organization photo linked to an improvement, workpack, actor, or object prefix in {foreignTenant}.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Create and read required photo metadata whose relations and object prefix agree with {ownTenant}.",
+        "withCheckCase": "Substitute each foreign site, workpack, improvement, actor, or object prefix separately.",
+        "preSourceRisk": "The current row policy checks organization only; live storage object enforcement was not inspected.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      },
+      {
+        "boundary": "storage.objects",
+        "directionIds": ["A-to-B", "B-to-A"],
+        "foreignTargetTemplate": "An object in {foreignTenant}, a forged foreign prefix, or metadata and path that disagree across tenants.",
+        "commands": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+        "expectedForeignOutcomePerCommand": "deny",
+        "ownTenantPositiveControl": "Use the approved service route for an object whose path and metadata both agree with {ownTenant}.",
+        "withCheckCase": "List, read, write, move, or delete the foreign object and test metadata/path disagreement.",
+        "preSourceRisk": "Live policies, grants, ownership, direct-client reachability, and path checks are unverified.",
+        "preExecutionStatus": "not_executed",
+        "postExecutionStatus": "not_executed"
+      }
+    ],
+    "negativeAssertionAccounting": {
+      "uniqueBoundaryCases": 14,
+      "directionsPerCase": 2,
+      "commandsPerDirection": 4,
+      "negativeAssertions": 112,
+      "sameTenantPositiveControlsPerDirection": 1,
+      "sameTenantPositiveAssertions": 28,
+      "matrixAssertionsPerPhase": 140,
+      "preExecutionsPlanned": 140,
+      "postExecutionsPlanned": 140,
+      "executedByPacket": 0
+    },
+    "sameTenantPositiveControls": [
+      {"id": "POS-ORG", "directionIds": ["A-to-B", "B-to-A"], "operation": "Read each actor's own organization and create a correctly owned child site.", "postExpected": "allow", "status": "not_executed"},
+      {"id": "POS-WORKPACK", "directionIds": ["A-to-B", "B-to-A"], "operation": "Create and read each actor's own-tenant workpack and retain required fields.", "postExpected": "allow", "status": "not_executed"},
+      {"id": "POS-HISTORY", "directionIds": ["A-to-B", "B-to-A"], "operation": "Insert each actor's own-tenant education, dispatch, and history rows; direct history mutation follows the approved command matrix.", "postExpected": "allow required command and deny disallowed history mutation", "status": "not_executed"},
+      {"id": "POS-SHARE", "directionIds": ["A-to-B", "B-to-A"], "operation": "Create and read each actor's own-tenant share session and worker confirmation.", "postExpected": "allow", "status": "not_executed"},
+      {"id": "POS-MCP", "directionIds": ["A-to-B", "B-to-A"], "operation": "Issue independently scoped A and B tokens and read only the matching site and organization memory.", "postExpected": "allow scoped result", "status": "not_executed"},
+      {"id": "POS-PUBLIC", "directionIds": ["anon-public"], "operation": "Read deliberate safety catalog fields and a fully published and cited ontology subgraph.", "postExpected": "allow sanitized public result", "status": "not_executed"},
+      {"id": "POS-STORAGE", "directionIds": ["A-to-B", "B-to-A"], "operation": "Upload, read, and delete independent A and B objects whose metadata and generated prefixes agree.", "postExpected": "allow without exposing credentials", "status": "not_executed"}
+    ],
+    "withCheckFocusedCases": [
+      "INSERT a row with organization A and each foreign site/workpack/worker/share/improvement relation one at a time.",
+      "UPDATE a valid A row so its organization becomes B.",
+      "UPDATE a valid A row so only a related site/workpack/worker/share/improvement becomes B.",
+      "UPDATE trusted created_by or approved_by attribution to user B where attribution integrity is approved.",
+      "INSERT or UPDATE dispatch_logs with null organization_id.",
+      "Publish ontology nodes/edges with empty provenance or an unpublished endpoint.",
+      "Create an MCP scope with null, orphaned, or site/org-mismatched values.",
+      "Create or move a storage object to a prefix that disagrees with metadata or the authenticated tenant."
+    ],
+    "serviceRoleTests": {
+      "routeCount": 21,
+      "directCount": 19,
+      "brokerMediatedCount": 2,
+      "preExecutionStatus": "not_executed",
+      "postExecutionStatus": "not_executed",
+      "requiredCasesPerRoute": [
+        "No user identity or invalid broker identity denies before privileged access.",
+        "Valid tenant-A identity with tenant-B path/body/query identifier denies without existence disclosure.",
+        "Valid tenant-A identity with tenant-A identifiers preserves required behavior.",
+        "Privileged child reads include final organization and site scope where applicable.",
+        "Logs contain a redacted authorization reason and no credential or row body."
+      ]
+    },
+    "publicSurfaceTests": {
+      "apiCount": 6,
+      "serverPageCount": 5,
+      "httpSurfaceCount": 11,
+      "preExecutionStatus": "not_executed",
+      "postExecutionStatus": "not_executed",
+      "requiredCases": [
+        "Anon receives only the documented public response shape.",
+        "No organization, site, workpack, worker, token, raw ingestion details, private ontology row, or storage metadata leaks.",
+        "Authenticated tenant context does not broaden a public/global response.",
+        "Error responses do not reveal foreign resource existence.",
+        "Public behavior required by the product remains available after policy changes."
+      ]
+    }
+  },
+  "rolloutPlan": {
+    "stagingFirst": true,
+    "productionAuthorized": false,
+    "backupAndEvidenceCapture": [
+      "Pin the application revision, migration history, and target project identifier without storing credentials.",
+      "Capture staging policy, role target, object privilege, default privilege, owner, function, FORCE, and storage policy metadata in an access-controlled operations record.",
+      "Take an encrypted staging backup and a schema-only authorization snapshot; record restore ownership and expiry outside this repository.",
+      "Record per-table total rows and per-organization rows for the 13 tenant tables, plus operator/public table counts.",
+      "Create a fixture manifest before mutation so cleanup is allowlisted by exact IDs and the fixture tag."
+    ],
+    "preChangeDataIntegrityChecks": [
+      "Count null organization_id values in dispatch_logs and classify each as tenant or operator intent.",
+      "Count organization/site/workpack/worker/share/improvement relationship mismatches without changing rows.",
+      "Verify every mcp_tokens site/org pair is complete and consistent and no plaintext token is stored.",
+      "Count published ontology rows with empty provenance and edges with unpublished endpoints.",
+      "Compare storage metadata bucket/path prefixes with organization, workpack, and improvement ownership where staging access is approved.",
+      "Record row counts and stable identifiers required to prove no silent loss after each batch."
+    ],
+    "rehearsalSequence": [
+      "Restore or refresh an isolated, sanitized staging target and verify the backup restore procedure.",
+      "Provision the tagged A/B fixture set only after Batch E approval.",
+      "Execute the pre matrix and record actual outcomes without treating a known source weakness as success.",
+      "Apply approved Batch A only; rerun policy, public-surface, data-integrity, and rollback checks.",
+      "Apply approved Batch B only; rerun all 21 service-role route cases and data-integrity checks.",
+      "Inspect and rehearse Batch D under the selected storage access model.",
+      "Evaluate Batch C separately after owner and maintenance-path inventory; never bundle it silently with Batch A.",
+      "Execute the post matrix, verify positive controls, rehearse rollback for each batch, and repeat the launch gate after rollback and reapply."
+    ],
+    "postChangeDataIntegrityChecks": [
+      "All preexisting row counts and per-organization distributions match the recorded baseline except explicitly tagged fixtures.",
+      "Required payout-equivalent application fields are not relevant here; for this product, all workpack, worker, site, evidence, and storage metadata fields required by the audited routes remain present.",
+      "No new null tenant key or cross-tenant relationship mismatch is introduced.",
+      "No valid same-tenant row becomes orphaned or silently hidden from its owner.",
+      "MCP token scope pairs remain consistent and token plaintext is absent from database extracts and logs.",
+      "Public catalog and ontology outputs contain only the approved public shape.",
+      "Storage metadata and object prefixes agree for all tagged test objects."
+    ],
+    "telemetry": {
+      "events": [
+        "tenant_scope_denied",
+        "service_role_scope_mismatch",
+        "mcp_scope_binding_rejected",
+        "storage_scope_mismatch",
+        "public_shape_violation",
+        "rls_policy_error"
+      ],
+      "requiredDimensions": ["route", "method", "role class", "batch", "redacted reason", "request correlation ID"],
+      "forbiddenFields": ["authorization header", "bearer token", "service key", "row body", "query text", "foreign resource UUID"],
+      "stopSignals": [
+        "Any cross-tenant operation returns or mutates a row or object.",
+        "Any denial reveals whether a foreign resource exists.",
+        "Any required same-tenant or deliberate public control fails after a batch.",
+        "Any unplanned row-count or relationship-integrity change appears.",
+        "Any credential-like value appears in an artifact or log."
+      ]
+    },
+    "rollback": {
+      "A": [
+        "Restore the captured policy, role target, privilege, function, and authorization metadata as one reviewed staging rollback unit.",
+        "Prefer fail-closed access during diagnosis; do not broadly reopen direct client access merely to restore availability.",
+        "Rerun the 112 symmetric negative assertions and 28 matrix positive controls after rollback."
+      ],
+      "B": [
+        "Redeploy the prior application commit without changing database state.",
+        "Invalidate or rotate only credentials proven exposed; do not rotate speculatively without an operations record.",
+        "Rerun the affected route's own-tenant and foreign-tenant cases."
+      ],
+      "C": [
+        "Revert only the affected table's FORCE state if an owner-executed maintenance path fails.",
+        "Keep ordinary RLS enabled and retain Batch A role/command semantics."
+      ],
+      "D": [
+        "Restore the captured storage policy snapshot and prior application deployment.",
+        "Remove only fixture-tagged objects and verify metadata/object cleanup parity."
+      ],
+      "E": [
+        "Delete only exact IDs in the staging fixture manifest after evidence is sealed.",
+        "Verify post-cleanup table/object counts against the pre-fixture baseline.",
+        "Do not run fixture cleanup against production."
+      ]
+    },
+    "launchGate": [
+      "All 10 findings have an approved disposition and no P1 finding remains open for launch.",
+      "Batch A and Batch B staging rehearsals pass with unchanged non-fixture data integrity.",
+      "Batch C has a documented per-table decision and owner-path evidence, even if the decision is to defer FORCE.",
+      "Batch D has a selected access model and verified cross-tenant storage denial evidence.",
+      "All 14 boundary cases are executed in both directions for 112 post-change foreign-tenant command denials.",
+      "All 28 matrix same-tenant positive controls, explicit new-row checks, service-role route cases, and all 11 public surfaces meet their postconditions.",
+      "Rollback and reapply are rehearsed in staging with no silent row or object loss.",
+      "Telemetry contains no secrets and no stop signal is present.",
+      "A fresh approval records target revision, staging evidence, production window, rollback owner, and go/no-go decision."
+    ]
+  },
+  "validationContract": {
+    "validator": "evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py",
+    "log": "evaluation/rls-remediation-approval-packet-2026-07-14/logs/validator.log",
+    "validatorClaimsOnly": "Artifact structure, parity, source-reference bounds, scope declarations, and rejection of known packet-corruption cases.",
+    "runtimeClaimsExcluded": ["database enforcement", "live grants", "cross-tenant isolation", "storage isolation", "finding closure"],
+    "mechanicalChecks": [
+      "Parse report.json.",
+      "Load the authoritative audit from the pinned base commit and require its exact Git blob and full immutable count object.",
+      "Require the audited product revision, packet base, evidence root, descendant HEAD, product-source zero-delta contract, and pinned external integration authority.",
+      "Recompute the integration merge base, 168-path authority delta, zero packet-path overlap, and conflict-free merge-tree markers from Git.",
+      "Compare the actual Git changed-path set with the five immutable evaluation-only packet outputs.",
+      "Compare all 10 finding IDs, severities, titles, tables, and evidence references with the source audit report.",
+      "Require exploit prerequisites, false-positive caveats, remediation owners, exact approvals, and bidirectional finding-to-batch mappings.",
+      "Validate the exact 43-file cited source set and every line range against the pinned product commit.",
+      "Verify 13 tenant command rows and explicit SELECT, INSERT, UPDATE, DELETE, and new-row-check semantics.",
+      "Verify 21 tenant/admin service-role routes split 19 direct and 2 broker-mediated, including workflow dispatch and hazard-analysis method semantics, plus 6 public APIs and 5 public server pages.",
+      "Preserve the audit seed at 14 cases and 56 expected denials while requiring the packet matrix to expand to 112 symmetric denials and 28 same-tenant controls; all remain executed zero.",
+      "Verify report.md contains the same findings, counts, approvals, and no-execution statement.",
+      "Tokenize SQL comments outside single, double, and dollar quotes before rejecting executable DDL, DML, privilege, transaction, procedural, and psql forms while accepting quoted explanatory prose.",
+      "Scan report.json, report.md, validate_packet.py, validator.log, and tdd-red.log for credential assignments, key prefixes, Bearer values, JWTs, private-key blocks, and project service-role forms without logging matched values."
+    ],
+    "attackCases": [
+      {"id": "stale-finding-count", "mutation": "Change the finding total while leaving immutable audit truth unchanged.", "expectedValidatorResult": "reject"},
+      {"id": "stale-policy-count-with-mutated-audit", "mutation": "Change the policy count in both packet and mutable audit copies.", "expectedValidatorResult": "reject"},
+      {"id": "missing-approval-flag", "mutation": "Remove the explicit approval field from Batch A.", "expectedValidatorResult": "reject"},
+      {"id": "deleted-required-db-approval-action", "mutation": "Delete one immutable database approval action.", "expectedValidatorResult": "reject"},
+      {"id": "accidental-migration-path", "mutation": "Add a produced path under supabase/migrations.", "expectedValidatorResult": "reject"},
+      {"id": "undeclared-output-path", "mutation": "Add an output inside the allowed prefix but outside the immutable path set.", "expectedValidatorResult": "reject"},
+      {"id": "create-policy-pseudocode", "mutation": "Inject an executable policy statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "drop-table-pseudocode", "mutation": "Inject a destructive table-removal statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "alter-table-pseudocode", "mutation": "Inject an executable table-alteration statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "truncate-table-pseudocode", "mutation": "Inject an executable table-truncation statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "delete-from-pseudocode", "mutation": "Inject an executable row-deletion statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "insert-into-pseudocode", "mutation": "Inject an executable row-insertion statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "update-set-pseudocode", "mutation": "Inject an executable row-update statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "grant-pseudocode", "mutation": "Inject an executable privilege-grant statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "revoke-pseudocode", "mutation": "Inject an executable privilege-revocation statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "do-block-pseudocode", "mutation": "Inject an executable procedural block into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "psql-include-pseudocode", "mutation": "Inject a psql include command into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "with-delete-pseudocode", "mutation": "Inject a data-modifying common-table-expression statement into pseudocode material.", "expectedValidatorResult": "reject"},
+      {"id": "markdown-bullet-drop-table", "mutation": "Inject an unquoted destructive statement as a Markdown list item.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-create-block", "mutation": "Place a block comment between CREATE and TABLE.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-create-line", "mutation": "Place a line comment between CREATE and TABLE.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-drop-block", "mutation": "Place a block comment between DROP and TABLE.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-drop-line", "mutation": "Place a line comment between DROP and TABLE.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-cte-delete-block", "mutation": "Obfuscate a CTE DELETE with block comments between executable tokens.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-cte-delete-line", "mutation": "Obfuscate a CTE DELETE with line comments between executable tokens.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-cte-update-block", "mutation": "Obfuscate a CTE UPDATE with block comments between executable tokens.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-cte-update-line", "mutation": "Obfuscate a CTE UPDATE with line comments between executable tokens.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-cte-insert-block", "mutation": "Obfuscate a CTE INSERT with block comments between executable tokens.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-cte-insert-line", "mutation": "Obfuscate a CTE INSERT with line comments between executable tokens.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-alter-block", "mutation": "Place a block comment between ALTER and TABLE.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-alter-line", "mutation": "Place a line comment between ALTER and TABLE.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-truncate-block", "mutation": "Place a block comment between TRUNCATE and TABLE.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-truncate-line", "mutation": "Place a line comment between TRUNCATE and TABLE.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-grant-block", "mutation": "Place a block comment after GRANT.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-grant-line", "mutation": "Place a line comment after GRANT.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-revoke-block", "mutation": "Place a block comment after REVOKE.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-revoke-line", "mutation": "Place a line comment after REVOKE.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-do-block", "mutation": "Place a block comment between DO and its dollar-quoted body.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-do-line", "mutation": "Place a line comment between DO and its dollar-quoted body.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-psql-include-block", "mutation": "Place a block comment before a psql include command.", "expectedValidatorResult": "reject"},
+      {"id": "sql-comment-psql-include-line", "mutation": "Place a line comment before a psql include command.", "expectedValidatorResult": "reject"},
+      {"id": "base-revision-mutation", "mutation": "Replace the packet base revision.", "expectedValidatorResult": "reject"},
+      {"id": "asymmetric-finding-batch-map", "mutation": "Remove a finding from only the batch side of the exact map.", "expectedValidatorResult": "reject"},
+      {"id": "workflow-dispatch-dispatch-logs-misclassification", "mutation": "Attach workflow dispatch to the dispatch_logs boundary or finding.", "expectedValidatorResult": "reject"},
+      {"id": "hazard-get-service-role-misclassification", "mutation": "Treat hazard-analysis GET as a service-role method.", "expectedValidatorResult": "reject"},
+      {"id": "missing-b-to-a-negative-direction", "mutation": "Remove B-to-A from one negative matrix case.", "expectedValidatorResult": "reject"},
+      {"id": "missing-b-to-a-positive-control", "mutation": "Remove B-to-A from one same-tenant positive control.", "expectedValidatorResult": "reject"},
+      {"id": "secret-raw-unquoted-assignment-report-json", "mutation": "Place a raw unquoted service-role assignment in report.json.", "expectedValidatorResult": "reject"},
+      {"id": "secret-openai-prefix-report-md", "mutation": "Place a structurally secret OpenAI key prefix in report.md.", "expectedValidatorResult": "reject"},
+      {"id": "secret-supabase-prefix-validator-source", "mutation": "Place a Supabase secret prefix in the validator source copy.", "expectedValidatorResult": "reject"},
+      {"id": "secret-bearer-validator-log", "mutation": "Place an opaque Bearer credential in validator.log.", "expectedValidatorResult": "reject"},
+      {"id": "secret-jwt-tdd-red-log", "mutation": "Place a JWT-shaped credential in tdd-red.log.", "expectedValidatorResult": "reject"},
+      {"id": "secret-private-key-validator-source", "mutation": "Place a private-key block in the validator source copy.", "expectedValidatorResult": "reject"},
+      {"id": "secret-project-service-role-validator-log", "mutation": "Place a project service-role assignment in validator.log.", "expectedValidatorResult": "reject"}
+    ],
+    "controlCases": [
+      {"id": "quoted-sql-explanatory-prose", "mutation": "Append a quoted explanatory SQL phrase without an executable statement.", "expectedValidatorResult": "accept"},
+      {"id": "quoted-commented-sql-explanatory-prose", "mutation": "Append a quoted SQL-comment example that remains explanatory prose.", "expectedValidatorResult": "accept"},
+      {"id": "safe-secret-placeholders", "mutation": "Place redacted, environment-reference, and explicit placeholder values across all five packet files.", "expectedValidatorResult": "accept"}
+    ],
+    "tddRedEvidence": {
+      "log": "evaluation/rls-remediation-approval-packet-2026-07-14/logs/tdd-red.log",
+      "head": "d77205bb498080ac02b9f506d72bd44648f4a660",
+      "exitCode": 1,
+      "attacksTotal": 13,
+      "rejected": 4,
+      "acceptedUnexpectedly": 9,
+      "exactResults": [
+        "attack.stale-finding-count=REJECTED errors=1",
+        "attack.stale-policy-count-with-mutated-audit=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.missing-approval-flag=REJECTED errors=1",
+        "attack.deleted-required-db-approval-action=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.accidental-migration-path=REJECTED errors=2",
+        "attack.undeclared-output-path=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.create-policy-pseudocode=REJECTED errors=1",
+        "attack.drop-table-pseudocode=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.base-revision-mutation=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.asymmetric-finding-batch-map=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.workflow-dispatch-dispatch-logs-misclassification=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.hazard-get-service-role-misclassification=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.missing-b-to-a-negative-direction=ACCEPTED_UNEXPECTEDLY errors=0"
+      ]
+    },
+    "secondReviewTddRedEvidence": {
+      "log": "evaluation/rls-remediation-approval-packet-2026-07-14/logs/tdd-red.log",
+      "head": "cd1d608b89871ad4a14bf2185e762d6bc967dea3",
+      "exitCode": 1,
+      "attacksTotal": 29,
+      "rejected": 4,
+      "acceptedUnexpectedly": 25,
+      "controlsTotal": 2,
+      "controlsAccepted": 2,
+      "exactResults": [
+        "attack.sql-comment-create-block=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-create-line=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-drop-block=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-drop-line=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-cte-delete-block=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-cte-delete-line=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-cte-update-block=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-cte-update-line=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-cte-insert-block=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-cte-insert-line=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-alter-block=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-alter-line=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-truncate-block=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-truncate-line=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-grant-block=REJECTED errors=1",
+        "attack.sql-comment-grant-line=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-revoke-block=REJECTED errors=1",
+        "attack.sql-comment-revoke-line=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-do-block=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-do-line=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-psql-include-block=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.sql-comment-psql-include-line=REJECTED errors=1",
+        "attack.secret-raw-unquoted-assignment-report-json=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.secret-openai-prefix-report-md=REJECTED errors=1",
+        "attack.secret-supabase-prefix-validator-source=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.secret-bearer-validator-log=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.secret-jwt-tdd-red-log=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.secret-private-key-validator-source=ACCEPTED_UNEXPECTEDLY errors=0",
+        "attack.secret-project-service-role-validator-log=ACCEPTED_UNEXPECTEDLY errors=0"
+      ]
+    },
+    "latestValidatedResult": {
+      "command": "python -B evaluation/rls-remediation-approval-packet-2026-07-14/validate_packet.py --self-test",
+      "exitCode": 0,
+      "baseline": "PASS",
+      "attacksTotal": 54,
+      "attacksRejected": 54,
+      "controlsTotal": 3,
+      "controlsAccepted": 3,
+      "runtimeClaimsMade": false,
+      "launchReadiness": false
+    },
+    "allowedVerification": ["local validator", "git diff and scope scan", "all-declared-path local secret scan"],
+    "statusSource": "See validator.log after execution; this report does not pre-claim a validator result."
+  }
+}
