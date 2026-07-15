@@ -1,50 +1,76 @@
 {
   "date": "2026-07-15",
   "branch": "fix/northstar-grounded-generation-20260715",
-  "base": "dc608c8d7f7f854270669e05789cad88816d0f43",
-  "productCandidateSha": "68010bb",
-  "scope": "general /api/ask full-mode deliverable generation",
-  "result": "pass_pending_independent_review",
-  "contract": {
-    "version": "grounded-generation-v1",
-    "llmRole": "naturalize_only",
-    "packetSerialization": "canonical source order identical to sourceIdentity material",
-    "referenceMatching": "typed exact plus complete KOSHA version tokens",
-    "controlMatching": "exact control or packet-resolved citation-only suffix",
-    "tbmProvenance": "required evidenceRefs on measures and unaddressed actions",
-    "pipelineFailurePolicy": "preserve packet identity and critical controls as review_required",
-    "fallbackMissingControlPolicy": "surface in DB harness missingEvidence"
-  },
-  "closedReviewFindings": [
-    "TBM schema and prompt provenance mismatch",
-    "pipeline-wide failure dropped critical controls",
-    "approved control prefix allowed arbitrary appended instructions",
-    "sourceIdentity did not guarantee identical serialized prompt order",
-    "site zone labels such as A-1 were parsed as KOSHA references"
+  "startingHead": "cdf53d8b028bf776cee93256c7ee49acc428f77e",
+  "scope": "independent grounded-generation findings and intermittent editor-focus suite diagnosis",
+  "result": "pass",
+  "closedFindings": [
+    "canonical citation-only control suffix",
+    "runAsk outer-failure response review surface preserves sourceIdentity and criticalControls",
+    "deterministic duplicate source-key ordering and deduplication"
   ],
+  "contract": {
+    "citationSuffix": "one canonical KOSHA or law token per parenthesized suffix group; arbitrary prose rejected",
+    "outerFailureReviewSurface": "AskResponse.groundingReview rendered by AnswerPanel",
+    "duplicateSourceKeys": "canonical representative plus sorted unique aliases and controls"
+  },
+  "editorFocusDiagnosis": {
+    "focusAssertionFailures": 0,
+    "rootCause": "Windows temporary-directory cleanup raced the isolated Next process-tree exit after taskkill",
+    "initialLoop": {
+      "runs": 10,
+      "focusAssertionsPassed": 10,
+      "cleanupFailures": 1
+    },
+    "boundedDeleteRetryOnly": {
+      "runs": 3,
+      "focusAssertionsPassed": 3,
+      "cleanupFailures": 1,
+      "acceptedAsFixed": false
+    },
+    "finalRemediation": "wait for process exit with a bounded timeout, fail if still alive, then perform bounded filesystem retries",
+    "finalLoop": {
+      "runs": 3,
+      "focusAssertionsPassed": 3,
+      "cleanupFailures": 0
+    }
+  },
   "verification": [
     {
-      "command": "npm.cmd test -- tests/grounded-generation-contract.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts",
+      "command": "npm.cmd test -- tests/grounded-generation-contract.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts --reporter=dot",
       "testFilesPassed": 4,
-      "testsPassed": 66,
+      "testsPassed": 69,
       "testsFailed": 0
     },
     {
-      "command": "npm.cmd test -- tests/tbm-deterministic-structures.test.ts tests/quality-contract.test.ts tests/xlsx-export-route.test.ts tests/workspace-layout-regression.test.ts",
-      "testFilesPassed": 4,
-      "testsPassed": 40,
-      "testsSkipped": 1,
+      "command": "npm.cmd test -- tests/isolated-next-browser-harness.test.ts --maxWorkers=1 --no-file-parallelism --reporter=dot",
+      "testFilesPassed": 1,
+      "testsPassed": 3,
       "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd test -- tests/documents-editor-layout.test.ts -t opens a requested document in an editor-first workspace --reporter=dot (3 serial runs)",
+      "runs": 3,
+      "testsPassed": 3,
+      "testsSkipped": 63,
+      "testsFailed": 0,
+      "cleanupFailures": 0
     },
     {
       "command": "npm.cmd run typecheck",
-      "exitCode": 0
+      "exitCode": 0,
+      "finalGateRerun": true
     },
     {
       "command": "git diff --check",
-      "exitCode": 0
+      "exitCode": 0,
+      "finalGateRerun": true
     }
   ],
-  "remainingBoundary": "Free-form prose is checked for explicit out-of-packet citations; complete semantic equivalence for every naturalized sentence remains human-confirmed.",
-  "excludedChanges": ["database schema", "migration", "environment contract", "API response schema"]
+  "excludedChanges": [
+    "database schema",
+    "migration",
+    "environment contract",
+    "data mutation"
+  ]
 }

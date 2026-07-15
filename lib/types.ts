@@ -660,6 +660,11 @@ export type AskResponse = {
       ontologyStatus: DbHarnessPacket["ontologyChecklist"]["status"];
     };
   };
+  groundingReview?: {
+    status: "review_required";
+    sourceIdentity: string;
+    criticalControls: string[];
+  };
   generationTrace?: GenerationTrace;
   generationEvidence?: GenerationEvidenceEnvelope;
   generationEvidenceError?: GenerationEvidenceError;
