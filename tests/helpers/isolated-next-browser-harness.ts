@@ -100,10 +100,16 @@ async function stopProcessTree(server: ChildProcessWithoutNullStreams | null): P
   const processId = server?.pid;
   if (!processId || server.exitCode !== null || server.signalCode !== null) return;
   if (process.platform === "win32") {
-    spawnSync("taskkill.exe", ["/PID", String(processId), "/T", "/F"], {
+    const exited = new Promise<void>((resolve) => server.once("exit", () => resolve()));
+    const result = spawnSync("taskkill.exe", ["/PID", String(processId), "/T", "/F"], {
       encoding: "utf8",
       windowsHide: true
     });
+    if (result.error) throw result.error;
+    await Promise.race([exited, delay(5_000)]);
+    if (server.exitCode === null && server.signalCode === null) {
+      throw new Error(`Windows browser harness server did not exit after taskkill (pid=${processId}, status=${result.status ?? "unknown"})`);
+    }
     return;
   }
   const exited = new Promise<void>((resolve) => server.once("exit", () => resolve()));
@@ -148,7 +154,12 @@ async function startIsolatedNextBrowserHarnessAttempt(
     ) {
       throw new Error(`Refusing to remove unexpected browser harness temp directory: ${temporaryDirectory}`);
     }
-    fs.rmSync(temporaryDirectory, { recursive: true, force: true });
+    fs.rmSync(temporaryDirectory, {
+      recursive: true,
+      force: true,
+      maxRetries: 20,
+      retryDelay: 250
+    });
   };
 
   const appendServerOutput = (value: string): void => {

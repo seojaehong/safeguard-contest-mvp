@@ -1003,6 +1003,35 @@ describe("current-base runAsk retrieval provenance", () => {
     }
   }, 30_000);
 
+  it("preserves packet identity and critical controls on the response review surface after an outer pipeline failure", async () => {
+    const direct = retrievalReference("outer-failure-direct", "ranked");
+    direct.controls = ["OUTER_FAILURE_CRITICAL_CONTROL"];
+    mocks.searchSafetyReferences.mockResolvedValue(searchResult("ranked-rpc", [direct]));
+    const diagnostics = providerResult().diagnostics;
+    Object.defineProperty(diagnostics, "groupResults", {
+      get(): never {
+        throw new Error("forced outer pipeline failure after grounding packet creation");
+      }
+    });
+    let expectedReview: AskResponse["groundingReview"];
+    mocks.generateAllDeliverablesWithDiagnostics.mockImplementation(async (input: GenerateAllOptions) => {
+      const packet = input.groundingPacket!;
+      expectedReview = {
+        status: "review_required",
+        sourceIdentity: packet.sourceIdentity,
+        criticalControls: [...new Set(packet.sources.flatMap((source) => source.controls))].sort()
+      };
+      return { deliverables: {}, diagnostics };
+    });
+
+    const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
+
+    expect(response.mode).toBe("fallback");
+    expect(expectedReview?.sourceIdentity).toMatch(/^[0-9a-f]{64}$/u);
+    expect(expectedReview?.criticalControls.length).toBeGreaterThan(0);
+    expect(response.groundingReview).toEqual(expectedReview);
+  }, 30_000);
+
   it("keeps distinct verified KOSHA documents with identical operational controls", async () => {
     const first = retrievalReference("verified-same-controls-a", "local-ranked");
     const second = retrievalReference("verified-same-controls-b", "local-ranked");

@@ -20,6 +20,15 @@ export function AnswerPanel({ data }: { data: AskResponse }) {
       <ul className="answer-status-notes">
         {statusNotes.map((note) => <li key={note}>{note}</li>)}
       </ul>
+      {data.groundingReview ? (
+        <section aria-label="근거 생성 검토">
+          <h3 className="h3">근거 생성 검토 필요</h3>
+          <p className="muted small">근거 식별자 <code>{data.groundingReview.sourceIdentity}</code></p>
+          <ul>
+            {data.groundingReview.criticalControls.map((control) => <li key={control}>{control}</li>)}
+          </ul>
+        </section>
+      ) : null}
       <pre>{answerForDisplay}</pre>
       <hr />
       <h2 className="h3">실무 체크포인트</h2>

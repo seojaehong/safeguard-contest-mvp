@@ -46,6 +46,34 @@ function compareCanonical(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
+function canonicalizeSources(
+  input: readonly GroundedGenerationSource[]
+): GroundedGenerationSource[] {
+  const grouped = new Map<string, GroundedGenerationSource[]>();
+  for (const source of input) {
+    const canonical = {
+      ...source,
+      aliases: [...source.aliases].sort(compareCanonical),
+      controls: [...source.controls].sort(compareCanonical)
+    };
+    const existing = grouped.get(canonical.referenceKey) || [];
+    existing.push(canonical);
+    grouped.set(canonical.referenceKey, existing);
+  }
+
+  return [...grouped.values()].map((duplicates) => {
+    const ordered = [...duplicates].sort((left, right) => (
+      compareCanonical(JSON.stringify(left), JSON.stringify(right))
+    ));
+    const representative = ordered[0];
+    return {
+      ...representative,
+      aliases: uniqueStrings(ordered.flatMap((source) => source.aliases)).sort(compareCanonical),
+      controls: uniqueStrings(ordered.flatMap((source) => source.controls)).sort(compareCanonical)
+    };
+  });
+}
+
 function safetySource(
   item: SafetyReferenceItem,
   kind: GroundedGenerationSource["kind"],
@@ -117,12 +145,7 @@ export function buildGroundedGenerationPacket(input: {
     kosha: 2,
     law: 3
   };
-  const sources = [...direct, ...sif, ...kosha, ...law]
-    .map((source) => ({
-      ...source,
-      aliases: [...source.aliases].sort(compareCanonical),
-      controls: [...source.controls].sort(compareCanonical)
-    }))
+  const sources = canonicalizeSources([...direct, ...sif, ...kosha, ...law])
     .sort((left, right) => (
       kindOrder[left.kind] - kindOrder[right.kind]
       || compareCanonical(left.referenceKey, right.referenceKey)
@@ -195,16 +218,21 @@ function controlClaimMatches(
   control: string,
   controlSources: readonly GroundedGenerationSource[]
 ): boolean {
-  const normalizedClaim = normalize(claim);
-  const normalizedControl = normalize(control);
+  const canonicalClaim = claim.replace(/\s+/g, " ").trim();
+  const canonicalControl = control.replace(/\s+/g, " ").trim();
+  const normalizedClaim = normalize(canonicalClaim);
+  const normalizedControl = normalize(canonicalControl);
   if (normalizedClaim === normalizedControl) return true;
   if (!normalizedClaim.startsWith(normalizedControl)) return false;
-  const suffix = normalizedClaim.slice(normalizedControl.length).trim();
+  const suffix = canonicalClaim.slice(canonicalControl.length).trim();
   if (!/^(?:\([^()]+\)\s*)+$/.test(suffix)) return false;
-  const references = collectExplicitReferences(suffix);
-  return references.length > 0 && references.every((reference) => (
-    controlSources.some((source) => sourceHasExplicitReference(source, reference))
-  ));
+  const citationGroups = [...suffix.matchAll(/\(([^()]+)\)/g)].map((match) => match[1].trim());
+  return citationGroups.length > 0 && citationGroups.every((citation) => {
+    const references = collectExplicitReferences(citation);
+    return references.length === 1
+      && normalize(references[0].value) === normalize(citation)
+      && controlSources.some((source) => sourceHasExplicitReference(source, references[0]));
+  });
 }
 
 function validateControlObject(
