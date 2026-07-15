@@ -129,7 +129,7 @@ function isGroundedKoshaReference(
   return isRecord(value)
     && typeof value.item_type === "string"
     && isKoshaSupportingCitationEligible(value as SafetyReferenceItem)
-    && (testOnlyTrustedKoshaReference?.(value as SafetyReferenceItem) ?? true);
+    && (testOnlyTrustedKoshaReference?.(value as SafetyReferenceItem) ?? false);
 }
 
 function isSuccessfulRequiredSearch(

@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import { describe, expect, it, vi } from "vitest";
 
 import type { ClawChatEvent } from "@/lib/agent-loop";
@@ -685,6 +683,84 @@ describe("experimental Hermes EngineAdapter", () => {
     },
   );
 
+  it("allows only explicitly trusted KOSHA claims from mixed supporting evidence", async () => {
+    const trustedKosha = recoveredKoshaReference();
+    trustedKosha.controls = ["신뢰된 KOSHA 조치"];
+    const untrustedKosha = recoveredKoshaReference();
+    untrustedKosha.id = "kosha-guide-untrusted";
+    untrustedKosha.controls = ["미신뢰 KOSHA 조치"];
+    if (!untrustedKosha.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
+    untrustedKosha.kosha_guide.evidenceRef = "KOSHA UNTRUSTED p.1";
+    const packet = buildDbHarnessPacket({
+      question: "오늘 작업 위험을 점검해줘",
+      references: [sifReference(), trustedKosha, untrustedKosha],
+      retrieval: { mode: "ranked-rpc", message: "mixed KOSHA trust decisions" },
+    });
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...groundedHarnessResult(),
+      packet,
+    });
+    let allowlistedLabels: readonly string[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async ({ evidenceClaims }) => {
+        allowlistedLabels = evidenceClaims.flatMap((claim) => (
+          claim.citations.map((citation) => citation.label)
+        ));
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(allowlistedLabels).toContain("KOSHA 실행지침: KOSHA D-C-13-2026 p.1");
+    expect(allowlistedLabels).not.toContain("KOSHA 실행지침: KOSHA UNTRUSTED p.1");
+  });
+
+  it("rejects an otherwise valid packet when the eligible claim allowlist is empty", async () => {
+    const sifWithoutClaims = sifReference();
+    sifWithoutClaims.controls = [];
+    const koshaWithoutClaims = recoveredKoshaReference();
+    koshaWithoutClaims.controls = [];
+    const packet = buildDbHarnessPacket({
+      question: "오늘 작업 위험을 점검해줘",
+      references: [sifWithoutClaims, koshaWithoutClaims],
+      retrieval: { mode: "ranked-rpc", message: "valid evidence without eligible claims" },
+    });
+    for (const reference of [
+      ...packet.directEvidence,
+      ...packet.sifCases,
+      ...packet.supportingEvidence,
+    ]) {
+      reference.controls = [];
+    }
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...groundedHarnessResult(),
+      packet,
+    });
+    let plannerCalls = 0;
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async () => {
+        plannerCalls += 1;
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(0);
+  });
+
   it("blocks output when planner mutates the same attested packet object", async () => {
     const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(
       groundedHarnessResult(),
@@ -974,6 +1050,36 @@ describe("experimental Hermes EngineAdapter", () => {
       runtime: "hermes",
       authority: { humanConfirmationRequired: true },
     });
+  });
+
+  it("rejects production KOSHA evidence when no explicit trust verifier is configured", async () => {
+    const executeSpy = mockHarnessPreload();
+    const engine = createProductionEngineAdapter(boundLocalPocEnv, {
+      openClawHermes: {
+        runtimeCapability: async () => true,
+        verifyToolFreeAgent: async () => true,
+        assertOAuth: async (config) => ({
+          ok: true,
+          provider: "openai",
+          authProvider: "openai/oauth",
+          model: config.model,
+          checkedAt: "2026-07-15T00:00:00.000Z",
+          message: "OpenClaw OpenAI OAuth profile is usable.",
+        }),
+        runChat: async ({ prompt, emit }) => {
+          emit({ kind: "text-delta", text: structuredPlannerResponse(prompt) });
+        },
+      },
+    });
+
+    try {
+      await expect(engine.run(runInput())).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
   });
 
   it("fails closed before runtime auth when the bound site does not match", async () => {
