@@ -2,8 +2,10 @@ import { createHash } from "node:crypto";
 
 import type { DbHarnessPacket } from "@/lib/db-harness";
 import {
+  getKoshaGroundingDecision,
   getSafetyReferenceDisplayTitle,
   isKoshaSupportingCitationEligible,
+  isKoshaTechnicalReference,
   isSafetyReferenceDirectEligible,
   type SafetyReferenceItem
 } from "@/lib/safety-reference-catalog";
@@ -126,16 +128,23 @@ export function buildGroundedGenerationPacket(input: {
   eligibleKoshaIds: ReadonlySet<string>;
 }): GroundedGenerationPacket {
   const direct = input.dbHarnessPacket.directEvidence
-    .filter(isSafetyReferenceDirectEligible)
+    .filter((item) => !isKoshaTechnicalReference(item) && isSafetyReferenceDirectEligible(item))
     .map((item) => safetySource(item, "direct", `DB:${item.id}`));
   const sif = input.dbHarnessPacket.sifCases
     .filter((item) => item.item_type === "sif-case")
     .map((item) => safetySource(item, "sif", `SIF:${item.id}`));
-  const kosha = input.dbHarnessPacket.supportingEvidence
+  const kosha = [
+    ...input.dbHarnessPacket.directEvidence,
+    ...input.dbHarnessPacket.supportingEvidence
+  ]
+    .filter(isKoshaTechnicalReference)
     .filter((item) => input.eligibleKoshaIds.has(item.id) && isKoshaSupportingCitationEligible(item))
     .map((item) => {
-      const stableKey = item.kosha_guide?.stableDocumentKey || item.id;
-      const version = item.kosha_guide?.version;
+      const grounding = getKoshaGroundingDecision(item);
+      const stableKey = item.kosha_guide?.stableDocumentKey
+        || grounding?.metadata?.stableDocumentKey
+        || item.id;
+      const version = item.kosha_guide?.version || grounding?.metadata?.version;
       return safetySource(item, "kosha", `KOSHA:${stableKey}${version ? `@${version}` : ""}`);
     });
   const law = input.legalCandidates.map(legalSource);

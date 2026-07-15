@@ -99,6 +99,12 @@ function localGateMessage(
   return `KOSHA 로컬 코퍼스 미설정: ${excluded}.${retained}`;
 }
 
+export function isRemoteReferenceRetainedByLocalKoshaGate(
+  item: SafetyReferenceItem
+): boolean {
+  return !isKoshaTechnicalReference(item) || isKoshaSupportingCitationEligible(item);
+}
+
 export async function searchSafetyReferences(
   options: SafetyReferenceServerSearchOptions
 ): Promise<SafetyReferenceSearchResult> {
@@ -120,7 +126,7 @@ export async function searchSafetyReferences(
     : null;
   const localGateFailures = localCorpus.status === "blocked" ? localCorpus.failures : [];
   const retainedRemoteItems = localGateStatus
-    ? remote.items.filter((item) => !isKoshaTechnicalReference(item) || isKoshaSupportingCitationEligible(item))
+    ? remote.items.filter(isRemoteReferenceRetainedByLocalKoshaGate)
     : remote.items;
   const excludedRemoteCount = remote.items.length - retainedRemoteItems.length;
   const retainedVerifiedRemoteCount = retainedRemoteItems.filter((item) => (

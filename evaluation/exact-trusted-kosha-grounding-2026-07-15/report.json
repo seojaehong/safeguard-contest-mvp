@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "safeclaw-evaluation/v1",
+  "evaluatedAt": "2026-07-15T20:37:00+09:00",
+  "baseSha": "b15f24e0f8412dd5d86a5a07292427e39838410e",
+  "branch": "fix/exact-trusted-kosha-grounding-20260715",
+  "status": "pass",
+  "scope": {
+    "databaseMutation": false,
+    "databaseMigration": false,
+    "fullSuiteRun": false,
+    "authority": "technical_guidance_only"
+  },
+  "tdd": {
+    "initialRed": {
+      "files": 1,
+      "failed": 5,
+      "passed": 0
+    },
+    "finalFocused": {
+      "files": 6,
+      "tests": 157,
+      "passed": 157,
+      "failed": 0
+    },
+    "typecheck": "pass",
+    "diffCheck": "pass"
+  },
+  "trustFields": [
+    "itemId",
+    "sourceId",
+    "itemType",
+    "title",
+    "version",
+    "officialUrl",
+    "officialFileId",
+    "publishedAt",
+    "bodySha256"
+  ],
+  "rejectedMutations": [
+    "bodySha256",
+    "itemId",
+    "sourceId",
+    "itemType",
+    "version",
+    "lifecycle",
+    "officialUrl",
+    "officialFileId",
+    "publishedAt"
+  ],
+  "preservedBoundaries": [
+    "general_verified_kosha_supporting_only",
+    "d_c_7_review_required",
+    "no_statutory_mandate_promotion",
+    "naturalize_only",
+    "local_gate_fail_closed"
+  ]
+}

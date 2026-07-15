@@ -1,4 +1,5 @@
 import { createLogger } from "@/lib/logger";
+import { buildExactTrustedKoshaGroundingDecision } from "@/lib/production-kosha-trust";
 
 export type KoshaGroundingReason =
   | "verified-current"
@@ -32,12 +33,12 @@ export type KoshaGroundingMetadata = {
 export type KoshaGroundingDecision = {
   status: "verified_current" | "review_required" | "blocked";
   reason: KoshaGroundingReason;
-  source: "local-corpus" | "remote-payload" | "local-gate";
+  source: "local-corpus" | "remote-payload" | "local-gate" | "production-registry";
   reviewRequired: boolean;
-  directEvidenceEligible: false;
+  directEvidenceEligible: boolean;
   supportingCitationEligible: boolean;
   mandatoryCitationEligible: boolean;
-  riskRowEligible: false;
+  riskRowEligible: boolean;
   promptExcerptEligible: boolean;
   metadata: KoshaGroundingMetadata | null;
 };
@@ -466,6 +467,8 @@ function localKoshaMetadata(item: SafetyReferenceItem): KoshaGroundingMetadata |
 
 export function getKoshaGroundingDecision(item: SafetyReferenceItem): KoshaGroundingDecision | null {
   if (!isKoshaTechnicalReference(item)) return null;
+  const exactTrusted = buildExactTrustedKoshaGroundingDecision(item);
+  if (exactTrusted) return exactTrusted;
   if (item.kosha_grounding) return item.kosha_grounding;
   const guide = item.kosha_guide;
   if (!guide) return reviewRequiredKoshaDecision("remote-payload", "metadata-absent");
@@ -504,6 +507,8 @@ export function getKoshaGroundingDecision(item: SafetyReferenceItem): KoshaGroun
 }
 
 async function buildRemoteKoshaGroundingDecision(item: SafetyReferenceItem): Promise<KoshaGroundingDecision> {
+  const exactTrusted = buildExactTrustedKoshaGroundingDecision(item);
+  if (exactTrusted) return exactTrusted;
   const body = item.body || "";
   if (!body.trim()) return reviewRequiredKoshaDecision("remote-payload", "body-empty");
   const records = metadataRecords(item);
@@ -1906,10 +1911,10 @@ export function buildSafetyReferenceOperationalMetadata(item: SafetyReferenceIte
   };
 }
 
-function deriveEvidenceRole(
-  item: Pick<SafetyReferenceItem, "item_type" | "source_id" | "evidence_role" | "kosha_guide">
-): "direct" | "supporting" {
-  if (isKoshaTechnicalReference(item)) return "supporting";
+function deriveEvidenceRole(item: SafetyReferenceItem): "direct" | "supporting" {
+  if (isKoshaTechnicalReference(item)) {
+    return getKoshaGroundingDecision(item)?.directEvidenceEligible === true ? "direct" : "supporting";
+  }
   if (item.kosha_guide) return "supporting";
   if (item.evidence_role) return item.evidence_role;
   const directTypes = new Set([
@@ -1929,14 +1934,19 @@ export function isKoshaTechnicalReference(
 }
 
 export function isSafetyReferenceRiskEligible(item: SafetyReferenceItem): boolean {
-  if (isKoshaTechnicalReference(item)) return false;
+  if (isKoshaTechnicalReference(item)) {
+    return getKoshaGroundingDecision(item)?.riskRowEligible === true;
+  }
   return !item.kosha_guide;
 }
 
 export function isSafetyReferenceDirectEligible(
-  item: Pick<SafetyReferenceItem, "item_type" | "kosha_guide">
+  item: SafetyReferenceItem
 ): boolean {
-  return !isKoshaTechnicalReference(item) && !item.kosha_guide;
+  if (isKoshaTechnicalReference(item)) {
+    return getKoshaGroundingDecision(item)?.directEvidenceEligible === true;
+  }
+  return !item.kosha_guide;
 }
 
 export function isKoshaSupportingCitationEligible(item: SafetyReferenceItem): boolean {

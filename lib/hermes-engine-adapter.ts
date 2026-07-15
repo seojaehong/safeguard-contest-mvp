@@ -16,6 +16,7 @@ import {
 import type { DbHarnessPacket } from "@/lib/db-harness";
 import {
   isKoshaSupportingCitationEligible,
+  isKoshaTechnicalReference,
   isSafetyReferenceDirectEligible,
   type SafetyReferenceItem,
 } from "@/lib/safety-reference-catalog";
@@ -225,9 +226,15 @@ function buildEvidenceClaims(
   trustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
 ): readonly HermesEvidenceClaim[] {
   const claims = new Map<string, HermesEvidenceClaim>();
+  const koshaReferences = [...packet.directEvidence, ...packet.supportingEvidence]
+    .filter(isKoshaTechnicalReference)
+    .filter((item) => isGroundedKoshaReference(item, trustedKoshaReference));
+  const uniqueKoshaReferences = [...new Map(
+    koshaReferences.map((item) => [item.id, item]),
+  ).values()];
   const references: EligibleClaimReference[] = [
     ...packet.directEvidence
-      .filter(isSafetyReferenceDirectEligible)
+      .filter((item) => !isKoshaTechnicalReference(item) && isSafetyReferenceDirectEligible(item))
       .map((item) => ({ item, authorityLabel: "직접 근거", controls: item.controls })),
     ...packet.sifCases
       .filter((item) => item.item_type === "sif-case")
@@ -236,8 +243,7 @@ function buildEvidenceClaims(
         authorityLabel: "SIF 사례 근거(위험 우선순위)",
         controls: item.controls,
       })),
-    ...packet.supportingEvidence
-      .filter((item) => isGroundedKoshaReference(item, trustedKoshaReference))
+    ...uniqueKoshaReferences
       .map((item) => ({
         item,
         authorityLabel: "KOSHA 실행지침",
@@ -374,7 +380,7 @@ function readEvidencePacket(
     || sourceCounts.supportingEvidence !== supportingEvidence.length
     || sifCases.length === 0
     || !sifCases.some((item) => isRecord(item) && item.item_type === "sif-case")
-    || !supportingEvidence.some((item) => (
+    || ![...directEvidence, ...supportingEvidence].some((item) => (
       isGroundedKoshaReference(item, trustedKoshaReference)
     ))
     || ontology.status !== "ready"
