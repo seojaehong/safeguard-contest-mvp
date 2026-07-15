@@ -39,6 +39,41 @@ function buildSource(count = 24): NeighborhoodSource {
   return { nodes, related };
 }
 
+function buildDenseTwoHopSource(): NeighborhoodSource {
+  const nodes = Array.from({ length: 22 }, (_, index) => ({
+    id: `dense-${index}`,
+    kind: index === 0 ? "Task" as const : index < 6 ? "Hazard" as const : "Control" as const,
+    label: `밀집 항목 ${index}`,
+    outgoingCount: index === 0 ? 5 : index < 6 ? 3 : 0,
+    incomingCount: index === 0 ? 0 : 1
+  }));
+  const edges = [1, 2, 3, 4, 5].flatMap((firstHop, branch) => {
+    const secondHopStart = 6 + branch * 3;
+    return [
+      { source: 0, target: firstHop },
+      { source: firstHop, target: secondHopStart },
+      { source: firstHop, target: secondHopStart + 1 },
+      { source: firstHop, target: secondHopStart + 2 }
+    ];
+  });
+  const related = nodes.map((node) => ({
+    id: node.id,
+    title: node.label,
+    subtitle: node.kind,
+    excerpt: null,
+    evidenceCount: 1,
+    related: edges.filter((edge) => edge.source === Number(node.id.split("-")[1])).map((edge) => ({
+      rel: "relatedTo",
+      direction: "outgoing" as const,
+      sourceId: nodes[edge.source].id,
+      sourceLabel: nodes[edge.source].label,
+      targetId: nodes[edge.target].id,
+      targetLabel: nodes[edge.target].label
+    }))
+  }));
+  return { nodes, related };
+}
+
 describe("ontology P0 neighborhood contract", () => {
   it("bounds a deterministic two-hop neighborhood to collision-free display slots", () => {
     const source = buildSource();
@@ -59,6 +94,13 @@ describe("ontology P0 neighborhood contract", () => {
       .toEqual(["node-6", "node-5", "node-7"]);
     expect(buildOntologyNeighborhood(source, "node-6", 2, 15).nodes.map((node) => node.id))
       .toEqual(["node-6", "node-5", "node-7", "node-4", "node-8"]);
+  });
+
+  it("fills the bounded two-hop canvas with fifteen non-overlapping nodes", () => {
+    const result = buildOntologyNeighborhood(buildDenseTwoHopSource(), "dense-0", 2, 15);
+
+    expect(result.nodes).toHaveLength(15);
+    expect(countPositionOverlaps(result.nodes)).toBe(0);
   });
 });
 
@@ -85,5 +127,20 @@ describe("ontology P0 presentation contract", () => {
     expect(styles).toContain("@media (max-width: 720px)");
     expect(styles).toMatch(/\.desktopGraph\s*\{[\s\S]*?display:\s*none/);
     expect(styles).toMatch(/\.mobileRelations\s*\{[\s\S]*?display:\s*grid/);
+  });
+
+  it("uses design tokens and customer-facing Korean labels at the presentation boundary", () => {
+    const page = read("app/ontology/page.tsx");
+    const explorer = read("app/ontology/OntologyExplorer.tsx");
+    const styles = read("app/ontology/OntologyWorkbench.module.css");
+
+    expect(styles).not.toMatch(/#[\da-fA-F]{3,8}|rgba?\(/);
+    expect(page).not.toContain("개 노드");
+    for (const internalLabel of ["published 범위", "검증 노드", "노드 검색", "노드를 선택", ">1홉<", ">2홉<", ">대체본<"]) {
+      expect(explorer).not.toContain(internalLabel);
+    }
+    for (const customerLabel of ["검증된 안전지식", "직접 관계", "확장 관계", "대체자료"]) {
+      expect(`${page}\n${explorer}`).toContain(customerLabel);
+    }
   });
 });

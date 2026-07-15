@@ -33,7 +33,7 @@ export default async function OntologyPage() {
   const isSeedFallback = !result.ok && Boolean(fallbackGraph);
   const status = result.ok ? "live" : graph ? "partial" : result.configured ? "partial" : "planned";
   const mappedTo = graph
-    ? `${graph.counts.nodes.toLocaleString("ko-KR")}개 노드 · ${graph.counts.edges.toLocaleString("ko-KR")}개 관계${isSeedFallback ? " · 시드 대체본" : ""}`
+    ? `${graph.counts.nodes.toLocaleString("ko-KR")}개 안전지식 · ${graph.counts.edges.toLocaleString("ko-KR")}개 연결${isSeedFallback ? " · 대체자료" : ""}`
     : "배포된 그래프 조회 대기";
 
   return (

@@ -17,6 +17,8 @@ type BrowserMetric = {
   desktopGraphVisible: boolean;
   mobileRelationsVisible: boolean;
   expandedGraphVerified: boolean;
+  expandedGraphNodeCount: number;
+  dialogKeyboardContract: boolean;
 };
 
 function luminanceChannel(value: number) {
@@ -47,14 +49,28 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 39
   const desktopGraphVisible = await desktopGraph.isVisible();
   const mobileRelationsVisible = await mobileRelations.isVisible();
   let expandedGraphVerified = false;
+  let expandedGraphNodeCount = 0;
+  let dialogKeyboardContract = false;
+
+  await page.getByRole("button", { name: "확장 관계" }).click();
 
   if (width === 390) {
     expect(desktopGraphVisible).toBe(false);
     expect(mobileRelationsVisible).toBe(true);
-    await page.getByRole("button", { name: "그래프 전체 화면" }).click();
-    await page.getByRole("dialog", { name: "온톨로지 그래프 전체 화면" }).waitFor();
-    expandedGraphVerified = await page.getByRole("dialog", { name: "온톨로지 그래프 전체 화면" }).isVisible();
-    await page.getByRole("button", { name: "닫기" }).click();
+    const trigger = page.getByRole("button", { name: "그래프 전체 화면" });
+    await trigger.click();
+    const dialog = page.getByRole("dialog", { name: "온톨로지 그래프 전체 화면" });
+    await dialog.waitFor();
+    expandedGraphVerified = await dialog.isVisible();
+    expandedGraphNodeCount = await dialog.locator('[data-testid="ontology-neighborhood-node"]').count();
+    expect(await page.evaluate(() => document.activeElement?.textContent?.trim())).toBe("닫기");
+    await page.keyboard.press("Shift+Tab");
+    const shiftTabStayedInside = await dialog.evaluate((element) => element.contains(document.activeElement));
+    await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => document.activeElement?.textContent?.trim())).toBe("닫기");
+    await page.keyboard.press("Escape");
+    expect(await trigger.evaluate((element) => element === document.activeElement)).toBe(true);
+    dialogKeyboardContract = shiftTabStayedInside;
   } else {
     expect(desktopGraphVisible).toBe(true);
     expect(mobileRelationsVisible).toBe(false);
@@ -83,7 +99,12 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 39
     const minimumControlHeight = controls.length
       ? Math.min(...controls.map((element) => element.getBoundingClientRect().height))
       : 0;
-    const parseRgb = (value: string) => (value.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+    const parseRgb = (value: string) => {
+      const channels = (value.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      return value.startsWith("color(srgb")
+        ? channels.map((channel) => channel * 255)
+        : channels;
+    };
     const nodeContrasts = [...document.querySelectorAll<HTMLElement>('[data-testid="ontology-neighborhood-node"]')]
       .filter(visible)
       .map((element) => {
@@ -104,6 +125,8 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 39
 
   expect(geometry.horizontalOverflow).toBe(0);
   expect(geometry.overlapPairs).toBe(0);
+  if (width === 1440) expect(geometry.visibleNeighborhoodNodes).toBe(15);
+  if (width === 390) expect(expandedGraphNodeCount).toBe(15);
   expect(geometry.minimumControlHeight).toBeGreaterThanOrEqual(44);
   if (minimumNodeContrast !== null) expect(minimumNodeContrast).toBeGreaterThanOrEqual(4.5);
 
@@ -119,7 +142,9 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 39
     minimumNodeContrast: minimumNodeContrast === null ? null : Math.round(minimumNodeContrast * 100) / 100,
     desktopGraphVisible,
     mobileRelationsVisible,
-    expandedGraphVerified
+    expandedGraphVerified,
+    expandedGraphNodeCount,
+    dialogKeyboardContract
   };
 }
 
