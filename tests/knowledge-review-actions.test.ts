@@ -7,7 +7,9 @@ import {
 } from "@/lib/knowledge-review";
 
 type FakeOptions = {
+  organizationOwnerId?: string;
   runUpdateError?: Error;
+  runUpdateErrorAt?: number;
   eventUpdateErrorAt?: number;
   eventOrganizationId?: string;
   eventSiteId?: string | null;
@@ -49,12 +51,13 @@ function makeReviewClient(options: FakeOptions = {}) {
     }
   ];
   const tables: Record<string, Array<Record<string, unknown>>> = {
-    organizations: [{ id: "org-1", owner_id: "reviewer-auth" }],
+    organizations: [{ id: "org-1", owner_id: options.organizationOwnerId ?? "reviewer-auth" }],
     sites: [{ id: "site-1", organization_id: "org-1" }],
     knowledge_regeneration_runs: [run, ...(options.additionalRuns ?? [])],
     knowledge_events: events
   };
   const updates: Array<{ table: string; value: unknown }> = [];
+  let runUpdateAttempt = 0;
   let eventUpdateAttempt = 0;
 
   function isRecord(value: unknown): value is Record<string, unknown> {
@@ -78,8 +81,11 @@ function makeReviewClient(options: FakeOptions = {}) {
       function execute(): FakeQueryResult {
         if (updateValue !== undefined) {
           if (!isRecord(updateValue)) throw new Error("Expected record update value");
-          if (table === "knowledge_regeneration_runs" && options.runUpdateError) {
-            return { data: null, error: options.runUpdateError };
+          if (table === "knowledge_regeneration_runs") {
+            runUpdateAttempt += 1;
+            if (options.runUpdateError || options.runUpdateErrorAt === runUpdateAttempt) {
+              return { data: null, error: options.runUpdateError ?? new Error(`run update failed at ${runUpdateAttempt}`) };
+            }
           }
           if (table === "knowledge_regeneration_runs") options.beforeRunUpdate?.(run);
           if (table === "knowledge_events") {
@@ -151,6 +157,69 @@ function makeReviewClient(options: FakeOptions = {}) {
   return { client, events, run, updates };
 }
 
+function makeReceipt(overrides: {
+  action?: "approve_candidate" | "keep_site_only" | "reject";
+  scope?: "promotion_candidate" | "site_private" | "rejected";
+  organizationId?: string;
+  siteId?: string | null;
+  reviewerId?: string;
+  reviewedAt?: string;
+  operationId?: string;
+} = {}) {
+  const action = overrides.action ?? "approve_candidate";
+  const scope = action === "reject"
+    ? "rejected"
+    : action === "keep_site_only" ? "site_private" : "promotion_candidate";
+  return {
+    contractVersion: "knowledge-human-review.v1",
+    operationId: overrides.operationId ?? `knowledge-review:run-1:${action}`,
+    action,
+    scope: overrides.scope ?? scope,
+    runId: "run-1",
+    organizationId: overrides.organizationId ?? "org-1",
+    siteId: overrides.siteId === undefined ? "site-1" : overrides.siteId,
+    reviewer: {
+      id: overrides.reviewerId ?? "reviewer-auth",
+      email: null
+    },
+    reviewedAt: overrides.reviewedAt ?? "2026-07-16T08:00:00.000Z",
+    publicationState: "unpublished",
+    ontologyPublished: false,
+    publishPerformed: false,
+    migrationPerformed: false,
+    atomic: false
+  };
+}
+
+function makeLegacyReceipt(overrides: {
+  action?: "approve_candidate" | "keep_site_only" | "reject";
+  scope?: "promotion_candidate" | "site_private" | "rejected";
+  reviewerId?: string;
+  reviewedAt?: string;
+  publicationState?: "unpublished" | "published";
+  ontologyPublished?: boolean;
+} = {}) {
+  const action = overrides.action ?? "approve_candidate";
+  const scope = action === "reject"
+    ? "rejected"
+    : action === "keep_site_only" ? "site_private" : "promotion_candidate";
+  return {
+    contractVersion: "knowledge-human-review.v1",
+    action,
+    scope: overrides.scope ?? scope,
+    reviewer: {
+      id: overrides.reviewerId ?? "reviewer-auth",
+      email: null
+    },
+    reviewedAt: overrides.reviewedAt ?? "2026-07-15T01:02:03.000Z",
+    publicationState: overrides.publicationState ?? "unpublished",
+    ontologyPublished: overrides.ontologyPublished ?? false,
+    publishPerformed: false,
+    migrationPerformed: false,
+    atomic: false
+  };
+}
+
 describe("knowledge review actions", () => {
   it("approves a validated candidate while preserving an unpublished human receipt", async () => {
     const fake = makeReviewClient();
@@ -177,17 +246,23 @@ describe("knowledge review actions", () => {
     });
     expect(fake.updates).toHaveLength(3);
     expect(fake.updates[0]).toMatchObject({
-      table: "knowledge_regeneration_runs",
+      table: "knowledge_events",
       value: {
-        status: "approved",
-        generated_output: {
-          candidate: "기존 검토 초안",
+        review_status: "approved",
+        proposed_wiki_update: {
+          existingKey: "event-one",
           publicationState: "unpublished",
           ontologyPublished: false,
+          publishPerformed: false,
+          migrationPerformed: false,
           humanReviewReceipt: {
             contractVersion: "knowledge-human-review.v1",
+            operationId: "knowledge-review:run-1:approve_candidate",
             action: "approve_candidate",
             scope: "promotion_candidate",
+            runId: "run-1",
+            organizationId: "org-1",
+            siteId: "site-1",
             reviewedAt: "2026-07-15T01:02:03.000Z",
             reviewer: { id: "reviewer-auth", email: "reviewer@example.com" },
             atomic: false
@@ -200,25 +275,26 @@ describe("knowledge review actions", () => {
       value: {
         review_status: "approved",
         proposed_wiki_update: {
-          existingKey: "event-one",
-          publicationState: "unpublished",
-          ontologyPublished: false,
-          humanReviewReceipt: {
-            action: "approve_candidate",
-            scope: "promotion_candidate",
-            reviewer: { id: "reviewer-auth", email: "reviewer@example.com" },
-            reviewedAt: "2026-07-15T01:02:03.000Z"
-          }
+          existingKey: "event-two",
+          humanReviewReceipt: { scope: "promotion_candidate" }
         }
       }
     });
     expect(fake.updates[2]).toMatchObject({
-      table: "knowledge_events",
+      table: "knowledge_regeneration_runs",
       value: {
-        review_status: "approved",
-        proposed_wiki_update: {
-          existingKey: "event-two",
-          humanReviewReceipt: { scope: "promotion_candidate" }
+        status: "approved",
+        generated_output: {
+          candidate: "기존 검토 초안",
+          publicationState: "unpublished",
+          ontologyPublished: false,
+          publishPerformed: false,
+          migrationPerformed: false,
+          humanReviewReceipt: {
+            action: "approve_candidate",
+            scope: "promotion_candidate",
+            runId: "run-1"
+          }
         }
       }
     });
@@ -250,10 +326,10 @@ describe("knowledge review actions", () => {
         compensationRequired: false
       });
       expect(fake.updates[0]).toMatchObject({
-        table: "knowledge_regeneration_runs",
+        table: "knowledge_events",
         value: {
-          status: runStatus,
-          generated_output: {
+          review_status: eventReviewStatus,
+          proposed_wiki_update: {
             humanReviewReceipt: { action, scope }
           }
         }
@@ -291,14 +367,15 @@ describe("knowledge review actions", () => {
     expect(fake.updates).toHaveLength(0);
   });
 
-  it("reports required compensation when the second update fails after the run update", async () => {
+  it("keeps the run actionable and resumes only incomplete events after a partial failure", async () => {
     const fake = makeReviewClient({ eventUpdateErrorAt: 2 });
 
     try {
       await applyKnowledgeReviewAction(
         fake.client as never,
         { id: "reviewer-auth", email: "reviewer@example.com" },
-        { runId: "run-1", action: "approve_candidate" }
+        { runId: "run-1", action: "approve_candidate" },
+        { now: () => "2026-07-16T08:00:00.000Z" }
       );
       throw new Error("Expected applyKnowledgeReviewAction to fail");
     } catch (error) {
@@ -308,16 +385,564 @@ describe("knowledge review actions", () => {
         code: "review_event_update_failed",
         compensationRequired: true,
         updates: {
-          runUpdated: true,
+          runUpdated: false,
           eventsUpdated: false,
           eventsUpdatedCount: 1,
           eventsTotal: 2
         }
       });
     }
-    expect(fake.updates).toHaveLength(3);
+    expect(fake.updates).toHaveLength(2);
+    expect(fake.run.status).toBe("review_required");
     expect(fake.events[0]?.review_status).toBe("approved");
     expect(fake.events[1]?.review_status).toBe("pending_review");
+    expect(fake.events[0]?.proposed_wiki_update).toMatchObject({
+      publicationState: "unpublished",
+      ontologyPublished: false,
+      humanReviewReceipt: {
+        action: "approve_candidate",
+        runId: "run-1",
+        organizationId: "org-1",
+        siteId: "site-1"
+      }
+    });
+
+    const retryResult = await applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: "reviewer@example.com" },
+      { runId: "run-1", action: "approve_candidate" },
+      { now: () => "2026-07-16T09:00:00.000Z" }
+    );
+
+    expect(retryResult).toMatchObject({
+      ok: true,
+      runStatus: "approved",
+      compensationRequired: false,
+      updates: {
+        runUpdated: true,
+        eventsUpdated: true,
+        eventsUpdatedCount: 1,
+        eventsTotal: 2
+      }
+    });
+    expect(fake.updates).toHaveLength(4);
+    expect(fake.updates[2]).toMatchObject({
+      table: "knowledge_events",
+      value: { review_status: "approved" }
+    });
+    expect(fake.updates[3]).toMatchObject({
+      table: "knowledge_regeneration_runs",
+      value: { status: "approved" }
+    });
+    expect(fake.run.status).toBe("approved");
+    expect(fake.events.map((event) => event.review_status)).toEqual(["approved", "approved"]);
+    expect(fake.events[1]?.proposed_wiki_update).toMatchObject({
+      publicationState: "unpublished",
+      ontologyPublished: false,
+      humanReviewReceipt: {
+        reviewedAt: "2026-07-16T08:00:00.000Z"
+      }
+    });
+  });
+
+  it("resumes pending events from a finalized legacy run-first partial state", async () => {
+    const fake = makeReviewClient();
+    const receipt = makeLegacyReceipt();
+    fake.run.status = "approved";
+    fake.run.generated_output = {
+      candidate: "기존 검토 초안",
+      publicationState: "unpublished",
+      ontologyPublished: false,
+      humanReviewReceipt: receipt
+    };
+    if (fake.events[0]) {
+      fake.events[0].review_status = "approved";
+      fake.events[0].proposed_wiki_update = {
+        existingKey: "event-one",
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        humanReviewReceipt: receipt
+      };
+    }
+
+    const result = await applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      runStatus: "approved",
+      updates: {
+        runUpdated: true,
+        eventsUpdated: true,
+        eventsUpdatedCount: 2,
+        eventsTotal: 2
+      }
+    });
+    expect(fake.updates).toHaveLength(3);
+    expect(fake.updates[0]).toMatchObject({
+      table: "knowledge_events",
+      value: {
+        proposed_wiki_update: {
+          publicationState: "unpublished",
+          ontologyPublished: false,
+          publishPerformed: false,
+          migrationPerformed: false,
+          humanReviewReceipt: {
+            operationId: "knowledge-review:run-1:approve_candidate",
+            runId: "run-1",
+            organizationId: "org-1",
+            siteId: "site-1"
+          }
+        }
+      }
+    });
+    expect(fake.updates[1]).toMatchObject({
+      table: "knowledge_events",
+      value: {
+        review_status: "approved",
+        proposed_wiki_update: {
+          publicationState: "unpublished",
+          ontologyPublished: false,
+          publishPerformed: false,
+          migrationPerformed: false
+        }
+      }
+    });
+    expect(fake.updates[2]).toMatchObject({
+      table: "knowledge_regeneration_runs",
+      value: {
+        generated_output: {
+          publicationState: "unpublished",
+          ontologyPublished: false,
+          publishPerformed: false,
+          migrationPerformed: false,
+          humanReviewReceipt: {
+            operationId: "knowledge-review:run-1:approve_candidate",
+            runId: "run-1",
+            organizationId: "org-1",
+            siteId: "site-1"
+          }
+        }
+      }
+    });
+    expect(fake.events.map((event) => event.review_status)).toEqual(["approved", "approved"]);
+  });
+
+  it("blocks a finalized legacy resume when an actionable run shares an event", async () => {
+    const fake = makeReviewClient({
+      additionalRuns: [{
+        id: "run-shared",
+        organization_id: "org-1",
+        site_id: "site-1",
+        raw_event_ids: ["event-2"],
+        generated_output: { candidate: "공유 이벤트 초안" },
+        status: "generated"
+      }]
+    });
+    const receipt = makeLegacyReceipt();
+    fake.run.status = "approved";
+    fake.run.generated_output = {
+      candidate: "기존 검토 초안",
+      humanReviewReceipt: receipt
+    };
+    if (fake.events[0]) {
+      fake.events[0].review_status = "approved";
+      fake.events[0].proposed_wiki_update = {
+        existingKey: "event-one",
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        humanReviewReceipt: receipt
+      };
+    }
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_shared_event_conflict",
+      compensationRequired: false
+    });
+    expect(fake.updates).toHaveLength(0);
+    expect(fake.events[1]?.review_status).toBe("pending_review");
+  });
+
+  it("blocks both finalized legacy runs that share the same pending event", async () => {
+    const fake = makeReviewClient({
+      additionalRuns: [{
+        id: "run-2",
+        organization_id: "org-1",
+        site_id: "site-1",
+        raw_event_ids: ["event-2"],
+        generated_output: {
+          candidate: "거절 검토 초안",
+          humanReviewReceipt: {
+            ...makeLegacyReceipt({ action: "reject" }),
+            reviewer: { id: "reviewer-auth", email: null }
+          }
+        },
+        status: "failed"
+      }]
+    });
+    const approvedReceipt = makeLegacyReceipt();
+    fake.run.status = "approved";
+    fake.run.generated_output = {
+      candidate: "승인 검토 초안",
+      humanReviewReceipt: approvedReceipt
+    };
+    if (fake.events[0]) {
+      fake.events[0].review_status = "approved";
+      fake.events[0].proposed_wiki_update = {
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        humanReviewReceipt: approvedReceipt
+      };
+    }
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_shared_event_conflict"
+    });
+    expect(fake.updates).toHaveLength(0);
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-2", action: "reject" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_shared_event_conflict"
+    });
+    expect(fake.updates).toHaveLength(0);
+    expect(fake.events[1]?.review_status).toBe("pending_review");
+  });
+
+  it("fails closed when a cross-reviewer finalized run shares a pending event", async () => {
+    const fake = makeReviewClient({
+      additionalRuns: [{
+        id: "run-unrelated-final",
+        organization_id: "org-1",
+        site_id: "site-1",
+        raw_event_ids: ["event-2"],
+        generated_output: {
+          candidate: "무관한 완료 run",
+          humanReviewReceipt: makeLegacyReceipt({ reviewerId: "reviewer-other" })
+        },
+        status: "approved"
+      }]
+    });
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_shared_event_conflict",
+      compensationRequired: false
+    });
+
+    expect(fake.updates).toHaveLength(0);
+    expect(fake.events.map((event) => event.review_status)).toEqual([
+      "pending_review",
+      "pending_review"
+    ]);
+  });
+
+  it("fails closed when a malformed finalized receipt shares a pending event", async () => {
+    const fake = makeReviewClient({
+      additionalRuns: [{
+        id: "run-malformed-final",
+        organization_id: "org-1",
+        site_id: "site-1",
+        raw_event_ids: ["event-2"],
+        generated_output: {
+          candidate: "형식이 깨진 완료 run",
+          humanReviewReceipt: {
+            contractVersion: "knowledge-human-review.v1",
+            action: "approve_candidate",
+            scope: "promotion_candidate",
+            reviewer: "malformed"
+          }
+        },
+        status: "approved"
+      }]
+    });
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_shared_event_conflict",
+      compensationRequired: false
+    });
+
+    expect(fake.updates).toHaveLength(0);
+    expect(fake.events[1]?.review_status).toBe("pending_review");
+  });
+
+  it("ignores a valid finalized run that overlaps only a completed event", async () => {
+    const fake = makeReviewClient({
+      additionalRuns: [{
+        id: "run-completed-overlap",
+        organization_id: "org-1",
+        site_id: "site-1",
+        raw_event_ids: ["event-1"],
+        generated_output: {
+          candidate: "완료 이벤트만 공유",
+          humanReviewReceipt: makeLegacyReceipt()
+        },
+        status: "approved"
+      }]
+    });
+    if (fake.events[0]) {
+      fake.events[0].review_status = "approved";
+      fake.events[0].proposed_wiki_update = {
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        publishPerformed: false,
+        migrationPerformed: false,
+        humanReviewReceipt: makeReceipt()
+      };
+    }
+
+    const result = await applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      updates: { eventsUpdatedCount: 1 }
+    });
+    expect(fake.events.map((event) => event.review_status)).toEqual(["approved", "approved"]);
+  });
+
+  it("rejects an arbitrary legacy receipt before writes", async () => {
+    const fake = makeReviewClient();
+    fake.run.generated_output = {
+      candidate: "기존 검토 초안",
+      humanReviewReceipt: makeLegacyReceipt()
+    };
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_idempotency_conflict",
+      compensationRequired: true
+    });
+    expect(fake.updates).toHaveLength(0);
+  });
+
+  it.each([
+    ["action", makeReceipt({ action: "reject" })],
+    ["scope", makeReceipt({ scope: "site_private" })],
+    ["organization", makeReceipt({ organizationId: "org-tampered" })],
+    ["site", makeReceipt({ siteId: "site-tampered" })],
+    ["operation", makeReceipt({ operationId: "knowledge-review:other:approve_candidate" })]
+  ] as const)("rejects an actionable run with a mismatched %s receipt before writes", async (_label, receipt) => {
+    const fake = makeReviewClient();
+    fake.run.generated_output = {
+      candidate: "기존 검토 초안",
+      humanReviewReceipt: receipt
+    };
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_idempotency_conflict",
+      compensationRequired: true
+    });
+    expect(fake.updates).toHaveLength(0);
+  });
+
+  it("rejects resume when the authenticated reviewer changed", async () => {
+    const fake = makeReviewClient({ organizationOwnerId: "reviewer-new" });
+    const oldReceipt = makeReceipt({ reviewerId: "reviewer-auth" });
+    fake.run.generated_output = {
+      candidate: "기존 검토 초안",
+      humanReviewReceipt: oldReceipt
+    };
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-new", email: "new@example.com" },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_idempotency_conflict"
+    });
+    expect(fake.updates).toHaveLength(0);
+  });
+
+  it("resumes a null-site partial state without widening its scope", async () => {
+    const fake = makeReviewClient({ eventUpdateErrorAt: 2, eventSiteId: null });
+    fake.run.site_id = null;
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "keep_site_only" },
+      { now: () => "2026-07-16T08:00:00.000Z" }
+    )).rejects.toMatchObject({ code: "review_event_update_failed" });
+
+    const retry = await applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "keep_site_only" }
+    );
+    expect(retry).toMatchObject({
+      ok: true,
+      siteId: null,
+      updates: { eventsUpdatedCount: 1 }
+    });
+    expect(fake.events.every((event) => event.site_id === null)).toBe(true);
+    expect(fake.events.every((event) => (
+      (event.proposed_wiki_update as { humanReviewReceipt?: { siteId?: unknown } })
+        .humanReviewReceipt?.siteId === null
+    ))).toBe(true);
+  });
+
+  it("rejects a different action after a partial update without changing its receipt", async () => {
+    const fake = makeReviewClient({ eventUpdateErrorAt: 2 });
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" },
+      { now: () => "2026-07-16T08:00:00.000Z" }
+    )).rejects.toMatchObject({ code: "review_event_update_failed" });
+    const writesAfterFailure = fake.updates.length;
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "reject" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_idempotency_conflict",
+      compensationRequired: true
+    });
+    expect(fake.updates).toHaveLength(writesAfterFailure);
+    expect(fake.events[0]?.review_status).toBe("approved");
+  });
+
+  it("treats a replay of a completed review as an idempotent no-op", async () => {
+    const fake = makeReviewClient();
+    const user = { id: "reviewer-auth", email: "reviewer@example.com" };
+    const request = { runId: "run-1", action: "keep_site_only" } as const;
+    await applyKnowledgeReviewAction(fake.client as never, user, request);
+    const writesAfterSuccess = fake.updates.length;
+
+    const replay = await applyKnowledgeReviewAction(fake.client as never, user, request);
+
+    expect(replay).toMatchObject({
+      ok: true,
+      action: "keep_site_only",
+      runStatus: "approved",
+      compensationRequired: false,
+      updates: {
+        runUpdated: false,
+        eventsUpdated: false,
+        eventsUpdatedCount: 0,
+        eventsTotal: 2
+      }
+    });
+    expect(fake.updates).toHaveLength(writesAfterSuccess);
+  });
+
+  it.each([
+    ["empty", ""],
+    ["invalid", "2026-02-30T00:00:00Z"]
+  ] as const)("fails closed for a finalized current receipt with %s reviewedAt", async (_label, reviewedAt) => {
+    const fake = makeReviewClient();
+    const receipt = makeReceipt({ reviewedAt });
+    fake.run.status = "approved";
+    fake.run.generated_output = {
+      candidate: "기존 검토 초안",
+      publicationState: "unpublished",
+      ontologyPublished: false,
+      publishPerformed: false,
+      migrationPerformed: false,
+      humanReviewReceipt: receipt
+    };
+    for (const event of fake.events) {
+      event.review_status = "approved";
+      event.proposed_wiki_update = {
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        publishPerformed: false,
+        migrationPerformed: false,
+        humanReviewReceipt: receipt
+      };
+    }
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_idempotency_conflict",
+      compensationRequired: true
+    });
+    expect(fake.updates).toHaveLength(0);
+  });
+
+  it("accepts a finalized current receipt with a valid RFC3339 instant", async () => {
+    const fake = makeReviewClient();
+    const receipt = makeReceipt({ reviewedAt: "2026-07-16T17:30:00+09:00" });
+    fake.run.status = "approved";
+    fake.run.generated_output = {
+      candidate: "기존 검토 초안",
+      publicationState: "unpublished",
+      ontologyPublished: false,
+      publishPerformed: false,
+      migrationPerformed: false,
+      humanReviewReceipt: receipt
+    };
+    for (const event of fake.events) {
+      event.review_status = "approved";
+      event.proposed_wiki_update = {
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        publishPerformed: false,
+        migrationPerformed: false,
+        humanReviewReceipt: receipt
+      };
+    }
+
+    const result = await applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      updates: {
+        runUpdated: false,
+        eventsUpdated: false,
+        eventsUpdatedCount: 0
+      }
+    });
+    expect(fake.updates).toHaveLength(0);
   });
 
   it("detects a shared-event race as a compensating partial update", async () => {
@@ -336,7 +961,7 @@ describe("knowledge review actions", () => {
       code: "review_event_update_failed",
       compensationRequired: true,
       updates: {
-        runUpdated: true,
+        runUpdated: false,
         eventsUpdated: false,
         eventsUpdatedCount: 1,
         eventsTotal: 2
@@ -394,8 +1019,8 @@ describe("knowledge review actions", () => {
     }
   });
 
-  it("does not attempt the event update when the run update fails", async () => {
-    const fake = makeReviewClient({ runUpdateError: new Error("run update unavailable") });
+  it("resumes only the final run update after all events were safely reviewed", async () => {
+    const fake = makeReviewClient({ runUpdateErrorAt: 1 });
 
     await expect(applyKnowledgeReviewAction(
       fake.client as never,
@@ -404,14 +1029,70 @@ describe("knowledge review actions", () => {
     )).rejects.toMatchObject({
       status: 500,
       code: "review_run_update_failed",
-      compensationRequired: false,
-      updates: { runUpdated: false, eventsUpdated: false }
+      compensationRequired: true,
+      updates: {
+        runUpdated: false,
+        eventsUpdated: true,
+        eventsUpdatedCount: 2,
+        eventsTotal: 2
+      }
     });
-    expect(fake.updates).toHaveLength(1);
-    expect(fake.updates[0]?.table).toBe("knowledge_regeneration_runs");
+    expect(fake.updates).toHaveLength(3);
+    expect(fake.updates.map((update) => update.table)).toEqual([
+      "knowledge_events",
+      "knowledge_events",
+      "knowledge_regeneration_runs"
+    ]);
+    expect(fake.run.status).toBe("review_required");
+
+    const retry = await applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "reject" }
+    );
+    expect(retry).toMatchObject({
+      ok: true,
+      runStatus: "failed",
+      updates: {
+        runUpdated: true,
+        eventsUpdated: false,
+        eventsUpdatedCount: 0,
+        eventsTotal: 2
+      }
+    });
+    expect(fake.updates).toHaveLength(4);
+    expect(fake.updates[3]?.table).toBe("knowledge_regeneration_runs");
+    expect(fake.run.status).toBe("failed");
   });
 
-  it("fails a stale conditional run update before touching events", async () => {
+  it("reports no event write when a run-only retry fails again", async () => {
+    const fake = makeReviewClient({ runUpdateError: new Error("run update unavailable") });
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "reject" }
+    )).rejects.toMatchObject({
+      code: "review_run_update_failed",
+      updates: { eventsUpdated: true, eventsUpdatedCount: 2 }
+    });
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "reject" }
+    )).rejects.toMatchObject({
+      code: "review_run_update_failed",
+      updates: {
+        runUpdated: false,
+        eventsUpdated: false,
+        eventsUpdatedCount: 0,
+        eventsTotal: 2
+      }
+    });
+  });
+
+  it("keeps a stale final run update resumable after events are safely reviewed", async () => {
     const fake = makeReviewClient({
       beforeRunUpdate(run) {
         run.status = "approved";
@@ -425,15 +1106,164 @@ describe("knowledge review actions", () => {
     )).rejects.toMatchObject({
       status: 500,
       code: "review_run_update_failed",
-      compensationRequired: false,
+      compensationRequired: true,
       updates: {
         runUpdated: false,
+        eventsUpdated: true,
+        eventsUpdatedCount: 2,
+        eventsTotal: 2
+      }
+    });
+    expect(fake.updates).toHaveLength(3);
+    expect(fake.events.map((event) => event.review_status)).toEqual(["approved", "approved"]);
+    expect(fake.events.every((event) => (
+      (event.proposed_wiki_update as Record<string, unknown>).publicationState === "unpublished"
+    ))).toBe(true);
+
+    const writesAfterFailure = fake.updates.length;
+    const retry = await applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    );
+    expect(retry).toMatchObject({
+      ok: true,
+      runStatus: "approved",
+      updates: {
+        runUpdated: true,
         eventsUpdated: false,
         eventsUpdatedCount: 0,
-        eventsTotal: 0
+        eventsTotal: 2
+      }
+    });
+    expect(fake.updates).toHaveLength(writesAfterFailure + 1);
+    expect(fake.updates.at(-1)).toMatchObject({
+      table: "knowledge_regeneration_runs",
+      value: {
+        generated_output: {
+          publicationState: "unpublished",
+          ontologyPublished: false,
+          publishPerformed: false,
+          migrationPerformed: false,
+          humanReviewReceipt: {
+            operationId: "knowledge-review:run-1:approve_candidate",
+            runId: "run-1",
+            organizationId: "org-1",
+            siteId: "site-1"
+          }
+        }
+      }
+    });
+  });
+
+  it("normalizes a published final run from completed event receipts", async () => {
+    const fake = makeReviewClient();
+    const receipt = makeReceipt();
+    fake.run.status = "approved";
+    fake.run.generated_output = {
+      candidate: "기존 검토 초안",
+      publicationState: "published",
+      ontologyPublished: true,
+      publishPerformed: true,
+      migrationPerformed: true
+    };
+    for (const event of fake.events) {
+      event.review_status = "approved";
+      event.proposed_wiki_update = {
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        publishPerformed: false,
+        migrationPerformed: false,
+        humanReviewReceipt: receipt
+      };
+    }
+
+    const result = await applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      runStatus: "approved",
+      updates: {
+        runUpdated: true,
+        eventsUpdated: false,
+        eventsUpdatedCount: 0
       }
     });
     expect(fake.updates).toHaveLength(1);
+    expect(fake.run.generated_output).toMatchObject({
+      publicationState: "unpublished",
+      ontologyPublished: false,
+      publishPerformed: false,
+      migrationPerformed: false,
+      humanReviewReceipt: {
+        operationId: "knowledge-review:run-1:approve_candidate",
+        runId: "run-1",
+        organizationId: "org-1",
+        siteId: "site-1"
+      }
+    });
+  });
+
+  it.each([
+    ["publicationState", { publicationState: "published" }],
+    ["ontologyPublished", { ontologyPublished: true }],
+    ["publishPerformed", { publishPerformed: true }],
+    ["migrationPerformed", { migrationPerformed: true }]
+  ] as const)("normalizes a completed event with unsafe top-level %s", async (_label, unsafeState) => {
+    const fake = makeReviewClient();
+    const receipt = makeReceipt();
+    fake.run.status = "approved";
+    fake.run.generated_output = {
+      candidate: "기존 검토 초안",
+      publicationState: "unpublished",
+      ontologyPublished: false,
+      publishPerformed: false,
+      migrationPerformed: false,
+      humanReviewReceipt: receipt
+    };
+    for (const event of fake.events) {
+      event.review_status = "approved";
+      event.proposed_wiki_update = {
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        publishPerformed: false,
+        migrationPerformed: false,
+        humanReviewReceipt: receipt
+      };
+    }
+    if (fake.events[0]) {
+      fake.events[0].proposed_wiki_update = {
+        ...(fake.events[0].proposed_wiki_update as Record<string, unknown>),
+        ...unsafeState
+      };
+    }
+
+    const result = await applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      updates: {
+        runUpdated: false,
+        eventsUpdated: true,
+        eventsUpdatedCount: 1,
+        eventsTotal: 2
+      }
+    });
+    expect(fake.updates).toHaveLength(1);
+    expect(fake.events[0]?.proposed_wiki_update).toMatchObject({
+      publicationState: "unpublished",
+      ontologyPublished: false,
+      publishPerformed: false,
+      migrationPerformed: false
+    });
   });
 
   it("drops body-supplied reviewer and tenant claims from the parsed request", () => {

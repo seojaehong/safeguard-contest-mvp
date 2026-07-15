@@ -4,6 +4,7 @@ import type {
   WorkspaceUser
 } from "@/lib/supabase-admin";
 import { toJson } from "@/lib/supabase-admin";
+import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 
 export const KNOWLEDGE_REVIEW_RUN_STATUSES = [
   "draft",
@@ -324,34 +325,58 @@ function actionTransition(action: KnowledgeReviewAction) {
   };
 }
 
-function buildReviewedOutput(input: {
-  generatedOutput: unknown;
+type HumanReviewReceipt = {
+  contractVersion: "knowledge-human-review.v1";
+  operationId: string;
+  action: KnowledgeReviewAction;
+  scope: "rejected" | "site_private" | "promotion_candidate";
+  runId: string;
+  organizationId: string;
+  siteId: string | null;
+  reviewer: {
+    id: string;
+    email: string | null;
+  };
+  reviewedAt: string;
+  publicationState: "unpublished";
+  ontologyPublished: false;
+  publishPerformed: false;
+  migrationPerformed: false;
+  atomic: false;
+};
+
+type LegacyHumanReviewReceipt = Omit<HumanReviewReceipt,
+  | "operationId"
+  | "runId"
+  | "organizationId"
+  | "siteId"
+>;
+
+type ReceiptOperationContext = {
   request: KnowledgeReviewRequest;
   user: WorkspaceUser;
-  reviewedAt: string;
-}) {
-  const preservedOutput = isRecord(input.generatedOutput)
-    ? input.generatedOutput
-    : { candidateOutput: input.generatedOutput };
-
-  return {
-    ...preservedOutput,
-    publicationState: "unpublished" as const,
-    ontologyPublished: false,
-    humanReviewReceipt: buildHumanReviewReceipt(input)
-  };
-}
+  runId: string;
+  organizationId: string;
+  siteId: string | null;
+};
 
 function buildHumanReviewReceipt(input: {
   request: KnowledgeReviewRequest;
   user: WorkspaceUser;
   reviewedAt: string;
-}) {
+  runId: string;
+  organizationId: string;
+  siteId: string | null;
+}): HumanReviewReceipt {
   const transition = actionTransition(input.request.action);
   return {
     contractVersion: "knowledge-human-review.v1" as const,
+    operationId: `knowledge-review:${input.runId}:${input.request.action}`,
     action: input.request.action,
     scope: transition.scope,
+    runId: input.runId,
+    organizationId: input.organizationId,
+    siteId: input.siteId,
     reviewer: {
       id: input.user.id,
       email: input.user.email
@@ -365,11 +390,154 @@ function buildHumanReviewReceipt(input: {
   };
 }
 
-function buildReviewedEventProposal(input: {
-  proposedWikiUpdate: unknown;
+function readHumanReviewReceipt(value: unknown): HumanReviewReceipt | null {
+  if (!isRecord(value) || !isRecord(value.humanReviewReceipt)) return null;
+  const receipt = value.humanReviewReceipt;
+  if (
+    receipt.contractVersion !== "knowledge-human-review.v1"
+    || typeof receipt.operationId !== "string"
+    || (receipt.action !== "approve_candidate"
+      && receipt.action !== "keep_site_only"
+      && receipt.action !== "reject")
+    || (receipt.scope !== "promotion_candidate"
+      && receipt.scope !== "site_private"
+      && receipt.scope !== "rejected")
+    || typeof receipt.runId !== "string"
+    || typeof receipt.organizationId !== "string"
+    || (receipt.siteId !== null && typeof receipt.siteId !== "string")
+    || !isRecord(receipt.reviewer)
+    || typeof receipt.reviewer.id !== "string"
+    || (receipt.reviewer.email !== null && typeof receipt.reviewer.email !== "string")
+    || !isRfc3339OffsetTimestamp(receipt.reviewedAt)
+    || receipt.publicationState !== "unpublished"
+    || receipt.ontologyPublished !== false
+    || receipt.publishPerformed !== false
+    || receipt.migrationPerformed !== false
+    || receipt.atomic !== false
+  ) {
+    return null;
+  }
+  return receipt as HumanReviewReceipt;
+}
+
+function readLegacyHumanReviewReceipt(value: unknown): LegacyHumanReviewReceipt | null {
+  if (!isRecord(value) || !isRecord(value.humanReviewReceipt)) return null;
+  const receipt = value.humanReviewReceipt;
+  const identityFields = ["operationId", "runId", "organizationId", "siteId"] as const;
+  if (identityFields.some((field) => Object.prototype.hasOwnProperty.call(receipt, field))) {
+    return null;
+  }
+  if (
+    receipt.contractVersion !== "knowledge-human-review.v1"
+    || (receipt.action !== "approve_candidate"
+      && receipt.action !== "keep_site_only"
+      && receipt.action !== "reject")
+    || (receipt.scope !== "promotion_candidate"
+      && receipt.scope !== "site_private"
+      && receipt.scope !== "rejected")
+    || !isRecord(receipt.reviewer)
+    || typeof receipt.reviewer.id !== "string"
+    || (receipt.reviewer.email !== null && typeof receipt.reviewer.email !== "string")
+    || !isRfc3339OffsetTimestamp(receipt.reviewedAt)
+    || receipt.publicationState !== "unpublished"
+    || receipt.ontologyPublished !== false
+    || receipt.publishPerformed !== false
+    || receipt.migrationPerformed !== false
+    || receipt.atomic !== false
+  ) {
+    return null;
+  }
+  return receipt as LegacyHumanReviewReceipt;
+}
+
+function receiptMatchesOperation(input: {
+  receipt: HumanReviewReceipt;
   request: KnowledgeReviewRequest;
   user: WorkspaceUser;
-  reviewedAt: string;
+  runId: string;
+  organizationId: string;
+  siteId: string | null;
+}): boolean {
+  const transition = actionTransition(input.request.action);
+  return input.receipt.operationId === `knowledge-review:${input.runId}:${input.request.action}`
+    && input.receipt.action === input.request.action
+    && input.receipt.scope === transition.scope
+    && input.receipt.runId === input.runId
+    && input.receipt.organizationId === input.organizationId
+    && input.receipt.siteId === input.siteId
+    && input.receipt.reviewer.id === input.user.id;
+}
+
+function resolveHumanReviewReceipt(
+  value: unknown,
+  context: ReceiptOperationContext
+): { receipt: HumanReviewReceipt; needsUpgrade: boolean } | null {
+  const currentReceipt = readHumanReviewReceipt(value);
+  if (currentReceipt) {
+    return receiptMatchesOperation({ receipt: currentReceipt, ...context })
+      ? { receipt: currentReceipt, needsUpgrade: false }
+      : null;
+  }
+
+  const legacyReceipt = readLegacyHumanReviewReceipt(value);
+  if (!legacyReceipt) return null;
+  const transition = actionTransition(context.request.action);
+  if (
+    legacyReceipt.action !== context.request.action
+    || legacyReceipt.scope !== transition.scope
+    || legacyReceipt.reviewer.id !== context.user.id
+  ) {
+    return null;
+  }
+
+  return {
+    receipt: {
+      ...legacyReceipt,
+      operationId: `knowledge-review:${context.runId}:${context.request.action}`,
+      runId: context.runId,
+      organizationId: context.organizationId,
+      siteId: context.siteId
+    },
+    needsUpgrade: true
+  };
+}
+
+function receiptsAreConsistent(left: HumanReviewReceipt, right: HumanReviewReceipt): boolean {
+  return left.operationId === right.operationId
+    && left.reviewedAt === right.reviewedAt
+    && left.reviewer.id === right.reviewer.id
+    && left.reviewer.email === right.reviewer.email;
+}
+
+function hasSafeReviewEnvelope(value: unknown): boolean {
+  return isRecord(value)
+    && value.publicationState === "unpublished"
+    && value.ontologyPublished === false
+    && value.publishPerformed === false
+    && value.migrationPerformed === false;
+}
+
+function buildReviewedOutput(input: {
+  generatedOutput: unknown;
+  receipt: HumanReviewReceipt;
+}) {
+  const preservedOutput = isRecord(input.generatedOutput)
+    ? input.generatedOutput
+    : { candidateOutput: input.generatedOutput };
+
+  return {
+    ...preservedOutput,
+    publicationState: "unpublished" as const,
+    ontologyPublished: false,
+    publishPerformed: false,
+    migrationPerformed: false,
+    humanReviewReceipt: input.receipt
+  };
+}
+
+function buildReviewedEventProposal(input: {
+  proposedWikiUpdate: unknown;
+  receipt: HumanReviewReceipt;
 }) {
   const preservedProposal = isRecord(input.proposedWikiUpdate)
     ? input.proposedWikiUpdate
@@ -378,7 +546,50 @@ function buildReviewedEventProposal(input: {
     ...preservedProposal,
     publicationState: "unpublished" as const,
     ontologyPublished: false,
-    humanReviewReceipt: buildHumanReviewReceipt(input)
+    publishPerformed: false,
+    migrationPerformed: false,
+    humanReviewReceipt: input.receipt
+  };
+}
+
+function buildKnowledgeReviewSuccessResult(input: {
+  request: KnowledgeReviewRequest;
+  user: WorkspaceUser;
+  run: {
+    id: string;
+    organization_id: string;
+    site_id: string | null;
+  };
+  transition: ReturnType<typeof actionTransition>;
+  runUpdated: boolean;
+  eventsUpdated: boolean;
+  eventsUpdatedCount: number;
+  eventsTotal: number;
+}) {
+  return {
+    ok: true as const,
+    action: input.request.action,
+    runId: input.run.id,
+    organizationId: input.run.organization_id,
+    siteId: input.run.site_id,
+    runStatus: input.transition.runStatus,
+    eventReviewStatus: input.transition.eventReviewStatus,
+    publicationState: "unpublished" as const,
+    ontologyPublished: false,
+    publishPerformed: false,
+    migrationPerformed: false,
+    atomic: false,
+    compensationRequired: false,
+    updates: {
+      runUpdated: input.runUpdated,
+      eventsUpdated: input.eventsUpdated,
+      eventsUpdatedCount: input.eventsUpdatedCount,
+      eventsTotal: input.eventsTotal
+    },
+    reviewer: {
+      id: input.user.id,
+      email: input.user.email
+    }
   };
 }
 
@@ -418,7 +629,31 @@ export async function applyKnowledgeReviewAction(
       message: "이 조직에서 검토할 수 없는 대상입니다."
     });
   }
-  if (!(KNOWLEDGE_REVIEW_RUN_STATUSES as readonly string[]).includes(run.status)) {
+  const transition = actionTransition(request.action);
+  const runIsActionable = (KNOWLEDGE_REVIEW_RUN_STATUSES as readonly string[]).includes(run.status);
+  const runHasStoredReceipt = isRecord(run.generated_output)
+    && Object.prototype.hasOwnProperty.call(run.generated_output, "humanReviewReceipt");
+  const runHasTargetFinalStatus = run.status === transition.runStatus;
+  const receiptContext: ReceiptOperationContext = {
+    request,
+    user,
+    runId: run.id,
+    organizationId: run.organization_id,
+    siteId: run.site_id
+  };
+  const runReceiptResolution = resolveHumanReviewReceipt(run.generated_output, receiptContext);
+  if (runHasStoredReceipt && (
+    !runReceiptResolution
+    || (runReceiptResolution.needsUpgrade && !runHasTargetFinalStatus)
+  )) {
+    throw new KnowledgeReviewError({
+      status: 409,
+      code: "review_idempotency_conflict",
+      message: "run에 저장된 검토 영수증이 현재 요청 범위와 일치하지 않습니다.",
+      compensationRequired: true
+    });
+  }
+  if (!runIsActionable && !runHasTargetFinalStatus) {
     throw new KnowledgeReviewError({
       status: 409,
       code: "review_run_not_actionable",
@@ -458,21 +693,58 @@ export async function applyKnowledgeReviewAction(
     });
   }
 
+  const { data: events, error: eventReadError } = await client
+    .from("knowledge_events")
+    .select("id,organization_id,site_id,review_status,proposed_wiki_update")
+    .in("id", uniqueEventIds);
+  assertReadSucceeded(eventReadError, "원본 이벤트 범위를 확인하지 못했습니다.");
+
+  const eventIds = new Set((events ?? []).map((event) => event.id));
+  const allEventsMatchScope = (events ?? []).length === uniqueEventIds.length
+    && uniqueEventIds.every((eventId) => eventIds.has(eventId))
+    && (events ?? []).every((event) => (
+      event.organization_id === run.organization_id
+      && event.site_id === run.site_id
+    ));
+  if (!allEventsMatchScope) {
+    throw new KnowledgeReviewError({
+      status: 409,
+      code: "review_event_tenant_mismatch",
+      message: "모든 원본 이벤트가 같은 조직, 현장, 검토 상태에 속해야 합니다."
+    });
+  }
+  const pendingEventIds = new Set((events ?? [])
+    .filter((event) => event.review_status === "pending_review")
+    .map((event) => event.id));
+
   let overlappingRunQuery = client
     .from("knowledge_regeneration_runs")
-    .select("id,raw_event_ids")
+    .select("id,organization_id,site_id,raw_event_ids,generated_output,status")
     .eq("organization_id", run.organization_id)
-    .in("status", [...KNOWLEDGE_REVIEW_RUN_STATUSES])
+    .in("status", [...KNOWLEDGE_REVIEW_RUN_STATUSES, "approved", "failed"])
     .overlaps("raw_event_ids", uniqueEventIds);
   overlappingRunQuery = run.site_id === null
     ? overlappingRunQuery.is("site_id", null)
     : overlappingRunQuery.eq("site_id", run.site_id);
   const { data: overlappingRuns, error: overlappingRunError } = await overlappingRunQuery;
   assertReadSucceeded(overlappingRunError, "공유 원본 이벤트 연결을 확인하지 못했습니다.");
-  const sharedConflictRunIds = findSharedEventConflictRunIds((overlappingRuns ?? []).map((candidate) => ({
-    id: candidate.id,
-    rawEventIds: candidate.raw_event_ids
-  })));
+  const conflictCandidates = (overlappingRuns ?? []).filter((candidate) => {
+    if (candidate.id === run.id) return false;
+    if ((KNOWLEDGE_REVIEW_RUN_STATUSES as readonly string[]).includes(candidate.status)) {
+      return true;
+    }
+    const sharesPendingEvent = candidate.raw_event_ids
+      .some((eventId) => pendingEventIds.has(eventId));
+    return sharesPendingEvent
+      && (candidate.status === "approved" || candidate.status === "failed");
+  });
+  const sharedConflictRunIds = findSharedEventConflictRunIds([
+    { id: run.id, rawEventIds: uniqueEventIds },
+    ...conflictCandidates.map((candidate) => ({
+      id: candidate.id,
+      rawEventIds: candidate.raw_event_ids
+    }))
+  ]);
   if (sharedConflictRunIds.has(run.id)) {
     throw new KnowledgeReviewError({
       status: 409,
@@ -481,35 +753,189 @@ export async function applyKnowledgeReviewAction(
     });
   }
 
-  const { data: events, error: eventReadError } = await client
-    .from("knowledge_events")
-    .select("id,organization_id,site_id,review_status,proposed_wiki_update")
-    .in("id", uniqueEventIds);
-  assertReadSucceeded(eventReadError, "원본 이벤트 범위를 확인하지 못했습니다.");
+  const eventById = new Map((events ?? []).map((event) => [event.id, event]));
+  let operationReceipt = runReceiptResolution?.receipt ?? null;
+  const eventIdsToNormalize = new Set<string>();
+  let completedEventCount = 0;
+  for (const event of events ?? []) {
+    if (event.review_status === "pending_review") continue;
+    const eventReceiptResolution = resolveHumanReviewReceipt(
+      event.proposed_wiki_update,
+      receiptContext
+    );
+    if (
+      event.review_status !== transition.eventReviewStatus
+      || !eventReceiptResolution
+      || (eventReceiptResolution.needsUpgrade && !runHasTargetFinalStatus)
+    ) {
+      throw new KnowledgeReviewError({
+        status: 409,
+        code: "review_idempotency_conflict",
+        message: "이미 저장된 이벤트 검토 결과가 현재 요청과 일치하지 않습니다.",
+        compensationRequired: true,
+        updates: {
+          runUpdated: false,
+          eventsUpdated: false,
+          eventsUpdatedCount: 0,
+          eventsTotal: uniqueEventIds.length
+        }
+      });
+    }
+    const receipt = eventReceiptResolution.receipt;
+    if (operationReceipt && !receiptsAreConsistent(operationReceipt, receipt)) {
+      throw new KnowledgeReviewError({
+        status: 409,
+        code: "review_idempotency_conflict",
+        message: "부분 저장된 이벤트의 검토 영수증이 서로 일치하지 않습니다.",
+        compensationRequired: true,
+        updates: {
+          runUpdated: false,
+          eventsUpdated: false,
+          eventsUpdatedCount: 0,
+          eventsTotal: uniqueEventIds.length
+        }
+      });
+    }
+    operationReceipt = receipt;
+    if (!hasSafeReviewEnvelope(event.proposed_wiki_update)) {
+      eventIdsToNormalize.add(event.id);
+    }
+    completedEventCount += 1;
+  }
 
-  const eventIds = new Set((events ?? []).map((event) => event.id));
-  const allEventsMatch = (events ?? []).length === uniqueEventIds.length
-    && uniqueEventIds.every((eventId) => eventIds.has(eventId))
-    && (events ?? []).every((event) => (
-      event.organization_id === run.organization_id
-      && event.site_id === run.site_id
-      && event.review_status === "pending_review"
-    ));
-  if (!allEventsMatch) {
+  if (runHasTargetFinalStatus && !operationReceipt) {
     throw new KnowledgeReviewError({
       status: 409,
-      code: "review_event_tenant_mismatch",
-      message: "모든 원본 이벤트가 같은 조직, 현장, 검토 상태에 속해야 합니다."
+      code: "review_idempotency_conflict",
+      message: "완료된 run을 현재 요청에 연결할 검토 영수증이 없습니다.",
+      compensationRequired: true,
+      updates: {
+        runUpdated: false,
+        eventsUpdated: false,
+        eventsUpdatedCount: 0,
+        eventsTotal: uniqueEventIds.length
+      }
     });
   }
 
-  const transition = actionTransition(request.action);
-  const reviewedAt = (options.now ?? (() => new Date().toISOString()))();
-  const generatedOutput = buildReviewedOutput({
-    generatedOutput: run.generated_output,
+  operationReceipt ??= buildHumanReviewReceipt({
     request,
     user,
-    reviewedAt
+    reviewedAt: (options.now ?? (() => new Date().toISOString()))(),
+    runId: run.id,
+    organizationId: run.organization_id,
+    siteId: run.site_id
+  });
+
+  let eventsUpdatedCount = 0;
+  for (const eventId of uniqueEventIds) {
+    const event = eventById.get(eventId);
+    if (!event) {
+      throw new KnowledgeReviewError({
+        status: 500,
+        code: "review_event_update_failed",
+        message: "일부 원본 이벤트만 저장되어 동일 요청으로 재개해야 합니다.",
+        compensationRequired: true,
+        updates: {
+          runUpdated: false,
+          eventsUpdated: false,
+          eventsUpdatedCount,
+          eventsTotal: uniqueEventIds.length
+        }
+      });
+    }
+    const eventIsCompleted = event.review_status === transition.eventReviewStatus;
+    if (eventIsCompleted && !eventIdsToNormalize.has(eventId)) continue;
+    const proposedWikiUpdate = buildReviewedEventProposal({
+      proposedWikiUpdate: event.proposed_wiki_update,
+      receipt: operationReceipt
+    });
+    let eventUpdate = client
+      .from("knowledge_events")
+      .update(eventIsCompleted
+        ? { proposed_wiki_update: toJson(proposedWikiUpdate) }
+        : {
+            review_status: transition.eventReviewStatus,
+            proposed_wiki_update: toJson(proposedWikiUpdate)
+          })
+      .eq("id", eventId)
+      .eq("organization_id", run.organization_id)
+      .eq("review_status", eventIsCompleted
+        ? transition.eventReviewStatus
+        : "pending_review");
+    eventUpdate = run.site_id === null
+      ? eventUpdate.is("site_id", null)
+      : eventUpdate.eq("site_id", run.site_id);
+    const { data: updatedEvent, error: eventUpdateError } = await eventUpdate
+      .select("id")
+      .maybeSingle();
+    if (eventUpdateError || !updatedEvent) {
+      throw new KnowledgeReviewError({
+        status: 500,
+        code: "review_event_update_failed",
+        message: "일부 원본 이벤트만 저장되어 동일 요청으로 재개해야 합니다.",
+        compensationRequired: true,
+        updates: {
+          runUpdated: false,
+          eventsUpdated: false,
+          eventsUpdatedCount,
+          eventsTotal: uniqueEventIds.length
+        },
+        cause: eventUpdateError
+      });
+    }
+    eventsUpdatedCount += 1;
+  }
+
+  if (runHasTargetFinalStatus) {
+    const runNeedsNormalization = runReceiptResolution?.needsUpgrade !== false
+      || !hasSafeReviewEnvelope(run.generated_output);
+    let runUpdated = false;
+    if (runNeedsNormalization) {
+      const normalizedOutput = buildReviewedOutput({
+        generatedOutput: run.generated_output,
+        receipt: operationReceipt
+      });
+      const { data: normalizedRun, error: normalizationError } = await client
+        .from("knowledge_regeneration_runs")
+        .update({ generated_output: toJson(normalizedOutput) })
+        .eq("id", run.id)
+        .eq("organization_id", run.organization_id)
+        .eq("status", transition.runStatus)
+        .select("id")
+        .single();
+      if (normalizationError || !normalizedRun) {
+        throw new KnowledgeReviewError({
+          status: 500,
+          code: "review_run_normalization_failed",
+          message: "완료된 run의 비공개 검토 영수증을 정규화하지 못했습니다.",
+          compensationRequired: true,
+          updates: {
+            runUpdated: false,
+            eventsUpdated: eventsUpdatedCount > 0,
+            eventsUpdatedCount,
+            eventsTotal: uniqueEventIds.length
+          },
+          cause: normalizationError
+        });
+      }
+      runUpdated = true;
+    }
+    return buildKnowledgeReviewSuccessResult({
+      request,
+      user,
+      run,
+      transition,
+      runUpdated,
+      eventsUpdated: eventsUpdatedCount > 0,
+      eventsUpdatedCount,
+      eventsTotal: uniqueEventIds.length
+    });
+  }
+
+  const generatedOutput = buildReviewedOutput({
+    generatedOutput: run.generated_output,
+    receipt: operationReceipt
   });
   const { data: updatedRun, error: runUpdateError } = await client
     .from("knowledge_regeneration_runs")
@@ -527,91 +953,26 @@ export async function applyKnowledgeReviewAction(
     throw new KnowledgeReviewError({
       status: 500,
       code: "review_run_update_failed",
-      message: "검토 run 상태를 저장하지 못했습니다.",
+      message: "원본 이벤트는 저장됐지만 검토 run 상태를 확정하지 못했습니다.",
+      compensationRequired: true,
+      updates: {
+        runUpdated: false,
+        eventsUpdated: eventsUpdatedCount > 0,
+        eventsUpdatedCount,
+        eventsTotal: uniqueEventIds.length
+      },
       cause: runUpdateError
     });
   }
 
-  const eventById = new Map((events ?? []).map((event) => [event.id, event]));
-  let eventsUpdatedCount = 0;
-  for (const eventId of uniqueEventIds) {
-    const event = eventById.get(eventId);
-    if (!event) {
-      throw new KnowledgeReviewError({
-        status: 500,
-        code: "review_event_update_failed",
-        message: "run은 갱신됐지만 원본 이벤트 상태 저장이 완료되지 않았습니다.",
-        compensationRequired: true,
-        updates: {
-          runUpdated: true,
-          eventsUpdated: false,
-          eventsUpdatedCount,
-          eventsTotal: uniqueEventIds.length
-        }
-      });
-    }
-    const proposedWikiUpdate = buildReviewedEventProposal({
-      proposedWikiUpdate: event.proposed_wiki_update,
-      request,
-      user,
-      reviewedAt
-    });
-    let eventUpdate = client
-      .from("knowledge_events")
-      .update({
-        review_status: transition.eventReviewStatus,
-        proposed_wiki_update: toJson(proposedWikiUpdate)
-      })
-      .eq("id", eventId)
-      .eq("organization_id", run.organization_id)
-      .eq("review_status", "pending_review");
-    eventUpdate = run.site_id === null
-      ? eventUpdate.is("site_id", null)
-      : eventUpdate.eq("site_id", run.site_id);
-    const { data: updatedEvent, error: eventUpdateError } = await eventUpdate
-      .select("id")
-      .maybeSingle();
-    if (eventUpdateError || !updatedEvent) {
-      throw new KnowledgeReviewError({
-        status: 500,
-        code: "review_event_update_failed",
-        message: "run은 갱신됐지만 원본 이벤트 상태 저장이 완료되지 않았습니다.",
-        compensationRequired: true,
-        updates: {
-          runUpdated: true,
-          eventsUpdated: false,
-          eventsUpdatedCount,
-          eventsTotal: uniqueEventIds.length
-        },
-        cause: eventUpdateError
-      });
-    }
-    eventsUpdatedCount += 1;
-  }
-
-  return {
-    ok: true as const,
-    action: request.action,
-    runId: run.id,
-    organizationId: run.organization_id,
-    siteId: run.site_id,
-    runStatus: transition.runStatus,
-    eventReviewStatus: transition.eventReviewStatus,
-    publicationState: "unpublished" as const,
-    ontologyPublished: false,
-    publishPerformed: false,
-    migrationPerformed: false,
-    atomic: false,
-    compensationRequired: false,
-    updates: {
-      runUpdated: true,
-      eventsUpdated: true,
-      eventsUpdatedCount,
-      eventsTotal: uniqueEventIds.length
-    },
-    reviewer: {
-      id: user.id,
-      email: user.email
-    }
-  };
+  return buildKnowledgeReviewSuccessResult({
+    request,
+    user,
+    run,
+    transition,
+    runUpdated: true,
+    eventsUpdated: eventsUpdatedCount > 0,
+    eventsUpdatedCount,
+    eventsTotal: uniqueEventIds.length
+  });
 }
