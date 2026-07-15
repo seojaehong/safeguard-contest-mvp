@@ -1,5 +1,6 @@
 import {
   buildAnswerPanelStatusNotes,
+  groundingFieldLabel,
   sanitizeAnswerForDisplay
 } from "@/lib/answer-panel-display";
 import type { AskResponse } from "@/lib/types";
@@ -26,16 +27,6 @@ const GROUNDING_ISSUE_LABELS: Readonly<Record<string, string>> = {
 
 function groundingGroupLabel(group: string): string {
   return GROUNDING_GROUP_LABELS[group] || "안전 문서";
-}
-
-function groundingFieldLabel(path: string): string {
-  if (path.includes("stopCriteria")) return "작업중지 기준";
-  if (path.includes("firstAid")) return "응급조치";
-  if (path.includes("workerConfirmations")) return "작업자 확인사항";
-  if (path.includes("keyPoints")) return "교육 핵심내용";
-  if (path.includes("completionChecks")) return "작업 완료 확인";
-  if (path.includes("riskAssessmentDraft")) return "위험성평가 본문";
-  return "안전조치 항목";
 }
 
 export function AnswerPanel({ data }: { data: AskResponse }) {

@@ -359,6 +359,12 @@ function validateSchemaControls(
   }
   const education = recordOf(output.educationRecordStructured);
   if (education) {
+    validateUnreferencedControlArray(
+      output.safetyEducationPoints,
+      packet,
+      "$.safetyEducationPoints",
+      violations
+    );
     const curriculum = Array.isArray(education.curriculum) ? education.curriculum : [];
     curriculum.forEach((item, index) => {
       validateUnreferencedControlArray(
@@ -393,8 +399,7 @@ function isInstructionShapedNominalClause(value: string): boolean {
   const clause = value.replace(/[.!?]+$/, "").trim();
   if (!clause || /^(?:\[.*\]|\(.*\))$/.test(clause) || /[:：]$/.test(clause)) return false;
   const tokens = clause.split(/\s+/);
-  return tokens.length >= 2
-    && tokens.length <= 4
+  return tokens.length === 2
     && clause.length <= 30
     && tokens.every((token) => NOMINAL_CLAUSE_TOKEN_RE.test(token));
 }

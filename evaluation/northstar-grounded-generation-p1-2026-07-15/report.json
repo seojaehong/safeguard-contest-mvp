@@ -4,6 +4,23 @@
   "startingHead": "ec3f6bef6380774efda7e2b04e4ad38dd5aad239",
   "scope": "P1 grounded-generation sentinel and Korean nominal-instruction remediation",
   "result": "pass",
+  "freshReReview": {
+    "startingHead": "467c734cb6ec178c6ec445b209a4565daab01a2d",
+    "closedFindings": [
+      "educationRecord safetyEducationPoints are packet-bound",
+      "two-token action-shaped nominal clauses fail closed while descriptive nominal fields remain allowed",
+      "structured grounding paths render concrete Korean document names"
+    ],
+    "red": {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts",
+      "behavioralTestsFailed": 3,
+      "failures": [
+        "unsupported safetyEducationPoints entry was accepted",
+        "작업 장소 A-1 구역 was rejected",
+        "사용 장비 이동식 크레인 was rejected"
+      ]
+    }
+  },
   "red": {
     "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts",
     "testsPassed": 29,
@@ -38,6 +55,28 @@
     {
       "command": "git diff --check",
       "exitCode": 0
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts",
+      "testFilesPassed": 2,
+      "testsPassed": 48,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts --reporter=dot",
+      "testFilesPassed": 5,
+      "testsPassed": 103,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "freshReReview": true
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "freshReReview": true
     }
   ],
   "excludedChanges": [

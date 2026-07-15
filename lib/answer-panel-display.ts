@@ -50,6 +50,20 @@ export function sanitizeAnswerForDisplay(answer: string) {
     : "근거 요약을 준비했습니다. 원문 근거와 현장 조건을 확인해 문서팩에 반영하세요.";
 }
 
+export function groundingFieldLabel(path: string): string {
+  if (path.includes("workPlanStructured")) return "작업계획서";
+  if (path.includes("tbmBriefingStructured")) return "TBM 브리핑";
+  if (path.includes("tbmLogStructured")) return "TBM 기록";
+  if (path.includes("educationRecordStructured")) return "안전보건교육 기록";
+  if (path.includes("stopCriteria")) return "작업중지 기준";
+  if (path.includes("firstAid")) return "응급조치";
+  if (path.includes("workerConfirmations")) return "작업자 확인사항";
+  if (path.includes("keyPoints")) return "교육 핵심내용";
+  if (path.includes("completionChecks")) return "작업 완료 확인";
+  if (path.includes("riskAssessmentDraft")) return "위험성평가 본문";
+  return "안전조치 항목";
+}
+
 export function buildAnswerPanelStatusNotes(data: AnswerPanelPublicStatusInput) {
   const notes = [
     `법령 근거: ${publicModeLabel(data.status.lawgo)}`,

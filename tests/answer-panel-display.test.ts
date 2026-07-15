@@ -2,11 +2,21 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildAnswerPanelStatusNotes,
+  groundingFieldLabel,
   sanitizeAnswerForDisplay,
   type AnswerPanelPublicStatusInput
 } from "@/lib/answer-panel-display";
 
 describe("answer panel display copy", () => {
+  it.each([
+    ["$.workPlanStructured.stopCriteria[0]", "작업계획서"],
+    ["$.tbmBriefingStructured.stopCriteria[0]", "TBM 브리핑"],
+    ["$.tbmLogStructured.workerConfirmations[0]", "TBM 기록"],
+    ["$.educationRecordStructured.curriculum[0].keyPoints[0]", "안전보건교육 기록"]
+  ])("labels the structured grounding path %s", (path, expectedLabel) => {
+    expect(groundingFieldLabel(path)).toBe(expectedLabel);
+  });
+
   it("removes internal provider and fallback diagnostics from visible answer text", () => {
     const answer = [
       "Law.go와 OpenAI 응답을 결합했습니다. OPENAI_API_KEY가 없어 fallback 정책을 따릅니다.",
