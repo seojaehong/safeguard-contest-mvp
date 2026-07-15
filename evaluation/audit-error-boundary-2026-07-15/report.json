@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-15T16:07:27+09:00",
+  "branch": "fix/audit-error-boundary-20260715",
+  "baselineHead": "79e48daec4add10706068dd6a5705c4f5ca7d5f9",
+  "sourceIdentity": "28fc56272ef81f8a3dbf8aa5cf09efa896d425dd73cc698fb8f248832da0a897",
+  "status": "pass_with_out_of_scope_blocker",
+  "exactTarget": {
+    "route": "special:error",
+    "viewport": "desktop-1440",
+    "status": "pass",
+    "httpStatus": 500,
+    "expectedHttpStatus": 500,
+    "boundaryMarker": "error",
+    "boundaryMarkerCount": 1,
+    "unexpectedConsoleErrorCount": 0,
+    "unexpectedPageErrorCount": 0
+  },
+  "buildSeparation": {
+    "normalMarkerCount": 0,
+    "auditMarkerCount": 1,
+    "normalQueryHttpStatus": 200,
+    "normalQueryBoundaryMarkerCount": 0
+  },
+  "checks": [
+    { "name": "focused-tests", "status": "pass", "tests": 4, "log": "logs/focused-tests-final.log" },
+    { "name": "bundle-contract-tests", "status": "pass", "tests": 6, "log": "logs/bundle-contract-tests-final.log" },
+    { "name": "runner-contract-tests", "status": "pass", "tests": 4, "log": "logs/runner-contract-tests-final.log" },
+    { "name": "typecheck", "status": "pass", "command": "npm.cmd run typecheck", "log": "logs/typecheck-final.log" },
+    { "name": "static-audit", "status": "pass", "pageFiles": 32, "componentFiles": 23, "violationCount": 0, "log": "logs/static-audit-final.log" },
+    { "name": "normal-build", "status": "pass", "log": "logs/normal-build-final.log" },
+    { "name": "normal-bundle", "status": "pass", "markerCount": 0, "log": "logs/normal-bundle-final.log" },
+    { "name": "audit-build", "status": "pass", "log": "logs/audit-build-final.log" },
+    { "name": "audit-bundle", "status": "pass", "markerCount": 1, "log": "logs/audit-bundle-final.log" },
+    { "name": "audit-runtime-special-error", "status": "pass", "httpStatus": 500, "boundaryMarkerCount": 1, "unexpectedErrorCount": 0, "evidence": "audit-runtime-probe.json" }
+  ],
+  "fullBrowserMatrix": {
+    "status": "fail_out_of_scope",
+    "item_count": 108,
+    "success_count": 107,
+    "failure_count": 1,
+    "elapsed_seconds": 118.332,
+    "exactTargetPassed": true,
+    "remainingFinding": "/ontology tablet-1024: 124px horizontal overflow",
+    "log": "logs/full-browser-108.log",
+    "note": "Matrix preceded only the runner output-directory relocation fix; final current-identity focused, build, bundle, and runtime gates were rerun."
+  },
+  "sharedStaticAuditCommitted": false,
+  "dbMutationPerformed": false,
+  "schemaChangePerformed": false
+}

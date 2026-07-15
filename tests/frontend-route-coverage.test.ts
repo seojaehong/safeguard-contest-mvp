@@ -626,6 +626,7 @@ describe("browser evidence reconciliation", () => {
       expectedStatuses: [200], expectedFinalPath: "/workspace", finalUrl: "http://127.0.0.1:3011/workspace",
       consoleErrors: [], pageErrors: [], horizontalOverflow: 0,
       visiblePrimaryContent: "작업 화면을 준비하고 있습니다", boundaryMarker: "loading",
+      boundaryMarkerCount: 1,
       bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
       bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
       primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
@@ -873,7 +874,7 @@ describe("browser evidence reconciliation", () => {
   }, 15_000);
 
   it("retains unrelated boundary and hydration errors", () => {
-    const probeErrors = ["SafeClaw deterministic frontend audit error boundary probe", "unrelated runtime failure"];
+    const probeErrors = ["SafeClaw deterministic frontend audit error boundary confirmed", "unrelated runtime failure"];
     const filtered = runBrowserContractProbe(`audit.filterExpectedBoundaryErrors(${JSON.stringify(probeErrors)}, "error", "page")`) as string[];
     expect(filtered).toEqual(["unrelated runtime failure"]);
     const genericServerError = "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.";
@@ -902,10 +903,34 @@ describe("browser evidence reconciliation", () => {
     expect(probe({ ...base, finalUrl: "http://127.0.0.1:3011/login" }).findings).toContain("final path /login, expected /workspace");
   }, 15_000);
 
+  it("rejects duplicate runtime markers on the app error boundary", () => {
+    const row = {
+      route: "special:error", viewport: "desktop-1440", status: 500,
+      expectedStatuses: [500], expectedFinalPath: "/dryrun", finalUrl: "http://127.0.0.1:3011/dryrun",
+      consoleErrors: [], pageErrors: [], horizontalOverflow: 0, visiblePrimaryContent: "일시적인 오류",
+      boundaryMarker: "error", boundaryMarkerCount: 2,
+      bodyFont: '"Noto Sans KR", "Malgun Gothic", sans-serif', bodyFontSize: "15px",
+      bodyFontWeight: "500", bodyLineHeight: "24px", bodyLetterSpacing: "0px", productFontLoaded: true,
+      primaryHeading: { fontFamily: '"Noto Sans KR"', fontSize: "40px", fontWeight: "800", lineHeight: "46px", letterSpacing: "-1.4px" },
+      renderedControls: [], keySurfaces: [], documentTypography: {},
+    };
+    const result = runBrowserContractProbe(
+      `audit.numericalContractFindings(${JSON.stringify(row)}, { expectedBoundary: "error" })`,
+    ) as { findings: string[] };
+
+    expect(result.findings).toContain("expected exactly 1 error boundary marker, received 2");
+  }, 15_000);
+
   it("keeps the normal-production audit query inert and reports structured gates", () => {
     const errorSource = read("app/error.tsx");
-    expect(errorSource).toContain('[data-safeclaw-audit-enabled="true"]');
-    expect(errorSource).toContain('__auditBoundary") === "error"');
+    expect(errorSource).toContain('confirmAppErrorBoundaryProbe(new URLSearchParams(window.location.search).get("__auditBoundary"))');
+    expect(errorSource).not.toContain('data-safeclaw-audit-enabled="true"');
+    expect(read("lib/frontend-audit/AppBoundaryProbe.audit.ts")).toContain(
+      "SafeClaw deterministic frontend audit error boundary confirmed",
+    );
+    expect(read("lib/frontend-audit/AppBoundaryProbe.noop.ts")).not.toContain(
+      "SafeClaw deterministic frontend audit error boundary confirmed",
+    );
     const report = JSON.parse(read("evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json")) as { verificationCommands: unknown[] };
     expect(report.verificationCommands).toEqual([
       expect.objectContaining({ command: "node ./scripts/frontend_consistency_browser_audit.mjs", outcome: "pass", exitCode: 0 }),
