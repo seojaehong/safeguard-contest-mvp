@@ -1,18 +1,23 @@
 import { describe, expect, test } from "vitest";
 
-import { buildDocpackResult } from "@/lib/mcp-tools";
-import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import {
   attachGenerationEvidence,
   verifyAskResponseGenerationEvidence,
 } from "@/lib/generation-evidence";
-import {
-  buildPhaseAProductMaterialization,
-  materializePhaseAProductDocuments,
-} from "@/lib/ontology/product-materialization";
+import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { buildDocpackResult } from "@/lib/mcp-tools";
+import type {
+  ActiveEvidenceChainPack,
+  ObligationClassification,
+} from "@/lib/ontology/evidence-chain";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
+import {
+  buildPhaseAProductMaterialization,
+  materializePhaseAProductIntoResponse,
+} from "@/lib/ontology/product-materialization";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
+import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import type { AskResponse } from "@/lib/types";
 import {
   buildReopenData,
@@ -51,108 +56,291 @@ const cases = [
   },
 ] as const;
 
-describe("Phase A product materialization", () => {
-  test.each(cases)(
-    "connects $chainId retrieval provenance to review-required document rows",
-    ({ input, chainId, taskNodeId, hazardNodeId, sifCount, controlCount }) => {
-      const knowledge = buildPublishedSafetyKnowledge(publishedGraph, input);
+function buildSyntheticRelabeledPack(input = "고소작업"): ActiveEvidenceChainPack {
+  const knowledge = buildPublishedSafetyKnowledge(publishedGraph, input);
+  if (!knowledge.found || !knowledge.evidenceContract) {
+    throw new Error("expected Phase A evidence contract");
+  }
+  const pack = structuredClone(knowledge.evidenceContract);
+  for (const source of [...pack.hazardPriority, ...pack.guidance, ...pack.law]) {
+    source.reviewState = "published";
+    source.resolution = "resolved";
+  }
+  for (const control of pack.controls) {
+    for (const source of [...control.guidanceEvidence, ...control.lawEvidence]) {
+      source.reviewState = "published";
+      source.resolution = "resolved";
+    }
+    control.guidanceStatus = control.guidanceEvidence.length > 0 ? "verified" : "missing";
+    control.guidanceReviewRequired = false;
+    const classification: ObligationClassification = control.guidanceEvidence.length > 0
+      ? "statutory_mandate_with_guidance"
+      : "statutory_mandate";
+    control.obligation.classification = classification;
+    const plan = pack.materialization.find((item) => item.controlId === control.controlId);
+    if (!plan) throw new Error(`expected materialization plan for ${control.controlId}`);
+    plan.obligation.classification = classification;
+    plan.guidanceStatus = control.guidanceStatus;
+    plan.guidanceReviewRequired = false;
+  }
+  return pack;
+}
 
-      expect(knowledge.found).toBe(true);
-      if (!knowledge.found || !knowledge.phaseAProduct) {
+function expectNoPhaseAScore(response: AskResponse): void {
+  expect(response.structured?.riskAssessmentRows ?? []).toEqual([]);
+  expect(response.structured?.tbmRiskLinks ?? []).toEqual([]);
+  const serialized = JSON.stringify(response.structured) ?? "";
+  expect(serialized).not.toContain('"riskLevel":"high"');
+  expect(serialized).not.toContain('"likelihood":3');
+  expect(serialized).not.toContain('"severity":4');
+}
+
+describe("Phase A product materialization", () => {
+  test("never promotes a synthetic fully relabeled evidence pack above review-required", () => {
+    const pack = buildSyntheticRelabeledPack();
+    const product = buildPhaseAProductMaterialization({ evidencePack: pack });
+
+    expect(product).toMatchObject({
+      chainId: null,
+      reportedEvidenceChainState: "review_required",
+      evidenceChainState: "review_required",
+      authorityState: "review_required",
+      outputStatus: "review_required_draft",
+      verifiedDocumentRows: [],
+      humanConfirmation: { required: true, status: "pending" },
+    });
+    expect(product?.controls).toEqual([]);
+    expect(product?.documentRows).toEqual([]);
+    expect(product?.provenance).toEqual({
+      taskNodeIds: [],
+      sifAccidentCitedUids: [],
+      hazardNodeIds: [],
+      controlNodeIds: [],
+      koshaGuidanceCitedUids: [],
+      lawCitedUids: [],
+      articleNodeIds: [],
+    });
+  });
+
+  test("does not persist caller-controlled provenance or document prose", () => {
+    const pack = buildSyntheticRelabeledPack();
+    pack.task.nodeId = "CALLER_TASK_NODE_SENTINEL";
+    pack.task.label = "CALLER_TASK_LABEL_SENTINEL";
+    pack.hazard.nodeId = "CALLER_HAZARD_NODE_SENTINEL";
+    pack.hazard.label = "CALLER_HAZARD_LABEL_SENTINEL";
+    const source = pack.hazardPriority[0];
+    const control = pack.controls[0];
+    const plan = pack.materialization[0];
+    if (!source || !control || !plan) throw new Error("expected mutable Phase A fixture");
+    source.citedUid = "CALLER_SIF_UID_SENTINEL";
+    control.controlId = "CALLER_CONTROL_ID_SENTINEL";
+    control.graphControlNodeId = "CALLER_CONTROL_NODE_SENTINEL";
+    control.label = "CALLER_CONTROL_LABEL_SENTINEL";
+    control.applicabilityCondition = "CALLER_APPLICABILITY_SENTINEL";
+    control.obligation.classification = "technical_guidance_only";
+    plan.controlId = control.controlId;
+    plan.controlLabel = control.label;
+    plan.obligation.classification = "technical_guidance_only";
+    plan.targets[0].stableKey = "CALLER_STABLE_KEY_SENTINEL";
+
+    const response = materializePhaseAProductIntoResponse(
+      buildMockAskResponse("고소작업", mockSearchResults.slice(0, 3), "mock", "caller provenance test"),
+      pack,
+    );
+    const serialized = JSON.stringify({
+      phaseAProduct: response.phaseAProduct,
+      riskAssessmentDraft: response.deliverables.riskAssessmentDraft,
+      tbmBriefing: response.deliverables.tbmBriefing,
+    });
+
+    expect(response.phaseAProduct).toMatchObject({
+      chainId: null,
+      authorityState: "review_required",
+      evidenceChainState: "review_required",
+      task: null,
+      accidents: [],
+      hazard: null,
+      controls: [],
+      provenance: {
+        taskNodeIds: [],
+        sifAccidentCitedUids: [],
+        hazardNodeIds: [],
+        controlNodeIds: [],
+        koshaGuidanceCitedUids: [],
+        lawCitedUids: [],
+        articleNodeIds: [],
+      },
+      humanConfirmation: {
+        required: true,
+        status: "pending",
+        message: expect.stringContaining("사람 확인"),
+      },
+      reviewMessage: expect.stringContaining("사람 확인"),
+    });
+    expect(serialized).not.toContain("CALLER_");
+    expect(serialized).not.toContain("technical_guidance_only");
+    expect(response.phaseAProduct?.documentRows).toEqual([]);
+  });
+
+  test.each(cases)(
+    "returns empty review-required provenance for loader chain $chainId",
+    ({ input }) => {
+      const knowledge = buildPublishedSafetyKnowledge(publishedGraph, input);
+      if (!knowledge.found || !knowledge.phaseAProduct || !knowledge.evidenceContract) {
         throw new Error(`expected Phase A product evidence for ${input}`);
       }
 
-      const product = knowledge.phaseAProduct;
-      expect(product).toMatchObject({
-        schemaVersion: "phase-a-product-materialization/v1",
-        chainId,
-        evidenceChainState: "review_required",
-        authorityState: "review_required",
-        task: { nodeId: taskNodeId },
-        hazard: { nodeId: hazardNodeId },
-      });
-      expect(product.accidents).toHaveLength(sifCount);
-      expect(product.controls).toHaveLength(controlCount);
-      expect(product.documentRows).toHaveLength(controlCount * 2);
-      expect(product.verifiedDocumentRows).toEqual([]);
-      expect(product.controls.every((control) => control.classification === "review_required")).toBe(true);
-      expect(product.documentRows.every((row) => row.classification === "review_required")).toBe(true);
-      expect(product.documentRows.every((row) => row.verificationStatus === "review_required")).toBe(true);
-
-      for (const row of product.documentRows) {
-        expect(row.provenance.taskNodeId).toBe(taskNodeId);
-        expect(row.provenance.sifAccidentCitedUids).toHaveLength(sifCount);
-        expect(row.provenance.hazardNodeId).toBe(hazardNodeId);
-        expect(row.provenance.controlNodeId).toMatch(/^Control_/);
-        expect(row.provenance.lawCitedUids.length).toBeGreaterThan(0);
-        expect(row.provenance.articleNodeIds.every((nodeId) => nodeId.startsWith("Article_"))).toBe(true);
-      }
-
-      const response = materializePhaseAProductDocuments(
-        buildMockAskResponse(input, mockSearchResults.slice(0, 3), "mock", "Phase A materialization test"),
-        product,
+      const original = buildMockAskResponse(
+        input,
+        mockSearchResults.slice(0, 3),
+        "mock",
+        "Phase A review artifact test",
       );
-      const docpack = buildDocpackResult(response, true);
-      const riskDocument = docpack.documents.riskAssessmentDraft;
-      const tbmDocument = docpack.documents.tbmBriefing;
+      const response = materializePhaseAProductIntoResponse(
+        original,
+        knowledge.evidenceContract,
+      );
+      const product = response.phaseAProduct;
+      expect(product).toMatchObject({
+        chainId: null,
+        authorityState: "review_required",
+        evidenceChainState: "review_required",
+        task: null,
+        hazard: null,
+        accidents: [],
+        controls: [],
+        documentRows: [],
+        verifiedDocumentRows: [],
+        coverage: {
+          expectedDocumentRows: 0,
+          materializedDocumentRows: 0,
+          verifiedDocumentRows: 0,
+        },
+      });
+      expect(product?.provenance).toEqual({
+        taskNodeIds: [],
+        sifAccidentCitedUids: [],
+        hazardNodeIds: [],
+        controlNodeIds: [],
+        koshaGuidanceCitedUids: [],
+        lawCitedUids: [],
+        articleNodeIds: [],
+      });
+      expect(response.deliverables).toEqual(original.deliverables);
+      expectNoPhaseAScore(response);
 
-      expect(docpack.phaseAProduct).toEqual(product);
-      expect(typeof riskDocument).toBe("string");
-      expect(typeof tbmDocument).toBe("string");
-      if (typeof riskDocument !== "string" || typeof tbmDocument !== "string") {
-        throw new Error("expected full Phase A documents");
-      }
-      for (const row of product.documentRows) {
-        const document = row.document === "risk_assessment" ? riskDocument : tbmDocument;
-        expect(document).toContain(row.stableKey);
-        expect(document).toContain(row.provenance.taskNodeId);
-        expect(document).toContain(row.provenance.hazardNodeId);
-        expect(document).toContain(row.provenance.controlNodeId);
-        for (const citedUid of row.provenance.sifAccidentCitedUids) {
-          expect(document).toContain(citedUid);
-        }
-        for (const citedUid of row.provenance.lawCitedUids) {
-          expect(document).toContain(citedUid);
-        }
-      }
-      const materializedRiskRows = response.structured?.riskAssessmentRows.slice(-controlCount) ?? [];
-      expect(materializedRiskRows).toHaveLength(controlCount);
-      expect(materializedRiskRows.every((row) => row.verificationStatus === "needsReview")).toBe(true);
-      expect(materializedRiskRows.every((row) => row.currentControls === "현장 확인 필요")).toBe(true);
-      expect(
-        materializedRiskRows.every((row) =>
-          product.controls.some((control) => row.additionalControls.includes(control.label)),
-        ),
-      ).toBe(true);
-      expect(response.structured?.riskAssessmentValidation.ok).toBe(true);
+      const docpack = buildDocpackResult(response, true);
+      expect(docpack.phaseAProduct?.provenance).toEqual(product?.provenance);
     },
   );
 
-  test("fails closed when a caller labels draft and unresolved sources as resolved", () => {
-    const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "고소작업");
-    expect(knowledge.found).toBe(true);
-    if (!knowledge.found || !knowledge.evidenceContract) {
-      throw new Error("expected assembled evidence contract");
-    }
+  test.each([
+    {
+      label: "source review state",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        const source = pack.hazardPriority[0];
+        if (!source) throw new Error("expected SIF source");
+        source.reviewState = "draft";
+        source.resolution = "unresolved";
+      },
+    },
+    {
+      label: "source UID",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        const source = pack.hazardPriority[0];
+        if (!source) throw new Error("expected SIF source");
+        source.citedUid = "ref:safety_reference_items:forged-sif-source";
+      },
+    },
+    {
+      label: "control provenance",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        const control = pack.controls[0];
+        if (!control) throw new Error("expected control");
+        control.graphControlNodeId = "Control_forged";
+      },
+    },
+  ])("never scores a synthetic or mutated pack: $label", ({ mutate }) => {
+    const pack = buildSyntheticRelabeledPack();
+    mutate(pack);
 
-    const forged = buildPhaseAProductMaterialization({
-      evidenceChainState: "resolved",
-      evidencePack: structuredClone(knowledge.evidenceContract),
+    const response = materializePhaseAProductIntoResponse(
+      buildMockAskResponse("고소작업", mockSearchResults.slice(0, 3), "mock", "Phase A mutation test"),
+      pack,
+    );
+
+    expectNoPhaseAScore(response);
+    expect(response.phaseAProduct).toMatchObject({
+      authorityState: "review_required",
+      evidenceChainState: "review_required",
+      verifiedDocumentRows: [],
     });
-
-    expect(forged).not.toBeNull();
-    expect(forged?.evidenceChainState).toBe("review_required");
-    expect(forged?.authorityState).toBe("review_required");
-    expect(forged?.verifiedDocumentRows).toEqual([]);
-    expect(forged?.controls.every((control) => control.classification === "review_required")).toBe(true);
   });
 
-  test("materialization is idempotent by stable document row key", () => {
-    const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "전기 작업");
-    expect(knowledge.found).toBe(true);
-    if (!knowledge.found || !knowledge.phaseAProduct) {
-      throw new Error("expected electrical Phase A product evidence");
-    }
+  test("preserves existing unrelated risk rows and TBM links byte-for-byte", () => {
+    const pack = buildSyntheticRelabeledPack();
+    const existingRow: RiskAssessmentRow = {
+      location: "EXISTING_LOCATION",
+      process: "EXISTING_PROCESS",
+      task: "EXISTING_TASK",
+      equipment: "EXISTING_EQUIPMENT",
+      hazard: "NON_CANONICAL_EXISTING_HAZARD",
+      fourM: "Media",
+      accidentType: "fall",
+      currentControls: "EXISTING_CURRENT_CONTROL",
+      likelihood: 3,
+      severity: 4,
+      riskLevel: "high",
+      additionalControls: "NON_CANONICAL_EXISTING_CONTROL",
+      owner: "EXISTING_OWNER",
+      due: "EXISTING_DUE",
+      verification: "EXISTING_VERIFICATION",
+      verificationStatus: "planned",
+      verificationDate: "EXISTING_DATE",
+      verificationChecker: "EXISTING_CHECKER",
+      whyLikelihood: "EXISTING_LIKELIHOOD",
+      whySeverity: "EXISTING_SEVERITY",
+      evidenceRefs: ["NON_CANONICAL_REF"],
+    };
+    const original = buildMockAskResponse(
+      "고소작업",
+      mockSearchResults.slice(0, 3),
+      "mock",
+      "Phase A unrelated row preservation test",
+    );
+    const attacked: AskResponse = {
+      ...original,
+      structured: {
+        riskAssessmentRows: [existingRow],
+        riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] },
+        tbmRiskLinks: [{
+          riskRowIndex: 0,
+          hazard: existingRow.hazard,
+          control: existingRow.additionalControls,
+          weatherSignal: "EXISTING_WEATHER",
+          confirmQuestion: "EXISTING_QUESTION",
+          owner: existingRow.owner,
+          verification: existingRow.verification,
+          evidenceRefs: existingRow.evidenceRefs,
+        }],
+      },
+    };
+
+    const expectedRows = structuredClone(attacked.structured?.riskAssessmentRows);
+    const expectedLinks = structuredClone(attacked.structured?.tbmRiskLinks);
+    const expectedRowsJson = JSON.stringify(expectedRows);
+    const expectedLinksJson = JSON.stringify(expectedLinks);
+
+    const materialized = materializePhaseAProductIntoResponse(attacked, pack);
+
+    expect(materialized.structured?.riskAssessmentRows).toEqual(expectedRows);
+    expect(materialized.structured?.tbmRiskLinks).toEqual(expectedLinks);
+    expect(JSON.stringify(materialized.structured?.riskAssessmentRows)).toBe(expectedRowsJson);
+    expect(JSON.stringify(materialized.structured?.tbmRiskLinks)).toBe(expectedLinksJson);
+  });
+
+  test("materialization is idempotent by stable review row key", () => {
+    const pack = buildSyntheticRelabeledPack("전기 작업");
     const original = buildMockAskResponse(
       "전기 작업",
       mockSearchResults.slice(0, 3),
@@ -160,19 +348,18 @@ describe("Phase A product materialization", () => {
       "Phase A idempotency test",
     );
 
-    const once = materializePhaseAProductDocuments(original, knowledge.phaseAProduct);
-    const twice = materializePhaseAProductDocuments(once, knowledge.phaseAProduct);
+    const once = materializePhaseAProductIntoResponse(original, pack);
+    const twice = materializePhaseAProductIntoResponse(once, pack);
 
     expect(twice.deliverables.riskAssessmentDraft).toBe(once.deliverables.riskAssessmentDraft);
     expect(twice.deliverables.tbmBriefing).toBe(once.deliverables.tbmBriefing);
-    expect(twice.structured?.riskAssessmentRows).toEqual(once.structured?.riskAssessmentRows);
+    expectNoPhaseAScore(twice);
   });
 
-  test("reseals generation evidence and survives evidence-summary reopen", () => {
+  test("reseals review-only materialization and survives evidence-summary reopen", () => {
     const secret = "phase-a-materialization-secret";
     const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "지게차 상하차");
-    expect(knowledge.found).toBe(true);
-    if (!knowledge.found || !knowledge.phaseAProduct) {
+    if (!knowledge.found || !knowledge.phaseAProduct || !knowledge.evidenceContract) {
       throw new Error("expected entrapment Phase A product evidence");
     }
     const base = buildMockAskResponse(
@@ -181,20 +368,19 @@ describe("Phase A product materialization", () => {
       "mock",
       "Phase A generation evidence test",
     );
-    const sealable: AskResponse = {
+    const sealed = attachGenerationEvidence({
       ...base,
-      dbHarness: {
-        packet: {},
-      } as NonNullable<AskResponse["dbHarness"]>,
-    };
-    const sealed = attachGenerationEvidence(sealable, {
+      dbHarness: { packet: {} } as NonNullable<AskResponse["dbHarness"]>,
+    }, {
       secret,
       generatedAt: "2026-07-14T12:00:00.000Z",
     });
 
-    const materialized = materializePhaseAProductDocuments(sealed, knowledge.phaseAProduct, {
-      generationEvidenceSecret: secret,
-    });
+    const materialized = materializePhaseAProductIntoResponse(
+      sealed,
+      knowledge.evidenceContract,
+      { generationEvidenceSecret: secret },
+    );
     const verification = verifyAskResponseGenerationEvidence(materialized, secret);
     expect(verification.ok).toBe(true);
     if (!verification.ok) throw new Error(verification.message);
@@ -210,5 +396,6 @@ describe("Phase A product materialization", () => {
     expect(reopened.blockers).toEqual([]);
     expect(reopened.data?.phaseAProduct).toEqual(knowledge.phaseAProduct);
     expect(reopened.data && verifyAskResponseGenerationEvidence(reopened.data, secret).ok).toBe(true);
+    if (reopened.data) expectNoPhaseAScore(reopened.data);
   });
 });

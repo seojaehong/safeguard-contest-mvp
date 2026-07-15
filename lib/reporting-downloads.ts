@@ -127,7 +127,7 @@ function isExternalData(value: unknown): boolean {
 function isRiskSummary(value: unknown): boolean {
   return isRecord(value)
     && hasStringFields(value, ["title", "riskLevel", "topRisk"])
-    && ["상", "중", "하"].includes(value.riskLevel as string)
+    && ["상", "중", "하", "현장 확인 필요"].includes(value.riskLevel as string)
     && isStringArray(value.immediateActions);
 }
 
@@ -149,6 +149,8 @@ function isStatus(value: unknown): boolean {
 
 function isRiskAssessmentRow(value: unknown): boolean {
   return isRecord(value)
+    && (!("controlId" in value)
+      || (typeof value.controlId === "string" && value.controlId.trim().length > 0))
     && hasStringFields(value, [
       "location",
       "process",
@@ -616,7 +618,7 @@ function normalizeRiskRow(row: RiskAssessmentRow, index: number): RiskReportRow 
 
 function fallbackRiskRow(workpack: StoredCurrentWorkpack): RiskReportRow[] {
   const risk = workpack.data.riskSummary;
-  if (!risk.topRisk) return [];
+  if (!risk.topRisk || risk.riskLevel === "현장 확인 필요") return [];
   const riskLevel = risk.riskLevel === "상" ? "high" : risk.riskLevel === "중" ? "medium" : "low";
   return [{
     index: 1,

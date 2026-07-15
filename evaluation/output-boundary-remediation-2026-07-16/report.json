@@ -1,0 +1,168 @@
+{
+  "date": "2026-07-16",
+  "branch": "fix/naturalize-output-contract",
+  "status": "ready_for_independent_review",
+  "commitCreated": false,
+  "pushPerformed": false,
+  "contract": {
+    "uncitedNewClaims": "rejected",
+    "canonicalControlEvidenceBinding": "review_required_only_no_v1_positive_acceptance",
+    "crossControlEvidenceRefs": "rejected",
+    "nestedStructuredClaims": "deep_validated",
+    "finalProseNormalization": "after_all_appendices",
+    "tbmRiskLinks": "valid_row_index_and_same_row_control_hazard_evidence_binding_required",
+    "providerStructuredSafetyProse": "rejected_review_required_only",
+    "finalStructuredBoundary": "optional_structured_objects_rows_and_links_removed",
+    "finalRiskSummary": "canonical_task_hazard_controls_or_field_confirmation_without_fabricated_risk_level",
+    "unregisteredKnowledgeIntent": "found_false_without_fuzzy_published_graph_exposure",
+    "materializerSemanticValidation": "not_applicable_because_scored_rows_are_disabled",
+    "reviewRequiredMaterialization": "empty_provenance_review_artifact_without_scored_rows",
+    "authoritativeMaterialization": "disabled_for_all_phase_a_products",
+    "materializerAuthorityBoundary": "no_scoring_or_caller_provenance_authority_in_v1",
+    "syntheticAuthorityObjects": "review_required_without_scored_rows",
+    "currentRuntimeLimitation": "kosha_production_provenance_unresolved_requires_human_confirmation",
+    "tamperedProduct": "not_accepted_by_public_materializer",
+    "rowProvenance": "empty_canonical_set_until_trusted_resolver_persistence_contract_exists",
+    "persistedControlId": "absent_or_nonempty_string_only",
+    "searchBoundary": "single_shared_phase_a_boundary",
+    "phaseAFallback": "canonical_or_field_confirmation_required",
+    "productMaterializationRows": "adds_zero_rows_or_links_and_preserves_preexisting_arrays_exactly",
+    "deferredScoringGate": "requires_separate_db_provenance_migration_approval_and_trusted_resolver_contract",
+    "nonCanonicalFallback": "preserved",
+    "answerBoundary": "server_canonical_reconstruction",
+    "deliverablesBoundary": "server_canonical_reconstruction"
+  },
+  "tdd": {
+    "initialRed": {
+      "failedTestFiles": 3,
+      "failedTests": 3,
+      "passedTests": 29
+    },
+    "parserTracerRed": {
+      "failedTestFiles": 1,
+      "failedTests": 1
+    },
+    "independentReviewRejectRed": {
+      "failedTestFiles": 4,
+      "failedTests": 6,
+      "passedTests": 60
+    },
+    "finalReviewResidualRed": {
+      "failedTestFiles": 2,
+      "failedTests": 3,
+      "nestedTracerFailedTests": 1
+    },
+    "finalResidualRed": {
+      "failedTestFiles": 3,
+      "failedTests": 3,
+      "passedTests": 55,
+      "command": "npm.cmd test -- tests/phase-a-runtime-evidence-grounding.test.ts tests/phase-a-product-materialization.test.ts tests/kosha-current-review-run-ask.test.ts"
+    },
+    "freshIndependentReviewRed": {
+      "failedTestFiles": 3,
+      "failedTests": 3,
+      "passedTests": 137,
+      "knowledgeTracerFailedTests": 1,
+      "command": "npm.cmd test -- tests/phase-a-product-materialization.test.ts tests/ontology-evidence-chains.test.ts tests/kosha-current-review-run-ask.test.ts tests/reporting-downloads.test.ts"
+    },
+    "latestP1P3Red": {
+      "failedTestFiles": 3,
+      "failedTests": 6,
+      "passedTests": 83,
+      "command": "npm.cmd test -- tests/phase-a-product-materialization.test.ts tests/mcp-product-materialization-persistence.test.ts tests/claw-tools-phase-a-materialization.test.ts tests/reporting-downloads.test.ts"
+    },
+    "finalBoundaryBypassRed": {
+      "failedTestFiles": 1,
+      "failedTests": 6,
+      "passedTests": 11,
+      "command": "npm.cmd test -- tests/phase-a-product-materialization.test.ts"
+    },
+    "failClosedV1Red": {
+      "failedTestFiles": 1,
+      "failedTests": 1,
+      "skippedTests": 18,
+      "command": "npm.cmd test -- tests/phase-a-product-materialization.test.ts -t \"never promotes a synthetic\""
+    },
+    "finalCleanupPreservationRed": {
+      "failedTestFiles": 1,
+      "failedTests": 1,
+      "skippedTests": 9,
+      "command": "npm.cmd test -- tests/phase-a-product-materialization.test.ts -t \"preserves existing unrelated\""
+    },
+    "finalCleanupValidatorRed": {
+      "failedTestFiles": 1,
+      "failedTests": 1,
+      "skippedTests": 20,
+      "command": "npm.cmd test -- tests/phase-a-runtime-evidence-grounding.test.ts -t \"never promotes\""
+    },
+    "finalCleanupProviderScoreRed": {
+      "failedTestFiles": 1,
+      "failedTests": 1,
+      "skippedTests": 11,
+      "command": "npm.cmd test -- tests/phase-a-runtime-evidence-grounding.test.ts -t \"rejects provider risk scoring\""
+    },
+    "finalP2CallerProvenanceRed": {
+      "failedTestFiles": 1,
+      "failedTests": 1,
+      "skippedTests": 10,
+      "command": "npm.cmd test -- tests/phase-a-product-materialization.test.ts -t \"does not persist caller-controlled\""
+    },
+    "finalP2ContractTransitionRed": {
+      "failedTestFiles": 4,
+      "failedTests": 18,
+      "passedTests": 112,
+      "command": "npm.cmd test -- tests/phase-a-product-materialization.test.ts tests/phase-a-runtime-evidence-grounding.test.ts tests/phase-a-runtime-evidence-bridge.test.ts tests/claw-tools-phase-a-materialization.test.ts tests/mcp-product-materialization-persistence.test.ts tests/mcp-reviewed-route-task-binding.test.ts tests/ontology-evidence-chains.test.ts"
+    },
+    "finalFocused": {
+      "passedTestFiles": 14,
+      "passedTests": 242,
+      "failedTests": 0,
+      "command": "npm.cmd test -- tests/ai-generation-trace.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-safe-parse.test.ts tests/phase-a-runtime-evidence-grounding.test.ts tests/ontology-evidence-chains.test.ts tests/phase-a-product-materialization.test.ts tests/phase-a-runtime-evidence-bridge.test.ts tests/claw-tools-phase-a-materialization.test.ts tests/mcp-product-materialization-persistence.test.ts tests/mcp-reviewed-route-task-binding.test.ts tests/risk-row-normalization.test.ts tests/risk-ref-gate-wiring.test.ts tests/kosha-current-review-run-ask.test.ts tests/reporting-downloads.test.ts"
+    }
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "status": "passed",
+    "initialDependencyBlocker": [
+      "pdf-lib",
+      "@pdf-lib/fontkit"
+    ],
+    "dependencyRecoveryCommand": "npm.cmd install --ignore-scripts",
+    "trackedDependencyFilesChanged": false
+  },
+  "diffCheck": {
+    "gitDiffCheck": "passed",
+    "typescriptAnyMatches": 0,
+    "reportJsonParse": "passed",
+    "graphStoreSemanticDiff": "zero",
+    "stagedFiles": 0
+  },
+  "changedFiles": [
+    "lib/ai-deliverables.ts",
+    "lib/ai.ts",
+    "lib/claw-tools.ts",
+    "lib/mcp-docpack-handler.ts",
+    "lib/mcp-tools.ts",
+    "lib/ontology/evidence-chain.ts",
+    "lib/ontology/knowledge-tool.ts",
+    "lib/ontology/product-materialization.ts",
+    "lib/reporting-downloads.ts",
+    "lib/risk-assessment-schema.ts",
+    "lib/search.ts",
+    "lib/types.ts",
+    "tests/ai-deliverables-generation-trace.test.ts",
+    "tests/ai-generation-trace.test.ts",
+    "tests/claw-tools-phase-a-materialization.test.ts",
+    "tests/kosha-current-review-run-ask.test.ts",
+    "tests/mcp-product-materialization-persistence.test.ts",
+    "tests/mcp-reviewed-route-task-binding.test.ts",
+    "tests/ontology-evidence-chains.test.ts",
+    "tests/phase-a-product-materialization.test.ts",
+    "tests/phase-a-runtime-evidence-bridge.test.ts",
+    "tests/phase-a-runtime-evidence-grounding.test.ts",
+    "tests/reporting-downloads.test.ts",
+    "tests/risk-row-normalization.test.ts",
+    "evaluation/output-boundary-remediation-2026-07-16/report.md",
+    "evaluation/output-boundary-remediation-2026-07-16/report.json"
+  ]
+}

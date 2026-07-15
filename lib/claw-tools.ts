@@ -21,8 +21,7 @@ import {
 } from "./mcp-tools";
 import { querySafetyKnowledge } from "./ontology/knowledge-tool";
 import {
-  buildPhaseAProductMaterialization,
-  materializePhaseAProductDocuments,
+  materializePhaseAProductIntoResponse,
 } from "./ontology/product-materialization";
 import {
   buildPhaseAGenerationGrounding,
@@ -152,18 +151,14 @@ export async function executeClawTool(
       });
       const task = phaseAGrounding?.evidencePack?.task.label
         ?? resolveReviewTaskLabel(requestedTask, question);
-      const product = phaseAGrounding ? buildPhaseAProductMaterialization({
-        evidenceChainState: phaseAGrounding.groundingStatus === "resolved"
-          ? "resolved"
-          : phaseAGrounding.evidencePack
-            ? "review_required"
-            : phaseAGrounding.evidenceChainState,
-        evidencePack: phaseAGrounding.evidencePack as ActiveEvidenceChainPack | null,
-      }) : null;
-      const response = product
-        ? materializePhaseAProductDocuments(generatedResponse, product, {
-            generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
-          })
+      const response = phaseAGrounding?.evidencePack
+        ? materializePhaseAProductIntoResponse(
+            generatedResponse,
+            phaseAGrounding.evidencePack as ActiveEvidenceChainPack,
+            {
+              generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+            },
+          )
         : generatedResponse;
       const qa = await reviewDocpack(task, selectQaDocumentText(response));
       return buildReviewedDocpackResult(response, qa, task, includeFull);
@@ -183,18 +178,14 @@ export async function executeClawTool(
         aiMode: mode,
         ...(phaseAGrounding ? { phaseAGrounding } : {}),
       });
-      const product = phaseAGrounding ? buildPhaseAProductMaterialization({
-        evidenceChainState: phaseAGrounding.groundingStatus === "resolved"
-          ? "resolved"
-          : phaseAGrounding.evidencePack
-            ? "review_required"
-            : phaseAGrounding.evidenceChainState,
-        evidencePack: phaseAGrounding.evidencePack as ActiveEvidenceChainPack | null,
-      }) : null;
-      const response = product
-        ? materializePhaseAProductDocuments(generatedResponse, product, {
-            generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
-          })
+      const response = phaseAGrounding?.evidencePack
+        ? materializePhaseAProductIntoResponse(
+            generatedResponse,
+            phaseAGrounding.evidencePack as ActiveEvidenceChainPack,
+            {
+              generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+            },
+          )
         : generatedResponse;
       return buildDocpackResult(response, includeFull);
     }

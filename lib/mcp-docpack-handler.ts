@@ -15,8 +15,7 @@ import {
   type PhaseAGenerationGrounding,
 } from "@/lib/ontology/evidence-chain";
 import {
-  buildPhaseAProductMaterialization,
-  materializePhaseAProductDocuments,
+  materializePhaseAProductIntoResponse,
 } from "@/lib/ontology/product-materialization";
 import type { QaReviewResult } from "@/lib/ontology/qa-review";
 import type { AskResponse } from "@/lib/types";
@@ -65,18 +64,14 @@ export function createGenerateSafetyDocpackHandler(
       mode ?? dependencies.defaultMode,
       grounding,
     );
-    const product = grounding ? buildPhaseAProductMaterialization({
-      evidenceChainState: grounding.groundingStatus === "resolved"
-        ? "resolved"
-        : grounding.evidencePack
-          ? "review_required"
-          : grounding.evidenceChainState,
-      evidencePack: grounding.evidencePack as ActiveEvidenceChainPack | null,
-    }) : null;
-    const response = product
-      ? materializePhaseAProductDocuments(generatedResponse, product, {
-          generationEvidenceSecret,
-        })
+    const response = grounding?.evidencePack
+      ? materializePhaseAProductIntoResponse(
+          generatedResponse,
+          grounding.evidencePack as ActiveEvidenceChainPack,
+          {
+            generationEvidenceSecret,
+          },
+        )
       : generatedResponse;
     const result = buildDocpackResult(response, includeFull ?? false) as Record<string, unknown>;
 
@@ -156,18 +151,14 @@ export function createGenerateReviewedSafetyDocpackHandler(
     );
     const reviewTask = grounding?.evidencePack?.task.label
       ?? resolveReviewTaskLabel(task, question);
-    const product = grounding ? buildPhaseAProductMaterialization({
-      evidenceChainState: grounding.groundingStatus === "resolved"
-        ? "resolved"
-        : grounding.evidencePack
-          ? "review_required"
-          : grounding.evidenceChainState,
-      evidencePack: grounding.evidencePack as ActiveEvidenceChainPack | null,
-    }) : null;
-    const response = product
-      ? materializePhaseAProductDocuments(generatedResponse, product, {
-          generationEvidenceSecret,
-        })
+    const response = grounding?.evidencePack
+      ? materializePhaseAProductIntoResponse(
+          generatedResponse,
+          grounding.evidencePack as ActiveEvidenceChainPack,
+          {
+            generationEvidenceSecret,
+          },
+        )
       : generatedResponse;
     const qa = await dependencies.reviewResponse(reviewTask, selectReviewedQaText(response));
     const result = buildReviewedDocpackResult(
