@@ -1442,6 +1442,9 @@ describe("workspace layout regression", () => {
     expect(await page.locator(".field-workspace").count()).toBe(0);
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
+    const focusMessageBackground = await page.locator(".editor-focus-message").evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).waitFor({ state: "visible" });
 
     expect(await page.locator(".document-workbench").count()).toBe(0);
@@ -1488,7 +1491,6 @@ describe("workspace layout regression", () => {
       const editor = readRect(".document-editor");
       const textarea = readRect(".document-textarea");
       const activeTab = readRect(".doc-tab.active");
-      const focusMessage = readRect(".editor-focus-message");
       const desktopTabs = document.querySelector(".doc-tab-list");
       const mobilePicker = document.querySelector('select[aria-label="편집 문서 선택"]')?.parentElement;
       if (!desktopTabs || !mobilePicker) throw new Error("Missing responsive document navigation");
@@ -1531,7 +1533,6 @@ describe("workspace layout regression", () => {
         editor,
         textarea,
         activeTab,
-        focusMessage,
         compactHeadOverlaps,
         largestCompactHeadHeight: maxHeight(".field-workspace .compact-head"),
         impactListHeight: maxHeight(".impact-list"),
@@ -1586,7 +1587,7 @@ describe("workspace layout regression", () => {
     expect(metrics.textarea.width).toBeGreaterThanOrEqual(Math.floor(metrics.editor.width * 0.8));
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
-    expect(metrics.focusMessage.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
+    expect(focusMessageBackground).not.toBe("rgba(14, 14, 18, 0.78)");
     expect(String(collapsedActiveElementClass)).toContain("document-textarea");
 
     await page.setViewportSize({ width: 1024, height: 900 });
