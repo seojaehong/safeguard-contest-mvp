@@ -2,7 +2,7 @@
   "status": "pass",
   "sourceBase": "080450b8a8461f8e77dc3923039e8e014b187b3a",
   "branch": "fix/northstar-ontology-ui-20260715",
-  "candidateCommit": "3c8ed41591109ce603776516657e8772a86d35db",
+  "candidateCommit": "f3087040f1a63bdd11922b7069071b9a5deb2334",
   "scope": [
     "app/ontology/**",
     "tests/ontology-ui-remediation.test.ts",
@@ -17,7 +17,7 @@
   },
   "tests": {
     "focusedFiles": 8,
-    "focusedTests": 49,
+    "focusedTests": 50,
     "browserFiles": 1,
     "browserTests": 1,
     "typecheck": "pass",
@@ -30,7 +30,12 @@
       "coverageIssues": 0,
       "violationCount": 0
     },
-    "rawCssColorLiterals": 0
+    "rawCssColorLiterals": 0,
+    "visibleCopyTerminology": {
+      "status": "pass",
+      "forbiddenTerms": ["published", "seed", "시드", "node", "노드", "hop", "홉"],
+      "scope": "visible JSX copy and placeholders; data attributes and code identifiers excluded"
+    }
   },
   "browser": {
     "variants": 4,

@@ -3,7 +3,7 @@
 ## 범위
 
 - 통합 기준 HEAD: `080450b8a8461f8e77dc3923039e8e014b187b3a`
-- 제품 커밋: `3c8ed41591109ce603776516657e8772a86d35db`
+- 최신 제품 커밋: `f3087040f1a63bdd11922b7069071b9a5deb2334`
 - 전용 브랜치: `fix/northstar-ontology-ui-20260715`
 - 소유 범위: `app/ontology/**`, 온톨로지 전용 테스트, 이 평가 산출물
 - DB, 온톨로지 schema, published 데이터, retrieval 계약 변경: 없음
@@ -30,10 +30,11 @@
 - RED 3: 브라우저가 확장 관계를 클릭하지 않는 기존 계측 계약 검출
 - RED 4: CSS Color 4 `color(srgb ...)`를 0~255 RGB로 오독해 대비 `1.16:1`로 오판
 - GREEN: 5×3 비중첩 슬롯, 변수 기반 색상, 고객용 presentation label, 실제 확장 관계 클릭 및 CSS Color 4 환산을 적용해 desktop Day/Night 노드 대비 `16.01:1`
+- 최종 P1 RED/GREEN: visible JSX copy만 AST로 추출하는 회귀 테스트가 `검증된 노드 찾기`를 검출했고, `검증된 안전지식 찾기`로 교체한 뒤 `published|seed|시드|node|노드|hop|홉` 금지 계약을 통과했습니다. 내부 data attribute와 코드 식별자는 검사 대상에서 제외합니다.
 
 ## 검증 결과
 
-- focused ontology/unit/navigation/typography: 8 files, 49 tests PASS
+- focused ontology/unit/navigation/typography: 8 files, 50 tests PASS
 - production browser contract: 1 file, 1 test PASS
 - strict TypeScript typecheck: PASS
 - production build: PASS, static generation units 28
