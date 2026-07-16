@@ -291,6 +291,13 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
         cases = (
             ("failure-alias", "asset", "receipt", "asset", "promotion-output-path-alias"),
             (
+                "hierarchical-output",
+                "asset",
+                "receipt",
+                "asset/failure.json",
+                "promotion-output-path-hierarchy:asset:failure",
+            ),
+            (
                 "managed-transaction-target",
                 ".d-c-7-promotion-transaction/asset",
                 "receipt",
@@ -334,6 +341,58 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
 
                 if asset_path == failure_path:
                     self.assertEqual(asset_path.read_bytes(), b'{"asset":"verified-old"}\n')
+
+    def test_revalidates_output_components_after_fetch(self) -> None:
+        pdf_bytes = build_pdf_bytes(["KOSHA GUIDE D-C-7-2026 exact native body"])
+        normalized_body = "KOSHA GUIDE D-C-7-2026 exact native body"
+        ledger = fixture_ledger(pdf_bytes)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            output_root = root / "outputs"
+            original_root = root / "outputs-original"
+            external_root = root / "external"
+            output_root.mkdir()
+            external_root.mkdir()
+            ledger_path = root / "ledger.json"
+            asset_path = output_root / "asset.json"
+            receipt_path = output_root / "receipt.json"
+            failure_path = output_root / "failure.json"
+            ledger_path.write_text(json.dumps(ledger, ensure_ascii=False), encoding="utf-8")
+
+            def swap_parent_during_fetch(url: str) -> bytes:
+                del url
+                output_root.rename(original_root)
+                try:
+                    output_root.symlink_to(external_root, target_is_directory=True)
+                except OSError as exc:
+                    original_root.rename(output_root)
+                    self.skipTest(f"directory symlink creation unavailable: {exc}")
+                return pdf_bytes
+
+            with (
+                patch.object(acquire_exact_kosha_body, "PINNED_PDF_SHA256", sha256(pdf_bytes)),
+                patch.object(
+                    acquire_exact_kosha_body,
+                    "PINNED_NORMALIZED_BODY_SHA256",
+                    sha256(normalized_body.encode("utf-8")),
+                ),
+                self.assertRaisesRegex(
+                    acquire_exact_kosha_body.AcquisitionError,
+                    "promotion-output-symlink:asset",
+                ),
+            ):
+                acquire_exact_kosha_body.acquire_exact_body(
+                    ledger_path,
+                    asset_path,
+                    receipt_path,
+                    failure_path,
+                    fetch_bytes=swap_parent_during_fetch,
+                    expected_ledger_sha256=str(ledger["ledger_sha256"]),
+                )
+
+            self.assertFalse((external_root / "asset.json").exists())
+            self.assertFalse((external_root / "receipt.json").exists())
+            self.assertFalse((external_root / "failure.json").exists())
 
     def test_activation_interrupt_recovers_before_next_acquisition(self) -> None:
         pdf_bytes = build_pdf_bytes(["KOSHA GUIDE D-C-7-2026 exact native body"])
