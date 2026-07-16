@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createRemoteHermesAttemptEnvelope,
+  createRemoteHermesAttemptReceipt,
   createRemoteHermesReplayGuard,
   createRemoteHermesLogicalRequest,
   digestRemoteHermesValue,
@@ -201,6 +202,11 @@ describe("remote Hermes contract", () => {
       issuedAt: "2026-07-16T14:59:00.000Z",
       expiresAt: "2026-07-16T14:59:30.000Z",
     });
+    const attemptReceipt = createRemoteHermesAttemptReceipt({
+      receiptId: "ledger-receipt-1",
+      attemptEnvelopeDigest: attempt.attemptEnvelopeDigest,
+      reservedAt: "2026-07-16T14:59:00.000Z",
+    });
     const unsigned = {
       responseVersion: "engine-remote-response/v1" as const,
       kind: "success" as const,
@@ -211,6 +217,7 @@ describe("remote Hermes contract", () => {
       organizationId: attempt.organizationId,
       siteId: attempt.siteId,
       attemptEnvelopeDigest: attempt.attemptEnvelopeDigest,
+      attemptLedgerReceiptDigest: attemptReceipt.receiptDigest,
       promptProjectionDigest: attempt.promptProjectionDigest,
       claimsProjectionDigest: attempt.claimsProjectionDigest,
       evidenceDigest: attempt.evidenceDigest,
@@ -251,6 +258,7 @@ describe("remote Hermes contract", () => {
     expect(() => validateRemoteHermesResponse({
       response: { ...response, organizationId: "org-attacker" },
       attempt,
+      attemptReceiptDigest: attemptReceipt.receiptDigest,
       expectedServiceId: serviceId,
       expectedKeyId: "hermes-key-1",
       verificationSecret: "v".repeat(32),
@@ -260,6 +268,7 @@ describe("remote Hermes contract", () => {
     expect(() => validateRemoteHermesResponse({
       response,
       attempt,
+      attemptReceiptDigest: attemptReceipt.receiptDigest,
       expectedServiceId: serviceId,
       expectedKeyId: "hermes-key-1",
       verificationSecret: "v".repeat(32),
@@ -267,8 +276,19 @@ describe("remote Hermes contract", () => {
       replayGuard: createRemoteHermesReplayGuard(),
     })).toThrow(expect.objectContaining({ code: "REMOTE_EXPIRED" }));
     expect(() => validateRemoteHermesResponse({
+      response,
+      attempt,
+      attemptReceiptDigest: attemptReceipt.receiptDigest,
+      expectedServiceId: serviceId,
+      expectedKeyId: "hermes-key-1",
+      verificationSecret: "v".repeat(32),
+      now: new Date("2026-07-16T14:59:30.000Z"),
+      replayGuard: createRemoteHermesReplayGuard(),
+    })).toThrow(expect.objectContaining({ code: "REMOTE_EXPIRED" }));
+    expect(() => validateRemoteHermesResponse({
       response: { ...response, responseEnvelopeDigest: "0".repeat(64) },
       attempt,
+      attemptReceiptDigest: attemptReceipt.receiptDigest,
       expectedServiceId: serviceId,
       expectedKeyId: "hermes-key-1",
       verificationSecret: "v".repeat(32),
@@ -281,6 +301,7 @@ describe("remote Hermes contract", () => {
         serviceReceipt: { ...response.serviceReceipt, signature: "0".repeat(64) },
       },
       attempt,
+      attemptReceiptDigest: attemptReceipt.receiptDigest,
       expectedServiceId: serviceId,
       expectedKeyId: "hermes-key-1",
       verificationSecret: "v".repeat(32),
@@ -291,6 +312,7 @@ describe("remote Hermes contract", () => {
     expect(validateRemoteHermesResponse({
       response,
       attempt,
+      attemptReceiptDigest: attemptReceipt.receiptDigest,
       expectedServiceId: serviceId,
       expectedKeyId: "hermes-key-1",
       verificationSecret: "v".repeat(32),
@@ -300,6 +322,7 @@ describe("remote Hermes contract", () => {
     expect(() => validateRemoteHermesResponse({
       response,
       attempt,
+      attemptReceiptDigest: attemptReceipt.receiptDigest,
       expectedServiceId: serviceId,
       expectedKeyId: "hermes-key-1",
       verificationSecret: "v".repeat(32),
@@ -317,6 +340,7 @@ describe("remote Hermes contract", () => {
       organizationId: attempt.organizationId,
       siteId: attempt.siteId,
       attemptEnvelopeDigest: attempt.attemptEnvelopeDigest,
+      attemptLedgerReceiptDigest: attemptReceipt.receiptDigest,
       promptProjectionDigest: attempt.promptProjectionDigest,
       claimsProjectionDigest: attempt.claimsProjectionDigest,
       evidenceDigest: attempt.evidenceDigest,
@@ -349,6 +373,7 @@ describe("remote Hermes contract", () => {
     expect(validateRemoteHermesResponse({
       response: failureResponse,
       attempt,
+      attemptReceiptDigest: attemptReceipt.receiptDigest,
       expectedServiceId: serviceId,
       expectedKeyId: "hermes-key-1",
       verificationSecret: "v".repeat(32),

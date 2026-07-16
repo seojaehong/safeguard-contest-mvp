@@ -10,7 +10,7 @@ export type EngineRuntimeReadinessState =
   | "configuration-required"
   | "local-attestation-required"
   | "remote-attestation-required"
-  | "remote-evaluation-ready";
+  | "remote-contract-ready";
 export type EngineRuntimeReadinessIssue =
   | "unsupported-mode"
   | "vercel-local-runtime-forbidden"
@@ -23,13 +23,17 @@ export type EngineRuntimeReadinessIssue =
   | "remote-tenant-allowlist-required"
   | "remote-request-signer-required"
   | "remote-response-verifier-required"
-  | "remote-policy-attestation-required";
+  | "remote-policy-attestation-required"
+  | "remote-trusted-transport-required"
+  | "remote-attempt-ledger-required";
 
 export type EngineRuntimeReadiness = {
   requestedMode: EngineRequestedMode;
   resolvedMode: EngineMode;
   state: EngineRuntimeReadinessState;
   issueCodes: readonly EngineRuntimeReadinessIssue[];
+  contractReady?: boolean;
+  executionReady?: boolean;
 };
 
 function requestedMode(env: EnvLike): EngineRequestedMode {
@@ -100,11 +104,16 @@ export function assessEngineRuntimeReadiness(env: EnvLike): EngineRuntimeReadine
     } catch {
       issueCodes.push("remote-policy-attestation-required");
     }
+    const contractReady = issueCodes.length === 0;
     return {
       requestedMode: requested,
       resolvedMode: resolved,
-      state: issueCodes.length > 0 ? "configuration-required" : "remote-evaluation-ready",
-      issueCodes,
+      state: contractReady ? "remote-contract-ready" : "configuration-required",
+      issueCodes: contractReady
+        ? ["remote-trusted-transport-required", "remote-attempt-ledger-required"]
+        : issueCodes,
+      contractReady,
+      executionReady: false,
     };
   }
 

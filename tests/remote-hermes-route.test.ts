@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { createProductionEngineAdapter } from "@/lib/openclaw-broker-route";
 import { assessEngineRuntimeReadiness } from "@/lib/engine-runtime-readiness-policy";
@@ -63,12 +63,9 @@ function signedPolicyWith(overrides: Record<string, unknown>): string {
 
 describe("remote Hermes production route", () => {
   it("keeps traffic disabled without a signed remote policy attestation", async () => {
-    const fetchImpl = vi.fn();
     const env = createRemoteEnv();
     delete (env as { SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION?: string }).SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION;
-    const engine = createProductionEngineAdapter(env, {
-      remoteHermes: { fetchImpl },
-    });
+    const engine = createProductionEngineAdapter(env);
     const context = {
       userId: "user-1",
       organizationId: "org-1",
@@ -80,11 +77,9 @@ describe("remote Hermes production route", () => {
       code: "ENGINE_UNAVAILABLE",
       status: 503,
     });
-    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it("rejects an attested HTTPS IP-literal endpoint before network access", async () => {
-    const fetchImpl = vi.fn();
     const env = createRemoteEnv();
     env.SAFECLAW_REMOTE_HERMES_ENDPOINT = "https://127.0.0.1/v1/naturalize";
     env.SAFECLAW_REMOTE_HERMES_HOST_ALLOWLIST = "127.0.0.1";
@@ -98,7 +93,7 @@ describe("remote Hermes production route", () => {
         signingSecret: "v".repeat(32),
       }),
     );
-    const engine = createProductionEngineAdapter(env, { remoteHermes: { fetchImpl } });
+    const engine = createProductionEngineAdapter(env);
 
     await expect(engine.checkAvailability({
       userId: "user-1",
@@ -106,7 +101,6 @@ describe("remote Hermes production route", () => {
       siteId: "site-1",
       site: { siteName: "현장", region: "서울", briefingQuestion: null },
     })).rejects.toMatchObject({ code: "ENGINE_UNAVAILABLE" });
-    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -116,10 +110,9 @@ describe("remote Hermes production route", () => {
     ["process-local ledger", { ledgerMode: "process-local" }],
     ["process-local replay", { replayMode: "process-local" }],
   ])("rejects signed policy attestation with %s", async (_label, overrides) => {
-    const fetchImpl = vi.fn();
     const env = createRemoteEnv();
     env.SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION = signedPolicyWith(overrides);
-    const engine = createProductionEngineAdapter(env, { remoteHermes: { fetchImpl } });
+    const engine = createProductionEngineAdapter(env);
 
     await expect(engine.checkAvailability({
       userId: "user-1",
@@ -127,14 +120,12 @@ describe("remote Hermes production route", () => {
       siteId: "site-1",
       site: { siteName: "현장", region: "서울", briefingQuestion: null },
     })).rejects.toMatchObject({ code: "ENGINE_UNAVAILABLE" });
-    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it("revalidates policy attestation expiry before every adapter attempt", async () => {
     let now = new Date();
-    const fetchImpl = vi.fn();
     const engine = createProductionEngineAdapter(createRemoteEnv(), {
-      remoteHermes: { fetchImpl, now: () => now },
+      remoteHermes: { now: () => now },
     });
     now = new Date(now.getTime() + 120_000);
 
@@ -143,22 +134,15 @@ describe("remote Hermes production route", () => {
       organizationId: "org-1",
       siteId: "site-1",
       site: { siteName: "현장", region: "서울", briefingQuestion: null },
-    })).rejects.toMatchObject({ code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN" });
-    expect(fetchImpl).not.toHaveBeenCalled();
+    })).rejects.toMatchObject({ code: "ENGINE_UNAVAILABLE" });
   });
 
-  it("composes a tool-free naturalizer without widening SafeClaw authority", () => {
+  it("keeps the product adapter unavailable until a trusted transport and durable ledger are injected", () => {
     const engine = createProductionEngineAdapter(createRemoteEnv());
 
     expect(engine).toMatchObject({
-      id: "remote-hermes",
-      runtime: "hermes",
-      capabilities: ["stream_text"],
-      authority: {
-        canMutate: false,
-        canPublish: false,
-        humanConfirmationRequired: true,
-      },
+      id: "unavailable",
+      runtime: "unavailable",
     });
   });
 
@@ -167,11 +151,10 @@ describe("remote Hermes production route", () => {
     "SAFECLAW_REMOTE_HERMES_TENANT_ALLOWLIST",
     "SAFECLAW_REMOTE_HERMES_REQUEST_SIGNING_SECRET",
   ] as const)("fails closed with zero network calls when %s is missing", async (missingKey) => {
-    const fetchImpl = vi.fn();
     const engine = createProductionEngineAdapter({
       ...createRemoteEnv(),
       [missingKey]: undefined,
-    }, { remoteHermes: { fetchImpl } });
+    });
     const context = {
       userId: "user-1",
       organizationId: "org-1",
@@ -183,18 +166,22 @@ describe("remote Hermes production route", () => {
       code: "ENGINE_UNAVAILABLE",
       status: 503,
     });
-    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
-  it("reports remote configuration separately from local OpenClaw attestation", () => {
+  it("reports a valid remote contract separately from unavailable runtime dependencies", () => {
     expect(assessEngineRuntimeReadiness({
       ...createRemoteEnv(),
       VERCEL: "1",
-    })).toEqual({
+    })).toMatchObject({
       requestedMode: "remote-hermes",
       resolvedMode: "remote-hermes",
-      state: "remote-evaluation-ready",
-      issueCodes: [],
+      state: "remote-contract-ready",
+      contractReady: true,
+      executionReady: false,
+      issueCodes: [
+        "remote-trusted-transport-required",
+        "remote-attempt-ledger-required",
+      ],
     });
 
     expect(assessEngineRuntimeReadiness({

@@ -22,11 +22,13 @@ function enginePresentation(readiness: EngineRuntimeReadiness): {
 } {
   const mode = readiness.requestedMode === "experimental-hermes"
     ? "Hermes 로컬 검증"
-    : readiness.requestedMode === "local-openclaw"
-      ? "OpenClaw 로컬 검증"
-      : readiness.requestedMode === "unsupported"
-        ? "지원하지 않는 설정"
-        : "연결 전";
+    : readiness.requestedMode === "remote-hermes"
+      ? "Hermes 원격 계약"
+      : readiness.requestedMode === "local-openclaw"
+        ? "OpenClaw 로컬 검증"
+        : readiness.requestedMode === "unsupported"
+          ? "지원하지 않는 설정"
+          : "연결 전";
   if (readiness.state === "disabled") {
     return {
       mode,
@@ -39,6 +41,13 @@ function enginePresentation(readiness: EngineRuntimeReadiness): {
       mode,
       state: "설정 점검 필요",
       detail: `${readiness.issueCodes.length.toLocaleString("ko-KR")}개 실행 경계를 확인해야 합니다. 비밀값은 이 화면에 표시하지 않습니다.`,
+    };
+  }
+  if (readiness.state === "remote-contract-ready") {
+    return {
+      mode,
+      state: "실행 계층 연결 필요",
+      detail: "원격 계약은 확인됐지만 신뢰 전송 계층과 지속 원장이 연결되지 않아 실행하지 않습니다.",
     };
   }
   return {

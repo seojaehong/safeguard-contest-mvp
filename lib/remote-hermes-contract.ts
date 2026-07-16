@@ -6,6 +6,7 @@ export const REMOTE_HERMES_ERROR_TAXONOMY_VERSION = "engine-remote-error/v1" as 
 export const REMOTE_HERMES_MAX_TTL_MS = 60_000;
 export const REMOTE_HERMES_POLICY_ATTESTATION_VERSION = "remote-policy-attestation/v1" as const;
 export const REMOTE_HERMES_POLICY_MAX_TTL_MS = 24 * 60 * 60 * 1_000;
+export const REMOTE_HERMES_ATTEMPT_RECEIPT_VERSION = "remote-hermes-attempt-ledger-receipt/v1" as const;
 
 const SHA256_HEX = /^[a-f0-9]{64}$/u;
 const OPAQUE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u;
@@ -103,6 +104,14 @@ export type RemoteHermesAttemptEnvelope = RemoteHermesLogicalRequest & {
     signature: string;
   };
   attemptEnvelopeDigest: string;
+};
+
+export type RemoteHermesAttemptReceipt = {
+  version: typeof REMOTE_HERMES_ATTEMPT_RECEIPT_VERSION;
+  receiptId: string;
+  attemptEnvelopeDigest: string;
+  reservedAt: string;
+  receiptDigest: string;
 };
 
 export type RemoteHermesErrorCode =
@@ -465,6 +474,74 @@ export function createRemoteHermesAttemptEnvelope(input: {
   });
 }
 
+export function createRemoteHermesAttemptReceipt(input: {
+  receiptId: string;
+  attemptEnvelopeDigest: string;
+  reservedAt: string;
+}): RemoteHermesAttemptReceipt {
+  assertOpaqueId(input.receiptId);
+  assertDigest(input.attemptEnvelopeDigest);
+  const reservedAtMs = Date.parse(input.reservedAt);
+  if (!Number.isFinite(reservedAtMs) || new Date(reservedAtMs).toISOString() !== input.reservedAt) {
+    fail("REMOTE_REQUEST_INVALID");
+  }
+  const unsigned = {
+    version: REMOTE_HERMES_ATTEMPT_RECEIPT_VERSION,
+    receiptId: input.receiptId,
+    attemptEnvelopeDigest: input.attemptEnvelopeDigest,
+    reservedAt: input.reservedAt,
+  };
+  return Object.freeze({ ...unsigned, receiptDigest: digestRemoteHermesValue(unsigned) });
+}
+
+export function validateRemoteHermesAttemptReceipt(input: {
+  value: unknown;
+  attempt: RemoteHermesAttemptEnvelope;
+  now: Date;
+}): RemoteHermesAttemptReceipt {
+  if (!isRecord(input.value)
+    || !exactKeys(input.value, ["version", "receiptId", "attemptEnvelopeDigest", "reservedAt", "receiptDigest"])
+    || input.value.version !== REMOTE_HERMES_ATTEMPT_RECEIPT_VERSION
+    || typeof input.value.receiptId !== "string"
+    || typeof input.value.attemptEnvelopeDigest !== "string"
+    || typeof input.value.reservedAt !== "string"
+    || typeof input.value.receiptDigest !== "string") {
+    return fail("REMOTE_REQUEST_INVALID");
+  }
+  try {
+    assertOpaqueId(input.value.receiptId);
+    assertDigest(input.value.attemptEnvelopeDigest);
+    assertDigest(input.value.receiptDigest);
+  } catch {
+    return fail("REMOTE_REQUEST_INVALID");
+  }
+  const reservedAtMs = Date.parse(input.value.reservedAt);
+  const nowMs = input.now.getTime();
+  const issuedAtMs = Date.parse(input.attempt.issuedAt);
+  const expiresAtMs = Date.parse(input.attempt.expiresAt);
+  if (!Number.isFinite(reservedAtMs)
+    || !Number.isFinite(nowMs)
+    || !Number.isFinite(issuedAtMs)
+    || !Number.isFinite(expiresAtMs)
+    || new Date(reservedAtMs).toISOString() !== input.value.reservedAt
+    || reservedAtMs < issuedAtMs
+    || reservedAtMs >= expiresAtMs
+    || reservedAtMs > nowMs
+    || input.value.attemptEnvelopeDigest !== input.attempt.attemptEnvelopeDigest) {
+    return fail("REMOTE_TENANT_BINDING_REJECTED");
+  }
+  const unsigned = {
+    version: input.value.version,
+    receiptId: input.value.receiptId,
+    attemptEnvelopeDigest: input.value.attemptEnvelopeDigest,
+    reservedAt: input.value.reservedAt,
+  };
+  if (input.value.receiptDigest !== digestRemoteHermesValue(unsigned)) {
+    return fail("REMOTE_RESPONSE_INVALID");
+  }
+  return Object.freeze({ ...unsigned, receiptDigest: input.value.receiptDigest });
+}
+
 export function createRemoteHermesReplayGuard(options: {
   ttlMs?: number;
   maxEntries?: number;
@@ -596,6 +673,7 @@ export function validateRemoteHermesPolicyAttestation(input: {
 const RESPONSE_COMMON_KEYS = [
   "responseVersion", "kind", "runId", "logicalRequestDigest", "requestId",
   "attemptId", "organizationId", "siteId", "attemptEnvelopeDigest",
+  "attemptLedgerReceiptDigest",
   "promptProjectionDigest", "claimsProjectionDigest", "evidenceDigest", "usage",
   "latencyMs", "terminalStatus",
 ] as const;
@@ -641,7 +719,11 @@ function validateUsage(value: unknown): RemoteHermesUsage {
   return value as RemoteHermesUsage;
 }
 
-function assertEchoedBindings(response: Record<string, unknown>, attempt: RemoteHermesAttemptEnvelope): void {
+function assertEchoedBindings(
+  response: Record<string, unknown>,
+  attempt: RemoteHermesAttemptEnvelope,
+  attemptReceiptDigest: string,
+): void {
   if (response.runId !== attempt.runId
     || response.logicalRequestDigest !== attempt.logicalRequestDigest
     || response.requestId !== attempt.requestId
@@ -649,6 +731,7 @@ function assertEchoedBindings(response: Record<string, unknown>, attempt: Remote
     || response.organizationId !== attempt.organizationId
     || response.siteId !== attempt.siteId
     || response.attemptEnvelopeDigest !== attempt.attemptEnvelopeDigest
+    || response.attemptLedgerReceiptDigest !== attemptReceiptDigest
     || response.promptProjectionDigest !== attempt.promptProjectionDigest
     || response.claimsProjectionDigest !== attempt.claimsProjectionDigest
     || response.evidenceDigest !== attempt.evidenceDigest) {
@@ -659,6 +742,7 @@ function assertEchoedBindings(response: Record<string, unknown>, attempt: Remote
 export function validateRemoteHermesResponse(input: {
   response: unknown;
   attempt: RemoteHermesAttemptEnvelope;
+  attemptReceiptDigest: string;
   expectedServiceId: string;
   expectedKeyId: string;
   verificationSecret: string;
@@ -666,7 +750,7 @@ export function validateRemoteHermesResponse(input: {
   replayGuard: RemoteHermesReplayGuard;
 }): RemoteHermesValidatedResponse {
   const nowMs = (input.now ?? new Date()).getTime();
-  if (!Number.isFinite(nowMs) || nowMs > Date.parse(input.attempt.expiresAt)) fail("REMOTE_EXPIRED");
+  if (!Number.isFinite(nowMs) || nowMs >= Date.parse(input.attempt.expiresAt)) fail("REMOTE_EXPIRED");
   if (!isRecord(input.response)) fail("REMOTE_RESPONSE_INVALID");
   const response = input.response;
   if (response.responseVersion !== REMOTE_HERMES_RESPONSE_VERSION
@@ -682,7 +766,7 @@ export function validateRemoteHermesResponse(input: {
   ])) {
     fail("REMOTE_RESPONSE_INVALID");
   }
-  assertEchoedBindings(response, input.attempt);
+  assertEchoedBindings(response, input.attempt, input.attemptReceiptDigest);
   const usage = validateUsage(response.usage);
   if (!Number.isSafeInteger(response.latencyMs) || (response.latencyMs as number) < 0) {
     fail("REMOTE_RESPONSE_INVALID");

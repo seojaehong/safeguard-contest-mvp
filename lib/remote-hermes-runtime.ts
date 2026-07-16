@@ -1,5 +1,4 @@
 import { createHash, randomUUID } from "node:crypto";
-import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 
 import {
@@ -20,10 +19,14 @@ import {
   createRemoteHermesAttemptEnvelope,
   createRemoteHermesLogicalRequest,
   createRemoteHermesReplayGuard,
+  validateRemoteHermesAttemptReceipt,
   validateRemoteHermesPolicyAttestation,
   validateRemoteHermesResponse,
+  type RemoteHermesAttemptEnvelope,
+  type RemoteHermesAttemptReceipt,
   type RemoteHermesClaimsProjection,
   type RemoteHermesFieldClassification,
+  type RemoteHermesPolicyAttestation,
 } from "@/lib/remote-hermes-contract";
 
 const REMOTE_TIMEOUT_MS = 20_000;
@@ -33,6 +36,7 @@ const MAX_RESPONSE_BYTES = 32_768;
 
 type RemoteHermesConfig = {
   endpoint: string;
+  origin: string;
   allowedTenants: ReadonlySet<string>;
   issuer: string;
   audience: string;
@@ -41,18 +45,48 @@ type RemoteHermesConfig = {
   serviceId: string;
   responseKeyId: string;
   responseVerificationSecret: string;
-  policyAttestation: ReturnType<typeof validateRemoteHermesPolicyAttestation>;
-  hostname: string;
+  policyAttestation: RemoteHermesPolicyAttestation;
+};
+
+export type RemoteHermesTrustedConnection = {
+  version: "remote-hermes-connected-origin/v1";
+  endpointOrigin: string;
+  connectedOrigin: string;
+  connectedAddress: string;
+  redirects: 0;
+  serviceId: string;
+  policyAttestationDigest: string;
+};
+
+export type RemoteHermesTrustedTransport = {
+  dispatch: (input: {
+    endpoint: string;
+    expectedOrigin: string;
+    attempt: RemoteHermesAttemptEnvelope;
+    attemptReceipt: RemoteHermesAttemptReceipt;
+    body: string;
+    signal: AbortSignal;
+  }) => Promise<{
+    response: Response;
+    connection: RemoteHermesTrustedConnection;
+  }>;
+};
+
+export type RemoteHermesAttemptLedger = {
+  reserve: (
+    attempt: RemoteHermesAttemptEnvelope,
+    signal: AbortSignal,
+  ) => Promise<RemoteHermesAttemptReceipt>;
 };
 
 export type RemoteHermesRuntimeDependencies = {
   env: EnvLike;
-  fetchImpl?: typeof fetch;
+  trustedTransport?: RemoteHermesTrustedTransport;
+  attemptLedger?: RemoteHermesAttemptLedger;
   now?: () => Date;
   randomId?: () => string;
   randomNonce?: () => string;
   trustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
-  resolveHostname?: (hostname: string) => Promise<readonly string[]>;
 };
 
 export type RemoteHermesRuntime = {
@@ -101,7 +135,21 @@ export function resolveRemoteHermesEndpointPolicy(env: EnvLike): RemoteHermesEnd
   return { endpoint, origin: parsed.origin, hostname };
 }
 
-function isPublicAddress(address: string): boolean {
+function mappedIpv4Address(address: string): string | undefined {
+  const normalized = address.toLowerCase();
+  if (!normalized.startsWith("::ffff:")) return undefined;
+  const suffix = normalized.slice("::ffff:".length);
+  if (isIP(suffix) === 4) return suffix;
+  const groups = suffix.split(":");
+  if (groups.length !== 2 || groups.some((group) => !/^[0-9a-f]{1,4}$/u.test(group))) {
+    return undefined;
+  }
+  const high = Number.parseInt(groups[0] ?? "", 16);
+  const low = Number.parseInt(groups[1] ?? "", 16);
+  return `${high >>> 8}.${high & 0xff}.${low >>> 8}.${low & 0xff}`;
+}
+
+function isPublicConnectedAddress(address: string): boolean {
   const version = isIP(address);
   if (version === 4) {
     const parts = address.split(".").map(Number);
@@ -121,6 +169,8 @@ function isPublicAddress(address: string): boolean {
   }
   if (version === 6) {
     const normalized = address.toLowerCase();
+    const mappedAddress = mappedIpv4Address(normalized);
+    if (mappedAddress) return isPublicConnectedAddress(mappedAddress);
     return normalized !== "::"
       && normalized !== "::1"
       && !normalized.startsWith("fe8")
@@ -130,33 +180,9 @@ function isPublicAddress(address: string): boolean {
       && !normalized.startsWith("fc")
       && !normalized.startsWith("fd")
       && !normalized.startsWith("ff")
-      && !normalized.startsWith("2001:db8:")
-      && !normalized.startsWith("::ffff:10.")
-      && !normalized.startsWith("::ffff:127.")
-      && !normalized.startsWith("::ffff:169.254.")
-      && !normalized.startsWith("::ffff:192.168.");
+      && !normalized.startsWith("2001:db8:");
   }
   return false;
-}
-
-function sameAddresses(left: readonly string[], right: readonly string[]): boolean {
-  const leftSet = [...new Set(left)].sort();
-  const rightSet = [...new Set(right)].sort();
-  return leftSet.length === rightSet.length
-    && leftSet.every((address, index) => address === rightSet[index]);
-}
-
-async function defaultResolveHostname(hostname: string): Promise<readonly string[]> {
-  return (await lookup(hostname, { all: true, verbatim: true })).map((entry) => entry.address);
-}
-
-async function withAbort<T>(operation: Promise<T>, signal: AbortSignal): Promise<T> {
-  if (signal.aborted) throw signal.reason instanceof Error ? signal.reason : new Error("deadline");
-  return await new Promise<T>((resolve, reject) => {
-    const abort = (): void => reject(signal.reason instanceof Error ? signal.reason : new Error("deadline"));
-    signal.addEventListener("abort", abort, { once: true });
-    operation.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
-  });
 }
 
 function resolveConfig(env: EnvLike, now: Date): RemoteHermesConfig | undefined {
@@ -182,7 +208,7 @@ function resolveConfig(env: EnvLike, now: Date): RemoteHermesConfig | undefined 
     || [...allowedTenants].some((entry) => !/^[A-Za-z0-9._-]+:[A-Za-z0-9._-]+$/u.test(entry))) {
     return undefined;
   }
-  let policyAttestation: ReturnType<typeof validateRemoteHermesPolicyAttestation>;
+  let policyAttestation: RemoteHermesPolicyAttestation;
   try {
     policyAttestation = validateRemoteHermesPolicyAttestation({
       value: JSON.parse(policyAttestationJson) as unknown,
@@ -197,7 +223,7 @@ function resolveConfig(env: EnvLike, now: Date): RemoteHermesConfig | undefined 
   }
   return {
     endpoint: endpointPolicy.endpoint,
-    hostname: endpointPolicy.hostname,
+    origin: endpointPolicy.origin,
     allowedTenants,
     issuer,
     audience,
@@ -262,6 +288,32 @@ function deepFreeze<T>(value: T): T {
   return value;
 }
 
+async function withAbort<T>(operation: Promise<T>, signal: AbortSignal): Promise<T> {
+  if (signal.aborted) {
+    throw signal.reason instanceof Error ? signal.reason : new Error("deadline");
+  }
+  return await new Promise<T>((resolve, reject) => {
+    const abort = (): void => reject(signal.reason instanceof Error ? signal.reason : new Error("deadline"));
+    signal.addEventListener("abort", abort, { once: true });
+    operation.then(resolve, reject).finally(() => signal.removeEventListener("abort", abort));
+  });
+}
+
+function validateTrustedConnection(
+  connection: RemoteHermesTrustedConnection,
+  config: RemoteHermesConfig,
+): void {
+  if (connection.version !== "remote-hermes-connected-origin/v1"
+    || connection.endpointOrigin !== config.origin
+    || connection.connectedOrigin !== config.origin
+    || !isPublicConnectedAddress(connection.connectedAddress)
+    || connection.redirects !== 0
+    || connection.serviceId !== config.serviceId
+    || connection.policyAttestationDigest !== config.policyAttestation.attestationDigest) {
+    throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+  }
+}
+
 export async function readRemoteHermesResponseBody(
   response: Response,
   signal: AbortSignal,
@@ -302,14 +354,13 @@ export async function readRemoteHermesResponseBody(
 
 function createPlanner(
   config: RemoteHermesConfig,
-  dependencies: Omit<RemoteHermesRuntimeDependencies, "env">,
+  dependencies: Required<Pick<RemoteHermesRuntimeDependencies, "trustedTransport" | "attemptLedger">>
+    & Omit<RemoteHermesRuntimeDependencies, "env" | "trustedTransport" | "attemptLedger">,
 ): HermesPlanner {
-  const fetchImpl = dependencies.fetchImpl ?? fetch;
   const now = dependencies.now ?? (() => new Date());
   const randomId = dependencies.randomId ?? randomUUID;
   const randomNonce = dependencies.randomNonce ?? randomUUID;
   const replayGuard = createRemoteHermesReplayGuard();
-  const resolveHostname = dependencies.resolveHostname ?? defaultResolveHostname;
 
   return async (input): Promise<void> => {
     if (!config.allowedTenants.has(tenantKey(input.context))) {
@@ -359,10 +410,17 @@ function createPlanner(
     input.signal.addEventListener("abort", abortFromCaller, { once: true });
     const timeout = setTimeout(() => timeoutController.abort(), REMOTE_TIMEOUT_MS);
     let responseText: string;
+    let attemptReceipt: RemoteHermesAttemptReceipt;
     try {
-      let resolvedAddresses: readonly string[];
       try {
-        resolvedAddresses = await withAbort(resolveHostname(config.hostname), timeoutController.signal);
+        attemptReceipt = validateRemoteHermesAttemptReceipt({
+          value: await withAbort(
+            dependencies.attemptLedger.reserve(attempt, timeoutController.signal),
+            timeoutController.signal,
+          ),
+          attempt,
+          now: now(),
+        });
       } catch (error) {
         throw new BrokerError(
           timeoutController.signal.aborted ? "ENGINE_TIMEOUT" : "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
@@ -370,18 +428,21 @@ function createPlanner(
           error,
         );
       }
-      if (resolvedAddresses.length === 0 || resolvedAddresses.some((address) => !isPublicAddress(address))) {
-        throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
-      }
-      let response: Response;
+      const immutableReceipt = deepFreeze(structuredClone(attemptReceipt));
+      const body = JSON.stringify({ attempt, attemptReceipt: immutableReceipt });
+      let dispatch;
       try {
-        response = await fetchImpl(config.endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(attempt),
-          signal: timeoutController.signal,
-          redirect: "error",
-        });
+        dispatch = await withAbort(
+          dependencies.trustedTransport.dispatch({
+            endpoint: config.endpoint,
+            expectedOrigin: config.origin,
+            attempt,
+            attemptReceipt: immutableReceipt,
+            body,
+            signal: timeoutController.signal,
+          }),
+          timeoutController.signal,
+        );
       } catch (error) {
         throw new BrokerError(
           timeoutController.signal.aborted ? "ENGINE_TIMEOUT" : "ENGINE_EXECUTION_FAILED",
@@ -389,23 +450,18 @@ function createPlanner(
           error,
         );
       }
-      if (!response.ok) {
-        await response.body?.cancel().catch(() => undefined);
+      try {
+        validateTrustedConnection(dispatch.connection, config);
+      } catch (error) {
+        await dispatch.response.body?.cancel().catch(() => undefined);
+        throw error;
+      }
+      if (!dispatch.response.ok) {
+        await dispatch.response.body?.cancel().catch(() => undefined);
         throw new BrokerError("ENGINE_EXECUTION_FAILED", 503);
       }
-      let confirmedAddresses: readonly string[];
       try {
-        confirmedAddresses = await withAbort(resolveHostname(config.hostname), timeoutController.signal);
-      } catch (error) {
-        throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503, error);
-      }
-      if (confirmedAddresses.some((address) => !isPublicAddress(address))
-        || !sameAddresses(resolvedAddresses, confirmedAddresses)) {
-        await response.body?.cancel().catch(() => undefined);
-        throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
-      }
-      try {
-        responseText = await readRemoteHermesResponseBody(response, timeoutController.signal);
+        responseText = await readRemoteHermesResponseBody(dispatch.response, timeoutController.signal);
       } catch (error) {
         throw new BrokerError(
           timeoutController.signal.aborted ? "ENGINE_TIMEOUT" : "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
@@ -428,6 +484,7 @@ function createPlanner(
       validated = validateRemoteHermesResponse({
         response: body,
         attempt,
+        attemptReceiptDigest: attemptReceipt.receiptDigest,
         expectedServiceId: config.serviceId,
         expectedKeyId: config.responseKeyId,
         verificationSecret: config.responseVerificationSecret,
@@ -457,15 +514,19 @@ export function createRemoteHermesRuntime(
 ): RemoteHermesRuntime | undefined {
   const now = dependencies.now ?? (() => new Date());
   const config = resolveConfig(dependencies.env, now());
-  if (!config) return undefined;
+  if (!config || !dependencies.trustedTransport || !dependencies.attemptLedger) return undefined;
   return {
-    planner: createPlanner(config, dependencies),
+    planner: createPlanner(config, {
+      ...dependencies,
+      trustedTransport: dependencies.trustedTransport,
+      attemptLedger: dependencies.attemptLedger,
+    }),
     async attestRuntime(context): Promise<void> {
       try {
         validateRemoteHermesPolicyAttestation({
           value: config.policyAttestation,
           expectedServiceId: config.serviceId,
-          expectedEndpointOrigin: new URL(config.endpoint).origin,
+          expectedEndpointOrigin: config.origin,
           expectedKeyId: config.responseKeyId,
           verificationSecret: config.responseVerificationSecret,
           now: now(),

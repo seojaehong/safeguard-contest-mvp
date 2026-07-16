@@ -56,6 +56,12 @@ export type HermesEvidenceClaim = {
   }[];
 };
 
+export type HermesEvidenceExclusion = {
+  referenceDigest: string;
+  evidenceKind: "sif_case";
+  reason: "remote_sif_source_not_verified";
+};
+
 export type HermesPlannerInput = {
   contractVersion: typeof ENGINE_ADAPTER_CONTRACT_VERSION;
   authority: EngineAuthority;
@@ -64,6 +70,7 @@ export type HermesPlannerInput = {
   evidencePacket: ImmutableEvidencePacket;
   evidenceDigest: string;
   evidenceClaims: readonly HermesEvidenceClaim[];
+  evidenceExclusions: readonly HermesEvidenceExclusion[];
   emitText: (output: HermesPlannerTextOutput) => void;
   signal: AbortSignal;
   requestReadTool: (intent: HermesReadToolIntent) => Promise<unknown>;
@@ -231,6 +238,7 @@ function extractableKoshaClaims(item: SafetyReferenceItem): readonly string[] {
 function buildEvidenceClaims(
   packet: DbHarnessPacket,
   trustedKoshaReference?: (item: SafetyReferenceItem) => boolean,
+  remoteExecution = false,
 ): readonly HermesEvidenceClaim[] {
   const claims = new Map<string, HermesEvidenceClaim>();
   const koshaReferences = [...packet.directEvidence, ...packet.supportingEvidence]
@@ -244,7 +252,8 @@ function buildEvidenceClaims(
       .filter((item) => !isKoshaTechnicalReference(item) && isSafetyReferenceDirectEligible(item))
       .map((item) => ({ item, authorityLabel: "직접 근거", controls: item.controls })),
     ...packet.sifCases
-      .filter((item) => item.item_type === "sif-case")
+      .filter((item) => item.item_type === "sif-case"
+        && (!remoteExecution || item.source_id === "kosha-sif-archive-20260401"))
       .map((item) => ({
         item,
         authorityLabel: "SIF 사례 근거(위험 우선순위)",
@@ -272,7 +281,8 @@ function buildEvidenceClaims(
           ? "current_law" as const
           : "published_ontology" as const;
     const remotePublicProvenance = isKoshaTechnicalReference(reference)
-      || (reference.item_type === "sif-case" && reference.source_id === "kosha-sif-archive")
+      || (reference.item_type === "sif-case"
+        && reference.source_id === "kosha-sif-archive-20260401")
       ? "verified_public_safety_corpus" as const
       : undefined;
     const sourceRefDigest = createHash("sha256")
@@ -299,6 +309,27 @@ function buildEvidenceClaims(
     }
   }
   return deepFreeze([...claims.values()]);
+}
+
+function buildEvidenceExclusions(
+  packet: DbHarnessPacket,
+  remoteExecution: boolean,
+): readonly HermesEvidenceExclusion[] {
+  if (!remoteExecution) return [];
+  return deepFreeze(packet.sifCases
+    .filter((item) => item.item_type === "sif-case"
+      && item.source_id !== "kosha-sif-archive-20260401")
+    .map((item) => ({
+      referenceDigest: createHash("sha256")
+        .update(canonicalJson({
+          id: item.id,
+          itemType: item.item_type,
+          sourceId: item.source_id,
+        }), "utf8")
+        .digest("hex"),
+      evidenceKind: "sif_case" as const,
+      reason: "remote_sif_source_not_verified" as const,
+    })));
 }
 
 function renderAttestedClaims(
@@ -472,6 +503,7 @@ function createHermesAdapter(
       let evidencePacket: ImmutableEvidencePacket;
       let evidenceDigest: string;
       let evidenceClaims: readonly HermesEvidenceClaim[];
+      let evidenceExclusions: readonly HermesEvidenceExclusion[];
       try {
         const harnessResult = await dependencies.composition.readExecutor.execute({
           context: input.context,
@@ -489,8 +521,18 @@ function createHermesAdapter(
         evidenceClaims = buildEvidenceClaims(
           validatedPacket,
           dependencies.composition.trustedKoshaReference,
+          identity.mode === "remote-hermes",
         );
-        if (evidenceClaims.length === 0) {
+        evidenceExclusions = buildEvidenceExclusions(
+          validatedPacket,
+          identity.mode === "remote-hermes",
+        );
+        const hasRemoteSifClaim = evidenceClaims.some((claim) => (
+          claim.remotePublicProvenance === "verified_public_safety_corpus"
+          && claim.citations.some((citation) => citation.provenanceClass === "sif_case")
+        ));
+        if (evidenceClaims.length === 0
+          || (identity.mode === "remote-hermes" && !hasRemoteSifClaim)) {
           throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
         }
       } catch (error) {
@@ -505,6 +547,7 @@ function createHermesAdapter(
         evidencePacket,
         evidenceDigest,
         evidenceClaims,
+        evidenceExclusions,
         emitText: (output) => {
           if (typeof output !== "object"
             || output === null

@@ -12,6 +12,7 @@ import { isProductionTrustedKoshaReference } from "@/lib/production-kosha-trust"
 import * as safetyReferenceServer from "@/lib/safety-reference-catalog-server";
 import {
   createExperimentalHermesAdapter,
+  createRemoteHermesAdapter,
   createSafeClawHermesComposition as createHermesComposition,
   HERMES_OUTPUT_ATTESTATION_VERSION,
   type HermesPlanner,
@@ -232,6 +233,87 @@ function runInput(emit: (event: ClawChatEvent) => void = () => undefined) {
 }
 
 describe("experimental Hermes EngineAdapter", () => {
+  it("runs the production harness with only the verified 20260401 SIF subset for remote execution", async () => {
+    const verifiedSif = sifReference();
+    verifiedSif.source_id = "kosha-sif-archive-20260401";
+    const legacySif = {
+      ...sifReference(),
+      id: "sif-legacy",
+      controls: ["레거시 출처는 원격 근거로 승격하지 않습니다."],
+    };
+    const unsupportedSif = {
+      ...sifReference(),
+      id: "sif-unverified",
+      source_id: "kosha-sif-archive-unverified",
+      controls: ["지원되지 않은 SIF 근거는 원격으로 보내지 않습니다."],
+    };
+    const packet = buildDbHarnessPacket({
+      question: "오늘 작업 위험을 점검해줘",
+      references: [verifiedSif, legacySif, unsupportedSif, recoveredKoshaReference()],
+      retrieval: { mode: "ranked-rpc", message: "production SIF evidence resolved" },
+    });
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...groundedHarnessResult(),
+      packet,
+    });
+    let captured: HermesPlannerInput | undefined;
+    const engine = createRemoteHermesAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "remote-hermes" },
+      composition: createHermesComposition(async (input) => {
+        captured = input;
+        input.emitText(attestedOutput(input));
+      }, { trustedKoshaReference: isTestOnlyRecoveredKoshaFixture, toolPolicy: "deny-all" }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(captured).toBeDefined();
+    const remoteSifClaims = captured?.evidenceClaims.filter((claim) => (
+      claim.citations.some((citation) => citation.provenanceClass === "sif_case")
+    )) ?? [];
+    expect(remoteSifClaims).toHaveLength(2);
+    expect(remoteSifClaims.every((claim) => (
+      claim.remotePublicProvenance === "verified_public_safety_corpus"
+    ))).toBe(true);
+    expect(captured?.evidenceExclusions).toEqual([
+      expect.objectContaining({
+        referenceDigest: expect.stringMatching(/^[a-f0-9]{64}$/u),
+        evidenceKind: "sif_case",
+        reason: "remote_sif_source_not_verified",
+      }),
+      expect.objectContaining({
+        referenceDigest: expect.stringMatching(/^[a-f0-9]{64}$/u),
+        evidenceKind: "sif_case",
+        reason: "remote_sif_source_not_verified",
+      }),
+    ]);
+  });
+
+  it("fails remote execution when the harness has no verified production SIF claim", async () => {
+    const executeSpy = mockHarnessPreload();
+    const planner = vi.fn<HermesPlanner>();
+    const engine = createRemoteHermesAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "remote-hermes" },
+      composition: createHermesComposition(planner, {
+        trustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
+        toolPolicy: "deny-all",
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+    expect(planner).not.toHaveBeenCalled();
+  });
+
   if (false) {
     const arbitraryExecutorComposition = {
       planner: async () => undefined,
