@@ -123,12 +123,12 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
         normalized_body = "KOSHA GUIDE D-C-7-2026 exact native body"
         replace_count = 0
 
-        def fail_second_publish(source: Path, destination: Path) -> None:
+        def fail_second_publish(phase: str) -> None:
             nonlocal replace_count
             replace_count += 1
             if replace_count == 2:
                 raise OSError("injected-second-publish-failure")
-            os.replace(source, destination)
+            self.assertEqual(phase, "before-publish-asset")
 
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -158,7 +158,7 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
                     failure_path,
                     fetch_bytes=lambda url: pdf_bytes,
                     expected_ledger_sha256=str(ledger["ledger_sha256"]),
-                    publish_replace=fail_second_publish,
+                    publish_hook=fail_second_publish,
                 )
 
             failure = json.loads(failure_path.read_text(encoding="utf-8"))
@@ -394,6 +394,65 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
             self.assertFalse((external_root / "receipt.json").exists())
             self.assertFalse((external_root / "failure.json").exists())
 
+    def test_publish_hook_parent_swap_cannot_redirect_safe_replace(self) -> None:
+        pdf_bytes = build_pdf_bytes(["KOSHA GUIDE D-C-7-2026 exact native body"])
+        normalized_body = "KOSHA GUIDE D-C-7-2026 exact native body"
+        ledger = fixture_ledger(pdf_bytes)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            output_root = root / "outputs"
+            original_root = root / "outputs-original"
+            external_root = root / "external"
+            output_root.mkdir()
+            external_root.mkdir()
+            ledger_path = root / "ledger.json"
+            asset_path = output_root / "asset.json"
+            receipt_path = output_root / "receipt.json"
+            failure_path = output_root / "failure.json"
+            ledger_path.write_text(json.dumps(ledger, ensure_ascii=False), encoding="utf-8")
+            old_asset = b'{"asset":"verified-old"}\n'
+            old_receipt = b'{"receipt":"verified-old"}\n'
+            asset_path.write_bytes(old_asset)
+            receipt_path.write_bytes(old_receipt)
+
+            def swap_parent_before_publish(phase: str) -> None:
+                if phase != "before-publish-asset":
+                    return
+                output_root.rename(original_root)
+                try:
+                    output_root.symlink_to(external_root, target_is_directory=True)
+                except OSError as exc:
+                    original_root.rename(output_root)
+                    self.skipTest(f"directory symlink creation unavailable: {exc}")
+
+            with (
+                patch.object(acquire_exact_kosha_body, "PINNED_PDF_SHA256", sha256(pdf_bytes)),
+                patch.object(
+                    acquire_exact_kosha_body,
+                    "PINNED_NORMALIZED_BODY_SHA256",
+                    sha256(normalized_body.encode("utf-8")),
+                ),
+                self.assertRaisesRegex(
+                    acquire_exact_kosha_body.AcquisitionError,
+                    "promotion-output-symlink:asset",
+                ),
+            ):
+                acquire_exact_kosha_body.acquire_exact_body(
+                    ledger_path,
+                    asset_path,
+                    receipt_path,
+                    failure_path,
+                    fetch_bytes=lambda url: pdf_bytes,
+                    expected_ledger_sha256=str(ledger["ledger_sha256"]),
+                    publish_hook=swap_parent_before_publish,
+                )
+
+            self.assertFalse((external_root / "asset.json").exists())
+            self.assertFalse((external_root / "receipt.json").exists())
+            self.assertFalse((external_root / "failure.json").exists())
+            self.assertEqual((original_root / "asset.json").read_bytes(), old_asset)
+            self.assertEqual((original_root / "receipt.json").read_bytes(), old_receipt)
+
     def test_activation_interrupt_recovers_before_next_acquisition(self) -> None:
         pdf_bytes = build_pdf_bytes(["KOSHA GUIDE D-C-7-2026 exact native body"])
         normalized_body = "KOSHA GUIDE D-C-7-2026 exact native body"
@@ -492,10 +551,10 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
                 receipt_path.write_bytes(b'{"receipt":"partial-new"}\n')
                 restore_count = 0
 
-                def interrupt_restore(destination: Path, value: bytes) -> None:
+                def interrupt_restore(phase: str) -> None:
                     nonlocal restore_count
                     restore_count += 1
-                    acquire_exact_kosha_body._write_bytes(destination, value)
+                    self.assertTrue(phase.startswith("after-restore-"))
                     if restore_count == fail_after_restore:
                         raise OSError(f"restore-interrupted-{fail_after_restore}")
 
@@ -505,7 +564,7 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
                         asset_path,
                         receipt_path,
                         failure_path,
-                        restore_write=interrupt_restore,
+                        restore_hook=interrupt_restore,
                     )
 
                 self.assertTrue((transaction_dir / "asset.backup").is_file())
@@ -708,11 +767,13 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
         self.assertEqual(receipt["pageCount"], fixture["pageCount"])
         self.assertEqual(receipt["bodySha256"], asset["bodySha256"])
         self.assertEqual(receipt["pdfSha256"], asset["pdfSha256"])
-        self.assertEqual(receipt["promotionProtocol"], "recoverable-staged-pair/v3")
+        self.assertEqual(receipt["promotionProtocol"], "recoverable-handle-bound-pair/v4")
         self.assertTrue(receipt["checks"]["prepublishStagingIsolated"])
         self.assertTrue(receipt["checks"]["preparedJournalAtomicActivation"])
         self.assertTrue(receipt["checks"]["prejournalOrphanConvergence"])
         self.assertTrue(receipt["checks"]["activeJournalRevalidatedBeforePublish"])
+        self.assertTrue(receipt["checks"]["handleBoundTargetReplacement"])
+        self.assertTrue(receipt["checks"]["mutationCallbacksCannotWrite"])
         self.assertTrue(all(receipt["checks"].values()))
 
 
