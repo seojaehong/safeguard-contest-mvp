@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-07-16",
+  "sourceSha": "7d5b09b55bd97cc078b01d9a39e5e61060b14c11",
+  "triggerRunId": 29491156696,
+  "trigger": {
+    "passed": 1895,
+    "failed": 3,
+    "skipped": 17
+  },
+  "focusedVerification": {
+    "frontendAndPhotoPassed": 78,
+    "photoGroundingPassed": 39,
+    "browserRowsPassed": 108,
+    "browserRowsFailed": 0,
+    "browserFindings": 0,
+    "normalBuildStaticPages": 28,
+    "normalBuildAuditMarkers": 0,
+    "auditBuildStaticPages": 28,
+    "auditBuildMarkers": 1,
+    "typecheck": "pass"
+  },
+  "localFullSuite": {
+    "status": "terminated_without_final_summary",
+    "exitMarker": -1,
+    "acceptedAsPass": false,
+    "log": "full-test.log"
+  },
+  "authoritativeNextGate": "github_actions_full_suite"
+}

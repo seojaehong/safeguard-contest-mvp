@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-07-16",
+  "sourceSha": "85f98af720adaaefe69a23631bcbec7890f50081",
+  "mode": "read-only",
+  "result": "approval_required",
+  "tenantScopedTables": 13,
+  "rlsEnabledTables": 13,
+  "forceRlsTables": 0,
+  "crudPolicyTables": 13,
+  "withCheckTables": 13,
+  "authenticatedCrossTenantAssertionsExecuted": 0,
+  "requiredTableCrossTenantAssertions": 52,
+  "requiredStorageAssertions": 4,
+  "databaseMutation": false,
+  "schemaMutation": false,
+  "migrationCreated": false,
+  "findings": {
+    "p0": 0,
+    "p1": 3,
+    "p2": 4,
+    "p3": 3
+  },
+  "launchProven": false,
+  "nextStepRequiresExplicitApproval": true
+}

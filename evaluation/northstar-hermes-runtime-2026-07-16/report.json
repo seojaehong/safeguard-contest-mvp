@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-07-16",
+  "sourceSha": "85f98af720adaaefe69a23631bcbec7890f50081",
+  "scope": "Local OpenClaw OAuth execution and SafeClaw Hermes production boundary",
+  "localRuntime": {
+    "openClawVersion": "2026.6.11",
+    "profile": "safeclaw",
+    "agent": "main",
+    "provider": "openai",
+    "model": "gpt-5.5",
+    "oauthUsable": true,
+    "toolAllowCount": 0,
+    "toolDenyAll": true,
+    "runtimeToolCount": 0,
+    "fallbackUsed": false,
+    "exitCode": 0,
+    "exactMarkerReturned": true,
+    "durationMs": 45458
+  },
+  "safeClawBoundary": {
+    "evidenceHarnessContractTested": true,
+    "organizationBindingConfigured": false,
+    "siteBindingConfigured": false,
+    "vercelLocalHermesAllowed": false,
+    "localRouteReady": false,
+    "productionRouteReady": false,
+    "databaseMutation": false,
+    "schemaMutation": false
+  },
+  "verification": {
+    "focusedTestFiles": 5,
+    "focusedTests": 87,
+    "focusedFailed": 0,
+    "vercelDeployment": "pass",
+    "githubCi": "fail",
+    "githubCiReason": "stale frontend audit identity and KOSHA-expanded photo-analysis assertions"
+  },
+  "warnings": [
+    "Legacy config-health state conflicts with shared SQLite state.",
+    "OpenClaw plugins.allow is empty; explicit plugin allowlisting is recommended."
+  ]
+}

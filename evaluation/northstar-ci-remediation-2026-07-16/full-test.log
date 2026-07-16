@@ -1,0 +1,7 @@
+
+> safeclaw@0.1.0 test
+> vitest run --maxWorkers=1 --fileParallelism=false
+
+
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/northstar-clean-integration-20260715
+
