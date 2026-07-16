@@ -8,11 +8,12 @@
 
 ## TDD Evidence
 
-- RED command: `npm.cmd test -- tests/workpack-commercial-tenant-hardening.test.ts`
-- RED: 1 test file, 6 tests, 4 passed, 2 failed (operation-graph tuple and nullable-site cases)
+- Historical mutation-stage RED was not preserved as a committed raw artifact. It is described only qualitatively and is not used as release evidence.
+- Before the operation-graph tuple fix, the focused tenant behavior exposed missing operation-graph child scoping. No numerical RED count is claimed.
 - GREEN command: `npm.cmd test -- tests/workpack-commercial-tenant-hardening.test.ts tests/workpack-commercial.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-improvement-route.test.ts tests/generation-evidence-operation-routes.test.ts tests/commercial-migration.test.ts`
 - GREEN: 6 test files, 28 tests, 28 passed, 0 failed
 - TypeScript command: `npm.cmd run typecheck`, exit 0
+- Diff check command: `git diff --check`, exit 0
 
 ## Hardened Accesses
 
