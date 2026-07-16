@@ -1,14 +1,14 @@
 # SafeClaw North Star 통합 검증 보고서
 
-검증 기준 HEAD: `ee96509ccf53cd884dc2300e40b40ce25783a90b`
+검증 기준 HEAD: `42dd73fa3016431eb3d26f966fa73e8665fe1177`
 
 ## 통합 범위
 
-- Phase A 런타임 근거 고정: SIF -> KOSHA Guide -> 현행 법령
-- tenant-scoped 현장 개선 메모리와 public MCP 하네스 연결
-- 지식 검토함 및 모바일 지식 페이지 정보구조
-- 작업공간 입력/대비/레이아웃 회귀 계약
-- 정적 UI 계약, 전체 라우트 브라우저 감사, PDF 한글 내보내기
+- Phase A 근거 하네스: SIF 사례 -> KOSHA Guide -> 현행 법령 -> LLM 문장화
+- 추락·끼임·감전의 corpus-backed SIF Accident overlay
+- KOSHA D-C-7 공식 PDF와 정규화 본문의 정확 해시·복구 프로토콜
+- 작업공간, 문서, 공유를 포함한 32개 제품 라우트 정적·브라우저 계약
+- 기존 tenant memory, 공개 MCP, 문서 내보내기 계약 보존
 
 DB migration, schema 변경, 대량 데이터 수정은 수행하지 않았다.
 
@@ -16,49 +16,51 @@ DB migration, schema 변경, 대량 데이터 수정은 수행하지 않았다.
 
 | 게이트 | 결과 |
 | --- | --- |
-| 전체 직렬 테스트 | 170 files / 1,818 tests 중 1건 stale browser evidence로 최초 실패 |
-| stale evidence 재생성 후 해당 테스트 | 1 file / 38 tests PASS |
-| 대비 및 문서 레이아웃 | 2 files / 42 tests PASS |
-| Phase A 근거 고정 | 12 files / 214 tests PASS |
-| public MCP tenant memory | 6 files / 62 tests PASS |
-| Knowledge review + tenant memory | 5 files / 74 tests PASS |
+| KOSHA 복구 Python | 73 / 73 PASS |
+| SIF·KOSHA·온톨로지 통합 | 17 files / 369 tests PASS |
+| 프론트 감사 계약 | 3 files / 42 tests PASS |
 | strict typecheck | PASS |
 | 정적 프론트 감사 | 32 pages / 23 components / coverage 0 / violations 0 / important 0 |
+| normal production build | PASS, 28 / 28 static pages |
+| audit production build | PASS, 28 / 28 static pages |
+| normal bundle | PASS, 293 chunks, audit marker 0 |
+| audit bundle | PASS, 294 chunks, required marker 1 |
 | 브라우저 감사 | 32 routes / 108 screenshots / failures 0 / findings 0 / recovered 0 |
-| audit production build | PASS, 28 static pages |
-| normal production build | PASS, 28 static pages |
-| PDF focused tests | 2 files / 23 tests PASS |
-| PDF NFT trace | Regular/Bold/OFL 3 assets present |
 
-전체 테스트의 단일 실패는 제품 코드 실패가 아니라 소스 변경 후 과거 브라우저 보고서의 `sourceIdentity`가 달라져 fail-closed 된 결과였다. 동일 HEAD에서 정적/브라우저 증거를 다시 생성한 뒤 해당 계약 테스트 38개가 통과했다. 전체 테스트 결과를 다시 녹색으로 둔갑시키지 않고 이 순서를 그대로 기록한다.
+## KOSHA 정확 본문
+
+- 대상: KOSHA Guide `D-C-7`
+- 공식 PDF SHA-256: `5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3`
+- 정규화 본문 SHA-256: `97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112`
+- 분량: 71 pages / 38,781 chars
+- 복구 프로토콜: `recoverable-handle-bound-pair/v4`
+- receipt 검사: 23 / 23 PASS
+
+공식 PDF 자체는 저장소에 커밋하지 않았다. 취득·검증·승격 과정은 Windows reparse-safe handle과 POSIX `O_NOFOLLOW`/`dir_fd` 경계로 경로 교체 공격과 중단 복구를 fail-closed 처리한다.
 
 ## 브라우저 계약
 
-- source SHA: `ee96509ccf53cd884dc2300e40b40ce25783a90b`
-- source identity: `f7401c6cebe9d1a137fdf2b382c921f5e23a011060ff3d03e3d182c1ea92a8a2`
+- source SHA: `42dd73fa3016431eb3d26f966fa73e8665fe1177`
+- source identity: `aa4c9fa1233852739a5c7dd7602ab70e58a747d53029e1a1fe52afd7e662793a`
 - route rows: 96
 - workspace Day/Night rows: 6
 - special surface rows: 4
 - generated surface rows: 2
 - total: 108 / 108 successful
+- elapsed: 140,202 ms
 
-## 남은 운영 게이트
+## 아직 닫히지 않은 운영 게이트
 
-- KOSHA 234개 승격 후보의 최종 본문은 Git 추적 자산만으로 재구성할 수 없어 production-wide trust를 주장하지 않는다.
-- Supabase RLS 감사의 `launchReadiness=false`는 실제 정책 보완 및 승인 전까지 유지한다.
-- 이 보고서는 로컬 통합 HEAD 검증이다. 원격 push 이후 CI/Vercel preview와 live production 매핑은 별도로 확인해야 한다.
+- D-C-7 단일 정확 본문은 승인됐지만 KOSHA 234개 후보 전체를 production trusted corpus로 승격한 것은 아니다.
+- Hermes/OpenClaw 코드 계약은 유지되지만 실제 앱 런타임은 현재 disabled/unavailable 상태다. durable worker·queue·lease·checkpoint 구현 완료를 주장하지 않는다.
+- Supabase RLS 감사의 `launchReadiness=false`는 정책 보완과 사용자 승인 전까지 유지한다.
+- 이 보고서는 로컬 통합 HEAD 검증이다. 원격 push 후 CI/Vercel preview와 실제 production 매핑은 별도 확인한다.
 
 ## 증거
 
-- `full-tests.log`
-- `contrast-layout-tests.log`
-- `typecheck.log`
-- `static-audit.log`
-- `browser-audit.log`
-- `audit-build.log`
-- `production-build-final.log`
-- `route-evidence-tests.log`
-- `pdf-tests.log`
-- `pdf-nft-trace.log`
-- `../frontend-audit-runner-port-v2-2026-07-11/browser-report.json`
 - `../frontend-audit-runner-port-v2-2026-07-11/static-audit.json`
+- `../frontend-audit-runner-port-v2-2026-07-11/bundle-normal.json`
+- `../frontend-audit-runner-port-v2-2026-07-11/bundle-audit.json`
+- `../frontend-audit-runner-port-v2-2026-07-11/browser-report.json`
+- `../frontend-audit-runner-port-v2-2026-07-11/browser-report.md`
+- `../phase-a-supabase-rls-audit-2026-07-13/report.md`

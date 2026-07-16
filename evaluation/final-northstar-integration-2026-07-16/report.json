@@ -1,40 +1,27 @@
 {
-  "generatedAt": "2026-07-16T05:33:00+09:00",
-  "sourceSha": "ee96509ccf53cd884dc2300e40b40ce25783a90b",
-  "sourceIdentity": "f7401c6cebe9d1a137fdf2b382c921f5e23a011060ff3d03e3d182c1ea92a8a2",
+  "generatedAt": "2026-07-16T17:54:00+09:00",
+  "sourceSha": "42dd73fa3016431eb3d26f966fa73e8665fe1177",
+  "sourceIdentity": "aa4c9fa1233852739a5c7dd7602ab70e58a747d53029e1a1fe52afd7e662793a",
   "databaseMutationPerformed": false,
-  "fullSerialSuite": {
-    "filesTotal": 170,
-    "filesPassed": 161,
-    "filesSkipped": 8,
-    "filesFailed": 1,
-    "testsTotal": 1818,
-    "testsPassed": 1803,
-    "testsSkipped": 14,
-    "testsFailed": 1,
-    "failureClassification": "stale_browser_evidence_source_identity"
-  },
-  "staleEvidenceClosure": {
-    "staticAuditRegenerated": true,
-    "browserAuditRegenerated": true,
-    "focusedFiles": 1,
-    "focusedTests": 38,
-    "status": "pass"
-  },
   "gates": {
-    "contrastAndLayoutTests": { "files": 2, "tests": 42, "status": "pass" },
-    "phaseAGroundingTests": { "files": 12, "tests": 214, "status": "pass" },
-    "publicMcpTenantMemoryTests": { "files": 6, "tests": 62, "status": "pass" },
-    "knowledgeAndTenantTests": { "files": 5, "tests": 74, "status": "pass" },
+    "koshaRecoveryPython": { "tests": 73, "status": "pass" },
+    "sifKoshaOntology": { "files": 17, "tests": 369, "status": "pass" },
+    "frontendAuditContracts": { "files": 3, "tests": 42, "status": "pass" },
     "typecheck": "pass",
+    "normalBuild": { "staticPages": 28, "status": "pass" },
     "auditBuild": { "staticPages": 28, "status": "pass" },
-    "productionBuild": { "staticPages": 28, "status": "pass" },
-    "pdfTests": { "files": 2, "tests": 23, "status": "pass" },
-    "pdfNftAssets": {
-      "count": 3,
-      "names": ["NotoSansKR-Regular.ttf", "NotoSansKR-Bold.ttf", "NotoSansKR-OFL.txt"],
-      "status": "pass"
-    }
+    "normalBundle": { "chunks": 293, "markerCount": 0, "status": "pass" },
+    "auditBundle": { "chunks": 294, "markerCount": 1, "status": "pass" }
+  },
+  "koshaExactBody": {
+    "guideId": "D-C-7",
+    "pdfSha256": "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3",
+    "normalizedBodySha256": "97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112",
+    "pages": 71,
+    "characters": 38781,
+    "protocol": "recoverable-handle-bound-pair/v4",
+    "receiptChecks": 23,
+    "receiptChecksPassed": 23
   },
   "staticAudit": {
     "status": "pass",
@@ -55,10 +42,12 @@
     "failedRows": 0,
     "recoveredRows": 0,
     "findingCount": 0,
-    "failures": 0
+    "failures": 0,
+    "elapsedMs": 140202
   },
   "remainingGates": [
-    "KOSHA 234 candidate final bodies are unavailable from tracked Git assets",
+    "KOSHA 234 candidates are not production-wide trusted corpus",
+    "Hermes actual application runtime is disabled or unavailable",
     "Supabase RLS launchReadiness remains false",
     "remote CI, Vercel preview, and live production mapping require post-push verification"
   ]
