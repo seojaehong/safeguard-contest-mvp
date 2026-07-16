@@ -1,4 +1,5 @@
 import { assembleGraph, type OntologyGraph } from "./ontology/graph-store";
+import { queryByTask } from "./ontology/query";
 import { reviewDocumentCoverage, type QaReviewResult } from "./ontology/qa-review";
 import type {
   AskResponse,
@@ -15,19 +16,6 @@ const REVALIDATION_DOCUMENT_KEYS = [
   "emergencyResponseDraft"
 ] as const;
 
-const REVALIDATION_TASK_RULES = [
-  { label: "용접", keywords: ["용접", "절단", "불티", "용접흄"] },
-  { label: "화기 작업", keywords: ["화기", "가연물", "화재감시"] },
-  { label: "밀폐공간 작업", keywords: ["밀폐", "산소결핍", "질식"] },
-  { label: "비계 조립·해체", keywords: ["비계"] },
-  { label: "고소작업", keywords: ["고소", "추락", "외벽"] },
-  { label: "전기 작업", keywords: ["전기", "감전", "활선"] },
-  { label: "지게차 상하차", keywords: ["지게차"] },
-  { label: "크레인 양중", keywords: ["크레인", "양중"] },
-  { label: "하역·운반", keywords: ["하역", "운반"] },
-  { label: "도장(스프레이)", keywords: ["도장", "스프레이"] }
-] as const;
-
 export type WorkpackReadinessStatus = "ready" | "blocked";
 
 export type WorkpackReadiness = {
@@ -41,6 +29,11 @@ export type WorkpackReadinessOptions = {
   requiresRevalidation?: boolean;
 };
 
+export type WorkpackRevalidationBasis = {
+  reviewTasks: string[];
+  source: "generated-ontology-qa";
+};
+
 const APPROVAL_PLACEHOLDER_PATTERNS = [
   /\[결재\]/,
   /작성\s*_{2,}/,
@@ -48,6 +41,34 @@ const APPROVAL_PLACEHOLDER_PATTERNS = [
   /승인\s*_{2,}/,
   /_{6,}/
 ];
+
+export function buildWorkpackRevalidationBasis(response: AskResponse): WorkpackRevalidationBasis | null {
+  const reviewTask = response.ontologyQa?.reviewTask.trim();
+  if (!reviewTask) return null;
+  return {
+    reviewTasks: [reviewTask],
+    source: "generated-ontology-qa"
+  };
+}
+
+function canonicalizeFingerprintValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalizeFingerprintValue);
+  if (typeof value !== "object" || value === null) return value;
+  return Object.keys(value as Record<string, unknown>).sort().reduce<Record<string, unknown>>((record, key) => {
+    record[key] = canonicalizeFingerprintValue((value as Record<string, unknown>)[key]);
+    return record;
+  }, {});
+}
+
+export function buildWorkpackDeliverablesFingerprint(deliverables: AskResponse["deliverables"]): string {
+  const serialized = JSON.stringify(canonicalizeFingerprintValue(deliverables));
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < serialized.length; index += 1) {
+    hash ^= serialized.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
 
 function textDeliverables(response: AskResponse) {
   return Object.values(response.deliverables)
@@ -74,21 +95,14 @@ function hasDbHarnessBlocker(response: AskResponse) {
   return response.dbHarness.summary.missingEvidence.length > 0 || response.dbHarness.summary.ontologyStatus !== "ready";
 }
 
-function resolveRevalidationTask(response: AskResponse): string {
-  const haystack = `${response.scenario.workSummary} ${response.question}`.normalize("NFC").toLowerCase();
-  return REVALIDATION_TASK_RULES.find((rule) =>
-    rule.keywords.some((keyword) => haystack.includes(keyword.toLowerCase()))
-  )?.label ?? response.scenario.workSummary.trim();
-}
-
 function buildRevalidationSource(response: AskResponse): { text: string; documentKeys: string[] } {
   const chunks = REVALIDATION_DOCUMENT_KEYS.flatMap((key) => {
     const body = response.deliverables[key];
-    return body ? [`[${key}]\n${body}`] : [];
+    return body?.trim() ? [{ key, text: `[${key}]\n${body}` }] : [];
   });
   return {
-    text: chunks.join("\n\n"),
-    documentKeys: chunks.length ? [...REVALIDATION_DOCUMENT_KEYS] : []
+    text: chunks.map((chunk) => chunk.text).join("\n\n"),
+    documentKeys: chunks.map((chunk) => chunk.key)
   };
 }
 
@@ -195,21 +209,51 @@ export function parsePublishedOntologyGraph(payload: unknown): OntologyGraph | n
   if (typeof payload !== "object" || payload === null || !("ok" in payload) || !("graph" in payload)) {
     return null;
   }
-  const candidate = payload as { ok?: unknown; graph?: unknown };
-  if (candidate.ok !== true || typeof candidate.graph !== "object" || candidate.graph === null) return null;
+  const candidate = payload as { ok?: unknown; scope?: unknown; graph?: unknown };
+  if (
+    candidate.ok !== true
+    || candidate.scope !== "published"
+    || typeof candidate.graph !== "object"
+    || candidate.graph === null
+  ) return null;
   const graph = candidate.graph as { nodes?: unknown; edges?: unknown };
   if (!Array.isArray(graph.nodes) || !Array.isArray(graph.edges)) return null;
-  return assembleGraph(graph.nodes, graph.edges);
+  const assembled = assembleGraph(graph.nodes, graph.edges);
+  if (
+    assembled.nodes.length === 0
+    || assembled.edges.length === 0
+    || assembled.nodes.length !== graph.nodes.length
+    || assembled.edges.length !== graph.edges.length
+    || assembled.nodes.some((node) => node.review_state !== "published")
+    || assembled.edges.some((edge) => edge.review_state !== "published")
+  ) return null;
+  return assembled;
 }
 
 export function revalidateEditedWorkpack(
   response: AskResponse,
+  basis: WorkpackRevalidationBasis | null,
   graph: OntologyGraph,
   generatedAt = new Date().toISOString()
 ): AskResponse {
-  const reviewTask = resolveRevalidationTask(response);
+  const reviewTask = basis?.reviewTasks.length === 1 ? basis.reviewTasks[0] : "";
   const source = buildRevalidationSource(response);
-  const result = reviewDocumentCoverage(reviewTask, source.text, graph);
+  const taskEvidence = reviewTask ? queryByTask(graph, reviewTask) : null;
+  const result: QaReviewResult = !reviewTask
+    ? {
+        reviewable: false,
+        errorCode: "ontology_qa_failed",
+        message: "편집 전 authoritative 검수 작업을 하나로 확인할 수 없습니다.",
+        registeredTasks: []
+      }
+    : !taskEvidence || taskEvidence.hazards.length === 0 || taskEvidence.controls.length === 0
+      ? {
+          reviewable: false,
+          errorCode: "ontology_qa_failed",
+          message: `published 온톨로지에서 '${reviewTask}'의 필수 위험요인-안전조치 근거 경로를 확인할 수 없습니다.`,
+          registeredTasks: []
+        }
+      : reviewDocumentCoverage(reviewTask, source.text, graph);
   const reviewed = attachRevalidatedQa(response, reviewTask, result, source.documentKeys);
   return {
     ...reviewed,

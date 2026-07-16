@@ -6,6 +6,9 @@ import type { QaReviewFound } from "@/lib/ontology/qa-review";
 import {
   applyWorkpackDeliverablesChange,
   assessWorkpackReadiness,
+  buildWorkpackDeliverablesFingerprint,
+  buildWorkpackRevalidationBasis,
+  parsePublishedOntologyGraph,
   revalidateEditedWorkpack
 } from "@/lib/workpack-readiness";
 import type { AskResponse, QualityContract } from "@/lib/types";
@@ -99,6 +102,51 @@ function makeResponse(): AskResponse {
 }
 
 describe("workpack readiness", () => {
+  it("captures only the authoritative original review task for later edited-content revalidation", () => {
+    const response = makeResponse();
+    response.question = "외벽 도장 작업에서 이동식 비계를 사용한다.";
+    response.scenario.workSummary = "외벽 도장";
+    response.ontologyQa = {
+      ...response.ontologyQa!,
+      reviewTask: "외벽 도장"
+    };
+
+    expect(buildWorkpackRevalidationBasis(response)).toEqual({
+      reviewTasks: ["외벽 도장"],
+      source: "generated-ontology-qa"
+    });
+
+    response.ontologyQa = undefined;
+    expect(buildWorkpackRevalidationBasis(response)).toBeNull();
+  });
+
+  it("changes the canonical deliverables fingerprint after any edited document change", () => {
+    const response = makeResponse();
+    const before = buildWorkpackDeliverablesFingerprint(response.deliverables);
+    const edited = applyWorkpackDeliverablesChange(response, {
+      tbmBriefing: `${response.deliverables.tbmBriefing}\n추가 편집`
+    });
+
+    expect(buildWorkpackDeliverablesFingerprint(edited.deliverables)).not.toBe(before);
+    expect(buildWorkpackDeliverablesFingerprint(structuredClone(response.deliverables))).toBe(before);
+  });
+
+  it("rejects graph payloads that are not explicitly published or lose required rows during assembly", () => {
+    expect(parsePublishedOntologyGraph({
+      ok: true,
+      scope: "all",
+      graph: { nodes: [], edges: [] }
+    })).toBeNull();
+    expect(parsePublishedOntologyGraph({
+      ok: true,
+      scope: "published",
+      graph: {
+        nodes: [{ node_id: "invalid", cited_uids: [] }],
+        edges: []
+      }
+    })).toBeNull();
+  });
+
   it("blocks normal sharing when generated output still has review blockers", () => {
     const response = makeResponse();
     const incompleteQa: QaReviewFound = {
@@ -196,7 +244,7 @@ describe("workpack readiness", () => {
         {
           node_id: "Task_high_work",
           kind: "Task",
-          label: "고소작업",
+          label: "외벽 도장",
           text_excerpt: null,
           cited_uids: ["manual:launch-p0-test"],
           meta: {},
@@ -241,10 +289,16 @@ describe("workpack readiness", () => {
       ]
     );
     const response = makeResponse();
+    response.question = "외벽 도장 작업에서 이동식 비계를 사용한다.";
+    response.scenario.workSummary = "외벽 도장";
+    response.deliverables.workPlanDraft = "";
+    response.deliverables.emergencyResponseDraft = "";
     response.ontologyQa = {
       ...response.ontologyQa!,
+      reviewTask: "외벽 도장",
       detail: "STALE_QA_MUST_NOT_RETURN"
     };
+    const basis = buildWorkpackRevalidationBasis(response);
     const edited = applyWorkpackDeliverablesChange(
       response,
       {
@@ -256,30 +310,89 @@ describe("workpack readiness", () => {
       { requiresRevalidation: true }
     );
 
-    const revalidated = revalidateEditedWorkpack(edited, graph, "2026-07-17T00:00:00.000Z");
+    const revalidated = revalidateEditedWorkpack(edited, basis, graph, "2026-07-17T00:00:00.000Z");
     const readiness = assessWorkpackReadiness(revalidated);
 
     expect(revalidated.deliverables.tbmBriefing).toContain("사용자 편집 본문");
     expect(revalidated.ontologyQa?.result.reviewable).toBe(true);
     expect(revalidated.ontologyQa?.result.reviewable && revalidated.ontologyQa.result.verdict).toBe("통과");
     expect(revalidated.ontologyQa?.detail).not.toContain("STALE_QA_MUST_NOT_RETURN");
+    expect(revalidated.ontologyQa?.sourceDocumentKeys).toEqual([
+      "riskAssessmentDraft",
+      "tbmBriefing",
+      "tbmLogDraft",
+      "safetyEducationRecordDraft"
+    ]);
     expect(revalidated.qualityContract?.generatedAt).toBe("2026-07-17T00:00:00.000Z");
     expect(readiness.canShare).toBe(true);
   });
 
   it("fails closed when deterministic revalidation cannot review the edited task", () => {
+    const response = makeResponse();
+    const basis = buildWorkpackRevalidationBasis(response);
     const edited = applyWorkpackDeliverablesChange(
-      makeResponse(),
+      response,
       { tbmBriefing: "사용자 편집 본문" },
       { requiresRevalidation: true }
     );
     const emptyGraph = assembleGraph([], []);
 
-    const revalidated = revalidateEditedWorkpack(edited, emptyGraph, "2026-07-17T00:00:00.000Z");
+    const revalidated = revalidateEditedWorkpack(edited, basis, emptyGraph, "2026-07-17T00:00:00.000Z");
     const readiness = assessWorkpackReadiness(revalidated);
 
     expect(revalidated.ontologyQa?.result.reviewable).toBe(false);
     expect(readiness.canShare).toBe(false);
     expect(readiness.reasons).toContain("안전조치 검수 미통과");
+  });
+
+  it("fails closed without an unambiguous authoritative revalidation basis", () => {
+    const edited = applyWorkpackDeliverablesChange(
+      makeResponse(),
+      { tbmBriefing: "외벽 도장과 비계 작업 안전조치를 모두 편집했다." },
+      { requiresRevalidation: true }
+    );
+    const graph = assembleGraph([], []);
+
+    const missingBasis = revalidateEditedWorkpack(edited, null, graph, "2026-07-17T00:00:00.000Z");
+    const ambiguousBasis = revalidateEditedWorkpack(edited, {
+      reviewTasks: ["외벽 도장", "비계 조립·해체"],
+      source: "generated-ontology-qa"
+    }, graph, "2026-07-17T00:00:00.000Z");
+
+    for (const result of [missingBasis, ambiguousBasis]) {
+      expect(result.ontologyQa?.result.reviewable).toBe(false);
+      expect(assessWorkpackReadiness(result).canShare).toBe(false);
+    }
+  });
+
+  it("fails closed when the published task has no required hazard-control evidence path", () => {
+    const response = makeResponse();
+    const basis = buildWorkpackRevalidationBasis(response);
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      { tbmBriefing: "사용자 편집 본문" },
+      { requiresRevalidation: true }
+    );
+    const taskOnlyGraph = assembleGraph([{
+      node_id: "Task_high_work",
+      kind: "Task",
+      label: "외벽 도장",
+      text_excerpt: null,
+      cited_uids: ["manual:published-test-task"],
+      meta: {},
+      review_state: "published"
+    }], []);
+    expect(taskOnlyGraph.nodes).toHaveLength(1);
+
+    const revalidated = revalidateEditedWorkpack(
+      edited,
+      basis,
+      taskOnlyGraph,
+      "2026-07-17T00:00:00.000Z"
+    );
+
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(false);
+    expect(revalidated.qualityContract?.overall).toBe("blocked");
+    expect(assessWorkpackReadiness(revalidated).canShare).toBe(false);
   });
 });
