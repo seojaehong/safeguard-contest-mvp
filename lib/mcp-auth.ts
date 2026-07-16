@@ -205,33 +205,20 @@ async function verifyPersistedTenantIdentity(
   client: NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
   row: McpTokenRow,
 ): Promise<boolean> {
-  if (!row.org_id) return false;
+  if (!row.site_id || !row.org_id) return false;
 
   try {
-    if (row.site_id) {
-      const { data, error } = await client
-        .from("sites")
-        .select("id, organization_id")
-        .eq("id", row.site_id)
-        .eq("organization_id", row.org_id)
-        .maybeSingle();
-      if (error) {
-        log.warn("MCP token tenant identity verification failed", error);
-        return false;
-      }
-      return data?.id === row.site_id && data.organization_id === row.org_id;
-    }
-
     const { data, error } = await client
-      .from("organizations")
-      .select("id")
-      .eq("id", row.org_id)
+      .from("sites")
+      .select("id, organization_id")
+      .eq("id", row.site_id)
+      .eq("organization_id", row.org_id)
       .maybeSingle();
     if (error) {
       log.warn("MCP token tenant identity verification failed", error);
       return false;
     }
-    return data?.id === row.org_id;
+    return data?.id === row.site_id && data.organization_id === row.org_id;
   } catch (error) {
     log.warn("MCP token tenant identity verification threw", error);
     return false;
