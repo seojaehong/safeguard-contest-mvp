@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -13,6 +15,16 @@ import {
 } from "@/components/WorkflowSharePolicy";
 
 describe("workflow share panel behavior", () => {
+  it("builds recipient variants from saved worker languages independently of manager preview", () => {
+    const source = readFileSync(join(process.cwd(), "components", "WorkflowSharePanel.tsx"), "utf8");
+
+    expect(source).toContain("function buildRecipientMessageVariants");
+    expect(source).toContain("targetWorkers.map((worker) => worker.languageCode)");
+    expect(source).toContain("messageVariants: recipientMessageVariants.messageVariants");
+    expect(source).not.toContain("messageTarget: selectedMessageTarget");
+    expect(source).not.toContain("message: selectedMessage");
+  });
+
   it("clears result, session, and log evidence when the target or workpack scope changes", () => {
     const targetSignature = buildWorkflowShareTargetSignature([{
       displayName: "Worker One",

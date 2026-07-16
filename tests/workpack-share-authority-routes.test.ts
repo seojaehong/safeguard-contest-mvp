@@ -209,6 +209,67 @@ describe("share session route authority", () => {
 });
 
 describe("workflow dispatch route authority", () => {
+  it("binds each server-saved recipient language to an explicit message variant", async () => {
+    const { buildLocalizedDispatchRecipients } = await import("@/app/api/workflow/dispatch/route");
+    const koreanRecipient = {
+      ...serverRecipient.workerSnapshot,
+      workerId: "22222222-2222-4222-8222-222222222222",
+      displayName: "Server Kim",
+      languageCode: "ko",
+      languageLabel: "한국어"
+    };
+
+    expect(buildLocalizedDispatchRecipients(
+      [serverRecipient.workerSnapshot, koreanRecipient],
+      {
+        vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.",
+        ko: "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요."
+      }
+    )).toEqual({
+      ok: true,
+      recipients: [
+        expect.objectContaining({
+          workerId: WORKER_ID,
+          dispatchLanguageCode: "vi",
+          message: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+        }),
+        expect.objectContaining({
+          workerId: koreanRecipient.workerId,
+          dispatchLanguageCode: "ko",
+          message: "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요."
+        })
+      ]
+    });
+  });
+
+  it("fails closed before provider dispatch when a saved recipient language body is unavailable", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: {
+        ko: "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요."
+      }
+    }));
+    const body = await response.json() as {
+      missingLanguageCodes?: string[];
+      providerCalled?: boolean;
+    };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      missingLanguageCodes: ["vi"],
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
   it("rejects client-forged workpack and recipients fields", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     const { POST } = await import("@/app/api/workflow/dispatch/route");
@@ -235,8 +296,9 @@ describe("workflow dispatch route authority", () => {
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["email", "sms"],
       operatorNote: "server authority",
-      messageTarget: "manager",
-      message: "작업 전 안전수칙을 확인해 주세요."
+      messageVariants: {
+        vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+      }
     }));
     const body = await response.json() as {
       duplicateRisk?: boolean;
@@ -266,8 +328,9 @@ describe("workflow dispatch route authority", () => {
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["email"],
       operatorNote: "fixture validation",
-      messageTarget: "foreign:vi",
-      message: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+      messageVariants: {
+        vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+      }
     }));
     const body = await response.json() as {
       providerStatus?: string;
@@ -286,25 +349,35 @@ describe("workflow dispatch route authority", () => {
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 
-  it("builds the provider payload with the exact validated selected message", async () => {
-    const { buildWorkflowDispatchWebhookPayload } = await import("@/lib/workflow-share-client");
-    const message = "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.";
+  it("builds a payload that proves each recipient language body without a global message", async () => {
+    const { buildLocalizedDispatchWebhookPayload } = await import("@/app/api/workflow/dispatch/route");
+    const messageVariants = {
+      vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.",
+      en: "[SafeClaw]\nEnglish\n\n- Stop work when conditions are unsafe."
+    };
+    const recipients = [{
+      ...serverRecipient.workerSnapshot,
+      dispatchLanguageCode: "vi",
+      message: messageVariants.vi
+    }];
 
-    expect(buildWorkflowDispatchWebhookPayload({
+    const payload = buildLocalizedDispatchWebhookPayload({
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["sms"],
-      recipients: [serverRecipient.workerSnapshot],
+      recipients,
       operatorNote: "TBM 후 확인",
-      messageTarget: "foreign:vi",
-      message,
       workpack: serverWorkpack,
       sentAt: "2026-07-15T00:00:00.000Z"
-    })).toMatchObject({
-      event: "safeguard.workpack.dispatch",
-      messageTarget: "foreign:vi",
-      message,
-      recipients: [serverRecipient.workerSnapshot]
     });
+
+    expect(payload).toMatchObject({
+      event: "safeguard.workpack.dispatch",
+      recipientMessageContract: "saved-worker-language-v1",
+      recipients
+    });
+    expect(payload.messageVariants).toEqual({ vi: messageVariants.vi });
+    expect(payload).not.toHaveProperty("messageTarget");
+    expect(payload).not.toHaveProperty("message");
   });
 
   it("rejects internal diagnostics and oversized selected messages before relay", async () => {
@@ -316,21 +389,39 @@ describe("workflow dispatch route authority", () => {
       shareSessionId: SESSION_ID,
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["sms"],
-      operatorNote: "",
-      messageTarget: "foreign:vi"
+      operatorNote: ""
     };
 
     const internalResponse = await POST(jsonRequest("/api/workflow/dispatch", {
       ...baseBody,
-      message: "DB 하네스 내부 진단"
+      messageVariants: { vi: "DB 하네스 내부 진단" }
     }));
     expect(internalResponse.status).toBe(400);
 
     const oversizedResponse = await POST(jsonRequest("/api/workflow/dispatch", {
       ...baseBody,
-      message: "x".repeat(4_001)
+      messageVariants: { vi: "x".repeat(4_001) }
     }));
     expect(oversizedResponse.status).toBe(400);
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("rejects the legacy single-message-for-all request contract", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageTarget: "foreign:vi",
+      message: "하나의 본문을 모든 수신자에게 보내는 과거 요청"
+    }));
+
+    expect(response.status).toBe(400);
+    expect(mocks.loadOwnedWorkpackOperationContext).not.toHaveBeenCalled();
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 });

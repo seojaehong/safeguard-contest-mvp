@@ -10,7 +10,6 @@ import {
 } from "@/lib/workspace";
 import {
   createAuthenticatedShareSession,
-  dispatchAuthenticatedShareSession,
   type WorkflowDispatchChannelResult,
   type WorkflowDispatchResult
 } from "@/lib/workflow-share-client";
@@ -47,6 +46,9 @@ type ActiveChannel = Extract<Channel, "email" | "sms" | "kakao">;
 type MessageTarget = "manager" | `foreign:${string}`;
 type WorkflowSharePhase = "idle" | "saving-workpack" | "creating-session" | "dispatching" | "saving-log";
 type RemoteRecordStatus = "idle" | "loading" | "ready" | "unconfigured" | "error";
+type RecipientMessageVariantsResult =
+  | { ok: true; messageVariants: Record<string, string> }
+  | { ok: false; missingLanguageCodes: string[] };
 
 type WorkflowSharePanelProps = {
   data: AskResponse;
@@ -204,6 +206,65 @@ function readString(value: unknown): string {
 
 function readArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
+}
+
+async function dispatchLocalizedShareSession(input: {
+  authToken: string;
+  workpackId: string;
+  shareSessionId: string;
+  idempotencyKey: string;
+  channels: ActiveChannel[];
+  operatorNote: string;
+  messageVariants: Record<string, string>;
+}): Promise<WorkflowDispatchResult> {
+  const response = await fetch("/api/workflow/dispatch", {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${input.authToken}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      workpackId: input.workpackId,
+      shareSessionId: input.shareSessionId,
+      idempotencyKey: input.idempotencyKey,
+      channels: input.channels,
+      operatorNote: input.operatorNote,
+      messageVariants: input.messageVariants
+    })
+  });
+  let body: Record<string, unknown> = {};
+  try {
+    const parsed = await response.json() as unknown;
+    body = isRecord(parsed) ? parsed : {};
+  } catch (error) {
+    console.warn("localized workflow dispatch response parse failed", error);
+  }
+  const channelResults = readArray(body.channelResults).flatMap((item): WorkflowDispatchChannelResult[] => {
+    if (!isRecord(item)) return [];
+    return [{
+      channel: readString(item.channel) || undefined,
+      provider: readString(item.provider) || undefined,
+      status: readString(item.status) || undefined,
+      message: readString(item.message) || undefined,
+      httpStatus: typeof item.httpStatus === "number" ? item.httpStatus : undefined
+    }];
+  });
+  const result: WorkflowDispatchResult = {
+    ok: body.ok === true,
+    configured: body.configured === true,
+    message: readString(body.message) || (body.ok === true ? "전파 요청을 접수했습니다." : "전파 요청이 완료되지 않았습니다."),
+    workflowRunId: readString(body.workflowRunId) || undefined,
+    providerStatus: readString(body.providerStatus) || undefined,
+    idempotencyKey: readString(body.idempotencyKey) || undefined,
+    idempotencySupported: typeof body.idempotencySupported === "boolean" ? body.idempotencySupported : undefined,
+    duplicateRisk: typeof body.duplicateRisk === "boolean" ? body.duplicateRisk : undefined,
+    providerCalled: typeof body.providerCalled === "boolean" ? body.providerCalled : undefined,
+    channelResults: channelResults.length ? channelResults : undefined
+  };
+  if (!response.ok && !result.duplicateRisk) {
+    throw new Error(`${result.message} (HTTP ${response.status})`);
+  }
+  return result;
 }
 
 export function parseWorkflowShareArchive(
@@ -478,7 +539,7 @@ export function deriveWorkflowShareStatus(input: WorkflowShareStatusInput): {
 
 function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
   const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
-  if (!language) return data.deliverables.foreignWorkerTransmission;
+  if (!language) return "";
 
   return [
     "[SafeClaw]",
@@ -486,6 +547,30 @@ function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
     "",
     ...language.lines.map((line) => `- ${line}`),
   ].join("\n");
+}
+
+function buildRecipientMessageVariants(input: {
+  data: AskResponse;
+  recipientLanguageCodes: string[];
+}): RecipientMessageVariantsResult {
+  const messageVariants: Record<string, string> = {};
+  const missingLanguageCodes = new Set<string>();
+
+  for (const languageCode of [...new Set(input.recipientLanguageCodes)].sort()) {
+    const message = languageCode === "ko"
+      ? input.data.deliverables.kakaoMessage.trim()
+      : buildForeignLanguageMessage(input.data, languageCode).trim();
+    if (!message) {
+      missingLanguageCodes.add(languageCode || "unknown");
+      continue;
+    }
+    messageVariants[languageCode] = message;
+  }
+
+  if (missingLanguageCodes.size) {
+    return { ok: false, missingLanguageCodes: [...missingLanguageCodes].sort() };
+  }
+  return { ok: true, messageVariants };
 }
 
 function formatChannelName(channel?: string) {
@@ -841,6 +926,24 @@ export function WorkflowSharePanel({
       });
       return;
     }
+    const recipientMessageVariants = buildRecipientMessageVariants({
+      data,
+      recipientLanguageCodes: targetWorkers.map((worker) => worker.languageCode)
+    });
+    if (!recipientMessageVariants.ok) {
+      updateDispatchEvidence({
+        type: "set_result",
+        scopeKey: evidenceScopeKey,
+        result: {
+          ok: false,
+          configured: true,
+          providerCalled: false,
+          message: `저장할 작업자 언어 본문이 없습니다: ${recipientMessageVariants.missingLanguageCodes.join(", ")}`
+        },
+        resultSource: "dispatch"
+      });
+      return;
+    }
 
     dispatchInFlightRef.current = true;
     setIsSending(true);
@@ -915,15 +1018,14 @@ export function WorkflowSharePanel({
         dispatchAttemptId,
         channels: activeChannels
       });
-      const payload = await dispatchAuthenticatedShareSession(fetch, {
+      const payload = await dispatchLocalizedShareSession({
         authToken,
         workpackId: authority.workpackId,
         shareSessionId: activeShareSessionId,
         idempotencyKey: providerIdempotencyKey,
         channels: activeChannels,
         operatorNote: "",
-        messageTarget: selectedMessageTarget,
-        message: selectedMessage
+        messageVariants: recipientMessageVariants.messageVariants
       });
       updateDispatchEvidence({
         type: "set_result",
@@ -1163,7 +1265,7 @@ export function WorkflowSharePanel({
             ))}
           </select>
           <p className="channel-readiness-note">
-            작업자별 저장 언어로 자동 전송하며, 여기서는 실제 전달 문구를 미리 확인합니다.
+            미리보기 선택은 전송 본문을 바꾸지 않습니다. 요청에는 작업자별 저장 언어 본문을 각각 포함합니다.
           </p>
         </section>
 
