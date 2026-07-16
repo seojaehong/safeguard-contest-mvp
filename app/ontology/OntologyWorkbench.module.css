@@ -13,6 +13,7 @@
   --ontology-selected: color-mix(in srgb, var(--sc-hazard-yellow) 18%, var(--sc-paper));
   --ontology-focus-ring: color-mix(in srgb, var(--workspace-accent) 55%, transparent);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   color: var(--ontology-ink);
 }
