@@ -56,8 +56,11 @@ import { buildGenerationProgressState } from "@/lib/workspace-generation-progres
 import {
   applyWorkpackDeliverablesChange,
   assessWorkpackReadiness,
+  buildWorkpackDeliverablesFingerprint,
+  buildWorkpackRevalidationBasis,
   parsePublishedOntologyGraph,
   revalidateEditedWorkpack,
+  type WorkpackRevalidationBasis,
   type WorkpackReadiness
 } from "@/lib/workpack-readiness";
 import { formatCustomerFacingLabel, formatCustomerFacingText } from "@/lib/web-safe-presentation";
@@ -1052,6 +1055,10 @@ export function SafeGuardCommandCenter({
   const [generationFingerprint, setGenerationFingerprint] = useState<string | null>(null);
   const [requiresRevalidation, setRequiresRevalidation] = useState(false);
   const [isRevalidating, setIsRevalidating] = useState(false);
+  const dataRef = useRef<AskResponse | null>(null);
+  const revalidationBasisRef = useRef<WorkpackRevalidationBasis | null>(null);
+  const revalidationVersionRef = useRef(0);
+  const deliverablesFingerprintRef = useRef<string | null>(null);
   const [message, setMessage] = useState("");
   const [inputError, setInputError] = useState("");
   const commandInputRef = useRef<HTMLTextAreaElement>(null);
@@ -1148,20 +1155,34 @@ export function SafeGuardCommandCenter({
     change: WorkpackDeliverablesChange
   ) => {
     if (change.requiresRevalidation) {
+      revalidationVersionRef.current += 1;
       setRequiresRevalidation(true);
       setMessage("편집 내용을 보존했습니다. 공유 전 편집본을 다시 검증하세요.");
     }
     setData((current) => {
       if (!current) return current;
+      if (change.requiresRevalidation && !revalidationBasisRef.current) {
+        revalidationBasisRef.current = buildWorkpackRevalidationBasis(current);
+      }
       const currentDocuments: Partial<Record<DocumentKey, string>> = current.deliverables;
       const documentKeys = Object.keys(values) as DocumentKey[];
       if (documentKeys.every((key) => currentDocuments[key] === values[key])) return current;
-      return applyWorkpackDeliverablesChange(current, values, change);
+      const next = applyWorkpackDeliverablesChange(current, values, change);
+      dataRef.current = next;
+      deliverablesFingerprintRef.current = buildWorkpackDeliverablesFingerprint(next.deliverables);
+      return next;
     });
   }, []);
 
   async function handleEditedWorkpackRevalidation() {
+    const basis = revalidationBasisRef.current;
     if (!data || !requiresRevalidation || isRevalidating) return;
+    if (!basis || basis.reviewTasks.length !== 1) {
+      setMessage("편집 전 authoritative 검수 작업을 확인할 수 없어 공유 잠금을 유지합니다.");
+      return;
+    }
+    const requestVersion = revalidationVersionRef.current;
+    const requestFingerprint = buildWorkpackDeliverablesFingerprint(data.deliverables);
     setIsRevalidating(true);
     setMessage("편집된 문서 본문으로 안전조치를 다시 검증하고 있습니다.");
     try {
@@ -1172,28 +1193,61 @@ export function SafeGuardCommandCenter({
         throw new Error(`편집본 재검증 근거 조회 실패: HTTP ${response.status}`);
       }
 
-      const revalidated = revalidateEditedWorkpack(data, graph);
+      const currentData = dataRef.current;
+      if (
+        requestVersion !== revalidationVersionRef.current
+        || !currentData
+        || requestFingerprint !== buildWorkpackDeliverablesFingerprint(currentData.deliverables)
+      ) {
+        setRequiresRevalidation(true);
+        setMessage("재검증 중 편집 내용이 변경되었습니다. 현재 편집본으로 다시 검증하세요.");
+        return;
+      }
+
+      const revalidated = revalidateEditedWorkpack(currentData, basis, graph);
       const readiness = assessWorkpackReadiness(revalidated);
+      if (
+        requestVersion !== revalidationVersionRef.current
+        || requestFingerprint !== deliverablesFingerprintRef.current
+      ) {
+        setRequiresRevalidation(true);
+        setMessage("재검증 중 편집 내용이 변경되었습니다. 현재 편집본으로 다시 검증하세요.");
+        return;
+      }
+      dataRef.current = revalidated;
+      deliverablesFingerprintRef.current = buildWorkpackDeliverablesFingerprint(revalidated.deliverables);
       setData(revalidated);
-      setRequiresRevalidation(false);
-      if (generationFingerprint) persistCurrentWorkpack(revalidated, generationFingerprint);
+      setRequiresRevalidation(!readiness.canShare);
+      if (generationFingerprint) persistCurrentWorkpack(revalidated, generationFingerprint, basis);
       setMessage(readiness.canShare
         ? "편집본 재검증을 통과했습니다. 공유할 수 있습니다."
         : readiness.reasons[0] || "편집본 재검증에서 보완 항목을 확인했습니다.");
     } catch (error) {
       console.error("edited workpack revalidation failed", error);
+      setRequiresRevalidation(true);
       setMessage("편집본 재검증을 완료하지 못했습니다. 공유 잠금을 유지합니다.");
     } finally {
       setIsRevalidating(false);
     }
   }
 
-  function persistCurrentWorkpack(payload: AskResponse, fingerprint: string) {
+  function persistCurrentWorkpack(
+    payload: AskResponse,
+    fingerprint: string,
+    revalidationBasis = revalidationBasisRef.current
+  ) {
     if (typeof window === "undefined") return;
     try {
+      const existing = parseStoredCurrentWorkpack(window.localStorage.getItem(CURRENT_WORKPACK_STORAGE_KEY));
+      const sameGeneration = existing?.generationFingerprint === fingerprint;
       window.localStorage.setItem(
         CURRENT_WORKPACK_STORAGE_KEY,
-        JSON.stringify(buildStoredCurrentWorkpack(payload, { generationFingerprint: fingerprint }))
+        JSON.stringify(buildStoredCurrentWorkpack(payload, {
+          generationFingerprint: fingerprint,
+          revalidationBasis: revalidationBasis || undefined,
+          workerSnapshot: sameGeneration ? existing?.workerSnapshot : undefined,
+          dispatchSnapshot: sameGeneration ? existing?.dispatchSnapshot : undefined
+        }))
       );
     } catch (error) {
       console.warn("safeclaw current workpack save failed", error);
@@ -1595,8 +1649,13 @@ export function SafeGuardCommandCenter({
   }
 
   function applyGeneratedPayload(payload: AskResponse) {
+    revalidationVersionRef.current += 1;
     const fingerprint = buildGenerationEvidenceFingerprint(payload);
-    persistCurrentWorkpack(payload, fingerprint);
+    const revalidationBasis = buildWorkpackRevalidationBasis(payload);
+    revalidationBasisRef.current = revalidationBasis;
+    dataRef.current = payload;
+    deliverablesFingerprintRef.current = buildWorkpackDeliverablesFingerprint(payload.deliverables);
+    persistCurrentWorkpack(payload, fingerprint, revalidationBasis);
     setGenerationFingerprint(fingerprint);
     setData(payload);
     setRequiresRevalidation(false);
@@ -1678,9 +1737,13 @@ export function SafeGuardCommandCenter({
   }
 
   function selectExample(example: FieldExample) {
+    revalidationVersionRef.current += 1;
     setSelectedExampleId(example.id);
     setQuestion(example.question);
     setData(null);
+    dataRef.current = null;
+    revalidationBasisRef.current = null;
+    deliverablesFingerprintRef.current = null;
     setGenerationFingerprint(null);
     setRequiresRevalidation(false);
     setSavedWorkpackId(null);
@@ -1700,8 +1763,14 @@ export function SafeGuardCommandCenter({
     setSelectedExampleId(null);
     setQuestion(stored.data.question);
     setData(stored.data);
+    dataRef.current = stored.data;
+    revalidationBasisRef.current = stored.revalidationBasis || buildWorkpackRevalidationBasis(stored.data);
+    deliverablesFingerprintRef.current = buildWorkpackDeliverablesFingerprint(stored.data.deliverables);
     setGenerationFingerprint(stored.generationFingerprint);
-    setRequiresRevalidation(false);
+    setRequiresRevalidation(Boolean(
+      !stored.data.ontologyQa
+      || stored.data.qualityContract?.ontology.status === "pending"
+    ));
     setState("ready");
     setDocumentSurfaceMode("review");
     setWorkspacePage("document");
@@ -2366,6 +2435,7 @@ export function SafeGuardCommandCenter({
                 editorFocusToken={editorFocusToken}
                 requestedDocumentKey={requestedDocumentKey}
                 readiness={workpackReadiness || undefined}
+                revalidationBasis={revalidationBasisRef.current || undefined}
                 onDeliverablesChange={handleWorkpackDeliverablesChange}
                 surface="editor"
               />
@@ -2417,6 +2487,7 @@ export function SafeGuardCommandCenter({
                   data={data}
                   generationFingerprint={generationFingerprint || undefined}
                   readiness={workpackReadiness || undefined}
+                  revalidationBasis={revalidationBasisRef.current || undefined}
                   onDeliverablesChange={handleWorkpackDeliverablesChange}
                   surface="share"
                 />

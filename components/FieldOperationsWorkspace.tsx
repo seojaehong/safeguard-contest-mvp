@@ -30,7 +30,11 @@ import {
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
 import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
-import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/workpack-readiness";
+import {
+  applyWorkpackDeliverablesChange,
+  type WorkpackReadiness,
+  type WorkpackRevalidationBasis
+} from "@/lib/workpack-readiness";
 import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
 import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
 import {
@@ -839,6 +843,7 @@ export function FieldOperationsWorkspace({
   editorFocusToken = 0,
   requestedDocumentKey,
   readiness,
+  revalidationBasis,
   onDeliverablesChange,
   surface = "full"
 }: {
@@ -847,6 +852,7 @@ export function FieldOperationsWorkspace({
   editorFocusToken?: number;
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
+  revalidationBasis?: WorkpackRevalidationBasis;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
   surface?: "full" | "share" | "editor";
 }) {
@@ -1039,6 +1045,7 @@ export function FieldOperationsWorkspace({
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(nextData, {
           generationFingerprint,
+          revalidationBasis,
           workerSnapshot: workerSnapshotRef.current,
           dispatchSnapshot: dispatchSnapshotRef.current
         }))
@@ -1046,7 +1053,7 @@ export function FieldOperationsWorkspace({
     } catch (error) {
       console.warn("safeclaw current workpack update failed", error);
     }
-  }, []);
+  }, [generationFingerprint, revalidationBasis]);
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
     ["PLAN", "계획", `${workspaceData.citations.length}건 근거 · 위험성평가·작업계획`],
@@ -1214,6 +1221,7 @@ export function FieldOperationsWorkspace({
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(workspaceData, {
           generationFingerprint,
+          revalidationBasis,
           workerSnapshot,
           dispatchSnapshot
         }))
@@ -1221,7 +1229,7 @@ export function FieldOperationsWorkspace({
     } catch (error) {
       console.warn("safeclaw current workpack snapshot update failed", error);
     }
-  }, [dispatchSnapshot, generationFingerprint, workerSnapshot, workspaceData]);
+  }, [dispatchSnapshot, generationFingerprint, revalidationBasis, workerSnapshot, workspaceData]);
 
   if (surface === "share") {
     return (

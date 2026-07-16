@@ -1,13 +1,17 @@
 {
   "task": "launch edit to revalidation to share P0",
   "authoritativeBase": "d42e143575c636fcc6e698b9c9eb35609c70b156",
+  "remediationStartHead": "f7c1acf86da314e86993b0865a6da9ea1388fce4",
   "branch": "fix/launch-edit-revalidation-share-p0-v2",
   "scope": {
     "productionFiles": [
+      "components/FieldOperationsWorkspace.tsx",
       "components/SafeGuardCommandCenter.tsx",
+      "lib/current-workpack.ts",
       "lib/workpack-readiness.ts"
     ],
     "testFiles": [
+      "tests/editor-first-state.test.ts",
       "tests/workpack-readiness.test.ts",
       "tests/workspace-share-simplification.test.ts",
       "tests/workspace-layout-regression.test.ts"
@@ -17,28 +21,37 @@
   "behavior": {
     "editInvalidatesStaleQa": true,
     "editPreservesCanonicalContent": true,
-    "editPreservesDbHarnessEvidence": true,
-    "revalidationSource": "/api/ontology/graph published graph",
+    "editPreservesWorkerAndDispatchSnapshots": true,
+    "revalidationCapturesDeliverableVersionAndFingerprint": true,
+    "staleAsyncRevalidationIsDiscarded": true,
+    "authoritativeReviewBasisIsStoredOutsideInvalidatedQa": true,
+    "reviewTaskKeywordInference": false,
+    "ambiguousOrMissingReviewBasisFailsClosed": true,
+    "revalidationSource": "/api/ontology/graph with explicit published scope",
     "revalidationRecomputesQaFromEditedContent": true,
+    "zeroHazardsControlsOrGraphEdgesFailsClosed": true,
+    "sourceDocumentKeysContainOnlyReviewedNonEmptyDocuments": true,
+    "reloadRestoresEditedContentAndShowsRevalidationAction": true,
     "nonReviewableFailsClosed": true,
-    "shareUnlockRequiresPassingQaAndAllExistingReadinessGates": true
+    "shareUnlockRequiresPassingQaAndAllExistingReadinessGates": true,
+    "databaseMutationPerformed": false
   },
   "tdd": {
     "red": [
-      "workpack readiness tests failed because quality evidence was deleted and revalidateEditedWorkpack did not exist",
-      "workspace source contract failed because no revalidation action existed",
-      "production browser test failed with safety review not passing before the deterministic graph fixture matched the inferred task"
+      "unit tests initially failed because no immutable revalidation basis or deliverable fingerprint contract existed",
+      "unit tests exposed acceptance of non-published or empty ontology graph paths and inaccurate source document keys",
+      "browser test initially exposed missing reload selection state and then confirmed the expected stale in-flight result discard contract"
     ],
     "green": [
-      "4 focused test files passed with 22 tests",
-      "production browser edit-revalidation-remount scenario passed"
+      "4 focused test files passed with 28 tests",
+      "production browser passed real reload restoration, stale in-flight result discard, fresh revalidation, persistence, and responsive CTA geometry"
     ]
   },
   "verification": [
     {
       "command": "npm.cmd test -- tests/workpack-readiness.test.ts tests/workspace-share-simplification.test.ts tests/workspace-pages.test.ts tests/editor-first-state.test.ts",
       "result": "passed",
-      "tests": 22,
+      "tests": 28,
       "failures": 0
     },
     {
@@ -52,12 +65,22 @@
       "failures": 0
     },
     {
-      "command": "$env:WORKSPACE_INPUT_PROD_MATRIX='1'; npm.cmd test -- tests/workspace-layout-regression.test.ts -t 'preserves the edited active document across review and editor remount'",
+      "command": "$env:WORKSPACE_INPUT_PROD_MATRIX='1'; npm.cmd test -- tests/workspace-layout-regression.test.ts -t 'preserves edited workpack through reload, concurrent revalidation, and responsive share gating'",
       "result": "passed",
       "tests": 1,
       "skipped": 24,
-      "failures": 0
+      "failures": 0,
+      "viewports": [
+        "1440x900",
+        "390x844"
+      ],
+      "assertions": [
+        "revalidation and share actions are at least 44px high",
+        "revalidation action does not overlap the share action",
+        "workspace has no horizontal overflow",
+        "edited text and worker/dispatch snapshots survive reload and remount",
+        "stale async revalidation cannot clear the lock or overwrite the concurrent edit"
+      ]
     }
-  ],
-  "knownHarnessNote": "The authoritative dev browser harness returned HTTP 500 because its custom Next 15 distDir lacked required-server-files.json. The same browser assertion passed against the repository-supported production matrix after a successful build."
+  ]
 }
