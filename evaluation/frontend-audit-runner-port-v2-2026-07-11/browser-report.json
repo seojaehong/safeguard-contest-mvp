@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-16T23:31:07.388Z",
+  "generatedAt": "2026-07-16T23:57:37.156Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "acdaf1ee22bba32f1b057c142dd9a0884e969238",
+  "sourceSha": "80dcf230449dd9011c5f88a9f3e12b1172185515",
   "sourceIdentity": "317f48f5d03149865be0e164dcd2265b1152be3701138fb73abe4259a1016edb",
-  "evidenceHead": "acdaf1ee22bba32f1b057c142dd9a0884e969238",
+  "evidenceHead": "80dcf230449dd9011c5f88a9f3e12b1172185515",
   "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 32,
@@ -27,10 +27,10 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 112519
+    "elapsedMs": 105932
   },
   "staticAudit": {
-    "sourceSha": "acdaf1ee22bba32f1b057c142dd9a0884e969238",
+    "sourceSha": "80dcf230449dd9011c5f88a9f3e12b1172185515",
     "sourceIdentity": "317f48f5d03149865be0e164dcd2265b1152be3701138fb73abe4259a1016edb",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
@@ -9803,7 +9803,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-desktop-1440.jpg",
-      "screenshotSha256": "19fc005ba26cc254cf9590e78f35191374657d05459ba443a5f2e1709834a842",
+      "screenshotSha256": "837922c96de47cadb36891b74a9b6739fe1b0526128139e1963e0c849393acb8",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10015,7 +10015,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-mobile-390.jpg",
-      "screenshotSha256": "fab57124e198fb9128e24b17853def39df9628e75177541ce2e77488ca7bf26b",
+      "screenshotSha256": "98afcbb3aabb6b1fc3886b1b95432ee5b459a63dbc911bfac157d4818a5c8331",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -13098,7 +13098,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/special-loading.jpg",
-      "screenshotSha256": "66ad25859ff30d2c947c78cabf97fc565306e569e6fbd208d08f0ba89cd4479c",
+      "screenshotSha256": "801eb5cefd4e92da3a7d211742295b8956c5e680f0a7ac35bc7c7b0952966654",
       "boundaryMarker": "loading",
       "boundaryMarkerCount": 1,
       "renderedControls": [],
@@ -13114,7 +13114,7 @@
           ]
         }
       ],
-      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.4,20.2,33.6,33.6,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.8,20.6,32.8,32.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -13593,7 +13593,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 17. 오전 8:31:07 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 17. 오전 8:57:36 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13637,7 +13637,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "f2d3324785acf8d250cffe1622401ba6b0c57525eb3ce94576ecaea91b66a1ec",
+      "screenshotSha256": "4885e9f3e23e09060aade13aa3a48949881c8f052a3eb44cdd092e29e7dca4f4",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,
