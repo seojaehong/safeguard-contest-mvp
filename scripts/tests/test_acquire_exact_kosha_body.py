@@ -137,6 +137,10 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
             receipt_path = root / "receipt.json"
             failure_path = root / "failure.json"
             ledger_path.write_text(json.dumps(ledger, ensure_ascii=False), encoding="utf-8")
+            old_asset = b'{"asset":"verified-old"}\n'
+            old_receipt = b'{"receipt":"verified-old"}\n'
+            asset_path.write_bytes(old_asset)
+            receipt_path.write_bytes(old_receipt)
 
             with (
                 patch.object(acquire_exact_kosha_body, "PINNED_PDF_SHA256", sha256(pdf_bytes)),
@@ -162,37 +166,193 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
             self.assertEqual(failure["error"], "injected-second-publish-failure")
             self.assertFalse(failure["promotionState"]["partialPromotionPresent"])
             self.assertFalse(failure["promotionState"]["transactionPresent"])
-            self.assertFalse(asset_path.exists())
-            self.assertFalse(receipt_path.exists())
+            self.assertEqual(asset_path.read_bytes(), old_asset)
+            self.assertEqual(receipt_path.read_bytes(), old_receipt)
             self.assertFalse((root / ".d-c-7-promotion-transaction").exists())
 
     def test_recovers_interrupted_partial_publish_from_journal(self) -> None:
+        for fail_after_restore in (1, 2):
+            with self.subTest(fail_after_restore=fail_after_restore), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                asset_path = root / "asset.json"
+                receipt_path = root / "receipt.json"
+                failure_path = root / "failure.json"
+                old_asset = b'{"asset":"old"}\n'
+                old_receipt = b'{"receipt":"old"}\n'
+                asset_path.write_bytes(old_asset)
+                receipt_path.write_bytes(old_receipt)
+                transaction_dir = acquire_exact_kosha_body._prepare_promotion_transaction(
+                    asset_path,
+                    receipt_path,
+                    failure_path,
+                    {"asset": "new"},
+                    {"receipt": "new"},
+                )
+                journal = json.loads((transaction_dir / "journal.json").read_text(encoding="utf-8"))
+                self.assertEqual(journal["state"], "prepared")
+                self.assertTrue(all(not value.startswith(("/", "\\")) for value in journal["targets"]["paths"].values()))
+                self.assertEqual(
+                    journal["backups"]["asset"]["sha256"],
+                    sha256(old_asset),
+                )
+                self.assertEqual(
+                    journal["backups"]["receipt"]["sha256"],
+                    sha256(old_receipt),
+                )
+                asset_path.write_bytes(b'{"asset":"partial-new"}\n')
+                receipt_path.write_bytes(b'{"receipt":"partial-new"}\n')
+                restore_count = 0
+
+                def interrupt_restore(destination: Path, value: bytes) -> None:
+                    nonlocal restore_count
+                    restore_count += 1
+                    acquire_exact_kosha_body._write_bytes(destination, value)
+                    if restore_count == fail_after_restore:
+                        raise OSError(f"restore-interrupted-{fail_after_restore}")
+
+                with self.assertRaisesRegex(OSError, f"restore-interrupted-{fail_after_restore}"):
+                    acquire_exact_kosha_body._rollback_transaction(
+                        transaction_dir,
+                        asset_path,
+                        receipt_path,
+                        failure_path,
+                        restore_write=interrupt_restore,
+                    )
+
+                self.assertTrue((transaction_dir / "asset.backup").is_file())
+                self.assertTrue((transaction_dir / "receipt.backup").is_file())
+                acquire_exact_kosha_body._recover_incomplete_promotion(
+                    transaction_dir,
+                    asset_path,
+                    receipt_path,
+                    failure_path,
+                )
+                self.assertEqual(asset_path.read_bytes(), old_asset)
+                self.assertEqual(receipt_path.read_bytes(), old_receipt)
+                self.assertFalse(transaction_dir.exists())
+
+    def test_committed_recovery_requires_durable_completion_before_cleanup(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             asset_path = root / "asset.json"
             receipt_path = root / "receipt.json"
-            transaction_dir = root / ".d-c-7-promotion-transaction"
-            old_asset = b'{"asset":"old"}\n'
-            old_receipt = b'{"receipt":"old"}\n'
-            asset_path.write_bytes(b'{"asset":"partial-new"}\n')
-            receipt_path.write_bytes(old_receipt)
-            transaction_dir.mkdir()
-            (transaction_dir / "asset.backup").write_bytes(old_asset)
-            (transaction_dir / "receipt.backup").write_bytes(old_receipt)
-            (transaction_dir / "journal.json").write_text(
-                json.dumps({"had_asset": True, "had_receipt": True}),
-                encoding="utf-8",
+            failure_path = root / "failure.json"
+            asset_path.write_bytes(b"old-asset")
+            receipt_path.write_bytes(b"old-receipt")
+            transaction_dir = acquire_exact_kosha_body._prepare_promotion_transaction(
+                asset_path,
+                receipt_path,
+                failure_path,
+                {"asset": "new"},
+                {"receipt": "new"},
             )
+            os.replace(transaction_dir / "asset.staged.json", asset_path)
+            os.replace(transaction_dir / "receipt.staged.json", receipt_path)
+            journal_path = transaction_dir / "journal.json"
+            journal = json.loads(journal_path.read_text(encoding="utf-8"))
+            journal["state"] = "committed"
+            acquire_exact_kosha_body._write_json(journal_path, journal)
 
+            with self.assertRaisesRegex(
+                acquire_exact_kosha_body.AcquisitionError,
+                "promotion-completion-invalid",
+            ):
+                acquire_exact_kosha_body._recover_incomplete_promotion(
+                    transaction_dir,
+                    asset_path,
+                    receipt_path,
+                    failure_path,
+                )
+
+            self.assertTrue(transaction_dir.exists())
+            journal["completion"] = {
+                "state": "committed",
+                "targetsSha256": sha256(
+                    canonical_json(journal["published"]).encode("utf-8")
+                ),
+            }
+            acquire_exact_kosha_body._write_json(journal_path, journal)
+            new_asset = asset_path.read_bytes()
+            new_receipt = receipt_path.read_bytes()
             acquire_exact_kosha_body._recover_incomplete_promotion(
                 transaction_dir,
                 asset_path,
                 receipt_path,
+                failure_path,
             )
 
-            self.assertEqual(asset_path.read_bytes(), old_asset)
-            self.assertEqual(receipt_path.read_bytes(), old_receipt)
+            self.assertEqual(asset_path.read_bytes(), new_asset)
+            self.assertEqual(receipt_path.read_bytes(), new_receipt)
             self.assertFalse(transaction_dir.exists())
+
+    def test_recovery_rejects_changed_target_paths_without_touching_either_pair(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            asset_path = root / "asset.json"
+            receipt_path = root / "receipt.json"
+            failure_path = root / "failure.json"
+            asset_path.write_bytes(b"old-asset")
+            receipt_path.write_bytes(b"old-receipt")
+            transaction_dir = acquire_exact_kosha_body._prepare_promotion_transaction(
+                asset_path,
+                receipt_path,
+                failure_path,
+                {"asset": "new"},
+                {"receipt": "new"},
+            )
+            asset_path.write_bytes(b"partial-asset")
+            changed_asset = root / "changed" / "asset.json"
+            changed_asset.parent.mkdir()
+            changed_asset.write_bytes(b"changed-sentinel")
+
+            with self.assertRaisesRegex(
+                acquire_exact_kosha_body.AcquisitionError,
+                "promotion-target-identity-mismatch",
+            ):
+                acquire_exact_kosha_body._recover_incomplete_promotion(
+                    transaction_dir,
+                    changed_asset,
+                    receipt_path,
+                    failure_path,
+                )
+
+            self.assertEqual(asset_path.read_bytes(), b"partial-asset")
+            self.assertEqual(receipt_path.read_bytes(), b"old-receipt")
+            self.assertEqual(changed_asset.read_bytes(), b"changed-sentinel")
+            self.assertTrue(transaction_dir.exists())
+
+    def test_recovery_validates_all_backup_hashes_before_modifying_targets(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            asset_path = root / "asset.json"
+            receipt_path = root / "receipt.json"
+            failure_path = root / "failure.json"
+            asset_path.write_bytes(b"old-asset")
+            receipt_path.write_bytes(b"old-receipt")
+            transaction_dir = acquire_exact_kosha_body._prepare_promotion_transaction(
+                asset_path,
+                receipt_path,
+                failure_path,
+                {"asset": "new"},
+                {"receipt": "new"},
+            )
+            asset_path.write_bytes(b"partial-asset")
+            receipt_path.write_bytes(b"partial-receipt")
+            (transaction_dir / "receipt.backup").write_bytes(b"tampered")
+
+            with self.assertRaisesRegex(
+                acquire_exact_kosha_body.AcquisitionError,
+                "promotion-backup-sha256-mismatch:receipt",
+            ):
+                acquire_exact_kosha_body._recover_incomplete_promotion(
+                    transaction_dir,
+                    asset_path,
+                    receipt_path,
+                    failure_path,
+                )
+
+            self.assertEqual(asset_path.read_bytes(), b"partial-asset")
+            self.assertEqual(receipt_path.read_bytes(), b"partial-receipt")
 
     def test_pinned_extractor_rejects_body_not_matching_known_official_hash(self) -> None:
         pdf_bytes = build_pdf_bytes(["KOSHA GUIDE D-C-7-2026 incomplete body"])
