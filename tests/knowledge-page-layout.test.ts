@@ -298,7 +298,7 @@ describe("knowledge page decision layout", () => {
     }
   }, 90_000);
 
-  it("shows an honest read-only status and localized schema labels", async () => {
+  it("shows an honest unpublished review status and localized schema labels", async () => {
     if (!browser) throw new Error("Browser was not started");
 
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -308,8 +308,9 @@ describe("knowledge page decision layout", () => {
     const governance = page.locator('[data-knowledge-governance-flow="true"]');
     await governance.waitFor();
     const governanceText = await governance.textContent();
-    expect(governanceText).toContain("읽기 전용 화면");
-    expect(governanceText).toContain("검토와 게시 기능은 아직 연결 전");
+    expect(governanceText).toContain("승인, 현장 전용 유지 또는 반려");
+    expect(governanceText).toContain("미게시 상태");
+    expect(governanceText).toContain("온톨로지에는 자동 반영되지 않습니다");
 
     await page.getByRole("tab", { name: "진단" }).click();
     const schemaSection = page.locator('[aria-labelledby="schema-heading"]');

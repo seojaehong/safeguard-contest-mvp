@@ -11,6 +11,7 @@ import type {
 } from "@/lib/knowledge-governance";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 import { KnowledgeSectionNavigator } from "./KnowledgeSectionNavigator";
+import { KnowledgeReviewInbox } from "./KnowledgeReviewInbox";
 import styles from "./KnowledgePage.module.css";
 
 type WikiEntry = {
@@ -268,8 +269,8 @@ export default async function KnowledgePage() {
           </article>
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>운영 지식</span>
-            <h2>원본 이벤트 · 검토 대기 · 읽기 전용</h2>
-            <p>AI가 만든 내용은 검토 전 후보로 분리됩니다. 검토와 게시 기능은 아직 연결 전입니다.</p>
+            <h2>원본 이벤트 · 검토 대기 · 미게시</h2>
+            <p>AI가 만든 내용은 검토 전 후보로 분리되며, 사람의 결정 후에도 자동 게시되지 않습니다.</p>
           </article>
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>지식 카탈로그</span>
@@ -302,13 +303,15 @@ export default async function KnowledgePage() {
           <header className={styles.sectionHeader}>
             <div>
               <span className={styles.kicker}>지식 승격 규칙</span>
-              <h2 id="knowledge-governance-heading">지식 검토 흐름 · 읽기 전용</h2>
+              <h2 id="knowledge-governance-heading">지식 검토 흐름 · 사람 확인 필수</h2>
             </div>
             <p>
-              현재는 근거와 상태를 확인하는 읽기 전용 화면입니다. 후보의 출처와 적용 범위를
-              살펴볼 수 있으며, 검토와 게시 기능은 아직 연결 전입니다.
+              후보의 출처와 적용 범위를 확인해 승인, 현장 전용 유지 또는 반려할 수 있습니다.
+              모든 결정은 미게시 상태로 남고 온톨로지에는 자동 반영되지 않습니다.
             </p>
           </header>
+
+          <KnowledgeReviewInbox />
 
           <ol className={styles.promotionFlow} aria-label="지식 승격 네 단계">
             {KNOWLEDGE_PROMOTION_STAGES.map((stage) => (

@@ -11,6 +11,10 @@ describe("knowledge governance UI contract", () => {
     path.join(process.cwd(), "app/knowledge/KnowledgePage.module.css"),
     "utf8"
   );
+  const inboxSource = fs.readFileSync(
+    path.join(process.cwd(), "app/knowledge/KnowledgeReviewInbox.tsx"),
+    "utf8"
+  );
 
   it("renders the four promotion stages from the shared governance model", () => {
     expect(pageSource).toContain("KNOWLEDGE_PROMOTION_STAGES");
@@ -46,11 +50,13 @@ describe("knowledge governance UI contract", () => {
     expect(governanceSection).not.toContain("publish(");
   });
 
-  it("states that knowledge review and publishing are not connected yet", () => {
-    expect(pageSource).toContain("현재는 근거와 상태를 확인하는 읽기 전용 화면입니다.");
-    expect(pageSource).toContain("검토와 게시 기능은 아직 연결 전입니다.");
-    expect(pageSource).not.toContain("사람이 검토해 게시한 온톨로지만 확정 지식으로 사용합니다.");
-    expect(pageSource).not.toContain("서로 다른 상태로 관리합니다.");
+  it("connects human review while keeping publication and legal authority blocked", () => {
+    expect(pageSource).toContain("승인, 현장 전용 유지 또는 반려할 수 있습니다.");
+    expect(pageSource).toContain("모든 결정은 미게시 상태로 남고 온톨로지에는 자동 반영되지 않습니다.");
+    expect(inboxSource).toContain('action: ReviewAction');
+    expect(inboxSource).toContain("검토 결과를 저장했습니다. 게시되지는 않았습니다.");
+    expect(inboxSource).not.toContain("publish_ontology");
+    expect(inboxSource).not.toContain("legalConfirmed: true");
   });
 
   it("localizes schema field names at the presentation boundary", () => {
