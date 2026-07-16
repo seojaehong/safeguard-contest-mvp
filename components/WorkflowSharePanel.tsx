@@ -9,7 +9,9 @@ import {
   type WorkerDispatchTarget
 } from "@/lib/workspace";
 import {
+  buildCanonicalRecipientMessageVariants,
   createAuthenticatedShareSession,
+  resolveWorkflowMessagePreview,
   type WorkflowDispatchChannelResult,
   type WorkflowDispatchResult
 } from "@/lib/workflow-share-client";
@@ -46,10 +48,6 @@ type ActiveChannel = Extract<Channel, "email" | "sms" | "kakao">;
 type MessageTarget = "manager" | `foreign:${string}`;
 type WorkflowSharePhase = "idle" | "saving-workpack" | "creating-session" | "dispatching" | "saving-log";
 type RemoteRecordStatus = "idle" | "loading" | "ready" | "unconfigured" | "error";
-type RecipientMessageVariantsResult =
-  | { ok: true; messageVariants: Record<string, string> }
-  | { ok: false; missingLanguageCodes: string[] };
-
 type WorkflowSharePanelProps = {
   data: AskResponse;
   recipientSuggestions?: RecipientSuggestion[];
@@ -537,42 +535,6 @@ export function deriveWorkflowShareStatus(input: WorkflowShareStatusInput): {
   return { storage, session, dispatch, acknowledgment };
 }
 
-function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
-  const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
-  if (!language) return "";
-
-  return [
-    "[SafeClaw]",
-    language.nativeLabel,
-    "",
-    ...language.lines.map((line) => `- ${line}`),
-  ].join("\n");
-}
-
-function buildRecipientMessageVariants(input: {
-  data: AskResponse;
-  recipientLanguageCodes: string[];
-}): RecipientMessageVariantsResult {
-  const messageVariants: Record<string, string> = {};
-  const missingLanguageCodes = new Set<string>();
-
-  for (const languageCode of [...new Set(input.recipientLanguageCodes)].sort()) {
-    const message = languageCode === "ko"
-      ? input.data.deliverables.kakaoMessage.trim()
-      : buildForeignLanguageMessage(input.data, languageCode).trim();
-    if (!message) {
-      missingLanguageCodes.add(languageCode || "unknown");
-      continue;
-    }
-    messageVariants[languageCode] = message;
-  }
-
-  if (missingLanguageCodes.size) {
-    return { ok: false, missingLanguageCodes: [...missingLanguageCodes].sort() };
-  }
-  return { ok: true, messageVariants };
-}
-
 function formatChannelName(channel?: string) {
   const option = channelOptions.find((item) => item.key === channel);
   return option?.label || "기타 채널";
@@ -633,8 +595,7 @@ export function WorkflowSharePanel({
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const selectedMessage = useMemo(() => {
-    if (selectedMessageTarget === "manager") return data.deliverables.kakaoMessage;
-    return buildForeignLanguageMessage(data, selectedMessageTarget.replace("foreign:", ""));
+    return resolveWorkflowMessagePreview(data, selectedMessageTarget);
   }, [data, selectedMessageTarget]);
   const targetSignature = useMemo(
     () => buildWorkflowShareTargetSignature(targetWorkers),
@@ -926,7 +887,7 @@ export function WorkflowSharePanel({
       });
       return;
     }
-    const recipientMessageVariants = buildRecipientMessageVariants({
+    const recipientMessageVariants = buildCanonicalRecipientMessageVariants({
       data,
       recipientLanguageCodes: targetWorkers.map((worker) => worker.languageCode)
     });
@@ -938,7 +899,10 @@ export function WorkflowSharePanel({
           ok: false,
           configured: true,
           providerCalled: false,
-          message: `저장할 작업자 언어 본문이 없습니다: ${recipientMessageVariants.missingLanguageCodes.join(", ")}`
+          message: `저장할 작업자 언어 본문을 검증하지 못했습니다: ${[
+            ...recipientMessageVariants.invalidLanguageCodes,
+            ...recipientMessageVariants.koreanLeakLanguageCodes
+          ].join(", ")}`
         },
         resultSource: "dispatch"
       });

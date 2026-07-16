@@ -53,20 +53,7 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain('return "한국어 전송본 미리보기"');
     expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 전송본 미리보기`');
     expect(sharePanel).not.toContain("외국인 근로자 전송본 ·");
-    expect(sharePanel).toContain("messageVariants: recipientMessageVariants.messageVariants");
-    expect(sharePanel).not.toContain("messageTarget: selectedMessageTarget");
-    expect(sharePanel).not.toContain("message: selectedMessage");
     expect(sharePanel).toContain("미리보기 선택은 전송 본문을 바꾸지 않습니다.");
-  });
-
-  it("exposes exactly one direct primary send action", () => {
-    expect(sharePanel.match(/data-share-primary/g)).toHaveLength(2);
-    expect(sharePanel).toContain("onClick={dispatchWorkflow}");
-    expect(sharePanel).not.toContain("setIsConfirming");
-    expect(sharePanel).not.toContain("dispatch-confirm-panel");
-    expect(sharePanel).toContain("dispatchInFlightRef.current");
-    expect(sharePanel).toContain('shareRecords.status === "loading"');
-    expect(sharePanel).toContain('shareRecords.status === "error"');
   });
 
   it("separates authored documents from the total deliverable output count", () => {

@@ -4,7 +4,11 @@ import { enforceRateLimit } from "@/lib/api-guard";
 import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } from "@/lib/n8n-webhook";
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 import { validateDispatchContacts, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
-import { validateWorkflowDispatchMessage } from "@/lib/workflow-share-client";
+import {
+  buildCanonicalRecipientMessageVariants,
+  getCanonicalDispatchLanguageCodes,
+  validateWorkflowDispatchMessage
+} from "@/lib/workflow-share-client";
 import {
   loadActiveOwnedShareSession,
   loadOwnedWorkpackOperationContext
@@ -57,7 +61,10 @@ type WorkflowSummary = {
   skipped: number;
 };
 
-type LocalizedDispatchRecipient = Record<string, unknown> & {
+type LocalizedDispatchRecipient = {
+  workerId: string;
+  phone?: string;
+  email?: string;
   dispatchLanguageCode: string;
   message: string;
 };
@@ -94,22 +101,35 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function buildLocalizedDispatchRecipients(
-  recipients: Array<Record<string, unknown>>,
-  messageVariants: Record<string, string>
+  input: {
+    recipients: Array<Record<string, unknown>>;
+    messageVariants: Record<string, string>;
+    channels: ActiveWorkflowChannel[];
+  }
 ): LocalizedDispatchRecipientsResult {
   const missingLanguageCodes = new Set<string>();
-  const localizedRecipients = recipients.flatMap((recipient): LocalizedDispatchRecipient[] => {
+  const localizedRecipients = input.recipients.flatMap((recipient): LocalizedDispatchRecipient[] => {
+    const workerId = typeof recipient.workerId === "string" ? recipient.workerId.trim() : "";
     const languageCode = typeof recipient.languageCode === "string" ? recipient.languageCode.trim() : "";
-    const message = languageCode ? messageVariants[languageCode]?.trim() : "";
-    if (!languageCode || !message) {
+    const message = languageCode ? input.messageVariants[languageCode] : "";
+    if (!workerId || !languageCode || !message) {
       missingLanguageCodes.add(languageCode || "unknown");
       return [];
     }
-    return [{
-      ...recipient,
+    const phone = typeof recipient.phone === "string" ? recipient.phone.trim() : "";
+    const email = typeof recipient.email === "string" ? recipient.email.trim() : "";
+    const localizedRecipient: LocalizedDispatchRecipient = {
+      workerId,
       dispatchLanguageCode: languageCode,
       message
-    }];
+    };
+    if (input.channels.some((channel) => channel === "sms" || channel === "kakao") && phone) {
+      localizedRecipient.phone = phone;
+    }
+    if (input.channels.includes("email") && email) {
+      localizedRecipient.email = email;
+    }
+    return [localizedRecipient];
   });
 
   if (missingLanguageCodes.size) {
@@ -165,7 +185,7 @@ function parseMessageVariants(value: unknown): Record<string, string> | null {
       console.warn("workflow dispatch message variant validation failed", error);
       return null;
     }
-    variants[languageCode] = message.trim();
+    variants[languageCode] = message;
   }
   return variants;
 }
@@ -416,7 +436,53 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, configured: true, message: contactValidation.message }, { status: 409 });
   }
   const recipients = activeSession.session.recipients.map((recipient) => recipient.workerSnapshot || {});
-  const localized = buildLocalizedDispatchRecipients(recipients, messageVariants);
+  const workpack = owned.context.shareAuthority.workpack;
+  const allowedLanguageCodes = getCanonicalDispatchLanguageCodes(workpack);
+  const allowedLanguageCodeSet = new Set(allowedLanguageCodes);
+  const unknownLanguageCodes = Object.keys(messageVariants)
+    .filter((languageCode) => !allowedLanguageCodeSet.has(languageCode))
+    .sort();
+  const canonicalVariants = buildCanonicalRecipientMessageVariants({
+    data: workpack,
+    recipientLanguageCodes: allowedLanguageCodes
+  });
+  if (!canonicalVariants.ok) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      providerCalled: false,
+      invalidLanguageCodes: canonicalVariants.invalidLanguageCodes,
+      koreanLeakLanguageCodes: canonicalVariants.koreanLeakLanguageCodes,
+      message: "저장된 작업팩의 언어별 전송 본문을 안전하게 검증할 수 없어 provider 호출을 차단했습니다."
+    }, { status: 409 });
+  }
+  const mismatchedLanguageCodes = Object.entries(messageVariants)
+    .filter(([languageCode, message]) => canonicalVariants.messageVariants[languageCode] !== message)
+    .map(([languageCode]) => languageCode)
+    .sort();
+  const recipientLanguageCodes = [...new Set(recipients.map((recipient) => (
+    typeof recipient.languageCode === "string" ? recipient.languageCode.trim() : ""
+  )))];
+  const missingLanguageCodes = recipientLanguageCodes
+    .filter((languageCode) => !languageCode || !Object.hasOwn(messageVariants, languageCode))
+    .map((languageCode) => languageCode || "unknown")
+    .sort();
+  if (unknownLanguageCodes.length || mismatchedLanguageCodes.length || missingLanguageCodes.length) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      providerCalled: false,
+      unknownLanguageCodes,
+      mismatchedLanguageCodes,
+      missingLanguageCodes,
+      message: "요청한 언어별 본문이 저장된 작업팩의 canonical 전송 본문과 일치하지 않아 provider 호출을 차단했습니다."
+    }, { status: 409 });
+  }
+  const localized = buildLocalizedDispatchRecipients({
+    recipients,
+    messageVariants: canonicalVariants.messageVariants,
+    channels
+  });
   if (!localized.ok) {
     return NextResponse.json({
       ok: false,
@@ -487,7 +553,7 @@ export async function POST(request: NextRequest) {
     channels: dispatchChannels,
     recipients: localized.recipients,
     operatorNote: typeof body.operatorNote === "string" ? body.operatorNote : "",
-    workpack: owned.context.shareAuthority.workpack
+    workpack
   });
 
   try {

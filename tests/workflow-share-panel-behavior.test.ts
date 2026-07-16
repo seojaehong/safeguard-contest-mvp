@@ -1,6 +1,10 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+
+import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import {
+  buildCanonicalRecipientMessageVariants,
+  resolveWorkflowMessagePreview
+} from "@/lib/workflow-share-client";
 
 import {
   buildProviderDispatchIdempotencyKey,
@@ -15,14 +19,50 @@ import {
 } from "@/components/WorkflowSharePolicy";
 
 describe("workflow share panel behavior", () => {
-  it("builds recipient variants from saved worker languages independently of manager preview", () => {
-    const source = readFileSync(join(process.cwd(), "components", "WorkflowSharePanel.tsx"), "utf8");
+  it("keeps canonical recipient variants unchanged when the manager changes preview language", () => {
+    const data = buildSampleWorkpack();
+    const recipientLanguageCodes = ["ko", "vi"];
+    const beforePreviewChange = buildCanonicalRecipientMessageVariants({ data, recipientLanguageCodes });
 
-    expect(source).toContain("function buildRecipientMessageVariants");
-    expect(source).toContain("targetWorkers.map((worker) => worker.languageCode)");
-    expect(source).toContain("messageVariants: recipientMessageVariants.messageVariants");
-    expect(source).not.toContain("messageTarget: selectedMessageTarget");
-    expect(source).not.toContain("message: selectedMessage");
+    expect(resolveWorkflowMessagePreview(data, "manager")).toBe(data.deliverables.kakaoMessage);
+    expect(resolveWorkflowMessagePreview(data, "foreign:vi")).toContain("Tiếng Việt");
+
+    const afterPreviewChange = buildCanonicalRecipientMessageVariants({ data, recipientLanguageCodes });
+    expect(afterPreviewChange).toEqual(beforePreviewChange);
+    expect(afterPreviewChange).toMatchObject({
+      ok: true,
+      messageVariants: {
+        ko: data.deliverables.kakaoMessage.trim(),
+        vi: expect.stringContaining("Tiếng Việt")
+      }
+    });
+    if (afterPreviewChange.ok) {
+      expect(afterPreviewChange.messageVariants.vi).not.toMatch(/[가-힣]/u);
+    }
+  });
+
+  it("fails closed for a malformed language code stored in the workpack", () => {
+    const data = buildSampleWorkpack();
+    const malformedCode = "vi<script>";
+    const malformed = {
+      ...data,
+      deliverables: {
+        ...data.deliverables,
+        foreignWorkerLanguages: [{
+          ...data.deliverables.foreignWorkerLanguages[0],
+          code: malformedCode
+        }]
+      }
+    };
+
+    expect(buildCanonicalRecipientMessageVariants({
+      data: malformed,
+      recipientLanguageCodes: [malformedCode]
+    })).toEqual({
+      ok: false,
+      invalidLanguageCodes: [malformedCode],
+      koreanLeakLanguageCodes: []
+    });
   });
 
   it("clears result, session, and log evidence when the target or workpack scope changes", () => {
