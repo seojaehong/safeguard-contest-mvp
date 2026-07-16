@@ -26,6 +26,13 @@ const authContext: McpAuthContext = {
   source: "env",
   tokenId: null,
 };
+const tenantAuthContext: McpAuthContext = {
+  siteId: "site-a",
+  orgId: "org-a",
+  scopes: ["tools:generate_safety_docpack"],
+  source: "db",
+  tokenId: "token-a",
+};
 
 type CanonicalPackForgery = {
   field: "task" | "control" | "evidence" | "law";
@@ -68,6 +75,23 @@ const CANONICAL_PACK_FORGERIES: readonly CanonicalPackForgery[] = [
 const FORGED_MCP_CASES = (["plain", "reviewed"] as const).flatMap((route) =>
   CANONICAL_PACK_FORGERIES.map((forgery) => ({ route, ...forgery })),
 );
+
+const MALFORMED_MCP_CASES = (["plain", "reviewed"] as const).flatMap((route) => [
+  {
+    route,
+    field: "task",
+    mutate: (pack: ActiveEvidenceChainPack): void => {
+      Reflect.set(pack, "task", null);
+    },
+  },
+  {
+    route,
+    field: "applicability",
+    mutate: (pack: ActiveEvidenceChainPack): void => {
+      Reflect.set(pack, "applicability", null);
+    },
+  },
+]);
 
 function parseToolPayload(result: McpToolResult): Record<string, unknown> {
   const parsed: unknown = JSON.parse(result.content[0]?.text ?? "null");
@@ -230,6 +254,9 @@ describe("Phase A runtime evidence bridge", () => {
         registeredTasks: [],
       }));
       const persistResponse = vi.fn(async () => null);
+      const getWorkpackRepository = vi.fn(() => {
+        throw new Error("plain persistence must not initialize");
+      });
       const queryKnowledge = async (): Promise<SafetyKnowledgeResult> => {
         const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "고소작업");
         if (!knowledge.found || !knowledge.evidenceContract) {
@@ -249,9 +276,9 @@ describe("Phase A runtime evidence bridge", () => {
             defaultMode: "full",
             queryKnowledge,
             generateResponse: provider,
-            getWorkpackRepository: () => null,
+            getWorkpackRepository,
             getGenerationEvidenceSecret: () => undefined,
-          })({ question: "고소작업", mode: "template" }, authContext)
+          })({ question: "고소작업", mode: "template" }, tenantAuthContext)
         : await createGenerateReviewedSafetyDocpackHandler({
             defaultMode: "full",
             queryKnowledge,
@@ -263,7 +290,7 @@ describe("Phase A runtime evidence bridge", () => {
             question: "고소작업 문서팩",
             task: "고소작업",
             mode: "template",
-          }, authContext);
+          }, tenantAuthContext);
 
       expect(parseToolPayload(result)).toMatchObject({
         status: "review_required",
@@ -272,8 +299,81 @@ describe("Phase A runtime evidence bridge", () => {
         failClosed: true,
       });
       expect(provider).toHaveBeenCalledTimes(0);
-      expect(reviewResponse).toHaveBeenCalledTimes(0);
-      expect(persistResponse).toHaveBeenCalledTimes(0);
+      if (route === "plain") {
+        expect(getWorkpackRepository).toHaveBeenCalledTimes(0);
+      } else {
+        expect(reviewResponse).toHaveBeenCalledTimes(0);
+        expect(persistResponse).toHaveBeenCalledTimes(0);
+      }
+    },
+  );
+
+  test.each(MALFORMED_MCP_CASES)(
+    "fails closed before every side effect for malformed $field on the $route route",
+    async ({ route, mutate }) => {
+      const provider = vi.fn(async (question: string) => buildMockAskResponse(
+        question,
+        mockSearchResults.slice(0, 3),
+        "mock",
+        "malformed canonical pack must not reach provider",
+      ));
+      const reviewResponse = vi.fn(async () => ({
+        reviewable: false as const,
+        message: "review must not run",
+        registeredTasks: [],
+      }));
+      const persistResponse = vi.fn(async () => null);
+      const getWorkpackRepository = vi.fn(() => {
+        throw new Error("plain persistence must not initialize");
+      });
+      const queryKnowledge = async (): Promise<SafetyKnowledgeResult> => {
+        const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "고소작업");
+        if (!knowledge.found || !knowledge.evidenceContract) {
+          throw new Error("expected canonical evidence pack");
+        }
+        const malformedPack = structuredClone(knowledge.evidenceContract);
+        mutate(malformedPack);
+        return {
+          ...knowledge,
+          evidenceContract: malformedPack,
+          phaseAProduct: null,
+        };
+      };
+
+      const result = route === "plain"
+        ? await createGenerateSafetyDocpackHandler({
+            defaultMode: "full",
+            queryKnowledge,
+            generateResponse: provider,
+            getWorkpackRepository,
+            getGenerationEvidenceSecret: () => undefined,
+          })({ question: "고소작업", mode: "template" }, tenantAuthContext)
+        : await createGenerateReviewedSafetyDocpackHandler({
+            defaultMode: "full",
+            queryKnowledge,
+            generateResponse: provider,
+            reviewResponse,
+            persistResponse,
+            getGenerationEvidenceSecret: () => undefined,
+          })({
+            question: "고소작업 문서팩",
+            task: "고소작업",
+            mode: "template",
+          }, tenantAuthContext);
+
+      expect(parseToolPayload(result)).toMatchObject({
+        status: "review_required",
+        evidenceChainState: "review_required",
+        reason: "canonical_evidence_pack_mismatch",
+        failClosed: true,
+      });
+      expect(provider).toHaveBeenCalledTimes(0);
+      if (route === "plain") {
+        expect(getWorkpackRepository).toHaveBeenCalledTimes(0);
+      } else {
+        expect(reviewResponse).toHaveBeenCalledTimes(0);
+        expect(persistResponse).toHaveBeenCalledTimes(0);
+      }
     },
   );
 

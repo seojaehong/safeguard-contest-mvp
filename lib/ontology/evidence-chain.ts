@@ -1157,7 +1157,7 @@ export function buildCanonicalProductEvidenceIdentity(
  * allowed only when its complete identity and row plan match the canonical
  * registry; review state changes never expand that identity.
  */
-export function validateCanonicalEvidenceChainPack(
+function validateCanonicalEvidenceChainPackValue(
   pack: ActiveEvidenceChainPack,
 ): boolean {
   const matched = findDefinition(pack.task.input);
@@ -1262,6 +1262,18 @@ export function validateCanonicalEvidenceChainPack(
   return pack.applicability.authority === "scope_only"
     && sameJson(pack.provenance, expectedProvenance)
     && sameJson(pack.pipeline, expectedPipeline);
+}
+
+export function validateCanonicalEvidenceChainPack(
+  pack: unknown,
+): pack is ActiveEvidenceChainPack {
+  if (typeof pack !== "object" || pack === null || Array.isArray(pack)) return false;
+
+  try {
+    return validateCanonicalEvidenceChainPackValue(pack as ActiveEvidenceChainPack);
+  } catch {
+    return false;
+  }
 }
 
 function requireLaw(articleNo: string): LawEvidenceRecord {

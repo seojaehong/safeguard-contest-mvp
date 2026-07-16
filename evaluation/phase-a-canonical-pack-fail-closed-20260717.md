@@ -30,18 +30,38 @@ npm.cmd test -- tests/phase-a-runtime-evidence-bridge.test.ts
 
 Result after the gate: 1 test file passed, 13 tests passed.
 
+### P2 remediation RED/GREEN
+
+The follow-up review found that malformed nested structures could throw before the
+handler returned its honest fail-closed payload, and that persistence assertions
+used a non-tenant auth context. The regression matrix now treats the runtime pack
+as `unknown`, includes `task: null` and `applicability: null`, and enables tenant
+persistence boundaries for both MCP routes.
+
+RED result before the safe validator boundary: 1 test file failed, with 4 malformed
+pack cases failing and 13 tests passing. Both plain and reviewed routes threw a
+`TypeError` from canonical validation.
+
+GREEN result after the boundary: 1 test file passed, 17 tests passed. Malformed
+packs now return the same `canonical_evidence_pack_mismatch` payload as shaped
+forgeries.
+
 ## Attack matrix
 
-| MCP route | Forged identity field | Result | Provider calls | QA calls | Persistence calls |
+| MCP route | Untrusted field | Result | Provider calls | QA calls | Persistence boundary calls |
 | --- | --- | --- | ---: | ---: | ---: |
-| plain | task node | `review_required`, fail closed | 0 | 0 | 0 |
-| plain | control node | `review_required`, fail closed | 0 | 0 | 0 |
-| plain | SIF evidence UID | `review_required`, fail closed | 0 | 0 | 0 |
-| plain | law evidence UID | `review_required`, fail closed | 0 | 0 | 0 |
-| reviewed | task node | `review_required`, fail closed | 0 | 0 | 0 |
-| reviewed | control node | `review_required`, fail closed | 0 | 0 | 0 |
-| reviewed | SIF evidence UID | `review_required`, fail closed | 0 | 0 | 0 |
-| reviewed | law evidence UID | `review_required`, fail closed | 0 | 0 | 0 |
+| plain | task node | `review_required`, fail closed | 0 | N/A | repository initialization 0 |
+| plain | control node | `review_required`, fail closed | 0 | N/A | repository initialization 0 |
+| plain | SIF evidence UID | `review_required`, fail closed | 0 | N/A | repository initialization 0 |
+| plain | law evidence UID | `review_required`, fail closed | 0 | N/A | repository initialization 0 |
+| plain | malformed task | `review_required`, fail closed | 0 | N/A | repository initialization 0 |
+| plain | malformed applicability | `review_required`, fail closed | 0 | N/A | repository initialization 0 |
+| reviewed | task node | `review_required`, fail closed | 0 | 0 | persist callback 0 |
+| reviewed | control node | `review_required`, fail closed | 0 | 0 | persist callback 0 |
+| reviewed | SIF evidence UID | `review_required`, fail closed | 0 | 0 | persist callback 0 |
+| reviewed | law evidence UID | `review_required`, fail closed | 0 | 0 | persist callback 0 |
+| reviewed | malformed task | `review_required`, fail closed | 0 | 0 | persist callback 0 |
+| reviewed | malformed applicability | `review_required`, fail closed | 0 | 0 | persist callback 0 |
 
 The returned payload identifies `canonical_evidence_pack_mismatch`, sets `evidenceChainState` to `review_required`, and sets `failClosed` to `true`.
 
@@ -51,7 +71,7 @@ The returned payload identifies `canonical_evidence_pack_mismatch`, sets `eviden
 npm.cmd test -- tests/phase-a-runtime-evidence-bridge.test.ts tests/phase-a-runtime-evidence-grounding.test.ts tests/phase-a-product-materialization.test.ts tests/mcp-product-materialization-persistence.test.ts
 ```
 
-Result: 4 test files passed, 65 tests passed. This includes valid canonical plain/reviewed MCP behavior and the existing canonical materialization forgery matrix.
+Result: 4 test files passed, 69 tests passed. This includes valid canonical plain/reviewed MCP behavior, tenant-enabled persistence boundaries, malformed runtime packs, and the existing canonical materialization forgery matrix.
 
 ```powershell
 npm.cmd run typecheck
