@@ -45,9 +45,18 @@
 5. Non-array stored `lines` is covered by the same strict runtime parser and returns the exact malformed field path.
 6. Route tests assert `providerCalled: false` and no webhook invocation for both malformed stored payload cases.
 
+## Strict localization and relay remediation TDD evidence
+
+1. Blank `nativeLabel` RED returned `409` without the exact malformed field classification.
+2. Empty `lines` RED reached fixture dispatch with HTTP `200`; it now returns `409`, `providerCalled: false`, and no webhook invocation.
+3. A whitespace-only line entry RED reached fixture dispatch with HTTP `200`; it now fails closed at the stored deliverable parser.
+4. Duplicate language code RED reached fixture dispatch with HTTP `200`; the second code now returns the exact malformed field path.
+5. The n8n template RED still consumed legacy `workpack.message`; SMS, SMTP, and provider webhook paths now consume each server-authoritative `recipient.message` independently.
+6. `PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED` remains `false`; live provider dispatch remains RED pending approved persistent idempotency migration.
+
 ## Verification
 
-- Focused share/client/route suite: 4 files, 54 tests passed.
+- Focused share/client/route suite: 4 files, 59 tests passed.
 - Mobile browser contract: 1 test passed across desktop/mobile x day/night with one visible primary CTA and no clipping or overflow.
 - `npm.cmd run typecheck`: passed.
 - `git diff --check`: passed.

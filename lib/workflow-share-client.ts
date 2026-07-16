@@ -161,6 +161,7 @@ function parseCanonicalDispatchDeliverables(data: unknown):
   }
 
   const languages: CanonicalForeignWorkerLanguage[] = [];
+  const languageCodes = new Set<string>();
   for (const [index, value] of deliverables.foreignWorkerLanguages.entries()) {
     const prefix = `deliverables.foreignWorkerLanguages[${index}]`;
     if (!isRecord(value)) {
@@ -169,10 +170,18 @@ function parseCanonicalDispatchDeliverables(data: unknown):
     if (typeof value.code !== "string") {
       return { ok: false, malformedFields: [`${prefix}.code`] };
     }
-    if (typeof value.nativeLabel !== "string") {
+    if (languageCodes.has(value.code)) {
+      return { ok: false, malformedFields: [`${prefix}.code`] };
+    }
+    languageCodes.add(value.code);
+    if (typeof value.nativeLabel !== "string" || !value.nativeLabel.trim()) {
       return { ok: false, malformedFields: [`${prefix}.nativeLabel`] };
     }
-    if (!Array.isArray(value.lines) || value.lines.some((line) => typeof line !== "string")) {
+    if (
+      !Array.isArray(value.lines)
+      || value.lines.length === 0
+      || value.lines.some((line) => typeof line !== "string" || !line.trim())
+    ) {
       return { ok: false, malformedFields: [`${prefix}.lines`] };
     }
     languages.push({
