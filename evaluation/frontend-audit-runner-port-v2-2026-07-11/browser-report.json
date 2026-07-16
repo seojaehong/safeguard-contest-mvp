@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-15T20:26:26.596Z",
+  "generatedAt": "2026-07-16T03:22:23.068Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "ee96509ccf53cd884dc2300e40b40ce25783a90b",
-  "sourceIdentity": "f7401c6cebe9d1a137fdf2b382c921f5e23a011060ff3d03e3d182c1ea92a8a2",
-  "evidenceHead": "ee96509ccf53cd884dc2300e40b40ce25783a90b",
+  "sourceSha": "518f630ad7e3c673037801c7a7e819b3ff542a47",
+  "sourceIdentity": "aa4c9fa1233852739a5c7dd7602ab70e58a747d53029e1a1fe52afd7e662793a",
+  "evidenceHead": "518f630ad7e3c673037801c7a7e819b3ff542a47",
   "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 32,
@@ -27,11 +27,11 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 102078
+    "elapsedMs": 121738
   },
   "staticAudit": {
-    "sourceSha": "ee96509ccf53cd884dc2300e40b40ce25783a90b",
-    "sourceIdentity": "f7401c6cebe9d1a137fdf2b382c921f5e23a011060ff3d03e3d182c1ea92a8a2",
+    "sourceSha": "518f630ad7e3c673037801c7a7e819b3ff542a47",
+    "sourceIdentity": "aa4c9fa1233852739a5c7dd7602ab70e58a747d53029e1a1fe52afd7e662793a",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
@@ -9773,7 +9773,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-desktop-1440.jpg",
-      "screenshotSha256": "3b7088ecb24d8745a19e57c55d99f7881e24fc6b89fd0fd0d9adb932fec545ba",
+      "screenshotSha256": "837922c96de47cadb36891b74a9b6739fe1b0526128139e1963e0c849393acb8",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9879,7 +9879,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-tablet-1024.jpg",
-      "screenshotSha256": "f0e2a59d8d944870bb41aeafb15ac836dbc83e63572633ec3c70e7a316688c61",
+      "screenshotSha256": "406ec8d955aa720dda4733ee30803d0d2f53600bcab9173418afafe6aaf53920",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10472,7 +10472,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workers-desktop-1440.jpg",
-      "screenshotSha256": "9fcc92c92854d25bb0c5780be337a3dd86e1df31bb3a7181cb67c5305d93b5e8",
+      "screenshotSha256": "50c3c0510cfe4877c41957cf1c9817347f8a0e42bd375222ebc9d36cc1810387",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10676,7 +10676,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workers-tablet-1024.jpg",
-      "screenshotSha256": "10943267a8639a48c10e278d1219a0baf635a3e63a7d772eda85749967add02c",
+      "screenshotSha256": "0f1db7f4d0067bfa6ea310e14c891f6f6a619c6e78e8833ccd9f845186c561be",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10880,7 +10880,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workers-mobile-390.jpg",
-      "screenshotSha256": "8fb856ef24e31508560e8ca3ff61eea992001bc6aef6d329fe63d50981f5151c",
+      "screenshotSha256": "bebc35449d092f3d3400a1589ff20b2c9aa0bae714109e1043265ce232a488df",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12254,7 +12254,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-desktop-1440.jpg",
-      "screenshotSha256": "5c1dfb036ae6e11f9e0b3da124d9ad4cf09d165453296c1aab8a98559106fd42",
+      "screenshotSha256": "cdd5d0f9e0952d1ba5a45eb3960a19ead47b510c222e30e09879d18629ef9abb",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12458,7 +12458,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-tablet-1024.jpg",
-      "screenshotSha256": "69193e76ec66031955e1f52cab01f730d89896294af2393d500ca5f376e42a5e",
+      "screenshotSha256": "3c9e9b2002137f136f9cc5611388c0a981d90c13aad0ed7b4fe1d2a33a1f04f3",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12662,7 +12662,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-mobile-390.jpg",
-      "screenshotSha256": "fdce758efd0de13bc8fd9d0e9df5a427fa3446fbac9507a402525cffd3fa7be8",
+      "screenshotSha256": "62c9154dad8fb8b0f5db19b056d1445e059a0c68acb56de2caf4a50c0603d2a4",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -13068,7 +13068,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/special-loading.jpg",
-      "screenshotSha256": "b8a9dd69cc7c080f7ab5997d792c340376dda691ee32e15ab096dd8e5f43593b",
+      "screenshotSha256": "524b19d8f519d627368f4d00ecbbcce0740bf426bcf058b812f065b50538392a",
       "boundaryMarker": "loading",
       "boundaryMarkerCount": 1,
       "renderedControls": [],
@@ -13563,7 +13563,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 16. 오전 5:26:26 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 16. 오후 12:22:22 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13607,7 +13607,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "095567af3a0aae8d9e57a2168c442e49bb8bc37b43e01b0278ef3ec810888ff1",
+      "screenshotSha256": "201f6e8d0fefc2e4efca4fc9abde61fc3c60ad5f5282f89c40bfeb0c3101ea6c",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,

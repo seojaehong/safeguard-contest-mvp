@@ -1,36 +1,35 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-15T08:03:02.615Z",
+  "generatedAt": "2026-07-16T03:19:43.901Z",
   "mode": "audit",
   "buildDirectory": ".next",
-  "buildId": "AOFWTOYUqatUZofnRpILs",
-  "sourceSha": "94cae0c0e9d5d6e0906e95ad27f2e1c2c7abda81",
-  "sourceIdentity": "1dd41311a1063b69e3b774f999fe8a004a8eb88c60d26160512144d58752ba29",
-  "buildIdentity": "d9cc244791aec69562c02c0b37654af177f01c58ce026f4c55fd403198f03337",
-  "chunkCount": 289,
-  "staticChunkCount": 100,
-  "serverChunkCount": 189,
+  "buildId": "Mzmv-sdUBL8sQXcECa6RS",
+  "sourceSha": "518f630ad7e3c673037801c7a7e819b3ff542a47",
+  "sourceIdentity": "aa4c9fa1233852739a5c7dd7602ab70e58a747d53029e1a1fe52afd7e662793a",
+  "buildIdentity": "11f2ffd467d9f08de8a141a979a1629535f467af7721f56f8b87a4e3c4c0684b",
+  "chunkCount": 294,
+  "staticChunkCount": 101,
+  "serverChunkCount": 193,
   "markerCount": 1,
   "markerFiles": [
-    "static/chunks/app/layout-572767ba4e328087.js"
+    "static/chunks/app/layout-541c3e0a964ca50d.js"
   ],
   "markers": {
     "global": {
       "staticCount": 1,
-      "serverCount": 10,
-      "totalCount": 11,
+      "serverCount": 9,
+      "totalCount": 10,
       "files": [
-        "static/chunks/app/layout-572767ba4e328087.js",
-        "server/app/auth/callback/page.js",
+        "static/chunks/app/layout-541c3e0a964ca50d.js",
         "server/app/demo/page.js",
         "server/app/interpretation/[id]/page.js",
         "server/app/law/[id]/page.js",
-        "server/app/login/page.js",
         "server/app/precedent/[id]/page.js",
         "server/app/prototype/page.js",
         "server/app/_not-found/page.js",
-        "server/chunks/7657.js",
-        "server/chunks/8373.js"
+        "server/chunks/3239.js",
+        "server/chunks/3471.js",
+        "server/chunks/5915.js"
       ]
     },
     "appError": {
@@ -46,7 +45,7 @@
       "serverCount": 0,
       "totalCount": 1,
       "files": [
-        "static/chunks/app/error-3b628c7d871febd0.js"
+        "static/chunks/app/error-4fd60a95d990c0d2.js"
       ]
     }
   },
