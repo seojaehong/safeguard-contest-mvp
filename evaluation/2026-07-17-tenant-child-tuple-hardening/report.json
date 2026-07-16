@@ -1,16 +1,18 @@
 {
-  "authoritative_head": "d42e143575c636fcc6e698b9c9eb35609c70b156",
+  "base_sha": "d42e143575c636fcc6e698b9c9eb35609c70b156",
   "scope": "bounded no-migration commercial workpack tenant hardening",
   "red": {
+    "command": "npm.cmd test -- tests/workpack-commercial-tenant-hardening.test.ts",
     "test_files": 1,
-    "tests": 5,
-    "passed": 0,
-    "failed": 5
+    "tests": 6,
+    "passed": 4,
+    "failed": 2
   },
   "green": {
+    "command": "npm.cmd test -- tests/workpack-commercial-tenant-hardening.test.ts tests/workpack-commercial.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-improvement-route.test.ts tests/generation-evidence-operation-routes.test.ts tests/commercial-migration.test.ts",
     "test_files": 6,
-    "tests": 30,
-    "passed": 30,
+    "tests": 28,
+    "passed": 28,
     "failed": 0
   },
   "typecheck": {

@@ -38,14 +38,18 @@ function normalizeImprovementSourceType(value: string | null): HarnessImprovemen
 
 async function loadImprovementMemory(
   client: NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
-  workpackId: string
+  input: { organizationId: string; siteId: string | null; workpackId: string }
 ): Promise<HarnessImprovement[]> {
   try {
-    const { data, error } = await client
+    let improvementQuery = client
       .from("workpack_improvements")
       .select("id,task_label,hazard_label,improvement_text,reflected_documents,source_type,analysis_payload,created_at")
-      .eq("workpack_id", workpackId)
-      .order("created_at", { ascending: false });
+      .eq("workpack_id", input.workpackId)
+      .eq("organization_id", input.organizationId);
+    improvementQuery = input.siteId === null
+      ? improvementQuery.is("site_id", null)
+      : improvementQuery.eq("site_id", input.siteId);
+    const { data, error } = await improvementQuery.order("created_at", { ascending: false });
 
     if (error) {
       console.warn("operation graph improvement memory unavailable", error);
@@ -69,14 +73,18 @@ async function loadImprovementMemory(
 
 async function loadReadConfirmations(
   client: NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
-  workpackId: string
+  input: { organizationId: string; siteId: string | null; workpackId: string }
 ): Promise<ReadConfirmation[]> {
   try {
-    const { data, error } = await client
+    let confirmationQuery = client
       .from("workpack_read_confirmations")
       .select("worker_display_name,language_code,read_at")
-      .eq("workpack_id", workpackId)
-      .order("read_at", { ascending: true });
+      .eq("workpack_id", input.workpackId)
+      .eq("organization_id", input.organizationId);
+    confirmationQuery = input.siteId === null
+      ? confirmationQuery.is("site_id", null)
+      : confirmationQuery.eq("site_id", input.siteId);
+    const { data, error } = await confirmationQuery.order("read_at", { ascending: true });
 
     if (error) {
       console.warn("operation graph read confirmations unavailable", error);
@@ -133,9 +141,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 
   const comparisonRequested = request.nextUrl.searchParams.get("comparison") === "true";
+  const childScope = {
+    organizationId: owned.context.organizationId,
+    siteId: owned.context.siteId,
+    workpackId: owned.context.workpackId
+  };
   const [improvements, confirmations, comparisonSearch] = await Promise.all([
-    loadImprovementMemory(client, owned.context.workpackId),
-    loadReadConfirmations(client, owned.context.workpackId),
+    loadImprovementMemory(client, childScope),
+    loadReadConfirmations(client, childScope),
     comparisonRequested
       ? searchSafetyReferences({ query: verification.snapshot.question, limit: 12 })
       : Promise.resolve(null)
