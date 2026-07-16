@@ -32,9 +32,8 @@ DEFAULT_RETRIES = 1
 
 JsonObject = dict[str, object]
 FetchBytes = Callable[[str], bytes]
-ReplaceFile = Callable[[Path, Path], None]
-RestoreWrite = Callable[[Path, bytes], None]
 PrepareHook = Callable[[str], None]
+MutationHook = Callable[[str], None]
 
 
 class AcquisitionError(RuntimeError):
@@ -244,6 +243,8 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
             "preparedJournalAtomicActivation": True,
             "prejournalOrphanConvergence": True,
             "activeJournalRevalidatedBeforePublish": True,
+            "handleBoundTargetReplacement": True,
+            "mutationCallbacksCannotWrite": True,
         },
         "portabilityLedgerSha256": ledger_sha256,
         "sourceRecord": {
@@ -261,7 +262,7 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
         "bodySha256": body_sha256,
         "extractorVersion": snapshot_kosha_guide_corpus.EXTRACTOR_VERSION,
         "extractorDependency": f"pypdf=={snapshot_kosha_guide_corpus.PYPDF_VERSION}",
-        "promotionProtocol": "recoverable-staged-pair/v3",
+        "promotionProtocol": "recoverable-handle-bound-pair/v4",
         "dbMutationPerformed": False,
         "schemaMutationPerformed": False,
         "pdfCommitted": False,
@@ -425,6 +426,164 @@ def _fsync_directory(path: Path) -> None:
         os.close(descriptor)
 
 
+def _windows_handle_final_path(handle: int) -> Path:
+    import ctypes
+    from ctypes import wintypes
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    get_final_path = kernel32.GetFinalPathNameByHandleW
+    get_final_path.argtypes = (
+        wintypes.HANDLE,
+        wintypes.LPWSTR,
+        wintypes.DWORD,
+        wintypes.DWORD,
+    )
+    get_final_path.restype = wintypes.DWORD
+    size = get_final_path(handle, None, 0, 0)
+    if size == 0:
+        raise ctypes.WinError(ctypes.get_last_error())
+    buffer = ctypes.create_unicode_buffer(size + 1)
+    written = get_final_path(handle, buffer, len(buffer), 0)
+    if written == 0 or written >= len(buffer):
+        raise ctypes.WinError(ctypes.get_last_error())
+    value = buffer.value
+    if value.startswith("\\\\?\\UNC\\"):
+        value = f"\\\\{value[8:]}"
+    elif value.startswith("\\\\?\\"):
+        value = value[4:]
+    return _absolute_lexical_path(Path(value))
+
+
+def _windows_open_bound_handle(path: Path, *, directory: bool) -> tuple[object, int]:
+    import ctypes
+    from ctypes import wintypes
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    create_file = kernel32.CreateFileW
+    create_file.argtypes = (
+        wintypes.LPCWSTR,
+        wintypes.DWORD,
+        wintypes.DWORD,
+        wintypes.LPVOID,
+        wintypes.DWORD,
+        wintypes.DWORD,
+        wintypes.HANDLE,
+    )
+    create_file.restype = wintypes.HANDLE
+    delete_access = 0x00010000
+    synchronize = 0x00100000
+    share_all = 0x00000001 | 0x00000002 | 0x00000004
+    open_existing = 3
+    open_reparse_point = 0x00200000
+    backup_semantics = 0x02000000 if directory else 0
+    handle = create_file(
+        str(_absolute_lexical_path(path)),
+        delete_access | synchronize,
+        share_all,
+        None,
+        open_existing,
+        open_reparse_point | backup_semantics,
+        None,
+    )
+    if handle == ctypes.c_void_p(-1).value:
+        raise ctypes.WinError(ctypes.get_last_error())
+    final_path = _windows_handle_final_path(handle)
+    if final_path != _absolute_lexical_path(path):
+        kernel32.CloseHandle(handle)
+        raise AcquisitionError("promotion-bound-handle-path-mismatch")
+    return kernel32, int(handle)
+
+
+def _windows_replace_file_safely(source: Path, destination: Path) -> None:
+    import ctypes
+    from ctypes import wintypes
+
+    source_kernel32, source_handle = _windows_open_bound_handle(source, directory=False)
+    destination_kernel32: object | None = None
+    destination_handle: int | None = None
+    try:
+        destination_kernel32, destination_handle = _windows_open_bound_handle(
+            destination.parent,
+            directory=True,
+        )
+
+        class FileRenameInformation(ctypes.Structure):
+            _fields_ = (
+                ("ReplaceIfExists", wintypes.BOOLEAN),
+                ("RootDirectory", wintypes.HANDLE),
+                ("FileNameLength", wintypes.ULONG),
+                ("FileName", wintypes.WCHAR * 1),
+            )
+
+        class IoStatusBlock(ctypes.Structure):
+            _fields_ = (
+                ("Status", ctypes.c_void_p),
+                ("Information", ctypes.c_size_t),
+            )
+
+        encoded_name = destination.name.encode("utf-16-le")
+        name_offset = FileRenameInformation.FileName.offset
+        buffer_size = max(
+            ctypes.sizeof(FileRenameInformation),
+            name_offset + len(encoded_name),
+        )
+        buffer = ctypes.create_string_buffer(buffer_size)
+        rename = FileRenameInformation.from_buffer(buffer)
+        rename.ReplaceIfExists = 1
+        rename.RootDirectory = destination_handle
+        rename.FileNameLength = len(encoded_name)
+        ctypes.memmove(
+            ctypes.addressof(buffer) + name_offset,
+            encoded_name,
+            len(encoded_name),
+        )
+        nt_set_information = ctypes.WinDLL("ntdll").NtSetInformationFile
+        nt_set_information.argtypes = (
+            wintypes.HANDLE,
+            ctypes.POINTER(IoStatusBlock),
+            wintypes.LPVOID,
+            wintypes.ULONG,
+            wintypes.ULONG,
+        )
+        nt_set_information.restype = wintypes.LONG
+        io_status = IoStatusBlock()
+        status = nt_set_information(
+            source_handle,
+            ctypes.byref(io_status),
+            buffer,
+            buffer_size,
+            10,
+        )
+        if status != 0:
+            raise OSError(f"promotion-handle-rename-failed:0x{status & 0xFFFFFFFF:08x}")
+    finally:
+        source_kernel32.CloseHandle(source_handle)
+        if destination_kernel32 is not None and destination_handle is not None:
+            destination_kernel32.CloseHandle(destination_handle)
+
+
+def _replace_file_safely(source: Path, destination: Path) -> None:
+    if source.parent == destination.parent and source.name == destination.name:
+        raise AcquisitionError("promotion-source-destination-alias")
+    if os.name == "nt":
+        _windows_replace_file_safely(source, destination)
+        return
+    source_flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    destination_flags = source_flags
+    source_directory = os.open(source.parent, source_flags)
+    destination_directory = os.open(destination.parent, destination_flags)
+    try:
+        os.replace(
+            source.name,
+            destination.name,
+            src_dir_fd=source_directory,
+            dst_dir_fd=destination_directory,
+        )
+    finally:
+        os.close(source_directory)
+        os.close(destination_directory)
+
+
 def _portable_target_identity(
     asset_path: Path,
     receipt_path: Path,
@@ -532,7 +691,7 @@ def _rollback_transaction(
     receipt_path: Path,
     failure_path: Path,
     *,
-    restore_write: RestoreWrite = _write_bytes,
+    restore_hook: MutationHook = _noop_prepare_hook,
 ) -> None:
     _validate_output_paths(asset_path, receipt_path, failure_path)
     journal = _validated_transaction_journal(
@@ -558,11 +717,22 @@ def _rollback_transaction(
             raise AcquisitionError(f"promotion-backup-descriptor-invalid:{name}")
         if descriptor["present"]:
             destination.parent.mkdir(parents=True, exist_ok=True)
-            restore_write(destination, backup.read_bytes())
+            restore_staged = transaction_dir / f"{name}.restore-staged"
+            _write_bytes(restore_staged, backup.read_bytes())
+            _fsync_directory(transaction_dir)
+            _validate_output_paths(asset_path, receipt_path, failure_path)
+            _replace_file_safely(restore_staged, destination)
             _fsync_directory(destination.parent)
+            _fsync_directory(transaction_dir)
+            restore_hook(f"after-restore-{name}")
         elif destination.exists():
-            destination.unlink()
+            delete_staged = transaction_dir / f"{name}.rollback-delete"
+            _replace_file_safely(destination, delete_staged)
             _fsync_directory(destination.parent)
+            _fsync_directory(transaction_dir)
+            delete_staged.unlink()
+            _fsync_directory(transaction_dir)
+            restore_hook(f"after-remove-{name}")
     _validate_target_state(targets, backups, "promotion-rollback")
     journal["state"] = "rolled_back"
     journal["completion"] = {
@@ -702,7 +872,7 @@ def _publish_promotion_pair(
     failure_path: Path,
     asset: JsonObject,
     receipt: JsonObject,
-    replace_file: ReplaceFile = os.replace,
+    publish_hook: MutationHook = _noop_prepare_hook,
     prepare_hook: PrepareHook = _noop_prepare_hook,
 ) -> None:
     _validate_output_paths(asset_path, receipt_path, failure_path)
@@ -728,11 +898,15 @@ def _publish_promotion_pair(
         asset_path.parent.mkdir(parents=True, exist_ok=True)
         receipt_path.parent.mkdir(parents=True, exist_ok=True)
         _validate_output_paths(asset_path, receipt_path, failure_path)
-        replace_file(staged_asset, asset_path)
+        publish_hook("before-publish-asset")
+        _validate_output_paths(asset_path, receipt_path, failure_path)
+        _replace_file_safely(staged_asset, asset_path)
         _fsync_directory(asset_path.parent)
         _fsync_directory(transaction_dir)
         _validate_output_paths(asset_path, receipt_path, failure_path)
-        replace_file(staged_receipt, receipt_path)
+        publish_hook("before-publish-receipt")
+        _validate_output_paths(asset_path, receipt_path, failure_path)
+        _replace_file_safely(staged_receipt, receipt_path)
         _fsync_directory(receipt_path.parent)
         _fsync_directory(transaction_dir)
         journal = _validated_transaction_journal(
@@ -773,7 +947,7 @@ def acquire_exact_body(
     *,
     fetch_bytes: FetchBytes = fetch_official_pdf,
     expected_ledger_sha256: str = PINNED_LEDGER_SHA256,
-    publish_replace: ReplaceFile = os.replace,
+    publish_hook: MutationHook = _noop_prepare_hook,
     prepare_hook: PrepareHook = _noop_prepare_hook,
 ) -> JsonObject:
     _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)
@@ -796,7 +970,7 @@ def acquire_exact_body(
             failure_path,
             asset,
             receipt,
-            publish_replace,
+            publish_hook,
             prepare_hook,
         )
         _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)

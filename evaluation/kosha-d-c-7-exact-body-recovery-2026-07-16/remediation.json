@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-evaluation/v1",
-  "parentRejectedCommit": "6e5b7e937420b030bf82fee883c9c785ccb8f9d1",
+  "parentRejectedCommit": "25a3f92a0d4aa0a78b56256438e8d7e28fbb2f74",
   "priorRejectedCommits": [
     "cf5261828c95a329b919d40e8e55f406652f9985",
     "756f3f04930512cd2dbc6ea6774654ed0d3a9456"
@@ -26,7 +26,7 @@
   "closedFindings": {
     "P1": {
       "status": "closed",
-      "protocol": "recoverable-staged-pair/v3",
+      "protocol": "recoverable-handle-bound-pair/v4",
       "evidence": [
         "asset, receipt, backups, and prepared journal are built in an isolated pre-publish directory",
         "the prepared directory is atomically activated only after journal identity and hashes validate",
@@ -39,6 +39,9 @@
         "aliased and managed-directory output paths fail closed before failure-report writes",
         "ancestor and descendant output paths fail closed before recovery or fetch",
         "output components are revalidated after fetch and before every recovery, staging, activation, publish, rollback, and failure-report mutation",
+        "POSIX replacement is bound to no-follow directory file descriptors",
+        "Windows replacement uses reparse-safe bound handles and relative NtSetInformationFile rename",
+        "test hooks can interrupt mutations but cannot perform target writes",
         "journal binds portable common-root-relative target identities",
         "all immutable backup hashes validate before either target is modified",
         "second publish failure rolls back both targets",
@@ -63,13 +66,13 @@
     "status": "verified",
     "officialUrl": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914243912403149/2",
     "receipt": "receipt.json",
-    "receiptCheckCount": 21,
+    "receiptCheckCount": 23,
     "receiptFailedCheckCount": 0
   },
   "verification": {
     "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body scripts.tests.test_snapshot_kosha_guide_corpus",
-    "testsRun": 59,
-    "testsPassed": 59,
+    "testsRun": 60,
+    "testsPassed": 60,
     "testsFailed": 0,
     "diffCheck": "pass"
   }
