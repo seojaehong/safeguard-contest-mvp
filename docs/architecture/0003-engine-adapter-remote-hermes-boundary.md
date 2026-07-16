@@ -20,6 +20,8 @@ roadmap:
   OAuth copy;
 - SafeClaw binds the authenticated user, organization, site, run, evidence,
   policy, and budget before calling the worker;
+- SafeClaw sends a minimized, structurally redacted prompt projection under a
+  versioned redaction policy, never the raw or merely normalized user prompt;
 - the remote worker receives only the bounded claim allowlist needed for
   `naturalize_only` output;
 - the remote worker receives no SafeClaw tool credentials or tool schemas, and
@@ -109,45 +111,102 @@ silently change adapter semantics.
 ### Request Envelope
 
 SafeClaw creates the envelope after user authentication, site authorization,
-Evidence Harness validation, and budget allocation. User text or worker output
-must never be trusted to supply these fields.
+Evidence Harness validation, structural PII redaction, prompt minimization, and
+budget allocation. User text or worker output must never be trusted to supply
+these fields.
 
 | Field | Contract |
 | --- | --- |
 | `contractVersion` | Exact value `engine-remote/v1`; unknown versions fail closed. |
-| `requestId` | Unique transport request identifier used for replay detection. |
-| `runId` / `attemptId` | SafeClaw-owned logical run and concrete attempt identifiers. |
+| `runId` | SafeClaw-owned logical run identifier, stable across retries. |
+| `logicalRequestDigest` | Digest of the stable logical request. It is identical across retries for the same work. |
+| `requestId` / `attemptId` | Fresh identifiers for one transport attempt. Both change on every retry and are used for replay and late-response detection. |
 | `organizationId` / `siteId` | Derived from the authenticated SafeClaw context and repeated in the signed service assertion. |
 | `actorRef` | Opaque SafeClaw actor reference; no user credential or session token crosses the boundary. |
 | `purpose` | Exact value `naturalize_only`. |
 | `evidenceDigest` | SHA-256 digest of the immutable, validated Evidence Harness packet. |
 | `claims` | Bounded claim and citation allowlist. Raw tenant records and unrestricted retrieval context are excluded. |
-| `prompt` | Normalized user request after SafeClaw input policy checks. |
-| `policyVersion` | Tool-deny, output-attestation, redaction, and model-routing policy snapshot. |
-| `budget` | Hard deadline, provider-call allowance, output-byte allowance, and retry allowance assigned by SafeClaw. |
-| `issuedAt` / `expiresAt` | Short validity window checked by the service gateway. |
+| `promptProjection` | SafeClaw-created, minimized projection containing only allowlisted task intent, jurisdiction, language, output intent, and non-identifying constraints. The raw or normalized user prompt is prohibited. |
+| `promptProjectionDigest` | Digest of the canonical minimized projection. |
+| `redactionProof` | Non-sensitive proof containing the projection schema version, `redactionPolicyVersion`, source-field classification digest, projection digest, and a terminal `piiDisposition` accepted by policy. It contains no removed values. |
+| `policyVersion` | Tool-deny, output-attestation, and model-routing policy snapshot. Redaction is separately pinned by `redactionPolicyVersion` in `redactionProof`. |
+| `logicalBudget` | Stable end-to-end deadline, provider-call allowance, output-byte allowance, and retry allowance assigned to the logical run. |
+| `attemptBudget` | Remaining allowance for this attempt; it may narrow but never expand `logicalBudget`. |
+| `issuedAt` / `expiresAt` | Fresh, short validity window for this attempt, checked by the service gateway. |
+| `attemptEnvelopeDigest` | Digest of the complete unsigned attempt envelope, including `logicalRequestDigest`, `requestId`, `attemptId`, attempt budget, timestamps, nonce, and service-auth issuer/audience/key reference. Signature bytes are excluded to avoid a circular digest. |
 
-The signed canonical request digest covers every field above. A change to the
-tenant, prompt, evidence, policy, or budget creates a different request and
-invalidates any prior response or approval association.
+SafeClaw computes two different digests:
+
+1. `logicalRequestDigest` covers canonical stable fields: contract version,
+   run, tenant, opaque actor reference, purpose, evidence and claims digests,
+   prompt projection and redaction proof, policy version, and logical budget.
+   It explicitly excludes `requestId`, `attemptId`, `issuedAt`, `expiresAt`,
+   attempt number, transport nonce, and attempt-specific remaining budget.
+2. `attemptEnvelopeDigest` covers the complete concrete attempt, including the
+   stable `logicalRequestDigest` plus fresh `requestId`, `attemptId`, timestamps,
+   nonce, attempt budget, and service assertion metadata. The SafeClaw service
+   identity signs this digest, not the logical digest alone; signature bytes
+   are not input to the digest.
+
+A change to tenant, prompt projection, redaction proof or policy, evidence,
+claims, policy, or logical budget creates a new `logicalRequestDigest`. Every
+retry keeps that logical digest and `evidenceDigest` but creates a new
+`requestId`, `attemptId`, validity window, `attemptEnvelopeDigest`, and
+signature.
+
+### Prompt Projection And Structural Redaction
+
+SafeClaw must not dispatch the raw user prompt, a normalized copy of it, or an
+arbitrary free-text blob with best-effort substitutions. Before constructing a
+remote envelope, SafeClaw creates a typed projection from an allowlist such as:
+
+- task or document intent;
+- jurisdiction and requested language;
+- approved work category and non-identifying operating constraints;
+- requested output shape; and
+- references to already-redacted claim IDs, never embedded raw records.
+
+Structural PII redaction happens before projection canonicalization. SafeClaw
+classifies every candidate source field by schema and provenance, removes
+identity/contact/account/signature/address and unrestricted-note fields, and
+tokenizes an allowed quasi-identifier only when the pinned policy defines a
+non-reversible representation. Regex replacement alone is not proof because it
+cannot establish which source fields were considered.
+
+The local redaction gate emits `redactionProof` only when all source fields are
+classified, every included projection field is allowlisted, removed values are
+absent, and the canonical projection passes the pinned policy. The service
+gateway accepts only supported projection-schema and redaction-policy versions
+and verifies that `redactionProof.projectionDigest` equals
+`promptProjectionDigest`.
+
+If SafeClaw cannot prove field coverage, encounters an unknown field class,
+cannot remove or safely tokenize detected PII, or cannot reproduce the
+projection digest, it fails closed before remote dispatch. The request enters a
+local review-required state; no fallback may send the raw prompt or relax the
+redaction policy. Raw prompts and removed values are also excluded from ordinary
+logs, retry envelopes, receipts, and evaluation exports.
 
 ### Response Envelope
 
 The service returns structured data only:
 
-- `contractVersion`, `requestId`, `runId`, and `attemptId`;
+- `contractVersion`, `runId`, `logicalRequestDigest`, `requestId`, and
+  `attemptId`;
 - echoed `organizationId` and `siteId`;
-- the accepted request digest and `evidenceDigest`;
+- the accepted `attemptEnvelopeDigest`, `promptProjectionDigest`, and
+  `evidenceDigest`;
 - selected claim IDs and only their allowed citation IDs;
 - provider/model reference, usage counters, latency, and terminal status;
 - a service response signature or gateway-verifiable receipt; and
 - a sanitized error code when no valid attestation can be returned.
 
-SafeClaw validates all echoed bindings, digests, IDs, expiry, claim membership,
-citation membership, usage limits, and receipt authenticity before rendering
-text. The worker's prose is never accepted directly. SafeClaw renders the
-validated fixed claims and citations, preserving the current
-`hermes-output-attestation/v1` behavior.
+SafeClaw validates both digests, all echoed bindings, IDs, expiry, claim
+membership, citation membership, usage limits, and receipt authenticity before
+rendering text. A response for a different or superseded attempt is never
+accepted merely because its logical digest matches. The worker's prose is never
+accepted directly. SafeClaw renders the validated fixed claims and citations,
+preserving the current `hermes-output-attestation/v1` behavior.
 
 ## Authentication And Tenant Binding
 
@@ -158,13 +217,15 @@ Authentication stays split into independent planes.
 | User auth | Who requested or approved work | Supabase Auth and SafeClaw org/site role checks. Never forwarded to Hermes. |
 | SafeClaw-to-Hermes service auth | An approved SafeClaw deployment called the worker service | Prefer workload identity with audience-bound, short-lived credentials. A rotated machine credential in a managed secret store is an interim fallback, not a site credential. |
 | Provider auth | Which model account pays for inference | Central runtime vault or provider service account. No customer OAuth refresh token and no operator OAuth profile in contract traffic. |
-| Tenant capability | Which tenant-bound request this worker may process | Short-lived signed assertion binding service identity, run, attempt, organization, site, purpose, evidence digest, policy, budget, and expiry. |
+| Tenant capability | Which tenant-bound attempt this worker may process | Short-lived signed assertion binding service identity, logical request digest, attempt envelope digest, run, request, attempt, organization, site, purpose, evidence digest, prompt projection digest, redaction policy, budgets, and expiry. |
 | MCP/effect capability | Which exact tool step may execute | SafeClaw-only, step-bound, one-time capability. It is not issued in the remote naturalization slice. |
 
 The service gateway rejects missing, expired, replayed, wrong-audience,
-wrong-issuer, or digest-mismatched assertions before queueing work. The worker
-must echo the signed tenant binding, but that echo does not grant authority;
-SafeClaw verifies it again on response.
+wrong-issuer, unsupported-redaction-policy, or digest-mismatched assertions
+before queueing work. Reusing a `requestId` or `attemptId`, or presenting a
+valid logical digest with the wrong attempt envelope, is a replay failure. The
+worker must echo the signed tenant binding and both digests, but that echo does
+not grant authority; SafeClaw verifies them again on response.
 
 One central worker pool serves all tenants through these per-request bindings.
 There is no Hermes deployment, runtime home, OAuth profile, queue, or provider
@@ -178,15 +239,15 @@ No per-site OAuth copies are permitted.
 
 Workers have:
 
-- access only to the verified request envelope and central provider credential
-  needed for model inference;
+- access only to the verified request envelope, minimized prompt projection,
+  and central provider credential needed for model inference;
 - no Supabase service role, database connection string, SafeClaw user session,
   customer OAuth credential, or general MCP token;
 - no durable tenant memory and no cross-request conversation state;
 - no tenant-selected plugins, shell, browser, filesystem, or network tools;
 - bounded temporary storage that is destroyed after the attempt; and
-- structured logs keyed by opaque run/attempt IDs, with prompts and tenant data
-  redacted by default.
+- structured logs keyed by opaque run/attempt IDs, with no raw prompt or
+  removed PII and with the projection governed by the same redaction policy.
 
 Queue scheduling may use organization/site attribution for fairness and caps,
 but a worker is fungible. Sticky routing and site-specific runtime homes are
@@ -205,10 +266,11 @@ The remote slice preserves the DB Harness generation contract:
 - `fallbackChainAllowed=false`; and
 - `genericProseSubstitutionAllowed=false`.
 
-SafeClaw performs retrieval and validates completeness before remote dispatch.
-The worker receives the claim allowlist, not authority to search for missing
-facts. Missing or stale evidence returns `review_required` from SafeClaw and no
-remote call is made.
+SafeClaw performs retrieval, validates completeness, and builds the minimized
+redacted prompt projection before remote dispatch. The worker receives the
+projection and claim allowlist, not the raw prompt or authority to search for
+missing facts. Missing or stale evidence, or an unprovable redaction result,
+returns `review_required` from SafeClaw and no remote call is made.
 
 Tool denial is enforced twice:
 
@@ -279,8 +341,11 @@ count and end-to-end deadline remain. Retries are forbidden for:
 
 Backoff is calculated by SafeClaw or the service gateway and recorded with the
 reason. The model runtime cannot recursively retry itself. A retry keeps the
-same `runId` and request digest but receives a new `attemptId`; late responses
-from superseded attempts are recorded and ignored.
+same `runId`, `logicalRequestDigest`, `evidenceDigest`, and
+`promptProjectionDigest`. It receives a new `requestId`, `attemptId`,
+`issuedAt`, `expiresAt`, transport nonce, `attemptEnvelopeDigest`, and service
+signature. Late responses from superseded attempts are recorded and ignored,
+even when their logical digest remains valid.
 
 Provider usage, response bytes, elapsed time, attempts, and retry reason feed
 the organization/site usage ledger. Budget exhaustion is a terminal,
@@ -291,14 +356,17 @@ untracked model.
 
 Production Vercel code is the control-plane client. It may authenticate the
 user, authorize the site, obtain and validate the Evidence Harness packet,
-allocate a budget, sign a remote request, validate the response, record the
-attempt, and render accepted claims.
+construct and prove the minimized redacted prompt projection, allocate a
+budget, calculate the logical and attempt digests, sign the attempt envelope,
+validate the response, record the attempt, and render accepted claims.
 
 Production Vercel code must not:
 
 - spawn OpenClaw or Hermes subprocesses;
 - rely on a local runtime home, SQLite file, OAuth profile, or filesystem queue;
 - hold a long-lived provider refresh token for a human operator;
+- send a raw or merely normalized user prompt, unknown source field, or
+  unproven redaction result to the remote service;
 - trust platform request retries as the durable retry ledger;
 - pass a Supabase service role or unrestricted MCP token to the worker; or
 - enable the remote path merely because an environment flag exists.
@@ -315,7 +383,8 @@ Evidence Harness packet and records an independent adapter attempt.
 Public errors remain generic. Internal records distinguish at least:
 
 - service-auth failure;
-- tenant-binding or replay failure;
+- tenant-binding, logical/attempt digest, or replay failure;
+- unsupported or unprovable prompt-projection/redaction policy;
 - worker unavailable or overloaded;
 - provider unavailable or timed out;
 - budget exhausted;
@@ -324,11 +393,13 @@ Public errors remain generic. Internal records distinguish at least:
 - malformed remote contract; and
 - late or duplicate response.
 
-Every attempt is reconstructable from `runId` to request digest, evidence
-digest, policy version, service identity reference, worker pool reference,
-provider/model reference, usage, retry decision, response digest, and terminal
-state. Secrets, raw credentials, unrestricted tenant payloads, and unredacted
-PII are excluded from ordinary logs and evaluation exports.
+Every attempt is reconstructable from `runId` to `logicalRequestDigest`, fresh
+request and attempt IDs, `attemptEnvelopeDigest`, prompt projection digest,
+redaction and execution policy versions, evidence digest, service identity
+reference, worker pool reference, provider/model reference, usage, retry
+decision, response digest, and terminal state. Secrets, raw credentials, raw
+prompts, unrestricted tenant payloads, removed values, and unredacted PII are
+excluded from ordinary logs and evaluation exports.
 
 Health checks prove process readiness only. They do not prove tenant binding,
 Evidence Harness adherence, tool denial, or provider usability. Promotion
@@ -338,14 +409,17 @@ evidence must include signed end-to-end conformance runs.
 
 Implementation proceeds in separately approved slices:
 
-1. **Contract fixtures:** freeze canonical request/response examples, digest
-   rules, error taxonomy, and local-versus-remote parity tests.
+1. **Contract fixtures:** freeze canonical request/response examples, prompt
+   projection and redaction fixtures, logical-versus-attempt digest rules,
+   error taxonomy, and local-versus-remote parity tests.
 2. **Service identity:** verify short-lived audience-bound service auth and
    rotation without customer or operator OAuth credentials.
 3. **Stateless shadow:** run tool-free naturalization on synthetic or approved
    test packets; no customer-visible output.
-4. **Tenant isolation:** prove swapped org/site, replay, late response, queue
-   reuse, logging, and worker-restart cases fail closed.
+4. **Tenant isolation:** prove swapped org/site, raw/unknown PII fields,
+   unsupported redaction policy, reused request/attempt IDs, mismatched attempt
+   digest, replay, late response, queue reuse, logging, and worker-restart cases
+   fail closed.
 5. **Budget and recovery:** prove deadlines, retry classification, duplicate
    suppression, usage attribution, and service outage behavior.
 6. **Ledger readiness:** separately approve any database migration, RLS policy,
@@ -382,6 +456,12 @@ only when executable evidence shows all of the following:
   or cross-tenant disclosure;
 - org/site swaps, replay, expiry, signature mismatch, evidence mutation, and
   late responses fail closed;
+- raw or normalized prompts never cross the remote boundary; only a minimized
+  projection with a supported `redactionPolicyVersion` and reproducible
+  structural-redaction proof can be dispatched;
+- retries preserve `logicalRequestDigest`, `evidenceDigest`, and the prompt
+  projection while each attempt uses fresh request/attempt IDs, timestamps,
+  `attemptEnvelopeDigest`, and signature;
 - every worker has a verified tool policy of `allow: []`, `deny: ["*"]`, and a
   model tool call cannot reach an executor;
 - only allowlisted claims and citations matching the Evidence Harness digest

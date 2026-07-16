@@ -1,7 +1,7 @@
 # Hermes EngineAdapter Remote Boundary Evaluation
 
 Date: 2026-07-16
-Verdict: PASS for bounded architecture documentation
+Verdict: PASS after P1 contract remediation
 
 ## Evaluated Baseline
 
@@ -24,6 +24,27 @@ The contract is intentionally documentation-only. It defines the first remote
 slice as a stateless, tool-free `naturalize_only` service and leaves effectful
 planning behind ADR 0001's existing Phase 4 promotion gate.
 
+## Independent Review Remediation
+
+The initial commit `2590556b7754150a1d818300e6b5fd36685e0fdf` was rejected
+because the network request could include a normalized raw prompt and because
+one request digest ambiguously covered both a logical run and retry-specific
+transport fields. Both findings are remediated in the architecture contract:
+
+1. `prompt` is removed from the remote envelope. SafeClaw now creates an
+   allowlisted `promptProjection`, applies structural PII redaction before
+   dispatch, pins `redactionPolicyVersion`, and emits a non-sensitive
+   `redactionProof`. Unknown field classes, detected PII that cannot be safely
+   removed/tokenized, unsupported policy versions, or irreproducible digests
+   fail closed before any remote call. A raw or merely normalized prompt is
+   explicitly prohibited.
+2. `logicalRequestDigest` now covers stable logical fields and excludes
+   `requestId`, `attemptId`, `issuedAt`, `expiresAt`, attempt number, nonce, and
+   attempt-specific budget. `attemptEnvelopeDigest` covers the complete
+   concrete attempt and is what the service identity signs. Every retry keeps
+   the logical and evidence digests but creates fresh request/attempt IDs,
+   timestamps, envelope digest, and signature.
+
 ## Reconciliation Review
 
 | Existing record | Review result |
@@ -45,6 +66,8 @@ conflict.
 | Local OAuth POC versus contract service auth | PASS | `Current State And Target State`; `Authentication And Tenant Binding` |
 | Stateless shared worker pool | PASS | `Target Remote Slice`; `Stateless Worker Pool` |
 | Tenant binding | PASS | `Request Envelope`; `Authentication And Tenant Binding` |
+| Minimized/redacted remote prompt | PASS | `Prompt Projection And Structural Redaction`; raw or normalized prompts are prohibited and redaction uncertainty fails closed before dispatch. |
+| Stable logical digest versus signed attempt digest | PASS | `Request Envelope`; `Response Envelope`; `Retries, Deadlines, And Budgets` |
 | Evidence Harness `naturalize_only` | PASS | `Evidence Harness And Tool Deny` |
 | Tool deny | PASS | No tool schema or credential; service policy must attest `allow: []`, `deny: ["*"]`; any tool request is terminal. |
 | Approval and effect ledger | PASS | `Approval And Effect Ledger` |
@@ -121,6 +144,23 @@ Result: thirteen concepts found, zero missing. A broader bounded search for
 Hermes, EngineAdapter, OAuth, naturalize_only, approval, effect, retry, budget,
 Vercel, and per-site terms returned ninety-one matching lines for manual
 review.
+
+The follow-up P1 gate additionally searches for:
+
+```text
+promptProjection
+redactionPolicyVersion
+redactionProof
+structural PII redaction
+raw or normalized prompts never cross
+logicalRequestDigest
+attemptEnvelopeDigest
+fresh request/attempt IDs
+```
+
+Result: all remediation concepts found. The contract contains no remote
+envelope field named `prompt`, and the retry rule explicitly creates both a new
+`requestId` and a new `attemptId` for every retry.
 
 ## Scope And Diff Validation
 
