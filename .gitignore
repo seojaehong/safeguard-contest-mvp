@@ -27,3 +27,4 @@ progress.txt
 .last-branch
 .bkit/
 .worktrees/
+.cache/kosha-review/

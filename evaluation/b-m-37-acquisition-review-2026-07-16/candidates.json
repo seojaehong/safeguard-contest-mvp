@@ -1,0 +1,255 @@
+[
+  {
+    "actionableExcerpt": "산업안전보건기준에 관한 규칙 제87조(원동기‧회전축 등의 위험 방지) 1 사업주는 기계의 원동기ᆞ회전축ᆞ기어ᆞ풀리ᆞ플라이휠ᆞ벨트 및 체인 등 근로자가 위험에 처할 우려가 있는 부위에 덮개ᆞ울ᆞ슬리브 및 건널다리 등을 설치하여야 한다.",
+    "actionableExcerptEnd": 265,
+    "actionableExcerptStart": 135,
+    "anchorInHeading": false,
+    "blockIndex": 1,
+    "category": "guards",
+    "contextAfter": "ᆞ울ᆞ슬리브 및 건널다리 등을 설치하여야 한다.2 사업주는 회전축ᆞ기어ᆞ풀리 및 플라이휠 등에 부속되는 키ᆞ핀 등의 기계요소는 묻힘형으로 하거나 해당 부위에 덮개를 설치하여야 한다.(이하생략) 산업안전보건기준에 관한",
+    "contextBefore": "방지를위해방호조치를실시하여야한다.산업안전보건기준에 관한 규칙 제87조(원동기‧회전축 등의 위험 방지) 1 사업주는 기계의 원동기ᆞ회전축ᆞ기어ᆞ풀리ᆞ플라이휠ᆞ벨트 및 체인 등 근로자가 위험에 처할 우려가 있는 부위에 ",
+    "detectedSection": {
+      "heading": "4.1회전기계등의위험방지",
+      "number": "4.1",
+      "status": "detected"
+    },
+    "exactCandidateSubstring": "덮개",
+    "matchedTerms": [
+      "덮개"
+    ],
+    "page": 8,
+    "pageLine": 4,
+    "sourceMatchEnd": 239,
+    "sourceMatchStart": 237
+  },
+  {
+    "actionableExcerpt": "산업안전보건기준에 관한 규칙 제100조(띠톱기계의 덮개 등) 사업주는 띠톱기계(목재가공용 띠톱기계는 제외한다)의 절단에 필요한 톱날 부위 외의 위험한 톱날 부위에 덮개 또는 울 등을 설치하여야 한다. 산업안전보건기준에 관한 규칙 제101조(원형톱기계의 톱날접촉예방장치) 사업주는 원형톱기계(목재가공용 둥근톱기계는 제외한다)에는 톱날접촉예방장치를 설치하여야 한다.",
+    "actionableExcerptEnd": 1056,
+    "actionableExcerptStart": 854,
+    "anchorInHeading": false,
+    "blockIndex": 3,
+    "category": "guards",
+    "contextAfter": " 등) 사업주는 띠톱기계(목재가공용 띠톱기계는 제외한다)의 절단에 필요한 톱날 부위 외의 위험한 톱날 부위에 덮개 또는 울 등을 설치하여야 한다. 산업안전보건기준에 관한 규칙 제101조(원형톱기계의 톱날접촉예방장치)",
+    "contextBefore": "산업안전보건기준에 관한 규칙 제100조(띠톱기계의 ",
+    "detectedSection": {
+      "heading": "4.2.1공작기계의위험방지",
+      "number": "4.2.1",
+      "status": "detected"
+    },
+    "exactCandidateSubstring": "덮개",
+    "matchedTerms": [
+      "덮개"
+    ],
+    "page": 8,
+    "pageLine": 6,
+    "sourceMatchEnd": 884,
+    "sourceMatchStart": 882
+  },
+  {
+    "actionableExcerpt": "조(프레스 등의 위험 방지) 1 사업주는 프레스 또는 전단기(剪斷機)(이하 “프레스등”이라 한다)를 사용하여 작업하는 근로자의 신체 일부가 위험한계에 들어가지 않도록 해당 부위에 덮개를 설치하는 등 필요한 방호 조치를 하여야 한다. 다만, 슬라이드 또는 칼날에 의한 위험을 방지하는 구조로 되어 있는 프레스등에 대해서는 그러하지 아니",
+    "actionableExcerptEnd": 1279,
+    "actionableExcerptStart": 1093,
+    "anchorInHeading": false,
+    "blockIndex": 4,
+    "category": "guards",
+    "contextAfter": "를 설치하는 등 필요한 방호 조치를 하여야 한다. 다만, 슬라이드 또는 칼날에 의한 위험을 방지하는 구조로 되어 있는 프레스등에 대해서는 그러하지 아니",
+    "contextBefore": "산업안전보건기준에 관한 규칙 제103조(프레스 등의 위험 방지) 1 사업주는 프레스 또는 전단기(剪斷機)(이하 “프레스등”이라 한다)를 사용하여 작업하는 근로자의 신체 일부가 위험한계에 들어가지 않도록 해당 부위에 ",
+    "detectedSection": {
+      "heading": "4.2.2프레스및전단기의위험방지",
+      "number": "4.2.2",
+      "status": "detected"
+    },
+    "exactCandidateSubstring": "덮개",
+    "matchedTerms": [
+      "덮개"
+    ],
+    "page": 8,
+    "pageLine": 6,
+    "sourceMatchEnd": 1195,
+    "sourceMatchStart": 1193
+  },
+  {
+    "actionableExcerpt": "산업안전보건기준에 관한 규칙 제125조(신선기의 인발블록의 덮개 등)사업주는 신선기의 인발블록(drawing block) 또는 꼬는 기계의 케이지(cage)로서 근로자가 위험해질 우려가 있는 경우 해당 부위에 덮개 또는 울 등을 설치하여야 한다.",
+    "actionableExcerptEnd": 639,
+    "actionableExcerptStart": 502,
+    "anchorInHeading": false,
+    "blockIndex": 1,
+    "category": "guards",
+    "contextAfter": " 등)사업주는 신선기의 인발블록(drawing block) 또는 꼬는 기계의 케이지(cage)로서 근로자가 위험해질 우려가 있는 경우 해당 부위에 덮개 또는 울 등을 설치하여야 한다. 산업안전보건기준에 관한 규칙 제",
+    "contextBefore": "판ᆞ종이ᆞ천 및 금속박 등을 통과시키는 롤러기로서 근로자가 위험해질 우려가 있는 부위에는 울 또는 가이드롤러(guide roller) 등을 설치하여야 한다.산업안전보건기준에 관한 규칙 제125조(신선기의 인발블록의 ",
+    "detectedSection": {
+      "heading": "4.2.5사출성형기,연삭숫돌,롤러기,신선기,버프연마기의위험방지",
+      "number": "4.2.5",
+      "status": "detected"
+    },
+    "exactCandidateSubstring": "덮개",
+    "matchedTerms": [
+      "덮개"
+    ],
+    "page": 10,
+    "pageLine": 3,
+    "sourceMatchEnd": 537,
+    "sourceMatchStart": 535
+  },
+  {
+    "actionableExcerpt": "(가)회전기계에연결되어있는조인트나커플링등이풀리면서주위로튀어오를가능성이있는경우에는조인트나커플링주위에덮개를설치한다.",
+    "actionableExcerptEnd": 414,
+    "actionableExcerptStart": 352,
+    "anchorInHeading": false,
+    "blockIndex": 1,
+    "category": "guards",
+    "contextAfter": "를설치한다.(나)벨트구동부위에근로자가말려들어갈가능성이있는경우에는벨트풀리위에벨트덮개를설치하거나기계전체에덮개를설치한다.(다)비스듬하게지지되었거나유격이있는회전체에과도한축방향힘으로인해축이이탈할가능성이있는경우에는축밀림방지장치",
+    "contextBefore": "(1)회전기계에위험발생의우려가있는때에는다음과같은예방조치를하여야한다.(가)회전기계에연결되어있는조인트나커플링등이풀리면서주위로튀어오를가능성이있는경우에는조인트나커플링주위에",
+    "detectedSection": {
+      "heading": "5.3회전기계등의위험예방조치",
+      "number": "5.3",
+      "status": "detected"
+    },
+    "exactCandidateSubstring": "덮개",
+    "matchedTerms": [
+      "덮개"
+    ],
+    "page": 12,
+    "pageLine": 6,
+    "sourceMatchEnd": 408,
+    "sourceMatchStart": 406
+  },
+  {
+    "actionableExcerpt": "주기계획검토(1)위험동력기계를분석하여발생가능한위험을제어할수있는방호장치,제어기능등을기술하고준비한다.",
+    "actionableExcerptEnd": 390,
+    "actionableExcerptStart": 336,
+    "anchorInHeading": false,
+    "blockIndex": 2,
+    "category": "guards",
+    "contextAfter": ",제어기능등을기술하고준비한다.",
+    "contextBefore": "주기계획검토(1)위험동력기계를분석하여발생가능한위험을제어할수있는",
+    "detectedSection": {
+      "heading": "7.2.1방호장치및점검",
+      "number": "7.2.1",
+      "status": "detected"
+    },
+    "exactCandidateSubstring": "방호장치",
+    "matchedTerms": [
+      "방호장치"
+    ],
+    "page": 31,
+    "pageLine": 10,
+    "sourceMatchEnd": 374,
+    "sourceMatchStart": 370
+  },
+  {
+    "actionableExcerpt": "(3)동력기계의정기점검에서는주요부품들을점검하고방호장치를시험한다.(4)동력기계의정기점검은해당기계를잘알고있는점검경험을가진전문가가수행한다.",
+    "actionableExcerptEnd": 282,
+    "actionableExcerptStart": 208,
+    "anchorInHeading": false,
+    "blockIndex": 1,
+    "category": "guards",
+    "contextAfter": "를시험한다.(4)동력기계의정기점검은해당기계를잘알고있는점검경험을가진전문가가수행한다.(5)동력기계의정기점검시점검의방법과범위는다음점검까지의최대기간과앞으로의가동을위한기계의적합성정도에따라정한다.(6)동력기계의정기점검을통해확인",
+    "contextBefore": "의가동전점검사항은기계의가동전에점검이이루어져야하며설계에따라설치가완비되었는지확인한다.(2)KOSHAGUIDEC-C-52-2026「가동전안전점검에관한기술지원규정」에따라점검한다.(3)동력기계의정기점검에서는주요부품들을점검하고",
+    "detectedSection": {
+      "heading": "7.2.2동력기계의점검",
+      "number": "7.2.2",
+      "status": "detected"
+    },
+    "exactCandidateSubstring": "방호장치",
+    "matchedTerms": [
+      "방호장치"
+    ],
+    "page": 32,
+    "pageLine": 3,
+    "sourceMatchEnd": 237,
+    "sourceMatchStart": 233
+  },
+  {
+    "actionableExcerpt": "잘못조절하였을경우운전자를보호할수없는구역이발생할수있어근로자가급박한위험에노출될수있음∙양수조작식안전장치,2인이상의공동작업제어시스템,재기동방지장치등의안전장치를사용∙소량의특정제품생산등으로안전장치의설치가현실적으로곤란한경우에는치공구등을사용하여소재를투입,꺼내는등거리제한에의한안전을확보3작업여건상안전장치의설치가현실적으로불가능하여발스위치를사용하는경우에는다음을따른다.",
+    "actionableExcerptEnd": 606,
+    "actionableExcerptStart": 412,
+    "anchorInHeading": false,
+    "blockIndex": 0,
+    "category": "restart_prevention",
+    "contextAfter": "장치등의안전장치를사용∙소량의특정제품생산등으로안전장치의설치가현실적으로곤란한경우에는치공구등을사용하여소재를투입,꺼내는등거리제한에의한안전을확보3작업여건상안전장치의설치가현실적으로불가능하여발스위치를사용하는경우에는다음을따른다.∙",
+    "contextBefore": "ng)기능을설정할수있음.이때에는특정가공물이나과업에따라기능이적절하게조절되었음을확인하여야함.잘못조절하였을경우운전자를보호할수없는구역이발생할수있어근로자가급박한위험에노출될수있음∙양수조작식안전장치,2인이상의공동작업제어시스템,재",
+    "detectedSection": {
+      "heading": null,
+      "number": null,
+      "status": "unknown"
+    },
+    "exactCandidateSubstring": "기동방지",
+    "matchedTerms": [
+      "기동방지"
+    ],
+    "page": 39,
+    "pageLine": 5,
+    "sourceMatchEnd": 487,
+    "sourceMatchStart": 483
+  },
+  {
+    "actionableExcerpt": "5안전하게유지보수할수있도록록아웃/태그아웃을적용한다.6재기동방지를위하여운전재개시수동으로재설정하는기능이있는비상정지장치를사용한다.",
+    "actionableExcerptEnd": 476,
+    "actionableExcerptStart": 407,
+    "anchorInHeading": false,
+    "blockIndex": 0,
+    "category": "loto",
+    "contextAfter": "/태그아웃을적용한다.6재기동방지를위하여운전재개시수동으로재설정하는기능이있는비상정지장치를사용한다.7식별이용이하고근로자가쉽게접근할수있는곳에비상정지버튼,삼각대식비상정치장치,당기는줄로된비상정지장치등을설치한다.\n1안전운전절차를",
+    "contextBefore": "고표지판이나경광등을설치한다.3컨베이어를사용하지않거나일정기간방치할때에는벽,바닥,슈트,호퍼등에설치된개구부에덮개를설치한다.4돌발적인실수로인하여기동버튼이눌려지지않도록운전대,운전실등에는가드를설치한다.5안전하게유지보수할수있도록",
+    "detectedSection": {
+      "heading": null,
+      "number": null,
+      "status": "unknown"
+    },
+    "exactCandidateSubstring": "록아웃",
+    "matchedTerms": [
+      "록아웃"
+    ],
+    "page": 40,
+    "pageLine": 6,
+    "sourceMatchEnd": 424,
+    "sourceMatchStart": 421
+  },
+  {
+    "actionableExcerpt": "KOSHAGUIDEB–M–37-2026\n-40-\n8운전자가위험부위에접근할수있도록한개이상의인터록가드를제거한상태에서연판을투입,조정하거나주유를할경우미동모드,역회전모드등을사용한다.",
+    "actionableExcerptEnd": 96,
+    "actionableExcerptStart": 0,
+    "anchorInHeading": false,
+    "blockIndex": 0,
+    "category": "interlocks",
+    "contextAfter": "가드를제거한상태에서연판을투입,조정하거나주유를할경우미동모드,역회전모드등을사용한다.이때미동모드의속도나운전간격은근로자에게위험을가하지않을정도로설계한다.9정상운전절차를준수할때에만인쇄기를기동할수있어야한다.인터록가드를개방했다가원",
+    "contextBefore": "KOSHAGUIDEB–M–37-2026\n-40-\n8운전자가위험부위에접근할수있도록한개이상의",
+    "detectedSection": {
+      "heading": null,
+      "number": null,
+      "status": "unknown"
+    },
+    "exactCandidateSubstring": "인터록",
+    "matchedTerms": [
+      "인터록"
+    ],
+    "page": 44,
+    "pageLine": 3,
+    "sourceMatchEnd": 52,
+    "sourceMatchStart": 49
+  },
+  {
+    "actionableExcerpt": "가드등의설치2손으로잡고연마해야되는경우조절이가능한튼튼한작업대사용3발스위치로기동하는경우불시의기동을방지하기위하여가드설치4필요시운전자와작업점사이의안전거리를확보할수있도록치공구등사용\n1안전운전절차를지속적으로개발하고적용하며,이를정상적으로이행하고있는지주기적으로점검한다.",
+    "actionableExcerptEnd": 703,
+    "actionableExcerptStart": 561,
+    "anchorInHeading": false,
+    "blockIndex": 0,
+    "category": "guards",
+    "contextAfter": "등의설치2손으로잡고연마해야되는경우조절이가능한튼튼한작업대사용3발스위치로기동하는경우불시의기동을방지하기위하여가드설치4필요시운전자와작업점사이의안전거리를확보할수있도록치공구등사용\n1안전운전절차를지속적으로개발하고적용하며,이를정상",
+    "contextBefore": "숫돌의덮개가부적절한경우4숫돌과작업대사이에가공물이끼어숫돌이파괴되어비산5숫돌이회전하고있는동안작업대조정,숫돌균형잡기,숫돌주위청소,회전하는숫돌을손으로정지시키기,가공물탑재또는제거,치\n1스핀들끝단,너트,플랜지돌출부등에안전덮개.",
+    "detectedSection": {
+      "heading": null,
+      "number": null,
+      "status": "unknown"
+    },
+    "exactCandidateSubstring": "가드",
+    "matchedTerms": [
+      "가드"
+    ],
+    "page": 52,
+    "pageLine": 7,
+    "sourceMatchEnd": 563,
+    "sourceMatchStart": 561
+  }
+]
