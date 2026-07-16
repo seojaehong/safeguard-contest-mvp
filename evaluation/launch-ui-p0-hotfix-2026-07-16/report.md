@@ -37,6 +37,14 @@ Initial aggregate run exposed two missing CSS prerequisites after selective inte
 
 The two skipped tests are explicit environment gates in the ontology browser suite; the deterministic ontology unit/DOM contracts and the remaining browser scenarios passed.
 
-## Release boundary
+## Live verification
 
-This artifact validates the hotfix branch built from current production. It does not claim that `www.safeclaw.kr` changed before this branch is merged and Vercel production deployment is verified.
+The bounded hotfix was merged as `1b17eecf05faeed20c711f771c01e73917c2566d` and Vercel production deployment completed.
+
+- Blank workspace: visible alert, focus returned to `field-command-input`, `/api/ask` requests 0, horizontal overflow 0.
+- `/why` at 390px Day/Night: five stacked rows, width 332px, outside elements 0, horizontal overflow 0.
+- `/ontology` desktop Day/Night: 13 neighborhood nodes, overlap pairs 0, outside elements 0, horizontal overflow 0.
+- `/ontology` mobile Day/Night: desktop graph nodes hidden, relationship list present, outside elements 0, horizontal overflow 0.
+- Customer-facing ontology internal-term matches: 0.
+
+The first live contrast sweep found the `/why` desktop header at 1.56:1 in Day mode. A follow-up TDD contract reproduced the failure and changed only the header text token to `--sc-black`; Day and Night browser tests then passed with a minimum 4.5:1 contract.
