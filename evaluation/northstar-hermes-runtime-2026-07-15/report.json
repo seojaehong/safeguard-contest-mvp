@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 6,
+  "date": "2026-07-15",
+  "implementationBaseSha": "6fc00ef463a621ef03d96510b52ee1a70dea7f0c",
+  "branch": "fix/northstar-hermes-runtime-20260715",
+  "scope": "Hermes P1 actual-body KOSHA trust and body-extractable planner claims",
+  "result": "pass_pending_independent_review",
+  "attestation": {
+    "actualItemBodySha256Recomputed": true,
+    "metadataHashTrustedAlone": false,
+    "computedBodyHashMustMatchRegistry": true,
+    "metadataBodyHashMustMatchRegistry": true,
+    "productionRegistryPinChanged": false,
+    "metadataOnlyArbitraryBodyAccepted": false,
+    "koshaClaimsRequireBodyExtract": true,
+    "forgedArbitraryControlsSelectable": false,
+    "verifiedBodyAnchorFallback": true,
+    "tenantSiteBindingPreserved": true,
+    "toolFreePolicyPreserved": true,
+    "openAiOAuthPreserved": true,
+    "humanConfirmationRequired": true,
+    "providerPolicyPreserved": true,
+    "mutationAuthority": false,
+    "publishAuthority": false
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests/hermes-engine-adapter.test.ts tests/openclaw-hermes-route.test.ts tests/openclaw-chat.test.ts tests/openclaw-broker-ui-context.test.ts tests/engine-adapter.test.ts tests/ai-provider-policy.test.ts --reporter=dot",
+      "testFiles": 6,
+      "tests": 95,
+      "passed": 95,
+      "failed": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd run build",
+      "exitCode": 0,
+      "staticItemsGenerated": 28,
+      "buildId": "6jAB9kHRJbdawnVN1-c9e"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "excluded": [
+    "database changes",
+    "schema changes",
+    "data mutation",
+    "deployment",
+    "publication"
+  ],
+  "runtimeReady": false,
+  "runtimeBlockers": [
+    "Installed OpenClaw CLI 2026.6.5 is behind config writer 2026.6.11.",
+    "The safeclaw profile has no explicit agents.list tool-free entry.",
+    "Organization and site binding environment values are not configured for live execution.",
+    "Local Hermes execution remains disabled on Vercel."
+  ]
+}
