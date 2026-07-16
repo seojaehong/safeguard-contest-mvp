@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-evaluation/v1",
-  "parentRejectedCommit": "25a3f92a0d4aa0a78b56256438e8d7e28fbb2f74",
+  "parentRejectedCommit": "381656e7bb1b5e833ccd9061fbd5b7ebdafe4535",
   "priorRejectedCommits": [
     "cf5261828c95a329b919d40e8e55f406652f9985",
     "756f3f04930512cd2dbc6ea6774654ed0d3a9456"
@@ -42,6 +42,8 @@
         "POSIX replacement is bound to no-follow directory file descriptors",
         "Windows replacement uses reparse-safe bound handles and relative NtSetInformationFile rename",
         "test hooks can interrupt mutations but cannot perform target writes",
+        "initial output-parent file identities are retained and matched against every later validation and rename handle",
+        "a same-name regular-directory swap fails closed without writing into the replacement namespace",
         "journal binds portable common-root-relative target identities",
         "all immutable backup hashes validate before either target is modified",
         "second publish failure rolls back both targets",
@@ -71,8 +73,8 @@
   },
   "verification": {
     "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body scripts.tests.test_snapshot_kosha_guide_corpus",
-    "testsRun": 60,
-    "testsPassed": 60,
+    "testsRun": 61,
+    "testsPassed": 61,
     "testsFailed": 0,
     "diffCheck": "pass"
   }

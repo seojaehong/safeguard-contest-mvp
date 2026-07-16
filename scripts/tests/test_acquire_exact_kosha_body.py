@@ -453,6 +453,58 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
             self.assertEqual((original_root / "asset.json").read_bytes(), old_asset)
             self.assertEqual((original_root / "receipt.json").read_bytes(), old_receipt)
 
+    def test_publish_hook_regular_directory_swap_fails_identity_guard(self) -> None:
+        pdf_bytes = build_pdf_bytes(["KOSHA GUIDE D-C-7-2026 exact native body"])
+        normalized_body = "KOSHA GUIDE D-C-7-2026 exact native body"
+        ledger = fixture_ledger(pdf_bytes)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            output_root = root / "outputs"
+            original_root = root / "outputs-original"
+            output_root.mkdir()
+            ledger_path = root / "ledger.json"
+            asset_path = output_root / "asset.json"
+            receipt_path = output_root / "receipt.json"
+            failure_path = output_root / "failure.json"
+            ledger_path.write_text(json.dumps(ledger, ensure_ascii=False), encoding="utf-8")
+            old_asset = b'{"asset":"verified-old"}\n'
+            old_receipt = b'{"receipt":"verified-old"}\n'
+            asset_path.write_bytes(old_asset)
+            receipt_path.write_bytes(old_receipt)
+
+            def swap_parent_object(phase: str) -> None:
+                if phase == "before-publish-asset":
+                    output_root.rename(original_root)
+                    output_root.mkdir()
+
+            with (
+                patch.object(acquire_exact_kosha_body, "PINNED_PDF_SHA256", sha256(pdf_bytes)),
+                patch.object(
+                    acquire_exact_kosha_body,
+                    "PINNED_NORMALIZED_BODY_SHA256",
+                    sha256(normalized_body.encode("utf-8")),
+                ),
+                self.assertRaisesRegex(
+                    acquire_exact_kosha_body.AcquisitionError,
+                    "promotion-output-parent-identity-mismatch",
+                ),
+            ):
+                acquire_exact_kosha_body.acquire_exact_body(
+                    ledger_path,
+                    asset_path,
+                    receipt_path,
+                    failure_path,
+                    fetch_bytes=lambda url: pdf_bytes,
+                    expected_ledger_sha256=str(ledger["ledger_sha256"]),
+                    publish_hook=swap_parent_object,
+                )
+
+            self.assertFalse((output_root / "asset.json").exists())
+            self.assertFalse((output_root / "receipt.json").exists())
+            self.assertFalse((output_root / "failure.json").exists())
+            self.assertEqual((original_root / "asset.json").read_bytes(), old_asset)
+            self.assertEqual((original_root / "receipt.json").read_bytes(), old_receipt)
+
     def test_activation_interrupt_recovers_before_next_acquisition(self) -> None:
         pdf_bytes = build_pdf_bytes(["KOSHA GUIDE D-C-7-2026 exact native body"])
         normalized_body = "KOSHA GUIDE D-C-7-2026 exact native body"
@@ -773,7 +825,7 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
         self.assertTrue(receipt["checks"]["prejournalOrphanConvergence"])
         self.assertTrue(receipt["checks"]["activeJournalRevalidatedBeforePublish"])
         self.assertTrue(receipt["checks"]["handleBoundTargetReplacement"])
-        self.assertTrue(receipt["checks"]["mutationCallbacksCannotWrite"])
+        self.assertTrue(receipt["checks"]["mutationHooksAreInterruptionOnly"])
         self.assertTrue(all(receipt["checks"].values()))
 
 
