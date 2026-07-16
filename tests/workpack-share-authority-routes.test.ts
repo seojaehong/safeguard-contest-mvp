@@ -5,7 +5,9 @@ import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { evaluateShareSessionReuse } from "@/components/WorkflowSharePolicy";
+import type { AskResponse } from "@/lib/types";
 import {
+  buildCanonicalRecipientMessageVariants,
   buildLocalizedDispatchRecipients,
   buildLocalizedDispatchWebhookPayload
 } from "@/lib/workflow-share-client";
@@ -271,6 +273,25 @@ describe("workflow dispatch route authority", () => {
         }
       ]
     });
+  });
+
+  it("fails closed instead of truncating an SMS recipient message", () => {
+    const oversizedMessage = "V".repeat(901);
+
+    expect(buildLocalizedDispatchRecipients({
+      recipients: [serverRecipient.workerSnapshot],
+      messageVariants: { vi: oversizedMessage },
+      channels: ["sms"]
+    })).toEqual({
+      ok: false,
+      missingLanguageCodes: [],
+      oversizedMessageLanguageCodes: ["vi"]
+    });
+    expect(buildLocalizedDispatchRecipients({
+      recipients: [serverRecipient.workerSnapshot],
+      messageVariants: { vi: oversizedMessage },
+      channels: ["email"]
+    })).toMatchObject({ ok: true });
   });
 
   it("omits phone after kakao preflight leaves email as the only relay channel", async () => {
@@ -775,6 +796,59 @@ describe("workflow dispatch route authority", () => {
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 
+  it("fails closed before provider dispatch instead of truncating an oversized SMS body", async () => {
+    const oversizedWorkpack = {
+      ...serverWorkpack,
+      mode: "live",
+      deliverables: {
+        ...serverWorkpack.deliverables,
+        foreignWorkerLanguages: [{
+          ...serverWorkpack.deliverables.foreignWorkerLanguages[0],
+          lines: ["V".repeat(900)]
+        }]
+      }
+    };
+    const canonical = buildCanonicalRecipientMessageVariants({
+      data: oversizedWorkpack as unknown as AskResponse,
+      recipientLanguageCodes: ["vi"]
+    });
+    if (!canonical.ok) throw new Error("Expected an oversized canonical message fixture");
+    expect(canonical.messageVariants.vi.length).toBeGreaterThan(900);
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue({
+      ...ownedContext(),
+      context: {
+        ...ownedContext().context,
+        shareAuthority: {
+          ...ownedContext().context.shareAuthority,
+          workpack: oversizedWorkpack
+        }
+      }
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: canonical.messageVariants
+    }));
+    const body = await response.json() as {
+      oversizedMessageLanguageCodes?: string[];
+      providerCalled?: boolean;
+    };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      oversizedMessageLanguageCodes: ["vi"],
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
   it("rejects client-forged workpack and recipients fields", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     const { POST } = await import("@/app/api/workflow/dispatch/route");
@@ -968,7 +1042,8 @@ describe("n8n recipient localization contract", () => {
     expect(script).toContain("recipientText(recipient)");
     expect(script).toContain("for (const recipient of messageRecipients)");
     expect(script).toContain("recipients: [recipient]");
-    expect(script).toContain("const text = recipientText(recipient).slice(0, 900)");
+    expect(script).toContain("const text = recipientText(recipient)");
+    expect(script).not.toContain("recipientText(recipient).slice(0, 900)");
     expect(script).toContain(
       "client.mail(config.smtpUser, [email], payload.subject, recipientText(recipient), recipient.messageTarget)"
     );
@@ -1087,6 +1162,7 @@ describe("n8n recipient localization contract", () => {
     ) => (...args: unknown[]) => Promise<unknown>;
     const execute = new AsyncFunction("$json", "$env", "$execution", "require", "fetch", "Buffer", script);
 
+    const longVietnameseMessage = `SafeClaw ${"V".repeat(892)}`;
     await execute({
       headers: { "x-safeguard-secret": "secret" },
       body: {
@@ -1098,7 +1174,7 @@ describe("n8n recipient localization contract", () => {
           phone: "010-1111-2222",
           dispatchLanguageCode: "vi",
           messageTarget: "foreign:vi",
-          message: VI_MESSAGE
+          message: longVietnameseMessage
         }],
         workpack: { companyName: "Safe Site" }
       }
@@ -1114,9 +1190,9 @@ describe("n8n recipient localization contract", () => {
       message: {
         to: "01011112222",
         from: "0299998888",
-        text: VI_MESSAGE,
+        text: longVietnameseMessage,
         messageTarget: "foreign:vi",
-        message: VI_MESSAGE
+        message: longVietnameseMessage
       }
     }]);
   });

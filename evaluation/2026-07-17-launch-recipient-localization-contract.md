@@ -63,10 +63,11 @@
 5. SMTP sandbox RED omitted the target; the actual SMTP wire now includes `X-SafeClaw-Message-Target` and the recipient-specific message body.
 6. Tenant ownership, active-session authority, canonical byte-equivalence, allowlist validation, and the persistent idempotency RED gate remain unchanged.
 7. A non-empty Korean `operatorNote` RED contaminated Vietnamese webhook, Solapi, and SMTP bodies; the note remains audit metadata but provider text now contains only the canonical per-recipient message.
+8. A 901-character SMS RED was silently truncated by the relay; SMS now fails closed above 900 characters before provider dispatch, while accepted Solapi bodies are sent byte-for-byte without relay truncation.
 
 ## Verification
 
-- Focused share/client/route suite: 4 files, 62 tests passed.
+- Focused share/client/route suite: 4 files, 66 tests passed on the integrated remediation.
 - Mobile browser contract: 1 test passed across desktop/mobile x day/night with one visible primary CTA and no clipping or overflow.
 - `npm.cmd run typecheck`: passed.
 - `git diff --check`: passed.

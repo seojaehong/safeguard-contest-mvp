@@ -483,7 +483,10 @@ export async function POST(request: NextRequest) {
       configured: Boolean(webhookConfig.url && webhookConfig.token),
       providerCalled: false,
       missingLanguageCodes: localizedPayload.missingLanguageCodes,
-      message: "저장된 작업자 언어에 맞는 전송 본문이 없어 provider 호출을 차단했습니다."
+      oversizedMessageLanguageCodes: localizedPayload.oversizedMessageLanguageCodes,
+      message: localizedPayload.oversizedMessageLanguageCodes.length
+        ? "문자 전송 본문이 900자를 초과해 provider 호출을 차단했습니다."
+        : "저장된 작업자 언어에 맞는 전송 본문이 없어 provider 호출을 차단했습니다."
     }, { status: 409 });
   }
   const payload = localizedPayload.payload;

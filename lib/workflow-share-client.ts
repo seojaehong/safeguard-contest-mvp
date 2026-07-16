@@ -14,7 +14,11 @@ export type LocalizedDispatchRecipient = {
 
 export type LocalizedDispatchRecipientsResult =
   | { ok: true; recipients: LocalizedDispatchRecipient[] }
-  | { ok: false; missingLanguageCodes: string[] };
+  | {
+      ok: false;
+      missingLanguageCodes: string[];
+      oversizedMessageLanguageCodes: string[];
+    };
 
 export type CanonicalRecipientMessageVariantsResult =
   | { ok: true; messageVariants: Record<string, string> }
@@ -96,12 +100,17 @@ export function buildLocalizedDispatchRecipients(input: {
   channels: WorkflowShareChannel[];
 }): LocalizedDispatchRecipientsResult {
   const missingLanguageCodes = new Set<string>();
+  const oversizedMessageLanguageCodes = new Set<string>();
   const localizedRecipients = input.recipients.flatMap((recipient): LocalizedDispatchRecipient[] => {
     const workerId = typeof recipient.workerId === "string" ? recipient.workerId.trim() : "";
     const languageCode = typeof recipient.languageCode === "string" ? recipient.languageCode.trim() : "";
     const message = languageCode ? input.messageVariants[languageCode] : "";
     if (!workerId || !languageCode || !message) {
       missingLanguageCodes.add(languageCode || "unknown");
+      return [];
+    }
+    if (input.channels.includes("sms") && message.length > 900) {
+      oversizedMessageLanguageCodes.add(languageCode);
       return [];
     }
     const phone = typeof recipient.phone === "string" ? recipient.phone.trim() : "";
@@ -121,8 +130,12 @@ export function buildLocalizedDispatchRecipients(input: {
     return [localizedRecipient];
   });
 
-  if (missingLanguageCodes.size) {
-    return { ok: false, missingLanguageCodes: [...missingLanguageCodes].sort() };
+  if (missingLanguageCodes.size || oversizedMessageLanguageCodes.size) {
+    return {
+      ok: false,
+      missingLanguageCodes: [...missingLanguageCodes].sort(),
+      oversizedMessageLanguageCodes: [...oversizedMessageLanguageCodes].sort()
+    };
   }
   return { ok: true, recipients: localizedRecipients };
 }
@@ -145,7 +158,11 @@ export function buildLocalizedDispatchWebhookPayload(input: {
   recipientMessageContract: "saved-worker-language-v1";
   operatorNote: string;
   workpack: unknown;
-} } | { ok: false; missingLanguageCodes: string[] } {
+} } | {
+  ok: false;
+  missingLanguageCodes: string[];
+  oversizedMessageLanguageCodes: string[];
+} {
   const localized = buildLocalizedDispatchRecipients(input);
   if (!localized.ok) return localized;
   const messageVariants = localized.recipients.reduce<Record<string, string>>((variants, recipient) => {
