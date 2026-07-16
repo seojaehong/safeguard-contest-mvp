@@ -245,8 +245,6 @@ export async function resolveMcpAuth(bearerToken: string | undefined | null): Pr
   const token = bearerToken?.trim();
   if (!token) return null;
 
-  const legacyTokens = parseLegacyTokens(process.env.SAFECLAW_MCP_TOKENS);
-
   let dbRow: McpTokenRow | null = null;
   const client = createSupabaseAdminClient();
   if (client) {
@@ -283,5 +281,8 @@ export async function resolveMcpAuth(bearerToken: string | undefined | null): Pr
     }
   }
 
+  if (dbRow) return buildDbContext(dbRow);
+
+  const legacyTokens = parseLegacyTokens(process.env.SAFECLAW_MCP_TOKENS);
   return decideAuthContext({ dbRow, legacyTokens, token });
 }
