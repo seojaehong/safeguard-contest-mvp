@@ -11,6 +11,7 @@ import { assembleGraph } from "@/lib/ontology/graph-store";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import {
   buildPhaseAProductMaterialization,
+  materializePhaseAProductDocuments,
   materializePhaseAProductIntoResponse,
 } from "@/lib/ontology/product-materialization";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
@@ -210,6 +211,56 @@ describe("Phase A product materialization", () => {
       },
     },
     {
+      label: "runtime graph node states",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        pack.provenance.runtimeGraph.nodeStates = ["verified"];
+      },
+    },
+    {
+      label: "runtime graph edge states",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        pack.provenance.runtimeGraph.edgeStates = ["draft"];
+      },
+    },
+    {
+      label: "law authority",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        Reflect.set(pack.provenance.lawLayer, "authority", "forged_authority");
+      },
+    },
+    {
+      label: "law effective date",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        Reflect.set(pack.provenance.lawLayer, "effectiveDate", "2025-01-01");
+      },
+    },
+    {
+      label: "guidance overlay",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        pack.provenance.guidanceOverlay.reviewState = "published";
+      },
+    },
+    {
+      label: "SIF overlay",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        Reflect.set(pack.provenance.sifOverlay, "embedded", true);
+      },
+    },
+    {
+      label: "pipeline stages",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        const stages = [...pack.pipeline.stages];
+        [stages[0], stages[1]] = [stages[1], stages[0]];
+        Reflect.set(pack.pipeline, "stages", stages);
+      },
+    },
+    {
+      label: "provider fallback",
+      mutate(pack: ActiveEvidenceChainPack): void {
+        Reflect.set(pack.pipeline, "providerFallback", "forged_provider_fallback");
+      },
+    },
+    {
       label: "review row stable key",
       mutate(pack: ActiveEvidenceChainPack): void {
         const target = pack.materialization[0]?.targets[0];
@@ -226,9 +277,12 @@ describe("Phase A product materialization", () => {
       .toThrow("canonical registry validation");
   });
 
-  test("is deterministic and leaves existing scored rows byte-for-byte unchanged", () => {
+  test("projects canonical review rows without inventing provider risk scores", () => {
     const pack = buildCanonicalPack("전기 작업");
+    const product = buildPhaseAProductMaterialization({ evidencePack: pack });
+    if (!product) throw new Error("expected canonical Phase A product");
     const existingRow: RiskAssessmentRow = {
+      controlId: "electrical-grounding",
       location: "EXISTING_LOCATION",
       process: "EXISTING_PROCESS",
       task: "EXISTING_TASK",
@@ -259,15 +313,40 @@ describe("Phase A product materialization", () => {
         tbmRiskLinks: [],
       },
     };
-    const structuredJson = JSON.stringify(original.structured);
+    const once = materializePhaseAProductDocuments(original, product);
+    const twice = materializePhaseAProductDocuments(once, product);
+    const projected = once.structured?.riskAssessmentRows[0];
 
-    const once = materializePhaseAProductIntoResponse(original, pack);
-    const twice = materializePhaseAProductIntoResponse(once, pack);
+    expect(once.structured?.riskAssessmentRows).toHaveLength(1);
+    expect(projected).toMatchObject({
+      controlId: "electrical-grounding",
+      likelihood: 3,
+      severity: 4,
+      riskLevel: "high",
+      verificationStatus: "needsReview",
+    });
+    expect(projected?.evidenceRefs).toContain(
+      "phase-a-stable-key:electrical-work-electrocution:risk-assessment:electrical-grounding",
+    );
+    expect(once.deliverables.riskAssessmentDraft).toContain(
+      "stableKey: electrical-work-electrocution:risk-assessment:electrical-grounding",
+    );
+    expect(once.deliverables.tbmBriefing).toContain(
+      "stableKey: electrical-work-electrocution:tbm:electrical-grounding",
+    );
+    expect(twice.deliverables).toEqual(once.deliverables);
+    expect(twice.structured).toEqual(once.structured);
+    expect(twice.phaseAProduct).toEqual(once.phaseAProduct);
 
-    expect(JSON.stringify(once.phaseAProduct)).toBe(JSON.stringify(twice.phaseAProduct));
-    expect(JSON.stringify(once.structured)).toBe(structuredJson);
-    expect(JSON.stringify(twice.structured)).toBe(structuredJson);
-    expect(once.deliverables).toEqual(original.deliverables);
+    const compatibility = materializePhaseAProductIntoResponse(original, pack);
+    expect(compatibility).toEqual(once);
+
+    const withoutProviderRows = materializePhaseAProductDocuments({
+      ...buildResponse("전기 작업"),
+      structured: undefined,
+    }, product);
+    expect(withoutProviderRows.structured).toBeUndefined();
+    expectNoInventedScore(withoutProviderRows.phaseAProduct);
   });
 
   test("reseals canonical review rows and survives evidence-summary reopen", () => {

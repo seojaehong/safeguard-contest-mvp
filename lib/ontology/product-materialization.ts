@@ -4,6 +4,7 @@ import {
   type ActiveEvidenceChainPack,
   type ObligationClassification,
 } from "@/lib/ontology/evidence-chain";
+import { validateRiskAssessmentRows, type RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import type { AskResponse } from "@/lib/types";
 
 export type PhaseAProductAuthorityState = "review_required";
@@ -201,6 +202,136 @@ type MaterializePhaseAProductOptions = {
   generationEvidenceSecret?: string;
 };
 
+function assertReviewRequiredProduct(product: PhaseAProductMaterialization): void {
+  const valid = product.authorityState === "review_required"
+    && product.evidenceChainState === "review_required"
+    && product.reportedEvidenceChainState === "review_required"
+    && product.outputStatus === "review_required_draft"
+    && product.verifiedDocumentRows.length === 0
+    && product.coverage.verifiedDocumentRows === 0
+    && product.humanConfirmation.required
+    && product.humanConfirmation.status === "pending"
+    && product.controls.every((control) => (
+      control.authorityState === "review_required"
+      && control.classification === "review_required"
+    ))
+    && product.documentRows.every((row) => (
+      row.classification === "review_required"
+      && row.verificationStatus === "review_required"
+    ));
+  if (!valid) {
+    throw new Error("Phase A product must remain review_required with human confirmation pending");
+  }
+}
+
+function rowBlock(row: PhaseAProductDocumentRow): string {
+  const guidance = row.provenance.koshaGuidanceCitedUids.length > 0
+    ? row.provenance.koshaGuidanceCitedUids.join(", ")
+    : "현장 확인 필요";
+  const path = [
+    `Task(${row.provenance.taskNodeId})`,
+    `SIF/Accident(${row.provenance.sifAccidentCitedUids.join(", ")})`,
+    `Hazard(${row.provenance.hazardNodeId})`,
+    `Control(${row.provenance.controlNodeId}: ${row.controlLabel})`,
+    `mandatedBy Article(${row.provenance.articleNodeIds.join(", ")})`,
+  ].join(" -> ");
+  return [
+    `[${row.rowOrSection}]`,
+    `stableKey: ${row.stableKey}`,
+    "상태: 검토 필요",
+    `적용조건: ${row.applicabilityCondition}`,
+    `확인질문: ${row.confirmationQuestion}`,
+    `근거 경로: ${path}`,
+    `SIF/Accident UID: ${row.provenance.sifAccidentCitedUids.join(", ")}`,
+    `KOSHA guidance UID: ${guidance}`,
+    `mandatedBy law UID: ${row.provenance.lawCitedUids.join(", ")}`,
+    "사람 확인: pending",
+  ].join("\n");
+}
+
+function prependMissingRows(
+  document: string,
+  rows: readonly PhaseAProductDocumentRow[],
+): string {
+  const missing = rows.filter((row) => !document.includes(`stableKey: ${row.stableKey}`));
+  if (missing.length === 0) return document;
+  const prefix = missing.map(rowBlock).join("\n\n");
+  return document.trim().length > 0 ? `${prefix}\n\n${document}` : prefix;
+}
+
+function projectExistingRiskRows(
+  rows: readonly RiskAssessmentRow[],
+  product: PhaseAProductMaterialization,
+): RiskAssessmentRow[] {
+  const reviewRowsByControlId = new Map(
+    product.documentRows
+      .filter((row) => row.document === "risk_assessment")
+      .map((row) => [row.controlId, row]),
+  );
+  return rows.map((row) => {
+    if (!row.controlId) return row;
+    const reviewRow = reviewRowsByControlId.get(row.controlId);
+    if (!reviewRow) return row;
+    return {
+      ...row,
+      verification: `review_required: ${reviewRow.stableKey}`,
+      verificationStatus: "needsReview",
+      evidenceRefs: unique([
+        ...row.evidenceRefs,
+        `phase-a-stable-key:${reviewRow.stableKey}`,
+        reviewRow.provenance.taskNodeId,
+        ...reviewRow.provenance.sifAccidentCitedUids,
+        reviewRow.provenance.hazardNodeId,
+        reviewRow.provenance.controlNodeId,
+        ...reviewRow.provenance.koshaGuidanceCitedUids,
+        ...reviewRow.provenance.lawCitedUids,
+        ...reviewRow.provenance.articleNodeIds,
+      ]),
+    };
+  });
+}
+
+export function materializePhaseAProductDocuments(
+  response: AskResponse,
+  product: PhaseAProductMaterialization,
+  options: MaterializePhaseAProductOptions = {},
+): AskResponse {
+  assertReviewRequiredProduct(product);
+  const riskRows = product.documentRows.filter((row) => row.document === "risk_assessment");
+  const tbmRows = product.documentRows.filter((row) => row.document === "tbm");
+  const projectedRows = response.structured
+    ? projectExistingRiskRows(response.structured.riskAssessmentRows, product)
+    : null;
+  const validation = projectedRows ? validateRiskAssessmentRows(projectedRows) : null;
+  const materialized: AskResponse = {
+    ...response,
+    deliverables: {
+      ...response.deliverables,
+      riskAssessmentDraft: prependMissingRows(response.deliverables.riskAssessmentDraft, riskRows),
+      tbmBriefing: prependMissingRows(response.deliverables.tbmBriefing, tbmRows),
+    },
+    structured: response.structured && projectedRows && validation
+      ? {
+          ...response.structured,
+          riskAssessmentRows: projectedRows,
+          riskAssessmentValidation: {
+            ok: validation.ok,
+            issueCount: validation.issues.length,
+            issues: validation.issues,
+          },
+        }
+      : response.structured,
+    phaseAProduct: product,
+  };
+  const generatedAt = response.generationEvidence?.snapshot.generatedAt;
+  return generatedAt
+    ? attachGenerationEvidence(materialized, {
+        secret: options.generationEvidenceSecret,
+        generatedAt,
+      })
+    : materialized;
+}
+
 export function materializePhaseAProductIntoResponse(
   response: AskResponse,
   evidencePack: ActiveEvidenceChainPack,
@@ -210,15 +341,5 @@ export function materializePhaseAProductIntoResponse(
   if (!rebuiltProduct) {
     throw new Error("Phase A product materialization failed canonical registry validation");
   }
-  const materialized: AskResponse = {
-    ...response,
-    phaseAProduct: rebuiltProduct,
-  };
-  const generatedAt = response.generationEvidence?.snapshot.generatedAt;
-  return generatedAt
-    ? attachGenerationEvidence(materialized, {
-        secret: options.generationEvidenceSecret,
-        generatedAt,
-      })
-    : materialized;
+  return materializePhaseAProductDocuments(response, rebuiltProduct, options);
 }

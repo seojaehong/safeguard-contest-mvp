@@ -1148,12 +1148,10 @@ export function validateCanonicalEvidenceChainPack(
   const expectedGuidance = definition.guidance.filter(
     (source) => source.registryMapping === "mapped",
   ).map((source) => applyGuidanceResolution(source, undefined));
+  const expectedLaw = definition.lawArticles.map(requireLaw);
   if (
     !sameJson(pack.guidance, expectedGuidance)
-    || !sameJson(
-      pack.law,
-      definition.lawArticles.map(requireLaw),
-    )
+    || !sameJson(pack.law, expectedLaw)
   ) {
     return false;
   }
@@ -1171,20 +1169,59 @@ export function validateCanonicalEvidenceChainPack(
     return false;
   }
 
-  return pack.applicability.authority === "scope_only"
-    && pack.provenance.runtimeGraph.scope === "published_only"
-    && pack.provenance.runtimeGraph.taskNodeId === definition.canonicalTaskNodeId
-    && pack.provenance.runtimeGraph.hazardNodeId === definition.hazard.nodeId
-    && sameJson(
-      pack.provenance.lawLayer.publishedGraphArticleNodeIds,
-      pack.law.flatMap((source) => (
+  const guidanceStatus = aggregateGuidanceStatus(expectedGuidance);
+  const expectedProvenance: EvidenceChainPack["provenance"] = {
+    runtimeGraph: {
+      scope: "published_only",
+      nodeStates: ["published"],
+      edgeStates: ["published"],
+      taskNodeId: definition.canonicalTaskNodeId,
+      hazardNodeId: definition.hazard.nodeId,
+    },
+    lawLayer: {
+      authority: "current_law_validates_mandatedBy",
+      effectiveDate: CURRENT_LAW_EFFECTIVE_DATE,
+      publishedGraphArticleNodeIds: expectedLaw.flatMap((source) => (
         source.graphArticleNodeId ? [source.graphArticleNodeId] : []
       )),
-    )
-    && pack.pipeline.llmRole === "naturalize_only"
-    && pack.pipeline.fixedPackImmutable
-    && pack.pipeline.qualityCheckRequired
-    && pack.pipeline.humanConfirmationRequired;
+      officialCurrentOverlayArticles: expectedLaw
+        .filter((source) => source.layer === "official_current_overlay")
+        .map((source) => source.articleNo),
+    },
+    guidanceOverlay: {
+      authority: "technical_guidance_only",
+      reviewState: guidanceStatus.reviewState,
+      resolution: guidanceStatus.resolution,
+      launchReady: KOSHA_CORPUS_STATE.launchReady,
+      bodyMissingCount: KOSHA_CORPUS_STATE.bodyMissingCount,
+      downloadProvenance: KOSHA_CORPUS_STATE.downloadProvenance,
+      productionChunkBridge: KOSHA_CORPUS_STATE.productionChunkBridge,
+    },
+    sifOverlay: {
+      ...SIF_CORPUS_STATE,
+      authority: "hazard_priority_only",
+    },
+  };
+  const expectedPipeline: EvidenceChainPack["pipeline"] = {
+    stages: [
+      "input",
+      "canonical_task_alias_match",
+      "published_subgraph",
+      "evidence_pack",
+      "llm_naturalize_only",
+      "quality_check",
+      "human_confirm",
+    ],
+    llmRole: "naturalize_only",
+    fixedPackImmutable: true,
+    qualityCheckRequired: true,
+    humanConfirmationRequired: true,
+    providerFallback: "preserve_current_provider_fallback",
+  };
+
+  return pack.applicability.authority === "scope_only"
+    && sameJson(pack.provenance, expectedProvenance)
+    && sameJson(pack.pipeline, expectedPipeline);
 }
 
 function requireLaw(articleNo: string): LawEvidenceRecord {

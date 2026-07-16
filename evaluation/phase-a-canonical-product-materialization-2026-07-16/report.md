@@ -4,29 +4,39 @@
 
 - Base commit: `530efbfafb30c6145c1536172b260ff644845846`
 - Branch: `feat/phase-a-canonical-workpack-materialization-20260716`
+- Initial Phase A commit: `a523e56e912da95bab24153356da8191193b6bd0`
 - Database and migrations: unchanged
 - Ontology publication: not performed
 - Runtime search path: unchanged
 
+## Integration Reconciliation
+
+- Fetched integration tip: `origin/feat/northstar-24h-integration-20260715` at `68cc9c5`.
+- Authoritative integration sequence after the requested base: `530efbf` -> `2065e5e` -> `6277896` -> `68cc9c5`.
+- The owned core blobs in `evidence-chain.ts`, `product-materialization.ts`, and `search.ts` are unchanged between `530efbf` and `68cc9c5`; no integration commit needed to be cherry-picked or rebased into this isolated branch.
+- This follow-up restores `materializePhaseAProductDocuments` as the document/structured-row projection path and keeps `materializePhaseAProductIntoResponse` as the compatibility entry point used by existing Claw and MCP callers.
+- The older implementation that appended synthetic scored risk rows was not restored.
+
 ## Implemented Contract
 
-- Runtime evidence packs are validated against the canonical Phase A registry before product projection.
+- Runtime evidence packs are validated against the canonical Phase A registry before product projection, including runtime node/edge states, law authority/effective date/article overlays, complete KOSHA and SIF overlays, and the complete pipeline stages/provider fallback contract.
 - Chain, task, hazard, control, SIF, mapped KOSHA chunk provenance, and law provenance are preserved.
 - Each canonical control produces one deterministic risk-assessment review row and one deterministic TBM review row.
 - Every projected row remains `review_required`; `verifiedDocumentRows` stays empty and human confirmation stays pending.
-- Product projection does not create likelihood, severity, or risk-level values and does not modify existing structured risk rows.
-- Forged task, SIF, control, KOSHA, law, review-state, and stable-key values fail closed.
+- Product projection does not create likelihood, severity, or risk-level values. Existing provider rows are only review-marked when their `controlId` matches a canonical control; their pre-existing score fields are preserved unchanged.
+- Forged valid-shape task, SIF, control, KOSHA, law, runtime graph, overlay, pipeline-stage, provider-fallback, review-state, and stable-key mutations fail closed.
 - MCP response, persisted evidence summary, and tenant-scoped reopen payload preserve the same Phase A product.
 
 ## Verification
 
 | Check | Result |
 | --- | --- |
-| Focused materialization/runtime/MCP/Claw tests | PASS, 4 files / 52 tests |
-| Ontology/MCP/generation/workpack regression tests | PASS, 4 files / 99 tests |
+| Focused materialization/runtime/MCP/Claw tests | PASS, 4 files / 60 tests |
+| Related ontology evidence-chain tests | PASS, 1 file / 61 tests |
+| Related reviewed-route task-binding test | 6 PASS / 1 stale assertion outside ownership; it expects a null Phase A product where current MCP parity correctly returns `work-at-height-fall` |
 | TypeScript strict typecheck | PASS |
 | `git diff --check` | PASS |
-| Ownership diff check | PASS, 7 files including this report |
+| Ownership diff check | PASS, 6 follow-up files including this report; no DB, migration, ontology publication, or search changes |
 
 ## Materialization Counts
 

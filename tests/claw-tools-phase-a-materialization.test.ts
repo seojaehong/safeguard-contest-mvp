@@ -117,7 +117,9 @@ describe("Claw Phase A product handlers", () => {
     expect(Object.isFrozen(reviewedOptions?.phaseAGrounding)).toBe(true);
     expect(mocks.reviewDocpack).toHaveBeenCalledWith(
       "고소작업",
-      expect.not.stringContaining("work-at-height-fall:risk-assessment:fall-work-platform"),
+      expect.stringContaining(
+        "stableKey: work-at-height-fall:risk-assessment:fall-work-platform",
+      ),
     );
     expect(result).toMatchObject({
       phaseAReviewStatus: {

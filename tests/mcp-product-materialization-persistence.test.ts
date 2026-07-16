@@ -275,7 +275,8 @@ describe("MCP Phase A product persistence behavior", () => {
     if (typeof savedSummary !== "object" || savedSummary === null || Array.isArray(savedSummary)) {
       throw new Error("expected persisted evidence summary");
     }
-    expect(savedSummary.phaseAProduct).toEqual(payload.phaseAProduct);
+    const persistedSummary = savedSummary as Record<string, unknown>;
+    expect(persistedSummary["phaseAProduct"]).toEqual(payload["phaseAProduct"]);
   });
 
   test("reopens the exact tenant row with HMAC and blocks foreign tenant insert/read", async () => {
