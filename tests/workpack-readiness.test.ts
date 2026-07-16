@@ -1,9 +1,29 @@
 import { describe, expect, it } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { assembleGraph } from "@/lib/ontology/graph-store";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
-import { applyWorkpackDeliverablesChange, assessWorkpackReadiness } from "@/lib/workpack-readiness";
+import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
+import {
+  applyWorkpackDeliverablesChange,
+  assessWorkpackReadiness,
+  buildWorkpackRevalidationBasis,
+  parseWorkpackRevalidationGraph,
+  revalidateEditedWorkpack
+} from "@/lib/workpack-readiness";
 import type { AskResponse, QualityContract } from "@/lib/types";
+
+const publishedGraph = assembleGraph(
+  SEED_NODES.filter((node) => node.review_state === "published"),
+  SEED_EDGES.filter((edge) => edge.review_state === "published")
+);
+
+const weldingControls = [
+  "가연성물질 별도 보관·격리",
+  "용접방화포·불티비산방지덮개 설치",
+  "화재감시자 배치",
+  "차광보안면·방열복 착용"
+].join("\n");
 
 const readyQuality: QualityContract = {
   overall: "ready",
@@ -93,6 +113,82 @@ function makeResponse(): AskResponse {
   };
 }
 
+function makeRevalidatableResponse(): AskResponse {
+  const response = makeResponse();
+  response.question = "용접 작업 전 안전조치 확인";
+  response.ontologyQa = {
+    ...response.ontologyQa!,
+    reviewTask: "용접"
+  };
+  response.deliverables.tbmBriefing = weldingControls;
+  response.status = {
+    ...response.status,
+    lawgo: "live",
+    ai: "live",
+    weather: "live",
+    work24: "live",
+    kosha: "live"
+  };
+  response.externalData.weather.mode = "live";
+  response.externalData.training.mode = "live";
+  response.externalData.koshaEducation.mode = "live";
+  response.externalData.accidentCases.mode = "live";
+  response.externalData.kosha.mode = "live";
+  response.externalData.safetyKnowledge = {
+    source: "safety-knowledge",
+    mode: "live",
+    detail: "검수 기준 연결",
+    matches: [{
+      id: "welding-ready",
+      title: "용접 안전조치",
+      primaryDocuments: ["TBM 브리핑"],
+      controls: weldingControls.split("\n"),
+      sourceTitles: ["published ontology"],
+      legalMappingTitles: []
+    }]
+  };
+  response.externalData.safetyReference = {
+    source: "safety-reference-catalog",
+    mode: "live",
+    query: response.question,
+    count: 1,
+    totalItems: 1,
+    message: "published reference ready",
+    items: []
+  };
+  response.structured = {
+    riskAssessmentRows: [{} as NonNullable<AskResponse["structured"]>["riskAssessmentRows"][number]],
+    riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
+  };
+  response.deliverables.workPlanStructured = {} as NonNullable<AskResponse["deliverables"]["workPlanStructured"]>;
+  response.deliverables.tbmBriefingStructured = {} as NonNullable<AskResponse["deliverables"]["tbmBriefingStructured"]>;
+  response.deliverables.tbmLogStructured = {} as NonNullable<AskResponse["deliverables"]["tbmLogStructured"]>;
+  response.dbHarness!.packet = {
+    mode: "db_harness_first",
+    question: response.question,
+    directEvidence: [{} as NonNullable<AskResponse["dbHarness"]>["packet"]["directEvidence"][number]],
+    sifCases: [],
+    supportingEvidence: [],
+    improvementMemory: [],
+    workpackMemory: [],
+    retrievalContract: response.dbHarness!.summary.retrievalContract,
+    ontologyChecklist: { status: "ready", missing: [] },
+    generationContract: {
+      llmRole: "naturalize_only",
+      llmOutputScope: "rewrite_fixed_evidence_only",
+      evidenceAuthority: "db_harness",
+      providerRetryScope: "naturalization_retry_only",
+      fallbackChainAllowed: false,
+      genericProseSubstitutionAllowed: false,
+      missingEvidencePolicy: "surface_review_required",
+      requiredDocuments: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+      missingEvidence: [],
+      documentCoverage: readyQuality.dbHarness.documentCoverage
+    }
+  };
+  return response;
+}
+
 describe("workpack readiness", () => {
   it("blocks normal sharing when generated output still has review blockers", () => {
     const response = makeResponse();
@@ -176,10 +272,69 @@ describe("workpack readiness", () => {
 
     expect(edited.ontologyQa).toBeUndefined();
     expect(edited.qualityContract).toBeUndefined();
-    expect(edited.dbHarness).toBeUndefined();
+    expect(edited.dbHarness?.summary.ontologyStatus).toBe("review_required");
+    expect(edited.dbHarness?.packet.ontologyChecklist).toEqual({
+      status: "review_required",
+      missing: ["편집된 문서 재검수 필요"]
+    });
+    expect(buildWorkpackRevalidationBasis(edited)?.reviewTask).toBe("고소작업");
     expect(readiness.canShare).toBe(false);
     expect(readiness.status).toBe("blocked");
     expect(readiness.summary).toBe("편집 후 재검수 필요");
     expect(readiness.reasons).toContain("편집된 문서 재검수 필요");
+  });
+
+  it("revalidates edited canonical content without restoring the old QA result", () => {
+    const response = makeRevalidatableResponse();
+    const previousQa = response.ontologyQa;
+    const basis = buildWorkpackRevalidationBasis(response);
+    const editedValue = `${weldingControls}\n편집된 작업순서 유지`;
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      { tbmBriefing: editedValue },
+      { requiresRevalidation: true }
+    );
+
+    const revalidated = revalidateEditedWorkpack(
+      edited,
+      basis,
+      publishedGraph,
+      "2026-07-17T00:00:00.000Z"
+    );
+
+    expect(revalidated.deliverables.tbmBriefing).toBe(editedValue);
+    expect(revalidated.ontologyQa).toBeDefined();
+    expect(revalidated.ontologyQa).not.toBe(previousQa);
+    expect(revalidated.ontologyQa?.result.reviewable && revalidated.ontologyQa.result.verdict).toBe("통과");
+    expect(revalidated.qualityContract?.generatedAt).toBe("2026-07-17T00:00:00.000Z");
+    expect(assessWorkpackReadiness(revalidated).canShare).toBe(true);
+  });
+
+  it("keeps sharing blocked when edited canonical content fails revalidation", () => {
+    const response = makeRevalidatableResponse();
+    const basis = buildWorkpackRevalidationBasis(response);
+    const editedValue = weldingControls
+      .split("\n")
+      .filter((control) => control !== "화재감시자 배치")
+      .join("\n");
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      { tbmBriefing: editedValue },
+      { requiresRevalidation: true }
+    );
+
+    const revalidated = revalidateEditedWorkpack(edited, basis, publishedGraph);
+    const readiness = assessWorkpackReadiness(revalidated);
+
+    expect(revalidated.deliverables.tbmBriefing).toBe(editedValue);
+    expect(revalidated.ontologyQa?.result.reviewable && revalidated.ontologyQa.result.verdict).not.toBe("통과");
+    expect(readiness.canShare).toBe(false);
+    expect(readiness.reasons).toContain("안전조치 검수 미통과");
+  });
+
+  it("rejects malformed ontology graph responses before revalidation", () => {
+    expect(parseWorkpackRevalidationGraph({ graph: { nodes: [{}], edges: [] } })).toBeNull();
+    expect(parseWorkpackRevalidationGraph({ graph: { nodes: publishedGraph.nodes, edges: publishedGraph.edges } }))
+      .toEqual({ nodes: publishedGraph.nodes, edges: publishedGraph.edges });
   });
 });

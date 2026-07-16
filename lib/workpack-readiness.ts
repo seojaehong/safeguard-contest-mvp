@@ -1,4 +1,8 @@
 import type { AskResponse } from "./types";
+import type { QueryableGraph } from "./ontology/query";
+import { reviewDocumentCoverage } from "./ontology/qa-review";
+import { ontologyEdgeSchema, ontologyNodeSchema } from "./ontology/schema";
+import { buildQualityContract } from "./quality-contract";
 
 export type WorkpackReadinessStatus = "ready" | "blocked";
 
@@ -12,6 +16,33 @@ export type WorkpackReadiness = {
 export type WorkpackReadinessOptions = {
   requiresRevalidation?: boolean;
 };
+
+export type WorkpackRevalidationBasis = {
+  reviewTask: string;
+  dbHarness: NonNullable<AskResponse["dbHarness"]>;
+};
+
+const ONTOLOGY_QA_DOCUMENT_KEYS = [
+  "riskAssessmentDraft",
+  "workPlanDraft",
+  "tbmBriefing",
+  "tbmLogDraft",
+  "safetyEducationRecordDraft",
+  "emergencyResponseDraft"
+] as const;
+
+const REVIEW_TASK_INFERENCE: ReadonlyArray<{ task: string; keywords: readonly string[] }> = [
+  { task: "용접", keywords: ["용접", "절단", "불티", "용접흄"] },
+  { task: "화기 작업", keywords: ["화기", "가연물", "화재감시"] },
+  { task: "밀폐공간 작업", keywords: ["밀폐", "산소결핍", "질식"] },
+  { task: "비계 조립·해체", keywords: ["비계"] },
+  { task: "고소작업", keywords: ["고소", "추락", "외벽"] },
+  { task: "전기 작업", keywords: ["전기", "감전", "활선"] },
+  { task: "지게차 상하차", keywords: ["지게차"] },
+  { task: "크레인 양중", keywords: ["크레인", "양중"] },
+  { task: "하역·운반", keywords: ["하역", "운반"] },
+  { task: "도장(스프레이)", keywords: ["도장", "스프레이"] }
+];
 
 const APPROVAL_PLACEHOLDER_PATTERNS = [
   /\[결재\]/,
@@ -46,6 +77,91 @@ function hasDbHarnessBlocker(response: AskResponse) {
   return response.dbHarness.summary.missingEvidence.length > 0 || response.dbHarness.summary.ontologyStatus !== "ready";
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function parseWorkpackRevalidationGraph(value: unknown): QueryableGraph | null {
+  if (!isRecord(value) || !isRecord(value.graph)) return null;
+  const rawNodes = value.graph.nodes;
+  const rawEdges = value.graph.edges;
+  if (!Array.isArray(rawNodes) || !Array.isArray(rawEdges)) return null;
+
+  const nodes = rawNodes.flatMap((node) => {
+    const parsed = ontologyNodeSchema.safeParse(node);
+    return parsed.success ? [parsed.data] : [];
+  });
+  const edges = rawEdges.flatMap((edge) => {
+    const parsed = ontologyEdgeSchema.safeParse(edge);
+    return parsed.success ? [parsed.data] : [];
+  });
+  if (nodes.length !== rawNodes.length || edges.length !== rawEdges.length || nodes.length === 0) return null;
+  return { nodes, edges };
+}
+
+export function buildWorkpackRevalidationBasis(response: AskResponse): WorkpackRevalidationBasis | null {
+  const reviewTask = response.ontologyQa?.reviewTask.trim()
+    || REVIEW_TASK_INFERENCE.find((candidate) =>
+      candidate.keywords.some((keyword) => response.question.includes(keyword))
+    )?.task;
+  if (!reviewTask || !response.dbHarness) return null;
+  return {
+    reviewTask,
+    dbHarness: response.dbHarness
+  };
+}
+
+export function revalidateEditedWorkpack(
+  response: AskResponse,
+  basis: WorkpackRevalidationBasis | null,
+  graph: QueryableGraph,
+  generatedAt = new Date().toISOString()
+): AskResponse {
+  if (!basis) return response;
+
+  const sourceDocumentKeys = ONTOLOGY_QA_DOCUMENT_KEYS.filter((key) =>
+    Boolean(response.deliverables[key]?.trim())
+  );
+  const documentText = sourceDocumentKeys
+    .map((key) => `[${key}]\n${response.deliverables[key]}`)
+    .join("\n\n");
+  const result = reviewDocumentCoverage(basis.reviewTask, documentText, graph);
+  const ontologyReady = result.reviewable && result.verdict === "통과";
+  const dbHarness = {
+    ...basis.dbHarness,
+    packet: {
+      ...basis.dbHarness.packet,
+      ontologyChecklist: {
+        status: ontologyReady ? "ready" as const : "review_required" as const,
+        missing: result.reviewable
+          ? result.missing.controls.map((control) => control.control)
+          : [result.message]
+      }
+    },
+    summary: {
+      ...basis.dbHarness.summary,
+      ontologyStatus: ontologyReady ? "ready" as const : "review_required" as const
+    }
+  };
+  const reviewed: AskResponse = {
+    ...response,
+    dbHarness,
+    ontologyQa: {
+      reviewTask: basis.reviewTask,
+      result,
+      sourceDocumentKeys: [...sourceDocumentKeys],
+      detail: result.reviewable
+        ? `안전조치 검수 ${result.verdict}: 편집된 문서 본문을 다시 확인했습니다.`
+        : result.message
+    }
+  };
+
+  return {
+    ...reviewed,
+    qualityContract: buildQualityContract(reviewed, generatedAt)
+  };
+}
+
 export function applyWorkpackDeliverablesChange(
   response: AskResponse,
   deliverables: Partial<AskResponse["deliverables"]>,
@@ -64,7 +180,22 @@ export function applyWorkpackDeliverablesChange(
     ...nextResponse,
     ontologyQa: undefined,
     qualityContract: undefined,
-    dbHarness: undefined
+    dbHarness: nextResponse.dbHarness
+      ? {
+        ...nextResponse.dbHarness,
+        packet: {
+          ...nextResponse.dbHarness.packet,
+          ontologyChecklist: {
+            status: "review_required",
+            missing: ["편집된 문서 재검수 필요"]
+          }
+        },
+        summary: {
+          ...nextResponse.dbHarness.summary,
+          ontologyStatus: "review_required"
+        }
+      }
+      : undefined
   };
 }
 

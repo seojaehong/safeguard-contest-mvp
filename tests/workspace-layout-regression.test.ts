@@ -1821,7 +1821,7 @@ describe("workspace layout regression", () => {
       return stored.data || null;
     });
     expect(invalidatedReview).not.toHaveProperty("ontologyQa");
-    expect(invalidatedReview).not.toHaveProperty("dbHarness");
+    expect(invalidatedReview).toHaveProperty("dbHarness.summary.ontologyStatus", "review_required");
 
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });

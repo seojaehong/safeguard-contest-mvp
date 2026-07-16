@@ -56,6 +56,10 @@ import { buildGenerationProgressState } from "@/lib/workspace-generation-progres
 import {
   applyWorkpackDeliverablesChange,
   assessWorkpackReadiness,
+  buildWorkpackRevalidationBasis,
+  parseWorkpackRevalidationGraph,
+  revalidateEditedWorkpack,
+  type WorkpackRevalidationBasis,
   type WorkpackReadiness
 } from "@/lib/workpack-readiness";
 import { formatCustomerFacingLabel, formatCustomerFacingText } from "@/lib/web-safe-presentation";
@@ -72,6 +76,7 @@ type WorkspaceTheme = "night" | "day";
 type DocumentSurfaceMode = "review" | "editor";
 
 type GenerationState = "idle" | "generating" | "ready" | "error";
+type RevalidationState = "idle" | "checking" | "error";
 
 type WorkflowStep = {
   key: WorkspacePage;
@@ -1049,6 +1054,9 @@ export function SafeGuardCommandCenter({
   const [data, setData] = useState<AskResponse | null>(null);
   const [generationFingerprint, setGenerationFingerprint] = useState<string | null>(null);
   const [requiresRevalidation, setRequiresRevalidation] = useState(false);
+  const [revalidationState, setRevalidationState] = useState<RevalidationState>("idle");
+  const revalidationBasisRef = useRef<WorkpackRevalidationBasis | null>(null);
+  const revalidationVersionRef = useRef(0);
   const [message, setMessage] = useState("");
   const [inputError, setInputError] = useState("");
   const commandInputRef = useRef<HTMLTextAreaElement>(null);
@@ -1144,15 +1152,61 @@ export function SafeGuardCommandCenter({
     values: WorkpackDocumentValues,
     change: WorkpackDeliverablesChange
   ) => {
-    if (change.requiresRevalidation) setRequiresRevalidation(true);
+    if (change.requiresRevalidation) {
+      revalidationVersionRef.current += 1;
+      setRequiresRevalidation(true);
+      setRevalidationState("idle");
+      setSavedWorkpackId(null);
+    }
     setData((current) => {
       if (!current) return current;
+      if (change.requiresRevalidation && !revalidationBasisRef.current) {
+        revalidationBasisRef.current = buildWorkpackRevalidationBasis(current);
+      }
       const currentDocuments: Partial<Record<DocumentKey, string>> = current.deliverables;
       const documentKeys = Object.keys(values) as DocumentKey[];
       if (documentKeys.every((key) => currentDocuments[key] === values[key])) return current;
       return applyWorkpackDeliverablesChange(current, values, change);
     });
   }, []);
+
+  async function revalidateCurrentWorkpack() {
+    if (!data || !revalidationBasisRef.current) {
+      setRevalidationState("error");
+      setMessage("편집 전 검수 기준을 확인할 수 없어 문서팩을 다시 생성해야 합니다.");
+      return;
+    }
+
+    setRevalidationState("checking");
+    const revalidationVersion = revalidationVersionRef.current;
+    try {
+      const response = await fetch("/api/ontology/graph", { cache: "no-store" });
+      const payload = (await response.json().catch((): unknown => null)) as unknown;
+      const graph = response.ok ? parseWorkpackRevalidationGraph(payload) : null;
+      if (!graph) throw new Error(`published ontology graph unavailable: HTTP ${response.status}`);
+      if (revalidationVersion !== revalidationVersionRef.current) {
+        setRequiresRevalidation(true);
+        setRevalidationState("idle");
+        setMessage("점검 중 편집 내용이 변경되었습니다. 현재 내용으로 다시 점검해 주세요.");
+        return;
+      }
+
+      const nextData = revalidateEditedWorkpack(data, revalidationBasisRef.current, graph);
+      const nextReadiness = assessWorkpackReadiness(nextData);
+      setData(nextData);
+      setRequiresRevalidation(!nextReadiness.canShare);
+      setRevalidationState("idle");
+      if (generationFingerprint) persistCurrentWorkpack(nextData, generationFingerprint);
+      setMessage(nextReadiness.canShare
+        ? "편집된 문서를 다시 점검했습니다. 공유 단계로 이동할 수 있습니다."
+        : `편집된 문서에 보완이 필요합니다. ${nextReadiness.reasons.join(" · ")}`);
+    } catch (error) {
+      console.error("edited workpack revalidation failed", error);
+      setRequiresRevalidation(true);
+      setRevalidationState("error");
+      setMessage("편집 내용 점검을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    }
+  }
 
   function persistCurrentWorkpack(payload: AskResponse, fingerprint: string) {
     if (typeof window === "undefined") return;
@@ -1561,11 +1615,14 @@ export function SafeGuardCommandCenter({
   }
 
   function applyGeneratedPayload(payload: AskResponse) {
+    revalidationVersionRef.current += 1;
     const fingerprint = buildGenerationEvidenceFingerprint(payload);
     persistCurrentWorkpack(payload, fingerprint);
     setGenerationFingerprint(fingerprint);
     setData(payload);
+    revalidationBasisRef.current = buildWorkpackRevalidationBasis(payload);
     setRequiresRevalidation(false);
+    setRevalidationState("idle");
     setSavedWorkpackId(null);
     setImprovementSaveState("idle");
     setCheckedActions(payload.riskSummary.immediateActions.map(() => false));
@@ -1644,11 +1701,14 @@ export function SafeGuardCommandCenter({
   }
 
   function selectExample(example: FieldExample) {
+    revalidationVersionRef.current += 1;
     setSelectedExampleId(example.id);
     setQuestion(example.question);
     setData(null);
+    revalidationBasisRef.current = null;
     setGenerationFingerprint(null);
     setRequiresRevalidation(false);
+    setRevalidationState("idle");
     setSavedWorkpackId(null);
     setImprovementSaveState("idle");
     setLiveWeather(null);
@@ -1666,8 +1726,12 @@ export function SafeGuardCommandCenter({
     setSelectedExampleId(null);
     setQuestion(stored.data.question);
     setData(stored.data);
+    const restoredRevalidationBasis = buildWorkpackRevalidationBasis(stored.data);
+    revalidationBasisRef.current = restoredRevalidationBasis;
     setGenerationFingerprint(stored.generationFingerprint);
-    setRequiresRevalidation(false);
+    setRequiresRevalidation(Boolean(
+      restoredRevalidationBasis && (!stored.data.ontologyQa || !stored.data.qualityContract)
+    ));
     setState("ready");
     setDocumentSurfaceMode("review");
     setWorkspacePage("document");
@@ -2263,6 +2327,15 @@ export function SafeGuardCommandCenter({
                       ? selectedDocumentBody.slice(0, 1200)
                       : "현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다."}
                   </pre>
+                  {requiresRevalidation ? <button
+                    type="button"
+                    className="button secondary document-next-button"
+                    data-testid="revalidate-edited-workpack"
+                    disabled={revalidationState === "checking"}
+                    onClick={() => void revalidateCurrentWorkpack()}
+                  >
+                    {revalidationState === "checking" ? "편집 내용 점검 중" : "편집 내용 다시 점검"}
+                  </button> : null}
                   <button
                     type="button"
                     className="button command-primary document-next-button workbench-primary-action workbench-disabled-state"
