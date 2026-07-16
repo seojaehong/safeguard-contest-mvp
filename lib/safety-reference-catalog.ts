@@ -11,6 +11,7 @@ export type KoshaGroundingReason =
   | "body-kind-unverified"
   | "body-integrity-unverified"
   | "body-integrity-mismatch"
+  | "exact-registry-integrity-failed"
   | "local-corpus-integrity-failed"
   | "local-corpus-unavailable";
 
@@ -1952,7 +1953,7 @@ export function summarizeKoshaGrounding(input: {
   items: readonly SafetyReferenceItem[];
   localCorpusStatus?: KoshaGroundingSearchDecision["localCorpusStatus"];
   excludedCount?: number;
-  blockedReason?: "local-corpus-integrity-failed" | "local-corpus-unavailable";
+  blockedReason?: "exact-registry-integrity-failed" | "local-corpus-integrity-failed" | "local-corpus-unavailable";
 }): KoshaGroundingSearchDecision {
   const decisions = input.items
     .filter(isKoshaTechnicalReference)
@@ -1962,8 +1963,12 @@ export function summarizeKoshaGrounding(input: {
   const reviewRequired = decisions.filter((decision) => decision.status !== "verified_current");
   const excludedCount = input.excludedCount || 0;
   const localCorpusStatus = input.localCorpusStatus || "not_applicable";
-  const localGateReason = input.blockedReason || null;
-  if (input.blockedReason === "local-corpus-integrity-failed") {
+  const localGateReason = input.blockedReason === "local-corpus-integrity-failed"
+    || input.blockedReason === "local-corpus-unavailable"
+    ? input.blockedReason
+    : null;
+  if (input.blockedReason === "local-corpus-integrity-failed"
+    || input.blockedReason === "exact-registry-integrity-failed") {
     return {
       status: "blocked",
       reason: input.blockedReason,

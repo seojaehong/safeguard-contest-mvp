@@ -81,6 +81,7 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
 
             asset = json.loads(asset_path.read_text(encoding="utf-8"))
             self.assertEqual(receipt["status"], "verified")
+            self.assertEqual(asset["publishedAt"], "2026-01-30")
             self.assertEqual(asset["pdfSha256"], sha256(pdf_bytes))
             self.assertEqual(asset["bodySha256"], sha256(asset["body"].encode("utf-8")))
             self.assertEqual(asset["extractorDependency"], "pypdf==6.7.1")

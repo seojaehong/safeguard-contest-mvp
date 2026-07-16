@@ -21,6 +21,7 @@ from scripts import snapshot_kosha_guide_corpus
 
 TARGET_STABLE_KEY = "D-C-7"
 TARGET_VERSION = "D-C-7-2026"
+TARGET_PUBLISHED_AT = "2026-01-30"
 TARGET_TITLE = "D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정"
 TARGET_ITEM_ID = "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정"
 PINNED_LEDGER_SHA256 = "b2ade4323cddecc0a50dab98f944f0781dc09885c8bdece4c1a6c0ea2010d0ef"
@@ -212,6 +213,7 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
         "pdfSha256": actual_pdf_sha256,
         "officialUrl": official_url,
         "officialFileId": official_file_id,
+        "publishedAt": TARGET_PUBLISHED_AT,
         "extractionSchema": snapshot_kosha_guide_corpus.CORPUS_SCHEMA_VERSION,
         "extractorVersion": snapshot_kosha_guide_corpus.EXTRACTOR_VERSION,
         "extractorDependency": f"pypdf=={snapshot_kosha_guide_corpus.PYPDF_VERSION}",

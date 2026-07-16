@@ -17,6 +17,7 @@ export type ExactKoshaTrustPin = Readonly<{
   officialUrl: string;
   officialFileId: string;
   publishedAt: string;
+  provenanceSha256: string;
 }>;
 
 const PRODUCTION_TRUSTED_KOSHA_REFERENCES: readonly ExactKoshaTrustPin[] = Object.freeze([
@@ -32,8 +33,31 @@ const PRODUCTION_TRUSTED_KOSHA_REFERENCES: readonly ExactKoshaTrustPin[] = Objec
     officialUrl: "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1",
     officialFileId: "CTC2026012914371557826167",
     publishedAt: "2026-01-30",
+    provenanceSha256: "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+  }),
+  Object.freeze({
+    itemId: "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정",
+    sourceId: "kosha-technical-support-regulations-2025",
+    itemType: "technical-support-regulation",
+    title: "D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정",
+    stableDocumentKey: "D-C-7",
+    version: "D-C-7-2026",
+    bodySha256: "97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112",
+    pdfSha256: "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3",
+    officialUrl: "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914243912403149/2",
+    officialFileId: "CTC2026012914243912403149",
+    publishedAt: "2026-01-30",
+    provenanceSha256: "b2ade4323cddecc0a50dab98f944f0781dc09885c8bdece4c1a6c0ea2010d0ef",
   }),
 ]);
+
+export function getProductionExactKoshaTrustPin(itemId: string): ExactKoshaTrustPin | null {
+  return PRODUCTION_TRUSTED_KOSHA_REFERENCES.find((pin) => pin.itemId === itemId) ?? null;
+}
+
+export function getProductionExactKoshaTrustPins(): readonly ExactKoshaTrustPin[] {
+  return PRODUCTION_TRUSTED_KOSHA_REFERENCES;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -170,6 +194,10 @@ function metadataDoesNotContradictPin(
     records,
     ["official_published_at", "officialPublishedAt", "published_at", "publishedAt"],
     pin.publishedAt,
+  ) && matchesRequiredPinnedValue(
+    records,
+    ["extraction_snapshot", "extractionSnapshot", "portability_ledger_sha256", "portabilityLedgerSha256"],
+    pin.provenanceSha256,
   );
 }
 

@@ -9,6 +9,7 @@ declare module "@/next.config.mjs" {
   }
   const nextConfig: {
     headers: () => Promise<HeaderRule[]>;
+    outputFileTracingIncludes?: Record<string, readonly string[]>;
   };
   export default nextConfig;
 }
