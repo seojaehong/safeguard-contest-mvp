@@ -313,14 +313,12 @@ def _path_is_within(path: Path, parent: Path) -> bool:
         return False
 
 
-def _validate_promotion_paths(
-    ledger_path: Path,
+def _validate_output_paths(
     asset_path: Path,
     receipt_path: Path,
     failure_path: Path,
 ) -> None:
     paths = {
-        "ledger": ledger_path,
         "asset": asset_path,
         "receipt": receipt_path,
         "failure": failure_path,
@@ -332,6 +330,14 @@ def _validate_promotion_paths(
             raise AcquisitionError(f"promotion-output-path-alias:{name}")
         identities[name] = identity
 
+    path_items = tuple(paths.items())
+    for index, (left_name, left_path) in enumerate(path_items):
+        for right_name, right_path in path_items[index + 1 :]:
+            if _path_is_within(left_path, right_path) or _path_is_within(right_path, left_path):
+                raise AcquisitionError(
+                    f"promotion-output-path-hierarchy:{left_name}:{right_name}"
+                )
+
     managed_directories = (_transaction_dir(failure_path), _staging_dir(failure_path))
     for name, path in paths.items():
         for managed_directory in managed_directories:
@@ -342,10 +348,32 @@ def _validate_promotion_paths(
         link_component = _first_link_component(paths[name])
         if link_component is not None:
             raise AcquisitionError(f"promotion-output-symlink:{name}")
+        if paths[name].exists() and not paths[name].is_file():
+            raise AcquisitionError(f"promotion-output-not-regular:{name}")
     for managed_directory in managed_directories:
         link_component = _first_link_component(managed_directory)
         if link_component is not None:
             raise AcquisitionError("promotion-managed-directory-symlink")
+
+
+def _validate_promotion_paths(
+    ledger_path: Path,
+    asset_path: Path,
+    receipt_path: Path,
+    failure_path: Path,
+) -> None:
+    _validate_output_paths(asset_path, receipt_path, failure_path)
+    ledger_identity = os.path.normcase(os.fspath(_absolute_lexical_path(ledger_path)))
+    for name, output_path in (
+        ("asset", asset_path),
+        ("receipt", receipt_path),
+        ("failure", failure_path),
+    ):
+        output_identity = os.path.normcase(os.fspath(_absolute_lexical_path(output_path)))
+        if ledger_identity == output_identity:
+            raise AcquisitionError(f"promotion-output-path-alias:{name}")
+        if _path_is_within(ledger_path, output_path) or _path_is_within(output_path, ledger_path):
+            raise AcquisitionError(f"promotion-output-path-hierarchy:ledger:{name}")
 
 
 def _fsync_directory(path: Path) -> None:
@@ -506,6 +534,7 @@ def _rollback_transaction(
     *,
     restore_write: RestoreWrite = _write_bytes,
 ) -> None:
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     journal = _validated_transaction_journal(
         transaction_dir,
         asset_path,
@@ -522,6 +551,7 @@ def _rollback_transaction(
     if not isinstance(backups, dict):
         raise AcquisitionError("promotion-backups-invalid")
     for name, destination in targets:
+        _validate_output_paths(asset_path, receipt_path, failure_path)
         backup = transaction_dir / f"{name}.backup"
         descriptor = backups[name]
         if not isinstance(descriptor, dict):
@@ -539,6 +569,7 @@ def _rollback_transaction(
         "state": "rolled_back",
         "targetsSha256": _sha256_bytes(_canonical_json(backups).encode("utf-8")),
     }
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     _write_json(transaction_dir / "journal.json", journal)
     _fsync_directory(transaction_dir)
     shutil.rmtree(transaction_dir)
@@ -551,6 +582,7 @@ def _recover_incomplete_promotion(
     receipt_path: Path,
     failure_path: Path,
 ) -> None:
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     if not transaction_dir.exists():
         return
     journal = _validated_transaction_journal(
@@ -586,6 +618,7 @@ def _prepare_promotion_transaction(
     receipt: JsonObject,
     prepare_hook: PrepareHook = _noop_prepare_hook,
 ) -> Path:
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     transaction_dir = _transaction_dir(failure_path)
     staging_dir = _staging_dir(failure_path)
     _recover_incomplete_promotion(
@@ -595,10 +628,12 @@ def _prepare_promotion_transaction(
         failure_path,
     )
     if staging_dir.exists():
+        _validate_output_paths(asset_path, receipt_path, failure_path)
         if transaction_dir.exists() or not staging_dir.is_dir() or _is_symlink_or_junction(staging_dir):
             raise AcquisitionError("promotion-staging-orphan-unsafe")
         shutil.rmtree(staging_dir)
         _fsync_directory(staging_dir.parent)
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     staging_dir.mkdir(parents=True, exist_ok=False)
     _fsync_directory(staging_dir.parent)
     prepare_hook("after-mkdir")
@@ -606,9 +641,11 @@ def _prepare_promotion_transaction(
         "asset": staging_dir / "asset.staged.json",
         "receipt": staging_dir / "receipt.staged.json",
     }
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     _write_json(staged["asset"], asset)
     _fsync_directory(staging_dir)
     prepare_hook("after-staged-asset")
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     _write_json(staged["receipt"], receipt)
     _fsync_directory(staging_dir)
     prepare_hook("after-staged-receipt")
@@ -619,6 +656,7 @@ def _prepare_promotion_transaction(
     backups: JsonObject = {}
     published: JsonObject = {}
     for name, destination in targets.items():
+        _validate_output_paths(asset_path, receipt_path, failure_path)
         if destination.is_file():
             backup = staging_dir / f"{name}.backup"
             _write_bytes(backup, destination.read_bytes())
@@ -631,6 +669,7 @@ def _prepare_promotion_transaction(
             "present": True,
             "sha256": _sha256_file(staged[name]),
         }
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     _write_json(
         staging_dir / "journal.json",
         {
@@ -643,12 +682,14 @@ def _prepare_promotion_transaction(
     )
     _fsync_directory(staging_dir)
     prepare_hook("after-prepared-journal")
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     _validated_transaction_journal(
         staging_dir,
         asset_path,
         receipt_path,
         failure_path,
     )
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     os.replace(staging_dir, transaction_dir)
     _fsync_directory(transaction_dir.parent)
     prepare_hook("after-activation")
@@ -664,6 +705,7 @@ def _publish_promotion_pair(
     replace_file: ReplaceFile = os.replace,
     prepare_hook: PrepareHook = _noop_prepare_hook,
 ) -> None:
+    _validate_output_paths(asset_path, receipt_path, failure_path)
     transaction_dir = _prepare_promotion_transaction(
         asset_path,
         receipt_path,
@@ -675,17 +717,21 @@ def _publish_promotion_pair(
     staged_asset = transaction_dir / "asset.staged.json"
     staged_receipt = transaction_dir / "receipt.staged.json"
     try:
+        _validate_output_paths(asset_path, receipt_path, failure_path)
         _validated_transaction_journal(
             transaction_dir,
             asset_path,
             receipt_path,
             failure_path,
         )
+        _validate_output_paths(asset_path, receipt_path, failure_path)
         asset_path.parent.mkdir(parents=True, exist_ok=True)
         receipt_path.parent.mkdir(parents=True, exist_ok=True)
+        _validate_output_paths(asset_path, receipt_path, failure_path)
         replace_file(staged_asset, asset_path)
         _fsync_directory(asset_path.parent)
         _fsync_directory(transaction_dir)
+        _validate_output_paths(asset_path, receipt_path, failure_path)
         replace_file(staged_receipt, receipt_path)
         _fsync_directory(receipt_path.parent)
         _fsync_directory(transaction_dir)
@@ -704,6 +750,7 @@ def _publish_promotion_pair(
                 _canonical_json(journal["published"]).encode("utf-8")
             ),
         }
+        _validate_output_paths(asset_path, receipt_path, failure_path)
         _write_json(transaction_dir / "journal.json", journal)
         _fsync_directory(transaction_dir)
     except Exception:
@@ -740,7 +787,9 @@ def acquire_exact_body(
     try:
         record, ledger_sha256 = load_target_record(ledger_path, expected_ledger_sha256)
         pdf_bytes = fetch_bytes(str(record["official_url"]))
+        _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)
         asset, receipt = _extract_asset(record, pdf_bytes, ledger_sha256)
+        _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)
         _publish_promotion_pair(
             asset_path,
             receipt_path,
@@ -750,6 +799,7 @@ def acquire_exact_body(
             publish_replace,
             prepare_hook,
         )
+        _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)
         if failure_path.exists():
             failure_path.unlink()
             _fsync_directory(failure_path.parent)
@@ -772,6 +822,10 @@ def acquire_exact_body(
             "dbMutationPerformed": False,
             "schemaMutationPerformed": False,
         }
+        try:
+            _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)
+        except AcquisitionError as path_error:
+            raise path_error from exc
         _write_json(failure_path, failure)
         _fsync_directory(failure_path.parent)
         raise
