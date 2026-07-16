@@ -657,11 +657,11 @@ describe("browser evidence reconciliation", () => {
     expect(nextConfig).toContain(
       'const frontendAuditEnabled = process.env.SAFECLAW_FRONTEND_AUDIT === "1";',
     );
-    expect(nextConfig).toContain(
-      'frontendAuditEnabled\n        ? "lib/frontend-audit/GlobalBoundaryProbe.audit.tsx"',
+    expect(nextConfig).toMatch(
+      /frontendAuditEnabled\r?\n\s+\? "lib\/frontend-audit\/GlobalBoundaryProbe\.audit\.tsx"/u,
     );
-    expect(nextConfig).not.toContain(
-      'process.env.SAFECLAW_FRONTEND_AUDIT === "1"\n        ? "lib/frontend-audit/GlobalBoundaryProbe.audit.tsx"',
+    expect(nextConfig).not.toMatch(
+      /process\.env\.SAFECLAW_FRONTEND_AUDIT === "1"\r?\n\s+\? "lib\/frontend-audit\/GlobalBoundaryProbe\.audit\.tsx"/u,
     );
   });
 
