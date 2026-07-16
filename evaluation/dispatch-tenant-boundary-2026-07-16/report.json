@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "safeclaw-dispatch-tenant-boundary/v1",
+  "sourceHead": "f1d3735f937f1acabc1506097c5dc95284be55e9",
+  "status": "pass",
+  "noDatabaseMutation": true,
+  "schemaChanged": false,
+  "red": {
+    "files": 1,
+    "tests": 4,
+    "failed": 2
+  },
+  "green": {
+    "files": 3,
+    "tests": 65,
+    "failed": 0,
+    "typecheck": "pass",
+    "diffCheck": "pass"
+  },
+  "closedBoundaries": [
+    "malformed_workpack_id",
+    "foreign_organization_workpack",
+    "foreign_site_workpack",
+    "ownership_lookup_failure"
+  ],
+  "preservedPaths": [
+    "owned_same_site_workpack_dispatch",
+    "dispatch_without_workpack"
+  ],
+  "logs": {
+    "focusedTests": "evaluation/dispatch-tenant-boundary-2026-07-16/logs/focused-tests.log",
+    "typecheck": "evaluation/dispatch-tenant-boundary-2026-07-16/logs/typecheck.log"
+  },
+  "remainingGate": "full RLS launch readiness requires approved migration and isolated two-tenant live fixtures"
+}

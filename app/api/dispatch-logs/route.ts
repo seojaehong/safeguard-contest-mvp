@@ -4,6 +4,8 @@ import { isRecord, parseScenarioContext, readString } from "@/lib/workspace-api"
 
 export const dynamic = "force-dynamic";
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 type DispatchLogDraft = {
   channel: string;
   targetLabel?: string;
@@ -188,8 +190,51 @@ export async function POST(request: NextRequest) {
   if (!logs.length) {
     return NextResponse.json({ ok: false, configured: true, savedCount: 0, message: "저장할 전파 이력이 없습니다." }, { status: 400 });
   }
+  if (workpackId && !UUID_PATTERN.test(workpackId)) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      savedCount: 0,
+      code: "dispatch_workpack_id_invalid",
+      message: "문서팩 식별자가 올바르지 않습니다.",
+    }, { status: 400 });
+  }
 
   const context = await ensureWorkspaceContext(client, user, parseScenarioContext(body.scenario));
+  if (workpackId) {
+    const { data: ownedWorkpack, error: workpackError } = await client
+      .from("workpacks")
+      .select("id,organization_id,site_id")
+      .eq("id", workpackId)
+      .eq("organization_id", context.organizationId)
+      .eq("site_id", context.siteId)
+      .maybeSingle();
+
+    if (workpackError) {
+      console.error("dispatch workpack ownership verification failed", workpackError);
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        savedCount: 0,
+        code: "dispatch_workpack_verification_failed",
+        message: "문서팩 소유 범위를 확인하지 못해 전파 이력을 저장하지 않았습니다.",
+      }, { status: 500 });
+    }
+
+    if (!ownedWorkpack
+      || ownedWorkpack.id !== workpackId
+      || ownedWorkpack.organization_id !== context.organizationId
+      || ownedWorkpack.site_id !== context.siteId) {
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        savedCount: 0,
+        code: "dispatch_workpack_not_owned",
+        message: "현재 현장에서 확인할 수 없는 문서팩입니다.",
+      }, { status: 404 });
+    }
+  }
+
   const rows = logs.map((log) => ({
     organization_id: context.organizationId,
     site_id: context.siteId,
