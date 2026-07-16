@@ -29,6 +29,40 @@
     "build": "pass",
     "staticPages": 28
   },
-  "productionLiveVerified": false,
-  "productionLiveVerificationReason": "merge and Vercel production deployment pending"
+  "productionMergeSha": "1b17eecf05faeed20c711f771c01e73917c2566d",
+  "productionLiveVerified": true,
+  "liveMetrics": {
+    "workspace": {
+      "alertVisible": true,
+      "focusedId": "field-command-input",
+      "askRequests": 0,
+      "horizontalOverflow": 0
+    },
+    "whyMobile": {
+      "themes": 2,
+      "rows": 5,
+      "rowWidth": 332,
+      "outsideElements": 0,
+      "horizontalOverflow": 0
+    },
+    "ontologyDesktop": {
+      "themes": 2,
+      "nodes": 13,
+      "overlapPairs": 0,
+      "outsideElements": 0,
+      "horizontalOverflow": 0
+    },
+    "ontologyMobile": {
+      "themes": 2,
+      "graphNodes": 0,
+      "relationshipListVisible": true,
+      "outsideElements": 0,
+      "horizontalOverflow": 0
+    }
+  },
+  "followUpContrast": {
+    "redDayRatio": 1.56,
+    "testResult": "4 passed",
+    "minimumRequiredRatio": 4.5
+  }
 }
