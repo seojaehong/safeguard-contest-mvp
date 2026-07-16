@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-evaluation/v1",
-  "parentRejectedCommit": "615fab519834bd561e7cdf56a52cb4f38680607d",
+  "parentRejectedCommit": "9281ad3d28c62ebe9f483bd7b896a528259967cd",
   "priorRejectedCommits": [
     "cf5261828c95a329b919d40e8e55f406652f9985",
     "756f3f04930512cd2dbc6ea6774654ed0d3a9456"
@@ -30,9 +30,13 @@
       "evidence": [
         "asset, receipt, backups, and prepared journal are built in an isolated pre-publish directory",
         "the prepared directory is atomically activated only after journal identity and hashes validate",
+        "staging and parent directory metadata is flushed before and after atomic activation on Windows and POSIX",
         "mkdir, each staged write, each backup write, and journal-publication interruptions preserve targets",
+        "activation interruption is recovered before the next acquisition publishes either target",
         "a second full acquisition safely removes the inactive orphan and converges",
         "the activated journal is revalidated before either target is modified",
+        "symlink or junction output paths fail closed before fetch or mutation",
+        "aliased and managed-directory output paths fail closed before failure-report writes",
         "journal binds portable common-root-relative target identities",
         "all immutable backup hashes validate before either target is modified",
         "second publish failure rolls back both targets",
@@ -48,7 +52,8 @@
         "ledger PDF SHA must equal the production PDF pin",
         "downloaded bytes must equal the production PDF pin",
         "normalized extracted body must equal the production body pin",
-        "tracked fixture binds PDF, body, page count, character count, extractor version, and dependency"
+        "tracked fixture binds PDF, body, page count, character count, extractor version, and dependency",
+        "tracked receipt was regenerated through the production acquisition entrypoint with protocol v3 and 21 passing checks"
       ]
     }
   },
@@ -61,8 +66,8 @@
   },
   "verification": {
     "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body scripts.tests.test_snapshot_kosha_guide_corpus",
-    "testsRun": 55,
-    "testsPassed": 55,
+    "testsRun": 58,
+    "testsPassed": 58,
     "testsFailed": 0,
     "diffCheck": "pass"
   }
