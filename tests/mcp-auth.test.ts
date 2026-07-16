@@ -45,6 +45,7 @@ type LookupResult<Row> = {
 
 function makeAuthClient(input: {
   tokenRow: McpTokenRow;
+  tokenLookup?: LookupResult<McpTokenRow>;
   site?: LookupResult<{ id: string; organization_id: string }>;
 }) {
   const lookups: TenantLookup[] = [];
@@ -54,7 +55,11 @@ function makeAuthClient(input: {
       return tokenSelectQuery;
     },
     async maybeSingle() {
-      return { data: input.tokenRow, error: null };
+      if (input.tokenLookup?.throws) throw input.tokenLookup.throws;
+      return {
+        data: input.tokenLookup ? (input.tokenLookup.data ?? null) : input.tokenRow,
+        error: input.tokenLookup?.error ?? null,
+      };
     },
   };
   const client = {
@@ -353,6 +358,25 @@ describe("resolveMcpAuth tenant identity", () => {
     const fake = makeAuthClient({
       tokenRow: { ...tokenRow, site_id: null, org_id: existingOrg.id },
     });
+    vi.mocked(createSupabaseAdminClient).mockReturnValue(fake.client);
+
+    await expect(resolveMcpAuth("persisted-token")).resolves.toBeNull();
+    expect(fake.lookups).toEqual([]);
+    expect(fake.updates).toEqual([]);
+  });
+
+  it.each([
+    {
+      label: "returns an error",
+      tokenLookup: { error: new Error("private token lookup error") },
+    },
+    {
+      label: "throws",
+      tokenLookup: { throws: new Error("private token lookup throw") },
+    },
+  ])("fails closed when the persisted-token lookup $label", async ({ tokenLookup }) => {
+    vi.stubEnv("SAFECLAW_MCP_TOKENS", "persisted-token");
+    const fake = makeAuthClient({ tokenRow, tokenLookup });
     vi.mocked(createSupabaseAdminClient).mockReturnValue(fake.client);
 
     await expect(resolveMcpAuth("persisted-token")).resolves.toBeNull();

@@ -53,6 +53,20 @@ const env = {
 
 describe("issueMcpToken CLI", () => {
   it.each([
+    ["omitted", ["node", "scripts/issue-mcp-token.mjs"]],
+    ["blank", ["node", "scripts/issue-mcp-token.mjs", "   ", "Main Site"]],
+  ])("rejects a %s label before client creation or DB insert", async (_label, argv) => {
+    const fake = makeClient();
+    const createClient = vi.fn(() => fake.client);
+
+    await expect(issueMcpToken({ argv, env, createClient })).rejects.toThrow(
+      'Usage: node scripts/issue-mcp-token.mjs "<label>" "<site name>"',
+    );
+    expect(createClient).not.toHaveBeenCalled();
+    expect(fake.inserts).toEqual([]);
+  });
+
+  it.each([
     ["omitted", ["node", "scripts/issue-mcp-token.mjs", "Operator token"]],
     ["blank", ["node", "scripts/issue-mcp-token.mjs", "Operator token", "   "]],
   ])("rejects a %s site before client creation or DB insert", async (_label, argv) => {
