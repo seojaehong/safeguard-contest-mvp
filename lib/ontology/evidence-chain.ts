@@ -1117,6 +1117,28 @@ function sameJson(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
+const ACTIVE_EVIDENCE_CHAIN_PACK_KEYS = Object.keys({
+  applicability: true,
+  chainId: true,
+  chainLabel: true,
+  contractVersion: true,
+  controls: true,
+  guidance: true,
+  hazard: true,
+  hazardPriority: true,
+  law: true,
+  materialization: true,
+  pipeline: true,
+  provenance: true,
+  task: true,
+} satisfies Record<keyof ActiveEvidenceChainPack, true>).sort();
+
+function hasExactActiveEvidenceChainPackKeys(value: object): boolean {
+  const keys = Reflect.ownKeys(value);
+  return keys.every((key): key is string => typeof key === "string")
+    && sameJson(keys.sort(), ACTIVE_EVIDENCE_CHAIN_PACK_KEYS);
+}
+
 function isCanonicalApplicability(
   value: unknown,
 ): value is EvidenceChainPack["applicability"] {
@@ -1285,6 +1307,7 @@ export function validateCanonicalEvidenceChainPack(
   pack: unknown,
 ): pack is ActiveEvidenceChainPack {
   if (typeof pack !== "object" || pack === null || Array.isArray(pack)) return false;
+  if (!hasExactActiveEvidenceChainPackKeys(pack)) return false;
 
   try {
     return validateCanonicalEvidenceChainPackValue(pack as ActiveEvidenceChainPack);
