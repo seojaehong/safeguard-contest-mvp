@@ -1,0 +1,30 @@
+{
+  "artifact": "supabase-tenant-isolation-harness-skeleton",
+  "authoritativeBase": "530efbfafb30c6145c1536172b260ff644845846",
+  "branch": "feat/supabase-tenant-isolation-harness-skeleton",
+  "manifest": {
+    "tableCount": 13,
+    "scenariosPerTable": 4,
+    "tableScenarioCount": 52,
+    "storageScenarioCount": 4,
+    "totalScenarioCount": 56
+  },
+  "unitTests": {
+    "itemCount": 16,
+    "successCount": 16,
+    "failureCount": 0,
+    "elapsedSeconds": 3.259,
+    "networkRequests": 0,
+    "logPath": "evaluation/supabase-tenant-isolation-harness-test.log"
+  },
+  "runtimeSafety": {
+    "realSupabaseConnected": false,
+    "usersCreated": false,
+    "databaseMutated": false,
+    "migrationsAdded": false,
+    "envLocalLoadedOrWritten": false,
+    "serviceRoleClientProvided": false,
+    "defaultDryRunWithoutSecrets": "fail_closed"
+  },
+  "verifiedAt": "2026-07-16T21:12:56+09:00"
+}
