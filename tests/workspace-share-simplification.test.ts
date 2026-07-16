@@ -53,8 +53,10 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain('return "한국어 전송본 미리보기"');
     expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 전송본 미리보기`');
     expect(sharePanel).not.toContain("외국인 근로자 전송본 ·");
-    expect(sharePanel).toContain("messageTarget: selectedMessageTarget");
-    expect(sharePanel).toContain("message: selectedMessage");
+    expect(sharePanel).toContain("messageVariants: recipientMessageVariants.messageVariants");
+    expect(sharePanel).not.toContain("messageTarget: selectedMessageTarget");
+    expect(sharePanel).not.toContain("message: selectedMessage");
+    expect(sharePanel).toContain("미리보기 선택은 전송 본문을 바꾸지 않습니다.");
   });
 
   it("exposes exactly one direct primary send action", () => {
