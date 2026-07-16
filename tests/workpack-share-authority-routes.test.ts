@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { evaluateShareSessionReuse } from "@/components/WorkflowSharePolicy";
@@ -496,6 +499,195 @@ describe("workflow dispatch route authority", () => {
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 
+  it("fails closed when a stored foreign worker native label is blank", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const malformedWorkpack = {
+      ...serverWorkpack,
+      deliverables: {
+        ...serverWorkpack.deliverables,
+        foreignWorkerLanguages: [{
+          ...serverWorkpack.deliverables.foreignWorkerLanguages[0],
+          nativeLabel: "   "
+        }]
+      }
+    };
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue({
+      ...ownedContext(),
+      context: {
+        ...ownedContext().context,
+        shareAuthority: {
+          ...ownedContext().context.shareAuthority,
+          workpack: malformedWorkpack
+        }
+      }
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: { vi: VI_MESSAGE }
+    }));
+    const body = await response.json() as {
+      malformedFields?: string[];
+      providerCalled?: boolean;
+    };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      malformedFields: ["deliverables.foreignWorkerLanguages[0].nativeLabel"],
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when stored foreign worker lines are empty", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const malformedWorkpack = {
+      ...serverWorkpack,
+      deliverables: {
+        ...serverWorkpack.deliverables,
+        foreignWorkerLanguages: [{
+          ...serverWorkpack.deliverables.foreignWorkerLanguages[0],
+          lines: []
+        }]
+      }
+    };
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue({
+      ...ownedContext(),
+      context: {
+        ...ownedContext().context,
+        shareAuthority: {
+          ...ownedContext().context.shareAuthority,
+          workpack: malformedWorkpack
+        }
+      }
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: { vi: "[SafeClaw]\nTiếng Việt" }
+    }));
+    const body = await response.json() as {
+      malformedFields?: string[];
+      providerCalled?: boolean;
+    };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      malformedFields: ["deliverables.foreignWorkerLanguages[0].lines"],
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when a stored foreign worker line is blank", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const malformedWorkpack = {
+      ...serverWorkpack,
+      deliverables: {
+        ...serverWorkpack.deliverables,
+        foreignWorkerLanguages: [{
+          ...serverWorkpack.deliverables.foreignWorkerLanguages[0],
+          lines: ["   "]
+        }]
+      }
+    };
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue({
+      ...ownedContext(),
+      context: {
+        ...ownedContext().context,
+        shareAuthority: {
+          ...ownedContext().context.shareAuthority,
+          workpack: malformedWorkpack
+        }
+      }
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: { vi: "[SafeClaw]\nTiếng Việt\n\n-" }
+    }));
+    const body = await response.json() as {
+      malformedFields?: string[];
+      providerCalled?: boolean;
+    };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      malformedFields: ["deliverables.foreignWorkerLanguages[0].lines"],
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when stored foreign worker language codes are duplicated", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const language = serverWorkpack.deliverables.foreignWorkerLanguages[0];
+    const malformedWorkpack = {
+      ...serverWorkpack,
+      deliverables: {
+        ...serverWorkpack.deliverables,
+        foreignWorkerLanguages: [
+          language,
+          {
+            ...language,
+            nativeLabel: "Vietnamese",
+            lines: ["Stop work when strong wind begins."]
+          }
+        ]
+      }
+    };
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue({
+      ...ownedContext(),
+      context: {
+        ...ownedContext().context,
+        shareAuthority: {
+          ...ownedContext().context.shareAuthority,
+          workpack: malformedWorkpack
+        }
+      }
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: { vi: VI_MESSAGE }
+    }));
+    const body = await response.json() as {
+      malformedFields?: string[];
+      providerCalled?: boolean;
+    };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      malformedFields: ["deliverables.foreignWorkerLanguages[1].code"],
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
   it("fails closed before provider dispatch when a saved recipient language body is unavailable", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     mocks.isLiveDispatchEnabled.mockReturnValue(false);
@@ -700,6 +892,68 @@ describe("workflow dispatch route authority", () => {
     expect(response.status).toBe(400);
     expect(mocks.loadOwnedWorkpackOperationContext).not.toHaveBeenCalled();
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+});
+
+describe("n8n recipient localization contract", () => {
+  it("consumes each server-authoritative recipient message without a legacy global body", async () => {
+    const template = JSON.parse(readFileSync(
+      join(process.cwd(), "docs", "n8n_safeguard_workflow_template.json"),
+      "utf8"
+    )) as Array<{ nodes?: Array<{ name?: string; parameters?: { jsCode?: string } }> }>;
+    const script = template[0]?.nodes
+      ?.find((node) => node.name === "Validate Secret and Dispatch Channels")
+      ?.parameters?.jsCode;
+
+    expect(script).toBeTypeOf("string");
+    expect(script).not.toContain("const message = workpack.message");
+    expect(script).not.toContain("payload.message");
+    expect(script).toContain("recipient.message");
+    expect(script).toContain("recipientText(recipient)");
+    expect(script).toContain("for (const recipient of messageRecipients)");
+    expect(script).toContain("recipients: [recipient]");
+    expect(script).toContain("const text = recipientText(recipient).slice(0, 900)");
+    expect(script).toContain("client.mail(config.smtpUser, [email], payload.subject, recipientText(recipient))");
+
+    const providerBodies: Array<Record<string, unknown>> = [];
+    const providerFetch = vi.fn(async (_input: unknown, init: unknown) => {
+      const request = init as { body?: unknown };
+      providerBodies.push(JSON.parse(String(request.body)) as Record<string, unknown>);
+      return new Response("accepted", { status: 200 });
+    });
+    const AsyncFunction = Object.getPrototypeOf(async () => undefined).constructor as new (
+      ...args: string[]
+    ) => (...args: unknown[]) => Promise<unknown>;
+    const execute = new AsyncFunction("$json", "$env", "$execution", "require", "fetch", "Buffer", script || "");
+    await execute({
+      headers: { "x-safeguard-secret": "secret" },
+      body: {
+        recipientMessageContract: "saved-worker-language-v1",
+        channels: ["sms"],
+        recipients: [
+          { workerId: WORKER_ID, phone: "010-1111-2222", dispatchLanguageCode: "vi", message: VI_MESSAGE },
+          { workerId: KOREAN_WORKER_ID, phone: "010-3333-4444", dispatchLanguageCode: "ko", message: KO_MESSAGE }
+        ],
+        workpack: { companyName: "Safe Site" }
+      }
+    }, {
+      SAFEGUARD_WEBHOOK_TOKEN: "secret",
+      SAFEGUARD_SMS_WEBHOOK_URL: "https://provider.example/sms"
+    }, { id: "execution-1" }, createRequire(import.meta.url), providerFetch, Buffer);
+
+    expect(providerFetch).toHaveBeenCalledTimes(2);
+    expect(providerBodies).toEqual([
+      expect.objectContaining({
+        recipients: [{ workerId: WORKER_ID, phone: "010-1111-2222", dispatchLanguageCode: "vi", message: VI_MESSAGE }],
+        message: VI_MESSAGE,
+        text: VI_MESSAGE
+      }),
+      expect.objectContaining({
+        recipients: [{ workerId: KOREAN_WORKER_ID, phone: "010-3333-4444", dispatchLanguageCode: "ko", message: KO_MESSAGE }],
+        message: KO_MESSAGE,
+        text: KO_MESSAGE
+      })
+    ]);
   });
 });
 
