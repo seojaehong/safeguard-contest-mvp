@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const projectRoot = dirname(fileURLToPath(import.meta.url));
+const frontendAuditEnabled = process.env.SAFECLAW_FRONTEND_AUDIT === "1";
 
 // 빌드 시점에 마지막 git 커밋 날짜를 inject. Vercel build에서 매 배포마다 자동 갱신
 // → 푸터 UPDATED 라인 수동 갱신 불필요. git unavailable / 런타임 fallback은 today.
@@ -27,16 +28,15 @@ const nextConfig = {
     NEXT_PUBLIC_BUILD_DATE: buildDate
   },
   webpack(config) {
-    const auditEnabled = process.env.SAFECLAW_FRONTEND_AUDIT === "1";
     config.resolve.alias["safeclaw-audit-error-escalation$"] = join(
       projectRoot,
-      auditEnabled
+      frontendAuditEnabled
         ? "lib/frontend-audit/GlobalBoundaryProbe.audit.tsx"
         : "lib/frontend-audit/GlobalBoundaryProbe.noop.tsx"
     );
     config.resolve.alias["safeclaw-audit-app-error-escalation$"] = join(
       projectRoot,
-      auditEnabled
+      frontendAuditEnabled
         ? "lib/frontend-audit/AppBoundaryProbe.audit.ts"
         : "lib/frontend-audit/AppBoundaryProbe.noop.ts"
     );

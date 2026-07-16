@@ -128,13 +128,30 @@ describe("why comparison layout", () => {
           const head = table.querySelector("thead tr, .comparison-head");
           const firstRow = table.querySelector("tbody tr, :scope > [role='row']:not(.comparison-head)");
           if (!head || !firstRow) throw new Error("Missing desktop comparison rows");
+          const parseRgb = (value: string) => (value.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+          const luminance = (channels: number[]) => {
+            const [red, green, blue] = channels.map((channel) => {
+              const normalized = channel / 255;
+              return normalized <= 0.04045
+                ? normalized / 12.92
+                : ((normalized + 0.055) / 1.055) ** 2.4;
+            });
+            return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+          };
+          const contrasts = Array.from(head.children).map((cell) => {
+            const style = getComputedStyle(cell);
+            const foreground = luminance(parseRgb(style.color));
+            const background = luminance(parseRgb(style.backgroundColor));
+            return (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+          });
           return {
             headColumns: head.children.length,
             rowColumns: firstRow.children.length,
             headDisplay: getComputedStyle(head).display,
             rowDisplay: getComputedStyle(firstRow).display,
             tableWidth: Math.round(table.getBoundingClientRect().width),
-            documentOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth
+            documentOverflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth,
+            minimumHeaderContrast: Math.min(...contrasts)
           };
         });
 
@@ -142,7 +159,7 @@ describe("why comparison layout", () => {
           console.info(`WHY_DESKTOP_AUDIT ${JSON.stringify({ viewport: "1440x900", theme, ...metrics })}`);
         }
 
-        expect(metrics).toEqual({
+        expect(metrics).toMatchObject({
           headColumns: 5,
           rowColumns: 5,
           headDisplay: "grid",
@@ -151,6 +168,7 @@ describe("why comparison layout", () => {
           documentOverflow: 0
         });
         expect(metrics.tableWidth).toBeGreaterThan(900);
+        expect(metrics.minimumHeaderContrast).toBeGreaterThanOrEqual(4.5);
       } finally {
         await page.close();
       }

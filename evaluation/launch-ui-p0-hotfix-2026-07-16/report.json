@@ -1,0 +1,103 @@
+{
+  "date": "2026-07-16",
+  "productionBase": "238a011b3d0d436b5d498c415795cede61b3045e",
+  "branch": "fix/launch-ui-p0-20260716",
+  "scope": [
+    "why-mobile",
+    "ontology-focused-explorer",
+    "workspace-blank-input",
+    "contrast",
+    "mobile-touch-targets"
+  ],
+  "databaseMutation": false,
+  "verification": {
+    "initialFocused": {
+      "passed": 78,
+      "failed": 2,
+      "skipped": 2
+    },
+    "correctedStaticContracts": {
+      "passed": 20,
+      "failed": 0
+    },
+    "finalFocused": {
+      "passed": 55,
+      "failed": 0,
+      "skipped": 2
+    },
+    "typecheck": "pass",
+    "build": "pass",
+    "staticPages": 28
+  },
+  "productionMergeSha": "06abce94124809680cba5f8441b5beac05296005",
+  "productionLiveVerified": true,
+  "liveMetrics": {
+    "workspace": {
+      "alertVisible": true,
+      "focusedId": "field-command-input",
+      "askRequests": 0,
+      "horizontalOverflow": 0
+    },
+    "whyMobile": {
+      "themes": 2,
+      "rows": 5,
+      "rowWidth": 332,
+      "outsideElements": 0,
+      "horizontalOverflow": 0
+    },
+    "ontologyDesktop": {
+      "themes": 2,
+      "nodes": 13,
+      "overlapPairs": 0,
+      "outsideElements": 0,
+      "horizontalOverflow": 0
+    },
+    "ontologyMobile": {
+      "themes": 2,
+      "graphNodes": 0,
+      "relationshipListVisible": true,
+      "outsideElements": 0,
+      "horizontalOverflow": 0
+    }
+  },
+  "followUpContrast": {
+    "redDayRatio": 1.56,
+    "testResult": "4 passed",
+    "minimumRequiredRatio": 4.5
+  },
+  "finalCiRemediation": {
+    "focusedTests": {
+      "passed": 78,
+      "failed": 0
+    },
+    "ontologyBrowser": {
+      "viewports": [
+        1440,
+        1024,
+        390
+      ],
+      "themes": 2,
+      "tabletOverflowBefore": 124,
+      "tabletOverflowAfter": 0
+    },
+    "staticAudit": {
+      "pages": 32,
+      "productComponents": 23,
+      "coverageIssues": 0,
+      "violations": 0
+    },
+    "browserAudit": {
+      "rows": 108,
+      "passed": 108,
+      "failed": 0,
+      "findings": 0,
+      "recovered": 0
+    },
+    "typecheck": "pass",
+    "normalBuild": {
+      "status": "pass",
+      "staticPages": 28,
+      "auditMarkers": 0
+    }
+  }
+}
