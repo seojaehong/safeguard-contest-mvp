@@ -13,6 +13,7 @@ import {
   buildPhaseAProductMaterialization,
   materializePhaseAProductDocuments,
   materializePhaseAProductIntoResponse,
+  type PhaseAProductMaterialization,
 } from "@/lib/ontology/product-materialization";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
@@ -347,6 +348,101 @@ describe("Phase A product materialization", () => {
     }, product);
     expect(withoutProviderRows.structured).toBeUndefined();
     expectNoInventedScore(withoutProviderRows.phaseAProduct);
+  });
+
+  test("inserts a canonical row when provider prose contains only its stable key", () => {
+    const pack = buildCanonicalPack("고소작업");
+    const product = buildPhaseAProductMaterialization({ evidencePack: pack });
+    if (!product) throw new Error("expected canonical Phase A product");
+    const stableKey = "work-at-height-fall:risk-assessment:fall-work-platform";
+    const response = buildResponse("고소작업");
+    response.deliverables.riskAssessmentDraft = `provider note\nstableKey: ${stableKey}`;
+
+    const materialized = materializePhaseAProductDocuments(response, product);
+
+    expect(materialized.deliverables.riskAssessmentDraft).toContain(
+      `<!-- safeclaw:phase-a-canonical-row:start stableKey="${stableKey}" -->`,
+    );
+    expect(materialized.deliverables.riskAssessmentDraft.match(
+      new RegExp(`stableKey: ${stableKey}`, "g"),
+    )).toHaveLength(2);
+  });
+
+  test("inserts a canonical row when an owned marker block is incomplete", () => {
+    const pack = buildCanonicalPack("고소작업");
+    const product = buildPhaseAProductMaterialization({ evidencePack: pack });
+    if (!product) throw new Error("expected canonical Phase A product");
+    const stableKey = "work-at-height-fall:risk-assessment:fall-work-platform";
+    const start = `<!-- safeclaw:phase-a-canonical-row:start stableKey="${stableKey}" -->`;
+    const end = `<!-- safeclaw:phase-a-canonical-row:end stableKey="${stableKey}" -->`;
+    const response = buildResponse("고소작업");
+    response.deliverables.riskAssessmentDraft = [
+      start,
+      `stableKey: ${stableKey}`,
+      "provider omitted canonical provenance",
+      end,
+    ].join("\n");
+
+    const materialized = materializePhaseAProductDocuments(response, product);
+
+    expect(materialized.deliverables.riskAssessmentDraft.match(
+      new RegExp(start.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
+    )).toHaveLength(2);
+    expect(materialized.deliverables.riskAssessmentDraft).toContain(
+      "근거 경로: Task(Task_work_at_height)",
+    );
+  });
+
+  test.each<{
+    label: string;
+    mutate: (product: PhaseAProductMaterialization) => void;
+  }>([
+    {
+      label: "schema",
+      mutate(product): void {
+        Reflect.set(product, "schemaVersion", "phase-a-product-materialization/forged");
+      },
+    },
+    {
+      label: "chain",
+      mutate(product): void {
+        Reflect.set(product, "chainId", "forged-chain");
+      },
+    },
+    {
+      label: "stable key",
+      mutate(product): void {
+        if (product.documentRows[0]) product.documentRows[0].stableKey = "forged-stable-key";
+      },
+    },
+    {
+      label: "control",
+      mutate(product): void {
+        if (product.controls[0]) product.controls[0].label = "forged control";
+      },
+    },
+    {
+      label: "provenance",
+      mutate(product): void {
+        product.provenance.taskNodeIds = ["Task_forged"];
+      },
+    },
+    {
+      label: "coverage",
+      mutate(product): void {
+        product.coverage.materializedDocumentRows += 1;
+      },
+    },
+  ])("direct document materialization fails closed for forged product $label", ({ mutate }) => {
+    const product = buildPhaseAProductMaterialization({
+      evidencePack: buildCanonicalPack("고소작업"),
+    });
+    if (!product) throw new Error("expected canonical Phase A product");
+    const forged = structuredClone(product);
+    mutate(forged);
+
+    expect(() => materializePhaseAProductDocuments(buildResponse("고소작업"), forged))
+      .toThrow("canonical product identity");
   });
 
   test("reseals canonical review rows and survives evidence-summary reopen", () => {

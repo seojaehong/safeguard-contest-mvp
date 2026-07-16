@@ -1,7 +1,9 @@
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import {
+  buildCanonicalProductEvidenceIdentity,
   validateCanonicalEvidenceChainPack,
   type ActiveEvidenceChainPack,
+  type CanonicalProductEvidenceIdentity,
   type ObligationClassification,
 } from "@/lib/ontology/evidence-chain";
 import { validateRiskAssessmentRows, type RiskAssessmentRow } from "@/lib/risk-assessment-schema";
@@ -97,7 +99,7 @@ function unique(values: readonly string[]): string[] {
 }
 
 function buildControlProvenance(
-  pack: ActiveEvidenceChainPack,
+  pack: CanonicalProductEvidenceIdentity,
   control: ActiveEvidenceChainPack["controls"][number],
 ): PhaseAProductControlProvenance {
   return {
@@ -124,7 +126,12 @@ export function buildPhaseAProductMaterialization(
     return null;
   }
 
-  const pack = structuredClone(input.evidencePack);
+  return buildPhaseAProductFromCanonicalEvidence(structuredClone(input.evidencePack));
+}
+
+function buildPhaseAProductFromCanonicalEvidence(
+  pack: CanonicalProductEvidenceIdentity,
+): PhaseAProductMaterialization {
   const controls = pack.controls.map((control): PhaseAProductControl => ({
     controlId: control.controlId,
     nodeId: control.graphControlNodeId,
@@ -203,24 +210,12 @@ type MaterializePhaseAProductOptions = {
 };
 
 function assertReviewRequiredProduct(product: PhaseAProductMaterialization): void {
-  const valid = product.authorityState === "review_required"
-    && product.evidenceChainState === "review_required"
-    && product.reportedEvidenceChainState === "review_required"
-    && product.outputStatus === "review_required_draft"
-    && product.verifiedDocumentRows.length === 0
-    && product.coverage.verifiedDocumentRows === 0
-    && product.humanConfirmation.required
-    && product.humanConfirmation.status === "pending"
-    && product.controls.every((control) => (
-      control.authorityState === "review_required"
-      && control.classification === "review_required"
-    ))
-    && product.documentRows.every((row) => (
-      row.classification === "review_required"
-      && row.verificationStatus === "review_required"
-    ));
-  if (!valid) {
-    throw new Error("Phase A product must remain review_required with human confirmation pending");
+  const canonicalEvidence = buildCanonicalProductEvidenceIdentity(product.task.input);
+  const canonicalProduct = canonicalEvidence
+    ? buildPhaseAProductFromCanonicalEvidence(canonicalEvidence)
+    : null;
+  if (!canonicalProduct || JSON.stringify(product) !== JSON.stringify(canonicalProduct)) {
+    throw new Error("Phase A materialization failed canonical product identity validation");
   }
 }
 
@@ -249,13 +244,44 @@ function rowBlock(row: PhaseAProductDocumentRow): string {
   ].join("\n");
 }
 
+type CanonicalRowBlock = {
+  stableKey: string;
+  block: string;
+};
+
+const CANONICAL_ROW_BLOCK_PATTERN = /<!-- safeclaw:phase-a-canonical-row:start stableKey="([^"\r\n]+)" -->\r?\n[\s\S]*?\r?\n<!-- safeclaw:phase-a-canonical-row:end stableKey="\1" -->/g;
+
+function canonicalRowBlock(row: PhaseAProductDocumentRow): string {
+  return [
+    `<!-- safeclaw:phase-a-canonical-row:start stableKey="${row.stableKey}" -->`,
+    rowBlock(row),
+    `<!-- safeclaw:phase-a-canonical-row:end stableKey="${row.stableKey}" -->`,
+  ].join("\n");
+}
+
+function parseCanonicalRowBlocks(document: string): CanonicalRowBlock[] {
+  return [...document.matchAll(CANONICAL_ROW_BLOCK_PATTERN)].map((match) => ({
+    stableKey: match[1] ?? "",
+    block: match[0].replace(/\r\n/g, "\n"),
+  }));
+}
+
+function hasCompleteCanonicalRowBlock(
+  blocks: readonly CanonicalRowBlock[],
+  row: PhaseAProductDocumentRow,
+): boolean {
+  const expected = canonicalRowBlock(row);
+  return blocks.some((block) => block.stableKey === row.stableKey && block.block === expected);
+}
+
 function prependMissingRows(
   document: string,
   rows: readonly PhaseAProductDocumentRow[],
 ): string {
-  const missing = rows.filter((row) => !document.includes(`stableKey: ${row.stableKey}`));
+  const ownedBlocks = parseCanonicalRowBlocks(document);
+  const missing = rows.filter((row) => !hasCompleteCanonicalRowBlock(ownedBlocks, row));
   if (missing.length === 0) return document;
-  const prefix = missing.map(rowBlock).join("\n\n");
+  const prefix = missing.map(canonicalRowBlock).join("\n\n");
   return document.trim().length > 0 ? `${prefix}\n\n${document}` : prefix;
 }
 

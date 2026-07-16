@@ -221,6 +221,11 @@ export type ActiveEvidenceChainPack = Omit<
   "reviewOnlyEvidence" | "reviewOnlyGuidance"
 >;
 
+export type CanonicalProductEvidenceIdentity = Pick<
+  ActiveEvidenceChainPack,
+  "chainId" | "task" | "hazard" | "hazardPriority" | "controls" | "materialization"
+>;
+
 export type EvidenceChainDiagnostics = Pick<
   EvidenceChainPack,
   "reviewOnlyEvidence" | "reviewOnlyGuidance"
@@ -1110,6 +1115,41 @@ function materialize(
 
 function sameJson(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
+}
+
+export function buildCanonicalProductEvidenceIdentity(
+  input: string,
+): CanonicalProductEvidenceIdentity | null {
+  const matched = findDefinition(input);
+  if (!matched) return null;
+  const definition = matched.definition;
+  const hazardPriority = [...definition.sif].sort(
+    (left, right) => left.rank - right.rank || left.itemId.localeCompare(right.itemId, "ko"),
+  );
+  const guidance = definition.guidance
+    .filter((source) => source.registryMapping === "mapped")
+    .map((source) => applyGuidanceResolution(source, undefined));
+  const law = definition.lawArticles.map(requireLaw);
+  const controls = resolveControls(definition, law, guidance);
+
+  return {
+    chainId: definition.chainId,
+    task: {
+      nodeId: definition.canonicalTaskNodeId,
+      label: definition.canonicalTaskLabel,
+      input,
+      match: matched.match,
+      publicationState: "published",
+    },
+    hazard: {
+      nodeId: definition.hazard.nodeId,
+      label: definition.hazard.label,
+      authority: "published_graph",
+    },
+    hazardPriority,
+    controls,
+    materialization: materialize(definition, controls, hazardPriority),
+  };
 }
 
 /**
