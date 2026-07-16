@@ -38,6 +38,24 @@ function readWorkbookText(workbook: ExcelJS.Workbook) {
   return cells.join("\n");
 }
 
+function computedContrastRatio(foreground: string, background: string): number {
+  const luminance = (color: string): number => {
+    const channels = color.match(/[\d.]+/gu)?.slice(0, 3).map((channel) => {
+      const normalized = Number(channel) / 255;
+      return normalized <= 0.04045
+        ? normalized / 12.92
+        : ((normalized + 0.055) / 1.055) ** 2.4;
+    });
+    if (!channels || channels.length !== 3) throw new Error(`Unsupported computed color: ${color}`);
+    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  };
+
+  const foregroundLuminance = luminance(foreground);
+  const backgroundLuminance = luminance(background);
+  return (Math.max(foregroundLuminance, backgroundLuminance) + 0.05)
+    / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
+}
+
 async function exportSelectedXlsx(page: Page) {
   const exportPanel = page.getByTestId("editor-export-panel");
   if (!await exportPanel.evaluate((element) => (element as HTMLDetailsElement).open)) {
@@ -663,6 +681,62 @@ describe("documents editor layout", () => {
 
     expect(ratios.length).toBeGreaterThanOrEqual(2);
     ratios.forEach(({ text, ratio }) => expect(ratio, text).toBeGreaterThanOrEqual(4.5));
+  }, 90_000);
+
+  it.each(["day", "night"] as const)(
+    "keeps the primary %s document export action at AA text contrast",
+    async (theme) => {
+      if (!browser) throw new Error("Browser was not started");
+      const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+      await page.goto(`${baseUrl}/documents?theme=${theme}`, { waitUntil: "networkidle" });
+
+      const colors = await page.locator(".safeclaw-doc-export a:first-of-type").evaluate((element) => {
+        const style = getComputedStyle(element);
+        return { foreground: style.color, background: style.backgroundColor };
+      });
+
+      expect(computedContrastRatio(colors.foreground, colors.background), theme).toBeGreaterThanOrEqual(4.5);
+    },
+    90_000,
+  );
+
+  it("renders every landing light-grid label at AA text contrast", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
+
+    const grids = [
+      [".safeclaw-pipeline-grid", 5],
+      [".safeclaw-proof-matrix", 6],
+      [".safeclaw-language-matrix", 10],
+      [".safeclaw-module-map", 8],
+    ] as const;
+
+    for (const [selector, expectedLabels] of grids) {
+      const labels = page.locator(`${selector} > * > span`);
+      await expect.poll(() => labels.count(), { message: selector }).toBe(expectedLabels);
+      const colors = await labels.evaluateAll((elements) => elements.map((element) => {
+        const foreground = getComputedStyle(element).color;
+        let surface: Element | null = element.parentElement;
+        let background = "";
+        while (surface) {
+          const candidate = getComputedStyle(surface).backgroundColor;
+          const channels = candidate.match(/[\d.]+/gu)?.map(Number) ?? [];
+          const alpha = channels.length >= 4 ? channels[3] : 1;
+          if (alpha === 1) {
+            background = candidate;
+            break;
+          }
+          surface = surface.parentElement;
+        }
+        if (!background) throw new Error(`Missing painted background for ${element.textContent ?? "landing label"}`);
+        return { foreground, background, text: element.textContent?.trim() || "" };
+      }));
+
+      colors.forEach(({ foreground, background, text }) => {
+        expect(computedContrastRatio(foreground, background), `${selector} ${text}`).toBeGreaterThanOrEqual(4.5);
+      });
+    }
   }, 90_000);
 
   it("supports roving keyboard navigation across document tabs", async () => {

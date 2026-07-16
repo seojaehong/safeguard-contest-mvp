@@ -1,0 +1,22 @@
+{
+  "date": "2026-07-15",
+  "route": "/workspace",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "focusedTest": {
+    "passed": 1,
+    "skipped": 24,
+    "failed": 0
+  },
+  "typecheck": "pass",
+  "frontendStaticAudit": {
+    "status": "pass",
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "coverageIssues": 0,
+    "violations": 0
+  },
+  "blankSubmitAskRequests": 0
+}

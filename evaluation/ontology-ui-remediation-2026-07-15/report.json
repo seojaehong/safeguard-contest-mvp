@@ -1,0 +1,43 @@
+{
+  "status": "pass",
+  "sourceBase": "cb43e4d10416150577cfe88179cdced5f4a23e94",
+  "branch": "fix/northstar-ontology-ui-20260715",
+  "candidateCommit": null,
+  "scope": [
+    "app/ontology/**",
+    "tests/ontology-ui-remediation.test.ts",
+    "tests/ontology-ui-browser.test.ts",
+    "evaluation/ontology-ui-remediation-2026-07-15/**"
+  ],
+  "dataChanges": {
+    "database": false,
+    "schema": false,
+    "publishedOntology": false,
+    "retrievalContract": false
+  },
+  "tests": {
+    "focusedFiles": 8,
+    "focusedTests": 47,
+    "browserFiles": 1,
+    "browserTests": 1,
+    "typecheck": "pass",
+    "productionBuild": "pass",
+    "staticGenerationUnits": 28
+  },
+  "browser": {
+    "variants": 4,
+    "failedVariants": 0,
+    "maximumDisplayedNodes": 13,
+    "overlapPairs": 0,
+    "horizontalOverflow": 0,
+    "minimumControlHeight": 44,
+    "minimumDesktopNodeContrast": 16.37,
+    "mobileDefault": "relation_cards",
+    "mobileExpandedGraph": "pass"
+  },
+  "integration": {
+    "integratedToMain": false,
+    "liveVerified": false,
+    "requiredNextGate": "regenerate frontend 108-row audit and verify live 1440/390 Day/Night on authoritative integrated HEAD"
+  }
+}

@@ -144,6 +144,65 @@ describe("shared shell hooks and accessibility", () => {
 describe("canonical shared surface styles", () => {
   const css = read("app/globals.css");
 
+  it("keeps yellow actions and light-surface accent labels readable", () => {
+    expect(declarationsForExactSelector(css, ".safeclaw-core-card span")).toMatchObject({
+      color: "var(--sc-hazard-text)",
+    });
+    for (const selector of [
+      ".safeclaw-pipeline-grid span",
+      ".safeclaw-proof-matrix span",
+      ".safeclaw-language-matrix span",
+      ".safeclaw-module-map span",
+    ]) {
+      expect(declarationsForExactSelector(css, selector), selector).toMatchObject({
+        color: "var(--sc-hazard-text)",
+      });
+    }
+    expect(
+      declarationsForExactSelector(
+        css,
+        ".safeclaw-module-shell.module-variant-document .safeclaw-current-workpack a",
+      ),
+    ).toMatchObject({ color: "var(--workspace-accent-text)" });
+    expect(
+      declarationsForExactSelector(
+        css,
+        ".safeclaw-module-shell.module-variant-document .safeclaw-doc-export a:first-of-type",
+      ),
+    ).toMatchObject({ color: "var(--workspace-ink)" });
+    expect(
+      declarationsForExactSelector(
+        css,
+        '.safeclaw-module-shell.module-variant-document[data-theme="night"] .safeclaw-doc-export a:first-of-type',
+      ),
+    ).toMatchObject({ color: "var(--workspace-canvas)" });
+    expect(
+      declarationsForExactSelector(
+        css,
+        ".safeclaw-module-shell.module-variant-document .safeclaw-module-primary",
+      ),
+    ).toMatchObject({ color: "var(--module-primary-color, var(--workspace-ink))" });
+    expect(
+      declarationsForExactSelector(
+        css,
+        ".command-center-shell .advanced-settings:not([open]) summary",
+      ),
+    ).toMatchObject({ color: "var(--workspace-muted)" });
+  });
+
+  it("shows every core document selector without a mobile horizontal rail", () => {
+    expect(
+      declarationsForExactSelector(
+        css,
+        ".command-center-shell .document-workbench .document-viewer-list",
+      ),
+    ).toMatchObject({
+      "grid-auto-flow": "row",
+      "grid-template-columns": "minmax(0, 1fr)",
+      "overflow-x": "visible",
+    });
+  });
+
   it("defines the shared special state with canonical panel geometry", () => {
     const rule = declarationsForExactSelector(css, ".special-state");
 

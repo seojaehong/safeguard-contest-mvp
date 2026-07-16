@@ -1,0 +1,420 @@
+.root {
+  --ontology-ink: var(--workspace-ink);
+  --ontology-muted: var(--workspace-muted);
+  --ontology-line: var(--workspace-rule);
+  --ontology-surface: var(--workspace-surface-1);
+  --ontology-canvas: var(--workspace-surface-2);
+  --ontology-accent: var(--workspace-accent-text);
+  --ontology-card: var(--sc-paper);
+  --ontology-card-ink: var(--sc-steel-950);
+  --ontology-card-muted: var(--sc-steel-650);
+  --ontology-card-border: var(--sc-steel-300);
+  --ontology-graph-canvas: var(--sc-steel-060);
+  --ontology-selected: color-mix(in srgb, var(--sc-hazard-yellow) 18%, var(--sc-paper));
+  --ontology-focus-ring: color-mix(in srgb, var(--workspace-accent) 55%, transparent);
+  display: grid;
+  gap: 24px;
+  color: var(--ontology-ink);
+}
+
+.emptyPanel {
+  padding: 24px;
+}
+
+.emptyPanel h2 { margin: 8px 0; font-size: 22px; line-height: 30px; }
+.emptyPanel p { margin: 0; color: var(--workspace-muted); font-size: 14px; line-height: 22px; }
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summaryGrid article,
+.explorer,
+.directory,
+.rawExports,
+.loopStrip {
+  border: 1px solid var(--ontology-line);
+  border-radius: 14px;
+  background: var(--ontology-surface);
+}
+
+.summaryGrid article {
+  display: grid;
+  min-height: 128px;
+  padding: 20px;
+  align-content: space-between;
+}
+
+.summaryGrid span,
+.explorerHeader span,
+.directory header span,
+.selectionSummary span,
+.toolbar label > span,
+.nodeGrid span,
+.graphNode span,
+.mobileRelations span {
+  color: var(--ontology-muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.summaryGrid strong {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 36px;
+}
+
+.summaryGrid small,
+.selectionSummary small,
+.nodeGrid small,
+.graphNode small,
+.mobileRelations small {
+  color: var(--ontology-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.loopStrip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 12px;
+}
+
+.loopStrip div {
+  display: grid;
+  gap: 4px;
+  padding: 12px 16px;
+  border-right: 1px solid var(--ontology-line);
+}
+
+.loopStrip div:last-child { border-right: 0; }
+.loopStrip span { color: var(--ontology-accent); font-size: 12px; font-weight: 700; line-height: 18px; }
+.loopStrip strong { font-size: 15px; line-height: 24px; }
+.loopStrip small { color: var(--ontology-muted); font-size: 12px; line-height: 18px; }
+
+.explorer,
+.directory { padding: 24px; }
+
+.explorerHeader,
+.directory > header,
+.selectionSummary,
+.graphDialog > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.explorerHeader h2,
+.directory h2 {
+  margin: 4px 0 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+}
+
+.explorerHeader p {
+  margin: 8px 0 0;
+  color: var(--ontology-muted);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.depthControl,
+.graphTools {
+  display: flex;
+  gap: 8px;
+}
+
+.depthControl button,
+.graphTools button,
+.expandButton,
+.moreButton,
+.toolbar input,
+.toolbar select,
+.rawExports summary,
+.rawExports a,
+.graphDialog button {
+  min-height: 44px;
+}
+
+.depthControl button,
+.graphTools button,
+.expandButton,
+.moreButton,
+.graphDialog button {
+  border: 1px solid var(--ontology-line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ontology-ink);
+  padding: 0 14px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.depthControl button[aria-pressed="true"],
+.expandButton {
+  border-color: var(--sc-hazard-yellow);
+  background: var(--sc-hazard-yellow);
+  color: var(--sc-steel-950);
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) 180px 180px;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.toolbar label { display: grid; gap: 6px; }
+.toolbar input,
+.toolbar select {
+  width: 100%;
+  border: 1px solid var(--ontology-line);
+  border-radius: 8px;
+  background: var(--ontology-surface);
+  color: var(--ontology-ink);
+  padding: 0 12px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.toolbar input:focus,
+.toolbar select:focus,
+.depthControl button:focus-visible,
+.graphTools button:focus-visible,
+.graphNode:focus-visible,
+.nodeGrid button:focus-visible,
+.mobileRelations button:focus-visible,
+.expandButton:focus-visible,
+.moreButton:focus-visible,
+.rawExports summary:focus-visible,
+.rawExports a:focus-visible,
+.graphDialog button:focus-visible {
+  outline: 3px solid var(--ontology-focus-ring);
+  outline-offset: 2px;
+}
+
+.selectionSummary {
+  align-items: center;
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--ontology-line);
+  border-radius: 12px;
+  background: var(--ontology-graph-canvas);
+  color: var(--ontology-card-ink);
+}
+
+.selectionSummary > div { display: grid; gap: 3px; min-width: 0; }
+.selectionSummary strong { overflow-wrap: anywhere; font-size: 17px; line-height: 26px; }
+.selectionSummary span,
+.selectionSummary small { color: var(--ontology-card-muted); }
+
+.desktopGraph { display: block; margin-top: 16px; }
+.graphTools { justify-content: flex-end; margin-bottom: 8px; }
+.graphTools button { background: var(--ontology-surface); min-width: 44px; }
+
+.graphViewport {
+  overflow: auto;
+  border: 1px solid var(--ontology-card-border);
+  border-radius: 12px;
+  background: var(--ontology-graph-canvas);
+}
+
+.graphCanvas {
+  position: relative;
+  width: 100%;
+  min-width: 860px;
+  height: 560px;
+  transform-origin: center;
+  transition: transform 160ms ease;
+}
+
+.graphCanvas svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.edge,
+.activeEdge { vector-effect: non-scaling-stroke; stroke-width: 0.28; }
+.edge { stroke: var(--ontology-card-muted); opacity: 0.58; }
+.activeEdge { stroke: var(--sc-hazard-text); stroke-width: 0.5; opacity: 0.95; }
+
+.graphNode {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  width: 148px;
+  min-height: 76px;
+  padding: 10px 12px;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--ontology-card-border);
+  border-radius: 10px;
+  background: var(--ontology-card);
+  color: var(--ontology-card-ink);
+  text-align: left;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.graphNode:hover { border-color: var(--sc-hazard-text); }
+.graphNode span { color: var(--ontology-card-muted); }
+.graphNode strong { overflow-wrap: anywhere; font-size: 13px; line-height: 19px; white-space: normal; }
+.graphNode small { color: var(--ontology-card-muted); }
+.selectedNode { border: 2px solid var(--sc-hazard-text); background: var(--ontology-selected); }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.legend span {
+  border: 1px solid var(--ontology-line);
+  border-radius: 9999px;
+  padding: 5px 10px;
+  color: var(--ontology-muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.mobileRelations { display: none; }
+
+.directory > header { align-items: center; }
+.directory > header > strong { color: var(--ontology-muted); font-size: 14px; }
+.nodeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.nodeGrid button,
+.mobileRelations button {
+  display: grid;
+  min-width: 0;
+  min-height: 88px;
+  gap: 3px;
+  border: 1px solid var(--ontology-line);
+  border-radius: 10px;
+  background: var(--ontology-surface);
+  color: var(--ontology-ink);
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nodeGrid strong,
+.mobileRelations strong { overflow-wrap: anywhere; font-size: 14px; line-height: 22px; }
+.nodeGrid .activeListNode { border: 2px solid var(--workspace-accent); background: color-mix(in srgb, var(--workspace-accent) 11%, var(--ontology-surface)); }
+.moreButton { display: block; margin: 16px auto 0; }
+
+.rawExports { padding: 0 16px; }
+.rawExports summary {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+.rawExports > div { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 0 16px; }
+.rawExports p { flex-basis: 100%; margin: 0; color: var(--ontology-muted); font-size: 13px; line-height: 20px; }
+.rawExports a { display: inline-flex; align-items: center; border: 1px solid var(--ontology-line); border-radius: 8px; padding: 0 12px; color: var(--ontology-ink); text-decoration: none; }
+
+.graphDialog {
+  position: fixed;
+  z-index: 100;
+  inset: 16px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 1px solid var(--ontology-card-border);
+  border-radius: 14px;
+  background: var(--ontology-card);
+  color: var(--ontology-card-ink);
+  box-shadow: var(--shadow);
+}
+
+.graphDialog > header { align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--ontology-card-border); }
+.graphDialog button { border: 1px solid var(--ontology-card-border); border-radius: 8px; background: var(--ontology-card); color: var(--ontology-card-ink); padding: 0 14px; }
+.dialogScroller { min-height: 0; overflow: auto; padding: 16px; background: var(--ontology-graph-canvas); }
+.dialogScroller .graphViewport { min-width: 920px; }
+
+/* The module shell colors generic buttons by theme. Ontology controls keep their semantic surfaces. */
+:global(.safeclaw-module-shell[data-theme]) .root .graphNode {
+  border-color: var(--ontology-card-border);
+  background: var(--ontology-card);
+  color: var(--ontology-card-ink);
+}
+
+:global(.safeclaw-module-shell[data-theme]) .root .selectedNode {
+  border-color: var(--sc-hazard-text);
+  background: var(--ontology-selected);
+  color: var(--ontology-card-ink);
+}
+
+:global(.safeclaw-module-shell[data-theme]) .root .nodeGrid button,
+:global(.safeclaw-module-shell[data-theme]) .root .mobileRelations button,
+:global(.safeclaw-module-shell[data-theme]) .root .graphTools button,
+:global(.safeclaw-module-shell[data-theme]) .root .moreButton {
+  border-color: var(--ontology-line);
+  background: var(--ontology-surface);
+  color: var(--ontology-ink);
+}
+
+:global(.safeclaw-module-shell[data-theme]) .root .depthControl button {
+  border-color: var(--ontology-line);
+  background: transparent;
+  color: var(--ontology-ink);
+}
+
+:global(.safeclaw-module-shell[data-theme]) .root .depthControl button[aria-pressed="true"],
+:global(.safeclaw-module-shell[data-theme]) .root .expandButton {
+  border-color: var(--sc-hazard-yellow);
+  background: var(--sc-hazard-yellow);
+  color: var(--sc-steel-950);
+}
+
+@media (max-width: 900px) {
+  .summaryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .toolbar { grid-template-columns: 1fr 1fr; }
+  .searchField { grid-column: 1 / -1; }
+  .nodeGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .root { gap: 16px; }
+  .summaryGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .summaryGrid article { min-height: 100px; padding: 12px; }
+  .summaryGrid article:nth-child(n + 4) { display: none; }
+  .summaryGrid strong { font-size: 22px; line-height: 30px; }
+  .summaryGrid small { font-size: 11px; line-height: 16px; }
+  .loopStrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .loopStrip div:nth-child(2) { border-right: 0; }
+  .loopStrip div:nth-child(-n + 2) { border-bottom: 1px solid var(--ontology-line); }
+  .explorer,
+  .directory { padding: 16px; }
+  .explorerHeader { display: grid; }
+  .depthControl { width: 100%; }
+  .depthControl button { flex: 1; }
+  .toolbar { grid-template-columns: 1fr; }
+  .searchField { grid-column: auto; }
+  .selectionSummary { display: grid; }
+  .expandButton { width: 100%; }
+  .desktopGraph { display: none; }
+  .mobileRelations { display: grid; gap: 8px; margin-top: 16px; }
+  .mobileRelations h3 { margin: 0 0 4px; font-size: 16px; line-height: 24px; }
+  .mobileRelations p { color: var(--ontology-muted); font-size: 14px; line-height: 22px; }
+  .mobileRelations button { min-height: 84px; }
+  .nodeGrid { grid-template-columns: 1fr; }
+  .nodeGrid button { min-height: 80px; }
+  .rawExports > div { display: grid; }
+  .rawExports a { width: 100%; }
+  .graphDialog { inset: 8px; }
+  .dialogScroller { padding: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graphCanvas { transition: none; }
+}

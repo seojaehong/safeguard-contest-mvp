@@ -818,7 +818,7 @@ ul {
 }
 
 .safeclaw-core-card span {
-  color: var(--sc-hazard-yellow);
+  color: var(--sc-hazard-text);
   font-family: var(--font-hud);
   font-size: var(--text-body-lg);
   font-weight: 500;
@@ -1528,7 +1528,7 @@ ul {
 .safeclaw-module-map span {
   display: block;
   margin-bottom: 24px;
-  color: var(--os-yellow);
+  color: var(--sc-hazard-text);
   font-family: var(--font-hud);
   font-size: var(--text-body);
   font-weight: 500;
@@ -13043,7 +13043,7 @@ body:has(.safeclaw-landing) :is(
   min-height: 38px;
   border-radius: 4px;
   padding: 8px 16px;
-  color: #a4aab4;
+  color: var(--workspace-muted);
   font-size: var(--text-control);
   font-weight: 700;
   line-height: var(--leading-control);
@@ -13076,7 +13076,7 @@ body:has(.safeclaw-landing) :is(
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 36px;
+  min-height: var(--control-height);
   border: 1px solid var(--workspace-rule);
   border-radius: var(--r-lg);
   background: var(--workspace-surface-2);
@@ -13160,7 +13160,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .composer-submit-button {
-  min-height: 38px;
+  min-height: var(--control-height);
   margin-left: auto;
   border-radius: var(--r-lg);
   padding: 8px 16px;
@@ -13590,7 +13590,7 @@ body:has(.safeclaw-landing) :is(
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: #a4aab4;
+  color: var(--workspace-muted);
   padding: 0;
   text-decoration: underline;
   text-decoration-color: rgba(164, 170, 180, 0.45);
@@ -13600,7 +13600,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .advanced-settings:not([open]) summary::after,
 .command-center-shell .quick-scenario-chips:not([open]) summary::after {
   float: none;
-  color: #a4aab4;
+  color: var(--workspace-muted);
 }
 
 .command-center-shell .advanced-settings[open],
@@ -15850,6 +15850,18 @@ body:has(.safeclaw-landing) :is(
     padding: 12px;
   }
 
+  .command-center-shell .document-workbench .document-viewer-list {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-template-columns: minmax(0, 1fr);
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+
+  .command-center-shell .document-workbench .document-viewer-list button {
+    min-height: var(--control-height);
+  }
+
   .command-center-shell .document-workbench .document-preview-pane pre {
     min-height: 360px;
     max-height: 58vh;
@@ -16410,7 +16422,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-module-primary {
   border-color: var(--module-primary-border, var(--workspace-accent));
   background: var(--module-primary-background, var(--workspace-accent));
-  color: var(--module-primary-color, #ffffff);
+  color: var(--module-primary-color, var(--workspace-ink));
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-current-workpack a {
+  color: var(--workspace-accent-text);
 }
 
 .safeclaw-module-shell.module-variant-document button:not(:where(.secondary, .ghost, .doc-tab, .template-card, .safeclaw-module-chrome-button)):hover,
@@ -17661,7 +17677,11 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-doc-export a:first-of-type {
   border-color: var(--workspace-accent);
   background: var(--workspace-accent);
-  color: #ffffff;
+  color: var(--workspace-ink);
+}
+
+.safeclaw-module-shell.module-variant-document[data-theme="night"] .safeclaw-doc-export a:first-of-type {
+  color: var(--workspace-canvas);
 }
 
 @media (max-width: 900px) {
@@ -18128,7 +18148,7 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .composer-attach-button,
   .command-center-shell.workspace-theme-day .composer-attach-button {
-    min-height: 32px;
+    min-height: var(--control-height);
     padding: 4px 8px;
   }
 
@@ -18144,7 +18164,7 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .composer-submit-button,
   .command-center-shell.workspace-theme-day .composer-submit-button {
-    min-height: 32px;
+    min-height: var(--control-height);
     padding: 8px 12px;
   }
 }
@@ -20813,6 +20833,13 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell.workspace-theme-day .workspace-input-page .composer-attach-button,
 .command-center-shell.workspace-theme-night .workspace-input-page .composer-attach-button {
   border-radius: var(--r-lg);
+}
+
+.command-center-shell.workspace-theme-day .workspace-input-page .input-helper.input-helper-error,
+.command-center-shell.workspace-theme-night .workspace-input-page .input-helper.input-helper-error {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--danger);
 }
 
 .command-center-shell.workspace-theme-day .workspace-input-page .composer-submit-button,
