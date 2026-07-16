@@ -35,7 +35,7 @@
 - Exact asset size: 147,724 bytes
 - `git diff --check`: PASS
 
-확장 34-file Vitest는 `tests/kosha-guide-corpus-audit.test.ts`의 3개 assertion에서 실패했다. 실패는 snapshot integrity/credential-order runner 출력이 비어 있거나 `audit.log`가 생성되지 않은 경로이며, 원인을 이번 exact registry product PASS로 재분류하지 않았다. 전체 summary와 실패 stack은 `kosha-sif-ontology-tests.log`에 보존했다.
+확장 34-file Vitest는 실행을 완료하고 최종 summary를 출력했으며, `tests/kosha-guide-corpus-audit.test.ts`의 3개 assertion에서 실패했다. 실패는 snapshot integrity/credential-order runner 출력이 비어 있거나 `audit.log`가 생성되지 않은 경로이며, 원인을 이번 exact registry product PASS로 재분류하지 않았다. 실패 stack과 최종 summary(`1 failed / 30 passed / 3 skipped`, `3 failed / 386 passed / 4 skipped`)는 `kosha-sif-ontology-tests.log`에 그대로 보존했다. 이 실행은 hang이나 summary 미출력으로 분류하지 않으며 broad suite PASS 근거로 사용하지 않는다.
 
 ## 남은 경계
 
