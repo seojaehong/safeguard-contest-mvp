@@ -12,30 +12,75 @@ import { SIF_ACCIDENT_EDGES, SIF_ACCIDENT_NODES } from "@/lib/ontology/seed/sif-
 const SOURCE_ROWS = 190;
 const SOURCE_HIGH = 177;
 const SOURCE_MEDIUM = 13;
-const SIF_CORPUS_HASH = "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e";
 
 const SIF_ACCIDENTS = [
   {
     itemId: "sif-아카이브-건설업-00323",
-    hazardId: "Hazard_추락",
-    contentHash: "e6035abf293df3d2b5d4a59083c1276955f8f47ee7c37743bc0646d185dea770",
-    excerpt:
-      "2021년 03월경 ○○현장에서 피재자가 멍에(각관)설치상태 확인을 위해 발붙임 겸용 신축형 사다리(A형) 최상부 디딘대(9단)에 올라가 확인 하던 중 2.5m 아래 바닥으로 떨어져 사망"
+    hazardId: "Hazard_추락"
   },
   {
     itemId: "sif-아카이브-건설업-00024",
-    hazardId: "Hazard_충돌_협착_끼임",
-    contentHash: "4ae1315616343d8dcc50385276c2d6d847a6f5be613c2825fabdf2525cfc288f",
-    excerpt:
-      "2017년 12월경 ○○ 신축공사 현장에서 굴삭기 후미로 이동하던 설비 작업자가 회전하는 굴삭기 몸체 후미와 콘크리트 구조물 사이에 협착되어 쓰러져 있는 재해자를 주변 근로자가 발견하여 119에 연락 응급조치 및 병원으로 후송 하였으나 사망"
+    hazardId: "Hazard_충돌_협착_끼임"
   },
   {
     itemId: "sif-아카이브-건설업-01798",
-    hazardId: "Hazard_감전_직접_간접_접촉",
-    contentHash: "ba16f6e2587914f70b8a37d1f7b95e0b3ab8b29e8debea6570141cf1b8c3374a",
-    excerpt: "2021년 07월경 ○○현장에서 수·변전반 결선작업 중 380V 노출충전부에 신체가 접촉되어 감전 사망"
+    hazardId: "Hazard_감전_직접_간접_접촉"
   }
 ] as const;
+
+type SifCorpusFixture = {
+  referenceItemId: string;
+  contentHash: string;
+  embeddingText: string;
+};
+
+function isSifCorpusFixture(value: unknown): value is SifCorpusFixture {
+  if (typeof value !== "object" || value === null) return false;
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.referenceItemId === "string" &&
+    typeof record.contentHash === "string" &&
+    typeof record.embeddingText === "string"
+  );
+}
+
+function readSifCorpusFixtures(): Map<string, SifCorpusFixture> {
+  const fixturePath = path.resolve(
+    __dirname,
+    "..",
+    "evaluation",
+    "sif-embedding-gate",
+    "sif-embedding-corpus.jsonl"
+  );
+  const fixtures = new Map<string, SifCorpusFixture>();
+  for (const line of readFileSync(fixturePath, "utf-8").split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const parsed = JSON.parse(line) as unknown;
+    if (isSifCorpusFixture(parsed)) fixtures.set(parsed.referenceItemId, parsed);
+  }
+  return fixtures;
+}
+
+function readSifCorpusHash(): string {
+  const reportPath = path.resolve(
+    __dirname,
+    "..",
+    "evaluation",
+    "sif-embedding-gate",
+    "approval-preflight-report.json"
+  );
+  const parsed = JSON.parse(readFileSync(reportPath, "utf-8")) as unknown;
+  if (typeof parsed !== "object" || parsed === null) throw new Error("SIF corpus report is not an object");
+  const corpusHash = (parsed as Record<string, unknown>).corpusHash;
+  if (typeof corpusHash !== "string") throw new Error("SIF corpus report has no corpusHash");
+  return corpusHash;
+}
+
+function accidentOverview(fixture: SifCorpusFixture): string {
+  const match = fixture.embeddingText.match(/재해개요:\s*([\s\S]*?)\s*기인물:/);
+  if (!match) throw new Error(`No accident overview in ${fixture.referenceItemId}`);
+  return match[1];
+}
 
 describe("시드 파싱 무결성 — 원본 감수 문서와 수치 일치", () => {
   test("원본 행 수(높음/중간)가 SEED_STATS와 일치한다", () => {
@@ -89,20 +134,24 @@ describe("시드 데이터 스키마·provenance 무결성", () => {
   });
 
   test("SIF 사고 overlay는 원문 사고개요와 hash provenance만 가진 draft Accident다", () => {
+    const fixtures = readSifCorpusFixtures();
+    const corpusHash = readSifCorpusHash();
     for (const expected of SIF_ACCIDENTS) {
+      const fixture = fixtures.get(expected.itemId);
+      if (!fixture) throw new Error(`Missing tracked SIF fixture: ${expected.itemId}`);
       const node = SEED_NODES.find(
         (candidate) => candidate.kind === "Accident" && candidate.cited_uids.includes(`ref:safety_reference_items:${expected.itemId}`)
       );
       expect(node, expected.itemId).toBeDefined();
       expect(node).toMatchObject({
         kind: "Accident",
-        text_excerpt: expected.excerpt,
+        text_excerpt: accidentOverview(fixture),
         cited_uids: [`ref:safety_reference_items:${expected.itemId}`],
         review_state: "draft",
         meta: {
           source_item_id: expected.itemId,
-          content_hash: expected.contentHash,
-          corpus_hash: SIF_CORPUS_HASH,
+          content_hash: fixture.contentHash,
+          corpus_hash: corpusHash,
           evidence_role: "hazard_priority_only",
           llm_role: "naturalize_only"
         }
@@ -112,6 +161,8 @@ describe("시드 데이터 스키마·provenance 무결성", () => {
   });
 
   test("SIF 사고 overlay는 Hazard-evidencedBy-Accident draft edge만 추가한다", () => {
+    const fixtures = readSifCorpusFixtures();
+    const corpusHash = readSifCorpusHash();
     const accidentIds = new Set(
       SEED_NODES.filter((node) =>
         SIF_ACCIDENTS.some((expected) => node.cited_uids.includes(`ref:safety_reference_items:${expected.itemId}`))
@@ -122,6 +173,8 @@ describe("시드 데이터 스키마·provenance 무결성", () => {
     expect(accidentIds.size).toBe(SIF_ACCIDENTS.length);
     expect(overlayEdges).toHaveLength(SIF_ACCIDENTS.length);
     for (const expected of SIF_ACCIDENTS) {
+      const fixture = fixtures.get(expected.itemId);
+      if (!fixture) throw new Error(`Missing tracked SIF fixture: ${expected.itemId}`);
       const citedUid = `ref:safety_reference_items:${expected.itemId}`;
       expect(overlayEdges).toContainEqual(
         expect.objectContaining({
@@ -131,6 +184,8 @@ describe("시드 데이터 스키마·provenance 무결성", () => {
           review_state: "draft",
           meta: expect.objectContaining({
             source_item_id: expected.itemId,
+            content_hash: fixture.contentHash,
+            corpus_hash: corpusHash,
             evidence_role: "hazard_priority_only",
             llm_role: "naturalize_only"
           })
