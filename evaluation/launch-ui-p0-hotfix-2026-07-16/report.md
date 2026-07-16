@@ -48,3 +48,19 @@ The bounded hotfix was merged as `1b17eecf05faeed20c711f771c01e73917c2566d` and 
 - Customer-facing ontology internal-term matches: 0.
 
 The first live contrast sweep found the `/why` desktop header at 1.56:1 in Day mode. A follow-up TDD contract reproduced the failure and changed only the header text token to `--sc-black`; Day and Night browser tests then passed with a minimum 4.5:1 contract.
+
+## Final CI remediation
+
+The production merge CI exposed four follow-up failures. Three assertions still described the retired ontology surface, and the KOSHA route test depended on live official-site latency. The tests now follow the focused explorer's actual presentation boundary and mock KOSHA retrieval at the route boundary while preserving production fail-closed behavior.
+
+The 1024px audit also exposed a real 124px horizontal overflow in `/ontology`. The root grid's implicit min-content track expanded to 912px inside a 788px module main. A browser RED test added tablet Day/Night coverage, and the root now uses a bounded `minmax(0, 1fr)` track.
+
+- CI remediation focused suite: 78/78 passed.
+- Ontology browser contract: 1440/1024/390 Day/Night passed; tablet horizontal overflow 0.
+- Static frontend audit: 32 pages, 23 product components, coverage issues 0, violations 0.
+- Browser audit: 108/108 rows passed, failed rows 0, findings 0, recovered rows 0.
+- Strict TypeScript: passed.
+- Clean normal production build: 28/28 static pages generated.
+- Normal browser bundle audit markers: 0.
+
+The audit-only alias now captures `SAFECLAW_FRONTEND_AUDIT` when Next loads its configuration. This keeps the audit probe stable across server and client compiler passes. A clean normal build still selects the no-op module, so the probe does not ship or hydrate in production.

@@ -650,6 +650,20 @@ describe("browser evidence reconciliation", () => {
     expect(normalProbe).not.toContain('data-audit-boundary="loading"');
   });
 
+  it("captures the audit build flag before Next starts separate compiler passes", () => {
+    const nextConfig = read("next.config.mjs");
+
+    expect(nextConfig).toContain(
+      'const frontendAuditEnabled = process.env.SAFECLAW_FRONTEND_AUDIT === "1";',
+    );
+    expect(nextConfig).toContain(
+      'frontendAuditEnabled\n        ? "lib/frontend-audit/GlobalBoundaryProbe.audit.tsx"',
+    );
+    expect(nextConfig).not.toContain(
+      'process.env.SAFECLAW_FRONTEND_AUDIT === "1"\n        ? "lib/frontend-audit/GlobalBoundaryProbe.audit.tsx"',
+    );
+  });
+
   it("reconciles the complete route, theme, special-state, and generated-surface evidence", () => {
     const reportPath = path.join(root, "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json");
     expect(fs.existsSync(reportPath), "browser audit report exists").toBe(true);

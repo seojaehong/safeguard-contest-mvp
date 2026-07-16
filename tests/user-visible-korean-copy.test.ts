@@ -119,8 +119,8 @@ describe("user-visible Korean copy contract", () => {
   });
 
   it("uses positive Korean labels on ontology and knowledge surfaces", () => {
-    const ontology = read("app/ontology/page.tsx");
-    for (const label of ["노드", "관계", "근거 차단", "대체본", "운영 이력", "작업팩", "근거", "개선사항", "열람 확인"]) {
+    const ontology = `${read("app/ontology/page.tsx")}\n${read("app/ontology/OntologyExplorer.tsx")}`;
+    for (const label of ["검증된 안전지식", "검증된 연결", "근거 차단", "대체자료", "오늘 작업", "개선 기록", "연결된 근거", "전체 목록"]) {
       expect(ontology).toContain(`>${label}<`);
     }
 
@@ -140,7 +140,8 @@ describe("user-visible Korean copy contract", () => {
     expect(currentWorkpack).toContain("providerStatus");
     expect(currentWorkpack).toContain("formatDispatchProviderStatus(log.providerStatus)");
     expect(currentWorkpack).not.toContain('log.providerStatus || "상태 확인"');
-    expect(read("app/ontology/page.tsx")).toContain("/api/workpacks/[id]/operation-graph");
+    expect(read("app/ontology/OntologyExplorer.tsx")).toContain("/api/ontology/graph");
+    expect(read("app/api/workpacks/[id]/operation-graph/route.ts")).toContain("buildOperationMemoryGraph");
   });
 
   it("uses Korean before-and-after labels on the Reports page and download center", () => {

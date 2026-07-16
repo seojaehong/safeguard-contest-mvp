@@ -38,7 +38,7 @@ function contrastRatio(foreground: number[], background: number[]) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 390): Promise<BrowserMetric> {
+async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 1024 | 390): Promise<BrowserMetric> {
   const height = width === 390 ? 844 : 1000;
   await page.setViewportSize({ width, height });
   await page.goto(`${baseUrl}/ontology?theme=${theme}`, { waitUntil: "networkidle" });
@@ -125,12 +125,12 @@ async function auditVariant(page: Page, theme: "day" | "night", width: 1440 | 39
 
   expect(geometry.horizontalOverflow).toBe(0);
   expect(geometry.overlapPairs).toBe(0);
-  if (width === 1440) expect(geometry.visibleNeighborhoodNodes).toBe(15);
+  if (width !== 390) expect(geometry.visibleNeighborhoodNodes).toBe(15);
   if (width === 390) expect(expandedGraphNodeCount).toBe(15);
   expect(geometry.minimumControlHeight).toBeGreaterThanOrEqual(44);
   if (minimumNodeContrast !== null) expect(minimumNodeContrast).toBeGreaterThanOrEqual(4.5);
 
-  const variant = `${width === 390 ? "mobile" : "desktop"}-${theme}`;
+  const variant = `${width === 390 ? "mobile" : width === 1024 ? "tablet" : "desktop"}-${theme}`;
   await page.screenshot({ path: path.join(artifactDirectory, `${variant}.png`), fullPage: true });
   return {
     variant,
@@ -157,6 +157,7 @@ describe.skipIf(!baseUrl)("ontology UI production browser contract", () => {
       const metrics: BrowserMetric[] = [];
       for (const theme of ["day", "night"] as const) {
         metrics.push(await auditVariant(page, theme, 1440));
+        metrics.push(await auditVariant(page, theme, 1024));
         metrics.push(await auditVariant(page, theme, 390));
       }
       fs.writeFileSync(

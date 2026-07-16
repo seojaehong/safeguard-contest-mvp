@@ -9,9 +9,14 @@ import type { AskResponse, SearchResult, TbmRiskLink } from "@/lib/types";
 
 const mocks = vi.hoisted(() => ({
   enhanceLegalEvidenceMappings: vi.fn(),
+  fetchKoshaReferences: vi.fn(),
   generateAllDeliverablesWithDiagnostics: vi.fn(),
   generateAnswer: vi.fn(),
   searchSafetyReferences: vi.fn()
+}));
+
+vi.mock("@/lib/kosha", () => ({
+  fetchKoshaReferences: mocks.fetchKoshaReferences
 }));
 
 vi.mock("@/lib/ai", async (importOriginal) => {
@@ -357,6 +362,12 @@ function configureV5QueryUnrelatedDirectEvidenceSearch() {
 describe("current-base runAsk retrieval provenance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.fetchKoshaReferences.mockResolvedValue({
+      source: "kosha",
+      mode: "fallback",
+      detail: "테스트에서 공식 자료 URL 확인을 생략했습니다.",
+      references: []
+    });
     mocks.enhanceLegalEvidenceMappings.mockImplementation(
       async (_question: string, citations: SearchResult[]) => citations
     );

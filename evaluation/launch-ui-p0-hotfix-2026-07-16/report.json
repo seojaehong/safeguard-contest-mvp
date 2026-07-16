@@ -29,7 +29,7 @@
     "build": "pass",
     "staticPages": 28
   },
-  "productionMergeSha": "1b17eecf05faeed20c711f771c01e73917c2566d",
+  "productionMergeSha": "06abce94124809680cba5f8441b5beac05296005",
   "productionLiveVerified": true,
   "liveMetrics": {
     "workspace": {
@@ -64,5 +64,40 @@
     "redDayRatio": 1.56,
     "testResult": "4 passed",
     "minimumRequiredRatio": 4.5
+  },
+  "finalCiRemediation": {
+    "focusedTests": {
+      "passed": 78,
+      "failed": 0
+    },
+    "ontologyBrowser": {
+      "viewports": [
+        1440,
+        1024,
+        390
+      ],
+      "themes": 2,
+      "tabletOverflowBefore": 124,
+      "tabletOverflowAfter": 0
+    },
+    "staticAudit": {
+      "pages": 32,
+      "productComponents": 23,
+      "coverageIssues": 0,
+      "violations": 0
+    },
+    "browserAudit": {
+      "rows": 108,
+      "passed": 108,
+      "failed": 0,
+      "findings": 0,
+      "recovered": 0
+    },
+    "typecheck": "pass",
+    "normalBuild": {
+      "status": "pass",
+      "staticPages": 28,
+      "auditMarkers": 0
+    }
   }
 }
