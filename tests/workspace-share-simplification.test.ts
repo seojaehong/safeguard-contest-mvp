@@ -8,6 +8,13 @@ const commandCenter = readFileSync(join(root, "components", "SafeGuardCommandCen
 const sharePanel = readFileSync(join(root, "components", "WorkflowSharePanel.tsx"), "utf8");
 
 describe("workspace share simplification", () => {
+  it("offers one deterministic revalidation action after document edits", () => {
+    expect(commandCenter).toContain("revalidateEditedWorkpack");
+    expect(commandCenter).toContain('fetch("/api/ontology/graph"');
+    expect(commandCenter).toContain("편집본 재검증");
+    expect(commandCenter).toContain("handleEditedWorkpackRevalidation");
+  });
+
   it("keeps the workspace share page focused on the delivery workflow", () => {
     const sharePage = commandCenter.slice(
       commandCenter.indexOf('{workspacePage === "share" ? ('),

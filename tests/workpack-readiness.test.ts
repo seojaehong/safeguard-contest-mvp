@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { assembleGraph } from "@/lib/ontology/graph-store";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
-import { applyWorkpackDeliverablesChange, assessWorkpackReadiness } from "@/lib/workpack-readiness";
+import {
+  applyWorkpackDeliverablesChange,
+  assessWorkpackReadiness,
+  revalidateEditedWorkpack
+} from "@/lib/workpack-readiness";
 import type { AskResponse, QualityContract } from "@/lib/types";
 
 const readyQuality: QualityContract = {
@@ -175,11 +180,106 @@ describe("workpack readiness", () => {
     const readiness = assessWorkpackReadiness(edited, { requiresRevalidation: true });
 
     expect(edited.ontologyQa).toBeUndefined();
-    expect(edited.qualityContract).toBeUndefined();
-    expect(edited.dbHarness).toBeUndefined();
+    expect(edited.qualityContract?.overall).toBe("blocked");
+    expect(edited.qualityContract?.ontology.status).toBe("pending");
+    expect(edited.dbHarness).toBe(response.dbHarness);
+    expect(edited.deliverables.tbmBriefing).toContain("편집된 안전대책");
     expect(readiness.canShare).toBe(false);
     expect(readiness.status).toBe("blocked");
     expect(readiness.summary).toBe("편집 후 재검수 필요");
     expect(readiness.reasons).toContain("편집된 문서 재검수 필요");
+  });
+
+  it("revalidates the edited canonical text and only unlocks a newly passing review", () => {
+    const graph = assembleGraph(
+      [
+        {
+          node_id: "Task_high_work",
+          kind: "Task",
+          label: "고소작업",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Hazard_fall",
+          kind: "Hazard",
+          label: "추락",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Control_platform",
+          kind: "Control",
+          label: "작업발판 점검",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        }
+      ],
+      [
+        {
+          src: "Task_high_work",
+          rel: "entailsHazard",
+          dst: "Hazard_fall",
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          src: "Hazard_fall",
+          rel: "mitigatedBy",
+          dst: "Control_platform",
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        }
+      ]
+    );
+    const response = makeResponse();
+    response.ontologyQa = {
+      ...response.ontologyQa!,
+      detail: "STALE_QA_MUST_NOT_RETURN"
+    };
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      {
+        tbmBriefing: [
+          "사용자 편집 본문",
+          "추락 위험을 확인하고 작업발판 점검을 완료한다."
+        ].join("\n")
+      },
+      { requiresRevalidation: true }
+    );
+
+    const revalidated = revalidateEditedWorkpack(edited, graph, "2026-07-17T00:00:00.000Z");
+    const readiness = assessWorkpackReadiness(revalidated);
+
+    expect(revalidated.deliverables.tbmBriefing).toContain("사용자 편집 본문");
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(true);
+    expect(revalidated.ontologyQa?.result.reviewable && revalidated.ontologyQa.result.verdict).toBe("통과");
+    expect(revalidated.ontologyQa?.detail).not.toContain("STALE_QA_MUST_NOT_RETURN");
+    expect(revalidated.qualityContract?.generatedAt).toBe("2026-07-17T00:00:00.000Z");
+    expect(readiness.canShare).toBe(true);
+  });
+
+  it("fails closed when deterministic revalidation cannot review the edited task", () => {
+    const edited = applyWorkpackDeliverablesChange(
+      makeResponse(),
+      { tbmBriefing: "사용자 편집 본문" },
+      { requiresRevalidation: true }
+    );
+    const emptyGraph = assembleGraph([], []);
+
+    const revalidated = revalidateEditedWorkpack(edited, emptyGraph, "2026-07-17T00:00:00.000Z");
+    const readiness = assessWorkpackReadiness(revalidated);
+
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(false);
+    expect(readiness.canShare).toBe(false);
+    expect(readiness.reasons).toContain("안전조치 검수 미통과");
   });
 });

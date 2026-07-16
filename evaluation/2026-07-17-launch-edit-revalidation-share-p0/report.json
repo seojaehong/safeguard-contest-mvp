@@ -1,0 +1,63 @@
+{
+  "task": "launch edit to revalidation to share P0",
+  "authoritativeBase": "d42e143575c636fcc6e698b9c9eb35609c70b156",
+  "branch": "fix/launch-edit-revalidation-share-p0-v2",
+  "scope": {
+    "productionFiles": [
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/workpack-readiness.ts"
+    ],
+    "testFiles": [
+      "tests/workpack-readiness.test.ts",
+      "tests/workspace-share-simplification.test.ts",
+      "tests/workspace-layout-regression.test.ts"
+    ],
+    "excludedFilesChanged": []
+  },
+  "behavior": {
+    "editInvalidatesStaleQa": true,
+    "editPreservesCanonicalContent": true,
+    "editPreservesDbHarnessEvidence": true,
+    "revalidationSource": "/api/ontology/graph published graph",
+    "revalidationRecomputesQaFromEditedContent": true,
+    "nonReviewableFailsClosed": true,
+    "shareUnlockRequiresPassingQaAndAllExistingReadinessGates": true
+  },
+  "tdd": {
+    "red": [
+      "workpack readiness tests failed because quality evidence was deleted and revalidateEditedWorkpack did not exist",
+      "workspace source contract failed because no revalidation action existed",
+      "production browser test failed with safety review not passing before the deterministic graph fixture matched the inferred task"
+    ],
+    "green": [
+      "4 focused test files passed with 22 tests",
+      "production browser edit-revalidation-remount scenario passed"
+    ]
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests/workpack-readiness.test.ts tests/workspace-share-simplification.test.ts tests/workspace-pages.test.ts tests/editor-first-state.test.ts",
+      "result": "passed",
+      "tests": 22,
+      "failures": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "passed",
+      "failures": 0
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "passed",
+      "failures": 0
+    },
+    {
+      "command": "$env:WORKSPACE_INPUT_PROD_MATRIX='1'; npm.cmd test -- tests/workspace-layout-regression.test.ts -t 'preserves the edited active document across review and editor remount'",
+      "result": "passed",
+      "tests": 1,
+      "skipped": 24,
+      "failures": 0
+    }
+  ],
+  "knownHarnessNote": "The authoritative dev browser harness returned HTTP 500 because its custom Next 15 distDir lacked required-server-files.json. The same browser assertion passed against the repository-supported production matrix after a successful build."
+}
