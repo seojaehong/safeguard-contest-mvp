@@ -838,12 +838,14 @@ function boundKoshaPromptValue(value: string, maxChars: number): string {
 }
 
 function boundKoshaPromptExcerpt(item: SafetyReferenceItem, query: string): string {
+  const verifiedBody = item.body ?? "";
   const queryTokens = query
     .normalize("NFKC")
     .toLocaleLowerCase("ko-KR")
     .split(/[^\p{L}\p{N}]+/gu)
     .filter((token) => token.length >= 2);
   const anchors = (item.kosha_guide?.anchors ?? [])
+    .filter((anchor) => Boolean(anchor.excerpt.trim()) && verifiedBody.includes(anchor.excerpt))
     .map((anchor) => ({
       ...anchor,
       score: queryTokens.filter((token) => (
@@ -855,7 +857,7 @@ function boundKoshaPromptExcerpt(item: SafetyReferenceItem, query: string): stri
   const anchored = (relevantAnchors.length ? relevantAnchors : anchors)
     .map((anchor) => `[p.${anchor.page}] ${anchor.excerpt}`)
     .join("\n");
-  const value = anchored || item.body || "";
+  const value = anchored || verifiedBody;
   const normalized = value
     .replace(/\r\n?/gu, "\n")
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u2028\u2029]/gu, " ");

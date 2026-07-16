@@ -580,6 +580,28 @@ describe("DB harness packet", () => {
     expect(promptContext).toContain("KOSHA 외벽 도장 지침");
   });
 
+  it("ignores stale KOSHA anchors that are absent from the verified body", () => {
+    const verifiedBody = "외벽 도장 작업에서는 작업발판과 안전난간 상태를 확인한다.";
+    const staleAnchor = "STALE_KOSHA_ANCHOR_NOT_PRESENT_IN_BODY";
+    const guidance = verifiedKoshaReference({
+      id: "guide-stale-anchor",
+      title: "KOSHA 외벽 도장 작업 기술지침",
+      summary: verifiedBody,
+      body: verifiedBody
+    });
+    if (!guidance.kosha_guide) throw new Error("expected verified KOSHA metadata");
+    guidance.kosha_guide.anchors = [{ page: 99, excerpt: staleAnchor }];
+
+    const packet = buildDbHarnessPacket({
+      question: "외벽 도장 작업의 작업발판과 안전난간을 점검한다.",
+      references: [reference(), guidance]
+    });
+    const promptContext = buildHarnessPromptContext(packet);
+
+    expect(promptContext).toContain(verifiedBody);
+    expect(promptContext).not.toContain(staleAnchor);
+  });
+
   it("marks missing SIF as review-required", () => {
     const packet = buildDbHarnessPacket({
       question: "성수동 외벽 도장 작업",
