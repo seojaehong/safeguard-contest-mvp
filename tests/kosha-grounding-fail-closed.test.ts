@@ -23,7 +23,8 @@ import { resetKoshaGuideCorpusCacheForTests } from "@/lib/kosha-guide-corpus";
 import { GET as searchSafetyReferenceRoute } from "@/app/api/safety-reference/search/route";
 import {
   cleanupKoshaFixtures,
-  createKoshaFixture
+  createKoshaFixture,
+  koshaTestLookup,
 } from "@/tests/helpers/kosha-offline-fixture";
 
 type GroundingProjection = {
@@ -237,6 +238,28 @@ afterEach(() => {
 });
 
 describe("bounded KOSHA grounding fail-closed", () => {
+  it("preserves the exact-registry block when remote search is unconfigured and local support exists", async () => {
+    const rootDir = createKoshaFixture({ state: "current" });
+    vi.stubEnv("SUPABASE_URL", "");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+
+    const result = await searchServerSafetyReferences({
+      query: "지게차 보행자 동선",
+      limit: 5,
+      exactKoshaAssetPaths: [join(rootDir, "missing-exact-registry.json")],
+      offlineCorpus: koshaTestLookup(rootDir),
+    }) as SafetyReferenceSearchResult & GroundingSearchProjection;
+
+    expect(result.items).toEqual([]);
+    expect(result.koshaGrounding).toMatchObject({
+      status: "blocked",
+      reason: "exact-registry-integrity-failed",
+      localCorpusStatus: "ready",
+      acceptedCount: 0,
+    });
+    expect(result.message).toMatch(/정확 본문 레지스트리 무결성 실패/u);
+  });
+
   it("parses only core REST columns and classifies adversarial remote KOSHA rows", async () => {
     const verifiedBody = [
       VERIFIED_BODY_PREFIX,
@@ -654,20 +677,21 @@ describe("bounded KOSHA grounding fail-closed", () => {
       offlineCorpus: { rootDir: null, env: { KOSHA_GUIDE_CORPUS_DIR: undefined } },
     }) as SafetyReferenceSearchResult & GroundingSearchProjection;
 
-    expect(result.items).toHaveLength(1);
+    expect(result.items).toHaveLength(2);
     expect(result.items[0]?.id).toBe(bundled.item.id);
     expect(result.items[0]?.body).toHaveLength(19_058);
+    expect(result.items.map((item) => item.kosha_guide?.stableDocumentKey)).toEqual(["D-C-13", "D-C-7"]);
     expect(grounding(result.items[0])).toMatchObject({
       status: "verified_current",
       source: "production-registry",
       directEvidenceEligible: true,
     });
     expect(result.koshaGrounding).toMatchObject({
-      acceptedCount: 1,
+      acceptedCount: 2,
       excludedCount: 1,
       localCorpusStatus: "unconfigured",
     });
-    expect(result.message).toMatch(/불변 번들.*partial DB 본문을 대체/u);
+    expect(result.message).toMatch(/정확 본문 번들.*partial DB 본문을 대체/u);
   });
 
   it("keeps the exact gate active for a matching public sourceId filter", async () => {
@@ -745,7 +769,7 @@ describe("bounded KOSHA grounding fail-closed", () => {
     ));
     const directResponse = await searchSafetyReferenceRoute(directRequest);
     const direct = await directResponse.json() as SafetyReferenceSearchResult;
-    expect(direct.items.map((item) => item.id)).toEqual([bundled.id]);
+    expect(direct.items.map((item) => item.kosha_guide?.stableDocumentKey)).toEqual(["D-C-13", "D-C-7"]);
     expect(direct.items.some((item) => item.id === "general-verified-kosha")).toBe(false);
 
     const supportingRequest = new NextRequest(new URL(

@@ -56,6 +56,7 @@ const TRUST_PIN: ExactKoshaTrustPin = Object.freeze({
   officialUrl: "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1",
   officialFileId: "CTC2026012914371557826167",
   publishedAt: "2026-01-30",
+  provenanceSha256: "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
 });
 
 function trustedKosha(overrides: Partial<SafetyReferenceItem> = {}): SafetyReferenceItem {
@@ -87,6 +88,7 @@ function trustedKosha(overrides: Partial<SafetyReferenceItem> = {}): SafetyRefer
       official_url: TRUST_PIN.officialUrl,
       official_file_id: TRUST_PIN.officialFileId,
       official_published_at: TRUST_PIN.publishedAt,
+      extraction_snapshot: TRUST_PIN.provenanceSha256,
       official_status: "current",
       review_state: "published",
       body_kind: "native",
@@ -231,6 +233,7 @@ describe("exact-trusted KOSHA grounding", () => {
       "official_url",
       "official_file_id",
       "official_published_at",
+      "extraction_snapshot",
     ] as const;
 
     for (const field of requiredFields) {
