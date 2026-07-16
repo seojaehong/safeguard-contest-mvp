@@ -898,6 +898,7 @@ def _recover_incomplete_promotion(
     receipt_path: Path,
     failure_path: Path,
     directory_guards: DirectoryGuards | None = None,
+    recovery_hook: MutationHook = _noop_prepare_hook,
 ) -> None:
     _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     if not transaction_dir.exists():
@@ -908,6 +909,7 @@ def _recover_incomplete_promotion(
         receipt_path,
         failure_path,
     )
+    recovery_hook("after-recovery-journal")
     targets = (("asset", asset_path), ("receipt", receipt_path))
     if journal["state"] == "prepared":
         _rollback_transaction(
@@ -915,6 +917,7 @@ def _recover_incomplete_promotion(
             asset_path,
             receipt_path,
             failure_path,
+            directory_guards=directory_guards,
         )
         return
     descriptors_key = "published" if journal["state"] == "committed" else "backups"
