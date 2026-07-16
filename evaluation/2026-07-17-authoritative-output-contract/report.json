@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-07-16T20:41:54.391Z",
+  "baseUrl": "http://127.0.0.1:3011",
+  "xlsx": {
+    "ok": true,
+    "httpStatus": 200,
+    "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "filePath": "evaluation/2026-07-17-authoritative-output-contract/files/risk-assessment-contract.xlsx",
+    "bytes": 8384,
+    "sheetName": "위험성평가표",
+    "expectedHeaderCount": 18,
+    "missingHeaders": []
+  },
+  "pdf": {
+    "ok": true,
+    "httpStatus": 200,
+    "contentType": "application/pdf",
+    "filePath": "evaluation/2026-07-17-authoritative-output-contract/files/risk-assessment-contract.pdf",
+    "bytes": 22106,
+    "magic": "%PDF-",
+    "looksLikeHtml": false
+  },
+  "sourceContracts": {
+    "tbmRiskLinksGenerated": true,
+    "tbmRiskLinksExposed": true,
+    "xlsxUsesKoshasHeaders": true
+  },
+  "elapsedMs": 207,
+  "overall": "pass"
+}
