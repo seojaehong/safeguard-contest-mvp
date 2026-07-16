@@ -1,6 +1,7 @@
 {
   "schemaVersion": "safeclaw-evaluation/v1",
-  "parentRejectedCommit": "756f3f04930512cd2dbc6ea6774654ed0d3a9456",
+  "parentRejectedCommit": "cf5261828c95a329b919d40e8e55f406652f9985",
+  "priorRejectedCommit": "756f3f04930512cd2dbc6ea6774654ed0d3a9456",
   "branch": "feat/kosha-corpus-body-recovery",
   "status": "implementation-verified",
   "scope": {
@@ -22,13 +23,16 @@
   "closedFindings": {
     "P1": {
       "status": "closed",
-      "protocol": "recoverable-staged-pair/v1",
+      "protocol": "recoverable-staged-pair/v2",
       "evidence": [
         "asset and receipt are fully staged before publication",
-        "existing pair is backed up behind a recovery journal",
+        "journal binds portable common-root-relative target identities",
+        "all immutable backup hashes validate before either target is modified",
         "second publish failure rolls back both targets",
-        "failure receipt records a non-partial state",
-        "next-run recovery restores an interrupted prepared transaction"
+        "restore interruption after either target is idempotently recoverable",
+        "changed target paths fail closed without touching either pair",
+        "existing pair remains byte-identical after rollback",
+        "durable terminal completion is required before cleanup"
       ]
     },
     "P2": {
@@ -45,13 +49,13 @@
     "status": "verified",
     "officialUrl": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914243912403149/2",
     "receipt": "receipt.json",
-    "receiptCheckCount": 12,
+    "receiptCheckCount": 17,
     "receiptFailedCheckCount": 0
   },
   "verification": {
     "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body scripts.tests.test_snapshot_kosha_guide_corpus",
-    "testsRun": 51,
-    "testsPassed": 51,
+    "testsRun": 54,
+    "testsPassed": 54,
     "testsFailed": 0,
     "diffCheck": "pass"
   }

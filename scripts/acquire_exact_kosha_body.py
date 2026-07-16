@@ -33,6 +33,7 @@ DEFAULT_RETRIES = 1
 JsonObject = dict[str, object]
 FetchBytes = Callable[[str], bytes]
 ReplaceFile = Callable[[Path, Path], None]
+RestoreWrite = Callable[[Path, bytes], None]
 
 
 class AcquisitionError(RuntimeError):
@@ -233,6 +234,11 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
             "normalizedBodySha256Pinned": True,
             "promotionPairStaged": True,
             "partialPublishRollback": True,
+            "portableTargetIdentityBound": True,
+            "backupHashesValidatedBeforeRestore": True,
+            "immutableBackupsUntilCompletion": True,
+            "restoreRecoveryIdempotent": True,
+            "durableCompletionRequired": True,
         },
         "portabilityLedgerSha256": ledger_sha256,
         "sourceRecord": {
@@ -250,7 +256,7 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
         "bodySha256": body_sha256,
         "extractorVersion": snapshot_kosha_guide_corpus.EXTRACTOR_VERSION,
         "extractorDependency": f"pypdf=={snapshot_kosha_guide_corpus.PYPDF_VERSION}",
-        "promotionProtocol": "recoverable-staged-pair/v1",
+        "promotionProtocol": "recoverable-staged-pair/v2",
         "dbMutationPerformed": False,
         "schemaMutationPerformed": False,
         "pdfCommitted": False,
@@ -262,32 +268,151 @@ def _transaction_dir(failure_path: Path) -> Path:
     return failure_path.parent / ".d-c-7-promotion-transaction"
 
 
+def _sha256_file(path: Path) -> str:
+    return _sha256_bytes(path.read_bytes())
+
+
+def _portable_target_identity(
+    asset_path: Path,
+    receipt_path: Path,
+    failure_path: Path,
+) -> JsonObject:
+    resolved = {
+        "asset": asset_path.resolve(),
+        "receipt": receipt_path.resolve(),
+        "failure": failure_path.resolve(),
+    }
+    common_root = Path(os.path.commonpath([str(path) for path in resolved.values()]))
+    paths = {
+        name: path.relative_to(common_root).as_posix()
+        for name, path in resolved.items()
+    }
+    identity_payload: JsonObject = {
+        "scheme": "common-root-relative-posix/v1",
+        "paths": paths,
+    }
+    return {
+        **identity_payload,
+        "sha256": _sha256_bytes(_canonical_json(identity_payload).encode("utf-8")),
+    }
+
+
+def _read_transaction_journal(transaction_dir: Path) -> JsonObject:
+    journal_path = transaction_dir / "journal.json"
+    if not journal_path.is_file():
+        raise AcquisitionError("promotion-journal-missing")
+    journal = json.loads(journal_path.read_text(encoding="utf-8"))
+    if not isinstance(journal, dict):
+        raise AcquisitionError("promotion-journal-invalid")
+    if journal.get("schemaVersion") != "safeclaw-exact-kosha-promotion-transaction/v2":
+        raise AcquisitionError("promotion-journal-version-invalid")
+    if journal.get("state") not in {"prepared", "committed", "rolled_back"}:
+        raise AcquisitionError("promotion-journal-state-invalid")
+    return journal
+
+
+def _validated_transaction_journal(
+    transaction_dir: Path,
+    asset_path: Path,
+    receipt_path: Path,
+    failure_path: Path,
+) -> JsonObject:
+    journal = _read_transaction_journal(transaction_dir)
+    expected_targets = _portable_target_identity(asset_path, receipt_path, failure_path)
+    if journal.get("targets") != expected_targets:
+        raise AcquisitionError("promotion-target-identity-mismatch")
+    backups = journal.get("backups")
+    if not isinstance(backups, dict):
+        raise AcquisitionError("promotion-backups-invalid")
+    for name in ("asset", "receipt"):
+        descriptor = backups.get(name)
+        if not isinstance(descriptor, dict) or not isinstance(descriptor.get("present"), bool):
+            raise AcquisitionError(f"promotion-backup-descriptor-invalid:{name}")
+        backup = transaction_dir / f"{name}.backup"
+        if descriptor["present"]:
+            expected_sha256 = descriptor.get("sha256")
+            if not isinstance(expected_sha256, str) or not backup.is_file():
+                raise AcquisitionError(f"promotion-backup-missing:{name}")
+            if _sha256_file(backup) != expected_sha256:
+                raise AcquisitionError(f"promotion-backup-sha256-mismatch:{name}")
+        elif backup.exists():
+            raise AcquisitionError(f"promotion-unexpected-backup:{name}")
+    state = journal["state"]
+    if state in {"committed", "rolled_back"}:
+        completion = journal.get("completion")
+        descriptors_key = "published" if state == "committed" else "backups"
+        descriptors = journal.get(descriptors_key)
+        expected_completion_sha256 = _sha256_bytes(
+            _canonical_json(descriptors).encode("utf-8")
+        )
+        if (
+            not isinstance(completion, dict)
+            or completion.get("state") != state
+            or completion.get("targetsSha256") != expected_completion_sha256
+        ):
+            raise AcquisitionError("promotion-completion-invalid")
+    return journal
+
+
+def _validate_target_state(
+    paths: tuple[tuple[str, Path], ...],
+    descriptors: object,
+    error_prefix: str,
+) -> None:
+    if not isinstance(descriptors, dict):
+        raise AcquisitionError(f"{error_prefix}-descriptors-invalid")
+    for name, path in paths:
+        descriptor = descriptors.get(name)
+        if not isinstance(descriptor, dict) or not isinstance(descriptor.get("present"), bool):
+            raise AcquisitionError(f"{error_prefix}-descriptor-invalid:{name}")
+        if descriptor["present"]:
+            expected_sha256 = descriptor.get("sha256")
+            if not path.is_file() or _sha256_file(path) != expected_sha256:
+                raise AcquisitionError(f"{error_prefix}-sha256-mismatch:{name}")
+        elif path.exists():
+            raise AcquisitionError(f"{error_prefix}-unexpected-target:{name}")
+
+
 def _rollback_transaction(
     transaction_dir: Path,
     asset_path: Path,
     receipt_path: Path,
+    failure_path: Path,
+    *,
+    restore_write: RestoreWrite = _write_bytes,
 ) -> None:
-    journal_path = transaction_dir / "journal.json"
-    if not journal_path.is_file():
-        shutil.rmtree(transaction_dir, ignore_errors=True)
-        return
-    journal = json.loads(journal_path.read_text(encoding="utf-8"))
-    if not isinstance(journal, dict):
-        raise AcquisitionError("promotion-journal-invalid")
+    journal = _validated_transaction_journal(
+        transaction_dir,
+        asset_path,
+        receipt_path,
+        failure_path,
+    )
+    if journal["state"] == "committed":
+        raise AcquisitionError("promotion-committed-rollback-forbidden")
     targets = (
         ("asset", asset_path),
         ("receipt", receipt_path),
     )
+    backups = journal["backups"]
+    if not isinstance(backups, dict):
+        raise AcquisitionError("promotion-backups-invalid")
     for name, destination in targets:
         backup = transaction_dir / f"{name}.backup"
-        had_destination = journal.get(f"had_{name}") is True
-        if had_destination:
-            if not backup.is_file():
-                raise AcquisitionError(f"promotion-backup-missing:{name}")
+        descriptor = backups[name]
+        if not isinstance(descriptor, dict):
+            raise AcquisitionError(f"promotion-backup-descriptor-invalid:{name}")
+        if descriptor["present"]:
             destination.parent.mkdir(parents=True, exist_ok=True)
-            os.replace(backup, destination)
+            restore_write(destination, backup.read_bytes())
         elif destination.exists():
             destination.unlink()
+    _validate_target_state(targets, backups, "promotion-rollback")
+    journal["state"] = "rolled_back"
+    journal["completion"] = {
+        "state": "rolled_back",
+        "targetsSha256": _sha256_bytes(_canonical_json(backups).encode("utf-8")),
+    }
+    _write_json(transaction_dir / "journal.json", journal)
     shutil.rmtree(transaction_dir)
 
 
@@ -295,9 +420,83 @@ def _recover_incomplete_promotion(
     transaction_dir: Path,
     asset_path: Path,
     receipt_path: Path,
+    failure_path: Path,
 ) -> None:
-    if transaction_dir.exists():
-        _rollback_transaction(transaction_dir, asset_path, receipt_path)
+    if not transaction_dir.exists():
+        return
+    journal = _validated_transaction_journal(
+        transaction_dir,
+        asset_path,
+        receipt_path,
+        failure_path,
+    )
+    targets = (("asset", asset_path), ("receipt", receipt_path))
+    if journal["state"] == "prepared":
+        _rollback_transaction(
+            transaction_dir,
+            asset_path,
+            receipt_path,
+            failure_path,
+        )
+        return
+    descriptors_key = "published" if journal["state"] == "committed" else "backups"
+    _validate_target_state(
+        targets,
+        journal.get(descriptors_key),
+        f"promotion-{journal['state']}",
+    )
+    shutil.rmtree(transaction_dir)
+
+
+def _prepare_promotion_transaction(
+    asset_path: Path,
+    receipt_path: Path,
+    failure_path: Path,
+    asset: JsonObject,
+    receipt: JsonObject,
+) -> Path:
+    transaction_dir = _transaction_dir(failure_path)
+    _recover_incomplete_promotion(
+        transaction_dir,
+        asset_path,
+        receipt_path,
+        failure_path,
+    )
+    transaction_dir.mkdir(parents=True, exist_ok=False)
+    staged = {
+        "asset": transaction_dir / "asset.staged.json",
+        "receipt": transaction_dir / "receipt.staged.json",
+    }
+    _write_json(staged["asset"], asset)
+    _write_json(staged["receipt"], receipt)
+    targets = {
+        "asset": asset_path,
+        "receipt": receipt_path,
+    }
+    backups: JsonObject = {}
+    published: JsonObject = {}
+    for name, destination in targets.items():
+        if destination.is_file():
+            backup = transaction_dir / f"{name}.backup"
+            _write_bytes(backup, destination.read_bytes())
+            backups[name] = {"present": True, "sha256": _sha256_file(backup)}
+        else:
+            backups[name] = {"present": False, "sha256": None}
+        published[name] = {
+            "present": True,
+            "sha256": _sha256_file(staged[name]),
+        }
+    _write_json(
+        transaction_dir / "journal.json",
+        {
+            "schemaVersion": "safeclaw-exact-kosha-promotion-transaction/v2",
+            "state": "prepared",
+            "targets": _portable_target_identity(asset_path, receipt_path, failure_path),
+            "backups": backups,
+            "published": published,
+        },
+    )
+    return transaction_dir
 
 
 def _publish_promotion_pair(
@@ -308,34 +507,43 @@ def _publish_promotion_pair(
     receipt: JsonObject,
     replace_file: ReplaceFile = os.replace,
 ) -> None:
-    transaction_dir = _transaction_dir(failure_path)
-    _recover_incomplete_promotion(transaction_dir, asset_path, receipt_path)
-    transaction_dir.mkdir(parents=True, exist_ok=False)
+    transaction_dir = _prepare_promotion_transaction(
+        asset_path,
+        receipt_path,
+        failure_path,
+        asset,
+        receipt,
+    )
     staged_asset = transaction_dir / "asset.staged.json"
     staged_receipt = transaction_dir / "receipt.staged.json"
     try:
-        _write_json(staged_asset, asset)
-        _write_json(staged_receipt, receipt)
-        had_asset = asset_path.is_file()
-        had_receipt = receipt_path.is_file()
-        if had_asset:
-            _write_bytes(transaction_dir / "asset.backup", asset_path.read_bytes())
-        if had_receipt:
-            _write_bytes(transaction_dir / "receipt.backup", receipt_path.read_bytes())
-        _write_json(
-            transaction_dir / "journal.json",
-            {
-                "schemaVersion": "safeclaw-exact-kosha-promotion-transaction/v1",
-                "had_asset": had_asset,
-                "had_receipt": had_receipt,
-            },
-        )
         asset_path.parent.mkdir(parents=True, exist_ok=True)
         receipt_path.parent.mkdir(parents=True, exist_ok=True)
         replace_file(staged_asset, asset_path)
         replace_file(staged_receipt, receipt_path)
+        journal = _validated_transaction_journal(
+            transaction_dir,
+            asset_path,
+            receipt_path,
+            failure_path,
+        )
+        targets = (("asset", asset_path), ("receipt", receipt_path))
+        _validate_target_state(targets, journal.get("published"), "promotion-published")
+        journal["state"] = "committed"
+        journal["completion"] = {
+            "state": "committed",
+            "targetsSha256": _sha256_bytes(
+                _canonical_json(journal["published"]).encode("utf-8")
+            ),
+        }
+        _write_json(transaction_dir / "journal.json", journal)
     except Exception:
-        _rollback_transaction(transaction_dir, asset_path, receipt_path)
+        _rollback_transaction(
+            transaction_dir,
+            asset_path,
+            receipt_path,
+            failure_path,
+        )
         raise
     shutil.rmtree(transaction_dir)
 
@@ -351,7 +559,12 @@ def acquire_exact_body(
     publish_replace: ReplaceFile = os.replace,
 ) -> JsonObject:
     transaction_dir = _transaction_dir(failure_path)
-    _recover_incomplete_promotion(transaction_dir, asset_path, receipt_path)
+    _recover_incomplete_promotion(
+        transaction_dir,
+        asset_path,
+        receipt_path,
+        failure_path,
+    )
     try:
         record, ledger_sha256 = load_target_record(ledger_path, expected_ledger_sha256)
         pdf_bytes = fetch_bytes(str(record["official_url"]))
