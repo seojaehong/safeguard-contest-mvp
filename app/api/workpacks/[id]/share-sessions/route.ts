@@ -37,10 +37,15 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, sessions: [], confirmations: [], message: owned.message }, { status: owned.status });
   }
 
-  const { data: sessions, error: sessionError } = await client
+  let sessionQuery = client
     .from("workpack_share_sessions")
     .select("id,share_scope,recipients_snapshot,access_policy,status,expires_at,created_at,updated_at")
     .eq("workpack_id", owned.context.workpackId)
+    .eq("organization_id", owned.context.organizationId);
+  sessionQuery = owned.context.siteId === null
+    ? sessionQuery.is("site_id", null)
+    : sessionQuery.eq("site_id", owned.context.siteId);
+  const { data: sessions, error: sessionError } = await sessionQuery
     .order("created_at", { ascending: false });
 
   if (sessionError) {
@@ -48,10 +53,15 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, sessions: [], confirmations: [], message: "공유 세션을 불러오지 못했습니다." }, { status: 500 });
   }
 
-  const { data: confirmations, error: confirmationError } = await client
+  let confirmationQuery = client
     .from("workpack_read_confirmations")
     .select("id,share_session_id,worker_display_name,language_code,read_at")
     .eq("workpack_id", owned.context.workpackId)
+    .eq("organization_id", owned.context.organizationId);
+  confirmationQuery = owned.context.siteId === null
+    ? confirmationQuery.is("site_id", null)
+    : confirmationQuery.eq("site_id", owned.context.siteId);
+  const { data: confirmations, error: confirmationError } = await confirmationQuery
     .order("read_at", { ascending: false });
 
   if (confirmationError) {

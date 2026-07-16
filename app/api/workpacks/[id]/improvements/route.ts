@@ -145,14 +145,23 @@ async function uploadPhoto(input: {
 
 async function cleanupFailedImprovement(input: {
   client: NonNullable<ReturnType<typeof createSupabaseAdminClient>>;
+  organizationId: string;
+  siteId: string | null;
+  workpackId: string;
   improvementId: string;
   uploadedPaths: string[];
 }) {
   let cleaned = true;
-  const { error: deleteError } = await input.client
+  let cleanupQuery = input.client
     .from("workpack_improvements")
     .delete()
-    .eq("id", input.improvementId);
+    .eq("id", input.improvementId)
+    .eq("organization_id", input.organizationId)
+    .eq("workpack_id", input.workpackId);
+  cleanupQuery = input.siteId === null
+    ? cleanupQuery.is("site_id", null)
+    : cleanupQuery.eq("site_id", input.siteId);
+  const { error: deleteError } = await cleanupQuery;
 
   if (deleteError) {
     cleaned = false;
@@ -190,11 +199,15 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, improvements: [], message: owned.message }, { status: owned.status });
   }
 
-  const { data, error } = await client
+  let improvementQuery = client
     .from("workpack_improvements")
     .select("id,task_label,hazard_label,improvement_text,reflected_documents,review_status,source_type,photo_summary,analysis_payload,created_at,updated_at")
     .eq("workpack_id", owned.context.workpackId)
-    .order("created_at", { ascending: false });
+    .eq("organization_id", owned.context.organizationId);
+  improvementQuery = owned.context.siteId === null
+    ? improvementQuery.is("site_id", null)
+    : improvementQuery.eq("site_id", owned.context.siteId);
+  const { data, error } = await improvementQuery.order("created_at", { ascending: false });
 
   if (error) {
     console.error("workpack improvements fetch failed", error);
@@ -318,6 +331,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
       .filter((storagePath): storagePath is string => Boolean(storagePath));
     const cleanupOk = await cleanupFailedImprovement({
       client,
+      organizationId: owned.context.organizationId,
+      siteId: owned.context.siteId,
+      workpackId: owned.context.workpackId,
       improvementId: data.id,
       uploadedPaths
     });
