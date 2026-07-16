@@ -34,6 +34,7 @@
     "singularApiCompatibility": "pass",
     "focusedVitest": { "files": 5, "tests": 77, "status": "pass" },
     "broadVitest": {
+      "completedWithFinalSummary": true,
       "filesPassed": 30,
       "filesFailed": 1,
       "filesSkipped": 3,
@@ -41,7 +42,9 @@
       "testsFailed": 3,
       "testsSkipped": 4,
       "status": "fail",
-      "failedFile": "tests/kosha-guide-corpus-audit.test.ts"
+      "historicalOutcome": "failed_unresolved",
+      "failedFile": "tests/kosha-guide-corpus-audit.test.ts",
+      "logArtifact": "evaluation/kosha-trust-registry-wave2-2026-07-16/kosha-sif-ontology-tests.log"
     },
     "pythonAcquisition": { "tests": 19, "status": "pass" },
     "strictTypecheck": "pass",
