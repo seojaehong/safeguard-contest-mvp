@@ -987,6 +987,7 @@ describe("n8n recipient localization contract", () => {
       headers: { "x-safeguard-secret": "secret" },
       body: {
         recipientMessageContract: "saved-worker-language-v1",
+        operatorNote: "TBM 후 확인",
         channels: ["sms"],
         recipients: [
           {
@@ -1090,6 +1091,7 @@ describe("n8n recipient localization contract", () => {
       headers: { "x-safeguard-secret": "secret" },
       body: {
         recipientMessageContract: "saved-worker-language-v1",
+        operatorNote: "TBM 후 확인",
         channels: ["sms"],
         recipients: [{
           workerId: WORKER_ID,
@@ -1184,6 +1186,7 @@ describe("n8n recipient localization contract", () => {
       headers: { "x-safeguard-secret": "secret" },
       body: {
         recipientMessageContract: "saved-worker-language-v1",
+        operatorNote: "TBM 후 확인",
         channels: ["email"],
         recipients: [{
           workerId: WORKER_ID,

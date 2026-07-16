@@ -62,6 +62,7 @@
 4. Solapi sandbox RED preserved only `text`; the actual HTTPS wire JSON now preserves the recipient's canonical `message` and `messageTarget` alongside the provider text.
 5. SMTP sandbox RED omitted the target; the actual SMTP wire now includes `X-SafeClaw-Message-Target` and the recipient-specific message body.
 6. Tenant ownership, active-session authority, canonical byte-equivalence, allowlist validation, and the persistent idempotency RED gate remain unchanged.
+7. A non-empty Korean `operatorNote` RED contaminated Vietnamese webhook, Solapi, and SMTP bodies; the note remains audit metadata but provider text now contains only the canonical per-recipient message.
 
 ## Verification
 
