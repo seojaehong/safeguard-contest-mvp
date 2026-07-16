@@ -64,16 +64,17 @@ export function createGenerateSafetyDocpackHandler(
   return async ({ question, mode, includeFull }, authContext) => {
     const generationEvidenceSecret = dependencies.getGenerationEvidenceSecret();
     const knowledge = await dependencies.queryKnowledge(question);
+    const evidenceContract: unknown = knowledge.evidenceContract;
     if (
-      knowledge.evidenceContract
-      && !validateCanonicalEvidenceChainPack(knowledge.evidenceContract)
+      evidenceContract !== null
+      && !validateCanonicalEvidenceChainPack(evidenceContract)
     ) {
       return canonicalEvidencePackReviewRequiredResult();
     }
-    const grounding = knowledge.evidenceContract
+    const grounding = evidenceContract
       ? buildPhaseAGenerationGrounding({
           evidenceChainState: knowledge.evidenceChainState,
-          evidencePack: knowledge.evidenceContract,
+          evidencePack: evidenceContract,
         })
       : undefined;
     const generatedResponse = await dependencies.generateResponse(
@@ -152,19 +153,20 @@ export function createGenerateReviewedSafetyDocpackHandler(
   return async ({ question, task, mode, includeFull }, authContext) => {
     const generationEvidenceSecret = dependencies.getGenerationEvidenceSecret();
     const knowledge = await dependencies.queryKnowledge(task);
+    const evidenceContract: unknown = knowledge.evidenceContract;
     if (
-      knowledge.evidenceContract
-      && !validateCanonicalEvidenceChainPack(knowledge.evidenceContract)
+      evidenceContract !== null
+      && !validateCanonicalEvidenceChainPack(evidenceContract)
     ) {
       return canonicalEvidencePackReviewRequiredResult();
     }
     const taskBound = knowledge.found
-      && knowledge.evidenceContract !== null
-      && isEvidenceChainTaskBoundToQuestion(task, question, knowledge.evidenceContract.chainId);
-    const grounding = taskBound && knowledge.evidenceContract
+      && evidenceContract !== null
+      && isEvidenceChainTaskBoundToQuestion(task, question, evidenceContract.chainId);
+    const grounding = taskBound && evidenceContract
       ? buildPhaseAGenerationGrounding({
           evidenceChainState: knowledge.evidenceChainState,
-          evidencePack: knowledge.evidenceContract,
+          evidencePack: evidenceContract,
         })
       : undefined;
     const generatedResponse = await dependencies.generateResponse(

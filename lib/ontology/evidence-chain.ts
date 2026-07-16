@@ -1117,6 +1117,23 @@ function sameJson(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
+function isCanonicalApplicability(
+  value: unknown,
+): value is EvidenceChainPack["applicability"] {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const keys = Object.keys(value).sort();
+  if (!sameJson(keys, ["authority", "fieldHistory", "weather"])) return false;
+
+  const authority = Reflect.get(value, "authority");
+  const fieldHistory = Reflect.get(value, "fieldHistory");
+  const weather = Reflect.get(value, "weather");
+  return authority === "scope_only"
+    && Array.isArray(fieldHistory)
+    && fieldHistory.every((item: unknown) => typeof item === "string")
+    && Array.isArray(weather)
+    && weather.every((item: unknown) => typeof item === "string");
+}
+
 export function buildCanonicalProductEvidenceIdentity(
   input: string,
 ): CanonicalProductEvidenceIdentity | null {
@@ -1259,7 +1276,7 @@ function validateCanonicalEvidenceChainPackValue(
     providerFallback: "preserve_current_provider_fallback",
   };
 
-  return pack.applicability.authority === "scope_only"
+  return isCanonicalApplicability(pack.applicability)
     && sameJson(pack.provenance, expectedProvenance)
     && sameJson(pack.pipeline, expectedPipeline);
 }
