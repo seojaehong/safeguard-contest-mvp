@@ -1,0 +1,34 @@
+{
+  "date": "2026-07-16",
+  "productionBase": "238a011b3d0d436b5d498c415795cede61b3045e",
+  "branch": "fix/launch-ui-p0-20260716",
+  "scope": [
+    "why-mobile",
+    "ontology-focused-explorer",
+    "workspace-blank-input",
+    "contrast",
+    "mobile-touch-targets"
+  ],
+  "databaseMutation": false,
+  "verification": {
+    "initialFocused": {
+      "passed": 78,
+      "failed": 2,
+      "skipped": 2
+    },
+    "correctedStaticContracts": {
+      "passed": 20,
+      "failed": 0
+    },
+    "finalFocused": {
+      "passed": 55,
+      "failed": 0,
+      "skipped": 2
+    },
+    "typecheck": "pass",
+    "build": "pass",
+    "staticPages": 28
+  },
+  "productionLiveVerified": false,
+  "productionLiveVerificationReason": "merge and Vercel production deployment pending"
+}
