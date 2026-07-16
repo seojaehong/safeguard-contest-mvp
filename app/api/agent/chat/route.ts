@@ -12,5 +12,8 @@ export const POST = createAgentChatPost({
     openClawHermes: {
       trustedKoshaReference: isProductionTrustedKoshaReference,
     },
+    remoteHermes: {
+      trustedKoshaReference: isProductionTrustedKoshaReference,
+    },
   }),
 });

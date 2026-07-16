@@ -85,7 +85,7 @@ describe("engine runtime readiness policy", () => {
 
   it("rejects unsupported modes instead of silently presenting them as ready", () => {
     expect(assessEngineRuntimeReadiness({
-      SAFECLAW_ENGINE_MODE: "remote-hermes",
+      SAFECLAW_ENGINE_MODE: "future-hermes",
     })).toEqual({
       requestedMode: "unsupported",
       resolvedMode: "disabled",

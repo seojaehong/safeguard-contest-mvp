@@ -49,6 +49,9 @@ export type HermesEvidenceClaim = {
   citations: readonly {
     citationId: string;
     label: string;
+    publicLabel: string;
+    provenanceClass: "current_law" | "kosha_guide" | "sif_case" | "published_ontology";
+    sourceRefDigest: string;
   }[];
 };
 
@@ -91,6 +94,7 @@ export type SafeClawHermesComposition = {
   readonly readExecutor: SafeClawScopedMcpReadExecutor;
   readonly attestRuntime?: HermesRuntimeAttestation;
   readonly trustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
+  readonly toolPolicy: "safeclaw-read-only" | "deny-all";
   readonly [SAFECLAW_HERMES_COMPOSITION]: true;
 };
 
@@ -99,6 +103,7 @@ export function createSafeClawHermesComposition(
   options: {
     attestRuntime?: HermesRuntimeAttestation;
     trustedKoshaReference?: (item: SafetyReferenceItem) => boolean;
+    toolPolicy?: "safeclaw-read-only" | "deny-all";
   } = {},
 ): SafeClawHermesComposition {
   return Object.freeze({
@@ -106,6 +111,7 @@ export function createSafeClawHermesComposition(
     readExecutor: createSafeClawScopedMcpReadExecutor(),
     attestRuntime: options.attestRuntime,
     trustedKoshaReference: options.trustedKoshaReference,
+    toolPolicy: options.toolPolicy ?? "safeclaw-read-only",
     [SAFECLAW_HERMES_COMPOSITION]: true as const,
   });
 }
@@ -257,6 +263,16 @@ function buildEvidenceClaims(
     const citationId = `citation:${createHash("sha256")
       .update(canonicalJson({ id: reference.id, label }), "utf8")
       .digest("hex")}`;
+    const provenanceClass = isKoshaTechnicalReference(reference)
+      ? "kosha_guide" as const
+      : reference.item_type === "sif-case"
+        ? "sif_case" as const
+        : reference.source_id.includes("law") || reference.source_id.includes("regulation")
+          ? "current_law" as const
+          : "published_ontology" as const;
+    const sourceRefDigest = createHash("sha256")
+      .update(canonicalJson({ id: reference.id, sourceId: reference.source_id }), "utf8")
+      .digest("hex");
     for (const control of controls) {
       const text = control.trim();
       if (!text) continue;
@@ -266,7 +282,13 @@ function buildEvidenceClaims(
       claims.set(claimId, {
         claimId,
         text,
-        citations: [{ citationId, label }],
+        citations: [{
+          citationId,
+          label,
+          publicLabel: authorityLabel,
+          provenanceClass,
+          sourceRefDigest,
+        }],
       });
     }
   }
@@ -412,25 +434,28 @@ export type ExperimentalHermesAdapterDependencies = {
   composition: SafeClawHermesComposition;
 };
 
-export function createExperimentalHermesAdapter(
+function createHermesAdapter(
   dependencies: ExperimentalHermesAdapterDependencies,
+  identity: { id: "experimental-hermes" | "remote-hermes"; mode: "experimental-hermes" | "remote-hermes" },
 ): EngineAdapter {
   if (!isSafeClawHermesComposition(dependencies.composition)) {
     throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
   }
 
   function assertEnabled(): void {
-    if (resolveEngineMode(dependencies.env) !== "experimental-hermes") {
+    if (resolveEngineMode(dependencies.env) !== identity.mode) {
       throw new BrokerError("ENGINE_UNAVAILABLE", 503);
     }
   }
 
   return {
-    id: "experimental-hermes",
+    id: identity.id,
     contractVersion: ENGINE_ADAPTER_CONTRACT_VERSION,
     runtime: "hermes",
     authority: SAFECLAW_ENGINE_AUTHORITY,
-    capabilities: ["stream_text", "request_read_tool"],
+    capabilities: dependencies.composition.toolPolicy === "deny-all"
+      ? ["stream_text"]
+      : ["stream_text", "request_read_tool"],
     async checkAvailability(context, signal): Promise<void> {
       assertEnabled();
       await dependencies.composition.attestRuntime?.(context, signal);
@@ -495,7 +520,8 @@ export function createExperimentalHermesAdapter(
         },
         signal: input.signal,
         async requestReadTool(intent): Promise<unknown> {
-          if (intent.toolName === "run_safeclaw_harness_agent"
+          if (dependencies.composition.toolPolicy === "deny-all"
+            || intent.toolName === "run_safeclaw_harness_agent"
             || !isReadOnlyMcpTool(intent.toolName)) {
             throw new BrokerError("ENGINE_TOOL_FORBIDDEN", 403);
           }
@@ -509,4 +535,22 @@ export function createExperimentalHermesAdapter(
       });
     },
   };
+}
+
+export function createExperimentalHermesAdapter(
+  dependencies: ExperimentalHermesAdapterDependencies,
+): EngineAdapter {
+  return createHermesAdapter(dependencies, {
+    id: "experimental-hermes",
+    mode: "experimental-hermes",
+  });
+}
+
+export function createRemoteHermesAdapter(
+  dependencies: ExperimentalHermesAdapterDependencies,
+): EngineAdapter {
+  return createHermesAdapter(dependencies, {
+    id: "remote-hermes",
+    mode: "remote-hermes",
+  });
 }

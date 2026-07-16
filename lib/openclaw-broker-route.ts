@@ -25,6 +25,7 @@ import {
 } from "@/lib/openclaw-chat";
 import {
   createExperimentalHermesAdapter,
+  createRemoteHermesAdapter,
   type SafeClawHermesComposition,
 } from "@/lib/hermes-engine-adapter";
 import {
@@ -32,6 +33,10 @@ import {
   type OpenClawHermesRuntimeDependencies,
 } from "@/lib/openclaw-hermes-runtime";
 import type { ResolveBrokerContext } from "@/lib/openclaw-broker-auth";
+import {
+  createRemoteHermesComposition,
+  type RemoteHermesRuntimeDependencies,
+} from "@/lib/remote-hermes-runtime";
 
 const log = createLogger("api/agent/chat");
 export type AgentChatRouteDependencies = {
@@ -44,6 +49,7 @@ export type AgentChatRouteDependencies = {
 export type ProductionEngineAdapterDependencies = {
   experimentalHermes?: SafeClawHermesComposition;
   openClawHermes?: OpenClawHermesRuntimeDependencies;
+  remoteHermes?: Omit<RemoteHermesRuntimeDependencies, "env">;
 };
 
 function jsonError(error: BrokerError): Response {
@@ -84,6 +90,14 @@ export function createProductionEngineAdapter(
       ?? createOpenClawHermesComposition(env, dependencies.openClawHermes);
     base = composition
       ? createExperimentalHermesAdapter({ env, composition })
+      : createUnavailableEngineAdapter();
+  } else if (mode === "remote-hermes") {
+    const composition = createRemoteHermesComposition({
+      env,
+      ...dependencies.remoteHermes,
+    });
+    base = composition
+      ? createRemoteHermesAdapter({ env, composition })
       : createUnavailableEngineAdapter();
   } else {
     base = createUnavailableEngineAdapter();
