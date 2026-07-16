@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "safeclaw-evaluation/v1",
+  "parentRejectedCommit": "756f3f04930512cd2dbc6ea6774654ed0d3a9456",
+  "branch": "feat/kosha-corpus-body-recovery",
+  "status": "implementation-verified",
+  "scope": {
+    "target": "D-C-7-2026",
+    "dbMutationPerformed": false,
+    "schemaMutationPerformed": false,
+    "migrationPerformed": false,
+    "pdfCommitted": false
+  },
+  "pins": {
+    "portabilityLedgerSha256": "b2ade4323cddecc0a50dab98f944f0781dc09885c8bdece4c1a6c0ea2010d0ef",
+    "pdfSha256": "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3",
+    "normalizedBodySha256": "97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112",
+    "extractorVersion": "safeclaw-kosha-native-pdf/v2",
+    "extractorDependency": "pypdf==6.7.1",
+    "pageCount": 71,
+    "normalizedCharCount": 38781
+  },
+  "closedFindings": {
+    "P1": {
+      "status": "closed",
+      "protocol": "recoverable-staged-pair/v1",
+      "evidence": [
+        "asset and receipt are fully staged before publication",
+        "existing pair is backed up behind a recovery journal",
+        "second publish failure rolls back both targets",
+        "failure receipt records a non-partial state",
+        "next-run recovery restores an interrupted prepared transaction"
+      ]
+    },
+    "P2": {
+      "status": "closed",
+      "evidence": [
+        "ledger PDF SHA must equal the production PDF pin",
+        "downloaded bytes must equal the production PDF pin",
+        "normalized extracted body must equal the production body pin",
+        "tracked fixture binds PDF, body, page count, character count, extractor version, and dependency"
+      ]
+    }
+  },
+  "officialAcquisition": {
+    "status": "verified",
+    "officialUrl": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914243912403149/2",
+    "receipt": "receipt.json",
+    "receiptCheckCount": 12,
+    "receiptFailedCheckCount": 0
+  },
+  "verification": {
+    "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body scripts.tests.test_snapshot_kosha_guide_corpus",
+    "testsRun": 51,
+    "testsPassed": 51,
+    "testsFailed": 0,
+    "diffCheck": "pass"
+  }
+}

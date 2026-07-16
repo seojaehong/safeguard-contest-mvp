@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
+import shutil
 import sys
 from pathlib import Path
 from typing import Callable
@@ -22,12 +24,15 @@ TARGET_VERSION = "D-C-7-2026"
 TARGET_TITLE = "D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정"
 TARGET_ITEM_ID = "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정"
 PINNED_LEDGER_SHA256 = "b2ade4323cddecc0a50dab98f944f0781dc09885c8bdece4c1a6c0ea2010d0ef"
+PINNED_PDF_SHA256 = "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3"
+PINNED_NORMALIZED_BODY_SHA256 = "97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112"
 OFFICIAL_HOST = "portal.kosha.or.kr"
 DEFAULT_TIMEOUT_SECONDS = 20.0
 DEFAULT_RETRIES = 1
 
 JsonObject = dict[str, object]
 FetchBytes = Callable[[str], bytes]
+ReplaceFile = Callable[[Path, Path], None]
 
 
 class AcquisitionError(RuntimeError):
@@ -49,6 +54,10 @@ def _ledger_sha256(ledger: JsonObject) -> str:
 
 def _write_json(path: Path, value: object) -> None:
     snapshot_kosha_guide_corpus._write_json(path, value)
+
+
+def _write_bytes(path: Path, value: bytes) -> None:
+    snapshot_kosha_guide_corpus._atomic_write_bytes(path, value)
 
 
 def _validate_official_url(value: object) -> str:
@@ -136,6 +145,8 @@ def load_target_record(
     expected_pdf_sha256 = record.get("expected_sha256")
     if not isinstance(expected_pdf_sha256, str) or re.fullmatch(r"[0-9a-f]{64}", expected_pdf_sha256) is None:
         raise AcquisitionError("target-sha256-invalid")
+    if expected_pdf_sha256 != PINNED_PDF_SHA256:
+        raise AcquisitionError("target-sha256-pin-mismatch")
     _validate_official_url(record.get("official_url"))
     return record, actual_ledger_sha256
 
@@ -180,6 +191,8 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
     if "KOSHAGUIDEDC72026" not in compact_identity:
         raise AcquisitionError("pdf-internal-identity-mismatch")
     body_sha256 = _sha256_bytes(body.encode("utf-8"))
+    if body_sha256 != PINNED_NORMALIZED_BODY_SHA256:
+        raise AcquisitionError(f"normalized-body-sha256-mismatch:{body_sha256}")
     official_url = str(record["official_url"])
     official_file_id = urlsplit(official_url).path.split("/")[-2]
     asset: JsonObject = {
@@ -217,6 +230,9 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
             "extractedTitleIdentity": True,
             "pdfInternalIdentity": True,
             "nativeBodyNonEmpty": True,
+            "normalizedBodySha256Pinned": True,
+            "promotionPairStaged": True,
+            "partialPublishRollback": True,
         },
         "portabilityLedgerSha256": ledger_sha256,
         "sourceRecord": {
@@ -234,11 +250,94 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
         "bodySha256": body_sha256,
         "extractorVersion": snapshot_kosha_guide_corpus.EXTRACTOR_VERSION,
         "extractorDependency": f"pypdf=={snapshot_kosha_guide_corpus.PYPDF_VERSION}",
+        "promotionProtocol": "recoverable-staged-pair/v1",
         "dbMutationPerformed": False,
         "schemaMutationPerformed": False,
         "pdfCommitted": False,
     }
     return asset, receipt
+
+
+def _transaction_dir(failure_path: Path) -> Path:
+    return failure_path.parent / ".d-c-7-promotion-transaction"
+
+
+def _rollback_transaction(
+    transaction_dir: Path,
+    asset_path: Path,
+    receipt_path: Path,
+) -> None:
+    journal_path = transaction_dir / "journal.json"
+    if not journal_path.is_file():
+        shutil.rmtree(transaction_dir, ignore_errors=True)
+        return
+    journal = json.loads(journal_path.read_text(encoding="utf-8"))
+    if not isinstance(journal, dict):
+        raise AcquisitionError("promotion-journal-invalid")
+    targets = (
+        ("asset", asset_path),
+        ("receipt", receipt_path),
+    )
+    for name, destination in targets:
+        backup = transaction_dir / f"{name}.backup"
+        had_destination = journal.get(f"had_{name}") is True
+        if had_destination:
+            if not backup.is_file():
+                raise AcquisitionError(f"promotion-backup-missing:{name}")
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            os.replace(backup, destination)
+        elif destination.exists():
+            destination.unlink()
+    shutil.rmtree(transaction_dir)
+
+
+def _recover_incomplete_promotion(
+    transaction_dir: Path,
+    asset_path: Path,
+    receipt_path: Path,
+) -> None:
+    if transaction_dir.exists():
+        _rollback_transaction(transaction_dir, asset_path, receipt_path)
+
+
+def _publish_promotion_pair(
+    asset_path: Path,
+    receipt_path: Path,
+    failure_path: Path,
+    asset: JsonObject,
+    receipt: JsonObject,
+    replace_file: ReplaceFile = os.replace,
+) -> None:
+    transaction_dir = _transaction_dir(failure_path)
+    _recover_incomplete_promotion(transaction_dir, asset_path, receipt_path)
+    transaction_dir.mkdir(parents=True, exist_ok=False)
+    staged_asset = transaction_dir / "asset.staged.json"
+    staged_receipt = transaction_dir / "receipt.staged.json"
+    try:
+        _write_json(staged_asset, asset)
+        _write_json(staged_receipt, receipt)
+        had_asset = asset_path.is_file()
+        had_receipt = receipt_path.is_file()
+        if had_asset:
+            _write_bytes(transaction_dir / "asset.backup", asset_path.read_bytes())
+        if had_receipt:
+            _write_bytes(transaction_dir / "receipt.backup", receipt_path.read_bytes())
+        _write_json(
+            transaction_dir / "journal.json",
+            {
+                "schemaVersion": "safeclaw-exact-kosha-promotion-transaction/v1",
+                "had_asset": had_asset,
+                "had_receipt": had_receipt,
+            },
+        )
+        asset_path.parent.mkdir(parents=True, exist_ok=True)
+        receipt_path.parent.mkdir(parents=True, exist_ok=True)
+        replace_file(staged_asset, asset_path)
+        replace_file(staged_receipt, receipt_path)
+    except Exception:
+        _rollback_transaction(transaction_dir, asset_path, receipt_path)
+        raise
+    shutil.rmtree(transaction_dir)
 
 
 def acquire_exact_body(
@@ -249,17 +348,26 @@ def acquire_exact_body(
     *,
     fetch_bytes: FetchBytes = fetch_official_pdf,
     expected_ledger_sha256: str = PINNED_LEDGER_SHA256,
+    publish_replace: ReplaceFile = os.replace,
 ) -> JsonObject:
+    transaction_dir = _transaction_dir(failure_path)
+    _recover_incomplete_promotion(transaction_dir, asset_path, receipt_path)
     try:
         record, ledger_sha256 = load_target_record(ledger_path, expected_ledger_sha256)
         pdf_bytes = fetch_bytes(str(record["official_url"]))
         asset, receipt = _extract_asset(record, pdf_bytes, ledger_sha256)
-        _write_json(asset_path, asset)
-        _write_json(receipt_path, receipt)
+        _publish_promotion_pair(
+            asset_path,
+            receipt_path,
+            failure_path,
+            asset,
+            receipt,
+            publish_replace,
+        )
+        if failure_path.exists():
+            failure_path.unlink()
         return receipt
     except Exception as exc:
-        if asset_path.exists() or receipt_path.exists():
-            raise AcquisitionError("refusing-to-overwrite-existing-promotion-on-failure") from exc
         failure = {
             "schemaVersion": "safeclaw-exact-kosha-acquisition-evaluation/v1",
             "status": "not-promoted",
@@ -267,6 +375,12 @@ def acquire_exact_body(
             "target": TARGET_VERSION,
             "errorType": type(exc).__name__,
             "error": str(exc),
+            "promotionState": {
+                "assetPresent": asset_path.is_file(),
+                "receiptPresent": receipt_path.is_file(),
+                "partialPromotionPresent": asset_path.is_file() != receipt_path.is_file(),
+                "transactionPresent": transaction_dir.exists(),
+            },
             "dbMutationPerformed": False,
             "schemaMutationPerformed": False,
         }
