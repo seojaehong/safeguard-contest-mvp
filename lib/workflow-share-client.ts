@@ -1,5 +1,11 @@
+import type { AskResponse } from "@/lib/types";
+
 export type WorkflowShareChannel = "email" | "sms" | "kakao";
 export type WorkflowDispatchMessageTarget = "manager" | `foreign:${string}`;
+
+export type CanonicalRecipientMessageVariantsResult =
+  | { ok: true; messageVariants: Record<string, string> }
+  | { ok: false; invalidLanguageCodes: string[]; koreanLeakLanguageCodes: string[] };
 
 export type WorkflowDispatchChannelResult = {
   channel?: string;
@@ -46,6 +52,7 @@ const providerIdempotencyKeyPattern = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f
 const foreignMessageTargetPattern = /^foreign:[a-z]{2,3}(?:-[A-Z]{2})?$/;
 const internalMessagePattern = /(?:qualityContract|ontologyQa|directEvidence|DB\s*하네스|하네스\s*JSONL)/i;
 const dispatchMessageMaxLength = 4_000;
+const koreanTextPattern = /[가-힣]/u;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -101,6 +108,77 @@ export function validateWorkflowDispatchMessage(input: {
   if (internalMessagePattern.test(input.message)) {
     throw new Error("전송 메시지에 내부 검수 정보가 포함되어 있습니다.");
   }
+}
+
+function buildCanonicalForeignMessage(data: AskResponse, languageCode: string): string | null {
+  const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
+  if (!language) return null;
+  return [
+    "[SafeClaw]",
+    language.nativeLabel,
+    "",
+    ...language.lines.map((line) => `- ${line}`)
+  ].join("\n").trim();
+}
+
+export function getCanonicalDispatchLanguageCodes(data: AskResponse): string[] {
+  return [...new Set(["ko", ...data.deliverables.foreignWorkerLanguages.map((language) => language.code)])].sort();
+}
+
+export function buildCanonicalRecipientMessageVariants(input: {
+  data: AskResponse;
+  recipientLanguageCodes: string[];
+}): CanonicalRecipientMessageVariantsResult {
+  const allowedLanguageCodes = new Set(getCanonicalDispatchLanguageCodes(input.data));
+  const invalidLanguageCodes = new Set<string>();
+  const koreanLeakLanguageCodes = new Set<string>();
+  const messageVariants: Record<string, string> = {};
+
+  for (const languageCode of [...new Set(input.recipientLanguageCodes)].sort()) {
+    if (!languageCode || !allowedLanguageCodes.has(languageCode)) {
+      invalidLanguageCodes.add(languageCode || "unknown");
+      continue;
+    }
+    const message = languageCode === "ko"
+      ? input.data.deliverables.kakaoMessage.trim()
+      : buildCanonicalForeignMessage(input.data, languageCode);
+    if (!message) {
+      invalidLanguageCodes.add(languageCode);
+      continue;
+    }
+    if (languageCode !== "ko" && koreanTextPattern.test(message)) {
+      koreanLeakLanguageCodes.add(languageCode);
+      continue;
+    }
+    try {
+      validateWorkflowDispatchMessage({
+        messageTarget: languageCode === "ko" ? "manager" : `foreign:${languageCode}`,
+        message
+      });
+    } catch (error) {
+      console.warn("canonical workflow dispatch message validation failed", error);
+      invalidLanguageCodes.add(languageCode);
+      continue;
+    }
+    messageVariants[languageCode] = message;
+  }
+
+  if (invalidLanguageCodes.size || koreanLeakLanguageCodes.size) {
+    return {
+      ok: false,
+      invalidLanguageCodes: [...invalidLanguageCodes].sort(),
+      koreanLeakLanguageCodes: [...koreanLeakLanguageCodes].sort()
+    };
+  }
+  return { ok: true, messageVariants };
+}
+
+export function resolveWorkflowMessagePreview(
+  data: AskResponse,
+  selectedTarget: WorkflowDispatchMessageTarget
+): string {
+  if (selectedTarget === "manager") return data.deliverables.kakaoMessage;
+  return buildCanonicalForeignMessage(data, selectedTarget.replace("foreign:", "")) || "";
 }
 
 type WorkflowDispatchWebhookPayloadInput = {

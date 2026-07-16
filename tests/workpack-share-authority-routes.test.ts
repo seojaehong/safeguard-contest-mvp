@@ -38,6 +38,9 @@ vi.mock("@/lib/api-guard", () => ({
 const WORKPACK_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const SESSION_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const WORKER_ID = "11111111-1111-4111-8111-111111111111";
+const KOREAN_WORKER_ID = "22222222-2222-4222-8222-222222222222";
+const KO_MESSAGE = "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요.";
+const VI_MESSAGE = "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.";
 
 const serverRecipient = {
   workerId: WORKER_ID,
@@ -55,6 +58,22 @@ const serverRecipient = {
   }
 };
 
+const koreanRecipient = {
+  workerId: KOREAN_WORKER_ID,
+  displayName: "Server Kim",
+  languageCode: "ko",
+  role: "viewer" as const,
+  workerSnapshot: {
+    workerId: KOREAN_WORKER_ID,
+    displayName: "Server Kim",
+    workerRole: "배관공",
+    languageCode: "ko",
+    languageLabel: "한국어",
+    phone: "010-3333-4444",
+    email: "kim@example.com"
+  }
+};
+
 const serverWorkpack = {
   question: "server workpack",
   answer: "server answer",
@@ -64,7 +83,16 @@ const serverWorkpack = {
   scenario: {},
   externalData: {},
   riskSummary: {},
-  deliverables: {},
+  deliverables: {
+    kakaoMessage: KO_MESSAGE,
+    foreignWorkerLanguages: [{
+      code: "vi",
+      label: "베트남어",
+      nativeLabel: "Tiếng Việt",
+      rationale: "test",
+      lines: ["Dừng công việc khi gió mạnh."]
+    }]
+  },
   status: {}
 };
 
@@ -209,37 +237,112 @@ describe("share session route authority", () => {
 });
 
 describe("workflow dispatch route authority", () => {
-  it("binds each server-saved recipient language to an explicit message variant", async () => {
+  it("builds an exact minimal provider DTO for each canonical recipient message", async () => {
     const { buildLocalizedDispatchRecipients } = await import("@/app/api/workflow/dispatch/route");
-    const koreanRecipient = {
-      ...serverRecipient.workerSnapshot,
-      workerId: "22222222-2222-4222-8222-222222222222",
-      displayName: "Server Kim",
-      languageCode: "ko",
-      languageLabel: "한국어"
-    };
 
     expect(buildLocalizedDispatchRecipients(
-      [serverRecipient.workerSnapshot, koreanRecipient],
       {
-        vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.",
-        ko: "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요."
+        recipients: [serverRecipient.workerSnapshot, koreanRecipient.workerSnapshot],
+        messageVariants: { vi: VI_MESSAGE, ko: KO_MESSAGE },
+        channels: ["sms"]
       }
     )).toEqual({
       ok: true,
       recipients: [
-        expect.objectContaining({
+        {
           workerId: WORKER_ID,
+          phone: "010-1111-2222",
           dispatchLanguageCode: "vi",
-          message: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
-        }),
-        expect.objectContaining({
-          workerId: koreanRecipient.workerId,
+          message: VI_MESSAGE
+        },
+        {
+          workerId: KOREAN_WORKER_ID,
+          phone: "010-3333-4444",
           dispatchLanguageCode: "ko",
-          message: "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요."
-        })
+          message: KO_MESSAGE
+        }
       ]
     });
+  });
+
+  it("rejects a forged foreign body before provider dispatch", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: { vi: "[SafeClaw]\nTiếng Việt\n\n- Nội dung bị giả mạo." }
+    }));
+    const body = await response.json() as { providerCalled?: boolean };
+
+    expect(response.status).toBe(409);
+    expect(body.providerCalled).toBe(false);
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("rejects unknown language keys before provider dispatch", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: { vi: VI_MESSAGE, zz: "Unknown language body" }
+    }));
+    const body = await response.json() as { providerCalled?: boolean };
+
+    expect(response.status).toBe(409);
+    expect(body.providerCalled).toBe(false);
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("rejects Korean leakage in a stored foreign variant before provider dispatch", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const leakingWorkpack = {
+      ...serverWorkpack,
+      deliverables: {
+        ...serverWorkpack.deliverables,
+        foreignWorkerLanguages: [{
+          ...serverWorkpack.deliverables.foreignWorkerLanguages[0],
+          lines: ["강풍 시 작업을 중지하세요."]
+        }]
+      }
+    };
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue({
+      ...ownedContext(),
+      context: {
+        ...ownedContext().context,
+        shareAuthority: {
+          ...ownedContext().context.shareAuthority,
+          workpack: leakingWorkpack
+        }
+      }
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: { vi: "[SafeClaw]\nTiếng Việt\n\n- 강풍 시 작업을 중지하세요." }
+    }));
+    const body = await response.json() as { providerCalled?: boolean };
+
+    expect(response.status).toBe(409);
+    expect(body.providerCalled).toBe(false);
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 
   it("fails closed before provider dispatch when a saved recipient language body is unavailable", async () => {
@@ -297,7 +400,7 @@ describe("workflow dispatch route authority", () => {
       channels: ["email", "sms"],
       operatorNote: "server authority",
       messageVariants: {
-        vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+        vi: VI_MESSAGE
       }
     }));
     const body = await response.json() as {
@@ -329,7 +432,7 @@ describe("workflow dispatch route authority", () => {
       channels: ["email"],
       operatorNote: "fixture validation",
       messageVariants: {
-        vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+        vi: VI_MESSAGE
       }
     }));
     const body = await response.json() as {
@@ -350,21 +453,25 @@ describe("workflow dispatch route authority", () => {
   });
 
   it("builds a payload that proves each recipient language body without a global message", async () => {
-    const { buildLocalizedDispatchWebhookPayload } = await import("@/app/api/workflow/dispatch/route");
+    const {
+      buildLocalizedDispatchRecipients,
+      buildLocalizedDispatchWebhookPayload
+    } = await import("@/app/api/workflow/dispatch/route");
     const messageVariants = {
-      vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.",
-      en: "[SafeClaw]\nEnglish\n\n- Stop work when conditions are unsafe."
+      vi: VI_MESSAGE,
+      ko: KO_MESSAGE
     };
-    const recipients = [{
-      ...serverRecipient.workerSnapshot,
-      dispatchLanguageCode: "vi",
-      message: messageVariants.vi
-    }];
+    const localized = buildLocalizedDispatchRecipients({
+      recipients: [serverRecipient.workerSnapshot, koreanRecipient.workerSnapshot],
+      messageVariants,
+      channels: ["sms"]
+    });
+    if (!localized.ok) throw new Error("Expected canonical recipients");
 
     const payload = buildLocalizedDispatchWebhookPayload({
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["sms"],
-      recipients,
+      recipients: localized.recipients,
       operatorNote: "TBM 후 확인",
       workpack: serverWorkpack,
       sentAt: "2026-07-15T00:00:00.000Z"
@@ -373,11 +480,27 @@ describe("workflow dispatch route authority", () => {
     expect(payload).toMatchObject({
       event: "safeguard.workpack.dispatch",
       recipientMessageContract: "saved-worker-language-v1",
-      recipients
+      recipients: localized.recipients
     });
-    expect(payload.messageVariants).toEqual({ vi: messageVariants.vi });
+    expect(payload.messageVariants).toEqual(messageVariants);
     expect(payload).not.toHaveProperty("messageTarget");
     expect(payload).not.toHaveProperty("message");
+    const foreignRecipient = payload.recipients.find((recipient) => recipient.dispatchLanguageCode === "vi");
+    expect(foreignRecipient).toEqual({
+      workerId: WORKER_ID,
+      phone: "010-1111-2222",
+      dispatchLanguageCode: "vi",
+      message: VI_MESSAGE
+    });
+    expect(Object.keys(foreignRecipient || {})).not.toEqual(expect.arrayContaining([
+      "displayName",
+      "workerRole",
+      "languageLabel",
+      "trainingStatus",
+      "trainingSummary",
+      "email"
+    ]));
+    expect(foreignRecipient?.message).not.toMatch(/[가-힣]/u);
   });
 
   it("rejects internal diagnostics and oversized selected messages before relay", async () => {
