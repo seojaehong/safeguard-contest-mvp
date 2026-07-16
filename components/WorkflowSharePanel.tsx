@@ -513,8 +513,7 @@ function formatChannelMeta(item: WorkflowDispatchChannelResult) {
 }
 
 function previewLines(message: string) {
-  const lines = message.split(/\r?\n/).filter(Boolean);
-  return lines.slice(0, 8);
+  return message.split(/\r?\n/).filter(Boolean);
 }
 
 function formatMessageTargetLabel(data: AskResponse, selectedTarget: MessageTarget) {

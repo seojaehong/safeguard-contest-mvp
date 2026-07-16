@@ -2092,7 +2092,7 @@ export function SafeGuardCommandCenter({
                   />
                   <span>
                     <strong>풀 AI (전체 문서 생성)</strong>
-                    <small>응답 +30–60초 · 문서 12종 + 외국인 안내문 5개 언어 모두 AI 생성</small>
+                    <small>응답 +30–60초 · 작성 문서 9종(핵심 3종 + 지원 6종) · 총 산출물 12개</small>
                   </span>
                 </label>
               </fieldset>
@@ -2289,8 +2289,8 @@ export function SafeGuardCommandCenter({
               </div>
             </details>
             <details className="supporting-doc-cards">
-              <summary>+ {supportingDocumentItems.length}개 문서 더 보기</summary>
-              <div className="supporting-doc-list" aria-label="보조 문서 목록">
+              <summary>+ {supportingDocumentItems.length}개 추가 산출물 보기</summary>
+              <div className="supporting-doc-list" aria-label="추가 산출물 목록">
                 {supportingDocumentItems.map((item) => (
                   <button
                     key={item.key}
