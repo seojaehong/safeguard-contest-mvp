@@ -63,7 +63,7 @@ describe("authenticated workflow share client", () => {
     );
   });
 
-  it("dispatches the exact selected message target and preview body with server authority identifiers", async () => {
+  it("dispatches exact canonical message variants with server authority identifiers", async () => {
     const { dispatchAuthenticatedShareSession } = await loadClient();
     const fetcher = vi.fn(async (_input: string, _init: RequestInit) => new Response(JSON.stringify({
       ok: true,
@@ -80,8 +80,10 @@ describe("authenticated workflow share client", () => {
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["email", "sms"],
       operatorNote: "TBM 후 확인",
-      messageTarget: "foreign:vi",
-      message: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+      messageVariants: {
+        ko: "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요.",
+        vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+      }
     });
 
     expect(result.ok).toBe(true);
@@ -98,8 +100,10 @@ describe("authenticated workflow share client", () => {
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["email", "sms"],
       operatorNote: "TBM 후 확인",
-      messageTarget: "foreign:vi",
-      message: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+      messageVariants: {
+        ko: "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요.",
+        vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+      }
     });
   });
 
@@ -112,19 +116,18 @@ describe("authenticated workflow share client", () => {
       shareSessionId: "33333333-3333-4333-8333-333333333333",
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["sms"] as const,
-      operatorNote: "",
-      messageTarget: "foreign:vi" as const
+      operatorNote: ""
     };
 
     await expect(dispatchAuthenticatedShareSession(fetcher, {
       ...baseRequest,
       channels: [...baseRequest.channels],
-      message: "x".repeat(4_001)
+      messageVariants: { vi: "x".repeat(4_001) }
     })).rejects.toThrow("4,000자");
     await expect(dispatchAuthenticatedShareSession(fetcher, {
       ...baseRequest,
       channels: [...baseRequest.channels],
-      message: "qualityContract 내부 진단"
+      messageVariants: { vi: "qualityContract 내부 진단" }
     })).rejects.toThrow("내부 검수 정보");
     expect(fetcher).not.toHaveBeenCalled();
   });
@@ -149,8 +152,7 @@ describe("authenticated workflow share client", () => {
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["sms"],
       operatorNote: "",
-      messageTarget: "manager",
-      message: "작업 전 안전수칙을 확인해 주세요."
+      messageVariants: { ko: "작업 전 안전수칙을 확인해 주세요." }
     });
 
     expect(result).toMatchObject({
@@ -184,8 +186,7 @@ describe("authenticated workflow share client", () => {
       idempotencyKey,
       channels: ["sms"],
       operatorNote: "",
-      messageTarget: "manager",
-      message: "작업 전 안전수칙을 확인해 주세요."
+      messageVariants: { ko: "작업 전 안전수칙을 확인해 주세요." }
     });
 
     expect(result).toMatchObject({
@@ -243,8 +244,7 @@ describe("authenticated workflow share client", () => {
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["email"],
       operatorNote: "",
-      messageTarget: "manager",
-      message: "작업 전 안전수칙을 확인해 주세요."
+      messageVariants: { ko: "작업 전 안전수칙을 확인해 주세요." }
     })).rejects.toThrow("전파 요청에 실패했습니다. (HTTP 502)");
   });
 

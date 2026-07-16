@@ -61,7 +61,8 @@ describe("workflow share panel behavior", () => {
     })).toEqual({
       ok: false,
       invalidLanguageCodes: [malformedCode],
-      koreanLeakLanguageCodes: []
+      koreanLeakLanguageCodes: [],
+      malformedFields: []
     });
   });
 
