@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "safeclaw-remote-hermes-gate/v1",
+  "generatedAt": "2026-07-17T05:08:00+09:00",
+  "featureBaseSha": "ce211b10f53470a95432284613fbb00d47f115de",
+  "remediationParentSha": "733617a254e0a65192f2558f24caf61cc99dc14f",
+  "candidateSha": "950db2117e1d0ebc75c8584184da80d235bfaece",
+  "status": "experimental_contract_ready_execution_disabled",
+  "productionExecutionEnabled": false,
+  "databaseMutationPerformed": false,
+  "schemaMutationPerformed": false,
+  "runtime": {
+    "environmentOnlyCreatesRuntime": false,
+    "trustedTransportRequired": true,
+    "durableAttemptLedgerRequired": true,
+    "productRouteInjectsRuntimeDependencies": false,
+    "toolPolicy": "deny-all",
+    "purpose": "naturalize_only"
+  },
+  "gates": {
+    "focusedTests": { "files": 10, "tests": 197, "status": "pass" },
+    "coreRemoteTests": { "files": 4, "tests": 92, "status": "pass" },
+    "strictTypecheck": "pass",
+    "productionBuild": { "staticPages": 28, "status": "pass" },
+    "liveRemoteProbe": "not_run_no_gateway"
+  },
+  "independentReview": {
+    "spec": "pass",
+    "codeQuality": "pass",
+    "p0": 0,
+    "p1": 0,
+    "p2": 0,
+    "p3": 0
+  },
+  "remaining": [
+    "connection-pinned trusted transport implementation",
+    "durable attempt ledger implementation",
+    "KMS or workload identity",
+    "live gateway interoperability probe",
+    "queue and resume failover"
+  ]
+}
