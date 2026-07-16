@@ -97,7 +97,7 @@ The final independent review found that persisted-token lookup errors still reac
    - A returned `mcp_tokens` lookup error and a thrown lookup both promoted the duplicated plaintext from `SAFECLAW_MCP_TOKENS` to a full-trust env context.
 2. P1 GREEN: `npm.cmd test -- tests/mcp-auth.test.ts`
    - 1 file passed, 34 tests passed.
-   - Both lookup failure paths now return `null` immediately without tenant lookup, env-token evaluation, or `last_used_at` update. Env fallback remains available only after a successful DB lookup returns no persisted row, or when the DB client is not configured.
+   - Both lookup failure paths now return `null` immediately without tenant lookup, reading or evaluating env tokens, or `last_used_at` update. Env parsing and fallback occur only after a successful DB lookup returns no persisted row, or when the DB client is not configured.
 3. P3 direct evidence: `npm.cmd test -- tests/issue-mcp-token-cli.test.ts`
    - 1 file passed, 5 tests passed.
    - Omitted and blank labels, as well as omitted and blank site names, are each rejected before Supabase client creation or token insert.
