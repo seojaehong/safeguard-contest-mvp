@@ -74,9 +74,21 @@ describe("Phase A runtime evidence bridge", () => {
     expect(Object.isFrozen(providerGrounding?.evidencePack)).toBe(true);
     expect(payload).toMatchObject({
       phaseAProduct: {
-        chainId: null,
+        chainId: "work-at-height-fall",
         authorityState: "review_required",
-        provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
+        verifiedDocumentRows: [],
+        documentRows: expect.arrayContaining([
+          expect.objectContaining({
+            stableKey: "work-at-height-fall:risk-assessment:fall-work-platform",
+            verificationStatus: "review_required",
+          }),
+        ]),
+        provenance: expect.objectContaining({
+          taskNodeIds: ["Task_work_at_height"],
+          hazardNodeIds: ["Hazard_추락"],
+          controlNodeIds: expect.any(Array),
+          lawCitedUids: expect.any(Array),
+        }),
       },
     });
   });
@@ -128,8 +140,13 @@ describe("Phase A runtime evidence bridge", () => {
     expect(parseToolPayload(result)).toMatchObject({
       docpack: {
         phaseAProduct: {
-          chainId: null,
-          provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
+          chainId: "work-at-height-fall",
+          authorityState: "review_required",
+          verifiedDocumentRows: [],
+          provenance: expect.objectContaining({
+            controlNodeIds: expect.any(Array),
+            lawCitedUids: expect.any(Array),
+          }),
         },
       },
     });

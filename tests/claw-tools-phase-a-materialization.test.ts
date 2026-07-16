@@ -129,10 +129,19 @@ describe("Claw Phase A product handlers", () => {
       qaAuthority: "diagnostic_only",
       docpack: {
         phaseAProduct: {
-          chainId: null,
+          chainId: "work-at-height-fall",
           authorityState: "review_required",
           verifiedDocumentRows: [],
-          provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
+          documentRows: expect.arrayContaining([
+            expect.objectContaining({
+              stableKey: "work-at-height-fall:risk-assessment:fall-work-platform",
+              verificationStatus: "review_required",
+            }),
+          ]),
+          provenance: expect.objectContaining({
+            controlNodeIds: expect.any(Array),
+            lawCitedUids: expect.any(Array),
+          }),
         },
       },
     });
@@ -253,7 +262,7 @@ describe("Claw Phase A product handlers", () => {
     expect(result).not.toHaveProperty("phaseAReviewStatus");
   });
 
-  test("keeps reviewed status without persisting Phase A provenance", async () => {
+  test("keeps reviewed status while preserving canonical Phase A provenance", async () => {
     mocks.querySafetyKnowledge.mockResolvedValue(
       buildPublishedSafetyKnowledge(publishedGraph, "높은 곳 작업"),
     );
@@ -269,11 +278,17 @@ describe("Claw Phase A product handlers", () => {
 
     expect(result.docpack).toMatchObject({
       phaseAProduct: {
-        chainId: null,
-        provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
+        chainId: "work-at-height-fall",
+        authorityState: "review_required",
+        provenance: expect.objectContaining({
+          controlNodeIds: expect.any(Array),
+          lawCitedUids: expect.any(Array),
+        }),
       },
     });
-    expect(JSON.stringify(result.docpack)).not.toContain("work-at-height-fall:");
+    expect(JSON.stringify(result.docpack)).toContain(
+      "work-at-height-fall:risk-assessment:",
+    );
   });
 
   test("materializes an electrical registry alias through the plain docpack product path", async () => {
@@ -303,13 +318,18 @@ describe("Claw Phase A product handlers", () => {
     );
     expect(result).toMatchObject({
       phaseAProduct: {
-        chainId: null,
+        chainId: "electrical-work-electrocution",
         authorityState: "review_required",
         verifiedDocumentRows: [],
-        provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
+        provenance: expect.objectContaining({
+          controlNodeIds: expect.any(Array),
+          lawCitedUids: expect.any(Array),
+        }),
       },
     });
-    expect(JSON.stringify(result)).not.toContain("electrical-work-electrocution:");
+    expect(JSON.stringify(result)).toContain(
+      "electrical-work-electrocution:risk-assessment:",
+    );
   });
 
   test.each([
@@ -336,13 +356,17 @@ describe("Claw Phase A product handlers", () => {
     expect(mocks.querySafetyKnowledge).toHaveBeenCalledWith(task);
     expect(result).toMatchObject({
       phaseAProduct: {
-        chainId: null,
+        chainId,
         authorityState: "review_required",
+        verifiedDocumentRows: [],
         humanConfirmation: { required: true, status: "pending" },
-        provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
+        provenance: expect.objectContaining({
+          controlNodeIds: expect.any(Array),
+          lawCitedUids: expect.any(Array),
+        }),
       },
     });
-    expect(JSON.stringify(result)).not.toContain(`${chainId}:`);
+    expect(JSON.stringify(result)).toContain(`${chainId}:risk-assessment:`);
   });
 
   test("preserves plain docpack generation outside the registered Phase A chains", async () => {

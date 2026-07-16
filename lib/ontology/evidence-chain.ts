@@ -1108,6 +1108,85 @@ function materialize(
   });
 }
 
+function sameJson(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+/**
+ * Treat every runtime evidence pack as untrusted input. Product projection is
+ * allowed only when its complete identity and row plan match the canonical
+ * registry; review state changes never expand that identity.
+ */
+export function validateCanonicalEvidenceChainPack(
+  pack: ActiveEvidenceChainPack,
+): boolean {
+  const matched = findDefinition(pack.task.input);
+  if (!matched || matched.definition.chainId !== pack.chainId || matched.match !== pack.task.match) {
+    return false;
+  }
+  const definition = matched.definition;
+  if (
+    pack.contractVersion !== EVIDENCE_CHAIN_CONTRACT_VERSION
+    || pack.chainLabel !== definition.label
+    || !sameJson(pack.task, {
+      nodeId: definition.canonicalTaskNodeId,
+      label: definition.canonicalTaskLabel,
+      input: pack.task.input,
+      match: matched.match,
+      publicationState: "published",
+    })
+    || !sameJson(pack.hazard, {
+      nodeId: definition.hazard.nodeId,
+      label: definition.hazard.label,
+      authority: "published_graph",
+    })
+    || !sameJson(pack.hazardPriority, definition.sif)
+  ) {
+    return false;
+  }
+
+  const expectedGuidance = definition.guidance.filter(
+    (source) => source.registryMapping === "mapped",
+  ).map((source) => applyGuidanceResolution(source, undefined));
+  if (
+    !sameJson(pack.guidance, expectedGuidance)
+    || !sameJson(
+      pack.law,
+      definition.lawArticles.map(requireLaw),
+    )
+  ) {
+    return false;
+  }
+
+  const expectedControls = resolveControls(definition, pack.law, pack.guidance);
+  const expectedMaterialization = materialize(
+    definition,
+    expectedControls,
+    pack.hazardPriority,
+  );
+  if (
+    !sameJson(pack.controls, expectedControls)
+    || !sameJson(pack.materialization, expectedMaterialization)
+  ) {
+    return false;
+  }
+
+  return pack.applicability.authority === "scope_only"
+    && pack.provenance.runtimeGraph.scope === "published_only"
+    && pack.provenance.runtimeGraph.taskNodeId === definition.canonicalTaskNodeId
+    && pack.provenance.runtimeGraph.hazardNodeId === definition.hazard.nodeId
+    && sameJson(
+      pack.provenance.lawLayer.publishedGraphArticleNodeIds,
+      pack.law.flatMap((source) => (
+        source.graphArticleNodeId ? [source.graphArticleNodeId] : []
+      )),
+    )
+    && pack.pipeline.llmRole === "naturalize_only"
+    && pack.pipeline.fixedPackImmutable
+    && pack.pipeline.qualityCheckRequired
+    && pack.pipeline.humanConfirmationRequired;
+}
+
 function requireLaw(articleNo: string): LawEvidenceRecord {
   const source = getLawEvidence(articleNo);
   if (!source) throw new Error(`등록되지 않은 법령 evidence: 제${articleNo}조`);

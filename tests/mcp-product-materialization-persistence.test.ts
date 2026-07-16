@@ -206,8 +206,13 @@ describe("MCP Phase A product persistence behavior", () => {
       reviewTask: "고소작업",
       docpack: {
         phaseAProduct: {
-          chainId: null,
-          provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
+          chainId: "work-at-height-fall",
+          authorityState: "review_required",
+          verifiedDocumentRows: [],
+          provenance: expect.objectContaining({
+            controlNodeIds: expect.any(Array),
+            lawCitedUids: expect.any(Array),
+          }),
         },
       },
     });
@@ -228,13 +233,18 @@ describe("MCP Phase A product persistence behavior", () => {
       { question: task, mode: "template", includeFull: true },
       TENANT_CONTEXT,
     );
+    const payload = parseToolPayload(result);
 
-    expect(parseToolPayload(result)).toMatchObject({
+    expect(payload).toMatchObject({
       phaseAProduct: {
-        chainId: null,
+        chainId,
         authorityState: "review_required",
+        verifiedDocumentRows: [],
         humanConfirmation: { required: true, status: "pending" },
-        provenance: expect.objectContaining({ controlNodeIds: [], lawCitedUids: [] }),
+        provenance: expect.objectContaining({
+          controlNodeIds: expect.any(Array),
+          lawCitedUids: expect.any(Array),
+        }),
       },
       attribution: {
         siteId: "site-a",
@@ -243,7 +253,7 @@ describe("MCP Phase A product persistence behavior", () => {
         saved: true,
       },
     });
-    expect(JSON.stringify(parseToolPayload(result))).not.toContain(`${chainId}:`);
+    expect(JSON.stringify(payload)).toContain(`${chainId}:risk-assessment:`);
     expect(repository.inserts).toHaveLength(1);
     expect(repository.inserts[0]).toMatchObject({
       organizationId: "org-a",
@@ -261,16 +271,22 @@ describe("MCP Phase A product persistence behavior", () => {
       "siteId",
       "status",
     ]);
+    const savedSummary = repository.inserts[0]?.evidenceSummary;
+    if (typeof savedSummary !== "object" || savedSummary === null || Array.isArray(savedSummary)) {
+      throw new Error("expected persisted evidence summary");
+    }
+    expect(savedSummary.phaseAProduct).toEqual(payload.phaseAProduct);
   });
 
   test("reopens the exact tenant row with HMAC and blocks foreign tenant insert/read", async () => {
     const repository = new InMemoryMcpWorkpackRepository();
     const handler = createHandler(repository);
 
-    await handler(
+    const initialResult = await handler(
       { question: "차량계·기계 인접작업", mode: "template", includeFull: true },
       TENANT_CONTEXT,
     );
+    const initialPayload = parseToolPayload(initialResult);
     const reopened = await reopenMcpDocpackWorkpackWithRepository(
       repository,
       { workpackId: "workpack-1", siteId: "site-a", orgId: "org-a" },
@@ -282,12 +298,14 @@ describe("MCP Phase A product persistence behavior", () => {
       workpackId: "workpack-1",
       response: {
         phaseAProduct: {
-          chainId: null,
+          chainId: "vehicle-machinery-entrapment",
           authorityState: "review_required",
+          verifiedDocumentRows: [],
         },
       },
     });
     if (!reopened.ok) throw new Error("expected reopened Phase A workpack");
+    expect(reopened.response.phaseAProduct).toEqual(initialPayload.phaseAProduct);
     expect(reopened.response.structured?.riskAssessmentRows ?? []).toEqual([]);
     const serialized = JSON.stringify(reopened.response.structured) ?? "";
     expect(serialized).not.toContain('"riskLevel":"high"');
@@ -302,7 +320,10 @@ describe("MCP Phase A product persistence behavior", () => {
       { ...TENANT_CONTEXT, orgId: "org-foreign", tokenId: "token-foreign" },
     );
     expect(parseToolPayload(foreignResult)).toMatchObject({
-      phaseAProduct: { chainId: null },
+      phaseAProduct: {
+        chainId: "work-at-height-fall",
+        authorityState: "review_required",
+      },
       attribution: { saved: false, workpackId: null },
     });
     expect(repository.inserts).toHaveLength(1);
