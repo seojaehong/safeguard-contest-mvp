@@ -62,6 +62,23 @@ The existing schema defines `mcp_tokens.site_id` with `ON DELETE SET NULL`. A de
 
 The post-delete assertion also places the token in `SAFECLAW_MCP_TOKENS`, requires no tenant lookup, and requires zero `mcp_tokens` updates. No migration or schema file changed.
 
+## P2 CLI Issuance Remediation TDD Evidence
+
+The operator CLI previously treated an omitted site as a successful unbound issuance and inserted `site_id = null, org_id = null`. Under the current no-migration authentication contract, that token could never authenticate.
+
+1. Test seam: `scripts/issue-mcp-token.mjs` was split into an importable `issueMcpToken` function and a direct-run wrapper without changing the optional-site behavior.
+2. RED: `npm.cmd test -- tests/issue-mcp-token-cli.test.ts`
+   - 2 tests failed and 1 passed.
+   - Omitted and blank site arguments both completed a null-bound insert; the valid site path passed.
+3. GREEN: `npm.cmd test -- tests/issue-mcp-token-cli.test.ts`
+   - 1 file passed, 3 tests passed.
+4. Final focused regression: `npm.cmd test -- tests/issue-mcp-token-cli.test.ts tests/mcp-token-service.test.ts tests/mcp-auth.test.ts tests/tenant-harness-memory.test.ts`
+   - 4 files passed, 67 tests passed.
+5. Strict TypeScript: `npm.cmd run typecheck`
+   - Passed with `tsc --noEmit --incremental false`.
+
+The CLI now trims and requires both label and site name before credential checks or Supabase client creation. A valid site is resolved first, and only its non-null `id` and `organization_id` tuple reaches `mcp_tokens.insert`. Documentation removes the unbound issuance example and records that org-only persisted tokens remain unavailable pending an approved `scope_type` or `ON DELETE` schema migration. No migration or schema file changed.
+
 ## Full Regression Run
 
 Command: `npm.cmd test`
@@ -73,4 +90,4 @@ Command: `npm.cmd test`
 
 ## Result
 
-The MCP tenant identity P1 is remediated under focused behavior tests and strict typechecking. Persisted authentication now requires a non-null site and organization tuple proven against `sites`; every null-site row is rejected without env fallback or `last_used_at` mutation. Organization-only persisted tokens remain deliberately unavailable until an approved schema design can distinguish them from deleted site-bound rows. The earlier repository-wide run remains RED for the unrelated infrastructure-heavy suites listed above; no failure referenced `lib/mcp-auth.ts` or the focused tenant-memory tests.
+The MCP tenant identity P1 and CLI issuance P2 are remediated under focused behavior tests and strict typechecking. Persisted authentication requires a non-null site and organization tuple proven against `sites`, and the operator CLI can issue only that usable tuple shape. Every null-site row is rejected without env fallback or `last_used_at` mutation. Organization-only persisted tokens remain deliberately unavailable until an approved schema design can distinguish them from deleted site-bound rows. The earlier repository-wide run remains RED for the unrelated infrastructure-heavy suites listed above; no failure referenced this focused MCP slice.
