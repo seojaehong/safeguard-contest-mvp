@@ -4,6 +4,8 @@ export const REMOTE_HERMES_CONTRACT_VERSION = "engine-remote/v1" as const;
 export const REMOTE_HERMES_RESPONSE_VERSION = "engine-remote-response/v1" as const;
 export const REMOTE_HERMES_ERROR_TAXONOMY_VERSION = "engine-remote-error/v1" as const;
 export const REMOTE_HERMES_MAX_TTL_MS = 60_000;
+export const REMOTE_HERMES_POLICY_ATTESTATION_VERSION = "remote-policy-attestation/v1" as const;
+export const REMOTE_HERMES_POLICY_MAX_TTL_MS = 24 * 60 * 60 * 1_000;
 
 const SHA256_HEX = /^[a-f0-9]{64}$/u;
 const OPAQUE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u;
@@ -17,9 +19,10 @@ export type RemoteHermesProvenanceClass =
   | "published_ontology";
 export type RemoteHermesFieldClassification =
   | "opaque_claim_id"
-  | "public_safety_claim_text"
+  | "closed_claim_kind"
+  | "verified_public_corpus_attestation"
   | "opaque_citation_id"
-  | "public_source_label"
+  | "closed_source_label_code"
   | "public_provenance_class"
   | "non_reversible_source_digest";
 
@@ -35,10 +38,11 @@ export type RemoteHermesClaimsProjection = {
   schemaVersion: "claims-projection/v1";
   entries: readonly {
     claimId: string;
-    text: string;
+    claimKind: "control";
+    publicCorpusAttestation: "verified_public_safety_corpus";
     citations: readonly {
       citationId: string;
-      displayLabel: string;
+      sourceLabelCode: RemoteHermesProvenanceClass;
       provenanceClass: RemoteHermesProvenanceClass;
       sourceRefDigest: string;
     }[];
@@ -150,6 +154,23 @@ export type RemoteHermesReplayGuard = {
   consume(key: string): boolean;
 };
 
+export type RemoteHermesPolicyAttestation = {
+  version: typeof REMOTE_HERMES_POLICY_ATTESTATION_VERSION;
+  serviceId: string;
+  endpointOrigin: string;
+  toolPolicy: { allow: readonly []; deny: readonly ["*"] };
+  preflightMode: "required";
+  ledgerMode: "durable";
+  replayMode: "durable";
+  issuedAt: string;
+  expiresAt: string;
+  attestationDigest: string;
+  receipt: {
+    keyId: string;
+    signature: string;
+  };
+};
+
 export type RemoteHermesContractErrorCode =
   | "REMOTE_REQUEST_INVALID"
   | "REMOTE_RESPONSE_INVALID"
@@ -228,20 +249,17 @@ function expectedClassificationEntries(
   projection.entries.forEach((entry, entryIndex) => {
     const base = `/entries/${entryIndex}`;
     expected[`${base}/claimId`] = "opaque_claim_id";
-    expected[`${base}/text`] = "public_safety_claim_text";
+    expected[`${base}/claimKind`] = "closed_claim_kind";
+    expected[`${base}/publicCorpusAttestation`] = "verified_public_corpus_attestation";
     entry.citations.forEach((_citation, citationIndex) => {
       const citationBase = `${base}/citations/${citationIndex}`;
       expected[`${citationBase}/citationId`] = "opaque_citation_id";
-      expected[`${citationBase}/displayLabel`] = "public_source_label";
+      expected[`${citationBase}/sourceLabelCode`] = "closed_source_label_code";
       expected[`${citationBase}/provenanceClass`] = "public_provenance_class";
       expected[`${citationBase}/sourceRefDigest`] = "non_reversible_source_digest";
     });
   });
   return expected;
-}
-
-function containsPiiShape(value: string): boolean {
-  return /(?:\b01[016789][- ]?\d{3,4}[- ]?\d{4}\b)|(?:\b\d{6}[- ]?[1-4]\d{6}\b)|(?:[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/iu.test(value);
 }
 
 function assertClaimsProjection(value: RemoteHermesClaimsProjection): void {
@@ -257,12 +275,9 @@ function assertClaimsProjection(value: RemoteHermesClaimsProjection): void {
   const citationOwners = new Map<string, string>();
   for (const entry of value.entries) {
     if (!isRecord(entry)
-      || !exactKeys(entry, ["claimId", "text", "citations"])
-      || typeof entry.text !== "string"
-      || entry.text.trim() !== entry.text
-      || entry.text.length === 0
-      || entry.text.length > 1_000
-      || containsPiiShape(entry.text)
+      || !exactKeys(entry, ["claimId", "claimKind", "publicCorpusAttestation", "citations"])
+      || entry.claimKind !== "control"
+      || entry.publicCorpusAttestation !== "verified_public_safety_corpus"
       || !Array.isArray(entry.citations)
       || entry.citations.length === 0) {
       fail("REMOTE_REQUEST_INVALID");
@@ -272,12 +287,8 @@ function assertClaimsProjection(value: RemoteHermesClaimsProjection): void {
     claimIds.add(entry.claimId);
     for (const citation of entry.citations) {
       if (!isRecord(citation)
-        || !exactKeys(citation, ["citationId", "displayLabel", "provenanceClass", "sourceRefDigest"])
-        || typeof citation.displayLabel !== "string"
-        || citation.displayLabel.trim() !== citation.displayLabel
-        || citation.displayLabel.length === 0
-        || citation.displayLabel.length > 200
-        || containsPiiShape(citation.displayLabel)
+        || !exactKeys(citation, ["citationId", "sourceLabelCode", "provenanceClass", "sourceRefDigest"])
+        || citation.sourceLabelCode !== citation.provenanceClass
         || !["current_law", "kosha_guide", "sif_case", "published_ontology"].includes(
           String(citation.provenanceClass),
         )) {
@@ -454,15 +465,132 @@ export function createRemoteHermesAttemptEnvelope(input: {
   });
 }
 
-export function createRemoteHermesReplayGuard(): RemoteHermesReplayGuard {
-  const consumed = new Set<string>();
+export function createRemoteHermesReplayGuard(options: {
+  ttlMs?: number;
+  maxEntries?: number;
+  now?: () => number;
+} = {}): RemoteHermesReplayGuard {
+  const ttlMs = options.ttlMs ?? REMOTE_HERMES_MAX_TTL_MS;
+  const maxEntries = options.maxEntries ?? 10_000;
+  const now = options.now ?? Date.now;
+  if (!Number.isSafeInteger(ttlMs) || ttlMs <= 0
+    || !Number.isSafeInteger(maxEntries) || maxEntries <= 0) {
+    fail("REMOTE_REQUEST_INVALID");
+  }
+  const consumed = new Map<string, number>();
   return {
     consume(key: string): boolean {
+      const current = now();
+      if (!Number.isFinite(current) || !key) return false;
+      for (const [candidate, expiresAt] of consumed) {
+        if (expiresAt <= current) consumed.delete(candidate);
+      }
       if (consumed.has(key)) return false;
-      consumed.add(key);
+      if (consumed.size >= maxEntries) return false;
+      consumed.set(key, current + ttlMs);
       return true;
     },
   };
+}
+
+export function createRemoteHermesPolicyAttestation(input: {
+  serviceId: string;
+  endpointOrigin: string;
+  issuedAt: string;
+  expiresAt: string;
+  keyId: string;
+  signingSecret: string;
+}): RemoteHermesPolicyAttestation {
+  const unsigned = {
+    version: REMOTE_HERMES_POLICY_ATTESTATION_VERSION,
+    serviceId: input.serviceId,
+    endpointOrigin: input.endpointOrigin,
+    toolPolicy: { allow: [] as const, deny: ["*"] as const },
+    preflightMode: "required" as const,
+    ledgerMode: "durable" as const,
+    replayMode: "durable" as const,
+    issuedAt: input.issuedAt,
+    expiresAt: input.expiresAt,
+  };
+  const attestationDigest = digestRemoteHermesValue(unsigned);
+  return {
+    ...unsigned,
+    attestationDigest,
+    receipt: {
+      keyId: input.keyId,
+      signature: signRemoteHermesDigest(
+        input.signingSecret,
+        `safeclaw-remote-policy-attestation/v1:${input.serviceId}`,
+        attestationDigest,
+      ),
+    },
+  };
+}
+
+export function validateRemoteHermesPolicyAttestation(input: {
+  value: unknown;
+  expectedServiceId: string;
+  expectedEndpointOrigin: string;
+  expectedKeyId: string;
+  verificationSecret: string;
+  now: Date;
+}): RemoteHermesPolicyAttestation {
+  if (!isRecord(input.value)
+    || !exactKeys(input.value, [
+      "version", "serviceId", "endpointOrigin", "toolPolicy", "preflightMode",
+      "ledgerMode", "replayMode", "issuedAt", "expiresAt", "attestationDigest", "receipt",
+    ])
+    || input.value.version !== REMOTE_HERMES_POLICY_ATTESTATION_VERSION
+    || input.value.serviceId !== input.expectedServiceId
+    || input.value.endpointOrigin !== input.expectedEndpointOrigin
+    || !isRecord(input.value.toolPolicy)
+    || !exactKeys(input.value.toolPolicy, ["allow", "deny"])
+    || !Array.isArray(input.value.toolPolicy.allow)
+    || input.value.toolPolicy.allow.length !== 0
+    || !Array.isArray(input.value.toolPolicy.deny)
+    || input.value.toolPolicy.deny.length !== 1
+    || input.value.toolPolicy.deny[0] !== "*"
+    || input.value.preflightMode !== "required"
+    || input.value.ledgerMode !== "durable"
+    || input.value.replayMode !== "durable"
+    || typeof input.value.issuedAt !== "string"
+    || typeof input.value.expiresAt !== "string"
+    || typeof input.value.attestationDigest !== "string"
+    || !isRecord(input.value.receipt)
+    || !exactKeys(input.value.receipt, ["keyId", "signature"])
+    || input.value.receipt.keyId !== input.expectedKeyId
+    || typeof input.value.receipt.signature !== "string") {
+    return fail("REMOTE_REQUEST_INVALID");
+  }
+  const issuedAtMs = Date.parse(input.value.issuedAt);
+  const expiresAtMs = Date.parse(input.value.expiresAt);
+  const nowMs = input.now.getTime();
+  if (!Number.isFinite(nowMs)
+    || !Number.isFinite(issuedAtMs)
+    || !Number.isFinite(expiresAtMs)
+    || new Date(issuedAtMs).toISOString() !== input.value.issuedAt
+    || new Date(expiresAtMs).toISOString() !== input.value.expiresAt
+    || issuedAtMs > nowMs
+    || expiresAtMs <= nowMs
+    || expiresAtMs - issuedAtMs > REMOTE_HERMES_POLICY_MAX_TTL_MS) {
+    return fail("REMOTE_EXPIRED");
+  }
+  const unsigned = Object.fromEntries(Object.entries(input.value).filter(([key]) => (
+    key !== "attestationDigest" && key !== "receipt"
+  )));
+  const digest = digestRemoteHermesValue(unsigned);
+  if (input.value.attestationDigest !== digest
+    || !remoteHermesSignaturesEqual(
+      input.value.receipt.signature,
+      signRemoteHermesDigest(
+        input.verificationSecret,
+        `safeclaw-remote-policy-attestation/v1:${input.expectedServiceId}`,
+        digest,
+      ),
+    )) {
+    return fail("REMOTE_RESPONSE_SIGNATURE_INVALID");
+  }
+  return input.value as RemoteHermesPolicyAttestation;
 }
 
 const RESPONSE_COMMON_KEYS = [

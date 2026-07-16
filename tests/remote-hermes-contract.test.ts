@@ -23,19 +23,21 @@ function logicalRequest() {
     schemaVersion: "claims-projection/v1",
     entries: [{
       claimId: "claim:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      text: "작업 전 추락 방지 설비를 확인합니다.",
+      claimKind: "control",
+      publicCorpusAttestation: "verified_public_safety_corpus",
       citations: [{
         citationId: "citation:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        displayLabel: "KOSHA 실행지침",
+        sourceLabelCode: "kosha_guide",
         provenanceClass: "kosha_guide",
         sourceRefDigest: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
       }],
     }],
     fieldClassifications: {
       "/entries/0/claimId": "opaque_claim_id",
-      "/entries/0/text": "public_safety_claim_text",
+      "/entries/0/claimKind": "closed_claim_kind",
+      "/entries/0/publicCorpusAttestation": "verified_public_corpus_attestation",
       "/entries/0/citations/0/citationId": "opaque_citation_id",
-      "/entries/0/citations/0/displayLabel": "public_source_label",
+      "/entries/0/citations/0/sourceLabelCode": "closed_source_label_code",
       "/entries/0/citations/0/provenanceClass": "public_provenance_class",
       "/entries/0/citations/0/sourceRefDigest": "non_reversible_source_digest",
     },
@@ -59,6 +61,22 @@ function logicalRequest() {
 }
 
 describe("remote Hermes contract", () => {
+  it("bounds process-local replay state and cleans up only after TTL expiry", () => {
+    let now = 0;
+    const guard = createRemoteHermesReplayGuard({
+      ttlMs: 100,
+      maxEntries: 2,
+      now: () => now,
+    });
+
+    expect(guard.consume("receipt-a")).toBe(true);
+    expect(guard.consume("receipt-a")).toBe(false);
+    expect(guard.consume("receipt-b")).toBe(true);
+    expect(guard.consume("receipt-c")).toBe(false);
+    now = 101;
+    expect(guard.consume("receipt-c")).toBe(true);
+  });
+
   it("builds a closed logical request from minimized prompt and public claims projections", () => {
     const promptProjection: RemoteHermesPromptProjection = {
       schemaVersion: "prompt-projection/v1",
@@ -71,19 +89,21 @@ describe("remote Hermes contract", () => {
       schemaVersion: "claims-projection/v1",
       entries: [{
         claimId: "claim:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        text: "작업 전 추락 방지 설비를 확인합니다.",
+        claimKind: "control",
+        publicCorpusAttestation: "verified_public_safety_corpus",
         citations: [{
           citationId: "citation:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-          displayLabel: "KOSHA 실행지침",
+          sourceLabelCode: "kosha_guide",
           provenanceClass: "kosha_guide",
           sourceRefDigest: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
         }],
       }],
       fieldClassifications: {
         "/entries/0/claimId": "opaque_claim_id",
-        "/entries/0/text": "public_safety_claim_text",
+        "/entries/0/claimKind": "closed_claim_kind",
+        "/entries/0/publicCorpusAttestation": "verified_public_corpus_attestation",
         "/entries/0/citations/0/citationId": "opaque_citation_id",
-        "/entries/0/citations/0/displayLabel": "public_source_label",
+        "/entries/0/citations/0/sourceLabelCode": "closed_source_label_code",
         "/entries/0/citations/0/provenanceClass": "public_provenance_class",
         "/entries/0/citations/0/sourceRefDigest": "non_reversible_source_digest",
       },
@@ -135,15 +155,23 @@ describe("remote Hermes contract", () => {
     expect(first.serviceAssertion.signature).not.toBe(second.serviceAssertion.signature);
   });
 
-  it("rejects PII-shaped claim text before an attempt can be created", () => {
+  it.each([
+    ["text", "김민수"],
+    ["text", "서울시 성동구 성수동 123-4"],
+    ["text", "국민은행 123456-78-901234"],
+    ["text", "M12345678"],
+    ["text", "900101-5123456"],
+    ["displayLabel", "성수 2공구 A현장"],
+  ])("rejects arbitrary %s field carrying identity data: %s", (field, sensitiveValue) => {
     const base = logicalRequest();
-    const claimsProjection: RemoteHermesClaimsProjection = {
-      ...base.claimsProjection,
-      entries: [{
-        ...base.claimsProjection.entries[0],
-        text: "김민수 연락처 010-1234-5678로 확인합니다.",
-      }],
-    };
+    const claimsProjection = structuredClone(base.claimsProjection) as RemoteHermesClaimsProjection;
+    const entry = claimsProjection.entries[0] as unknown as Record<string, unknown>;
+    if (field === "displayLabel") {
+      const citation = (entry.citations as unknown[])[0] as Record<string, unknown>;
+      citation[field] = sensitiveValue;
+    } else {
+      entry[field] = sensitiveValue;
+    }
 
     expect(() => createRemoteHermesLogicalRequest({
       runId: base.runId,

@@ -108,10 +108,15 @@ describe("engine runtime readiness policy", () => {
       "OPENCLAW_MAX_CONCURRENT",
       "SAFECLAW_HERMES_BOUND_ORGANIZATION_ID",
       "SAFECLAW_HERMES_BOUND_SITE_ID",
+      "SAFECLAW_REMOTE_HERMES_ENDPOINT",
+      "SAFECLAW_REMOTE_HERMES_HOST_ALLOWLIST",
+      "SAFECLAW_REMOTE_HERMES_TENANT_ALLOWLIST",
+      "SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION",
     ]) {
       expect(example).toMatch(new RegExp(`^${key}=`, "mu"));
     }
     expect(example).toMatch(/^# OPENCLAW_MODEL=$/mu);
+    expect(example).toMatch(/Supported values: disabled, local-openclaw, experimental-hermes, remote-hermes/u);
     expect(example).not.toMatch(/SAFECLAW_SMOKE_BEARER_TOKEN=\S+/u);
     expect(example).not.toMatch(/SAFECLAW_HERMES_BOUND_(?:ORGANIZATION|SITE)_ID=\S+/u);
   });

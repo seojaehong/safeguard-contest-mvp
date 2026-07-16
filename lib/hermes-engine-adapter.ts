@@ -46,10 +46,11 @@ export const HERMES_OUTPUT_ATTESTATION_VERSION = "hermes-output-attestation/v1" 
 export type HermesEvidenceClaim = {
   claimId: string;
   text: string;
+  claimKind: "control";
+  remotePublicProvenance?: "verified_public_safety_corpus";
   citations: readonly {
     citationId: string;
     label: string;
-    publicLabel: string;
     provenanceClass: "current_law" | "kosha_guide" | "sif_case" | "published_ontology";
     sourceRefDigest: string;
   }[];
@@ -270,6 +271,10 @@ function buildEvidenceClaims(
         : reference.source_id.includes("law") || reference.source_id.includes("regulation")
           ? "current_law" as const
           : "published_ontology" as const;
+    const remotePublicProvenance = isKoshaTechnicalReference(reference)
+      || (reference.item_type === "sif-case" && reference.source_id === "kosha-sif-archive")
+      ? "verified_public_safety_corpus" as const
+      : undefined;
     const sourceRefDigest = createHash("sha256")
       .update(canonicalJson({ id: reference.id, sourceId: reference.source_id }), "utf8")
       .digest("hex");
@@ -282,10 +287,11 @@ function buildEvidenceClaims(
       claims.set(claimId, {
         claimId,
         text,
+        claimKind: "control",
+        remotePublicProvenance,
         citations: [{
           citationId,
           label,
-          publicLabel: authorityLabel,
           provenanceClass,
           sourceRefDigest,
         }],
