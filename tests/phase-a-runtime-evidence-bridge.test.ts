@@ -91,6 +91,48 @@ const MALFORMED_MCP_CASES = (["plain", "reviewed"] as const).flatMap((route) => 
       Reflect.set(pack, "applicability", null);
     },
   },
+  {
+    route,
+    field: "applicability.fieldHistory",
+    mutate: (pack: ActiveEvidenceChainPack): void => {
+      Reflect.set(pack.applicability, "fieldHistory", null);
+    },
+  },
+  {
+    route,
+    field: "applicability.fieldHistory item",
+    mutate: (pack: ActiveEvidenceChainPack): void => {
+      Reflect.set(pack.applicability, "fieldHistory", ["confirmed", 7]);
+    },
+  },
+  {
+    route,
+    field: "applicability.weather",
+    mutate: (pack: ActiveEvidenceChainPack): void => {
+      Reflect.set(pack.applicability, "weather", false);
+    },
+  },
+  {
+    route,
+    field: "applicability.weather item",
+    mutate: (pack: ActiveEvidenceChainPack): void => {
+      Reflect.set(pack.applicability, "weather", ["clear", null]);
+    },
+  },
+  {
+    route,
+    field: "applicability.authority",
+    mutate: (pack: ActiveEvidenceChainPack): void => {
+      Reflect.set(pack.applicability, "authority", "provider_supplied");
+    },
+  },
+  {
+    route,
+    field: "applicability extra field",
+    mutate: (pack: ActiveEvidenceChainPack): void => {
+      Reflect.set(pack.applicability, "forged", true);
+    },
+  },
 ]);
 
 function parseToolPayload(result: McpToolResult): Record<string, unknown> {
@@ -238,6 +280,131 @@ describe("Phase A runtime evidence bridge", () => {
 
     expect(providerGrounding).toBeUndefined();
   });
+
+  test("accepts a canonical pack with string applicability arrays", async () => {
+    let providerGrounding: PhaseAGenerationGrounding | undefined;
+    const queryKnowledge = async (): Promise<SafetyKnowledgeResult> => {
+      const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "고소작업");
+      if (!knowledge.found || !knowledge.evidenceContract) {
+        throw new Error("expected canonical evidence pack");
+      }
+      const evidenceContract = structuredClone(knowledge.evidenceContract);
+      evidenceContract.applicability.fieldHistory = ["작업발판 설치 확인"];
+      evidenceContract.applicability.weather = ["강풍 예보 확인"];
+      return { ...knowledge, evidenceContract };
+    };
+    const handler = createGenerateSafetyDocpackHandler({
+      defaultMode: "full",
+      queryKnowledge,
+      generateResponse: async (question, _mode, grounding) => {
+        providerGrounding = grounding;
+        return buildMockAskResponse(
+          question,
+          mockSearchResults.slice(0, 3),
+          "mock",
+          "valid applicability arrays",
+        );
+      },
+      getWorkpackRepository: () => null,
+      getGenerationEvidenceSecret: () => undefined,
+    });
+
+    await handler({ question: "고소작업", mode: "template" }, authContext);
+
+    expect(providerGrounding?.evidencePack?.applicability).toEqual({
+      authority: "scope_only",
+      fieldHistory: ["작업발판 설치 확인"],
+      weather: ["강풍 예보 확인"],
+    });
+  });
+
+  test.each([false, 0, ""])(
+    "fails closed before plain tenant side effects for falsy non-null evidence pack %j",
+    async (malformedEvidenceContract) => {
+      const provider = vi.fn(async (question: string) => buildMockAskResponse(
+        question,
+        mockSearchResults.slice(0, 3),
+        "mock",
+        "falsy evidence pack must not reach provider",
+      ));
+      const getWorkpackRepository = vi.fn(() => {
+        throw new Error("plain persistence must not initialize");
+      });
+      const queryKnowledge = async (): Promise<SafetyKnowledgeResult> => {
+        const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "고소작업");
+        Reflect.set(knowledge, "evidenceContract", malformedEvidenceContract);
+        return knowledge;
+      };
+      const handler = createGenerateSafetyDocpackHandler({
+        defaultMode: "full",
+        queryKnowledge,
+        generateResponse: provider,
+        getWorkpackRepository,
+        getGenerationEvidenceSecret: () => undefined,
+      });
+
+      const result = await handler(
+        { question: "고소작업", mode: "template" },
+        tenantAuthContext,
+      );
+
+      expect(parseToolPayload(result)).toMatchObject({
+        status: "review_required",
+        evidenceChainState: "review_required",
+        reason: "canonical_evidence_pack_mismatch",
+        failClosed: true,
+      });
+      expect(provider).toHaveBeenCalledTimes(0);
+      expect(getWorkpackRepository).toHaveBeenCalledTimes(0);
+    },
+  );
+
+  test.each([false, 0, ""])(
+    "fails closed before reviewed tenant side effects for falsy non-null evidence pack %j",
+    async (malformedEvidenceContract) => {
+      const provider = vi.fn(async (question: string) => buildMockAskResponse(
+        question,
+        mockSearchResults.slice(0, 3),
+        "mock",
+        "falsy evidence pack must not reach provider",
+      ));
+      const reviewResponse = vi.fn(async () => ({
+        reviewable: false as const,
+        message: "review must not run",
+        registeredTasks: [],
+      }));
+      const persistResponse = vi.fn(async () => null);
+      const queryKnowledge = async (): Promise<SafetyKnowledgeResult> => {
+        const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "고소작업");
+        Reflect.set(knowledge, "evidenceContract", malformedEvidenceContract);
+        return knowledge;
+      };
+      const handler = createGenerateReviewedSafetyDocpackHandler({
+        defaultMode: "full",
+        queryKnowledge,
+        generateResponse: provider,
+        reviewResponse,
+        persistResponse,
+        getGenerationEvidenceSecret: () => undefined,
+      });
+
+      const result = await handler({
+        question: "고소작업 문서팩",
+        task: "고소작업",
+        mode: "template",
+      }, tenantAuthContext);
+
+      expect(parseToolPayload(result)).toMatchObject({
+        status: "review_required",
+        evidenceChainState: "review_required",
+        reason: "canonical_evidence_pack_mismatch",
+        failClosed: true,
+      });
+      expect(provider).toHaveBeenCalledTimes(0);
+      expect(reviewResponse).toHaveBeenCalledTimes(0);
+      expect(persistResponse).toHaveBeenCalledTimes(0);
+    },
+  );
 
   test.each(FORGED_MCP_CASES)(
     "fails closed before the provider for a forged $field field on the $route route",
