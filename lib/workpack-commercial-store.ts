@@ -91,10 +91,15 @@ export async function loadServerShareRecipients(
   client: SupabaseClient<WorkspaceDatabase>,
   input: { organizationId: string; siteId: string | null; requestedWorkerIds: string[] }
 ): Promise<ServerShareRecipientsResult> {
-  const { data, error } = await client
+  let workerQuery = client
     .from("workers")
     .select("id,organization_id,site_id,external_key,display_name,role,joined_at,experience_summary,nationality,language_code,language_label,is_new_worker,is_foreign_worker,training_status,training_summary,phone,email")
-    .in("id", input.requestedWorkerIds);
+    .in("id", input.requestedWorkerIds)
+    .eq("organization_id", input.organizationId);
+  workerQuery = input.siteId === null
+    ? workerQuery.is("site_id", null)
+    : workerQuery.eq("site_id", input.siteId);
+  const { data, error } = await workerQuery;
 
   if (error) {
     console.error("share recipient worker fetch failed", error);
@@ -115,14 +120,17 @@ export async function loadActiveOwnedShareSession(
     now?: Date;
   }
 ): Promise<ActiveOwnedShareSessionResult> {
-  const { data, error } = await client
+  let shareSessionQuery = client
     .from("workpack_share_sessions")
     .select("id,organization_id,site_id,workpack_id,recipients_snapshot,status,expires_at,created_by")
     .eq("id", input.shareSessionId)
     .eq("workpack_id", input.workpackId)
     .eq("organization_id", input.organizationId)
-    .eq("created_by", input.userId)
-    .maybeSingle();
+    .eq("created_by", input.userId);
+  shareSessionQuery = input.siteId === null
+    ? shareSessionQuery.is("site_id", null)
+    : shareSessionQuery.eq("site_id", input.siteId);
+  const { data, error } = await shareSessionQuery.maybeSingle();
 
   if (error) {
     console.error("owned share session fetch failed", error);

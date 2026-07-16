@@ -1,0 +1,22 @@
+{
+  "authoritative_head": "d42e143575c636fcc6e698b9c9eb35609c70b156",
+  "scope": "bounded no-migration commercial workpack tenant hardening",
+  "red": {
+    "test_files": 1,
+    "tests": 5,
+    "passed": 0,
+    "failed": 5
+  },
+  "green": {
+    "test_files": 6,
+    "tests": 30,
+    "passed": 30,
+    "failed": 0
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "exit_code": 0
+  },
+  "database_changes": false,
+  "live_writes": false
+}

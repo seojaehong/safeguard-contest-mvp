@@ -35,11 +35,15 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, confirmations: [], message: owned.message }, { status: owned.status });
   }
 
-  const { data, error } = await client
+  let confirmationQuery = client
     .from("workpack_read_confirmations")
     .select("id,share_session_id,worker_id,worker_display_name,worker_snapshot,language_code,confirmation_method,read_at")
     .eq("workpack_id", owned.context.workpackId)
-    .order("read_at", { ascending: false });
+    .eq("organization_id", owned.context.organizationId);
+  confirmationQuery = owned.context.siteId === null
+    ? confirmationQuery.is("site_id", null)
+    : confirmationQuery.eq("site_id", owned.context.siteId);
+  const { data, error } = await confirmationQuery.order("read_at", { ascending: false });
 
   if (error) {
     console.error("read confirmations fetch failed", error);
@@ -110,13 +114,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }, { status: 400 });
   }
 
-  const { data: existing, error: existingError } = await client
+  let existingQuery = client
     .from("workpack_read_confirmations")
     .select("id")
     .eq("workpack_id", owned.context.workpackId)
+    .eq("organization_id", owned.context.organizationId)
     .eq("share_session_id", activeSession.session.id)
-    .eq("worker_id", workerId)
-    .maybeSingle();
+    .eq("worker_id", workerId);
+  existingQuery = owned.context.siteId === null
+    ? existingQuery.is("site_id", null)
+    : existingQuery.eq("site_id", owned.context.siteId);
+  const { data: existing, error: existingError } = await existingQuery.maybeSingle();
 
   if (existingError) {
     console.error("read confirmation idempotency check failed", existingError);
