@@ -5,6 +5,7 @@ import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } f
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 import { validateDispatchContacts, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
 import {
+  buildLocalizedDispatchWebhookPayload,
   buildCanonicalRecipientMessageVariants,
   getCanonicalDispatchLanguageCodes,
   validateWorkflowDispatchMessage
@@ -61,19 +62,6 @@ type WorkflowSummary = {
   skipped: number;
 };
 
-type LocalizedDispatchRecipient = {
-  workerId: string;
-  phone?: string;
-  email?: string;
-  dispatchLanguageCode: string;
-  messageTarget: "manager" | `foreign:${string}`;
-  message: string;
-};
-
-type LocalizedDispatchRecipientsResult =
-  | { ok: true; recipients: LocalizedDispatchRecipient[] }
-  | { ok: false; missingLanguageCodes: string[] };
-
 const ACTIVE_CHANNELS: ActiveWorkflowChannel[] = ["email", "sms", "kakao"];
 const LOCKED_CHANNELS: WorkflowChannel[] = ["band"];
 const PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED = false;
@@ -99,86 +87,6 @@ function formatChannelLabel(channel: WorkflowChannel) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-export function buildLocalizedDispatchRecipients(
-  input: {
-    recipients: Array<Record<string, unknown>>;
-    messageVariants: Record<string, string>;
-    channels: ActiveWorkflowChannel[];
-  }
-): LocalizedDispatchRecipientsResult {
-  const missingLanguageCodes = new Set<string>();
-  const localizedRecipients = input.recipients.flatMap((recipient): LocalizedDispatchRecipient[] => {
-    const workerId = typeof recipient.workerId === "string" ? recipient.workerId.trim() : "";
-    const languageCode = typeof recipient.languageCode === "string" ? recipient.languageCode.trim() : "";
-    const message = languageCode ? input.messageVariants[languageCode] : "";
-    if (!workerId || !languageCode || !message) {
-      missingLanguageCodes.add(languageCode || "unknown");
-      return [];
-    }
-    const phone = typeof recipient.phone === "string" ? recipient.phone.trim() : "";
-    const email = typeof recipient.email === "string" ? recipient.email.trim() : "";
-    const localizedRecipient: LocalizedDispatchRecipient = {
-      workerId,
-      dispatchLanguageCode: languageCode,
-      messageTarget: languageCode === "ko" ? "manager" : `foreign:${languageCode}`,
-      message
-    };
-    if (input.channels.some((channel) => channel === "sms" || channel === "kakao") && phone) {
-      localizedRecipient.phone = phone;
-    }
-    if (input.channels.includes("email") && email) {
-      localizedRecipient.email = email;
-    }
-    return [localizedRecipient];
-  });
-
-  if (missingLanguageCodes.size) {
-    return { ok: false, missingLanguageCodes: [...missingLanguageCodes].sort() };
-  }
-  return { ok: true, recipients: localizedRecipients };
-}
-
-export function buildLocalizedDispatchWebhookPayload(input: {
-  idempotencyKey: string;
-  channels: ActiveWorkflowChannel[];
-  recipients: Array<Record<string, unknown>>;
-  messageVariants: Record<string, string>;
-  operatorNote: string;
-  workpack: unknown;
-  sentAt?: string;
-}): { ok: true; payload: {
-  event: "safeguard.workpack.dispatch";
-  idempotencyKey: string;
-  sentAt: string;
-  channels: ActiveWorkflowChannel[];
-  recipients: LocalizedDispatchRecipient[];
-  messageVariants: Record<string, string>;
-  recipientMessageContract: "saved-worker-language-v1";
-  operatorNote: string;
-  workpack: unknown;
-} } | { ok: false; missingLanguageCodes: string[] } {
-  const localized = buildLocalizedDispatchRecipients(input);
-  if (!localized.ok) return localized;
-  const messageVariants = localized.recipients.reduce<Record<string, string>>((variants, recipient) => {
-    variants[recipient.dispatchLanguageCode] = recipient.message;
-    return variants;
-  }, {});
-  return {
-    ok: true,
-    payload: {
-      event: "safeguard.workpack.dispatch" as const,
-      idempotencyKey: input.idempotencyKey,
-      sentAt: input.sentAt || new Date().toISOString(),
-      channels: input.channels,
-      recipients: localized.recipients,
-      messageVariants,
-      recipientMessageContract: "saved-worker-language-v1" as const,
-      operatorNote: input.operatorNote,
-      workpack: input.workpack
-    }
-  };
 }
 
 function parseChannels(value: unknown): ActiveWorkflowChannel[] {

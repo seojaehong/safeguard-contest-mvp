@@ -5,6 +5,10 @@ import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { evaluateShareSessionReuse } from "@/components/WorkflowSharePolicy";
+import {
+  buildLocalizedDispatchRecipients,
+  buildLocalizedDispatchWebhookPayload
+} from "@/lib/workflow-share-client";
 
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
@@ -242,8 +246,6 @@ describe("share session route authority", () => {
 
 describe("workflow dispatch route authority", () => {
   it("builds an exact minimal provider DTO for each canonical recipient message", async () => {
-    const { buildLocalizedDispatchRecipients } = await import("@/app/api/workflow/dispatch/route");
-
     expect(buildLocalizedDispatchRecipients(
       {
         recipients: [serverRecipient.workerSnapshot, koreanRecipient.workerSnapshot],
@@ -272,8 +274,6 @@ describe("workflow dispatch route authority", () => {
   });
 
   it("omits phone after kakao preflight leaves email as the only relay channel", async () => {
-    const { buildLocalizedDispatchWebhookPayload } = await import("@/app/api/workflow/dispatch/route");
-
     const localizedPayload = buildLocalizedDispatchWebhookPayload({
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["email"],
@@ -855,10 +855,6 @@ describe("workflow dispatch route authority", () => {
   });
 
   it("builds a payload that proves each recipient language body without a global message", async () => {
-    const {
-      buildLocalizedDispatchRecipients,
-      buildLocalizedDispatchWebhookPayload
-    } = await import("@/app/api/workflow/dispatch/route");
     const messageVariants = {
       vi: VI_MESSAGE,
       ko: KO_MESSAGE

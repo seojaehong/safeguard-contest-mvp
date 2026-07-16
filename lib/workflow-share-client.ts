@@ -3,6 +3,19 @@ import type { AskResponse } from "@/lib/types";
 export type WorkflowShareChannel = "email" | "sms" | "kakao";
 export type WorkflowDispatchMessageTarget = "manager" | `foreign:${string}`;
 
+export type LocalizedDispatchRecipient = {
+  workerId: string;
+  phone?: string;
+  email?: string;
+  dispatchLanguageCode: string;
+  messageTarget: WorkflowDispatchMessageTarget;
+  message: string;
+};
+
+export type LocalizedDispatchRecipientsResult =
+  | { ok: true; recipients: LocalizedDispatchRecipient[] }
+  | { ok: false; missingLanguageCodes: string[] };
+
 export type CanonicalRecipientMessageVariantsResult =
   | { ok: true; messageVariants: Record<string, string> }
   | {
@@ -75,6 +88,84 @@ const koreanTextPattern = /[가-힣]/u;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+export function buildLocalizedDispatchRecipients(input: {
+  recipients: Array<Record<string, unknown>>;
+  messageVariants: Record<string, string>;
+  channels: WorkflowShareChannel[];
+}): LocalizedDispatchRecipientsResult {
+  const missingLanguageCodes = new Set<string>();
+  const localizedRecipients = input.recipients.flatMap((recipient): LocalizedDispatchRecipient[] => {
+    const workerId = typeof recipient.workerId === "string" ? recipient.workerId.trim() : "";
+    const languageCode = typeof recipient.languageCode === "string" ? recipient.languageCode.trim() : "";
+    const message = languageCode ? input.messageVariants[languageCode] : "";
+    if (!workerId || !languageCode || !message) {
+      missingLanguageCodes.add(languageCode || "unknown");
+      return [];
+    }
+    const phone = typeof recipient.phone === "string" ? recipient.phone.trim() : "";
+    const email = typeof recipient.email === "string" ? recipient.email.trim() : "";
+    const localizedRecipient: LocalizedDispatchRecipient = {
+      workerId,
+      dispatchLanguageCode: languageCode,
+      messageTarget: languageCode === "ko" ? "manager" : `foreign:${languageCode}`,
+      message
+    };
+    if (input.channels.some((channel) => channel === "sms" || channel === "kakao") && phone) {
+      localizedRecipient.phone = phone;
+    }
+    if (input.channels.includes("email") && email) {
+      localizedRecipient.email = email;
+    }
+    return [localizedRecipient];
+  });
+
+  if (missingLanguageCodes.size) {
+    return { ok: false, missingLanguageCodes: [...missingLanguageCodes].sort() };
+  }
+  return { ok: true, recipients: localizedRecipients };
+}
+
+export function buildLocalizedDispatchWebhookPayload(input: {
+  idempotencyKey: string;
+  channels: WorkflowShareChannel[];
+  recipients: Array<Record<string, unknown>>;
+  messageVariants: Record<string, string>;
+  operatorNote: string;
+  workpack: unknown;
+  sentAt?: string;
+}): { ok: true; payload: {
+  event: "safeguard.workpack.dispatch";
+  idempotencyKey: string;
+  sentAt: string;
+  channels: WorkflowShareChannel[];
+  recipients: LocalizedDispatchRecipient[];
+  messageVariants: Record<string, string>;
+  recipientMessageContract: "saved-worker-language-v1";
+  operatorNote: string;
+  workpack: unknown;
+} } | { ok: false; missingLanguageCodes: string[] } {
+  const localized = buildLocalizedDispatchRecipients(input);
+  if (!localized.ok) return localized;
+  const messageVariants = localized.recipients.reduce<Record<string, string>>((variants, recipient) => {
+    variants[recipient.dispatchLanguageCode] = recipient.message;
+    return variants;
+  }, {});
+  return {
+    ok: true,
+    payload: {
+      event: "safeguard.workpack.dispatch",
+      idempotencyKey: input.idempotencyKey,
+      sentAt: input.sentAt || new Date().toISOString(),
+      channels: input.channels,
+      recipients: localized.recipients,
+      messageVariants,
+      recipientMessageContract: "saved-worker-language-v1",
+      operatorNote: input.operatorNote,
+      workpack: input.workpack
+    }
+  };
 }
 
 function readString(value: unknown): string | undefined {
