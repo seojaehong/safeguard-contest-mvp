@@ -34,6 +34,8 @@ JsonObject = dict[str, object]
 FetchBytes = Callable[[str], bytes]
 PrepareHook = Callable[[str], None]
 MutationHook = Callable[[str], None]
+DirectoryIdentity = tuple[int, int]
+DirectoryGuards = dict[str, DirectoryIdentity]
 
 
 class AcquisitionError(RuntimeError):
@@ -244,7 +246,7 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
             "prejournalOrphanConvergence": True,
             "activeJournalRevalidatedBeforePublish": True,
             "handleBoundTargetReplacement": True,
-            "mutationCallbacksCannotWrite": True,
+            "mutationHooksAreInterruptionOnly": True,
         },
         "portabilityLedgerSha256": ledger_sha256,
         "sourceRecord": {
@@ -318,6 +320,7 @@ def _validate_output_paths(
     asset_path: Path,
     receipt_path: Path,
     failure_path: Path,
+    directory_guards: DirectoryGuards | None = None,
 ) -> None:
     paths = {
         "asset": asset_path,
@@ -355,6 +358,8 @@ def _validate_output_paths(
         link_component = _first_link_component(managed_directory)
         if link_component is not None:
             raise AcquisitionError("promotion-managed-directory-symlink")
+    if directory_guards is not None:
+        _validate_directory_guards(directory_guards)
 
 
 def _validate_promotion_paths(
@@ -362,8 +367,9 @@ def _validate_promotion_paths(
     asset_path: Path,
     receipt_path: Path,
     failure_path: Path,
+    directory_guards: DirectoryGuards | None = None,
 ) -> None:
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     ledger_identity = os.path.normcase(os.fspath(_absolute_lexical_path(ledger_path)))
     for name, output_path in (
         ("asset", asset_path),
@@ -494,7 +500,97 @@ def _windows_open_bound_handle(path: Path, *, directory: bool) -> tuple[object, 
     return kernel32, int(handle)
 
 
-def _windows_replace_file_safely(source: Path, destination: Path) -> None:
+def _windows_handle_identity(handle: int) -> DirectoryIdentity:
+    import ctypes
+    from ctypes import wintypes
+
+    class ByHandleFileInformation(ctypes.Structure):
+        _fields_ = (
+            ("FileAttributes", wintypes.DWORD),
+            ("CreationTime", wintypes.FILETIME),
+            ("LastAccessTime", wintypes.FILETIME),
+            ("LastWriteTime", wintypes.FILETIME),
+            ("VolumeSerialNumber", wintypes.DWORD),
+            ("FileSizeHigh", wintypes.DWORD),
+            ("FileSizeLow", wintypes.DWORD),
+            ("NumberOfLinks", wintypes.DWORD),
+            ("FileIndexHigh", wintypes.DWORD),
+            ("FileIndexLow", wintypes.DWORD),
+        )
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    information = ByHandleFileInformation()
+    if kernel32.GetFileInformationByHandle(handle, ctypes.byref(information)) == 0:
+        raise ctypes.WinError(ctypes.get_last_error())
+    file_index = (int(information.FileIndexHigh) << 32) | int(information.FileIndexLow)
+    return int(information.VolumeSerialNumber), file_index
+
+
+def _directory_identity(path: Path) -> DirectoryIdentity:
+    if os.name == "nt":
+        kernel32, handle = _windows_open_bound_handle(path, directory=True)
+        try:
+            return _windows_handle_identity(handle)
+        finally:
+            kernel32.CloseHandle(handle)
+    status = os.stat(path, follow_symlinks=False)
+    return int(status.st_dev), int(status.st_ino)
+
+
+def _directory_guard_key(path: Path) -> str:
+    return os.path.normcase(os.fspath(_absolute_lexical_path(path)))
+
+
+def _capture_directory_guards(
+    asset_path: Path,
+    receipt_path: Path,
+    failure_path: Path,
+) -> DirectoryGuards:
+    guards: DirectoryGuards = {}
+    for name, path in (
+        ("asset", asset_path),
+        ("receipt", receipt_path),
+        ("failure", failure_path),
+    ):
+        parent = _absolute_lexical_path(path.parent)
+        if not parent.is_dir():
+            raise AcquisitionError(f"promotion-output-parent-missing:{name}")
+        key = _directory_guard_key(parent)
+        identity = _directory_identity(parent)
+        existing = guards.get(key)
+        if existing is not None and existing != identity:
+            raise AcquisitionError("promotion-output-parent-identity-conflict")
+        guards[key] = identity
+    return guards
+
+
+def _validate_directory_guards(guards: DirectoryGuards) -> None:
+    for path_text, expected_identity in guards.items():
+        path = Path(path_text)
+        if _first_link_component(path) is not None or not path.is_dir():
+            raise AcquisitionError("promotion-output-parent-replaced")
+        if _directory_identity(path) != expected_identity:
+            raise AcquisitionError("promotion-output-parent-identity-mismatch")
+
+
+def _guarded_directory_identity(
+    path: Path,
+    guards: DirectoryGuards | None,
+) -> DirectoryIdentity:
+    if guards is None:
+        return _directory_identity(path)
+    expected = guards.get(_directory_guard_key(path))
+    if expected is None:
+        return _directory_identity(path)
+    return expected
+
+
+def _windows_replace_file_safely(
+    source: Path,
+    destination: Path,
+    source_parent_identity: DirectoryIdentity,
+    destination_parent_identity: DirectoryIdentity,
+) -> None:
     import ctypes
     from ctypes import wintypes
 
@@ -502,10 +598,21 @@ def _windows_replace_file_safely(source: Path, destination: Path) -> None:
     destination_kernel32: object | None = None
     destination_handle: int | None = None
     try:
+        source_parent_kernel32, source_parent_handle = _windows_open_bound_handle(
+            source.parent,
+            directory=True,
+        )
+        try:
+            if _windows_handle_identity(source_parent_handle) != source_parent_identity:
+                raise AcquisitionError("promotion-source-parent-identity-mismatch")
+        finally:
+            source_parent_kernel32.CloseHandle(source_parent_handle)
         destination_kernel32, destination_handle = _windows_open_bound_handle(
             destination.parent,
             directory=True,
         )
+        if _windows_handle_identity(destination_handle) != destination_parent_identity:
+            raise AcquisitionError("promotion-destination-parent-identity-mismatch")
 
         class FileRenameInformation(ctypes.Structure):
             _fields_ = (
@@ -562,17 +669,41 @@ def _windows_replace_file_safely(source: Path, destination: Path) -> None:
             destination_kernel32.CloseHandle(destination_handle)
 
 
-def _replace_file_safely(source: Path, destination: Path) -> None:
+def _replace_file_safely(
+    source: Path,
+    destination: Path,
+    *,
+    source_parent_identity: DirectoryIdentity | None = None,
+    destination_parent_identity: DirectoryIdentity | None = None,
+) -> None:
     if source.parent == destination.parent and source.name == destination.name:
         raise AcquisitionError("promotion-source-destination-alias")
+    expected_source_identity = source_parent_identity or _directory_identity(source.parent)
+    expected_destination_identity = destination_parent_identity or _directory_identity(
+        destination.parent
+    )
     if os.name == "nt":
-        _windows_replace_file_safely(source, destination)
+        _windows_replace_file_safely(
+            source,
+            destination,
+            expected_source_identity,
+            expected_destination_identity,
+        )
         return
     source_flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
     destination_flags = source_flags
     source_directory = os.open(source.parent, source_flags)
     destination_directory = os.open(destination.parent, destination_flags)
     try:
+        source_status = os.fstat(source_directory)
+        destination_status = os.fstat(destination_directory)
+        if (int(source_status.st_dev), int(source_status.st_ino)) != expected_source_identity:
+            raise AcquisitionError("promotion-source-parent-identity-mismatch")
+        if (
+            int(destination_status.st_dev),
+            int(destination_status.st_ino),
+        ) != expected_destination_identity:
+            raise AcquisitionError("promotion-destination-parent-identity-mismatch")
         os.replace(
             source.name,
             destination.name,
@@ -692,8 +823,9 @@ def _rollback_transaction(
     failure_path: Path,
     *,
     restore_hook: MutationHook = _noop_prepare_hook,
+    directory_guards: DirectoryGuards | None = None,
 ) -> None:
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     journal = _validated_transaction_journal(
         transaction_dir,
         asset_path,
@@ -710,7 +842,7 @@ def _rollback_transaction(
     if not isinstance(backups, dict):
         raise AcquisitionError("promotion-backups-invalid")
     for name, destination in targets:
-        _validate_output_paths(asset_path, receipt_path, failure_path)
+        _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
         backup = transaction_dir / f"{name}.backup"
         descriptor = backups[name]
         if not isinstance(descriptor, dict):
@@ -720,14 +852,28 @@ def _rollback_transaction(
             restore_staged = transaction_dir / f"{name}.restore-staged"
             _write_bytes(restore_staged, backup.read_bytes())
             _fsync_directory(transaction_dir)
-            _validate_output_paths(asset_path, receipt_path, failure_path)
-            _replace_file_safely(restore_staged, destination)
+            _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
+            _replace_file_safely(
+                restore_staged,
+                destination,
+                destination_parent_identity=_guarded_directory_identity(
+                    destination.parent,
+                    directory_guards,
+                ),
+            )
             _fsync_directory(destination.parent)
             _fsync_directory(transaction_dir)
             restore_hook(f"after-restore-{name}")
         elif destination.exists():
             delete_staged = transaction_dir / f"{name}.rollback-delete"
-            _replace_file_safely(destination, delete_staged)
+            _replace_file_safely(
+                destination,
+                delete_staged,
+                source_parent_identity=_guarded_directory_identity(
+                    destination.parent,
+                    directory_guards,
+                ),
+            )
             _fsync_directory(destination.parent)
             _fsync_directory(transaction_dir)
             delete_staged.unlink()
@@ -739,7 +885,7 @@ def _rollback_transaction(
         "state": "rolled_back",
         "targetsSha256": _sha256_bytes(_canonical_json(backups).encode("utf-8")),
     }
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     _write_json(transaction_dir / "journal.json", journal)
     _fsync_directory(transaction_dir)
     shutil.rmtree(transaction_dir)
@@ -751,8 +897,9 @@ def _recover_incomplete_promotion(
     asset_path: Path,
     receipt_path: Path,
     failure_path: Path,
+    directory_guards: DirectoryGuards | None = None,
 ) -> None:
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     if not transaction_dir.exists():
         return
     journal = _validated_transaction_journal(
@@ -787,8 +934,9 @@ def _prepare_promotion_transaction(
     asset: JsonObject,
     receipt: JsonObject,
     prepare_hook: PrepareHook = _noop_prepare_hook,
+    directory_guards: DirectoryGuards | None = None,
 ) -> Path:
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     transaction_dir = _transaction_dir(failure_path)
     staging_dir = _staging_dir(failure_path)
     _recover_incomplete_promotion(
@@ -796,14 +944,15 @@ def _prepare_promotion_transaction(
         asset_path,
         receipt_path,
         failure_path,
+        directory_guards,
     )
     if staging_dir.exists():
-        _validate_output_paths(asset_path, receipt_path, failure_path)
+        _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
         if transaction_dir.exists() or not staging_dir.is_dir() or _is_symlink_or_junction(staging_dir):
             raise AcquisitionError("promotion-staging-orphan-unsafe")
         shutil.rmtree(staging_dir)
         _fsync_directory(staging_dir.parent)
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     staging_dir.mkdir(parents=True, exist_ok=False)
     _fsync_directory(staging_dir.parent)
     prepare_hook("after-mkdir")
@@ -811,11 +960,11 @@ def _prepare_promotion_transaction(
         "asset": staging_dir / "asset.staged.json",
         "receipt": staging_dir / "receipt.staged.json",
     }
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     _write_json(staged["asset"], asset)
     _fsync_directory(staging_dir)
     prepare_hook("after-staged-asset")
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     _write_json(staged["receipt"], receipt)
     _fsync_directory(staging_dir)
     prepare_hook("after-staged-receipt")
@@ -826,7 +975,7 @@ def _prepare_promotion_transaction(
     backups: JsonObject = {}
     published: JsonObject = {}
     for name, destination in targets.items():
-        _validate_output_paths(asset_path, receipt_path, failure_path)
+        _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
         if destination.is_file():
             backup = staging_dir / f"{name}.backup"
             _write_bytes(backup, destination.read_bytes())
@@ -839,7 +988,7 @@ def _prepare_promotion_transaction(
             "present": True,
             "sha256": _sha256_file(staged[name]),
         }
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     _write_json(
         staging_dir / "journal.json",
         {
@@ -852,14 +1001,14 @@ def _prepare_promotion_transaction(
     )
     _fsync_directory(staging_dir)
     prepare_hook("after-prepared-journal")
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     _validated_transaction_journal(
         staging_dir,
         asset_path,
         receipt_path,
         failure_path,
     )
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     os.replace(staging_dir, transaction_dir)
     _fsync_directory(transaction_dir.parent)
     prepare_hook("after-activation")
@@ -874,8 +1023,9 @@ def _publish_promotion_pair(
     receipt: JsonObject,
     publish_hook: MutationHook = _noop_prepare_hook,
     prepare_hook: PrepareHook = _noop_prepare_hook,
+    directory_guards: DirectoryGuards | None = None,
 ) -> None:
-    _validate_output_paths(asset_path, receipt_path, failure_path)
+    _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
     transaction_dir = _prepare_promotion_transaction(
         asset_path,
         receipt_path,
@@ -883,30 +1033,45 @@ def _publish_promotion_pair(
         asset,
         receipt,
         prepare_hook,
+        directory_guards,
     )
     staged_asset = transaction_dir / "asset.staged.json"
     staged_receipt = transaction_dir / "receipt.staged.json"
     try:
-        _validate_output_paths(asset_path, receipt_path, failure_path)
+        _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
         _validated_transaction_journal(
             transaction_dir,
             asset_path,
             receipt_path,
             failure_path,
         )
-        _validate_output_paths(asset_path, receipt_path, failure_path)
+        _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
         asset_path.parent.mkdir(parents=True, exist_ok=True)
         receipt_path.parent.mkdir(parents=True, exist_ok=True)
-        _validate_output_paths(asset_path, receipt_path, failure_path)
+        _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
         publish_hook("before-publish-asset")
-        _validate_output_paths(asset_path, receipt_path, failure_path)
-        _replace_file_safely(staged_asset, asset_path)
+        _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
+        _replace_file_safely(
+            staged_asset,
+            asset_path,
+            destination_parent_identity=_guarded_directory_identity(
+                asset_path.parent,
+                directory_guards,
+            ),
+        )
         _fsync_directory(asset_path.parent)
         _fsync_directory(transaction_dir)
-        _validate_output_paths(asset_path, receipt_path, failure_path)
+        _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
         publish_hook("before-publish-receipt")
-        _validate_output_paths(asset_path, receipt_path, failure_path)
-        _replace_file_safely(staged_receipt, receipt_path)
+        _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
+        _replace_file_safely(
+            staged_receipt,
+            receipt_path,
+            destination_parent_identity=_guarded_directory_identity(
+                receipt_path.parent,
+                directory_guards,
+            ),
+        )
         _fsync_directory(receipt_path.parent)
         _fsync_directory(transaction_dir)
         journal = _validated_transaction_journal(
@@ -924,7 +1089,7 @@ def _publish_promotion_pair(
                 _canonical_json(journal["published"]).encode("utf-8")
             ),
         }
-        _validate_output_paths(asset_path, receipt_path, failure_path)
+        _validate_output_paths(asset_path, receipt_path, failure_path, directory_guards)
         _write_json(transaction_dir / "journal.json", journal)
         _fsync_directory(transaction_dir)
     except Exception:
@@ -933,6 +1098,7 @@ def _publish_promotion_pair(
             asset_path,
             receipt_path,
             failure_path,
+            directory_guards=directory_guards,
         )
         raise
     shutil.rmtree(transaction_dir)
@@ -951,19 +1117,40 @@ def acquire_exact_body(
     prepare_hook: PrepareHook = _noop_prepare_hook,
 ) -> JsonObject:
     _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)
+    directory_guards = _capture_directory_guards(asset_path, receipt_path, failure_path)
+    _validate_promotion_paths(
+        ledger_path,
+        asset_path,
+        receipt_path,
+        failure_path,
+        directory_guards,
+    )
     transaction_dir = _transaction_dir(failure_path)
     _recover_incomplete_promotion(
         transaction_dir,
         asset_path,
         receipt_path,
         failure_path,
+        directory_guards,
     )
     try:
         record, ledger_sha256 = load_target_record(ledger_path, expected_ledger_sha256)
         pdf_bytes = fetch_bytes(str(record["official_url"]))
-        _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)
+        _validate_promotion_paths(
+            ledger_path,
+            asset_path,
+            receipt_path,
+            failure_path,
+            directory_guards,
+        )
         asset, receipt = _extract_asset(record, pdf_bytes, ledger_sha256)
-        _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)
+        _validate_promotion_paths(
+            ledger_path,
+            asset_path,
+            receipt_path,
+            failure_path,
+            directory_guards,
+        )
         _publish_promotion_pair(
             asset_path,
             receipt_path,
@@ -972,8 +1159,15 @@ def acquire_exact_body(
             receipt,
             publish_hook,
             prepare_hook,
+            directory_guards,
         )
-        _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)
+        _validate_promotion_paths(
+            ledger_path,
+            asset_path,
+            receipt_path,
+            failure_path,
+            directory_guards,
+        )
         if failure_path.exists():
             failure_path.unlink()
             _fsync_directory(failure_path.parent)
@@ -997,7 +1191,13 @@ def acquire_exact_body(
             "schemaMutationPerformed": False,
         }
         try:
-            _validate_promotion_paths(ledger_path, asset_path, receipt_path, failure_path)
+            _validate_promotion_paths(
+                ledger_path,
+                asset_path,
+                receipt_path,
+                failure_path,
+                directory_guards,
+            )
         except AcquisitionError as path_error:
             raise path_error from exc
         _write_json(failure_path, failure)
