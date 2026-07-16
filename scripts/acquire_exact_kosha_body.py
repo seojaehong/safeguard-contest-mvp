@@ -34,6 +34,7 @@ JsonObject = dict[str, object]
 FetchBytes = Callable[[str], bytes]
 ReplaceFile = Callable[[Path, Path], None]
 RestoreWrite = Callable[[Path, bytes], None]
+PrepareHook = Callable[[str], None]
 
 
 class AcquisitionError(RuntimeError):
@@ -239,6 +240,10 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
             "immutableBackupsUntilCompletion": True,
             "restoreRecoveryIdempotent": True,
             "durableCompletionRequired": True,
+            "prepublishStagingIsolated": True,
+            "preparedJournalAtomicActivation": True,
+            "prejournalOrphanConvergence": True,
+            "activeJournalRevalidatedBeforePublish": True,
         },
         "portabilityLedgerSha256": ledger_sha256,
         "sourceRecord": {
@@ -256,7 +261,7 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
         "bodySha256": body_sha256,
         "extractorVersion": snapshot_kosha_guide_corpus.EXTRACTOR_VERSION,
         "extractorDependency": f"pypdf=={snapshot_kosha_guide_corpus.PYPDF_VERSION}",
-        "promotionProtocol": "recoverable-staged-pair/v2",
+        "promotionProtocol": "recoverable-staged-pair/v3",
         "dbMutationPerformed": False,
         "schemaMutationPerformed": False,
         "pdfCommitted": False,
@@ -266,6 +271,14 @@ def _extract_asset(record: JsonObject, pdf_bytes: bytes, ledger_sha256: str) -> 
 
 def _transaction_dir(failure_path: Path) -> Path:
     return failure_path.parent / ".d-c-7-promotion-transaction"
+
+
+def _staging_dir(failure_path: Path) -> Path:
+    return failure_path.parent / ".d-c-7-promotion-staging"
+
+
+def _noop_prepare_hook(phase: str) -> None:
+    del phase
 
 
 def _sha256_file(path: Path) -> str:
@@ -454,21 +467,30 @@ def _prepare_promotion_transaction(
     failure_path: Path,
     asset: JsonObject,
     receipt: JsonObject,
+    prepare_hook: PrepareHook = _noop_prepare_hook,
 ) -> Path:
     transaction_dir = _transaction_dir(failure_path)
+    staging_dir = _staging_dir(failure_path)
     _recover_incomplete_promotion(
         transaction_dir,
         asset_path,
         receipt_path,
         failure_path,
     )
-    transaction_dir.mkdir(parents=True, exist_ok=False)
+    if staging_dir.exists():
+        if transaction_dir.exists() or not staging_dir.is_dir() or staging_dir.is_symlink():
+            raise AcquisitionError("promotion-staging-orphan-unsafe")
+        shutil.rmtree(staging_dir)
+    staging_dir.mkdir(parents=True, exist_ok=False)
+    prepare_hook("after-mkdir")
     staged = {
-        "asset": transaction_dir / "asset.staged.json",
-        "receipt": transaction_dir / "receipt.staged.json",
+        "asset": staging_dir / "asset.staged.json",
+        "receipt": staging_dir / "receipt.staged.json",
     }
     _write_json(staged["asset"], asset)
+    prepare_hook("after-staged-asset")
     _write_json(staged["receipt"], receipt)
+    prepare_hook("after-staged-receipt")
     targets = {
         "asset": asset_path,
         "receipt": receipt_path,
@@ -477,9 +499,10 @@ def _prepare_promotion_transaction(
     published: JsonObject = {}
     for name, destination in targets.items():
         if destination.is_file():
-            backup = transaction_dir / f"{name}.backup"
+            backup = staging_dir / f"{name}.backup"
             _write_bytes(backup, destination.read_bytes())
             backups[name] = {"present": True, "sha256": _sha256_file(backup)}
+            prepare_hook(f"after-backup-{name}")
         else:
             backups[name] = {"present": False, "sha256": None}
         published[name] = {
@@ -487,7 +510,7 @@ def _prepare_promotion_transaction(
             "sha256": _sha256_file(staged[name]),
         }
     _write_json(
-        transaction_dir / "journal.json",
+        staging_dir / "journal.json",
         {
             "schemaVersion": "safeclaw-exact-kosha-promotion-transaction/v2",
             "state": "prepared",
@@ -496,6 +519,14 @@ def _prepare_promotion_transaction(
             "published": published,
         },
     )
+    prepare_hook("after-prepared-journal")
+    _validated_transaction_journal(
+        staging_dir,
+        asset_path,
+        receipt_path,
+        failure_path,
+    )
+    os.replace(staging_dir, transaction_dir)
     return transaction_dir
 
 
@@ -506,6 +537,7 @@ def _publish_promotion_pair(
     asset: JsonObject,
     receipt: JsonObject,
     replace_file: ReplaceFile = os.replace,
+    prepare_hook: PrepareHook = _noop_prepare_hook,
 ) -> None:
     transaction_dir = _prepare_promotion_transaction(
         asset_path,
@@ -513,10 +545,17 @@ def _publish_promotion_pair(
         failure_path,
         asset,
         receipt,
+        prepare_hook,
     )
     staged_asset = transaction_dir / "asset.staged.json"
     staged_receipt = transaction_dir / "receipt.staged.json"
     try:
+        _validated_transaction_journal(
+            transaction_dir,
+            asset_path,
+            receipt_path,
+            failure_path,
+        )
         asset_path.parent.mkdir(parents=True, exist_ok=True)
         receipt_path.parent.mkdir(parents=True, exist_ok=True)
         replace_file(staged_asset, asset_path)
@@ -557,6 +596,7 @@ def acquire_exact_body(
     fetch_bytes: FetchBytes = fetch_official_pdf,
     expected_ledger_sha256: str = PINNED_LEDGER_SHA256,
     publish_replace: ReplaceFile = os.replace,
+    prepare_hook: PrepareHook = _noop_prepare_hook,
 ) -> JsonObject:
     transaction_dir = _transaction_dir(failure_path)
     _recover_incomplete_promotion(
@@ -576,6 +616,7 @@ def acquire_exact_body(
             asset,
             receipt,
             publish_replace,
+            prepare_hook,
         )
         if failure_path.exists():
             failure_path.unlink()
@@ -593,6 +634,7 @@ def acquire_exact_body(
                 "receiptPresent": receipt_path.is_file(),
                 "partialPromotionPresent": asset_path.is_file() != receipt_path.is_file(),
                 "transactionPresent": transaction_dir.exists(),
+                "stagingPresent": _staging_dir(failure_path).exists(),
             },
             "dbMutationPerformed": False,
             "schemaMutationPerformed": False,

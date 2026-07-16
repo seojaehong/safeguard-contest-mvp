@@ -1,7 +1,10 @@
 {
   "schemaVersion": "safeclaw-evaluation/v1",
-  "parentRejectedCommit": "cf5261828c95a329b919d40e8e55f406652f9985",
-  "priorRejectedCommit": "756f3f04930512cd2dbc6ea6774654ed0d3a9456",
+  "parentRejectedCommit": "615fab519834bd561e7cdf56a52cb4f38680607d",
+  "priorRejectedCommits": [
+    "cf5261828c95a329b919d40e8e55f406652f9985",
+    "756f3f04930512cd2dbc6ea6774654ed0d3a9456"
+  ],
   "branch": "feat/kosha-corpus-body-recovery",
   "status": "implementation-verified",
   "scope": {
@@ -23,9 +26,13 @@
   "closedFindings": {
     "P1": {
       "status": "closed",
-      "protocol": "recoverable-staged-pair/v2",
+      "protocol": "recoverable-staged-pair/v3",
       "evidence": [
-        "asset and receipt are fully staged before publication",
+        "asset, receipt, backups, and prepared journal are built in an isolated pre-publish directory",
+        "the prepared directory is atomically activated only after journal identity and hashes validate",
+        "mkdir, each staged write, each backup write, and journal-publication interruptions preserve targets",
+        "a second full acquisition safely removes the inactive orphan and converges",
+        "the activated journal is revalidated before either target is modified",
         "journal binds portable common-root-relative target identities",
         "all immutable backup hashes validate before either target is modified",
         "second publish failure rolls back both targets",
@@ -49,13 +56,13 @@
     "status": "verified",
     "officialUrl": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914243912403149/2",
     "receipt": "receipt.json",
-    "receiptCheckCount": 17,
+    "receiptCheckCount": 21,
     "receiptFailedCheckCount": 0
   },
   "verification": {
     "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body scripts.tests.test_snapshot_kosha_guide_corpus",
-    "testsRun": 54,
-    "testsPassed": 54,
+    "testsRun": 55,
+    "testsPassed": 55,
     "testsFailed": 0,
     "diffCheck": "pass"
   }

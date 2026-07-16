@@ -170,6 +170,83 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
             self.assertEqual(receipt_path.read_bytes(), old_receipt)
             self.assertFalse((root / ".d-c-7-promotion-transaction").exists())
 
+    def test_prejournal_interruptions_preserve_pair_and_second_acquisition_converges(self) -> None:
+        phases = (
+            "after-mkdir",
+            "after-staged-asset",
+            "after-staged-receipt",
+            "after-backup-asset",
+            "after-backup-receipt",
+            "after-prepared-journal",
+        )
+        pdf_bytes = build_pdf_bytes(["KOSHA GUIDE D-C-7-2026 exact native body"])
+        normalized_body = "KOSHA GUIDE D-C-7-2026 exact native body"
+        ledger = fixture_ledger(pdf_bytes)
+        for interrupted_phase in phases:
+            with self.subTest(interrupted_phase=interrupted_phase), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                ledger_path = root / "ledger.json"
+                asset_path = root / "asset.json"
+                receipt_path = root / "receipt.json"
+                failure_path = root / "failure.json"
+                ledger_path.write_text(json.dumps(ledger, ensure_ascii=False), encoding="utf-8")
+                old_asset = b'{"asset":"verified-old"}\n'
+                old_receipt = b'{"receipt":"verified-old"}\n'
+                asset_path.write_bytes(old_asset)
+                receipt_path.write_bytes(old_receipt)
+
+                def interrupt_prepare(phase: str) -> None:
+                    if phase == interrupted_phase:
+                        raise OSError(f"injected-{phase}")
+
+                with (
+                    patch.object(acquire_exact_kosha_body, "PINNED_PDF_SHA256", sha256(pdf_bytes)),
+                    patch.object(
+                        acquire_exact_kosha_body,
+                        "PINNED_NORMALIZED_BODY_SHA256",
+                        sha256(normalized_body.encode("utf-8")),
+                    ),
+                    self.assertRaisesRegex(OSError, f"injected-{interrupted_phase}"),
+                ):
+                    acquire_exact_kosha_body.acquire_exact_body(
+                        ledger_path,
+                        asset_path,
+                        receipt_path,
+                        failure_path,
+                        fetch_bytes=lambda url: pdf_bytes,
+                        expected_ledger_sha256=str(ledger["ledger_sha256"]),
+                        prepare_hook=interrupt_prepare,
+                    )
+
+                self.assertEqual(asset_path.read_bytes(), old_asset)
+                self.assertEqual(receipt_path.read_bytes(), old_receipt)
+                self.assertFalse((root / ".d-c-7-promotion-transaction").exists())
+                self.assertTrue((root / ".d-c-7-promotion-staging").exists())
+
+                with (
+                    patch.object(acquire_exact_kosha_body, "PINNED_PDF_SHA256", sha256(pdf_bytes)),
+                    patch.object(
+                        acquire_exact_kosha_body,
+                        "PINNED_NORMALIZED_BODY_SHA256",
+                        sha256(normalized_body.encode("utf-8")),
+                    ),
+                ):
+                    result = acquire_exact_kosha_body.acquire_exact_body(
+                        ledger_path,
+                        asset_path,
+                        receipt_path,
+                        failure_path,
+                        fetch_bytes=lambda url: pdf_bytes,
+                        expected_ledger_sha256=str(ledger["ledger_sha256"]),
+                    )
+
+                self.assertEqual(result["status"], "verified")
+                self.assertNotEqual(asset_path.read_bytes(), old_asset)
+                self.assertNotEqual(receipt_path.read_bytes(), old_receipt)
+                self.assertFalse((root / ".d-c-7-promotion-staging").exists())
+                self.assertFalse((root / ".d-c-7-promotion-transaction").exists())
+                self.assertFalse(failure_path.exists())
+
     def test_recovers_interrupted_partial_publish_from_journal(self) -> None:
         for fail_after_restore in (1, 2):
             with self.subTest(fail_after_restore=fail_after_restore), tempfile.TemporaryDirectory() as temp_dir:
