@@ -4,6 +4,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 type FixtureRow = Record<string, unknown>;
 type FixtureTables = Record<string, FixtureRow[]>;
 type QueryFilter = { method: "eq" | "in"; column: string; value: unknown };
+type OperationGraphResponse = {
+  graph: {
+    input: {
+      improvements: Array<{ id: string }>;
+      confirmations: Array<{ displayName: string }>;
+    };
+  };
+};
 
 const mocks = vi.hoisted(() => ({
   createSupabaseAdminClient: vi.fn(),
@@ -413,12 +421,16 @@ describe("commercial workpack service-role tenant hardening", () => {
     const response = await GET(request("/api/workpacks/workpack-a/operation-graph"), {
       params: Promise.resolve({ id: "workpack-a" })
     });
-    const body = await response.json() as {
-      source: { improvementCount: number; confirmationCount: number };
-    };
+    const body = await response.json() as OperationGraphResponse;
+    const improvementIds = body.graph.input.improvements.map((item) => item.id);
+    const confirmationNames = body.graph.input.confirmations.map((item) => item.displayName);
 
-    expect(body.source.improvementCount).toBe(1);
-    expect(body.source.confirmationCount).toBe(1);
+    expect(improvementIds).toEqual(["improvement-match"]);
+    expect(improvementIds).not.toContain("improvement-wrong-org");
+    expect(improvementIds).not.toContain("improvement-wrong-site");
+    expect(confirmationNames).toEqual(["Tenant A Worker"]);
+    expect(confirmationNames).not.toContain("Foreign Org Worker");
+    expect(confirmationNames).not.toContain("Foreign Site Worker");
   });
 
   it("uses IS NULL for nullable-site operation graph child rows", async () => {
@@ -430,12 +442,16 @@ describe("commercial workpack service-role tenant hardening", () => {
     const response = await GET(request("/api/workpacks/workpack-a/operation-graph"), {
       params: Promise.resolve({ id: "workpack-a" })
     });
-    const body = await response.json() as {
-      source: { improvementCount: number; confirmationCount: number };
-    };
+    const body = await response.json() as OperationGraphResponse;
+    const improvementIds = body.graph.input.improvements.map((item) => item.id);
+    const confirmationNames = body.graph.input.confirmations.map((item) => item.displayName);
 
-    expect(body.source.improvementCount).toBe(1);
-    expect(body.source.confirmationCount).toBe(1);
+    expect(improvementIds).toEqual(["improvement-match"]);
+    expect(improvementIds).not.toContain("improvement-wrong-org");
+    expect(improvementIds).not.toContain("improvement-wrong-site");
+    expect(confirmationNames).toEqual(["Tenant A Worker"]);
+    expect(confirmationNames).not.toContain("Foreign Org Worker");
+    expect(confirmationNames).not.toContain("Foreign Site Worker");
     expect(fake.calls.filter((call) => call.method === "is")).toEqual([
       { table: "workpack_improvements", method: "is", column: "site_id", value: null },
       { table: "workpack_read_confirmations", method: "is", column: "site_id", value: null }
