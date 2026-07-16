@@ -1,6 +1,8 @@
 import { assembleGraph, type OntologyGraph } from "./ontology/graph-store";
+import { EVIDENCE_CHAIN_REGISTRY } from "./ontology/evidence-chain-registry";
 import { queryByTask } from "./ontology/query";
 import { reviewDocumentCoverage, type QaReviewResult } from "./ontology/qa-review";
+import { normalizeLabel, type OntologyNode } from "./ontology/schema";
 import type {
   AskResponse,
   QualityContract,
@@ -230,6 +232,47 @@ export function parsePublishedOntologyGraph(payload: unknown): OntologyGraph | n
   return assembled;
 }
 
+function resolveExactPublishedTask(
+  graph: OntologyGraph,
+  reviewTask: string
+): { task: OntologyNode; graph: OntologyGraph } | null {
+  const normalizedReviewTask = normalizeLabel(reviewTask);
+  if (!normalizedReviewTask) return null;
+
+  const candidates = new Map<string, OntologyNode>();
+  for (const node of graph.nodes) {
+    if (
+      node.kind === "Task"
+      && node.review_state === "published"
+      && normalizeLabel(node.label) === normalizedReviewTask
+    ) {
+      candidates.set(node.node_id, node);
+    }
+  }
+
+  for (const definition of EVIDENCE_CHAIN_REGISTRY) {
+    const approvedLabels = [definition.canonicalTaskLabel, ...definition.aliases];
+    if (!approvedLabels.some((label) => normalizeLabel(label) === normalizedReviewTask)) continue;
+    const canonicalNode = graph.nodes.find((node) => (
+      node.node_id === definition.canonicalTaskNodeId
+      && node.kind === "Task"
+      && node.review_state === "published"
+      && normalizeLabel(node.label) === normalizeLabel(definition.canonicalTaskLabel)
+    ));
+    if (canonicalNode) candidates.set(canonicalNode.node_id, canonicalNode);
+  }
+
+  if (candidates.size !== 1) return null;
+  const task = Array.from(candidates.values())[0];
+  return {
+    task,
+    graph: {
+      ...graph,
+      nodes: graph.nodes.filter((node) => node.kind !== "Task" || node.node_id === task.node_id)
+    }
+  };
+}
+
 export function revalidateEditedWorkpack(
   response: AskResponse,
   basis: WorkpackRevalidationBasis | null,
@@ -238,7 +281,8 @@ export function revalidateEditedWorkpack(
 ): AskResponse {
   const reviewTask = basis?.reviewTasks.length === 1 ? basis.reviewTasks[0] : "";
   const source = buildRevalidationSource(response);
-  const taskEvidence = reviewTask ? queryByTask(graph, reviewTask) : null;
+  const exactTask = reviewTask ? resolveExactPublishedTask(graph, reviewTask) : null;
+  const taskEvidence = exactTask ? queryByTask(exactTask.graph, exactTask.task.label) : null;
   const result: QaReviewResult = !reviewTask
     ? {
         reviewable: false,
@@ -246,14 +290,14 @@ export function revalidateEditedWorkpack(
         message: "편집 전 authoritative 검수 작업을 하나로 확인할 수 없습니다.",
         registeredTasks: []
       }
-    : !taskEvidence || taskEvidence.hazards.length === 0 || taskEvidence.controls.length === 0
+    : !exactTask || !taskEvidence || taskEvidence.hazards.length === 0 || taskEvidence.controls.length === 0
       ? {
           reviewable: false,
           errorCode: "ontology_qa_failed",
           message: `published 온톨로지에서 '${reviewTask}'의 필수 위험요인-안전조치 근거 경로를 확인할 수 없습니다.`,
           registeredTasks: []
         }
-      : reviewDocumentCoverage(reviewTask, source.text, graph);
+      : reviewDocumentCoverage(exactTask.task.label, source.text, exactTask.graph);
   const reviewed = attachRevalidatedQa(response, reviewTask, result, source.documentKeys);
   return {
     ...reviewed,
