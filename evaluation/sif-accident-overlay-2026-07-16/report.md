@@ -48,3 +48,17 @@
 | TypeScript | `npm.cmd run typecheck` | pass |
 | Ontology regression | `npm.cmd test -- <all tests/ontology*.test.ts>` | 134 passed, 4 skipped |
 | Patch whitespace | `git diff --check` | pass |
+
+## P2 Remediation
+
+- Evaluated: `2026-07-16T12:23:12.9771299+09:00`
+- Parent commit: `6248cadb2c38af8d25a68f64e505c78a97d16ddc`
+- Corrected the `00323` accident excerpt from `디딘대(9단)` to the tracked source text `디딤대(9단)`.
+- Replaced duplicated excerpt and hash constants in the seed test with direct reads from:
+  - `evaluation/sif-embedding-gate/sif-embedding-corpus.jsonl`
+  - `evaluation/sif-embedding-gate/approval-preflight-report.json`
+- The fixture-backed test extracts `재해개요`, reads each row's `contentHash`, and reads the tracked `corpusHash`; it compares those values against both overlay nodes and edges.
+- RED: `npm.cmd test -- tests/ontology-seed.test.ts` failed exactly once on `디딘대` versus `디딤대`.
+- GREEN: the same command passed 14 of 14 tests after the source correction.
+- Final focused verification: 29 of 29 tests passed across `ontology-seed` and `ontology-query`.
+- Final regression verification: TypeScript passed; ontology tests reported 134 passed and 4 skipped; `git diff --check` passed.
