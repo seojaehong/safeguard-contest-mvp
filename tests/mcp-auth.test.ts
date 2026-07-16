@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 
 import {
   MCP_TOOL_NAMES,
@@ -16,8 +18,69 @@ import {
   normalizeScopes,
   parseLegacyTokens,
   requireMcpToolScope,
+  resolveMcpAuth,
   type McpTokenRow,
 } from "@/lib/mcp-auth";
+
+vi.mock("@/lib/supabase-admin", () => ({
+  createSupabaseAdminClient: vi.fn(),
+}));
+
+type AuthTable = "mcp_tokens" | "sites";
+type AuthFilter = { column: string; value: unknown };
+
+function makeAuthClient(input: {
+  tokenRow: McpTokenRow;
+  siteRow?: { id: string; organization_id: string } | null;
+  siteError?: Error | null;
+}) {
+  const siteFilters: AuthFilter[] = [];
+  const selectedTables: AuthTable[] = [];
+  const tokenSelectQuery = {
+    eq() {
+      return tokenSelectQuery;
+    },
+    async maybeSingle() {
+      return { data: input.tokenRow, error: null };
+    },
+  };
+  const siteSelectQuery = {
+    eq(column: string, value: unknown) {
+      siteFilters.push({ column, value });
+      return siteSelectQuery;
+    },
+    async maybeSingle() {
+      return { data: input.siteRow ?? null, error: input.siteError ?? null };
+    },
+  };
+  const client = {
+    from(table: AuthTable) {
+      selectedTables.push(table);
+      return {
+        select() {
+          return table === "mcp_tokens" ? tokenSelectQuery : siteSelectQuery;
+        },
+        update() {
+          return {
+            eq() {
+              return Promise.resolve({ error: null });
+            },
+          };
+        },
+      };
+    },
+  };
+  return {
+    client: client as unknown as NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
+    selectedTables,
+    siteFilters,
+  };
+}
+
+afterEach(() => {
+  vi.clearAllMocks();
+  vi.unstubAllEnvs();
+});
 
 describe("hashToken", () => {
   it("produces the known sha256 hex vector and is deterministic", () => {
@@ -225,5 +288,76 @@ describe("asAuthContext", () => {
     expect(asAuthContext(null)).toBeNull();
     expect(asAuthContext({ source: "bogus", scopes: [] })).toBeNull();
     expect(asAuthContext({ source: "db", scopes: "nope" })).toBeNull();
+  });
+});
+
+describe("resolveMcpAuth tenant identity", () => {
+  const tokenRow: McpTokenRow = {
+    id: "token-1",
+    site_id: "site-1",
+    org_id: "org-1",
+    scopes: ["tools:read"],
+    disabled: false,
+  };
+
+  it("preserves a site token when the existing sites contract proves its organization", async () => {
+    const fake = makeAuthClient({
+      tokenRow,
+      siteRow: { id: "site-1", organization_id: "org-1" },
+    });
+    vi.mocked(createSupabaseAdminClient).mockReturnValue(fake.client);
+
+    await expect(resolveMcpAuth("persisted-token")).resolves.toEqual({
+      siteId: "site-1",
+      orgId: "org-1",
+      scopes: ["tools:read"],
+      source: "db",
+      tokenId: "token-1",
+    });
+    expect(fake.siteFilters).toEqual([
+      { column: "id", value: "site-1" },
+      { column: "organization_id", value: "org-1" },
+    ]);
+  });
+
+  it("fails closed without env fallback when the site and organization do not match", async () => {
+    vi.stubEnv("SAFECLAW_MCP_TOKENS", "persisted-token");
+    const fake = makeAuthClient({ tokenRow, siteRow: null });
+    vi.mocked(createSupabaseAdminClient).mockReturnValue(fake.client);
+
+    await expect(resolveMcpAuth("persisted-token")).resolves.toBeNull();
+    expect(fake.selectedTables).toContain("sites");
+  });
+
+  it("fails closed when the site ownership lookup cannot prove consistency", async () => {
+    const fake = makeAuthClient({
+      tokenRow,
+      siteError: new Error("private site lookup failure"),
+    });
+    vi.mocked(createSupabaseAdminClient).mockReturnValue(fake.client);
+
+    await expect(resolveMcpAuth("persisted-token")).resolves.toBeNull();
+  });
+
+  it("rejects a persisted site token that has no organization to verify", async () => {
+    const fake = makeAuthClient({ tokenRow: { ...tokenRow, org_id: null } });
+    vi.mocked(createSupabaseAdminClient).mockReturnValue(fake.client);
+
+    await expect(resolveMcpAuth("persisted-token")).resolves.toBeNull();
+    expect(fake.selectedTables).not.toContain("sites");
+  });
+
+  it("preserves an organization-scoped token without requiring a site lookup", async () => {
+    const fake = makeAuthClient({ tokenRow: { ...tokenRow, site_id: null } });
+    vi.mocked(createSupabaseAdminClient).mockReturnValue(fake.client);
+
+    await expect(resolveMcpAuth("persisted-token")).resolves.toEqual({
+      siteId: null,
+      orgId: "org-1",
+      scopes: ["tools:read"],
+      source: "db",
+      tokenId: "token-1",
+    });
+    expect(fake.selectedTables).not.toContain("sites");
   });
 });

@@ -201,6 +201,31 @@ function supabaseConfigured(): boolean {
   );
 }
 
+async function verifyPersistedTenantIdentity(
+  client: NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
+  row: McpTokenRow,
+): Promise<boolean> {
+  if (!row.site_id) return true;
+  if (!row.org_id) return false;
+
+  try {
+    const { data, error } = await client
+      .from("sites")
+      .select("id, organization_id")
+      .eq("id", row.site_id)
+      .eq("organization_id", row.org_id)
+      .maybeSingle();
+    if (error) {
+      log.warn("MCP token tenant identity verification failed", error);
+      return false;
+    }
+    return data?.id === row.site_id && data.organization_id === row.org_id;
+  } catch (error) {
+    log.warn("MCP token tenant identity verification threw", error);
+    return false;
+  }
+}
+
 /** MCP 계층이 켜져 있는지(env 토큰 존재 또는 Supabase 서비스 롤 설정). */
 export function isMcpEnabled(): boolean {
   return computeEnablement({
@@ -236,7 +261,12 @@ export async function resolveMcpAuth(bearerToken: string | undefined | null): Pr
       if (error) {
         log.warn("mcp_tokens 조회 실패 — env 폴백으로 진행", error);
       } else if (data) {
-        dbRow = data as McpTokenRow;
+        const persistedRow = data as McpTokenRow;
+        if (!(await verifyPersistedTenantIdentity(client, persistedRow))) {
+          log.warn("MCP token tenant identity could not be proven");
+          return null;
+        }
+        dbRow = persistedRow;
         // last_used_at 갱신은 fire-and-forget(응답 경로를 막지 않는다).
         void client
           .from("mcp_tokens")
