@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-evaluation/v1",
-  "parentRejectedCommit": "381656e7bb1b5e833ccd9061fbd5b7ebdafe4535",
+  "parentRejectedCommit": "e4bac2c7440c51d7833e31de6c9829aa48470c10",
   "priorRejectedCommits": [
     "cf5261828c95a329b919d40e8e55f406652f9985",
     "756f3f04930512cd2dbc6ea6774654ed0d3a9456"
@@ -44,6 +44,8 @@
         "test hooks can interrupt mutations but cannot perform target writes",
         "initial output-parent file identities are retained and matched against every later validation and rename handle",
         "a same-name regular-directory swap fails closed without writing into the replacement namespace",
+        "prepared-journal recovery forwards the original directory guards into rollback",
+        "a recovery-time namespace swap preserves both the replacement namespace and original transaction",
         "journal binds portable common-root-relative target identities",
         "all immutable backup hashes validate before either target is modified",
         "second publish failure rolls back both targets",
@@ -73,8 +75,8 @@
   },
   "verification": {
     "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body scripts.tests.test_snapshot_kosha_guide_corpus",
-    "testsRun": 61,
-    "testsPassed": 61,
+    "testsRun": 62,
+    "testsPassed": 62,
     "testsFailed": 0,
     "diffCheck": "pass"
   }

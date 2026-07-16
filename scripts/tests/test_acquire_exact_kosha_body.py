@@ -631,6 +631,60 @@ class AcquireExactKoshaBodyTest(unittest.TestCase):
                 self.assertEqual(receipt_path.read_bytes(), old_receipt)
                 self.assertFalse(transaction_dir.exists())
 
+    def test_recovery_parent_swap_preserves_original_transaction_and_replacement_namespace(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            output_root = root / "outputs"
+            original_root = root / "outputs-original"
+            output_root.mkdir()
+            asset_path = output_root / "asset.json"
+            receipt_path = output_root / "receipt.json"
+            failure_path = output_root / "failure.json"
+            old_asset = b'{"asset":"old"}\n'
+            old_receipt = b'{"receipt":"old"}\n'
+            asset_path.write_bytes(old_asset)
+            receipt_path.write_bytes(old_receipt)
+            directory_guards = acquire_exact_kosha_body._capture_directory_guards(
+                asset_path,
+                receipt_path,
+                failure_path,
+            )
+            transaction_dir = acquire_exact_kosha_body._prepare_promotion_transaction(
+                asset_path,
+                receipt_path,
+                failure_path,
+                {"asset": "new"},
+                {"receipt": "new"},
+                directory_guards=directory_guards,
+            )
+            asset_path.write_bytes(b'{"asset":"partial"}\n')
+            receipt_path.write_bytes(b'{"receipt":"partial"}\n')
+
+            def swap_parent_after_journal(phase: str) -> None:
+                self.assertEqual(phase, "after-recovery-journal")
+                output_root.rename(original_root)
+                output_root.mkdir()
+
+            with self.assertRaisesRegex(
+                acquire_exact_kosha_body.AcquisitionError,
+                "promotion-output-parent-identity-mismatch",
+            ):
+                acquire_exact_kosha_body._recover_incomplete_promotion(
+                    transaction_dir,
+                    asset_path,
+                    receipt_path,
+                    failure_path,
+                    directory_guards,
+                    swap_parent_after_journal,
+                )
+
+            self.assertFalse((output_root / "asset.json").exists())
+            self.assertFalse((output_root / "receipt.json").exists())
+            self.assertFalse((output_root / ".d-c-7-promotion-transaction").exists())
+            self.assertEqual((original_root / "asset.json").read_bytes(), b'{"asset":"partial"}\n')
+            self.assertEqual((original_root / "receipt.json").read_bytes(), b'{"receipt":"partial"}\n')
+            self.assertTrue((original_root / ".d-c-7-promotion-transaction").is_dir())
+
     def test_committed_recovery_requires_durable_completion_before_cleanup(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
