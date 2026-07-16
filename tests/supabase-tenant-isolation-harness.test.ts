@@ -2,69 +2,126 @@ import { describe, expect, it } from "vitest";
 
 import {
   DISPOSABLE_PROJECT_ACK,
-  EXPECTED_HEAD,
   redactSecrets,
   runTenantIsolationHarness,
+  validateScenarioObservation,
+} from "../scripts/supabase_tenant_isolation_harness.mjs";
+import type {
+  HarnessEnvironment,
+  Scenario,
+  ScenarioExecutor,
+  ScenarioObservation,
+  ServiceRoleVerifier,
 } from "../scripts/supabase_tenant_isolation_harness.mjs";
 import {
-  STORAGE_SCENARIOS,
-  TABLE_SCENARIOS,
+  CROSS_TENANT_DENY_ASSERTIONS,
+  OWN_TENANT_POSITIVE_CONTROLS,
   TENANT_ISOLATION_MANIFEST,
 } from "../scripts/supabase_tenant_isolation_manifest.mjs";
 
+const RUNTIME_EXPECTED_HEAD = "a".repeat(40);
 const TEST_REF = "abcdefghijklmnopqrst";
 const PRODUCTION_REF = "zyxwvutsrqponmlkjihg";
 
-function validEnv(): Record<string, string> {
+function validEnv(): HarnessEnvironment {
   return {
     SUPABASE_TENANT_TEST_PROJECT_REF: TEST_REF,
     SUPABASE_PRODUCTION_PROJECT_REF: PRODUCTION_REF,
     SUPABASE_TENANT_TEST_DISPOSABLE_ACK: DISPOSABLE_PROJECT_ACK,
-    SUPABASE_TENANT_TEST_EXPECTED_HEAD: EXPECTED_HEAD,
+    SUPABASE_TENANT_TEST_EXPECTED_HEAD: RUNTIME_EXPECTED_HEAD,
     SUPABASE_TENANT_TEST_ANON_KEY: "anon-secret-value",
     SUPABASE_TENANT_TEST_USER_A_JWT: "user-a-secret-value",
     SUPABASE_TENANT_TEST_USER_B_JWT: "user-b-secret-value",
   };
 }
 
-function requestCounter() {
-  let count = 0;
-  let receivedContext: unknown;
+function validObservation(scenario: Scenario): ScenarioObservation {
+  const mutatesOwnFixture = scenario.control === "positive" && scenario.operation !== "SELECT";
   return {
-    executor: {
-      async executeScenario(context: unknown) {
-        count += 1;
-        receivedContext = context;
-        return { passed: true, cleanupPassed: true, residualCount: 0 };
-      },
+    httpStatus: scenario.expectedHttpStatuses[0],
+    affectedRows: scenario.expectedAffectedRows,
+    returnedRows: scenario.expectedReturnedRows,
+    beforeFingerprint: "before-state",
+    afterFingerprint: mutatesOwnFixture ? "after-state" : "before-state",
+    foreignUnchanged: true,
+  };
+}
+
+function successfulHarness() {
+  const executeContexts: unknown[] = [];
+  const cleanupContexts: unknown[] = [];
+  const foreignVerifyContexts: unknown[] = [];
+  let residualCalls = 0;
+  const executor: ScenarioExecutor = {
+    async executeScenario(context) {
+      executeContexts.push(context);
+      return validObservation(context.scenario);
     },
-    count: () => count,
-    context: () => receivedContext,
+    async cleanupScenario(context) {
+      cleanupContexts.push(context);
+      return { httpStatus: 204, affectedRows: 1 };
+    },
+  };
+  const verifier: ServiceRoleVerifier = {
+    async verifyForeignState(context) {
+      foreignVerifyContexts.push(context);
+      return {
+        affectedRows: 0,
+        beforeFingerprint: context.beforeFingerprint,
+        afterFingerprint: context.beforeFingerprint,
+        foreignUnchanged: true,
+      };
+    },
+    async verifyResidualZero() {
+      residualCalls += 1;
+      return { tableRows: 0, storageObjects: 0 };
+    },
+  };
+  return {
+    executor,
+    verifier,
+    executeContexts,
+    cleanupContexts,
+    foreignVerifyContexts,
+    residualCalls: () => residualCalls,
   };
 }
 
 describe("Supabase tenant-isolation manifest", () => {
-  it("contains exactly 13 tables x 4 scenarios plus 4 storage scenarios", () => {
+  it("contains exactly 56 cross-tenant deny assertions", () => {
     expect(TENANT_ISOLATION_MANIFEST.tables).toHaveLength(13);
-    expect(TABLE_SCENARIOS).toHaveLength(52);
-    expect(STORAGE_SCENARIOS).toHaveLength(4);
-    expect(TENANT_ISOLATION_MANIFEST.scenarios).toHaveLength(56);
+    expect(CROSS_TENANT_DENY_ASSERTIONS).toHaveLength(56);
+    expect(CROSS_TENANT_DENY_ASSERTIONS.filter((scenario) => scenario.resourceType === "table")).toHaveLength(52);
+    expect(CROSS_TENANT_DENY_ASSERTIONS.filter((scenario) => scenario.resourceType === "storage")).toHaveLength(4);
+    expect(new Set(CROSS_TENANT_DENY_ASSERTIONS.map((scenario) => scenario.operation))).toEqual(
+      new Set(["SELECT", "INSERT", "UPDATE", "DELETE"]),
+    );
+    expect(CROSS_TENANT_DENY_ASSERTIONS.every((scenario) => scenario.expected === "deny")).toBe(true);
   });
 
-  it("represents positive controls and fail-closed cleanup/residual rules", () => {
-    const scenarios = TENANT_ISOLATION_MANIFEST.scenarios;
-    expect(scenarios.filter((scenario) => scenario.control === "positive").length).toBeGreaterThan(0);
-    expect(scenarios.filter((scenario) => scenario.expected === "deny").length).toBeGreaterThan(0);
-    for (const scenario of scenarios) {
+  it("keeps same-CRUD own-tenant positive controls separate from the 56 denies", () => {
+    expect(OWN_TENANT_POSITIVE_CONTROLS).toHaveLength(56);
+    expect(OWN_TENANT_POSITIVE_CONTROLS.every((scenario) => scenario.control === "positive")).toBe(true);
+    expect(TENANT_ISOLATION_MANIFEST.scenarios).toHaveLength(112);
+    expect(TENANT_ISOLATION_MANIFEST.denyAssertionCount).toBe(56);
+    expect(TENANT_ISOLATION_MANIFEST.positiveControlCount).toBe(56);
+  });
+
+  it("requires always-cleanup and a separate final residual-zero check", () => {
+    for (const scenario of TENANT_ISOLATION_MANIFEST.scenarios) {
       expect(scenario.cleanup.run).toBe("always");
-      expect(scenario.cleanup.credential).toBe("fixture_owner");
-      expect(scenario.residual.expectedCount).toBe(0);
-      expect(scenario.residual.onMismatch).toBe("fail_closed");
+      expect(scenario.cleanup.phase).toBe("scenario_finally");
     }
+    expect(TENANT_ISOLATION_MANIFEST.execution.finalResidualVerification).toEqual({
+      credential: "service_role_verifier",
+      expectedTableRows: 0,
+      expectedStorageObjects: 0,
+      onMismatch: "fail_closed",
+    });
   });
 });
 
-describe("Supabase tenant-isolation harness preflight", () => {
+describe("Supabase tenant-isolation preflight", () => {
   it.each([
     "SUPABASE_TENANT_TEST_PROJECT_REF",
     "SUPABASE_PRODUCTION_PROJECT_REF",
@@ -73,82 +130,178 @@ describe("Supabase tenant-isolation harness preflight", () => {
     "SUPABASE_TENANT_TEST_ANON_KEY",
     "SUPABASE_TENANT_TEST_USER_A_JWT",
     "SUPABASE_TENANT_TEST_USER_B_JWT",
-  ])("makes zero requests when %s is missing", async (missingKey) => {
+  ] satisfies Array<keyof HarnessEnvironment>)("calls no hook when %s is missing", async (missingKey) => {
     const env = validEnv();
     delete env[missingKey];
-    const counter = requestCounter();
-
+    const harness = successfulHarness();
     const result = await runTenantIsolationHarness({
       env,
-      actualHead: EXPECTED_HEAD,
+      actualHead: RUNTIME_EXPECTED_HEAD,
       mode: "execute",
-      executor: counter.executor,
+      executor: harness.executor,
+      verifier: harness.verifier,
     });
-
     expect(result.ok).toBe(false);
     expect(result.requestCount).toBe(0);
-    expect(counter.count()).toBe(0);
+    expect(harness.executeContexts).toHaveLength(0);
+    expect(harness.cleanupContexts).toHaveLength(0);
+    expect(harness.foreignVerifyContexts).toHaveLength(0);
+    expect(harness.residualCalls()).toBe(0);
   });
 
   it.each([
-    ["disposable ACK mismatch", { SUPABASE_TENANT_TEST_DISPOSABLE_ACK: "no" }, EXPECTED_HEAD],
-    ["expected-head env mismatch", { SUPABASE_TENANT_TEST_EXPECTED_HEAD: "0".repeat(40) }, EXPECTED_HEAD],
-    ["actual HEAD mismatch", {}, "1".repeat(40)],
-    ["production and disposable refs match", { SUPABASE_PRODUCTION_PROJECT_REF: TEST_REF }, EXPECTED_HEAD],
-  ])("makes zero requests on %s", async (_label, override, actualHead) => {
-    const counter = requestCounter();
+    ["disposable ACK", { SUPABASE_TENANT_TEST_DISPOSABLE_ACK: "no" }, RUNTIME_EXPECTED_HEAD],
+    ["expected HEAD", { SUPABASE_TENANT_TEST_EXPECTED_HEAD: "0".repeat(40) }, RUNTIME_EXPECTED_HEAD],
+    ["actual HEAD", {}, "1".repeat(40)],
+    ["different production ref", { SUPABASE_PRODUCTION_PROJECT_REF: TEST_REF }, RUNTIME_EXPECTED_HEAD],
+  ] satisfies Array<[string, Partial<HarnessEnvironment>, string]>)("calls no hook on mismatched %s gate", async (_label, override, actualHead) => {
+    const harness = successfulHarness();
     const result = await runTenantIsolationHarness({
       env: { ...validEnv(), ...override },
       actualHead,
       mode: "execute",
-      executor: counter.executor,
+      executor: harness.executor,
+      verifier: harness.verifier,
     });
-
     expect(result.ok).toBe(false);
     expect(result.requestCount).toBe(0);
-    expect(counter.count()).toBe(0);
+    expect(harness.executeContexts).toHaveLength(0);
+    expect(harness.residualCalls()).toBe(0);
+  });
+});
+
+describe("Supabase tenant-isolation observation validation", () => {
+  it.each([
+    ["HTTP status", { httpStatus: 500 }],
+    ["affected rows", { affectedRows: 1 }],
+    ["returned rows", { returnedRows: 1 }],
+    ["before/after state", { afterFingerprint: "mutated" }],
+    ["foreign unchanged", { foreignUnchanged: false }],
+  ] satisfies Array<[string, Partial<ScenarioObservation>]>)("fails a deny assertion on wrong %s", (_label, override) => {
+    const scenario = CROSS_TENANT_DENY_ASSERTIONS.find((item) => item.operation === "SELECT");
+    if (!scenario) throw new Error("Missing SELECT deny assertion");
+    const observation = { ...validObservation(scenario), passed: true, ...override };
+    expect(validateScenarioObservation(scenario, observation).ok).toBe(false);
   });
 
-  it("does not execute in default dry-run mode even when every gate passes", async () => {
-    const counter = requestCounter();
+  it("does not accept a passed boolean as evidence", () => {
+    const scenario = CROSS_TENANT_DENY_ASSERTIONS.find((item) => item.operation === "UPDATE");
+    if (!scenario) throw new Error("Missing UPDATE deny assertion");
+    const observation = { ...validObservation(scenario), affectedRows: 9, passed: true };
+    expect(validateScenarioObservation(scenario, observation).ok).toBe(false);
+  });
+});
+
+describe("Supabase tenant-isolation execution lifecycle", () => {
+  it("validates all 112 observations and keeps service-role hooks outside executor context", async () => {
+    const harness = successfulHarness();
     const result = await runTenantIsolationHarness({
       env: validEnv(),
-      actualHead: EXPECTED_HEAD,
-      executor: counter.executor,
+      actualHead: RUNTIME_EXPECTED_HEAD,
+      mode: "execute",
+      executor: harness.executor,
+      verifier: harness.verifier,
     });
+    expect(result.ok).toBe(true);
+    expect(result.requestCount).toBe(112);
+    expect(harness.executeContexts).toHaveLength(112);
+    expect(harness.cleanupContexts).toHaveLength(112);
+    expect(harness.foreignVerifyContexts).toHaveLength(28);
+    expect(harness.residualCalls()).toBe(1);
+    expect(result.results).toHaveLength(112);
+    expect(result.results?.[0]).toMatchObject({
+      observation: {
+        httpStatus: 200,
+        affectedRows: 0,
+        returnedRows: 0,
+        beforeFingerprint: "before-state",
+        afterFingerprint: "before-state",
+        foreignUnchanged: true,
+      },
+      cleanupObservation: { httpStatus: 204, affectedRows: 1 },
+    });
+    expect(result.results?.filter((item) => item.foreignVerification !== null)).toHaveLength(28);
+    for (const rawContext of harness.executeContexts) {
+      const context = rawContext as { clients: Record<string, unknown> } & Record<string, unknown>;
+      expect(Object.keys(context).filter((key) => key !== "scenario")).not.toContain("serviceRoleClient");
+      expect(Object.keys(context.clients)).toEqual(["tenantA", "tenantB"]);
+    }
+    expect(JSON.stringify(harness.foreignVerifyContexts)).toContain("service_role_verifier");
+  });
 
+  it("runs cleanup in finally and the final residual verifier after executor failure", async () => {
+    const harness = successfulHarness();
+    harness.executor.executeScenario = async () => {
+      throw new Error("actor request failed");
+    };
+    const result = await runTenantIsolationHarness({
+      env: validEnv(),
+      actualHead: RUNTIME_EXPECTED_HEAD,
+      mode: "execute",
+      executor: harness.executor,
+      verifier: harness.verifier,
+    });
+    expect(result.ok).toBe(false);
+    expect(harness.cleanupContexts).toHaveLength(1);
+    expect(harness.residualCalls()).toBe(1);
+  });
+
+  it("fails closed when the final service-role residual verifier finds data", async () => {
+    const harness = successfulHarness();
+    harness.verifier.verifyResidualZero = async () => ({ tableRows: 1, storageObjects: 0 });
+    const result = await runTenantIsolationHarness({
+      env: validEnv(),
+      actualHead: RUNTIME_EXPECTED_HEAD,
+      mode: "execute",
+      executor: harness.executor,
+      verifier: harness.verifier,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.residualVerification).toEqual({ tableRows: 1, storageObjects: 0, passed: false });
+  });
+
+  it("fails closed when a hidden UPDATE/DELETE verifier detects mutation", async () => {
+    const harness = successfulHarness();
+    harness.verifier.verifyForeignState = async (context) => ({
+      affectedRows: 1,
+      beforeFingerprint: context.beforeFingerprint,
+      afterFingerprint: "changed-by-hidden-update",
+      foreignUnchanged: false,
+    });
+    const result = await runTenantIsolationHarness({
+      env: validEnv(),
+      actualHead: RUNTIME_EXPECTED_HEAD,
+      mode: "execute",
+      executor: harness.executor,
+      verifier: harness.verifier,
+    });
+    expect(result.ok).toBe(false);
+    expect(harness.cleanupContexts.length).toBeGreaterThan(0);
+    expect(harness.residualCalls()).toBe(1);
+  });
+
+  it("keeps default dry-run at zero requests", async () => {
+    const harness = successfulHarness();
+    const result = await runTenantIsolationHarness({
+      env: validEnv(),
+      actualHead: RUNTIME_EXPECTED_HEAD,
+      executor: harness.executor,
+      verifier: harness.verifier,
+    });
     expect(result.ok).toBe(true);
     expect(result.mode).toBe("dry-run");
     expect(result.requestCount).toBe(0);
-    expect(counter.count()).toBe(0);
-  });
-
-  it("executes all 56 scenarios only after every gate passes", async () => {
-    const counter = requestCounter();
-    const result = await runTenantIsolationHarness({
-      env: validEnv(),
-      actualHead: EXPECTED_HEAD,
-      mode: "execute",
-      executor: counter.executor,
-    });
-
-    expect(result.ok).toBe(true);
-    expect(result.requestCount).toBe(56);
-    expect(counter.count()).toBe(56);
-    expect(JSON.stringify(counter.context())).not.toMatch(/service.?role/i);
+    expect(harness.executeContexts).toHaveLength(0);
   });
 
   it("redacts secrets recursively from reports and errors", () => {
     const secret = "jwt-super-secret-value";
-    const redacted = redactSecrets({
+    const serialized = JSON.stringify(redactSecrets({
       token: secret,
       nested: { authorization: `Bearer ${secret}` },
       message: `request failed for ${secret}`,
-    }, [secret]);
-    const serialized = JSON.stringify(redacted);
-
+    }, [secret]));
     expect(serialized).not.toContain(secret);
-    expect(serialized).not.toContain(`Bearer ${secret}`);
     expect(serialized).toContain("[REDACTED]");
   });
 });

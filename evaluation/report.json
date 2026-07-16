@@ -1,30 +1,47 @@
 {
-  "artifact": "supabase-tenant-isolation-harness-skeleton",
+  "artifact": "supabase-tenant-isolation-harness-review-remediation",
   "authoritativeBase": "530efbfafb30c6145c1536172b260ff644845846",
   "branch": "feat/supabase-tenant-isolation-harness-skeleton",
+  "committedEvidencePath": "evaluation/report.json",
   "manifest": {
     "tableCount": 13,
-    "scenariosPerTable": 4,
-    "tableScenarioCount": 52,
-    "storageScenarioCount": 4,
-    "totalScenarioCount": 56
+    "crudOperationsPerResource": 4,
+    "tableDenyAssertionCount": 52,
+    "storageDenyAssertionCount": 4,
+    "crossTenantDenyAssertionCount": 56,
+    "ownTenantPositiveControlCount": 56,
+    "totalScenarioCount": 112
   },
   "unitTests": {
-    "itemCount": 16,
-    "successCount": 16,
+    "itemCount": 26,
+    "successCount": 26,
     "failureCount": 0,
-    "elapsedSeconds": 3.259,
+    "elapsedSeconds": 0.891,
     "networkRequests": 0,
-    "logPath": "evaluation/supabase-tenant-isolation-harness-test.log"
+    "command": "npm.cmd test -- tests/supabase-tenant-isolation-harness.test.ts"
+  },
+  "strictTypecheck": {
+    "passed": true,
+    "implicitAnyErrors": 0,
+    "command": "npm.cmd run typecheck",
+    "declarations": [
+      "scripts/supabase_tenant_isolation_manifest.d.mts",
+      "scripts/supabase_tenant_isolation_harness.d.mts"
+    ]
   },
   "runtimeSafety": {
     "realSupabaseConnected": false,
+    "networkAdapterImplemented": false,
     "usersCreated": false,
     "databaseMutated": false,
     "migrationsAdded": false,
     "envLocalLoadedOrWritten": false,
-    "serviceRoleClientProvided": false,
+    "serviceRoleClientProvidedToExecutor": false,
+    "serviceRoleVerifierDefinedAsHookOnly": true,
+    "scenarioCleanupRunsInFinally": true,
+    "finalResidualZeroVerificationSeparate": true,
     "defaultDryRunWithoutSecrets": "fail_closed"
   },
-  "verifiedAt": "2026-07-16T21:12:56+09:00"
+  "reviewVerdict": "remediated_locally_pending_independent_rereview",
+  "verifiedAt": "2026-07-16T21:41:07+09:00"
 }
