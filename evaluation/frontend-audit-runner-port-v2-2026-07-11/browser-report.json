@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-16T12:48:17.218Z",
+  "generatedAt": "2026-07-16T13:33:10.615Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "547c5be072db1c043cbfc6149418bd627f06a0bd",
-  "sourceIdentity": "c86fe092a8848d2fe726f6aa51ad7518b297fb7f9fae71256ac20a62e778575b",
-  "evidenceHead": "547c5be072db1c043cbfc6149418bd627f06a0bd",
+  "sourceSha": "8538a46dbdd69fa5337d8c7e32839b2888b08cd7",
+  "sourceIdentity": "533b8e28d86bd286984f3d2d420418cf4c94873d2405488050b973bbddf4f533",
+  "evidenceHead": "8538a46dbdd69fa5337d8c7e32839b2888b08cd7",
   "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 32,
@@ -27,11 +27,11 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 124487
+    "elapsedMs": 120723
   },
   "staticAudit": {
-    "sourceSha": "547c5be072db1c043cbfc6149418bd627f06a0bd",
-    "sourceIdentity": "c86fe092a8848d2fe726f6aa51ad7518b297fb7f9fae71256ac20a62e778575b",
+    "sourceSha": "8538a46dbdd69fa5337d8c7e32839b2888b08cd7",
+    "sourceIdentity": "533b8e28d86bd286984f3d2d420418cf4c94873d2405488050b973bbddf4f533",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
@@ -103,7 +103,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-root-desktop-1440.jpg",
-      "screenshotSha256": "64ce8a9c6d3a7f0a4a1d6deb7859b8b51d75bc5f3990d7a6d22100664db4ed17",
+      "screenshotSha256": "50dd5d7d42ae005fc78ffad68d0b070773abee1cd4d15bae9ac8612df949474e",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -13098,7 +13098,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/special-loading.jpg",
-      "screenshotSha256": "524b19d8f519d627368f4d00ecbbcce0740bf426bcf058b812f065b50538392a",
+      "screenshotSha256": "88eed6de0263cab9286ce004e7c17c2f09d18b7d81e94d69dba6f7eb2de18136",
       "boundaryMarker": "loading",
       "boundaryMarkerCount": 1,
       "renderedControls": [],
@@ -13114,7 +13114,7 @@
           ]
         }
       ],
-      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.4,20.2,33.7,33.7,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.8,20.6,32.8,32.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -13593,7 +13593,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 16. 오후 9:48:16 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 16. 오후 10:33:10 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13637,7 +13637,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "9515e6ea4ae097ac8ae1e9ba57d17b738fc9a4e63415a81a8d0f3cdee3b77555",
+      "screenshotSha256": "86dd3a966702f1bd19ba96e6966ad0866e75fbc6301f3397249c7af41015a364",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,
