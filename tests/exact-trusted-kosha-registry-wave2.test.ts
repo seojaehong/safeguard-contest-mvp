@@ -47,7 +47,7 @@ describe("exact-trusted KOSHA registry wave 2", () => {
     expect(loaded.status).toBe("ready");
     if (loaded.status !== "ready") throw new Error("expected exact KOSHA registry");
 
-    expect(loaded.items.map((item) => item.id)).toEqual([
+    expect(loaded.items.slice(0, 2).map((item) => item.id)).toEqual([
       "technical-support-01-0065-d-c-13-2026-외벽도장보수공사에-안전작업에-관한-기술지원규정",
       "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정",
     ]);
@@ -235,6 +235,7 @@ describe("exact-trusted KOSHA registry wave 2", () => {
     expect(nextConfig.outputFileTracingIncludes?.["/api/safety-reference/search"]).toEqual([
       "./data/safety-knowledge/exact-kosha/d-c-13-2026.json",
       "./data/safety-knowledge/exact-kosha/d-c-7-2026.json",
+      "./data/safety-knowledge/exact-kosha/b-e-10-2026.json",
     ]);
     expect(nextConfig.outputFileTracingIncludes?.["/api/safety-reference/search"]).not.toContain(
       "./data/safety-knowledge/exact-kosha/d-c-7-2026.pdf",
@@ -247,6 +248,7 @@ describe("exact-trusted KOSHA registry wave 2", () => {
       expect(nextConfig.outputFileTracingIncludes?.[route], route).toEqual([
         "./data/safety-knowledge/exact-kosha/d-c-13-2026.json",
         "./data/safety-knowledge/exact-kosha/d-c-7-2026.json",
+        "./data/safety-knowledge/exact-kosha/b-e-10-2026.json",
       ]);
     }
   });

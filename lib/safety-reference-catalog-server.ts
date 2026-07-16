@@ -85,7 +85,32 @@ const DEFAULT_EXACT_KOSHA_ASSET_PATHS = Object.freeze([
     "exact-kosha",
     "d-c-7-2026.json",
   ),
+  join(
+    process.cwd(),
+    "data",
+    "safety-knowledge",
+    "exact-kosha",
+    "b-e-10-2026.json",
+  ),
 ]);
+
+const EXACT_KOSHA_CONTENT = Object.freeze({
+  "B-E-10": Object.freeze({
+    summary: "정전전로 전기작업의 전원 차단, 잠금·표지, 검전 및 무전압 확인 기술지침",
+    keywords: ["정전전로", "전기작업", "전원 차단", "잠금표지", "LOTO", "검전", "무전압"],
+    riskTags: ["감전", "전기", "정전작업"],
+    controls: [
+      "전기기기등에 공급되는 모든 전원을 관련 도면, 배선도 등으로 확인할 것",
+      "차단장치나 단로기 등에 잠금장치 및 꼬리표를 부착할 것",
+      "검전기를 이용하여 작업 대상 기기가 충전되었는지를 확인할 것",
+    ],
+    anchors: [
+      { page: 5, excerpt: "전기기기등에 공급되는 모든 전원을 관련 도면, 배선도 등으로 확인할 것" },
+      { page: 5, excerpt: "차단장치나 단로기 등에 잠금장치 및 꼬리표를 부착할 것" },
+      { page: 5, excerpt: "검전기를 이용하여 작업 대상 기기가 충전되었는지를 확인할 것" },
+    ],
+  }),
+});
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -172,6 +197,13 @@ function buildBundledExactKoshaItem(asset: BundledExactKoshaAsset): SafetyRefere
     return null;
   }
   const provenanceSnapshot = pin.provenanceSha256;
+  const exactContent = EXACT_KOSHA_CONTENT[asset.stableDocumentKey as keyof typeof EXACT_KOSHA_CONTENT];
+  if (exactContent && (
+    exactContent.controls.some((control) => !asset.body.includes(control))
+    || exactContent.anchors.some((anchor) => !asset.body.includes(anchor.excerpt))
+  )) {
+    return null;
+  }
   const payload: Record<string, unknown> = {
     reference_item_id: asset.itemId,
     stable_document_key: asset.stableDocumentKey,
@@ -196,16 +228,16 @@ function buildBundledExactKoshaItem(asset: BundledExactKoshaAsset): SafetyRefere
     category: asset.category,
     subcategory: "기술지원규정",
     title: asset.title,
-    summary: asset.stableDocumentKey === "D-C-7"
+    summary: exactContent?.summary ?? (asset.stableDocumentKey === "D-C-7"
       ? "비계 구조, 작업발판, 추락 방지 및 조립·해체 작업의 기술지침"
-      : "외벽도장보수공사의 작업발판, 비계, 추락 방지 및 작업 전 점검 기술지침",
+      : "외벽도장보수공사의 작업발판, 비계, 추락 방지 및 작업 전 점검 기술지침"),
     body: asset.body,
-    keywords: asset.stableDocumentKey === "D-C-7"
+    keywords: exactContent?.keywords ?? (asset.stableDocumentKey === "D-C-7"
       ? ["비계", "이동식 비계", "시스템비계", "작업발판", "조립", "해체", "추락"]
-      : ["외벽도장", "외벽 보수", "비계", "작업발판", "추락", "강풍"],
-    risk_tags: ["추락", "비계", "고소작업"],
+      : ["외벽도장", "외벽 보수", "비계", "작업발판", "추락", "강풍"]),
+    risk_tags: exactContent?.riskTags ?? ["추락", "비계", "고소작업"],
     primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
-    controls: [
+    controls: exactContent?.controls ?? [
       "작업발판과 비계의 구조 및 설치 상태를 확인한다.",
       "추락방지설비와 개인보호구 착용 상태를 확인한다.",
       "기상 조건과 작업중지 기준을 작업 전 공유한다.",
@@ -221,7 +253,7 @@ function buildBundledExactKoshaItem(asset: BundledExactKoshaAsset): SafetyRefere
       quality: "accepted",
       lifecycle: "current",
       bodyKind: "native",
-      anchors: [],
+      anchors: exactContent?.anchors ?? [],
       evidenceRef: `${asset.version} 공식 정규화 본문`,
       directEligible: true,
       officialUrl: asset.officialUrl,

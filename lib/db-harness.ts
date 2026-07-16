@@ -837,7 +837,25 @@ function boundKoshaPromptValue(value: string, maxChars: number): string {
   return Array.from(singleLine).slice(0, maxChars).join("");
 }
 
-function boundKoshaPromptExcerpt(value: string): string {
+function boundKoshaPromptExcerpt(item: SafetyReferenceItem, query: string): string {
+  const queryTokens = query
+    .normalize("NFKC")
+    .toLocaleLowerCase("ko-KR")
+    .split(/[^\p{L}\p{N}]+/gu)
+    .filter((token) => token.length >= 2);
+  const anchors = (item.kosha_guide?.anchors ?? [])
+    .map((anchor) => ({
+      ...anchor,
+      score: queryTokens.filter((token) => (
+        anchor.excerpt.normalize("NFKC").toLocaleLowerCase("ko-KR").includes(token)
+      )).length,
+    }))
+    .sort((left, right) => right.score - left.score || left.page - right.page);
+  const relevantAnchors = anchors.filter((anchor) => anchor.score > 0);
+  const anchored = (relevantAnchors.length ? relevantAnchors : anchors)
+    .map((anchor) => `[p.${anchor.page}] ${anchor.excerpt}`)
+    .join("\n");
+  const value = anchored || item.body || "";
   const normalized = value
     .replace(/\r\n?/gu, "\n")
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u2028\u2029]/gu, " ");
@@ -846,7 +864,7 @@ function boundKoshaPromptExcerpt(value: string): string {
 
 function buildVerifiedKoshaPromptLines(
   items: readonly SafetyReferenceItem[],
-  options: { parentCandidates: readonly SafetyReferenceItem[] }
+  options: { parentCandidates: readonly SafetyReferenceItem[]; query: string }
 ): string[] {
   const unique = new Map<string, SafetyReferenceItem>();
 
@@ -894,7 +912,7 @@ function buildVerifiedKoshaPromptLines(
       lifecycle: metadata.lifecycle,
       reviewRequired: decision.reviewRequired || !parentEvidenceReady,
       parentEvidenceReady,
-      ...(parentEvidenceReady && item.body ? { bodyExcerpt: boundKoshaPromptExcerpt(item.body) } : {})
+      ...(parentEvidenceReady && item.body ? { bodyExcerpt: boundKoshaPromptExcerpt(item, options.query) } : {})
     };
     return `KOSHA_SUPPORTING_BODY_JSON: ${JSON.stringify(payload)}`;
   }).filter(Boolean);
@@ -909,7 +927,7 @@ export function buildHarnessPromptContext(packet: DbHarnessPacket) {
     ...packet.directEvidence
       .filter((item) => !isKoshaTechnicalReference(item))
       .map((item) => `공식자료: ${getSafetyReferenceDisplayTitle(item)} -> ${item.primary_documents.join(", ")}`),
-    ...buildVerifiedKoshaPromptLines(koshaEvidence, { parentCandidates }),
+    ...buildVerifiedKoshaPromptLines(koshaEvidence, { parentCandidates, query: packet.question }),
     ...packet.improvementMemory.map((item) => [
       `개선이력: ${item.hazardLabel} -> ${item.improvementText}`,
       item.visionStatus ? `visionStatus: ${item.visionStatus}` : "",

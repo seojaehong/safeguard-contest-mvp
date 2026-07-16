@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "safeclaw-kosha-trust-registry-wave3-report/v1",
+  "generatedAt": "2026-07-16T21:27:36+09:00",
+  "status": "pass",
+  "baseSha": "530efbfafb30c6145c1536172b260ff644845846",
+  "networkFetchPerformed": false,
+  "databaseMutationPerformed": false,
+  "schemaMutationPerformed": false,
+  "productionTrust": {
+    "previousExactPins": 2,
+    "currentExactPins": 3,
+    "trustedStableKeys": ["D-C-13", "D-C-7", "B-E-10"]
+  },
+  "bE10": {
+    "version": "B-E-10-2026",
+    "normalizedCharCount": 15049,
+    "bodySha256": "6fe137a8f788914b0f9804fbd81e8f9fa987dd108ce6edb2fd47eda9bee9b121",
+    "corpusWhitespaceNormalizedBodySha256": "36d16c70c54669d0a8b57d346d7b2f85ab0c491ff8fc1202e4c717f868042e4d",
+    "pdfSha256": "0a44548411eb5402761934de46fd70393064dca22c56b7b8a27967c3cab4eb23",
+    "provenanceSha256": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+    "officialFileId": "CTC2026012913263450093332",
+    "publishedAt": "2026-01-30",
+    "controls": 3,
+    "bodyAnchors": 3
+  },
+  "gates": {
+    "atomicRegistryMembership": "pass",
+    "pinMismatchFailClosed": "pass",
+    "boundedElectricalApplicability": "pass",
+    "commercialFalsePositiveBlock": "pass",
+    "bodyExtractableGenerationControls": "pass",
+    "bodyExtractablePhotoControls": "pass",
+    "queryRelevantPromptAnchor": "pass",
+    "focusedVitest": { "files": 6, "tests": 134, "status": "pass" },
+    "strictTypecheck": "pass",
+    "productionBuild": { "staticPages": 28, "status": "pass" },
+    "nextFileTrace": {
+      "manifestCount": 78,
+      "consumerManifestCount": 16,
+      "partialManifestCount": 0,
+      "exactAssetBytes": 186981,
+      "status": "pass"
+    },
+    "diffCheck": "pass"
+  }
+}

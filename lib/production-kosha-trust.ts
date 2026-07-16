@@ -49,6 +49,20 @@ const PRODUCTION_TRUSTED_KOSHA_REFERENCES: readonly ExactKoshaTrustPin[] = Objec
     publishedAt: "2026-01-30",
     provenanceSha256: "b2ade4323cddecc0a50dab98f944f0781dc09885c8bdece4c1a6c0ea2010d0ef",
   }),
+  Object.freeze({
+    itemId: "technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
+    sourceId: "kosha-technical-support-regulations-2025",
+    itemType: "technical-support-regulation",
+    title: "B-E-10-2026 정전전로 및 그 인근에서의 전기작업에 관한 기술지원규정",
+    stableDocumentKey: "B-E-10",
+    version: "B-E-10-2026",
+    bodySha256: "6fe137a8f788914b0f9804fbd81e8f9fa987dd108ce6edb2fd47eda9bee9b121",
+    pdfSha256: "0a44548411eb5402761934de46fd70393064dca22c56b7b8a27967c3cab4eb23",
+    officialUrl: "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012913263450093332/1",
+    officialFileId: "CTC2026012913263450093332",
+    publishedAt: "2026-01-30",
+    provenanceSha256: "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+  }),
 ]);
 
 export function getProductionExactKoshaTrustPin(itemId: string): ExactKoshaTrustPin | null {

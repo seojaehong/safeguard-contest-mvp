@@ -6,7 +6,8 @@ const projectRoot = dirname(fileURLToPath(import.meta.url));
 const frontendAuditEnabled = process.env.SAFECLAW_FRONTEND_AUDIT === "1";
 const exactKoshaAssets = [
   "./data/safety-knowledge/exact-kosha/d-c-13-2026.json",
-  "./data/safety-knowledge/exact-kosha/d-c-7-2026.json"
+  "./data/safety-knowledge/exact-kosha/d-c-7-2026.json",
+  "./data/safety-knowledge/exact-kosha/b-e-10-2026.json"
 ];
 const exactKoshaConsumers = [
   "/api/agent/chat",

@@ -32,8 +32,28 @@ function hasOperationalTerm(tokens: readonly string[]): boolean {
   return tokens.some((token) => /^(?:작업|공사|조립|해체|설치|사용|점검|안전점검|안전기준|도장|보수|청소|안전|기준|붕괴|예방|조립작업|해체작업|설치작업|도장작업|보수작업)(?:은|는|이|가|을|를|의|에|에서|과|와|로|으로)?$/u.test(token));
 }
 
+function hasElectricalWorkTerm(tokens: readonly string[]): boolean {
+  return tokens.some((token) => /^(?:전기(?:설비|기기|기계|작업|공사)?|정전전로|전로|배전반|수전반|차단기|개폐기|단로기)(?:은|는|이|가|을|를|의|에|에서|과|와|로|으로)?$/u.test(token));
+}
+
+function hasOutageControlTerm(tokens: readonly string[]): boolean {
+  const direct = tokens.some((token) => /^(?:정전(?:전로|작업|상태)?|전원차단|잠금(?:장치|표지)?|꼬리표|loto|검전(?:기)?|무전압)(?:은|는|이|가|을|를|의|에|에서|과|와|로|으로)?$/u.test(token));
+  const voltageAbsence = hasExactOrCompoundTerm(tokens, "전압")
+    && hasAny(tokens, ["부재", "없음", "없는지", "미검출"]);
+  return direct || voltageAbsence;
+}
+
 export function exactKoshaReferenceAppliesToQuery(stableDocumentKey: string, query: string): boolean {
   const tokens = normalizedTokens(query);
+  if (stableDocumentKey === "B-E-10") {
+    const commercial = hasAny(tokens, ["구매", "견적", "납품", "판매", "가격", "상품", "할인"]);
+    if (commercial) return false;
+    const electricalWork = hasElectricalWorkTerm(tokens);
+    const outageControl = hasOutageControlTerm(tokens);
+    const operational = hasAny(tokens, ["작업", "정비", "점검", "설치", "해체", "보수", "확인", "검전"])
+      || tokens.some((token) => /^(?:전기|정전|검전|정비|점검|설치|해체|보수)작업$/u.test(token));
+    return electricalWork && outageControl && operational;
+  }
   if (stableDocumentKey === "D-C-7") {
     const scaffold = hasScaffoldTerm(tokens);
     const operational = hasOperationalTerm(tokens);
