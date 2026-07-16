@@ -22,8 +22,8 @@ roadmap:
   policy, and budget before calling the worker;
 - SafeClaw sends a minimized, structurally redacted prompt projection under a
   versioned redaction policy, never the raw or merely normalized user prompt;
-- the remote worker receives only the bounded claim allowlist needed for
-  `naturalize_only` output;
+- the remote worker receives only a typed, minimized `claimsProjection` whose
+  redacted claim/citation leaves and provenance are structurally classified;
 - the remote worker receives no SafeClaw tool credentials or tool schemas, and
   its runtime policy denies all tools;
 - approvals and externally visible effects remain SafeClaw-owned ledger events;
@@ -125,10 +125,11 @@ these fields.
 | `actorRef` | Opaque SafeClaw actor reference; no user credential or session token crosses the boundary. |
 | `purpose` | Exact value `naturalize_only`. |
 | `evidenceDigest` | SHA-256 digest of the immutable, validated Evidence Harness packet. |
-| `claims` | Bounded claim and citation allowlist. Raw tenant records and unrestricted retrieval context are excluded. |
+| `claimsProjection` | Typed `claims-projection/v1` DTO containing only allowlisted, structurally classified claim/citation fields. Raw local claim or Evidence Harness objects are prohibited. |
+| `claimsProjectionDigest` | Digest of the canonical typed claims projection. It is included in `redactionProof` and `logicalRequestDigest`. |
 | `promptProjection` | SafeClaw-created, minimized projection containing only allowlisted task intent, jurisdiction, language, output intent, and non-identifying constraints. The raw or normalized user prompt is prohibited. |
 | `promptProjectionDigest` | Digest of the canonical minimized projection. |
-| `redactionProof` | Non-sensitive proof containing the projection schema version, `redactionPolicyVersion`, source-field classification digest, projection digest, and a terminal `piiDisposition` accepted by policy. It contains no removed values. |
+| `redactionProof` | Non-sensitive proof containing prompt and claims projection schema versions, `redactionPolicyVersion`, claims field-classification policy version/digest, `promptProjectionDigest`, `claimsProjectionDigest`, source-field classification digest, and a terminal `piiDisposition` accepted by policy. It contains no removed values. |
 | `policyVersion` | Tool-deny, output-attestation, and model-routing policy snapshot. Redaction is separately pinned by `redactionPolicyVersion` in `redactionProof`. |
 | `logicalBudget` | Stable end-to-end deadline, provider-call allowance, output-byte allowance, and retry allowance assigned to the logical run. |
 | `attemptBudget` | Remaining allowance for this attempt; it may narrow but never expand `logicalBudget`. |
@@ -138,21 +139,76 @@ these fields.
 SafeClaw computes two different digests:
 
 1. `logicalRequestDigest` covers canonical stable fields: contract version,
-   run, tenant, opaque actor reference, purpose, evidence and claims digests,
-   prompt projection and redaction proof, policy version, and logical budget.
-   It explicitly excludes `requestId`, `attemptId`, `issuedAt`, `expiresAt`,
-   attempt number, transport nonce, and attempt-specific remaining budget.
+   run, tenant, opaque actor reference, purpose, `evidenceDigest`,
+   `claimsProjectionDigest`, prompt projection and redaction proof, policy
+   version, and logical budget. It explicitly excludes `requestId`,
+   `attemptId`, `issuedAt`, `expiresAt`, attempt number, transport nonce, and
+   attempt-specific remaining budget.
 2. `attemptEnvelopeDigest` covers the complete concrete attempt, including the
    stable `logicalRequestDigest` plus fresh `requestId`, `attemptId`, timestamps,
    nonce, attempt budget, and service assertion metadata. The SafeClaw service
    identity signs this digest, not the logical digest alone; signature bytes
    are not input to the digest.
 
-A change to tenant, prompt projection, redaction proof or policy, evidence,
-claims, policy, or logical budget creates a new `logicalRequestDigest`. Every
-retry keeps that logical digest and `evidenceDigest` but creates a new
-`requestId`, `attemptId`, validity window, `attemptEnvelopeDigest`, and
-signature.
+A change to tenant, prompt projection, claims projection, redaction proof or
+policy, evidence, execution policy, or logical budget creates a new
+`logicalRequestDigest`. Every retry keeps that logical digest,
+`evidenceDigest`, and `claimsProjectionDigest` but creates a new `requestId`,
+`attemptId`, validity window, `attemptEnvelopeDigest`, and signature.
+
+### Typed Claims Projection
+
+SafeClaw must project local evidence claims into `claims-projection/v1` before
+remote dispatch. The projection is a closed DTO, not a renamed local
+`HermesEvidenceClaim`, DB Harness packet fragment, ORM row, or object spread.
+Its only allowed shape is:
+
+```text
+claimsProjection:
+  schemaVersion: "claims-projection/v1"
+  entries[]:
+    claimId
+    text
+    citations[]:
+      citationId
+      displayLabel
+      provenanceClass
+      sourceRefDigest
+  fieldClassifications:
+    <JSON pointer for every scalar leaf>: <allowed classification>
+```
+
+`claimId` and `citationId` are opaque identifiers. `text` contains only the
+minimum redacted, allowlisted safety statement needed for naturalization.
+`displayLabel` contains only an approved public label, never a raw document
+title, URL, filename, person, site, free-text note, or local record label.
+`sourceRefDigest` is a non-reversible source reference digest. The only allowed
+`provenanceClass` values in the remote slice are `current_law`, `kosha_guide`,
+`sif_case`, and `published_ontology`; organization history, site operation
+memory, photos, acknowledgements, and unreviewed candidates do not cross this
+boundary.
+
+Every scalar leaf present in `entries` must have exactly one corresponding
+JSON-pointer entry in `fieldClassifications`, and no classification entry may
+refer to an absent field. Allowed classifications are closed and versioned:
+`opaque_claim_id`, `public_safety_claim_text`, `opaque_citation_id`,
+`public_source_label`, `public_provenance_class`, and
+`non_reversible_source_digest`. The schema rejects additional properties.
+
+Before dispatch, SafeClaw verifies projection schema, provenance allowlist,
+field-classification completeness, redaction disposition, text/label length,
+identifier shape, duplicate IDs, citation ownership, and canonical digest. An
+unknown field, missing/extra classification, disallowed provenance, raw local
+claim property, PII detection, unrestricted text, or digest mismatch fails
+closed before remote dispatch. The request becomes `review_required`; no raw
+claim object or best-effort fallback is sent.
+
+`redactionProof` includes `claimsProjectionDigest`, claims projection schema
+version, field-classification policy version, and a digest of the complete
+classification map. It contains no removed claim values. Both
+`claimsProjectionDigest` and that proof are covered by
+`logicalRequestDigest`, so a retry cannot substitute claim text, citations,
+provenance, or classifications while retaining the logical identity.
 
 ### Prompt Projection And Structural Redaction
 
@@ -177,8 +233,10 @@ The local redaction gate emits `redactionProof` only when all source fields are
 classified, every included projection field is allowlisted, removed values are
 absent, and the canonical projection passes the pinned policy. The service
 gateway accepts only supported projection-schema and redaction-policy versions
-and verifies that `redactionProof.projectionDigest` equals
-`promptProjectionDigest`.
+and verifies that `redactionProof.promptProjectionDigest` equals
+`promptProjectionDigest`, `redactionProof.claimsProjectionDigest` equals
+`claimsProjectionDigest`, and the claims classification-map digest matches the
+canonical typed projection.
 
 If SafeClaw cannot prove field coverage, encounters an unknown field class,
 cannot remove or safely tokenize detected PII, or cannot reproduce the
@@ -189,24 +247,104 @@ logs, retry envelopes, receipts, and evaluation exports.
 
 ### Response Envelope
 
-The service returns structured data only:
+The service returns a closed, discriminated `engine-remote-response/v1`
+envelope. Common unsigned fields are:
 
-- `contractVersion`, `runId`, `logicalRequestDigest`, `requestId`, and
-  `attemptId`;
-- echoed `organizationId` and `siteId`;
-- the accepted `attemptEnvelopeDigest`, `promptProjectionDigest`, and
-  `evidenceDigest`;
-- selected claim IDs and only their allowed citation IDs;
-- provider/model reference, usage counters, latency, and terminal status;
-- a service response signature or gateway-verifiable receipt; and
-- a sanitized error code when no valid attestation can be returned.
+```text
+responseVersion
+kind: "success" | "failure"
+runId
+logicalRequestDigest
+requestId
+attemptId
+organizationId
+siteId
+attemptEnvelopeDigest
+promptProjectionDigest
+claimsProjectionDigest
+evidenceDigest
+usage
+latencyMs
+terminalStatus
+```
 
-SafeClaw validates both digests, all echoed bindings, IDs, expiry, claim
-membership, citation membership, usage limits, and receipt authenticity before
-rendering text. A response for a different or superseded attempt is never
-accepted merely because its logical digest matches. The worker's prose is never
-accepted directly. SafeClaw renders the validated fixed claims and citations,
+`usage` is present in both variants and contains the provider/model reference,
+input/output usage counters, and `usageComplete`. Unknown counters are explicit
+nulls with `usageComplete=false`, not omitted fields.
+
+The variants are mutually exclusive:
+
+- `kind="success"` requires `terminalStatus="succeeded"` and
+  `selectedClaims[]`, where each entry contains one `claimId` and a non-empty
+  list of `citationIds`. It prohibits `error`.
+- `kind="failure"` requires `terminalStatus="failed"` and `error`, containing
+  `taxonomyVersion="engine-remote-error/v1"`, one known `code`, and an optional
+  bounded non-sensitive diagnostics reference. It prohibits `selectedClaims`.
+
+Additional properties, mixed variants, missing usage, an unknown terminal
+status, or selected claim/citation IDs outside `claimsProjection` make the
+response invalid.
+
+The service computes `responseEnvelopeDigest` over canonical JSON containing
+**every unsigned response field**, including the discriminant, all echoed
+request/tenant/digest bindings, the complete selected claim/citation structure
+for success, the complete error structure for failure, usage, latency, and
+terminal status. The digest excludes only `responseEnvelopeDigest` itself and
+the signature/receipt fields to avoid recursion.
+
+The service appends `responseEnvelopeDigest`, then returns `serviceReceipt`
+with that digest, service key reference, and signature. The signature is
+domain-separated and binds
+`responseEnvelopeDigest` to `attemptEnvelopeDigest`, response version, and
+service identity. A receipt or signature over only selected fields is invalid.
+
+SafeClaw recomputes `responseEnvelopeDigest`, verifies the receipt and both
+request digests, checks all echoed bindings, IDs, expiry, claim/citation
+membership, usage limits, and variant rules before rendering or recording a
+validated remote failure. A response for a different or superseded attempt is
+never accepted merely because its logical digest matches. The worker's prose is
+never accepted directly. SafeClaw renders validated fixed claims and citations,
 preserving the current `hermes-output-attestation/v1` behavior.
+
+### Versioned Error Taxonomy And Retry Ownership
+
+`engine-remote-error/v1` is a closed taxonomy. Unknown codes fail response
+validation. SafeClaw also uses the same taxonomy for locally observed transport
+and validation failures that cannot produce a signed service response.
+
+| Error code | Origin | SafeClaw base disposition |
+| --- | --- | --- |
+| `REMOTE_AUTH_REJECTED` | gateway | `terminal_failure` |
+| `REMOTE_TENANT_BINDING_REJECTED` | gateway | `terminal_failure` |
+| `REMOTE_REPLAY_REJECTED` | gateway | `terminal_failure` |
+| `REMOTE_CONTRACT_UNSUPPORTED` | gateway | `terminal_failure` |
+| `REMOTE_REDACTION_POLICY_REJECTED` | gateway or SafeClaw validation | `review_required` |
+| `REMOTE_CLAIMS_PROJECTION_REJECTED` | gateway or SafeClaw validation | `review_required` |
+| `REMOTE_TOOL_POLICY_VIOLATION` | gateway or worker policy monitor | `terminal_failure` |
+| `REMOTE_OUTPUT_ATTESTATION_INVALID` | SafeClaw validation | `terminal_failure` |
+| `REMOTE_RESPONSE_INVALID` | SafeClaw validation | `terminal_failure` |
+| `REMOTE_RESPONSE_SIGNATURE_INVALID` | SafeClaw validation | `terminal_failure` |
+| `REMOTE_BUDGET_EXHAUSTED` | gateway or SafeClaw budget check | `terminal_failure` |
+| `REMOTE_WORKER_OVERLOADED` | gateway | `retry_new_attempt` |
+| `REMOTE_PROVIDER_UNAVAILABLE` | worker | `retry_new_attempt` |
+| `REMOTE_PROVIDER_TIMEOUT` | worker | `retry_new_attempt` |
+| `REMOTE_TRANSPORT_UNAVAILABLE` | SafeClaw transport client | `retry_new_attempt` |
+| `REMOTE_INTERNAL_FAILURE` | gateway or worker | `terminal_failure` |
+
+The worker and gateway do not return `retryable`, `retryDisposition`, or an
+authoritative retry class. They report only a taxonomy version, code, and
+bounded facts. SafeClaw owns `engine-remote-retry-policy/v1`, validates the
+error origin and signed envelope when present, maps the code to the table, then
+applies remaining attempt count, logical deadline, budget, supersession, and
+receipt state. A base `retry_new_attempt` becomes `terminal_failure` when any
+limit is exhausted. A transport `Retry-After` value may affect scheduling only
+after SafeClaw has independently selected `retry_new_attempt`.
+
+Unknown codes, malformed/unsigned failure envelopes, signature failures,
+policy violations, and ambiguous outcomes never inherit a transient class.
+The ledger records taxonomy version, observed code, retry-policy version,
+validated origin, deterministic disposition, and the policy inputs. The worker
+cannot choose whether SafeClaw retries.
 
 ## Authentication And Tenant Binding
 
@@ -217,7 +355,7 @@ Authentication stays split into independent planes.
 | User auth | Who requested or approved work | Supabase Auth and SafeClaw org/site role checks. Never forwarded to Hermes. |
 | SafeClaw-to-Hermes service auth | An approved SafeClaw deployment called the worker service | Prefer workload identity with audience-bound, short-lived credentials. A rotated machine credential in a managed secret store is an interim fallback, not a site credential. |
 | Provider auth | Which model account pays for inference | Central runtime vault or provider service account. No customer OAuth refresh token and no operator OAuth profile in contract traffic. |
-| Tenant capability | Which tenant-bound attempt this worker may process | Short-lived signed assertion binding service identity, logical request digest, attempt envelope digest, run, request, attempt, organization, site, purpose, evidence digest, prompt projection digest, redaction policy, budgets, and expiry. |
+| Tenant capability | Which tenant-bound attempt this worker may process | Short-lived signed assertion binding service identity, logical request digest, attempt envelope digest, run, request, attempt, organization, site, purpose, evidence digest, prompt and claims projection digests, redaction/classification policies, budgets, and expiry. |
 | MCP/effect capability | Which exact tool step may execute | SafeClaw-only, step-bound, one-time capability. It is not issued in the remote naturalization slice. |
 
 The service gateway rejects missing, expired, replayed, wrong-audience,
@@ -239,8 +377,8 @@ No per-site OAuth copies are permitted.
 
 Workers have:
 
-- access only to the verified request envelope, minimized prompt projection,
-  and central provider credential needed for model inference;
+- access only to the verified request envelope, minimized prompt and claims
+  projections, and central provider credential needed for model inference;
 - no Supabase service role, database connection string, SafeClaw user session,
   customer OAuth credential, or general MCP token;
 - no durable tenant memory and no cross-request conversation state;
@@ -267,10 +405,11 @@ The remote slice preserves the DB Harness generation contract:
 - `genericProseSubstitutionAllowed=false`.
 
 SafeClaw performs retrieval, validates completeness, and builds the minimized
-redacted prompt projection before remote dispatch. The worker receives the
-projection and claim allowlist, not the raw prompt or authority to search for
-missing facts. Missing or stale evidence, or an unprovable redaction result,
-returns `review_required` from SafeClaw and no remote call is made.
+redacted prompt and claims projections before remote dispatch. The worker
+receives only those typed projections, not the raw prompt, local claim objects,
+or authority to search for missing facts. Missing or stale evidence, an
+unknown/PII-bearing claim field, or an unprovable redaction/classification
+result returns `review_required` from SafeClaw and no remote call is made.
 
 Tool denial is enforced twice:
 
@@ -328,9 +467,11 @@ The initial remote naturalization policy is:
 | Output | Structured claim selection only, bounded by an explicit byte limit in the request. |
 | Time | Each attempt and the end-to-end run must have caller-supplied deadlines; worker timeout cannot extend the SafeClaw deadline. |
 
-Retries are allowed only for a classified transient transport failure, gateway
-overload, or provider availability failure, and only while both the attempt
-count and end-to-end deadline remain. Retries are forbidden for:
+Retry eligibility starts only when SafeClaw maps
+`REMOTE_WORKER_OVERLOADED`, `REMOTE_PROVIDER_UNAVAILABLE`,
+`REMOTE_PROVIDER_TIMEOUT`, or `REMOTE_TRANSPORT_UNAVAILABLE` to the base
+disposition `retry_new_attempt`, and only while attempt, deadline, and budget
+limits remain. Retries are forbidden for:
 
 - authentication, authorization, tenant-binding, replay, or signature failure;
 - contract-version, policy-attestation, evidence-digest, or output-attestation
@@ -339,10 +480,12 @@ count and end-to-end deadline remain. Retries are forbidden for:
 - invalid input or exhausted budget; and
 - an unknown result that cannot be reconciled by `requestId` and `attemptId`.
 
-Backoff is calculated by SafeClaw or the service gateway and recorded with the
-reason. The model runtime cannot recursively retry itself. A retry keeps the
-same `runId`, `logicalRequestDigest`, `evidenceDigest`, and
-`promptProjectionDigest`. It receives a new `requestId`, `attemptId`,
+SafeClaw calculates backoff after applying
+`engine-remote-retry-policy/v1` and records the policy inputs and disposition.
+The gateway may report bounded load timing facts, but neither gateway nor model
+runtime can select the retry class or recursively retry. A retry keeps the same
+`runId`, `logicalRequestDigest`, `evidenceDigest`, `promptProjectionDigest`, and
+`claimsProjectionDigest`. It receives a new `requestId`, `attemptId`,
 `issuedAt`, `expiresAt`, transport nonce, `attemptEnvelopeDigest`, and service
 signature. Late responses from superseded attempts are recorded and ignored,
 even when their logical digest remains valid.
@@ -356,9 +499,10 @@ untracked model.
 
 Production Vercel code is the control-plane client. It may authenticate the
 user, authorize the site, obtain and validate the Evidence Harness packet,
-construct and prove the minimized redacted prompt projection, allocate a
-budget, calculate the logical and attempt digests, sign the attempt envelope,
-validate the response, record the attempt, and render accepted claims.
+construct and prove the minimized redacted prompt and typed claims projections,
+allocate a budget, calculate the logical and attempt digests, sign the attempt
+envelope, validate the discriminated response and response receipt, apply the
+SafeClaw retry policy, record the attempt, and render accepted claims.
 
 Production Vercel code must not:
 
@@ -367,6 +511,8 @@ Production Vercel code must not:
 - hold a long-lived provider refresh token for a human operator;
 - send a raw or merely normalized user prompt, unknown source field, or
   unproven redaction result to the remote service;
+- send a raw local claim, unclassified claim/citation field, disallowed
+  provenance, or PII-bearing claims projection;
 - trust platform request retries as the durable retry ledger;
 - pass a Supabase service role or unrestricted MCP token to the worker; or
 - enable the remote path merely because an environment flag exists.
@@ -394,12 +540,14 @@ Public errors remain generic. Internal records distinguish at least:
 - late or duplicate response.
 
 Every attempt is reconstructable from `runId` to `logicalRequestDigest`, fresh
-request and attempt IDs, `attemptEnvelopeDigest`, prompt projection digest,
-redaction and execution policy versions, evidence digest, service identity
-reference, worker pool reference, provider/model reference, usage, retry
-decision, response digest, and terminal state. Secrets, raw credentials, raw
-prompts, unrestricted tenant payloads, removed values, and unredacted PII are
-excluded from ordinary logs and evaluation exports.
+request and attempt IDs, `attemptEnvelopeDigest`, prompt and claims projection
+digests, redaction/classification/execution policy versions, evidence digest,
+service identity reference, worker pool reference, provider/model reference,
+usage, error-taxonomy and retry-policy versions, deterministic retry
+disposition, `responseEnvelopeDigest`, receipt, and terminal state. Secrets,
+raw credentials, raw prompts/claims, unrestricted tenant payloads, removed
+values, and unredacted PII are excluded from ordinary logs and evaluation
+exports.
 
 Health checks prove process readiness only. They do not prove tenant binding,
 Evidence Harness adherence, tool denial, or provider usability. Promotion
@@ -409,9 +557,10 @@ evidence must include signed end-to-end conformance runs.
 
 Implementation proceeds in separately approved slices:
 
-1. **Contract fixtures:** freeze canonical request/response examples, prompt
-   projection and redaction fixtures, logical-versus-attempt digest rules,
-   error taxonomy, and local-versus-remote parity tests.
+1. **Contract fixtures:** freeze canonical request/response examples, prompt and
+   claims projection/redaction fixtures, logical/attempt/response digest rules,
+   discriminated response variants, error taxonomy, retry mapping, and
+   local-versus-remote parity tests.
 2. **Service identity:** verify short-lived audience-bound service auth and
    rotation without customer or operator OAuth credentials.
 3. **Stateless shadow:** run tool-free naturalization on synthetic or approved
@@ -420,8 +569,9 @@ Implementation proceeds in separately approved slices:
    unsupported redaction policy, reused request/attempt IDs, mismatched attempt
    digest, replay, late response, queue reuse, logging, and worker-restart cases
    fail closed.
-5. **Budget and recovery:** prove deadlines, retry classification, duplicate
-   suppression, usage attribution, and service outage behavior.
+5. **Budget and recovery:** prove deadlines, SafeClaw-owned deterministic retry
+   classification, unknown-code rejection, duplicate suppression, usage
+   attribution, and service outage behavior.
 6. **Ledger readiness:** separately approve any database migration, RLS policy,
    retention policy, and operator UI needed for durable attempts.
 7. **Limited canary:** require explicit production promotion approval and a
@@ -459,15 +609,23 @@ only when executable evidence shows all of the following:
 - raw or normalized prompts never cross the remote boundary; only a minimized
   projection with a supported `redactionPolicyVersion` and reproducible
   structural-redaction proof can be dispatched;
+- raw local claim objects never cross the boundary; every field in the typed
+  `claimsProjection` is allowlisted, structurally classified, PII-checked, and
+  bound by `claimsProjectionDigest` in both `redactionProof` and
+  `logicalRequestDigest`;
 - retries preserve `logicalRequestDigest`, `evidenceDigest`, and the prompt
-  projection while each attempt uses fresh request/attempt IDs, timestamps,
-  `attemptEnvelopeDigest`, and signature;
+  and claims projections while each attempt uses fresh request/attempt IDs,
+  timestamps, `attemptEnvelopeDigest`, and signature;
 - every worker has a verified tool policy of `allow: []`, `deny: ["*"]`, and a
   model tool call cannot reach an executor;
 - only allowlisted claims and citations matching the Evidence Harness digest
   can reach rendered output;
-- retries remain within the signed budget and never turn policy failures into
-  retries;
+- success and failure responses are mutually exclusive, every response field
+  is bound by `responseEnvelopeDigest`, and the service receipt signs that
+  digest for the exact attempt;
+- SafeClaw validates `engine-remote-error/v1` and exclusively determines retry
+  disposition under `engine-remote-retry-policy/v1`; retries remain within the
+  signed budget and never turn unknown or policy failures into retries;
 - request, attempt, usage, failure, and accepted response receipts are
   reconstructable without secrets or raw PII; and
 - no database write, external send, approval, or publication can be caused by

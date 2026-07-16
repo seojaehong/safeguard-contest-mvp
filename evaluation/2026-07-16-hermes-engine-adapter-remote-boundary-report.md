@@ -1,7 +1,7 @@
 # Hermes EngineAdapter Remote Boundary Evaluation
 
 Date: 2026-07-16
-Verdict: PASS after P1 contract remediation
+Verdict: PASS for the docs-only contract after fresh HOLD remediation; runtime implementation not verified
 
 ## Evaluated Baseline
 
@@ -45,6 +45,41 @@ transport fields. Both findings are remediated in the architecture contract:
    the logical and evidence digests but creates fresh request/attempt IDs,
    timestamps, envelope digest, and signature.
 
+## Fresh HOLD Remediation
+
+The follow-up commit `8b47a33d36037ffabf264d4d898bb046659abd61`
+remained on HOLD because `claims` did not prove a minimized remote DTO, the
+response did not have closed success/failure variants or a whole-envelope
+digest, and retry classification ownership remained underspecified. This
+follow-up changes the documentation contract only:
+
+1. Ambiguous `claims` is replaced by typed `claimsProjection` with
+   `schemaVersion="claims-projection/v1"`. Only opaque IDs, minimum redacted
+   safety text, bounded citation fields, allowed public provenance, and a
+   complete scalar-leaf classification map may cross. Raw local claim/Harness
+   objects, extra or unclassified fields, disallowed provenance, unknown data,
+   and PII fail closed before dispatch.
+2. `claimsProjectionDigest` is required in `redactionProof` and
+   `logicalRequestDigest`. The redaction proof also pins claims projection and
+   field-classification policy versions plus the complete classification-map
+   digest.
+3. `engine-remote-response/v1` is discriminated by `kind="success"` or
+   `kind="failure"`. The variants are mutually exclusive and both require
+   usage and terminal status. Canonical `responseEnvelopeDigest` covers every
+   unsigned response field, including selected claims/citations or the error,
+   usage, and status. The service receipt signs and binds that digest to the
+   exact attempt.
+4. `engine-remote-error/v1` is a closed error-code taxonomy and
+   `engine-remote-retry-policy/v1` is SafeClaw-owned. Workers and the gateway
+   cannot provide an authoritative retryable flag or disposition. SafeClaw
+   validates origin/signature, maps the known code, applies remaining budgets,
+   and records the deterministic result. Unknown, malformed, unsigned, policy,
+   or signature failures do not become transient retries.
+
+This report does not claim those contracts are implemented in product code or
+deployed remotely. It verifies only that the bounded ADR/spec now states the
+required fail-closed behavior without modifying production code.
+
 ## Reconciliation Review
 
 | Existing record | Review result |
@@ -68,6 +103,11 @@ conflict.
 | Tenant binding | PASS | `Request Envelope`; `Authentication And Tenant Binding` |
 | Minimized/redacted remote prompt | PASS | `Prompt Projection And Structural Redaction`; raw or normalized prompts are prohibited and redaction uncertainty fails closed before dispatch. |
 | Stable logical digest versus signed attempt digest | PASS | `Request Envelope`; `Response Envelope`; `Retries, Deadlines, And Budgets` |
+| Typed minimized `claimsProjection` | PASS | `Typed Claims Projection`; closed DTO, public provenance allowlist, complete scalar-leaf classifications, PII/unknown fail-closed rules, and no raw local claim objects. |
+| Claims digest binding | PASS | `claimsProjectionDigest` is present in `redactionProof`, `logicalRequestDigest`, retry identity, tenant capability, and response validation. |
+| Discriminated response variants | PASS | `Response Envelope`; success and failure are mutually exclusive and both bind usage and terminal status. |
+| Whole-response digest and receipt | PASS | `responseEnvelopeDigest` covers every unsigned response field; `serviceReceipt` signs and binds it to the exact attempt. |
+| Versioned errors and SafeClaw retry ownership | PASS | `Versioned Error Taxonomy And Retry Ownership`; closed codes and deterministic SafeClaw disposition. |
 | Evidence Harness `naturalize_only` | PASS | `Evidence Harness And Tool Deny` |
 | Tool deny | PASS | No tool schema or credential; service policy must attest `allow: []`, `deny: ["*"]`; any tool request is terminal. |
 | Approval and effect ledger | PASS | `Approval And Effect Ledger` |
@@ -140,10 +180,9 @@ Vercel
 per-site
 ```
 
-Result: thirteen concepts found, zero missing. A broader bounded search for
-Hermes, EngineAdapter, OAuth, naturalize_only, approval, effect, retry, budget,
-Vercel, and per-site terms returned ninety-one matching lines for manual
-review.
+The earlier `2590556` validation found thirteen baseline concepts and the
+`8b47a33` follow-up added the prompt/digest checks below. Those results describe
+the earlier commits and do not by themselves clear the fresh HOLD.
 
 The follow-up P1 gate additionally searches for:
 
@@ -161,6 +200,43 @@ fresh request/attempt IDs
 Result: all remediation concepts found. The contract contains no remote
 envelope field named `prompt`, and the retry rule explicitly creates both a new
 `requestId` and a new `attemptId` for every retry.
+
+The fresh HOLD gate additionally requires:
+
+```text
+claimsProjection
+claims-projection/v1
+claimsProjectionDigest
+fieldClassifications
+allowed provenance classes
+raw local claim objects prohibited
+engine-remote-response/v1
+kind: "success" | "failure"
+responseEnvelopeDigest
+selectedClaims and error mutual exclusion
+engine-remote-error/v1
+engine-remote-retry-policy/v1
+worker cannot choose retry disposition
+```
+
+Result: all fresh HOLD contract concepts are present. Stale ambiguous request
+field `claims` is absent from the request table. The response contract binds
+all unsigned fields to a signed receipt, and retry ownership is explicitly
+SafeClaw-only. These are documentation checks, not executable runtime tests.
+
+### Fresh HOLD Validation Result
+
+- typed claims projection requirements checked: sixteen;
+- discriminated response/digest requirements checked: fourteen;
+- error taxonomy and retry-ownership requirements checked: eleven;
+- evaluation honesty/coverage requirements checked: six;
+- missing requirements: zero;
+- stale ambiguous `claims` request fields: zero;
+- relative links checked across both artifacts: six, missing zero;
+- changed files: two, both under the owned documentation/evaluation paths;
+- `git diff --check`: pass;
+- product code, tests, migrations, configuration, secrets, deployment, and
+  remote runtime changed or executed: zero.
 
 ## Scope And Diff Validation
 
