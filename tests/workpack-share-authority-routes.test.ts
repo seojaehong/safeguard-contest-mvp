@@ -265,6 +265,74 @@ describe("workflow dispatch route authority", () => {
     });
   });
 
+  it("omits phone after kakao preflight leaves email as the only relay channel", async () => {
+    const { buildLocalizedDispatchWebhookPayload } = await import("@/app/api/workflow/dispatch/route");
+
+    const localizedPayload = buildLocalizedDispatchWebhookPayload({
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["email"],
+      recipients: [serverRecipient.workerSnapshot],
+      messageVariants: { vi: VI_MESSAGE },
+      operatorNote: "",
+      workpack: serverWorkpack,
+      sentAt: "2026-07-17T00:00:00.000Z"
+    });
+    if (!localizedPayload.ok) throw new Error("Expected localized payload");
+    const payload = localizedPayload.payload;
+
+    expect(payload).toMatchObject({
+      channels: ["email"],
+      recipients: [{
+        workerId: WORKER_ID,
+        email: "server@example.com",
+        dispatchLanguageCode: "vi",
+        message: VI_MESSAGE
+      }]
+    });
+    expect(payload.recipients[0]).not.toHaveProperty("phone");
+  });
+
+  it("does not require phone when kakao preflight leaves email as the only relay channel", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    mocks.loadActiveOwnedShareSession.mockResolvedValue({
+      ...activeSession(),
+      session: {
+        ...activeSession().session,
+        recipients: [{
+          ...serverRecipient,
+          workerSnapshot: {
+            ...serverRecipient.workerSnapshot,
+            phone: null
+          }
+        }]
+      }
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["email", "kakao"],
+      operatorNote: "",
+      messageVariants: { vi: VI_MESSAGE }
+    }));
+    const body = await response.json() as {
+      ok?: boolean;
+      providerCalled?: boolean;
+      channelResults?: Array<{ channel?: string; status?: string }>;
+    };
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({ ok: true, providerCalled: false });
+    expect(body.channelResults).toEqual(expect.arrayContaining([
+      expect.objectContaining({ channel: "email", status: "sent" }),
+      expect.objectContaining({ channel: "kakao", status: "unconfigured" })
+    ]));
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
   it("rejects a forged foreign body before provider dispatch", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     mocks.isLiveDispatchEnabled.mockReturnValue(false);
@@ -342,6 +410,89 @@ describe("workflow dispatch route authority", () => {
 
     expect(response.status).toBe(409);
     expect(body.providerCalled).toBe(false);
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when stored foreignWorkerLanguages is missing", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const { foreignWorkerLanguages: _removed, ...deliverables } = serverWorkpack.deliverables;
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue({
+      ...ownedContext(),
+      context: {
+        ...ownedContext().context,
+        shareAuthority: {
+          ...ownedContext().context.shareAuthority,
+          workpack: { ...serverWorkpack, deliverables }
+        }
+      }
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: { vi: VI_MESSAGE }
+    }));
+    const body = await response.json() as {
+      malformedFields?: string[];
+      providerCalled?: boolean;
+    };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      malformedFields: ["deliverables.foreignWorkerLanguages"],
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when stored foreign worker lines is not an array", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const malformedWorkpack = {
+      ...serverWorkpack,
+      deliverables: {
+        ...serverWorkpack.deliverables,
+        foreignWorkerLanguages: [{
+          ...serverWorkpack.deliverables.foreignWorkerLanguages[0],
+          lines: "Dừng công việc khi gió mạnh."
+        }]
+      }
+    };
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue({
+      ...ownedContext(),
+      context: {
+        ...ownedContext().context,
+        shareAuthority: {
+          ...ownedContext().context.shareAuthority,
+          workpack: malformedWorkpack
+        }
+      }
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: { vi: VI_MESSAGE }
+    }));
+    const body = await response.json() as {
+      malformedFields?: string[];
+      providerCalled?: boolean;
+    };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      malformedFields: ["deliverables.foreignWorkerLanguages[0].lines"],
+      providerCalled: false
+    });
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 
@@ -468,14 +619,17 @@ describe("workflow dispatch route authority", () => {
     });
     if (!localized.ok) throw new Error("Expected canonical recipients");
 
-    const payload = buildLocalizedDispatchWebhookPayload({
+    const localizedPayload = buildLocalizedDispatchWebhookPayload({
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
       channels: ["sms"],
-      recipients: localized.recipients,
+      recipients: [serverRecipient.workerSnapshot, koreanRecipient.workerSnapshot],
+      messageVariants,
       operatorNote: "TBM 후 확인",
       workpack: serverWorkpack,
       sentAt: "2026-07-15T00:00:00.000Z"
     });
+    if (!localizedPayload.ok) throw new Error("Expected localized payload");
+    const payload = localizedPayload.payload;
 
     expect(payload).toMatchObject({
       event: "safeguard.workpack.dispatch",

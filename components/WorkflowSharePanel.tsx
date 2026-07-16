@@ -11,6 +11,7 @@ import {
 import {
   buildCanonicalRecipientMessageVariants,
   createAuthenticatedShareSession,
+  dispatchAuthenticatedShareSession,
   resolveWorkflowMessagePreview,
   type WorkflowDispatchChannelResult,
   type WorkflowDispatchResult
@@ -204,65 +205,6 @@ function readString(value: unknown): string {
 
 function readArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
-}
-
-async function dispatchLocalizedShareSession(input: {
-  authToken: string;
-  workpackId: string;
-  shareSessionId: string;
-  idempotencyKey: string;
-  channels: ActiveChannel[];
-  operatorNote: string;
-  messageVariants: Record<string, string>;
-}): Promise<WorkflowDispatchResult> {
-  const response = await fetch("/api/workflow/dispatch", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${input.authToken}`,
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
-      workpackId: input.workpackId,
-      shareSessionId: input.shareSessionId,
-      idempotencyKey: input.idempotencyKey,
-      channels: input.channels,
-      operatorNote: input.operatorNote,
-      messageVariants: input.messageVariants
-    })
-  });
-  let body: Record<string, unknown> = {};
-  try {
-    const parsed = await response.json() as unknown;
-    body = isRecord(parsed) ? parsed : {};
-  } catch (error) {
-    console.warn("localized workflow dispatch response parse failed", error);
-  }
-  const channelResults = readArray(body.channelResults).flatMap((item): WorkflowDispatchChannelResult[] => {
-    if (!isRecord(item)) return [];
-    return [{
-      channel: readString(item.channel) || undefined,
-      provider: readString(item.provider) || undefined,
-      status: readString(item.status) || undefined,
-      message: readString(item.message) || undefined,
-      httpStatus: typeof item.httpStatus === "number" ? item.httpStatus : undefined
-    }];
-  });
-  const result: WorkflowDispatchResult = {
-    ok: body.ok === true,
-    configured: body.configured === true,
-    message: readString(body.message) || (body.ok === true ? "전파 요청을 접수했습니다." : "전파 요청이 완료되지 않았습니다."),
-    workflowRunId: readString(body.workflowRunId) || undefined,
-    providerStatus: readString(body.providerStatus) || undefined,
-    idempotencyKey: readString(body.idempotencyKey) || undefined,
-    idempotencySupported: typeof body.idempotencySupported === "boolean" ? body.idempotencySupported : undefined,
-    duplicateRisk: typeof body.duplicateRisk === "boolean" ? body.duplicateRisk : undefined,
-    providerCalled: typeof body.providerCalled === "boolean" ? body.providerCalled : undefined,
-    channelResults: channelResults.length ? channelResults : undefined
-  };
-  if (!response.ok && !result.duplicateRisk) {
-    throw new Error(`${result.message} (HTTP ${response.status})`);
-  }
-  return result;
 }
 
 export function parseWorkflowShareArchive(
@@ -901,7 +843,8 @@ export function WorkflowSharePanel({
           providerCalled: false,
           message: `저장할 작업자 언어 본문을 검증하지 못했습니다: ${[
             ...recipientMessageVariants.invalidLanguageCodes,
-            ...recipientMessageVariants.koreanLeakLanguageCodes
+            ...recipientMessageVariants.koreanLeakLanguageCodes,
+            ...recipientMessageVariants.malformedFields
           ].join(", ")}`
         },
         resultSource: "dispatch"
@@ -982,7 +925,7 @@ export function WorkflowSharePanel({
         dispatchAttemptId,
         channels: activeChannels
       });
-      const payload = await dispatchLocalizedShareSession({
+      const payload = await dispatchAuthenticatedShareSession(fetch, {
         authToken,
         workpackId: authority.workpackId,
         shareSessionId: activeShareSessionId,
