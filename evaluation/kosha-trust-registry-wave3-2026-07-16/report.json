@@ -1,8 +1,9 @@
 {
   "schemaVersion": "safeclaw-kosha-trust-registry-wave3-report/v1",
-  "generatedAt": "2026-07-16T21:27:36+09:00",
+  "generatedAt": "2026-07-16T22:03:17+09:00",
   "status": "pass",
   "baseSha": "530efbfafb30c6145c1536172b260ff644845846",
+  "remediationParentSha": "a38ba4a94677c0dcaab007ff86363ec5959d5b7a",
   "networkFetchPerformed": false,
   "databaseMutationPerformed": false,
   "schemaMutationPerformed": false,
@@ -21,26 +22,31 @@
     "officialFileId": "CTC2026012913263450093332",
     "publishedAt": "2026-01-30",
     "controls": 3,
-    "bodyAnchors": 3
+    "bodyAnchors": 3,
+    "anchorPdfPage": 6,
+    "printedPage": 3,
+    "printedPageEncoded": false
   },
   "gates": {
     "atomicRegistryMembership": "pass",
     "pinMismatchFailClosed": "pass",
+    "publishedAtRequiredForEveryExactItem": "pass",
     "boundedElectricalApplicability": "pass",
     "commercialFalsePositiveBlock": "pass",
     "bodyExtractableGenerationControls": "pass",
     "bodyExtractablePhotoControls": "pass",
     "queryRelevantPromptAnchor": "pass",
-    "focusedVitest": { "files": 6, "tests": 134, "status": "pass" },
+    "focusedVitest": { "files": 6, "tests": 151, "status": "pass" },
     "strictTypecheck": "pass",
     "productionBuild": { "staticPages": 28, "status": "pass" },
     "nextFileTrace": {
       "manifestCount": 78,
       "consumerManifestCount": 16,
       "partialManifestCount": 0,
-      "exactAssetBytes": 186981,
+      "exactAssetBytes": 187007,
       "status": "pass"
     },
     "diffCheck": "pass"
-  }
+  },
+  "commercialNegativeTerms": ["구매", "견적", "납품", "판매", "가격", "상품", "할인", "임대", "비용", "구입", "제품", "쇼핑"]
 }

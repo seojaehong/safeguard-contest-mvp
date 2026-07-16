@@ -4,7 +4,7 @@
   "nftManifestCount": 78,
   "allThreeExactAssetsManifestCount": 16,
   "partialExactAssetsManifestCount": 0,
-  "exactAssetBytes": 186981,
+  "exactAssetBytes": 187007,
   "routes": [
     "api/agent/chat",
     "api/ask",

@@ -89,6 +89,17 @@ describe("exact-trusted KOSHA registry wave 3", () => {
     ["배전반 구매 가격 비교", false],
     ["정전 할인 상품 판매", false],
     ["사무실 정전 공지 작성", false],
+    ["배전반 임대 비용 문의", false],
+    ["차단기 제품 구입 일정", false],
+    ["LOTO 제품 쇼핑", false],
+    ["전기공사 비용 견적", false],
+    ["배전반 LOTO 임대 점검", false],
+    ["배전반 LOTO 비용 점검", false],
+    ["배전반 LOTO 구입 점검", false],
+    ["배전반 LOTO 제품 점검", false],
+    ["배전반 LOTO 쇼핑 점검", false],
+    ["배전반 구입 후 정전 전기작업에서 LOTO와 검전기로 무전압 확인", true],
+    ["차단기 임대 후 정전전로 전기설비 정비 작업, 잠금표지와 검전 실시", true],
   ])("bounds B-E-10 applicability for %s", (query, expected) => {
     expect(exactKoshaReferenceAppliesToQuery("B-E-10", query)).toBe(expected);
   });
@@ -102,7 +113,10 @@ describe("exact-trusted KOSHA registry wave 3", () => {
     expect(item.controls.length).toBeGreaterThanOrEqual(3);
     for (const control of item.controls) expect(item.body).toContain(control);
     expect(item.kosha_guide?.anchors.length).toBeGreaterThan(0);
-    for (const anchor of item.kosha_guide?.anchors ?? []) expect(item.body).toContain(anchor.excerpt);
+    for (const anchor of item.kosha_guide?.anchors ?? []) {
+      expect(anchor.page).toBe(6);
+      expect(item.body).toContain(anchor.excerpt);
+    }
 
     const question = "배전반 정전 후 전원 차단, 잠금표지 LOTO, 검전기로 무전압 확인하는 전기작업";
     const packet = buildDbHarnessPacket({
@@ -140,6 +154,40 @@ describe("exact-trusted KOSHA registry wave 3", () => {
     const firstBodyWindow = Array.from(item.body ?? "").slice(0, 720).join("");
     expect(prompt).not.toContain(JSON.stringify(firstBodyWindow).slice(1, -1));
     expect(item.kosha_guide?.anchors.some((anchor) => prompt.includes(anchor.excerpt))).toBe(true);
+  });
+
+  it.each(EXACT_PATHS)("fails closed when publishedAt is missing from %s", async (assetPath) => {
+    const directory = mkdtempSync(join(tmpdir(), "safeclaw-published-at-missing-"));
+    try {
+      const asset = JSON.parse(readFileSync(assetPath, "utf8")) as Record<string, unknown>;
+      delete asset.publishedAt;
+      const mutatedPath = join(directory, "missing-published-at.json");
+      writeFileSync(mutatedPath, JSON.stringify(asset), "utf8");
+
+      await expect(loadBundledExactKoshaReference(mutatedPath)).resolves.toMatchObject({
+        status: "blocked",
+        reason: "asset-invalid",
+      });
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it.each(EXACT_PATHS)("fails closed when publishedAt is null in %s", async (assetPath) => {
+    const directory = mkdtempSync(join(tmpdir(), "safeclaw-published-at-null-"));
+    try {
+      const asset = JSON.parse(readFileSync(assetPath, "utf8")) as Record<string, unknown>;
+      asset.publishedAt = null;
+      const mutatedPath = join(directory, "null-published-at.json");
+      writeFileSync(mutatedPath, JSON.stringify(asset), "utf8");
+
+      await expect(loadBundledExactKoshaReference(mutatedPath)).resolves.toMatchObject({
+        status: "blocked",
+        reason: "asset-invalid",
+      });
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 
   it("selects B-E-10 only for operational electrical queries and traces all three assets", async () => {

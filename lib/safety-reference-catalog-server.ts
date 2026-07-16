@@ -49,7 +49,7 @@ type BundledExactKoshaAsset = Readonly<{
   pdfSha256: string;
   officialUrl: string;
   officialFileId: string;
-  publishedAt: string | null;
+  publishedAt: string;
   extractionSchema: string;
   extractionSnapshot: string | null;
   portabilityLedgerSha256: string | null;
@@ -105,9 +105,9 @@ const EXACT_KOSHA_CONTENT = Object.freeze({
       "검전기를 이용하여 작업 대상 기기가 충전되었는지를 확인할 것",
     ],
     anchors: [
-      { page: 5, excerpt: "전기기기등에 공급되는 모든 전원을 관련 도면, 배선도 등으로 확인할 것" },
-      { page: 5, excerpt: "차단장치나 단로기 등에 잠금장치 및 꼬리표를 부착할 것" },
-      { page: 5, excerpt: "검전기를 이용하여 작업 대상 기기가 충전되었는지를 확인할 것" },
+      { page: 6, excerpt: "전기기기등에 공급되는 모든 전원을 관련 도면, 배선도 등으로 확인할 것" },
+      { page: 6, excerpt: "차단장치나 단로기 등에 잠금장치 및 꼬리표를 부착할 것" },
+      { page: 6, excerpt: "검전기를 이용하여 작업 대상 기기가 충전되었는지를 확인할 것" },
     ],
   }),
 });
@@ -140,6 +140,7 @@ function parseBundledExactKoshaAsset(value: unknown): BundledExactKoshaAsset | n
     "pdfSha256",
     "officialUrl",
     "officialFileId",
+    "publishedAt",
     "extractionSchema",
     "body",
   ] as const;
@@ -162,7 +163,7 @@ function parseBundledExactKoshaAsset(value: unknown): BundledExactKoshaAsset | n
     pdfSha256: strings.pdfSha256 as string,
     officialUrl: strings.officialUrl as string,
     officialFileId: strings.officialFileId as string,
-    publishedAt: readAssetString(value, "publishedAt"),
+    publishedAt: strings.publishedAt as string,
     extractionSchema: strings.extractionSchema as string,
     extractionSnapshot: readAssetString(value, "extractionSnapshot"),
     portabilityLedgerSha256: readAssetString(value, "portabilityLedgerSha256"),
@@ -187,7 +188,7 @@ function buildBundledExactKoshaItem(asset: BundledExactKoshaAsset): SafetyRefere
     || pin.pdfSha256 !== asset.pdfSha256
     || pin.officialUrl !== asset.officialUrl
     || pin.officialFileId !== asset.officialFileId
-    || (asset.publishedAt !== null && asset.publishedAt !== pin.publishedAt)) {
+    || asset.publishedAt !== pin.publishedAt) {
     return null;
   }
   const provenanceSnapshots = [asset.extractionSnapshot, asset.portabilityLedgerSha256]

@@ -1,0 +1,36 @@
+KOSHA exact registry wave 3 independent review remediation
+worktree: C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-exact-registry-wave3-b-e-10-2026
+base: 530efbfafb30c6145c1536172b260ff644845846
+remediation parent: a38ba4a94677c0dcaab007ff86363ec5959d5b7a
+network fetch: false
+database mutation: false
+schema mutation: false
+
+TDD RED command:
+npm.cmd test -- --run tests/exact-trusted-kosha-registry-wave3.test.ts --maxWorkers=1 --no-file-parallelism
+result: exit 1; 1 file; 34 tests; 12 failed; 22 passed
+failures: 5 commercial-term cases, 1 PDF-page anchor case, 3 missing-publishedAt cases, 3 null-publishedAt cases
+
+TDD GREEN command:
+npm.cmd test -- --run tests/exact-trusted-kosha-registry-wave3.test.ts --maxWorkers=1 --no-file-parallelism
+result: exit 0; 1 file passed; 34 tests passed
+
+Focused command:
+npm.cmd test -- --run tests/exact-trusted-kosha-registry-wave3.test.ts tests/exact-trusted-kosha-registry-wave2.test.ts tests/exact-trusted-kosha-grounding.test.ts tests/exact-kosha-applicability-policy.test.ts tests/grounded-generation-contract.test.ts tests/photo-vision-analysis.test.ts --maxWorkers=1 --no-file-parallelism
+result: exit 0; 6 files passed; 151 tests passed
+
+Strict typecheck command:
+npm.cmd run typecheck
+result: exit 0
+
+Production build command:
+npm.cmd run build
+result: exit 0; 28 static pages generated
+
+NFT atomic trace command:
+node -e "const fs=require('fs'),path=require('path'); const manifests=[]; const walk=d=>{for(const e of fs.readdirSync(d,{withFileTypes:true})){const p=path.join(d,e.name); if(e.isDirectory()) walk(p); else if(e.name.endsWith('.nft.json')) manifests.push(p);}}; walk('.next'); const assets=['d-c-13-2026.json','d-c-7-2026.json','b-e-10-2026.json']; let allThreeCount=0,partialCount=0; const routes=[]; for(const manifest of manifests){const files=JSON.parse(fs.readFileSync(manifest,'utf8')).files||[]; const present=assets.filter(asset=>files.some(file=>file.split(path.sep).join('/').endsWith('/data/safety-knowledge/exact-kosha/'+asset))); if(present.length===3){allThreeCount++; routes.push(manifest.split(path.sep).join('/').replace(/^\.next\/server\/app\//,'').replace(/\/route\.js\.nft\.json$|\/page\.js\.nft\.json$|\.js\.nft\.json$/,''));} else if(present.length>0) partialCount++;} const exactAssetBytes=assets.reduce((sum,asset)=>sum+fs.statSync(path.join('data/safety-knowledge/exact-kosha',asset)).size,0); console.log(JSON.stringify({manifestCount:manifests.length,allThreeCount,partialCount,exactAssetBytes,routes:routes.sort()},null,2));"
+result: exit 0; 78 manifests; 16 all-three consumers; 0 partial consumers; 187007 exact-asset bytes
+
+Diff check command:
+git diff --check
+result: exit 0
