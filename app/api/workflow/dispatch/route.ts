@@ -66,6 +66,7 @@ type LocalizedDispatchRecipient = {
   phone?: string;
   email?: string;
   dispatchLanguageCode: string;
+  messageTarget: "manager" | `foreign:${string}`;
   message: string;
 };
 
@@ -121,6 +122,7 @@ export function buildLocalizedDispatchRecipients(
     const localizedRecipient: LocalizedDispatchRecipient = {
       workerId,
       dispatchLanguageCode: languageCode,
+      messageTarget: languageCode === "ko" ? "manager" : `foreign:${languageCode}`,
       message
     };
     if (input.channels.some((channel) => channel === "sms" || channel === "kakao") && phone) {

@@ -170,7 +170,7 @@ function parseCanonicalDispatchDeliverables(data: unknown):
     if (typeof value.code !== "string") {
       return { ok: false, malformedFields: [`${prefix}.code`] };
     }
-    if (languageCodes.has(value.code)) {
+    if (value.code === "ko" || languageCodes.has(value.code)) {
       return { ok: false, malformedFields: [`${prefix}.code`] };
     }
     languageCodes.add(value.code);

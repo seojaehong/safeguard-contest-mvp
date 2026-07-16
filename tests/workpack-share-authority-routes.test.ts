@@ -1,3 +1,4 @@
+import { EventEmitter } from "node:events";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
@@ -256,12 +257,14 @@ describe("workflow dispatch route authority", () => {
           workerId: WORKER_ID,
           phone: "010-1111-2222",
           dispatchLanguageCode: "vi",
+          messageTarget: "foreign:vi",
           message: VI_MESSAGE
         },
         {
           workerId: KOREAN_WORKER_ID,
           phone: "010-3333-4444",
           dispatchLanguageCode: "ko",
+          messageTarget: "manager",
           message: KO_MESSAGE
         }
       ]
@@ -688,6 +691,62 @@ describe("workflow dispatch route authority", () => {
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });
 
+  it("fails closed when foreign worker languages reserve the canonical ko code", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    mocks.isLiveDispatchEnabled.mockReturnValue(false);
+    const language = serverWorkpack.deliverables.foreignWorkerLanguages[0];
+    const malformedWorkpack = {
+      ...serverWorkpack,
+      deliverables: {
+        ...serverWorkpack.deliverables,
+        foreignWorkerLanguages: [{
+          ...language,
+          code: "ko",
+          nativeLabel: "한국어",
+          lines: ["작업 전 안전수칙을 확인해 주세요."]
+        }]
+      }
+    };
+    mocks.loadOwnedWorkpackOperationContext.mockResolvedValue({
+      ...ownedContext(),
+      context: {
+        ...ownedContext().context,
+        shareAuthority: {
+          ...ownedContext().context.shareAuthority,
+          workpack: malformedWorkpack
+        }
+      }
+    });
+    mocks.loadActiveOwnedShareSession.mockResolvedValue({
+      ...activeSession(),
+      session: {
+        ...activeSession().session,
+        recipients: [koreanRecipient]
+      }
+    });
+    const { POST } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await POST(jsonRequest("/api/workflow/dispatch", {
+      workpackId: WORKPACK_ID,
+      shareSessionId: SESSION_ID,
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      operatorNote: "",
+      messageVariants: { ko: KO_MESSAGE }
+    }));
+    const body = await response.json() as {
+      malformedFields?: string[];
+      providerCalled?: boolean;
+    };
+
+    expect(response.status).toBe(409);
+    expect(body).toMatchObject({
+      malformedFields: ["deliverables.foreignWorkerLanguages[0].code"],
+      providerCalled: false
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
   it("fails closed before provider dispatch when a saved recipient language body is unavailable", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({});
     mocks.isLiveDispatchEnabled.mockReturnValue(false);
@@ -836,6 +895,7 @@ describe("workflow dispatch route authority", () => {
       workerId: WORKER_ID,
       phone: "010-1111-2222",
       dispatchLanguageCode: "vi",
+      messageTarget: "foreign:vi",
       message: VI_MESSAGE
     });
     expect(Object.keys(foreignRecipient || {})).not.toEqual(expect.arrayContaining([
@@ -913,7 +973,9 @@ describe("n8n recipient localization contract", () => {
     expect(script).toContain("for (const recipient of messageRecipients)");
     expect(script).toContain("recipients: [recipient]");
     expect(script).toContain("const text = recipientText(recipient).slice(0, 900)");
-    expect(script).toContain("client.mail(config.smtpUser, [email], payload.subject, recipientText(recipient))");
+    expect(script).toContain(
+      "client.mail(config.smtpUser, [email], payload.subject, recipientText(recipient), recipient.messageTarget)"
+    );
 
     const providerBodies: Array<Record<string, unknown>> = [];
     const providerFetch = vi.fn(async (_input: unknown, init: unknown) => {
@@ -931,8 +993,20 @@ describe("n8n recipient localization contract", () => {
         recipientMessageContract: "saved-worker-language-v1",
         channels: ["sms"],
         recipients: [
-          { workerId: WORKER_ID, phone: "010-1111-2222", dispatchLanguageCode: "vi", message: VI_MESSAGE },
-          { workerId: KOREAN_WORKER_ID, phone: "010-3333-4444", dispatchLanguageCode: "ko", message: KO_MESSAGE }
+          {
+            workerId: WORKER_ID,
+            phone: "010-1111-2222",
+            dispatchLanguageCode: "vi",
+            messageTarget: "foreign:vi",
+            message: VI_MESSAGE
+          },
+          {
+            workerId: KOREAN_WORKER_ID,
+            phone: "010-3333-4444",
+            dispatchLanguageCode: "ko",
+            messageTarget: "manager",
+            message: KO_MESSAGE
+          }
         ],
         workpack: { companyName: "Safe Site" }
       }
@@ -944,16 +1018,198 @@ describe("n8n recipient localization contract", () => {
     expect(providerFetch).toHaveBeenCalledTimes(2);
     expect(providerBodies).toEqual([
       expect.objectContaining({
-        recipients: [{ workerId: WORKER_ID, phone: "010-1111-2222", dispatchLanguageCode: "vi", message: VI_MESSAGE }],
+        recipients: [{
+          workerId: WORKER_ID,
+          phone: "010-1111-2222",
+          dispatchLanguageCode: "vi",
+          messageTarget: "foreign:vi",
+          message: VI_MESSAGE
+        }],
+        messageTarget: "foreign:vi",
         message: VI_MESSAGE,
         text: VI_MESSAGE
       }),
       expect.objectContaining({
-        recipients: [{ workerId: KOREAN_WORKER_ID, phone: "010-3333-4444", dispatchLanguageCode: "ko", message: KO_MESSAGE }],
+        recipients: [{
+          workerId: KOREAN_WORKER_ID,
+          phone: "010-3333-4444",
+          dispatchLanguageCode: "ko",
+          messageTarget: "manager",
+          message: KO_MESSAGE
+        }],
+        messageTarget: "manager",
         message: KO_MESSAGE,
         text: KO_MESSAGE
       })
     ]);
+  });
+
+  it("preserves each recipient message and messageTarget on the Solapi wire payload", async () => {
+    const template = JSON.parse(readFileSync(
+      join(process.cwd(), "docs", "n8n_safeguard_workflow_template.json"),
+      "utf8"
+    )) as Array<{ nodes?: Array<{ name?: string; parameters?: { jsCode?: string } }> }>;
+    const script = template[0]?.nodes
+      ?.find((node) => node.name === "Validate Secret and Dispatch Channels")
+      ?.parameters?.jsCode || "";
+    const wireBodies: Array<Record<string, unknown>> = [];
+    const fakeHttps = {
+      request(_options: unknown, callback: (response: EventEmitter & {
+        statusCode: number;
+        setEncoding: (encoding: string) => void;
+      }) => void) {
+        let requestBody = "";
+        const request = new EventEmitter() as EventEmitter & {
+          write: (chunk: string) => void;
+          end: () => void;
+          destroy: (error?: Error) => void;
+        };
+        request.write = (chunk: string) => { requestBody += chunk; };
+        request.destroy = (error?: Error) => { if (error) request.emit("error", error); };
+        request.end = () => {
+          wireBodies.push(JSON.parse(requestBody) as Record<string, unknown>);
+          const response = new EventEmitter() as EventEmitter & {
+            statusCode: number;
+            setEncoding: (encoding: string) => void;
+          };
+          response.statusCode = 200;
+          response.setEncoding = () => undefined;
+          callback(response);
+          queueMicrotask(() => {
+            response.emit("data", "accepted");
+            response.emit("end");
+          });
+        };
+        return request;
+      }
+    };
+    const nodeRequire = createRequire(import.meta.url);
+    const sandboxRequire = (id: string): unknown => id === "https" ? fakeHttps : nodeRequire(id);
+    const AsyncFunction = Object.getPrototypeOf(async () => undefined).constructor as new (
+      ...args: string[]
+    ) => (...args: unknown[]) => Promise<unknown>;
+    const execute = new AsyncFunction("$json", "$env", "$execution", "require", "fetch", "Buffer", script);
+
+    await execute({
+      headers: { "x-safeguard-secret": "secret" },
+      body: {
+        recipientMessageContract: "saved-worker-language-v1",
+        channels: ["sms"],
+        recipients: [{
+          workerId: WORKER_ID,
+          phone: "010-1111-2222",
+          dispatchLanguageCode: "vi",
+          messageTarget: "foreign:vi",
+          message: VI_MESSAGE
+        }],
+        workpack: { companyName: "Safe Site" }
+      }
+    }, {
+      SAFEGUARD_WEBHOOK_TOKEN: "secret",
+      SOLAPI_API_KEY: "api-key",
+      SOLAPI_API_SECRET: "api-secret",
+      SOLAPI_SENDER: "0299998888",
+      SOLAPI_BASE_URL: "https://api.solapi.example"
+    }, { id: "execution-solapi" }, sandboxRequire, vi.fn(), Buffer);
+
+    expect(wireBodies).toEqual([{
+      message: {
+        to: "01011112222",
+        from: "0299998888",
+        text: VI_MESSAGE,
+        messageTarget: "foreign:vi",
+        message: VI_MESSAGE
+      }
+    }]);
+  });
+
+  it("preserves each recipient message and messageTarget on the SMTP wire payload", async () => {
+    const template = JSON.parse(readFileSync(
+      join(process.cwd(), "docs", "n8n_safeguard_workflow_template.json"),
+      "utf8"
+    )) as Array<{ nodes?: Array<{ name?: string; parameters?: { jsCode?: string } }> }>;
+    const script = template[0]?.nodes
+      ?.find((node) => node.name === "Validate Secret and Dispatch Channels")
+      ?.parameters?.jsCode || "";
+    const smtpWrites: string[] = [];
+    const createSocket = (responses: string[]) => {
+      const socket = new EventEmitter() as EventEmitter & {
+        setEncoding: (encoding: string) => void;
+        write: (chunk: string) => void;
+      };
+      socket.setEncoding = () => undefined;
+      socket.write = (chunk: string) => {
+        smtpWrites.push(chunk);
+        const response = responses.shift();
+        if (!response) throw new Error(`Unexpected SMTP write: ${chunk.slice(0, 40)}`);
+        queueMicrotask(() => socket.emit("data", response));
+      };
+      return socket;
+    };
+    const fakeNet = {
+      connect(_options: unknown, callback: () => void) {
+        const socket = createSocket(["250 hello\r\n", "220 tls\r\n"]);
+        queueMicrotask(() => {
+          callback();
+          socket.emit("data", "220 ready\r\n");
+        });
+        return socket;
+      }
+    };
+    const fakeTls = {
+      connect() {
+        const socket = createSocket([
+          "250 hello\r\n",
+          "334 user\r\n",
+          "334 pass\r\n",
+          "235 authenticated\r\n",
+          "250 sender\r\n",
+          "250 recipient\r\n",
+          "354 data\r\n",
+          "250 queued\r\n",
+          "221 bye\r\n"
+        ]);
+        queueMicrotask(() => socket.emit("secureConnect"));
+        return socket;
+      }
+    };
+    const nodeRequire = createRequire(import.meta.url);
+    const sandboxRequire = (id: string): unknown => {
+      if (id === "net") return fakeNet;
+      if (id === "tls") return fakeTls;
+      return nodeRequire(id);
+    };
+    const AsyncFunction = Object.getPrototypeOf(async () => undefined).constructor as new (
+      ...args: string[]
+    ) => (...args: unknown[]) => Promise<unknown>;
+    const execute = new AsyncFunction("$json", "$env", "$execution", "require", "fetch", "Buffer", script);
+
+    await execute({
+      headers: { "x-safeguard-secret": "secret" },
+      body: {
+        recipientMessageContract: "saved-worker-language-v1",
+        channels: ["email"],
+        recipients: [{
+          workerId: WORKER_ID,
+          email: "worker@example.com",
+          dispatchLanguageCode: "vi",
+          messageTarget: "foreign:vi",
+          message: VI_MESSAGE
+        }],
+        workpack: { companyName: "Safe Site" }
+      }
+    }, {
+      SAFEGUARD_WEBHOOK_TOKEN: "secret",
+      SMTP_HOST: "smtp.example.com",
+      SMTP_PORT: "587",
+      SMTP_USER: "sender@example.com",
+      SMTP_PASS: "smtp-pass"
+    }, { id: "execution-smtp" }, sandboxRequire, vi.fn(), Buffer);
+
+    const dataWrite = smtpWrites.find((write) => write.includes("Content-Transfer-Encoding: base64")) || "";
+    expect(dataWrite).toContain("X-SafeClaw-Message-Target: foreign:vi");
+    const encodedBody = dataWrite.split("\r\n\r\n")[1]?.split("\r\n.\r\n")[0] || "";
+    expect(Buffer.from(encodedBody.replace(/\r\n/gu, ""), "base64").toString("utf8")).toBe(VI_MESSAGE);
   });
 });
 

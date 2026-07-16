@@ -17,7 +17,7 @@
 - Every client `messageVariants` value must be byte-equivalent to the server-derived canonical value.
 - The active share-session recipient snapshot remains authoritative for each recipient language and contact.
 - The relay payload declares `recipientMessageContract: saved-worker-language-v1` and contains only variants used by server-authoritative recipients.
-- Provider recipient DTOs contain only `workerId`, channel-required contact, `dispatchLanguageCode`, and `message`.
+- Provider recipient DTOs contain only `workerId`, channel-required contact, `dispatchLanguageCode`, explicit per-recipient `messageTarget`, and `message`.
 - Recipient DTOs are built only after preflight determines the final relay channels.
 - Foreign recipient DTOs exclude Korean labels, job/education fields, display names, and unrelated contacts.
 - Missing, malformed, unknown, mismatched, or Korean-leaking foreign variants fail closed with `providerCalled: false` before provider dispatch.
@@ -54,9 +54,18 @@
 5. The n8n template RED still consumed legacy `workpack.message`; SMS, SMTP, and provider webhook paths now consume each server-authoritative `recipient.message` independently.
 6. `PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED` remains `false`; live provider dispatch remains RED pending approved persistent idempotency migration.
 
+## Reserved language and relay wire remediation TDD evidence
+
+1. A reserved `ko` entry inside `foreignWorkerLanguages` RED reached fixture dispatch with HTTP `200`; it now returns `409`, `providerCalled: false`, the exact malformed `.code` path, and no webhook invocation.
+2. Exact provider DTO RED showed that `dispatchLanguageCode` did not provide the required explicit `messageTarget`; each recipient now carries both fields.
+3. Provider webhook sandbox RED omitted top-level `messageTarget`; each per-recipient webhook body now carries `messageTarget` and `message` independently.
+4. Solapi sandbox RED preserved only `text`; the actual HTTPS wire JSON now preserves the recipient's canonical `message` and `messageTarget` alongside the provider text.
+5. SMTP sandbox RED omitted the target; the actual SMTP wire now includes `X-SafeClaw-Message-Target` and the recipient-specific message body.
+6. Tenant ownership, active-session authority, canonical byte-equivalence, allowlist validation, and the persistent idempotency RED gate remain unchanged.
+
 ## Verification
 
-- Focused share/client/route suite: 4 files, 59 tests passed.
+- Focused share/client/route suite: 4 files, 62 tests passed.
 - Mobile browser contract: 1 test passed across desktop/mobile x day/night with one visible primary CTA and no clipping or overflow.
 - `npm.cmd run typecheck`: passed.
 - `git diff --check`: passed.
