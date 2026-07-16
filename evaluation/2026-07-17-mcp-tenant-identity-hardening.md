@@ -88,6 +88,28 @@ Command: `npm.cmd test`
 - Failures were outside the MCP auth slice and occurred in browser/server/subprocess suites under parallel load: shared `.next` manifest `ENOENT`, Next/browser startup timeouts, and isolated audit/git subprocess timeouts.
 - The run rewrote two tracked UI screenshots; those test-generated side effects were restored to authoritative HEAD before commit.
 
+## Final P1/P3 Review Remediation
+
+The final independent review found that persisted-token lookup errors still reached the legacy env-token decision and that the CLI label precondition lacked direct test evidence.
+
+1. P1 RED: `npm.cmd test -- tests/mcp-auth.test.ts`
+   - 2 tests failed and 32 passed.
+   - A returned `mcp_tokens` lookup error and a thrown lookup both promoted the duplicated plaintext from `SAFECLAW_MCP_TOKENS` to a full-trust env context.
+2. P1 GREEN: `npm.cmd test -- tests/mcp-auth.test.ts`
+   - 1 file passed, 34 tests passed.
+   - Both lookup failure paths now return `null` immediately without tenant lookup, env-token evaluation, or `last_used_at` update. Env fallback remains available only after a successful DB lookup returns no persisted row, or when the DB client is not configured.
+3. P3 direct evidence: `npm.cmd test -- tests/issue-mcp-token-cli.test.ts`
+   - 1 file passed, 5 tests passed.
+   - Omitted and blank labels, as well as omitted and blank site names, are each rejected before Supabase client creation or token insert.
+4. Tenant regression: `npm.cmd test -- tests/mcp-auth.test.ts tests/tenant-harness-memory.test.ts`
+   - 2 files passed, 47 tests passed.
+5. Final focused regression: `npm.cmd test -- tests/issue-mcp-token-cli.test.ts tests/mcp-token-service.test.ts tests/mcp-auth.test.ts tests/tenant-harness-memory.test.ts`
+   - 4 files passed, 71 tests passed.
+6. Strict TypeScript: `npm.cmd run typecheck`
+   - Passed with `tsc --noEmit --incremental false`.
+
+No migration or schema file changed.
+
 ## Result
 
-The MCP tenant identity P1 and CLI issuance P2 are remediated under focused behavior tests and strict typechecking. Persisted authentication requires a non-null site and organization tuple proven against `sites`, and the operator CLI can issue only that usable tuple shape. Every null-site row is rejected without env fallback or `last_used_at` mutation. Organization-only persisted tokens remain deliberately unavailable until an approved schema design can distinguish them from deleted site-bound rows. The earlier repository-wide run remains RED for the unrelated infrastructure-heavy suites listed above; no failure referenced this focused MCP slice.
+The MCP tenant identity findings and CLI issuance evidence gap are remediated under focused behavior tests. Persisted authentication requires a non-null site and organization tuple proven against `sites`; persisted-token lookup errors and exceptions fail closed before env-token evaluation; and the operator CLI can issue only a usable site-bound tuple after both label and site validation. Every null-site row is rejected without env fallback or `last_used_at` mutation. Organization-only persisted tokens remain deliberately unavailable until an approved schema design can distinguish them from deleted site-bound rows. The earlier repository-wide run remains RED for the unrelated infrastructure-heavy suites listed above; no failure referenced this focused MCP slice.
