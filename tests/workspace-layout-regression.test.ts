@@ -7,6 +7,7 @@ import {
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import { assembleGraph } from "@/lib/ontology/graph-store";
 import {
   startIsolatedNextBrowserHarness,
   type IsolatedNextBrowserHarness
@@ -1713,6 +1714,98 @@ describe("workspace layout regression", () => {
       sourceDocumentKeys: ["riskAssessmentDraft", "tbmBriefing"],
       detail: "안전조치 검수 통과"
     };
+    const packet = buildDbHarnessPacket({ question: sample.question, references: [] });
+    packet.ontologyChecklist = { status: "ready", missing: [] };
+    packet.generationContract.missingEvidence = [];
+    packet.generationContract.documentCoverage = packet.generationContract.requiredDocuments.map((document) => ({
+      document,
+      covered: true,
+      evidenceTypes: ["directEvidence"]
+    }));
+    sample.dbHarness = {
+      packet,
+      promptContext: buildHarnessPromptContext(packet),
+      summary: {
+        mode: packet.mode,
+        llmRole: packet.generationContract.llmRole,
+        llmOutputScope: packet.generationContract.llmOutputScope,
+        evidenceAuthority: packet.generationContract.evidenceAuthority,
+        providerRetryScope: packet.generationContract.providerRetryScope,
+        fallbackChainAllowed: packet.generationContract.fallbackChainAllowed,
+        genericProseSubstitutionAllowed: packet.generationContract.genericProseSubstitutionAllowed,
+        missingEvidencePolicy: packet.generationContract.missingEvidencePolicy,
+        directEvidence: 1,
+        sifCases: 1,
+        supportingEvidence: 1,
+        improvementMemory: 0,
+        workpackMemory: 0,
+        missingEvidence: [],
+        documentCoverage: packet.generationContract.documentCoverage,
+        retrievalContract: packet.retrievalContract,
+        ontologyStatus: "ready"
+      }
+    };
+    if (!sample.qualityContract) throw new Error("Sample quality contract is required");
+    sample.qualityContract = {
+      ...sample.qualityContract,
+      overall: "ready",
+      fallback: { hasFallback: false, modes: {} },
+      items: sample.qualityContract.items.map((item) => ({ ...item, status: "ready" })),
+      ontology: { ...sample.qualityContract.ontology, status: "ready", verdict: "통과", missingControlCount: 0 },
+      evidence: { ...sample.qualityContract.evidence, status: "ready" },
+      structured: { ...sample.qualityContract.structured, status: "ready" },
+      persistence: { ...sample.qualityContract.persistence, status: "ready" },
+      dbHarness: { ...sample.qualityContract.dbHarness, status: "ready", missingEvidence: [] }
+    };
+    const revalidationGraph = assembleGraph(
+      [
+        {
+          node_id: "Task_high_work",
+          kind: "Task",
+          label: "비계 조립·해체",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-browser"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Hazard_fall",
+          kind: "Hazard",
+          label: "추락",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-browser"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Control_platform",
+          kind: "Control",
+          label: "작업발판 점검",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-browser"],
+          meta: {},
+          review_state: "published"
+        }
+      ],
+      [
+        {
+          src: "Task_high_work",
+          rel: "entailsHazard",
+          dst: "Hazard_fall",
+          cited_uids: ["manual:launch-p0-browser"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          src: "Hazard_fall",
+          rel: "mitigatedBy",
+          dst: "Control_platform",
+          cited_uids: ["manual:launch-p0-browser"],
+          meta: {},
+          review_state: "published"
+        }
+      ]
+    );
     const regeneratedSample = structuredClone(sample);
     regeneratedSample.deliverables.tbmBriefing = `${regeneratedSentinel}\n${sample.deliverables.tbmBriefing}`;
     let generationCount = 0;
@@ -1735,6 +1828,13 @@ describe("workspace layout regression", () => {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify(responseBody)
+      });
+    });
+    await page.route("**/api/ontology/graph", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, graph: revalidationGraph })
       });
     });
     await page.route("**/api/export/xlsx", async (route) => {
@@ -1821,12 +1921,27 @@ describe("workspace layout regression", () => {
       return stored.data || null;
     });
     expect(invalidatedReview).not.toHaveProperty("ontologyQa");
-    expect(invalidatedReview).not.toHaveProperty("dbHarness");
+    expect(invalidatedReview).toHaveProperty("dbHarness");
+    expect(invalidatedReview).toHaveProperty("qualityContract.ontology.status", "pending");
 
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
     expect(await page.locator(".document-preview-pane pre").textContent()).toContain(sentinel);
     expect(await page.locator(".document-preview-head strong").textContent()).toBe("TBM 브리핑");
+    await page.getByRole("button", { name: "편집본 재검증" }).click();
+    await expect.poll(
+      async () => page.locator(".document-workbench-head small").textContent(),
+      { timeout: 10_000 }
+    ).toBe("편집본 재검증을 통과했습니다. 공유할 수 있습니다.");
+    const revalidatedReview = await page.evaluate(() => {
+      const raw = window.localStorage.getItem("safeclaw.currentWorkpack.v1");
+      if (!raw) return null;
+      const stored = JSON.parse(raw) as { data?: Record<string, unknown> };
+      return stored.data || null;
+    });
+    expect(revalidatedReview).toHaveProperty("ontologyQa.result.verdict", "통과");
+    expect(revalidatedReview).toHaveProperty("qualityContract.overall", "ready");
+    expect(JSON.stringify(revalidatedReview)).toContain(sentinel);
 
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     const reopenedEditor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });

@@ -56,6 +56,8 @@ import { buildGenerationProgressState } from "@/lib/workspace-generation-progres
 import {
   applyWorkpackDeliverablesChange,
   assessWorkpackReadiness,
+  parsePublishedOntologyGraph,
+  revalidateEditedWorkpack,
   type WorkpackReadiness
 } from "@/lib/workpack-readiness";
 import { formatCustomerFacingLabel, formatCustomerFacingText } from "@/lib/web-safe-presentation";
@@ -1049,6 +1051,7 @@ export function SafeGuardCommandCenter({
   const [data, setData] = useState<AskResponse | null>(null);
   const [generationFingerprint, setGenerationFingerprint] = useState<string | null>(null);
   const [requiresRevalidation, setRequiresRevalidation] = useState(false);
+  const [isRevalidating, setIsRevalidating] = useState(false);
   const [message, setMessage] = useState("");
   const [inputError, setInputError] = useState("");
   const commandInputRef = useRef<HTMLTextAreaElement>(null);
@@ -1144,7 +1147,10 @@ export function SafeGuardCommandCenter({
     values: WorkpackDocumentValues,
     change: WorkpackDeliverablesChange
   ) => {
-    if (change.requiresRevalidation) setRequiresRevalidation(true);
+    if (change.requiresRevalidation) {
+      setRequiresRevalidation(true);
+      setMessage("편집 내용을 보존했습니다. 공유 전 편집본을 다시 검증하세요.");
+    }
     setData((current) => {
       if (!current) return current;
       const currentDocuments: Partial<Record<DocumentKey, string>> = current.deliverables;
@@ -1153,6 +1159,34 @@ export function SafeGuardCommandCenter({
       return applyWorkpackDeliverablesChange(current, values, change);
     });
   }, []);
+
+  async function handleEditedWorkpackRevalidation() {
+    if (!data || !requiresRevalidation || isRevalidating) return;
+    setIsRevalidating(true);
+    setMessage("편집된 문서 본문으로 안전조치를 다시 검증하고 있습니다.");
+    try {
+      const response = await fetch("/api/ontology/graph", { cache: "no-store" });
+      const payload: unknown = await response.json();
+      const graph = parsePublishedOntologyGraph(payload);
+      if (!response.ok || !graph) {
+        throw new Error(`편집본 재검증 근거 조회 실패: HTTP ${response.status}`);
+      }
+
+      const revalidated = revalidateEditedWorkpack(data, graph);
+      const readiness = assessWorkpackReadiness(revalidated);
+      setData(revalidated);
+      setRequiresRevalidation(false);
+      if (generationFingerprint) persistCurrentWorkpack(revalidated, generationFingerprint);
+      setMessage(readiness.canShare
+        ? "편집본 재검증을 통과했습니다. 공유할 수 있습니다."
+        : readiness.reasons[0] || "편집본 재검증에서 보완 항목을 확인했습니다.");
+    } catch (error) {
+      console.error("edited workpack revalidation failed", error);
+      setMessage("편집본 재검증을 완료하지 못했습니다. 공유 잠금을 유지합니다.");
+    } finally {
+      setIsRevalidating(false);
+    }
+  }
 
   function persistCurrentWorkpack(payload: AskResponse, fingerprint: string) {
     if (typeof window === "undefined") return;
@@ -2263,6 +2297,16 @@ export function SafeGuardCommandCenter({
                       ? selectedDocumentBody.slice(0, 1200)
                       : "현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다."}
                   </pre>
+                  {requiresRevalidation ? (
+                    <button
+                      type="button"
+                      className="button command-primary workbench-primary-action"
+                      disabled={isRevalidating}
+                      onClick={() => void handleEditedWorkpackRevalidation()}
+                    >
+                      {isRevalidating ? "재검증 중" : "편집본 재검증"}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className="button command-primary document-next-button workbench-primary-action workbench-disabled-state"
