@@ -11,6 +11,7 @@ import {
 import {
   buildPhaseAGenerationGrounding,
   isEvidenceChainTaskBoundToQuestion,
+  validateCanonicalEvidenceChainPack,
   type ActiveEvidenceChainPack,
   type PhaseAGenerationGrounding,
 } from "@/lib/ontology/evidence-chain";
@@ -47,12 +48,28 @@ type GenerateSafetyDocpackHandlerDependencies = {
   getGenerationEvidenceSecret: () => string | undefined;
 };
 
+function canonicalEvidencePackReviewRequiredResult(): McpToolResult {
+  return toToolResult({
+    status: "review_required",
+    evidenceChainState: "review_required",
+    reason: "canonical_evidence_pack_mismatch",
+    failClosed: true,
+    message: "제공된 Phase A evidence pack이 canonical registry identity와 일치하지 않아 provider를 호출하지 않았습니다.",
+  });
+}
+
 export function createGenerateSafetyDocpackHandler(
   dependencies: GenerateSafetyDocpackHandlerDependencies,
 ): GenerateSafetyDocpackHandler {
   return async ({ question, mode, includeFull }, authContext) => {
     const generationEvidenceSecret = dependencies.getGenerationEvidenceSecret();
     const knowledge = await dependencies.queryKnowledge(question);
+    if (
+      knowledge.evidenceContract
+      && !validateCanonicalEvidenceChainPack(knowledge.evidenceContract)
+    ) {
+      return canonicalEvidencePackReviewRequiredResult();
+    }
     const grounding = knowledge.evidenceContract
       ? buildPhaseAGenerationGrounding({
           evidenceChainState: knowledge.evidenceChainState,
@@ -135,6 +152,12 @@ export function createGenerateReviewedSafetyDocpackHandler(
   return async ({ question, task, mode, includeFull }, authContext) => {
     const generationEvidenceSecret = dependencies.getGenerationEvidenceSecret();
     const knowledge = await dependencies.queryKnowledge(task);
+    if (
+      knowledge.evidenceContract
+      && !validateCanonicalEvidenceChainPack(knowledge.evidenceContract)
+    ) {
+      return canonicalEvidencePackReviewRequiredResult();
+    }
     const taskBound = knowledge.found
       && knowledge.evidenceContract !== null
       && isEvidenceChainTaskBoundToQuestion(task, question, knowledge.evidenceContract.chainId);

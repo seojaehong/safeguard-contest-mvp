@@ -7,7 +7,10 @@ import {
   createGenerateSafetyDocpackHandler,
 } from "@/lib/mcp-docpack-handler";
 import type { McpToolResult, SafetyKnowledgeResult } from "@/lib/mcp-tools";
-import type { PhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
+import type {
+  ActiveEvidenceChainPack,
+  PhaseAGenerationGrounding,
+} from "@/lib/ontology/evidence-chain";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
@@ -23,6 +26,48 @@ const authContext: McpAuthContext = {
   source: "env",
   tokenId: null,
 };
+
+type CanonicalPackForgery = {
+  field: "task" | "control" | "evidence" | "law";
+  mutate: (pack: ActiveEvidenceChainPack) => void;
+};
+
+const CANONICAL_PACK_FORGERIES: readonly CanonicalPackForgery[] = [
+  {
+    field: "task",
+    mutate: (pack) => {
+      pack.task.nodeId = "Task_forged";
+    },
+  },
+  {
+    field: "control",
+    mutate: (pack) => {
+      const control = pack.controls[0];
+      if (!control) throw new Error("expected canonical control");
+      control.graphControlNodeId = "Control_forged";
+    },
+  },
+  {
+    field: "evidence",
+    mutate: (pack) => {
+      const evidence = pack.hazardPriority[0];
+      if (!evidence) throw new Error("expected canonical SIF evidence");
+      evidence.citedUid = "ref:safety_reference_items:forged";
+    },
+  },
+  {
+    field: "law",
+    mutate: (pack) => {
+      const law = pack.controls[0]?.lawEvidence[0];
+      if (!law) throw new Error("expected canonical law evidence");
+      law.citedUid = "law:forged:제999조";
+    },
+  },
+];
+
+const FORGED_MCP_CASES = (["plain", "reviewed"] as const).flatMap((route) =>
+  CANONICAL_PACK_FORGERIES.map((forgery) => ({ route, ...forgery })),
+);
 
 function parseToolPayload(result: McpToolResult): Record<string, unknown> {
   const parsed: unknown = JSON.parse(result.content[0]?.text ?? "null");
@@ -169,6 +214,68 @@ describe("Phase A runtime evidence bridge", () => {
 
     expect(providerGrounding).toBeUndefined();
   });
+
+  test.each(FORGED_MCP_CASES)(
+    "fails closed before the provider for a forged $field field on the $route route",
+    async ({ route, mutate }) => {
+      const provider = vi.fn(async (question: string) => buildMockAskResponse(
+        question,
+        mockSearchResults.slice(0, 3),
+        "mock",
+        "forged canonical pack must not reach provider",
+      ));
+      const reviewResponse = vi.fn(async () => ({
+        reviewable: false as const,
+        message: "review must not run",
+        registeredTasks: [],
+      }));
+      const persistResponse = vi.fn(async () => null);
+      const queryKnowledge = async (): Promise<SafetyKnowledgeResult> => {
+        const knowledge = buildPublishedSafetyKnowledge(publishedGraph, "고소작업");
+        if (!knowledge.found || !knowledge.evidenceContract) {
+          throw new Error("expected canonical evidence pack");
+        }
+        const forgedPack = structuredClone(knowledge.evidenceContract);
+        mutate(forgedPack);
+        return {
+          ...knowledge,
+          evidenceContract: forgedPack,
+          phaseAProduct: null,
+        };
+      };
+
+      const result = route === "plain"
+        ? await createGenerateSafetyDocpackHandler({
+            defaultMode: "full",
+            queryKnowledge,
+            generateResponse: provider,
+            getWorkpackRepository: () => null,
+            getGenerationEvidenceSecret: () => undefined,
+          })({ question: "고소작업", mode: "template" }, authContext)
+        : await createGenerateReviewedSafetyDocpackHandler({
+            defaultMode: "full",
+            queryKnowledge,
+            generateResponse: provider,
+            reviewResponse,
+            persistResponse,
+            getGenerationEvidenceSecret: () => undefined,
+          })({
+            question: "고소작업 문서팩",
+            task: "고소작업",
+            mode: "template",
+          }, authContext);
+
+      expect(parseToolPayload(result)).toMatchObject({
+        status: "review_required",
+        evidenceChainState: "review_required",
+        reason: "canonical_evidence_pack_mismatch",
+        failClosed: true,
+      });
+      expect(provider).toHaveBeenCalledTimes(0);
+      expect(reviewResponse).toHaveBeenCalledTimes(0);
+      expect(persistResponse).toHaveBeenCalledTimes(0);
+    },
+  );
 
   test.each([
     ["plain", createGenerateSafetyDocpackHandler, { question: "고소작업", mode: "template" }],
