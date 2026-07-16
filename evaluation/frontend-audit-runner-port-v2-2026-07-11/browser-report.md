@@ -1,9 +1,9 @@
 # SafeClaw frontend consistency browser audit
 
-- Generated: 2026-07-16T20:38:55.317Z
-- Source SHA: 2b4316056b44b8729903d364d93022a916383ab6
-- Source identity: c5796fe86454b739eaf55ec795ffdd0891284e64370fda97126dd8beba7e0bc3
-- Evidence HEAD: 2b4316056b44b8729903d364d93022a916383ab6
+- Generated: 2026-07-16T23:31:07.388Z
+- Source SHA: acdaf1ee22bba32f1b057c142dd9a0884e969238
+- Source identity: 317f48f5d03149865be0e164dcd2265b1152be3701138fb73abe4259a1016edb
+- Evidence HEAD: acdaf1ee22bba32f1b057c142dd9a0884e969238
 - Evidence-only descendant: false
 - Routes: 32/32
 - Route matrix: 96/96
@@ -15,7 +15,7 @@
 - Failed rows: 0
 - Recovered transient rows: 0
 - Findings: 0
-- Elapsed: 104958 ms
+- Elapsed: 112519 ms
 
 ## Executed verification
 
