@@ -8,12 +8,11 @@ type ReviewAction = "approve_candidate" | "keep_site_only" | "reject";
 
 type ReviewInboxItem = {
   runId: string;
-  question: string;
+  candidateLabel: string;
   status: "draft" | "generated" | "review_required";
-  provider: string | null;
-  generatedText: string;
-  matchedHazardIds: string[];
-  eventCount: number;
+  providerLabel: string | null;
+  candidateText: string;
+  sourceEventCount: number;
 };
 
 const MAX_UI_TEXT_LENGTH = 12_000;
@@ -36,34 +35,30 @@ function readString(value: unknown, maxLength: number): string {
 }
 
 function parseInboxItem(value: unknown): ReviewInboxItem | null {
-  if (!isRecord(value) || !isRecord(value.run) || !Array.isArray(value.events)) return null;
-  const runId = readString(value.run.id, 128);
-  const status = value.run.status;
+  if (!isRecord(value)) return null;
+  const runId = readString(value.runId, 128);
+  const status = value.status;
   if (!runId || (status !== "draft" && status !== "generated" && status !== "review_required")) {
     return null;
   }
 
-  const output = isRecord(value.run.generatedOutput) ? value.run.generatedOutput : null;
-  const candidate = output && isRecord(output.candidate) ? output.candidate : null;
-  const generatedText = candidate ? readString(candidate.generatedText, MAX_UI_TEXT_LENGTH) : "";
-  const candidateQuestion = candidate ? readString(candidate.question, 500) : "";
-  const matchedHazardIds = candidate && Array.isArray(candidate.matchedHazardIds)
-    ? candidate.matchedHazardIds
-        .filter((item): item is string => typeof item === "string")
-        .map((item) => item.trim().slice(0, 128))
-        .filter(Boolean)
-        .slice(0, 20)
-    : [];
+  const candidateText = readString(value.candidateText, MAX_UI_TEXT_LENGTH);
+  const candidateLabel = readString(value.candidateLabel, 500);
+  const sourceEventCount = typeof value.sourceEventCount === "number"
+    && Number.isInteger(value.sourceEventCount)
+    && value.sourceEventCount > 0
+    && value.sourceEventCount <= 20
+    ? value.sourceEventCount
+    : 0;
 
-  if (status === "review_required" && (!generatedText || !candidateQuestion)) return null;
+  if (!candidateLabel || sourceEventCount === 0 || (status === "review_required" && !candidateText)) return null;
   return {
     runId,
-    question: candidateQuestion || `원본 이벤트 ${Math.min(value.events.length, 20)}건 후보 준비`,
+    candidateLabel,
     status,
-    provider: typeof value.run.provider === "string" ? value.run.provider.slice(0, 96) : null,
-    generatedText,
-    matchedHazardIds,
-    eventCount: Math.min(value.events.length, 20)
+    providerLabel: typeof value.providerLabel === "string" ? value.providerLabel.slice(0, 96) : null,
+    candidateText,
+    sourceEventCount
   };
 }
 
@@ -211,21 +206,21 @@ export function KnowledgeReviewInbox() {
                 <div className={styles.reviewItemHeading}>
                   <div>
                     <span>{item.status === "review_required" ? "검토 대기" : "후보 준비 전"}</span>
-                    <h4>{item.question}</h4>
+                    <h4>{item.candidateLabel}</h4>
                   </div>
                   <dl>
-                    <div><dt>근거</dt><dd>{item.eventCount}건</dd></div>
+                    <div><dt>근거</dt><dd>{item.sourceEventCount}건</dd></div>
                     <div><dt>게시</dt><dd>미게시</dd></div>
                   </dl>
                 </div>
 
                 {item.status === "review_required" ? (
                   <>
-                    <p className={styles.candidateText}>{item.generatedText}</p>
+                    <p className={styles.candidateText}>{item.candidateText}</p>
                     <div className={styles.reviewMeta}>
                       <span>법적 확정 아님</span>
                       <span>온톨로지 미반영</span>
-                      {item.provider ? <span>{item.provider}</span> : null}
+                      {item.providerLabel ? <span>{item.providerLabel}</span> : null}
                     </div>
                     <div className={styles.reviewActions} role="group" aria-label="검토 결정">
                       <button type="button" disabled={pending} onClick={() => void submit(item.runId, "approve_candidate")}>후보 승인</button>
@@ -233,11 +228,11 @@ export function KnowledgeReviewInbox() {
                       <button type="button" disabled={pending} onClick={() => void submit(item.runId, "reject")}>반려</button>
                     </div>
                   </>
-                ) : (
+                ) : item.status === "draft" ? (
                   <button className={styles.prepareButton} type="button" disabled={pending} onClick={() => void prepare(item.runId)}>
                     후보 준비
                   </button>
-                )}
+                ) : null}
               </li>
             );
           })}

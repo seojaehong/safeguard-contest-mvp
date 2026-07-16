@@ -1,5 +1,10 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { buildKnowledgeCandidate } from "@/lib/knowledge-governance";
+import {
+  buildKnowledgeReviewSourceSnapshot,
+  type KnowledgeReviewSourceEventRow
+} from "@/lib/knowledge-review-prepare";
 import * as knowledgeReview from "@/lib/knowledge-review";
 
 const mocks = vi.hoisted(() => ({
@@ -56,6 +61,50 @@ function makeReadClient(
     }],
     ...overrides
   };
+  for (const event of rows.knowledge_events ?? []) {
+    if (!Array.isArray(event.reflected_documents) || event.reflected_documents.length === 0) {
+      event.reflected_documents = ["fixture-document"];
+    }
+    event.payload ??= {};
+    event.url ??= null;
+  }
+  for (const run of rows.knowledge_regeneration_runs ?? []) {
+    if (run.status !== "review_required"
+      || typeof run.organization_id !== "string"
+      || typeof run.site_id !== "string"
+      || !Array.isArray(run.raw_event_ids)
+      || typeof run.generated_output !== "object"
+      || run.generated_output === null) continue;
+    const sourceEvents = run.raw_event_ids
+      .map((eventId) => rows.knowledge_events?.find((event) => event.id === eventId))
+      .filter((event): event is Record<string, unknown> => event !== undefined);
+    if (sourceEvents.length !== run.raw_event_ids.length
+      || sourceEvents.some((event) => event.organization_id !== run.organization_id || event.site_id !== run.site_id)) continue;
+    const sourceBinding = buildKnowledgeReviewSourceSnapshot({
+      eventIds: run.raw_event_ids as string[],
+      events: sourceEvents as KnowledgeReviewSourceEventRow[],
+      tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
+    });
+    const candidate = buildKnowledgeCandidate({
+      question: `원본 이벤트 ${sourceEvents.length}건 기반 현장 지식 후보 검토`,
+      rawEvents: sourceBinding.rawEvents,
+      matchedHazardIds: [],
+      generatedText: "현장 안전 지식 후보를 검토합니다.",
+      providerLabel: typeof run.provider === "string" ? run.provider : null,
+      tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
+    });
+    run.generated_output = {
+      contractVersion: "knowledge-review-preparation.v1",
+      candidate,
+      sourceSnapshot: sourceBinding.snapshot,
+      publicationState: "unpublished",
+      ontologyPublished: false,
+      publishPerformed: false,
+      migrationPerformed: false,
+      legalConfirmed: false,
+      rawEventPayloadIncluded: false
+    };
+  }
 
   return {
     calls,
@@ -105,7 +154,7 @@ describe("knowledge review route fail-closed setup", () => {
       method,
       headers: { "content-type": "application/json" },
       ...(method === "POST"
-        ? { body: JSON.stringify({ runId: "run-1", action: "approve_candidate" }) }
+        ? { body: JSON.stringify({ runId: "11111111-1111-4111-8111-111111111111", action: "approve_candidate" }) }
         : {})
     });
 
@@ -131,7 +180,7 @@ describe("knowledge review route fail-closed setup", () => {
       method,
       headers: { "content-type": "application/json" },
       ...(method === "POST"
-        ? { body: JSON.stringify({ runId: "run-1", action: "approve_candidate" }) }
+        ? { body: JSON.stringify({ runId: "11111111-1111-4111-8111-111111111111", action: "approve_candidate" }) }
         : {})
     });
 
@@ -165,6 +214,28 @@ describe("knowledge review route fail-closed setup", () => {
       compensationRequired: false
     });
   });
+
+  it.each(["run-1", "11111111-1111-1111-8111-111111111111", "{11111111-1111-4111-8111-111111111111}"])(
+    "rejects non-canonical review UUID %s before applying an action",
+    async (runId) => {
+      mocks.createSupabaseAdminClient.mockReturnValue({});
+      mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
+      const applySpy = vi.spyOn(knowledgeReview, "applyKnowledgeReviewAction");
+      const { POST } = await import("@/app/api/knowledge/review/route");
+
+      const response = await POST(new NextRequest("http://localhost/api/knowledge/review", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: "Bearer test-token" },
+        body: JSON.stringify({ runId, action: "approve_candidate" })
+      }));
+
+      expect(response.status).toBe(400);
+      expect(mocks.createSupabaseAdminClient).not.toHaveBeenCalled();
+      expect(mocks.getWorkspaceUser).not.toHaveBeenCalled();
+      expect(applySpy).not.toHaveBeenCalled();
+      applySpy.mockRestore();
+    }
+  );
 });
 
 describe("knowledge review GET", () => {
@@ -184,24 +255,11 @@ describe("knowledge review GET", () => {
     expect(payload).toMatchObject({
       ok: true,
       configured: true,
-      tenantBoundary: {
-        ownerUserId: "reviewer-1",
-        organizationIds: ["org-owned"],
-        rawEventPayloadIncluded: false
-      },
       queue: [{
-        run: {
-          id: "run-1",
-          organizationId: "org-owned",
-          siteId: "site-1",
-          status: "review_required"
-        },
-        events: [{
-          id: "event-1",
-          organizationId: "org-owned",
-          siteId: "site-1",
-          reviewStatus: "pending_review"
-        }]
+        runId: "run-1",
+        status: "review_required",
+        sourceEventCount: 1,
+        candidateText: "현장 안전 지식 후보를 검토합니다."
       }],
       dropped: {
         runCount: 0,
@@ -211,6 +269,24 @@ describe("knowledge review GET", () => {
     });
     expect(serialized).not.toContain("raw-secret");
     expect(serialized).not.toContain("token-secret");
+    for (const forbidden of [
+      "현장 검토 이벤트",
+      "manual-1",
+      "추락 위험 검토",
+      "org-owned",
+      "site-1",
+      "rawEventIds",
+      "generatedOutput",
+      '"events"'
+    ]) {
+      expect(serialized, `network response exposes ${forbidden}`).not.toContain(forbidden);
+    }
+    expect(payload.queue[0]).toEqual(expect.objectContaining({
+      runId: "run-1",
+      status: "review_required",
+      sourceEventCount: 1
+    }));
+    expect(payload.queue[0].run).toBeUndefined();
     expect(fake.calls).toContainEqual({
       table: "organizations",
       operation: "eq",
@@ -335,13 +411,13 @@ describe("knowledge review GET", () => {
 
     expect(response.status).toBe(200);
     expect(payload.queue).toHaveLength(1);
-    expect(payload.queue[0].run.id).toBe("run-valid");
+    expect(payload.queue[0].runId).toBe("run-valid");
     expect(payload.dropped).toEqual({
       runCount: 3,
-      eventCount: 2,
+      eventCount: 1,
       reasons: [
         { runId: "run-missing-event", reason: "raw_event_missing_or_not_pending" },
-        { runId: "run-cross-site", reason: "tenant_mismatch" },
+        { runId: "run-cross-site", reason: "raw_event_missing_or_not_pending" },
         { runId: "run-invalid-output", reason: "generated_output_invalid" }
       ]
     });
@@ -455,7 +531,7 @@ describe("knowledge review GET", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.queue.map((item: { run: { id: string } }) => item.run.id)).toEqual(["run-valid-site-1"]);
+    expect(payload.queue.map((item: { runId: string }) => item.runId)).toEqual(["run-valid-site-1"]);
     expect(payload.dropped.reasons).toContainEqual({
       runId: "run-invalid-site-2",
       reason: "tenant_mismatch"
@@ -521,19 +597,16 @@ describe("knowledge review GET", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.queue.map((item: { run: { id: string } }) => item.run.id)).toEqual(["run-valid"]);
+    expect(payload.queue.map((item: { runId: string }) => item.runId)).toEqual(["run-valid"]);
     expect(payload.dropped).toEqual({
-      runCount: 2,
-      eventCount: 2,
-      reasons: [
-        { runId: "run-foreign-site", reason: "site_tenant_mismatch" },
-        { runId: "run-missing-site", reason: "site_tenant_mismatch" }
-      ]
+      runCount: 0,
+      eventCount: 0,
+      reasons: []
     });
     expect(fake.calls).toContainEqual({
       table: "sites",
       operation: "in",
-      args: ["id", ["site-1", "site-foreign", "site-missing"]]
+      args: ["organization_id", ["org-owned"]]
     });
   });
 
@@ -587,7 +660,7 @@ describe("knowledge review POST failure disclosure", () => {
         "content-type": "application/json",
         authorization: "Bearer test-token"
       },
-      body: JSON.stringify({ runId: "run-1", action: "approve_candidate" })
+      body: JSON.stringify({ runId: "11111111-1111-4111-8111-111111111111", action: "approve_candidate" })
     }));
     const payload = await response.json();
 

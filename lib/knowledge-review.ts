@@ -5,6 +5,12 @@ import type {
 } from "@/lib/supabase-admin";
 import { toJson } from "@/lib/supabase-admin";
 import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
+import {
+  buildKnowledgeReviewSourceSnapshot,
+  isStrictUuidV4,
+  readCurrentSourceBoundCandidate,
+  type KnowledgeReviewSourceEventRow
+} from "@/lib/knowledge-review-prepare";
 
 export const KNOWLEDGE_REVIEW_RUN_STATUSES = [
   "draft",
@@ -22,6 +28,17 @@ export type KnowledgeReviewAction =
 export type KnowledgeReviewRequest = {
   runId: string;
   action: KnowledgeReviewAction;
+};
+
+export type KnowledgeReviewInboxPresentationDto = {
+  runId: string;
+  status: (typeof KNOWLEDGE_REVIEW_RUN_STATUSES)[number];
+  statusLabel: string;
+  sourceEventCount: number;
+  candidateLabel: string;
+  candidateText: string;
+  matchedHazardCount: number;
+  providerLabel: string | null;
 };
 
 export type KnowledgeReviewFailureUpdates = {
@@ -69,6 +86,8 @@ type ReviewEventRow = Pick<KnowledgeEventRow,
   | "source_id"
   | "captured_at"
   | "title"
+  | "url"
+  | "payload"
   | "related_hazard_ids"
   | "reflected_documents"
   | "review_status"
@@ -119,41 +138,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function mapReviewEvent(row: ReviewEventRow) {
-  return {
-    id: row.id,
-    organizationId: row.organization_id,
-    siteId: row.site_id,
-    source: row.source,
-    sourceId: row.source_id,
-    capturedAt: row.captured_at,
-    title: row.title,
-    relatedHazardIds: row.related_hazard_ids,
-    reflectedDocuments: row.reflected_documents,
-    reviewStatus: row.review_status,
-    createdAt: row.created_at
-  };
-}
-
-function mapReviewRun(row: ReviewRunRow) {
-  return {
-    id: row.id,
-    organizationId: row.organization_id,
-    siteId: row.site_id,
-    question: row.question,
-    rawEventIds: row.raw_event_ids,
-    generatedOutput: row.generated_output,
-    provider: row.provider,
-    status: row.status,
-    createdAt: row.created_at
-  };
-}
-
 export function parseKnowledgeReviewRequest(value: unknown): KnowledgeReviewRequest | null {
   if (!isRecord(value)) return null;
   const runId = typeof value.runId === "string" ? value.runId.trim() : "";
   const action = value.action;
-  if (!runId) return null;
+  if (!isStrictUuidV4(runId)) return null;
   if (action !== "approve_candidate" && action !== "keep_site_only" && action !== "reject") {
     return null;
   }
@@ -173,11 +162,6 @@ export async function loadKnowledgeReviewInbox(
   const organizationIds = (organizations ?? []).map((organization) => organization.id);
   if (organizationIds.length === 0) {
     return {
-      tenantBoundary: {
-        ownerUserId: user.id,
-        organizationIds,
-        rawEventPayloadIncluded: false
-      },
       queue: [],
       dropped: {
         runCount: 0,
@@ -187,10 +171,25 @@ export async function loadKnowledgeReviewInbox(
     };
   }
 
+  const { data: sites, error: siteError } = await client
+    .from("sites")
+    .select("id,organization_id")
+    .in("organization_id", organizationIds);
+  if (siteError) throw siteError;
+  const siteIds = (sites ?? []).map((site) => site.id);
+  const siteOrganizationById = new Map((sites ?? []).map((site) => [site.id, site.organization_id]));
+  if (siteIds.length === 0) {
+    return {
+      queue: [],
+      dropped: { runCount: 0, eventCount: 0, reasons: [] }
+    };
+  }
+
   const { data: events, error: eventError } = await client
     .from("knowledge_events")
-    .select("id,organization_id,site_id,source,source_id,captured_at,title,related_hazard_ids,reflected_documents,review_status,created_at")
+    .select("id,organization_id,site_id,source,source_id,captured_at,title,url,payload,related_hazard_ids,reflected_documents,review_status,created_at")
     .in("organization_id", organizationIds)
+    .in("site_id", siteIds)
     .eq("review_status", "pending_review")
     .order("created_at", { ascending: false });
 
@@ -200,23 +199,11 @@ export async function loadKnowledgeReviewInbox(
     .from("knowledge_regeneration_runs")
     .select("id,organization_id,site_id,question,raw_event_ids,generated_output,provider,status,created_at")
     .in("organization_id", organizationIds)
+    .in("site_id", siteIds)
     .in("status", [...KNOWLEDGE_REVIEW_RUN_STATUSES])
     .order("created_at", { ascending: false });
 
   if (runError) throw runError;
-
-  const nonNullSiteIds = [...new Set((runs ?? []).flatMap((run) => (
-    run.site_id === null ? [] : [run.site_id]
-  )))];
-  let siteOrganizationById = new Map<string, string>();
-  if (nonNullSiteIds.length > 0) {
-    const { data: sites, error: siteError } = await client
-      .from("sites")
-      .select("id,organization_id")
-      .in("id", nonNullSiteIds);
-    if (siteError) throw siteError;
-    siteOrganizationById = new Map((sites ?? []).map((site) => [site.id, site.organization_id]));
-  }
 
   const eventById = new Map((events ?? []).map((event) => [event.id, event]));
   const droppedReasons: Array<{ runId: string; reason: KnowledgeReviewDropReason }> = [];
@@ -276,21 +263,47 @@ export async function loadKnowledgeReviewInbox(
       droppedReasons.push({ runId: run.id, reason: "tenant_mismatch" });
       continue;
     }
+    if (run.status === "review_required") {
+      if (!run.site_id) {
+        droppedReasons.push({ runId: run.id, reason: "site_tenant_mismatch" });
+        continue;
+      }
+      const sourceBinding = buildKnowledgeReviewSourceSnapshot({
+        eventIds: uniqueEventIds,
+        events: relatedEvents as KnowledgeReviewSourceEventRow[],
+        tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
+      });
+      if (!readCurrentSourceBoundCandidate(run.generated_output, sourceBinding.snapshot)) {
+        droppedReasons.push({ runId: run.id, reason: "generated_output_invalid" });
+        continue;
+      }
+    }
     relationValidRuns.push({ run, events: relatedEvents });
   }
 
-  const queue = relationValidRuns.map((candidate) => ({
-      run: mapReviewRun(candidate.run),
-      events: candidate.events.map(mapReviewEvent)
-  }));
-  const includedEventIds = new Set(queue.flatMap((item) => item.events.map((event) => event.id)));
+  const queue: KnowledgeReviewInboxPresentationDto[] = relationValidRuns.map(({ run, events: relatedEvents }) => {
+    const sourceEventCount = relatedEvents.length;
+    const candidate = run.site_id && run.status === "review_required"
+      ? readCurrentSourceBoundCandidate(run.generated_output, buildKnowledgeReviewSourceSnapshot({
+          eventIds: run.raw_event_ids,
+          events: relatedEvents as KnowledgeReviewSourceEventRow[],
+          tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
+        }).snapshot)
+      : null;
+    return {
+      runId: run.id,
+      status: run.status as KnowledgeReviewInboxPresentationDto["status"],
+      statusLabel: run.status === "review_required" ? "검토 대기" : "후보 준비 전",
+      sourceEventCount,
+      candidateLabel: candidate?.question ?? `원본 이벤트 ${sourceEventCount}건 후보 준비`,
+      candidateText: candidate?.generatedText ?? "",
+      matchedHazardCount: candidate?.matchedHazardIds.length ?? 0,
+      providerLabel: candidate?.providerLabel ?? null
+    };
+  });
+  const includedEventIds = new Set(relationValidRuns.flatMap((item) => item.events.map((event) => event.id)));
 
   return {
-    tenantBoundary: {
-      ownerUserId: user.id,
-      organizationIds,
-      rawEventPayloadIncluded: false
-    },
     queue,
     dropped: {
       runCount: droppedReasons.length,
@@ -614,11 +627,26 @@ export async function applyKnowledgeReviewAction(
     });
   }
 
+  const { data: ownedSites, error: ownedSiteError } = await client
+    .from("sites")
+    .select("id,organization_id")
+    .in("organization_id", organizationIds);
+  assertReadSucceeded(ownedSiteError, "검토자 현장 범위를 확인하지 못했습니다.");
+  const siteIds = (ownedSites ?? []).map((site) => site.id);
+  if (siteIds.length === 0) {
+    throw new KnowledgeReviewError({
+      status: 403,
+      code: "review_tenant_forbidden",
+      message: "검토 가능한 현장이 없습니다."
+    });
+  }
+
   const { data: run, error: runReadError } = await client
     .from("knowledge_regeneration_runs")
     .select("id,organization_id,site_id,raw_event_ids,generated_output,status")
     .eq("id", request.runId)
     .in("organization_id", organizationIds)
+    .in("site_id", siteIds)
     .maybeSingle();
   assertReadSucceeded(runReadError, "검토 대상을 확인하지 못했습니다.");
 
@@ -630,7 +658,7 @@ export async function applyKnowledgeReviewAction(
     });
   }
   const transition = actionTransition(request.action);
-  const runIsActionable = (KNOWLEDGE_REVIEW_RUN_STATUSES as readonly string[]).includes(run.status);
+  const runIsActionable = run.status === "review_required";
   const runHasStoredReceipt = isRecord(run.generated_output)
     && Object.prototype.hasOwnProperty.call(run.generated_output, "humanReviewReceipt");
   const runHasTargetFinalStatus = run.status === transition.runStatus;
@@ -660,28 +688,13 @@ export async function applyKnowledgeReviewAction(
       message: "이미 처리되었거나 검토할 수 없는 상태입니다."
     });
   }
-  if (!isRecord(run.generated_output)) {
+  if (!run.site_id
+    || !(ownedSites ?? []).some((site) => site.id === run.site_id && site.organization_id === run.organization_id)) {
     throw new KnowledgeReviewError({
       status: 409,
-      code: "review_generated_output_invalid",
-      message: "검토 대상의 생성 결과 형식이 유효하지 않습니다."
+      code: "review_site_mismatch",
+      message: "검토 대상의 조직과 현장 범위가 일치하지 않습니다."
     });
-  }
-  if (run.site_id) {
-    const { data: site, error: siteError } = await client
-      .from("sites")
-      .select("id,organization_id")
-      .eq("id", run.site_id)
-      .eq("organization_id", run.organization_id)
-      .maybeSingle();
-    assertReadSucceeded(siteError, "검토 대상의 현장 범위를 확인하지 못했습니다.");
-    if (!site) {
-      throw new KnowledgeReviewError({
-        status: 409,
-        code: "review_site_mismatch",
-        message: "검토 대상의 조직과 현장 범위가 일치하지 않습니다."
-      });
-    }
   }
 
   const uniqueEventIds = [...new Set(run.raw_event_ids)];
@@ -695,8 +708,10 @@ export async function applyKnowledgeReviewAction(
 
   const { data: events, error: eventReadError } = await client
     .from("knowledge_events")
-    .select("id,organization_id,site_id,review_status,proposed_wiki_update")
-    .in("id", uniqueEventIds);
+    .select("id,organization_id,site_id,source,source_id,captured_at,title,url,payload,related_hazard_ids,reflected_documents,review_status,proposed_wiki_update")
+    .in("id", uniqueEventIds)
+    .eq("organization_id", run.organization_id)
+    .eq("site_id", run.site_id);
   assertReadSucceeded(eventReadError, "원본 이벤트 범위를 확인하지 못했습니다.");
 
   const eventIds = new Set((events ?? []).map((event) => event.id));
@@ -750,6 +765,31 @@ export async function applyKnowledgeReviewAction(
       status: 409,
       code: "review_shared_event_conflict",
       message: "같은 원본 이벤트를 공유하는 다른 검토 run이 있어 처리할 수 없습니다."
+    });
+  }
+
+  let sourceBinding: ReturnType<typeof buildKnowledgeReviewSourceSnapshot>;
+  try {
+    sourceBinding = buildKnowledgeReviewSourceSnapshot({
+      eventIds: uniqueEventIds,
+      events: events as KnowledgeReviewSourceEventRow[],
+      tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
+    });
+  } catch (error) {
+    throw new KnowledgeReviewError({
+      status: 409,
+      code: "review_candidate_source_binding_invalid",
+      message: "검토 후보의 원본 이벤트 snapshot을 검증할 수 없습니다.",
+      cause: error
+    });
+  }
+  if (!readCurrentSourceBoundCandidate(run.generated_output, sourceBinding.snapshot, {
+    requireSafeEnvelope: runIsActionable
+  })) {
+    throw new KnowledgeReviewError({
+      status: 409,
+      code: "review_candidate_source_binding_invalid",
+      message: "검토 후보가 현재 원본 이벤트 snapshot과 일치하지 않습니다."
     });
   }
 
@@ -901,6 +941,7 @@ export async function applyKnowledgeReviewAction(
         .update({ generated_output: toJson(normalizedOutput) })
         .eq("id", run.id)
         .eq("organization_id", run.organization_id)
+        .eq("site_id", run.site_id)
         .eq("status", transition.runStatus)
         .select("id")
         .single();
@@ -945,7 +986,8 @@ export async function applyKnowledgeReviewAction(
     })
     .eq("id", run.id)
     .eq("organization_id", run.organization_id)
-    .in("status", [...KNOWLEDGE_REVIEW_RUN_STATUSES])
+    .eq("site_id", run.site_id)
+    .eq("status", "review_required")
     .select("id")
     .single();
 

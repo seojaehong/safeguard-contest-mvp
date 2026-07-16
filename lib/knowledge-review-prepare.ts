@@ -1,5 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { KnowledgeCandidate } from "@/lib/knowledge-governance";
+import {
+  classifyKnowledgeEvent,
+  type KnowledgeCandidate,
+  type KnowledgeEventProvenance
+} from "@/lib/knowledge-governance";
 import { normalizeKnowledgeRawEvent, type KnowledgeRawEvent } from "@/lib/safety-knowledge";
 import type { WorkspaceDatabase, WorkspaceUser } from "@/lib/supabase-admin";
 import { toJson } from "@/lib/supabase-admin";
@@ -16,7 +20,7 @@ type KnowledgeRunRow = Pick<
   "id" | "organization_id" | "site_id" | "question" | "raw_event_ids" | "status"
 >;
 
-type KnowledgeEventRow = Pick<
+export type KnowledgeReviewSourceEventRow = Pick<
   WorkspaceDatabase["public"]["Tables"]["knowledge_events"]["Row"],
   | "id"
   | "organization_id"
@@ -31,6 +35,13 @@ type KnowledgeEventRow = Pick<
   | "reflected_documents"
   | "review_status"
 >;
+
+export type KnowledgeReviewSourceSnapshot = {
+  contractVersion: "knowledge-review-source-snapshot.v1";
+  eventIds: string[];
+  tenantContext: { organizationId: string; siteId: string };
+  provenance: KnowledgeEventProvenance[];
+};
 
 export type KnowledgeReviewPrepareRequest = {
   runId: string;
@@ -75,7 +86,23 @@ function assertRead(error: unknown, message: string): void {
   });
 }
 
-function toRawEvent(row: KnowledgeEventRow): KnowledgeRawEvent {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function canonicalize(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalize).join(",")}]`;
+  if (isRecord(value)) {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalize(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value) ?? "null";
+}
+
+export function isStrictUuidV4(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(value);
+}
+
+export function toKnowledgeRawEvent(row: KnowledgeReviewSourceEventRow): KnowledgeRawEvent {
   const normalized = normalizeKnowledgeRawEvent({
     source: row.source,
     sourceId: row.source_id,
@@ -90,6 +117,84 @@ function toRawEvent(row: KnowledgeEventRow): KnowledgeRawEvent {
     fail(409, "source_event_invalid", "원본 이벤트가 후보 생성 계약을 충족하지 않습니다.");
   }
   return normalized.event;
+}
+
+export function buildKnowledgeReviewSourceSnapshot(input: {
+  eventIds: readonly string[];
+  events: readonly KnowledgeReviewSourceEventRow[];
+  tenantContext: { organizationId: string; siteId: string };
+}): { rawEvents: KnowledgeRawEvent[]; snapshot: KnowledgeReviewSourceSnapshot } {
+  const eventById = new Map(input.events.map((event) => [event.id, event]));
+  const orderedRows = input.eventIds.map((eventId) => eventById.get(eventId));
+  if (orderedRows.some((event) => event === undefined)) {
+    fail(409, "source_event_missing", "원본 이벤트 snapshot을 구성할 수 없습니다.");
+  }
+  const rawEvents = orderedRows.map((event) => toKnowledgeRawEvent(event as KnowledgeReviewSourceEventRow));
+  return {
+    rawEvents,
+    snapshot: {
+      contractVersion: "knowledge-review-source-snapshot.v1",
+      eventIds: [...input.eventIds],
+      tenantContext: { ...input.tenantContext },
+      provenance: rawEvents.map((event) => classifyKnowledgeEvent(event, input.tenantContext))
+    }
+  };
+}
+
+function candidateHasSafeSchema(value: unknown, tenantContext: { organizationId: string; siteId: string }): value is KnowledgeCandidate {
+  if (!isRecord(value) || !isRecord(value.tenantContext)) return false;
+  return value.contractVersion === "knowledge-candidate.v2"
+    && value.stage === "candidate"
+    && value.reviewStatus === "pending_review"
+    && value.publicationState === "unpublished"
+    && (value.generatedBy === "hermes_or_llm" || value.generatedBy === "safeclaw_candidate_builder")
+    && (value.providerLabel === null || typeof value.providerLabel === "string")
+    && value.authority === "none"
+    && value.nextStage === "human_review"
+    && value.dbMutationAllowed === false
+    && value.dbMutationPerformed === false
+    && value.publishAllowed === false
+    && typeof value.question === "string"
+    && value.question.length > 0
+    && value.question.length <= MAX_QUESTION_LENGTH
+    && typeof value.generatedText === "string"
+    && value.generatedText.trim().length > 0
+    && value.generatedText.length <= MAX_CANDIDATE_TEXT_LENGTH
+    && Array.isArray(value.matchedHazardIds)
+    && value.matchedHazardIds.length <= 20
+    && value.matchedHazardIds.every((item) => typeof item === "string" && item.length > 0 && item.length <= 128)
+    && value.tenantContext.organizationId === tenantContext.organizationId
+    && value.tenantContext.siteId === tenantContext.siteId
+    && Array.isArray(value.provenance);
+}
+
+export function readCurrentSourceBoundCandidate(
+  generatedOutput: unknown,
+  expectedSnapshot: KnowledgeReviewSourceSnapshot,
+  options: { requireSafeEnvelope?: boolean } = {}
+): KnowledgeCandidate | null {
+  const requireSafeEnvelope = options.requireSafeEnvelope ?? true;
+  if (!isRecord(generatedOutput)
+    || generatedOutput.contractVersion !== "knowledge-review-preparation.v1"
+    || generatedOutput.legalConfirmed !== false
+    || generatedOutput.rawEventPayloadIncluded !== false
+    || (requireSafeEnvelope && (
+      generatedOutput.publicationState !== "unpublished"
+      || generatedOutput.ontologyPublished !== false
+      || generatedOutput.publishPerformed !== false
+      || generatedOutput.migrationPerformed !== false
+    ))
+    || !candidateHasSafeSchema(generatedOutput.candidate, expectedSnapshot.tenantContext)
+    || !isRecord(generatedOutput.sourceSnapshot)) {
+    return null;
+  }
+  const candidate = generatedOutput.candidate;
+  return canonicalize(generatedOutput.sourceSnapshot) === canonicalize(expectedSnapshot)
+    && canonicalize(candidate.provenance) === canonicalize(expectedSnapshot.provenance)
+    && candidate.provenance.length === expectedSnapshot.eventIds.length
+    && candidate.provenance.length > 0
+    ? candidate
+    : null;
 }
 
 function validateCandidate(
@@ -144,11 +249,22 @@ export async function prepareKnowledgeReviewCandidate(
     fail(403, "prepare_tenant_forbidden", "후보를 준비할 수 있는 조직이 없습니다.");
   }
 
+  const { data: ownedSites, error: ownedSiteError } = await client
+    .from("sites")
+    .select("id,organization_id")
+    .in("organization_id", organizationIds);
+  assertRead(ownedSiteError, "후보 준비 현장 범위를 확인하지 못했습니다.");
+  const siteIds = (ownedSites ?? []).map((site) => site.id);
+  if (siteIds.length === 0) {
+    fail(403, "prepare_tenant_forbidden", "후보를 준비할 수 있는 현장이 없습니다.");
+  }
+
   const { data: run, error: runError } = await client
     .from("knowledge_regeneration_runs")
     .select("id,organization_id,site_id,question,raw_event_ids,status")
     .eq("id", runId)
     .in("organization_id", organizationIds)
+    .in("site_id", siteIds)
     .maybeSingle();
   assertRead(runError, "후보 준비 run을 확인하지 못했습니다.");
   if (!run) fail(403, "prepare_run_forbidden", "이 조직에서 준비할 수 없는 run입니다.");
@@ -166,19 +282,15 @@ export async function prepareKnowledgeReviewCandidate(
     fail(409, "prepare_event_ids_duplicate", "중복 원본 이벤트가 포함된 run은 준비할 수 없습니다.");
   }
 
-  const { data: sites, error: siteError } = await client
-    .from("sites")
-    .select("id,organization_id")
-    .eq("id", run.site_id)
-    .eq("organization_id", run.organization_id);
-  assertRead(siteError, "run 현장 범위를 확인하지 못했습니다.");
-  if ((sites ?? []).length !== 1) {
+  if (!(ownedSites ?? []).some((site) => site.id === run.site_id && site.organization_id === run.organization_id)) {
     fail(409, "prepare_site_tenant_mismatch", "run 현장이 조직 범위와 일치하지 않습니다.");
   }
 
   const { data: sharedRuns, error: sharedRunError } = await client
     .from("knowledge_regeneration_runs")
     .select("id")
+    .eq("organization_id", run.organization_id)
+    .eq("site_id", run.site_id)
     .overlaps("raw_event_ids", uniqueEventIds)
     .in("status", [...ACTIONABLE_RUN_STATUSES]);
   assertRead(sharedRunError, "원본 이벤트 공유 여부를 확인하지 못했습니다.");
@@ -189,7 +301,9 @@ export async function prepareKnowledgeReviewCandidate(
   const { data: events, error: eventError } = await client
     .from("knowledge_events")
     .select("id,organization_id,site_id,source,source_id,captured_at,title,url,payload,related_hazard_ids,reflected_documents,review_status")
-    .in("id", uniqueEventIds);
+    .in("id", uniqueEventIds)
+    .eq("organization_id", run.organization_id)
+    .eq("site_id", run.site_id);
   assertRead(eventError, "원본 이벤트를 확인하지 못했습니다.");
   if ((events ?? []).length !== uniqueEventIds.length) {
     fail(409, "prepare_event_missing", "원본 이벤트가 누락되어 후보를 준비할 수 없습니다.");
@@ -207,13 +321,18 @@ export async function prepareKnowledgeReviewCandidate(
     fail(409, "prepare_event_tenant_mismatch", "원본 이벤트의 조직, 현장 또는 검토 상태가 일치하지 않습니다.");
   }
 
+  const sourceBinding = buildKnowledgeReviewSourceSnapshot({
+    eventIds: uniqueEventIds,
+    events: orderedEvents as KnowledgeReviewSourceEventRow[],
+    tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
+  });
   const safeQuestion = buildSafeReviewQuestion(orderedEvents.length);
   let built: KnowledgeReviewCandidateBuildResult;
   try {
     built = await dependencies.buildCandidate({
       runId: run.id,
       question: safeQuestion,
-      rawEvents: orderedEvents.map((event) => toRawEvent(event as KnowledgeEventRow)),
+      rawEvents: sourceBinding.rawEvents,
       tenantContext: { organizationId: run.organization_id, siteId: run.site_id }
     });
   } catch (error) {
@@ -226,9 +345,15 @@ export async function prepareKnowledgeReviewCandidate(
     });
   }
   const candidate = validateCandidate(built, run, safeQuestion);
+  if (canonicalize(candidate.provenance) !== canonicalize(sourceBinding.snapshot.provenance)
+    || candidate.provenance.length !== sourceBinding.snapshot.eventIds.length
+    || candidate.provenance.length === 0) {
+    fail(422, "candidate_source_binding_invalid", "지식 후보가 현재 원본 이벤트 snapshot과 일치하지 않습니다.");
+  }
   const generatedOutput = {
     contractVersion: "knowledge-review-preparation.v1",
     candidate,
+    sourceSnapshot: sourceBinding.snapshot,
     publicationState: "unpublished",
     ontologyPublished: false,
     publishPerformed: false,

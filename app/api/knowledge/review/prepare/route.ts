@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateKnowledgeText } from "@/lib/ai";
 import { buildKnowledgeCandidateDraft } from "@/lib/knowledge-candidate-route";
 import {
+  isStrictUuidV4,
   KnowledgeReviewPrepareError,
   prepareKnowledgeReviewCandidate
 } from "@/lib/knowledge-review-prepare";
@@ -14,6 +15,22 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export async function POST(request: NextRequest) {
+  const body = await request.json().catch((): unknown => null);
+  const runId = typeof body === "object"
+    && body !== null
+    && !Array.isArray(body)
+    && typeof (body as Record<string, unknown>).runId === "string"
+    ? ((body as Record<string, unknown>).runId as string).trim()
+    : "";
+  if (!isStrictUuidV4(runId)) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      code: "prepare_run_id_required",
+      message: "유효한 runId가 필요합니다."
+    }, { status: 400 });
+  }
+
   const client = createSupabaseAdminClient();
   if (!client) {
     return NextResponse.json({
@@ -30,22 +47,6 @@ export async function POST(request: NextRequest) {
       configured: true,
       message: "로그인이 필요합니다."
     }, { status: 401 });
-  }
-
-  const body = await request.json().catch((): unknown => null);
-  const runId = typeof body === "object"
-    && body !== null
-    && !Array.isArray(body)
-    && typeof (body as Record<string, unknown>).runId === "string"
-    ? ((body as Record<string, unknown>).runId as string).trim()
-    : "";
-  if (!runId) {
-    return NextResponse.json({
-      ok: false,
-      configured: true,
-      code: "prepare_run_id_required",
-      message: "runId가 필요합니다."
-    }, { status: 400 });
   }
 
   try {

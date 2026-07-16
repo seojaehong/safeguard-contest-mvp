@@ -1,4 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { buildKnowledgeCandidate } from "@/lib/knowledge-governance";
+import {
+  buildKnowledgeReviewSourceSnapshot,
+  type KnowledgeReviewSourceEventRow
+} from "@/lib/knowledge-review-prepare";
 import {
   applyKnowledgeReviewAction,
   KnowledgeReviewError,
@@ -24,32 +29,70 @@ type FakeQueryResult = {
 };
 
 function makeReviewClient(options: FakeOptions = {}) {
-  const run: Record<string, unknown> = {
-    id: "run-1",
-    organization_id: "org-1",
-    site_id: "site-1",
-    raw_event_ids: ["event-1", "event-2"],
-    generated_output: { candidate: "기존 검토 초안" },
-    status: "review_required"
-  };
   const events: Array<Record<string, unknown>> = [
     {
       id: "event-1",
       organization_id: options.eventOrganizationId ?? "org-1",
       site_id: options.eventSiteId === undefined ? "site-1" : options.eventSiteId,
+      source: "manual",
+      source_id: "manual-event-1",
+      captured_at: "2026-07-16T00:00:00.000Z",
+      title: "현장 안전 이벤트 1",
+      url: null,
       review_status: "pending_review",
       proposed_wiki_update: { existingKey: "event-one" },
-      payload: { rawSecret: "preserve-one" }
+      payload: { rawSecret: "preserve-one" },
+      related_hazard_ids: ["hazard-1"],
+      reflected_documents: ["위험성평가표"]
     },
     {
       id: "event-2",
       organization_id: options.eventOrganizationId ?? "org-1",
       site_id: options.eventSiteId === undefined ? "site-1" : options.eventSiteId,
+      source: "manual",
+      source_id: "manual-event-2",
+      captured_at: "2026-07-16T00:01:00.000Z",
+      title: "현장 안전 이벤트 2",
+      url: null,
       review_status: "pending_review",
       proposed_wiki_update: { existingKey: "event-two" },
-      payload: { rawSecret: "preserve-two" }
+      payload: { rawSecret: "preserve-two" },
+      related_hazard_ids: ["hazard-2"],
+      reflected_documents: ["위험성평가표"]
     }
   ];
+  const sourceBinding = buildKnowledgeReviewSourceSnapshot({
+    eventIds: ["event-1", "event-2"],
+    events: events as KnowledgeReviewSourceEventRow[],
+    tenantContext: { organizationId: "org-1", siteId: "site-1" }
+  });
+  const candidate = buildKnowledgeCandidate({
+    question: "원본 이벤트 2건 기반 현장 지식 후보 검토",
+    rawEvents: sourceBinding.rawEvents,
+    matchedHazardIds: ["hazard-1", "hazard-2"],
+    generatedText: "현장 위험요인을 검토하고 필요한 예방조치를 확인합니다.",
+    providerLabel: "fixture-provider",
+    tenantContext: { organizationId: "org-1", siteId: "site-1" }
+  });
+  const preparedOutput = {
+    contractVersion: "knowledge-review-preparation.v1",
+    candidate,
+    sourceSnapshot: sourceBinding.snapshot,
+    publicationState: "unpublished",
+    ontologyPublished: false,
+    publishPerformed: false,
+    migrationPerformed: false,
+    legalConfirmed: false,
+    rawEventPayloadIncluded: false
+  };
+  const run: Record<string, unknown> = {
+    id: "run-1",
+    organization_id: "org-1",
+    site_id: "site-1",
+    raw_event_ids: ["event-1", "event-2"],
+    generated_output: preparedOutput,
+    status: "review_required"
+  };
   const tables: Record<string, Array<Record<string, unknown>>> = {
     organizations: [{ id: "org-1", owner_id: options.organizationOwnerId ?? "reviewer-auth" }],
     sites: [{ id: "site-1", organization_id: "org-1" }],
@@ -57,6 +100,7 @@ function makeReviewClient(options: FakeOptions = {}) {
     knowledge_events: events
   };
   const updates: Array<{ table: string; value: unknown }> = [];
+  const calls: Array<{ table: string; operation: string; column: string; value: unknown }> = [];
   let runUpdateAttempt = 0;
   let eventUpdateAttempt = 0;
 
@@ -110,10 +154,12 @@ function makeReviewClient(options: FakeOptions = {}) {
       const query = {
         select(columns: string) { selectedColumns = columns; return query; },
         eq(column: string, value: unknown) {
+          calls.push({ table, operation: "eq", column, value });
           filters.push((row) => row[column] === value);
           return query;
         },
         in(column: string, values: unknown[]) {
+          calls.push({ table, operation: "in", column, value: values });
           filters.push((row) => values.includes(row[column]));
           return query;
         },
@@ -154,7 +200,7 @@ function makeReviewClient(options: FakeOptions = {}) {
     }
   };
 
-  return { client, events, run, updates };
+  return { client, events, run, updates, calls, preparedOutput };
 }
 
 function makeReceipt(overrides: {
@@ -221,6 +267,75 @@ function makeLegacyReceipt(overrides: {
 }
 
 describe("knowledge review actions", () => {
+  it.each([
+    ["draft", { candidate: "draft" }],
+    ["generated", { candidate: "generated" }],
+    ["review_required", {}]
+  ] as const)("blocks %s or schema-invalid candidates before mutation", async (status, generatedOutput) => {
+    const fake = makeReviewClient();
+    fake.run.status = status;
+    fake.run.generated_output = generatedOutput;
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "approve_candidate" }
+    )).rejects.toMatchObject({
+      status: 409,
+      compensationRequired: false
+    });
+
+    expect(fake.updates).toEqual([]);
+  });
+
+  it.each(["empty", "stale", "foreign"] as const)(
+    "blocks a %s source binding before mutation",
+    async (attack) => {
+      const fake = makeReviewClient();
+      const output = structuredClone(fake.preparedOutput);
+      if (attack === "empty") {
+        output.candidate.provenance = [];
+      } else if (attack === "stale") {
+        const first = output.sourceSnapshot.provenance[0];
+        if (!first) throw new Error("Expected fixture provenance");
+        first.eventReference.digest = "0".repeat(64);
+      } else {
+        const first = output.candidate.provenance[0];
+        if (!first) throw new Error("Expected fixture provenance");
+        first.tenantContext.organizationId = "org-foreign";
+      }
+      fake.run.generated_output = output;
+
+      await expect(applyKnowledgeReviewAction(
+        fake.client as never,
+        { id: "reviewer-auth", email: null },
+        { runId: "run-1", action: "approve_candidate" }
+      )).rejects.toMatchObject({
+        status: 409,
+        code: "review_candidate_source_binding_invalid",
+        compensationRequired: false
+      });
+      expect(fake.updates).toEqual([]);
+    }
+  );
+
+  it("blocks a source event that no longer satisfies the snapshot schema", async () => {
+    const fake = makeReviewClient();
+    if (!fake.events[0]) throw new Error("Expected fixture event");
+    fake.events[0].reflected_documents = [];
+
+    await expect(applyKnowledgeReviewAction(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      { runId: "run-1", action: "reject" }
+    )).rejects.toMatchObject({
+      status: 409,
+      code: "review_candidate_source_binding_invalid",
+      compensationRequired: false
+    });
+    expect(fake.updates).toEqual([]);
+  });
+
   it("approves a validated candidate while preserving an unpublished human receipt", async () => {
     const fake = makeReviewClient();
     const result = await applyKnowledgeReviewAction(
@@ -285,7 +400,6 @@ describe("knowledge review actions", () => {
       value: {
         status: "approved",
         generated_output: {
-          candidate: "기존 검토 초안",
           publicationState: "unpublished",
           ontologyPublished: false,
           publishPerformed: false,
@@ -300,6 +414,24 @@ describe("knowledge review actions", () => {
     });
     expect(fake.events[0]?.payload).toEqual({ rawSecret: "preserve-one" });
     expect(fake.events[1]?.payload).toEqual({ rawSecret: "preserve-two" });
+    expect(fake.calls).toContainEqual({
+      table: "knowledge_regeneration_runs",
+      operation: "in",
+      column: "site_id",
+      value: ["site-1"]
+    });
+    expect(fake.calls).toContainEqual({
+      table: "knowledge_events",
+      operation: "eq",
+      column: "organization_id",
+      value: "org-1"
+    });
+    expect(fake.calls).toContainEqual({
+      table: "knowledge_events",
+      operation: "eq",
+      column: "site_id",
+      value: "site-1"
+    });
   });
 
   it.each([
@@ -450,7 +582,7 @@ describe("knowledge review actions", () => {
     const receipt = makeLegacyReceipt();
     fake.run.status = "approved";
     fake.run.generated_output = {
-      candidate: "기존 검토 초안",
+      ...fake.preparedOutput,
       publicationState: "unpublished",
       ontologyPublished: false,
       humanReviewReceipt: receipt
@@ -545,7 +677,7 @@ describe("knowledge review actions", () => {
     const receipt = makeLegacyReceipt();
     fake.run.status = "approved";
     fake.run.generated_output = {
-      candidate: "기존 검토 초안",
+      ...fake.preparedOutput,
       humanReviewReceipt: receipt
     };
     if (fake.events[0]) {
@@ -579,7 +711,6 @@ describe("knowledge review actions", () => {
         site_id: "site-1",
         raw_event_ids: ["event-2"],
         generated_output: {
-          candidate: "거절 검토 초안",
           humanReviewReceipt: {
             ...makeLegacyReceipt({ action: "reject" }),
             reviewer: { id: "reviewer-auth", email: null }
@@ -591,7 +722,7 @@ describe("knowledge review actions", () => {
     const approvedReceipt = makeLegacyReceipt();
     fake.run.status = "approved";
     fake.run.generated_output = {
-      candidate: "승인 검토 초안",
+      ...fake.preparedOutput,
       humanReviewReceipt: approvedReceipt
     };
     if (fake.events[0]) {
@@ -633,7 +764,6 @@ describe("knowledge review actions", () => {
         site_id: "site-1",
         raw_event_ids: ["event-2"],
         generated_output: {
-          candidate: "무관한 완료 run",
           humanReviewReceipt: makeLegacyReceipt({ reviewerId: "reviewer-other" })
         },
         status: "approved"
@@ -665,7 +795,6 @@ describe("knowledge review actions", () => {
         site_id: "site-1",
         raw_event_ids: ["event-2"],
         generated_output: {
-          candidate: "형식이 깨진 완료 run",
           humanReviewReceipt: {
             contractVersion: "knowledge-human-review.v1",
             action: "approve_candidate",
@@ -699,7 +828,6 @@ describe("knowledge review actions", () => {
         site_id: "site-1",
         raw_event_ids: ["event-1"],
         generated_output: {
-          candidate: "완료 이벤트만 공유",
           humanReviewReceipt: makeLegacyReceipt()
         },
         status: "approved"
@@ -732,7 +860,7 @@ describe("knowledge review actions", () => {
   it("rejects an arbitrary legacy receipt before writes", async () => {
     const fake = makeReviewClient();
     fake.run.generated_output = {
-      candidate: "기존 검토 초안",
+      ...fake.preparedOutput,
       humanReviewReceipt: makeLegacyReceipt()
     };
 
@@ -757,7 +885,7 @@ describe("knowledge review actions", () => {
   ] as const)("rejects an actionable run with a mismatched %s receipt before writes", async (_label, receipt) => {
     const fake = makeReviewClient();
     fake.run.generated_output = {
-      candidate: "기존 검토 초안",
+      ...fake.preparedOutput,
       humanReviewReceipt: receipt
     };
 
@@ -777,7 +905,7 @@ describe("knowledge review actions", () => {
     const fake = makeReviewClient({ organizationOwnerId: "reviewer-new" });
     const oldReceipt = makeReceipt({ reviewerId: "reviewer-auth" });
     fake.run.generated_output = {
-      candidate: "기존 검토 초안",
+      ...fake.preparedOutput,
       humanReviewReceipt: oldReceipt
     };
 
@@ -792,7 +920,7 @@ describe("knowledge review actions", () => {
     expect(fake.updates).toHaveLength(0);
   });
 
-  it("resumes a null-site partial state without widening its scope", async () => {
+  it("rejects a null-site partial state without mutation", async () => {
     const fake = makeReviewClient({ eventUpdateErrorAt: 2, eventSiteId: null });
     fake.run.site_id = null;
 
@@ -801,23 +929,8 @@ describe("knowledge review actions", () => {
       { id: "reviewer-auth", email: null },
       { runId: "run-1", action: "keep_site_only" },
       { now: () => "2026-07-16T08:00:00.000Z" }
-    )).rejects.toMatchObject({ code: "review_event_update_failed" });
-
-    const retry = await applyKnowledgeReviewAction(
-      fake.client as never,
-      { id: "reviewer-auth", email: null },
-      { runId: "run-1", action: "keep_site_only" }
-    );
-    expect(retry).toMatchObject({
-      ok: true,
-      siteId: null,
-      updates: { eventsUpdatedCount: 1 }
-    });
-    expect(fake.events.every((event) => event.site_id === null)).toBe(true);
-    expect(fake.events.every((event) => (
-      (event.proposed_wiki_update as { humanReviewReceipt?: { siteId?: unknown } })
-        .humanReviewReceipt?.siteId === null
-    ))).toBe(true);
+    )).rejects.toMatchObject({ code: "review_run_forbidden" });
+    expect(fake.updates).toHaveLength(0);
   });
 
   it("rejects a different action after a partial update without changing its receipt", async () => {
@@ -875,7 +988,7 @@ describe("knowledge review actions", () => {
     const receipt = makeReceipt({ reviewedAt });
     fake.run.status = "approved";
     fake.run.generated_output = {
-      candidate: "기존 검토 초안",
+      ...fake.preparedOutput,
       publicationState: "unpublished",
       ontologyPublished: false,
       publishPerformed: false,
@@ -910,7 +1023,7 @@ describe("knowledge review actions", () => {
     const receipt = makeReceipt({ reviewedAt: "2026-07-16T17:30:00+09:00" });
     fake.run.status = "approved";
     fake.run.generated_output = {
-      candidate: "기존 검토 초안",
+      ...fake.preparedOutput,
       publicationState: "unpublished",
       ontologyPublished: false,
       publishPerformed: false,
@@ -1001,18 +1114,18 @@ describe("knowledge review actions", () => {
     const user = { id: "reviewer-auth", email: "reviewer@example.com" };
 
     const inbox = await loadKnowledgeReviewInbox(fake.client as never, user);
-    expect(inbox.queue.map((item) => item.run.id)).toEqual(["run-1"]);
+    expect(inbox.queue.map((item) => item.runId)).toEqual(["run-1"]);
 
     for (const item of inbox.queue) {
       const result = await applyKnowledgeReviewAction(
         fake.client as never,
         user,
-        { runId: item.run.id, action: "approve_candidate" },
+        { runId: item.runId, action: "approve_candidate" },
         { now: () => "2026-07-16T00:00:00.000Z" }
       );
       expect(result).toMatchObject({
         ok: true,
-        runId: item.run.id,
+        runId: item.runId,
         runStatus: "approved",
         compensationRequired: false
       });
@@ -1161,7 +1274,7 @@ describe("knowledge review actions", () => {
     const receipt = makeReceipt();
     fake.run.status = "approved";
     fake.run.generated_output = {
-      candidate: "기존 검토 초안",
+      ...fake.preparedOutput,
       publicationState: "published",
       ontologyPublished: true,
       publishPerformed: true,
@@ -1218,7 +1331,7 @@ describe("knowledge review actions", () => {
     const receipt = makeReceipt();
     fake.run.status = "approved";
     fake.run.generated_output = {
-      candidate: "기존 검토 초안",
+      ...fake.preparedOutput,
       publicationState: "unpublished",
       ontologyPublished: false,
       publishPerformed: false,
@@ -1268,13 +1381,13 @@ describe("knowledge review actions", () => {
 
   it("drops body-supplied reviewer and tenant claims from the parsed request", () => {
     expect(parseKnowledgeReviewRequest({
-      runId: "run-1",
+      runId: "11111111-1111-4111-8111-111111111111",
       action: "approve_candidate",
       reviewer: { id: "forged-reviewer" },
       organizationId: "org-foreign",
       siteId: "site-foreign"
     })).toEqual({
-      runId: "run-1",
+      runId: "11111111-1111-4111-8111-111111111111",
       action: "approve_candidate"
     });
   });

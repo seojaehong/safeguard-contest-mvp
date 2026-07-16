@@ -10,40 +10,14 @@ let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
 
 const queueItem = {
-  run: {
-    id: "run-1",
-    organizationId: "org-1",
-    siteId: "site-1",
-    question: "홍길동 서명 완료 추락 위험 검토",
-    rawEventIds: ["event-1"],
-    generatedOutput: {
-      candidate: {
-        contractVersion: "knowledge-candidate.v2",
-        question: "위험성평가표 현장 지식 검토",
-        generatedText: "작업발판 단부의 안전난간 상태를 확인하고 현장 책임자가 적용 여부를 검토합니다.",
-        matchedHazardIds: ["hazard-fall"],
-        publicationState: "unpublished",
-        publishAllowed: false,
-        legalConfirmed: false
-      }
-    },
-    provider: "fixture-provider",
-    status: "review_required",
-    createdAt: "2026-07-16T00:01:00.000Z"
-  },
-  events: [{
-    id: "event-1",
-    organizationId: "org-1",
-    siteId: "site-1",
-    source: "manual",
-    sourceId: "manual-1",
-    capturedAt: "2026-07-16T00:00:00.000Z",
-    title: "추락 위험 현장 관찰",
-    relatedHazardIds: ["hazard-fall"],
-    reflectedDocuments: ["위험성평가표"],
-    reviewStatus: "pending_review",
-    createdAt: "2026-07-16T00:00:00.000Z"
-  }]
+  runId: "11111111-1111-4111-8111-111111111111",
+  status: "review_required",
+  statusLabel: "검토 대기",
+  sourceEventCount: 1,
+  candidateLabel: "위험성평가표 현장 지식 검토",
+  candidateText: "작업발판 단부의 안전난간 상태를 확인하고 현장 책임자가 적용 여부를 검토합니다.",
+  matchedHazardCount: 1,
+  providerLabel: "fixture-provider"
 };
 
 describe("knowledge review inbox browser", () => {
@@ -87,21 +61,23 @@ describe("knowledge review inbox browser", () => {
         }
       }));
     });
-    let queue = [queueItem];
+    let queue: typeof queueItem[] = [queueItem];
     const submittedBodies: unknown[] = [];
+    const networkBodies: string[] = [];
 
     await page.route("**/api/knowledge/review", async (route) => {
       if (route.request().method() === "GET") {
+        const body = JSON.stringify({
+          ok: true,
+          configured: true,
+          queue,
+          dropped: { runCount: 0, eventCount: 0, reasons: [] }
+        });
+        networkBodies.push(body);
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          body: JSON.stringify({
-            ok: true,
-            configured: true,
-            tenantBoundary: { rawEventPayloadIncluded: false },
-            queue,
-            dropped: { runCount: 0, eventCount: 0, reasons: [] }
-          })
+          body
         });
         return;
       }
@@ -125,6 +101,17 @@ describe("knowledge review inbox browser", () => {
     await inbox.waitFor();
     await expect.poll(() => inbox.getByText("위험성평가표 현장 지식 검토").isVisible()).toBe(true);
     expect(await inbox.textContent()).not.toContain("홍길동");
+    expect(networkBodies).not.toHaveLength(0);
+    for (const forbidden of [
+      "sourceId",
+      "rawEventIds",
+      "tenantContext",
+      "generatedOutput",
+      "provenance",
+      "홍길동"
+    ]) {
+      expect(networkBodies[0], `network response exposes ${forbidden}`).not.toContain(forbidden);
+    }
 
     const metrics = await inbox.evaluate((root) => {
       const groups = [...root.querySelectorAll<HTMLElement>('[role="group"][aria-label="검토 결정"]')];
@@ -171,7 +158,10 @@ describe("knowledge review inbox browser", () => {
 
     await page.getByRole("button", { name: "후보 승인" }).click();
     await expect.poll(() => submittedBodies.length).toBe(1);
-    expect(submittedBodies[0]).toEqual({ runId: "run-1", action: "approve_candidate" });
+    expect(submittedBodies[0]).toEqual({
+      runId: "11111111-1111-4111-8111-111111111111",
+      action: "approve_candidate"
+    });
     await expect.poll(() => inbox.getByText("검토 대기 후보가 없습니다.").isVisible()).toBe(true);
     await page.close();
   }, 90_000);

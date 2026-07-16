@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { KnowledgeCandidate } from "@/lib/knowledge-governance";
+import {
+  classifyKnowledgeEvent,
+  type KnowledgeCandidate
+} from "@/lib/knowledge-governance";
 import {
   KnowledgeReviewPrepareError,
   prepareKnowledgeReviewCandidate
@@ -18,6 +21,16 @@ type FakeOptions = {
 };
 
 function makeCandidate(runId: string): KnowledgeCandidate {
+  const provenance = classifyKnowledgeEvent({
+    source: "manual",
+    sourceId: "manual-1",
+    capturedAt: "2026-07-16T00:00:00.000Z",
+    title: "작업자 홍길동 서명 포함 원문",
+    url: "https://private.example/photo.jpg?signature=secret",
+    payload: { residentNumber: "secret", photo: "base64-secret", signature: "secret" },
+    relatedHazardIds: ["hazard-fall"],
+    reflectedDocuments: ["위험성평가표"]
+  }, { organizationId: "org-1", siteId: "site-1" });
   return {
     contractVersion: "knowledge-candidate.v2",
     stage: "candidate",
@@ -34,11 +47,12 @@ function makeCandidate(runId: string): KnowledgeCandidate {
     generatedText: "추락 방지 난간 상태를 확인하고 현장 책임자가 검토합니다.",
     matchedHazardIds: ["hazard-fall"],
     tenantContext: { organizationId: "org-1", siteId: "site-1" },
-    provenance: []
+    provenance: [provenance]
   };
 }
 
 function makeClient(options: FakeOptions = {}) {
+  const calls: Array<{ table: string; operation: string; column: string; value: unknown }> = [];
   const baseRun: Row = {
     id: "run-1",
     organization_id: "org-1",
@@ -103,10 +117,12 @@ function makeClient(options: FakeOptions = {}) {
       const query = {
         select(value: string) { columns = value; return query; },
         eq(column: string, value: unknown) {
+          calls.push({ table, operation: "eq", column, value });
           filters.push((row) => row[column] === value);
           return query;
         },
         in(column: string, values: unknown[]) {
+          calls.push({ table, operation: "in", column, value: values });
           filters.push((row) => values.includes(row[column]));
           return query;
         },
@@ -139,7 +155,7 @@ function makeClient(options: FakeOptions = {}) {
   };
 
   const client = rawClient as unknown as Parameters<typeof prepareKnowledgeReviewCandidate>[0];
-  return { client, tables, writes, getOntologyWriteCount: () => ontologyWriteCount };
+  return { client, tables, writes, calls, getOntologyWriteCount: () => ontologyWriteCount };
 }
 
 const user = { id: "reviewer-1", email: "reviewer@example.com" };
@@ -186,6 +202,24 @@ describe("knowledge review candidate preparation", () => {
     expect(JSON.stringify(result)).not.toMatch(/홍길동|residentNumber|base64-secret|signature=secret/u);
     expect(builderQuestion).toBe("원본 이벤트 1건 기반 현장 지식 후보 검토");
     expect(builderQuestion).not.toContain("홍길동");
+    expect(fake.calls).toContainEqual({
+      table: "knowledge_regeneration_runs",
+      operation: "in",
+      column: "site_id",
+      value: ["site-1"]
+    });
+    expect(fake.calls).toContainEqual({
+      table: "knowledge_events",
+      operation: "eq",
+      column: "organization_id",
+      value: "org-1"
+    });
+    expect(fake.calls).toContainEqual({
+      table: "knowledge_events",
+      operation: "eq",
+      column: "site_id",
+      value: "site-1"
+    });
   });
 
   it.each([
@@ -249,6 +283,46 @@ describe("knowledge review candidate preparation", () => {
     expect(fake.tables.knowledge_regeneration_runs[0].status).toBe("draft");
   });
 
+  it.each([
+    {
+      name: "empty provenance",
+      mutate: (candidate: KnowledgeCandidate): KnowledgeCandidate => ({ ...candidate, provenance: [] })
+    },
+    {
+      name: "stale event digest",
+      mutate: (candidate: KnowledgeCandidate): KnowledgeCandidate => ({
+        ...candidate,
+        provenance: candidate.provenance.map((item) => ({
+          ...item,
+          eventReference: { ...item.eventReference, digest: "0".repeat(64) }
+        }))
+      })
+    },
+    {
+      name: "foreign tenant provenance",
+      mutate: (candidate: KnowledgeCandidate): KnowledgeCandidate => ({
+        ...candidate,
+        provenance: candidate.provenance.map((item) => ({
+          ...item,
+          tenantContext: { organizationId: "org-foreign", siteId: "site-foreign" }
+        }))
+      })
+    }
+  ])("blocks $name before persistence", async ({ mutate }) => {
+    const fake = makeClient();
+
+    await expect(prepareKnowledgeReviewCandidate(fake.client, user, { runId: "run-1" }, {
+      buildCandidate: async () => ({
+        candidate: mutate(makeCandidate("run-1")),
+        configured: true,
+        providerLabel: "fixture-provider"
+      })
+    })).rejects.toMatchObject({ code: "candidate_source_binding_invalid" });
+
+    expect(fake.writes).toEqual([]);
+    expect(fake.tables.knowledge_regeneration_runs[0].status).toBe("draft");
+  });
+
   it("completes prepare, inbox load, and existing approval without publishing", async () => {
     const fake = makeClient();
     await prepareKnowledgeReviewCandidate(fake.client, user, { runId: "run-1" }, {
@@ -261,7 +335,7 @@ describe("knowledge review candidate preparation", () => {
 
     const inbox = await loadKnowledgeReviewInbox(fake.client, user);
     expect(inbox.queue).toHaveLength(1);
-    expect(inbox.queue[0].run.status).toBe("review_required");
+    expect(inbox.queue[0].status).toBe("review_required");
 
     const review = await applyKnowledgeReviewAction(fake.client, user, {
       runId: "run-1",

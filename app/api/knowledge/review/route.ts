@@ -59,6 +59,19 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const parsedBody = await request.json().catch((): unknown => null);
+  const reviewRequest = parseKnowledgeReviewRequest(parsedBody);
+  if (!reviewRequest) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      code: "invalid_review_action",
+      atomic: false,
+      compensationRequired: false,
+      message: "runId와 허용된 검토 action을 확인해 주세요."
+    }, { status: 400 });
+  }
+
   const client = createSupabaseAdminClient();
   if (!client) return unconfiguredResponse();
 
@@ -71,19 +84,6 @@ export async function POST(request: NextRequest) {
       compensationRequired: false,
       message: "로그인이 필요합니다."
     }, { status: 401 });
-  }
-
-  const parsedBody = await request.json().catch((): unknown => null);
-  const reviewRequest = parseKnowledgeReviewRequest(parsedBody);
-  if (!reviewRequest) {
-    return NextResponse.json({
-      ok: false,
-      configured: true,
-      code: "invalid_review_action",
-      atomic: false,
-      compensationRequired: false,
-      message: "runId와 허용된 검토 action을 확인해 주세요."
-    }, { status: 400 });
   }
 
   try {

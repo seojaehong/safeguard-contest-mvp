@@ -71,6 +71,21 @@ reviewable.
 
 SafeClaw persists one bounded candidate envelope in the existing
 `generated_output` column and changes the guarded draft row to `review_required`.
+The envelope also stores a SafeClaw-computed source snapshot containing the exact
+ordered event IDs, tenant context, and immutable event and payload digests. The
+prepare path compares candidate provenance to that snapshot before its single
+update. Every review action reloads the currently scoped events, recomputes the
+snapshot, and requires exact count, ID, tenant, and digest equality. Empty,
+foreign, or stale provenance fails with no mutation.
+
+Service-role reads are tenant constrained in the database query as well as after
+the read: owned site IDs constrain run queries, and organization plus site IDs
+constrain event queries. Prepare and review POST routes reject non-canonical UUID
+v4 run IDs before creating a database client. Only `review_required` runs with a
+schema-valid source-bound candidate can begin a new decision. Finalized runs may
+only enter the existing compensation path when their receipt matches the exact
+operation and their stored candidate remains source-bound.
+
 The envelope fixes `publicationState=unpublished`, `ontologyPublished=false`,
 `publishPerformed=false`, `migrationPerformed=false`, and `legalConfirmed=false`.
 The prepare response omits stored provenance and tenant
@@ -79,6 +94,11 @@ hazard IDs, provider label, event count, and unpublished state. Stored run quest
 are not reused in the prompt or UI because ingest titles can contain personal data;
 the prepare path substitutes a generic event-count question. Raw payloads, URLs,
 photos, signatures, and event titles are not rendered in the candidate inbox.
+The browser inbox API uses a presentation DTO rather than serialized storage
+rows. It exposes only a run ID, safe labels, status, source and hazard counts,
+bounded candidate text, and an optional provider label. It never includes event
+titles or source IDs, the original run question or raw event IDs, tenant context,
+the full generated output, or provenance.
 
 The existing authenticated `/api/knowledge/ingest` path remains product-owned and
 may persist raw events and draft run records under its current RLS policy. It is

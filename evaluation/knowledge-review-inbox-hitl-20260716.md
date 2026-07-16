@@ -16,6 +16,11 @@ migration, ontology, Hermes, corpus, or wiki markdown changes.
 | Cross-org, cross-site, missing, duplicate, shared, invalid-status inputs write nothing | Six fail-closed fixture cases assert an empty write log | Pass |
 | Empty or failed generation cannot become reviewable | Empty/whitespace and thrown generator cases preserve `draft` with zero writes | Pass |
 | Candidate and API are redacted and bounded | Generic event-count question, digest-only model prompt, 12,000-character text limit, 20-event/hazard limits, 96-character provider limit, response without provenance/tenant/raw fields | Pass |
+| Candidate is bound to the current source snapshot | Prepare and action attack fixtures reject empty, stale, foreign, or invalid provenance before writes | Pass |
+| Browser DTO excludes storage fields | Route JSON and Playwright network-body assertions reject titles, source IDs, original questions, raw event IDs, tenant context, generated output, and provenance | Pass |
+| Action gate is fail closed | `draft`, `generated`, empty output, stale candidate, and foreign provenance return 4xx with zero mutations | Pass |
+| Service-role reads are scoped in SQL | Run reads include owned organization and site; event reads include exact organization and site constraints, with post-read validation retained | Pass |
+| UUIDs fail before DB access | Prepare and review route tests reject non-canonical, v1, and braced IDs and assert no client, auth, or action call | Pass |
 | Prepare to inbox to existing review action | Authenticated in-memory fixture prepares, loads the real inbox loader, and calls the real existing approval action | Pass |
 | Review receipts stay unpublished | Existing action suite covers approve, site-only, reject; receipts require `publicationState=unpublished`, `ontologyPublished=false`, `publishPerformed=false` | Pass |
 | No ontology mutation | Integration fixture records zero ontology table access/write through prepare and review | Pass |
@@ -24,13 +29,14 @@ migration, ontology, Hermes, corpus, or wiki markdown changes.
 
 ## TDD Record
 
-1. Prepare tests failed because `lib/knowledge-review-prepare.ts` did not exist.
-2. Prepare route tests failed because the route did not exist.
-3. Browser test failed because the inbox component did not exist.
-4. PII regression test failed because the stored run question reached the builder.
-5. Minimal implementation was added after each failure and the focused tests were rerun green.
-
-New focused tests: 15 (`11` prepare, `3` prepare route, `1` browser).
+1. The remediation attack suite ran before implementation with `15` failures and
+   `62` passes across the four focused server files.
+2. RED covered UUID bypass, raw storage DTO disclosure, missing query constraints,
+   empty/stale/foreign provenance, and action acceptance of draft/generated/empty output.
+3. Snapshot binding, DTO allowlisting, query scoping, UUID validation, and the
+   action gate were implemented through shared pure validation helpers.
+4. Compensation fixtures were upgraded to current source-bound envelopes and
+   rerun to preserve partial-write resume and idempotency behavior.
 
 ## Verification
 
@@ -40,15 +46,22 @@ Final focused command:
 npm.cmd test -- tests/knowledge-governance.test.ts tests/knowledge-governance-ui-contract.test.ts tests/knowledge-regenerate-route.test.ts tests/knowledge-review-route.test.ts tests/knowledge-review-actions.test.ts tests/knowledge-review-prepare.test.ts tests/knowledge-review-prepare-route.test.ts tests/knowledge-review-inbox-browser.test.ts tests/knowledge-page-layout.test.ts tests/knowledge-mobile-ia-browser.test.ts
 ```
 
-Result: `10` test files passed, `100` tests passed, `0` failed.
+Machine-readable results:
+
+- `evaluation/knowledge-review-remediation-tests.json`: focused non-browser suite.
+- `evaluation/knowledge-review-remediation-browser.json`: 390px Playwright suite.
+
+Final result: `104/104` focused non-browser tests and `1/1` browser test passed;
+`105` total tests passed with `0` failures.
 
 Typecheck command: `npm.cmd run typecheck`
 Build command: `npm.cmd run build`
 
-Both reached unrelated PDF export imports and stopped because the shared
-`node_modules` does not contain declared dependencies `pdf-lib` and
-`@pdf-lib/fontkit`. No type error from the changed knowledge files remained.
-The build failed only on those two unresolved modules.
+The first typecheck found declared PDF dependencies missing from the shared
+`node_modules`. `npm.cmd install --ignore-scripts` synchronized dependencies with
+zero `package.json` or lockfile diff. The subsequent strict typecheck and production
+build both passed. The final build completed without warnings after replacing the
+unsupported CSS alignment value with `flex-start`.
 
 ## Boundaries Confirmed
 
@@ -62,7 +75,6 @@ The build failed only on those two unresolved modules.
 
 ## Limitations
 
-- No live Supabase mutation was run; persistence and authentication were verified
-  with typed in-memory and route fixtures.
-- Full typecheck and production build require restoring the two existing PDF
-  dependencies in the shared workspace dependency tree.
+- No live Supabase mutation, RLS, or service-role credential probe was run;
+  persistence, authentication, query scope, and mutation behavior are proven by
+  authenticated typed fakes and route fixtures.

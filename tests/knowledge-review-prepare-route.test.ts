@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   prepareKnowledgeReviewCandidate: vi.fn()
 }));
 
+const RUN_ID = "11111111-1111-4111-8111-111111111111";
+
 vi.mock("@/lib/supabase-admin", () => ({
   createSupabaseAdminClient: mocks.createSupabaseAdminClient,
   getWorkspaceUser: mocks.getWorkspaceUser
@@ -36,12 +38,12 @@ function request(body: unknown) {
 describe("knowledge review prepare route", () => {
   it("fails closed when persistence or authentication is unavailable", async () => {
     const { POST } = await import("@/app/api/knowledge/review/prepare/route");
-    const unconfigured = await POST(request({ runId: "run-1" }));
+    const unconfigured = await POST(request({ runId: RUN_ID }));
     expect(unconfigured.status).toBe(503);
 
     mocks.createSupabaseAdminClient.mockReturnValue({});
     mocks.getWorkspaceUser.mockResolvedValue(null);
-    const unauthenticated = await POST(request({ runId: "run-1" }));
+    const unauthenticated = await POST(request({ runId: RUN_ID }));
     expect(unauthenticated.status).toBe(401);
     expect(mocks.prepareKnowledgeReviewCandidate).not.toHaveBeenCalled();
   });
@@ -56,12 +58,28 @@ describe("knowledge review prepare route", () => {
     expect(mocks.prepareKnowledgeReviewCandidate).not.toHaveBeenCalled();
   });
 
+  it.each(["run-1", "11111111-1111-1111-8111-111111111111", "{11111111-1111-4111-8111-111111111111}"])(
+    "rejects non-canonical UUID %s before database preparation",
+    async (runId) => {
+      mocks.createSupabaseAdminClient.mockReturnValue({});
+      mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
+      const { POST } = await import("@/app/api/knowledge/review/prepare/route");
+
+      const response = await POST(request({ runId }));
+
+      expect(response.status).toBe(400);
+      expect(mocks.createSupabaseAdminClient).not.toHaveBeenCalled();
+      expect(mocks.getWorkspaceUser).not.toHaveBeenCalled();
+      expect(mocks.prepareKnowledgeReviewCandidate).not.toHaveBeenCalled();
+    }
+  );
+
   it("returns only the bounded unpublished preparation result", async () => {
     mocks.createSupabaseAdminClient.mockReturnValue({ from: vi.fn() });
     mocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: null });
     mocks.prepareKnowledgeReviewCandidate.mockResolvedValue({
       ok: true,
-      runId: "run-1",
+      runId: RUN_ID,
       status: "review_required",
       candidate: {
         contractVersion: "knowledge-candidate.v2",
@@ -77,7 +95,7 @@ describe("knowledge review prepare route", () => {
     });
     const { POST } = await import("@/app/api/knowledge/review/prepare/route");
 
-    const response = await POST(request({ runId: "run-1" }));
+    const response = await POST(request({ runId: RUN_ID }));
     const payload = await response.json();
     const serialized = JSON.stringify(payload);
 
