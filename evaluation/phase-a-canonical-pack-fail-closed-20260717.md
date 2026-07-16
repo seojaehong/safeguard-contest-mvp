@@ -61,7 +61,23 @@ authority, arrays for `fieldHistory` and `weather`, and string elements in both
 arrays. Wrong authority, malformed children, non-string elements, and extra fields
 all fail closed. A valid pack with non-empty string arrays remains accepted.
 
-Final focused handler result: 1 test file passed, 36 tests passed.
+Focused handler result at this stage: 1 test file passed, 36 tests passed.
+
+### Final P1 complete-key remediation RED/GREEN
+
+The final independent review found that a canonical pack with an unknown
+top-level `forgedInstructions` field still passed validation. The tenant-enabled
+RED produced exactly two failures with 36 tests passing: the plain route reached
+repository initialization, while the reviewed route returned generated and QA
+output instead of the mismatch payload.
+
+The canonical predicate now requires the exact own top-level key set of
+`ActiveEvidenceChainPack` before inspecting nested values. Unknown string or
+symbol keys fail closed before provider invocation. The same tenant-enabled
+plain/reviewed tests verify provider 0, QA 0, repository initialization 0, and
+reviewed persistence 0. Existing canonical plain/reviewed behavior remains green.
+
+Final focused handler result: 1 test file passed, 38 tests passed.
 
 ## Attack matrix
 
@@ -83,6 +99,8 @@ Final focused handler result: 1 test file passed, 36 tests passed.
 | reviewed | `false`, `0`, empty string | `review_required`, fail closed | 0 | 0 | persist callback 0 |
 | plain | malformed applicability children/authority/extra field | `review_required`, fail closed | 0 | N/A | repository initialization 0 |
 | reviewed | malformed applicability children/authority/extra field | `review_required`, fail closed | 0 | 0 | persist callback 0 |
+| plain | top-level `forgedInstructions` | `review_required`, fail closed | 0 | N/A | repository initialization 0 |
+| reviewed | top-level `forgedInstructions` | `review_required`, fail closed | 0 | 0 | persist callback 0 |
 
 The returned payload identifies `canonical_evidence_pack_mismatch`, sets `evidenceChainState` to `review_required`, and sets `failClosed` to `true`.
 
@@ -92,7 +110,7 @@ The returned payload identifies `canonical_evidence_pack_mismatch`, sets `eviden
 npm.cmd test -- tests/phase-a-runtime-evidence-bridge.test.ts tests/phase-a-runtime-evidence-grounding.test.ts tests/phase-a-product-materialization.test.ts tests/mcp-product-materialization-persistence.test.ts
 ```
 
-Result: 4 test files passed, 88 tests passed. This includes valid canonical plain/reviewed MCP behavior, tenant-enabled persistence boundaries, falsy non-null and malformed runtime packs, valid applicability arrays, and the existing canonical materialization forgery matrix.
+Result: 4 test files passed, 90 tests passed. This includes valid canonical plain/reviewed MCP behavior, tenant-enabled persistence boundaries, falsy non-null and malformed runtime packs, exact top-level pack keys, valid applicability arrays, and the existing canonical materialization forgery matrix.
 
 ```powershell
 npm.cmd run typecheck
