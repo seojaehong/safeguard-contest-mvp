@@ -894,3 +894,47 @@ Artifacts:
 Deployment mapping note:
 
 - Vercel CLI is installed but no Vercel credentials are available in this environment (`vercel inspect` requires login or token). Therefore this gate proves the current public surface behavior, but it does not prove that the live deployment commit equals local HEAD `495992a621cd97c8e169286e764b1d3e0e055c11`.
+
+### 2026-07-18 photo hazard analysis and Before/After improvement gate
+
+The input-photo hazard analysis, Before/After improvement memory, and photo-backed reporting/export boundary were rechecked on current HEAD `3022c37cdae0d183051c2a1d10c7f2002a393d65`.
+
+Results:
+
+- `npm.cmd test -- tests\photo-vision-analysis.test.ts tests\photo-vision-analysis-route.test.ts tests\operation-improvements.test.ts tests\operation-improvement-history.test.ts tests\workpack-improvement-route.test.ts tests\workspace-operation-graph.test.ts tests\generation-evidence-operation-routes.test.ts tests\kosha-current-review-photo-storage.test.ts tests\reports-download-center.test.ts`
+  - Result: 9 files / 83 tests passed.
+
+Verified boundary:
+
+- `/api/input-photos/hazard-analysis` exposes a readiness contract and an authenticated multipart POST path for input photos.
+- The input-photo cap is aligned across the route and operation-improvement helpers at 10 photos.
+- The route rejects unauthenticated calls before multipart/provider work, rejects oversized `Content-Length`, and rechecks aggregate file size after parsing so underreported payloads do not bypass the limit.
+- Vision execution reports explicit `analyzed`, `partial`, `unconfigured`, `failed`, and per-image `rejected` states. Missing `OPENAI_API_KEY` is an explicit `unconfigured` result, not a silent success.
+- Accepted photo hazard candidates preserve provider/model response metadata, source photo names, DB/MCP harness provenance, reflected documents, and user-decision state before entering the generation appendix.
+- Before/After improvement records preserve photo-pair provenance and vision/OCR metadata for operation memory, report downloads, and the next DB-harness generation loop.
+- `rejected` and `on_hold` improvements remain excluded from the next harness memory; `candidate` and `approved` photo-analysis improvements can still be used as reviewable operational memory.
+
+Integration note:
+
+- This gate performed tests and documentation only; no database schema, Storage object, external OpenAI call, production data, or Supabase project state was changed.
+
+### 2026-07-18 recipient portal current-head recheck after stale handoff
+
+The worker-facing share recipient portal was rechecked on current HEAD `3022c37cdae0d183051c2a1d10c7f2002a393d65` after a read-only handoff based on older `de4103db` reported that no recipient portal existed.
+
+Results:
+
+- `npm.cmd test -- tests\share-recipient-portal-browser.test.ts tests\workpack-share-authority-routes.test.ts tests\workflow-share-panel-behavior.test.ts tests\workspace-share-simplification.test.ts`
+  - Result: 3 files passed / 1 skipped; 51 tests passed / 1 skipped.
+
+Verified boundary:
+
+- Current route census includes `app/share/[sessionId]/page.tsx` and `app/api/share-sessions/[sessionId]/route.ts`.
+- `/share/[sessionId]` is a worker-facing document-pack confirmation surface: it loads the stored worker-language message, core 3-document pack, and read-confirmation controls.
+- The public share-session API filters recipient hints by invited `workerId`, rejects invalid or unauthorized confirmation attempts, and stores read confirmations from the server-authoritative recipient snapshot.
+- Anonymous/open-group copy remains hidden unless the session policy explicitly allows anonymous access and does not require a known worker snapshot.
+- The manager-side share panel still does not expose the raw `/share/[sessionId]` URL as the default CTA; dispatch and portal-link presentation remain separate contracts.
+
+Integration note:
+
+- The older read-only handoff is stale relative to current master. The remaining product decision is not route existence, but whether and where the manager UI should surface recipient portal links during the demo.
