@@ -793,3 +793,23 @@ Verified boundary:
 Integration note:
 
 - The production server used for the `ONTOLOGY_BASE_URL` gate was stopped after the test run. No product code, database schema, or production data was changed by this recheck.
+
+### 2026-07-18 Hermes, OpenClaw, and MCP engine boundary recheck
+
+The long-term Hermes/OpenClaw engine boundary was rechecked on current HEAD `e00d9614ef238994b9e6ec8443d7f9c67c8fe5c4`.
+
+Results:
+
+- `npm.cmd test -- tests\engine-adapter.test.ts tests\engine-runtime-readiness-policy.test.ts tests\hermes-engine-adapter.test.ts tests\openclaw-hermes-route.test.ts tests\remote-engine-protocol.test.ts tests\remote-hermes-contract.test.ts tests\remote-hermes-https-transport.test.ts tests\remote-hermes-route.test.ts tests\remote-hermes-runtime.test.ts tests\remote-hermes-service-auth.test.ts tests\mcp-auth.test.ts tests\mcp-route-scope-contract.test.ts tests\mcp-tools.test.ts`
+  - Result: 13 files / 329 tests passed.
+
+Verified boundary:
+
+- `docs/phase-b-organization-knowledge-and-engine-plan.md` keeps Hermes/OpenClaw as planner-runtime choices behind a versioned `EngineAdapter`; they are not model-provider branches in `ai-provider-policy.ts`.
+- SafeClaw remains the system of record and effect authority. Runtime engines can propose tool intent, but MCP scope, tenant identity, evidence harnessing, approval, and effect execution stay in the SafeClaw-controlled path.
+- Remote Hermes tests cover protocol shape, service-auth assertion/replay checks, HTTPS transport, runtime policy attestation, route fail-closed behavior, and terminal ledger boundaries.
+- MCP tests cover authentication and route/tool scope contracts that the engine boundary depends on.
+
+Integration note:
+
+- This is a boundary/contract recheck, not a production Hermes traffic cutover. The Phase B document still requires a separate explicit approval gate before GPT OAuth proof-of-concept work, service-auth traffic, DB migration, billing schema, or tenant data mutation.
