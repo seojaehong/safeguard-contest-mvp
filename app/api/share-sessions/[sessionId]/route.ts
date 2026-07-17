@@ -52,13 +52,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, session: null, message: activeSession.message }, { status: activeSession.status });
   }
 
-  const recipientHints = activeSession.session.accessPolicy.anonymousAllowed
-    ? buildPublicRecipientHint(activeSession.session.recipients).slice(0, 10)
-    : workerId
-      ? buildPublicRecipientHint(
-        activeSession.session.recipients.filter((recipient) => recipient.workerId === workerId)
-      ).slice(0, 1)
-      : [];
+  const recipientHints = workerId
+    ? buildPublicRecipientHint(
+      activeSession.session.recipients.filter((recipient) => recipient.workerId === workerId)
+    ).slice(0, 1)
+    : [];
 
   return NextResponse.json({
     ok: true,
@@ -115,6 +113,23 @@ export async function POST(request: NextRequest, context: RouteContext) {
   const authorizedRecipient = workerId
     ? findShareSessionRecipient(activeSession.session.recipients, workerId)
     : null;
+
+  if (!authorizedRecipient && activeSession.session.accessPolicy.requireKnownWorkerSnapshot) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      confirmationId: null,
+      message: "초대된 작업자 식별자가 확인되지 않아 열람 확인을 저장할 수 없습니다."
+    }, { status: 403 });
+  }
+  if (!authorizedRecipient && !activeSession.session.accessPolicy.anonymousAllowed) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      confirmationId: null,
+      message: "초대된 작업자 링크로 다시 접속해 주세요."
+    }, { status: 403 });
+  }
 
   const resolvedDisplayName = authorizedRecipient?.displayName || displayName;
   const resolvedWorkerId = workerId || null;

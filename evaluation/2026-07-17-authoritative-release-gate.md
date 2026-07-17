@@ -415,3 +415,21 @@ Artifacts:
 - `evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json`
 - `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json`
 - `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.md`
+
+### Share recipient identity boundary gate
+
+The worker recipient portal keeps the invited-worker identity boundary separate from open group viewing.
+
+Fixes verified:
+
+- Anonymous share lookups without a worker identity no longer return recipient hints or worker display names.
+- Sessions that require a known worker snapshot reject anonymous/manual confirmation attempts before inserting a read-confirmation row.
+- The recipient UI only presents the open group-copy path when the session is both anonymous and does not require a known worker snapshot.
+- The manager share panel copy remains locked so it does not expose the raw recipient URL as a default CTA.
+
+Fresh current-tree gates:
+
+- `npm.cmd test -- tests\workpack-share-authority-routes.test.ts tests\share-recipient-portal-browser.test.ts tests\workflow-share-panel-behavior.test.ts`
+  - Result: 2 files passed, 1 file skipped; 41 tests passed, 1 skipped.
+- `npm.cmd run typecheck`
+  - Result: passed.

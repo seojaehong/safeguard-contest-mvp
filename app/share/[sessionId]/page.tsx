@@ -252,10 +252,12 @@ export default function ShareRecipientPage() {
   const question = sessionPayload?.question || "공유 중인 작업 상세가 아직 로드되지 않았습니다.";
   const status = sessionPayload ? sessionPayload.status : "active";
   const documents = sessionPayload?.documents || [];
+  const requiresKnownWorker = sessionPayload?.accessPolicy.requireKnownWorkerSnapshot ?? true;
+  const isAnonymousOpenSession = Boolean(sessionPayload?.accessPolicy.anonymousAllowed && !requiresKnownWorker);
   const canSubmit = fetchState !== "loading"
     && status === "active"
     && (
-      Boolean(sessionPayload?.accessPolicy.anonymousAllowed)
+      isAnonymousOpenSession
       || Boolean(workerId.trim())
     );
 
@@ -271,7 +273,9 @@ export default function ShareRecipientPage() {
     >
       <section className="safeclaw-share-recipient-page">
         <h2>문서팩 검토</h2>
-        <p className="safeclaw-subtitle">지정된 작업자만 열람하고 확인할 수 있습니다.</p>
+        <p className="safeclaw-subtitle">
+          {isAnonymousOpenSession ? "공동 열람 링크로 문서팩을 확인하고 이름을 남길 수 있습니다." : "지정된 작업자만 열람하고 확인할 수 있습니다."}
+        </p>
         <article className="safeclaw-share-recipient-card">
           <h3>현재 작업</h3>
           <p>{question}</p>
@@ -316,7 +320,7 @@ export default function ShareRecipientPage() {
               </article>
             )}
 
-            {sessionPayload.accessPolicy.anonymousAllowed ? null : (
+            {isAnonymousOpenSession ? null : (
               <article className="safeclaw-share-recipient-card">
                 <h3>작업자 식별</h3>
                 <label>
@@ -384,11 +388,10 @@ export default function ShareRecipientPage() {
                 </p>
               ) : null}
             </article>
-            {sessionPayload.accessPolicy.anonymousAllowed && sessionPayload.recipients.length ? (
+            {isAnonymousOpenSession ? (
               <article className="safeclaw-share-recipient-card">
                 <h3>참여자 안내</h3>
-                <p>현재 페이지는 초대된 사용자의 열람 확인 저장을 지원합니다.</p>
-                <p>예시 대상: {sessionPayload.recipients.slice(0, 5).map((recipient) => recipient.displayName).join(", ")}</p>
+                <p>현재 페이지는 공동 열람 확인 저장을 지원합니다. 작업자 명단은 관리자 화면에서만 확인합니다.</p>
               </article>
             ) : null}
           </>

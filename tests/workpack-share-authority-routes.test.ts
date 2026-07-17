@@ -288,6 +288,36 @@ describe("share session route authority", () => {
     });
   });
 
+  it("does not expose recipient hints on an anonymous share lookup without worker identity", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    const anonymousSession = publicSession();
+    anonymousSession.session.accessPolicy = {
+      ...anonymousSession.session.accessPolicy,
+      anonymousAllowed: true
+    };
+    mocks.loadActivePublicShareSession.mockResolvedValueOnce(anonymousSession);
+    const { GET } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const response = await GET(
+      getRequest(`/api/share-sessions/${SESSION_ID}`),
+      { params: Promise.resolve({ sessionId: SESSION_ID }) }
+    );
+
+    expect(response.status).toBe(200);
+    expect(mocks.loadActivePublicShareSession).toHaveBeenCalledWith(expect.anything(), {
+      shareSessionId: SESSION_ID,
+      workerId: undefined
+    });
+    const body = await response.json() as {
+      session: {
+        accessPolicy: { anonymousAllowed: boolean };
+        recipients: Array<{ workerId: string; displayName: string; languageCode: string }>;
+      };
+    };
+    expect(body.session.accessPolicy.anonymousAllowed).toBe(true);
+    expect(body.session.recipients).toEqual([]);
+  });
+
   it("public recipient confirmation ignores forged body fields and stores the invited snapshot", async () => {
     const fake = makeConfirmationClient(null);
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
@@ -311,6 +341,32 @@ describe("share session route authority", () => {
       language_code: "vi",
       worker_snapshot: serverRecipient.workerSnapshot
     });
+  });
+
+  it("rejects anonymous confirmation when the session requires a known worker snapshot", async () => {
+    const fake = makeConfirmationClient(null);
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const anonymousSession = publicSession();
+    anonymousSession.session.accessPolicy = {
+      ...anonymousSession.session.accessPolicy,
+      anonymousAllowed: true,
+      requireKnownWorkerSnapshot: true
+    };
+    mocks.loadActivePublicShareSession.mockResolvedValueOnce(anonymousSession);
+    const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}`, {
+      displayName: "Manual Visitor",
+      languageCode: "vi"
+    }), { params: Promise.resolve({ sessionId: SESSION_ID }) });
+    const body = await response.json() as { ok: boolean; message: string };
+
+    expect(response.status).toBe(403);
+    expect(body).toMatchObject({
+      ok: false,
+      message: "초대된 작업자 식별자가 확인되지 않아 열람 확인을 저장할 수 없습니다."
+    });
+    expect(fake.insertCount()).toBe(0);
   });
 
   it("ignores forged recipient fields and persists only the server worker snapshot", async () => {
