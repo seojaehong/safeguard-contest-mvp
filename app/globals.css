@@ -21037,6 +21037,8 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell.workspace-theme-day .workspace-input-page .field-brief-chip-row,
 .command-center-shell.workspace-theme-night .workspace-input-page .field-brief-chip-row {
   margin-top: 20px;
+  min-height: 88px;
+  align-content: flex-start;
 }
 
 .command-center-shell.workspace-theme-day .workspace-input-page .field-brief-chip-row span,
