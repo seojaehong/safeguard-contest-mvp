@@ -1,7 +1,7 @@
 # North Star Current Surface Verification
 
 Date: 2026-07-17
-Authoritative HEAD: `e8d14edabef05b0032c79dd7b956448fe5685e9b`
+Authoritative code HEAD: `e8d14edabef05b0032c79dd7b956448fe5685e9b`
 
 ## Scope
 
@@ -9,20 +9,27 @@ This verification records the current master state after the recipient share por
 
 No DB schema changes, Supabase data mutations, provider activation, or ontology publication mutations were performed.
 
-## Deployment
+## Build / Deployment Smoke
 
-GitHub/Vercel status for `9e839ebfeee01948b23d28a526834f4866297d81`:
+Local production build for `757b845a29854f1adb78535752bba9e82b440d99`:
 
-- Vercel: success
-- Deployment: `https://vercel.com/seojaehongs-projects/safeguard-contest-mvp/EeWPpW3L3riu4KXzQ3f5axZskAcF`
+```powershell
+npm.cmd run build
+```
+
+Result:
+
+- Build: passed
+- Static pages: 28/28 generated
+
+Vercel CLI deployment inspection was not available in this local session because no Vercel credentials were configured. Live HTTP smoke was still run against `www.safeclaw.kr`.
 
 Live route smoke:
 
 ```text
 /share/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb?workerId=11111111-1111-4111-8111-111111111111 -> 200, recipient page marker present
-/ontology -> 200
-/why -> 200
 /workspace -> 200
+/documents -> 200
 ```
 
 ## UI/UX Regression Gates
