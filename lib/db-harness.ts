@@ -817,14 +817,28 @@ function buildParentlessKoshaIdentity(item: SafetyReferenceItem): SafetyReferenc
   };
 }
 
+function buildPublicKoshaActionEvidence(item: SafetyReferenceItem): SafetyReferenceItem {
+  if (!isKoshaTechnicalReference(item)) return item;
+  const operational = deriveSafetyReferenceOperationalView(item);
+  if (!operational.controls.length) return item;
+  return {
+    ...item,
+    summary: operational.hazard || item.summary,
+    controls: operational.controls,
+    document_reflection_label: operational.controls[0] || item.document_reflection_label,
+    operation_signal_label: operational.controls[1] || item.operation_signal_label
+  };
+}
+
 export function buildPublicDbHarnessPacket(packet: DbHarnessPacket): DbHarnessPacket {
   const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
   return {
     ...packet,
+    directEvidence: packet.directEvidence.map(buildPublicKoshaActionEvidence),
     supportingEvidence: packet.supportingEvidence.map((item) => (
       isKoshaTechnicalReference(item) && !hasRelevantKoshaParent(item, parentCandidates)
         ? buildParentlessKoshaIdentity(item)
-        : item
+        : buildPublicKoshaActionEvidence(item)
     ))
   };
 }

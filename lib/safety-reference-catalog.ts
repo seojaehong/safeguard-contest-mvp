@@ -1080,6 +1080,17 @@ export function deriveSafetyReferenceOperationalView(item: SafetyReferenceItem):
     };
   }
 
+  if (/D-C-7-2026|비계\s*구조|비계구조/u.test(text)) {
+    return {
+      hazard: "비계 조립·사용 중 작업발판·안전난간·고정 상태 미확인으로 인한 추락·전도 위험",
+      controls: [
+        "작업발판 폭·고정, 안전난간·발끝막이판, 바퀴 잠금·아웃트리거 상태 확인",
+        "비계 하부 출입통제, 안전대 체결, 강풍 전후 벽이음·고정상태 점검"
+      ],
+      reviewRequired: false
+    };
+  }
+
   if (/B-E-20-2026|정전도장기|정전도장/u.test(text)) {
     return {
       hazard: "정전도장 중 정전기 방전과 도료 증기 점화로 인한 화재·폭발 위험",

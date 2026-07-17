@@ -340,7 +340,29 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
   const process = response.riskSummary.title || scenario.companyType || "현장 작업";
   const due = "현장 확인";
 
+  const paintFireRows: RiskAssessmentRow[] = /도장|도료|페인트|유기용제|방수/.test(workText)
+    ? [
+        buildRiskRow({
+          location,
+          process,
+          task: "도장 자재 취급 및 작업구역 환기",
+          equipment: "도료, 희석제, 환기장치, 소화기, 점화원 관리표지",
+          hazard: "도료·희석제 증기와 점화원 관리 미흡으로 인한 화재·폭발 및 유해증기 노출 위험",
+          currentControls: "도료·희석제 보관 상태, 환기 상태, 소화기 배치, 흡연·용접 등 점화원 금지를 확인합니다.",
+          likelihood: 3,
+          severity: 5,
+          additionalControls: "작업 전 MSDS와 사용량을 공유하고 밀폐·강풍 조건에서는 환기와 작업중지 기준을 함께 확인합니다.",
+          owner: "작업반장",
+          due,
+          verification: "도장 자재 반입 전 MSDS, 환기, 소화기, 점화원 통제 상태를 현장 사진과 TBM으로 확인",
+          verificationChecker: "관리감독자",
+          evidenceRefs: ["KOSHA 위험성평가", "MSDS", "화재·폭발 예방 조치", "TBM 기록"]
+        })
+      ]
+    : [];
+
   return [
+    ...paintFireRows,
     buildRiskRow({
       location,
       process,

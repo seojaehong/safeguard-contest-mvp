@@ -1838,6 +1838,19 @@ describe("runAsk DB harness mode", () => {
     expect(response.structured?.riskAssessmentRows.length).toBeGreaterThan(0);
     expect(response.structured?.riskAssessmentValidation.ok).toBe(true);
     expect(response.structured?.tbmRiskLinks?.length).toBeGreaterThan(0);
+    const directEvidenceActionSurface = response.dbHarness?.packet.directEvidence.map((item) => [
+      item.title,
+      item.summary,
+      item.short_summary,
+      item.document_reflection_label,
+      item.operation_signal_label,
+      ...item.controls
+    ].join(" ")).join("\n") || "";
+    expect(directEvidenceActionSurface).not.toMatch(/방호덮개|비상정지|잠금표지|LOTO/);
+    expect(response.structured?.riskAssessmentRows.some((row) => (
+      /도료|희석제|도장/.test(`${row.task} ${row.hazard}`)
+      && /환기|점화원|소화기|MSDS/.test(`${row.currentControls} ${row.additionalControls}`)
+    ))).toBe(true);
     expect(response.qualityContract?.structured.status).toBe("ready");
     expect(response.qualityContract?.dbHarness.status).toBe("ready");
   }, 20_000);
