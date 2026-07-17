@@ -3,18 +3,17 @@
   "liveTarget": "https://www.safeclaw.kr",
   "latestConfirmedProductionDeployment": {
     "environment": "Production",
-    "sha": "62cccafbdeb5a87e045c9f9bd7c43619029ddd17",
+    "sha": "f6c6b5ce471f442be0209e3e508fdf8f98e47fb9",
     "state": "success",
     "description": "Deployment has completed",
-    "targetUrl": "https://safeguard-contest-rlwyjidew-seojaehongs-projects.vercel.app",
-    "createdAt": "2026-07-17T20:16:46Z"
+    "targetUrl": "https://safeguard-contest-ym5dy3vhi-seojaehongs-projects.vercel.app",
+    "createdAt": "2026-07-17T20:22:27Z"
   },
-  "currentMasterHead": "d137bc5184b16bbd68973f049840898656c4bc29",
+  "currentMasterHead": "f6c6b5ce471f442be0209e3e508fdf8f98e47fb9",
   "currentHeadRuntimeProductChangedAfterDeployment": false,
   "currentHeadDelta": "documentation/evaluation artifact only",
   "ciAtCheckTime": {
-    "d137bc51": "in_progress",
-    "62cccafb": "in_progress"
+    "f6c6b5ce": "in_progress_typecheck_passed_full_test_running"
   },
   "liveHeadersSample": {
     "server": "Vercel",

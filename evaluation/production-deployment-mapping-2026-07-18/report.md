@@ -4,28 +4,28 @@ Generated: 2026-07-18 KST
 
 ## Summary
 
-The latest confirmed successful GitHub production deployment maps `www.safeclaw.kr` to product commit:
+The latest confirmed successful GitHub production deployment maps `www.safeclaw.kr` to commit:
 
-`62cccafbdeb5a87e045c9f9bd7c43619029ddd17`
+`f6c6b5ce471f442be0209e3e508fdf8f98e47fb9`
 
-That commit is `docs: record live harness quality pass`, which records the passing live DB/SIF/KOSHA harness probe after the structured-row and control-surface fixes.
+That commit is `docs: record production deployment mapping`. It is documentation/evaluation-only and sits on top of the product-code live harness pass commit `62cccafbdeb5a87e045c9f9bd7c43619029ddd17`.
 
 The current local/pushed `master` HEAD is:
 
-`d137bc5184b16bbd68973f049840898656c4bc29`
+`f6c6b5ce471f442be0209e3e508fdf8f98e47fb9`
 
-`d137bc51` only adds reconciliation documentation under `evaluation/`; it does not change product runtime code. Therefore the current production product surface is aligned with the latest product-code state that matters for the imminent demo.
+The current HEAD only adds reconciliation/deployment documentation under `evaluation/` after `62cccafb`; it does not change product runtime code. Therefore the current production product surface is aligned with the latest product-code state that matters for the imminent demo.
 
 ## Evidence
 
 GitHub Deployments API:
 
 - Environment: `Production`
-- Deployment SHA: `62cccafbdeb5a87e045c9f9bd7c43619029ddd17`
+- Deployment SHA: `f6c6b5ce471f442be0209e3e508fdf8f98e47fb9`
 - State: `success`
 - Description: `Deployment has completed`
-- Target URL: `https://safeguard-contest-rlwyjidew-seojaehongs-projects.vercel.app`
-- Created at: `2026-07-17T20:16:46Z`
+- Target URL: `https://safeguard-contest-ym5dy3vhi-seojaehongs-projects.vercel.app`
+- Created at: `2026-07-17T20:22:27Z`
 
 Live response headers from `https://www.safeclaw.kr`:
 
@@ -36,10 +36,9 @@ Live response headers from `https://www.safeclaw.kr`:
 
 ## Current CI State
 
-At the time of this mapping check:
+At the time of the latest mapping check:
 
-- `d137bc51` CI: in progress.
-- `62cccafb` CI: in progress, with typecheck already completed and full test step running.
+- `f6c6b5ce` CI: in progress, with typecheck completed and the full test step running.
 
 This report does not claim CI completion. It records the deployment mapping and the product-code equivalence of the current doc-only HEAD.
 
