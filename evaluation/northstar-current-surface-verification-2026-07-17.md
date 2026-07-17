@@ -92,6 +92,17 @@ Current exact KOSHA trace reality:
 - Partial exact KOSHA consumers: 0
 - Exact asset bytes: 187,009
 
+Focused KOSHA / ontology grounding gate:
+
+```powershell
+npm.cmd test -- --run tests\exact-trusted-kosha-registry-wave3.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\exact-trusted-kosha-grounding.test.ts tests\exact-kosha-applicability-policy.test.ts tests\grounded-generation-contract.test.ts tests\ontology-evidence-chains.test.ts tests\ontology-operation-memory.test.ts --maxWorkers=1 --no-file-parallelism
+```
+
+Result:
+
+- Test files: 7 passed
+- Tests: 176 passed
+
 ## Hermes / EngineAdapter / Knowledge Review Gate
 
 The long-term Hermes/OpenClaw direction remains bounded by the accepted ADR:
