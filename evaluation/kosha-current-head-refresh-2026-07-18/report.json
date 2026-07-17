@@ -1,0 +1,60 @@
+{
+  "generatedAt": "2026-07-18T01:06:54.0798498+09:00",
+  "head": "32f5fd9732ca18d5981be82ae5532b4f5ba78aff",
+  "status": "pass",
+  "scope": "KOSHA exact trust, KOSHA corpus, SIF/ontology integration, Python acquisition, strict typecheck, production build, Next NFT trace",
+  "commands": [
+    {
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\exact-kosha-applicability-policy.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts",
+      "status": "pass",
+      "filesPassed": 6,
+      "testsPassed": 114
+    },
+    {
+      "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body",
+      "status": "pass",
+      "testsPassed": 19
+    },
+    {
+      "command": "npm.cmd test -- tests\\kosha-guide-corpus-audit.test.ts",
+      "status": "pass",
+      "filesPassed": 1,
+      "testsPassed": 110
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
+    },
+    {
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-current-review-lifecycle.test.ts tests\\kosha-current-review-photo-storage.test.ts tests\\kosha-current-review-provenance.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-guide-corpus-audit.test.ts tests\\kosha-guide-offline-harness-expanded.test.ts tests\\kosha-guide-offline-harness.test.ts tests\\kosha-guide-provenance-gate.test.ts tests\\kosha-guide-supporting-row-relevance.test.ts tests\\kosha-verified-subset-gate.test.ts tests\\ontology-evidence-chains.test.ts tests\\ontology-graph-store.test.ts tests\\ontology-knowledge-tool.test.ts tests\\ontology-operation-memory.test.ts tests\\ontology-qa-review.test.ts tests\\ontology-query.test.ts tests\\ontology-schema.test.ts tests\\ontology-seed.test.ts tests\\ontology-tablet-overflow.test.ts tests\\ontology-typography-production-matrix.test.ts tests\\ontology-typography-role-contract.test.ts tests\\ontology-ui-browser.test.ts tests\\ontology-ui-remediation.test.ts tests\\ontology-visualization.test.ts tests\\sif-causality-audit-gate.test.ts tests\\sif-embedding-approval-packet.test.ts tests\\sif-embedding-gate-status.test.ts tests\\sif-embedding-post-migration-verify.test.ts tests\\sif-embedding-preflight.test.ts tests\\sif-embedding-runtime-probe.test.ts tests\\workpack-ontology-qa.test.ts",
+      "status": "pass",
+      "filesPassed": 31,
+      "filesSkipped": 3,
+      "testsPassed": 395,
+      "testsSkipped": 4
+    },
+    {
+      "command": "npm.cmd run build",
+      "status": "pass",
+      "staticPagesGenerated": 28,
+      "appRoutesBuilt": 77
+    }
+  ],
+  "nextTrace": {
+    "nftTotal": 81,
+    "exactAssets": 3,
+    "manifestsWithAllExactAssets": 17,
+    "partialAssetManifests": 0,
+    "exactAssetBytes": 187009,
+    "assetSizes": {
+      "data/safety-knowledge/exact-kosha/b-e-10-2026.json": 39258,
+      "data/safety-knowledge/exact-kosha/d-c-13-2026.json": 48689,
+      "data/safety-knowledge/exact-kosha/d-c-7-2026.json": 99062
+    }
+  },
+  "notes": [
+    "This refresh verifies the current master HEAD after the latest live release integrity audit.",
+    "No database migration or production data mutation was performed.",
+    "The pre-existing output/playwright module-shell screenshots remain unstaged and unchanged."
+  ]
+}

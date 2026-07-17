@@ -409,6 +409,25 @@ Verified coverage:
 - Supabase Kakao provider redirect is enabled and points back to the production callback.
 - MCP token query indexes are present in the approved migration evidence.
 
+### KOSHA current-head evidence refresh
+
+Fresh KOSHA/SIF/ontology evidence was refreshed on current HEAD `32f5fd9732ca18d5981be82ae5532b4f5ba78aff`.
+
+Artifact:
+
+- `evaluation/kosha-current-head-refresh-2026-07-18/report.md`
+- `evaluation/kosha-current-head-refresh-2026-07-18/report.json`
+
+Results:
+
+- KOSHA exact trust/applicability focused suite: 6 files / 114 tests passed.
+- KOSHA corpus audit: 1 file / 110 tests passed.
+- SIF/KOSHA/ontology broad suite: 31 files passed / 3 skipped, 395 tests passed / 4 skipped.
+- Python exact-body acquisition: 19 tests passed.
+- Strict TypeScript typecheck: passed.
+- Production build: passed, 28/28 static pages generated.
+- Next NFT exact KOSHA trace: 81 manifests, 17 include all 3 exact assets, 0 partial manifests.
+
 ### Frontend audit evidence refresh and share copy boundary
 
 The frontend browser audit evidence was refreshed after the share-recipient route and final share-panel copy boundary were reconciled.
