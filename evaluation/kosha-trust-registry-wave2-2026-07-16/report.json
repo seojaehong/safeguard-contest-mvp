@@ -32,7 +32,7 @@
     "conflictingProvenanceAliases": "pass",
     "boundedApplicabilityPolicy": "pass",
     "singularApiCompatibility": "pass",
-    "focusedVitest": { "files": 5, "tests": 77, "status": "pass" },
+    "focusedVitest": { "files": 5, "tests": 76, "status": "pass" },
     "broadVitest": {
       "completedWithFinalSummary": true,
       "filesPassed": 30,

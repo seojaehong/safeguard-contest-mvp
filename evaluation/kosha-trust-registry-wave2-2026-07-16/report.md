@@ -26,7 +26,7 @@
 
 ## 검증
 
-- Focused Vitest: 5 files, 77 tests PASS
+- Focused Vitest: 5 files, 76/76 tests PASS
 - Broad Vitest: 30 files PASS, 1 file FAIL, 3 files SKIP; 386 tests PASS, 3 FAIL, 4 SKIP
 - Python acquisition: 19 tests PASS
 - Strict TypeScript: PASS
