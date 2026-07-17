@@ -649,3 +649,26 @@ Notes:
 
 - An initial browser-audit attempt without a freshly controlled port 3011 server produced blank screenshots and was discarded before commit.
 - The final browser evidence was generated only after a fresh production build and a controlled `next start -p 3011` server.
+
+### 2026-07-18 KOSHA/SIF/ontology broad gate recheck
+
+The KOSHA exact trust, KOSHA Guide corpus audit, SIF embedding approval boundary, and ontology test surface were rechecked on current HEAD `67ed505a22d60ba4e3c6a7989d2e1719f506c85e`.
+
+Results:
+
+- `npm.cmd test -- tests\kosha-guide-corpus-audit.test.ts`
+  - Result: 1 file / 110 tests passed.
+- `npm.cmd test -- tests\sif-embedding-gate-status.test.ts`
+  - Result: 1 file / 5 tests passed.
+- 34-file KOSHA/SIF/ontology broad suite:
+  - Command: `npm.cmd test -- tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\kosha-current-review-lifecycle.test.ts tests\kosha-current-review-photo-storage.test.ts tests\kosha-current-review-provenance.test.ts tests\kosha-current-review-run-ask.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-guide-corpus-audit.test.ts tests\kosha-guide-offline-harness-expanded.test.ts tests\kosha-guide-offline-harness.test.ts tests\kosha-guide-provenance-gate.test.ts tests\kosha-guide-supporting-row-relevance.test.ts tests\kosha-verified-subset-gate.test.ts tests\ontology-evidence-chains.test.ts tests\ontology-graph-store.test.ts tests\ontology-knowledge-tool.test.ts tests\ontology-operation-memory.test.ts tests\ontology-qa-review.test.ts tests\ontology-query.test.ts tests\ontology-schema.test.ts tests\ontology-seed.test.ts tests\ontology-tablet-overflow.test.ts tests\ontology-typography-production-matrix.test.ts tests\ontology-typography-role-contract.test.ts tests\ontology-ui-browser.test.ts tests\ontology-ui-remediation.test.ts tests\ontology-visualization.test.ts tests\sif-causality-audit-gate.test.ts tests\sif-embedding-approval-packet.test.ts tests\sif-embedding-gate-status.test.ts tests\sif-embedding-post-migration-verify.test.ts tests\sif-embedding-preflight.test.ts tests\sif-embedding-runtime-probe.test.ts tests\workpack-ontology-qa.test.ts`
+  - Result: 31 files passed / 3 skipped; 395 tests passed / 4 skipped.
+
+Fix verified:
+
+- `tests\sif-embedding-gate-status.test.ts` now normalizes `generatedAt` and `checkedAt` before hashing the machine fixture. This keeps the approval-boundary fixture sensitive to product contract changes while avoiding false RED from timestamp-only evidence refreshes.
+
+Integration note:
+
+- The stale `feat/kosha-trust-registry-wave2` branch still contains branch-local broad RED evidence and is far behind current master; a whole-branch merge would delete current share portal, Hermes, knowledge, and release evidence files.
+- Current master direct verification above is therefore the authoritative state for the KOSHA/SIF/ontology broad gate.
