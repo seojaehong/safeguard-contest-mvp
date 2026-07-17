@@ -2,7 +2,6 @@
 
 Date: 2026-07-17
 Verified code HEAD: `f23ae8077d5f182aa6a5a223d3717618fea6e5af`
-Report commit: `e054731cbaa0d30beb8b581c294fe642461c837b`
 
 ## Verdict
 
