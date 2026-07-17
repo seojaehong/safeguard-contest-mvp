@@ -60,7 +60,7 @@
   },
   "operationalNotes": [
     "The 34-file broad Vitest run completed with 3 failures in tests/kosha-guide-corpus-audit.test.ts; it is recorded as unresolved RED and is not counted as a pass.",
-    "Non-blocking P3: regression coverage checks a representative trace key and removal of the global wildcard, but does not yet lock all 16 consumer keys or the built NFT manifest count; the fresh build observed 78 manifests, 16 with both exact assets, and zero partial-asset manifests.",
+    "Non-blocking P3: regression coverage locks removal of the global wildcard, all 16 configured consumer keys, and exact asset membership for every key. It does not lock the production build's total NFT manifest count or included-manifest count; the fresh build observed 78 manifests, 16 with both exact assets, and zero partial-asset manifests.",
     "The tracked D-C-7 asset predates the publishedAt generator field, so runtime publication date remains pinned by the immutable production registry until the asset is regenerated through the verified acquisition transaction.",
     "The 234 metadata-verified candidates are not production exact pins; only D-C-13 and D-C-7 are direct exact evidence in this wave."
   ]
