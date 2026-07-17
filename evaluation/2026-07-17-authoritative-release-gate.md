@@ -567,3 +567,30 @@ Verified boundary:
 - Export surfaces keep Korean user-facing labels for document status, accident types, 4M labels, and Before/After improvement wording.
 - Foreign recipient dispatch messages remain language-specific and are checked for Korean leakage in the delivery contract.
 - This was a verification-only gate; no database migration or production data mutation was performed.
+
+### 2026-07-18 SIF embedding, LLM Wiki, and Hermes boundary gate
+
+The long-term North Star boundary for SIF vector retrieval, LLM Wiki governance, and Hermes/OpenClaw runtime integration was rechecked on current HEAD `111a2602ab05bc4438d785c56e6d10b87ff73aa9`.
+
+SIF embedding approval boundary:
+
+- `npm.cmd test -- tests\sif-embedding-preflight.test.ts tests\sif-embedding-runtime-probe.test.ts tests\sif-embedding-post-migration-verify.test.ts tests\sif-embedding-approval-packet.test.ts tests\sif-embedding-gate-status.test.ts tests\llm-wiki-rls-approval-packet.test.ts tests\knowledge-governance.test.ts tests\knowledge-promotion-gate.test.ts`
+  - Result: 8 files / 34 tests passed.
+- `npm.cmd run knowledge:sif-embedding-preflight -- --require-execution-env --output evaluation/sif-embedding-gate/approval-preflight-report.json`
+  - Result: ok, approval held, corpus 6,032 rows, source SIF rows 6,033, corpus hash `2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e`, execution ready after approval.
+- `npm.cmd run knowledge:sif-embedding-runtime-probe -- --output evaluation/sif-embedding-gate/runtime-db-probe.json`
+  - Result: configured, `safety_reference_items` count 6,033, vector table/RPC absent, status `migration-required`, vector feature flag off.
+- `npm.cmd run knowledge:sif-embedding-post-migration-verify -- --output evaluation/sif-embedding-gate/post-migration-verify.json`
+  - Result: expected non-zero exit with status `migration-required`; no DB mutation performed; upload verification remains blocked until the approved SIF-only migration creates the table and RPC.
+
+Hermes/OpenClaw runtime boundary:
+
+- `npm.cmd test -- tests\hermes-engine-adapter.test.ts tests\openclaw-hermes-route.test.ts tests\remote-hermes-contract.test.ts tests\remote-hermes-https-transport.test.ts tests\remote-hermes-route.test.ts tests\remote-hermes-runtime.test.ts tests\remote-hermes-service-auth.test.ts`
+  - Result: 7 files / 176 tests passed.
+
+Verified boundary:
+
+- SIF embeddings remain prepared but not generated, uploaded, or enabled at runtime without explicit migration/cost/upload approval.
+- LLM Wiki/knowledge promotion remains human-reviewed and approval-gated; generation candidates are not automatically published.
+- Hermes/OpenClaw remains an adapter/runtime boundary behind service auth, replay, attestation, and evidence contracts; it does not replace the SafeClaw DB/MCP system of record.
+- This gate performed read/probe/test work only; no database migration, embedding upload, or production data mutation was performed.
