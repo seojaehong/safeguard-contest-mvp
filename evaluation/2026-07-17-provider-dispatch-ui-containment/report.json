@@ -1,19 +1,26 @@
 {
   "auditDate": "2026-07-17",
   "baseCommit": "f16d152e3c38669f69029dab45ebf2e7a645acb3",
-  "scope": "P0 provider dispatch UI containment",
+  "reviewRemediationParentCommit": "a95c61f9313990cf412c9e99bca3f6d80e5ccf5d",
+  "scope": "P0 containment with North Star P1/P2 capability-state remediation",
   "providerDispatch": {
     "capability": false,
     "mode": "preview_only",
-    "reason": "persistent_idempotency_unavailable"
+    "reason": "persistent_idempotency_unavailable",
+    "channels": ["email", "sms", "kakao"]
   },
   "verifiedContracts": [
-    "The dispatch capability endpoint reports preview-only mode without invoking a provider.",
+    "A server-owned pure policy resolves global and channel capability from typed idempotency, live-mode, provider-configuration, and contact-readiness signals.",
+    "The dispatch capability endpoint currently reports preview-only mode without invoking a provider.",
+    "The UI distinguishes checking, error, preview_only, and live states; only live can send.",
+    "Malformed and non-success capability responses render lookup failure and can be retried.",
+    "Unavailable states provide a channel-settings link and an explicit retry action.",
     "Email, SMS, and Kakao controls are disabled and do not retain active or pressed presentation.",
+    "Disabled channel accessible names contain the blocking reason and omit misleading next actions.",
     "The primary action is disabled and labeled as preview-only until live capability is explicitly reported.",
-    "Capability lookup errors remain fail-closed.",
     "Share-session creation code and localized message preview paths remain present.",
-    "Recipient-facing copy describes language-specific preparation without claiming a portal, link, or recipient confirmation."
+    "Recipient-facing copy describes language-specific preparation without claiming a portal, link, or recipient confirmation.",
+    "Browser tests observed zero share-session and workflow-dispatch POST requests in checking, error, and preview-only states."
   ],
   "excluded": [
     "Database or migration changes",
@@ -45,13 +52,40 @@
       "case": "disabled channel presentation",
       "red": "disabled channels could retain active and aria-pressed presentation",
       "green": "disabled channels are neither active nor aria-pressed"
+    },
+    {
+      "case": "server-owned capability policy",
+      "red": "the route sourced capability from a client constant and exposed no channel state",
+      "green": "the route uses a pure server resolver with typed channel, provider, and contact signals"
+    },
+    {
+      "case": "capability lookup state",
+      "red": "checking and lookup failures were presented as preview-only",
+      "green": "checking, error, preview_only, and live have distinct fail-closed contracts"
+    },
+    {
+      "case": "future contact reason aggregation",
+      "red": "contact-only blocking was mislabeled as provider configuration unavailable",
+      "green": "the resolver preserves recipient_contact_unavailable at channel and global levels"
+    },
+    {
+      "case": "browser containment",
+      "red": "the first browser attempt exposed a Strict Mode request-count assumption in the test",
+      "green": "controlled response modes verify pending, malformed, 405, retry, preview, disabled semantics, foreign preview, and zero POSTs"
     }
   ],
   "verification": {
     "focusedTests": {
-      "command": "npm.cmd test -- tests/workflow-share-client.test.ts tests/workpack-share-authority-routes.test.ts tests/workspace-share-simplification.test.ts --maxWorkers=1 --no-file-parallelism",
-      "filesPassed": 3,
-      "testsPassed": 63
+      "command": "npm.cmd test -- tests/workflow-share-client.test.ts tests/workflow-dispatch-capability-policy.test.ts tests/workpack-share-authority-routes.test.ts tests/workspace-share-simplification.test.ts --maxWorkers=1 --no-file-parallelism",
+      "filesPassed": 4,
+      "testsPassed": 68
+    },
+    "browserTests": {
+      "command": "npm.cmd test -- tests/workflow-share-capability-browser.test.ts --maxWorkers=1 --no-file-parallelism",
+      "filesPassed": 1,
+      "testsPassed": 2,
+      "shareSessionPosts": 0,
+      "workflowDispatchPosts": 0
     },
     "typecheck": {
       "command": "npm.cmd run typecheck",

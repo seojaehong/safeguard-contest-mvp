@@ -16,6 +16,29 @@ async function loadPolicy() {
 }
 
 describe("authenticated workflow share client", () => {
+  it("distinguishes capability checking and lookup failure from preview-only mode", async () => {
+    const { buildProviderDispatchUiContract } = await loadClient();
+
+    expect(buildProviderDispatchUiContract({ status: "checking" })).toEqual({
+      status: "checking",
+      canDispatch: false,
+      statusLabel: "발송 상태 확인 중",
+      reasonLabel: "발송 채널 상태를 확인하고 있습니다.",
+      primaryLabel: "발송 상태 확인 중",
+      primaryDisabled: true,
+      showUnavailableActions: false
+    });
+    expect(buildProviderDispatchUiContract({ status: "error" })).toEqual({
+      status: "error",
+      canDispatch: false,
+      statusLabel: "상태 확인 실패",
+      reasonLabel: "발송 채널 상태를 확인하지 못했습니다.",
+      primaryLabel: "상태 확인 실패",
+      primaryDisabled: true,
+      showUnavailableActions: true
+    });
+  });
+
   it("keeps provider controls preview-only when dispatch capability is unavailable", async () => {
     const {
       buildProviderDispatchUiContract,
@@ -26,7 +49,12 @@ describe("authenticated workflow share client", () => {
       providerDispatch: {
         capability: false,
         mode: "preview_only",
-        reason: "persistent_idempotency_unavailable"
+        reason: "persistent_idempotency_unavailable",
+        channels: {
+          email: { capability: false, reason: "persistent_idempotency_unavailable" },
+          sms: { capability: false, reason: "persistent_idempotency_unavailable" },
+          kakao: { capability: false, reason: "persistent_idempotency_unavailable" }
+        }
       }
     }), { status: 200, headers: { "content-type": "application/json" } }));
 
@@ -39,15 +67,55 @@ describe("authenticated workflow share client", () => {
     expect(capability).toEqual({
       capability: false,
       mode: "preview_only",
-      reason: "persistent_idempotency_unavailable"
+      reason: "persistent_idempotency_unavailable",
+      channels: {
+        email: { capability: false, reason: "persistent_idempotency_unavailable" },
+        sms: { capability: false, reason: "persistent_idempotency_unavailable" },
+        kakao: { capability: false, reason: "persistent_idempotency_unavailable" }
+      }
     });
-    expect(buildProviderDispatchUiContract(capability)).toEqual({
+    expect(buildProviderDispatchUiContract({ status: "preview_only", capability })).toEqual({
+      status: "preview_only",
       canDispatch: false,
-      channelBadge: "미리보기 전용",
+      statusLabel: "미리보기 전용",
+      reasonLabel: "안전한 중복 방지 저장 기능을 준비하고 있습니다.",
       primaryLabel: "미리보기 전용",
-      primaryDisabled: true
+      primaryDisabled: true,
+      showUnavailableActions: true
     });
-    expect(buildProviderDispatchUiContract(null).canDispatch).toBe(false);
+  });
+
+  it("enables sending only for live channels reported by the server", async () => {
+    const {
+      buildProviderDispatchChannelUiContract,
+      buildProviderDispatchUiContract
+    } = await loadClient();
+    const state = {
+      status: "live" as const,
+      capability: {
+        capability: true,
+        mode: "live" as const,
+        reason: null,
+        channels: {
+          email: { capability: true, reason: null },
+          sms: { capability: false, reason: "provider_configuration_unavailable" as const },
+          kakao: { capability: false, reason: "provider_configuration_unavailable" as const }
+        }
+      }
+    };
+
+    expect(buildProviderDispatchUiContract(state).canDispatch).toBe(true);
+    expect(buildProviderDispatchChannelUiContract({ state, channel: "email", selected: true })).toMatchObject({
+      enabled: true,
+      selected: true,
+      badge: "사용 가능"
+    });
+    expect(buildProviderDispatchChannelUiContract({ state, channel: "sms", selected: true })).toEqual({
+      enabled: false,
+      selected: false,
+      badge: "사용 불가",
+      reasonLabel: "발송 채널 설정이 필요합니다."
+    });
   });
 
   it("resolves selected local worker keys to the real saved worker UUIDs", async () => {
@@ -179,7 +247,12 @@ describe("authenticated workflow share client", () => {
       providerDispatch: {
         capability: false,
         mode: "preview_only",
-        reason: "persistent_idempotency_unavailable"
+        reason: "persistent_idempotency_unavailable",
+        channels: {
+          email: { capability: false, reason: "persistent_idempotency_unavailable" },
+          sms: { capability: false, reason: "persistent_idempotency_unavailable" },
+          kakao: { capability: false, reason: "persistent_idempotency_unavailable" }
+        }
       },
       message: "영속 중복방지를 보장할 수 없어 provider 호출을 차단했습니다."
     }), { status: 409, headers: { "content-type": "application/json" } }));
@@ -203,7 +276,12 @@ describe("authenticated workflow share client", () => {
       providerDispatch: {
         capability: false,
         mode: "preview_only",
-        reason: "persistent_idempotency_unavailable"
+        reason: "persistent_idempotency_unavailable",
+        channels: {
+          email: { capability: false, reason: "persistent_idempotency_unavailable" },
+          sms: { capability: false, reason: "persistent_idempotency_unavailable" },
+          kakao: { capability: false, reason: "persistent_idempotency_unavailable" }
+        }
       }
     });
     expect(isProviderDispatchConfirmed(result)).toBe(false);
