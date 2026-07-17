@@ -1,3 +1,9 @@
+import {
+  validateRiskAssessmentRows,
+  type RiskAssessmentRow,
+  type RiskLevel
+} from "@/lib/risk-assessment-schema";
+
 export type DocumentKey =
   | "workpackSummaryDraft"
   | "riskAssessmentDraft"
@@ -52,6 +58,80 @@ export type StructuredDocumentModel = {
   body: StructuredDocumentSection[];
   appendices: StructuredDocumentSection[];
 };
+
+function riskLevelFor(likelihood: number, severity: number): RiskLevel {
+  const score = likelihood * severity;
+  if (score >= 10) return "high";
+  if (score >= 5) return "medium";
+  return "low";
+}
+
+export function updateRiskAssessmentRowField<K extends keyof RiskAssessmentRow>(
+  row: RiskAssessmentRow,
+  field: K,
+  value: RiskAssessmentRow[K]
+): RiskAssessmentRow {
+  const next = { ...row, [field]: value };
+  if (field !== "likelihood" && field !== "severity") return next;
+  return {
+    ...next,
+    riskLevel: riskLevelFor(next.likelihood, next.severity)
+  };
+}
+
+export function serializeRiskAssessmentRowsToDraft(rows: readonly RiskAssessmentRow[]): string {
+  return [
+    "위험성평가표(구조화 편집본)",
+    "",
+    ...rows.flatMap((row, index) => [
+      `[${index + 1}. ${row.task}]`,
+      `관리번호: ${row.controlId || "-"}`,
+      `작업장소: ${row.location}`,
+      `공정: ${row.process}`,
+      `세부작업: ${row.task}`,
+      `장비/도구: ${row.equipment}`,
+      `유해·위험요인: ${row.hazard}`,
+      `4M: ${row.fourM}`,
+      `재해형태: ${row.accidentType}`,
+      `현재 안전조치: ${row.currentControls}`,
+      `가능성: ${row.likelihood}`,
+      `중대성: ${row.severity}`,
+      `위험등급: ${row.riskLevel}`,
+      `추가 감소대책: ${row.additionalControls}`,
+      `조치담당자: ${row.owner}`,
+      `조치기한: ${row.due}`,
+      `확인방법: ${row.verification}`,
+      `확인상태: ${row.verificationStatus}`,
+      `확인일: ${row.verificationDate}`,
+      `확인자: ${row.verificationChecker}`,
+      `가능성 판단근거: ${row.whyLikelihood}`,
+      `중대성 판단근거: ${row.whySeverity}`,
+      `근거: ${row.evidenceRefs.join(" | ")}`,
+      ""
+    ])
+  ].join("\n").trimEnd();
+}
+
+export function isCanonicalRiskAssessmentExportSafe(
+  rows: readonly RiskAssessmentRow[],
+  canonicalText: string | null,
+  currentText: string
+): boolean {
+  if (!canonicalText || canonicalText !== currentText) return false;
+  const validation = validateRiskAssessmentRows(rows);
+  return validation.ok && serializeRiskAssessmentRowsToDraft(validation.rows) === canonicalText;
+}
+
+export function areRiskAssessmentRowsRepresentedInDraft(
+  rows: readonly RiskAssessmentRow[],
+  draft: string
+): boolean {
+  const validation = validateRiskAssessmentRows(rows);
+  if (!validation.ok) return false;
+  return validation.rows.every((row) => (
+    draft.includes(row.hazard) && draft.includes(row.additionalControls)
+  ));
+}
 
 const documentEditorProfiles: Record<DocumentKey, DocumentEditorProfile> = {
   workpackSummaryDraft: {
