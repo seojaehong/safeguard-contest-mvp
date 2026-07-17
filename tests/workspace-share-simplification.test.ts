@@ -60,10 +60,9 @@ describe("workspace share simplification", () => {
   });
 
   it("describes language-specific preparation and the active worker viewer link contract", () => {
-    expect(sharePanel).toContain("선택한 대상에게 언어별 전송본을 준비합니다.");
-    expect(sharePanel).toContain("전송 후 관리자 화면에서 작업자별 전송 상태와 확인 이력을 이어서 관리합니다.");
-    expect(sharePanel).toContain("전송 후 작업자는 개인 링크에서 문서팩을 열람하고 확인을 남깁니다.");
-    expect(sharePanel).toContain("아래 미리보기로 첫 번째 작업자 화면을 확인할 수 있습니다.");
+    expect(sharePanel).toContain("작업자별 저장 언어로 전송본을 준비합니다.");
+    expect(sharePanel).toContain("오늘 대상에게 문서팩을 보내고, 작업자는 개인 화면에서 확인을 남깁니다.");
+    expect(sharePanel).toContain("첫 번째 작업자 화면을 미리 열어 전송본을 확인할 수 있습니다.");
     expect(sharePanel).toContain("recipientPortalPreviewHref");
     expect(sharePanel).toContain("작업자 화면 미리보기");
     expect(sharePanel).not.toContain("공유 링크로 활성화");
@@ -117,7 +116,7 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain('return "한국어 전송본 미리보기"');
     expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 전송본 미리보기`');
     expect(sharePanel).not.toContain("외국인 근로자 전송본 ·");
-    expect(sharePanel).toContain("미리보기 선택은 전송 본문을 바꾸지 않습니다.");
+    expect(sharePanel).toContain("전송은 작업자별 저장 언어를 사용합니다.");
     expect(sharePanel).toContain("messageVariants: recipientMessageVariants.messageVariants");
   });
 

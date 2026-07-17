@@ -1151,12 +1151,8 @@ export function WorkflowSharePanel({
         <div>
           <span className="eyebrow">오늘 작업</span>
           <strong>{providerDispatchUi.canDispatch ? "문서팩 보내기" : "언어별 전송본 미리보기"}</strong>
-          <p>선택한 대상의 작업자 언어로 안전 내용을 준비하고 확인합니다.</p>
-          <p>전송 후 관리자 화면에서 작업자별 전송 상태와 확인 이력을 이어서 관리합니다.</p>
-          <p>
-            공유 대상과 전송 권한은 저장 기록으로 추적되며, 전송 후 작업자는 개인 링크에서 문서팩을 열람하고 확인을 남깁니다.
-            {recipientPortalPreviewHref ? <> 아래 미리보기로 첫 번째 작업자 화면을 확인할 수 있습니다.</> : null}
-          </p>
+          <p>오늘 대상에게 문서팩을 보내고, 작업자는 개인 화면에서 확인을 남깁니다.</p>
+          {recipientPortalPreviewHref ? <p>첫 번째 작업자 화면을 미리 열어 전송본을 확인할 수 있습니다.</p> : null}
         </div>
         <div className="share-status-pill" aria-label="공유 워크플로 상태" aria-live="polite">
           <span>{providerDispatchUi.canDispatch ? (shareBlocked ? "보완 필요" : sessionReady ? "공유 가능" : storageReady ? "저장 완료" : "전송 준비") : providerDispatchUi.statusLabel}</span>
@@ -1183,7 +1179,7 @@ export function WorkflowSharePanel({
             <p className="muted small">오늘 작업에 참여할 작업자를 먼저 선택해 주세요.</p>
           )}
           {recipientSuggestions.length ? (
-            <p className="muted small">선택한 대상에게 언어별 전송본을 준비합니다.</p>
+            <p className="muted small">작업자별 저장 언어로 전송본을 준비합니다.</p>
           ) : targetWorkers.length ? (
             <p className="muted small">선택한 참여자의 연락처를 확인해 주세요.</p>
           ) : null}
@@ -1254,7 +1250,7 @@ export function WorkflowSharePanel({
             ))}
           </select>
           <p className="channel-readiness-note">
-            미리보기 선택은 전송 본문을 바꾸지 않습니다. 요청에는 작업자별 저장 언어 본문을 각각 포함합니다.
+            전송은 작업자별 저장 언어를 사용합니다. 여기서는 표시 언어만 바꿔 확인합니다.
           </p>
         </section>
 
