@@ -2238,10 +2238,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const koshaParentEvidenceReadyIds = buildKoshaParentEvidenceReadyIds(dbHarnessEvidencePacket);
     const hasIndependentParentEvidence = dbHarnessEvidencePacket.directEvidence.length > 0
       || dbHarnessEvidencePacket.sifCases.length > 0;
-    const parentlessKoshaReviewRequired = !hasIndependentParentEvidence && dbHarnessEvidencePacket.supportingEvidence.some((item) => (
+    const hasParentlessKoshaSupport = dbHarnessEvidencePacket.supportingEvidence.some((item) => (
       isKoshaTechnicalReference(item)
       && !koshaParentEvidenceReadyIds.has(item.id)
     ));
+    const parentlessKoshaReviewRequired = !hasIndependentParentEvidence && hasParentlessKoshaSupport;
     const publicEvidenceItems = [
       ...dbHarnessEvidencePacket.directEvidence,
       ...dbHarnessEvidencePacket.sifCases,
@@ -2353,14 +2354,24 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       : parentlessKoshaReviewRequired
         ? buildParentlessKoshaReviewDeliverables(question, citations)
         : response.deliverables;
+    const boundedResponseDeliverables = hasParentlessKoshaSupport
+      ? Object.fromEntries(Object.entries(responseDeliverables).filter(([key]) => (
+          key !== "structuredRiskRows"
+          && key !== "structuredRiskRowsValidationIssues"
+          && key !== "tbmRiskLinks"
+        ))) as AskResponse["deliverables"]
+      : responseDeliverables;
     const baseDeliverables = {
-      ...responseDeliverables,
+      ...boundedResponseDeliverables,
       ...Object.fromEntries(Object.entries(aiBodies).filter(([key, v]) => (
-        v != null && key !== "structuredRiskRows" && key !== "structuredRiskRowsValidationIssues"
+        v != null
+        && key !== "structuredRiskRows"
+        && key !== "structuredRiskRowsValidationIssues"
+        && (!hasParentlessKoshaSupport || key !== "tbmRiskLinks")
       )))
     };
     const generatedStructuredRiskValidation = normalizeAndValidateRiskAssessmentRows(aiBodies.structuredRiskRows || []);
-    const generatedStructuredRiskRows = parentlessKoshaReviewRequired
+    const generatedStructuredRiskRows = parentlessKoshaReviewRequired || hasParentlessKoshaSupport
       ? []
       : generatedStructuredRiskValidation.rows;
     const photoSeedRiskRows = options.phaseAGrounding
@@ -2398,7 +2409,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       : generatedStructuredRiskRows.length
         ? `structured rows=AI${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`
         : `structured rows=${harnessStructuredRiskRows.length ? "DB harness deterministic" : "deterministic baseline"}${photoSeedRiskRows.length ? ` + photo seeds ${photoSeedRiskRows.length}` : ""}`;
-    const generatedTbmRiskLinks = parentlessKoshaReviewRequired ? [] : aiBodies.tbmRiskLinks || [];
+    const generatedTbmRiskLinks = parentlessKoshaReviewRequired || hasParentlessKoshaSupport ? [] : aiBodies.tbmRiskLinks || [];
     const photoSeedRiskStartIndex = baseStructuredRiskRows.length;
     const photoSeedTbmRiskLinks = acceptedPhotoSeedRiskRows.length
       ? buildTbmRiskLinks(acceptedPhotoSeedRiskRows, weather.summary)

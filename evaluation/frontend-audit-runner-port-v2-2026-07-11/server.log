@@ -7,11 +7,7 @@
    - Network:      http://172.30.1.25:3011
 
  ✓ Starting...
- ✓ Ready in 584ms
-[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"e87e0206-0335-4bc4-acdc-2c5b2caed460","provider":"mock","model":null,"fallbackUsed":false}
-[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"940197de-9985-4a82-9164-2fd91aa7ed3a","provider":"mock","model":null,"fallbackUsed":false}
-[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"c8a40626-4e62-46ba-92a0-cedf9b26c838","provider":"mock","model":null,"fallbackUsed":false}
- ⨯ Error: SafeClaw deterministic frontend audit error boundary probe
-    at l (<repo>\.next\server\app\dryrun\page.js:1:1085) {
-  digest: '798085137'
-}
+ ✓ Ready in 537ms
+[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"ca771507-2447-4098-9c4f-7fb43ffb09b8","provider":"openai","model":"gpt-4.1-mini","fallbackUsed":false}
+[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"7510d94d-e2b9-466e-ab49-b28e0d14a62d","provider":"openai","model":"gpt-4.1-mini","fallbackUsed":false}
+[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"e9a70f38-45fb-4788-a494-4a138b9b5dd6","provider":"openai","model":"gpt-4.1-mini","fallbackUsed":false}
