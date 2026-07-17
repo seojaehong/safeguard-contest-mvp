@@ -2,15 +2,18 @@
 
 ## Verdict
 
-Frontend static, bundle, and browser evidence pass for source
-`7d5b09b55bd97cc078b01d9a39e5e61060b14c11`. Overall CI remains pending because
-the first full run found three stale post-KOSHA assertions, and the local serial
-retry later stalled during browser-test teardown. No full-suite PASS is claimed.
+Frontend static, bundle, and browser evidence is ready for source
+`b17b5d2e3458f1002555e9301b3e13346f70584f`. Verification status is
+`evidence_ready_ci_pending`. Master CI run `29554912622` failed only because the
+frontend route-coverage test still referenced the previous source identity.
+This evidence refresh closes that mismatch locally, but a new integrated master
+CI remains pending until the evidence commit is merged. No passing master CI is
+claimed.
 
 ## Source Identity
 
-- Source SHA: `7d5b09b55bd97cc078b01d9a39e5e61060b14c11`
-- Source identity: `dcc85935e638cc4198b78b72a92493085589c6f2ba6d3ee35842f47b48c1d18c`
+- Source SHA: `b17b5d2e3458f1002555e9301b3e13346f70584f`
+- Source identity: `009e5a3965d9b14c46c58c746391701953bde8ecab0c02806fc6281b295b7bce`
 - Product pages: `32`
 - Product components: `23`
 - Database/schema/data mutation: none
@@ -28,16 +31,16 @@ retry later stalled during browser-test teardown. No full-suite PASS is claimed.
 Normal build:
 
 - Static pages: `28/28`
-- Build ID: `5ZHk0go9MAseG9VoPYWMn`
+- Build ID: `hkOztE3TdrZ7LRXVQxbca`
 - Audit markers: `0`
 - Artifact: `bundle-normal.json`
 
 Audit build:
 
 - Static pages: `28/28`
-- Build ID: `6ciq3Y3JcV-vDzG22FvYP`
+- Build ID: `E6TqGHwXevApK11CeeiRr`
 - Audit marker count: `1`
-- Marker file: `static/chunks/app/layout-541c3e0a964ca50d.js`
+- Marker file: `static/chunks/app/layout-ea88bcd9c891c6c3.js`
 - Artifact: `bundle-audit.json`
 
 ## Browser Contract
@@ -54,17 +57,16 @@ Audit build:
 
 ## Test Evidence
 
-- CI run `29491156696`: 1,895 passed, 3 failed, 17 skipped before remediation.
-- The failures were one stale frontend identity assertion and two photo-analysis
-  assertions that predated the D-C-7 exact registry entry.
-- Focused post-remediation frontend/photo tests: 78/78 passed.
-- Photo-analysis product grounding tests after body-extractability remediation:
-  39/39 passed.
+- Focused frontend route-coverage, static-contract, and bundle-contract tests:
+  `3 files / 70 tests` passed.
 - Strict TypeScript typecheck: passed.
-- Local full serial retry: not accepted; the runner stalled during browser-test
-  teardown and was terminated without a final summary.
+- Normal production build: `28/28` static pages passed.
+- Audit production build: `28/28` static pages passed.
+- Master CI run `29554912622`: failed on the stale source-identity assertion in
+  `tests/frontend-route-coverage.test.ts`.
 
-The next GitHub CI run is the authoritative full-suite gate.
+The next integrated master CI after this evidence commit merges is the
+authoritative full-suite gate.
 
 ## Boundary
 
