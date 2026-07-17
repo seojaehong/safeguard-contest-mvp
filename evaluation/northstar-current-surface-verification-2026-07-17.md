@@ -91,6 +91,26 @@ Current exact KOSHA trace reality:
 - Partial exact KOSHA consumers: 0
 - Exact asset bytes: 187,009
 
+## Hermes / EngineAdapter / Knowledge Review Gate
+
+The long-term Hermes/OpenClaw direction remains bounded by the accepted ADR:
+
+- SafeClaw MCP/DB/Evidence Harness remains the system of record and effect authority.
+- Hermes/OpenClaw/fork execution is only allowed behind `EngineAdapter`.
+- Runtime selection remains separate from model-provider fallback.
+- LLM/wiki updates are candidate-only until human review.
+
+Focused gate:
+
+```powershell
+npm.cmd test -- tests\engine-adapter.test.ts tests\hermes-engine-adapter.test.ts tests\remote-hermes-contract.test.ts tests\remote-engine-protocol.test.ts tests\engine-runtime-readiness-policy.test.ts tests\knowledge-governance.test.ts tests\knowledge-review-actions.test.ts tests\llm-wiki-rls-approval-packet.test.ts
+```
+
+Result:
+
+- Test files: 8 passed
+- Tests: 198 passed
+
 ## Remaining North Star Work
 
 This is not a completion claim for the full North Star objective. The following remain active workstreams:
@@ -100,4 +120,3 @@ This is not a completion claim for the full North Star objective. The following 
 - broader document editing UX for 12 document types
 - production provider dispatch activation and end-to-end recipient confirmation with real workers
 - continued UI density review across non-core pages
-
