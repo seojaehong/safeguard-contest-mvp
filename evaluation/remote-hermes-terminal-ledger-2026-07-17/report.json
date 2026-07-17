@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "remote-hermes-terminal-ledger-evaluation/v1",
+  "date": "2026-07-17",
+  "baseSha": "56cb66f1405c49e18e88f583a95025b13f09c40d",
+  "finalVerificationBaseSha": "6b2c1d936de1b47684436c18f7335a6eae40556d",
+  "branch": "feat/remote-hermes-terminal-ledger",
+  "scope": {
+    "customerRouteWiring": false,
+    "databasePersistence": false,
+    "migration": false,
+    "providerPolicyChange": false
+  },
+  "tdd": {
+    "initialRed": {
+      "files": 2,
+      "tests": 72,
+      "expectedFailures": 3
+    },
+    "contractCompletenessRed": {
+      "tests": 1,
+      "expectedFailures": 1
+    },
+    "reviewRemediationRed": {
+      "files": 2,
+      "tests": 35,
+      "expectedFailures": 7
+    },
+    "secondReviewRed": {
+      "files": 2,
+      "tests": 48,
+      "expectedFailures": 10,
+      "unhandledTimeoutRejections": 2
+    },
+    "thirdReviewRed": {
+      "files": 1,
+      "tests": 40,
+      "expectedFailures": 2
+    },
+    "finalP3Coverage": {
+      "testsAdded": 1,
+      "productionCodeChanged": false,
+      "terminalTimeoutBounded": true,
+      "timerLeakDetected": false
+    },
+    "focusedGreen": {
+      "files": 6,
+      "tests": 159,
+      "passed": 159,
+      "failed": 0,
+      "command": "npm.cmd test -- tests/remote-hermes-contract.test.ts tests/remote-hermes-runtime.test.ts tests/remote-hermes-route.test.ts tests/remote-hermes-https-transport.test.ts tests/hermes-engine-adapter.test.ts tests/claw-chat-route.test.ts",
+      "testFiles": [
+        "tests/remote-hermes-contract.test.ts",
+        "tests/remote-hermes-runtime.test.ts",
+        "tests/remote-hermes-route.test.ts",
+        "tests/remote-hermes-https-transport.test.ts",
+        "tests/hermes-engine-adapter.test.ts",
+        "tests/claw-chat-route.test.ts"
+      ]
+    }
+  },
+  "verification": {
+    "strictTypecheck": "pass",
+    "productionBuild": "not_rerun_test_and_report_only_change",
+    "lastProductionBuild": "pass",
+    "lastStaticPages": 28,
+    "packageManifestChanged": false,
+    "packageLockChanged": false
+  },
+  "remainingBlockers": [
+    "durable_database_ledger_not_connected",
+    "customer_visible_route_not_connected",
+    "cross_instance_replay_requires_durable_ledger",
+    "workload_identity_and_key_rotation_unverified",
+    "effectful_authority_requires_human_approval_receipt"
+  ]
+}

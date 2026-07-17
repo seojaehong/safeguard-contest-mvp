@@ -233,6 +233,26 @@ function runInput(emit: (event: ClawChatEvent) => void = () => undefined) {
 }
 
 describe("experimental Hermes EngineAdapter", () => {
+  it("exposes remote Hermes as stream text only with no read or effect authority", () => {
+    const engine = createRemoteHermesAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "remote-hermes" },
+      composition: createHermesComposition(async () => undefined, {
+        trustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
+        toolPolicy: "deny-all",
+      }),
+    });
+
+    expect(engine.capabilities).toEqual(["stream_text"]);
+    expect(engine.capabilities).not.toContain("request_read_tool");
+    expect(engine.authority).toEqual({
+      systemOfRecord: "safeclaw-mcp-db-harness",
+      toolExecutionBoundary: "safeclaw-mcp-interceptor",
+      canMutate: false,
+      canPublish: false,
+      humanConfirmationRequired: true,
+    });
+  });
+
   it("runs the production harness with only the verified 20260401 SIF subset for remote execution", async () => {
     const verifiedSif = sifReference();
     verifiedSif.source_id = "kosha-sif-archive-20260401";
