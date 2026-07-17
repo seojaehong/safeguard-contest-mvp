@@ -387,3 +387,31 @@ Verified coverage:
 - The scale envelope models 1, 10, 100, 1,000, and 10,000 users with constant per-request row bounds.
 - Supabase Kakao provider redirect is enabled and points back to the production callback.
 - MCP token query indexes are present in the approved migration evidence.
+
+### Frontend audit evidence refresh and share copy boundary
+
+The frontend browser audit evidence was refreshed after the share-recipient route and final share-panel copy boundary were reconciled.
+
+Fixes verified:
+
+- The workspace Day/Night geometry comparison now ignores non-geometric readiness state classes (`pending`, `ready`) while preserving actual geometry, spacing, radius, and typography checks.
+- The share panel no longer exposes a raw `/share/[sessionId]` link as a default administrator CTA. It describes the current implemented boundary as administrator-side dispatch/confirmation tracking and displays only the session ID when present.
+
+Fresh current-tree gates:
+
+- `npm.cmd run audit:frontend-consistency`
+  - Result: 33 pages, 23 product components, 0 coverage issues, 0 violations.
+- `node .\scripts\frontend_consistency_browser_audit.mjs` against the fresh production build on port 3011
+  - Result: 111/111 screenshots, 0 failed rows, 0 recovered rows, 0 findings.
+- `npm.cmd test -- tests\frontend-design-contract.test.ts tests\frontend-route-coverage.test.ts tests\product-module-shell.test.ts`
+  - Result: 3 files / 64 tests passed.
+- `npm.cmd run build`
+  - Result: passed, 28/28 static pages generated.
+- `npm.cmd run typecheck`
+  - Result: passed.
+
+Artifacts:
+
+- `evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json`
+- `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json`
+- `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.md`

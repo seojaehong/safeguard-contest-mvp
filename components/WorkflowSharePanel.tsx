@@ -1149,18 +1149,10 @@ export function WorkflowSharePanel({
           <span className="eyebrow">오늘 작업</span>
           <strong>{providerDispatchUi.canDispatch ? "문서팩 보내기" : "언어별 전송본 미리보기"}</strong>
           <p>선택한 대상의 작업자 언어로 안전 내용을 준비하고 확인합니다.</p>
-          <p>전송 후 수신자 확인 화면에서 작업자별 확인 상태를 이어서 수집합니다.</p>
+          <p>전송 후 관리자 화면에서 작업자별 전송 상태와 확인 이력을 이어서 관리합니다.</p>
           <p>
-            공유 대상은 저장 기록으로 추적되며, 세션 생성 후 작업자 확인 화면은 /share/[sessionId] 경로에서 열립니다.
-            {shareSessionId ? (
-              <>
-                {" "}
-                현재 세션:{" "}
-                <a href={`/share/${shareSessionId}`} className="link-inline" target="_blank" rel="noopener noreferrer">
-                  /share/{shareSessionId}
-                </a>
-              </>
-            ) : null}
+            공유 대상과 전송 권한은 저장 기록으로 추적되며, 작업자용 공동 열람 링크는 별도 승인된 포털에서 열립니다.
+            {shareSessionId ? <> 현재 세션 ID: {shareSessionId}</> : null}
           </p>
         </div>
         <div className="share-status-pill" aria-label="공유 워크플로 상태" aria-live="polite">

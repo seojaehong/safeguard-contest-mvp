@@ -419,7 +419,7 @@ async function capture(page, options) {
     const geometryFingerprint = [...document.querySelectorAll("main [class], body > [class]")].filter(visible).slice(0, 80).map((element) => {
       const rect = element.getBoundingClientRect();
       const style = getComputedStyle(element);
-      const className = [...new Set(String(element.className).replace(/workspace-theme-(?:day|night|field|light)/g, "workspace-theme").split(/\s+/).filter((value) => value && value !== "active"))].join(" ");
+      const className = [...new Set(String(element.className).replace(/workspace-theme-(?:day|night|field|light)/g, "workspace-theme").split(/\s+/).filter((value) => value && !["active", "pending", "ready"].includes(value)))].join(" ");
       return [element.tagName, className, ...[rect.x, rect.y, rect.width, rect.height].map((value) => Math.round(value * 10) / 10), style.display, style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft, style.borderTopLeftRadius, style.fontSize, style.lineHeight, style.letterSpacing];
     });
     return {
