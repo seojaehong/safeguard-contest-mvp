@@ -511,3 +511,26 @@ Fresh current-tree gates:
   - Result: 2 files passed, 1 file skipped; 41 tests passed, 1 skipped.
 - `npm.cmd run typecheck`
   - Result: passed.
+
+### 2026-07-18 knowledge and recipient portal recheck
+
+The `/knowledge` mobile governance blocker and the recipient portal handoff were rechecked on current HEAD `7ad69632e9848a81f5bd81ecc7c43e2af1fc4a76`.
+
+Knowledge UI results:
+
+- User-facing governance stages no longer expose raw machine labels such as `human_review`, `published_ontology`, `Published ontology`, `Hermes / LLM`, or `SafeClaw system of record` in the visible governance flow.
+- Machine identifiers remain available only as `data-knowledge-stage` / `data-knowledge-authority` attributes for audit and test contracts.
+- Repeated KOSHA evidence disclosure summaries and links keep 44px minimum touch targets and no same-row target overlap on mobile.
+- Focused gate: `npm.cmd test -- tests\knowledge-governance-ui-contract.test.ts tests\knowledge-page-layout.test.ts tests\user-visible-korean-copy.test.ts`
+  - Result: 3 files / 21 tests passed.
+
+Recipient portal results:
+
+- The read-only handoff claiming no `/share/[sessionId]` recipient portal is stale for current HEAD.
+- Current route census includes `app/share/[sessionId]/page.tsx` and public recipient API route `app/api/share-sessions/[sessionId]/route.ts`.
+- Production build confirms `/share/[sessionId]` is included as a dynamic app route.
+- The first recipient browser run failed because `.next` production artifacts were absent (`required-server-files.json` and app route files missing), not because of a product route failure.
+- After `npm.cmd run build`, focused gate passed: `npm.cmd test -- tests\share-recipient-portal-browser.test.ts tests\workpack-share-authority-routes.test.ts tests\workflow-share-panel-behavior.test.ts`
+  - Result: 3 files / 42 tests passed.
+- Production build gate: `npm.cmd run build`
+  - Result: passed, 28/28 static pages generated.
