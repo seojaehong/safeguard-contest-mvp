@@ -3,7 +3,8 @@
 ## Scope
 
 - Original integration source HEAD: `2b4316056b44b8729903d364d93022a916383ab6`
-- Current verification HEAD: `45b68f83355dc41969ec0cc36dcfb3f390dfdb7d`
+- Current product verification HEAD: `06c0d0ba83d472521c7bfb5cdfa806507dcf29c9`
+- Later commits in this file are documentation-only evidence refreshes unless stated otherwise.
 - KOSHA exact-trust Wave 2: already present on the authoritative branch with equivalent product and evidence patches.
 - Remote Hermes: trusted-transport and durable-attempt-ledger boundary integrated; product execution remains disabled until those application-owned dependencies are supplied.
 
@@ -25,6 +26,9 @@
 ### Build and frontend audit
 
 - Normal production build: passed, 28/28 static pages generated.
+- Fresh current-HEAD production build after the KOSHA/share evidence refresh: passed, 28/28 static pages generated.
+- Fresh current-HEAD strict typecheck after build: passed.
+- Note: running `npm.cmd run typecheck` before a fresh `next build` failed because `tsconfig.json` includes `.next/types/**/*.ts` and the generated Next type files were missing. The subsequent `npm.cmd run build` regenerated `.next/types`, and the immediate typecheck rerun passed. This is recorded as a build-artifact ordering issue, not a source type error.
 - Static frontend contract: 32 pages, 23 product components, 0 coverage issues, 0 violations.
 - Normal bundle contract: passed; audit marker count 0.
 - Audit bundle contract: passed; deterministic marker present only in the audit graph.
