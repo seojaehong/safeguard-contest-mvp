@@ -346,8 +346,8 @@ async function readVisibleTouchTargets(page: Page) {
     if (rect.width === 0 || rect.height === 0) return [];
     return [{
       label: target.textContent?.trim() || target.getAttribute("aria-label") || target.tagName,
-      width: Math.round(rect.width),
-      height: Math.round(rect.height)
+      width: rect.width,
+      height: rect.height
     }];
   }));
 }

@@ -5,6 +5,7 @@
     "height": 844
   },
   "tdd": {
+    "routeCount": 12,
     "red": {
       "testFilesFailed": 1,
       "testsFailed": 1,

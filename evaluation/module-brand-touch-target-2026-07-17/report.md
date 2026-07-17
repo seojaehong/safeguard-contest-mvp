@@ -11,7 +11,7 @@
 
 ### RED
 
-After adding `.safeclaw-module-brand` to `readVisibleTouchTargets()`, the focused browser suite failed on every shared module route because the home link height was `24px`.
+After adding `.safeclaw-module-brand` to `readVisibleTouchTargets()`, the focused browser suite failed across its 12-route matrix because the home link height was `24px`.
 
 - Command: `npm.cmd test -- tests/product-module-shell.test.ts`
 - Result: `1 file failed`, `1 test failed / 2 passed`
@@ -27,7 +27,7 @@ The mobile shared-shell media query now applies `min-width: 44px` and `min-heigh
 
 ## Browser geometry
 
-The production build was served locally and measured with Playwright at `390x844` across 11 shared module routes:
+The production build was served locally and measured with Playwright at `390x844` across 11 shared module routes. The focused test matrix also covers `/reports`; the standalone geometry capture omitted that route because its authenticated data state is conditional.
 
 - Routes: `/home`, `/documents`, `/workers`, `/evidence`, `/knowledge`, `/settings`, `/tbm`, `/archive`, `/ops/api`, `/ask`, `/dispatch`
 - Brand target on every route: `93.6x44px`
