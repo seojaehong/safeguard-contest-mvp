@@ -600,12 +600,28 @@ function createPlanner(
               : { diagnosticsRef: validated.error.diagnosticsRef }),
           },
         };
-      await writeTerminal(terminalRecord);
+      const signedFailure = validated.kind === "failure"
+        ? new BrokerError("ENGINE_EXECUTION_FAILED", 503, new Error(validated.error.code))
+        : undefined;
+      try {
+        await writeTerminal(terminalRecord);
+      } catch (terminalError) {
+        if (!signedFailure) throw terminalError;
+        throw new BrokerError(
+          "ENGINE_EXECUTION_FAILED",
+          503,
+          new AggregateError(
+            [signedFailure, terminalError],
+            "remote Hermes signed failure could not be terminally recorded",
+          ),
+        );
+      }
       if (!replayGuard.consume(`${attempt.nonce}:${validated.responseEnvelopeDigest}`)) {
         throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
       }
       if (validated.kind === "failure") {
-        throw new BrokerError("ENGINE_EXECUTION_FAILED", 503, new Error(validated.error.code));
+        if (!signedFailure) throw new BrokerError("ENGINE_EXECUTION_FAILED", 503);
+        throw signedFailure;
       }
       const output: HermesPlannerTextOutput = {
         evidencePacket: deepFreeze(structuredClone(input.evidencePacket)),

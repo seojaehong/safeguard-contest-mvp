@@ -487,6 +487,55 @@ describe("remote Hermes runtime", () => {
     })]);
   });
 
+  it.each(["throw", "duplicate"] as const)(
+    "preserves a signed remote failure when terminal persistence returns %s",
+    async (terminalOutcome) => {
+      const emitted: HermesPlannerTextOutput[] = [];
+      const terminalFailure = new Error("terminal ledger unavailable");
+      const ledger = {
+        reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt),
+        recordTerminal: vi.fn(async () => {
+          if (terminalOutcome === "throw") throw terminalFailure;
+          return "duplicate" as const;
+        }),
+      };
+      const transport = {
+        dispatch: vi.fn(async ({ body }: { body: string }) => {
+          const payload = JSON.parse(body) as {
+            attempt: RemoteHermesAttemptEnvelope;
+            attemptReceipt: AttemptReceipt;
+          };
+          return {
+            response: failureResponse(payload.attempt, payload.attemptReceipt),
+            connection: trustedConnection(),
+          };
+        }),
+      };
+      const runtime = createRemoteHermesRuntime(runtimeDependencies({ attemptLedger: ledger, trustedTransport: transport }));
+      expect(runtime).toBeDefined();
+      if (!runtime) return;
+      const input = plannerInput();
+      input.emitText = (output) => emitted.push(output);
+
+      let caught: unknown;
+      try {
+        await runtime.planner(input);
+      } catch (error) {
+        caught = error;
+      }
+      expect(caught).toMatchObject({
+        code: "ENGINE_EXECUTION_FAILED",
+        cause: expect.any(AggregateError),
+      });
+      const aggregate = (caught as Error & { cause: AggregateError }).cause;
+      expect(aggregate.errors).toHaveLength(2);
+      expect(aggregate.errors[0]).toMatchObject({ code: "ENGINE_EXECUTION_FAILED" });
+      expect(aggregate.errors[1]).toMatchObject({ code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN" });
+      expect(ledger.recordTerminal).toHaveBeenCalledTimes(1);
+      expect(emitted).toEqual([]);
+    },
+  );
+
   it("rejects duplicate terminal records before any replayed output", async () => {
     const terminalKeys = new Set<string>();
     const emitted: HermesPlannerTextOutput[] = [];

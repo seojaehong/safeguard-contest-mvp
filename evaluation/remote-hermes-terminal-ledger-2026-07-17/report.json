@@ -31,10 +31,15 @@
       "expectedFailures": 10,
       "unhandledTimeoutRejections": 2
     },
+    "thirdReviewRed": {
+      "files": 1,
+      "tests": 40,
+      "expectedFailures": 2
+    },
     "focusedGreen": {
       "files": 6,
-      "tests": 156,
-      "passed": 156,
+      "tests": 158,
+      "passed": 158,
       "failed": 0,
       "command": "npm.cmd test -- tests/remote-hermes-contract.test.ts tests/remote-hermes-runtime.test.ts tests/remote-hermes-route.test.ts tests/remote-hermes-https-transport.test.ts tests/hermes-engine-adapter.test.ts tests/claw-chat-route.test.ts",
       "testFiles": [

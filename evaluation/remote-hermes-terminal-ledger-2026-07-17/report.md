@@ -18,6 +18,7 @@
 - Recorded post-reserve transport, connection, HTTP, body, JSON, and signature/response validation failures as sanitized gateway terminal failures.
 - Closed post-reserve timeout and caller-abort failures through a separate two-second terminal-persistence deadline, never the already-aborted execution signal.
 - Preserved the original timeout, transport, or validation `BrokerError` classification when terminal persistence failed or returned `duplicate`, while attaching both errors as an `AggregateError` cause.
+- Constructed a validated signed remote failure as `ENGINE_EXECUTION_FAILED` before terminal persistence; ledger errors, deadlines, and duplicates preserve that original classification with terminal evidence attached as an `AggregateError` cause.
 - Blocked output when terminal persistence fails.
 - Kept a signed response retryable when terminal persistence fails because replay state is not consumed before the durable write succeeds.
 - Required `recordTerminal` to return `recorded` or `duplicate`; duplicate always fails closed without output.
@@ -31,6 +32,7 @@
 - Contract-completeness RED: reserve-only ledger runtime was incorrectly created.
 - Review remediation RED: 2 files, 35 tests; 7 expected failures covering replay timing and five post-reserve failure phases.
 - Second review RED: 2 files, 48 tests; 10 expected failures covering opaque diagnostics, independent terminal-close signaling, and original gateway error preservation. The pre-fix timer reuse also produced two unhandled timeout rejections.
+- Third review RED: 1 file, 40 tests; 2 expected failures proving signed remote failures were masked by terminal ledger errors and duplicates.
 - Final command: `npm.cmd test -- tests/remote-hermes-contract.test.ts tests/remote-hermes-runtime.test.ts tests/remote-hermes-route.test.ts tests/remote-hermes-https-transport.test.ts tests/hermes-engine-adapter.test.ts tests/claw-chat-route.test.ts`
 - Final focused suite files:
   - `tests/remote-hermes-contract.test.ts`
@@ -39,7 +41,7 @@
   - `tests/remote-hermes-https-transport.test.ts`
   - `tests/hermes-engine-adapter.test.ts`
   - `tests/claw-chat-route.test.ts`
-- Final focused result: 6 files, 156 tests passed.
+- Final focused result: 6 files, 158 tests passed.
 - Strict TypeScript: passed.
 - Production build: passed; 28 static pages generated.
 - Dependency synchronization: `npm.cmd install`; package and lock files unchanged.
