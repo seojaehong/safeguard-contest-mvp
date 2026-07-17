@@ -21,7 +21,7 @@ This patch keeps the existing share workflow behavior and recipient portal contr
   - channel
   - language preview
 - Recipient card no longer spans the entire row on desktop.
-- Message preview lines are bounded to a 168px scroll area so the send CTA is not pushed far below the fold.
+- Message preview remains fully visible without inner scrolling to preserve the existing browser contract.
 - Mobile/container behavior remains single-column through the existing module container rule.
 
 ## Verification
@@ -52,3 +52,7 @@ Results:
 - No DB schema or data changes.
 - No change to worker recipient portal route behavior.
 - No staging of unrelated screenshot artifacts already dirty in the worktree.
+
+## CI Follow-Up
+
+Initial run `29618621125` correctly rejected the first version of this patch because it capped the message preview at 168px and introduced hidden inner content. The browser contract requires the complete outgoing message preview to remain visible without an internal scrollbar. The follow-up keeps the desktop three-card compression but restores the preview lines to `max-height: none` and `overflow: visible`.

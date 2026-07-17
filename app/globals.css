@@ -14916,8 +14916,8 @@ body:has(.safeclaw-landing) :is(
 [data-share-preview] .message-preview-lines {
   display: grid;
   gap: 4px;
-  max-height: 168px;
-  overflow: auto;
+  max-height: none;
+  overflow: visible;
   border-top: 1px solid var(--share-line);
   padding-top: 12px;
 }

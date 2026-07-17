@@ -100,8 +100,8 @@ describe("workbench visual contract", () => {
       /grid-template-columns:\s*minmax\(0,\s*1\.15fr\) minmax\(0,\s*0\.85fr\) minmax\(0,\s*0\.9fr\);/u,
     );
     expect(exactBlock(".share-recipient-card")).toMatch(/grid-column:\s*auto;/u);
-    expect(exactBlock("[data-share-preview] .message-preview-lines")).toMatch(/max-height:\s*168px;/u);
-    expect(exactBlock("[data-share-preview] .message-preview-lines")).toMatch(/overflow:\s*auto;/u);
+    expect(exactBlock("[data-share-preview] .message-preview-lines")).toMatch(/max-height:\s*none;/u);
+    expect(exactBlock("[data-share-preview] .message-preview-lines")).toMatch(/overflow:\s*visible;/u);
   });
 
   it("implements the field workspace desktop, tablet, and mobile cascade", () => {
