@@ -73,7 +73,7 @@ export function exactKoshaReferenceAppliesToQuery(stableDocumentKey: string, que
   if (stableDocumentKey !== "D-C-13") return false;
 
   const exteriorWall = hasExteriorWallTerm(tokens);
-  const exteriorWork = hasAny(tokens, ["도장", "페인트", "보수", "비계", "작업발판", "곤돌라"])
+  const exteriorWork = hasAny(tokens, ["도장", "페인트", "보수", "비계", "작업발판", "곤돌라", "로프"])
     || tokens.some((token) => /^외벽(?:도장|보수|청소|작업)$/u.test(token));
   const commercial = hasAny(tokens, ["구매", "견적", "납품", "판매", "가격"]);
   const explicitOperation = hasOperationalTerm(tokens);

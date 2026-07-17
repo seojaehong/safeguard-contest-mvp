@@ -20,9 +20,12 @@ describe("exact KOSHA applicability policy", () => {
   it.each([
     ["아파트 외벽 도장 작업", true],
     ["외벽도장 작업", true],
+    ["외벽 로프 작업 안전점검", true],
+    ["외벽 로프 청소 작업", true],
     ["건물 외벽 페인트 견적", false],
     ["공동주택 달비계 안전점검", true],
     ["외벽 자재 납품 일정", false],
+    ["로프 구매 가격 비교", false],
   ])("classifies D-C-13 query %s", (query, expected) => {
     expect(exactKoshaReferenceAppliesToQuery("D-C-13", query)).toBe(expected);
   });
