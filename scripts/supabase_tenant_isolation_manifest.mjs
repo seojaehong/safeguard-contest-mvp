@@ -45,16 +45,17 @@ const STATUS_BY_EXPECTATION = Object.freeze({
 function scenario(resource, resourceType, operation, expected, control, direction) {
   const positiveMutation = control === "positive" && operation !== "SELECT";
   const actor = control === "positive" ? direction.fixtureOwner : direction.actor;
+  const scenarioDirection = control === "positive"
+    ? (actor === "tenant_a" ? "a_to_a" : "b_to_b")
+    : direction.direction;
   return Object.freeze({
-    id: `${resourceType}:${resource}:${control}:${direction.direction}:${operation.toLowerCase()}`,
+    id: `${resourceType}:${resource}:${control}:${scenarioDirection}:${operation.toLowerCase()}`,
     resource,
     resourceType,
     operation,
     actor,
     fixtureOwner: direction.fixtureOwner,
-    direction: control === "positive"
-      ? (actor === "tenant_a" ? "a_to_a" : "b_to_b")
-      : direction.direction,
+    direction: scenarioDirection,
     expected,
     control,
     expectedHttpStatuses: STATUS_BY_EXPECTATION[control === "positive" ? "positive" : "deny"][operation],

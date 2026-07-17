@@ -69,7 +69,8 @@ but does not represent that inventory as a PASS. `--execute` fails closed as
 verifier adapters are explicitly provided in code. Unit-test fake adapters use
 `adapterMode=contract-test`; even when every assertion passes, the aggregate stays
 RED with `ok=false`, `executionStatus=executed_contract_test`, and
-`launchProven=false`. Only a separately reviewed live adapter may select
-`adapterMode=live-reviewed`.
+`launchProven=false`. This non-executing packet has no reviewed live-adapter
+identity registry, so caller-supplied `adapterMode=live-reviewed` is rejected
+before any actor, cleanup, or verifier hook runs.
 
 Committed verification evidence is recorded in `evaluation/report.json`.

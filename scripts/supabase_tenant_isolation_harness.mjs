@@ -112,7 +112,7 @@ export async function runTenantIsolationHarness({ env = process.env, actualHead 
     executionStatus: mode === "execute" ? "blocked_no_live_adapter" : "not_executed",
     adapterMode,
     adapterHooksProvided: Boolean(executor && verifier),
-    liveExecutorAvailable: adapterMode === "live-reviewed" && Boolean(executor && verifier),
+    liveExecutorAvailable: false,
     contractValidated: false,
     launchProven: false,
     expectedHead: env.SUPABASE_TENANT_TEST_EXPECTED_HEAD ?? null,
@@ -131,6 +131,13 @@ export async function runTenantIsolationHarness({ env = process.env, actualHead 
     return redactSecrets({
       ...base,
       error: "Network-free contract validation only; no live executor was invoked.",
+    }, secrets);
+  }
+  if (adapterMode === "live-reviewed") {
+    return redactSecrets({
+      ...base,
+      executionStatus: "blocked_unreviewed_live_adapter",
+      error: "This non-executing packet has no reviewed live-adapter identity registry.",
     }, secrets);
   }
   if (!executor || typeof executor.executeScenario !== "function" || typeof executor.cleanupScenario !== "function") {
@@ -222,13 +229,12 @@ export async function runTenantIsolationHarness({ env = process.env, actualHead 
   }
 
   const contractValidated = failure === null && results.length === TENANT_ISOLATION_MANIFEST.scenarios.length;
-  const liveExecution = adapterMode === "live-reviewed";
   return redactSecrets({
     ...base,
-    ok: contractValidated && liveExecution,
-    executionStatus: liveExecution ? "executed_live" : "executed_contract_test",
+    ok: false,
+    executionStatus: "executed_contract_test",
     contractValidated,
-    launchProven: contractValidated && liveExecution,
+    launchProven: false,
     requestCount,
     cleanupCount,
     verifierCount,
@@ -236,9 +242,7 @@ export async function runTenantIsolationHarness({ env = process.env, actualHead 
     residualVerification,
     ...(failure
       ? { error: failure }
-      : liveExecution
-        ? {}
-        : { error: "Contract adapters completed; no reviewed live executor ran." }),
+      : { error: "Contract adapters completed; no reviewed live executor ran." }),
   }, secrets);
 }
 

@@ -113,6 +113,15 @@ describe("Supabase tenant-isolation manifest", () => {
     expect(TENANT_ISOLATION_MANIFEST.positiveControlCount).toBe(112);
   });
 
+  it("builds positive scenario IDs from normalized same-tenant directions", () => {
+    expect(OWN_TENANT_POSITIVE_CONTROLS.every((scenario) => (
+      scenario.id.includes(`:positive:${scenario.direction}:`)
+    ))).toBe(true);
+    expect(OWN_TENANT_POSITIVE_CONTROLS.some((scenario) => (
+      scenario.id.includes(":positive:a_to_b:") || scenario.id.includes(":positive:b_to_a:")
+    ))).toBe(false);
+  });
+
   it("requires always-cleanup and a separate final residual-zero check", () => {
     for (const scenario of TENANT_ISOLATION_MANIFEST.scenarios) {
       expect(scenario.cleanup.run).toBe("always");
@@ -323,6 +332,28 @@ describe("Supabase tenant-isolation execution lifecycle", () => {
     expect(result.launchProven).toBe(false);
     expect(result.requestCount).toBe(0);
     expect(result.error).toBe("Actor executor and cleanup hook are required.");
+  });
+
+  it("cannot turn injected fake adapters into launch proof with a caller-supplied live-reviewed label", async () => {
+    const harness = successfulHarness();
+    const result = await runTenantIsolationHarness({
+      env: validEnv(),
+      actualHead: RUNTIME_EXPECTED_HEAD,
+      mode: "execute",
+      adapterMode: "live-reviewed",
+      executor: harness.executor,
+      verifier: harness.verifier,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.executionStatus).toBe("blocked_unreviewed_live_adapter");
+    expect(result.liveExecutorAvailable).toBe(false);
+    expect(result.contractValidated).toBe(false);
+    expect(result.launchProven).toBe(false);
+    expect(result.requestCount).toBe(0);
+    expect(harness.executeContexts).toHaveLength(0);
+    expect(harness.cleanupContexts).toHaveLength(0);
+    expect(harness.foreignVerifyContexts).toHaveLength(0);
+    expect(harness.residualCalls()).toBe(0);
   });
 
   it("redacts secrets recursively from reports and errors", () => {

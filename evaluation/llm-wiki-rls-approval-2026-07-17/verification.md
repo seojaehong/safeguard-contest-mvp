@@ -1,12 +1,15 @@
 # Verification Log
 
 Date: 2026-07-17
-Target base: `de4103db20be6ca2be738748143fb6a6fbd26693`
+Audited source: `de4103db20be6ca2be738748143fb6a6fbd26693`
+HOLD remediation base: `a4c4004acccdccfb2f8f2a328d3cc63fe7da71a7`
+Packet commit: resolve after commit with
+`git log -1 --format=%H -- evaluation/llm-wiki-rls-approval-2026-07-17/report.json`.
 
 ## Commands
 
-1. `npm.cmd test -- --run tests/supabase-tenant-isolation-harness.test.ts`
-   - Final result: 1 file, 27 tests passed, 0 failed.
+1. `npm.cmd test -- --run tests/supabase-tenant-isolation-harness.test.ts tests/llm-wiki-rls-approval-packet.test.ts`
+   - Final result after HOLD correction: 2 files, 31 tests passed, 0 failed.
 2. `npm.cmd run typecheck`
    - Initial run was blocked because declared local dependencies `pdf-lib` and
      `@pdf-lib/fontkit` were absent from `node_modules`.
@@ -32,3 +35,13 @@ Target base: `de4103db20be6ca2be738748143fb6a6fbd26693`
 - Database/schema/data/publication mutation: none.
 
 No fake adapter result is accepted as live tenant-isolation proof.
+
+## TDD correction evidence
+
+- P1 RED: caller-supplied `live-reviewed` plus fake hooks produced `ok=true`.
+- P1 GREEN: the same request is blocked before hooks; `launchProven=false`.
+- P2 RED: positive IDs retained cross-tenant direction text.
+- P2 GREEN: positive IDs use only `a_to_a` or `b_to_b`.
+- P2 RED: report had one short `baseCommit` and no packet identity semantics.
+- P2 GREEN: full audited/remediation SHAs and nullable containing-commit semantics
+  are contract-tested.

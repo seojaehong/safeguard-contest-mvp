@@ -1,7 +1,13 @@
 {
   "schemaVersion": "llm-wiki-rls-approval/v1",
   "date": "2026-07-17",
-  "baseCommit": "de4103db",
+  "sourceIdentity": {
+    "auditedSourceCommit": "de4103db20be6ca2be738748143fb6a6fbd26693",
+    "remediationBaseCommit": "a4c4004acccdccfb2f8f2a328d3cc63fe7da71a7",
+    "packetCommit": null,
+    "packetCommitSemantics": "Null avoids an impossible self-reference; the authoritative packet commit is the Git commit containing this report blob.",
+    "packetCommitVerificationCommand": "git log -1 --format=%H -- evaluation/llm-wiki-rls-approval-2026-07-17/report.json"
+  },
   "mode": "db-non-mutating-network-free",
   "verdict": "red_approval_required",
   "launchProven": false,
@@ -33,14 +39,20 @@
     "totalScenarios": 224,
     "directions": ["a_to_b", "b_to_a", "a_to_a", "b_to_b"],
     "liveExecutorPresent": false,
+    "reviewedLiveAdapterIdentityRegistryPresent": false,
+    "callerSuppliedLiveReviewedAccepted": false,
+    "launchProofCapability": "disabled_in_non_executing_packet",
     "liveAssertionsExecuted": 0,
     "status": "red_no_live_executor"
   },
   "verification": {
-    "focusedTestFiles": 1,
-    "focusedTestsPassed": 27,
+    "focusedTestFiles": 2,
+    "focusedTestsPassed": 31,
     "focusedTestsFailed": 0,
     "strictTypecheckPassed": true,
+    "fakeAdapterRegressionPassed": true,
+    "positiveIdNormalizationPassed": true,
+    "packetIdentityContractPassed": true,
     "networkRequests": 0,
     "liveAssertionsExecuted": 0,
     "log": "evaluation/llm-wiki-rls-approval-2026-07-17/verification.md"
