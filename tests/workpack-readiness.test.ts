@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
 import {
@@ -12,12 +13,20 @@ import {
   revalidateEditedWorkpack
 } from "@/lib/workpack-readiness";
 import type { AskResponse, QualityContract } from "@/lib/types";
+import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 
 const readyQuality: QualityContract = {
   overall: "ready",
   summary: "공유 전 핵심 항목이 준비됐습니다.",
   generatedAt: "2026-07-09T00:00:00.000Z",
-  items: [],
+  items: [
+    {
+      key: "integrity",
+      label: "문서 본문 검수",
+      status: "ready",
+      detail: "핵심 문서 3/3종의 본문 placeholder와 필수 문구를 확인했습니다."
+    }
+  ],
   fallback: { hasFallback: false, modes: {} },
   ontology: {
     status: "ready",
@@ -36,6 +45,13 @@ const readyQuality: QualityContract = {
     readyCount: 4,
     requiredCount: 4,
     detail: "구조화 완료"
+  },
+  integrity: {
+    status: "ready",
+    checkedCount: 3,
+    blockedCount: 0,
+    blockedKeys: [],
+    detail: "핵심 문서 3/3종의 본문 placeholder와 필수 문구를 확인했습니다."
   },
   persistence: {
     status: "ready",
@@ -57,7 +73,28 @@ const readyQuality: QualityContract = {
   }
 };
 
+const harnessReferences: SafetyReferenceItem[] = [
+  {
+    id: "sif-fall-workpack-readiness",
+    source_id: "sif",
+    item_type: "sif-case",
+    category: "건설",
+    subcategory: "외벽 도장",
+    title: "외벽 도장 추락 SIF 사례",
+    summary: "외벽 도장 작업 중 작업발판 점검 미흡으로 추락 위험이 발생한 사례",
+    keywords: ["외벽", "도장", "추락"],
+    risk_tags: ["추락"],
+    primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+    controls: ["작업발판 점검", "추락 위험 확인"],
+    evidence_role: "direct"
+  }
+];
+
 function makeResponse(): AskResponse {
+  const packet = buildDbHarnessPacket({
+    question: "성수동 외벽 도장 작업",
+    references: harnessReferences
+  });
   return {
     ...buildMockAskResponse("성수동 외벽 도장 작업", mockSearchResults.slice(0, 3), "live", "test"),
     qualityContract: readyQuality,
@@ -76,8 +113,8 @@ function makeResponse(): AskResponse {
       detail: "안전조치 검수 통과"
     },
     dbHarness: {
-      packet: {} as NonNullable<AskResponse["dbHarness"]>["packet"],
-      promptContext: "DB harness context",
+      packet,
+      promptContext: buildHarnessPromptContext(packet),
       summary: {
         mode: "db_harness_first",
         llmRole: "naturalize_only",
@@ -398,8 +435,10 @@ describe("workpack readiness", () => {
       response,
       {
         tbmBriefing: [
-          "사용자 편집 본문",
-          "추락 위험을 확인하고 작업발판 점검을 완료한다."
+          "TBM 사용자 편집 본문",
+          "외벽 도장 작업 전 추락 위험을 확인하고 작업발판 점검을 완료한다.",
+          "작업자는 TBM에서 보호구 착용, 하부 통제, 작업발판 점검 상태를 복창 확인한다.",
+          "관리감독자는 작업 시작 전 사진 기록과 근로자 확인을 남긴다."
         ].join("\n")
       },
       { requiresRevalidation: true }
@@ -420,6 +459,84 @@ describe("workpack readiness", () => {
     ]);
     expect(revalidated.qualityContract?.generatedAt).toBe("2026-07-17T00:00:00.000Z");
     expect(readiness.canShare).toBe(true);
+  });
+
+  it("recomputes core document body integrity after deterministic revalidation", () => {
+    const graph = assembleGraph(
+      [
+        {
+          node_id: "Task_high_work",
+          kind: "Task",
+          label: "외벽 도장",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Hazard_fall",
+          kind: "Hazard",
+          label: "추락",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Control_platform",
+          kind: "Control",
+          label: "작업발판 점검",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        }
+      ],
+      [
+        {
+          src: "Task_high_work",
+          rel: "entailsHazard",
+          dst: "Hazard_fall",
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          src: "Hazard_fall",
+          rel: "mitigatedBy",
+          dst: "Control_platform",
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        }
+      ]
+    );
+    const response = makeResponse();
+    const basis = buildWorkpackRevalidationBasis(response);
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      {
+        riskAssessmentDraft: [
+          "위험성평가표",
+          "회사명: ____",
+          "작업장소: 현장 확인 필요",
+          "TODO"
+        ].join("\n"),
+        tbmBriefing: "추락 위험을 확인하고 작업발판 점검을 완료한다."
+      },
+      { requiresRevalidation: true }
+    );
+
+    const revalidated = revalidateEditedWorkpack(edited, basis, graph, "2026-07-17T00:00:00.000Z");
+    const readiness = assessWorkpackReadiness(revalidated);
+
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(true);
+    expect(revalidated.ontologyQa?.result.reviewable && revalidated.ontologyQa.result.verdict).toBe("통과");
+    expect(revalidated.qualityContract?.integrity?.status).toBe("blocked");
+    expect(revalidated.qualityContract?.integrity?.blockedKeys).toContain("riskAssessmentDraft");
+    expect(revalidated.qualityContract?.overall).toBe("blocked");
+    expect(readiness.canShare).toBe(false);
+    expect(readiness.reasons).toContain("품질 검수 보완 필요");
   });
 
   it("fails closed when deterministic revalidation cannot review the edited task", () => {
@@ -487,7 +604,7 @@ describe("workpack readiness", () => {
       {
         riskAssessmentDraft: "",
         workPlanDraft: "",
-        tbmBriefing: "용접흄 위험을 확인하고 용접면 착용을 완료한다.",
+        tbmBriefing: "TBM 용접흄 위험을 확인하고 용접면 착용을 완료한다. 작업 전 근로자 확인과 보호구 착용 확인을 기록한다.",
         tbmLogDraft: "",
         safetyEducationRecordDraft: "",
         emergencyResponseDraft: ""
@@ -505,7 +622,8 @@ describe("workpack readiness", () => {
     expect(revalidated.ontologyQa.result.task).toBe("용접 작업");
     expect(revalidated.ontologyQa.result.covered.controls).toEqual(["용접면 착용"]);
     expect(revalidated.ontologyQa.sourceDocumentKeys).toEqual(["tbmBriefing"]);
-    expect(assessWorkpackReadiness(revalidated).canShare).toBe(true);
+    expect(revalidated.qualityContract?.integrity?.status).toBe("blocked");
+    expect(assessWorkpackReadiness(revalidated).canShare).toBe(false);
   });
 
   it("resolves an approved registry alias only to its canonical published Task", () => {
@@ -561,7 +679,13 @@ describe("workpack readiness", () => {
     const response = makeResponse();
     const edited = applyWorkpackDeliverablesChange(
       response,
-      { tbmBriefing: "추락 위험을 확인하고 작업발판 점검을 완료한다." },
+      {
+        tbmBriefing: [
+          "TBM 고소작업 추락 위험을 확인하고 작업발판 점검을 완료한다.",
+          "작업자는 작업발판 점검, 보호구 착용, 하부 통제 상태를 확인한다.",
+          "관리감독자는 TBM 참석 확인과 사진 기록을 남긴다."
+        ].join("\n")
+      },
       { requiresRevalidation: true }
     );
 

@@ -228,7 +228,15 @@ function dbHarnessItem(response: AskResponse): QualityContractItem {
     };
   }
 
-  const contract = harness.packet.generationContract;
+  const contract = harness.packet?.generationContract;
+  if (!contract) {
+    return {
+      key: "dbHarness",
+      label: "DB 하네스 계약",
+      status: "blocked",
+      detail: "DB 하네스 생성 계약이 응답에 없습니다."
+    };
+  }
   const contractReady =
     harness.packet.mode === "db_harness_first" &&
     contract.llmRole === "naturalize_only" &&
@@ -346,13 +354,13 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
     dbHarness: {
       status: dbHarness.status,
       mode: response.dbHarness?.packet.mode,
-      llmRole: response.dbHarness?.packet.generationContract.llmRole,
-      llmOutputScope: response.dbHarness?.packet.generationContract.llmOutputScope,
-      evidenceAuthority: response.dbHarness?.packet.generationContract.evidenceAuthority,
-      providerRetryScope: response.dbHarness?.packet.generationContract.providerRetryScope,
-      fallbackChainAllowed: response.dbHarness?.packet.generationContract.fallbackChainAllowed,
-      genericProseSubstitutionAllowed: response.dbHarness?.packet.generationContract.genericProseSubstitutionAllowed,
-      missingEvidencePolicy: response.dbHarness?.packet.generationContract.missingEvidencePolicy,
+      llmRole: response.dbHarness?.packet.generationContract?.llmRole,
+      llmOutputScope: response.dbHarness?.packet.generationContract?.llmOutputScope,
+      evidenceAuthority: response.dbHarness?.packet.generationContract?.evidenceAuthority,
+      providerRetryScope: response.dbHarness?.packet.generationContract?.providerRetryScope,
+      fallbackChainAllowed: response.dbHarness?.packet.generationContract?.fallbackChainAllowed,
+      genericProseSubstitutionAllowed: response.dbHarness?.packet.generationContract?.genericProseSubstitutionAllowed,
+      missingEvidencePolicy: response.dbHarness?.packet.generationContract?.missingEvidencePolicy,
       directEvidenceCount: response.dbHarness?.summary.directEvidence ?? 0,
       sifCaseCount: response.dbHarness?.summary.sifCases ?? 0,
       supportingEvidenceCount: response.dbHarness?.summary.supportingEvidence ?? 0,

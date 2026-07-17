@@ -3,9 +3,11 @@ import { EVIDENCE_CHAIN_REGISTRY } from "./ontology/evidence-chain-registry";
 import { queryByTask } from "./ontology/query";
 import { reviewDocumentCoverage, type QaReviewResult } from "./ontology/qa-review";
 import { normalizeLabel, type OntologyNode } from "./ontology/schema";
+import { auditAskDeliverables, summarizeIntegrityItems } from "./deliverable-integrity-policy";
 import type {
   AskResponse,
   QualityContract,
+  QualityContractItem,
   QualityContractStatus
 } from "./types";
 
@@ -149,6 +151,52 @@ function invalidateQualityContract(contract: QualityContract): QualityContract {
   };
 }
 
+const CORE_DELIVERABLE_INTEGRITY_KEYS = [
+  "riskAssessmentDraft",
+  "tbmBriefing",
+  "tbmLogDraft"
+] as const;
+
+function buildIntegritySummary(response: AskResponse): NonNullable<QualityContract["integrity"]> {
+  const items = auditAskDeliverables({
+    deliverables: response.deliverables,
+    requiredKeys: CORE_DELIVERABLE_INTEGRITY_KEYS
+  });
+  const summary = summarizeIntegrityItems(items);
+  const blockedKeys = items.filter((item) => item.verdict === "blocked").map((item) => item.key);
+  return {
+    status: summary.verdict === "pass" ? "ready" : "blocked",
+    checkedCount: summary.totalCount,
+    blockedCount: summary.blockedCount,
+    blockedKeys,
+    detail: summary.verdict === "pass"
+      ? `핵심 문서 ${summary.passCount}/${summary.totalCount}종의 본문 placeholder와 필수 문구를 확인했습니다.`
+      : `핵심 문서 ${summary.blockedCount}/${summary.totalCount}종 보완 필요: ${blockedKeys.join(", ")}`
+  };
+}
+
+function integrityContractItem(integrity: NonNullable<QualityContract["integrity"]>): QualityContractItem {
+  return {
+    key: "integrity",
+    label: "문서 본문 검수",
+    status: integrity.status,
+    detail: integrity.detail
+  };
+}
+
+function upsertQualityItem(
+  items: readonly QualityContractItem[],
+  updated: QualityContractItem
+): QualityContractItem[] {
+  let found = false;
+  const next = items.map((item) => {
+    if (item.key !== updated.key) return item;
+    found = true;
+    return updated;
+  });
+  return found ? next : [...next, updated];
+}
+
 function qaContractStatus(result: QaReviewResult): Exclude<QualityContractStatus, "pending"> {
   if (!result.reviewable) return "blocked";
   if (result.verdict === "통과") return "ready";
@@ -157,15 +205,19 @@ function qaContractStatus(result: QaReviewResult): Exclude<QualityContractStatus
 
 function refreshedOverall(
   contract: QualityContract,
-  ontologyStatus: Exclude<QualityContractStatus, "pending">
+  ontologyStatus: Exclude<QualityContractStatus, "pending">,
+  integrityStatus: QualityContractStatus
 ): QualityContract["overall"] {
   const statuses: QualityContractStatus[] = [
     ontologyStatus,
+    integrityStatus,
     contract.evidence.status,
     contract.structured.status,
     contract.persistence.status,
     contract.dbHarness.status,
-    ...contract.items.filter((item) => item.key !== "ontology").map((item) => item.status)
+    ...contract.items
+      .filter((item) => item.key !== "ontology" && item.key !== "integrity")
+      .map((item) => item.status)
   ];
   if (statuses.includes("blocked")) return "blocked";
   if (statuses.some((status) => status === "degraded" || status === "pending")) return "degraded";
@@ -173,37 +225,46 @@ function refreshedOverall(
 }
 
 function refreshQualityContract(
+  response: AskResponse,
   contract: QualityContract,
   reviewTask: string,
   result: QaReviewResult,
   generatedAt: string
 ): QualityContract {
   const ontologyStatus = qaContractStatus(result);
-  const overall = refreshedOverall(contract, ontologyStatus);
-  const detail = result.reviewable
+  const integrity = buildIntegritySummary(response);
+  const overall = refreshedOverall(contract, ontologyStatus, integrity.status);
+  const ontologyDetail = result.reviewable
     ? result.verdict === "통과"
       ? `${reviewTask} 작업의 편집된 문서가 안전조치 검수를 통과했습니다.`
       : `${reviewTask} 작업의 편집된 문서에 안전조치 ${result.missing.controls.length}건을 보완해야 합니다.`
     : result.message;
+  const ontologyItem: QualityContractItem = {
+    key: "ontology",
+    label: "안전조치 검수",
+    status: ontologyStatus,
+    detail: ontologyDetail
+  };
+  const itemsWithOntology = upsertQualityItem(contract.items, ontologyItem);
+  const items = upsertQualityItem(itemsWithOntology, integrityContractItem(integrity));
 
   return {
     ...contract,
     overall,
     summary: overall === "ready"
-      ? "편집된 문서의 안전조치 재검수가 완료됐습니다."
+      ? "편집된 문서의 안전조치와 본문 검수가 완료됐습니다."
       : "편집된 문서의 재검수에서 보완 항목을 확인했습니다.",
     generatedAt,
-    items: contract.items.map((item) => item.key === "ontology"
-      ? { ...item, status: ontologyStatus, detail }
-      : item),
+    items,
     ontology: {
       ...contract.ontology,
       status: ontologyStatus,
       reviewTask,
       verdict: result.reviewable ? result.verdict : undefined,
       missingControlCount: result.reviewable ? result.missing.controls.length : undefined,
-      detail
-    }
+      detail: ontologyDetail
+    },
+    integrity
   };
 }
 
@@ -295,14 +356,14 @@ export function revalidateEditedWorkpack(
           reviewable: false,
           errorCode: "ontology_qa_failed",
           message: `published 온톨로지에서 '${reviewTask}'의 필수 위험요인-안전조치 근거 경로를 확인할 수 없습니다.`,
-          registeredTasks: []
-        }
-      : reviewDocumentCoverage(exactTask.task.label, source.text, exactTask.graph);
+        registeredTasks: []
+      }
+    : reviewDocumentCoverage(exactTask.task.label, source.text, exactTask.graph);
   const reviewed = attachRevalidatedQa(response, reviewTask, result, source.documentKeys);
   return {
     ...reviewed,
     qualityContract: response.qualityContract
-      ? refreshQualityContract(response.qualityContract, reviewTask, result, generatedAt)
+      ? refreshQualityContract(reviewed, response.qualityContract, reviewTask, result, generatedAt)
       : undefined
   };
 }

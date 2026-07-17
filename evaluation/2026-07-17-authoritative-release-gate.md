@@ -269,6 +269,8 @@ Verified fixes:
 - Placeholder-heavy core documents now produce `qualityContract.overall = blocked`.
 - The `integrity` summary records checked count, blocked count, blocked keys, and a user-facing detail string.
 - Existing DB-harness, workpack readiness, and answer-panel display contracts continue to pass.
+- Edited workpacks recompute the core body integrity gate during deterministic revalidation. A document can no longer regain share readiness merely because ontology revalidation passes while `riskAssessmentDraft`, `tbmBriefing`, or `tbmLogDraft` still contains unresolved placeholders.
+- Malformed or incomplete DB harness packets are classified as blocked quality-contract state instead of throwing during quality-contract rebuild.
 
 Fresh post-commit current-HEAD gates:
 
@@ -278,6 +280,12 @@ Fresh post-commit current-HEAD gates:
   - Result: 6 files / 180 tests passed.
 - `npm.cmd run build`
   - Result: passed, 28/28 static pages generated.
+- `npm.cmd test -- tests\workpack-readiness.test.ts tests\quality-contract.test.ts tests\deliverable-integrity-policy.test.ts`
+  - Result: 3 files / 25 tests passed.
+- `npm.cmd test -- tests\commercial-harness.test.ts tests\workflow-share-client.test.ts tests\workpack-share-authority-routes.test.ts`
+  - Result: 3 files / 112 tests passed.
+- `npm.cmd run typecheck`
+  - Result: passed.
 
 ### Hermes / EngineAdapter current boundary gate
 
