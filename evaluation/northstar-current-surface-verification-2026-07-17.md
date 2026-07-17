@@ -1,7 +1,7 @@
 # North Star Current Surface Verification
 
 Date: 2026-07-17
-Authoritative code HEAD: `e8d14edabef05b0032c79dd7b956448fe5685e9b`
+Authoritative code HEAD: `858c38a7e9138be3b148ecb4025aa2430113c043`
 
 ## Scope
 
@@ -33,6 +33,32 @@ Live route smoke:
 ```
 
 ## UI/UX Regression Gates
+
+Workspace input density / stale example gate:
+
+- Empty input topbar now uses concise copy: `준비됨` / `현장 상황 입력`.
+- The previous duplicated waiting copy (`작업 입력 대기` + `입력 대기`) is covered by a browser regression.
+- Existing focused browser contracts also confirm that clearing an example removes stale example affordances and that the filled desktop side rail remains height-aligned with the main input panel.
+
+```powershell
+npm.cmd test -- tests\workspace-layout-regression.test.ts -t "keeps the empty input topbar concise|removes stale example affordances|keeps a filled workspace rail aligned"
+```
+
+Result:
+
+- Test files: 1 passed
+- Tests: 3 passed, 23 skipped
+
+Broader workspace/shared UI gate:
+
+```powershell
+npm.cmd test -- tests\workspace-layout-regression.test.ts tests\user-visible-korean-copy.test.ts tests\frontend-shared-surfaces.test.ts
+```
+
+Result:
+
+- Test files: 3 passed
+- Tests: 48 passed, 1 skipped
 
 ```powershell
 npm.cmd test -- tests\ontology-ui-remediation.test.ts tests\ontology-tablet-overflow.test.ts tests\why-mobile-layout.test.ts tests\product-module-shell.test.ts
