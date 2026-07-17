@@ -1,11 +1,30 @@
 {
-  "source": "http://127.0.0.1:3027",
-  "generatedAt": "2026-07-15T13:36:33.092Z",
+  "source": "https://www.safeclaw.kr",
+  "generatedAt": "2026-07-17T12:52:17.378Z",
   "metrics": [
     {
       "variant": "desktop-day",
       "viewport": {
         "width": 1440,
+        "height": 1000
+      },
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 15,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "expandedGraphVerified": false,
+      "expandedGraphNodeCount": 0,
+      "dialogKeyboardContract": false
+    },
+    {
+      "variant": "tablet-day",
+      "viewport": {
+        "width": 1024,
         "height": 1000
       },
       "horizontalOverflow": 0,
@@ -44,6 +63,25 @@
       "variant": "desktop-night",
       "viewport": {
         "width": 1440,
+        "height": 1000
+      },
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "visibleNeighborhoodNodes": 15,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
+      "desktopGraphVisible": true,
+      "mobileRelationsVisible": false,
+      "expandedGraphVerified": false,
+      "expandedGraphNodeCount": 0,
+      "dialogKeyboardContract": false
+    },
+    {
+      "variant": "tablet-night",
+      "viewport": {
+        "width": 1024,
         "height": 1000
       },
       "horizontalOverflow": 0,

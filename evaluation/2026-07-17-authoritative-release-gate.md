@@ -43,3 +43,32 @@
 - Remote Hermes production execution is intentionally unavailable until an application-owned connection-pinned transport and durable attempt ledger are wired.
 - DB migration, published ontology mutation, and production data mutation were not performed.
 - Existing unrelated/generated screenshot changes outside the current audit artifact set were not staged.
+
+## 2026-07-17 Continuation Evidence
+
+Current continuation HEAD after KOSHA/share copy work: `a2cf31f6cb3ddd32ef60e47010c4a420c1ed2380`.
+
+### KOSHA D-C-13 applicability
+
+- `외벽 로프 작업 안전점검` and `외벽 로프 청소 작업` now map to the exact trusted D-C-13 exterior-wall KOSHA reference.
+- `로프 구매 가격 비교` remains non-applicable, so commercial rope queries do not reopen direct evidence.
+- Focused policy test: `tests\exact-kosha-applicability-policy.test.ts` passed, 1 file / 17 tests.
+- KOSHA + ontology focused gate passed, 7 files / 179 tests.
+- Strict typecheck passed.
+- Normal production build passed, 28/28 static pages.
+
+### Live `/ontology` P0 visual gate
+
+The earlier live audit reported a 166-node hairball graph with severe overlap and contrast failures. Current production no longer exposes that default surface.
+
+Fresh live browser gate:
+
+- Command: `$env:ONTOLOGY_BASE_URL='https://www.safeclaw.kr'; npm.cmd test -- tests\ontology-ui-browser.test.ts`
+- Result: 1 file / 1 test passed.
+- Desktop and tablet Day/Night: 15 visible neighborhood nodes, overlap pairs 0, horizontal overflow 0.
+- Mobile Day/Night: default graph hidden, relation-card view visible, fullscreen graph verified with 15 nodes, dialog keyboard trap verified.
+- Minimum control height: 44px.
+- Minimum node text contrast: 5.6:1.
+- Artifact: `evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json`.
+
+This proves the current production `/ontology` surface is now a selected-neighborhood explorer rather than an unreadable full-graph hairball.
