@@ -7,11 +7,12 @@ import {
   applyKnowledgeReviewAction,
   KnowledgeReviewError,
   loadKnowledgeReviewInbox,
+  loadOntologyPromotionTrustedContext,
   parseKnowledgeReviewRequest
 } from "@/lib/knowledge-review";
 import {
   evaluateOntologyPromotionCommand,
-  isOntologyPromotionCommandEnvelope,
+  isOntologyPromotionLikeEnvelope,
   OntologyPromotionPolicyError,
   parseOntologyPromotionCommand
 } from "@/lib/ontology-promotion-policy";
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const parsedBody = await request.json().catch((): unknown => null);
   const promotionCommand = parseOntologyPromotionCommand(parsedBody);
-  const promotionEnvelope = isOntologyPromotionCommandEnvelope(parsedBody);
+  const promotionEnvelope = isOntologyPromotionLikeEnvelope(parsedBody);
   if (promotionEnvelope && !promotionCommand) {
     return NextResponse.json({
       ok: false,
@@ -107,13 +108,27 @@ export async function POST(request: NextRequest) {
 
   if (promotionCommand) {
     try {
-      const result = evaluateOntologyPromotionCommand(promotionCommand, { reviewerId: user.id });
+      const trustedContext = await loadOntologyPromotionTrustedContext(client, user, promotionCommand);
+      const result = evaluateOntologyPromotionCommand(promotionCommand, trustedContext);
       return NextResponse.json({
         configured: true,
         ...result,
         message: "온톨로지 승격 명령은 검토 대기 상태입니다. DB 승인 전 저장 또는 공개하지 않습니다."
       }, { status: 202 });
     } catch (error) {
+      if (error instanceof KnowledgeReviewError) {
+        return NextResponse.json({
+          ok: false,
+          configured: true,
+          code: error.code,
+          status: "review_required",
+          persistenceState: "pending_persistence",
+          publicationState: "unpublished",
+          ontologyPublished: false,
+          dbMutationPerformed: false,
+          message: error.message
+        }, { status: error.status });
+      }
       if (error instanceof OntologyPromotionPolicyError) {
         return NextResponse.json({
           ok: false,

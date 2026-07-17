@@ -8,6 +8,7 @@ import {
   applyKnowledgeReviewAction,
   KnowledgeReviewError,
   loadKnowledgeReviewInbox,
+  loadOntologyPromotionTrustedContext,
   parseKnowledgeReviewRequest
 } from "@/lib/knowledge-review";
 
@@ -1390,5 +1391,141 @@ describe("knowledge review actions", () => {
       runId: "11111111-1111-4111-8111-111111111111",
       action: "approve_candidate"
     });
+  });
+
+  it("loads promotion approval and source digest from stored rows without writing", async () => {
+    const fake = makeReviewClient();
+    const receipt = makeReceipt();
+    fake.run.status = "approved";
+    fake.run.generated_output = {
+      ...fake.preparedOutput,
+      humanReviewReceipt: receipt
+    };
+    for (const event of fake.events) {
+      event.review_status = "approved";
+      event.proposed_wiki_update = {
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        publishPerformed: false,
+        migrationPerformed: false,
+        humanReviewReceipt: receipt
+      };
+    }
+
+    const context = await loadOntologyPromotionTrustedContext(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      {
+        contractVersion: "ontology-promotion-command.v1",
+        commandIdentity: "ontology-promotion-command:fixture",
+        organizationId: "org-1",
+        siteId: "site-1",
+        runId: "run-1",
+        action: "approve_candidate"
+      }
+    );
+
+    expect(context).toMatchObject({
+      authenticatedReviewerId: "reviewer-auth",
+      organizationId: "org-1",
+      siteId: "site-1",
+      runId: "run-1",
+      action: "approve_candidate",
+      humanApprovalReceipt: receipt,
+      source: {
+        digestAlgorithm: "sha256",
+        digest: expect.stringMatching(/^[a-f0-9]{64}$/u),
+        publicationState: "unavailable",
+        verificationState: "review_required"
+      }
+    });
+    expect(fake.updates).toEqual([]);
+  });
+
+  it("rejects a forged stored approval receipt without writing", async () => {
+    const fake = makeReviewClient();
+    const receipt = makeReceipt();
+    fake.run.status = "approved";
+    fake.run.generated_output = {
+      ...fake.preparedOutput,
+      humanReviewReceipt: { ...receipt, reviewer: { id: "forged-reviewer", email: null } }
+    };
+    for (const event of fake.events) {
+      event.review_status = "approved";
+      event.proposed_wiki_update = {
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        publishPerformed: false,
+        migrationPerformed: false,
+        humanReviewReceipt: receipt
+      };
+    }
+
+    await expect(loadOntologyPromotionTrustedContext(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      {
+        contractVersion: "ontology-promotion-command.v1",
+        commandIdentity: "ontology-promotion-command:fixture",
+        organizationId: "org-1",
+        siteId: "site-1",
+        runId: "run-1",
+        action: "approve_candidate"
+      }
+    )).rejects.toMatchObject({ code: "promotion_stored_receipt_invalid" });
+    expect(fake.updates).toEqual([]);
+  });
+
+  it("rejects a forged command tenant without writing", async () => {
+    const fake = makeReviewClient();
+
+    await expect(loadOntologyPromotionTrustedContext(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      {
+        contractVersion: "ontology-promotion-command.v1",
+        commandIdentity: "ontology-promotion-command:fixture",
+        organizationId: "org-foreign",
+        siteId: "site-1",
+        runId: "run-1",
+        action: "approve_candidate"
+      }
+    )).rejects.toMatchObject({ code: "promotion_tenant_forbidden" });
+    expect(fake.updates).toEqual([]);
+  });
+
+  it("rejects source data that no longer matches the stored snapshot digest without writing", async () => {
+    const fake = makeReviewClient();
+    const receipt = makeReceipt();
+    fake.run.status = "approved";
+    fake.run.generated_output = {
+      ...fake.preparedOutput,
+      humanReviewReceipt: receipt
+    };
+    for (const event of fake.events) {
+      event.review_status = "approved";
+      event.proposed_wiki_update = {
+        publicationState: "unpublished",
+        ontologyPublished: false,
+        publishPerformed: false,
+        migrationPerformed: false,
+        humanReviewReceipt: receipt
+      };
+    }
+    if (fake.events[0]) fake.events[0].payload = { tampered: true };
+
+    await expect(loadOntologyPromotionTrustedContext(
+      fake.client as never,
+      { id: "reviewer-auth", email: null },
+      {
+        contractVersion: "ontology-promotion-command.v1",
+        commandIdentity: "ontology-promotion-command:fixture",
+        organizationId: "org-1",
+        siteId: "site-1",
+        runId: "run-1",
+        action: "approve_candidate"
+      }
+    )).rejects.toMatchObject({ code: "promotion_source_digest_mismatch" });
+    expect(fake.updates).toEqual([]);
   });
 });
