@@ -925,7 +925,7 @@ The worker-facing share recipient portal was rechecked on current HEAD `3022c37c
 Results:
 
 - `npm.cmd test -- tests\share-recipient-portal-browser.test.ts tests\workpack-share-authority-routes.test.ts tests\workflow-share-panel-behavior.test.ts tests\workspace-share-simplification.test.ts`
-  - Result: 3 files passed / 1 skipped; 51 tests passed / 1 skipped.
+  - Result: 4 files / 52 tests passed.
 
 Verified boundary:
 
@@ -946,7 +946,7 @@ The manager-side share screen now exposes a secondary worker-preview action afte
 Results:
 
 - `npm.cmd test -- tests\workflow-share-panel-behavior.test.ts tests\workspace-share-simplification.test.ts tests\share-recipient-portal-browser.test.ts tests\workpack-share-authority-routes.test.ts`
-  - Result: 3 files passed / 1 skipped; 51 tests passed / 1 skipped.
+  - Result: 4 files / 52 tests passed.
 - `npm.cmd run typecheck`
   - Result: passed.
 - `npm.cmd run build`
