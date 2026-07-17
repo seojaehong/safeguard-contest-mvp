@@ -241,6 +241,166 @@ describe("documents editor layout", () => {
     expect(freeformExport.payload).not.toHaveProperty("riskAssessmentRows");
   }, 90_000);
 
+  it("persists an incomplete new risk row across reload while excluding invalid canonical export", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 430, height: 932 } });
+    const sample = buildSampleWorkpack();
+    const canonicalRow = {
+      location: sample.scenario.siteName,
+      process: "외벽 도장",
+      task: "이동식 비계 작업",
+      equipment: "이동식 비계",
+      hazard: "RELOAD_BASE_HAZARD",
+      fourM: "Machine" as const,
+      accidentType: "fall" as const,
+      currentControls: "안전난간 확인",
+      likelihood: 3,
+      severity: 4,
+      riskLevel: "high" as const,
+      additionalControls: "RELOAD_BASE_CONTROL",
+      owner: "관리감독자",
+      due: "현장 확인",
+      verification: "사진 확인",
+      verificationStatus: "planned" as const,
+      verificationDate: "현장 확인",
+      verificationChecker: "안전관리자",
+      whyLikelihood: "반복 노출",
+      whySeverity: "중상 가능",
+      evidenceRefs: ["현장 작업계획"]
+    };
+    sample.deliverables.riskAssessmentDraft = `위험요인: ${canonicalRow.hazard}\n감소대책: ${canonicalRow.additionalControls}`;
+    sample.structured = {
+      riskAssessmentRows: [canonicalRow],
+      riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
+    };
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
+    await page.getByRole("button", { name: "위험 항목" }).click();
+    await page.getByRole("textbox", { name: "행 2 세부작업" }).fill("RELOAD_INCOMPLETE_TASK");
+    await expect.poll(() => page.getByRole("textbox", { name: "행 2 유해·위험요인" }).getAttribute("aria-invalid"))
+      .toBe("true");
+    const describedBy = await page.getByRole("textbox", { name: "행 2 유해·위험요인" }).getAttribute("aria-describedby");
+    expect(describedBy).toBeTruthy();
+    expect(await page.locator(`#${describedBy}`).isVisible()).toBe(true);
+
+    await page.reload({ waitUntil: "networkidle" });
+    await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
+    await expect.poll(() => page.getByRole("textbox", { name: "행 2 세부작업" }).inputValue())
+      .toBe("RELOAD_INCOMPLETE_TASK");
+
+    const { payload } = await exportSelectedXlsx(page);
+    expect(payload).toMatchObject({ mode: "single", edited: true });
+    expect(payload).not.toHaveProperty("riskAssessmentRows");
+  }, 90_000);
+
+  it("requires explicit confirmation before structured rows replace divergent freeform prose", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 430, height: 932 } });
+    const sample = buildSampleWorkpack();
+    const freeform = "FREEFORM_AUTHORITATIVE_PROSE_DO_NOT_OVERWRITE";
+    const canonicalRow = {
+      location: sample.scenario.siteName,
+      process: "외벽 도장",
+      task: "이동식 비계 작업",
+      equipment: "이동식 비계",
+      hazard: "DIVERGENT_STRUCTURED_HAZARD",
+      fourM: "Machine" as const,
+      accidentType: "fall" as const,
+      currentControls: "안전난간 확인",
+      likelihood: 3,
+      severity: 4,
+      riskLevel: "high" as const,
+      additionalControls: "DIVERGENT_STRUCTURED_CONTROL",
+      owner: "관리감독자",
+      due: "현장 확인",
+      verification: "사진 확인",
+      verificationStatus: "planned" as const,
+      verificationDate: "현장 확인",
+      verificationChecker: "안전관리자",
+      whyLikelihood: "반복 노출",
+      whySeverity: "중상 가능",
+      evidenceRefs: ["현장 작업계획"]
+    };
+    sample.deliverables.riskAssessmentDraft = freeform;
+    sample.structured = {
+      riskAssessmentRows: [canonicalRow],
+      riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
+    };
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+
+    await page.goto(`${baseUrl}/documents?theme=night`, { waitUntil: "networkidle" });
+    await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
+    const hazard = page.getByRole("textbox", { name: "행 1 유해·위험요인" });
+    await expect.poll(() => hazard.isDisabled()).toBe(true);
+    await expect.poll(() => page.getByRole("button", { name: "구조 편집으로 전환" }).isVisible()).toBe(true);
+    await page.getByRole("button", { name: "원문" }).click();
+    await expect.poll(() => page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" }).inputValue()).toContain(freeform);
+
+    await page.getByRole("button", { name: "구조화" }).click();
+    await page.getByRole("button", { name: "구조 편집으로 전환" }).click();
+    await expect.poll(() => hazard.isEnabled()).toBe(true);
+    await page.getByRole("button", { name: "원문" }).click();
+    await expect.poll(() => page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" }).inputValue()).not.toContain(freeform);
+  }, 90_000);
+
+  it("keeps row identity, focus, details state, and values stable while controlId changes", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 430, height: 932 } });
+    const sample = buildSampleWorkpack();
+    const canonicalRow = {
+      controlId: "",
+      location: sample.scenario.siteName,
+      process: "외벽 도장",
+      task: "이동식 비계 작업",
+      equipment: "이동식 비계",
+      hazard: "IDENTITY_HAZARD",
+      fourM: "Machine" as const,
+      accidentType: "fall" as const,
+      currentControls: "안전난간 확인",
+      likelihood: 3,
+      severity: 4,
+      riskLevel: "high" as const,
+      additionalControls: "IDENTITY_CONTROL",
+      owner: "관리감독자",
+      due: "현장 확인",
+      verification: "사진 확인",
+      verificationStatus: "planned" as const,
+      verificationDate: "현장 확인",
+      verificationChecker: "안전관리자",
+      whyLikelihood: "반복 노출",
+      whySeverity: "중상 가능",
+      evidenceRefs: ["현장 작업계획"]
+    };
+    sample.deliverables.riskAssessmentDraft = `위험요인: ${canonicalRow.hazard}\n감소대책: ${canonicalRow.additionalControls}`;
+    sample.structured = {
+      riskAssessmentRows: [canonicalRow],
+      riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
+    };
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+
+    await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
+    await page.getByRole("combobox", { name: "편집 문서 선택" }).selectOption("riskAssessmentDraft");
+    const details = page.getByText("공정·조치·확인 세부", { exact: true }).locator("..");
+    await details.locator("summary").click();
+    const controlId = page.getByRole("textbox", { name: "행 1 관리번호" });
+    await controlId.pressSequentially("ABC", { delay: 30 });
+
+    await expect.poll(() => controlId.inputValue()).toBe("ABC");
+    expect(await controlId.evaluate((element) => document.activeElement === element)).toBe(true);
+    expect(await details.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
+  }, 90_000);
+
   it("keeps the document editor in the same light workbench system", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });

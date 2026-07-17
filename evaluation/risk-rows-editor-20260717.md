@@ -21,3 +21,18 @@
 ## Fail-safe Result
 
 Canonical rows are exported only when schema validation passes and either the generated prose represents every row's hazard and additional control, or the row editor's deterministic serialization exactly matches the current draft. Switching to freeform prose invalidates that match, so XLSX/HWP export cannot silently reuse stale structured rows.
+
+## Emergency TDD Remediation
+
+- Incomplete structured rows now persist as editor drafts across reload while remaining excluded from canonical export.
+- Canonical parse failure or freeform divergence locks the structured controls until the user explicitly chooses `구조 편집으로 전환`.
+- React row identity uses persisted internal row IDs rather than editable `controlId` or array content.
+- Validation issues expose field-specific `aria-invalid`, `aria-describedby`, and stable error IDs.
+
+| Final check | Result | Evidence |
+| --- | --- | --- |
+| Focused browser regressions | PASS | `tests/documents-editor-layout.test.ts`: 3 passed, 27 skipped |
+| Strict typecheck | PASS | `npm.cmd run typecheck` |
+| Production build | NOT RERUN AFTER FINAL PATCH | Same-turn build passed before the final state/persistence adjustment; final confidence is based on focused browser tests and strict typecheck |
+
+The scope remains limited to the risk-row editor, its browser regressions, styles, and this evaluation. Documents 11, Share, DB/schema, and API contracts were not changed.
