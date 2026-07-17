@@ -28,6 +28,10 @@
    - Disabled local snapshot broadening when `sourceId`, `riskTag`, or `evidenceRole` is used as an explicit filter.
    - Recomputed `koshaGrounding` summaries from the retained item set after exact bundle replacement.
 
+6. Photo improvement memory vs parentless KOSHA
+   - Treated accepted operation improvement memory as operational parent evidence for deterministic row generation.
+   - Kept parentless KOSHA provider action surfaces blocked while preserving photo-derived deterministic risk rows and TBM links.
+
 ## Verification
 
 - `npm.cmd test -- tests\generation-evidence-operation-routes.test.ts tests\kosha-current-review-run-ask.test.ts tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false`
@@ -48,6 +52,8 @@
   - 3 files / 103 tests PASS
 - `npm.cmd test -- tests\generation-evidence-operation-routes.test.ts tests\kosha-current-review-run-ask.test.ts tests\commercial-harness.test.ts tests\frontend-route-coverage.test.ts tests\photo-vision-analysis.test.ts tests\kosha-grounding-fail-closed.test.ts --maxWorkers=1 --fileParallelism=false`
   - 6 files / 176 tests PASS
+- `npm.cmd test -- tests\commercial-harness.test.ts tests\kosha-current-review-run-ask.test.ts tests\photo-vision-analysis.test.ts tests\kosha-grounding-fail-closed.test.ts --maxWorkers=1 --fileParallelism=false`
+  - 4 files / 134 tests PASS
 - `npm.cmd run build`
   - PASS, 28/28 static pages
 

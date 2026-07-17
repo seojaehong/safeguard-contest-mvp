@@ -2238,11 +2238,13 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const koshaParentEvidenceReadyIds = buildKoshaParentEvidenceReadyIds(dbHarnessEvidencePacket);
     const hasIndependentParentEvidence = dbHarnessEvidencePacket.directEvidence.length > 0
       || dbHarnessEvidencePacket.sifCases.length > 0;
+    const hasOperationalParentEvidence = hasIndependentParentEvidence
+      || dbHarnessEvidencePacket.improvementMemory.length > 0;
     const hasParentlessKoshaSupport = dbHarnessEvidencePacket.supportingEvidence.some((item) => (
       isKoshaTechnicalReference(item)
       && !koshaParentEvidenceReadyIds.has(item.id)
     ));
-    const parentlessKoshaReviewRequired = !hasIndependentParentEvidence && hasParentlessKoshaSupport;
+    const parentlessKoshaReviewRequired = !hasOperationalParentEvidence && hasParentlessKoshaSupport;
     const publicEvidenceItems = [
       ...dbHarnessEvidencePacket.directEvidence,
       ...dbHarnessEvidencePacket.sifCases,
