@@ -1,7 +1,8 @@
 # KOSHA Wave2/Wave3 Current Master Verification
 
 Date: 2026-07-17
-Authoritative HEAD: `f23ae8077d5f182aa6a5a223d3717618fea6e5af`
+Verified code HEAD: `f23ae8077d5f182aa6a5a223d3717618fea6e5af`
+Report commit: `e054731cbaa0d30beb8b581c294fe642461c837b`
 
 ## Verdict
 
@@ -15,7 +16,8 @@ Do not range-merge old `feat/kosha-trust-registry-wave2` or other historical KOS
 
 ## Fresh Verification
 
-Commands were executed on current `master`.
+Commands were executed on `master` at `f23ae8077d5f182aa6a5a223d3717618fea6e5af`.
+The report commit only adds this evidence file and does not change production code.
 
 ```powershell
 npm.cmd test -- --run tests/exact-trusted-kosha-registry-wave3.test.ts tests/exact-trusted-kosha-registry-wave2.test.ts tests/exact-trusted-kosha-grounding.test.ts tests/exact-kosha-applicability-policy.test.ts tests/grounded-generation-contract.test.ts tests/photo-vision-analysis.test.ts --maxWorkers=1 --no-file-parallelism
@@ -82,4 +84,3 @@ The additional `ops/api` trace is not a regression by itself. It is a later oper
 - Preserve the SafeClaw evidence hierarchy: SIF and KOSHA establish practical hazard/control grounding first; law articles validate mandatory duties where applicable.
 - Do not present KOSHA guidance-only controls as legal obligations.
 - Do not use stale wave2 worktree evidence as current integration proof.
-
