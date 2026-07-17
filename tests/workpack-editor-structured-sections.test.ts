@@ -127,6 +127,27 @@ describe("workpack editor structured sections", () => {
     expect(model.body.every((section) => section.value === "")).toBe(true);
   });
 
+  it("keeps edited empty fallback sections isolated after reparsing", () => {
+    const initial = buildStructuredDocumentSections("workPermitDraft", "");
+    const edited = replaceStructuredDocumentSection(
+      "",
+      initial.body[1],
+      "산소농도 측정, 환기, 감시인 배치 확인"
+    );
+    const reparsed = buildStructuredDocumentSections("workPermitDraft", edited);
+
+    expect(reparsed.body.map((section) => section.label)).toEqual([
+      "허가 기본 정보",
+      "작업 전 허가조건",
+      "격리·보호구 확인",
+      "작업 종료 확인"
+    ]);
+    expect(reparsed.body[0].value).toBe("");
+    expect(reparsed.body[1].value).toContain("산소농도 측정");
+    expect(reparsed.body[2].value).toBe("");
+    expect(reparsed.body[3].value).toBe("");
+  });
+
   it("keeps an embedded submission body addressable after text is prepended", () => {
     const source = [
       "[필수 확인 항목]",

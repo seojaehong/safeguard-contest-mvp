@@ -147,6 +147,11 @@ Result:
 
 The current document editor surface is not claimed as the final 12-document product editor, but its present layout and structured-section contracts were rechecked.
 
+Structured fallback isolation fix:
+
+- Empty documents now keep a later edited fallback section isolated after reparsing.
+- Example locked by test: editing `workPermitDraft` section `작업 전 허가조건` must not make `허가 기본 정보` inherit the same text.
+
 ```powershell
 npm.cmd test -- tests\documents-editor-layout.test.ts tests\workpack-editor-structured-sections.test.ts
 ```
@@ -154,7 +159,21 @@ npm.cmd test -- tests\documents-editor-layout.test.ts tests\workpack-editor-stru
 Result:
 
 - Test files: 2 passed
-- Tests: 36 passed
+- Tests: 37 passed
+
+Focused regression and type gate:
+
+```powershell
+npm.cmd test -- tests\workpack-editor-structured-sections.test.ts
+npm.cmd test -- tests\documents-editor-layout.test.ts
+npm.cmd run typecheck
+```
+
+Result:
+
+- Structured sections: 1 file / 7 tests passed
+- Documents layout: 1 file / 30 tests passed
+- TypeScript strict typecheck: passed
 
 ## Remaining North Star Work
 

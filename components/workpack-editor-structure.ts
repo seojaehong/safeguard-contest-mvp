@@ -398,7 +398,7 @@ function buildFallbackSections(profile: DocumentEditorProfile, source: string): 
 
   return profile.fallbackSections.map((section, index) => {
     const contentStart = starts[index];
-    const laterStarts = starts.slice(index + 1).filter((start) => start > contentStart);
+    const laterStarts = starts.slice(index + 1).filter((start) => start >= contentStart);
     const blockEnd = laterStarts.length ? Math.min(...laterStarts) : source.length;
     const contentEnd = trimSectionBoundary(source, contentStart, blockEnd);
     const value = source.slice(contentStart, contentEnd);
