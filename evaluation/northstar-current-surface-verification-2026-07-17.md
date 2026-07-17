@@ -1,19 +1,20 @@
 # North Star Current Surface Verification
 
 Date: 2026-07-17
-Authoritative HEAD: `484b29b8cfd4fe45d4aa8f98100f379e45d9f3b2`
+Authoritative HEAD: `343c610e30d24260d930e5de00845c7c30542a97`
 
 ## Scope
 
-This verification records the current master state after the recipient share portal and foreign-language share boundary hardening work.
+This verification records the current master state after the recipient share portal, foreign-language share boundary hardening, current KOSHA exact evidence, and Hermes/Knowledge governance gate recording work.
 
 No DB schema changes, Supabase data mutations, provider activation, or ontology publication mutations were performed.
 
 ## Deployment
 
-GitHub/Vercel status for `484b29b8cfd4fe45d4aa8f98100f379e45d9f3b2`:
+GitHub/Vercel status for `343c610e30d24260d930e5de00845c7c30542a97`:
 
 - Vercel: success
+- Deployment: `https://vercel.com/seojaehongs-projects/safeguard-contest-mvp/9XmuJ1cfrjCNCFcqAFPvHKZVS6BY`
 
 Live route smoke:
 
@@ -110,6 +111,26 @@ Result:
 
 - Test files: 8 passed
 - Tests: 198 passed
+
+Additional Knowledge / LLM Wiki UI and governance gates:
+
+```powershell
+npm.cmd test -- tests\knowledge-mobile-ia-browser.test.ts tests\knowledge-page-layout.test.ts tests\knowledge-governance-ui-contract.test.ts tests\knowledge-review-inbox-browser.test.ts
+```
+
+Result:
+
+- Test files: 4 passed
+- Tests: 19 passed
+
+```powershell
+npm.cmd test -- tests\knowledge-governance.test.ts tests\knowledge-review-actions.test.ts tests\knowledge-promotion-gate.test.ts tests\knowledge-review-route.test.ts tests\knowledge-regenerate-route.test.ts
+```
+
+Result:
+
+- Test files: 5 passed
+- Tests: 92 passed
 
 ## Remaining North Star Work
 
