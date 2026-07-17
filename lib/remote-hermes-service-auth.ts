@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 export const REMOTE_HERMES_SERVICE_AUTH_VERSION = "remote-hermes-service-auth/v1" as const;
 export const REMOTE_HERMES_SERVICE_AUTH_MAX_TTL_MS = 5 * 60 * 1000;
 export const REMOTE_HERMES_SERVICE_AUTH_MAX_FUTURE_SKEW_MS = 30 * 1000;
+export const REMOTE_HERMES_SERVICE_AUTH_CONSUME_TIMEOUT_MS = 1000;
 
 const HMAC_DOMAIN = "safeclaw-remote-hermes-service-auth/v1";
 const OPAQUE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u;
@@ -84,7 +85,15 @@ export type VerifiedRemoteHermesServiceAssertion = Readonly<{
   keySlot: "current" | "next";
 }>;
 
-export type RemoteHermesServiceAuthReplayConsumer = (bindingKey: string) => boolean;
+export type RemoteHermesServiceAuthReplayConsumerInput = Readonly<{
+  bindingKey: string;
+  retainUntil: string;
+  signal: AbortSignal;
+}>;
+
+export type RemoteHermesServiceAuthReplayConsumer = (
+  input: RemoteHermesServiceAuthReplayConsumerInput,
+) => Promise<boolean>;
 
 function fail(code: RemoteHermesServiceAuthErrorCode): never {
   throw new RemoteHermesServiceAuthError(code);
@@ -200,6 +209,44 @@ function replayBindingKey(claims: RemoteHermesServiceAuthClaims): string {
   });
 }
 
+function isPromiseLike(value: unknown): value is PromiseLike<boolean> {
+  return (typeof value === "object" || typeof value === "function")
+    && value !== null
+    && "then" in value
+    && typeof value.then === "function";
+}
+
+async function consumeReplayBinding(
+  consume: RemoteHermesServiceAuthReplayConsumer,
+  claims: RemoteHermesServiceAuthClaims,
+): Promise<void> {
+  const controller = new AbortController();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timeoutResult = new Promise<never>((_resolve, reject) => {
+    timeout = setTimeout(() => {
+      controller.abort();
+      reject(new Error("replay consumption timed out"));
+    }, REMOTE_HERMES_SERVICE_AUTH_CONSUME_TIMEOUT_MS);
+  });
+
+  try {
+    if (typeof consume !== "function") fail("SERVICE_AUTH_REPLAY_REJECTED");
+    const pending = consume(Object.freeze({
+      bindingKey: replayBindingKey(claims),
+      retainUntil: claims.expiresAt,
+      signal: controller.signal,
+    }));
+    if (!isPromiseLike(pending)) fail("SERVICE_AUTH_REPLAY_REJECTED");
+    if (!await Promise.race([Promise.resolve(pending), timeoutResult])) {
+      fail("SERVICE_AUTH_REPLAY_REJECTED");
+    }
+  } catch {
+    fail("SERVICE_AUTH_REPLAY_REJECTED");
+  } finally {
+    if (timeout !== undefined) clearTimeout(timeout);
+  }
+}
+
 function selectVerificationKey(
   keyring: RemoteHermesServiceAuthVerificationKeyring,
   keyId: string,
@@ -236,13 +283,13 @@ export function createRemoteHermesServiceAssertion(input: {
   });
 }
 
-export function verifyRemoteHermesServiceAssertion(input: {
+export async function verifyRemoteHermesServiceAssertion(input: {
   assertion: unknown;
   consume: RemoteHermesServiceAuthReplayConsumer;
   expected: RemoteHermesServiceAuthClaims;
   keyring: RemoteHermesServiceAuthVerificationKeyring;
   now?: Date;
-}): VerifiedRemoteHermesServiceAssertion {
+}): Promise<VerifiedRemoteHermesServiceAssertion> {
   if (!isRecord(input.assertion)
     || !hasExactKeys(input.assertion, ["claims", "keyId", "signature"])
     || typeof input.assertion.keyId !== "string"
@@ -262,12 +309,6 @@ export function verifyRemoteHermesServiceAssertion(input: {
   if (canonicalJson(claims) !== canonicalJson(expected)) {
     fail("SERVICE_AUTH_BINDING_MISMATCH");
   }
-  try {
-    if (typeof input.consume !== "function" || !input.consume(replayBindingKey(claims))) {
-      fail("SERVICE_AUTH_REPLAY_REJECTED");
-    }
-  } catch {
-    fail("SERVICE_AUTH_REPLAY_REJECTED");
-  }
+  await consumeReplayBinding(input.consume, claims);
   return Object.freeze({ claims: Object.freeze({ ...claims }), keyId: selected.key.keyId, keySlot: selected.keySlot });
 }
