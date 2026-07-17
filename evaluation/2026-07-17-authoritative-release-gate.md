@@ -838,3 +838,32 @@ RLS approval status:
 Integration note:
 
 - This gate performed tests and documentation only; no database schema, RLS policy, migration, Storage operation, production data, or Supabase project state was changed.
+
+### 2026-07-18 current-head full serial test and frontend evidence refresh
+
+The current HEAD `b59cead62c4e54edf9eaafb7beae2cb36fa4188b` received a fresh frontend evidence refresh and full serial test rerun.
+
+Frontend audit refresh:
+
+- `npm.cmd run audit:frontend-consistency`
+  - Result: pass; 33 page files, 23 product components, 0 coverage issues, 0 violations, 0 important declarations.
+- `npm.cmd run build`
+  - Result: pass; 28/28 static pages generated.
+- `node .\scripts\frontend_consistency_browser_audit.mjs` against a controlled production server on port 3011
+  - Result: 111 screenshots, 111 successes, 0 failed rows, 0 recovered rows, 0 findings.
+- `npm.cmd test -- tests\frontend-route-coverage.test.ts`
+  - Result: 1 file / 39 tests passed.
+
+Full serial test:
+
+- Command: `npm.cmd test -- --maxWorkers=1 --no-file-parallelism --reporter=verbose --reporter=hanging-process`
+- Log: `evaluation/2026-07-18-authoritative-full-test-current-rerun.log` (local ignored log artifact)
+- Result: 188 files passed / 9 skipped; 2308 tests passed / 15 skipped; exit code 0.
+
+Skip note:
+
+- The skipped tests are production-matrix/browser tests gated by environment variables or a production build id. Their corresponding production/browser surfaces are covered by the focused gates above and the earlier ontology/document/frontend browser gates in this release file.
+
+Integration note:
+
+- The first full serial attempt on the same HEAD found one stale frontend route evidence identity. After regenerating the static/browser audit evidence, `tests\frontend-route-coverage.test.ts` passed and the full serial rerun exited 0.
