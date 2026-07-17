@@ -80,7 +80,7 @@ export interface ValidationResult {
 export interface HarnessResult {
   readonly ok: boolean;
   readonly mode: "dry-run" | "execute";
-  readonly executionStatus: "not_executed" | "blocked_no_live_adapter" | "executed_contract_test" | "executed_live";
+  readonly executionStatus: "not_executed" | "blocked_no_live_adapter" | "blocked_unreviewed_live_adapter" | "executed_contract_test";
   readonly adapterMode: "contract-test" | "live-reviewed";
   readonly adapterHooksProvided: boolean;
   readonly liveExecutorAvailable: boolean;

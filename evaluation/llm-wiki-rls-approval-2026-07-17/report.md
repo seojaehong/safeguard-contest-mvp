@@ -1,7 +1,10 @@
 # LLM Wiki Publication and RLS Approval Packet
 
 Date: 2026-07-17
-Base and audited HEAD: `de4103db`
+Audited source commit: `de4103db20be6ca2be738748143fb6a6fbd26693`
+HOLD remediation base: `a4c4004acccdccfb2f8f2a328d3cc63fe7da71a7`
+Packet commit: `null` in-file to avoid self-reference; resolve the containing
+commit with `git log -1 --format=%H -- evaluation/llm-wiki-rls-approval-2026-07-17/report.json`.
 Mode: current-head source audit and network-free contract validation
 Verdict: **RED / approval required / launch not proven**
 
@@ -105,9 +108,10 @@ tuples. Tenant operation memory is not public merely because it was anonymized.
 
 Manifest v3 models 224 network-free scenarios: 104 table denies and 8 Storage
 denies across A-to-B and B-to-A, plus 112 A-to-A/B-to-B controls. The repository
-has no live executor. Dry-run is RED with zero requests; execute without injected
-actor and service-role adapters fails closed. Fake test adapters validate the
-lifecycle only and do not prove deployed isolation.
+has no reviewed live-adapter identity registry. Dry-run is RED with zero requests;
+execute without hooks fails closed. Caller-supplied `adapterMode='live-reviewed'`
+also fails before any hook runs. Fake adapters validate the lifecycle only and
+can never set `launchProven=true` in this packet.
 
 ## Approval-required blockers
 
