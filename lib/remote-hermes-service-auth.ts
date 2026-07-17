@@ -1,6 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const REMOTE_HERMES_SERVICE_AUTH_VERSION = "remote-hermes-service-auth/v1" as const;
+export const REMOTE_HERMES_SERVICE_AUTH_MAX_TTL_MS = 5 * 60 * 1000;
+export const REMOTE_HERMES_SERVICE_AUTH_MAX_FUTURE_SKEW_MS = 30 * 1000;
 
 const HMAC_DOMAIN = "safeclaw-remote-hermes-service-auth/v1";
 const OPAQUE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u;
@@ -29,6 +31,7 @@ export type RemoteHermesServiceAuthErrorCode =
   | "SERVICE_AUTH_ASSERTION_EXPIRED"
   | "SERVICE_AUTH_ASSERTION_INVALID"
   | "SERVICE_AUTH_BINDING_MISMATCH"
+  | "SERVICE_AUTH_REPLAY_REJECTED"
   | "SERVICE_AUTH_KEY_INVALID"
   | "SERVICE_AUTH_SIGNATURE_INVALID";
 
@@ -80,6 +83,8 @@ export type VerifiedRemoteHermesServiceAssertion = Readonly<{
   keyId: string;
   keySlot: "current" | "next";
 }>;
+
+export type RemoteHermesServiceAuthReplayConsumer = (bindingKey: string) => boolean;
 
 function fail(code: RemoteHermesServiceAuthErrorCode): never {
   throw new RemoteHermesServiceAuthError(code);
@@ -155,6 +160,20 @@ function readClaims(value: unknown): RemoteHermesServiceAuthClaims {
   return value as RemoteHermesServiceAuthClaims;
 }
 
+function requireAssertionLifetime(claims: RemoteHermesServiceAuthClaims, now: Date): void {
+  const nowMs = now.getTime();
+  const issuedAtMs = Date.parse(claims.issuedAt);
+  const expiresAtMs = Date.parse(claims.expiresAt);
+  if (!Number.isFinite(nowMs)) fail("SERVICE_AUTH_ASSERTION_INVALID");
+  if (issuedAtMs > nowMs + REMOTE_HERMES_SERVICE_AUTH_MAX_FUTURE_SKEW_MS) {
+    fail("SERVICE_AUTH_ASSERTION_NOT_ACTIVE");
+  }
+  if (expiresAtMs <= nowMs) fail("SERVICE_AUTH_ASSERTION_EXPIRED");
+  if (expiresAtMs - issuedAtMs > REMOTE_HERMES_SERVICE_AUTH_MAX_TTL_MS) {
+    fail("SERVICE_AUTH_ASSERTION_INVALID");
+  }
+}
+
 function assertionPayload(claims: RemoteHermesServiceAuthClaims, keyId: string): string {
   return `${HMAC_DOMAIN}:${canonicalJson({ claims, keyId })}`;
 }
@@ -168,6 +187,17 @@ function sign(claims: RemoteHermesServiceAuthClaims, key: RemoteHermesServiceAut
 function signaturesEqual(actual: string, expected: string): boolean {
   if (!SHA256_HEX.test(actual) || !SHA256_HEX.test(expected)) return false;
   return timingSafeEqual(Buffer.from(actual, "hex"), Buffer.from(expected, "hex"));
+}
+
+function replayBindingKey(claims: RemoteHermesServiceAuthClaims): string {
+  return canonicalJson({
+    organizationId: claims.organizationId,
+    siteId: claims.siteId,
+    runId: claims.runId,
+    requestId: claims.requestId,
+    attemptId: claims.attemptId,
+    attemptEnvelopeDigest: claims.attemptEnvelopeDigest,
+  });
 }
 
 function selectVerificationKey(
@@ -198,6 +228,7 @@ export function createRemoteHermesServiceAssertion(input: {
   const claims = Object.freeze({ ...readClaims(input.claims) });
   const now = input.now ?? new Date();
   requireActiveKey(input.activeKey, now);
+  requireAssertionLifetime(claims, now);
   return Object.freeze({
     claims,
     keyId: input.activeKey.keyId,
@@ -207,6 +238,7 @@ export function createRemoteHermesServiceAssertion(input: {
 
 export function verifyRemoteHermesServiceAssertion(input: {
   assertion: unknown;
+  consume: RemoteHermesServiceAuthReplayConsumer;
   expected: RemoteHermesServiceAuthClaims;
   keyring: RemoteHermesServiceAuthVerificationKeyring;
   now?: Date;
@@ -223,14 +255,19 @@ export function verifyRemoteHermesServiceAssertion(input: {
   const selected = selectVerificationKey(input.keyring, input.assertion.keyId);
   const now = input.now ?? new Date();
   requireActiveKey(selected.key, now);
-  const nowMs = now.getTime();
-  if (nowMs < Date.parse(claims.issuedAt)) fail("SERVICE_AUTH_ASSERTION_NOT_ACTIVE");
-  if (nowMs >= Date.parse(claims.expiresAt)) fail("SERVICE_AUTH_ASSERTION_EXPIRED");
+  requireAssertionLifetime(claims, now);
   if (!signaturesEqual(input.assertion.signature, sign(claims, selected.key))) {
     fail("SERVICE_AUTH_SIGNATURE_INVALID");
   }
   if (canonicalJson(claims) !== canonicalJson(expected)) {
     fail("SERVICE_AUTH_BINDING_MISMATCH");
+  }
+  try {
+    if (typeof input.consume !== "function" || !input.consume(replayBindingKey(claims))) {
+      fail("SERVICE_AUTH_REPLAY_REJECTED");
+    }
+  } catch {
+    fail("SERVICE_AUTH_REPLAY_REJECTED");
   }
   return Object.freeze({ claims: Object.freeze({ ...claims }), keyId: selected.key.keyId, keySlot: selected.keySlot });
 }
