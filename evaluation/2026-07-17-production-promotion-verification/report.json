@@ -1,0 +1,77 @@
+{
+  "status": "production_ui_verified",
+  "mergeCommit": "880db7af65cae369a897264ba7b66e7566d80540",
+  "productionUrl": "https://www.safeclaw.kr",
+  "vercelDeployment": "JA6xh6QQivDWpjzwzpGE7QYkK7up",
+  "vercelStatus": "success",
+  "masterCiRun": 29545201500,
+  "masterCiStatus": "success",
+  "masterCi": {
+    "testFilesPassed": 177,
+    "testFilesSkipped": 9,
+    "testsPassed": 2151,
+    "testsSkipped": 17,
+    "typecheck": "pass",
+    "productionBuild": "pass",
+    "staticPages": 28
+  },
+  "ontology": {
+    "preDeployment": {
+      "status": "fail",
+      "minimumNodeTextContrast": 1.01
+    },
+    "postDeployment": {
+      "status": "pass",
+      "testFiles": 1,
+      "tests": 1,
+      "variants": 6,
+      "horizontalOverflow": 0,
+      "overlapPairs": 0,
+      "minimumControlHeight": 44
+    }
+  },
+  "liveProbes": {
+    "whyMobile": {
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "comparisonRows": 5
+    },
+    "workspaceBlankSubmit": {
+      "horizontalOverflow": 0,
+      "alertCount": 1,
+      "focusTarget": "field-command-input"
+    },
+    "knowledgeMobile": {
+      "horizontalOverflow": 0,
+      "taskTabs": 6,
+      "bodyScrollHeight": 1148
+    }
+  },
+  "postLaunchIntegration": {
+    "head": "dfc4efaa",
+    "siteBoundKnowledgeIngest": {
+      "status": "integrated",
+      "independentReview": "go",
+      "requiresOwnedSite": true,
+      "crossSiteConflict": "fail_closed",
+      "concurrentReingestConflict": "fail_closed"
+    },
+    "ontologyPromotionCommand": {
+      "status": "integrated",
+      "independentReview": "go",
+      "resultState": "approved_pending_persistence",
+      "requestSuppliedProvenanceTrusted": false,
+      "publicationMutation": false
+    },
+    "verification": {
+      "testFilesPassed": 4,
+      "testsPassed": 70,
+      "typecheck": "pass",
+      "productionBuild": "pass",
+      "staticPages": 28
+    }
+  },
+  "databaseChanges": false,
+  "providerActivation": false,
+  "ontologyPublicationMutation": false
+}
