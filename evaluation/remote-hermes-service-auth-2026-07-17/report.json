@@ -1,0 +1,24 @@
+{
+  "date": "2026-07-17",
+  "baseCommit": "8405a6cb6492207cf0c8a4380130e11a8e0b591e",
+  "scope": "db-free-remote-hermes-service-auth-p1-remediation",
+  "bounds": {
+    "maxTtlMs": 300000,
+    "maxFutureSkewMs": 30000
+  },
+  "tdd": {
+    "timeBoundRed": { "tests": 21, "failed": 1 },
+    "timeBoundGreen": { "tests": 21, "failed": 0 },
+    "replayRed": { "tests": 25, "failed": 3 },
+    "replayGreen": { "tests": 25, "failed": 0 },
+    "preservedOriginalTests": 20
+  },
+  "verification": {
+    "testFiles": 3,
+    "tests": 95,
+    "failures": 0,
+    "strictTypecheck": "passed"
+  },
+  "databaseChanges": false,
+  "productionRouteChanges": false
+}

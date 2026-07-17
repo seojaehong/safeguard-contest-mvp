@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  REMOTE_HERMES_SERVICE_AUTH_MAX_FUTURE_SKEW_MS,
+  REMOTE_HERMES_SERVICE_AUTH_MAX_TTL_MS,
   RemoteHermesServiceAuthError,
   createRemoteHermesServiceAssertion,
-  verifyRemoteHermesServiceAssertion,
+  verifyRemoteHermesServiceAssertion as verifyAssertion,
   type RemoteHermesServiceAuthClaims,
   type RemoteHermesServiceAuthKey,
   type RemoteHermesServiceAuthVerificationKeyring,
@@ -58,7 +60,108 @@ function expectCode(operation: () => unknown, code: RemoteHermesServiceAuthError
   expect(operation).toThrowError(expect.objectContaining({ code }));
 }
 
+function verifyRemoteHermesServiceAssertion(
+  input: Omit<Parameters<typeof verifyAssertion>[0], "consume">,
+) {
+  return verifyAssertion({ ...input, consume: () => true });
+}
+
 describe("Remote Hermes service authentication", () => {
+  it("rejects creation outside the bounded assertion lifetime", () => {
+    expect(REMOTE_HERMES_SERVICE_AUTH_MAX_TTL_MS).toBe(5 * 60 * 1000);
+    expect(REMOTE_HERMES_SERVICE_AUTH_MAX_FUTURE_SKEW_MS).toBe(30 * 1000);
+
+    expectCode(() => createRemoteHermesServiceAssertion({
+      claims: claims({
+        issuedAt: new Date(NOW.getTime() + REMOTE_HERMES_SERVICE_AUTH_MAX_FUTURE_SKEW_MS + 1).toISOString(),
+        expiresAt: new Date(NOW.getTime() + REMOTE_HERMES_SERVICE_AUTH_MAX_FUTURE_SKEW_MS + 2).toISOString(),
+      }),
+      activeKey: key("current-key"),
+      now: NOW,
+    }), "SERVICE_AUTH_ASSERTION_NOT_ACTIVE");
+
+    expectCode(() => createRemoteHermesServiceAssertion({
+      claims: claims({ expiresAt: NOW.toISOString() }),
+      activeKey: key("current-key"),
+      now: NOW,
+    }), "SERVICE_AUTH_ASSERTION_EXPIRED");
+
+    expectCode(() => createRemoteHermesServiceAssertion({
+      claims: claims({
+        issuedAt: NOW.toISOString(),
+        expiresAt: new Date(NOW.getTime() + REMOTE_HERMES_SERVICE_AUTH_MAX_TTL_MS + 1).toISOString(),
+      }),
+      activeKey: key("current-key"),
+      now: NOW,
+    }), "SERVICE_AUTH_ASSERTION_INVALID");
+  });
+
+  it("enforces the bounded assertion lifetime during verification", () => {
+    const assertion = createRemoteHermesServiceAssertion({
+      claims: claims(),
+      activeKey: key("current-key"),
+      now: NOW,
+    });
+    const overlong = {
+      ...assertion,
+      claims: {
+        ...assertion.claims,
+        expiresAt: new Date(
+          Date.parse(assertion.claims.issuedAt) + REMOTE_HERMES_SERVICE_AUTH_MAX_TTL_MS + 1,
+        ).toISOString(),
+      },
+    };
+
+    expectCode(() => verifyRemoteHermesServiceAssertion({
+      assertion: overlong,
+      expected: overlong.claims,
+      keyring: keyring(),
+      now: NOW,
+    }), "SERVICE_AUTH_ASSERTION_INVALID");
+  });
+
+  it("consumes the full tenant attempt binding exactly once", () => {
+    const assertion = createRemoteHermesServiceAssertion({
+      claims: claims(),
+      activeKey: key("current-key"),
+      now: NOW,
+    });
+    const consumed = new Set<string>();
+    const consume = (bindingKey: string): boolean => {
+      if (consumed.has(bindingKey)) return false;
+      consumed.add(bindingKey);
+      return true;
+    };
+    const input = { assertion, expected: claims(), keyring: keyring(), now: NOW, consume };
+
+    expect(verifyAssertion(input).keyId).toBe("current-key");
+    expectCode(() => verifyAssertion(input), "SERVICE_AUTH_REPLAY_REJECTED");
+    expect([...consumed]).toEqual([
+      "{\"attemptEnvelopeDigest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"attemptId\":\"attempt-a\",\"organizationId\":\"org-a\",\"requestId\":\"request-a\",\"runId\":\"run-a\",\"siteId\":\"site-a\"}",
+    ]);
+  });
+
+  it.each([
+    ["returns false", (): boolean => false],
+    ["throws", (): boolean => { throw new Error("store detail must not escape"); }],
+  ] as const)("fails closed when replay consumption %s", (_case, consume) => {
+    const assertion = createRemoteHermesServiceAssertion({
+      claims: claims(),
+      activeKey: key("current-key"),
+      now: NOW,
+    });
+
+    let caught: unknown;
+    try {
+      verifyAssertion({ assertion, expected: claims(), keyring: keyring(), now: NOW, consume });
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toMatchObject({ code: "SERVICE_AUTH_REPLAY_REJECTED" });
+    expect(String(caught)).not.toContain("store detail");
+  });
+
   it("signs with the active key and verifies against the current verify-only key", () => {
     const active = key("current-key");
     const assertion = createRemoteHermesServiceAssertion({ claims: claims(), activeKey: active, now: NOW });
@@ -192,9 +295,9 @@ describe("Remote Hermes service authentication", () => {
 
   it("rejects assertions outside their issuedAt and expiresAt window", () => {
     const notYetIssued = createRemoteHermesServiceAssertion({
-      claims: claims({ issuedAt: "2026-07-17T06:00:01.000Z", expiresAt: "2026-07-17T06:01:00.000Z" }),
+      claims: claims({ issuedAt: "2026-07-17T06:00:30.001Z", expiresAt: "2026-07-17T06:01:00.000Z" }),
       activeKey: key("current-key"),
-      now: new Date("2026-07-17T06:00:02.000Z"),
+      now: new Date("2026-07-17T06:00:31.000Z"),
     });
     const expired = createRemoteHermesServiceAssertion({
       claims: claims({ issuedAt: "2026-07-17T05:58:00.000Z", expiresAt: NOW.toISOString() }),
