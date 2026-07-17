@@ -1,0 +1,27 @@
+{
+  "date": "2026-07-17",
+  "baseCommit": "de4103db20be6ca2be738748143fb6a6fbd26693",
+  "verifiedIntegrationHead": "4d961e6a",
+  "databaseMutations": 0,
+  "migrationFilesAdded": 0,
+  "focusedTests": {
+    "filesPassed": 7,
+    "testsPassed": 122,
+    "failed": 0
+  },
+  "typecheck": "pass",
+  "build": {
+    "status": "pass",
+    "staticPagesGenerated": 28,
+    "staticPagesExpected": 28
+  },
+  "independentReview": {
+    "llmWikiRls": "pass",
+    "remoteHermesTransport": "pass",
+    "riskRowsEditor": "pass"
+  },
+  "activation": {
+    "remoteHermes": "disabled_pending_durable_ledger_and_wiring",
+    "llmWikiPublication": "approval_required"
+  }
+}
