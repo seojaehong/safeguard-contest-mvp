@@ -133,3 +133,22 @@ Fresh live probe:
 - Result: 0 hits on every probed route.
 
 This proves the previously cited internal implementation terminology is not visible on the current production route set.
+
+### Recipient portal and foreign-worker delivery gate
+
+Current production code includes a worker-facing recipient confirmation page at `/share/[sessionId]`. The previous report that treated the recipient portal as unimplemented is stale for the current HEAD.
+
+Fresh focused gates:
+
+- `npm.cmd test -- tests\workflow-share-client.test.ts tests\workpack-share-authority-routes.test.ts tests\workflow-share-panel-behavior.test.ts tests\share-recipient-portal-browser.test.ts`
+  - Result: 4 files / 68 tests passed.
+- `npm.cmd test -- tests\workspace-share-mobile-browser.test.ts`
+  - Result: 1 file / 1 test passed.
+
+Verified contract:
+
+- The manager language selector is preview-only.
+- Server dispatch derives canonical per-recipient message variants from the stored workpack and active share-session snapshot.
+- Foreign recipient DTOs fail closed on Korean text leaks, unknown languages, malformed stored language entries, forged message variants, and SMS bodies above the relay-safe length budget.
+- The invited recipient page renders on mobile without horizontal overflow, preserves 44px controls, preselects the stored worker language, and posts `{ workerId, displayName, languageCode }` for confirmation.
+- Actual provider dispatch remains gated until the persistent idempotency/storage migration receives explicit approval.
