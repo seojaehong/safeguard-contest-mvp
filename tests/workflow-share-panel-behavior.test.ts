@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import {
+  buildCanonicalRecipientMessageVariants,
+  resolveWorkflowMessagePreview
+} from "@/lib/workflow-share-client";
+
 import {
   buildProviderDispatchIdempotencyKey,
   buildShareEvidenceSummary,
@@ -13,6 +19,53 @@ import {
 } from "@/components/WorkflowSharePolicy";
 
 describe("workflow share panel behavior", () => {
+  it("keeps canonical recipient variants unchanged when the manager changes preview language", () => {
+    const data = buildSampleWorkpack();
+    const recipientLanguageCodes = ["ko", "vi"];
+    const beforePreviewChange = buildCanonicalRecipientMessageVariants({ data, recipientLanguageCodes });
+
+    expect(resolveWorkflowMessagePreview(data, "manager")).toBe(data.deliverables.kakaoMessage);
+    expect(resolveWorkflowMessagePreview(data, "foreign:vi")).toContain("Tiếng Việt");
+
+    const afterPreviewChange = buildCanonicalRecipientMessageVariants({ data, recipientLanguageCodes });
+    expect(afterPreviewChange).toEqual(beforePreviewChange);
+    expect(afterPreviewChange).toMatchObject({
+      ok: true,
+      messageVariants: {
+        ko: data.deliverables.kakaoMessage.trim(),
+        vi: expect.stringContaining("Tiếng Việt")
+      }
+    });
+    if (afterPreviewChange.ok) {
+      expect(afterPreviewChange.messageVariants.vi).not.toMatch(/[가-힣]/u);
+    }
+  });
+
+  it("fails closed for a malformed language code stored in the workpack", () => {
+    const data = buildSampleWorkpack();
+    const malformedCode = "vi<script>";
+    const malformed = {
+      ...data,
+      deliverables: {
+        ...data.deliverables,
+        foreignWorkerLanguages: [{
+          ...data.deliverables.foreignWorkerLanguages[0],
+          code: malformedCode
+        }]
+      }
+    };
+
+    expect(buildCanonicalRecipientMessageVariants({
+      data: malformed,
+      recipientLanguageCodes: [malformedCode]
+    })).toEqual({
+      ok: false,
+      invalidLanguageCodes: [malformedCode],
+      koreanLeakLanguageCodes: [],
+      malformedFields: []
+    });
+  });
+
   it("clears result, session, and log evidence when the target or workpack scope changes", () => {
     const targetSignature = buildWorkflowShareTargetSignature([{
       displayName: "Worker One",

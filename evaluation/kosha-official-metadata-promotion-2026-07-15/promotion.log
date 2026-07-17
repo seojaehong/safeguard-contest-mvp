@@ -1,0 +1,14 @@
+generated_at=2026-07-15T00:30:30.372679+00:00
+source_snapshot_id=976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282
+snapshot_id=c10572ee3531d9c66ca455265bf0d599f5eae5b01b8113daaa71ad5f9012a129
+network_timeout_seconds=20.0
+network_retries=1
+candidates=234
+official_rows=1039
+verified=212
+failures=22
+failure_counts=official-pdf-hash-mismatch=22
+category_reconciliation=A=115/115 duplicates=0, B=233/233 duplicates=0, C=234/234 duplicates=0, D=76/76 duplicates=0, E=381/381 duplicates=0
+page_shards=13
+launch_ready=false
+trusted_registry_populated=false

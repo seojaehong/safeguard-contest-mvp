@@ -150,7 +150,24 @@ describe("Next MCP route reviewed task binding", () => {
     expect(parseToolPayload(result)).toMatchObject({
       reviewTask: "고소작업",
       docpack: {
-        phaseAProduct: { chainId: "work-at-height-fall" },
+        phaseAProduct: {
+          chainId: "work-at-height-fall",
+          authorityState: "review_required",
+          task: { nodeId: "Task_work_at_height" },
+          hazard: { nodeId: "Hazard_추락" },
+          provenance: expect.objectContaining({
+            controlNodeIds: [
+              "Control_작업발판_설치_추락방호망_설치",
+              "Control_개구부_단부_안전난간_덮개_설치",
+              "Control_안전대_부착설비_지지로프_설치",
+            ],
+            lawCitedUids: [
+              "law:산업안전보건기준에 관한 규칙:제42조",
+              "law:산업안전보건기준에 관한 규칙:제43조",
+              "law:산업안전보건기준에 관한 규칙:제44조",
+            ],
+          }),
+        },
       },
     });
   });

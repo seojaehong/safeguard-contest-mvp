@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { contextBlock, foreignWorkerPrompt, freeFormPrompt, parseForeign, parseFree, persona } from "@/lib/ai-deliverables";
 import { ACCIDENT_REPORT_TEMPLATE } from "@/lib/safety-contacts";
+import { buildPhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
 
 const baseCtx = {
   question: "질문",
@@ -33,6 +34,26 @@ describe("persona", () => {
   it("keeps hazard discovery inside the DB harness evidence packet", () => {
     expect(persona()).toContain("위험요인은 DB 하네스·근거 후보 안에서 구체화");
     expect(persona()).toContain("근거 밖 새 위험요인은 만들지 말고");
+  });
+
+  it("limits legal citations to candidates in the immutable packet", () => {
+    expect(persona()).toContain("불변 생성 근거 패킷에 제공된 후보만 인용");
+    expect(persona()).toContain("후보가 없으면 조문 번호를 만들지 않는다");
+    expect(persona()).not.toContain("제38조·제39조");
+  });
+
+  it("places Phase A grounding before the deliverable persona", () => {
+    const grounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_registered",
+      evidencePack: null,
+    });
+    const prompt = persona(grounding);
+
+    expect(prompt).toContain("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>");
+    expect(prompt.indexOf("<<<BEGIN_PHASE_A_UNTRUSTED_EVIDENCE_JSON>>>")).toBeLessThan(
+      prompt.indexOf("당신은 한국 산업안전기사"),
+    );
+    expect(prompt).toContain('"groundingStatus":"missing"');
   });
 });
 

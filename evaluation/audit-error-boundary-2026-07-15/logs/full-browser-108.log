@@ -1,0 +1,15 @@
+{
+  "routes": 32,
+  "routeRows": 96,
+  "workspaceThemeRows": 6,
+  "specialSurfaceRows": 4,
+  "generatedSurfaceRows": 2,
+  "screenshots": 108,
+  "successes": 107,
+  "failedRows": 1,
+  "recoveredRows": 0,
+  "findingCount": 1,
+  "failures": 1,
+  "elapsedMs": 118332
+}
+/ontology tablet-1024: 124px horizontal overflow

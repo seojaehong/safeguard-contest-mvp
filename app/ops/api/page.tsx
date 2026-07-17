@@ -3,6 +3,10 @@ import { getLatestDryrunSnapshot } from "@/lib/dryrun-status";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { toDryrunPresentationSnapshot } from "@/lib/web-safe-presentation";
+import {
+  assessEngineRuntimeReadiness,
+  type EngineRuntimeReadiness,
+} from "@/lib/engine-runtime-readiness-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +14,48 @@ export const dynamic = "force-dynamic";
 export const metadata = {
   robots: { index: false, follow: false }
 };
+
+function enginePresentation(readiness: EngineRuntimeReadiness): {
+  mode: string;
+  state: string;
+  detail: string;
+} {
+  const mode = readiness.requestedMode === "experimental-hermes"
+    ? "Hermes 로컬 검증"
+    : readiness.requestedMode === "remote-hermes"
+      ? "Hermes 원격 계약"
+      : readiness.requestedMode === "local-openclaw"
+        ? "OpenClaw 로컬 검증"
+        : readiness.requestedMode === "unsupported"
+          ? "지원하지 않는 설정"
+          : "연결 전";
+  if (readiness.state === "disabled") {
+    return {
+      mode,
+      state: "비활성",
+      detail: "SafeClaw 근거·도구는 유지되며, 별도 실행 엔진은 연결하지 않은 상태입니다.",
+    };
+  }
+  if (readiness.state === "configuration-required") {
+    return {
+      mode,
+      state: "설정 점검 필요",
+      detail: `${readiness.issueCodes.length.toLocaleString("ko-KR")}개 실행 경계를 확인해야 합니다. 비밀값은 이 화면에 표시하지 않습니다.`,
+    };
+  }
+  if (readiness.state === "remote-contract-ready") {
+    return {
+      mode,
+      state: "실행 계층 연결 필요",
+      detail: "원격 계약은 확인됐지만 신뢰 전송 계층과 지속 원장이 연결되지 않아 실행하지 않습니다.",
+    };
+  }
+  return {
+    mode,
+    state: "로컬 검증 단계",
+    detail: "설정은 갖춰졌으며, 요청마다 OAuth·도구 차단·조직·현장 연결을 다시 확인합니다.",
+  };
+}
 
 export default async function ApiOperationsPage() {
   let snapshot: ReturnType<typeof toDryrunPresentationSnapshot> = null;
@@ -19,6 +65,7 @@ export default async function ApiOperationsPage() {
     console.error("API operations dry-run snapshot presentation read failed", error);
   }
   const safetyDb = await getSafetyReferenceStats();
+  const engine = enginePresentation(assessEngineRuntimeReadiness(process.env));
 
   return (
     <SafeClawModuleShell
@@ -40,6 +87,17 @@ export default async function ApiOperationsPage() {
         <span>운영 점검</span>
         <h2>{snapshot?.qualityNote || "최근 점검 결과가 없습니다."}</h2>
         <p>이 화면은 제출·운영용 요약만 보여줍니다. 원문 JSON, 내부 엔드포인트, 적재 경로는 관리자 검증 산출물에서만 확인합니다.</p>
+      </section>
+      <section className="safeclaw-module-grid four" aria-label="에이전트 엔진 운영 상태">
+        <article><span>실행 엔진</span><strong>{engine.mode}</strong></article>
+        <article><span>연결 상태</span><strong>{engine.state}</strong></article>
+        <article><span>근거 권한</span><strong>SafeClaw 고정</strong></article>
+        <article><span>사람 확인</span><strong>항상 필요</strong></article>
+      </section>
+      <section className="safeclaw-module-panel">
+        <span>에이전트 실행 경계</span>
+        <h2>{engine.state}</h2>
+        <p>{engine.detail}</p>
       </section>
       <section className="safeclaw-module-grid four">
         <article><span>안전 지식 DB</span><strong>{safetyDb.ok ? "연결됨" : "점검 필요"}</strong></article>

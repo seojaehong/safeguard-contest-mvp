@@ -121,7 +121,7 @@ async function verifyXlsx() {
     ok: result.ok && missingHeaders.length === 0,
     httpStatus: result.status,
     contentType: result.contentType,
-    filePath,
+    filePath: path.relative(repoRoot, filePath).replaceAll("\\", "/"),
     bytes: result.buffer.length,
     sheetName: worksheet.name,
     expectedHeaderCount: expectedHeaders.length,
@@ -140,7 +140,7 @@ async function verifyPdf() {
     ok: result.ok && result.contentType.includes("application/pdf") && magic === "%PDF-" && !looksLikeHtml,
     httpStatus: result.status,
     contentType: result.contentType,
-    filePath,
+    filePath: path.relative(repoRoot, filePath).replaceAll("\\", "/"),
     bytes: result.buffer.length,
     magic,
     looksLikeHtml
@@ -152,7 +152,8 @@ function verifySourceContracts() {
   const typesSource = fs.readFileSync(path.join(repoRoot, "lib", "types.ts"), "utf8");
   const xlsxSource = fs.readFileSync(path.join(repoRoot, "lib", "xlsx-builder.ts"), "utf8");
   return {
-    tbmRiskLinksGenerated: searchSource.includes("tbmRiskLinks = buildTbmRiskLinks"),
+    tbmRiskLinksGenerated: searchSource.includes("export function buildTbmRiskLinks")
+      && searchSource.includes("buildTbmRiskLinks(structuredRiskRows, weather.summary)"),
     tbmRiskLinksExposed: typesSource.includes("tbmRiskLinks?: TbmRiskLink[]"),
     xlsxUsesKoshasHeaders: expectedHeaders.every((header) => xlsxSource.includes(header))
   };

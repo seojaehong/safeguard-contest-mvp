@@ -21,7 +21,6 @@ import { runAsk } from "@/lib/search";
 import { fetchWeatherSignal } from "@/lib/weather";
 import { fetchAccidentCases } from "@/lib/accident-cases";
 import { createRateLimiter } from "@/lib/rate-limit";
-import { createLogger } from "@/lib/logger";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import {
   createSupabaseMcpWorkpackRepository,
@@ -34,13 +33,12 @@ import {
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "@/lib/sif-embedding-corpus";
-import type { HarnessImprovement, HarnessWorkpackMemory } from "@/lib/db-harness";
+import { loadTenantHarnessMemoryForMcp } from "@/lib/tenant-harness-memory";
 import { querySafetyKnowledge } from "@/lib/ontology/knowledge-tool";
 import { reviewDocpack } from "@/lib/ontology/qa-review-tool";
 import {
   isMcpEnabled,
   resolveMcpAuth,
-  type McpAuthContext,
 } from "@/lib/mcp-auth";
 import { registerScopedTool } from "@/lib/mcp-scoped-tool";
 import {
@@ -54,11 +52,12 @@ import {
   validateCitations,
 } from "@/lib/mcp-tools";
 
-const log = createLogger("mcp-route");
-
 const generateSafetyDocpackHandler = createGenerateSafetyDocpackHandler({
   defaultMode: "full",
-  generateResponse: (question, mode) => runAsk(question, { aiMode: mode }),
+  generateResponse: (question, mode, phaseAGrounding) => runAsk(question, {
+    aiMode: mode,
+    phaseAGrounding,
+  }),
   queryKnowledge: querySafetyKnowledge,
   getWorkpackRepository: () => {
     const client = createSupabaseAdminClient();
@@ -69,7 +68,10 @@ const generateSafetyDocpackHandler = createGenerateSafetyDocpackHandler({
 
 const generateReviewedSafetyDocpackHandler = createGenerateReviewedSafetyDocpackHandler({
   defaultMode: "full",
-  generateResponse: (question, mode) => runAsk(question, { aiMode: mode }),
+  generateResponse: (question, mode, phaseAGrounding) => runAsk(question, {
+    aiMode: mode,
+    phaseAGrounding,
+  }),
   queryKnowledge: querySafetyKnowledge,
   reviewResponse: reviewDocpack,
   persistResponse: async (authContext, response) => {
@@ -91,158 +93,10 @@ const generateReviewedSafetyDocpackHandler = createGenerateReviewedSafetyDocpack
   getGenerationEvidenceSecret: () => process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
 });
 
-type SupabaseAdminClient = NonNullable<ReturnType<typeof createSupabaseAdminClient>>;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function compactText(value: string, maxLength = 96): string {
-  const normalized = value.replace(/\s+/g, " ").trim();
-  if (normalized.length <= maxLength) return normalized;
-  return `${normalized.slice(0, maxLength - 1).trimEnd()}…`;
-}
-
-function readStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
-}
-
-function readOptionalPayloadString(value: unknown, key: string): string | undefined {
-  if (!isRecord(value)) return undefined;
-  const text = value[key];
-  return typeof text === "string" && text.trim() ? compactText(text, 120) : undefined;
-}
-
-function normalizeImprovementSourceType(value: string | null): HarnessImprovement["sourceType"] {
-  if (value === "manual" || value === "photo_analysis" || value === "operator_note") return value;
-  return "operator_note";
-}
-
-function reflectedDocumentsFromDeliverables(deliverables: unknown): string[] {
-  if (!isRecord(deliverables)) return [];
-  const mappings = [
-    ["riskAssessmentDraft", "위험성평가표"],
-    ["tbmBriefing", "TBM 브리핑"],
-    ["tbmLogDraft", "TBM 기록"],
-    ["workPlanDraft", "작업계획서"],
-    ["safetyEducationRecordDraft", "안전보건교육"],
-  ] as const;
-  return mappings
-    .filter(([key]) => typeof deliverables[key] === "string" && deliverables[key].trim().length > 0)
-    .map(([, label]) => label);
-}
-
-function statusLabelFromWorkpack(status: unknown): string {
-  if (isRecord(status) && typeof status.summary === "string" && status.summary.trim()) {
-    return compactText(status.summary, 72);
-  }
-  if (isRecord(status) && typeof status.label === "string" && status.label.trim()) {
-    return compactText(status.label, 72);
-  }
-  return "저장된 작업팩";
-}
-
-function tokenizeForMemorySearch(value: string): string[] {
-  const stopwords = new Set(["작업", "현장", "안전", "문서", "오늘", "작업자", "관리", "확인"]);
-  return Array.from(new Set(
-    value
-      .replace(/[^\p{L}\p{N}\s]/gu, " ")
-      .split(/\s+/)
-      .map((term) => term.trim())
-      .filter((term) => term.length >= 2 && !stopwords.has(term))
-  ));
-}
-
-function scoreWorkpackMemory(question: string, searchTerms: string[]): number {
-  if (!searchTerms.length) return 0;
-  const normalized = question.toLowerCase();
-  return searchTerms.reduce((score, term) => (
-    normalized.includes(term.toLowerCase()) ? score + 1 : score
-  ), 0);
-}
-
 function uniqueReferences(items: SafetyReferenceItem[]): SafetyReferenceItem[] {
   const byId = new Map<string, SafetyReferenceItem>();
   for (const item of items) byId.set(item.id, item);
   return Array.from(byId.values());
-}
-
-async function loadHarnessWorkpackMemory(
-  client: SupabaseAdminClient,
-  authContext: McpAuthContext | null,
-  question: string
-): Promise<HarnessWorkpackMemory[]> {
-  if (!authContext?.siteId) return [];
-  try {
-    const { data, error } = await client
-      .from("workpacks")
-      .select("id,question,deliverables,status,created_at")
-      .eq("site_id", authContext.siteId)
-      .order("created_at", { ascending: false })
-      .limit(20);
-
-    if (error) {
-      log.warn("harness workpack memory unavailable", error);
-      return [];
-    }
-
-    const searchTerms = tokenizeForMemorySearch(question);
-    return (data || [])
-      .map((row) => ({
-        id: row.id,
-        question: row.question,
-        generatedAt: row.created_at,
-        reflectedDocuments: reflectedDocumentsFromDeliverables(row.deliverables),
-        statusLabel: statusLabelFromWorkpack(row.status),
-        score: scoreWorkpackMemory(row.question, searchTerms),
-      }))
-      .sort((a, b) => b.score - a.score || b.generatedAt.localeCompare(a.generatedAt))
-      .slice(0, 5)
-      .map((memory) => ({
-        id: memory.id,
-        question: memory.question,
-        generatedAt: memory.generatedAt,
-        reflectedDocuments: memory.reflectedDocuments,
-        statusLabel: memory.statusLabel,
-      }));
-  } catch (error) {
-    log.warn("harness workpack memory load failed", error);
-    return [];
-  }
-}
-
-async function loadHarnessImprovementMemory(
-  client: SupabaseAdminClient,
-  authContext: McpAuthContext | null
-): Promise<HarnessImprovement[]> {
-  if (!authContext?.siteId) return [];
-  try {
-    const { data, error } = await client
-      .from("workpack_improvements")
-      .select("id,task_label,hazard_label,improvement_text,reflected_documents,source_type,analysis_payload,created_at")
-      .eq("site_id", authContext.siteId)
-      .order("created_at", { ascending: false })
-      .limit(12);
-
-    if (error) {
-      log.warn("harness improvement memory unavailable", error);
-      return [];
-    }
-
-    return (data || []).map((row) => ({
-      id: row.id,
-      taskLabel: row.task_label,
-      hazardLabel: row.hazard_label,
-      improvementText: row.improvement_text,
-      reflectedDocuments: readStringArray(row.reflected_documents),
-      sourceType: normalizeImprovementSourceType(row.source_type),
-      visionSummary: readOptionalPayloadString(row.analysis_payload, "summary"),
-      ocrText: readOptionalPayloadString(row.analysis_payload, "ocrText"),
-    }));
-  } catch (error) {
-    log.warn("harness improvement memory load failed", error);
-    return [];
-  }
 }
 
 export function registerTools(server: McpServer): void {
@@ -263,15 +117,10 @@ export function registerTools(server: McpServer): void {
           searchSafetyReferences({ query: question, limit: 6, evidenceRole: "supporting" }),
         ]);
 
-        const client = createSupabaseAdminClient();
-        let workpackMemory: HarnessWorkpackMemory[] = [];
-        let improvementMemory: HarnessImprovement[] = [];
-        if (client) {
-          [workpackMemory, improvementMemory] = await Promise.all([
-            loadHarnessWorkpackMemory(client, authContext, question),
-            loadHarnessImprovementMemory(client, authContext),
-          ]);
-        }
+        const tenantMemory = await loadTenantHarnessMemoryForMcp(
+          authContext,
+          createSupabaseAdminClient,
+        );
 
         const result = buildHarnessAgentResult({
           question,
@@ -280,8 +129,8 @@ export function registerTools(server: McpServer): void {
             ...sif.items.filter(isEmbeddableSifReferenceItem),
             ...supporting.items,
           ]),
-          improvements: improvementMemory,
-          workpackMemory,
+          tenantMemory,
+          memoryStages: tenantMemory.stages,
           referenceSearch: [
             summarizeHarnessSearch("direct_evidence", direct),
             summarizeHarnessSearch("sif_cases", sif),

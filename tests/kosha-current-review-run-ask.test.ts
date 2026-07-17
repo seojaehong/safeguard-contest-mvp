@@ -4,7 +4,9 @@ import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
 import type { AiDeliverables, AiDeliverablesDiagnostics, AiMode, GenerateAllOptions } from "@/lib/ai-deliverables";
 import type { RiskAssessmentRow } from "@/lib/risk-assessment-schema";
 import { runAsk } from "@/lib/search";
+import { buildPhaseAGenerationGrounding } from "@/lib/ontology/evidence-chain";
 import type { SafetyReferenceItem, SafetyReferenceSearchResult } from "@/lib/safety-reference-catalog";
+import { loadBundledExactKoshaReference } from "@/lib/safety-reference-catalog-server";
 import type { AskResponse, SearchResult, TbmRiskLink } from "@/lib/types";
 
 const mocks = vi.hoisted(() => ({
@@ -36,8 +38,8 @@ vi.mock("@/lib/ai-deliverables", async (importOriginal) => {
   };
 });
 
-vi.mock("@/lib/safety-reference-catalog", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@/lib/safety-reference-catalog")>();
+vi.mock("@/lib/safety-reference-catalog-server", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/safety-reference-catalog-server")>();
   return { ...original, searchSafetyReferences: mocks.searchSafetyReferences };
 });
 
@@ -387,6 +389,76 @@ describe("current-base runAsk retrieval provenance", () => {
     vi.restoreAllMocks();
   });
 
+  it("passes the identical Phase A grounding to legal evidence mapping", async () => {
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "review_required",
+      evidencePack: null,
+    });
+
+    await runAsk("고소작업", { aiMode: "enhanced", phaseAGrounding });
+
+    expect(mocks.enhanceLegalEvidenceMappings).toHaveBeenCalledWith(
+      "고소작업",
+      expect.any(Array),
+      phaseAGrounding,
+    );
+  }, 30_000);
+
+  it("fails closed in runAsk when the answer provider rejects a Phase A request", async () => {
+    const direct = retrievalReference("phase-a-answer-failure-direct", "ranked");
+    mocks.searchSafetyReferences.mockResolvedValue(searchResult("ranked-rpc", [direct]));
+    mocks.generateAnswer.mockRejectedValue(new Error("forced Phase A provider failure"));
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_registered",
+      evidencePack: null,
+    });
+
+    const response = await runAsk("고소작업", { aiMode: "enhanced", phaseAGrounding });
+
+    expect(response.answer).toBe([
+      "핵심 판단: 현장 확인 필요",
+      "즉시 조치: 현장 확인 필요",
+      "실무 체크포인트: 현장 확인 필요",
+    ].join("\n"));
+    const canonicalText = response.answer;
+    const proseDeliverables = [
+      response.deliverables.workpackSummaryDraft,
+      response.deliverables.riskAssessmentDraft,
+      response.deliverables.workPlanDraft,
+      response.deliverables.tbmBriefing,
+      response.deliverables.tbmLogDraft,
+      response.deliverables.safetyEducationRecordDraft,
+      response.deliverables.emergencyResponseDraft,
+      response.deliverables.photoEvidenceDraft,
+      response.deliverables.foreignWorkerBriefing,
+      response.deliverables.foreignWorkerTransmission,
+      response.deliverables.kakaoMessage,
+    ];
+    expect(proseDeliverables.every((value) => value === canonicalText)).toBe(true);
+    expect(JSON.stringify(response.deliverables)).not.toContain(direct.title);
+    expect(JSON.stringify(response.deliverables)).not.toContain("기상청");
+    expect(JSON.stringify(response.deliverables)).not.toContain("KOSHA 보강");
+    expect(JSON.stringify(response.deliverables)).not.toContain("외국인 근로자 공지");
+    expect(response.riskSummary).toEqual({
+      title: "현장 확인 필요",
+      riskLevel: "현장 확인 필요",
+      topRisk: "현장 확인 필요",
+      immediateActions: ["현장 확인 필요"],
+    });
+    expect(response.practicalPoints).toEqual(["현장 확인 필요"]);
+    expect(JSON.stringify({
+      riskSummary: response.riskSummary,
+      practicalPoints: response.practicalPoints,
+    })).not.toContain(direct.title);
+    expect(response.generationTrace?.answer.provider).toBe("safeclaw");
+    expect(response.generationTrace?.fallbackUsed).toBe(true);
+    expect(response.structured?.riskAssessmentRows).toEqual([]);
+    expect(response.deliverables.workPlanStructured).toBeUndefined();
+    expect(response.deliverables.tbmBriefingStructured).toBeUndefined();
+    expect(response.deliverables.tbmLogStructured).toBeUndefined();
+    expect(response.deliverables.educationRecordStructured).toBeUndefined();
+  }, 30_000);
+
   it("propagates final local-ranked items through runAsk and the DB packet", async () => {
     mocks.searchSafetyReferences.mockResolvedValue(searchResult(
       "local-ranked",
@@ -423,7 +495,7 @@ describe("current-base runAsk retrieval provenance", () => {
     });
   }, 30_000);
 
-  it("excludes stale D-C-13 when the local corpus is unavailable", async () => {
+  it("preserves the server exclusion of stale D-C-13 when the local corpus is unavailable", async () => {
     const remote = retrievalReference("remote-ranked-guide", "ranked");
     const local = retrievalReference("d-c-13-current-unverified", "local-ranked");
     remote.title = "외벽 작업발판 안전난간 직접 근거";
@@ -450,7 +522,7 @@ describe("current-base runAsk retrieval provenance", () => {
         return searchResult("ranked-rpc", [remote], options.query);
       }
       if (options.itemType === "technical-guideline") {
-        return searchResult("local-ranked", [local], options.query);
+        return searchResult("unconfigured", [], options.query);
       }
       return searchResult("unconfigured", [], options.query);
     });
@@ -478,8 +550,12 @@ describe("current-base runAsk retrieval provenance", () => {
     const generationInputs = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.map(([input]) => input as {
       koshaLines?: string[];
       koshaPrimaryRefs?: Array<{ title: string }>;
+      groundingPacket?: GenerateAllOptions["groundingPacket"];
     });
     expect(generationInputs.every((input) => (input.koshaPrimaryRefs || []).length === 0)).toBe(true);
+    expect(generationInputs.every((input) => input.groundingPacket?.sources.every((source) => (
+      source.sourceId !== unverified.source_id
+    )))).toBe(true);
     expect(generationInputs.flatMap((input) => input.koshaLines || []).join("\n")).not.toContain(
       "EXCLUDED_KOSHA_CONTROL"
     );
@@ -957,10 +1033,117 @@ describe("current-base runAsk retrieval provenance", () => {
 
     const generationInputs = mocks.generateAllDeliverablesWithDiagnostics.mock.calls.map(([input]) => input as {
       koshaPrimaryRefs?: Array<{ title: string }>;
+      groundingPacket?: GenerateAllOptions["groundingPacket"];
     });
     expect(generationInputs.some((input) => (
       input.koshaPrimaryRefs || []
     ).some((reference) => reference.title === verifiedTitle))).toBe(true);
+    expect(generationInputs.some((input) => input.groundingPacket?.sources.some((source) => (
+      source.kind === "kosha" && source.sourceId === verified.source_id
+    )))).toBe(true);
+    expect(generationInputs.every((input) => Object.isFrozen(input.groundingPacket))).toBe(true);
+  }, 30_000);
+
+  it("wires exact trusted D-C-13 direct evidence into the runAsk grounding packet", async () => {
+    const bundled = await loadBundledExactKoshaReference();
+    if (bundled.status !== "ready") throw new Error("expected exact D-C-13 bundle fixture");
+    mocks.searchSafetyReferences.mockResolvedValue(searchResult(
+      "local-ranked",
+      [bundled.item],
+      "외벽 도장 작업발판 안전난간"
+    ));
+    let capturedPacket: GenerateAllOptions["groundingPacket"];
+    mocks.generateAllDeliverablesWithDiagnostics.mockImplementation(async (input: GenerateAllOptions) => {
+      capturedPacket = input.groundingPacket;
+      return providerResult();
+    });
+
+    const response = await runAsk("외벽 도장 작업발판 안전난간", { aiMode: "full" });
+    const directControls = response.dbHarness?.packet.directEvidence.find((item) => (
+      item.id === bundled.item.id
+    ))?.controls ?? [];
+    const groundedControls = capturedPacket?.sources.flatMap((source) => source.controls) ?? [];
+
+    expect(response.dbHarness?.packet.directEvidence.map((item) => item.id)).toContain(bundled.item.id);
+    expect(directControls.length).toBeGreaterThan(0);
+    expect(capturedPacket?.sources).toContainEqual(expect.objectContaining({
+      kind: "kosha",
+      sourceId: bundled.item.source_id
+    }));
+    expect(groundedControls).toEqual(expect.arrayContaining(directControls));
+  }, 30_000);
+
+  it("surfaces every critical packet control that a rejected group fallback does not materialize", async () => {
+    const direct = retrievalReference("grounding-fallback-direct", "ranked");
+    const kosha = retrievalReference("grounding-fallback-kosha", "local-ranked");
+    kosha.controls = ["GROUNDING_KOSHA_CRITICAL_CONTROL 후진 경보 확인"];
+    mocks.searchSafetyReferences.mockResolvedValue(searchResult("hybrid-local-supabase", [kosha, direct]));
+    let capturedCriticalControls: string[] = [];
+    mocks.generateAllDeliverablesWithDiagnostics.mockImplementation(async (input: GenerateAllOptions) => {
+      const packet = input.groundingPacket!;
+      const criticalControls = packet.sources.flatMap((source) => source.controls);
+      capturedCriticalControls = criticalControls;
+      return {
+        deliverables: {},
+        diagnostics: {
+          ...providerResult().diagnostics,
+          groupResults: [{ group: "structuredRiskRows", status: "rejected", reason: "provider unavailable" }],
+          grounding: {
+            status: "grounded",
+            sourceIdentity: packet.sourceIdentity,
+            rejectedGroups: [],
+            violations: [],
+            criticalControls
+          }
+        }
+      };
+    });
+
+    const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
+    const materialized = JSON.stringify({
+      deliverables: response.deliverables,
+      structured: response.structured
+    });
+    const missing = response.dbHarness?.summary.missingEvidence || [];
+
+    expect(capturedCriticalControls.length).toBeGreaterThan(0);
+    for (const control of capturedCriticalControls) {
+      expect(materialized.includes(control) || missing.some((item) => item.includes(control))).toBe(true);
+    }
+    if (capturedCriticalControls.some((control) => !materialized.includes(control))) {
+      expect(response.dbHarness?.summary.ontologyStatus).toBe("review_required");
+    }
+  }, 30_000);
+
+  it("preserves packet identity and critical controls on the response review surface after an outer pipeline failure", async () => {
+    const direct = retrievalReference("outer-failure-direct", "ranked");
+    direct.controls = ["OUTER_FAILURE_CRITICAL_CONTROL"];
+    mocks.searchSafetyReferences.mockResolvedValue(searchResult("ranked-rpc", [direct]));
+    const diagnostics = providerResult().diagnostics;
+    Object.defineProperty(diagnostics, "groupResults", {
+      get(): never {
+        throw new Error("forced outer pipeline failure after grounding packet creation");
+      }
+    });
+    let expectedReview: AskResponse["groundingReview"];
+    mocks.generateAllDeliverablesWithDiagnostics.mockImplementation(async (input: GenerateAllOptions) => {
+      const packet = input.groundingPacket!;
+      expectedReview = {
+        status: "review_required",
+        sourceIdentity: packet.sourceIdentity,
+        criticalControls: [...new Set(packet.sources.flatMap((source) => source.controls))].sort(),
+        rejectedGroups: ["deliverablesPipeline"],
+        violations: []
+      };
+      return { deliverables: {}, diagnostics };
+    });
+
+    const response = await runAsk("지게차 보행자 동선 충돌", { aiMode: "full" });
+
+    expect(response.mode).toBe("fallback");
+    expect(expectedReview?.sourceIdentity).toMatch(/^[0-9a-f]{64}$/u);
+    expect(expectedReview?.criticalControls.length).toBeGreaterThan(0);
+    expect(response.groundingReview).toEqual(expectedReview);
   }, 30_000);
 
   it("keeps distinct verified KOSHA documents with identical operational controls", async () => {

@@ -246,6 +246,8 @@ describe("knowledge candidate API", () => {
     expect(prompt).not.toContain(sensitiveTitle);
     expect(prompt).not.toContain(sensitivePayload);
     expect(prompt).not.toContain(sensitiveUrlToken);
+    expect(prompt).not.toContain("manual-event-77");
+    expect(prompt).not.toContain("provenanceScope");
   });
 
   it("exposes the same read-only promotion and authority contract", async () => {

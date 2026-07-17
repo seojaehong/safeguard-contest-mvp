@@ -132,6 +132,7 @@ const listedToken: TokenSummary = {
 type NetworkProbe = {
   tokenRequests: number;
   authenticatedTokenRequests: number;
+  issuedTokenLabel: string | null;
 };
 
 async function fulfillJson(route: Route, body: unknown, status = 200): Promise<void> {
@@ -143,7 +144,7 @@ async function fulfillJson(route: Route, body: unknown, status = 200): Promise<v
 }
 
 async function installNetworkFixtures(page: Page): Promise<NetworkProbe> {
-  const probe: NetworkProbe = { tokenRequests: 0, authenticatedTokenRequests: 0 };
+  const probe: NetworkProbe = { tokenRequests: 0, authenticatedTokenRequests: 0, issuedTokenLabel: null };
 
   await page.route(`${DUMMY_SUPABASE_URL}/auth/v1/**`, async (route) => {
     if (route.request().url().includes("/token")) {
@@ -158,6 +159,11 @@ async function installNetworkFixtures(page: Page): Promise<NetworkProbe> {
       probe.authenticatedTokenRequests += 1;
     }
     if (route.request().method() === "POST") {
+      const requestBody: unknown = route.request().postDataJSON();
+      probe.issuedTokenLabel = requestBody && typeof requestBody === "object" && "label" in requestBody
+        && typeof requestBody.label === "string"
+        ? requestBody.label
+        : null;
       await fulfillJson(route, {
         ok: true,
         configured: true,
@@ -424,6 +430,8 @@ productionMatrix("AI connect production matrix", () => {
 
         await page.getByRole("button", { name: "연결 토큰 발급" }).click();
         await page.locator(".ai-connect-secret textarea").waitFor({ state: "visible" });
+        expect(probe.issuedTokenLabel).toBe("SafeClaw Harness Agent");
+        await page.getByText("SafeClaw 근거 고정", { exact: true }).waitFor();
         await page.locator(".ai-connect-sif-preflight summary").click();
 
         for (const roleCheck of roleChecks) {

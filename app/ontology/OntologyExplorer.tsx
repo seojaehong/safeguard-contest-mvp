@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { OntologyVisualizationModel } from "@/lib/ontology/visualization";
 import { KIND_KO, type NodeKind } from "@/lib/ontology/schema";
@@ -284,16 +283,6 @@ export function OntologyExplorer({
           <button type="button" className={styles.moreButton} onClick={() => setVisibleListCount((value) => value + 18)}>18개 더 보기</button>
         ) : null}
       </section>
-
-      <details className={styles.rawExports}>
-        <summary>원본 데이터 내보내기</summary>
-        <div>
-          <p>운영 검증이나 외부 분석이 필요할 때만 원본 형식을 사용합니다.</p>
-          <Link href="/api/ontology/graph">그래프 JSON</Link>
-          <Link href="/reports">MD · JSONL · Obsidian 내보내기</Link>
-          <Link href="/ops/api">API 계약 보기</Link>
-        </div>
-      </details>
 
       {expanded ? (
         <section ref={dialogRef} className={styles.graphDialog} role="dialog" aria-modal="true" aria-label="온톨로지 그래프 전체 화면">

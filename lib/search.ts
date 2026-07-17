@@ -1,10 +1,20 @@
 import { randomUUID } from "node:crypto";
 import { AskResponse, type GenerationDeliverableModelTrace, type GenerationTrace, type PermitInspectionStructured, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
-import { enhanceLegalEvidenceMappings, generateAnswer, type AnswerGenerationResult } from "./ai";
+import {
+  applyPhaseAAnswerBoundary,
+  enhanceLegalEvidenceMappings,
+  generateAnswer,
+  type AnswerGenerationResult,
+} from "./ai";
 import { buildMockAskResponse, inferScenario, mockSearchResults } from "./mock-data";
 import { attachQualityContract } from "./quality-contract";
 import { attachWebOntologyQa } from "./workpack-ontology-qa";
-import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiMode } from "./ai-deliverables";
+import { buildFailedDeliverablesDiagnostics, generateAllDeliverables, generateAllDeliverablesWithDiagnostics, type AiDeliverablesDiagnostics, type AiMode } from "./ai-deliverables";
+import { buildGroundedGenerationPacket, type GroundedGenerationPacket } from "./grounded-generation-contract";
+import {
+  buildPhaseACanonicalAnswer,
+  type PhaseAGenerationGrounding,
+} from "./ontology/evidence-chain";
 import {
   deriveSafetyReferenceOperationalView,
   deriveSafetyReferenceRetrievalModeFromItems,
@@ -53,6 +63,65 @@ import {
 
 const log = createLogger("search");
 
+function buildPhaseACanonicalDeliverables(
+  grounding: PhaseAGenerationGrounding,
+): AskResponse["deliverables"] {
+  const canonicalText = buildPhaseACanonicalAnswer(grounding);
+  return {
+    workpackSummaryDraft: canonicalText,
+    riskAssessmentDraft: canonicalText,
+    workPlanDraft: canonicalText,
+    tbmBriefing: canonicalText,
+    tbmLogDraft: canonicalText,
+    safetyEducationRecordDraft: canonicalText,
+    emergencyResponseDraft: canonicalText,
+    photoEvidenceDraft: canonicalText,
+    foreignWorkerBriefing: canonicalText,
+    foreignWorkerTransmission: canonicalText,
+    foreignWorkerLanguages: [],
+    safetyEducationPoints: [],
+    tbmQuestions: [],
+    kakaoMessage: canonicalText,
+  };
+}
+
+function buildPhaseACanonicalSummary(
+  _response: AskResponse,
+  _grounding: PhaseAGenerationGrounding,
+): Pick<AskResponse, "riskSummary" | "practicalPoints"> {
+  const reviewRequired = ["현장 확인 필요"];
+  return {
+    riskSummary: {
+      title: "현장 확인 필요",
+      riskLevel: "현장 확인 필요",
+      topRisk: "현장 확인 필요",
+      immediateActions: reviewRequired,
+    },
+    practicalPoints: reviewRequired,
+  };
+}
+
+function applyPhaseAResponseBoundary(
+  response: AskResponse,
+  grounding?: PhaseAGenerationGrounding,
+): AskResponse {
+  if (!grounding) return response;
+  return {
+    ...applyPhaseAAnswerBoundary(response, grounding),
+    ...buildPhaseACanonicalSummary(response, grounding),
+    deliverables: buildPhaseACanonicalDeliverables(grounding),
+    structured: {
+      riskAssessmentRows: [],
+      tbmRiskLinks: [],
+      riskAssessmentValidation: {
+        ok: false,
+        issueCount: 0,
+        issues: [],
+      },
+    },
+  };
+}
+
 function buildParentlessKoshaReviewDeliverables(
   question: string,
   citations: AskResponse["citations"]
@@ -67,6 +136,19 @@ function buildParentlessKoshaReviewDeliverables(
 
 function safeFailureContext(error: unknown): { errorType: string } {
   return { errorType: error instanceof Error ? error.name : typeof error };
+}
+
+function buildGroundingReview(
+  grounding: AiDeliverablesDiagnostics["grounding"]
+): AskResponse["groundingReview"] {
+  if (!grounding || grounding.status !== "review_required") return undefined;
+  return {
+    status: "review_required",
+    sourceIdentity: grounding.sourceIdentity,
+    criticalControls: [...grounding.criticalControls],
+    rejectedGroups: [...grounding.rejectedGroups],
+    violations: grounding.violations.map((violation) => ({ ...violation }))
+  };
 }
 
 const FINAL_DELIVERABLE_TRACE_KEYS = [
@@ -376,10 +458,15 @@ function getSupportingKoshaEvidenceRef(item: SafetyReferenceItem): string {
 
 function buildKoshaParentEvidenceReadyIds(packet: DbHarnessPacket): Set<string> {
   const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
-  return new Set(packet.supportingEvidence
+  const exactDirectIds = packet.directEvidence
+    .filter(isKoshaTechnicalReference)
+    .filter(isSafetyReferenceDirectEligible)
+    .map((item) => item.id);
+  const parentReadySupportingIds = packet.supportingEvidence
     .filter(isKoshaTechnicalReference)
     .filter((item) => hasRelevantKoshaParent(item, parentCandidates))
-    .map((item) => item.id));
+    .map((item) => item.id);
+  return new Set([...exactDirectIds, ...parentReadySupportingIds]);
 }
 
 export function buildSafetyReferenceRiskRows(
@@ -611,7 +698,8 @@ export function buildTbmBriefingStructuredFromRiskRows(
   const measures = selectedRows.map((row, index) => ({
     hazardRef: Math.min(index + 1, safeHazards.length),
     action: compactTbmText(row.additionalControls || row.currentControls, "작업 전 안전조치 확인", 80),
-    owner: compactTbmText(row.owner, "작업반장", 30)
+    owner: compactTbmText(row.owner, "작업반장", 30),
+    evidenceRefs: [...row.evidenceRefs]
   }));
   const stopCriteria = fillTbmList(
     [
@@ -646,7 +734,8 @@ export function buildTbmBriefingStructuredFromRiskRows(
     measures: measures.length ? measures : [{
       hazardRef: 1,
       action: "작업 전 안전조치 확인",
-      owner: "작업반장"
+      owner: "작업반장",
+      evidenceRefs: []
     }],
     stopCriteria,
     confirmTopics,
@@ -681,7 +770,8 @@ export function buildTbmLogStructuredFromRiskRows(
       item: compactTbmText(row.hazard, "보완 필요 위험요인", 50),
       plannedAction: compactTbmText(row.additionalControls || row.verification, "관리감독자 확인 후 작업 재개", 70),
       owner: compactTbmText(row.owner, "작업반장", 30),
-      dueDate: row.due || "현장 확인"
+      dueDate: row.due || "현장 확인",
+      evidenceRefs: [...row.evidenceRefs]
     }));
 
   return {
@@ -1494,6 +1584,8 @@ function normalizeAskResponseText(response: AskResponse): AskResponse {
 export type RunAskOptions = {
   aiMode?: AiMode;
   harnessMemory?: HarnessMemoryInput;
+  /** Fixed Phase A evidence selected before any answer or deliverable provider call. */
+  phaseAGrounding?: PhaseAGenerationGrounding;
   /** Task D-2a: SSE progress callback for the AI console. Defaults to no-op. */
   onProgress?: OnAskProgress;
 };
@@ -1687,10 +1779,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     envDefault: process.env.AI_MODE_DEFAULT
   });
   let deliverablesAttempted = false;
+  let deliverablesGroundingPacket: GroundedGenerationPacket | null = null;
 
   // Fix 4: template fast path — no external calls, no AI, pure static output < 100ms
   if (aiMode === "template") {
-    const response = attachDbHarnessFallback(
+    const response = applyPhaseAResponseBoundary(attachDbHarnessFallback(
       buildMockAskResponse(
         question,
         mockSearchResults.slice(0, 4),
@@ -1698,7 +1791,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         "AI_MODE=template (외부 호출 없음, DB 하네스 템플릿 계약 적용)"
       ),
       { question, harnessMemory }
-    );
+    ), options.phaseAGrounding);
     const upstreamTrace = {
       provider: "mock",
       model: null,
@@ -1741,7 +1834,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     );
     // enhanceLegalEvidenceMappings: optional quality pass, runs in parallel, best-effort.
     const citationsPromise = rawCitationsBasePromise.then((base) =>
-      enhanceLegalEvidenceMappings(question, base).catch((error) => {
+      enhanceLegalEvidenceMappings(question, base, options.phaseAGrounding).catch((error) => {
         log.error(
           "AI legal evidence mapping failed; using original legal evidence order",
           safeFailureContext(error)
@@ -1751,15 +1844,18 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     );
     // generateAnswer uses raw citations directly — no longer waits for enhance.
     const responsePromise = rawCitationsBasePromise.then((rawBase) =>
-      generateAnswer(question, rawBase.slice(0, 6), { traceId }).catch((error): AnswerGenerationResult => {
+      generateAnswer(question, rawBase.slice(0, 6), {
+        traceId,
+        phaseAGrounding: options.phaseAGrounding,
+      }).catch((error): AnswerGenerationResult => {
         log.error("AI response generation failed; using DB harness fallback", safeFailureContext(error));
         return {
-          response: buildMockAskResponse(
+          response: applyPhaseAResponseBoundary(buildMockAskResponse(
             question,
             rawBase.slice(0, 6),
             "fallback",
             "AI 응답 생성에 실패해 공식자료 기반 산출물 초안으로 전환했습니다."
-          ),
+          ), options.phaseAGrounding),
           trace: {
             provider: "mock",
             model: null,
@@ -1909,6 +2005,12 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             });
             const dbHarnessPacket = buildPublicDbHarnessPacket(internalDbHarnessPacket);
             const koshaParentEvidenceReadyIdsEarly = buildKoshaParentEvidenceReadyIds(dbHarnessPacket);
+            const groundingPacket = buildGroundedGenerationPacket({
+              dbHarnessPacket,
+              legalCandidates: rawBase.slice(0, 6),
+              eligibleKoshaIds: koshaParentEvidenceReadyIdsEarly
+            });
+            deliverablesGroundingPacket = groundingPacket;
             const dbHarnessContext = buildHarnessPromptContext(dbHarnessPacket);
             const publicSafeRefItems = [
               ...dbHarnessPacket.directEvidence,
@@ -1940,6 +2042,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
               accidentLines: accidentLinesEarly,
               koshaPrimaryRefs: koshaPrimaryRefsEarly,
               dbHarnessContext,
+              groundingPacket,
+              phaseAGrounding: options.phaseAGrounding,
               scope: "full",
               onProgress,
               traceId
@@ -1955,7 +2059,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
                 deliverables: {},
                 diagnostics: buildFailedDeliverablesDiagnostics({
                   attempted: deliverablesAttempted,
-                  fallbackUsed: true
+                  fallbackUsed: true,
+                  groundingPacket
                 })
               };
             });
@@ -1963,7 +2068,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
             log.error("deliverablesPromise setup failed", safeFailureContext(error));
             return {
               deliverables: {},
-              diagnostics: buildFailedDeliverablesDiagnostics({ attempted: false, fallbackUsed: true })
+              diagnostics: buildFailedDeliverablesDiagnostics({
+                attempted: false,
+                fallbackUsed: true,
+                groundingPacket: deliverablesGroundingPacket
+              })
             };
           })
         : Promise.resolve(null);
@@ -2075,7 +2184,10 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
       : (
           log.warn("responsePromise failed", safeFailureContext((allResults[6] as PromiseRejectedResult).reason)),
           {
-          response: buildMockAskResponse(question, mockSearchResults.slice(0, 4), "fallback", "AI 응답 생성 실패"),
+          response: applyPhaseAResponseBoundary(
+            buildMockAskResponse(question, mockSearchResults.slice(0, 4), "fallback", "AI 응답 생성 실패"),
+            options.phaseAGrounding,
+          ),
           trace: {
             provider: "mock" as const,
             model: null,
@@ -2083,7 +2195,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
           }
           }
         );
-    const response = answerResult.response;
+    const response = applyPhaseAAnswerBoundary(answerResult.response, options.phaseAGrounding);
     const safetyReference = allResults[7].status === "fulfilled" ? allResults[7].value : (
       log.warn("safetyReferencePromise failed", safeFailureContext((allResults[7] as PromiseRejectedResult).reason)),
       safetyReferenceFallback
@@ -2127,7 +2239,8 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
                 deliverables: {},
                 diagnostics: buildFailedDeliverablesDiagnostics({
                   attempted: deliverablesAttempted,
-                  fallbackUsed: true
+                  fallbackUsed: true,
+                  groundingPacket: deliverablesGroundingPacket
                 })
               }
             : null
@@ -2211,9 +2324,11 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         aiModeAppliedDetail = `AI_MODE=${aiMode} 문서 생성기 미응답 → 하네스 템플릿 보강`;
       }
     }
-    const responseDeliverables = parentlessKoshaReviewRequired
-      ? buildParentlessKoshaReviewDeliverables(question, citations)
-      : response.deliverables;
+    const responseDeliverables = options.phaseAGrounding
+      ? buildPhaseACanonicalDeliverables(options.phaseAGrounding)
+      : parentlessKoshaReviewRequired
+        ? buildParentlessKoshaReviewDeliverables(question, citations)
+        : response.deliverables;
     const baseDeliverables = {
       ...responseDeliverables,
       ...Object.fromEntries(Object.entries(aiBodies).filter(([key, v]) => (
@@ -2224,12 +2339,16 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const generatedStructuredRiskRows = parentlessKoshaReviewRequired
       ? []
       : generatedStructuredRiskValidation.rows;
-    const photoSeedRiskRows = buildPhotoHazardRiskRows(response, harnessMemory.improvements);
+    const photoSeedRiskRows = options.phaseAGrounding
+      ? []
+      : buildPhotoHazardRiskRows(response, harnessMemory.improvements);
     const harnessStructuredRiskRows = generatedStructuredRiskRows.length
       || parentlessKoshaReviewRequired
       ? []
       : buildSafetyReferenceRiskRows(response, publicEvidenceItems, weather.summary, question);
-    const fallbackStructuredRiskRows = generatedStructuredRiskRows.length
+    const fallbackStructuredRiskRows = options.phaseAGrounding
+      ? []
+      : generatedStructuredRiskRows.length
       ? []
       : harnessStructuredRiskRows.length
         ? harnessStructuredRiskRows
@@ -2284,12 +2403,29 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
     const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
     const foreignWorkerTransmissionText = aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput);
+    const groundingDiagnostics = deliverablesResult?.diagnostics.grounding;
+    const fallbackMaterialization = JSON.stringify({
+      deliverables: baseDeliverables,
+      structuredRiskRows,
+      tbmRiskLinks
+    });
+    const hasRejectedDeliverableGroup = deliverablesResult?.diagnostics.groupResults.some((group) => (
+      group.status === "rejected"
+    )) === true;
+    const groundingFallbackMissing = groundingDiagnostics && hasRejectedDeliverableGroup
+      ? groundingDiagnostics.criticalControls
+        .filter((control) => !fallbackMaterialization.includes(control))
+        .map((control) => `grounded-generation fallback missing critical control: ${control}`)
+      : [];
     const internalDbHarnessPacket = buildDbHarnessPacket({
       question,
       references: safetyReference.items,
       improvements: harnessMemory.improvements,
       workpackMemory: harnessMemory.workpackMemory,
-      ontologyMissing: structuredRiskIssues.map((issue) => `${String(issue.field)}: ${issue.message}`),
+      ontologyMissing: [
+        ...structuredRiskIssues.map((issue) => `${String(issue.field)}: ${issue.message}`),
+        ...groundingFallbackMissing
+      ],
       retrieval: {
         errorCode: safetyReference.errorCode,
         mode: safetyReference.retrievalMode,
@@ -2334,6 +2470,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
 
     const enriched: AskResponse = {
       ...response,
+      groundingReview: buildGroundingReview(groundingDiagnostics),
       riskSummary: parentlessKoshaReviewRequired
         ? { ...response.riskSummary, immediateActions: [] }
         : response.riskSummary,
@@ -2509,7 +2646,10 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     };
 
     const withOntologyQa = await attachWebOntologyQa(withMcpDetail, question);
-    const finalResponse = attachQualityContract(withOntologyQa);
+    const finalResponse = applyPhaseAResponseBoundary(
+      attachQualityContract(withOntologyQa),
+      options.phaseAGrounding,
+    );
     const finalDeliverablesTrace = finalizeDeliverablesTrace(finalResponse, deliverablesExecutionTrace);
     return {
       ...finalResponse,
@@ -2527,7 +2667,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     log.error("runAsk pipeline failed; using DB harness fallback", {
       errorType: error instanceof Error ? error.name : typeof error
     });
-    const response = attachDbHarnessFallback(
+    const response = applyPhaseAResponseBoundary(attachDbHarnessFallback(
       buildMockAskResponse(
         question,
         mockSearchResults.slice(0, 4),
@@ -2535,7 +2675,7 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         "일부 외부 연결을 확인하지 못해 규정 기반 문서팩으로 전환했습니다."
       ),
       { question, harnessMemory }
-    );
+    ), options.phaseAGrounding);
     const upstreamTrace = {
       provider: "mock",
       model: null,
@@ -2543,11 +2683,13 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     } as const;
     const failedDeliverables = buildFailedDeliverablesDiagnostics({
       attempted: deliverablesAttempted,
-      fallbackUsed: true
+      fallbackUsed: true,
+      groundingPacket: deliverablesGroundingPacket
     });
     const finalDeliverablesTrace = finalizeDeliverablesTrace(response, failedDeliverables.trace);
     return {
       ...response,
+      groundingReview: buildGroundingReview(failedDeliverables.grounding),
       generationTrace: {
         traceId,
         askMode: aiMode,

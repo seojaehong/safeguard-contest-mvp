@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-16T20:37:02.506Z",
+  "command": "node ./scripts/frontend_audit_runtime_probe.mjs --mode audit",
+  "mode": "audit",
+  "sourceSha": "2b4316056b44b8729903d364d93022a916383ab6",
+  "sourceIdentity": "c5796fe86454b739eaf55ec795ffdd0891284e64370fda97126dd8beba7e0bc3",
+  "buildId": "4lJOoaoo1rv2hMYBCVvZj",
+  "buildDirectory": ".next",
+  "row": {
+    "route": "special:error",
+    "viewport": "desktop-1440",
+    "requestedUrl": "http://127.0.0.1:3011/dryrun?__auditBoundary=error",
+    "finalUrl": "http://127.0.0.1:3011/dryrun?__auditBoundary=error",
+    "status": 500,
+    "boundaryMarker": "error",
+    "boundaryMarkerCount": 1,
+    "probeConfirmed": true,
+    "rawConsoleErrors": [
+      "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+      "Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.",
+      "SafeClaw deterministic frontend audit error boundary confirmed"
+    ],
+    "rawPageErrors": [],
+    "consoleErrors": [],
+    "pageErrors": []
+  },
+  "status": "pass"
+}

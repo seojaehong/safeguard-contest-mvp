@@ -1,0 +1,65 @@
+{
+  "reviewDate": "2026-07-16",
+  "branch": "feat/tenant-harness-memory-20260715",
+  "verdict": {
+    "scopedClawRuntime": "PASS",
+    "publicMcpIntegration": "INTEGRATED"
+  },
+  "scope": {
+    "publicMcpImplementationModified": true,
+    "schemaMigration": false,
+    "dataMutation": false,
+    "commitCreated": true,
+    "pushPerformed": true
+  },
+  "tdd": {
+    "loaderPiiRedObserved": true,
+    "runtimePiiRedObserved": true,
+    "unreviewedWorkpackTestAdded": true,
+    "greenTestFiles": 3,
+    "greenTests": 48,
+    "greenPassed": 48,
+    "greenFailed": 0,
+    "typecheck": "passed"
+  },
+  "memoryContract": {
+    "selectedFreeTextColumns": [],
+    "reviewStatuses": ["approved", "reflected"],
+    "digestFields": [
+      "id",
+      "workpackId",
+      "reviewStatus",
+      "sourceType",
+      "reviewedAt",
+      "generatedAt",
+      "provenanceImprovementIds",
+      "reflectedDocuments"
+    ],
+    "unknownRuntimeFieldsDiscarded": true,
+    "workpackApprovalGate": true,
+    "noApprovalBehavior": "omit_and_skip",
+    "workpackLimit": 8,
+    "improvementLimit": 12,
+    "reflectedDocumentsAllowlisted": true,
+    "legacyQualityPipelinePreserved": true,
+    "qualityPipelineStatusSeparate": true
+  },
+  "tenantIsolation": {
+    "siteToken": "organization_id_and_site_id",
+    "dbOrganizationToken": "organization_id_bounded_cross_site",
+    "envGlobal": "skipped",
+    "missingOrganization": "skipped"
+  },
+  "publicMcp": {
+    "hookStatus": "INTEGRATED",
+    "legacyRawArgumentsSerialized": false,
+    "phaseAIntegrationClaimed": true,
+    "integrationCommit": "ee96509ccf53cd884dc2300e40b40ce25783a90b",
+    "integratedFocusedTests": 62,
+    "finalIndependentReview": "PASS"
+  },
+  "logs": [
+    "evaluation/tenant-harness-memory-2026-07-15/green-focused-tests.log",
+    "evaluation/tenant-harness-memory-2026-07-15/green-typecheck.log"
+  ]
+}

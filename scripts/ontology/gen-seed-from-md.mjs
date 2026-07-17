@@ -340,6 +340,7 @@ function main() {
 // core-triples.json과 반드시 동기 상태여야 한다 (tests/ontology-seed.test.ts가 검증).
 import type { OntologyNodeInput, OntologyEdgeInput } from "@/lib/ontology/schema";
 import seed from "./core-triples.json";
+import { SIF_ACCIDENT_EDGES, SIF_ACCIDENT_NODES } from "./sif-accident-overlay";
 
 export const SEED_SOURCE = seed.source;
 
@@ -356,11 +357,25 @@ export type SeedStats = {
   nodes_by_kind: Record<string, number>;
 };
 
-export const SEED_STATS: SeedStats = seed.stats;
+const CORE_NODES = seed.nodes as OntologyNodeInput[];
+const CORE_EDGES = seed.edges as OntologyEdgeInput[];
 
-export const SEED_NODES: OntologyNodeInput[] = seed.nodes as OntologyNodeInput[];
+export const SEED_NODES: OntologyNodeInput[] = [...CORE_NODES, ...SIF_ACCIDENT_NODES];
 
-export const SEED_EDGES: OntologyEdgeInput[] = seed.edges as OntologyEdgeInput[];
+export const SEED_EDGES: OntologyEdgeInput[] = [...CORE_EDGES, ...SIF_ACCIDENT_EDGES];
+
+export const SEED_STATS: SeedStats = {
+  ...seed.stats,
+  nodes: SEED_NODES.length,
+  edges: SEED_EDGES.length,
+  draft_nodes: seed.stats.draft_nodes + SIF_ACCIDENT_NODES.length,
+  draft_edges: seed.stats.draft_edges + SIF_ACCIDENT_EDGES.length,
+  nodes_by_kind: {
+    ...seed.stats.nodes_by_kind,
+    Accident:
+      ((seed.stats.nodes_by_kind as Record<string, number>).Accident ?? 0) + SIF_ACCIDENT_NODES.length
+  }
+};
 `;
   writeFileSync(OUT_TS, ts, "utf-8");
   console.log(`\n생성 완료: ${OUT_TS}\n          ${OUT_JSON}`);

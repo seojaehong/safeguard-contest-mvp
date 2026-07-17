@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 2,
+  "branch": "fix/audit-error-boundary-20260715",
+  "verifiedCodeSha": "d3dab1d2426ab90b033ce227b99ce3306328ec48",
+  "sourceIdentity": "781cd0edf69d880a22a8b9cdb200fd0db4c34f43a3853e7662ee5302be255124",
+  "status": "pass",
+  "focusedChecks": {
+    "bundleContract": { "passed": 9, "failed": 0 },
+    "runnerWithoutSharedReconciliation": { "passed": 4, "failed": 0 },
+    "sharedReconciliation": "pending_final_integration"
+  },
+  "audit": {
+    "buildId": "hwr9o3MNlJpGlL533IEdb",
+    "globalStaticMarkerCount": 1,
+    "appErrorServerMarkerCount": 1,
+    "confirmationStaticMarkerCount": 1,
+    "httpStatus": 500,
+    "boundaryMarkerCount": 1,
+    "unexpectedErrorCount": 0
+  },
+  "normalAfterAudit": {
+    "buildId": "PdlkAZyAYRkMob0BMw_3N",
+    "staticMarkerCount": 0,
+    "serverMarkerCount": 0,
+    "httpStatus": 200,
+    "boundaryMarkerCount": 0,
+    "unexpectedErrorCount": 0
+  },
+  "branchLocalStaticAudit": {
+    "pageFiles": 32,
+    "componentFiles": 23,
+    "violationCount": 0,
+    "evidence": "static-audit-review.json"
+  },
+  "sharedArtifactsCommitted": false,
+  "dbMutationPerformed": false,
+  "schemaChangePerformed": false
+}

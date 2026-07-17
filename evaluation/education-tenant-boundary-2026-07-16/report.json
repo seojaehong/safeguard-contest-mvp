@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "safeclaw-education-tenant-boundary/v1",
+  "sourceHead": "7ebb3d7a845d895f50fa81572793743d89f071d8",
+  "status": "pass",
+  "noDatabaseMutation": true,
+  "schemaChanged": false,
+  "red": {
+    "files": 1,
+    "tests": 7,
+    "failed": 6
+  },
+  "green": {
+    "files": 3,
+    "tests": 69,
+    "failed": 0,
+    "typecheck": "pass",
+    "diffCheck": "pass"
+  },
+  "closedBoundaries": [
+    "malformed_workpack_id",
+    "malformed_worker_id",
+    "foreign_organization_workpack",
+    "foreign_site_workpack",
+    "foreign_organization_worker",
+    "foreign_site_worker",
+    "relationship_lookup_failure"
+  ],
+  "preservedPaths": [
+    "owned_same_site_relationships",
+    "education_record_without_workpack_or_persisted_worker"
+  ],
+  "logs": {
+    "focusedTests": "evaluation/education-tenant-boundary-2026-07-16/logs/focused-tests.log",
+    "typecheck": "evaluation/education-tenant-boundary-2026-07-16/logs/typecheck.log"
+  },
+  "remainingGate": "database constraints and authenticated two-tenant fixtures require separate approval"
+}

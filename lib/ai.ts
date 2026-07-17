@@ -4,6 +4,11 @@ import { buildMockAskResponse } from "./mock-data";
 import { generateWithVertex } from "./vertex/client";
 import { resolvePositiveIntEnv } from "@/lib/ai-deliverables-policy";
 import { createLogger } from "@/lib/logger";
+import {
+  buildPhaseACanonicalAnswer,
+  buildPhaseAGenerationPrompt,
+  type PhaseAGenerationGrounding,
+} from "@/lib/ontology/evidence-chain";
 
 const log = createLogger("ai");
 
@@ -44,6 +49,15 @@ export type AnswerGenerationResult = {
     fallbackUsed: boolean;
   };
 };
+
+export function applyPhaseAAnswerBoundary(
+  response: AskResponse,
+  grounding?: PhaseAGenerationGrounding,
+): AskResponse {
+  return grounding
+    ? { ...response, answer: buildPhaseACanonicalAnswer(grounding) }
+    : response;
+}
 
 function isVertexConfigured(): boolean {
   return Boolean(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON && process.env.GCP_PROJECT_ID);
@@ -157,7 +171,11 @@ function trimCitationText(text: string, maxLength: number) {
   return `${text.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
-function buildPrompt(question: string, citations: SearchResult[]) {
+function buildPrompt(
+  question: string,
+  citations: SearchResult[],
+  phaseAGrounding?: PhaseAGenerationGrounding,
+) {
   const trimmedQuestion = trimCitationText(question.trim(), 220);
   const compactCitations = citations.slice(0, 4).map((citation, index) => {
     const title = trimCitationText(citation.title, 60);
@@ -167,6 +185,7 @@ function buildPrompt(question: string, citations: SearchResult[]) {
   });
 
   return [
+    ...(phaseAGrounding ? [buildPhaseAGenerationPrompt(phaseAGrounding), ""] : []),
     "당신은 산업안전 실무용 코파일럿이다.",
     "사용자가 현장 조건을 제공하면, 법정 제출 최종본이 아니라 현장 검토용 초안을 바로 작성하라.",
     "현장 실측값이 부족하다는 이유로 생성을 거절하지 말고, 부족한 항목은 '현장 확인 필요'로 표시하라.",
@@ -235,7 +254,11 @@ function parseCitationMappings(text: string): CitationMapping[] {
   }
 }
 
-function buildCitationMappingPrompt(question: string, citations: SearchResult[]) {
+function buildCitationMappingPrompt(
+  question: string,
+  citations: SearchResult[],
+  phaseAGrounding?: PhaseAGenerationGrounding,
+) {
   const evidence = citations.slice(0, 10).map((item, index) => ({
     index: index + 1,
     id: item.id,
@@ -247,6 +270,7 @@ function buildCitationMappingPrompt(question: string, citations: SearchResult[])
   }));
 
   return [
+    ...(phaseAGrounding ? [buildPhaseAGenerationPrompt(phaseAGrounding), ""] : []),
     "당신은 산업안전 문서팩의 근거 매핑 편집자다.",
     "목표는 검색된 법령·해석례·판례를 오늘 작업 조건에 맞게 재정렬하고, 화면과 문서에 들어갈 '연결 이유'를 짧고 정확하게 쓰는 것이다.",
     "절대 새로운 법령, 사건번호, 출처, 사실관계를 만들지 말라. 제공된 id만 사용하라.",
@@ -259,10 +283,14 @@ function buildCitationMappingPrompt(question: string, citations: SearchResult[])
   ].join("\n");
 }
 
-export async function enhanceLegalEvidenceMappings(question: string, citations: SearchResult[]): Promise<SearchResult[]> {
+export async function enhanceLegalEvidenceMappings(
+  question: string,
+  citations: SearchResult[],
+  phaseAGrounding?: PhaseAGenerationGrounding,
+): Promise<SearchResult[]> {
   if (!citations.length || (!isVertexConfigured() && !openAiApiKey)) return citations;
 
-  const prompt = buildCitationMappingPrompt(question, citations);
+  const prompt = buildCitationMappingPrompt(question, citations, phaseAGrounding);
   const response = isVertexConfigured()
       ? await generateWithGemini(prompt).catch((error) => {
         if (!openAiApiKey) throw error;
@@ -298,7 +326,7 @@ export async function enhanceLegalEvidenceMappings(question: string, citations: 
 export async function generateAnswer(
   question: string,
   citations: SearchResult[],
-  options: { traceId: string }
+  options: { traceId: string; phaseAGrounding?: PhaseAGenerationGrounding }
 ): Promise<AnswerGenerationResult> {
   if (!isVertexConfigured() && !openAiApiKey) {
     const trace = { provider: "mock", model: null, fallbackUsed: false } as const;
@@ -308,17 +336,17 @@ export async function generateAnswer(
       ...trace
     });
     return {
-      response: buildMockAskResponse(
+      response: applyPhaseAAnswerBoundary(buildMockAskResponse(
         question,
         citations,
         "mock",
         "AI 제공자 키가 없어 규정 기반 문서팩으로 구성했습니다."
-      ),
+      ), options.phaseAGrounding),
       trace
     };
   }
 
-  const prompt = buildPrompt(question, citations);
+  const prompt = buildPrompt(question, citations, options.phaseAGrounding);
 
   const response = isVertexConfigured()
     ? await generateWithGemini(prompt).catch((error) => {
@@ -345,7 +373,7 @@ export async function generateAnswer(
     ...trace
   });
   return {
-    response: {
+    response: applyPhaseAAnswerBoundary({
       ...live,
       answer: response.answer,
       status: {
@@ -354,7 +382,7 @@ export async function generateAnswer(
         ai: "live" as const,
         policyNote: response.policyNote
       }
-    },
+    }, options.phaseAGrounding),
     trace
   };
 }

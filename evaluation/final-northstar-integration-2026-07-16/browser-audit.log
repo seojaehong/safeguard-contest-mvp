@@ -1,0 +1,14 @@
+{
+  "routes": 32,
+  "routeRows": 96,
+  "workspaceThemeRows": 6,
+  "specialSurfaceRows": 4,
+  "generatedSurfaceRows": 2,
+  "screenshots": 108,
+  "successes": 108,
+  "failedRows": 0,
+  "recoveredRows": 0,
+  "findingCount": 0,
+  "failures": 0,
+  "elapsedMs": 102078
+}

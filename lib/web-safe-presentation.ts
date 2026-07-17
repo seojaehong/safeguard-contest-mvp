@@ -282,6 +282,22 @@ const DRYRUN_QUALITY_NOTE_LABELS: LabelMap = {
     "문서 생성 점검 중 실패했거나 응답이 부족한 사례가 있습니다."
 };
 
+const CUSTOMER_FACING_LABELS: LabelMap = {
+  "SafeClaw Harness Agent": "SafeClaw 근거 고정",
+  "DB 하네스 계약": "검증 근거",
+  "관리자 원본 JSON": "현재 조회 결과 데이터",
+  "다음 생성용 MD": "재사용 검토 문서",
+  "하네스 JSONL": "재사용 검토 데이터",
+  "Obsidian MD": "연결형 작업 메모"
+};
+
+const CUSTOMER_FACING_PHRASES: ReadonlyArray<readonly [string, string]> = [
+  ["DB 하네스 근거", "검증 근거"],
+  ["품질 계약을", "품질 검수를"],
+  ["DB 하네스", "검증 체계"],
+  ["품질 계약", "품질 검수"]
+];
+
 const PHOTO_FILE_VALIDATION_MODE_LABELS: LabelMap = {
   signature_only: "파일 시그니처 확인"
 };
@@ -476,6 +492,17 @@ export function formatWorkflowRunId(value: unknown): string {
 export function formatDryrunQualityNote(value: unknown): string {
   if (value === null || value === undefined || value === "") return "최근 점검 결과가 없습니다.";
   return formatMappedValue(value, DRYRUN_QUALITY_NOTE_LABELS, "상태 확인 필요");
+}
+
+export function formatCustomerFacingLabel(value: string): string {
+  return CUSTOMER_FACING_LABELS[value] ?? value;
+}
+
+export function formatCustomerFacingText(value: string): string {
+  return CUSTOMER_FACING_PHRASES.reduce(
+    (text, [operational, customerFacing]) => text.replaceAll(operational, customerFacing),
+    value
+  );
 }
 
 export function toDryrunPresentationSnapshot(value: unknown): DryrunPresentationSnapshot | null {

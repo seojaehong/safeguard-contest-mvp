@@ -5,6 +5,12 @@ import { isLiveDispatchEnabled, postWebhookWithTimeout, resolveWebhookConfig } f
 import { createSupabaseAdminClient, getWorkspaceUser } from "@/lib/supabase-admin";
 import { validateDispatchContacts, type WorkpackDispatchChannel } from "@/lib/workpack-commercial";
 import {
+  buildLocalizedDispatchWebhookPayload,
+  buildCanonicalRecipientMessageVariants,
+  getCanonicalDispatchLanguageCodes,
+  validateWorkflowDispatchMessage
+} from "@/lib/workflow-share-client";
+import {
   loadActiveOwnedShareSession,
   loadOwnedWorkpackOperationContext
 } from "@/lib/workpack-commercial-store";
@@ -14,6 +20,7 @@ export const dynamic = "force-dynamic";
 const limiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
 
 type WorkflowChannel = "email" | "sms" | "kakao" | "band";
+type ActiveWorkflowChannel = Exclude<WorkflowChannel, "band">;
 
 type WorkflowRequest = {
   workpackId?: string;
@@ -21,6 +28,7 @@ type WorkflowRequest = {
   idempotencyKey?: string;
   channels?: WorkflowChannel[];
   operatorNote?: string;
+  messageVariants?: Record<string, unknown>;
 };
 
 type WorkflowSuccessResponse = {
@@ -54,7 +62,7 @@ type WorkflowSummary = {
   skipped: number;
 };
 
-const ACTIVE_CHANNELS: WorkflowChannel[] = ["email", "sms", "kakao"];
+const ACTIVE_CHANNELS: ActiveWorkflowChannel[] = ["email", "sms", "kakao"];
 const LOCKED_CHANNELS: WorkflowChannel[] = ["band"];
 const PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED = false;
 const PROVIDER_IDEMPOTENCY_KEY_PATTERN = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
@@ -81,11 +89,31 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function parseChannels(value: unknown): WorkflowChannel[] {
+function parseChannels(value: unknown): ActiveWorkflowChannel[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is WorkflowChannel => (
-    typeof item === "string" && ACTIVE_CHANNELS.includes(item as WorkflowChannel)
+  return value.filter((item): item is ActiveWorkflowChannel => (
+    typeof item === "string" && ACTIVE_CHANNELS.includes(item as ActiveWorkflowChannel)
   ));
+}
+
+function parseMessageVariants(value: unknown): Record<string, string> | null {
+  if (!isRecord(value)) return null;
+  const entries = Object.entries(value);
+  if (!entries.length) return null;
+
+  const variants: Record<string, string> = {};
+  for (const [languageCode, message] of entries) {
+    if (typeof message !== "string") return null;
+    const messageTarget = languageCode === "ko" ? "manager" : `foreign:${languageCode}`;
+    try {
+      validateWorkflowDispatchMessage({ messageTarget, message });
+    } catch (error) {
+      console.warn("workflow dispatch message variant validation failed", error);
+      return null;
+    }
+    variants[languageCode] = message;
+  }
+  return variants;
 }
 
 function parseLockedChannels(value: unknown): WorkflowChannel[] {
@@ -123,7 +151,7 @@ function normalizeChannelResults(value: unknown, requestedChannels: WorkflowChan
     for (const item of value) {
       if (!isRecord(item)) continue;
       const channel = item.channel;
-      if (typeof channel !== "string" || !ACTIVE_CHANNELS.includes(channel as WorkflowChannel)) continue;
+      if (typeof channel !== "string" || !ACTIVE_CHANNELS.includes(channel as ActiveWorkflowChannel)) continue;
       byChannel.set(channel as WorkflowChannel, {
         channel: channel as WorkflowChannel,
         provider: typeof item.provider === "string" ? item.provider : "n8n",
@@ -236,7 +264,14 @@ export async function POST(request: NextRequest) {
   const channels = parseChannels(body.channels);
   const lockedChannels = parseLockedChannels(body.channels);
   const unsupportedChannels = parseUnsupportedChannels(body.channels);
-  const allowedFields = new Set(["workpackId", "shareSessionId", "idempotencyKey", "channels", "operatorNote"]);
+  const allowedFields = new Set([
+    "workpackId",
+    "shareSessionId",
+    "idempotencyKey",
+    "channels",
+    "operatorNote",
+    "messageVariants"
+  ]);
   const rejectedFields = Object.keys(body).filter((key) => !allowedFields.has(key));
 
   if (rejectedFields.length) {
@@ -244,7 +279,7 @@ export async function POST(request: NextRequest) {
       ok: false,
       configured: Boolean(webhookConfig.url && webhookConfig.token),
       rejectedFields,
-      message: "전파 요청에는 workpackId, shareSessionId, channels, operatorNote만 사용할 수 있습니다."
+      message: "전파 요청에는 서버 권한 식별자, 채널, 대상 언어, 검증된 메시지만 사용할 수 있습니다."
     }, { status: 400 });
   }
 
@@ -269,11 +304,20 @@ export async function POST(request: NextRequest) {
   const workpackId = typeof body.workpackId === "string" ? body.workpackId.trim() : "";
   const shareSessionId = typeof body.shareSessionId === "string" ? body.shareSessionId.trim() : "";
   const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim() : "";
+  const messageVariants = parseMessageVariants(body.messageVariants);
   if (!workpackId || !shareSessionId || !PROVIDER_IDEMPOTENCY_KEY_PATTERN.test(idempotencyKey) || channels.length === 0) {
     return NextResponse.json({
       ok: false,
       configured: Boolean(webhookConfig.url && webhookConfig.token),
       message: "작업팩, 공유 세션, provider idempotency key, 전파 채널을 확인해 주세요."
+    }, { status: 400 });
+  }
+  if (!messageVariants) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      providerCalled: false,
+      message: "수신자 언어별 전송 본문을 확인해 주세요."
     }, { status: 400 });
   }
 
@@ -310,32 +354,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, configured: true, message: activeSession.message }, { status: activeSession.status });
   }
 
-  const contactValidation = validateDispatchContacts({
-    channels: channels as WorkpackDispatchChannel[],
-    recipients: activeSession.session.recipients
-  });
-  if (!contactValidation.ok) {
-    return NextResponse.json({ ok: false, configured: true, message: contactValidation.message }, { status: 409 });
-  }
-  const recipients = activeSession.session.recipients.map((recipient) => recipient.workerSnapshot || {});
-
-  if (isLiveDispatchEnabled() && !PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED) {
-    return NextResponse.json({
-      ok: false,
-      configured: false,
-      providerStatus: "idempotency-unsupported",
-      idempotencySupported: false,
-      duplicateRisk: true,
-      providerCalled: false,
-      idempotencyKey,
-      message: "영속 provider idempotency를 보장할 저장 계약이 없어 실제 provider 호출을 차단했습니다. 중복방지 지원 전에는 재전송하지 마세요."
-    }, { status: 409 });
-  }
-
   const webhookConfigured = Boolean(webhookConfig.url && webhookConfig.token);
   const preflightChannelResults = buildPreflightChannelResults(channels, webhookConfigured);
   const dispatchChannels = channels.filter((channel) => !isPreflightBlocked(channel, preflightChannelResults));
-
   if (!dispatchChannels.length) {
     const summary = summarizeChannelResults(preflightChannelResults);
     return NextResponse.json({
@@ -349,6 +370,80 @@ export async function POST(request: NextRequest) {
       summary,
       message: "선택한 전파 채널 중 즉시 전송 가능한 채널이 없습니다. 카카오 알림톡 채널·템플릿 설정을 확인해 주세요."
     });
+  }
+
+  const contactValidation = validateDispatchContacts({
+    channels: dispatchChannels as WorkpackDispatchChannel[],
+    recipients: activeSession.session.recipients
+  });
+  if (!contactValidation.ok) {
+    return NextResponse.json({ ok: false, configured: true, message: contactValidation.message }, { status: 409 });
+  }
+  const recipients = activeSession.session.recipients.map((recipient) => recipient.workerSnapshot || {});
+  const workpack = owned.context.shareAuthority.workpack;
+  const allowedLanguageCodesResult = getCanonicalDispatchLanguageCodes(workpack);
+  if (!allowedLanguageCodesResult.ok) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      providerCalled: false,
+      malformedFields: allowedLanguageCodesResult.malformedFields,
+      message: "저장된 작업팩의 언어별 전송 본문 구조가 올바르지 않아 provider 호출을 차단했습니다."
+    }, { status: 409 });
+  }
+  const allowedLanguageCodes = allowedLanguageCodesResult.languageCodes;
+  const allowedLanguageCodeSet = new Set(allowedLanguageCodes);
+  const unknownLanguageCodes = Object.keys(messageVariants)
+    .filter((languageCode) => !allowedLanguageCodeSet.has(languageCode))
+    .sort();
+  const canonicalVariants = buildCanonicalRecipientMessageVariants({
+    data: workpack,
+    recipientLanguageCodes: allowedLanguageCodes
+  });
+  if (!canonicalVariants.ok) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      providerCalled: false,
+      invalidLanguageCodes: canonicalVariants.invalidLanguageCodes,
+      koreanLeakLanguageCodes: canonicalVariants.koreanLeakLanguageCodes,
+      malformedFields: canonicalVariants.malformedFields,
+      message: "저장된 작업팩의 언어별 전송 본문을 안전하게 검증할 수 없어 provider 호출을 차단했습니다."
+    }, { status: 409 });
+  }
+  const mismatchedLanguageCodes = Object.entries(messageVariants)
+    .filter(([languageCode, message]) => canonicalVariants.messageVariants[languageCode] !== message)
+    .map(([languageCode]) => languageCode)
+    .sort();
+  const recipientLanguageCodes = [...new Set(recipients.map((recipient) => (
+    typeof recipient.languageCode === "string" ? recipient.languageCode.trim() : ""
+  )))];
+  const missingLanguageCodes = recipientLanguageCodes
+    .filter((languageCode) => !languageCode || !Object.hasOwn(messageVariants, languageCode))
+    .map((languageCode) => languageCode || "unknown")
+    .sort();
+  if (unknownLanguageCodes.length || mismatchedLanguageCodes.length || missingLanguageCodes.length) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      providerCalled: false,
+      unknownLanguageCodes,
+      mismatchedLanguageCodes,
+      missingLanguageCodes,
+      message: "요청한 언어별 본문이 저장된 작업팩의 canonical 전송 본문과 일치하지 않아 provider 호출을 차단했습니다."
+    }, { status: 409 });
+  }
+  if (isLiveDispatchEnabled() && !PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED) {
+    return NextResponse.json({
+      ok: false,
+      configured: false,
+      providerStatus: "idempotency-unsupported",
+      idempotencySupported: false,
+      duplicateRisk: true,
+      providerCalled: false,
+      idempotencyKey,
+      message: "영속 provider idempotency를 보장할 저장 계약이 없어 실제 provider 호출을 차단했습니다. 중복방지 지원 전에는 재전송하지 마세요."
+    }, { status: 409 });
   }
 
   if (isLiveDispatchEnabled() && (!webhookConfig.url || !webhookConfig.token)) {
@@ -374,20 +469,32 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const payload = {
-    event: "safeguard.workpack.dispatch",
+  const localizedPayload = buildLocalizedDispatchWebhookPayload({
     idempotencyKey,
-    sentAt: new Date().toISOString(),
     channels: dispatchChannels,
     recipients,
+    messageVariants: canonicalVariants.messageVariants,
     operatorNote: typeof body.operatorNote === "string" ? body.operatorNote : "",
-    workpack: owned.context.shareAuthority.workpack
-  };
+    workpack
+  });
+  if (!localizedPayload.ok) {
+    return NextResponse.json({
+      ok: false,
+      configured: Boolean(webhookConfig.url && webhookConfig.token),
+      providerCalled: false,
+      missingLanguageCodes: localizedPayload.missingLanguageCodes,
+      oversizedMessageLanguageCodes: localizedPayload.oversizedMessageLanguageCodes,
+      message: localizedPayload.oversizedMessageLanguageCodes.length
+        ? "문자 전송 본문이 900자를 초과해 provider 호출을 차단했습니다."
+        : "저장된 작업자 언어에 맞는 전송 본문이 없어 provider 호출을 차단했습니다."
+    }, { status: 409 });
+  }
+  const payload = localizedPayload.payload;
 
   try {
     const workflowResponse = isLiveDispatchEnabled()
       ? await postWebhookWithTimeout(webhookConfig.url, webhookConfig.token, payload)
-      : buildFixtureDispatchResponse(dispatchChannels, recipients);
+      : buildFixtureDispatchResponse(dispatchChannels, payload.recipients);
     const channelResults = [
       ...normalizeChannelResults(workflowResponse.channelResults, dispatchChannels),
       ...preflightChannelResults

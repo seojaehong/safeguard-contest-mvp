@@ -309,19 +309,30 @@ export function buildDbHarnessPacket(input: {
   const references = input.references
     .filter((item) => isSafetyReferenceCompatibleWithQuery(input.question, item))
     .filter((item) => isDirectEvidenceCompatibleWithQueryHazard(item, queryHazardFamilies))
-    .map((item) => ({
-      ...item,
-      evidence_role: isKoshaTechnicalReference(item) || item.item_type === "sif-case"
-        ? "supporting" as const
-        : item.evidence_role,
-      ...buildSafetyReferenceOperationalMetadata(item)
-    }));
+    .map((item) => {
+      const exactDirectKosha = isKoshaTechnicalReference(item)
+        && isSafetyReferenceDirectEligible(item);
+      return {
+        ...item,
+        evidence_role: item.item_type === "sif-case"
+          ? "supporting" as const
+          : exactDirectKosha
+            ? "direct" as const
+            : isKoshaTechnicalReference(item)
+              ? "supporting" as const
+              : item.evidence_role,
+        ...buildSafetyReferenceOperationalMetadata(item)
+      };
+    });
   const directEvidence = references.filter((item) => (
     item.evidence_role === "direct" && isSafetyReferenceDirectEligible(item)
   ));
   const sifCases = references.filter((item) => item.item_type === "sif-case");
-  const directIds = new Set(directEvidence.map((item) => item.id));
-  const supportingEvidence = references.filter((item) => !directIds.has(item.id));
+  const classifiedIds = new Set([
+    ...directEvidence.map((item) => item.id),
+    ...sifCases.map((item) => item.id)
+  ]);
+  const supportingEvidence = references.filter((item) => !classifiedIds.has(item.id));
   const retrievalContract = buildRetrievalContract({
     references,
     directEvidence,
@@ -826,7 +837,27 @@ function boundKoshaPromptValue(value: string, maxChars: number): string {
   return Array.from(singleLine).slice(0, maxChars).join("");
 }
 
-function boundKoshaPromptExcerpt(value: string): string {
+function boundKoshaPromptExcerpt(item: SafetyReferenceItem, query: string): string {
+  const verifiedBody = item.body ?? "";
+  const queryTokens = query
+    .normalize("NFKC")
+    .toLocaleLowerCase("ko-KR")
+    .split(/[^\p{L}\p{N}]+/gu)
+    .filter((token) => token.length >= 2);
+  const anchors = (item.kosha_guide?.anchors ?? [])
+    .filter((anchor) => Boolean(anchor.excerpt.trim()) && verifiedBody.includes(anchor.excerpt))
+    .map((anchor) => ({
+      ...anchor,
+      score: queryTokens.filter((token) => (
+        anchor.excerpt.normalize("NFKC").toLocaleLowerCase("ko-KR").includes(token)
+      )).length,
+    }))
+    .sort((left, right) => right.score - left.score || left.page - right.page);
+  const relevantAnchors = anchors.filter((anchor) => anchor.score > 0);
+  const anchored = (relevantAnchors.length ? relevantAnchors : anchors)
+    .map((anchor) => `[p.${anchor.page}] ${anchor.excerpt}`)
+    .join("\n");
+  const value = anchored || verifiedBody;
   const normalized = value
     .replace(/\r\n?/gu, "\n")
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u2028\u2029]/gu, " ");
@@ -835,7 +866,7 @@ function boundKoshaPromptExcerpt(value: string): string {
 
 function buildVerifiedKoshaPromptLines(
   items: readonly SafetyReferenceItem[],
-  options: { parentCandidates: readonly SafetyReferenceItem[] }
+  options: { parentCandidates: readonly SafetyReferenceItem[]; query: string }
 ): string[] {
   const unique = new Map<string, SafetyReferenceItem>();
 
@@ -883,7 +914,7 @@ function buildVerifiedKoshaPromptLines(
       lifecycle: metadata.lifecycle,
       reviewRequired: decision.reviewRequired || !parentEvidenceReady,
       parentEvidenceReady,
-      ...(parentEvidenceReady && item.body ? { bodyExcerpt: boundKoshaPromptExcerpt(item.body) } : {})
+      ...(parentEvidenceReady && item.body ? { bodyExcerpt: boundKoshaPromptExcerpt(item, options.query) } : {})
     };
     return `KOSHA_SUPPORTING_BODY_JSON: ${JSON.stringify(payload)}`;
   }).filter(Boolean);
@@ -891,10 +922,14 @@ function buildVerifiedKoshaPromptLines(
 
 export function buildHarnessPromptContext(packet: DbHarnessPacket) {
   const parentCandidates = [...packet.sifCases, ...packet.directEvidence];
+  const koshaEvidence = [...packet.directEvidence, ...packet.supportingEvidence]
+    .filter(isKoshaTechnicalReference);
   const evidenceLines = [
     ...packet.sifCases.map((item) => `SIF: ${getSafetyReferenceDisplayTitle(item)} -> ${deriveSafetyReferenceOperationalView(item).controls.slice(0, 2).join(" / ")}`),
-    ...packet.directEvidence.map((item) => `공식자료: ${getSafetyReferenceDisplayTitle(item)} -> ${item.primary_documents.join(", ")}`),
-    ...buildVerifiedKoshaPromptLines(packet.supportingEvidence, { parentCandidates }),
+    ...packet.directEvidence
+      .filter((item) => !isKoshaTechnicalReference(item))
+      .map((item) => `공식자료: ${getSafetyReferenceDisplayTitle(item)} -> ${item.primary_documents.join(", ")}`),
+    ...buildVerifiedKoshaPromptLines(koshaEvidence, { parentCandidates, query: packet.question }),
     ...packet.improvementMemory.map((item) => [
       `개선이력: ${item.hazardLabel} -> ${item.improvementText}`,
       item.visionStatus ? `visionStatus: ${item.visionStatus}` : "",

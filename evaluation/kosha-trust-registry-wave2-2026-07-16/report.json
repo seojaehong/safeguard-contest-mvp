@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "safeclaw-kosha-trust-registry-wave2-report/v1",
+  "generatedAt": "2026-07-16T19:02:00+09:00",
+  "status": "product_pass_with_unresolved_broad_suite_failures",
+  "independentReview": {
+    "spec": "pass",
+    "codeQuality": "pass",
+    "integration": "yes",
+    "blockingFindings": 0
+  },
+  "baseSha": "482c7af825d3e9b9169ef440070f2d7a74d4d3e9",
+  "databaseMutationPerformed": false,
+  "schemaMutationPerformed": false,
+  "productionTrust": {
+    "previousExactPins": 1,
+    "currentExactPins": 2,
+    "trustedStableKeys": ["D-C-13", "D-C-7"],
+    "remainingMetadataVerifiedCandidatesNotExactPinned": 232
+  },
+  "dC7": {
+    "version": "D-C-7-2026",
+    "normalizedCharCount": 38781,
+    "bodySha256": "97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112",
+    "pdfSha256": "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3",
+    "provenanceSha256": "b2ade4323cddecc0a50dab98f944f0781dc09885c8bdece4c1a6c0ea2010d0ef",
+    "publishedAt": "2026-01-30"
+  },
+  "gates": {
+    "atomicRegistryMembership": "pass",
+    "atomicSearchFailure": "pass",
+    "perItemProvenanceExactPin": "pass",
+    "conflictingProvenanceAliases": "pass",
+    "boundedApplicabilityPolicy": "pass",
+    "singularApiCompatibility": "pass",
+    "focusedVitest": { "files": 5, "tests": 77, "status": "pass" },
+    "broadVitest": {
+      "completedWithFinalSummary": true,
+      "filesPassed": 30,
+      "filesFailed": 1,
+      "filesSkipped": 3,
+      "testsPassed": 386,
+      "testsFailed": 3,
+      "testsSkipped": 4,
+      "status": "fail",
+      "historicalOutcome": "failed_unresolved",
+      "failedFile": "tests/kosha-guide-corpus-audit.test.ts",
+      "logArtifact": "evaluation/kosha-trust-registry-wave2-2026-07-16/kosha-sif-ontology-tests.log"
+    },
+    "pythonAcquisition": { "tests": 19, "status": "pass" },
+    "strictTypecheck": "pass",
+    "productionBuild": { "staticPages": 28, "status": "pass" },
+    "nextFileTrace": {
+      "manifestCount": 78,
+      "consumerManifestCount": 16,
+      "exactAssetBytes": 147724,
+      "globalWildcardRemoved": true,
+      "status": "pass"
+    },
+    "diffCheck": "pass"
+  },
+  "operationalNotes": [
+    "The 34-file broad Vitest run completed with 3 failures in tests/kosha-guide-corpus-audit.test.ts; it is recorded as unresolved RED and is not counted as a pass.",
+    "The tracked D-C-7 asset predates the publishedAt generator field, so runtime publication date remains pinned by the immutable production registry until the asset is regenerated through the verified acquisition transaction.",
+    "The 234 metadata-verified candidates are not production exact pins; only D-C-13 and D-C-7 are direct exact evidence in this wave."
+  ]
+}

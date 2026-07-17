@@ -13,6 +13,7 @@
   --ontology-selected: color-mix(in srgb, var(--sc-hazard-yellow) 18%, var(--sc-paper));
   --ontology-focus-ring: color-mix(in srgb, var(--workspace-accent) 55%, transparent);
   display: grid;
+  min-width: 0;
   grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   color: var(--ontology-ink);
@@ -34,7 +35,6 @@
 .summaryGrid article,
 .explorer,
 .directory,
-.rawExports,
 .loopStrip {
   border: 1px solid var(--ontology-line);
   border-radius: 14px;
@@ -136,8 +136,6 @@
 .moreButton,
 .toolbar input,
 .toolbar select,
-.rawExports summary,
-.rawExports a,
 .graphDialog button {
   min-height: 44px;
 }
@@ -194,8 +192,6 @@
 .mobileRelations button:focus-visible,
 .expandButton:focus-visible,
 .moreButton:focus-visible,
-.rawExports summary:focus-visible,
-.rawExports a:focus-visible,
 .graphDialog button:focus-visible {
   outline: 3px solid var(--ontology-focus-ring);
   outline-offset: 2px;
@@ -312,18 +308,6 @@
 .nodeGrid .activeListNode { border: 2px solid var(--workspace-accent); background: color-mix(in srgb, var(--workspace-accent) 11%, var(--ontology-surface)); }
 .moreButton { display: block; margin: 16px auto 0; }
 
-.rawExports { padding: 0 16px; }
-.rawExports summary {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-}
-.rawExports > div { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 0 16px; }
-.rawExports p { flex-basis: 100%; margin: 0; color: var(--ontology-muted); font-size: 13px; line-height: 20px; }
-.rawExports a { display: inline-flex; align-items: center; border: 1px solid var(--ontology-line); border-radius: 8px; padding: 0 12px; color: var(--ontology-ink); text-decoration: none; }
-
 .graphDialog {
   position: fixed;
   z-index: 100;
@@ -355,6 +339,15 @@
   color: var(--ontology-card-ink);
 }
 
+:global(.safeclaw-module-shell[data-theme]) .root .graphNode strong {
+  color: var(--ontology-card-ink);
+}
+
+:global(.safeclaw-module-shell[data-theme]) .root .graphNode span,
+:global(.safeclaw-module-shell[data-theme]) .root .graphNode small {
+  color: var(--ontology-card-muted);
+}
+
 :global(.safeclaw-module-shell[data-theme]) .root .nodeGrid button,
 :global(.safeclaw-module-shell[data-theme]) .root .mobileRelations button,
 :global(.safeclaw-module-shell[data-theme]) .root .graphTools button,
@@ -384,6 +377,11 @@
   .nodeGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+@media (min-width: 901px) and (max-width: 1100px) {
+  .graphCanvas { min-width: 0; }
+  .graphNode { width: 120px; }
+}
+
 @media (max-width: 720px) {
   .root { gap: 16px; }
   .summaryGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -410,8 +408,6 @@
   .mobileRelations button { min-height: 84px; }
   .nodeGrid { grid-template-columns: 1fr; }
   .nodeGrid button { min-height: 80px; }
-  .rawExports > div { display: grid; }
-  .rawExports a { width: 100%; }
   .graphDialog { inset: 8px; }
   .dialogScroller { padding: 8px; }
 }

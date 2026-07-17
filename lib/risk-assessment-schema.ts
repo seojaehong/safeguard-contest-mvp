@@ -26,6 +26,7 @@ export type RiskLevel = (typeof RISK_LEVEL_VALUES)[number];
 export type VerificationStatus = (typeof VERIFICATION_STATUS_VALUES)[number];
 
 export type RiskAssessmentRow = {
+  controlId?: string;
   location: string;
   process: string;
   task: string;
@@ -118,6 +119,7 @@ export const riskAssessmentSchemaRegistryEntry: FormSchemaRegistryEntry = {
     required: REQUIRED_FIELDS,
     additionalProperties: false,
     properties: {
+      controlId: { type: "string" },
       location: { type: "string" },
       process: { type: "string" },
       task: { type: "string" },
@@ -212,6 +214,9 @@ function parseRiskAssessmentRow(value: unknown, rowIndex: number): { row: RiskAs
       issues.push({ rowIndex, field, message: "must be a non-empty string" });
     }
   }
+  if ("controlId" in value && !isNonEmptyString(value.controlId)) {
+    issues.push({ rowIndex, field: "controlId", message: "must be a non-empty string when provided" });
+  }
 
   if (!isEnumValue(value.fourM, FOUR_M_VALUES)) {
     issues.push({ rowIndex, field: "fourM", message: `must be one of ${FOUR_M_VALUES.join(", ")}` });
@@ -260,6 +265,7 @@ function parseRiskAssessmentRow(value: unknown, rowIndex: number): { row: RiskAs
 
   return {
     row: {
+      ...(isNonEmptyString(value.controlId) ? { controlId: value.controlId.trim() } : {}),
       location: String(value.location).trim(),
       process: String(value.process).trim(),
       task: String(value.task).trim(),

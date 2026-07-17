@@ -28,6 +28,18 @@ export type KnowledgeCandidatePostDependencies = {
   mutationGateway: KnowledgeMutationGateway;
 };
 
+export type KnowledgeCandidateBuildDependencies = {
+  generateText: typeof generateKnowledgeText;
+};
+
+export type KnowledgeCandidateBuildInput = {
+  question: string;
+  rawEvents: KnowledgeRawEvent[];
+  tenantContext: KnowledgeTenantContext;
+  limit?: number;
+  generate?: boolean;
+};
+
 export const BLOCKED_KNOWLEDGE_MUTATION_GATEWAY: KnowledgeMutationGateway = {
   async write(command): Promise<void> {
     throw new Error(`Knowledge mutation is not allowed: ${command.type}`);
@@ -79,7 +91,26 @@ function readRawEvents(value: unknown) {
   return { events, errors, message: null };
 }
 
-function buildKnowledgePrompt(
+function buildPromptProvenance(
+  event: KnowledgeRawEvent,
+  tenantContext: KnowledgeTenantContext
+) {
+  const provenance = classifyKnowledgeEvent(event, tenantContext);
+  return {
+    source: provenance.source,
+    capturedAt: provenance.eventReference.capturedAt,
+    eventDigest: provenance.eventReference.digest,
+    payloadDigest: provenance.payloadEvidence.digest,
+    payloadByteLength: provenance.payloadEvidence.byteLength,
+    payloadTopLevelKeyCount: provenance.payloadEvidence.topLevelKeyCount,
+    authorityId: provenance.authorityId,
+    authority: provenance.authority,
+    scope: provenance.scope,
+    legalDutyRole: provenance.legalDutyRole
+  };
+}
+
+export function buildKnowledgePrompt(
   bundle: ReturnType<typeof buildKnowledgeRegenerationBundle>,
   tenantContext: KnowledgeTenantContext
 ) {
@@ -101,11 +132,37 @@ function buildKnowledgePrompt(
     ...hazards,
     "원본 이벤트 provenance:",
     JSON.stringify(
-      bundle.rawEvents.map((event) => classifyKnowledgeEvent(event, tenantContext)),
+      bundle.rawEvents.map((event) => buildPromptProvenance(event, tenantContext)),
       null,
       2
     )
   ].join("\n");
+}
+
+export async function buildKnowledgeCandidateDraft(
+  input: KnowledgeCandidateBuildInput,
+  dependencies: KnowledgeCandidateBuildDependencies
+) {
+  const limit = Math.min(Math.max(Math.trunc(input.limit ?? 4), 1), 10);
+  const bundle = buildKnowledgeRegenerationBundle(input.question, input.rawEvents, limit);
+  const generated = input.generate === false
+    ? {
+        configured: false,
+        text: "",
+        providerLabel: null,
+        policyNote: "generate=true가 아니어서 AI 초안 생성을 건너뛰었습니다."
+      }
+    : await dependencies.generateText(buildKnowledgePrompt(bundle, input.tenantContext));
+  const candidate = buildKnowledgeCandidate({
+    question: input.question,
+    rawEvents: bundle.rawEvents,
+    matchedHazardIds: bundle.matchedHazards.map((hazard) => hazard.id),
+    generatedText: generated.text,
+    providerLabel: generated.providerLabel,
+    tenantContext: input.tenantContext
+  });
+
+  return { bundle, candidate, generated };
 }
 
 export function createKnowledgeCandidatePostHandler(
@@ -163,23 +220,13 @@ export function createKnowledgeCandidatePostHandler(
       );
     }
 
-    const bundle = buildKnowledgeRegenerationBundle(question, events, limit);
-    const generated = shouldGenerate
-      ? await dependencies.generateText(buildKnowledgePrompt(bundle, tenantContext))
-      : {
-          configured: false,
-          text: "",
-          providerLabel: null,
-          policyNote: "generate=true가 아니어서 AI 초안 생성을 건너뛰었습니다."
-        };
-    const candidate = buildKnowledgeCandidate({
+    const { bundle, candidate, generated } = await buildKnowledgeCandidateDraft({
       question,
-      rawEvents: bundle.rawEvents,
-      matchedHazardIds: bundle.matchedHazards.map((hazard) => hazard.id),
-      generatedText: generated.text,
-      providerLabel: generated.providerLabel,
-      tenantContext
-    });
+      rawEvents: events,
+      tenantContext,
+      limit,
+      generate: shouldGenerate
+    }, dependencies);
     const responseBundle = {
       question: bundle.question,
       matchedHazards: bundle.matchedHazards,

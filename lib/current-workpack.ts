@@ -1,5 +1,6 @@
 import type { AskResponse } from "@/lib/types";
 import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
+import type { WorkpackRevalidationBasis } from "@/lib/workpack-readiness";
 import type {
   RecipientSuggestion,
   WorkerDispatchTarget,
@@ -29,6 +30,7 @@ export type StoredCurrentWorkpack = {
   source: "workspace";
   generationFingerprint: string;
   data: AskResponse;
+  revalidationBasis?: WorkpackRevalidationBasis;
   workerSnapshot?: CurrentWorkerSnapshot;
   dispatchSnapshot?: CurrentDispatchSnapshot;
 };
@@ -203,6 +205,18 @@ function parseDispatchSnapshot(value: unknown): CurrentDispatchSnapshot | undefi
   };
 }
 
+function parseRevalidationBasis(value: unknown): WorkpackRevalidationBasis | undefined {
+  if (!isRecord(value) || value.source !== "generated-ontology-qa") return undefined;
+  const reviewTasks = readStringArray(value.reviewTasks)
+    .map((task) => task.trim())
+    .filter(Boolean);
+  if (reviewTasks.length !== 1) return undefined;
+  return {
+    reviewTasks,
+    source: "generated-ontology-qa"
+  };
+}
+
 function parseStoredCurrentWorkpackValue(parsed: Record<string, unknown>): StoredCurrentWorkpackInspection {
   if (!isRfc3339OffsetTimestamp(parsed.savedAt)) {
     return {
@@ -237,6 +251,7 @@ function parseStoredCurrentWorkpackValue(parsed: Record<string, unknown>): Store
       source: "workspace",
       generationFingerprint: readString(parsed.generationFingerprint) || buildWorkpackGenerationFingerprint(data as AskResponse),
       data: data as AskResponse,
+      revalidationBasis: parseRevalidationBasis(parsed.revalidationBasis),
       workerSnapshot: parseWorkerSnapshot(parsed.workerSnapshot),
       dispatchSnapshot: parseDispatchSnapshot(parsed.dispatchSnapshot)
     }
@@ -273,6 +288,7 @@ export function buildStoredCurrentWorkpack(
   snapshots: {
     workerSnapshot?: CurrentWorkerSnapshot;
     dispatchSnapshot?: CurrentDispatchSnapshot;
+    revalidationBasis?: WorkpackRevalidationBasis;
     generationFingerprint?: string;
   } = {}
 ): StoredCurrentWorkpack {
@@ -281,6 +297,7 @@ export function buildStoredCurrentWorkpack(
     source: "workspace",
     generationFingerprint: snapshots.generationFingerprint || buildWorkpackGenerationFingerprint(data),
     data,
+    revalidationBasis: snapshots.revalidationBasis,
     workerSnapshot: snapshots.workerSnapshot,
     dispatchSnapshot: snapshots.dispatchSnapshot
   };

@@ -1,0 +1,26 @@
+{
+  "base_sha": "d42e143575c636fcc6e698b9c9eb35609c70b156",
+  "scope": "bounded no-migration commercial workpack tenant hardening",
+  "historical_red": {
+    "preserved_committed_raw_artifact": false,
+    "used_as_release_evidence": false,
+    "statement": "Before the operation-graph tuple fix, focused tenant behavior exposed missing operation-graph child scoping. No numerical RED count is claimed."
+  },
+  "green": {
+    "command": "npm.cmd test -- tests/workpack-commercial-tenant-hardening.test.ts tests/workpack-commercial.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-improvement-route.test.ts tests/generation-evidence-operation-routes.test.ts tests/commercial-migration.test.ts",
+    "test_files": 6,
+    "tests": 28,
+    "passed": 28,
+    "failed": 0
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "exit_code": 0
+  },
+  "diff_check": {
+    "command": "git diff --check",
+    "exit_code": 0
+  },
+  "database_changes": false,
+  "live_writes": false
+}

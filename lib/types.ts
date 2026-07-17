@@ -154,6 +154,7 @@ export type TbmBriefingStructured = {
     hazardRef: number;         // hazards 배열의 인덱스 (1부터)
     action: string;            // 안전대책 (80자 이내, KOSHA 인용 가능)
     owner: string;             // 담당자
+    evidenceRefs: string[];    // 연결 근거 패킷 referenceKey
   }>;
   stopCriteria: string[];      // 작업중지 기준 (3-5개)
   confirmTopics: string[];     // 마무리 확인질문 (5개)
@@ -200,6 +201,7 @@ export type TbmLogStructured = {
     plannedAction: string;
     owner: string;
     dueDate: string;             // YYYY-MM-DD 또는 "현장 확인"
+    evidenceRefs: string[];      // 연결 근거 패킷 referenceKey
   }>;
   photoEvidence: {               // 사진증빙
     captureLocations: string[];  // 촬영 위치 (예: ["1층 작업장 동측", "장비실"])
@@ -278,6 +280,7 @@ export type PermitInspectionStructured = {
 };
 
 export type TbmRiskLink = {
+  controlId?: string;
   riskRowIndex: number;
   hazard: string;
   control: string;
@@ -576,7 +579,7 @@ export type AskResponse = {
   };
   riskSummary: {
     title: string;
-    riskLevel: "상" | "중" | "하";
+    riskLevel: "상" | "중" | "하" | "현장 확인 필요";
     topRisk: string;
     immediateActions: string[];
   };
@@ -657,6 +660,17 @@ export type AskResponse = {
       retrievalContract: DbHarnessPacket["retrievalContract"];
       ontologyStatus: DbHarnessPacket["ontologyChecklist"]["status"];
     };
+  };
+  groundingReview?: {
+    status: "review_required";
+    sourceIdentity: string;
+    criticalControls: string[];
+    rejectedGroups: string[];
+    violations: Array<{
+      group: string;
+      code: "unknown_reference" | "control_provenance_missing" | "control_claim_not_in_packet";
+      path: string;
+    }>;
   };
   generationTrace?: GenerationTrace;
   generationEvidence?: GenerationEvidenceEnvelope;

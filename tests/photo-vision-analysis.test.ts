@@ -34,6 +34,8 @@ const PHOTO_BYTES: Record<string, ArrayBuffer> = {
   "image/gif": photoBytes([0x47, 0x49, 0x46, 0x38, 0x39, 0x61])
 };
 
+const EXACT_D_C_7_ID = "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정";
+
 function createPhoto(name: string, type: string, content?: BlobPart): File {
   return new File([content ?? PHOTO_BYTES[type] ?? "not-an-image"], name, { type });
 }
@@ -908,8 +910,18 @@ describe("photo vision analysis contract", () => {
     expect(queries.filter((query) => query.includes("비계"))).toHaveLength(3);
     expect(queries.filter((query) => query.includes("지게차"))).toHaveLength(3);
     expect(analysis.counts.harnessConfirmed).toBe(2);
-    expect(analysis.candidates[0]?.harness.evidence.map((item) => item.sourceId)).toEqual(["fall-scaffold"]);
-    expect(analysis.candidates[0]?.harness.evidence[0]).toMatchObject({
+    const scaffoldEvidence = analysis.candidates[0]?.harness.evidence ?? [];
+    expect(scaffoldEvidence.map((item) => item.sourceId)).toEqual([
+      EXACT_D_C_7_ID,
+      "fall-scaffold"
+    ]);
+    expect(scaffoldEvidence.find((item) => item.sourceId === EXACT_D_C_7_ID)).toMatchObject({
+      stableDocumentKey: "D-C-7",
+      evidenceRole: "direct",
+      directEligible: true,
+      reviewRequired: false
+    });
+    expect(scaffoldEvidence.find((item) => item.sourceId === "fall-scaffold")).toMatchObject({
       catalogSourceId: "fall-scaffold-source",
       sourceUrl: "https://safety.example/fall-scaffold",
       itemType: "guideline",
@@ -920,7 +932,8 @@ describe("photo vision analysis contract", () => {
         expect.objectContaining({ channel: "supporting", mode: "ranked-rpc", source: "ranked" })
       ])
     });
-    expect(analysis.candidates[0]?.harness.confirmedControls).toEqual([{
+    const scaffoldControls = analysis.candidates[0]?.harness.confirmedControls ?? [];
+    expect(scaffoldControls).toEqual([{
       text: "비계 작업발판 안전난간 상태 확인",
       evidenceSourceIds: ["fall-scaffold"]
     }]);
@@ -967,6 +980,40 @@ describe("photo vision analysis contract", () => {
       riskTags: ["추락"],
       controls: ["외벽 작업발판 안전난간 상태 확인"]
     });
+    const bodyExtractableReference = safetyReference({
+      id: "body-extractable-kosha-control",
+      title: "비계 작업발판 안전 기술지원규정",
+      keywords: ["비계", "추락", "작업발판"],
+      riskTags: ["추락"],
+      controls: ["작업발판 고정 상태를 확인한다."]
+    });
+    bodyExtractableReference.item_type = "technical-support-regulation";
+    bodyExtractableReference.body = "작업 전 작업발판 고정 상태를 확인한다.";
+    bodyExtractableReference.kosha_grounding = {
+      status: "verified_current",
+      reason: "verified-current",
+      source: "local-corpus",
+      reviewRequired: false,
+      directEvidenceEligible: true,
+      supportingCitationEligible: true,
+      mandatoryCitationEligible: true,
+      riskRowEligible: false,
+      promptExcerptEligible: true,
+      metadata: {
+        uid: bodyExtractableReference.id,
+        stableDocumentKey: "D-C-PHOTO-TEST",
+        version: "2026",
+        currentVersion: "2026",
+        lifecycle: "current",
+        reviewState: "verified",
+        bodyKind: "native",
+        bodySha256: "a".repeat(64),
+        officialUrl: "https://portal.kosha.or.kr/photo-test",
+        officialFileId: "PHOTO-TEST",
+        publishedAt: "2026-01-01",
+        provenance: "test-exact-body"
+      }
+    };
     reviewRequiredReference.source_id = "kosha-guide-offline:D-C-13";
     reviewRequiredReference.item_type = "technical-support-regulation";
     reviewRequiredReference.evidence_role = "supporting";
@@ -987,8 +1034,8 @@ describe("photo vision analysis contract", () => {
       ok: true,
       configured: true,
       query: "비계 작업발판 추락 위험",
-      count: 2,
-      items: [trustedReference, reviewRequiredReference],
+      count: 3,
+      items: [trustedReference, bodyExtractableReference, reviewRequiredReference],
       retrievalMode: "ranked-rpc",
       vectorSearch: {
         enabled: false,
@@ -1024,11 +1071,15 @@ describe("photo vision analysis contract", () => {
     }, { provider });
 
     expect(analysis.candidates[0]?.harness.status).toBe("confirmed");
-    expect(analysis.candidates[0]?.harness.evidence.map((item) => item.sourceId)).toEqual([
+    expect(analysis.candidates[0]?.harness.evidence.map((item) => item.sourceId)).toEqual(expect.arrayContaining([
+      EXACT_D_C_7_ID,
       "trusted-fall-control",
+      "body-extractable-kosha-control",
       "review-required-fall-control"
-    ]);
-    expect(analysis.candidates[0]?.harness.evidence[1]).toMatchObject({
+    ]));
+    expect(analysis.candidates[0]?.harness.evidence.find((item) => (
+      item.sourceId === "review-required-fall-control"
+    ))).toMatchObject({
       evidenceRole: "supporting",
       stableDocumentKey: "D-C-13",
       anchor: { page: 7, excerpt: "외벽 작업발판 안전난간 상태 확인" },
@@ -1037,10 +1088,20 @@ describe("photo vision analysis contract", () => {
       directEligible: false,
       reviewRequired: true
     });
-    expect(analysis.candidates[0]?.harness.confirmedControls).toEqual([{
-      text: "비계 작업발판 안전난간 상태 확인",
-      evidenceSourceIds: ["trusted-fall-control"]
-    }]);
+    const confirmedControls = analysis.candidates[0]?.harness.confirmedControls ?? [];
+    expect(confirmedControls).toEqual(expect.arrayContaining([
+      {
+        text: "비계 작업발판 안전난간 상태 확인",
+        evidenceSourceIds: ["trusted-fall-control"]
+      },
+      {
+        text: "작업발판 고정 상태를 확인한다.",
+        evidenceSourceIds: ["body-extractable-kosha-control"]
+      }
+    ]));
+    expect(confirmedControls.flatMap((item) => item.evidenceSourceIds)).not.toContain(
+      "review-required-fall-control"
+    );
   });
 
   it("does not ground a candidate from generic review vocabulary alone", async () => {

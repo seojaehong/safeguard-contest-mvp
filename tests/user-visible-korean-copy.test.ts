@@ -54,6 +54,25 @@ const forbiddenUserFacingCopy: Record<string, readonly string[]> = {
     "<span>Improvement</span>",
     "<span>Ack</span>"
   ],
+  "app/ontology/OntologyExplorer.tsx": [
+    "Graph unavailable",
+    "Graph Ontology",
+    "List Ontology",
+    "Hover Cards",
+    "<span>Nodes</span>",
+    "<span>Edges</span>",
+    "<span>Gate</span>",
+    "<span>Fallback</span>",
+    "Operation Memory",
+    "<span>Workpack</span>",
+    "<span>Evidence</span>",
+    "<span>Improvement</span>",
+    "<span>Ack</span>",
+    "그래프 JSON",
+    "JSONL",
+    "Obsidian",
+    "API 계약 보기"
+  ],
   "app/knowledge/page.tsx": [
     "Built-in Wiki",
     "Runtime Knowledge",
@@ -119,9 +138,14 @@ describe("user-visible Korean copy contract", () => {
   });
 
   it("uses positive Korean labels on ontology and knowledge surfaces", () => {
-    const ontology = `${read("app/ontology/page.tsx")}\n${read("app/ontology/OntologyExplorer.tsx")}`;
-    for (const label of ["검증된 안전지식", "검증된 연결", "근거 차단", "대체자료", "오늘 작업", "개선 기록", "연결된 근거", "전체 목록"]) {
-      expect(ontology).toContain(`>${label}<`);
+    const ontologyPage = read("app/ontology/page.tsx");
+    for (const label of ["운영 온톨로지", "작업과 근거의 연결.", "그래프를 사용할 수 없음"]) {
+      expect(ontologyPage).toContain(label);
+    }
+
+    const ontologyExplorer = read("app/ontology/OntologyExplorer.tsx");
+    for (const label of ["검증된 안전지식", "검증된 연결", "근거 차단", "대체자료", "관계 탐색", "연결된 근거", "개선 기록"]) {
+      expect(ontologyExplorer).toContain(`>${label}<`);
     }
 
     const knowledge = read("app/knowledge/page.tsx");
@@ -140,8 +164,8 @@ describe("user-visible Korean copy contract", () => {
     expect(currentWorkpack).toContain("providerStatus");
     expect(currentWorkpack).toContain("formatDispatchProviderStatus(log.providerStatus)");
     expect(currentWorkpack).not.toContain('log.providerStatus || "상태 확인"');
-    expect(read("app/ontology/OntologyExplorer.tsx")).toContain("/api/ontology/graph");
-    expect(read("app/api/workpacks/[id]/operation-graph/route.ts")).toContain("buildOperationMemoryGraph");
+    const fieldOperations = read("components/FieldOperationsWorkspace.tsx");
+    expect(fieldOperations).toContain("fetch(`/api/workpacks/${encodeURIComponent(workpackId)}/operation-graph`");
   });
 
   it("uses Korean before-and-after labels on the Reports page and download center", () => {

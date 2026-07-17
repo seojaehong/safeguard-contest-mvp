@@ -1,6 +1,6 @@
 import type { ClawChatEvent, ClawSiteProfile } from "@/lib/agent-loop";
 
-export type EngineMode = "disabled" | "local-openclaw" | "experimental-hermes";
+export type EngineMode = "disabled" | "local-openclaw" | "experimental-hermes" | "remote-hermes";
 export type EnvLike = Record<string, string | undefined>;
 export const ENGINE_ADAPTER_CONTRACT_VERSION = "engine-adapter/v1" as const;
 
@@ -108,6 +108,7 @@ export function resolveEngineMode(env: EnvLike): EngineMode {
       ? "disabled"
       : "experimental-hermes";
   }
+  if (requested === "remote-hermes") return "remote-hermes";
   return "disabled";
 }
 

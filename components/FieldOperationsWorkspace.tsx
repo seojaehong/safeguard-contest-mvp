@@ -30,7 +30,11 @@ import {
 } from "@/lib/current-workpack";
 import type { AskResponse } from "@/lib/types";
 import type { OperationMemoryGraph } from "@/lib/ontology/operation-memory";
-import { applyWorkpackDeliverablesChange, type WorkpackReadiness } from "@/lib/workpack-readiness";
+import {
+  applyWorkpackDeliverablesChange,
+  type WorkpackReadiness,
+  type WorkpackRevalidationBasis
+} from "@/lib/workpack-readiness";
 import { buildWorkspaceOperationMemoryGraph } from "@/lib/workspace-operation-graph";
 import { resolveSavedWorkerIds } from "@/lib/workflow-share-client";
 import {
@@ -298,7 +302,7 @@ function AdminAccessPanel({
       setMessage("관리자 로그인 링크를 보냈습니다. 메일함에서 확인해 주세요.");
     } catch (error) {
       console.error("supabase otp send failed", error);
-      setMessage("로그인 링크 발송에 실패했습니다. Supabase Auth 설정을 확인해 주세요.");
+      setMessage("로그인 링크 발송에 실패했습니다. 관리자 로그인 설정을 확인해 주세요.");
     } finally {
       setIsSending(false);
     }
@@ -689,11 +693,11 @@ function WorkpackHistoryPanel({
       anchor.remove();
       URL.revokeObjectURL(url);
       if (format === "jsonl") {
-        setDownloadMessage("JSONL 운영 메모리를 내려받았습니다.");
+        setDownloadMessage("재사용 검토 데이터를 내려받았습니다.");
       } else if (format === "obsidian") {
-        setDownloadMessage("Obsidian용 작업 그래프 Markdown을 내려받았습니다.");
+        setDownloadMessage("연결형 작업 메모를 내려받았습니다.");
       } else {
-        setDownloadMessage("Markdown 개선 메모리를 내려받았습니다.");
+        setDownloadMessage("개선 메모리 문서를 내려받았습니다.");
       }
     } catch (error) {
       console.error("learning export download failed", error);
@@ -725,7 +729,7 @@ function WorkpackHistoryPanel({
           onClick={() => downloadLearningExport("markdown")}
           disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
         >
-          {downloadingFormat === "markdown" ? "내려받는 중" : "작업 이력 MD"}
+          {downloadingFormat === "markdown" ? "내려받는 중" : "작업 이력 문서"}
         </button>
         <button
           type="button"
@@ -733,7 +737,7 @@ function WorkpackHistoryPanel({
           onClick={() => downloadLearningExport("jsonl")}
           disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
         >
-          {downloadingFormat === "jsonl" ? "내려받는 중" : "하네스 JSONL"}
+          {downloadingFormat === "jsonl" ? "내려받는 중" : "재사용 검토 데이터"}
         </button>
         <button
           type="button"
@@ -741,7 +745,7 @@ function WorkpackHistoryPanel({
           onClick={() => downloadLearningExport("obsidian")}
           disabled={!session || !storageSnapshot.workpackId || downloadingFormat !== null}
         >
-          {downloadingFormat === "obsidian" ? "내려받는 중" : "Obsidian MD"}
+          {downloadingFormat === "obsidian" ? "내려받는 중" : "연결형 작업 메모"}
         </button>
       </div>
       <p className="muted small">
@@ -777,7 +781,7 @@ function WorkspaceOperationGraphPanel({
   useEffect(() => {
     if (!authToken || !workpackId) {
       setServerGraph(null);
-      setGraphMessage("저장 전에는 현재 생성 결과와 DB 하네스 패킷으로 작업 이력 그래프를 임시 구성합니다.");
+      setGraphMessage("저장 전에는 현재 생성 결과와 검증 근거로 작업 이력 그래프를 임시 구성합니다.");
       return;
     }
 
@@ -796,8 +800,8 @@ function WorkspaceOperationGraphPanel({
       if (cancelled) return;
       setServerGraph(payload.graph);
       setGraphMessage(typeof payload.source === "object"
-        ? "저장된 작업팩, 개선사항, 열람 확인 이력을 Supabase에서 다시 구성했습니다."
-        : "현재 생성 결과와 DB 하네스 패킷으로 작업 이력 그래프를 구성했습니다."
+        ? "저장된 작업팩, 개선사항, 열람 확인 이력을 서버 기록에서 다시 구성했습니다."
+        : "현재 생성 결과와 검증 근거로 작업 이력 그래프를 구성했습니다."
       );
     }).catch((error: unknown) => {
       if (cancelled) return;
@@ -819,12 +823,12 @@ function WorkspaceOperationGraphPanel({
   return (
     <OperationMemoryGraphViewer
       graph={graph}
-      eyebrow="Operation Ontology"
+      eyebrow="작업 근거 연결"
       title="작업 이력 그래프"
       className="workspace-operation-memory"
       description={(
         <>
-          오늘 문서팩이 사용한 DB 하네스 근거, 유사 과거 작업, 위험요인, 감소대책, 사진 개선사항, 열람 확인을 한 화면에서 연결합니다.{" "}
+          오늘 문서팩이 사용한 검증 근거, 유사 과거 작업, 위험요인, 감소대책, 사진 개선사항, 열람 확인을 한 화면에서 연결합니다.{" "}
           {ackMessage}
         </>
       )}
@@ -839,6 +843,7 @@ export function FieldOperationsWorkspace({
   editorFocusToken = 0,
   requestedDocumentKey,
   readiness,
+  revalidationBasis,
   onDeliverablesChange,
   surface = "full"
 }: {
@@ -847,6 +852,7 @@ export function FieldOperationsWorkspace({
   editorFocusToken?: number;
   requestedDocumentKey?: DocumentKey;
   readiness?: WorkpackReadiness;
+  revalidationBasis?: WorkpackRevalidationBasis;
   onDeliverablesChange?: (values: WorkpackDocumentValues, change: WorkpackDeliverablesChange) => void;
   surface?: "full" | "share" | "editor";
 }) {
@@ -1039,6 +1045,7 @@ export function FieldOperationsWorkspace({
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(nextData, {
           generationFingerprint,
+          revalidationBasis,
           workerSnapshot: workerSnapshotRef.current,
           dispatchSnapshot: dispatchSnapshotRef.current
         }))
@@ -1046,7 +1053,7 @@ export function FieldOperationsWorkspace({
     } catch (error) {
       console.warn("safeclaw current workpack update failed", error);
     }
-  }, []);
+  }, [generationFingerprint, revalidationBasis]);
   const workerSummary = summarizeWorkers(selectedWorkers);
   const pilotChecklist = [
     ["PLAN", "계획", `${workspaceData.citations.length}건 근거 · 위험성평가·작업계획`],
@@ -1151,7 +1158,7 @@ export function FieldOperationsWorkspace({
       return snapshot;
     } catch (error) {
       console.error("workspace save failed", error);
-      return setStorageFailure("작업공간 저장 중 오류가 발생했습니다. Supabase 설정과 로그인 상태를 확인해 주세요.");
+      return setStorageFailure("작업공간 저장 중 오류가 발생했습니다. 서버 저장 설정과 로그인 상태를 확인해 주세요.");
     }
   }
 
@@ -1214,6 +1221,7 @@ export function FieldOperationsWorkspace({
         CURRENT_WORKPACK_STORAGE_KEY,
         JSON.stringify(buildStoredCurrentWorkpack(workspaceData, {
           generationFingerprint,
+          revalidationBasis,
           workerSnapshot,
           dispatchSnapshot
         }))
@@ -1221,7 +1229,7 @@ export function FieldOperationsWorkspace({
     } catch (error) {
       console.warn("safeclaw current workpack snapshot update failed", error);
     }
-  }, [dispatchSnapshot, generationFingerprint, workerSnapshot, workspaceData]);
+  }, [dispatchSnapshot, generationFingerprint, revalidationBasis, workerSnapshot, workspaceData]);
 
   if (surface === "share") {
     return (

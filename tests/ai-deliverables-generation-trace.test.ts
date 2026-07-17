@@ -1,9 +1,34 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
+import type { GroundedGenerationPacket } from "@/lib/grounded-generation-contract";
+import { buildPublishedSafetyKnowledge } from "@/lib/ontology/knowledge-tool";
+import {
+  buildPhaseAGenerationGrounding,
+  type PhaseAGenerationGrounding,
+} from "@/lib/ontology/evidence-chain";
+import { assembleGraph } from "@/lib/ontology/graph-store";
+import { SEED_EDGES, SEED_NODES } from "@/lib/ontology/seed/core-triples";
+
 const mocks = vi.hoisted(() => ({
   anthropicGenerate: vi.fn(),
   vertexGenerate: vi.fn()
 }));
+
+const groundingPacket: GroundedGenerationPacket = Object.freeze({
+  version: "grounded-generation-v1",
+  sourceIdentity: "test-packet",
+  status: "ready",
+  llmRole: "naturalize_only",
+  sources: Object.freeze([Object.freeze({
+    referenceKey: "LAW:law-38",
+    kind: "law",
+    sourceId: "law-38",
+    title: "산업안전보건법 제38조",
+    summary: "사업주의 안전조치 의무",
+    aliases: Object.freeze(["LAW:law-38", "산업안전보건법 제38조"]),
+    controls: Object.freeze([])
+  })])
+});
 
 vi.mock("@/lib/anthropic-client", () => ({
   generateWithAnthropic: mocks.anthropicGenerate
@@ -90,6 +115,70 @@ describe("deliverables generation trace", () => {
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"traceId":"trace-anthropic-documents"'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"model":"claude-opus-4-8"'));
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"model":"claude-haiku-4-5"'));
+  });
+
+  test("rejects provider-authored control prose at the Phase A deliverables boundary", async () => {
+    const providerClaim = "고정 패킷에 없는 신규 붕괴 위험 때문에 드론 감시원을 배치한다. ".repeat(8);
+    mocks.anthropicGenerate.mockImplementation(async (_model: string, prompt: string) => {
+      if (prompt.includes('"riskAssessmentDraft"')) {
+        return JSON.stringify({ riskAssessmentDraft: providerClaim });
+      }
+      throw new Error("fixture leaves this document on deterministic fallback");
+    });
+    const { generateAllDeliverablesWithDiagnostics } = await import("@/lib/ai-deliverables");
+    const { buildPhaseAGenerationGrounding } = await import("@/lib/ontology/evidence-chain");
+    const phaseAGrounding = buildPhaseAGenerationGrounding({
+      evidenceChainState: "not_registered",
+      evidencePack: null,
+    });
+
+    const result = await generateAllDeliverablesWithDiagnostics({
+      scenario: {
+        companyName: "테스트사",
+        siteName: "테스트 현장",
+        workSummary: "일반 작업",
+        workerCount: 4,
+        weatherNote: "현장 확인",
+      },
+      question: "일반 작업",
+      scope: "full",
+      traceId: "trace-phase-a-deliverables-boundary",
+      phaseAGrounding,
+    });
+
+    expect(result.deliverables.riskAssessmentDraft).toBeUndefined();
+    expect(result.diagnostics.groupResults).toContainEqual({
+      group: "riskAssessment",
+      status: "rejected",
+      reason: "grounding review required",
+    });
+  });
+
+  test("rejects structured risk rows from the actual review-required Phase A path", async () => {
+    const phaseAGrounding = reviewRequiredPhaseAGrounding();
+    expect(phaseAGrounding.groundingStatus).toBe("review_required");
+    expect(phaseAGrounding.allowedEvidence).toEqual([]);
+    const { generateAllDeliverablesWithDiagnostics } = await import("@/lib/ai-deliverables");
+
+    const result = await generateAllDeliverablesWithDiagnostics({
+      scenario: {
+        companyName: "테스트사",
+        siteName: "테스트 현장",
+        workSummary: "고소작업",
+        workerCount: 4,
+        weatherNote: "현장 확인",
+      },
+      question: "고소작업",
+      scope: "full",
+      traceId: "trace-phase-a-canonical-row",
+      phaseAGrounding,
+    });
+
+    expect(result.deliverables.structuredRiskRows).toBeUndefined();
+    expect(result.diagnostics.groupResults).toContainEqual(expect.objectContaining({
+      group: "structuredRiskRows",
+      status: "rejected",
+    }));
   });
 
   test("attempts Anthropic generation without requiring Vertex credentials", async () => {
@@ -324,4 +413,122 @@ describe("deliverables generation trace", () => {
     expect(logged).not.toContain("900101-1234567");
     expect(logged).not.toContain("sk-private-deliverables");
   });
+
+  test("fails closed when a parsed document cites a law outside the immutable grounding packet", async () => {
+    mocks.anthropicGenerate.mockImplementation(async (_model: string, prompt: string) => {
+      if (prompt.includes('"riskAssessmentDraft"')) {
+        return JSON.stringify({
+          riskAssessmentDraft: `산업안전보건법 제39조를 근거로 임의 통제조치를 적용한다. ${"형식상 유효한 본문 ".repeat(15)}`
+        });
+      }
+      throw new Error("fixture deterministic fallback");
+    });
+    mocks.vertexGenerate.mockRejectedValue(new Error("fixture vertex unavailable"));
+    const { generateAllDeliverablesWithDiagnostics } = await import("@/lib/ai-deliverables");
+
+    const result = await generateAllDeliverablesWithDiagnostics({
+      scenario: {
+        companyName: "테스트사",
+        siteName: "테스트 현장",
+        workSummary: "외벽 도장",
+        workerCount: 4,
+        weatherNote: "강풍 주의"
+      },
+      question: "성수동 외벽 도장 작업",
+      groundingPacket,
+      traceId: "trace-grounding-rejection"
+    });
+
+    expect(result.deliverables.riskAssessmentDraft).toBeUndefined();
+    expect(result.diagnostics.groupResults).toContainEqual(expect.objectContaining({
+      group: "riskAssessment",
+      status: "rejected",
+      reason: "grounding review required"
+    }));
+    expect(result.diagnostics.grounding).toMatchObject({
+      status: "review_required",
+      sourceIdentity: "test-packet",
+      rejectedGroups: ["riskAssessment"]
+    });
+  });
+
+  test("preserves critical controls when the provider pipeline fails", async () => {
+    const { buildFailedDeliverablesDiagnostics } = await import("@/lib/ai-deliverables");
+    const controlPacket: GroundedGenerationPacket = Object.freeze({
+      ...groundingPacket,
+      sourceIdentity: "failed-pipeline-packet",
+      sources: Object.freeze([Object.freeze({
+        referenceKey: "SIF:sif-fall",
+        kind: "sif" as const,
+        sourceId: "sif-fall",
+        title: "추락 사례",
+        summary: "개구부 추락 위험",
+        aliases: Object.freeze(["SIF:sif-fall"]),
+        controls: Object.freeze(["개구부 덮개를 고정한다."])
+      })])
+    });
+
+    const diagnostics = buildFailedDeliverablesDiagnostics({
+      attempted: true,
+      fallbackUsed: true,
+      groundingPacket: controlPacket
+    });
+
+    expect(diagnostics.grounding).toEqual({
+      status: "review_required",
+      sourceIdentity: "failed-pipeline-packet",
+      rejectedGroups: ["deliverablesPipeline"],
+      violations: [],
+      criticalControls: ["개구부 덮개를 고정한다."]
+    });
+  });
+
+  test("preserves a valid generated document whose citation resolves to the packet", async () => {
+    mocks.anthropicGenerate.mockImplementation(async (_model: string, prompt: string) => {
+      if (prompt.includes('"riskAssessmentDraft"')) {
+        return JSON.stringify({
+          riskAssessmentDraft: `산업안전보건법 제38조는 제공된 법령 근거입니다. ${"근거 패킷을 반영한 본문 ".repeat(15)}`
+        });
+      }
+      throw new Error("fixture deterministic fallback");
+    });
+    mocks.vertexGenerate.mockRejectedValue(new Error("fixture vertex unavailable"));
+    const { generateAllDeliverablesWithDiagnostics } = await import("@/lib/ai-deliverables");
+
+    const result = await generateAllDeliverablesWithDiagnostics({
+      scenario: {
+        companyName: "테스트사",
+        siteName: "테스트 현장",
+        workSummary: "외벽 도장",
+        workerCount: 4,
+        weatherNote: "강풍 주의"
+      },
+      question: "성수동 외벽 도장 작업",
+      groundingPacket,
+      traceId: "trace-grounding-accepted"
+    });
+
+    expect(result.deliverables.riskAssessmentDraft).toContain("산업안전보건법 제38조");
+    expect(result.diagnostics.groupResults).toContainEqual(expect.objectContaining({
+      group: "riskAssessment",
+      status: "fulfilled"
+    }));
+    expect(result.diagnostics.grounding).toMatchObject({
+      status: "grounded",
+      sourceIdentity: "test-packet",
+      rejectedGroups: []
+    });
+  });
 });
+
+function reviewRequiredPhaseAGrounding(): PhaseAGenerationGrounding {
+  const graph = assembleGraph(
+    SEED_NODES.filter((node) => node.review_state === "published"),
+    SEED_EDGES.filter((edge) => edge.review_state === "published"),
+  );
+  const knowledge = buildPublishedSafetyKnowledge(graph, "고소작업");
+  return buildPhaseAGenerationGrounding({
+    evidenceChainState: knowledge.evidenceChainState,
+    evidencePack: knowledge.evidenceContract,
+  });
+}

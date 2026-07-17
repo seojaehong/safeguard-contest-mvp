@@ -3,6 +3,7 @@ import { appendFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { NextRequest } from "next/server";
 
 import { buildDbHarnessPacket, buildHarnessPromptContext } from "@/lib/db-harness";
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
@@ -14,11 +15,16 @@ import {
   type SafetyReferenceItem,
   type SafetyReferenceSearchResult
 } from "@/lib/safety-reference-catalog";
-import { searchSafetyReferences as searchServerSafetyReferences } from "@/lib/safety-reference-catalog-server";
+import {
+  loadBundledExactKoshaReference,
+  searchSafetyReferences as searchServerSafetyReferences,
+} from "@/lib/safety-reference-catalog-server";
 import { resetKoshaGuideCorpusCacheForTests } from "@/lib/kosha-guide-corpus";
+import { GET as searchSafetyReferenceRoute } from "@/app/api/safety-reference/search/route";
 import {
   cleanupKoshaFixtures,
-  createKoshaFixture
+  createKoshaFixture,
+  koshaTestLookup,
 } from "@/tests/helpers/kosha-offline-fixture";
 
 type GroundingProjection = {
@@ -137,6 +143,47 @@ function nonKoshaReference(overrides: Partial<SafetyReferenceItem> = {}): Safety
   };
 }
 
+async function exactBundleWithPartialAndGeneralRows(): Promise<{
+  bundled: SafetyReferenceItem;
+  partialRow: SafetyReferenceItem;
+  generalRow: Record<string, unknown>;
+}> {
+  const bundled = await loadBundledExactKoshaReference();
+  if (bundled.status !== "ready") throw new Error("expected exact bundle fixture");
+  const partialBody = bundled.item.body?.slice(0, 2_582) ?? "";
+  const partialRow: SafetyReferenceItem = {
+    ...bundled.item,
+    body: partialBody,
+    kosha_grounding: undefined,
+    kosha_guide: undefined,
+    payload: {
+      ...(bundled.item.payload ?? {}),
+      body_sha256: sha256(partialBody),
+    },
+  };
+  const generalBody = `${VERIFIED_BODY_PREFIX}: 일반 KOSHA 행은 exact trust 경계를 통과하지 못한다.`;
+  const generalRow = referenceRow(
+    "general-verified-kosha",
+    generalBody,
+    verifiedPayload("general-verified-kosha", generalBody),
+  );
+  return { bundled: bundled.item, partialRow, generalRow };
+}
+
+function mockRankedReferenceRows(rows: readonly unknown[]): void {
+  vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {
+    const url = String(input);
+    if (url.includes("/rpc/search_safety_references_ranked")
+      || url.includes("/rest/v1/safety_reference_items")) {
+      return new Response(JSON.stringify(rows), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    throw new Error(`Unexpected fetch URL: ${url}`);
+  }));
+}
+
 async function searchRemoteRows(rows: Record<string, unknown>[]): Promise<{
   result: SafetyReferenceSearchResult;
   select: string;
@@ -191,6 +238,28 @@ afterEach(() => {
 });
 
 describe("bounded KOSHA grounding fail-closed", () => {
+  it("preserves the exact-registry block when remote search is unconfigured and local support exists", async () => {
+    const rootDir = createKoshaFixture({ state: "current" });
+    vi.stubEnv("SUPABASE_URL", "");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+
+    const result = await searchServerSafetyReferences({
+      query: "지게차 보행자 동선",
+      limit: 5,
+      exactKoshaAssetPaths: [join(rootDir, "missing-exact-registry.json")],
+      offlineCorpus: koshaTestLookup(rootDir),
+    }) as SafetyReferenceSearchResult & GroundingSearchProjection;
+
+    expect(result.items).toEqual([]);
+    expect(result.koshaGrounding).toMatchObject({
+      status: "blocked",
+      reason: "exact-registry-integrity-failed",
+      localCorpusStatus: "ready",
+      acceptedCount: 0,
+    });
+    expect(result.message).toMatch(/정확 본문 레지스트리 무결성 실패/u);
+  });
+
   it("parses only core REST columns and classifies adversarial remote KOSHA rows", async () => {
     const verifiedBody = [
       VERIFIED_BODY_PREFIX,
@@ -456,7 +525,7 @@ describe("bounded KOSHA grounding fail-closed", () => {
     });
   });
 
-  it("keeps the aggregate blocked when an integrity-failed local corpus retains verified remote KOSHA", async () => {
+  it("keeps the aggregate blocked and excludes general verified KOSHA when local integrity fails", async () => {
     const rootDir = createKoshaFixture({ state: "current" });
     appendFileSync(join(rootDir, "current.json"), "tampered", "utf8");
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
@@ -484,25 +553,17 @@ describe("bounded KOSHA grounding fail-closed", () => {
       limit: 5,
       offlineCorpus: { rootDir }
     }) as SafetyReferenceSearchResult & GroundingSearchProjection;
-    const retained = result.items[0];
-
-    expect(result.items.map((item) => item.id)).toEqual(["verified-remote-with-local-integrity-block"]);
-    expect(grounding(retained)).toMatchObject({
-      status: "verified_current",
-      supportingCitationEligible: true,
-      directEvidenceEligible: false,
-      riskRowEligible: false
-    });
+    expect(result.items).toEqual([]);
     expect(result.koshaGrounding).toMatchObject({
       status: "blocked",
       reason: "local-corpus-integrity-failed",
       localGateReason: "local-corpus-integrity-failed",
       localCorpusStatus: "blocked",
-      acceptedCount: 1,
+      acceptedCount: 0,
       reviewRequiredCount: 0,
-      excludedCount: 0
+      excludedCount: 1
     });
-    expect(result.message).toMatch(/무결성.*검증된 현행 원격 KOSHA 1건.*기술적 보조지침/u);
+    expect(result.message).toMatch(/무결성.*검증되지 않은 원격 KOSHA 1건 제외/u);
   });
 
   it("fails closed when the local corpus is unavailable without affecting non-KOSHA rows", async () => {
@@ -540,7 +601,7 @@ describe("bounded KOSHA grounding fail-closed", () => {
     expect(isSafetyReferenceRiskEligible(result.items[0] as SafetyReferenceItem)).toBe(true);
   });
 
-  it("keeps verified remote KOSHA supporting evidence while exposing the unavailable local gate", async () => {
+  it("excludes general verified KOSHA when the exact local trust boundary is unavailable", async () => {
     vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
@@ -568,16 +629,155 @@ describe("bounded KOSHA grounding fail-closed", () => {
       offlineCorpus: { rootDir: null, env: { KOSHA_GUIDE_CORPUS_DIR: undefined } }
     }) as SafetyReferenceSearchResult & GroundingSearchProjection;
 
-    expect(result.items.map((item) => item.id)).toEqual(["verified-remote-with-local-unavailable"]);
+    expect(result.items).toEqual([]);
     expect(result.koshaGrounding).toMatchObject({
-      status: "ready",
-      reason: "verified-current",
+      status: "blocked",
+      reason: "local-corpus-unavailable",
       localGateReason: "local-corpus-unavailable",
       localCorpusStatus: "unconfigured",
-      acceptedCount: 1,
+      acceptedCount: 0,
       reviewRequiredCount: 0,
-      excludedCount: 0
+      excludedCount: 1
     });
-    expect(result.message).toMatch(/검증된 현행 원격 KOSHA 1건.*기술적 보조지침/u);
+    expect(result.message).toMatch(/검증되지 않은 원격 KOSHA 1건 제외/u);
+  });
+
+  it("replaces the live 2,582-character D-C-13 DB row with the immutable official bundle", async () => {
+    vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const bundled = await loadBundledExactKoshaReference();
+    if (bundled.status !== "ready") throw new Error("expected exact bundle fixture");
+    const partialBody = bundled.item.body?.slice(0, 2_582) ?? "";
+    const partialRow = {
+      ...bundled.item,
+      body: partialBody,
+      kosha_grounding: undefined,
+      kosha_guide: undefined,
+      payload: {
+        ...(bundled.item.payload ?? {}),
+        body_sha256: sha256(partialBody),
+      },
+    };
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url.includes("/rpc/search_safety_references_ranked")) {
+        return new Response(JSON.stringify([partialRow]), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      throw new Error(`Unexpected fetch URL: ${url}`);
+    }));
+
+    const result = await searchServerSafetyReferences({
+      query: "서울 외벽 도장 작업, 이동식 비계와 강풍 추락 위험",
+      limit: 5,
+      offlineCorpus: { rootDir: null, env: { KOSHA_GUIDE_CORPUS_DIR: undefined } },
+    }) as SafetyReferenceSearchResult & GroundingSearchProjection;
+
+    expect(result.items).toHaveLength(2);
+    expect(result.items[0]?.id).toBe(bundled.item.id);
+    expect(result.items[0]?.body).toHaveLength(19_058);
+    expect(result.items.map((item) => item.kosha_guide?.stableDocumentKey)).toEqual(["D-C-13", "D-C-7"]);
+    expect(grounding(result.items[0])).toMatchObject({
+      status: "verified_current",
+      source: "production-registry",
+      directEvidenceEligible: true,
+    });
+    expect(result.koshaGrounding).toMatchObject({
+      acceptedCount: 2,
+      excludedCount: 1,
+      localCorpusStatus: "unconfigured",
+    });
+    expect(result.message).toMatch(/정확 본문 번들.*partial DB 본문을 대체/u);
+  });
+
+  it("keeps the exact gate active for a matching public sourceId filter", async () => {
+    vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const { bundled, partialRow, generalRow } = await exactBundleWithPartialAndGeneralRows();
+    mockRankedReferenceRows([partialRow, generalRow]);
+
+    const request = new NextRequest(new URL(
+      `/api/safety-reference/search?q=${encodeURIComponent("아파트 외벽 페인트 작업")}`
+        + `&sourceId=${encodeURIComponent(bundled.source_id)}`,
+      "https://safeclaw.test",
+    ));
+    const response = await searchSafetyReferenceRoute(request);
+    const result = await response.json() as SafetyReferenceSearchResult & GroundingSearchProjection;
+
+    expect(response.status).toBe(200);
+    expect(result.items.map((item) => item.id)).toEqual([bundled.id]);
+    expect(result.items[0]?.body).toHaveLength(19_058);
+    expect(result.items.some((item) => item.id === "general-verified-kosha")).toBe(false);
+    expect(result.koshaGrounding).toMatchObject({
+      localCorpusStatus: "unconfigured",
+      acceptedCount: 1,
+      excludedCount: 2,
+    });
+  });
+
+  it("preserves sourceId and riskTag filters without admitting partial or general KOSHA", async () => {
+    vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const { bundled, partialRow, generalRow } = await exactBundleWithPartialAndGeneralRows();
+    mockRankedReferenceRows([partialRow, generalRow]);
+
+    const matching = await searchServerSafetyReferences({
+      query: "곤돌라 외벽 보수",
+      sourceId: bundled.source_id,
+      riskTag: "추락",
+      limit: 5,
+      offlineCorpus: { rootDir: null, env: { KOSHA_GUIDE_CORPUS_DIR: undefined } },
+    });
+    expect(matching.items.map((item) => item.id)).toEqual([bundled.id]);
+
+    const sourceMismatch = await searchServerSafetyReferences({
+      query: "곤돌라 외벽 보수",
+      sourceId: "another-official-source",
+      limit: 5,
+      offlineCorpus: { rootDir: null, env: { KOSHA_GUIDE_CORPUS_DIR: undefined } },
+    });
+    expect(sourceMismatch.items).toEqual([]);
+
+    const riskMismatchRequest = new NextRequest(new URL(
+      `/api/safety-reference/search?q=${encodeURIComponent("곤돌라 외벽 보수")}&riskTag=${encodeURIComponent("충돌")}`,
+      "https://safeclaw.test",
+    ));
+    const riskMismatchResponse = await searchSafetyReferenceRoute(riskMismatchRequest);
+    const riskMismatch = await riskMismatchResponse.json() as SafetyReferenceSearchResult;
+    expect(riskMismatch.items).toEqual([]);
+  });
+
+  it("maps the exact trusted bundle to the public direct role without promoting general KOSHA", async () => {
+    vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
+    vi.stubEnv("SAFETY_REFERENCE_VECTOR_SEARCH", "0");
+    const { bundled, partialRow, generalRow } = await exactBundleWithPartialAndGeneralRows();
+    mockRankedReferenceRows([partialRow, generalRow]);
+
+    const directRequest = new NextRequest(new URL(
+      `/api/safety-reference/search?q=${encodeURIComponent("아파트 달비계 로프 작업")}&evidenceRole=direct`,
+      "https://safeclaw.test",
+    ));
+    const directResponse = await searchSafetyReferenceRoute(directRequest);
+    const direct = await directResponse.json() as SafetyReferenceSearchResult;
+    expect(direct.items.map((item) => item.kosha_guide?.stableDocumentKey)).toEqual(["D-C-13", "D-C-7"]);
+    expect(direct.items.some((item) => item.id === "general-verified-kosha")).toBe(false);
+
+    const supportingRequest = new NextRequest(new URL(
+      `/api/safety-reference/search?q=${encodeURIComponent("아파트 달비계 로프 작업")}&evidenceRole=supporting`,
+      "https://safeclaw.test",
+    ));
+    const supportingResponse = await searchSafetyReferenceRoute(supportingRequest);
+    const supporting = await supportingResponse.json() as SafetyReferenceSearchResult;
+    expect(supporting.items).toEqual([]);
   });
 });

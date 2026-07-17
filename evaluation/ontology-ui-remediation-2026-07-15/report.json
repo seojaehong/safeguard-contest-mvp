@@ -1,8 +1,8 @@
 {
   "status": "pass",
-  "sourceBase": "cb43e4d10416150577cfe88179cdced5f4a23e94",
+  "sourceBase": "080450b8a8461f8e77dc3923039e8e014b187b3a",
   "branch": "fix/northstar-ontology-ui-20260715",
-  "candidateCommit": null,
+  "candidateCommit": "f3087040f1a63bdd11922b7069071b9a5deb2334",
   "scope": [
     "app/ontology/**",
     "tests/ontology-ui-remediation.test.ts",
@@ -17,23 +17,41 @@
   },
   "tests": {
     "focusedFiles": 8,
-    "focusedTests": 47,
+    "focusedTests": 50,
     "browserFiles": 1,
     "browserTests": 1,
     "typecheck": "pass",
     "productionBuild": "pass",
-    "staticGenerationUnits": 28
+    "staticGenerationUnits": 28,
+    "staticAudit": {
+      "status": "pass",
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violationCount": 0
+    },
+    "rawCssColorLiterals": 0,
+    "visibleCopyTerminology": {
+      "status": "pass",
+      "forbiddenTerms": ["published", "seed", "시드", "node", "노드", "hop", "홉"],
+      "scope": "visible JSX copy and placeholders; data attributes and code identifiers excluded"
+    }
   },
   "browser": {
     "variants": 4,
     "failedVariants": 0,
-    "maximumDisplayedNodes": 13,
+    "maximumDisplayedNodes": 15,
     "overlapPairs": 0,
     "horizontalOverflow": 0,
     "minimumControlHeight": 44,
-    "minimumDesktopNodeContrast": 16.37,
+    "minimumDesktopNodeContrast": 16.01,
     "mobileDefault": "relation_cards",
-    "mobileExpandedGraph": "pass"
+    "mobileExpandedGraph": "pass",
+    "mobileExpandedGraphNodes": 15,
+    "dialogInitialFocus": "pass",
+    "dialogFocusTrap": "pass",
+    "dialogEscapeClose": "pass",
+    "dialogFocusRestore": "pass"
   },
   "integration": {
     "integratedToMain": false,

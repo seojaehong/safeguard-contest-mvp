@@ -7,6 +7,7 @@ import {
   type CurrentWorkerSnapshot
 } from "@/lib/current-workpack";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import { assembleGraph } from "@/lib/ontology/graph-store";
 import {
   startIsolatedNextBrowserHarness,
   type IsolatedNextBrowserHarness
@@ -17,6 +18,7 @@ let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
 const workspaceInputProductionMatrix = process.env.WORKSPACE_INPUT_PROD_MATRIX === "1" ? it : it.skip;
 const CSS_PIXEL_ADJACENCY_TOLERANCE = 0.01;
+const DEFAULT_VISIBLE_OPERATIONAL_LABELS = /\b(?:Markdown|Supabase|API|JSON)\b|Operation Ontology|Operation Graph|DB 하네스|품질 계약/u;
 
 function areCssPixelEdgesAdjacent(sideBottom: number, mainTop: number): boolean {
   return Math.abs(sideBottom - mainTop) <= CSS_PIXEL_ADJACENCY_TOLERANCE;
@@ -384,9 +386,17 @@ describe("workspace layout regression", () => {
     await page.locator(".workspace-document-page").waitFor({ state: "visible" });
     expect(await page.locator(".workspace-top-title strong").textContent()).toBe("문서");
     expect(await page.locator(".workspace-current-brief strong").textContent()).toContain(stored.data.scenario.workSummary);
+    await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "공유" }).click();
+    const sharePage = page.locator(".workspace-share-page");
+    await sharePage.waitFor({ state: "visible" });
+    expect("DB 하네스 · 품질 계약").toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
+    expect(await sharePage.innerText()).not.toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
+    await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "문서" }).click();
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
-    await page.locator(".field-workspace").waitFor({ state: "visible" });
-    expect(await page.locator(".field-workspace").textContent()).toContain("복원 작업자");
+    const fieldWorkspace = page.locator(".field-workspace");
+    await fieldWorkspace.waitFor({ state: "visible" });
+    expect(await fieldWorkspace.textContent()).toContain("복원 작업자");
+    expect(await fieldWorkspace.innerText()).not.toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
     expect(await page.locator(".workspace-input-page").count()).toBe(0);
   }, 90_000);
 
@@ -1442,6 +1452,9 @@ describe("workspace layout regression", () => {
     expect(await page.locator(".field-workspace").count()).toBe(0);
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     await page.locator(".document-editor.editor-focus-cue").waitFor({ state: "visible" });
+    const focusMessageBackground = await page.locator(".editor-focus-message").evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).waitFor({ state: "visible" });
 
     expect(await page.locator(".document-workbench").count()).toBe(0);
@@ -1488,7 +1501,6 @@ describe("workspace layout regression", () => {
       const editor = readRect(".document-editor");
       const textarea = readRect(".document-textarea");
       const activeTab = readRect(".doc-tab.active");
-      const focusMessage = readRect(".editor-focus-message");
       const desktopTabs = document.querySelector(".doc-tab-list");
       const mobilePicker = document.querySelector('select[aria-label="편집 문서 선택"]')?.parentElement;
       if (!desktopTabs || !mobilePicker) throw new Error("Missing responsive document navigation");
@@ -1531,7 +1543,6 @@ describe("workspace layout regression", () => {
         editor,
         textarea,
         activeTab,
-        focusMessage,
         compactHeadOverlaps,
         largestCompactHeadHeight: maxHeight(".field-workspace .compact-head"),
         impactListHeight: maxHeight(".impact-list"),
@@ -1586,7 +1597,7 @@ describe("workspace layout regression", () => {
     expect(metrics.textarea.width).toBeGreaterThanOrEqual(Math.floor(metrics.editor.width * 0.8));
     expect(metrics.activeTab.backgroundColor).not.toBe("rgb(108, 111, 247)");
     expect(metrics.activeTab.color).not.toBe("rgb(255, 255, 255)");
-    expect(metrics.focusMessage.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
+    expect(focusMessageBackground).not.toBe("rgba(14, 14, 18, 0.78)");
     expect(String(collapsedActiveElementClass)).toContain("document-textarea");
 
     await page.setViewportSize({ width: 1024, height: 900 });
@@ -1663,12 +1674,13 @@ describe("workspace layout regression", () => {
     expect(await page.locator(".document-workbench").count()).toBe(1);
   }, 90_000);
 
-  it("preserves the edited active document across review and editor remount", async () => {
+  it("preserves edited workpack through reload, concurrent revalidation, and responsive share gating", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const sample = buildSampleWorkpack();
     const sentinel = "편집안전대책: SAFECLAW_DOCUMENT_EDIT_PRESERVED";
     const proseSentinel = "사용자가 직접 편집한 외벽 도장 작업 안전조치 문장은 내보내기에 반드시 보존됩니다.";
+    const concurrentSentinel = "SAFECLAW_CONCURRENT_EDIT_PRESERVED";
     const regeneratedSentinel = "[SAFECLAW_REGENERATED_TBM]";
     sample.deliverables.tbmBriefingStructured = {
       meta: {
@@ -1684,7 +1696,7 @@ describe("workspace layout regression", () => {
         equipment: ["이동식 비계"]
       },
       hazards: [{ category: "Machine", description: "생성 시점 구조화 위험요인" }],
-      measures: [{ hazardRef: 1, action: "생성 시점 구조화 안전대책", owner: "관리감독자" }],
+      measures: [{ hazardRef: 1, action: "생성 시점 구조화 안전대책", owner: "관리감독자", evidenceRefs: ["KOSHA 지침"] }],
       stopCriteria: ["강풍 시 작업중지"],
       confirmTopics: ["작업중지 기준 확인"],
       photoEvidenceLocation: "현장 안전 폴더"
@@ -1703,9 +1715,108 @@ describe("workspace layout regression", () => {
       sourceDocumentKeys: ["riskAssessmentDraft", "tbmBriefing"],
       detail: "안전조치 검수 통과"
     };
+    const packet = buildDbHarnessPacket({ question: sample.question, references: [] });
+    packet.ontologyChecklist = { status: "ready", missing: [] };
+    packet.generationContract.missingEvidence = [];
+    packet.generationContract.documentCoverage = packet.generationContract.requiredDocuments.map((document) => ({
+      document,
+      covered: true,
+      evidenceTypes: ["directEvidence"]
+    }));
+    sample.dbHarness = {
+      packet,
+      promptContext: buildHarnessPromptContext(packet),
+      summary: {
+        mode: packet.mode,
+        llmRole: packet.generationContract.llmRole,
+        llmOutputScope: packet.generationContract.llmOutputScope,
+        evidenceAuthority: packet.generationContract.evidenceAuthority,
+        providerRetryScope: packet.generationContract.providerRetryScope,
+        fallbackChainAllowed: packet.generationContract.fallbackChainAllowed,
+        genericProseSubstitutionAllowed: packet.generationContract.genericProseSubstitutionAllowed,
+        missingEvidencePolicy: packet.generationContract.missingEvidencePolicy,
+        directEvidence: 1,
+        sifCases: 1,
+        supportingEvidence: 1,
+        improvementMemory: 0,
+        workpackMemory: 0,
+        missingEvidence: [],
+        documentCoverage: packet.generationContract.documentCoverage,
+        retrievalContract: packet.retrievalContract,
+        ontologyStatus: "ready"
+      }
+    };
+    if (!sample.qualityContract) throw new Error("Sample quality contract is required");
+    sample.qualityContract = {
+      ...sample.qualityContract,
+      overall: "ready",
+      fallback: { hasFallback: false, modes: {} },
+      items: sample.qualityContract.items.map((item) => ({ ...item, status: "ready" })),
+      ontology: { ...sample.qualityContract.ontology, status: "ready", verdict: "통과", missingControlCount: 0 },
+      evidence: { ...sample.qualityContract.evidence, status: "ready" },
+      structured: { ...sample.qualityContract.structured, status: "ready" },
+      persistence: { ...sample.qualityContract.persistence, status: "ready" },
+      dbHarness: { ...sample.qualityContract.dbHarness, status: "ready", missingEvidence: [] }
+    };
+    const revalidationGraph = assembleGraph(
+      [
+        {
+          node_id: "Task_high_work",
+          kind: "Task",
+          label: "외벽 도장",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-browser"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Hazard_fall",
+          kind: "Hazard",
+          label: "추락",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-browser"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Control_platform",
+          kind: "Control",
+          label: "작업발판 점검",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-browser"],
+          meta: {},
+          review_state: "published"
+        }
+      ],
+      [
+        {
+          src: "Task_high_work",
+          rel: "entailsHazard",
+          dst: "Hazard_fall",
+          cited_uids: ["manual:launch-p0-browser"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          src: "Hazard_fall",
+          rel: "mitigatedBy",
+          dst: "Control_platform",
+          cited_uids: ["manual:launch-p0-browser"],
+          meta: {},
+          review_state: "published"
+        }
+      ]
+    );
     const regeneratedSample = structuredClone(sample);
     regeneratedSample.deliverables.tbmBriefing = `${regeneratedSentinel}\n${sample.deliverables.tbmBriefing}`;
     let generationCount = 0;
+    let graphRequestCount = 0;
+    let releaseFirstGraph: () => void = () => {
+      throw new Error("First graph gate was not initialized");
+    };
+    const firstGraphGate = new Promise<void>((resolve) => {
+      releaseFirstGraph = resolve;
+    });
     let xlsxPayload: Record<string, unknown> | null = null;
     let hwpPayload: Record<string, unknown> | null = null;
     await page.addInitScript(() => {
@@ -1725,6 +1836,15 @@ describe("workspace layout regression", () => {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify(responseBody)
+      });
+    });
+    await page.route("**/api/ontology/graph", async (route) => {
+      graphRequestCount += 1;
+      if (graphRequestCount === 1) await firstGraphGate;
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, configured: true, scope: "published", graph: revalidationGraph })
       });
     });
     await page.route("**/api/export/xlsx", async (route) => {
@@ -1811,17 +1931,95 @@ describe("workspace layout regression", () => {
       return stored.data || null;
     });
     expect(invalidatedReview).not.toHaveProperty("ontologyQa");
-    expect(invalidatedReview).not.toHaveProperty("dbHarness");
+    expect(invalidatedReview).toHaveProperty("dbHarness");
+    expect(invalidatedReview).toHaveProperty("qualityContract.ontology.status", "pending");
 
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
     await page.locator(".document-preview-pane").waitFor({ state: "visible" });
     expect(await page.locator(".document-preview-pane pre").textContent()).toContain(sentinel);
     expect(await page.locator(".document-preview-head strong").textContent()).toBe("TBM 브리핑");
 
+    await page.reload({ waitUntil: "networkidle" });
+    await page.locator(".document-preview-pane").waitFor({ state: "visible" });
+    await page.locator(".document-viewer-list button", { hasText: "TBM 브리핑" }).click();
+    expect(await page.locator(".document-preview-pane pre").textContent()).toContain(sentinel);
+    await page.getByRole("button", { name: "편집본 재검증" }).waitFor({ state: "visible" });
+    const restoredEnvelope = await page.evaluate(() => {
+      const raw = window.localStorage.getItem("safeclaw.currentWorkpack.v1");
+      return raw ? JSON.parse(raw) as Record<string, unknown> : null;
+    });
+    expect(restoredEnvelope).toHaveProperty("revalidationBasis.reviewTasks", ["외벽 도장"]);
+    expect(restoredEnvelope).toHaveProperty("workerSnapshot");
+    expect(restoredEnvelope).toHaveProperty("dispatchSnapshot");
+
+    await page.getByRole("button", { name: "편집본 재검증" }).click();
+    await expect.poll(() => graphRequestCount).toBe(1);
+    await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
+    const concurrentEditor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
+    await concurrentEditor.fill(`${editedValue}\n${concurrentSentinel}`);
+    await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();
+    releaseFirstGraph();
+    await expect.poll(() => page.getByRole("button", { name: "편집본 재검증" }).isVisible()).toBe(true);
+    await expect.poll(() => page.locator(".document-preview-pane pre").textContent()).toContain(concurrentSentinel);
+
+    async function assertRevalidationCtaGeometry() {
+      const metrics = await page.evaluate(() => {
+        const revalidate = Array.from(document.querySelectorAll("button"))
+          .find((button) => button.textContent?.trim() === "편집본 재검증");
+        const share = Array.from(document.querySelectorAll("button"))
+          .find((button) => button.textContent?.trim() === "공유 단계로 이동");
+        if (!(revalidate instanceof HTMLButtonElement) || !(share instanceof HTMLButtonElement)) {
+          throw new Error("Revalidation CTA geometry targets are missing");
+        }
+        const cta = revalidate.getBoundingClientRect();
+        const next = share.getBoundingClientRect();
+        return {
+          viewportWidth: window.innerWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+          cta: { left: cta.left, right: cta.right, top: cta.top, bottom: cta.bottom, height: cta.height },
+          next: { left: next.left, right: next.right, top: next.top, bottom: next.bottom, height: next.height }
+        };
+      });
+      expect(metrics.cta.height).toBeGreaterThanOrEqual(44);
+      expect(metrics.next.height).toBeGreaterThanOrEqual(44);
+      expect(metrics.cta.bottom).toBeLessThanOrEqual(metrics.next.top);
+      expect(metrics.cta.left).toBeGreaterThanOrEqual(0);
+      expect(metrics.cta.right).toBeLessThanOrEqual(metrics.viewportWidth);
+      expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+    }
+
+    await assertRevalidationCtaGeometry();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await assertRevalidationCtaGeometry();
+    await page.setViewportSize({ width: 1440, height: 900 });
+
+    await page.getByRole("button", { name: "편집본 재검증" }).click();
+    await expect.poll(
+      async () => page.locator(".document-workbench-head small").textContent(),
+      { timeout: 10_000 }
+    ).toBe("편집본 재검증을 통과했습니다. 공유할 수 있습니다.");
+    const revalidatedReview = await page.evaluate(() => {
+      const raw = window.localStorage.getItem("safeclaw.currentWorkpack.v1");
+      if (!raw) return null;
+      const stored = JSON.parse(raw) as { data?: Record<string, unknown> };
+      return stored.data || null;
+    });
+    expect(revalidatedReview).toHaveProperty("ontologyQa.result.verdict", "통과");
+    expect(revalidatedReview).toHaveProperty("qualityContract.overall", "ready");
+    expect(JSON.stringify(revalidatedReview)).toContain(sentinel);
+    expect(JSON.stringify(revalidatedReview)).toContain(concurrentSentinel);
+    const revalidatedEnvelope = await page.evaluate(() => {
+      const raw = window.localStorage.getItem("safeclaw.currentWorkpack.v1");
+      return raw ? JSON.parse(raw) as Record<string, unknown> : null;
+    });
+    expect(revalidatedEnvelope).toHaveProperty("revalidationBasis.reviewTasks", ["외벽 도장"]);
+    expect(revalidatedEnvelope).toHaveProperty("workerSnapshot");
+    expect(revalidatedEnvelope).toHaveProperty("dispatchSnapshot");
+
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     const reopenedEditor = page.getByRole("textbox", { name: "TBM/작업 전 안전점검회의 편집" });
     await reopenedEditor.waitFor({ state: "visible" });
-    expect(await reopenedEditor.inputValue()).toBe(editedValue);
+    expect(await reopenedEditor.inputValue()).toBe(`${editedValue}\n${concurrentSentinel}`);
 
     await page.getByRole("button", { name: /^입력/ }).click();
     await page.getByRole("button", { name: /안전 문서 생성/ }).click();

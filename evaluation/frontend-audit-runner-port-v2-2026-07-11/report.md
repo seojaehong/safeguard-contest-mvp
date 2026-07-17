@@ -1,16 +1,16 @@
-# SafeClaw Frontend Audit Runner V2 Final Reconciliation
+# SafeClaw Frontend Audit Runner V2 Current Reconciliation
 
 ## Verdict
 
-**Verification PASS for source `514b2d9a3c884c1a18ecf725285dde0e8a95b6cd`.**
-
-This report supersedes the earlier blocked port report from 2026-07-11. That historical state had 2,444 unresolved static findings and did not run the 108-row browser audit. The integrated remediation now has a zero-violation static prerequisite and a complete browser run.
+Frontend static, bundle, and browser evidence pass for source
+`7d5b09b55bd97cc078b01d9a39e5e61060b14c11`. Overall CI remains pending because
+the first full run found three stale post-KOSHA assertions, and the local serial
+retry later stalled during browser-test teardown. No full-suite PASS is claimed.
 
 ## Source Identity
 
-- Source SHA: `514b2d9a3c884c1a18ecf725285dde0e8a95b6cd`
-- Source identity: `cf3acf32f236a5c6ecdca5cf0b244ef16bd36c1ff8ecfa6b063e522a2ed723ac`
-- Line-ending contract: CRLF and LF normalize to the same identity before hashing.
+- Source SHA: `7d5b09b55bd97cc078b01d9a39e5e61060b14c11`
+- Source identity: `dcc85935e638cc4198b78b72a92493085589c6f2ba6d3ee35842f47b48c1d18c`
 - Product pages: `32`
 - Product components: `23`
 - Database/schema/data mutation: none
@@ -23,25 +23,21 @@ This report supersedes the earlier blocked port report from 2026-07-11. That his
 - Important declarations: `0`
 - Artifact: `static-audit.json`
 
-The earlier blocked classification remains available in Git history. It is not the current integration verdict.
-
 ## Production Bundles
 
 Normal build:
 
-- Static pages: `27/27`
-- Build ID: `GZHsLnN8pBcRAUWz5FMu1`
-- Chunks: `98`
+- Static pages: `28/28`
+- Build ID: `5ZHk0go9MAseG9VoPYWMn`
 - Audit markers: `0`
 - Artifact: `bundle-normal.json`
 
 Audit build:
 
-- Static pages: `27/27`
-- Build ID: `KWLW3gxAjtwayCo6QPlnx`
-- Chunks: `98`
-- Audit markers: exactly `1`
-- Marker file: `static/chunks/app/layout-4a08a2eec725a6bc.js`
+- Static pages: `28/28`
+- Build ID: `6ciq3Y3JcV-vDzG22FvYP`
+- Audit marker count: `1`
+- Marker file: `static/chunks/app/layout-541c3e0a964ca50d.js`
 - Artifact: `bundle-audit.json`
 
 ## Browser Contract
@@ -54,19 +50,24 @@ Audit build:
 - Failed rows: `0`
 - Findings: `0`
 - Recovered rows: `0`
-- Screenshots: `108`
 - Artifact: `browser-report.json`
-
-The browser runner consumed the passing static report with the same source SHA and source identity. It did not fabricate external test, typecheck, or build outcomes.
 
 ## Test Evidence
 
-- Evidence-only descendant contract: `3` tests passed.
-- Final full serial suite: `132` files and `1,282` tests passed.
+- CI run `29491156696`: 1,895 passed, 3 failed, 17 skipped before remediation.
+- The failures were one stale frontend identity assertion and two photo-analysis
+  assertions that predated the D-C-7 exact registry entry.
+- Focused post-remediation frontend/photo tests: 78/78 passed.
+- Photo-analysis product grounding tests after body-extractability remediation:
+  39/39 passed.
 - Strict TypeScript typecheck: passed.
-- Final normal build after the full suite: `27/27`, audit markers `0`.
-- Curated release evidence: `evaluation/backend-release-final-2026-07-13/`.
+- Local full serial retry: not accepted; the runner stalled during browser-test
+  teardown and was terminated without a final summary.
+
+The next GitHub CI run is the authoritative full-suite gate.
 
 ## Boundary
 
-This is a frontend verification verdict, not a product launch-readiness verdict. Phase A ontology provenance and RLS findings remain separately gated.
+This is a frontend evidence reconciliation, not a complete launch-readiness
+verdict. Hermes production binding and authenticated RLS tenant-isolation tests
+remain separately gated.

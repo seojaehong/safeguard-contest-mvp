@@ -1,0 +1,59 @@
+{
+  "task": "knowledge-mobile-ia-20260715",
+  "status": "integrated_independent_review_passed",
+  "integrationCommit": "b988b34",
+  "independentReview": {
+    "spec": "PASS",
+    "codeQuality": "PASS",
+    "findings": 0
+  },
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "baseline": {
+    "source": "user_provided",
+    "document_height_px": 8890
+  },
+  "measurements": [
+    {
+      "theme": "day",
+      "document_height_px": 1148,
+      "horizontal_overflow_px": 0,
+      "visible_panel_count": 1,
+      "active_panel_top_px": 441.96875,
+      "tab_width_px": 119.328125,
+      "tab_height_px": 44
+    },
+    {
+      "theme": "night",
+      "document_height_px": 1148,
+      "horizontal_overflow_px": 0,
+      "visible_panel_count": 1,
+      "active_panel_top_px": 441.96875,
+      "tab_width_px": 119.328125,
+      "tab_height_px": 44
+    }
+  ],
+  "tests": {
+    "files_passed": 2,
+    "tests_passed": 11,
+    "tests_failed": 0,
+    "duration_seconds": 36.62
+  },
+  "checks": {
+    "desktop_all_content_visible": true,
+    "mobile_single_panel": true,
+    "server_render_all_sections_visible": true,
+    "hash_history_navigation": true,
+    "keyboard_navigation": true,
+    "localized_labels": true,
+    "raw_diagnostic_ids_preserved": true,
+    "git_diff_check": true,
+    "typecheck": true,
+    "production_build": false
+  },
+  "blockers": [],
+  "commit_created": true,
+  "sourceCommit": "1229dd49fd999213e13ff839d182de2d673c8a17"
+}

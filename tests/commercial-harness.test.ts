@@ -415,19 +415,19 @@ describe("DB harness packet", () => {
       sourceCounts: {
         directEvidence: 0,
         sifCases: 1,
-        supportingEvidence: 1
+        supportingEvidence: 0
       }
     });
     expect(packet.generationContract.documentCoverage).toEqual([
-      { document: "위험성평가표", covered: true, evidenceTypes: ["sifCase", "supportingEvidence", "improvementMemory"] },
-      { document: "TBM 브리핑", covered: true, evidenceTypes: ["sifCase", "supportingEvidence", "improvementMemory"] },
-      { document: "TBM 기록", covered: true, evidenceTypes: ["sifCase", "supportingEvidence"] }
+      { document: "위험성평가표", covered: true, evidenceTypes: ["sifCase", "improvementMemory"] },
+      { document: "TBM 브리핑", covered: true, evidenceTypes: ["sifCase", "improvementMemory"] },
+      { document: "TBM 기록", covered: true, evidenceTypes: ["sifCase"] }
     ]);
     expect(hasDocumentCoverage(packet, "TBM 기록")).toBe(true);
     expect(promptContext).toContain("DB harness가 고정한 근거");
     expect(promptContext).toContain("근거 권위: safety_reference_items");
     expect(promptContext).toContain("검색 경로: rest-ilike / vector=disabled");
-    expect(promptContext).toContain("검색 출처: direct 0, SIF 1, supporting 1");
+    expect(promptContext).toContain("검색 출처: direct 0, SIF 1, supporting 0");
     expect(promptContext).toContain("제공자 재시도");
     expect(promptContext).toContain("문장화 실패 복구에만 허용");
     expect(promptContext).toContain("산문으로 메우지 않는다");
@@ -570,7 +570,7 @@ describe("DB harness packet", () => {
     expect(packet.retrievalContract.sourceCounts).toMatchObject({
       directEvidence: 0,
       sifCases: 1,
-      supportingEvidence: 2,
+      supportingEvidence: 1,
       hybrid: 1,
       ranked: 1
     });
@@ -578,6 +578,28 @@ describe("DB harness packet", () => {
     expect(promptContext).toContain("hybrid 1, vector 0, ranked 1");
     expect(promptContext).toContain("KOSHA_SUPPORTING_BODY_JSON");
     expect(promptContext).toContain("KOSHA 외벽 도장 지침");
+  });
+
+  it("ignores stale KOSHA anchors that are absent from the verified body", () => {
+    const verifiedBody = "외벽 도장 작업에서는 작업발판과 안전난간 상태를 확인한다.";
+    const staleAnchor = "STALE_KOSHA_ANCHOR_NOT_PRESENT_IN_BODY";
+    const guidance = verifiedKoshaReference({
+      id: "guide-stale-anchor",
+      title: "KOSHA 외벽 도장 작업 기술지침",
+      summary: verifiedBody,
+      body: verifiedBody
+    });
+    if (!guidance.kosha_guide) throw new Error("expected verified KOSHA metadata");
+    guidance.kosha_guide.anchors = [{ page: 99, excerpt: staleAnchor }];
+
+    const packet = buildDbHarnessPacket({
+      question: "외벽 도장 작업의 작업발판과 안전난간을 점검한다.",
+      references: [reference(), guidance]
+    });
+    const promptContext = buildHarnessPromptContext(packet);
+
+    expect(promptContext).toContain(verifiedBody);
+    expect(promptContext).not.toContain(staleAnchor);
   });
 
   it("marks missing SIF as review-required", () => {

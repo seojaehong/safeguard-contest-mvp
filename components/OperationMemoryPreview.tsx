@@ -75,7 +75,7 @@ function downloadTextFile(fileName: string, contentType: string, content: string
 
 export function OperationMemoryGraphViewer({
   graph,
-  eyebrow = "Operation Graph",
+  eyebrow = "작업 이력 연결",
   title,
   description,
   actions,
@@ -300,14 +300,14 @@ export function OperationMemoryPreview() {
     const file = buildWorkpackLearningFile(preview.learningInput, format);
     downloadTextFile(file.fileName, file.contentType, file.content);
     if (format === "jsonl") {
-      setDownloadMessage("운영 메모리 JSONL을 내려받았습니다.");
+      setDownloadMessage("재사용 검토 데이터를 내려받았습니다.");
       return;
     }
     if (format === "obsidian") {
-      setDownloadMessage("Obsidian용 작업 그래프 Markdown을 내려받았습니다.");
+      setDownloadMessage("연결형 작업 메모를 내려받았습니다.");
       return;
     }
-    setDownloadMessage("작업 개선 메모리 Markdown을 내려받았습니다.");
+    setDownloadMessage("작업 개선 메모리 문서를 내려받았습니다.");
   }
 
   return (
@@ -319,7 +319,7 @@ export function OperationMemoryPreview() {
           {preview.mode === "local"
             ? "워크스페이스에서 보관한 최근 개선사항을 관리자 검토용 작업 이력 그래프로 재구성했습니다."
             : "아직 로컬 개선 후보가 없어 Before/After 개선 루프 샘플을 보여줍니다."}
-          {" "}MD/JSONL/Obsidian 노트는 다음 위험성평가와 TBM 생성에서 DB 하네스가 먼저 조회할 후보입니다.
+          {" "}내려받은 작업 이력은 다음 위험성평가와 TBM 생성에서 검증 근거 후보로 다시 확인합니다.
         </>
       )}
       actions={(
@@ -328,13 +328,13 @@ export function OperationMemoryPreview() {
             최근 후보 다시 읽기
           </button>
           <button type="button" onClick={() => downloadLearningMemory("markdown")}>
-            작업 이력 MD
+            작업 이력 문서
           </button>
           <button type="button" onClick={() => downloadLearningMemory("jsonl")}>
-            하네스 JSONL
+            재사용 검토 데이터
           </button>
           <button type="button" onClick={() => downloadLearningMemory("obsidian")}>
-            Obsidian MD
+            연결형 작업 메모
           </button>
         </>
       )}

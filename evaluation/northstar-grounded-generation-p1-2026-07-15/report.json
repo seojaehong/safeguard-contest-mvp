@@ -1,0 +1,131 @@
+{
+  "date": "2026-07-15",
+  "branch": "fix/northstar-grounded-current-20260715",
+  "startingHead": "ec3f6bef6380774efda7e2b04e4ad38dd5aad239",
+  "scope": "P1 grounded-generation sentinel and Korean nominal-instruction remediation",
+  "result": "pass",
+  "freshReReview": {
+    "startingHead": "467c734cb6ec178c6ec445b209a4565daab01a2d",
+    "closedFindings": [
+      "educationRecord safetyEducationPoints are packet-bound",
+      "two-token action-shaped nominal clauses fail closed while descriptive nominal fields remain allowed",
+      "structured grounding paths render concrete Korean document names"
+    ],
+    "red": {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts",
+      "behavioralTestsFailed": 3,
+      "failures": [
+        "unsupported safetyEducationPoints entry was accepted",
+        "작업 장소 A-1 구역 was rejected",
+        "사용 장비 이동식 크레인 was rejected"
+      ]
+    }
+  },
+  "thirdReReview": {
+    "startingHead": "c82d3fbb9d1c081df1c9fa51f67175c7b48ba3d0",
+    "closedFindings": [
+      "multiword action-shaped nominal clauses are packet-bound",
+      "descriptive metadata labels remain allowed by structural label distinction",
+      "safetyEducationPoints are validated without an educationRecordStructured sibling",
+      "actual structured rejectedGroups keys use the AnswerPanel group-label path"
+    ],
+    "red": {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts",
+      "testsFailed": 7,
+      "failures": {
+        "multiwordNominalActions": 2,
+        "independentSafetyEducationPoints": 1,
+        "structuredRejectedGroupLabels": 4
+      }
+    }
+  },
+  "red": {
+    "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts",
+    "testsPassed": 29,
+    "testsFailed": 2,
+    "failures": [
+      "structured mixed sentinel and unsupported action was accepted",
+      "narrative mixed sentinel and unsupported action was accepted"
+    ]
+  },
+  "contract": {
+    "sentinel": "현장 확인 필요 is accepted only when the whitespace-normalized whole field equals the sentinel",
+    "nominalInstructions": "short instruction-shaped nominal clauses are grounded without a finite verb allowlist",
+    "descriptiveProse": "declarative descriptive sentences remain allowed"
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts",
+      "testFilesPassed": 1,
+      "testsPassed": 39,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts --reporter=dot",
+      "testFilesPassed": 4,
+      "testsPassed": 94,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts",
+      "testFilesPassed": 2,
+      "testsPassed": 48,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts --reporter=dot",
+      "testFilesPassed": 5,
+      "testsPassed": 103,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "freshReReview": true
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "freshReReview": true
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts",
+      "testFilesPassed": 2,
+      "testsPassed": 54,
+      "testsFailed": 0,
+      "thirdReReview": true
+    },
+    {
+      "command": "npm.cmd test -- --run tests/grounded-generation-contract.test.ts tests/answer-panel-display.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts --reporter=dot",
+      "testFilesPassed": 5,
+      "testsPassed": 109,
+      "testsFailed": 0,
+      "thirdReReview": true
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "thirdReReview": true
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "thirdReReview": true
+    }
+  ],
+  "excludedChanges": [
+    "database schema",
+    "migration",
+    "data mutation",
+    "package manifest",
+    "lockfile"
+  ]
+}

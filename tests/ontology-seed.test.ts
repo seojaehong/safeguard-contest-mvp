@@ -4,6 +4,7 @@ import { describe, expect, test } from "vitest";
 import { ontologyNodeSchema, ontologyEdgeSchema, parseCitedUid } from "@/lib/ontology/schema";
 import { assembleGraph } from "@/lib/ontology/graph-store";
 import { SEED_NODES, SEED_EDGES, SEED_STATS, SEED_SOURCE } from "@/lib/ontology/seed/core-triples";
+import { SIF_ACCIDENT_EDGES, SIF_ACCIDENT_NODES } from "@/lib/ontology/seed/sif-accident-overlay";
 
 // 원본 감수 문서(온톨로지_시드트리플_감수용_v1.md)의 확정 수치.
 // 문서 헤더 기준 트리플 188로 표기됐으나 표 실측은 190행 (문서 카운트 오차) —
@@ -11,6 +12,75 @@ import { SEED_NODES, SEED_EDGES, SEED_STATS, SEED_SOURCE } from "@/lib/ontology/
 const SOURCE_ROWS = 190;
 const SOURCE_HIGH = 177;
 const SOURCE_MEDIUM = 13;
+
+const SIF_ACCIDENTS = [
+  {
+    itemId: "sif-아카이브-건설업-00323",
+    hazardId: "Hazard_추락"
+  },
+  {
+    itemId: "sif-아카이브-건설업-00024",
+    hazardId: "Hazard_충돌_협착_끼임"
+  },
+  {
+    itemId: "sif-아카이브-건설업-01798",
+    hazardId: "Hazard_감전_직접_간접_접촉"
+  }
+] as const;
+
+type SifCorpusFixture = {
+  referenceItemId: string;
+  contentHash: string;
+  embeddingText: string;
+};
+
+function isSifCorpusFixture(value: unknown): value is SifCorpusFixture {
+  if (typeof value !== "object" || value === null) return false;
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.referenceItemId === "string" &&
+    typeof record.contentHash === "string" &&
+    typeof record.embeddingText === "string"
+  );
+}
+
+function readSifCorpusFixtures(): Map<string, SifCorpusFixture> {
+  const fixturePath = path.resolve(
+    __dirname,
+    "..",
+    "evaluation",
+    "sif-embedding-gate",
+    "sif-embedding-corpus.jsonl"
+  );
+  const fixtures = new Map<string, SifCorpusFixture>();
+  for (const line of readFileSync(fixturePath, "utf-8").split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const parsed = JSON.parse(line) as unknown;
+    if (isSifCorpusFixture(parsed)) fixtures.set(parsed.referenceItemId, parsed);
+  }
+  return fixtures;
+}
+
+function readSifCorpusHash(): string {
+  const reportPath = path.resolve(
+    __dirname,
+    "..",
+    "evaluation",
+    "sif-embedding-gate",
+    "approval-preflight-report.json"
+  );
+  const parsed = JSON.parse(readFileSync(reportPath, "utf-8")) as unknown;
+  if (typeof parsed !== "object" || parsed === null) throw new Error("SIF corpus report is not an object");
+  const corpusHash = (parsed as Record<string, unknown>).corpusHash;
+  if (typeof corpusHash !== "string") throw new Error("SIF corpus report has no corpusHash");
+  return corpusHash;
+}
+
+function accidentOverview(fixture: SifCorpusFixture): string {
+  const match = fixture.embeddingText.match(/재해개요:\s*([\s\S]*?)\s*기인물:/);
+  if (!match) throw new Error(`No accident overview in ${fixture.referenceItemId}`);
+  return match[1];
+}
 
 describe("시드 파싱 무결성 — 원본 감수 문서와 수치 일치", () => {
   test("원본 행 수(높음/중간)가 SEED_STATS와 일치한다", () => {
@@ -22,17 +92,18 @@ describe("시드 파싱 무결성 — 원본 감수 문서와 수치 일치", ()
   test("엣지의 원본 행 합계(meta.source_rows)가 원본 총행과 일치한다 — 유실 없음", () => {
     const totalRows = SEED_EDGES.reduce((sum, e) => {
       const rows = e.meta && typeof e.meta === "object" ? (e.meta as Record<string, unknown>).source_rows : 1;
-      return sum + (typeof rows === "number" ? rows : 1);
+      return sum + (typeof rows === "number" ? rows : 0);
     }, 0);
     expect(totalRows).toBe(SOURCE_ROWS);
   });
 
   test("확신도 반영: 중간 엣지는 전부 draft + meta.confidence='medium', 높음 엣지는 published", () => {
-    const drafts = SEED_EDGES.filter((e) => e.review_state === "draft");
+    const sourceEdges = SEED_EDGES.filter((e) => typeof (e.meta as Record<string, unknown>).source_rows === "number");
+    const drafts = sourceEdges.filter((e) => e.review_state === "draft");
     const published = SEED_EDGES.filter((e) => e.review_state === "published");
     expect(drafts.length).toBe(SOURCE_MEDIUM);
     expect(drafts.every((e) => (e.meta as Record<string, unknown>).confidence === "medium")).toBe(true);
-    expect(published.length + drafts.length).toBe(SEED_EDGES.length);
+    expect(published.length + drafts.length).toBe(sourceEdges.length);
     expect(published.every((e) => (e.meta as Record<string, unknown>).confidence === undefined)).toBe(true);
   });
 
@@ -60,6 +131,67 @@ describe("시드 데이터 스키마·provenance 무결성", () => {
   test("무출처 없음: 모든 노드/엣지 cited_uids ≥ 1", () => {
     expect(SEED_NODES.every((n) => n.cited_uids.length >= 1)).toBe(true);
     expect(SEED_EDGES.every((e) => e.cited_uids.length >= 1)).toBe(true);
+  });
+
+  test("SIF 사고 overlay는 원문 사고개요와 hash provenance만 가진 draft Accident다", () => {
+    const fixtures = readSifCorpusFixtures();
+    const corpusHash = readSifCorpusHash();
+    for (const expected of SIF_ACCIDENTS) {
+      const fixture = fixtures.get(expected.itemId);
+      if (!fixture) throw new Error(`Missing tracked SIF fixture: ${expected.itemId}`);
+      const node = SEED_NODES.find(
+        (candidate) => candidate.kind === "Accident" && candidate.cited_uids.includes(`ref:safety_reference_items:${expected.itemId}`)
+      );
+      expect(node, expected.itemId).toBeDefined();
+      expect(node).toMatchObject({
+        kind: "Accident",
+        text_excerpt: accidentOverview(fixture),
+        cited_uids: [`ref:safety_reference_items:${expected.itemId}`],
+        review_state: "draft",
+        meta: {
+          source_item_id: expected.itemId,
+          content_hash: fixture.contentHash,
+          corpus_hash: corpusHash,
+          evidence_role: "hazard_priority_only",
+          llm_role: "naturalize_only"
+        }
+      });
+      expect(JSON.stringify(node)).not.toMatch(/controls?|mitigatedBy/i);
+    }
+  });
+
+  test("SIF 사고 overlay는 Hazard-evidencedBy-Accident draft edge만 추가한다", () => {
+    const fixtures = readSifCorpusFixtures();
+    const corpusHash = readSifCorpusHash();
+    const accidentIds = new Set(
+      SEED_NODES.filter((node) =>
+        SIF_ACCIDENTS.some((expected) => node.cited_uids.includes(`ref:safety_reference_items:${expected.itemId}`))
+      ).map((node) => node.node_id)
+    );
+    const overlayEdges = SEED_EDGES.filter((edge) => accidentIds.has(edge.dst));
+
+    expect(accidentIds.size).toBe(SIF_ACCIDENTS.length);
+    expect(overlayEdges).toHaveLength(SIF_ACCIDENTS.length);
+    for (const expected of SIF_ACCIDENTS) {
+      const fixture = fixtures.get(expected.itemId);
+      if (!fixture) throw new Error(`Missing tracked SIF fixture: ${expected.itemId}`);
+      const citedUid = `ref:safety_reference_items:${expected.itemId}`;
+      expect(overlayEdges).toContainEqual(
+        expect.objectContaining({
+          src: expected.hazardId,
+          rel: "evidencedBy",
+          cited_uids: [citedUid],
+          review_state: "draft",
+          meta: expect.objectContaining({
+            source_item_id: expected.itemId,
+            content_hash: fixture.contentHash,
+            corpus_hash: corpusHash,
+            evidence_role: "hazard_priority_only",
+            llm_role: "naturalize_only"
+          })
+        })
+      );
+    }
   });
 
   test("Article 노드는 전부 law: uid를 갖고 node_id가 조문 식별 형식이다", () => {
@@ -117,7 +249,7 @@ describe("시드 데이터 스키마·provenance 무결성", () => {
     }
   });
 
-  test("core-triples.json과 TS 상수가 동기 상태다", () => {
+  test("core-triples.json 본체와 SIF overlay가 TS 상수에 유실 없이 합성된다", () => {
     const jsonPath = path.resolve(__dirname, "..", "lib", "ontology", "seed", "core-triples.json");
     const raw = JSON.parse(readFileSync(jsonPath, "utf-8")) as {
       source: string;
@@ -125,7 +257,7 @@ describe("시드 데이터 스키마·provenance 무결성", () => {
       edges: unknown[];
     };
     expect(raw.source).toBe(SEED_SOURCE);
-    expect(raw.nodes).toEqual(SEED_NODES);
-    expect(raw.edges).toEqual(SEED_EDGES);
+    expect([...raw.nodes, ...SIF_ACCIDENT_NODES]).toEqual(SEED_NODES);
+    expect([...raw.edges, ...SIF_ACCIDENT_EDGES]).toEqual(SEED_EDGES);
   });
 });

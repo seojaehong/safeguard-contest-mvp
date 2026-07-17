@@ -1,0 +1,105 @@
+
+> safeclaw@0.1.0 build:frontend:normal
+> node ./scripts/frontend_audit_clean_build.mjs --mode normal
+
+
+> safeclaw@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.20
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 37.5s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/28) ...
+   Generating static pages (7/28) 
+   Generating static pages (14/28) 
+   Generating static pages (21/28) 
+ ✓ Generating static pages (28/28)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                     Size  First Load JS
+┌ ƒ /                                        2.88 kB         109 kB
+├ ○ /_not-found                                245 B         103 kB
+├ ○ /.well-known/agent.json                    245 B         103 kB
+├ ƒ /api/agent/chat                            245 B         103 kB
+├ ƒ /api/agent/context                         245 B         103 kB
+├ ƒ /api/ask                                   245 B         103 kB
+├ ƒ /api/ask/stream                            245 B         103 kB
+├ ƒ /api/briefing/run                          245 B         103 kB
+├ ƒ /api/briefing/settings                     245 B         103 kB
+├ ƒ /api/dispatch-logs                         245 B         103 kB
+├ ƒ /api/education-records                     245 B         103 kB
+├ ƒ /api/export/hwp                            245 B         103 kB
+├ ƒ /api/export/hwpx-template                  245 B         103 kB
+├ ƒ /api/export/pdf                            245 B         103 kB
+├ ƒ /api/export/xlsx                           245 B         103 kB
+├ ƒ /api/input-photos/hazard-analysis          245 B         103 kB
+├ ○ /api/knowledge/governance                  245 B         103 kB
+├ ƒ /api/knowledge/ingest                      245 B         103 kB
+├ ƒ /api/knowledge/match                       245 B         103 kB
+├ ƒ /api/knowledge/regenerate                  245 B         103 kB
+├ ƒ /api/mcp-tokens                            245 B         103 kB
+├ ƒ /api/mcp-tokens/[id]                       245 B         103 kB
+├ ƒ /api/mcp/[transport]                       245 B         103 kB
+├ ƒ /api/ontology/graph                        245 B         103 kB
+├ ƒ /api/safety-reference/search               245 B         103 kB
+├ ƒ /api/safety-reference/status               245 B         103 kB
+├ ƒ /api/search                                245 B         103 kB
+├ ƒ /api/sif-embedding-gate/approval-packet    245 B         103 kB
+├ ƒ /api/sif-embedding-gate/status             245 B         103 kB
+├ ƒ /api/weather                               245 B         103 kB
+├ ƒ /api/workers                               245 B         103 kB
+├ ƒ /api/workflow/dispatch                     245 B         103 kB
+├ ƒ /api/workpack/remediate                    245 B         103 kB
+├ ƒ /api/workpacks                             245 B         103 kB
+├ ƒ /api/workpacks/[id]                        245 B         103 kB
+├ ƒ /api/workpacks/[id]/improvements           245 B         103 kB
+├ ƒ /api/workpacks/[id]/learning-export        245 B         103 kB
+├ ƒ /api/workpacks/[id]/operation-graph        245 B         103 kB
+├ ƒ /api/workpacks/[id]/read-confirmations     245 B         103 kB
+├ ƒ /api/workpacks/[id]/share-sessions         245 B         103 kB
+├ ○ /archive                                 5.77 kB         181 kB
+├ ƒ /ask                                     2.44 kB         109 kB
+├ ○ /auth/callback                           1.47 kB         168 kB
+├ ƒ /demo                                    4.92 kB         111 kB
+├ ○ /dispatch                                  200 B         232 kB
+├ ○ /documents                                 190 B         232 kB
+├ ƒ /dryrun                                  2.47 kB         109 kB
+├ ƒ /evidence                                  201 B         232 kB
+├ ○ /evidence-file                           4.76 kB         206 kB
+├ ○ /home                                    5.47 kB         112 kB
+├ ƒ /interpretation/[id]                       245 B         103 kB
+├ ƒ /knowledge                               3.03 kB         109 kB
+├ ƒ /knowledge/[section]/[slug]              2.47 kB         109 kB
+├ ƒ /law/[id]                                  245 B         103 kB
+├ ○ /login                                   2.22 kB         169 kB
+├ ƒ /ontology                                19.8 kB         126 kB
+├ ƒ /ops/api                                 2.47 kB         109 kB
+├ ƒ /precedent/[id]                            245 B         103 kB
+├ ○ /preview                                 2.47 kB         109 kB
+├ ○ /prototype                                 245 B         103 kB
+├ ƒ /reports                                 17.1 kB         218 kB
+├ ○ /roadmap                                 2.47 kB         109 kB
+├ ƒ /search                                   2.7 kB         109 kB
+├ ○ /settings                                3.79 kB         171 kB
+├ ƒ /settings/ai-connect                     6.85 kB         182 kB
+├ ○ /sitemap.xml                               245 B         103 kB
+├ ○ /tbm                                     2.47 kB         109 kB
+├ ○ /trust                                   2.47 kB         109 kB
+├ ○ /why                                     2.55 kB         109 kB
+├ ○ /worker                                  1.61 kB         142 kB
+├ ○ /workers                                   203 B         232 kB
+└ ƒ /workspace                               54.8 kB         268 kB
++ First Load JS shared by all                 103 kB
+  ├ chunks/1255-d90f22433f14e976.js          46.2 kB
+  ├ chunks/4bd1b696-f785427dddbba9fb.js      54.2 kB
+  └ other shared chunks (total)              2.21 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+{"mode":"normal","buildDirectory":".next","cleanBeforeBuild":true,"auditEnabled":false}

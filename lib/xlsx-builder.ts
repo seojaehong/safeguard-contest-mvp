@@ -599,7 +599,8 @@ function parseTbmBriefingStructured(value: StructuredRecord): TbmBriefingStructu
       return [{
         hazardRef: readNumber(item.hazardRef, 0),
         action: readString(item.action, "안전대책 확인"),
-        owner: readString(item.owner, "담당자 확인")
+        owner: readString(item.owner, "담당자 확인"),
+        evidenceRefs: readStringArray(item.evidenceRefs)
       }];
     }),
     stopCriteria: readStringArray(value.stopCriteria),
@@ -665,7 +666,8 @@ function parseTbmLogStructured(value: StructuredRecord): TbmLogStructured {
         item: readString(item.item, "미조치 항목 확인"),
         plannedAction: readString(item.plannedAction, "조치계획 확인"),
         owner: readString(item.owner, "담당자 확인"),
-        dueDate: readString(item.dueDate, "기한 확인")
+        dueDate: readString(item.dueDate, "기한 확인"),
+        evidenceRefs: readStringArray(item.evidenceRefs)
       }];
     }),
     photoEvidence: {

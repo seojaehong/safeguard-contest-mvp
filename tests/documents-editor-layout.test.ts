@@ -12,6 +12,7 @@ import {
 let baseUrl = "";
 let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
+const DEFAULT_VISIBLE_OPERATIONAL_LABELS = /\b(?:Markdown|Supabase|API|JSON)\b|Operation Ontology|Operation Graph|DB 하네스|품질 계약/u;
 
 type XlsxLoadBuffer = Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0];
 
@@ -95,6 +96,16 @@ describe("documents editor layout", () => {
     if (!browser) return;
     await Promise.all(browser.contexts().map((context) => context.close()));
   }, 30_000);
+
+  it("keeps operational format labels out of the default rendered document surface", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+
+    const visibleText = await page.locator("body").innerText();
+    expect("DB 하네스 · 품질 계약").toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
+    expect(visibleText).not.toMatch(DEFAULT_VISIBLE_OPERATIONAL_LABELS);
+  }, 90_000);
 
   it("renders actual message samples and an empty permit with document-specific structured sections", async () => {
     if (!browser) throw new Error("Browser was not started");

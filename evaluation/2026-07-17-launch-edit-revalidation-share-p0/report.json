@@ -1,0 +1,99 @@
+{
+  "task": "launch edit to revalidation to share P0",
+  "authoritativeBase": "d42e143575c636fcc6e698b9c9eb35609c70b156",
+  "remediationStartHead": "f7c1acf86da314e86993b0865a6da9ea1388fce4",
+  "branch": "fix/launch-edit-revalidation-share-p0-v2",
+  "scope": {
+    "productionFiles": [
+      "components/FieldOperationsWorkspace.tsx",
+      "components/SafeGuardCommandCenter.tsx",
+      "lib/current-workpack.ts",
+      "lib/workpack-readiness.ts"
+    ],
+    "testFiles": [
+      "tests/editor-first-state.test.ts",
+      "tests/workpack-readiness.test.ts",
+      "tests/workspace-share-simplification.test.ts",
+      "tests/workspace-layout-regression.test.ts"
+    ],
+    "excludedFilesChanged": []
+  },
+  "behavior": {
+    "editInvalidatesStaleQa": true,
+    "editPreservesCanonicalContent": true,
+    "editPreservesWorkerAndDispatchSnapshots": true,
+    "revalidationCapturesDeliverableVersionAndFingerprint": true,
+    "staleAsyncRevalidationIsDiscarded": true,
+    "authoritativeReviewBasisIsStoredOutsideInvalidatedQa": true,
+    "reviewTaskKeywordInference": false,
+    "ambiguousOrMissingReviewBasisFailsClosed": true,
+    "exactPublishedTaskIdentityRequired": true,
+    "approvedAliasResolutionUsesExplicitEvidenceChainRegistry": true,
+    "substringTaskAggregation": false,
+    "zeroOrMultipleExactTaskMatchesFailClosed": true,
+    "revalidationSource": "/api/ontology/graph with explicit published scope",
+    "revalidationRecomputesQaFromEditedContent": true,
+    "zeroHazardsControlsOrGraphEdgesFailsClosed": true,
+    "sourceDocumentKeysContainOnlyReviewedNonEmptyDocuments": true,
+    "reloadRestoresEditedContentAndShowsRevalidationAction": true,
+    "nonReviewableFailsClosed": true,
+    "shareUnlockRequiresPassingQaAndAllExistingReadinessGates": true,
+    "databaseMutationPerformed": false
+  },
+  "tdd": {
+    "red": [
+      "unit tests initially failed because no immutable revalidation basis or deliverable fingerprint contract existed",
+      "unit tests exposed acceptance of non-published or empty ontology graph paths and inaccurate source document keys",
+      "browser test initially exposed missing reload selection state and then confirmed the expected stale in-flight result discard contract",
+      "P1 regression test proved that the broad task identity '작업' incorrectly aggregated the published '용접 작업' and '화기 작업' paths"
+    ],
+    "green": [
+      "4 focused test files passed with 32 tests",
+      "exact normalized Task identity accepts one published match and rejects zero or multiple matches without substring aggregation",
+      "production browser passed real reload restoration, stale in-flight result discard, fresh revalidation, persistence, and responsive CTA geometry"
+    ]
+  },
+  "repoWideFrontendEvidence": {
+    "status": "stale-red",
+    "currentSourceIdentity": "be2e652ad60633f5ef8c447d741dbc4205ae38e371e3f5157cd5cde0b40e7f49",
+    "committedEvidenceSourceIdentity": "c5796fe86454b739eaf55ec795ffdd0891284e64370fda97126dd8beba7e0bc3",
+    "globalEvidenceModified": false,
+    "disposition": "Do not regenerate global frontend evidence on this scoped revalidation branch. Regenerate it only from the final integrated HEAD."
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests/workpack-readiness.test.ts tests/workspace-share-simplification.test.ts tests/workspace-pages.test.ts tests/editor-first-state.test.ts",
+      "result": "passed",
+      "tests": 32,
+      "failures": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "passed",
+      "failures": 0
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "passed",
+      "failures": 0
+    },
+    {
+      "command": "$env:WORKSPACE_INPUT_PROD_MATRIX='1'; npm.cmd test -- tests/workspace-layout-regression.test.ts -t 'preserves edited workpack through reload, concurrent revalidation, and responsive share gating'",
+      "result": "passed",
+      "tests": 1,
+      "skipped": 24,
+      "failures": 0,
+      "viewports": [
+        "1440x900",
+        "390x844"
+      ],
+      "assertions": [
+        "revalidation and share actions are at least 44px high",
+        "revalidation action does not overlap the share action",
+        "workspace has no horizontal overflow",
+        "edited text and worker/dispatch snapshots survive reload and remount",
+        "stale async revalidation cannot clear the lock or overwrite the concurrent edit"
+      ]
+    }
+  ]
+}

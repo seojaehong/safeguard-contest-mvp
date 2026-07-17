@@ -4,6 +4,29 @@ import { fileURLToPath } from "node:url";
 
 const projectRoot = dirname(fileURLToPath(import.meta.url));
 const frontendAuditEnabled = process.env.SAFECLAW_FRONTEND_AUDIT === "1";
+const exactKoshaAssets = [
+  "./data/safety-knowledge/exact-kosha/d-c-13-2026.json",
+  "./data/safety-knowledge/exact-kosha/d-c-7-2026.json",
+  "./data/safety-knowledge/exact-kosha/b-e-10-2026.json"
+];
+const exactKoshaConsumers = [
+  "/api/agent/chat",
+  "/api/ask",
+  "/api/ask/stream",
+  "/api/briefing/run",
+  "/api/input-photos/hazard-analysis",
+  "/api/mcp/[transport]",
+  "/api/safety-reference/search",
+  "/api/search",
+  "/api/workpack/remediate",
+  "/api/workpacks/[id]/improvements",
+  "/api/workpacks/[id]/operation-graph",
+  "/ask",
+  "/interpretation/[id]",
+  "/law/[id]",
+  "/precedent/[id]",
+  "/search"
+];
 
 // 빌드 시점에 마지막 git 커밋 날짜를 inject. Vercel build에서 매 배포마다 자동 갱신
 // → 푸터 UPDATED 라인 수동 갱신 불필요. git unavailable / 런타임 fallback은 today.
@@ -21,6 +44,9 @@ const buildDate = (() => {
 const nextConfig = {
   typedRoutes: true,
   outputFileTracingRoot: projectRoot,
+  outputFileTracingIncludes: Object.fromEntries(
+    exactKoshaConsumers.map((route) => [route, exactKoshaAssets])
+  ),
   env: {
     NEXT_PUBLIC_BUILD_DATE: buildDate
   },
@@ -30,6 +56,12 @@ const nextConfig = {
       frontendAuditEnabled
         ? "lib/frontend-audit/GlobalBoundaryProbe.audit.tsx"
         : "lib/frontend-audit/GlobalBoundaryProbe.noop.tsx"
+    );
+    config.resolve.alias["safeclaw-audit-app-error-escalation$"] = join(
+      projectRoot,
+      frontendAuditEnabled
+        ? "lib/frontend-audit/AppBoundaryProbe.audit.ts"
+        : "lib/frontend-audit/AppBoundaryProbe.noop.ts"
     );
     return config;
   },

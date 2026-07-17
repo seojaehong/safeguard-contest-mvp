@@ -17,6 +17,7 @@ import {
   deriveSafetyReferenceOperationalView,
   getSafetyReferenceDisplaySummary,
   getSafetyReferenceDisplayTitle,
+  isKoshaTechnicalReference,
   isSafetyReferenceDirectEligible,
   type SafetyReferenceItem,
   type SafetyReferenceSearchResult
@@ -24,6 +25,13 @@ import {
 import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 
 const log = createLogger("photo-vision");
+
+function isControlExtractableFromBody(item: SafetyReferenceItem, control: string): boolean {
+  if (!isKoshaTechnicalReference(item)) return true;
+  const body = (item.body ?? "").normalize("NFC").replace(/\s+/gu, "");
+  const extract = control.normalize("NFC").replace(/\s+/gu, "").trim();
+  return Boolean(body && extract && body.includes(extract));
+}
 
 export type ImprovementVisionAnalysis = {
   status: "analyzed" | "unconfigured" | "failed";
@@ -778,8 +786,11 @@ function resolveCandidateFromReferences(input: {
   matchedReferences.forEach((item) => {
     const operational = operationalByReferenceId.get(item.id);
     if (!operational || operational.reviewRequired) return;
-    if (operational.controls.length) hasConfirmedControl = true;
-    operational.controls.slice(0, 2).forEach((control) => {
+    const groundedControls = operational.controls.filter((control) => (
+      isControlExtractableFromBody(item, control)
+    ));
+    if (groundedControls.length) hasConfirmedControl = true;
+    groundedControls.slice(0, 2).forEach((control) => {
       const text = control.trim();
       if (!text) return;
       const existing = controlsByText.get(text);

@@ -981,6 +981,22 @@ describe("pipeline and document materialization contract", () => {
     ]);
   });
 
+  test("fails closed in the knowledge payload for an unregistered fuzzy Phase A intent", () => {
+    const payload = buildPublishedSafetyKnowledge(
+      publishedGraph,
+      "추락 위험",
+    );
+
+    expect(payload).toMatchObject({
+      found: false,
+      evidenceChainState: "not_registered",
+      evidenceContract: null,
+      phaseAProduct: null,
+    });
+    expect(JSON.stringify(payload)).not.toContain("Task_work_at_height");
+    expect(JSON.stringify(payload)).not.toContain("Hazard_추락");
+  });
+
   test("returns review-only SIF evidence from MCP as diagnostics, never active evidence", () => {
     const payload = buildPublishedSafetyKnowledge(publishedGraph, "차량계·기계 인접작업");
     expect(payload.found).toBe(true);

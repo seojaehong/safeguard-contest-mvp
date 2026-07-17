@@ -53,4 +53,13 @@ describe("risk row normalization", () => {
     expect(finalValidation.rows[0].riskLevel).toBe("high");
     expect(finalValidation.issues).toEqual([]);
   });
+
+  it("preserves an optional canonical controlId through schema validation", () => {
+    const validation = validateRiskAssessmentRows({
+      rows: [row({ controlId: "fall-work-platform", riskLevel: "high" })],
+    });
+
+    expect(validation.ok).toBe(true);
+    expect(validation.rows[0]?.controlId).toBe("fall-work-platform");
+  });
 });

@@ -20,13 +20,21 @@ import {
   type WeatherSignalLike,
 } from "./mcp-tools";
 import { querySafetyKnowledge } from "./ontology/knowledge-tool";
-import { materializePhaseAProductDocuments } from "./ontology/product-materialization";
-import { isEvidenceChainTaskBoundToQuestion } from "./ontology/evidence-chain";
+import {
+  materializePhaseAProductIntoResponse,
+} from "./ontology/product-materialization";
+import {
+  buildPhaseAGenerationGrounding,
+  isEvidenceChainTaskBoundToQuestion,
+  type ActiveEvidenceChainPack,
+} from "./ontology/evidence-chain";
 import { reviewDocpack } from "./ontology/qa-review-tool";
 import type { SafetyReferenceItem } from "./safety-reference-catalog";
 import { searchSafetyReferences } from "./safety-reference-catalog-server";
 import { isEmbeddableSifReferenceItem } from "./sif-embedding-corpus";
 import type { McpAuthContext } from "./mcp-auth";
+import { createSupabaseAdminClient } from "./supabase-admin";
+import { loadTenantHarnessMemoryForMcp } from "./tenant-harness-memory";
 
 function asString(input: unknown, key: string): string {
   const value = (input as Record<string, unknown> | null)?.[key];
@@ -74,10 +82,11 @@ export async function executeClawTool(
   switch (name) {
     case "run_safeclaw_harness_agent": {
       const question = asString(input, "question");
-      const [direct, sif, supporting] = await Promise.all([
+      const [direct, sif, supporting, memory] = await Promise.all([
         searchSafetyReferences({ query: question, limit: 6, evidenceRole: "direct" }),
         searchSafetyReferences({ query: question, limit: 6, itemType: "sif-case" }),
         searchSafetyReferences({ query: question, limit: 6, evidenceRole: "supporting" }),
+        loadTenantHarnessMemoryForMcp(authContext, createSupabaseAdminClient),
       ]);
       return buildHarnessAgentResult({
         question,
@@ -91,6 +100,8 @@ export async function executeClawTool(
           summarizeHarnessSearch("sif_cases", sif),
           summarizeHarnessSearch("supporting_evidence", supporting),
         ],
+        tenantMemory: memory,
+        memoryStages: memory.stages,
         auth: authContext ? {
           source: authContext.source,
           siteId: authContext.siteId,
@@ -120,21 +131,34 @@ export async function executeClawTool(
       const requestedTask = asString(input, "task");
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
-      const [generatedResponse, knowledge] = await Promise.all([
-        runAsk(question, { aiMode: mode }),
-        querySafetyKnowledge(requestedTask),
-      ]);
-      const task = knowledge.phaseAProduct?.task.label
-        ?? resolveReviewTaskLabel(requestedTask, question);
-      const response = knowledge.found && knowledge.phaseAProduct
+      const knowledge = await querySafetyKnowledge(requestedTask);
+      const taskBound = knowledge.found
+        && knowledge.evidenceContract !== null
         && isEvidenceChainTaskBoundToQuestion(
           requestedTask,
           question,
-          knowledge.phaseAProduct.chainId,
-        )
-        ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
-            generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+          knowledge.evidenceContract.chainId,
+        );
+      const phaseAGrounding = taskBound && knowledge.evidenceContract
+        ? buildPhaseAGenerationGrounding({
+            evidenceChainState: knowledge.evidenceChainState,
+            evidencePack: knowledge.evidenceContract,
           })
+        : undefined;
+      const generatedResponse = await runAsk(question, {
+        aiMode: mode,
+        ...(phaseAGrounding ? { phaseAGrounding } : {}),
+      });
+      const task = phaseAGrounding?.evidencePack?.task.label
+        ?? resolveReviewTaskLabel(requestedTask, question);
+      const response = phaseAGrounding?.evidencePack
+        ? materializePhaseAProductIntoResponse(
+            generatedResponse,
+            phaseAGrounding.evidencePack as ActiveEvidenceChainPack,
+            {
+              generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+            },
+          )
         : generatedResponse;
       const qa = await reviewDocpack(task, selectQaDocumentText(response));
       return buildReviewedDocpackResult(response, qa, task, includeFull);
@@ -143,14 +167,25 @@ export async function executeClawTool(
       const question = asString(input, "question");
       const mode = asAiMode(input, "enhanced");
       const includeFull = asIncludeFull(input);
-      const [generatedResponse, knowledge] = await Promise.all([
-        runAsk(question, { aiMode: mode }),
-        querySafetyKnowledge(question),
-      ]);
-      const response = knowledge.found && knowledge.phaseAProduct
-        ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
-            generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+      const knowledge = await querySafetyKnowledge(question);
+      const phaseAGrounding = knowledge.evidenceContract
+        ? buildPhaseAGenerationGrounding({
+            evidenceChainState: knowledge.evidenceChainState,
+            evidencePack: knowledge.evidenceContract,
           })
+        : undefined;
+      const generatedResponse = await runAsk(question, {
+        aiMode: mode,
+        ...(phaseAGrounding ? { phaseAGrounding } : {}),
+      });
+      const response = phaseAGrounding?.evidencePack
+        ? materializePhaseAProductIntoResponse(
+            generatedResponse,
+            phaseAGrounding.evidencePack as ActiveEvidenceChainPack,
+            {
+              generationEvidenceSecret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
+            },
+          )
         : generatedResponse;
       return buildDocpackResult(response, includeFull);
     }

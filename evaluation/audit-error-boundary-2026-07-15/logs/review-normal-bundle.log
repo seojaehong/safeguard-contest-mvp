@@ -1,0 +1,40 @@
+
+> safeclaw@0.1.0 audit:frontend-bundle
+> node ./scripts/frontend_audit_bundle_contract.mjs --mode normal
+
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-15T07:43:17.648Z",
+  "mode": "normal",
+  "buildDirectory": ".next",
+  "buildId": "PdlkAZyAYRkMob0BMw_3N",
+  "sourceSha": "d3dab1d2426ab90b033ce227b99ce3306328ec48",
+  "sourceIdentity": "781cd0edf69d880a22a8b9cdb200fd0db4c34f43a3853e7662ee5302be255124",
+  "buildIdentity": "807fb9969c0e587c0617eacf241fe0cbb441f5521f4330169ee71e92bab6232c",
+  "chunkCount": 289,
+  "staticChunkCount": 100,
+  "serverChunkCount": 189,
+  "markerCount": 0,
+  "markerFiles": [],
+  "markers": {
+    "global": {
+      "staticCount": 0,
+      "serverCount": 0,
+      "totalCount": 0,
+      "files": []
+    },
+    "appError": {
+      "staticCount": 0,
+      "serverCount": 0,
+      "totalCount": 0,
+      "files": []
+    },
+    "appErrorConfirmation": {
+      "staticCount": 0,
+      "serverCount": 0,
+      "totalCount": 0,
+      "files": []
+    }
+  },
+  "status": "pass"
+}

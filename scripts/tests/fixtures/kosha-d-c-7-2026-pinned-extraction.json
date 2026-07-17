@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "safeclaw-kosha-pinned-extraction-fixture/v1",
+  "version": "D-C-7-2026",
+  "officialUrl": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914243912403149/2",
+  "pdfSha256": "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3",
+  "normalizedBodySha256": "97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112",
+  "pageCount": 71,
+  "normalizedCharCount": 38781,
+  "extractorVersion": "safeclaw-kosha-native-pdf/v2",
+  "extractorDependency": "pypdf==6.7.1"
+}

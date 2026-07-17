@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import { describe, expect, it, vi } from "vitest";
 
 import type { ClawChatEvent } from "@/lib/agent-loop";
@@ -10,15 +8,22 @@ import type {
   SafetyReferenceItem,
   SafetyReferenceSearchResult,
 } from "@/lib/safety-reference-catalog";
+import { isProductionTrustedKoshaReference } from "@/lib/production-kosha-trust";
 import * as safetyReferenceServer from "@/lib/safety-reference-catalog-server";
 import {
   createExperimentalHermesAdapter,
-  createSafeClawHermesComposition,
+  createRemoteHermesAdapter,
+  createSafeClawHermesComposition as createHermesComposition,
+  HERMES_OUTPUT_ATTESTATION_VERSION,
+  type HermesPlanner,
+  type HermesPlannerInput,
+  type ImmutableEvidencePacket,
 } from "@/lib/hermes-engine-adapter";
 import {
   createProductionEngineAdapter,
   type ProductionEngineAdapterDependencies,
 } from "@/lib/openclaw-broker-route";
+import { isToolFreeOpenClawAgentPolicy } from "@/lib/openclaw-hermes-runtime";
 
 const context: BrokerRequestContext = {
   userId: "user-1",
@@ -30,6 +35,13 @@ const context: BrokerRequestContext = {
 const localPocEnv = {
   SAFECLAW_ENGINE_MODE: "experimental-hermes",
   SAFECLAW_HERMES_LOCAL_POC: "1",
+};
+
+const boundLocalPocEnv = {
+  ...localPocEnv,
+  OPENCLAW_LOCAL: "1",
+  SAFECLAW_HERMES_BOUND_ORGANIZATION_ID: context.organizationId,
+  SAFECLAW_HERMES_BOUND_SITE_ID: context.siteId,
 };
 
 const executeClawTool = clawTools.executeClawTool;
@@ -53,43 +65,109 @@ function sifReference(): SafetyReferenceItem {
   };
 }
 
-function verifiedKoshaReference(): SafetyReferenceItem {
-  const body = "오늘 작업 전 작업발판, 난간, 안전대 상태를 점검합니다.";
-  const officialUrl = "https://portal.kosha.or.kr/archive/resources/tech-support/search/all";
+function recoveredKoshaReference(): SafetyReferenceItem {
+  const body = "외벽도장보수공사 작업 전 작업발판, 난간, 개구부와 안전대 상태를 확인합니다.";
   return {
     ...sifReference(),
     id: "kosha-guide-1",
     source_id: "kosha-technical-guidelines",
     item_type: "technical-guideline",
-    title: "G-67-2011 오늘 작업 위험 점검 기술지침",
+    title: "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
     summary: "외벽 작업의 추락 예방 점검 지침",
     body,
-    source_url: officialUrl,
+    controls: ["작업발판, 난간, 개구부와 안전대 상태를 확인"],
+    source_url: "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1",
     kosha_guide: {
       referenceId: "kosha-guide-1",
-      stableDocumentKey: "G-67",
-      version: "G-67-2011",
+      stableDocumentKey: "D-C-13",
+      version: "D-C-13-2026",
+      officialVersion: "D-C-13-2026",
+      officialStatus: "current",
       quality: "accepted",
       lifecycle: "current",
       bodyKind: "native",
+      bodySha256: "ea8bb93a3e03a40873222ab385d257e1a5946cb4d28e5c65951353731b0a5919",
+      pdfSha256: "790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179",
+      officialUrl: "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1",
+      officialFileId: "CTC2026012914371557826167",
+      publicationDate: "2026-01-30",
       anchors: [{ page: 1, excerpt: body }],
-      evidenceRef: "KOSHA G-67-2011 p.1",
+      evidenceRef: "KOSHA D-C-13-2026 p.1",
       directEligible: true,
-      officialUrl,
-      officialFileId: "fixture-kosha-guide-1",
-      publicationDate: "2011-01-01",
-      officialVersion: "G-67-2011",
-      officialStatus: "current",
-      pdfSha256: "b".repeat(64),
-      bodySha256: createHash("sha256").update(body).digest("hex"),
     },
   };
+}
+
+const pinnedRecoveredKoshaFixture = recoveredKoshaReference();
+
+function isTestOnlyRecoveredKoshaFixture(item: SafetyReferenceItem): boolean {
+  return item.id === pinnedRecoveredKoshaFixture.id
+    && item.title === pinnedRecoveredKoshaFixture.title
+    && item.body === pinnedRecoveredKoshaFixture.body
+    && item.source_url === pinnedRecoveredKoshaFixture.source_url
+    && item.kosha_guide?.stableDocumentKey === pinnedRecoveredKoshaFixture.kosha_guide?.stableDocumentKey
+    && item.kosha_guide?.version === pinnedRecoveredKoshaFixture.kosha_guide?.version
+    && item.kosha_guide?.officialVersion === pinnedRecoveredKoshaFixture.kosha_guide?.officialVersion
+    && item.kosha_guide?.bodySha256 === pinnedRecoveredKoshaFixture.kosha_guide?.bodySha256
+    && item.kosha_guide?.pdfSha256 === pinnedRecoveredKoshaFixture.kosha_guide?.pdfSha256
+    && item.kosha_guide?.officialFileId === pinnedRecoveredKoshaFixture.kosha_guide?.officialFileId
+    && item.kosha_guide?.officialUrl === pinnedRecoveredKoshaFixture.kosha_guide?.officialUrl
+    && item.kosha_guide?.publicationDate === pinnedRecoveredKoshaFixture.kosha_guide?.publicationDate;
+}
+
+function createSafeClawHermesComposition(planner: HermesPlanner) {
+  return createHermesComposition(planner, {
+    trustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
+  });
+}
+
+function attestedOutput(
+  input: HermesPlannerInput,
+  evidencePacket: ImmutableEvidencePacket = freezeRecursivelyForTest(
+    structuredClone(input.evidencePacket),
+  ),
+) {
+  const claim = input.evidenceClaims[0];
+  if (!claim) throw new Error("test fixture requires an evidence claim");
+  return {
+    evidencePacket,
+    attestation: {
+      schemaVersion: HERMES_OUTPUT_ATTESTATION_VERSION,
+      evidenceDigest: input.evidenceDigest,
+      claims: [{
+        claimId: claim.claimId,
+        citationIds: claim.citations.map((citation) => citation.citationId),
+      }],
+    },
+  };
+}
+
+function structuredPlannerResponse(prompt: string): string {
+  const allowlistJson = prompt.split("\n").at(-1);
+  if (!allowlistJson) throw new Error("planner prompt requires an allowlist");
+  const allowlist = JSON.parse(allowlistJson) as {
+    evidenceDigest: string;
+    claims: Array<{
+      claimId: string;
+      citations: Array<{ citationId: string }>;
+    }>;
+  };
+  const claim = allowlist.claims[0];
+  if (!claim) throw new Error("planner prompt requires a claim");
+  return JSON.stringify({
+    schemaVersion: HERMES_OUTPUT_ATTESTATION_VERSION,
+    evidenceDigest: allowlist.evidenceDigest,
+    claims: [{
+      claimId: claim.claimId,
+      citationIds: claim.citations.map((citation) => citation.citationId),
+    }],
+  });
 }
 
 function groundedHarnessResult(question = "오늘 작업 위험을 점검해줘") {
   const packet = buildDbHarnessPacket({
     question,
-    references: [sifReference(), verifiedKoshaReference()],
+    references: [sifReference(), recoveredKoshaReference()],
     retrieval: { mode: "ranked-rpc", message: "required evidence resolved" },
   });
   return {
@@ -155,6 +233,87 @@ function runInput(emit: (event: ClawChatEvent) => void = () => undefined) {
 }
 
 describe("experimental Hermes EngineAdapter", () => {
+  it("runs the production harness with only the verified 20260401 SIF subset for remote execution", async () => {
+    const verifiedSif = sifReference();
+    verifiedSif.source_id = "kosha-sif-archive-20260401";
+    const legacySif = {
+      ...sifReference(),
+      id: "sif-legacy",
+      controls: ["레거시 출처는 원격 근거로 승격하지 않습니다."],
+    };
+    const unsupportedSif = {
+      ...sifReference(),
+      id: "sif-unverified",
+      source_id: "kosha-sif-archive-unverified",
+      controls: ["지원되지 않은 SIF 근거는 원격으로 보내지 않습니다."],
+    };
+    const packet = buildDbHarnessPacket({
+      question: "오늘 작업 위험을 점검해줘",
+      references: [verifiedSif, legacySif, unsupportedSif, recoveredKoshaReference()],
+      retrieval: { mode: "ranked-rpc", message: "production SIF evidence resolved" },
+    });
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...groundedHarnessResult(),
+      packet,
+    });
+    let captured: HermesPlannerInput | undefined;
+    const engine = createRemoteHermesAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "remote-hermes" },
+      composition: createHermesComposition(async (input) => {
+        captured = input;
+        input.emitText(attestedOutput(input));
+      }, { trustedKoshaReference: isTestOnlyRecoveredKoshaFixture, toolPolicy: "deny-all" }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(captured).toBeDefined();
+    const remoteSifClaims = captured?.evidenceClaims.filter((claim) => (
+      claim.citations.some((citation) => citation.provenanceClass === "sif_case")
+    )) ?? [];
+    expect(remoteSifClaims).toHaveLength(2);
+    expect(remoteSifClaims.every((claim) => (
+      claim.remotePublicProvenance === "verified_public_safety_corpus"
+    ))).toBe(true);
+    expect(captured?.evidenceExclusions).toEqual([
+      expect.objectContaining({
+        referenceDigest: expect.stringMatching(/^[a-f0-9]{64}$/u),
+        evidenceKind: "sif_case",
+        reason: "remote_sif_source_not_verified",
+      }),
+      expect.objectContaining({
+        referenceDigest: expect.stringMatching(/^[a-f0-9]{64}$/u),
+        evidenceKind: "sif_case",
+        reason: "remote_sif_source_not_verified",
+      }),
+    ]);
+  });
+
+  it("fails remote execution when the harness has no verified production SIF claim", async () => {
+    const executeSpy = mockHarnessPreload();
+    const planner = vi.fn<HermesPlanner>();
+    const engine = createRemoteHermesAdapter({
+      env: { SAFECLAW_ENGINE_MODE: "remote-hermes" },
+      composition: createHermesComposition(planner, {
+        trustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
+        toolPolicy: "deny-all",
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+    expect(planner).not.toHaveBeenCalled();
+  });
+
   if (false) {
     const arbitraryExecutorComposition = {
       planner: async () => undefined,
@@ -210,6 +369,38 @@ describe("experimental Hermes EngineAdapter", () => {
     expect(harnessCalls).toBe(1);
   }, 15_000);
 
+  it("accepts an exact trusted KOSHA reference from the direct bucket", async () => {
+    const harnessResult = structuredClone(groundedHarnessResult());
+    const koshaIndex = harnessResult.packet.supportingEvidence.findIndex(
+      (item) => item.id === pinnedRecoveredKoshaFixture.id,
+    );
+    const kosha = harnessResult.packet.supportingEvidence[koshaIndex];
+    if (!kosha || koshaIndex < 0) throw new Error("test fixture requires grounded KOSHA evidence");
+    harnessResult.packet.supportingEvidence.splice(koshaIndex, 1);
+    harnessResult.packet.directEvidence.push(kosha);
+    harnessResult.packet.retrievalContract.sourceCounts.supportingEvidence -= 1;
+    harnessResult.packet.retrievalContract.sourceCounts.directEvidence += 1;
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(harnessResult);
+    let plannerCalls = 0;
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async (input) => {
+        plannerCalls += 1;
+        expect(input.evidenceClaims.some((claim) => (
+          claim.citations.some((citation) => citation.label.startsWith("KOSHA 실행지침:"))
+        ))).toBe(true);
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(1);
+  });
+
   it("accepts the production executeClawTool Harness packet with controlled grounded searches", async () => {
     const searchSpy = vi.spyOn(safetyReferenceServer, "searchSafetyReferences").mockImplementation(
       async (options) => {
@@ -217,7 +408,7 @@ describe("experimental Hermes EngineAdapter", () => {
           return searchResult(options.query, [sifReference()]);
         }
         if (options.evidenceRole === "supporting") {
-          return searchResult(options.query, [verifiedKoshaReference()]);
+          return searchResult(options.query, [recoveredKoshaReference()]);
         }
         return searchResult(options.query, []);
       },
@@ -245,6 +436,46 @@ describe("experimental Hermes EngineAdapter", () => {
 
     expect(searchCalls).toBe(3);
     expect(plannerCalls).toBe(1);
+  });
+
+  it("excludes review-required KOSHA controls from a mixed evidence claim allowlist", async () => {
+    const mixedResult = structuredClone(groundedHarnessResult());
+    const reviewRequired = recoveredKoshaReference();
+    reviewRequired.id = "kosha-review-required";
+    reviewRequired.title = "검토 필요 KOSHA 항목";
+    reviewRequired.controls = ["검증되지 않은 임의 통제조치"];
+    if (!reviewRequired.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
+    reviewRequired.kosha_guide.quality = "review_required";
+    reviewRequired.kosha_guide.directEligible = false;
+    reviewRequired.kosha_guide.evidenceRef = "KOSHA 미검증 근거";
+    mixedResult.packet.supportingEvidence.push(reviewRequired);
+    mixedResult.packet.retrievalContract.sourceCounts.supportingEvidence += 1;
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValue(mixedResult);
+    let inspectedClaims = 0;
+    const events: ClawChatEvent[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async (input) => {
+        inspectedClaims += 1;
+        expect(input.evidenceClaims.map((claim) => claim.text)).not.toContain(
+          "검증되지 않은 임의 통제조치",
+        );
+        expect(input.evidenceClaims.some((claim) => (
+          claim.citations.some((citation) => citation.label.startsWith("KOSHA 실행지침:"))
+        ))).toBe(true);
+        input.emitText(attestedOutput(input));
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(inspectedClaims).toBe(1);
+    expect(events).toHaveLength(1);
+    expect(JSON.stringify(events)).not.toContain("검증되지 않은 임의 통제조치");
   });
 
   it.each([
@@ -298,9 +529,9 @@ describe("experimental Hermes EngineAdapter", () => {
     const events: ClawChatEvent[] = [];
     const engine = createExperimentalHermesAdapter({
       env: localPocEnv,
-      composition: createSafeClawHermesComposition(async ({ emitText, evidencePacket }) => {
+      composition: createSafeClawHermesComposition(async (plannerInput) => {
         plannerCalled = true;
-        emitText({ text: "근거 없는 출력", evidencePacket });
+        plannerInput.emitText(attestedOutput(plannerInput));
       }),
     });
 
@@ -499,7 +730,7 @@ describe("experimental Hermes EngineAdapter", () => {
   });
 
   it("fails closed before planner when KOSHA evidence is unresolved", async () => {
-    const unresolvedKosha = verifiedKoshaReference();
+    const unresolvedKosha = recoveredKoshaReference();
     if (!unresolvedKosha.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
     unresolvedKosha.kosha_guide.quality = "review_required";
     const packet = buildDbHarnessPacket({
@@ -531,6 +762,158 @@ describe("experimental Hermes EngineAdapter", () => {
     expect(plannerCalls).toBe(0);
   });
 
+  it.each(["body", "pdfSha256", "officialFileId"] as const)(
+    "rejects a pinned test-only KOSHA fixture with a %s mismatch",
+    async (field) => {
+      const mismatchedKosha = recoveredKoshaReference();
+      if (!mismatchedKosha.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
+      if (field === "body") mismatchedKosha.body = `${mismatchedKosha.body} 변조`;
+      if (field === "pdfSha256") mismatchedKosha.kosha_guide.pdfSha256 = "0".repeat(64);
+      if (field === "officialFileId") mismatchedKosha.kosha_guide.officialFileId = "mismatched-file";
+      const packet = buildDbHarnessPacket({
+        question: "오늘 작업 위험을 점검해줘",
+        references: [sifReference(), mismatchedKosha],
+        retrieval: { mode: "ranked-rpc", message: "mismatched KOSHA provenance" },
+      });
+      const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+        ...groundedHarnessResult(),
+        packet,
+      });
+      let plannerCalls = 0;
+      const engine = createExperimentalHermesAdapter({
+        env: localPocEnv,
+        composition: createSafeClawHermesComposition(async () => {
+          plannerCalls += 1;
+        }),
+      });
+
+      try {
+        await expect(engine.run(runInput())).rejects.toMatchObject({
+          code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+          status: 503,
+        });
+      } finally {
+        executeSpy.mockRestore();
+      }
+      expect(plannerCalls).toBe(0);
+    },
+  );
+
+  it("allows only explicitly trusted KOSHA claims from mixed supporting evidence", async () => {
+    const trustedKosha = recoveredKoshaReference();
+    trustedKosha.controls = ["작업발판, 난간, 개구부와 안전대 상태를 확인"];
+    const untrustedKosha = recoveredKoshaReference();
+    untrustedKosha.id = "kosha-guide-untrusted";
+    untrustedKosha.controls = ["미신뢰 KOSHA 조치"];
+    if (!untrustedKosha.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
+    untrustedKosha.kosha_guide.evidenceRef = "KOSHA UNTRUSTED p.1";
+    const packet = buildDbHarnessPacket({
+      question: "오늘 작업 위험을 점검해줘",
+      references: [sifReference(), trustedKosha, untrustedKosha],
+      retrieval: { mode: "ranked-rpc", message: "mixed KOSHA trust decisions" },
+    });
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...groundedHarnessResult(),
+      packet,
+    });
+    let allowlistedLabels: readonly string[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async ({ evidenceClaims }) => {
+        allowlistedLabels = evidenceClaims.flatMap((claim) => (
+          claim.citations.map((citation) => citation.label)
+        ));
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(allowlistedLabels).toContain("KOSHA 실행지침: KOSHA D-C-13-2026 p.1");
+    expect(allowlistedLabels).not.toContain("KOSHA 실행지침: KOSHA UNTRUSTED p.1");
+  });
+
+  it("allows only KOSHA controls extractable from the pinned body", async () => {
+    const kosha = recoveredKoshaReference();
+    const bodyExtract = "작업발판, 난간, 개구부와 안전대 상태를 확인";
+    const forgedControl = "메타데이터와 함께 주입한 임의 통제조치";
+    kosha.controls = [bodyExtract, forgedControl];
+    const packet = buildDbHarnessPacket({
+      question: "오늘 작업 위험을 점검해줘",
+      references: [sifReference(), kosha],
+      retrieval: { mode: "ranked-rpc", message: "forged KOSHA controls" },
+    });
+    const packetKosha = packet.supportingEvidence.find((item) => (
+      item.item_type === "technical-guideline"
+    ));
+    if (!packetKosha) throw new Error("test fixture requires KOSHA supporting evidence");
+    packetKosha.controls = [bodyExtract, forgedControl];
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...groundedHarnessResult(),
+      packet,
+    });
+    let allowlistedClaims: readonly string[] = [];
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async ({ evidenceClaims }) => {
+        allowlistedClaims = evidenceClaims.map((claim) => claim.text);
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(allowlistedClaims).toContain(bodyExtract);
+    expect(allowlistedClaims).not.toContain(forgedControl);
+  });
+
+  it("uses a pinned KOSHA body anchor when metadata controls are empty", async () => {
+    const sifWithoutClaims = sifReference();
+    sifWithoutClaims.controls = [];
+    const koshaWithoutClaims = recoveredKoshaReference();
+    koshaWithoutClaims.controls = [];
+    const packet = buildDbHarnessPacket({
+      question: "오늘 작업 위험을 점검해줘",
+      references: [sifWithoutClaims, koshaWithoutClaims],
+      retrieval: { mode: "ranked-rpc", message: "valid evidence without eligible claims" },
+    });
+    for (const reference of [
+      ...packet.directEvidence,
+      ...packet.sifCases,
+      ...packet.supportingEvidence,
+    ]) {
+      reference.controls = [];
+    }
+    const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+      ...groundedHarnessResult(),
+      packet,
+    });
+    let plannerCalls = 0;
+    const engine = createExperimentalHermesAdapter({
+      env: localPocEnv,
+      composition: createSafeClawHermesComposition(async ({ evidenceClaims }) => {
+        plannerCalls += 1;
+        expect(evidenceClaims.map((claim) => claim.text)).toContain(
+          recoveredKoshaReference().body,
+        );
+      }),
+    });
+
+    try {
+      await expect(engine.run(runInput())).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(plannerCalls).toBe(1);
+  });
+
   it("blocks output when planner mutates the same attested packet object", async () => {
     const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(
       groundedHarnessResult(),
@@ -538,11 +921,12 @@ describe("experimental Hermes EngineAdapter", () => {
     const events: ClawChatEvent[] = [];
     const engine = createExperimentalHermesAdapter({
       env: localPocEnv,
-      composition: createSafeClawHermesComposition(async ({ evidencePacket, emitText }) => {
+      composition: createSafeClawHermesComposition(async (plannerInput) => {
+        const { evidencePacket } = plannerInput;
         expect(Object.isFrozen(evidencePacket)).toBe(true);
         expect(Object.isFrozen(evidencePacket.retrievalContract)).toBe(true);
         (evidencePacket as unknown as { question: string }).question = "planner가 바꾼 질문";
-        emitText({ text: "변조된 packet 출력", evidencePacket });
+        plannerInput.emitText(attestedOutput(plannerInput, evidencePacket));
       }),
     });
 
@@ -562,10 +946,11 @@ describe("experimental Hermes EngineAdapter", () => {
     const events: ClawChatEvent[] = [];
     const engine = createExperimentalHermesAdapter({
       env: localPocEnv,
-      composition: createSafeClawHermesComposition(async ({ evidencePacket, emitText }) => {
+      composition: createSafeClawHermesComposition(async (plannerInput) => {
+        const { evidencePacket } = plannerInput;
         const otherQuestionPacket = structuredClone(evidencePacket);
         (otherQuestionPacket as unknown as { question: string }).question = "다른 질문";
-        emitText({ text: "다른 질문 packet 출력", evidencePacket: otherQuestionPacket });
+        plannerInput.emitText(attestedOutput(plannerInput, otherQuestionPacket));
       }),
     });
 
@@ -588,8 +973,8 @@ describe("experimental Hermes EngineAdapter", () => {
     const events: ClawChatEvent[] = [];
     const engine = createExperimentalHermesAdapter({
       env: localPocEnv,
-      composition: createSafeClawHermesComposition(async ({ evidencePacket, emitText }) => {
-        emitText({ text: "same object", evidencePacket });
+      composition: createSafeClawHermesComposition(async (plannerInput) => {
+        plannerInput.emitText(attestedOutput(plannerInput, plannerInput.evidencePacket));
       }),
     });
 
@@ -612,8 +997,11 @@ describe("experimental Hermes EngineAdapter", () => {
     const events: ClawChatEvent[] = [];
     const engine = createExperimentalHermesAdapter({
       env: localPocEnv,
-      composition: createSafeClawHermesComposition(async ({ evidencePacket, emitText }) => {
-        emitText({ text: "attested output", evidencePacket: structuredClone(evidencePacket) });
+      composition: createSafeClawHermesComposition(async (plannerInput) => {
+        plannerInput.emitText(attestedOutput(
+          plannerInput,
+          structuredClone(plannerInput.evidencePacket),
+        ));
       }),
     });
 
@@ -636,12 +1024,13 @@ describe("experimental Hermes EngineAdapter", () => {
     const events: ClawChatEvent[] = [];
     const engine = createExperimentalHermesAdapter({
       env: localPocEnv,
-      composition: createSafeClawHermesComposition(async ({ evidencePacket, emitText }) => {
+      composition: createSafeClawHermesComposition(async (plannerInput) => {
+        const { evidencePacket } = plannerInput;
         const rootOnlyFrozen = structuredClone(evidencePacket);
         Object.freeze(rootOnlyFrozen);
         expect(Object.isFrozen(rootOnlyFrozen)).toBe(true);
         expect(Object.isFrozen(rootOnlyFrozen.sifCases)).toBe(false);
-        emitText({ text: "root only", evidencePacket: rootOnlyFrozen });
+        plannerInput.emitText(attestedOutput(plannerInput, rootOnlyFrozen));
       }),
     });
 
@@ -664,13 +1053,14 @@ describe("experimental Hermes EngineAdapter", () => {
     const events: ClawChatEvent[] = [];
     const engine = createExperimentalHermesAdapter({
       env: localPocEnv,
-      composition: createSafeClawHermesComposition(async ({ evidencePacket, emitText }) => {
+      composition: createSafeClawHermesComposition(async (plannerInput) => {
+        const { evidencePacket } = plannerInput;
         const frozenClone = freezeRecursivelyForTest(structuredClone(evidencePacket));
         expect(frozenClone).not.toBe(evidencePacket);
         expect(Object.isFrozen(frozenClone)).toBe(true);
         expect(Object.isFrozen(frozenClone.sifCases)).toBe(true);
         expect(Object.isFrozen(frozenClone.sifCases[0]?.controls)).toBe(true);
-        emitText({ text: "attested output", evidencePacket: frozenClone });
+        plannerInput.emitText(attestedOutput(plannerInput, frozenClone));
       }),
     });
 
@@ -680,8 +1070,41 @@ describe("experimental Hermes EngineAdapter", () => {
       executeSpy.mockRestore();
     }
 
-    expect(events).toContainEqual({ kind: "text-delta", text: "attested output" });
+    expect(events).toContainEqual({
+      kind: "text-delta",
+      text: expect.stringContaining("["),
+    });
   });
+
+  it.each(["digest", "claim", "citation"] as const)(
+    "rejects planner output with an unknown %s attestation",
+    async (field) => {
+      const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(
+        groundedHarnessResult(),
+      );
+      const events: ClawChatEvent[] = [];
+      const engine = createExperimentalHermesAdapter({
+        env: localPocEnv,
+        composition: createSafeClawHermesComposition(async (plannerInput) => {
+          const output = attestedOutput(plannerInput);
+          if (field === "digest") output.attestation.evidenceDigest = "0".repeat(64);
+          if (field === "claim") output.attestation.claims[0]!.claimId = "claim:unknown";
+          if (field === "citation") output.attestation.claims[0]!.citationIds = ["citation:unknown"];
+          plannerInput.emitText(output);
+        }),
+      });
+
+      try {
+        await expect(engine.run(runInput((event) => events.push(event)))).rejects.toMatchObject({
+          code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+          status: 503,
+        });
+      } finally {
+        executeSpy.mockRestore();
+      }
+      expect(events).toEqual([]);
+    },
+  );
 
   it("rejects planner text emitted without the required Evidence Harness packet", async () => {
     const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce(
@@ -772,6 +1195,213 @@ describe("experimental Hermes EngineAdapter", () => {
       contractVersion: "engine-adapter/v1",
     });
   });
+  it("selects the OpenClaw Hermes runtime from the production env-only boundary", () => {
+    const engine = createProductionEngineAdapter(boundLocalPocEnv);
+
+    expect(engine).toMatchObject({
+      id: "experimental-hermes",
+      runtime: "hermes",
+      authority: { humanConfirmationRequired: true },
+    });
+  });
+
+  it("rejects production KOSHA evidence when no explicit trust verifier is configured", async () => {
+    const executeSpy = mockHarnessPreload();
+    const engine = createProductionEngineAdapter(boundLocalPocEnv, {
+      openClawHermes: {
+        runtimeCapability: async () => true,
+        verifyToolFreeAgent: async () => true,
+        assertOAuth: async (config) => ({
+          ok: true,
+          provider: "openai",
+          authProvider: "openai/oauth",
+          model: config.model,
+          checkedAt: "2026-07-15T00:00:00.000Z",
+          message: "OpenClaw OpenAI OAuth profile is usable.",
+        }),
+        runChat: async ({ prompt, emit }) => {
+          emit({ kind: "text-delta", text: structuredPlannerResponse(prompt) });
+        },
+      },
+    });
+
+    try {
+      await expect(engine.run(runInput())).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+  });
+
+  it("fails closed before runtime auth when the bound site does not match", async () => {
+    const assertOAuth = vi.fn(async () => ({
+      ok: true as const,
+      provider: "openai" as const,
+      authProvider: "openai/oauth" as const,
+      model: "openai/gpt-5.5",
+      checkedAt: "2026-07-15T00:00:00.000Z",
+      message: "OpenClaw OpenAI OAuth profile is usable.",
+    }));
+    const engine = createProductionEngineAdapter(boundLocalPocEnv, {
+      openClawHermes: {
+        runtimeCapability: async () => true,
+        verifyToolFreeAgent: async () => true,
+        assertOAuth,
+        runChat: async () => undefined,
+      },
+    });
+
+    await expect(engine.checkAvailability({ ...context, siteId: "site-2" }))
+      .rejects.toMatchObject({ code: "ENGINE_SITE_BINDING_UNPROVEN" });
+    expect(assertOAuth).not.toHaveBeenCalled();
+  });
+
+  it("requires an exact tool-free OpenClaw agent policy", () => {
+    expect(isToolFreeOpenClawAgentPolicy(JSON.stringify([
+      { id: "main", tools: { allow: [], deny: ["*"] } },
+    ]), "main")).toBe(true);
+
+    for (const unsafePolicy of [
+      [{ id: "main", tools: { deny: ["*"] } }],
+      [{ id: "main", tools: { allow: ["read"], deny: ["*"] } }],
+      [{ id: "main", tools: { allow: [], deny: ["exec"] } }],
+      [{ id: "other", tools: { allow: [], deny: ["*"] } }],
+    ]) {
+      expect(isToolFreeOpenClawAgentPolicy(JSON.stringify(unsafePolicy), "main")).toBe(false);
+    }
+    expect(isToolFreeOpenClawAgentPolicy("not-json", "main")).toBe(false);
+  });
+
+  it("rejects arbitrary OpenClaw text without structured claim attestation", async () => {
+    const prompts: string[] = [];
+    const events: ClawChatEvent[] = [];
+    const executeSpy = mockHarnessPreload();
+    const engine = createProductionEngineAdapter(boundLocalPocEnv, {
+      openClawHermes: {
+        runtimeCapability: async () => true,
+        verifyToolFreeAgent: async () => true,
+        trustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
+        assertOAuth: async (config) => ({
+          ok: true,
+          provider: "openai",
+          authProvider: "openai/oauth",
+          model: config.model,
+          checkedAt: "2026-07-15T00:00:00.000Z",
+          message: "OpenClaw OpenAI OAuth profile is usable.",
+        }),
+        runChat: async ({ prompt, emit }) => {
+          prompts.push(prompt);
+          emit({ kind: "text-delta", text: "고정된 근거만 자연스럽게 설명합니다." });
+        },
+      },
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).rejects.toMatchObject({
+        code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+        status: 503,
+      });
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(prompts).toHaveLength(1);
+    expect(prompts[0]).toContain("naturalize_only");
+    expect(prompts[0]).toContain('"evidenceDigest"');
+    expect(prompts[0]).toContain('"claimId"');
+    expect(events).toEqual([]);
+  });
+
+  it("runs the OpenClaw composition with an explicitly pinned test KOSHA reference", async () => {
+    const events: ClawChatEvent[] = [];
+    const executeSpy = mockHarnessPreload();
+    const engine = createProductionEngineAdapter(boundLocalPocEnv, {
+      openClawHermes: {
+        runtimeCapability: async () => true,
+        verifyToolFreeAgent: async () => true,
+        trustedKoshaReference: isTestOnlyRecoveredKoshaFixture,
+        assertOAuth: async (config) => ({
+          ok: true,
+          provider: "openai",
+          authProvider: "openai/oauth",
+          model: config.model,
+          checkedAt: "2026-07-15T00:00:00.000Z",
+          message: "OpenClaw OpenAI OAuth profile is usable.",
+        }),
+        runChat: async ({ prompt, emit }) => {
+          emit({ kind: "text-delta", text: structuredPlannerResponse(prompt) });
+        },
+      },
+    });
+
+    try {
+      await expect(engine.run(runInput((event) => events.push(event)))).resolves.toBeUndefined();
+    } finally {
+      executeSpy.mockRestore();
+    }
+
+    expect(events).toEqual([{
+      kind: "text-delta",
+      text: "작업발판·안전난간·개구부 상태 확인 [SIF 사례 근거(위험 우선순위): 오늘 작업 위험 점검 SIF 추락 사례]",
+    }]);
+  });
+
+  it("rejects forged KOSHA metadata when the actual body does not match the production pin", () => {
+    const forged = recoveredKoshaReference();
+    forged.body = "공격자가 주입한 임의 본문";
+    forged.controls = ["공격자가 주입한 임의 통제조치"];
+
+    expect(isProductionTrustedKoshaReference(forged)).toBe(false);
+  });
+
+  it.each(["unknown", "untrusted"] as const)(
+    "rejects %s KOSHA references at the production composition boundary",
+    async (variant) => {
+      const kosha = recoveredKoshaReference();
+      if (!kosha.kosha_guide) throw new Error("test fixture requires KOSHA metadata");
+      if (variant === "unknown") kosha.kosha_guide.stableDocumentKey = "UNKNOWN-13";
+      if (variant === "untrusted") kosha.kosha_guide.quality = "review_required";
+      const packet = buildDbHarnessPacket({
+        question: "오늘 작업 위험을 점검해줘",
+        references: [sifReference(), kosha],
+        retrieval: { mode: "ranked-rpc", message: `${variant} KOSHA reference` },
+      });
+      const executeSpy = vi.spyOn(clawTools, "executeClawTool").mockResolvedValueOnce({
+        ...groundedHarnessResult(),
+        packet,
+      });
+      const runChat = vi.fn(async () => undefined);
+      const engine = createProductionEngineAdapter(boundLocalPocEnv, {
+        openClawHermes: {
+          runtimeCapability: async () => true,
+          verifyToolFreeAgent: async () => true,
+          trustedKoshaReference: isProductionTrustedKoshaReference,
+          assertOAuth: async (config) => ({
+            ok: true,
+            provider: "openai",
+            authProvider: "openai/oauth",
+            model: config.model,
+            checkedAt: "2026-07-15T00:00:00.000Z",
+            message: "OpenClaw OpenAI OAuth profile is usable.",
+          }),
+          runChat,
+        },
+      });
+
+      try {
+        await expect(engine.run(runInput())).rejects.toMatchObject({
+          code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+          status: 503,
+        });
+      } finally {
+        executeSpy.mockRestore();
+      }
+
+      expect(runChat).not.toHaveBeenCalled();
+    },
+  );
 
   it("identifies itself as a versioned engine with no mutation or publish authority", () => {
     const engine = createExperimentalHermesAdapter({
@@ -805,10 +1435,8 @@ describe("experimental Hermes EngineAdapter", () => {
           toolName: "get_evidence_mapping",
           input: { docType: "riskAssessment" },
         });
-        plannerInput.emitText({
-          text: JSON.stringify(result),
-          evidencePacket: freezeRecursivelyForTest(structuredClone(plannerInput.evidencePacket)),
-        });
+        expect(result).toMatchObject({ docType: "riskAssessment" });
+        plannerInput.emitText(attestedOutput(plannerInput));
       }),
     });
 
@@ -821,7 +1449,7 @@ describe("experimental Hermes EngineAdapter", () => {
 
     expect(events).toContainEqual(expect.objectContaining({
       kind: "text-delta",
-      text: expect.stringContaining("riskAssessment"),
+      text: expect.stringContaining("["),
     }));
   });
 

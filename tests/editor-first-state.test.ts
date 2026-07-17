@@ -2,8 +2,61 @@ import { describe, expect, it } from "vitest";
 
 import { buildStoredCurrentWorkpack, parseStoredCurrentWorkpack } from "@/lib/current-workpack";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import type { WorkpackRevalidationBasis } from "@/lib/workpack-readiness";
 
 describe("editor-first draft identity", () => {
+  it("round-trips the authoritative revalidation basis with worker and dispatch snapshots", () => {
+    const sample = buildSampleWorkpack();
+    const revalidationBasis = {
+      reviewTasks: ["외벽 도장"],
+      source: "generated-ontology-qa"
+    } satisfies WorkpackRevalidationBasis;
+    const workerSnapshot = {
+      savedAt: "2026-07-17T00:00:00.000+09:00",
+      source: "workspace" as const,
+      workers: [{
+        id: "worker-1",
+        displayName: "테스트 작업자",
+        role: "작업자",
+        joinedAt: "2026-07-01",
+        experienceLevel: "중간" as const,
+        experienceSummary: "현장 배치 확인",
+        nationality: "대한민국",
+        languageCode: "ko",
+        languageLabel: "한국어",
+        isNewWorker: false,
+        isForeignWorker: false,
+        trainingStatus: "이수" as const,
+        trainingSummary: "교육 이수"
+      }],
+      selectedWorkerIds: ["worker-1"]
+    };
+    const dispatchSnapshot = {
+      savedAt: "2026-07-17T00:00:00.000+09:00",
+      source: "workspace" as const,
+      recipientSuggestions: [],
+      targetWorkers: [{
+        displayName: "테스트 작업자",
+        role: "작업자",
+        nationality: "대한민국",
+        languageCode: "ko",
+        languageLabel: "한국어",
+        trainingStatus: "이수" as const
+      }]
+    };
+
+    const stored = buildStoredCurrentWorkpack(sample, {
+      revalidationBasis,
+      workerSnapshot,
+      dispatchSnapshot
+    });
+    const reopened = parseStoredCurrentWorkpack(JSON.stringify(stored));
+
+    expect(reopened?.revalidationBasis).toEqual(revalidationBasis);
+    expect(reopened?.workerSnapshot).toEqual(workerSnapshot);
+    expect(reopened?.dispatchSnapshot).toEqual(dispatchSnapshot);
+  });
+
   it("keeps the generation fingerprint stable when only volatile quality time changes", () => {
     const first = buildSampleWorkpack();
     const second = structuredClone(first);

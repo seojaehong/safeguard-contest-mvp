@@ -8,8 +8,16 @@ import {
   type McpToolResult,
   type SafetyKnowledgeResult,
 } from "@/lib/mcp-tools";
-import { isEvidenceChainTaskBoundToQuestion } from "@/lib/ontology/evidence-chain";
-import { materializePhaseAProductDocuments } from "@/lib/ontology/product-materialization";
+import {
+  buildPhaseAGenerationGrounding,
+  isEvidenceChainTaskBoundToQuestion,
+  validateCanonicalEvidenceChainPack,
+  type ActiveEvidenceChainPack,
+  type PhaseAGenerationGrounding,
+} from "@/lib/ontology/evidence-chain";
+import {
+  materializePhaseAProductIntoResponse,
+} from "@/lib/ontology/product-materialization";
 import type { QaReviewResult } from "@/lib/ontology/qa-review";
 import type { AskResponse } from "@/lib/types";
 import {
@@ -30,25 +38,58 @@ export type GenerateSafetyDocpackHandler = (
 
 type GenerateSafetyDocpackHandlerDependencies = {
   defaultMode: AiMode;
-  generateResponse: (question: string, mode: AiMode) => Promise<AskResponse>;
+  generateResponse: (
+    question: string,
+    mode: AiMode,
+    grounding?: PhaseAGenerationGrounding,
+  ) => Promise<AskResponse>;
   queryKnowledge: (query: string) => Promise<SafetyKnowledgeResult>;
   getWorkpackRepository: () => McpWorkpackRepository | null;
   getGenerationEvidenceSecret: () => string | undefined;
 };
+
+function canonicalEvidencePackReviewRequiredResult(): McpToolResult {
+  return toToolResult({
+    status: "review_required",
+    evidenceChainState: "review_required",
+    reason: "canonical_evidence_pack_mismatch",
+    failClosed: true,
+    message: "제공된 Phase A evidence pack이 canonical registry identity와 일치하지 않아 provider를 호출하지 않았습니다.",
+  });
+}
 
 export function createGenerateSafetyDocpackHandler(
   dependencies: GenerateSafetyDocpackHandlerDependencies,
 ): GenerateSafetyDocpackHandler {
   return async ({ question, mode, includeFull }, authContext) => {
     const generationEvidenceSecret = dependencies.getGenerationEvidenceSecret();
-    const [generatedResponse, knowledge] = await Promise.all([
-      dependencies.generateResponse(question, mode ?? dependencies.defaultMode),
-      dependencies.queryKnowledge(question),
-    ]);
-    const response = knowledge.found && knowledge.phaseAProduct
-      ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
-          generationEvidenceSecret,
+    const knowledge = await dependencies.queryKnowledge(question);
+    const evidenceContract: unknown = knowledge.evidenceContract;
+    if (
+      evidenceContract !== null
+      && !validateCanonicalEvidenceChainPack(evidenceContract)
+    ) {
+      return canonicalEvidencePackReviewRequiredResult();
+    }
+    const grounding = evidenceContract
+      ? buildPhaseAGenerationGrounding({
+          evidenceChainState: knowledge.evidenceChainState,
+          evidencePack: evidenceContract,
         })
+      : undefined;
+    const generatedResponse = await dependencies.generateResponse(
+      question,
+      mode ?? dependencies.defaultMode,
+      grounding,
+    );
+    const response = grounding?.evidencePack
+      ? materializePhaseAProductIntoResponse(
+          generatedResponse,
+          grounding.evidencePack as ActiveEvidenceChainPack,
+          {
+            generationEvidenceSecret,
+          },
+        )
       : generatedResponse;
     const result = buildDocpackResult(response, includeFull ?? false) as Record<string, unknown>;
 
@@ -84,7 +125,11 @@ export type GenerateReviewedSafetyDocpackHandler = (
 
 type GenerateReviewedSafetyDocpackHandlerDependencies = {
   defaultMode: AiMode;
-  generateResponse: (question: string, mode: AiMode) => Promise<AskResponse>;
+  generateResponse: (
+    question: string,
+    mode: AiMode,
+    grounding?: PhaseAGenerationGrounding,
+  ) => Promise<AskResponse>;
   queryKnowledge: (query: string) => Promise<SafetyKnowledgeResult>;
   reviewResponse: (task: string, documentText: string) => Promise<QaReviewResult>;
   persistResponse: (
@@ -107,17 +152,38 @@ export function createGenerateReviewedSafetyDocpackHandler(
 ): GenerateReviewedSafetyDocpackHandler {
   return async ({ question, task, mode, includeFull }, authContext) => {
     const generationEvidenceSecret = dependencies.getGenerationEvidenceSecret();
-    const [generatedResponse, knowledge] = await Promise.all([
-      dependencies.generateResponse(question, mode ?? dependencies.defaultMode),
-      dependencies.queryKnowledge(task),
-    ]);
-    const reviewTask = knowledge.phaseAProduct?.task.label
-      ?? resolveReviewTaskLabel(task, question);
-    const response = knowledge.found && knowledge.phaseAProduct
-      && isEvidenceChainTaskBoundToQuestion(task, question, knowledge.phaseAProduct.chainId)
-      ? materializePhaseAProductDocuments(generatedResponse, knowledge.phaseAProduct, {
-          generationEvidenceSecret,
+    const knowledge = await dependencies.queryKnowledge(task);
+    const evidenceContract: unknown = knowledge.evidenceContract;
+    if (
+      evidenceContract !== null
+      && !validateCanonicalEvidenceChainPack(evidenceContract)
+    ) {
+      return canonicalEvidencePackReviewRequiredResult();
+    }
+    const taskBound = knowledge.found
+      && evidenceContract !== null
+      && isEvidenceChainTaskBoundToQuestion(task, question, evidenceContract.chainId);
+    const grounding = taskBound && evidenceContract
+      ? buildPhaseAGenerationGrounding({
+          evidenceChainState: knowledge.evidenceChainState,
+          evidencePack: evidenceContract,
         })
+      : undefined;
+    const generatedResponse = await dependencies.generateResponse(
+      question,
+      mode ?? dependencies.defaultMode,
+      grounding,
+    );
+    const reviewTask = grounding?.evidencePack?.task.label
+      ?? resolveReviewTaskLabel(task, question);
+    const response = grounding?.evidencePack
+      ? materializePhaseAProductIntoResponse(
+          generatedResponse,
+          grounding.evidencePack as ActiveEvidenceChainPack,
+          {
+            generationEvidenceSecret,
+          },
+        )
       : generatedResponse;
     const qa = await dependencies.reviewResponse(reviewTask, selectReviewedQaText(response));
     const result = buildReviewedDocpackResult(

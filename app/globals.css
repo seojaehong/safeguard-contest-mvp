@@ -67,6 +67,7 @@
   --sc-steel-060: #f4f5f6;
   --sc-paper: #faf9f5;
   --sc-hazard-yellow: #ffd400;
+  --sc-hazard-text: #665100;
   --sc-warning: #ff8a00;
   --sc-danger: #d92d20;
   --sc-ok: #067647;
@@ -14735,22 +14736,26 @@ body:has(.safeclaw-landing) :is(
   line-height: 1.6;
 }
 
-.message-preview-lines {
+[data-share-preview] .message-preview-lines {
   display: grid;
   gap: 4px;
-  max-height: 240px;
-  overflow: auto;
+  max-height: none;
+  overflow: visible;
   border-top: 1px solid var(--share-line);
   padding-top: 12px;
 }
 
-.message-preview-lines p {
+[data-share-preview] .message-preview-lines p {
   margin: 0;
   color: var(--share-soft);
   font-size: var(--text-table);
   line-height: var(--leading-table);
   font-weight: 500;
   letter-spacing: var(--tracking-body);
+}
+
+.command-center-shell:has([data-share-root]) .workspace-theme-toggle button {
+  min-height: var(--control-height);
 }
 
 .message-source-detail {

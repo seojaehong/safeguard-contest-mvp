@@ -10,7 +10,11 @@ import { canonicalFrontendSourceIdentity } from "./frontend_audit_source_identit
 
 const root = process.cwd();
 const baseUrl = process.env.FRONTEND_AUDIT_BASE_URL ?? "http://127.0.0.1:3011";
-const outputDirectory = path.join(root, "evaluation/frontend-audit-runner-port-v2-2026-07-11");
+const outputDirectory = path.resolve(
+  root,
+  process.env.FRONTEND_AUDIT_OUTPUT_DIR
+    ?? "evaluation/frontend-audit-runner-port-v2-2026-07-11",
+);
 const screenshotDirectory = path.join(outputDirectory, "browser-screenshots");
 const startedAt = Date.now();
 const staticAuditPath = path.resolve(
@@ -177,7 +181,7 @@ export function workspaceThemeRequestedPath(theme) {
 }
 
 function relativeScreenshot(name) {
-  return `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/${name}.jpg`;
+  return path.relative(root, path.join(screenshotDirectory, `${name}.jpg`)).replaceAll("\\", "/");
 }
 
 function isRelevantConsoleError(text) {
@@ -218,7 +222,7 @@ function tupleFindings(label, tuple, expected) {
 }
 
 const probeMessages = {
-  error: "SafeClaw deterministic frontend audit error boundary probe",
+  error: "SafeClaw deterministic frontend audit error boundary confirmed",
   "global-error": "SafeClaw deterministic frontend audit global boundary probe",
 };
 
@@ -340,6 +344,9 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
   if (expectedBoundary && row.boundaryMarker !== expectedBoundary) {
     findings.push(`expected ${expectedBoundary} boundary marker, received ${row.boundaryMarker || "none"}`);
   }
+  if (expectedBoundary && row.boundaryMarkerCount !== 1) {
+    findings.push(`expected exactly 1 ${expectedBoundary} boundary marker, received ${row.boundaryMarkerCount ?? 0}`);
+  }
   const uniqueFindings = [...new Set(findings)];
   return { passed: uniqueFindings.length === 0, headingRole: expectedHeading?.role ?? null, findings: uniqueFindings };
 }
@@ -426,6 +433,7 @@ async function capture(page, options) {
           ? "Day"
           : null,
       boundaryMarker: document.querySelector("[data-audit-boundary]")?.getAttribute("data-audit-boundary") ?? "",
+      boundaryMarkerCount: document.querySelectorAll("[data-audit-boundary]").length,
       renderedControls,
       keySurfaces,
       geometryFingerprint: JSON.stringify(geometryFingerprint),
@@ -457,7 +465,8 @@ async function capture(page, options) {
     productFontLoaded: metrics.productFontLoaded, primaryHeading: metrics.primaryHeading,
     visiblePrimaryContent: metrics.visiblePrimaryContent, visibleOutsideBoundary: metrics.visibleOutsideBoundary,
     workspaceTheme: metrics.workspaceTheme, screenshot, screenshotSha256,
-    boundaryMarker: metrics.boundaryMarker, renderedControls: metrics.renderedControls,
+    boundaryMarker: metrics.boundaryMarker, boundaryMarkerCount: metrics.boundaryMarkerCount,
+    renderedControls: metrics.renderedControls,
     keySurfaces: metrics.keySurfaces, geometryFingerprint: metrics.geometryFingerprint,
     documentTypography: metrics.documentTypography,
     limitation: limitation || navigationError, fallbackKind,
@@ -641,7 +650,7 @@ async function main() {
       violationCount: staticAudit.violationCount,
     },
     verificationCommands,
-    serverLog: "evaluation/frontend-audit-runner-port-v2-2026-07-11/server.log",
+    serverLog: path.relative(root, path.join(outputDirectory, "server.log")).replaceAll("\\", "/"),
     reviewedScreenshots: [
       "route-root-desktop-1440.jpg", "workspace-day-desktop-1440.jpg", "workspace-night-desktop-1440.jpg",
       "route-reports-desktop-1440.jpg", "route-knowledge-section-slug-desktop-1440.jpg",

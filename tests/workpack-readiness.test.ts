@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import { buildMockAskResponse, mockSearchResults } from "@/lib/mock-data";
+import { assembleGraph } from "@/lib/ontology/graph-store";
 import type { QaReviewFound } from "@/lib/ontology/qa-review";
-import { applyWorkpackDeliverablesChange, assessWorkpackReadiness } from "@/lib/workpack-readiness";
+import {
+  applyWorkpackDeliverablesChange,
+  assessWorkpackReadiness,
+  buildWorkpackDeliverablesFingerprint,
+  buildWorkpackRevalidationBasis,
+  parsePublishedOntologyGraph,
+  revalidateEditedWorkpack
+} from "@/lib/workpack-readiness";
 import type { AskResponse, QualityContract } from "@/lib/types";
 
 const readyQuality: QualityContract = {
@@ -93,7 +101,147 @@ function makeResponse(): AskResponse {
   };
 }
 
+function makeAmbiguousTaskGraph() {
+  return assembleGraph(
+    [
+      {
+        node_id: "Task_welding_work",
+        kind: "Task",
+        label: "용접 작업",
+        text_excerpt: null,
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      },
+      {
+        node_id: "Task_hot_work",
+        kind: "Task",
+        label: "화기 작업",
+        text_excerpt: null,
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      },
+      {
+        node_id: "Hazard_welding_fume",
+        kind: "Hazard",
+        label: "용접흄",
+        text_excerpt: null,
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      },
+      {
+        node_id: "Hazard_fire",
+        kind: "Hazard",
+        label: "화재",
+        text_excerpt: null,
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      },
+      {
+        node_id: "Control_welding_mask",
+        kind: "Control",
+        label: "용접면 착용",
+        text_excerpt: null,
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      },
+      {
+        node_id: "Control_fire_blanket",
+        kind: "Control",
+        label: "방화포 설치",
+        text_excerpt: null,
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      }
+    ],
+    [
+      {
+        src: "Task_welding_work",
+        rel: "entailsHazard",
+        dst: "Hazard_welding_fume",
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      },
+      {
+        src: "Hazard_welding_fume",
+        rel: "mitigatedBy",
+        dst: "Control_welding_mask",
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      },
+      {
+        src: "Task_hot_work",
+        rel: "entailsHazard",
+        dst: "Hazard_fire",
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      },
+      {
+        src: "Hazard_fire",
+        rel: "mitigatedBy",
+        dst: "Control_fire_blanket",
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      }
+    ]
+  );
+}
+
 describe("workpack readiness", () => {
+  it("captures only the authoritative original review task for later edited-content revalidation", () => {
+    const response = makeResponse();
+    response.question = "외벽 도장 작업에서 이동식 비계를 사용한다.";
+    response.scenario.workSummary = "외벽 도장";
+    response.ontologyQa = {
+      ...response.ontologyQa!,
+      reviewTask: "외벽 도장"
+    };
+
+    expect(buildWorkpackRevalidationBasis(response)).toEqual({
+      reviewTasks: ["외벽 도장"],
+      source: "generated-ontology-qa"
+    });
+
+    response.ontologyQa = undefined;
+    expect(buildWorkpackRevalidationBasis(response)).toBeNull();
+  });
+
+  it("changes the canonical deliverables fingerprint after any edited document change", () => {
+    const response = makeResponse();
+    const before = buildWorkpackDeliverablesFingerprint(response.deliverables);
+    const edited = applyWorkpackDeliverablesChange(response, {
+      tbmBriefing: `${response.deliverables.tbmBriefing}\n추가 편집`
+    });
+
+    expect(buildWorkpackDeliverablesFingerprint(edited.deliverables)).not.toBe(before);
+    expect(buildWorkpackDeliverablesFingerprint(structuredClone(response.deliverables))).toBe(before);
+  });
+
+  it("rejects graph payloads that are not explicitly published or lose required rows during assembly", () => {
+    expect(parsePublishedOntologyGraph({
+      ok: true,
+      scope: "all",
+      graph: { nodes: [], edges: [] }
+    })).toBeNull();
+    expect(parsePublishedOntologyGraph({
+      ok: true,
+      scope: "published",
+      graph: {
+        nodes: [{ node_id: "invalid", cited_uids: [] }],
+        edges: []
+      }
+    })).toBeNull();
+  });
+
   it("blocks normal sharing when generated output still has review blockers", () => {
     const response = makeResponse();
     const incompleteQa: QaReviewFound = {
@@ -139,8 +287,8 @@ describe("workpack readiness", () => {
     expect(readiness.status).toBe("blocked");
     expect(readiness.summary).toBe("공유 전 보완 필요");
     expect(readiness.reasons.join(" / ")).toContain("안전조치 검수 미통과");
-    expect(readiness.reasons.join(" / ")).toContain("품질 계약 보완 필요");
-    expect(readiness.reasons.join(" / ")).toContain("DB 하네스 근거 보강 필요");
+    expect(readiness.reasons.join(" / ")).toContain("품질 검수 보완 필요");
+    expect(readiness.reasons.join(" / ")).toContain("검증 근거 보강 필요");
     expect(readiness.reasons.join(" / ")).toContain("결재·서명 placeholder 확인 필요");
   });
 
@@ -161,7 +309,7 @@ describe("workpack readiness", () => {
     const readiness = assessWorkpackReadiness(response);
 
     expect(readiness.canShare).toBe(false);
-    expect(readiness.reasons).toContain("품질 계약 확인 필요");
+    expect(readiness.reasons).toContain("품질 검수 확인 필요");
     expect(readiness.reasons).toContain("안전조치 검수 정보 확인 필요");
   });
 
@@ -175,11 +323,318 @@ describe("workpack readiness", () => {
     const readiness = assessWorkpackReadiness(edited, { requiresRevalidation: true });
 
     expect(edited.ontologyQa).toBeUndefined();
-    expect(edited.qualityContract).toBeUndefined();
-    expect(edited.dbHarness).toBeUndefined();
+    expect(edited.qualityContract?.overall).toBe("blocked");
+    expect(edited.qualityContract?.ontology.status).toBe("pending");
+    expect(edited.dbHarness).toBe(response.dbHarness);
+    expect(edited.deliverables.tbmBriefing).toContain("편집된 안전대책");
     expect(readiness.canShare).toBe(false);
     expect(readiness.status).toBe("blocked");
     expect(readiness.summary).toBe("편집 후 재검수 필요");
     expect(readiness.reasons).toContain("편집된 문서 재검수 필요");
+  });
+
+  it("revalidates the edited canonical text and only unlocks a newly passing review", () => {
+    const graph = assembleGraph(
+      [
+        {
+          node_id: "Task_high_work",
+          kind: "Task",
+          label: "외벽 도장",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Hazard_fall",
+          kind: "Hazard",
+          label: "추락",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Control_platform",
+          kind: "Control",
+          label: "작업발판 점검",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        }
+      ],
+      [
+        {
+          src: "Task_high_work",
+          rel: "entailsHazard",
+          dst: "Hazard_fall",
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          src: "Hazard_fall",
+          rel: "mitigatedBy",
+          dst: "Control_platform",
+          cited_uids: ["manual:launch-p0-test"],
+          meta: {},
+          review_state: "published"
+        }
+      ]
+    );
+    const response = makeResponse();
+    response.question = "외벽 도장 작업에서 이동식 비계를 사용한다.";
+    response.scenario.workSummary = "외벽 도장";
+    response.deliverables.workPlanDraft = "";
+    response.deliverables.emergencyResponseDraft = "";
+    response.ontologyQa = {
+      ...response.ontologyQa!,
+      reviewTask: "외벽 도장",
+      detail: "STALE_QA_MUST_NOT_RETURN"
+    };
+    const basis = buildWorkpackRevalidationBasis(response);
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      {
+        tbmBriefing: [
+          "사용자 편집 본문",
+          "추락 위험을 확인하고 작업발판 점검을 완료한다."
+        ].join("\n")
+      },
+      { requiresRevalidation: true }
+    );
+
+    const revalidated = revalidateEditedWorkpack(edited, basis, graph, "2026-07-17T00:00:00.000Z");
+    const readiness = assessWorkpackReadiness(revalidated);
+
+    expect(revalidated.deliverables.tbmBriefing).toContain("사용자 편집 본문");
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(true);
+    expect(revalidated.ontologyQa?.result.reviewable && revalidated.ontologyQa.result.verdict).toBe("통과");
+    expect(revalidated.ontologyQa?.detail).not.toContain("STALE_QA_MUST_NOT_RETURN");
+    expect(revalidated.ontologyQa?.sourceDocumentKeys).toEqual([
+      "riskAssessmentDraft",
+      "tbmBriefing",
+      "tbmLogDraft",
+      "safetyEducationRecordDraft"
+    ]);
+    expect(revalidated.qualityContract?.generatedAt).toBe("2026-07-17T00:00:00.000Z");
+    expect(readiness.canShare).toBe(true);
+  });
+
+  it("fails closed when deterministic revalidation cannot review the edited task", () => {
+    const response = makeResponse();
+    const basis = buildWorkpackRevalidationBasis(response);
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      { tbmBriefing: "사용자 편집 본문" },
+      { requiresRevalidation: true }
+    );
+    const emptyGraph = assembleGraph([], []);
+
+    const revalidated = revalidateEditedWorkpack(edited, basis, emptyGraph, "2026-07-17T00:00:00.000Z");
+    const readiness = assessWorkpackReadiness(revalidated);
+
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(false);
+    expect(readiness.canShare).toBe(false);
+    expect(readiness.reasons).toContain("안전조치 검수 미통과");
+  });
+
+  it("fails closed without an unambiguous authoritative revalidation basis", () => {
+    const edited = applyWorkpackDeliverablesChange(
+      makeResponse(),
+      { tbmBriefing: "외벽 도장과 비계 작업 안전조치를 모두 편집했다." },
+      { requiresRevalidation: true }
+    );
+    const graph = assembleGraph([], []);
+
+    const missingBasis = revalidateEditedWorkpack(edited, null, graph, "2026-07-17T00:00:00.000Z");
+    const ambiguousBasis = revalidateEditedWorkpack(edited, {
+      reviewTasks: ["외벽 도장", "비계 조립·해체"],
+      source: "generated-ontology-qa"
+    }, graph, "2026-07-17T00:00:00.000Z");
+
+    for (const result of [missingBasis, ambiguousBasis]) {
+      expect(result.ontologyQa?.result.reviewable).toBe(false);
+      expect(assessWorkpackReadiness(result).canShare).toBe(false);
+    }
+  });
+
+  it("fails closed when a broad task identity would aggregate multiple published tasks", () => {
+    const response = makeResponse();
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      {
+        tbmBriefing: "용접흄과 화재 위험을 확인하고 용접면 착용 및 방화포 설치를 완료한다."
+      },
+      { requiresRevalidation: true }
+    );
+
+    const revalidated = revalidateEditedWorkpack(edited, {
+      reviewTasks: ["작업"],
+      source: "generated-ontology-qa"
+    }, makeAmbiguousTaskGraph(), "2026-07-17T00:00:00.000Z");
+
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(false);
+    expect(revalidated.qualityContract?.overall).toBe("blocked");
+    expect(assessWorkpackReadiness(revalidated).canShare).toBe(false);
+  });
+
+  it("reviews only the single published task whose normalized label exactly matches", () => {
+    const response = makeResponse();
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      {
+        riskAssessmentDraft: "",
+        workPlanDraft: "",
+        tbmBriefing: "용접흄 위험을 확인하고 용접면 착용을 완료한다.",
+        tbmLogDraft: "",
+        safetyEducationRecordDraft: "",
+        emergencyResponseDraft: ""
+      },
+      { requiresRevalidation: true }
+    );
+
+    const revalidated = revalidateEditedWorkpack(edited, {
+      reviewTasks: ["용접 작업"],
+      source: "generated-ontology-qa"
+    }, makeAmbiguousTaskGraph(), "2026-07-17T00:00:00.000Z");
+
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(true);
+    if (!revalidated.ontologyQa?.result.reviewable) throw new Error("Expected exact task review");
+    expect(revalidated.ontologyQa.result.task).toBe("용접 작업");
+    expect(revalidated.ontologyQa.result.covered.controls).toEqual(["용접면 착용"]);
+    expect(revalidated.ontologyQa.sourceDocumentKeys).toEqual(["tbmBriefing"]);
+    expect(assessWorkpackReadiness(revalidated).canShare).toBe(true);
+  });
+
+  it("resolves an approved registry alias only to its canonical published Task", () => {
+    const graph = assembleGraph(
+      [
+        {
+          node_id: "Task_work_at_height",
+          kind: "Task",
+          label: "고소작업",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p1-alias-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Hazard_fall",
+          kind: "Hazard",
+          label: "추락",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p1-alias-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          node_id: "Control_platform",
+          kind: "Control",
+          label: "작업발판 점검",
+          text_excerpt: null,
+          cited_uids: ["manual:launch-p1-alias-test"],
+          meta: {},
+          review_state: "published"
+        }
+      ],
+      [
+        {
+          src: "Task_work_at_height",
+          rel: "entailsHazard",
+          dst: "Hazard_fall",
+          cited_uids: ["manual:launch-p1-alias-test"],
+          meta: {},
+          review_state: "published"
+        },
+        {
+          src: "Hazard_fall",
+          rel: "mitigatedBy",
+          dst: "Control_platform",
+          cited_uids: ["manual:launch-p1-alias-test"],
+          meta: {},
+          review_state: "published"
+        }
+      ]
+    );
+    const response = makeResponse();
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      { tbmBriefing: "추락 위험을 확인하고 작업발판 점검을 완료한다." },
+      { requiresRevalidation: true }
+    );
+
+    const revalidated = revalidateEditedWorkpack(edited, {
+      reviewTasks: ["높은 곳 작업"],
+      source: "generated-ontology-qa"
+    }, graph, "2026-07-17T00:00:00.000Z");
+
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(true);
+    if (!revalidated.ontologyQa?.result.reviewable) throw new Error("Expected approved alias review");
+    expect(revalidated.ontologyQa.result.task).toBe("고소작업");
+    expect(revalidated.qualityContract?.overall).toBe("ready");
+  });
+
+  it("fails closed when multiple published Task nodes have the same exact normalized label", () => {
+    const graph = makeAmbiguousTaskGraph();
+    const duplicateTaskGraph = assembleGraph([
+      ...graph.nodes,
+      {
+        node_id: "Task_welding_work_duplicate",
+        kind: "Task",
+        label: "용접작업",
+        text_excerpt: null,
+        cited_uids: ["manual:launch-p1-test"],
+        meta: {},
+        review_state: "published"
+      }
+    ], graph.edges);
+    const response = makeResponse();
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      { tbmBriefing: "용접흄 위험을 확인하고 용접면 착용을 완료한다." },
+      { requiresRevalidation: true }
+    );
+
+    const revalidated = revalidateEditedWorkpack(edited, {
+      reviewTasks: ["용접 작업"],
+      source: "generated-ontology-qa"
+    }, duplicateTaskGraph, "2026-07-17T00:00:00.000Z");
+
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(false);
+    expect(revalidated.qualityContract?.overall).toBe("blocked");
+    expect(assessWorkpackReadiness(revalidated).canShare).toBe(false);
+  });
+
+  it("fails closed when the published task has no required hazard-control evidence path", () => {
+    const response = makeResponse();
+    const basis = buildWorkpackRevalidationBasis(response);
+    const edited = applyWorkpackDeliverablesChange(
+      response,
+      { tbmBriefing: "사용자 편집 본문" },
+      { requiresRevalidation: true }
+    );
+    const taskOnlyGraph = assembleGraph([{
+      node_id: "Task_high_work",
+      kind: "Task",
+      label: "외벽 도장",
+      text_excerpt: null,
+      cited_uids: ["manual:published-test-task"],
+      meta: {},
+      review_state: "published"
+    }], []);
+    expect(taskOnlyGraph.nodes).toHaveLength(1);
+
+    const revalidated = revalidateEditedWorkpack(
+      edited,
+      basis,
+      taskOnlyGraph,
+      "2026-07-17T00:00:00.000Z"
+    );
+
+    expect(revalidated.ontologyQa?.result.reviewable).toBe(false);
+    expect(revalidated.qualityContract?.overall).toBe("blocked");
+    expect(assessWorkpackReadiness(revalidated).canShare).toBe(false);
   });
 });

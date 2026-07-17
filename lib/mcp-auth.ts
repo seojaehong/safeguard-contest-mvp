@@ -201,6 +201,30 @@ function supabaseConfigured(): boolean {
   );
 }
 
+async function verifyPersistedTenantIdentity(
+  client: NonNullable<ReturnType<typeof createSupabaseAdminClient>>,
+  row: McpTokenRow,
+): Promise<boolean> {
+  if (!row.site_id || !row.org_id) return false;
+
+  try {
+    const { data, error } = await client
+      .from("sites")
+      .select("id, organization_id")
+      .eq("id", row.site_id)
+      .eq("organization_id", row.org_id)
+      .maybeSingle();
+    if (error) {
+      log.warn("MCP token tenant identity verification failed", error);
+      return false;
+    }
+    return data?.id === row.site_id && data.organization_id === row.org_id;
+  } catch (error) {
+    log.warn("MCP token tenant identity verification threw", error);
+    return false;
+  }
+}
+
 /** MCP 계층이 켜져 있는지(env 토큰 존재 또는 Supabase 서비스 롤 설정). */
 export function isMcpEnabled(): boolean {
   return computeEnablement({
@@ -213,14 +237,13 @@ export function isMcpEnabled(): boolean {
  * Bearer 토큰을 인증 컨텍스트로 해석한다.
  * 1) Supabase 서비스 롤이 있으면 sha256 해시로 mcp_tokens 조회(disabled=false).
  *    매칭 시 last_used_at을 fire-and-forget으로 갱신.
- * 2) DB 미매칭/미설정이면 env 레거시 토큰으로 폴백.
+ * 2) DB 조회가 성공했지만 미매칭이거나 DB가 미설정이면 env 레거시 토큰으로 폴백.
+ *    DB 조회 오류/예외는 env 토큰을 평가하지 않고 인증 실패.
  * 어느 쪽도 아니면 null(=인증 실패).
  */
 export async function resolveMcpAuth(bearerToken: string | undefined | null): Promise<McpAuthContext | null> {
   const token = bearerToken?.trim();
   if (!token) return null;
-
-  const legacyTokens = parseLegacyTokens(process.env.SAFECLAW_MCP_TOKENS);
 
   let dbRow: McpTokenRow | null = null;
   const client = createSupabaseAdminClient();
@@ -234,9 +257,15 @@ export async function resolveMcpAuth(bearerToken: string | undefined | null): Pr
         .eq("disabled", false)
         .maybeSingle();
       if (error) {
-        log.warn("mcp_tokens 조회 실패 — env 폴백으로 진행", error);
+        log.warn("mcp_tokens lookup failed — authentication denied", error);
+        return null;
       } else if (data) {
-        dbRow = data as McpTokenRow;
+        const persistedRow = data as McpTokenRow;
+        if (!(await verifyPersistedTenantIdentity(client, persistedRow))) {
+          log.warn("MCP token tenant identity could not be proven");
+          return null;
+        }
+        dbRow = persistedRow;
         // last_used_at 갱신은 fire-and-forget(응답 경로를 막지 않는다).
         void client
           .from("mcp_tokens")
@@ -247,9 +276,13 @@ export async function resolveMcpAuth(bearerToken: string | undefined | null): Pr
           });
       }
     } catch (error) {
-      log.warn("mcp_tokens 조회 예외 — env 폴백으로 진행", error);
+      log.warn("mcp_tokens lookup threw — authentication denied", error);
+      return null;
     }
   }
 
+  if (dbRow) return buildDbContext(dbRow);
+
+  const legacyTokens = parseLegacyTokens(process.env.SAFECLAW_MCP_TOKENS);
   return decideAuthContext({ dbRow, legacyTokens, token });
 }

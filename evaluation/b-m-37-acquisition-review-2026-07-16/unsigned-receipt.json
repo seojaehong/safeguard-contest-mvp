@@ -1,0 +1,25 @@
+{
+  "candidateCount": 11,
+  "decision": null,
+  "document": {
+    "normalizedBodySha256": "a3aec8a392778a07389b3e3bdf51c5503b391ff5720c26d7dac3e99c4d24111d",
+    "officialFileId": "CTC2026012913155142440463",
+    "officialFileSequence": 1,
+    "officialUrl": "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012913155142440463/1",
+    "pageCount": 58,
+    "pdfSha256": "85a8ff9713a684c0768cb2f210e0827e48e4801f0208cde178e8d0f5c6f4a05e",
+    "pdfSizeBytes": 1063326,
+    "publicationDate": "2026-01-30",
+    "stableKey": "B-M-37",
+    "version": "B-M-37-2026"
+  },
+  "evaluationOnly": true,
+  "productionTrustMutationAuthorized": false,
+  "reviewChecklistComplete": false,
+  "reviewerName": null,
+  "reviewerOrganization": null,
+  "schemaVersion": "safeclaw-b-m-37-human-review-receipt/v1",
+  "signedAt": null,
+  "sourceRedistributionPermissionEstablished": false,
+  "status": "unsigned"
+}

@@ -1,7 +1,7 @@
 # ADR 0001: SafeClaw Core and Agent Runtime Boundary
 
 Date: 2026-07-09
-Last updated: 2026-07-14
+Last updated: 2026-07-16
 
 ## Status
 
@@ -61,9 +61,13 @@ minimum boundary needed for a local Hermes evaluation:
 
 - Hermes is selected only by `SAFECLAW_ENGINE_MODE=experimental-hermes` with
   `SAFECLAW_HERMES_LOCAL_POC=1`, and is disabled on Vercel.
-- The production chat composition supplies no Hermes planner or tool executor,
-  so setting environment flags alone still resolves to the unavailable
-  adapter.
+- The production chat composition creates the local OpenClaw-backed Hermes
+  planner only when the explicit POC flag, local-runtime flag, and fixed
+  organization/site bindings are all present. Configuration alone does not
+  authorize a request: availability still re-attests the local CLI, exact
+  tool-free agent policy, OpenAI OAuth profile, and request tenant binding.
+  During execution, the Evidence Harness packet and production KOSHA trust are
+  validated before planner output is accepted.
 - Hermes receives a text-only streaming callback and a read-tool-intent
   callback. It receives no Supabase client, MCP token, mutation callback, or
   publish callback.

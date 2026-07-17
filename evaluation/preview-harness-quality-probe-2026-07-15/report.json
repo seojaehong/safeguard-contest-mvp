@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "safeclaw-live-harness-quality-probe/v1",
+  "generatedAt": "2026-07-15T14:02:46.875Z",
+  "startedAt": "2026-07-15T14:02:46.258Z",
+  "baseUrl": "https://safeguard-contest-mvp-git-feat-nort-0f5618-seojaehongs-projects.vercel.app",
+  "scenario": {
+    "id": "seongsu-exterior-paint-scaffold-wind-forklift",
+    "question": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계를 사용하고 작업자 5명 중 신규 투입자 1명이 포함된다. 오후 강풍 예보가 있으며 자재 반입 지게차 동선과 작업자 통행 동선이 겹친다.",
+    "aiMode": "enhanced"
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/ask",
+    "body": {
+      "question": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계를 사용하고 작업자 5명 중 신규 투입자 1명이 포함된다. 오후 강풍 예보가 있으며 자재 반입 지게차 동선과 작업자 통행 동선이 겹친다.",
+      "aiMode": "enhanced"
+    }
+  },
+  "transport": {
+    "ok": false,
+    "status": 401,
+    "timeoutMs": 180000,
+    "elapsedMs": 615,
+    "contentType": "application/json"
+  },
+  "operations": [
+    {
+      "method": "POST",
+      "path": "/api/ask",
+      "mutatesDb": false
+    }
+  ],
+  "evaluation": {
+    "verdict": "fail",
+    "states": {
+      "quality": "missing",
+      "ontology": "missing",
+      "harnessOntology": "missing"
+    },
+    "contracts": [
+      {
+        "id": "api_response",
+        "label": "API response",
+        "state": "fail",
+        "summary": "The live API request failed or returned a non-success status.",
+        "evidence": [
+          "HTTP status: 401"
+        ]
+      },
+      {
+        "id": "enhanced_mode",
+        "label": "Enhanced mode",
+        "state": "fail",
+        "summary": "Enhanced mode was not preserved across the request and response.",
+        "evidence": [
+          "requested: enhanced",
+          "request body: enhanced",
+          "response: missing"
+        ]
+      },
+      {
+        "id": "generation_evidence_sealed",
+        "label": "Generation evidence sealed",
+        "state": "fail",
+        "summary": "The generation evidence envelope is absent, malformed, or detached from the returned harness packet.",
+        "evidence": [
+          "version: missing",
+          "algorithm: missing",
+          "snapshot packet: mismatch",
+          "signature: structural presence only; server secret is not read by this probe"
+        ]
+      },
+      {
+        "id": "db_harness_first",
+        "label": "DB harness first",
+        "state": "fail",
+        "summary": "The generation contract is not sealed to DB-harness-first naturalization.",
+        "evidence": [
+          "mode: missing",
+          "evidence authority: missing",
+          "LLM role: missing",
+          "fallback chain: missing"
+        ]
+      },
+      {
+        "id": "evidence_sets_present",
+        "label": "Direct, SIF, and supporting evidence",
+        "state": "fail",
+        "summary": "One or more required evidence groups are missing or malformed.",
+        "evidence": [
+          "direct: missing",
+          "sif: missing",
+          "supporting: missing"
+        ]
+      },
+      {
+        "id": "structured_risk_tbm_links",
+        "label": "Structured risk rows and TBM links",
+        "state": "fail",
+        "summary": "Structured risk rows or their TBM evidence links are absent or invalid.",
+        "evidence": [
+          "risk rows: missing",
+          "TBM links: missing",
+          "row validation: not ready"
+        ]
+      },
+      {
+        "id": "scenario_controls_present",
+        "label": "Fall, scaffold, wind, and traffic controls",
+        "state": "fail",
+        "summary": "One or more canonical scenario control domains are absent from structured output.",
+        "evidence": [
+          "fall: missing",
+          "scaffold: missing",
+          "wind: missing",
+          "traffic: missing",
+          "paint_fire: missing"
+        ]
+      },
+      {
+        "id": "irrelevant_controls_absent",
+        "label": "Irrelevant controls absent",
+        "state": "pass",
+        "summary": "No unsupported machine-guard or electrostatic-paint controls were found.",
+        "evidence": [
+          "unsupported control flags: none"
+        ]
+      },
+      {
+        "id": "quality_state_ready",
+        "label": "Quality state ready",
+        "state": "fail",
+        "summary": "One or more required quality states are not ready.",
+        "evidence": [
+          "overall: missing",
+          "evidence: missing",
+          "structured: missing",
+          "DB harness: missing"
+        ]
+      },
+      {
+        "id": "ontology_state_ready",
+        "label": "Ontology state ready",
+        "state": "fail",
+        "summary": "The quality, harness, or QA ontology state requires review.",
+        "evidence": [
+          "quality ontology: missing",
+          "harness ontology: missing",
+          "summary ontology: missing",
+          "QA verdict: not supplied"
+        ]
+      },
+      {
+        "id": "no_db_mutation",
+        "label": "No DB mutation",
+        "state": "pass",
+        "summary": "The probe issued only the non-persistence `/api/ask` generation request.",
+        "evidence": [
+          "POST /api/ask mutatesDb=false"
+        ]
+      }
+    ],
+    "flags": []
+  },
+  "response": {
+    "protection": {
+      "password_enabled": false,
+      "vercel_auth_enabled": true,
+      "vercel_auth_callback": "https://vercel.com/sso-api?url=https%3A%2F%2Fsafeguard-contest-mvp-git-feat-nort-0f5618-seojaehongs-projects.vercel.app%2Fapi%2Fask&nonce=a7ec0703868d6f2922c7f77c6107754c2bc5783456d17601c21cecbf0fc8e2f9",
+      "auto_vercel_auth_redirect": true
+    },
+    "error": {
+      "message": "Protected deployment",
+      "code": "401"
+    }
+  }
+}

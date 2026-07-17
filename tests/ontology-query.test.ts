@@ -8,6 +8,7 @@ const publishedGraph = assembleGraph(
   SEED_NODES.filter((n) => n.review_state === "published"),
   SEED_EDGES.filter((e) => e.review_state === "published")
 );
+const fullGraph = assembleGraph(SEED_NODES, SEED_EDGES);
 
 describe("matchTaskNodes — Task 라벨 퍼지 매칭", () => {
   test("부분 문자열(포함)로 매칭한다", () => {
@@ -78,5 +79,31 @@ describe("queryByTask — 용접", () => {
     expect(result!.articles.map((a) => a.node_id)).toContain("Article_기준규칙_241의2");
     // Task→documentedIn→workPlan→fulfillsDuty→§4-3호
     expect(result!.duties.map((d) => d.node_id)).toContain("Duty_중처법시행령_제4조제3호");
+  });
+});
+
+describe("queryByTask — SIF Accident draft overlay", () => {
+  test.each([
+    ["고소작업", "sif-아카이브-건설업-00323"],
+    ["지게차", "sif-아카이브-건설업-00024"],
+    ["전기 작업", "sif-아카이브-건설업-01798"]
+  ])("full graph의 %s 질의에서 %s draft 사고를 조회한다", (taskLabel, itemId) => {
+    const result = queryByTask(fullGraph, taskLabel);
+
+    expect(result).not.toBeNull();
+    expect(result!.accidents).toContainEqual(
+      expect.objectContaining({
+        kind: "Accident",
+        cited_uids: [`ref:safety_reference_items:${itemId}`],
+        review_state: "draft"
+      })
+    );
+  });
+
+  test.each(["고소작업", "지게차", "전기 작업"])("published graph의 %s 질의에는 draft 사고가 노출되지 않는다", (taskLabel) => {
+    const result = queryByTask(publishedGraph, taskLabel);
+
+    expect(result).not.toBeNull();
+    expect(result!.accidents).toEqual([]);
   });
 });

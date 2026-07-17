@@ -81,11 +81,11 @@ const INITIAL_DOWNLOAD_STATE: DownloadState = {
 };
 
 const reportExportLabels = [
-  "개선사항 포함 MD",
+  "개선사항 포함 문서",
   "공정·작업 분류 CSV",
-  "관리자 원본 JSON",
-  "다음 생성용 MD",
-  "하네스 JSONL"
+  "현재 조회 결과 데이터",
+  "재사용 검토 문서",
+  "재사용 검토 데이터"
 ] as const;
 
 const preservedHistoryStatusLabelMap: Record<NonNullable<OperationImprovement["status"]>, string> = {
@@ -373,7 +373,7 @@ function DownloadActions({
           buildContent: () => buildReportMarkdown(snapshot)
         })}
       >
-        개선사항 포함 MD
+        개선사항 포함 문서
       </button>
       <button
         type="button"
@@ -387,45 +387,48 @@ function DownloadActions({
       >
         공정·작업 분류 CSV
       </button>
-      <button
-        type="button"
-        className="button secondary"
-        disabled={disabled}
-        onClick={() => void onDownload({
-          fileName: `${snapshot.fileBaseName}.json`,
-          contentType: "application/json;charset=utf-8",
-          buildContent: () => buildReportJson(snapshot)
-        })}
-      >
-        관리자 원본 JSON
-      </button>
-      <p className="safeclaw-download-note">
-        아래 파일은 승인 전 지식 후보입니다. 사용자 근거처럼 바로 노출하지 않습니다.
-      </p>
-      <button
-        type="button"
-        className="button secondary"
-        disabled={disabled}
-        onClick={() => void onDownload({
-          fileName: `${snapshot.fileBaseName}-corpus.md`,
-          contentType: "text/markdown;charset=utf-8",
-          buildContent: () => buildReportLearningMarkdown(snapshot)
-        })}
-      >
-        다음 생성용 MD
-      </button>
-      <button
-        type="button"
-        className="button secondary"
-        disabled={disabled}
-        onClick={() => void onDownload({
-          fileName: `${snapshot.fileBaseName}-corpus.jsonl`,
-          contentType: "application/x-ndjson;charset=utf-8",
-          buildContent: () => buildReportLearningJsonl(snapshot)
-        })}
-      >
-        하네스 JSONL
-      </button>
+      <details className="safeclaw-report-admin-downloads">
+        <summary>관리자용 상세 파일</summary>
+        <button
+          type="button"
+          className="button secondary"
+          disabled={disabled}
+          onClick={() => void onDownload({
+            fileName: `${snapshot.fileBaseName}.json`,
+            contentType: "application/json;charset=utf-8",
+            buildContent: () => buildReportJson(snapshot)
+          })}
+        >
+          현재 조회 결과 데이터
+        </button>
+        <p className="safeclaw-download-note">
+          아래 파일은 승인 전 지식 후보입니다. 사용자 근거처럼 바로 노출하지 않습니다.
+        </p>
+        <button
+          type="button"
+          className="button secondary"
+          disabled={disabled}
+          onClick={() => void onDownload({
+            fileName: `${snapshot.fileBaseName}-corpus.md`,
+            contentType: "text/markdown;charset=utf-8",
+            buildContent: () => buildReportLearningMarkdown(snapshot)
+          })}
+        >
+          재사용 검토 문서
+        </button>
+        <button
+          type="button"
+          className="button secondary"
+          disabled={disabled}
+          onClick={() => void onDownload({
+            fileName: `${snapshot.fileBaseName}-corpus.jsonl`,
+            contentType: "application/x-ndjson;charset=utf-8",
+            buildContent: () => buildReportLearningJsonl(snapshot)
+          })}
+        >
+          재사용 검토 데이터
+        </button>
+      </details>
     </div>
   );
 }

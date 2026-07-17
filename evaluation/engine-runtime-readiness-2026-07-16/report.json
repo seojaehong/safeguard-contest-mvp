@@ -1,0 +1,34 @@
+{
+  "date": "2026-07-16",
+  "productBaseSha": "530efbfafb30c6145c1536172b260ff644845846",
+  "dbMutationPerformed": false,
+  "secretsExposed": false,
+  "focusedTests": {
+    "command": "npm.cmd test -- tests/engine-runtime-readiness-policy.test.ts tests/engine-adapter.test.ts tests/hermes-engine-adapter.test.ts --maxWorkers=1 --no-file-parallelism --reporter=dot",
+    "filesUnderTest": [
+      "tests/engine-runtime-readiness-policy.test.ts",
+      "tests/engine-adapter.test.ts",
+      "tests/hermes-engine-adapter.test.ts"
+    ],
+    "files": 3,
+    "passed": 69,
+    "failed": 0
+  },
+  "typecheck": "pass",
+  "build": {
+    "status": "pass",
+    "staticPages": 28
+  },
+  "browser": {
+    "desktop": {
+      "viewportWidth": 1440,
+      "bodyWidth": 1440
+    },
+    "mobile": {
+      "viewportWidth": 390,
+      "bodyWidth": 390,
+      "horizontalOverflow": false
+    }
+  },
+  "authenticatedProductRouteE2e": "not-executed"
+}

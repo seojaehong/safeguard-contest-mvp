@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "phase-a-runtime-evidence-bridge-report/v1",
+  "branch": "feat/phase-a-runtime-evidence-bridge-20260715",
+  "baseCommit": "5249be5e6c36c15d1f3359aab8e0f65868574e8c",
+  "status": "passed",
+  "databaseChanges": 0,
+  "schemaChanges": 0,
+  "committed": false,
+  "verification": {
+    "focusedTestFiles": 12,
+    "focusedTests": 214,
+    "passed": 214,
+    "failed": 0,
+    "elapsedSeconds": 28.66,
+    "typecheck": "passed"
+  },
+  "contracts": {
+    "knowledgeBeforeGeneration": true,
+    "immutableGrounding": true,
+    "samePackMaterialization": true,
+    "naturalizeOnly": true,
+    "unresolvedFailClosed": true,
+    "exactKoshaProvenanceRequired": true,
+    "koshaHostnameBoundaryEnforced": true,
+    "forgedCitationRejected": true,
+    "structuredCitationBoundaryEnforced": true,
+    "roleSpecificCitationAllowlistsEnforced": true,
+    "ordinaryProsePreserved": true,
+    "promptInjectionDelimited": true,
+    "mappingGroundingIdentityPreserved": true,
+    "deepReadonlyPublicGrounding": true,
+    "knowledgeRejectionStopsProvider": true,
+    "providerFallbackPreserved": true,
+    "generalAskContractPreserved": true
+  },
+  "artifacts": {
+    "focusedTests": "evaluation/phase-a-runtime-evidence-bridge-2026-07-15/p1-focused-tests.log",
+    "p1RedKoshaHostname": "evaluation/phase-a-runtime-evidence-bridge-2026-07-15/p1-red-kosha-hostname.log",
+    "p1GreenKoshaHostname": "evaluation/phase-a-runtime-evidence-bridge-2026-07-15/p1-green-kosha-hostname.log",
+    "p1RedStructuredCitationBoundary": "evaluation/phase-a-runtime-evidence-bridge-2026-07-15/p1-red-structured-citation-boundary.log",
+    "p1GreenStructuredCitationBoundary": "evaluation/phase-a-runtime-evidence-bridge-2026-07-15/p1-green-structured-citation-boundary.log",
+    "reviewRedTests": "evaluation/phase-a-runtime-evidence-bridge-2026-07-15/review-red-tests.log",
+    "reviewReadonlyRedTypecheck": "evaluation/phase-a-runtime-evidence-bridge-2026-07-15/review-readonly-red-typecheck.log",
+    "typecheck": "evaluation/phase-a-runtime-evidence-bridge-2026-07-15/p1-typecheck.log",
+    "report": "evaluation/phase-a-runtime-evidence-bridge-2026-07-15/report.md"
+  }
+}

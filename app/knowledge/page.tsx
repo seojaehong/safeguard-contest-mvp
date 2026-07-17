@@ -5,7 +5,13 @@ import {
   KNOWLEDGE_AUTHORITY_LANES,
   KNOWLEDGE_PROMOTION_STAGES
 } from "@/lib/knowledge-governance";
+import type {
+  KnowledgeAuthorityId,
+  KnowledgePromotionStageId
+} from "@/lib/knowledge-governance";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
+import { KnowledgeSectionNavigator } from "./KnowledgeSectionNavigator";
+import { KnowledgeReviewInbox } from "./KnowledgeReviewInbox";
 import styles from "./KnowledgePage.module.css";
 
 type WikiEntry = {
@@ -24,6 +30,76 @@ type KoshaReferenceEntry = {
 };
 
 const KNOWLEDGE_SUMMARY_MAX_LENGTH = 150;
+
+const KNOWLEDGE_SCHEMA_PRESENTATION_LABELS = {
+  roleLabel: "문서 역할",
+  shortSummary: "짧은 요약",
+  documentReflectionLabel: "문서 반영 위치"
+} as const;
+
+const KNOWLEDGE_STAGE_PRESENTATION = {
+  knowledge_event: {
+    label: "원본 이벤트",
+    detail: "수집 시점, 출처, 원문 링크와 현장 범위를 보존한 원본 기록",
+    ownerLabel: "SafeClaw 수집"
+  },
+  candidate: {
+    label: "지식 후보",
+    detail: "AI가 출처 정보를 유지해 만든 사람 검토용 제안",
+    ownerLabel: "AI 문서화 도구"
+  },
+  human_review: {
+    label: "사람 검토",
+    detail: "출처, 권위, 적용 범위와 충돌 여부를 확인하는 검토 단계 · 현재 연결 전",
+    ownerLabel: "검토 책임자"
+  },
+  published_ontology: {
+    label: "게시된 안전지식",
+    detail: "별도 승인과 감사 요건을 통과한 읽기 전용 안전지식 · 현재 새 게시 연결 전",
+    ownerLabel: "SafeClaw 공식 지식 저장소"
+  }
+} satisfies Record<KnowledgePromotionStageId, {
+  label: string;
+  detail: string;
+  ownerLabel: string;
+}>;
+
+const NEXT_STAGE_LABELS = {
+  knowledge_event: "원본 이벤트",
+  candidate: "지식 후보",
+  human_review: "사람 검토",
+  published_ontology: "게시된 안전지식"
+} satisfies Record<KnowledgePromotionStageId, string>;
+
+const KNOWLEDGE_AUTHORITY_PRESENTATION = {
+  sif: {
+    label: "SIF 재해·통제 근거",
+    provenanceRule: "중대재해 패턴과 통제 근거로 추적하며 법령 출처로 대체하지 않음"
+  },
+  kosha: {
+    label: "KOSHA 기술지침",
+    provenanceRule: "기술적 실행 방법과 통제대책 근거로 사용하며 법적 강제성과 분리"
+  },
+  law: {
+    label: "현행 법령",
+    provenanceRule: "공식 조문, 시행일과 개정 상태를 확인한 경우에만 법적 의무 근거로 사용"
+  },
+  organization_history: {
+    label: "조직 이력",
+    provenanceRule: "해당 조직의 작업팩과 개선 이력으로 제한하고 공개 참조와 섞지 않음"
+  },
+  site_history: {
+    label: "현장 이력",
+    provenanceRule: "해당 현장의 관찰과 조치 이력으로 제한하고 조직 밖 승격을 허용하지 않음"
+  },
+  hermes_llm: {
+    label: "AI 문서화 도구",
+    provenanceRule: "근거를 재작성한 후보만 만들며 DB 수정과 온톨로지 게시를 수행하지 않음"
+  }
+} satisfies Record<KnowledgeAuthorityId, {
+  label: string;
+  provenanceRule: string;
+}>;
 
 const koshaReferenceEntries: KoshaReferenceEntry[] = [
   {
@@ -124,6 +200,13 @@ function excerptFromMarkdown(markdown: string) {
   return normalizeKnowledgeSnippet(excerpt);
 }
 
+function localizeSchemaForPresentation(markdown: string) {
+  return Object.entries(KNOWLEDGE_SCHEMA_PRESENTATION_LABELS).reduce(
+    (localized, [machineLabel, displayLabel]) => localized.replaceAll(machineLabel, displayLabel),
+    markdown.replaceAll("LLM", "AI")
+  );
+}
+
 async function readWikiEntries(relativeDir: string) {
   const root = process.cwd();
   const dir = path.join(root, "knowledge", "wiki", relativeDir);
@@ -145,6 +228,13 @@ export default async function KnowledgePage() {
   const root = process.cwd();
   const indexMarkdown = await readText(path.join(root, "knowledge", "wiki", "index.md"));
   const schemaMarkdown = await readText(path.join(root, "knowledge", "SCHEMA.md"));
+  const schemaPresentationSource = [
+    "표시 항목",
+    ...Object.keys(KNOWLEDGE_SCHEMA_PRESENTATION_LABELS).map((label) => `- ${label}`),
+    "",
+    schemaMarkdown
+  ].join("\n");
+  const schemaDisplayMarkdown = localizeSchemaForPresentation(schemaPresentationSource);
   const hazardEntries = await readWikiEntries("hazards");
   const formEntries = await readWikiEntries("forms");
   const stats = await getSafetyReferenceStats();
@@ -159,7 +249,19 @@ export default async function KnowledgePage() {
       activeHref="/knowledge"
     >
       <div className={styles.page} data-knowledge-surface>
-        <section className={`knowledge-status-grid ${styles.overview}`} aria-label="지식 DB 상태">
+        <KnowledgeSectionNavigator>
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-today"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-today"
+          data-knowledge-panel="today"
+        >
+        <section
+          className={`knowledge-status-grid ${styles.overview}`}
+          id="knowledge-today"
+          aria-label="오늘의 지식 DB 상태"
+        >
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>내장 지식 베이스</span>
             <h2>{hazardEntries.length}개 위험요인 · {formEntries.length}개 서식</h2>
@@ -167,8 +269,8 @@ export default async function KnowledgePage() {
           </article>
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>운영 지식</span>
-            <h2>원본 이벤트 · 후보 · 사람 검토</h2>
-            <p>AI 출력은 미게시 후보로 분리하고, 사람이 검토해 게시한 온톨로지만 확정 지식으로 사용합니다.</p>
+            <h2>원본 이벤트 · 검토 대기 · 미게시</h2>
+            <p>AI가 만든 내용은 검토 전 후보로 분리되며, 사람의 결정 후에도 자동 게시되지 않습니다.</p>
           </article>
           <article className={styles.overviewItem}>
             <span className={styles.kicker}>지식 카탈로그</span>
@@ -177,6 +279,22 @@ export default async function KnowledgePage() {
           </article>
         </section>
 
+        <aside className={styles.searchAction} aria-label="핵심 지식 검색">
+          <div>
+            <span className={styles.kicker}>오늘 할 일</span>
+            <strong>작업과 위험요인으로 필요한 근거를 먼저 찾으세요.</strong>
+          </div>
+          <a href="/search">근거 검색</a>
+        </aside>
+        </div>
+
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-governance"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-governance"
+          data-knowledge-panel="governance"
+        >
         <section
           className={`${styles.section} ${styles.governanceSection}`}
           aria-labelledby="knowledge-governance-heading"
@@ -185,13 +303,15 @@ export default async function KnowledgePage() {
           <header className={styles.sectionHeader}>
             <div>
               <span className={styles.kicker}>지식 승격 규칙</span>
-              <h2 id="knowledge-governance-heading">지식 승격 흐름</h2>
+              <h2 id="knowledge-governance-heading">지식 검토 흐름 · 사람 확인 필수</h2>
             </div>
             <p>
-              원본 지식 이벤트의 내용과 출처를 유지한 채 후보, 사람 검토, 게시된 온톨로지를
-              서로 다른 상태로 관리합니다.
+              후보의 출처와 적용 범위를 확인해 승인, 현장 전용 유지 또는 반려할 수 있습니다.
+              모든 결정은 미게시 상태로 남고 온톨로지에는 자동 반영되지 않습니다.
             </p>
           </header>
+
+          <KnowledgeReviewInbox />
 
           <ol className={styles.promotionFlow} aria-label="지식 승격 네 단계">
             {KNOWLEDGE_PROMOTION_STAGES.map((stage) => (
@@ -200,16 +320,16 @@ export default async function KnowledgePage() {
                   <span className={styles.stageSequence}>{stage.sequence}</span>
                   <span className={styles.stageState}>{stage.stateLabel}</span>
                 </div>
-                <h3>{stage.label}</h3>
-                <p>{stage.detail}</p>
+                <h3>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].label}</h3>
+                <p>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].detail}</p>
                 <dl className={styles.stageMeta}>
                   <div>
                     <dt>소유</dt>
-                    <dd>{stage.ownerLabel}</dd>
+                    <dd>{KNOWLEDGE_STAGE_PRESENTATION[stage.id].ownerLabel}</dd>
                   </div>
                   <div>
                     <dt>다음 상태</dt>
-                    <dd>{stage.nextStage || "최종 읽기 범위"}</dd>
+                    <dd>{stage.nextStage ? NEXT_STAGE_LABELS[stage.nextStage] : "최종 읽기 범위"}</dd>
                   </div>
                 </dl>
               </li>
@@ -225,8 +345,8 @@ export default async function KnowledgePage() {
               {KNOWLEDGE_AUTHORITY_LANES.map((lane) => (
                 <li key={lane.id} className={styles.authorityRow} data-knowledge-authority={lane.id}>
                   <div className={styles.authorityIdentity}>
-                    <strong>{lane.label}</strong>
-                    <span>{lane.provenanceRule}</span>
+                    <strong>{KNOWLEDGE_AUTHORITY_PRESENTATION[lane.id].label}</strong>
+                    <span>{KNOWLEDGE_AUTHORITY_PRESENTATION[lane.id].provenanceRule}</span>
                   </div>
                   <dl className={styles.authorityFacts}>
                     <div>
@@ -247,7 +367,15 @@ export default async function KnowledgePage() {
             </ul>
           </div>
         </section>
+        </div>
 
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-technical"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-technical"
+          data-knowledge-panel="technical"
+        >
         <section className={styles.section} aria-labelledby="technical-support-heading">
           <header className={styles.sectionHeader}>
             <div>
@@ -308,7 +436,15 @@ export default async function KnowledgePage() {
           </ul>
           {/* data-knowledge-list-end="technical-support" */}
         </section>
+        </div>
 
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-references"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-references"
+          data-knowledge-panel="references"
+        >
         <section className={styles.section} aria-labelledby="reference-library-heading">
           <header className={styles.sectionHeader}>
             <div>
@@ -352,7 +488,15 @@ export default async function KnowledgePage() {
           </ul>
           {/* data-knowledge-list-end="reference-library" */}
         </section>
+        </div>
 
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-wiki"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-wiki"
+          data-knowledge-panel="wiki"
+        >
         <section className={styles.section} aria-labelledby="wiki-index-heading">
           <header className={styles.sectionHeader}>
             <div>
@@ -401,20 +545,30 @@ export default async function KnowledgePage() {
             </ul>
           </article>
         </section>
+        </div>
 
+        <div
+          className={styles.knowledgePanel}
+          id="knowledge-panel-diagnostics"
+          role="tabpanel"
+          aria-labelledby="knowledge-tab-diagnostics"
+          data-knowledge-panel="diagnostics"
+        >
         <section className={styles.section} aria-labelledby="schema-heading">
           <header className={styles.sectionHeader}>
             <div>
               <span className={styles.kicker}>스키마</span>
-              <h2 id="schema-heading">LLM 재생성 스키마</h2>
+              <h2 id="schema-heading">문서화 항목 안내</h2>
             </div>
-            <p>재생성 스키마는 개발/운영 확인용입니다. 현장 문서에는 roleLabel, shortSummary, documentReflectionLabel만 반영합니다.</p>
+            <p>AI 문서화에 쓰는 문서 역할, 짧은 요약, 문서 반영 위치를 확인합니다.</p>
           </header>
           <details className={styles.rawDetails}>
-            <summary>스키마 원문 펼치기</summary>
-            <pre>{schemaMarkdown}</pre>
+            <summary>운영 항목 원문 펼치기</summary>
+            <pre>{schemaDisplayMarkdown}</pre>
           </details>
         </section>
+        </div>
+        </KnowledgeSectionNavigator>
       </div>
     </SafeClawModuleShell>
   );

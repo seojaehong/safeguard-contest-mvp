@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 import { getLatestDryrunReport, getLatestDryrunSnapshot } from "@/lib/dryrun-status";
 import { toDryrunPresentationSnapshot } from "@/lib/web-safe-presentation";
+import { triggerAppErrorBoundary } from "safeclaw-audit-app-error-escalation";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +17,7 @@ export default async function DryrunPage({
   searchParams: Promise<{ __auditBoundary?: string }>;
 }) {
   const query = await searchParams;
-  if (process.env.SAFECLAW_FRONTEND_AUDIT === "1" && query.__auditBoundary === "error") {
-    throw new Error("SafeClaw deterministic frontend audit error boundary probe");
-  }
+  triggerAppErrorBoundary(query.__auditBoundary);
 
   let snapshot: ReturnType<typeof toDryrunPresentationSnapshot> = null;
   try {
@@ -34,9 +33,9 @@ export default async function DryrunPage({
       title="문서 생성 점검."
       description="위험성평가, TBM, 작업계획서 등 문서형 산출물의 생성 상태와 응답 품질을 운영 관점에서 추적합니다."
       status={snapshot ? "live" : "partial"}
-      mappedTo="생성 점검 · 로그 · 원문 리포트"
+      mappedTo="생성 점검 · 기록 · 상세 결과"
       activeHref="/dryrun"
-      actions={<Link href="/ops/api">API 상태</Link>}
+      actions={<Link href="/ops/api">연결 상태</Link>}
     >
       {snapshot ? (
         <section className="safeclaw-module-panel dryrun-card">
@@ -47,10 +46,13 @@ export default async function DryrunPage({
             <article><span>P95</span><strong>{snapshot.p95Ms}밀리초</strong></article>
           </div>
           <h2>{snapshot.qualityNote}</h2>
-          <p>
-            요약: <code>{snapshot.summaryPath}</code><br />
-            보고서: <code>{snapshot.reportPath}</code>
-          </p>
+          <details>
+            <summary>상세 점검 기록</summary>
+            <p>
+              요약: <code>{snapshot.summaryPath}</code><br />
+              보고서: <code>{snapshot.reportPath}</code>
+            </p>
+          </details>
         </section>
       ) : null}
 
@@ -73,10 +75,10 @@ export default async function DryrunPage({
       ) : null}
 
       {report ? (
-        <section className="safeclaw-module-panel dryrun-card">
-          <span>원문 리포트</span>
+        <details className="safeclaw-module-panel dryrun-card">
+          <summary>상세 점검 기록</summary>
           <pre className="dryrun-report">{report}</pre>
-        </section>
+        </details>
       ) : null}
     </SafeClawModuleShell>
   );

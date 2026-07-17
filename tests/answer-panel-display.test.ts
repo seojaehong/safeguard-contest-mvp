@@ -2,11 +2,31 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildAnswerPanelStatusNotes,
+  groundingFieldLabel,
+  groundingGroupLabel,
   sanitizeAnswerForDisplay,
   type AnswerPanelPublicStatusInput
 } from "@/lib/answer-panel-display";
 
 describe("answer panel display copy", () => {
+  it.each([
+    ["workPlanStructured", "작업계획서"],
+    ["tbmBriefingStructured", "TBM 브리핑"],
+    ["tbmLogStructured", "TBM 기록"],
+    ["educationRecordStructured", "안전보건교육 기록"]
+  ])("labels the rejected group %s on the AnswerPanel display path", (group, expectedLabel) => {
+    expect(groundingGroupLabel(group)).toBe(expectedLabel);
+  });
+
+  it.each([
+    ["$.workPlanStructured.stopCriteria[0]", "작업계획서"],
+    ["$.tbmBriefingStructured.stopCriteria[0]", "TBM 브리핑"],
+    ["$.tbmLogStructured.workerConfirmations[0]", "TBM 기록"],
+    ["$.educationRecordStructured.curriculum[0].keyPoints[0]", "안전보건교육 기록"]
+  ])("labels the structured grounding path %s", (path, expectedLabel) => {
+    expect(groundingFieldLabel(path)).toBe(expectedLabel);
+  });
+
   it("removes internal provider and fallback diagnostics from visible answer text", () => {
     const answer = [
       "Law.go와 OpenAI 응답을 결합했습니다. OPENAI_API_KEY가 없어 fallback 정책을 따릅니다.",
@@ -52,7 +72,7 @@ describe("answer panel display copy", () => {
 
     expect(notes).toContain("법령 근거: 연결됨");
     expect(notes).toContain("기상 신호: 보조 근거로 표시");
-    expect(notes).toContain("DB 하네스: 직접 근거 3건 · SIF 사례 2건");
+    expect(notes).toContain("검증 근거: 직접 근거 3건 · SIF 사례 2건");
     expect(notes).not.toMatch(/fallback|OPENAI_API_KEY|timeout|AI_MODE/i);
   });
 });

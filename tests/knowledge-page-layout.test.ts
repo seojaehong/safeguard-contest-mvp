@@ -195,16 +195,23 @@ describe("knowledge page decision layout", () => {
     ] as const) {
       const page = await browser.newPage({ viewport });
       await page.goto(`${baseUrl}/knowledge?theme=day`, { waitUntil: "domcontentloaded" });
-      await page.locator('[data-knowledge-list="reference-library"]').waitFor();
-      await page.locator('[data-knowledge-list="reference-library"] details').first().click();
+      if (viewport.name === "mobile") {
+        const referencesTab = page.getByRole("tab", { name: "참고자료" });
+        await referencesTab.click();
+        await expect.poll(() => referencesTab.getAttribute("aria-selected")).toBe("true");
+      }
+      const referenceLibrary = page.locator('[data-knowledge-list="reference-library"]');
+      await expect.poll(() => referenceLibrary.isVisible(), { message: viewport.name }).toBe(true);
+      await referenceLibrary.locator("details").first().click();
 
       const metrics = await page.evaluate(() => {
         const list = document.querySelector('[data-knowledge-list="reference-library"]');
-        const rows = [...document.querySelectorAll<HTMLElement>("[data-knowledge-row]")];
-        const summaries = [...document.querySelectorAll<HTMLElement>("[data-knowledge-summary]")];
-        if (!list || rows.length === 0 || summaries.length === 0) {
+        if (!list) {
           throw new Error("Missing knowledge layout targets");
         }
+        const rows = [...list.querySelectorAll<HTMLElement>("[data-knowledge-row]")];
+        const summaries = [...list.querySelectorAll<HTMLElement>("[data-knowledge-summary]")];
+        if (rows.length === 0 || summaries.length === 0) throw new Error("Missing knowledge rows");
         const firstRowStyle = getComputedStyle(rows[0]);
         const radii = [...document.querySelectorAll<HTMLElement>("[data-knowledge-surface] *")]
           .map((element) => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0);
@@ -239,6 +246,9 @@ describe("knowledge page decision layout", () => {
     ] as const) {
       const page = await browser.newPage({ viewport });
       await page.goto(`${baseUrl}/knowledge?theme=day`, { waitUntil: "domcontentloaded" });
+      if (viewport.name === "mobile") {
+        await page.getByRole("tab", { name: "검토 흐름" }).click();
+      }
       const flow = page.locator('[data-knowledge-governance-flow="true"]');
       await flow.waitFor();
 
@@ -252,6 +262,7 @@ describe("knowledge page decision layout", () => {
           sectionContained: section.scrollWidth <= section.clientWidth + 1,
           stagesContained: stages.every((stage) => stage.scrollWidth <= stage.clientWidth + 1),
           authorityRowsContained: authorityRows.every((row) => row.scrollWidth <= row.clientWidth + 1),
+          visibleText: section.textContent || "",
           mutationControls: section.querySelectorAll("button, [data-publish-action]").length
         };
       });
@@ -273,8 +284,153 @@ describe("knowledge page decision layout", () => {
       expect(metrics.sectionContained, viewport.name).toBe(true);
       expect(metrics.stagesContained, viewport.name).toBe(true);
       expect(metrics.authorityRowsContained, viewport.name).toBe(true);
+      for (const internalLabel of [
+        "Hermes / LLM",
+        "human_review",
+        "Published ontology",
+        "published_ontology",
+        "SafeClaw system of record"
+      ]) {
+        expect(metrics.visibleText, `${viewport.name} exposes ${internalLabel}`).not.toContain(internalLabel);
+      }
       expect(metrics.mutationControls, viewport.name).toBe(0);
       await page.close();
     }
+  }, 90_000);
+
+  it("shows an honest unpublished review status and localized schema labels", async () => {
+    if (!browser) throw new Error("Browser was not started");
+
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.goto(`${baseUrl}/knowledge?theme=day`, { waitUntil: "domcontentloaded" });
+
+    await page.getByRole("tab", { name: "검토 흐름" }).click();
+    const governance = page.locator('[data-knowledge-governance-flow="true"]');
+    await governance.waitFor();
+    const governanceText = await governance.textContent();
+    expect(governanceText).toContain("승인, 현장 전용 유지 또는 반려");
+    expect(governanceText).toContain("미게시 상태");
+    expect(governanceText).toContain("온톨로지에는 자동 반영되지 않습니다");
+
+    await page.getByRole("tab", { name: "진단" }).click();
+    const schemaSection = page.locator('[aria-labelledby="schema-heading"]');
+    await schemaSection.locator("summary").click();
+    const schemaText = await schemaSection.textContent();
+    const schemaPreText = await schemaSection.locator("pre").textContent();
+    expect(schemaText).toContain("문서화 항목 안내");
+    expect(schemaPreText).toContain("문서 역할");
+    expect(schemaPreText).toContain("짧은 요약");
+    expect(schemaPreText).toContain("문서 반영 위치");
+    for (const internalLabel of [
+      "LLM 재생성 스키마",
+      "roleLabel",
+      "shortSummary",
+      "documentReflectionLabel"
+    ]) {
+      expect(schemaPreText, `schema pre exposes ${internalLabel}`).not.toContain(internalLabel);
+    }
+
+    await page.close();
+  }, 90_000);
+
+  it("keeps mobile evidence disclosures interactive, separated, and at least 44px tall", async () => {
+    if (!browser) throw new Error("Browser was not started");
+
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.goto(`${baseUrl}/knowledge?theme=night`, { waitUntil: "domcontentloaded" });
+    await page.getByRole("tab", { name: "기술 지원" }).click();
+    await page.locator('[data-knowledge-list="technical-support"]').waitFor();
+
+    const technicalList = page.locator('[data-knowledge-list="technical-support"]');
+    let activeList = technicalList;
+    let activeListSelector = '[data-knowledge-list="technical-support"]';
+    if (await technicalList.locator("[data-knowledge-row]").count() === 0) {
+      const provenanceText = await page
+        .locator('[data-knowledge-provenance="true"]')
+        .filter({ hasText: /데이터 연결 상태/u })
+        .textContent();
+      expect(provenanceText).toMatch(/service role key가 없어|안전 지식 DB 상태 확인 중 오류/u);
+      await page.getByRole("tab", { name: "참고자료" }).click();
+      activeList = page.locator('[data-knowledge-list="reference-library"]');
+      activeListSelector = '[data-knowledge-list="reference-library"]';
+      await activeList.locator("[data-knowledge-row]").first().waitFor();
+    }
+
+    const details = activeList.locator("[data-knowledge-row] details");
+    for (let index = 0; index < await details.count(); index += 1) {
+      const detail = details.nth(index);
+      const summary = detail.locator("summary");
+      expect(await detail.evaluate((element) => {
+        if (!(element instanceof HTMLDetailsElement)) {
+          throw new Error("Expected a knowledge evidence details element");
+        }
+        return element.open;
+      })).toBe(false);
+      await summary.click();
+      expect(await detail.evaluate((element) => {
+        if (!(element instanceof HTMLDetailsElement)) {
+          throw new Error("Expected a knowledge evidence details element");
+        }
+        return element.open;
+      })).toBe(true);
+    }
+
+    const metrics = await page.evaluate((listSelector) => {
+      const interactiveElements = [
+        ...document.querySelectorAll<HTMLElement>(`${listSelector} [data-knowledge-row] details > summary`),
+        ...document.querySelectorAll<HTMLElement>(`${listSelector} [data-knowledge-row] details a`)
+      ];
+      const targets = interactiveElements
+        .filter((element) => {
+          const style = getComputedStyle(element);
+          return style.display !== "none" && style.visibility !== "hidden";
+        })
+        .map((element) => {
+          const rectangle = element.getBoundingClientRect();
+          return {
+          label: element.textContent?.trim() || element.tagName,
+            href: element instanceof HTMLAnchorElement ? element.getAttribute("href") : null,
+            detailIndex: [...document.querySelectorAll(`${listSelector} [data-knowledge-row] details`)]
+              .indexOf(element.closest("details") as HTMLDetailsElement),
+            left: rectangle.left,
+            right: rectangle.right,
+            top: rectangle.top,
+            bottom: rectangle.bottom,
+            width: rectangle.width,
+            height: rectangle.height
+          };
+        });
+
+      const overlapPairs: string[] = [];
+      for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
+        for (let secondIndex = firstIndex + 1; secondIndex < targets.length; secondIndex += 1) {
+          const first = targets[firstIndex];
+          const second = targets[secondIndex];
+          if (first.detailIndex !== second.detailIndex) continue;
+          const horizontalOverlap = Math.min(first.right, second.right) - Math.max(first.left, second.left);
+          const verticalOverlap = Math.min(first.bottom, second.bottom) - Math.max(first.top, second.top);
+          if (horizontalOverlap > 0.5 && verticalOverlap > 0.5) {
+            overlapPairs.push(`${first.label} / ${second.label}`);
+          }
+        }
+      }
+
+      return { targets, overlapPairs };
+    }, activeListSelector);
+
+    expect(metrics.targets.length).toBeGreaterThan(0);
+    expect(metrics.overlapPairs).toEqual([]);
+    for (const target of metrics.targets) {
+      expect(target.height, target.label).toBeGreaterThanOrEqual(44);
+      expect(target.width, target.label).toBeGreaterThanOrEqual(44);
+      if (target.label === "이 근거로 조회") {
+        expect(target.href, target.label).toMatch(/^\/knowledge\?reference=[^&]+$/u);
+        const targetUrl = new URL(target.href || "", baseUrl);
+        expect(targetUrl.origin).toBe(baseUrl);
+        expect(targetUrl.pathname).toBe("/knowledge");
+        expect(targetUrl.searchParams.get("reference")?.trim().length).toBeGreaterThan(0);
+      }
+    }
+    await page.close();
   }, 90_000);
 });

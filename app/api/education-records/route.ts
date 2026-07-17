@@ -4,6 +4,8 @@ import { isRecord, parseEducationRecordDrafts, parseScenarioContext, parseWorker
 
 export const dynamic = "force-dynamic";
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 function readWorkerMap(value: unknown) {
   if (!isRecord(value)) return new Map<string, string>();
   return new Map(
@@ -34,7 +36,93 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, configured: true, savedCount: 0, message: "저장할 교육기록이 없습니다." }, { status: 400 });
   }
 
+  const referencedWorkerIds = Array.from(new Set(records.flatMap((record) => {
+    const workerId = workerMap.get(record.workerId);
+    return workerId ? [workerId] : [];
+  })));
+  if ((workpackId && !UUID_PATTERN.test(workpackId))
+    || referencedWorkerIds.some((workerId) => !UUID_PATTERN.test(workerId))) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      savedCount: 0,
+      code: "education_relationship_id_invalid",
+      message: "문서팩 또는 작업자 식별자가 올바르지 않습니다.",
+    }, { status: 400 });
+  }
+
   const context = await ensureWorkspaceContext(client, user, parseScenarioContext(body.scenario));
+  if (workpackId) {
+    const { data: ownedWorkpack, error: workpackError } = await client
+      .from("workpacks")
+      .select("id,organization_id,site_id")
+      .eq("id", workpackId)
+      .eq("organization_id", context.organizationId)
+      .eq("site_id", context.siteId)
+      .maybeSingle();
+
+    if (workpackError) {
+      console.error("education workpack ownership verification failed", workpackError);
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        savedCount: 0,
+        code: "education_relationship_verification_failed",
+        message: "교육기록의 문서팩 범위를 확인하지 못해 저장하지 않았습니다.",
+      }, { status: 500 });
+    }
+
+    if (!ownedWorkpack
+      || ownedWorkpack.id !== workpackId
+      || ownedWorkpack.organization_id !== context.organizationId
+      || ownedWorkpack.site_id !== context.siteId) {
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        savedCount: 0,
+        code: "education_relationship_not_owned",
+        message: "현재 현장에서 확인할 수 없는 문서팩 또는 작업자입니다.",
+      }, { status: 404 });
+    }
+  }
+
+  if (referencedWorkerIds.length) {
+    const { data: ownedWorkers, error: workerError } = await client
+      .from("workers")
+      .select("id,organization_id,site_id")
+      .in("id", referencedWorkerIds)
+      .eq("organization_id", context.organizationId)
+      .eq("site_id", context.siteId);
+
+    if (workerError) {
+      console.error("education worker ownership verification failed", workerError);
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        savedCount: 0,
+        code: "education_relationship_verification_failed",
+        message: "교육기록의 작업자 범위를 확인하지 못해 저장하지 않았습니다.",
+      }, { status: 500 });
+    }
+
+    const ownedWorkerIds = new Set((ownedWorkers || []).flatMap((worker) => (
+      worker.organization_id === context.organizationId
+      && worker.site_id === context.siteId
+      && referencedWorkerIds.includes(worker.id)
+        ? [worker.id]
+        : []
+    )));
+    if (ownedWorkerIds.size !== referencedWorkerIds.length) {
+      return NextResponse.json({
+        ok: false,
+        configured: true,
+        savedCount: 0,
+        code: "education_relationship_not_owned",
+        message: "현재 현장에서 확인할 수 없는 문서팩 또는 작업자입니다.",
+      }, { status: 404 });
+    }
+  }
+
   const rows = records.map((record) => {
     const worker = workers.find((item) => item.id === record.workerId);
     return {

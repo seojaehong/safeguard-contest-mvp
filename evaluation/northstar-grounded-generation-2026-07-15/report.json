@@ -1,0 +1,81 @@
+{
+  "date": "2026-07-15",
+  "branch": "fix/northstar-grounded-current-20260715",
+  "startingHead": "cb43e4d10416150577cfe88179cdced5f4a23e94",
+  "replayedCommits": ["875dfe1", "f473be6", "68010bb", "cdf53d8", "7f568c1"],
+  "scope": "independent grounded-generation findings and intermittent editor-focus suite diagnosis",
+  "result": "pass",
+  "closedFindings": [
+    "canonical citation-only control suffix",
+    "runAsk outer-failure response review surface preserves sourceIdentity and criticalControls",
+    "deterministic duplicate source-key ordering and deduplication",
+    "narrative actionable controls fail closed when absent from the immutable packet",
+    "structured stop-work emergency education permit and worker-confirmation controls are packet-bound",
+    "rejected groups and violation paths reach a Korean human-confirmation surface"
+  ],
+  "contract": {
+    "citationSuffix": "one canonical KOSHA or law token per parenthesized suffix group; arbitrary prose rejected",
+    "outerFailureReviewSurface": "AskResponse.groundingReview rendered by AnswerPanel",
+    "duplicateSourceKeys": "canonical representative plus sorted unique aliases and controls",
+    "narrativeControls": "actionable control sentences must match an immutable packet control; unsupported prose is review_required"
+  },
+  "editorFocusDiagnosis": {
+    "focusAssertionFailures": 0,
+    "rootCause": "Windows temporary-directory cleanup raced the isolated Next process-tree exit after taskkill",
+    "initialLoop": {
+      "runs": 10,
+      "focusAssertionsPassed": 10,
+      "cleanupFailures": 1
+    },
+    "boundedDeleteRetryOnly": {
+      "runs": 3,
+      "focusAssertionsPassed": 3,
+      "cleanupFailures": 1,
+      "acceptedAsFixed": false
+    },
+    "finalRemediation": "wait for process exit with a bounded timeout, fail if still alive, then perform bounded filesystem retries",
+    "finalLoop": {
+      "runs": 3,
+      "focusAssertionsPassed": 3,
+      "cleanupFailures": 0
+    }
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests/grounded-generation-contract.test.ts tests/ai-deliverables-generation-trace.test.ts tests/ai-deliverables-prompts.test.ts tests/kosha-current-review-run-ask.test.ts --reporter=dot",
+      "testFilesPassed": 4,
+      "testsPassed": 84,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd test -- tests/isolated-next-browser-harness.test.ts --maxWorkers=1 --no-file-parallelism --reporter=dot",
+      "testFilesPassed": 1,
+      "testsPassed": 3,
+      "testsFailed": 0
+    },
+    {
+      "command": "npm.cmd test -- tests/documents-editor-layout.test.ts -t opens a requested document in an editor-first workspace --reporter=dot (3 serial runs)",
+      "runs": 3,
+      "testsPassed": 3,
+      "testsSkipped": 63,
+      "testsFailed": 0,
+      "cleanupFailures": 0
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "finalGateRerun": true
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "finalGateRerun": true
+    }
+  ],
+  "excludedChanges": [
+    "database schema",
+    "migration",
+    "environment contract",
+    "data mutation"
+  ]
+}

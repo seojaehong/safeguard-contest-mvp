@@ -1,0 +1,104 @@
+{
+  "status": "pass",
+  "sourceBase": "79e48daec4add10706068dd6a5705c4f5ca7d5f9",
+  "branch": "fix/ontology-tablet-overflow-20260715",
+  "scope": [
+    "app/ontology/OntologyWorkbench.module.css",
+    "tests/ontology-tablet-overflow.test.ts",
+    "evaluation/ontology-tablet-overflow-2026-07-15/**"
+  ],
+  "excludedChanges": {
+    "database": false,
+    "schema": false,
+    "groundedGeneration": false,
+    "hermes": false,
+    "auditRunner": false
+  },
+  "reproduction": {
+    "viewports": ["1024x900", "1024x768"],
+    "documentScrollWidth": 1148,
+    "bodyScrollWidth": 1148,
+    "horizontalOverflow": 124,
+    "cause": "The ontology graph canvas 860px minimum width propagated through the grid beside the 224px module rail."
+  },
+  "change": {
+    "rootMinimumWidth": 0,
+    "tabletRange": "901px..1100px",
+    "tabletGraphCanvasMinimumWidth": 0,
+    "tabletGraphNodeWidth": 120,
+    "contentHidden": false
+  },
+  "tests": {
+    "tabletBrowserRegression": {
+      "status": "pass",
+      "files": 1,
+      "passed": 2,
+      "failed": 0
+    },
+    "focusedOntology": {
+      "status": "pass",
+      "passedFiles": 13,
+      "skippedFiles": 1,
+      "passedTests": 136,
+      "skippedTests": 1
+    },
+    "desktopMobileBrowserContract": {
+      "status": "pass",
+      "files": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "typecheck": "pass",
+    "staticAudit": {
+      "status": "pass",
+      "pageFiles": 32,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violationCount": 0
+    }
+  },
+  "tabletBrowser": {
+    "viewport": "1024x768",
+    "themes": ["day", "night"],
+    "documentOverflow": 0,
+    "bodyOverflow": 0,
+    "outsideElements": 0,
+    "clippedNodes": 0,
+    "maximumDisplayedNodes": 15,
+    "overlapPairs": 0,
+    "minimumControlHeight": 44,
+    "minimumNodeContrast": 16.01,
+    "desktopGraphVisible": true,
+    "mobileRelationsVisible": false
+  },
+  "preservedContracts": {
+    "neighborhoodMaximum": 15,
+    "overlapPairs": 0,
+    "aaContrast": "pass",
+    "mobileRelationCards": "pass",
+    "mobileFullscreenGraph": "pass",
+    "dialogFocusTrap": "pass"
+  },
+  "independentReviewRemediation": {
+    "tabletAssertions": {
+      "themes": ["day", "night"],
+      "graphVisible": true,
+      "visibleNodes": 15,
+      "overlapPairs": 0,
+      "clippedNodes": 0,
+      "minimumNodeContrastRequired": 4.5
+    },
+    "priorRangeCheckCorrection": {
+      "range": "79e48da..f580f5c",
+      "status": "fail",
+      "newBlankLinesAtEof": 5
+    },
+    "followUpRangeCheck": {
+      "candidateCommit": "4349d80",
+      "command": "git diff --check f580f5cfb61c8c41156ef1f70fd0259c4288ac02..4349d80",
+      "status": "pass",
+      "exitCode": 0,
+      "evidence": "logs/follow-up-range-check.log"
+    }
+  }
+}

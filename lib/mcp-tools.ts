@@ -37,6 +37,14 @@ import type {
   SafetyReferenceVectorStatus
 } from "./safety-reference-catalog";
 import { deriveSafetyReferenceRetrievalModeFromItems } from "./safety-reference-catalog";
+import type {
+  TenantHarnessImprovementDigest,
+  TenantHarnessMemoryResult,
+  TenantHarnessMemoryStage,
+  TenantHarnessMemoryStageName,
+  TenantHarnessWorkpackDigest,
+} from "./tenant-harness-memory";
+import { TENANT_REFLECTED_DOCUMENTS } from "./tenant-harness-memory";
 
 /** MCP 도구가 반환하는 CallToolResult의 최소 형태 (SDK 타입과 호환). */
 export type McpToolResult = {
@@ -265,11 +273,37 @@ export type HarnessAgentResult = {
     "load_improvement_memory",
     "build_db_harness_packet"
   ];
+  qualityPipelineStatus: HarnessAgentPipelineStage[];
+  packetClassification: {
+    classification: "tenant-confidential";
+    externalRuntimePolicy: "tenant_authorized_runtime_only";
+    rawMemoryForwardingAllowed: false;
+    sanitizationScope: "structured_approved_provenance_only";
+  };
+  tenantMemoryDigest: {
+    provenancePolicy: "approved_or_reflected_only";
+    workpacks: TenantHarnessWorkpackDigest[];
+    improvements: TenantHarnessImprovementDigest[];
+  };
   packet: ReturnType<typeof buildPublicDbHarnessPacket>;
   promptContext: string;
   referenceSearch: HarnessAgentSearchSummary[];
   auth: HarnessAgentAuthSummary;
   openClawUsageNote: string;
+};
+
+export type HarnessAgentPipelineStageName =
+  | "search_safety_reference_items"
+  | TenantHarnessMemoryStageName
+  | "build_db_harness_packet";
+
+export type HarnessAgentPipelineStage = {
+  name: HarnessAgentPipelineStageName;
+  status: "completed" | "skipped" | "failed";
+  attempted: boolean;
+  count?: number;
+  reason?: TenantHarnessMemoryStage["reason"];
+  error?: string;
 };
 
 export function summarizeHarnessSearch(
@@ -302,19 +336,85 @@ function combineHarnessVectorStatus(searches: HarnessAgentSearchSummary[]): Safe
     searches[0]?.vectorSearch;
 }
 
+const TENANT_REFLECTED_DOCUMENT_SET: ReadonlySet<string> = new Set(TENANT_REFLECTED_DOCUMENTS);
+
+function structuredIdentifier(value: unknown): string {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(value)) return "";
+  return value;
+}
+
+function structuredTimestamp(value: unknown): string {
+  if (typeof value !== "string" || value.length > 64 || Number.isNaN(Date.parse(value))) return "";
+  return value;
+}
+
+function structuredDocuments(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.filter(
+    (item): item is string => typeof item === "string" && TENANT_REFLECTED_DOCUMENT_SET.has(item),
+  ))].slice(0, TENANT_REFLECTED_DOCUMENTS.length);
+}
+
+function buildRuntimeTenantMemoryDigest(
+  memory: Pick<TenantHarnessMemoryResult, "workpackMemory" | "improvements"> | undefined,
+): HarnessAgentResult["tenantMemoryDigest"] {
+  const improvements = (memory?.improvements ?? []).flatMap((item): TenantHarnessImprovementDigest[] => {
+    const id = structuredIdentifier(item.id);
+    const workpackId = structuredIdentifier(item.workpackId);
+    const reviewedAt = structuredTimestamp(item.reviewedAt);
+    if (!id || !workpackId || !reviewedAt) return [];
+    if (item.reviewStatus !== "approved" && item.reviewStatus !== "reflected") return [];
+    const sourceType = item.sourceType === "photo_analysis" || item.sourceType === "operator_note"
+      ? item.sourceType
+      : "manual";
+    return [{
+      id,
+      workpackId,
+      reviewStatus: item.reviewStatus,
+      sourceType,
+      reviewedAt,
+      reflectedDocuments: structuredDocuments(item.reflectedDocuments),
+    }];
+  });
+  const improvementIds = new Set(improvements.map((item) => item.id));
+  const approvedWorkpackIds = new Set(improvements.map((item) => item.workpackId));
+  const workpacks = (memory?.workpackMemory ?? []).flatMap((item): TenantHarnessWorkpackDigest[] => {
+    const id = structuredIdentifier(item.id);
+    const generatedAt = structuredTimestamp(item.generatedAt);
+    if (!id || !generatedAt || !approvedWorkpackIds.has(id)) return [];
+    const provenanceImprovementIds = item.provenanceImprovementIds
+      .map(structuredIdentifier)
+      .filter((improvementId) => improvementIds.has(improvementId));
+    if (provenanceImprovementIds.length === 0) return [];
+    return [{
+      id,
+      generatedAt,
+      provenanceImprovementIds,
+      reflectedDocuments: structuredDocuments(item.reflectedDocuments),
+    }];
+  });
+  return {
+    provenancePolicy: "approved_or_reflected_only",
+    workpacks,
+    improvements,
+  };
+}
+
 export function buildHarnessAgentResult(input: {
   question: string;
   references: SafetyReferenceItem[];
+  tenantMemory?: Pick<TenantHarnessMemoryResult, "workpackMemory" | "improvements">;
+  /** Legacy compatibility only. Raw memory is intentionally ignored. */
   improvements?: HarnessImprovement[];
+  /** Legacy compatibility only. Raw memory is intentionally ignored. */
   workpackMemory?: HarnessWorkpackMemory[];
   referenceSearch: HarnessAgentSearchSummary[];
   auth?: HarnessAgentAuthSummary;
+  memoryStages?: TenantHarnessMemoryStage[];
 }): HarnessAgentResult {
   const internalPacket = buildDbHarnessPacket({
     question: input.question,
     references: input.references,
-    improvements: input.improvements,
-    workpackMemory: input.workpackMemory,
     retrieval: {
       mode: deriveSafetyReferenceRetrievalModeFromItems(
         input.references,
@@ -325,6 +425,48 @@ export function buildHarnessAgentResult(input: {
     }
   });
   const packet = buildPublicDbHarnessPacket(internalPacket);
+  const tenantMemoryDigest = buildRuntimeTenantMemoryDigest(input.tenantMemory);
+  const inferredSiteScope: TenantHarnessMemoryStage["siteScope"] = input.auth?.siteId
+    ? "site"
+    : input.auth?.source === "db" && input.auth.orgId
+      ? "organization"
+      : "none";
+  const inferredScopeDetail: TenantHarnessMemoryStage["scopeDetail"] = inferredSiteScope === "site"
+    ? "site_token_single_site"
+    : inferredSiteScope === "organization"
+      ? "organization_token_cross_site_bounded"
+      : undefined;
+  const inferredMemoryStages: TenantHarnessMemoryStage[] = [
+    {
+      name: "load_workpack_memory",
+      status: input.tenantMemory === undefined ? "skipped" : "completed",
+      attempted: input.tenantMemory !== undefined,
+      siteScope: inferredSiteScope,
+      scopeDetail: inferredScopeDetail,
+      count: tenantMemoryDigest.workpacks.length,
+    },
+    {
+      name: "load_improvement_memory",
+      status: input.tenantMemory === undefined ? "skipped" : "completed",
+      attempted: input.tenantMemory !== undefined,
+      siteScope: inferredSiteScope,
+      scopeDetail: inferredScopeDetail,
+      count: tenantMemoryDigest.improvements.length,
+    },
+  ];
+  const qualityPipelineStatus: HarnessAgentPipelineStage[] = [
+    {
+      name: "search_safety_reference_items",
+      status: input.referenceSearch.some((search) => !search.ok) ? "failed" : "completed",
+      attempted: true,
+      count: input.references.length,
+      error: input.referenceSearch.some((search) => !search.ok)
+        ? "일부 참고자료 검색에 실패했습니다. 확인된 근거만 제공합니다."
+        : undefined,
+    },
+    ...(input.memoryStages ?? inferredMemoryStages),
+    { name: "build_db_harness_packet", status: "completed", attempted: true },
+  ];
 
   return {
     agentKind: "safeclaw_harness_engineering_agent",
@@ -335,6 +477,14 @@ export function buildHarnessAgentResult(input: {
       "load_improvement_memory",
       "build_db_harness_packet",
     ],
+    qualityPipelineStatus,
+    packetClassification: {
+      classification: "tenant-confidential",
+      externalRuntimePolicy: "tenant_authorized_runtime_only",
+      rawMemoryForwardingAllowed: false,
+      sanitizationScope: "structured_approved_provenance_only",
+    },
+    tenantMemoryDigest,
     packet,
     promptContext: buildHarnessPromptContext(packet),
     referenceSearch: input.referenceSearch,
@@ -345,7 +495,7 @@ export function buildHarnessAgentResult(input: {
       tokenBound: false,
     },
     openClawUsageNote:
-      "OpenClaw는 이 도구 결과를 먼저 읽고, packet.generationContract의 naturalize_only 계약을 지켜 문장화·검토만 수행하세요. 근거 없는 위험요인, 개선 이력, 확인 이력은 새로 만들지 않습니다.",
+      "OpenClaw는 이 tenant-confidential 결과를 승인된 tenant runtime 안에서만 읽고 외부 runtime으로 raw memory를 전달하지 마세요. packet.generationContract의 naturalize_only 계약을 지켜 문장화·검토만 수행하며, 근거 없는 위험요인, 개선 이력, 확인 이력은 새로 만들지 않습니다.",
   };
 }
 
@@ -683,7 +833,6 @@ export function buildSafetyKnowledgeResult(
     evidenceDiagnostics: evidencePack?.diagnostics ?? null,
     evidenceChainState,
     phaseAProduct: buildPhaseAProductMaterialization({
-      evidenceChainState,
       evidencePack: evidencePack?.activePack ?? null,
     }),
   };

@@ -1,6 +1,6 @@
 {
-  "source": "http://127.0.0.1:3012",
-  "generatedAt": "2026-07-16T02:10:14.877Z",
+  "source": "http://127.0.0.1:3027",
+  "generatedAt": "2026-07-15T13:36:33.092Z",
   "metrics": [
     {
       "variant": "desktop-day",
@@ -9,27 +9,12 @@
         "height": 1000
       },
       "horizontalOverflow": 0,
+      "outsideElementCount": 0,
       "visibleNeighborhoodNodes": 15,
       "overlapPairs": 0,
       "minimumControlHeight": 44,
       "minimumNodeContrast": 16.01,
-      "desktopGraphVisible": true,
-      "mobileRelationsVisible": false,
-      "expandedGraphVerified": false,
-      "expandedGraphNodeCount": 0,
-      "dialogKeyboardContract": false
-    },
-    {
-      "variant": "tablet-day",
-      "viewport": {
-        "width": 1024,
-        "height": 1000
-      },
-      "horizontalOverflow": 0,
-      "visibleNeighborhoodNodes": 15,
-      "overlapPairs": 0,
-      "minimumControlHeight": 44,
-      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
       "desktopGraphVisible": true,
       "mobileRelationsVisible": false,
       "expandedGraphVerified": false,
@@ -43,10 +28,12 @@
         "height": 844
       },
       "horizontalOverflow": 0,
+      "outsideElementCount": 0,
       "visibleNeighborhoodNodes": 0,
       "overlapPairs": 0,
       "minimumControlHeight": 44,
-      "minimumNodeContrast": null,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
       "desktopGraphVisible": false,
       "mobileRelationsVisible": true,
       "expandedGraphVerified": true,
@@ -60,27 +47,12 @@
         "height": 1000
       },
       "horizontalOverflow": 0,
+      "outsideElementCount": 0,
       "visibleNeighborhoodNodes": 15,
       "overlapPairs": 0,
       "minimumControlHeight": 44,
       "minimumNodeContrast": 16.01,
-      "desktopGraphVisible": true,
-      "mobileRelationsVisible": false,
-      "expandedGraphVerified": false,
-      "expandedGraphNodeCount": 0,
-      "dialogKeyboardContract": false
-    },
-    {
-      "variant": "tablet-night",
-      "viewport": {
-        "width": 1024,
-        "height": 1000
-      },
-      "horizontalOverflow": 0,
-      "visibleNeighborhoodNodes": 15,
-      "overlapPairs": 0,
-      "minimumControlHeight": 44,
-      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
       "desktopGraphVisible": true,
       "mobileRelationsVisible": false,
       "expandedGraphVerified": false,
@@ -94,10 +66,12 @@
         "height": 844
       },
       "horizontalOverflow": 0,
+      "outsideElementCount": 0,
       "visibleNeighborhoodNodes": 0,
       "overlapPairs": 0,
       "minimumControlHeight": 44,
-      "minimumNodeContrast": null,
+      "minimumNodeContrast": 16.01,
+      "minimumNodeTextContrast": 5.6,
       "desktopGraphVisible": false,
       "mobileRelationsVisible": true,
       "expandedGraphVerified": true,

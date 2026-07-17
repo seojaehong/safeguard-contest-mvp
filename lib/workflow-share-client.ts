@@ -1,4 +1,48 @@
+import type { AskResponse } from "@/lib/types";
+
 export type WorkflowShareChannel = "email" | "sms" | "kakao";
+export type WorkflowDispatchMessageTarget = "manager" | `foreign:${string}`;
+
+export type LocalizedDispatchRecipient = {
+  workerId: string;
+  phone?: string;
+  email?: string;
+  dispatchLanguageCode: string;
+  messageTarget: WorkflowDispatchMessageTarget;
+  message: string;
+};
+
+export type LocalizedDispatchRecipientsResult =
+  | { ok: true; recipients: LocalizedDispatchRecipient[] }
+  | {
+      ok: false;
+      missingLanguageCodes: string[];
+      oversizedMessageLanguageCodes: string[];
+    };
+
+export type CanonicalRecipientMessageVariantsResult =
+  | { ok: true; messageVariants: Record<string, string> }
+  | {
+      ok: false;
+      invalidLanguageCodes: string[];
+      koreanLeakLanguageCodes: string[];
+      malformedFields: string[];
+    };
+
+export type CanonicalDispatchLanguageCodesResult =
+  | { ok: true; languageCodes: string[] }
+  | { ok: false; malformedFields: string[] };
+
+type CanonicalForeignWorkerLanguage = {
+  code: string;
+  nativeLabel: string;
+  lines: string[];
+};
+
+type CanonicalDispatchDeliverables = {
+  kakaoMessage: string;
+  foreignWorkerLanguages: CanonicalForeignWorkerLanguage[];
+};
 
 export type WorkflowDispatchChannelResult = {
   channel?: string;
@@ -36,13 +80,109 @@ type DispatchRequest = {
   idempotencyKey: string;
   channels: WorkflowShareChannel[];
   operatorNote: string;
+  messageVariants: Record<string, string>;
 };
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const providerIdempotencyKeyPattern = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
+const foreignMessageTargetPattern = /^foreign:[a-z]{2,3}(?:-[A-Z]{2})?$/;
+const internalMessagePattern = /(?:qualityContract|ontologyQa|directEvidence|DB\s*하네스|하네스\s*JSONL)/i;
+const dispatchMessageMaxLength = 4_000;
+const koreanTextPattern = /[가-힣]/u;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+export function buildLocalizedDispatchRecipients(input: {
+  recipients: Array<Record<string, unknown>>;
+  messageVariants: Record<string, string>;
+  channels: WorkflowShareChannel[];
+}): LocalizedDispatchRecipientsResult {
+  const missingLanguageCodes = new Set<string>();
+  const oversizedMessageLanguageCodes = new Set<string>();
+  const localizedRecipients = input.recipients.flatMap((recipient): LocalizedDispatchRecipient[] => {
+    const workerId = typeof recipient.workerId === "string" ? recipient.workerId.trim() : "";
+    const languageCode = typeof recipient.languageCode === "string" ? recipient.languageCode.trim() : "";
+    const message = languageCode ? input.messageVariants[languageCode] : "";
+    if (!workerId || !languageCode || !message) {
+      missingLanguageCodes.add(languageCode || "unknown");
+      return [];
+    }
+    if (input.channels.includes("sms") && message.length > 900) {
+      oversizedMessageLanguageCodes.add(languageCode);
+      return [];
+    }
+    const phone = typeof recipient.phone === "string" ? recipient.phone.trim() : "";
+    const email = typeof recipient.email === "string" ? recipient.email.trim() : "";
+    const localizedRecipient: LocalizedDispatchRecipient = {
+      workerId,
+      dispatchLanguageCode: languageCode,
+      messageTarget: languageCode === "ko" ? "manager" : `foreign:${languageCode}`,
+      message
+    };
+    if (input.channels.some((channel) => channel === "sms" || channel === "kakao") && phone) {
+      localizedRecipient.phone = phone;
+    }
+    if (input.channels.includes("email") && email) {
+      localizedRecipient.email = email;
+    }
+    return [localizedRecipient];
+  });
+
+  if (missingLanguageCodes.size || oversizedMessageLanguageCodes.size) {
+    return {
+      ok: false,
+      missingLanguageCodes: [...missingLanguageCodes].sort(),
+      oversizedMessageLanguageCodes: [...oversizedMessageLanguageCodes].sort()
+    };
+  }
+  return { ok: true, recipients: localizedRecipients };
+}
+
+export function buildLocalizedDispatchWebhookPayload(input: {
+  idempotencyKey: string;
+  channels: WorkflowShareChannel[];
+  recipients: Array<Record<string, unknown>>;
+  messageVariants: Record<string, string>;
+  operatorNote: string;
+  workpack: unknown;
+  sentAt?: string;
+}): { ok: true; payload: {
+  event: "safeguard.workpack.dispatch";
+  idempotencyKey: string;
+  sentAt: string;
+  channels: WorkflowShareChannel[];
+  recipients: LocalizedDispatchRecipient[];
+  messageVariants: Record<string, string>;
+  recipientMessageContract: "saved-worker-language-v1";
+  operatorNote: string;
+  workpack: unknown;
+} } | {
+  ok: false;
+  missingLanguageCodes: string[];
+  oversizedMessageLanguageCodes: string[];
+} {
+  const localized = buildLocalizedDispatchRecipients(input);
+  if (!localized.ok) return localized;
+  const messageVariants = localized.recipients.reduce<Record<string, string>>((variants, recipient) => {
+    variants[recipient.dispatchLanguageCode] = recipient.message;
+    return variants;
+  }, {});
+  return {
+    ok: true,
+    payload: {
+      event: "safeguard.workpack.dispatch",
+      idempotencyKey: input.idempotencyKey,
+      sentAt: input.sentAt || new Date().toISOString(),
+      channels: input.channels,
+      recipients: localized.recipients,
+      messageVariants,
+      recipientMessageContract: "saved-worker-language-v1",
+      operatorNote: input.operatorNote,
+      workpack: input.workpack
+    }
+  };
 }
 
 function readString(value: unknown): string | undefined {
@@ -73,6 +213,196 @@ function buildHeaders(authToken: string): Record<string, string> {
 
 function buildHttpError(body: Record<string, unknown>, response: Response, fallback: string): Error {
   return new Error(`${readString(body.message) || fallback} (HTTP ${response.status})`);
+}
+
+export function validateWorkflowDispatchMessage(input: {
+  messageTarget: string;
+  message: string;
+}): asserts input is {
+  messageTarget: WorkflowDispatchMessageTarget;
+  message: string;
+} {
+  if (input.messageTarget !== "manager" && !foreignMessageTargetPattern.test(input.messageTarget)) {
+    throw new Error("전송 메시지 대상 언어 코드가 올바르지 않습니다.");
+  }
+  if (!input.message.trim()) throw new Error("전송할 메시지 본문이 필요합니다.");
+  if (input.message.length > dispatchMessageMaxLength) {
+    throw new Error("전송 메시지는 4,000자 이하여야 합니다.");
+  }
+  if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(input.message)) {
+    throw new Error("전송 메시지에 허용되지 않는 제어 문자가 있습니다.");
+  }
+  if (internalMessagePattern.test(input.message)) {
+    throw new Error("전송 메시지에 내부 검수 정보가 포함되어 있습니다.");
+  }
+}
+
+export function validateWorkflowDispatchMessageVariants(
+  value: unknown
+): asserts value is Record<string, string> {
+  if (!isRecord(value) || !Object.keys(value).length) {
+    throw new Error("수신자 언어별 전송 본문이 필요합니다.");
+  }
+  for (const [languageCode, message] of Object.entries(value)) {
+    if (typeof message !== "string") {
+      throw new Error("수신자 언어별 전송 본문은 문자열이어야 합니다.");
+    }
+    validateWorkflowDispatchMessage({
+      messageTarget: languageCode === "ko" ? "manager" : `foreign:${languageCode}`,
+      message
+    });
+  }
+}
+
+function parseCanonicalDispatchDeliverables(data: unknown):
+  | { ok: true; deliverables: CanonicalDispatchDeliverables }
+  | { ok: false; malformedFields: string[] } {
+  if (!isRecord(data) || !isRecord(data.deliverables)) {
+    return { ok: false, malformedFields: ["deliverables"] };
+  }
+  const deliverables = data.deliverables;
+  if (typeof deliverables.kakaoMessage !== "string") {
+    return { ok: false, malformedFields: ["deliverables.kakaoMessage"] };
+  }
+  if (!Array.isArray(deliverables.foreignWorkerLanguages)) {
+    return { ok: false, malformedFields: ["deliverables.foreignWorkerLanguages"] };
+  }
+
+  const languages: CanonicalForeignWorkerLanguage[] = [];
+  const languageCodes = new Set<string>();
+  for (const [index, value] of deliverables.foreignWorkerLanguages.entries()) {
+    const prefix = `deliverables.foreignWorkerLanguages[${index}]`;
+    if (!isRecord(value)) {
+      return { ok: false, malformedFields: [prefix] };
+    }
+    if (typeof value.code !== "string") {
+      return { ok: false, malformedFields: [`${prefix}.code`] };
+    }
+    if (value.code === "ko" || languageCodes.has(value.code)) {
+      return { ok: false, malformedFields: [`${prefix}.code`] };
+    }
+    languageCodes.add(value.code);
+    if (typeof value.nativeLabel !== "string" || !value.nativeLabel.trim()) {
+      return { ok: false, malformedFields: [`${prefix}.nativeLabel`] };
+    }
+    if (
+      !Array.isArray(value.lines)
+      || value.lines.length === 0
+      || value.lines.some((line) => typeof line !== "string" || !line.trim())
+    ) {
+      return { ok: false, malformedFields: [`${prefix}.lines`] };
+    }
+    languages.push({
+      code: value.code,
+      nativeLabel: value.nativeLabel,
+      lines: value.lines
+    });
+  }
+
+  return {
+    ok: true,
+    deliverables: {
+      kakaoMessage: deliverables.kakaoMessage,
+      foreignWorkerLanguages: languages
+    }
+  };
+}
+
+function buildCanonicalForeignMessage(
+  deliverables: CanonicalDispatchDeliverables,
+  languageCode: string
+): string | null {
+  const language = deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
+  if (!language) return null;
+  return [
+    "[SafeClaw]",
+    language.nativeLabel,
+    "",
+    ...language.lines.map((line) => `- ${line}`)
+  ].join("\n").trim();
+}
+
+export function getCanonicalDispatchLanguageCodes(data: unknown): CanonicalDispatchLanguageCodesResult {
+  const parsed = parseCanonicalDispatchDeliverables(data);
+  if (!parsed.ok) return parsed;
+  return {
+    ok: true,
+    languageCodes: [...new Set([
+      "ko",
+      ...parsed.deliverables.foreignWorkerLanguages.map((language) => language.code)
+    ])].sort()
+  };
+}
+
+export function buildCanonicalRecipientMessageVariants(input: {
+  data: unknown;
+  recipientLanguageCodes: string[];
+}): CanonicalRecipientMessageVariantsResult {
+  const parsed = parseCanonicalDispatchDeliverables(input.data);
+  if (!parsed.ok) {
+    return {
+      ok: false,
+      invalidLanguageCodes: [],
+      koreanLeakLanguageCodes: [],
+      malformedFields: parsed.malformedFields
+    };
+  }
+  const allowedLanguageCodes = new Set([
+    "ko",
+    ...parsed.deliverables.foreignWorkerLanguages.map((language) => language.code)
+  ]);
+  const invalidLanguageCodes = new Set<string>();
+  const koreanLeakLanguageCodes = new Set<string>();
+  const messageVariants: Record<string, string> = {};
+
+  for (const languageCode of [...new Set(input.recipientLanguageCodes)].sort()) {
+    if (!languageCode || !allowedLanguageCodes.has(languageCode)) {
+      invalidLanguageCodes.add(languageCode || "unknown");
+      continue;
+    }
+    const message = languageCode === "ko"
+      ? parsed.deliverables.kakaoMessage.trim()
+      : buildCanonicalForeignMessage(parsed.deliverables, languageCode);
+    if (!message) {
+      invalidLanguageCodes.add(languageCode);
+      continue;
+    }
+    if (languageCode !== "ko" && koreanTextPattern.test(message)) {
+      koreanLeakLanguageCodes.add(languageCode);
+      continue;
+    }
+    try {
+      validateWorkflowDispatchMessage({
+        messageTarget: languageCode === "ko" ? "manager" : `foreign:${languageCode}`,
+        message
+      });
+    } catch (error) {
+      console.warn("canonical workflow dispatch message validation failed", error);
+      invalidLanguageCodes.add(languageCode);
+      continue;
+    }
+    messageVariants[languageCode] = message;
+  }
+
+  if (invalidLanguageCodes.size || koreanLeakLanguageCodes.size) {
+    return {
+      ok: false,
+      invalidLanguageCodes: [...invalidLanguageCodes].sort(),
+      koreanLeakLanguageCodes: [...koreanLeakLanguageCodes].sort(),
+      malformedFields: []
+    };
+  }
+  return { ok: true, messageVariants };
+}
+
+export function resolveWorkflowMessagePreview(
+  data: AskResponse,
+  selectedTarget: WorkflowDispatchMessageTarget
+): string {
+  if (selectedTarget === "manager") return data.deliverables.kakaoMessage;
+  const parsed = parseCanonicalDispatchDeliverables(data);
+  if (!parsed.ok) return "";
+  return buildCanonicalForeignMessage(parsed.deliverables, selectedTarget.replace("foreign:", "")) || "";
 }
 
 function parseChannelResults(value: unknown): WorkflowDispatchChannelResult[] | undefined {
@@ -160,6 +490,7 @@ export async function dispatchAuthenticatedShareSession(
     throw new Error("provider 전송 idempotency key가 올바르지 않습니다.");
   }
   if (!request.channels.length) throw new Error("전파 채널을 하나 이상 선택해 주세요.");
+  validateWorkflowDispatchMessageVariants(request.messageVariants);
 
   const response = await fetcher("/api/workflow/dispatch", {
     method: "POST",
@@ -169,7 +500,8 @@ export async function dispatchAuthenticatedShareSession(
       shareSessionId: request.shareSessionId,
       idempotencyKey: request.idempotencyKey,
       channels: request.channels,
-      operatorNote: request.operatorNote
+      operatorNote: request.operatorNote,
+      messageVariants: request.messageVariants
     })
   });
   const body = await readResponseBody(response);

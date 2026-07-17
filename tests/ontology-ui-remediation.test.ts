@@ -145,13 +145,13 @@ describe("ontology P0 presentation contract", () => {
     expect(explorer).toContain("그래프 전체 화면");
   });
 
-  it("keeps raw exports secondary and controls touch-safe", () => {
+  it("keeps operator export formats off the customer explorer and controls touch-safe", () => {
     const explorer = read("app/ontology/OntologyExplorer.tsx");
     const styles = read("app/ontology/OntologyWorkbench.module.css");
 
-    expect(explorer).toContain("원본 데이터 내보내기");
-    expect(explorer).toContain("<details");
-    expect(explorer).toContain("그래프 JSON");
+    for (const operatorCopy of ["원본 데이터 내보내기", "그래프 JSON", "JSONL", "Obsidian", "API 계약 보기"]) {
+      expect(explorer).not.toContain(operatorCopy);
+    }
     expect(styles).toMatch(/min-height:\s*44px/);
     expect(styles).toContain("@media (max-width: 720px)");
     expect(styles).toMatch(/\.desktopGraph\s*\{[\s\S]*?display:\s*none/);

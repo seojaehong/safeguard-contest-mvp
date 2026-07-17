@@ -8,6 +8,13 @@ const commandCenter = readFileSync(join(root, "components", "SafeGuardCommandCen
 const sharePanel = readFileSync(join(root, "components", "WorkflowSharePanel.tsx"), "utf8");
 
 describe("workspace share simplification", () => {
+  it("offers one deterministic revalidation action after document edits", () => {
+    expect(commandCenter).toContain("revalidateEditedWorkpack");
+    expect(commandCenter).toContain('fetch("/api/ontology/graph"');
+    expect(commandCenter).toContain("편집본 재검증");
+    expect(commandCenter).toContain("handleEditedWorkpackRevalidation");
+  });
+
   it("keeps the workspace share page focused on the delivery workflow", () => {
     const sharePage = commandCenter.slice(
       commandCenter.indexOf('{workspacePage === "share" ? ('),
@@ -46,6 +53,8 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain('return "한국어 전송본 미리보기"');
     expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 전송본 미리보기`');
     expect(sharePanel).not.toContain("외국인 근로자 전송본 ·");
+    expect(sharePanel).toContain("미리보기 선택은 전송 본문을 바꾸지 않습니다.");
+    expect(sharePanel).toContain("messageVariants: recipientMessageVariants.messageVariants");
   });
 
   it("exposes exactly one direct primary send action", () => {
@@ -56,5 +65,11 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain("dispatchInFlightRef.current");
     expect(sharePanel).toContain('shareRecords.status === "loading"');
     expect(sharePanel).toContain('shareRecords.status === "error"');
+  });
+
+  it("separates authored documents from the total deliverable output count", () => {
+    expect(commandCenter).toContain("작성 문서 9종(핵심 3종 + 지원 6종) · 총 산출물 12개");
+    expect(commandCenter).toContain("개 추가 산출물 보기");
+    expect(commandCenter).not.toContain("문서 12종 + 외국인 안내문");
   });
 });

@@ -1,0 +1,58 @@
+
+> safeclaw@0.1.0 audit:frontend-bundle
+> node ./scripts/frontend_audit_bundle_contract.mjs --mode audit
+
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-15T07:39:43.132Z",
+  "mode": "audit",
+  "buildDirectory": ".next",
+  "buildId": "hwr9o3MNlJpGlL533IEdb",
+  "sourceSha": "d3dab1d2426ab90b033ce227b99ce3306328ec48",
+  "sourceIdentity": "781cd0edf69d880a22a8b9cdb200fd0db4c34f43a3853e7662ee5302be255124",
+  "buildIdentity": "69d2a642cc2c404dc0dc27513f7f57082ecd17173c6c5bcb455557767d66577d",
+  "chunkCount": 289,
+  "staticChunkCount": 100,
+  "serverChunkCount": 189,
+  "markerCount": 1,
+  "markerFiles": [
+    "static/chunks/app/layout-d0fcf36d0229f9fd.js"
+  ],
+  "markers": {
+    "global": {
+      "staticCount": 1,
+      "serverCount": 10,
+      "totalCount": 11,
+      "files": [
+        "static/chunks/app/layout-d0fcf36d0229f9fd.js",
+        "server/app/auth/callback/page.js",
+        "server/app/demo/page.js",
+        "server/app/interpretation/[id]/page.js",
+        "server/app/law/[id]/page.js",
+        "server/app/login/page.js",
+        "server/app/precedent/[id]/page.js",
+        "server/app/prototype/page.js",
+        "server/app/_not-found/page.js",
+        "server/chunks/6109.js",
+        "server/chunks/9585.js"
+      ]
+    },
+    "appError": {
+      "staticCount": 0,
+      "serverCount": 1,
+      "totalCount": 1,
+      "files": [
+        "server/app/dryrun/page.js"
+      ]
+    },
+    "appErrorConfirmation": {
+      "staticCount": 1,
+      "serverCount": 0,
+      "totalCount": 1,
+      "files": [
+        "static/chunks/app/error-d57981a4cab06272.js"
+      ]
+    }
+  },
+  "status": "pass"
+}

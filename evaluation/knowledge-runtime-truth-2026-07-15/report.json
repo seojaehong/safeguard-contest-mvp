@@ -1,0 +1,31 @@
+{
+  "date": "2026-07-15",
+  "baseHead": "b15f24e0f8412dd5d86a5a07292427e39838410e",
+  "branch": "fix/knowledge-runtime-truth-20260715",
+  "scope": {
+    "route": "/knowledge",
+    "presentationOnly": true,
+    "databaseChanged": false,
+    "migrationChanged": false,
+    "runtimeChanged": false,
+    "koshaChanged": false,
+    "apiContractChanged": false
+  },
+  "tdd": {
+    "reviewFinding": "static and diff review identified that the browser assertion inspected the whole schema section",
+    "remediation": "runtime assertion now inspects the rendered pre and uses an explicit machine-label presentation fixture",
+    "preRemediationExecutionArtifactClaimed": false,
+    "focusedFiles": 2,
+    "focusedTests": 14,
+    "focusedPassed": 14,
+    "renderedPreMachineLabels": 0,
+    "renderedPreKoreanLabels": 3
+  },
+  "verification": {
+    "strictTypecheck": "pass",
+    "normalBuild": "pass",
+    "staticPages": 28,
+    "browserViewport": "390x844"
+  },
+  "verdict": "pass"
+}

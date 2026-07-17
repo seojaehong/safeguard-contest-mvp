@@ -30,4 +30,3 @@ Received: "98b7e78a7b6984703cc20e28fe954e3bf3387189afa209aaeebb153a20915628"
       Tests  1 failed | 36 passed (37)
    Start at  11:37:12
    Duration  80.09s (transform 171ms, setup 0ms, import 234ms, tests 78.85s, environment 0ms)
-

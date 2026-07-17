@@ -1,0 +1,61 @@
+{
+  "date": "2026-07-15",
+  "branch": "fix/ci-contract-stale-tests-20260715",
+  "base": "79e48daec4add10706068dd6a5705c4f5ca7d5f9",
+  "status": "pass",
+  "scope": {
+    "testFilesChanged": [
+      "tests/reports-download-center.test.ts",
+      "tests/user-visible-korean-copy.test.ts"
+    ],
+    "productCodeChanged": false,
+    "frontendRouteCoverageChanged": false,
+    "sharedAuditArtifactsCreated": false
+  },
+  "red": {
+    "command": "npm.cmd test -- tests/reports-download-center.test.ts tests/user-visible-korean-copy.test.ts",
+    "passed": 14,
+    "failed": 3,
+    "durationSeconds": 46.83,
+    "failures": [
+      "reports expected 5 visible controls but received 2",
+      "ontology labels were asserted against stale page ownership",
+      "operation graph path was asserted against stale page ownership"
+    ]
+  },
+  "green": {
+    "exact": {
+      "command": "npm.cmd test -- tests/reports-download-center.test.ts tests/user-visible-korean-copy.test.ts",
+      "filesPassed": 2,
+      "testsPassed": 17,
+      "testsFailed": 0,
+      "durationSeconds": 32.59
+    },
+    "related": {
+      "command": "npm.cmd test -- tests/reports-design-remediation.test.ts tests/reporting-downloads.test.ts tests/ontology-ui-remediation.test.ts tests/ontology-ui-browser.test.ts tests/workspace-operation-graph.test.ts tests/operation-memory-visualization.test.ts",
+      "filesPassed": 5,
+      "filesSkipped": 1,
+      "testsPassed": 66,
+      "testsSkipped": 1,
+      "testsFailed": 0,
+      "durationSeconds": 122.41
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "pass",
+      "diagnostics": 0,
+      "note": "Initial failure came from broken ignored node_modules junctions for declared pdf-lib dependencies; local installation repair changed no tracked dependency files."
+    },
+    "diffCheck": "pass"
+  },
+  "preservedBehavior": {
+    "defaultCustomerActions": 2,
+    "collapsedAdvancedActions": 3,
+    "preservedHistoryInspectable": true,
+    "preservedHistoryMergedIntoSample": false,
+    "visibleInternalOntologyTermsReintroduced": false
+  },
+  "deferred": {
+    "frontendRouteCoverage": "Must close through final 108 evidence."
+  }
+}

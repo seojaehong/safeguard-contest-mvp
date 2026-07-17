@@ -65,6 +65,10 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
   발급 CLI는 항상 명시적 scope를 저장해 이 기본값을 사용하지 않는다. 기본값 자체를
   fail-closed로 바꾸는 작업은 별도 승인 migration 전까지 수행하지 않으며, 수동 SQL insert는
   scope를 반드시 명시해야 한다.
+- 현재 no-migration 인증 계약에서는 모든 DB 토큰에 유효한 `site_id`와 그 site의
+  `organization_id`가 필요하다. `site_id`가 null인 persisted token은 org-only 의도로 발급됐더라도
+  인증되지 않는다. Org-only persisted token은 승인된 `scope_type` 또는 `ON DELETE` schema
+  migration으로 삭제된 site 토큰과 구분할 수 있을 때까지 사용할 수 없다.
 - `generate_safety_docpack`은
   `siteId`가 있으면 결과 workpack을 해당 사이트로 귀속 저장하고, 성패와 무관하게
   `attribution`(`{siteId, orgId, workpackId, saved}`) 메타를 응답에 기록한다. 나머지 도구는
@@ -89,13 +93,14 @@ env `SAFECLAW_MCP_TOKENS`는 **전체 신뢰**(모든 사이트 접근) 레거�
 발급하도록 안내한다. 비활성 토큰은 감사 이력으로 남고 인증에는 사용되지 않는다.
 
 서비스 롤 키가 필요하다(`mcp_tokens`는 RLS로 `service_role` 전용). 평문 토큰은 발급 시
-stdout에 **한 번만** 출력되며 복구 불가다.
+stdout에 **한 번만** 출력되며 복구 불가다. CLI의 site name은 필수이며, 생략하거나 공백으로
+전달하면 Supabase client 생성이나 DB insert 전에 종료한다.
 
 ```bash
 # .env.local의 SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY를 사용한다.
-node scripts/issue-mcp-token.mjs "부평 파일럿 - 안전관리자" "부평공장"   # 사이트 귀속
-node scripts/issue-mcp-token.mjs "운영자 미귀속"                         # 사이트 미귀속, 현재 10개 도구만
-# npm 스크립트로도 동일: npm.cmd run token:mcp -- "<label>" ["<site name>"]
+node scripts/issue-mcp-token.mjs "부평 파일럿 - 안전관리자" "부평공장"
+# npm 스크립트로도 동일하며 site name은 필수다.
+npm.cmd run token:mcp -- "<label>" "<site name>"
 ```
 
 출력된 평문 토큰을 그대로 `Authorization: Bearer <token>`으로 쓰면 된다(접속 방법 동일).

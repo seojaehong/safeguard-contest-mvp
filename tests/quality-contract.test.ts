@@ -98,7 +98,7 @@ const tbmBriefingStructured: TbmBriefingStructured = {
     equipment: ["작업대"]
   },
   hazards: [{ category: "Media", description: "추락 위험" }],
-  measures: [{ hazardRef: 1, action: "난간과 안전대 확인", owner: "현장소장" }],
+  measures: [{ hazardRef: 1, action: "난간과 안전대 확인", owner: "현장소장", evidenceRefs: ["KOSHA 지침"] }],
   stopCriteria: ["난간 미설치", "보호구 미착용", "강풍"],
   confirmTopics: ["난간 확인", "안전대 착용", "작업구역 통제"],
   photoEvidenceLocation: "현장 공유 드라이브"
@@ -288,10 +288,10 @@ describe("qualityContract", () => {
 
     const contract = buildQualityContract(response, "2026-07-08T00:00:00.000Z");
 
-    expect(contract.overall).toBe("degraded");
-    expect(contract.dbHarness.status).toBe("degraded");
+    expect(contract.overall).toBe("blocked");
+    expect(contract.dbHarness.status).toBe("blocked");
     expect(contract.dbHarness.missingEvidence).toContain("SIF 유사사례");
-    expect(contract.dbHarness.detail).toContain("SIF 유사사례");
+    expect(contract.dbHarness.detail).toContain("고정된 DB 근거가 없어");
   });
 
   it("uses the core 3-structure contract for enhanced generation", () => {

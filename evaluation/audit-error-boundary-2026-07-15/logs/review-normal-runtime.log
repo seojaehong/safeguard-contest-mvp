@@ -1,0 +1,29 @@
+
+> safeclaw@0.1.0 audit:frontend-runtime
+> node ./scripts/frontend_audit_runtime_probe.mjs --mode normal
+
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-15T07:43:46.293Z",
+  "command": "node ./scripts/frontend_audit_runtime_probe.mjs --mode normal",
+  "mode": "normal",
+  "sourceSha": "d3dab1d2426ab90b033ce227b99ce3306328ec48",
+  "sourceIdentity": "781cd0edf69d880a22a8b9cdb200fd0db4c34f43a3853e7662ee5302be255124",
+  "buildId": "PdlkAZyAYRkMob0BMw_3N",
+  "buildDirectory": ".next",
+  "row": {
+    "route": "special:error",
+    "viewport": "desktop-1440",
+    "requestedUrl": "http://127.0.0.1:3063/dryrun?__auditBoundary=error",
+    "finalUrl": "http://127.0.0.1:3063/dryrun?__auditBoundary=error",
+    "status": 200,
+    "boundaryMarker": "",
+    "boundaryMarkerCount": 0,
+    "probeConfirmed": false,
+    "rawConsoleErrors": [],
+    "rawPageErrors": [],
+    "consoleErrors": [],
+    "pageErrors": []
+  },
+  "status": "pass"
+}

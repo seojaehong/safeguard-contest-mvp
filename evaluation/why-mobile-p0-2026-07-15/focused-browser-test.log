@@ -26,4 +26,3 @@ WHY_DESKTOP_AUDIT {"viewport":"1440x900","theme":"night","headColumns":5,"rowCol
       Tests  4 passed (4)
    Start at  11:39:24
    Duration  53.77s (transform 141ms, setup 0ms, import 1.19s, tests 51.30s, environment 0ms)
-

@@ -1,0 +1,74 @@
+{
+  "blockers": [
+    "verified-count-incomplete",
+    "failure-ledger-not-empty"
+  ],
+  "candidate_count": 234,
+  "category_reconciliations": [
+    {
+      "category": "A",
+      "duplicate_count": 0,
+      "expected_total_count": 115,
+      "matches_total_count": true,
+      "normalized_row_count": 115,
+      "raw_row_count": 115,
+      "unique_row_count": 115
+    },
+    {
+      "category": "B",
+      "duplicate_count": 0,
+      "expected_total_count": 233,
+      "matches_total_count": true,
+      "normalized_row_count": 233,
+      "raw_row_count": 233,
+      "unique_row_count": 233
+    },
+    {
+      "category": "C",
+      "duplicate_count": 0,
+      "expected_total_count": 234,
+      "matches_total_count": true,
+      "normalized_row_count": 234,
+      "raw_row_count": 234,
+      "unique_row_count": 234
+    },
+    {
+      "category": "D",
+      "duplicate_count": 0,
+      "expected_total_count": 76,
+      "matches_total_count": true,
+      "normalized_row_count": 76,
+      "raw_row_count": 76,
+      "unique_row_count": 76
+    },
+    {
+      "category": "E",
+      "duplicate_count": 0,
+      "expected_total_count": 381,
+      "matches_total_count": true,
+      "normalized_row_count": 381,
+      "raw_row_count": 381,
+      "unique_row_count": 381
+    }
+  ],
+  "elapsed_seconds": 107.99,
+  "failure_count": 22,
+  "failure_counts": {
+    "official-pdf-hash-mismatch": 22
+  },
+  "generated_at": "2026-07-15T00:30:30.372679+00:00",
+  "item_count": 234,
+  "launch_ready": false,
+  "official_metadata_sha256": null,
+  "official_row_count": 1039,
+  "output_hashes": {
+    "failures.jsonl": "e458269900cdaf17db762d79c0d0ceb93feb83b0380768b44581d9ef617ea38f",
+    "official-metadata.jsonl": "b730a50c92df9411dacaca9c522d7de8d30050830fb79df88e774fbd9738cdb9"
+  },
+  "page_shard_count": 13,
+  "snapshot_id": "c10572ee3531d9c66ca455265bf0d599f5eae5b01b8113daaa71ad5f9012a129",
+  "source_snapshot_id": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+  "success_count": 212,
+  "trusted_registry_populated": false,
+  "verified_count": 212
+}

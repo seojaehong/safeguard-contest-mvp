@@ -1,0 +1,54 @@
+{
+  "generatedAt": "2026-07-16T17:54:00+09:00",
+  "sourceSha": "42dd73fa3016431eb3d26f966fa73e8665fe1177",
+  "sourceIdentity": "aa4c9fa1233852739a5c7dd7602ab70e58a747d53029e1a1fe52afd7e662793a",
+  "databaseMutationPerformed": false,
+  "gates": {
+    "koshaRecoveryPython": { "tests": 73, "status": "pass" },
+    "sifKoshaOntology": { "files": 17, "tests": 369, "status": "pass" },
+    "frontendAuditContracts": { "files": 3, "tests": 42, "status": "pass" },
+    "typecheck": "pass",
+    "normalBuild": { "staticPages": 28, "status": "pass" },
+    "auditBuild": { "staticPages": 28, "status": "pass" },
+    "normalBundle": { "chunks": 293, "markerCount": 0, "status": "pass" },
+    "auditBundle": { "chunks": 294, "markerCount": 1, "status": "pass" }
+  },
+  "koshaExactBody": {
+    "guideId": "D-C-7",
+    "pdfSha256": "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3",
+    "normalizedBodySha256": "97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112",
+    "pages": 71,
+    "characters": 38781,
+    "protocol": "recoverable-handle-bound-pair/v4",
+    "receiptChecks": 23,
+    "receiptChecksPassed": 23
+  },
+  "staticAudit": {
+    "status": "pass",
+    "pages": 32,
+    "productComponents": 23,
+    "coverageIssues": 0,
+    "violations": 0,
+    "importantDeclarations": 0
+  },
+  "browserAudit": {
+    "routes": 32,
+    "routeRows": 96,
+    "workspaceThemeRows": 6,
+    "specialSurfaceRows": 4,
+    "generatedSurfaceRows": 2,
+    "screenshots": 108,
+    "successes": 108,
+    "failedRows": 0,
+    "recoveredRows": 0,
+    "findingCount": 0,
+    "failures": 0,
+    "elapsedMs": 140202
+  },
+  "remainingGates": [
+    "KOSHA 234 candidates are not production-wide trusted corpus",
+    "Hermes actual application runtime is disabled or unavailable",
+    "Supabase RLS launchReadiness remains false",
+    "remote CI, Vercel preview, and live production mapping require post-push verification"
+  ]
+}

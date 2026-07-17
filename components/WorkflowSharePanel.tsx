@@ -9,8 +9,10 @@ import {
   type WorkerDispatchTarget
 } from "@/lib/workspace";
 import {
+  buildCanonicalRecipientMessageVariants,
   createAuthenticatedShareSession,
   dispatchAuthenticatedShareSession,
+  resolveWorkflowMessagePreview,
   type WorkflowDispatchChannelResult,
   type WorkflowDispatchResult
 } from "@/lib/workflow-share-client";
@@ -47,7 +49,6 @@ type ActiveChannel = Extract<Channel, "email" | "sms" | "kakao">;
 type MessageTarget = "manager" | `foreign:${string}`;
 type WorkflowSharePhase = "idle" | "saving-workpack" | "creating-session" | "dispatching" | "saving-log";
 type RemoteRecordStatus = "idle" | "loading" | "ready" | "unconfigured" | "error";
-
 type WorkflowSharePanelProps = {
   data: AskResponse;
   recipientSuggestions?: RecipientSuggestion[];
@@ -476,18 +477,6 @@ export function deriveWorkflowShareStatus(input: WorkflowShareStatusInput): {
   return { storage, session, dispatch, acknowledgment };
 }
 
-function buildForeignLanguageMessage(data: AskResponse, languageCode: string) {
-  const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
-  if (!language) return data.deliverables.foreignWorkerTransmission;
-
-  return [
-    "[SafeClaw]",
-    language.nativeLabel,
-    "",
-    ...language.lines.map((line) => `- ${line}`),
-  ].join("\n");
-}
-
 function formatChannelName(channel?: string) {
   const option = channelOptions.find((item) => item.key === channel);
   return option?.label || "기타 채널";
@@ -513,8 +502,7 @@ function formatChannelMeta(item: WorkflowDispatchChannelResult) {
 }
 
 function previewLines(message: string) {
-  const lines = message.split(/\r?\n/).filter(Boolean);
-  return lines.slice(0, 8);
+  return message.split(/\r?\n/).filter(Boolean);
 }
 
 function formatMessageTargetLabel(data: AskResponse, selectedTarget: MessageTarget) {
@@ -549,8 +537,7 @@ export function WorkflowSharePanel({
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const selectedMessage = useMemo(() => {
-    if (selectedMessageTarget === "manager") return data.deliverables.kakaoMessage;
-    return buildForeignLanguageMessage(data, selectedMessageTarget.replace("foreign:", ""));
+    return resolveWorkflowMessagePreview(data, selectedMessageTarget);
   }, [data, selectedMessageTarget]);
   const targetSignature = useMemo(
     () => buildWorkflowShareTargetSignature(targetWorkers),
@@ -842,6 +829,28 @@ export function WorkflowSharePanel({
       });
       return;
     }
+    const recipientMessageVariants = buildCanonicalRecipientMessageVariants({
+      data,
+      recipientLanguageCodes: targetWorkers.map((worker) => worker.languageCode)
+    });
+    if (!recipientMessageVariants.ok) {
+      updateDispatchEvidence({
+        type: "set_result",
+        scopeKey: evidenceScopeKey,
+        result: {
+          ok: false,
+          configured: true,
+          providerCalled: false,
+          message: `저장할 작업자 언어 본문을 검증하지 못했습니다: ${[
+            ...recipientMessageVariants.invalidLanguageCodes,
+            ...recipientMessageVariants.koreanLeakLanguageCodes,
+            ...recipientMessageVariants.malformedFields
+          ].join(", ")}`
+        },
+        resultSource: "dispatch"
+      });
+      return;
+    }
 
     dispatchInFlightRef.current = true;
     setIsSending(true);
@@ -922,7 +931,8 @@ export function WorkflowSharePanel({
         shareSessionId: activeShareSessionId,
         idempotencyKey: providerIdempotencyKey,
         channels: activeChannels,
-        operatorNote: ""
+        operatorNote: "",
+        messageVariants: recipientMessageVariants.messageVariants
       });
       updateDispatchEvidence({
         type: "set_result",
@@ -1162,7 +1172,7 @@ export function WorkflowSharePanel({
             ))}
           </select>
           <p className="channel-readiness-note">
-            작업자별 저장 언어로 자동 전송하며, 여기서는 실제 전달 문구를 미리 확인합니다.
+            미리보기 선택은 전송 본문을 바꾸지 않습니다. 요청에는 작업자별 저장 언어 본문을 각각 포함합니다.
           </p>
         </section>
 

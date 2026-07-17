@@ -11,6 +11,7 @@ export type KoshaGroundingReason =
   | "body-kind-unverified"
   | "body-integrity-unverified"
   | "body-integrity-mismatch"
+  | "exact-registry-integrity-failed"
   | "local-corpus-integrity-failed"
   | "local-corpus-unavailable";
 
@@ -32,12 +33,12 @@ export type KoshaGroundingMetadata = {
 export type KoshaGroundingDecision = {
   status: "verified_current" | "review_required" | "blocked";
   reason: KoshaGroundingReason;
-  source: "local-corpus" | "remote-payload" | "local-gate";
+  source: "local-corpus" | "remote-payload" | "local-gate" | "production-registry";
   reviewRequired: boolean;
-  directEvidenceEligible: false;
+  directEvidenceEligible: boolean;
   supportingCitationEligible: boolean;
   mandatoryCitationEligible: boolean;
-  riskRowEligible: false;
+  riskRowEligible: boolean;
   promptExcerptEligible: boolean;
   metadata: KoshaGroundingMetadata | null;
 };
@@ -1906,10 +1907,10 @@ export function buildSafetyReferenceOperationalMetadata(item: SafetyReferenceIte
   };
 }
 
-function deriveEvidenceRole(
-  item: Pick<SafetyReferenceItem, "item_type" | "source_id" | "evidence_role" | "kosha_guide">
-): "direct" | "supporting" {
-  if (isKoshaTechnicalReference(item)) return "supporting";
+function deriveEvidenceRole(item: SafetyReferenceItem): "direct" | "supporting" {
+  if (isKoshaTechnicalReference(item)) {
+    return getKoshaGroundingDecision(item)?.directEvidenceEligible === true ? "direct" : "supporting";
+  }
   if (item.kosha_guide) return "supporting";
   if (item.evidence_role) return item.evidence_role;
   const directTypes = new Set([
@@ -1929,14 +1930,19 @@ export function isKoshaTechnicalReference(
 }
 
 export function isSafetyReferenceRiskEligible(item: SafetyReferenceItem): boolean {
-  if (isKoshaTechnicalReference(item)) return false;
+  if (isKoshaTechnicalReference(item)) {
+    return getKoshaGroundingDecision(item)?.riskRowEligible === true;
+  }
   return !item.kosha_guide;
 }
 
 export function isSafetyReferenceDirectEligible(
-  item: Pick<SafetyReferenceItem, "item_type" | "kosha_guide">
+  item: SafetyReferenceItem
 ): boolean {
-  return !isKoshaTechnicalReference(item) && !item.kosha_guide;
+  if (isKoshaTechnicalReference(item)) {
+    return getKoshaGroundingDecision(item)?.directEvidenceEligible === true;
+  }
+  return !item.kosha_guide;
 }
 
 export function isKoshaSupportingCitationEligible(item: SafetyReferenceItem): boolean {
@@ -1947,7 +1953,7 @@ export function summarizeKoshaGrounding(input: {
   items: readonly SafetyReferenceItem[];
   localCorpusStatus?: KoshaGroundingSearchDecision["localCorpusStatus"];
   excludedCount?: number;
-  blockedReason?: "local-corpus-integrity-failed" | "local-corpus-unavailable";
+  blockedReason?: "exact-registry-integrity-failed" | "local-corpus-integrity-failed" | "local-corpus-unavailable";
 }): KoshaGroundingSearchDecision {
   const decisions = input.items
     .filter(isKoshaTechnicalReference)
@@ -1957,8 +1963,12 @@ export function summarizeKoshaGrounding(input: {
   const reviewRequired = decisions.filter((decision) => decision.status !== "verified_current");
   const excludedCount = input.excludedCount || 0;
   const localCorpusStatus = input.localCorpusStatus || "not_applicable";
-  const localGateReason = input.blockedReason || null;
-  if (input.blockedReason === "local-corpus-integrity-failed") {
+  const localGateReason = input.blockedReason === "local-corpus-integrity-failed"
+    || input.blockedReason === "local-corpus-unavailable"
+    ? input.blockedReason
+    : null;
+  if (input.blockedReason === "local-corpus-integrity-failed"
+    || input.blockedReason === "exact-registry-integrity-failed") {
     return {
       status: "blocked",
       reason: input.blockedReason,
