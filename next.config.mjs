@@ -9,6 +9,14 @@ const exactKoshaAssets = [
   "./data/safety-knowledge/exact-kosha/d-c-7-2026.json",
   "./data/safety-knowledge/exact-kosha/b-e-10-2026.json"
 ];
+const koshaGuideCorpusAssets = [
+  "./data/safety-knowledge/kosha-guide-corpus/current.json",
+  "./data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/manifest.json",
+  "./data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/items.jsonl",
+  "./data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/chunks.jsonl",
+  "./data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/failures.jsonl"
+];
+const koshaRuntimeAssets = [...exactKoshaAssets, ...koshaGuideCorpusAssets];
 const exactKoshaConsumers = [
   "/api/agent/chat",
   "/api/ask",
@@ -17,6 +25,7 @@ const exactKoshaConsumers = [
   "/api/input-photos/hazard-analysis",
   "/api/mcp/[transport]",
   "/api/safety-reference/search",
+  "/api/safety-reference/status",
   "/api/search",
   "/api/workpack/remediate",
   "/api/workpacks/[id]/improvements",
@@ -45,7 +54,7 @@ const nextConfig = {
   typedRoutes: true,
   outputFileTracingRoot: projectRoot,
   outputFileTracingIncludes: Object.fromEntries(
-    exactKoshaConsumers.map((route) => [route, exactKoshaAssets])
+    exactKoshaConsumers.map((route) => [route, koshaRuntimeAssets])
   ),
   env: {
     NEXT_PUBLIC_BUILD_DATE: buildDate

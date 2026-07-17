@@ -23,6 +23,7 @@ import { searchSafetyReferences } from "@/lib/safety-reference-catalog-server";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
 import {
   ACTUAL_KOSHA_ROOT,
+  BUNDLED_KOSHA_ROOT,
   asRecord,
   cleanupKoshaFixtures,
   createKoshaFixture,
@@ -208,6 +209,27 @@ describe("KOSHA v3 offline harness on current architecture", () => {
     const loaded = await loadKoshaGuideCorpus({ rootDir: ACTUAL_KOSHA_ROOT });
     expect(loaded.status).toBe("blocked");
     expect(loaded.status === "blocked" && loaded.failures).toContain("schema:manifest.json");
+  }, 20_000);
+
+  it("loads the bundled launch-ready KOSHA verified subset when no runtime env is configured", async () => {
+    vi.stubEnv("KOSHA_GUIDE_CORPUS_DIR", "");
+    const loaded = await loadKoshaGuideCorpus();
+    expect(loaded.status).toBe("ready");
+    if (loaded.status !== "ready") throw new Error("expected bundled KOSHA corpus to be ready");
+    expect(loaded.rootDir.replaceAll("\\", "/")).toContain("data/safety-knowledge/kosha-guide-corpus");
+    expect(loaded.snapshotId).toBe("e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12");
+    expect(loaded.manifestSha256).toBe("e234586aa3f217acc701aca743eb70ab89448ac8de71e1eb61960e526cabefa5");
+    expect(loaded.itemCount).toBe(234);
+    expect(loaded.chunkCount).toBe(7127);
+    expect(loaded.failureCount).toBe(0);
+  }, 20_000);
+
+  it.skipIf(!existsSync(BUNDLED_KOSHA_ROOT))("loads the committed KOSHA corpus through the explicit bundled path", async () => {
+    const loaded = await loadKoshaGuideCorpus({ rootDir: BUNDLED_KOSHA_ROOT });
+    expect(loaded.status).toBe("ready");
+    if (loaded.status !== "ready") throw new Error("expected committed KOSHA corpus to be ready");
+    expect(loaded.itemCount).toBe(234);
+    expect(loaded.chunkCount).toBe(7127);
   }, 20_000);
 
   it("caches by current and manifest identity, then invalidates on snapshot switch", async () => {

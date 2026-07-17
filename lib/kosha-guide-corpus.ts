@@ -9,14 +9,17 @@ export type KoshaGuideCorpusItemType = "technical-guideline" | "technical-suppor
 export type KoshaGuideOfflineRetrievalMode = "local-tag" | "local-ranked" | "local-hybrid";
 
 const VERIFIED_SUBSET_CONTRACT = {
-  sourceSnapshotId: "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+  sourceSnapshotId: "935340ef3f74078c36168666650164c43511daced84efa3eda849833ad8d6844",
   scopeId: "technical-support-regulation-current-native",
   sourceInventoryCount: 1040,
   candidateCount: 234,
   outOfScopeCount: 806,
   selection: "technical-support-regulation+current-unverified+success+native"
 } as const;
-const PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256: readonly string[] = Object.freeze([]);
+const PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256: readonly string[] = Object.freeze([
+  "1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f"
+]);
+const DEFAULT_BUNDLED_KOSHA_GUIDE_CORPUS_DIR = "data/safety-knowledge/kosha-guide-corpus";
 
 export type KoshaGuideCorpusAnchor = {
   page: number;
@@ -996,7 +999,13 @@ async function loadUncached(
 }
 
 export async function loadKoshaGuideCorpus(options: KoshaGuideCorpusLookup = {}): Promise<KoshaGuideCorpusLoadResult> {
-  const configuredRoot = options.rootDir ?? options.env?.KOSHA_GUIDE_CORPUS_DIR ?? process.env.KOSHA_GUIDE_CORPUS_DIR;
+  const envRoot = options.env ? options.env.KOSHA_GUIDE_CORPUS_DIR : process.env.KOSHA_GUIDE_CORPUS_DIR;
+  const configuredRoot = options.rootDir
+    ?? (envRoot && envRoot.trim().length > 0
+      ? envRoot
+      : options.env
+        ? undefined
+        : DEFAULT_BUNDLED_KOSHA_GUIDE_CORPUS_DIR);
   if (!configuredRoot) return { status: "unconfigured", rootDir: null, failures: [] };
   let rootDir: string;
   try {

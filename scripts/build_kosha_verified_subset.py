@@ -14,13 +14,15 @@ from urllib.parse import urlparse
 
 JsonObject = dict[str, Any]
 SHA256_PATTERN_LENGTH = 64
-PINNED_SOURCE_SNAPSHOT_ID = "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282"
+PINNED_SOURCE_SNAPSHOT_ID = "935340ef3f74078c36168666650164c43511daced84efa3eda849833ad8d6844"
 PINNED_SCOPE_ID = "technical-support-regulation-current-native"
 PINNED_SELECTION = "technical-support-regulation+current-unverified+success+native"
 PINNED_SOURCE_INVENTORY_COUNT = 1040
 PINNED_CANDIDATE_COUNT = 234
 PINNED_OUT_OF_SCOPE_COUNT = 806
-PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256: frozenset[str] = frozenset()
+PRODUCTION_TRUSTED_OFFICIAL_METADATA_SHA256: frozenset[str] = frozenset({
+    "1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f",
+})
 
 
 class SubsetBuildError(RuntimeError):
@@ -504,6 +506,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--output-root", type=Path, required=True)
+    parser.add_argument("--official-metadata", type=Path)
     parser.add_argument("--report", type=Path)
     return parser.parse_args(argv)
 
@@ -514,6 +517,7 @@ def main(argv: list[str] | None = None) -> int:
         report = build_verified_subset(
             source_root=args.source_root,
             output_root=args.output_root,
+            _test_only_official_metadata_path=args.official_metadata,
         )
         report_text = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True)
         if args.report is not None:

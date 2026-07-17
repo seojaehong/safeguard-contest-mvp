@@ -26,6 +26,7 @@ const EXPECTED_TRACE_ROUTES = [
   "/api/input-photos/hazard-analysis",
   "/api/mcp/[transport]",
   "/api/safety-reference/search",
+  "/api/safety-reference/status",
   "/api/search",
   "/api/workpack/remediate",
   "/api/workpacks/[id]/improvements",
@@ -35,6 +36,16 @@ const EXPECTED_TRACE_ROUTES = [
   "/law/[id]",
   "/precedent/[id]",
   "/search",
+] as const;
+const EXPECTED_TRACE_ASSETS = [
+  "./data/safety-knowledge/exact-kosha/d-c-13-2026.json",
+  "./data/safety-knowledge/exact-kosha/d-c-7-2026.json",
+  "./data/safety-knowledge/exact-kosha/b-e-10-2026.json",
+  "./data/safety-knowledge/kosha-guide-corpus/current.json",
+  "./data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/manifest.json",
+  "./data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/items.jsonl",
+  "./data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/chunks.jsonl",
+  "./data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/failures.jsonl",
 ] as const;
 
 describe("exact-trusted KOSHA registry wave 2", () => {
@@ -232,11 +243,7 @@ describe("exact-trusted KOSHA registry wave 2", () => {
     expect(dC7.normalizedCharCount).toBe(38_781);
     expect(dC7.bodySha256).toBe("97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112");
 
-    expect(nextConfig.outputFileTracingIncludes?.["/api/safety-reference/search"]).toEqual([
-      "./data/safety-knowledge/exact-kosha/d-c-13-2026.json",
-      "./data/safety-knowledge/exact-kosha/d-c-7-2026.json",
-      "./data/safety-knowledge/exact-kosha/b-e-10-2026.json",
-    ]);
+    expect(nextConfig.outputFileTracingIncludes?.["/api/safety-reference/search"]).toEqual(EXPECTED_TRACE_ASSETS);
     expect(nextConfig.outputFileTracingIncludes?.["/api/safety-reference/search"]).not.toContain(
       "./data/safety-knowledge/exact-kosha/d-c-7-2026.pdf",
     );
@@ -245,11 +252,7 @@ describe("exact-trusted KOSHA registry wave 2", () => {
       [...EXPECTED_TRACE_ROUTES].sort(),
     );
     for (const route of EXPECTED_TRACE_ROUTES) {
-      expect(nextConfig.outputFileTracingIncludes?.[route], route).toEqual([
-        "./data/safety-knowledge/exact-kosha/d-c-13-2026.json",
-        "./data/safety-knowledge/exact-kosha/d-c-7-2026.json",
-        "./data/safety-knowledge/exact-kosha/b-e-10-2026.json",
-      ]);
+      expect(nextConfig.outputFileTracingIncludes?.[route], route).toEqual(EXPECTED_TRACE_ASSETS);
     }
   });
 });

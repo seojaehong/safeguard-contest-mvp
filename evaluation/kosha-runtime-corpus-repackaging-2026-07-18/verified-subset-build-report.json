@@ -1,0 +1,18 @@
+{
+  "accepted_count": 234,
+  "blockers": [],
+  "candidate_count": 234,
+  "elapsed_seconds": 2.131,
+  "launch_ready": true,
+  "official_metadata_sha256": "1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f",
+  "out_of_scope_count": 806,
+  "output_hashes": {
+    "chunks.jsonl": "82f08fcd317cae0f28205d65d1736b0b9bf91adb9cd91165e3eae15bbbb83925",
+    "failures.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "items.jsonl": "253ce7a80b09a62831a39dd12d504f3b46b0cfc0b86db87fca31192d17eedae9"
+  },
+  "rejected_count": 0,
+  "source_inventory_count": 1040,
+  "source_snapshot_id": "935340ef3f74078c36168666650164c43511daced84efa3eda849833ad8d6844",
+  "subset_snapshot_id": "e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12"
+}

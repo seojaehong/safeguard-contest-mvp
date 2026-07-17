@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-07-18T03:49:00+09:00",
-  "status": "hold",
-  "summary": "Full KOSHA body recovery exists, but it must be repackaged into the runtime verified-subset trust contract before production bundling.",
+  "status": "pass",
+  "summary": "Full KOSHA body recovery was repackaged into a runtime verified-subset corpus and local production /api/safety-reference/status now returns ready.",
   "liveStatus": {
     "endpoint": "/api/safety-reference/status",
     "httpStatus": 503,
@@ -28,21 +28,47 @@
     "copiedDataRemoved": true,
     "decision": "do-not-bypass-runtime-trust-gate"
   },
+  "runtimeVerifiedSubset": {
+    "root": "data/safety-knowledge/kosha-guide-corpus",
+    "snapshotId": "e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12",
+    "manifestSha256": "e234586aa3f217acc701aca743eb70ab89448ac8de71e1eb61960e526cabefa5",
+    "acceptedItems": 234,
+    "rejectedItems": 0,
+    "chunks": 7127,
+    "officialMetadataSha256": "1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f",
+    "launchReady": true
+  },
   "verification": [
     {
-      "command": "npm.cmd test -- tests\\kosha-guide-offline-harness.test.ts tests\\kosha-guide-offline-harness-expanded.test.ts tests\\safety-reference-status-route.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts",
+      "command": "npm.cmd test -- tests\\safety-reference-status-bundled-corpus.test.ts tests\\kosha-guide-offline-harness.test.ts tests\\kosha-guide-offline-harness-expanded.test.ts tests\\safety-reference-status-route.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\kosha-verified-subset-gate.test.ts",
       "result": "pass",
-      "files": 5,
-      "tests": 81
+      "files": 7,
+      "tests": 93
     },
     {
-      "command": "$env:KOSHA_GUIDE_CORPUS_DIR='<body-recovery-corpus>'; npm.cmd test -- tests\\kosha-guide-offline-harness.test.ts tests\\kosha-guide-offline-harness-expanded.test.ts tests\\safety-reference-status-route.test.ts",
+      "command": "python -m unittest scripts.tests.test_build_kosha_verified_subset",
       "result": "pass",
-      "files": 3,
-      "tests": 37
+      "files": 1,
+      "tests": 6
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "pass"
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "pass",
+      "staticPages": "28/28"
+    },
+    {
+      "command": "curl.exe -s -i http://localhost:3017/api/safety-reference/status",
+      "result": "pass",
+      "httpStatus": 200,
+      "searchReady": true,
+      "localCorpusStatus": "ready"
     }
   ],
-  "requiredNextStep": "Generate a runtime safeclaw-kosha-verified-subset/v1 corpus from the 2026-07-15 body recovery output with trusted official_metadata_sha256 pinned, then add narrow Next tracing and prove /api/safety-reference/status HTTP 200.",
+  "requiredNextStep": "Deploy current commit and prove the live /api/safety-reference/status endpoint returns HTTP 200 with localCorpus.status=ready.",
   "dbMutationPerformed": false,
   "schemaMutationPerformed": false
 }

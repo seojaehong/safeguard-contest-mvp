@@ -53,11 +53,11 @@ These are not failures in the current patch. They are the remaining items that p
    - Live readiness now proves OpenAI vision is configured, but dispatch remains preview-only.
    - Evidence still needed: provider-specific dry run without leaking secrets or sending unintended real messages.
 
-5. KOSHA local corpus is not live-ready.
-   - Live `/api/safety-reference/status` returns 503 because `localCorpus.status=unconfigured`.
-   - Supabase catalog and exact trusted KOSHA references are present.
-   - The 2026-07-15 full KOSHA body recovery corpus is present locally and launch-ready as a recovery artifact, but it is not yet packaged as a runtime `safeclaw-kosha-verified-subset/v1` corpus with trusted `official_metadata_sha256` pinned.
-   - Current blocker report: `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md`.
+5. KOSHA local corpus is local-production ready, but live deployment proof is pending.
+   - The prior live `/api/safety-reference/status` returned 503 because `localCorpus.status=unconfigured`.
+   - The 2026-07-15 full KOSHA body recovery output has now been repackaged into a runtime `safeclaw-kosha-verified-subset/v1` corpus with trusted `official_metadata_sha256` pinned.
+   - Local production `/api/safety-reference/status` returns HTTP 200 with `searchReady=true`, `localCorpus.status=ready`, `itemCount=234`, and `chunkCount=7127`.
+   - Current evidence report: `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md`.
 
 6. Long-term LLM Wiki and organization knowledge promotion are still human-in-the-loop.
    - Current plan preserves public/organization/site memory boundaries.
@@ -75,7 +75,7 @@ These are not failures in the current patch. They are the remaining items that p
    - Convert dispatch from preview-only only after persistent idempotency and provider configuration are proven.
 
 4. KOSHA local corpus readiness:
-   - Repackage the 2026-07-15 body recovery output into the runtime verified-subset trust contract, then add narrow tracing and prove `/api/safety-reference/status` returns ready.
+   - Deploy the current commit and prove live `/api/safety-reference/status` returns ready.
 
 5. Supabase RLS read-only live audit:
    - Run a read-only catalog audit and tenant A/B negative plan only after confirming safe credentials and no data mutation.

@@ -25,6 +25,13 @@ const EXACT_PATHS = [
   join(EXACT_DIR, "d-c-7-2026.json"),
   B_E_10_PATH,
 ] as const;
+const GUIDE_CORPUS_TRACE_ASSETS = [
+  "data/safety-knowledge/kosha-guide-corpus/current.json",
+  "data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/manifest.json",
+  "data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/items.jsonl",
+  "data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/chunks.jsonl",
+  "data/safety-knowledge/kosha-guide-corpus/snapshots/e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12/failures.jsonl",
+].map((path) => `./${path}`);
 
 const B_E_10_ID = "technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정";
 
@@ -212,8 +219,12 @@ describe("exact-trusted KOSHA registry wave 3", () => {
     });
     expect(commercial).toEqual([]);
 
+    const expectedAssets = [
+      ...EXACT_PATHS.map((path) => `./${path.slice(process.cwd().length + 1).replaceAll("\\", "/")}`),
+      ...GUIDE_CORPUS_TRACE_ASSETS,
+    ];
     for (const assets of Object.values(nextConfig.outputFileTracingIncludes ?? {})) {
-      expect(assets).toEqual(EXACT_PATHS.map((path) => `./${path.slice(process.cwd().length + 1).replaceAll("\\", "/")}`));
+      expect(assets).toEqual(expectedAssets);
     }
   });
 });

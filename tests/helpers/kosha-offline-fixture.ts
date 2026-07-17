@@ -13,6 +13,7 @@ export type JsonRecord = Record<string, unknown>;
 
 export const ACTUAL_KOSHA_ROOT =
   "C:/Users/iceam/dev/safeclaw-local-artifacts/kosha-corpus-body-recovery-2026-07-12-v3";
+export const BUNDLED_KOSHA_ROOT = join(process.cwd(), "data/safety-knowledge/kosha-guide-corpus");
 
 const tempDirs: string[] = [];
 
@@ -177,7 +178,7 @@ export function writeSnapshot(
   const sourceIdentity = "1".repeat(64);
   const generationPolicy: JsonRecord = {
     schema_version: "safeclaw-kosha-verified-subset-policy/v1",
-    source_snapshot_id: "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282",
+    source_snapshot_id: "935340ef3f74078c36168666650164c43511daced84efa3eda849833ad8d6844",
     official_metadata_sha256: KOSHA_TEST_METADATA_SHA256,
     trusted_metadata_registry_sha256: sha256(JSON.stringify([KOSHA_TEST_METADATA_SHA256])),
     generator_source_sha256: sha256(`fixture-generator:${snapshotId}`),

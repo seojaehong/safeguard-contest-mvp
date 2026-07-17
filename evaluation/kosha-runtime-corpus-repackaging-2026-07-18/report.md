@@ -16,7 +16,17 @@ A launch-ready body recovery artifact exists locally:
 - Failure ledger: `1`
 - Body recovery report: `evaluation/kosha-official-body-recovery-2026-07-15/report.json`
 
-However, this artifact is a full body recovery corpus, not a runtime-accepted verified subset. The current runtime loader requires the `safeclaw-kosha-verified-subset/v1` contract with trusted `official_metadata_sha256` pinned in the generation policy. The body recovery corpus manifest does not satisfy that runtime trust gate.
+The body recovery artifact was not bundled directly. It was repackaged into the runtime `safeclaw-kosha-verified-subset/v1` contract with trusted `official_metadata_sha256` pinned in the generation policy.
+
+Runtime verified subset:
+
+- Runtime root: `data/safety-knowledge/kosha-guide-corpus`
+- Runtime snapshot: `e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12`
+- Runtime manifest SHA-256: `e234586aa3f217acc701aca743eb70ab89448ac8de71e1eb61960e526cabefa5`
+- Accepted items: `234`
+- Rejected items: `0`
+- Chunks: `7127`
+- Official metadata SHA-256: `1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f`
 
 ## Attempted Gate
 
@@ -24,44 +34,82 @@ I temporarily copied the body recovery corpus into `data/safety-knowledge/kosha-
 
 This is the correct safety outcome: SafeClaw must not mark KOSHA local corpus search as ready by bypassing the provenance gate.
 
+## Repackaging Result
+
+The body recovery corpus was then converted through `scripts/build_kosha_verified_subset.py` with the official metadata artifact:
+
+```powershell
+python scripts\build_kosha_verified_subset.py --source-root "C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\northstar-kosha-official-metadata-20260715\output\kobr26\corpus" --official-metadata "data\safety-knowledge\kosha-official-metadata\official-metadata-2026-07-15.jsonl" --output-root "data\safety-knowledge\kosha-guide-corpus" --report "evaluation\kosha-runtime-corpus-repackaging-2026-07-18\verified-subset-build-report.json"
+```
+
+Result:
+
+- `accepted_count=234`
+- `rejected_count=0`
+- `launch_ready=true`
+- `subset_snapshot_id=e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12`
+
 ## Current Verified Commands
 
-After reverting the unsafe bundling attempt:
+After verified-subset repackaging:
 
 ```powershell
-npm.cmd test -- tests\kosha-guide-offline-harness.test.ts tests\kosha-guide-offline-harness-expanded.test.ts tests\safety-reference-status-route.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\exact-trusted-kosha-registry-wave3.test.ts
+npm.cmd test -- tests\safety-reference-status-bundled-corpus.test.ts tests\kosha-guide-offline-harness.test.ts tests\kosha-guide-offline-harness-expanded.test.ts tests\safety-reference-status-route.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\exact-trusted-kosha-registry-wave3.test.ts tests\kosha-verified-subset-gate.test.ts
 ```
 
 Result:
 
-- Test files: `5 passed`
-- Tests: `81 passed`
+- Test files: `7 passed`
+- Tests: `93 passed`
 
-With an external `KOSHA_GUIDE_CORPUS_DIR` pointed at the body recovery corpus, the older harness-focused subset also remains green:
+Python builder tests:
 
 ```powershell
-$env:KOSHA_GUIDE_CORPUS_DIR='C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\northstar-kosha-official-metadata-20260715\output\kobr26\corpus'
-npm.cmd test -- tests\kosha-guide-offline-harness.test.ts tests\kosha-guide-offline-harness-expanded.test.ts tests\safety-reference-status-route.test.ts
+python -m unittest scripts.tests.test_build_kosha_verified_subset
 ```
 
 Result:
 
-- Test files: `3 passed`
-- Tests: `37 passed`
+- Tests: `6 passed`
 
-That proves the artifact shape is close enough for many harness paths, but not enough for the stricter production trust gate.
+TypeScript and production build:
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run build
+```
+
+Result:
+
+- Typecheck: PASS
+- Build: PASS
+- Static pages: `28/28`
+
+Local production endpoint:
+
+```powershell
+npm.cmd run start -- -p 3017
+curl.exe -s -i http://localhost:3017/api/safety-reference/status
+```
+
+Result:
+
+- HTTP `200`
+- `ok=true`
+- `searchReady=true`
+- `localCorpus.status=ready`
+- `localCorpus.snapshotId=e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12`
+- `localCorpus.itemCount=234`
+- `localCorpus.chunkCount=7127`
+- `localCorpus.failureCount=0`
+
+Next build trace:
+
+- `.next/server/app/api/safety-reference/status/route.js.nft.json` includes `current.json`, `manifest.json`, `items.jsonl`, `chunks.jsonl`, and `failures.jsonl`.
 
 ## Launch Decision
 
-Do not bundle the full body recovery corpus directly into production yet.
-
-Required next step:
-
-1. Repackage the 2026-07-15 body recovery output into a runtime `safeclaw-kosha-verified-subset/v1` corpus.
-2. Include `official_metadata_sha256 = 1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f`.
-3. Set `trusted_metadata_registry_sha256` to the exact hash of the approved metadata registry.
-4. Preserve the one boundary item as a failure ledger entry, or explicitly decide whether the production runtime allows partial-but-verified coverage.
-5. Only after the loader returns `ready`, add narrow Next tracing for the runtime corpus files and prove `/api/safety-reference/status` returns HTTP 200.
+The runtime KOSHA corpus is now locally launch-ready in the production build. Live production still needs deployment of the current commit before `www.safeclaw.kr/api/safety-reference/status` can be expected to return HTTP 200.
 
 ## Product Impact
 
@@ -71,4 +119,4 @@ For the imminent demo, the exact trusted KOSHA registry remains available throug
 - `D-C-7-2026` scaffold structure and safe work
 - `B-E-10-2026` de-energized electrical work
 
-The full KOSHA corpus should be described as a prepared/recoverable corpus awaiting runtime trust repackaging, not as already live-ready in production.
+The full KOSHA body recovery corpus should be described as the source artifact. The runtime product should claim only the verified subset: 234 current technical-support regulations with official metadata and hash provenance pinned.
