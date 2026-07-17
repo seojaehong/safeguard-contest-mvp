@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-17T07:18:06.953Z",
+  "generatedAt": "2026-07-17T07:46:42.361Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "fc3feabb1d42d3bf87de327b62e96b13441550a1",
-  "sourceIdentity": "cbc5ff4092795f97c78bc583a31822f73eaf17a2f9a0cda2837b0a43513ee5f9",
-  "evidenceHead": "fc3feabb1d42d3bf87de327b62e96b13441550a1",
+  "sourceSha": "5f20028730249c0fa3b1eda12d7362c441eec4b6",
+  "sourceIdentity": "8e7ebcfb8384fc761cae1c6f8ca403d8cd24eeda23eefef6bb8553dcdc0ce3b8",
+  "evidenceHead": "5f20028730249c0fa3b1eda12d7362c441eec4b6",
   "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 32,
@@ -27,11 +27,11 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 104752
+    "elapsedMs": 105434
   },
   "staticAudit": {
-    "sourceSha": "fc3feabb1d42d3bf87de327b62e96b13441550a1",
-    "sourceIdentity": "cbc5ff4092795f97c78bc583a31822f73eaf17a2f9a0cda2837b0a43513ee5f9",
+    "sourceSha": "5f20028730249c0fa3b1eda12d7362c441eec4b6",
+    "sourceIdentity": "8e7ebcfb8384fc761cae1c6f8ca403d8cd24eeda23eefef6bb8553dcdc0ce3b8",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
@@ -12993,7 +12993,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/special-loading.jpg",
-      "screenshotSha256": "66ad25859ff30d2c947c78cabf97fc565306e569e6fbd208d08f0ba89cd4479c",
+      "screenshotSha256": "524b19d8f519d627368f4d00ecbbcce0740bf426bcf058b812f065b50538392a",
       "boundaryMarker": "loading",
       "boundaryMarkerCount": 1,
       "renderedControls": [],
@@ -13009,7 +13009,7 @@
           ]
         }
       ],
-      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.4,20.2,33.7,33.7,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.2,20,33.9,33.9,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -13488,7 +13488,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 17. 오후 4:18:06 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 17. 오후 4:46:42 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13532,7 +13532,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "aea2ebac5a2f7d0f2d2db68db52ca6c6e990887ab9ab07a2a820fa8b7754021d",
+      "screenshotSha256": "708fa3431058f6070519a807637fa03b479704842d1dc65a0021fcaa0081c3db",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,
