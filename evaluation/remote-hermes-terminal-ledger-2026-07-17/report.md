@@ -3,7 +3,7 @@
 ## Scope
 
 - Requested base: `56cb66f1405c49e18e88f583a95025b13f09c40d`
-- Final rebase and verification base: `b17b5d2e3458f1002555e9301b3e13346f70584f`
+- Final rebase and verification base: `6b2c1d936de1b47684436c18f7335a6eae40556d`
 - Branch: `feat/remote-hermes-terminal-ledger`
 - Product boundary: contract and runtime only
 - Explicit exclusions: customer route wiring, database persistence, migrations, provider policy
@@ -33,6 +33,7 @@
 - Review remediation RED: 2 files, 35 tests; 7 expected failures covering replay timing and five post-reserve failure phases.
 - Second review RED: 2 files, 48 tests; 10 expected failures covering opaque diagnostics, independent terminal-close signaling, and original gateway error preservation. The pre-fix timer reuse also produced two unhandled timeout rejections.
 - Third review RED: 1 file, 40 tests; 2 expected failures proving signed remote failures were masked by terminal ledger errors and duplicates.
+- Final P3 coverage: extended the same signed-failure terminal table with a hanging ledger. The existing bounded deadline preserved `ENGINE_EXECUTION_FAILED`, attached terminal-timeout evidence, emitted nothing, and left zero fake timers without production changes.
 - Final command: `npm.cmd test -- tests/remote-hermes-contract.test.ts tests/remote-hermes-runtime.test.ts tests/remote-hermes-route.test.ts tests/remote-hermes-https-transport.test.ts tests/hermes-engine-adapter.test.ts tests/claw-chat-route.test.ts`
 - Final focused suite files:
   - `tests/remote-hermes-contract.test.ts`
@@ -41,9 +42,9 @@
   - `tests/remote-hermes-https-transport.test.ts`
   - `tests/hermes-engine-adapter.test.ts`
   - `tests/claw-chat-route.test.ts`
-- Final focused result: 6 files, 158 tests passed.
+- Final focused result: 6 files, 159 tests passed.
 - Strict TypeScript: passed.
-- Production build: passed; 28 static pages generated.
+- Production build: not rerun for the final test-and-report-only P3; the last production-source build passed with 28 static pages and this commit changes no production source.
 - Dependency synchronization: `npm.cmd install`; package and lock files unchanged.
 
 ## Remaining Blockers

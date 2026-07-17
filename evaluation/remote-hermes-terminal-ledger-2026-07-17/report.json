@@ -2,7 +2,7 @@
   "schemaVersion": "remote-hermes-terminal-ledger-evaluation/v1",
   "date": "2026-07-17",
   "baseSha": "56cb66f1405c49e18e88f583a95025b13f09c40d",
-  "finalVerificationBaseSha": "b17b5d2e3458f1002555e9301b3e13346f70584f",
+  "finalVerificationBaseSha": "6b2c1d936de1b47684436c18f7335a6eae40556d",
   "branch": "feat/remote-hermes-terminal-ledger",
   "scope": {
     "customerRouteWiring": false,
@@ -36,10 +36,16 @@
       "tests": 40,
       "expectedFailures": 2
     },
+    "finalP3Coverage": {
+      "testsAdded": 1,
+      "productionCodeChanged": false,
+      "terminalTimeoutBounded": true,
+      "timerLeakDetected": false
+    },
     "focusedGreen": {
       "files": 6,
-      "tests": 158,
-      "passed": 158,
+      "tests": 159,
+      "passed": 159,
       "failed": 0,
       "command": "npm.cmd test -- tests/remote-hermes-contract.test.ts tests/remote-hermes-runtime.test.ts tests/remote-hermes-route.test.ts tests/remote-hermes-https-transport.test.ts tests/hermes-engine-adapter.test.ts tests/claw-chat-route.test.ts",
       "testFiles": [
@@ -54,8 +60,9 @@
   },
   "verification": {
     "strictTypecheck": "pass",
-    "productionBuild": "pass",
-    "staticPages": 28,
+    "productionBuild": "not_rerun_test_and_report_only_change",
+    "lastProductionBuild": "pass",
+    "lastStaticPages": 28,
     "packageManifestChanged": false,
     "packageLockChanged": false
   },
