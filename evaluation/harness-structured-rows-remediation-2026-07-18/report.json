@@ -1,0 +1,36 @@
+{
+  "verdict": "LOCAL_PASS_DEPLOY_RECHECK_REQUIRED",
+  "date": "2026-07-18",
+  "liveFailureBeforePatch": {
+    "command": "node scripts\\live_harness_quality_probe.mjs --base-url https://www.safeclaw.kr --output live-harness-quality-probe-2026-07-18-current --timeout-ms 300000",
+    "httpStatus": 200,
+    "failedContracts": [
+      "structured_risk_tbm_links",
+      "scenario_controls_present",
+      "irrelevant_controls_absent",
+      "quality_state_ready",
+      "ontology_state_ready"
+    ],
+    "structuredRiskRows": 0,
+    "tbmRiskLinks": 0,
+    "directEvidence": 3,
+    "sifCases": 3,
+    "supportingEvidence": 4,
+    "structuredStatus": "blocked",
+    "dbHarnessStatus": "degraded"
+  },
+  "rootCause": "parentless KOSHA supporting candidates blocked deterministic rows even when direct and SIF evidence existed",
+  "verification": {
+    "focused": {
+      "command": "npm.cmd test -- tests\\commercial-harness.test.ts tests\\live-harness-quality-probe.test.ts",
+      "files": 2,
+      "tests": 55,
+      "status": "PASS"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    }
+  },
+  "deployRecheckRequired": true
+}

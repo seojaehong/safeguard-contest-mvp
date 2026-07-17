@@ -1826,6 +1826,22 @@ describe("runAsk DB harness mode", () => {
     expect(response.deliverables.tbmLogStructured?.hazardsDiscussed.length).toBeGreaterThan(0);
   }, 20_000);
 
+  it("keeps deterministic rows when unparented KOSHA support coexists with direct and SIF evidence", async () => {
+    const response = await runAsk(
+      "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계를 사용하고 작업자 5명 중 신규 투입자 1명이 포함된다. 오후 강풍 예보가 있으며 자재 반입 지게차 동선과 작업자 통행 동선이 겹친다.",
+      { aiMode: "enhanced" }
+    );
+
+    expect(response.dbHarness?.summary.directEvidence).toBeGreaterThan(0);
+    expect(response.dbHarness?.summary.sifCases).toBeGreaterThan(0);
+    expect(response.dbHarness?.summary.supportingEvidence).toBeGreaterThan(0);
+    expect(response.structured?.riskAssessmentRows.length).toBeGreaterThan(0);
+    expect(response.structured?.riskAssessmentValidation.ok).toBe(true);
+    expect(response.structured?.tbmRiskLinks?.length).toBeGreaterThan(0);
+    expect(response.qualityContract?.structured.status).toBe("ready");
+    expect(response.qualityContract?.dbHarness.status).toBe("ready");
+  }, 20_000);
+
   it("turns accepted photo hazard memory into deterministic risk rows and TBM links", async () => {
     const response = await runAsk("성수동 외벽 도장 작업, 이동식 비계 사용", {
       aiMode: "template",

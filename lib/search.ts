@@ -2214,7 +2214,9 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     });
     const dbHarnessEvidencePacket = buildPublicDbHarnessPacket(internalDbHarnessEvidencePacket);
     const koshaParentEvidenceReadyIds = buildKoshaParentEvidenceReadyIds(dbHarnessEvidencePacket);
-    const parentlessKoshaReviewRequired = dbHarnessEvidencePacket.supportingEvidence.some((item) => (
+    const hasIndependentParentEvidence = dbHarnessEvidencePacket.directEvidence.length > 0
+      || dbHarnessEvidencePacket.sifCases.length > 0;
+    const parentlessKoshaReviewRequired = !hasIndependentParentEvidence && dbHarnessEvidencePacket.supportingEvidence.some((item) => (
       isKoshaTechnicalReference(item)
       && !koshaParentEvidenceReadyIds.has(item.id)
     ));
