@@ -594,3 +594,26 @@ Verified boundary:
 - LLM Wiki/knowledge promotion remains human-reviewed and approval-gated; generation candidates are not automatically published.
 - Hermes/OpenClaw remains an adapter/runtime boundary behind service auth, replay, attestation, and evidence contracts; it does not replace the SafeClaw DB/MCP system of record.
 - This gate performed read/probe/test work only; no database migration, embedding upload, or production data mutation was performed.
+
+### 2026-07-18 tenant/RLS and operation-memory boundary gate
+
+The tenant-boundary, MCP token, share authority, and LLM Wiki RLS approval boundary were rechecked on current HEAD `de920955094c09eaa41b101c3d78fb0a94dcdcfc`.
+
+Application boundary results:
+
+- `npm.cmd test -- tests\supabase-tenant-isolation-harness.test.ts tests\workpack-commercial-tenant-hardening.test.ts tests\workpack-commercial.test.ts tests\workpack-share-authority.test.ts tests\workpack-share-authority-routes.test.ts tests\dispatch-logs-tenant-boundary.test.ts tests\education-records-tenant-boundary.test.ts tests\mcp-auth.test.ts tests\mcp-token-service.test.ts tests\tenant-harness-memory.test.ts tests\tenant-harness-memory-claw-tool.test.ts tests\llm-wiki-rls-approval-packet.test.ts`
+  - Result: 12 files / 176 tests passed.
+
+RLS approval status:
+
+- The current approval packet remains `approval_required`: `evaluation/supabase-rls-approval-2026-07-17/report.md` and `report.json`.
+- The packet is read-only evidence, not authorization to migrate or mutate a Supabase project.
+- Launch-ready DB-level tenant isolation is not yet proven because authoritative live `pg_catalog` policy snapshots, authenticated tenant A/B negative tests, and Storage object isolation tests are still approval-gated.
+- The app-layer route and MCP boundary tests above are passing, but they do not replace DB RLS/catalog proof because service-role routes bypass RLS and must be evaluated separately.
+
+Verified boundary:
+
+- Tenant operation memory remains scoped through approved/reflected rows and structured digests.
+- Public LLM Wiki/knowledge promotion remains approval-gated and separate from tenant operation memory.
+- MCP token/service boundaries remain tested at the application layer.
+- This gate performed tests and documentation only; no database migration, RLS policy change, Storage operation, or production data mutation was performed.
