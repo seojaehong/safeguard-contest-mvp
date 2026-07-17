@@ -5,6 +5,7 @@ import { isRecord, parseScenarioContext, readString } from "@/lib/workspace-api"
 export const dynamic = "force-dynamic";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const DISPATCH_LOG_IDEMPOTENCY_PATTERN = /^dispatch-v1-[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i;
 
 type DispatchLogDraft = {
   channel: string;
@@ -187,8 +188,18 @@ export async function POST(request: NextRequest) {
   const body = isRecord(parsed) ? parsed : {};
   const logs = parseDispatchLogs(body.logs);
   const workpackId = readString(body.workpackId) || null;
+  const idempotencyKey = readString(body.idempotencyKey);
   if (!logs.length) {
     return NextResponse.json({ ok: false, configured: true, savedCount: 0, message: "저장할 전파 이력이 없습니다." }, { status: 400 });
+  }
+  if (!DISPATCH_LOG_IDEMPOTENCY_PATTERN.test(idempotencyKey)) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      savedCount: 0,
+      code: "dispatch_log_idempotency_key_invalid",
+      message: "전파 이력 저장 요청 키가 올바르지 않습니다.",
+    }, { status: 400 });
   }
   if (workpackId && !UUID_PATTERN.test(workpackId)) {
     return NextResponse.json({
@@ -247,7 +258,10 @@ export async function POST(request: NextRequest) {
     provider_status: log.providerStatus || null,
     workflow_run_id: log.workflowRunId || null,
     failure_reason: log.failureReason || null,
-    payload: toJson(log.payload || {})
+    payload: toJson({
+      ...(isRecord(log.payload) ? log.payload : {}),
+      idempotencyKey
+    })
   }));
 
   const { error } = await client.from("dispatch_logs").insert(rows);

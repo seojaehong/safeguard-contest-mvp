@@ -16,6 +16,7 @@ vi.mock("@/lib/supabase-admin", () => ({
 
 const OWNED_WORKPACK_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const FOREIGN_WORKPACK_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+const DISPATCH_LOG_IDEMPOTENCY_KEY = "dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef";
 
 type WorkpackLookup = {
   data: { id: string; organization_id: string; site_id: string | null } | null;
@@ -31,8 +32,13 @@ function jsonRequest(workpackId?: string): NextRequest {
     },
     body: JSON.stringify({
       ...(workpackId ? { workpackId } : {}),
+      idempotencyKey: DISPATCH_LOG_IDEMPOTENCY_KEY,
       scenario: { region: "서울" },
-      logs: [{ channel: "sms", targetLabel: "작업자 A" }],
+      logs: [{
+        channel: "sms",
+        targetLabel: "작업자 A",
+        payload: { idempotencyKey: "dispatch-v1-55555555-5555-4555-8555-555555555555-badf00d0" },
+      }],
     }),
   });
 }
@@ -122,6 +128,32 @@ describe("dispatch log tenant boundary", () => {
     expect(fake.insertPayload()).toBeNull();
   });
 
+  it("rejects dispatch log saves without a valid request idempotency key before querying Supabase", async () => {
+    const fake = fakeClient({ data: null, error: null });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/dispatch-logs/route");
+
+    const response = await POST(new NextRequest("http://localhost/api/dispatch-logs", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer test-token",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        workpackId: OWNED_WORKPACK_ID,
+        scenario: { region: "서울" },
+        logs: [{ channel: "sms", targetLabel: "작업자 A" }],
+      }),
+    }));
+    const body = await response.json() as { code?: string };
+
+    expect(response.status).toBe(400);
+    expect(body.code).toBe("dispatch_log_idempotency_key_invalid");
+    expect(mocks.ensureWorkspaceContext).not.toHaveBeenCalled();
+    expect(fake.workpackLookupCount()).toBe(0);
+    expect(fake.insertPayload()).toBeNull();
+  });
+
   it.each([
     ["organization", { id: OWNED_WORKPACK_ID, organization_id: "org-foreign", site_id: "site-1" }],
     ["site", { id: OWNED_WORKPACK_ID, organization_id: "org-1", site_id: "site-foreign" }],
@@ -157,6 +189,9 @@ describe("dispatch log tenant boundary", () => {
         organization_id: "org-1",
         site_id: "site-1",
         workpack_id: OWNED_WORKPACK_ID,
+        payload: expect.objectContaining({
+          idempotencyKey: DISPATCH_LOG_IDEMPOTENCY_KEY,
+        }),
       }),
     ]);
   });
