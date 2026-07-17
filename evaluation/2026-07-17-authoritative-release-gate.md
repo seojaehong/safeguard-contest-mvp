@@ -90,3 +90,20 @@ Fresh live geometry probe:
 - Focused layout test: `npm.cmd test -- tests\why-mobile-layout.test.ts` passed, 1 file / 4 tests.
 
 This proves the current production `/why` comparison surface no longer clips horizontally on the audited mobile viewport.
+
+### Live blank `/workspace` input gate
+
+The earlier live audit reported that clicking `안전 문서 생성` on a clean blank workspace produced no alert, no focus movement, and no visible error. Current production now fails closed on the client before any generation request.
+
+Fresh live probe:
+
+- Route: `https://www.safeclaw.kr/workspace?theme=day`
+- Viewport: 390px by 844px
+- Action: clear local storage, reload, leave `#field-command-input` blank, click `안전 문서 생성`
+- Error text: `현장 상황을 입력해 주세요.`
+- Error role: `alert`
+- Input `aria-invalid`: `true`
+- Focus after click: `#field-command-input`
+- Focused regression test: `npm.cmd test -- tests\workspace-layout-regression.test.ts --testNamePattern="focuses the input and announces an error when blank generation is submitted"` passed, 1 file / 1 test.
+
+This proves the current production workspace no longer silently ignores a blank first action.
