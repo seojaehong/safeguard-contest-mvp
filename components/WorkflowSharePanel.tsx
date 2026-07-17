@@ -1149,9 +1149,9 @@ export function WorkflowSharePanel({
           <span className="eyebrow">오늘 작업</span>
           <strong>{providerDispatchUi.canDispatch ? "문서팩 보내기" : "언어별 전송본 미리보기"}</strong>
           <p>선택한 대상의 작업자 언어로 안전 내용을 준비하고 확인합니다.</p>
-          <p>수신자용 확인 화면이 공유 링크로 활성화되어, 작업자별 확인 상태를 이어서 수집합니다.</p>
+          <p>전송 후 수신자 확인 화면에서 작업자별 확인 상태를 이어서 수집합니다.</p>
           <p>
-            공유 대상은 저장 기록으로 추적되며, 작업자 확인 화면은 /share/[sessionId] 경로에서 확인할 수 있습니다.
+            공유 대상은 저장 기록으로 추적되며, 세션 생성 후 작업자 확인 화면은 /share/[sessionId] 경로에서 열립니다.
             {shareSessionId ? (
               <>
                 {" "}

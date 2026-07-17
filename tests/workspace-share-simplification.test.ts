@@ -59,8 +59,11 @@ describe("workspace share simplification", () => {
     expect(capabilityResolver).not.toContain("relayConfigured || isKakaoProviderConfigured()");
   });
 
-  it("describes language-specific preparation without claiming a recipient portal", () => {
+  it("describes language-specific preparation without claiming a pre-created share link", () => {
     expect(sharePanel).toContain("선택한 대상에게 언어별 전송본을 준비합니다.");
+    expect(sharePanel).toContain("전송 후 수신자 확인 화면에서 작업자별 확인 상태를 이어서 수집합니다.");
+    expect(sharePanel).toContain("세션 생성 후 작업자 확인 화면은 /share/[sessionId] 경로에서 열립니다.");
+    expect(sharePanel).not.toContain("공유 링크로 활성화");
     expect(sharePanel).not.toContain("열람 링크");
     expect(sharePanel).not.toContain("열람 확인");
     expect(sharePanel).not.toContain("수신자가 확인");
