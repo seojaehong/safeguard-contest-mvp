@@ -16,6 +16,40 @@ async function loadPolicy() {
 }
 
 describe("authenticated workflow share client", () => {
+  it("keeps provider controls preview-only when dispatch capability is unavailable", async () => {
+    const {
+      buildProviderDispatchUiContract,
+      loadProviderDispatchCapability
+    } = await loadClient();
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({
+      ok: true,
+      providerDispatch: {
+        capability: false,
+        mode: "preview_only",
+        reason: "persistent_idempotency_unavailable"
+      }
+    }), { status: 200, headers: { "content-type": "application/json" } }));
+
+    const capability = await loadProviderDispatchCapability(fetcher);
+
+    expect(fetcher).toHaveBeenCalledWith("/api/workflow/dispatch", {
+      method: "GET",
+      headers: { accept: "application/json" }
+    });
+    expect(capability).toEqual({
+      capability: false,
+      mode: "preview_only",
+      reason: "persistent_idempotency_unavailable"
+    });
+    expect(buildProviderDispatchUiContract(capability)).toEqual({
+      canDispatch: false,
+      channelBadge: "미리보기 전용",
+      primaryLabel: "미리보기 전용",
+      primaryDisabled: true
+    });
+    expect(buildProviderDispatchUiContract(null).canDispatch).toBe(false);
+  });
+
   it("resolves selected local worker keys to the real saved worker UUIDs", async () => {
     const { resolveSavedWorkerIds } = await loadClient();
     const workerMap = {
@@ -142,6 +176,11 @@ describe("authenticated workflow share client", () => {
       idempotencySupported: false,
       duplicateRisk: true,
       providerCalled: false,
+      providerDispatch: {
+        capability: false,
+        mode: "preview_only",
+        reason: "persistent_idempotency_unavailable"
+      },
       message: "영속 중복방지를 보장할 수 없어 provider 호출을 차단했습니다."
     }), { status: 409, headers: { "content-type": "application/json" } }));
 
@@ -160,7 +199,12 @@ describe("authenticated workflow share client", () => {
       providerStatus: "idempotency-unsupported",
       idempotencySupported: false,
       duplicateRisk: true,
-      providerCalled: false
+      providerCalled: false,
+      providerDispatch: {
+        capability: false,
+        mode: "preview_only",
+        reason: "persistent_idempotency_unavailable"
+      }
     });
     expect(isProviderDispatchConfirmed(result)).toBe(false);
   });
