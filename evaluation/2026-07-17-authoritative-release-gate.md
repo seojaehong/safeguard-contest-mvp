@@ -72,3 +72,21 @@ Fresh live browser gate:
 - Artifact: `evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json`.
 
 This proves the current production `/ontology` surface is now a selected-neighborhood explorer rather than an unreadable full-graph hairball.
+
+### Live `/why` mobile comparison gate
+
+The earlier live audit reported a mobile comparison table extending to roughly 889px on a 390px viewport. Current production reflows the comparison table into stacked readable cards.
+
+Fresh live geometry probe:
+
+- Route: `https://www.safeclaw.kr/why?theme=day` and `?theme=night`
+- Viewport: 390px by 844px
+- Document horizontal overflow: 0 in both themes
+- Out-of-viewport visible elements: 0 in both themes
+- Comparison table width: 332px in both themes
+- Body row widths: `[332, 332, 332, 332, 332]` in both themes
+- First row display: `grid`
+- Visible mobile cell labels: `SafeClaw`, `안전관리 SaaS`, `한글·엑셀 양식`, `일반 AI`
+- Focused layout test: `npm.cmd test -- tests\why-mobile-layout.test.ts` passed, 1 file / 4 tests.
+
+This proves the current production `/why` comparison surface no longer clips horizontally on the audited mobile viewport.
