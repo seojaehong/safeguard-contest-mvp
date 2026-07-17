@@ -489,6 +489,12 @@ export type WorkspaceDatabase = {
           created_at?: string;
         };
         Update: {
+          captured_at?: string;
+          title?: string;
+          url?: string | null;
+          payload?: Json;
+          related_hazard_ids?: string[];
+          reflected_documents?: string[];
           review_status?: string;
           proposed_wiki_update?: Json;
         };

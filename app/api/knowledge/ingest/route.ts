@@ -116,6 +116,29 @@ export async function POST(request: NextRequest) {
         sourceTitle: normalized.event.title,
         reviewRequired: true
       };
+      const eventMutableValues = {
+        captured_at: normalized.event.capturedAt,
+        title: normalized.event.title,
+        url: normalized.event.url || null,
+        payload: toJson(normalized.event.payload),
+        related_hazard_ids: normalized.event.relatedHazardIds,
+        reflected_documents: normalized.event.reflectedDocuments,
+        proposed_wiki_update: toJson(proposedWikiUpdate)
+      };
+      const updateExistingEvent = async (eventId: string) => {
+        const { data, error } = await client
+          .from("knowledge_events")
+          .update(eventMutableValues)
+          .eq("id", eventId)
+          .eq("organization_id", context.organizationId)
+          .eq("site_id", context.siteId)
+          .eq("source", normalized.event.source)
+          .eq("source_id", normalized.event.sourceId)
+          .select("id")
+          .maybeSingle();
+        if (error) throw error;
+        return data?.id || null;
+      };
 
       const { data: existingEvent, error: existingEventError } = await client
         .from("knowledge_events")
@@ -134,7 +157,14 @@ export async function POST(request: NextRequest) {
       }
 
       if (existingEvent) {
-        savedEventId = existingEvent.id;
+        savedEventId = await updateExistingEvent(existingEvent.id);
+        if (!savedEventId) {
+          return NextResponse.json({
+            ok: false,
+            configured: true,
+            message: "원본 이벤트의 현장 귀속이 변경되어 갱신하지 않았습니다."
+          }, { status: 409 });
+        }
       } else {
         const { data: eventData, error: eventError } = await client
           .from("knowledge_events")
@@ -143,20 +173,43 @@ export async function POST(request: NextRequest) {
             site_id: context.siteId,
             source: normalized.event.source,
             source_id: normalized.event.sourceId,
-            captured_at: normalized.event.capturedAt,
-            title: normalized.event.title,
-            url: normalized.event.url || null,
-            payload: toJson(normalized.event.payload),
-            related_hazard_ids: normalized.event.relatedHazardIds,
-            reflected_documents: normalized.event.reflectedDocuments,
-            proposed_wiki_update: toJson(proposedWikiUpdate),
+            ...eventMutableValues,
             created_by: user.id
           })
           .select("id")
           .single();
 
-        if (eventError) throw eventError;
-        savedEventId = eventData.id;
+        if (!eventError) {
+          savedEventId = eventData.id;
+        } else if (eventError.code === "23505") {
+          const { data: concurrentEvent, error: concurrentEventError } = await client
+            .from("knowledge_events")
+            .select("id,site_id")
+            .eq("organization_id", context.organizationId)
+            .eq("source", normalized.event.source)
+            .eq("source_id", normalized.event.sourceId)
+            .maybeSingle();
+          if (concurrentEventError) throw concurrentEventError;
+          if (!concurrentEvent) throw eventError;
+          if (concurrentEvent.site_id !== context.siteId) {
+            return NextResponse.json({
+              ok: false,
+              configured: true,
+              message: "동일한 원본 이벤트가 다른 현장에 이미 귀속되어 있습니다."
+            }, { status: 409 });
+          }
+
+          savedEventId = await updateExistingEvent(concurrentEvent.id);
+          if (!savedEventId) {
+            return NextResponse.json({
+              ok: false,
+              configured: true,
+              message: "원본 이벤트의 현장 귀속이 변경되어 갱신하지 않았습니다."
+            }, { status: 409 });
+          }
+        } else {
+          throw eventError;
+        }
       }
 
       const { data: runData, error: runError } = await client

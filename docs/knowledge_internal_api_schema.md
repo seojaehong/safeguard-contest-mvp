@@ -10,7 +10,7 @@ SafeGuard 지식층은 `기초 지식 DB -> live API 원본 이벤트 -> AI 재�
 - 런타임 매칭은 `/api/knowledge/match`가 담당한다.
 - live 호출로 새로 들어온 원본은 `/api/knowledge/ingest`에서 스키마 검증과 wiki 반영 후보 생성을 수행한다.
 - AI 재생성은 `/api/knowledge/regenerate`가 만든 bundle을 사용한다.
-- 현 단계의 원본 이벤트 저장은 `stateless`이다. 영구 누적은 Supabase migration 승인 후 `knowledge_events` 또는 `daily_entries` 스냅샷 테이블로 전환한다.
+- 원본 이벤트 ingest는 인증된 사용자가 소유한 site에만 `knowledge_events`와 `knowledge_regeneration_runs`를 영구 저장한다. 저장소 설정, 인증, 현장 소유권 중 하나라도 확인되지 않으면 저장 없이 실패한다.
 
 ## API
 
@@ -50,12 +50,35 @@ Response:
 
 ### `POST /api/knowledge/ingest`
 
-live API 호출 결과 또는 수동 확인 자료를 원본 이벤트로 검증한다. Supabase와 관리자 토큰이 있으면 `knowledge_events`에 저장하고, 없으면 stateless 검증 결과만 반환한다.
+live API 호출 결과 또는 수동 확인 자료를 원본 이벤트로 검증한다. `Authorization: Bearer <Supabase access token>`과 `siteId`가 필수이며, 서버는 site가 인증 사용자의 organization에 속하는지 확인한 뒤에만 저장한다. `organizationId`를 함께 보내면 소유 site에서 파생한 organization과 일치해야 한다. stateless 성공 fallback은 제공하지 않는다.
+
+Example:
+
+```powershell
+$headers = @{
+  Authorization = "Bearer <supabase-access-token>"
+  "Content-Type" = "application/json"
+}
+$body = @{
+  siteId = "site-id"
+  organizationId = "organization-id"
+  source = "kosha-openapi"
+  sourceId = "smart-search-20260501-001"
+  capturedAt = "2026-05-01T09:00:00.000Z"
+  title = "이동식 비계 강풍 작업중지 기준 확인"
+  payload = @{ keyword = "이동식 비계 강풍 추락" }
+  relatedHazardIds = @("hazard_scaffold_fall")
+  reflectedDocuments = @("위험성평가표", "TBM", "안전보건교육")
+} | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Method Post -Uri "$baseUrl/api/knowledge/ingest" -Headers $headers -Body $body
+```
 
 Request:
 
 ```json
 {
+  "siteId": "site-id",
+  "organizationId": "organization-id",
   "source": "kosha-openapi",
   "sourceId": "smart-search-20260501-001",
   "capturedAt": "2026-05-01T09:00:00.000Z",
@@ -68,6 +91,18 @@ Request:
   "reflectedDocuments": ["위험성평가표", "TBM", "안전보건교육"]
 }
 ```
+
+동일 organization/source/sourceId가 같은 site에 다시 들어오면 기존 raw event의 `payload`, `title`, `captured_at` 등 원본 필드를 먼저 갱신하고 그 event ID로 새 regeneration run을 만든다. 동일 source identity가 다른 site에 있으면 `409`로 거부한다. 최초 insert가 동시 요청과 충돌해도 row를 다시 읽어 같은 기준으로 분류한다.
+
+Fail-closed responses:
+
+| 상태 | 조건 |
+| --- | --- |
+| `400` | `siteId` 또는 원본 이벤트 필드가 유효하지 않음 |
+| `401` | Bearer 토큰이 없거나 인증되지 않음 |
+| `404` | site가 없거나 인증 사용자가 소유하지 않거나 명시 organization이 일치하지 않음 |
+| `409` | cross-site source identity 충돌 또는 갱신 중 tenant binding 변경 |
+| `503` | Supabase 영구 저장소가 설정되지 않음 |
 
 Response:
 
