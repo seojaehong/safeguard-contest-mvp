@@ -47,7 +47,7 @@
 
 ## 2026-07-17 Continuation Evidence
 
-Current continuation HEAD after KOSHA/share/Hermes evidence work: `92563fbf9f957c50147d02532a2dc3224739e7c4`.
+Current continuation HEAD before the final foreign-recipient evidence refresh: `651fe9b3474fdd78efd2aa6e4ad129e2566a2704`.
 
 ### KOSHA D-C-13 applicability
 
@@ -142,7 +142,7 @@ Current production code includes a worker-facing recipient confirmation page at 
 Fresh focused gates:
 
 - `npm.cmd test -- tests\workflow-share-client.test.ts tests\workpack-share-authority-routes.test.ts tests\workflow-share-panel-behavior.test.ts tests\share-recipient-portal-browser.test.ts`
-  - Result: 4 files / 68 tests passed.
+  - Result: 4 files / 69 tests passed.
 - `npm.cmd test -- tests\workspace-share-mobile-browser.test.ts`
   - Result: 1 file / 1 test passed.
 
@@ -150,7 +150,9 @@ Verified contract:
 
 - The manager language selector is preview-only.
 - Server dispatch derives canonical per-recipient message variants from the stored workpack and active share-session snapshot.
+- Canonical recipient variants were verified for simultaneous `ko`, `en`, `vi`, `zh`, and `th` recipients. Duplicate recipient language requests collapse to one server-authoritative message variant.
 - Foreign recipient DTOs fail closed on Korean text leaks, unknown languages, malformed stored language entries, forged message variants, and SMS bodies above the relay-safe length budget.
+- A Korean text leak in one foreign-language variant fails only that canonical bundle instead of silently falling back to a Korean or manager-facing message.
 - The invited recipient page renders on mobile without horizontal overflow, preserves 44px controls, preselects the stored worker language, and posts `{ workerId, displayName, languageCode }` for confirmation.
 - Actual provider dispatch remains gated until the persistent idempotency/storage migration receives explicit approval.
 

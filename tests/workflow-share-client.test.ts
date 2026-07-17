@@ -467,6 +467,107 @@ describe("authenticated workflow share client", () => {
       malformedFields: []
     });
   });
+
+  it("builds every selected foreign recipient variant from the canonical language bundle", async () => {
+    const { buildCanonicalRecipientMessageVariants } = await loadClient();
+    const sample = buildSampleWorkpack();
+    const foreignWorkerLanguages = [
+      {
+        code: "en",
+        label: "영어",
+        nativeLabel: "English",
+        rationale: "English recipient delivery contract",
+        lines: [
+          "Check the scaffold wheels, guardrails, access route, and fall-arrest anchor before work.",
+          "Stop work and call the supervisor if strong wind or shaking is observed."
+        ]
+      },
+      {
+        code: "vi",
+        label: "베트남어",
+        nativeLabel: "Tiếng Việt",
+        rationale: "Vietnamese recipient delivery contract",
+        lines: [
+          "Kiểm tra bánh xe giàn giáo, lan can, lối đi và điểm neo dây an toàn trước khi làm việc.",
+          "Dừng công việc và gọi quản lý nếu có gió mạnh hoặc giàn giáo rung."
+        ]
+      },
+      {
+        code: "zh",
+        label: "중국어",
+        nativeLabel: "中文",
+        rationale: "Chinese recipient delivery contract",
+        lines: [
+          "作业前检查脚手架轮子、护栏、通道和安全带锚点。",
+          "如果出现强风或脚手架晃动，请立即停止作业并联系负责人。"
+        ]
+      },
+      {
+        code: "th",
+        label: "태국어",
+        nativeLabel: "ไทย",
+        rationale: "Thai recipient delivery contract",
+        lines: [
+          "ตรวจสอบล้อ นั่งร้าน ราวกันตก ทางเดิน และจุดยึดเข็มขัดนิรภัยก่อนเริ่มงาน",
+          "หยุดงานและแจ้งหัวหน้างานทันทีเมื่อมีลมแรงหรือนั่งร้านสั่น"
+        ]
+      }
+    ];
+    const data = {
+      ...sample,
+      deliverables: {
+        ...sample.deliverables,
+        kakaoMessage: "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요.",
+        foreignWorkerLanguages
+      }
+    };
+
+    const result = buildCanonicalRecipientMessageVariants({
+      data,
+      recipientLanguageCodes: ["ko", "vi", "en", "zh", "th", "vi"]
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      messageVariants: expect.objectContaining({
+        ko: "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요.",
+        en: expect.stringContaining("English"),
+        vi: expect.stringContaining("Tiếng Việt"),
+        zh: expect.stringContaining("中文"),
+        th: expect.stringContaining("ไทย")
+      })
+    });
+    if (!result.ok) throw new Error("Expected canonical recipient messages to build");
+    expect(Object.keys(result.messageVariants).sort()).toEqual(["en", "ko", "th", "vi", "zh"]);
+    for (const [languageCode, message] of Object.entries(result.messageVariants)) {
+      expect(message).toMatch(/^\[SafeClaw\]/u);
+      if (languageCode !== "ko") {
+        expect(message, `${languageCode} should not leak Korean text`).not.toMatch(/[가-힣]/u);
+      }
+    }
+
+    const leaked = buildCanonicalRecipientMessageVariants({
+      data: {
+        ...data,
+        deliverables: {
+          ...data.deliverables,
+          foreignWorkerLanguages: foreignWorkerLanguages.map((language) =>
+            language.code === "zh"
+              ? { ...language, lines: [...language.lines, "현장 관리자에게 다시 확인하세요."] }
+              : language
+          )
+        }
+      },
+      recipientLanguageCodes: ["en", "zh", "th"]
+    });
+
+    expect(leaked).toEqual({
+      ok: false,
+      invalidLanguageCodes: [],
+      koreanLeakLanguageCodes: ["zh"],
+      malformedFields: []
+    });
+  });
 });
 
 describe("workflow share component wiring", () => {
