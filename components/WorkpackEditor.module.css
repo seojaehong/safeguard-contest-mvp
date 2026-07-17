@@ -258,6 +258,239 @@
   min-width: 0;
 }
 
+.riskRowsEditor {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  border-bottom: 1px solid var(--workspace-rule);
+  padding-bottom: var(--space-1);
+}
+
+.riskRowsHeader,
+.riskRowHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.riskRowsHeader > div,
+.riskRowHeader > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.riskRowsHeader strong,
+.riskRowHeader strong {
+  overflow-wrap: anywhere;
+  color: var(--workspace-ink);
+  font-size: var(--text-table);
+  line-height: var(--leading-table);
+}
+
+.riskRowsHeader small {
+  font-size: var(--text-hud);
+  line-height: var(--leading-table);
+}
+
+.rowStatusReady {
+  color: var(--workspace-accent);
+}
+
+.rowStatusBlocked,
+.riskRowIssues {
+  color: var(--workspace-danger, #a83224);
+}
+
+.addRiskRowButton,
+.removeRiskRowButton {
+  min-height: 44px;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: var(--radius-soft);
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+  font: inherit;
+  font-size: var(--text-control);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.addRiskRowButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 var(--space-3);
+}
+
+.addRiskRowButton span {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.removeRiskRowButton {
+  width: 44px;
+  flex: 0 0 44px;
+  padding: 0;
+  font-size: 22px;
+}
+
+.riskRowsList {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.riskRowsFieldset {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.riskRowsLockNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: 6px;
+  background: var(--workspace-surface-2);
+  padding: var(--space-3);
+}
+
+.riskRowsLockNotice p {
+  margin: 0;
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.riskRowsLockNotice button {
+  min-height: 44px;
+  flex: 0 0 auto;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: 6px;
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+  padding: 8px 12px;
+  font: inherit;
+  font-weight: 700;
+}
+
+.riskRow {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--radius-soft);
+  background: var(--workspace-surface-2);
+  padding: var(--space-3);
+}
+
+.riskRowHeader span {
+  color: var(--workspace-subtle);
+  font-family: var(--font-hud);
+  font-size: var(--text-hud);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.riskRowPrimaryGrid,
+.riskRowDetailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.riskScaleGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.riskRow label,
+.riskLevelValue {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  color: var(--workspace-muted);
+  font-size: var(--text-hud);
+  font-weight: 700;
+}
+
+.riskRow input,
+.riskRow select,
+.riskRow textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: 6px;
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+  padding: 9px 10px;
+  font: inherit;
+  font-size: var(--text-control);
+  font-weight: 500;
+  line-height: var(--leading-table);
+  letter-spacing: 0;
+}
+
+.riskRow textarea {
+  resize: vertical;
+}
+
+.riskRowWideField {
+  grid-column: 1 / -1;
+}
+
+.riskLevelValue strong {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: 6px;
+  background: var(--workspace-surface-1);
+  padding: 0 10px;
+  color: var(--workspace-ink);
+  font-size: var(--text-control);
+  text-transform: uppercase;
+}
+
+.riskLevelValue strong[data-risk-level="high"] {
+  color: var(--workspace-danger, #a83224);
+}
+
+.riskRowDetails {
+  min-width: 0;
+  border-top: 1px solid var(--workspace-rule);
+  padding-top: var(--space-2);
+}
+
+.riskRowDetails summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--workspace-ink);
+  font-size: var(--text-control);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.riskRowDetailGrid {
+  padding-top: var(--space-2);
+}
+
+.riskRowIssues {
+  margin: 0;
+  font-size: var(--text-hud);
+  line-height: var(--leading-table);
+}
+
 .documentSection {
   display: grid;
   gap: var(--space-2);
@@ -877,6 +1110,34 @@
 
   .editorModeControl {
     width: 100%;
+  }
+
+  .riskRowsLockNotice {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .riskRowsEditor {
+    gap: var(--space-1);
+    padding-bottom: 0;
+  }
+
+  .riskRowsList {
+    gap: var(--space-2);
+  }
+
+  .riskRow {
+    padding: var(--space-2);
+  }
+
+  .riskRowPrimaryGrid,
+  .riskRowDetailGrid,
+  .riskScaleGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .riskRowWideField {
+    grid-column: auto;
   }
 
   .secondaryTools {

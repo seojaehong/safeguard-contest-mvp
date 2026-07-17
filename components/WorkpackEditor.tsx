@@ -3,6 +3,13 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { AskResponse, type PermitInspectionStructured } from "@/lib/types";
 import {
+  ACCIDENT_TYPE_VALUES,
+  FOUR_M_VALUES,
+  VERIFICATION_STATUS_VALUES,
+  validateRiskAssessmentRows,
+  type RiskAssessmentRow
+} from "@/lib/risk-assessment-schema";
+import {
   evaluatePublicSafetyRubric,
   rubricCategoryLabel,
   rubricStatusLabel,
@@ -11,9 +18,13 @@ import {
 } from "@/lib/safety-document-rubric";
 import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
 import {
+  areRiskAssessmentRowsRepresentedInDraft,
   buildStructuredDocumentSections,
+  isCanonicalRiskAssessmentExportSafe,
   isMetaSection,
   replaceStructuredDocumentSection,
+  serializeRiskAssessmentRowsToDraft,
+  updateRiskAssessmentRowField,
   type DocumentKey
 } from "./workpack-editor-structure";
 import styles from "./WorkpackEditor.module.css";
@@ -77,6 +88,55 @@ type CustomerTemplateField = {
   mapsTo: string;
   appliesTo: string;
 };
+
+const accidentTypeLabels: Record<RiskAssessmentRow["accidentType"], string> = {
+  fall: "추락",
+  slip: "미끄러짐·넘어짐",
+  struckBy: "충돌·맞음",
+  caughtIn: "끼임",
+  cut: "베임",
+  burn: "화상",
+  collapse: "붕괴",
+  fireExplosion: "화재·폭발",
+  electricShock: "감전",
+  chemicalExposure: "유해물질 노출",
+  asphyxiation: "질식",
+  heatIllness: "온열질환",
+  traffic: "차량 충돌",
+  other: "기타"
+};
+
+const verificationStatusLabels: Record<RiskAssessmentRow["verificationStatus"], string> = {
+  planned: "확인 예정",
+  done: "확인 완료",
+  needsReview: "재확인 필요"
+};
+
+function createEmptyRiskAssessmentRow(data: AskResponse): RiskAssessmentRow {
+  return {
+    location: data.scenario.siteName,
+    process: data.scenario.workSummary,
+    task: "",
+    equipment: "",
+    hazard: "",
+    fourM: "Man",
+    accidentType: "other",
+    currentControls: "",
+    likelihood: 1,
+    severity: 1,
+    riskLevel: "low",
+    additionalControls: "",
+    owner: "",
+    due: "현장 확인",
+    verification: "",
+    verificationStatus: "planned",
+    verificationDate: "현장 확인",
+    verificationChecker: "",
+    whyLikelihood: "",
+    whySeverity: "",
+    evidenceRefs: []
+  };
+}
 type SafetyFormProfile = {
   code: string;
   subtitle: string;
@@ -1622,7 +1682,65 @@ type StoredEditorDraft = {
   version: 1;
   values: WorkpackDocumentValues;
   dirtyKeys: DocumentKey[];
+  draftRiskRows?: RiskAssessmentRow[];
+  riskRowIds?: string[];
+  canonicalRiskRows?: RiskAssessmentRow[];
+  canonicalRiskText?: string;
 };
+
+function parseStoredRiskRows(value: unknown): RiskAssessmentRow[] | null {
+  if (!Array.isArray(value)) return null;
+  const stringFields = [
+    "location", "process", "task", "equipment", "hazard", "currentControls",
+    "additionalControls", "owner", "due", "verification", "verificationDate",
+    "verificationChecker", "whyLikelihood", "whySeverity"
+  ] as const;
+  const rows: RiskAssessmentRow[] = [];
+
+  for (const item of value) {
+    const row = readObject(item);
+    if (!row || !stringFields.every((field) => typeof row[field] === "string")) return null;
+    if (row.controlId !== undefined && typeof row.controlId !== "string") return null;
+    if (!FOUR_M_VALUES.includes(row.fourM as RiskAssessmentRow["fourM"])) return null;
+    if (!ACCIDENT_TYPE_VALUES.includes(row.accidentType as RiskAssessmentRow["accidentType"])) return null;
+    if (!VERIFICATION_STATUS_VALUES.includes(row.verificationStatus as RiskAssessmentRow["verificationStatus"])) return null;
+    if (!["low", "medium", "high"].includes(String(row.riskLevel))) return null;
+    if (!Number.isInteger(row.likelihood) || !Number.isInteger(row.severity)) return null;
+    if (!Array.isArray(row.evidenceRefs) || !row.evidenceRefs.every((ref) => typeof ref === "string")) return null;
+
+    rows.push({
+      ...(typeof row.controlId === "string" && row.controlId ? { controlId: row.controlId } : {}),
+      location: row.location as string,
+      process: row.process as string,
+      task: row.task as string,
+      equipment: row.equipment as string,
+      hazard: row.hazard as string,
+      fourM: row.fourM as RiskAssessmentRow["fourM"],
+      accidentType: row.accidentType as RiskAssessmentRow["accidentType"],
+      currentControls: row.currentControls as string,
+      likelihood: row.likelihood as number,
+      severity: row.severity as number,
+      riskLevel: row.riskLevel as RiskAssessmentRow["riskLevel"],
+      additionalControls: row.additionalControls as string,
+      owner: row.owner as string,
+      due: row.due as string,
+      verification: row.verification as string,
+      verificationStatus: row.verificationStatus as RiskAssessmentRow["verificationStatus"],
+      verificationDate: row.verificationDate as string,
+      verificationChecker: row.verificationChecker as string,
+      whyLikelihood: row.whyLikelihood as string,
+      whySeverity: row.whySeverity as string,
+      evidenceRefs: row.evidenceRefs as string[]
+    });
+  }
+  return rows;
+}
+
+function parseStoredRiskRowIds(value: unknown, rowCount: number): string[] | null {
+  if (!Array.isArray(value) || value.length !== rowCount) return null;
+  const ids = value.filter((id): id is string => typeof id === "string" && id.length > 0);
+  return ids.length === rowCount && new Set(ids).size === ids.length ? ids : null;
+}
 
 function isDocumentKey(value: unknown): value is DocumentKey {
   return typeof value === "string" && documentMeta.some((item) => item.key === value);
@@ -1637,7 +1755,11 @@ function parseDocumentValues(value: unknown, fallback: WorkpackDocumentValues): 
   }, { ...fallback });
 }
 
-function parseStoredDraft(raw: string | null, fallback: WorkpackDocumentValues): StoredEditorDraft {
+function parseStoredDraft(
+  raw: string | null,
+  fallback: WorkpackDocumentValues,
+  fallbackRiskRows: RiskAssessmentRow[]
+): StoredEditorDraft {
   if (!raw) return { version: 1, values: fallback, dirtyKeys: [] };
 
   try {
@@ -1654,7 +1776,29 @@ function parseStoredDraft(raw: string | null, fallback: WorkpackDocumentValues):
       acc[key] = parsedValues[key];
       return acc;
     }, { ...fallback });
-    return { version: 1, values, dirtyKeys };
+    const canonicalRiskText = typeof record.canonicalRiskText === "string"
+      ? record.canonicalRiskText
+      : undefined;
+    const draftRiskRows = parseStoredRiskRows(record.draftRiskRows);
+    const restoredRiskRows = draftRiskRows ?? fallbackRiskRows;
+    const riskRowIds = parseStoredRiskRowIds(record.riskRowIds, restoredRiskRows.length) ?? undefined;
+    const parsedRiskRows = validateRiskAssessmentRows(record.canonicalRiskRows);
+    const hasStoredCanonicalRows = parsedRiskRows.ok
+      && canonicalRiskText !== undefined
+      && isCanonicalRiskAssessmentExportSafe(parsedRiskRows.rows, canonicalRiskText, values.riskAssessmentDraft);
+    const hasCurrentStructuredDraft = draftRiskRows !== null
+      && canonicalRiskText !== undefined
+      && canonicalRiskText === values.riskAssessmentDraft
+      && serializeRiskAssessmentRowsToDraft(draftRiskRows) === canonicalRiskText;
+    return {
+      version: 1,
+      values,
+      dirtyKeys,
+      draftRiskRows: restoredRiskRows,
+      riskRowIds,
+      canonicalRiskRows: hasStoredCanonicalRows ? parsedRiskRows.rows : restoredRiskRows,
+      canonicalRiskText: hasStoredCanonicalRows || hasCurrentStructuredDraft ? canonicalRiskText : undefined
+    };
   } catch (error) {
     console.warn("workpack local draft parse failed", error);
     return { version: 1, values: fallback, dirtyKeys: [] };
@@ -1848,6 +1992,213 @@ function SafetyDocumentPreview({
   );
 }
 
+function RiskAssessmentRowsEditor({
+  rows,
+  rowIds,
+  validation,
+  isCurrent,
+  isLocked,
+  onConfirmStructuredEdit,
+  onRowChange,
+  onAdd,
+  onRemove
+}: {
+  rows: RiskAssessmentRow[];
+  rowIds: string[];
+  validation: ReturnType<typeof validateRiskAssessmentRows>;
+  isCurrent: boolean;
+  isLocked: boolean;
+  onConfirmStructuredEdit: () => void;
+  onRowChange: <K extends keyof RiskAssessmentRow>(rowIndex: number, field: K, value: RiskAssessmentRow[K]) => void;
+  onAdd: () => void;
+  onRemove: (rowIndex: number) => void;
+}) {
+  const fieldErrorProps = (
+    rowIndex: number,
+    rowId: string,
+    field: keyof RiskAssessmentRow
+  ): { "aria-invalid"?: true; "aria-describedby"?: string } => {
+    const hasError = validation.issues.some((issue) => issue.rowIndex === rowIndex && issue.field === field);
+    return hasError
+      ? { "aria-invalid": true, "aria-describedby": `risk-row-${rowId}-${field}-error` }
+      : {};
+  };
+
+  return (
+    <section className={styles.riskRowsEditor} aria-label="위험성평가 구조화 행 편집">
+      <header className={styles.riskRowsHeader}>
+        <div>
+          <span className="eyebrow">평가 행</span>
+          <strong>{rows.length.toLocaleString("ko-KR")}개 위험 항목</strong>
+          <small className={validation.ok && isCurrent ? styles.rowStatusReady : styles.rowStatusBlocked}>
+            {validation.ok && isCurrent ? "미리보기·내보내기 동기화됨" : "구조행 내보내기 보류 · 필수값 또는 원문 일치 확인"}
+          </small>
+        </div>
+        <button type="button" className={styles.addRiskRowButton} onClick={onAdd} disabled={isLocked}>
+          <span aria-hidden="true">+</span>
+          위험 항목
+        </button>
+      </header>
+
+      {isLocked ? (
+        <div className={styles.riskRowsLockNotice} role="alert">
+          <p>현재 원문과 구조화 행이 다릅니다. 일반 구조 편집은 원문을 덮어쓸 수 있어 잠겨 있습니다.</p>
+          <button type="button" onClick={onConfirmStructuredEdit}>구조 편집으로 전환</button>
+        </div>
+      ) : null}
+
+      <fieldset className={styles.riskRowsFieldset} disabled={isLocked}>
+      <div className={styles.riskRowsList}>
+        {rows.map((row, rowIndex) => {
+          const rowId = rowIds[rowIndex] ?? `risk-row-${rowIndex}`;
+          const rowIssues = validation.issues.filter((issue) => issue.rowIndex === rowIndex);
+          return (
+            <article className={styles.riskRow} key={rowId}>
+              <header className={styles.riskRowHeader}>
+                <div>
+                  <span>{String(rowIndex + 1).padStart(2, "0")}</span>
+                  <strong>{row.task || row.hazard || "새 위험 항목"}</strong>
+                </div>
+                <button
+                  type="button"
+                  className={styles.removeRiskRowButton}
+                  aria-label={`행 ${rowIndex + 1} 삭제`}
+                  title="위험 항목 삭제"
+                  onClick={() => onRemove(rowIndex)}
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+              </header>
+
+              <div className={styles.riskRowPrimaryGrid}>
+                <label>
+                  <span>세부작업</span>
+                  <input
+                    aria-label={`행 ${rowIndex + 1} 세부작업`}
+                    {...fieldErrorProps(rowIndex, rowId, "task")}
+                    value={row.task}
+                    onChange={(event) => onRowChange(rowIndex, "task", event.target.value)}
+                  />
+                </label>
+                <label>
+                  <span>작업장소</span>
+                  <input
+                    aria-label={`행 ${rowIndex + 1} 작업장소`}
+                    {...fieldErrorProps(rowIndex, rowId, "location")}
+                    value={row.location}
+                    onChange={(event) => onRowChange(rowIndex, "location", event.target.value)}
+                  />
+                </label>
+                <label className={styles.riskRowWideField}>
+                  <span>유해·위험요인</span>
+                  <textarea
+                    aria-label={`행 ${rowIndex + 1} 유해·위험요인`}
+                    {...fieldErrorProps(rowIndex, rowId, "hazard")}
+                    rows={2}
+                    value={row.hazard}
+                    onChange={(event) => onRowChange(rowIndex, "hazard", event.target.value)}
+                  />
+                </label>
+                <label className={styles.riskRowWideField}>
+                  <span>추가 감소대책</span>
+                  <textarea
+                    aria-label={`행 ${rowIndex + 1} 추가 감소대책`}
+                    {...fieldErrorProps(rowIndex, rowId, "additionalControls")}
+                    rows={2}
+                    value={row.additionalControls}
+                    onChange={(event) => onRowChange(rowIndex, "additionalControls", event.target.value)}
+                  />
+                </label>
+              </div>
+
+              <div className={styles.riskScaleGrid}>
+                <label>
+                  <span>4M</span>
+                  <select
+                    aria-label={`행 ${rowIndex + 1} 4M`}
+                    {...fieldErrorProps(rowIndex, rowId, "fourM")}
+                    value={row.fourM}
+                    onChange={(event) => onRowChange(rowIndex, "fourM", event.target.value as RiskAssessmentRow["fourM"])}
+                  >
+                    {FOUR_M_VALUES.map((value) => <option key={value} value={value}>{value}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span>재해형태</span>
+                  <select
+                    aria-label={`행 ${rowIndex + 1} 재해형태`}
+                    {...fieldErrorProps(rowIndex, rowId, "accidentType")}
+                    value={row.accidentType}
+                    onChange={(event) => onRowChange(rowIndex, "accidentType", event.target.value as RiskAssessmentRow["accidentType"])}
+                  >
+                    {ACCIDENT_TYPE_VALUES.map((value) => <option key={value} value={value}>{accidentTypeLabels[value]}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span>가능성</span>
+                  <select
+                    aria-label={`행 ${rowIndex + 1} 가능성`}
+                    {...fieldErrorProps(rowIndex, rowId, "likelihood")}
+                    value={row.likelihood}
+                    onChange={(event) => onRowChange(rowIndex, "likelihood", Number(event.target.value))}
+                  >
+                    {[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span>중대성</span>
+                  <select
+                    aria-label={`행 ${rowIndex + 1} 중대성`}
+                    {...fieldErrorProps(rowIndex, rowId, "severity")}
+                    value={row.severity}
+                    onChange={(event) => onRowChange(rowIndex, "severity", Number(event.target.value))}
+                  >
+                    {[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value}</option>)}
+                  </select>
+                </label>
+                <div className={styles.riskLevelValue}>
+                  <span>위험등급</span>
+                  <strong data-risk-level={row.riskLevel}>{row.riskLevel}</strong>
+                </div>
+              </div>
+
+              <details className={styles.riskRowDetails}>
+                <summary>공정·조치·확인 세부</summary>
+                <div className={styles.riskRowDetailGrid}>
+                  <label><span>관리번호</span><input aria-label={`행 ${rowIndex + 1} 관리번호`} {...fieldErrorProps(rowIndex, rowId, "controlId")} value={row.controlId || ""} onChange={(event) => onRowChange(rowIndex, "controlId", event.target.value || undefined)} /></label>
+                  <label><span>공정</span><input aria-label={`행 ${rowIndex + 1} 공정`} {...fieldErrorProps(rowIndex, rowId, "process")} value={row.process} onChange={(event) => onRowChange(rowIndex, "process", event.target.value)} /></label>
+                  <label><span>장비/도구</span><input aria-label={`행 ${rowIndex + 1} 장비 도구`} {...fieldErrorProps(rowIndex, rowId, "equipment")} value={row.equipment} onChange={(event) => onRowChange(rowIndex, "equipment", event.target.value)} /></label>
+                  <label><span>조치담당자</span><input aria-label={`행 ${rowIndex + 1} 조치담당자`} {...fieldErrorProps(rowIndex, rowId, "owner")} value={row.owner} onChange={(event) => onRowChange(rowIndex, "owner", event.target.value)} /></label>
+                  <label className={styles.riskRowWideField}><span>현재 안전조치</span><textarea aria-label={`행 ${rowIndex + 1} 현재 안전조치`} {...fieldErrorProps(rowIndex, rowId, "currentControls")} rows={2} value={row.currentControls} onChange={(event) => onRowChange(rowIndex, "currentControls", event.target.value)} /></label>
+                  <label><span>조치기한</span><input aria-label={`행 ${rowIndex + 1} 조치기한`} {...fieldErrorProps(rowIndex, rowId, "due")} value={row.due} onChange={(event) => onRowChange(rowIndex, "due", event.target.value)} /></label>
+                  <label><span>확인상태</span><select aria-label={`행 ${rowIndex + 1} 확인상태`} {...fieldErrorProps(rowIndex, rowId, "verificationStatus")} value={row.verificationStatus} onChange={(event) => onRowChange(rowIndex, "verificationStatus", event.target.value as RiskAssessmentRow["verificationStatus"])}>{VERIFICATION_STATUS_VALUES.map((value) => <option key={value} value={value}>{verificationStatusLabels[value]}</option>)}</select></label>
+                  <label><span>확인일</span><input aria-label={`행 ${rowIndex + 1} 확인일`} {...fieldErrorProps(rowIndex, rowId, "verificationDate")} value={row.verificationDate} onChange={(event) => onRowChange(rowIndex, "verificationDate", event.target.value)} /></label>
+                  <label><span>확인자</span><input aria-label={`행 ${rowIndex + 1} 확인자`} {...fieldErrorProps(rowIndex, rowId, "verificationChecker")} value={row.verificationChecker} onChange={(event) => onRowChange(rowIndex, "verificationChecker", event.target.value)} /></label>
+                  <label className={styles.riskRowWideField}><span>확인방법</span><textarea aria-label={`행 ${rowIndex + 1} 확인방법`} {...fieldErrorProps(rowIndex, rowId, "verification")} rows={2} value={row.verification} onChange={(event) => onRowChange(rowIndex, "verification", event.target.value)} /></label>
+                  <label className={styles.riskRowWideField}><span>가능성 판단근거</span><textarea aria-label={`행 ${rowIndex + 1} 가능성 판단근거`} {...fieldErrorProps(rowIndex, rowId, "whyLikelihood")} rows={2} value={row.whyLikelihood} onChange={(event) => onRowChange(rowIndex, "whyLikelihood", event.target.value)} /></label>
+                  <label className={styles.riskRowWideField}><span>중대성 판단근거</span><textarea aria-label={`행 ${rowIndex + 1} 중대성 판단근거`} {...fieldErrorProps(rowIndex, rowId, "whySeverity")} rows={2} value={row.whySeverity} onChange={(event) => onRowChange(rowIndex, "whySeverity", event.target.value)} /></label>
+                  <label className={styles.riskRowWideField}><span>근거 자료</span><textarea aria-label={`행 ${rowIndex + 1} 근거 자료`} {...fieldErrorProps(rowIndex, rowId, "evidenceRefs")} rows={2} value={row.evidenceRefs.join("\n")} onChange={(event) => onRowChange(rowIndex, "evidenceRefs", event.target.value.split(/\r?\n|\|/u).map((item) => item.trim()).filter(Boolean))} /></label>
+                </div>
+              </details>
+
+              {rowIssues.length ? (
+                <p className={styles.riskRowIssues} role="status">
+                  필수값 확인: {rowIssues.map((issue) => (
+                    <span id={`risk-row-${rowId}-${issue.field}-error`} key={`${issue.field}-${issue.message}`}>
+                      {String(issue.field)}: {issue.message}.{" "}
+                    </span>
+                  ))}
+                </p>
+              ) : null}
+            </article>
+          );
+        })}
+      </div>
+      </fieldset>
+    </section>
+  );
+}
+
 export function WorkpackEditor({
   data,
   generationFingerprint,
@@ -1884,9 +2235,16 @@ export function WorkpackEditor({
     () => `safeclaw-workpack:${data.scenario.companyName}:${data.scenario.siteName}:${data.question}:${generationFingerprint || buildGenerationEvidenceFingerprint(data)}`,
     [data, generationFingerprint]
   );
+  const initialRiskRows = useMemo(
+    () => data.structured?.riskAssessmentRows ?? [],
+    [data]
+  );
   const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
   const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
   const [dirtyDocumentKeys, setDirtyDocumentKeys] = useState<DocumentKey[]>([]);
+  const [canonicalRiskRows, setCanonicalRiskRows] = useState<RiskAssessmentRow[]>(initialRiskRows);
+  const [riskRowIds, setRiskRowIds] = useState<string[]>(() => initialRiskRows.map((_row, index) => `generated-risk-row-${index}`));
+  const [canonicalRiskText, setCanonicalRiskText] = useState<string | null>(null);
   const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
   const [hwpxStatus, setHwpxStatus] = useState<"idle" | "building" | "error">("idle");
   const [xlsxStatus, setXlsxStatus] = useState<"idle" | "building" | "error">("idle");
@@ -1906,6 +2264,7 @@ export function WorkpackEditor({
   const onDeliverablesChangeRef = useRef(onDeliverablesChange);
   const onSelectedDocumentChangeRef = useRef(onSelectedDocumentChange);
   const saveAnnouncementTimerRef = useRef<number | null>(null);
+  const nextRiskRowIdRef = useRef(initialRiskRows.length);
   const pendingChangeRef = useRef<WorkpackDeliverablesChange>({
     source: "generated",
     requiresRevalidation: false
@@ -1930,6 +2289,29 @@ export function WorkpackEditor({
   const selectedRows = buildRowsForDocument(selected, values);
   const riskAssessmentMeta = documentMeta.find((item) => item.key === "riskAssessmentDraft") || documentMeta[1];
   const riskAssessmentRows = buildRowsForDocument(riskAssessmentMeta, values);
+  const canonicalRiskValidation = useMemo(
+    () => validateRiskAssessmentRows(canonicalRiskRows),
+    [canonicalRiskRows]
+  );
+  const canonicalRiskRowsAreCurrent = canonicalRiskText
+    ? isCanonicalRiskAssessmentExportSafe(canonicalRiskRows, canonicalRiskText, values.riskAssessmentDraft)
+    : !dirtyDocumentKeys.includes("riskAssessmentDraft")
+      && values.riskAssessmentDraft === initialValues.riskAssessmentDraft
+      && areRiskAssessmentRowsRepresentedInDraft(canonicalRiskRows, values.riskAssessmentDraft);
+  const expectedInitialCanonicalRiskText = withSubmitReadiness(
+    "위험성평가표",
+    serializeRiskAssessmentRowsToDraft(initialRiskRows),
+    data
+  );
+  const initialRiskTextIsExactlyCanonical = initialRiskRows.length > 0
+    && initialValues.riskAssessmentDraft === expectedInitialCanonicalRiskText;
+  const structuredRiskEditLocked = canonicalRiskText === null
+    ? dirtyDocumentKeys.includes("riskAssessmentDraft")
+      || values.riskAssessmentDraft !== initialValues.riskAssessmentDraft
+      || !initialRiskTextIsExactlyCanonical
+    : canonicalRiskText !== values.riskAssessmentDraft;
+  const selectedUsesCanonicalRiskRows = selected.key === "riskAssessmentDraft"
+    && canonicalRiskRowsAreCurrent;
   const selectedFormProfile = getSafetyFormProfile(selected.key);
   const rubricEvaluation = useMemo(() => evaluatePublicSafetyRubric(values), [values]);
   const selectedRubricItems = useMemo(() => {
@@ -2014,6 +2396,11 @@ export function WorkpackEditor({
   }, [onSelectedDocumentChange]);
 
   useEffect(() => {
+    if (dirtyDocumentKeys.includes("riskAssessmentDraft") || canonicalRiskText) return;
+    setCanonicalRiskRows(initialRiskRows);
+  }, [canonicalRiskText, dirtyDocumentKeys, initialRiskRows]);
+
+  useEffect(() => {
     onSelectedDocumentChangeRef.current?.(selected.key);
   }, [selected.key]);
 
@@ -2032,7 +2419,7 @@ export function WorkpackEditor({
     if (hydratedStorageKey === storageKey) return;
 
     setHydratedStorageKey(null);
-    const stored = parseStoredDraft(window.localStorage.getItem(storageKey), initialValues);
+    const stored = parseStoredDraft(window.localStorage.getItem(storageKey), initialValues, initialRiskRows);
     const restoredDraft = stored.dirtyKeys.length > 0;
     pendingChangeRef.current = {
       source: restoredDraft ? "stored-draft" : "generated",
@@ -2040,6 +2427,11 @@ export function WorkpackEditor({
     };
     setValues(stored.values);
     setDirtyDocumentKeys(stored.dirtyKeys);
+    const restoredRiskRows = stored.draftRiskRows ?? stored.canonicalRiskRows ?? initialRiskRows;
+    setCanonicalRiskRows(restoredRiskRows);
+    setRiskRowIds(stored.riskRowIds ?? restoredRiskRows.map((_row, index) => `stored-risk-row-${index}`));
+    nextRiskRowIdRef.current = restoredRiskRows.length;
+    setCanonicalRiskText(stored.canonicalRiskText ?? null);
     setLastEditedAt(null);
     if (saveAnnouncementTimerRef.current) {
       window.clearTimeout(saveAnnouncementTimerRef.current);
@@ -2052,7 +2444,7 @@ export function WorkpackEditor({
       setSaveAnnouncement("");
     }
     setHydratedStorageKey(storageKey);
-  }, [hydratedStorageKey, initialValues, storageKey]);
+  }, [hydratedStorageKey, initialRiskRows, initialValues, storageKey]);
 
   useEffect(() => {
     if (hydratedStorageKey !== storageKey) return;
@@ -2061,7 +2453,17 @@ export function WorkpackEditor({
         const storedDraft: StoredEditorDraft = {
           version: 1,
           values,
-          dirtyKeys: dirtyDocumentKeys
+          dirtyKeys: dirtyDocumentKeys,
+          draftRiskRows: canonicalRiskRows,
+          riskRowIds,
+          ...(canonicalRiskText
+            && canonicalRiskText === values.riskAssessmentDraft
+            && serializeRiskAssessmentRowsToDraft(canonicalRiskRows) === canonicalRiskText
+            ? {
+                canonicalRiskText,
+                ...(canonicalRiskRowsAreCurrent ? { canonicalRiskRows } : {})
+              }
+            : {})
         };
         window.localStorage.setItem(storageKey, JSON.stringify(storedDraft));
       } catch (error) {
@@ -2094,7 +2496,7 @@ export function WorkpackEditor({
     }
     setSaveStatusLabel("자동 저장");
     setSaveAnnouncement("");
-  }, [dirtyDocumentKeys, hydratedStorageKey, lastEditedAt, storageKey, values]);
+  }, [canonicalRiskRows, canonicalRiskRowsAreCurrent, canonicalRiskText, dirtyDocumentKeys, hydratedStorageKey, lastEditedAt, riskRowIds, storageKey, values]);
 
   useEffect(() => {
     if (!focusToken) return;
@@ -2122,11 +2524,48 @@ export function WorkpackEditor({
     };
   }, [focusToken, requestedDocumentKey]);
 
-  function updateValue(value: string) {
+  function updateValue(value: string, options: { preserveCanonicalRiskRows?: boolean } = {}) {
     pendingChangeRef.current = { source: "user-edit", requiresRevalidation: true };
+    if (selected.key === "riskAssessmentDraft" && !options.preserveCanonicalRiskRows) {
+      setCanonicalRiskText(null);
+    }
     setValues((current) => ({ ...current, [selected.key]: value }));
     setDirtyDocumentKeys((current) => current.includes(selected.key) ? current : [...current, selected.key]);
     setLastEditedAt(new Date());
+  }
+
+  function syncCanonicalRiskRows(nextRows: RiskAssessmentRow[]) {
+    const serialized = serializeRiskAssessmentRowsToDraft(nextRows);
+    setCanonicalRiskRows(nextRows);
+    setCanonicalRiskText(serialized);
+    updateValue(serialized, { preserveCanonicalRiskRows: true });
+  }
+
+  function updateCanonicalRiskRow<K extends keyof RiskAssessmentRow>(
+    rowIndex: number,
+    field: K,
+    value: RiskAssessmentRow[K]
+  ) {
+    const nextRows = canonicalRiskRows.map((row, index) => (
+      index === rowIndex ? updateRiskAssessmentRowField(row, field, value) : row
+    ));
+    syncCanonicalRiskRows(nextRows);
+  }
+
+  function addCanonicalRiskRow() {
+    const nextId = `draft-risk-row-${Date.now()}-${nextRiskRowIdRef.current}`;
+    nextRiskRowIdRef.current += 1;
+    setRiskRowIds((current) => [...current, nextId]);
+    syncCanonicalRiskRows([...canonicalRiskRows, createEmptyRiskAssessmentRow(data)]);
+  }
+
+  function removeCanonicalRiskRow(rowIndex: number) {
+    setRiskRowIds((current) => current.filter((_id, index) => index !== rowIndex));
+    syncCanonicalRiskRows(canonicalRiskRows.filter((_row, index) => index !== rowIndex));
+  }
+
+  function confirmStructuredRiskEdit() {
+    syncCanonicalRiskRows(canonicalRiskRows);
   }
 
   function updateStructuredSection(sectionId: string, value: string) {
@@ -2311,12 +2750,14 @@ export function WorkpackEditor({
           }
         : {
             mode: "single",
-            edited: selectedUsesEditedText,
+            edited: selectedUsesEditedText && !selectedUsesCanonicalRiskRows,
             title: selected.title,
             rows: selectedRows,
             profile: selectedFormProfile,
             scenario: data.scenario,
-            riskAssessmentRows: selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
+            riskAssessmentRows: selectedUsesCanonicalRiskRows
+              ? canonicalRiskRows
+              : selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
           };
       const response = await fetch("/api/export/xlsx", {
         method: "POST",
@@ -2342,12 +2783,14 @@ export function WorkpackEditor({
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          edited: selectedUsesEditedText,
+          edited: selectedUsesEditedText && !selectedUsesCanonicalRiskRows,
           title: selected.title,
           rows: selectedRows,
           profile: selectedFormProfile,
           scenario: data.scenario,
-          riskAssessmentRows: selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
+          riskAssessmentRows: selectedUsesCanonicalRiskRows
+            ? canonicalRiskRows
+            : selectedUsesEditedText ? undefined : data.structured?.riskAssessmentRows
         })
       });
       if (!response.ok) {
@@ -2639,6 +3082,19 @@ export function WorkpackEditor({
               data-testid="document-structured-editor"
               data-editor-kind={structuredDocument.profile.kind}
             >
+              {selected.key === "riskAssessmentDraft" ? (
+                <RiskAssessmentRowsEditor
+                  rows={canonicalRiskRows}
+                  rowIds={riskRowIds}
+                  validation={canonicalRiskValidation}
+                  isCurrent={canonicalRiskRowsAreCurrent}
+                  isLocked={structuredRiskEditLocked}
+                  onConfirmStructuredEdit={confirmStructuredRiskEdit}
+                  onRowChange={updateCanonicalRiskRow}
+                  onAdd={addCanonicalRiskRow}
+                  onRemove={removeCanonicalRiskRow}
+                />
+              ) : null}
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;
                 const lineCount = Math.max(4, section.value.split(/\r?\n/u).length + 1);

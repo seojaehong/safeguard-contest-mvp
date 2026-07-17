@@ -15,6 +15,10 @@ const TABLES = Object.freeze([
 ]);
 
 const OPERATIONS = Object.freeze(["SELECT", "INSERT", "UPDATE", "DELETE"]);
+const TENANT_DIRECTIONS = Object.freeze([
+  Object.freeze({ actor: "tenant_a", fixtureOwner: "tenant_b", direction: "a_to_b" }),
+  Object.freeze({ actor: "tenant_b", fixtureOwner: "tenant_a", direction: "b_to_a" }),
+]);
 const STORAGE_RESOURCE = "safeclaw-improvement-photos";
 const CLEANUP = Object.freeze({
   run: "always",
@@ -38,15 +42,20 @@ const STATUS_BY_EXPECTATION = Object.freeze({
   }),
 });
 
-function scenario(resource, resourceType, operation, expected, control) {
+function scenario(resource, resourceType, operation, expected, control, direction) {
   const positiveMutation = control === "positive" && operation !== "SELECT";
+  const actor = control === "positive" ? direction.fixtureOwner : direction.actor;
+  const scenarioDirection = control === "positive"
+    ? (actor === "tenant_a" ? "a_to_a" : "b_to_b")
+    : direction.direction;
   return Object.freeze({
-    id: `${resourceType}:${resource}:${control}:${operation.toLowerCase()}`,
+    id: `${resourceType}:${resource}:${control}:${scenarioDirection}:${operation.toLowerCase()}`,
     resource,
     resourceType,
     operation,
-    actor: control === "positive" ? "tenant_a" : "tenant_b",
-    fixtureOwner: "tenant_a",
+    actor,
+    fixtureOwner: direction.fixtureOwner,
+    direction: scenarioDirection,
     expected,
     control,
     expectedHttpStatuses: STATUS_BY_EXPECTATION[control === "positive" ? "positive" : "deny"][operation],
@@ -64,15 +73,19 @@ const RESOURCES = Object.freeze([
 ]);
 
 export const CROSS_TENANT_DENY_ASSERTIONS = Object.freeze(RESOURCES.flatMap(({ resource, resourceType }) => (
-  OPERATIONS.map((operation) => scenario(resource, resourceType, operation, "deny", "isolation"))
+  TENANT_DIRECTIONS.flatMap((direction) => OPERATIONS.map((operation) => (
+    scenario(resource, resourceType, operation, "deny", "isolation", direction)
+  )))
 )));
 
 export const OWN_TENANT_POSITIVE_CONTROLS = Object.freeze(RESOURCES.flatMap(({ resource, resourceType }) => (
-  OPERATIONS.map((operation) => scenario(resource, resourceType, operation, "allow", "positive"))
+  TENANT_DIRECTIONS.flatMap((direction) => OPERATIONS.map((operation) => (
+    scenario(resource, resourceType, operation, "allow", "positive", direction)
+  )))
 )));
 
 export const TENANT_ISOLATION_MANIFEST = Object.freeze({
-  version: 2,
+  version: 3,
   tables: TABLES,
   storageBucket: STORAGE_RESOURCE,
   denyAssertionCount: CROSS_TENANT_DENY_ASSERTIONS.length,

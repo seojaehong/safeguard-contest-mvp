@@ -103,12 +103,18 @@ function errorMessage(error) {
   return error instanceof Error ? error.message : String(error);
 }
 
-export async function runTenantIsolationHarness({ env = process.env, actualHead = "", mode = "dry-run", executor, verifier } = {}) {
+export async function runTenantIsolationHarness({ env = process.env, actualHead = "", mode = "dry-run", adapterMode = "contract-test", executor, verifier } = {}) {
   const secrets = REQUIRED_SECRETS.map((name) => env[name] ?? "");
   const preflight = evaluatePreflight({ env, actualHead });
   const base = {
-    ok: preflight.ok,
+    ok: false,
     mode,
+    executionStatus: mode === "execute" ? "blocked_no_live_adapter" : "not_executed",
+    adapterMode,
+    adapterHooksProvided: Boolean(executor && verifier),
+    liveExecutorAvailable: false,
+    contractValidated: false,
+    launchProven: false,
     expectedHead: env.SUPABASE_TENANT_TEST_EXPECTED_HEAD ?? null,
     actualHead,
     denyAssertionCount: TENANT_ISOLATION_MANIFEST.denyAssertionCount,
@@ -120,7 +126,20 @@ export async function runTenantIsolationHarness({ env = process.env, actualHead 
     preflight,
   };
 
-  if (!preflight.ok || mode !== "execute") return redactSecrets(base, secrets);
+  if (!preflight.ok) return redactSecrets(base, secrets);
+  if (mode !== "execute") {
+    return redactSecrets({
+      ...base,
+      error: "Network-free contract validation only; no live executor was invoked.",
+    }, secrets);
+  }
+  if (adapterMode === "live-reviewed") {
+    return redactSecrets({
+      ...base,
+      executionStatus: "blocked_unreviewed_live_adapter",
+      error: "This non-executing packet has no reviewed live-adapter identity registry.",
+    }, secrets);
+  }
   if (!executor || typeof executor.executeScenario !== "function" || typeof executor.cleanupScenario !== "function") {
     return redactSecrets({ ...base, ok: false, error: "Actor executor and cleanup hook are required." }, secrets);
   }
@@ -209,15 +228,21 @@ export async function runTenantIsolationHarness({ env = process.env, actualHead 
     }
   }
 
+  const contractValidated = failure === null && results.length === TENANT_ISOLATION_MANIFEST.scenarios.length;
   return redactSecrets({
     ...base,
-    ok: failure === null && results.length === TENANT_ISOLATION_MANIFEST.scenarios.length,
+    ok: false,
+    executionStatus: "executed_contract_test",
+    contractValidated,
+    launchProven: false,
     requestCount,
     cleanupCount,
     verifierCount,
     results,
     residualVerification,
-    ...(failure ? { error: failure } : {}),
+    ...(failure
+      ? { error: failure }
+      : { error: "Contract adapters completed; no reviewed live executor ran." }),
   }, secrets);
 }
 

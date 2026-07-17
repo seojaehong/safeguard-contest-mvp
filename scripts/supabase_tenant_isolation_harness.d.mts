@@ -80,6 +80,12 @@ export interface ValidationResult {
 export interface HarnessResult {
   readonly ok: boolean;
   readonly mode: "dry-run" | "execute";
+  readonly executionStatus: "not_executed" | "blocked_no_live_adapter" | "blocked_unreviewed_live_adapter" | "executed_contract_test";
+  readonly adapterMode: "contract-test" | "live-reviewed";
+  readonly adapterHooksProvided: boolean;
+  readonly liveExecutorAvailable: boolean;
+  readonly contractValidated: boolean;
+  readonly launchProven: boolean;
   readonly expectedHead: string | null;
   readonly actualHead: string;
   readonly denyAssertionCount: number;
@@ -109,6 +115,7 @@ export function runTenantIsolationHarness(input?: {
   env?: HarnessEnvironment;
   actualHead?: string;
   mode?: "dry-run" | "execute";
+  adapterMode?: "contract-test" | "live-reviewed";
   executor?: ScenarioExecutor;
   verifier?: ServiceRoleVerifier;
 }): Promise<HarnessResult>;

@@ -32,7 +32,7 @@ import {
 const REMOTE_TIMEOUT_MS = 20_000;
 const ATTEMPT_TTL_MS = 15_000;
 const OUTPUT_BYTES = 8_192;
-const MAX_RESPONSE_BYTES = 32_768;
+export const REMOTE_HERMES_MAX_ENVELOPE_BYTES = 32_768;
 
 type RemoteHermesConfig = {
   endpoint: string;
@@ -317,7 +317,7 @@ function validateTrustedConnection(
 export async function readRemoteHermesResponseBody(
   response: Response,
   signal: AbortSignal,
-  maxBytes = MAX_RESPONSE_BYTES,
+  maxBytes = REMOTE_HERMES_MAX_ENVELOPE_BYTES,
 ): Promise<string> {
   if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0) {
     throw new Error("invalid remote Hermes response size policy");

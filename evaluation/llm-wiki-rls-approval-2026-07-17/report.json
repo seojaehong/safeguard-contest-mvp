@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "llm-wiki-rls-approval/v1",
+  "date": "2026-07-17",
+  "sourceIdentity": {
+    "auditedSourceCommit": "de4103db20be6ca2be738748143fb6a6fbd26693",
+    "remediationBaseCommit": "a4c4004acccdccfb2f8f2a328d3cc63fe7da71a7",
+    "packetCommit": null,
+    "packetCommitSemantics": "Null avoids an impossible self-reference; the authoritative packet commit is the Git commit containing this report blob.",
+    "packetCommitVerificationCommand": "git log -1 --format=%H -- evaluation/llm-wiki-rls-approval-2026-07-17/report.json"
+  },
+  "mode": "db-non-mutating-network-free",
+  "verdict": "red_approval_required",
+  "launchProven": false,
+  "databaseConnected": false,
+  "databaseMutationPerformed": false,
+  "migrationAdded": false,
+  "publicationPerformed": false,
+  "inventory": {
+    "migrationFiles": 9,
+    "applicationTables": 22,
+    "rlsEnabledApplicationTables": 20,
+    "rlsMissingApplicationTables": 2,
+    "forceRlsTables": 0,
+    "policies": 20,
+    "forAllPolicies": 13,
+    "selectOnlyPolicies": 7,
+    "policiesWithExplicitRole": 0,
+    "currentPublicationLedger": false,
+    "currentPublicationRpc": false,
+    "currentRollbackRpc": false,
+    "currentPublicationEndpoint": false
+  },
+  "harness": {
+    "manifestVersion": 3,
+    "tableDenyAssertions": 104,
+    "storageDenyAssertions": 8,
+    "crossTenantDenyAssertions": 112,
+    "positiveControls": 112,
+    "totalScenarios": 224,
+    "directions": ["a_to_b", "b_to_a", "a_to_a", "b_to_b"],
+    "liveExecutorPresent": false,
+    "reviewedLiveAdapterIdentityRegistryPresent": false,
+    "callerSuppliedLiveReviewedAccepted": false,
+    "launchProofCapability": "disabled_in_non_executing_packet",
+    "liveAssertionsExecuted": 0,
+    "status": "red_no_live_executor"
+  },
+  "verification": {
+    "focusedTestFiles": 2,
+    "focusedTestsPassed": 31,
+    "focusedTestsFailed": 0,
+    "strictTypecheckPassed": true,
+    "fakeAdapterRegressionPassed": true,
+    "positiveIdNormalizationPassed": true,
+    "packetIdentityContractPassed": true,
+    "networkRequests": 0,
+    "liveAssertionsExecuted": 0,
+    "log": "evaluation/llm-wiki-rls-approval-2026-07-17/verification.md"
+  },
+  "requiredApprovals": [
+    "migration_ddl_and_append_only_retention",
+    "security_definer_rpc_and_execute_grants",
+    "legal_confirmation_authority_and_source_fields",
+    "public_provenance_allowlist_and_promotion_scope",
+    "disposable_project_and_live_adapters",
+    "live_catalog_rls_grant_storage_inspection",
+    "rpc_atomicity_idempotency_rollback_and_leak_tests",
+    "separate_production_migration_and_canary"
+  ]
+}

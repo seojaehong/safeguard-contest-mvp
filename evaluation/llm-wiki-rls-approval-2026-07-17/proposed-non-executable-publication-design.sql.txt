@@ -1,0 +1,105 @@
+-- DESIGN REVIEW ONLY. NOT A MIGRATION. DO NOT EXECUTE.
+-- Names and types require schema, RLS, legal, and operations approval.
+
+begin;
+
+create table proposed_ontology_publication_versions (
+  publication_version uuid primary key,
+  graph_digest text not null unique,
+  node_set jsonb not null,
+  edge_set jsonb not null,
+  public_provenance jsonb not null,
+  created_at timestamptz not null default clock_timestamp(),
+  check (jsonb_typeof(node_set) = 'array'),
+  check (jsonb_typeof(edge_set) = 'array'),
+  check (jsonb_typeof(public_provenance) = 'object')
+);
+
+create table proposed_ontology_publication_pointer (
+  singleton boolean primary key default true check (singleton),
+  publication_version uuid not null references proposed_ontology_publication_versions,
+  promotion_id uuid not null unique,
+  updated_at timestamptz not null default clock_timestamp()
+);
+
+create table proposed_ontology_promotion_ledger (
+  ledger_id bigint generated always as identity primary key,
+  promotion_id uuid not null,
+  command_id uuid not null,
+  idempotency_key text not null,
+  attempt_no integer not null check (attempt_no > 0),
+  operation text not null check (operation in ('publish', 'rollback')),
+  organization_id uuid not null references organizations(id),
+  site_id uuid not null references sites(id),
+  review_run_id uuid not null references knowledge_regeneration_runs(id),
+  review_receipt_digest text not null,
+  candidate_schema_version text not null,
+  candidate_digest text not null,
+  source_snapshot_digest text not null,
+  ordered_source_event_ids uuid[] not null,
+  ordered_source_event_digest text not null,
+  approved_node_ids text[] not null,
+  approved_edge_ids text[] not null,
+  graph_digest text not null,
+  source_authority_class text not null,
+  source_publication_proof jsonb not null,
+  source_verification_proof jsonb not null,
+  legal_confirmed_by uuid not null,
+  legal_confirmed_at timestamptz not null,
+  actor_id uuid not null,
+  service_principal_id text not null,
+  request_digest text not null,
+  policy_version text not null,
+  base_revision text not null,
+  status text not null check (status in ('pending', 'committed', 'rolled_back', 'failed')),
+  previous_publication_version uuid,
+  new_publication_version uuid,
+  rollback_target_version uuid,
+  error_code text,
+  created_at timestamptz not null default clock_timestamp(),
+  committed_at timestamptz,
+  unique (promotion_id, attempt_no),
+  unique (idempotency_key, operation, request_digest, status)
+);
+
+-- Proposed trigger: reject UPDATE and DELETE on the ledger for every role.
+-- Proposed RLS: no direct internal-table access for anon/authenticated.
+-- Proposed grants: published allowlisted view SELECT only for anon/authenticated;
+-- RPC EXECUTE only for the approved service principal role.
+
+create function proposed_publish_reviewed_ontology(
+  p_command_id uuid,
+  p_idempotency_key text,
+  p_request_digest text
+) returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  -- Lock the idempotency key; re-read trusted run, receipt, tenant tuple,
+  -- ordered events, provenance, legal confirmation, and graph digests.
+  -- Append pending attempt, immutable version, pointer, and committed receipt in
+  -- one transaction. Raise on mismatch so every change rolls back.
+  raise exception 'DESIGN ONLY - NOT IMPLEMENTED';
+end;
+$$;
+
+create function proposed_rollback_ontology_publication(
+  p_command_id uuid,
+  p_idempotency_key text,
+  p_request_digest text,
+  p_target_version uuid
+) returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  -- Validate a committed target, append rollback attempt, atomically move the
+  -- pointer, and append its receipt. Never mutate an earlier ledger row.
+  raise exception 'DESIGN ONLY - NOT IMPLEMENTED';
+end;
+$$;
+
+rollback;
