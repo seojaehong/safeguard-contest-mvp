@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-07-18T00:00:00+09:00",
+  "liveTarget": "https://www.safeclaw.kr",
+  "latestConfirmedProductionDeployment": {
+    "environment": "Production",
+    "sha": "62cccafbdeb5a87e045c9f9bd7c43619029ddd17",
+    "state": "success",
+    "description": "Deployment has completed",
+    "targetUrl": "https://safeguard-contest-rlwyjidew-seojaehongs-projects.vercel.app",
+    "createdAt": "2026-07-17T20:16:46Z"
+  },
+  "currentMasterHead": "d137bc5184b16bbd68973f049840898656c4bc29",
+  "currentHeadRuntimeProductChangedAfterDeployment": false,
+  "currentHeadDelta": "documentation/evaluation artifact only",
+  "ciAtCheckTime": {
+    "d137bc51": "in_progress",
+    "62cccafb": "in_progress"
+  },
+  "liveHeadersSample": {
+    "server": "Vercel",
+    "xMatchedPath": "/",
+    "xVercelCache": "MISS",
+    "xVercelId": "icn1::icn1::xdhrm-1784319599123-3b84e75bbaad"
+  },
+  "demoDecision": {
+    "useProduction": true,
+    "readyPath": [
+      "/workspace",
+      "document review",
+      "share session",
+      "worker preview",
+      "/share/[sessionId]?workerId=..."
+    ],
+    "previewOnly": [
+      "email",
+      "sms",
+      "kakao"
+    ]
+  }
+}
