@@ -23,6 +23,7 @@ This is not a completion declaration. It records what current evidence proves an
 | Production build | `npm.cmd run build` on current gate | Build passed; 28/28 static pages generated; `/share/[sessionId]` remains in the route map. |
 | Public live smoke | `evaluation/live-public-smoke-2026-07-18/report.md` and `report.json` | Public routes responded and showed no horizontal overflow or console/page errors in the checked desktop/mobile smoke. |
 | Exact KOSHA registry | `evaluation/2026-07-17-authoritative-release-gate.md` | D-C-13, D-C-7, and B-E-10 exact registry lineage is present on current master; 5 files / 97 tests passed in the latest recorded focused gate. |
+| Live provider readiness | `evaluation/live-provider-readiness-2026-07-18/report.md` | OpenAI vision is ready on live, dispatch is preview-only, KOSHA local corpus is unconfigured, and SIF embedding remains approval-held. |
 | Ontology UI | `evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json` | Default `/ontology` no longer exposes the 166-node hairball; bounded neighborhood UI passes overflow, overlap, contrast, and mobile fullscreen gates in recorded browser evidence. |
 | Hermes/OpenClaw boundary | `docs/phase-b-organization-knowledge-and-engine-plan.md` and engine tests | Hermes/OpenClaw remain behind `EngineAdapter`; SafeClaw keeps tenant, MCP, evidence, approval, and effect authority. |
 | Tenant/RLS app boundary | `evaluation/supabase-rls-approval-2026-07-17/report.md` and app-layer tests | App-layer tenant and route boundaries are covered; live DB catalog RLS proof is still approval-gated. |
@@ -49,9 +50,14 @@ These are not failures in the current patch. They are the remaining items that p
 
 4. Real external provider dispatch and production OpenAI vision execution need environment-specific proof.
    - Tests prove contracts and fail-closed behavior.
-   - Evidence still needed: controlled production credential check and provider-specific dry run without leaking secrets or sending unintended real messages.
+   - Live readiness now proves OpenAI vision is configured, but dispatch remains preview-only.
+   - Evidence still needed: provider-specific dry run without leaking secrets or sending unintended real messages.
 
-5. Long-term LLM Wiki and organization knowledge promotion are still human-in-the-loop.
+5. KOSHA local corpus is not live-ready.
+   - Live `/api/safety-reference/status` returns 503 because `localCorpus.status=unconfigured`.
+   - Supabase catalog and exact trusted KOSHA references are present, but a verified local corpus still needs a launch-ready artifact or production runtime configuration.
+
+6. Long-term LLM Wiki and organization knowledge promotion are still human-in-the-loop.
    - Current plan preserves public/organization/site memory boundaries.
    - Evidence still needed: approved migration and review-queue implementation beyond the current Phase A/launch-safe scope.
 
@@ -64,12 +70,15 @@ These are not failures in the current patch. They are the remaining items that p
    - After deploy mapping, smoke `/workspace` share flow and `/share/[sessionId]` recipient flow on live or preview deployment.
 
 3. Provider readiness proof:
-   - Confirm OpenAI vision readiness and dispatch provider readiness using shape-only logs, never secret values.
+   - Convert dispatch from preview-only only after persistent idempotency and provider configuration are proven.
 
-4. Supabase RLS read-only live audit:
+4. KOSHA local corpus readiness:
+   - Provide a launch-ready corpus artifact or configure `KOSHA_GUIDE_CORPUS_DIR` in production, then prove `/api/safety-reference/status` returns ready.
+
+5. Supabase RLS read-only live audit:
    - Run a read-only catalog audit and tenant A/B negative plan only after confirming safe credentials and no data mutation.
 
-5. Phase B entry packet:
+6. Phase B entry packet:
    - Present the already documented Hermes/organization-knowledge plan as the next approval gate, rather than starting migrations implicitly.
 
 ## Working-Tree Note

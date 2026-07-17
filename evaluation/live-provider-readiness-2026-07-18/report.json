@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-07-18T03:38:00+09:00",
+  "target": "https://www.safeclaw.kr",
+  "localHeadAtCheckTime": "e3b64681f3ad295676d9a237f0ba8534cb092622",
+  "checks": {
+    "photoHazardAnalysis": {
+      "endpoint": "/api/input-photos/hazard-analysis",
+      "httpStatus": 200,
+      "ok": true,
+      "status": "ready",
+      "provider": "openai",
+      "model": "gpt-4.1-mini",
+      "apiKeyPresent": true,
+      "maxInputPhotos": 10
+    },
+    "workflowDispatch": {
+      "endpoint": "/api/workflow/dispatch",
+      "httpStatus": 200,
+      "ok": true,
+      "capability": false,
+      "mode": "preview_only",
+      "reason": "persistent_idempotency_unavailable"
+    },
+    "safetyReferenceStatus": {
+      "endpoint": "/api/safety-reference/status",
+      "httpStatus": 503,
+      "ok": false,
+      "status": "degraded",
+      "items": 9920,
+      "technicalTotal": 1040,
+      "technicalSupportRegulations": 237,
+      "technicalGuidelines": 803,
+      "technicalSplitOk": true,
+      "catalogSearchOk": true,
+      "searchReady": false,
+      "localCorpusStatus": "unconfigured"
+    },
+    "sifEmbeddingGate": {
+      "endpoint": "/api/sif-embedding-gate/status",
+      "httpStatus": 200,
+      "ok": true,
+      "stage": "ready-for-approval",
+      "approvalHeld": true,
+      "dbMutationPerformed": false,
+      "embeddingGenerated": false,
+      "uploaded": false,
+      "corpusCount": 6032,
+      "uploadedCount": 0
+    }
+  },
+  "conclusion": "photo_vision_ready_dispatch_preview_only_kosha_local_corpus_unconfigured_sif_embedding_approval_held"
+}

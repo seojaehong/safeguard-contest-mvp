@@ -7,6 +7,7 @@
     "frontend_consistency",
     "production_build",
     "public_live_smoke",
+    "live_provider_readiness",
     "exact_kosha_registry",
     "ontology_ui",
     "hermes_openclaw_boundary",
@@ -21,6 +22,7 @@
     "live_supabase_catalog_rls_proof",
     "phase_b_approval_and_migrations",
     "real_external_provider_dispatch_and_vision_execution",
+    "live_kosha_local_corpus_readiness",
     "llm_wiki_organization_knowledge_promotion"
   ],
   "latestVerification": {
@@ -37,6 +39,13 @@
       "command": "npm.cmd run build",
       "status": "passed",
       "staticPagesGenerated": 28
+    },
+    "liveProviderReadiness": {
+      "artifact": "evaluation/live-provider-readiness-2026-07-18/report.json",
+      "photoVision": "ready",
+      "dispatch": "preview_only",
+      "koshaLocalCorpus": "unconfigured",
+      "sifEmbedding": "approval_held"
     }
   },
   "notes": [
