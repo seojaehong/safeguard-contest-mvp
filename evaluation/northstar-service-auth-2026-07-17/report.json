@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "verifiedHead": "a58cc33fb11981414a81b58ad5ad76ace0b93fd0",
+  "baseHead": "f16d152e3c38669f69029dab45ebf2e7a645acb3",
+  "status": "code_verified_pre_push",
+  "databaseMutationApplied": false,
+  "verification": {
+    "fullSuite": {
+      "filesTotal": 196,
+      "filesPassed": 188,
+      "filesSkipped": 8,
+      "testsTotal": 2305,
+      "testsPassed": 2291,
+      "testsSkipped": 14,
+      "testsFailed": 0
+    },
+    "focusedIntegration": { "filesPassed": 10, "testsPassed": 182 },
+    "providerRecovery": { "filesPassed": 4, "testsPassed": 43 },
+    "typecheck": "pass",
+    "staticFrontendAudit": {
+      "pages": 32,
+      "productComponents": 23,
+      "coverageIssues": 0,
+      "violations": 0
+    },
+    "browserAudit": {
+      "rows": 108,
+      "passed": 108,
+      "failed": 0,
+      "recovered": 0,
+      "findings": 0
+    },
+    "auditBuildStaticPages": 28,
+    "normalBuildStaticPages": 28,
+    "normalBundleContractTestsPassed": 9,
+    "independentReview": {
+      "spec": "pass",
+      "code": "pass",
+      "p0": 0,
+      "p1": 0,
+      "p2": 0,
+      "p3": 0
+    }
+  },
+  "remainingGates": [
+    "remote_hermes_production_wiring",
+    "durable_replay_ledger",
+    "provider_dispatch_persistent_idempotency",
+    "authenticated_recipient_channel_resolver",
+    "recipient_portal",
+    "supabase_rls_approval_and_tenant_ab_verification",
+    "vercel_deploy_and_live_probe"
+  ]
+}
