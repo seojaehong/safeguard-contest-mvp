@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
+import { buildSampleWorkpack } from "@/lib/sample-workpack";
+
 const clientPath = path.join(process.cwd(), "lib", "workflow-share-client.ts");
 const policyPath = path.join(process.cwd(), "components", "WorkflowSharePolicy.ts");
 
@@ -406,6 +408,64 @@ describe("authenticated workflow share client", () => {
       message: "provider accepted",
       channelResults: [{ channel: "sms", provider: "latest-sms", status: "sent" }]
     })).toBe(true);
+  });
+
+  it("keeps foreign recipient previews language-only and blocks Korean text leaks", async () => {
+    const {
+      buildCanonicalRecipientMessageVariants,
+      resolveWorkflowMessagePreview
+    } = await loadClient();
+    const sample = buildSampleWorkpack();
+    const data = {
+      ...sample,
+      deliverables: {
+        ...sample.deliverables,
+        kakaoMessage: "[SafeClaw]\n작업 전 안전수칙을 확인해 주세요.",
+        foreignWorkerLanguages: [{
+          code: "vi",
+          label: "베트남어",
+          nativeLabel: "Tiếng Việt",
+          rationale: "베트남어 수신자용 화면 계약 검증",
+          lines: [
+            "Stop work immediately when scaffold wheels, guardrails, or anchor points are unsafe.",
+            "Ask the supervisor or interpreter again if any instruction is unclear."
+          ]
+        }]
+      }
+    };
+
+    const preview = resolveWorkflowMessagePreview(data, "foreign:vi");
+    expect(preview).toContain("Tiếng Việt");
+    expect(preview).toContain("Stop work immediately");
+    expect(preview).not.toMatch(/[가-힣]/u);
+
+    expect(buildCanonicalRecipientMessageVariants({
+      data,
+      recipientLanguageCodes: ["vi"]
+    })).toEqual({
+      ok: true,
+      messageVariants: { vi: preview }
+    });
+
+    expect(buildCanonicalRecipientMessageVariants({
+      data: {
+        ...sample,
+        deliverables: {
+          ...sample.deliverables,
+          kakaoMessage: data.deliverables.kakaoMessage,
+          foreignWorkerLanguages: [{
+            ...data.deliverables.foreignWorkerLanguages[0],
+            lines: ["현장 위험을 확인하세요."]
+          }]
+        }
+      },
+      recipientLanguageCodes: ["vi"]
+    })).toEqual({
+      ok: false,
+      invalidLanguageCodes: [],
+      koreanLeakLanguageCodes: ["vi"],
+      malformedFields: []
+    });
   });
 });
 
