@@ -2,6 +2,7 @@
   "schemaVersion": "remote-hermes-terminal-ledger-evaluation/v1",
   "date": "2026-07-17",
   "baseSha": "56cb66f1405c49e18e88f583a95025b13f09c40d",
+  "finalVerificationBaseSha": "b17b5d2e3458f1002555e9301b3e13346f70584f",
   "branch": "feat/remote-hermes-terminal-ledger",
   "scope": {
     "customerRouteWiring": false,

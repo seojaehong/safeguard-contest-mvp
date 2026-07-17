@@ -2,7 +2,8 @@
 
 ## Scope
 
-- Base: `56cb66f1405c49e18e88f583a95025b13f09c40d`
+- Requested base: `56cb66f1405c49e18e88f583a95025b13f09c40d`
+- Final rebase and verification base: `b17b5d2e3458f1002555e9301b3e13346f70584f`
 - Branch: `feat/remote-hermes-terminal-ledger`
 - Product boundary: contract and runtime only
 - Explicit exclusions: customer route wiring, database persistence, migrations, provider policy
