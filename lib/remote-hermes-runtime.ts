@@ -19,6 +19,7 @@ import {
   createRemoteHermesAttemptEnvelope,
   createRemoteHermesLogicalRequest,
   createRemoteHermesReplayGuard,
+  RemoteHermesContractError,
   validateRemoteHermesAttemptReceipt,
   validateRemoteHermesPolicyAttestation,
   validateRemoteHermesResponse,
@@ -26,6 +27,7 @@ import {
   type RemoteHermesAttemptReceipt,
   type RemoteHermesClaimsProjection,
   type RemoteHermesFieldClassification,
+  type RemoteHermesErrorCode,
   type RemoteHermesPolicyAttestation,
   type RemoteHermesTerminalRecord,
 } from "@/lib/remote-hermes-contract";
@@ -81,7 +83,7 @@ export type RemoteHermesAttemptLedger = {
   recordTerminal: (
     record: RemoteHermesTerminalRecord,
     signal: AbortSignal,
-  ) => Promise<void>;
+  ) => Promise<"recorded" | "duplicate">;
 };
 
 export type RemoteHermesRuntimeDependencies = {
@@ -414,6 +416,53 @@ function createPlanner(
     const abortFromCaller = (): void => timeoutController.abort(input.signal.reason);
     input.signal.addEventListener("abort", abortFromCaller, { once: true });
     const timeout = setTimeout(() => timeoutController.abort(), REMOTE_TIMEOUT_MS);
+    const terminalLatencyMs = (): number => {
+      const elapsed = now().getTime() - issuedAtMs;
+      return Number.isSafeInteger(elapsed) && elapsed >= 0 ? elapsed : 0;
+    };
+    const terminalIdentity = () => ({
+      organizationId: attempt.organizationId,
+      siteId: attempt.siteId,
+      runId: attempt.runId,
+      requestId: attempt.requestId,
+      attemptId: attempt.attemptId,
+      logicalRequestDigest: attempt.logicalRequestDigest,
+      attemptEnvelopeDigest: attempt.attemptEnvelopeDigest,
+    });
+    const writeTerminal = async (record: RemoteHermesTerminalRecord): Promise<void> => {
+      let result: "recorded" | "duplicate";
+      try {
+        result = await withAbort(
+          dependencies.attemptLedger.recordTerminal(
+            deepFreeze(structuredClone(record)),
+            timeoutController.signal,
+          ),
+          timeoutController.signal,
+        );
+      } catch (error) {
+        throw new BrokerError(
+          timeoutController.signal.aborted ? "ENGINE_TIMEOUT" : "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+          503,
+          error,
+        );
+      }
+      if (result !== "recorded") {
+        throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
+      }
+    };
+    const closeGatewayFailure = async (
+      errorCode: RemoteHermesErrorCode,
+      brokerCode: "ENGINE_TIMEOUT" | "ENGINE_EXECUTION_FAILED" | "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+      cause?: unknown,
+    ): Promise<never> => {
+      await writeTerminal({
+        ...terminalIdentity(),
+        terminalStatus: "failure",
+        latencyMs: terminalLatencyMs(),
+        error: { code: errorCode, origin: "gateway" },
+      });
+      throw new BrokerError(brokerCode, 503, cause);
+    };
     let responseText: string;
     let attemptReceipt: RemoteHermesAttemptReceipt;
     try {
@@ -449,9 +498,9 @@ function createPlanner(
           timeoutController.signal,
         );
       } catch (error) {
-        throw new BrokerError(
+        return await closeGatewayFailure(
+          "REMOTE_TRANSPORT_UNAVAILABLE",
           timeoutController.signal.aborted ? "ENGINE_TIMEOUT" : "ENGINE_EXECUTION_FAILED",
-          503,
           error,
         );
       }
@@ -459,18 +508,22 @@ function createPlanner(
         validateTrustedConnection(dispatch.connection, config);
       } catch (error) {
         await dispatch.response.body?.cancel().catch(() => undefined);
-        throw error;
+        return await closeGatewayFailure(
+          "REMOTE_TRANSPORT_UNAVAILABLE",
+          "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+          error,
+        );
       }
       if (!dispatch.response.ok) {
         await dispatch.response.body?.cancel().catch(() => undefined);
-        throw new BrokerError("ENGINE_EXECUTION_FAILED", 503);
+        return await closeGatewayFailure("REMOTE_TRANSPORT_UNAVAILABLE", "ENGINE_EXECUTION_FAILED");
       }
       try {
         responseText = await readRemoteHermesResponseBody(dispatch.response, timeoutController.signal);
       } catch (error) {
-        throw new BrokerError(
+        return await closeGatewayFailure(
+          "REMOTE_RESPONSE_INVALID",
           timeoutController.signal.aborted ? "ENGINE_TIMEOUT" : "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
-          503,
           error,
         );
       }
@@ -478,7 +531,7 @@ function createPlanner(
       try {
         responseBody = JSON.parse(responseText) as unknown;
       } catch (error) {
-        throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503, error);
+        return await closeGatewayFailure("REMOTE_RESPONSE_INVALID", "ENGINE_EXECUTION_ATTESTATION_UNPROVEN", error);
       }
       let validated;
       try {
@@ -491,18 +544,22 @@ function createPlanner(
           verificationSecret: config.responseVerificationSecret,
           now: now(),
           replayGuard,
+          consumeReplay: false,
         });
       } catch (error) {
-        throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503, error);
+        const errorCode: RemoteHermesErrorCode = error instanceof RemoteHermesContractError
+          ? error.code === "REMOTE_RESPONSE_SIGNATURE_INVALID"
+            ? "REMOTE_RESPONSE_SIGNATURE_INVALID"
+            : error.code === "REMOTE_TENANT_BINDING_REJECTED"
+              ? "REMOTE_TENANT_BINDING_REJECTED"
+              : error.code === "REMOTE_REPLAY_REJECTED"
+                ? "REMOTE_REPLAY_REJECTED"
+                : "REMOTE_RESPONSE_INVALID"
+          : "REMOTE_RESPONSE_INVALID";
+        return await closeGatewayFailure(errorCode, "ENGINE_EXECUTION_ATTESTATION_UNPROVEN", error);
       }
       const commonTerminalRecord = {
-        organizationId: attempt.organizationId,
-        siteId: attempt.siteId,
-        runId: attempt.runId,
-        requestId: attempt.requestId,
-        attemptId: attempt.attemptId,
-        logicalRequestDigest: attempt.logicalRequestDigest,
-        attemptEnvelopeDigest: attempt.attemptEnvelopeDigest,
+        ...terminalIdentity(),
         responseEnvelopeDigest: validated.responseEnvelopeDigest,
         usage: validated.usage,
         latencyMs: validated.latencyMs,
@@ -520,20 +577,9 @@ function createPlanner(
               : { diagnosticsRef: validated.error.diagnosticsRef }),
           },
         };
-      try {
-        await withAbort(
-          dependencies.attemptLedger.recordTerminal(
-            deepFreeze(structuredClone(terminalRecord)),
-            timeoutController.signal,
-          ),
-          timeoutController.signal,
-        );
-      } catch (error) {
-        throw new BrokerError(
-          timeoutController.signal.aborted ? "ENGINE_TIMEOUT" : "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
-          503,
-          error,
-        );
+      await writeTerminal(terminalRecord);
+      if (!replayGuard.consume(`${attempt.nonce}:${validated.responseEnvelopeDigest}`)) {
+        throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
       }
       if (validated.kind === "failure") {
         throw new BrokerError("ENGINE_EXECUTION_FAILED", 503, new Error(validated.error.code));

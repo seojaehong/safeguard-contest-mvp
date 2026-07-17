@@ -10,6 +10,7 @@ export const REMOTE_HERMES_ATTEMPT_RECEIPT_VERSION = "remote-hermes-attempt-ledg
 
 const SHA256_HEX = /^[a-f0-9]{64}$/u;
 const OPAQUE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u;
+const OPAQUE_DIAGNOSTICS_REF = /^[a-z][a-z0-9._:-]{0,127}$/u;
 
 export type RemoteHermesTaskIntent = "naturalize_safety_claims";
 export type RemoteHermesOutputIntent = "safety_chat";
@@ -167,21 +168,32 @@ type RemoteHermesTerminalRecordCommon = Readonly<{
   attemptId: string;
   logicalRequestDigest: string;
   attemptEnvelopeDigest: string;
-  responseEnvelopeDigest: string;
-  usage: RemoteHermesUsage;
   latencyMs: number;
 }>;
 
 export type RemoteHermesTerminalRecord = RemoteHermesTerminalRecordCommon & (
   | Readonly<{
     terminalStatus: "success";
+    responseEnvelopeDigest: string;
+    usage: RemoteHermesUsage;
   }>
   | Readonly<{
     terminalStatus: "failure";
+    responseEnvelopeDigest: string;
+    usage: RemoteHermesUsage;
     error: Readonly<{
       code: RemoteHermesErrorCode;
       origin: "gateway" | "worker";
       diagnosticsRef?: string;
+    }>;
+  }>
+  | Readonly<{
+    terminalStatus: "failure";
+    responseEnvelopeDigest?: never;
+    usage?: never;
+    error: Readonly<{
+      code: RemoteHermesErrorCode;
+      origin: "gateway";
     }>;
   }>
 );
@@ -775,6 +787,7 @@ export function validateRemoteHermesResponse(input: {
   verificationSecret: string;
   now?: Date;
   replayGuard: RemoteHermesReplayGuard;
+  consumeReplay?: boolean;
 }): RemoteHermesValidatedResponse {
   const nowMs = (input.now ?? new Date()).getTime();
   if (!Number.isFinite(nowMs) || nowMs >= Date.parse(input.attempt.expiresAt)) fail("REMOTE_EXPIRED");
@@ -870,7 +883,8 @@ export function validateRemoteHermesResponse(input: {
       || !REMOTE_ERROR_CODES.includes(response.error.code as RemoteHermesErrorCode)
       || (response.error.origin !== "gateway" && response.error.origin !== "worker")
       || (response.error.diagnosticsRef !== undefined
-        && (typeof response.error.diagnosticsRef !== "string" || response.error.diagnosticsRef.length > 128))) {
+        && (typeof response.error.diagnosticsRef !== "string"
+          || !OPAQUE_DIAGNOSTICS_REF.test(response.error.diagnosticsRef)))) {
       fail("REMOTE_RESPONSE_INVALID");
     }
     const error = {
@@ -889,7 +903,8 @@ export function validateRemoteHermesResponse(input: {
       responseEnvelopeDigest: recomputedDigest,
     };
   }
-  if (!input.replayGuard.consume(`${input.attempt.nonce}:${recomputedDigest}`)) {
+  if (input.consumeReplay !== false
+    && !input.replayGuard.consume(`${input.attempt.nonce}:${recomputedDigest}`)) {
     fail("REMOTE_REPLAY_REJECTED");
   }
   return validated;

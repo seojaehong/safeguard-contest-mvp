@@ -19,11 +19,25 @@
       "tests": 1,
       "expectedFailures": 1
     },
+    "reviewRemediationRed": {
+      "files": 2,
+      "tests": 35,
+      "expectedFailures": 7
+    },
     "focusedGreen": {
       "files": 6,
-      "tests": 138,
-      "passed": 138,
-      "failed": 0
+      "tests": 144,
+      "passed": 144,
+      "failed": 0,
+      "command": "npm.cmd test -- tests/remote-hermes-contract.test.ts tests/remote-hermes-runtime.test.ts tests/remote-hermes-route.test.ts tests/remote-hermes-https-transport.test.ts tests/hermes-engine-adapter.test.ts tests/claw-chat-route.test.ts",
+      "testFiles": [
+        "tests/remote-hermes-contract.test.ts",
+        "tests/remote-hermes-runtime.test.ts",
+        "tests/remote-hermes-route.test.ts",
+        "tests/remote-hermes-https-transport.test.ts",
+        "tests/hermes-engine-adapter.test.ts",
+        "tests/claw-chat-route.test.ts"
+      ]
     }
   },
   "verification": {

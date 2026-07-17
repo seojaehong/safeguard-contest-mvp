@@ -383,5 +383,70 @@ describe("remote Hermes contract", () => {
       kind: "failure",
       error: { code: "REMOTE_PROVIDER_TIMEOUT" },
     });
+
+    const verifyOnlyGuard = createRemoteHermesReplayGuard();
+    expect(validateRemoteHermesResponse({
+      response,
+      attempt,
+      attemptReceiptDigest: attemptReceipt.receiptDigest,
+      expectedServiceId: serviceId,
+      expectedKeyId: "hermes-key-1",
+      verificationSecret: "v".repeat(32),
+      now: new Date("2026-07-16T14:59:20.000Z"),
+      replayGuard: verifyOnlyGuard,
+      consumeReplay: false,
+    })).toMatchObject({ kind: "success" });
+    expect(validateRemoteHermesResponse({
+      response,
+      attempt,
+      attemptReceiptDigest: attemptReceipt.receiptDigest,
+      expectedServiceId: serviceId,
+      expectedKeyId: "hermes-key-1",
+      verificationSecret: "v".repeat(32),
+      now: new Date("2026-07-16T14:59:20.000Z"),
+      replayGuard: verifyOnlyGuard,
+      consumeReplay: false,
+    })).toMatchObject({ kind: "success" });
+    expect(verifyOnlyGuard.consume(`${attempt.nonce}:${responseEnvelopeDigest}`)).toBe(true);
+
+    for (const diagnosticsRef of [
+      "https://attacker.example/detail",
+      "operator@example.test",
+      "010-1234-5678",
+      "raw detail with spaces",
+      "내부 오류 상세",
+      "UPPERCASE-ID",
+    ]) {
+      const unsafeFailure = {
+        ...unsignedFailure,
+        error: { ...unsignedFailure.error, diagnosticsRef },
+      };
+      const unsafeDigest = digestRemoteHermesValue(unsafeFailure);
+      expect(() => validateRemoteHermesResponse({
+        response: {
+          ...unsafeFailure,
+          responseEnvelopeDigest: unsafeDigest,
+          serviceReceipt: {
+            responseEnvelopeDigest: unsafeDigest,
+            attemptEnvelopeDigest: attempt.attemptEnvelopeDigest,
+            requestNonce: attempt.nonce,
+            serviceId,
+            keyId: "hermes-key-1",
+            signature: signRemoteHermesDigest(
+              "v".repeat(32),
+              `safeclaw-engine-remote-response/v1:${serviceId}:${attempt.attemptEnvelopeDigest}`,
+              unsafeDigest,
+            ),
+          },
+        },
+        attempt,
+        attemptReceiptDigest: attemptReceipt.receiptDigest,
+        expectedServiceId: serviceId,
+        expectedKeyId: "hermes-key-1",
+        verificationSecret: "v".repeat(32),
+        now: new Date("2026-07-16T14:59:20.000Z"),
+        replayGuard: createRemoteHermesReplayGuard(),
+      })).toThrow(expect.objectContaining({ code: "REMOTE_RESPONSE_INVALID" }));
+    }
   });
 });
