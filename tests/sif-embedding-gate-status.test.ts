@@ -9,6 +9,9 @@ function canonicalizeMachineFixture(value: unknown, key = ""): unknown {
   if (key === "sha256" || key === "byteSize" || key === "approvalFingerprint") {
     return `<${typeof value}>`;
   }
+  if (key === "generatedAt" || key === "checkedAt") {
+    return "<timestamp>";
+  }
   if (typeof value === "string") {
     const normalizedPath = /path$/iu.test(key) ? value.replace(/\\/g, "/") : value;
     return key === "evidenceSummary"
@@ -352,6 +355,6 @@ describe("SIF embedding gate status", () => {
     const canonicalFixture = JSON.stringify(canonicalizeMachineFixture(jsonValue));
     const fixtureHash = createHash("sha256").update(canonicalFixture).digest("hex");
 
-    expect(fixtureHash).toBe("f1fefacf29a64968543595754c3ebcab2b7288def75359f9d294051824e89451");
+    expect(fixtureHash).toBe("52eeb49392938b0a8430d66728d5e36fa21a01b56e875d30e036be50919468fd");
   });
 });
