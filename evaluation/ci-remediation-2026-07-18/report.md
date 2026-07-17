@@ -23,6 +23,11 @@
    - The read-only handoff for `de4103db` said no recipient portal existed.
    - Current source already contains `/share/[sessionId]` and `/api/share-sessions/[sessionId]`, so no copy-only downgrade was applied in this remediation.
 
+5. Exact KOSHA trust-gate search boundary
+   - Kept remote technical KOSHA rows out of exact-registry search results unless the row is one of the configured exact trusted bundle items.
+   - Disabled local snapshot broadening when `sourceId`, `riskTag`, or `evidenceRole` is used as an explicit filter.
+   - Recomputed `koshaGrounding` summaries from the retained item set after exact bundle replacement.
+
 ## Verification
 
 - `npm.cmd test -- tests\generation-evidence-operation-routes.test.ts tests\kosha-current-review-run-ask.test.ts tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false`
@@ -39,6 +44,12 @@
   - PASS, coverage issues 0, violations 0
 - `node .\scripts\frontend_consistency_browser_audit.mjs`
   - PASS, 111/111 rows, failed rows 0, findings 0
+- `npm.cmd test -- tests\photo-vision-analysis.test.ts tests\kosha-grounding-fail-closed.test.ts tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false`
+  - 3 files / 103 tests PASS
+- `npm.cmd test -- tests\generation-evidence-operation-routes.test.ts tests\kosha-current-review-run-ask.test.ts tests\commercial-harness.test.ts tests\frontend-route-coverage.test.ts tests\photo-vision-analysis.test.ts tests\kosha-grounding-fail-closed.test.ts --maxWorkers=1 --fileParallelism=false`
+  - 6 files / 176 tests PASS
+- `npm.cmd run build`
+  - PASS, 28/28 static pages
 
 ## Artifacts
 

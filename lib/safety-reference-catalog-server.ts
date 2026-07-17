@@ -341,7 +341,10 @@ function isKoshaTechnicalItemType(itemType: string): boolean {
 }
 
 function localSnapshotAllowed(options: SafetyReferenceServerSearchOptions): boolean {
-  return !options.sourceId && !options.riskTag && (!options.itemType || isKoshaTechnicalItemType(options.itemType));
+  return !options.sourceId
+    && !options.riskTag
+    && !options.evidenceRole
+    && (!options.itemType || isKoshaTechnicalItemType(options.itemType));
 }
 
 function koshaTrustGateApplies(options: SafetyReferenceServerSearchOptions): boolean {
@@ -480,7 +483,10 @@ export function mergeBundledExactKoshaFallbacks(input: Readonly<{
     gated.find((item) => item.id === bundledItem.id && isProductionTrustedKoshaReference(item))
     ?? bundledItem
   ));
-  const retained = gated.filter((item) => !configuredIds.has(item.id));
+  const retained = gated.filter((item) => (
+    !configuredIds.has(item.id)
+    && !isKoshaTechnicalReference(item)
+  ));
   const selected = [...exactItems, ...retained];
   const deduplicated: SafetyReferenceItem[] = [];
   const seen = new Set<string>();
@@ -503,6 +509,7 @@ export async function searchSafetyReferences(
   const localCorpus = trustGateActive
     ? await loadKoshaGuideCorpus(options.offlineCorpus)
     : { status: "unconfigured" as const, rootDir: null, failures: [] as [] };
+  const responseLocalCorpusStatus = localSearchAllowed ? localCorpus.status : "unconfigured";
   const localSearch = localSearchAllowed && localCorpus.status === "ready"
     ? searchKoshaGuideCorpus(localCorpus, query, limit, options.itemType)
     : { retrievalMode: null, items: [] };
@@ -550,6 +557,11 @@ export async function searchSafetyReferences(
         configured: true,
         count: retainedRemoteItems.length,
         items: retainedRemoteItems,
+        koshaGrounding: summarizeKoshaGrounding({
+          items: retainedRemoteItems,
+          localCorpusStatus: localGateStatus ?? responseLocalCorpusStatus,
+          excludedCount: excludedRemoteCount,
+        }),
         message: bundledFallbackUsed
           ? `${remote.message} 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다.`.trim()
           : `${remote.message} 질의 및 exact trust gate 기준에 맞지 않는 KOSHA 원격 행을 제외했습니다.`.trim(),
@@ -574,7 +586,7 @@ export async function searchSafetyReferences(
         items: retainedRemoteItems,
         koshaGrounding: summarizeKoshaGrounding({
           items: retainedRemoteItems,
-          localCorpusStatus: localGateStatus ?? localCorpus.status,
+          localCorpusStatus: localGateStatus ?? responseLocalCorpusStatus,
           excludedCount: excludedRemoteCount,
           blockedReason,
         }),
