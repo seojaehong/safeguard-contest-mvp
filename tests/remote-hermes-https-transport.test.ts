@@ -1,13 +1,22 @@
+import { EventEmitter } from "node:events";
+import type { ClientRequest, IncomingMessage } from "node:http";
+import { PassThrough } from "node:stream";
+import type { DetailedPeerCertificate } from "node:tls";
+
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  createNodeRemoteHermesHttpsDial,
   createRemoteHermesHttpsTransport,
+  REMOTE_HERMES_MAX_OUTBOUND_BODY_BYTES,
   type RemoteHermesHttpsDial,
   type RemoteHermesHttpsDialInput,
   type RemoteHermesHttpsDialResult,
   type RemoteHermesResolvedAddress,
   type RemoteHermesResolver,
+  type RemoteHermesNodeRequestFactory,
 } from "@/lib/remote-hermes-https-transport";
+import { createRemoteHermesPolicyAttestation } from "@/lib/remote-hermes-contract";
 import type {
   RemoteHermesAttemptEnvelope,
   RemoteHermesAttemptReceipt,
@@ -25,6 +34,10 @@ function dispatchInput(signal: AbortSignal = new AbortController().signal) {
     body: JSON.stringify({ request: "safe" }),
     signal,
   };
+}
+
+function dispatchInputWithBody(body: string, signal: AbortSignal = new AbortController().signal) {
+  return { ...dispatchInput(signal), body };
 }
 
 function dialResult(
@@ -61,6 +74,110 @@ function createTransport(input: {
 }
 
 describe("remote Hermes pinned HTTPS transport", () => {
+  it("accepts an outbound body at the exact UTF-8 byte cap", async () => {
+    const resolver = vi.fn(async () => [{ address: "93.184.216.34", family: 4 as const }]);
+    const dial = vi.fn(async (input: RemoteHermesHttpsDialInput) => dialResult(input));
+    const transport = createRemoteHermesHttpsTransport({
+      serviceId: "hermes-service",
+      policyAttestationDigest: "a".repeat(64),
+      resolver,
+      dial,
+    });
+    const exactBody = `${"가".repeat(Math.floor(REMOTE_HERMES_MAX_OUTBOUND_BODY_BYTES / 3))}${"a".repeat(
+      REMOTE_HERMES_MAX_OUTBOUND_BODY_BYTES % 3,
+    )}`;
+    expect(Buffer.byteLength(exactBody, "utf8")).toBe(REMOTE_HERMES_MAX_OUTBOUND_BODY_BYTES);
+
+    await transport.dispatch(dispatchInputWithBody(exactBody));
+
+    expect(resolver).toHaveBeenCalledOnce();
+    expect(dial).toHaveBeenCalledOnce();
+  });
+
+  it("rejects an outbound body over the UTF-8 byte cap before DNS or dialing", async () => {
+    const resolver = vi.fn<RemoteHermesResolver>();
+    const dial = vi.fn<RemoteHermesHttpsDial>();
+    const transport = createRemoteHermesHttpsTransport({
+      serviceId: "hermes-service",
+      policyAttestationDigest: "a".repeat(64),
+      resolver,
+      dial,
+    });
+    const overBody = `${"a".repeat(REMOTE_HERMES_MAX_OUTBOUND_BODY_BYTES)}가`;
+
+    await expect(transport.dispatch(dispatchInputWithBody(overBody))).rejects.toThrow("outbound body exceeds");
+    expect(resolver).not.toHaveBeenCalled();
+    expect(dial).not.toHaveBeenCalled();
+  });
+
+  it("uses the Node HTTPS request path with the pin and original TLS hostname", async () => {
+    let requestOptions: Parameters<RemoteHermesNodeRequestFactory>[1] | undefined;
+    const response = Object.assign(new PassThrough(), {
+      statusCode: 200,
+      headers: { "content-type": "application/json" },
+      socket: { remoteAddress: "93.184.216.34" },
+    });
+    const end = vi.fn(() => response.end("{}"));
+    const request = Object.assign(new EventEmitter(), { end }) as unknown as ClientRequest;
+    const requestFactory = vi.fn<RemoteHermesNodeRequestFactory>((_url, options, onResponse) => {
+      requestOptions = options;
+      queueMicrotask(() => onResponse(response as unknown as IncomingMessage));
+      return request;
+    });
+    const certificateVerifier = vi.fn((
+      _hostname: string,
+      _certificate: DetailedPeerCertificate,
+    ) => undefined);
+    const nodeDial = createNodeRemoteHermesHttpsDial({ requestFactory, certificateVerifier });
+    const input: RemoteHermesHttpsDialInput = {
+      url: new URL(endpoint),
+      body: "{}",
+      signal: new AbortController().signal,
+      selectedAddress: "93.184.216.34",
+      selectedFamily: 4,
+      servername: "hermes.example.test",
+      certificateHostname: "hermes.example.test",
+      rejectUnauthorized: true,
+      hostHeader: "hermes.example.test",
+    };
+
+    const result = await nodeDial(input);
+    if (!requestOptions) throw new Error("request factory did not receive options");
+    expect(requestFactory).toHaveBeenCalledWith(new URL(endpoint), expect.any(Object), expect.any(Function));
+    expect(requestOptions).toMatchObject({
+      method: "POST",
+      agent: false,
+      rejectUnauthorized: true,
+      servername: "hermes.example.test",
+      headers: expect.objectContaining({ host: "hermes.example.test" }),
+    });
+    expect(end).toHaveBeenCalledWith("{}");
+    expect(result.connectedAddress).toBe("93.184.216.34");
+
+    const lookup = requestOptions.lookup as unknown as (
+      hostname: string,
+      options: object,
+      callback: (error: NodeJS.ErrnoException | null, address: string, family: number) => void,
+    ) => void;
+    await new Promise<void>((resolve, reject) => {
+      lookup("hermes.example.test", {}, (error, address, family) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        expect(address).toBe("93.184.216.34");
+        expect(family).toBe(4);
+        resolve();
+      });
+    });
+
+    const verifyCertificate = requestOptions.checkServerIdentity;
+    if (!verifyCertificate) throw new Error("certificate verifier was not configured");
+    verifyCertificate("socket-callback-host.invalid", {} as DetailedPeerCertificate);
+    expect(certificateVerifier).toHaveBeenCalledWith("hermes.example.test", expect.any(Object));
+    await result.body.cancel();
+  });
+
   it("resolves once, pins a public address, and reports the actual socket address", async () => {
     const resolver = vi.fn(async () => [{ address: "93.184.216.34", family: 4 as const }]);
     const dial = vi.fn(async (input: RemoteHermesHttpsDialInput) => dialResult(input));
@@ -240,10 +357,40 @@ describe("remote Hermes pinned HTTPS transport", () => {
     }));
   });
 
-  it("keeps the runtime unavailable when only the transport exists and no ledger is supplied", async () => {
+  it("isolates the missing durable ledger as the only runtime availability blocker", async () => {
     const { createRemoteHermesRuntime } = await import("@/lib/remote-hermes-runtime");
     const transport = createTransport({});
+    const now = Date.now();
+    const env = {
+      SAFECLAW_REMOTE_HERMES_ENDPOINT: endpoint,
+      SAFECLAW_REMOTE_HERMES_HOST_ALLOWLIST: "hermes.example.test",
+      SAFECLAW_REMOTE_HERMES_TENANT_ALLOWLIST: "org-1:site-1",
+      SAFECLAW_REMOTE_HERMES_ISSUER: "safeclaw-control-plane",
+      SAFECLAW_REMOTE_HERMES_AUDIENCE: "hermes-gateway",
+      SAFECLAW_REMOTE_HERMES_REQUEST_KEY_ID: "safeclaw-request-key",
+      SAFECLAW_REMOTE_HERMES_REQUEST_SIGNING_SECRET: "s".repeat(32),
+      SAFECLAW_REMOTE_HERMES_SERVICE_ID: "hermes-service",
+      SAFECLAW_REMOTE_HERMES_RESPONSE_KEY_ID: "hermes-response-key",
+      SAFECLAW_REMOTE_HERMES_RESPONSE_VERIFICATION_SECRET: "v".repeat(32),
+      SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION: JSON.stringify(createRemoteHermesPolicyAttestation({
+        serviceId: "hermes-service",
+        endpointOrigin: origin,
+        issuedAt: new Date(now - 1_000).toISOString(),
+        expiresAt: new Date(now + 60_000).toISOString(),
+        keyId: "hermes-response-key",
+        signingSecret: "v".repeat(32),
+      })),
+    };
 
-    expect(createRemoteHermesRuntime({ env: {}, trustedTransport: transport })).toBeUndefined();
+    expect(createRemoteHermesRuntime({
+      env,
+      trustedTransport: transport,
+      attemptLedger: {
+        reserve: vi.fn(async () => {
+          throw new Error("ledger fixture must not execute during runtime creation");
+        }),
+      },
+    })).toBeDefined();
+    expect(createRemoteHermesRuntime({ env, trustedTransport: transport })).toBeUndefined();
   });
 });

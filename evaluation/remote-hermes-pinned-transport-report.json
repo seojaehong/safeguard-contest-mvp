@@ -1,26 +1,31 @@
 {
   "schemaVersion": "remote-hermes-pinned-transport-evaluation/v1",
-  "generatedAt": "2026-07-17T11:15:00+09:00",
+  "generatedAt": "2026-07-17T11:27:00+09:00",
   "scope": "connection-pinned Remote Hermes Node HTTPS transport",
+  "independentReviewRemediation": "HOLD items addressed pending independent re-review",
+  "limits": {
+    "outboundRequestBodyUtf8Bytes": 32768,
+    "alignment": "REMOTE_HERMES_MAX_ENVELOPE_BYTES"
+  },
   "summary": {
     "itemCount": 2,
     "successCount": 2,
     "failureCount": 0,
-    "elapsedMs": 20347
+    "elapsedMs": 22508
   },
   "checks": [
     {
       "name": "focused-remote-hermes-tests",
       "status": "passed",
       "testFileCount": 4,
-      "testCount": 62,
-      "elapsedMs": 6112,
+      "testCount": 65,
+      "elapsedMs": 6767,
       "log": "evaluation/remote-hermes-pinned-transport-tests.log"
     },
     {
       "name": "typescript-strict-typecheck",
       "status": "passed",
-      "elapsedMs": 14235,
+      "elapsedMs": 15741,
       "log": "evaluation/remote-hermes-pinned-transport-typecheck.log"
     }
   ],
@@ -33,6 +38,12 @@
     "redirect rejection and body cancellation",
     "abort propagation and late body cancellation",
     "original Host, SNI, and certificate hostname preservation"
+  ],
+  "holdCorrections": [
+    "UTF-8 outbound body cap enforced before DNS resolution",
+    "exact boundary accepted and over-boundary rejected without resolver or dial calls",
+    "Node HTTPS request factory path verifies lookup pin, Host, SNI, certificate hostname, and socket remoteAddress",
+    "valid signed environment and trusted transport prove the durable ledger is the isolated runtime blocker"
   ],
   "activation": {
     "routeWired": false,
