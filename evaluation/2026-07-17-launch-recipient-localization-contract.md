@@ -71,7 +71,7 @@
 - Mobile browser contract: 1 test passed across desktop/mobile x day/night with one visible primary CTA and no clipping or overflow.
 - `npm.cmd run typecheck`: passed.
 - `git diff --check`: passed.
-- Full `npm.cmd test`: **RED**. 171 test files passed, 5 failed, and 8 skipped; 2,059 tests passed, 5 failed, and 24 skipped.
-- Full-suite failed suites: `knowledge-page-layout.test.ts` and `product-module-shell.test.ts` could not start Next because `.next/prerender-manifest.json` was missing.
-- Full-suite failed tests: stale frontend source identity, isolated Next browser harness timeout, and three reports git-fixture timeout cases.
-- The localization-focused and mobile gates are green, but the repository-wide test gate remains red.
+- Final integrated full serial suite: 178 files passed, 8 skipped; 2,154 tests passed, 14 skipped; failures 0.
+- Final production build: 28/28 static pages passed after eliminating concurrent `.next` writers.
+- Final frontend evidence: static violations 0, normal marker 0, audit marker 1, browser rows 108/108 with findings 0.
+- Actual provider dispatch remains intentionally blocked until the persistent idempotency migration receives explicit approval and passes its DB concurrency/RLS gates.

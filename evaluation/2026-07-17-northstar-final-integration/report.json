@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-07-17T09:14:00+09:00",
+  "productHead": "80dcf230449dd9011c5f88a9f3e12b1172185515",
+  "branch": "integrate/northstar-security-20260717",
+  "databaseMutation": false,
+  "tests": {
+    "fullSerial": {
+      "passedFiles": 178,
+      "skippedFiles": 8,
+      "passedTests": 2154,
+      "skippedTests": 14,
+      "failedTests": 0,
+      "durationSeconds": 857.96
+    },
+    "koshaWave2": { "files": 5, "passed": 77, "failed": 0 },
+    "koshaPython": { "passed": 19, "failed": 0 },
+    "editedWorkpackRevalidation": { "files": 4, "passed": 32, "failed": 0 },
+    "recipientLocalization": { "files": 4, "passed": 66, "failed": 0 },
+    "frontendEvidence": { "passed": 39, "failed": 0 }
+  },
+  "build": { "status": "pass", "staticPages": 28 },
+  "frontend": {
+    "staticViolations": 0,
+    "coverageIssues": 0,
+    "normalBundleMarkers": 0,
+    "auditBundleMarkers": 1,
+    "browserRows": 108,
+    "browserFailedRows": 0,
+    "browserFindings": 0
+  },
+  "providerDispatch": {
+    "enabled": false,
+    "status": "persistent-idempotency-approval-required",
+    "providerCalledInVerification": false
+  }
+}
