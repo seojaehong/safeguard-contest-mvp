@@ -114,13 +114,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
     ? findShareSessionRecipient(activeSession.session.recipients, workerId)
     : null;
 
-  const resolvedDisplayName = activeSession.session.accessPolicy.anonymousAllowed && authorizedRecipient?.displayName
-    ? authorizedRecipient.displayName
-    : displayName;
+  const resolvedDisplayName = authorizedRecipient?.displayName || displayName;
   const resolvedWorkerId = workerId || null;
-  const resolvedSnapshot = activeSession.session.accessPolicy.anonymousAllowed && authorizedRecipient?.workerSnapshot
-    ? authorizedRecipient.workerSnapshot
-    : {
+  const resolvedSnapshot = authorizedRecipient?.workerSnapshot
+    || {
       ...manualWorkerSnapshot,
       source: "public-share",
       shareSessionId: activeSession.session.id,

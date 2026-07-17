@@ -261,6 +261,31 @@ describe("share session route authority", () => {
     }]);
   });
 
+  it("public recipient confirmation ignores forged body fields and stores the invited snapshot", async () => {
+    const fake = makeConfirmationClient(null);
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const response = await POST(jsonRequest(`/api/share-sessions/${SESSION_ID}`, {
+      workerId: WORKER_ID,
+      displayName: "Forged Name",
+      languageCode: "ko",
+      workerSnapshot: {
+        workerId: WORKER_ID,
+        displayName: "Forged Name",
+        phone: "010-9999-9999"
+      }
+    }), { params: Promise.resolve({ sessionId: SESSION_ID }) });
+
+    expect(response.status).toBe(200);
+    expect(fake.inserted()).toMatchObject({
+      worker_id: WORKER_ID,
+      worker_display_name: "Server Nguyen",
+      language_code: "vi",
+      worker_snapshot: serverRecipient.workerSnapshot
+    });
+  });
+
   it("ignores forged recipient fields and persists only the server worker snapshot", async () => {
     const fake = makeShareInsertClient();
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
