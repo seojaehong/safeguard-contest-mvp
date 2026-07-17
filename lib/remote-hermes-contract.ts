@@ -10,7 +10,7 @@ export const REMOTE_HERMES_ATTEMPT_RECEIPT_VERSION = "remote-hermes-attempt-ledg
 
 const SHA256_HEX = /^[a-f0-9]{64}$/u;
 const OPAQUE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u;
-const OPAQUE_DIAGNOSTICS_REF = /^[a-z][a-z0-9._:-]{0,127}$/u;
+const OPAQUE_DIAGNOSTICS_REF = /^diag_[a-f0-9]{64}$/u;
 
 export type RemoteHermesTaskIntent = "naturalize_safety_claims";
 export type RemoteHermesOutputIntent = "safety_chat";

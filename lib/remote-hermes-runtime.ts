@@ -32,7 +32,8 @@ import {
   type RemoteHermesTerminalRecord,
 } from "@/lib/remote-hermes-contract";
 
-const REMOTE_TIMEOUT_MS = 20_000;
+export const REMOTE_HERMES_EXECUTION_TIMEOUT_MS = 20_000;
+export const REMOTE_HERMES_TERMINAL_PERSIST_TIMEOUT_MS = 2_000;
 const ATTEMPT_TTL_MS = 15_000;
 const OUTPUT_BYTES = 8_192;
 export const REMOTE_HERMES_MAX_ENVELOPE_BYTES = 32_768;
@@ -392,7 +393,7 @@ function createPlanner(
       claimsProjection: projectClaims(input.evidenceClaims),
       policyVersion: "remote-naturalizer-policy/v1",
       logicalBudget: {
-        deadlineAt: new Date(issuedAtMs + REMOTE_TIMEOUT_MS).toISOString(),
+        deadlineAt: new Date(issuedAtMs + REMOTE_HERMES_EXECUTION_TIMEOUT_MS).toISOString(),
         providerCalls: 1,
         outputBytes: OUTPUT_BYTES,
         retryAllowance: 0,
@@ -415,7 +416,10 @@ function createPlanner(
     const timeoutController = new AbortController();
     const abortFromCaller = (): void => timeoutController.abort(input.signal.reason);
     input.signal.addEventListener("abort", abortFromCaller, { once: true });
-    const timeout = setTimeout(() => timeoutController.abort(), REMOTE_TIMEOUT_MS);
+    const timeout = setTimeout(
+      () => timeoutController.abort(new Error("remote Hermes execution deadline exceeded")),
+      REMOTE_HERMES_EXECUTION_TIMEOUT_MS,
+    );
     const terminalLatencyMs = (): number => {
       const elapsed = now().getTime() - issuedAtMs;
       return Number.isSafeInteger(elapsed) && elapsed >= 0 ? elapsed : 0;
@@ -430,21 +434,28 @@ function createPlanner(
       attemptEnvelopeDigest: attempt.attemptEnvelopeDigest,
     });
     const writeTerminal = async (record: RemoteHermesTerminalRecord): Promise<void> => {
+      const terminalController = new AbortController();
+      const terminalTimeout = setTimeout(
+        () => terminalController.abort(new Error("remote Hermes terminal persistence deadline exceeded")),
+        REMOTE_HERMES_TERMINAL_PERSIST_TIMEOUT_MS,
+      );
       let result: "recorded" | "duplicate";
       try {
         result = await withAbort(
           dependencies.attemptLedger.recordTerminal(
             deepFreeze(structuredClone(record)),
-            timeoutController.signal,
+            terminalController.signal,
           ),
-          timeoutController.signal,
+          terminalController.signal,
         );
       } catch (error) {
         throw new BrokerError(
-          timeoutController.signal.aborted ? "ENGINE_TIMEOUT" : "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+          "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
           503,
           error,
         );
+      } finally {
+        clearTimeout(terminalTimeout);
       }
       if (result !== "recorded") {
         throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503);
@@ -455,13 +466,25 @@ function createPlanner(
       brokerCode: "ENGINE_TIMEOUT" | "ENGINE_EXECUTION_FAILED" | "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
       cause?: unknown,
     ): Promise<never> => {
-      await writeTerminal({
-        ...terminalIdentity(),
-        terminalStatus: "failure",
-        latencyMs: terminalLatencyMs(),
-        error: { code: errorCode, origin: "gateway" },
-      });
-      throw new BrokerError(brokerCode, 503, cause);
+      const original = new BrokerError(brokerCode, 503, cause);
+      try {
+        await writeTerminal({
+          ...terminalIdentity(),
+          terminalStatus: "failure",
+          latencyMs: terminalLatencyMs(),
+          error: { code: errorCode, origin: "gateway" },
+        });
+      } catch (terminalError) {
+        throw new BrokerError(
+          brokerCode,
+          503,
+          new AggregateError(
+            [original, terminalError],
+            "remote Hermes gateway failure could not be terminally recorded",
+          ),
+        );
+      }
+      throw original;
     };
     let responseText: string;
     let attemptReceipt: RemoteHermesAttemptReceipt;

@@ -12,12 +12,15 @@ import {
 import {
   createRemoteHermesRuntime,
   readRemoteHermesResponseBody,
+  REMOTE_HERMES_EXECUTION_TIMEOUT_MS,
+  REMOTE_HERMES_TERMINAL_PERSIST_TIMEOUT_MS,
   type RemoteHermesAttemptLedger,
   type RemoteHermesRuntimeDependencies,
   type RemoteHermesTrustedConnection,
 } from "@/lib/remote-hermes-runtime";
 
 const now = new Date("2026-07-16T14:59:00.000Z");
+const SAFE_DIAGNOSTICS_REF = `diag_${"a".repeat(64)}`;
 
 type AttemptReceipt = {
   version: "remote-hermes-attempt-ledger-receipt/v1";
@@ -170,7 +173,7 @@ function trustedConnection(): RemoteHermesTrustedConnection {
 function failureResponse(
   attempt: RemoteHermesAttemptEnvelope,
   receipt: AttemptReceipt,
-  diagnosticsRef = "diag-safe-1",
+  diagnosticsRef = SAFE_DIAGNOSTICS_REF,
 ): Response {
   const unsigned = {
     responseVersion: "engine-remote-response/v1" as const,
@@ -477,7 +480,7 @@ describe("remote Hermes runtime", () => {
       error: {
         code: "REMOTE_PROVIDER_UNAVAILABLE",
         origin: "worker",
-        diagnosticsRef: "diag-safe-1",
+        diagnosticsRef: SAFE_DIAGNOSTICS_REF,
       },
       usage: expect.objectContaining({ inputTokens: 17, outputTokens: 0, usageComplete: true }),
       latencyMs: 12,
@@ -606,7 +609,14 @@ describe("remote Hermes runtime", () => {
     expect(JSON.stringify(terminalRecords)).not.toMatch(/raw secret/iu);
   });
 
-  it("rejects malicious signed diagnostics without persisting the raw detail", async () => {
+  it.each([
+    "password:abc123",
+    "token_abcdef",
+    "p010-1234-5678",
+    "https://attacker.example/detail",
+    "operator@example.test",
+    "내부 오류 상세",
+  ])("rejects non-opaque signed diagnostics without persisting %s", async (diagnosticsRef) => {
     const terminalRecords: RemoteHermesTerminalRecord[] = [];
     const ledger = {
       reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt),
@@ -622,11 +632,7 @@ describe("remote Hermes runtime", () => {
           attemptReceipt: AttemptReceipt;
         };
         return {
-          response: failureResponse(
-            payload.attempt,
-            payload.attemptReceipt,
-            "https://attacker.example/010-1234-5678 내부 상세",
-          ),
+          response: failureResponse(payload.attempt, payload.attemptReceipt, diagnosticsRef),
           connection: trustedConnection(),
         };
       }),
@@ -642,7 +648,161 @@ describe("remote Hermes runtime", () => {
       terminalStatus: "failure",
       error: { code: "REMOTE_RESPONSE_INVALID", origin: "gateway" },
     })]);
-    expect(JSON.stringify(terminalRecords)).not.toMatch(/attacker|010-1234|내부 상세/iu);
+    expect(JSON.stringify(terminalRecords)).not.toContain(diagnosticsRef);
+  });
+
+  it("uses a fresh non-aborted signal to close the terminal after caller abort", async () => {
+    const callerController = new AbortController();
+    let terminalSignal: AbortSignal | undefined;
+    const ledger = {
+      reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt),
+      recordTerminal: vi.fn(async (_record: RemoteHermesTerminalRecord, signal: AbortSignal) => {
+        terminalSignal = signal;
+        expect(signal).not.toBe(callerController.signal);
+        expect(signal.aborted).toBe(false);
+        return "recorded" as const;
+      }),
+    };
+    const transport = {
+      dispatch: vi.fn(async ({ signal }: { signal: AbortSignal }) => await new Promise<never>((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+      })),
+    };
+    const runtime = createRemoteHermesRuntime(runtimeDependencies({ attemptLedger: ledger, trustedTransport: transport }));
+    expect(runtime).toBeDefined();
+    if (!runtime) return;
+    const input = plannerInput();
+    input.signal = callerController.signal;
+    const pending = runtime.planner(input);
+    await vi.waitFor(() => expect(transport.dispatch).toHaveBeenCalledTimes(1));
+    callerController.abort(new Error("caller aborted"));
+
+    await expect(pending).rejects.toMatchObject({ code: "ENGINE_TIMEOUT" });
+    expect(ledger.recordTerminal).toHaveBeenCalledTimes(1);
+    expect(terminalSignal?.aborted).toBe(false);
+  });
+
+  it("uses an independent signal to close the terminal after execution timeout", async () => {
+    vi.useFakeTimers();
+    try {
+      let executionSignal: AbortSignal | undefined;
+      let terminalSignal: AbortSignal | undefined;
+      const ledger = {
+        reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt),
+        recordTerminal: vi.fn(async (_record: RemoteHermesTerminalRecord, signal: AbortSignal) => {
+          terminalSignal = signal;
+          expect(signal).not.toBe(executionSignal);
+          expect(signal.aborted).toBe(false);
+          return "recorded" as const;
+        }),
+      };
+      const transport = {
+        dispatch: vi.fn(async ({ signal }: { signal: AbortSignal }) => {
+          executionSignal = signal;
+          return await new Promise<never>((_resolve, reject) => {
+            signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+          });
+        }),
+      };
+      const runtime = createRemoteHermesRuntime(runtimeDependencies({ attemptLedger: ledger, trustedTransport: transport }));
+      expect(runtime).toBeDefined();
+      if (!runtime) return;
+      const pending = runtime.planner(plannerInput());
+      const rejection = expect(pending).rejects.toMatchObject({ code: "ENGINE_TIMEOUT" });
+      await vi.advanceTimersByTimeAsync(REMOTE_HERMES_EXECUTION_TIMEOUT_MS);
+
+      await rejection;
+      expect(ledger.recordTerminal).toHaveBeenCalledTimes(1);
+      expect(terminalSignal?.aborted).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("bounds terminal persistence after abort without masking the timeout", async () => {
+    vi.useFakeTimers();
+    try {
+      const callerController = new AbortController();
+      let terminalSignal: AbortSignal | undefined;
+      const ledger = {
+        reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt),
+        recordTerminal: vi.fn(async (_record: RemoteHermesTerminalRecord, signal: AbortSignal) => {
+          terminalSignal = signal;
+          return await new Promise<never>(() => undefined);
+        }),
+      };
+      const transport = {
+        dispatch: vi.fn(async ({ signal }: { signal: AbortSignal }) => await new Promise<never>((_resolve, reject) => {
+          signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+        })),
+      };
+      const runtime = createRemoteHermesRuntime(runtimeDependencies({ attemptLedger: ledger, trustedTransport: transport }));
+      expect(runtime).toBeDefined();
+      if (!runtime) return;
+      const input = plannerInput();
+      input.signal = callerController.signal;
+      const pending = runtime.planner(input);
+      const rejection = expect(pending).rejects.toMatchObject({ code: "ENGINE_TIMEOUT" });
+      await vi.waitFor(() => expect(transport.dispatch).toHaveBeenCalledTimes(1));
+      callerController.abort(new Error("caller aborted"));
+      await vi.waitFor(() => expect(ledger.recordTerminal).toHaveBeenCalledTimes(1));
+      await vi.advanceTimersByTimeAsync(REMOTE_HERMES_TERMINAL_PERSIST_TIMEOUT_MS);
+
+      await rejection;
+      expect(terminalSignal?.aborted).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it.each([
+    ["transport", "throw", "ENGINE_EXECUTION_FAILED"],
+    ["transport", "duplicate", "ENGINE_EXECUTION_FAILED"],
+    ["validation", "throw", "ENGINE_EXECUTION_ATTESTATION_UNPROVEN"],
+    ["validation", "duplicate", "ENGINE_EXECUTION_ATTESTATION_UNPROVEN"],
+  ] as const)("preserves the original %s classification when terminal close returns %s", async (phase, terminalOutcome, expectedCode) => {
+    const ledgerFailure = new Error("terminal ledger unavailable");
+    const ledger = {
+      reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt),
+      recordTerminal: vi.fn(async () => {
+        if (terminalOutcome === "throw") throw ledgerFailure;
+        return "duplicate" as const;
+      }),
+    };
+    const transport = {
+      dispatch: vi.fn(async ({ body }: { body: string }) => {
+        if (phase === "transport") throw new Error("transport unavailable");
+        const payload = JSON.parse(body) as {
+          attempt: RemoteHermesAttemptEnvelope;
+          attemptReceipt: AttemptReceipt;
+        };
+        const signed = await successResponse(payload.attempt, payload.attemptReceipt).json() as {
+          serviceReceipt: { signature: string };
+        };
+        signed.serviceReceipt.signature = "0".repeat(64);
+        return {
+          response: new Response(JSON.stringify(signed), { status: 200 }),
+          connection: trustedConnection(),
+        };
+      }),
+    };
+    const runtime = createRemoteHermesRuntime(runtimeDependencies({ attemptLedger: ledger, trustedTransport: transport }));
+    expect(runtime).toBeDefined();
+    if (!runtime) return;
+    const emitted: HermesPlannerTextOutput[] = [];
+    const input = plannerInput();
+    input.emitText = (output) => emitted.push(output);
+
+    let caught: unknown;
+    try {
+      await runtime.planner(input);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toMatchObject({ code: expectedCode, cause: expect.any(AggregateError) });
+    expect((caught as Error & { cause: AggregateError }).cause.errors).toHaveLength(2);
+    expect(ledger.recordTerminal).toHaveBeenCalledTimes(1);
+    expect(emitted).toEqual([]);
   });
 
   it("rejects a ledger receipt reserved before its attempt was issued", async () => {

@@ -410,12 +410,12 @@ describe("remote Hermes contract", () => {
     expect(verifyOnlyGuard.consume(`${attempt.nonce}:${responseEnvelopeDigest}`)).toBe(true);
 
     for (const diagnosticsRef of [
+      "password:abc123",
+      "token_abcdef",
+      "p010-1234-5678",
       "https://attacker.example/detail",
       "operator@example.test",
-      "010-1234-5678",
-      "raw detail with spaces",
       "내부 오류 상세",
-      "UPPERCASE-ID",
     ]) {
       const unsafeFailure = {
         ...unsignedFailure,
