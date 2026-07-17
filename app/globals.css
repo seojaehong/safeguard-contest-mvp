@@ -14576,7 +14576,7 @@ body:has(.safeclaw-landing) :is(
 
 .share-form-shell {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) minmax(0, 0.9fr);
   gap: 12px;
 }
 
@@ -14606,7 +14606,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .share-recipient-card {
-  grid-column: 1 / -1;
+  grid-column: auto;
 }
 
 .share-form-shell > details,
@@ -14916,8 +14916,8 @@ body:has(.safeclaw-landing) :is(
 [data-share-preview] .message-preview-lines {
   display: grid;
   gap: 4px;
-  max-height: none;
-  overflow: visible;
+  max-height: 168px;
+  overflow: auto;
   border-top: 1px solid var(--share-line);
   padding-top: 12px;
 }

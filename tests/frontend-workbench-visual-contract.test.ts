@@ -95,6 +95,15 @@ describe("workbench visual contract", () => {
     );
   });
 
+  it("keeps the share send form compact before the preview surface", () => {
+    expect(exactBlock(".share-form-shell")).toMatch(
+      /grid-template-columns:\s*minmax\(0,\s*1\.15fr\) minmax\(0,\s*0\.85fr\) minmax\(0,\s*0\.9fr\);/u,
+    );
+    expect(exactBlock(".share-recipient-card")).toMatch(/grid-column:\s*auto;/u);
+    expect(exactBlock("[data-share-preview] .message-preview-lines")).toMatch(/max-height:\s*168px;/u);
+    expect(exactBlock("[data-share-preview] .message-preview-lines")).toMatch(/overflow:\s*auto;/u);
+  });
+
   it("implements the field workspace desktop, tablet, and mobile cascade", () => {
     const desktopRule = css.match(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) 320px;[^}]*\}/u)?.[0] ?? "";
     const tabletStart = css.indexOf("@media (min-width: 768px) and (max-width: 1279px)");
