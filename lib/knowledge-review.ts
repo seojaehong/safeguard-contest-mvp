@@ -6,11 +6,16 @@ import type {
 import { toJson } from "@/lib/supabase-admin";
 import { isRfc3339OffsetTimestamp } from "@/lib/rfc3339-timestamp";
 import {
+  buildKnowledgeReviewSourceSnapshotDigest,
   buildKnowledgeReviewSourceSnapshot,
   isStrictUuidV4,
   readCurrentSourceBoundCandidate,
   type KnowledgeReviewSourceEventRow
 } from "@/lib/knowledge-review-prepare";
+import type {
+  OntologyPromotionTrustedContext,
+  OntologyPromotionCommand
+} from "@/lib/ontology-promotion-policy";
 
 export const KNOWLEDGE_REVIEW_RUN_STATUSES = [
   "draft",
@@ -602,6 +607,150 @@ function buildKnowledgeReviewSuccessResult(input: {
     reviewer: {
       id: input.user.id,
       email: input.user.email
+    }
+  };
+}
+
+export async function loadOntologyPromotionTrustedContext(
+  client: KnowledgeReviewClient,
+  user: WorkspaceUser,
+  command: OntologyPromotionCommand
+): Promise<OntologyPromotionTrustedContext> {
+  const { data: organization, error: organizationError } = await client
+    .from("organizations")
+    .select("id")
+    .eq("id", command.organizationId)
+    .eq("owner_id", user.id)
+    .maybeSingle();
+  assertReadSucceeded(organizationError, "승격 명령의 조직 소유권을 확인하지 못했습니다.");
+  if (!organization) {
+    throw new KnowledgeReviewError({
+      status: 403,
+      code: "promotion_tenant_forbidden",
+      message: "승격 명령의 조직을 검토할 권한이 없습니다."
+    });
+  }
+
+  const { data: site, error: siteError } = await client
+    .from("sites")
+    .select("id,organization_id")
+    .eq("id", command.siteId)
+    .eq("organization_id", command.organizationId)
+    .maybeSingle();
+  assertReadSucceeded(siteError, "승격 명령의 현장 소유권을 확인하지 못했습니다.");
+  if (!site) {
+    throw new KnowledgeReviewError({
+      status: 403,
+      code: "promotion_site_forbidden",
+      message: "승격 명령의 현장이 조직 범위와 일치하지 않습니다."
+    });
+  }
+
+  const { data: run, error: runError } = await client
+    .from("knowledge_regeneration_runs")
+    .select("id,organization_id,site_id,raw_event_ids,generated_output,status")
+    .eq("id", command.runId)
+    .eq("organization_id", command.organizationId)
+    .eq("site_id", command.siteId)
+    .maybeSingle();
+  assertReadSucceeded(runError, "승격 명령의 저장된 검토 run을 확인하지 못했습니다.");
+  if (!run) {
+    throw new KnowledgeReviewError({
+      status: 403,
+      code: "promotion_run_forbidden",
+      message: "승격 명령과 일치하는 저장된 run이 없습니다."
+    });
+  }
+  if (run.status !== "approved") {
+    throw new KnowledgeReviewError({
+      status: 409,
+      code: "promotion_human_approval_required",
+      message: "사람 검토가 승인 완료된 run만 승격 명령을 준비할 수 있습니다."
+    });
+  }
+
+  const receiptContext: ReceiptOperationContext = {
+    request: { runId: command.runId, action: command.action },
+    user,
+    runId: run.id,
+    organizationId: run.organization_id,
+    siteId: run.site_id
+  };
+  const receiptResolution = resolveHumanReviewReceipt(run.generated_output, receiptContext);
+  if (!receiptResolution || receiptResolution.needsUpgrade) {
+    throw new KnowledgeReviewError({
+      status: 409,
+      code: "promotion_stored_receipt_invalid",
+      message: "저장된 사람 검토 영수증이 현재 승격 명령과 일치하지 않습니다."
+    });
+  }
+
+  const eventIds = [...new Set(run.raw_event_ids)];
+  if (eventIds.length === 0 || eventIds.length !== run.raw_event_ids.length) {
+    throw new KnowledgeReviewError({
+      status: 409,
+      code: "promotion_source_set_invalid",
+      message: "승격 명령의 저장된 원본 이벤트 연결이 유효하지 않습니다."
+    });
+  }
+  const { data: events, error: eventsError } = await client
+    .from("knowledge_events")
+    .select("id,organization_id,site_id,source,source_id,captured_at,title,url,payload,related_hazard_ids,reflected_documents,review_status,proposed_wiki_update")
+    .in("id", eventIds)
+    .eq("organization_id", command.organizationId)
+    .eq("site_id", command.siteId);
+  assertReadSucceeded(eventsError, "승격 명령의 저장된 원본 이벤트를 확인하지 못했습니다.");
+  const storedEvents = events ?? [];
+  const storedEventIds = new Set(storedEvents.map((event) => event.id));
+  const eventsAreApproved = storedEvents.length === eventIds.length
+    && eventIds.every((eventId) => storedEventIds.has(eventId))
+    && storedEvents.every((event) => event.review_status === "approved");
+  if (!eventsAreApproved) {
+    throw new KnowledgeReviewError({
+      status: 409,
+      code: "promotion_source_approval_incomplete",
+      message: "모든 저장된 원본 이벤트의 사람 검토가 완료되지 않았습니다."
+    });
+  }
+  for (const event of storedEvents) {
+    const eventReceipt = resolveHumanReviewReceipt(event.proposed_wiki_update, receiptContext);
+    if (!eventReceipt
+      || eventReceipt.needsUpgrade
+      || !receiptsAreConsistent(receiptResolution.receipt, eventReceipt.receipt)) {
+      throw new KnowledgeReviewError({
+        status: 409,
+        code: "promotion_stored_receipt_invalid",
+        message: "저장된 이벤트 승인 영수증이 run 승인 영수증과 일치하지 않습니다."
+      });
+    }
+  }
+
+  const sourceBinding = buildKnowledgeReviewSourceSnapshot({
+    eventIds,
+    events: storedEvents as KnowledgeReviewSourceEventRow[],
+    tenantContext: { organizationId: command.organizationId, siteId: command.siteId }
+  });
+  if (!readCurrentSourceBoundCandidate(run.generated_output, sourceBinding.snapshot)) {
+    throw new KnowledgeReviewError({
+      status: 409,
+      code: "promotion_source_digest_mismatch",
+      message: "저장된 후보와 현재 원본 이벤트 snapshot이 일치하지 않습니다."
+    });
+  }
+
+  // Existing rows prove the current snapshot digest, but not source publication or verification authority.
+  return {
+    authenticatedReviewerId: user.id,
+    organizationId: run.organization_id,
+    siteId: command.siteId,
+    runId: run.id,
+    action: command.action,
+    humanApprovalReceipt: receiptResolution.receipt as OntologyPromotionTrustedContext["humanApprovalReceipt"],
+    source: {
+      digestAlgorithm: "sha256",
+      digest: buildKnowledgeReviewSourceSnapshotDigest(sourceBinding.snapshot),
+      publicationState: "unavailable",
+      verificationState: "review_required"
     }
   };
 }

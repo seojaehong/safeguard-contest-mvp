@@ -1,15 +1,19 @@
 import { NextRequest } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  buildOntologyPromotionCommandId,
+  buildOntologyPromotionCommandIdentity,
   evaluateOntologyPromotionCommand,
   parseOntologyPromotionCommand,
-  type OntologyPromotionCommand
+  type OntologyPromotionCommand,
+  type OntologyPromotionCommandInput,
+  type OntologyPromotionTrustedContext
 } from "@/lib/ontology-promotion-policy";
 
 const routeMocks = vi.hoisted(() => ({
+  applyKnowledgeReviewAction: vi.fn(),
   createSupabaseAdminClient: vi.fn(),
-  getWorkspaceUser: vi.fn()
+  getWorkspaceUser: vi.fn(),
+  loadOntologyPromotionTrustedContext: vi.fn()
 }));
 
 vi.mock("@/lib/supabase-admin", () => ({
@@ -17,185 +21,159 @@ vi.mock("@/lib/supabase-admin", () => ({
   getWorkspaceUser: routeMocks.getWorkspaceUser
 }));
 
-const baseCommandWithoutId = {
+vi.mock("@/lib/knowledge-review", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/knowledge-review")>();
+  return {
+    ...original,
+    applyKnowledgeReviewAction: routeMocks.applyKnowledgeReviewAction,
+    loadOntologyPromotionTrustedContext: routeMocks.loadOntologyPromotionTrustedContext
+  };
+});
+
+const commandInput: OntologyPromotionCommandInput = {
   contractVersion: "ontology-promotion-command.v1",
   organizationId: "org-1",
   siteId: "site-1",
   runId: "11111111-1111-4111-8111-111111111111",
-  action: "approve_candidate",
-  provenance: [{
-    sourceId: "kosha-guide:C-27-2011",
-    publicationState: "published",
-    verificationState: "verified",
-    digestAlgorithm: "sha256",
-    digest: "a".repeat(64)
-  }],
-  humanApprovalReceipt: {
-    contractVersion: "knowledge-human-review.v1",
-    operationId: "knowledge-review:11111111-1111-4111-8111-111111111111:approve_candidate",
-    action: "approve_candidate",
-    scope: "promotion_candidate",
-    runId: "11111111-1111-4111-8111-111111111111",
-    organizationId: "org-1",
-    siteId: "site-1",
-    reviewer: { id: "reviewer-1", email: "reviewer@example.com" },
-    reviewedAt: "2026-07-17T09:00:00.000+09:00",
-    publicationState: "unpublished",
-    ontologyPublished: false,
-    publishPerformed: false,
-    migrationPerformed: false,
-    atomic: false
-  }
-} as const;
+  action: "approve_candidate"
+};
 
 function makeCommand(): OntologyPromotionCommand {
   return {
-    ...baseCommandWithoutId,
-    provenance: [...baseCommandWithoutId.provenance],
-    commandId: buildOntologyPromotionCommandId(baseCommandWithoutId)
+    ...commandInput,
+    commandIdentity: buildOntologyPromotionCommandIdentity(commandInput)
   };
 }
 
+const storedReceipt = {
+  contractVersion: "knowledge-human-review.v1",
+  operationId: "knowledge-review:11111111-1111-4111-8111-111111111111:approve_candidate",
+  action: "approve_candidate",
+  scope: "promotion_candidate",
+  runId: "11111111-1111-4111-8111-111111111111",
+  organizationId: "org-1",
+  siteId: "site-1",
+  reviewer: { id: "reviewer-1", email: "reviewer@example.com" },
+  reviewedAt: "2026-07-17T09:00:00.000+09:00",
+  publicationState: "unpublished",
+  ontologyPublished: false,
+  publishPerformed: false,
+  migrationPerformed: false,
+  atomic: false
+} as const;
+
+function makeTrustedContext(): OntologyPromotionTrustedContext {
+  return {
+    authenticatedReviewerId: "reviewer-1",
+    organizationId: "org-1",
+    siteId: "site-1",
+    runId: commandInput.runId,
+    action: "approve_candidate",
+    humanApprovalReceipt: storedReceipt,
+    source: {
+      digestAlgorithm: "sha256",
+      digest: "a".repeat(64),
+      publicationState: "unavailable",
+      verificationState: "review_required"
+    }
+  };
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  routeMocks.createSupabaseAdminClient.mockReturnValue({});
+  routeMocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: "reviewer@example.com" });
+  routeMocks.loadOntologyPromotionTrustedContext.mockResolvedValue(makeTrustedContext());
+});
+
 describe("human-approved ontology promotion command gate", () => {
-  it("accepts an exact approved command as review-required and pending persistence", () => {
-    const command = makeCommand();
+  it("builds a deterministic command-content identity without claiming execution idempotency", () => {
+    const identity = buildOntologyPromotionCommandIdentity(commandInput);
 
-    expect(evaluateOntologyPromotionCommand(command, { reviewerId: "reviewer-1" })).toEqual({
-      ok: true,
-      contractVersion: "ontology-promotion-result.v1",
-      commandId: command.commandId,
-      organizationId: "org-1",
-      siteId: "site-1",
-      runId: "11111111-1111-4111-8111-111111111111",
-      action: "approve_candidate",
-      status: "review_required",
-      persistenceState: "pending_persistence",
-      publicationState: "unpublished",
-      ontologyPublished: false,
-      publishPerformed: false,
-      migrationPerformed: false,
-      dbMutationPerformed: false,
-      requiresDatabaseApproval: true
-    });
+    expect(identity).toBe(buildOntologyPromotionCommandIdentity({ ...commandInput }));
+    expect(identity).not.toBe(buildOntologyPromotionCommandIdentity({
+      ...commandInput,
+      organizationId: "org-foreign"
+    }));
   });
 
-  it.each([
-    { label: "empty", provenance: [] },
-    {
-      label: "unpublished",
-      provenance: [{ ...baseCommandWithoutId.provenance[0], publicationState: "unpublished" }]
-    },
-    {
-      label: "unverified",
-      provenance: [{ ...baseCommandWithoutId.provenance[0], verificationState: "review_required" }]
-    },
-    {
-      label: "invalid digest",
-      provenance: [{ ...baseCommandWithoutId.provenance[0], digest: "not-a-sha256" }]
-    }
-  ])("rejects $label provenance", ({ provenance }) => {
-    const command = {
-      ...makeCommand(),
-      provenance
-    } as unknown as OntologyPromotionCommand;
-
-    expect(() => evaluateOntologyPromotionCommand(command, { reviewerId: "reviewer-1" }))
-      .toThrowError(expect.objectContaining({ code: "promotion_provenance_not_eligible" }));
-  });
-
-  it.each([
-    { label: "organization", patch: { organizationId: "org-foreign" } },
-    { label: "site", patch: { siteId: "site-foreign" } },
-    { label: "run", patch: { runId: "22222222-2222-4222-8222-222222222222" } },
-    { label: "action", patch: { action: "keep_site_only" } },
-    {
-      label: "reviewer",
-      patch: {
-        humanApprovalReceipt: {
-          ...baseCommandWithoutId.humanApprovalReceipt,
-          reviewer: { id: "reviewer-foreign", email: null }
-        }
-      }
-    }
-  ])("rejects a command whose exact $label is not approved", ({ patch }) => {
-    const command = { ...makeCommand(), ...patch } as unknown as OntologyPromotionCommand;
-
-    expect(() => evaluateOntologyPromotionCommand(command, { reviewerId: "reviewer-1" }))
-      .toThrowError(expect.objectContaining({ code: "promotion_approval_mismatch" }));
-  });
-
-  it("rejects a replay identity that does not cover the exact approved command", () => {
-    const command = { ...makeCommand(), commandId: `ontology-promotion:${"0".repeat(64)}` };
-
-    expect(() => evaluateOntologyPromotionCommand(command, { reviewerId: "reviewer-1" }))
-      .toThrowError(expect.objectContaining({ code: "promotion_command_identity_mismatch" }));
-  });
-
-  it("builds the same idempotent identity when provenance order changes", () => {
-    const secondProvenance = {
-      ...baseCommandWithoutId.provenance[0],
-      sourceId: "sif-case:case-2",
-      digest: "b".repeat(64)
-    };
-    const forward = {
-      ...baseCommandWithoutId,
-      provenance: [baseCommandWithoutId.provenance[0], secondProvenance]
-    };
-    const reversed = { ...forward, provenance: [...forward.provenance].reverse() };
-
-    expect(buildOntologyPromotionCommandId(forward)).toBe(buildOntologyPromotionCommandId(reversed));
-  });
-
-  it("parses only a complete command contract from an untrusted body", () => {
+  it("parses only exact v1 identifiers and never accepts request receipt or provenance", () => {
     const command = makeCommand();
 
     expect(parseOntologyPromotionCommand(command)).toEqual(command);
-    expect(parseOntologyPromotionCommand({
-      ...command,
-      humanApprovalReceipt: { ...command.humanApprovalReceipt, reviewedAt: "not-a-timestamp" }
-    })).toBeNull();
-    expect(parseOntologyPromotionCommand({ ...command, siteId: "" })).toBeNull();
-    expect(parseOntologyPromotionCommand({ ...command, contractVersion: "ontology-promotion-command.v0" }))
-      .toBeNull();
+    expect(parseOntologyPromotionCommand({ ...command, humanApprovalReceipt: storedReceipt })).toBeNull();
+    expect(parseOntologyPromotionCommand({ ...command, provenance: [] })).toBeNull();
+    expect(parseOntologyPromotionCommand({ ...command, commandId: "legacy-id" })).toBeNull();
   });
 
-  it("returns an authenticated 202 command result without persistence or publication", async () => {
-    routeMocks.createSupabaseAdminClient.mockReturnValue({});
-    routeMocks.getWorkspaceUser.mockResolvedValue({ id: "reviewer-1", email: "reviewer@example.com" });
+  it("reports approved pending persistence separately from pre-review status", () => {
+    expect(evaluateOntologyPromotionCommand(makeCommand(), makeTrustedContext())).toMatchObject({
+      ok: false,
+      status: "approved_pending_persistence",
+      reviewStatus: "review_required",
+      persistenceState: "pending_persistence",
+      publicationState: "unpublished",
+      ontologyPublished: false,
+      dbMutationPerformed: false,
+      deterministicCommandIdentity: true,
+      executionIdempotencyGuaranteed: false
+    });
+  });
+
+  it("rejects a forged command tenant against trusted server context", () => {
+    const command = {
+      ...makeCommand(),
+      organizationId: "org-foreign"
+    };
+
+    expect(() => evaluateOntologyPromotionCommand(command, makeTrustedContext()))
+      .toThrowError(expect.objectContaining({ code: "promotion_trusted_context_mismatch" }));
+  });
+
+  it("loads trusted server context before returning a non-success pending result", async () => {
+    const command = makeCommand();
     const { POST } = await import("@/app/api/knowledge/review/route");
 
     const response = await POST(new NextRequest("http://localhost/api/knowledge/review", {
       method: "POST",
       headers: { "content-type": "application/json", authorization: "Bearer fixture" },
-      body: JSON.stringify(makeCommand())
+      body: JSON.stringify(command)
     }));
     const payload = await response.json();
 
     expect(response.status).toBe(202);
+    expect(routeMocks.loadOntologyPromotionTrustedContext).toHaveBeenCalledWith(
+      {},
+      { id: "reviewer-1", email: "reviewer@example.com" },
+      command
+    );
+    expect(routeMocks.applyKnowledgeReviewAction).not.toHaveBeenCalled();
     expect(payload).toMatchObject({
-      ok: true,
-      configured: true,
-      status: "review_required",
+      ok: false,
+      status: "approved_pending_persistence",
+      reviewStatus: "review_required",
       persistenceState: "pending_persistence",
-      publicationState: "unpublished",
       ontologyPublished: false,
-      dbMutationPerformed: false,
-      requiresDatabaseApproval: true
+      dbMutationPerformed: false
     });
   });
 
-  it("fails closed on a malformed promotion envelope before authentication", async () => {
-    routeMocks.createSupabaseAdminClient.mockClear();
-    routeMocks.getWorkspaceUser.mockClear();
+  it.each([
+    { contractVersion: "ontology-promotion-command.v0" },
+    { contractVersion: null },
+    { commandId: "legacy-looking-command" },
+    { commandIdentity: "malformed-command-identity" },
+    { provenance: [] },
+    { humanApprovalReceipt: {} }
+  ])("never falls through promotion-like input to legacy review mutation", async (promotionMarker) => {
     const { POST } = await import("@/app/api/knowledge/review/route");
-    const command = makeCommand();
-
     const response = await POST(new NextRequest("http://localhost/api/knowledge/review", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        ...command,
-        provenance: [{ ...command.provenance[0], publicationState: "unpublished" }]
+        runId: commandInput.runId,
+        action: "approve_candidate",
+        ...promotionMarker
       })
     }));
     const payload = await response.json();
@@ -204,5 +182,7 @@ describe("human-approved ontology promotion command gate", () => {
     expect(payload).toMatchObject({ ok: false, code: "invalid_ontology_promotion_command" });
     expect(routeMocks.createSupabaseAdminClient).not.toHaveBeenCalled();
     expect(routeMocks.getWorkspaceUser).not.toHaveBeenCalled();
+    expect(routeMocks.loadOntologyPromotionTrustedContext).not.toHaveBeenCalled();
+    expect(routeMocks.applyKnowledgeReviewAction).not.toHaveBeenCalled();
   });
 });
