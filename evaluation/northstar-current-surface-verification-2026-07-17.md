@@ -1,20 +1,20 @@
 # North Star Current Surface Verification
 
 Date: 2026-07-17
-Authoritative HEAD: `343c610e30d24260d930e5de00845c7c30542a97`
+Authoritative HEAD: `9e839ebfeee01948b23d28a526834f4866297d81`
 
 ## Scope
 
-This verification records the current master state after the recipient share portal, foreign-language share boundary hardening, current KOSHA exact evidence, and Hermes/Knowledge governance gate recording work.
+This verification records the current master state after the recipient share portal, foreign-language share boundary hardening, invited-recipient confirmation snapshot hardening, current KOSHA exact evidence, and Hermes/Knowledge governance gate recording work.
 
 No DB schema changes, Supabase data mutations, provider activation, or ontology publication mutations were performed.
 
 ## Deployment
 
-GitHub/Vercel status for `343c610e30d24260d930e5de00845c7c30542a97`:
+GitHub/Vercel status for `9e839ebfeee01948b23d28a526834f4866297d81`:
 
 - Vercel: success
-- Deployment: `https://vercel.com/seojaehongs-projects/safeguard-contest-mvp/9XmuJ1cfrjCNCFcqAFPvHKZVS6BY`
+- Deployment: `https://vercel.com/seojaehongs-projects/safeguard-contest-mvp/EeWPpW3L3riu4KXzQ3f5axZskAcF`
 
 Live route smoke:
 
@@ -55,6 +55,22 @@ Result:
 
 - Test files: 3 passed
 - Tests: 31 passed
+
+Invited recipient confirmation hardening:
+
+```powershell
+npm.cmd test -- tests\workpack-share-authority-routes.test.ts -t "public recipient confirmation ignores forged body fields"
+npm.cmd test -- tests\workpack-share-authority-routes.test.ts
+npm.cmd test -- tests\workflow-share-client.test.ts tests\workpack-share-authority.test.ts tests\workspace-share-mobile-browser.test.ts tests\share-recipient-portal-browser.test.ts
+```
+
+Result:
+
+- Focused public recipient confirmation: 1 file / 1 test passed
+- Share authority route suite: 1 file / 31 tests passed
+- Share/mobile/recipient bundle: 3 passed, 1 skipped / 38 passed, 1 skipped
+
+The public recipient confirmation route now stores the invited server snapshot when `workerId` matches a share-session recipient. Client-supplied display name, language code, and worker snapshot are ignored for invited recipients.
 
 Additional strict gate:
 
