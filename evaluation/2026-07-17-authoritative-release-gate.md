@@ -232,6 +232,24 @@ Verified fixes:
 - The public API still filters recipient hints by invited `workerId` and stores confirmations from the server-authoritative recipient snapshot, ignoring forged client fields.
 - Internal evidence, DB harness diagnostics, JSONL, and full manager-only workpack data are not added to the recipient DTO.
 
+### Document editor provenance separation refresh
+
+The current document editor keeps the editable submission body separate from provenance and audit appendices. This closes the earlier issue where KOSHA/legal/internal evidence text could be mixed into the visible editor body as if it were part of the submitted document.
+
+Fresh current-tree gates:
+
+- `npm.cmd test -- tests\north-star-document-ux.test.ts tests\documents-editor-layout.test.ts`
+  - Result: 2 files / 34 tests passed.
+- `npm.cmd test -- tests\workflow-share-client.test.ts tests\workflow-share-panel-behavior.test.ts tests\workflow-dispatch-capability-policy.test.ts tests\share-recipient-portal-browser.test.ts`
+  - Result: 4 files / 40 tests passed.
+
+Verified fixes:
+
+- Review mode has one compact provenance trigger (`근거 N건 · 확인 필요 M건`) instead of a persistent right evidence rail or repeated yellow evidence badges.
+- Edit mode renders structured body sections as separate textareas and moves source/provenance appendices into the `근거 부록` area inside the collapsed provenance drawer.
+- The editor keeps 12 document options available while preserving mobile no-overflow, no nested scroll container, no clipped controls, and no sub-44px visible touch targets in the north-star browser matrix.
+- Share v2 remains focused on target, channel, language preview, message preview, and one primary send action; recipient portal and foreign-language delivery contracts still pass after the document editor refresh.
+
 ### Hermes / EngineAdapter current boundary gate
 
 The long-term Hermes/OpenClaw direction remains active, but current production does not claim a runnable external engine. It keeps SafeClaw's evidence harness as the system of record and presents the engine as inactive until the trusted transport and durable attempt ledger exist.
