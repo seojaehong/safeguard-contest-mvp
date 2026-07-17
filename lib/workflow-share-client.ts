@@ -3,6 +3,25 @@ import type { AskResponse } from "@/lib/types";
 export type WorkflowShareChannel = "email" | "sms" | "kakao";
 export type WorkflowDispatchMessageTarget = "manager" | `foreign:${string}`;
 
+export type ProviderDispatchCapability = {
+  capability: boolean;
+  mode: "preview_only" | "live";
+  reason: "persistent_idempotency_unavailable" | null;
+};
+
+export type ProviderDispatchUiContract = {
+  canDispatch: boolean;
+  channelBadge: "사용 가능" | "미리보기 전용";
+  primaryLabel: "문서팩 전송하기" | "미리보기 전용";
+  primaryDisabled: boolean;
+};
+
+export const PROVIDER_DISPATCH_CAPABILITY: ProviderDispatchCapability = Object.freeze({
+  capability: false,
+  mode: "preview_only",
+  reason: "persistent_idempotency_unavailable"
+});
+
 export type LocalizedDispatchRecipient = {
   workerId: string;
   phone?: string;
@@ -62,6 +81,7 @@ export type WorkflowDispatchResult = {
   idempotencySupported?: boolean;
   duplicateRisk?: boolean;
   providerCalled?: boolean;
+  providerDispatch?: ProviderDispatchCapability;
   channelResults?: WorkflowDispatchChannelResult[];
 };
 
@@ -197,6 +217,55 @@ async function readResponseBody(response: Response): Promise<Record<string, unkn
     console.warn("workflow share response parse failed", error);
     return {};
   }
+}
+
+function parseProviderDispatchCapability(value: unknown): ProviderDispatchCapability {
+  if (!isRecord(value)) throw new Error("provider dispatch capability 응답이 없습니다.");
+  const capability = value.capability;
+  const mode = value.mode;
+  const reason = value.reason;
+  if (typeof capability !== "boolean") {
+    throw new Error("provider dispatch capability 값이 올바르지 않습니다.");
+  }
+  if (mode !== "preview_only" && mode !== "live") {
+    throw new Error("provider dispatch mode 값이 올바르지 않습니다.");
+  }
+  if (reason !== null && reason !== "persistent_idempotency_unavailable") {
+    throw new Error("provider dispatch reason 값이 올바르지 않습니다.");
+  }
+  if (capability !== (mode === "live")) {
+    throw new Error("provider dispatch capability와 mode가 일치하지 않습니다.");
+  }
+  if (capability === (reason !== null)) {
+    throw new Error("provider dispatch capability와 reason이 일치하지 않습니다.");
+  }
+  return { capability, mode, reason };
+}
+
+export async function loadProviderDispatchCapability(
+  fetcher: Fetcher
+): Promise<ProviderDispatchCapability> {
+  const response = await fetcher("/api/workflow/dispatch", {
+    method: "GET",
+    headers: { accept: "application/json" }
+  });
+  const body = await readResponseBody(response);
+  if (!response.ok || body.ok !== true) {
+    throw buildHttpError(body, response, "provider dispatch capability를 확인하지 못했습니다.");
+  }
+  return parseProviderDispatchCapability(body.providerDispatch);
+}
+
+export function buildProviderDispatchUiContract(
+  capability: ProviderDispatchCapability | null
+): ProviderDispatchUiContract {
+  const canDispatch = capability?.capability === true && capability.mode === "live";
+  return {
+    canDispatch,
+    channelBadge: canDispatch ? "사용 가능" : "미리보기 전용",
+    primaryLabel: canDispatch ? "문서팩 전송하기" : "미리보기 전용",
+    primaryDisabled: !canDispatch
+  };
 }
 
 function requireBearerContext(authToken: string, workpackId: string): void {
@@ -516,6 +585,9 @@ export async function dispatchAuthenticatedShareSession(
     idempotencySupported: typeof body.idempotencySupported === "boolean" ? body.idempotencySupported : undefined,
     duplicateRisk: typeof body.duplicateRisk === "boolean" ? body.duplicateRisk : undefined,
     providerCalled: typeof body.providerCalled === "boolean" ? body.providerCalled : undefined,
+    providerDispatch: body.providerDispatch === undefined
+      ? undefined
+      : parseProviderDispatchCapability(body.providerDispatch),
     channelResults: parseChannelResults(body.channelResults)
   };
   if (!response.ok && !result.duplicateRisk) {

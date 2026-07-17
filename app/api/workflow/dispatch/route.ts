@@ -8,6 +8,7 @@ import {
   buildLocalizedDispatchWebhookPayload,
   buildCanonicalRecipientMessageVariants,
   getCanonicalDispatchLanguageCodes,
+  PROVIDER_DISPATCH_CAPABILITY,
   validateWorkflowDispatchMessage
 } from "@/lib/workflow-share-client";
 import {
@@ -69,6 +70,13 @@ const PROVIDER_IDEMPOTENCY_KEY_PATTERN = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9
 
 function isKakaoDispatchEnabled() {
   return process.env.SAFEGUARD_KAKAO_ENABLED === "1" || process.env.SAFECLAW_KAKAO_ENABLED === "1";
+}
+
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    providerDispatch: PROVIDER_DISPATCH_CAPABILITY
+  });
 }
 
 function isKakaoProviderConfigured() {
@@ -441,6 +449,7 @@ export async function POST(request: NextRequest) {
       idempotencySupported: false,
       duplicateRisk: true,
       providerCalled: false,
+      providerDispatch: PROVIDER_DISPATCH_CAPABILITY,
       idempotencyKey,
       message: "영속 provider idempotency를 보장할 저장 계약이 없어 실제 provider 호출을 차단했습니다. 중복방지 지원 전에는 재전송하지 마세요."
     }, { status: 409 });

@@ -1,0 +1,61 @@
+{
+  "auditDate": "2026-07-17",
+  "baseCommit": "f16d152e3c38669f69029dab45ebf2e7a645acb3",
+  "scope": "P0 provider dispatch UI containment",
+  "providerDispatch": {
+    "capability": false,
+    "mode": "preview_only",
+    "reason": "persistent_idempotency_unavailable"
+  },
+  "verifiedContracts": [
+    "The dispatch capability endpoint reports preview-only mode without invoking a provider.",
+    "Email, SMS, and Kakao controls are disabled and do not retain active or pressed presentation.",
+    "The primary action is disabled and labeled as preview-only until live capability is explicitly reported.",
+    "Capability lookup errors remain fail-closed.",
+    "Share-session creation code and localized message preview paths remain present.",
+    "Recipient-facing copy describes language-specific preparation without claiming a portal, link, or recipient confirmation."
+  ],
+  "excluded": [
+    "Database or migration changes",
+    "Provider enablement or provider calls",
+    "Recipient portal or share-token route implementation"
+  ],
+  "tddEvidence": [
+    {
+      "case": "client capability and UI contract",
+      "red": "loadProviderDispatchCapability was absent",
+      "green": "capability parsing and fail-closed UI contract passed"
+    },
+    {
+      "case": "server capability endpoint",
+      "red": "workflow dispatch GET export was absent",
+      "green": "GET returned the explicit preview-only capability without provider invocation"
+    },
+    {
+      "case": "idempotency-blocked POST capability",
+      "red": "the blocked response omitted providerDispatch",
+      "green": "the blocked response included the explicit preview-only capability"
+    },
+    {
+      "case": "recipient portal claim containment",
+      "red": "the panel claimed that it sends a recipient viewing link",
+      "green": "the panel describes preparing language-specific transfer copies and forbids portal claims"
+    },
+    {
+      "case": "disabled channel presentation",
+      "red": "disabled channels could retain active and aria-pressed presentation",
+      "green": "disabled channels are neither active nor aria-pressed"
+    }
+  ],
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests/workflow-share-client.test.ts tests/workpack-share-authority-routes.test.ts tests/workspace-share-simplification.test.ts --maxWorkers=1 --no-file-parallelism",
+      "filesPassed": 3,
+      "testsPassed": 63
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "passed"
+    }
+  }
+}
