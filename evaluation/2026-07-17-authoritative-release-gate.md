@@ -326,3 +326,32 @@ Verified fixes:
 - `candidate` and `approved` photo-analysis improvements still flow into harness memory, so a manager's saved Before/After improvement candidate can still come back into the next 위험성평가/TBM loop.
 - The workspace generation path now uses the filtered conversion helper instead of mapping every local operation-improvement record directly.
 - Existing photo analysis, report download, workpack-improvement route, and commercial harness contracts continue to pass.
+
+### Live output integrity gate
+
+Fresh production output integrity passed against the current live deployment marker `dpl_DhJM6HoN6guwEJvaasrG2areQmgb`.
+
+Command:
+
+- `$env:SAFECLAW_OUTPUT_INTEGRITY_BASE_URL='https://www.safeclaw.kr'; $env:SAFECLAW_OUTPUT_INTEGRITY_OUT_DIR='evaluation/final-output-integrity-audit-2026-07-18'; npm.cmd run audit:output-integrity`
+
+Result:
+
+- Overall verdict: `pass`
+- Base URL: `https://www.safeclaw.kr`
+- Elapsed: 167,571 ms
+- Ask scenarios: 3/3 passed
+- Ask deliverables: 11/11 passed for each scenario
+- Generated download/export files: 14/14 passed for each scenario
+- Blocked documents: none
+- Blocked files: none
+- Artifact: `evaluation/final-output-integrity-audit-2026-07-18/report.md`
+- Machine report: `evaluation/final-output-integrity-audit-2026-07-18/report.json`
+
+Scenario coverage:
+
+- `서울 건설 강풍`: 11/11 live deliverables passed; 14/14 generated files passed.
+- `인천 물류 우천`: 11/11 live deliverables passed; 14/14 generated files passed.
+- `안산 제조 화기 외국인 포함`: 11/11 live deliverables passed; 14/14 generated files passed.
+
+This verifies live document quality across core risk assessment, TBM, education, emergency, photo/evidence, foreign-worker briefing/transmission, and Kakao/share message outputs, plus text/json/csv/xls/doc/html/hwpx/hwp/xlsx/pdf/jpg and bundle export signatures.
