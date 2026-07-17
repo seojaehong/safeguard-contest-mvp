@@ -17,7 +17,20 @@ vi.mock("@/lib/supabase-admin", async (importOriginal) => {
 
 type QueryResult = {
   data: Record<string, unknown> | null;
-  error: { message: string } | null;
+  error: { message: string; code?: string } | null;
+};
+
+type QueryCall = {
+  table: string;
+  method: "eq";
+  column: string;
+  value: unknown;
+};
+
+type WriteCall = {
+  table: string;
+  method: "insert" | "update";
+  payload: unknown;
 };
 
 function request(overrides: Record<string, unknown> = {}): NextRequest {
@@ -43,8 +56,14 @@ function fakeClient(options: {
   site?: QueryResult;
   organization?: QueryResult;
   existingEvent?: QueryResult;
+  existingEvents?: QueryResult[];
+  eventInsert?: QueryResult;
+  eventUpdate?: QueryResult;
 } = {}) {
-  const writes: Array<{ table: string; payload: unknown }> = [];
+  const calls: QueryCall[] = [];
+  const writes: WriteCall[] = [];
+  let existingEventRead = 0;
+  let updatingEvent = false;
 
   return {
     client: {
@@ -55,7 +74,10 @@ function fakeClient(options: {
             : options.organization ?? { data: { id: "org-1" }, error: null };
           const query = {
             select: () => query,
-            eq: () => query,
+            eq(column: string, value: unknown) {
+              calls.push({ table, method: "eq", column, value });
+              return query;
+            },
             maybeSingle: async () => result,
           };
           return query;
@@ -64,26 +86,30 @@ function fakeClient(options: {
         if (table === "knowledge_events") {
           const query = {
             select: () => query,
-            eq: () => query,
-            maybeSingle: async () => options.existingEvent ?? { data: null, error: null },
-            upsert(payload: unknown) {
-              writes.push({ table, payload });
-              return {
-                select: () => ({
-                  single: async () => ({ data: { id: "event-db-1" }, error: null }),
-                }),
-              };
+            eq(column: string, value: unknown) {
+              calls.push({ table, method: "eq", column, value });
+              return query;
+            },
+            maybeSingle: async () => {
+              if (updatingEvent) {
+                updatingEvent = false;
+                return options.eventUpdate ?? { data: { id: "event-existing" }, error: null };
+              }
+              const sequenced = options.existingEvents?.[existingEventRead];
+              existingEventRead += 1;
+              return sequenced ?? options.existingEvent ?? { data: null, error: null };
             },
             insert(payload: unknown) {
-              writes.push({ table, payload });
+              writes.push({ table, method: "insert", payload });
               return {
                 select: () => ({
-                  single: async () => ({ data: { id: "event-db-1" }, error: null }),
+                  single: async () => options.eventInsert ?? { data: { id: "event-db-1" }, error: null },
                 }),
               };
             },
             update(payload: unknown) {
-              writes.push({ table, payload });
+              writes.push({ table, method: "update", payload });
+              updatingEvent = true;
               return query;
             },
             single: async () => ({ data: { id: "event-db-1" }, error: null }),
@@ -94,7 +120,7 @@ function fakeClient(options: {
         if (table === "knowledge_regeneration_runs") {
           return {
             insert(payload: unknown) {
-              writes.push({ table, payload });
+              writes.push({ table, method: "insert", payload });
               return {
                 select: () => ({
                   single: async () => ({ data: { id: "run-db-1" }, error: null }),
@@ -107,6 +133,7 @@ function fakeClient(options: {
         throw new Error(`Unexpected table ${table}`);
       },
     },
+    calls,
     writes,
   };
 }
@@ -214,24 +241,128 @@ describe("knowledge ingest tenant binding", () => {
       savedEventId: "event-db-1",
       savedRunId: "run-db-1",
     });
+    expect(fake.calls).toEqual([
+      { table: "sites", method: "eq", column: "id", value: "site-1" },
+      { table: "organizations", method: "eq", column: "id", value: "org-1" },
+      { table: "organizations", method: "eq", column: "owner_id", value: "user-1" },
+      { table: "knowledge_events", method: "eq", column: "organization_id", value: "org-1" },
+      { table: "knowledge_events", method: "eq", column: "source", value: "manual" },
+      { table: "knowledge_events", method: "eq", column: "source_id", value: "event-1" },
+    ]);
   });
 
-  it("reuses an existing same-site event without changing its attribution", async () => {
+  it("updates an existing same-site event before creating a run for the new bundle", async () => {
     const fake = fakeClient({
       existingEvent: {
         data: { id: "event-existing", site_id: "site-1" },
         error: null,
+      },
+      eventUpdate: { data: { id: "event-existing" }, error: null },
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/knowledge/ingest/route");
+
+    const response = await POST(request({
+      capturedAt: "2026-07-17T01:00:00.000Z",
+      title: "갱신된 이동식 비계 작업 검토",
+      payload: { revision: 2 },
+    }));
+    const payload = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(fake.writes).toHaveLength(2);
+    expect(fake.writes[0]).toMatchObject({
+      table: "knowledge_events",
+      method: "update",
+      payload: {
+        captured_at: "2026-07-17T01:00:00.000Z",
+        title: "갱신된 이동식 비계 작업 검토",
+        payload: { revision: 2 },
+      },
+    });
+    expect(fake.writes[1]).toMatchObject({
+      table: "knowledge_regeneration_runs",
+      payload: { raw_event_ids: ["event-existing"] },
+    });
+    expect(payload.savedEventId).toBe("event-existing");
+    expect(fake.calls).toEqual([
+      { table: "sites", method: "eq", column: "id", value: "site-1" },
+      { table: "organizations", method: "eq", column: "id", value: "org-1" },
+      { table: "organizations", method: "eq", column: "owner_id", value: "user-1" },
+      { table: "knowledge_events", method: "eq", column: "organization_id", value: "org-1" },
+      { table: "knowledge_events", method: "eq", column: "source", value: "manual" },
+      { table: "knowledge_events", method: "eq", column: "source_id", value: "event-1" },
+      { table: "knowledge_events", method: "eq", column: "id", value: "event-existing" },
+      { table: "knowledge_events", method: "eq", column: "organization_id", value: "org-1" },
+      { table: "knowledge_events", method: "eq", column: "site_id", value: "site-1" },
+      { table: "knowledge_events", method: "eq", column: "source", value: "manual" },
+      { table: "knowledge_events", method: "eq", column: "source_id", value: "event-1" },
+    ]);
+  });
+
+  it("re-reads a concurrent same-site unique conflict and updates it before creating the run", async () => {
+    const fake = fakeClient({
+      existingEvents: [
+        { data: null, error: null },
+        { data: { id: "event-concurrent", site_id: "site-1" }, error: null },
+      ],
+      eventInsert: {
+        data: null,
+        error: { code: "23505", message: "duplicate key value violates unique constraint" },
+      },
+      eventUpdate: { data: { id: "event-concurrent" }, error: null },
+    });
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    const { POST } = await import("@/app/api/knowledge/ingest/route");
+
+    const response = await POST(request({ payload: { revision: "concurrent" } }));
+    const payload = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(fake.writes.map((write) => [write.table, write.method])).toEqual([
+      ["knowledge_events", "insert"],
+      ["knowledge_events", "update"],
+      ["knowledge_regeneration_runs", "insert"],
+    ]);
+    expect(fake.writes[1]).toMatchObject({
+      payload: { payload: { revision: "concurrent" } },
+    });
+    expect(fake.writes[2]).toMatchObject({
+      payload: { raw_event_ids: ["event-concurrent"] },
+    });
+    expect(payload.savedEventId).toBe("event-concurrent");
+  });
+
+  it("re-reads a concurrent cross-site unique conflict and returns 409 without a run", async () => {
+    const fake = fakeClient({
+      existingEvents: [
+        { data: null, error: null },
+        { data: { id: "event-concurrent", site_id: "site-other" }, error: null },
+      ],
+      eventInsert: {
+        data: null,
+        error: { code: "23505", message: "duplicate key value violates unique constraint" },
       },
     });
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
     const { POST } = await import("@/app/api/knowledge/ingest/route");
 
     const response = await POST(request());
-    const payload = await response.json() as Record<string, unknown>;
 
-    expect(response.status).toBe(200);
-    expect(fake.writes).toHaveLength(1);
-    expect(fake.writes[0]).toMatchObject({ table: "knowledge_regeneration_runs" });
-    expect(payload.savedEventId).toBe("event-existing");
+    expect(response.status).toBe(409);
+    expect(fake.writes.map((write) => [write.table, write.method])).toEqual([
+      ["knowledge_events", "insert"],
+    ]);
+    expect(fake.calls).toEqual([
+      { table: "sites", method: "eq", column: "id", value: "site-1" },
+      { table: "organizations", method: "eq", column: "id", value: "org-1" },
+      { table: "organizations", method: "eq", column: "owner_id", value: "user-1" },
+      { table: "knowledge_events", method: "eq", column: "organization_id", value: "org-1" },
+      { table: "knowledge_events", method: "eq", column: "source", value: "manual" },
+      { table: "knowledge_events", method: "eq", column: "source_id", value: "event-1" },
+      { table: "knowledge_events", method: "eq", column: "organization_id", value: "org-1" },
+      { table: "knowledge_events", method: "eq", column: "source", value: "manual" },
+      { table: "knowledge_events", method: "eq", column: "source_id", value: "event-1" },
+    ]);
   });
 });

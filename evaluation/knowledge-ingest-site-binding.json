@@ -1,7 +1,10 @@
 {
-  "generatedAt": "2026-07-17T09:47:40+09:00",
+  "generatedAt": "2026-07-17T10:01:00+09:00",
   "baseSha": "880db7af65cae369a897264ba7b66e7566d80540",
+  "rejectedCommit": "258f84152c25b783f3902a0c2c1cbab062dd99f0",
   "branch": "fix/site-bound-knowledge-ingest-20260717",
+  "reviewStatus": "remediated pending independent re-review",
+  "integrationStatus": "not integrated",
   "scope": "site-bound authenticated knowledge ingest",
   "constraints": {
     "databaseSchemaChanged": false,
@@ -15,26 +18,30 @@
     "explicitOrganizationIdMustMatch": true,
     "siteOwnershipCheckedAgainstAuthenticatedUser": true,
     "crossSiteSourceIdentityConflict": "409 fail-closed",
+    "sameSiteReingest": "updates raw event before creating a new run",
+    "concurrentUniqueViolation": "re-read then same-site update or cross-site 409",
     "unconfiguredStore": "503 fail-closed",
     "unauthenticatedRequest": "401 fail-closed"
   },
   "tddEvidence": {
     "focusedTestFile": "tests/knowledge-ingest-route.test.ts",
-    "tests": 8,
+    "tests": 10,
     "observedRedFailures": [
       "missing siteId returned 500 before validation",
       "unconfigured store returned 200 stateless success",
       "unauthenticated request returned 200 stateless success",
       "foreign organization ownership returned 200",
       "contradictory organizationId returned 200",
-      "cross-site source identity collision returned 200"
+      "cross-site source identity collision returned 200",
+      "same-site reingest created a run without updating the referenced raw event",
+      "concurrent same-site unique violation returned 500 instead of re-reading"
     ]
   },
   "verification": [
     {
       "command": "npm.cmd test -- tests/knowledge-ingest-route.test.ts",
       "exitCode": 0,
-      "result": "1 file passed, 8 tests passed"
+      "result": "1 file passed, 10 tests passed"
     },
     {
       "command": "npm.cmd run typecheck",
@@ -44,7 +51,9 @@
   ],
   "changedFiles": [
     "app/api/knowledge/ingest/route.ts",
+    "lib/supabase-admin.ts",
     "tests/knowledge-ingest-route.test.ts",
+    "docs/knowledge_internal_api_schema.md",
     "evaluation/knowledge-ingest-site-binding.json"
   ]
 }
