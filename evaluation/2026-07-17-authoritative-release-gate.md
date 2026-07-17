@@ -456,6 +456,17 @@ Fixes verified:
 - The workspace Day/Night geometry comparison now ignores non-geometric readiness state classes (`pending`, `ready`) while preserving actual geometry, spacing, radius, and typography checks.
 - The share panel no longer exposes a raw `/share/[sessionId]` link as a default administrator CTA. It describes the current implemented boundary as administrator-side dispatch/confirmation tracking and displays only the session ID when present.
 
+### 2026-07-18 UI blocker recheck
+
+The prior live-audit blockers for `/why`, blank workspace submission, and module contrast were rechecked on HEAD `e1298644be1a78a59b0be8ef4cd4513c1ca64c51`.
+
+Results:
+
+- `/why` comparison layout: `npm.cmd test -- tests\why-mobile-layout.test.ts` passed, 1 file / 4 tests.
+- Blank workspace submission: `npm.cmd test -- tests\workspace-layout-regression.test.ts -t "focuses the input and announces an error when blank generation is submitted"` passed, 1 test / 25 skipped.
+- Contrast/primary command spot check: `npm.cmd test -- tests\product-module-shell.test.ts tests\module-shell-design-regression.test.ts tests\reports-design-remediation.test.ts -t "contrast|AA|primary|Day|Night|workspace accents|heroCta"` passed, 2 files / 2 tests, 1 file / 17 tests skipped.
+- Live root still responds HTTP 200 after the latest push.
+
 Fresh current-tree gates:
 
 - `npm.cmd run audit:frontend-consistency`
