@@ -1,0 +1,38 @@
+{
+  "date": "2026-07-18",
+  "currentMasterHeadAtCheck": "c14456f3",
+  "checkedBranch": "feat/kosha-trust-registry-wave2",
+  "decision": "skip older documentation-only cherry-picks because current master evidence is newer and stronger",
+  "attemptedCherryPicks": [
+    "10d1d142ceffae9758f84bead67246e8e10e5815",
+    "040e351d744c9fe2a3195ccdbf1b0a164a111e1b",
+    "daee789a0f001fc6d7aca0d242f205bfcc6f338e"
+  ],
+  "conflictFiles": [
+    "evaluation/kosha-trust-registry-wave2-2026-07-16/report.md",
+    "evaluation/kosha-trust-registry-wave2-2026-07-16/report.json",
+    "evaluation/kosha-trust-registry-wave2-2026-07-16/kosha-sif-ontology-tests.log"
+  ],
+  "keptEvidence": {
+    "focusedVitest": {
+      "files": 5,
+      "testsPassed": 80,
+      "status": "pass"
+    },
+    "koshaCorpusAudit": {
+      "files": 1,
+      "testsPassed": 110,
+      "status": "pass"
+    },
+    "broadVitest": {
+      "filesPassed": 31,
+      "filesSkipped": 3,
+      "testsPassed": 395,
+      "testsSkipped": 4,
+      "status": "pass"
+    }
+  },
+  "productCodeChanged": false,
+  "dbSchemaChanged": false,
+  "supabaseDataChanged": false
+}
