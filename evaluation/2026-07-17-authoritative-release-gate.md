@@ -549,3 +549,21 @@ Verified boundary:
 - Current exact KOSHA direct-evidence registry remains limited to the reviewed exact assets: `D-C-13-2026`, `D-C-7-2026`, and `B-E-10-2026`.
 - Trusted KOSHA references remain gated by immutable pins, applicability policy, registry membership, fail-closed behavior, and current-review run/ask coverage.
 - This was a verification-only gate; no database migration or production data mutation was performed.
+
+### 2026-07-18 document export and foreign recipient delivery gate
+
+The document-output and foreign-recipient delivery contracts were rechecked on current HEAD `67f7107039f5a5e0fd4156533f93589b768a8980`.
+
+Results:
+
+- `npm.cmd test -- tests\document-export-localization.test.ts tests\pdf-korean-font-integration.test.ts tests\pdf-font-failure.test.ts tests\xlsx-export-route.test.ts tests\workflow-share-client.test.ts tests\workflow-share-panel-behavior.test.ts`
+  - Result: 6 files / 79 tests passed.
+- `npm.cmd test -- tests\web-safe-presentation-localization.test.ts tests\editor-export-integrity.test.ts`
+  - Result: 2 files / 10 tests passed.
+
+Verified boundary:
+
+- PDF/HWPX/XLSX-facing localization and Korean font/error handling remain covered by focused tests.
+- Export surfaces keep Korean user-facing labels for document status, accident types, 4M labels, and Before/After improvement wording.
+- Foreign recipient dispatch messages remain language-specific and are checked for Korean leakage in the delivery contract.
+- This was a verification-only gate; no database migration or production data mutation was performed.
