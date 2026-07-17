@@ -762,3 +762,34 @@ Verified boundary:
 
 - `/share/[sessionId]`, `/workspace`, `/documents`, `/reports`, `/knowledge`, `/ontology`, `/api/input-photos/hazard-analysis`, export routes, share-session routes, and KOSHA/SIF status routes remain present in the production route map.
 - This build was run sequentially after typecheck. No concurrent build process was started for this gate.
+
+### 2026-07-18 ontology, knowledge, and why UI gate recheck
+
+The prior launch-blocker UI routes were rechecked on current HEAD `0d29cb6482d81c2bf2a9230f75a40f85c656782b`.
+
+Results:
+
+- `npm.cmd test -- tests\ontology-ui-browser.test.ts tests\ontology-ui-remediation.test.ts tests\ontology-tablet-overflow.test.ts tests\ontology-visualization.test.ts tests\knowledge-mobile-ia-browser.test.ts tests\knowledge-page-layout.test.ts tests\knowledge-governance-ui-contract.test.ts tests\why-mobile-layout.test.ts`
+  - Result: 6 files passed / 2 skipped; 31 tests passed / 3 skipped.
+  - The skipped files require `ONTOLOGY_BASE_URL`.
+- `ONTOLOGY_BASE_URL=http://localhost:3012 npm.cmd test -- tests\ontology-ui-browser.test.ts tests\ontology-tablet-overflow.test.ts`
+  - Result: 2 files / 3 tests passed against a fresh production build served on port 3012.
+
+Browser metrics:
+
+- `evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json`
+  - desktop/tablet/mobile Day/Night: horizontal overflow 0, outside elements 0, overlap pairs 0.
+  - desktop/tablet visible neighborhood nodes: 15.
+  - mobile default relation list visible, fullscreen graph verified with 15 nodes and keyboard dialog contract.
+  - minimum control height: 44px.
+  - minimum node/text contrast: at least 5.6:1 in the captured variants.
+
+Verified boundary:
+
+- `/ontology` no longer exposes the previous 166-node hairball as the default customer surface in the tested production build. The bounded neighborhood explorer passes collision, contrast, overflow, and mobile fullscreen gates.
+- `/knowledge` mobile IA, localized governance labels, full-size evidence disclosures, and touch targets are covered by focused browser/contract tests.
+- `/why` mobile comparison layout keeps stacked cards readable without horizontal overflow while preserving the desktop comparison table.
+
+Integration note:
+
+- The production server used for the `ONTOLOGY_BASE_URL` gate was stopped after the test run. No product code, database schema, or production data was changed by this recheck.
