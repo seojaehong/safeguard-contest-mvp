@@ -222,10 +222,12 @@ async function consumeReplayBinding(
 ): Promise<void> {
   const controller = new AbortController();
   let timeout: ReturnType<typeof setTimeout> | undefined;
+  let timedOut = false;
   const timeoutResult = new Promise<never>((_resolve, reject) => {
     timeout = setTimeout(() => {
-      controller.abort();
+      timedOut = true;
       reject(new Error("replay consumption timed out"));
+      controller.abort();
     }, REMOTE_HERMES_SERVICE_AUTH_CONSUME_TIMEOUT_MS);
   });
 
@@ -237,7 +239,8 @@ async function consumeReplayBinding(
       signal: controller.signal,
     }));
     if (!isPromiseLike(pending)) fail("SERVICE_AUTH_REPLAY_REJECTED");
-    if (!await Promise.race([Promise.resolve(pending), timeoutResult])) {
+    const consumed = await Promise.race([Promise.resolve(pending), timeoutResult]);
+    if (timedOut || !consumed) {
       fail("SERVICE_AUTH_REPLAY_REJECTED");
     }
   } catch {
