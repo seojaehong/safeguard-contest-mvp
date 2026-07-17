@@ -2,12 +2,70 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
+import { buildProviderDispatchUiContract } from "@/lib/workflow-share-client";
+import type { ProviderDispatchCapability } from "@/lib/workflow-dispatch-capability";
 
 const root = process.cwd();
 const commandCenter = readFileSync(join(root, "components", "SafeGuardCommandCenter.tsx"), "utf8");
 const sharePanel = readFileSync(join(root, "components", "WorkflowSharePanel.tsx"), "utf8");
+const dispatchRoute = readFileSync(join(root, "app", "api", "workflow", "dispatch", "route.ts"), "utf8");
 
 describe("workspace share simplification", () => {
+  it("keeps channels and the primary action preview-only when provider dispatch is unavailable", () => {
+    const capability: ProviderDispatchCapability = {
+      capability: false,
+      mode: "preview_only",
+      reason: "persistent_idempotency_unavailable",
+      channels: {
+        email: { capability: false, reason: "persistent_idempotency_unavailable" },
+        sms: { capability: false, reason: "persistent_idempotency_unavailable" },
+        kakao: { capability: false, reason: "persistent_idempotency_unavailable" }
+      }
+    };
+    expect(buildProviderDispatchUiContract({ status: "preview_only", capability })).toEqual({
+      status: "preview_only",
+      canDispatch: false,
+      statusLabel: "미리보기 전용",
+      reasonLabel: "안전한 중복 방지 저장 기능을 준비하고 있습니다.",
+      primaryLabel: "미리보기 전용",
+      primaryDisabled: true,
+      showUnavailableActions: true
+    });
+    expect(sharePanel).toContain("loadProviderDispatchCapability");
+    expect(sharePanel).toContain("providerDispatchUi.canDispatch");
+    expect(sharePanel).toContain("providerDispatchUi.primaryDisabled");
+    expect(sharePanel).toContain("providerDispatchUi.primaryLabel");
+    expect(sharePanel).toContain("buildProviderDispatchChannelUiContract");
+    expect(sharePanel).toContain("createAuthenticatedShareSession");
+    expect(sharePanel).toContain("recipientMessageVariants.messageVariants");
+    expect(sharePanel).toContain('id="workflow-language-select"');
+  });
+
+  it("offers channel preparation guidance and retry without misleading unavailable channel actions", () => {
+    expect(sharePanel).toContain('href="/settings"');
+    expect(sharePanel).toContain("발송 채널 준비 안내");
+    expect(sharePanel).toContain("다시 확인");
+    expect(sharePanel).toContain("channelUi.reasonLabel");
+    expect(sharePanel).toContain("channelUi.enabled");
+  });
+
+  it("advertises only the relay transport implemented by provider dispatch", () => {
+    const capabilityResolver = dispatchRoute.slice(
+      dispatchRoute.indexOf("function resolveCurrentProviderDispatchCapability"),
+      dispatchRoute.indexOf("export async function GET")
+    );
+
+    expect(capabilityResolver).toContain("providerConfigured: relayConfigured");
+    expect(capabilityResolver).not.toContain("relayConfigured || isKakaoProviderConfigured()");
+  });
+
+  it("describes language-specific preparation without claiming a recipient portal", () => {
+    expect(sharePanel).toContain("선택한 대상에게 언어별 전송본을 준비합니다.");
+    expect(sharePanel).not.toContain("열람 링크");
+    expect(sharePanel).not.toContain("열람 확인");
+    expect(sharePanel).not.toContain("수신자가 확인");
+  });
+
   it("offers one deterministic revalidation action after document edits", () => {
     expect(commandCenter).toContain("revalidateEditedWorkpack");
     expect(commandCenter).toContain('fetch("/api/ontology/graph"');
@@ -57,9 +115,10 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain("messageVariants: recipientMessageVariants.messageVariants");
   });
 
-  it("exposes exactly one direct primary send action", () => {
+  it("renders one fail-closed primary control", () => {
     expect(sharePanel.match(/data-share-primary/g)).toHaveLength(2);
     expect(sharePanel).toContain("onClick={dispatchWorkflow}");
+    expect(sharePanel).toContain("disabled={primaryDisabled}");
     expect(sharePanel).not.toContain("setIsConfirming");
     expect(sharePanel).not.toContain("dispatch-confirm-panel");
     expect(sharePanel).toContain("dispatchInFlightRef.current");

@@ -1,0 +1,20 @@
+{
+  "baseSha": "f16d152e3c38669f69029dab45ebf2e7a645acb3",
+  "scope": "workpack submission preview completeness",
+  "status": "focused_pass_typecheck_pass",
+  "tests": {
+    "files": 2,
+    "passed": 4,
+    "failed": 0
+  },
+  "typecheck": "pass",
+  "build": "pass_28_static_pages",
+  "browser": {
+    "passed": 1,
+    "skipped": 29,
+    "scope": "opened submission preview containment"
+  },
+  "dependencySync": "npm.cmd install; package and lock files unchanged",
+  "databaseChanged": false,
+  "exportSerializersChanged": false
+}

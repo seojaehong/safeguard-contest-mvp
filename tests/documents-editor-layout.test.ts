@@ -442,7 +442,8 @@ describe("documents editor layout", () => {
       const activeTab = readRect(".doc-tab.active");
       const sheetExportPanel = readRect(".sheet-export-panel");
       const previewPanel = readRect(".submission-preview-panel");
-      const previewDisplay = getComputedStyle(document.querySelector(".submission-preview-panel .safety-form-preview") as Element).display;
+      const preview = document.querySelector(".submission-preview-panel .safety-form-preview");
+      const previewDisplay = preview ? getComputedStyle(preview).display : "not-mounted";
 
       return {
         viewportWidth: window.innerWidth,
@@ -476,7 +477,7 @@ describe("documents editor layout", () => {
     expect(metrics.sheetExportPanel.borderRadius).toBeLessThanOrEqual(8);
     expect(metrics.sheetExportPanel.color).not.toBe("rgb(246, 245, 239)");
     expect(metrics.previewPanel.backgroundColor).not.toBe("rgba(14, 14, 18, 0.78)");
-    expect(metrics.previewDisplay).toBe("none");
+    expect(["none", "not-mounted"]).toContain(metrics.previewDisplay);
   }, 90_000);
 
   it("keeps the desktop cockpit in three columns with one launch-document count", async () => {
@@ -1240,6 +1241,7 @@ describe("documents editor layout", () => {
     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
     await page.locator(".workpack-shell").scrollIntoViewIfNeeded();
     await page.locator(".submission-preview-panel summary").click();
+    await page.locator(".submission-preview-panel .safety-form-preview").waitFor({ state: "visible" });
 
     const metrics = await page.evaluate(() => {
       const editor = document.querySelector(".document-editor");

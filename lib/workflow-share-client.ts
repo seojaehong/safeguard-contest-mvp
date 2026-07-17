@@ -1,7 +1,37 @@
 import type { AskResponse } from "@/lib/types";
+import type {
+  ProviderDispatchCapability,
+  ProviderDispatchChannel,
+  ProviderDispatchReason
+} from "@/lib/workflow-dispatch-capability";
+
+export type { ProviderDispatchCapability } from "@/lib/workflow-dispatch-capability";
 
 export type WorkflowShareChannel = "email" | "sms" | "kakao";
 export type WorkflowDispatchMessageTarget = "manager" | `foreign:${string}`;
+
+export type ProviderDispatchUiState =
+  | { status: "checking" }
+  | { status: "error" }
+  | { status: "preview_only"; capability: ProviderDispatchCapability }
+  | { status: "live"; capability: ProviderDispatchCapability };
+
+export type ProviderDispatchUiContract = {
+  status: ProviderDispatchUiState["status"];
+  canDispatch: boolean;
+  statusLabel: string;
+  reasonLabel: string;
+  primaryLabel: string;
+  primaryDisabled: boolean;
+  showUnavailableActions: boolean;
+};
+
+export type ProviderDispatchChannelUiContract = {
+  enabled: boolean;
+  selected: boolean;
+  badge: "사용 가능" | "사용 불가" | "미리보기 전용" | "상태 확인 중" | "상태 확인 실패";
+  reasonLabel: string;
+};
 
 export type LocalizedDispatchRecipient = {
   workerId: string;
@@ -62,6 +92,7 @@ export type WorkflowDispatchResult = {
   idempotencySupported?: boolean;
   duplicateRisk?: boolean;
   providerCalled?: boolean;
+  providerDispatch?: ProviderDispatchCapability;
   channelResults?: WorkflowDispatchChannelResult[];
 };
 
@@ -197,6 +228,138 @@ async function readResponseBody(response: Response): Promise<Record<string, unkn
     console.warn("workflow share response parse failed", error);
     return {};
   }
+}
+
+function parseProviderDispatchCapability(value: unknown): ProviderDispatchCapability {
+  if (!isRecord(value)) throw new Error("provider dispatch capability 응답이 없습니다.");
+  const capability = value.capability;
+  const mode = value.mode;
+  const reason = value.reason;
+  if (typeof capability !== "boolean") {
+    throw new Error("provider dispatch capability 값이 올바르지 않습니다.");
+  }
+  if (mode !== "preview_only" && mode !== "live") {
+    throw new Error("provider dispatch mode 값이 올바르지 않습니다.");
+  }
+  const validReasons: ProviderDispatchReason[] = [
+    "persistent_idempotency_unavailable",
+    "live_dispatch_disabled",
+    "provider_configuration_unavailable",
+    "recipient_contact_unavailable"
+  ];
+  if (reason !== null && !validReasons.includes(reason as ProviderDispatchReason)) {
+    throw new Error("provider dispatch reason 값이 올바르지 않습니다.");
+  }
+  if (capability !== (mode === "live")) {
+    throw new Error("provider dispatch capability와 mode가 일치하지 않습니다.");
+  }
+  if (capability === (reason !== null)) {
+    throw new Error("provider dispatch capability와 reason이 일치하지 않습니다.");
+  }
+  if (!isRecord(value.channels)) {
+    throw new Error("provider dispatch channel capability 값이 없습니다.");
+  }
+  const channelValues = value.channels;
+  const channels = Object.fromEntries((["email", "sms", "kakao"] as ProviderDispatchChannel[]).map((channel) => {
+    const channelValue = channelValues[channel];
+    if (!isRecord(channelValue) || typeof channelValue.capability !== "boolean") {
+      throw new Error(`${channel} provider dispatch capability 값이 올바르지 않습니다.`);
+    }
+    const channelReason = channelValue.reason;
+    if (channelReason !== null && !validReasons.includes(channelReason as ProviderDispatchReason)) {
+      throw new Error(`${channel} provider dispatch reason 값이 올바르지 않습니다.`);
+    }
+    if (channelValue.capability === (channelReason !== null)) {
+      throw new Error(`${channel} provider dispatch capability와 reason이 일치하지 않습니다.`);
+    }
+    return [channel, { capability: channelValue.capability, reason: channelReason }];
+  })) as ProviderDispatchCapability["channels"];
+  return { capability, mode, reason: reason as ProviderDispatchReason | null, channels };
+}
+
+export async function loadProviderDispatchCapability(
+  fetcher: Fetcher
+): Promise<ProviderDispatchCapability> {
+  const response = await fetcher("/api/workflow/dispatch", {
+    method: "GET",
+    headers: { accept: "application/json" }
+  });
+  const body = await readResponseBody(response);
+  if (!response.ok || body.ok !== true) {
+    throw buildHttpError(body, response, "provider dispatch capability를 확인하지 못했습니다.");
+  }
+  return parseProviderDispatchCapability(body.providerDispatch);
+}
+
+export function formatProviderDispatchReason(reason: ProviderDispatchReason | null): string {
+  if (reason === "persistent_idempotency_unavailable") return "안전한 중복 방지 저장 기능을 준비하고 있습니다.";
+  if (reason === "live_dispatch_disabled") return "실제 발송 기능이 비활성화되어 있습니다.";
+  if (reason === "provider_configuration_unavailable") return "발송 채널 설정이 필요합니다.";
+  if (reason === "recipient_contact_unavailable") return "선택한 대상의 연락처가 필요합니다.";
+  return "";
+}
+
+export function buildProviderDispatchUiContract(state: ProviderDispatchUiState): ProviderDispatchUiContract {
+  if (state.status === "checking") {
+    return {
+      status: "checking",
+      canDispatch: false,
+      statusLabel: "발송 상태 확인 중",
+      reasonLabel: "발송 채널 상태를 확인하고 있습니다.",
+      primaryLabel: "발송 상태 확인 중",
+      primaryDisabled: true,
+      showUnavailableActions: false
+    };
+  }
+  if (state.status === "error") {
+    return {
+      status: "error",
+      canDispatch: false,
+      statusLabel: "상태 확인 실패",
+      reasonLabel: "발송 채널 상태를 확인하지 못했습니다.",
+      primaryLabel: "상태 확인 실패",
+      primaryDisabled: true,
+      showUnavailableActions: true
+    };
+  }
+  const canDispatch = state.status === "live"
+    && state.capability.capability
+    && state.capability.mode === "live";
+  const hasUnavailableChannels = Object.values(state.capability.channels)
+    .some((channel) => !channel.capability);
+  return {
+    status: state.status,
+    canDispatch,
+    statusLabel: canDispatch ? "발송 가능" : "미리보기 전용",
+    reasonLabel: formatProviderDispatchReason(state.capability.reason),
+    primaryLabel: canDispatch ? "문서팩 전송하기" : "미리보기 전용",
+    primaryDisabled: !canDispatch,
+    showUnavailableActions: !canDispatch || hasUnavailableChannels
+  };
+}
+
+export function buildProviderDispatchChannelUiContract(input: {
+  state: ProviderDispatchUiState;
+  channel: ProviderDispatchChannel;
+  selected: boolean;
+}): ProviderDispatchChannelUiContract {
+  if (input.state.status === "checking" || input.state.status === "error") {
+    const failed = input.state.status === "error";
+    return {
+      enabled: false,
+      selected: false,
+      badge: failed ? "상태 확인 실패" : "상태 확인 중",
+      reasonLabel: failed ? "발송 채널 상태를 확인하지 못했습니다." : "발송 채널 상태를 확인하고 있습니다."
+    };
+  }
+  const channelCapability = input.state.capability.channels[input.channel];
+  const enabled = input.state.status === "live" && channelCapability.capability;
+  return {
+    enabled,
+    selected: enabled && input.selected,
+    badge: enabled ? "사용 가능" : input.state.status === "preview_only" ? "미리보기 전용" : "사용 불가",
+    reasonLabel: enabled ? "" : formatProviderDispatchReason(channelCapability.reason)
+  };
 }
 
 function requireBearerContext(authToken: string, workpackId: string): void {
@@ -516,6 +679,9 @@ export async function dispatchAuthenticatedShareSession(
     idempotencySupported: typeof body.idempotencySupported === "boolean" ? body.idempotencySupported : undefined,
     duplicateRisk: typeof body.duplicateRisk === "boolean" ? body.duplicateRisk : undefined,
     providerCalled: typeof body.providerCalled === "boolean" ? body.providerCalled : undefined,
+    providerDispatch: body.providerDispatch === undefined
+      ? undefined
+      : parseProviderDispatchCapability(body.providerDispatch),
     channelResults: parseChannelResults(body.channelResults)
   };
   if (!response.ok && !result.duplicateRisk) {

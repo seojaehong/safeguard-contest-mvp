@@ -10,6 +10,7 @@ import {
   getCanonicalDispatchLanguageCodes,
   validateWorkflowDispatchMessage
 } from "@/lib/workflow-share-client";
+import { resolveProviderDispatchCapability } from "@/lib/server/workflow-dispatch-capability-policy";
 import {
   loadActiveOwnedShareSession,
   loadOwnedWorkpackOperationContext
@@ -69,6 +70,30 @@ const PROVIDER_IDEMPOTENCY_KEY_PATTERN = /^provider-dispatch-v1-[0-9a-f]{8}-[0-9
 
 function isKakaoDispatchEnabled() {
   return process.env.SAFEGUARD_KAKAO_ENABLED === "1" || process.env.SAFECLAW_KAKAO_ENABLED === "1";
+}
+
+function resolveCurrentProviderDispatchCapability() {
+  const webhookConfig = resolveWebhookConfig();
+  const relayConfigured = Boolean(webhookConfig.url && webhookConfig.token);
+  return resolveProviderDispatchCapability({
+    persistentIdempotencySupported: PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED,
+    liveDispatchEnabled: isLiveDispatchEnabled(),
+    channels: {
+      email: { providerConfigured: relayConfigured, contactReadiness: "request_scoped" },
+      sms: { providerConfigured: relayConfigured, contactReadiness: "request_scoped" },
+      kakao: {
+        providerConfigured: relayConfigured,
+        contactReadiness: "request_scoped"
+      }
+    }
+  });
+}
+
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    providerDispatch: resolveCurrentProviderDispatchCapability()
+  });
 }
 
 function isKakaoProviderConfigured() {
@@ -441,6 +466,7 @@ export async function POST(request: NextRequest) {
       idempotencySupported: false,
       duplicateRisk: true,
       providerCalled: false,
+      providerDispatch: resolveCurrentProviderDispatchCapability(),
       idempotencyKey,
       message: "영속 provider idempotency를 보장할 저장 계약이 없어 실제 provider 호출을 차단했습니다. 중복방지 지원 전에는 재전송하지 마세요."
     }, { status: 409 });

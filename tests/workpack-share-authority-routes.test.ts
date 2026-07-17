@@ -247,6 +247,29 @@ describe("share session route authority", () => {
 });
 
 describe("workflow dispatch route authority", () => {
+  it("reports provider dispatch as preview-only without activating a provider", async () => {
+    const { GET } = await import("@/app/api/workflow/dispatch/route");
+
+    const response = await GET();
+    const body = await response.json() as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      ok: true,
+      providerDispatch: {
+        capability: false,
+        mode: "preview_only",
+        reason: "persistent_idempotency_unavailable",
+        channels: {
+          email: { capability: false, reason: "persistent_idempotency_unavailable" },
+          sms: { capability: false, reason: "persistent_idempotency_unavailable" },
+          kakao: { capability: false, reason: "persistent_idempotency_unavailable" }
+        }
+      }
+    });
+    expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
+  });
+
   it("builds an exact minimal provider DTO for each canonical recipient message", async () => {
     expect(buildLocalizedDispatchRecipients(
       {
@@ -884,6 +907,11 @@ describe("workflow dispatch route authority", () => {
       idempotencySupported?: boolean;
       idempotencyKey?: string;
       providerCalled?: boolean;
+      providerDispatch?: {
+        capability: boolean;
+        mode: string;
+        reason: string | null;
+      };
     };
 
     expect(response.status).toBe(409);
@@ -891,7 +919,12 @@ describe("workflow dispatch route authority", () => {
       duplicateRisk: true,
       idempotencySupported: false,
       idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
-      providerCalled: false
+      providerCalled: false,
+      providerDispatch: {
+        capability: false,
+        mode: "preview_only",
+        reason: "persistent_idempotency_unavailable"
+      }
     });
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
   });

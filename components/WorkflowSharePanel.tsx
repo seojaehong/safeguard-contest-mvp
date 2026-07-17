@@ -9,10 +9,14 @@ import {
   type WorkerDispatchTarget
 } from "@/lib/workspace";
 import {
+  buildProviderDispatchChannelUiContract,
+  buildProviderDispatchUiContract,
   buildCanonicalRecipientMessageVariants,
   createAuthenticatedShareSession,
   dispatchAuthenticatedShareSession,
+  loadProviderDispatchCapability,
   resolveWorkflowMessagePreview,
+  type ProviderDispatchUiState,
   type WorkflowDispatchChannelResult,
   type WorkflowDispatchResult
 } from "@/lib/workflow-share-client";
@@ -150,7 +154,7 @@ type WorkflowShareStatusInput = {
 };
 
 const channelOptions: Array<{
-  key: Channel;
+  key: ActiveChannel;
   label: string;
   helper: string;
   nextAction: string;
@@ -185,7 +189,7 @@ const channelOptions: Array<{
 const activeDispatchChannels: ActiveChannel[] = ["email", "sms", "kakao"];
 const EMPTY_SHARE_RECORDS: ShareRecordsState = {
   status: "idle",
-  message: "문서팩을 저장하면 공유와 열람 이력을 확인할 수 있습니다.",
+  message: "문서팩을 저장하면 공유 준비 이력을 확인할 수 있습니다.",
   sessions: [],
   confirmations: []
 };
@@ -299,7 +303,7 @@ function formatSessionReuseReason(reason: ShareSessionReuseReason | null): strin
   if (reason === "expiry_missing") return "이전 공유의 만료 시간을 확인할 수 없어 새로 준비합니다.";
   if (reason === "expiry_invalid") return "이전 공유의 만료 시간이 올바르지 않아 새로 준비합니다.";
   if (reason === "expired") return "만료된 세션이라 재사용하지 않습니다.";
-  if (reason === "permission_not_ready") return "초대된 참여자의 열람 권한을 다시 확인해야 합니다.";
+  if (reason === "permission_not_ready") return "선택한 대상의 공유 준비 상태를 다시 확인해야 합니다.";
   if (reason === "recipient_mismatch") return "현재 참여자와 이전에 저장한 참여자가 달라 새로 준비합니다.";
   return "현재 대상과 재사용 정책을 모두 충족한 세션이 아닙니다.";
 }
@@ -360,14 +364,14 @@ export function deriveWorkflowShareStatus(input: WorkflowShareStatusInput): {
   if (input.phase === "creating-session") {
     session = {
       label: "공유 설정 중",
-      detail: "초대할 참여자와 열람 권한을 저장하고 있습니다.",
+      detail: "선택한 대상과 공유 준비 정보를 저장하고 있습니다.",
       nextAction: "잠시만 기다려 주세요"
     };
   } else if (input.activeSession) {
     session = {
       label: input.sessionReusable ? `활성 · ${recipientCount}명` : `재사용 불가 · ${recipientCount}명`,
       detail: input.sessionReusable && isShareSessionPermissionReady(input.activeSession)
-        ? "초대된 참여자 · 열람 전용"
+        ? "선택한 대상 · 전송 준비"
         : formatSessionReuseReason(input.sessionReuseReason),
       nextAction: input.shareRecordsStatus === "error"
         ? "세션 이력 다시 조회"
@@ -534,6 +538,7 @@ export function WorkflowSharePanel({
   const [resolvedAuthority, setResolvedAuthority] = useState<(ShareAuthority & { targetSignature: string }) | null>(null);
   const [shareRecords, setShareRecords] = useState<ShareRecordsState>(EMPTY_SHARE_RECORDS);
   const [dispatchRecords, setDispatchRecords] = useState<DispatchRecordsState>(EMPTY_DISPATCH_RECORDS);
+  const [providerDispatchState, setProviderDispatchState] = useState<ProviderDispatchUiState>({ status: "checking" });
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const selectedMessage = useMemo(() => {
@@ -579,8 +584,35 @@ export function WorkflowSharePanel({
   const targetSignatureRef = useRef(targetSignature);
   const archiveWorkpackIdRef = useRef(archiveWorkpackId);
   const dispatchInFlightRef = useRef(false);
+  const providerDispatchRequestIdRef = useRef(0);
   targetSignatureRef.current = targetSignature;
   archiveWorkpackIdRef.current = archiveWorkpackId;
+
+  async function refreshProviderDispatchCapability() {
+    const requestId = providerDispatchRequestIdRef.current + 1;
+    providerDispatchRequestIdRef.current = requestId;
+    setProviderDispatchState({ status: "checking" });
+    try {
+      const capability = await loadProviderDispatchCapability(fetch);
+      if (providerDispatchRequestIdRef.current !== requestId) return;
+      setProviderDispatchState({
+        status: capability.capability && capability.mode === "live" ? "live" : "preview_only",
+        capability
+      });
+    } catch (error: unknown) {
+      console.warn("provider dispatch capability lookup failed", error);
+      if (providerDispatchRequestIdRef.current === requestId) {
+        setProviderDispatchState({ status: "error" });
+      }
+    }
+  }
+
+  useEffect(() => {
+    void refreshProviderDispatchCapability();
+    return () => {
+      providerDispatchRequestIdRef.current += 1;
+    };
+  }, []);
 
   useEffect(() => {
     updateDispatchEvidence({ type: "scope_changed", scopeKey: dispatchEvidenceScopeKey });
@@ -594,7 +626,7 @@ export function WorkflowSharePanel({
     }
 
     let cancelled = false;
-    setShareRecords((current) => ({ ...current, status: "loading", message: "공유 세션과 열람 이력을 조회하고 있습니다." }));
+    setShareRecords((current) => ({ ...current, status: "loading", message: "공유 세션과 준비 이력을 조회하고 있습니다." }));
     setDispatchRecords((current) => ({ ...current, status: "loading", message: "현재 workpack의 전송 로그를 조회하고 있습니다." }));
 
     const requestJson = async (url: string): Promise<{ httpOk: boolean; payload: unknown }> => {
@@ -704,7 +736,11 @@ export function WorkflowSharePanel({
 
   function toggleChannel(channel: Channel) {
     const option = channelOptions.find((item) => item.key === channel);
-    if (!option?.enabled) return;
+    if (!option?.enabled || !buildProviderDispatchChannelUiContract({
+      state: providerDispatchState,
+      channel: option.key,
+      selected: selectedChannels.includes(option.key)
+    }).enabled) return;
     setSelectedChannels((current) => (
       current.includes(channel)
         ? current.filter((item) => item !== channel)
@@ -790,9 +826,15 @@ export function WorkflowSharePanel({
 
   async function dispatchWorkflow() {
     if (dispatchInFlightRef.current) return;
+    if (!providerDispatchUi.canDispatch) return;
     let evidenceScopeKey = dispatchEvidenceScopeKey;
     const activeChannels = selectedChannels.filter((channel): channel is ActiveChannel => (
       activeDispatchChannels.includes(channel as ActiveChannel)
+      && buildProviderDispatchChannelUiContract({
+        state: providerDispatchState,
+        channel: channel as ActiveChannel,
+        selected: true
+      }).enabled
     ));
     if (!authToken) {
       updateDispatchEvidence({
@@ -801,7 +843,7 @@ export function WorkflowSharePanel({
         result: {
           ok: false,
           configured: true,
-          message: "관리자 로그인 후 서버 공유 세션을 만들 수 있습니다. 비회원 초안은 서버 전파나 열람 확인으로 기록되지 않습니다."
+          message: "관리자 로그인 후 서버 공유 세션을 만들 수 있습니다. 비회원 초안은 서버 전파 기록으로 남지 않습니다."
         },
         resultSource: "dispatch"
       });
@@ -1030,7 +1072,7 @@ export function WorkflowSharePanel({
     }
   }
 
-  const recipientLabel = targetWorkers.length ? `${targetWorkers.length}명 초대` : "작업자 선택 필요";
+  const recipientLabel = targetWorkers.length ? `${targetWorkers.length}명 선택` : "작업자 선택 필요";
   const previewItems = previewLines(selectedMessage);
   const storageReady = Boolean(authToken && effectiveAuthority);
   const sessionReady = Boolean(reusableSession);
@@ -1054,13 +1096,23 @@ export function WorkflowSharePanel({
     ? readiness.reasons
     : ["서버 검수 조건을 확인해 주세요."];
   const canResolveAuthority = Boolean(effectiveAuthority || ensureWorkpackSaved);
+  const providerDispatchUi = buildProviderDispatchUiContract(providerDispatchState);
+  const hasSelectedDispatchChannel = selectedChannels.some((channel) => (
+    activeDispatchChannels.includes(channel as ActiveChannel)
+    && buildProviderDispatchChannelUiContract({
+      state: providerDispatchState,
+      channel: channel as ActiveChannel,
+      selected: true
+    }).enabled
+  ));
   const primaryDisabled = Boolean(
-    !authToken
+    providerDispatchUi.primaryDisabled
+    || !authToken
     || shareBlocked
     || isSending
     || shareRecords.status === "loading"
     || shareRecords.status === "error"
-    || !selectedChannels.length
+    || !hasSelectedDispatchChannel
     || !targetWorkers.length
     || !canResolveAuthority
   );
@@ -1073,7 +1125,9 @@ export function WorkflowSharePanel({
   };
   const primaryLabel = isSending
     ? phaseLabel[phase]
-    : !authToken
+    : !providerDispatchUi.canDispatch
+      ? providerDispatchUi.primaryLabel
+      : !authToken
       ? "로그인하고 전송하기"
       : shareBlocked
         ? "보완 후 전송할 수 있어요"
@@ -1093,12 +1147,12 @@ export function WorkflowSharePanel({
       <header className="share-workflow-header">
         <div>
           <span className="eyebrow">오늘 작업</span>
-          <strong>문서팩 보내기</strong>
-          <p>대상과 채널을 확인하고 작업자 언어로 안전 내용을 전달합니다.</p>
+          <strong>{providerDispatchUi.canDispatch ? "문서팩 보내기" : "언어별 전송본 미리보기"}</strong>
+          <p>선택한 대상의 작업자 언어로 안전 내용을 준비하고 확인합니다.</p>
         </div>
         <div className="share-status-pill" aria-label="공유 워크플로 상태" aria-live="polite">
-          <span>{shareBlocked ? "보완 필요" : sessionReady ? "공유 가능" : storageReady ? "저장 완료" : "전송 준비"}</span>
-          <strong>{shareBlocked ? readiness?.summary : isSending ? phaseLabel[phase] : statusModel.dispatch.label}</strong>
+          <span>{providerDispatchUi.canDispatch ? (shareBlocked ? "보완 필요" : sessionReady ? "공유 가능" : storageReady ? "저장 완료" : "전송 준비") : providerDispatchUi.statusLabel}</span>
+          <strong>{providerDispatchUi.canDispatch ? (shareBlocked ? readiness?.summary : isSending ? phaseLabel[phase] : statusModel.dispatch.label) : providerDispatchUi.reasonLabel}</strong>
         </div>
       </header>
 
@@ -1121,7 +1175,7 @@ export function WorkflowSharePanel({
             <p className="muted small">오늘 작업에 참여할 작업자를 먼저 선택해 주세요.</p>
           )}
           {recipientSuggestions.length ? (
-            <p className="muted small">저장된 연락처로 초대된 사람에게만 열람 링크를 보냅니다.</p>
+            <p className="muted small">선택한 대상에게 언어별 전송본을 준비합니다.</p>
           ) : targetWorkers.length ? (
             <p className="muted small">선택한 참여자의 연락처를 확인해 주세요.</p>
           ) : null}
@@ -1134,22 +1188,42 @@ export function WorkflowSharePanel({
             <strong id="workflow-channel-heading">채널</strong>
           </div>
           <div className="channel-grid" aria-label="전파 채널 선택">
-            {channelOptions.map((channel) => (
-              <button
-                key={channel.key}
-                type="button"
-                className={`channel-card ${selectedChannels.includes(channel.key) ? "active" : ""} ${channel.enabled ? "" : "disabled"}`}
-                onClick={() => toggleChannel(channel.key)}
-                disabled={!channel.enabled}
-                aria-disabled={!channel.enabled}
-                aria-pressed={selectedChannels.includes(channel.key)}
-                aria-label={`${channel.label} · ${channel.badge}. 다음 행동: ${channel.nextAction}`}
-              >
-                <strong>{channel.label}</strong>
-                {channel.badge !== "사용 가능" ? <em>{channel.badge}</em> : null}
-              </button>
-            ))}
+            {channelOptions.map((channel) => {
+              const channelUi = buildProviderDispatchChannelUiContract({
+                state: providerDispatchState,
+                channel: channel.key,
+                selected: selectedChannels.includes(channel.key)
+              });
+              const channelEnabled = channel.enabled && channelUi.enabled;
+              const channelSelected = channelEnabled && channelUi.selected;
+              const channelAriaLabel = channelEnabled
+                ? `${channel.label} · ${channelUi.badge}. 다음 행동: ${channel.nextAction}`
+                : `${channel.label} · ${channelUi.badge}. 이유: ${channelUi.reasonLabel}`;
+              return (
+                <button
+                  key={channel.key}
+                  type="button"
+                  className={`channel-card ${channelSelected ? "active" : ""} ${channelEnabled ? "" : "disabled"}`}
+                  onClick={() => toggleChannel(channel.key)}
+                  disabled={!channelEnabled}
+                  aria-disabled={!channelEnabled}
+                  aria-pressed={channelSelected}
+                  aria-label={channelAriaLabel}
+                >
+                  <strong>{channel.label}</strong>
+                  {channelUi.badge !== "사용 가능" ? <em>{channelUi.badge}</em> : null}
+                </button>
+              );
+            })}
           </div>
+          {providerDispatchUi.showUnavailableActions ? (
+            <div className="command-actions" aria-label="발송 채널 상태 작업">
+              <a className="button secondary" href="/settings">발송 채널 준비 안내</a>
+              <button className="button secondary" type="button" onClick={() => void refreshProviderDispatchCapability()}>
+                다시 확인
+              </button>
+            </div>
+          ) : null}
         </section>
 
         <section className="share-form-card" aria-labelledby="workflow-language-heading" data-share-owner="language-preview">
@@ -1203,7 +1277,7 @@ export function WorkflowSharePanel({
       </section>
 
       <div className="command-actions">
-        {!authToken ? (
+        {!authToken && providerDispatchUi.canDispatch ? (
           <a href="/login" className="button command-primary workbench-primary-action" data-share-primary>{primaryLabel}</a>
         ) : (
           <button
@@ -1224,7 +1298,7 @@ export function WorkflowSharePanel({
             {customerSafeMessage(result.message, "채널별 전송 결과를 확인해 주세요.")}
           </p>
           {validationOnlyResult ? (
-            <p>미리 확인용 응답입니다. 실제 전송이나 열람 이력으로 저장하지 않습니다.</p>
+            <p>미리 확인용 응답입니다. 실제 전송 기록으로 저장하지 않습니다.</p>
           ) : null}
           {result.duplicateRisk ? (
             <p role="alert">
@@ -1234,7 +1308,7 @@ export function WorkflowSharePanel({
             </p>
           ) : null}
           {resultSource === "dispatch" ? (
-            <p>전송 이력 · {customerSafeMessage(logSaveState.message, "저장 상태를 확인해 주세요.")} 열람 확인 · {statusModel.acknowledgment.label}, 전송 완료와 별도 기록.</p>
+            <p>전송 이력 · {customerSafeMessage(logSaveState.message, "저장 상태를 확인해 주세요.")}</p>
           ) : null}
           {result.channelResults?.length ? (
             <div className="workflow-channel-results" aria-label="채널별 전송 결과">

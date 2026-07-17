@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "safeclaw-supabase-rls-approval/v1",
+  "generatedAt": "2026-07-17T06:10:00Z",
+  "sourceSha": "f16d152e3c38669f69029dab45ebf2e7a645acb3",
+  "status": "approval_required",
+  "mode": "read_only",
+  "launchIsolationProven": false,
+  "mutation": {
+    "database": false,
+    "schema": false,
+    "migration": false,
+    "data": false,
+    "applicationCode": false
+  },
+  "inventory": {
+    "tenantBoundTables": 14,
+    "rlsEnabledByMigration": 14,
+    "forceRlsByMigration": 0,
+    "ownerForAllPolicyTables": 13,
+    "withCheckPolicyTables": 13,
+    "serviceRoleOnlyPolicylessTables": 1,
+    "explicitPolicyRoleTargets": 0,
+    "explicitGrantOrRevokeStatements": 0,
+    "tables": [
+      { "name": "organizations", "policy": "owner_select_and_owner_all", "withCheck": "owner_id_auth_uid", "liveReachability": "present" },
+      { "name": "sites", "policy": "owner_all", "withCheck": "organization_owner", "liveReachability": "present" },
+      { "name": "workers", "policy": "owner_all", "withCheck": "row_organization_only", "liveReachability": "present" },
+      { "name": "workpacks", "policy": "owner_all", "withCheck": "row_organization_only", "liveReachability": "present" },
+      { "name": "education_records", "policy": "owner_all", "withCheck": "row_organization_only", "liveReachability": "present" },
+      { "name": "dispatch_logs", "policy": "owner_or_null_organization_all", "withCheck": "owner_or_null_organization", "liveReachability": "present" },
+      { "name": "daily_entries", "policy": "owner_all", "withCheck": "row_organization_only", "liveReachability": "present" },
+      { "name": "knowledge_events", "policy": "owner_all", "withCheck": "row_organization_only", "liveReachability": "present" },
+      { "name": "knowledge_regeneration_runs", "policy": "owner_all", "withCheck": "row_organization_only", "liveReachability": "present" },
+      { "name": "mcp_tokens", "policy": "none_default_deny", "withCheck": "none", "liveReachability": "present" },
+      { "name": "workpack_share_sessions", "policy": "owner_all", "withCheck": "row_organization_only", "liveReachability": "http_404" },
+      { "name": "workpack_read_confirmations", "policy": "owner_all", "withCheck": "row_organization_only", "liveReachability": "http_404" },
+      { "name": "workpack_improvements", "policy": "owner_all", "withCheck": "row_organization_only", "liveReachability": "http_404" },
+      { "name": "workpack_improvement_photos", "policy": "owner_all", "withCheck": "row_organization_only", "liveReachability": "http_404" }
+    ]
+  },
+  "serviceRole": {
+    "bypassesRls": true,
+    "applicationUsesAdminClient": true,
+    "liveRouteIsolationProven": false
+  },
+  "liveHeadEvidence": {
+    "requestCountPerRun": 44,
+    "inheritedProcessEnvironment": {
+      "targetAuthority": "unresolved",
+      "statusCounts": { "200": 30, "206": 4, "404": 10 },
+      "migration010TablesReturning404": [
+        "workpack_share_sessions",
+        "workpack_read_confirmations",
+        "workpack_improvements",
+        "workpack_improvement_photos",
+        "safety_reference_embeddings"
+      ]
+    },
+    "explicitEnvLocal": {
+      "targetAuthority": "unresolved",
+      "statusCounts": { "401": 44 }
+    },
+    "policyCatalogVerified": false,
+    "authenticatedCrossTenantAssertionsExecuted": 0
+  },
+  "findings": {
+    "p0Confirmed": 0,
+    "p0ApprovalBlockers": [
+      "authoritative_project_and_credentials_unresolved",
+      "live_catalog_and_authenticated_ab_evidence_missing"
+    ],
+    "p1": [
+      "dispatch_logs_null_organization_global_branch",
+      "child_foreign_key_tenant_tuple_not_enforced",
+      "service_role_bypass_requires_independent_route_controls",
+      "migration_010_tenant_tables_absent_on_reachable_target",
+      "storage_objects_policy_and_path_isolation_unverified"
+    ],
+    "p2": [
+      "history_tables_have_broad_owner_update_delete",
+      "mcp_tokens_site_org_tuple_not_constrained",
+      "tenant_isolation_harness_has_no_reviewed_live_adapters"
+    ],
+    "p3": [
+      "policy_roles_and_effective_grants_not_explicit",
+      "force_rls_not_configured_or_live_verified",
+      "actor_attribution_not_database_bound"
+    ]
+  },
+  "verification": {
+    "focusedTests": { "files": 11, "tests": 163, "failures": 0 },
+    "strictTypecheck": { "completed": true, "exitCode": 0 }
+  },
+  "requiredBeforeApproval": [
+    "authoritative_read_only_pg_catalog_snapshot",
+    "disposable_project_two_tenant_negative_matrix",
+    "child_tuple_insert_and_update_rejection",
+    "service_role_route_idor_and_state_invariance",
+    "storage_objects_cross_tenant_isolation",
+    "cleanup_and_residual_zero_evidence"
+  ]
+}
