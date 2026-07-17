@@ -272,6 +272,25 @@ describe("qualityContract", () => {
     expect(contract.dbHarness.retrievalContract?.source).toBe("safety_reference_items");
     expect(contract.dbHarness.documentCoverage.every((item) => item.covered)).toBe(true);
     expect(contract.persistence.status).toBe("ready");
+    expect(contract.integrity?.status).toBe("ready");
+    expect(contract.integrity?.blockedCount).toBe(0);
+  });
+
+  it("blocks sharing when core deliverable bodies still contain unresolved placeholders", () => {
+    const response = makeLiveStructuredResponse();
+    response.deliverables.riskAssessmentDraft = [
+      "위험성평가표",
+      "회사명: ____",
+      "작업장소: 현장 확인 필요",
+      "TODO"
+    ].join("\n");
+
+    const contract = buildQualityContract(response, "2026-07-08T00:00:00.000Z");
+
+    expect(contract.overall).toBe("blocked");
+    expect(contract.integrity?.status).toBe("blocked");
+    expect(contract.integrity?.blockedKeys).toContain("riskAssessmentDraft");
+    expect(contract.items.find((item) => item.key === "integrity")?.detail).toContain("riskAssessmentDraft");
   });
 
   it("does not mark the DB harness ready when required SIF evidence is missing", () => {

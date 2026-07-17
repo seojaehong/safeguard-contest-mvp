@@ -46,6 +46,13 @@ export type QualityContract = {
     requiredCount: number;
     detail: string;
   };
+  integrity?: {
+    status: QualityContractStatus;
+    checkedCount: number;
+    blockedCount: number;
+    blockedKeys: string[];
+    detail: string;
+  };
   persistence: {
     status: QualityContractStatus;
     requiresLogin: boolean;

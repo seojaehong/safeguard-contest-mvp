@@ -250,6 +250,26 @@ Verified fixes:
 - The editor keeps 12 document options available while preserving mobile no-overflow, no nested scroll container, no clipped controls, and no sub-44px visible touch targets in the north-star browser matrix.
 - Share v2 remains focused on target, channel, language preview, message preview, and one primary send action; recipient portal and foreign-language delivery contracts still pass after the document editor refresh.
 
+### Core document body integrity gate
+
+The quality contract now includes a `문서 본문 검수` item for the three core deliverables: `riskAssessmentDraft`, `tbmBriefing`, and `tbmLogDraft`. If any core body is missing, too short, placeholder-heavy, or missing required document terms, the overall quality contract becomes `blocked`, which keeps the existing share-readiness gate closed.
+
+Fresh current-tree gates:
+
+- RED first: `tests\quality-contract.test.ts` failed before implementation because `qualityContract.integrity` was absent and placeholder-heavy `riskAssessmentDraft` still produced an overall `ready`.
+- `npm.cmd test -- tests\quality-contract.test.ts tests\deliverable-integrity-policy.test.ts tests\workpack-readiness.test.ts`
+  - Result: 3 files / 24 tests passed.
+- `npm.cmd test -- tests\commercial-harness.test.ts tests\live-harness-quality-probe.test.ts tests\answer-panel-display.test.ts`
+  - Result: 3 files / 64 tests passed.
+- `npm.cmd run typecheck`
+  - Result: passed.
+
+Verified fixes:
+
+- Placeholder-heavy core documents now produce `qualityContract.overall = blocked`.
+- The `integrity` summary records checked count, blocked count, blocked keys, and a user-facing detail string.
+- Existing DB-harness, workpack readiness, and answer-panel display contracts continue to pass.
+
 ### Hermes / EngineAdapter current boundary gate
 
 The long-term Hermes/OpenClaw direction remains active, but current production does not claim a runnable external engine. It keeps SafeClaw's evidence harness as the system of record and presents the engine as inactive until the trusted transport and durable attempt ledger exist.

@@ -1,4 +1,5 @@
 import type { AskResponse, QualityContract, QualityContractItem, QualityContractStatus } from "./types";
+import { auditAskDeliverables, summarizeIntegrityItems } from "./deliverable-integrity-policy";
 
 const REQUIRED_EVIDENCE_KEYS = [
   "riskAssessmentDraft",
@@ -21,6 +22,12 @@ const ENHANCED_REQUIRED_STRUCTURED_KEYS = [
   "riskAssessmentRows",
   "tbmBriefingStructured",
   "tbmLogStructured"
+] as const;
+
+const CORE_DELIVERABLE_INTEGRITY_KEYS = [
+  "riskAssessmentDraft",
+  "tbmBriefing",
+  "tbmLogDraft"
 ] as const;
 
 type StructuredKey = typeof REQUIRED_STRUCTURED_KEYS[number];
@@ -168,6 +175,48 @@ function structuredItem(response: AskResponse): QualityContractItem {
   };
 }
 
+function deliverableIntegrityItem(response: AskResponse): QualityContractItem {
+  const items = auditAskDeliverables({
+    deliverables: response.deliverables,
+    requiredKeys: CORE_DELIVERABLE_INTEGRITY_KEYS
+  });
+  const summary = summarizeIntegrityItems(items);
+  if (summary.verdict === "pass") {
+    return {
+      key: "integrity",
+      label: "문서 본문 검수",
+      status: "ready",
+      detail: `핵심 문서 ${summary.passCount}/${summary.totalCount}종의 본문 placeholder와 필수 문구를 확인했습니다.`
+    };
+  }
+
+  const blockedKeys = items.filter((item) => item.verdict === "blocked").map((item) => item.key);
+  return {
+    key: "integrity",
+    label: "문서 본문 검수",
+    status: "blocked",
+    detail: `핵심 문서 ${summary.blockedCount}/${summary.totalCount}종 보완 필요: ${blockedKeys.join(", ")}`
+  };
+}
+
+function deliverableIntegritySummary(response: AskResponse) {
+  const items = auditAskDeliverables({
+    deliverables: response.deliverables,
+    requiredKeys: CORE_DELIVERABLE_INTEGRITY_KEYS
+  });
+  const summary = summarizeIntegrityItems(items);
+  const blockedKeys = items.filter((item) => item.verdict === "blocked").map((item) => item.key);
+  return {
+    status: summary.verdict === "pass" ? "ready" as const : "blocked" as const,
+    checkedCount: summary.totalCount,
+    blockedCount: summary.blockedCount,
+    blockedKeys,
+    detail: summary.verdict === "pass"
+      ? `핵심 문서 ${summary.passCount}/${summary.totalCount}종의 본문 placeholder와 필수 문구를 확인했습니다.`
+      : `핵심 문서 ${summary.blockedCount}/${summary.totalCount}종 보완 필요: ${blockedKeys.join(", ")}`
+  };
+}
+
 function dbHarnessItem(response: AskResponse): QualityContractItem {
   const harness = response.dbHarness;
   if (!harness) {
@@ -241,6 +290,7 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
     ontologyItem(response),
     evidenceItem(response),
     structuredItem(response),
+    deliverableIntegrityItem(response),
     dbHarnessItem(response),
     persistenceItem(response)
   ];
@@ -250,6 +300,7 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
   const ontology = items.find((item) => item.key === "ontology") ?? ontologyItem(response);
   const evidence = items.find((item) => item.key === "evidence") ?? evidenceItem(response);
   const structured = items.find((item) => item.key === "structured") ?? structuredItem(response);
+  const integrity = deliverableIntegritySummary(response);
   const dbHarness = items.find((item) => item.key === "dbHarness") ?? dbHarnessItem(response);
   const persistence = items.find((item) => item.key === "persistence") ?? persistenceItem(response);
   const readyCount = countReady(items);
@@ -291,6 +342,7 @@ export function buildQualityContract(response: AskResponse, generatedAt = new Da
       requiredCount: structuredRequiredKeys.length,
       detail: structured.detail
     },
+    integrity,
     dbHarness: {
       status: dbHarness.status,
       mode: response.dbHarness?.packet.mode,
