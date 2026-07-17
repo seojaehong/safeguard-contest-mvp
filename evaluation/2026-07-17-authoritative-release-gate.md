@@ -949,6 +949,8 @@ Results:
   - Result: 3 files passed / 1 skipped; 51 tests passed / 1 skipped.
 - `npm.cmd run typecheck`
   - Result: passed.
+- `npm.cmd run build`
+  - Result: passed; 28/28 static pages generated and `/share/[sessionId]` remained in the production route map.
 
 Verified boundary:
 
