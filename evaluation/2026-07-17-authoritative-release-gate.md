@@ -3,7 +3,7 @@
 ## Scope
 
 - Original integration source HEAD: `2b4316056b44b8729903d364d93022a916383ab6`
-- Current verification HEAD: `92563fbf9f957c50147d02532a2dc3224739e7c4`
+- Current verification HEAD: `45b68f83355dc41969ec0cc36dcfb3f390dfdb7d`
 - KOSHA exact-trust Wave 2: already present on the authoritative branch with equivalent product and evidence patches.
 - Remote Hermes: trusted-transport and durable-attempt-ledger boundary integrated; product execution remains disabled until those application-owned dependencies are supplied.
 
@@ -47,7 +47,7 @@
 
 ## 2026-07-17 Continuation Evidence
 
-Current continuation HEAD before the final foreign-recipient evidence refresh: `651fe9b3474fdd78efd2aa6e4ad129e2566a2704`.
+Current continuation HEAD after the final foreign-recipient evidence refresh: `45b68f83355dc41969ec0cc36dcfb3f390dfdb7d`.
 
 ### KOSHA D-C-13 applicability
 
@@ -57,6 +57,17 @@ Current continuation HEAD before the final foreign-recipient evidence refresh: `
 - KOSHA + ontology focused gate passed, 7 files / 179 tests.
 - Strict typecheck passed.
 - Normal production build passed, 28/28 static pages.
+
+### Current master KOSHA exact-trust Wave 2 focused gate
+
+Fresh current-HEAD verification:
+
+- Command: `npm.cmd test -- tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts tests\exact-kosha-applicability-policy.test.ts`
+  - Result: 5 files / 80 tests passed.
+- Command: `python -m unittest scripts.tests.test_acquire_exact_kosha_body`
+  - Result: 19 tests passed.
+
+This proves the current master still has the D-C-13/D-C-7 exact trust registry, fail-closed KOSHA grounding, bounded applicability policy, and acquisition parser contract alive after the share/Hermes evidence refresh. The broader historical KOSHA corpus audit RED remains recorded as unresolved and is not reclassified as a pass.
 
 ### Live `/ontology` P0 visual gate
 
