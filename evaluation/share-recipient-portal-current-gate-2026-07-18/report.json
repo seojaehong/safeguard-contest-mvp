@@ -1,0 +1,22 @@
+{
+  "verdict": "PASS",
+  "date": "2026-07-18",
+  "head": "cd8905109d36c4f5107f2faa37674c142c2f7d57",
+  "staleFinding": "recipient portal absent on older/read-only baseline",
+  "currentRoutes": [
+    "app/share/[sessionId]/page.tsx",
+    "app/api/share-sessions/[sessionId]/route.ts"
+  ],
+  "managerLink": "components/WorkflowSharePanel.tsx recipientPortalPreviewHref",
+  "tests": {
+    "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workpack-share-authority-routes.test.ts tests\\workflow-share-panel-behavior.test.ts tests\\workspace-share-simplification.test.ts",
+    "files": 4,
+    "tests": 52,
+    "status": "PASS"
+  },
+  "typecheck": {
+    "command": "npm.cmd run typecheck",
+    "status": "PASS"
+  },
+  "deployMappingVerified": false
+}
