@@ -2,7 +2,8 @@
 
 ## Scope
 
-- Source HEAD: `2b4316056b44b8729903d364d93022a916383ab6`
+- Original integration source HEAD: `2b4316056b44b8729903d364d93022a916383ab6`
+- Current verification HEAD: `92563fbf9f957c50147d02532a2dc3224739e7c4`
 - KOSHA exact-trust Wave 2: already present on the authoritative branch with equivalent product and evidence patches.
 - Remote Hermes: trusted-transport and durable-attempt-ledger boundary integrated; product execution remains disabled until those application-owned dependencies are supplied.
 
@@ -46,7 +47,7 @@
 
 ## 2026-07-17 Continuation Evidence
 
-Current continuation HEAD after KOSHA/share copy work: `a2cf31f6cb3ddd32ef60e47010c4a420c1ed2380`.
+Current continuation HEAD after KOSHA/share/Hermes evidence work: `92563fbf9f957c50147d02532a2dc3224739e7c4`.
 
 ### KOSHA D-C-13 applicability
 
