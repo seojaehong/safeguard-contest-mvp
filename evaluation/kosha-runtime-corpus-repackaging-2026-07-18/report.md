@@ -105,7 +105,14 @@ Result:
 
 Next build trace:
 
-- `.next/server/app/api/safety-reference/status/route.js.nft.json` includes `current.json`, `manifest.json`, `items.jsonl`, `chunks.jsonl`, and `failures.jsonl`.
+- `.next/server/app/api/safety-reference/status/route.js.nft.json` includes `current.json`, `manifest.json`, `items.jsonl.gz`, `chunks.jsonl.gz`, and `failures.jsonl`.
+
+Packaging remediation:
+
+- A direct Vercel production upload rejected the raw `items.jsonl` and `chunks.jsonl` payload with `Request body too large. Limit: 10mb`.
+- The runtime bundle now stores `items.jsonl.gz` and `chunks.jsonl.gz` with deterministic gzip output.
+- `loadKoshaGuideCorpus()` accepts the compressed bundle only as a fallback, decompresses it in-process, and still verifies the original manifest hashes for `items.jsonl` and `chunks.jsonl`.
+- Security failures on the plain file path, including the existing `path:toctou` guard, do not fall through to gzip fallback.
 
 ## Launch Decision
 

@@ -38,6 +38,19 @@
     "officialMetadataSha256": "1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f",
     "launchReady": true
   },
+  "packagingRemediation": {
+    "trigger": "Vercel direct production upload rejected raw JSONL payload with Request body too large. Limit: 10mb.",
+    "rawFilesRemoved": [
+      "items.jsonl",
+      "chunks.jsonl"
+    ],
+    "bundledFiles": [
+      "items.jsonl.gz",
+      "chunks.jsonl.gz"
+    ],
+    "integrity": "Loader decompresses gzip fallback and still verifies the original manifest hashes for items.jsonl and chunks.jsonl.",
+    "securityGuard": "CorpusGateError failures on the plain path, including path:toctou, do not fall through to gzip fallback."
+  },
   "verification": [
     {
       "command": "npm.cmd test -- tests\\safety-reference-status-bundled-corpus.test.ts tests\\kosha-guide-offline-harness.test.ts tests\\kosha-guide-offline-harness-expanded.test.ts tests\\safety-reference-status-route.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\kosha-verified-subset-gate.test.ts",

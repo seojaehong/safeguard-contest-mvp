@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { lstat, open, realpath, type FileHandle } from "node:fs/promises";
 import type { Stats } from "node:fs";
 import { basename, isAbsolute, relative, resolve, sep } from "node:path";
+import { gunzipSync } from "node:zlib";
 
 export type KoshaGuideCorpusItemType = "technical-guideline" | "technical-support-regulation";
 export type KoshaGuideOfflineRetrievalMode = "local-tag" | "local-ranked" | "local-hybrid";
@@ -703,7 +704,28 @@ async function readJsonLines<T>(
   parser: (value: unknown) => T | null,
   hooks?: KoshaGuideCorpusLookup["testHooks"]
 ): Promise<{ rows: T[]; hash: string }> {
-  const file = await openSafeFile(rootDir, path, maxBytes, hooks);
+  let file: { handle: FileHandle; path: string; initialSize: number };
+  try {
+    file = await openSafeFile(rootDir, path, maxBytes, hooks);
+  } catch (error) {
+    if (error instanceof CorpusGateError) throw error;
+    const compressedPath = `${path}.gz`;
+    const compressedFile = await openSafeFile(rootDir, compressedPath, maxBytes, hooks);
+    try {
+      const compressed = Buffer.alloc(compressedFile.initialSize);
+      const result = await compressedFile.handle.read(compressed, 0, compressed.length, 0);
+      if (result.bytesRead !== compressed.length) throw new CorpusGateError(`read:short:${basename(compressedPath)}`);
+      const raw = gunzipSync(compressed);
+      if (raw.length > maxBytes) throw new CorpusGateError(`limit:file:${basename(path)}`);
+      await hooks?.afterStreamChunk?.(compressedFile.path, raw.length);
+      return parseJsonLinesBuffer(raw, path, maxLines, maxLineBytes, parser);
+    } catch (compressedError) {
+      if (compressedError instanceof CorpusGateError) throw compressedError;
+      throw new CorpusGateError(`schema:${basename(compressedPath)}`);
+    } finally {
+      await compressedFile.handle.close();
+    }
+  }
   const hash = createHash("sha256");
   const rows: T[] = [];
   let pending = Buffer.alloc(0);
@@ -750,6 +772,46 @@ async function readJsonLines<T>(
   } finally {
     await file.handle.close();
   }
+}
+
+function parseJsonLinesBuffer<T>(
+  raw: Buffer,
+  path: string,
+  maxLines: number,
+  maxLineBytes: number,
+  parser: (value: unknown) => T | null
+): { rows: T[]; hash: string } {
+  const hash = createHash("sha256");
+  const rows: T[] = [];
+  const parseLine = (lineWithCr: Buffer): void => {
+    const line = lineWithCr.at(-1) === 13 ? lineWithCr.subarray(0, -1) : lineWithCr;
+    if (!line.length) return;
+    if (line.length > maxLineBytes) throw new CorpusGateError(`limit:record:${basename(path)}`);
+    if (rows.length >= maxLines) throw new CorpusGateError(`limit:lines:${basename(path)}`);
+    let value: T | null = null;
+    try {
+      value = parser(JSON.parse(line.toString("utf8")) as unknown);
+    } catch {
+      throw new CorpusGateError(`schema:${basename(path)}`);
+    }
+    if (!value) throw new CorpusGateError(`schema:${basename(path)}`);
+    rows.push(value);
+  };
+  hash.update(raw);
+  let pending = raw;
+  let newline = pending.indexOf(10);
+  while (newline >= 0) {
+    parseLine(pending.subarray(0, newline));
+    pending = pending.subarray(newline + 1);
+    newline = pending.indexOf(10);
+  }
+  if (pending.length) {
+    if (pending.length > maxLineBytes) {
+      throw new CorpusGateError(`limit:record:${basename(path)}`);
+    }
+    parseLine(pending);
+  }
+  return { rows, hash: hash.digest("hex") };
 }
 
 const RISK_TERMS = ["추락", "충돌", "끼임", "감전", "질식", "화재", "폭발", "붕괴", "낙하", "전도"];
