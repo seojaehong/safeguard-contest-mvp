@@ -2,9 +2,9 @@
 
 ## 범위
 
-- 통합 기준 HEAD: `080450b8a8461f8e77dc3923039e8e014b187b3a`
-- 최신 제품 커밋: `f3087040f1a63bdd11922b7069071b9a5deb2334`
-- 전용 브랜치: `fix/northstar-ontology-ui-20260715`
+- 현재 검증 HEAD: `c80b45e868c60b38ec523ae7334e8502bb752772`
+- 브랜치: `master`
+- 현재화 시각: `2026-07-18T01:23:28.4031953+09:00`
 - 소유 범위: `app/ontology/**`, 온톨로지 전용 테스트, 이 평가 산출물
 - DB, 온톨로지 schema, published 데이터, retrieval 계약 변경: 없음
 
@@ -34,8 +34,9 @@
 
 ## 검증 결과
 
-- focused ontology/unit/navigation/typography: 8 files, 50 tests PASS
-- production browser contract: 1 file, 1 test PASS
+- focused ontology contract: 3 files, 10 tests PASS / 2 files, 3 tests SKIPPED without browser base
+- production browser contract with `ONTOLOGY_BASE_URL=http://localhost:3011`: 2 files, 3 tests PASS
+- production typography matrix with `ONTOLOGY_TYPOGRAPHY_PROD_MATRIX=1`: 1 file, 1 test PASS
 - strict TypeScript typecheck: PASS
 - production build: PASS, static generation units 28
 - frontend static audit: PASS, 32 pages, 23 product components, coverage issues 0, violations 0
@@ -64,7 +65,6 @@
 
 ## 통합 후 필수 게이트
 
-- 이 브랜치는 main에 통합하지 않았습니다.
-- 전역 frontend 108행 감사는 source identity가 바뀌므로 authoritative 통합 HEAD에서 재생성해야 합니다.
+- 이 검증은 현재 `master`에서 수행했습니다.
 - live 배포 후 `/ontology` 1440/390 Day/Night를 다시 확인해야 합니다.
 - 기존 전역 CSS의 퇴역 온톨로지 selector는 별도 전역 정리에서 제거해야 하며, 이번 bounded 변경에서는 시각적으로 사용하지 않습니다.

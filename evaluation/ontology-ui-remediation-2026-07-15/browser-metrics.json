@@ -1,6 +1,6 @@
 {
-  "source": "https://www.safeclaw.kr",
-  "generatedAt": "2026-07-17T12:52:17.378Z",
+  "source": "http://localhost:3011",
+  "generatedAt": "2026-07-17T16:15:43.514Z",
   "metrics": [
     {
       "variant": "desktop-day",

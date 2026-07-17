@@ -46,35 +46,6 @@ async function expectRole(
   }
 }
 
-const renderedOntologyFamilies = {
-  support: [
-    ".ontology-operation-loop > p",
-    ".ontology-graph-shell > p",
-  ],
-  hud: [
-    ".ontology-operation-flow span",
-    ".ontology-graph-point > span",
-    ".ontology-graph-stats span",
-    ".ontology-graph-legend span",
-    ".ontology-node-row span",
-  ],
-  componentTitle: [
-    ".ontology-operation-flow strong",
-    ".ontology-graph-popover strong",
-    ".ontology-node-row strong",
-  ],
-  caption: [
-    ".ontology-operation-flow small",
-    ".ontology-graph-point strong",
-    ".ontology-graph-point small",
-    ".ontology-node-row small",
-  ],
-  table: [
-    ".ontology-hover-card p",
-    ".ontology-hover-card li span",
-  ],
-} as const;
-
 type OperationMemoryRoute = "ontology" | "workspace";
 type OperationMemoryRole = "support" | "supportCompact" | "action" | "hud" | "hudTracked" | "bodyTitle" | "caption";
 type OperationMemoryFamily = {
@@ -210,30 +181,24 @@ productionMatrix("ontology typography production matrix", () => {
         const page = await browser.newPage({ viewport });
         await page.goto(`${harness.baseUrl}/ontology?theme=${theme}`, { waitUntil: "networkidle" });
         await page.locator(".safeclaw-module-shell[data-ready='true']").waitFor();
+        const compactOntology = viewport.width <= 720;
 
-        await expectRole(page, renderedOntologyFamilies.support, { firstFont: "Noto Sans KR", size: "15px", weight: "500", lineHeight: 24, tracking: 0 });
-        await expectRole(page, [".ontology-kind-list strong"], { firstFont: "Noto Sans KR", size: "14px", weight: "500", lineHeight: 22.4, tracking: 0 });
-        await expectRole(page, [".ontology-operation-loop code"], { firstFont: "Geist Mono", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
-        await expectRole(page, renderedOntologyFamilies.hud, { firstFont: "Geist Mono", size: "11px", weight: "700", lineHeight: 16, tracking: 0 });
-        await expectRole(page, [".ontology-map-column > span", ".ontology-graph-popover li span"], { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
-        await expectRole(page, renderedOntologyFamilies.componentTitle, { firstFont: "Noto Sans KR", size: "17px", weight: "500", lineHeight: 28.05, tracking: 0 });
-        await expectRole(page, [".ontology-hover-card strong"], { firstFont: "Noto Sans KR", size: "20px", weight: "700", lineHeight: 27, tracking: 0 });
-        await expectRole(page, renderedOntologyFamilies.caption, { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
-        await expectRole(page, [".ontology-graph-popover p"], { firstFont: "Noto Sans KR", size: "15px", weight: "500", lineHeight: 24, tracking: 0 });
-        await expectRole(page, renderedOntologyFamilies.table, { firstFont: "Noto Sans KR", size: "13px", weight: "500", lineHeight: 20, tracking: 0 });
-        await expectOperationMemoryFamilies(page, "ontology");
-
-        const nodeRow = page.locator(".ontology-node-row").filter({ has: page.locator(".ontology-hover-card") }).first();
-        const hoverCard = nodeRow.locator(".ontology-hover-card");
-        expect(await hoverCard.evaluate((element) => getComputedStyle(element).opacity)).toBe("0");
-        await nodeRow.hover();
-        const hoverCardElement = await hoverCard.elementHandle();
-        if (!hoverCardElement) throw new Error("Missing rendered ontology hover card");
-        await page.waitForFunction((element) => getComputedStyle(element).opacity === "1", hoverCardElement);
-        expect(await hoverCard.evaluate((element) => {
-          const rect = element.getBoundingClientRect();
-          return rect.width > 0 && rect.height > 0 && rect.right > 0 && rect.left < window.innerWidth;
-        })).toBe(true);
+        await expectRole(page, ['[aria-label="온톨로지 상태 요약"] article span'], { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
+        await expectRole(page, ['[aria-label="온톨로지 상태 요약"] article strong'], compactOntology
+          ? { firstFont: "Noto Sans KR", size: "22px", weight: "600", lineHeight: 30, tracking: 0 }
+          : { firstFont: "Noto Sans KR", size: "28px", weight: "600", lineHeight: 36, tracking: 0 });
+        await expectRole(page, ['[aria-label="온톨로지 상태 요약"] article small'], compactOntology
+          ? { firstFont: "Noto Sans KR", size: "11px", weight: "500", lineHeight: 16, tracking: 0 }
+          : { firstFont: "Noto Sans KR", size: "13px", weight: "500", lineHeight: 20, tracking: 0 });
+        await expectRole(page, ['[aria-label="작업팩 개선 루프"] span'], { firstFont: "Noto Sans KR", size: "12px", weight: "700", lineHeight: 18, tracking: 0 });
+        await expectRole(page, ['[aria-label="작업팩 개선 루프"] strong'], { firstFont: "Noto Sans KR", size: "15px", weight: "500", lineHeight: 24, tracking: 0 });
+        await expectRole(page, ['#ontology-explorer-title'], { firstFont: "Noto Sans KR", size: "24px", weight: "600", lineHeight: 32, tracking: 0 });
+        await expectRole(page, ['[aria-labelledby="ontology-explorer-title"] header p'], { firstFont: "Noto Sans KR", size: "14px", weight: "500", lineHeight: 22, tracking: 0 });
+        await expectRole(page, ['[data-testid="ontology-neighborhood-node"] span'], { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
+        await expectRole(page, ['[data-testid="ontology-neighborhood-node"] strong'], { firstFont: "Noto Sans KR", size: "13px", weight: "500", lineHeight: 19, tracking: 0 });
+        await expectRole(page, ['[data-testid="ontology-neighborhood-node"] small'], { firstFont: "Noto Sans KR", size: "13px", weight: "700", lineHeight: 20, tracking: 0 });
+        await expectRole(page, ['[aria-labelledby="ontology-directory-title"] button span'], { firstFont: "Noto Sans KR", size: "12px", weight: "600", lineHeight: 18, tracking: 0 });
+        await expectRole(page, ['[aria-labelledby="ontology-directory-title"] button strong'], { firstFont: "Noto Sans KR", size: "14px", weight: "500", lineHeight: 22, tracking: 0 });
         expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
         await page.close();
       }

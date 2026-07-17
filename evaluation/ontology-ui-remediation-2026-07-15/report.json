@@ -1,12 +1,14 @@
 {
   "status": "pass",
-  "sourceBase": "080450b8a8461f8e77dc3923039e8e014b187b3a",
-  "branch": "fix/northstar-ontology-ui-20260715",
-  "candidateCommit": "f3087040f1a63bdd11922b7069071b9a5deb2334",
+  "generatedAt": "2026-07-18T01:23:28.4031953+09:00",
+  "sourceBase": "c80b45e868c60b38ec523ae7334e8502bb752772",
+  "branch": "master",
+  "candidateCommit": "c80b45e868c60b38ec523ae7334e8502bb752772",
   "scope": [
     "app/ontology/**",
     "tests/ontology-ui-remediation.test.ts",
     "tests/ontology-ui-browser.test.ts",
+    "tests/ontology-typography-production-matrix.test.ts",
     "evaluation/ontology-ui-remediation-2026-07-15/**"
   ],
   "dataChanges": {
@@ -16,10 +18,13 @@
     "retrievalContract": false
   },
   "tests": {
-    "focusedFiles": 8,
-    "focusedTests": 50,
-    "browserFiles": 1,
-    "browserTests": 1,
+    "focusedFiles": 3,
+    "focusedTests": 10,
+    "focusedSkippedFiles": 2,
+    "focusedSkippedTests": 3,
+    "browserFiles": 2,
+    "browserTests": 3,
+    "productionTypographyMatrix": "pass",
     "typecheck": "pass",
     "productionBuild": "pass",
     "staticGenerationUnits": 28,
@@ -38,7 +43,7 @@
     }
   },
   "browser": {
-    "variants": 4,
+    "variants": 6,
     "failedVariants": 0,
     "maximumDisplayedNodes": 15,
     "overlapPairs": 0,
@@ -54,8 +59,8 @@
     "dialogFocusRestore": "pass"
   },
   "integration": {
-    "integratedToMain": false,
+    "integratedToMain": true,
     "liveVerified": false,
-    "requiredNextGate": "regenerate frontend 108-row audit and verify live 1440/390 Day/Night on authoritative integrated HEAD"
+    "requiredNextGate": "verify live 1440/390 Day/Night after deployment of this evidence refresh"
   }
 }

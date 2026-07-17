@@ -428,6 +428,25 @@ Results:
 - Production build: passed, 28/28 static pages generated.
 - Next NFT exact KOSHA trace: 81 manifests, 17 include all 3 exact assets, 0 partial manifests.
 
+### Ontology UI P0 current-head refresh
+
+The `/ontology` hairball graph blocker remains closed on current HEAD `c80b45e868c60b38ec523ae7334e8502bb752772`.
+
+Artifact:
+
+- `evaluation/ontology-ui-remediation-2026-07-15/report.md`
+- `evaluation/ontology-ui-remediation-2026-07-15/report.json`
+- `evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json`
+
+Results:
+
+- Focused ontology contract: 3 files / 10 tests passed; 2 browser-gated files skipped without base URL.
+- Production browser contract with `ONTOLOGY_BASE_URL=http://localhost:3011`: 2 files / 3 tests passed.
+- Production typography matrix with `ONTOLOGY_TYPOGRAPHY_PROD_MATRIX=1`: 1 file / 1 test passed.
+- Strict TypeScript typecheck: passed.
+- Production build: passed, 28/28 static pages generated.
+- Browser metrics: 6 variants, horizontal overflow 0, overlap pairs 0, minimum control height 44px, desktop visible neighborhood nodes 15, mobile default relation cards with expanded graph 15 nodes.
+
 ### Frontend audit evidence refresh and share copy boundary
 
 The frontend browser audit evidence was refreshed after the share-recipient route and final share-panel copy boundary were reconciled.
