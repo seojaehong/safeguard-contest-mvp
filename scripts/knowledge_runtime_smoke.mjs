@@ -3,7 +3,9 @@ import path from "node:path";
 import { performance } from "node:perf_hooks";
 
 const root = process.cwd();
-const outDir = path.join(root, "evaluation", "knowledge-runtime");
+const outDir = process.env.KNOWLEDGE_SMOKE_OUTPUT_DIR
+  ? path.resolve(root, process.env.KNOWLEDGE_SMOKE_OUTPUT_DIR)
+  : path.join(root, "evaluation", "knowledge-runtime");
 
 async function readJson(relativePath) {
   const raw = await readFile(path.join(root, relativePath), "utf8");
