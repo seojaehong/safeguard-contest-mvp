@@ -11,7 +11,7 @@ No DB schema changes, Supabase data mutations, provider activation, or ontology 
 
 ## Build / Deployment Smoke
 
-Local production build for `757b845a29854f1adb78535752bba9e82b440d99`:
+Local production build for `6d6dbf988e6e75ac5810111d01498b19bd2de833`:
 
 ```powershell
 npm.cmd run build
