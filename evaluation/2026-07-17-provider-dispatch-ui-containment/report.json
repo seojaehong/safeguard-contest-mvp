@@ -2,6 +2,7 @@
   "auditDate": "2026-07-17",
   "baseCommit": "f16d152e3c38669f69029dab45ebf2e7a645acb3",
   "reviewRemediationParentCommit": "a95c61f9313990cf412c9e99bca3f6d80e5ccf5d",
+  "partialLiveRemediationParentCommit": "292b24fb9738787314b6b0a23fd7082f87b109d0",
   "scope": "P0 containment with North Star P1/P2 capability-state remediation",
   "providerDispatch": {
     "capability": false,
@@ -15,12 +16,14 @@
     "The UI distinguishes checking, error, preview_only, and live states; only live can send.",
     "Malformed and non-success capability responses render lookup failure and can be retried.",
     "Unavailable states provide a channel-settings link and an explicit retry action.",
+    "Partial-live states retain channel-settings and retry actions whenever any channel remains blocked.",
     "Email, SMS, and Kakao controls are disabled and do not retain active or pressed presentation.",
     "Disabled channel accessible names contain the blocking reason and omit misleading next actions.",
     "The primary action is disabled and labeled as preview-only until live capability is explicitly reported.",
     "Share-session creation code and localized message preview paths remain present.",
     "Recipient-facing copy describes language-specific preparation without claiming a portal, link, or recipient confirmation.",
-    "Browser tests observed zero share-session and workflow-dispatch POST requests in checking, error, and preview-only states."
+    "Browser tests observed zero share-session and workflow-dispatch POST requests in checking, error, and preview-only states.",
+    "A foreign-language preview selected during capability error remains selected and unchanged through retry, 405, and preview-only transitions."
   ],
   "excluded": [
     "Database or migration changes",
@@ -72,6 +75,16 @@
       "case": "browser containment",
       "red": "the first browser attempt exposed a Strict Mode request-count assumption in the test",
       "green": "controlled response modes verify pending, malformed, 405, retry, preview, disabled semantics, foreign preview, and zero POSTs"
+    },
+    {
+      "case": "partial-live unavailable actions",
+      "red": "a globally live capability hid setup and retry actions even when SMS and Kakao remained unavailable",
+      "green": "channel-level blockers keep setup and retry actions visible while available channels remain usable"
+    },
+    {
+      "case": "foreign preview transition preservation",
+      "red": "the browser contract selected the foreign preview only after capability recovery",
+      "green": "foreign:vi is selected during error and its selection and rendered preview remain unchanged across retries"
     }
   ],
   "verification": {
@@ -83,7 +96,7 @@
     "browserTests": {
       "command": "npm.cmd test -- tests/workflow-share-capability-browser.test.ts --maxWorkers=1 --no-file-parallelism",
       "filesPassed": 1,
-      "testsPassed": 2,
+      "testsPassed": 3,
       "shareSessionPosts": 0,
       "workflowDispatchPosts": 0
     },

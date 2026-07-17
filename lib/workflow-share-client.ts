@@ -325,6 +325,8 @@ export function buildProviderDispatchUiContract(state: ProviderDispatchUiState):
   const canDispatch = state.status === "live"
     && state.capability.capability
     && state.capability.mode === "live";
+  const hasUnavailableChannels = Object.values(state.capability.channels)
+    .some((channel) => !channel.capability);
   return {
     status: state.status,
     canDispatch,
@@ -332,7 +334,7 @@ export function buildProviderDispatchUiContract(state: ProviderDispatchUiState):
     reasonLabel: formatProviderDispatchReason(state.capability.reason),
     primaryLabel: canDispatch ? "문서팩 전송하기" : "미리보기 전용",
     primaryDisabled: !canDispatch,
-    showUnavailableActions: !canDispatch
+    showUnavailableActions: !canDispatch || hasUnavailableChannels
   };
 }
 
