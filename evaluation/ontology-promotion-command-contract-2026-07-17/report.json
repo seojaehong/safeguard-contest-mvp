@@ -1,0 +1,35 @@
+{
+  "artifact": "ontology-promotion-command-contract-evaluation",
+  "evaluatedAt": "2026-07-17T09:49:30+09:00",
+  "baseCommit": "880db7af65cae369a897264ba7b66e7566d80540",
+  "branch": "feat/ontology-promotion-command-contract-20260717",
+  "contract": {
+    "version": "ontology-promotion-command.v1",
+    "requiresPublishedProvenance": true,
+    "requiresVerifiedProvenance": true,
+    "requiresExactTenantRunAction": true,
+    "requiresHumanApprovalReceipt": true,
+    "idempotentCommandIdentity": true,
+    "resultStatus": "review_required",
+    "persistenceState": "pending_persistence",
+    "ontologyPublished": false,
+    "dbMutationPerformed": false,
+    "requiresDatabaseApproval": true
+  },
+  "verification": {
+    "focusedTestFiles": 5,
+    "focusedTestsPassed": 96,
+    "focusedTestsFailed": 0,
+    "typecheckPassed": true,
+    "commands": [
+      "npm.cmd test -- --run tests/knowledge-promotion-gate.test.ts tests/knowledge-review-actions.test.ts tests/knowledge-review-route.test.ts tests/knowledge-review-prepare.test.ts tests/knowledge-review-prepare-route.test.ts",
+      "npm.cmd run typecheck"
+    ]
+  },
+  "safety": {
+    "schemaChanged": false,
+    "migrationAdded": false,
+    "databaseMutationExecuted": false,
+    "ontologyPublicationExecuted": false
+  }
+}

@@ -338,7 +338,7 @@ function actionTransition(action: KnowledgeReviewAction) {
   };
 }
 
-type HumanReviewReceipt = {
+export type HumanReviewReceipt = {
   contractVersion: "knowledge-human-review.v1";
   operationId: string;
   action: KnowledgeReviewAction;
