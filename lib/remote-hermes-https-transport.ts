@@ -1,10 +1,15 @@
 import { lookup as dnsLookup } from "node:dns";
-import { request as httpsRequest } from "node:https";
+import { request as httpsRequest, type RequestOptions } from "node:https";
 import { isIP } from "node:net";
-import { checkServerIdentity } from "node:tls";
-import type { IncomingHttpHeaders, IncomingMessage } from "node:http";
+import { checkServerIdentity, type DetailedPeerCertificate } from "node:tls";
+import type { ClientRequest, IncomingHttpHeaders, IncomingMessage } from "node:http";
 
-import type { RemoteHermesTrustedTransport } from "@/lib/remote-hermes-runtime";
+import {
+  REMOTE_HERMES_MAX_ENVELOPE_BYTES,
+  type RemoteHermesTrustedTransport,
+} from "@/lib/remote-hermes-runtime";
+
+export const REMOTE_HERMES_MAX_OUTBOUND_BODY_BYTES = REMOTE_HERMES_MAX_ENVELOPE_BYTES;
 
 export type RemoteHermesResolvedAddress = {
   address: string;
@@ -38,6 +43,17 @@ export type RemoteHermesHttpsDialResult = {
 export type RemoteHermesHttpsDial = (
   input: RemoteHermesHttpsDialInput,
 ) => Promise<RemoteHermesHttpsDialResult>;
+
+export type RemoteHermesNodeRequestFactory = (
+  url: URL,
+  options: RequestOptions,
+  onResponse: (response: IncomingMessage) => void,
+) => ClientRequest;
+
+export type RemoteHermesCertificateVerifier = (
+  hostname: string,
+  certificate: DetailedPeerCertificate,
+) => Error | undefined;
 
 export type RemoteHermesHttpsTransportOptions = {
   serviceId: string;
@@ -248,45 +264,58 @@ function responseBody(response: IncomingMessage, signal: AbortSignal): ReadableS
   });
 }
 
-const defaultDial: RemoteHermesHttpsDial = async (input) => {
-  const operation = new Promise<RemoteHermesHttpsDialResult>((resolve, reject) => {
-    const request = httpsRequest(input.url, {
-      method: "POST",
-      agent: false,
-      rejectUnauthorized: input.rejectUnauthorized,
-      servername: input.servername,
-      checkServerIdentity: (_hostname, certificate) => (
-        checkServerIdentity(input.certificateHostname, certificate)
-      ),
-      signal: input.signal,
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-        "content-length": Buffer.byteLength(input.body, "utf8"),
-        host: input.hostHeader,
-      },
-      lookup: (_hostname, _options, callback) => {
-        callback(null, input.selectedAddress, input.selectedFamily);
-      },
-    }, (response) => {
-      const connectedAddress = response.socket.remoteAddress;
-      if (!connectedAddress) {
-        response.destroy();
-        reject(new Error("remote Hermes HTTPS socket has no remote address"));
-        return;
-      }
-      resolve({
-        statusCode: response.statusCode ?? 0,
-        headers: responseHeaders(response.headers),
-        body: responseBody(response, input.signal),
-        connectedAddress,
+const defaultRequestFactory: RemoteHermesNodeRequestFactory = (url, options, onResponse) => (
+  httpsRequest(url, options, onResponse)
+);
+
+export function createNodeRemoteHermesHttpsDial(options: {
+  requestFactory?: RemoteHermesNodeRequestFactory;
+  certificateVerifier?: RemoteHermesCertificateVerifier;
+} = {}): RemoteHermesHttpsDial {
+  const requestFactory = options.requestFactory ?? defaultRequestFactory;
+  const certificateVerifier = options.certificateVerifier ?? checkServerIdentity;
+  return async (input) => {
+    const operation = new Promise<RemoteHermesHttpsDialResult>((resolve, reject) => {
+      const request = requestFactory(input.url, {
+        method: "POST",
+        agent: false,
+        rejectUnauthorized: input.rejectUnauthorized,
+        servername: input.servername,
+        checkServerIdentity: (_hostname, certificate) => (
+          certificateVerifier(input.certificateHostname, certificate)
+        ),
+        signal: input.signal,
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+          "content-length": Buffer.byteLength(input.body, "utf8"),
+          host: input.hostHeader,
+        },
+        lookup: (_hostname, _options, callback) => {
+          callback(null, input.selectedAddress, input.selectedFamily);
+        },
+      }, (response) => {
+        const connectedAddress = response.socket.remoteAddress;
+        if (!connectedAddress) {
+          response.destroy();
+          reject(new Error("remote Hermes HTTPS socket has no remote address"));
+          return;
+        }
+        resolve({
+          statusCode: response.statusCode ?? 0,
+          headers: responseHeaders(response.headers),
+          body: responseBody(response, input.signal),
+          connectedAddress,
+        });
       });
+      request.once("error", reject);
+      request.end(input.body);
     });
-    request.once("error", reject);
-    request.end(input.body);
-  });
-  return await abortable(operation, input.signal);
-};
+    return await abortable(operation, input.signal);
+  };
+}
+
+const defaultDial = createNodeRemoteHermesHttpsDial();
 
 export function createRemoteHermesHttpsTransport(
   options: RemoteHermesHttpsTransportOptions,
@@ -299,6 +328,9 @@ export function createRemoteHermesHttpsTransport(
   return {
     async dispatch(input) {
       if (input.signal.aborted) throw abortReason(input.signal);
+      if (Buffer.byteLength(input.body, "utf8") > REMOTE_HERMES_MAX_OUTBOUND_BODY_BYTES) {
+        throw new Error("remote Hermes HTTPS outbound body exceeds the bounded envelope size");
+      }
       const url = new URL(input.endpoint);
       if (url.protocol !== "https:"
         || url.origin !== input.expectedOrigin
