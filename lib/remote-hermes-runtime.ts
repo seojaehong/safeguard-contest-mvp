@@ -27,6 +27,7 @@ import {
   type RemoteHermesClaimsProjection,
   type RemoteHermesFieldClassification,
   type RemoteHermesPolicyAttestation,
+  type RemoteHermesTerminalRecord,
 } from "@/lib/remote-hermes-contract";
 
 const REMOTE_TIMEOUT_MS = 20_000;
@@ -77,6 +78,10 @@ export type RemoteHermesAttemptLedger = {
     attempt: RemoteHermesAttemptEnvelope,
     signal: AbortSignal,
   ) => Promise<RemoteHermesAttemptReceipt>;
+  recordTerminal: (
+    record: RemoteHermesTerminalRecord,
+    signal: AbortSignal,
+  ) => Promise<void>;
 };
 
 export type RemoteHermesRuntimeDependencies = {
@@ -429,7 +434,7 @@ function createPlanner(
         );
       }
       const immutableReceipt = deepFreeze(structuredClone(attemptReceipt));
-      const body = JSON.stringify({ attempt, attemptReceipt: immutableReceipt });
+      const requestBody = JSON.stringify({ attempt, attemptReceipt: immutableReceipt });
       let dispatch;
       try {
         dispatch = await withAbort(
@@ -438,7 +443,7 @@ function createPlanner(
             expectedOrigin: config.origin,
             attempt,
             attemptReceipt: immutableReceipt,
-            body,
+            body: requestBody,
             signal: timeoutController.signal,
           }),
           timeoutController.signal,
@@ -469,43 +474,83 @@ function createPlanner(
           error,
         );
       }
+      let responseBody: unknown;
+      try {
+        responseBody = JSON.parse(responseText) as unknown;
+      } catch (error) {
+        throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503, error);
+      }
+      let validated;
+      try {
+        validated = validateRemoteHermesResponse({
+          response: responseBody,
+          attempt,
+          attemptReceiptDigest: attemptReceipt.receiptDigest,
+          expectedServiceId: config.serviceId,
+          expectedKeyId: config.responseKeyId,
+          verificationSecret: config.responseVerificationSecret,
+          now: now(),
+          replayGuard,
+        });
+      } catch (error) {
+        throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503, error);
+      }
+      const commonTerminalRecord = {
+        organizationId: attempt.organizationId,
+        siteId: attempt.siteId,
+        runId: attempt.runId,
+        requestId: attempt.requestId,
+        attemptId: attempt.attemptId,
+        logicalRequestDigest: attempt.logicalRequestDigest,
+        attemptEnvelopeDigest: attempt.attemptEnvelopeDigest,
+        responseEnvelopeDigest: validated.responseEnvelopeDigest,
+        usage: validated.usage,
+        latencyMs: validated.latencyMs,
+      };
+      const terminalRecord: RemoteHermesTerminalRecord = validated.kind === "success"
+        ? { ...commonTerminalRecord, terminalStatus: "success" }
+        : {
+          ...commonTerminalRecord,
+          terminalStatus: "failure",
+          error: {
+            code: validated.error.code,
+            origin: validated.error.origin,
+            ...(validated.error.diagnosticsRef === undefined
+              ? {}
+              : { diagnosticsRef: validated.error.diagnosticsRef }),
+          },
+        };
+      try {
+        await withAbort(
+          dependencies.attemptLedger.recordTerminal(
+            deepFreeze(structuredClone(terminalRecord)),
+            timeoutController.signal,
+          ),
+          timeoutController.signal,
+        );
+      } catch (error) {
+        throw new BrokerError(
+          timeoutController.signal.aborted ? "ENGINE_TIMEOUT" : "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+          503,
+          error,
+        );
+      }
+      if (validated.kind === "failure") {
+        throw new BrokerError("ENGINE_EXECUTION_FAILED", 503, new Error(validated.error.code));
+      }
+      const output: HermesPlannerTextOutput = {
+        evidencePacket: deepFreeze(structuredClone(input.evidencePacket)),
+        attestation: {
+          schemaVersion: HERMES_OUTPUT_ATTESTATION_VERSION,
+          evidenceDigest: input.evidenceDigest,
+          claims: validated.selectedClaims,
+        },
+      };
+      input.emitText(output);
     } finally {
       clearTimeout(timeout);
       input.signal.removeEventListener("abort", abortFromCaller);
     }
-    let body: unknown;
-    try {
-      body = JSON.parse(responseText) as unknown;
-    } catch (error) {
-      throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503, error);
-    }
-    let validated;
-    try {
-      validated = validateRemoteHermesResponse({
-        response: body,
-        attempt,
-        attemptReceiptDigest: attemptReceipt.receiptDigest,
-        expectedServiceId: config.serviceId,
-        expectedKeyId: config.responseKeyId,
-        verificationSecret: config.responseVerificationSecret,
-        now: now(),
-        replayGuard,
-      });
-    } catch (error) {
-      throw new BrokerError("ENGINE_EXECUTION_ATTESTATION_UNPROVEN", 503, error);
-    }
-    if (validated.kind === "failure") {
-      throw new BrokerError("ENGINE_EXECUTION_FAILED", 503, new Error(validated.error.code));
-    }
-    const output: HermesPlannerTextOutput = {
-      evidencePacket: deepFreeze(structuredClone(input.evidencePacket)),
-      attestation: {
-        schemaVersion: HERMES_OUTPUT_ATTESTATION_VERSION,
-        evidenceDigest: input.evidenceDigest,
-        claims: validated.selectedClaims,
-      },
-    };
-    input.emitText(output);
   };
 }
 
@@ -514,7 +559,13 @@ export function createRemoteHermesRuntime(
 ): RemoteHermesRuntime | undefined {
   const now = dependencies.now ?? (() => new Date());
   const config = resolveConfig(dependencies.env, now());
-  if (!config || !dependencies.trustedTransport || !dependencies.attemptLedger) return undefined;
+  if (!config
+    || !dependencies.trustedTransport
+    || !dependencies.attemptLedger
+    || typeof dependencies.attemptLedger.reserve !== "function"
+    || typeof dependencies.attemptLedger.recordTerminal !== "function") {
+    return undefined;
+  }
   return {
     planner: createPlanner(config, {
       ...dependencies,

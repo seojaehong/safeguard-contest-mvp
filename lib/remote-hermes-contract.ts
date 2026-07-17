@@ -151,13 +151,40 @@ export type RemoteHermesValidatedResponse = {
   responseEnvelopeDigest: string;
 };
 
-type RemoteHermesUsage = {
+export type RemoteHermesUsage = Readonly<{
   providerRef: string;
   modelRef: string;
   inputTokens: number | null;
   outputTokens: number | null;
   usageComplete: boolean;
-};
+}>;
+
+type RemoteHermesTerminalRecordCommon = Readonly<{
+  organizationId: string;
+  siteId: string;
+  runId: string;
+  requestId: string;
+  attemptId: string;
+  logicalRequestDigest: string;
+  attemptEnvelopeDigest: string;
+  responseEnvelopeDigest: string;
+  usage: RemoteHermesUsage;
+  latencyMs: number;
+}>;
+
+export type RemoteHermesTerminalRecord = RemoteHermesTerminalRecordCommon & (
+  | Readonly<{
+    terminalStatus: "success";
+  }>
+  | Readonly<{
+    terminalStatus: "failure";
+    error: Readonly<{
+      code: RemoteHermesErrorCode;
+      origin: "gateway" | "worker";
+      diagnosticsRef?: string;
+    }>;
+  }>
+);
 
 export type RemoteHermesReplayGuard = {
   consume(key: string): boolean;

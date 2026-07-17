@@ -389,6 +389,9 @@ describe("remote Hermes pinned HTTPS transport", () => {
         reserve: vi.fn(async () => {
           throw new Error("ledger fixture must not execute during runtime creation");
         }),
+        recordTerminal: vi.fn(async () => {
+          throw new Error("terminal ledger fixture must not execute during runtime creation");
+        }),
       },
     })).toBeDefined();
     expect(createRemoteHermesRuntime({ env, trustedTransport: transport })).toBeUndefined();

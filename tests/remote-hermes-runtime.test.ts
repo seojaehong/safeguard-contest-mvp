@@ -7,10 +7,12 @@ import {
   createRemoteHermesPolicyAttestation,
   signRemoteHermesDigest,
   type RemoteHermesAttemptEnvelope,
+  type RemoteHermesTerminalRecord,
 } from "@/lib/remote-hermes-contract";
 import {
   createRemoteHermesRuntime,
   readRemoteHermesResponseBody,
+  type RemoteHermesAttemptLedger,
   type RemoteHermesRuntimeDependencies,
   type RemoteHermesTrustedConnection,
 } from "@/lib/remote-hermes-runtime";
@@ -144,6 +146,65 @@ function successResponse(attempt: RemoteHermesAttemptEnvelope, receipt: AttemptR
   }), { status: 200, headers: { "Content-Type": "application/json" } });
 }
 
+function ledgerWith(
+  reserve: RemoteHermesAttemptLedger["reserve"],
+): RemoteHermesAttemptLedger {
+  return {
+    reserve,
+    recordTerminal: async () => undefined,
+  };
+}
+
+function failureResponse(attempt: RemoteHermesAttemptEnvelope, receipt: AttemptReceipt): Response {
+  const unsigned = {
+    responseVersion: "engine-remote-response/v1" as const,
+    kind: "failure" as const,
+    runId: attempt.runId,
+    logicalRequestDigest: attempt.logicalRequestDigest,
+    requestId: attempt.requestId,
+    attemptId: attempt.attemptId,
+    organizationId: attempt.organizationId,
+    siteId: attempt.siteId,
+    attemptEnvelopeDigest: attempt.attemptEnvelopeDigest,
+    attemptLedgerReceiptDigest: receipt.receiptDigest,
+    promptProjectionDigest: attempt.promptProjectionDigest,
+    claimsProjectionDigest: attempt.claimsProjectionDigest,
+    evidenceDigest: attempt.evidenceDigest,
+    usage: {
+      providerRef: "provider-opaque",
+      modelRef: "model-opaque",
+      inputTokens: 17,
+      outputTokens: 0,
+      usageComplete: true,
+    },
+    latencyMs: 12,
+    terminalStatus: "failed" as const,
+    error: {
+      taxonomyVersion: "engine-remote-error/v1" as const,
+      code: "REMOTE_PROVIDER_UNAVAILABLE" as const,
+      origin: "worker" as const,
+      diagnosticsRef: "diag-safe-1",
+    },
+  };
+  const responseEnvelopeDigest = digestRemoteHermesValue(unsigned);
+  return new Response(JSON.stringify({
+    ...unsigned,
+    responseEnvelopeDigest,
+    serviceReceipt: {
+      responseEnvelopeDigest,
+      attemptEnvelopeDigest: attempt.attemptEnvelopeDigest,
+      requestNonce: attempt.nonce,
+      serviceId: "hermes-service",
+      keyId: "hermes-response-key",
+      signature: signRemoteHermesDigest(
+        "v".repeat(32),
+        `safeclaw-engine-remote-response/v1:hermes-service:${attempt.attemptEnvelopeDigest}`,
+        responseEnvelopeDigest,
+      ),
+    },
+  }), { status: 200, headers: { "Content-Type": "application/json" } });
+}
+
 function runtimeDependencies(overrides: Record<string, unknown> = {}): RemoteHermesRuntimeDependencies {
   return {
     env: remoteEnv(),
@@ -192,11 +253,22 @@ describe("remote Hermes runtime", () => {
     expect(runtime).toBeUndefined();
   });
 
+  it("does not create a runnable runtime from a reserve-only ledger", () => {
+    const incompleteLedger = {
+      reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt),
+    } as unknown as RemoteHermesAttemptLedger;
+
+    expect(createRemoteHermesRuntime(runtimeDependencies({
+      attemptLedger: incompleteLedger,
+      trustedTransport: { dispatch: vi.fn() },
+    }))).toBeUndefined();
+  });
+
   it("revalidates policy expiry before each injected runtime attempt", async () => {
     let current = now;
     const runtime = createRemoteHermesRuntime(runtimeDependencies({
       now: () => current,
-      attemptLedger: { reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt) },
+      attemptLedger: ledgerWith(async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt)),
       trustedTransport: { dispatch: vi.fn() },
     }));
     expect(runtime).toBeDefined();
@@ -219,6 +291,11 @@ describe("remote Hermes runtime", () => {
       reserve: vi.fn(async (attempt: RemoteHermesAttemptEnvelope) => {
         sequence.push("ledger");
         return receiptFor(attempt);
+      }),
+      recordTerminal: vi.fn(async (record: RemoteHermesTerminalRecord) => {
+        sequence.push("terminal");
+        expect(Object.isFrozen(record)).toBe(true);
+        expect(Object.isFrozen(record.usage)).toBe(true);
       }),
     };
     const transport = {
@@ -255,9 +332,28 @@ describe("remote Hermes runtime", () => {
     input.emitText = (output) => emitted.push(output);
     await runtime.planner(input);
 
-    expect(sequence).toEqual(["ledger", "transport"]);
+    expect(sequence).toEqual(["ledger", "transport", "terminal"]);
     expect(ledger.reserve).toHaveBeenCalledTimes(1);
     expect(transport.dispatch).toHaveBeenCalledTimes(1);
+    expect(ledger.recordTerminal).toHaveBeenCalledWith(expect.objectContaining({
+      organizationId: "org-1",
+      siteId: "site-1",
+      runId: "run-1",
+      requestId: "request-1",
+      attemptId: "attempt-1",
+      logicalRequestDigest: expect.stringMatching(/^[a-f0-9]{64}$/u),
+      attemptEnvelopeDigest: expect.stringMatching(/^[a-f0-9]{64}$/u),
+      responseEnvelopeDigest: expect.stringMatching(/^[a-f0-9]{64}$/u),
+      terminalStatus: "success",
+      latencyMs: 10,
+      usage: {
+        providerRef: "provider-opaque",
+        modelRef: "model-opaque",
+        inputTokens: null,
+        outputTokens: null,
+        usageComplete: false,
+      },
+    }), expect.any(AbortSignal));
     expect(outbound).not.toMatch(/김민수|010-1234-5678|성수동|성수 현장|작업 전 추락 방지 설비|내부 렌더 라벨|oauth|supabase/iu);
     expect(emitted[0]?.attestation.claims).toEqual([{
       claimId: `claim:${"a".repeat(64)}`,
@@ -265,11 +361,157 @@ describe("remote Hermes runtime", () => {
     }]);
   });
 
+  it("fails closed without emitting when the terminal ledger write fails", async () => {
+    const emitted: HermesPlannerTextOutput[] = [];
+    const ledger = {
+      reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt),
+      recordTerminal: vi.fn(async () => { throw new Error("terminal write failed"); }),
+    };
+    const transport = {
+      dispatch: vi.fn(async ({ body }: { body: string }) => {
+        const payload = JSON.parse(body) as {
+          attempt: RemoteHermesAttemptEnvelope;
+          attemptReceipt: AttemptReceipt;
+        };
+        return {
+          response: successResponse(payload.attempt, payload.attemptReceipt),
+          connection: {
+            version: "remote-hermes-connected-origin/v1" as const,
+            endpointOrigin: "https://hermes.example.test",
+            connectedOrigin: "https://hermes.example.test",
+            connectedAddress: "93.184.216.34",
+            redirects: 0 as const,
+            serviceId: "hermes-service",
+            policyAttestationDigest: JSON.parse(remoteEnv().SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION).attestationDigest,
+          },
+        };
+      }),
+    };
+    const runtime = createRemoteHermesRuntime(runtimeDependencies({ attemptLedger: ledger, trustedTransport: transport }));
+    expect(runtime).toBeDefined();
+    if (!runtime) return;
+    const input = plannerInput();
+    input.emitText = (output) => emitted.push(output);
+
+    await expect(runtime.planner(input)).rejects.toMatchObject({
+      code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+    });
+    expect(ledger.recordTerminal).toHaveBeenCalledTimes(1);
+    expect(emitted).toEqual([]);
+  });
+
+  it("records a signed remote failure before failing closed", async () => {
+    const sequence: string[] = [];
+    const terminalRecords: RemoteHermesTerminalRecord[] = [];
+    const ledger = {
+      reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt),
+      recordTerminal: vi.fn(async (record: RemoteHermesTerminalRecord) => {
+        sequence.push("terminal");
+        expect(Object.isFrozen(record)).toBe(true);
+        expect(Object.isFrozen(record.usage)).toBe(true);
+        if (record.terminalStatus === "failure") expect(Object.isFrozen(record.error)).toBe(true);
+        terminalRecords.push(record);
+      }),
+    };
+    const transport = {
+      dispatch: vi.fn(async ({ body }: { body: string }) => {
+        sequence.push("transport");
+        const payload = JSON.parse(body) as {
+          attempt: RemoteHermesAttemptEnvelope;
+          attemptReceipt: AttemptReceipt;
+        };
+        return {
+          response: failureResponse(payload.attempt, payload.attemptReceipt),
+          connection: {
+            version: "remote-hermes-connected-origin/v1" as const,
+            endpointOrigin: "https://hermes.example.test",
+            connectedOrigin: "https://hermes.example.test",
+            connectedAddress: "93.184.216.34",
+            redirects: 0 as const,
+            serviceId: "hermes-service",
+            policyAttestationDigest: JSON.parse(remoteEnv().SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION).attestationDigest,
+          },
+        };
+      }),
+    };
+    const runtime = createRemoteHermesRuntime(runtimeDependencies({ attemptLedger: ledger, trustedTransport: transport }));
+    expect(runtime).toBeDefined();
+    if (!runtime) return;
+
+    await expect(runtime.planner(plannerInput())).rejects.toMatchObject({ code: "ENGINE_EXECUTION_FAILED" });
+    expect(sequence).toEqual(["transport", "terminal"]);
+    expect(terminalRecords).toEqual([expect.objectContaining({
+      terminalStatus: "failure",
+      error: {
+        code: "REMOTE_PROVIDER_UNAVAILABLE",
+        origin: "worker",
+        diagnosticsRef: "diag-safe-1",
+      },
+      usage: expect.objectContaining({ inputTokens: 17, outputTokens: 0, usageComplete: true }),
+      latencyMs: 12,
+    })]);
+  });
+
+  it("rejects duplicate terminal records before any replayed output", async () => {
+    const terminalKeys = new Set<string>();
+    const emitted: HermesPlannerTextOutput[] = [];
+    const ledger = {
+      reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt),
+      recordTerminal: async (record: RemoteHermesTerminalRecord) => {
+        const key = `${record.organizationId}:${record.siteId}:${record.attemptId}`;
+        if (terminalKeys.has(key)) throw new Error("duplicate terminal record");
+        terminalKeys.add(key);
+      },
+    };
+    const transport = {
+      dispatch: vi.fn(async ({ body }: { body: string }) => {
+        const payload = JSON.parse(body) as {
+          attempt: RemoteHermesAttemptEnvelope;
+          attemptReceipt: AttemptReceipt;
+        };
+        return {
+          response: successResponse(payload.attempt, payload.attemptReceipt),
+          connection: {
+            version: "remote-hermes-connected-origin/v1" as const,
+            endpointOrigin: "https://hermes.example.test",
+            connectedOrigin: "https://hermes.example.test",
+            connectedAddress: "93.184.216.34",
+            redirects: 0 as const,
+            serviceId: "hermes-service",
+            policyAttestationDigest: JSON.parse(remoteEnv().SAFECLAW_REMOTE_HERMES_POLICY_ATTESTATION).attestationDigest,
+          },
+        };
+      }),
+    };
+    const runtime = createRemoteHermesRuntime(runtimeDependencies({
+      attemptLedger: ledger,
+      trustedTransport: transport,
+      randomId: (() => {
+        const ids = ["run-1", "request-1", "attempt-1", "run-1", "request-1", "attempt-1"];
+        return () => ids.shift() ?? "unexpected-id";
+      })(),
+    }));
+    expect(runtime).toBeDefined();
+    if (!runtime) return;
+    const first = plannerInput();
+    first.emitText = (output) => emitted.push(output);
+    await runtime.planner(first);
+    const second = plannerInput();
+    second.emitText = (output) => emitted.push(output);
+
+    await expect(runtime.planner(second)).rejects.toMatchObject({
+      code: "ENGINE_EXECUTION_ATTESTATION_UNPROVEN",
+    });
+    expect(transport.dispatch).toHaveBeenCalledTimes(2);
+    expect(terminalKeys.size).toBe(1);
+    expect(emitted).toHaveLength(1);
+  });
+
   it("rejects a ledger receipt reserved before its attempt was issued", async () => {
     const transport = { dispatch: vi.fn() };
     const runtime = createRemoteHermesRuntime(runtimeDependencies({
-      attemptLedger: {
-        reserve: async (attempt: RemoteHermesAttemptEnvelope) => {
+      attemptLedger: ledgerWith(
+        async (attempt: RemoteHermesAttemptEnvelope) => {
           const unsigned = {
             version: "remote-hermes-attempt-ledger-receipt/v1" as const,
             receiptId: "ledger-receipt-early",
@@ -278,7 +520,7 @@ describe("remote Hermes runtime", () => {
           };
           return { ...unsigned, receiptDigest: digestRemoteHermesValue(unsigned) };
         },
-      },
+      ),
       trustedTransport: transport,
     }));
     expect(runtime).toBeDefined();
@@ -291,7 +533,7 @@ describe("remote Hermes runtime", () => {
   });
 
   it("rejects unclassified evidence before reserving or dispatching", async () => {
-    const ledger = { reserve: vi.fn() };
+    const ledger = ledgerWith(vi.fn());
     const transport = { dispatch: vi.fn() };
     const runtime = createRemoteHermesRuntime(runtimeDependencies({
       attemptLedger: ledger,
@@ -314,7 +556,7 @@ describe("remote Hermes runtime", () => {
   it("keeps transport at zero when the durable attempt ledger cannot reserve the attempt", async () => {
     const transport = { dispatch: vi.fn() };
     const runtime = createRemoteHermesRuntime(runtimeDependencies({
-      attemptLedger: { reserve: async () => { throw new Error("ledger write failed"); } },
+      attemptLedger: ledgerWith(async () => { throw new Error("ledger write failed"); }),
       trustedTransport: transport,
     }));
     expect(runtime).toBeDefined();
@@ -330,9 +572,7 @@ describe("remote Hermes runtime", () => {
     const transport = { dispatch: vi.fn() };
     const controller = new AbortController();
     const runtime = createRemoteHermesRuntime(runtimeDependencies({
-      attemptLedger: {
-        reserve: async () => await new Promise<AttemptReceipt>(() => undefined),
-      },
+      attemptLedger: ledgerWith(async () => await new Promise<AttemptReceipt>(() => undefined)),
       trustedTransport: transport,
     }));
     expect(runtime).toBeDefined();
@@ -347,7 +587,7 @@ describe("remote Hermes runtime", () => {
   });
 
   it("rejects a rebinding transport report instead of accepting a signed response", async () => {
-    const ledger = { reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt) };
+    const ledger = ledgerWith(async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt));
     const transport = {
       dispatch: vi.fn(async ({ body }: { body: string }) => {
         const payload = JSON.parse(body) as {
@@ -386,7 +626,7 @@ describe("remote Hermes runtime", () => {
   });
 
   it("rejects IPv4-mapped private IPv6 connection reports", async () => {
-    const ledger = { reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt) };
+    const ledger = ledgerWith(async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt));
     const transport = {
       dispatch: vi.fn(async ({ body }: { body: string }) => {
         const payload = JSON.parse(body) as {
@@ -427,7 +667,7 @@ describe("remote Hermes runtime", () => {
     ["policy attestation", { policyAttestationDigest: "0".repeat(64) }],
   ])("rejects a mismatched trusted-connection %s report and cancels its body", async (_label, override) => {
     const cancel = vi.fn();
-    const ledger = { reserve: async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt) };
+    const ledger = ledgerWith(async (attempt: RemoteHermesAttemptEnvelope) => receiptFor(attempt));
     const transport = {
       dispatch: vi.fn(async () => ({
         response: new Response(new ReadableStream<Uint8Array>({ cancel })),

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "remote-hermes-terminal-ledger-evaluation/v1",
+  "date": "2026-07-17",
+  "baseSha": "56cb66f1405c49e18e88f583a95025b13f09c40d",
+  "branch": "feat/remote-hermes-terminal-ledger",
+  "scope": {
+    "customerRouteWiring": false,
+    "databasePersistence": false,
+    "migration": false,
+    "providerPolicyChange": false
+  },
+  "tdd": {
+    "initialRed": {
+      "files": 2,
+      "tests": 72,
+      "expectedFailures": 3
+    },
+    "contractCompletenessRed": {
+      "tests": 1,
+      "expectedFailures": 1
+    },
+    "focusedGreen": {
+      "files": 6,
+      "tests": 138,
+      "passed": 138,
+      "failed": 0
+    }
+  },
+  "verification": {
+    "strictTypecheck": "pass",
+    "productionBuild": "pass",
+    "staticPages": 28,
+    "packageManifestChanged": false,
+    "packageLockChanged": false
+  },
+  "remainingBlockers": [
+    "durable_database_ledger_not_connected",
+    "customer_visible_route_not_connected",
+    "cross_instance_replay_requires_durable_ledger",
+    "workload_identity_and_key_rotation_unverified",
+    "effectful_authority_requires_human_approval_receipt"
+  ]
+}
