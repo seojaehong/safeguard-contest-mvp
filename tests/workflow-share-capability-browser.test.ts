@@ -26,6 +26,20 @@ const previewCapability = {
   }
 } as const;
 
+const partialLiveCapability = {
+  ok: true,
+  providerDispatch: {
+    capability: true,
+    mode: "live",
+    reason: null,
+    channels: {
+      email: { capability: true, reason: null },
+      sms: { capability: false, reason: "provider_configuration_unavailable" },
+      kakao: { capability: false, reason: "provider_configuration_unavailable" }
+    }
+  }
+} as const;
+
 let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
 
@@ -142,6 +156,37 @@ describe("workflow share capability browser containment", () => {
     }
   }, 90_000);
 
+  it("keeps setup and retry actions visible for blocked channels in partial-live mode", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const posts = countContainmentPosts(page);
+    await page.route("**/api/workflow/dispatch", async (route: Route) => {
+      if (route.request().method() !== "GET" || new URL(route.request().url()).search) {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(partialLiveCapability) });
+    });
+
+    try {
+      await openSharePanel(page);
+      await expect.poll(() => page.getByText("문서팩 보내기", { exact: true }).count()).toBeGreaterThan(0);
+      expect(await page.getByRole("link", { name: "발송 채널 설정" }).getAttribute("href")).toBe("/settings");
+      expect(await page.getByRole("button", { name: "다시 확인" }).isVisible()).toBe(true);
+      const channels = page.getByLabel("전파 채널 선택").getByRole("button");
+      expect(await channels.nth(0).isEnabled()).toBe(true);
+      expect(await channels.nth(0).getAttribute("aria-pressed")).toBe("true");
+      for (const index of [1, 2]) {
+        expect(await channels.nth(index).isDisabled()).toBe(true);
+        expect(await channels.nth(index).getAttribute("aria-pressed")).toBe("false");
+        expect(await channels.nth(index).getAttribute("aria-label")).toContain("발송 채널 설정이 필요합니다.");
+      }
+      expect(posts.read()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  }, 90_000);
+
   it("shows lookup failure for malformed and 405 responses, then retries into preview-only", async () => {
     if (!browser || !harness) throw new Error("Browser harness was not started");
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -169,16 +214,25 @@ describe("workflow share capability browser containment", () => {
       await openSharePanel(page);
       await expect.poll(() => page.getByText("상태 확인 실패", { exact: true }).count()).toBeGreaterThan(0);
       expect(await page.getByRole("link", { name: "발송 채널 설정" }).getAttribute("href")).toBe("/settings");
+      const languageSelect = page.locator("#workflow-language-select");
+      const preview = page.locator("[data-share-preview]");
+      await languageSelect.selectOption("foreign:vi");
+      await expect.poll(() => preview.innerText()).toContain("Tiếng Việt");
+      const foreignPreviewBeforeRetry = await preview.innerText();
       responseMode = "method_not_allowed";
       const attemptsBefore405 = attempts;
       await page.getByRole("button", { name: "다시 확인" }).click();
       await expect.poll(() => attempts).toBeGreaterThan(attemptsBefore405);
       await expect.poll(() => page.getByText("상태 확인 실패", { exact: true }).count()).toBeGreaterThan(0);
+      expect(await languageSelect.inputValue()).toBe("foreign:vi");
+      expect(await preview.innerText()).toBe(foreignPreviewBeforeRetry);
       responseMode = "preview";
       const attemptsBeforePreview = attempts;
       await page.getByRole("button", { name: "다시 확인" }).click();
       await expect.poll(() => attempts).toBeGreaterThan(attemptsBeforePreview);
       await expect.poll(() => page.getByText("미리보기 전용", { exact: true }).count()).toBeGreaterThan(0);
+      expect(await languageSelect.inputValue()).toBe("foreign:vi");
+      expect(await preview.innerText()).toBe(foreignPreviewBeforeRetry);
       await expectContainedPreviewDom(page);
       expect(posts.read()).toBe(0);
     } finally {

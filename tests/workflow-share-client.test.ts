@@ -104,7 +104,10 @@ describe("authenticated workflow share client", () => {
       }
     };
 
-    expect(buildProviderDispatchUiContract(state).canDispatch).toBe(true);
+    expect(buildProviderDispatchUiContract(state)).toMatchObject({
+      canDispatch: true,
+      showUnavailableActions: true
+    });
     expect(buildProviderDispatchChannelUiContract({ state, channel: "email", selected: true })).toMatchObject({
       enabled: true,
       selected: true,
