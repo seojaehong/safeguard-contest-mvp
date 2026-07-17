@@ -132,12 +132,25 @@ Result:
 - Test files: 5 passed
 - Tests: 92 passed
 
+## Document Editing UX Gate
+
+The current document editor surface is not claimed as the final 12-document product editor, but its present layout and structured-section contracts were rechecked.
+
+```powershell
+npm.cmd test -- tests\documents-editor-layout.test.ts tests\workpack-editor-structured-sections.test.ts
+```
+
+Result:
+
+- Test files: 2 passed
+- Tests: 36 passed
+
 ## Remaining North Star Work
 
 This is not a completion claim for the full North Star objective. The following remain active workstreams:
 
 - Hermes/OpenClaw engine adapter and service-auth operating model
 - LLM wiki / knowledge review queue beyond current Phase A evidence harness
-- broader document editing UX for 12 document types
+- richer document-specific editing controls beyond the current shared editor surface
 - production provider dispatch activation and end-to-end recipient confirmation with real workers
 - continued UI density review across non-core pages
