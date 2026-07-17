@@ -9,13 +9,14 @@ import {
   type WorkerDispatchTarget
 } from "@/lib/workspace";
 import {
+  buildProviderDispatchChannelUiContract,
   buildProviderDispatchUiContract,
   buildCanonicalRecipientMessageVariants,
   createAuthenticatedShareSession,
   dispatchAuthenticatedShareSession,
   loadProviderDispatchCapability,
   resolveWorkflowMessagePreview,
-  type ProviderDispatchCapability,
+  type ProviderDispatchUiState,
   type WorkflowDispatchChannelResult,
   type WorkflowDispatchResult
 } from "@/lib/workflow-share-client";
@@ -153,7 +154,7 @@ type WorkflowShareStatusInput = {
 };
 
 const channelOptions: Array<{
-  key: Channel;
+  key: ActiveChannel;
   label: string;
   helper: string;
   nextAction: string;
@@ -537,7 +538,7 @@ export function WorkflowSharePanel({
   const [resolvedAuthority, setResolvedAuthority] = useState<(ShareAuthority & { targetSignature: string }) | null>(null);
   const [shareRecords, setShareRecords] = useState<ShareRecordsState>(EMPTY_SHARE_RECORDS);
   const [dispatchRecords, setDispatchRecords] = useState<DispatchRecordsState>(EMPTY_DISPATCH_RECORDS);
-  const [providerDispatchCapability, setProviderDispatchCapability] = useState<ProviderDispatchCapability | null>(null);
+  const [providerDispatchState, setProviderDispatchState] = useState<ProviderDispatchUiState>({ status: "checking" });
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const selectedMessage = useMemo(() => {
@@ -583,20 +584,33 @@ export function WorkflowSharePanel({
   const targetSignatureRef = useRef(targetSignature);
   const archiveWorkpackIdRef = useRef(archiveWorkpackId);
   const dispatchInFlightRef = useRef(false);
+  const providerDispatchRequestIdRef = useRef(0);
   targetSignatureRef.current = targetSignature;
   archiveWorkpackIdRef.current = archiveWorkpackId;
 
-  useEffect(() => {
-    let active = true;
-    loadProviderDispatchCapability(fetch)
-      .then((capability) => {
-        if (active) setProviderDispatchCapability(capability);
-      })
-      .catch((error: unknown) => {
-        console.warn("provider dispatch capability lookup failed", error);
+  async function refreshProviderDispatchCapability() {
+    const requestId = providerDispatchRequestIdRef.current + 1;
+    providerDispatchRequestIdRef.current = requestId;
+    setProviderDispatchState({ status: "checking" });
+    try {
+      const capability = await loadProviderDispatchCapability(fetch);
+      if (providerDispatchRequestIdRef.current !== requestId) return;
+      setProviderDispatchState({
+        status: capability.capability && capability.mode === "live" ? "live" : "preview_only",
+        capability
       });
+    } catch (error: unknown) {
+      console.warn("provider dispatch capability lookup failed", error);
+      if (providerDispatchRequestIdRef.current === requestId) {
+        setProviderDispatchState({ status: "error" });
+      }
+    }
+  }
+
+  useEffect(() => {
+    void refreshProviderDispatchCapability();
     return () => {
-      active = false;
+      providerDispatchRequestIdRef.current += 1;
     };
   }, []);
 
@@ -722,7 +736,11 @@ export function WorkflowSharePanel({
 
   function toggleChannel(channel: Channel) {
     const option = channelOptions.find((item) => item.key === channel);
-    if (!option?.enabled) return;
+    if (!option?.enabled || !buildProviderDispatchChannelUiContract({
+      state: providerDispatchState,
+      channel: option.key,
+      selected: selectedChannels.includes(option.key)
+    }).enabled) return;
     setSelectedChannels((current) => (
       current.includes(channel)
         ? current.filter((item) => item !== channel)
@@ -812,6 +830,11 @@ export function WorkflowSharePanel({
     let evidenceScopeKey = dispatchEvidenceScopeKey;
     const activeChannels = selectedChannels.filter((channel): channel is ActiveChannel => (
       activeDispatchChannels.includes(channel as ActiveChannel)
+      && buildProviderDispatchChannelUiContract({
+        state: providerDispatchState,
+        channel: channel as ActiveChannel,
+        selected: true
+      }).enabled
     ));
     if (!authToken) {
       updateDispatchEvidence({
@@ -1073,7 +1096,15 @@ export function WorkflowSharePanel({
     ? readiness.reasons
     : ["서버 검수 조건을 확인해 주세요."];
   const canResolveAuthority = Boolean(effectiveAuthority || ensureWorkpackSaved);
-  const providerDispatchUi = buildProviderDispatchUiContract(providerDispatchCapability);
+  const providerDispatchUi = buildProviderDispatchUiContract(providerDispatchState);
+  const hasSelectedDispatchChannel = selectedChannels.some((channel) => (
+    activeDispatchChannels.includes(channel as ActiveChannel)
+    && buildProviderDispatchChannelUiContract({
+      state: providerDispatchState,
+      channel: channel as ActiveChannel,
+      selected: true
+    }).enabled
+  ));
   const primaryDisabled = Boolean(
     providerDispatchUi.primaryDisabled
     || !authToken
@@ -1081,7 +1112,7 @@ export function WorkflowSharePanel({
     || isSending
     || shareRecords.status === "loading"
     || shareRecords.status === "error"
-    || !selectedChannels.length
+    || !hasSelectedDispatchChannel
     || !targetWorkers.length
     || !canResolveAuthority
   );
@@ -1120,8 +1151,8 @@ export function WorkflowSharePanel({
           <p>선택한 대상의 작업자 언어로 안전 내용을 준비하고 확인합니다.</p>
         </div>
         <div className="share-status-pill" aria-label="공유 워크플로 상태" aria-live="polite">
-          <span>{providerDispatchUi.canDispatch ? (shareBlocked ? "보완 필요" : sessionReady ? "공유 가능" : storageReady ? "저장 완료" : "전송 준비") : "미리보기 전용"}</span>
-          <strong>{shareBlocked ? readiness?.summary : isSending ? phaseLabel[phase] : statusModel.dispatch.label}</strong>
+          <span>{providerDispatchUi.canDispatch ? (shareBlocked ? "보완 필요" : sessionReady ? "공유 가능" : storageReady ? "저장 완료" : "전송 준비") : providerDispatchUi.statusLabel}</span>
+          <strong>{providerDispatchUi.canDispatch ? (shareBlocked ? readiness?.summary : isSending ? phaseLabel[phase] : statusModel.dispatch.label) : providerDispatchUi.reasonLabel}</strong>
         </div>
       </header>
 
@@ -1158,9 +1189,16 @@ export function WorkflowSharePanel({
           </div>
           <div className="channel-grid" aria-label="전파 채널 선택">
             {channelOptions.map((channel) => {
-              const channelEnabled = channel.enabled && providerDispatchUi.canDispatch;
-              const channelBadge = providerDispatchUi.canDispatch ? channel.badge : providerDispatchUi.channelBadge;
-              const channelSelected = channelEnabled && selectedChannels.includes(channel.key);
+              const channelUi = buildProviderDispatchChannelUiContract({
+                state: providerDispatchState,
+                channel: channel.key,
+                selected: selectedChannels.includes(channel.key)
+              });
+              const channelEnabled = channel.enabled && channelUi.enabled;
+              const channelSelected = channelEnabled && channelUi.selected;
+              const channelAriaLabel = channelEnabled
+                ? `${channel.label} · ${channelUi.badge}. 다음 행동: ${channel.nextAction}`
+                : `${channel.label} · ${channelUi.badge}. 이유: ${channelUi.reasonLabel}`;
               return (
                 <button
                   key={channel.key}
@@ -1170,14 +1208,22 @@ export function WorkflowSharePanel({
                   disabled={!channelEnabled}
                   aria-disabled={!channelEnabled}
                   aria-pressed={channelSelected}
-                  aria-label={`${channel.label} · ${channelBadge}. 다음 행동: ${channel.nextAction}`}
+                  aria-label={channelAriaLabel}
                 >
                   <strong>{channel.label}</strong>
-                  {channelBadge !== "사용 가능" ? <em>{channelBadge}</em> : null}
+                  {channelUi.badge !== "사용 가능" ? <em>{channelUi.badge}</em> : null}
                 </button>
               );
             })}
           </div>
+          {providerDispatchUi.showUnavailableActions ? (
+            <div className="command-actions" aria-label="발송 채널 상태 작업">
+              <a className="button secondary" href="/settings">발송 채널 설정</a>
+              <button className="button secondary" type="button" onClick={() => void refreshProviderDispatchCapability()}>
+                다시 확인
+              </button>
+            </div>
+          ) : null}
         </section>
 
         <section className="share-form-card" aria-labelledby="workflow-language-heading" data-share-owner="language-preview">

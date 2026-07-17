@@ -259,7 +259,12 @@ describe("workflow dispatch route authority", () => {
       providerDispatch: {
         capability: false,
         mode: "preview_only",
-        reason: "persistent_idempotency_unavailable"
+        reason: "persistent_idempotency_unavailable",
+        channels: {
+          email: { capability: false, reason: "persistent_idempotency_unavailable" },
+          sms: { capability: false, reason: "persistent_idempotency_unavailable" },
+          kakao: { capability: false, reason: "persistent_idempotency_unavailable" }
+        }
       }
     });
     expect(mocks.postWebhookWithTimeout).not.toHaveBeenCalled();
