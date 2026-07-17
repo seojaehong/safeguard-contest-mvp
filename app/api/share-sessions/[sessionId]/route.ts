@@ -52,6 +52,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, session: null, message: activeSession.message }, { status: activeSession.status });
   }
 
+  const recipientHints = activeSession.session.accessPolicy.anonymousAllowed
+    ? buildPublicRecipientHint(activeSession.session.recipients).slice(0, 10)
+    : workerId
+      ? buildPublicRecipientHint(
+        activeSession.session.recipients.filter((recipient) => recipient.workerId === workerId)
+      ).slice(0, 1)
+      : [];
+
   return NextResponse.json({
     ok: true,
     configured: true,
@@ -63,9 +71,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       status: activeSession.session.status,
       expiresAt: activeSession.session.expiresAt,
       accessPolicy: activeSession.session.accessPolicy,
-      recipients: activeSession.session.accessPolicy.anonymousAllowed
-        ? buildPublicRecipientHint(activeSession.session.recipients).slice(0, 10)
-        : []
+      recipients: recipientHints
     },
     message: "공유 세션을 조회했습니다."
   });

@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   loadOwnedWorkpackOperationContext: vi.fn(),
   loadServerShareRecipients: vi.fn(),
   loadActiveOwnedShareSession: vi.fn(),
+  loadActivePublicShareSession: vi.fn(),
   postWebhookWithTimeout: vi.fn(),
   resolveWebhookConfig: vi.fn(),
   isLiveDispatchEnabled: vi.fn()
@@ -32,7 +33,8 @@ vi.mock("@/lib/supabase-admin", () => ({
 vi.mock("@/lib/workpack-commercial-store", () => ({
   loadOwnedWorkpackOperationContext: mocks.loadOwnedWorkpackOperationContext,
   loadServerShareRecipients: mocks.loadServerShareRecipients,
-  loadActiveOwnedShareSession: mocks.loadActiveOwnedShareSession
+  loadActiveOwnedShareSession: mocks.loadActiveOwnedShareSession,
+  loadActivePublicShareSession: mocks.loadActivePublicShareSession
 }));
 
 vi.mock("@/lib/n8n-webhook", () => ({
@@ -117,6 +119,12 @@ function jsonRequest(path: string, body: unknown) {
   });
 }
 
+function getRequest(path: string) {
+  return new NextRequest(`http://localhost${path}`, {
+    method: "GET"
+  });
+}
+
 function ownedContext() {
   return {
     ok: true,
@@ -141,6 +149,28 @@ function activeSession() {
       id: SESSION_ID,
       workpackId: WORKPACK_ID,
       recipients: [serverRecipient],
+      expiresAt: "2099-01-01T00:00:00.000Z"
+    }
+  };
+}
+
+function publicSession() {
+  return {
+    ok: true,
+    session: {
+      id: SESSION_ID,
+      organizationId: "org-1",
+      siteId: "site-1",
+      workpackId: WORKPACK_ID,
+      shareScope: "invited",
+      question: "부산 해운대 천장 누수 보수",
+      recipients: [serverRecipient, koreanRecipient],
+      accessPolicy: {
+        anonymousAllowed: false,
+        manualLanguageSwitchAllowed: true,
+        requireKnownWorkerSnapshot: true
+      },
+      status: "active",
       expiresAt: "2099-01-01T00:00:00.000Z"
     }
   };
@@ -198,12 +228,39 @@ beforeEach(() => {
   mocks.loadOwnedWorkpackOperationContext.mockResolvedValue(ownedContext());
   mocks.loadServerShareRecipients.mockResolvedValue({ ok: true, recipients: [serverRecipient] });
   mocks.loadActiveOwnedShareSession.mockResolvedValue(activeSession());
+  mocks.loadActivePublicShareSession.mockResolvedValue(publicSession());
   mocks.resolveWebhookConfig.mockReturnValue({ url: "https://n8n.example/webhook", token: "secret" });
   mocks.isLiveDispatchEnabled.mockReturnValue(true);
   mocks.postWebhookWithTimeout.mockResolvedValue({ ok: true, workflowRunId: "run-1", channelResults: [] });
 });
 
 describe("share session route authority", () => {
+  it("returns only the invited worker hint for a public recipient share link", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    const { GET } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const response = await GET(
+      getRequest(`/api/share-sessions/${SESSION_ID}?workerId=${WORKER_ID}`),
+      { params: Promise.resolve({ sessionId: SESSION_ID }) }
+    );
+
+    expect(response.status).toBe(200);
+    expect(mocks.loadActivePublicShareSession).toHaveBeenCalledWith(expect.anything(), {
+      shareSessionId: SESSION_ID,
+      workerId: WORKER_ID
+    });
+    const body = await response.json() as {
+      ok: boolean;
+      session: { recipients: Array<{ workerId: string; displayName: string; languageCode: string }> };
+    };
+    expect(body.ok).toBe(true);
+    expect(body.session.recipients).toEqual([{
+      workerId: WORKER_ID,
+      displayName: "Server Nguyen",
+      languageCode: "vi"
+    }]);
+  });
+
   it("ignores forged recipient fields and persists only the server worker snapshot", async () => {
     const fake = makeShareInsertClient();
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
