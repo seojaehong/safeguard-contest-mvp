@@ -617,3 +617,35 @@ Verified boundary:
 - Public LLM Wiki/knowledge promotion remains approval-gated and separate from tenant operation memory.
 - MCP token/service boundaries remain tested at the application layer.
 - This gate performed tests and documentation only; no database migration, RLS policy change, Storage operation, or production data mutation was performed.
+
+### 2026-07-18 frontend current-head browser gate
+
+The current frontend surface was rechecked on current HEAD `0b2a847121e2e47312a0ba81c5996d106d7baa3b` after stabilizing the workspace input summary chip row against asynchronous weather-brief text changes.
+
+Results:
+
+- `npm.cmd run audit:frontend-consistency`
+  - Result: pass; 33 page files, 23 product components, 0 coverage issues, 0 violations, 0 important declarations.
+- `npm.cmd run typecheck`
+  - Result: pass.
+- `npm.cmd run build`
+  - Result: pass; 28/28 static pages generated; `/share/[sessionId]` remains present in the production route map.
+- `node .\scripts\frontend_consistency_browser_audit.mjs` against the fresh production build on port 3011 with `FRONTEND_AUDIT_OUTPUT_DIR=evaluation/frontend-audit-current-head-2026-07-18`
+  - Result: 111/111 screenshots, 0 failed rows, 0 recovered rows, 0 findings.
+
+Fix verified:
+
+- Prior run on the same current-head line found `/workspace` tablet Day/Night geometry mismatch because the weather summary chip changed from a loading label to a longer live-weather label between captures.
+- `app/globals.css` now reserves a stable workspace input summary-chip row height and aligns wrapped chips from the top, preventing the evidence rail and following controls from shifting when the weather summary resolves.
+
+Artifacts:
+
+- `evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json`
+- `evaluation/frontend-audit-current-head-2026-07-18/browser-report.json`
+- `evaluation/frontend-audit-current-head-2026-07-18/browser-report.md`
+- `evaluation/frontend-audit-current-head-2026-07-18/browser-screenshots/`
+
+Notes:
+
+- An initial browser-audit attempt without a freshly controlled port 3011 server produced blank screenshots and was discarded before commit.
+- The final browser evidence was generated only after a fresh production build and a controlled `next start -p 3011` server.
