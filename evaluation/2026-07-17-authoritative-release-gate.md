@@ -688,3 +688,22 @@ Verified boundary:
 - Share session and read-confirmation route authority remain covered by route tests.
 - Owner-side share panel behavior remains covered by focused UI tests.
 - Older read-only delegation that reported no recipient portal is stale relative to current master.
+
+### 2026-07-18 document editor UX gate recheck
+
+The document review/editor surface was rechecked on current HEAD `556c2221734a38d083cb574f2006f575cb77ffa9` after comparing current master against the older `feat/workpack-document-editors-v2-target-ready-v5` worktree.
+
+Results:
+
+- `npm.cmd test -- tests\documents-editor-layout.test.ts tests\workpack-editor-structured-sections.test.ts tests\workpack-risk-rows-editor.test.ts tests\editor-export-integrity.test.ts tests\north-star-document-ux.test.ts`
+  - Result: 5 files / 47 tests passed.
+
+Verified boundary:
+
+- Current master already contains the structured document editor surface (`document-structured-editor`), section-level editable textareas (`document-section-textarea`), source text mode (`document-source-textarea`), and collapsed provenance drawer (`editor-provenance-drawer`).
+- Current master also contains later document-editor follow-up commits such as provenance copy sanitization, structured fallback edit isolation, and canonical risk-row editor hardening.
+- The older target-ready worktree must not be whole-merged: it is behind current master and its tree diff would remove current share portal, Hermes, KOSHA, knowledge, and release-gate test surfaces.
+
+Integration note:
+
+- No product code change was required for this gate. The current master state is the authoritative document editor UX baseline unless a fresh browser audit finds a new regression on this HEAD or later.
