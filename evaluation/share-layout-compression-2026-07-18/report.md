@@ -56,3 +56,26 @@ Results:
 ## CI Follow-Up
 
 Initial run `29618621125` correctly rejected the first version of this patch because it capped the message preview at 168px and introduced hidden inner content. The browser contract requires the complete outgoing message preview to remain visible without an internal scrollbar. The follow-up keeps the desktop three-card compression but restores the preview lines to `max-height: none` and `overflow: visible`.
+
+## Final CI / Deployment Evidence
+
+Commit `d0508187` (`fix: keep share preview fully visible`) was pushed to `master`.
+
+GitHub Actions:
+
+- Run: `29619298708`
+- Result: PASS
+- Gates: typecheck PASS, full test suite PASS, production build PASS
+
+Production:
+
+- Vercel deployment: `dpl_BNNekJNef3VXZMvqVbH3c3rFktSa`
+- Target: production
+- Status: Ready
+- Alias: `https://www.safeclaw.kr`
+
+Live probes:
+
+- `https://www.safeclaw.kr/share/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb?workerId=11111111-1111-4111-8111-111111111111` -> 200
+- `https://www.safeclaw.kr/api/safety-reference/status` -> 200
+- `https://www.safeclaw.kr/workspace` -> 200
