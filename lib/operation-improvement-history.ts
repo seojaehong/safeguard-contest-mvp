@@ -118,6 +118,10 @@ function sourcePhotosForImprovement(item: OperationImprovement) {
   ]).slice(0, 10);
 }
 
+export function canUseOperationImprovementAsHarnessMemory(item: OperationImprovement): boolean {
+  return item.status !== "rejected" && item.status !== "on_hold";
+}
+
 export function operationImprovementToHarnessImprovement(item: OperationImprovement): HarnessImprovement {
   const sourcePhotoNames = sourcePhotosForImprovement(item);
   const photoCount = item.photoCount || sourcePhotoNames.length || undefined;
@@ -146,6 +150,12 @@ export function operationImprovementToHarnessImprovement(item: OperationImprovem
     visionErrorMessage: item.visionErrorMessage,
     photoHazardProvenance: item.photoHazardProvenance
   };
+}
+
+export function operationImprovementsToHarnessImprovements(items: readonly OperationImprovement[]): HarnessImprovement[] {
+  return items
+    .filter(canUseOperationImprovementAsHarnessMemory)
+    .map(operationImprovementToHarnessImprovement);
 }
 
 export function parseOperationImprovements(raw: string | null): OperationImprovement[] {

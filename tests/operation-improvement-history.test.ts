@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  operationImprovementsToHarnessImprovements,
   operationImprovementToHarnessImprovement,
   parseOperationImprovements
 } from "@/lib/operation-improvement-history";
@@ -216,5 +217,37 @@ describe("parseOperationImprovements", () => {
 
     expect(operationImprovementToHarnessImprovement(parsed[0]).photoHazardProvenance)
       .toEqual(parsed[0].photoHazardProvenance);
+  });
+
+  it("keeps rejected or held improvements out of the next DB harness memory", () => {
+    const base = {
+      createdAt: "2026-07-17T09:00:00+09:00",
+      siteName: "성수동 현장",
+      workSummary: "외벽 도장",
+      hazardLabel: "추락",
+      improvementText: "작업발판 난간 보강",
+      reflectedDocuments: ["위험성평가표", "TBM 브리핑"],
+      sourceType: "photo_analysis" as const,
+      beforePhotoName: "before.jpg",
+      afterPhotoName: "after.jpg",
+      visionStatus: "analyzed" as const,
+      analysisMode: "vision_ocr" as const,
+      photoPairAttached: true
+    };
+    const parsed = parseOperationImprovements(JSON.stringify([
+      { ...base, id: "approved-photo", status: "approved" },
+      { ...base, id: "candidate-photo", status: "candidate" },
+      { ...base, id: "rejected-photo", status: "rejected" },
+      { ...base, id: "held-photo", status: "on_hold" }
+    ]));
+
+    const harnessMemory = operationImprovementsToHarnessImprovements(parsed);
+
+    expect(harnessMemory.map((item) => item.id)).toEqual(["approved-photo", "candidate-photo"]);
+    expect(harnessMemory.every((item) => item.sourceType === "photo_analysis")).toBe(true);
+    expect(harnessMemory).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "rejected-photo" }),
+      expect.objectContaining({ id: "held-photo" })
+    ]));
   });
 });

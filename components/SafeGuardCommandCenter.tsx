@@ -38,7 +38,7 @@ import {
 import { createLatestOnlyRequestGate } from "@/lib/request-version-guard";
 import {
   OPERATION_IMPROVEMENTS_STORAGE_KEY,
-  operationImprovementToHarnessImprovement,
+  operationImprovementsToHarnessImprovements,
   parseOperationImprovementStatus,
   parseOperationImprovements,
   type OperationImprovement,
@@ -1398,7 +1398,7 @@ export function SafeGuardCommandCenter({
       model: inputHazardPhotoAnalysis.model,
       providerResponses: inputHazardPhotoAnalysis.providerResponses
     });
-    const storedImprovements: HarnessImprovement[] = operationImprovements.slice(0, 8).map(operationImprovementToHarnessImprovement);
+    const storedImprovements: HarnessImprovement[] = operationImprovementsToHarnessImprovements(operationImprovements).slice(0, 8);
     const improvements = [...acceptedPhotoImprovements, ...storedImprovements].slice(0, 12);
     return { improvements, workpackMemory: [] };
   }

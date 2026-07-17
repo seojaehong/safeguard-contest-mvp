@@ -303,3 +303,26 @@ Fresh live `/ops/api` probe:
 - Internal raw readiness strings such as `remote-contract-ready`, `executionReady`, or `disabled` were not visible in the route body.
 
 This proves the current production surface does not overstate Hermes runtime readiness while preserving the long-term EngineAdapter path.
+
+### Before/After photo improvement memory gate
+
+The workspace now keeps rejected or held operation improvements out of the next DB-harness generation memory. This preserves the intended human decision boundary: accepted input-photo hazard candidates and usable saved improvements may inform the next risk assessment/TBM, but explicitly rejected or held improvement records cannot silently re-enter the generation loop.
+
+Fresh current-tree gates:
+
+- RED first: `tests\operation-improvement-history.test.ts` failed because `operationImprovementsToHarnessImprovements` did not exist and stored operation improvements had no filtered harness-memory boundary.
+- `npm.cmd test -- tests\operation-improvement-history.test.ts tests\operation-improvements.test.ts tests\commercial-harness.test.ts`
+  - Result: 3 files / 70 tests passed.
+- `npm.cmd test -- tests\reporting-downloads.test.ts tests\workpack-improvement-route.test.ts tests\photo-vision-analysis-route.test.ts`
+  - Result: 3 files / 52 tests passed.
+- `npm.cmd run build`
+  - Result: passed, 28/28 static pages generated.
+- `npm.cmd run typecheck`
+  - Result: passed after the build regenerated `.next/types`.
+
+Verified fixes:
+
+- `rejected` and `on_hold` improvements are filtered before conversion to DB-harness memory.
+- `candidate` and `approved` photo-analysis improvements still flow into harness memory, so a manager's saved Before/After improvement candidate can still come back into the next 위험성평가/TBM loop.
+- The workspace generation path now uses the filtered conversion helper instead of mapping every local operation-improvement record directly.
+- Existing photo analysis, report download, workpack-improvement route, and commercial harness contracts continue to pass.
