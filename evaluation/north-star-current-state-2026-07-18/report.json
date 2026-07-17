@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-07-18T03:36:00+09:00",
+  "authoritativeHead": "966a129400f8c76e1c273349aa19ad132c7be9cc",
+  "status": "in_progress",
+  "provenGates": [
+    "full_serial_suite",
+    "frontend_consistency",
+    "production_build",
+    "public_live_smoke",
+    "exact_kosha_registry",
+    "ontology_ui",
+    "hermes_openclaw_boundary",
+    "tenant_rls_app_boundary",
+    "document_quality_export",
+    "photo_hazard_analysis",
+    "recipient_portal",
+    "manager_demo_path"
+  ],
+  "remainingCompletionItems": [
+    "live_deployment_commit_mapping",
+    "live_supabase_catalog_rls_proof",
+    "phase_b_approval_and_migrations",
+    "real_external_provider_dispatch_and_vision_execution",
+    "llm_wiki_organization_knowledge_promotion"
+  ],
+  "latestVerification": {
+    "shareRecipientPortal": {
+      "command": "npm.cmd test -- tests\\workflow-share-panel-behavior.test.ts tests\\workspace-share-simplification.test.ts tests\\share-recipient-portal-browser.test.ts tests\\workpack-share-authority-routes.test.ts",
+      "filesPassed": 4,
+      "testsPassed": 52
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "passed"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "passed",
+      "staticPagesGenerated": 28
+    }
+  },
+  "notes": [
+    "This is not a completion declaration.",
+    "No DB schema, production data, Supabase project state, or external provider state was changed by this checkpoint.",
+    "Known unrelated module-shell screenshot dirties remain excluded."
+  ]
+}
