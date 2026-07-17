@@ -1240,6 +1240,7 @@ describe("documents editor layout", () => {
     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
     await page.locator(".workpack-shell").scrollIntoViewIfNeeded();
     await page.locator(".submission-preview-panel summary").click();
+    await page.locator(".submission-preview-panel .safety-form-preview").waitFor({ state: "visible" });
 
     const metrics = await page.evaluate(() => {
       const editor = document.querySelector(".document-editor");

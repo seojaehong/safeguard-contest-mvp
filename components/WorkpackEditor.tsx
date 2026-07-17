@@ -20,6 +20,7 @@ import { buildWorkpackGenerationFingerprint } from "@/lib/current-workpack";
 import {
   areRiskAssessmentRowsRepresentedInDraft,
   buildStructuredDocumentSections,
+  groupSubmissionPreviewRows,
   isCanonicalRiskAssessmentExportSafe,
   isMetaSection,
   replaceStructuredDocumentSection,
@@ -145,10 +146,6 @@ type SafetyFormProfile = {
   actionColumn: string;
   confirmationRows: string[];
   approvalLabels: string[];
-};
-type SectionGroup = {
-  section: string;
-  rows: SheetRow[];
 };
 type RemediationDraft = {
   itemId: string;
@@ -321,18 +318,6 @@ function escapeHtml(value: string) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-function groupRowsBySection(rows: SheetRow[]) {
-  return rows.reduce<SectionGroup[]>((groups, row) => {
-    const existing = groups.find((group) => group.section === row.section);
-    if (existing) {
-      existing.rows.push(row);
-      return groups;
-    }
-    groups.push({ section: row.section, rows: [row] });
-    return groups;
-  }, []);
 }
 
 function rowText(row: SheetRow) {
@@ -761,7 +746,7 @@ const documentPreviewCss = `
 `;
 
 function buildGenericSections(rows: SheetRow[], profile: SafetyFormProfile) {
-  return groupRowsBySection(rows).map((group) => `
+  return groupSubmissionPreviewRows(rows).map((group) => `
     <section class="section-block">
       <div class="section-label">${escapeHtml(group.section)}</div>
       <table>
@@ -1880,8 +1865,7 @@ function SafetyDocumentPreview({
   data: AskResponse;
   riskRows: SheetRow[];
 }) {
-  const groups = groupRowsBySection(rows);
-  const previewGroups = groups.slice(0, 3);
+  const groups = groupSubmissionPreviewRows(rows);
   const tbmBridgeRows = profile.layout === "tbmBriefing" || profile.layout === "tbmLog"
     ? buildTbmBridgeRows(data, riskRows)
     : [];
@@ -1954,7 +1938,7 @@ function SafetyDocumentPreview({
         </section>
       ) : null}
       <div className="safety-form-section-stack">
-        {previewGroups.map((group) => (
+        {groups.map((group) => (
           <section key={group.section}>
             <h3>{group.section}</h3>
             <div className="safety-form-table-wrap">
@@ -1968,7 +1952,7 @@ function SafetyDocumentPreview({
                   </tr>
                 </thead>
                 <tbody>
-                  {group.rows.slice(0, 4).map((row, index) => (
+                  {group.rows.map((row, index) => (
                     <tr key={`${group.section}-${row.item}-${index}`}>
                       <td>{index + 1}</td>
                       <td>{previewRowItem(row, tableLabels.primary)}</td>
@@ -2257,6 +2241,7 @@ export function WorkpackEditor({
   const [saveStatusLabel, setSaveStatusLabel] = useState("자동 저장");
   const [saveAnnouncement, setSaveAnnouncement] = useState("");
   const [showFocusCue, setShowFocusCue] = useState(false);
+  const [submissionPreviewOpen, setSubmissionPreviewOpen] = useState(false);
   const [remediationDrafts, setRemediationDrafts] = useState<Record<string, RemediationDraft>>({});
   const [remediationLoadingId, setRemediationLoadingId] = useState<string | null>(null);
   const documentBodyRef = useRef<HTMLDivElement | null>(null);
@@ -3486,7 +3471,10 @@ export function WorkpackEditor({
             </div>
           </details>
 
-          <details className={`submission-preview-panel ${styles.utilityPanel}`}>
+          <details
+            className={`submission-preview-panel ${styles.utilityPanel}`}
+            onToggle={(event) => setSubmissionPreviewOpen(event.currentTarget.open)}
+          >
             <summary className={styles.utilitySummary}>
               <span>
                 <b>제출 양식 미리보기</b>
@@ -3494,17 +3482,19 @@ export function WorkpackEditor({
               </span>
               <em>인쇄물</em>
             </summary>
-            <div className={styles.utilityContent}>
-              <p className="muted small">다운로드와 출력에 사용되는 제출형 표 서식입니다.</p>
-              <SafetyDocumentPreview
-                title={selected.title}
-                rows={selectedRows}
-                scenario={data.scenario}
-                profile={selectedFormProfile}
-                data={data}
-                riskRows={riskAssessmentRows}
-              />
-            </div>
+            {submissionPreviewOpen ? (
+              <div className={styles.utilityContent}>
+                <p className="muted small">다운로드와 출력에 사용되는 제출형 표 서식입니다.</p>
+                <SafetyDocumentPreview
+                  title={selected.title}
+                  rows={selectedRows}
+                  scenario={data.scenario}
+                  profile={selectedFormProfile}
+                  data={data}
+                  riskRows={riskAssessmentRows}
+                />
+              </div>
+            ) : null}
           </details>
         </div>
       </div>

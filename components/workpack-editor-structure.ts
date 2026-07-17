@@ -53,6 +53,20 @@ export type StructuredDocumentSection = {
   replacementPrefix?: string;
 };
 
+export function groupSubmissionPreviewRows<T extends { section: string }>(
+  rows: readonly T[],
+): Array<{ section: string; rows: T[] }> {
+  return rows.reduce<Array<{ section: string; rows: T[] }>>((groups, row) => {
+    const existing = groups.find((group) => group.section === row.section);
+    if (existing) {
+      existing.rows.push(row);
+      return groups;
+    }
+    groups.push({ section: row.section, rows: [row] });
+    return groups;
+  }, []);
+}
+
 export type StructuredDocumentModel = {
   profile: DocumentEditorProfile;
   body: StructuredDocumentSection[];
