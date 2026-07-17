@@ -120,3 +120,16 @@ Fresh live probe:
 - Result: low-contrast controls `0` on every probed route.
 
 This proves the previously cited white-on-yellow CTA contrast issue is not present on the current production route set.
+
+### Live internal-terminology spot gate
+
+The earlier live audit reported user-facing internal implementation terms such as DB harness, raw JSON/JSONL, Obsidian, and raw logs. A fresh mobile Day probe did not find those terms in the current visible route bodies.
+
+Fresh live probe:
+
+- Viewport: 390px by 844px
+- Routes: `/workspace`, `/documents`, `/reports`, `/ontology`, `/dryrun`, `/knowledge`, `/ops/api`
+- Terms checked: `DB 하네스`, `품질 계약`, `관리자 원본 JSON`, `다음 생성용 MD`, `하네스 JSONL`, `JSONL`, `Obsidian`, `API path`, `sample id`, `dryrun`, `raw log`, `published_ontology`, `Published ontology`
+- Result: 0 hits on every probed route.
+
+This proves the previously cited internal implementation terminology is not visible on the current production route set.
