@@ -257,7 +257,7 @@ describe("frontend design contract", () => {
   });
 
   it("inventories every browser and generated-document surface", () => {
-    expect(userVisibleRoutes).toHaveLength(32);
+    expect(userVisibleRoutes).toHaveLength(33);
     expect(new Set(userVisibleRoutes).size).toBe(userVisibleRoutes.length);
     for (const relativePath of [...specialSurfaceFiles, ...generatedSurfaceFiles]) {
       expect(fs.existsSync(path.join(root, relativePath)), relativePath).toBe(true);

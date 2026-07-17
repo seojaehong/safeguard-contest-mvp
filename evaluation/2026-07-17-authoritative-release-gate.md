@@ -174,6 +174,24 @@ Verified contract:
 - Live route existence probe: `https://www.safeclaw.kr/share/test-session-id` returned HTTP 200 and a Next page containing the current deployment asset marker `dpl_B8zyhtxqTq3B3Ac2HdBR3ddQ2KKY`; this proves the worker-facing share route is deployed as a page surface. Functional confirmation still requires a real issued share session or the local mocked route tests above.
 - Actual provider dispatch remains gated until the persistent idempotency/storage migration receives explicit approval.
 
+### Frontend contract refresh with recipient route
+
+Fresh current-HEAD audit evidence now includes the worker-facing `/share/[sessionId]` surface as a first-class product route.
+
+- Pre-commit source HEAD used for generated audit evidence: `5e477ac77f78be1b7eefd7bda06a247c909bb91c`.
+- Static frontend contract: 33 pages, 23 product components, 0 coverage issues, 0 violations.
+- Browser matrix: 111/111 rows passed, 111 screenshots, 0 failed rows, 0 recovered rows, 0 findings.
+- Focused frontend contract tests: 2 files / 61 tests passed.
+- Foreign recipient share client test: 1 file / 30 tests passed.
+- Strict typecheck passed.
+- Normal production build passed, 28/28 static pages.
+
+Verified fixes:
+
+- `/share/[sessionId]` is now represented in the static route inventory, browser route matrix, and route coverage contract.
+- Invalid share session ids are rejected on the recipient page before any API call, so deterministic audit fixtures do not produce user-visible or console-level `/api/share-sessions` failures.
+- `/interpretation/[id]`, `/law/[id]`, and `/precedent/[id]` are treated as deterministic missing-record fallbacks in the browser audit when no checked-in fixture exists.
+
 ### Hermes / EngineAdapter current boundary gate
 
 The long-term Hermes/OpenClaw direction remains active, but current production does not claim a runnable external engine. It keeps SafeClaw's evidence harness as the system of record and presents the engine as inactive until the trusted transport and durable attempt ledger exist.

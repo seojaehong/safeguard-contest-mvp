@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-17T07:43:46.581Z",
-  "sourceSha": "5f20028730249c0fa3b1eda12d7362c441eec4b6",
-  "sourceIdentity": "8e7ebcfb8384fc761cae1c6f8ca403d8cd24eeda23eefef6bb8553dcdc0ce3b8",
+  "generatedAt": "2026-07-17T13:31:26.733Z",
+  "sourceSha": "5e477ac77f78be1b7eefd7bda06a247c909bb91c",
+  "sourceIdentity": "03544184bbc18adb39be17f80874edadc43f74c4d72a667d22b315b5bfd62047",
   "status": "pass",
   "counts": {
-    "pageFiles": 32,
+    "pageFiles": 33,
     "componentFiles": 23,
-    "cssLines": 21004,
+    "cssLines": 21137,
     "importantDeclarations": 0
   },
   "coverage": {
@@ -38,6 +38,7 @@
       "/search",
       "/settings",
       "/settings/ai-connect",
+      "/share/[sessionId]",
       "/tbm",
       "/trust",
       "/why",
@@ -72,6 +73,7 @@
       "/search",
       "/settings",
       "/settings/ai-connect",
+      "/share/[sessionId]",
       "/tbm",
       "/trust",
       "/why",

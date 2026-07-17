@@ -14693,10 +14693,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-share-recipient-page h2 {
   margin: 0;
   color: var(--workspace-ink);
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 32px;
-  letter-spacing: 0;
+  font-size: var(--text-section-title);
+  font-weight: 800;
+  line-height: var(--leading-section-title);
+  letter-spacing: var(--tracking-section-title);
 }
 
 .safeclaw-subtitle,
@@ -14704,8 +14704,10 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-note {
   margin: 0;
   color: var(--workspace-muted);
-  font-size: 14px;
-  line-height: 22px;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
   overflow-wrap: anywhere;
 }
 
@@ -14713,7 +14715,7 @@ body:has(.safeclaw-landing) :is(
   display: grid;
   gap: 10px;
   border: 1px solid var(--workspace-rule);
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   background: var(--workspace-surface-1);
   color: var(--workspace-ink);
   padding: 16px;
@@ -14723,17 +14725,19 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-share-recipient-card h3 {
   margin: 0;
   color: var(--workspace-ink);
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 24px;
-  letter-spacing: 0;
+  font-size: var(--text-component-title);
+  font-weight: 700;
+  line-height: var(--leading-component-title);
+  letter-spacing: var(--tracking-component-title);
 }
 
 .safeclaw-share-recipient-card p {
   margin: 0;
   color: var(--workspace-muted);
-  font-size: 14px;
-  line-height: 22px;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
   overflow-wrap: anywhere;
 }
 
@@ -14741,9 +14745,10 @@ body:has(.safeclaw-landing) :is(
   display: grid;
   gap: 6px;
   color: var(--workspace-muted);
-  font-size: 13px;
+  font-size: var(--text-caption);
   font-weight: 600;
-  line-height: 20px;
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-input,
@@ -14751,13 +14756,15 @@ body:has(.safeclaw-landing) :is(
   width: 100%;
   min-height: 44px;
   border: 1px solid var(--workspace-rule);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: var(--workspace-surface-2);
   color: var(--workspace-ink);
   padding: 8px 12px;
   font: inherit;
-  font-size: 15px;
-  line-height: 24px;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-input:focus,
@@ -14769,14 +14776,15 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-button {
   min-height: 44px;
   border: 1px solid var(--workspace-rule);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   padding: 8px 14px;
   color: var(--workspace-ink);
   background: var(--workspace-surface-2);
   font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 22px;
+  font-size: var(--text-control);
+  font-weight: 700;
+  line-height: var(--leading-control);
+  letter-spacing: var(--tracking-body);
   cursor: pointer;
 }
 

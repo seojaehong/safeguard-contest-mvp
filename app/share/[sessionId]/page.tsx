@@ -61,6 +61,10 @@ function buildLanguageLabel(code: string): string {
   return code || "자동감지";
 }
 
+function isValidShareSessionId(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value);
+}
+
 export default function ShareRecipientPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const [fetchState, setFetchState] = useState<FetchState>("idle");
@@ -143,6 +147,12 @@ export default function ShareRecipientPage() {
     if (queryWorkerId === null) return;
     if (!sessionId) {
       setSessionMessage("공유 세션 식별값이 비어 있습니다.");
+      setFetchState("error");
+      return;
+    }
+    if (!isValidShareSessionId(sessionId)) {
+      setSessionPayload(null);
+      setSessionMessage("공유 세션 식별값을 확인해 주세요.");
       setFetchState("error");
       return;
     }

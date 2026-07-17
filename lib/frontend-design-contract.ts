@@ -178,6 +178,7 @@ export const userVisibleRoutes = [
   "/search",
   "/settings",
   "/settings/ai-connect",
+  "/share/[sessionId]",
   "/tbm",
   "/trust",
   "/why",

@@ -39,10 +39,16 @@ const routes = [
   ["/ops/api", "/ops/api"], ["/precedent/[id]", "/precedent/prec-subcontract-safety"],
   ["/preview", "/preview"], ["/prototype", "/prototype"], ["/reports", "/reports"],
   ["/roadmap", "/roadmap"], ["/search", "/search?q=추락"], ["/settings", "/settings"],
-  ["/settings/ai-connect", "/settings/ai-connect"], ["/tbm", "/tbm"], ["/trust", "/trust"],
+  ["/settings/ai-connect", "/settings/ai-connect"], ["/share/[sessionId]", "/share/test-session-id"],
+  ["/tbm", "/tbm"], ["/trust", "/trust"],
   ["/why", "/why"], ["/worker", "/worker"], ["/workers", "/workers"],
   ["/workspace", "/workspace?scenario=seoul-construction-windy"],
 ];
+const deterministicMissingRecordRoutes = new Set([
+  "/interpretation/[id]",
+  "/law/[id]",
+  "/precedent/[id]",
+]);
 const viewports = [
   { name: "desktop-1440", width: 1440, height: 1000 },
   { name: "tablet-1024", width: 1024, height: 900 },
@@ -126,7 +132,7 @@ export function validateStaticAuditPrerequisite(staticAudit, source, { now, repo
   if (staticAudit.status !== "pass"
     || staticAudit.violationCount !== 0
     || staticAudit.coverageIssues !== 0
-    || staticAudit.counts?.pageFiles !== 32
+    || staticAudit.counts?.pageFiles !== routes.length
     || staticAudit.counts?.componentFiles !== 23) {
     throw new Error(
       `Static audit prerequisite failed: status=${staticAudit.status}, violations=${staticAudit.violationCount}, coverage=${staticAudit.coverageIssues}, pages=${staticAudit.counts?.pageFiles}, components=${staticAudit.counts?.componentFiles}`,
@@ -504,12 +510,13 @@ async function main() {
         : route === "/auth/callback"
           ? "No authentication code is supplied in the deterministic audit environment; the pending callback fallback is captured."
           : "";
+      const isDeterministicMissingRecord = deterministicMissingRecordRoutes.has(route);
       routeRows.push(await capture(page, {
         route, requestedPath, viewport, theme: route === "/workspace" ? "Day" : "Product",
         name: `route-${safeName(route)}-${viewport.name}`,
-        limitation: authFallback || (route === "/interpretation/[id]" ? "No checked-in interpretation fixture; deterministic missing-record fallback captured." : ""),
-        fallbackKind: authFallback || route === "/interpretation/[id]" ? "expected-deterministic-fallback" : "none",
-        expectedStatuses: route === "/interpretation/[id]" ? [404] : [200],
+        limitation: authFallback || (isDeterministicMissingRecord ? "No checked-in content fixture; deterministic missing-record fallback captured." : ""),
+        fallbackKind: authFallback || isDeterministicMissingRecord ? "expected-deterministic-fallback" : "none",
+        expectedStatuses: isDeterministicMissingRecord ? [404] : [200],
         expectedFinalPath: route === "/prototype" ? "/workspace" : new URL(requestedPath, baseUrl).pathname,
       }));
     }

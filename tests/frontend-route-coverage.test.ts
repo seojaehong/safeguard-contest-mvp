@@ -40,7 +40,7 @@ const routeFamilies = {
   workbench: ["/workspace", "/reports"],
   module: ["/archive", "/documents", "/dispatch", "/evidence", "/evidence-file", "/ontology", "/tbm", "/worker", "/workers"],
   "knowledge/legal": ["/ask", "/knowledge", "/knowledge/[section]/[slug]", "/search", "/law/[id]", "/interpretation/[id]", "/precedent/[id]"],
-  authentication: ["/login", "/auth/callback", "/settings", "/settings/ai-connect"],
+  authentication: ["/login", "/auth/callback", "/settings", "/settings/ai-connect", "/share/[sessionId]"],
   "internal/demo": ["/demo", "/preview", "/prototype", "/dryrun", "/ops/api"],
 } as const;
 
@@ -71,6 +71,7 @@ const routeSurfaceOwners: Record<(typeof userVisibleRoutes)[number], string> = {
   "/search": "app/search/page.tsx",
   "/settings": "components/SafeClawModuleShell.tsx",
   "/settings/ai-connect": "components/SafeClawModuleShell.tsx",
+  "/share/[sessionId]": "app/share/[sessionId]/page.tsx",
   "/tbm": "components/SafeClawModuleShell.tsx",
   "/trust": "app/trust/page.tsx",
   "/why": "app/why/page.tsx",
@@ -95,6 +96,7 @@ const canonicalSurfaceHooks: Record<string, string> = {
   "app/preview/page.tsx": "SafeClawModuleShell",
   "app/roadmap/page.tsx": "SafeClawModuleShell",
   "app/search/page.tsx": "SafeClawModuleShell",
+  "app/share/[sessionId]/page.tsx": "safeclaw-share-recipient-page",
   "app/trust/page.tsx": "SafeClawModuleShell",
   "app/why/page.tsx": "SafeClawModuleShell",
 };
@@ -108,6 +110,7 @@ const delegatedHeadingOwners: Partial<Record<(typeof userVisibleRoutes)[number],
   "/preview": "components/SafeClawModuleShell.tsx",
   "/roadmap": "components/SafeClawModuleShell.tsx",
   "/search": "components/SafeClawModuleShell.tsx",
+  "/share/[sessionId]": "components/SafeClawModuleShell.tsx",
   "/trust": "components/SafeClawModuleShell.tsx",
   "/why": "components/SafeClawModuleShell.tsx",
 };
@@ -426,7 +429,7 @@ describe("browser evidence reconciliation", () => {
         sourceSha: "1".repeat(40),
         sourceIdentity: fixtureIdentity.sourceIdentity,
         status: "pass",
-        counts: { pageFiles: 32, componentFiles: 23 },
+        counts: { pageFiles: 33, componentFiles: 23 },
         coverageIssues: 0,
         violationCount: 0,
       };
@@ -461,7 +464,7 @@ describe("browser evidence reconciliation", () => {
       sourceSha: source.sourceSha,
       sourceIdentity: source.sourceIdentity,
       status: "pass",
-      counts: { pageFiles: 32, componentFiles: 23 },
+      counts: { pageFiles: 33, componentFiles: 23 },
       coverageIssues: 0,
       violationCount: 0,
     };
@@ -514,7 +517,7 @@ describe("browser evidence reconciliation", () => {
       sourceSha: verifiedSourceSha,
       sourceIdentity,
       status: "pass",
-      counts: { pageFiles: 32, componentFiles: 23 },
+      counts: { pageFiles: 33, componentFiles: 23 },
       coverageIssues: 0,
       violationCount: 0,
     };
@@ -556,7 +559,7 @@ describe("browser evidence reconciliation", () => {
       sourceSha: source.sourceSha,
       sourceIdentity: source.sourceIdentity,
       status: "fail",
-      counts: { pageFiles: 32, componentFiles: 23 },
+      counts: { pageFiles: 33, componentFiles: 23 },
       coverageIssues: 0,
       violationCount: 1,
     };
@@ -578,13 +581,13 @@ describe("browser evidence reconciliation", () => {
 
   it("keeps the route-row contract explicit", () => {
     expect(runBrowserContractProbe("audit.browserAuditRowContract()")).toEqual({
-      routes: 32,
+      routes: 33,
       viewports: 3,
-      routeRows: 96,
+      routeRows: 99,
       workspaceThemeRows: 6,
       specialSurfaceRows: 4,
       generatedSurfaceRows: 2,
-      totalRows: 108,
+      totalRows: 111,
     });
   });
 
@@ -713,13 +716,13 @@ describe("browser evidence reconciliation", () => {
       sourceIdentity: staticAudit.sourceIdentity,
     });
     expect(report.rowContract).toEqual({
-      routes: 32,
+      routes: 33,
       viewports: 3,
-      routeRows: 96,
+      routeRows: 99,
       workspaceThemeRows: 6,
       specialSurfaceRows: 4,
       generatedSurfaceRows: 2,
-      totalRows: 108,
+      totalRows: 111,
     });
 
     expect(report.routeRows).toHaveLength(userVisibleRoutes.length * viewports.length);
