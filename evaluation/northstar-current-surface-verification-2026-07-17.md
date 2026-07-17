@@ -1,7 +1,7 @@
 # North Star Current Surface Verification
 
 Date: 2026-07-17
-Authoritative HEAD: `9e839ebfeee01948b23d28a526834f4866297d81`
+Authoritative HEAD: `e8d14edabef05b0032c79dd7b956448fe5685e9b`
 
 ## Scope
 
@@ -71,6 +71,23 @@ Result:
 - Share/mobile/recipient bundle: 3 passed, 1 skipped / 38 passed, 1 skipped
 
 The public recipient confirmation route now stores the invited server snapshot when `workerId` matches a share-session recipient. Client-supplied display name, language code, and worker snapshot are ignored for invited recipients.
+
+Dispatch log idempotency hardening:
+
+- Code commit: `e8d14eda`
+- `POST /api/dispatch-logs` now requires a valid `dispatch-v1-{attemptUuid}-{hash}` request key before any workspace-context or workpack lookup.
+- Saved log payloads are normalized with the server request idempotency key, so forged per-log payload keys cannot become archive evidence.
+- This does not activate live provider dispatch. Provider dispatch remains fail-closed until persistent provider idempotency is backed by a stronger storage contract.
+
+```powershell
+npm.cmd test -- tests\dispatch-logs-tenant-boundary.test.ts
+npm.cmd test -- tests\workflow-share-client.test.ts tests\workpack-share-authority.test.ts tests\workspace-share-mobile-browser.test.ts tests\share-recipient-portal-browser.test.ts tests\dispatch-logs-tenant-boundary.test.ts
+```
+
+Result:
+
+- Dispatch log tenant boundary: 1 file / 8 tests passed
+- Share/mobile/recipient/dispatch bundle: 4 passed, 1 skipped / 46 passed, 1 skipped
 
 Additional strict gate:
 
