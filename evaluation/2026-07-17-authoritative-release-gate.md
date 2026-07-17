@@ -355,3 +355,35 @@ Scenario coverage:
 - `안산 제조 화기 외국인 포함`: 11/11 live deliverables passed; 14/14 generated files passed.
 
 This verifies live document quality across core risk assessment, TBM, education, emergency, photo/evidence, foreign-worker briefing/transmission, and Kakao/share message outputs, plus text/json/csv/xls/doc/html/hwpx/hwp/xlsx/pdf/jpg and bundle export signatures.
+
+### Live release scale and operator readiness gate
+
+Fresh production release-scale audit also passed against `https://www.safeclaw.kr`.
+
+Command:
+
+- `$env:SAFECLAW_RELEASE_BASE_URL='https://www.safeclaw.kr'; $env:SAFECLAW_RELEASE_AUDIT_OUT_DIR='evaluation/final-release-scale-audit-2026-07-18'; npm.cmd run audit:release-scale`
+
+Result:
+
+- Overall verdict: `pass`
+- Automated verdict: `pass`
+- Release verdict: `pass`
+- Exit verdict: `pass`
+- Strict mode: `false`
+- Automated gates: 13/13 passed
+- Release gates: 2/2 passed
+- Artifact: `evaluation/final-release-scale-audit-2026-07-18/final-release-scale-audit.md`
+- Machine report: `evaluation/final-release-scale-audit-2026-07-18/final-release-scale-audit.json`
+
+Verified coverage:
+
+- Production `/api/ask` generated the existing web workflow with 11 deliverables and no missing documents.
+- `/settings/ai-connect` rendered successfully.
+- AI token API and MCP API both returned the expected auth guard responses without leaking access.
+- Tenant-scoped token storage remains hash-only with organization/site scope.
+- Token listing uses bounded cursor pagination and bounded site-name lookup.
+- Active token caps and operator scale documentation remain present.
+- The scale envelope models 1, 10, 100, 1,000, and 10,000 users with constant per-request row bounds.
+- Supabase Kakao provider redirect is enabled and points back to the production callback.
+- MCP token query indexes are present in the approved migration evidence.

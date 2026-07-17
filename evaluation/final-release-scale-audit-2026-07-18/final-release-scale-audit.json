@@ -1,0 +1,225 @@
+{
+  "generatedAt": "2026-07-17T15:10:30.755Z",
+  "elapsedMs": 19702,
+  "baseUrl": "https://www.safeclaw.kr",
+  "strictMode": false,
+  "automatedVerdict": "pass",
+  "releaseVerdict": "pass",
+  "verdict": "pass",
+  "exitVerdict": "pass",
+  "tokenIndexApprovalCandidate": "evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql",
+  "tokenIndexVerificationQuery": "evaluation/final-release-scale-audit/mcp-token-query-indexes-verify.sql",
+  "scaleEnvelope": {
+    "targets": [
+      {
+        "users": 1,
+        "tokenListRowsReadPerRequestMax": 51,
+        "siteNameRowsReadPerRequestMax": 50,
+        "activeTokensWithOneSitePerUserMax": 50
+      },
+      {
+        "users": 10,
+        "tokenListRowsReadPerRequestMax": 51,
+        "siteNameRowsReadPerRequestMax": 50,
+        "activeTokensWithOneSitePerUserMax": 500
+      },
+      {
+        "users": 100,
+        "tokenListRowsReadPerRequestMax": 51,
+        "siteNameRowsReadPerRequestMax": 50,
+        "activeTokensWithOneSitePerUserMax": 5000
+      },
+      {
+        "users": 1000,
+        "tokenListRowsReadPerRequestMax": 51,
+        "siteNameRowsReadPerRequestMax": 50,
+        "activeTokensWithOneSitePerUserMax": 50000
+      },
+      {
+        "users": 10000,
+        "tokenListRowsReadPerRequestMax": 51,
+        "siteNameRowsReadPerRequestMax": 50,
+        "activeTokensWithOneSitePerUserMax": 500000
+      }
+    ],
+    "requestBounds": {
+      "tokenListRequestedLimitMax": 50,
+      "tokenListFetchRowsMax": 51,
+      "siteNameLookupRowsMax": 50,
+      "activeTokensPerSiteMax": 50
+    },
+    "invariant": "Per-request token list and site-name lookup row counts stay constant as total users grow; 10000-user release requires the mcp_tokens org/site query indexes to be approved and applied.",
+    "requiredIndexes": [
+      "mcp_tokens(org_id, created_at desc, id desc)",
+      "mcp_tokens(site_id, created_at desc, id desc)",
+      "mcp_tokens(site_id) where disabled = false"
+    ]
+  },
+  "gates": [
+    {
+      "name": "existing-web-api-ask",
+      "verdict": "pass",
+      "details": {
+        "status": 200,
+        "elapsedMs": 18941,
+        "missingDeliverables": [],
+        "deliverableCount": 11,
+        "scenario": {
+          "companyName": "그린메탈",
+          "companyType": "제조업",
+          "siteName": "경기 안산 제조공장",
+          "workSummary": "그린메탈 경기 안산 제조공장 옥외 용접 작업",
+          "workerCount": 6,
+          "weatherNote": "우천 후 바닥 젖음, 미끄럼·동선 분리 기준 공유 필요"
+        },
+        "tbmPreview": "[오늘 개선·이력 반영 - TBM]\n- 공유 전 보완: TBM 기록 근거\n\n작업 전 안전점검회의(TBM) 브리핑(초안)\n공식자료 기반: KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고\n\n일시: 작업 시작 전\n장소: 경기 안산 제조공장\n업체명: 그린메탈\n오늘 작업: 용접·절단 화기작업\n참석 대상: 작업자 6명, 작업반장, 관리감독자\n\n[1. 작업내용]\n- 그린메탈 경기 안산 제조공장 옥외 용접 작업\n- 기"
+      }
+    },
+    {
+      "name": "ai-connect-page",
+      "verdict": "pass",
+      "details": {
+        "status": 200,
+        "elapsedMs": 114
+      }
+    },
+    {
+      "name": "ai-token-api-auth-guard",
+      "verdict": "pass",
+      "details": {
+        "status": 401,
+        "limit": 50,
+        "nextCursor": null,
+        "message": "관리자 로그인이 필요합니다."
+      }
+    },
+    {
+      "name": "mcp-no-token-auth-guard",
+      "verdict": "pass",
+      "details": {
+        "status": 401,
+        "rawPreview": "{\"error\":\"invalid_token\",\"error_description\":\"No authorization provided\"}"
+      }
+    },
+    {
+      "name": "tenant-scoped-token-insert",
+      "verdict": "pass",
+      "details": {
+        "evidence": "lib/mcp-token-service.ts stores only hash + site/org scope"
+      }
+    },
+    {
+      "name": "bounded-token-list",
+      "verdict": "pass",
+      "details": {
+        "evidence": "token list limit constants and API usage present"
+      }
+    },
+    {
+      "name": "cursor-pagination-contract",
+      "verdict": "pass",
+      "details": {
+        "evidence": "opaque cursor helpers, API nextCursor, and UI load-more present"
+      }
+    },
+    {
+      "name": "bounded-site-name-lookup",
+      "verdict": "pass",
+      "details": {
+        "evidence": "token route loads site names only for current page token rows"
+      }
+    },
+    {
+      "name": "active-token-cap",
+      "verdict": "pass",
+      "details": {
+        "evidence": "site-level active token cap enforced before issuing plaintext token"
+      }
+    },
+    {
+      "name": "scale-envelope-matches-code-bounds",
+      "verdict": "pass",
+      "details": {
+        "maxListLimit": 50,
+        "maxActiveTokensPerSite": 50,
+        "requestBounds": {
+          "tokenListRequestedLimitMax": 50,
+          "tokenListFetchRowsMax": 51,
+          "siteNameLookupRowsMax": 50,
+          "activeTokensPerSiteMax": 50
+        },
+        "evidence": "scale envelope row bounds are derived from the token list limit, +1 cursor fetch, pageRows slice, and active-token cap"
+      }
+    },
+    {
+      "name": "explicit-user-scale-envelope",
+      "verdict": "pass",
+      "details": {
+        "targets": [
+          1,
+          10,
+          100,
+          1000,
+          10000
+        ],
+        "requestBounds": {
+          "tokenListRequestedLimitMax": 50,
+          "tokenListFetchRowsMax": 51,
+          "siteNameLookupRowsMax": 50,
+          "activeTokensPerSiteMax": 50
+        },
+        "evidence": "audit payload models 1, 10, 100, 1000, and 10000-user operation with constant per-request row bounds"
+      }
+    },
+    {
+      "name": "multi-provider-auth-return",
+      "verdict": "pass",
+      "details": {
+        "evidence": "email hash callbacks and OAuth code callbacks return to AI connect safely"
+      }
+    },
+    {
+      "name": "operator-scale-docs",
+      "verdict": "pass",
+      "details": {
+        "evidence": "docs/mcp-server.md documents cursor paging, active cap, and index approval gate"
+      }
+    }
+  ],
+  "releaseGates": [
+    {
+      "name": "supabase-kakao-provider-enabled",
+      "verdict": "pass",
+      "details": {
+        "status": 302,
+        "elapsedMs": 178,
+        "supabaseOrigin": "https://mewqgevgdgghhatqtuos.supabase.co",
+        "disabledReason": null,
+        "redirectTo": "https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect",
+        "locationPreview": "https://kauth.kakao.com/oauth/authorize?client_id=[redacted]&redirect_to=https%3A%2F%2Fwww.safeclaw.kr%2Fauth%2Fcallback%3Fnext%3D%252Fsettings%252Fai-connect&r",
+        "responsePreview": "<a href=\"https://kauth.kakao.com/oauth/authorize?client_id=[redacted]&amp;redirect_to=https%3A%2F%2Fwww.safeclaw.kr%2Fauth%2Fcallback%3Fnext%3D%252Fsettings%252Fai-connect&amp;redirect_uri=https%3A%2F%2Fmewqgevgdgghhatqtuos.supabase.co%2Fau",
+        "operatorAction": "Enable Kakao in Supabase Auth Providers and configure the production callback URL."
+      }
+    },
+    {
+      "name": "mcp-token-query-indexes-approved",
+      "verdict": "pass",
+      "details": {
+        "hasOrgCreatedIndex": true,
+        "hasSiteCreatedIndex": true,
+        "orgIndexEvidenceFiles": [
+          "supabase/migrations/009_mcp_token_query_indexes.sql"
+        ],
+        "siteIndexEvidenceFiles": [
+          "supabase/migrations/009_mcp_token_query_indexes.sql"
+        ],
+        "approvalRequired": true,
+        "approvalCandidate": "evaluation/final-release-scale-audit/mcp-token-query-indexes-approval.sql",
+        "approvalCandidateExists": true,
+        "verificationQuery": "evaluation/final-release-scale-audit/mcp-token-query-indexes-verify.sql",
+        "verificationQueryExists": true,
+        "operatorAction": "After approval, add indexes for mcp_tokens(org_id, created_at desc) and mcp_tokens(site_id, created_at desc)."
+      }
+    }
+  ]
+}
