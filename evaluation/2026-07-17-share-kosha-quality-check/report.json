@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-07-17T00:00:00+09:00",
+  "scope": "share-ux + kosha-guide verification",
+  "artifact": "evaluation/2026-07-17-share-kosha-quality-check",
+  "results": [
+    {
+      "command": "npm.cmd test -- tests/exact-trusted-kosha-grounding.test.ts tests/exact-trusted-kosha-registry-wave2.test.ts tests/kosha-grounding-fail-closed.test.ts tests/kosha-current-review-run-ask.test.ts",
+      "files": 4,
+      "passedFiles": 4,
+      "tests": 63,
+      "passedTests": 63,
+      "durationSec": 18.28,
+      "status": "PASS"
+    },
+    {
+      "command": "npm.cmd test -- tests/workpack-ontology-qa.test.ts tests/quality-contract.test.ts tests/mcp-tools.test.ts",
+      "files": 3,
+      "passedFiles": 3,
+      "tests": 42,
+      "passedTests": 42,
+      "durationSec": 0.71,
+      "status": "PASS"
+    },
+    {
+      "command": "npm.cmd test -- tests/workspace-share-simplification.test.ts",
+      "files": 1,
+      "passedFiles": 1,
+      "tests": 10,
+      "passedTests": 10,
+      "durationSec": 0.29,
+      "status": "PASS"
+    }
+  ],
+  "typecheck": {
+    "status": "FAIL",
+    "reason": "Missing modules/types in local environment: '@pdf-lib/fontkit', 'pdf-lib'"
+  },
+  "notes": [
+    "Workflow share panel now includes explicit copy that recipient-only mobile reading portal is not yet implemented and text-message based sharing history is active flow.",
+    "Observed commit: f2b0b1eb fixes share precondition / copy parity." ,
+    "Known blocker: recipient portal API/route is not implemented yet; UI behavior currently reflects admin dispatch + read-confirmation by workpack owner scope."
+  ]
+}
