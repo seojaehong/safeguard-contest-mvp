@@ -701,8 +701,20 @@ export function AiConnectPanel() {
                 <pre>{sifGate.nextApprovalGate.command}</pre>
               ) : null}
               <div className="ai-connect-sif-packet-actions">
-                <Link href="/api/sif-embedding-gate/approval-packet">승인 패킷 열기</Link>
-                <Link href="/api/sif-embedding-gate/approval-packet?format=json">JSON 보기</Link>
+                <a
+                  href="/api/sif-embedding-gate/approval-packet"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  승인 패킷 열기
+                </a>
+                <a
+                  href="/api/sif-embedding-gate/approval-packet?format=json"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  JSON 보기
+                </a>
               </div>
             </div>
             <div className={`ai-connect-sif-operator-gate ${sifGate.operatorGate.status}`}>
