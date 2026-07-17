@@ -1,0 +1,25 @@
+{
+  "date": "2026-07-18",
+  "baseHeadBeforeArtifact": "c3f560d3",
+  "scope": "Revalidate current foreign recipient distribution and share preview contract.",
+  "verification": {
+    "command": "npm.cmd test -- tests\\workflow-share-client.test.ts tests\\workpack-share-authority-routes.test.ts tests\\workspace-share-simplification.test.ts tests\\workspace-share-mobile-browser.test.ts tests\\foreign-worker-languages.test.ts",
+    "filesPassed": 5,
+    "testsPassed": 80,
+    "status": "passed"
+  },
+  "confirmedContracts": [
+    "manager-language-selector-preview-only",
+    "canonical-per-recipient-message-variants",
+    "foreign-variant-fail-closed-before-provider-dispatch",
+    "recipient-specific-provider-dto-message-and-target",
+    "mobile-vietnamese-preview-no-overflow",
+    "share-copy-reflects-current-worker-viewer-link"
+  ],
+  "nonGoals": [
+    "provider-idempotency-migration",
+    "db-schema-change",
+    "anonymous-public-share",
+    "live-provider-send"
+  ]
+}
