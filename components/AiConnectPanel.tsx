@@ -560,7 +560,7 @@ export function AiConnectPanel() {
         <h2>{activeTab === "harness" ? "내 OAuth와 SafeClaw 검증 근거를 분리해 연결합니다." : "내 AI에 SafeClaw 도구를 붙입니다."}</h2>
         <p>
           {activeTab === "harness"
-            ? "OpenClaw의 모델 사용은 내 OpenAI OAuth 프로필이 담당하고, SafeClaw 데이터 접근은 이 연결 토큰이 담당합니다. 작업을 시작하면 SIF·KOSHA·작업 이력을 먼저 확인한 뒤 문서를 작성합니다."
+            ? "OpenClaw의 모델 사용은 내 OpenAI OAuth 프로필이 담당하고, SafeClaw 데이터 접근은 이 연결 토큰이 담당합니다. 작업을 시작하면 SIF·KOSHA·작업 이력을 먼저 확인하고, 실제 문서 생성은 SafeClaw 승인 흐름에서만 실행됩니다."
             : "토큰은 발급 직후 한 번만 표시됩니다. 화면을 떠난 뒤에는 기존 토큰을 다시 볼 수 없고, 새로 발급하거나 기존 토큰을 끌 수 있습니다."}
         </p>
         <div className="ai-connect-actions">

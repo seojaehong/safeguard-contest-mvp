@@ -304,6 +304,25 @@ Fresh live `/ops/api` probe:
 
 This proves the current production surface does not overstate Hermes runtime readiness while preserving the long-term EngineAdapter path.
 
+### AiConnect copy/runtime boundary gate
+
+The AI connection page now separates token issuance from actual document execution.
+
+Fixes verified:
+
+- The harness tab no longer says that connecting OpenClaw immediately writes documents.
+- The page states that SIF/KOSHA/work-history are checked first and that actual document generation runs only through the SafeClaw approval flow.
+- Engine readiness policy still reports remote Hermes as not execution-ready until the trusted transport and durable attempt ledger are supplied.
+
+Fresh current-tree gates:
+
+- `npm.cmd test -- tests\customer-terminology-boundary.test.ts tests\engine-runtime-readiness-policy.test.ts tests\ai-connect-production-matrix.test.ts`
+  - Result: 2 files passed, 1 file skipped; 13 tests passed, 2 skipped.
+- `npm.cmd run typecheck`
+  - Result: passed.
+- `npm.cmd run build`
+  - Result: passed, 28/28 static pages generated.
+
 ### Before/After photo improvement memory gate
 
 The workspace now keeps rejected or held operation improvements out of the next DB-harness generation memory. This preserves the intended human decision boundary: accepted input-photo hazard candidates and usable saved improvements may inform the next risk assessment/TBM, but explicitly rejected or held improvement records cannot silently re-enter the generation loop.

@@ -69,6 +69,8 @@ describe("customer terminology boundary", () => {
     expect(aiConnect).toContain('{ label: "SafeClaw Harness Agent" }');
     expect(aiConnect).toContain("formatCustomerFacingLabel(token.label)");
     expect(aiConnect).toContain("SIF·KOSHA·작업 이력을 먼저 확인");
+    expect(aiConnect).toContain("실제 문서 생성은 SafeClaw 승인 흐름에서만 실행됩니다.");
+    expect(aiConnect).not.toContain("먼저 확인한 뒤 문서를 작성합니다.");
     expect(workspace).toContain("formatCustomerFacingLabel(harnessSurface.label)");
     expect(workspace).toContain('formatCustomerFacingText(`${harnessSurface.headline} · ${harnessSurface.detail}`)');
     expect(workspace).not.toContain('detail: harnessSurface\\n        ? `${harnessSurface.headline} · ${harnessSurface.detail}`');
