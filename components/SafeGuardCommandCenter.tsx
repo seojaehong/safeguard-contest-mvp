@@ -626,7 +626,7 @@ function buildDocumentHarnessLoop(
         ? harnessSurface.status === "locked" ? "근거 고정" : "검토 필요"
         : "응답 없음",
       detail: harnessSurface
-        ? `${harnessSurface.headline} · ${harnessSurface.detail}`
+        ? formatCustomerFacingText(`${harnessSurface.headline} · ${harnessSurface.detail}`)
         : "작성 근거를 확인한 뒤 문서를 공유해 주세요.",
       tone: harnessSurface?.status === "locked" ? "ready" : "warn"
     },

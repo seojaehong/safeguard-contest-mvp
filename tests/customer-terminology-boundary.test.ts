@@ -70,6 +70,8 @@ describe("customer terminology boundary", () => {
     expect(aiConnect).toContain("formatCustomerFacingLabel(token.label)");
     expect(aiConnect).toContain("SIF·KOSHA·작업 이력을 먼저 확인");
     expect(workspace).toContain("formatCustomerFacingLabel(harnessSurface.label)");
+    expect(workspace).toContain('formatCustomerFacingText(`${harnessSurface.headline} · ${harnessSurface.detail}`)');
+    expect(workspace).not.toContain('detail: harnessSurface\\n        ? `${harnessSurface.headline} · ${harnessSurface.detail}`');
     expect(workspace).not.toContain("하네스 근거가 연결됐습니다");
     expect(answerDisplay).toContain("검증 근거: 직접 근거");
   });
