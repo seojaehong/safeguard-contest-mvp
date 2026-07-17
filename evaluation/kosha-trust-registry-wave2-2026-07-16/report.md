@@ -2,7 +2,7 @@
 
 ## 판정
 
-제품 요구사항과 focused gate는 통과했다. 다만 확장 34-file 실행에서 기존 KOSHA corpus audit 3건이 실패해 broad suite는 RED로 정직하게 유지한다. 이번 변경은 DB나 Supabase schema를 수정하지 않는다.
+제품 요구사항, focused gate, 확장 34-file KOSHA/SIF/온톨로지 suite가 모두 통과했다. 이전 broad suite RED였던 KOSHA corpus audit 3건은 bridge-only preflight를 보강해 현재 master에서 해소했다. 이번 변경은 DB나 Supabase schema를 수정하지 않는다.
 
 최종 독립 리뷰는 SPEC PASS / CODE QUALITY PASS / 통합 가능이며 차단 finding은 없다.
 
@@ -26,8 +26,9 @@
 
 ## 검증
 
-- Focused Vitest: 5 files, 76/76 tests PASS
-- Broad Vitest: 30 files PASS, 1 file FAIL, 3 files SKIP; 386 tests PASS, 3 FAIL, 4 SKIP
+- Focused Vitest: 5 files, 80/80 tests PASS
+- KOSHA corpus audit: 1 file, 110/110 tests PASS
+- Broad Vitest: 31 files PASS, 3 files SKIP; 395 tests PASS, 4 SKIP
 - Python acquisition: 19 tests PASS
 - Strict TypeScript: PASS
 - Production build: 28/28 static pages PASS
@@ -35,7 +36,7 @@
 - Exact asset size: 147,724 bytes
 - `git diff --check`: PASS
 
-확장 34-file Vitest는 실행을 완료하고 최종 summary를 출력했으며, `tests/kosha-guide-corpus-audit.test.ts`의 3개 assertion에서 실패했다. 실패는 snapshot integrity/credential-order runner 출력이 비어 있거나 `audit.log`가 생성되지 않은 경로이며, 원인을 이번 exact registry product PASS로 재분류하지 않았다. 실패 stack과 최종 summary(`1 failed / 30 passed / 3 skipped`, `3 failed / 386 passed / 4 skipped`)는 `kosha-sif-ontology-tests.log`에 그대로 보존했다. 이 실행은 hang이나 summary 미출력으로 분류하지 않으며 broad suite PASS 근거로 사용하지 않는다.
+확장 34-file Vitest는 실행을 완료하고 최종 summary를 출력했으며, 현재 결과는 `31 passed / 3 skipped`, `395 passed / 4 skipped`이다. 이전 실패 원인은 bridge-only runner가 스냅샷 무결성/자격증명 부재를 판정하기 전에 Vite module server를 로드해 30초 timeout에 도달하던 구조였다. 현재는 bridge-only preflight가 current snapshot traversal, items/chunks/checkpoint hash, reproducibility hash, Supabase credential absence를 Vite 로드 전에 fail-closed로 판정하고 fatal code와 `audit.log`를 남긴다.
 
 ## 남은 경계
 

@@ -1,68 +1,13 @@
 
 > safeclaw@0.1.0 test
-> vitest run C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\exact-trusted-kosha-grounding.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\exact-trusted-kosha-registry-wave2.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-current-review-lifecycle.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-current-review-photo-storage.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-current-review-provenance.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-current-review-run-ask.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-grounding-fail-closed.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-guide-corpus-audit.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-guide-offline-harness-expanded.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-guide-offline-harness.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-guide-provenance-gate.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-guide-supporting-row-relevance.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\kosha-verified-subset-gate.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-evidence-chains.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-graph-store.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-knowledge-tool.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-operation-memory.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-qa-review.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-query.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-schema.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-seed.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-tablet-overflow.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-typography-production-matrix.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-typography-role-contract.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-ui-browser.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-ui-remediation.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\ontology-visualization.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\sif-causality-audit-gate.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\sif-embedding-approval-packet.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\sif-embedding-gate-status.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\sif-embedding-post-migration-verify.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\sif-embedding-preflight.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\sif-embedding-runtime-probe.test.ts C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\kosha-trust-registry-wave2\tests\workpack-ontology-qa.test.ts
+> vitest run tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\kosha-current-review-lifecycle.test.ts tests\kosha-current-review-photo-storage.test.ts tests\kosha-current-review-provenance.test.ts tests\kosha-current-review-run-ask.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-guide-corpus-audit.test.ts tests\kosha-guide-offline-harness-expanded.test.ts tests\kosha-guide-offline-harness.test.ts tests\kosha-guide-provenance-gate.test.ts tests\kosha-guide-supporting-row-relevance.test.ts tests\kosha-verified-subset-gate.test.ts tests\ontology-evidence-chains.test.ts tests\ontology-graph-store.test.ts tests\ontology-knowledge-tool.test.ts tests\ontology-operation-memory.test.ts tests\ontology-qa-review.test.ts tests\ontology-query.test.ts tests\ontology-schema.test.ts tests\ontology-seed.test.ts tests\ontology-tablet-overflow.test.ts tests\ontology-typography-production-matrix.test.ts tests\ontology-typography-role-contract.test.ts tests\ontology-ui-browser.test.ts tests\ontology-ui-remediation.test.ts tests\ontology-visualization.test.ts tests\sif-causality-audit-gate.test.ts tests\sif-embedding-approval-packet.test.ts tests\sif-embedding-gate-status.test.ts tests\sif-embedding-post-migration-verify.test.ts tests\sif-embedding-preflight.test.ts tests\sif-embedding-runtime-probe.test.ts tests\workpack-ontology-qa.test.ts
 
 
- RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp/.worktrees/kosha-trust-registry-wave2
-
- ❯ tests/kosha-guide-corpus-audit.test.ts (110 tests | 3 failed) 100361ms
-     × rejects a tampered snapshot before checking missing production credentials 31170ms
-     × checks a valid snapshot before reporting the missing credential blocker 31076ms
-     × rejects a traversal snapshot pointer before reading outside the corpus root 30957ms
-
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
-
- FAIL  tests/kosha-guide-corpus-audit.test.ts:866:3 > KOSHA GUIDE read-only runner contract > rejects a tampered snapshot before checking missing production credentials
-AssertionError: expected '' to contain 'kosha-bridge-items-hash-mismatch'
-
-- Expected
-+ Received
-
-- kosha-bridge-items-hash-mismatch
-
- ❯ tests/kosha-guide-corpus-audit.test.ts:897:22
-    895|
-    896|       expect(result.status).not.toBe(0);
-    897|       expect(output).toContain("kosha-bridge-items-hash-mismatch");
-       |                      ^
-    898|       expect(output).not.toContain("supabase-read-credentials-unavaila…
-    899|       expect(readFileSync(join(outputRoot, "audit.log"), "utf8")).not.…
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
-
- FAIL  tests/kosha-guide-corpus-audit.test.ts:907:3 > KOSHA GUIDE read-only runner contract > checks a valid snapshot before reporting the missing credential blocker
-Error: ENOENT: no such file or directory, open 'C:\Users\iceam\AppData\Local\Temp\kosha-bridge-credential-after-integrity-zBxuJK\output\audit.log'
- ❯ tests/kosha-guide-corpus-audit.test.ts:936:24
-    934|       ], environment);
-    935|       const output = `${result.stdout}${result.stderr}`;
-    936|       const auditLog = readFileSync(join(outputRoot, "audit.log"), "ut…
-       |                        ^
-    937|
-    938|       expect(result.status).not.toBe(0);
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+ RUN  v4.1.10 C:/Users/iceam/dev/safeguard-contest-mvp
 
 
- Test Files  1 failed | 30 passed | 3 skipped (34)
-      Tests  3 failed | 386 passed | 4 skipped (393)
-   Start at  18:30:48
-   Duration  104.47s (transform 56.12s, setup 0ms, import 106.26s, tests 144.45s, environment 28ms)
-
- FAIL  tests/kosha-guide-corpus-audit.test.ts:1072:3 > KOSHA GUIDE read-only runner contract > rejects a traversal snapshot pointer before reading outside the corpus root
-AssertionError: expected '' to contain 'kosha-bridge-current-snapshot-id-inva…'
-
-- Expected
-+ Received
-
-- kosha-bridge-current-snapshot-id-invalid
-
- ❯ tests/kosha-guide-corpus-audit.test.ts:1111:22
-    1109|
-    1110|       expect(result.status).not.toBe(0);
-    1111|       expect(output).toContain("kosha-bridge-current-snapshot-id-inval…
-       |                      ^
-    1112|       expect(output).not.toContain("EXTERNAL_FILE_MUST_NOT_BE_READ");
-    1113|       expect(output).not.toContain("Unexpected token");
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+ Test Files  31 passed | 3 skipped (34)
+      Tests  395 passed | 4 skipped (399)
+   Start at  22:46:55
+   Duration  18.06s (transform 19.03s, setup 0ms, import 37.67s, tests 37.28s, environment 11ms)
 

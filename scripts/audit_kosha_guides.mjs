@@ -226,6 +226,170 @@ function hashBytes(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function isSha256(value) {
+  return /^[0-9a-f]{64}$/u.test(value);
+}
+
+const KOSHA_BODY_CURRENT_SCHEMA_VERSION = "safeclaw-kosha-body-current/v1";
+const KOSHA_BODY_CORPUS_SCHEMA_VERSION = "safeclaw-kosha-body-corpus/v2";
+const KOSHA_SNAPSHOT_OUTPUT_FILES = [
+  "items.jsonl",
+  "chunks.jsonl",
+  "failures.jsonl",
+  "checkpoint.json"
+];
+
+function canonicalSha256(value) {
+  return createHash("sha256").update(stableJson(value)).digest("hex");
+}
+
+function readSnapshotOutputHashes(value, label) {
+  if (!isRecord(value)) throw new Error(`kosha-bridge-${label}-output-hashes-invalid`);
+  const expectedKeys = [...KOSHA_SNAPSHOT_OUTPUT_FILES].sort(codepointCompare);
+  const actualKeys = Object.keys(value).sort(codepointCompare);
+  if (
+    actualKeys.length !== expectedKeys.length ||
+    actualKeys.some((key, index) => key !== expectedKeys[index])
+  ) {
+    throw new Error(`kosha-bridge-${label}-output-hash-set-mismatch`);
+  }
+  const outputHashes = {};
+  for (const name of KOSHA_SNAPSHOT_OUTPUT_FILES) {
+    const digest = readString(value[name]);
+    if (!isSha256(digest)) {
+      throw new Error(`kosha-bridge-${label}-output-hash-invalid:${name}`);
+    }
+    outputHashes[name] = digest;
+  }
+  return outputHashes;
+}
+
+function verifyKoshaBridgeSnapshotIntegrityLocal(snapshot) {
+  if (snapshot.currentSchemaVersion !== KOSHA_BODY_CURRENT_SCHEMA_VERSION) {
+    throw new Error("kosha-bridge-current-schema-version-mismatch");
+  }
+  if (snapshot.manifestSchemaVersion !== KOSHA_BODY_CORPUS_SCHEMA_VERSION) {
+    throw new Error("kosha-bridge-manifest-schema-version-mismatch");
+  }
+  if (!isRecord(snapshot.manifestSourceIdentity)) {
+    throw new Error("kosha-bridge-manifest-source-identity-mismatch");
+  }
+  const sourceIdentityMaterial = Object.fromEntries(
+    Object.entries(snapshot.manifestSourceIdentity).filter(([key]) => key !== "identity_sha256")
+  );
+  const recomputedSourceIdentitySha256 = canonicalSha256(sourceIdentityMaterial);
+  const embeddedSourceIdentitySha256 = readString(snapshot.manifestSourceIdentity.identity_sha256);
+  if (
+    !isSha256(snapshot.manifestSourceIdentitySha256) ||
+    !isSha256(embeddedSourceIdentitySha256) ||
+    snapshot.manifestSourceIdentitySha256 !== embeddedSourceIdentitySha256 ||
+    snapshot.manifestSourceIdentitySha256 !== recomputedSourceIdentitySha256
+  ) {
+    throw new Error("kosha-bridge-manifest-source-identity-mismatch");
+  }
+  if (
+    !isSha256(snapshot.currentSourceIdentitySha256) ||
+    snapshot.currentSourceIdentitySha256 !== recomputedSourceIdentitySha256
+  ) {
+    throw new Error("kosha-bridge-source-identity-mismatch");
+  }
+
+  if (!isRecord(snapshot.manifestGenerationPolicy)) {
+    throw new Error("kosha-bridge-manifest-generation-policy-hash-mismatch");
+  }
+  const recomputedGenerationPolicySha256 = canonicalSha256(snapshot.manifestGenerationPolicy);
+  if (
+    !isSha256(snapshot.manifestGenerationPolicySha256) ||
+    snapshot.manifestGenerationPolicySha256 !== recomputedGenerationPolicySha256
+  ) {
+    throw new Error("kosha-bridge-manifest-generation-policy-hash-mismatch");
+  }
+  if (
+    !isSha256(snapshot.currentGenerationPolicySha256) ||
+    snapshot.currentGenerationPolicySha256 !== recomputedGenerationPolicySha256
+  ) {
+    throw new Error("kosha-bridge-generation-policy-identity-mismatch");
+  }
+
+  const snapshotIds = [
+    snapshot.currentSnapshotId,
+    snapshot.currentReproducibilityHash,
+    snapshot.manifestSnapshotId,
+    snapshot.manifestReproducibilityHash
+  ];
+  if (!snapshotIds.every(isSha256) || new Set(snapshotIds).size !== 1) {
+    throw new Error("kosha-bridge-snapshot-id-mismatch");
+  }
+  if (
+    !isSha256(snapshot.currentManifestSha256) ||
+    !isSha256(snapshot.manifestFileSha256) ||
+    snapshot.currentManifestSha256 !== snapshot.manifestFileSha256
+  ) {
+    throw new Error("kosha-bridge-manifest-hash-mismatch");
+  }
+  if (
+    !isSha256(snapshot.manifestItemsSha256) ||
+    !isSha256(snapshot.itemsFileSha256) ||
+    snapshot.manifestItemsSha256 !== snapshot.itemsFileSha256
+  ) {
+    throw new Error("kosha-bridge-items-hash-mismatch");
+  }
+  if (
+    !isSha256(snapshot.manifestChunksSha256) ||
+    !isSha256(snapshot.chunksFileSha256) ||
+    snapshot.manifestChunksSha256 !== snapshot.chunksFileSha256
+  ) {
+    throw new Error("kosha-bridge-chunks-hash-mismatch");
+  }
+
+  const manifestOutputHashes = readSnapshotOutputHashes(snapshot.manifestOutputHashes, "manifest");
+  const snapshotOutputHashes = readSnapshotOutputHashes(snapshot.snapshotOutputHashes, "snapshot");
+  for (const name of KOSHA_SNAPSHOT_OUTPUT_FILES) {
+    if (manifestOutputHashes[name] !== snapshotOutputHashes[name]) {
+      throw new Error(`kosha-bridge-output-hash-mismatch:${name}`);
+    }
+  }
+  if (
+    manifestOutputHashes["items.jsonl"] !== snapshot.manifestItemsSha256 ||
+    snapshotOutputHashes["items.jsonl"] !== snapshot.itemsFileSha256
+  ) {
+    throw new Error("kosha-bridge-items-hash-mismatch");
+  }
+  if (
+    manifestOutputHashes["chunks.jsonl"] !== snapshot.manifestChunksSha256 ||
+    snapshotOutputHashes["chunks.jsonl"] !== snapshot.chunksFileSha256
+  ) {
+    throw new Error("kosha-bridge-chunks-hash-mismatch");
+  }
+
+  const recomputedReproducibilityHash = canonicalSha256({
+    schema_version: snapshot.manifestSchemaVersion,
+    source_identity_sha256: recomputedSourceIdentitySha256,
+    generation_policy_sha256: recomputedGenerationPolicySha256,
+    output_hashes: snapshotOutputHashes
+  });
+  if (snapshotIds[0] !== recomputedReproducibilityHash) {
+    throw new Error("kosha-bridge-reproducibility-hash-mismatch");
+  }
+}
+
+function hasSupabaseBridgeCredentials() {
+  const baseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/$/u, "");
+  const credentials = [
+    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  ].filter(Boolean);
+  return Boolean(baseUrl && credentials.length);
+}
+
 function readJsonObject(path, label) {
   const value = JSON.parse(readFileSync(path, "utf8"));
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -1163,6 +1327,13 @@ try {
   reviewedCandidatePath = options.bridgeOnly && options.reviewedCandidate
     ? resolveKoshaReviewedCandidatePath(options.localCorpusRoot, options.reviewedCandidate)
     : null;
+  if (options.bridgeOnly) {
+    const local = readKoshaBridgeSnapshot(options.localCorpusRoot);
+    verifyKoshaBridgeSnapshotIntegrityLocal(local.snapshot);
+    if (!options.offline && !hasSupabaseBridgeCredentials()) {
+      throw new Error("Supabase read credentials are unavailable");
+    }
+  }
   moduleServer = await createServer({
     root: process.cwd(),
     appType: "custom",

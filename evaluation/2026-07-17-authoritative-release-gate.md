@@ -71,7 +71,22 @@ Fresh current-HEAD verification:
 - Command: `python -m unittest scripts.tests.test_acquire_exact_kosha_body`
   - Result: 19 tests passed.
 
-This proves the current master still has the D-C-13/D-C-7 exact trust registry, fail-closed KOSHA grounding, bounded applicability policy, and acquisition parser contract alive after the share/Hermes evidence refresh. The broader historical KOSHA corpus audit RED remains recorded as unresolved and is not reclassified as a pass.
+This proves the current master still has the D-C-13/D-C-7 exact trust registry, fail-closed KOSHA grounding, bounded applicability policy, and acquisition parser contract alive after the share/Hermes evidence refresh. The broader historical KOSHA corpus audit RED is addressed separately in the next gate.
+
+### Current master KOSHA broad corpus gate
+
+The historical KOSHA corpus audit RED is now resolved on current master.
+
+- Fix: `scripts/audit_kosha_guides.mjs` now performs bridge-only snapshot integrity and missing-credential fail-closed checks before loading the Vite module server.
+- This closes the previous timeout path where tampered snapshots, traversal snapshot pointers, and missing Supabase credentials produced empty output or no `audit.log`.
+- `npm.cmd test -- tests\kosha-guide-corpus-audit.test.ts`
+  - Result: 1 file / 110 tests passed.
+- 34-file KOSHA/SIF/ontology broad gate:
+  - Result: 31 files passed, 3 skipped; 395 tests passed, 4 skipped.
+- Strict typecheck passed after the fix.
+- Artifact: `evaluation/kosha-trust-registry-wave2-2026-07-16/kosha-sif-ontology-tests.log`.
+
+This upgrades the prior KOSHA exact-trust Wave 2 evidence from focused-only product PASS with broad RED to focused plus broad PASS. It does not perform DB mutation, schema migration, embedding generation, or production data writes.
 
 ### Live `/ontology` P0 visual gate
 
