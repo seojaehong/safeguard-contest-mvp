@@ -1,21 +1,25 @@
 {
   "date": "2026-07-17",
   "baseCommit": "8405a6cb6492207cf0c8a4380130e11a8e0b591e",
+  "asyncReplayRemediationBase": "8af5f3313e49f99c1d9aa34a0a8dabcc2eaa78d7",
   "scope": "db-free-remote-hermes-service-auth-p1-remediation",
   "bounds": {
     "maxTtlMs": 300000,
-    "maxFutureSkewMs": 30000
+    "maxFutureSkewMs": 30000,
+    "consumeTimeoutMs": 1000
   },
   "tdd": {
     "timeBoundRed": { "tests": 21, "failed": 1 },
     "timeBoundGreen": { "tests": 21, "failed": 0 },
     "replayRed": { "tests": 25, "failed": 3 },
     "replayGreen": { "tests": 25, "failed": 0 },
+    "asyncReplayRed": { "tests": 26, "failed": 1 },
+    "asyncReplayGreen": { "tests": 30, "failed": 0 },
     "preservedOriginalTests": 20
   },
   "verification": {
     "testFiles": 3,
-    "tests": 95,
+    "tests": 100,
     "failures": 0,
     "strictTypecheck": "passed"
   },
