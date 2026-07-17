@@ -726,3 +726,23 @@ Verified boundary:
 Integration note:
 
 - No database schema, Supabase data, or production corpus mutation was performed by this recheck.
+
+### 2026-07-18 foreign dispatch and export localization gate recheck
+
+The foreign-worker dispatch, recipient language contract, and document export localization surface were rechecked on current HEAD `c5c85333c9a3fc0d0204b34489f26ad32b107ba7`.
+
+Results:
+
+- `npm.cmd test -- tests\foreign-parse.test.ts tests\foreign-worker-languages.test.ts tests\workspace-share-mobile-browser.test.ts tests\workpack-share-authority-routes.test.ts tests\workflow-share-panel-behavior.test.ts tests\workspace-share-simplification.test.ts tests\document-export-localization.test.ts tests\pdf-korean-font-integration.test.ts tests\xlsx-export-route.test.ts tests\web-safe-presentation-localization.test.ts`
+  - Result: 10 files / 107 tests passed.
+
+Verified boundary:
+
+- Foreign-worker language parsing and canonical language metadata remain covered.
+- The workspace share mobile browser contract covers full Vietnamese preview paragraphs before the primary CTA without clipping or horizontal overflow.
+- Share authority route tests cover recipient-language payload construction, forged foreign body rejection, unknown language rejection, Korean leakage rejection for foreign variants, and provider dispatch headers.
+- PDF/XLSX/web-safe export localization remains covered so raw enum labels such as `Man`, `Machine`, `planned`, `fall`, `No.`, and English Before/After wording do not leak into the customer-facing export boundary.
+
+Integration note:
+
+- This gate validates current master behavior only. It does not claim that machine translation quality is complete for every future language; it proves the current saved-language dispatch and export-localization contracts.
