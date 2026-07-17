@@ -1,0 +1,27 @@
+{
+  "date": "2026-07-18",
+  "baseHeadBeforeChange": "5fef985e",
+  "scope": "Align manager share copy with implemented recipient portal and preview flow.",
+  "changedBehavior": {
+    "managerPrimaryCta": "unchanged dispatch action",
+    "workerPreview": "secondary preview link remains available when shareSessionId and workerId exist",
+    "copy": "workers open a personal link, review the document pack, and leave confirmation"
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts tests\\workflow-share-panel-behavior.test.ts tests\\workpack-share-authority-routes.test.ts",
+      "filesPassed": 3,
+      "testsPassed": 51
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "passed"
+    }
+  },
+  "nonGoals": [
+    "db-schema-change",
+    "provider-dispatch-behavior-change",
+    "anonymous-public-sharing",
+    "old-playwright-screenshot-diffs"
+  ]
+}

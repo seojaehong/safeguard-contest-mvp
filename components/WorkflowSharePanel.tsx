@@ -1154,8 +1154,8 @@ export function WorkflowSharePanel({
           <p>선택한 대상의 작업자 언어로 안전 내용을 준비하고 확인합니다.</p>
           <p>전송 후 관리자 화면에서 작업자별 전송 상태와 확인 이력을 이어서 관리합니다.</p>
           <p>
-            공유 대상과 전송 권한은 저장 기록으로 추적되며, 작업자용 공동 열람 링크는 별도 승인된 포털에서 열립니다.
-            {shareSessionId ? <> 현재 세션 ID: {shareSessionId}</> : null}
+            공유 대상과 전송 권한은 저장 기록으로 추적되며, 전송 후 작업자는 개인 링크에서 문서팩을 열람하고 확인을 남깁니다.
+            {recipientPortalPreviewHref ? <> 아래 미리보기로 첫 번째 작업자 화면을 확인할 수 있습니다.</> : null}
           </p>
         </div>
         <div className="share-status-pill" aria-label="공유 워크플로 상태" aria-live="polite">

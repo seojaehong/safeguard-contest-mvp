@@ -59,15 +59,17 @@ describe("workspace share simplification", () => {
     expect(capabilityResolver).not.toContain("relayConfigured || isKakaoProviderConfigured()");
   });
 
-  it("describes language-specific preparation without claiming a pre-created share link", () => {
+  it("describes language-specific preparation and the active worker viewer link contract", () => {
     expect(sharePanel).toContain("선택한 대상에게 언어별 전송본을 준비합니다.");
     expect(sharePanel).toContain("전송 후 관리자 화면에서 작업자별 전송 상태와 확인 이력을 이어서 관리합니다.");
-    expect(sharePanel).toContain("작업자용 공동 열람 링크는 별도 승인된 포털에서 열립니다.");
+    expect(sharePanel).toContain("전송 후 작업자는 개인 링크에서 문서팩을 열람하고 확인을 남깁니다.");
+    expect(sharePanel).toContain("아래 미리보기로 첫 번째 작업자 화면을 확인할 수 있습니다.");
+    expect(sharePanel).toContain("recipientPortalPreviewHref");
+    expect(sharePanel).toContain("작업자 화면 미리보기");
     expect(sharePanel).not.toContain("공유 링크로 활성화");
     expect(sharePanel).not.toContain("href={`/share/${shareSessionId}`");
+    expect(sharePanel).not.toContain("작업자용 공동 열람 링크는 별도 승인된 포털에서 열립니다.");
     expect(sharePanel).not.toContain("작업자 확인 화면은 /share/[sessionId] 경로에서 열립니다.");
-    expect(sharePanel).not.toContain("열람 확인");
-    expect(sharePanel).not.toContain("수신자가 확인");
   });
 
   it("offers one deterministic revalidation action after document edits", () => {
