@@ -28,6 +28,28 @@ const sessionPayload = {
       manualLanguageSwitchAllowed: true,
       requireKnownWorkerSnapshot: true
     },
+    documents: [
+      {
+        key: "riskAssessmentDraft",
+        title: "위험성평가표",
+        body: "추락 위험: 이동식 비계 고정과 안전대 착용을 확인합니다."
+      },
+      {
+        key: "tbmBriefing",
+        title: "TBM 브리핑",
+        body: "강풍 시 작업을 중지하고 관리감독자에게 보고합니다."
+      },
+      {
+        key: "tbmLogDraft",
+        title: "TBM 기록",
+        body: "작업자 전원이 위험요인과 작업중지 기준을 확인했습니다."
+      }
+    ],
+    recipientMessage: {
+      languageCode: "vi",
+      title: "Tiếng Việt 안내",
+      body: "Dừng công việc khi gió mạnh.\nKiểm tra dây an toàn trước khi làm việc."
+    },
     recipients: [{
       workerId: WORKER_ID,
       displayName: "Server Nguyen",
@@ -85,6 +107,10 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     }
     await expect.poll(() => page.locator("body").innerText()).toContain("문서팩 검토");
     await expect.poll(() => page.getByText("Server Nguyen", { exact: false }).count()).toBeGreaterThan(0);
+    await expect.poll(() => page.locator("body").innerText()).toContain("Tiếng Việt 안내");
+    await expect.poll(() => page.getByText("위험성평가표", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("TBM 브리핑", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.locator("body").innerText()).toContain("Dừng công việc khi gió mạnh.");
     await expect.poll(() => page.locator(".safeclaw-select").inputValue()).toBe("vi");
 
     const metrics = await page.evaluate(() => {

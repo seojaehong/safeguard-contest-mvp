@@ -198,6 +198,36 @@ function fixtureRows(siteId: string | null): FixtureTables {
             displayName: "Tenant A Worker"
           }
         }],
+        share_scope: "invited",
+        access_policy: {
+          anonymousAllowed: false,
+          manualLanguageSwitchAllowed: true,
+          requireKnownWorkerSnapshot: true
+        },
+        status: "active",
+        expires_at: "2099-01-01T00:00:00.000Z",
+        created_by: "user-1",
+        created_at: "2026-07-17T00:00:00.000Z"
+      },
+      {
+        id: "33333333-3333-4333-8333-333333333333",
+        ...tenant,
+        recipients_snapshot: [{
+          workerId: "11111111-1111-4111-8111-111111111111",
+          displayName: "Tenant A Worker",
+          languageCode: "ko",
+          role: "viewer",
+          workerSnapshot: {
+            workerId: "11111111-1111-4111-8111-111111111111",
+            displayName: "Tenant A Worker"
+          }
+        }],
+        share_scope: "invited",
+        access_policy: {
+          anonymousAllowed: false,
+          manualLanguageSwitchAllowed: true,
+          requireKnownWorkerSnapshot: true
+        },
         status: "active",
         expires_at: "2099-01-01T00:00:00.000Z",
         created_by: "user-1",
@@ -208,6 +238,12 @@ function fixtureRows(siteId: string | null): FixtureTables {
         ...tenant,
         organization_id: "org-b",
         recipients_snapshot: [],
+        share_scope: "invited",
+        access_policy: {
+          anonymousAllowed: false,
+          manualLanguageSwitchAllowed: true,
+          requireKnownWorkerSnapshot: true
+        },
         status: "active",
         expires_at: "2099-01-01T00:00:00.000Z",
         created_by: "user-1",
@@ -218,10 +254,35 @@ function fixtureRows(siteId: string | null): FixtureTables {
         ...tenant,
         site_id: "site-b",
         recipients_snapshot: [],
+        share_scope: "invited",
+        access_policy: {
+          anonymousAllowed: false,
+          manualLanguageSwitchAllowed: true,
+          requireKnownWorkerSnapshot: true
+        },
         status: "active",
         expires_at: "2099-01-01T00:00:00.000Z",
         created_by: "user-1",
         created_at: "2026-07-17T00:00:00.000Z"
+      }
+    ],
+    workpacks: [
+      {
+        id: "workpack-a",
+        organization_id: "org-a",
+        site_id: siteId,
+        question: "Tenant A 작업팩",
+        deliverables: {
+          riskAssessmentDraft: "위험성평가표 본문: 추락 위험과 통제조치를 확인합니다.",
+          tbmBriefing: "TBM 브리핑 본문: 강풍 시 작업중지 기준을 공유합니다.",
+          tbmLogDraft: "TBM 기록 본문: 작업자가 확인 버튼으로 열람을 남깁니다.",
+          kakaoMessage: "한국어 전송본",
+          foreignWorkerLanguages: [{
+            code: "vi",
+            nativeLabel: "Tiếng Việt",
+            lines: ["Dừng công việc khi gió mạnh.", "Kiểm tra dây an toàn."]
+          }]
+        }
       }
     ],
     workpack_read_confirmations: [
@@ -353,6 +414,35 @@ describe("commercial workpack service-role tenant hardening", () => {
     });
   });
 
+  it("loads an invited public share session with safe document previews and recipient language message", async () => {
+    const store = await vi.importActual<typeof import("@/lib/workpack-commercial-store")>(
+      "@/lib/workpack-commercial-store"
+    );
+    const fake = createFixtureClient(fixtureRows("site-a"));
+
+    const result = await store.loadActivePublicShareSession(fake.client as never, {
+      shareSessionId: "33333333-3333-4333-8333-333333333333",
+      workerId: "11111111-1111-4111-8111-111111111111"
+    });
+
+    expect(result).toMatchObject({
+      ok: true,
+      session: {
+        question: "Tenant A 작업팩",
+        documents: [
+          { key: "riskAssessmentDraft", title: "위험성평가표" },
+          { key: "tbmBriefing", title: "TBM 브리핑" },
+          { key: "tbmLogDraft", title: "TBM 기록" }
+        ],
+        recipientMessage: {
+          languageCode: "ko",
+          title: "한국어 전송본",
+          body: "한국어 전송본"
+        }
+      }
+    });
+  });
+
   it("returns only full-tuple share sessions and confirmations", async () => {
     const fake = createFixtureClient(fixtureRows("site-a"));
     mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
@@ -366,7 +456,10 @@ describe("commercial workpack service-role tenant hardening", () => {
       confirmations: FixtureRow[];
     };
 
-    expect(body.sessions.map((row) => row.id)).toEqual(["session-match"]);
+    expect(body.sessions.map((row) => row.id)).toEqual([
+      "session-match",
+      "33333333-3333-4333-8333-333333333333"
+    ]);
     expect(body.confirmations.map((row) => row.id)).toEqual(["confirmation-match"]);
   });
 

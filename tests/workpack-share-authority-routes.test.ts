@@ -170,6 +170,23 @@ function publicSession() {
         manualLanguageSwitchAllowed: true,
         requireKnownWorkerSnapshot: true
       },
+      documents: [
+        {
+          key: "riskAssessmentDraft" as const,
+          title: "위험성평가표",
+          body: "추락 위험을 확인합니다."
+        },
+        {
+          key: "tbmBriefing" as const,
+          title: "TBM 브리핑",
+          body: "강풍 시 작업을 중지합니다."
+        }
+      ],
+      recipientMessage: {
+        languageCode: "vi",
+        title: "Tiếng Việt 안내",
+        body: "Dừng công việc khi gió mạnh."
+      },
       status: "active",
       expiresAt: "2099-01-01T00:00:00.000Z"
     }
@@ -251,7 +268,11 @@ describe("share session route authority", () => {
     });
     const body = await response.json() as {
       ok: boolean;
-      session: { recipients: Array<{ workerId: string; displayName: string; languageCode: string }> };
+      session: {
+        recipients: Array<{ workerId: string; displayName: string; languageCode: string }>;
+        documents: Array<{ key: string; title: string; body: string }>;
+        recipientMessage: { languageCode: string; title: string; body: string } | null;
+      };
     };
     expect(body.ok).toBe(true);
     expect(body.session.recipients).toEqual([{
@@ -259,6 +280,12 @@ describe("share session route authority", () => {
       displayName: "Server Nguyen",
       languageCode: "vi"
     }]);
+    expect(body.session.documents.map((document) => document.title)).toEqual(["위험성평가표", "TBM 브리핑"]);
+    expect(body.session.recipientMessage).toEqual({
+      languageCode: "vi",
+      title: "Tiếng Việt 안내",
+      body: "Dừng công việc khi gió mạnh."
+    });
   });
 
   it("public recipient confirmation ignores forged body fields and stores the invited snapshot", async () => {

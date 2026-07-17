@@ -71,7 +71,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
       status: activeSession.session.status,
       expiresAt: activeSession.session.expiresAt,
       accessPolicy: activeSession.session.accessPolicy,
-      recipients: recipientHints
+      recipients: recipientHints,
+      documents: activeSession.session.documents,
+      recipientMessage: activeSession.session.recipientMessage
     },
     message: "공유 세션을 조회했습니다."
   });

@@ -95,6 +95,20 @@ export type PublicShareSession = {
   status: "active" | "revoked" | "expired";
   expiresAt: string | null;
   question: string;
+  documents: PublicShareDocument[];
+  recipientMessage: PublicShareRecipientMessage | null;
+};
+
+export type PublicShareDocument = {
+  key: "riskAssessmentDraft" | "tbmBriefing" | "tbmLogDraft";
+  title: string;
+  body: string;
+};
+
+export type PublicShareRecipientMessage = {
+  languageCode: string;
+  title: string;
+  body: string;
 };
 
 export type PublicShareSessionResult = {
@@ -212,6 +226,78 @@ function parseShareAccessPolicy(value: unknown): ShareAccessPolicy {
   };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function readPublicString(value: unknown, maxLength = 2_400): string {
+  if (typeof value !== "string") return "";
+  return value
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{4,}/g, "\n\n\n")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function readDeliverables(value: unknown): Record<string, unknown> {
+  return isRecord(value) ? value : {};
+}
+
+function buildPublicShareDocuments(deliverablesValue: unknown): PublicShareDocument[] {
+  const deliverables = readDeliverables(deliverablesValue);
+  const candidates: PublicShareDocument[] = [
+    {
+      key: "riskAssessmentDraft",
+      title: "위험성평가표",
+      body: readPublicString(deliverables.riskAssessmentDraft)
+    },
+    {
+      key: "tbmBriefing",
+      title: "TBM 브리핑",
+      body: readPublicString(deliverables.tbmBriefing)
+    },
+    {
+      key: "tbmLogDraft",
+      title: "TBM 기록",
+      body: readPublicString(deliverables.tbmLogDraft)
+    }
+  ];
+  return candidates.filter((document) => document.body.length > 0);
+}
+
+function buildPublicRecipientMessage(
+  deliverablesValue: unknown,
+  languageCode: string
+): PublicShareRecipientMessage | null {
+  const deliverables = readDeliverables(deliverablesValue);
+  const normalizedLanguageCode = languageCode.trim().toLowerCase() || "ko";
+  if (normalizedLanguageCode === "ko") {
+    const body = readPublicString(deliverables.kakaoMessage, 1_800);
+    return body ? { languageCode: "ko", title: "한국어 전송본", body } : null;
+  }
+
+  const languages = Array.isArray(deliverables.foreignWorkerLanguages)
+    ? deliverables.foreignWorkerLanguages
+    : [];
+  for (const item of languages) {
+    if (!isRecord(item)) continue;
+    const code = readPublicString(item.code, 24).toLowerCase();
+    if (code !== normalizedLanguageCode) continue;
+    const nativeLabel = readPublicString(item.nativeLabel, 80);
+    const lines = Array.isArray(item.lines)
+      ? item.lines.map((line) => readPublicString(line, 500)).filter(Boolean)
+      : [];
+    if (!lines.length) continue;
+    return {
+      languageCode: code,
+      title: nativeLabel ? `${nativeLabel} 안내` : `${code} 안내`,
+      body: lines.join("\n")
+    };
+  }
+
+  return null;
+}
+
 export async function loadActivePublicShareSession(
   client: SupabaseClient<WorkspaceDatabase>,
   input: {
@@ -273,7 +359,7 @@ export async function loadActivePublicShareSession(
 
   const { data: workpackData, error: workpackError } = await client
     .from("workpacks")
-    .select("question")
+    .select("question,deliverables")
     .eq("id", sessionData.workpack_id)
     .maybeSingle();
 
@@ -286,6 +372,10 @@ export async function loadActivePublicShareSession(
   }
 
   const shareScope = sessionData.share_scope === "organization" ? "organization" : "invited";
+  const requestedRecipient = requestedWorkerId
+    ? recipients.find((recipient) => recipient.workerId === requestedWorkerId)
+    : recipients[0];
+  const requestedLanguageCode = requestedRecipient?.languageCode || "ko";
 
   return {
     ok: true,
@@ -299,7 +389,9 @@ export async function loadActivePublicShareSession(
       accessPolicy,
       status: sessionData.status as "active" | "revoked" | "expired",
       expiresAt: sessionData.expires_at,
-      question: workpackData.question
+      question: workpackData.question,
+      documents: buildPublicShareDocuments(workpackData.deliverables),
+      recipientMessage: buildPublicRecipientMessage(workpackData.deliverables, requestedLanguageCode)
     }
   };
 }

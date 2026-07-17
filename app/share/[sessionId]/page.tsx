@@ -24,6 +24,16 @@ type ShareSessionPayload = {
     requireKnownWorkerSnapshot: boolean;
   };
   recipients: ShareRecipientHint[];
+  documents: Array<{
+    key: "riskAssessmentDraft" | "tbmBriefing" | "tbmLogDraft";
+    title: string;
+    body: string;
+  }>;
+  recipientMessage: {
+    languageCode: string;
+    title: string;
+    body: string;
+  } | null;
 };
 
 type ShareSessionResponse = {
@@ -59,6 +69,12 @@ function buildLanguageLabel(code: string): string {
   if (normalized === "mn") return "몽골어";
   if (normalized === "ne") return "네팔어";
   return code || "자동감지";
+}
+
+function buildPreviewText(value: string, maxLength = 700): string {
+  const text = value.replace(/\r\n/g, "\n").trim();
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trim()}...`;
 }
 
 function isValidShareSessionId(value: string): boolean {
@@ -235,6 +251,7 @@ export default function ShareRecipientPage() {
 
   const question = sessionPayload?.question || "공유 중인 작업 상세가 아직 로드되지 않았습니다.";
   const status = sessionPayload ? sessionPayload.status : "active";
+  const documents = sessionPayload?.documents || [];
   const canSubmit = fetchState !== "loading"
     && status === "active"
     && (
@@ -254,7 +271,7 @@ export default function ShareRecipientPage() {
     >
       <section className="safeclaw-share-recipient-page">
         <h2>문서팩 검토</h2>
-        <p className="safeclaw-subtitle">공유 코드: {sessionId}</p>
+        <p className="safeclaw-subtitle">지정된 작업자만 열람하고 확인할 수 있습니다.</p>
         <article className="safeclaw-share-recipient-card">
           <h3>현재 작업</h3>
           <p>{question}</p>
@@ -272,6 +289,33 @@ export default function ShareRecipientPage() {
           <p className="safeclaw-hint">세션 정보를 조회하는 중입니다...</p>
         ) : (
           <>
+            {sessionPayload.recipientMessage ? (
+              <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-emphasis">
+                <h3>{sessionPayload.recipientMessage.title}</h3>
+                <p className="safeclaw-note">작업자 언어 기준으로 생성된 현장 안내입니다.</p>
+                <pre className="safeclaw-share-recipient-preview">{buildPreviewText(sessionPayload.recipientMessage.body, 900)}</pre>
+              </article>
+            ) : null}
+
+            {documents.length ? (
+              <article className="safeclaw-share-recipient-card">
+                <h3>문서팩 핵심 3종</h3>
+                <div className="safeclaw-share-recipient-documents">
+                  {documents.map((document) => (
+                    <section key={document.key}>
+                      <h4>{document.title}</h4>
+                      <pre className="safeclaw-share-recipient-preview">{buildPreviewText(document.body)}</pre>
+                    </section>
+                  ))}
+                </div>
+              </article>
+            ) : (
+              <article className="safeclaw-share-recipient-card">
+                <h3>문서팩 준비 중</h3>
+                <p>관리자가 공유한 문서 본문을 아직 불러오지 못했습니다. 작업 전 관리자에게 최신 문서팩을 확인해 주세요.</p>
+              </article>
+            )}
+
             {sessionPayload.accessPolicy.anonymousAllowed ? null : (
               <article className="safeclaw-share-recipient-card">
                 <h3>작업자 식별</h3>

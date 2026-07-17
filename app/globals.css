@@ -14722,6 +14722,11 @@ body:has(.safeclaw-landing) :is(
   box-shadow: none;
 }
 
+.safeclaw-share-recipient-card-emphasis {
+  border-color: color-mix(in srgb, var(--workspace-accent) 44%, var(--workspace-rule));
+  background: color-mix(in srgb, var(--workspace-accent) 7%, var(--workspace-surface-1));
+}
+
 .safeclaw-share-recipient-card h3 {
   margin: 0;
   color: var(--workspace-ink);
@@ -14729,6 +14734,15 @@ body:has(.safeclaw-landing) :is(
   font-weight: 700;
   line-height: var(--leading-component-title);
   letter-spacing: var(--tracking-component-title);
+}
+
+.safeclaw-share-recipient-card h4 {
+  margin: 0;
+  color: var(--workspace-ink);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-share-recipient-card p {
@@ -14739,6 +14753,36 @@ body:has(.safeclaw-landing) :is(
   line-height: var(--leading-body);
   letter-spacing: var(--tracking-body);
   overflow-wrap: anywhere;
+}
+
+.safeclaw-share-recipient-documents {
+  display: grid;
+  gap: 12px;
+}
+
+.safeclaw-share-recipient-documents section {
+  display: grid;
+  gap: 6px;
+  border-top: 1px solid var(--workspace-rule);
+  padding-top: 10px;
+}
+
+.safeclaw-share-recipient-preview {
+  max-height: 220px;
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--workspace-rule);
+  border-radius: var(--radius-control);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+  padding: 12px;
+  font-family: inherit;
+  font-size: var(--text-support);
+  font-weight: 500;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
 }
 
 .safeclaw-share-recipient-card label {

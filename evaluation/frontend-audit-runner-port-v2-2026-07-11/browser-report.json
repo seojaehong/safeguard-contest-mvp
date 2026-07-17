@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-17T13:35:49.968Z",
+  "generatedAt": "2026-07-17T14:30:04.327Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "5e477ac77f78be1b7eefd7bda06a247c909bb91c",
-  "sourceIdentity": "03544184bbc18adb39be17f80874edadc43f74c4d72a667d22b315b5bfd62047",
-  "evidenceHead": "5e477ac77f78be1b7eefd7bda06a247c909bb91c",
+  "sourceSha": "bfe40cde29b470076a6a3c98b29939e82b229469",
+  "sourceIdentity": "935f07b4cab7a16c0389da926543f00d1c1a2a5860820ebe6748e80898c66ff8",
+  "evidenceHead": "bfe40cde29b470076a6a3c98b29939e82b229469",
   "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 33,
@@ -27,18 +27,18 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 140356
+    "elapsedMs": 150059
   },
   "staticAudit": {
-    "sourceSha": "5e477ac77f78be1b7eefd7bda06a247c909bb91c",
-    "sourceIdentity": "03544184bbc18adb39be17f80874edadc43f74c4d72a667d22b315b5bfd62047",
+    "sourceSha": "bfe40cde29b470076a6a3c98b29939e82b229469",
+    "sourceIdentity": "935f07b4cab7a16c0389da926543f00d1c1a2a5860820ebe6748e80898c66ff8",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
     "counts": {
       "pageFiles": 33,
       "componentFiles": 23,
-      "cssLines": 21137,
+      "cssLines": 21181,
       "importantDeclarations": 0
     },
     "coverageIssues": 0,
@@ -778,7 +778,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ask-desktop-1440.jpg",
-      "screenshotSha256": "00e769843433cf600425d8cfcbc483bb91f959e04c9a0cf15422d94cc7ac6338",
+      "screenshotSha256": "0b4cffb4867ee6d3d3bd8e1a21eb70df2246aa99cc67063bc9fe93314a65f0a3",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -867,7 +867,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ask-tablet-1024.jpg",
-      "screenshotSha256": "647c652725267cc32b9c81ec3e7b9bbf2c856c5866d2816fda522326f8186484",
+      "screenshotSha256": "e1bd2326f707d78076f3cca2a507848b690aea31c77065e5943c6ef238be464f",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -956,7 +956,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ask-mobile-390.jpg",
-      "screenshotSha256": "48beef7f2af003dc81aafad57bb76d1376a3433b42e6331f3a243e2fb6d2b28b",
+      "screenshotSha256": "e197248e378de28a1a61ac7210657a4a5e667d4180d571a852e64bb652b83c5a",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9230,7 +9230,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-share-sessionId-desktop-1440.jpg",
-      "screenshotSha256": "0c1f42dd09e0ccb8386e8ef6cf9a2bff7c6ba1ca08ccb3d17ddb9bd3922c9aba",
+      "screenshotSha256": "3d11656b9ffd76df6aa20609a971cbb8ef8e0d0962124ce6aded2922c1975ed4",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9308,7 +9308,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-share-sessionId-tablet-1024.jpg",
-      "screenshotSha256": "f9bcaae9b8f9782f5c7e96d225246a899827313fcb5901f87bf704f69efc1bb8",
+      "screenshotSha256": "513deee1714ec28329e6ae263aecb9ec79bd273bd3557eb29102013e08f8135f",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9386,7 +9386,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-share-sessionId-mobile-390.jpg",
-      "screenshotSha256": "d89a0885734b1daa63c615f77c7f03835ce05d5619eb620357ed09bdeed3236f",
+      "screenshotSha256": "b94989bebf5afd3d24c2349c9e71425202247d238212f635ff74ed9fedc6a4b7",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9998,7 +9998,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-desktop-1440.jpg",
-      "screenshotSha256": "837922c96de47cadb36891b74a9b6739fe1b0526128139e1963e0c849393acb8",
+      "screenshotSha256": "3f61d9a8c8a53302ef008265b258b1f49ed6e97d29a163996263ebb2704e9ac3",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -11717,7 +11717,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workspace-mobile-390.jpg",
-      "screenshotSha256": "a4f928ead913ff4a7440afe5dbaefcdf2e988dcda7924a039a32351f5c219b93",
+      "screenshotSha256": "9c6bdfda7025196567f4804389f3236f62b72756a864364a59630b4c683a9176",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -11842,7 +11842,7 @@
         }
       ],
       "keySurfaces": [],
-      "geometryFingerprint": "[[\"MAIN\",\"command-center-shell workbench-root workspace-theme\",0,0,390,1467.8,\"grid\",\"12px\",\"0px\",\"64px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"HEADER\",\"command-topbar workspace-command-topbar\",10,12,370,112,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"A\",\"brand-lockup safeclaw-lockup\",23,25,344,28,\"flex\",\"0px\",\"12px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"IMG\",\"brand-mark\",23,26,26,26,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-theme-toggle workbench-theme-toggle\",23,65,344,46,\"flex\",\"4px\",\"4px\",\"4px\",\"4px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",28,70,50.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"BUTTON\",\"\",82.3,70,62,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"SECTION\",\"command-viewport linear-workspace-layout\",10,156,370,1247.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ASIDE\",\"workspace-side-nav\",11,157,368,103,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-side-group\",23,169,344,78,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",23,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot\",36,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",141.7,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",154.7,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",260.3,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",273.3,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"SECTION\",\"command-main card command-main-studio workspace-view-input\",11,260,368,1142.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"workspace-step-page workspace-input-page\",11,260,368,1142.8,\"grid\",\"16px\",\"18px\",\"20px\",\"18px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"command-copy\",29,276,332,80.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"eyebrow\",29,278,85.1,20,\"inline\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"FORM\",\"command-console\",29,372.8,332,958,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"console-head\",29,372.8,332,20,\"flex\",\"0px\",\"4px\",\"0px\",\"4px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"counter\",299.5,373.8,57.5,18,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"12px\",\"18px\",\"normal\"],[\"TEXTAREA\",\"textarea command-console-input\",29,404.8,332,142,\"block\",\"16px\",\"16px\",\"16px\",\"16px\",\"4px\",\"15px\",\"25.2px\",\"normal\"],[\"DIV\",\"input-composer-tray\",29,566.8,332,188,\"grid\",\"8px\",\"8px\",\"8px\",\"8px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"composer-attach-button\",38,575.8,314,44,\"flex\",\"8px\",\"12px\",\"8px\",\"12px\",\"12px\",\"13px\",\"20px\",\"normal\"],[\"DIV\",\"composer-attachment-status\",38,627.8,314,20,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"composer-mode-label\",38,655.8,314,36,\"flex\",\"0px\",\"12px\",\"0px\",\"12px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"button command-primary composer-submit-button workbench-primary-action\",38,699.8,314,46,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"field-brief-chip-row\",29,786.8,332,138,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"evidence-readiness-rail\",29,936.8,332,290,\"grid\",\"12px\",\"0px\",\"12px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,948.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,1004.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,1060.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,1116.8,332,43,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card ready\",29,1171.8,332,43,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DETAILS\",\"advanced-settings\",29,1250.8,332,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"FIELDSET\",\"ai-mode-toggle\",31,1286.8,328,308,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",44,1316.8,302,69.8,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option selected\",44,1394.6,302,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",44,1492.2,302,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"DIV\",\"command-actions\",29,1286.8,332,44,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"button secondary\",29,1286.8,94.1,44,\"flex\",\"12px\",\"0px\",\"12px\",\"0px\",\"0px\",\"14px\",\"18.9px\",\"normal\"],[\"DETAILS\",\"quick-scenario-chips\",29,1358.8,332,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"quick-scenario-chip-list\",29,1394.8,332,256,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1394.8,177.5,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1438.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1482.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1526.8,187.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1570.8,202.4,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1614.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"MAIN\",\"command-center-shell workbench-root workspace-theme\",0,0,390,1467.8,\"grid\",\"12px\",\"0px\",\"64px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"HEADER\",\"command-topbar workspace-command-topbar\",10,12,370,112,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"A\",\"brand-lockup safeclaw-lockup\",23,25,344,28,\"flex\",\"0px\",\"12px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"IMG\",\"brand-mark\",23,26,26,26,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-theme-toggle workbench-theme-toggle\",23,65,344,46,\"flex\",\"4px\",\"4px\",\"4px\",\"4px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",28,70,50.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"BUTTON\",\"\",82.3,70,62,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"SECTION\",\"command-viewport linear-workspace-layout\",10,156,370,1247.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ASIDE\",\"workspace-side-nav\",11,157,368,103,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"workspace-side-group\",23,169,344,78,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"\",23,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot\",36,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",141.7,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",154.7,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"\",260.3,199,106.7,48,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"20.25px\",\"normal\"],[\"SPAN\",\"step-dot locked\",273.3,215,16,16,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"SECTION\",\"command-main card command-main-studio workspace-view-input\",11,260,368,1142.8,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"workspace-step-page workspace-input-page\",11,260,368,1142.8,\"grid\",\"16px\",\"18px\",\"20px\",\"18px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"command-copy\",29,276,332,80.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"eyebrow\",29,278,85.1,20,\"inline\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"FORM\",\"command-console\",29,372.8,332,958,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"console-head\",29,372.8,332,20,\"flex\",\"0px\",\"4px\",\"0px\",\"4px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"counter\",299.5,373.8,57.5,18,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"12px\",\"18px\",\"normal\"],[\"TEXTAREA\",\"textarea command-console-input\",29,404.8,332,142,\"block\",\"16px\",\"16px\",\"16px\",\"16px\",\"4px\",\"15px\",\"25.2px\",\"normal\"],[\"DIV\",\"input-composer-tray\",29,566.8,332,188,\"grid\",\"8px\",\"8px\",\"8px\",\"8px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"composer-attach-button\",38,575.8,314,44,\"flex\",\"8px\",\"12px\",\"8px\",\"12px\",\"12px\",\"13px\",\"20px\",\"normal\"],[\"DIV\",\"composer-attachment-status\",38,627.8,314,20,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"composer-mode-label\",38,655.8,314,36,\"flex\",\"0px\",\"12px\",\"0px\",\"12px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"button command-primary composer-submit-button workbench-primary-action\",38,699.8,314,46,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"8px\",\"14px\",\"20px\",\"normal\"],[\"DIV\",\"field-brief-chip-row\",29,786.8,332,138,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"evidence-readiness-rail\",29,936.8,332,290,\"grid\",\"12px\",\"0px\",\"12px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,948.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,1004.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,1060.8,332,44,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,1116.8,332,43,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"ARTICLE\",\"evidence-readiness-card pending\",29,1171.8,332,43,\"flex\",\"12px\",\"16px\",\"12px\",\"16px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"DETAILS\",\"advanced-settings\",29,1250.8,332,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"FIELDSET\",\"ai-mode-toggle\",31,1286.8,328,308,\"grid\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"15px\",\"24px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",44,1316.8,302,69.8,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option selected\",44,1394.6,302,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"LABEL\",\"ai-mode-option\",44,1492.2,302,89.6,\"flex\",\"12px\",\"12px\",\"12px\",\"12px\",\"4px\",\"13px\",\"20px\",\"normal\"],[\"DIV\",\"command-actions\",29,1286.8,332,44,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"button secondary\",29,1286.8,94.1,44,\"flex\",\"12px\",\"0px\",\"12px\",\"0px\",\"0px\",\"14px\",\"18.9px\",\"normal\"],[\"DETAILS\",\"quick-scenario-chips\",29,1358.8,332,24,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"quick-scenario-chip-list\",29,1394.8,332,256,\"flex\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1394.8,177.5,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1438.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1482.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1526.8,187.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1570.8,202.4,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"],[\"BUTTON\",\"quick-chip\",29,1614.8,180.3,36,\"block\",\"8px\",\"12px\",\"8px\",\"12px\",\"4px\",\"12px\",\"16.2px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -11895,7 +11895,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-day-desktop-1440.jpg",
-      "screenshotSha256": "7a82f461ab5c867df76b38ec9617c90623c40bb45d9a5c079d464daa60988562",
+      "screenshotSha256": "78d0b3200350a0c216b70dace41de053a4fec2ae43239c959dfbc1d71e09f1e6",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12099,7 +12099,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-day-tablet-1024.jpg",
-      "screenshotSha256": "87eee72c4c704b13ba1809972a9293bb6ddb21b2826c17f8f4ce184b7f5ede89",
+      "screenshotSha256": "2ea85f71b80058c13eac8800ef59407a1c7641e3cf62a84f4e0379cf5ad581fa",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12303,7 +12303,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-day-mobile-390.jpg",
-      "screenshotSha256": "a4f928ead913ff4a7440afe5dbaefcdf2e988dcda7924a039a32351f5c219b93",
+      "screenshotSha256": "456147a69fac8b35e637a78e40b525765104b63553591396798e7302ab4c9d7c",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12479,7 +12479,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-desktop-1440.jpg",
-      "screenshotSha256": "17cf936d2e878ce241abb2a13fd4a7bd88a63af5a51d095a245551474bb3b857",
+      "screenshotSha256": "b47df416f1b73fdcb5939dd740a9225ab71157d7a1d373c2695724d8437200fc",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12683,7 +12683,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-tablet-1024.jpg",
-      "screenshotSha256": "83af060e79c065cf81eb1278e0291d6b615c0169ce861a48dcd7f51e39ce13bf",
+      "screenshotSha256": "d24472f4d511e98139c6362fbebf614e4d5a805a5ab28422c96c850b22476e9b",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12887,7 +12887,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-mobile-390.jpg",
-      "screenshotSha256": "344dc5a6b2726640f1a18db98b58ae6363e0489d350adc477bf13cb45e76abe9",
+      "screenshotSha256": "b83530690c03c42fdf5766d63dd2aa782a581b6f16bd13dd46068ad41a9bc9c9",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -13293,7 +13293,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/special-loading.jpg",
-      "screenshotSha256": "524b19d8f519d627368f4d00ecbbcce0740bf426bcf058b812f065b50538392a",
+      "screenshotSha256": "b8a9dd69cc7c080f7ab5997d792c340376dda691ee32e15ab096dd8e5f43593b",
       "boundaryMarker": "loading",
       "boundaryMarkerCount": 1,
       "renderedControls": [],
@@ -13309,7 +13309,7 @@
           ]
         }
       ],
-      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.2,20,33.9,33.9,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.4,20.2,33.6,33.6,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -13363,7 +13363,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-document-preview.jpg",
-      "screenshotSha256": "475aa366a02f7298f829dcbfce4c2a7d79fc5f026fa4b01a4413d446927a5869",
+      "screenshotSha256": "d80d7fbdae5130427e14ed2a5d6b904bfed8abe09cd2c308c1505d9aeae4050c",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -13788,7 +13788,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 17. 오후 10:35:49 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 17. 오후 11:30:04 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13832,7 +13832,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "bb4d39b7c9fc93f41aa474246d6f610af0cf3728c1505d96ee149003203261d0",
+      "screenshotSha256": "2e8fd45ca6722c6e864a480a876424fc9bd5e68cc167b9c5ccde3297447c539c",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,

@@ -206,6 +206,32 @@ Verified fixes:
 - Invalid share session ids are rejected on the recipient page before any API call, so deterministic audit fixtures do not produce user-visible or console-level `/api/share-sessions` failures.
 - `/interpretation/[id]`, `/law/[id]`, and `/precedent/[id]` are treated as deterministic missing-record fallbacks in the browser audit when no checked-in fixture exists.
 
+### Recipient portal document-pack viewing refresh
+
+The worker-facing share page now behaves as a lightweight document-pack viewer, not only a confirmation button.
+
+Fresh current-tree gates:
+
+- `npm.cmd test -- tests\workpack-commercial-tenant-hardening.test.ts tests\workpack-share-authority-routes.test.ts tests\share-recipient-portal-browser.test.ts`
+  - Result: 3 files / 41 tests passed.
+- `npm.cmd test -- tests\frontend-design-contract.test.ts tests\frontend-route-coverage.test.ts`
+  - Result: 2 files / 61 tests passed.
+- `npm.cmd run typecheck`
+  - Result: passed.
+- `npm.cmd run build`
+  - Result: passed, 28/28 static pages generated.
+- `npm.cmd run audit:frontend-consistency`
+  - Result: 33 pages, 23 product components, 0 coverage issues, 0 violations.
+- `node .\scripts\frontend_consistency_browser_audit.mjs` against the fresh production build on port 3011
+  - Result: 111/111 screenshots, 0 failed rows, 0 recovered rows, 0 findings.
+
+Verified fixes:
+
+- Public share session reads `workpacks.deliverables` and returns a safe recipient-facing document pack: `위험성평가표`, `TBM 브리핑`, and `TBM 기록`.
+- The recipient page shows the stored worker-language message first, then the core 3-document pack, then the read-confirmation controls.
+- The public API still filters recipient hints by invited `workerId` and stores confirmations from the server-authoritative recipient snapshot, ignoring forged client fields.
+- Internal evidence, DB harness diagnostics, JSONL, and full manager-only workpack data are not added to the recipient DTO.
+
 ### Hermes / EngineAdapter current boundary gate
 
 The long-term Hermes/OpenClaw direction remains active, but current production does not claim a runnable external engine. It keeps SafeClaw's evidence harness as the system of record and presents the engine as inactive until the trusted transport and durable attempt ledger exist.
