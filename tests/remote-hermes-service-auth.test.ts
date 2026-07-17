@@ -219,6 +219,58 @@ describe("Remote Hermes service authentication", () => {
     }
   });
 
+  it("rejects when abort synchronously resolves the consumer true", async () => {
+    vi.useFakeTimers();
+    try {
+      const assertion = createRemoteHermesServiceAssertion({
+        claims: claims(),
+        activeKey: key("current-key"),
+        now: NOW,
+      });
+      const pending = verifyAssertion({
+        assertion,
+        expected: claims(),
+        keyring: keyring(),
+        now: NOW,
+        consume: ({ signal }): Promise<boolean> => new Promise<boolean>((resolve) => {
+          signal.addEventListener("abort", () => resolve(true), { once: true });
+        }),
+      });
+      const rejection = expect(pending).rejects.toMatchObject({ code: "SERVICE_AUTH_REPLAY_REJECTED" });
+
+      await vi.advanceTimersByTimeAsync(REMOTE_HERMES_SERVICE_AUTH_CONSUME_TIMEOUT_MS);
+      await rejection;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("rejects the abort-resolution race with real timers and no unhandled rejection", async () => {
+    const assertion = createRemoteHermesServiceAssertion({
+      claims: claims(),
+      activeKey: key("current-key"),
+      now: NOW,
+    });
+    const unhandled: unknown[] = [];
+    const onUnhandled = (reason: unknown): void => { unhandled.push(reason); };
+    process.on("unhandledRejection", onUnhandled);
+    try {
+      await expect(verifyAssertion({
+        assertion,
+        expected: claims(),
+        keyring: keyring(),
+        now: NOW,
+        consume: ({ signal }): Promise<boolean> => new Promise<boolean>((resolve) => {
+          signal.addEventListener("abort", () => resolve(true), { once: true });
+        }),
+      })).rejects.toMatchObject({ code: "SERVICE_AUTH_REPLAY_REJECTED" });
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      expect(unhandled).toEqual([]);
+    } finally {
+      process.off("unhandledRejection", onUnhandled);
+    }
+  });
+
   it("contains a late consumer rejection after timeout without exposing its error", async () => {
     vi.useFakeTimers();
     const unhandled: unknown[] = [];
