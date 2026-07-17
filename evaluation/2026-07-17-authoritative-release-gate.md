@@ -152,3 +152,20 @@ Verified contract:
 - Foreign recipient DTOs fail closed on Korean text leaks, unknown languages, malformed stored language entries, forged message variants, and SMS bodies above the relay-safe length budget.
 - The invited recipient page renders on mobile without horizontal overflow, preserves 44px controls, preselects the stored worker language, and posts `{ workerId, displayName, languageCode }` for confirmation.
 - Actual provider dispatch remains gated until the persistent idempotency/storage migration receives explicit approval.
+
+### Hermes / EngineAdapter current boundary gate
+
+The long-term Hermes/OpenClaw direction remains active, but current production does not claim a runnable external engine. It keeps SafeClaw's evidence harness as the system of record and presents the engine as inactive until the trusted transport and durable attempt ledger exist.
+
+Fresh focused gate:
+
+- `npm.cmd test -- tests\engine-runtime-readiness-policy.test.ts tests\engine-adapter.test.ts tests\hermes-engine-adapter.test.ts tests\claw-chat-route.test.ts tests\remote-engine-protocol.test.ts tests\remote-hermes-service-auth.test.ts`
+  - Result: 6 files / 180 tests passed.
+
+Fresh live `/ops/api` probe:
+
+- Route: `https://www.safeclaw.kr/ops/api?theme=day`
+- User-facing engine status text includes: `실행 엔진`, `연결 전`, `연결 상태 비활성`, `근거 권한 SafeClaw 고정`, `사람 확인 항상 필요`, `에이전트 실행 경계 비활성`.
+- Internal raw readiness strings such as `remote-contract-ready`, `executionReady`, or `disabled` were not visible in the route body.
+
+This proves the current production surface does not overstate Hermes runtime readiness while preserving the long-term EngineAdapter path.
