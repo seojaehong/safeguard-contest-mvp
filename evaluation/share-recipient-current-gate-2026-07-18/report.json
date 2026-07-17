@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-07-18T03:52:00+09:00",
+  "status": "pass",
+  "staleFindingCorrected": true,
+  "staleFindingBase": "de4103db",
+  "currentConclusion": "Recipient portal exists on current master and is covered by focused share tests.",
+  "implementedRoutes": [
+    "app/share/[sessionId]/page.tsx",
+    "app/api/share-sessions/[sessionId]/route.ts"
+  ],
+  "managerPreviewAction": "작업자 화면 미리보기",
+  "verification": {
+    "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workflow-share-panel-behavior.test.ts tests\\workspace-share-simplification.test.ts tests\\workpack-share-authority-routes.test.ts",
+    "result": "pass",
+    "files": 4,
+    "tests": 52
+  },
+  "liveDeploymentMappingRequired": true,
+  "anonymousPublicLinkClaimAllowed": false
+}
