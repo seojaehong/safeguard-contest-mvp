@@ -65,4 +65,3 @@ AssertionError: expected '' to contain 'kosha-bridge-current-snapshot-id-inva…
     1113|       expect(output).not.toContain("Unexpected token");
 
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
-
