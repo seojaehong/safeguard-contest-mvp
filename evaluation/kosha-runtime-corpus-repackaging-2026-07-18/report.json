@@ -4,12 +4,19 @@
   "summary": "Full KOSHA body recovery was repackaged into a runtime verified-subset corpus and local production /api/safety-reference/status now returns ready.",
   "liveStatus": {
     "endpoint": "/api/safety-reference/status",
-    "httpStatus": 503,
+    "httpStatus": 200,
     "catalogItems": 9920,
     "technicalTotal": 1040,
     "technicalSupportRegulations": 237,
     "technicalGuidelines": 803,
-    "localCorpusStatus": "unconfigured"
+    "localCorpusStatus": "ready",
+    "searchReady": true,
+    "snapshotId": "e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12",
+    "itemCount": 234,
+    "chunkCount": 7127,
+    "failureCount": 0,
+    "verifiedAt": "2026-07-18T04:22:00+09:00",
+    "url": "https://www.safeclaw.kr/api/safety-reference/status"
   },
   "candidateBodyRecoveryCorpus": {
     "path": ".worktrees/northstar-kosha-official-metadata-20260715/output/kobr26/corpus",
@@ -81,7 +88,7 @@
       "localCorpusStatus": "ready"
     }
   ],
-  "requiredNextStep": "Deploy current commit and prove the live /api/safety-reference/status endpoint returns HTTP 200 with localCorpus.status=ready.",
+  "requiredNextStep": "Keep the live endpoint on the compressed verified corpus bundle; do not claim the unverified full body recovery corpus as direct runtime evidence.",
   "dbMutationPerformed": false,
   "schemaMutationPerformed": false
 }

@@ -116,7 +116,20 @@ Packaging remediation:
 
 ## Launch Decision
 
-The runtime KOSHA corpus is now locally launch-ready in the production build. Live production still needs deployment of the current commit before `www.safeclaw.kr/api/safety-reference/status` can be expected to return HTTP 200.
+The runtime KOSHA corpus is now launch-ready in both local production and live production.
+
+Live verification:
+
+- URL: `https://www.safeclaw.kr/api/safety-reference/status`
+- Verified at: `2026-07-18T04:22:00+09:00`
+- HTTP `200`
+- `ok=true`
+- `searchReady=true`
+- `localCorpus.status=ready`
+- `localCorpus.snapshotId=e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12`
+- `localCorpus.itemCount=234`
+- `localCorpus.chunkCount=7127`
+- `localCorpus.failureCount=0`
 
 ## Product Impact
 
