@@ -156,6 +156,8 @@ Fresh focused gates:
   - Result: 4 files / 69 tests passed.
 - `npm.cmd test -- tests\workspace-share-mobile-browser.test.ts`
   - Result: 1 file / 1 test passed.
+- `npm.cmd test -- tests\share-recipient-portal-browser.test.ts tests\workpack-share-authority-routes.test.ts`
+  - Result: 2 files / 32 tests passed.
 
 Verified contract:
 
@@ -165,6 +167,7 @@ Verified contract:
 - Foreign recipient DTOs fail closed on Korean text leaks, unknown languages, malformed stored language entries, forged message variants, and SMS bodies above the relay-safe length budget.
 - A Korean text leak in one foreign-language variant fails only that canonical bundle instead of silently falling back to a Korean or manager-facing message.
 - The invited recipient page renders on mobile without horizontal overflow, preserves 44px controls, preselects the stored worker language, and posts `{ workerId, displayName, languageCode }` for confirmation.
+- Live route existence probe: `https://www.safeclaw.kr/share/test-session-id` returned HTTP 200 and a Next page containing the current deployment asset marker `dpl_B8zyhtxqTq3B3Ac2HdBR3ddQ2KKY`; this proves the worker-facing share route is deployed as a page surface. Functional confirmation still requires a real issued share session or the local mocked route tests above.
 - Actual provider dispatch remains gated until the persistent idempotency/storage migration receives explicit approval.
 
 ### Hermes / EngineAdapter current boundary gate
