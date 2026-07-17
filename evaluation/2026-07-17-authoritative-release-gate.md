@@ -707,3 +707,22 @@ Verified boundary:
 Integration note:
 
 - No product code change was required for this gate. The current master state is the authoritative document editor UX baseline unless a fresh browser audit finds a new regression on this HEAD or later.
+
+### 2026-07-18 exact KOSHA registry current-master recheck
+
+The exact KOSHA trust registry was rechecked on current HEAD `10f87615579b03a129fad55d901a376dacf43274` after comparing the older `feat/kosha-trust-registry-wave2` worktree with current master.
+
+Results:
+
+- `npm.cmd test -- tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\exact-trusted-kosha-registry-wave3.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts`
+  - Result: 5 files / 97 tests passed.
+
+Verified boundary:
+
+- Current master contains the exact KOSHA registry lineage through D-C-13, D-C-7, and B-E-10 hardening.
+- Per-item immutable body/PDF/URL/file/publication/provenance pins, dual provenance alias validation, query applicability policy, fail-closed registry gating, and route-scoped Next file tracing are covered by the focused registry tests above.
+- The older `feat/kosha-trust-registry-wave2` branch is not authoritative as a branch object. Current master has later exact-registry commits and must remain the integration source of truth.
+
+Integration note:
+
+- No database schema, Supabase data, or production corpus mutation was performed by this recheck.
