@@ -352,7 +352,7 @@ export function numericalContractFindings(row, { documentRole = false, expectedB
 }
 
 async function capture(page, options) {
-  const { route, requestedPath, viewport, theme = "Product", name, limitation = "", fallbackKind = "none", expectedBoundary = "", expectedStatuses = [200], expectedFinalPath = new URL(requestedPath, baseUrl).pathname, attempt = 1 } = options;
+  const { route, requestedPath, viewport, theme = "Product", name, limitation = "", fallbackKind = "none", expectedBoundary = "", expectedStatuses = [200], expectedFinalPath = new URL(requestedPath, baseUrl).pathname, expandSubmissionPreview = false, attempt = 1 } = options;
   await page.setViewportSize({ width: viewport.width, height: viewport.height });
   await page.goto("about:blank");
   const consoleErrors = [];
@@ -370,6 +370,11 @@ async function capture(page, options) {
     if (expectedBoundary) await page.waitForSelector(`[data-audit-boundary="${expectedBoundary}"]`, { timeout: 8_000 });
     await page.waitForTimeout(650);
     await page.evaluate(() => document.fonts.ready);
+    if (expandSubmissionPreview) {
+      const previewSummary = page.locator(".submission-preview-panel > summary");
+      await previewSummary.click();
+      await page.waitForSelector(".submission-preview-panel .safety-form-preview", { state: "visible" });
+    }
   } catch (error) {
     navigationError = error instanceof Error ? error.message : String(error);
     pageErrors.push(navigationError);
@@ -544,7 +549,7 @@ async function main() {
   const documentPreview = await capture(page, {
     route: "generated:document-preview", requestedPath: "/documents", viewport: viewports[0], theme: "Document",
     name: "generated-document-preview", limitation: "Repository sample workpack fallback captured without external or authenticated state.",
-    expectedStatuses: [200], expectedFinalPath: "/documents",
+    expectedStatuses: [200], expectedFinalPath: "/documents", expandSubmissionPreview: true,
   });
   const samplePayload = {
     title: "SafeClaw 작업 전 안전회의 기록", project: "서울 현장", date: "2026-07-11",
