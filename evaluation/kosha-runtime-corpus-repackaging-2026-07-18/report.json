@@ -1,0 +1,48 @@
+{
+  "generatedAt": "2026-07-18T03:49:00+09:00",
+  "status": "hold",
+  "summary": "Full KOSHA body recovery exists, but it must be repackaged into the runtime verified-subset trust contract before production bundling.",
+  "liveStatus": {
+    "endpoint": "/api/safety-reference/status",
+    "httpStatus": 503,
+    "catalogItems": 9920,
+    "technicalTotal": 1040,
+    "technicalSupportRegulations": 237,
+    "technicalGuidelines": 803,
+    "localCorpusStatus": "unconfigured"
+  },
+  "candidateBodyRecoveryCorpus": {
+    "path": ".worktrees/northstar-kosha-official-metadata-20260715/output/kobr26/corpus",
+    "snapshotId": "935340ef3f74078c36168666650164c43511daced84efa3eda849833ad8d6844",
+    "manifestSha256": "ab77251d0c95ce81d86470f1dbe19cdc18778dc5f6b32cde1b2d4f77bc427ab8",
+    "items": 1039,
+    "chunks": 20536,
+    "failureLedger": 1,
+    "bodyRecoveryReport": "evaluation/kosha-official-body-recovery-2026-07-15/report.json",
+    "officialMetadataSha256FromReport": "1c03af6776158ba21650325ea7b31f2a661d0adea9441d29aacf977e0c815a5f"
+  },
+  "unsafeBundlingAttempt": {
+    "copiedToDataDirectory": true,
+    "loaderStatus": "blocked",
+    "reverted": true,
+    "copiedDataRemoved": true,
+    "decision": "do-not-bypass-runtime-trust-gate"
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\kosha-guide-offline-harness.test.ts tests\\kosha-guide-offline-harness-expanded.test.ts tests\\safety-reference-status-route.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts",
+      "result": "pass",
+      "files": 5,
+      "tests": 81
+    },
+    {
+      "command": "$env:KOSHA_GUIDE_CORPUS_DIR='<body-recovery-corpus>'; npm.cmd test -- tests\\kosha-guide-offline-harness.test.ts tests\\kosha-guide-offline-harness-expanded.test.ts tests\\safety-reference-status-route.test.ts",
+      "result": "pass",
+      "files": 3,
+      "tests": 37
+    }
+  ],
+  "requiredNextStep": "Generate a runtime safeclaw-kosha-verified-subset/v1 corpus from the 2026-07-15 body recovery output with trusted official_metadata_sha256 pinned, then add narrow Next tracing and prove /api/safety-reference/status HTTP 200.",
+  "dbMutationPerformed": false,
+  "schemaMutationPerformed": false
+}
