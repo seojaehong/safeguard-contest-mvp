@@ -78,6 +78,36 @@ export type ActiveOwnedShareSession = {
   expiresAt: string | null;
 };
 
+export type ShareAccessPolicy = {
+  anonymousAllowed: boolean;
+  manualLanguageSwitchAllowed: boolean;
+  requireKnownWorkerSnapshot: boolean;
+};
+
+export type PublicShareSession = {
+  id: string;
+  organizationId: string;
+  siteId: string | null;
+  workpackId: string;
+  shareScope: "invited" | "organization";
+  recipients: ShareRecipientInput[];
+  accessPolicy: ShareAccessPolicy;
+  status: "active" | "revoked" | "expired";
+  expiresAt: string | null;
+  question: string;
+};
+
+export type PublicShareSessionResult = {
+  ok: true;
+  session: PublicShareSession;
+} | {
+  ok: false;
+  status: number;
+  message: string;
+};
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export type ActiveOwnedShareSessionResult = {
   ok: true;
   session: ActiveOwnedShareSession;
@@ -167,6 +197,109 @@ export async function loadActiveOwnedShareSession(
       workpackId: data.workpack_id,
       recipients,
       expiresAt: data.expires_at
+    }
+  };
+}
+
+function parseShareAccessPolicy(value: unknown): ShareAccessPolicy {
+  const payload = typeof value === "object" && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+  return {
+    anonymousAllowed: payload.anonymousAllowed === true,
+    manualLanguageSwitchAllowed: payload.manualLanguageSwitchAllowed !== false,
+    requireKnownWorkerSnapshot: payload.requireKnownWorkerSnapshot !== false
+  };
+}
+
+export async function loadActivePublicShareSession(
+  client: SupabaseClient<WorkspaceDatabase>,
+  input: {
+    shareSessionId: string;
+    workerId?: string;
+    now?: Date;
+  }
+): Promise<PublicShareSessionResult> {
+  if (!UUID_PATTERN.test(input.shareSessionId)) {
+    return { ok: false, status: 400, message: "공유 세션 식별 형식이 올바르지 않습니다." };
+  }
+
+  const { data: sessionData, error } = await client
+    .from("workpack_share_sessions")
+    .select("id,organization_id,site_id,workpack_id,share_scope,recipients_snapshot,access_policy,status,expires_at")
+    .eq("id", input.shareSessionId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("public share session fetch failed", error);
+    return { ok: false, status: 500, message: "공유 세션을 확인하지 못했습니다." };
+  }
+
+  if (!sessionData || sessionData.status !== "active") {
+    return { ok: false, status: 404, message: "유효한 공유 세션을 찾지 못했습니다." };
+  }
+
+  const accessPolicy = parseShareAccessPolicy(sessionData.access_policy);
+  if (sessionData.expires_at) {
+    const now = input.now || new Date();
+    const expiresAt = new Date(sessionData.expires_at).getTime();
+    if (!Number.isFinite(expiresAt) || expiresAt <= now.getTime()) {
+      return { ok: false, status: 410, message: "공유 세션이 만료되었거나 만료 시각이 올바르지 않습니다." };
+    }
+  }
+
+  const recipients = parseShareSessionRecipients(sessionData.recipients_snapshot);
+  if (sessionData.share_scope === "invited" && !recipients.length) {
+    return { ok: false, status: 409, message: "공유 세션 수신자 정보를 확인할 수 없습니다." };
+  }
+
+  const requestedWorkerId = input.workerId?.trim() || "";
+  if (sessionData.share_scope === "invited" && !accessPolicy.anonymousAllowed) {
+    if (!requestedWorkerId || !UUID_PATTERN.test(requestedWorkerId)) {
+      return { ok: false, status: 400, message: "공유 세션 접근에는 작업자 식별자가 필요합니다." };
+    }
+    const authorizedRecipient = recipients.find((recipient) => recipient.workerId === requestedWorkerId);
+    if (!authorizedRecipient) {
+      return { ok: false, status: 403, message: "공유 세션에 등록된 작업자만 열람 가능합니다." };
+    }
+    if (accessPolicy.requireKnownWorkerSnapshot && !authorizedRecipient.workerSnapshot) {
+      return { ok: false, status: 409, message: "공유 세션에 필요한 작업자 식별 정보가 없어 열람할 수 없습니다." };
+    }
+  }
+
+  if (sessionData.share_scope === "organization" && !accessPolicy.anonymousAllowed && !requestedWorkerId) {
+    return { ok: false, status: 400, message: "이 공유 방식은 별도 식별이 필요합니다." };
+  }
+
+  const { data: workpackData, error: workpackError } = await client
+    .from("workpacks")
+    .select("question")
+    .eq("id", sessionData.workpack_id)
+    .maybeSingle();
+
+  if (workpackError) {
+    console.error("public share workpack fetch failed", workpackError);
+    return { ok: false, status: 500, message: "작업팩 정보를 확인하지 못했습니다." };
+  }
+  if (!workpackData || typeof workpackData.question !== "string" || !workpackData.question.trim()) {
+    return { ok: false, status: 404, message: "연결된 작업 정보를 찾지 못했습니다." };
+  }
+
+  const shareScope = sessionData.share_scope === "organization" ? "organization" : "invited";
+
+  return {
+    ok: true,
+    session: {
+      id: sessionData.id,
+      organizationId: sessionData.organization_id,
+      siteId: sessionData.site_id,
+      workpackId: sessionData.workpack_id,
+      shareScope,
+      recipients,
+      accessPolicy,
+      status: sessionData.status as "active" | "revoked" | "expired",
+      expiresAt: sessionData.expires_at,
+      question: workpackData.question
     }
   };
 }
