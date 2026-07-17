@@ -1,7 +1,7 @@
 # KOSHA Wave2/Wave3 Current Master Verification
 
 Date: 2026-07-17
-Verified code HEAD: `f23ae8077d5f182aa6a5a223d3717618fea6e5af`
+Verified code HEAD: `d23fb8ee55e330eed5019ea2df399ea98683bbe3` plus the pending D-C-13 rope-work applicability patch.
 
 ## Verdict
 
@@ -40,6 +40,48 @@ Recent launch gates already executed on the same HEAD:
 - `npm.cmd run build`: passed, 28/28 static pages
 - `npm.cmd run typecheck`: passed
 - `git diff --check`: passed
+
+## Additional D-C-13 Applicability Gate
+
+The D-C-13 exterior wall exact KOSHA applicability policy was tightened on 2026-07-17 so common rope-work phrasing maps to the trusted exterior-wall safety reference without reopening commercial rope queries.
+
+New locked cases:
+
+- `외벽 로프 작업 안전점검` -> applicable to `D-C-13`
+- `외벽 로프 청소 작업` -> applicable to `D-C-13`
+- `로프 구매 가격 비교` -> not applicable to `D-C-13`
+
+Fresh commands executed after the patch:
+
+```powershell
+npm.cmd test -- tests\exact-kosha-applicability-policy.test.ts
+```
+
+Result:
+
+- Test files: 1 passed / 1
+- Tests: 17 passed / 17
+
+```powershell
+npm.cmd test -- --run tests\exact-trusted-kosha-registry-wave3.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\exact-trusted-kosha-grounding.test.ts tests\exact-kosha-applicability-policy.test.ts tests\grounded-generation-contract.test.ts tests\ontology-evidence-chains.test.ts tests\ontology-operation-memory.test.ts --maxWorkers=1 --no-file-parallelism
+```
+
+Result:
+
+- Test files: 7 passed / 7
+- Tests: 179 passed / 179
+
+```powershell
+npm.cmd run typecheck
+npm.cmd run build
+git diff --check
+```
+
+Result:
+
+- Typecheck: passed
+- Production build: passed, 28/28 static pages
+- Diff check: passed
 
 ## NFT Trace Reality
 
