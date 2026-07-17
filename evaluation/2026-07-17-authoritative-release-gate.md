@@ -348,7 +348,7 @@ Verified fixes:
 
 ### Live output integrity gate
 
-Fresh production output integrity passed against the current live deployment marker `dpl_DhJM6HoN6guwEJvaasrG2areQmgb`.
+Fresh production output integrity passed against the current live deployment marker `dpl_36k9BvS1pTSzivrhDxHiPb9zeo5U`.
 
 Command:
 
@@ -358,7 +358,8 @@ Result:
 
 - Overall verdict: `pass`
 - Base URL: `https://www.safeclaw.kr`
-- Elapsed: 167,571 ms
+- Generated: `2026-07-17T15:59:46.196Z`
+- Elapsed: 138,731 ms
 - Ask scenarios: 3/3 passed
 - Ask deliverables: 11/11 passed for each scenario
 - Generated download/export files: 14/14 passed for each scenario
@@ -386,6 +387,7 @@ Command:
 Result:
 
 - Overall verdict: `pass`
+- Generated: `2026-07-17T16:00:16.572Z`
 - Automated verdict: `pass`
 - Release verdict: `pass`
 - Exit verdict: `pass`

@@ -1,18 +1,18 @@
 {
   "baseUrl": "https://www.safeclaw.kr",
-  "generatedAt": "2026-07-17T15:08:27.272Z",
-  "elapsedMs": 31723,
+  "generatedAt": "2026-07-17T15:59:46.137Z",
+  "elapsedMs": 25529,
   "question": "그린메탈 경기 안산 공장 배관 용접·절단 화기작업. 외국인 근로자 2명과 신규 작업자 1명 포함, 작업자 6명, 실내 고온과 환기 불량, 가연물 인접. 화재감시자와 다국어 안전교육까지 반영해 위험성평가, TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 3598,
+    "elapsedMs": 2339,
     "mode": "live",
-    "summary": "단시간 흐림, 비, 기온 26℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+    "summary": "단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
     "signalCount": 5
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 24145,
+    "elapsedMs": 19679,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -31,7 +31,7 @@
         "TBM 기상 신호",
         "작업중지 기준"
       ],
-      "evidence": "단시간 흐림, 비, 기온 26℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+      "evidence": "단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
       "count": 5
     },
     {
@@ -133,7 +133,7 @@
         "TBM 예방 포인트",
         "교육 사례"
       ],
-      "evidence": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: raw-query:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다.",
+      "evidence": "KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다.",
       "count": 3
     }
   ],
@@ -202,7 +202,7 @@
     {
       "format": "XLSX_OOXML",
       "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.xlsx",
-      "bytes": 12467,
+      "bytes": 12468,
       "ok": true,
       "sheetNames": [
         "위험성평가표"
@@ -213,7 +213,7 @@
     {
       "format": "PDF",
       "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.pdf",
-      "bytes": 300978,
+      "bytes": 301747,
       "ok": true
     },
     {
@@ -225,19 +225,19 @@
     {
       "format": "ALL_TXT",
       "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.txt",
-      "bytes": 70090,
+      "bytes": 70086,
       "ok": true
     },
     {
       "format": "ALL_CSV",
       "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.csv",
-      "bytes": 102180,
+      "bytes": 102176,
       "ok": true
     },
     {
       "format": "ALL_XLS",
       "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.xls",
-      "bytes": 164365,
+      "bytes": 164361,
       "ok": true
     }
   ],

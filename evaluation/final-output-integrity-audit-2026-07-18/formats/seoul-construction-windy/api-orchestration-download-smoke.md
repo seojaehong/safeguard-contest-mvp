@@ -1,16 +1,16 @@
 # SafeGuard API 조합 및 다운로드 스모크
 
-- 생성시각: 2026-07-17T15:07:26.854Z
+- 생성시각: 2026-07-17T15:58:56.958Z
 - 대상 URL: https://www.safeclaw.kr
 - 질문: 세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.
-- 기상 선조회: live / 단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)
+- 기상 선조회: live / 단시간 흐림, 비, 기온 26℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)
 - /api/ask: live / 문서 11종
 
 ## API 반영 맵
 
 | API | 호출 경로 | 상태 | 반영 위치 | 건수/신호 | 증거 |
 | --- | --- | --- | --- | ---: | --- |
-| 기상청 현재/초단기/단기/특보/영향예보 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 8 | 단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영) |
+| 기상청 현재/초단기/단기/특보/영향예보 | /api/weather 선조회<br>/api/ask 내부 fetchWeatherSignal | live | 현장 브리프 날씨<br>위험성평가표 작업조건<br>TBM 기상 신호<br>작업중지 기준 | 8 | 단시간 흐림, 비, 기온 26℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영) |
 | Law.go + korean-law-mcp | /api/ask 내부 searchLegalSources | live | 근거 출처<br>위험성평가표 반영 근거<br>TBM 기록 반영 근거<br>사진/증빙 확인 근거 | 6 | korean-law-mcp 비활성화 |
 | Gemini | /api/ask 내부 generateAnswer | live | 점검결과 요약<br>위험성평가표<br>TBM<br>안전보건교육<br>외국인 전송본 | 11 | 1) 하네스 판단
 - 직접 근거: D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정 / D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정
@@ -33,9 +33,9 @@
 | HTML | ok | 10762 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-risk-assessment.html |
 | HWPX | ok | 12056 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-risk-assessment.hwpx |
 | HWP_TABLE | ok | 19968 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-risk-assessment.hwp |
-| XLSX_OOXML | ok | 13311 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-risk-assessment.xlsx |
-| PDF | ok | 315339 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-risk-assessment.pdf |
+| XLSX_OOXML | ok | 13312 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-risk-assessment.xlsx |
+| PDF | ok | 315673 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-risk-assessment.pdf |
 | JPG | ok | 184259 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-risk-assessment.jpg |
-| ALL_TXT | ok | 79729 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.txt |
-| ALL_CSV | ok | 115575 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.csv |
-| ALL_XLS | ok | 181347 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.xls |
+| ALL_TXT | ok | 79733 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.txt |
+| ALL_CSV | ok | 115579 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.csv |
+| ALL_XLS | ok | 181351 | evaluation\final-output-integrity-audit-2026-07-18\formats\seoul-construction-windy\files\세이프건설-safeguard-workpack.xls |

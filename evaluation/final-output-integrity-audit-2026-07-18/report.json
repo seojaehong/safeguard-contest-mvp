@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-17T15:08:27.314Z",
+  "generatedAt": "2026-07-17T15:59:46.196Z",
   "baseUrl": "https://www.safeclaw.kr",
-  "elapsedMs": 167571,
+  "elapsedMs": 138731,
   "verdict": "pass",
   "askSummary": {
     "verdict": "pass",
@@ -20,7 +20,7 @@
       "id": "seoul-construction-windy",
       "title": "서울 건설 강풍",
       "status": 200,
-      "elapsedMs": 20605,
+      "elapsedMs": 18280,
       "payloadPath": "evaluation/final-output-integrity-audit-2026-07-18/ask-payloads/seoul-construction-windy.json",
       "mode": "live",
       "sourceMix": {
@@ -76,7 +76,7 @@
           "key": "tbmBriefing",
           "title": "TBM/작업 전 안전점검회의",
           "verdict": "pass",
-          "charCount": 2814,
+          "charCount": 2816,
           "placeholderCount": 0,
           "missingRequiredTerms": [],
           "missingScenarioTerms": [],
@@ -86,7 +86,7 @@
           "key": "tbmLogDraft",
           "title": "TBM 기록",
           "verdict": "pass",
-          "charCount": 2224,
+          "charCount": 2226,
           "placeholderCount": 0,
           "missingRequiredTerms": [],
           "missingScenarioTerms": [],
@@ -158,7 +158,7 @@
       "id": "incheon-logistics-rain",
       "title": "인천 물류 우천",
       "status": 200,
-      "elapsedMs": 24222,
+      "elapsedMs": 19472,
       "payloadPath": "evaluation/final-output-integrity-audit-2026-07-18/ask-payloads/incheon-logistics-rain.json",
       "mode": "live",
       "sourceMix": {
@@ -296,7 +296,7 @@
       "id": "ansan-manufacturing-foreign-hotwork",
       "title": "안산 제조 화기 외국인 포함",
       "status": 200,
-      "elapsedMs": 26676,
+      "elapsedMs": 24153,
       "payloadPath": "evaluation/final-output-integrity-audit-2026-07-18/ask-payloads/ansan-manufacturing-foreign-hotwork.json",
       "mode": "live",
       "sourceMix": {
@@ -352,7 +352,7 @@
           "key": "tbmBriefing",
           "title": "TBM/작업 전 안전점검회의",
           "verdict": "pass",
-          "charCount": 1896,
+          "charCount": 1894,
           "placeholderCount": 0,
           "missingRequiredTerms": [],
           "missingScenarioTerms": [],
@@ -362,7 +362,7 @@
           "key": "tbmLogDraft",
           "title": "TBM 기록",
           "verdict": "pass",
-          "charCount": 1811,
+          "charCount": 1809,
           "placeholderCount": 0,
           "missingRequiredTerms": [],
           "missingScenarioTerms": [],
@@ -440,14 +440,14 @@
       "reportPath": "evaluation/final-output-integrity-audit-2026-07-18/formats/seoul-construction-windy/api-orchestration-download-smoke.json",
       "weather": {
         "status": 200,
-        "elapsedMs": 5213,
+        "elapsedMs": 2106,
         "mode": "live",
-        "summary": "단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)",
+        "summary": "단시간 흐림, 비, 기온 26℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보/기상특보/생활기상 자외선 반영)",
         "signalCount": 8
       },
       "ask": {
         "status": 200,
-        "elapsedMs": 26016,
+        "elapsedMs": 20552,
         "mode": "live",
         "statusSummary": "연결됨",
         "documentCount": 11
@@ -534,7 +534,7 @@
         {
           "format": "XLSX_OOXML",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.xlsx",
-          "bytes": 13311,
+          "bytes": 13312,
           "contentMode": "xlsx-cells",
           "generatorOk": true,
           "verdict": "pass",
@@ -543,7 +543,7 @@
         {
           "format": "PDF",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\seoul-construction-windy\\files\\세이프건설-risk-assessment.pdf",
-          "bytes": 315339,
+          "bytes": 315673,
           "contentMode": "binary-pdf",
           "generatorOk": true,
           "verdict": "pass",
@@ -561,7 +561,7 @@
         {
           "format": "ALL_TXT",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.txt",
-          "bytes": 79729,
+          "bytes": 79733,
           "contentMode": "text",
           "generatorOk": true,
           "verdict": "pass",
@@ -570,7 +570,7 @@
         {
           "format": "ALL_CSV",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.csv",
-          "bytes": 115575,
+          "bytes": 115579,
           "contentMode": "text",
           "generatorOk": true,
           "verdict": "pass",
@@ -579,7 +579,7 @@
         {
           "format": "ALL_XLS",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\seoul-construction-windy\\files\\세이프건설-safeguard-workpack.xls",
-          "bytes": 181347,
+          "bytes": 181351,
           "contentMode": "text",
           "generatorOk": true,
           "verdict": "pass",
@@ -595,14 +595,14 @@
       "reportPath": "evaluation/final-output-integrity-audit-2026-07-18/formats/incheon-logistics-rain/api-orchestration-download-smoke.json",
       "weather": {
         "status": 200,
-        "elapsedMs": 3894,
+        "elapsedMs": 971,
         "mode": "live",
         "summary": "단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
         "signalCount": 5
       },
       "ask": {
         "status": 200,
-        "elapsedMs": 19803,
+        "elapsedMs": 18243,
         "mode": "live",
         "statusSummary": "연결됨",
         "documentCount": 11
@@ -689,7 +689,7 @@
         {
           "format": "XLSX_OOXML",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.xlsx",
-          "bytes": 12739,
+          "bytes": 12740,
           "contentMode": "xlsx-cells",
           "generatorOk": true,
           "verdict": "pass",
@@ -698,7 +698,7 @@
         {
           "format": "PDF",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.pdf",
-          "bytes": 311986,
+          "bytes": 312001,
           "contentMode": "binary-pdf",
           "generatorOk": true,
           "verdict": "pass",
@@ -750,14 +750,14 @@
       "reportPath": "evaluation/final-output-integrity-audit-2026-07-18/formats/ansan-manufacturing-foreign-hotwork/api-orchestration-download-smoke.json",
       "weather": {
         "status": 200,
-        "elapsedMs": 3598,
+        "elapsedMs": 2339,
         "mode": "live",
-        "summary": "단시간 흐림, 비, 기온 26℃, 풍속 0.1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
+        "summary": "단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
         "signalCount": 5
       },
       "ask": {
         "status": 200,
-        "elapsedMs": 24145,
+        "elapsedMs": 19679,
         "mode": "live",
         "statusSummary": "연결됨",
         "documentCount": 11
@@ -844,7 +844,7 @@
         {
           "format": "XLSX_OOXML",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.xlsx",
-          "bytes": 12467,
+          "bytes": 12468,
           "contentMode": "xlsx-cells",
           "generatorOk": true,
           "verdict": "pass",
@@ -853,7 +853,7 @@
         {
           "format": "PDF",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-risk-assessment.pdf",
-          "bytes": 300978,
+          "bytes": 301747,
           "contentMode": "binary-pdf",
           "generatorOk": true,
           "verdict": "pass",
@@ -871,7 +871,7 @@
         {
           "format": "ALL_TXT",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.txt",
-          "bytes": 70090,
+          "bytes": 70086,
           "contentMode": "text",
           "generatorOk": true,
           "verdict": "pass",
@@ -880,7 +880,7 @@
         {
           "format": "ALL_CSV",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.csv",
-          "bytes": 102180,
+          "bytes": 102176,
           "contentMode": "text",
           "generatorOk": true,
           "verdict": "pass",
@@ -889,7 +889,7 @@
         {
           "format": "ALL_XLS",
           "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\ansan-manufacturing-foreign-hotwork\\files\\그린메탈-safeguard-workpack.xls",
-          "bytes": 164365,
+          "bytes": 164361,
           "contentMode": "text",
           "generatorOk": true,
           "verdict": "pass",

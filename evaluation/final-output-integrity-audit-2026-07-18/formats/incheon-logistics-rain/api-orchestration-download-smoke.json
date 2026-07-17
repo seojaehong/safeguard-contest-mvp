@@ -1,18 +1,18 @@
 {
   "baseUrl": "https://www.safeclaw.kr",
-  "generatedAt": "2026-07-17T15:07:55.090Z",
-  "elapsedMs": 27665,
+  "generatedAt": "2026-07-17T15:59:20.157Z",
+  "elapsedMs": 22638,
   "question": "한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업. 숙련 지게차 운전자 2명과 피킹 인력 6명, 우천 후 출입구 바닥 젖음, 보행 동선과 지게차 동선이 겹친다. 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "weather": {
     "status": 200,
-    "elapsedMs": 3894,
+    "elapsedMs": 971,
     "mode": "live",
     "summary": "단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)",
     "signalCount": 5
   },
   "ask": {
     "status": 200,
-    "elapsedMs": 19803,
+    "elapsedMs": 18243,
     "mode": "live",
     "statusSummary": "연결됨",
     "documentCount": 11
@@ -202,7 +202,7 @@
     {
       "format": "XLSX_OOXML",
       "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.xlsx",
-      "bytes": 12739,
+      "bytes": 12740,
       "ok": true,
       "sheetNames": [
         "위험성평가표"
@@ -213,7 +213,7 @@
     {
       "format": "PDF",
       "file": "evaluation\\final-output-integrity-audit-2026-07-18\\formats\\incheon-logistics-rain\\files\\한빛로지스-risk-assessment.pdf",
-      "bytes": 311986,
+      "bytes": 312001,
       "ok": true
     },
     {

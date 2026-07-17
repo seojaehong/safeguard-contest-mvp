@@ -1,6 +1,6 @@
 # SafeClaw Final Release Scale Audit
 
-Generated: 2026-07-17T15:10:30.755Z
+Generated: 2026-07-17T16:00:16.572Z
 
 Base URL: https://www.safeclaw.kr
 
@@ -32,8 +32,8 @@ Invariant: Per-request token list and site-name lookup row counts stay constant 
 
 | Gate | Verdict | Details |
 |------|---------|---------|
-| existing-web-api-ask | pass | {"status":200,"elapsedMs":18941,"missingDeliverables":[],"deliverableCount":11,"scenario":{"companyName":"그린메탈","companyType":"제조업","siteName":"경기 안산 제조공장","workSummary":"그린메탈 경기 안산 제조공장 옥외 용접 작업","workerCount":6,"weathe |
-| ai-connect-page | pass | {"status":200,"elapsedMs":114} |
+| existing-web-api-ask | pass | {"status":200,"elapsedMs":18016,"missingDeliverables":[],"deliverableCount":11,"scenario":{"companyName":"그린메탈","companyType":"제조업","siteName":"경기 안산 제조공장","workSummary":"그린메탈 경기 안산 제조공장 옥외 용접 작업","workerCount":6,"weathe |
+| ai-connect-page | pass | {"status":200,"elapsedMs":294} |
 | ai-token-api-auth-guard | pass | {"status":401,"limit":50,"nextCursor":null,"message":"관리자 로그인이 필요합니다."} |
 | mcp-no-token-auth-guard | pass | {"status":401,"rawPreview":"{\"error\":\"invalid_token\",\"error_description\":\"No authorization provided\"}"} |
 | tenant-scoped-token-insert | pass | {"evidence":"lib/mcp-token-service.ts stores only hash + site/org scope"} |
@@ -50,7 +50,7 @@ Invariant: Per-request token list and site-name lookup row counts stay constant 
 
 | Gate | Verdict | Details |
 |------|---------|---------|
-| supabase-kakao-provider-enabled | pass | {"status":302,"elapsedMs":178,"supabaseOrigin":"https://mewqgevgdgghhatqtuos.supabase.co","disabledReason":null,"redirectTo":"https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect","locationPreview":"https: |
+| supabase-kakao-provider-enabled | pass | {"status":302,"elapsedMs":187,"supabaseOrigin":"https://mewqgevgdgghhatqtuos.supabase.co","disabledReason":null,"redirectTo":"https://www.safeclaw.kr/auth/callback?next=%2Fsettings%2Fai-connect","locationPreview":"https: |
 | mcp-token-query-indexes-approved | pass | {"hasOrgCreatedIndex":true,"hasSiteCreatedIndex":true,"orgIndexEvidenceFiles":["supabase/migrations/009_mcp_token_query_indexes.sql"],"siteIndexEvidenceFiles":["supabase/migrations/009_mcp_token_query_indexes.sql"],"appr |
 
 ## Remaining Operator Actions

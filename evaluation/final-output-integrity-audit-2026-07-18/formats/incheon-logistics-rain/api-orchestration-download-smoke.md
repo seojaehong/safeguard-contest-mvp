@@ -1,6 +1,6 @@
 # SafeGuard API 조합 및 다운로드 스모크
 
-- 생성시각: 2026-07-17T15:07:55.090Z
+- 생성시각: 2026-07-17T15:59:20.157Z
 - 대상 URL: https://www.safeclaw.kr
 - 질문: 한빛로지스 인천 남동공단 물류센터 지게차 상하차 작업. 숙련 지게차 운전자 2명과 피킹 인력 6명, 우천 후 출입구 바닥 젖음, 보행 동선과 지게차 동선이 겹친다. 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.
 - 기상 선조회: live / 단시간 흐림, 비, 기온 26℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보 반영)
@@ -33,8 +33,8 @@
 | HTML | ok | 9949 | evaluation\final-output-integrity-audit-2026-07-18\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.html |
 | HWPX | ok | 11516 | evaluation\final-output-integrity-audit-2026-07-18\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.hwpx |
 | HWP_TABLE | ok | 19456 | evaluation\final-output-integrity-audit-2026-07-18\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.hwp |
-| XLSX_OOXML | ok | 12739 | evaluation\final-output-integrity-audit-2026-07-18\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.xlsx |
-| PDF | ok | 311986 | evaluation\final-output-integrity-audit-2026-07-18\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.pdf |
+| XLSX_OOXML | ok | 12740 | evaluation\final-output-integrity-audit-2026-07-18\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.xlsx |
+| PDF | ok | 312001 | evaluation\final-output-integrity-audit-2026-07-18\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.pdf |
 | JPG | ok | 174878 | evaluation\final-output-integrity-audit-2026-07-18\formats\incheon-logistics-rain\files\한빛로지스-risk-assessment.jpg |
 | ALL_TXT | ok | 53602 | evaluation\final-output-integrity-audit-2026-07-18\formats\incheon-logistics-rain\files\한빛로지스-safeguard-workpack.txt |
 | ALL_CSV | ok | 81032 | evaluation\final-output-integrity-audit-2026-07-18\formats\incheon-logistics-rain\files\한빛로지스-safeguard-workpack.csv |
