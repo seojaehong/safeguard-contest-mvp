@@ -3,7 +3,7 @@
 ## Scope
 
 - Original integration source HEAD: `2b4316056b44b8729903d364d93022a916383ab6`
-- Current product verification HEAD: `0b2187d54e1bfda6e992505e2c01627a419827c9`
+- Current product verification HEAD: `449fd46b2239a8dcfe4edc2a2d8d4dfe5f18e05d`
 - Later commits in this file are documentation-only evidence refreshes unless stated otherwise.
 - KOSHA exact-trust Wave 2: already present on the authoritative branch with equivalent product and evidence patches.
 - Remote Hermes: trusted-transport and durable-attempt-ledger boundary integrated; product execution remains disabled until those application-owned dependencies are supplied.
@@ -269,6 +269,15 @@ Verified fixes:
 - Placeholder-heavy core documents now produce `qualityContract.overall = blocked`.
 - The `integrity` summary records checked count, blocked count, blocked keys, and a user-facing detail string.
 - Existing DB-harness, workpack readiness, and answer-panel display contracts continue to pass.
+
+Fresh post-commit current-HEAD gates:
+
+- `npm.cmd test -- tests\frontend-design-contract.test.ts tests\frontend-route-coverage.test.ts tests\product-module-shell.test.ts`
+  - Result: 3 files / 64 tests passed.
+- `npm.cmd test -- tests\engine-runtime-readiness-policy.test.ts tests\engine-adapter.test.ts tests\hermes-engine-adapter.test.ts tests\claw-chat-route.test.ts tests\remote-engine-protocol.test.ts tests\remote-hermes-service-auth.test.ts`
+  - Result: 6 files / 180 tests passed.
+- `npm.cmd run build`
+  - Result: passed, 28/28 static pages generated.
 
 ### Hermes / EngineAdapter current boundary gate
 
