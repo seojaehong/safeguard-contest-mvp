@@ -1,20 +1,17 @@
-[audit-command] npm.cmd run start -- -p 3047
-[audit-server-ready] http://127.0.0.1:3047
 
 > safeclaw@0.1.0 start
-> next start -p 3047
+> next start -p 3011
 
    ▲ Next.js 15.5.20
-   - Local:        http://localhost:3047
-   - Network:      http://172.30.1.36:3047
+   - Local:        http://localhost:3011
+   - Network:      http://172.30.1.25:3011
 
  ✓ Starting...
- ✓ Ready in 1049ms
-[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"331c231e-1303-472e-9a58-78f5653ac60f","provider":"mock","model":null,"fallbackUsed":false}
-[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"341d0e38-7230-44f8-9bb2-6db9b4af3681","provider":"mock","model":null,"fallbackUsed":false}
-[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"aebd98f0-1853-42a1-a8cc-880a8bb85414","provider":"mock","model":null,"fallbackUsed":false}
+ ✓ Ready in 584ms
+[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"e87e0206-0335-4bc4-acdc-2c5b2caed460","provider":"mock","model":null,"fallbackUsed":false}
+[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"940197de-9985-4a82-9164-2fd91aa7ed3a","provider":"mock","model":null,"fallbackUsed":false}
+[ai] safeclaw_answer_trace {"event":"safeclaw_answer_trace","traceId":"c8a40626-4e62-46ba-92a0-cedf9b26c838","provider":"mock","model":null,"fallbackUsed":false}
  ⨯ Error: SafeClaw deterministic frontend audit error boundary probe
-    at k (<repo>\.next\server\app\dryrun\page.js:2:7794) {
-  digest: '2742078557'
+    at l (<repo>\.next\server\app\dryrun\page.js:1:1085) {
+  digest: '798085137'
 }
-[audit-completion] browser-audit-server-stopped

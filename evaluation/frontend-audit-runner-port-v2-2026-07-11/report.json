@@ -1,10 +1,10 @@
 {
   "schemaVersion": 4,
-  "generatedAt": "2026-07-16T11:18:00.000Z",
-  "verificationStatus": "partial_pending_ci",
+  "generatedAt": "2026-07-17T05:11:03.207Z",
+  "verificationStatus": "evidence_ready_ci_pending",
   "launchReadiness": "not_evaluated_here",
-  "sourceSha": "7d5b09b55bd97cc078b01d9a39e5e61060b14c11",
-  "sourceIdentity": "dcc85935e638cc4198b78b72a92493085589c6f2ba6d3ee35842f47b48c1d18c",
+  "sourceSha": "b17b5d2e3458f1002555e9301b3e13346f70584f",
+  "sourceIdentity": "009e5a3965d9b14c46c58c746391701953bde8ecab0c02806fc6281b295b7bce",
   "lineEndingsNormalized": true,
   "staticAudit": {
     "status": "pass",
@@ -19,16 +19,16 @@
     "normal": {
       "status": "pass",
       "staticPages": 28,
-      "buildId": "5ZHk0go9MAseG9VoPYWMn",
+      "buildId": "hkOztE3TdrZ7LRXVQxbca",
       "markerCount": 0,
       "artifact": "bundle-normal.json"
     },
     "audit": {
       "status": "pass",
       "staticPages": 28,
-      "buildId": "6ciq3Y3JcV-vDzG22FvYP",
+      "buildId": "E6TqGHwXevApK11CeeiRr",
       "markerCount": 1,
-      "markerFile": "static/chunks/app/layout-541c3e0a964ca50d.js",
+      "markerFile": "static/chunks/app/layout-ea88bcd9c891c6c3.js",
       "artifact": "bundle-audit.json"
     }
   },
@@ -45,17 +45,18 @@
     "artifact": "browser-report.json"
   },
   "focusedRemediation": {
-    "frontendAndPhotoTestsPassed": 78,
-    "photoGroundingTestsPassed": 39,
-    "typecheck": "pass"
+    "testFilesPassed": 3,
+    "testsPassed": 70,
+    "typecheck": "pass",
+    "normalBuildStaticPages": 28,
+    "auditBuildStaticPages": 28
   },
   "fullSuite": {
-    "githubRunId": 29491156696,
-    "preRemediationPassed": 1895,
-    "preRemediationFailed": 3,
-    "preRemediationSkipped": 17,
-    "postRemediationStatus": "pending_new_ci",
-    "localRetry": "terminated_without_final_summary"
+    "githubRunId": 29554912622,
+    "status": "failed_source_identity_mismatch",
+    "failureScope": "tests/frontend-route-coverage.test.ts",
+    "newIntegratedMasterCi": "pending_after_evidence_commit_merge",
+    "passingMasterCiClaimed": false
   },
   "databaseChanged": false,
   "schemaChanged": false
