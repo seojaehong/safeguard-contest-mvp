@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-07-17T09:47:40+09:00",
+  "baseSha": "880db7af65cae369a897264ba7b66e7566d80540",
+  "branch": "fix/site-bound-knowledge-ingest-20260717",
+  "scope": "site-bound authenticated knowledge ingest",
+  "constraints": {
+    "databaseSchemaChanged": false,
+    "databaseDataMutated": false,
+    "syntheticSiteAttributionRemoved": true,
+    "typescriptAnyAdded": false
+  },
+  "tenantBoundary": {
+    "siteIdRequired": true,
+    "organizationIdDerivedFromOwnedSite": true,
+    "explicitOrganizationIdMustMatch": true,
+    "siteOwnershipCheckedAgainstAuthenticatedUser": true,
+    "crossSiteSourceIdentityConflict": "409 fail-closed",
+    "unconfiguredStore": "503 fail-closed",
+    "unauthenticatedRequest": "401 fail-closed"
+  },
+  "tddEvidence": {
+    "focusedTestFile": "tests/knowledge-ingest-route.test.ts",
+    "tests": 8,
+    "observedRedFailures": [
+      "missing siteId returned 500 before validation",
+      "unconfigured store returned 200 stateless success",
+      "unauthenticated request returned 200 stateless success",
+      "foreign organization ownership returned 200",
+      "contradictory organizationId returned 200",
+      "cross-site source identity collision returned 200"
+    ]
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests/knowledge-ingest-route.test.ts",
+      "exitCode": 0,
+      "result": "1 file passed, 8 tests passed"
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "exitCode": 0,
+      "result": "tsc --noEmit --incremental false"
+    }
+  ],
+  "changedFiles": [
+    "app/api/knowledge/ingest/route.ts",
+    "tests/knowledge-ingest-route.test.ts",
+    "evaluation/knowledge-ingest-site-binding.json"
+  ]
+}
