@@ -181,6 +181,66 @@ describe("documents editor layout", () => {
     expect(workbookText).not.toContain("사용자 편집 반영");
   }, 90_000);
 
+  it("edits canonical risk rows and drops them from export after freeform prose diverges", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const sample = buildSampleWorkpack();
+    const canonicalRow = {
+      controlId: "CTRL-UI-001",
+      location: sample.scenario.siteName,
+      process: "외벽 도장",
+      task: "이동식 비계 작업",
+      equipment: "이동식 비계",
+      hazard: "STALE_CANONICAL_UI_HAZARD",
+      fourM: "Machine" as const,
+      accidentType: "fall" as const,
+      currentControls: "안전난간 설치 상태 확인",
+      likelihood: 3,
+      severity: 4,
+      riskLevel: "high" as const,
+      additionalControls: "강풍 시 작업중지",
+      owner: "관리감독자",
+      due: "현장 확인",
+      verification: "작업 전 사진 확인",
+      verificationStatus: "planned" as const,
+      verificationDate: "현장 확인",
+      verificationChecker: "안전관리자",
+      whyLikelihood: "반복 노출",
+      whySeverity: "추락 시 중상 가능",
+      evidenceRefs: ["현장 작업계획"]
+    };
+    sample.structured = {
+      riskAssessmentRows: [canonicalRow],
+      riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
+    };
+    const stored = buildStoredCurrentWorkpack(sample);
+    await page.addInitScript(({ storageKey, serialized }) => {
+      window.localStorage.setItem(storageKey, serialized);
+    }, { storageKey: CURRENT_WORKPACK_STORAGE_KEY, serialized: JSON.stringify(stored) });
+
+    await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
+    await page.getByRole("tab", { name: /위험성평가표/u }).click();
+    const hazardInput = page.getByRole("textbox", { name: "행 1 유해·위험요인" });
+    await hazardInput.fill("CANONICAL_UI_EDITED_HAZARD");
+
+    const canonicalExport = await exportSelectedXlsx(page);
+    expect(canonicalExport.payload).toMatchObject({
+      mode: "single",
+      edited: false,
+      riskAssessmentRows: [{ hazard: "CANONICAL_UI_EDITED_HAZARD" }]
+    });
+    expect(readWorkbookText(canonicalExport.workbook)).toContain("CANONICAL_UI_EDITED_HAZARD");
+    expect(readWorkbookText(canonicalExport.workbook)).not.toContain("STALE_CANONICAL_UI_HAZARD");
+
+    await page.getByRole("button", { name: "원문" }).click();
+    const source = page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" });
+    await source.fill(`${await source.inputValue()}\nFREEFORM_PROSE_DIVERGENCE`);
+
+    const freeformExport = await exportSelectedXlsx(page);
+    expect(freeformExport.payload).toMatchObject({ mode: "single", edited: true });
+    expect(freeformExport.payload).not.toHaveProperty("riskAssessmentRows");
+  }, 90_000);
+
   it("keeps the document editor in the same light workbench system", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
