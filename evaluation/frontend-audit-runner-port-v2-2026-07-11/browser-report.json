@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-17T15:27:37.698Z",
+  "generatedAt": "2026-07-17T15:54:30.511Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "5f7d5936c26744eb1b09b6bd121f520dc18da9e3",
-  "sourceIdentity": "2f033894471f57850c46c5dae7ad8619d9402b47cf2a62417fdf3587ed466e6b",
-  "evidenceHead": "5f7d5936c26744eb1b09b6bd121f520dc18da9e3",
+  "sourceSha": "3ce357a716dddc4349c58a793b06bd11217bd2b8",
+  "sourceIdentity": "de25eece4902fb7352dd30e7ce923663d114e64d54b3674b33fb7151c7a153ff",
+  "evidenceHead": "3ce357a716dddc4349c58a793b06bd11217bd2b8",
   "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 33,
@@ -27,11 +27,11 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 141982
+    "elapsedMs": 151034
   },
   "staticAudit": {
-    "sourceSha": "5f7d5936c26744eb1b09b6bd121f520dc18da9e3",
-    "sourceIdentity": "2f033894471f57850c46c5dae7ad8619d9402b47cf2a62417fdf3587ed466e6b",
+    "sourceSha": "3ce357a716dddc4349c58a793b06bd11217bd2b8",
+    "sourceIdentity": "de25eece4902fb7352dd30e7ce923663d114e64d54b3674b33fb7151c7a153ff",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
@@ -10104,7 +10104,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-tablet-1024.jpg",
-      "screenshotSha256": "406ec8d955aa720dda4733ee30803d0d2f53600bcab9173418afafe6aaf53920",
+      "screenshotSha256": "e86889d3e58d55b96837bbbc96975601a8d57c37c3dc066bed79757f9a728c78",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -11513,7 +11513,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workspace-tablet-1024.jpg",
-      "screenshotSha256": "6e10ad885c4339bbd453bbe1812e7bbc908325732fb8fe7503e1e4731c95afa4",
+      "screenshotSha256": "2ea85f71b80058c13eac8800ef59407a1c7641e3cf62a84f4e0379cf5ad581fa",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -11717,7 +11717,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workspace-mobile-390.jpg",
-      "screenshotSha256": "9c6bdfda7025196567f4804389f3236f62b72756a864364a59630b4c683a9176",
+      "screenshotSha256": "456147a69fac8b35e637a78e40b525765104b63553591396798e7302ab4c9d7c",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -11895,7 +11895,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-day-desktop-1440.jpg",
-      "screenshotSha256": "7b6025834a2d4e3996c1df892dc200cf07ec651d14dad33baf783a9e588e0fb3",
+      "screenshotSha256": "78d0b3200350a0c216b70dace41de053a4fec2ae43239c959dfbc1d71e09f1e6",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12099,7 +12099,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-day-tablet-1024.jpg",
-      "screenshotSha256": "945660d0fce0d717c72be24597f7b65160335dcb10d0f679820b7b0d1bf8a528",
+      "screenshotSha256": "2ea85f71b80058c13eac8800ef59407a1c7641e3cf62a84f4e0379cf5ad581fa",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12303,7 +12303,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-day-mobile-390.jpg",
-      "screenshotSha256": "273b663b426eb87f2dd484adfe8e7ebfb9fdd0d6058a7bdce58e4d0e47222bff",
+      "screenshotSha256": "456147a69fac8b35e637a78e40b525765104b63553591396798e7302ab4c9d7c",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12479,7 +12479,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-desktop-1440.jpg",
-      "screenshotSha256": "57c17d25d852b73c8e0d1ed7f24801629194de3829ef535aeeed50342bda936d",
+      "screenshotSha256": "b47df416f1b73fdcb5939dd740a9225ab71157d7a1d373c2695724d8437200fc",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12683,7 +12683,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-tablet-1024.jpg",
-      "screenshotSha256": "8a2504dc5b14ae6fbb9c8babc7fe1a2fc1c477b79a9de5a8305ed45f38357e57",
+      "screenshotSha256": "d24472f4d511e98139c6362fbebf614e4d5a805a5ab28422c96c850b22476e9b",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12887,7 +12887,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-mobile-390.jpg",
-      "screenshotSha256": "71468a229dcf33d44fa4f067e966b900ff7fe8a09ea8d8cd90ca4c77deb96b39",
+      "screenshotSha256": "b83530690c03c42fdf5766d63dd2aa782a581b6f16bd13dd46068ad41a9bc9c9",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -13309,7 +13309,7 @@
           ]
         }
       ],
-      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.2,20,33.9,33.9,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.4,20.2,33.7,33.7,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -13788,7 +13788,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 18. 오전 12:27:37 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 18. 오전 12:54:30 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13832,7 +13832,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "392a5a08b33db017d8a9a60b9ab032215bc51affbe18dbc2bdb8b42781258e58",
+      "screenshotSha256": "fc7cb18b793d0499232b0b6b03c82cd4f3683dfb5a1883db56bc7bdd1e0844b0",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,

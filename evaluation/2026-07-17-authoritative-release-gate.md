@@ -435,6 +435,14 @@ Artifacts:
 - `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json`
 - `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.md`
 
+Latest current-HEAD refresh after the AiConnect runtime-boundary copy change:
+
+- Source SHA: `3ce357a716dddc4349c58a793b06bd11217bd2b8`
+- Static frontend contract: 33 pages, 23 product components, 0 coverage issues, 0 violations.
+- Browser matrix: 111/111 rows passed, 0 failed rows, 0 recovered rows, 0 findings.
+- Focused evidence reconciliation: `npm.cmd test -- tests\frontend-design-contract.test.ts tests\frontend-route-coverage.test.ts tests\product-module-shell.test.ts`
+  - Result: 3 files / 64 tests passed.
+
 ### Share recipient identity boundary gate
 
 The worker recipient portal keeps the invited-worker identity boundary separate from open group viewing.
