@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-07-17T23:26:13.965Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "xlsx": {
+    "ok": true,
+    "httpStatus": 200,
+    "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "filePath": "evaluation/northstar-output-contract-2026-07-18/files/risk-assessment-contract.xlsx",
+    "bytes": 8384,
+    "sheetName": "위험성평가표",
+    "expectedHeaderCount": 18,
+    "missingHeaders": []
+  },
+  "pdf": {
+    "ok": true,
+    "httpStatus": 200,
+    "contentType": "application/pdf",
+    "filePath": "evaluation/northstar-output-contract-2026-07-18/files/risk-assessment-contract.pdf",
+    "bytes": 22131,
+    "magic": "%PDF-",
+    "looksLikeHtml": false
+  },
+  "sourceContracts": {
+    "tbmRiskLinksGenerated": true,
+    "tbmRiskLinksExposed": true,
+    "xlsxUsesKoshasHeaders": true
+  },
+  "elapsedMs": 2676,
+  "overall": "pass"
+}
