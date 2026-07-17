@@ -534,3 +534,18 @@ Recipient portal results:
   - Result: 3 files / 42 tests passed.
 - Production build gate: `npm.cmd run build`
   - Result: passed, 28/28 static pages generated.
+
+### 2026-07-18 current-head KOSHA exact gate
+
+The KOSHA exact registry and applicability boundary were rechecked after the latest release-gate evidence commit on current HEAD `5d8fb3632b710be5c3f8856e7912a0e83587b5d9`.
+
+Results:
+
+- `npm.cmd test -- tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\exact-trusted-kosha-registry-wave3.test.ts tests\exact-kosha-applicability-policy.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts`
+  - Result: 6 files / 114 tests passed.
+
+Verified boundary:
+
+- Current exact KOSHA direct-evidence registry remains limited to the reviewed exact assets: `D-C-13-2026`, `D-C-7-2026`, and `B-E-10-2026`.
+- Trusted KOSHA references remain gated by immutable pins, applicability policy, registry membership, fail-closed behavior, and current-review run/ask coverage.
+- This was a verification-only gate; no database migration or production data mutation was performed.
