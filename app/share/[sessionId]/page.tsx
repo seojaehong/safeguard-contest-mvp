@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState, useEffect, useCallback } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { SafeClawModuleShell } from "@/components/SafeClawModuleShell";
 
 type ShareRecipientHint = {
@@ -63,11 +63,11 @@ function buildLanguageLabel(code: string): string {
 
 export default function ShareRecipientPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const searchParams = useSearchParams();
   const [fetchState, setFetchState] = useState<FetchState>("idle");
   const [sessionMessage, setSessionMessage] = useState("");
   const [sessionPayload, setSessionPayload] = useState<ShareSessionPayload | null>(null);
-  const [workerId, setWorkerId] = useState(searchParams.get("workerId") || "");
+  const [queryWorkerId, setQueryWorkerId] = useState<string | null>(null);
+  const [workerId, setWorkerId] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [languageCode, setLanguageCode] = useState("ko");
   const [confirmationMessage, setConfirmationMessage] = useState("");
@@ -131,7 +131,16 @@ export default function ShareRecipientPage() {
     return sessionPayload?.accessPolicy.manualLanguageSwitchAllowed ?? false;
   }, [sessionPayload]);
 
+  useEffect(() => {
+    const nextWorkerId = new URLSearchParams(window.location.search).get("workerId") || "";
+    setQueryWorkerId(nextWorkerId);
+    if (nextWorkerId) {
+      setWorkerId((current) => current || nextWorkerId);
+    }
+  }, []);
+
   const fetchSession = useCallback(async () => {
+    if (queryWorkerId === null) return;
     if (!sessionId) {
       setSessionMessage("공유 세션 식별값이 비어 있습니다.");
       setFetchState("error");
@@ -139,7 +148,8 @@ export default function ShareRecipientPage() {
     }
     setFetchState("loading");
     setSessionMessage("");
-    const query = workerId ? `?workerId=${encodeURIComponent(workerId)}` : "";
+    const requestWorkerId = workerId || queryWorkerId;
+    const query = requestWorkerId ? `?workerId=${encodeURIComponent(requestWorkerId)}` : "";
     const response = await fetch(`/api/share-sessions/${encodeURIComponent(sessionId)}${query}`, { cache: "no-store" });
     const payload = (await response.json()) as ShareSessionResponse;
     if (!payload.ok) {
@@ -157,7 +167,7 @@ export default function ShareRecipientPage() {
     }
     setSessionPayload(nextPayload);
 
-    const recipientByQuery = nextPayload.recipients.find((recipient) => recipient.workerId === (searchParams.get("workerId") || ""));
+    const recipientByQuery = nextPayload.recipients.find((recipient) => recipient.workerId === queryWorkerId);
     if (recipientByQuery) {
       setWorkerId(recipientByQuery.workerId);
       if (!displayName) setDisplayName(recipientByQuery.displayName || "");
@@ -175,7 +185,7 @@ export default function ShareRecipientPage() {
     }
     setSessionMessage("열람 대상 공유 세션을 확인했습니다.");
     setFetchState("idle");
-  }, [displayName, sessionId, languageCode, searchParams, workerId]);
+  }, [displayName, sessionId, languageCode, queryWorkerId, workerId]);
 
   useEffect(() => {
     void fetchSession();

@@ -14683,6 +14683,131 @@ body:has(.safeclaw-landing) :is(
   outline: 2px solid rgba(94, 106, 210, 0.26);
 }
 
+.safeclaw-share-recipient-page {
+  display: grid;
+  max-width: 760px;
+  margin: 0 auto;
+  gap: 12px;
+}
+
+.safeclaw-share-recipient-page h2 {
+  margin: 0;
+  color: var(--workspace-ink);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: 0;
+}
+
+.safeclaw-subtitle,
+.safeclaw-hint,
+.safeclaw-note {
+  margin: 0;
+  color: var(--workspace-muted);
+  font-size: 14px;
+  line-height: 22px;
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-share-recipient-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+  padding: 16px;
+  box-shadow: none;
+}
+
+.safeclaw-share-recipient-card h3 {
+  margin: 0;
+  color: var(--workspace-ink);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: 0;
+}
+
+.safeclaw-share-recipient-card p {
+  margin: 0;
+  color: var(--workspace-muted);
+  font-size: 14px;
+  line-height: 22px;
+  overflow-wrap: anywhere;
+}
+
+.safeclaw-share-recipient-card label {
+  display: grid;
+  gap: 6px;
+  color: var(--workspace-muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.safeclaw-input,
+.safeclaw-select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.safeclaw-input:focus,
+.safeclaw-select:focus {
+  outline: 2px solid color-mix(in srgb, var(--workspace-accent) 42%, transparent);
+  outline-offset: 2px;
+}
+
+.safeclaw-button {
+  min-height: 44px;
+  border: 1px solid var(--workspace-rule);
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: var(--workspace-ink);
+  background: var(--workspace-surface-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  cursor: pointer;
+}
+
+.safeclaw-button-primary {
+  border-color: var(--workspace-accent);
+  background: var(--workspace-accent);
+  color: var(--workspace-accent-ink);
+}
+
+.safeclaw-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.link-inline {
+  color: var(--workspace-accent-text);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .safeclaw-share-recipient-page {
+    max-width: none;
+    gap: 10px;
+  }
+
+  .safeclaw-share-recipient-card {
+    padding: 14px;
+  }
+}
+
 .share-inline-note,
 .channel-readiness-note {
   margin: 0;
