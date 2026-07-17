@@ -200,7 +200,7 @@ type ImprovementApiResult = {
 const workflowSteps: WorkflowStep[] = [
   { id: "01", key: "input", label: "입력", caption: "현장 상황" },
   { id: "02", key: "document", label: "문서", caption: "결과 검토" },
-  { id: "03", key: "share", label: "공유", caption: "열람·확인" }
+  { id: "03", key: "share", label: "공유", caption: "공유·기록" }
 ];
 
 const outputItems: Array<{ title: string; key: DocumentKey }> = [
@@ -890,7 +890,7 @@ function SafeClawHomepage({ onStart }: { onStart: () => void }) {
   const pipeline = [
     { code: "01 · INPUT", title: "입력", body: "오늘 작업 한 줄에서 현장 브리프와 근거 후보를 준비", metric: "현장 상황" },
     { code: "02 · DOCS", title: "문서", body: "위험성평가와 TBM을 중심으로 공식 근거와 누락 조치를 대조", metric: "위험성평가/TBM" },
-    { code: "03 · SHARE", title: "공유", body: "작업자 열람, 언어 전환, 확인 이력, 개선사항 후보를 남김", metric: "열람·확인" }
+    { code: "03 · SHARE", title: "공유", body: "문서팩 전파, 전송 로그, 개선사항 후보를 남김", metric: "공유·기록" }
   ];
   const proofSources = [
     ["L.14991", "산업안전보건법", "법령 조항"],
@@ -1876,7 +1876,7 @@ export function SafeGuardCommandCenter({
   const shareAckLabel = workpackReadiness && !workpackReadiness.canShare
     ? "공유 전 보완 필요"
     : data
-      ? "열람 확인 대기 중"
+      ? "전송 기록 대기 중"
       : "문서 생성 후 활성화";
   const currentWorkflowStep = workflowSteps.find((step) => step.key === workspacePage) ?? workflowSteps[0];
   const themeShellClass = activeWorkspaceTheme === "day"
