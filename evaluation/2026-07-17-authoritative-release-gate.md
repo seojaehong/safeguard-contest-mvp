@@ -813,3 +813,28 @@ Verified boundary:
 Integration note:
 
 - This is a boundary/contract recheck, not a production Hermes traffic cutover. The Phase B document still requires a separate explicit approval gate before GPT OAuth proof-of-concept work, service-auth traffic, DB migration, billing schema, or tenant data mutation.
+
+### 2026-07-18 tenant/RLS application-boundary gate recheck
+
+The tenant-boundary, MCP token, share authority, and LLM Wiki RLS approval boundary were rechecked on current HEAD `c22c8d76854993003bef96fc563563ccdba438a9`.
+
+Results:
+
+- `npm.cmd test -- tests\supabase-tenant-isolation-harness.test.ts tests\workpack-commercial-tenant-hardening.test.ts tests\workpack-commercial.test.ts tests\workpack-share-authority.test.ts tests\workpack-share-authority-routes.test.ts tests\dispatch-logs-tenant-boundary.test.ts tests\education-records-tenant-boundary.test.ts tests\mcp-auth.test.ts tests\mcp-token-service.test.ts tests\tenant-harness-memory.test.ts tests\tenant-harness-memory-claw-tool.test.ts tests\llm-wiki-rls-approval-packet.test.ts`
+  - Result: 12 files / 176 tests passed.
+
+Verified boundary:
+
+- Tenant operation memory remains scoped through approved/reflected rows and structured digests.
+- Workpack share authority, recipient session construction, dispatch log boundaries, education record boundaries, MCP token service behavior, and LLM Wiki approval-packet boundaries are covered by focused app-layer tests.
+- Public LLM Wiki/knowledge promotion remains approval-gated and separate from tenant operation memory.
+
+RLS approval status:
+
+- The authoritative approval packet remains `approval_required`: `evaluation/supabase-rls-approval-2026-07-17/report.md` and `report.json`.
+- The read-only audit confirms the repository/migration contract and non-mutating REST reachability evidence, but it does not prove live `pg_catalog` policy expressions, `FORCE RLS`, grants, authenticated tenant A/B negative tests, or Storage object path isolation.
+- Service-role routes bypass RLS, so route predicates and relational ownership checks remain separately tested at the application layer.
+
+Integration note:
+
+- This gate performed tests and documentation only; no database schema, RLS policy, migration, Storage operation, production data, or Supabase project state was changed.
