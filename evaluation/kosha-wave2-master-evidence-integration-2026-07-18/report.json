@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "safeclaw-kosha-wave2-master-evidence-integration/v1",
+  "generatedAt": "2026-07-18T09:00:00+09:00",
+  "status": "evidence_integrated_with_broad_suite_red_preserved",
+  "databaseMutationPerformed": false,
+  "schemaMutationPerformed": false,
+  "integratedCommits": [
+    "41355b47",
+    "e78e6eaf"
+  ],
+  "changedFiles": [
+    "evaluation/kosha-trust-registry-wave2-2026-07-16/report.md",
+    "evaluation/kosha-trust-registry-wave2-2026-07-16/report.json",
+    "evaluation/kosha-trust-registry-wave2-2026-07-16/kosha-sif-ontology-tests.log"
+  ],
+  "currentVerification": {
+    "conflictMarkers": "none",
+    "reportJson": "valid",
+    "focusedVitest": {
+      "files": 4,
+      "tests": 49,
+      "status": "pass"
+    },
+    "pythonAcquisition": {
+      "tests": 19,
+      "status": "pass"
+    },
+    "strictTypecheck": "pass"
+  },
+  "preservedBoundary": {
+    "historicalBroadSuite": "unresolved_red",
+    "failedFile": "tests/kosha-guide-corpus-audit.test.ts",
+    "failedTests": 3
+  }
+}
