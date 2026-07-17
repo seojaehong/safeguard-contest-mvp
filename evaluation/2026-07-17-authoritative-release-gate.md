@@ -746,3 +746,19 @@ Verified boundary:
 Integration note:
 
 - This gate validates current master behavior only. It does not claim that machine translation quality is complete for every future language; it proves the current saved-language dispatch and export-localization contracts.
+
+### 2026-07-18 current-head typecheck and production build
+
+The basic release build gate was rechecked on current HEAD `5c8d6f60b361e7ce92287e3d51ca02f67caac22e`.
+
+Results:
+
+- `npm.cmd run typecheck`
+  - Result: pass.
+- `npm.cmd run build`
+  - Result: pass; 28/28 static pages generated.
+
+Verified boundary:
+
+- `/share/[sessionId]`, `/workspace`, `/documents`, `/reports`, `/knowledge`, `/ontology`, `/api/input-photos/hazard-analysis`, export routes, share-session routes, and KOSHA/SIF status routes remain present in the production route map.
+- This build was run sequentially after typecheck. No concurrent build process was started for this gate.
