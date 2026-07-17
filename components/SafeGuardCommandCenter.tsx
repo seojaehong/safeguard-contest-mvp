@@ -230,7 +230,7 @@ function statusCopy(state: GenerationState, readiness?: WorkpackReadiness | null
   if (state === "ready" && readiness && !readiness.canShare) return "공유 전 보완";
   if (state === "ready") return "문서팩 준비됨";
   if (state === "error") return "연결 점검 필요";
-  return "작업 입력 대기";
+  return "준비됨";
 }
 
 function stepStatusCopy(status: StepStatus) {
@@ -277,7 +277,7 @@ function operationalStatus(data: AskResponse | null, state: GenerationState, rea
   if (state === "error") return "연결 점검 필요";
   if (data && readiness && !readiness.canShare) return readiness.reasons[0] || readiness.summary;
   if (data) return data.status.summary || "근거 연결됨";
-  return "입력 대기";
+  return "현장 상황 입력";
 }
 
 function compactWeatherBrief(weather: string) {

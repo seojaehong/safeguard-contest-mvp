@@ -646,6 +646,25 @@ describe("workspace layout regression", () => {
     await page.close();
   }, 90_000);
 
+  it("keeps the empty input topbar concise without duplicated waiting copy", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.addInitScript((storageKey) => window.localStorage.removeItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY);
+    await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+
+    const status = await page.locator(".topbar-status").evaluate((element) => ({
+      text: element.textContent?.replace(/\s+/gu, " ").trim() ?? "",
+      label: element.querySelector("span")?.textContent?.trim() ?? "",
+      detail: element.querySelector("b")?.textContent?.trim() ?? ""
+    }));
+
+    expect(status.label).toBe("준비됨");
+    expect(status.detail).toBe("현장 상황 입력");
+    expect(status.text).not.toContain("작업 입력 대기");
+    expect(status.text).not.toContain("입력 대기");
+    await page.close();
+  }, 90_000);
+
   it("keeps a filled workspace rail aligned without an independent desktop scrollbar", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1560, height: 700 } });
