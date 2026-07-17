@@ -107,3 +107,16 @@ Fresh live probe:
 - Focused regression test: `npm.cmd test -- tests\workspace-layout-regression.test.ts --testNamePattern="focuses the input and announces an error when blank generation is submitted"` passed, 1 file / 1 test.
 
 This proves the current production workspace no longer silently ignores a blank first action.
+
+### Live CTA contrast spot gate
+
+The earlier live audit reported low-contrast white/yellow CTA combinations on several public and product routes. A fresh Day mobile spot probe found no remaining low-contrast interactive controls with opaque backgrounds on the cited route set.
+
+Fresh live probe:
+
+- Viewport: 390px by 844px
+- Routes: `/documents`, `/roadmap`, `/why`, `/settings/ai-connect`, `/search`, `/worker`, `/workers`, `/archive`, `/home`
+- Method: collect visible `a[href]`, `button`, and `[role="button"]` elements, compute foreground/background contrast where the element has an opaque background, report controls below 4.5:1.
+- Result: low-contrast controls `0` on every probed route.
+
+This proves the previously cited white-on-yellow CTA contrast issue is not present on the current production route set.
