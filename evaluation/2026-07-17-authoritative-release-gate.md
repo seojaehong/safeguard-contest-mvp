@@ -3,7 +3,7 @@
 ## Scope
 
 - Original integration source HEAD: `2b4316056b44b8729903d364d93022a916383ab6`
-- Current product verification HEAD: `06c0d0ba83d472521c7bfb5cdfa806507dcf29c9`
+- Current product verification HEAD: `0b2187d54e1bfda6e992505e2c01627a419827c9`
 - Later commits in this file are documentation-only evidence refreshes unless stated otherwise.
 - KOSHA exact-trust Wave 2: already present on the authoritative branch with equivalent product and evidence patches.
 - Remote Hermes: trusted-transport and durable-attempt-ledger boundary integrated; product execution remains disabled until those application-owned dependencies are supplied.
@@ -13,10 +13,9 @@
 ### Full test suite
 
 - Command: `npm.cmd test -- --maxWorkers=1 --no-file-parallelism --reporter=verbose --reporter=hanging-process`
-- Result before evidence refresh: 184 files, 175 passed, 1 failed, 8 skipped; 2,062 tests passed, 1 failed, 14 skipped.
-- The only failure was a stale frontend browser-evidence source identity after the Hermes integration. It was not a product assertion failure.
-- Evidence log: `evaluation/2026-07-17-authoritative-full-test.log` (local generated log, intentionally not committed).
-- After regenerating the static and browser evidence, the failed contract suite passed: 1 file / 39 tests.
+- Current HEAD result: 188 files passed, 9 skipped; 2,301 tests passed, 15 skipped.
+- Evidence log: `evaluation/2026-07-17-authoritative-full-test-current.log` (local generated log, intentionally not committed).
+- The prior stale frontend browser-evidence source identity failure is no longer present on the current HEAD.
 
 ### Focused backend trust gate
 
@@ -29,11 +28,11 @@
 - Fresh current-HEAD production build after the KOSHA/share evidence refresh: passed, 28/28 static pages generated.
 - Fresh current-HEAD strict typecheck after build: passed.
 - Note: running `npm.cmd run typecheck` before a fresh `next build` failed because `tsconfig.json` includes `.next/types/**/*.ts` and the generated Next type files were missing. The subsequent `npm.cmd run build` regenerated `.next/types`, and the immediate typecheck rerun passed. This is recorded as a build-artifact ordering issue, not a source type error.
-- Static frontend contract: 32 pages, 23 product components, 0 coverage issues, 0 violations.
+- Static frontend contract: 33 pages, 23 product components, 0 coverage issues, 0 violations.
 - Normal bundle contract: passed; audit marker count 0.
 - Audit bundle contract: passed; deterministic marker present only in the audit graph.
 - Audit runtime boundary: HTTP 500 expected, one boundary marker, no unfiltered page or console errors.
-- Browser matrix: 108/108 rows passed, 108 screenshots, 0 failed rows, 0 recovered rows, 0 findings.
+- Browser matrix: 111/111 rows passed, 111 screenshots, 0 failed rows, 0 recovered rows, 0 findings.
 
 ### Export contract
 
@@ -51,7 +50,7 @@
 
 ## 2026-07-17 Continuation Evidence
 
-Current continuation HEAD after the final foreign-recipient evidence refresh: `45b68f83355dc41969ec0cc36dcfb3f390dfdb7d`.
+Current continuation HEAD after the KOSHA broad gate and frontend recipient-route audit refresh: `0b2187d54e1bfda6e992505e2c01627a419827c9`.
 
 ### KOSHA D-C-13 applicability
 
