@@ -1,0 +1,16 @@
+{
+  "verdict": "PASS",
+  "date": "2026-07-18",
+  "afterCommit": "5c4604ba",
+  "command": "npm.cmd run build",
+  "staticPages": {
+    "completed": 28,
+    "total": 28,
+    "status": "PASS"
+  },
+  "routesPresent": [
+    "/api/ask",
+    "/share/[sessionId]"
+  ],
+  "liveHarnessRecheckRequired": true
+}
