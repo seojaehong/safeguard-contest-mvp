@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2026-07-18T00:00:00+09:00",
+  "authoritativeHead": "62cccafbdeb5a87e045c9f9bd7c43619029ddd17",
+  "liveTarget": "https://www.safeclaw.kr",
+  "productCodeChanged": false,
+  "staleReportsReconciled": [
+    {
+      "claim": "recipient portal is not implemented",
+      "currentVerdict": "stale",
+      "currentEvidence": [
+        "app/share/[sessionId]/page.tsx",
+        "app/api/share-sessions/[sessionId]/route.ts",
+        "components/WorkflowSharePanel.tsx recipientPortalPreviewHref"
+      ]
+    },
+    {
+      "claim": "KOSHA local corpus is live-unconfigured",
+      "currentVerdict": "stale",
+      "currentEvidence": [
+        "GET /api/safety-reference/status HTTP 200",
+        "localCorpus.status=ready",
+        "localCorpus.itemCount=234",
+        "localCorpus.chunkCount=7127"
+      ]
+    }
+  ],
+  "liveChecks": {
+    "shareRecipientRoute": {
+      "url": "https://www.safeclaw.kr/share/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb?workerId=11111111-1111-4111-8111-111111111111",
+      "http": 200,
+      "scope": "route shell availability"
+    },
+    "safetyReferenceStatus": {
+      "http": 200,
+      "ok": true,
+      "status": "ready",
+      "searchReady": true,
+      "localCorpusStatus": "ready",
+      "localCorpusItemCount": 234,
+      "localCorpusChunkCount": 7127
+    },
+    "photoHazardAnalysis": {
+      "http": 200,
+      "status": "ready",
+      "provider": "openai",
+      "model": "gpt-4.1-mini",
+      "apiKeyPresent": true,
+      "maxInputPhotos": 10
+    },
+    "providerDispatch": {
+      "http": 200,
+      "capability": false,
+      "mode": "preview_only",
+      "reason": "persistent_idempotency_unavailable"
+    }
+  },
+  "currentDemoScope": {
+    "ready": [
+      "workspace document generation with DB harness",
+      "verified KOSHA runtime corpus",
+      "photo hazard analysis readiness",
+      "recipient portal route shell",
+      "manager-side worker preview link after session creation"
+    ],
+    "previewOnly": [
+      "email dispatch",
+      "sms dispatch",
+      "kakao dispatch"
+    ],
+    "approvalHeld": [
+      "SIF embedding DB upload",
+      "Supabase migration/data mutation",
+      "Phase B organization ontology",
+      "Hermes shared worker pool production cutover",
+      "LLM Wiki publication workflow"
+    ]
+  }
+}
