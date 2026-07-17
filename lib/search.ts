@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { AskResponse, type GenerationDeliverableModelTrace, type GenerationTrace, type PermitInspectionStructured, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
+import { AskResponse, type AccidentCase, type GenerationDeliverableModelTrace, type GenerationTrace, type PermitInspectionStructured, type TbmBriefingStructured, type TbmLogStructured, type TbmRiskLink, type WorkPlanStructured } from "./types";
 import {
   applyPhaseAAnswerBoundary,
   enhanceLegalEvidenceMappings,
@@ -39,7 +39,7 @@ import { fetchWeatherSignal } from "./weather";
 import { fetchTrainingRecommendations } from "./work24";
 import { fetchKoshaEducationRecommendations } from "./kosha-education";
 import { fetchKoshaReferences } from "./kosha";
-import { fetchAccidentCases } from "./accident-cases";
+import { fetchAccidentCases, selectFallbackAccidentCases } from "./accident-cases";
 import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
 import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission, reconcileLanguages } from "./foreign-worker";
 import { matchSafetyKnowledge } from "./safety-knowledge";
@@ -62,6 +62,83 @@ import {
 } from "./db-harness";
 
 const log = createLogger("search");
+
+function accidentTypeToRiskTags(accidentType: string | undefined, text: string): string[] {
+  const haystack = `${accidentType || ""} ${text}`;
+  const tags = [
+    ["추락", /추락|떨어|낙상|비계|고소/u],
+    ["충돌", /충돌|지게차|동선|보행/u],
+    ["끼임", /끼임|협착/u],
+    ["화재", /화재|용접|절단|불티/u],
+    ["폭발", /폭발/u],
+    ["감전", /감전|전기|누전/u],
+    ["질식", /질식|밀폐|산소/u],
+    ["화학물질", /화학|용제|세척|MSDS/u],
+  ] as const;
+  const matched = tags.filter(([, pattern]) => pattern.test(haystack)).map(([tag]) => tag);
+  return matched.length ? matched : ["중대위험"];
+}
+
+function accidentCaseToSafetyReference(item: AccidentCase, index: number): SafetyReferenceItem {
+  const text = `${item.title} ${item.summary} ${item.preventionPoint}`;
+  const riskTags = accidentTypeToRiskTags(item.accidentType, text);
+  return {
+    id: `offline-sif-${index + 1}-${item.title.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").toLowerCase()}`,
+    source_id: "safeclaw-offline-sif-cases",
+    item_type: "sif-case",
+    category: item.industry || "현장 안전",
+    subcategory: item.accidentType || null,
+    title: item.title,
+    summary: item.summary,
+    body: `${item.summary}\n예방 포인트: ${item.preventionPoint}`,
+    keywords: Array.from(new Set([
+      ...(item.industry ? [item.industry] : []),
+      ...(item.accidentType ? [item.accidentType] : []),
+      ...riskTags,
+      ...item.title.split(/[\s·/,-]+/u).filter((token) => token.length >= 2).slice(0, 4),
+    ])),
+    risk_tags: riskTags,
+    primary_documents: ["위험성평가표", "TBM 브리핑", "TBM 기록"],
+    controls: [item.preventionPoint],
+    source_url: item.sourceUrl || null,
+    evidence_role: "supporting",
+    retrieval_source: "local-ranked",
+    display_title: item.title,
+    display_summary: item.summary,
+    short_summary: item.summary,
+    document_reflection_label: "위험성평가표와 TBM에 유사사례 예방 포인트 반영",
+    operation_signal_label: item.matchedReason || "오프라인 SIF 유사사례를 작업 전 확인",
+    source_kind_label: "오프라인 SIF 유사사례",
+    payload: {
+      sourceType: item.sourceType || "fallback",
+      matchedReason: item.matchedReason,
+    },
+  };
+}
+
+function buildOfflineSifFallbackResult(question: string, limit: number): SafetyReferenceSearchResult {
+  const items = selectFallbackAccidentCases(question)
+    .slice(0, limit)
+    .map(accidentCaseToSafetyReference);
+  return {
+    ok: items.length > 0,
+    configured: true,
+    query: question,
+    count: items.length,
+    items,
+    retrievalMode: "local-ranked",
+    vectorSearch: {
+      enabled: false,
+      attempted: false,
+      ok: false,
+      reason: "disabled",
+      count: 0,
+      model: "text-embedding-3-small",
+      message: "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+    },
+    message: "Supabase 미설정 환경에서 오프라인 SIF 유사사례를 사용했습니다."
+  };
+}
 
 function buildPhaseACanonicalDeliverables(
   grounding: PhaseAGenerationGrounding,
@@ -1923,12 +2000,15 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
         };
       });
     const safetyReferencePromise = (async () => {
-      const [supportReg, guideline, sif, general] = await Promise.all([
+      const [supportReg, guideline, sifSearch, general] = await Promise.all([
         safeSearch({ query: question, limit: 3, itemType: "technical-support-regulation" }),
         safeSearch({ query: question, limit: 3, itemType: "technical-guideline" }),
         safeSearch({ query: question, limit: 3, itemType: "sif-case" }),
         safeSearch({ query: question, limit: 5 })
       ]);
+      const sif = !sifSearch.configured && sifSearch.items.length === 0
+        ? buildOfflineSifFallbackResult(question, 3)
+        : sifSearch;
       // Merge all buckets, then rerank by task-specific query relevance. Official
       // KOSHA refs still stay in the candidate set, but broad support regulations
       // should not outrank SIF/confined-space/LOTO-specific evidence.

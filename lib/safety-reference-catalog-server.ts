@@ -11,6 +11,7 @@ import {
 } from "@/lib/kosha-guide-corpus";
 import {
   getKoshaGroundingDecision,
+  deriveSafetyReferenceRetrievalModeFromItems,
   isSafetyReferenceDirectEligible,
   isKoshaSupportingCitationEligible,
   isKoshaTechnicalReference,
@@ -604,20 +605,31 @@ export async function searchSafetyReferences(
   if (!remote.configured) {
     if (exactRegistryBlocked) return gatedRemote;
     if (localItems.length) {
+      const mergedItems = mergeLocalAndRemoteSafetyReferenceResults({
+        localItems,
+        remoteItems: retainedRemoteItems,
+        remoteRetrievalMode: remoteWithFallback.retrievalMode,
+        limit
+      }).items;
       return {
         ok: true,
         configured: true,
         query,
-        count: localItems.length,
-        items: localItems,
-        retrievalMode: localSearch.retrievalMode || "local-tag",
+        count: mergedItems.length,
+        items: mergedItems,
+        retrievalMode: deriveSafetyReferenceRetrievalModeFromItems(
+          mergedItems,
+          localSearch.retrievalMode || remoteWithFallback.retrievalMode || "local-tag",
+        ),
         vectorSearch: resolveSafetyReferenceVectorSearchState(options.offlineCorpus?.env).status,
         koshaGrounding: summarizeKoshaGrounding({
-          items: localItems,
+          items: mergedItems,
           localCorpusStatus: "ready",
           excludedCount: excludedRemoteCount,
         }),
-        message: "서버 전용 KOSHA 스냅샷에서 오프라인 보조근거를 조회했습니다."
+        message: retainedRemoteItems.length
+          ? "공식 KOSHA 정확 본문 번들과 서버 전용 KOSHA 스냅샷을 함께 조회했습니다."
+          : "서버 전용 KOSHA 스냅샷에서 오프라인 보조근거를 조회했습니다."
       };
     }
     if (localCorpus.status === "blocked") {

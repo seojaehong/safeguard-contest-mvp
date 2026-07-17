@@ -18,6 +18,7 @@ import { validateRiskAssessmentRows } from "@/lib/risk-assessment-schema";
 import { attachDbHarnessFallback, buildSafetyReferenceRiskRows, buildSafetyReferenceSurfaceItem, buildTbmRiskLinks, normalizeSafetyTermTypos, runAsk } from "@/lib/search";
 import { buildSifEmbeddingBatchManifest, buildSifEmbeddingCorpus, isEmbeddableSifReferenceItem, toSifEmbeddingJsonl } from "@/lib/sif-embedding-corpus";
 import type { SafetyReferenceItem } from "@/lib/safety-reference-catalog";
+import { withNoSupabase } from "@/tests/helpers/kosha-offline-fixture";
 import {
   buildWorkpackLearningFile,
   buildWorkpackLearningJsonl,
@@ -1851,6 +1852,23 @@ describe("runAsk DB harness mode", () => {
       /도료|희석제|도장/.test(`${row.task} ${row.hazard}`)
       && /환기|점화원|소화기|MSDS/.test(`${row.currentControls} ${row.additionalControls}`)
     ))).toBe(true);
+    expect(response.qualityContract?.structured.status).toBe("ready");
+    expect(response.qualityContract?.dbHarness.status).toBe("ready");
+  }, 20_000);
+
+  it("keeps the launch demo row-first when Supabase is unavailable", async () => {
+    const response = await withNoSupabase(() => runAsk(
+      "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계를 사용하고 작업자 5명 중 신규 투입자 1명이 포함된다. 오후 강풍 예보가 있으며 자재 반입 지게차 동선과 작업자 통행 동선이 겹친다.",
+      { aiMode: "enhanced" }
+    ));
+
+    expect(response.dbHarness?.summary.directEvidence).toBeGreaterThan(0);
+    expect(response.dbHarness?.summary.sifCases).toBeGreaterThan(0);
+    expect(response.dbHarness?.summary.supportingEvidence).toBeGreaterThan(0);
+    expect(response.structured?.riskAssessmentRows.length).toBeGreaterThan(0);
+    expect(response.structured?.tbmRiskLinks?.length).toBeGreaterThan(0);
+    expect(response.status.detail).toContain("structured rows=DB harness deterministic");
+    expect(response.status.detail).toContain("TBM structured=deterministic from risk rows");
     expect(response.qualityContract?.structured.status).toBe("ready");
     expect(response.qualityContract?.dbHarness.status).toBe("ready");
   }, 20_000);

@@ -32,6 +32,12 @@
    - Treated accepted operation improvement memory as operational parent evidence for deterministic row generation.
    - Kept parentless KOSHA provider action surfaces blocked while preserving photo-derived deterministic risk rows and TBM links.
 
+7. No-Supabase launch harness fallback
+   - Reproduced GitHub CI run `29614720378` by clearing local Supabase environment variables.
+   - Preserved exact trusted KOSHA direct evidence when remote Supabase is unavailable but the bundled local KOSHA corpus is ready.
+   - Added an offline SIF fallback from curated accident cases so the launch demo still has Task/SIF/KOSHA evidence hierarchy without generic LLM substitution.
+   - Added a regression that runs the launch demo through `withNoSupabase()`.
+
 ## Verification
 
 - `npm.cmd test -- tests\generation-evidence-operation-routes.test.ts tests\kosha-current-review-run-ask.test.ts tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false`
@@ -56,9 +62,21 @@
   - 4 files / 134 tests PASS
 - `npm.cmd run build`
   - PASS, 28/28 static pages
+- No-Supabase reproduction:
+  - `npm.cmd test -- tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false --reporter=verbose` with `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` cleared
+  - 1 file / 53 tests PASS
+- `npm.cmd test -- tests\generation-evidence-operation-routes.test.ts tests\kosha-current-review-run-ask.test.ts tests\commercial-harness.test.ts tests\frontend-route-coverage.test.ts tests\photo-vision-analysis.test.ts tests\kosha-grounding-fail-closed.test.ts --maxWorkers=1 --fileParallelism=false`
+  - 6 files / 177 tests PASS
+- `npm.cmd run typecheck`
+  - PASS
+- `git diff --check`
+  - PASS (line-ending warnings only)
+- `npm.cmd run build`
+  - PASS, 28/28 static pages
 
 ## Artifacts
 
 - `evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json`
 - `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.json`
 - `evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-report.md`
+- `evaluation/ci-remediation-2026-07-18/run-29614720378-failed.log`
