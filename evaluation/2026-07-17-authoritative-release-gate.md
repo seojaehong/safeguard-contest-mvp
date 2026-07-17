@@ -672,3 +672,19 @@ Integration note:
 
 - The stale `feat/kosha-trust-registry-wave2` branch still contains branch-local broad RED evidence and is far behind current master; a whole-branch merge would delete current share portal, Hermes, knowledge, and release evidence files.
 - Current master direct verification above is therefore the authoritative state for the KOSHA/SIF/ontology broad gate.
+
+### 2026-07-18 recipient portal and foreign dispatch gate recheck
+
+The recipient portal and owner-side share authority were rechecked on current HEAD `dfe75bfd7a9fa0056e73fe52acac28f4d65542ad`.
+
+Results:
+
+- `npm.cmd test -- tests\share-recipient-portal-browser.test.ts tests\workpack-share-authority-routes.test.ts tests\workflow-share-panel-behavior.test.ts`
+  - Result: 3 files / 42 tests passed.
+
+Verified boundary:
+
+- `/share/[sessionId]` remains present in the product route map and is covered by the recipient portal browser contract.
+- Share session and read-confirmation route authority remain covered by route tests.
+- Owner-side share panel behavior remains covered by focused UI tests.
+- Older read-only delegation that reported no recipient portal is stale relative to current master.
