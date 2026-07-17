@@ -1,6 +1,6 @@
 {
   "verdict": "pass",
-  "generatedAt": "2026-05-02T10:45:17.840Z",
+  "generatedAt": "2026-07-17T01:10:07.593Z",
   "elapsedMs": 6,
   "seedDatabase": {
     "hazards": 8,
@@ -49,8 +49,27 @@
     "ok": true,
     "errors": []
   },
+  "requestContract": {
+    "authentication": "Authorization: Bearer <Supabase access token> required",
+    "siteId": "required and ownership-validated",
+    "organizationId": "derived from owned site; explicit value must match"
+  },
   "storagePolicy": {
-    "current": "stateless validation and regeneration bundle",
-    "next": "Supabase knowledge_events or DailyEntry snapshots after migration approval"
+    "current": "authenticated site-bound persistent ingest",
+    "fallback": "none",
+    "sameSiteReingest": "update raw event before creating regeneration run",
+    "concurrentUniqueViolation": "re-read; same-site update or cross-site 409"
+  },
+  "failClosed": {
+    "invalidRequest": "400",
+    "unauthenticated": "401",
+    "siteNotOwned": "404",
+    "tenantConflict": "409",
+    "storeUnconfigured": "503"
+  },
+  "smokeExecution": {
+    "mode": "offline-contract",
+    "credentialsLoaded": false,
+    "liveDatabaseMutationPerformed": false
   }
 }

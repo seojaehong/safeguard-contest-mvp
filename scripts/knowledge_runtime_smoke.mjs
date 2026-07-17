@@ -30,6 +30,7 @@ function matchHazards(hazards, question) {
 
 function validateRawEvent(event) {
   const errors = [];
+  if (!event.siteId) errors.push("siteId missing");
   if (!event.source) errors.push("source missing");
   if (!event.sourceId) errors.push("sourceId missing");
   if (!event.title) errors.push("title missing");
@@ -51,6 +52,7 @@ const migrationExists = await stat(path.join(root, "supabase", "migrations", "00
 const scenario = "서울 성수동 외벽 도장 작업. 이동식 비계 사용, 오후 강풍, 신규 작업자 포함, 추락과 지게차 동선 위험.";
 const matches = matchHazards(hazards, scenario);
 const rawEvent = {
+  siteId: "smoke-site-id",
   source: "kosha-openapi",
   sourceId: "smoke-kosha-smart-search-001",
   capturedAt: new Date().toISOString(),
@@ -94,9 +96,28 @@ const report = {
     ok: rawEventErrors.length === 0,
     errors: rawEventErrors
   },
+  requestContract: {
+    authentication: "Authorization: Bearer <Supabase access token> required",
+    siteId: "required and ownership-validated",
+    organizationId: "derived from owned site; explicit value must match"
+  },
   storagePolicy: {
-    current: "stateless validation and regeneration bundle",
-    next: "Supabase knowledge_events or DailyEntry snapshots after migration approval"
+    current: "authenticated site-bound persistent ingest",
+    fallback: "none",
+    sameSiteReingest: "update raw event before creating regeneration run",
+    concurrentUniqueViolation: "re-read; same-site update or cross-site 409"
+  },
+  failClosed: {
+    invalidRequest: "400",
+    unauthenticated: "401",
+    siteNotOwned: "404",
+    tenantConflict: "409",
+    storeUnconfigured: "503"
+  },
+  smokeExecution: {
+    mode: "offline-contract",
+    credentialsLoaded: false,
+    liveDatabaseMutationPerformed: false
   }
 };
 
