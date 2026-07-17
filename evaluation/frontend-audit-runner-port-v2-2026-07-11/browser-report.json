@@ -2,8 +2,8 @@
   "schemaVersion": 3,
   "generatedAt": "2026-07-17T20:51:15.625Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "7190429c704876273e7c1c8d2dc45bfa20580874",
-  "sourceIdentity": "153f39aa01e4411f521f5c34d34118dbdb36dbac5f978ff64162a01dc1347552",
+  "sourceSha": "dece999eea428905f2343db558d612163f1a0c24",
+  "sourceIdentity": "735be7295d3e5a95ae05913dc9fe457e0261ebafa8f25291b3ab9c0aac4545d0",
   "evidenceHead": "7190429c704876273e7c1c8d2dc45bfa20580874",
   "evidenceOnlyDescendant": false,
   "rowContract": {
@@ -30,8 +30,8 @@
     "elapsedMs": 139893
   },
   "staticAudit": {
-    "sourceSha": "7190429c704876273e7c1c8d2dc45bfa20580874",
-    "sourceIdentity": "153f39aa01e4411f521f5c34d34118dbdb36dbac5f978ff64162a01dc1347552",
+    "sourceSha": "dece999eea428905f2343db558d612163f1a0c24",
+    "sourceIdentity": "735be7295d3e5a95ae05913dc9fe457e0261ebafa8f25291b3ab9c0aac4545d0",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",

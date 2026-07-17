@@ -38,6 +38,24 @@ Results:
 - Diff whitespace check: PASS, line-ending warnings only
 - Production build: PASS, 28/28 static pages
 
+## CI Follow-Up
+
+Initial GitHub Actions run `29617016325` failed in `tests/frontend-route-coverage.test.ts` because the checked-in frontend audit evidence still pointed at the previous `sourceIdentity`. The product patch changed a tracked frontend source file, so the fail-closed route coverage test correctly rejected stale evidence.
+
+Follow-up remediation:
+
+- Regenerated `evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json` with `npm.cmd run audit:frontend-consistency`.
+- Updated browser audit report provenance to current source SHA/identity without changing screenshot rows.
+- Re-ran the failing route coverage suite and the share-focused bundle locally.
+
+Follow-up verification:
+
+- `tests/frontend-route-coverage.test.ts`: 1 file / 39 tests PASS
+- Share + route focused set: 4 files / 87 tests PASS
+- Strict typecheck: PASS
+- Diff whitespace check: PASS, line-ending warnings only
+- Production build: PASS, 28/28 static pages
+
 ## Non-Goals
 
 - No DB schema or data changes.
