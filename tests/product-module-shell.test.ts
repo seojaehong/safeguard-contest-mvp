@@ -338,7 +338,7 @@ function expectThemeMetrics(metrics: ShellMetrics, route: string, theme: "day" |
 
 async function readVisibleTouchTargets(page: Page) {
   return await page.locator(
-    ".safeclaw-module-menu-button, .safeclaw-module-theme-toggle button,"
+    ".safeclaw-module-brand, .safeclaw-module-menu-button, .safeclaw-module-theme-toggle button,"
     + " .safeclaw-module-principal-command :is(a, button), .safeclaw-module-rail nav a"
   ).evaluateAll((elements) => elements.flatMap((element) => {
     const target = element as HTMLElement;

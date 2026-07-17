@@ -1,0 +1,41 @@
+{
+  "baseSha": "56cb66f1405c49e18e88f583a95025b13f09c40d",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "tdd": {
+    "red": {
+      "testFilesFailed": 1,
+      "testsFailed": 1,
+      "testsPassed": 2,
+      "observedBrandHeightPx": 24
+    },
+    "green": {
+      "testFilesPassed": 1,
+      "testsPassed": 3,
+      "typecheck": "pass",
+      "build": "pass",
+      "staticPagesGenerated": 28
+    }
+  },
+  "browser": {
+    "routesChecked": 11,
+    "routes": [
+      "/home",
+      "/documents",
+      "/workers",
+      "/evidence",
+      "/knowledge",
+      "/settings",
+      "/tbm",
+      "/archive",
+      "/ops/api",
+      "/ask",
+      "/dispatch"
+    ],
+    "minimumBrandWidthPx": 93.6,
+    "minimumBrandHeightPx": 44,
+    "maximumHorizontalOverflowPx": 0
+  }
+}

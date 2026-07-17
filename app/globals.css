@@ -19521,6 +19521,11 @@ body:has(.safeclaw-landing) :is(
     display: none;
   }
 
+  .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-brand {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
   .safeclaw-module-shell .safeclaw-module-menu-button {
     display: inline-flex;
     min-width: 44px;
