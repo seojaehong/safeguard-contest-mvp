@@ -938,3 +938,21 @@ Verified boundary:
 Integration note:
 
 - The older read-only handoff is stale relative to current master. The remaining product decision is not route existence, but whether and where the manager UI should surface recipient portal links during the demo.
+
+### 2026-07-18 manager share portal preview action
+
+The manager-side share screen now exposes a secondary worker-preview action after a share session exists, without changing the primary delivery CTA.
+
+Results:
+
+- `npm.cmd test -- tests\workflow-share-panel-behavior.test.ts tests\workspace-share-simplification.test.ts tests\share-recipient-portal-browser.test.ts tests\workpack-share-authority-routes.test.ts`
+  - Result: 3 files passed / 1 skipped; 51 tests passed / 1 skipped.
+- `npm.cmd run typecheck`
+  - Result: passed.
+
+Verified boundary:
+
+- The primary manager action remains the delivery action (`문서팩 전송하기`, or the relevant fail-closed/login state).
+- When `shareSessionId` and the first selected `workerId` are available, the command row also shows a secondary `작업자 화면 미리보기` link.
+- The preview link opens `/share/[sessionId]?workerId=[workerId]` in a new tab so a demo can immediately show the recipient-facing document pack and confirmation surface.
+- The manager screen still does not expose the raw recipient URL as the default CTA.

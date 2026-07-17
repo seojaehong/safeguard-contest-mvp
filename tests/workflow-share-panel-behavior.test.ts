@@ -188,6 +188,8 @@ describe("workflow share panel behavior", () => {
 
     expect(source).toContain("전송 후 관리자 화면에서 작업자별 전송 상태와 확인 이력을 이어서 관리합니다.");
     expect(source).toContain("작업자용 공동 열람 링크는 별도 승인된 포털에서 열립니다.");
+    expect(source).toContain("recipientPortalPreviewHref");
+    expect(source).toContain("작업자 화면 미리보기");
     expect(source).not.toContain("href={`/share/${shareSessionId}`");
     expect(source).not.toContain("작업자 확인 화면은 /share/[sessionId] 경로에서 열립니다.");
   });

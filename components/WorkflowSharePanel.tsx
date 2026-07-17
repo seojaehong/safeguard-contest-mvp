@@ -1105,6 +1105,9 @@ export function WorkflowSharePanel({
       selected: true
     }).enabled
   ));
+  const recipientPortalPreviewHref = shareSessionId && workerIds[0]
+    ? `/share/${encodeURIComponent(shareSessionId)}?workerId=${encodeURIComponent(workerIds[0])}`
+    : null;
   const primaryDisabled = Boolean(
     providerDispatchUi.primaryDisabled
     || !authToken
@@ -1295,6 +1298,11 @@ export function WorkflowSharePanel({
             {primaryLabel}
           </button>
         )}
+        {recipientPortalPreviewHref ? (
+          <a className="button secondary" href={recipientPortalPreviewHref} target="_blank" rel="noreferrer">
+            작업자 화면 미리보기
+          </a>
+        ) : null}
       </div>
 
       {result ? (
