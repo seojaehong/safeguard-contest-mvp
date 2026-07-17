@@ -47,6 +47,30 @@
       "bodyScrollHeight": 1148
     }
   },
+  "postLaunchIntegration": {
+    "head": "dfc4efaa",
+    "siteBoundKnowledgeIngest": {
+      "status": "integrated",
+      "independentReview": "go",
+      "requiresOwnedSite": true,
+      "crossSiteConflict": "fail_closed",
+      "concurrentReingestConflict": "fail_closed"
+    },
+    "ontologyPromotionCommand": {
+      "status": "integrated",
+      "independentReview": "go",
+      "resultState": "approved_pending_persistence",
+      "requestSuppliedProvenanceTrusted": false,
+      "publicationMutation": false
+    },
+    "verification": {
+      "testFilesPassed": 4,
+      "testsPassed": 70,
+      "typecheck": "pass",
+      "productionBuild": "pass",
+      "staticPages": 28
+    }
+  },
   "databaseChanges": false,
   "providerActivation": false,
   "ontologyPublicationMutation": false

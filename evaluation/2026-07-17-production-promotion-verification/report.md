@@ -34,6 +34,12 @@
 ## Remaining gates
 
 - GitHub master CI run `29545201500`은 성공했다: strict typecheck PASS, 177 files / 2,151 tests PASS, production build 28/28 PASS.
+- 후속 통합 HEAD는 `dfc4efaa`다. 사이트 귀속 지식 수집과 온톨로지 승격 명령 계약을 독립 검수 GO 후 선택 통합했다.
+- 결합 검증은 focused 4 files / 70 tests PASS, strict typecheck PASS, production build 28/28 PASS다.
+- 지식 수집은 인증된 조직이 소유한 `siteId`를 필수로 하며, 타 현장 혼입과 동시 재수집 충돌을 fail-closed 처리한다.
+- 승격 명령은 요청자가 보낸 receipt/provenance를 신뢰하지 않고 저장된 tenant, run, event, source snapshot을 다시 대조한다.
+- 승인된 후보는 `approved_pending_persistence`로만 반환되며 published ontology에 직접 기록되지 않는다.
 - Remote Hermes production execution은 trusted transport와 durable attempt ledger가 없어 계속 fail-closed 상태다.
-- Human review candidate는 아직 published ontology에 직접 기록되지 않는다.
 - 실제 provider dispatch는 DB-backed persistent idempotency migration 승인 전까지 잠겨 있다.
+
+이번 후속 통합에서도 DB schema/data 변경, provider activation, ontology publication mutation은 수행하지 않았다.
