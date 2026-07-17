@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "remote-hermes-pinned-transport-evaluation/v1",
+  "generatedAt": "2026-07-17T11:15:00+09:00",
+  "scope": "connection-pinned Remote Hermes Node HTTPS transport",
+  "summary": {
+    "itemCount": 2,
+    "successCount": 2,
+    "failureCount": 0,
+    "elapsedMs": 20347
+  },
+  "checks": [
+    {
+      "name": "focused-remote-hermes-tests",
+      "status": "passed",
+      "testFileCount": 4,
+      "testCount": 62,
+      "elapsedMs": 6112,
+      "log": "evaluation/remote-hermes-pinned-transport-tests.log"
+    },
+    {
+      "name": "typescript-strict-typecheck",
+      "status": "passed",
+      "elapsedMs": 14235,
+      "log": "evaluation/remote-hermes-pinned-transport-typecheck.log"
+    }
+  ],
+  "transportCoverage": [
+    "single injectable DNS resolution",
+    "public address pin",
+    "private and reserved address rejection",
+    "mixed public and private DNS fail-close",
+    "actual socket address pin match",
+    "redirect rejection and body cancellation",
+    "abort propagation and late body cancellation",
+    "original Host, SNI, and certificate hostname preservation"
+  ],
+  "activation": {
+    "routeWired": false,
+    "providerActivated": false,
+    "databaseChanged": false,
+    "runtimeAvailableWithoutLedger": false
+  }
+}
