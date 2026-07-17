@@ -867,3 +867,30 @@ Skip note:
 Integration note:
 
 - The first full serial attempt on the same HEAD found one stale frontend route evidence identity. After regenerating the static/browser audit evidence, `tests\frontend-route-coverage.test.ts` passed and the full serial rerun exited 0.
+
+### 2026-07-18 public live smoke
+
+The public live surface was smoke-tested against `https://www.safeclaw.kr` after the current-head local gate refresh.
+
+Results:
+
+- `HEAD` checks:
+  - `https://www.safeclaw.kr`: 200, Vercel `icn1`.
+  - `https://safeclaw.kr`: 200, Vercel `icn1`.
+  - `https://www.safeclaw.kr/workspace`: 200.
+  - `https://www.safeclaw.kr/share/test-session-id`: 200.
+  - `https://www.safeclaw.kr/ontology`: 200.
+- Playwright public smoke:
+  - Routes: `/`, `/workspace`, `/documents`, `/reports`, `/ontology`, `/knowledge`, `/why`, `/share/test-session-id`.
+  - Viewports: desktop 1440x900 and mobile 390x844.
+  - Result: 16 rows, 16 ok, 0 failures.
+  - Each checked row had HTTP 200, no horizontal overflow, no outside elements, no console/page errors, and visible body content.
+
+Artifacts:
+
+- `evaluation/live-public-smoke-2026-07-18/report.json`
+- `evaluation/live-public-smoke-2026-07-18/report.md`
+
+Deployment mapping note:
+
+- Vercel CLI is installed but no Vercel credentials are available in this environment (`vercel inspect` requires login or token). Therefore this gate proves the current public surface behavior, but it does not prove that the live deployment commit equals local HEAD `495992a621cd97c8e169286e764b1d3e0e055c11`.
