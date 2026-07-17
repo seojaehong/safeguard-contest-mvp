@@ -2,6 +2,7 @@ export type CrudOperation = "SELECT" | "INSERT" | "UPDATE" | "DELETE";
 export type ScenarioControl = "positive" | "isolation";
 export type ScenarioExpectation = "allow" | "deny";
 export type ResourceType = "table" | "storage";
+export type TenantDirection = "a_to_b" | "b_to_a" | "a_to_a" | "b_to_b";
 
 export interface Scenario {
   readonly id: string;
@@ -9,7 +10,8 @@ export interface Scenario {
   readonly resourceType: ResourceType;
   readonly operation: CrudOperation;
   readonly actor: "tenant_a" | "tenant_b";
-  readonly fixtureOwner: "tenant_a";
+  readonly fixtureOwner: "tenant_a" | "tenant_b";
+  readonly direction: TenantDirection;
   readonly expected: ScenarioExpectation;
   readonly control: ScenarioControl;
   readonly expectedHttpStatuses: readonly number[];
@@ -26,7 +28,7 @@ export interface Scenario {
 }
 
 export interface TenantIsolationManifest {
-  readonly version: 2;
+  readonly version: 3;
   readonly tables: readonly string[];
   readonly storageBucket: string;
   readonly denyAssertionCount: number;

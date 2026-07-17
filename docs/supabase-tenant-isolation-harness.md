@@ -9,10 +9,11 @@ observations without making network requests.
 
 The manifest has two separate suites:
 
-- 56 cross-tenant deny assertions: 13 tables x SELECT/INSERT/UPDATE/DELETE,
-  plus storage SELECT/INSERT/UPDATE/DELETE.
-- 56 own-tenant positive controls covering the same resources and CRUD verbs.
-- 112 total scenarios. Positive controls are not counted among the 56 denies.
+- 112 cross-tenant deny assertions: 13 tables and one storage bucket x four
+  CRUD verbs x A-to-B and B-to-A directions.
+- 112 own-tenant positive controls covering A-to-A and B-to-B for the same
+  resources and CRUD verbs.
+- 224 total scenarios. Positive controls are not counted among the 112 denies.
 
 Every scenario declares accepted HTTP statuses, expected affected and returned
 row/object counts, expected before/after state change, foreign-state invariance,
@@ -60,10 +61,15 @@ npm.cmd test -- tests/supabase-tenant-isolation-harness.test.ts
 npm.cmd run typecheck
 ```
 
-The default command is dry-run. Without secrets it exits non-zero with zero hook
-calls. With valid preflight values it reports the 56 deny assertions and 56
-positive controls but still calls no hooks. `--execute` also exits non-zero until
-separately reviewed actor and service-role verifier adapters are explicitly
-provided in code.
+The default command is dry-run. It exits non-zero with zero hook calls and reports
+`ok=false`, `executionStatus=not_executed`, and `launchProven=false`. With valid
+preflight values it reports the 112 deny assertions and 112 positive controls,
+but does not represent that inventory as a PASS. `--execute` fails closed as
+`blocked_no_live_adapter` until separately reviewed actor and service-role
+verifier adapters are explicitly provided in code. Unit-test fake adapters use
+`adapterMode=contract-test`; even when every assertion passes, the aggregate stays
+RED with `ok=false`, `executionStatus=executed_contract_test`, and
+`launchProven=false`. Only a separately reviewed live adapter may select
+`adapterMode=live-reviewed`.
 
 Committed verification evidence is recorded in `evaluation/report.json`.

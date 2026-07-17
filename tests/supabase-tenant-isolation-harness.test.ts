@@ -88,23 +88,29 @@ function successfulHarness() {
 }
 
 describe("Supabase tenant-isolation manifest", () => {
-  it("contains exactly 56 cross-tenant deny assertions", () => {
+  it("contains both A-to-B and B-to-A cross-tenant deny assertions", () => {
     expect(TENANT_ISOLATION_MANIFEST.tables).toHaveLength(13);
-    expect(CROSS_TENANT_DENY_ASSERTIONS).toHaveLength(56);
-    expect(CROSS_TENANT_DENY_ASSERTIONS.filter((scenario) => scenario.resourceType === "table")).toHaveLength(52);
-    expect(CROSS_TENANT_DENY_ASSERTIONS.filter((scenario) => scenario.resourceType === "storage")).toHaveLength(4);
+    expect(CROSS_TENANT_DENY_ASSERTIONS).toHaveLength(112);
+    expect(CROSS_TENANT_DENY_ASSERTIONS.filter((scenario) => scenario.resourceType === "table")).toHaveLength(104);
+    expect(CROSS_TENANT_DENY_ASSERTIONS.filter((scenario) => scenario.resourceType === "storage")).toHaveLength(8);
+    expect(new Set(CROSS_TENANT_DENY_ASSERTIONS.map((scenario) => scenario.direction))).toEqual(
+      new Set(["a_to_b", "b_to_a"]),
+    );
     expect(new Set(CROSS_TENANT_DENY_ASSERTIONS.map((scenario) => scenario.operation))).toEqual(
       new Set(["SELECT", "INSERT", "UPDATE", "DELETE"]),
     );
     expect(CROSS_TENANT_DENY_ASSERTIONS.every((scenario) => scenario.expected === "deny")).toBe(true);
   });
 
-  it("keeps same-CRUD own-tenant positive controls separate from the 56 denies", () => {
-    expect(OWN_TENANT_POSITIVE_CONTROLS).toHaveLength(56);
+  it("keeps matching A and B own-tenant controls separate from denies", () => {
+    expect(OWN_TENANT_POSITIVE_CONTROLS).toHaveLength(112);
     expect(OWN_TENANT_POSITIVE_CONTROLS.every((scenario) => scenario.control === "positive")).toBe(true);
-    expect(TENANT_ISOLATION_MANIFEST.scenarios).toHaveLength(112);
-    expect(TENANT_ISOLATION_MANIFEST.denyAssertionCount).toBe(56);
-    expect(TENANT_ISOLATION_MANIFEST.positiveControlCount).toBe(56);
+    expect(new Set(OWN_TENANT_POSITIVE_CONTROLS.map((scenario) => scenario.direction))).toEqual(
+      new Set(["a_to_a", "b_to_b"]),
+    );
+    expect(TENANT_ISOLATION_MANIFEST.scenarios).toHaveLength(224);
+    expect(TENANT_ISOLATION_MANIFEST.denyAssertionCount).toBe(112);
+    expect(TENANT_ISOLATION_MANIFEST.positiveControlCount).toBe(112);
   });
 
   it("requires always-cleanup and a separate final residual-zero check", () => {
@@ -193,7 +199,7 @@ describe("Supabase tenant-isolation observation validation", () => {
 });
 
 describe("Supabase tenant-isolation execution lifecycle", () => {
-  it("validates all 112 observations and keeps service-role hooks outside executor context", async () => {
+  it("validates all 224 observations and keeps service-role hooks outside executor context", async () => {
     const harness = successfulHarness();
     const result = await runTenantIsolationHarness({
       env: validEnv(),
@@ -202,13 +208,18 @@ describe("Supabase tenant-isolation execution lifecycle", () => {
       executor: harness.executor,
       verifier: harness.verifier,
     });
-    expect(result.ok).toBe(true);
-    expect(result.requestCount).toBe(112);
-    expect(harness.executeContexts).toHaveLength(112);
-    expect(harness.cleanupContexts).toHaveLength(112);
-    expect(harness.foreignVerifyContexts).toHaveLength(28);
+    expect(result.ok).toBe(false);
+    expect(result.executionStatus).toBe("executed_contract_test");
+    expect(result.contractValidated).toBe(true);
+    expect(result.liveExecutorAvailable).toBe(false);
+    expect(result.launchProven).toBe(false);
+    expect(result.error).toContain("no reviewed live executor");
+    expect(result.requestCount).toBe(224);
+    expect(harness.executeContexts).toHaveLength(224);
+    expect(harness.cleanupContexts).toHaveLength(224);
+    expect(harness.foreignVerifyContexts).toHaveLength(56);
     expect(harness.residualCalls()).toBe(1);
-    expect(result.results).toHaveLength(112);
+    expect(result.results).toHaveLength(224);
     expect(result.results?.[0]).toMatchObject({
       observation: {
         httpStatus: 200,
@@ -220,7 +231,7 @@ describe("Supabase tenant-isolation execution lifecycle", () => {
       },
       cleanupObservation: { httpStatus: 204, affectedRows: 1 },
     });
-    expect(result.results?.filter((item) => item.foreignVerification !== null)).toHaveLength(28);
+    expect(result.results?.filter((item) => item.foreignVerification !== null)).toHaveLength(56);
     for (const rawContext of harness.executeContexts) {
       const context = rawContext as { clients: Record<string, unknown> } & Record<string, unknown>;
       expect(Object.keys(context).filter((key) => key !== "scenario")).not.toContain("serviceRoleClient");
@@ -280,7 +291,7 @@ describe("Supabase tenant-isolation execution lifecycle", () => {
     expect(harness.residualCalls()).toBe(1);
   });
 
-  it("keeps default dry-run at zero requests", async () => {
+  it("reports network-free dry-run as RED because no live executor ran", async () => {
     const harness = successfulHarness();
     const result = await runTenantIsolationHarness({
       env: validEnv(),
@@ -288,10 +299,30 @@ describe("Supabase tenant-isolation execution lifecycle", () => {
       executor: harness.executor,
       verifier: harness.verifier,
     });
-    expect(result.ok).toBe(true);
+    expect(result.ok).toBe(false);
     expect(result.mode).toBe("dry-run");
+    expect(result.executionStatus).toBe("not_executed");
+    expect(result.adapterHooksProvided).toBe(true);
+    expect(result.liveExecutorAvailable).toBe(false);
+    expect(result.launchProven).toBe(false);
+    expect(result.error).toContain("no live executor");
     expect(result.requestCount).toBe(0);
     expect(harness.executeContexts).toHaveLength(0);
+  });
+
+  it("fails closed when execute mode has no live adapter", async () => {
+    const result = await runTenantIsolationHarness({
+      env: validEnv(),
+      actualHead: RUNTIME_EXPECTED_HEAD,
+      mode: "execute",
+    });
+    expect(result.ok).toBe(false);
+    expect(result.executionStatus).toBe("blocked_no_live_adapter");
+    expect(result.liveExecutorAvailable).toBe(false);
+    expect(result.adapterHooksProvided).toBe(false);
+    expect(result.launchProven).toBe(false);
+    expect(result.requestCount).toBe(0);
+    expect(result.error).toBe("Actor executor and cleanup hook are required.");
   });
 
   it("redacts secrets recursively from reports and errors", () => {
