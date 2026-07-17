@@ -8,6 +8,7 @@ import type { ProviderDispatchCapability } from "@/lib/workflow-dispatch-capabil
 const root = process.cwd();
 const commandCenter = readFileSync(join(root, "components", "SafeGuardCommandCenter.tsx"), "utf8");
 const sharePanel = readFileSync(join(root, "components", "WorkflowSharePanel.tsx"), "utf8");
+const dispatchRoute = readFileSync(join(root, "app", "api", "workflow", "dispatch", "route.ts"), "utf8");
 
 describe("workspace share simplification", () => {
   it("keeps channels and the primary action preview-only when provider dispatch is unavailable", () => {
@@ -40,12 +41,22 @@ describe("workspace share simplification", () => {
     expect(sharePanel).toContain('id="workflow-language-select"');
   });
 
-  it("offers channel setup and retry without misleading unavailable channel actions", () => {
+  it("offers channel preparation guidance and retry without misleading unavailable channel actions", () => {
     expect(sharePanel).toContain('href="/settings"');
-    expect(sharePanel).toContain("발송 채널 설정");
+    expect(sharePanel).toContain("발송 채널 준비 안내");
     expect(sharePanel).toContain("다시 확인");
     expect(sharePanel).toContain("channelUi.reasonLabel");
     expect(sharePanel).toContain("channelUi.enabled");
+  });
+
+  it("advertises only the relay transport implemented by provider dispatch", () => {
+    const capabilityResolver = dispatchRoute.slice(
+      dispatchRoute.indexOf("function resolveCurrentProviderDispatchCapability"),
+      dispatchRoute.indexOf("export async function GET")
+    );
+
+    expect(capabilityResolver).toContain("providerConfigured: relayConfigured");
+    expect(capabilityResolver).not.toContain("relayConfigured || isKakaoProviderConfigured()");
   });
 
   it("describes language-specific preparation without claiming a recipient portal", () => {

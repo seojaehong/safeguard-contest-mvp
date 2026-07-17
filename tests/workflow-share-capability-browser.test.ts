@@ -171,7 +171,7 @@ describe("workflow share capability browser containment", () => {
     try {
       await openSharePanel(page);
       await expect.poll(() => page.getByText("문서팩 보내기", { exact: true }).count()).toBeGreaterThan(0);
-      expect(await page.getByRole("link", { name: "발송 채널 설정" }).getAttribute("href")).toBe("/settings");
+      expect(await page.getByRole("link", { name: "발송 채널 준비 안내" }).getAttribute("href")).toBe("/settings");
       expect(await page.getByRole("button", { name: "다시 확인" }).isVisible()).toBe(true);
       const channels = page.getByLabel("전파 채널 선택").getByRole("button");
       expect(await channels.nth(0).isEnabled()).toBe(true);
@@ -213,7 +213,7 @@ describe("workflow share capability browser containment", () => {
     try {
       await openSharePanel(page);
       await expect.poll(() => page.getByText("상태 확인 실패", { exact: true }).count()).toBeGreaterThan(0);
-      expect(await page.getByRole("link", { name: "발송 채널 설정" }).getAttribute("href")).toBe("/settings");
+      expect(await page.getByRole("link", { name: "발송 채널 준비 안내" }).getAttribute("href")).toBe("/settings");
       const languageSelect = page.locator("#workflow-language-select");
       const preview = page.locator("[data-share-preview]");
       await languageSelect.selectOption("foreign:vi");

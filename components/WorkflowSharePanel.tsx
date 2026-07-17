@@ -1218,7 +1218,7 @@ export function WorkflowSharePanel({
           </div>
           {providerDispatchUi.showUnavailableActions ? (
             <div className="command-actions" aria-label="발송 채널 상태 작업">
-              <a className="button secondary" href="/settings">발송 채널 설정</a>
+              <a className="button secondary" href="/settings">발송 채널 준비 안내</a>
               <button className="button secondary" type="button" onClick={() => void refreshProviderDispatchCapability()}>
                 다시 확인
               </button>

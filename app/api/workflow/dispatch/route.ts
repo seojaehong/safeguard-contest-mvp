@@ -82,7 +82,7 @@ function resolveCurrentProviderDispatchCapability() {
       email: { providerConfigured: relayConfigured, contactReadiness: "request_scoped" },
       sms: { providerConfigured: relayConfigured, contactReadiness: "request_scoped" },
       kakao: {
-        providerConfigured: relayConfigured || isKakaoProviderConfigured(),
+        providerConfigured: relayConfigured,
         contactReadiness: "request_scoped"
       }
     }
