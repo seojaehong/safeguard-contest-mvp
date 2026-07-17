@@ -341,6 +341,43 @@
   min-width: 0;
 }
 
+.riskRowsFieldset {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.riskRowsLockNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: 6px;
+  background: var(--workspace-surface-2);
+  padding: var(--space-3);
+}
+
+.riskRowsLockNotice p {
+  margin: 0;
+  color: var(--workspace-muted);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.riskRowsLockNotice button {
+  min-height: 44px;
+  flex: 0 0 auto;
+  border: 1px solid var(--workspace-rule-strong);
+  border-radius: 6px;
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+  padding: 8px 12px;
+  font: inherit;
+  font-weight: 700;
+}
+
 .riskRow {
   display: grid;
   gap: var(--space-3);
@@ -1076,6 +1113,11 @@
   }
 
   .riskRowsHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .riskRowsLockNotice {
     align-items: stretch;
     flex-direction: column;
   }
