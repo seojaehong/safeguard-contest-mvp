@@ -26,7 +26,7 @@
 
 ## 검증
 
-- Focused Vitest: 5 files, 77 tests PASS
+- Focused Vitest: 5 files, 76/76 tests PASS
 - Broad Vitest: 30 files PASS, 1 file FAIL, 3 files SKIP; 386 tests PASS, 3 FAIL, 4 SKIP
 - Python acquisition: 19 tests PASS
 - Strict TypeScript: PASS
@@ -39,6 +39,7 @@
 
 ## 남은 경계
 
+- 비차단 P3: 현재 회귀 테스트는 대표 trace key와 전역 `/*` 부재를 확인하지만, 구성된 16개 consumer key 전체와 production build의 NFT manifest 개수까지 고정하지는 않는다. 이번 실제 build에서는 78개 manifest 중 정확히 16개가 두 exact asset을 포함했고 partial asset manifest는 0개였으나, 이 수치는 후속 durability 테스트로 잠글 필요가 있다.
 - D-C-7 tracked asset은 기존 생성본이라 `publishedAt` 필드가 없다. acquisition generator에는 필드를 추가했고 runtime은 immutable pin의 날짜를 사용한다. 다음 verified acquisition transaction에서 asset을 재생성한다.
 - metadata-verified 234개 전체의 exact production 승격은 별도 wave다.
 - Hermes 실제 runtime과 RLS 후속 감사는 이 변경 범위 밖이며 기존 북극성 계획에서 계속 진행한다.
