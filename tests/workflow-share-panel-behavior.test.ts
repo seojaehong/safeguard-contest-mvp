@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
@@ -178,6 +181,15 @@ describe("workflow share panel behavior", () => {
       detail: "workpack 저장 확인 · 초대 snapshot 생성 계획 · provider 로그 저장 미확인 · 작업자 확인 인증 경로 미연결"
     });
     expect(summary.detail).not.toContain("4개 기록 분리");
+  });
+
+  it("does not expose a raw recipient portal link as the manager share CTA", () => {
+    const source = readFileSync(join(process.cwd(), "components", "WorkflowSharePanel.tsx"), "utf8");
+
+    expect(source).toContain("전송 후 관리자 화면에서 작업자별 전송 상태와 확인 이력을 이어서 관리합니다.");
+    expect(source).toContain("작업자용 공동 열람 링크는 별도 승인된 포털에서 열립니다.");
+    expect(source).not.toContain("href={`/share/${shareSessionId}`");
+    expect(source).not.toContain("작업자 확인 화면은 /share/[sessionId] 경로에서 열립니다.");
   });
 
   it("builds a stable provider-dispatch idempotency key for one attempt", () => {
