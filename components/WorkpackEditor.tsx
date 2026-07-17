@@ -2298,13 +2298,18 @@ export function WorkpackEditor({
     : !dirtyDocumentKeys.includes("riskAssessmentDraft")
       && values.riskAssessmentDraft === initialValues.riskAssessmentDraft
       && areRiskAssessmentRowsRepresentedInDraft(canonicalRiskRows, values.riskAssessmentDraft);
-  const riskRowsMatchCurrentText = canonicalRiskRows.length > 0 && canonicalRiskRows.every((row) => (
-    row.hazard.trim().length > 0
-    && row.additionalControls.trim().length > 0
-    && values.riskAssessmentDraft.includes(row.hazard)
-    && values.riskAssessmentDraft.includes(row.additionalControls)
-  ));
-  const structuredRiskEditLocked = canonicalRiskText === null && !riskRowsMatchCurrentText;
+  const expectedInitialCanonicalRiskText = withSubmitReadiness(
+    "위험성평가표",
+    serializeRiskAssessmentRowsToDraft(initialRiskRows),
+    data
+  );
+  const initialRiskTextIsExactlyCanonical = initialRiskRows.length > 0
+    && initialValues.riskAssessmentDraft === expectedInitialCanonicalRiskText;
+  const structuredRiskEditLocked = canonicalRiskText === null
+    ? dirtyDocumentKeys.includes("riskAssessmentDraft")
+      || values.riskAssessmentDraft !== initialValues.riskAssessmentDraft
+      || !initialRiskTextIsExactlyCanonical
+    : canonicalRiskText !== values.riskAssessmentDraft;
   const selectedUsesCanonicalRiskRows = selected.key === "riskAssessmentDraft"
     && canonicalRiskRowsAreCurrent;
   const selectedFormProfile = getSafetyFormProfile(selected.key);

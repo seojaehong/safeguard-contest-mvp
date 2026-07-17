@@ -4,6 +4,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { Browser, Download, Page } from "playwright";
 import { buildStoredCurrentWorkpack, CURRENT_WORKPACK_STORAGE_KEY } from "@/lib/current-workpack";
 import { buildSampleWorkpack } from "@/lib/sample-workpack";
+import { serializeRiskAssessmentRowsToDraft } from "@/components/workpack-editor-structure";
 import {
   startIsolatedNextBrowserHarness,
   type IsolatedNextBrowserHarness
@@ -220,6 +221,7 @@ describe("documents editor layout", () => {
 
     await page.goto(`${baseUrl}/documents`, { waitUntil: "networkidle" });
     await page.getByRole("tab", { name: /위험성평가표/u }).click();
+    await page.getByRole("button", { name: "구조 편집으로 전환" }).click();
     const hazardInput = page.getByRole("textbox", { name: "행 1 유해·위험요인" });
     await hazardInput.fill("CANONICAL_UI_EDITED_HAZARD");
 
@@ -268,7 +270,7 @@ describe("documents editor layout", () => {
       whySeverity: "중상 가능",
       evidenceRefs: ["현장 작업계획"]
     };
-    sample.deliverables.riskAssessmentDraft = `위험요인: ${canonicalRow.hazard}\n감소대책: ${canonicalRow.additionalControls}`;
+    sample.deliverables.riskAssessmentDraft = serializeRiskAssessmentRowsToDraft([canonicalRow]);
     sample.structured = {
       riskAssessmentRows: [canonicalRow],
       riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
@@ -298,11 +300,11 @@ describe("documents editor layout", () => {
     expect(payload).not.toHaveProperty("riskAssessmentRows");
   }, 90_000);
 
-  it("requires explicit confirmation before structured rows replace divergent freeform prose", async () => {
+  it("locks structured editing when synchronized canonical text has an appended freeform marker", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 430, height: 932 } });
     const sample = buildSampleWorkpack();
-    const freeform = "FREEFORM_AUTHORITATIVE_PROSE_DO_NOT_OVERWRITE";
+    const appendedMarker = "APPENDED_FREEFORM_MARKER_DO_NOT_OVERWRITE";
     const canonicalRow = {
       location: sample.scenario.siteName,
       process: "외벽 도장",
@@ -326,7 +328,8 @@ describe("documents editor layout", () => {
       whySeverity: "중상 가능",
       evidenceRefs: ["현장 작업계획"]
     };
-    sample.deliverables.riskAssessmentDraft = freeform;
+    const canonicalText = serializeRiskAssessmentRowsToDraft([canonicalRow]);
+    sample.deliverables.riskAssessmentDraft = `${canonicalText}\n${appendedMarker}`;
     sample.structured = {
       riskAssessmentRows: [canonicalRow],
       riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
@@ -342,13 +345,14 @@ describe("documents editor layout", () => {
     await expect.poll(() => hazard.isDisabled()).toBe(true);
     await expect.poll(() => page.getByRole("button", { name: "구조 편집으로 전환" }).isVisible()).toBe(true);
     await page.getByRole("button", { name: "원문" }).click();
-    await expect.poll(() => page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" }).inputValue()).toContain(freeform);
+    await expect.poll(() => page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" }).inputValue()).toContain(appendedMarker);
 
     await page.getByRole("button", { name: "구조화" }).click();
+    await expect.poll(() => hazard.inputValue()).toBe(canonicalRow.hazard);
     await page.getByRole("button", { name: "구조 편집으로 전환" }).click();
     await expect.poll(() => hazard.isEnabled()).toBe(true);
     await page.getByRole("button", { name: "원문" }).click();
-    await expect.poll(() => page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" }).inputValue()).not.toContain(freeform);
+    await expect.poll(() => page.getByRole("textbox", { name: "위험성평가표 전체 원문 편집" }).inputValue()).not.toContain(appendedMarker);
   }, 90_000);
 
   it("keeps row identity, focus, details state, and values stable while controlId changes", async () => {
@@ -379,7 +383,7 @@ describe("documents editor layout", () => {
       whySeverity: "중상 가능",
       evidenceRefs: ["현장 작업계획"]
     };
-    sample.deliverables.riskAssessmentDraft = `위험요인: ${canonicalRow.hazard}\n감소대책: ${canonicalRow.additionalControls}`;
+    sample.deliverables.riskAssessmentDraft = serializeRiskAssessmentRowsToDraft([canonicalRow]);
     sample.structured = {
       riskAssessmentRows: [canonicalRow],
       riskAssessmentValidation: { ok: true, issueCount: 0, issues: [] }
