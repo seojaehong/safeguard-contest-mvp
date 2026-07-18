@@ -13,6 +13,18 @@
     "table": "provider_dispatch_attempts",
     "uniqueIndex": "provider_dispatch_attempts_org_idempotency_key_unique",
     "forceRls": true,
+    "tenantTupleRequired": [
+      "organization_id",
+      "site_id",
+      "workpack_id",
+      "share_session_id"
+    ],
+    "legacyDispatchLogAntiPatternsRejected": [
+      "nullable_organization_branch",
+      "owner_for_all_policy",
+      "owner_delete_policy",
+      "related_ids_without_same_tenant_tuple_check"
+    ],
     "ownerPolicies": [
       "provider_dispatch_attempts_owner_select",
       "provider_dispatch_attempts_owner_insert",
@@ -35,7 +47,7 @@
       "command": "npm.cmd test -- tests\\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false",
       "status": "passed",
       "files": 1,
-      "tests": 4
+      "tests": 6
     },
     {
       "command": "npm.cmd run typecheck",

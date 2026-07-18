@@ -26,10 +26,14 @@ The draft creates `provider_dispatch_attempts` as a server-side reservation tabl
 
 - unique `(organization_id, idempotency_key)` gate
 - workpack and share-session ownership checks
+- required tenant tuple: `organization_id`, `site_id`, `workpack_id`, and `share_session_id`
 - provider call state: `reserved`, `provider_called`, `accepted`, `failed`, `uncertain`
 - `provider_called` and `request_hash` fields for retry safety
 - RLS enabled and forced
 - owner-scoped SELECT/INSERT/UPDATE policies
+- no nullable organization branch, no `FOR ALL`, and no owner DELETE policy
+
+This explicitly avoids the legacy `dispatch_logs` anti-patterns identified in the Supabase RLS audit: null-organization reachability, broad owner `FOR ALL`, and child rows that do not prove same-tenant relationships.
 
 ## Required Before Enabling Live Dispatch
 
@@ -50,5 +54,5 @@ The draft creates `provider_dispatch_attempts` as a server-side reservation tabl
 
 ## Verification
 
-- `npm.cmd test -- tests\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false`: PASS, 1 file / 4 tests.
+- `npm.cmd test -- tests\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false`: PASS, 1 file / 6 tests.
 - `npm.cmd run typecheck`: PASS.

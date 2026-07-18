@@ -35,6 +35,10 @@ describe("provider dispatch idempotency approval gate", () => {
   it("drafts a persistent idempotency reservation table without applying it as a migration", () => {
     expect(report.draftMigration.table).toBe("provider_dispatch_attempts");
     expect(sql).toContain("create table if not exists provider_dispatch_attempts");
+    expect(sql).toContain("organization_id uuid not null references organizations(id) on delete cascade");
+    expect(sql).toContain("site_id uuid not null references sites(id) on delete cascade");
+    expect(sql).toContain("workpack_id uuid not null references workpacks(id) on delete cascade");
+    expect(sql).toContain("share_session_id uuid not null references workpack_share_sessions(id) on delete cascade");
     expect(sql).toContain("idempotency_key text not null");
     expect(sql).toContain("request_hash text not null");
     expect(sql).toContain("provider_called boolean not null default false");
@@ -56,6 +60,20 @@ describe("provider dispatch idempotency approval gate", () => {
     expect(sql).toContain("alter table provider_dispatch_attempts enable row level security");
     expect(sql).toContain("alter table provider_dispatch_attempts force row level security");
     expect(sql).toContain("workpacks.organization_id = provider_dispatch_attempts.organization_id");
+    expect(sql).toContain("workpack_share_sessions.workpack_id = provider_dispatch_attempts.workpack_id");
+  });
+
+  it("does not repeat the legacy dispatch log RLS anti-patterns", () => {
+    expect(sql).not.toMatch(/organization_id\s+uuid\s+references\s+organizations/i);
+    expect(sql).not.toContain("organization_id is null");
+    expect(sql).not.toMatch(/for\s+all/i);
+    expect(sql).not.toMatch(/for\s+delete/i);
+  });
+
+  it("requires a full tenant tuple for every related dispatch artifact", () => {
+    expect(sql).toContain("workpacks.site_id = provider_dispatch_attempts.site_id");
+    expect(sql).toContain("workpack_share_sessions.organization_id = provider_dispatch_attempts.organization_id");
+    expect(sql).toContain("workpack_share_sessions.site_id = provider_dispatch_attempts.site_id");
     expect(sql).toContain("workpack_share_sessions.workpack_id = provider_dispatch_attempts.workpack_id");
   });
 });

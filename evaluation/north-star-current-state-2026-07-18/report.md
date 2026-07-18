@@ -62,6 +62,7 @@ These are not failures in the current patch. They are the remaining items that p
 
 2. Provider readiness proof:
    - Review and approve `evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql`, then implement the route reservation flow before converting dispatch from preview-only.
+   - The draft intentionally requires a full tenant tuple and avoids the legacy `dispatch_logs` nullable-organization / `FOR ALL` pattern.
 
 3. KOSHA exact reference expansion:
    - Keep live `/api/safety-reference/status` on the compressed verified subset bundle and do not present the unverified full body recovery corpus as direct runtime evidence.

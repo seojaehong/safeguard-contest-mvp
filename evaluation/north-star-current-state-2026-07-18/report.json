@@ -80,9 +80,15 @@
       "providerMessageSent": false,
       "focusedTests": {
         "files": 1,
-        "tests": 4,
+        "tests": 6,
         "status": "passed"
       },
+      "legacyDispatchLogAntiPatternsRejected": [
+        "nullable_organization_branch",
+        "owner_for_all_policy",
+        "owner_delete_policy",
+        "related_ids_without_same_tenant_tuple_check"
+      ],
       "typecheck": "passed"
     }
   },
