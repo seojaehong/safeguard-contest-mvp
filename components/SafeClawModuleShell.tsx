@@ -43,8 +43,8 @@ const defaultChromeLabels: ModuleChromeLabels = {
   evidenceContext: "공공 근거",
   weatherContext: "기상청",
   themeAria: "화면 테마",
-  dayLabel: "주간",
-  nightLabel: "야간",
+  dayLabel: "Day",
+  nightLabel: "Night",
   status: statusLabel
 };
 
