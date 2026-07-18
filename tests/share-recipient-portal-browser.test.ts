@@ -131,9 +131,13 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     await expect.poll(() => page.locator("body").innerText()).toContain("Kiểm tra gói tài liệu");
     await expect.poll(() => page.locator("body").innerText()).toContain("Màn hình xác nhận chỉ dành cho công nhân được mời.");
     await expect.poll(() => page.getByText("Server Nguyen", { exact: false }).count()).toBeGreaterThan(0);
-    await expect.poll(() => page.locator("body").innerText()).toContain("Tiếng Việt 안내");
-    await expect.poll(() => page.getByText("위험성평가표", { exact: true }).count()).toBe(1);
-    await expect.poll(() => page.getByText("TBM 브리핑", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.locator("body").innerText()).toContain("Thông báo an toàn");
+    await expect.poll(() => page.locator("body").innerText()).not.toContain("Tiếng Việt 안내");
+    await expect.poll(() => page.getByText("Đánh giá rủi ro", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("Họp an toàn TBM", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("Biên bản TBM", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("위험성평가표", { exact: true }).count()).toBe(0);
+    await expect.poll(() => page.getByText("TBM 브리핑", { exact: true }).count()).toBe(0);
     await expect.poll(() => page.locator("body").innerText()).toContain("Dừng công việc khi gió mạnh.");
     await expect.poll(() => page.locator(".safeclaw-select").inputValue()).toBe("vi");
     await expect.poll(() => page.getByText("작업자 ID", { exact: true }).count()).toBe(0);

@@ -112,6 +112,7 @@ type RecipientPortalCopy = {
   fallbackQuestion: string;
   inactiveHelp: string;
   loading: string;
+  workerNoticeTitle: string;
   workerNoticeNote: string;
   inviteInfoTitle: string;
   workerIdLabel: string;
@@ -128,6 +129,7 @@ type RecipientPortalCopy = {
   anonymousGuideBody: string;
   documentsTitle: string;
   documentsNote: string;
+  documentTitles: Record<ShareSessionPayload["documents"][number]["key"], string>;
   documentsLoadingTitle: string;
   documentsLoadingBody: string;
   displayNameRequired: string;
@@ -180,6 +182,7 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     fallbackQuestion: "공유 중인 작업 상세가 아직 로드되지 않았습니다.",
     inactiveHelp: "현재 확인이 차단된 상태입니다. 관리자에게 세션 상태를 요청해 주세요.",
     loading: "세션 정보를 조회하는 중입니다...",
+    workerNoticeTitle: "작업자 안전공지",
     workerNoticeNote: "작업자 언어 기준으로 생성된 현장 안내입니다.",
     inviteInfoTitle: "초대 정보 확인",
     workerIdLabel: "작업자 식별값",
@@ -196,6 +199,11 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     anonymousGuideBody: "현재 페이지는 공동 열람 확인 저장을 지원합니다. 작업자 명단은 관리자 화면에서만 확인합니다.",
     documentsTitle: "문서팩 핵심 3종",
     documentsNote: "자세한 문서 본문은 필요할 때만 펼쳐 확인합니다.",
+    documentTitles: {
+      riskAssessmentDraft: "위험성평가표",
+      tbmBriefing: "TBM 브리핑",
+      tbmLogDraft: "TBM 기록"
+    },
     documentsLoadingTitle: "문서팩 준비 중",
     documentsLoadingBody: "관리자가 공유한 문서 본문을 아직 불러오지 못했습니다. 작업 전 관리자에게 최신 문서팩을 확인해 주세요.",
     displayNameRequired: "작업자 표시명을 입력해 주세요.",
@@ -246,6 +254,7 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     fallbackQuestion: "Chưa tải được chi tiết công việc được chia sẻ.",
     inactiveHelp: "Hiện không thể xác nhận. Vui lòng hỏi quản lý về trạng thái phiên.",
     loading: "Đang tải thông tin phiên...",
+    workerNoticeTitle: "Thông báo an toàn",
     workerNoticeNote: "Thông báo hiện trường được tạo theo ngôn ngữ của công nhân.",
     inviteInfoTitle: "Kiểm tra thông tin mời",
     workerIdLabel: "Mã công nhân",
@@ -262,6 +271,11 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     anonymousGuideBody: "Trang này hỗ trợ lưu xác nhận xem chung. Danh sách công nhân chỉ được quản lý xem.",
     documentsTitle: "3 tài liệu chính",
     documentsNote: "Chỉ mở nội dung chi tiết khi cần kiểm tra.",
+    documentTitles: {
+      riskAssessmentDraft: "Đánh giá rủi ro",
+      tbmBriefing: "Họp an toàn TBM",
+      tbmLogDraft: "Biên bản TBM"
+    },
     documentsLoadingTitle: "Đang chuẩn bị tài liệu",
     documentsLoadingBody: "Chưa tải được nội dung tài liệu do quản lý chia sẻ. Hãy xác nhận gói tài liệu mới nhất trước khi làm việc.",
     displayNameRequired: "Vui lòng nhập tên hiển thị của công nhân.",
@@ -312,6 +326,7 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     fallbackQuestion: "Shared task details have not loaded yet.",
     inactiveHelp: "Confirmation is currently blocked. Ask the manager to check the session status.",
     loading: "Loading share session...",
+    workerNoticeTitle: "Safety notice",
     workerNoticeNote: "This site notice is generated for the worker language.",
     inviteInfoTitle: "Check invitation",
     workerIdLabel: "Worker ID",
@@ -328,6 +343,11 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     anonymousGuideBody: "This page stores shared read confirmations. The worker roster is visible only to managers.",
     documentsTitle: "Three core documents",
     documentsNote: "Open detailed document text only when needed.",
+    documentTitles: {
+      riskAssessmentDraft: "Risk assessment",
+      tbmBriefing: "TBM briefing",
+      tbmLogDraft: "TBM log"
+    },
     documentsLoadingTitle: "Document pack preparing",
     documentsLoadingBody: "The shared document body could not be loaded yet. Confirm the latest document pack with the manager before work.",
     displayNameRequired: "Please enter the worker display name.",
@@ -616,7 +636,7 @@ export default function ShareRecipientPage() {
           <>
             {sessionPayload.recipientMessage ? (
               <article className="safeclaw-share-recipient-card safeclaw-share-recipient-card-emphasis">
-                <h3>{sessionPayload.recipientMessage.title}</h3>
+                <h3>{copy.workerNoticeTitle}</h3>
                 <p className="safeclaw-note">{copy.workerNoticeNote}</p>
                 <pre className="safeclaw-share-recipient-preview">{buildPreviewText(sessionPayload.recipientMessage.body, 900)}</pre>
               </article>
@@ -704,7 +724,7 @@ export default function ShareRecipientPage() {
                 <div className="safeclaw-share-recipient-documents">
                   {documents.map((document) => (
                     <details key={document.key} className="safeclaw-share-recipient-document">
-                      <summary>{document.title}</summary>
+                      <summary>{copy.documentTitles[document.key] || document.title}</summary>
                       <pre className="safeclaw-share-recipient-preview">{buildPreviewText(document.body)}</pre>
                     </details>
                   ))}
