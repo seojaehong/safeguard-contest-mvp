@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-18T05:34:17.745Z",
+  "generatedAt": "2026-07-18T06:28:10.069Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "6d08434b1a0b1fcea4e56f23aacd5b7bbfc80f20",
-  "sourceIdentity": "e127cfc189a2439a4639f9f6112d80c0e25c9f8ce998e0b5ecdf0d40794d7543",
-  "evidenceHead": "6d08434b1a0b1fcea4e56f23aacd5b7bbfc80f20",
+  "sourceSha": "2ce86e550019c47b8fee290019eb4fd38929d2a1",
+  "sourceIdentity": "c73453fcc8d168c9749e2cae97bca4d722c4b7e0c1891a310379c77e5a369a41",
+  "evidenceHead": "2ce86e550019c47b8fee290019eb4fd38929d2a1",
   "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 33,
@@ -27,11 +27,11 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 134460
+    "elapsedMs": 121795
   },
   "staticAudit": {
-    "sourceSha": "6d08434b1a0b1fcea4e56f23aacd5b7bbfc80f20",
-    "sourceIdentity": "e127cfc189a2439a4639f9f6112d80c0e25c9f8ce998e0b5ecdf0d40794d7543",
+    "sourceSha": "2ce86e550019c47b8fee290019eb4fd38929d2a1",
+    "sourceIdentity": "c73453fcc8d168c9749e2cae97bca4d722c4b7e0c1891a310379c77e5a369a41",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
@@ -8436,7 +8436,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-search-tablet-1024.jpg",
-      "screenshotSha256": "047153daa72194767f018d845b6cf5f09d1337e1cab85633b7aee539235a0dd0",
+      "screenshotSha256": "dbfdd3a649b68ae8bca218dc593881e5d370dc33e485ac32ee545c0504a5460a",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9932,7 +9932,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-desktop-1440.jpg",
-      "screenshotSha256": "837922c96de47cadb36891b74a9b6739fe1b0526128139e1963e0c849393acb8",
+      "screenshotSha256": "4b5e7dbb36fa9a4d65dd725109eb8e33cf1ab5b9d7521248e6c36827441a8f03",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -13722,7 +13722,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 18. 오후 2:34:17 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 18. 오후 3:28:09 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13766,7 +13766,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "ac65d648dc7cde90d9941d14cea3707e499dcb9736a843b4e4c71ba47d2d8dee",
+      "screenshotSha256": "646704298a2aa33359e7f5bf29a337876b7578a778183ce49b9443d876501205",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,
