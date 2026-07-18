@@ -14852,7 +14852,7 @@ body:has(.safeclaw-landing) :is(
 @media (max-width: 720px) {
   .safeclaw-module-shell[data-module-route="/share"] .safeclaw-module-nav {
     grid-template-columns: minmax(0, 1fr) auto;
-    padding: 8px 16px;
+    padding: var(--space-2) var(--space-4);
   }
 
   .safeclaw-module-shell[data-module-route="/share"] .safeclaw-module-nav > span:first-child,
@@ -14862,8 +14862,8 @@ body:has(.safeclaw-landing) :is(
 
   .safeclaw-module-shell[data-module-route="/share"] .safeclaw-page-decision-header {
     grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
-    padding: 18px 16px;
+    gap: var(--space-4);
+    padding: var(--space-4);
   }
 
   .safeclaw-module-shell[data-module-route="/share"] .safeclaw-page-decision-action {
@@ -14871,23 +14871,25 @@ body:has(.safeclaw-landing) :is(
     grid-template-columns: minmax(0, 1fr);
     border-left: 0;
     border-top: 1px solid var(--workspace-rule);
-    padding: 14px 0 0;
+    padding: var(--space-3) 0 0;
   }
 
   .safeclaw-module-shell[data-module-route="/share"] .safeclaw-page-decision-copy h1 {
-    font-size: clamp(28px, 8vw, 36px);
-    line-height: 1.04;
+    font-size: var(--text-page-title);
+    font-weight: 800;
+    line-height: var(--leading-page-title);
+    letter-spacing: var(--tracking-page-title);
   }
 
   .safeclaw-module-shell[data-module-route="/share"] .safeclaw-module-content {
-    padding: 0 16px 32px;
+    padding: 0 var(--space-4) var(--space-8);
   }
 
   .safeclaw-share-recipient-page {
     max-width: none;
     gap: 10px;
     box-sizing: border-box;
-    padding: 0 16px 32px;
+    padding: 0 var(--space-4) var(--space-8);
   }
 
   .safeclaw-share-recipient-card {

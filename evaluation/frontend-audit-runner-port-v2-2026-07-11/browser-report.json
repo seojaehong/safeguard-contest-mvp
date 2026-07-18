@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-18T00:49:30.641Z",
+  "generatedAt": "2026-07-18T01:28:53.244Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "eb1b841a318d7045002ec6f49179153338978bd7",
-  "sourceIdentity": "df1eb91e056741a3dd76e3574ececc881fb3968f3b088e58987b0f261307fdc0",
-  "evidenceHead": "eb1b841a318d7045002ec6f49179153338978bd7",
+  "sourceSha": "4ba948906fd0a789111f141c62026482d63e9258",
+  "sourceIdentity": "94af0afc832ad0a8f07acad96dd807dffc656f40e91184071d658fff024d5ef8",
+  "evidenceHead": "4ba948906fd0a789111f141c62026482d63e9258",
   "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 33,
@@ -27,18 +27,18 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 144433
+    "elapsedMs": 145516
   },
   "staticAudit": {
-    "sourceSha": "eb1b841a318d7045002ec6f49179153338978bd7",
-    "sourceIdentity": "df1eb91e056741a3dd76e3574ececc881fb3968f3b088e58987b0f261307fdc0",
+    "sourceSha": "4ba948906fd0a789111f141c62026482d63e9258",
+    "sourceIdentity": "94af0afc832ad0a8f07acad96dd807dffc656f40e91184071d658fff024d5ef8",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
     "counts": {
       "pageFiles": 33,
       "componentFiles": 23,
-      "cssLines": 21183,
+      "cssLines": 21220,
       "importantDeclarations": 0
     },
     "coverageIssues": 0,
@@ -778,7 +778,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ask-desktop-1440.jpg",
-      "screenshotSha256": "fda78ea9133c8fb5d63acffee286f27f13dff3fae2c2af61187bf7580387eb1d",
+      "screenshotSha256": "f13673bf1e2ab27937f51d07811262624265045c82644b8ecb5fa30c0287dc76",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -867,7 +867,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ask-tablet-1024.jpg",
-      "screenshotSha256": "bc63171ac21e349da78b7b97db423b636e97e21968813849dec8c4a3a4fde620",
+      "screenshotSha256": "6b9489708995a87cea08153263c009c4c4ebb0fc9ad1428177ecb01a616db4ee",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -956,7 +956,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ask-mobile-390.jpg",
-      "screenshotSha256": "d1c43e2ddf416e2d198c6a787a1c6ee6df880e93feb31ea531a9fe07d95debb7",
+      "screenshotSha256": "f7f6b3093216e6e11573cf861b1952f8b2bef74ed11460370ee3a8db5d5566f7",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9386,7 +9386,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-share-sessionId-mobile-390.jpg",
-      "screenshotSha256": "e0d5280621eef63251804fd3558b3b2cc866e48d48524f17e0209c0b6599fc5c",
+      "screenshotSha256": "9fc0509c746221a0a552b48f39f2dd15c5d8a7d6636c9422a07bd1a19037080c",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9413,7 +9413,7 @@
         }
       ],
       "keySurfaces": [],
-      "geometryFingerprint": "[[\"DIV\",\"safeclaw-module-shell module-variant-document\",0,0,390,844,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"HEADER\",\"safeclaw-module-nav\",0,65,390,63,\"flex\",\"4px\",\"12px\",\"4px\",\"12px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"safeclaw-module-status live\",115.2,83,88.5,26,\"flex\",\"0px\",\"8px\",\"0px\",\"8px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"I\",\"sc-blink sc-blink--good\",124.2,92.5,7,7,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"12px\",\"18px\",\"normal\"],[\"DIV\",\"safeclaw-module-theme-toggle\",211.7,69,106,54,\"grid\",\"4px\",\"4px\",\"4px\",\"4px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"safeclaw-module-chrome-button\",216.7,74,48,44,\"flex\",\"0px\",\"8px\",\"0px\",\"8px\",\"4px\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"safeclaw-module-chrome-button\",264.7,74,48,44,\"flex\",\"0px\",\"8px\",\"0px\",\"8px\",\"4px\",\"12px\",\"18px\",\"normal\"],[\"HEADER\",\"safeclaw-page-decision-header safeclaw-module-header\",0,128,390,126.6,\"grid\",\"4px\",\"12px\",\"4px\",\"12px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"safeclaw-page-decision-copy\",12,132,236,117.6,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"safeclaw-module-eyebrow\",12,136,58.6,17,\"inline\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"12px\",\"18px\",\"normal\"],[\"H1\",\"safeclaw-module-title\",12,160,236,36.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"32px\",\"36.8px\",\"-1.12px\"],[\"P\",\"safeclaw-module-description\",12,204.8,236,44.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"ASIDE\",\"safeclaw-page-decision-action\",260,132,118,94,\"grid\",\"0px\",\"0px\",\"0px\",\"12px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"safeclaw-module-principal-command\",273,182,105,44,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"safeclaw-share-recipient-page\",0,254.6,390,313.7,\"grid\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"P\",\"safeclaw-subtitle\",0,294.6,390,22.4,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"ARTICLE\",\"safeclaw-share-recipient-card\",0,327,390,209,\"grid\",\"14px\",\"14px\",\"14px\",\"14px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"P\",\"safeclaw-hint\",0,545.9,390,22.4,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"DIV\",\"safeclaw-module-shell module-variant-document\",0,0,390,844,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"HEADER\",\"safeclaw-module-nav\",0,65,390,63,\"flex\",\"4px\",\"12px\",\"4px\",\"12px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"safeclaw-module-theme-toggle\",12,69,106,54,\"grid\",\"4px\",\"4px\",\"4px\",\"4px\",\"8px\",\"15px\",\"24px\",\"normal\"],[\"BUTTON\",\"safeclaw-module-chrome-button\",17,74,48,44,\"flex\",\"0px\",\"8px\",\"0px\",\"8px\",\"4px\",\"12px\",\"18px\",\"normal\"],[\"BUTTON\",\"safeclaw-module-chrome-button\",65,74,48,44,\"flex\",\"0px\",\"8px\",\"0px\",\"8px\",\"4px\",\"12px\",\"18px\",\"normal\"],[\"HEADER\",\"safeclaw-page-decision-header safeclaw-module-header\",0,128,390,273.6,\"grid\",\"16px\",\"16px\",\"16px\",\"16px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"safeclaw-page-decision-copy\",16,144,358,117.6,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SPAN\",\"safeclaw-module-eyebrow\",16,148,58.6,17,\"inline\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"12px\",\"18px\",\"normal\"],[\"H1\",\"safeclaw-module-title\",16,172,358,36.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"32px\",\"36.8px\",\"-1.12px\"],[\"P\",\"safeclaw-module-description\",16,216.8,358,44.8,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"ASIDE\",\"safeclaw-page-decision-action\",16,277.6,358,107,\"grid\",\"12px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"safeclaw-module-principal-command\",16,340.6,358,44,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"SECTION\",\"safeclaw-share-recipient-page\",0,401.6,390,345.7,\"grid\",\"0px\",\"16px\",\"32px\",\"16px\",\"0px\",\"15px\",\"24px\",\"normal\"],[\"P\",\"safeclaw-subtitle\",16,441.6,358,22.4,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"],[\"ARTICLE\",\"safeclaw-share-recipient-card\",16,474,358,209,\"grid\",\"14px\",\"14px\",\"14px\",\"14px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"P\",\"safeclaw-hint\",16,692.9,358,22.4,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"14px\",\"22.4px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -9998,7 +9998,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-desktop-1440.jpg",
-      "screenshotSha256": "f8691da09aabaadb0edf46d920c0b39155658e9a1f45f0e77dfb10e97cca040a",
+      "screenshotSha256": "837922c96de47cadb36891b74a9b6739fe1b0526128139e1963e0c849393acb8",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10104,7 +10104,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-tablet-1024.jpg",
-      "screenshotSha256": "406ec8d955aa720dda4733ee30803d0d2f53600bcab9173418afafe6aaf53920",
+      "screenshotSha256": "e86889d3e58d55b96837bbbc96975601a8d57c37c3dc066bed79757f9a728c78",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10210,7 +10210,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-mobile-390.jpg",
-      "screenshotSha256": "98afcbb3aabb6b1fc3886b1b95432ee5b459a63dbc911bfac157d4818a5c8331",
+      "screenshotSha256": "fab57124e198fb9128e24b17853def39df9628e75177541ce2e77488ca7bf26b",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -11513,7 +11513,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workspace-tablet-1024.jpg",
-      "screenshotSha256": "74669abd813ff4d83bb41c0831a8b8e2ef8895dd675baa09250bb569a8a6045e",
+      "screenshotSha256": "06e6e44edac5755ffb86b2718d97a8d7bae8b6a06f00c2dbd1ea37eb8ec80f46",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -11717,7 +11717,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workspace-mobile-390.jpg",
-      "screenshotSha256": "9e58b85f5f34d3c01b1742d19fda47d6568ea0e364c7abaf055a823521f6e91e",
+      "screenshotSha256": "9c6bdfda7025196567f4804389f3236f62b72756a864364a59630b4c683a9176",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -11895,7 +11895,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-day-desktop-1440.jpg",
-      "screenshotSha256": "3d1daa7932d0f4d6532c40222c6a66a9b19035af030b6e2b9efbb824a6ff20a8",
+      "screenshotSha256": "22c05befcc84c387efbce48e877bf137f2c165ea21938bd7cf42f11457fe1443",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12099,7 +12099,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-day-tablet-1024.jpg",
-      "screenshotSha256": "74669abd813ff4d83bb41c0831a8b8e2ef8895dd675baa09250bb569a8a6045e",
+      "screenshotSha256": "06e6e44edac5755ffb86b2718d97a8d7bae8b6a06f00c2dbd1ea37eb8ec80f46",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12303,7 +12303,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Day",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-day-mobile-390.jpg",
-      "screenshotSha256": "9e58b85f5f34d3c01b1742d19fda47d6568ea0e364c7abaf055a823521f6e91e",
+      "screenshotSha256": "9c6bdfda7025196567f4804389f3236f62b72756a864364a59630b4c683a9176",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12479,7 +12479,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-desktop-1440.jpg",
-      "screenshotSha256": "0281b353901950cbf14ccfc0f8ac918a2e53dfabeee582fe01d589ede8ae4af1",
+      "screenshotSha256": "41b086bce2b0537eca02db23e5faca59921a95d03b0bfc82c4c20977990a08a3",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12683,7 +12683,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-tablet-1024.jpg",
-      "screenshotSha256": "5c906753e659b65bca6f68d2a8df1fb9f4feaaa5bc8ae4a53b262d4c84b96aa3",
+      "screenshotSha256": "8bf5bd3ceb2dc6815d13eda992f68f08503988eaba72462a475a0c84666644a6",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -12887,7 +12887,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": "Night",
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/workspace-night-mobile-390.jpg",
-      "screenshotSha256": "73cd1a7de6f4aae3318d590b1ba5c9b0b798f153701fe89a00846c33e1d36301",
+      "screenshotSha256": "ba4d072dcac860b82814a3437a0e3fdd37212785105c45eab84329bbe3cf656e",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -13309,7 +13309,7 @@
           ]
         }
       ],
-      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.4,20.2,33.7,33.7,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
+      "geometryFingerprint": "[[\"SECTION\",\"card list special-state\",412.2,0,615.6,200,\"grid\",\"24px\",\"24px\",\"24px\",\"24px\",\"14px\",\"15px\",\"24px\",\"normal\"],[\"DIV\",\"loading-spinner\",432.2,20,33.9,33.9,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"50%\",\"15px\",\"24px\",\"normal\"],[\"H1\",\"special-state-title\",437.2,65,565.6,46,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"40px\",\"46px\",\"-1.4px\"],[\"DIV\",\"muted\",437.2,127,565.6,48,\"block\",\"0px\",\"0px\",\"0px\",\"0px\",\"0px\",\"15px\",\"24px\",\"normal\"]]",
       "documentTypography": {
         "title": null,
         "section": null,
@@ -13788,7 +13788,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 18. 오전 9:49:30 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 18. 오전 10:28:52 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13832,7 +13832,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "fd8db0a41cff57c25822256d1be08911a08b41735c3c750c2b873b67501253b7",
+      "screenshotSha256": "930ad44beb70dd8cde3348fb8943eafa19b20fa8eb4e4c9ce7c1f8235ca30a83",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,
