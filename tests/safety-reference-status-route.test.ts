@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getSafetyReferenceStats: vi.fn(),
-  loadKoshaGuideCorpus: vi.fn()
+  loadKoshaGuideCorpus: vi.fn(),
+  loadBundledExactKoshaReferences: vi.fn()
 }));
 
 vi.mock("@/lib/safety-reference-catalog", () => ({
@@ -11,6 +12,10 @@ vi.mock("@/lib/safety-reference-catalog", () => ({
 
 vi.mock("@/lib/kosha-guide-corpus", () => ({
   loadKoshaGuideCorpus: mocks.loadKoshaGuideCorpus
+}));
+
+vi.mock("@/lib/safety-reference-catalog-server", () => ({
+  loadBundledExactKoshaReferences: mocks.loadBundledExactKoshaReferences
 }));
 
 import { GET } from "@/app/api/safety-reference/status/route";
@@ -37,6 +42,14 @@ describe("safety-reference status route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getSafetyReferenceStats.mockResolvedValue(readyCatalogStats);
+    mocks.loadBundledExactKoshaReferences.mockResolvedValue({
+      status: "ready",
+      items: [
+        { id: "KOSHA-D-C-13-2026" },
+        { id: "KOSHA-D-C-7-2026" },
+        { id: "KOSHA-B-E-10-2026" }
+      ]
+    });
   });
 
   it("fails closed when the catalog is ready but the local KOSHA corpus is unavailable", async () => {
@@ -125,6 +138,9 @@ describe("safety-reference status route", () => {
       exactTrustRegistry: {
         status: "ready",
         count: 3,
+        integrityStatus: "ready",
+        loadedItemCount: 3,
+        failureReason: null,
         stableDocumentKeys: ["D-C-13", "D-C-7", "B-E-10"],
         versions: ["D-C-13-2026", "D-C-7-2026", "B-E-10-2026"]
       }
@@ -135,6 +151,45 @@ describe("safety-reference status route", () => {
       version: "B-E-10-2026",
       officialFileId: "CTC2026012913263450093332"
     });
+    expect(JSON.stringify(payload)).not.toContain("C:/private/kosha-corpus");
+  });
+
+  it("fails closed when the exact KOSHA trust assets fail runtime integrity loading", async () => {
+    mocks.loadKoshaGuideCorpus.mockResolvedValue({
+      status: "ready",
+      rootDir: "C:/private/kosha-corpus",
+      snapshotId: "snapshot-id",
+      manifestSha256: "manifest-sha256",
+      inventoryCount: 1_040,
+      itemCount: 1_040,
+      chunkCount: 20_520,
+      failureCount: 0,
+      records: [],
+      indexedRecords: []
+    });
+    mocks.loadBundledExactKoshaReferences.mockResolvedValue({
+      status: "blocked",
+      reason: "asset-integrity-failed",
+      message: "exact KOSHA asset does not satisfy the immutable production trust pin"
+    });
+
+    const response = await GET();
+    const payload = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(payload).toMatchObject({
+      ok: false,
+      status: "degraded",
+      searchReady: false,
+      exactTrustRegistry: {
+        status: "blocked",
+        count: 3,
+        integrityStatus: "blocked",
+        loadedItemCount: 0,
+        failureReason: "asset-integrity-failed"
+      }
+    });
+    expect(payload.message).toContain("exact KOSHA registry integrity gate blocked");
     expect(JSON.stringify(payload)).not.toContain("C:/private/kosha-corpus");
   });
 

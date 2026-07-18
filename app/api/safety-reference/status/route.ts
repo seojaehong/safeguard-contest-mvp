@@ -2,16 +2,19 @@ import { NextResponse } from "next/server";
 import { loadKoshaGuideCorpus } from "@/lib/kosha-guide-corpus";
 import { getProductionExactKoshaTrustPins } from "@/lib/production-kosha-trust";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
+import { loadBundledExactKoshaReferences } from "@/lib/safety-reference-catalog-server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const exactTrustPins = getProductionExactKoshaTrustPins();
-  const [catalog, localCorpus] = await Promise.all([
+  const [catalog, localCorpus, exactTrustRegistryLoad] = await Promise.all([
     getSafetyReferenceStats(),
-    loadKoshaGuideCorpus()
+    loadKoshaGuideCorpus(),
+    loadBundledExactKoshaReferences()
   ]);
-  const searchReady = catalog.ok && localCorpus.status === "ready";
+  const exactTrustReady = exactTrustRegistryLoad.status === "ready";
+  const searchReady = catalog.ok && localCorpus.status === "ready" && exactTrustReady;
   const status = searchReady ? "ready" : "degraded";
   const localCorpusStatus = localCorpus.status === "ready"
     ? {
@@ -33,6 +36,9 @@ export async function GET() {
     : localCorpus.status === "blocked"
       ? `KOSHA 로컬 코퍼스 무결성 게이트가 차단되어 검색 준비 상태가 아닙니다: ${localCorpus.failures.join(", ") || "integrity-failed"}.`
       : "KOSHA 로컬 코퍼스 무결성 게이트가 준비되었습니다.";
+  const exactTrustMessage = exactTrustReady
+    ? "Exact KOSHA registry integrity gate ready."
+    : `exact KOSHA registry integrity gate blocked: ${exactTrustRegistryLoad.reason}.`;
   const result = {
     ...catalog,
     ok: searchReady,
@@ -40,8 +46,11 @@ export async function GET() {
     searchReady,
     localCorpus: localCorpusStatus,
     exactTrustRegistry: {
-      status: exactTrustPins.length ? "ready" : "blocked",
+      status: exactTrustReady ? "ready" : "blocked",
       count: exactTrustPins.length,
+      integrityStatus: exactTrustReady ? "ready" : "blocked",
+      loadedItemCount: exactTrustReady ? exactTrustRegistryLoad.items.length : 0,
+      failureReason: exactTrustReady ? null : exactTrustRegistryLoad.reason,
       stableDocumentKeys: exactTrustPins.map((pin) => pin.stableDocumentKey),
       versions: exactTrustPins.map((pin) => pin.version),
       items: exactTrustPins.map((pin) => ({
@@ -57,7 +66,7 @@ export async function GET() {
         provenanceSha256: pin.provenanceSha256
       }))
     },
-    message: `${catalog.message} ${localMessage}`
+    message: `${catalog.message} ${localMessage} ${exactTrustMessage}`
   };
 
   return NextResponse.json(result, { status: result.ok ? 200 : 503 });
