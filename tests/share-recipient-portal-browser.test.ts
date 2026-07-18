@@ -105,8 +105,8 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     if (!response || response.status() >= 400) {
       throw new Error(`share page returned ${response?.status() ?? "no response"}\n${await page.locator("body").innerText().catch(() => "")}\n${harness.readServerOutput()}`);
     }
-    await expect.poll(() => page.locator("body").innerText()).toContain("문서팩 검토");
-    await expect.poll(() => page.locator("body").innerText()).toContain("초대된 작업자에게만 열린 확인 화면입니다.");
+    await expect.poll(() => page.locator("body").innerText()).toContain("Kiểm tra gói tài liệu");
+    await expect.poll(() => page.locator("body").innerText()).toContain("Màn hình xác nhận chỉ dành cho công nhân được mời.");
     await expect.poll(() => page.getByText("Server Nguyen", { exact: false }).count()).toBeGreaterThan(0);
     await expect.poll(() => page.locator("body").innerText()).toContain("Tiếng Việt 안내");
     await expect.poll(() => page.getByText("위험성평가표", { exact: true }).count()).toBe(1);
@@ -120,15 +120,15 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       const controls = [...document.querySelectorAll<HTMLElement>(".safeclaw-input, .safeclaw-select, .safeclaw-button")];
       const cards = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")];
       const confirmButton = [...document.querySelectorAll<HTMLElement>("button")]
-        .find((item) => item.innerText.trim() === "열람 확인");
+        .find((item) => item.innerText.trim() === "Tôi đã xem");
       const documentsCard = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")]
-        .find((item) => item.innerText.includes("문서팩 핵심 3종"));
+        .find((item) => item.innerText.includes("3 tài liệu chính"));
       const closedDocuments = [...document.querySelectorAll<HTMLDetailsElement>(".safeclaw-share-recipient-document")]
         .filter((item) => !item.open);
       const documentSummaries = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-document summary")];
       const decisionAction = document.querySelector<HTMLElement>(".safeclaw-page-decision-action");
       const reviewHeading = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-page h2")]
-        .find((item) => item.innerText.trim() === "문서팩 검토");
+        .find((item) => item.innerText.trim() === "Kiểm tra gói tài liệu");
       return {
         documentWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
@@ -156,10 +156,11 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     expect(metrics.reviewHeadingLeft).toBeGreaterThanOrEqual(16);
     expect(metrics.outsideCards).toBe(0);
 
-    await page.getByRole("button", { name: "열람 확인" }).click();
-    await expect.poll(() => page.getByText("작업자 열람 확인을 저장했습니다.", { exact: true }).count()).toBe(1);
-    await expect.poll(() => page.getByText("관리자 화면에 확인 이력이 저장되었습니다.", { exact: true }).count()).toBe(1);
+    await page.getByRole("button", { name: "Tôi đã xem" }).click();
+    await expect.poll(() => page.getByText("Đã lưu xác nhận xem tài liệu.", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("Lịch sử xác nhận đã được lưu cho quản lý.", { exact: true }).count()).toBe(1);
     await expect.poll(() => page.getByText("확인 ID:", { exact: false }).count()).toBe(0);
+    await expect.poll(() => page.getByText("열람 확인", { exact: true }).count()).toBe(0);
     expect(confirmationBody).toEqual({
       workerId: WORKER_ID,
       displayName: "Server Nguyen",
