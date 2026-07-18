@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-07-19T00:20:00+09:00",
-  "authoritativeHead": "48a5c8b83d076f427748b0ac2dbe04712ddecec8",
+  "authoritativeHead": "e779a3ce4f2239e02f44d63894bcab539668766d",
   "status": "in_progress",
   "provenGates": [
     "full_serial_suite",
@@ -59,8 +59,8 @@
       "staticPagesGenerated": 28
     },
     "ci": {
-      "runId": 29651333050,
-      "headSha": "94d45b02651f7dd4179988791d8ad564474db954",
+      "runId": 29652521833,
+      "headSha": "e779a3ce4f2239e02f44d63894bcab539668766d",
       "status": "completed",
       "conclusion": "success",
       "checks": [
@@ -73,7 +73,7 @@
       "url": "https://www.safeclaw.kr/api/build-info",
       "statusCode": 200,
       "configured": true,
-      "commitSha": "94d45b02651f7dd4179988791d8ad564474db954",
+      "commitSha": "e779a3ce4f2239e02f44d63894bcab539668766d",
       "branch": "master",
       "environment": "production",
       "source": "vercel-system-env"
@@ -108,6 +108,7 @@
     "currentKoshaReconciliation": {
       "artifact": "evaluation/kosha-current-master-reconciliation-2026-07-19/report.json",
       "sourceHead": "48a5c8b83d076f427748b0ac2dbe04712ddecec8",
+      "evidenceCommitSha": "e779a3ce4f2239e02f44d63894bcab539668766d",
       "productionExactPins": ["D-C-13", "D-C-7", "B-E-10"],
       "focusedKoshaVitest": {
         "files": 5,

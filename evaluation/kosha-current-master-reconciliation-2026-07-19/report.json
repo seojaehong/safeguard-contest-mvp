@@ -2,8 +2,9 @@
   "artifact": "kosha-current-master-reconciliation-2026-07-19",
   "verdict": "pass_current_master_kosha_exact_registry_and_local_corpus_readiness",
   "sourceHead": "48a5c8b83d076f427748b0ac2dbe04712ddecec8",
+  "evidenceCommitSha": "e779a3ce4f2239e02f44d63894bcab539668766d",
   "productionBuildInfo": {
-    "commitSha": "48a5c8b83d076f427748b0ac2dbe04712ddecec8",
+    "commitSha": "e779a3ce4f2239e02f44d63894bcab539668766d",
     "branch": "master",
     "environment": "production"
   },
@@ -52,7 +53,15 @@
       "localCorpusStatus": "ready",
       "localCorpusItemCount": 234,
       "localCorpusChunkCount": 7127,
-      "localCorpusFailureCount": 0
+      "localCorpusFailureCount": 0,
+      "exactTrustRegistryStatus": "ready",
+      "exactTrustRegistryCount": 3,
+      "exactTrustRegistryKeys": [
+        "D-C-13",
+        "D-C-7",
+        "B-E-10"
+      ],
+      "exactTrustRegistryPartialFailure": false
     }
   },
   "mutations": {

@@ -1,7 +1,7 @@
 # SafeClaw North Star Current State
 
 Generated at: 2026-07-19 KST  
-Authoritative live-proven HEAD: `48a5c8b83d076f427748b0ac2dbe04712ddecec8`
+Authoritative live-proven HEAD: `e779a3ce4f2239e02f44d63894bcab539668766d`
 
 ## Purpose
 
@@ -20,8 +20,8 @@ This is not a completion declaration. It records what current evidence proves an
 | --- | --- | --- |
 | Full serial suite | `evaluation/2026-07-18-authoritative-full-test-current-rerun.log` | 188 files passed / 9 skipped; 2308 tests passed / 15 skipped; exit code 0. |
 | Frontend consistency | `evaluation/frontend-audit-runner-port-v2-2026-07-11/` | Static audit and browser audit were refreshed; 111 screenshot rows completed with 0 findings. |
-| Current CI and production build | GitHub Actions run `29651333050` | `typecheck`, full `npm.cmd test -- --maxWorkers=1 --fileParallelism=false`, and `npm.cmd run build` all passed in CI for `94d45b02`. |
-| Live deployment commit mapping | `GET https://www.safeclaw.kr/api/build-info` | Live production returns `commitSha=94d45b02651f7dd4179988791d8ad564474db954`, `branch=master`, `environment=production`. |
+| Current CI and production build | GitHub Actions run `29652521833` | `typecheck`, full `npm.cmd test -- --maxWorkers=1 --fileParallelism=false`, and `npm.cmd run build` all passed in CI for `e779a3ce`. |
+| Live deployment commit mapping | `GET https://www.safeclaw.kr/api/build-info` | Live production returns `commitSha=e779a3ce4f2239e02f44d63894bcab539668766d`, `branch=master`, `environment=production`. |
 | Public live smoke | `evaluation/live-public-smoke-2026-07-18/report.md` and `report.json` | Public routes responded and showed no horizontal overflow or console/page errors in the checked desktop/mobile smoke. |
 | Exact KOSHA registry | `evaluation/live-provider-readiness-2026-07-19/report.md`, `evaluation/kosha-trust-registry-wave2-2026-07-16/report.md`, `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md` | D-C-13, D-C-7, and B-E-10 are exact trust registry entries; KOSHA local corpus is live-ready with the compressed verified subset. Live `/api/safety-reference/status` returns HTTP 200, `searchReady=true`, `localCorpus.status=ready`, `itemCount=234`, `chunkCount=7127`. |
 | Live provider readiness | `evaluation/live-provider-readiness-2026-07-19/report.md` | OpenAI vision is ready on live, dispatch is preview-only because provider idempotency remains intentionally locked, KOSHA local corpus is live-ready, and SIF embedding remains approval-held. |

@@ -8,8 +8,9 @@ No database schema change, Supabase data mutation, or KOSHA corpus upload was pe
 
 ## Current Source
 
-- Source HEAD: `48a5c8b83d076f427748b0ac2dbe04712ddecec8`
-- Production build-info: `commitSha=48a5c8b83d076f427748b0ac2dbe04712ddecec8`, `branch=master`, `environment=production`
+- Verified product-code source HEAD: `48a5c8b83d076f427748b0ac2dbe04712ddecec8`
+- Evidence-only commit carrying this report: `e779a3ce4f2239e02f44d63894bcab539668766d`
+- Production build-info after evidence commit: `commitSha=e779a3ce4f2239e02f44d63894bcab539668766d`, `branch=master`, `environment=production`
 
 ## Runtime Findings
 
@@ -74,6 +75,9 @@ Live KOSHA status probe:
 - `localCorpus.itemCount=234`
 - `localCorpus.chunkCount=7127`
 - `localCorpus.failureCount=0`
+- `exactTrustRegistry.status=ready`
+- `exactTrustRegistry.count=3`
+- `exactTrustRegistry.stableDocumentKeys=D-C-13, D-C-7, B-E-10`
 
 ## Decision
 
