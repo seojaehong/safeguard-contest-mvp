@@ -1,0 +1,36 @@
+{
+  "status": "pass",
+  "verifiedBase": "d9c266e5b30464198a935c0c00c1142256fd18b7",
+  "date": "2026-07-18",
+  "scope": "current master document delivery and foreign worker dispatch recheck",
+  "commands": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts tests\\workpack-editor-structured-sections.test.ts tests\\document-export-localization.test.ts tests\\pdf-korean-font-integration.test.ts tests\\xlsx-export-route.test.ts tests\\web-safe-presentation-localization.test.ts tests\\foreign-worker-languages.test.ts tests\\workspace-share-simplification.test.ts tests\\workflow-share-panel-behavior.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "pass",
+      "files": 9,
+      "tests": 106,
+      "durationSeconds": 204.49
+    }
+  ],
+  "integrity": {
+    "dbMigration": false,
+    "supabaseDataMutation": false,
+    "staleBranchMerged": false
+  },
+  "coveredBoundaries": [
+    "document editor layout",
+    "structured document sections",
+    "PDF Korean localization",
+    "XLSX export localization",
+    "web-safe presentation localization",
+    "foreign worker languages",
+    "share simplification",
+    "workflow share behavior"
+  ],
+  "remainingNorthStarWork": [
+    "document-specific field editors",
+    "additional exact KOSHA reference promotion",
+    "Hermes and LLM Wiki governance runtime",
+    "broader live UI UX sweeps"
+  ]
+}
