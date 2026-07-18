@@ -1,10 +1,10 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-07-18T06:28:10.069Z",
+  "generatedAt": "2026-07-18T07:53:47.741Z",
   "baseUrl": "http://127.0.0.1:3011",
-  "sourceSha": "2ce86e550019c47b8fee290019eb4fd38929d2a1",
-  "sourceIdentity": "c73453fcc8d168c9749e2cae97bca4d722c4b7e0c1891a310379c77e5a369a41",
-  "evidenceHead": "2ce86e550019c47b8fee290019eb4fd38929d2a1",
+  "sourceSha": "69e23e2a1f0fd40fe1b6ad6e837304c0ac9a70f5",
+  "sourceIdentity": "a36a907b75fc1e59c6c3004ba36a59a643264402472a55dbad08fc9927c96e2a",
+  "evidenceHead": "69e23e2a1f0fd40fe1b6ad6e837304c0ac9a70f5",
   "evidenceOnlyDescendant": false,
   "rowContract": {
     "routes": 33,
@@ -27,11 +27,11 @@
     "recoveredRows": 0,
     "findingCount": 0,
     "failures": 0,
-    "elapsedMs": 121795
+    "elapsedMs": 118532
   },
   "staticAudit": {
-    "sourceSha": "2ce86e550019c47b8fee290019eb4fd38929d2a1",
-    "sourceIdentity": "c73453fcc8d168c9749e2cae97bca4d722c4b7e0c1891a310379c77e5a369a41",
+    "sourceSha": "69e23e2a1f0fd40fe1b6ad6e837304c0ac9a70f5",
+    "sourceIdentity": "a36a907b75fc1e59c6c3004ba36a59a643264402472a55dbad08fc9927c96e2a",
     "command": "npm.cmd run audit:frontend-consistency",
     "reportPath": "evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json",
     "status": "pass",
@@ -526,7 +526,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-archive-tablet-1024.jpg",
-      "screenshotSha256": "ac08355a1701950efa039986925c8f2db74ee6db5ee8401e1825caea0dab0aed",
+      "screenshotSha256": "dc9172bdf8afc3c00ffed9b40cdfee54938e12af3bb82c3d1cad7b93aba5b8a8",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -652,7 +652,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-archive-mobile-390.jpg",
-      "screenshotSha256": "7a3526e2a93205f8199067bc6a68a978080a60f96a4a35800b581ee9d30690fd",
+      "screenshotSha256": "5179f1e1dd32012709c48c9207475128031abdcfb3e2b2a89a861ba55de6657d",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -867,7 +867,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ask-tablet-1024.jpg",
-      "screenshotSha256": "489d713a39c89e40bb61c88051a5e303a130abbaa160ecacceb38532021c2a2b",
+      "screenshotSha256": "7ef2516cfd37be9eaa5ff725331c43ca2be659012147024a6463e33835b8a839",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -956,7 +956,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ask-mobile-390.jpg",
-      "screenshotSha256": "c8bb3497773e5de9c026425d7bb92018f73f077b125297a2d6ea411c72678337",
+      "screenshotSha256": "87bac0eed2f7fb73d813550bb2e67f457fb75c7cf4f916eb067a4342502804b1",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -1723,7 +1723,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-dispatch-tablet-1024.jpg",
-      "screenshotSha256": "209001015d90616167226565016ce1edafb248749c46c708d7b31e8d34e248ae",
+      "screenshotSha256": "6391cb57793138eb3c7387a00241b379845ac572c05cec9642006a9217f47958",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -1822,7 +1822,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-dispatch-mobile-390.jpg",
-      "screenshotSha256": "ecb04123468af2f0ff9cf442642e28d1d6caa6aa7eb5f8e32f492fb39d9f15b0",
+      "screenshotSha256": "65176271700cf16d9c1de06b490258c609bc6592ec385bf778dc61f87c961a05",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -2307,7 +2307,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-documents-tablet-1024.jpg",
-      "screenshotSha256": "3436dbef82a2cf7fe1755867ccbfd05cdd30fc5e01a79e83be9b57a32e56b1b9",
+      "screenshotSha256": "4ab19523c5383d7deeaafb00fffda5cc2419559b27d00624e732712eda9b1a6f",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -2616,7 +2616,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-documents-mobile-390.jpg",
-      "screenshotSha256": "d78ce809ea3f2fc46d6103988f1a0f2637ba7d438f4f9a08fd8ff50b824735d2",
+      "screenshotSha256": "542bcdb9fcdd4fc4278c0570d805637d36d1b15a2abb8aab2a4e65683376ed93",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -3034,7 +3034,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-dryrun-tablet-1024.jpg",
-      "screenshotSha256": "03d2e572c628654a657f107a02af5b2770a3f2a102e50f39a387821eb53b2ad6",
+      "screenshotSha256": "d8190024f878ad9a8a85a1ea6adf5d1e5a61d34e75a5f2ddff49fa7147cb3db8",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -3143,7 +3143,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-dryrun-mobile-390.jpg",
-      "screenshotSha256": "24b553a04d305a37761360890e6287571445f706324465ab51975c740999bcd0",
+      "screenshotSha256": "b4979d78ff6509056712e12c6cc7dd0343ccd5d09645cb65313cd3120df0b3f9",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -3361,7 +3361,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-evidence-tablet-1024.jpg",
-      "screenshotSha256": "9f2a14347bb7edf8f13386ec7d82b6213bc4a55a6d6645bfef37121573ff573f",
+      "screenshotSha256": "465db4348dc9184849442d1598a7a3e390e72cac05808ad0bea91e3bc6a1c34d",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -3470,7 +3470,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-evidence-mobile-390.jpg",
-      "screenshotSha256": "ad00e154624e86845e8f790586403c65d18618d099f7d885dbf9b7d3cee725cd",
+      "screenshotSha256": "17dcef0e0dbac0ca70368e078824998ae0926cd77481f834c34ffcecb8060d24",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -3688,7 +3688,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-evidence-file-tablet-1024.jpg",
-      "screenshotSha256": "7fb6cb7486bf3aa3dce61e089713087a4732ba1d254ad8e910113512dc8ab0bd",
+      "screenshotSha256": "074668ff2e33ca1fa95270e4930d34f76117293052a3c1492193778ca24ae365",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -3797,7 +3797,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-evidence-file-mobile-390.jpg",
-      "screenshotSha256": "ebb3a7532956b93e18082393d6e4dbe4b39780e2646dec8941b9593589052cc6",
+      "screenshotSha256": "cacdb362da6f7fe2c49487fe2d759b628fcf90743f7e9a5dcca03d9f1c07fb47",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -4005,7 +4005,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-home-tablet-1024.jpg",
-      "screenshotSha256": "fb2190ec6609341c8050d1cdcf0180bb28eec0d592e034d78d81d23f1143b8d6",
+      "screenshotSha256": "7570735b3152e11e8704c426775ade9ec3f8a0e1e74970c664b851770dfa767c",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -4104,7 +4104,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-home-mobile-390.jpg",
-      "screenshotSha256": "40b8b4e8cb5255467a8b32d1d9bea0a6457d55437e4399b4acc8b4cfd1d8ce59",
+      "screenshotSha256": "b7280ee6f3917e556cd7b1d9bc893f5927ea221070044504ccc093af0c06026b",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -4506,7 +4506,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-knowledge-tablet-1024.jpg",
-      "screenshotSha256": "992c78c1975780ad99c84a1a3f3367f750d5b035396754f34b020c26f8a95af7",
+      "screenshotSha256": "7379d3f4e4ab7f7318bc38d7c472651cff4c74443be495bc6f629095916f0e8c",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -4584,7 +4584,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-knowledge-mobile-390.jpg",
-      "screenshotSha256": "d04078f936fb52fe4b2e8ba22a8f7bc5bbd2b4dc5d460bcd7367df3d0f762620",
+      "screenshotSha256": "5bbebc7deb39bcdcbf51a833f892136a9f1586a706d054a72cad123ea0e34669",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -4793,7 +4793,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-knowledge-section-slug-tablet-1024.jpg",
-      "screenshotSha256": "f2bf016018973a0ed1e22cfe7adace3fd3f31385d0a6662266b315edcd4878d5",
+      "screenshotSha256": "ceb8e8fdc35a611f057233edc34b84e77b43ddf6d07a8f7a2a5dc1e7d1d0318f",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -4882,7 +4882,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-knowledge-section-slug-mobile-390.jpg",
-      "screenshotSha256": "b2ed607799b5ec78e26995f00c0223ea83e945b3642de3482bd8af74ea5aa358",
+      "screenshotSha256": "59b0d77bf5125b732360cd3837b95866c47f6c3721a79ddbc60722dab74090ae",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -5729,7 +5729,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ontology-tablet-1024.jpg",
-      "screenshotSha256": "4e0c9325570c56ccbef26d938f302e27583fc417f3ebffb828e74518202d312e",
+      "screenshotSha256": "e544dd4f685982e5b7088eea5f5de1074d35df18b099bb3fee5ca0767ed512ba",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -6094,7 +6094,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ontology-mobile-390.jpg",
-      "screenshotSha256": "ae986ba402e94a6b4f08bfec681f2d9480afd9d7fe80c1c4d639d3e9adc9800f",
+      "screenshotSha256": "d91ae669ff9c76ad70eea6d68c67cbd344c94e50e442bb3cf4a0bedb462a2dea",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -6540,7 +6540,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ops-api-tablet-1024.jpg",
-      "screenshotSha256": "81ae8f280d5437ffc14a944137edb135ff97d2e559b8c575d6a239551f664578",
+      "screenshotSha256": "e269214f32b3eced3b0a64df71797b393692face55e643c6e14878fa0e6c34eb",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -6649,7 +6649,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-ops-api-mobile-390.jpg",
-      "screenshotSha256": "e4f4bb9337defe810ce78fe5dd05ef313707df48cf7ced78d4e629411ee36c9d",
+      "screenshotSha256": "edfbd8b4ad163f474e22135d816cd1c0674e010cdc1e1413ec8b043a13b622cf",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -7072,7 +7072,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-preview-tablet-1024.jpg",
-      "screenshotSha256": "b53345dbf2d6dfb82ded118b27ede78aeef1282b3f9c9735f2bf44c11cd4f413",
+      "screenshotSha256": "7bebfa16c3c228f55ccaa0f78fc5545269ec8f33ce74e2a2f965efbfb85a3c5b",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -7161,7 +7161,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-preview-mobile-390.jpg",
-      "screenshotSha256": "daa91051455b6475651e46cd665f7eac14e94146d6a262f16d0a18ab67c3c2ed",
+      "screenshotSha256": "1a2f806b54b919d3431c3e57878d0a14b75758502793c0bb095baecc30181b41",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -7853,7 +7853,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-reports-tablet-1024.jpg",
-      "screenshotSha256": "1cca07418425f102a8798e3843cda923a345b2f9afe5d01719dc393c44f80673",
+      "screenshotSha256": "3f6c4fa14a9976a51e79e465e5e3f53d4365f1f39966b4f79e5eca9438be7d39",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -7949,7 +7949,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-reports-mobile-390.jpg",
-      "screenshotSha256": "eb68b65d0c63577b4aed196a43b867632d9dbca00a10f3a177aa1c207790a3e3",
+      "screenshotSha256": "8792c79bf26d52291ace3535ed86149a0c1866a0c13d1b40780cfd883b24bfb2",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -8141,7 +8141,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-roadmap-tablet-1024.jpg",
-      "screenshotSha256": "eebcffd5ff4be2f7f2afb0209367aece89bad888488e95888ea0e412446bb0ef",
+      "screenshotSha256": "a68535eac0023beaa2984eb7750184483f80d67bc8ddec544455a5bf439da736",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -8237,7 +8237,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-roadmap-mobile-390.jpg",
-      "screenshotSha256": "aa25cda17788f03fe848e82bdaad5f85c62793daa3bf58a885b414c5356b0e8e",
+      "screenshotSha256": "bbeb31905f2601c467b0cdf24901a8c614a5e84dfb4df7b162e998b926fbd9ec",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -8436,7 +8436,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-search-tablet-1024.jpg",
-      "screenshotSha256": "dbfdd3a649b68ae8bca218dc593881e5d370dc33e485ac32ee545c0504a5460a",
+      "screenshotSha256": "9fcf7f091b6912cd0aefdab88037f68358983fcff24d3d0878d3b0f0cc90f4da",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -8539,7 +8539,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-search-mobile-390.jpg",
-      "screenshotSha256": "a935550d2923b71a6b80c8090866674e0ffd5668ced25a0a35efd3d8c1978122",
+      "screenshotSha256": "069fc2e6e58a3daf7ec47ca255c356c33ac6548e06a49cbf987b6b96af562739",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -8720,7 +8720,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-settings-tablet-1024.jpg",
-      "screenshotSha256": "05408bfc5f73481e507af04f6c2892fb2d29ff636106fa0b76f70496c34d940e",
+      "screenshotSha256": "970579422a4fd3c19340e08a720c41a6d0143ae138f1a74ff95cb094bac9a536",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -8798,7 +8798,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-settings-mobile-390.jpg",
-      "screenshotSha256": "7c6b6704e2cc26f5fb26769653bd8f6aaabf1cb3481941b1869b516766f1d073",
+      "screenshotSha256": "cc332cdf58ec46ac7172437e4ccd6cbc28aa7b3cd87322758c2bc0ecf3d70326",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -8972,7 +8972,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-settings-ai-connect-tablet-1024.jpg",
-      "screenshotSha256": "afac5300ba2b7c3465e66c3883ddeca26cc4a54cc5310f4dd5b6f011e8b72864",
+      "screenshotSha256": "4f3bd3eac949b5218764d5e899aa0f731f92de3d1a1d1f74463ac870e8776cd8",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9068,7 +9068,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-settings-ai-connect-mobile-390.jpg",
-      "screenshotSha256": "5f1468b431bc855fe3280334b72d4fd3b9a0dd6e2415421d7701133db0bc4ff1",
+      "screenshotSha256": "a0c70e4960b99de8c4723a044007b3d337b64a78c16b2378b3b4ab9d326a2e27",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9242,7 +9242,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-share-sessionId-tablet-1024.jpg",
-      "screenshotSha256": "651ef0d48c029fe68d0acd2ad5972aa53fab93176636316407699b37f90b1052",
+      "screenshotSha256": "7ff5b7072f5fdd1d22a3d71445600399aa0eee38958a70a557ea3643b06812b9",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9487,7 +9487,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-tbm-tablet-1024.jpg",
-      "screenshotSha256": "1d7ec78f233b3490e3f3fe78d555be23dce042ae7a33bfe61b7070fce2251c16",
+      "screenshotSha256": "8840daf92aa09a9ec23451df020fcd92c99164da79aaec96b7f6c923c674774e",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9576,7 +9576,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-tbm-mobile-390.jpg",
-      "screenshotSha256": "f2fa31b2316c76b93ce7f32985768d00333b2ad2c7ddb089b15f03eaebe86dab",
+      "screenshotSha256": "864634ced0c6487512b8e2d25a1fd62edeef45809776a6ed3675faa5000f02ae",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9754,7 +9754,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-trust-tablet-1024.jpg",
-      "screenshotSha256": "b65bf5416826fae2140d1ded43d40fbdb1428a3e52217f5fafb0978727d1b6d7",
+      "screenshotSha256": "7d28b3d3b143f2e9a261c5256a133268bc2c27b6639eabace8b6e5f52d428874",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -9843,7 +9843,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-trust-mobile-390.jpg",
-      "screenshotSha256": "a2f12ab3d9515165df0ee6807f0c60840c59270d62653e86eed50196a89e8d82",
+      "screenshotSha256": "d6d3ed6ed1210ac9e271142acc4a88a46ee64f2d81b15e36b7b57592d33a1987",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10038,7 +10038,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-tablet-1024.jpg",
-      "screenshotSha256": "406ec8d955aa720dda4733ee30803d0d2f53600bcab9173418afafe6aaf53920",
+      "screenshotSha256": "863ed7092c17c98f25da59069a63e7a90019d1d569ac144504244dc9fe86efef",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10144,7 +10144,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-why-mobile-390.jpg",
-      "screenshotSha256": "98afcbb3aabb6b1fc3886b1b95432ee5b459a63dbc911bfac157d4818a5c8331",
+      "screenshotSha256": "bf050bde2de62978ec6b763596b49755c4b41108880fb0d876f5459b3880927d",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10377,7 +10377,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-worker-tablet-1024.jpg",
-      "screenshotSha256": "df136ff1ee26e3896c5e13cb3c46ba12060758fd24d16bae794f6f32dc788a90",
+      "screenshotSha256": "4be96b829d7353072ede5d17536565aedb54ae8e5eaff12bc50637dfb4daf1bf",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10504,7 +10504,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-worker-mobile-390.jpg",
-      "screenshotSha256": "8050018f36d1fe1fdab62e1f5d69fa8d4e567e4ed508611fddd72b0a996c5b31",
+      "screenshotSha256": "4906bfe038b283e62b9dd2a66862973553c739f23f05850a2f877c162924b347",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -10835,7 +10835,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workers-tablet-1024.jpg",
-      "screenshotSha256": "226eb55417e5f681b92f738cf8155fbd6b72648903b67d7e7fee70731d17663d",
+      "screenshotSha256": "4251836085729b7a964e7debdfe7b1382086a462cfecf4e8e1076516f5dde7b3",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -11039,7 +11039,7 @@
       "visibleOutsideBoundary": false,
       "workspaceTheme": null,
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/route-workers-mobile-390.jpg",
-      "screenshotSha256": "80b41829b11f64e55640f40dd6678d83485e6160ae1f1045c816825e242eda36",
+      "screenshotSha256": "d711f58d1c92883dfd670c1955215e4fc30f8bc78fae4499e18f2b7b138597ad",
       "boundaryMarker": "",
       "boundaryMarkerCount": 0,
       "renderedControls": [
@@ -13722,7 +13722,7 @@
         "lineHeight": "43.4px",
         "letterSpacing": "-1.12px"
       },
-      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 18. 오후 3:28:09 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
+      "visiblePrimaryContent": "SafeClaw 작업 전 안전회의 기록 SafeClaw 공식자료 기반 현장 검토용 출력 초안 · 생성 2026. 7. 18. 오후 4:53:47 작성서명 검토서명 승인서명 사업장SafeClaw 현장 현장현장명 확인 작업내용작업내용 확인 인원/기상0명 · 기상 정보 확인 서식 구분: 일반 문서: 현장 확인 항목 중심 · 원본 서식 1:1 재현이 아니며 발주처 지정 양식 확인이 필요합니다. 위험수준 확인 핵심 위험요인을 현장에서 ",
       "documentTypography": {
         "title": {
           "fontFamily": "\"Malgun Gothic\", \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif",
@@ -13766,7 +13766,7 @@
         }
       },
       "screenshot": "evaluation/frontend-audit-runner-port-v2-2026-07-11/browser-screenshots/generated-pdf-export.jpg",
-      "screenshotSha256": "646704298a2aa33359e7f5bf29a337876b7578a778183ce49b9443d876501205",
+      "screenshotSha256": "a830d1fcd5ac8feeb2edfacfb9d27302c729f0a95ae947f9fb24fa8648358878",
       "limitation": "Actual print-ready HTML response from the PDF export endpoint; binary PDF structure is covered by generated-document tests.",
       "contractChecks": {
         "passed": true,
