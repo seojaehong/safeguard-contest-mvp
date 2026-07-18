@@ -28,6 +28,10 @@
   - PASS, 28/28 static pages
 - `git diff --check`
   - PASS, line-ending warnings only
+- `npm.cmd run audit:frontend-consistency`
+  - PASS, `evaluation/frontend-audit-runner-port-v2-2026-07-11/static-audit.json` regenerated with source identity `6273ff8cba82fa14a9ec0965212cff40b79dd036805ef953c34c5b20d237b5f6`
+- `npm.cmd test -- tests\frontend-route-coverage.test.ts --maxWorkers=1 --fileParallelism=false`
+  - 1 file / 39 tests PASS
 
 ## Live Baseline
 

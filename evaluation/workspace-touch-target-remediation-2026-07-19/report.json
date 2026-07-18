@@ -46,6 +46,17 @@
       "command": "git diff --check",
       "result": "PASS",
       "notes": "line-ending warnings only"
+    },
+    {
+      "command": "npm.cmd run audit:frontend-consistency",
+      "result": "PASS",
+      "sourceIdentity": "6273ff8cba82fa14a9ec0965212cff40b79dd036805ef953c34c5b20d237b5f6"
+    },
+    {
+      "command": "npm.cmd test -- tests\\frontend-route-coverage.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 39
     }
   ],
   "liveBaselineArtifact": "evaluation/north-star-live-ui-surface-2026-07-19/report.md"
