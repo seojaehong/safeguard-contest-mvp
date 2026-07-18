@@ -254,6 +254,7 @@ export default function ShareRecipientPage() {
   const documents = sessionPayload?.documents || [];
   const requiresKnownWorker = sessionPayload?.accessPolicy.requireKnownWorkerSnapshot ?? true;
   const isAnonymousOpenSession = Boolean(sessionPayload?.accessPolicy.anonymousAllowed && !requiresKnownWorker);
+  const needsManualWorkerIdentity = Boolean(sessionPayload && !isAnonymousOpenSession && !selectedRecipient);
   const canSubmit = fetchState !== "loading"
     && status === "active"
     && (
@@ -265,7 +266,7 @@ export default function ShareRecipientPage() {
       <SafeClawModuleShell
         eyebrow="작업자 열람"
         title="문서팩 확인 화면"
-        description="문자/메시지로 전달된 링크에서 작업자가 열람 확인 버튼을 누르는 화면입니다."
+        description="전달받은 현장 안전 문서와 안내문을 확인하고 열람 확인을 남깁니다."
       status="live"
       mappedTo="공유 수신자 확인"
       activeHref="/share"
@@ -274,7 +275,7 @@ export default function ShareRecipientPage() {
       <section className="safeclaw-share-recipient-page">
         <h2>문서팩 검토</h2>
         <p className="safeclaw-subtitle">
-          {isAnonymousOpenSession ? "공동 열람 링크로 문서팩을 확인하고 이름을 남길 수 있습니다." : "지정된 작업자만 열람하고 확인할 수 있습니다."}
+          {isAnonymousOpenSession ? "문서팩을 확인한 뒤 표시명을 남겨 주세요." : "초대된 작업자에게만 열린 확인 화면입니다."}
         </p>
         <article className="safeclaw-share-recipient-card">
           <h3>현재 작업</h3>
@@ -320,27 +321,27 @@ export default function ShareRecipientPage() {
               </article>
             )}
 
-            {isAnonymousOpenSession ? null : (
+            {needsManualWorkerIdentity ? (
               <article className="safeclaw-share-recipient-card">
-                <h3>작업자 식별</h3>
+                <h3>초대 정보 확인</h3>
                 <label>
-                  작업자 ID
+                  작업자 식별값
                   <input
                     type="text"
                     value={workerId}
                     onChange={(event) => setWorkerId(event.target.value)}
-                    placeholder="하이퍼링크에 포함된 workerId가 있으면 자동 입력됩니다."
+                    placeholder="전달받은 링크의 작업자 식별값"
                     className="safeclaw-input"
                   />
                 </label>
                 <p className="safeclaw-hint">
-                  세션 방식이 invited(지정작업자)인 경우 작업자 ID가 필요합니다.
+                  초대 정보가 누락된 경우 관리자에게 링크를 다시 요청해 주세요.
                 </p>
               </article>
-            )}
+            ) : null}
 
           <article className="safeclaw-share-recipient-card">
-                <h3>확인자</h3>
+                <h3>열람 확인</h3>
               <label>
                 표시명
                 <input
@@ -381,7 +382,7 @@ export default function ShareRecipientPage() {
               </button>
               {confirmationMessage ? <p className="safeclaw-note">{confirmationMessage}</p> : null}
                 {isIdempotent ? <p className="safeclaw-note">이미 확인한 작업입니다.</p> : null}
-              {confirmationToken ? <p className="safeclaw-note">확인 ID: {confirmationToken}</p> : null}
+              {confirmationToken ? <p className="safeclaw-note">관리자 화면에 확인 이력이 저장되었습니다.</p> : null}
               {selectedRecipient ? (
                 <p className="safeclaw-note">
                   대상자: {selectedRecipient.displayName} ({buildLanguageLabel(selectedRecipient.languageCode)})

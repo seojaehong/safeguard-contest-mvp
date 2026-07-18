@@ -1,0 +1,38 @@
+{
+  "status": "pass",
+  "date": "2026-07-18",
+  "scope": "share-recipient-portal-polish",
+  "changedFiles": [
+    "app/share/[sessionId]/page.tsx",
+    "tests/share-recipient-portal-browser.test.ts"
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests/workpack-share-authority-routes.test.ts tests/share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "pass",
+      "filesPassed": 1,
+      "filesSkipped": 1,
+      "testsPassed": 33,
+      "testsSkipped": 1,
+      "note": "Browser contract skipped before production build because .next/BUILD_ID was absent."
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "pass"
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "pass",
+      "staticPages": 28,
+      "shareRoute": "/share/[sessionId]"
+    },
+    {
+      "command": "npm.cmd test -- tests/share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "pass",
+      "filesPassed": 1,
+      "testsPassed": 1
+    }
+  ],
+  "dbMutation": false,
+  "schemaMutation": false
+}

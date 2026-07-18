@@ -106,12 +106,15 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       throw new Error(`share page returned ${response?.status() ?? "no response"}\n${await page.locator("body").innerText().catch(() => "")}\n${harness.readServerOutput()}`);
     }
     await expect.poll(() => page.locator("body").innerText()).toContain("문서팩 검토");
+    await expect.poll(() => page.locator("body").innerText()).toContain("초대된 작업자에게만 열린 확인 화면입니다.");
     await expect.poll(() => page.getByText("Server Nguyen", { exact: false }).count()).toBeGreaterThan(0);
     await expect.poll(() => page.locator("body").innerText()).toContain("Tiếng Việt 안내");
     await expect.poll(() => page.getByText("위험성평가표", { exact: true }).count()).toBe(1);
     await expect.poll(() => page.getByText("TBM 브리핑", { exact: true }).count()).toBe(1);
     await expect.poll(() => page.locator("body").innerText()).toContain("Dừng công việc khi gió mạnh.");
     await expect.poll(() => page.locator(".safeclaw-select").inputValue()).toBe("vi");
+    await expect.poll(() => page.getByText("작업자 ID", { exact: true }).count()).toBe(0);
+    await expect.poll(() => page.getByText("세션 방식", { exact: false }).count()).toBe(0);
 
     const metrics = await page.evaluate(() => {
       const controls = [...document.querySelectorAll<HTMLElement>(".safeclaw-input, .safeclaw-select, .safeclaw-button")];
@@ -134,6 +137,8 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
 
     await page.getByRole("button", { name: "열람 확인" }).click();
     await expect.poll(() => page.getByText("작업자 열람 확인을 저장했습니다.", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("관리자 화면에 확인 이력이 저장되었습니다.", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("확인 ID:", { exact: false }).count()).toBe(0);
     expect(confirmationBody).toEqual({
       workerId: WORKER_ID,
       displayName: "Server Nguyen",
