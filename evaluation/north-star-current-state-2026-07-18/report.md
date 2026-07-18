@@ -1,7 +1,7 @@
 # SafeClaw North Star Current State
 
-Generated at: 2026-07-18 KST  
-Authoritative HEAD: `2f121d3488908ca450398bfbb70f5f97827023fa`
+Generated at: 2026-07-19 KST  
+Authoritative live-proven HEAD: `1f8d207e421aec50831a93cd1da07a9b4c1d35d4`
 
 ## Purpose
 
@@ -20,11 +20,11 @@ This is not a completion declaration. It records what current evidence proves an
 | --- | --- | --- |
 | Full serial suite | `evaluation/2026-07-18-authoritative-full-test-current-rerun.log` | 188 files passed / 9 skipped; 2308 tests passed / 15 skipped; exit code 0. |
 | Frontend consistency | `evaluation/frontend-audit-runner-port-v2-2026-07-11/` | Static audit and browser audit were refreshed; 111 screenshot rows completed with 0 findings. |
-| Current CI and production build | GitHub Actions run `29648455422` | `typecheck`, full `npm.cmd test -- --maxWorkers=1 --fileParallelism=false`, and `npm.cmd run build` all passed in CI. Local build also passed and generated 28/28 static pages with `/api/build-info` in the route map. |
-| Live deployment commit mapping | `GET https://www.safeclaw.kr/api/build-info` | Live production returns `commitSha=2f121d3488908ca450398bfbb70f5f97827023fa`, `branch=master`, `environment=production`; Vercel status for the same SHA is success. |
+| Current CI and production build | GitHub Actions run `29649045099` | `typecheck`, full `npm.cmd test -- --maxWorkers=1 --fileParallelism=false`, and `npm.cmd run build` all passed in CI for `1f8d207e`. |
+| Live deployment commit mapping | `GET https://www.safeclaw.kr/api/build-info` | Live production returns `commitSha=1f8d207e421aec50831a93cd1da07a9b4c1d35d4`, `branch=master`, `environment=production`. |
 | Public live smoke | `evaluation/live-public-smoke-2026-07-18/report.md` and `report.json` | Public routes responded and showed no horizontal overflow or console/page errors in the checked desktop/mobile smoke. |
-| Exact KOSHA registry | `evaluation/kosha-trust-registry-wave2-2026-07-16/report.md`, `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md` | D-C-13 and D-C-7 are exact direct evidence pins; KOSHA local corpus is live-ready with the compressed verified subset. Live `/api/safety-reference/status` returns HTTP 200, `searchReady=true`, `localCorpus.status=ready`, `itemCount=234`, `chunkCount=7127`. |
-| Live provider readiness | `evaluation/live-provider-readiness-2026-07-18/report.md`, `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md` | OpenAI vision is ready on live, dispatch is preview-only, KOSHA local corpus is now live-ready with the compressed verified subset, and SIF embedding remains approval-held. |
+| Exact KOSHA registry | `evaluation/live-provider-readiness-2026-07-19/report.md`, `evaluation/kosha-trust-registry-wave2-2026-07-16/report.md`, `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md` | D-C-13, D-C-7, and B-E-10 are exact trust registry entries; KOSHA local corpus is live-ready with the compressed verified subset. Live `/api/safety-reference/status` returns HTTP 200, `searchReady=true`, `localCorpus.status=ready`, `itemCount=234`, `chunkCount=7127`. |
+| Live provider readiness | `evaluation/live-provider-readiness-2026-07-19/report.md` | OpenAI vision is ready on live, dispatch is preview-only because provider idempotency remains intentionally locked, KOSHA local corpus is live-ready, and SIF embedding remains approval-held. |
 | Ontology UI | `evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json` | Default `/ontology` no longer exposes the 166-node hairball; bounded neighborhood UI passes overflow, overlap, contrast, and mobile fullscreen gates in recorded browser evidence. |
 | Hermes/OpenClaw boundary | `docs/phase-b-organization-knowledge-and-engine-plan.md` and engine tests | Hermes/OpenClaw remain behind `EngineAdapter`; SafeClaw keeps tenant, MCP, evidence, approval, and effect authority. |
 | Tenant/RLS app boundary | `evaluation/supabase-rls-approval-2026-07-17/report.md` and app-layer tests | App-layer tenant and route boundaries are covered; live DB catalog RLS proof is still approval-gated. |

@@ -1,0 +1,76 @@
+{
+  "checkedAt": "2026-07-19T00:20:00+09:00",
+  "target": "https://www.safeclaw.kr",
+  "sourceHeadAtCheckTime": "1f8d207e421aec50831a93cd1da07a9b4c1d35d4",
+  "checks": {
+    "buildInfo": {
+      "endpoint": "/api/build-info",
+      "httpStatus": 200,
+      "ok": true,
+      "configured": true,
+      "commitSha": "1f8d207e421aec50831a93cd1da07a9b4c1d35d4",
+      "branch": "master",
+      "environment": "production"
+    },
+    "photoHazardAnalysis": {
+      "endpoint": "/api/input-photos/hazard-analysis",
+      "httpStatus": 200,
+      "ok": true,
+      "status": "ready",
+      "provider": "openai",
+      "model": "gpt-4.1-mini",
+      "apiKeyPresent": true,
+      "maxInputPhotos": 10,
+      "beforeAfterSupported": true,
+      "ocrSupported": true
+    },
+    "workflowDispatch": {
+      "endpoint": "/api/workflow/dispatch",
+      "httpStatus": 200,
+      "ok": true,
+      "capability": false,
+      "mode": "preview_only",
+      "reason": "persistent_idempotency_unavailable",
+      "codeLock": "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false"
+    },
+    "safetyReferenceStatus": {
+      "endpoint": "/api/safety-reference/status",
+      "httpStatus": 200,
+      "ok": true,
+      "status": "ready",
+      "items": 9920,
+      "technicalTotal": 1040,
+      "technicalSupportRegulations": 237,
+      "technicalGuidelines": 803,
+      "technicalSplitOk": true,
+      "catalogSearchOk": true,
+      "searchReady": true,
+      "localCorpusStatus": "ready",
+      "localCorpusItemCount": 234,
+      "localCorpusChunkCount": 7127,
+      "exactTrustRegistryStatus": "ready",
+      "exactTrustRegistryCount": 3,
+      "exactStableDocumentKeys": [
+        "D-C-13",
+        "D-C-7",
+        "B-E-10"
+      ]
+    },
+    "sifEmbeddingGate": {
+      "endpoint": "/api/sif-embedding-gate/status",
+      "httpStatus": 200,
+      "ok": true,
+      "stage": "ready-for-approval",
+      "approvalHeld": true,
+      "dbMutationPerformed": false,
+      "embeddingGenerated": false,
+      "uploaded": false,
+      "corpusCount": 6032,
+      "uploadedCount": 0,
+      "vectorFeatureFlagEnabled": false,
+      "runtimeDbProbeStatus": "migration-required"
+    }
+  },
+  "conclusion": "photo_vision_ready_kosha_ready_dispatch_preview_only_sif_embedding_approval_held",
+  "dbMutationPerformed": false
+}

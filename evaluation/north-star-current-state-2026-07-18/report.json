@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-18T23:52:00+09:00",
-  "authoritativeHead": "2f121d3488908ca450398bfbb70f5f97827023fa",
+  "generatedAt": "2026-07-19T00:20:00+09:00",
+  "authoritativeHead": "1f8d207e421aec50831a93cd1da07a9b4c1d35d4",
   "status": "in_progress",
   "provenGates": [
     "full_serial_suite",
@@ -41,8 +41,8 @@
       "staticPagesGenerated": 28
     },
     "ci": {
-      "runId": 29648455422,
-      "headSha": "2f121d3488908ca450398bfbb70f5f97827023fa",
+      "runId": 29649045099,
+      "headSha": "1f8d207e421aec50831a93cd1da07a9b4c1d35d4",
       "status": "completed",
       "conclusion": "success",
       "checks": [
@@ -55,17 +55,18 @@
       "url": "https://www.safeclaw.kr/api/build-info",
       "statusCode": 200,
       "configured": true,
-      "commitSha": "2f121d3488908ca450398bfbb70f5f97827023fa",
+      "commitSha": "1f8d207e421aec50831a93cd1da07a9b4c1d35d4",
       "branch": "master",
       "environment": "production",
       "source": "vercel-system-env"
     },
     "liveProviderReadiness": {
-      "artifact": "evaluation/live-provider-readiness-2026-07-18/report.json",
+      "artifact": "evaluation/live-provider-readiness-2026-07-19/report.json",
       "photoVision": "ready",
       "dispatch": "preview_only",
       "koshaLocalCorpus": "ready",
-      "sifEmbedding": "approval_held"
+      "sifEmbedding": "approval_held",
+      "dispatchBlocker": "persistent_idempotency_unavailable"
     }
   },
   "notes": [
