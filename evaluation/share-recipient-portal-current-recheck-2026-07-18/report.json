@@ -1,0 +1,33 @@
+{
+  "status": "partial-pass",
+  "verifiedBase": "713a9fe02de537f81edf214eb35431a78683ff67",
+  "date": "2026-07-18",
+  "scope": "current master recipient share portal recheck",
+  "routesPresent": {
+    "page": "app/share/[sessionId]/page.tsx",
+    "api": "app/api/share-sessions/[sessionId]/route.ts"
+  },
+  "commands": [
+    {
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "partial-pass",
+      "filesPassed": 1,
+      "filesSkipped": 1,
+      "testsPassed": 34,
+      "testsSkipped": 4,
+      "durationSeconds": 1.84
+    }
+  ],
+  "localWindowsBuild": {
+    "status": "blocked",
+    "command": "npm.cmd run build",
+    "error": "<Html> should not be imported outside of pages/_document",
+    "impact": "browser portal tests skip without .next/BUILD_ID"
+  },
+  "decision": "Recipient portal exists on current master; stale reports saying route absent no longer apply. Browser verification remains pending against deployed build or after local Windows build isolation.",
+  "integrity": {
+    "codeChanged": false,
+    "dbMigration": false,
+    "supabaseDataMutation": false
+  }
+}
