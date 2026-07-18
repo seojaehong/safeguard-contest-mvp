@@ -745,7 +745,7 @@ export function buildForeignWorkerLanguageMessage(input: BriefingInput, language
   const pack = getPack(language);
   const keywords = detectSafetyKeywords(input);
   return [
-    "[SafeClaw]",
+    `[SafeClaw ${language.nativeLabel}]`,
     language.nativeLabel,
     buildVisualCueLine(language, keywords),
     "",

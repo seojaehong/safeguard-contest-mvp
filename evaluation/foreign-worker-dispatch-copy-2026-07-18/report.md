@@ -9,11 +9,12 @@ Tightened the worker-specific foreign language dispatch block so non-Korean reci
 ## Product Change
 
 - `buildForeignWorkerLanguageMessage` now renders a compact language-specific dispatch block:
-  - `[SafeClaw]`
+  - `[SafeClaw {native language label}]`
   - native language label
   - localized visual cue line
   - localized safety lines
   - localized supervisor confirmation line
+- `foreignWorkerTransmission` structured-editor parsing now treats the transmission document as the established four-part fallback model instead of splitting every `[SafeClaw ...]` language block into a separate editable section.
 - Korean manager-facing summary text remains in the broader Korean transmission surface, but the worker-specific block is language-only.
 
 ## Verification
@@ -22,6 +23,8 @@ Tightened the worker-specific foreign language dispatch block so non-Korean reci
 - GREEN:
   - `npm.cmd test -- tests/foreign-worker-languages.test.ts --maxWorkers=1 --fileParallelism=false`: 1 file / 7 tests PASS.
   - `npm.cmd test -- tests/foreign-parse.test.ts tests/foreign-worker-languages.test.ts tests/workflow-share-client.test.ts tests/workflow-share-panel-behavior.test.ts tests/workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false`: 5 files / 83 tests PASS.
+  - `npm.cmd test -- tests/foreign-worker-languages.test.ts tests/workpack-editor-structured-sections.test.ts tests/documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false`: 3 files / 44 tests PASS.
+  - `npm.cmd test -- tests/foreign-parse.test.ts tests/foreign-worker-languages.test.ts tests/workflow-share-client.test.ts tests/workflow-share-panel-behavior.test.ts tests/workpack-share-authority-routes.test.ts tests/workpack-editor-structured-sections.test.ts --maxWorkers=1 --fileParallelism=false`: 6 files / 90 tests PASS.
   - `npm.cmd run typecheck`: PASS.
   - `npm.cmd run build`: PASS, 28/28 static pages generated.
 

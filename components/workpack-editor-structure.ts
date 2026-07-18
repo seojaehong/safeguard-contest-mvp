@@ -276,7 +276,7 @@ const documentEditorProfiles: Record<DocumentKey, DocumentEditorProfile> = {
     fallbackSections: [
       { label: "공지 기본 정보" },
       { label: "쉬운 한국어", startPattern: /^쉬운 한국어:/u },
-      { label: "다국어 안내", startPattern: /^\[SafeClaw (?!외국인 근로자).*안전공지\]/u },
+      { label: "다국어 안내", startPattern: /^\[SafeClaw (?!외국인 근로자).+\]$/u },
       { label: "관리자 확인", startPattern: /^관리자 확인:/u }
     ]
   },
@@ -416,6 +416,13 @@ function buildFallbackSections(profile: DocumentEditorProfile, source: string): 
 
 export function buildStructuredDocumentSections(key: DocumentKey, source: string): StructuredDocumentModel {
   const profile = getDocumentEditorProfile(key);
+  if (profile.kind === "multilingual-message") {
+    return {
+      profile,
+      body: buildFallbackSections(profile, source),
+      appendices: []
+    };
+  }
   const matches = Array.from(source.matchAll(/^\s*\[([^\]\r\n]+)\]\s*(?:\r?\n|$)/gmu));
   if (matches.length === 0) {
     return {
