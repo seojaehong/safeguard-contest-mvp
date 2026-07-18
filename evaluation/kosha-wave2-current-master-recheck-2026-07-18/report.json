@@ -1,8 +1,8 @@
 {
   "status": "pass",
-  "head": "5ce2ad1a53ac32fcccb8107fa616fc50b5349185",
+  "verifiedProductBase": "5ce2ad1a53ac32fcccb8107fa616fc50b5349185",
   "date": "2026-07-18",
-  "scope": "current master KOSHA Wave 2 focused and corpus recheck",
+  "scope": "current master KOSHA Wave 2 and Wave 3 focused recheck",
   "commands": [
     {
       "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\exact-kosha-applicability-policy.test.ts tests\\kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false",
@@ -13,6 +13,12 @@
     {
       "command": "npm.cmd run typecheck",
       "status": "pass"
+    },
+    {
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\safety-reference-status-bundled-corpus.test.ts tests\\safety-reference-status-route.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "pass",
+      "files": 3,
+      "tests": 40
     }
   ],
   "integrity": {
@@ -21,7 +27,8 @@
     "staleBranchMerged": false,
     "productionExactTrustPins": [
       "D-C-13-2026",
-      "D-C-7-2026"
+      "D-C-7-2026",
+      "B-E-10-2026"
     ]
   },
   "next": "Start a separate exact-reference expansion wave for additional KOSHA guides after body, PDF, provenance, and human review receipts are pinned."

@@ -2,7 +2,7 @@
 
 ## Scope
 
-Authoritative HEAD: `5ce2ad1a53ac32fcccb8107fa616fc50b5349185`
+Verified product base: `5ce2ad1a53ac32fcccb8107fa616fc50b5349185`
 
 This recheck verifies the current `origin/master` state after the share, ontology, and mobile UI launch-line commits. It does not modify DB schema, Supabase data, or production KOSHA records.
 
@@ -20,11 +20,12 @@ npm.cmd run typecheck
 ## Evidence
 
 - KOSHA focused + corpus Vitest: 6 files, 190/190 tests PASS
+- KOSHA Wave 3 + bundled status Vitest: 3 files, 40/40 tests PASS
 - Strict TypeScript: PASS
 - Existing current master KOSHA report: `evaluation/kosha-trust-registry-wave2-2026-07-16/report.md`
-- Confirmed production trust set remains D-C-13-2026 and D-C-7-2026 only; remaining metadata-verified references are not promoted to direct production evidence.
+- Confirmed production trust set is D-C-13-2026, D-C-7-2026, and B-E-10-2026. Remaining metadata-verified references are not promoted to direct production evidence.
 - No database migration or data mutation was performed.
 
 ## Decision
 
-KOSHA Wave 2 is current-master verified for the present north-star path. The next KOSHA expansion should proceed as a separate wave for additional exact body/PDF/provenance pinned references, not by reviving the stale divergent branch wholesale.
+KOSHA Wave 2 and the current B-E-10 Wave 3 exact registry are current-master verified for the present north-star path. The next KOSHA expansion should proceed as a separate wave for additional exact body/PDF/provenance pinned references, not by reviving stale divergent branches wholesale.
