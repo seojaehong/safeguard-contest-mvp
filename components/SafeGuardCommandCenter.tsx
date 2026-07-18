@@ -1815,7 +1815,9 @@ export function SafeGuardCommandCenter({
 
   const busy = state === "generating";
   const hasWorkpack = Boolean(data);
-  const hasOperatorInput = Boolean(question.trim()) || hasWorkpack;
+  const hasInputDraft = Boolean(question.trim()) || inputHazardPhotos.length > 0;
+  const hasOperatorInput = hasInputDraft || hasWorkpack;
+  const showWorkspaceContext = workspacePage === "input" ? hasInputDraft : hasOperatorInput;
   const currentStep = workspacePage;
   const workpackReadiness = data ? assessWorkpackReadiness(data, { requiresRevalidation }) : null;
   const statuses = buildWorkspaceStepStatuses({
@@ -1924,7 +1926,7 @@ export function SafeGuardCommandCenter({
       </header>
 
       <section className="command-viewport linear-workspace-layout" id="command">
-        <aside className={`workspace-side-nav ${hasOperatorInput ? "" : "is-empty"}`} aria-label="작업공간 메뉴">
+        <aside className={`workspace-side-nav ${showWorkspaceContext ? "" : "is-empty"}`} aria-label="작업공간 메뉴">
           <div className="workspace-side-group">
             <span>작업공간</span>
             {workflowSteps.map((step) => {
@@ -1949,12 +1951,12 @@ export function SafeGuardCommandCenter({
               );
             })}
           </div>
-          {hasOperatorInput ? <div className="workspace-side-group workspace-current-brief">
+          {showWorkspaceContext ? <div className="workspace-side-group workspace-current-brief">
             <span>현재 작업</span>
             <strong>{fieldBrief.workSummary}</strong>
             <small>{fieldBrief.siteName} · {fieldBrief.workerCount}</small>
           </div> : null}
-          {hasOperatorInput ? <div className="workspace-side-group workspace-source-status">
+          {showWorkspaceContext ? <div className="workspace-side-group workspace-source-status">
             <span>근거 준비</span>
             {readinessRail.slice(0, 3).map((item) => (
               <p key={item.key}>
@@ -1963,7 +1965,7 @@ export function SafeGuardCommandCenter({
               </p>
             ))}
           </div> : null}
-          {hasOperatorInput ? <div className="workspace-side-group workspace-recent-list">
+          {showWorkspaceContext ? <div className="workspace-side-group workspace-recent-list">
             <span>최근 예시</span>
             {examples.slice(0, 4).map((example) => (
               <button
@@ -2062,7 +2064,7 @@ export function SafeGuardCommandCenter({
                 {busy ? "근거 확인 중" : "안전 문서 생성"}
               </button>
             </div>
-            {hasOperatorInput ? (
+            {hasInputDraft ? (
               <div className="field-brief-chip-row" aria-label="자동 인식 현장 요약">
                 <span>{fieldBrief.siteName}</span>
                 <span>{fieldBrief.industry}</span>
@@ -2143,15 +2145,17 @@ export function SafeGuardCommandCenter({
               </div>
               </section>
             ) : null}
-            <div className="evidence-readiness-rail" aria-label="근거 준비 레일">
-              {readinessRail.map((item) => (
-                <article key={item.key} className={`evidence-readiness-card ${readinessClass(item.tone)}`}>
-                  <span>{item.label}</span>
-                  <strong>{item.status}</strong>
-                  <small>{item.detail}</small>
-                </article>
-              ))}
-            </div>
+            {hasInputDraft ? (
+              <div className="evidence-readiness-rail" aria-label="근거 준비 레일">
+                {readinessRail.map((item) => (
+                  <article key={item.key} className={`evidence-readiness-card ${readinessClass(item.tone)}`}>
+                    <span>{item.label}</span>
+                    <strong>{item.status}</strong>
+                    <small>{item.detail}</small>
+                  </article>
+                ))}
+              </div>
+            ) : null}
             <details className="advanced-settings">
               <summary>고급 설정</summary>
               <fieldset className="ai-mode-toggle" aria-label="AI 강도 선택">

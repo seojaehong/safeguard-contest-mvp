@@ -599,6 +599,7 @@ describe("workspace layout regression", () => {
     expect(metrics.sourceStatuses).toBe(0);
     expect(metrics.recentLists).toBe(0);
     expect(await page.locator(".field-brief-chip-row").count()).toBe(0);
+    expect(await page.locator(".evidence-readiness-rail").count()).toBe(0);
     expect(metrics.topDelta).toBeLessThanOrEqual(1);
     expect(metrics.bottomDelta).toBeLessThanOrEqual(1);
     expect(metrics.overflowY).toBe("visible");
@@ -643,6 +644,55 @@ describe("workspace layout regression", () => {
     expect(await page.locator(".workspace-current-brief").count()).toBe(0);
     expect(await page.locator(".workspace-source-status").count()).toBe(0);
     expect(await page.locator(".field-brief-chip-row").count()).toBe(0);
+    expect(await page.locator(".evidence-readiness-rail").count()).toBe(0);
+    await page.close();
+  }, 90_000);
+
+  it("removes generated-workpack context from the input surface when the operator clears the draft", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.addInitScript((storageKey) => {
+      window.localStorage.removeItem(storageKey);
+      window.localStorage.setItem("safeclaw.aiMode", "template");
+    }, CURRENT_WORKPACK_STORAGE_KEY);
+    await page.goto(`${baseUrl}/workspace?scenario=seoul-construction-windy&theme=day`, { waitUntil: "networkidle" });
+
+    await page.getByRole("button", { name: /안전 문서 생성/u }).click();
+    await page.locator(".workspace-document-page").waitFor({ state: "visible" });
+    await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "입력" }).click();
+
+    const input = page.locator("#field-command-input");
+    expect((await input.inputValue()).length).toBeGreaterThan(0);
+    await input.fill("");
+
+    const metrics = await page.evaluate(() => {
+      const side = document.querySelector<HTMLElement>(".workspace-side-nav");
+      const main = document.querySelector<HTMLElement>(".command-main-studio");
+      if (!side || !main) throw new Error("Missing cleared input columns");
+      const sideRect = side.getBoundingClientRect();
+      const mainRect = main.getBoundingClientRect();
+      return {
+        inputValue: (document.querySelector("#field-command-input") as HTMLTextAreaElement | null)?.value ?? null,
+        currentBriefs: document.querySelectorAll(".workspace-current-brief").length,
+        sourceStatuses: document.querySelectorAll(".workspace-source-status").length,
+        recentLists: document.querySelectorAll(".workspace-recent-list").length,
+        fieldChips: document.querySelectorAll(".field-brief-chip-row").length,
+        readinessRails: document.querySelectorAll(".evidence-readiness-rail").length,
+        sideIsEmpty: side.classList.contains("is-empty"),
+        topDelta: Math.abs(sideRect.top - mainRect.top),
+        bottomDelta: Math.abs(sideRect.bottom - mainRect.bottom)
+      };
+    });
+
+    expect(metrics.inputValue).toBe("");
+    expect(metrics.currentBriefs).toBe(0);
+    expect(metrics.sourceStatuses).toBe(0);
+    expect(metrics.recentLists).toBe(0);
+    expect(metrics.fieldChips).toBe(0);
+    expect(metrics.readinessRails).toBe(0);
+    expect(metrics.sideIsEmpty).toBe(true);
+    expect(metrics.topDelta).toBeLessThanOrEqual(1);
+    expect(metrics.bottomDelta).toBeLessThanOrEqual(1);
     await page.close();
   }, 90_000);
 
