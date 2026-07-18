@@ -48,7 +48,8 @@ These are not failures in the current patch. They are the remaining items that p
 3. Real external provider dispatch and production OpenAI vision execution need environment-specific proof.
    - Tests prove contracts and fail-closed behavior.
    - Live readiness now proves OpenAI vision is configured, but dispatch remains preview-only.
-   - Evidence still needed: provider-specific dry run without leaking secrets or sending unintended real messages.
+   - Next approval artifact: `evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql`.
+   - Evidence still needed: approved idempotency migration, runtime table/RLS/index probe, provider-specific dry run without leaking secrets or sending unintended real messages.
 
 4. Long-term LLM Wiki and organization knowledge promotion are still human-in-the-loop.
    - Current plan preserves public/organization/site memory boundaries.
@@ -60,7 +61,7 @@ These are not failures in the current patch. They are the remaining items that p
    - Smoke `/workspace` share flow and `/share/[sessionId]` recipient flow on live or preview deployment with the new `/api/build-info` mapping captured beside it.
 
 2. Provider readiness proof:
-   - Convert dispatch from preview-only only after persistent idempotency and provider configuration are proven.
+   - Review and approve `evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql`, then implement the route reservation flow before converting dispatch from preview-only.
 
 3. KOSHA exact reference expansion:
    - Keep live `/api/safety-reference/status` on the compressed verified subset bundle and do not present the unverified full body recovery corpus as direct runtime evidence.

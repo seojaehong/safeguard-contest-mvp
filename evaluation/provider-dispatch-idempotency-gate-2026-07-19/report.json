@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-07-19T00:30:00+09:00",
+  "scope": "provider_dispatch_idempotency_gate",
+  "status": "approval_required",
+  "liveDispatchState": {
+    "capability": false,
+    "mode": "preview_only",
+    "reason": "persistent_idempotency_unavailable",
+    "codeLock": "PROVIDER_DISPATCH_IDEMPOTENCY_SUPPORTED=false"
+  },
+  "draftMigration": {
+    "path": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql",
+    "table": "provider_dispatch_attempts",
+    "uniqueIndex": "provider_dispatch_attempts_org_idempotency_key_unique",
+    "forceRls": true,
+    "ownerPolicies": [
+      "provider_dispatch_attempts_owner_select",
+      "provider_dispatch_attempts_owner_insert",
+      "provider_dispatch_attempts_owner_update"
+    ]
+  },
+  "safetyLocks": {
+    "dbMigrationApplied": false,
+    "dbMutationPerformed": false,
+    "providerMessageSent": false,
+    "liveDispatchUnlocked": false
+  },
+  "nextApprovalGate": {
+    "id": "apply-provider-dispatch-idempotency-migration",
+    "label": "Provider dispatch idempotency migration approval",
+    "requiredBeforeLiveDispatch": true
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\provider-dispatch-idempotency-gate.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "passed",
+      "files": 1,
+      "tests": 4
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "passed"
+    }
+  ]
+}

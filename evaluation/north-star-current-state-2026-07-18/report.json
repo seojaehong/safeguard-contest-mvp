@@ -67,6 +67,19 @@
       "koshaLocalCorpus": "ready",
       "sifEmbedding": "approval_held",
       "dispatchBlocker": "persistent_idempotency_unavailable"
+    },
+    "providerDispatchIdempotencyGate": {
+      "artifact": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
+      "draftMigration": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/provider-dispatch-idempotency-draft.sql",
+      "status": "approval_required",
+      "dbMigrationApplied": false,
+      "providerMessageSent": false,
+      "focusedTests": {
+        "files": 1,
+        "tests": 4,
+        "status": "passed"
+      },
+      "typecheck": "passed"
     }
   },
   "notes": [
