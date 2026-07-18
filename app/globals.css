@@ -14760,11 +14760,23 @@ body:has(.safeclaw-landing) :is(
   gap: 12px;
 }
 
-.safeclaw-share-recipient-documents section {
+.safeclaw-share-recipient-document {
   display: grid;
   gap: 6px;
   border-top: 1px solid var(--workspace-rule);
   padding-top: 10px;
+}
+
+.safeclaw-share-recipient-document summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--workspace-ink);
+  font-size: var(--text-body);
+  font-weight: 650;
+  line-height: var(--leading-body);
+  letter-spacing: var(--tracking-body);
+  cursor: pointer;
 }
 
 .safeclaw-share-recipient-preview {

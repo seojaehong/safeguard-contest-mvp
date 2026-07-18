@@ -302,25 +302,6 @@ export default function ShareRecipientPage() {
               </article>
             ) : null}
 
-            {documents.length ? (
-              <article className="safeclaw-share-recipient-card">
-                <h3>문서팩 핵심 3종</h3>
-                <div className="safeclaw-share-recipient-documents">
-                  {documents.map((document) => (
-                    <section key={document.key}>
-                      <h4>{document.title}</h4>
-                      <pre className="safeclaw-share-recipient-preview">{buildPreviewText(document.body)}</pre>
-                    </section>
-                  ))}
-                </div>
-              </article>
-            ) : (
-              <article className="safeclaw-share-recipient-card">
-                <h3>문서팩 준비 중</h3>
-                <p>관리자가 공유한 문서 본문을 아직 불러오지 못했습니다. 작업 전 관리자에게 최신 문서팩을 확인해 주세요.</p>
-              </article>
-            )}
-
             {needsManualWorkerIdentity ? (
               <article className="safeclaw-share-recipient-card">
                 <h3>초대 정보 확인</h3>
@@ -395,6 +376,26 @@ export default function ShareRecipientPage() {
                 <p>현재 페이지는 공동 열람 확인 저장을 지원합니다. 작업자 명단은 관리자 화면에서만 확인합니다.</p>
               </article>
             ) : null}
+
+            {documents.length ? (
+              <article className="safeclaw-share-recipient-card">
+                <h3>문서팩 핵심 3종</h3>
+                <p className="safeclaw-note">자세한 문서 본문은 필요할 때만 펼쳐 확인합니다.</p>
+                <div className="safeclaw-share-recipient-documents">
+                  {documents.map((document) => (
+                    <details key={document.key} className="safeclaw-share-recipient-document">
+                      <summary>{document.title}</summary>
+                      <pre className="safeclaw-share-recipient-preview">{buildPreviewText(document.body)}</pre>
+                    </details>
+                  ))}
+                </div>
+              </article>
+            ) : (
+              <article className="safeclaw-share-recipient-card">
+                <h3>문서팩 준비 중</h3>
+                <p>관리자가 공유한 문서 본문을 아직 불러오지 못했습니다. 작업 전 관리자에게 최신 문서팩을 확인해 주세요.</p>
+              </article>
+            )}
           </>
         )}
       </section>

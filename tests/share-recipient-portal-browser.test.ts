@@ -119,6 +119,13 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     const metrics = await page.evaluate(() => {
       const controls = [...document.querySelectorAll<HTMLElement>(".safeclaw-input, .safeclaw-select, .safeclaw-button")];
       const cards = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")];
+      const confirmButton = [...document.querySelectorAll<HTMLElement>("button")]
+        .find((item) => item.innerText.trim() === "열람 확인");
+      const documentsCard = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")]
+        .find((item) => item.innerText.includes("문서팩 핵심 3종"));
+      const closedDocuments = [...document.querySelectorAll<HTMLDetailsElement>(".safeclaw-share-recipient-document")]
+        .filter((item) => !item.open);
+      const documentSummaries = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-document summary")];
       const decisionAction = document.querySelector<HTMLElement>(".safeclaw-page-decision-action");
       const reviewHeading = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-page h2")]
         .find((item) => item.innerText.trim() === "문서팩 검토");
@@ -127,6 +134,10 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
         scrollWidth: document.documentElement.scrollWidth,
         bodyScrollWidth: document.body.scrollWidth,
         minimumControlHeight: Math.min(...controls.map((item) => item.getBoundingClientRect().height)),
+        minimumDocumentSummaryHeight: Math.min(...documentSummaries.map((item) => item.getBoundingClientRect().height)),
+        confirmationTop: Math.round(confirmButton?.getBoundingClientRect().top ?? 0),
+        documentsTop: Math.round(documentsCard?.getBoundingClientRect().top ?? 0),
+        collapsedDocumentCount: closedDocuments.length,
         decisionActionWidth: Math.round(decisionAction?.getBoundingClientRect().width ?? 0),
         reviewHeadingLeft: Math.round(reviewHeading?.getBoundingClientRect().left ?? 0),
         outsideCards: cards.filter((item) => {
@@ -138,6 +149,9 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.documentWidth);
     expect(metrics.bodyScrollWidth).toBeLessThanOrEqual(metrics.documentWidth);
     expect(metrics.minimumControlHeight).toBeGreaterThanOrEqual(44);
+    expect(metrics.minimumDocumentSummaryHeight).toBeGreaterThanOrEqual(44);
+    expect(metrics.confirmationTop).toBeLessThan(metrics.documentsTop);
+    expect(metrics.collapsedDocumentCount).toBe(3);
     expect(metrics.decisionActionWidth).toBeGreaterThanOrEqual(300);
     expect(metrics.reviewHeadingLeft).toBeGreaterThanOrEqual(16);
     expect(metrics.outsideCards).toBe(0);
