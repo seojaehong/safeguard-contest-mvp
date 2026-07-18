@@ -1,7 +1,7 @@
 # SafeClaw North Star Current State
 
 Generated at: 2026-07-19 KST  
-Authoritative live-proven HEAD: `1f8d207e421aec50831a93cd1da07a9b4c1d35d4`
+Authoritative live-proven HEAD: `93b2120ef3f4abd33f87591d1a9e1f54d5767536`
 
 ## Purpose
 
@@ -20,8 +20,8 @@ This is not a completion declaration. It records what current evidence proves an
 | --- | --- | --- |
 | Full serial suite | `evaluation/2026-07-18-authoritative-full-test-current-rerun.log` | 188 files passed / 9 skipped; 2308 tests passed / 15 skipped; exit code 0. |
 | Frontend consistency | `evaluation/frontend-audit-runner-port-v2-2026-07-11/` | Static audit and browser audit were refreshed; 111 screenshot rows completed with 0 findings. |
-| Current CI and production build | GitHub Actions run `29649045099` | `typecheck`, full `npm.cmd test -- --maxWorkers=1 --fileParallelism=false`, and `npm.cmd run build` all passed in CI for `1f8d207e`. |
-| Live deployment commit mapping | `GET https://www.safeclaw.kr/api/build-info` | Live production returns `commitSha=1f8d207e421aec50831a93cd1da07a9b4c1d35d4`, `branch=master`, `environment=production`. |
+| Current CI and production build | GitHub Actions run `29649678383` | `typecheck`, full `npm.cmd test -- --maxWorkers=1 --fileParallelism=false`, and `npm.cmd run build` all passed in CI for `93b2120e`. |
+| Live deployment commit mapping | `GET https://www.safeclaw.kr/api/build-info` | Live production returns `commitSha=93b2120ef3f4abd33f87591d1a9e1f54d5767536`, `branch=master`, `environment=production`. |
 | Public live smoke | `evaluation/live-public-smoke-2026-07-18/report.md` and `report.json` | Public routes responded and showed no horizontal overflow or console/page errors in the checked desktop/mobile smoke. |
 | Exact KOSHA registry | `evaluation/live-provider-readiness-2026-07-19/report.md`, `evaluation/kosha-trust-registry-wave2-2026-07-16/report.md`, `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md` | D-C-13, D-C-7, and B-E-10 are exact trust registry entries; KOSHA local corpus is live-ready with the compressed verified subset. Live `/api/safety-reference/status` returns HTTP 200, `searchReady=true`, `localCorpus.status=ready`, `itemCount=234`, `chunkCount=7127`. |
 | Live provider readiness | `evaluation/live-provider-readiness-2026-07-19/report.md` | OpenAI vision is ready on live, dispatch is preview-only because provider idempotency remains intentionally locked, KOSHA local corpus is live-ready, and SIF embedding remains approval-held. |
@@ -30,7 +30,7 @@ This is not a completion declaration. It records what current evidence proves an
 | Tenant/RLS app boundary | `evaluation/supabase-rls-approval-2026-07-17/report.md` and app-layer tests | App-layer tenant and route boundaries are covered; live DB catalog RLS proof is still approval-gated. |
 | Document quality/export | `evaluation/2026-07-17-authoritative-release-gate.md` | Core document editor, export localization, Korean labels, and foreign recipient delivery contracts are covered by focused gates. |
 | Photo hazard analysis | `evaluation/2026-07-17-authoritative-release-gate.md` | Input-photo analysis supports 10 photos, explicit unconfigured/partial states, accepted candidate provenance, and Before/After improvement memory. |
-| Recipient portal | `evaluation/2026-07-17-authoritative-release-gate.md` | `/share/[sessionId]` exists and the latest share gate ran without skips: 4 files / 52 tests passed. |
+| Recipient portal | `evaluation/share-recipient-current-gate-2026-07-19/report.md` | `/share/[sessionId]` and `/api/share-sessions/[sessionId]` exist on the production-mapped HEAD. The stale `de4103db` "portal absent" finding is closed for current master. Focused gate: 2 files / 40 tests passed. |
 | Manager demo path | Commit `5b6422e2` and release gate | Share screen now shows secondary `작업자 화면 미리보기` when a session and worker id exist, while primary delivery CTA remains unchanged. |
 
 ## Remaining Non-Completion Items

@@ -1,0 +1,42 @@
+{
+  "artifact": "share-recipient-current-gate-2026-07-19",
+  "verdict": "pass_current_source_and_production_mapping",
+  "staleFinding": {
+    "baselineHead": "de4103db",
+    "finding": "recipient portal absent",
+    "currentDecision": "stale_for_current_master"
+  },
+  "head": {
+    "source": "93b2120ef3f4abd33f87591d1a9e1f54d5767536",
+    "productionBuildInfo": {
+      "commitSha": "93b2120ef3f4abd33f87591d1a9e1f54d5767536",
+      "branch": "master",
+      "environment": "production"
+    },
+    "ci": {
+      "runId": 29649678383,
+      "conclusion": "success"
+    }
+  },
+  "implemented": {
+    "recipientPage": "app/share/[sessionId]/page.tsx",
+    "recipientApi": "app/api/share-sessions/[sessionId]/route.ts",
+    "managerPreviewLink": "components/WorkflowSharePanel.tsx recipientPortalPreviewHref"
+  },
+  "verifiedBehavior": [
+    "invited sessions require known worker snapshot unless anonymous access is explicitly allowed",
+    "missing or unknown workerId is rejected before documents or recipient messages are exposed",
+    "matching workerId returns only the matching recipient hint",
+    "read confirmation persists the server-side worker snapshot",
+    "forged client recipient fields are ignored"
+  ],
+  "commands": [
+    {
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "pass",
+      "files": 2,
+      "tests": 40
+    }
+  ],
+  "remainingGap": "live_or_preview_real_share_session_worker_confirmation_ack_update"
+}

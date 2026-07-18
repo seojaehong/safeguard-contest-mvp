@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-07-19T00:20:00+09:00",
-  "authoritativeHead": "1f8d207e421aec50831a93cd1da07a9b4c1d35d4",
+  "authoritativeHead": "93b2120ef3f4abd33f87591d1a9e1f54d5767536",
   "status": "in_progress",
   "provenGates": [
     "full_serial_suite",
@@ -27,9 +27,13 @@
   ],
   "latestVerification": {
     "shareRecipientPortal": {
-      "command": "npm.cmd test -- tests\\workflow-share-panel-behavior.test.ts tests\\workspace-share-simplification.test.ts tests\\share-recipient-portal-browser.test.ts tests\\workpack-share-authority-routes.test.ts",
-      "filesPassed": 4,
-      "testsPassed": 52
+      "artifact": "evaluation/share-recipient-current-gate-2026-07-19/report.json",
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 2,
+      "testsPassed": 40,
+      "status": "implemented_on_current_production_mapped_head",
+      "staleFindingClosed": "de4103db recipient portal absent",
+      "remainingGap": "live_or_preview_real_share_session_worker_confirmation_ack_update"
     },
     "typecheck": {
       "command": "npm.cmd run typecheck",
@@ -41,8 +45,8 @@
       "staticPagesGenerated": 28
     },
     "ci": {
-      "runId": 29649045099,
-      "headSha": "1f8d207e421aec50831a93cd1da07a9b4c1d35d4",
+      "runId": 29649678383,
+      "headSha": "93b2120ef3f4abd33f87591d1a9e1f54d5767536",
       "status": "completed",
       "conclusion": "success",
       "checks": [
@@ -55,7 +59,7 @@
       "url": "https://www.safeclaw.kr/api/build-info",
       "statusCode": 200,
       "configured": true,
-      "commitSha": "1f8d207e421aec50831a93cd1da07a9b4c1d35d4",
+      "commitSha": "93b2120ef3f4abd33f87591d1a9e1f54d5767536",
       "branch": "master",
       "environment": "production",
       "source": "vercel-system-env"
