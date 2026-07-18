@@ -745,14 +745,10 @@ export function buildForeignWorkerLanguageMessage(input: BriefingInput, language
   const pack = getPack(language);
   const keywords = detectSafetyKeywords(input);
   return [
-    `[SafeClaw ${language.label} 안전공지] ${input.scenario.companyName}`,
-    `현장: ${input.scenario.siteName}`,
-    `작업: ${input.scenario.workSummary}`,
-    ...buildKoreanContextLines(input),
-    `⚠️ 핵심 위험: ${input.riskSummary.topRisk}`,
+    "[SafeClaw]",
+    language.nativeLabel,
     buildVisualCueLine(language, keywords),
     "",
-    `${language.label}(${language.nativeLabel})`,
     ...language.lines.map((line) => `- ${line}`),
     "",
     pack.supervisor

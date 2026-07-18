@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { reconcileLanguages } from "@/lib/foreign-worker";
+import { buildForeignWorkerLanguageMessage, buildForeignWorkerLanguages, reconcileLanguages } from "@/lib/foreign-worker";
 import type { ForeignWorkerLanguage } from "@/lib/types";
 
 function lang(code: string, label: string, nativeLabel: string): ForeignWorkerLanguage {
@@ -67,5 +67,40 @@ describe("reconcileLanguages", () => {
     const result = reconcileLanguages(briefing, transmission, claimed);
 
     expect(result.map((l) => l.code)).toEqual(["en", "vi"]);
+  });
+});
+
+describe("buildForeignWorkerLanguageMessage", () => {
+  it("keeps a worker-specific Vietnamese dispatch block free of Korean UI labels", () => {
+    const input = {
+      question: "foreign worker scaffold painting with strong wind",
+      scenario: {
+        siteName: "Seongsu exterior wall",
+        companyName: "SafeClaw Demo",
+        companyType: "construction",
+        workSummary: "Exterior painting with a mobile scaffold",
+        workerCount: 5,
+        weatherNote: "Strong wind expected"
+      },
+      riskSummary: {
+        title: "Strong wind scaffold work",
+        riskLevel: "상" as const,
+        topRisk: "mobile scaffold fall hazard",
+        immediateActions: [
+          "Lock scaffold wheels before work.",
+          "Stop outdoor work when the scaffold shakes.",
+          "Confirm fall-arrest anchor points."
+        ]
+      }
+    };
+    const vietnamese = buildForeignWorkerLanguages(input).find((language) => language.code === "vi");
+    if (!vietnamese) throw new Error("Vietnamese language template is required");
+    const message = buildForeignWorkerLanguageMessage(input, vietnamese);
+
+    expect(message).toContain("Tiếng Việt");
+    expect(message).not.toMatch(/[가-힣]/u);
+    expect(message).not.toContain("현장:");
+    expect(message).not.toContain("작업:");
+    expect(message).not.toContain("핵심 위험:");
   });
 });
