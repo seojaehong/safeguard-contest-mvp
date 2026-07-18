@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "verifiedBase": "d9c266e5b30464198a935c0c00c1142256fd18b7",
+  "verifiedBase": "6bda3deabacece38b4228e2765ae085b588f4236",
   "date": "2026-07-18",
   "scope": "current master document delivery and foreign worker dispatch recheck",
   "commands": [
@@ -12,6 +12,30 @@
       "durationSeconds": 204.49
     }
   ],
+  "remoteCi": {
+    "runId": "29645257009",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/29645257009",
+    "testFilesPassed": 188,
+    "testFilesSkipped": 10,
+    "testsPassed": 2316,
+    "testsSkipped": 21,
+    "buildStaticPages": 28,
+    "buildStatus": "pass"
+  },
+  "vercel": {
+    "status": "success",
+    "deployment": "Hjz9EyxA9XH91JztEDkYbix546vG",
+    "url": "https://vercel.com/seojaehongs-projects/safeguard-contest-mvp/Hjz9EyxA9XH91JztEDkYbix546vG"
+  },
+  "localWindowsBuild": {
+    "status": "blocked",
+    "command": "npm.cmd run build",
+    "error": "<Html> should not be imported outside of pages/_document",
+    "scope": "local Windows worktree build after clean .next removal",
+    "releaseGateInterpretation": "remote clean CI build passed on the same commit; investigate separately"
+  },
   "integrity": {
     "dbMigration": false,
     "supabaseDataMutation": false,
