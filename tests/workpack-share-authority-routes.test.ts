@@ -293,7 +293,8 @@ describe("share session route authority", () => {
     const anonymousSession = publicSession();
     anonymousSession.session.accessPolicy = {
       ...anonymousSession.session.accessPolicy,
-      anonymousAllowed: true
+      anonymousAllowed: true,
+      requireKnownWorkerSnapshot: false
     };
     mocks.loadActivePublicShareSession.mockResolvedValueOnce(anonymousSession);
     const { GET } = await import("@/app/api/share-sessions/[sessionId]/route");
@@ -316,6 +317,43 @@ describe("share session route authority", () => {
     };
     expect(body.session.accessPolicy.anonymousAllowed).toBe(true);
     expect(body.session.recipients).toEqual([]);
+  });
+
+  it("does not expose invited documents when a public recipient link is missing worker identity", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    const { GET } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const response = await GET(
+      getRequest(`/api/share-sessions/${SESSION_ID}`),
+      { params: Promise.resolve({ sessionId: SESSION_ID }) }
+    );
+
+    expect(response.status).toBe(403);
+    expect(mocks.loadActivePublicShareSession).toHaveBeenCalledWith(expect.anything(), {
+      shareSessionId: SESSION_ID,
+      workerId: undefined
+    });
+    const bodyText = await response.text();
+    expect(bodyText).toContain("초대된 작업자 링크로 다시 접속해 주세요.");
+    expect(bodyText).not.toContain("위험성평가표");
+    expect(bodyText).not.toContain("TBM 브리핑");
+    expect(bodyText).not.toContain("Dừng công việc khi gió mạnh.");
+  });
+
+  it("does not expose invited documents when a public recipient link has an unknown worker identity", async () => {
+    mocks.createSupabaseAdminClient.mockReturnValue({});
+    const { GET } = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const response = await GET(
+      getRequest(`/api/share-sessions/${SESSION_ID}?workerId=99999999-9999-4999-8999-999999999999`),
+      { params: Promise.resolve({ sessionId: SESSION_ID }) }
+    );
+
+    expect(response.status).toBe(403);
+    const bodyText = await response.text();
+    expect(bodyText).not.toContain("위험성평가표");
+    expect(bodyText).not.toContain("TBM 브리핑");
+    expect(bodyText).not.toContain("Dừng công việc khi gió mạnh.");
   });
 
   it("public recipient confirmation ignores forged body fields and stores the invited snapshot", async () => {

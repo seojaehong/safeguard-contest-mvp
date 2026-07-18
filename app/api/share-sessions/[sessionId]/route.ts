@@ -52,10 +52,29 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ ok: false, configured: true, session: null, message: activeSession.message }, { status: activeSession.status });
   }
 
-  const recipientHints = workerId
-    ? buildPublicRecipientHint(
-      activeSession.session.recipients.filter((recipient) => recipient.workerId === workerId)
-    ).slice(0, 1)
+  const authorizedRecipient = workerId
+    ? findShareSessionRecipient(activeSession.session.recipients, workerId)
+    : null;
+
+  if (!authorizedRecipient && activeSession.session.accessPolicy.requireKnownWorkerSnapshot) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      session: null,
+      message: "초대된 작업자 링크로 다시 접속해 주세요."
+    }, { status: 403 });
+  }
+  if (!authorizedRecipient && !activeSession.session.accessPolicy.anonymousAllowed) {
+    return NextResponse.json({
+      ok: false,
+      configured: true,
+      session: null,
+      message: "초대된 작업자 링크로 다시 접속해 주세요."
+    }, { status: 403 });
+  }
+
+  const recipientHints = authorizedRecipient
+    ? buildPublicRecipientHint([authorizedRecipient]).slice(0, 1)
     : [];
 
   return NextResponse.json({

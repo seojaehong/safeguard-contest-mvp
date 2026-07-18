@@ -1,0 +1,42 @@
+{
+  "artifact": "share-recipient-invited-gate-2026-07-18",
+  "status": "pass",
+  "scope": [
+    "app/api/share-sessions/[sessionId]/route.ts",
+    "tests/workpack-share-authority-routes.test.ts"
+  ],
+  "behavior": {
+    "invitedWorkerWithMatchingWorkerId": "returns one worker hint, documents, and saved worker-language recipient message",
+    "anonymousOpenSessionWithoutWorkerId": "returns session data without recipient hints when known-worker snapshot is not required",
+    "invitedSessionWithoutWorkerId": "returns 403 and does not expose documents or recipient message",
+    "invitedSessionWithUnknownWorkerId": "returns 403 and does not expose documents or recipient message"
+  },
+  "verification": {
+    "focusedShareTests": {
+      "command": "npm.cmd test -- tests\\workpack-share-authority-routes.test.ts tests\\share-recipient-portal-browser.test.ts tests\\workspace-share-simplification.test.ts tests\\workflow-share-panel-behavior.test.ts --maxWorkers=1 --fileParallelism=false",
+      "passedFiles": 3,
+      "skippedFiles": 1,
+      "passedTests": 54,
+      "skippedTests": 4,
+      "status": "pass"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
+    },
+    "frontendConsistency": {
+      "command": "npm.cmd run audit:frontend-consistency",
+      "status": "pass",
+      "pageFiles": 33,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violationCount": 0
+    },
+    "frontendRouteCoverage": {
+      "command": "npm.cmd test -- tests\\frontend-route-coverage.test.ts --maxWorkers=1 --fileParallelism=false",
+      "passedFiles": 1,
+      "passedTests": 39,
+      "status": "pass"
+    }
+  }
+}
