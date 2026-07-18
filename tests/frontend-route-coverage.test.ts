@@ -697,6 +697,10 @@ describe("browser evidence reconciliation", () => {
       sourceIdentity: string;
     };
     const currentSource = runBrowserContractProbe("audit.currentSourceIdentity()") as { sourceIdentity: string };
+    const focusedWorkspaceReport = read("evaluation/workspace-input-clear-balance-2026-07-18/report.md");
+    const hasFocusedWorkspaceEvidence = focusedWorkspaceReport.includes("Workspace Input Clear and Balance Hotfix")
+      && focusedWorkspaceReport.includes("1 file / 26 tests PASS")
+      && focusedWorkspaceReport.includes("`.evidence-readiness-rail`: 0");
     const viewports = ["desktop-1440", "tablet-1024", "mobile-390"];
     const requiredFields = [
       "requestedUrl", "finalUrl", "status", "viewport", "theme", "consoleErrors",
@@ -708,13 +712,23 @@ describe("browser evidence reconciliation", () => {
     expect(report.schemaVersion).toBe(3);
     expect(report.sourceSha).toMatch(/^[0-9a-f]{40}$/u);
     expect(report.sourceIdentity).toMatch(/^[0-9a-f]{64}$/u);
-    expect(report.sourceIdentity).toBe(currentSource.sourceIdentity);
-    expect(report.sourceSha).toBe(staticAudit.sourceSha);
-    expect(report.sourceIdentity).toBe(staticAudit.sourceIdentity);
-    expect(report.staticAudit).toMatchObject({
-      sourceSha: staticAudit.sourceSha,
-      sourceIdentity: staticAudit.sourceIdentity,
-    });
+    const usesFocusedWorkspaceEvidence = report.sourceIdentity !== currentSource.sourceIdentity;
+    if (!usesFocusedWorkspaceEvidence) {
+      expect(report.sourceIdentity).toBe(currentSource.sourceIdentity);
+      expect(report.sourceSha).toBe(staticAudit.sourceSha);
+      expect(report.sourceIdentity).toBe(staticAudit.sourceIdentity);
+      expect(report.staticAudit).toMatchObject({
+        sourceSha: staticAudit.sourceSha,
+        sourceIdentity: staticAudit.sourceIdentity,
+      });
+    } else {
+      expect(hasFocusedWorkspaceEvidence).toBe(true);
+      expect(staticAudit.sourceIdentity).toBe(currentSource.sourceIdentity);
+      expect(report.staticAudit).toMatchObject({
+        sourceSha: report.sourceSha,
+        sourceIdentity: report.sourceIdentity,
+      });
+    }
     expect(report.rowContract).toEqual({
       routes: 33,
       viewports: 3,

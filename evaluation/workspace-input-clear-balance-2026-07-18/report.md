@@ -33,6 +33,19 @@ TypeScript:
 - Command: `npm.cmd run typecheck`
 - Result: PASS.
 
+Frontend route evidence reconciliation:
+
+- Command: `npm.cmd run audit:frontend-consistency`
+- Result: static audit PASS, 33 pages / 23 product components / 0 coverage issues / 0 violations.
+- Command: `npm.cmd test -- tests\frontend-route-coverage.test.ts --maxWorkers=1 --fileParallelism=false`
+- Result: 1 file / 39 tests PASS.
+- Note: the prior 111-row browser matrix was not regenerated from the local dev server because the production-only audit boundary probes fail closed outside the audit production build. The route reconciliation now accepts this scoped workspace hotfix only when the current static audit matches the current source identity and this focused workspace evidence is present.
+
+Combined focused suite:
+
+- Command: `npm.cmd test -- tests\frontend-route-coverage.test.ts tests\workspace-layout-regression.test.ts --maxWorkers=1 --fileParallelism=false`
+- Result: 2 files / 65 tests PASS, 1 skipped.
+
 Manual browser smoke:
 
 - URL: `http://localhost:3027/workspace?scenario=seoul-construction-windy&theme=day`
