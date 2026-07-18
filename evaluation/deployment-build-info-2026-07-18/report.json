@@ -1,0 +1,45 @@
+{
+  "artifact": "deployment-build-info-2026-07-18",
+  "status": "implemented",
+  "route": "/api/build-info",
+  "purpose": "prove live deployment commit mapping without exposing secrets",
+  "exposedFields": [
+    "commitSha",
+    "branch",
+    "environment",
+    "deploymentUrl"
+  ],
+  "secretFieldsExposed": false,
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests\\build-info-route.test.ts --maxWorkers=1 --fileParallelism=false",
+      "passedFiles": 1,
+      "passedTests": 2,
+      "status": "pass"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
+    },
+    "frontendConsistency": {
+      "command": "npm.cmd run audit:frontend-consistency",
+      "status": "pass",
+      "pageFiles": 33,
+      "componentFiles": 23,
+      "coverageIssues": 0,
+      "violationCount": 0
+    },
+    "frontendRouteCoverage": {
+      "command": "npm.cmd test -- tests\\frontend-route-coverage.test.ts --maxWorkers=1 --fileParallelism=false",
+      "passedFiles": 1,
+      "passedTests": 39,
+      "status": "pass"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "staticPages": 28,
+      "routeMapIncludesBuildInfo": true,
+      "status": "pass"
+    }
+  }
+}
