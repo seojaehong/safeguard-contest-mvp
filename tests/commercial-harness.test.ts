@@ -2029,7 +2029,7 @@ describe("workpack learning export", () => {
     expect(markdown).toContain("promotionStatus: draft_candidate");
     expect(markdown).toContain("runtimeAuthority: no");
     expect(markdown).toContain("modelFineTuning: no");
-    expect(markdown).toContain("모델 파인튜닝 산출물이 아닙니다.");
+    expect(markdown).toContain("모델 가중치 변경 산출물이 아닙니다.");
     expect(markdown).toContain("## 운영 그래프");
     expect(markdown).toContain("- hazards: 1");
     expect(markdown).toContain("- improvements: 1");

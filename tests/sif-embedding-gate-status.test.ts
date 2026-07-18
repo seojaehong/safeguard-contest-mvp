@@ -105,7 +105,7 @@ describe("SIF embedding gate status", () => {
       nextGateId: "apply-sif-only-migration",
       nextGateLabel: "SIF-only DB migration 승인"
     });
-    expect(status.learningLifecycle.answer).toContain("모델 파인튜닝도 전체 임베딩 생성도 아직 실행하지 않았습니다");
+    expect(status.learningLifecycle.answer).toContain("모델 가중치 변경이나 전체 임베딩 생성은 아직 실행하지 않았습니다");
     expect(status.nextApprovalGate).toMatchObject({
       id: "apply-sif-only-migration",
       label: "SIF-only DB migration 승인",
@@ -355,6 +355,6 @@ describe("SIF embedding gate status", () => {
     const canonicalFixture = JSON.stringify(canonicalizeMachineFixture(jsonValue));
     const fixtureHash = createHash("sha256").update(canonicalFixture).digest("hex");
 
-    expect(fixtureHash).toBe("52eeb49392938b0a8430d66728d5e36fa21a01b56e875d30e036be50919468fd");
+    expect(fixtureHash).toBe("ea8bebd30962e0eae6a4e0cc79c73002e3af21a592edce1d817b18c593d38fc9");
   });
 });

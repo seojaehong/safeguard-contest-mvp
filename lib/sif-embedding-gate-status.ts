@@ -736,7 +736,7 @@ function buildLearningLifecycle(input: {
       : fullEmbeddingGenerated
         ? "SIF 임베딩 벡터는 생성됐지만 운영 DB 업로드와 row count 검증은 아직입니다."
         : input.corpusReady
-          ? "SIF 자료는 재생성 가능한 코퍼스로 준비됐지만, 모델 파인튜닝도 전체 임베딩 생성도 아직 실행하지 않았습니다."
+          ? "SIF 자료는 재생성 가능한 코퍼스로 준비됐지만, 모델 가중치 변경이나 전체 임베딩 생성은 아직 실행하지 않았습니다."
           : "SIF 코퍼스 품질 게이트를 먼저 다시 통과해야 합니다.";
 
   return {

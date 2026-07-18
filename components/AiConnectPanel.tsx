@@ -660,10 +660,10 @@ export function AiConnectPanel() {
                 </p>
               </article>
               <article>
-                <strong>SIF 학습/임베딩</strong>
+                <strong>SIF 코퍼스/임베딩</strong>
                 <p>{formatSifTextForPresentation(sifGate.learningLifecycle.answer)}</p>
                 <small>
-                  {formatSifTextForPresentation(sifGate.learningLifecycle.label)} · 파인튜닝 {sifGate.learningLifecycle.modelFineTuningPerformed ? "실행" : "미실행"}
+                  {formatSifTextForPresentation(sifGate.learningLifecycle.label)} · 모델 가중치 변경 {sifGate.learningLifecycle.modelFineTuningPerformed ? "있음" : "없음"}
                 </small>
               </article>
               <article>

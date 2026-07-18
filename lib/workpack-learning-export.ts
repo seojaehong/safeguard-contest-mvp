@@ -56,7 +56,7 @@ export const WORKPACK_LEARNING_GOVERNANCE: WorkpackLearningGovernance = {
     "다음 위험성평가와 TBM 생성 시 승인된 개선사항만 근거로 고정합니다."
   ],
   guardrails: [
-    "이 파일은 모델 파인튜닝 산출물이 아닙니다.",
+    "이 파일은 모델 가중치 변경 산출물이 아닙니다.",
     "검토 전 항목은 사용자 근거처럼 노출하지 않습니다.",
     "LLM은 승인된 근거와 개선사항을 문장화하는 역할로 제한합니다."
   ]

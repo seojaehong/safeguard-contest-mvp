@@ -989,7 +989,7 @@ function SafeClawHomepage({ onStart }: { onStart: () => void }) {
       <section className="safeclaw-os-section compact" id="execution">
         <div className="safeclaw-os-section-head">
           <span>§ 02</span>
-          <b>학습된 코퍼스 · 인용 가능 근거</b>
+          <b>검증 코퍼스 · 인용 가능 근거</b>
         </div>
         <div className="safeclaw-proof-matrix">
           {proofSources.map(([code, title, meta]) => (
