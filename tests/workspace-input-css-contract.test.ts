@@ -37,6 +37,23 @@ describe("workspace input CSS contract", () => {
     }
   });
 
+  it("keeps the input-page theme, disclosure, and example controls touch safe", () => {
+    const css = workspaceCss();
+
+    expect(css).toMatch(
+      /\.command-center-shell \.workspace-theme-toggle button\s*\{[\s\S]*?min-width:\s*var\(--control-height\);[\s\S]*?min-height:\s*var\(--control-height\);/u,
+    );
+    expect(css).toMatch(
+      /@media \(max-width:\s*720px\)\s*\{[\s\S]*?\.command-center-shell\.workspace-theme-day \.workbench-theme-toggle button,\s*\.command-center-shell\.workspace-theme-night \.workbench-theme-toggle button\s*\{[\s\S]*?min-height:\s*var\(--control-height\);/u,
+    );
+    expect(css).toMatch(
+      /\.command-center-shell \.advanced-settings:not\(\[open\]\) summary,\s*\.command-center-shell \.quick-scenario-chips:not\(\[open\]\) summary\s*\{[\s\S]*?min-height:\s*var\(--control-height\);/u,
+    );
+    expect(css).toMatch(
+      /\.command-center-shell \.workspace-input-page \.quick-chip\s*\{[\s\S]*?min-height:\s*var\(--control-height\);/u,
+    );
+  });
+
   it("keeps the responsive textarea cascade free of important overrides", () => {
     const guardCss = workspaceSubmissionGuardCss();
     const textareaBlocks = Array.from(

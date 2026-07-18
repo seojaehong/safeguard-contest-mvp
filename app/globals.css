@@ -3828,6 +3828,10 @@ ul {
   letter-spacing: var(--tracking-body);
 }
 
+.command-center-shell .workspace-input-page .quick-chip {
+  min-height: var(--control-height);
+}
+
 .quick-chip.active {
   border-color: rgba(33, 89, 79, 0.36);
   background: var(--accent-soft);
@@ -12798,6 +12802,7 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .workspace-theme-toggle button {
   min-width: var(--control-height);
+  min-height: var(--control-height);
   border: 0;
   border-radius: 4px;
   background: transparent;
@@ -13587,12 +13592,12 @@ body:has(.safeclaw-landing) :is(
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: auto;
+  min-height: var(--control-height);
   border: 0;
   border-radius: 0;
   background: transparent;
   color: var(--workspace-muted);
-  padding: 0;
+  padding: 0 4px;
   text-decoration: underline;
   text-decoration-color: rgba(164, 170, 180, 0.45);
   text-underline-offset: 5px;
@@ -21170,6 +21175,11 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-night .workspace-side-group:first-child button {
     min-height: 48px;
     padding: 12px;
+  }
+
+  .command-center-shell.workspace-theme-day .workbench-theme-toggle button,
+  .command-center-shell.workspace-theme-night .workbench-theme-toggle button {
+    min-height: var(--control-height);
   }
 
   .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page,
