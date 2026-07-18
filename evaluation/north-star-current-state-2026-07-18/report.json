@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-07-19T00:20:00+09:00",
-  "authoritativeHead": "93b2120ef3f4abd33f87591d1a9e1f54d5767536",
+  "authoritativeHead": "23d74199e695adb74b3a03b0d103456ddd8b410d",
   "status": "in_progress",
   "provenGates": [
     "full_serial_suite",
@@ -45,8 +45,8 @@
       "staticPagesGenerated": 28
     },
     "ci": {
-      "runId": 29649678383,
-      "headSha": "93b2120ef3f4abd33f87591d1a9e1f54d5767536",
+      "runId": 29650196721,
+      "headSha": "23d74199e695adb74b3a03b0d103456ddd8b410d",
       "status": "completed",
       "conclusion": "success",
       "checks": [
@@ -59,7 +59,7 @@
       "url": "https://www.safeclaw.kr/api/build-info",
       "statusCode": 200,
       "configured": true,
-      "commitSha": "93b2120ef3f4abd33f87591d1a9e1f54d5767536",
+      "commitSha": "23d74199e695adb74b3a03b0d103456ddd8b410d",
       "branch": "master",
       "environment": "production",
       "source": "vercel-system-env"
