@@ -40,6 +40,17 @@
     "horizontalOverflow": false,
     "pageError": "Minified React error #418"
   },
+  "productionSmokeAfterPatch": {
+    "commit": "5c954af4b725429a79b9bc459ae76a911e5aabde",
+    "deployment": "https://safeguard-contest-6a7qlpkk8-seojaehongs-projects.vercel.app",
+    "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+    "viewport": "390x844",
+    "status": 200,
+    "hasVietnameseChrome": true,
+    "hasKoreanChrome": false,
+    "horizontalOverflow": false,
+    "pageErrors": 0
+  },
   "patch": {
     "hydrationFix": "Initial recipient portal language is server-stable ko; query language is applied after mount.",
     "testHarnessFix": "Browser test production-build guard requires both BUILD_ID and prerender-manifest.json."

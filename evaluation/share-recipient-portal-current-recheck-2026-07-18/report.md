@@ -31,6 +31,8 @@ npm.cmd run typecheck
 - Initial route/API Vitest: 1 file PASS / 1 file skipped; 34 PASS / 4 skipped
 - Focused share Vitest after hydration patch: 3 files PASS / 1 skipped; 52 PASS / 4 skipped
 - Typecheck: PASS
+- Production deployment for patch commit `5c954af4`: success (`https://safeguard-contest-6a7qlpkk8-seojaehongs-projects.vercel.app`)
+- Production smoke after patch: `https://www.safeclaw.kr/share/not-a-session?lang=vi`, 390x844, HTTP 200, Vietnamese chrome present, Korean chrome absent, horizontal overflow 0, page errors 0
 - Skipped browser cases require a successful local `.next/BUILD_ID`.
 - Local Windows `npm.cmd run build` remains blocked by the existing `/404` prerender issue (`<Html> should not be imported outside of pages/_document`), while the same commit family passed remote GitHub Actions build.
 
