@@ -14850,9 +14850,44 @@ body:has(.safeclaw-landing) :is(
 }
 
 @media (max-width: 720px) {
+  .safeclaw-module-shell[data-module-route="/share"] .safeclaw-module-nav {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 8px 16px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/share"] .safeclaw-module-nav > span:first-child,
+  .safeclaw-module-shell[data-module-route="/share"] .safeclaw-module-status {
+    display: none;
+  }
+
+  .safeclaw-module-shell[data-module-route="/share"] .safeclaw-page-decision-header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 18px 16px;
+  }
+
+  .safeclaw-module-shell[data-module-route="/share"] .safeclaw-page-decision-action {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    border-left: 0;
+    border-top: 1px solid var(--workspace-rule);
+    padding: 14px 0 0;
+  }
+
+  .safeclaw-module-shell[data-module-route="/share"] .safeclaw-page-decision-copy h1 {
+    font-size: clamp(28px, 8vw, 36px);
+    line-height: 1.04;
+  }
+
+  .safeclaw-module-shell[data-module-route="/share"] .safeclaw-module-content {
+    padding: 0 16px 32px;
+  }
+
   .safeclaw-share-recipient-page {
     max-width: none;
     gap: 10px;
+    box-sizing: border-box;
+    padding: 0 16px 32px;
   }
 
   .safeclaw-share-recipient-card {

@@ -119,11 +119,16 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     const metrics = await page.evaluate(() => {
       const controls = [...document.querySelectorAll<HTMLElement>(".safeclaw-input, .safeclaw-select, .safeclaw-button")];
       const cards = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-card")];
+      const decisionAction = document.querySelector<HTMLElement>(".safeclaw-page-decision-action");
+      const reviewHeading = [...document.querySelectorAll<HTMLElement>(".safeclaw-share-recipient-page h2")]
+        .find((item) => item.innerText.trim() === "문서팩 검토");
       return {
         documentWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
         bodyScrollWidth: document.body.scrollWidth,
         minimumControlHeight: Math.min(...controls.map((item) => item.getBoundingClientRect().height)),
+        decisionActionWidth: Math.round(decisionAction?.getBoundingClientRect().width ?? 0),
+        reviewHeadingLeft: Math.round(reviewHeading?.getBoundingClientRect().left ?? 0),
         outsideCards: cards.filter((item) => {
           const rect = item.getBoundingClientRect();
           return rect.left < -0.5 || rect.right > window.innerWidth + 0.5;
@@ -133,6 +138,8 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.documentWidth);
     expect(metrics.bodyScrollWidth).toBeLessThanOrEqual(metrics.documentWidth);
     expect(metrics.minimumControlHeight).toBeGreaterThanOrEqual(44);
+    expect(metrics.decisionActionWidth).toBeGreaterThanOrEqual(300);
+    expect(metrics.reviewHeadingLeft).toBeGreaterThanOrEqual(16);
     expect(metrics.outsideCards).toBe(0);
 
     await page.getByRole("button", { name: "열람 확인" }).click();
