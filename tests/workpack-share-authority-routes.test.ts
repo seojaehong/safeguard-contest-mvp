@@ -239,6 +239,118 @@ function makeConfirmationClient(existingId: string | null) {
   };
 }
 
+type RouteLoopShareSessionRow = {
+  id: string;
+  organization_id: string;
+  site_id: string | null;
+  workpack_id: string;
+  share_scope: string;
+  recipients_snapshot: typeof serverRecipient[];
+  access_policy: {
+    anonymousAllowed?: boolean;
+    manualLanguageSwitchAllowed?: boolean;
+    requireKnownWorkerSnapshot?: boolean;
+  };
+  status: string;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+};
+
+type RouteLoopConfirmationRow = {
+  id: string;
+  organization_id: string;
+  site_id: string | null;
+  workpack_id: string;
+  share_session_id: string;
+  worker_id: string | null;
+  worker_display_name: string;
+  worker_snapshot: Record<string, unknown>;
+  language_code: string;
+  confirmation_method: string;
+  read_at: string;
+};
+
+function readRouteLoopField(row: Record<string, unknown>, field: string): unknown {
+  return row[field];
+}
+
+function makeShareRecipientRouteLoopClient() {
+  const shareSessions: RouteLoopShareSessionRow[] = [];
+  const confirmations: RouteLoopConfirmationRow[] = [];
+  const now = "2026-07-19T00:00:00.000Z";
+
+  function filterRows<T extends Record<string, unknown>>(rows: T[]) {
+    let filtered = [...rows];
+    const query = {
+      select() { return query; },
+      eq(field: string, value: unknown) {
+        filtered = filtered.filter((row) => readRouteLoopField(row, field) === value);
+        return query;
+      },
+      is(field: string, value: unknown) {
+        filtered = filtered.filter((row) => readRouteLoopField(row, field) === value);
+        return query;
+      },
+      order() {
+        return Promise.resolve({ data: filtered, error: null });
+      },
+      maybeSingle() {
+        return Promise.resolve({ data: filtered[0] || null, error: null });
+      }
+    };
+    return query;
+  }
+
+  return {
+    client: {
+      from(table: string) {
+        if (table === "workpack_share_sessions") {
+          return {
+            ...filterRows(shareSessions),
+            insert(value: Omit<RouteLoopShareSessionRow, "id" | "created_at" | "updated_at">) {
+              const row: RouteLoopShareSessionRow = {
+                ...value,
+                id: SESSION_ID,
+                created_at: now,
+                updated_at: now
+              };
+              shareSessions.push(row);
+              return {
+                select() {
+                  return { single: async () => ({ data: { id: row.id, expires_at: row.expires_at }, error: null }) };
+                }
+              };
+            }
+          };
+        }
+        if (table === "workpack_read_confirmations") {
+          return {
+            ...filterRows(confirmations),
+            insert(value: Omit<RouteLoopConfirmationRow, "id" | "read_at">) {
+              const row: RouteLoopConfirmationRow = {
+                ...value,
+                id: "confirmation-route-loop",
+                read_at: now
+              };
+              confirmations.push(row);
+              return {
+                select() {
+                  return { single: async () => ({ data: { id: row.id }, error: null }) };
+                }
+              };
+            }
+          };
+        }
+        throw new Error(`Unexpected table ${table}`);
+      }
+    },
+    latestShareSession: () => shareSessions[shareSessions.length - 1] || null,
+    confirmations: () => [...confirmations]
+  };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.getWorkspaceUser.mockResolvedValue({ id: "user-1", email: "owner@example.com" });
@@ -466,6 +578,117 @@ describe("share session route authority", () => {
       workpackId: WORKPACK_ID,
       workerIds: [WORKER_ID]
     }, 1, Date.now())).toEqual({ reusable: true });
+  });
+
+  it("proves the manager-created invited session can be opened by the worker and reflected in manager confirmations", async () => {
+    const fake = makeShareRecipientRouteLoopClient();
+    mocks.createSupabaseAdminClient.mockReturnValue(fake.client);
+    mocks.loadActivePublicShareSession.mockImplementation(async (_client: unknown, input: { shareSessionId: string; workerId?: string }) => {
+      const inserted = fake.latestShareSession();
+      if (!inserted || inserted.id !== input.shareSessionId) {
+        return { ok: false, status: 404, message: "공유 세션을 찾지 못했습니다." };
+      }
+      return {
+        ok: true,
+        session: {
+          ...publicSession().session,
+          id: inserted.id,
+          organizationId: inserted.organization_id,
+          siteId: inserted.site_id,
+          workpackId: inserted.workpack_id,
+          recipients: inserted.recipients_snapshot,
+          accessPolicy: inserted.access_policy,
+          shareScope: inserted.share_scope,
+          status: inserted.status,
+          expiresAt: inserted.expires_at
+        }
+      };
+    });
+
+    const managerShareRoute = await import("@/app/api/workpacks/[id]/share-sessions/route");
+    const publicRecipientRoute = await import("@/app/api/share-sessions/[sessionId]/route");
+
+    const createResponse = await managerShareRoute.POST(jsonRequest(`/api/workpacks/${WORKPACK_ID}/share-sessions`, {
+      recipients: [{ workerId: WORKER_ID }]
+    }), { params: Promise.resolve({ id: WORKPACK_ID }) });
+    const created = await createResponse.json() as { shareSessionId: string; expiresAt: string };
+
+    expect(createResponse.status).toBe(200);
+    expect(created.shareSessionId).toBe(SESSION_ID);
+    expect(fake.latestShareSession()).toMatchObject({
+      id: SESSION_ID,
+      workpack_id: WORKPACK_ID,
+      recipients_snapshot: [serverRecipient],
+      access_policy: {
+        anonymousAllowed: false,
+        manualLanguageSwitchAllowed: true,
+        requireKnownWorkerSnapshot: true
+      }
+    });
+
+    const workerGetResponse = await publicRecipientRoute.GET(
+      getRequest(`/api/share-sessions/${created.shareSessionId}?workerId=${WORKER_ID}`),
+      { params: Promise.resolve({ sessionId: created.shareSessionId }) }
+    );
+    const workerPayload = await workerGetResponse.json() as {
+      session: {
+        recipients: Array<{ workerId: string; displayName: string; languageCode: string }>;
+        recipientMessage: { languageCode: string; body: string };
+      };
+    };
+
+    expect(workerGetResponse.status).toBe(200);
+    expect(workerPayload.session.recipients).toEqual([{
+      workerId: WORKER_ID,
+      displayName: "Server Nguyen",
+      languageCode: "vi"
+    }]);
+    expect(workerPayload.session.recipientMessage.languageCode).toBe("vi");
+
+    const workerConfirmResponse = await publicRecipientRoute.POST(jsonRequest(`/api/share-sessions/${created.shareSessionId}?workerId=${WORKER_ID}`, {
+      workerId: KOREAN_WORKER_ID,
+      displayName: "Forged Kim",
+      languageCode: "ko"
+    }), { params: Promise.resolve({ sessionId: created.shareSessionId }) });
+    const workerConfirmation = await workerConfirmResponse.json() as { confirmationId: string };
+
+    expect(workerConfirmResponse.status).toBe(200);
+    expect(workerConfirmation.confirmationId).toBe("confirmation-route-loop");
+    expect(fake.confirmations()).toEqual([expect.objectContaining({
+      id: "confirmation-route-loop",
+      workpack_id: WORKPACK_ID,
+      share_session_id: SESSION_ID,
+      worker_id: WORKER_ID,
+      worker_display_name: "Server Nguyen",
+      language_code: "vi",
+      worker_snapshot: expect.objectContaining(serverRecipient.workerSnapshot)
+    })]);
+
+    const managerStatusResponse = await managerShareRoute.GET(
+      getRequest(`/api/workpacks/${WORKPACK_ID}/share-sessions`),
+      { params: Promise.resolve({ id: WORKPACK_ID }) }
+    );
+    const managerStatus = await managerStatusResponse.json() as {
+      sessions: Array<{ id: string; recipients_snapshot: typeof serverRecipient[] }>;
+      confirmations: Array<{ id: string; share_session_id: string; worker_display_name: string; language_code: string }>;
+    };
+
+    expect(managerStatusResponse.status).toBe(200);
+    expect(managerStatus.sessions).toEqual([expect.objectContaining({
+      id: SESSION_ID,
+      recipients_snapshot: [expect.objectContaining({
+        workerId: WORKER_ID,
+        displayName: "Server Nguyen",
+        languageCode: "vi",
+        workerSnapshot: expect.objectContaining(serverRecipient.workerSnapshot)
+      })]
+    })]);
+    expect(managerStatus.confirmations).toEqual([expect.objectContaining({
+      id: "confirmation-route-loop",
+      share_session_id: SESSION_ID,
+      worker_display_name: "Server Nguyen",
+      language_code: "vi"
+    })]);
   });
 });
 

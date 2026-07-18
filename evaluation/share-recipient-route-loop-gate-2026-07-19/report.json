@@ -1,0 +1,33 @@
+{
+  "artifact": "share-recipient-route-loop-gate-2026-07-19",
+  "verdict": "pass_non_mutating_route_level_invited_recipient_loop",
+  "baseSourceHead": "94d45b02651f7dd4179988791d8ad564474db954",
+  "productFilesChanged": [],
+  "testFilesChanged": [
+    "tests/workpack-share-authority-routes.test.ts"
+  ],
+  "routeLoop": {
+    "managerCreateShareSession": "POST /api/workpacks/{workpackId}/share-sessions",
+    "workerOpenRecipientSession": "GET /api/share-sessions/{sessionId}?workerId={workerId}",
+    "workerConfirmRead": "POST /api/share-sessions/{sessionId}?workerId={workerId}",
+    "managerReadConfirmationStatus": "GET /api/workpacks/{workpackId}/share-sessions"
+  },
+  "contract": {
+    "serverAuthoritativeRecipientSnapshot": true,
+    "onlyMatchingWorkerHintExposed": true,
+    "forgedWorkerFieldsIgnored": true,
+    "confirmationUsesServerSnapshot": true,
+    "managerStatusReadsBackConfirmation": true,
+    "productionMutationPerformed": false,
+    "providerMessageSent": false,
+    "dbMigrationApplied": false
+  },
+  "verification": {
+    "command": "npm.cmd test -- tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 1,
+    "testFilesTotal": 1,
+    "testsPassed": 37,
+    "testsTotal": 37
+  },
+  "remainingLiveGap": "real_invited_share_session_worker_confirmation_ack_update"
+}

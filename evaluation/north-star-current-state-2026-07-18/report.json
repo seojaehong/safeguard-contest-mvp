@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-07-19T00:20:00+09:00",
-  "authoritativeHead": "36b1a3ee2d9730239bacb0cbae6befe80e2becc3",
+  "authoritativeHead": "94d45b02651f7dd4179988791d8ad564474db954",
   "status": "in_progress",
   "provenGates": [
     "full_serial_suite",
@@ -29,14 +29,22 @@
     "shareRecipientPortal": {
       "artifact": "evaluation/share-recipient-current-gate-2026-07-19/report.json",
       "liveSmokeArtifact": "evaluation/share-recipient-live-smoke-2026-07-19/report.json",
+      "routeLoopArtifact": "evaluation/share-recipient-route-loop-gate-2026-07-19/report.json",
       "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
       "filesPassed": 2,
-      "testsPassed": 40,
+      "testsPassed": 41,
       "status": "implemented_on_current_production_mapped_head",
       "staleFindingClosed": "de4103db recipient portal absent",
       "liveRouteSmoke": {
         "portalShell": "GET /share/not-a-session?lang=vi -> 200",
         "invalidApiLookup": "GET /api/share-sessions/not-a-session?workerId=00000000-0000-0000-0000-000000000000 -> 400"
+      },
+      "routeLevelLoop": {
+        "managerCreateShareSession": true,
+        "workerOpenRecipientSession": true,
+        "workerConfirmRead": true,
+        "managerReadConfirmationStatus": true,
+        "productionMutationPerformed": false
       },
       "remainingGap": "real_invited_share_session_worker_confirmation_ack_update"
     },
@@ -50,8 +58,8 @@
       "staticPagesGenerated": 28
     },
     "ci": {
-      "runId": 29650771772,
-      "headSha": "36b1a3ee2d9730239bacb0cbae6befe80e2becc3",
+      "runId": 29651333050,
+      "headSha": "94d45b02651f7dd4179988791d8ad564474db954",
       "status": "completed",
       "conclusion": "success",
       "checks": [
@@ -64,7 +72,7 @@
       "url": "https://www.safeclaw.kr/api/build-info",
       "statusCode": 200,
       "configured": true,
-      "commitSha": "36b1a3ee2d9730239bacb0cbae6befe80e2becc3",
+      "commitSha": "94d45b02651f7dd4179988791d8ad564474db954",
       "branch": "master",
       "environment": "production",
       "source": "vercel-system-env"
