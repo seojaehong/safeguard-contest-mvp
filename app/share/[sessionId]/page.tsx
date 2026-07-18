@@ -72,6 +72,20 @@ function buildLanguageLabel(code: string): string {
 }
 
 type RecipientPortalCopy = {
+  skipLink: string;
+  railAria: string;
+  homeAria: string;
+  menu: string;
+  productSubtitle: string;
+  mappedToLabel: string;
+  decisionAria: string;
+  siteContext: string;
+  evidenceContext: string;
+  weatherContext: string;
+  themeAria: string;
+  statusLiveLabel: string;
+  statusPartialLabel: string;
+  statusPlannedLabel: string;
   shellEyebrow: string;
   shellTitle: string;
   shellDescription: string;
@@ -89,6 +103,11 @@ type RecipientPortalCopy = {
   scopePrefix: string;
   scopeOrganization: string;
   scopeInvited: string;
+  emptySessionId: string;
+  invalidSessionId: string;
+  sessionLoadFailed: string;
+  sessionVerified: string;
+  fallbackQuestion: string;
   inactiveHelp: string;
   loading: string;
   workerNoticeNote: string;
@@ -111,6 +130,7 @@ type RecipientPortalCopy = {
   documentsLoadingBody: string;
   displayNameRequired: string;
   missingWorkerId: string;
+  confirmationFailed: string;
   savedConfirmation: string;
   savedManagerHistory: string;
   alreadyConfirmed: string;
@@ -118,6 +138,20 @@ type RecipientPortalCopy = {
 
 const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
   ko: {
+    skipLink: "본문으로 건너뛰기",
+    railAria: "SafeClaw 제품 메뉴",
+    homeAria: "SafeClaw 홈",
+    menu: "메뉴",
+    productSubtitle: "현장 안전 문서팩",
+    mappedToLabel: "업무 범위",
+    decisionAria: "현재 모듈 결정",
+    siteContext: "SITE 기본 현장",
+    evidenceContext: "공공 근거",
+    weatherContext: "기상청",
+    themeAria: "화면 테마",
+    statusLiveLabel: "바로 사용",
+    statusPartialLabel: "연결 확인",
+    statusPlannedLabel: "설정 필요",
     shellEyebrow: "작업자 열람",
     shellTitle: "문서팩 확인 화면",
     shellDescription: "전달받은 현장 안전 문서와 안내문을 확인하고 열람 확인을 남깁니다.",
@@ -135,6 +169,11 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     scopePrefix: "범위",
     scopeOrganization: "조직 공유",
     scopeInvited: "지정 작업자 공유",
+    emptySessionId: "공유 세션 식별값이 비어 있습니다.",
+    invalidSessionId: "공유 세션 식별값을 확인해 주세요.",
+    sessionLoadFailed: "세션 정보를 불러오지 못했습니다.",
+    sessionVerified: "열람 대상 공유 세션을 확인했습니다.",
+    fallbackQuestion: "공유 중인 작업 상세가 아직 로드되지 않았습니다.",
     inactiveHelp: "현재 확인이 차단된 상태입니다. 관리자에게 세션 상태를 요청해 주세요.",
     loading: "세션 정보를 조회하는 중입니다...",
     workerNoticeNote: "작업자 언어 기준으로 생성된 현장 안내입니다.",
@@ -157,11 +196,26 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     documentsLoadingBody: "관리자가 공유한 문서 본문을 아직 불러오지 못했습니다. 작업 전 관리자에게 최신 문서팩을 확인해 주세요.",
     displayNameRequired: "작업자 표시명을 입력해 주세요.",
     missingWorkerId: "링크에 작업자 식별자가 없어서 확인할 수 없습니다.",
+    confirmationFailed: "열람 확인 처리에 실패했습니다.",
     savedConfirmation: "작업자 열람 확인을 저장했습니다.",
     savedManagerHistory: "관리자 화면에 확인 이력이 저장되었습니다.",
     alreadyConfirmed: "이미 확인한 작업입니다."
   },
   vi: {
+    skipLink: "Chuyển đến nội dung chính",
+    railAria: "Menu sản phẩm SafeClaw",
+    homeAria: "Trang chủ SafeClaw",
+    menu: "Menu",
+    productSubtitle: "Gói tài liệu an toàn hiện trường",
+    mappedToLabel: "Phạm vi công việc",
+    decisionAria: "Quyết định màn hình hiện tại",
+    siteContext: "Hiện trường mặc định",
+    evidenceContext: "Căn cứ chính thức",
+    weatherContext: "KMA",
+    themeAria: "Chủ đề màn hình",
+    statusLiveLabel: "Sẵn sàng dùng",
+    statusPartialLabel: "Cần kiểm tra kết nối",
+    statusPlannedLabel: "Cần thiết lập",
     shellEyebrow: "Công nhân xem",
     shellTitle: "Màn hình xác nhận tài liệu",
     shellDescription: "Kiểm tra tài liệu an toàn hiện trường và để lại xác nhận đã xem.",
@@ -179,6 +233,11 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     scopePrefix: "Phạm vi",
     scopeOrganization: "Chia sẻ trong tổ chức",
     scopeInvited: "Chỉ công nhân được chỉ định",
+    emptySessionId: "Thiếu mã phiên chia sẻ.",
+    invalidSessionId: "Vui lòng kiểm tra mã phiên chia sẻ.",
+    sessionLoadFailed: "Không thể tải thông tin phiên.",
+    sessionVerified: "Đã xác nhận phiên chia sẻ cho người nhận.",
+    fallbackQuestion: "Chưa tải được chi tiết công việc được chia sẻ.",
     inactiveHelp: "Hiện không thể xác nhận. Vui lòng hỏi quản lý về trạng thái phiên.",
     loading: "Đang tải thông tin phiên...",
     workerNoticeNote: "Thông báo hiện trường được tạo theo ngôn ngữ của công nhân.",
@@ -201,11 +260,26 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     documentsLoadingBody: "Chưa tải được nội dung tài liệu do quản lý chia sẻ. Hãy xác nhận gói tài liệu mới nhất trước khi làm việc.",
     displayNameRequired: "Vui lòng nhập tên hiển thị của công nhân.",
     missingWorkerId: "Không có mã công nhân trong liên kết nên không thể xác nhận.",
+    confirmationFailed: "Không thể lưu xác nhận xem.",
     savedConfirmation: "Đã lưu xác nhận xem tài liệu.",
     savedManagerHistory: "Lịch sử xác nhận đã được lưu cho quản lý.",
     alreadyConfirmed: "Công việc này đã được xác nhận."
   },
   en: {
+    skipLink: "Skip to main content",
+    railAria: "SafeClaw product menu",
+    homeAria: "SafeClaw home",
+    menu: "Menu",
+    productSubtitle: "Site safety document pack",
+    mappedToLabel: "Work scope",
+    decisionAria: "Current module decision",
+    siteContext: "Default site",
+    evidenceContext: "Official sources",
+    weatherContext: "KMA",
+    themeAria: "Screen theme",
+    statusLiveLabel: "Ready",
+    statusPartialLabel: "Check connection",
+    statusPlannedLabel: "Setup needed",
     shellEyebrow: "Worker view",
     shellTitle: "Document pack confirmation",
     shellDescription: "Review the shared site safety notice and leave a read confirmation.",
@@ -223,6 +297,11 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     scopePrefix: "Scope",
     scopeOrganization: "Organization share",
     scopeInvited: "Selected workers only",
+    emptySessionId: "The share session ID is empty.",
+    invalidSessionId: "Please check the share session ID.",
+    sessionLoadFailed: "Could not load the session.",
+    sessionVerified: "Share session for this recipient verified.",
+    fallbackQuestion: "Shared task details have not loaded yet.",
     inactiveHelp: "Confirmation is currently blocked. Ask the manager to check the session status.",
     loading: "Loading share session...",
     workerNoticeNote: "This site notice is generated for the worker language.",
@@ -245,6 +324,7 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     documentsLoadingBody: "The shared document body could not be loaded yet. Confirm the latest document pack with the manager before work.",
     displayNameRequired: "Please enter the worker display name.",
     missingWorkerId: "This link has no worker identifier, so confirmation cannot be saved.",
+    confirmationFailed: "Could not save the read confirmation.",
     savedConfirmation: "Read confirmation saved.",
     savedManagerHistory: "The confirmation history has been saved for the manager.",
     alreadyConfirmed: "This task was already confirmed."
@@ -369,15 +449,16 @@ export default function ShareRecipientPage() {
   }, []);
 
   const fetchSession = useCallback(async () => {
+    const activeCopy = resolveRecipientPortalCopy(languageCode);
     if (queryWorkerId === null) return;
     if (!sessionId) {
-      setSessionMessage("공유 세션 식별값이 비어 있습니다.");
+      setSessionMessage(activeCopy.emptySessionId);
       setFetchState("error");
       return;
     }
     if (!isValidShareSessionId(sessionId)) {
       setSessionPayload(null);
-      setSessionMessage("공유 세션 식별값을 확인해 주세요.");
+      setSessionMessage(activeCopy.invalidSessionId);
       setFetchState("error");
       return;
     }
@@ -396,7 +477,7 @@ export default function ShareRecipientPage() {
     const nextPayload = payload.session;
     if (!nextPayload) {
       setSessionPayload(null);
-      setSessionMessage("세션 정보를 불러오지 못했습니다.");
+      setSessionMessage(activeCopy.sessionLoadFailed);
       setFetchState("error");
       return;
     }
@@ -418,7 +499,7 @@ export default function ShareRecipientPage() {
     } else if (nextPayload.accessPolicy.manualLanguageSwitchAllowed && !nextPayload.recipients.length) {
       setLanguageCode(languageCode || "ko");
     }
-    setSessionMessage("열람 대상 공유 세션을 확인했습니다.");
+    setSessionMessage(activeCopy.sessionVerified);
     setFetchState("idle");
   }, [displayName, sessionId, languageCode, queryWorkerId, workerId]);
 
@@ -449,7 +530,7 @@ export default function ShareRecipientPage() {
     });
     const payload = (await response.json()) as ShareSessionResponse;
     if (!payload.ok) {
-      setConfirmationMessage(payload.message || "열람 확인 처리에 실패했습니다.");
+      setConfirmationMessage(payload.message || copy.confirmationFailed);
       setFetchState("error");
       return;
     }
@@ -460,7 +541,7 @@ export default function ShareRecipientPage() {
     await fetchSession();
   }, [copy, sessionPayload, sessionId, requestBody, fetchSession]);
 
-  const question = sessionPayload?.question || "공유 중인 작업 상세가 아직 로드되지 않았습니다.";
+  const question = sessionPayload?.question || copy.fallbackQuestion;
   const status = sessionPayload ? sessionPayload.status : "active";
   const documents = sessionPayload?.documents || [];
   const requiresKnownWorker = sessionPayload?.accessPolicy.requireKnownWorkerSnapshot ?? true;
@@ -482,6 +563,24 @@ export default function ShareRecipientPage() {
       mappedTo={copy.shellMappedTo}
       activeHref="/share"
       actions={<Link href="/workspace">{copy.shellAction}</Link>}
+      chromeLabels={{
+        skipLink: copy.skipLink,
+        railAria: copy.railAria,
+        homeAria: copy.homeAria,
+        menu: copy.menu,
+        productSubtitle: copy.productSubtitle,
+        mappedTo: copy.mappedToLabel,
+        decisionAria: copy.decisionAria,
+        siteContext: copy.siteContext,
+        evidenceContext: copy.evidenceContext,
+        weatherContext: copy.weatherContext,
+        themeAria: copy.themeAria,
+        status: {
+          live: copy.statusLiveLabel,
+          partial: copy.statusPartialLabel,
+          planned: copy.statusPlannedLabel
+        }
+      }}
     >
       <section className="safeclaw-share-recipient-page">
         <h2>{copy.reviewTitle}</h2>

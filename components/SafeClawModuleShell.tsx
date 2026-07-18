@@ -14,6 +14,36 @@ const statusLabel: Record<ModuleStatus, string> = {
   planned: "설정 필요"
 };
 
+type ModuleChromeLabels = {
+  skipLink: string;
+  railAria: string;
+  homeAria: string;
+  menu: string;
+  productSubtitle: string;
+  mappedTo: string;
+  decisionAria: string;
+  siteContext: string;
+  evidenceContext: string;
+  weatherContext: string;
+  themeAria: string;
+  status: Record<ModuleStatus, string>;
+};
+
+const defaultChromeLabels: ModuleChromeLabels = {
+  skipLink: "본문으로 건너뛰기",
+  railAria: "SafeClaw 제품 메뉴",
+  homeAria: "SafeClaw 홈",
+  menu: "메뉴",
+  productSubtitle: "현장 안전 문서팩",
+  mappedTo: "업무 범위",
+  decisionAria: "현재 모듈 결정",
+  siteContext: "SITE 기본 현장",
+  evidenceContext: "공공 근거",
+  weatherContext: "기상청",
+  themeAria: "화면 테마",
+  status: statusLabel
+};
+
 type SafeClawModuleShellProps = {
   eyebrow: string;
   title: string;
@@ -24,6 +54,9 @@ type SafeClawModuleShellProps = {
   actions?: ReactNode;
   activeHref?: string;
   variant?: "default" | "document";
+  chromeLabels?: Partial<Omit<ModuleChromeLabels, "status">> & {
+    status?: Partial<Record<ModuleStatus, string>>;
+  };
 };
 
 type PageDecisionHeaderProps = Pick<
@@ -31,6 +64,7 @@ type PageDecisionHeaderProps = Pick<
   "eyebrow" | "title" | "description" | "mappedTo" | "actions"
 > & {
   command: { href: string; label: string };
+  chromeLabels: ModuleChromeLabels;
 };
 
 function PageDecisionHeader({
@@ -39,7 +73,8 @@ function PageDecisionHeader({
   description,
   mappedTo,
   actions,
-  command
+  command,
+  chromeLabels
 }: PageDecisionHeaderProps) {
   return (
     <header className="safeclaw-page-decision-header safeclaw-module-header" data-testid="page-decision-header">
@@ -48,9 +83,9 @@ function PageDecisionHeader({
         <h1 className="safeclaw-module-title">{title}</h1>
         <p className="safeclaw-module-description">{description}</p>
       </div>
-      <aside className="safeclaw-page-decision-action" aria-label="현재 모듈 결정">
+      <aside className="safeclaw-page-decision-action" aria-label={chromeLabels.decisionAria}>
         <div>
-          <span>업무 범위</span>
+          <span>{chromeLabels.mappedTo}</span>
           <strong>{mappedTo}</strong>
         </div>
         <div className="safeclaw-module-principal-command" data-principal-command>
@@ -70,12 +105,21 @@ export function SafeClawModuleShell({
   children,
   actions,
   activeHref,
-  variant = "document"
+  variant = "document",
+  chromeLabels: chromeLabelOverrides
 }: SafeClawModuleShellProps) {
   const navModel = getModuleNavModel(activeHref);
   const [theme, setTheme] = useState<ModuleTheme>("day");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const chromeLabels: ModuleChromeLabels = {
+    ...defaultChromeLabels,
+    ...chromeLabelOverrides,
+    status: {
+      ...defaultChromeLabels.status,
+      ...chromeLabelOverrides?.status
+    }
+  };
 
   useEffect(() => {
     const queryTheme = new URLSearchParams(window.location.search).get("theme");
@@ -105,11 +149,11 @@ export function SafeClawModuleShell({
       data-module-route={activeHref}
     >
       <a className="safeclaw-skip-link" href="#safeclaw-module-main">
-        본문으로 건너뛰기
+        {chromeLabels.skipLink}
       </a>
-      <aside key={`module-rail-${theme}`} className="safeclaw-module-rail" aria-label="SafeClaw 제품 메뉴">
+      <aside key={`module-rail-${theme}`} className="safeclaw-module-rail" aria-label={chromeLabels.railAria}>
         <div className="safeclaw-module-rail-head">
-          <Link href="/" className="safeclaw-module-brand" aria-label="SafeClaw 홈">
+          <Link href="/" className="safeclaw-module-brand" aria-label={chromeLabels.homeAria}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/ClawMark.svg" alt="" width={28} height={28} />
             <strong>SafeClaw</strong>
@@ -121,10 +165,10 @@ export function SafeClawModuleShell({
             aria-expanded={mobileNavOpen}
             onClick={() => setMobileNavOpen((isOpen) => !isOpen)}
           >
-            메뉴
+            {chromeLabels.menu}
           </button>
         </div>
-        <p>현장 안전 문서팩</p>
+        <p>{chromeLabels.productSubtitle}</p>
         <nav
           id="safeclaw-module-navigation"
           className={`safeclaw-module-navigation${mobileNavOpen ? " open" : ""}`}
@@ -166,13 +210,13 @@ export function SafeClawModuleShell({
 
       <main id="safeclaw-module-main" className="safeclaw-module-main" tabIndex={-1}>
         <header key={`module-nav-${theme}`} className="safeclaw-module-nav">
-          <span><i /> SITE 기본 현장</span>
-          <span>공공 근거 <b>Law.go</b> · <b>KOSHA</b> · 기상청</span>
+          <span><i /> {chromeLabels.siteContext}</span>
+          <span>{chromeLabels.evidenceContext} <b>Law.go</b> · <b>KOSHA</b> · {chromeLabels.weatherContext}</span>
           <span className={`safeclaw-module-status ${status}`}>
             {status === "live" ? <i className="sc-blink sc-blink--good" aria-hidden="true" /> : null}
-            {statusLabel[status]}
+            {chromeLabels.status[status]}
           </span>
-          <div className="safeclaw-module-theme-toggle" role="group" aria-label="화면 테마">
+          <div className="safeclaw-module-theme-toggle" role="group" aria-label={chromeLabels.themeAria}>
             <button
               type="button"
               className={`safeclaw-module-chrome-button${theme === "day" ? " active" : ""}`}
@@ -199,6 +243,7 @@ export function SafeClawModuleShell({
           mappedTo={mappedTo}
           actions={actions}
           command={navModel.principalCommand}
+          chromeLabels={chromeLabels}
         />
 
         <div className="safeclaw-module-content">{children}</div>

@@ -95,8 +95,12 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       expect(bodyText).toContain("Kiểm tra gói tài liệu");
       expect(bodyText).toContain("Màn hình xác nhận chỉ dành cho công nhân được mời.");
       expect(bodyText).toContain("Đang tải thông tin phiên...");
+      expect(bodyText).toContain("Phạm vi công việc");
+      expect(bodyText).toContain("Chưa tải được chi tiết công việc được chia sẻ.");
       expect(bodyText).not.toContain("문서팩 검토");
       expect(bodyText).not.toContain("세션 정보를 조회하는 중입니다");
+      expect(bodyText).not.toContain("업무 범위");
+      expect(bodyText).not.toContain("공유 중인 작업 상세");
     } finally {
       await page.close();
     }
