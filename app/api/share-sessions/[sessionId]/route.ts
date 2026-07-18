@@ -90,7 +90,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   const parsed = await request.json().catch((): unknown => ({}));
   const body = isRecord(parsed) ? parsed : {};
   const bodyWorkerId = readString(body.workerId);
-  const workerId = bodyWorkerId || queryWorkerId || undefined;
+  const workerId = queryWorkerId || bodyWorkerId || undefined;
   const displayName = readString(body.displayName);
   const languageCode = sanitizeLanguageCode(body.languageCode);
   const manualWorkerSnapshot = isRecord(body.workerSnapshot) ? body.workerSnapshot : {};
