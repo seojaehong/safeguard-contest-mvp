@@ -21135,6 +21135,11 @@ body:has(.safeclaw-landing) :is(
     outline: 1px solid var(--workspace-rule);
     outline-offset: -1px;
   }
+
+  .command-center-shell.workspace-theme-day .linear-workspace-layout .workspace-step-page.workspace-input-page,
+  .command-center-shell.workspace-theme-night .linear-workspace-layout .workspace-step-page.workspace-input-page {
+    min-height: calc(100vh - 92px);
+  }
 }
 
 @media (max-width: 900px) {

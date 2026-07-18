@@ -1,0 +1,48 @@
+{
+  "title": "Workspace Input Height Parity Check",
+  "date": "2026-07-18",
+  "route": "/workspace",
+  "changedFiles": ["app/globals.css"],
+  "browserMeasurements": [
+    {
+      "viewport": "1440x900",
+      "horizontalOverflow": false,
+      "textareaValue": "",
+      "textareaPlaceholder": "",
+      "defaultJobPhraseVisible": false,
+      "exampleButtonVisible": true,
+      "sideBottom": 925.05,
+      "inputBottom": 925.05,
+      "mainBottom": 925.05,
+      "sideInputBottomDelta": 0,
+      "mainInputBottomDelta": 0
+    },
+    {
+      "viewport": "390x844",
+      "horizontalOverflow": false,
+      "textareaValue": "",
+      "textareaPlaceholder": "",
+      "defaultJobPhraseVisible": false,
+      "exampleButtonVisible": true,
+      "sideBottom": 268.05,
+      "inputBottom": 922.84,
+      "mainBottom": 922.84,
+      "sideInputBottomDelta": "stacked-mobile",
+      "mainInputBottomDelta": 0
+    }
+  ],
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests\\workspace-layout-regression.test.ts tests\\module-shell-design-regression.test.ts --maxWorkers=1 --fileParallelism=false",
+      "filesPassed": 2,
+      "testsPassed": 30,
+      "testsSkipped": 1,
+      "durationSeconds": 217.02,
+      "result": "PASS"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    }
+  }
+}
