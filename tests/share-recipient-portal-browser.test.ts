@@ -83,6 +83,25 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
     await harness?.stop();
   }, 60_000);
 
+  it("localizes the portal chrome from the query language before a session is loaded", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    try {
+      const response = await page.goto(`${harness.baseUrl}/share/not-a-session?lang=vi`, { waitUntil: "networkidle" });
+      if (!response || response.status() >= 400) {
+        throw new Error(`share page returned ${response?.status() ?? "no response"}`);
+      }
+      const bodyText = await page.locator("body").innerText();
+      expect(bodyText).toContain("Kiểm tra gói tài liệu");
+      expect(bodyText).toContain("Màn hình xác nhận chỉ dành cho công nhân được mời.");
+      expect(bodyText).toContain("Đang tải thông tin phiên...");
+      expect(bodyText).not.toContain("문서팩 검토");
+      expect(bodyText).not.toContain("세션 정보를 조회하는 중입니다");
+    } finally {
+      await page.close();
+    }
+  }, 45_000);
+
   it("renders an invited worker confirmation page without mobile overflow", async () => {
     if (!browser || !harness) throw new Error("Browser harness was not started");
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });

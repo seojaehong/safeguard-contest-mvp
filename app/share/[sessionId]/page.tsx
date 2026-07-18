@@ -258,6 +258,19 @@ function resolveRecipientPortalCopy(languageCode: string): RecipientPortalCopy {
   return RECIPIENT_PORTAL_COPY.ko;
 }
 
+function resolveSupportedLanguageCode(languageCode: string | null): "ko" | "vi" | "en" {
+  const normalized = languageCode?.trim().toLowerCase();
+  if (normalized === "vi") return "vi";
+  if (normalized === "en") return "en";
+  return "ko";
+}
+
+function initialRecipientPortalLanguageCode(): "ko" | "vi" | "en" {
+  if (typeof window === "undefined") return "ko";
+  const params = new URLSearchParams(window.location.search);
+  return resolveSupportedLanguageCode(params.get("lang") || params.get("language"));
+}
+
 function formatShareStatus(status: ShareSessionPayload["status"], copy: RecipientPortalCopy): string {
   if (status === "active") return copy.statusActive;
   if (status === "revoked") return copy.statusRevoked;
@@ -282,7 +295,7 @@ export default function ShareRecipientPage() {
   const [queryWorkerId, setQueryWorkerId] = useState<string | null>(null);
   const [workerId, setWorkerId] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [languageCode, setLanguageCode] = useState("ko");
+  const [languageCode, setLanguageCode] = useState<string>(initialRecipientPortalLanguageCode);
   const [confirmationMessage, setConfirmationMessage] = useState("");
   const [isIdempotent, setIsIdempotent] = useState(false);
   const [confirmationToken, setConfirmationToken] = useState<string | null>(null);
@@ -345,8 +358,11 @@ export default function ShareRecipientPage() {
   }, [sessionPayload]);
 
   useEffect(() => {
-    const nextWorkerId = new URLSearchParams(window.location.search).get("workerId") || "";
+    const params = new URLSearchParams(window.location.search);
+    const nextWorkerId = params.get("workerId") || "";
+    const requestedLanguage = resolveSupportedLanguageCode(params.get("lang") || params.get("language"));
     setQueryWorkerId(nextWorkerId);
+    setLanguageCode((current) => current === "ko" ? requestedLanguage : current);
     if (nextWorkerId) {
       setWorkerId((current) => current || nextWorkerId);
     }
