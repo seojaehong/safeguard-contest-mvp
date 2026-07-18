@@ -2,16 +2,16 @@
 
 ## Summary
 
-This pass integrates the reviewed KOSHA wave 2 evidence correction onto current `master` without changing product code, DB schema, or Supabase data.
+This pass reconciles the reviewed KOSHA wave 2 evidence on current `master` without changing product code, DB schema, or Supabase data.
 
-The important correction is evidence honesty: the exact trust registry product path is treated as passing, while the historical 34-file broad KOSHA/SIF/ontology run remains recorded as RED because `tests/kosha-guide-corpus-audit.test.ts` had 3 unresolved failures. The broad run is not reclassified as a pass.
+The important correction is evidence honesty: the older branch-level 34-file broad KOSHA/SIF/ontology RED is preserved only as historical context in the captured log history, while current `master` evidence remains authoritative and green.
 
 ## Integrated Commits
 
 - `41355b47` `docs: correct KOSHA wave2 focused evidence`
 - `e78e6eaf` `chore: normalize KOSHA wave2 evidence log`
 
-The intermediate upstream documentation commit was empty after conflict resolution because the final reviewed report content was applied in `41355b47`.
+These commits temporarily replayed older evidence wording. The follow-up correction restores the stronger current-master PASS evidence and keeps the older RED narrative from overriding current state.
 
 ## Changed Files
 
@@ -28,6 +28,9 @@ The intermediate upstream documentation commit was empty after conflict resoluti
 - Focused Vitest on current master:
   - Command: `npm.cmd test -- tests/exact-kosha-applicability-policy.test.ts tests/exact-trusted-kosha-grounding.test.ts tests/exact-trusted-kosha-registry-wave2.test.ts tests/kosha-grounding-fail-closed.test.ts --maxWorkers=1 --fileParallelism=false`
   - Result: 4 files / 49 tests PASS
+- KOSHA guide corpus audit on current master:
+  - Command: `npm.cmd test -- tests/kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false`
+  - Result: 1 file / 110 tests PASS
 - Python acquisition tests:
   - Command: `python -m unittest scripts.tests.test_acquire_exact_kosha_body`
   - Result: 19 tests PASS
@@ -37,4 +40,4 @@ The intermediate upstream documentation commit was empty after conflict resoluti
 
 ## Remaining Boundary
 
-This does not claim the historical broad KOSHA/SIF/ontology suite is green. The reviewed evidence package now explicitly records it as unresolved RED, while preserving the exact-trust product path and current focused gates as passing.
+Current master already contains a stronger KOSHA refresh artifact that records the 34-file broad KOSHA/SIF/ontology suite as PASS: 31 files passed / 3 skipped, 395 tests passed / 4 skipped. Future KOSHA work should continue from current master evidence, not by replaying older branch evidence.

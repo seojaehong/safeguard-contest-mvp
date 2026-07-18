@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-kosha-wave2-master-evidence-integration/v1",
   "generatedAt": "2026-07-18T09:00:00+09:00",
-  "status": "evidence_integrated_with_broad_suite_red_preserved",
+  "status": "current_master_kosha_evidence_green_restored",
   "databaseMutationPerformed": false,
   "schemaMutationPerformed": false,
   "integratedCommits": [
@@ -21,6 +21,11 @@
       "tests": 49,
       "status": "pass"
     },
+    "koshaGuideCorpusAudit": {
+      "files": 1,
+      "tests": 110,
+      "status": "pass"
+    },
     "pythonAcquisition": {
       "tests": 19,
       "status": "pass"
@@ -28,8 +33,8 @@
     "strictTypecheck": "pass"
   },
   "preservedBoundary": {
-    "historicalBroadSuite": "unresolved_red",
-    "failedFile": "tests/kosha-guide-corpus-audit.test.ts",
-    "failedTests": 3
+    "historicalBranchBroadSuite": "older_red_not_authoritative_for_current_master",
+    "currentMasterBroadSuite": "pass",
+    "currentMasterBroadSuiteEvidence": "evaluation/kosha-current-head-refresh-2026-07-18/report.md"
   }
 }
