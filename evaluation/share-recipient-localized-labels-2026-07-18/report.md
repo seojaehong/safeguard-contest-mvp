@@ -20,6 +20,8 @@ npm.cmd test -- tests\share-recipient-portal-browser.test.ts tests\workpack-shar
 npm.cmd run typecheck
 npm.cmd run build
 npm.cmd test -- tests\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false
+npm.cmd run audit:frontend-consistency
+npm.cmd test -- tests\frontend-route-coverage.test.ts --maxWorkers=1 --fileParallelism=false
 ```
 
 ## Results
@@ -28,6 +30,8 @@ npm.cmd test -- tests\share-recipient-portal-browser.test.ts --maxWorkers=1 --fi
 - TypeScript strict typecheck: PASS.
 - Production build: PASS, 28/28 static pages generated, `/share/[sessionId]` dynamic route present.
 - Production browser contract: 1 file, 2 tests PASS.
+- Frontend static consistency audit: PASS, 33 pages, 23 product components, 0 coverage issues, 0 violations.
+- Frontend route coverage: 1 file, 39 tests PASS.
 
 ## Locked Regression
 
