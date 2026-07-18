@@ -1,14 +1,16 @@
 {
-  "generatedAt": "2026-07-18T03:36:00+09:00",
-  "authoritativeHead": "966a129400f8c76e1c273349aa19ad132c7be9cc",
+  "generatedAt": "2026-07-18T23:52:00+09:00",
+  "authoritativeHead": "2f121d3488908ca450398bfbb70f5f97827023fa",
   "status": "in_progress",
   "provenGates": [
     "full_serial_suite",
     "frontend_consistency",
     "production_build",
+    "live_deployment_commit_mapping",
     "public_live_smoke",
     "live_provider_readiness",
     "exact_kosha_registry",
+    "live_kosha_local_corpus_readiness",
     "ontology_ui",
     "hermes_openclaw_boundary",
     "tenant_rls_app_boundary",
@@ -18,11 +20,9 @@
     "manager_demo_path"
   ],
   "remainingCompletionItems": [
-    "live_deployment_commit_mapping",
     "live_supabase_catalog_rls_proof",
     "phase_b_approval_and_migrations",
     "real_external_provider_dispatch_and_vision_execution",
-    "live_kosha_local_corpus_readiness",
     "llm_wiki_organization_knowledge_promotion"
   ],
   "latestVerification": {
@@ -40,11 +40,31 @@
       "status": "passed",
       "staticPagesGenerated": 28
     },
+    "ci": {
+      "runId": 29648455422,
+      "headSha": "2f121d3488908ca450398bfbb70f5f97827023fa",
+      "status": "completed",
+      "conclusion": "success",
+      "checks": [
+        "typecheck",
+        "full_serial_test",
+        "production_build"
+      ]
+    },
+    "liveDeploymentMapping": {
+      "url": "https://www.safeclaw.kr/api/build-info",
+      "statusCode": 200,
+      "configured": true,
+      "commitSha": "2f121d3488908ca450398bfbb70f5f97827023fa",
+      "branch": "master",
+      "environment": "production",
+      "source": "vercel-system-env"
+    },
     "liveProviderReadiness": {
       "artifact": "evaluation/live-provider-readiness-2026-07-18/report.json",
       "photoVision": "ready",
       "dispatch": "preview_only",
-      "koshaLocalCorpus": "unconfigured",
+      "koshaLocalCorpus": "ready",
       "sifEmbedding": "approval_held"
     }
   },

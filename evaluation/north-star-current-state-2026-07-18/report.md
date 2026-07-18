@@ -1,7 +1,7 @@
 # SafeClaw North Star Current State
 
 Generated at: 2026-07-18 KST  
-Authoritative HEAD: `966a129400f8c76e1c273349aa19ad132c7be9cc`
+Authoritative HEAD: `2f121d3488908ca450398bfbb70f5f97827023fa`
 
 ## Purpose
 
@@ -20,9 +20,10 @@ This is not a completion declaration. It records what current evidence proves an
 | --- | --- | --- |
 | Full serial suite | `evaluation/2026-07-18-authoritative-full-test-current-rerun.log` | 188 files passed / 9 skipped; 2308 tests passed / 15 skipped; exit code 0. |
 | Frontend consistency | `evaluation/frontend-audit-runner-port-v2-2026-07-11/` | Static audit and browser audit were refreshed; 111 screenshot rows completed with 0 findings. |
-| Production build | `npm.cmd run build` on current gate | Build passed; 28/28 static pages generated; `/share/[sessionId]` remains in the route map. |
+| Current CI and production build | GitHub Actions run `29648455422` | `typecheck`, full `npm.cmd test -- --maxWorkers=1 --fileParallelism=false`, and `npm.cmd run build` all passed in CI. Local build also passed and generated 28/28 static pages with `/api/build-info` in the route map. |
+| Live deployment commit mapping | `GET https://www.safeclaw.kr/api/build-info` | Live production returns `commitSha=2f121d3488908ca450398bfbb70f5f97827023fa`, `branch=master`, `environment=production`; Vercel status for the same SHA is success. |
 | Public live smoke | `evaluation/live-public-smoke-2026-07-18/report.md` and `report.json` | Public routes responded and showed no horizontal overflow or console/page errors in the checked desktop/mobile smoke. |
-| Exact KOSHA registry | `evaluation/2026-07-17-authoritative-release-gate.md` | D-C-13, D-C-7, and B-E-10 exact registry lineage is present on current master; 5 files / 97 tests passed in the latest recorded focused gate. |
+| Exact KOSHA registry | `evaluation/kosha-trust-registry-wave2-2026-07-16/report.md`, `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md` | D-C-13 and D-C-7 are exact direct evidence pins; KOSHA local corpus is live-ready with the compressed verified subset. Live `/api/safety-reference/status` returns HTTP 200, `searchReady=true`, `localCorpus.status=ready`, `itemCount=234`, `chunkCount=7127`. |
 | Live provider readiness | `evaluation/live-provider-readiness-2026-07-18/report.md`, `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md` | OpenAI vision is ready on live, dispatch is preview-only, KOSHA local corpus is now live-ready with the compressed verified subset, and SIF embedding remains approval-held. |
 | Ontology UI | `evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json` | Default `/ontology` no longer exposes the 166-node hairball; bounded neighborhood UI passes overflow, overlap, contrast, and mobile fullscreen gates in recorded browser evidence. |
 | Hermes/OpenClaw boundary | `docs/phase-b-organization-knowledge-and-engine-plan.md` and engine tests | Hermes/OpenClaw remain behind `EngineAdapter`; SafeClaw keeps tenant, MCP, evidence, approval, and effect authority. |
@@ -36,51 +37,38 @@ This is not a completion declaration. It records what current evidence proves an
 
 These are not failures in the current patch. They are the remaining items that prevent marking the full North Star objective complete.
 
-1. Live deployment commit mapping is not proven.
-   - Public smoke passed, but Vercel inspection requires credentials.
-   - Evidence needed: deployment commit or Vercel deployment metadata proving live equals the intended HEAD.
-
-2. Live Supabase catalog RLS proof remains approval-gated.
+1. Live Supabase catalog RLS proof remains approval-gated.
    - Current evidence covers app-layer tenant checks and non-mutating readiness.
    - Evidence still needed: live `pg_catalog` policy expressions, `FORCE RLS`, grants, authenticated tenant negative tests, and Storage path isolation.
 
-3. Phase B remains a design contract, not an authorized migration or production cutover.
+2. Phase B remains a design contract, not an authorized migration or production cutover.
    - Organization ontology, usage ledger, service-auth traffic, Hermes worker pool, and billing schema are documented but not authorized for implementation.
    - Evidence needed: explicit Phase B entry approval and per-slice migration approval.
 
-4. Real external provider dispatch and production OpenAI vision execution need environment-specific proof.
+3. Real external provider dispatch and production OpenAI vision execution need environment-specific proof.
    - Tests prove contracts and fail-closed behavior.
    - Live readiness now proves OpenAI vision is configured, but dispatch remains preview-only.
    - Evidence still needed: provider-specific dry run without leaking secrets or sending unintended real messages.
 
-5. KOSHA local corpus is live-production ready.
-   - The prior live `/api/safety-reference/status` returned 503 because `localCorpus.status=unconfigured`; after deployment it returns HTTP 200.
-   - The 2026-07-15 full KOSHA body recovery output has now been repackaged into a runtime `safeclaw-kosha-verified-subset/v1` corpus with trusted `official_metadata_sha256` pinned.
-   - Live and local production `/api/safety-reference/status` return HTTP 200 with `searchReady=true`, `localCorpus.status=ready`, `itemCount=234`, and `chunkCount=7127`.
-   - Current evidence report: `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md`.
-
-6. Long-term LLM Wiki and organization knowledge promotion are still human-in-the-loop.
+4. Long-term LLM Wiki and organization knowledge promotion are still human-in-the-loop.
    - Current plan preserves public/organization/site memory boundaries.
    - Evidence still needed: approved migration and review-queue implementation beyond the current Phase A/launch-safe scope.
 
 ## Recommended Next Work Order
 
-1. Deployment mapping proof:
-   - Use Vercel token or GitHub deployment metadata to map live `www.safeclaw.kr` to the intended commit.
+1. Share demo verification:
+   - Smoke `/workspace` share flow and `/share/[sessionId]` recipient flow on live or preview deployment with the new `/api/build-info` mapping captured beside it.
 
-2. Share demo verification:
-   - After deploy mapping, smoke `/workspace` share flow and `/share/[sessionId]` recipient flow on live or preview deployment.
-
-3. Provider readiness proof:
+2. Provider readiness proof:
    - Convert dispatch from preview-only only after persistent idempotency and provider configuration are proven.
 
-4. KOSHA local corpus readiness:
+3. KOSHA exact reference expansion:
    - Keep live `/api/safety-reference/status` on the compressed verified subset bundle and do not present the unverified full body recovery corpus as direct runtime evidence.
 
-5. Supabase RLS read-only live audit:
+4. Supabase RLS read-only live audit:
    - Run a read-only catalog audit and tenant A/B negative plan only after confirming safe credentials and no data mutation.
 
-6. Phase B entry packet:
+5. Phase B entry packet:
    - Present the already documented Hermes/organization-knowledge plan as the next approval gate, rather than starting migrations implicitly.
 
 ## Working-Tree Note
