@@ -40,6 +40,12 @@ describe("safety-reference status bundled KOSHA corpus", () => {
         chunkCount?: number;
         failureCount?: number;
       };
+      exactTrustRegistry: {
+        status: string;
+        count: number;
+        stableDocumentKeys: string[];
+        versions: string[];
+      };
     };
 
     expect(response.status).toBe(200);
@@ -52,6 +58,12 @@ describe("safety-reference status bundled KOSHA corpus", () => {
       itemCount: 234,
       chunkCount: 7127,
       failureCount: 0
+    });
+    expect(body.exactTrustRegistry).toMatchObject({
+      status: "ready",
+      count: 3,
+      stableDocumentKeys: ["D-C-13", "D-C-7", "B-E-10"],
+      versions: ["D-C-13-2026", "D-C-7-2026", "B-E-10-2026"]
     });
   }, 20_000);
 });

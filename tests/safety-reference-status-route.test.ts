@@ -121,7 +121,19 @@ describe("safety-reference status route", () => {
         snapshotId: "snapshot-id",
         inventoryCount: 1_040,
         failureCount: 0
+      },
+      exactTrustRegistry: {
+        status: "ready",
+        count: 3,
+        stableDocumentKeys: ["D-C-13", "D-C-7", "B-E-10"],
+        versions: ["D-C-13-2026", "D-C-7-2026", "B-E-10-2026"]
       }
+    });
+    expect(payload.exactTrustRegistry.items).toHaveLength(3);
+    expect(payload.exactTrustRegistry.items[2]).toMatchObject({
+      stableDocumentKey: "B-E-10",
+      version: "B-E-10-2026",
+      officialFileId: "CTC2026012913263450093332"
     });
     expect(JSON.stringify(payload)).not.toContain("C:/private/kosha-corpus");
   });

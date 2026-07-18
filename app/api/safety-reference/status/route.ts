@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { loadKoshaGuideCorpus } from "@/lib/kosha-guide-corpus";
+import { getProductionExactKoshaTrustPins } from "@/lib/production-kosha-trust";
 import { getSafetyReferenceStats } from "@/lib/safety-reference-catalog";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const exactTrustPins = getProductionExactKoshaTrustPins();
   const [catalog, localCorpus] = await Promise.all([
     getSafetyReferenceStats(),
     loadKoshaGuideCorpus()
@@ -37,6 +39,24 @@ export async function GET() {
     status,
     searchReady,
     localCorpus: localCorpusStatus,
+    exactTrustRegistry: {
+      status: exactTrustPins.length ? "ready" : "blocked",
+      count: exactTrustPins.length,
+      stableDocumentKeys: exactTrustPins.map((pin) => pin.stableDocumentKey),
+      versions: exactTrustPins.map((pin) => pin.version),
+      items: exactTrustPins.map((pin) => ({
+        itemId: pin.itemId,
+        stableDocumentKey: pin.stableDocumentKey,
+        version: pin.version,
+        title: pin.title,
+        itemType: pin.itemType,
+        publishedAt: pin.publishedAt,
+        officialFileId: pin.officialFileId,
+        bodySha256: pin.bodySha256,
+        pdfSha256: pin.pdfSha256,
+        provenanceSha256: pin.provenanceSha256
+      }))
+    },
     message: `${catalog.message} ${localMessage}`
   };
 
