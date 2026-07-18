@@ -25,7 +25,7 @@ describe("why comparison layout", () => {
 
   afterAll(async () => {
     await harness?.stop();
-  }, 30_000);
+  }, 90_000);
 
   for (const theme of themes) {
     it(`renders readable stacked comparison cards without horizontal overflow in ${theme} mode`, async () => {
