@@ -914,6 +914,8 @@ ul {
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  min-height: var(--control-height);
+  margin-block: -8px;
   padding-right: 12px;
 }
 
@@ -3618,6 +3620,7 @@ ul {
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  min-height: var(--control-height);
   padding: 12px;
   border: 1px solid #e3e7ee;
   border-radius: 4px;
@@ -3633,7 +3636,10 @@ ul {
   background: #e8f1ed;
 }
 .ai-mode-option input[type="radio"] {
-  margin-top: 4px;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  flex: 0 0 auto;
   accent-color: #1f4d43;
 }
 .ai-mode-option strong {
@@ -13095,6 +13101,8 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .composer-attach-button input {
   position: absolute;
   inset: 0;
+  min-width: var(--control-height);
+  min-height: var(--control-height);
   opacity: 0;
   cursor: pointer;
 }

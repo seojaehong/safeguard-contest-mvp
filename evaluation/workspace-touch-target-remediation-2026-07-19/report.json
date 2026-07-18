@@ -1,0 +1,52 @@
+{
+  "title": "Workspace Touch Target Remediation",
+  "date": "2026-07-19",
+  "scope": [
+    "workspace brand link touch target",
+    "workspace photo attachment input overlay",
+    "workspace AI mode controls",
+    "launch surface browser regression"
+  ],
+  "changedFiles": [
+    "app/globals.css",
+    "tests/workspace-input-css-contract.test.ts"
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-input-css-contract.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 5
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-input-css-contract.test.ts tests\\workspace-layout-regression.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 2,
+      "testsPassed": 31,
+      "testsSkipped": 1
+    },
+    {
+      "command": "npm.cmd test -- tests\\ontology-ui-browser.test.ts tests\\why-mobile-layout.test.ts tests\\knowledge-mobile-ia-browser.test.ts tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "filesPassed": 3,
+      "filesSkipped": 1,
+      "testsPassed": 12,
+      "testsSkipped": 1
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "PASS",
+      "staticPages": "28/28"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS",
+      "notes": "line-ending warnings only"
+    }
+  ],
+  "liveBaselineArtifact": "evaluation/north-star-live-ui-surface-2026-07-19/report.md"
+}

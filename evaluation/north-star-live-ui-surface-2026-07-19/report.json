@@ -1,0 +1,848 @@
+{
+  "generatedAt": "2026-07-18T21:15:53.853Z",
+  "baseUrl": "https://www.safeclaw.kr",
+  "commitSha": "abeb8e6197d18138d7b1c177bef38cd576d2a4de",
+  "verdict": "pass",
+  "rows": [
+    {
+      "route": "/workspace",
+      "viewport": "desktop",
+      "url": "https://www.safeclaw.kr/workspace",
+      "status": 200,
+      "finalUrl": "https://www.safeclaw.kr/workspace",
+      "errors": [],
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\north-star-live-ui-surface-2026-07-19\\desktop-workspace.png",
+      "title": "작업공간 | SafeClaw",
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyHeight": 989,
+      "outsideCount": 0,
+      "outsideSamples": [],
+      "under44Count": 6,
+      "under44Samples": [
+        {
+          "tag": "button",
+          "text": "Day",
+          "width": 50,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "width": 62,
+          "height": 36
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "width": 74,
+          "height": 42
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "width": 13,
+          "height": 13
+        }
+      ],
+      "termCounts": {
+        "DB 하네스": 0,
+        "품질 계약": 0,
+        "Obsidian": 0,
+        "JSONL": 0,
+        "raw log": 0,
+        "API path": 0,
+        "published_ontology": 0,
+        "human_review": 0,
+        "SafeClaw system of record": 0
+      },
+      "yellowContrast": [
+        {
+          "text": "안전 문서 생성",
+          "ratio": 10.8,
+          "fg": "rgb(23, 25, 29)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "SPAN",
+          "ratio": 11.11,
+          "fg": "rgb(20, 22, 26)",
+          "bg": "rgb(245, 197, 24)"
+        }
+      ],
+      "ontologyGraphCandidateCount": 0,
+      "ontologyOverlapPairs": 0,
+      "h1h2": [
+        "오늘 작업은 무엇인가요?"
+      ],
+      "overflow": false
+    },
+    {
+      "route": "/why",
+      "viewport": "desktop",
+      "url": "https://www.safeclaw.kr/why",
+      "status": 200,
+      "finalUrl": "https://www.safeclaw.kr/why",
+      "errors": [],
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\north-star-live-ui-surface-2026-07-19\\desktop-why.png",
+      "title": "왜 SafeClaw인가 | SafeClaw",
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyHeight": 1142,
+      "outsideCount": 0,
+      "outsideSamples": [],
+      "under44Count": 5,
+      "under44Samples": [
+        {
+          "tag": "button",
+          "text": "메뉴",
+          "width": 42,
+          "height": 36
+        },
+        {
+          "tag": "a",
+          "text": "01대시보드",
+          "width": 203,
+          "height": 40
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "width": 48,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "width": 48,
+          "height": 36
+        },
+        {
+          "tag": "a",
+          "text": "작업공간 열기",
+          "width": 96,
+          "height": 36
+        }
+      ],
+      "termCounts": {
+        "DB 하네스": 0,
+        "품질 계약": 0,
+        "Obsidian": 0,
+        "JSONL": 0,
+        "raw log": 0,
+        "API path": 0,
+        "published_ontology": 0,
+        "human_review": 0,
+        "SafeClaw system of record": 0
+      },
+      "yellowContrast": [
+        {
+          "text": "작업공간 열기",
+          "ratio": 10.8,
+          "fg": "rgb(23, 25, 29)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "기준",
+          "ratio": 12.14,
+          "fg": "rgb(10, 10, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "SafeClaw",
+          "ratio": 12.14,
+          "fg": "rgb(10, 10, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "안전관리 SaaS",
+          "ratio": 12.14,
+          "fg": "rgb(10, 10, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "한글·엑셀 양식",
+          "ratio": 12.14,
+          "fg": "rgb(10, 10, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "일반 AI",
+          "ratio": 12.14,
+          "fg": "rgb(10, 10, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "작업공간 열기",
+          "ratio": 12.22,
+          "fg": "rgb(8, 9, 11)",
+          "bg": "rgb(245, 197, 24)"
+        }
+      ],
+      "ontologyGraphCandidateCount": 0,
+      "ontologyOverlapPairs": 0,
+      "h1h2": [
+        "주요 메뉴",
+        "작업공간 관련",
+        "왜 SafeClaw인가.",
+        "기상청",
+        "Law.go",
+        "Work24",
+        "KOSHA",
+        "대안별 차이"
+      ],
+      "overflow": false
+    },
+    {
+      "route": "/ontology",
+      "viewport": "desktop",
+      "url": "https://www.safeclaw.kr/ontology",
+      "status": 200,
+      "finalUrl": "https://www.safeclaw.kr/ontology",
+      "errors": [],
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\north-star-live-ui-surface-2026-07-19\\desktop-ontology.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyHeight": 2383,
+      "outsideCount": 0,
+      "outsideSamples": [],
+      "under44Count": 8,
+      "under44Samples": [
+        {
+          "tag": "a",
+          "text": "SafeClaw",
+          "width": 94,
+          "height": 24
+        },
+        {
+          "tag": "button",
+          "text": "메뉴",
+          "width": 42,
+          "height": 36
+        },
+        {
+          "tag": "a",
+          "text": "01지식 DB",
+          "width": 203,
+          "height": 40
+        },
+        {
+          "tag": "a",
+          "text": "02온톨로지",
+          "width": 203,
+          "height": 40
+        },
+        {
+          "tag": "a",
+          "text": "03API 연결",
+          "width": 203,
+          "height": 40
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "width": 48,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "width": 48,
+          "height": 36
+        },
+        {
+          "tag": "a",
+          "text": "작업공간 열기",
+          "width": 96,
+          "height": 36
+        }
+      ],
+      "termCounts": {
+        "DB 하네스": 0,
+        "품질 계약": 0,
+        "Obsidian": 0,
+        "JSONL": 0,
+        "raw log": 0,
+        "API path": 0,
+        "published_ontology": 0,
+        "human_review": 0,
+        "SafeClaw system of record": 0
+      },
+      "yellowContrast": [
+        {
+          "text": "작업공간 열기",
+          "ratio": 12.22,
+          "fg": "rgb(8, 9, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "직접 관계",
+          "ratio": 12.57,
+          "fg": "rgb(20, 23, 26)",
+          "bg": "rgb(255, 212, 0)"
+        },
+        {
+          "text": "그래프 전체 화면",
+          "ratio": 12.57,
+          "fg": "rgb(20, 23, 26)",
+          "bg": "rgb(255, 212, 0)"
+        }
+      ],
+      "ontologyGraphCandidateCount": 0,
+      "ontologyOverlapPairs": 0,
+      "h1h2": [
+        "주요 메뉴",
+        "근거 관련",
+        "작업과 근거의 연결.",
+        "선택 항목 중심 안전지식",
+        "검증된 안전지식 찾기"
+      ],
+      "overflow": false
+    },
+    {
+      "route": "/knowledge",
+      "viewport": "desktop",
+      "url": "https://www.safeclaw.kr/knowledge",
+      "status": 200,
+      "finalUrl": "https://www.safeclaw.kr/knowledge",
+      "errors": [],
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\north-star-live-ui-surface-2026-07-19\\desktop-knowledge.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyHeight": 5325,
+      "outsideCount": 0,
+      "outsideSamples": [],
+      "under44Count": 8,
+      "under44Samples": [
+        {
+          "tag": "a",
+          "text": "SafeClaw",
+          "width": 94,
+          "height": 24
+        },
+        {
+          "tag": "button",
+          "text": "메뉴",
+          "width": 42,
+          "height": 36
+        },
+        {
+          "tag": "a",
+          "text": "01지식 DB",
+          "width": 203,
+          "height": 40
+        },
+        {
+          "tag": "a",
+          "text": "02온톨로지",
+          "width": 203,
+          "height": 40
+        },
+        {
+          "tag": "a",
+          "text": "03API 연결",
+          "width": 203,
+          "height": 40
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "width": 48,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "width": 48,
+          "height": 36
+        },
+        {
+          "tag": "a",
+          "text": "근거 검색",
+          "width": 74,
+          "height": 36
+        }
+      ],
+      "termCounts": {
+        "DB 하네스": 0,
+        "품질 계약": 0,
+        "Obsidian": 0,
+        "JSONL": 0,
+        "raw log": 0,
+        "API path": 0,
+        "published_ontology": 0,
+        "human_review": 0,
+        "SafeClaw system of record": 0
+      },
+      "yellowContrast": [
+        {
+          "text": "근거 검색",
+          "ratio": 12.22,
+          "fg": "rgb(8, 9, 11)",
+          "bg": "rgb(245, 197, 24)"
+        }
+      ],
+      "ontologyGraphCandidateCount": 0,
+      "ontologyOverlapPairs": 0,
+      "h1h2": [
+        "주요 메뉴",
+        "근거 관련",
+        "지식 DB.",
+        "8개 위험요인 · 4개 서식",
+        "원본 이벤트 · 검토 대기 · 미게시",
+        "9,920개 항목 · 1,063개 출처",
+        "지식 검토 흐름 · 사람 확인 필수",
+        "문서 반영용 KOSHA 기술 지원 자료"
+      ],
+      "overflow": false
+    },
+    {
+      "route": "/share/not-a-session?lang=vi",
+      "viewport": "desktop",
+      "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+      "status": 200,
+      "finalUrl": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+      "errors": [],
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\north-star-live-ui-surface-2026-07-19\\desktop-share-not-a-session-lang-vi.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyHeight": 900,
+      "outsideCount": 0,
+      "outsideSamples": [],
+      "under44Count": 6,
+      "under44Samples": [
+        {
+          "tag": "a",
+          "text": "SafeClaw",
+          "width": 94,
+          "height": 24
+        },
+        {
+          "tag": "button",
+          "text": "Menu",
+          "width": 54,
+          "height": 36
+        },
+        {
+          "tag": "a",
+          "text": "01대시보드",
+          "width": 203,
+          "height": 40
+        },
+        {
+          "tag": "button",
+          "text": "Sáng",
+          "width": 46,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "Tối",
+          "width": 46,
+          "height": 36
+        },
+        {
+          "tag": "a",
+          "text": "Về không gian làm việc",
+          "width": 161,
+          "height": 36
+        }
+      ],
+      "termCounts": {
+        "DB 하네스": 0,
+        "품질 계약": 0,
+        "Obsidian": 0,
+        "JSONL": 0,
+        "raw log": 0,
+        "API path": 0,
+        "published_ontology": 0,
+        "human_review": 0,
+        "SafeClaw system of record": 0
+      },
+      "yellowContrast": [
+        {
+          "text": "Về không gian làm việc",
+          "ratio": 12.22,
+          "fg": "rgb(8, 9, 11)",
+          "bg": "rgb(245, 197, 24)"
+        }
+      ],
+      "ontologyGraphCandidateCount": 0,
+      "ontologyOverlapPairs": 0,
+      "h1h2": [
+        "주요 메뉴",
+        "작업공간 관련",
+        "Màn hình xác nhận tài liệu",
+        "Kiểm tra gói tài liệu"
+      ],
+      "overflow": false
+    },
+    {
+      "route": "/workspace",
+      "viewport": "mobile",
+      "url": "https://www.safeclaw.kr/workspace",
+      "status": 200,
+      "finalUrl": "https://www.safeclaw.kr/workspace",
+      "errors": [],
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\north-star-live-ui-surface-2026-07-19\\mobile-workspace.png",
+      "title": "작업공간 | SafeClaw",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "bodyHeight": 988,
+      "outsideCount": 0,
+      "outsideSamples": [],
+      "under44Count": 5,
+      "under44Samples": [
+        {
+          "tag": "a",
+          "text": "SafeClaw현장 안전 문서팩",
+          "width": 344,
+          "height": 28
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "width": 312,
+          "height": 42
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "width": 13,
+          "height": 13
+        }
+      ],
+      "termCounts": {
+        "DB 하네스": 0,
+        "품질 계약": 0,
+        "Obsidian": 0,
+        "JSONL": 0,
+        "raw log": 0,
+        "API path": 0,
+        "published_ontology": 0,
+        "human_review": 0,
+        "SafeClaw system of record": 0
+      },
+      "yellowContrast": [
+        {
+          "text": "안전 문서 생성",
+          "ratio": 10.8,
+          "fg": "rgb(23, 25, 29)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "SPAN",
+          "ratio": 11.11,
+          "fg": "rgb(20, 22, 26)",
+          "bg": "rgb(245, 197, 24)"
+        }
+      ],
+      "ontologyGraphCandidateCount": 0,
+      "ontologyOverlapPairs": 0,
+      "h1h2": [
+        "오늘 작업은 무엇인가요?"
+      ],
+      "overflow": false
+    },
+    {
+      "route": "/why",
+      "viewport": "mobile",
+      "url": "https://www.safeclaw.kr/why",
+      "status": 200,
+      "finalUrl": "https://www.safeclaw.kr/why",
+      "errors": [],
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\north-star-live-ui-surface-2026-07-19\\mobile-why.png",
+      "title": "왜 SafeClaw인가 | SafeClaw",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "bodyHeight": 2727,
+      "outsideCount": 0,
+      "outsideSamples": [],
+      "under44Count": 0,
+      "under44Samples": [],
+      "termCounts": {
+        "DB 하네스": 0,
+        "품질 계약": 0,
+        "Obsidian": 0,
+        "JSONL": 0,
+        "raw log": 0,
+        "API path": 0,
+        "published_ontology": 0,
+        "human_review": 0,
+        "SafeClaw system of record": 0
+      },
+      "yellowContrast": [
+        {
+          "text": "작업공간 열기",
+          "ratio": 10.8,
+          "fg": "rgb(23, 25, 29)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "기준",
+          "ratio": 12.14,
+          "fg": "rgb(10, 10, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "SafeClaw",
+          "ratio": 12.14,
+          "fg": "rgb(10, 10, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "안전관리 SaaS",
+          "ratio": 12.14,
+          "fg": "rgb(10, 10, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "한글·엑셀 양식",
+          "ratio": 12.14,
+          "fg": "rgb(10, 10, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "일반 AI",
+          "ratio": 12.14,
+          "fg": "rgb(10, 10, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "작업공간 열기",
+          "ratio": 12.22,
+          "fg": "rgb(8, 9, 11)",
+          "bg": "rgb(245, 197, 24)"
+        }
+      ],
+      "ontologyGraphCandidateCount": 0,
+      "ontologyOverlapPairs": 0,
+      "h1h2": [
+        "주요 메뉴",
+        "작업공간 관련",
+        "왜 SafeClaw인가.",
+        "기상청",
+        "Law.go",
+        "Work24",
+        "KOSHA",
+        "대안별 차이"
+      ],
+      "overflow": false
+    },
+    {
+      "route": "/ontology",
+      "viewport": "mobile",
+      "url": "https://www.safeclaw.kr/ontology",
+      "status": 200,
+      "finalUrl": "https://www.safeclaw.kr/ontology",
+      "errors": [],
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\north-star-live-ui-surface-2026-07-19\\mobile-ontology.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "bodyHeight": 4602,
+      "outsideCount": 0,
+      "outsideSamples": [],
+      "under44Count": 0,
+      "under44Samples": [],
+      "termCounts": {
+        "DB 하네스": 0,
+        "품질 계약": 0,
+        "Obsidian": 0,
+        "JSONL": 0,
+        "raw log": 0,
+        "API path": 0,
+        "published_ontology": 0,
+        "human_review": 0,
+        "SafeClaw system of record": 0
+      },
+      "yellowContrast": [
+        {
+          "text": "작업공간 열기",
+          "ratio": 12.22,
+          "fg": "rgb(8, 9, 11)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "직접 관계",
+          "ratio": 12.57,
+          "fg": "rgb(20, 23, 26)",
+          "bg": "rgb(255, 212, 0)"
+        },
+        {
+          "text": "그래프 전체 화면",
+          "ratio": 12.57,
+          "fg": "rgb(20, 23, 26)",
+          "bg": "rgb(255, 212, 0)"
+        }
+      ],
+      "ontologyGraphCandidateCount": 0,
+      "ontologyOverlapPairs": 0,
+      "h1h2": [
+        "주요 메뉴",
+        "근거 관련",
+        "작업과 근거의 연결.",
+        "선택 항목 중심 안전지식",
+        "검증된 안전지식 찾기"
+      ],
+      "overflow": false
+    },
+    {
+      "route": "/knowledge",
+      "viewport": "mobile",
+      "url": "https://www.safeclaw.kr/knowledge",
+      "status": 200,
+      "finalUrl": "https://www.safeclaw.kr/knowledge",
+      "errors": [],
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\north-star-live-ui-surface-2026-07-19\\mobile-knowledge.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "bodyHeight": 1152,
+      "outsideCount": 0,
+      "outsideSamples": [],
+      "under44Count": 0,
+      "under44Samples": [],
+      "termCounts": {
+        "DB 하네스": 0,
+        "품질 계약": 0,
+        "Obsidian": 0,
+        "JSONL": 0,
+        "raw log": 0,
+        "API path": 0,
+        "published_ontology": 0,
+        "human_review": 0,
+        "SafeClaw system of record": 0
+      },
+      "yellowContrast": [
+        {
+          "text": "오늘",
+          "ratio": 10.8,
+          "fg": "rgb(23, 25, 29)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "기술 지원",
+          "ratio": 10.8,
+          "fg": "rgb(23, 25, 29)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "참고자료",
+          "ratio": 10.8,
+          "fg": "rgb(23, 25, 29)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "위키",
+          "ratio": 10.8,
+          "fg": "rgb(23, 25, 29)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "검토 흐름",
+          "ratio": 10.8,
+          "fg": "rgb(23, 25, 29)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "진단",
+          "ratio": 10.8,
+          "fg": "rgb(23, 25, 29)",
+          "bg": "rgb(245, 197, 24)"
+        },
+        {
+          "text": "근거 검색",
+          "ratio": 12.22,
+          "fg": "rgb(8, 9, 11)",
+          "bg": "rgb(245, 197, 24)"
+        }
+      ],
+      "ontologyGraphCandidateCount": 0,
+      "ontologyOverlapPairs": 0,
+      "h1h2": [
+        "주요 메뉴",
+        "근거 관련",
+        "지식 DB.",
+        "8개 위험요인 · 4개 서식",
+        "원본 이벤트 · 검토 대기 · 미게시",
+        "9,920개 항목 · 1,063개 출처",
+        "지식 검토 흐름 · 사람 확인 필수",
+        "문서 반영용 KOSHA 기술 지원 자료"
+      ],
+      "overflow": false
+    },
+    {
+      "route": "/share/not-a-session?lang=vi",
+      "viewport": "mobile",
+      "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+      "status": 200,
+      "finalUrl": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+      "errors": [],
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\north-star-live-ui-surface-2026-07-19\\mobile-share-not-a-session-lang-vi.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "bodyHeight": 855,
+      "outsideCount": 0,
+      "outsideSamples": [],
+      "under44Count": 0,
+      "under44Samples": [],
+      "termCounts": {
+        "DB 하네스": 0,
+        "품질 계약": 0,
+        "Obsidian": 0,
+        "JSONL": 0,
+        "raw log": 0,
+        "API path": 0,
+        "published_ontology": 0,
+        "human_review": 0,
+        "SafeClaw system of record": 0
+      },
+      "yellowContrast": [
+        {
+          "text": "Về không gian làm việc",
+          "ratio": 12.22,
+          "fg": "rgb(8, 9, 11)",
+          "bg": "rgb(245, 197, 24)"
+        }
+      ],
+      "ontologyGraphCandidateCount": 0,
+      "ontologyOverlapPairs": 0,
+      "h1h2": [
+        "주요 메뉴",
+        "작업공간 관련",
+        "Màn hình xác nhận tài liệu",
+        "Kiểm tra gói tài liệu"
+      ],
+      "overflow": false
+    }
+  ]
+}

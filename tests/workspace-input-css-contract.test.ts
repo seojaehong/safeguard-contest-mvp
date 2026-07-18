@@ -35,6 +35,19 @@ describe("workspace input CSS contract", () => {
 
       expect(minHeight, selectors.trim()).toMatch(/^(?:44px|var\(--control-height\))$/u);
     }
+
+    expect(css).toMatch(
+      /\.command-center-shell \.composer-attach-button input\s*\{[\s\S]*?min-width:\s*var\(--control-height\);[\s\S]*?min-height:\s*var\(--control-height\);/u,
+    );
+    expect(css).toMatch(
+      /\.brand-lockup\s*\{[\s\S]*?min-height:\s*var\(--control-height\);/u,
+    );
+    expect(css).toMatch(
+      /\.ai-mode-option\s*\{[\s\S]*?min-height:\s*var\(--control-height\);/u,
+    );
+    expect(css).toMatch(
+      /\.ai-mode-option input\[type="radio"\]\s*\{[\s\S]*?width:\s*20px;[\s\S]*?height:\s*20px;[\s\S]*?flex:\s*0 0 auto;/u,
+    );
   });
 
   it("keeps the input-page theme, disclosure, and example controls touch safe", () => {
