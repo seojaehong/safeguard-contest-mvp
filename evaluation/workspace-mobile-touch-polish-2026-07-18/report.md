@@ -36,6 +36,8 @@ Viewport: 390x844
 - `npm.cmd test -- tests\workspace-input-css-contract.test.ts --maxWorkers=1 --fileParallelism=false`: 1 file / 5 tests PASS
 - `npm.cmd test -- tests\frontend-workbench-visual-contract.test.ts tests\workspace-layout-regression.test.ts --maxWorkers=1 --fileParallelism=false`: 2 files / 38 tests PASS, 1 skipped
 - `npm.cmd run typecheck`: PASS
+- `npm.cmd run audit:frontend-consistency`: static audit PASS, 33 pages / 23 product components / 0 coverage issues / 0 violations
+- `npm.cmd test -- tests\frontend-route-coverage.test.ts --maxWorkers=1 --fileParallelism=false`: 1 file / 39 tests PASS
 
 ## Notes
 
