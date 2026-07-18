@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-07-18T23:59:00+09:00",
+  "scope": "share-recipient-current-reconciliation",
+  "sourceHead": "51d45720e0a8cc280703af549416eede926dd072",
+  "verdict": "recipient_portal_exists_on_current_head",
+  "routes": [
+    "app/share/[sessionId]/page.tsx",
+    "app/api/share-sessions/[sessionId]/route.ts"
+  ],
+  "liveProbes": [
+    {
+      "url": "https://www.safeclaw.kr/api/build-info",
+      "statusCode": 200,
+      "commitSha": "2f121d3488908ca450398bfbb70f5f97827023fa"
+    },
+    {
+      "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+      "statusCode": 200
+    },
+    {
+      "url": "https://www.safeclaw.kr/share/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb?workerId=11111111-1111-4111-8111-111111111111",
+      "statusCode": 200
+    }
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "passed",
+      "files": 1,
+      "tests": 4
+    },
+    {
+      "command": "npm.cmd test -- tests\\workpack-share-authority-routes.test.ts tests\\workflow-share-client.test.ts tests\\workspace-share-mobile-browser.test.ts tests\\share-recipient-portal-browser.test.ts tests\\workflow-share-panel-behavior.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "passed",
+      "files": 5,
+      "tests": 79
+    }
+  ],
+  "remainingCaveats": [
+    "live fixture URL proves route availability only",
+    "real demo should use a share session created from the workspace flow",
+    "provider dispatch remains preview-only until target credentials and idempotency are proven"
+  ]
+}
