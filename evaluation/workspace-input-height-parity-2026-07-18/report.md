@@ -26,6 +26,15 @@ Notes:
 - Desktop now gives the input page the same bottom edge as `.workspace-side-nav` and `.command-main`.
 - Mobile remains intentionally stacked: the side rail sits above the input page, while input and main stay aligned with no horizontal overflow.
 
+## Production Smoke
+
+Command source: Playwright against `https://www.safeclaw.kr/workspace` after the Vercel deployment for commit `0410a7d9` completed.
+
+| Viewport | Horizontal overflow | Textarea value | Default job phrase | Side bottom | Input bottom | Main bottom | Side/Input delta |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: |
+| 1440x900 | false | empty | false | 925.05 | 925.05 | 925.05 | 0 |
+| 390x844 | false | empty | false | 268.05 | 922.84 | 922.84 | stacked mobile |
+
 ## Verification
 
 - `npm.cmd test -- tests\workspace-layout-regression.test.ts tests\module-shell-design-regression.test.ts --maxWorkers=1 --fileParallelism=false`
