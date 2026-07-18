@@ -46,8 +46,6 @@ const routes = [
 ];
 const deterministicMissingRecordRoutes = new Set([
   "/interpretation/[id]",
-  "/law/[id]",
-  "/precedent/[id]",
 ]);
 const viewports = [
   { name: "desktop-1440", width: 1440, height: 1000 },
