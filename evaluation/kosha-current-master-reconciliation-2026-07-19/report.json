@@ -1,0 +1,69 @@
+{
+  "artifact": "kosha-current-master-reconciliation-2026-07-19",
+  "verdict": "pass_current_master_kosha_exact_registry_and_local_corpus_readiness",
+  "sourceHead": "48a5c8b83d076f427748b0ac2dbe04712ddecec8",
+  "productionBuildInfo": {
+    "commitSha": "48a5c8b83d076f427748b0ac2dbe04712ddecec8",
+    "branch": "master",
+    "environment": "production"
+  },
+  "productionExactPins": [
+    "D-C-13",
+    "D-C-7",
+    "B-E-10"
+  ],
+  "verification": {
+    "focusedKoshaVitest": {
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\exact-kosha-applicability-policy.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 5,
+      "testFilesTotal": 5,
+      "testsPassed": 80,
+      "testsTotal": 80,
+      "status": "pass"
+    },
+    "pythonAcquisition": {
+      "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body",
+      "testsPassed": 19,
+      "testsTotal": 19,
+      "status": "pass"
+    },
+    "productionBuild": {
+      "command": "npm.cmd run build",
+      "compiled": true,
+      "staticPagesGenerated": 28,
+      "staticPagesTotal": 28,
+      "status": "pass"
+    },
+    "nextFileTrace": {
+      "manifestCount": 82,
+      "allExactAssetsManifestCount": 18,
+      "partialExactAssetsManifestCount": 0,
+      "status": "pass"
+    },
+    "liveStatusProbe": {
+      "url": "https://www.safeclaw.kr/api/safety-reference/status",
+      "statusCode": 200,
+      "status": "ready",
+      "items": 9920,
+      "technicalTotal": 1040,
+      "technicalGuidelines": 803,
+      "technicalSupportRegulations": 237,
+      "searchReady": true,
+      "localCorpusStatus": "ready",
+      "localCorpusItemCount": 234,
+      "localCorpusChunkCount": 7127,
+      "localCorpusFailureCount": 0
+    }
+  },
+  "mutations": {
+    "dbSchemaChanged": false,
+    "supabaseDataChanged": false,
+    "corpusUploaded": false,
+    "historicalWave2RangeMerged": false
+  },
+  "nextKoshaWork": [
+    "exact production promotion for more of the 234 metadata-verified KOSHA candidates",
+    "durability test for every configured NFT consumer key",
+    "embedding migration only after explicit approval"
+  ]
+}

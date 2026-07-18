@@ -1,7 +1,7 @@
 # SafeClaw North Star Current State
 
 Generated at: 2026-07-19 KST  
-Authoritative live-proven HEAD: `94d45b02651f7dd4179988791d8ad564474db954`
+Authoritative live-proven HEAD: `48a5c8b83d076f427748b0ac2dbe04712ddecec8`
 
 ## Purpose
 
@@ -25,6 +25,7 @@ This is not a completion declaration. It records what current evidence proves an
 | Public live smoke | `evaluation/live-public-smoke-2026-07-18/report.md` and `report.json` | Public routes responded and showed no horizontal overflow or console/page errors in the checked desktop/mobile smoke. |
 | Exact KOSHA registry | `evaluation/live-provider-readiness-2026-07-19/report.md`, `evaluation/kosha-trust-registry-wave2-2026-07-16/report.md`, `evaluation/kosha-runtime-corpus-repackaging-2026-07-18/report.md` | D-C-13, D-C-7, and B-E-10 are exact trust registry entries; KOSHA local corpus is live-ready with the compressed verified subset. Live `/api/safety-reference/status` returns HTTP 200, `searchReady=true`, `localCorpus.status=ready`, `itemCount=234`, `chunkCount=7127`. |
 | Live provider readiness | `evaluation/live-provider-readiness-2026-07-19/report.md` | OpenAI vision is ready on live, dispatch is preview-only because provider idempotency remains intentionally locked, KOSHA local corpus is live-ready, and SIF embedding remains approval-held. |
+| Current KOSHA reconciliation | `evaluation/kosha-current-master-reconciliation-2026-07-19/report.md` | Current master carries exact production KOSHA pins for D-C-13, D-C-7, and B-E-10. Focused KOSHA gate passed 5 files / 80 tests, Python acquisition passed 19/19, local build generated 28/28 pages, NFT partial exact assets were 0, and live `/api/safety-reference/status` is ready. |
 | Ontology UI | `evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json` | Default `/ontology` no longer exposes the 166-node hairball; bounded neighborhood UI passes overflow, overlap, contrast, and mobile fullscreen gates in recorded browser evidence. |
 | Hermes/OpenClaw boundary | `docs/phase-b-organization-knowledge-and-engine-plan.md` and engine tests | Hermes/OpenClaw remain behind `EngineAdapter`; SafeClaw keeps tenant, MCP, evidence, approval, and effect authority. |
 | Tenant/RLS app boundary | `evaluation/supabase-rls-approval-2026-07-17/report.md` and app-layer tests | App-layer tenant and route boundaries are covered; live DB catalog RLS proof is still approval-gated. |

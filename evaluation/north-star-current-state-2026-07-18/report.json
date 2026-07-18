@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-07-19T00:20:00+09:00",
-  "authoritativeHead": "94d45b02651f7dd4179988791d8ad564474db954",
+  "authoritativeHead": "48a5c8b83d076f427748b0ac2dbe04712ddecec8",
   "status": "in_progress",
   "provenGates": [
     "full_serial_suite",
@@ -10,6 +10,7 @@
     "public_live_smoke",
     "live_provider_readiness",
     "exact_kosha_registry",
+    "current_kosha_reconciliation",
     "live_kosha_local_corpus_readiness",
     "ontology_ui",
     "hermes_openclaw_boundary",
@@ -103,6 +104,41 @@
         "related_ids_without_same_tenant_tuple_check"
       ],
       "typecheck": "passed"
+    },
+    "currentKoshaReconciliation": {
+      "artifact": "evaluation/kosha-current-master-reconciliation-2026-07-19/report.json",
+      "sourceHead": "48a5c8b83d076f427748b0ac2dbe04712ddecec8",
+      "productionExactPins": ["D-C-13", "D-C-7", "B-E-10"],
+      "focusedKoshaVitest": {
+        "files": 5,
+        "tests": 80,
+        "status": "passed"
+      },
+      "pythonAcquisition": {
+        "tests": 19,
+        "status": "passed"
+      },
+      "productionBuild": {
+        "staticPages": 28,
+        "status": "passed"
+      },
+      "nextFileTrace": {
+        "manifestCount": 82,
+        "allExactAssetsManifestCount": 18,
+        "partialExactAssetsManifestCount": 0,
+        "status": "passed"
+      },
+      "liveStatusProbe": {
+        "status": "ready",
+        "items": 9920,
+        "technicalTotal": 1040,
+        "technicalGuidelines": 803,
+        "technicalSupportRegulations": 237,
+        "searchReady": true,
+        "localCorpusItemCount": 234,
+        "localCorpusChunkCount": 7127,
+        "localCorpusFailureCount": 0
+      }
     }
   },
   "notes": [
