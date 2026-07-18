@@ -2,9 +2,9 @@
 
 ## 범위
 
-- 현재 검증 HEAD: `93e48186d79e6d0f482164bfc23eb985bc13dd57`
+- 현재 검증 HEAD: `799def45c17bca848ad4a1239fb361f00dd7626f`
 - 브랜치: `master`
-- 현재화 시각: `2026-07-18T14:52:57.2386107+09:00`
+- 현재화 시각: `2026-07-18T21:08:16+09:00`
 - 소유 범위: `app/ontology/**`, 온톨로지 전용 테스트, 이 평가 산출물
 - DB, 온톨로지 schema, published 데이터, retrieval 계약 변경: 없음
 
@@ -34,9 +34,9 @@
 
 ## 검증 결과
 
-- focused ontology contract: 3 files, 10 tests PASS / 2 files, 3 tests SKIPPED without browser base
+- focused ontology contract: 2 files, 9 tests PASS
 - production browser contract with `ONTOLOGY_BASE_URL=http://127.0.0.1:3011`: 2 files, 3 tests PASS
-- live production browser contract with `ONTOLOGY_BASE_URL=https://www.safeclaw.kr`: 2 files, 3 tests PASS
+- live production browser contract with `ONTOLOGY_BASE_URL=https://www.safeclaw.kr`: 1 file, 1 test PASS
 - production typography matrix with `ONTOLOGY_TYPOGRAPHY_PROD_MATRIX=1`: 1 file, 1 test PASS
 - strict TypeScript typecheck: PASS
 - production build: PASS, static generation units 28
@@ -68,7 +68,7 @@
 
 ## 현재 live 판정
 
-- 이 검증은 현재 `master`와 live production에서 수행했습니다.
+- 이 검증은 현재 `master` HEAD `799def45c17bca848ad4a1239fb361f00dd7626f`와 live production에서 수행했습니다.
 - 이전 production read-only audit의 `/ontology` hairball P0는 현재 live 기준으로 재현되지 않습니다.
 - `browser-metrics.json` 기준 `source=https://www.safeclaw.kr`, 변형 6개, 최대 가로 넘침 0, 최대 노드 겹침 0, 최소 제어 높이 44px, 최소 노드 대비 16.01:1, 최소 노드 텍스트 대비 5.6:1입니다.
 - 기존 전역 CSS의 퇴역 온톨로지 selector는 별도 전역 정리에서 제거해야 하며, 이번 bounded 변경에서는 시각적으로 사용하지 않습니다.
