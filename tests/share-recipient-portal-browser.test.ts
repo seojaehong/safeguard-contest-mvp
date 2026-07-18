@@ -59,6 +59,23 @@ const sessionPayload = {
   message: "공유 세션을 조회했습니다."
 };
 
+const chineseSessionPayload = {
+  ...sessionPayload,
+  session: {
+    ...sessionPayload.session,
+    recipientMessage: {
+      languageCode: "zh",
+      title: "SafeClaw safety notice",
+      body: "Stop work during strong wind.\nCheck fall protection before work."
+    },
+    recipients: [{
+      workerId: WORKER_ID,
+      displayName: "Worker Zhang",
+      languageCode: "zh"
+    }]
+  }
+};
+
 async function fulfillJson(route: Route, body: unknown): Promise<void> {
   await route.fulfill({
     status: 200,
@@ -101,6 +118,27 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       expect(bodyText).not.toContain("세션 정보를 조회하는 중입니다");
       expect(bodyText).not.toContain("업무 범위");
       expect(bodyText).not.toContain("공유 중인 작업 상세");
+    } finally {
+      await page.close();
+    }
+  }, 45_000);
+
+  it("uses non-Korean chrome for unsupported foreign query languages", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    try {
+      const response = await page.goto(`${harness.baseUrl}/share/not-a-session?lang=zh`, { waitUntil: "networkidle" });
+      if (!response || response.status() >= 400) {
+        throw new Error(`share page returned ${response?.status() ?? "no response"}`);
+      }
+      const bodyText = await page.locator("body").innerText();
+      expect(bodyText).toContain("Review document pack");
+      expect(bodyText).toContain("This confirmation screen is only for invited workers.");
+      expect(bodyText).toContain("Loading share session...");
+      expect(bodyText).toContain("Work scope");
+      expect(bodyText).not.toContain("문서팩 검토");
+      expect(bodyText).not.toContain("세션 정보를 조회하는 중입니다");
+      expect(bodyText).not.toContain("업무 범위");
     } finally {
       await page.close();
     }
@@ -193,6 +231,49 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       displayName: "Server Nguyen",
       languageCode: "vi"
     });
+    await page.close();
+  }, 90_000);
+
+  it("keeps unsupported foreign recipients on an English portal chrome fallback", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.route("**/api/share-sessions/**", async (route) => {
+      if (route.request().method() === "POST") {
+        await fulfillJson(route, {
+          ok: true,
+          configured: true,
+          confirmationId: "confirmation-zh",
+          message: "Read confirmation saved."
+        });
+        return;
+      }
+      await fulfillJson(route, chineseSessionPayload);
+    });
+
+    const response = await page.goto(`${harness.baseUrl}/share/${SESSION_ID}?workerId=${WORKER_ID}`, { waitUntil: "networkidle" });
+    if (!response || response.status() >= 400) {
+      throw new Error(`share page returned ${response?.status() ?? "no response"}\n${await page.locator("body").innerText().catch(() => "")}\n${harness.readServerOutput()}`);
+    }
+    await expect.poll(() => page.locator("body").innerText()).toContain("Review document pack");
+    await expect.poll(() => page.locator("body").innerText()).toContain("This confirmation screen is only for invited workers.");
+    await expect.poll(() => page.getByText("Safety notice", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("Risk assessment", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("TBM briefing", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("TBM log", { exact: true }).count()).toBe(1);
+    await expect.poll(() => page.getByText("中文", { exact: true }).count()).toBeGreaterThan(0);
+    await expect.poll(() => page.locator("body").innerText()).not.toContain("문서팩 검토");
+    await expect.poll(() => page.locator("body").innerText()).not.toContain("작업자 안전공지");
+    await expect.poll(() => page.locator("body").innerText()).not.toContain("위험성평가표");
+    await expect.poll(() => page.locator("body").innerText()).not.toContain("중국어");
+    await expect.poll(() => page.locator(".safeclaw-select").inputValue()).toBe("zh");
+
+    const metrics = await page.evaluate(() => ({
+      documentWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      bodyScrollWidth: document.body.scrollWidth
+    }));
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.documentWidth);
+    expect(metrics.bodyScrollWidth).toBeLessThanOrEqual(metrics.documentWidth);
     await page.close();
   }, 90_000);
 });

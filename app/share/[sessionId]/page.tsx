@@ -57,18 +57,18 @@ function formatIsoTime(value: string | null): string {
 function buildLanguageLabel(code: string): string {
   const normalized = code.toLowerCase();
   if (normalized === "ko") return "한국어";
-  if (normalized === "en") return "영어";
-  if (normalized === "vi") return "베트남어";
-  if (normalized === "zh") return "중국어";
-  if (normalized === "th") return "태국어";
-  if (normalized === "id") return "인도네시아어";
-  if (normalized === "tl") return "필리핀어";
-  if (normalized === "my") return "미얀마어";
-  if (normalized === "km") return "크메르어";
-  if (normalized === "uz") return "우즈베크어";
-  if (normalized === "mn") return "몽골어";
-  if (normalized === "ne") return "네팔어";
-  return code || "자동감지";
+  if (normalized === "en") return "English";
+  if (normalized === "vi") return "Tiếng Việt";
+  if (normalized === "zh") return "中文";
+  if (normalized === "th") return "ไทย";
+  if (normalized === "id") return "Bahasa Indonesia";
+  if (normalized === "tl") return "Filipino";
+  if (normalized === "my") return "မြန်မာ";
+  if (normalized === "km") return "ខ្មែរ";
+  if (normalized === "uz") return "O'zbekcha";
+  if (normalized === "mn") return "Монгол";
+  if (normalized === "ne") return "नेपाली";
+  return code || "Auto";
 }
 
 type RecipientPortalCopy = {
@@ -363,20 +363,22 @@ function resolveRecipientPortalCopy(languageCode: string): RecipientPortalCopy {
   const normalized = languageCode.trim().toLowerCase();
   if (normalized === "vi") return RECIPIENT_PORTAL_COPY.vi;
   if (normalized === "en") return RECIPIENT_PORTAL_COPY.en;
+  if (normalized && normalized !== "ko") return RECIPIENT_PORTAL_COPY.en;
   return RECIPIENT_PORTAL_COPY.ko;
 }
 
-function resolveSupportedLanguageCode(languageCode: string | null): "ko" | "vi" | "en" {
+function resolveInitialLanguageCode(languageCode: string | null): string {
   const normalized = languageCode?.trim().toLowerCase();
   if (normalized === "vi") return "vi";
   if (normalized === "en") return "en";
+  if (normalized) return normalized;
   return "ko";
 }
 
-function initialRecipientPortalLanguageCode(): "ko" | "vi" | "en" {
+function initialRecipientPortalLanguageCode(): string {
   if (typeof window === "undefined") return "ko";
   const params = new URLSearchParams(window.location.search);
-  return resolveSupportedLanguageCode(params.get("lang") || params.get("language"));
+  return resolveInitialLanguageCode(params.get("lang") || params.get("language"));
 }
 
 function formatShareStatus(status: ShareSessionPayload["status"], copy: RecipientPortalCopy): string {
@@ -468,7 +470,7 @@ export default function ShareRecipientPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const nextWorkerId = params.get("workerId") || "";
-    const requestedLanguage = resolveSupportedLanguageCode(params.get("lang") || params.get("language"));
+    const requestedLanguage = resolveInitialLanguageCode(params.get("lang") || params.get("language"));
     setQueryWorkerId(nextWorkerId);
     setLanguageCode((current) => current === "ko" ? requestedLanguage : current);
     if (nextWorkerId) {
