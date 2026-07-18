@@ -8,9 +8,9 @@ The read-only delegation based on `de4103db` reported that no worker recipient p
 
 ## Current HEAD
 
-- Source HEAD: `23d74199e695adb74b3a03b0d103456ddd8b410d`
-- Production build-info: `commitSha=23d74199e695adb74b3a03b0d103456ddd8b410d`, `branch=master`, `environment=production`
-- CI run: `29650196721`, success
+- Source HEAD: `36b1a3ee2d9730239bacb0cbae6befe80e2becc3`
+- Production build-info: `commitSha=36b1a3ee2d9730239bacb0cbae6befe80e2becc3`, `branch=master`, `environment=production`
+- CI run: `29650771772`, success
 
 ## Implemented Surface
 

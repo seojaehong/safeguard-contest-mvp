@@ -1,0 +1,38 @@
+{
+  "artifact": "share-recipient-live-smoke-2026-07-19",
+  "verdict": "pass_non_mutating_route_availability_and_fail_closed_invalid_api",
+  "head": {
+    "source": "36b1a3ee2d9730239bacb0cbae6befe80e2becc3",
+    "productionBuildInfo": {
+      "commitSha": "36b1a3ee2d9730239bacb0cbae6befe80e2becc3",
+      "branch": "master",
+      "environment": "production"
+    },
+    "ci": {
+      "runId": 29650771772,
+      "conclusion": "success"
+    }
+  },
+  "probes": [
+    {
+      "method": "GET",
+      "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+      "status": 200,
+      "bodyKind": "html_shell",
+      "meaning": "recipient_portal_route_deployed"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.safeclaw.kr/api/share-sessions/not-a-session?workerId=00000000-0000-0000-0000-000000000000",
+      "status": 400,
+      "bodyKind": "empty_probe_body",
+      "meaning": "invalid_session_lookup_fail_closed"
+    }
+  ],
+  "mutations": {
+    "shareSessionCreated": false,
+    "providerMessageSent": false,
+    "readConfirmationWritten": false
+  },
+  "remainingGap": "real_invited_share_session_worker_confirmation_ack_update"
+}
