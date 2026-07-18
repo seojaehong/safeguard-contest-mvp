@@ -8,7 +8,8 @@ import {
 
 const SESSION_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const WORKER_ID = "11111111-1111-4111-8111-111111111111";
-const hasProductionBuild = fs.existsSync(".next/BUILD_ID");
+const hasProductionBuild = fs.existsSync(".next/BUILD_ID")
+  && fs.existsSync(".next/prerender-manifest.json");
 
 let browser: Browser | null = null;
 let harness: IsolatedNextBrowserHarness | null = null;
@@ -103,6 +104,10 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
   it("localizes the portal chrome from the query language before a session is loaded", async () => {
     if (!browser || !harness) throw new Error("Browser harness was not started");
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const errors: string[] = [];
+    page.on("pageerror", (error) => {
+      errors.push(error.message);
+    });
     try {
       const response = await page.goto(`${harness.baseUrl}/share/not-a-session?lang=vi`, { waitUntil: "networkidle" });
       if (!response || response.status() >= 400) {
@@ -118,6 +123,7 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       expect(bodyText).not.toContain("세션 정보를 조회하는 중입니다");
       expect(bodyText).not.toContain("업무 범위");
       expect(bodyText).not.toContain("공유 중인 작업 상세");
+      expect(errors).toEqual([]);
     } finally {
       await page.close();
     }

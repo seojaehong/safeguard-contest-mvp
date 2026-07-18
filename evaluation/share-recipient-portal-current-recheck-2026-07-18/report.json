@@ -1,6 +1,6 @@
 {
   "status": "partial-pass",
-  "verifiedBase": "713a9fe02de537f81edf214eb35431a78683ff67",
+  "verifiedBase": "f8d711c0affe7dfdb5c768950cd48aeeb3454563",
   "date": "2026-07-18",
   "scope": "current master recipient share portal recheck",
   "routesPresent": {
@@ -16,17 +16,43 @@
       "testsPassed": 34,
       "testsSkipped": 4,
       "durationSeconds": 1.84
+    },
+    {
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workpack-share-authority-routes.test.ts tests\\workspace-share-simplification.test.ts tests\\workflow-share-panel-behavior.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "partial-pass",
+      "filesPassed": 3,
+      "filesSkipped": 1,
+      "testsPassed": 52,
+      "testsSkipped": 4,
+      "durationSeconds": 2.67
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
     }
   ],
+  "productionSmokeBeforePatch": {
+    "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+    "viewport": "390x844",
+    "status": 200,
+    "hasVietnameseChrome": true,
+    "hasKoreanChrome": false,
+    "horizontalOverflow": false,
+    "pageError": "Minified React error #418"
+  },
+  "patch": {
+    "hydrationFix": "Initial recipient portal language is server-stable ko; query language is applied after mount.",
+    "testHarnessFix": "Browser test production-build guard requires both BUILD_ID and prerender-manifest.json."
+  },
   "localWindowsBuild": {
     "status": "blocked",
     "command": "npm.cmd run build",
     "error": "<Html> should not be imported outside of pages/_document",
     "impact": "browser portal tests skip without .next/BUILD_ID"
   },
-  "decision": "Recipient portal exists on current master; stale reports saying route absent no longer apply. Browser verification remains pending against deployed build or after local Windows build isolation.",
+  "decision": "Recipient portal exists on current master; stale reports saying route absent no longer apply. Query-language hydration mismatch is patched. Full recipient confirmation remains pending against a deployed build with a real share session.",
   "integrity": {
-    "codeChanged": false,
+    "codeChanged": true,
     "dbMigration": false,
     "supabaseDataMutation": false
   }

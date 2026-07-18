@@ -375,12 +375,6 @@ function resolveInitialLanguageCode(languageCode: string | null): string {
   return "ko";
 }
 
-function initialRecipientPortalLanguageCode(): string {
-  if (typeof window === "undefined") return "ko";
-  const params = new URLSearchParams(window.location.search);
-  return resolveInitialLanguageCode(params.get("lang") || params.get("language"));
-}
-
 function formatShareStatus(status: ShareSessionPayload["status"], copy: RecipientPortalCopy): string {
   if (status === "active") return copy.statusActive;
   if (status === "revoked") return copy.statusRevoked;
@@ -405,7 +399,7 @@ export default function ShareRecipientPage() {
   const [queryWorkerId, setQueryWorkerId] = useState<string | null>(null);
   const [workerId, setWorkerId] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [languageCode, setLanguageCode] = useState<string>(initialRecipientPortalLanguageCode);
+  const [languageCode, setLanguageCode] = useState<string>("ko");
   const [confirmationMessage, setConfirmationMessage] = useState("");
   const [isIdempotent, setIsIdempotent] = useState(false);
   const [confirmationToken, setConfirmationToken] = useState<string | null>(null);
