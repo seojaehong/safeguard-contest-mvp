@@ -1,6 +1,6 @@
 {
   "schemaVersion": "safeclaw-kosha-trust-registry-wave2-report/v1",
-  "generatedAt": "2026-07-16T19:02:00+09:00",
+  "generatedAt": "2026-07-18T15:47:00+09:00",
   "status": "product_pass_with_broad_suite_pass",
   "independentReview": {
     "spec": "pass",
@@ -32,6 +32,7 @@
     "conflictingProvenanceAliases": "pass",
     "boundedApplicabilityPolicy": "pass",
     "singularApiCompatibility": "pass",
+    "freshFocusedAndCorpusVitest": { "files": 6, "tests": 190, "status": "pass" },
     "focusedVitest": { "files": 5, "tests": 80, "status": "pass" },
     "koshaCorpusAudit": { "files": 1, "tests": 110, "status": "pass" },
     "broadVitest": {
@@ -51,9 +52,10 @@
     "strictTypecheck": "pass",
     "productionBuild": { "staticPages": 28, "status": "pass" },
     "nextFileTrace": {
-      "manifestCount": 78,
-      "consumerManifestCount": 16,
-      "exactAssetBytes": 147724,
+      "manifestCount": 81,
+      "configuredConsumerManifestCount": 17,
+      "exactPinOnlyAdditionalManifestCount": 1,
+      "exactAssetBytes": 147751,
       "globalWildcardRemoved": true,
       "status": "pass"
     },
@@ -61,7 +63,8 @@
   },
   "operationalNotes": [
     "The 34-file broad Vitest run now passes with 31 files passed, 3 skipped, 395 tests passed, and 4 skipped. The prior KOSHA corpus audit RED is resolved by bridge-only preflight integrity and credential-order checks before Vite module loading.",
-    "Non-blocking P3: regression coverage locks removal of the global wildcard, all 16 configured consumer keys, and exact asset membership for every key. It does not lock the production build's total NFT manifest count or included-manifest count; the fresh build observed 78 manifests, 16 with both exact assets, and zero partial-asset manifests.",
+    "Fresh current-master verification ran the focused wave2 tests and KOSHA corpus audit together: 6 files and 190 tests passed.",
+    "Non-blocking P3: regression coverage locks removal of the global wildcard, all configured consumer keys, and exact asset membership for every key. It does not lock the production build's total NFT manifest count or included-manifest count; the fresh build observed 81 manifests, 17 configured consumer manifests with all KOSHA runtime assets, and one additional /ops/api manifest with exact pins only.",
     "The tracked D-C-7 asset predates the publishedAt generator field, so runtime publication date remains pinned by the immutable production registry until the asset is regenerated through the verified acquisition transaction.",
     "The 234 metadata-verified candidates are not production exact pins; only D-C-13 and D-C-7 are direct exact evidence in this wave."
   ]

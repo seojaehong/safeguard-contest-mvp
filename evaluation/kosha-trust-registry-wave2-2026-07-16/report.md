@@ -26,13 +26,23 @@
 
 ## 검증
 
-- Focused Vitest: 5 files, 80/80 tests PASS
-- KOSHA corpus audit: 1 file, 110/110 tests PASS
+- Fresh focused + corpus Vitest: 6 files, 190/190 tests PASS
+- Python acquisition: 19 tests PASS
+- Strict TypeScript: PASS
+- Production build: 28/28 static pages PASS
+- Next NFT: 81 manifests 중 configured consumer 17개에 전체 KOSHA runtime assets 포함, `/ops/api` 1개는 exact pins만 포함
+- Exact D-C-13 + D-C-7 asset size: 147,751 bytes
+- `git diff --check`: PASS
+
+이 fresh gate는 현재 master HEAD에서 `tests/exact-trusted-kosha-grounding.test.ts`, `tests/exact-trusted-kosha-registry-wave2.test.ts`, `tests/kosha-grounding-fail-closed.test.ts`, `tests/kosha-current-review-run-ask.test.ts`, `tests/exact-kosha-applicability-policy.test.ts`, `tests/kosha-guide-corpus-audit.test.ts`를 함께 실행한 결과다.
+
+이전 전체 KOSHA/SIF/온톨로지 broad gate의 보존 결과:
+
 - Broad Vitest: 31 files PASS, 3 files SKIP; 395 tests PASS, 4 SKIP
 - Python acquisition: 19 tests PASS
 - Strict TypeScript: PASS
 - Production build: 28/28 static pages PASS
-- Next NFT: 78 manifests 중 16 consumer manifests에만 두 exact JSON 포함
+- Next NFT: 78 manifests 중 16 consumer manifests에 두 exact JSON 포함
 - Exact asset size: 147,724 bytes
 - `git diff --check`: PASS
 
@@ -40,7 +50,7 @@
 
 ## 남은 경계
 
-- 비차단 P3: 현재 회귀 테스트는 전역 `/*` 부재, 구성된 16개 consumer key 전체, 각 key의 exact asset membership을 고정한다. 다만 production build가 생성한 NFT manifest 총수와 실제 포함 manifest 수까지 회귀 테스트로 고정하지는 않는다. 이번 실제 build에서는 78개 manifest 중 정확히 16개가 두 exact asset을 포함했고 partial asset manifest는 0개였으며, 이 build 산출물 수치는 후속 durability 테스트 대상이다.
+- 비차단 P3: 현재 회귀 테스트는 전역 `/*` 부재, 구성된 consumer key 전체, 각 key의 exact asset membership을 고정한다. 다만 production build가 생성한 NFT manifest 총수와 실제 포함 manifest 수까지 회귀 테스트로 고정하지는 않는다. 이번 fresh build에서는 81개 manifest 중 17개 configured consumer manifest가 전체 KOSHA runtime assets를 포함했고, `/ops/api` 1개 manifest가 exact pins만 포함했다. 이 build 산출물 수치는 후속 durability 테스트 대상이다.
 - D-C-7 tracked asset은 기존 생성본이라 `publishedAt` 필드가 없다. acquisition generator에는 필드를 추가했고 runtime은 immutable pin의 날짜를 사용한다. 다음 verified acquisition transaction에서 asset을 재생성한다.
 - metadata-verified 234개 전체의 exact production 승격은 별도 wave다.
 - Hermes 실제 runtime과 RLS 후속 감사는 이 변경 범위 밖이며 기존 북극성 계획에서 계속 진행한다.
