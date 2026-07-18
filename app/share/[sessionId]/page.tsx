@@ -83,6 +83,8 @@ type RecipientPortalCopy = {
   evidenceContext: string;
   weatherContext: string;
   themeAria: string;
+  dayLabel: string;
+  nightLabel: string;
   statusLiveLabel: string;
   statusPartialLabel: string;
   statusPlannedLabel: string;
@@ -149,6 +151,8 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     evidenceContext: "공공 근거",
     weatherContext: "기상청",
     themeAria: "화면 테마",
+    dayLabel: "주간",
+    nightLabel: "야간",
     statusLiveLabel: "바로 사용",
     statusPartialLabel: "연결 확인",
     statusPlannedLabel: "설정 필요",
@@ -213,6 +217,8 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     evidenceContext: "Căn cứ chính thức",
     weatherContext: "KMA",
     themeAria: "Chủ đề màn hình",
+    dayLabel: "Sáng",
+    nightLabel: "Tối",
     statusLiveLabel: "Sẵn sàng dùng",
     statusPartialLabel: "Cần kiểm tra kết nối",
     statusPlannedLabel: "Cần thiết lập",
@@ -277,6 +283,8 @@ const RECIPIENT_PORTAL_COPY: Record<"ko" | "vi" | "en", RecipientPortalCopy> = {
     evidenceContext: "Official sources",
     weatherContext: "KMA",
     themeAria: "Screen theme",
+    dayLabel: "Day",
+    nightLabel: "Night",
     statusLiveLabel: "Ready",
     statusPartialLabel: "Check connection",
     statusPlannedLabel: "Setup needed",
@@ -575,6 +583,8 @@ export default function ShareRecipientPage() {
         evidenceContext: copy.evidenceContext,
         weatherContext: copy.weatherContext,
         themeAria: copy.themeAria,
+        dayLabel: copy.dayLabel,
+        nightLabel: copy.nightLabel,
         status: {
           live: copy.statusLiveLabel,
           partial: copy.statusPartialLabel,

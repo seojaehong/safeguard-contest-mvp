@@ -26,6 +26,8 @@ type ModuleChromeLabels = {
   evidenceContext: string;
   weatherContext: string;
   themeAria: string;
+  dayLabel: string;
+  nightLabel: string;
   status: Record<ModuleStatus, string>;
 };
 
@@ -41,6 +43,8 @@ const defaultChromeLabels: ModuleChromeLabels = {
   evidenceContext: "공공 근거",
   weatherContext: "기상청",
   themeAria: "화면 테마",
+  dayLabel: "주간",
+  nightLabel: "야간",
   status: statusLabel
 };
 
@@ -223,7 +227,7 @@ export function SafeClawModuleShell({
               aria-pressed={theme === "day"}
               onClick={() => updateTheme("day")}
             >
-              Day
+              {chromeLabels.dayLabel}
             </button>
             <button
               type="button"
@@ -231,7 +235,7 @@ export function SafeClawModuleShell({
               aria-pressed={theme === "night"}
               onClick={() => updateTheme("night")}
             >
-              Night
+              {chromeLabels.nightLabel}
             </button>
           </div>
         </header>
