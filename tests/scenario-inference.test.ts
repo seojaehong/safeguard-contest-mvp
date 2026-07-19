@@ -138,4 +138,29 @@ describe("inferScenario", () => {
     expect(scenario.companyType).toBe("서비스업");
     expect(scenario.profile.hazards.join(" ")).toContain("화학세제");
   });
+
+  it("keeps an electrical distribution-board inspection out of generic maintenance", () => {
+    const question =
+      "세이프전기 부산 해운대 상가 정전전로 인근 배전반 점검 작업. 작업자 3명, 절연보호구와 검전 필요. 위험성평가와 TBM을 만들어줘.";
+    const scenario = inferScenario(question);
+    const response = buildMockAskResponse(question, [], "mock", "test");
+
+    expect(scenario.companyName).toBe("세이프전기");
+    expect(scenario.companyType).toBe("전기설비 점검");
+    expect(scenario.workSummary).toContain("정전전로 인근 배전반 점검 작업");
+    expect(scenario.profile.workName).toBe("정전전로 인근 배전반 점검 작업");
+    expect(scenario.profile.hazards.join(" ")).toMatch(/정전전로|배전반|검전|감전/);
+    expect(scenario.profile.hazards.join(" ")).not.toContain("비정형 작업 절차 미확정");
+
+    const documentSurface = [
+      response.deliverables.riskAssessmentDraft,
+      response.deliverables.tbmBriefing,
+      response.deliverables.kakaoMessage
+    ].join("\n");
+    expect(documentSurface).toContain("정전전로");
+    expect(documentSurface).toContain("배전반");
+    expect(documentSurface).toContain("검전");
+    expect(documentSurface).toContain("절연보호구");
+    expect(documentSurface).not.toContain("비정형 유지보수 작업");
+  });
 });

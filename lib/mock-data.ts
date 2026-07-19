@@ -464,6 +464,10 @@ function hasExcavationWorkIdentity(question: string) {
   return excavationWorkIdentityPatterns.some((pattern) => pattern.test(question));
 }
 
+function hasElectricalWorkIdentity(question: string) {
+  return /정전\s*전로|정전전로|충전\s*전로|충전전로|배전반|분전반|수전반|전기\s*(?:작업|점검|정비|공사)|검전|무전압|절연\s*보호구|절연보호구|LOTO|잠금표지/.test(question);
+}
+
 function inferKnownLocationPrefix(question: string) {
   const specificLocation = findSpecificLocationRule(question);
   if (specificLocation) return specificLocation.locationPrefix;
@@ -473,6 +477,7 @@ function inferKnownLocationPrefix(question: string) {
 
 function inferCustomWorkName(question: string) {
   if (hasExcavationWorkIdentity(question)) return "열수송관 굴착공사";
+  if (hasElectricalWorkIdentity(question)) return "정전전로 인근 배전반 점검 작업";
   if (/배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question)) {
     return "지하 기계실 배수펌프 점검";
   }
@@ -551,15 +556,18 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
   const companyName = inferCompanyName(question);
   if (hasExcavationWorkIdentity(question)) return buildExcavationScenarioProfile(question, companyName);
 
+  const isElectricalWork = hasElectricalWorkIdentity(question);
   const isPumpConfinedSpace = /배수\s*펌프|배수펌프|지하\s*기계실|밀폐공간|산소\s*농도|LOTO|잠금표지/.test(question);
   const isLeakMaintenance = /누수|비가\s*새|천장/.test(question);
   const workName = inferCustomWorkName(question);
-  const companyType = isPumpConfinedSpace
+  const companyType = isElectricalWork
+    ? "전기설비 점검"
+    : isPumpConfinedSpace
     ? "시설관리·기계설비 점검"
     : isLeakMaintenance
       ? "시설관리·유지보수"
       : "현장 유지보수";
-  const siteName = `${companyName} ${isPumpConfinedSpace ? "지하 기계실 배수펌프 점검 현장" : isLeakMaintenance ? "천장 누수 유지보수 현장" : "비정형 작업 현장"}`;
+  const siteName = `${companyName} ${isElectricalWork ? "전기설비 배전반 점검 현장" : isPumpConfinedSpace ? "지하 기계실 배수펌프 점검 현장" : isLeakMaintenance ? "천장 누수 유지보수 현장" : "비정형 작업 현장"}`;
 
   return {
     id: "custom-maintenance",
@@ -567,23 +575,35 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
     companyType,
     siteName,
     workName,
-    processName: isPumpConfinedSpace
+    processName: isElectricalWork
+      ? "정전전로 범위 확인, 전원 차단·잠금표지, 검전·무전압 확인, 배전반 점검, 절연보호구 착용"
+      : isPumpConfinedSpace
       ? "밀폐공간 진입 전 환기·산소농도 측정, 배수펌프 전원 차단·LOTO, 누수 바닥 보양 후 점검"
       : isLeakMaintenance
       ? "누수 부위 확인, 전기·천장재 상태 점검, 보양 후 천장 유지보수"
       : "작업 전 현장 확인, 위험구역 통제, 비정형 유지보수 수행",
-    weatherNote: isPumpConfinedSpace
+    weatherNote: isElectricalWork
+      ? "정전전로 및 그 인근 전기작업 조건, 통전 가능성·잔류전하·접근통제 확인 필요"
+      : isPumpConfinedSpace
       ? "지하 기계실 밀폐공간 조건, 산소·유해가스 농도와 환기 상태 확인 필요"
       : isLeakMaintenance
       ? "실내 누수 조건, 젖은 바닥·전기설비 접촉 가능성 확인 필요"
       : "현장 조건 미지정, 작업 전 실제 환경 확인 필요",
     riskLevel: "상",
-    topRisk: isPumpConfinedSpace
+    topRisk: isElectricalWork
+      ? "정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 또는 아크 화상 위험이 발생할 수 있음"
+      : isPumpConfinedSpace
       ? "지하 기계실 배수펌프 점검 중 산소결핍·유해가스 노출, 불시기동 끼임, 누수 바닥 미끄러짐 위험"
       : isLeakMaintenance
       ? "천장 누수 유지보수 중 고소작업 추락, 젖은 바닥 미끄러짐, 누전·감전, 천장재 낙하 위험"
       : "비정형 작업에서 작업방법·작업구역·감시자 역할이 불명확해 추락·끼임·감전 등 복합 위험이 발생할 수 있음",
-    hazards: isPumpConfinedSpace
+    hazards: isElectricalWork
+      ? [
+          "정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전",
+          "배전반 내부 충전부 접근 중 절연보호구·절연방호 미흡으로 인한 감전·화상",
+          "전원 차단·잠금표지·검전 절차 미확인으로 인한 오통전 및 작업자 접촉"
+        ]
+      : isPumpConfinedSpace
       ? [
           "밀폐공간 진입 전 환기·산소농도 측정 미흡으로 인한 질식",
           "배수펌프 전원 차단·LOTO 미흡으로 인한 불시기동 끼임·감전",
@@ -600,7 +620,13 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "작업구역 통제 미흡으로 인한 충돌·끼임",
           "2인 1조 감시·비상연락 미흡으로 인한 구조 지연"
         ],
-    actions: isPumpConfinedSpace
+    actions: isElectricalWork
+      ? [
+          "작업 전 정전 범위와 차단 위치를 표시하고 전원 차단·잠금표지 상태를 관리감독자가 확인",
+          "검전기로 무전압을 확인하고 잔류전하 방전 후 배전반 점검을 시작",
+          "절연장갑·절연화·안면보호구 등 절연보호구와 접근통제선을 작업 전 상호 확인"
+        ]
+      : isPumpConfinedSpace
       ? [
           "진입 전 강제환기 후 산소·유해가스 농도를 측정하고 감시인을 외부에 배치",
           "배수펌프 전원을 차단·검전하고 잠금표지(LOTO)를 부착한 뒤 점검 착수",
@@ -617,11 +643,19 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "2인 1조 역할을 작업자와 감시자로 분리하고 비상연락 수단을 확인",
           "작업구역 출입통제, 보호구 착용, 장비·공구 상태를 작업 전 확인"
         ],
-    educationName: isPumpConfinedSpace
+    educationName: isElectricalWork
+      ? "정전전로 인근 배전반 점검 전 감전 예방 TBM"
+      : isPumpConfinedSpace
       ? "지하 기계실 배수펌프 점검 전 밀폐공간·LOTO 안전교육"
       : isLeakMaintenance ? "천장 누수 유지보수 작업 전 감전·추락 예방 교육" : "비정형 유지보수 작업 전 안전교육",
-    educationTargets: "작업자 2인, 작업반장, 관리감독자",
-    questions: isPumpConfinedSpace
+    educationTargets: isElectricalWork ? "전기 작업자, 작업반장, 관리감독자" : "작업자 2인, 작업반장, 관리감독자",
+    questions: isElectricalWork
+      ? [
+          "정전 범위, 차단 위치, 잠금표지 상태를 누가 최종 확인했는가?",
+          "검전기로 무전압 확인과 잔류전하 방전을 작업 전 완료했는가?",
+          "절연보호구 착용, 접근통제, 비상연락 절차를 전원이 복창했는가?"
+        ]
+      : isPumpConfinedSpace
       ? [
           "진입 전 환기와 산소·유해가스 농도 측정값을 누가 확인했는가?",
           "배수펌프 전원 차단·검전·잠금표지(LOTO)를 작업 전 완료했는가?",
@@ -638,7 +672,13 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "2인 1조의 작업자·감시자 역할과 비상연락 절차를 전원이 이해했는가?",
           "작업구역 출입통제와 보호구 착용 상태를 작업 전 확인했는가?"
         ],
-    educationPoints: isPumpConfinedSpace
+    educationPoints: isElectricalWork
+      ? [
+          "정전전로 작업은 전원 차단·잠금표지·검전·잔류전하 방전 확인 전 시작하지 않기",
+          "배전반 접근 전 절연보호구와 절연공구 상태를 상호 확인",
+          "오통전 징후, 검전 이상, 보호구 손상 발견 시 즉시 작업중지 후 관리감독자에게 보고"
+        ]
+      : isPumpConfinedSpace
       ? [
           "밀폐공간 진입 전 환기와 산소·유해가스 농도 측정값 확인",
           "배수펌프 전원 차단·검전·잠금표지(LOTO) 완료 전 설비 접근 금지",
@@ -655,7 +695,7 @@ function buildCustomScenarioProfile(question: string): ScenarioProfile {
           "2인 1조 감시자와 비상연락 절차를 작업 전 복창",
           "위험구역 통제와 보호구 착용 확인 후 작업 시작"
         ],
-    keywords: []
+    keywords: isElectricalWork ? ["전기", "정전전로", "배전반", "검전", "절연보호구", "감전"] : []
   };
 }
 
@@ -689,7 +729,7 @@ function pickExplicitIndustryProfile(question: string) {
 function pickScenarioProfile(question: string) {
   const normalized = question.trim().toLowerCase();
 
-  if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question) || hasExcavationWorkIdentity(question)) {
+  if (/누수|비가\s*새|천장|비정형|유지보수|정비|점검/.test(question) || hasExcavationWorkIdentity(question) || hasElectricalWorkIdentity(question)) {
     return buildCustomScenarioProfile(question);
   }
 

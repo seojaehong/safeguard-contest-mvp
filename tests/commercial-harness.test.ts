@@ -2134,6 +2134,34 @@ describe("runAsk DB harness mode", () => {
     expect(response.qualityContract?.dbHarness.status).toBe("ready");
   }, 20_000);
 
+  it("materializes exact electrical KOSHA guidance into the generated workpack", async () => {
+    const response = await runAsk(
+      "세이프전기 부산 해운대 상가 정전전로 인근 배전반 점검 작업. 작업자 3명, 절연보호구와 검전 필요. 위험성평가와 TBM을 만들어줘.",
+      { aiMode: "enhanced" }
+    );
+
+    const documentSurface = [
+      response.scenario.workSummary,
+      response.riskSummary.topRisk,
+      response.deliverables.riskAssessmentDraft,
+      response.deliverables.tbmBriefing,
+      response.deliverables.kakaoMessage
+    ].join("\n");
+    const structuredSurface = JSON.stringify(response.structured ?? {});
+    const evidenceSurface = JSON.stringify(response.dbHarness?.packet ?? {});
+
+    expect(response.scenario.companyType).toBe("전기설비 점검");
+    expect(response.scenario.workSummary).toContain("정전전로 인근 배전반 점검 작업");
+    expect(documentSurface).toContain("정전전로");
+    expect(documentSurface).toContain("배전반");
+    expect(documentSurface).toContain("검전");
+    expect(documentSurface).toContain("절연보호구");
+    expect(documentSurface).not.toContain("비정형 유지보수 작업");
+    expect(`${structuredSurface}\n${documentSurface}`).toMatch(/감전|전원 차단|잠금표지|무전압|절연/);
+    expect(evidenceSurface).toContain("B-E-10");
+    expect(response.status.detail).toContain("structured rows=");
+  }, 20_000);
+
   it("turns accepted photo hazard memory into deterministic risk rows and TBM links", async () => {
     const response = await runAsk("성수동 외벽 도장 작업, 이동식 비계 사용", {
       aiMode: "template",
