@@ -29,6 +29,8 @@ Result: `2 files PASS / 1 skipped`, `9 tests PASS / 2 skipped`.
 
 ## Current Live Metrics
 
+Latest rerun: 2026-07-19T08:09:41Z against live `https://www.safeclaw.kr` while production build-info mapped to `f3dc4b6dd55bc37c770cebebb0d5f57b978d47e8`. The rerun refreshed `evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json`.
+
 - Desktop Day/Night: 15 visible neighborhood nodes, overlap pairs `0`, horizontal overflow `0`.
 - Tablet Day/Night: 15 visible neighborhood nodes, overlap pairs `0`, horizontal overflow `0`.
 - Mobile Day/Night: desktop graph hidden, relation cards visible, fullscreen graph verified with 15 nodes.
