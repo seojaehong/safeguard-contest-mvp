@@ -1,0 +1,64 @@
+{
+  "status": "pass-with-remaining-ia-work",
+  "date": "2026-07-20",
+  "head": "ac1a393f7fb5d27892e359a90449059845db27d1",
+  "served_surface": "http://localhost:3026",
+  "server": "next start --port 3026 from current production build",
+  "checked_blockers": [
+    {
+      "id": "why-mobile-comparison-overflow",
+      "prior_severity": "P0",
+      "current_verdict": "not_reproduced",
+      "evidence": {
+        "command": "npm.cmd test -- tests\\why-mobile-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+        "result": "pass",
+        "files": 1,
+        "tests": 4
+      }
+    },
+    {
+      "id": "interactive-yellow-contrast",
+      "prior_severity": "P0",
+      "current_verdict": "not_reproduced_in_representative_routes",
+      "evidence": {
+        "routes": [
+          "/",
+          "/workspace",
+          "/documents",
+          "/reports",
+          "/workers",
+          "/worker",
+          "/knowledge",
+          "/settings/ai-connect",
+          "/why",
+          "/archive",
+          "/home",
+          "/search"
+        ],
+        "selector_scope": "a, button, input[type=submit], [role=button]",
+        "low_contrast_interactive_count": 0
+      }
+    },
+    {
+      "id": "workspace-blank-submit-no-feedback",
+      "prior_severity": "P0",
+      "current_verdict": "fixed_on_current_head",
+      "evidence": {
+        "route": "/workspace?theme=day",
+        "viewport": "1440x900",
+        "after_empty_submit": {
+          "focus_tag": "TEXTAREA",
+          "alert_text": "현장 상황을 입력해 주세요."
+        }
+      }
+    }
+  ],
+  "deployment_marker_at_check_time": {
+    "production_commit_sha": "6314728790a2cd42f87a96280b98b8e88918984f",
+    "note": "Production had not yet advanced to ac1a393f at the start of this triage; this report is current-head local production evidence."
+  },
+  "remaining_recommended_next_work": [
+    "Mobile information architecture length reduction for /ontology and other knowledge-heavy pages.",
+    "Full live browser sweep after production marker reaches the current master."
+  ]
+}
