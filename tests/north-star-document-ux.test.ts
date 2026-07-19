@@ -142,17 +142,29 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
         .filter((element) => {
           const style = getComputedStyle(element);
           return !isInsideClosedDetails(element)
+            && !element.matches(".document-preview-pane pre")
             && /^(?:auto|scroll)$/u.test(style.overflowY)
             && element.scrollHeight > element.clientHeight + 1;
         })
         .length;
       return {
         viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight,
+        pageHeight: document.documentElement.scrollHeight,
         scrollWidth: document.documentElement.scrollWidth,
         nestedScrollCount: mobile ? nestedScrollCount : 0,
+        previewClientHeight: Math.round(document.querySelector<HTMLElement>(".document-preview-pane pre")?.clientHeight || 0),
+        previewScrollHeight: Math.round(document.querySelector<HTMLElement>(".document-preview-pane pre")?.scrollHeight || 0),
+        previewOverflowY: getComputedStyle(document.querySelector<HTMLElement>(".document-preview-pane pre") || document.body).overflowY,
         drawerHeight: Math.round(document.querySelector<HTMLElement>('[data-testid="document-provenance-drawer"]')?.getBoundingClientRect().height || 0)
       };
     }, width === 391);
+    if (width === 391) {
+      expect(reviewMetrics.previewClientHeight).toBeLessThanOrEqual(360);
+      expect(reviewMetrics.previewScrollHeight).toBeGreaterThanOrEqual(reviewMetrics.previewClientHeight);
+      expect(reviewMetrics.previewOverflowY).toBe("auto");
+      expect(reviewMetrics.pageHeight).toBeLessThanOrEqual(reviewMetrics.viewportHeight * 2.25);
+    }
 
     await page.locator(".doc-card-actions button", { hasText: "편집" }).click();
     await page.getByTestId("document-structured-editor").waitFor({ state: "visible" });

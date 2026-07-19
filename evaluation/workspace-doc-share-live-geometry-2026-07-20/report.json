@@ -1,0 +1,1518 @@
+{
+  "checkedAt": "2026-07-19T16:47:41.033Z",
+  "base": "https://www.safeclaw.kr",
+  "buildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "13346572796092333c7f7e8a0d28c189b32574a1",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-i402ux851-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "desktop": [
+    {
+      "label": "desktop-1440-input-empty",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "document": {
+        "scrollHeight": 988,
+        "clientHeight": 900,
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "bodyTextHead": "SafeClaw 현장 안전 문서팩 현장 상황 입력 Day Night 준비됨 현장 상황 입력 작업공간 입력 진행 중 ▣ 문서 잠김 ▣ 공유 잠김 현장 작업 입력 오늘 작업은 무엇인가요? 지역, 작업, 인원, 주요 위험만 적어도 됩니다. 현장 상황 입력 0/600자 작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 최대 10장 첨부하세요. + 사진 사진 첨부 최대 10장 첨부하면 위험요인 후보를 자동 분석하고, 선택한 후보만 문서에 반영합니다. 빠른 생성 안전 문서 생성 고급 설정 예시 불러오기",
+      "rects": {
+        "workbenchRoot": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 988,
+          "top": 0,
+          "bottom": 988,
+          "scrollHeight": 988,
+          "clientHeight": 988,
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        },
+        "fieldWorkspace": null,
+        "workspaceTopTitle": {
+          "x": 217,
+          "y": 25.796875,
+          "width": 863.71875,
+          "height": 44.390625,
+          "top": 25.796875,
+          "bottom": 70.1875,
+          "scrollHeight": 44,
+          "clientHeight": 44,
+          "scrollWidth": 864,
+          "clientWidth": 864
+        },
+        "workpackShell": null,
+        "workpackSidebar": null,
+        "documentCockpit": null,
+        "mobileDocumentPriority": null,
+        "documentViewerList": null,
+        "documentPreview": null,
+        "editorBody": null,
+        "structuredEditor": null,
+        "shareRoot": null,
+        "sharePreview": null,
+        "sharePrimary": null
+      },
+      "texts": {
+        "topTitle": "현장 상황입력",
+        "documentRail": "",
+        "shareRoot": "",
+        "sharePrimary": ""
+      },
+      "sticky": [],
+      "visibleControls": [
+        {
+          "tag": "a",
+          "text": "SafeClaw현장 안전 문서팩",
+          "x": 53,
+          "y": 24.46875,
+          "width": 140,
+          "height": 47.046875
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "x": 1109.71875,
+          "y": 30,
+          "width": 50.3125,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "x": 1164.03125,
+          "y": 30,
+          "width": 61.96875,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "입력진행 중",
+          "x": 52,
+          "y": 162,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "▣문서잠김",
+          "x": 52,
+          "y": 224,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "▣공유잠김",
+          "x": 52,
+          "y": 286,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "textarea",
+          "text": "",
+          "x": 430,
+          "y": 423.546875,
+          "width": 760,
+          "height": 152
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "x": 440,
+          "y": 670.9375,
+          "width": 73.921875,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "안전 문서 생성",
+          "x": 1005,
+          "y": 668.9375,
+          "width": 176,
+          "height": 46
+        },
+        {
+          "tag": "summary",
+          "text": "고급 설정",
+          "x": 430,
+          "y": 753.9375,
+          "width": 85.625,
+          "height": 44
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "x": 709,
+          "y": 854.9375,
+          "width": 20,
+          "height": 20
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "x": 955,
+          "y": 854.9375,
+          "width": 20,
+          "height": 20
+        },
+        {
+          "tag": "summary",
+          "text": "예시 불러오기",
+          "x": 320,
+          "y": 833.9375,
+          "width": 107.703125,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "인천 물류 · 우천 · 숙련자 중심",
+          "x": 497.265625,
+          "y": 889.9375,
+          "width": 180.296875,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "안산 제조 · 화기 · 외국인 포함",
+          "x": 685.5625,
+          "y": 889.9375,
+          "width": 180.296875,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "부산 시설 · 밀폐공간 · 2인 작업",
+          "x": 873.859375,
+          "y": 889.9375,
+          "width": 187.265625,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "label": "desktop-1440-after-generate",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "document": {
+        "scrollHeight": 1170,
+        "clientHeight": 900,
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "bodyTextHead": "SafeClaw 현장 안전 문서팩 결과 검토 문서 Day Night 공유 전 보완 안전조치 검수 정보 확인 필요 작업공간 ✓ 입력 완료 문서 검수 필요 ! 공유 전송 잠금 현재 작업 서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보 서울 성수동 근린생활시설 현장 · 5명 근거 준비 고위험요인 사례 조회 예정 KOSHA 공식자료 보조 근거 위험요인-조치 그래프 검수 보류 최근 예시 서울 건설 · 강풍 · 신규 혼재 서울 성수동 인천 물류 · 우천 · 숙련자 중심 인천 남동공단 안산 제조 · 화기 · 외국인 포함 경기 안산 부산 시설 · 밀폐공간 · 2인 작업 부산 해운대 문서 생성 완료 안전 문서팩 3종 준비 완료 문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요. 12/12 생성 검수 필요 · 4건 근거 근거 3건 · 확인 필요 8건 선택 위험성평가표 핵심 문서 TBM 브리핑 핵심 문서 TBM 기록 문서 미리보기 위험성평가표 ",
+      "rects": {
+        "workbenchRoot": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 1170,
+          "top": 0,
+          "bottom": 1170,
+          "scrollHeight": 1170,
+          "clientHeight": 1170,
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        },
+        "fieldWorkspace": null,
+        "workspaceTopTitle": {
+          "x": 217,
+          "y": 25.796875,
+          "width": 832.796875,
+          "height": 44.390625,
+          "top": 25.796875,
+          "bottom": 70.1875,
+          "scrollHeight": 44,
+          "clientHeight": 44,
+          "scrollWidth": 833,
+          "clientWidth": 833
+        },
+        "workpackShell": null,
+        "workpackSidebar": null,
+        "documentCockpit": null,
+        "mobileDocumentPriority": null,
+        "documentViewerList": {
+          "x": 389,
+          "y": 355.046875,
+          "width": 194,
+          "height": 484,
+          "top": 355.046875,
+          "bottom": 839.046875,
+          "scrollHeight": 484,
+          "clientHeight": 484,
+          "scrollWidth": 194,
+          "clientWidth": 194
+        },
+        "documentPreview": null,
+        "editorBody": null,
+        "structuredEditor": null,
+        "shareRoot": null,
+        "sharePreview": null,
+        "sharePrimary": null
+      },
+      "texts": {
+        "topTitle": "결과 검토문서",
+        "documentRail": "선택위험성평가표핵심 문서TBM 브리핑핵심 문서TBM 기록",
+        "shareRoot": "",
+        "sharePrimary": ""
+      },
+      "sticky": [],
+      "visibleControls": [
+        {
+          "tag": "a",
+          "text": "SafeClaw현장 안전 문서팩",
+          "x": 53,
+          "y": 24.46875,
+          "width": 140,
+          "height": 47.046875
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "x": 1078.796875,
+          "y": 30,
+          "width": 50.3125,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "x": 1133.109375,
+          "y": 30,
+          "width": 61.96875,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "✓입력완료",
+          "x": 52,
+          "y": 162,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "문서검수 필요",
+          "x": 52,
+          "y": 224,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "!공유전송 잠금",
+          "x": 52,
+          "y": 286,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "서울 건설 · 강풍 · 신규 혼재서울 성수동",
+          "x": 52,
+          "y": 854,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "summary",
+          "text": "근거 3건 · 확인 필요 8건",
+          "x": 390,
+          "y": 294,
+          "width": 940,
+          "height": 48.046875
+        },
+        {
+          "tag": "a",
+          "text": "원문 열기",
+          "x": 415,
+          "y": 728.046875,
+          "width": 55.453125,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "선택위험성평가표",
+          "x": 413,
+          "y": 379.046875,
+          "width": 146,
+          "height": 66
+        },
+        {
+          "tag": "button",
+          "text": "핵심 문서TBM 브리핑",
+          "x": 413,
+          "y": 453.046875,
+          "width": 146,
+          "height": 66
+        },
+        {
+          "tag": "button",
+          "text": "핵심 문서TBM 기록",
+          "x": 413,
+          "y": 527.046875,
+          "width": 146,
+          "height": 66
+        },
+        {
+          "tag": "button",
+          "text": "편집",
+          "x": 1166.296875,
+          "y": 380.046875,
+          "width": 48.09375,
+          "height": 34.1875
+        },
+        {
+          "tag": "button",
+          "text": "다운로드 설정",
+          "x": 1222.390625,
+          "y": 380.046875,
+          "width": 95.609375,
+          "height": 34.1875
+        },
+        {
+          "tag": "button",
+          "text": "공유 단계로 이동",
+          "x": 1142,
+          "y": 780.046875,
+          "width": 176,
+          "height": 46
+        },
+        {
+          "tag": "summary",
+          "text": "작업 이력완료",
+          "x": 390,
+          "y": 852.046875,
+          "width": 940,
+          "height": 42
+        }
+      ]
+    },
+    {
+      "label": "desktop-1440-documents-clicked",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "document": {
+        "scrollHeight": 1170,
+        "clientHeight": 900,
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "bodyTextHead": "SafeClaw 현장 안전 문서팩 결과 검토 문서 Day Night 공유 전 보완 안전조치 검수 정보 확인 필요 작업공간 ✓ 입력 완료 문서 검수 필요 ! 공유 전송 잠금 현재 작업 서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보 서울 성수동 근린생활시설 현장 · 5명 근거 준비 고위험요인 사례 조회 예정 KOSHA 공식자료 보조 근거 위험요인-조치 그래프 검수 보류 최근 예시 서울 건설 · 강풍 · 신규 혼재 서울 성수동 인천 물류 · 우천 · 숙련자 중심 인천 남동공단 안산 제조 · 화기 · 외국인 포함 경기 안산 부산 시설 · 밀폐공간 · 2인 작업 부산 해운대 문서 생성 완료 안전 문서팩 3종 준비 완료 문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요. 12/12 생성 검수 필요 · 4건 근거 근거 3건 · 확인 필요 8건 선택 위험성평가표 핵심 문서 TBM 브리핑 핵심 문서 TBM 기록 문서 미리보기 위험성평가표 ",
+      "rects": {
+        "workbenchRoot": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 1170,
+          "top": 0,
+          "bottom": 1170,
+          "scrollHeight": 1170,
+          "clientHeight": 1170,
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        },
+        "fieldWorkspace": null,
+        "workspaceTopTitle": {
+          "x": 217,
+          "y": 25.796875,
+          "width": 832.796875,
+          "height": 44.390625,
+          "top": 25.796875,
+          "bottom": 70.1875,
+          "scrollHeight": 44,
+          "clientHeight": 44,
+          "scrollWidth": 833,
+          "clientWidth": 833
+        },
+        "workpackShell": null,
+        "workpackSidebar": null,
+        "documentCockpit": null,
+        "mobileDocumentPriority": null,
+        "documentViewerList": {
+          "x": 389,
+          "y": 355.046875,
+          "width": 194,
+          "height": 484,
+          "top": 355.046875,
+          "bottom": 839.046875,
+          "scrollHeight": 484,
+          "clientHeight": 484,
+          "scrollWidth": 194,
+          "clientWidth": 194
+        },
+        "documentPreview": null,
+        "editorBody": null,
+        "structuredEditor": null,
+        "shareRoot": null,
+        "sharePreview": null,
+        "sharePrimary": null
+      },
+      "texts": {
+        "topTitle": "결과 검토문서",
+        "documentRail": "선택위험성평가표핵심 문서TBM 브리핑핵심 문서TBM 기록",
+        "shareRoot": "",
+        "sharePrimary": ""
+      },
+      "sticky": [],
+      "visibleControls": [
+        {
+          "tag": "a",
+          "text": "SafeClaw현장 안전 문서팩",
+          "x": 53,
+          "y": 24.46875,
+          "width": 140,
+          "height": 47.046875
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "x": 1078.796875,
+          "y": 30,
+          "width": 50.3125,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "x": 1133.109375,
+          "y": 30,
+          "width": 61.96875,
+          "height": 36
+        },
+        {
+          "tag": "button",
+          "text": "✓입력완료",
+          "x": 52,
+          "y": 162,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "문서검수 필요",
+          "x": 52,
+          "y": 224,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "!공유전송 잠금",
+          "x": 52,
+          "y": 286,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "서울 건설 · 강풍 · 신규 혼재서울 성수동",
+          "x": 52,
+          "y": 854,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "summary",
+          "text": "근거 3건 · 확인 필요 8건",
+          "x": 390,
+          "y": 294,
+          "width": 940,
+          "height": 48.046875
+        },
+        {
+          "tag": "a",
+          "text": "원문 열기",
+          "x": 415,
+          "y": 728.046875,
+          "width": 55.453125,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "선택위험성평가표",
+          "x": 413,
+          "y": 379.046875,
+          "width": 146,
+          "height": 66
+        },
+        {
+          "tag": "button",
+          "text": "핵심 문서TBM 브리핑",
+          "x": 413,
+          "y": 453.046875,
+          "width": 146,
+          "height": 66
+        },
+        {
+          "tag": "button",
+          "text": "핵심 문서TBM 기록",
+          "x": 413,
+          "y": 527.046875,
+          "width": 146,
+          "height": 66
+        },
+        {
+          "tag": "button",
+          "text": "편집",
+          "x": 1166.296875,
+          "y": 380.046875,
+          "width": 48.09375,
+          "height": 34.1875
+        },
+        {
+          "tag": "button",
+          "text": "다운로드 설정",
+          "x": 1222.390625,
+          "y": 380.046875,
+          "width": 95.609375,
+          "height": 34.1875
+        },
+        {
+          "tag": "button",
+          "text": "공유 단계로 이동",
+          "x": 1142,
+          "y": 780.046875,
+          "width": 176,
+          "height": 46
+        },
+        {
+          "tag": "summary",
+          "text": "작업 이력완료",
+          "x": 390,
+          "y": 852.046875,
+          "width": 940,
+          "height": 42
+        }
+      ]
+    },
+    {
+      "label": "desktop-1440-share-clicked",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "document": {
+        "scrollHeight": 1178,
+        "clientHeight": 900,
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "bodyTextHead": "SafeClaw 현장 안전 문서팩 공유·기록 공유 Day Night 공유 전 보완 안전조치 검수 정보 확인 필요 작업공간 ✓ 입력 완료 ! 문서 검수 필요 공유 보완 확인 현재 작업 서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보 서울 성수동 근린생활시설 현장 · 5명 근거 준비 고위험요인 사례 조회 예정 KOSHA 공식자료 보조 근거 위험요인-조치 그래프 검수 보류 최근 예시 서울 건설 · 강풍 · 신규 혼재 서울 성수동 인천 물류 · 우천 · 숙련자 중심 인천 남동공단 안산 제조 · 화기 · 외국인 포함 경기 안산 부산 시설 · 밀폐공간 · 2인 작업 부산 해운대 오늘 작업 언어별 전송본 미리보기 오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다. 미리보기 전용 안전한 중복 방지 저장 기능을 준비하고 있습니다. 01 오늘 대상 2명 선택 현장관리자 · 한국어 신규 작업자 · 한국어 작업자별 저장 언어로 전송본을 준비합니다. 대상 변경 02",
+      "rects": {
+        "workbenchRoot": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 1178,
+          "top": 0,
+          "bottom": 1178,
+          "scrollHeight": 1178,
+          "clientHeight": 1178,
+          "scrollWidth": 1440,
+          "clientWidth": 1440
+        },
+        "fieldWorkspace": {
+          "x": 376,
+          "y": 172,
+          "width": 968,
+          "height": 803.234375,
+          "top": 172,
+          "bottom": 975.234375,
+          "scrollHeight": 803,
+          "clientHeight": 803,
+          "scrollWidth": 968,
+          "clientWidth": 968
+        },
+        "workspaceTopTitle": {
+          "x": 217,
+          "y": 29.796875,
+          "width": 832.796875,
+          "height": 44.390625,
+          "top": 29.796875,
+          "bottom": 74.1875,
+          "scrollHeight": 44,
+          "clientHeight": 44,
+          "scrollWidth": 833,
+          "clientWidth": 833
+        },
+        "workpackShell": null,
+        "workpackSidebar": null,
+        "documentCockpit": null,
+        "mobileDocumentPriority": null,
+        "documentViewerList": null,
+        "documentPreview": null,
+        "editorBody": null,
+        "structuredEditor": null,
+        "shareRoot": {
+          "x": 376,
+          "y": 172,
+          "width": 968,
+          "height": 803.234375,
+          "top": 172,
+          "bottom": 975.234375,
+          "scrollHeight": 801,
+          "clientHeight": 801,
+          "scrollWidth": 966,
+          "clientWidth": 966
+        },
+        "sharePreview": {
+          "x": 391,
+          "y": 636.234375,
+          "width": 938,
+          "height": 270,
+          "top": 636.234375,
+          "bottom": 906.234375,
+          "scrollHeight": 268,
+          "clientHeight": 268,
+          "scrollWidth": 936,
+          "clientWidth": 936
+        },
+        "sharePrimary": {
+          "x": 1153,
+          "y": 916.234375,
+          "width": 176,
+          "height": 44,
+          "top": 916.234375,
+          "bottom": 960.234375,
+          "scrollHeight": 42,
+          "clientHeight": 42,
+          "scrollWidth": 174,
+          "clientWidth": 174
+        }
+      },
+      "texts": {
+        "topTitle": "공유·기록공유",
+        "documentRail": "",
+        "shareRoot": "오늘 작업언어별 전송본 미리보기오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다.미리보기 전용안전한 중복 방지 저장 기능을 준비하고 있습니다.01오늘 대상2명 선택현장관리자 · 한국어신규 작업자 · 한국어작업자별 저장 언어로 전송본을 준비합니다.대상 변경02채널메일미리보기 전용문자미리보기 전용카카오미리보기 전용발송 채널 준비 안내다시 확인03언어 미리보기표시 언어관리자용 한국어베트남어 · Tiếng Việt중국어 · 中文태국어 · ภาษาไทย우즈베크어",
+        "sharePrimary": "미리보기 전용"
+      },
+      "sticky": [],
+      "visibleControls": [
+        {
+          "tag": "a",
+          "text": "SafeClaw현장 안전 문서팩",
+          "x": 53,
+          "y": 28.46875,
+          "width": 140,
+          "height": 47.046875
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "x": 1078.796875,
+          "y": 30,
+          "width": 50.3125,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "x": 1133.109375,
+          "y": 30,
+          "width": 61.96875,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "✓입력완료",
+          "x": 52,
+          "y": 170,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "!문서검수 필요",
+          "x": 52,
+          "y": 232,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "공유보완 확인",
+          "x": 52,
+          "y": 294,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "button",
+          "text": "서울 건설 · 강풍 · 신규 혼재서울 성수동",
+          "x": 52,
+          "y": 862,
+          "width": 239,
+          "height": 50
+        },
+        {
+          "tag": "a",
+          "text": "대상 변경",
+          "x": 404,
+          "y": 439.5625,
+          "width": 336.4375,
+          "height": 49.828125
+        },
+        {
+          "tag": "button",
+          "text": "메일미리보기 전용",
+          "x": 778.4375,
+          "y": 323,
+          "width": 75.296875,
+          "height": 114.390625
+        },
+        {
+          "tag": "button",
+          "text": "문자미리보기 전용",
+          "x": 861.734375,
+          "y": 323,
+          "width": 75.296875,
+          "height": 114.390625
+        },
+        {
+          "tag": "button",
+          "text": "카카오미리보기 전용",
+          "x": 945.03125,
+          "y": 323,
+          "width": 75.3125,
+          "height": 114.390625
+        },
+        {
+          "tag": "a",
+          "text": "발송 채널 준비 안내",
+          "x": 798.25,
+          "y": 445.390625,
+          "width": 132.609375,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "다시 확인",
+          "x": 942.859375,
+          "y": 445.390625,
+          "width": 77.484375,
+          "height": 44
+        },
+        {
+          "tag": "select",
+          "text": "관리자용 한국어베트남어 · Tiếng Việt중국어 · 中文태국어 · ภาษาไทย우즈베크어 · O'zbekcha몽골어 · Монгол хэл네",
+          "x": 1058.34375,
+          "y": 362,
+          "width": 257.640625,
+          "height": 54.5
+        }
+      ]
+    }
+  ],
+  "mobile": [
+    {
+      "label": "mobile-390-input-empty",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "document": {
+        "scrollHeight": 988,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "bodyTextHead": "SafeClaw Day Night 작업공간 입력 ▣ 문서 ▣ 공유 현장 작업 입력 오늘 작업은 무엇인가요? 현장 상황 입력 0/600자 + 사진 사진 첨부 최대 10장 빠른 생성 안전 문서 생성 고급 설정 예시 불러오기",
+      "rects": {
+        "workbenchRoot": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 987.796875,
+          "top": 0,
+          "bottom": 987.796875,
+          "scrollHeight": 988,
+          "clientHeight": 988,
+          "scrollWidth": 390,
+          "clientWidth": 390
+        },
+        "fieldWorkspace": null,
+        "workspaceTopTitle": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "bottom": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "scrollWidth": 0,
+          "clientWidth": 0
+        },
+        "workpackShell": null,
+        "workpackSidebar": null,
+        "documentCockpit": null,
+        "mobileDocumentPriority": null,
+        "documentViewerList": null,
+        "documentPreview": null,
+        "editorBody": null,
+        "structuredEditor": null,
+        "shareRoot": null,
+        "sharePreview": null,
+        "sharePrimary": null
+      },
+      "texts": {
+        "topTitle": "현장 상황입력",
+        "documentRail": "",
+        "shareRoot": "",
+        "sharePrimary": ""
+      },
+      "sticky": [],
+      "visibleControls": [
+        {
+          "tag": "a",
+          "text": "SafeClaw현장 안전 문서팩",
+          "x": 23,
+          "y": 17,
+          "width": 344,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "x": 28,
+          "y": 70,
+          "width": 50.3125,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "x": 82.3125,
+          "y": 70,
+          "width": 61.96875,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "입력진행 중",
+          "x": 23,
+          "y": 207,
+          "width": 106.65625,
+          "height": 48
+        },
+        {
+          "tag": "button",
+          "text": "▣문서잠김",
+          "x": 141.65625,
+          "y": 207,
+          "width": 106.671875,
+          "height": 48
+        },
+        {
+          "tag": "button",
+          "text": "▣공유잠김",
+          "x": 260.328125,
+          "y": 207,
+          "width": 106.65625,
+          "height": 48
+        },
+        {
+          "tag": "textarea",
+          "text": "",
+          "x": 29,
+          "y": 412.796875,
+          "width": 332,
+          "height": 142
+        },
+        {
+          "tag": "input",
+          "text": "",
+          "x": 39,
+          "y": 584.796875,
+          "width": 312,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "안전 문서 생성",
+          "x": 38,
+          "y": 707.796875,
+          "width": 314,
+          "height": 46
+        },
+        {
+          "tag": "summary",
+          "text": "고급 설정",
+          "x": 29,
+          "y": 786.796875,
+          "width": 85.625,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "label": "mobile-390-after-generate",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "document": {
+        "scrollHeight": 2589,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "bodyTextHead": "SafeClaw Day Night 작업공간 ✓ 입력 문서 ! 공유 문서 생성 완료 안전 문서팩 3종 준비 완료 문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요. 12/12 생성 검수 필요 · 4건 근거 근거 3건 · 확인 필요 8건 위험성평가표 TBM 브리핑 TBM 기록 문서 미리보기 위험성평가표 편집 다운로드 설정 [오늘 개선·이력 반영 - 위험성평가] - 공유 전 보완: SIF 유사사례 - 공유 전 보완: 위험성평가표 근거 - 공유 전 보완: TBM 브리핑 근거 위험성평가표(초안) 공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고 업체명: 세이프건설 업종: 건설업 작업명: 외벽 도장 작업 공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제 작업장소: 서울 성수동 근린생활시설 현장 작업인원: 5명 기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요 [1. 사전준비] - 평가대상 작업: 외벽 도장 작업 - 참여자",
+      "rects": {
+        "workbenchRoot": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 2588.609375,
+          "top": 0,
+          "bottom": 2588.609375,
+          "scrollHeight": 2589,
+          "clientHeight": 2589,
+          "scrollWidth": 390,
+          "clientWidth": 390
+        },
+        "fieldWorkspace": null,
+        "workspaceTopTitle": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "bottom": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "scrollWidth": 0,
+          "clientWidth": 0
+        },
+        "workpackShell": null,
+        "workpackSidebar": null,
+        "documentCockpit": null,
+        "mobileDocumentPriority": null,
+        "documentViewerList": {
+          "x": 40,
+          "y": 593.046875,
+          "width": 310,
+          "height": 72,
+          "top": 593.046875,
+          "bottom": 665.046875,
+          "scrollHeight": 72,
+          "clientHeight": 72,
+          "scrollWidth": 310,
+          "clientWidth": 310
+        },
+        "documentPreview": null,
+        "editorBody": null,
+        "structuredEditor": null,
+        "shareRoot": null,
+        "sharePreview": null,
+        "sharePrimary": null
+      },
+      "texts": {
+        "topTitle": "결과 검토문서",
+        "documentRail": "선택위험성평가표핵심 문서TBM 브리핑핵심 문서TBM 기록",
+        "shareRoot": "",
+        "sharePrimary": ""
+      },
+      "sticky": [],
+      "visibleControls": [
+        {
+          "tag": "a",
+          "text": "SafeClaw현장 안전 문서팩",
+          "x": 23,
+          "y": 17,
+          "width": 344,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "x": 28,
+          "y": 70,
+          "width": 50.3125,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "x": 82.3125,
+          "y": 70,
+          "width": 61.96875,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "✓입력완료",
+          "x": 23,
+          "y": 207,
+          "width": 106.65625,
+          "height": 48
+        },
+        {
+          "tag": "button",
+          "text": "문서검수 필요",
+          "x": 141.65625,
+          "y": 207,
+          "width": 106.671875,
+          "height": 48
+        },
+        {
+          "tag": "button",
+          "text": "!공유전송 잠금",
+          "x": 260.328125,
+          "y": 207,
+          "width": 106.65625,
+          "height": 48
+        },
+        {
+          "tag": "summary",
+          "text": "근거 3건 · 확인 필요 8건",
+          "x": 41,
+          "y": 532,
+          "width": 308,
+          "height": 48.046875
+        },
+        {
+          "tag": "a",
+          "text": "원문 열기",
+          "x": 66,
+          "y": 714.046875,
+          "width": 55.453125,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "선택위험성평가표",
+          "x": 56,
+          "y": 609.046875,
+          "width": 87.328125,
+          "height": 56
+        },
+        {
+          "tag": "button",
+          "text": "핵심 문서TBM 브리핑",
+          "x": 151.328125,
+          "y": 609.046875,
+          "width": 87.328125,
+          "height": 56
+        },
+        {
+          "tag": "button",
+          "text": "핵심 문서TBM 기록",
+          "x": 246.65625,
+          "y": 609.046875,
+          "width": 87.34375,
+          "height": 56
+        },
+        {
+          "tag": "button",
+          "text": "편집",
+          "x": 191.796875,
+          "y": 702.046875,
+          "width": 48.09375,
+          "height": 34.1875
+        },
+        {
+          "tag": "button",
+          "text": "다운로드 설정",
+          "x": 191.796875,
+          "y": 744.234375,
+          "width": 95.609375,
+          "height": 34.1875
+        }
+      ]
+    },
+    {
+      "label": "mobile-390-documents-clicked",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "document": {
+        "scrollHeight": 2589,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "bodyTextHead": "SafeClaw Day Night 작업공간 ✓ 입력 문서 ! 공유 문서 생성 완료 안전 문서팩 3종 준비 완료 문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요. 12/12 생성 검수 필요 · 4건 근거 근거 3건 · 확인 필요 8건 위험성평가표 TBM 브리핑 TBM 기록 문서 미리보기 위험성평가표 편집 다운로드 설정 [오늘 개선·이력 반영 - 위험성평가] - 공유 전 보완: SIF 유사사례 - 공유 전 보완: 위험성평가표 근거 - 공유 전 보완: TBM 브리핑 근거 위험성평가표(초안) 공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고 업체명: 세이프건설 업종: 건설업 작업명: 외벽 도장 작업 공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제 작업장소: 서울 성수동 근린생활시설 현장 작업인원: 5명 기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요 [1. 사전준비] - 평가대상 작업: 외벽 도장 작업 - 참여자",
+      "rects": {
+        "workbenchRoot": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 2588.609375,
+          "top": 0,
+          "bottom": 2588.609375,
+          "scrollHeight": 2589,
+          "clientHeight": 2589,
+          "scrollWidth": 390,
+          "clientWidth": 390
+        },
+        "fieldWorkspace": null,
+        "workspaceTopTitle": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "bottom": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "scrollWidth": 0,
+          "clientWidth": 0
+        },
+        "workpackShell": null,
+        "workpackSidebar": null,
+        "documentCockpit": null,
+        "mobileDocumentPriority": null,
+        "documentViewerList": {
+          "x": 40,
+          "y": 593.046875,
+          "width": 310,
+          "height": 72,
+          "top": 593.046875,
+          "bottom": 665.046875,
+          "scrollHeight": 72,
+          "clientHeight": 72,
+          "scrollWidth": 310,
+          "clientWidth": 310
+        },
+        "documentPreview": null,
+        "editorBody": null,
+        "structuredEditor": null,
+        "shareRoot": null,
+        "sharePreview": null,
+        "sharePrimary": null
+      },
+      "texts": {
+        "topTitle": "결과 검토문서",
+        "documentRail": "선택위험성평가표핵심 문서TBM 브리핑핵심 문서TBM 기록",
+        "shareRoot": "",
+        "sharePrimary": ""
+      },
+      "sticky": [],
+      "visibleControls": [
+        {
+          "tag": "a",
+          "text": "SafeClaw현장 안전 문서팩",
+          "x": 23,
+          "y": 17,
+          "width": 344,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "x": 28,
+          "y": 70,
+          "width": 50.3125,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "x": 82.3125,
+          "y": 70,
+          "width": 61.96875,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "✓입력완료",
+          "x": 23,
+          "y": 207,
+          "width": 106.65625,
+          "height": 48
+        },
+        {
+          "tag": "button",
+          "text": "문서검수 필요",
+          "x": 141.65625,
+          "y": 207,
+          "width": 106.671875,
+          "height": 48
+        },
+        {
+          "tag": "button",
+          "text": "!공유전송 잠금",
+          "x": 260.328125,
+          "y": 207,
+          "width": 106.65625,
+          "height": 48
+        },
+        {
+          "tag": "summary",
+          "text": "근거 3건 · 확인 필요 8건",
+          "x": 41,
+          "y": 532,
+          "width": 308,
+          "height": 48.046875
+        },
+        {
+          "tag": "a",
+          "text": "원문 열기",
+          "x": 66,
+          "y": 714.046875,
+          "width": 55.453125,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "선택위험성평가표",
+          "x": 56,
+          "y": 609.046875,
+          "width": 87.328125,
+          "height": 56
+        },
+        {
+          "tag": "button",
+          "text": "핵심 문서TBM 브리핑",
+          "x": 151.328125,
+          "y": 609.046875,
+          "width": 87.328125,
+          "height": 56
+        },
+        {
+          "tag": "button",
+          "text": "핵심 문서TBM 기록",
+          "x": 246.65625,
+          "y": 609.046875,
+          "width": 87.34375,
+          "height": 56
+        },
+        {
+          "tag": "button",
+          "text": "편집",
+          "x": 191.796875,
+          "y": 702.046875,
+          "width": 48.09375,
+          "height": 34.1875
+        },
+        {
+          "tag": "button",
+          "text": "다운로드 설정",
+          "x": 191.796875,
+          "y": 744.234375,
+          "width": 95.609375,
+          "height": 34.1875
+        }
+      ]
+    },
+    {
+      "label": "mobile-390-share-clicked",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "document": {
+        "scrollHeight": 1678,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "bodyTextHead": "SafeClaw Day Night ✓ 입력 ! 문서 공유 오늘 작업 언어별 전송본 미리보기 미리보기 전용 안전한 중복 방지 저장 기능을 준비하고 있습니다. 01 오늘 대상 2명 선택 현장관리자 · 한국어 신규 작업자 · 한국어 작업자별 저장 언어로 전송본을 준비합니다. 대상 변경 02 채널 메일 미리보기 전용 문자 미리보기 전용 카카오 미리보기 전용 발송 채널 준비 안내 다시 확인 03 언어 미리보기 표시 언어 관리자용 한국어 베트남어 · Tiếng Việt 중국어 · 中文 태국어 · ภาษาไทย 우즈베크어 · O'zbekcha 몽골어 · Монгол хэл 네팔어 · नेपाली 캄보디아어 · ភាសាខ្មែរ 영어 · English 인도네시아어 · Bahasa Indonesia 미얀마어 · မြန်မာဘာသာ 전송 전 확인 공유 전 보완 필요 메시지 미리보기 한국어 메시지 미리보기 [오늘 작업 안전공지] 세이프건설 현장: 서울 성수동 근린생활시설 현장 작업: 외벽 도장 작업 특",
+      "rects": {
+        "workbenchRoot": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 1678.140625,
+          "top": 0,
+          "bottom": 1678.140625,
+          "scrollHeight": 1678,
+          "clientHeight": 1678,
+          "scrollWidth": 390,
+          "clientWidth": 390
+        },
+        "fieldWorkspace": {
+          "x": 27,
+          "y": 268,
+          "width": 316,
+          "height": 1305.140625,
+          "top": 268,
+          "bottom": 1573.140625,
+          "scrollHeight": 1305,
+          "clientHeight": 1305,
+          "scrollWidth": 316,
+          "clientWidth": 316
+        },
+        "workspaceTopTitle": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "bottom": 0,
+          "scrollHeight": 0,
+          "clientHeight": 0,
+          "scrollWidth": 0,
+          "clientWidth": 0
+        },
+        "workpackShell": null,
+        "workpackSidebar": null,
+        "documentCockpit": null,
+        "mobileDocumentPriority": null,
+        "documentViewerList": null,
+        "documentPreview": null,
+        "editorBody": null,
+        "structuredEditor": null,
+        "shareRoot": {
+          "x": 27,
+          "y": 268,
+          "width": 316,
+          "height": 1305.140625,
+          "top": 268,
+          "bottom": 1573.140625,
+          "scrollHeight": 1303,
+          "clientHeight": 1303,
+          "scrollWidth": 314,
+          "clientWidth": 314
+        },
+        "sharePreview": {
+          "x": 40,
+          "y": 1146.140625,
+          "width": 290,
+          "height": 362,
+          "top": 1146.140625,
+          "bottom": 1508.140625,
+          "scrollHeight": 360,
+          "clientHeight": 360,
+          "scrollWidth": 288,
+          "clientWidth": 288
+        },
+        "sharePrimary": {
+          "x": 40,
+          "y": 1516.140625,
+          "width": 290,
+          "height": 44,
+          "top": 1516.140625,
+          "bottom": 1560.140625,
+          "scrollHeight": 42,
+          "clientHeight": 42,
+          "scrollWidth": 288,
+          "clientWidth": 288
+        }
+      },
+      "texts": {
+        "topTitle": "공유·기록공유",
+        "documentRail": "",
+        "shareRoot": "오늘 작업언어별 전송본 미리보기오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다.미리보기 전용안전한 중복 방지 저장 기능을 준비하고 있습니다.01오늘 대상2명 선택현장관리자 · 한국어신규 작업자 · 한국어작업자별 저장 언어로 전송본을 준비합니다.대상 변경02채널메일미리보기 전용문자미리보기 전용카카오미리보기 전용발송 채널 준비 안내다시 확인03언어 미리보기표시 언어관리자용 한국어베트남어 · Tiếng Việt중국어 · 中文태국어 · ภาษาไทย우즈베크어",
+        "sharePrimary": "미리보기 전용"
+      },
+      "sticky": [],
+      "visibleControls": [
+        {
+          "tag": "a",
+          "text": "SafeClaw현장 안전 문서팩",
+          "x": 23,
+          "y": 17,
+          "width": 344,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "Day",
+          "x": 28,
+          "y": 70,
+          "width": 50.3125,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "Night",
+          "x": 82.3125,
+          "y": 70,
+          "width": 61.96875,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "✓입력완료",
+          "x": 31,
+          "y": 185,
+          "width": 105.328125,
+          "height": 48
+        },
+        {
+          "tag": "button",
+          "text": "!문서검수 필요",
+          "x": 142.328125,
+          "y": 185,
+          "width": 105.328125,
+          "height": 48
+        },
+        {
+          "tag": "button",
+          "text": "공유보완 확인",
+          "x": 253.65625,
+          "y": 185,
+          "width": 105.34375,
+          "height": 48
+        },
+        {
+          "tag": "a",
+          "text": "대상 변경",
+          "x": 51,
+          "y": 594.09375,
+          "width": 268,
+          "height": 44
+        },
+        {
+          "tag": "button",
+          "text": "메일미리보기 전용",
+          "x": 51,
+          "y": 702.09375,
+          "width": 84,
+          "height": 86
+        },
+        {
+          "tag": "button",
+          "text": "문자미리보기 전용",
+          "x": 143,
+          "y": 702.09375,
+          "width": 84,
+          "height": 86
+        },
+        {
+          "tag": "button",
+          "text": "카카오미리보기 전용",
+          "x": 235,
+          "y": 702.09375,
+          "width": 84,
+          "height": 86
+        },
+        {
+          "tag": "a",
+          "text": "발송 채널 준비 안내",
+          "x": 51,
+          "y": 794.09375,
+          "width": 268,
+          "height": 44
+        }
+      ]
+    }
+  ]
+}

@@ -1886,7 +1886,7 @@ export function SafeGuardCommandCenter({
     : "workspace-theme-night";
 
   return (
-    <main className={`command-center-shell workbench-root ${themeShellClass}`}>
+    <main className={`command-center-shell workbench-root ${themeShellClass} workspace-page-${workspacePage}`}>
       <header className="command-topbar workspace-command-topbar">
         <Link href="/" className="brand-lockup safeclaw-lockup" aria-label="SafeClaw 홈으로 이동">
           {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -129,8 +129,11 @@ describe("workspace mobile share presentation", () => {
             const primaryRect = primary.getBoundingClientRect();
             const lastParagraphRect = paragraphs.at(-1)?.getBoundingClientRect();
             return {
+              viewportHeight: window.innerHeight,
+              pageHeight: document.documentElement.scrollHeight,
               previewBottom: previewRect.bottom,
               primaryTop: primaryRect.top,
+              primaryBottom: primaryRect.bottom,
               linesClientHeight: lines.clientHeight,
               linesScrollHeight: lines.scrollHeight,
               linesOverflowY: getComputedStyle(lines).overflowY,
@@ -155,9 +158,16 @@ describe("workspace mobile share presentation", () => {
           expect.soft(metrics.primaryCount, `${scenario.label} ${theme} primary CTA count`).toBe(1);
           expect.soft(metrics.horizontalOverflow, `${scenario.label} ${theme} horizontal overflow`).toBe(0);
           expect.soft(metrics.previewBottom, `${scenario.label} ${theme} preview before CTA`).toBeLessThanOrEqual(metrics.primaryTop);
-          expect.soft(metrics.linesScrollHeight, `${scenario.label} ${theme} no hidden inner content`).toBeLessThanOrEqual(metrics.linesClientHeight + 1);
-          expect.soft(metrics.linesOverflowY, `${scenario.label} ${theme} no inner scrollbar`).toBe("visible");
-          expect.soft(metrics.lastParagraphBottom, `${scenario.label} ${theme} last paragraph visible`).toBeLessThanOrEqual(metrics.linesBottom + 1);
+          expect.soft(metrics.linesClientHeight, `${scenario.label} ${theme} bounded preview height`).toBeLessThanOrEqual(scenario.width < 600 ? 160 : 430);
+          expect.soft(metrics.linesScrollHeight, `${scenario.label} ${theme} full message retained in preview`).toBeGreaterThanOrEqual(metrics.linesClientHeight);
+          expect.soft(metrics.linesOverflowY, `${scenario.label} ${theme} bounded preview scroll`).toBe("auto");
+          if (scenario.width < 600) {
+            expect.soft(metrics.primaryBottom, `${scenario.label} ${theme} CTA closer to mobile viewport`).toBeLessThanOrEqual(metrics.viewportHeight * 1.72);
+            expect.soft(metrics.pageHeight, `${scenario.label} ${theme} mobile share task distance`).toBeLessThanOrEqual(metrics.viewportHeight * 1.85);
+          } else {
+            expect.soft(metrics.pageHeight, `${scenario.label} ${theme} desktop share task distance`).toBeLessThanOrEqual(metrics.viewportHeight * 1.35);
+            expect.soft(metrics.lastParagraphBottom, `${scenario.label} ${theme} desktop paragraph is bounded by preview`).toBeGreaterThanOrEqual(metrics.linesBottom);
+          }
           expect.soft(metrics.paragraphCount, `${scenario.label} ${theme} full Vietnamese paragraph count`).toBe(vietnameseParagraphs.length + 2);
           for (const paragraph of vietnameseParagraphs) {
             expect.soft(metrics.previewText, `${scenario.label} ${theme} Vietnamese paragraph`).toContain(paragraph);

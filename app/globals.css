@@ -14260,6 +14260,62 @@ body:has(.safeclaw-landing) :is(
   letter-spacing: var(--tracking-body);
 }
 
+.command-center-shell.workspace-page-document .linear-workspace-layout,
+.command-center-shell.workspace-page-share .linear-workspace-layout {
+  grid-template-columns: minmax(0, 1180px);
+  justify-content: center;
+}
+
+.command-center-shell.workspace-page-document .workspace-side-nav,
+.command-center-shell.workspace-page-share .workspace-side-nav {
+  position: static;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  width: 100%;
+  min-height: 0;
+  padding: 8px;
+}
+
+.command-center-shell.workspace-page-document .workspace-side-group:first-child,
+.command-center-shell.workspace-page-share .workspace-side-group:first-child {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.command-center-shell.workspace-page-document .workspace-side-group:first-child > span,
+.command-center-shell.workspace-page-share .workspace-side-group:first-child > span,
+.command-center-shell.workspace-page-document .workspace-side-group:not(:first-child),
+.command-center-shell.workspace-page-share .workspace-side-group:not(:first-child),
+.command-center-shell.workspace-page-document .workspace-current-brief,
+.command-center-shell.workspace-page-share .workspace-current-brief,
+.command-center-shell.workspace-page-document .workspace-source-status,
+.command-center-shell.workspace-page-share .workspace-source-status,
+.command-center-shell.workspace-page-document .workspace-example-list,
+.command-center-shell.workspace-page-share .workspace-example-list {
+  display: none;
+}
+
+.command-center-shell.workspace-page-document .workspace-side-group:first-child button,
+.command-center-shell.workspace-page-share .workspace-side-group:first-child button {
+  min-height: 52px;
+  padding: 8px 10px;
+}
+
+.command-center-shell.workspace-page-document .linear-workspace-layout .command-main,
+.command-center-shell.workspace-page-share .linear-workspace-layout .command-main {
+  width: 100%;
+  min-width: 0;
+}
+
+.command-center-shell.workspace-page-share .field-workspace-share-only .share-panel.workflow-panel {
+  width: 100%;
+}
+
 .command-center-shell .document-workbench .document-evidence-panel {
   position: sticky;
   top: 86px;
@@ -14536,6 +14592,49 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   background: color-mix(in srgb, var(--share-canvas) 86%, var(--share-surface));
   padding: 14px;
+}
+
+@media (min-width: 960px) {
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel {
+    max-width: 1180px;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 0.48fr);
+    align-items: start;
+    gap: 12px;
+  }
+
+  .command-center-shell.workspace-page-share .share-workflow-header {
+    grid-column: 1 / -1;
+  }
+
+  .command-center-shell.workspace-page-share .share-form-shell,
+  .command-center-shell.workspace-page-share .share-inline-note,
+  .command-center-shell.workspace-page-share .share-readiness-warning {
+    grid-column: 1;
+  }
+
+  .command-center-shell.workspace-page-share [data-share-preview] {
+    grid-column: 2;
+    grid-row: 2 / span 3;
+    align-self: stretch;
+  }
+
+  .command-center-shell.workspace-page-share [data-share-preview] .message-preview-lines {
+    max-height: 430px;
+    overflow: auto;
+  }
+
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel > .command-actions {
+    grid-column: 2;
+    justify-content: stretch;
+  }
+
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel > .command-actions .button {
+    flex: 1 1 0;
+  }
+
+  .command-center-shell.workspace-page-share .workflow-result {
+    grid-column: 1 / -1;
+  }
 }
 
 .share-workflow-header,
@@ -16183,14 +16282,18 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell .document-workbench .document-preview-pane pre {
-    min-height: 360px;
-    max-height: none;
-    overflow: visible;
+    min-height: 260px;
+    max-height: 360px;
+    overflow: auto;
     font-size: var(--text-caption);
     line-height: var(--leading-caption);
     padding: 16px;
     font-weight: 600;
     letter-spacing: var(--tracking-body);
+  }
+
+  .command-center-shell .document-workbench .document-preview-pane {
+    min-height: 0;
   }
 
   .share-panel.workflow-panel .channel-grid {
@@ -16204,6 +16307,24 @@ body:has(.safeclaw-landing) :is(
 
   .share-workflow-header {
     gap: 8px;
+  }
+
+  .share-status-pill {
+    min-height: 44px;
+    padding: 8px 10px;
+    gap: 2px;
+  }
+
+  .share-status-pill span {
+    font-size: var(--text-hud);
+    line-height: var(--leading-hud);
+    font-weight: 700;
+  }
+
+  .share-status-pill strong {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    font-weight: 700;
   }
 
   .share-workflow-header p,
@@ -16231,8 +16352,8 @@ body:has(.safeclaw-landing) :is(
   }
 
   [data-share-preview] .message-preview-lines {
-    max-height: none;
-    overflow: visible;
+    max-height: 160px;
+    overflow: auto;
     gap: 2px;
     padding-top: 8px;
   }
@@ -18534,6 +18655,73 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell.workspace-theme-day .composer-submit-button {
     min-height: var(--control-height);
     padding: 8px 12px;
+  }
+}
+
+/* North-star workspace stage guard: once a workpack exists, Documents and
+   Share should read as focused steps, not as a long input page with side
+   context still attached. Keep this scoped to the page state class. */
+.command-center-shell.workspace-page-document .linear-workspace-layout,
+.command-center-shell.workspace-page-share .linear-workspace-layout,
+.command-center-shell.workspace-theme-day.workspace-page-document .linear-workspace-layout,
+.command-center-shell.workspace-theme-day.workspace-page-share .linear-workspace-layout,
+.command-center-shell.workspace-theme-night.workspace-page-document .linear-workspace-layout,
+.command-center-shell.workspace-theme-night.workspace-page-share .linear-workspace-layout {
+  grid-template-columns: minmax(0, 1180px);
+  justify-content: center;
+}
+
+.command-center-shell.workspace-page-document .workspace-side-nav,
+.command-center-shell.workspace-page-share .workspace-side-nav,
+.command-center-shell.workspace-theme-day.workspace-page-document .workspace-side-nav,
+.command-center-shell.workspace-theme-day.workspace-page-share .workspace-side-nav,
+.command-center-shell.workspace-theme-night.workspace-page-document .workspace-side-nav,
+.command-center-shell.workspace-theme-night.workspace-page-share .workspace-side-nav {
+  position: static;
+  min-height: 0;
+  width: 100%;
+  border-right: 0;
+  border-bottom: 1px solid var(--workspace-rule);
+  border-radius: 0;
+  padding: 8px;
+}
+
+.command-center-shell.workspace-page-document .workspace-side-group:first-child,
+.command-center-shell.workspace-page-share .workspace-side-group:first-child {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.command-center-shell.workspace-page-document .workspace-side-group:first-child > span,
+.command-center-shell.workspace-page-share .workspace-side-group:first-child > span,
+.command-center-shell.workspace-page-document .workspace-current-brief,
+.command-center-shell.workspace-page-share .workspace-current-brief,
+.command-center-shell.workspace-page-document .workspace-source-status,
+.command-center-shell.workspace-page-share .workspace-source-status,
+.command-center-shell.workspace-page-document .workspace-example-list,
+.command-center-shell.workspace-page-share .workspace-example-list {
+  display: none;
+}
+
+.command-center-shell.workspace-page-document .workspace-side-group:first-child button,
+.command-center-shell.workspace-page-share .workspace-side-group:first-child button {
+  min-height: 48px;
+  padding: 8px 10px;
+}
+
+@media (max-width: 720px) {
+  .command-center-shell.workspace-page-document .document-workbench .document-preview-pane {
+    min-height: 0;
+  }
+
+  .command-center-shell.workspace-page-document .document-workbench .document-preview-pane pre {
+    min-height: 260px;
+    max-height: 360px;
+    overflow: auto;
   }
 }
 
