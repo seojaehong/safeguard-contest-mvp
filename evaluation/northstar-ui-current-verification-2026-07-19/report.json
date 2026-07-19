@@ -1,0 +1,39 @@
+{
+  "artifact": "northstar-ui-current-verification-2026-07-19",
+  "generatedAt": "2026-07-19T14:44:00Z",
+  "baseHead": "780f3e52a1275de637d04fb1356aee5b3095dbb9",
+  "mutationPerformed": false,
+  "verdict": "PASS_FOR_CHECKED_SURFACES",
+  "checks": [
+    {
+      "surface": "/ontology",
+      "priorFinding": "166-node hairball, overlap, dark-on-dark contrast",
+      "command": "$env:ONTOLOGY_BASE_URL='https://www.safeclaw.kr'; npm.cmd test -- tests\\ontology-ui-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "tests": 1,
+      "evidence": "evaluation/ontology-live-verification-2026-07-19/report.md"
+    },
+    {
+      "surface": "/why",
+      "priorFinding": "390px comparison table overflow",
+      "command": "npm.cmd test -- tests\\why-mobile-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "tests": 4
+    },
+    {
+      "surface": "shared module/contrast surfaces",
+      "priorFinding": "yellow/light-surface contrast failures",
+      "command": "npm.cmd test -- tests\\frontend-shared-surfaces.test.ts tests\\product-module-shell.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 2,
+      "tests": 19
+    }
+  ],
+  "remainingRisks": [
+    "GitHub Actions for the latest master is still in progress at the time of this report.",
+    "Workspace mobile share remains long from the prior measured evidence, although desktop share is no longer mobile-card-like.",
+    "This report verifies named P0/P1 UI surfaces; it is not a full 108-row browser audit rerun."
+  ]
+}
