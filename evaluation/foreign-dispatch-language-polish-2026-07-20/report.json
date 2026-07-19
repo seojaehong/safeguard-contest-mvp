@@ -1,0 +1,44 @@
+{
+  "date": "2026-07-20",
+  "scope": "foreign_dispatch_language_polish",
+  "productionBaseline": {
+    "route": "POST /api/ask",
+    "scenario": "hot work with Vietnamese workers, poor ventilation, indoor heat",
+    "elapsedSec": 17.99,
+    "mode": "live",
+    "finding": "Vietnamese recipient block contained English fallback hazard labels",
+    "englishFallbackTerms": [
+      "confined-space hazard",
+      "heat illness"
+    ]
+  },
+  "change": {
+    "files": [
+      "lib/foreign-worker.ts",
+      "tests/foreign-worker-languages.test.ts"
+    ],
+    "hazardKeysCoveredForVietnamese": [
+      "confined",
+      "heat",
+      "slip",
+      "heavyLoad",
+      "crane",
+      "excavation"
+    ]
+  },
+  "verification": {
+    "focusedTests": {
+      "command": "npm.cmd test -- tests\\foreign-worker-languages.test.ts tests\\workflow-share-client.test.ts tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 3,
+      "testFilesTotal": 3,
+      "testsPassed": 79,
+      "testsTotal": 79,
+      "status": "pass"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
+    },
+    "providerDispatchCalled": false
+  }
+}

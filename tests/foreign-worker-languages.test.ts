@@ -145,6 +145,42 @@ describe("buildForeignWorkerLanguageMessage", () => {
     expect(message).not.toContain("electric shock");
     expect(message).not.toContain("The work described in today's briefing");
   });
+
+  it("renders hot-work ventilation and heat hazards in Vietnamese without English fallback terms", () => {
+    const input = {
+      question: "그린메탈 경기 안산 공장 배관 용접·절단 화기작업. 베트남 작업자 2명과 신규 작업자 1명 포함, 작업자 6명, 실내 고온과 환기 불량, 가연물 인접. 화재감시자와 베트남어 안전교육까지 반영해줘.",
+      scenario: {
+        siteName: "경기 안산 공장",
+        companyName: "그린메탈",
+        companyType: "제조업",
+        workSummary: "배관 용접·절단 화기작업",
+        workerCount: 6,
+        weatherNote: "실내 고온과 환기 불량 확인 필요"
+      },
+      riskSummary: {
+        title: "고온·환기불량 화기작업",
+        riskLevel: "상" as const,
+        topRisk: "용접·절단 불티, 환기 불량, 고온으로 화재·질식·온열질환 위험이 발생할 수 있음",
+        immediateActions: [
+          "가연물을 제거하고 화재감시자를 배치합니다.",
+          "작업 전 환기 상태와 산소농도를 확인합니다.",
+          "물과 휴식시간을 확보하고 어지럼 증상을 즉시 보고합니다."
+        ]
+      }
+    };
+    const vietnamese = buildForeignWorkerLanguages(input).find((language) => language.code === "vi");
+    if (!vietnamese) throw new Error("Vietnamese language template is required");
+    const message = buildForeignWorkerLanguageMessage(input, vietnamese);
+
+    expect(message).toContain("Tiếng Việt");
+    expect(message).toContain("hàn/cắt");
+    expect(message).toContain("thông gió");
+    expect(message).toContain("say nóng");
+    expect(message).not.toMatch(/[가-힣]/u);
+    expect(message).not.toContain("confined-space hazard");
+    expect(message).not.toContain("heat illness");
+    expect(message).not.toContain("fire or hot-work hazard");
+  });
 });
 
 describe("foreign worker transmission context", () => {

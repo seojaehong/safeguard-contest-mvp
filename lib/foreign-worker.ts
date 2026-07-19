@@ -313,7 +313,13 @@ function localizedPacks(): Record<string, LocalizedPack> {
         forklift: "đường xe nâng giao với lối đi bộ",
         chemical: "tiếp xúc hóa chất hoặc thuốc tẩy",
         fire: "nguy cơ cháy khi hàn/cắt",
-        electric: "điện giật khi kiểm tra tủ điện"
+        confined: "nguy cơ thiếu oxy hoặc ngạt do thông gió kém",
+        electric: "điện giật khi kiểm tra tủ điện",
+        heat: "nguy cơ say nóng hoặc kiệt sức do nóng",
+        slip: "nguy cơ trượt ngã",
+        heavyLoad: "nguy cơ chấn thương khi nâng hoặc vận chuyển vật nặng",
+        crane: "nguy cơ va chạm trong khu vực nâng hạ",
+        excavation: "nguy cơ sạt lở hoặc va chạm công trình ngầm khi đào đất"
       },
       actionLabels: {
         wind: "Nếu gió mạnh hơn hoặc giàn giáo rung, hãy dừng công việc ngay.",
@@ -322,7 +328,13 @@ function localizedPacks(): Record<string, LocalizedPack> {
         forklift: "Tách đường xe nâng và lối đi bộ trước khi bắt đầu.",
         chemical: "Trước khi dùng hóa chất hoặc thuốc tẩy, kiểm tra thông gió, kính bảo hộ và găng tay.",
         fire: "Dọn vật dễ cháy, bố trí người giám sát cháy và chuẩn bị bình chữa cháy.",
-        electric: "Trước khi mở tủ điện, hãy cắt điện, gắn thẻ khóa, kiểm tra không còn điện bằng bút thử điện và đeo găng tay cách điện."
+        confined: "Kiểm tra thông gió, nồng độ oxy và bố trí người giám sát bên ngoài trước khi vào khu vực kín.",
+        electric: "Trước khi mở tủ điện, hãy cắt điện, gắn thẻ khóa, kiểm tra không còn điện bằng bút thử điện và đeo găng tay cách điện.",
+        heat: "Uống nước, nghỉ ở nơi mát và báo ngay nếu chóng mặt hoặc buồn nôn.",
+        slip: "Lau khô sàn ướt và đánh dấu lối đi trơn trước khi vận chuyển.",
+        heavyLoad: "Dùng xe đẩy hoặc nâng theo nhóm, dừng lại nếu đau lưng hoặc vai.",
+        crane: "Không đứng trong bán kính nâng và xác nhận người ra tín hiệu trước khi nâng.",
+        excavation: "Xác nhận công trình ngầm và giữ khoảng cách với mép hố đào."
       }
     },
     zh: {
