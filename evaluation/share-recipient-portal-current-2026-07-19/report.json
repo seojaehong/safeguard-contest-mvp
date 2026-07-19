@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-07-19T11:55:46+09:00",
+  "headSha": "aee6abe420139700485596753175c7bcb3648483",
+  "liveBuildSha": "aee6abe420139700485596753175c7bcb3648483",
+  "scope": "recipient portal and foreign worker distribution readiness",
+  "verdict": "pass",
+  "implementedRoutes": [
+    "app/share/[sessionId]/page.tsx",
+    "app/api/share-sessions/[sessionId]/route.ts"
+  ],
+  "contract": {
+    "anonymousPublicSharing": false,
+    "invitedWorkerConfirmation": true,
+    "manualLanguageSwitch": true,
+    "managerPrimaryCtaExposesRawPortalLink": false
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workspace-share-mobile-browser.test.ts tests\\workpack-share-authority-routes.test.ts tests\\workflow-share-panel-behavior.test.ts tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "5 files / 60 tests PASS"
+    },
+    {
+      "command": "Invoke-WebRequest https://www.safeclaw.kr/share/00000000-0000-4000-8000-000000000000",
+      "result": "HTTP 200 page shell"
+    }
+  ],
+  "remainingGaps": [
+    "Credentialed end-to-end provider dispatch to a real worker phone/email is not proven by this bounded gate."
+  ]
+}
