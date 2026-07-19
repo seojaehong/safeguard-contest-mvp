@@ -12701,6 +12701,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #23252a;
   --workspace-rule-strong: #34343a;
   --workspace-accent: #6c6ff7;
+  --workspace-accent-ink: #010102;
   --workspace-accent-hover: #8b8dfc;
   --workspace-success: #27a644;
   min-height: 100vh;
@@ -13132,7 +13133,7 @@ body:has(.safeclaw-landing) :is(
   height: 18px;
   border-radius: 50%;
   background: var(--workspace-accent);
-  color: #ffffff;
+  color: var(--workspace-accent-ink, var(--workspace-ink));
   font-size: var(--text-body);
   font-weight: 500;
   line-height: var(--leading-body);
@@ -13641,6 +13642,23 @@ body:has(.safeclaw-landing) :is(
   border-radius: 4px;
   background: var(--workspace-surface-1);
   padding: 16px;
+}
+
+.command-center-shell .quick-chip {
+  border-color: var(--workspace-rule);
+  background: var(--workspace-surface-2);
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .quick-chip:hover,
+.command-center-shell .quick-chip.active {
+  border-color: var(--workspace-accent);
+  background: color-mix(in srgb, var(--workspace-accent) 14%, var(--workspace-surface-1));
+  color: var(--workspace-ink);
+}
+
+.command-center-shell .workspace-input-page .ai-mode-toggle legend {
+  color: var(--workspace-muted);
 }
 
 .command-center-shell .evidence-readiness-rail {
@@ -15301,6 +15319,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #e6e8eb;
   --workspace-rule-strong: #d0d3d9;
   --workspace-accent: #f5c518;
+  --workspace-accent-ink: #1a1b1e;
   --workspace-accent-text: #665100;
   --workspace-accent-hover: #e0b30f;
   --workspace-success: #16a34a;
@@ -16488,6 +16507,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #23252a;
   --workspace-rule-strong: #34343a;
   --workspace-accent: #6c6ff7;
+  --workspace-accent-ink: #010102;
   --workspace-accent-text: #b5b7ff;
   --workspace-accent-hover: #8b8dfc;
   --workspace-success: #27a644;
@@ -16911,7 +16931,7 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell.module-variant-document .safeclaw-module-primary {
   border-color: var(--module-primary-border, var(--workspace-accent));
   background: var(--module-primary-background, var(--workspace-accent));
-  color: var(--module-primary-color, var(--workspace-ink));
+  color: var(--module-primary-color, var(--workspace-accent-ink, var(--workspace-ink)));
 }
 
 .safeclaw-module-shell.module-variant-document .safeclaw-current-workpack a {
@@ -17750,6 +17770,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #e1e5eb;
   --workspace-rule-strong: #cfd6df;
   --workspace-accent: #6c6ff7;
+  --workspace-accent-ink: #010102;
   --workspace-accent-hover: #5c60eb;
   --workspace-success: #16a34a;
   grid-template-columns: 252px minmax(0, 1fr);
@@ -19562,6 +19583,7 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #dfe2e7;
   --workspace-rule-strong: #c9cdd4;
   --workspace-accent: #f5c518;
+  --workspace-accent-ink: #17191d;
   --workspace-accent-text: #665100;
   --workspace-accent-hover: #d9ad00;
   --workspace-success: #187a36;
@@ -19586,9 +19608,35 @@ body:has(.safeclaw-landing) :is(
   --workspace-rule: #292b30;
   --workspace-rule-strong: #3b3d44;
   --workspace-accent: #6c6ff7;
+  --workspace-accent-ink: #010102;
   --workspace-accent-text: #b5b7ff;
   --workspace-accent-hover: #8588ff;
   --workspace-success: #4fc66a;
+}
+
+.safeclaw-module-shell:is(.module-variant-document, .module-variant-default) :is(.card, .list) :is(h2, h3, strong),
+.safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-panel :is(h2, h3, summary) {
+  color: var(--workspace-ink);
+}
+
+.safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .worker-language-switcher button {
+  border-color: var(--workspace-rule);
+  background: var(--workspace-surface-1);
+  color: var(--workspace-ink);
+}
+
+.safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .worker-language-switcher button small {
+  color: var(--workspace-muted);
+}
+
+.safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .worker-language-switcher button.active {
+  border-color: var(--workspace-accent);
+  background: var(--workspace-accent);
+  color: var(--workspace-accent-ink);
+}
+
+.safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .worker-language-switcher button.active small {
+  color: var(--workspace-accent-ink);
 }
 
 .safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-rail {
@@ -21243,6 +21291,28 @@ body:has(.safeclaw-landing) :is(
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-secondary-tools {
   margin-top: var(--space-4);
   border-top: 1px solid var(--workspace-rule);
+}
+
+/* North-star contrast closeout: keep accent backgrounds vivid while forcing
+   their text and nested summary surfaces onto the correct readable ink. */
+.command-center-shell .step-dot.active,
+.command-center-shell .workspace-input-page .input-attachment-button,
+.command-center-shell .workspace-input-page button[aria-label*="첨부"] {
+  color: var(--workspace-accent-ink, var(--workspace-ink));
+}
+
+.safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-content :is(.card, .card.list) :is(.h2, .h3, h2, h3, strong),
+.safeclaw-module-shell:is(.module-variant-document, .module-variant-default) .safeclaw-module-content .safeclaw-module-panel :is(summary, h2, h3),
+.safeclaw-module-shell[data-module-route="/documents"] .safeclaw-module-content :is(details > summary, .advanced-downloads summary, .submission-preview-panel summary) {
+  color: var(--workspace-ink);
+}
+
+.safeclaw-module-shell[data-module-route="/ontology"] .safeclaw-module-content [class*="selectionSummary"] strong {
+  color: var(--sc-steel-950);
+}
+
+.safeclaw-module-shell[data-module-route="/ontology"] .safeclaw-module-content [class*="selectionSummary"] small {
+  color: var(--sc-steel-650);
 }
 
 .safeclaw-module-shell[data-module-route="/reports"] .safeclaw-report-secondary-tools > summary {

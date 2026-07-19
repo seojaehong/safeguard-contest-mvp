@@ -1,0 +1,309 @@
+{
+  "checkedAt": "2026-07-19T19:09:56.709Z",
+  "results": [
+    {
+      "route": "/",
+      "theme": "day",
+      "failureCount": 3,
+      "failures": [
+        {
+          "text": "기상청 실황·특보 확인",
+          "tag": "span",
+          "cls": "agent-console-label",
+          "ratio": 3.14,
+          "color": "rgb(88, 97, 107)",
+          "background": "rgb(10, 10, 11)",
+          "fontSize": 13,
+          "x": 70,
+          "y": 1301,
+          "w": 279,
+          "h": 20
+        },
+        {
+          "text": "연결됨",
+          "tag": "em",
+          "cls": "",
+          "ratio": 3.48,
+          "color": "rgb(6, 118, 71)",
+          "background": "rgb(10, 10, 11)",
+          "fontSize": 15,
+          "x": 308,
+          "y": 7097,
+          "w": 33,
+          "h": 48
+        },
+        {
+          "text": "준비됨",
+          "tag": "em",
+          "cls": "",
+          "ratio": 3.48,
+          "color": "rgb(6, 118, 71)",
+          "background": "rgb(10, 10, 11)",
+          "fontSize": 15,
+          "x": 309,
+          "y": 10020,
+          "w": 32,
+          "h": 48
+        }
+      ],
+      "bodyH": 10800,
+      "overflowX": false
+    },
+    {
+      "route": "/",
+      "theme": "night",
+      "failureCount": 3,
+      "failures": [
+        {
+          "text": "기상청 실황·특보 확인",
+          "tag": "span",
+          "cls": "agent-console-label",
+          "ratio": 3.14,
+          "color": "rgb(88, 97, 107)",
+          "background": "rgb(10, 10, 11)",
+          "fontSize": 13,
+          "x": 70,
+          "y": 1301,
+          "w": 279,
+          "h": 20
+        },
+        {
+          "text": "연결됨",
+          "tag": "em",
+          "cls": "",
+          "ratio": 3.48,
+          "color": "rgb(6, 118, 71)",
+          "background": "rgb(10, 10, 11)",
+          "fontSize": 15,
+          "x": 308,
+          "y": 7097,
+          "w": 33,
+          "h": 48
+        },
+        {
+          "text": "준비됨",
+          "tag": "em",
+          "cls": "",
+          "ratio": 3.48,
+          "color": "rgb(6, 118, 71)",
+          "background": "rgb(10, 10, 11)",
+          "fontSize": 15,
+          "x": 309,
+          "y": 10020,
+          "w": 32,
+          "h": 48
+        }
+      ],
+      "bodyH": 10800,
+      "overflowX": false
+    },
+    {
+      "route": "/workspace",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 988,
+      "overflowX": false
+    },
+    {
+      "route": "/workspace",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 988,
+      "overflowX": false
+    },
+    {
+      "route": "/documents",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 2806,
+      "overflowX": false
+    },
+    {
+      "route": "/documents",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 2806,
+      "overflowX": false
+    },
+    {
+      "route": "/reports",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 844,
+      "overflowX": false
+    },
+    {
+      "route": "/reports",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 844,
+      "overflowX": false
+    },
+    {
+      "route": "/archive",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 4517,
+      "overflowX": false
+    },
+    {
+      "route": "/archive",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 4517,
+      "overflowX": false
+    },
+    {
+      "route": "/home",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 2009,
+      "overflowX": false
+    },
+    {
+      "route": "/home",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 2009,
+      "overflowX": false
+    },
+    {
+      "route": "/roadmap",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 1387,
+      "overflowX": false
+    },
+    {
+      "route": "/roadmap",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 1387,
+      "overflowX": false
+    },
+    {
+      "route": "/why",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 2727,
+      "overflowX": false
+    },
+    {
+      "route": "/why",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 2727,
+      "overflowX": false
+    },
+    {
+      "route": "/settings/ai-connect",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 844,
+      "overflowX": false
+    },
+    {
+      "route": "/settings/ai-connect",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 844,
+      "overflowX": false
+    },
+    {
+      "route": "/search",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 1816,
+      "overflowX": false
+    },
+    {
+      "route": "/search",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 1816,
+      "overflowX": false
+    },
+    {
+      "route": "/worker",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 912,
+      "overflowX": false
+    },
+    {
+      "route": "/worker",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 912,
+      "overflowX": false
+    },
+    {
+      "route": "/workers",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 3260,
+      "overflowX": false
+    },
+    {
+      "route": "/workers",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 3260,
+      "overflowX": false
+    },
+    {
+      "route": "/knowledge",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 1152,
+      "overflowX": false
+    },
+    {
+      "route": "/knowledge",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 1152,
+      "overflowX": false
+    },
+    {
+      "route": "/ontology",
+      "theme": "day",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 2893,
+      "overflowX": false
+    },
+    {
+      "route": "/ontology",
+      "theme": "night",
+      "failureCount": 0,
+      "failures": [],
+      "bodyH": 2893,
+      "overflowX": false
+    }
+  ]
+}

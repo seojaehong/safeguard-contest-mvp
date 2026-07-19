@@ -208,7 +208,7 @@
 }
 
 .selectionSummary > div { display: grid; gap: 3px; min-width: 0; }
-.selectionSummary strong { overflow-wrap: anywhere; font-size: 17px; line-height: 26px; }
+.selectionSummary strong { overflow-wrap: anywhere; color: var(--ontology-card-ink); font-size: 17px; line-height: 26px; }
 .selectionSummary span,
 .selectionSummary small { color: var(--ontology-card-muted); }
 
