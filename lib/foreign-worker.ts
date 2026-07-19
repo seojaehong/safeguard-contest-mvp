@@ -211,7 +211,7 @@ function detectSafetyKeywords(input: BriefingInput): SafetyKeyword[] {
     ["chemical", /화학|세제|물질|chemical/i],
     ["fire", /화기|용접|절단|화재|fire|welding/i],
     ["confined", /밀폐|산소|질식|confined/i],
-    ["electric", /감전|전기|electric/i],
+    ["electric", /감전|전기|정전전로|충전전로|배전반|분전반|검전|절연|electric/i],
     ["heat", /폭염|고온|온열|heat/i],
     ["slip", /미끄럼|젖음|slip/i],
     ["heavyLoad", /중량|운반|근골격|heavy/i],
@@ -225,6 +225,7 @@ function detectSafetyKeywords(input: BriefingInput): SafetyKeyword[] {
 
 function detectWorkLabelKey(input: BriefingInput) {
   const text = `${input.question} ${input.scenario.workSummary}`;
+  if (/정전전로|충전전로|배전반|분전반|수전반|검전|절연보호구|전기/.test(text)) return "electricalInspection";
   if (/외벽|도장|비계/.test(text)) return "paintingScaffold";
   if (/지게차|상하차|피킹/.test(text)) return "forkliftLoading";
   if (/용접|절단|화기/.test(text)) return "hotWork";
@@ -266,6 +267,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         confinedInspection: "Underground machine-room inspection with possible confined-space risk",
         chemicalCleaning: "Factory floor cleaning using chemical detergent",
         manualHandling: "Heavy box stacking and manual handling",
+        electricalInspection: "Distribution-board inspection near a de-energized electrical circuit",
         excavation: "Excavation work with equipment and buried utility checks",
         general: "The work described in today's briefing"
       },
@@ -278,7 +280,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         chemical: "Check the safety data sheet, ventilation, goggles, and gloves before use.",
         fire: "Remove combustibles, assign a fire watch, and keep extinguishers ready.",
         confined: "Measure oxygen and harmful gas before entry and keep a watcher outside.",
-        electric: "Shut off power where needed and keep wet areas away from electrical panels.",
+        electric: "Before opening the panel, shut off power, apply lockout tags, test for no voltage, and wear insulating gloves.",
         heat: "Take water and rest breaks, and report dizziness immediately.",
         slip: "Dry wet floors and mark slippery entrances before moving loads.",
         heavyLoad: "Use carts or team lifting and stop if back or shoulder pain occurs.",
@@ -299,6 +301,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         confinedInspection: "Kiểm tra phòng máy ngầm, có thể có nguy cơ không gian kín",
         chemicalCleaning: "Vệ sinh sàn nhà xưởng bằng hóa chất hoặc thuốc tẩy",
         manualHandling: "Xếp và vận chuyển thùng nặng",
+        electricalInspection: "Kiểm tra tủ điện gần mạch điện đã cắt điện",
         excavation: "Đào đất và kiểm tra công trình ngầm",
         general: "Công việc được quản lý hướng dẫn hôm nay"
       },
@@ -309,7 +312,8 @@ function localizedPacks(): Record<string, LocalizedPack> {
         wind: "gió mạnh",
         forklift: "đường xe nâng giao với lối đi bộ",
         chemical: "tiếp xúc hóa chất hoặc thuốc tẩy",
-        fire: "nguy cơ cháy khi hàn/cắt"
+        fire: "nguy cơ cháy khi hàn/cắt",
+        electric: "điện giật khi kiểm tra tủ điện"
       },
       actionLabels: {
         wind: "Nếu gió mạnh hơn hoặc giàn giáo rung, hãy dừng công việc ngay.",
@@ -317,7 +321,8 @@ function localizedPacks(): Record<string, LocalizedPack> {
         fall: "Mang dây an toàn và thiết bị bảo hộ, chỉ làm việc trong khu vực an toàn.",
         forklift: "Tách đường xe nâng và lối đi bộ trước khi bắt đầu.",
         chemical: "Trước khi dùng hóa chất hoặc thuốc tẩy, kiểm tra thông gió, kính bảo hộ và găng tay.",
-        fire: "Dọn vật dễ cháy, bố trí người giám sát cháy và chuẩn bị bình chữa cháy."
+        fire: "Dọn vật dễ cháy, bố trí người giám sát cháy và chuẩn bị bình chữa cháy.",
+        electric: "Trước khi mở tủ điện, hãy cắt điện, gắn thẻ khóa, kiểm tra không còn điện bằng bút thử điện và đeo găng tay cách điện."
       }
     },
     zh: {
@@ -333,6 +338,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         confinedInspection: "地下机房检查，可能存在有限空间风险",
         chemicalCleaning: "使用化学清洁剂清洗工厂地面",
         manualHandling: "重物堆放和人工搬运",
+        electricalInspection: "停电线路附近的配电盘检查",
         excavation: "开挖作业及地下埋设物确认",
         general: "今天现场说明的作业"
       },
@@ -343,7 +349,8 @@ function localizedPacks(): Record<string, LocalizedPack> {
         wind: "强风",
         forklift: "叉车路线与人员通道交叉",
         chemical: "化学品接触",
-        fire: "动火火灾危险"
+        fire: "动火火灾危险",
+        electric: "配电盘检查时触电危险"
       },
       actionLabels: {
         wind: "如风力增强或脚手架晃动，请立即停止作业。",
@@ -351,7 +358,8 @@ function localizedPacks(): Record<string, LocalizedPack> {
         fall: "佩戴防坠落防护用品，只在安全平台内作业。",
         forklift: "作业前分离叉车路线和人员通道。",
         chemical: "使用化学品前确认通风、护目镜和手套。",
-        fire: "清除可燃物，安排火灾监护人并准备灭火器。"
+        fire: "清除可燃物，安排火灾监护人并准备灭火器。",
+        electric: "打开配电盘前，切断电源、挂锁挂牌、验电确认无电，并佩戴绝缘手套。"
       }
     },
     th: {
@@ -367,6 +375,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         confinedInspection: "ตรวจห้องเครื่องใต้ดินที่อาจมีความเสี่ยงพื้นที่อับอากาศ",
         chemicalCleaning: "ทำความสะอาดพื้นโรงงานด้วยสารเคมี",
         manualHandling: "จัดเรียงกล่องหนักและยกด้วยมือ",
+        electricalInspection: "ตรวจตู้ไฟใกล้วงจรที่ตัดไฟแล้ว",
         excavation: "งานขุดและตรวจสอบสาธารณูปโภคใต้ดิน",
         general: "งานที่อธิบายในบรีฟวันนี้"
       },
@@ -377,7 +386,8 @@ function localizedPacks(): Record<string, LocalizedPack> {
         wind: "ลมแรง",
         forklift: "เส้นทางรถยกตัดกับทางเดินคน",
         chemical: "การสัมผัสสารเคมี",
-        fire: "ความเสี่ยงไฟไหม้จากงานที่มีประกายไฟ"
+        fire: "ความเสี่ยงไฟไหม้จากงานที่มีประกายไฟ",
+        electric: "ความเสี่ยงไฟฟ้าช็อตขณะตรวจตู้ไฟ"
       },
       actionLabels: {
         wind: "หากลมแรงขึ้นหรือนั่งร้านสั่น ให้หยุดงานทันที",
@@ -385,7 +395,8 @@ function localizedPacks(): Record<string, LocalizedPack> {
         fall: "สวมอุปกรณ์ป้องกันการตกและทำงานภายในพื้นที่ปลอดภัยเท่านั้น",
         forklift: "แยกเส้นทางรถยกและทางเดินคนก่อนเริ่มงาน",
         chemical: "ตรวจการระบายอากาศ แว่นตานิรภัย และถุงมือก่อนใช้สารเคมี",
-        fire: "เคลียร์วัสดุติดไฟ จัดผู้เฝ้าระวังไฟ และเตรียมถังดับเพลิง"
+        fire: "เคลียร์วัสดุติดไฟ จัดผู้เฝ้าระวังไฟ และเตรียมถังดับเพลิง",
+        electric: "ก่อนเปิดตู้ไฟ ให้ตัดไฟ ติดป้ายล็อก ตรวจว่าไม่มีไฟ และสวมถุงมือฉนวน"
       }
     },
     mn: {
@@ -401,6 +412,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         confinedInspection: "Далд/доод өрөөний үзлэг, битүү орчны эрсдэлтэй",
         chemicalCleaning: "Химийн бодис ашиглан шал цэвэрлэх ажил",
         manualHandling: "Хүнд хайрцаг өрөх, гараар зөөх ажил",
+        electricalInspection: "Цахилгаан тасалсан самбарын ойролцоох үзлэг",
         excavation: "Ухалт ба далд шугам шалгах ажил",
         general: "Өнөөдрийн зааварт тайлбарласан ажил"
       },
@@ -411,13 +423,15 @@ function localizedPacks(): Record<string, LocalizedPack> {
         wind: "хүчтэй салхи",
         forklift: "сэрээт ачигч ба явган хүний зам огтлолцох",
         chemical: "химийн бодист өртөх",
-        fire: "галтай ажлын галын эрсдэл"
+        fire: "галтай ажлын галын эрсдэл",
+        electric: "цахилгааны самбар шалгах үеийн тогонд цохиулах эрсдэл"
       },
       actionLabels: {
         wind: "Салхи хүчтэй болох эсвэл шат ганхвал ажлыг шууд зогсооно.",
         scaffold: "Дугуйг түгжиж, хамгаалалтын хашлагыг шалгана.",
         fall: "Унахаас хамгаалах хэрэгсэл өмсөж, аюулгүй тавцан дотор ажиллана.",
-        forklift: "Ажил эхлэхээс өмнө ачигчийн зам ба явган хүний замыг тусгаарлана."
+        forklift: "Ажил эхлэхээс өмнө ачигчийн зам ба явган хүний замыг тусгаарлана.",
+        electric: "Самбарыг нээхээс өмнө тэжээлийг салгаж, түгжээ/шошго тавьж, хүчдэлгүй эсэхийг шалгаад тусгаарлагч бээлий өмсөнө."
       }
     },
     uz: {
@@ -433,6 +447,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         confinedInspection: "Yer osti mashina xonasini tekshirish, yopiq joy xavfi bor",
         chemicalCleaning: "Kimyoviy vosita bilan sex polini tozalash",
         manualHandling: "Og'ir qutilarni taxlash va qo'lda tashish",
+        electricalInspection: "Elektr toki uzilgan taqsimlash shkafini tekshirish",
         excavation: "Qazish va yer osti tarmoqlarini tekshirish",
         general: "Bugungi brifingda tushuntirilgan ish"
       },
@@ -443,7 +458,8 @@ function localizedPacks(): Record<string, LocalizedPack> {
         wind: "kuchli shamol",
         forklift: "yuk ko'targich yo'li va piyoda yo'li kesishishi",
         chemical: "kimyoviy modda ta'siri",
-        fire: "olovli ishda yong'in xavfi"
+        fire: "olovli ishda yong'in xavfi",
+        electric: "elektr shkafini tekshirishda tok urishi xavfi"
       },
       actionLabels: {
         wind: "Shamol kuchaysa yoki havoza qimirlay boshlasa, ishni darhol to'xtating.",
@@ -451,7 +467,8 @@ function localizedPacks(): Record<string, LocalizedPack> {
         fall: "Yiqilishdan saqlovchi himoya vositalarini taqing va xavfsiz platformada ishlang.",
         forklift: "Ish boshlanishidan oldin yuk ko'targich yo'li va piyoda yo'lini ajrating.",
         chemical: "Kimyoviy vositadan oldin shamollatish, ko'zoynak va qo'lqopni tekshiring.",
-        fire: "Yonuvchi narsalarni olib tashlang, yong'in kuzatuvchisini belgilang va o't o'chirgich tayyorlang."
+        fire: "Yonuvchi narsalarni olib tashlang, yong'in kuzatuvchisini belgilang va o't o'chirgich tayyorlang.",
+        electric: "Shkafni ochishdan oldin tokni uzing, qulf-belgi qo'ying, kuchlanish yo'qligini tekshiring va dielektrik qo'lqop taqing."
       }
     },
     ne: {
@@ -467,6 +484,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         confinedInspection: "भूमिगत मेसिन कोठा निरीक्षण, बन्द ठाउँ जोखिम हुन सक्छ",
         chemicalCleaning: "रसायन प्रयोग गरी कारखाना भुइँ सफा गर्ने काम",
         manualHandling: "गह्रौं बाकस राख्ने र हातले बोक्ने काम",
+        electricalInspection: "बिजुली बन्द गरिएको वितरण प्यानलको निरीक्षण",
         excavation: "खन्ने काम र भूमिगत लाइन जाँच",
         general: "आजको ब्रिफिङमा वर्णन गरिएको काम"
       },
@@ -477,13 +495,15 @@ function localizedPacks(): Record<string, LocalizedPack> {
         wind: "बलियो हावा",
         forklift: "फोर्कलिफ्ट बाटो र पैदल बाटो जुध्ने",
         chemical: "रसायन सम्पर्क",
-        fire: "आगो प्रयोग हुने कामको आगलागी जोखिम"
+        fire: "आगो प्रयोग हुने कामको आगलागी जोखिम",
+        electric: "वितरण प्यानल निरीक्षण गर्दा करेन्ट लाग्ने जोखिम"
       },
       actionLabels: {
         wind: "हावा बलियो भयो वा स्काफोल्ड हल्लियो भने तुरुन्त काम रोक्नुहोस्।",
         scaffold: "पाङ्ग्रा लक गर्नुहोस्, रेलिङ जाँच गर्नुहोस्, मानिस माथि हुँदा स्काफोल्ड नसार्नुहोस्।",
         fall: "खस्नबाट जोगाउने सुरक्षा उपकरण लगाउनुहोस् र सुरक्षित प्लेटफर्मभित्र काम गर्नुहोस्।",
-        forklift: "काम अघि फोर्कलिफ्ट बाटो र पैदल बाटो अलग गर्नुहोस्।"
+        forklift: "काम अघि फोर्कलिफ्ट बाटो र पैदल बाटो अलग गर्नुहोस्।",
+        electric: "प्यानल खोल्नु अघि बिजुली बन्द गर्नुहोस्, लक/ट्याग लगाउनुहोस्, भोल्टेज नभएको जाँच गर्नुहोस् र इन्सुलेटेड पञ्जा लगाउनुहोस्।"
       }
     },
     km: {
@@ -499,6 +519,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         confinedInspection: "ពិនិត្យបន្ទប់ម៉ាស៊ីនក្រោមដី ដែលអាចមានហានិភ័យកន្លែងបិទជិត",
         chemicalCleaning: "សម្អាតជាន់រោងចក្រដោយប្រើសារធាតុគីមី",
         manualHandling: "រៀបប្រអប់ធ្ងន់ និងលើកដោយដៃ",
+        electricalInspection: "ពិនិត្យទូអគ្គិសនីនៅជិតខ្សែភ្លើងដែលបានផ្តាច់ចរន្ត",
         excavation: "ការជីក និងពិនិត្យបណ្តាញក្រោមដី",
         general: "ការងារដែលបានពន្យល់ក្នុងការណែនាំថ្ងៃនេះ"
       },
@@ -509,13 +530,15 @@ function localizedPacks(): Record<string, LocalizedPack> {
         wind: "ខ្យល់ខ្លាំង",
         forklift: "ផ្លូវរថយន្តលើកកាត់ផ្លូវដើរ",
         chemical: "ប៉ះពាល់សារធាតុគីមី",
-        fire: "ហានិភ័យភ្លើងក្នុងការងារមានភ្លើង"
+        fire: "ហានិភ័យភ្លើងក្នុងការងារមានភ្លើង",
+        electric: "ហានិភ័យឆក់អគ្គិសនីពេលពិនិត្យទូអគ្គិសនី"
       },
       actionLabels: {
         wind: "បើខ្យល់ខ្លាំង ឬរន្ទារង្គើ សូមឈប់ការងារភ្លាមៗ។",
         scaffold: "ចាក់សោកង់ ពិនិត្យរបាំងការពារ ហើយកុំរុញរន្ទាពេលមានមនុស្សនៅលើ។",
         fall: "ពាក់ឧបករណ៍ការពារការធ្លាក់ ហើយធ្វើការនៅលើវេទិកាសុវត្ថិភាពប៉ុណ្ណោះ។",
-        forklift: "បំបែកផ្លូវរថយន្តលើក និងផ្លូវដើរមុនចាប់ផ្តើមការងារ។"
+        forklift: "បំបែកផ្លូវរថយន្តលើក និងផ្លូវដើរមុនចាប់ផ្តើមការងារ។",
+        electric: "មុនបើកទូអគ្គិសនី សូមផ្តាច់ចរន្ត ដាក់សោ/ស្លាក ពិនិត្យថាគ្មានវ៉ុល ហើយពាក់ស្រោមដៃអ៊ីសូឡង់។"
       }
     },
     id: {
@@ -531,6 +554,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         confinedInspection: "Inspeksi ruang mesin bawah tanah dengan risiko ruang terbatas",
         chemicalCleaning: "Pembersihan lantai pabrik menggunakan bahan kimia",
         manualHandling: "Penyusunan kotak berat dan pengangkutan manual",
+        electricalInspection: "Pemeriksaan panel listrik dekat sirkuit yang sudah dimatikan",
         excavation: "Pekerjaan galian dan pemeriksaan utilitas bawah tanah",
         general: "Pekerjaan yang dijelaskan dalam briefing hari ini"
       },
@@ -541,13 +565,15 @@ function localizedPacks(): Record<string, LocalizedPack> {
         wind: "angin kencang",
         forklift: "jalur forklift bertemu jalur pejalan kaki",
         chemical: "paparan bahan kimia",
-        fire: "risiko kebakaran pada pekerjaan panas"
+        fire: "risiko kebakaran pada pekerjaan panas",
+        electric: "risiko tersengat listrik saat memeriksa panel listrik"
       },
       actionLabels: {
         wind: "Jika angin makin kencang atau perancah bergerak, hentikan pekerjaan segera.",
         scaffold: "Kunci roda, periksa pagar pengaman, dan jangan pindahkan perancah saat ada pekerja di atasnya.",
         fall: "Gunakan APD pencegah jatuh dan bekerja hanya di platform aman.",
-        forklift: "Pisahkan jalur forklift dan jalur pejalan kaki sebelum pekerjaan dimulai."
+        forklift: "Pisahkan jalur forklift dan jalur pejalan kaki sebelum pekerjaan dimulai.",
+        electric: "Sebelum membuka panel, matikan listrik, pasang kunci/tag, pastikan tidak ada tegangan, dan pakai sarung tangan isolasi."
       }
     },
     my: {
@@ -563,6 +589,7 @@ function localizedPacks(): Record<string, LocalizedPack> {
         confinedInspection: "မြေအောက်စက်ခန်း စစ်ဆေးခြင်း၊ ပိတ်ထားသောနေရာ အန္တရာယ်ရှိနိုင်",
         chemicalCleaning: "ဓာတုပစ္စည်းဖြင့် စက်ရုံကြမ်းပြင် သန့်ရှင်းရေး",
         manualHandling: "လေးသောသေတ္တာများ စီခြင်းနှင့် လက်ဖြင့်သယ်ခြင်း",
+        electricalInspection: "ဓာတ်အားဖြတ်ထားသော လျှပ်စစ်ပန်နယ်ကို စစ်ဆေးခြင်း",
         excavation: "တူးဖော်ခြင်းနှင့် မြေအောက်လိုင်း စစ်ဆေးခြင်း",
         general: "ယနေ့ briefing တွင် ရှင်းပြထားသောလုပ်ငန်း"
       },
@@ -573,13 +600,15 @@ function localizedPacks(): Record<string, LocalizedPack> {
         wind: "လေပြင်း",
         forklift: "ဖော့ကလစ်လမ်းကြောင်းနှင့် လူသွားလမ်း ထပ်နေခြင်း",
         chemical: "ဓာတုပစ္စည်း ထိတွေ့ခြင်း",
-        fire: "မီးသုံးလုပ်ငန်း မီးလောင်အန္တရာယ်"
+        fire: "မီးသုံးလုပ်ငန်း မီးလောင်အန္တရာယ်",
+        electric: "လျှပ်စစ်ပန်နယ် စစ်ဆေးစဉ် လျှပ်စစ်ဓာတ်လိုက်နိုင်သော အန္တရာယ်"
       },
       actionLabels: {
         wind: "လေပြင်းလာပါက သို့မဟုတ် ငြမ်းလှုပ်ပါက အလုပ်ကို ချက်ချင်းရပ်ပါ။",
         scaffold: "ဘီးကိုလော့ခ်ချပါ၊ ကာရံကိုစစ်ဆေးပါ၊ လူရှိနေချိန်တွင် ငြမ်းကို မရွှေ့ပါနှင့်။",
         fall: "ပြုတ်ကျမှုကာကွယ်ရေး ပစ္စည်းဝတ်ဆင်ပြီး လုံခြုံသော platform အတွင်းသာ လုပ်ကိုင်ပါ။",
-        forklift: "အလုပ်မစတင်မီ ဖော့ကလစ်လမ်းနှင့် လူသွားလမ်းကို ခွဲခြားပါ။"
+        forklift: "အလုပ်မစတင်မီ ဖော့ကလစ်လမ်းနှင့် လူသွားလမ်းကို ခွဲခြားပါ။",
+        electric: "ပန်နယ်မဖွင့်မီ ဓာတ်အားဖြတ်ပါ၊ lock/tag တပ်ပါ၊ ဗို့အားမရှိကြောင်း စစ်ဆေးပြီး insulation လက်အိတ်ဝတ်ပါ။"
       }
     }
   };

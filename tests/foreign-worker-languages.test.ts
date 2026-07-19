@@ -109,6 +109,42 @@ describe("buildForeignWorkerLanguageMessage", () => {
     expect(message).not.toContain("작업:");
     expect(message).not.toContain("핵심 위험:");
   });
+
+  it("renders electrical distribution-board hazards in Vietnamese without English fallback terms", () => {
+    const input = {
+      question: "세이프전기 부산 해운대 상가 정전전로 인근 배전반 점검 작업. 베트남 외국인 작업자에게 절연보호구와 검전 기준을 전달해줘.",
+      scenario: {
+        siteName: "부산 해운대 시설관리 현장",
+        companyName: "세이프전기",
+        companyType: "전기설비 점검",
+        workSummary: "정전전로 인근 배전반 점검 작업",
+        workerCount: 3,
+        weatherNote: "정전전로 및 그 인근 전기작업 조건 확인 필요"
+      },
+      riskSummary: {
+        title: "정전전로 인근 배전반 점검",
+        riskLevel: "상" as const,
+        topRisk: "정전전로 인근 배전반 점검 중 전원 차단·검전·절연보호구 확인이 미흡하면 감전 위험이 발생할 수 있음",
+        immediateActions: [
+          "작업 전 전원 차단·잠금표지 상태를 확인합니다.",
+          "검전기로 무전압을 확인합니다.",
+          "절연보호구와 접근통제선을 상호 확인합니다."
+        ]
+      }
+    };
+    const vietnamese = buildForeignWorkerLanguages(input).find((language) => language.code === "vi");
+    if (!vietnamese) throw new Error("Vietnamese language template is required");
+    const message = buildForeignWorkerLanguageMessage(input, vietnamese);
+
+    expect(message).toContain("Tiếng Việt");
+    expect(message).toContain("tủ điện");
+    expect(message).toContain("điện");
+    expect(message).toContain("bút thử điện");
+    expect(message).toContain("găng tay cách điện");
+    expect(message).not.toMatch(/[가-힣]/u);
+    expect(message).not.toContain("electric shock");
+    expect(message).not.toContain("The work described in today's briefing");
+  });
 });
 
 describe("foreign worker transmission context", () => {
