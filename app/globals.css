@@ -18424,6 +18424,34 @@ body:has(.safeclaw-landing) :is(
   color: #596270;
 }
 
+.command-center-shell.workspace-theme-day .workspace-top-title strong {
+  color: #464e59;
+}
+
+.command-center-shell.workspace-theme-night {
+  --workspace-subtle: #aeb5c0;
+}
+
+.command-center-shell.workspace-theme-night .workspace-side-group > span,
+.command-center-shell.workspace-theme-night .workspace-side-group button small,
+.command-center-shell.workspace-theme-night .workspace-top-title span {
+  color: #aeb5c0;
+}
+
+.command-center-shell.workspace-theme-night .workspace-input-page .composer-submit-button,
+.command-center-shell.workspace-theme-night .workbench-primary-action {
+  border-color: #5356d9;
+  background: #5356d9;
+  color: #ffffff;
+}
+
+.command-center-shell.workspace-theme-night .workspace-input-page .composer-submit-button:hover:not(:disabled),
+.command-center-shell.workspace-theme-night .workbench-primary-action:hover:not(:disabled) {
+  border-color: #6265ea;
+  background: #6265ea;
+  color: #ffffff;
+}
+
 .safeclaw-module-shell.module-variant-document .safeclaw-current-workpack {
   background: var(--workspace-surface-1);
   color: var(--workspace-muted);
