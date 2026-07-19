@@ -292,10 +292,17 @@ const CUSTOMER_FACING_LABELS: LabelMap = {
   "관리자 원본 JSON": "현재 조회 결과 데이터",
   "다음 생성용 MD": "재사용 검토 문서",
   "하네스 JSONL": "재사용 검토 데이터",
-  "Obsidian MD": "연결형 작업 메모"
+  "Obsidian MD": "연결형 작업 메모",
+  "작업 이력 MD": "작업 이력 문서"
 };
 
 const CUSTOMER_FACING_PHRASES: ReadonlyArray<readonly [string, string]> = [
+  ["MD/JSONL export", "재사용 검토 파일"],
+  ["MD/JSONL 내보내기", "재사용 검토 파일"],
+  ["하네스 JSONL", "재사용 검토 데이터"],
+  ["DB/MCP 하네스", "검증 체계"],
+  ["DB/MCP", "검증 체계"],
+  ["source ID", "근거 출처"],
   ["DB 하네스 근거", "검증 근거"],
   ["품질 계약을", "품질 검수를"],
   ["DB 하네스", "검증 체계"],
@@ -317,7 +324,7 @@ const PHOTO_FLOW_STEP_LABELS: LabelMap = {
 const PHOTO_FLOW_LABELS: LabelMap = {
   attach: "현장 사진 첨부",
   analyze: "사진 분석/OCR 후보 도출",
-  ground: "DB/MCP 근거 확정",
+  ground: "검증 근거 확정",
   review: "사용자 채택·기각",
   export: "운영 메모리 보존"
 };
@@ -575,9 +582,9 @@ function photoFlowDetail(step: string, maxInputPhotos: unknown): string {
       : `입력 화면의 첨부 기능에서 최대 ${limit}까지 받습니다.`;
   }
   if (step === "analyze") return "OpenAI Responses API가 관찰 내용과 추론을 분리한 위험 후보만 구조화합니다.";
-  if (step === "ground") return "SafeClaw DB/MCP 하네스가 후보별 근거 출처 ID와 현장 통제를 확정하거나 근거 부족으로 잠급니다.";
-  if (step === "review") return "하네스가 확정한 후보를 사용자가 채택하거나 기각하고, 채택한 항목만 개선 메모리에 들어갑니다.";
-  if (step === "export") return "채택된 후보와 개선 전/개선 후 사항은 MD/JSONL 내보내기 파일과 다음 DB 하네스 입력에 보존됩니다.";
+  if (step === "ground") return "SafeClaw 검증 체계가 후보별 근거 출처와 현장 통제를 확정하거나 근거 부족으로 잠급니다.";
+  if (step === "review") return "검증된 후보를 사용자가 채택하거나 기각하고, 채택한 항목만 개선 메모리에 들어갑니다.";
+  if (step === "export") return "채택된 후보와 개선 전/개선 후 사항은 재사용 검토 파일과 다음 검증 입력에 보존됩니다.";
   return "사진 분석/OCR 흐름을 확인해야 합니다.";
 }
 
@@ -604,7 +611,7 @@ export function readPhotoVisionPresentationPayload(value: unknown): PhotoVisionP
   const exportTargets = Array.isArray(value.exportTargets)
     ? value.exportTargets.flatMap((item): string[] => {
         const target = readNonEmptyString(item);
-        return target ? [target] : [];
+        return target ? [formatCustomerFacingText(formatCustomerFacingLabel(target))] : [];
       })
     : [];
 

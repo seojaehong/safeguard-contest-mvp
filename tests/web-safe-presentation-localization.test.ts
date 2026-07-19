@@ -138,15 +138,37 @@ describe("web-safe presentation localization", () => {
     expect(formatPhotoInputLimit({ value: 10 })).toBe("첨부 한도 확인 필요");
     expect(formatPhotoFileValidationMode("signature_only")).toBe("파일 시그니처 확인");
 
-    const knownFlow = buildPhotoFlowPresentation([{ step: "attach" }], 10);
+    const knownFlow = buildPhotoFlowPresentation(
+      [{ step: "attach" }, { step: "ground" }, { step: "review" }, { step: "export" }],
+      10
+    );
     expect(knownFlow).toEqual([
       {
         key: "attach-0",
         step: "1단계",
         label: "현장 사진 첨부",
         detail: "입력 화면의 첨부 기능에서 최대 10장까지 받습니다."
+      },
+      {
+        key: "ground-1",
+        step: "3단계",
+        label: "검증 근거 확정",
+        detail: "SafeClaw 검증 체계가 후보별 근거 출처와 현장 통제를 확정하거나 근거 부족으로 잠급니다."
+      },
+      {
+        key: "review-2",
+        step: "4단계",
+        label: "사용자 채택·기각",
+        detail: "검증된 후보를 사용자가 채택하거나 기각하고, 채택한 항목만 개선 메모리에 들어갑니다."
+      },
+      {
+        key: "export-3",
+        step: "5단계",
+        label: "운영 메모리 보존",
+        detail: "채택된 후보와 개선 전/개선 후 사항은 재사용 검토 파일과 다음 검증 입력에 보존됩니다."
       }
     ]);
+    expect(JSON.stringify(knownFlow)).not.toMatch(/하네스|JSONL|source ID|DB\/MCP/u);
 
     for (const input of [
       { flow: null, maxInputPhotos: null },
@@ -183,6 +205,9 @@ describe("web-safe presentation localization", () => {
       flow: { unsafe: true },
       exportTargets: []
     });
+    expect(readPhotoVisionPresentationPayload({
+      exportTargets: ["위험성평가표", "작업 이력 MD", "하네스 JSONL"]
+    })?.exportTargets).toEqual(["위험성평가표", "작업 이력 문서", "재사용 검토 데이터"]);
   });
 
   it("keeps JSON fields raw while localizing only Markdown values", () => {
