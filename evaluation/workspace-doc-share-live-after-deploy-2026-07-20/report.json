@@ -1,0 +1,666 @@
+{
+  "checkedAt": "2026-07-19T17:19:49.352Z",
+  "base": "https://www.safeclaw.kr",
+  "buildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "54af1d7d36b369031b29947e9a73e56a658ea346",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-lmztddpl8-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "desktop": [
+    {
+      "label": "desktop-1440-input-empty",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "document": {
+        "scrollHeight": 988,
+        "clientHeight": 900,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "outsideElements": 0
+      },
+      "textHead": "SafeClaw 현장 안전 문서팩 현장 상황 입력 Day Night 준비됨 현장 상황 입력 작업공간 입력 진행 중 ▣ 문서 잠김 ▣ 공유 잠김 현장 작업 입력 오늘 작업은 무엇인가요? 지역, 작업, 인원, 주요 위험만 적어도 됩니다. 현장 상황 입력 0/600자 작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 최대 10장 첨부하세요. + 사진 사진 첨부 최대 10장 첨부하면 위험요인 후보를 자동 분석하고, 선택한 후보만 문서에 반영합니다. 빠른 생성 안전 문서 생성 고급 설정 예시 불러오기",
+      "sticky": [],
+      "rects": {
+        "layout": {
+          "x": 40,
+          "y": 116,
+          "width": 1360,
+          "height": 808,
+          "top": 116,
+          "bottom": 924,
+          "scrollHeight": 808,
+          "clientHeight": 808,
+          "scrollWidth": 1360,
+          "clientWidth": 1360,
+          "overflowY": "hidden"
+        },
+        "sideNav": {
+          "x": 40,
+          "y": 116,
+          "width": 264,
+          "height": 808,
+          "top": 116,
+          "bottom": 924,
+          "scrollHeight": 808,
+          "clientHeight": 808,
+          "scrollWidth": 263,
+          "clientWidth": 263,
+          "overflowY": "visible"
+        },
+        "commandMain": {
+          "x": 320,
+          "y": 116,
+          "width": 1080,
+          "height": 808,
+          "top": 116,
+          "bottom": 924,
+          "scrollHeight": 808,
+          "clientHeight": 808,
+          "scrollWidth": 1080,
+          "clientWidth": 1080,
+          "overflowY": "visible"
+        },
+        "documentWorkbench": null,
+        "documentViewerList": null,
+        "documentPreviewPane": null,
+        "documentPreviewPre": null,
+        "shareRoot": null,
+        "shareFormShell": null,
+        "shareStatusPill": null,
+        "sharePreview": null,
+        "sharePreviewLines": null,
+        "sharePrimary": null
+      }
+    },
+    {
+      "label": "desktop-1440-documents",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "document": {
+        "scrollHeight": 1147,
+        "clientHeight": 900,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "outsideElements": 0
+      },
+      "textHead": "SafeClaw 현장 안전 문서팩 결과 검토 문서 Day Night 공유 전 보완 안전조치 검수 정보 확인 필요 ✓ 입력 완료 문서 검수 필요 ! 공유 전송 잠금 문서 생성 완료 안전 문서팩 3종 준비 완료 문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요. 12/12 생성 검수 필요 · 4건 근거 근거 3건 · 확인 필요 8건 선택 위험성평가표 핵심 문서 TBM 브리핑 핵심 문서 TBM 기록 문서 미리보기 위험성평가표 편집 다운로드 설정 [오늘 개선·이력 반영 - 위험성평가] - 공유 전 보완: SIF 유사사례 - 공유 전 보완: 위험성평가표 근거 - 공유 전 보완: TBM 브리핑 근거 위험성평가표(초안) 공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고 업체명: 세이프건설 업종: 건설업 작업명: 외벽 도장 작업 공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제 작업장소: 서울 성수동 근린생활시설 현장 작업인원: 5명 기",
+      "sticky": [],
+      "rects": {
+        "layout": {
+          "x": 40,
+          "y": 116,
+          "width": 1360,
+          "height": 967.23,
+          "top": 116,
+          "bottom": 1083.23,
+          "scrollHeight": 967,
+          "clientHeight": 967,
+          "scrollWidth": 1360,
+          "clientWidth": 1360,
+          "overflowY": "hidden"
+        },
+        "sideNav": {
+          "x": 130,
+          "y": 116,
+          "width": 264,
+          "height": 65,
+          "top": 116,
+          "bottom": 181,
+          "scrollHeight": 64,
+          "clientHeight": 64,
+          "scrollWidth": 293,
+          "clientWidth": 264,
+          "overflowY": "visible"
+        },
+        "commandMain": {
+          "x": 130,
+          "y": 181,
+          "width": 1180,
+          "height": 902.23,
+          "top": 181,
+          "bottom": 1083.23,
+          "scrollHeight": 902,
+          "clientHeight": 902,
+          "scrollWidth": 1180,
+          "clientWidth": 1180,
+          "overflowY": "visible"
+        },
+        "documentWorkbench": {
+          "x": 186,
+          "y": 229,
+          "width": 980,
+          "height": 798.23,
+          "top": 229,
+          "bottom": 1027.23,
+          "scrollHeight": 796,
+          "clientHeight": 796,
+          "scrollWidth": 978,
+          "clientWidth": 978,
+          "overflowY": "visible"
+        },
+        "documentViewerList": {
+          "x": 199,
+          "y": 420.05,
+          "width": 194,
+          "height": 484,
+          "top": 420.05,
+          "bottom": 904.05,
+          "scrollHeight": 484,
+          "clientHeight": 484,
+          "scrollWidth": 194,
+          "clientWidth": 194,
+          "overflowY": "visible"
+        },
+        "documentPreviewPane": {
+          "x": 405,
+          "y": 420.05,
+          "width": 748,
+          "height": 484,
+          "top": 420.05,
+          "bottom": 904.05,
+          "scrollHeight": 482,
+          "clientHeight": 482,
+          "scrollWidth": 746,
+          "clientWidth": 746,
+          "overflowY": "visible"
+        },
+        "documentPreviewPre": {
+          "x": 418,
+          "y": 515.05,
+          "width": 722,
+          "height": 320,
+          "top": 515.05,
+          "bottom": 835.05,
+          "scrollHeight": 1052,
+          "clientHeight": 318,
+          "scrollWidth": 720,
+          "clientWidth": 720,
+          "overflowY": "auto"
+        },
+        "shareRoot": null,
+        "shareFormShell": null,
+        "shareStatusPill": null,
+        "sharePreview": null,
+        "sharePreviewLines": null,
+        "sharePrimary": null
+      }
+    },
+    {
+      "label": "desktop-1440-share",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "document": {
+        "scrollHeight": 1061,
+        "clientHeight": 900,
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "outsideElements": 0
+      },
+      "textHead": "SafeClaw 현장 안전 문서팩 공유·기록 공유 Day Night 공유 전 보완 안전조치 검수 정보 확인 필요 ✓ 입력 완료 ! 문서 검수 필요 공유 보완 확인 오늘 작업 언어별 전송본 미리보기 오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다. 미리보기 전용 안전한 중복 방지 저장 기능을 준비하고 있습니다. 01 오늘 대상 2명 선택 현장관리자 · 한국어 신규 작업자 · 한국어 작업자별 저장 언어로 전송본을 준비합니다. 대상 변경 02 채널 메일 미리보기 전용 문자 미리보기 전용 카카오 미리보기 전용 발송 채널 준비 안내 다시 확인 03 언어 미리보기 표시 언어 관리자용 한국어 베트남어 · Tiếng Việt 중국어 · 中文 태국어 · ภาษาไทย 우즈베크어 · O'zbekcha 몽골어 · Монгол хэл 네팔어 · नेपाली 캄보디아어 · ភាសាខ្មែរ 영어 · English 인도네시아어 · Bahasa Indonesia 미얀마어 · မြန်မာဘာသာ 작업",
+      "sticky": [],
+      "rects": {
+        "layout": {
+          "x": 40,
+          "y": 124,
+          "width": 1360,
+          "height": 873,
+          "top": 124,
+          "bottom": 997,
+          "scrollHeight": 873,
+          "clientHeight": 873,
+          "scrollWidth": 1360,
+          "clientWidth": 1360,
+          "overflowY": "hidden"
+        },
+        "sideNav": {
+          "x": 130,
+          "y": 124,
+          "width": 264,
+          "height": 65,
+          "top": 124,
+          "bottom": 189,
+          "scrollHeight": 64,
+          "clientHeight": 64,
+          "scrollWidth": 293,
+          "clientWidth": 264,
+          "overflowY": "visible"
+        },
+        "commandMain": {
+          "x": 130,
+          "y": 189,
+          "width": 1180,
+          "height": 808,
+          "top": 189,
+          "bottom": 997,
+          "scrollHeight": 808,
+          "clientHeight": 808,
+          "scrollWidth": 1180,
+          "clientWidth": 1180,
+          "overflowY": "visible"
+        },
+        "documentWorkbench": null,
+        "documentViewerList": null,
+        "documentPreviewPane": null,
+        "documentPreviewPre": null,
+        "shareRoot": {
+          "x": 186,
+          "y": 237,
+          "width": 980,
+          "height": 667.63,
+          "top": 237,
+          "bottom": 904.63,
+          "scrollHeight": 666,
+          "clientHeight": 666,
+          "scrollWidth": 978,
+          "clientWidth": 978,
+          "overflowY": "visible"
+        },
+        "shareFormShell": {
+          "x": 201,
+          "y": 345,
+          "width": 598,
+          "height": 350.78,
+          "top": 345,
+          "bottom": 695.78,
+          "scrollHeight": 351,
+          "clientHeight": 351,
+          "scrollWidth": 598,
+          "clientWidth": 598,
+          "overflowY": "visible"
+        },
+        "shareStatusPill": {
+          "x": 724.97,
+          "y": 252,
+          "width": 426.03,
+          "height": 81,
+          "top": 252,
+          "bottom": 333,
+          "scrollHeight": 79,
+          "clientHeight": 79,
+          "scrollWidth": 424,
+          "clientWidth": 424,
+          "overflowY": "visible"
+        },
+        "sharePreview": {
+          "x": 811,
+          "y": 345,
+          "width": 340,
+          "height": 488.63,
+          "top": 345,
+          "bottom": 833.63,
+          "scrollHeight": 487,
+          "clientHeight": 487,
+          "scrollWidth": 338,
+          "clientWidth": 338,
+          "overflowY": "visible"
+        },
+        "sharePreviewLines": {
+          "x": 824,
+          "y": 464.31,
+          "width": 314,
+          "height": 356.31,
+          "top": 464.31,
+          "bottom": 820.63,
+          "scrollHeight": 355,
+          "clientHeight": 355,
+          "scrollWidth": 314,
+          "clientWidth": 314,
+          "overflowY": "auto"
+        },
+        "sharePrimary": {
+          "x": 811,
+          "y": 845.63,
+          "width": 340,
+          "height": 44,
+          "top": 845.63,
+          "bottom": 889.63,
+          "scrollHeight": 42,
+          "clientHeight": 42,
+          "scrollWidth": 338,
+          "clientWidth": 338,
+          "overflowY": "visible"
+        }
+      }
+    }
+  ],
+  "mobile": [
+    {
+      "label": "mobile-390-input-empty",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "document": {
+        "scrollHeight": 988,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "outsideElements": 0
+      },
+      "textHead": "SafeClaw Day Night 작업공간 입력 ▣ 문서 ▣ 공유 현장 작업 입력 오늘 작업은 무엇인가요? 현장 상황 입력 0/600자 + 사진 사진 첨부 최대 10장 빠른 생성 안전 문서 생성 고급 설정 예시 불러오기",
+      "sticky": [],
+      "rects": {
+        "layout": {
+          "x": 10,
+          "y": 164,
+          "width": 370,
+          "height": 759.8,
+          "top": 164,
+          "bottom": 923.8,
+          "scrollHeight": 758,
+          "clientHeight": 758,
+          "scrollWidth": 368,
+          "clientWidth": 368,
+          "overflowY": "hidden"
+        },
+        "sideNav": {
+          "x": 11,
+          "y": 165,
+          "width": 368,
+          "height": 103,
+          "top": 165,
+          "bottom": 268,
+          "scrollHeight": 102,
+          "clientHeight": 102,
+          "scrollWidth": 368,
+          "clientWidth": 368,
+          "overflowY": "visible"
+        },
+        "commandMain": {
+          "x": 11,
+          "y": 268,
+          "width": 368,
+          "height": 654.8,
+          "top": 268,
+          "bottom": 922.8,
+          "scrollHeight": 655,
+          "clientHeight": 655,
+          "scrollWidth": 368,
+          "clientWidth": 368,
+          "overflowY": "visible"
+        },
+        "documentWorkbench": null,
+        "documentViewerList": null,
+        "documentPreviewPane": null,
+        "documentPreviewPre": null,
+        "shareRoot": null,
+        "shareFormShell": null,
+        "shareStatusPill": null,
+        "sharePreview": null,
+        "sharePreviewLines": null,
+        "sharePrimary": null
+      }
+    },
+    {
+      "label": "mobile-390-documents",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "document": {
+        "scrollHeight": 1417,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "outsideElements": 0
+      },
+      "textHead": "SafeClaw Day Night ✓ 입력 문서 ! 공유 문서 생성 완료 안전 문서팩 3종 준비 완료 문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요. 12/12 생성 검수 필요 · 4건 근거 근거 3건 · 확인 필요 8건 위험성평가표 TBM 브리핑 TBM 기록 문서 미리보기 위험성평가표 편집 다운로드 설정 [오늘 개선·이력 반영 - 위험성평가] - 공유 전 보완: SIF 유사사례 - 공유 전 보완: 위험성평가표 근거 - 공유 전 보완: TBM 브리핑 근거 위험성평가표(초안) 공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고 업체명: 세이프건설 업종: 건설업 작업명: 외벽 도장 작업 공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제 작업장소: 서울 성수동 근린생활시설 현장 작업인원: 5명 기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요 [1. 사전준비] - 평가대상 작업: 외벽 도장 작업 - 참여자: 현장소",
+      "sticky": [],
+      "rects": {
+        "layout": {
+          "x": 10,
+          "y": 164,
+          "width": 370,
+          "height": 1188.61,
+          "top": 164,
+          "bottom": 1352.61,
+          "scrollHeight": 1187,
+          "clientHeight": 1187,
+          "scrollWidth": 368,
+          "clientWidth": 368,
+          "overflowY": "hidden"
+        },
+        "sideNav": {
+          "x": 11,
+          "y": 165,
+          "width": 368,
+          "height": 65,
+          "top": 165,
+          "bottom": 230,
+          "scrollHeight": 64,
+          "clientHeight": 64,
+          "scrollWidth": 368,
+          "clientWidth": 368,
+          "overflowY": "visible"
+        },
+        "commandMain": {
+          "x": 11,
+          "y": 230,
+          "width": 368,
+          "height": 1121.61,
+          "top": 230,
+          "bottom": 1351.61,
+          "scrollHeight": 1122,
+          "clientHeight": 1122,
+          "scrollWidth": 368,
+          "clientWidth": 368,
+          "overflowY": "visible"
+        },
+        "documentWorkbench": {
+          "x": 27,
+          "y": 262,
+          "width": 336,
+          "height": 1049.61,
+          "top": 262,
+          "bottom": 1311.61,
+          "scrollHeight": 1048,
+          "clientHeight": 1048,
+          "scrollWidth": 334,
+          "clientWidth": 334,
+          "overflowY": "visible"
+        },
+        "documentViewerList": {
+          "x": 40,
+          "y": 555.05,
+          "width": 310,
+          "height": 72,
+          "top": 555.05,
+          "bottom": 627.05,
+          "scrollHeight": 72,
+          "clientHeight": 72,
+          "scrollWidth": 310,
+          "clientWidth": 310,
+          "overflowY": "visible"
+        },
+        "documentPreviewPane": {
+          "x": 40,
+          "y": 639.05,
+          "width": 310,
+          "height": 549.38,
+          "top": 639.05,
+          "bottom": 1188.42,
+          "scrollHeight": 547,
+          "clientHeight": 547,
+          "scrollWidth": 308,
+          "clientWidth": 308,
+          "overflowY": "visible"
+        },
+        "documentPreviewPre": {
+          "x": 53,
+          "y": 759.42,
+          "width": 284,
+          "height": 360,
+          "top": 759.42,
+          "bottom": 1119.42,
+          "scrollHeight": 1492,
+          "clientHeight": 358,
+          "scrollWidth": 282,
+          "clientWidth": 282,
+          "overflowY": "auto"
+        },
+        "shareRoot": null,
+        "shareFormShell": null,
+        "shareStatusPill": null,
+        "sharePreview": null,
+        "sharePreviewLines": null,
+        "sharePrimary": null
+      }
+    },
+    {
+      "label": "mobile-390-share",
+      "url": "https://www.safeclaw.kr/workspace",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "document": {
+        "scrollHeight": 1487,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "outsideElements": 0
+      },
+      "textHead": "SafeClaw Day Night ✓ 입력 ! 문서 공유 오늘 작업 언어별 전송본 미리보기 미리보기 전용 안전한 중복 방지 저장 기능을 준비하고 있습니다. 01 오늘 대상 2명 선택 현장관리자 · 한국어 신규 작업자 · 한국어 작업자별 저장 언어로 전송본을 준비합니다. 대상 변경 02 채널 메일 미리보기 전용 문자 미리보기 전용 카카오 미리보기 전용 발송 채널 준비 안내 다시 확인 03 언어 미리보기 표시 언어 관리자용 한국어 베트남어 · Tiếng Việt 중국어 · 中文 태국어 · ภาษาไทย 우즈베크어 · O'zbekcha 몽골어 · Монгол хэл 네팔어 · नेपाली 캄보디아어 · ភាសាខ្មែរ 영어 · English 인도네시아어 · Bahasa Indonesia 미얀마어 · မြန်မာဘာသာ 전송 전 확인 공유 전 보완 필요 메시지 미리보기 한국어 메시지 미리보기 [오늘 작업 안전공지] 세이프건설 현장: 서울 성수동 근린생활시설 현장 작업: 외벽 도장 작업 특",
+      "sticky": [],
+      "rects": {
+        "layout": {
+          "x": 10,
+          "y": 164,
+          "width": 370,
+          "height": 1259.14,
+          "top": 164,
+          "bottom": 1423.14,
+          "scrollHeight": 1257,
+          "clientHeight": 1257,
+          "scrollWidth": 368,
+          "clientWidth": 368,
+          "overflowY": "hidden"
+        },
+        "sideNav": {
+          "x": 11,
+          "y": 165,
+          "width": 368,
+          "height": 65,
+          "top": 165,
+          "bottom": 230,
+          "scrollHeight": 64,
+          "clientHeight": 64,
+          "scrollWidth": 368,
+          "clientWidth": 368,
+          "overflowY": "visible"
+        },
+        "commandMain": {
+          "x": 11,
+          "y": 230,
+          "width": 368,
+          "height": 1192.14,
+          "top": 230,
+          "bottom": 1422.14,
+          "scrollHeight": 1192,
+          "clientHeight": 1192,
+          "scrollWidth": 368,
+          "clientWidth": 368,
+          "overflowY": "visible"
+        },
+        "documentWorkbench": null,
+        "documentViewerList": null,
+        "documentPreviewPane": null,
+        "documentPreviewPre": null,
+        "shareRoot": {
+          "x": 27,
+          "y": 244,
+          "width": 316,
+          "height": 1138.14,
+          "top": 244,
+          "bottom": 1382.14,
+          "scrollHeight": 1136,
+          "clientHeight": 1136,
+          "scrollWidth": 314,
+          "clientWidth": 314,
+          "overflowY": "visible"
+        },
+        "shareFormShell": {
+          "x": 40,
+          "y": 380,
+          "width": 290,
+          "height": 586.09,
+          "top": 380,
+          "bottom": 966.09,
+          "scrollHeight": 586,
+          "clientHeight": 586,
+          "scrollWidth": 290,
+          "clientWidth": 290,
+          "overflowY": "visible"
+        },
+        "shareStatusPill": {
+          "x": 40,
+          "y": 318,
+          "width": 290,
+          "height": 54,
+          "top": 318,
+          "bottom": 372,
+          "scrollHeight": 52,
+          "clientHeight": 52,
+          "scrollWidth": 288,
+          "clientWidth": 288,
+          "overflowY": "visible"
+        },
+        "sharePreview": {
+          "x": 40,
+          "y": 1068.14,
+          "width": 290,
+          "height": 249,
+          "top": 1068.14,
+          "bottom": 1317.14,
+          "scrollHeight": 247,
+          "clientHeight": 247,
+          "scrollWidth": 288,
+          "clientWidth": 288,
+          "overflowY": "visible"
+        },
+        "sharePreviewLines": {
+          "x": 51,
+          "y": 1146.14,
+          "width": 268,
+          "height": 160,
+          "top": 1146.14,
+          "bottom": 1306.14,
+          "scrollHeight": 272,
+          "clientHeight": 159,
+          "scrollWidth": 268,
+          "clientWidth": 268,
+          "overflowY": "auto"
+        },
+        "sharePrimary": {
+          "x": 40,
+          "y": 1325.14,
+          "width": 290,
+          "height": 44,
+          "top": 1325.14,
+          "bottom": 1369.14,
+          "scrollHeight": 42,
+          "clientHeight": 42,
+          "scrollWidth": 288,
+          "clientWidth": 288,
+          "overflowY": "visible"
+        }
+      }
+    }
+  ]
+}
