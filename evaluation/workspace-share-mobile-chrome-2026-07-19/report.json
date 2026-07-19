@@ -1,0 +1,53 @@
+{
+  "title": "Workspace share mobile chrome reduction",
+  "date": "2026-07-19",
+  "branch": "fix/ontology-readable-workbench-20260719",
+  "baseHead": "2f8fd1623f15880c10223a6b0631f35d2e076c36",
+  "verdict": "pass_for_bounded_share_mobile_chrome_fix",
+  "scope": [
+    "Mobile /workspace share step top chrome density",
+    "Preserve foreign-worker distribution preview",
+    "Preserve one primary share CTA and 44px theme controls"
+  ],
+  "changes": [
+    {
+      "file": "app/globals.css",
+      "summary": "Reduced mobile share-step command chrome padding and first side-nav group density without hiding message preview content."
+    }
+  ],
+  "nonGoals": [
+    "Full share IA rebuild",
+    "Recipient portal implementation",
+    "Document editor product restructuring",
+    "108-row frontend audit"
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "tests": 1,
+      "durationSeconds": 44.15,
+      "notes": "Verifies desktop and 390px mobile, Day/Night, Vietnamese preview paragraphs visible before the single CTA, horizontal overflow 0, and theme controls >=44px."
+    },
+    {
+      "command": "npm.cmd test -- tests\\workspace-layout-regression.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "testsPassed": 26,
+      "testsSkipped": 1,
+      "durationSeconds": 165.69,
+      "notes": "Verifies workspace document/editor/share layout regression coverage."
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS",
+      "notes": "Strict TypeScript check completed."
+    }
+  ],
+  "residualRisks": [
+    "Mobile share remains a longer step than ideal; this patch reduces chrome but does not replace the share IA.",
+    "Documents editor/review still needs the separate product editor simplification workstream.",
+    "Production verification is pending until Vercel deploys the pushed commit."
+  ]
+}
