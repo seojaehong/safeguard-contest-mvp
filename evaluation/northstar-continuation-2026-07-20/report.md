@@ -26,7 +26,9 @@ North-star mode remains active. Current master has made launch-surface progress 
 | Export / foreign dispatch current gate | `00d854f3` | `evaluation/export-foreign-dispatch-current-gate-2026-07-20/report.md` |
 | Current live workspace documents/share check | `daec3aa5` | `evaluation/workspace-doc-share-live-current-2026-07-20-c6b2236f/report.md` |
 | Current live critical surface check | `a807c6d4` | `evaluation/live-critical-surface-current-2026-07-20/report.md` |
-| Broad KOSHA guide corpus audit | current refresh | `evaluation/kosha-guide-current-audit-2026-07-20/report.md` |
+| Broad KOSHA guide corpus audit | `fa36115a` input state | `evaluation/kosha-guide-current-audit-2026-07-20/report.md` |
+| RLS / LLM Wiki approval preflight | `fa36115a` input state | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.md` |
+| North-star open gate matrix | `fa36115a` input state | `evaluation/northstar-open-gates-current-2026-07-20/report.md` |
 
 ## Verified Commands
 
@@ -57,6 +59,15 @@ North-star mode remains active. Current master has made launch-surface progress 
 - Broad KOSHA parser/ingest regression:
   - `python -m unittest scripts.tests.test_snapshot_kosha_guide_corpus scripts.tests.test_ingest_safety_reference_catalog`
   - PASS, 55 tests.
+- RLS / LLM Wiki approval preflight:
+  - `node scripts\rls_llm_wiki_approval_preflight.mjs --output evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20`
+  - PASS with overall `approval_ready_open`, launch readiness `false`, DB mutation `false`, network opened `false`, failed checks `0`.
+- RLS / LLM Wiki / Hermes focused gate:
+  - `npm.cmd test -- tests\rls-llm-wiki-approval-preflight.test.ts tests\llm-wiki-rls-approval-packet.test.ts tests\northstar-open-gate-audit.test.ts tests\hermes-engine-adapter.test.ts tests\engine-runtime-readiness-policy.test.ts tests\remote-hermes-runtime.test.ts tests\remote-hermes-route.test.ts tests\remote-hermes-service-auth.test.ts tests\remote-hermes-https-transport.test.ts tests\remote-hermes-contract.test.ts tests\knowledge-governance.test.ts tests\knowledge-governance-ui-contract.test.ts --maxWorkers=1 --fileParallelism=false`
+  - PASS, 12 files / 207 tests.
+- North-star open gate audit:
+  - `node scripts\northstar_open_gate_audit.mjs --output evaluation/northstar-open-gates-current-2026-07-20`
+  - PASS as an audit execution with overall `open`; `live_harness_quality` and `kosha_exact_trust_registry` remain proven, while `supabase_rls_launch_isolation`, `llm_wiki_publication`, and `sif_embedding_runtime` remain approval-gated.
 
 ## Current Product Claims That Are Safe
 
@@ -69,6 +80,8 @@ North-star mode remains active. Current master has made launch-surface progress 
 - The current live Share step measured 1068px wide on desktop and 336px wide on mobile; the old narrow desktop mobile-card blocker did not reproduce.
 - In live generation, Share is intentionally locked while the workpack is still 8/12; it unlocks after 12/12 when the document body is populated.
 - Export, PDF/XLSX localization, foreign-language generation/parse, and dispatch capability policies pass current focused tests.
+- RLS / LLM Wiki packets are ready for operator review without mutation. This is an approval-ready packet, not a launch proof.
+- Hermes/OpenClaw remains correctly bounded as a guarded EngineAdapter / remote naturalizer path; focused tests prove it cannot publish knowledge, mutate DB facts, or become the system of record without the missing gates.
 
 ## Claims Still Forbidden
 
@@ -83,7 +96,7 @@ North-star mode remains active. Current master has made launch-surface progress 
 ## Remaining North-Star Gates
 
 1. Re-run production marker after `00d854f3` and later commits deploy.
-2. Continue RLS / LLM Wiki approval-gated path only after explicit DB/migration approval.
+2. Continue RLS / LLM Wiki approval-gated path only after explicit DB/migration approval. The current zero-mutation packet is ready for operator review, but live catalog, tenant A/B, Storage, service-role, publication RPC, idempotency, rollback, and leak tests remain open.
 3. Expand exact KOSHA pins through the immutable acquisition/review pipeline, not by bulk-promoting metadata candidates. For the 1,040-row broad corpus, the next zero-mutation step is official URL/file ID/published/status provenance backfill dry-run plus body/OCR recovery candidates for the 818 empty-body rows.
 4. Continue Hermes as a versioned EngineAdapter / remote naturalizer boundary; do not move it into `ai-provider-policy` or grant tool/effect authority.
 5. Reduce remaining mobile/share IA burden and continue full-surface live browser checks after each UX patch.
