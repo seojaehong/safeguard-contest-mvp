@@ -20,6 +20,30 @@
       }
     ]
   },
+  "secondPostDeployProbe": {
+    "commitSha": "e473c79237bb3fb9e9b4d1c0af62c5e1ba183807",
+    "result": "specificity_failed",
+    "structuredRiskRowCount": 6,
+    "processCounts": {
+      "굴착": 2,
+      "토사반출": 2,
+      "자재양중": 2
+    },
+    "missingExpectedProcesses": [],
+    "underCoveredExpectedProcesses": [],
+    "specificityFailures": [
+      {
+        "label": "굴착",
+        "index": 0,
+        "reason": "used a mixed 토사반출용 차량 ... 굴착작업 case because the match surface contained both explicit process labels"
+      },
+      {
+        "label": "굴착",
+        "index": 1,
+        "reason": "used a 토사반출 덤프트럭 case for an excavation row"
+      }
+    ]
+  },
   "problem": "explicit multi-process prompts had process coverage but could reuse adjacent-process evidence or generic fallback rows",
   "fix": {
     "scope": "deterministic DB harness risk rows",
@@ -29,6 +53,8 @@
       "fallback rows are specialized with process-specific hazard, controls, equipment, verification, and evidence refs"
       ,
       "process-specific reference matching excludes summary-only mentions and uses title/category/subcategory/keywords/risk tags/controls"
+      ,
+      "mixed-process candidate rows are excluded when their match surface contains another explicit process label"
     ],
     "changedFiles": [
       "lib/search.ts",
@@ -44,13 +70,13 @@
     "green": {
       "command": "npm.cmd test -- tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
       "files": 1,
-      "tests": 56,
+      "tests": 57,
       "result": "pass"
     },
     "regression": {
       "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts tests\\ai-deliverables-scope.test.ts tests\\naturalize-output-contract.test.ts tests\\grounded-generation-contract.test.ts tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
       "files": 4,
-      "tests": 116,
+      "tests": 117,
       "result": "pass"
     },
     "typecheck": {

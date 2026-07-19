@@ -708,7 +708,11 @@ export function buildSafetyReferenceRiskRows(
       const processCandidates = filterAndRankSafetyReferencesByQuery(
         processQuery,
         topCandidates.filter((item) => {
-          return safetyReferenceProcessMatchSurface(item).includes(processLabel);
+          const matchSurface = safetyReferenceProcessMatchSurface(item);
+          return matchSurface.includes(processLabel)
+            && !explicitProcesses.some((otherProcess) => (
+              otherProcess !== processLabel && matchSurface.includes(otherProcess)
+            ));
         }),
         topCandidates.length
       );

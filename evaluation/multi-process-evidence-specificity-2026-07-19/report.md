@@ -4,7 +4,7 @@ Date: 2026-07-19
 
 ## Verdict
 
-LOCAL PASS. A post-deploy live probe for `22dc267f02960fc37cc995f7d432f832d6a9faf9` found one remaining specificity failure, and the follow-up remediation is now covered locally. A new post-deploy live probe is required after this latest remediation reaches production.
+LOCAL PASS. Post-deploy live probes for `22dc267f02960fc37cc995f7d432f832d6a9faf9` and `e473c79237bb3fb9e9b4d1c0af62c5e1ba183807` found specificity failures, and both follow-up remediations are now covered locally. A new post-deploy live probe is required after this latest remediation reaches production.
 
 ## Problem
 
@@ -42,6 +42,24 @@ Follow-up remediation:
 - process-specific reference matching now uses title/category/subcategory/keywords/risk tags/controls as the match surface;
 - summary-only mentions no longer qualify an adjacent-process accident case for the current process.
 
+Second post-deploy probe at `e473c79237bb3fb9e9b4d1c0af62c5e1ba183807`:
+
+- Structured risk rows: `6`
+- Process counts: `굴착: 2`, `토사반출: 2`, `자재양중: 2`
+- Missing requested processes: none
+- Under-covered requested processes: none
+- Specificity failure: `굴착` still used a mixed `토사반출용 차량 ... 굴착작업` case because the match surface contained both explicit process labels.
+
+Evidence:
+
+- `live-final-summary.json`
+- `live-final-sample.json`
+
+Second follow-up remediation:
+
+- mixed-process candidates are excluded from the default evidence row for a different explicit process;
+- ambiguous mixed cases now fall back to process-specialized deterministic rows instead of being misassigned.
+
 ## TDD Evidence
 
 RED:
@@ -64,14 +82,14 @@ GREEN:
 
 ```text
 npm.cmd test -- tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false
-1 file / 56 tests PASS
+1 file / 57 tests PASS
 ```
 
 Regression:
 
 ```text
 npm.cmd test -- tests\ai-deliverables-generation-trace.test.ts tests\ai-deliverables-scope.test.ts tests\naturalize-output-contract.test.ts tests\grounded-generation-contract.test.ts tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false
-4 files / 116 tests PASS
+4 files / 117 tests PASS
 ```
 
 TypeScript:
