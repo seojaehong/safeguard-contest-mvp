@@ -1,7 +1,8 @@
 # North Star Integrated Focused Gate
 
 Date: 2026-07-19
-Source HEAD: `6ec45d2eefd311859a98ae5c0a07934442a3fc85`
+Authoritative report commit: the commit containing this report file
+Verified source base before this report commit: `6ec45d2eefd311859a98ae5c0a07934442a3fc85`
 Live build-info at verification time: `6ec45d2eefd311859a98ae5c0a07934442a3fc85`
 
 ## Scope
