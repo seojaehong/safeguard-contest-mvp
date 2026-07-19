@@ -1,0 +1,286 @@
+{
+  "checkedAt": "2026-07-19T15:57:52.633Z",
+  "baseUrl": "http://127.0.0.1:3019",
+  "metrics": [
+    {
+      "label": "patched-desktop-doc-review",
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "document": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "scrollHeight": 1190
+      },
+      "stepPage": {
+        "x": 376,
+        "y": 164,
+        "w": 968,
+        "h": 798,
+        "top": 164,
+        "bottom": 962
+      },
+      "documentRail": {
+        "x": 389,
+        "y": 355,
+        "w": 194,
+        "h": 484,
+        "top": 355,
+        "bottom": 839
+      },
+      "previewPane": {
+        "x": 595,
+        "y": 355,
+        "w": 736,
+        "h": 484,
+        "top": 355,
+        "bottom": 839
+      },
+      "workpackEditor": null,
+      "editorBody": null,
+      "shareRoot": null,
+      "messagePreviewLines": null,
+      "outsideCount": 0,
+      "done12": true
+    },
+    {
+      "label": "patched-desktop-doc-edit",
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "document": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "scrollHeight": 1444
+      },
+      "stepPage": {
+        "x": 376,
+        "y": -9,
+        "w": 968,
+        "h": 1152,
+        "top": -9,
+        "bottom": 1143
+      },
+      "documentRail": null,
+      "previewPane": null,
+      "workpackEditor": {
+        "x": 376,
+        "y": 63,
+        "w": 968,
+        "h": 712,
+        "top": 63,
+        "bottom": 775
+      },
+      "editorBody": {
+        "x": 673,
+        "y": 64,
+        "w": 670,
+        "h": 5601,
+        "top": 64,
+        "bottom": 5665
+      },
+      "shareRoot": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "messagePreviewLines": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "outsideCount": 0,
+      "done12": false
+    },
+    {
+      "label": "patched-desktop-share",
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "document": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "scrollHeight": 1198
+      },
+      "stepPage": {
+        "x": 376,
+        "y": 172,
+        "w": 968,
+        "h": 859,
+        "top": 172,
+        "bottom": 1031
+      },
+      "documentRail": null,
+      "previewPane": null,
+      "workpackEditor": null,
+      "editorBody": null,
+      "shareRoot": {
+        "x": 376,
+        "y": 172,
+        "w": 968,
+        "h": 859,
+        "top": 172,
+        "bottom": 1031
+      },
+      "messagePreviewLines": {
+        "x": 404,
+        "y": 709,
+        "w": 912,
+        "h": 240,
+        "top": 709,
+        "bottom": 949
+      },
+      "outsideCount": 0,
+      "done12": false
+    },
+    {
+      "label": "patched-mobile-share",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "document": {
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "scrollHeight": 1661
+      },
+      "stepPage": {
+        "x": 27,
+        "y": 268,
+        "w": 316,
+        "h": 1288,
+        "top": 268,
+        "bottom": 1556
+      },
+      "documentRail": null,
+      "previewPane": null,
+      "workpackEditor": null,
+      "editorBody": null,
+      "shareRoot": {
+        "x": 27,
+        "y": 268,
+        "w": 316,
+        "h": 1288,
+        "top": 268,
+        "bottom": 1556
+      },
+      "messagePreviewLines": {
+        "x": 51,
+        "y": 1260,
+        "w": 268,
+        "h": 220,
+        "top": 1260,
+        "bottom": 1480
+      },
+      "outsideCount": 0,
+      "done12": false
+    },
+    {
+      "label": "patched-mobile-doc-review",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "document": {
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "scrollHeight": 1429
+      },
+      "stepPage": {
+        "x": 27,
+        "y": 300,
+        "w": 336,
+        "h": 1024,
+        "top": 300,
+        "bottom": 1324
+      },
+      "documentRail": {
+        "x": 40,
+        "y": 573,
+        "w": 310,
+        "h": 72,
+        "top": 573,
+        "bottom": 645
+      },
+      "previewPane": {
+        "x": 40,
+        "y": 657,
+        "w": 310,
+        "h": 544,
+        "top": 657,
+        "bottom": 1201
+      },
+      "workpackEditor": null,
+      "editorBody": null,
+      "shareRoot": null,
+      "messagePreviewLines": null,
+      "outsideCount": 0,
+      "done12": true
+    },
+    {
+      "label": "patched-mobile-doc-edit",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "document": {
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "scrollHeight": 1894
+      },
+      "stepPage": {
+        "x": 27,
+        "y": -130,
+        "w": 336,
+        "h": 1489,
+        "top": -130,
+        "bottom": 1359
+      },
+      "documentRail": null,
+      "previewPane": null,
+      "workpackEditor": {
+        "x": 27,
+        "y": -63,
+        "w": 336,
+        "h": 656,
+        "top": -63,
+        "bottom": 593
+      },
+      "editorBody": {
+        "x": 28,
+        "y": 64,
+        "w": 334,
+        "h": 7696,
+        "top": 64,
+        "bottom": 7760
+      },
+      "shareRoot": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "messagePreviewLines": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "outsideCount": 0,
+      "done12": false
+    }
+  ]
+}

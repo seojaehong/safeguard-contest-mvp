@@ -111,7 +111,7 @@ describe("workspace share simplification", () => {
     expect(sharePanel).not.toContain("메시지 복사");
     expect(sharePanel).not.toContain("전체 메시지 원문");
     expect(sharePanel).toContain('href="/login"');
-    expect(readFileSync(join(root, "app", "globals.css"), "utf8")).toContain(
+    expect(readFileSync(join(root, "app", "globals.css"), "utf8").replace(/\r\n/gu, "\n")).toContain(
       ".share-panel.workflow-panel .channel-grid {\n  grid-template-columns: repeat(3, minmax(0, 1fr));"
     );
   });

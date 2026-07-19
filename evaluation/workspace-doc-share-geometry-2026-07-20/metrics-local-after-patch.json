@@ -1,0 +1,483 @@
+{
+  "checkedAt": "2026-07-19T15:55:09.810Z",
+  "baseUrl": "http://127.0.0.1:3019",
+  "head": "local working tree after bounded patch",
+  "metrics": [
+    {
+      "label": "local-desktop-doc-review",
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "document": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "scrollHeight": 1190
+      },
+      "main": {
+        "x": 320,
+        "y": 116,
+        "w": 1080,
+        "h": 902,
+        "top": 116,
+        "bottom": 1018
+      },
+      "sideNav": {
+        "x": 40,
+        "y": 116,
+        "w": 264,
+        "h": 1010,
+        "top": 116,
+        "bottom": 1126
+      },
+      "stepPage": {
+        "x": 376,
+        "y": 164,
+        "w": 968,
+        "h": 798,
+        "top": 164,
+        "bottom": 962
+      },
+      "documentPage": {
+        "x": 376,
+        "y": 164,
+        "w": 968,
+        "h": 798,
+        "top": 164,
+        "bottom": 962
+      },
+      "documentWorkbench": {
+        "x": 376,
+        "y": 164,
+        "w": 968,
+        "h": 798,
+        "top": 164,
+        "bottom": 962
+      },
+      "documentRail": {
+        "x": 389,
+        "y": 355,
+        "w": 194,
+        "h": 484,
+        "top": 355,
+        "bottom": 839
+      },
+      "previewPane": {
+        "x": 595,
+        "y": 355,
+        "w": 736,
+        "h": 484,
+        "top": 355,
+        "bottom": 839
+      },
+      "editorSurface": null,
+      "workpackEditor": null,
+      "editorBody": null,
+      "sharePage": null,
+      "shareRoot": null,
+      "messagePreviewLines": null,
+      "stickyCount": 0,
+      "outsideCount": 0,
+      "done12": true
+    },
+    {
+      "label": "local-desktop-doc-edit",
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "document": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "scrollHeight": 1444
+      },
+      "main": {
+        "x": 320,
+        "y": -57,
+        "w": 1080,
+        "h": 1256,
+        "top": -57,
+        "bottom": 1199
+      },
+      "sideNav": {
+        "x": 40,
+        "y": -57,
+        "w": 264,
+        "h": 1256,
+        "top": -57,
+        "bottom": 1199
+      },
+      "stepPage": {
+        "x": 376,
+        "y": -9,
+        "w": 968,
+        "h": 1152,
+        "top": -9,
+        "bottom": 1143
+      },
+      "documentPage": {
+        "x": 376,
+        "y": -9,
+        "w": 968,
+        "h": 1152,
+        "top": -9,
+        "bottom": 1143
+      },
+      "documentWorkbench": null,
+      "documentRail": null,
+      "previewPane": null,
+      "editorSurface": {
+        "x": 376,
+        "y": -9,
+        "w": 968,
+        "h": 1152,
+        "top": -9,
+        "bottom": 1143
+      },
+      "workpackEditor": {
+        "x": 376,
+        "y": 63,
+        "w": 968,
+        "h": 712,
+        "top": 63,
+        "bottom": 775
+      },
+      "editorBody": {
+        "x": 673,
+        "y": 64,
+        "w": 670,
+        "h": 5601,
+        "top": 64,
+        "bottom": 5665
+      },
+      "sharePage": null,
+      "shareRoot": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "messagePreviewLines": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "stickyCount": 1,
+      "outsideCount": 0,
+      "done12": false
+    },
+    {
+      "label": "local-desktop-share",
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "document": {
+        "clientWidth": 1440,
+        "scrollWidth": 1440,
+        "scrollHeight": 1235
+      },
+      "main": {
+        "x": 320,
+        "y": 124,
+        "w": 1080,
+        "h": 1047,
+        "top": 124,
+        "bottom": 1171
+      },
+      "sideNav": {
+        "x": 40,
+        "y": 124,
+        "w": 264,
+        "h": 1047,
+        "top": 124,
+        "bottom": 1171
+      },
+      "stepPage": {
+        "x": 376,
+        "y": 172,
+        "w": 968,
+        "h": 943,
+        "top": 172,
+        "bottom": 1115
+      },
+      "documentPage": null,
+      "documentWorkbench": null,
+      "documentRail": null,
+      "previewPane": null,
+      "editorSurface": null,
+      "workpackEditor": null,
+      "editorBody": null,
+      "sharePage": {
+        "x": 376,
+        "y": 172,
+        "w": 968,
+        "h": 943,
+        "top": 172,
+        "bottom": 1115
+      },
+      "shareRoot": {
+        "x": 376,
+        "y": 172,
+        "w": 968,
+        "h": 943,
+        "top": 172,
+        "bottom": 1115
+      },
+      "messagePreviewLines": {
+        "x": 404,
+        "y": 709,
+        "w": 912,
+        "h": 324,
+        "top": 709,
+        "bottom": 1033
+      },
+      "stickyCount": 0,
+      "outsideCount": 0,
+      "done12": false
+    },
+    {
+      "label": "local-mobile-share",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "document": {
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "scrollHeight": 1761
+      },
+      "main": {
+        "x": 11,
+        "y": 254,
+        "w": 368,
+        "h": 1442,
+        "top": 254,
+        "bottom": 1696
+      },
+      "sideNav": {
+        "x": 11,
+        "y": 165,
+        "w": 368,
+        "h": 89,
+        "top": 165,
+        "bottom": 254
+      },
+      "stepPage": {
+        "x": 27,
+        "y": 268,
+        "w": 316,
+        "h": 1388,
+        "top": 268,
+        "bottom": 1656
+      },
+      "documentPage": null,
+      "documentWorkbench": null,
+      "documentRail": null,
+      "previewPane": null,
+      "editorSurface": null,
+      "workpackEditor": null,
+      "editorBody": null,
+      "sharePage": {
+        "x": 27,
+        "y": 268,
+        "w": 316,
+        "h": 1388,
+        "top": 268,
+        "bottom": 1656
+      },
+      "shareRoot": {
+        "x": 27,
+        "y": 268,
+        "w": 316,
+        "h": 1388,
+        "top": 268,
+        "bottom": 1656
+      },
+      "messagePreviewLines": {
+        "x": 51,
+        "y": 1260,
+        "w": 268,
+        "h": 320,
+        "top": 1260,
+        "bottom": 1580
+      },
+      "stickyCount": 0,
+      "outsideCount": 0,
+      "done12": false
+    },
+    {
+      "label": "local-mobile-doc-review",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "document": {
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "scrollHeight": 1581
+      },
+      "main": {
+        "x": 11,
+        "y": 268,
+        "w": 368,
+        "h": 1248,
+        "top": 268,
+        "bottom": 1516
+      },
+      "sideNav": {
+        "x": 11,
+        "y": 165,
+        "w": 368,
+        "h": 103,
+        "top": 165,
+        "bottom": 268
+      },
+      "stepPage": {
+        "x": 27,
+        "y": 300,
+        "w": 336,
+        "h": 1176,
+        "top": 300,
+        "bottom": 1476
+      },
+      "documentPage": {
+        "x": 27,
+        "y": 300,
+        "w": 336,
+        "h": 1176,
+        "top": 300,
+        "bottom": 1476
+      },
+      "documentWorkbench": {
+        "x": 27,
+        "y": 300,
+        "w": 336,
+        "h": 1176,
+        "top": 300,
+        "bottom": 1476
+      },
+      "documentRail": {
+        "x": 40,
+        "y": 573,
+        "w": 310,
+        "h": 224,
+        "top": 573,
+        "bottom": 797
+      },
+      "previewPane": {
+        "x": 40,
+        "y": 809,
+        "w": 310,
+        "h": 544,
+        "top": 809,
+        "bottom": 1353
+      },
+      "editorSurface": null,
+      "workpackEditor": null,
+      "editorBody": null,
+      "sharePage": null,
+      "shareRoot": null,
+      "messagePreviewLines": null,
+      "stickyCount": 0,
+      "outsideCount": 0,
+      "done12": true
+    },
+    {
+      "label": "local-mobile-doc-edit",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "document": {
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "scrollHeight": 1894
+      },
+      "main": {
+        "x": 11,
+        "y": -162,
+        "w": 368,
+        "h": 1561,
+        "top": -162,
+        "bottom": 1399
+      },
+      "sideNav": {
+        "x": 11,
+        "y": -265,
+        "w": 368,
+        "h": 103,
+        "top": -265,
+        "bottom": -162
+      },
+      "stepPage": {
+        "x": 27,
+        "y": -130,
+        "w": 336,
+        "h": 1489,
+        "top": -130,
+        "bottom": 1359
+      },
+      "documentPage": {
+        "x": 27,
+        "y": -130,
+        "w": 336,
+        "h": 1489,
+        "top": -130,
+        "bottom": 1359
+      },
+      "documentWorkbench": null,
+      "documentRail": null,
+      "previewPane": null,
+      "editorSurface": {
+        "x": 27,
+        "y": -130,
+        "w": 336,
+        "h": 1489,
+        "top": -130,
+        "bottom": 1359
+      },
+      "workpackEditor": {
+        "x": 27,
+        "y": -63,
+        "w": 336,
+        "h": 656,
+        "top": -63,
+        "bottom": 593
+      },
+      "editorBody": {
+        "x": 28,
+        "y": 64,
+        "w": 334,
+        "h": 7696,
+        "top": 64,
+        "bottom": 7760
+      },
+      "sharePage": null,
+      "shareRoot": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "messagePreviewLines": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "stickyCount": 0,
+      "outsideCount": 0,
+      "done12": false
+    }
+  ]
+}

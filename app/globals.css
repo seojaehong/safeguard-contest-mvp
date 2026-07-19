@@ -6363,6 +6363,10 @@ ul {
   pointer-events: none;
 }
 
+.field-workspace-editor-focus .editor-operations-disclosure:not([open]) > .workspace-side {
+  display: none;
+}
+
 .field-workspace-editor-focus .editor-operations-disclosure[open] {
   pointer-events: none;
 }
@@ -13974,13 +13978,13 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .document-workbench {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   width: min(1180px, 100%);
   margin: 0 auto;
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
   background: color-mix(in srgb, var(--workspace-surface-1) 92%, transparent);
-  padding: 16px;
+  padding: 12px;
 }
 
 .command-center-shell .document-workbench-head {
@@ -13989,7 +13993,7 @@ body:has(.safeclaw-landing) :is(
   justify-content: space-between;
   gap: 20px;
   border-bottom: 1px solid var(--workspace-rule);
-  padding-bottom: 16px;
+  padding-bottom: 10px;
 }
 
 .command-center-shell .document-workbench-head > div:first-child {
@@ -14211,8 +14215,8 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .document-workbench .document-viewer-list button {
-  min-height: 86px;
-  padding: 12px;
+  min-height: 66px;
+  padding: 10px;
 }
 
 .command-center-shell .document-workbench .document-viewer-list button strong {
@@ -14224,11 +14228,11 @@ body:has(.safeclaw-landing) :is(
 
 .command-center-shell .document-workbench .document-preview-pane {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
   background: var(--workspace-surface-2);
-  padding: 16px;
+  padding: 12px;
 }
 
 .command-center-shell .document-workbench .document-preview-head {
@@ -14236,18 +14240,18 @@ body:has(.safeclaw-landing) :is(
   justify-content: space-between;
   gap: 12px;
   border-bottom: 1px solid var(--workspace-rule);
-  padding-bottom: 12px;
+  padding-bottom: 8px;
 }
 
 .command-center-shell .document-workbench .document-preview-pane pre {
-  min-height: 360px;
-  max-height: min(48vh, 460px);
+  min-height: 260px;
+  max-height: min(36vh, 320px);
   overflow: auto;
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
   background: #090a0b;
   color: var(--workspace-ink);
-  padding: 20px;
+  padding: 16px;
   font-family: var(--font-multilingual);
   font-size: var(--text-table);
   line-height: var(--leading-table);
@@ -16154,16 +16158,16 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell .document-workbench .document-viewer-list {
-    grid-auto-flow: row;
-    grid-auto-columns: auto;
-    grid-template-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     overflow-x: visible;
     padding-bottom: 0;
   }
 
   .command-center-shell .document-workbench .document-viewer-list button {
-    min-height: 64px;
-    padding: 8px;
+    min-height: 56px;
+    padding: 7px 6px;
   }
 
   .command-center-shell .document-workbench .document-viewer-list button span,
@@ -16180,7 +16184,8 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .document-workbench .document-preview-pane pre {
     min-height: 360px;
-    max-height: 58vh;
+    max-height: none;
+    overflow: visible;
     font-size: var(--text-caption);
     line-height: var(--leading-caption);
     padding: 16px;
@@ -19191,6 +19196,10 @@ body:has(.safeclaw-landing) :is(
   gap: 12px;
 }
 
+.command-center-shell .field-workspace-editor-focus > .workspace-rail {
+  display: none;
+}
+
 .command-center-shell .field-workspace-editor-focus .workspace-canvas {
   gap: 0;
 }
@@ -19338,8 +19347,8 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .document-workbench .document-preview-pane pre {
     min-height: 300px;
-    max-height: min(42vh, 360px);
-    overflow: auto;
+    max-height: none;
+    overflow: visible;
   }
 }
 

@@ -490,11 +490,20 @@ export default function ShareRecipientPage() {
     setSessionMessage("");
     const requestWorkerId = workerId || queryWorkerId;
     const query = requestWorkerId ? `?workerId=${encodeURIComponent(requestWorkerId)}` : "";
-    const response = await fetch(`/api/share-sessions/${encodeURIComponent(sessionId)}${query}`, { cache: "no-store" });
-    const payload = (await response.json()) as ShareSessionResponse;
+    const payload = await fetch(`/api/share-sessions/${encodeURIComponent(sessionId)}${query}`, { cache: "no-store" })
+      .then(async (response) => (await response.json()) as ShareSessionResponse)
+      .catch((error): ShareSessionResponse => {
+        console.warn("share recipient session load failed", error);
+        return {
+          ok: false,
+          configured: true,
+          session: null,
+          message: activeCopy.sessionLoadFailed
+        };
+      });
     if (!payload.ok) {
       setSessionPayload(null);
-      setSessionMessage(payload.message);
+      setSessionMessage(activeCopy.sessionLoadFailed);
       setFetchState("error");
       return;
     }
@@ -547,14 +556,24 @@ export default function ShareRecipientPage() {
     setFetchState("submitting");
     setConfirmationMessage("");
     setIsIdempotent(false);
-    const response = await fetch(`/api/share-sessions/${encodeURIComponent(sessionPayload.id)}`, {
+    const payload = await fetch(`/api/share-sessions/${encodeURIComponent(sessionPayload.id)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
-    });
-    const payload = (await response.json()) as ShareSessionResponse;
+    })
+      .then(async (response) => (await response.json()) as ShareSessionResponse)
+      .catch((error): ShareSessionResponse => {
+        console.warn("share recipient confirmation failed", error);
+        return {
+          ok: false,
+          configured: true,
+          session: null,
+          confirmationId: null,
+          message: copy.confirmationFailed
+        };
+      });
     if (!payload.ok) {
-      setConfirmationMessage(payload.message || copy.confirmationFailed);
+      setConfirmationMessage(copy.confirmationFailed);
       setFetchState("error");
       return;
     }
@@ -626,8 +645,10 @@ export default function ShareRecipientPage() {
           ) : null}
         </article>
 
-        {!sessionPayload || fetchState === "loading" ? (
+        {fetchState === "loading" ? (
           <p className="safeclaw-hint">{copy.loading}</p>
+        ) : !sessionPayload ? (
+          sessionMessage ? <p className="safeclaw-hint">{sessionMessage}</p> : null
         ) : (
           <>
             {sessionPayload.recipientMessage ? (

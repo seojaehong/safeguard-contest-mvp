@@ -116,9 +116,10 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       const bodyText = await page.locator("body").innerText();
       expect(bodyText).toContain("Kiểm tra gói tài liệu");
       expect(bodyText).toContain("Màn hình xác nhận chỉ dành cho công nhân được mời.");
-      expect(bodyText).toContain("Đang tải thông tin phiên...");
+      expect(bodyText).toContain("Vui lòng kiểm tra mã phiên chia sẻ.");
       expect(bodyText).toContain("Phạm vi công việc");
       expect(bodyText).toContain("Chưa tải được chi tiết công việc được chia sẻ.");
+      expect(bodyText).not.toContain("Đang tải thông tin phiên...");
       expect(bodyText).not.toContain("문서팩 검토");
       expect(bodyText).not.toContain("세션 정보를 조회하는 중입니다");
       expect(bodyText).not.toContain("업무 범위");
@@ -140,11 +141,44 @@ describe.skipIf(!hasProductionBuild)("share recipient portal browser contract", 
       const bodyText = await page.locator("body").innerText();
       expect(bodyText).toContain("Review document pack");
       expect(bodyText).toContain("This confirmation screen is only for invited workers.");
-      expect(bodyText).toContain("Loading share session...");
+      expect(bodyText).toContain("Please check the share session ID.");
       expect(bodyText).toContain("Work scope");
+      expect(bodyText).not.toContain("Loading share session...");
       expect(bodyText).not.toContain("문서팩 검토");
       expect(bodyText).not.toContain("세션 정보를 조회하는 중입니다");
       expect(bodyText).not.toContain("업무 범위");
+    } finally {
+      await page.close();
+    }
+  }, 45_000);
+
+  it("does not leak Korean server errors into a Vietnamese recipient link", async () => {
+    if (!browser || !harness) throw new Error("Browser harness was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await page.route("**/api/share-sessions/**", async (route) => {
+      await route.fulfill({
+        status: 403,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: false,
+          configured: true,
+          session: null,
+          message: "초대된 작업자 링크로 다시 접속해 주세요."
+        })
+      });
+    });
+
+    try {
+      const response = await page.goto(`${harness.baseUrl}/share/${SESSION_ID}?workerId=${WORKER_ID}&lang=vi`, { waitUntil: "networkidle" });
+      if (!response || response.status() >= 400) {
+        throw new Error(`share page returned ${response?.status() ?? "no response"}\n${await page.locator("body").innerText().catch(() => "")}\n${harness.readServerOutput()}`);
+      }
+      await expect.poll(() => page.locator("body").innerText()).not.toContain("Đang tải thông tin phiên...");
+      const bodyText = await page.locator("body").innerText();
+      expect(bodyText).toContain("Không thể tải thông tin phiên.");
+      expect(bodyText).toContain("Kiểm tra gói tài liệu");
+      expect(bodyText).not.toContain("초대된 작업자 링크");
+      expect(bodyText).not.toContain("세션 정보를 불러오지 못했습니다");
     } finally {
       await page.close();
     }
