@@ -723,9 +723,10 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
     .map((language) => buildForeignWorkerLanguageMessage(input, language))
     .join("\n\n");
 
-  return [
+  return ensureForeignWorkerTransmissionContext([
     `[SafeClaw 외국인 근로자 안전공지] ${input.scenario.companyName}`,
     `현장: ${input.scenario.siteName}`,
+    `오늘 작업: ${input.scenario.workSummary}`,
     ...buildKoreanContextLines(input),
     `⚠️ 핵심 위험: ${input.riskSummary.topRisk}`,
     "",
@@ -738,7 +739,35 @@ export function buildForeignWorkerTransmission(input: BriefingInput) {
     languageDigest,
     "",
     "관리자 확인: 이 문구는 현장 통역 또는 관리자 확인 후 전송하세요."
-  ].join("\n");
+  ].join("\n"), input);
+}
+
+export function ensureForeignWorkerTransmissionContext(text: string, input: BriefingInput) {
+  const body = text.trim();
+  const workSummary = input.scenario.workSummary.trim();
+  if (!workSummary || body.includes(workSummary)) return body;
+
+  const workLine = `오늘 작업: ${workSummary}`;
+  const lines = body.split(/\r?\n/);
+  const siteLineIndex = lines.findIndex((line) => /^현장\s*:/u.test(line.trim()));
+  if (siteLineIndex >= 0) {
+    return [
+      ...lines.slice(0, siteLineIndex + 1),
+      workLine,
+      ...lines.slice(siteLineIndex + 1)
+    ].join("\n");
+  }
+
+  const headerIndex = lines.findIndex((line) => /^\[SafeClaw/u.test(line.trim()));
+  if (headerIndex >= 0) {
+    return [
+      ...lines.slice(0, headerIndex + 1),
+      workLine,
+      ...lines.slice(headerIndex + 1)
+    ].join("\n");
+  }
+
+  return `${workLine}\n${body}`;
 }
 
 export function buildForeignWorkerLanguageMessage(input: BriefingInput, language: ForeignWorkerLanguage) {

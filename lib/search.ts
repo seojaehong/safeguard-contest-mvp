@@ -41,7 +41,7 @@ import { fetchKoshaEducationRecommendations } from "./kosha-education";
 import { fetchKoshaReferences } from "./kosha";
 import { fetchAccidentCases, selectFallbackAccidentCases } from "./accident-cases";
 import { fetchKoshaOpenApiEvidence } from "./kosha-openapi";
-import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission, reconcileLanguages } from "./foreign-worker";
+import { buildForeignWorkerBriefing, buildForeignWorkerLanguages, buildForeignWorkerTransmission, ensureForeignWorkerTransmissionContext, reconcileLanguages } from "./foreign-worker";
 import { matchSafetyKnowledge } from "./safety-knowledge";
 import { validateRiskAssessmentRows, type AccidentType, type FourM, type RiskAssessmentRow, type RiskAssessmentValidationIssue } from "./risk-assessment-schema";
 import { splitDocumentMeta } from "./doc-meta-split";
@@ -2760,7 +2760,10 @@ export async function runAsk(question: string, options: RunAskOptions = {}): Pro
     const linkedWorkPlanStructured = linkWorkPlanToRiskRows(baseDeliverables.workPlanStructured, structuredRiskRows);
     const linkedPermitInspectionStructured = linkPermitToRiskRows(baseDeliverables.permitInspectionStructured, structuredRiskRows);
     const foreignWorkerBriefingText = aiBodies.foreignWorkerBriefing ?? buildForeignWorkerBriefing(foreignWorkerInput);
-    const foreignWorkerTransmissionText = aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput);
+    const foreignWorkerTransmissionText = ensureForeignWorkerTransmissionContext(
+      aiBodies.foreignWorkerTransmission ?? buildForeignWorkerTransmission(foreignWorkerInput),
+      foreignWorkerInput
+    );
     const groundingDiagnostics = deliverablesResult?.diagnostics.grounding;
     const fallbackMaterialization = JSON.stringify({
       deliverables: baseDeliverables,

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildForeignWorkerLanguageMessage, buildForeignWorkerLanguages, reconcileLanguages } from "@/lib/foreign-worker";
+import {
+  buildForeignWorkerLanguageMessage,
+  buildForeignWorkerLanguages,
+  buildForeignWorkerTransmission,
+  ensureForeignWorkerTransmissionContext,
+  reconcileLanguages
+} from "@/lib/foreign-worker";
 import type { ForeignWorkerLanguage } from "@/lib/types";
 
 function lang(code: string, label: string, nativeLabel: string): ForeignWorkerLanguage {
@@ -102,5 +108,51 @@ describe("buildForeignWorkerLanguageMessage", () => {
     expect(message).not.toContain("현장:");
     expect(message).not.toContain("작업:");
     expect(message).not.toContain("핵심 위험:");
+  });
+});
+
+describe("foreign worker transmission context", () => {
+  const input = {
+    question: "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보.",
+    scenario: {
+      siteName: "서울 성수동 근린생활시설 현장",
+      companyName: "세이프건설",
+      companyType: "건설업",
+      workSummary: "외벽 도장 작업",
+      workerCount: 5,
+      weatherNote: "오후 강풍 예보"
+    },
+    riskSummary: {
+      title: "외벽 도장 강풍 비계 작업",
+      riskLevel: "상" as const,
+      topRisk: "강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락할 위험",
+      immediateActions: [
+        "작업 전 비계 바퀴와 아웃트리거를 고정합니다.",
+        "비계가 흔들리면 즉시 작업을 멈춥니다.",
+        "안전대와 추락방지 설비를 확인합니다."
+      ]
+    }
+  };
+
+  it("keeps the Korean work summary in the default dispatch body", () => {
+    const transmission = buildForeignWorkerTransmission(input);
+
+    expect(transmission).toContain("오늘 작업: 외벽 도장 작업");
+    expect(transmission).toContain("도장");
+  });
+
+  it("injects the work summary into AI-authored dispatch bodies before scenario terms can be lost", () => {
+    const aiBody = [
+      "[SafeClaw 외국인 근로자 안전공지] 세이프건설",
+      "현장: 서울 성수동 근린생활시설 현장",
+      "작업조건: 오후 강풍 예보",
+      "쉬운 한국어:",
+      "위험하면 작업을 멈추고 관리자에게 말하세요."
+    ].join("\n");
+
+    const transmission = ensureForeignWorkerTransmissionContext(aiBody, input);
+
+    expect(transmission).toContain("현장: 서울 성수동 근린생활시설 현장\n오늘 작업: 외벽 도장 작업");
+    expect(transmission).toContain("도장");
   });
 });
