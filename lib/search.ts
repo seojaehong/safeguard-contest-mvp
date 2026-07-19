@@ -562,6 +562,125 @@ function specializeFallbackRiskRowForProcess(row: RiskAssessmentRow, processLabe
   };
 }
 
+function buildProcessSpecificFallbackRiskRows(
+  response: AskResponse,
+  processLabel: string,
+  weatherSummary: string
+): RiskAssessmentRow[] {
+  const location = response.scenario.siteName || "현장 작업구역";
+  const due = "현장 확인";
+  const commonEvidence = [`${processLabel} 작업 입력 조건`, "KOSHA 위험성평가", "문서팩 입력 조건"];
+  if (/굴착|터파기|흙막이/.test(processLabel)) {
+    return [
+      buildRiskRow({
+        location,
+        process: processLabel,
+        task: `${processLabel} 작업`,
+        equipment: "굴삭기, 굴착면, 흙막이, 출입통제 표지",
+        hazard: "굴착면·사면 붕괴 또는 낙석으로 작업자가 매몰·타격될 위험",
+        currentControls: "굴착면 균열, 토사 유실, 지하매설물, 흙막이 지지 상태를 작업 전 확인합니다.",
+        likelihood: 4,
+        severity: 5,
+        additionalControls: "굴착 하부와 사면 하단 출입을 통제하고 굴삭기 작업반경 밖 대기 위치를 지정합니다.",
+        owner: "작업반장",
+        due,
+        verification: "굴착면 상태와 출입통제선을 현장 사진·TBM 확인으로 기록",
+        verificationChecker: "관리감독자",
+        evidenceRefs: commonEvidence
+      }),
+      buildRiskRow({
+        location,
+        process: processLabel,
+        task: `${processLabel} 작업`,
+        equipment: "굴삭기, 신호수, 덤프 상차 위치",
+        hazard: "굴삭기 선회반경과 작업자 접근 구간이 겹쳐 충돌·끼임이 발생할 위험",
+        currentControls: "굴삭기 선회반경, 후방 사각지대, 신호수 위치를 작업 전 확인합니다.",
+        likelihood: 3,
+        severity: 5,
+        additionalControls: "상차·정리 작업자는 굴삭기 정지 후 접근하고 신호수 교신 기준을 TBM에서 복창합니다.",
+        owner: "장비 담당자",
+        due,
+        verification: "굴삭기 작업반경 통제와 신호수 배치를 작업 시작 전 확인",
+        verificationChecker: "작업반장",
+        evidenceRefs: commonEvidence
+      })
+    ];
+  }
+  if (/토사반출|반출|운반/.test(processLabel)) {
+    return [
+      buildRiskRow({
+        location,
+        process: processLabel,
+        task: `${processLabel} 작업`,
+        equipment: "덤프트럭, 가설도로, 차량 유도 표지",
+        hazard: "덤프트럭 후진·회전 구간에서 작업자와 충돌하거나 깔릴 위험",
+        currentControls: "덤프트럭 진출입 동선, 후진 구간, 보행자 통행 위치를 분리합니다.",
+        likelihood: 4,
+        severity: 5,
+        additionalControls: "후진·교차 구간에 신호수를 배치하고 보행자 접근금지선을 현장에 표시합니다.",
+        owner: "작업반장",
+        due,
+        verification: "차량 동선 분리와 신호수 배치를 TBM 및 현장 사진으로 확인",
+        verificationChecker: "관리감독자",
+        evidenceRefs: commonEvidence
+      }),
+      buildRiskRow({
+        location,
+        process: processLabel,
+        task: `${processLabel} 작업`,
+        equipment: "덤프트럭 적재함, 세륜·비산먼지 억제 설비",
+        hazard: "토사 적재·반출 중 적재물 낙하, 비산먼지, 가설도로 미끄럼으로 사고가 발생할 위험",
+        currentControls: "적재 높이, 덮개, 세륜, 가설도로 노면 상태를 반출 전 확인합니다.",
+        likelihood: 3,
+        severity: 4,
+        additionalControls: "반출로 정리와 살수·덮개 조치를 완료한 뒤 차량별 출발 순서를 지정합니다.",
+        owner: "장비 담당자",
+        due,
+        verification: "반출로 상태와 적재물 관리 상태를 반출 전 점검표로 확인",
+        verificationChecker: "작업반장",
+        evidenceRefs: commonEvidence
+      })
+    ];
+  }
+  if (/자재양중|양중|인양|크레인/.test(processLabel)) {
+    return [
+      buildRiskRow({
+        location,
+        process: processLabel,
+        task: `${processLabel} 작업`,
+        equipment: "이동식 크레인, 줄걸이, 훅 해지장치, 인양벨트",
+        hazard: "줄걸이 불량이나 훅 해지장치 미확인으로 인양물이 낙하할 위험",
+        currentControls: "줄걸이 각도, 인양벨트 손상, 훅 해지장치, 하중 표시를 작업 전 확인합니다.",
+        likelihood: 4,
+        severity: 5,
+        additionalControls: "인양 전 시험 권상과 신호수 교신을 실시하고 인양물 하부 출입을 금지합니다.",
+        owner: "양중 담당자",
+        due,
+        verification: "줄걸이 상태와 인양반경 통제선을 사진·TBM 확인으로 기록",
+        verificationChecker: "관리감독자",
+        evidenceRefs: commonEvidence
+      }),
+      buildRiskRow({
+        location,
+        process: processLabel,
+        task: `${processLabel} 작업`,
+        equipment: "이동식 크레인, 아웃트리거, 양중반경, 풍속 확인표",
+        hazard: `${weatherSummary || "기상 변화"} 상황에서 크레인 작업반경·아웃트리거 지지 불량으로 전도될 위험`,
+        currentControls: "아웃트리거 지반 지지, 수평 상태, 양중반경, 풍속 체감 신호를 확인합니다.",
+        likelihood: /강풍|돌풍|위험|높음/.test(weatherSummary) ? 4 : 3,
+        severity: 5,
+        additionalControls: "풍속 상승 또는 돌풍 체감 시 양중을 중지하고 인양물은 지상 안전 위치에 내립니다.",
+        owner: "양중 담당자",
+        due,
+        verification: "아웃트리거 지지 상태와 작업중지 기준 공유 여부를 작업 전 확인",
+        verificationChecker: "작업반장",
+        evidenceRefs: [`${processLabel} 작업 입력 조건`, "기상청 현재·예보", "KOSHA 위험성평가", "작업중지 기준"]
+      })
+    ];
+  }
+  return [];
+}
+
 function safetyReferenceProcessMatchSurface(item: SafetyReferenceItem): string {
   return [
     item.title,
@@ -747,9 +866,13 @@ export function buildSafetyReferenceRiskRows(
         if (candidateRow) rows.push(candidateRow);
         if (rows.filter((row) => row.process === processLabel).length >= 2) break;
       }
-      for (const fallbackRow of baselineRows) {
+      const processSpecificFallbackRows = buildProcessSpecificFallbackRiskRows(response, processLabel, weatherSummary);
+      const fallbackCandidates = processSpecificFallbackRows.length ? processSpecificFallbackRows : baselineRows;
+      for (const fallbackRow of fallbackCandidates) {
         if (rows.filter((row) => row.process === processLabel).length >= 2) break;
-        const processFallbackRow = specializeFallbackRiskRowForProcess(fallbackRow, processLabel);
+        const processFallbackRow = processSpecificFallbackRows.length
+          ? fallbackRow
+          : specializeFallbackRiskRowForProcess(fallbackRow, processLabel);
         const key = `${processLabel}|${processFallbackRow.hazard}|${processFallbackRow.currentControls}`;
         if (seen.has(key)) continue;
         seen.add(key);

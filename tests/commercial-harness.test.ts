@@ -1834,6 +1834,40 @@ describe("runAsk DB harness mode", () => {
     expect(excavationText).toContain("굴착 작업 입력 조건");
   });
 
+  it("uses process-specific deterministic fallback controls when direct process evidence is ambiguous", () => {
+    const question = "서울 성수동 복합건물 현장. 굴착, 토사반출, 자재양중 3개 공종을 오늘 동시에 진행한다.";
+    const response = buildMockAskResponse(
+      "굴착, 토사반출, 자재양중 3개 공종 동시 작업",
+      mockSearchResults,
+      "mock",
+      "테스트"
+    );
+
+    const rows = buildSafetyReferenceRiskRows(response, [], "오후 강풍 예보", question);
+    const textByProcess = Object.fromEntries(
+      ["굴착", "토사반출", "자재양중"].map((process) => [
+        process,
+        rows
+          .filter((row) => row.process === process)
+          .map((row) => [
+            row.hazard,
+            row.currentControls,
+            row.additionalControls,
+            ...row.evidenceRefs
+          ].join(" "))
+          .join("\n")
+      ])
+    );
+
+    expect(textByProcess["굴착"]).toMatch(/굴착면|사면|매몰|붕괴|굴삭기/);
+    expect(textByProcess["굴착"]).not.toMatch(/비계 고정핀|작업발판 상태/);
+    expect(textByProcess["토사반출"]).toMatch(/덤프트럭|후진|가설도로|차량 동선/);
+    expect(textByProcess["토사반출"]).not.toMatch(/비계 고정핀|작업발판 상태/);
+    expect(textByProcess["자재양중"]).toMatch(/이동식 크레인|줄걸이|인양|양중/);
+    expect(textByProcess["자재양중"]).not.toMatch(/비계 고정핀|작업발판 상태/);
+    expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
+  });
+
   it("retains confined-space pump and actual machinery controls while generic evidence stays review-required", () => {
     const confinedReference = reference({
       id: "confined-pump-controls",

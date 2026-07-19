@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-07-19T04:00:00.000Z",
+  "verdict": "local_pass_post_deploy_required",
+  "problem": "multi-process rows could preserve process labels while still using generic fallback hazards and controls",
+  "fix": {
+    "scope": "deterministic DB harness fallback rows",
+    "changedFiles": [
+      "lib/search.ts",
+      "tests/commercial-harness.test.ts"
+    ],
+    "processTemplates": [
+      "굴착",
+      "토사반출",
+      "자재양중"
+    ]
+  },
+  "verification": {
+    "red": {
+      "command": "npm.cmd test -- tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "failed as expected",
+      "failure": "generic fallback text did not include excavation-specific terms"
+    },
+    "green": {
+      "command": "npm.cmd test -- tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 1,
+      "tests": 58,
+      "result": "pass"
+    },
+    "regression": {
+      "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts tests\\ai-deliverables-scope.test.ts tests\\naturalize-output-contract.test.ts tests\\grounded-generation-contract.test.ts tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 4,
+      "tests": 118,
+      "result": "pass"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "pass"
+    }
+  },
+  "postDeployGate": {
+    "required": true,
+    "criteria": [
+      "excavation rows include excavation-specific terms",
+      "soil haulage rows include truck/route-specific terms",
+      "material lifting rows include crane/rigging-specific terms",
+      "no requested process uses unrelated scaffold/checklist wording"
+    ]
+  }
+}
