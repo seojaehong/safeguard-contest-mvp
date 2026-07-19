@@ -1,0 +1,68 @@
+{
+  "artifact": "rls-live-head-probe-current-2026-07-19",
+  "generatedAt": "2026-07-19T21:46:00+09:00",
+  "sourceHeadAtProbe": "6e51fa1687688019b33743b8a4174671aa163c6b",
+  "verdict": "blocked_read_only_snapshot_only",
+  "launchReadiness": false,
+  "mutationPerformed": false,
+  "networkOpened": true,
+  "probe": {
+    "rawResult": "evaluation/rls-live-head-probe-current-2026-07-19/live-probe-result.json",
+    "tablesRequested": 22,
+    "credentials": ["service_role", "anon"],
+    "requestsAttempted": 44,
+    "methodsUsed": ["HEAD"],
+    "statusCounts": {
+      "200": 30,
+      "206": 4,
+      "404": 10
+    },
+    "secretValuesStored": false
+  },
+  "positiveIsolationSignals": [
+    { "table": "organizations", "serviceRoleCount": 4, "anonCount": 0 },
+    { "table": "sites", "serviceRoleCount": 6, "anonCount": 0 },
+    { "table": "workers", "serviceRoleCount": 5, "anonCount": 0 },
+    { "table": "workpacks", "serviceRoleCount": 5, "anonCount": 0 },
+    { "table": "education_records", "serviceRoleCount": 4, "anonCount": 0 },
+    { "table": "dispatch_logs", "serviceRoleCount": 6, "anonCount": 0 },
+    { "table": "mcp_tokens", "serviceRoleCount": 1, "anonCount": 0 }
+  ],
+  "publicKnowledgeSignals": [
+    { "table": "safety_reference_sources", "serviceRoleCount": 1063, "anonCount": 1063 },
+    { "table": "safety_reference_items", "serviceRoleCount": 9920, "anonCount": 9920 },
+    { "table": "safety_reference_ingestion_runs", "serviceRoleCount": 2, "anonCount": 2 },
+    { "table": "safety_ontology_nodes", "serviceRoleCount": 171, "anonCount": 166 },
+    { "table": "safety_ontology_edges", "serviceRoleCount": 182, "anonCount": 169 }
+  ],
+  "missingProductionTables": [
+    "workpack_share_sessions",
+    "workpack_read_confirmations",
+    "workpack_improvements",
+    "workpack_improvement_photos",
+    "safety_reference_embeddings"
+  ],
+  "approvalGatedImpacts": [
+    "real_production_recipient_ack_storage",
+    "before_after_improvement_photo_storage",
+    "sif_kosha_embedding_runtime",
+    "authenticated_tenant_ab_negative_matrix",
+    "storage_objects_cross_tenant_isolation",
+    "llm_wiki_publication_rpc_rls_ledger"
+  ],
+  "safeClaims": [
+    "Live Supabase is configured and reachable.",
+    "Tenant tables show service-role vs anon count separation signals.",
+    "SIF/KOSHA public reference and published ontology surfaces are reachable.",
+    "Share/ACK, improvement-photo, and embedding storage are not live-schema proven."
+  ],
+  "forbiddenClaims": [
+    "RLS launch isolation is proven.",
+    "Authenticated tenant A/B cross-access denial is proven.",
+    "Storage object isolation is proven.",
+    "Real production invited-recipient ACK is proven.",
+    "Before/after improvement photos are production-persisted.",
+    "SIF/KOSHA embeddings are production-active.",
+    "LLM Wiki publication RPC/RLS/ledger is launch-ready."
+  ]
+}
