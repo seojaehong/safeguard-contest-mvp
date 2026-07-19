@@ -78,7 +78,7 @@ describe("workbench visual contract", () => {
     expect(exactBlock(".command-center-shell .workspace-theme-toggle button")).toMatch(/min-width:\s*var\(--control-height\);/u);
     expect(css).toMatch(/\.command-center-shell \.linear-workspace-layout\s*\{[^}]*grid-template-columns:\s*224px minmax\(0, 1fr\);/u);
     expect(css).toMatch(/\.field-workspace\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) 320px;[^}]*gap:\s*var\(--space-4\);/u);
-    expect(css).toMatch(/\.share-panel\.workflow-panel\s*\{[^}]*gap:\s*12px;[^}]*padding:\s*(?:16px|var\(--space-4\));/u);
+    expect(css).toMatch(/\.share-panel\.workflow-panel\s*\{[^}]*gap:\s*10px;[^}]*padding:\s*14px;/u);
     expect(exactBlock(".safeclaw-module-shell.module-variant-document .safeclaw-report-controls button")).toMatch(/min-height:\s*(?:44px|var\(--control-height\));[\s\S]*padding:\s*(?:12px 16px|var\(--space-3\) var\(--space-4\));/u);
   });
 
