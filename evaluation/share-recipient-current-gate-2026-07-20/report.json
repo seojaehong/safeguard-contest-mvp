@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "safeclaw-share-recipient-current-gate/v1",
+  "generatedAt": "2026-07-20T05:54:00+09:00",
+  "status": "pass",
+  "source": {
+    "branch": "integrate/kosha-wave2-green-20260720",
+    "head": "85eeecb4419f09c80ad24f33e2f8d553550bce9f",
+    "productionCommitSha": "20b0c32812aa6526c06d020c2d56e3cc530fafb4",
+    "productionBranch": "master",
+    "productionEnvironment": "production"
+  },
+  "branchClassification": {
+    "feat/workpack-share-v2-target-ready": "spec_only_not_product_integration",
+    "feat/workpack-share-v2-product": "hold_do_not_integrate_wholesale",
+    "fix/northstar-share-recipient-20260720": "prior_focused_implementation_source",
+    "integrate/kosha-wave2-green-20260720": "current_authoritative_candidate_verified"
+  },
+  "gates": {
+    "browser": {
+      "command": "npm.cmd test -- tests\\north-star-document-ux.test.ts tests\\workspace-share-mobile-browser.test.ts tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 3,
+      "tests": 10,
+      "status": "pass",
+      "durationSeconds": 115.59
+    },
+    "unitAndRoute": {
+      "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts tests\\workflow-share-client.test.ts tests\\workflow-share-panel-behavior.test.ts tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 4,
+      "tests": 86,
+      "status": "pass",
+      "durationSeconds": 2.03
+    }
+  },
+  "browserUpdatedArtifacts": [
+    "evaluation/north-star-document-ux-24h-2026-07-14/browser-metrics.json",
+    "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/desktop-day-editor.png",
+    "evaluation/north-star-document-ux-24h-2026-07-14/screenshots/desktop-night-editor.png",
+    "evaluation/share-mobile-p1/screenshots/mobile-390-day-vietnamese.png",
+    "evaluation/share-mobile-p1/screenshots/mobile-390-night-vietnamese.png"
+  ]
+}
