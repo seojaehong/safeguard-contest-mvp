@@ -1,0 +1,618 @@
+{
+  "summary": {
+    "generatedAt": "2026-07-19T01:40:08.611Z",
+    "baseUrl": "https://www.safeclaw.kr",
+    "rowCount": 14,
+    "pass": true,
+    "p1Count": 0,
+    "p2Count": 6
+  },
+  "verification": [
+    {
+      "command": "node evaluation\\northstar-live-ui-current-2026-07-19\\live-ui-smoke.mjs",
+      "result": "14 rows, P1 0, P2 6"
+    },
+    {
+      "command": "npm.cmd test -- tests\\frontend-design-contract.test.ts tests\\frontend-route-coverage.test.ts tests\\frontend-workbench-visual-contract.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "3 files / 73 tests PASS"
+    },
+    {
+      "command": "ONTOLOGY_BASE_URL=https://www.safeclaw.kr npm.cmd test -- tests\\ontology-ui-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "1 file / 1 test PASS"
+    },
+    {
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "2 files / 5 tests PASS"
+    },
+    {
+      "command": "node -e \"JSON.parse(...)\"",
+      "result": "report.json and ontology browser metrics parse successfully"
+    }
+  ],
+  "blockers": [
+    {
+      "severity": "P2",
+      "route": "workspace-day",
+      "viewport": "desktop",
+      "issue": "contrast samples below AA: 작업공간 3.78; 진행 중 4.09"
+    },
+    {
+      "severity": "P2",
+      "route": "workspace-night",
+      "viewport": "desktop",
+      "issue": "contrast samples below AA: Day Night 1.06; Day 3.25; 작업공간 3.3"
+    },
+    {
+      "severity": "P2",
+      "route": "documents-day",
+      "viewport": "desktop",
+      "issue": "contrast samples below AA: 기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입 1.09"
+    },
+    {
+      "severity": "P2",
+      "route": "workspace-day",
+      "viewport": "mobile",
+      "issue": "contrast samples below AA: 작업공간 3.78"
+    },
+    {
+      "severity": "P2",
+      "route": "workspace-night",
+      "viewport": "mobile",
+      "issue": "contrast samples below AA: Day Night 1.06; Day 3.25; 작업공간 3.3"
+    },
+    {
+      "severity": "P2",
+      "route": "documents-day",
+      "viewport": "mobile",
+      "issue": "contrast samples below AA: 기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입 1.09"
+    }
+  ],
+  "rows": [
+    {
+      "route": "workspace-day",
+      "path": "/workspace?theme=day",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": null,
+      "title": "작업공간 | SafeClaw",
+      "finalUrl": "https://www.safeclaw.kr/workspace?theme=day",
+      "documentWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 5,
+      "minControlHeight": 20,
+      "internalTermHits": [],
+      "contrastIssues": [
+        {
+          "text": "작업공간",
+          "ratio": 3.78,
+          "color": "rgb(123, 132, 145)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "text": "진행 중",
+          "ratio": 4.09,
+          "color": "rgb(110, 118, 130)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "SafeClaw 현장 안전 문서팩 현장 상황 입력 Day Night 준비됨 현장 상황 입력 작업공간 입력 진행 중 ▣ 문서 잠김 ▣ 공유 잠김 현장 작업 입력 오늘 작업은 무엇인가요? 지역, 작업, 인원, 주요 위험만 적어도 됩니다. 현장 상황 입력 0/600자 작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 최대 10장 첨부하세요. + 사진 사진 첨부 최대 10장 첨부하면 위험요"
+    },
+    {
+      "route": "workspace-night",
+      "path": "/workspace?theme=night",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": null,
+      "title": "작업공간 | SafeClaw",
+      "finalUrl": "https://www.safeclaw.kr/workspace?theme=night",
+      "documentWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 5,
+      "minControlHeight": 20,
+      "internalTermHits": [],
+      "contrastIssues": [
+        {
+          "text": "Day Night",
+          "ratio": 1.06,
+          "color": "rgb(247, 248, 248)",
+          "background": "rgba(255, 255, 255, 0.03)"
+        },
+        {
+          "text": "Day",
+          "ratio": 3.25,
+          "color": "rgb(138, 143, 152)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "text": "작업공간",
+          "ratio": 3.3,
+          "color": "rgb(98, 102, 109)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "text": "입력 진행 중",
+          "ratio": 3.76,
+          "color": "rgb(247, 248, 248)",
+          "background": "rgba(108, 111, 247, 0.12)"
+        },
+        {
+          "text": "입력",
+          "ratio": 3.76,
+          "color": "rgb(247, 248, 248)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "text": "진행 중",
+          "ratio": 1.44,
+          "color": "rgb(98, 102, 109)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "text": "잠김",
+          "ratio": 3.3,
+          "color": "rgb(98, 102, 109)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "text": "잠김",
+          "ratio": 3.3,
+          "color": "rgb(98, 102, 109)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "text": "안전 문서 생성",
+          "ratio": 4,
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(108, 111, 247)"
+        }
+      ],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "SafeClaw 현장 안전 문서팩 현장 상황 입력 Day Night 준비됨 현장 상황 입력 작업공간 입력 진행 중 ▣ 문서 잠김 ▣ 공유 잠김 현장 작업 입력 오늘 작업은 무엇인가요? 지역, 작업, 인원, 주요 위험만 적어도 됩니다. 현장 상황 입력 0/600자 작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 최대 10장 첨부하세요. + 사진 사진 첨부 최대 10장 첨부하면 위험요"
+    },
+    {
+      "route": "documents-day",
+      "path": "/documents?theme=day",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": null,
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "finalUrl": "https://www.safeclaw.kr/documents?theme=day",
+      "documentWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 20,
+      "minControlHeight": 24,
+      "internalTermHits": [],
+      "contrastIssues": [
+        {
+          "text": "기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입",
+          "ratio": 1.09,
+          "color": "rgba(246, 245, 239, 0.72)",
+          "background": "rgb(255, 255, 255)"
+        }
+      ],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "본문으로 건너뛰기 SafeClaw 메뉴 현장 안전 문서팩 주요 메뉴 01 작업공간 입력 · 생성 02 문서 위험성평가 · TBM 03 리포트 주간 · 월간 04 근거 DB · 온톨로지 05 이력 증빙 · 파일 06 설정 AI · 현장 문서 관련 01 TBM 모드 02 작업자 · 교육 03 현장 전파 04 작업자 열람 SITE 기본 현장 공공 근거 Law.go · KOSHA · 기상청 바로 사용 Day Night 문서팩 문서 편"
+    },
+    {
+      "route": "reports-day",
+      "path": "/reports?theme=day",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": null,
+      "title": "SafeClaw 리포트 · 다운로드 센터",
+      "finalUrl": "https://www.safeclaw.kr/reports?theme=day",
+      "documentWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 0,
+      "minControlHeight": 44,
+      "internalTermHits": [],
+      "contrastIssues": [],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "본문으로 건너뛰기 SafeClaw 메뉴 현장 안전 문서팩 주요 메뉴 01 작업공간 입력 · 생성 02 문서 위험성평가 · TBM 03 리포트 주간 · 월간 04 근거 DB · 온톨로지 05 이력 증빙 · 파일 06 설정 AI · 현장 SITE 기본 현장 공공 근거 Law.go · KOSHA · 기상청 바로 사용 Day Night 리포트 개선 리포트. 주간·월간·사용자 기간의 위험성평가와 승인된 개선 근거를 분류별로 정리합니다."
+    },
+    {
+      "route": "share-vi-invalid",
+      "path": "/share/not-a-session?lang=vi&workerId=11111111-1111-4111-8111-111111111111",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": null,
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "finalUrl": "https://www.safeclaw.kr/share/not-a-session?lang=vi&workerId=11111111-1111-4111-8111-111111111111",
+      "documentWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 6,
+      "minControlHeight": 24,
+      "internalTermHits": [],
+      "contrastIssues": [],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": true,
+        "koreanReview": false,
+        "loadingSessionVi": true,
+        "loadingSessionKo": false
+      },
+      "bodySample": "Chuyển đến nội dung chính SafeClaw Menu Gói tài liệu an toàn hiện trường 주요 메뉴 01 작업공간 입력 · 생성 02 문서 위험성평가 · TBM 03 리포트 주간 · 월간 04 근거 DB · 온톨로지 05 이력 증빙 · 파일 06 설정 AI · 현장 작업공간 관련 01 대시보드 Hiện trường mặc định Căn cứ chính thức Law.go · KOSH"
+    },
+    {
+      "route": "ontology-day",
+      "path": "/ontology?theme=day",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": null,
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "finalUrl": "https://www.safeclaw.kr/ontology?theme=day",
+      "documentWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 8,
+      "minControlHeight": 24,
+      "internalTermHits": [],
+      "contrastIssues": [],
+      "ontologyVisibleNodes": 13,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "본문으로 건너뛰기 SafeClaw 메뉴 현장 안전 문서팩 주요 메뉴 01 작업공간 입력 · 생성 02 문서 위험성평가 · TBM 03 리포트 주간 · 월간 04 근거 DB · 온톨로지 05 이력 증빙 · 파일 06 설정 AI · 현장 근거 관련 01 지식 DB 02 온톨로지 03 API 연결 SITE 기본 현장 공공 근거 Law.go · KOSHA · 기상청 바로 사용 Day Night 운영 온톨로지 작업과 근거의 연결. 작업"
+    },
+    {
+      "route": "why-day",
+      "path": "/why?theme=day",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": null,
+      "title": "왜 SafeClaw인가 | SafeClaw",
+      "finalUrl": "https://www.safeclaw.kr/why?theme=day",
+      "documentWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyScrollWidth": 1440,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 5,
+      "minControlHeight": 36,
+      "internalTermHits": [],
+      "contrastIssues": [],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "본문으로 건너뛰기 SafeClaw 메뉴 현장 안전 문서팩 주요 메뉴 01 작업공간 입력 · 생성 02 문서 위험성평가 · TBM 03 리포트 주간 · 월간 04 근거 DB · 온톨로지 05 이력 증빙 · 파일 06 설정 AI · 현장 작업공간 관련 01 대시보드 SITE 기본 현장 공공 근거 Law.go · KOSHA · 기상청 바로 사용 Day Night 차별성 왜 SafeClaw인가. 검색기나 템플릿이 아니라, 근거를 위험"
+    },
+    {
+      "route": "workspace-day",
+      "path": "/workspace?theme=day",
+      "viewport": "mobile",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\northstar-live-ui-current-2026-07-19\\screenshots\\workspace-day-mobile.png",
+      "title": "작업공간 | SafeClaw",
+      "finalUrl": "https://www.safeclaw.kr/workspace?theme=day",
+      "documentWidth": 390,
+      "scrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 3,
+      "minControlHeight": 20,
+      "internalTermHits": [],
+      "contrastIssues": [
+        {
+          "text": "작업공간",
+          "ratio": 3.78,
+          "color": "rgb(123, 132, 145)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      ],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "SafeClaw Day Night 작업공간 입력 ▣ 문서 ▣ 공유 현장 작업 입력 오늘 작업은 무엇인가요? 현장 상황 입력 0/600자 + 사진 사진 첨부 최대 10장 강화 모드 안전 문서 생성 고급 설정 예시 불러오기"
+    },
+    {
+      "route": "workspace-night",
+      "path": "/workspace?theme=night",
+      "viewport": "mobile",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": null,
+      "title": "작업공간 | SafeClaw",
+      "finalUrl": "https://www.safeclaw.kr/workspace?theme=night",
+      "documentWidth": 390,
+      "scrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 3,
+      "minControlHeight": 20,
+      "internalTermHits": [],
+      "contrastIssues": [
+        {
+          "text": "Day Night",
+          "ratio": 1.06,
+          "color": "rgb(247, 248, 248)",
+          "background": "rgba(255, 255, 255, 0.03)"
+        },
+        {
+          "text": "Day",
+          "ratio": 3.25,
+          "color": "rgb(138, 143, 152)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "text": "작업공간",
+          "ratio": 3.3,
+          "color": "rgb(98, 102, 109)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "text": "입력",
+          "ratio": 3.76,
+          "color": "rgb(247, 248, 248)",
+          "background": "rgba(108, 111, 247, 0.12)"
+        },
+        {
+          "text": "입력",
+          "ratio": 3.76,
+          "color": "rgb(247, 248, 248)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "text": "안전 문서 생성",
+          "ratio": 4,
+          "color": "rgb(255, 255, 255)",
+          "background": "rgb(108, 111, 247)"
+        }
+      ],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "SafeClaw Day Night 작업공간 입력 ▣ 문서 ▣ 공유 현장 작업 입력 오늘 작업은 무엇인가요? 현장 상황 입력 0/600자 + 사진 사진 첨부 최대 10장 강화 모드 안전 문서 생성 고급 설정 예시 불러오기"
+    },
+    {
+      "route": "documents-day",
+      "path": "/documents?theme=day",
+      "viewport": "mobile",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": null,
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "finalUrl": "https://www.safeclaw.kr/documents?theme=day",
+      "documentWidth": 390,
+      "scrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 3,
+      "minControlHeight": 24,
+      "internalTermHits": [],
+      "contrastIssues": [
+        {
+          "text": "기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입",
+          "ratio": 1.09,
+          "color": "rgba(246, 245, 239, 0.72)",
+          "background": "rgb(255, 255, 255)"
+        }
+      ],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "본문으로 건너뛰기 SafeClaw 메뉴 SITE 기본 현장 바로 사용 Day Night 문서팩 문서 편집. 위험성평가표, 작업계획서, TBM, 안전보건교육 기록을 한 화면에서 편집하고 PDF, XLS, HWPX 제출본으로 출력합니다. 업무 범위 편집 · 보완 · PDF/XLS/HWPX 출력 새 문서팩 만들기 기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합"
+    },
+    {
+      "route": "reports-day",
+      "path": "/reports?theme=day",
+      "viewport": "mobile",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": null,
+      "title": "SafeClaw 리포트 · 다운로드 센터",
+      "finalUrl": "https://www.safeclaw.kr/reports?theme=day",
+      "documentWidth": 390,
+      "scrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 0,
+      "minControlHeight": 44,
+      "internalTermHits": [],
+      "contrastIssues": [],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "본문으로 건너뛰기 SafeClaw 메뉴 SITE 기본 현장 바로 사용 Day Night 리포트 개선 리포트. 주간·월간·사용자 기간의 위험성평가와 승인된 개선 근거를 분류별로 정리합니다. 업무 범위 리포트 기능 사용 가능 작업공간에서 개선 추가 데이터 출처 · 없음 최근 작업팩이 없습니다. 작업공간에서 문서팩을 만든 뒤 리포트로 돌아오세요. 현재 작업팩 필요 작업팩을 만든 뒤 다운로드를 준비할 수 있습니다. 작업공간에서 만들기"
+    },
+    {
+      "route": "share-vi-invalid",
+      "path": "/share/not-a-session?lang=vi&workerId=11111111-1111-4111-8111-111111111111",
+      "viewport": "mobile",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\northstar-live-ui-current-2026-07-19\\screenshots\\share-vi-invalid-mobile.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "finalUrl": "https://www.safeclaw.kr/share/not-a-session?lang=vi&workerId=11111111-1111-4111-8111-111111111111",
+      "documentWidth": 390,
+      "scrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 0,
+      "minControlHeight": 44,
+      "internalTermHits": [],
+      "contrastIssues": [],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": true,
+        "koreanReview": false,
+        "loadingSessionVi": true,
+        "loadingSessionKo": false
+      },
+      "bodySample": "Chuyển đến nội dung chính SafeClaw Menu Sáng Tối Công nhân xem Màn hình xác nhận tài liệu Kiểm tra tài liệu an toàn hiện trường và để lại xác nhận đã xem. Phạm vi công việc Xác nhận người nhận Về không gian làm việc Kiểm tra gói tài liệu Mà"
+    },
+    {
+      "route": "ontology-day",
+      "path": "/ontology?theme=day",
+      "viewport": "mobile",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\northstar-live-ui-current-2026-07-19\\screenshots\\ontology-day-mobile.png",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "finalUrl": "https://www.safeclaw.kr/ontology?theme=day",
+      "documentWidth": 390,
+      "scrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 0,
+      "minControlHeight": 44,
+      "internalTermHits": [],
+      "contrastIssues": [],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "본문으로 건너뛰기 SafeClaw 메뉴 SITE 기본 현장 바로 사용 Day Night 운영 온톨로지 작업과 근거의 연결. 작업, 위험요인, 안전조치와 법령을 선택한 항목 중심으로 확인합니다. 업무 범위 166개 안전지식 · 169개 연결 작업공간 열기 검증된 안전지식 166 검증 완료 범위 검증된 연결 169 출처 연결 유지 근거 차단 0 무출처 항목 제외 01 오늘 작업 현장 맥락 02 SIF · KOSHA 위험·조치 근거"
+    },
+    {
+      "route": "why-day",
+      "path": "/why?theme=day",
+      "viewport": "mobile",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "okStatus": true,
+      "screenshotPath": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-wave2-evidence-master-20260718\\evaluation\\northstar-live-ui-current-2026-07-19\\screenshots\\why-day-mobile.png",
+      "title": "왜 SafeClaw인가 | SafeClaw",
+      "finalUrl": "https://www.safeclaw.kr/why?theme=day",
+      "documentWidth": 390,
+      "scrollWidth": 390,
+      "bodyScrollWidth": 390,
+      "horizontalOverflow": 0,
+      "outsideElementCount": 0,
+      "sub44ControlCount": 0,
+      "minControlHeight": 44,
+      "internalTermHits": [],
+      "contrastIssues": [],
+      "ontologyVisibleNodes": 0,
+      "ontologyOverlapPairs": 0,
+      "sharePortalChrome": {
+        "vietnameseReview": false,
+        "koreanReview": false,
+        "loadingSessionVi": false,
+        "loadingSessionKo": false
+      },
+      "bodySample": "본문으로 건너뛰기 SafeClaw 메뉴 SITE 기본 현장 바로 사용 Day Night 차별성 왜 SafeClaw인가. 검색기나 템플릿이 아니라, 근거를 위험성평가표, TBM, 교육기록, 전파 메시지의 문장으로 연결하는 작업공간입니다. 업무 범위 근거 연결 · 실행 문서 · 현장 전파 작업공간 열기 기상청 현재·예보·특보 신호를 작업중지 기준과 TBM 문구에 반영합니다. Law.go 법령, 판례, 해석례를 문서 반영 근거로 연"
+    }
+  ]
+}
