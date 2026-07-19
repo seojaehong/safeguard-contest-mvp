@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
+  "generatedAt": "2026-07-19T10:49:54.969Z",
+  "sourceSha": "d3e8ac7635d3654384cf145b77143d7e392047da",
+  "overall": "open",
+  "gates": [
+    {
+      "id": "final_99_gate",
+      "state": "notice",
+      "label": "Final 99 evidence gate",
+      "evidencePath": "evaluation\\final-99-gate\\report.json",
+      "detail": "final-99 overall is pass_with_notice.",
+      "nextActions": [
+        "Resolve or explicitly carry each notice before claiming fully automated launch readiness."
+      ]
+    },
+    {
+      "id": "live_harness_quality",
+      "state": "proven",
+      "label": "Live evidence harness quality",
+      "evidencePath": "evaluation\\live-harness-quality-probe-current-2026-07-19\\report.json",
+      "detail": "Live harness probe passed with zero failed contracts.",
+      "nextActions": []
+    },
+    {
+      "id": "supabase_rls_launch_isolation",
+      "state": "approval_gated",
+      "label": "Supabase RLS launch isolation",
+      "evidencePath": "evaluation\\supabase-rls-approval-2026-07-17\\report.md",
+      "detail": "Read-only audit exists, but live RLS catalog and tenant A/B isolation are not proven.",
+      "nextActions": [
+        "Approve authoritative project and credential provenance.",
+        "Run read-only live catalog capture.",
+        "Run disposable tenant A/B negative tests before production migration claims."
+      ]
+    },
+    {
+      "id": "llm_wiki_publication",
+      "state": "approval_gated",
+      "label": "LLM Wiki publication",
+      "evidencePath": "evaluation\\llm-wiki-rls-approval-2026-07-17\\report.md",
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete.",
+      "nextActions": [
+        "Approve final DDL, append-only ledger, graph pointer, and RPC threat model.",
+        "Run approved publication canary in an isolated project.",
+        "Keep generated wiki candidates unpublished until human confirmation and RPC evidence exist."
+      ]
+    },
+    {
+      "id": "sif_embedding_runtime",
+      "state": "approval_gated",
+      "label": "SIF embedding runtime",
+      "evidencePath": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held.",
+      "nextActions": [
+        "Approve SIF-only migration, embedding cost, upload, and vector runtime separately.",
+        "Do not claim vector retrieval is production-active before post-migration verification."
+      ]
+    }
+  ],
+  "safeDemoClaims": [
+    "SafeClaw fixes SIF/KOSHA/current work-history evidence before LLM wording.",
+    "Hermes/OpenClaw is connected through a guarded EngineAdapter boundary, while SafeClaw remains the system of record.",
+    "Worker recipient review is an invited-session flow, not an anonymous public portal.",
+    "Photo hazard analysis supports up to 10 images and keeps Before/After improvements as reviewed operation memory."
+  ],
+  "forbiddenClaims": [
+    "LLM Wiki publishes itself.",
+    "Hermes is the production source of truth.",
+    "OpenClaw learns or mutates DB facts automatically.",
+    "SIF vector retrieval is production-active before the approved migration/upload/runtime gate.",
+    "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
+    "Provider dispatch is fully live for unapproved channels."
+  ]
+}
