@@ -1,0 +1,72 @@
+{
+  "checkedAt": "2026-07-20T07:17:00+09:00",
+  "verdict": "pass_current_non_mutating_recipient_foreign_distribution_contract",
+  "localHead": "1bce421e3b2d1f07e402a9b0453961199c17f58a",
+  "live": {
+    "url": "https://www.safeclaw.kr",
+    "buildInfoUrl": "https://www.safeclaw.kr/api/build-info",
+    "commitSha": "1bce421e3b2d1f07e402a9b0453961199c17f58a",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-xikm3xs18-seojaehongs-projects.vercel.app"
+  },
+  "routes": {
+    "recipientPortal": "/share/[sessionId]",
+    "publicShareSessionApi": "/api/share-sessions/[sessionId]",
+    "managerShareSessionApi": "/api/workpacks/[id]/share-sessions",
+    "managerReadConfirmationApi": "/api/workpacks/[id]/read-confirmations"
+  },
+  "verification": {
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "pass",
+      "staticPages": "28/28",
+      "shareRoutePresent": true
+    },
+    "recipientPortalBrowser": {
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "pass",
+      "files": 1,
+      "tests": 5
+    },
+    "focusedRecipientShare": {
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\share-recipient-ack-approval-preflight.test.ts tests\\workflow-share-client.test.ts tests\\workflow-share-panel-behavior.test.ts tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "pass",
+      "files": 5,
+      "tests": 85
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
+    }
+  },
+  "liveNonMutatingProbe": {
+    "sharePage": {
+      "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+      "viewport": "390x844",
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "horizontalOverflow": false,
+      "hasVietnameseReviewTitleAfterHydration": true,
+      "hasVietnameseInvalidSessionGuidanceAfterHydration": true,
+      "hasKoreanReviewTitleAfterHydration": false
+    },
+    "api": {
+      "url": "https://www.safeclaw.kr/api/share-sessions/not-a-session?workerId=11111111-1111-4111-8111-111111111111",
+      "method": "GET",
+      "status": 400,
+      "failClosed": true
+    }
+  },
+  "mutationsPerformed": {
+    "productionDbWrite": false,
+    "providerMessageSent": false,
+    "shareSessionCreated": false,
+    "readConfirmationInserted": false
+  },
+  "approvalRequiredBeforeLiveCanary": [
+    "Create production workpack_share_sessions rows",
+    "Insert production workpack_read_confirmations rows",
+    "Send real email/SMS/Kakao/Band provider messages"
+  ]
+}
