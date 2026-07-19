@@ -7,6 +7,7 @@ import { formatSseEvent, type AskProgressEvent } from "@/lib/ask-progress";
 import { createLogger } from "@/lib/logger";
 import { parseHarnessMemoryInput } from "@/lib/db-harness";
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
+import { sanitizeAskResponsePublicSurface } from "@/lib/ask-public-surface";
 
 // Task D-2a: streaming twin of /api/ask (app/api/ask/route.ts is untouched — demo
 // stability). Same request body, but responds with an SSE stream of stage/doc progress
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
           secret: process.env.SAFECLAW_GENERATION_EVIDENCE_SECRET,
           generatedAt: new Date().toISOString()
         });
-        emit({ kind: "final", payload: sealed });
+        emit({ kind: "final", payload: sanitizeAskResponsePublicSurface(sealed) });
       } catch (error) {
         log.error("runAsk failed in stream route", {
           errorType: error instanceof Error ? error.name : typeof error

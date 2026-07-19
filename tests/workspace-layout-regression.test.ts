@@ -1674,6 +1674,7 @@ describe("workspace layout regression", () => {
     expect(metrics.loginRequiredMessageCount).toBe(1);
     expect(metrics.clawGreetingCount).toBe(0);
     expect(metrics.shell.display).toBe("grid");
+    expect(metrics.shell.overflowY).toBe("auto");
     expect(metrics.navigator.right).toBeLessThanOrEqual(metrics.editor.left - 12);
     expect(metrics.desktopTabsDisplay).not.toBe("none");
     expect(metrics.mobilePickerDisplay).toBe("none");
@@ -1718,6 +1719,34 @@ describe("workspace layout regression", () => {
       await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     });
     const mobileCollapsedScrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    const mobileCollapsedEditorMetrics = await page.evaluate(() => {
+      const fieldWorkspace = document.querySelector<HTMLElement>(".field-workspace-editor-focus");
+      const structuredEditor = document.querySelector<HTMLElement>('[data-testid="document-structured-editor"]');
+      const textarea = document.querySelector<HTMLElement>(".document-textarea");
+      const operationsDisclosure = document.querySelector<HTMLElement>(".editor-operations-disclosure");
+      const shell = document.querySelector<HTMLElement>(".workpack-shell");
+      if (!fieldWorkspace || !structuredEditor || !textarea || !operationsDisclosure || !shell) {
+        throw new Error("Missing mobile collapsed editor layout targets");
+      }
+      const toRect = (element: HTMLElement) => {
+        const rect = element.getBoundingClientRect();
+        return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, width: rect.width };
+      };
+      return {
+        viewportHeight: window.innerHeight,
+        scrollHeight: document.documentElement.scrollHeight,
+        fieldWorkspace: toRect(fieldWorkspace),
+        structuredEditor: toRect(structuredEditor),
+        textarea: toRect(textarea),
+        operationsDisclosure: toRect(operationsDisclosure),
+        operationsDisclosureDisplay: getComputedStyle(operationsDisclosure).display,
+        shellOverflowY: getComputedStyle(shell).overflowY,
+      };
+    });
+    await page.setViewportSize({ width: 740, height: 900 });
+    await page.evaluate(async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    });
     await operationsDisclosure.locator(":scope > summary").click();
     await page.locator('[data-testid="editor-export-panel"] > summary').click();
     const mobileMetrics = await page.evaluate(() => {
@@ -1748,16 +1777,22 @@ describe("workspace layout regression", () => {
       };
     });
     expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.viewportWidth + 1);
-    expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 9.5);
+    expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 3.4);
+    expect(mobileCollapsedEditorMetrics.shellOverflowY).toBe("auto");
+    expect(mobileCollapsedEditorMetrics.operationsDisclosureDisplay).toBe("none");
+    expect(mobileCollapsedEditorMetrics.structuredEditor.top).toBeLessThanOrEqual(520);
+    expect(mobileCollapsedEditorMetrics.textarea.top).toBeLessThanOrEqual(680);
     expect(mobileMetrics.canvas.width).toBeGreaterThanOrEqual(Math.floor(mobileMetrics.fieldWorkspace.width * 0.98));
     for (const button of mobileMetrics.exportButtons) {
       expect(button.left).toBeGreaterThanOrEqual(mobileMetrics.exportPanel.left);
       expect(button.right).toBeLessThanOrEqual(mobileMetrics.exportPanel.right);
     }
     for (let index = 1; index < mobileMetrics.exportButtons.length; index += 1) {
-      expect(mobileMetrics.exportButtons[index].top).toBeGreaterThanOrEqual(
-        mobileMetrics.exportButtons[index - 1].bottom - CSS_PIXEL_ADJACENCY_TOLERANCE,
-      );
+      const previous = mobileMetrics.exportButtons[index - 1];
+      const current = mobileMetrics.exportButtons[index];
+      const verticallySeparated = current.top >= previous.bottom - CSS_PIXEL_ADJACENCY_TOLERANCE;
+      const horizontallySeparated = current.left >= previous.right - CSS_PIXEL_ADJACENCY_TOLERANCE;
+      expect(verticallySeparated || horizontallySeparated).toBe(true);
     }
 
     await page.getByRole("button", { name: "문서 검토로 돌아가기" }).click();

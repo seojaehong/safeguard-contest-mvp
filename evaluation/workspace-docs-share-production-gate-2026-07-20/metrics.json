@@ -1,13 +1,13 @@
 {
-  "checkedAt": "2026-07-19T21:37:25.655Z",
+  "checkedAt": "2026-07-19T22:58:21.805Z",
   "build": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "8f77334b23345ae119caf50177ef1468e12fa727",
+    "commitSha": "43559c89c4fe180a0867de7b47b2bab756e75990",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-nagbh7nom-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-igkzhou2l-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "inputText": "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.",
@@ -24,14 +24,14 @@
       "stages": [
         {
           "stage": "documents",
-          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\ontology-readable-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\desktop-day-documents.png",
+          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\desktop-day-documents.png",
           "metrics": {
             "url": "https://www.safeclaw.kr/workspace?theme=day",
             "title": "작업공간 | SafeClaw",
             "body": {
               "width": 1440,
               "clientWidth": 1440,
-              "height": 1149,
+              "height": 1147,
               "clientHeight": 900,
               "overflowX": false
             },
@@ -41,23 +41,23 @@
               "x": 186,
               "y": 229,
               "w": 1068,
-              "h": 800,
-              "bottom": 1029
+              "h": 798,
+              "bottom": 1027
             },
             "sharePage": null,
             "documentWorkbench": {
               "x": 186,
               "y": 229,
               "w": 1068,
-              "h": 800,
-              "bottom": 1029
+              "h": 798,
+              "bottom": 1027
             },
             "documentPreview": {
               "x": 410,
-              "y": 482,
+              "y": 420,
               "w": 831,
-              "h": 424,
-              "bottom": 906
+              "h": 484,
+              "bottom": 904
             },
             "shareRoot": null,
             "shareWorkbench": null,
@@ -65,12 +65,12 @@
             "visibleDocumentPages": 1,
             "visibleSharePages": 0,
             "primaryShareCtas": 0,
-            "textSample": "SafeClaw\n현장 안전 문서팩\n결과 검토\n문서\nDay\nNight\n문서 생성 중\n현장 상황 입력\n✓\n입력\n완료\n문서\n진행 중\n▣\n공유\n잠김\n문서 생성 완료\n위험성평가표\n법령, 기상, 교육, 재해사례 근거를 확인하며 문서팩을 작성하고 있습니다.\n생성 중\n근거·문서 일괄 확인\n문서팩 생성 중검증된 템플릿과 현장 근거를 한 번에 적용하고 있습니다.\n근거 2건 · 확인 필요 11건\n선택\n위험성평가표\n핵심 문서\nTBM 브리핑\n핵심 문서\nTBM 기록\n생성 대기\n위험성평가표\n현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다.\n공유 단계로 이동\n작업 이력\n진행 중\n+ 9개 추가 산출물 보기"
+            "textSample": "SafeClaw\n현장 안전 문서팩\n결과 검토\n문서\nDay\nNight\n공유 전 보완\n안전조치 검수 정보 확인 필요\n✓\n입력\n완료\n문서\n검수 필요\n!\n공유\n전송 잠금\n문서 생성 완료\n안전 문서팩 3종 준비 완료\n문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요.\n12/12 생성\n검수 필요 · 4건 근거\n근거 3건 · 확인 필요 8건\n선택\n위험성평가표\n핵심 문서\nTBM 브리핑\n핵심 문서\nTBM 기록\n문서 미리보기\n위험성평가표\n편집\n다운로드 설정\n[오늘 개선·이력 반영 - 위험성평가]\n- 공유 전 보완: SIF 유사사례\n- 공유 전 보완: 위험성평가표 근거\n- 공유 전 보완: TBM 브리핑 근거\n\n위험성평가표(초안)\n공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고\n\n업체명: 세이프건설\n업종: 건설업\n작업명: 외벽 도장 작업\n공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제\n작업장소: 서울 성수동 근린생활시설 현장\n작업인원: 5명\n기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요\n\n[1. 사전준비]\n- 평가대상 작업: 외벽 도장 작업\n- 참여자: 현장소장, 관리감독자, 작업반장, 해당 작업자\n- 확인자료: 작업계획, 기상조건, 장비·보호구 상태, 최근 TBM 기록\n\n[2. 유해·위험요인 파악]\n1. 세부작업: 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 유해·위험요인: 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 4M 체크: Man:■ Machine:■ Media:□ Management:□ / 중점 확인: Man, Machine\n\n2. 세부작업: 강풍 시 비계 전도와 공구·자재 낙하\n   - 유해·위험요인: 강풍 시 비계 전도와 공구·자재 낙하\n   - 4M 체크: Man:■ Machine:■ Media:■ Management:□ / 중점 확인: Man, Machine, Media\n\n3. 세부작업: 지게차 동선 인접 구간에서 작업자 충돌\n   - 유해·위험요인: 지게차 동선 인접 구간에서 작업자 충돌\n   - 4M 체크: Man:■ Machine:■ Media:■ Management:■ / 중점 확인: Man, Machine, Media, Management\n\n[3. 위험성 결정]\n1. 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 현재 위험성: 상\n   - 판단근거: 사고 발생 가능성과 중대성을 함께 고려\n2. 강풍 시 비계 전도와 공구·자재 낙하\n   - 현재 위험성: 상\n   - 판단근거: 작업 전 통제 여부와 노출 빈도 확인\n3. 지게차 동선 인접 구간에서 작업자 충돌\n   - 현재 위험성: 중\n   - 판단근거: 관리감독 및 작업자 숙지 여부 확인\n\n[4. 감소대책 수립 및 실행]\n1. 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검\n   - 실행시점: 작업 시작 전\n   - 담당: 관리감독자 / 작업반장\n   - 잔여 위험성: 중\n2. 풍속 상승 또는 돌\n공유 단계로 이동\n작업 이력\n완료\n+ 9개 추가 산출물 보기"
           }
         },
         {
           "stage": "share",
-          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\ontology-readable-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\desktop-day-share.png",
+          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\desktop-day-share.png",
           "metrics": {
             "url": "https://www.safeclaw.kr/workspace?theme=day",
             "title": "작업공간 | SafeClaw",
@@ -128,7 +128,7 @@
       "stages": [
         {
           "stage": "documents",
-          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\ontology-readable-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\mobile-day-documents.png",
+          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\mobile-day-documents.png",
           "metrics": {
             "url": "https://www.safeclaw.kr/workspace?theme=day",
             "title": "작업공간 | SafeClaw",
@@ -174,7 +174,7 @@
         },
         {
           "stage": "share",
-          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\ontology-readable-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\mobile-day-share.png",
+          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\mobile-day-share.png",
           "metrics": {
             "url": "https://www.safeclaw.kr/workspace?theme=day",
             "title": "작업공간 | SafeClaw",

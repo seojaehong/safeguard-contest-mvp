@@ -1,0 +1,187 @@
+{
+  "generatedAt": "2026-07-19T22:50:46.421Z",
+  "buildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "43559c89c4fe180a0867de7b47b2bab756e75990",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-igkzhou2l-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "cases": [
+    {
+      "id": "scaffold-fall",
+      "expectedTerms": [
+        "KOSHA",
+        "비계",
+        "추락"
+      ],
+      "question": "세이프건설 서울 성수동 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 1명, 오후 강풍 예보. 추락 위험과 비계 고정, 작업중지 기준을 반영해 위험성평가와 TBM을 만들어줘."
+    },
+    {
+      "id": "hotwork-ventilation",
+      "expectedTerms": [
+        "KOSHA",
+        "화기",
+        "화재"
+      ],
+      "question": "그린메탈 경기 안산 공장 배관 용접·절단 화기작업. 작업자 6명, 베트남 작업자 2명, 실내 고온과 환기 불량, 가연물 인접. 화재감시자와 환기, 온열질환 조치를 반영해 위험성평가와 TBM, 외국인 전송본을 만들어줘."
+    },
+    {
+      "id": "electrical-panel",
+      "expectedTerms": [
+        "KOSHA",
+        "전기",
+        "감전"
+      ],
+      "question": "세이프전기 부산 해운대 상가 정전전로 인근 배전반 점검 작업. 작업자 3명, 검전과 절연보호구, 접근통제 미흡 가능성. 감전 예방 조치와 TBM 확인 질문을 반영해줘."
+    }
+  ],
+  "results": [
+    {
+      "id": "scaffold-fall",
+      "ok": true,
+      "elapsedSec": 17.95,
+      "mode": "live",
+      "statusKosha": "live",
+      "koshaExternalMode": "live",
+      "koshaExternalDetail": "KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다.",
+      "koshaReferenceCount": 5,
+      "koshaCitationCount": 0,
+      "deliverableKoshaCount": 34,
+      "expectedCoverage": {
+        "KOSHA": 409,
+        "비계": 1073,
+        "추락": 313
+      },
+      "internalTerms": [
+        "DB 하네스",
+        "fallback"
+      ],
+      "hasRiskAssessment": true,
+      "hasTbmBriefing": true,
+      "hasForeignTransmission": true,
+      "sampleKoshaLines": [
+        "[KOSHA 보강] KOSHA 위험성평가 사업안내 (공식 링크 확인)",
+        "KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다.",
+        "KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다.",
+        "KOSHA",
+        "KOSHA 위험성평가 사업안내",
+        "KOSHA",
+        "KOSHA 위험성평가 교육자료",
+        "위험성평가 작성과 작업자 공유 교육에 활용할 수 있는 KOSHA 교육자료입니다.",
+        "KOSHA",
+        "KOSHA 작업 전 안전점검회의(TBM) OPS",
+        "KOSHA",
+        "산업안전보건교육 가이드북"
+      ]
+    },
+    {
+      "id": "hotwork-ventilation",
+      "ok": true,
+      "elapsedSec": 20.85,
+      "mode": "live",
+      "statusKosha": "live",
+      "koshaExternalMode": "live",
+      "koshaExternalDetail": "KOSHA·고용노동부 공식 자료 URL 6건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다.",
+      "koshaReferenceCount": 6,
+      "koshaCitationCount": 0,
+      "deliverableKoshaCount": 20,
+      "expectedCoverage": {
+        "KOSHA": 129,
+        "화기": 112,
+        "화재": 226
+      },
+      "internalTerms": [
+        "DB 하네스",
+        "fallback"
+      ],
+      "hasRiskAssessment": true,
+      "hasTbmBriefing": true,
+      "hasForeignTransmission": true,
+      "sampleKoshaLines": [
+        "[KOSHA 보강] KOSHA 위험성평가 사업안내 (공식 링크 확인)",
+        "KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다.",
+        "KOSHA·고용노동부 공식 자료 URL 6건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다.",
+        "KOSHA",
+        "KOSHA 위험성평가 사업안내",
+        "KOSHA",
+        "KOSHA 위험성평가 교육자료",
+        "위험성평가 작성과 작업자 공유 교육에 활용할 수 있는 KOSHA 교육자료입니다.",
+        "KOSHA",
+        "KOSHA 작업 전 안전점검회의(TBM) OPS",
+        "KOSHA",
+        "산업안전보건교육 가이드북"
+      ]
+    },
+    {
+      "id": "electrical-panel",
+      "ok": true,
+      "elapsedSec": 19.21,
+      "mode": "live",
+      "statusKosha": "live",
+      "koshaExternalMode": "live",
+      "koshaExternalDetail": "KOSHA·고용노동부 공식 자료 URL 6건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다.",
+      "koshaReferenceCount": 6,
+      "koshaCitationCount": 0,
+      "deliverableKoshaCount": 29,
+      "expectedCoverage": {
+        "KOSHA": 199,
+        "전기": 381,
+        "감전": 150
+      },
+      "internalTerms": [
+        "DB 하네스",
+        "fallback"
+      ],
+      "hasRiskAssessment": true,
+      "hasTbmBriefing": true,
+      "hasForeignTransmission": true,
+      "sampleKoshaLines": [
+        "[KOSHA 보강] KOSHA 위험성평가 사업안내 (공식 링크 확인)",
+        "KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다.",
+        "KOSHA·고용노동부 공식 자료 URL 6건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다.",
+        "KOSHA",
+        "KOSHA 위험성평가 사업안내",
+        "KOSHA",
+        "KOSHA 위험성평가 교육자료",
+        "위험성평가 작성과 작업자 공유 교육에 활용할 수 있는 KOSHA 교육자료입니다.",
+        "KOSHA",
+        "KOSHA 작업 전 안전점검회의(TBM) OPS",
+        "KOSHA",
+        "산업안전보건교육 가이드북"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "severity": "P2",
+      "id": "scaffold-fall",
+      "issue": "internal-terms",
+      "terms": [
+        "DB 하네스",
+        "fallback"
+      ]
+    },
+    {
+      "severity": "P2",
+      "id": "hotwork-ventilation",
+      "issue": "internal-terms",
+      "terms": [
+        "DB 하네스",
+        "fallback"
+      ]
+    },
+    {
+      "severity": "P2",
+      "id": "electrical-panel",
+      "issue": "internal-terms",
+      "terms": [
+        "DB 하네스",
+        "fallback"
+      ]
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { enforceRateLimit } from "@/lib/api-guard";
 import { parseHarnessMemoryInput } from "@/lib/db-harness";
 import { attachGenerationEvidence } from "@/lib/generation-evidence";
 import { createLogger } from "@/lib/logger";
+import { sanitizeAskResponsePublicSurface } from "@/lib/ask-public-surface";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5min — Pro plan max; 7-way parallel Vertex calls need headroom
@@ -49,5 +50,5 @@ export async function POST(request: NextRequest) {
       evidenceSealed: Boolean(sealed.generationEvidence)
     });
   }
-  return NextResponse.json(sealed);
+  return NextResponse.json(sanitizeAskResponsePublicSurface(sealed));
 }
