@@ -10,7 +10,7 @@ This check proves the current SafeClaw harness is not merely storing KOSHA/SIF d
 
 ## Base
 
-- Head: `cae881c7f4bd6ce4bcfb60ab49e372351433341d`
+- Head: `ab4d2d308b34c59e141a5bca532c7514f03bd4cd`
 - Mutation: none
 - Scope: generated workpack materialization, not Supabase migration
 
@@ -29,6 +29,8 @@ npm.cmd test -- tests\kosha-materialization-matrix.test.ts --maxWorkers=1 --file
 ```
 
 Result: 1 file / 3 tests PASS, 12.12s.
+
+CI follow-up: the electrical B-E-10 scenario is allowed to report `degraded` rather than `ready` when ontology QA is incomplete, but the test still requires B-E-10 evidence and electrical control wording to be materialized in the generated workpack. `blocked` remains disallowed.
 
 ## Interpretation
 

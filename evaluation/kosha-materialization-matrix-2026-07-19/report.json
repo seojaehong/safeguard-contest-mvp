@@ -1,7 +1,7 @@
 {
   "artifact": "kosha-materialization-matrix-2026-07-19",
   "generatedAt": "2026-07-19T14:33:31Z",
-  "baseHead": "cae881c7f4bd6ce4bcfb60ab49e372351433341d",
+  "baseHead": "ab4d2d308b34c59e141a5bca532c7514f03bd4cd",
   "mutationPerformed": false,
   "scope": "Non-mutating KOSHA/SIF materialization regression for generated workpack surfaces.",
   "matrix": [
@@ -27,6 +27,7 @@
       "expectedExactGuide": "B-E-10",
       "evidenceAssertion": "dbHarness/externalData surface contains B-E-10.",
       "documentAssertion": "generated workpack surface contains de-energized circuit, distribution board, voltage test, insulating PPE, and electrical shock controls.",
+      "qualityStatusAssertion": "dbHarness quality status must not be blocked; degraded is allowed when ontology QA is incomplete but evidence materialization succeeds.",
       "status": "pass"
     }
   ],
@@ -42,6 +43,7 @@
   "notes": [
     "This is not a DB migration and does not mutate Supabase.",
     "The matrix verifies materialization into generated workpack surfaces, not only reference retrieval.",
-    "The D-C-13 case also verifies SIF cases are present for launch demo grounding."
+    "The D-C-13 case also verifies SIF cases are present for launch demo grounding.",
+    "The B-E-10 scenario keeps materialization strict while avoiding a false CI dependency on ontology QA readiness."
   ]
 }

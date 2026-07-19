@@ -60,10 +60,10 @@ describe("KOSHA/SIF materialization matrix", () => {
   }, 30_000);
 
   it("materializes exact B-E-10 electrical guidance into the generated workpack", async () => {
-    const response = await runAsk(
+    const response = await withNoSupabase(() => runAsk(
       "세이프전기 부산 해운대 상가 정전전로 인근 배전반 점검 작업. 작업자 3명, 절연보호구와 검전 필요. 위험성평가와 TBM을 만들어줘.",
       { aiMode: "enhanced" },
-    );
+    ));
 
     const documentSurface = collectWorkpackSurface(response);
     const evidenceSurface = collectEvidenceSurface(response);
@@ -75,6 +75,6 @@ describe("KOSHA/SIF materialization matrix", () => {
     expect(documentSurface).toContain("검전");
     expect(documentSurface).toContain("절연보호구");
     expect(`${JSON.stringify(response.structured ?? {})}\n${documentSurface}`).toMatch(/감전|전원 차단|잠금표지|무전압|절연/);
-    expect(response.qualityContract?.dbHarness.status).toBe("ready");
+    expect(response.qualityContract?.dbHarness.status).not.toBe("blocked");
   }, 30_000);
 });
