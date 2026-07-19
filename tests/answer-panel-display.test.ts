@@ -5,6 +5,7 @@ import {
   groundingFieldLabel,
   groundingGroupLabel,
   sanitizeAnswerForDisplay,
+  sanitizePracticalPointsForDisplay,
   type AnswerPanelPublicStatusInput
 } from "@/lib/answer-panel-display";
 
@@ -94,5 +95,20 @@ describe("answer panel display copy", () => {
     expect(notes).toContain("기상 신호: 보조 근거로 표시");
     expect(notes).toContain("검증 근거: 직접 근거 3건 · SIF 사례 2건");
     expect(notes).not.toMatch(/fallback|OPENAI_API_KEY|timeout|AI_MODE/i);
+  });
+
+  it("removes raw SIF diagnostics from practical checkpoints while keeping field actions", () => {
+    const points = sanitizePracticalPointsForDisplay([
+      "문서 반영 전 확인: SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
+      "문서 반영 전 확인: 관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음",
+      "문서 반영 전 확인: 작업발판·안전난간·개구부 상태 확인",
+      "문서 반영 전 확인: 안전대 체결 및 작업반경 출입통제"
+    ]);
+
+    expect(points).toEqual([
+      "작업발판·안전난간·개구부 상태 확인",
+      "안전대 체결 및 작업반경 출입통제"
+    ]);
+    expect(points.join(" ")).not.toMatch(/SIF 사고개요|원시 태그|관리감독자 검토 완료 전/u);
   });
 });

@@ -29,6 +29,7 @@ The AnswerPanel display sanitizer now removes:
 - DB harness headings and contract terms from the visible answer block;
 - raw direct-evidence and SIF-case diagnostic lines;
 - raw SIF review boilerplate such as `SIF 사고개요`, `원문 감소대책`, `원시 태그`, and `관리감독자 검토 완료 전`.
+- the same raw SIF review boilerplate when it appears in `practicalPoints`.
 
 It preserves field-action lines such as scaffold checks and strong-wind TBM actions.
 
@@ -41,14 +42,14 @@ npm.cmd test -- tests\answer-panel-display.test.ts --maxWorkers=1 --fileParallel
 ```
 
 - Test files: 1 passed / 1
-- Tests: 11 passed / 11
+- Tests: 12 passed / 12
 
 ```powershell
 npm.cmd test -- tests\answer-panel-display.test.ts tests\ai-generation-trace.test.ts tests\ai-deliverables-generation-trace.test.ts tests\quality-contract.test.ts --maxWorkers=1 --fileParallelism=false
 ```
 
 - Test files: 4 passed / 4
-- Tests: 36 passed / 36
+- Tests: 37 passed / 37
 
 ```powershell
 npm.cmd run typecheck

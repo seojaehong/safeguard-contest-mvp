@@ -2,7 +2,8 @@ import {
   buildAnswerPanelStatusNotes,
   groundingFieldLabel,
   groundingGroupLabel,
-  sanitizeAnswerForDisplay
+  sanitizeAnswerForDisplay,
+  sanitizePracticalPointsForDisplay
 } from "@/lib/answer-panel-display";
 import type { AskResponse } from "@/lib/types";
 
@@ -17,6 +18,7 @@ export function AnswerPanel({ data }: { data: AskResponse }) {
     data.mode === "live" ? "근거 연결됨" : data.mode === "fallback" ? "일부 근거 보류" : "연결 점검 필요";
   const statusNotes = buildAnswerPanelStatusNotes(data);
   const answerForDisplay = sanitizeAnswerForDisplay(data.answer);
+  const practicalPoints = sanitizePracticalPointsForDisplay(data.practicalPoints);
 
   return (
     <div className="card list">
@@ -54,7 +56,7 @@ export function AnswerPanel({ data }: { data: AskResponse }) {
       <hr />
       <h2 className="h3">실무 체크포인트</h2>
       <ul>
-        {data.practicalPoints.map((p) => <li key={p}>{p}</li>)}
+        {practicalPoints.map((p) => <li key={p}>{p}</li>)}
       </ul>
       <p className="muted small">출력물은 현장 조건 확인 후 문서팩에 반영하세요.</p>
     </div>

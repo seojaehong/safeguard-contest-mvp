@@ -93,6 +93,16 @@ export function sanitizeAnswerForDisplay(answer: string) {
     : "근거 요약을 준비했습니다. 원문 근거와 현장 조건을 확인해 문서팩에 반영하세요.";
 }
 
+export function sanitizePracticalPointsForDisplay(points: readonly string[]): string[] {
+  const sanitized = points
+    .map((point) => point.replace(/^문서 반영 전 확인:\s*/u, "").trim())
+    .filter((point) => point && !internalOperationalLinePattern.test(point));
+
+  return sanitized.length
+    ? sanitized
+    : ["현장 조건, 작업자 배치, 작업중지 기준을 확인한 뒤 문서팩에 반영하세요."];
+}
+
 export function groundingFieldLabel(path: string): string {
   if (path.includes("workPlanStructured")) return "작업계획서";
   if (path.includes("tbmBriefingStructured")) return "TBM 브리핑";
