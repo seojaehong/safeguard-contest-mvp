@@ -1,0 +1,46 @@
+{
+  "status": "pass",
+  "date": "2026-07-20",
+  "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-materialization-20260720",
+  "branch": "fix/kosha-materialization-20260720",
+  "base_head": "a1e92295aa27ebe2576064decde07111f86731d7",
+  "scope": "KOSHA/SIF/law Phase A product materialization wording boundary",
+  "changes": [
+    "Keep canonical stable keys and provenance objects intact.",
+    "Replace user-facing internal labels such as stableKey, KOSHA guidance UID, and mandatedBy law UID with Korean product labels.",
+    "Materialize KOSHA guide code, page, and supportStatement inside the canonical review row so the document shows what the guide actually contributed.",
+    "Keep review_required / human-confirmation wording; do not claim KOSHA corpus launchReady or legal compliance."
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\phase-a-product-materialization.test.ts tests\\claw-tools-phase-a-materialization.test.ts tests\\kosha-materialization-matrix.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "pass",
+      "files": 3,
+      "tests": 55
+    },
+    {
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\exact-kosha-applicability-policy.test.ts tests\\kosha-materialization-matrix.test.ts tests\\phase-a-product-materialization.test.ts tests\\claw-tools-phase-a-materialization.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "pass",
+      "files": 9,
+      "tests": 169
+    },
+    {
+      "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body",
+      "result": "pass",
+      "tests": 19
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "pass"
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "pass",
+      "static_pages": "28/28"
+    }
+  ],
+  "remaining_notes": [
+    "KOSHA_CORPUS_STATE remains launchReady=false with productionChunkBridge=absent, so output stays review_required and human-confirmation gated.",
+    "This patch improves the document materialization wording boundary only; it does not change DB schema, trust pins, registry assets, or retrieval ranking."
+  ]
+}

@@ -220,26 +220,37 @@ function assertReviewRequiredProduct(product: PhaseAProductMaterialization): voi
 }
 
 function rowBlock(row: PhaseAProductDocumentRow): string {
-  const guidance = row.provenance.koshaGuidanceCitedUids.length > 0
-    ? row.provenance.koshaGuidanceCitedUids.join(", ")
+  const guidance = row.provenance.koshaGuidanceEvidence.length > 0
+    ? row.provenance.koshaGuidanceEvidence
+      .map((source) => (
+        `${source.guideCode} p.${source.chunk.page}: ${source.chunk.supportStatement} (${source.citedUid})`
+      ))
+      .join("\n")
+    : "현장 확인 필요";
+  const law = row.provenance.lawEvidence.length > 0
+    ? row.provenance.lawEvidence
+      .map((source) => (
+        `${source.title} 제${source.articleNo}조 (${source.citedUid})`
+      ))
+      .join("\n")
     : "현장 확인 필요";
   const path = [
-    `Task(${row.provenance.taskNodeId})`,
-    `SIF/Accident(${row.provenance.sifAccidentCitedUids.join(", ")})`,
-    `Hazard(${row.provenance.hazardNodeId})`,
-    `Control(${row.provenance.controlNodeId}: ${row.controlLabel})`,
-    `mandatedBy Article(${row.provenance.articleNodeIds.join(", ")})`,
+    `작업(${row.provenance.taskNodeId})`,
+    `SIF 유사사례(${row.provenance.sifAccidentCitedUids.join(", ")})`,
+    `위험요인(${row.provenance.hazardNodeId})`,
+    `조치(${row.provenance.controlNodeId}: ${row.controlLabel})`,
+    `법령조항(${row.provenance.articleNodeIds.join(", ")})`,
   ].join(" -> ");
   return [
     `[${row.rowOrSection}]`,
-    `stableKey: ${row.stableKey}`,
+    `검토행 ID: ${row.stableKey}`,
     "상태: 검토 필요",
     `적용조건: ${row.applicabilityCondition}`,
     `확인질문: ${row.confirmationQuestion}`,
-    `근거 경로: ${path}`,
-    `SIF/Accident UID: ${row.provenance.sifAccidentCitedUids.join(", ")}`,
-    `KOSHA guidance UID: ${guidance}`,
-    `mandatedBy law UID: ${row.provenance.lawCitedUids.join(", ")}`,
+    `근거 연결: ${path}`,
+    `SIF 유사사례 근거: ${row.provenance.sifAccidentCitedUids.join(", ")}`,
+    `KOSHA 기술지침 근거:\n${guidance}`,
+    `법령 근거:\n${law}`,
     "사람 확인: pending",
   ].join("\n");
 }

@@ -330,11 +330,15 @@ describe("Phase A product materialization", () => {
       "phase-a-stable-key:electrical-work-electrocution:risk-assessment:electrical-grounding",
     );
     expect(once.deliverables.riskAssessmentDraft).toContain(
-      "stableKey: electrical-work-electrocution:risk-assessment:electrical-grounding",
+      "검토행 ID: electrical-work-electrocution:risk-assessment:electrical-grounding",
     );
     expect(once.deliverables.tbmBriefing).toContain(
-      "stableKey: electrical-work-electrocution:tbm:electrical-grounding",
+      "검토행 ID: electrical-work-electrocution:tbm:electrical-grounding",
     );
+    expect(once.deliverables.riskAssessmentDraft).toContain("KOSHA 기술지침 근거:");
+    expect(once.deliverables.riskAssessmentDraft).toContain("검전");
+    expect(once.deliverables.riskAssessmentDraft).not.toContain("KOSHA guidance UID:");
+    expect(once.deliverables.riskAssessmentDraft).not.toContain("mandatedBy law UID:");
     expect(twice.deliverables).toEqual(once.deliverables);
     expect(twice.structured).toEqual(once.structured);
     expect(twice.phaseAProduct).toEqual(once.phaseAProduct);
@@ -364,8 +368,9 @@ describe("Phase A product materialization", () => {
       `<!-- safeclaw:phase-a-canonical-row:start stableKey="${stableKey}" -->`,
     );
     expect(materialized.deliverables.riskAssessmentDraft.match(
-      new RegExp(`stableKey: ${stableKey}`, "g"),
-    )).toHaveLength(2);
+      new RegExp(`검토행 ID: ${stableKey}`, "g"),
+    )).toHaveLength(1);
+    expect(materialized.deliverables.riskAssessmentDraft).toContain(`stableKey: ${stableKey}`);
   });
 
   test("inserts a canonical row when an owned marker block is incomplete", () => {
@@ -389,8 +394,9 @@ describe("Phase A product materialization", () => {
       new RegExp(start.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
     )).toHaveLength(2);
     expect(materialized.deliverables.riskAssessmentDraft).toContain(
-      "근거 경로: Task(Task_work_at_height)",
+      "근거 연결: 작업(Task_work_at_height)",
     );
+    expect(materialized.deliverables.riskAssessmentDraft).toContain("KOSHA 기술지침 근거:");
   });
 
   test.each<{

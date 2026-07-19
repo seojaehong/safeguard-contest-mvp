@@ -118,7 +118,7 @@ describe("Claw Phase A product handlers", () => {
     expect(mocks.reviewDocpack).toHaveBeenCalledWith(
       "고소작업",
       expect.stringContaining(
-        "stableKey: work-at-height-fall:risk-assessment:fall-work-platform",
+        "검토행 ID: work-at-height-fall:risk-assessment:fall-work-platform",
       ),
     );
     expect(result).toMatchObject({
