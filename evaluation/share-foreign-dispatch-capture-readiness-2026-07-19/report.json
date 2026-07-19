@@ -1,7 +1,7 @@
 {
   "status": "pass",
   "date": "2026-07-19",
-  "verifiedProductBase": "895462484b86508d48cdb94d3fa7b654f793766b",
+  "verifiedProductBase": "b18a067560536824b8d5812361a74b6882c5113e",
   "liveTarget": "https://www.safeclaw.kr/workspace",
   "focusedBrowserGate": {
     "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
@@ -21,7 +21,9 @@
     "fullVietnameseParagraphsRendered": true,
     "messagePreviewInnerScrollbar": false,
     "recipientPortalRouteExists": true,
-    "productionBuildSha": "895462484b86508d48cdb94d3fa7b654f793766b"
+    "publicRecipientLookupExists": true,
+    "publicRecipientConfirmationExists": true,
+    "productionBuildSha": "b18a067560536824b8d5812361a74b6882c5113e"
   },
   "sessionScopedPreview": {
     "workerPortalPreviewRequiresShareSession": true,

@@ -1,7 +1,7 @@
 # Share / Foreign Worker Dispatch Capture Readiness
 
 Date: 2026-07-19
-Verified product base: `895462484b86508d48cdb94d3fa7b654f793766b`
+Verified product base: `b18a067560536824b8d5812361a74b6882c5113e`
 Live target: `https://www.safeclaw.kr/workspace`
 
 ## Summary
@@ -55,7 +55,7 @@ The generated screenshots above are from the isolated Next.js dev harness. A bla
 For submission or demo video capture, use the live production URL after confirming `/api/build-info` reports the target commit. The current live production build reports:
 
 ```text
-commitSha: 895462484b86508d48cdb94d3fa7b654f793766b
+commitSha: b18a067560536824b8d5812361a74b6882c5113e
 environment: production
 ```
 
@@ -64,6 +64,8 @@ The production page should not show the Next.js dev indicator.
 ## Current Verified Support Boundaries
 
 - Worker recipient portal route exists at `/share/[sessionId]`.
+- Public recipient lookup exists at `/api/share-sessions/[sessionId]?workerId=...`.
+- Public recipient confirmation exists on the same route via `POST`.
 - Public recipient confirmation is invited-session based, not anonymous open sharing.
 - Recipient confirmation uses the worker id from the share link as authoritative when present.
 - Vietnamese recipient chrome and document labels are covered by `tests/share-recipient-portal-browser.test.ts`.
