@@ -2,10 +2,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
-
-// @ts-expect-error -- executable MJS module exposes the audited runtime API.
-import * as rawAuditModule from "../scripts/northstar_open_gate_audit.mjs";
 
 type GateState = "proven" | "approval_gated" | "notice" | "missing" | "contradicted";
 
@@ -34,7 +32,20 @@ type AuditModule = {
   renderNorthstarOpenGateMarkdown: (audit: NorthstarAudit) => string;
 };
 
-const { buildNorthstarOpenGateAudit, renderNorthstarOpenGateMarkdown } = rawAuditModule as unknown as AuditModule;
+type KoshaReconciliationFixture = {
+  mutations: {
+    supabaseDataChanged: boolean;
+  };
+};
+
+async function loadAuditModule(): Promise<AuditModule> {
+  const sourcePath = path.resolve("scripts", "northstar_open_gate_audit.mjs");
+  const moduleDir = fs.mkdtempSync(path.join(os.tmpdir(), "safeclaw-northstar-module-"));
+  const modulePath = path.join(moduleDir, "northstar_open_gate_audit.mjs");
+  const source = fs.readFileSync(sourcePath, "utf8").replace(/^#!.*\r?\n/u, "");
+  fs.writeFileSync(modulePath, source, "utf8");
+  return await import(pathToFileURL(modulePath).href) as AuditModule;
+}
 
 function writeJson(rootDir: string, relativePath: string, value: unknown): void {
   const absolutePath = path.join(rootDir, relativePath);
@@ -84,13 +95,60 @@ function createFixtureRoot(): string {
     uploaded: false,
     corpusCount: 6032,
   });
+  writeJson(rootDir, path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"), {
+    verdict: "pass_current_master_kosha_exact_registry_and_local_corpus_readiness",
+    productionExactPins: ["D-C-13", "D-C-7", "B-E-10"],
+    verification: {
+      focusedKoshaVitest: {
+        testsPassed: 80,
+        testsTotal: 80,
+        status: "pass",
+      },
+      productionBuild: {
+        staticPagesGenerated: 28,
+        staticPagesTotal: 28,
+        status: "pass",
+      },
+      nextFileTrace: {
+        manifestCount: 82,
+        allExactAssetsManifestCount: 18,
+        partialExactAssetsManifestCount: 0,
+        status: "pass",
+      },
+      liveStatusProbe: {
+        status: "ready",
+        searchReady: true,
+        localCorpusStatus: "ready",
+        localCorpusItemCount: 234,
+        localCorpusChunkCount: 7127,
+        exactTrustRegistryStatus: "ready",
+        exactTrustRegistryCount: 3,
+        exactTrustRegistryKeys: ["D-C-13", "D-C-7", "B-E-10"],
+        exactTrustRegistryPartialFailure: false,
+      },
+    },
+    mutations: {
+      dbSchemaChanged: false,
+      supabaseDataChanged: false,
+      corpusUploaded: false,
+      historicalWave2RangeMerged: false,
+    },
+  });
+  writeText(rootDir, path.join("evaluation", "kosha-exact-trust-current-live-2026-07-19", "report.md"), [
+    "# KOSHA Exact Trust Current Live Gate",
+    "- `D-C-13-2026`",
+    "- `D-C-7-2026`",
+    "- `B-E-10-2026`",
+    "General KOSHA guide rows are not promoted to direct evidence unless they pass the exact trust gate.",
+  ].join("\n"));
   execFileSync("git", ["add", "."], { cwd: rootDir, stdio: "ignore" });
   execFileSync("git", ["commit", "-m", "fixture"], { cwd: rootDir, stdio: "ignore" });
   return rootDir;
 }
 
 describe("northstar open gate audit", () => {
-  it("keeps approval-gated north-star work open instead of complete", () => {
+  it("keeps approval-gated north-star work open instead of complete", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
     const audit = buildNorthstarOpenGateAudit({
       rootDir,
@@ -104,10 +162,13 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "supabase_rls_launch_isolation")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.state).toBe("approval_gated");
     expect(audit.gates.find((gate) => gate.id === "sif_embedding_runtime")?.state).toBe("approval_gated");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.state).toBe("proven");
     expect(audit.forbiddenClaims).toContain("LLM Wiki publishes itself.");
+    expect(audit.forbiddenClaims).toContain("All KOSHA metadata-verified candidates are exact production evidence.");
   });
 
-  it("fails evidence completeness when the LLM Wiki publication packet is missing", () => {
+  it("fails evidence completeness when the LLM Wiki publication packet is missing", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();
     fs.rmSync(path.join(rootDir, "evaluation", "llm-wiki-rls-approval-2026-07-17"), {
       recursive: true,
@@ -124,7 +185,89 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "llm_wiki_publication")?.state).toBe("missing");
   });
 
-  it("renders the approval boundary and forbidden claims in the Markdown report", () => {
+  it("contradicts the KOSHA exact trust gate when live exact pins are stale", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeJson(rootDir, path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"), {
+      verdict: "pass_current_master_kosha_exact_registry_and_local_corpus_readiness",
+      productionExactPins: ["D-C-13", "D-C-7"],
+      verification: {
+        focusedKoshaVitest: { testsPassed: 80, testsTotal: 80, status: "pass" },
+        productionBuild: { staticPagesGenerated: 28, staticPagesTotal: 28, status: "pass" },
+        nextFileTrace: {
+          manifestCount: 82,
+          allExactAssetsManifestCount: 18,
+          partialExactAssetsManifestCount: 0,
+          status: "pass",
+        },
+        liveStatusProbe: {
+          status: "ready",
+          searchReady: true,
+          localCorpusStatus: "ready",
+          localCorpusItemCount: 234,
+          localCorpusChunkCount: 7127,
+          exactTrustRegistryStatus: "ready",
+          exactTrustRegistryCount: 2,
+          exactTrustRegistryKeys: ["D-C-13", "D-C-7"],
+          exactTrustRegistryPartialFailure: false,
+        },
+      },
+      mutations: {
+        dbSchemaChanged: false,
+        supabaseDataChanged: false,
+        corpusUploaded: false,
+        historicalWave2RangeMerged: false,
+      },
+    });
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.state).toBe("contradicted");
+  });
+
+  it("contradicts the KOSHA exact trust gate when mutation safety is lost", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json");
+    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as KoshaReconciliationFixture;
+    report.mutations.supabaseDataChanged = true;
+    writeJson(rootDir, reportPath, report);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.state).toBe("contradicted");
+  });
+
+  it("fails evidence completeness when the current KOSHA reconciliation is missing", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    fs.rmSync(path.join(rootDir, "evaluation", "kosha-current-master-reconciliation-2026-07-19"), {
+      recursive: true,
+      force: true,
+    });
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("evidence_missing");
+    expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.state).toBe("missing");
+  });
+
+  it("renders the approval boundary and forbidden claims in the Markdown report", async () => {
+    const { buildNorthstarOpenGateAudit, renderNorthstarOpenGateMarkdown } = await loadAuditModule();
     const rootDir = createFixtureRoot();
     const audit = buildNorthstarOpenGateAudit({
       rootDir,
@@ -134,6 +277,7 @@ describe("northstar open gate audit", () => {
     const markdown = renderNorthstarOpenGateMarkdown(audit);
 
     expect(markdown).toContain("| llm_wiki_publication | approval_gated |");
+    expect(markdown).toContain("| kosha_exact_trust_registry | proven |");
     expect(markdown).toContain("LLM Wiki publishes itself.");
     expect(markdown).toContain("SafeClaw fixes SIF/KOSHA/current work-history evidence before LLM wording.");
   });

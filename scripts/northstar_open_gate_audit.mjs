@@ -19,6 +19,8 @@ const EVIDENCE_PATHS = Object.freeze({
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
   sifEmbeddingPreflight: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
+  koshaCurrentReconciliation: path.join("evaluation", "kosha-current-master-reconciliation-2026-07-19", "report.json"),
+  koshaCurrentLive: path.join("evaluation", "kosha-exact-trust-current-live-2026-07-19", "report.md"),
 });
 
 /**
@@ -337,6 +339,115 @@ function evaluateSifEmbeddingGate(rootDir) {
 }
 
 /**
+ * @param {unknown} value
+ * @returns {string[]}
+ */
+function readStringArray(value) {
+  return Array.isArray(value)
+    ? value.filter((item) => typeof item === "string")
+    : [];
+}
+
+/**
+ * @param {unknown} value
+ */
+function readNumber(value) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+/**
+ * @param {string} rootDir
+ * @returns {GateResult}
+ */
+function evaluateKoshaExactTrustGate(rootDir) {
+  const evidencePath = EVIDENCE_PATHS.koshaCurrentReconciliation;
+  const report = readJsonFile(rootDir, evidencePath);
+  const liveText = readTextFile(rootDir, EVIDENCE_PATHS.koshaCurrentLive);
+  if (!isRecord(report)) {
+    return gateResult({
+      id: "kosha_exact_trust_registry",
+      label: "KOSHA exact trust registry",
+      state: "missing",
+      evidencePath,
+      detail: "Current KOSHA reconciliation report is missing or invalid.",
+      nextActions: ["Regenerate the current KOSHA reconciliation artifact before launch claims."],
+    });
+  }
+
+  const verification = isRecord(report.verification) ? report.verification : {};
+  const mutations = isRecord(report.mutations) ? report.mutations : {};
+  const liveStatusProbe = isRecord(verification.liveStatusProbe) ? verification.liveStatusProbe : {};
+  const focused = isRecord(verification.focusedKoshaVitest) ? verification.focusedKoshaVitest : {};
+  const build = isRecord(verification.productionBuild) ? verification.productionBuild : {};
+  const trace = isRecord(verification.nextFileTrace) ? verification.nextFileTrace : {};
+  const productionPins = readStringArray(report.productionExactPins);
+  const liveKeys = readStringArray(liveStatusProbe.exactTrustRegistryKeys);
+  const requiredPins = ["D-C-13", "D-C-7", "B-E-10"];
+  const hasRequiredPins = requiredPins.every((pin) => productionPins.includes(pin) && liveKeys.includes(pin));
+  const liveMarkdownMatches = liveText !== null
+    && requiredPins.every((pin) => liveText.includes(pin))
+    && /General KOSHA guide rows are not promoted to direct evidence/u.test(liveText);
+  const focusedTests = readNumber(focused.testsPassed);
+  const focusedTotal = readNumber(focused.testsTotal);
+  const localCorpusCount = readNumber(liveStatusProbe.localCorpusItemCount);
+  const localChunkCount = readNumber(liveStatusProbe.localCorpusChunkCount);
+  const manifestCount = readNumber(trace.manifestCount);
+  const exactAssetManifests = readNumber(trace.allExactAssetsManifestCount);
+  const noMutations = mutations.dbSchemaChanged === false
+    && mutations.supabaseDataChanged === false
+    && mutations.corpusUploaded === false
+    && mutations.historicalWave2RangeMerged === false;
+  const readiness = readString(report.verdict) === "pass_current_master_kosha_exact_registry_and_local_corpus_readiness"
+    && hasRequiredPins
+    && focused.status === "pass"
+    && focusedTests !== null
+    && focusedTotal !== null
+    && focusedTests === focusedTotal
+    && focusedTotal >= 80
+    && liveStatusProbe.status === "ready"
+    && liveStatusProbe.searchReady === true
+    && liveStatusProbe.localCorpusStatus === "ready"
+    && localCorpusCount !== null
+    && localCorpusCount >= 234
+    && localChunkCount !== null
+    && localChunkCount >= 7000
+    && liveStatusProbe.exactTrustRegistryStatus === "ready"
+    && liveStatusProbe.exactTrustRegistryCount === 3
+    && liveStatusProbe.exactTrustRegistryPartialFailure === false
+    && build.status === "pass"
+    && readNumber(build.staticPagesGenerated) === readNumber(build.staticPagesTotal)
+    && trace.status === "pass"
+    && manifestCount !== null
+    && exactAssetManifests !== null
+    && exactAssetManifests > 0
+    && trace.partialExactAssetsManifestCount === 0
+    && noMutations
+    && liveMarkdownMatches;
+
+  if (readiness) {
+    return gateResult({
+      id: "kosha_exact_trust_registry",
+      label: "KOSHA exact trust registry",
+      state: "proven",
+      evidencePath,
+      detail: `Current runtime has ${productionPins.length} exact KOSHA pins (${productionPins.join(", ")}), local corpus ${localCorpusCount} items/${localChunkCount} chunks, and zero DB/corpus mutations.`,
+      nextActions: [
+        "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.",
+      ],
+    });
+  }
+
+  return gateResult({
+    id: "kosha_exact_trust_registry",
+    label: "KOSHA exact trust registry",
+    state: "contradicted",
+    evidencePath,
+    detail: "Current KOSHA reconciliation no longer proves exact pins, live readiness, mutation safety, and local corpus readiness together.",
+    nextActions: ["Re-run KOSHA exact trust reconciliation and live status probe before KOSHA launch claims."],
+  });
+}
+
+/**
  * @param {{ rootDir?: string, generatedAt?: string, sourceSha?: string }} [options]
  * @returns {NorthstarAudit}
  */
@@ -348,6 +459,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
     evaluateRlsApprovalGate(rootDir),
     evaluateLlmWikiGate(rootDir),
     evaluateSifEmbeddingGate(rootDir),
+    evaluateKoshaExactTrustGate(rootDir),
   ];
 
   const hasContradiction = gates.some((gate) => gate.state === "contradicted");
@@ -371,6 +483,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
       "Hermes is the production source of truth.",
       "OpenClaw learns or mutates DB facts automatically.",
       "SIF vector retrieval is production-active before the approved migration/upload/runtime gate.",
+      "All KOSHA metadata-verified candidates are exact production evidence.",
       "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
       "Provider dispatch is fully live for unapproved channels.",
     ],

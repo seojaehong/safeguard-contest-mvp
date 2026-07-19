@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-19T10:49:54.969Z
-Source SHA: `d3e8ac7635d3654384cf145b77143d7e392047da`
+Generated at: 2026-07-19T11:49:08.003Z
+Source SHA: `082b2d54294b22e1136c4db191718bc19060dd3d`
 Overall: `open`
 
 ## Gate Matrix
@@ -13,6 +13,7 @@ Overall: `open`
 | supabase_rls_launch_isolation | approval_gated | evaluation\supabase-rls-approval-2026-07-17\report.md | Read-only audit exists, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\llm-wiki-rls-approval-2026-07-17\report.md | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json | SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. |
+| kosha_exact_trust_registry | proven | evaluation\kosha-current-master-reconciliation-2026-07-19\report.json | Current runtime has 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), local corpus 234 items/7127 chunks, and zero DB/corpus mutations. |
 
 ## Safe Demo Claims
 
@@ -27,6 +28,7 @@ Overall: `open`
 - Hermes is the production source of truth.
 - OpenClaw learns or mutates DB facts automatically.
 - SIF vector retrieval is production-active before the approved migration/upload/runtime gate.
+- All KOSHA metadata-verified candidates are exact production evidence.
 - Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.
 - Provider dispatch is fully live for unapproved channels.
 
@@ -41,3 +43,4 @@ Overall: `open`
 - llm_wiki_publication: Keep generated wiki candidates unpublished until human confirmation and RPC evidence exist.
 - sif_embedding_runtime: Approve SIF-only migration, embedding cost, upload, and vector runtime separately.
 - sif_embedding_runtime: Do not claim vector retrieval is production-active before post-migration verification.
+- kosha_exact_trust_registry: Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.

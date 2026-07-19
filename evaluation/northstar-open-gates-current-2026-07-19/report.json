@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-19T10:49:54.969Z",
-  "sourceSha": "d3e8ac7635d3654384cf145b77143d7e392047da",
+  "generatedAt": "2026-07-19T11:49:08.003Z",
+  "sourceSha": "082b2d54294b22e1136c4db191718bc19060dd3d",
   "overall": "open",
   "gates": [
     {
@@ -56,6 +56,16 @@
         "Approve SIF-only migration, embedding cost, upload, and vector runtime separately.",
         "Do not claim vector retrieval is production-active before post-migration verification."
       ]
+    },
+    {
+      "id": "kosha_exact_trust_registry",
+      "state": "proven",
+      "label": "KOSHA exact trust registry",
+      "evidencePath": "evaluation\\kosha-current-master-reconciliation-2026-07-19\\report.json",
+      "detail": "Current runtime has 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), local corpus 234 items/7127 chunks, and zero DB/corpus mutations.",
+      "nextActions": [
+        "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review."
+      ]
     }
   ],
   "safeDemoClaims": [
@@ -69,6 +79,7 @@
     "Hermes is the production source of truth.",
     "OpenClaw learns or mutates DB facts automatically.",
     "SIF vector retrieval is production-active before the approved migration/upload/runtime gate.",
+    "All KOSHA metadata-verified candidates are exact production evidence.",
     "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
     "Provider dispatch is fully live for unapproved channels."
   ]
