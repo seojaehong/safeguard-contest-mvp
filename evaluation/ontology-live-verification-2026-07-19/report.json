@@ -1,0 +1,44 @@
+{
+  "artifact": "ontology-live-verification-2026-07-19",
+  "generatedAt": "2026-07-19T14:38:35.828Z",
+  "source": "https://www.safeclaw.kr",
+  "baseHead": "ba0bfaace52bcf1ee1913556ff74e0eed746d961",
+  "mutationPerformed": false,
+  "verdict": "PASS",
+  "closedPriorFinding": "/ontology hairball P0 from the 2026-07-15 production audit is not reproduced on the current live surface.",
+  "browserGate": {
+    "command": "$env:ONTOLOGY_BASE_URL='https://www.safeclaw.kr'; npm.cmd test -- tests\\ontology-ui-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+    "result": "PASS",
+    "files": 1,
+    "tests": 1,
+    "durationSeconds": 22.67
+  },
+  "metrics": {
+    "variants": 6,
+    "viewports": ["1440x1000", "1024x1000", "390x844"],
+    "themes": ["day", "night"],
+    "maximumHorizontalOverflow": 0,
+    "maximumOutsideElementCount": 0,
+    "maximumOverlapPairs": 0,
+    "minimumControlHeight": 44,
+    "minimumNodeContrast": 16.01,
+    "minimumNodeTextContrast": 5.6,
+    "desktopVisibleNeighborhoodNodes": 15,
+    "mobileDefault": "relation_cards",
+    "mobileExpandedGraphNodes": 15,
+    "dialogKeyboardContract": true
+  },
+  "screenshots": [
+    "evaluation/ontology-ui-remediation-2026-07-15/desktop-day.png",
+    "evaluation/ontology-ui-remediation-2026-07-15/tablet-day.png",
+    "evaluation/ontology-ui-remediation-2026-07-15/mobile-day.png",
+    "evaluation/ontology-ui-remediation-2026-07-15/desktop-night.png",
+    "evaluation/ontology-ui-remediation-2026-07-15/tablet-night.png",
+    "evaluation/ontology-ui-remediation-2026-07-15/mobile-night.png"
+  ],
+  "notes": [
+    "This verification did not change product code or ontology data.",
+    "The current live surface shows selected-neighborhood exploration instead of the prior full 166-node hairball.",
+    "Mobile renders relation cards by default and opens the graph only in the explicit full-screen dialog."
+  ]
+}
