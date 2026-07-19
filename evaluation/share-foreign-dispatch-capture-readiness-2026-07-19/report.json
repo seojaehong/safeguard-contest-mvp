@@ -1,0 +1,30 @@
+{
+  "status": "pass",
+  "date": "2026-07-19",
+  "verifiedProductBase": "895462484b86508d48cdb94d3fa7b654f793766b",
+  "liveTarget": "https://www.safeclaw.kr/workspace",
+  "focusedBrowserGate": {
+    "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+    "status": "pass",
+    "files": 1,
+    "tests": 1
+  },
+  "screenshots": [
+    "evaluation/share-mobile-p1/screenshots/desktop-day-vietnamese.png",
+    "evaluation/share-mobile-p1/screenshots/desktop-night-vietnamese.png",
+    "evaluation/share-mobile-p1/screenshots/mobile-390-day-vietnamese.png",
+    "evaluation/share-mobile-p1/screenshots/mobile-390-night-vietnamese.png"
+  ],
+  "verifiedClaims": {
+    "singlePrimaryShareCta": true,
+    "mobileHorizontalOverflow": false,
+    "fullVietnameseParagraphsRendered": true,
+    "messagePreviewInnerScrollbar": false,
+    "recipientPortalRouteExists": true,
+    "productionBuildSha": "895462484b86508d48cdb94d3fa7b654f793766b"
+  },
+  "captureWarnings": [
+    "Generated browser-test screenshots use the Next.js dev harness and may show a black circular N development indicator.",
+    "Submission video capture should use the live production URL."
+  ]
+}
