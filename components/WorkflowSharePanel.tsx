@@ -513,12 +513,12 @@ function formatMessageTargetLabel(data: AskResponse, selectedTarget: MessageTarg
   if (selectedTarget === "manager") return "관리자용 한국어";
   const languageCode = selectedTarget.replace("foreign:", "");
   const language = data.deliverables.foreignWorkerLanguages.find((item) => item.code === languageCode);
-  return language ? `${language.label}(${language.nativeLabel})` : "외국인 근로자 전송본";
+  return language ? `${language.label}(${language.nativeLabel})` : "외국인 작업자 안내";
 }
 
 function formatMessagePreviewHeading(data: AskResponse, selectedTarget: MessageTarget) {
-  if (selectedTarget === "manager") return "한국어 전송본 미리보기";
-  return `${formatMessageTargetLabel(data, selectedTarget)} 전송본 미리보기`;
+  if (selectedTarget === "manager") return "한국어 메시지 미리보기";
+  return `${formatMessageTargetLabel(data, selectedTarget)} 핵심 안전 안내`;
 }
 
 export function WorkflowSharePanel({
@@ -1235,7 +1235,7 @@ export function WorkflowSharePanel({
             <span>03</span>
             <strong id="workflow-language-heading">언어 미리보기</strong>
           </div>
-          <label className="field-label" htmlFor="workflow-language-select">전송본 확인 언어</label>
+          <label className="field-label" htmlFor="workflow-language-select">표시 언어</label>
           <select
             id="workflow-language-select"
             className="input"
@@ -1250,7 +1250,7 @@ export function WorkflowSharePanel({
             ))}
           </select>
           <p className="channel-readiness-note">
-            전송은 작업자별 저장 언어를 사용합니다. 여기서는 표시 언어만 바꿔 확인합니다.
+            작업자에게는 저장된 언어의 핵심 안전 안내를 보냅니다. 관리자 화면의 라벨은 한국어로 표시됩니다.
           </p>
         </section>
 

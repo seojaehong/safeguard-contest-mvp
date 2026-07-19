@@ -117,10 +117,12 @@ describe("workspace share simplification", () => {
   });
 
   it("keeps the localized message heading compact on mobile", () => {
-    expect(sharePanel).toContain('return "한국어 전송본 미리보기"');
-    expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 전송본 미리보기`');
+    expect(sharePanel).toContain('return "한국어 메시지 미리보기"');
+    expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 핵심 안전 안내`');
     expect(sharePanel).not.toContain("외국인 근로자 전송본 ·");
-    expect(sharePanel).toContain("전송은 작업자별 저장 언어를 사용합니다.");
+    expect(sharePanel).toContain("작업자에게는 저장된 언어의 핵심 안전 안내를 보냅니다.");
+    expect(sharePanel).toContain("관리자 화면의 라벨은 한국어로 표시됩니다.");
+    expect(sharePanel).toContain(">표시 언어</label>");
     expect(sharePanel).toContain("messageVariants: recipientMessageVariants.messageVariants");
   });
 
