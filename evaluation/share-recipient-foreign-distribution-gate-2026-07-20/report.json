@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-07-20T03:38:00+09:00",
+  "gitHead": "476dce43f2648a4b88b7f6c03f41a45b4f0bff5c",
+  "branch": "fix/kosha-materialization-20260720",
+  "verdict": "PASS",
+  "liveBuildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "476dce43f2648a4b88b7f6c03f41a45b4f0bff5c",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-nbxxdb89r-seojaehongs-projects.vercel.app"
+  },
+  "gates": [
+    {
+      "name": "Share authority + recipient portal + mobile foreign distribution",
+      "command": "npm.cmd test -- tests\\workpack-share-authority-routes.test.ts tests\\share-recipient-portal-browser.test.ts tests\\workflow-share-capability-browser.test.ts tests\\workspace-share-mobile-browser.test.ts tests\\workspace-share-simplification.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 5,
+      "testsPassed": 56
+    },
+    {
+      "name": "Live build marker",
+      "command": "Invoke-RestMethod https://www.safeclaw.kr/api/build-info",
+      "status": "PASS",
+      "commitSha": "476dce43f2648a4b88b7f6c03f41a45b4f0bff5c"
+    }
+  ],
+  "nonClaims": [
+    "This does not claim provider approval for KakaoTalk/Band channels.",
+    "This does not enable anonymous public links.",
+    "This does not claim every production organization has saved recipients configured."
+  ]
+}
