@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "safeclaw-share-recipient-ack-approval-preflight/v1",
+  "generatedAt": "2026-07-19T12:12:14.991Z",
+  "sourceSha": "b987422424081dc819b399a8ace1bd8e8efbe2f3",
+  "overall": "approval_ready_open",
+  "approvalRequired": true,
+  "liveDataMutationApproved": false,
+  "dbMutationPerformed": false,
+  "providerMessageSent": false,
+  "productionShareSessionCreated": false,
+  "productionReadConfirmationInserted": false,
+  "requiredApproval": {
+    "id": "run-real-production-invited-recipient-ack-gate",
+    "label": "Real production invited recipient ACK readback approval",
+    "reason": "Creating a production share session and read confirmation writes production rows."
+  },
+  "safeBeforeApproval": [
+    "Review route-level invited loop evidence.",
+    "Review focused share/recipient browser tests.",
+    "Verify live recipient shell and invalid-session fail-closed behavior.",
+    "Prepare a disposable workpack/worker pair for an approved live-data canary."
+  ],
+  "forbiddenBeforeApproval": [
+    "Create production workpack_share_sessions rows.",
+    "Insert production workpack_read_confirmations rows.",
+    "Send SMS/Kakao/email provider messages.",
+    "Claim every real invited production recipient ACK has been verified."
+  ],
+  "checks": [
+    {
+      "id": "current_share_surface_proven",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "route_loop_non_mutating_contract_proven",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "current_state_keeps_real_ack_approval_required",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "public_route_persists_confirmation_to_read_confirmations",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "public_route_rejects_missing_or_unknown_worker",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "manager_route_creates_authoritative_session_snapshot",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "authority_test_covers_real_loop_shape",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "browser_test_covers_mobile_foreign_worker_confirmation",
+      "passed": true,
+      "message": "ok"
+    }
+  ],
+  "failedCheckIds": [],
+  "inputs": {
+    "currentShareGate": "evaluation/share-recipient-live-current-2026-07-19/report.json",
+    "routeLoopGate": "evaluation/share-recipient-route-loop-gate-2026-07-19/report.json",
+    "currentState": "evaluation/north-star-current-state-2026-07-19/report.json",
+    "publicRecipientRoute": "app/api/share-sessions/[sessionId]/route.ts",
+    "managerShareRoute": "app/api/workpacks/[id]/share-sessions/route.ts",
+    "authorityRouteTest": "tests/workpack-share-authority-routes.test.ts",
+    "recipientBrowserTest": "tests/share-recipient-portal-browser.test.ts"
+  }
+}
