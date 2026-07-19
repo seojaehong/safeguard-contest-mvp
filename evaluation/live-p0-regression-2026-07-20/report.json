@@ -1,0 +1,515 @@
+{
+  "generatedAt": "2026-07-19T22:47:34.395Z",
+  "buildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "a36ca95855cc02bcc20005b8d623564b16030d89",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-fbl7hiaol-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "routeAudits": [
+    {
+      "path": "/ontology",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "documentHeight": 2077,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/ontology",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "documentHeight": 2893,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/why",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "documentHeight": 1142,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/why",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "documentHeight": 2727,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/workspace",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "documentHeight": 988,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/workspace",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "documentHeight": 988,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/documents",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "documentHeight": 3500,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/documents",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "documentHeight": 2529,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/reports",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "documentHeight": 900,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/reports",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "documentHeight": 844,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/knowledge",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "documentHeight": 5325,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    },
+    {
+      "path": "/knowledge",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "documentWidth": 390,
+      "bodyWidth": 390,
+      "documentHeight": 1152,
+      "horizontalOverflow": false,
+      "outside": 0,
+      "internalTerms": [],
+      "yellowContrastFailures": []
+    }
+  ],
+  "ontologyDesktop": {
+    "visibleNodeLikeCount": 35,
+    "overlapPairs": 0,
+    "sample": [
+      {
+        "text": "메뉴",
+        "rect": {
+          "left": 177.234375,
+          "top": 20,
+          "right": 219,
+          "bottom": 56,
+          "width": 41.765625,
+          "height": 36
+        },
+        "color": "rgb(0, 0, 0)",
+        "backgroundColor": "rgb(240, 240, 240)"
+      },
+      {
+        "text": "Day",
+        "rect": {
+          "left": 1295.84375,
+          "top": 5.5,
+          "right": 1343.828125,
+          "bottom": 41.5,
+          "width": 47.984375,
+          "height": 36
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "Night",
+        "rect": {
+          "left": 1343.828125,
+          "top": 5.5,
+          "right": 1391.8125,
+          "bottom": 41.5,
+          "width": 47.984375,
+          "height": 36
+        },
+        "color": "rgb(95, 101, 112)",
+        "backgroundColor": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "text": "검증된 안전지식166검증 완료 범위",
+        "rect": {
+          "left": 236,
+          "top": 201.390625,
+          "right": 528,
+          "bottom": 329.390625,
+          "width": 292,
+          "height": 128
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "검증된 연결169출처 연결 유지",
+        "rect": {
+          "left": 540,
+          "top": 201.390625,
+          "right": 832,
+          "bottom": 329.390625,
+          "width": 292,
+          "height": 128
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "근거 차단0무출처 항목 제외",
+        "rect": {
+          "left": 844,
+          "top": 201.390625,
+          "right": 1136,
+          "bottom": 329.390625,
+          "width": 292,
+          "height": 128
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "직접 관계",
+        "rect": {
+          "left": 1236.09375,
+          "top": 520.390625,
+          "right": 1321.546875,
+          "bottom": 564.390625,
+          "width": 85.453125,
+          "height": 44
+        },
+        "color": "rgb(20, 23, 26)",
+        "backgroundColor": "rgb(255, 212, 0)"
+      },
+      {
+        "text": "확장 관계",
+        "rect": {
+          "left": 1329.546875,
+          "top": 520.390625,
+          "right": 1415,
+          "bottom": 564.390625,
+          "width": 85.453125,
+          "height": 44
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "text": "그래프 전체 화면",
+        "rect": {
+          "left": 1270,
+          "top": 748.390625,
+          "right": 1398,
+          "bottom": 792.390625,
+          "width": 128,
+          "height": 44
+        },
+        "color": "rgb(20, 23, 26)",
+        "backgroundColor": "rgb(255, 212, 0)"
+      },
+      {
+        "text": "−",
+        "rect": {
+          "left": 1242.359375,
+          "top": 838.390625,
+          "right": 1286.359375,
+          "bottom": 882.390625,
+          "width": 44,
+          "height": 44
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "초기화",
+        "rect": {
+          "left": 1294.359375,
+          "top": 838.390625,
+          "right": 1363,
+          "bottom": 882.390625,
+          "width": 68.640625,
+          "height": 44
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "+",
+        "rect": {
+          "left": 1371,
+          "top": 838.390625,
+          "right": 1415,
+          "bottom": 882.390625,
+          "width": 44,
+          "height": 44
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  "ontologyMobile": {
+    "visibleNodeLikeCount": 25,
+    "overlapPairs": 0,
+    "sample": [
+      {
+        "text": "메뉴",
+        "rect": {
+          "left": 326.234375,
+          "top": 10,
+          "right": 378,
+          "bottom": 54,
+          "width": 51.765625,
+          "height": 44
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(244, 245, 247)"
+      },
+      {
+        "text": "Day",
+        "rect": {
+          "left": 216.71875,
+          "top": 74,
+          "right": 264.703125,
+          "bottom": 118,
+          "width": 47.984375,
+          "height": 44
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "Night",
+        "rect": {
+          "left": 264.703125,
+          "top": 74,
+          "right": 312.6875,
+          "bottom": 118,
+          "width": 47.984375,
+          "height": 44
+        },
+        "color": "rgb(95, 101, 112)",
+        "backgroundColor": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "text": "검증된 안전지식166검증 완료 범위",
+        "rect": {
+          "left": 0,
+          "top": 291.375,
+          "right": 124.65625,
+          "bottom": 391.375,
+          "width": 124.65625,
+          "height": 100
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "검증된 연결169출처 연결 유지",
+        "rect": {
+          "left": 132.65625,
+          "top": 291.375,
+          "right": 257.328125,
+          "bottom": 391.375,
+          "width": 124.671875,
+          "height": 100
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "근거 차단0무출처 항목 제외",
+        "rect": {
+          "left": 265.328125,
+          "top": 291.375,
+          "right": 389.984375,
+          "bottom": 391.375,
+          "width": 124.65625,
+          "height": 100
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "직접 관계",
+        "rect": {
+          "left": 17,
+          "top": 552.375,
+          "right": 191,
+          "bottom": 596.375,
+          "width": 174,
+          "height": 44
+        },
+        "color": "rgb(20, 23, 26)",
+        "backgroundColor": "rgb(255, 212, 0)"
+      },
+      {
+        "text": "확장 관계",
+        "rect": {
+          "left": 199,
+          "top": 552.375,
+          "right": 373,
+          "bottom": 596.375,
+          "width": 174,
+          "height": 44
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "text": "그래프 전체 화면",
+        "rect": {
+          "left": 34,
+          "top": 967.375,
+          "right": 339.140625,
+          "bottom": 1011.375,
+          "width": 305.140625,
+          "height": 44
+        },
+        "color": "rgb(20, 23, 26)",
+        "backgroundColor": "rgb(255, 212, 0)"
+      },
+      {
+        "text": "안전조치로 저감개구부·단부 안전난간·덮개 설치이 항목에서 연결",
+        "rect": {
+          "left": 17,
+          "top": 1080.375,
+          "right": 373,
+          "bottom": 1172.375,
+          "width": 356,
+          "height": 92
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "안전조치로 저감규격 안전난간 설치이 항목에서 연결",
+        "rect": {
+          "left": 17,
+          "top": 1180.375,
+          "right": 373,
+          "bottom": 1272.375,
+          "width": 356,
+          "height": 92
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      },
+      {
+        "text": "안전조치로 저감안전대·구명밧줄·송기마스크 착용이 항목에서 연결",
+        "rect": {
+          "left": 17,
+          "top": 1280.375,
+          "right": 373,
+          "bottom": 1372.375,
+          "width": 356,
+          "height": 92
+        },
+        "color": "rgb(23, 25, 29)",
+        "backgroundColor": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  "workspaceEmpty": {
+    "hasAlertRole": 1,
+    "hasErrorText": true,
+    "activeTag": "TEXTAREA",
+    "activeName": "field-command-input",
+    "textareaValueLength": 0
+  },
+  "findings": []
+}
