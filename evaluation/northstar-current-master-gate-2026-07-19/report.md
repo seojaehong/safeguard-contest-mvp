@@ -74,6 +74,7 @@ Interpretation:
 Current KOSHA gate refreshed in:
 
 - `evaluation/kosha-current-head-gate-2026-07-19/report.md`
+- `evaluation/live-harness-quality-probe-current-2026-07-19/report.md`
 
 Latest focused results:
 
@@ -85,6 +86,34 @@ Current traced exact KOSHA assets:
 - `data/safety-knowledge/exact-kosha/d-c-13-2026.json`
 - `data/safety-knowledge/exact-kosha/d-c-7-2026.json`
 - `data/safety-knowledge/exact-kosha/b-e-10-2026.json`
+
+Live harness quality probe:
+
+Command:
+
+```powershell
+node scripts/live_harness_quality_probe.mjs --base-url https://www.safeclaw.kr --output evaluation/live-harness-quality-probe-current-2026-07-19 --timeout-ms 120000
+```
+
+Result:
+
+- Verdict: `pass`
+- HTTP: `200`
+- failed contracts: `0`
+- quality state: `ready`
+- ontology state: `ready`
+
+Passed contracts:
+
+- `db_harness_first`
+- `generation_evidence_sealed`
+- `evidence_sets_present`
+- `structured_risk_tbm_links`
+- `scenario_controls_present`
+- `irrelevant_controls_absent`
+- `quality_state_ready`
+- `ontology_state_ready`
+- `no_db_mutation`
 
 ## Live Ops Surface
 
