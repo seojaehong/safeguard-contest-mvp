@@ -3103,19 +3103,6 @@ export function WorkpackEditor({
               data-testid="document-structured-editor"
               data-editor-kind={structuredDocument.profile.kind}
             >
-              {selected.key === "riskAssessmentDraft" ? (
-                <RiskAssessmentRowsEditor
-                  rows={canonicalRiskRows}
-                  rowIds={riskRowIds}
-                  validation={canonicalRiskValidation}
-                  isCurrent={canonicalRiskRowsAreCurrent}
-                  isLocked={structuredRiskEditLocked}
-                  onConfirmStructuredEdit={confirmStructuredRiskEdit}
-                  onRowChange={updateCanonicalRiskRow}
-                  onAdd={addCanonicalRiskRow}
-                  onRemove={removeCanonicalRiskRow}
-                />
-              ) : null}
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;
                 const lineCount = Math.min(8, Math.max(4, section.value.split(/\r?\n/u).length + 1));
@@ -3137,6 +3124,19 @@ export function WorkpackEditor({
                   </section>
                 );
               })}
+              {selected.key === "riskAssessmentDraft" ? (
+                <RiskAssessmentRowsEditor
+                  rows={canonicalRiskRows}
+                  rowIds={riskRowIds}
+                  validation={canonicalRiskValidation}
+                  isCurrent={canonicalRiskRowsAreCurrent}
+                  isLocked={structuredRiskEditLocked}
+                  onConfirmStructuredEdit={confirmStructuredRiskEdit}
+                  onRowChange={updateCanonicalRiskRow}
+                  onAdd={addCanonicalRiskRow}
+                  onRemove={removeCanonicalRiskRow}
+                />
+              ) : null}
             </div>
           ) : (
             <textarea
