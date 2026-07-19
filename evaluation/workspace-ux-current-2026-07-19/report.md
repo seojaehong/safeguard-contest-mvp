@@ -15,7 +15,7 @@ This report was re-run against the deployed production build after the share mob
 | Item | Evidence |
 | --- | --- |
 | URL | `https://www.safeclaw.kr/workspace?q=...&theme=day` |
-| Build marker | `/api/build-info` returned `eb230c865f7b7ff3ce4e235c45ed3e9d05b9d65a`, branch `master`, environment `production` |
+| Build marker | `/api/build-info` returned `d50b56c7c37b075380f304a297bd88de3652d953`, branch `master`, environment `production` |
 | Browser | Playwright Chromium |
 | Mutation | false |
 | Generated state | Local production build auto-generation completed in both desktop and mobile runs using the app fallback provider |
@@ -64,7 +64,7 @@ Mobile share remains single-column and longer than one viewport, but horizontal 
 
 - `npm.cmd run typecheck`: PASS
 - `npm.cmd run build`: PASS, 28/28 static pages
-- `node evaluation/workspace-ux-current-2026-07-19/measure_workspace_ux.cjs`: PASS, desktop and mobile generated on production build `eb230c865f7b7ff3ce4e235c45ed3e9d05b9d65a`
+- `node evaluation/workspace-ux-current-2026-07-19/measure_workspace_ux.cjs`: PASS, desktop and mobile generated on production build `d50b56c7c37b075380f304a297bd88de3652d953`
 
 ## Post-Deploy Gate
 
