@@ -1997,6 +1997,20 @@ function RiskAssessmentRowsEditor({
   onAdd: () => void;
   onRemove: (rowIndex: number) => void;
 }) {
+  const rowIdSignature = rowIds.join("\u001f");
+  const [expandedRiskRowIds, setExpandedRiskRowIds] = useState<Set<string>>(() => (
+    rowIds[0] ? new Set([rowIds[0]]) : new Set()
+  ));
+
+  useEffect(() => {
+    const currentRowIds = new Set(rowIds);
+    setExpandedRiskRowIds((current) => {
+      const next = new Set(Array.from(current).filter((id) => currentRowIds.has(id)));
+      if (!next.size && rowIds[0]) next.add(rowIds[0]);
+      return next;
+    });
+  }, [rowIdSignature]);
+
   const fieldErrorProps = (
     rowIndex: number,
     rowId: string,
@@ -2036,23 +2050,45 @@ function RiskAssessmentRowsEditor({
         {rows.map((row, rowIndex) => {
           const rowId = rowIds[rowIndex] ?? `risk-row-${rowIndex}`;
           const rowIssues = validation.issues.filter((issue) => issue.rowIndex === rowIndex);
+          const isExpanded = rowIndex === 0 || rowIssues.length > 0 || expandedRiskRowIds.has(rowId);
           return (
-            <article className={styles.riskRow} key={rowId}>
-              <header className={styles.riskRowHeader}>
+            <details
+              className={styles.riskRow}
+              key={rowId}
+              data-testid="risk-row-editor-row"
+              open={isExpanded}
+              onToggle={(event) => {
+                const isOpen = event.currentTarget.open;
+                setExpandedRiskRowIds((current) => {
+                  const next = new Set(current);
+                  if (isOpen || rowIndex === 0 || rowIssues.length > 0) next.add(rowId);
+                  else next.delete(rowId);
+                  return next;
+                });
+              }}
+            >
+              <summary className={styles.riskRowHeader}>
                 <div>
                   <span>{String(rowIndex + 1).padStart(2, "0")}</span>
                   <strong>{row.task || row.hazard || "새 위험 항목"}</strong>
+                  <small className={styles.riskRowSummaryMeta}>
+                    {accidentTypeLabels[row.accidentType]} · 위험등급 {row.riskLevel}
+                  </small>
                 </div>
                 <button
                   type="button"
                   className={styles.removeRiskRowButton}
                   aria-label={`행 ${rowIndex + 1} 삭제`}
                   title="위험 항목 삭제"
-                  onClick={() => onRemove(rowIndex)}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onRemove(rowIndex);
+                  }}
                 >
                   <span aria-hidden="true">×</span>
                 </button>
-              </header>
+              </summary>
 
               <div className={styles.riskRowPrimaryGrid}>
                 <label>
@@ -2174,7 +2210,7 @@ function RiskAssessmentRowsEditor({
                   ))}
                 </p>
               ) : null}
-            </article>
+            </details>
           );
         })}
       </div>

@@ -388,12 +388,33 @@
   padding: var(--space-3);
 }
 
+.riskRow:not([open]) {
+  gap: 0;
+}
+
+.riskRowHeader {
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.riskRowHeader::-webkit-details-marker {
+  display: none;
+}
+
 .riskRowHeader span {
   color: var(--workspace-subtle);
   font-family: var(--font-hud);
   font-size: var(--text-hud);
   font-variant-numeric: tabular-nums;
   font-weight: 700;
+}
+
+.riskRowSummaryMeta {
+  color: var(--workspace-muted);
+  font-size: var(--text-hud);
+  font-weight: 650;
+  line-height: var(--leading-table);
 }
 
 .riskRowPrimaryGrid,

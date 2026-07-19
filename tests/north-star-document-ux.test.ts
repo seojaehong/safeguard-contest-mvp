@@ -160,6 +160,13 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
     await expect.poll(() => editorDrawer.locator(":scope > summary").textContent()).toMatch(/^근거 \d+건 · 확인 필요 \d+건$/u);
     expect(await page.getByTestId("document-structured-editor").getAttribute("data-editor-kind")).toBe("risk-assessment");
     expect(await page.locator('[data-section-kind="body"] .document-section-textarea').count()).toBeGreaterThanOrEqual(4);
+    const rowDisclosureMetrics = await page.getByTestId("risk-row-editor-row").evaluateAll((rows) => ({
+      total: rows.length,
+      open: rows.filter((row) => row instanceof HTMLDetailsElement && row.open).length
+    }));
+    if (rowDisclosureMetrics.total > 1) {
+      expect(rowDisclosureMetrics.open).toBe(1);
+    }
     expect(await page.getByTestId("editor-provenance-appendices").count()).toBe(1);
     expect(await page.locator('select[aria-label="편집 문서 선택"] option').count()).toBe(12);
     const exactProvenanceSummaryCount = await page.locator("details > summary").evaluateAll((summaries) => (

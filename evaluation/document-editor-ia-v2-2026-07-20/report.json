@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "safeclaw-document-editor-ia-v2/v1",
+  "generatedAt": "2026-07-20T01:42:00+09:00",
+  "status": "pass",
+  "scope": {
+    "dbSchemaChanged": false,
+    "koshaRegistryChanged": false,
+    "exportRoutesChanged": false,
+    "provenanceDataRemoved": false
+  },
+  "behavior": {
+    "riskRowsUseDisclosure": true,
+    "firstRowOpenByDefault": true,
+    "invalidRowsOpenByDefault": true,
+    "validNonPrimaryRowsCollapsedByDefault": true
+  },
+  "gates": {
+    "selectedDocumentsEditorRegression": {
+      "files": 1,
+      "tests": 2,
+      "status": "pass"
+    },
+    "documentsEditorLayout": {
+      "files": 1,
+      "tests": 30,
+      "status": "pass"
+    },
+    "northStarDocumentUx": {
+      "files": 1,
+      "tests": 4,
+      "status": "pass"
+    },
+    "typecheck": {
+      "status": "pass"
+    },
+    "build": {
+      "staticPages": 28,
+      "status": "pass"
+    }
+  },
+  "northStarMetrics": {
+    "desktopDayEditorBodyOffset": 73,
+    "desktopNightEditorBodyOffset": 93,
+    "mobileDayEditorBodyOffset": 194,
+    "mobileNightEditorBodyOffset": 198,
+    "horizontalOverflow": 0,
+    "nestedScrollContainers": 0,
+    "tooSmallTouchTargets": 0
+  }
+}
