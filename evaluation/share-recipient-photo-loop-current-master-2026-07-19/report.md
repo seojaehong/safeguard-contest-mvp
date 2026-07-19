@@ -1,8 +1,8 @@
 # SafeClaw Share Recipient + Before/After Photo Loop Current Master Check
 
 Date: 2026-07-19
-Authoritative local HEAD: `3ed2e5ff62ff542be8a4842b36163481f73b624c`
-Live build-info commit: `3ed2e5ff62ff542be8a4842b36163481f73b624c`
+Authoritative local HEAD: `1837daae8adf35babeca037afcb52a04b2183c5a`
+Live build-info commit: `1837daae8adf35babeca037afcb52a04b2183c5a`
 
 ## Verdict
 
@@ -37,7 +37,7 @@ Result:
 - `ok=true`
 - `branch=master`
 - `environment=production`
-- `commitSha=3ed2e5ff62ff542be8a4842b36163481f73b624c`
+- `commitSha=1837daae8adf35babeca037afcb52a04b2183c5a`
 
 ### Photo Vision Readiness
 
@@ -107,6 +107,30 @@ Result:
 - Tests: `37 passed | 4 skipped`
 
 Note: `share-recipient-portal-browser.test.ts` is gated by a production build existing in `.next`. It skipped in this quick pass because the local worktree did not have the required build artifacts. This is not a product failure. The route and API contract tests passed.
+
+### Share Screen Simplification + Mobile Presentation Contract
+
+Command:
+
+```powershell
+npm.cmd test -- tests\workspace-share-simplification.test.ts tests\workspace-share-mobile-browser.test.ts tests\workflow-share-capability-browser.test.ts tests\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false
+```
+
+Result:
+
+- Test files: `3 passed | 1 skipped`
+- Tests: `14 passed | 4 skipped`
+
+The current workspace share surface is reduced to the delivery workflow:
+
+- today recipients,
+- channel,
+- language preview select,
+- message preview,
+- one fail-closed primary send/login CTA,
+- optional first worker portal preview link after a session id and worker id exist.
+
+The old always-visible language-chip wall, improvement/history panels, dispatch evidence ledger, source pre block, and duplicate copy/share actions are not part of the default share surface.
 
 ### Before/After + Improvement + Reports Contract
 
