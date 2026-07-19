@@ -18424,6 +18424,10 @@ body:has(.safeclaw-landing) :is(
   color: #596270;
 }
 
+.command-center-shell.workspace-theme-day .workspace-side-group button small {
+  color: #4f5661;
+}
+
 .command-center-shell.workspace-theme-day .workspace-top-title strong {
   color: #464e59;
 }
