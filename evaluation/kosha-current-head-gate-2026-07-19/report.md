@@ -4,8 +4,8 @@ Generated: 2026-07-19 KST
 
 ## 기준
 
-- Authoritative source HEAD: `4400304c9b97518e0a3571da8aded352e08cb3bf`
-- Live build-info at check time: `4400304c9b97518e0a3571da8aded352e08cb3bf`
+- Authoritative source HEAD at latest refresh: `9f02cf63b3d9c7d51d8f86f51d344f941154521d`
+- Live build-info during adjacent latest refresh: `7a28f463842cc2ba5bddc5b8bf83046acfa44be6`
 - DB schema/data mutation: none
 
 ## 판단
@@ -36,6 +36,36 @@ It also traces the current KOSHA guide corpus snapshot:
 - `failures.jsonl`
 
 ## 검증
+
+Latest focused refresh:
+
+Command:
+
+```powershell
+npm.cmd test -- tests\safety-reference-status-route.test.ts tests\exact-trusted-kosha-grounding.test.ts tests\exact-trusted-kosha-registry-wave2.test.ts tests\kosha-grounding-fail-closed.test.ts tests\kosha-current-review-run-ask.test.ts --maxWorkers=1 --fileParallelism=false
+```
+
+Result:
+
+- 5 files PASS
+- 68 tests PASS
+- Duration: 35.29s
+
+Command:
+
+```powershell
+npm.cmd test -- tests\ai-deliverables-generation-trace.test.ts tests\safety-document-rubric.test.ts tests\risk-ref-gate.test.ts tests\workpack-ontology-qa.test.ts -t "structured risk|risk rows|TBM|KOSHA|D-C-13|D-C-7|B-E-10|Phase A|grounding|evidence" --maxWorkers=1 --fileParallelism=false
+```
+
+Result:
+
+- 2 files PASS
+- 1 file SKIPPED
+- 4 tests PASS
+- 27 tests SKIPPED
+- Duration: 1.97s
+
+Earlier broader gate:
 
 Command:
 
