@@ -392,7 +392,9 @@ function isValidShareSessionId(value: string): boolean {
 }
 
 export default function ShareRecipientPage() {
-  const { sessionId } = useParams<{ sessionId: string }>();
+  const params = useParams<{ sessionId?: string | string[] }>();
+  const sessionIdParam = params?.sessionId;
+  const sessionId = Array.isArray(sessionIdParam) ? sessionIdParam[0] ?? "" : sessionIdParam ?? "";
   const [fetchState, setFetchState] = useState<FetchState>("idle");
   const [sessionMessage, setSessionMessage] = useState("");
   const [sessionPayload, setSessionPayload] = useState<ShareSessionPayload | null>(null);

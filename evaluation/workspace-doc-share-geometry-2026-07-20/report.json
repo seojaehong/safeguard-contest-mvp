@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-07-20T03:10:00+09:00",
+  "authoritativeHead": "d01d750193438e100e703b3544645f861f54fb05",
+  "servedSurface": "http://127.0.0.1:3028 (next dev, local authoritative worktree)",
+  "verdict": "PARTIALLY_FIXED",
+  "documents": {
+    "desktop": {
+      "viewport": { "width": 1440, "height": 723 },
+      "readyBodyHeight": 1088,
+      "heightRatio": 1.5,
+      "previewY": 420.046875,
+      "previewBottom": 844.3125,
+      "stickyCount": 0,
+      "horizontalOverflow": false,
+      "assessment": "Previously reported 2070px/2.9x long sticky composition is not reproduced after generation completes. Core preview starts within the first viewport, but bottom of preview still extends below the fold. Loading state can still be taller because provenance/work-history details open while busy."
+    },
+    "mobile": {
+      "viewport": { "width": 390, "height": 844 },
+      "bodyHeight": 1916,
+      "firstUsefulY": 262,
+      "previewY": 976.046875,
+      "stickyCount": 0,
+      "horizontalOverflow": false,
+      "assessment": "Mobile has no sticky overlap or horizontal overflow, but the preview starts below the first viewport. Document step is improved but still has mobile scroll burden."
+    }
+  },
+  "share": {
+    "desktop": {
+      "viewport": { "width": 1440, "height": 723 },
+      "bodyHeight": 1039,
+      "shareRootWidth": 980,
+      "shareRootWidthRatio": 0.6805555555555556,
+      "formColumns": 3,
+      "horizontalOverflow": false,
+      "assessment": "Not a literal mobile card: desktop renders target/channel/language as three columns with preview beside the form. However the root is still 980px centered with wide outer whitespace, so it can still feel narrower than a full desktop workbench."
+    },
+    "mobile": {
+      "viewport": { "width": 390, "height": 844 },
+      "bodyHeight": 1487,
+      "shareRootWidth": 316,
+      "horizontalOverflow": false,
+      "assessment": "Mobile share is compact enough for preview flow and has no horizontal overflow."
+    }
+  },
+  "staleSurfaceRisk": {
+    "productionBuildMarkerBeforeCheck": "6314728790a2cd42f87a96280b98b8e88918984f (observed earlier in this workstream)",
+    "latestPushedBeforeCheck": "d01d750193438e100e703b3544645f861f54fb05",
+    "assessment": "The user could be seeing a stale deployed build or older dev server if their surface is still showing a 2070px document page or single narrow share card. Current local authoritative HEAD does not reproduce the exact prior measurements."
+  },
+  "verification": {
+    "typecheck": "PASS",
+    "build": "PASS on Next 15.5.15; Next 15.5.20 reproduced /404 _document prerender failure",
+    "shareBrowserTests": "2 files / 8 tests PASS"
+  }
+}
