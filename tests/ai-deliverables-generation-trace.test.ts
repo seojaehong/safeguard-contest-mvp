@@ -181,6 +181,48 @@ describe("deliverables generation trace", () => {
     }));
   });
 
+  test("requires per-process risk row coverage for explicit multi-process work", async () => {
+    const prompts: string[] = [];
+    mocks.anthropicGenerate.mockImplementation(async (_model: string, prompt: string) => {
+      prompts.push(prompt);
+      if (prompt.includes('{"rows"')) {
+        return JSON.stringify({
+          rows: [
+            buildRiskRow("굴착", "터파기", "굴착면 붕괴"),
+            buildRiskRow("굴착", "흙막이 점검", "토사 유실"),
+            buildRiskRow("토사반출", "덤프트럭 상차", "차량 충돌"),
+            buildRiskRow("토사반출", "후진 유도", "작업자 협착"),
+            buildRiskRow("자재양중", "크레인 양중", "낙하물"),
+            buildRiskRow("자재양중", "줄걸이", "하중 이탈"),
+          ]
+        });
+      }
+      throw new Error("fixture only verifies structured risk row prompt");
+    });
+    const { generateAllDeliverablesWithDiagnostics } = await import("@/lib/ai-deliverables");
+
+    await generateAllDeliverablesWithDiagnostics({
+      scenario: {
+        companyName: "테스트사",
+        siteName: "테스트 현장",
+        workSummary: "굴착, 토사반출, 자재양중 병행 작업",
+        workerCount: 8,
+        weatherNote: "현장 확인",
+      },
+      question: "굴착, 토사반출, 자재양중 3개 공종을 각각 반영해서 위험성평가 rows를 만들어줘",
+      scope: "full",
+      traceId: "trace-multi-process-risk-rows",
+    });
+
+    const riskRowsPrompt = prompts.find((prompt) => prompt.includes("위험성평가표 렌더러가 바로 사용할 수 있는 JSON rows"));
+    expect(riskRowsPrompt).toBeTruthy();
+    expect(riskRowsPrompt).toContain("명시된 공종이 2개 이상이면");
+    expect(riskRowsPrompt).toContain("굴착");
+    expect(riskRowsPrompt).toContain("토사반출");
+    expect(riskRowsPrompt).toContain("자재양중");
+    expect(riskRowsPrompt).toContain("각 공종별 최소 2개 행");
+  });
+
   test("attempts Anthropic generation without requiring Vertex credentials", async () => {
     delete process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
     delete process.env.GCP_PROJECT_ID;
@@ -520,6 +562,32 @@ describe("deliverables generation trace", () => {
     });
   });
 });
+
+function buildRiskRow(processName: string, task: string, hazard: string) {
+  return {
+    location: "테스트 현장",
+    process: processName,
+    task,
+    equipment: "현장 장비",
+    hazard,
+    fourM: "Method",
+    accidentType: "collapse",
+    currentControls: "작업 전 통제구역과 작업순서를 확인한다.",
+    likelihood: 3,
+    severity: 4,
+    riskLevel: "high",
+    additionalControls: "관리감독자 확인 후 작업을 시작한다.",
+    owner: "작업반장",
+    due: "현장 확인",
+    verification: "TBM 기록과 사진으로 확인",
+    verificationStatus: "planned",
+    verificationDate: "현장 확인",
+    verificationChecker: "관리감독자",
+    whyLikelihood: "동시 작업으로 접촉 가능성이 높다.",
+    whySeverity: "중량물 또는 붕괴 위험으로 중대성이 높다.",
+    evidenceRefs: ["KOSHA 현장 기준"]
+  };
+}
 
 function reviewRequiredPhaseAGrounding(): PhaseAGenerationGrounding {
   const graph = assembleGraph(

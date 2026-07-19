@@ -623,6 +623,15 @@ function safetyEducationSinglePrompt(ctx: GenContext) {
 
 function structuredRiskRowsPrompt(ctx: GenContext) {
   const rowSchema = FORM_SCHEMA_REGISTRY.riskAssessment.rowSchema;
+  const explicitProcesses = extractExplicitProcessLabels(ctx);
+  const rowCoverageRule = explicitProcesses.length >= 2
+    ? [
+        `  - 명시된 공종이 2개 이상이면 rows는 전체 5~7개 고정이 아니라 공종별 coverage를 우선한다.`,
+        `  - 명시 공종: ${explicitProcesses.join(", ")}`,
+        "  - 각 공종별 최소 2개 행을 만들고, process 필드에는 위 명시 공종명을 그대로 넣는다.",
+        "  - 전체 rows는 공종 수×2 이상, 최대 18개까지 허용한다. 공종을 누락하거나 하나의 행으로 여러 공종을 합치지 않는다."
+      ]
+    : ["  - rows는 현장 시나리오에 맞는 5~7개 위험성평가 행이다."];
   return [
     persona(ctx.phaseAGrounding),
     "",
@@ -630,7 +639,7 @@ function structuredRiskRowsPrompt(ctx: GenContext) {
     "산문, 마크다운, 설명, 코드 fence 금지. 최상위 객체는 반드시 {\"rows\":[...]} 형태.",
     "",
     "필수 규칙:",
-    "  - rows는 현장 시나리오에 맞는 5~7개 위험성평가 행이다.",
+    ...rowCoverageRule,
     "  - 모든 행은 필수 필드를 빠짐없이 채운다.",
     "  - location은 작업장소, equipment는 장비·도구, verificationStatus/verificationDate/verificationChecker는 조치 확인 칸에 그대로 들어간다.",
     `  - fourM enum: ${FOUR_M_VALUES.join(", ")}`,
@@ -651,6 +660,24 @@ function structuredRiskRowsPrompt(ctx: GenContext) {
     "",
     contextBlock(ctx)
   ].join("\n");
+}
+
+function extractExplicitProcessLabels(ctx: GenContext): string[] {
+  const source = `${ctx.question}\n${ctx.scenario.workSummary}`;
+  if (!/[,\n/·+]|(?:\s및\s)|(?:\s와\s)|(?:\s과\s)/u.test(source)) return [];
+  const labels = new Set<string>();
+  for (const rawPart of source.split(/[,\n/·+]|(?:\s및\s)|(?:\s와\s)|(?:\s과\s)/u)) {
+    const cleaned = rawPart
+      .trim()
+      .replace(/\s+(?:\d+개\s*)?(?:공종|세부공정|작업|위험성평가|rows?|행|각각|반영|병행).*$/iu, "")
+      .replace(/\s*(?:을|를|은|는|이|가)$/u, "")
+      .trim();
+    if (!cleaned) continue;
+    if (cleaned.length < 2 || cleaned.length > 18) continue;
+    if (!/[가-힣A-Za-z]/u.test(cleaned)) continue;
+    labels.add(cleaned);
+  }
+  return [...labels].slice(0, 6);
 }
 
 function tbmRiskLinksPrompt(ctx: GenContext, rows: RiskAssessmentRow[]) {

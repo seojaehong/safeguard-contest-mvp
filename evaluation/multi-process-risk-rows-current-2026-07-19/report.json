@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-07-19T12:04:00+09:00",
+  "baseHeadBeforeChange": "25c29653673450ff02667c34e7dc3f2e1e5ba163",
+  "scope": "risk assessment structured rows prompt contract",
+  "verdict": "pass",
+  "change": {
+    "singleProcessBudget": "5-7 rows",
+    "multiProcessBudget": "at least 2 rows per named process, up to 18 rows",
+    "processFieldContract": "Use the explicit named process labels as process field values."
+  },
+  "verification": [
+    {
+      "phase": "red",
+      "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "failed because the prompt did not contain the multi-process coverage rule"
+    },
+    {
+      "phase": "green",
+      "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "1 file / 13 tests PASS"
+    },
+    {
+      "phase": "regression",
+      "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts tests\\ai-deliverables-scope.test.ts tests\\naturalize-output-contract.test.ts tests\\grounded-generation-contract.test.ts tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "4 files / 113 tests PASS"
+    },
+    {
+      "phase": "typecheck",
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    }
+  ],
+  "remainingGaps": [
+    "Provider-backed live generation compliance is not proven by this prompt-contract gate."
+  ]
+}
