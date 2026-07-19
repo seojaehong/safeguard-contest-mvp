@@ -1,0 +1,173 @@
+{
+  "checkedAt": "2026-07-19T18:39:58.469Z",
+  "results": [
+    {
+      "variant": "desktop-day",
+      "url": "http://localhost:3034/ontology?theme=day",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "body": {
+        "h": 2077,
+        "w": 1440,
+        "overflowX": false
+      },
+      "root": {
+        "x": 236,
+        "y": 201.390625,
+        "w": 1204,
+        "h": 1828,
+        "bottom": 2029.390625
+      },
+      "graph": {
+        "x": 261,
+        "y": 890.390625,
+        "w": 1154,
+        "h": 562,
+        "bottom": 1452.390625
+      },
+      "mobileRelations": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "bottom": 0
+      },
+      "visibleGraphNodes": 13,
+      "overlapPairs": 0,
+      "outside": 0,
+      "loopDisplay": "grid",
+      "relationButtons": 6,
+      "visibleText": "본문으로 건너뛰기\nSafeClaw\n메뉴\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n근거 관련\n01\n지식 DB\n02\n온톨로지\n03\nAPI 연결\n SITE 기본 현장\n공공 근거 Law.go · KOSHA · 기상청\n바로 사용\nDay\nNight\n운영 온톨로지\n작업과 근거의 연결.\n\n작업, 위험요인, 안전조치와 법령을 선택한 항목 중심으로 확인합니다.\n\n업무 범위\n166개 안전지식 · 169개 연결\n작업공간 열기\n검증된 안전지식\n166\n검증 완료 범위\n검증된 연결\n169\n출처 연결 유지\n근거 차단\n0\n무출처 항목 제외\n01\n오늘 작업\n현장 맥락\n02\nSIF · KOSHA\n위험·조치 근거\n03\n개선 기록\n사진·메모 반영\n04\n다음 작업\n검증 후 재사용\n관계 탐색\n선택 항목 중심 안전지식\n\n전체 그래프 대신 선택한 항목과 직접 연결된 근거만 표시합니다.\n\n직접 관계\n확장 관계\n안전지식 검색\n유형\n전체 유형\n문서종\n법조문\n안전조치\n위험요인\n작업유형\n중처법 의무\n정렬\n연결 많은 순\n이름 순\n위험요인\n추락\n관련 항목 13개 · 연결 12개 · 전체 안전지식 166개 보존\n그래프 전체 화면\n−\n초기화\n+\n위험요인\n추락\n연결 12\n작업유형\n고소작업\n연결 3\n작업유형\n비계 조립·해체\n연결 3\n안전조치\n개구부·단부 안전난간·덮개 설치\n연결 2\n안전조치\n규격 안전난간 설치\n연결 2\n안전조치\n안전대 부착설비(지지로프) 설치\n연결 2\n안전조치\n안전대·구명밧줄·송기마스크 착용\n연결 2\n안전조치\n안전모·안전대 지급·착용\n연결 2\n안전조치\n안전모·안전대 착용\n연결 2\n안전조치\n작업발판 구조(폭 40cm·틈 3cm·안전난간)\n연결 2\n안전조치\n작업발판 설치·추락방호망 설치\n연결 2\n안전조치\n조립·해체 준수(관리감독자 지휘·발판·안전대·출입통제)\n연결 2\n안전조치\n지붕 가장자리 안전난간·발판·채광창 덮개\n연결 2\n문서종\n법조문\n안전조치\n위험요인\n작업유형\n중처법 의무\n전체 목록\n검증된 안전지식 찾기\n166개\n위험요인\n추락\n연결 12\n위험요인\n감전(직접·간접 접촉)\n연결 7\n위험요인\n산소결핍 질식\n연결 7\n위험요인\n비계 붕괴·도괴\n연결 6\n문서종\n작업계획서\n연결 6\n작업유형\n용접\n연결 5\n작업유형\n하역·운반\n연결 5\n위험요인\n화물 낙하·하적단 붕괴\n연결 5\n법조문\n기준규칙 제32조(보호구의 지급 등",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-materialization-20260720\\evaluation\\ontology-current-browser-gate-2026-07-20\\desktop-day.png"
+    },
+    {
+      "variant": "mobile-day",
+      "url": "http://localhost:3034/ontology?theme=day",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "body": {
+        "h": 2893,
+        "w": 390,
+        "overflowX": false
+      },
+      "root": {
+        "x": 0,
+        "y": 291.375,
+        "w": 390,
+        "h": 2554,
+        "bottom": 2845.375
+      },
+      "graph": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "bottom": 0
+      },
+      "mobileRelations": {
+        "x": 17,
+        "y": 1044.375,
+        "w": 356,
+        "h": 686,
+        "bottom": 1730.375
+      },
+      "visibleGraphNodes": 0,
+      "overlapPairs": 0,
+      "outside": 0,
+      "loopDisplay": "none",
+      "relationButtons": 6,
+      "visibleText": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n운영 온톨로지\n작업과 근거의 연결.\n\n작업, 위험요인, 안전조치와 법령을 선택한 항목 중심으로 확인합니다.\n\n업무 범위\n166개 안전지식 · 169개 연결\n작업공간 열기\n검증된 안전지식\n166\n검증 완료 범위\n검증된 연결\n169\n출처 연결 유지\n근거 차단\n0\n무출처 항목 제외\n관계 탐색\n선택 항목 중심 안전지식\n\n전체 그래프 대신 선택한 항목과 직접 연결된 근거만 표시합니다.\n\n직접 관계\n확장 관계\n안전지식 검색\n유형\n전체 유형\n문서종\n법조문\n안전조치\n위험요인\n작업유형\n중처법 의무\n정렬\n연결 많은 순\n이름 순\n위험요인\n추락\n관련 항목 13개 · 연결 12개 · 전체 안전지식 166개 보존\n그래프 전체 화면\n연결된 근거\n안전조치로 저감\n개구부·단부 안전난간·덮개 설치\n이 항목에서 연결\n안전조치로 저감\n규격 안전난간 설치\n이 항목에서 연결\n안전조치로 저감\n안전대·구명밧줄·송기마스크 착용\n이 항목에서 연결\n안전조치로 저감\n안전대 부착설비(지지로프) 설치\n이 항목에서 연결\n안전조치로 저감\n안전모·안전대 지급·착용\n이 항목에서 연결\n안전조치로 저감\n안전모·안전대 착용\n이 항목에서 연결\n\n나머지 연결은 검색하거나 그래프 전체 화면에서 확인하세요.\n\n전체 목록\n검증된 안전지식 찾기\n166개\n위험요인\n추락\n연결 12\n위험요인\n감전(직접·간접 접촉)\n연결 7\n위험요인\n산소결핍 질식\n연결 7\n위험요인\n비계 붕괴·도괴\n연결 6\n문서종\n작업계획서\n연결 6\n작업유형\n용접\n연결 5\n작업유형\n하역·운반\n연결 5\n위험요인\n화물 낙하·하적단 붕괴\n연결 5\n법조문\n기준규칙 제32조(보호구의 지급 등)\n연결 4\n9개 더 보기",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-materialization-20260720\\evaluation\\ontology-current-browser-gate-2026-07-20\\mobile-day.png"
+    },
+    {
+      "variant": "desktop-night",
+      "url": "http://localhost:3034/ontology?theme=night",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "body": {
+        "h": 2077,
+        "w": 1440,
+        "overflowX": false
+      },
+      "root": {
+        "x": 236,
+        "y": 201.390625,
+        "w": 1204,
+        "h": 1828,
+        "bottom": 2029.390625
+      },
+      "graph": {
+        "x": 261,
+        "y": 890.390625,
+        "w": 1154,
+        "h": 562,
+        "bottom": 1452.390625
+      },
+      "mobileRelations": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "bottom": 0
+      },
+      "visibleGraphNodes": 13,
+      "overlapPairs": 0,
+      "outside": 0,
+      "loopDisplay": "grid",
+      "relationButtons": 6,
+      "visibleText": "본문으로 건너뛰기\nSafeClaw\n메뉴\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n근거 관련\n01\n지식 DB\n02\n온톨로지\n03\nAPI 연결\n SITE 기본 현장\n공공 근거 Law.go · KOSHA · 기상청\n바로 사용\nDay\nNight\n운영 온톨로지\n작업과 근거의 연결.\n\n작업, 위험요인, 안전조치와 법령을 선택한 항목 중심으로 확인합니다.\n\n업무 범위\n166개 안전지식 · 169개 연결\n작업공간 열기\n검증된 안전지식\n166\n검증 완료 범위\n검증된 연결\n169\n출처 연결 유지\n근거 차단\n0\n무출처 항목 제외\n01\n오늘 작업\n현장 맥락\n02\nSIF · KOSHA\n위험·조치 근거\n03\n개선 기록\n사진·메모 반영\n04\n다음 작업\n검증 후 재사용\n관계 탐색\n선택 항목 중심 안전지식\n\n전체 그래프 대신 선택한 항목과 직접 연결된 근거만 표시합니다.\n\n직접 관계\n확장 관계\n안전지식 검색\n유형\n전체 유형\n문서종\n법조문\n안전조치\n위험요인\n작업유형\n중처법 의무\n정렬\n연결 많은 순\n이름 순\n위험요인\n추락\n관련 항목 13개 · 연결 12개 · 전체 안전지식 166개 보존\n그래프 전체 화면\n−\n초기화\n+\n위험요인\n추락\n연결 12\n작업유형\n고소작업\n연결 3\n작업유형\n비계 조립·해체\n연결 3\n안전조치\n개구부·단부 안전난간·덮개 설치\n연결 2\n안전조치\n규격 안전난간 설치\n연결 2\n안전조치\n안전대 부착설비(지지로프) 설치\n연결 2\n안전조치\n안전대·구명밧줄·송기마스크 착용\n연결 2\n안전조치\n안전모·안전대 지급·착용\n연결 2\n안전조치\n안전모·안전대 착용\n연결 2\n안전조치\n작업발판 구조(폭 40cm·틈 3cm·안전난간)\n연결 2\n안전조치\n작업발판 설치·추락방호망 설치\n연결 2\n안전조치\n조립·해체 준수(관리감독자 지휘·발판·안전대·출입통제)\n연결 2\n안전조치\n지붕 가장자리 안전난간·발판·채광창 덮개\n연결 2\n문서종\n법조문\n안전조치\n위험요인\n작업유형\n중처법 의무\n전체 목록\n검증된 안전지식 찾기\n166개\n위험요인\n추락\n연결 12\n위험요인\n감전(직접·간접 접촉)\n연결 7\n위험요인\n산소결핍 질식\n연결 7\n위험요인\n비계 붕괴·도괴\n연결 6\n문서종\n작업계획서\n연결 6\n작업유형\n용접\n연결 5\n작업유형\n하역·운반\n연결 5\n위험요인\n화물 낙하·하적단 붕괴\n연결 5\n법조문\n기준규칙 제32조(보호구의 지급 등",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-materialization-20260720\\evaluation\\ontology-current-browser-gate-2026-07-20\\desktop-night.png"
+    },
+    {
+      "variant": "mobile-night",
+      "url": "http://localhost:3034/ontology?theme=night",
+      "title": "SafeClaw | 안전 문서팩 생성",
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "body": {
+        "h": 2893,
+        "w": 390,
+        "overflowX": false
+      },
+      "root": {
+        "x": 0,
+        "y": 291.375,
+        "w": 390,
+        "h": 2554,
+        "bottom": 2845.375
+      },
+      "graph": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "bottom": 0
+      },
+      "mobileRelations": {
+        "x": 17,
+        "y": 1044.375,
+        "w": 356,
+        "h": 686,
+        "bottom": 1730.375
+      },
+      "visibleGraphNodes": 0,
+      "overlapPairs": 0,
+      "outside": 0,
+      "loopDisplay": "none",
+      "relationButtons": 6,
+      "visibleText": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n운영 온톨로지\n작업과 근거의 연결.\n\n작업, 위험요인, 안전조치와 법령을 선택한 항목 중심으로 확인합니다.\n\n업무 범위\n166개 안전지식 · 169개 연결\n작업공간 열기\n검증된 안전지식\n166\n검증 완료 범위\n검증된 연결\n169\n출처 연결 유지\n근거 차단\n0\n무출처 항목 제외\n관계 탐색\n선택 항목 중심 안전지식\n\n전체 그래프 대신 선택한 항목과 직접 연결된 근거만 표시합니다.\n\n직접 관계\n확장 관계\n안전지식 검색\n유형\n전체 유형\n문서종\n법조문\n안전조치\n위험요인\n작업유형\n중처법 의무\n정렬\n연결 많은 순\n이름 순\n위험요인\n추락\n관련 항목 13개 · 연결 12개 · 전체 안전지식 166개 보존\n그래프 전체 화면\n연결된 근거\n안전조치로 저감\n개구부·단부 안전난간·덮개 설치\n이 항목에서 연결\n안전조치로 저감\n규격 안전난간 설치\n이 항목에서 연결\n안전조치로 저감\n안전대·구명밧줄·송기마스크 착용\n이 항목에서 연결\n안전조치로 저감\n안전대 부착설비(지지로프) 설치\n이 항목에서 연결\n안전조치로 저감\n안전모·안전대 지급·착용\n이 항목에서 연결\n안전조치로 저감\n안전모·안전대 착용\n이 항목에서 연결\n\n나머지 연결은 검색하거나 그래프 전체 화면에서 확인하세요.\n\n전체 목록\n검증된 안전지식 찾기\n166개\n위험요인\n추락\n연결 12\n위험요인\n감전(직접·간접 접촉)\n연결 7\n위험요인\n산소결핍 질식\n연결 7\n위험요인\n비계 붕괴·도괴\n연결 6\n문서종\n작업계획서\n연결 6\n작업유형\n용접\n연결 5\n작업유형\n하역·운반\n연결 5\n위험요인\n화물 낙하·하적단 붕괴\n연결 5\n법조문\n기준규칙 제32조(보호구의 지급 등)\n연결 4\n9개 더 보기",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-materialization-20260720\\evaluation\\ontology-current-browser-gate-2026-07-20\\mobile-night.png"
+    }
+  ]
+}
