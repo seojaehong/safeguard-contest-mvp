@@ -2,11 +2,11 @@
   "artifact": "north-star-current-state-2026-07-19",
   "generatedAt": "2026-07-19T22:00:00+09:00",
   "status": "in_progress_not_complete",
-  "latestPushedHead": "this_remediation_commit",
+  "latestPushedHead": "a1df769154ebb616767611cca5dd351d916480db",
   "productionBuildInfo": {
     "url": "https://www.safeclaw.kr/api/build-info",
     "statusCode": 200,
-    "commitSha": "6e51fa1687688019b33743b8a4174671aa163c6b",
+    "commitSha": "a1df769154ebb616767611cca5dd351d916480db",
     "branch": "master",
     "environment": "production"
   },
@@ -123,7 +123,7 @@
       "headSha": "6e51fa1687688019b33743b8a4174671aa163c6b"
     },
     "workspaceDocumentsAndShareUx": {
-      "state": "partially_fixed_local_remediation_deploy_verification_pending",
+      "state": "partially_fixed_production_verified",
       "artifact": "evaluation/workspace-ux-current-2026-07-19/report.json",
       "previousProduction": {
         "desktopDocumentReviewRatio": 1.52,
@@ -135,7 +135,8 @@
         "desktopShareViewportWidthPx": 1440
       },
       "localRemediation": {
-        "target": "http://127.0.0.1:3011",
+        "target": "https://www.safeclaw.kr",
+        "commitSha": "a1df769154ebb616767611cca5dd351d916480db",
         "desktopDocumentReviewRatio": 1.38,
         "desktopDocumentEditorRatio": 1.38,
         "mobileDocumentReviewRatio": 1.75,
@@ -143,7 +144,9 @@
         "mobileDocumentPreviewY": 691.05,
         "desktopSharePanelWidthPx": 968,
         "desktopShareViewportWidthPx": 1440,
-        "deployVerificationPending": true
+        "desktopShareRatio": 1.39,
+        "mobileShareRatio": 2.13,
+        "deployVerificationPending": false
       }
     }
   },
@@ -155,7 +158,7 @@
   ],
   "forbiddenClaims": [
     "The full North Star objective is complete.",
-    "Workspace Documents/Share UX blockers are production-fixed before the remediation deploy is verified.",
+    "Workspace Documents/Share UX is fully complete; mobile share height and remaining under-44 document/editor controls still need a follow-up pass.",
     "LLM Wiki production publication is available.",
     "Live Supabase RLS tenant isolation is launch-proven.",
     "SIF vector retrieval is production-active.",
@@ -163,7 +166,8 @@
     "Every real invited production recipient ACK has been verified."
   ],
   "nextWork": [
-    "Deploy and rerun the workspace UX measurement against https://www.safeclaw.kr.",
+    "Wait for GitHub Actions run 29688857645 to finish on production head a1df769154ebb616767611cca5dd351d916480db.",
+    "Continue Share v2 IA to reduce mobile share height and close remaining document/editor touch-target issues.",
     "If user approves production data mutation, run a real invited recipient ACK readback gate; otherwise keep route-level proof as the safe boundary.",
     "Proceed to approved Phase B gates only after explicit migration/provider/RLS approvals."
   ]

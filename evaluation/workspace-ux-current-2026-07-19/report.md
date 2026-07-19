@@ -4,18 +4,18 @@ Generated at: 2026-07-19 KST
 
 ## Verdict
 
-`PARTIALLY FIXED on local remediation HEAD`
+`PARTIALLY FIXED on production HEAD`
 
 The prior production check confirmed that the user's complaint was real, not stale UI. This remediation keeps the current 3-step direction and makes a bounded launch fix: the document editor no longer expands into a 10000px+ page, mobile document selection no longer pushes the preview below the first viewport, and desktop share no longer renders as a narrow mobile-card composition.
 
-The production deployment must still be rechecked after this commit ships.
+This report was re-run against the deployed production build after the remediation shipped.
 
 ## Served Surface
 
 | Item | Evidence |
 | --- | --- |
-| URL | `http://127.0.0.1:3011/workspace?q=...&theme=day` |
-| Build marker | Local `/api/build-info` is configured=false, commit unavailable |
+| URL | `https://www.safeclaw.kr/workspace?q=...&theme=day` |
+| Build marker | `/api/build-info` returned `a1df769154ebb616767611cca5dd351d916480db`, branch `master`, environment `production` |
 | Browser | Playwright Chromium |
 | Mutation | false |
 | Generated state | Local production build auto-generation completed in both desktop and mobile runs using the app fallback provider |
@@ -39,8 +39,8 @@ Screenshots:
 | Desktop document editor | 10156px / 11.28x | 1240px / 1.38x | Fixed for launch |
 | Mobile document review | 2821px / 3.34x, preview y=845.72 | 1479px / 1.75x, preview y=691.05 | Improved; preview now begins inside first viewport |
 | Mobile document editor | 15770px / 18.68x | 1292px / 1.53x | Fixed for launch |
-| Desktop share | 1429px / 1.59x, panel 632px | 1379px / 1.53x, panel 968px | Fixed desktop breakpoint |
-| Mobile share | 2296px / 2.72x | 1919px / 2.27x | Improved, still long |
+| Desktop share | 1429px / 1.59x, panel 632px | 1255px / 1.39x, panel 968px | Fixed desktop breakpoint |
+| Mobile share | 2296px / 2.72x | 1795px / 2.13x | Improved, still long |
 
 ## Documents Screen
 
@@ -64,13 +64,12 @@ Mobile share remains single-column and long, but horizontal overflow is false an
 
 - `npm.cmd run typecheck`: PASS
 - `npm.cmd run build`: PASS, 28/28 static pages
-- `SAFECLAW_UX_TARGET=http://127.0.0.1:3011 node evaluation/workspace-ux-current-2026-07-19/measure_workspace_ux.cjs`: PASS, desktop and mobile generated
+- `node evaluation/workspace-ux-current-2026-07-19/measure_workspace_ux.cjs`: PASS, desktop and mobile generated on production build `a1df769154ebb616767611cca5dd351d916480db`
 
 ## Post-Deploy Gate
 
-After deployment, rerun the same measurement against `https://www.safeclaw.kr` and confirm:
+Next production gate:
 
-- `/api/build-info` maps to the deployed commit.
-- Desktop document editor remains near 1.4x viewport height, not 10000px+.
-- Mobile document review preview starts before y=844.
-- Desktop share panel remains workspace-width, not mobile-card width.
+- Wait for GitHub Actions run `29688857645` to finish on the same head.
+- Continue Share v2 IA to reduce mobile share height further.
+- Continue touch-target cleanup for remaining document/editor controls under 44px.
