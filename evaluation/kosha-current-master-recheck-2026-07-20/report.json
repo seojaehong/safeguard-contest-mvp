@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "safeclaw-kosha-current-master-recheck/v1",
+  "generatedAt": "2026-07-20T01:20:00+09:00",
+  "status": "current_master_supersedes_wave2",
+  "authoritativeHead": "0835874c788797c0fa00b650e3ea31574b2868ac",
+  "wave2CherryPickAttempted": true,
+  "wave2CherryPickAborted": true,
+  "reason": "current master already contains D-C-7 plus newer B-E-10 exact KOSHA registry and KOSHA corpus tracing; applying stale wave2 would risk reverting newer registry/tracing state",
+  "exactAssets": [
+    {
+      "file": "data/safety-knowledge/exact-kosha/d-c-13-2026.json",
+      "bytes": 48689
+    },
+    {
+      "file": "data/safety-knowledge/exact-kosha/d-c-7-2026.json",
+      "bytes": 99062
+    },
+    {
+      "file": "data/safety-knowledge/exact-kosha/b-e-10-2026.json",
+      "bytes": 39258
+    }
+  ],
+  "gates": {
+    "focusedVitest": {
+      "files": 5,
+      "tests": 80,
+      "status": "pass"
+    },
+    "pythonAcquisition": {
+      "tests": 19,
+      "status": "pass"
+    },
+    "strictTypecheck": {
+      "status": "pass"
+    },
+    "productionBuild": {
+      "staticPages": 28,
+      "status": "pass"
+    }
+  },
+  "integrationDecision": "do_not_merge_stale_wave2_branch_start_future_kosha_work_from_current_master"
+}
