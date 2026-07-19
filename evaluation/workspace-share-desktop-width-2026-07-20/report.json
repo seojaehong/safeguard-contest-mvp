@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-07-19T18:27:06.424Z",
+  "verdict": "improved",
+  "base": "http://127.0.0.1:3032",
+  "measuredHead": "471bee04df0813b6f7048d658f7ff3f91a7bbf15",
+  "before": {
+    "panelWidth": 980,
+    "formWidth": 598,
+    "previewWidth": 340
+  },
+  "after": {
+    "panelWidth": 1068,
+    "formWidth": 646,
+    "previewWidth": 380,
+    "bodyHeight": 1039,
+    "horizontalOverflow": false
+  },
+  "verification": {
+    "focusedLayoutTests": "1 file / 2 tests PASS, 25 skipped by testNamePattern",
+    "build": "PASS, 28/28 static pages"
+  }
+}

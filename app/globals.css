@@ -14597,7 +14597,7 @@ body:has(.safeclaw-landing) :is(
 @media (min-width: 960px) {
   .command-center-shell.workspace-page-share .share-panel.workflow-panel {
     max-width: 1180px;
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 0.48fr);
+    grid-template-columns: minmax(0, 1fr) minmax(380px, 0.5fr);
     align-items: start;
     gap: 12px;
   }
@@ -18669,6 +18669,16 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell.workspace-theme-night.workspace-page-share .linear-workspace-layout {
   grid-template-columns: minmax(0, 1180px);
   justify-content: center;
+}
+
+.command-center-shell.workspace-page-document .linear-workspace-layout .workspace-step-page,
+.command-center-shell.workspace-page-share .linear-workspace-layout .workspace-step-page,
+.command-center-shell.workspace-theme-day.workspace-page-document .linear-workspace-layout .workspace-step-page,
+.command-center-shell.workspace-theme-day.workspace-page-share .linear-workspace-layout .workspace-step-page,
+.command-center-shell.workspace-theme-night.workspace-page-document .linear-workspace-layout .workspace-step-page,
+.command-center-shell.workspace-theme-night.workspace-page-share .linear-workspace-layout .workspace-step-page {
+  width: 100%;
+  max-width: 1180px;
 }
 
 .command-center-shell.workspace-page-document .workspace-side-nav,

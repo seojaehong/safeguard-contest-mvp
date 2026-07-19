@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-07-19T18:27:06.424Z",
+  "head": "471bee04df0813b6f7048d658f7ff3f91a7bbf15",
+  "base": "http://127.0.0.1:3032",
+  "before": {
+    "panelWidth": 980,
+    "formWidth": 598,
+    "previewWidth": 340
+  },
+  "after": {
+    "viewport": {
+      "w": 1440,
+      "h": 723
+    },
+    "bodyH": 1039,
+    "layout": {
+      "x": 40,
+      "y": 124,
+      "w": 1360,
+      "h": 851,
+      "bottom": 975
+    },
+    "main": {
+      "x": 130,
+      "y": 189,
+      "w": 1180,
+      "h": 786,
+      "bottom": 975
+    },
+    "step": {
+      "x": 186,
+      "y": 237,
+      "w": 1068,
+      "h": 682,
+      "bottom": 919
+    },
+    "field": {
+      "x": 186,
+      "y": 237,
+      "w": 1068,
+      "h": 682,
+      "bottom": 919
+    },
+    "panel": {
+      "x": 186,
+      "y": 237,
+      "w": 1068,
+      "h": 682,
+      "bottom": 919
+    },
+    "form": {
+      "x": 201,
+      "y": 345,
+      "w": 646,
+      "h": 350.78125,
+      "bottom": 695.78125
+    },
+    "preview": {
+      "x": 859,
+      "y": 345,
+      "w": 380,
+      "h": 503,
+      "bottom": 848
+    },
+    "overflowX": false
+  },
+  "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-materialization-20260720\\evaluation\\workspace-share-desktop-width-2026-07-20\\share-desktop-1440-final.png"
+}
