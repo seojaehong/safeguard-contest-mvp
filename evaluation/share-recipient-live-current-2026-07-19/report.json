@@ -1,0 +1,62 @@
+{
+  "artifact": "share-recipient-live-current-2026-07-19",
+  "generatedAt": "2026-07-19T21:03:00+09:00",
+  "verdict": "pass_current_production_mapped_share_recipient_surface",
+  "authoritativeHead": "57cd6c1034da9893f8080dc85f7d7ac844589005",
+  "liveBuildInfo": {
+    "url": "https://www.safeclaw.kr/api/build-info",
+    "statusCode": 200,
+    "commitSha": "57cd6c1034da9893f8080dc85f7d7ac844589005",
+    "branch": "master",
+    "environment": "production",
+    "configured": true
+  },
+  "focusedVerification": {
+    "command": "npm.cmd test -- tests\\workspace-share-simplification.test.ts tests\\workflow-share-panel-behavior.test.ts tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 3,
+    "testFilesTotal": 3,
+    "testsPassed": 22,
+    "testsTotal": 22,
+    "status": "pass"
+  },
+  "liveSmoke": {
+    "recipientShell": {
+      "url": "https://www.safeclaw.kr/share/not-a-session?lang=vi",
+      "statusCode": 200,
+      "contentLength": 15298,
+      "languageShellDetected": true
+    },
+    "invalidRecipientApi": {
+      "url": "https://www.safeclaw.kr/api/share-sessions/not-a-session?workerId=00000000-0000-0000-0000-000000000000",
+      "statusCode": 400,
+      "expectedFailClosed": true
+    }
+  },
+  "currentProductBoundary": {
+    "recipientPortalRouteExists": true,
+    "workerFacingRoute": "app/share/[sessionId]/page.tsx",
+    "publicRecipientApi": "app/api/share-sessions/[sessionId]/route.ts",
+    "managerShareSessionApi": "app/api/workpacks/[id]/share-sessions/route.ts",
+    "readConfirmationPath": "POST /api/share-sessions/[sessionId]?workerId={workerId}",
+    "anonymousPublicPortal": false,
+    "providerDispatchLive": false,
+    "providerDispatchMode": "preview_only"
+  },
+  "safeDemoClaims": [
+    "The current production-mapped build has a worker-facing recipient portal shell.",
+    "The manager share UI and recipient portal focused contract pass on current HEAD.",
+    "Vietnamese recipient portal chrome is available for the demo shell and browser fixture.",
+    "Invalid recipient API lookups fail closed instead of exposing documents."
+  ],
+  "forbiddenClaims": [
+    "Live SMS delivery is proven.",
+    "Live Kakao AlimTalk delivery is proven.",
+    "Live email provider dispatch is proven.",
+    "Anonymous public share links are enabled.",
+    "Every real invited recipient ACK has been verified on production data."
+  ],
+  "remainingGap": "real_invited_share_session_worker_confirmation_ack_update",
+  "dbSchemaChanged": false,
+  "supabaseDataChanged": false,
+  "providerMessageSent": false
+}
