@@ -526,6 +526,7 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
 function extractExplicitProcessLabelsFromQuery(query: string): string[] {
   const normalized = query.replace(/\s+/g, " ").trim();
   const markerMatch = normalized.match(/([가-힣A-Za-z0-9\s,·/+]+?)\s*\d+\s*개\s*공종/u);
+  if (!markerMatch && !/공종별|세부공정/u.test(normalized)) return [];
   const source = markerMatch?.[1] || normalized;
   const labels = new Set<string>();
   for (const rawPart of source.split(/[,\n/·+]|(?:\s및\s)|(?:\s와\s)|(?:\s과\s)/u)) {
@@ -542,6 +543,23 @@ function extractExplicitProcessLabelsFromQuery(query: string): string[] {
     labels.add(cleaned);
   }
   return [...labels].slice(0, 6);
+}
+
+function specializeFallbackRiskRowForProcess(row: RiskAssessmentRow, processLabel: string): RiskAssessmentRow {
+  return {
+    ...row,
+    process: processLabel,
+    task: `${processLabel} 작업`,
+    equipment: `${processLabel} 관련 장비·작업구역·보호구`,
+    hazard: `${processLabel} 작업 중 ${row.hazard}`,
+    currentControls: `${processLabel} 작업 전 ${row.currentControls}`,
+    additionalControls: `${processLabel} 담당자가 ${row.additionalControls}`,
+    verification: `${processLabel} 작업 기준으로 ${row.verification}`,
+    evidenceRefs: [
+      `${processLabel} 작업 입력 조건`,
+      ...row.evidenceRefs
+    ]
+  };
 }
 
 function compactRiskCell(value: string | null | undefined, maxLength = 96): string {
@@ -693,24 +711,18 @@ export function buildSafetyReferenceRiskRows(
         }),
         topCandidates.length
       );
-      const candidates = processCandidates.length
-        ? processCandidates
-        : filterAndRankSafetyReferencesByQuery(processQuery, [...topCandidates], topCandidates.length);
-      for (const item of candidates) {
+      for (const item of processCandidates) {
         const candidateRow = createReferenceRow(item, processLabel, `${processLabel} 작업`);
         if (candidateRow) rows.push(candidateRow);
         if (rows.filter((row) => row.process === processLabel).length >= 2) break;
       }
       for (const fallbackRow of baselineRows) {
         if (rows.filter((row) => row.process === processLabel).length >= 2) break;
-        const key = `${processLabel}|${fallbackRow.hazard}|${fallbackRow.currentControls}`;
+        const processFallbackRow = specializeFallbackRiskRowForProcess(fallbackRow, processLabel);
+        const key = `${processLabel}|${processFallbackRow.hazard}|${processFallbackRow.currentControls}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        rows.push({
-          ...fallbackRow,
-          process: processLabel,
-          task: `${processLabel} 작업`
-        });
+        rows.push(processFallbackRow);
       }
       if (rows.length >= explicitProcesses.length * 2) continue;
     }

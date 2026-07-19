@@ -1,0 +1,48 @@
+{
+  "generatedAt": "2026-07-19T03:25:00.000Z",
+  "verdict": "local_pass_post_deploy_required",
+  "problem": "explicit multi-process prompts had process coverage but could reuse adjacent-process evidence or generic fallback rows",
+  "fix": {
+    "scope": "deterministic DB harness risk rows",
+    "changes": [
+      "multi-process branch requires explicit process markers",
+      "adjacent-process evidence borrowing removed",
+      "fallback rows are specialized with process-specific hazard, controls, equipment, verification, and evidence refs"
+    ],
+    "changedFiles": [
+      "lib/search.ts",
+      "tests/commercial-harness.test.ts"
+    ]
+  },
+  "verification": {
+    "red": {
+      "command": "npm.cmd test -- tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "failed as expected",
+      "failure": "generic fallback row did not match the process-specific evidence pattern"
+    },
+    "green": {
+      "command": "npm.cmd test -- tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 1,
+      "tests": 55,
+      "result": "pass"
+    },
+    "regression": {
+      "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts tests\\ai-deliverables-scope.test.ts tests\\naturalize-output-contract.test.ts tests\\grounded-generation-contract.test.ts tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 4,
+      "tests": 115,
+      "result": "pass"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "pass"
+    }
+  },
+  "postDeployGate": {
+    "required": true,
+    "criteria": [
+      "each requested process has at least two structured risk rows",
+      "row text for each process contains process-specific equipment, hazard, controls, or evidence terms",
+      "single-task comma-separated condition prompts stay on the existing rerank path"
+    ]
+  }
+}
