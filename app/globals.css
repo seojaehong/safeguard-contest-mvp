@@ -16342,13 +16342,16 @@ body:has(.safeclaw-landing) :is(
   .share-status-pill span {
     font-size: var(--text-hud);
     line-height: var(--leading-hud);
+    font-family: var(--font-hud);
     font-weight: 700;
+    letter-spacing: var(--tracking-hud);
   }
 
   .share-status-pill strong {
     font-size: var(--text-caption);
     line-height: var(--leading-caption);
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: var(--tracking-body);
   }
 
   .share-workflow-header p,

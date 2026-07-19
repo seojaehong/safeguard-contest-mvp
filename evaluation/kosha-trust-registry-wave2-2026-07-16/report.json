@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-kosha-trust-registry-wave2-report/v1",
-  "generatedAt": "2026-07-16T19:02:00+09:00",
-  "status": "product_pass_with_unresolved_historical_broad_suite_failures",
+  "generatedAt": "2026-07-20T05:46:00+09:00",
+  "status": "pass",
   "independentReview": {
     "spec": "pass",
     "codeQuality": "pass",
@@ -35,27 +35,32 @@
     "freshFocusedAndCorpusVitest": { "files": 6, "tests": 190, "status": "pass" },
     "focusedVitest": { "files": 5, "tests": 80, "status": "pass" },
     "koshaCorpusAudit": { "files": 1, "tests": 110, "status": "pass" },
-    "historicalBroadVitest": {
+    "currentBroadVitest": {
       "completedWithFinalSummary": true,
-      "filesPassed": 30,
-      "filesFailed": 1,
+      "filesPassed": 31,
+      "filesFailed": 0,
       "filesSkipped": 3,
-      "testsPassed": 386,
-      "testsFailed": 3,
+      "testsPassed": 397,
+      "testsFailed": 0,
       "testsSkipped": 4,
-      "status": "fail",
-      "historicalOutcome": "failed_unresolved",
-      "failedFile": "tests/kosha-guide-corpus-audit.test.ts",
+      "status": "pass",
+      "historicalOutcome": "previously_failed_now_passes",
+      "failedFile": null,
       "logArtifact": "evaluation/kosha-trust-registry-wave2-2026-07-16/kosha-sif-ontology-tests.log"
+    },
+    "staticFrontendConsistencyAudit": {
+      "status": "pass",
+      "violationCount": 0,
+      "coverageIssues": 0
     },
     "pythonAcquisition": { "tests": 19, "status": "pass" },
     "strictTypecheck": "pass",
     "productionBuild": { "staticPages": 28, "status": "pass" },
     "nextFileTrace": {
-      "manifestCount": 81,
-      "configuredConsumerManifestCount": 17,
-      "opsApiExactPinsOnly": true,
-      "exactAssetBytes": 147724,
+      "manifestCount": 82,
+      "configuredConsumerManifestCount": 18,
+      "partialExactAssetsManifestCount": 0,
+      "exactAssetBytes": 147751,
       "globalWildcardRemoved": true,
       "status": "pass"
     },
@@ -63,8 +68,9 @@
   },
   "operationalNotes": [
     "Fresh focused + corpus rerun passed 6 files / 190 tests, including 110 KOSHA corpus audit assertions.",
-    "The earlier 34-file broad Vitest run completed with 3 failures in tests/kosha-guide-corpus-audit.test.ts; it remains recorded as historical unresolved RED and is not counted as a pass.",
-    "The current integrated build observed 81 manifests; 17 configured consumer manifests carry the KOSHA runtime assets and /ops/api carries exact pins only.",
+    "The current 34-file broad Vitest run passes: 31 files passed, 3 skipped; 397 tests passed, 4 skipped.",
+    "Static frontend consistency audit passes with violationCount 0 and coverageIssues 0 after the share status pill typography tuple fix.",
+    "The current integrated build observed 82 manifests; 18 configured consumer manifests carry both exact KOSHA runtime assets and partial asset manifests are 0.",
     "The tracked D-C-7 asset predates the publishedAt generator field, so runtime publication date remains pinned by the immutable production registry until the asset is regenerated through the verified acquisition transaction.",
     "The 234 metadata-verified candidates are not production exact pins; only D-C-13 and D-C-7 are direct exact evidence in this wave."
   ]
