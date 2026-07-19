@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-07-19T22:50:46.421Z",
+  "generatedAt": "2026-07-19T23:23:13.036Z",
   "buildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "43559c89c4fe180a0867de7b47b2bab756e75990",
+    "commitSha": "975fb3eff075e9b81d1310b3f683878cb0e40a18",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-igkzhou2l-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-9y7sl4swk-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "cases": [
@@ -43,7 +43,7 @@
     {
       "id": "scaffold-fall",
       "ok": true,
-      "elapsedSec": 17.95,
+      "elapsedSec": 21.35,
       "mode": "live",
       "statusKosha": "live",
       "koshaExternalMode": "live",
@@ -52,13 +52,47 @@
       "koshaCitationCount": 0,
       "deliverableKoshaCount": 34,
       "expectedCoverage": {
-        "KOSHA": 409,
+        "KOSHA": 408,
         "비계": 1073,
-        "추락": 313
+        "추락": 311
       },
-      "internalTerms": [
-        "DB 하네스",
-        "fallback"
+      "publicInternalTermHits": [],
+      "internalOnlyTermHits": [
+        "externalData.weather.signals.1.mode",
+        "externalData.weather.signals.6.mode",
+        "externalData.weather.signals.7.mode",
+        "qualityContract.items.0.key",
+        "generationTrace.deliverables.modelPerDocument.workpackSummaryDraft.source",
+        "generationTrace.deliverables.modelPerDocument.riskAssessmentDraft.source",
+        "generationTrace.deliverables.modelPerDocument.workPlanDraft.source",
+        "generationTrace.deliverables.modelPerDocument.tbmBriefing.source",
+        "generationTrace.deliverables.modelPerDocument.tbmBriefingStructured.source",
+        "generationTrace.deliverables.modelPerDocument.tbmLogDraft.source",
+        "generationTrace.deliverables.modelPerDocument.tbmLogStructured.source",
+        "generationTrace.deliverables.modelPerDocument.safetyEducationRecordDraft.source",
+        "generationTrace.deliverables.modelPerDocument.emergencyResponseDraft.source",
+        "generationTrace.deliverables.modelPerDocument.photoEvidenceDraft.source",
+        "generationTrace.deliverables.modelPerDocument.foreignWorkerBriefing.source",
+        "generationTrace.deliverables.modelPerDocument.foreignWorkerTransmission.source",
+        "generationTrace.deliverables.modelPerDocument.kakaoMessage.source",
+        "generationTrace.deliverables.modelPerDocument.structuredRiskRows.source",
+        "generationTrace.deliverables.modelPerDocument.tbmRiskLinks.source",
+        "dbHarness.promptContext",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.workpackSummaryDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.riskAssessmentDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.workPlanDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmBriefing.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmBriefingStructured.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmLogDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmLogStructured.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.safetyEducationRecordDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.emergencyResponseDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.photoEvidenceDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.foreignWorkerBriefing.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.foreignWorkerTransmission.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.kakaoMessage.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.structuredRiskRows.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmRiskLinks.source"
       ],
       "hasRiskAssessment": true,
       "hasTbmBriefing": true,
@@ -81,7 +115,7 @@
     {
       "id": "hotwork-ventilation",
       "ok": true,
-      "elapsedSec": 20.85,
+      "elapsedSec": 19.32,
       "mode": "live",
       "statusKosha": "live",
       "koshaExternalMode": "live",
@@ -90,13 +124,46 @@
       "koshaCitationCount": 0,
       "deliverableKoshaCount": 20,
       "expectedCoverage": {
-        "KOSHA": 129,
+        "KOSHA": 130,
         "화기": 112,
-        "화재": 226
+        "화재": 224
       },
-      "internalTerms": [
-        "DB 하네스",
-        "fallback"
+      "publicInternalTermHits": [],
+      "internalOnlyTermHits": [
+        "externalData.weather.signals.6.mode",
+        "externalData.weather.signals.7.mode",
+        "qualityContract.items.0.key",
+        "generationTrace.deliverables.modelPerDocument.workpackSummaryDraft.source",
+        "generationTrace.deliverables.modelPerDocument.riskAssessmentDraft.source",
+        "generationTrace.deliverables.modelPerDocument.workPlanDraft.source",
+        "generationTrace.deliverables.modelPerDocument.tbmBriefing.source",
+        "generationTrace.deliverables.modelPerDocument.tbmBriefingStructured.source",
+        "generationTrace.deliverables.modelPerDocument.tbmLogDraft.source",
+        "generationTrace.deliverables.modelPerDocument.tbmLogStructured.source",
+        "generationTrace.deliverables.modelPerDocument.safetyEducationRecordDraft.source",
+        "generationTrace.deliverables.modelPerDocument.emergencyResponseDraft.source",
+        "generationTrace.deliverables.modelPerDocument.photoEvidenceDraft.source",
+        "generationTrace.deliverables.modelPerDocument.foreignWorkerBriefing.source",
+        "generationTrace.deliverables.modelPerDocument.foreignWorkerTransmission.source",
+        "generationTrace.deliverables.modelPerDocument.kakaoMessage.source",
+        "generationTrace.deliverables.modelPerDocument.structuredRiskRows.source",
+        "generationTrace.deliverables.modelPerDocument.tbmRiskLinks.source",
+        "dbHarness.promptContext",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.workpackSummaryDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.riskAssessmentDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.workPlanDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmBriefing.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmBriefingStructured.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmLogDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmLogStructured.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.safetyEducationRecordDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.emergencyResponseDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.photoEvidenceDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.foreignWorkerBriefing.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.foreignWorkerTransmission.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.kakaoMessage.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.structuredRiskRows.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmRiskLinks.source"
       ],
       "hasRiskAssessment": true,
       "hasTbmBriefing": true,
@@ -119,7 +186,7 @@
     {
       "id": "electrical-panel",
       "ok": true,
-      "elapsedSec": 19.21,
+      "elapsedSec": 16.31,
       "mode": "live",
       "statusKosha": "live",
       "koshaExternalMode": "live",
@@ -129,12 +196,43 @@
       "deliverableKoshaCount": 29,
       "expectedCoverage": {
         "KOSHA": 199,
-        "전기": 381,
-        "감전": 150
+        "전기": 370,
+        "감전": 153
       },
-      "internalTerms": [
-        "DB 하네스",
-        "fallback"
+      "publicInternalTermHits": [],
+      "internalOnlyTermHits": [
+        "qualityContract.items.0.key",
+        "generationTrace.deliverables.modelPerDocument.workpackSummaryDraft.source",
+        "generationTrace.deliverables.modelPerDocument.riskAssessmentDraft.source",
+        "generationTrace.deliverables.modelPerDocument.workPlanDraft.source",
+        "generationTrace.deliverables.modelPerDocument.tbmBriefing.source",
+        "generationTrace.deliverables.modelPerDocument.tbmBriefingStructured.source",
+        "generationTrace.deliverables.modelPerDocument.tbmLogDraft.source",
+        "generationTrace.deliverables.modelPerDocument.tbmLogStructured.source",
+        "generationTrace.deliverables.modelPerDocument.safetyEducationRecordDraft.source",
+        "generationTrace.deliverables.modelPerDocument.emergencyResponseDraft.source",
+        "generationTrace.deliverables.modelPerDocument.photoEvidenceDraft.source",
+        "generationTrace.deliverables.modelPerDocument.foreignWorkerBriefing.source",
+        "generationTrace.deliverables.modelPerDocument.foreignWorkerTransmission.source",
+        "generationTrace.deliverables.modelPerDocument.kakaoMessage.source",
+        "generationTrace.deliverables.modelPerDocument.structuredRiskRows.source",
+        "generationTrace.deliverables.modelPerDocument.tbmRiskLinks.source",
+        "dbHarness.promptContext",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.workpackSummaryDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.riskAssessmentDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.workPlanDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmBriefing.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmBriefingStructured.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmLogDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmLogStructured.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.safetyEducationRecordDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.emergencyResponseDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.photoEvidenceDraft.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.foreignWorkerBriefing.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.foreignWorkerTransmission.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.kakaoMessage.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.structuredRiskRows.source",
+        "generationEvidence.snapshot.generationTrace.deliverables.modelPerDocument.tbmRiskLinks.source"
       ],
       "hasRiskAssessment": true,
       "hasTbmBriefing": true,
@@ -155,33 +253,5 @@
       ]
     }
   ],
-  "findings": [
-    {
-      "severity": "P2",
-      "id": "scaffold-fall",
-      "issue": "internal-terms",
-      "terms": [
-        "DB 하네스",
-        "fallback"
-      ]
-    },
-    {
-      "severity": "P2",
-      "id": "hotwork-ventilation",
-      "issue": "internal-terms",
-      "terms": [
-        "DB 하네스",
-        "fallback"
-      ]
-    },
-    {
-      "severity": "P2",
-      "id": "electrical-panel",
-      "issue": "internal-terms",
-      "terms": [
-        "DB 하네스",
-        "fallback"
-      ]
-    }
-  ]
+  "findings": []
 }

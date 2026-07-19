@@ -74,3 +74,16 @@ Verification:
 - `npm.cmd test -- tests\ask-public-surface.test.ts tests\answer-panel-display.test.ts tests\kosha-current-review-run-ask.test.ts --maxWorkers=1 --fileParallelism=false` — 3 files / 44 tests PASS
 - `npm.cmd run typecheck` — PASS after build completed
 - `npm.cmd run build` — 28/28 static pages PASS
+
+## Post-Deploy Verification
+
+After commit `975fb3eff075e9b81d1310b3f683878cb0e40a18` was deployed to production, the same geometry probe was rerun against `https://www.safeclaw.kr`.
+
+- Served commit: `975fb3eff075e9b81d1310b3f683878cb0e40a18`
+- Desktop documents review: page height 1147, horizontal overflow false
+- Desktop share: 1180px share surface, one primary CTA, horizontal overflow false
+- Mobile documents review: page height 1417, horizontal overflow false
+- Mobile document edit: page height 1152, horizontal overflow false, no sticky/fixed overlap detected
+- Mobile share: page height 1487, one primary CTA, horizontal overflow false
+
+Raw evidence was refreshed in `current-geometry.json` and the `*-current-*.png` screenshots.
