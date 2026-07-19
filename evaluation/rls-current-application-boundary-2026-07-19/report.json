@@ -1,0 +1,34 @@
+{
+  "artifact": "rls-current-application-boundary-2026-07-19",
+  "checkedAt": "2026-07-19T09:43:08+09:00",
+  "sourceHead": "f206939e0116373f7354dfef78cb22008ce0b718",
+  "verdict": "pass_app_layer_tenant_boundary_tests_only",
+  "rlsLaunchIsolationProven": false,
+  "approvalRequired": true,
+  "liveCatalogSnapshotExecuted": false,
+  "authenticatedTenantABExecuted": false,
+  "mutations": {
+    "dbSchemaChanged": false,
+    "rlsPolicyChanged": false,
+    "supabaseDataChanged": false,
+    "storageOperationPerformed": false
+  },
+  "verification": {
+    "command": "npm.cmd test -- tests\\supabase-tenant-isolation-harness.test.ts tests\\workpack-commercial-tenant-hardening.test.ts tests\\workpack-commercial.test.ts tests\\workpack-share-authority.test.ts tests\\workpack-share-authority-routes.test.ts tests\\dispatch-logs-tenant-boundary.test.ts tests\\education-records-tenant-boundary.test.ts tests\\mcp-auth.test.ts tests\\mcp-token-service.test.ts tests\\tenant-harness-memory.test.ts tests\\tenant-harness-memory-claw-tool.test.ts tests\\llm-wiki-rls-approval-packet.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 12,
+    "testFilesTotal": 12,
+    "testsPassed": 180,
+    "testsTotal": 180,
+    "status": "pass"
+  },
+  "stillApprovalGated": [
+    "authoritative Supabase project identity",
+    "read-only pg_class pg_policies and grant catalog snapshots",
+    "storage.objects policies and path isolation",
+    "disposable tenant A/B negative tests",
+    "dispatch_logs null organization decision",
+    "legacy query_logs documents decision",
+    "explicit policy roles and FORCE RLS decision",
+    "service-role child relationship ownership"
+  ]
+}
