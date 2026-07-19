@@ -1,0 +1,27 @@
+{
+  "date": "2026-07-20",
+  "route": "POST https://www.safeclaw.kr/api/ask",
+  "servedBuildCommit": "7c35c4dc9f72a4c6c14f703f7ec388447a60edd3",
+  "mode": "enhanced",
+  "runtimeMode": "live",
+  "elapsedSec": 19.4,
+  "scenario": "hot work with Vietnamese workers, poor ventilation, indoor heat",
+  "vietnameseRecipientLines": {
+    "lineCount": 7,
+    "hasHangul": false,
+    "hasConfinedEnglishFallback": false,
+    "hasHeatEnglishFallback": false,
+    "hasFireEnglishFallback": false,
+    "containsVietnameseVentilation": true,
+    "containsVietnameseHeatStress": true,
+    "sample": [
+      "Công việc hôm nay: Hàn, cắt và công việc có lửa",
+      "Nguy cơ chính của công việc này: nguy cơ cháy khi hàn/cắt, nguy cơ thiếu oxy hoặc ngạt do thông gió kém, nguy cơ say nóng hoặc kiệt sức do nóng",
+      "Trước khi bắt đầu: Dọn vật dễ cháy, bố trí người giám sát cháy và chuẩn bị bình chữa cháy.",
+      "Kiểm tra thông gió, nồng độ oxy và bố trí người giám sát bên ngoài trước khi vào khu vực kín.",
+      "Uống nước, nghỉ ở nơi mát và báo ngay nếu chóng mặt hoặc buồn nôn."
+    ]
+  },
+  "verdict": "pass",
+  "providerDispatchClaimed": false
+}
