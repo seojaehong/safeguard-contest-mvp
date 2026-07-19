@@ -1,16 +1,16 @@
 {
   "artifact": "workspace-ux-current-2026-07-19",
-  "generatedAt": "2026-07-19T13:01:25.504Z",
-  "target": "https://www.safeclaw.kr",
+  "generatedAt": "2026-07-19T13:22:07.234Z",
+  "target": "http://127.0.0.1:3011",
   "buildInfo": {
     "ok": true,
-    "configured": true,
-    "source": "vercel-system-env",
-    "commitSha": "6e51fa1687688019b33743b8a4174671aa163c6b",
-    "branch": "master",
-    "environment": "production",
-    "deploymentUrl": "safeguard-contest-9nfk0lm56-seojaehongs-projects.vercel.app",
-    "message": "배포 커밋 식별자를 확인했습니다."
+    "configured": false,
+    "source": "unavailable",
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null,
+    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
   },
   "query": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
   "mutationPerformed": false,
@@ -22,11 +22,11 @@
         "height": 900
       },
       "generated": true,
-      "bodyTextSample": "SafeClaw현장 안전 문서팩공유·기록공유DayNight문서팩 준비됨연결됨문서팩작업공간✓입력완료✓문서완료공유확인 중현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 성수동 근린생활시설 현장 · 5명근거 준비고위험요인 사례7건 반영KOSHA 공식자료7건 연결위험요인-조치 그래프통과최근 예시서울 건설 · 강풍 · 신규 혼재서울 성수동인천 물류 · 우천 · 숙련자 중심인천 남동공단안산 제조 · 화기 · 외국인 포함경기 안산부산 시설 · 밀폐공간 · 2인 작업부산 해운대오늘 작업언어별 전송본 미리보기오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다.미리보기 전용안전한 중복 방지 저장 기능을 준비하고 있습니다.01오늘 대상2명 선택현장관리자 · 한국어신규 작업자 · 한국어작업자별 저장 언어로 전송본을 준비합니다.대상 변경02채널메일미리보기 전용문자미리보기 전용카카오미리보기 전용발송 채널 준비 안내다시 확인03언어 미리보기표시 언어관리자용 한국어베트남어 · Tiếng ",
+      "bodyTextSample": "SafeClaw현장 안전 문서팩공유·기록공유DayNight공유 전 보완품질 검수 보완 필요문서팩작업공간✓입력완료!문서검수 필요공유보완 확인현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 성수동 근린생활시설 현장 · 5명근거 준비고위험요인 사례7건 반영KOSHA 공식자료7건 연결위험요인-조치 그래프통과최근 예시서울 건설 · 강풍 · 신규 혼재서울 성수동인천 물류 · 우천 · 숙련자 중심인천 남동공단안산 제조 · 화기 · 외국인 포함경기 안산부산 시설 · 밀폐공간 · 2인 작업부산 해운대오늘 작업언어별 전송본 미리보기오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다.미리보기 전용안전한 중복 방지 저장 기능을 준비하고 있습니다.01오늘 대상2명 선택현장관리자 · 한국어신규 작업자 · 한국어작업자별 저장 언어로 전송본을 준비합니다.대상 변경02채널메일미리보기 전용문자미리보기 전용카카오미리보기 전용발송 채널 준비 안내다시 확인03언어 미리보기표시 언어관리자용 한국어베",
       "metrics": [
         {
           "label": "desktop-1440x900:document-review",
-          "url": "https://www.safeclaw.kr/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
+          "url": "http://127.0.0.1:3011/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
           "viewport": {
             "width": 1440,
             "height": 900
@@ -34,8 +34,8 @@
           "document": {
             "clientWidth": 1440,
             "scrollWidth": 1440,
-            "scrollHeight": 1366,
-            "scrollToViewportRatio": 1.52,
+            "scrollHeight": 1240,
+            "scrollToViewportRatio": 1.38,
             "pageHorizontalOverflow": false
           },
           "rects": {
@@ -44,50 +44,50 @@
               "x": 40,
               "y": 116,
               "width": 264,
-              "height": 1186.23,
-              "bottom": 1302.23
+              "height": 1060.23,
+              "bottom": 1176.23
             },
             "commandMain": {
               "x": 320,
               "y": 116,
               "width": 1080,
-              "height": 1186.23,
-              "bottom": 1302.23
+              "height": 1060.23,
+              "bottom": 1176.23
             },
             "documentPage": {
               "x": 376,
               "y": 164,
               "width": 968,
-              "height": 1082.23,
-              "bottom": 1246.23
+              "height": 956.23,
+              "bottom": 1120.23
             },
             "documentWorkbench": {
               "x": 376,
               "y": 164,
               "width": 968,
-              "height": 1082.23,
-              "bottom": 1246.23
+              "height": 956.23,
+              "bottom": 1120.23
             },
             "documentViewerShell": {
               "x": 393,
               "y": 373.05,
               "width": 934,
-              "height": 738,
-              "bottom": 1111.05
+              "height": 612,
+              "bottom": 985.05
             },
             "documentRail": {
               "x": 393,
               "y": 373.05,
               "width": 194,
-              "height": 738,
-              "bottom": 1111.05
+              "height": 612,
+              "bottom": 985.05
             },
             "documentPreview": {
               "x": 599,
               "y": 373.05,
               "width": 728,
-              "height": 738,
-              "bottom": 1111.05
+              "height": 612,
+              "bottom": 985.05
             },
             "editorSurface": null,
             "fieldOpsWorkspace": null,
@@ -103,16 +103,16 @@
             "documentRail": {
               "clientWidth": 194,
               "scrollWidth": 194,
-              "clientHeight": 738,
-              "scrollHeight": 738,
+              "clientHeight": 612,
+              "scrollHeight": 612,
               "horizontalOverflow": false,
               "verticalOverflow": false
             },
             "commandMain": {
               "clientWidth": 1080,
               "scrollWidth": 1080,
-              "clientHeight": 1186,
-              "scrollHeight": 1186,
+              "clientHeight": 1060,
+              "scrollHeight": 1060,
               "horizontalOverflow": false,
               "verticalOverflow": false
             },
@@ -126,7 +126,7 @@
         },
         {
           "label": "desktop-1440x900:document-editor",
-          "url": "https://www.safeclaw.kr/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
+          "url": "http://127.0.0.1:3011/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
           "viewport": {
             "width": 1440,
             "height": 900
@@ -134,8 +134,8 @@
           "document": {
             "clientWidth": 1440,
             "scrollWidth": 1440,
-            "scrollHeight": 10156,
-            "scrollToViewportRatio": 11.28,
+            "scrollHeight": 1240,
+            "scrollToViewportRatio": 1.38,
             "pageHorizontalOverflow": false
           },
           "rects": {
@@ -144,22 +144,22 @@
               "x": 40,
               "y": -57,
               "width": 264,
-              "height": 9967.5,
-              "bottom": 9910.5
+              "height": 1052.05,
+              "bottom": 995.05
             },
             "commandMain": {
               "x": 320,
               "y": -57,
               "width": 1080,
-              "height": 9967.5,
-              "bottom": 9910.5
+              "height": 1052.05,
+              "bottom": 995.05
             },
             "documentPage": {
               "x": 376,
               "y": -9,
               "width": 968,
-              "height": 9863.5,
-              "bottom": 9854.5
+              "height": 948.05,
+              "bottom": 939.05
             },
             "documentWorkbench": null,
             "documentViewerShell": null,
@@ -169,46 +169,46 @@
               "x": 376,
               "y": -9,
               "width": 968,
-              "height": 9863.5,
-              "bottom": 9854.5
+              "height": 948.05,
+              "bottom": 939.05
             },
             "fieldOpsWorkspace": null,
             "workpackEditor": null,
             "sharePage": null,
             "sharePanel": {
-              "x": 460,
-              "y": 10804.59,
-              "width": 800,
-              "height": 1111.78,
-              "bottom": 11916.38
+              "x": 393,
+              "y": 1889.14,
+              "width": 934,
+              "height": 1109.23,
+              "bottom": 2998.38
             },
             "shareFormShell": {
-              "x": 475,
-              "y": 10910.59,
-              "width": 770,
-              "height": 350.78,
-              "bottom": 11261.38
+              "x": 408,
+              "y": 1995.14,
+              "width": 904,
+              "height": 224.39,
+              "bottom": 2219.53
             },
             "shareCard": {
-              "x": 475,
-              "y": 10910.59,
-              "width": 295.81,
-              "height": 350.78,
-              "bottom": 11261.38
+              "x": 408,
+              "y": 1995.14,
+              "width": 348.95,
+              "height": 224.39,
+              "bottom": 2219.53
             },
             "sharePreview": {
-              "x": 475,
-              "y": 11271.38,
-              "width": 770,
+              "x": 408,
+              "y": 2353.38,
+              "width": 904,
               "height": 576,
-              "bottom": 11847.38
+              "bottom": 2929.38
             },
             "shareCommand": {
-              "x": 795.81,
-              "y": 11148.38,
-              "width": 192.66,
-              "height": 100,
-              "bottom": 11248.38
+              "x": 781.95,
+              "y": 2162.53,
+              "width": 231.94,
+              "height": 44,
+              "bottom": 2206.53
             }
           },
           "overflow": {
@@ -216,22 +216,22 @@
             "commandMain": {
               "clientWidth": 1080,
               "scrollWidth": 1080,
-              "clientHeight": 9968,
-              "scrollHeight": 9968,
+              "clientHeight": 1052,
+              "scrollHeight": 5956,
               "horizontalOverflow": false,
-              "verticalOverflow": false
+              "verticalOverflow": true
             },
             "sharePanel": {
-              "clientWidth": 798,
-              "scrollWidth": 798,
-              "clientHeight": 1110,
-              "scrollHeight": 1110,
+              "clientWidth": 932,
+              "scrollWidth": 932,
+              "clientHeight": 1107,
+              "scrollHeight": 1107,
               "horizontalOverflow": false,
               "verticalOverflow": false
             }
           },
           "counts": {
-            "visibleControls": 264,
+            "visibleControls": 226,
             "visibleControlsUnder44": 16,
             "stickyLike": 1
           },
@@ -239,7 +239,7 @@
         },
         {
           "label": "desktop-1440x900:share",
-          "url": "https://www.safeclaw.kr/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
+          "url": "http://127.0.0.1:3011/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
           "viewport": {
             "width": 1440,
             "height": 900
@@ -247,8 +247,8 @@
           "document": {
             "clientWidth": 1440,
             "scrollWidth": 1440,
-            "scrollHeight": 1429,
-            "scrollToViewportRatio": 1.59,
+            "scrollHeight": 1379,
+            "scrollToViewportRatio": 1.53,
             "pageHorizontalOverflow": false
           },
           "rects": {
@@ -257,15 +257,15 @@
               "x": 40,
               "y": 124,
               "width": 264,
-              "height": 1240.78,
-              "bottom": 1364.78
+              "height": 1191.23,
+              "bottom": 1315.23
             },
             "commandMain": {
               "x": 320,
               "y": 124,
               "width": 1080,
-              "height": 1240.78,
-              "bottom": 1364.78
+              "height": 1191.23,
+              "bottom": 1315.23
             },
             "documentPage": null,
             "documentWorkbench": null,
@@ -279,43 +279,43 @@
               "x": 376,
               "y": 172,
               "width": 968,
-              "height": 1136.78,
-              "bottom": 1308.78
+              "height": 1087.23,
+              "bottom": 1259.23
             },
             "sharePanel": {
               "x": 376,
               "y": 172,
-              "width": 632,
-              "height": 1136.78,
-              "bottom": 1308.78
+              "width": 968,
+              "height": 1087.23,
+              "bottom": 1259.23
             },
             "shareFormShell": {
               "x": 391,
-              "y": 325,
-              "width": 602,
-              "height": 350.78,
-              "bottom": 675.78
+              "y": 278,
+              "width": 938,
+              "height": 224.39,
+              "bottom": 502.39
             },
             "shareCard": {
               "x": 391,
-              "y": 325,
-              "width": 229.2,
-              "height": 350.78,
-              "bottom": 675.78
+              "y": 278,
+              "width": 362.44,
+              "height": 224.39,
+              "bottom": 502.39
             },
             "sharePreview": {
               "x": 391,
-              "y": 685.78,
-              "width": 602,
+              "y": 636.23,
+              "width": 938,
               "height": 554,
-              "bottom": 1239.78
+              "bottom": 1190.23
             },
             "shareCommand": {
-              "x": 645.2,
-              "y": 562.78,
-              "width": 143.41,
-              "height": 100,
-              "bottom": 662.78
+              "x": 778.44,
+              "y": 445.39,
+              "width": 241.91,
+              "height": 44,
+              "bottom": 489.39
             }
           },
           "overflow": {
@@ -323,23 +323,23 @@
             "commandMain": {
               "clientWidth": 1080,
               "scrollWidth": 1080,
-              "clientHeight": 1241,
-              "scrollHeight": 1241,
+              "clientHeight": 1191,
+              "scrollHeight": 1191,
               "horizontalOverflow": false,
               "verticalOverflow": false
             },
             "sharePanel": {
-              "clientWidth": 630,
-              "scrollWidth": 630,
-              "clientHeight": 1135,
-              "scrollHeight": 1135,
+              "clientWidth": 966,
+              "scrollWidth": 966,
+              "clientHeight": 1085,
+              "scrollHeight": 1085,
               "horizontalOverflow": false,
               "verticalOverflow": false
             }
           },
           "counts": {
             "visibleControls": 18,
-            "visibleControlsUnder44": 3,
+            "visibleControlsUnder44": 0,
             "stickyLike": 1
           }
         }
@@ -352,11 +352,11 @@
         "height": 844
       },
       "generated": true,
-      "bodyTextSample": "SafeClaw현장 안전 문서팩공유·기록공유DayNight문서팩 준비됨연결됨문서팩작업공간✓입력완료✓문서완료공유확인 중현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 성수동 근린생활시설 현장 · 5명근거 준비고위험요인 사례7건 반영KOSHA 공식자료7건 연결위험요인-조치 그래프통과최근 예시서울 건설 · 강풍 · 신규 혼재서울 성수동인천 물류 · 우천 · 숙련자 중심인천 남동공단안산 제조 · 화기 · 외국인 포함경기 안산부산 시설 · 밀폐공간 · 2인 작업부산 해운대오늘 작업언어별 전송본 미리보기오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다.미리보기 전용안전한 중복 방지 저장 기능을 준비하고 있습니다.01오늘 대상2명 선택현장관리자 · 한국어신규 작업자 · 한국어작업자별 저장 언어로 전송본을 준비합니다.대상 변경02채널메일미리보기 전용문자미리보기 전용카카오미리보기 전용발송 채널 준비 안내다시 확인03언어 미리보기표시 언어관리자용 한국어베트남어 · Tiếng ",
+      "bodyTextSample": "SafeClaw현장 안전 문서팩공유·기록공유DayNight공유 전 보완품질 검수 보완 필요문서팩작업공간✓입력완료!문서검수 필요공유보완 확인현재 작업세이프건설 서울 성수동 근린생활시설 외벽 도장 작업서울 성수동 근린생활시설 현장 · 5명근거 준비고위험요인 사례7건 반영KOSHA 공식자료7건 연결위험요인-조치 그래프통과최근 예시서울 건설 · 강풍 · 신규 혼재서울 성수동인천 물류 · 우천 · 숙련자 중심인천 남동공단안산 제조 · 화기 · 외국인 포함경기 안산부산 시설 · 밀폐공간 · 2인 작업부산 해운대오늘 작업언어별 전송본 미리보기오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다.미리보기 전용안전한 중복 방지 저장 기능을 준비하고 있습니다.01오늘 대상2명 선택현장관리자 · 한국어신규 작업자 · 한국어작업자별 저장 언어로 전송본을 준비합니다.대상 변경02채널메일미리보기 전용문자미리보기 전용카카오미리보기 전용발송 채널 준비 안내다시 확인03언어 미리보기표시 언어관리자용 한국어베",
       "metrics": [
         {
           "label": "mobile-390x844:document-review",
-          "url": "https://www.safeclaw.kr/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
+          "url": "http://127.0.0.1:3011/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
           "viewport": {
             "width": 390,
             "height": 844
@@ -364,8 +364,8 @@
           "document": {
             "clientWidth": 390,
             "scrollWidth": 390,
-            "scrollHeight": 2821,
-            "scrollToViewportRatio": 3.34,
+            "scrollHeight": 1479,
+            "scrollToViewportRatio": 1.75,
             "pageHorizontalOverflow": false
           },
           "rects": {
@@ -381,43 +381,43 @@
               "x": 11,
               "y": 268,
               "width": 368,
-              "height": 2488.28,
-              "bottom": 2756.28
+              "height": 1146.08,
+              "bottom": 1414.08
             },
             "documentPage": {
               "x": 27,
               "y": 300,
               "width": 336,
-              "height": 2416.28,
-              "bottom": 2716.28
+              "height": 1074.08,
+              "bottom": 1374.08
             },
             "documentWorkbench": {
               "x": 27,
               "y": 300,
               "width": 336,
-              "height": 2416.28,
-              "bottom": 2716.28
+              "height": 1074.08,
+              "bottom": 1374.08
             },
             "documentViewerShell": {
               "x": 40,
-              "y": 607.05,
+              "y": 599.05,
               "width": 310,
-              "height": 1978.05,
-              "bottom": 2585.09
+              "height": 651.84,
+              "bottom": 1250.89
             },
             "documentRail": {
               "x": 40,
-              "y": 607.05,
+              "y": 599.05,
               "width": 310,
-              "height": 226.67,
-              "bottom": 833.72
+              "height": 80,
+              "bottom": 679.05
             },
             "documentPreview": {
               "x": 40,
-              "y": 845.72,
+              "y": 691.05,
               "width": 310,
-              "height": 1739.38,
-              "bottom": 2585.09
+              "height": 559.84,
+              "bottom": 1250.89
             },
             "editorSurface": null,
             "fieldOpsWorkspace": null,
@@ -433,16 +433,16 @@
             "documentRail": {
               "clientWidth": 310,
               "scrollWidth": 310,
-              "clientHeight": 227,
-              "scrollHeight": 227,
+              "clientHeight": 80,
+              "scrollHeight": 80,
               "horizontalOverflow": false,
               "verticalOverflow": false
             },
             "commandMain": {
               "clientWidth": 368,
               "scrollWidth": 368,
-              "clientHeight": 2488,
-              "scrollHeight": 2488,
+              "clientHeight": 1146,
+              "scrollHeight": 1146,
               "horizontalOverflow": false,
               "verticalOverflow": false
             },
@@ -456,7 +456,7 @@
         },
         {
           "label": "mobile-390x844:document-editor",
-          "url": "https://www.safeclaw.kr/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
+          "url": "http://127.0.0.1:3011/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
           "viewport": {
             "width": 390,
             "height": 844
@@ -464,8 +464,8 @@
           "document": {
             "clientWidth": 390,
             "scrollWidth": 390,
-            "scrollHeight": 15770,
-            "scrollToViewportRatio": 18.68,
+            "scrollHeight": 1292,
+            "scrollToViewportRatio": 1.53,
             "pageHorizontalOverflow": false
           },
           "rects": {
@@ -481,15 +481,15 @@
               "x": 11,
               "y": -162,
               "width": 368,
-              "height": 15437.23,
-              "bottom": 15275.23
+              "height": 959.05,
+              "bottom": 797.05
             },
             "documentPage": {
               "x": 27,
               "y": -130,
               "width": 336,
-              "height": 15365.23,
-              "bottom": 15235.23
+              "height": 887.05,
+              "bottom": 757.05
             },
             "documentWorkbench": null,
             "documentViewerShell": null,
@@ -499,46 +499,46 @@
               "x": 27,
               "y": -130,
               "width": 336,
-              "height": 15365.23,
-              "bottom": 15235.23
+              "height": 887.05,
+              "bottom": 757.05
             },
             "fieldOpsWorkspace": null,
             "workpackEditor": null,
             "sharePage": null,
             "sharePanel": {
               "x": 44,
-              "y": 16450.36,
+              "y": 1989.41,
               "width": 302,
-              "height": 2122.36,
-              "bottom": 18572.72
+              "height": 1625.2,
+              "bottom": 3614.61
             },
             "shareFormShell": {
               "x": 59,
-              "y": 16700.36,
+              "y": 2239.41,
               "width": 272,
               "height": 857.36,
-              "bottom": 17557.72
+              "bottom": 3096.77
             },
             "shareCard": {
               "x": 59,
-              "y": 16700.36,
+              "y": 2239.41,
               "width": 272,
               "height": 260.19,
-              "bottom": 16960.55
+              "bottom": 2499.59
             },
             "sharePreview": {
               "x": 59,
-              "y": 17567.72,
+              "y": 3230.61,
               "width": 272,
-              "height": 936,
-              "bottom": 18503.72
+              "height": 315,
+              "bottom": 3545.61
             },
             "shareCommand": {
               "x": 72,
-              "y": 17230.33,
+              "y": 2769.38,
               "width": 246,
               "height": 100,
-              "bottom": 17330.33
+              "bottom": 2869.38
             }
           },
           "overflow": {
@@ -546,22 +546,22 @@
             "commandMain": {
               "clientWidth": 368,
               "scrollWidth": 368,
-              "clientHeight": 15437,
-              "scrollHeight": 15437,
+              "clientHeight": 959,
+              "scrollHeight": 8170,
               "horizontalOverflow": false,
-              "verticalOverflow": false
+              "verticalOverflow": true
             },
             "sharePanel": {
               "clientWidth": 300,
               "scrollWidth": 300,
-              "clientHeight": 2120,
-              "scrollHeight": 2120,
+              "clientHeight": 1623,
+              "scrollHeight": 1623,
               "horizontalOverflow": false,
               "verticalOverflow": false
             }
           },
           "counts": {
-            "visibleControls": 249,
+            "visibleControls": 211,
             "visibleControlsUnder44": 16,
             "stickyLike": 1
           },
@@ -569,7 +569,7 @@
         },
         {
           "label": "mobile-390x844:share",
-          "url": "https://www.safeclaw.kr/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
+          "url": "http://127.0.0.1:3011/workspace?q=%EC%84%B8%EC%9D%B4%ED%94%84%EA%B1%B4%EC%84%A4%20%EC%84%9C%EC%9A%B8%20%EC%84%B1%EC%88%98%EB%8F%99%20%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4%20%EC%99%B8%EB%B2%BD%20%EB%8F%84%EC%9E%A5%20%EC%9E%91%EC%97%85.%20%EC%9D%B4%EB%8F%99%EC%8B%9D%20%EB%B9%84%EA%B3%84%20%EC%82%AC%EC%9A%A9%2C%20%EC%9E%91%EC%97%85%EC%9E%90%205%EB%AA%85%2C%20%EC%8B%A0%EA%B7%9C%20%ED%88%AC%EC%9E%85%EC%9E%90%201%EB%AA%85%2C%20%EC%98%A4%ED%9B%84%20%EA%B0%95%ED%92%8D%20%EC%98%88%EB%B3%B4.%20%EC%B6%94%EB%9D%BD%EA%B3%BC%20%EC%A7%80%EA%B2%8C%EC%B0%A8%20%EB%8F%99%EC%84%A0%20%EC%9C%84%ED%97%98%EC%9D%84%20%EB%B0%98%EC%98%81%ED%95%B4%20%EC%98%A4%EB%8A%98%20%EC%9C%84%ED%97%98%EC%84%B1%ED%8F%89%EA%B0%80%EC%99%80%20TBM%2C%20%EC%95%88%EC%A0%84%EB%B3%B4%EA%B1%B4%EA%B5%90%EC%9C%A1%20%EA%B8%B0%EB%A1%9D%EC%9D%84%20%EB%A7%8C%EB%93%A4%EC%96%B4%EC%A4%98.&theme=day",
           "viewport": {
             "width": 390,
             "height": 844
@@ -577,8 +577,8 @@
           "document": {
             "clientWidth": 390,
             "scrollWidth": 390,
-            "scrollHeight": 2296,
-            "scrollToViewportRatio": 2.72,
+            "scrollHeight": 1919,
+            "scrollToViewportRatio": 2.27,
             "pageHorizontalOverflow": false
           },
           "rects": {
@@ -594,8 +594,8 @@
               "x": 11,
               "y": 268,
               "width": 368,
-              "height": 1963.47,
-              "bottom": 2231.47
+              "height": 1586.31,
+              "bottom": 1854.31
             },
             "documentPage": null,
             "documentWorkbench": null,
@@ -609,15 +609,15 @@
               "x": 27,
               "y": 300,
               "width": 336,
-              "height": 1891.47,
-              "bottom": 2191.47
+              "height": 1514.31,
+              "bottom": 1814.31
             },
             "sharePanel": {
               "x": 27,
               "y": 300,
               "width": 336,
-              "height": 1891.47,
-              "bottom": 2191.47
+              "height": 1514.31,
+              "bottom": 1814.31
             },
             "shareFormShell": {
               "x": 42,
@@ -635,10 +635,10 @@
             },
             "sharePreview": {
               "x": 42,
-              "y": 1306.47,
+              "y": 1430.31,
               "width": 306,
-              "height": 816,
-              "bottom": 2122.47
+              "height": 315,
+              "bottom": 1745.31
             },
             "shareCommand": {
               "x": 55,
@@ -653,16 +653,16 @@
             "commandMain": {
               "clientWidth": 368,
               "scrollWidth": 368,
-              "clientHeight": 1963,
-              "scrollHeight": 1963,
+              "clientHeight": 1586,
+              "scrollHeight": 1586,
               "horizontalOverflow": false,
               "verticalOverflow": false
             },
             "sharePanel": {
               "clientWidth": 334,
               "scrollWidth": 334,
-              "clientHeight": 1889,
-              "scrollHeight": 1889,
+              "clientHeight": 1512,
+              "scrollHeight": 1512,
               "horizontalOverflow": false,
               "verticalOverflow": false
             }

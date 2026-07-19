@@ -1,14 +1,15 @@
 # SafeClaw North Star Current State
 
 Generated at: 2026-07-19 22:00 KST
-Latest pushed HEAD: `6e51fa1687688019b33743b8a4174671aa163c6b`
+Workspace UX remediation HEAD: this commit
+Previous production-mapped HEAD: `6e51fa1687688019b33743b8a4174671aa163c6b`
 Production build-info: `6e51fa1687688019b33743b8a4174671aa163c6b`
 
 ## Verdict
 
 `IN PROGRESS / NOT COMPLETE`
 
-The current production-mapped build is suitable for the proved demo surfaces, but the full North Star objective is not complete. Workspace Documents/Share UX, RLS launch proof, LLM Wiki publication, SIF vector upload/runtime, live provider dispatch, and real production invited-recipient ACK remain approval-gated or incomplete.
+The current production-mapped build is suitable for the proved demo surfaces, but the full North Star objective is not complete. Workspace Documents/Share UX has a local bounded remediation awaiting deploy verification; RLS launch proof, LLM Wiki publication, SIF vector upload/runtime, live provider dispatch, and real production invited-recipient ACK remain approval-gated or incomplete.
 
 ## Current CI
 
@@ -47,7 +48,7 @@ Completed green steps:
 | SIF embedding runtime | `evaluation/sif-embedding-gate/approval-preflight-report.json` | Approval-gated. 6032-record corpus is ready, but embedding generation/upload/runtime remain held. |
 | Provider dispatch | `evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json` | Approval-gated and preview-only. Live SMS/Kakao/email provider dispatch is not proven. |
 | Real production invited ACK | `evaluation/share-recipient-route-loop-gate-2026-07-19/report.json` | Route-level loop is proven, but a real production share session + worker confirmation + manager readback would mutate production data and requires explicit approval. |
-| Workspace Documents/Share UX | `evaluation/workspace-ux-current-2026-07-19/report.json`, `evaluation/workspace-ux-current-2026-07-19/report.md` | NOT FIXED on authoritative HEAD. Desktop editor 11.28x viewport, mobile editor 18.68x viewport, desktop share panel 632px on 1440px viewport. |
+| Workspace Documents/Share UX | `evaluation/workspace-ux-current-2026-07-19/report.json`, `evaluation/workspace-ux-current-2026-07-19/report.md` | PARTIALLY FIXED on local remediation HEAD; deploy verification pending. Desktop editor 11.28x -> 1.38x, mobile editor 18.68x -> 1.53x, mobile preview y 845.72 -> 691.05, desktop share panel 632px -> 968px. |
 | Full CI for latest HEAD | GitHub Actions run `29687115401` | Success. Typecheck, full `npm.cmd test -- --maxWorkers=1 --fileParallelism=false`, and production build all passed on latest HEAD. |
 
 ## Safe Demo Claims
@@ -60,7 +61,7 @@ Completed green steps:
 ## Forbidden Claims
 
 - The full North Star objective is complete.
-- Workspace Documents/Share UX blockers are fixed.
+- Workspace Documents/Share UX blockers are production-fixed before the remediation deploy is verified.
 - LLM Wiki production publication is available.
 - Live Supabase RLS tenant isolation is launch-proven.
 - SIF vector retrieval is production-active.
@@ -69,7 +70,7 @@ Completed green steps:
 
 ## Next Work
 
-1. Run bounded UX remediation for workspace Documents review/editor and Share desktop breakpoint.
+1. Deploy and rerun the workspace UX measurement against `https://www.safeclaw.kr`.
 2. If production data mutation is explicitly approved, run a real invited recipient ACK readback gate.
 3. Otherwise keep the route-level invited loop as the safe non-mutating boundary.
 4. Proceed to Phase B gates only after explicit migration, provider, and RLS approvals.

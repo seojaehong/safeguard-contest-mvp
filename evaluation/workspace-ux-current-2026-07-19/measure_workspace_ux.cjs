@@ -3,7 +3,7 @@ const path = require("node:path");
 const { chromium } = require("playwright");
 
 const OUTPUT_DIR = __dirname;
-const TARGET = "https://www.safeclaw.kr";
+const TARGET = process.env.SAFECLAW_UX_TARGET || "https://www.safeclaw.kr";
 const QUERY = [
   "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업.",
   "이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보.",

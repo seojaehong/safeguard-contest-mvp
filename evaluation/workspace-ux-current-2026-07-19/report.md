@@ -1,22 +1,24 @@
-# Workspace UX Current Geometry Check
+# Workspace UX Remediation Geometry Check
 
-Generated at: 2026-07-19 21:58 KST
+Generated at: 2026-07-19 KST
 
 ## Verdict
 
-`NOT FIXED on authoritative HEAD`
+`PARTIALLY FIXED on local remediation HEAD`
 
-The user's latest report is not explained by a stale local branch, stale dev server, or old deployment. The current production served surface maps to authoritative HEAD `6e51fa1687688019b33743b8a4174671aa163c6b`, and the Documents long-page/editor burden plus Share desktop mobile-card composition still reproduce.
+The prior production check confirmed that the user's complaint was real, not stale UI. This remediation keeps the current 3-step direction and makes a bounded launch fix: the document editor no longer expands into a 10000px+ page, mobile document selection no longer pushes the preview below the first viewport, and desktop share no longer renders as a narrow mobile-card composition.
+
+The production deployment must still be rechecked after this commit ships.
 
 ## Served Surface
 
 | Item | Evidence |
 | --- | --- |
-| URL | `https://www.safeclaw.kr/workspace?q=...&theme=day` |
-| Build marker | `/api/build-info` returned `6e51fa1687688019b33743b8a4174671aa163c6b`, branch `master`, environment `production` |
+| URL | `http://127.0.0.1:3011/workspace?q=...&theme=day` |
+| Build marker | Local `/api/build-info` is configured=false, commit unavailable |
 | Browser | Playwright Chromium |
 | Mutation | false |
-| Generated state | Real production auto-generation completed in both desktop and mobile runs |
+| Generated state | Local production build auto-generation completed in both desktop and mobile runs using the app fallback provider |
 
 Raw metrics: `evaluation/workspace-ux-current-2026-07-19/report.json`
 
@@ -29,44 +31,46 @@ Screenshots:
 - `mobile-390x844-document-editor.png`
 - `mobile-390x844-share.png`
 
+## Before To After
+
+| Viewport / state | Previous production | Local remediation | Result |
+| --- | ---: | ---: | --- |
+| Desktop document review | 1366px / 1.52x | 1240px / 1.38x | Improved |
+| Desktop document editor | 10156px / 11.28x | 1240px / 1.38x | Fixed for launch |
+| Mobile document review | 2821px / 3.34x, preview y=845.72 | 1479px / 1.75x, preview y=691.05 | Improved; preview now begins inside first viewport |
+| Mobile document editor | 15770px / 18.68x | 1292px / 1.53x | Fixed for launch |
+| Desktop share | 1429px / 1.59x, panel 632px | 1379px / 1.53x, panel 968px | Fixed desktop breakpoint |
+| Mobile share | 2296px / 2.72x | 1919px / 2.27x | Improved, still long |
+
 ## Documents Screen
 
-| Viewport / state | Viewport | Document height | Ratio | Finding |
-| --- | ---: | ---: | ---: | --- |
-| Desktop document review | 1440x900 | 1366px | 1.52x | Better than the user's 2.9x measurement, but still longer than one screen. The main document workbench itself is 1082px high, so the share CTA and lower state require scrolling. |
-| Desktop document editor | 1440x900 | 10156px | 11.28x | Severe blocker. Opening editor expands into a very long document/editing surface instead of a focused editor step. |
-| Mobile document review | 390x844 | 2821px | 3.34x | Blocker. The first document preview starts at y=845.72, below the first viewport. |
-| Mobile document editor | 390x844 | 15770px | 18.68x | Severe blocker. Editor is effectively unusable as a mobile field screen without deep scroll burden. |
+- Document preview body is capped to a viewport-aware scroll area instead of expanding the whole page.
+- Workpack editor textareas now cap generated row counts, so long generated text no longer inflates the DOM.
+- Editor-focused workspace hides secondary operation panels from the default page flow and constrains the editor shell to a focused viewport surface.
+- Mobile core document tabs render as a compact 3-item selector with no horizontal overflow.
 
-Additional signals:
+Remaining risk:
 
-- Desktop document review has 7 visible controls under 44px.
-- Mobile document review has 5 visible controls under 44px.
-- Horizontal overflow is not the main issue here; the blocker is vertical information architecture and editor density.
-- The app does render separate React step sections, but the product experience still feels like a long operational page because the active document/editor surfaces exceed the viewport by large margins.
+- Mobile share is improved but still long. It is not the current video blocker, but it should be part of the next Share v2 IA pass.
+- Some visible controls under 44px remain in the document/editor surfaces. This patch prioritized launch video geometry over full touch-target cleanup.
 
 ## Share Screen
 
-| Viewport / state | Viewport | Document height | Ratio | Share panel width | Finding |
-| --- | ---: | ---: | ---: | ---: | --- |
-| Desktop share | 1440x900 | 1429px | 1.59x | 632px | Not desktop-composed. The share step is a narrow centered wizard/card inside a 968px page, visually close to a mobile panel. |
-| Mobile share | 390x844 | 2296px | 2.72x | 336px | Mobile has no horizontal overflow and no under-44 controls in this run, but remains long. |
+Desktop share no longer uses a 632px mobile-like card. The measured share panel is 968px wide inside the workspace, and the form shell uses a desktop-width layout.
 
-The desktop share panel should use a desktop breakpoint, such as a wider two-column composition with target/channel controls and message preview side by side. The current 632px panel confirms the user's "mobile-like on desktop" complaint.
+Mobile share remains single-column and long, but horizontal overflow is false and under-44 controls were 0 in this run.
 
-## Explicit Answer To The Reference Session Question
+## Verification
 
-Verdict option: `2. NOT FIXED on authoritative HEAD; needs bounded UX remediation.`
+- `npm.cmd run typecheck`: PASS
+- `npm.cmd run build`: PASS, 28/28 static pages
+- `SAFECLAW_UX_TARGET=http://127.0.0.1:3011 node evaluation/workspace-ux-current-2026-07-19/measure_workspace_ux.cjs`: PASS, desktop and mobile generated
 
-- Documents long-page/sticky complaint: reproduced on current served production surface.
-- Share desktop-mobile-layout complaint: reproduced on current served production surface.
-- Stale-user-surface hypothesis: not supported. Current production build marker is authoritative `6e51fa16`, and the blockers reproduce there.
+## Post-Deploy Gate
 
-## Acceptance Gate For Remediation
+After deployment, rerun the same measurement against `https://www.safeclaw.kr` and confirm:
 
-- Desktop document review target: active document workbench should fit within roughly one viewport, or the first meaningful preview/editor and primary next action must both be visible without long scroll.
-- Desktop document editor target: editor should be a focused editor surface, not a 10000px page.
-- Mobile document review target: first useful preview/editor content should start well before y=844.
-- Mobile document editor target: eliminate the 15000px page burden by splitting fields/sections and collapsing provenance/audit content.
-- Desktop share target: share panel should no longer be a 632px mobile-style card; verify a desktop breakpoint with a wider/two-column composition.
-
+- `/api/build-info` maps to the deployed commit.
+- Desktop document editor remains near 1.4x viewport height, not 10000px+.
+- Mobile document review preview starts before y=844.
+- Desktop share panel remains workspace-width, not mobile-card width.

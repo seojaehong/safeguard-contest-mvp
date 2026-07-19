@@ -3082,7 +3082,7 @@ export function WorkpackEditor({
               ) : null}
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;
-                const lineCount = Math.max(4, section.value.split(/\r?\n/u).length + 1);
+                const lineCount = Math.min(8, Math.max(4, section.value.split(/\r?\n/u).length + 1));
                 return (
                   <section key={section.id} className={styles.documentSection} data-section-kind="body">
                     <label htmlFor={inputId}>
@@ -3107,7 +3107,7 @@ export function WorkpackEditor({
               ref={textareaRef}
               className={`document-textarea document-source-textarea ${styles.sourceTextarea}`}
               value={selectedText}
-              rows={Math.max(12, selectedText.split(/\r?\n/u).length + 1)}
+              rows={Math.min(16, Math.max(12, selectedText.split(/\r?\n/u).length + 1))}
               onChange={(event) => updateValue(event.target.value)}
               aria-label={`${selected.title} 전체 원문 편집`}
             />

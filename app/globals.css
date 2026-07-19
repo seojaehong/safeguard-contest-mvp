@@ -14224,8 +14224,8 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .document-workbench .document-preview-pane pre {
-  min-height: 520px;
-  max-height: 62vh;
+  min-height: 360px;
+  max-height: min(48vh, 460px);
   overflow: auto;
   border: 1px solid var(--workspace-rule);
   border-radius: 4px;
@@ -14508,7 +14508,8 @@ body:has(.safeclaw-landing) :is(
 
 .share-panel.workflow-panel {
   display: grid;
-  width: min(100%, 800px);
+  width: 100%;
+  max-width: 1040px;
   margin: 0 auto;
   gap: 10px;
   border: 1px solid var(--share-line);
@@ -14591,6 +14592,16 @@ body:has(.safeclaw-landing) :is(
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) minmax(0, 0.9fr);
   gap: 12px;
+}
+
+.field-workspace-share-only {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.field-workspace-share-only .share-panel.workflow-panel {
+  margin-inline: auto;
 }
 
 .share-form-card,
@@ -16092,18 +16103,35 @@ body:has(.safeclaw-landing) :is(
 @media (max-width: 720px) {
   .command-center-shell .document-workbench {
     padding: 12px;
+    gap: 12px;
+  }
+
+  .command-center-shell .document-review-status-strip,
+  .command-center-shell .document-harness-loop {
+    display: none;
   }
 
   .command-center-shell .document-workbench .document-viewer-list {
     grid-auto-flow: row;
     grid-auto-columns: auto;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     overflow-x: visible;
     padding-bottom: 0;
   }
 
   .command-center-shell .document-workbench .document-viewer-list button {
-    min-height: var(--control-height);
+    min-height: 64px;
+    padding: 8px;
+  }
+
+  .command-center-shell .document-workbench .document-viewer-list button span,
+  .command-center-shell .document-workbench .document-viewer-list button small {
+    display: none;
+  }
+
+  .command-center-shell .document-workbench .document-viewer-list button strong {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
   }
 
   .command-center-shell .document-workbench .document-preview-pane pre {
@@ -16118,6 +16146,11 @@ body:has(.safeclaw-landing) :is(
 
   .share-panel.workflow-panel .channel-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-share-preview] .message-preview-lines {
+    max-height: 220px;
+    overflow: auto;
   }
 }
 
@@ -19068,6 +19101,38 @@ body:has(.safeclaw-landing) :is(
   overflow: visible;
 }
 
+.command-center-shell .field-workspace-editor-focus {
+  gap: 12px;
+}
+
+.command-center-shell .field-workspace-editor-focus .workspace-canvas {
+  gap: 0;
+}
+
+.command-center-shell .field-workspace-editor-focus .workspace-canvas > :not(.workpack-shell) {
+  display: none;
+}
+
+.command-center-shell .field-workspace-editor-focus .workspace-rail {
+  display: none;
+}
+
+.command-center-shell .field-workspace-editor-focus .workpack-shell {
+  max-height: calc(100dvh - 188px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.command-center-shell .field-workspace-editor-focus .document-editor {
+  min-height: 0;
+}
+
+.command-center-shell .field-workspace-editor-focus .document-source-textarea,
+.command-center-shell .field-workspace-editor-focus .document-section-textarea {
+  max-height: 360px;
+  overflow: auto;
+}
+
 .command-center-shell.workspace-theme-night .field-workspace :is(.workspace-rail, .workspace-side, .workspace-panel, .workpack-sidebar, .document-editor) {
   border: 1px solid var(--workspace-rule);
   border-radius: var(--r-lg);
@@ -19185,8 +19250,8 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .document-workbench .document-preview-pane pre {
     min-height: 300px;
-    max-height: none;
-    overflow: visible;
+    max-height: min(42vh, 360px);
+    overflow: auto;
   }
 }
 
