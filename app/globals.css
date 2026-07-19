@@ -6318,6 +6318,8 @@ ul {
 .editor-operations-disclosure {
   grid-column: 1;
   grid-row: 3;
+  position: relative;
+  z-index: 0;
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-panel);
@@ -6355,6 +6357,18 @@ ul {
 .editor-operations-disclosure > .workspace-side {
   margin-top: var(--space-4);
   padding: 0;
+}
+
+.field-workspace-editor-focus .editor-operations-disclosure[open] > .workspace-side {
+  pointer-events: none;
+}
+
+.field-workspace-editor-focus .editor-operations-disclosure[open] {
+  pointer-events: none;
+}
+
+.field-workspace-editor-focus .editor-operations-disclosure[open] > summary {
+  pointer-events: auto;
 }
 
 .field-workspace-editor-focus .workspace-side > .share-panel {
@@ -14204,6 +14218,8 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .document-workbench .document-viewer-list button strong {
   white-space: normal;
   line-height: var(--leading-component-title);
+  font-weight: 600;
+  letter-spacing: var(--tracking-body);
 }
 
 .command-center-shell .document-workbench .document-preview-pane {
@@ -16114,7 +16130,7 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .document-workbench .document-viewer-list {
     grid-auto-flow: row;
     grid-auto-columns: auto;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     overflow-x: visible;
     padding-bottom: 0;
   }
@@ -16132,6 +16148,8 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .document-workbench .document-viewer-list button strong {
     font-size: var(--text-caption);
     line-height: var(--leading-caption);
+    font-weight: 600;
+    letter-spacing: var(--tracking-body);
   }
 
   .command-center-shell .document-workbench .document-preview-pane pre {
@@ -16177,11 +16195,22 @@ body:has(.safeclaw-landing) :is(
   .share-panel.workflow-panel .channel-card strong {
     font-size: var(--text-caption);
     line-height: var(--leading-caption);
+    font-weight: 600;
+    letter-spacing: var(--tracking-body);
   }
 
   [data-share-preview] .message-preview-lines {
-    max-height: 160px;
-    overflow: auto;
+    max-height: none;
+    overflow: visible;
+    gap: 2px;
+    padding-top: 8px;
+  }
+
+  [data-share-preview] .message-preview-lines p {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    font-weight: 600;
+    letter-spacing: var(--tracking-body);
   }
 }
 
@@ -19145,7 +19174,9 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .field-workspace-editor-focus .workspace-rail {
-  display: none;
+  display: grid;
+  gap: 8px;
+  padding-block: 8px;
 }
 
 .command-center-shell .field-workspace-editor-focus .workpack-shell {
