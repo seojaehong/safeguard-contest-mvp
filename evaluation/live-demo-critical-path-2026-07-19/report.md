@@ -6,6 +6,8 @@ Source HEAD: `6bba274edd106baec78a15ee871303f854e96c9d`
 
 Live build-info: `6bba274edd106baec78a15ee871303f854e96c9d`
 
+Evidence refresh HEAD: `98da1cb3b595434124b7b4d56e96ac48e2ec1884`
+
 ## Verdict
 
 The current production deployment is suitable for recording the workspace input, worker-language preview, and recipient confirmation demo path.
@@ -122,7 +124,19 @@ npm.cmd test -- tests\frontend-route-coverage.test.ts --maxWorkers=1 --fileParal
 Result from current workstream: 1 file / 39 tests PASS.
 
 ```powershell
+npm.cmd test -- tests\frontend-route-coverage.test.ts tests\customer-terminology-boundary.test.ts tests\workflow-share-client.test.ts --maxWorkers=1 --fileParallelism=false
+```
+
+Result at `98da1cb3b595434124b7b4d56e96ac48e2ec1884`: 3 files / 75 tests PASS.
+
+```powershell
 npm.cmd run typecheck
 ```
 
 Result from current workstream: PASS.
+
+```powershell
+npm.cmd run build
+```
+
+Result at `98da1cb3b595434124b7b4d56e96ac48e2ec1884`: PASS, static generation 28/28, includes `/workspace`, `/share/[sessionId]`, `/knowledge`, `/api/share-sessions/[sessionId]`, and `/api/workflow/dispatch`.
