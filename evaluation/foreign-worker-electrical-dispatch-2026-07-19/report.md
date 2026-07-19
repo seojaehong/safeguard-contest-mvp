@@ -64,6 +64,26 @@ Follow-up verification:
 - `npm.cmd run build`
   - PASS, 28/28 static pages generated
 
+Production `/api/build-info` later confirmed the regression fix commit `a753000695421da2d9b1d044f40d3fbcfa7faa13`.
+
+Live follow-up probe checked both the confined pump case and the electrical Vietnamese dispatch case:
+
+- Pump/LOTO scenario:
+  - HTTP 200
+  - companyType: `시설관리·기계설비 점검`
+  - workSummary: `지하 기계실 배수펌프 점검`
+  - pump/confined terms present: true
+  - wrong electrical work name `정전전로 인근 배전반 점검 작업`: false
+- Electrical Vietnamese dispatch:
+  - HTTP 200
+  - companyType: `전기설비 점검`
+  - workSummary: `정전전로 인근 배전반 점검 작업`
+  - Vietnamese language present: true
+  - `tủ điện`, `bút thử điện`, `găng tay cách điện`: true
+  - Korean in Vietnamese block: false
+  - English fallback in Vietnamese block: false
+  - full transmission contains Vietnamese electrical safety lines: true
+
 ## Launch Note
 
 Production `/api/build-info` confirmed commit `3bfe9d80a51657454242ce426d7629a01303d574`.
