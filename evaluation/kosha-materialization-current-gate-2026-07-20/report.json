@@ -1,0 +1,49 @@
+{
+  "checkedAt": "2026-07-20T03:34:00+09:00",
+  "gitHead": "d7227e55d52fedcece292af70584012491659976",
+  "branch": "fix/kosha-materialization-20260720",
+  "verdict": "PASS",
+  "scope": [
+    "exact trusted KOSHA grounding",
+    "KOSHA trust registry wave2",
+    "KOSHA trust registry wave3",
+    "KOSHA fail-closed grounding",
+    "run-ask grounding",
+    "KOSHA applicability policy",
+    "materialization matrix",
+    "Phase A product materialization",
+    "Claw tools Phase A materialization"
+  ],
+  "gates": [
+    {
+      "name": "KOSHA + Phase A focused Vitest",
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\exact-kosha-applicability-policy.test.ts tests\\kosha-materialization-matrix.test.ts tests\\phase-a-product-materialization.test.ts tests\\claw-tools-phase-a-materialization.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 9,
+      "testsPassed": 169
+    },
+    {
+      "name": "KOSHA acquisition Python tests",
+      "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body",
+      "status": "PASS",
+      "testsPassed": 19
+    },
+    {
+      "name": "Strict typecheck",
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    {
+      "name": "Production build",
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "nextVersion": "15.5.15",
+      "staticPages": 28
+    }
+  ],
+  "nonClaims": [
+    "No DB schema migration was performed.",
+    "No Supabase data mutation was performed.",
+    "This is not a full-site UX pass."
+  ]
+}
