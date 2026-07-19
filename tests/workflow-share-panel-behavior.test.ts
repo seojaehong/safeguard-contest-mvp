@@ -186,7 +186,7 @@ describe("workflow share panel behavior", () => {
   it("does not expose a raw recipient portal link as the manager share CTA", () => {
     const source = readFileSync(join(process.cwd(), "components", "WorkflowSharePanel.tsx"), "utf8");
 
-    expect(source).toContain("오늘 대상에게 문서팩을 보내고, 작업자는 개인 화면에서 확인을 남깁니다.");
+    expect(source).toContain("오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다.");
     expect(source).toContain("첫 번째 작업자 화면을 미리 열어 전송본을 확인할 수 있습니다.");
     expect(source).toContain("recipientPortalPreviewHref");
     expect(source).toContain("작업자 화면 미리보기");
