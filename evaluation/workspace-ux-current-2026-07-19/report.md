@@ -15,7 +15,7 @@ This report was re-run against the deployed production build after the share mob
 | Item | Evidence |
 | --- | --- |
 | URL | `https://www.safeclaw.kr/workspace?q=...&theme=day` |
-| Build marker | `/api/build-info` returned `1b3b6222131a3fde92ae168c113a4b8116a94c5b`, branch `master`, environment `production` |
+| Build marker | `/api/build-info` returned `eb230c865f7b7ff3ce4e235c45ed3e9d05b9d65a`, branch `master`, environment `production` |
 | Browser | Playwright Chromium |
 | Mutation | false |
 | Generated state | Local production build auto-generation completed in both desktop and mobile runs using the app fallback provider |
@@ -36,11 +36,11 @@ Screenshots:
 | Viewport / state | Previous production | Local remediation | Result |
 | --- | ---: | ---: | --- |
 | Desktop document review | 1366px / 1.52x | 1240px / 1.38x | Improved |
-| Desktop document editor | 10156px / 11.28x | 1240px / 1.38x | Fixed for launch |
-| Mobile document review | 2821px / 3.34x, preview y=845.72 | 1479px / 1.75x, preview y=691.05 | Improved; preview now begins inside first viewport |
-| Mobile document editor | 15770px / 18.68x | 1292px / 1.53x | Fixed for launch |
+| Desktop document editor | 10156px / 11.28x | 1444px / 1.60x | Fixed for launch |
+| Mobile document review | 2821px / 3.34x, preview y=845.72 | 1623px / 1.92x, preview y=835.05 | Improved; preview starts at the first viewport edge |
+| Mobile document editor | 15770px / 18.68x | 1894px / 2.24x | Fixed from hidden-scroll failure, still long |
 | Desktop share | 1429px / 1.59x, panel 632px | 1255px / 1.39x, panel 968px | Fixed desktop breakpoint |
-| Mobile share | 2296px / 2.72x | 1503px / 1.78x | Improved, still above one viewport |
+| Mobile share | 2296px / 2.72x | 1926px / 2.28x | Improved, still above one viewport |
 
 ## Documents Screen
 
@@ -51,25 +51,25 @@ Screenshots:
 
 Remaining risk:
 
-- Mobile share is improved again by the compact follow-up, but still remains above one viewport. It is usable for the video path and remains a Share v2 IA cleanup item.
+- Mobile share is improved from the original baseline but remains above one viewport. The current patch preserves the no-clipping foreign-language message contract, so Share v2 IA remains the cleanup item.
 - Some visible controls under 44px remain in the document/editor surfaces. This patch prioritized launch video geometry over full touch-target cleanup.
 
 ## Share Screen
 
 Desktop share no longer uses a 632px mobile-like card. The measured share panel is 968px wide inside the workspace, and the form shell uses a desktop-width layout.
 
-Mobile share remains single-column and longer than one viewport, but horizontal overflow is false, under-44 controls were 0, and the latest production height is 1503px / 1.78x.
+Mobile share remains single-column and longer than one viewport, but horizontal overflow is false, under-44 controls were 0, and the latest production height is 1926px / 2.28x.
 
 ## Verification
 
 - `npm.cmd run typecheck`: PASS
 - `npm.cmd run build`: PASS, 28/28 static pages
-- `node evaluation/workspace-ux-current-2026-07-19/measure_workspace_ux.cjs`: PASS, desktop and mobile generated on production build `1b3b6222131a3fde92ae168c113a4b8116a94c5b`
+- `node evaluation/workspace-ux-current-2026-07-19/measure_workspace_ux.cjs`: PASS, desktop and mobile generated on production build `eb230c865f7b7ff3ce4e235c45ed3e9d05b9d65a`
 
 ## Post-Deploy Gate
 
 Next production gate:
 
-- GitHub Actions run `29689208795` is still the authoritative CI gate for this head.
+- GitHub Actions run `29690411928` is still the authoritative CI gate for this head.
 - Continue Share v2 IA to reduce mobile share height further.
 - Continue touch-target cleanup for remaining document/editor controls under 44px.

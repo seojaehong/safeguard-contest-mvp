@@ -1,15 +1,15 @@
 {
   "artifact": "workspace-ux-current-2026-07-19",
-  "generatedAt": "2026-07-19T13:40:08.486Z",
+  "generatedAt": "2026-07-19T14:17:49.849Z",
   "target": "https://www.safeclaw.kr",
   "buildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "1b3b6222131a3fde92ae168c113a4b8116a94c5b",
+    "commitSha": "eb230c865f7b7ff3ce4e235c45ed3e9d05b9d65a",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ic8xm3v9v-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-8tbl29yiy-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "query": "세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.",
@@ -134,8 +134,8 @@
           "document": {
             "clientWidth": 1440,
             "scrollWidth": 1440,
-            "scrollHeight": 1240,
-            "scrollToViewportRatio": 1.38,
+            "scrollHeight": 1444,
+            "scrollToViewportRatio": 1.6,
             "pageHorizontalOverflow": false
           },
           "rects": {
@@ -144,22 +144,22 @@
               "x": 40,
               "y": -57,
               "width": 264,
-              "height": 1052.05,
-              "bottom": 995.05
+              "height": 1256.3,
+              "bottom": 1199.3
             },
             "commandMain": {
               "x": 320,
               "y": -57,
               "width": 1080,
-              "height": 1052.05,
-              "bottom": 995.05
+              "height": 1256.3,
+              "bottom": 1199.3
             },
             "documentPage": {
               "x": 376,
               "y": -9,
               "width": 968,
-              "height": 948.05,
-              "bottom": 939.05
+              "height": 1152.3,
+              "bottom": 1143.3
             },
             "documentWorkbench": null,
             "documentViewerShell": null,
@@ -169,46 +169,46 @@
               "x": 376,
               "y": -9,
               "width": 968,
-              "height": 948.05,
-              "bottom": 939.05
+              "height": 1152.3,
+              "bottom": 1143.3
             },
             "fieldOpsWorkspace": null,
             "workpackEditor": null,
             "sharePage": null,
             "sharePanel": {
               "x": 393,
-              "y": 1889.14,
+              "y": 2093.39,
               "width": 934,
               "height": 985.39,
-              "bottom": 2874.53
+              "bottom": 3078.78
             },
             "shareFormShell": {
               "x": 408,
-              "y": 1995.14,
+              "y": 2199.39,
               "width": 904,
               "height": 224.39,
-              "bottom": 2219.53
+              "bottom": 2423.78
             },
             "shareCard": {
               "x": 408,
-              "y": 1995.14,
+              "y": 2199.39,
               "width": 348.95,
               "height": 224.39,
-              "bottom": 2219.53
+              "bottom": 2423.78
             },
             "sharePreview": {
               "x": 408,
-              "y": 2229.53,
+              "y": 2433.78,
               "width": 904,
               "height": 576,
-              "bottom": 2805.53
+              "bottom": 3009.78
             },
             "shareCommand": {
               "x": 781.95,
-              "y": 2162.53,
+              "y": 2366.78,
               "width": 231.94,
               "height": 44,
-              "bottom": 2206.53
+              "bottom": 2410.78
             }
           },
           "overflow": {
@@ -216,7 +216,7 @@
             "commandMain": {
               "clientWidth": 1080,
               "scrollWidth": 1080,
-              "clientHeight": 1052,
+              "clientHeight": 1256,
               "scrollHeight": 5956,
               "horizontalOverflow": false,
               "verticalOverflow": true
@@ -364,8 +364,8 @@
           "document": {
             "clientWidth": 390,
             "scrollWidth": 390,
-            "scrollHeight": 1479,
-            "scrollToViewportRatio": 1.75,
+            "scrollHeight": 1623,
+            "scrollToViewportRatio": 1.92,
             "pageHorizontalOverflow": false
           },
           "rects": {
@@ -381,43 +381,43 @@
               "x": 11,
               "y": 268,
               "width": 368,
-              "height": 1146.08,
-              "bottom": 1414.08
+              "height": 1290.08,
+              "bottom": 1558.08
             },
             "documentPage": {
               "x": 27,
               "y": 300,
               "width": 336,
-              "height": 1074.08,
-              "bottom": 1374.08
+              "height": 1218.08,
+              "bottom": 1518.08
             },
             "documentWorkbench": {
               "x": 27,
               "y": 300,
               "width": 336,
-              "height": 1074.08,
-              "bottom": 1374.08
+              "height": 1218.08,
+              "bottom": 1518.08
             },
             "documentViewerShell": {
               "x": 40,
               "y": 599.05,
               "width": 310,
-              "height": 651.84,
-              "bottom": 1250.89
+              "height": 795.84,
+              "bottom": 1394.89
             },
             "documentRail": {
               "x": 40,
               "y": 599.05,
               "width": 310,
-              "height": 80,
-              "bottom": 679.05
+              "height": 224,
+              "bottom": 823.05
             },
             "documentPreview": {
               "x": 40,
-              "y": 691.05,
+              "y": 835.05,
               "width": 310,
               "height": 559.84,
-              "bottom": 1250.89
+              "bottom": 1394.89
             },
             "editorSurface": null,
             "fieldOpsWorkspace": null,
@@ -433,16 +433,16 @@
             "documentRail": {
               "clientWidth": 310,
               "scrollWidth": 310,
-              "clientHeight": 80,
-              "scrollHeight": 80,
+              "clientHeight": 224,
+              "scrollHeight": 224,
               "horizontalOverflow": false,
               "verticalOverflow": false
             },
             "commandMain": {
               "clientWidth": 368,
               "scrollWidth": 368,
-              "clientHeight": 1146,
-              "scrollHeight": 1146,
+              "clientHeight": 1290,
+              "scrollHeight": 1290,
               "horizontalOverflow": false,
               "verticalOverflow": false
             },
@@ -464,8 +464,8 @@
           "document": {
             "clientWidth": 390,
             "scrollWidth": 390,
-            "scrollHeight": 1292,
-            "scrollToViewportRatio": 1.53,
+            "scrollHeight": 1894,
+            "scrollToViewportRatio": 2.24,
             "pageHorizontalOverflow": false
           },
           "rects": {
@@ -481,15 +481,15 @@
               "x": 11,
               "y": -162,
               "width": 368,
-              "height": 959.05,
-              "bottom": 797.05
+              "height": 1561.17,
+              "bottom": 1399.17
             },
             "documentPage": {
               "x": 27,
               "y": -130,
               "width": 336,
-              "height": 887.05,
-              "bottom": 757.05
+              "height": 1489.17,
+              "bottom": 1359.17
             },
             "documentWorkbench": null,
             "documentViewerShell": null,
@@ -499,46 +499,46 @@
               "x": 27,
               "y": -130,
               "width": 336,
-              "height": 887.05,
-              "bottom": 757.05
+              "height": 1489.17,
+              "bottom": 1359.17
             },
             "fieldOpsWorkspace": null,
             "workpackEditor": null,
             "sharePage": null,
             "sharePanel": {
               "x": 44,
-              "y": 1972.17,
+              "y": 2574.3,
               "width": 302,
-              "height": 1114.09,
-              "bottom": 3086.27
+              "height": 1573.09,
+              "bottom": 4147.39
             },
             "shareFormShell": {
               "x": 57,
-              "y": 2162.17,
+              "y": 2764.3,
               "width": 276,
               "height": 602.09,
-              "bottom": 2764.27
+              "bottom": 3366.39
             },
             "shareCard": {
               "x": 57,
-              "y": 2162.17,
+              "y": 2764.3,
               "width": 276,
               "height": 191.09,
-              "bottom": 2353.27
+              "bottom": 2955.39
             },
             "sharePreview": {
               "x": 57,
-              "y": 2772.27,
+              "y": 3374.39,
               "width": 276,
-              "height": 249,
-              "bottom": 3021.27
+              "height": 708,
+              "bottom": 4082.39
             },
             "shareCommand": {
               "x": 68,
-              "y": 2514.27,
+              "y": 3116.39,
               "width": 254,
               "height": 100,
-              "bottom": 2614.27
+              "bottom": 3216.39
             }
           },
           "overflow": {
@@ -546,7 +546,7 @@
             "commandMain": {
               "clientWidth": 368,
               "scrollWidth": 368,
-              "clientHeight": 959,
+              "clientHeight": 1561,
               "scrollHeight": 8170,
               "horizontalOverflow": false,
               "verticalOverflow": true
@@ -554,8 +554,8 @@
             "sharePanel": {
               "clientWidth": 300,
               "scrollWidth": 300,
-              "clientHeight": 1112,
-              "scrollHeight": 1112,
+              "clientHeight": 1571,
+              "scrollHeight": 1571,
               "horizontalOverflow": false,
               "verticalOverflow": false
             }
@@ -577,8 +577,8 @@
           "document": {
             "clientWidth": 390,
             "scrollWidth": 390,
-            "scrollHeight": 1503,
-            "scrollToViewportRatio": 1.78,
+            "scrollHeight": 1926,
+            "scrollToViewportRatio": 2.28,
             "pageHorizontalOverflow": false
           },
           "rects": {
@@ -594,8 +594,8 @@
               "x": 11,
               "y": 268,
               "width": 368,
-              "height": 1170.09,
-              "bottom": 1438.09
+              "height": 1593.09,
+              "bottom": 1861.09
             },
             "documentPage": null,
             "documentWorkbench": null,
@@ -609,15 +609,15 @@
               "x": 27,
               "y": 300,
               "width": 336,
-              "height": 1098.09,
-              "bottom": 1398.09
+              "height": 1521.09,
+              "bottom": 1821.09
             },
             "sharePanel": {
               "x": 27,
               "y": 300,
               "width": 336,
-              "height": 1098.09,
-              "bottom": 1398.09
+              "height": 1521.09,
+              "bottom": 1821.09
             },
             "shareFormShell": {
               "x": 40,
@@ -637,8 +637,8 @@
               "x": 40,
               "y": 1084.09,
               "width": 310,
-              "height": 249,
-              "bottom": 1333.09
+              "height": 672,
+              "bottom": 1756.09
             },
             "shareCommand": {
               "x": 51,
@@ -653,16 +653,16 @@
             "commandMain": {
               "clientWidth": 368,
               "scrollWidth": 368,
-              "clientHeight": 1170,
-              "scrollHeight": 1170,
+              "clientHeight": 1593,
+              "scrollHeight": 1593,
               "horizontalOverflow": false,
               "verticalOverflow": false
             },
             "sharePanel": {
               "clientWidth": 334,
               "scrollWidth": 334,
-              "clientHeight": 1096,
-              "scrollHeight": 1096,
+              "clientHeight": 1519,
+              "scrollHeight": 1519,
               "horizontalOverflow": false,
               "verticalOverflow": false
             }
