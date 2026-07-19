@@ -27,6 +27,7 @@ North-star mode remains active. Current master has made launch-surface progress 
 | Current live workspace documents/share check | `daec3aa5` | `evaluation/workspace-doc-share-live-current-2026-07-20-c6b2236f/report.md` |
 | Current live critical surface check | `a807c6d4` | `evaluation/live-critical-surface-current-2026-07-20/report.md` |
 | Broad KOSHA guide corpus audit | `fa36115a` input state | `evaluation/kosha-guide-current-audit-2026-07-20/report.md` |
+| KOSHA provenance backfill dry-run | `92a7ca8d` input state | `evaluation/kosha-provenance-backfill-dry-run-2026-07-20/report.md` |
 | RLS / LLM Wiki approval preflight | `fa36115a` input state | `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.md` |
 | North-star open gate matrix | `fa36115a` input state | `evaluation/northstar-open-gates-current-2026-07-20/report.md` |
 
@@ -68,12 +69,16 @@ North-star mode remains active. Current master has made launch-surface progress 
 - North-star open gate audit:
   - `node scripts\northstar_open_gate_audit.mjs --output evaluation/northstar-open-gates-current-2026-07-20`
   - PASS as an audit execution with overall `open`; `live_harness_quality` and `kosha_exact_trust_registry` remain proven, while `supabase_rls_launch_isolation`, `llm_wiki_publication`, and `sif_embedding_runtime` remain approval-gated.
+- KOSHA provenance backfill dry-run assertion:
+  - `node -e "...kosha provenance dry-run assertions..."`
+  - PASS. The dry-run is read-only, DB mutation `false`, upload `false`, verified subset ready rows `234`, remaining broad corpus rows requiring metadata/body/review work `806`, version/state drift `8`, and tested retrieval reflection failures `13`.
 
 ## Current Product Claims That Are Safe
 
 - SafeClaw fixes SIF/KOSHA/legal/work-history evidence before LLM wording.
 - The exact KOSHA production registry includes reviewed pins for D-C-13, D-C-7, and B-E-10; broader metadata-verified KOSHA candidates are not claimed as direct exact evidence.
 - The broad KOSHA guide corpus is present and reproducibly audited: local ZIP and env-configured Supabase snapshot both expose 1,040 rows with matching canonical hash, but that parity proves corpus parity only.
+- A zero-mutation provenance dry-run identifies 234 verified current technical-support-regulation rows as ready for a future reviewed backfill packet. The remaining 806 broad corpus rows are not ready for authoritative grounding.
 - Workspace generation now keeps provenance/audit data available but does not auto-expand those details into the first review surface.
 - The generated Documents step on production commit `acb94db1` measured 1149px at 1440x723 and 1348px at 390x844, with sticky count 0 and no horizontal overflow.
 - The current live Documents step on production marker `c6b2236f` measured 1088px at 1440x723 and 1417px at 390x844, with sticky count 0 and no horizontal overflow.
@@ -97,6 +102,6 @@ North-star mode remains active. Current master has made launch-surface progress 
 
 1. Re-run production marker after `00d854f3` and later commits deploy.
 2. Continue RLS / LLM Wiki approval-gated path only after explicit DB/migration approval. The current zero-mutation packet is ready for operator review, but live catalog, tenant A/B, Storage, service-role, publication RPC, idempotency, rollback, and leak tests remain open.
-3. Expand exact KOSHA pins through the immutable acquisition/review pipeline, not by bulk-promoting metadata candidates. For the 1,040-row broad corpus, the next zero-mutation step is official URL/file ID/published/status provenance backfill dry-run plus body/OCR recovery candidates for the 818 empty-body rows.
+3. Expand exact KOSHA pins through the immutable acquisition/review pipeline, not by bulk-promoting metadata candidates. For the 1,040-row broad corpus, the next zero-mutation step is per-item official metadata harvesting for the remaining 806 rows and body/OCR recovery candidates for the 818 empty-body rows, then a reviewed approval packet before any DB write.
 4. Continue Hermes as a versioned EngineAdapter / remote naturalizer boundary; do not move it into `ai-provider-policy` or grant tool/effect authority.
 5. Reduce remaining mobile/share IA burden and continue full-surface live browser checks after each UX patch.
