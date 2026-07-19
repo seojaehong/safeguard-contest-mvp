@@ -34,4 +34,38 @@ This remediation checks the electrical work path where the exact KOSHA trust reg
 
 ## Launch Note
 
-This is a source-level and test-level fix. Live production must be re-probed after deployment confirms the new commit in `/api/build-info`.
+Production `/api/build-info` confirmed commit `f5eadcd40f00d5b80f1de222292620090ed19b94`.
+
+Live `/api/ask` probe against `https://www.safeclaw.kr` with the same electrical scenario returned:
+
+- HTTP 200
+- mode: `live`
+- generationMode: `enhanced`
+- companyType: `전기설비 점검`
+- workSummary: `정전전로 인근 배전반 점검 작업`
+- structured risk rows: 5
+- required materialization:
+  - `정전전로`: true
+  - `배전반`: true
+  - `검전`: true
+  - `절연보호구`: true
+  - `B-E-10`: true
+- generic fallback phrase `비정형 유지보수 작업`: false
+
+Risk assessment preview now begins with the electrical work identity:
+
+```text
+업체명: 세이프전기
+업종: 전기설비 점검
+작업명: 정전전로 인근 배전반 점검 작업
+공정/세부작업: 정전전로 범위 확인, 전원 차단·잠금표지, 검전·무전압 확인, 배전반 점검, 절연보호구 착용
+```
+
+TBM preview now carries the same electrical controls:
+
+```text
+오늘 작업: 정전전로 인근 배전반 점검 작업
+1. 정전전로 범위 오인 또는 잔류전하 확인 미흡으로 인한 감전
+2. 배전반 내부 충전부 접근 중 절연보호구·절연방호 미흡으로 인한 감전·화상
+3. 전원 차단·잠금표지·검전 절차 미확인으로 인한 오통전 및 작업자 접촉
+```
