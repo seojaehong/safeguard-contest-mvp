@@ -1,0 +1,47 @@
+{
+  "artifact": "kosha-materialization-matrix-2026-07-19",
+  "generatedAt": "2026-07-19T14:33:31Z",
+  "baseHead": "cae881c7f4bd6ce4bcfb60ab49e372351433341d",
+  "mutationPerformed": false,
+  "scope": "Non-mutating KOSHA/SIF materialization regression for generated workpack surfaces.",
+  "matrix": [
+    {
+      "scenario": "exterior-wall painting with scaffold/fall controls",
+      "query": "세이프건설 서울 성수동 외벽 도장 작업. 이동식 비계와 작업발판을 사용하고 안전난간, 안전대, 강풍 위험을 반영해 위험성평가와 TBM을 만들어줘.",
+      "expectedExactGuide": "D-C-13",
+      "evidenceAssertion": "dbHarness/externalData surface contains D-C-13 and directEvidence + SIF cases are present.",
+      "documentAssertion": "generated workpack surface contains exterior-wall/painting, work-platform/scaffold, guardrail/safety-belt/fall wording.",
+      "status": "pass"
+    },
+    {
+      "scenario": "mobile scaffold assembly",
+      "query": "이동식비계 조립작업. 작업자 4명, 바퀴 고정과 아웃트리거, 승강통로, 추락 위험을 반영해 위험성평가와 TBM을 만들어줘.",
+      "expectedExactGuide": "D-C-7",
+      "evidenceAssertion": "dbHarness/externalData surface contains D-C-7 and directEvidence is present.",
+      "documentAssertion": "generated workpack surface contains mobile-scaffold/scaffold and wheel/outrigger/access/fall wording.",
+      "status": "pass"
+    },
+    {
+      "scenario": "electrical distribution-board inspection near de-energized circuits",
+      "query": "세이프전기 부산 해운대 상가 정전전로 인근 배전반 점검 작업. 작업자 3명, 절연보호구와 검전 필요. 위험성평가와 TBM을 만들어줘.",
+      "expectedExactGuide": "B-E-10",
+      "evidenceAssertion": "dbHarness/externalData surface contains B-E-10.",
+      "documentAssertion": "generated workpack surface contains de-energized circuit, distribution board, voltage test, insulating PPE, and electrical shock controls.",
+      "status": "pass"
+    }
+  ],
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\kosha-materialization-matrix.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "tests": 3,
+      "durationSeconds": 12.12
+    }
+  ],
+  "notes": [
+    "This is not a DB migration and does not mutate Supabase.",
+    "The matrix verifies materialization into generated workpack surfaces, not only reference retrieval.",
+    "The D-C-13 case also verifies SIF cases are present for launch demo grounding."
+  ]
+}
