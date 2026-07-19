@@ -17,10 +17,10 @@ If the old behavior is still visible, the likely cause is stale local server, st
 
 - URL: `https://www.safeclaw.kr/workspace`
 - Build info source: `https://www.safeclaw.kr/api/build-info`
-- Commit: `8f77334b23345ae119caf50177ef1468e12fa727`
+- Commit: `1bce421e3b2d1f07e402a9b0453961199c17f58a`
 - Branch: `master`
 - Environment: `production`
-- Deployment URL: `safeguard-contest-nagbh7nom-seojaehongs-projects.vercel.app`
+- Deployment URL: `safeguard-contest-xikm3xs18-seojaehongs-projects.vercel.app`
 
 ## Flow Tested
 
