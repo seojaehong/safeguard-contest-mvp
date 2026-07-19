@@ -1,0 +1,128 @@
+{
+  "artifact": "north-star-current-state-2026-07-19",
+  "generatedAt": "2026-07-19T21:12:00+09:00",
+  "status": "in_progress_not_complete",
+  "latestPushedHead": "456f728421520eaf4b89063e61c4e25c77dca938",
+  "productionBuildInfo": {
+    "url": "https://www.safeclaw.kr/api/build-info",
+    "statusCode": 200,
+    "commitSha": "456f728421520eaf4b89063e61c4e25c77dca938",
+    "branch": "master",
+    "environment": "production"
+  },
+  "currentCi": {
+    "runId": 29686271574,
+    "url": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/29686271574",
+    "headSha": "456f728421520eaf4b89063e61c4e25c77dca938",
+    "status": "in_progress",
+    "completedGreenSteps": [
+      "checkout",
+      "setup-node",
+      "npm install",
+      "playwright chromium install",
+      "typecheck"
+    ],
+    "pendingSteps": [
+      "full npm.cmd test -- --maxWorkers=1 --fileParallelism=false",
+      "production build"
+    ]
+  },
+  "provenCurrentGates": {
+    "koshaExactTrustRegistry": {
+      "state": "proven",
+      "artifact": "evaluation/northstar-open-gates-current-2026-07-19/report.json",
+      "currentReconciliation": "evaluation/kosha-current-master-reconciliation-2026-07-19/report.json",
+      "exactPins": ["D-C-13", "D-C-7", "B-E-10"],
+      "localCorpus": {
+        "items": 234,
+        "chunks": 7127
+      },
+      "mutationSafety": {
+        "dbSchemaChanged": false,
+        "supabaseDataChanged": false,
+        "corpusUploaded": false
+      }
+    },
+    "shareRecipientSurface": {
+      "state": "proven_for_current_production_mapped_shell_and_focused_contract",
+      "artifact": "evaluation/share-recipient-live-current-2026-07-19/report.json",
+      "focusedTests": {
+        "files": 3,
+        "tests": 22,
+        "status": "pass"
+      },
+      "liveSmoke": {
+        "recipientShellStatus": 200,
+        "invalidRecipientApiStatus": 400,
+        "expectedFailClosed": true
+      }
+    },
+    "liveHarnessQuality": {
+      "state": "proven",
+      "artifact": "evaluation/live-harness-quality-probe-current-2026-07-19/report.json"
+    },
+    "ontologyAndWhyLiveUi": {
+      "state": "proven_in_current_live_rechecks",
+      "artifacts": [
+        "evaluation/ontology-current-live-recheck-2026-07-19/report.md",
+        "evaluation/why-current-layout-recheck-2026-07-19/report.md",
+        "evaluation/northstar-live-ui-current-2026-07-19/report.md"
+      ]
+    }
+  },
+  "approvalGatedOrIncompleteGates": {
+    "supabaseRlsLaunchIsolation": {
+      "state": "approval_gated",
+      "artifact": "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-19/report.json",
+      "launchReadiness": false,
+      "dbMutationPerformed": false
+    },
+    "llmWikiPublication": {
+      "state": "approval_gated",
+      "artifact": "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-19/report.json",
+      "launchReadiness": false,
+      "dbMutationPerformed": false
+    },
+    "sifEmbeddingRuntime": {
+      "state": "approval_gated",
+      "artifact": "evaluation/sif-embedding-gate/approval-preflight-report.json",
+      "corpusCount": 6032,
+      "embeddingGenerated": false,
+      "uploaded": false
+    },
+    "providerDispatch": {
+      "state": "approval_gated_preview_only",
+      "artifact": "evaluation/provider-dispatch-idempotency-gate-2026-07-19/report.json",
+      "providerMessageSent": false,
+      "liveDispatchUnlocked": false
+    },
+    "realProductionInvitedAck": {
+      "state": "requires_explicit_live_data_approval",
+      "reason": "The route-level invited loop is tested, but creating a real production share session and read confirmation would mutate production data."
+    },
+    "fullCiForLatestHead": {
+      "state": "in_progress",
+      "runId": 29686271574
+    }
+  },
+  "safeDemoClaims": [
+    "SafeClaw grounds generation in SIF/KOSHA/current work-history evidence before LLM wording.",
+    "The current production-mapped build has KOSHA exact trust registry readiness for D-C-13, D-C-7, and B-E-10.",
+    "The current production-mapped build has a worker-facing recipient portal shell and focused share contract.",
+    "Hermes/OpenClaw remains an adapter boundary while SafeClaw remains the system of record."
+  ],
+  "forbiddenClaims": [
+    "The full North Star objective is complete.",
+    "LLM Wiki production publication is available.",
+    "Live Supabase RLS tenant isolation is launch-proven.",
+    "SIF vector retrieval is production-active.",
+    "Live SMS/Kakao/email provider dispatch is proven.",
+    "Every real invited production recipient ACK has been verified."
+  ],
+  "nextWork": [
+    "Wait for CI 29686271574 and record final result.",
+    "If CI passes, update this current-state artifact with green CI evidence.",
+    "If user approves production data mutation, run a real invited recipient ACK readback gate; otherwise keep route-level proof as the safe boundary.",
+    "Proceed to approved Phase B gates only after explicit migration/provider/RLS approvals."
+  ]
+}
