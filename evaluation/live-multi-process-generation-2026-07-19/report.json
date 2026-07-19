@@ -1,6 +1,7 @@
 {
   "generatedAt": "2026-07-19T03:17:00.000Z",
   "verdictBeforePatch": "hold",
+  "verdictAfterDeployment": "pass",
   "liveProbeBeforePatch": {
     "route": "POST https://www.safeclaw.kr/api/ask",
     "status": 200,
@@ -55,12 +56,25 @@
     }
   },
   "postDeployGate": {
-    "required": true,
+    "required": false,
+    "commitSha": "08798afcb395c516adde31a65c7e823c63323bc0",
+    "result": "pass",
+    "structuredRiskRowCount": 6,
+    "processCounts": {
+      "굴착": 2,
+      "토사반출": 2,
+      "자재양중": 2
+    },
+    "missingExpectedProcesses": [],
+    "underCoveredExpectedProcesses": [],
     "criteria": [
       "missingExpectedProcesses is empty",
       "underCoveredExpectedProcesses is empty",
       "processCounts contains 굴착, 토사반출, 자재양중",
       "each requested process has at least two structured risk rows"
     ]
+  },
+  "followUp": {
+    "note": "process coverage is fixed; next quality pass should improve process-specific evidence matching so rows do not reuse stronger evidence from adjacent processes"
   }
 }

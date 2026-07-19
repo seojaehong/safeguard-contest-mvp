@@ -4,7 +4,9 @@ Date: 2026-07-19
 
 ## Verdict
 
-HOLD before this patch. The live `/api/ask` route accepted `aiMode: "full"` and returned HTTP 200, but the produced structured risk rows did not preserve the three requested process labels.
+PASS after deployment of `08798afcb395c516adde31a65c7e823c63323bc0`.
+
+Before the patch, the live `/api/ask` route accepted `aiMode: "full"` and returned HTTP 200, but the produced structured risk rows did not preserve the three requested process labels.
 
 ## Live Probe Input
 
@@ -65,11 +67,24 @@ npm.cmd run typecheck
 PASS
 ```
 
-## Remaining Gate
+## Post-Deploy Live Gate
 
-After deployment reaches the fix commit, rerun the same live `/api/ask` probe and require:
+After deployment reached `08798afcb395c516adde31a65c7e823c63323bc0`, the same live `/api/ask` probe passed:
 
-- `missingExpectedProcesses = []`
-- `underCoveredExpectedProcesses = []`
-- `processCounts` contains `굴착`, `토사반출`, `자재양중`
-- each requested process has at least two structured risk rows
+- Route: `POST https://www.safeclaw.kr/api/ask`
+- Status: `200`
+- Build-info commit: `08798afcb395c516adde31a65c7e823c63323bc0`
+- Structured risk rows: `6`
+- Process counts: `굴착: 2`, `토사반출: 2`, `자재양중: 2`
+- Missing requested processes: none
+- Under-covered requested processes: none
+- Source detail: `structured rows=DB harness deterministic`
+
+Postfix probe summaries:
+
+- `postfix-response-summary.json`
+- `postfix-response-sample.json`
+
+## Follow-Up Quality Note
+
+The fixed live response now preserves process coverage. Some evidence rows are still reused across process labels when the DB harness has stronger matching evidence for one process than another. That is acceptable for this gate but should be refined in the next quality pass with stricter per-process evidence matching and process-specific controls.
