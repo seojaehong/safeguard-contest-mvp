@@ -465,7 +465,7 @@ function hasExcavationWorkIdentity(question: string) {
 }
 
 function hasElectricalWorkIdentity(question: string) {
-  return /정전\s*전로|정전전로|충전\s*전로|충전전로|배전반|분전반|수전반|전기\s*(?:작업|점검|정비|공사)|검전|무전압|절연\s*보호구|절연보호구|LOTO|잠금표지/.test(question);
+  return /정전\s*전로|정전전로|충전\s*전로|충전전로|배전반|분전반|수전반|전기\s*(?:작업|점검|정비|공사)|(?:검전|무전압|절연\s*보호구|절연보호구).{0,20}(?:전기|전로|배전반|분전반|수전반)|(?:전기|전로|배전반|분전반|수전반).{0,20}(?:검전|무전압|절연\s*보호구|절연보호구)/.test(question);
 }
 
 function inferKnownLocationPrefix(question: string) {

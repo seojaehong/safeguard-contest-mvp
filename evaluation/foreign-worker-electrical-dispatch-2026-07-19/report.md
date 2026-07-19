@@ -42,6 +42,28 @@ After the electrical KOSHA workpack path was fixed, the worker-facing multilingu
   - `npm.cmd run build`
   - PASS, 28/28 static pages generated
 
+## CI Regression Follow-Up
+
+The first electrical workpack commit made the electrical identity detector too broad: `LOTO` / `잠금표지` alone could classify a basement pump confined-space inspection as an electrical distribution-board task. This was caught by CI in `tests/pump-confined-scenario.test.ts`.
+
+Follow-up fix:
+
+- `LOTO`, `잠금표지`, `검전`, and `절연` no longer classify a scenario as electrical by themselves.
+- The detector now requires explicit electrical work/equipment context such as `정전전로`, `충전전로`, `배전반`, `분전반`, `수전반`, or `전기 작업/점검/정비/공사`.
+
+Follow-up verification:
+
+- `npm.cmd test -- tests\pump-confined-scenario.test.ts tests\scenario-inference.test.ts --maxWorkers=1 --fileParallelism=false`
+  - 2 files / 29 tests PASS
+- `npm.cmd test -- tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false -t "materializes exact electrical KOSHA guidance"`
+  - 1 file / 1 selected test PASS
+- `npm.cmd test -- tests\foreign-worker-languages.test.ts tests\workflow-share-client.test.ts tests\workspace-share-simplification.test.ts tests\pump-confined-scenario.test.ts tests\scenario-inference.test.ts tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false -t "electrical|pump|keeps basement|distribution-board|share|foreign|language|materializes exact"`
+  - 6 files / 53 selected tests PASS
+- `npm.cmd run typecheck`
+  - PASS
+- `npm.cmd run build`
+  - PASS, 28/28 static pages generated
+
 ## Launch Note
 
 Production `/api/build-info` confirmed commit `3bfe9d80a51657454242ce426d7629a01303d574`.
