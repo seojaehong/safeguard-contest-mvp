@@ -1,0 +1,107 @@
+{
+  "checkedAt": "2026-07-19T21:08:15.114Z",
+  "base": "4d9548543b9e052455b00252ab2264d8ff430253",
+  "metrics": {
+    "href": "http://localhost:3021/documents",
+    "title": "SafeClaw | 안전 문서팩 생성",
+    "doc": {
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 2529,
+      "clientHeight": 844
+    },
+    "outside": 0,
+    "rects": {
+      ".safeclaw-module-nav": {
+        "x": 0,
+        "y": 65,
+        "w": 390,
+        "h": 63,
+        "scrollH": 62,
+        "clientH": 62,
+        "display": "flex"
+      },
+      ".safeclaw-page-decision-header": {
+        "x": 0,
+        "y": 128,
+        "w": 390,
+        "h": 71,
+        "scrollH": 70,
+        "clientH": 70,
+        "display": "grid"
+      },
+      ".safeclaw-current-workpack": {
+        "x": 16,
+        "y": 211,
+        "w": 358,
+        "h": 88,
+        "scrollH": 86,
+        "clientH": 86,
+        "display": "grid"
+      },
+      ".safeclaw-document-cockpit": {
+        "x": 12,
+        "y": 311,
+        "w": 366,
+        "h": 222,
+        "scrollH": 222,
+        "clientH": 222,
+        "display": "block"
+      },
+      ".workpack-shell": {
+        "x": 12,
+        "y": 549,
+        "w": 366,
+        "h": 1932.40625,
+        "scrollH": 1932,
+        "clientH": 1932,
+        "display": "grid"
+      },
+      ".workpack-sidebar": {
+        "x": 12,
+        "y": 549,
+        "w": 366,
+        "h": 110,
+        "scrollH": 108,
+        "clientH": 108,
+        "display": "grid"
+      },
+      ".document-editor": {
+        "x": 12,
+        "y": 675,
+        "w": 366,
+        "h": 1806.40625,
+        "scrollH": 1804,
+        "clientH": 1804,
+        "display": "grid"
+      },
+      ".document-toolbar": {
+        "x": 45,
+        "y": 708,
+        "w": 300,
+        "h": 151.875,
+        "scrollH": 152,
+        "clientH": 152,
+        "display": "grid"
+      },
+      ".document-textarea": {
+        "x": 45,
+        "y": 1035.875,
+        "w": 300,
+        "h": 236,
+        "scrollH": 287,
+        "clientH": 234,
+        "display": "block"
+      },
+      ".submission-preview-panel": {
+        "x": 41,
+        "y": 2321.609375,
+        "w": 308,
+        "h": 130.796875,
+        "scrollH": 129,
+        "clientH": 129,
+        "display": "grid"
+      }
+    }
+  }
+}
