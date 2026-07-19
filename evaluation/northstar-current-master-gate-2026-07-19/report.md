@@ -163,6 +163,35 @@ Latest current-master checks in this worktree:
 - `npm.cmd run typecheck`: PASS
 - `npm.cmd run build`: PASS, static pages `28/28`
 
+## Final 99 Gate
+
+Latest launch evidence refreshed in:
+
+- `evaluation/final-99-gate/decision.md`
+- `evaluation/final-99-gate/report.json`
+- `evaluation/final-99-gate/orchestration-download/api-orchestration-download-smoke.md`
+
+Command:
+
+```powershell
+node scripts/final_99_gate_runner.mjs
+```
+
+Result:
+
+- Overall: `pass_with_notice`
+- Commit under test: `d675aadf`
+- Elapsed: `82852ms`
+- Screenshots: `5`
+- Document export smoke: PASS
+- Ask orchestration: `11/11 documents`
+
+Notices:
+
+- `SAFEGUARD_AUTH_TOKEN` was absent, so live admin save/reopen was not run.
+- Dispatch stays auth-gated; raw payload is rejected and unapproved channels remain locked.
+- HWPX remains a submission draft format, while exact original cell-level cloning stays out of scope.
+
 ## Next North Star Work
 
 1. Approved live RLS catalog and disposable tenant A/B negative tests.

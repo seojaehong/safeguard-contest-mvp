@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-07T02:38:42.600Z",
-  "baseUrl": "https://www.safeclaw.kr",
-  "commit": "6b8ce93",
-  "overall": "blocked",
-  "elapsedMs": 120590,
+  "generatedAt": "2026-07-19T10:27:24.113Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "commit": "d675aadf",
+  "overall": "pass_with_notice",
+  "elapsedMs": 82852,
   "gates": [
     {
       "name": "ask-orchestration",
@@ -17,7 +17,7 @@
     },
     {
       "name": "document-downloads",
-      "verdict": "blocked",
+      "verdict": "pass",
       "evidence": "core PDF + orchestration XLS/HWPX/PDF smoke"
     },
     {
@@ -28,17 +28,17 @@
     {
       "name": "ai-remediation-flow",
       "verdict": "pass",
-      "evidence": "Gemini (gemini-flash-latest)"
+      "evidence": "OpenAI"
     },
     {
       "name": "dispatch-policy",
-      "verdict": "pass",
-      "evidence": "email/sms active, kakao/band locked"
+      "verdict": "pass_with_notice",
+      "evidence": "raw payload rejected, band locked, auth gate enforced"
     },
     {
       "name": "screenshots",
-      "verdict": "pass_with_notice",
-      "evidence": "0 screenshots"
+      "verdict": "pass",
+      "evidence": "5 screenshots"
     }
   ],
   "outputs": {
@@ -52,7 +52,7 @@
     "commercializationDoc": "docs/commercialization-onepager.md"
   },
   "notes": [
-    "카카오/밴드는 승인 전이라 제외했습니다.",
+    "provider 전파는 관리자 인증과 서버 소유 workpack/share session이 필요하며, 카카오/밴드는 승인 전이라 제외했습니다.",
     "HWPX는 제출형 초안으로 고지합니다.",
     "관리자 이력 게이트는 SAFEGUARD_AUTH_TOKEN이 없으면 pass_with_notice로 남습니다."
   ]
