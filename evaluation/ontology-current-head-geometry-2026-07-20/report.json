@@ -1,0 +1,44 @@
+{
+  "status": "partial-pass",
+  "date": "2026-07-20",
+  "head": "6314728790a2cd42f87a96280b98b8e88918984f",
+  "served_url": "http://localhost:3024/ontology",
+  "server": "next start --port 3024 after npm.cmd run build",
+  "verdict": "The prior 166-node hairball P0 is not reproduced on the current authoritative code path. Remaining issue is mobile page length/information architecture, not graph collision.",
+  "desktop_1440x900": {
+    "body_height": 2383,
+    "document_client_width": 1440,
+    "document_scroll_width": 1440,
+    "page_overflow": false,
+    "outside_elements": 0,
+    "neighborhood_graph_nodes": 13,
+    "neighborhood_overlap_pairs": 0,
+    "graph_rect": {
+      "x": 261,
+      "y": 890.39,
+      "width": 1154,
+      "height": 562
+    }
+  },
+  "mobile_390x844": {
+    "body_height": 4602,
+    "document_client_width": 390,
+    "document_scroll_width": 390,
+    "page_overflow": false,
+    "outside_elements": 0,
+    "desktop_graph_hidden": true,
+    "mobile_relations_visible": true,
+    "mobile_relations_rect": {
+      "x": 17,
+      "y": 1271.38,
+      "width": 356,
+      "height": 1250
+    },
+    "neighborhood_graph_nodes_in_dom": 13,
+    "neighborhood_overlap_pairs": 0
+  },
+  "remaining_risk": [
+    "Mobile /ontology is still long at 4602px, so task-based section collapse or deeper IA split remains useful.",
+    "This check used local production build because live deployment marker had not advanced to the latest master at measurement time."
+  ]
+}
