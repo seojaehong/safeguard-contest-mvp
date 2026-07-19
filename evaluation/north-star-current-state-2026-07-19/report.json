@@ -1,28 +1,26 @@
 {
   "artifact": "north-star-current-state-2026-07-19",
-  "generatedAt": "2026-07-19T21:12:00+09:00",
+  "generatedAt": "2026-07-19T21:28:00+09:00",
   "status": "in_progress_not_complete",
-  "latestPushedHead": "456f728421520eaf4b89063e61c4e25c77dca938",
+  "latestPushedHead": "2fbd5cc23daa089ca4b0bcbbd2ac1ea60aad6cb0",
   "productionBuildInfo": {
     "url": "https://www.safeclaw.kr/api/build-info",
     "statusCode": 200,
-    "commitSha": "456f728421520eaf4b89063e61c4e25c77dca938",
+    "commitSha": "2fbd5cc23daa089ca4b0bcbbd2ac1ea60aad6cb0",
     "branch": "master",
     "environment": "production"
   },
   "currentCi": {
-    "runId": 29686271574,
-    "url": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/29686271574",
-    "headSha": "456f728421520eaf4b89063e61c4e25c77dca938",
-    "status": "in_progress",
+    "runId": 29686651307,
+    "url": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/29686651307",
+    "headSha": "2fbd5cc23daa089ca4b0bcbbd2ac1ea60aad6cb0",
+    "status": "success",
     "completedGreenSteps": [
       "checkout",
       "setup-node",
       "npm install",
       "playwright chromium install",
-      "typecheck"
-    ],
-    "pendingSteps": [
+      "typecheck",
       "full npm.cmd test -- --maxWorkers=1 --fileParallelism=false",
       "production build"
     ]
@@ -101,8 +99,10 @@
       "reason": "The route-level invited loop is tested, but creating a real production share session and read confirmation would mutate production data."
     },
     "fullCiForLatestHead": {
-      "state": "in_progress",
-      "runId": 29686271574
+      "state": "proven",
+      "runId": 29686651307,
+      "url": "https://github.com/seojaehong/safeguard-contest-mvp/actions/runs/29686651307",
+      "headSha": "2fbd5cc23daa089ca4b0bcbbd2ac1ea60aad6cb0"
     }
   },
   "safeDemoClaims": [
@@ -120,8 +120,6 @@
     "Every real invited production recipient ACK has been verified."
   ],
   "nextWork": [
-    "Wait for CI 29686271574 and record final result.",
-    "If CI passes, update this current-state artifact with green CI evidence.",
     "If user approves production data mutation, run a real invited recipient ACK readback gate; otherwise keep route-level proof as the safe boundary.",
     "Proceed to approved Phase B gates only after explicit migration/provider/RLS approvals."
   ]
