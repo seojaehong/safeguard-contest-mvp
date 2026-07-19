@@ -1,0 +1,224 @@
+{
+  "checkedAt": "2026-07-19T21:37:25.655Z",
+  "build": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "8f77334b23345ae119caf50177ef1468e12fa727",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-nagbh7nom-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "inputText": "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.",
+  "results": [
+    {
+      "name": "desktop-day",
+      "viewport": {
+        "name": "desktop-day",
+        "width": 1440,
+        "height": 900,
+        "theme": "day"
+      },
+      "ok": true,
+      "stages": [
+        {
+          "stage": "documents",
+          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\ontology-readable-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\desktop-day-documents.png",
+          "metrics": {
+            "url": "https://www.safeclaw.kr/workspace?theme=day",
+            "title": "작업공간 | SafeClaw",
+            "body": {
+              "width": 1440,
+              "clientWidth": 1440,
+              "height": 1149,
+              "clientHeight": 900,
+              "overflowX": false
+            },
+            "outside": 0,
+            "inputPage": null,
+            "documentPage": {
+              "x": 186,
+              "y": 229,
+              "w": 1068,
+              "h": 800,
+              "bottom": 1029
+            },
+            "sharePage": null,
+            "documentWorkbench": {
+              "x": 186,
+              "y": 229,
+              "w": 1068,
+              "h": 800,
+              "bottom": 1029
+            },
+            "documentPreview": {
+              "x": 410,
+              "y": 482,
+              "w": 831,
+              "h": 424,
+              "bottom": 906
+            },
+            "shareRoot": null,
+            "shareWorkbench": null,
+            "sharePreview": null,
+            "visibleDocumentPages": 1,
+            "visibleSharePages": 0,
+            "primaryShareCtas": 0,
+            "textSample": "SafeClaw\n현장 안전 문서팩\n결과 검토\n문서\nDay\nNight\n문서 생성 중\n현장 상황 입력\n✓\n입력\n완료\n문서\n진행 중\n▣\n공유\n잠김\n문서 생성 완료\n위험성평가표\n법령, 기상, 교육, 재해사례 근거를 확인하며 문서팩을 작성하고 있습니다.\n생성 중\n근거·문서 일괄 확인\n문서팩 생성 중검증된 템플릿과 현장 근거를 한 번에 적용하고 있습니다.\n근거 2건 · 확인 필요 11건\n선택\n위험성평가표\n핵심 문서\nTBM 브리핑\n핵심 문서\nTBM 기록\n생성 대기\n위험성평가표\n현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다.\n공유 단계로 이동\n작업 이력\n진행 중\n+ 9개 추가 산출물 보기"
+          }
+        },
+        {
+          "stage": "share",
+          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\ontology-readable-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\desktop-day-share.png",
+          "metrics": {
+            "url": "https://www.safeclaw.kr/workspace?theme=day",
+            "title": "작업공간 | SafeClaw",
+            "body": {
+              "width": 1440,
+              "clientWidth": 1440,
+              "height": 1174,
+              "clientHeight": 900,
+              "overflowX": false
+            },
+            "outside": 0,
+            "inputPage": null,
+            "documentPage": null,
+            "sharePage": {
+              "x": 130,
+              "y": 189,
+              "w": 1180,
+              "h": 921,
+              "bottom": 1110
+            },
+            "documentWorkbench": null,
+            "documentPreview": null,
+            "shareRoot": {
+              "x": 130,
+              "y": 189,
+              "w": 1180,
+              "h": 921,
+              "bottom": 1110
+            },
+            "shareWorkbench": null,
+            "sharePreview": {
+              "x": 838,
+              "y": 305,
+              "w": 453,
+              "h": 726,
+              "bottom": 1031
+            },
+            "visibleDocumentPages": 0,
+            "visibleSharePages": 1,
+            "primaryShareCtas": 1,
+            "textSample": "SafeClaw\n현장 안전 문서팩\n공유·기록\n공유\nDay\nNight\n공유 전 보완\n안전조치 검수 정보 확인 필요\n✓\n입력\n완료\n!\n문서\n검수 필요\n공유\n보완 확인\n오늘 작업\n언어별 전송본 미리보기\n\n오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다.\n\n미리보기 전용\n안전한 중복 방지 저장 기능을 준비하고 있습니다.\n01\n오늘 대상\n2명 선택\n현장관리자 · 한국어\n신규 작업자 · 한국어\n\n작업자별 저장 언어로 전송본을 준비합니다.\n\n대상 변경\n02\n채널\n메일\n미리보기 전용\n문자\n미리보기 전용\n카카오\n미리보기 전용\n발송 채널 준비 안내\n다시 확인\n03\n언어 미리보기\n표시 언어\n관리자용 한국어\n베트남어 · Tiếng Việt\n중국어 · 中文\n태국어 · ภาษาไทย\n우즈베크어 · O'zbekcha\n몽골어 · Монгол хэл\n네팔어 · नेपाली\n캄보디아어 · ភាសាខ្មែរ\n영어 · English\n인도네시아어 · Bahasa Indonesia\n미얀마어 · မြန်မာဘာသာ\n\n작업자에게는 저장된 언어의 핵심 안전 안내를 보냅니다. 관리자 화면의 라벨은 한국어로 표시됩니다.\n\n전송 전 확인\n공유 전 보완 필요\n\n안전조치 검수 정보 확인 필요 · 품질 검수 보완 필요 · 검증 근거 보강 필요\n\n메시지 미리보기\n한국어 메시지 미리보기\n\n[오늘 작업 안전공지] 세이프건설\n\n현장: 서울 성수동 근린생활시설 현장\n\n작업: 외벽 도장 작업\n\n특수 대상/조건: 신규 투입자 1명 포함 — 작업중지 기준과 보호구 착용을 별도 복창 확인 / 우천·젖은 바닥 조건 — 미끄럼과 보행/장비 동선 분리 확인 / 강풍 조건 — 작업중지 기준과 대피 위치를 작업 전 공유\n\n핵심위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\n\n필수조치: 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 / 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기 / 작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인\n\nTBM 및 당일 안전교육 내용 확인 후 작업 시작 바랍니다.\n\n미리보기 전용"
+          }
+        }
+      ]
+    },
+    {
+      "name": "mobile-day",
+      "viewport": {
+        "name": "mobile-day",
+        "width": 390,
+        "height": 844,
+        "theme": "day"
+      },
+      "ok": true,
+      "stages": [
+        {
+          "stage": "documents",
+          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\ontology-readable-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\mobile-day-documents.png",
+          "metrics": {
+            "url": "https://www.safeclaw.kr/workspace?theme=day",
+            "title": "작업공간 | SafeClaw",
+            "body": {
+              "width": 390,
+              "clientWidth": 390,
+              "height": 1417,
+              "clientHeight": 844,
+              "overflowX": false
+            },
+            "outside": 0,
+            "inputPage": null,
+            "documentPage": {
+              "x": 27,
+              "y": 262,
+              "w": 336,
+              "h": 1050,
+              "bottom": 1312
+            },
+            "sharePage": null,
+            "documentWorkbench": {
+              "x": 27,
+              "y": 262,
+              "w": 336,
+              "h": 1050,
+              "bottom": 1312
+            },
+            "documentPreview": {
+              "x": 40,
+              "y": 639,
+              "w": 310,
+              "h": 549,
+              "bottom": 1188
+            },
+            "shareRoot": null,
+            "shareWorkbench": null,
+            "sharePreview": null,
+            "visibleDocumentPages": 1,
+            "visibleSharePages": 0,
+            "primaryShareCtas": 0,
+            "textSample": "SafeClaw\nDay\nNight\n✓\n입력\n문서\n!\n공유\n문서 생성 완료\n안전 문서팩 3종 준비 완료\n문서팩을 준비했습니다. 편집, 다운로드, 근거 확인, 현장 전파를 이어가세요.\n12/12 생성\n검수 필요 · 4건 근거\n근거 3건 · 확인 필요 8건\n위험성평가표\nTBM 브리핑\nTBM 기록\n문서 미리보기\n위험성평가표\n편집\n다운로드 설정\n[오늘 개선·이력 반영 - 위험성평가]\n- 공유 전 보완: SIF 유사사례\n- 공유 전 보완: 위험성평가표 근거\n- 공유 전 보완: TBM 브리핑 근거\n\n위험성평가표(초안)\n공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고\n\n업체명: 세이프건설\n업종: 건설업\n작업명: 외벽 도장 작업\n공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제\n작업장소: 서울 성수동 근린생활시설 현장\n작업인원: 5명\n기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요\n\n[1. 사전준비]\n- 평가대상 작업: 외벽 도장 작업\n- 참여자: 현장소장, 관리감독자, 작업반장, 해당 작업자\n- 확인자료: 작업계획, 기상조건, 장비·보호구 상태, 최근 TBM 기록\n\n[2. 유해·위험요인 파악]\n1. 세부작업: 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 유해·위험요인: 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 4M 체크: Man:■ Machine:■ Media:□ Management:□ / 중점 확인: Man, Machine\n\n2. 세부작업: 강풍 시 비계 전도와 공구·자재 낙하\n   - 유해·위험요인: 강풍 시 비계 전도와 공구·자재 낙하\n   - 4M 체크: Man:■ Machine:■ Media:■ Management:□ / 중점 확인: Man, Machine, Media\n\n3. 세부작업: 지게차 동선 인접 구간에서 작업자 충돌\n   - 유해·위험요인: 지게차 동선 인접 구간에서 작업자 충돌\n   - 4M 체크: Man:■ Machine:■ Media:■ Management:■ / 중점 확인: Man, Machine, Media, Management\n\n[3. 위험성 결정]\n1. 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 현재 위험성: 상\n   - 판단근거: 사고 발생 가능성과 중대성을 함께 고려\n2. 강풍 시 비계 전도와 공구·자재 낙하\n   - 현재 위험성: 상\n   - 판단근거: 작업 전 통제 여부와 노출 빈도 확인\n3. 지게차 동선 인접 구간에서 작업자 충돌\n   - 현재 위험성: 중\n   - 판단근거: 관리감독 및 작업자 숙지 여부 확인\n\n[4. 감소대책 수립 및 실행]\n1. 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검\n   - 실행시점: 작업 시작 전\n   - 담당: 관리감독자 / 작업반장\n   - 잔여 위험성: 중\n2. 풍속 상승 또는 돌\n공유 단계로 이동\n작업 이력\n완료\n+ 9개 추가 산출물 보기"
+          }
+        },
+        {
+          "stage": "share",
+          "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\ontology-readable-20260720\\evaluation\\workspace-docs-share-production-gate-2026-07-20\\mobile-day-share.png",
+          "metrics": {
+            "url": "https://www.safeclaw.kr/workspace?theme=day",
+            "title": "작업공간 | SafeClaw",
+            "body": {
+              "width": 390,
+              "clientWidth": 390,
+              "height": 1487,
+              "clientHeight": 844,
+              "overflowX": false
+            },
+            "outside": 0,
+            "inputPage": null,
+            "documentPage": null,
+            "sharePage": {
+              "x": 27,
+              "y": 244,
+              "w": 336,
+              "h": 1138,
+              "bottom": 1382
+            },
+            "documentWorkbench": null,
+            "documentPreview": null,
+            "shareRoot": {
+              "x": 27,
+              "y": 244,
+              "w": 336,
+              "h": 1138,
+              "bottom": 1382
+            },
+            "shareWorkbench": null,
+            "sharePreview": {
+              "x": 40,
+              "y": 1068,
+              "w": 310,
+              "h": 249,
+              "bottom": 1317
+            },
+            "visibleDocumentPages": 0,
+            "visibleSharePages": 1,
+            "primaryShareCtas": 1,
+            "textSample": "SafeClaw\nDay\nNight\n✓\n입력\n!\n문서\n공유\n오늘 작업\n언어별 전송본 미리보기\n미리보기 전용\n안전한 중복 방지 저장 기능을 준비하고 있습니다.\n01\n오늘 대상\n2명 선택\n현장관리자 · 한국어\n신규 작업자 · 한국어\n\n작업자별 저장 언어로 전송본을 준비합니다.\n\n대상 변경\n02\n채널\n메일\n미리보기 전용\n문자\n미리보기 전용\n카카오\n미리보기 전용\n발송 채널 준비 안내\n다시 확인\n03\n언어 미리보기\n표시 언어\n관리자용 한국어\n베트남어 · Tiếng Việt\n중국어 · 中文\n태국어 · ภาษาไทย\n우즈베크어 · O'zbekcha\n몽골어 · Монгол хэл\n네팔어 · नेपाली\n캄보디아어 · ភាសាខ្មែរ\n영어 · English\n인도네시아어 · Bahasa Indonesia\n미얀마어 · မြန်မာဘာသာ\n전송 전 확인\n공유 전 보완 필요\n메시지 미리보기\n한국어 메시지 미리보기\n\n[오늘 작업 안전공지] 세이프건설\n\n현장: 서울 성수동 근린생활시설 현장\n\n작업: 외벽 도장 작업\n\n특수 대상/조건: 신규 투입자 1명 포함 — 작업중지 기준과 보호구 착용을 별도 복창 확인 / 우천·젖은 바닥 조건 — 미끄럼과 보행/장비 동선 분리 확인 / 강풍 조건 — 작업중지 기준과 대피 위치를 작업 전 공유\n\n핵심위험: 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험\n\n필수조치: 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검 / 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기 / 작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인\n\nTBM 및 당일 안전교육 내용 확인 후 작업 시작 바랍니다.\n\n미리보기 전용"
+          }
+        }
+      ]
+    }
+  ]
+}
