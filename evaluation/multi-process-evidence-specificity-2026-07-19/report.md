@@ -4,7 +4,9 @@ Date: 2026-07-19
 
 ## Verdict
 
-LOCAL PASS. Post-deploy live probes for `22dc267f02960fc37cc995f7d432f832d6a9faf9` and `e473c79237bb3fb9e9b4d1c0af62c5e1ba183807` found specificity failures, and both follow-up remediations are now covered locally. A new post-deploy live probe is required after this latest remediation reaches production.
+PASS after deployment of `5af57cd7641181fa20353d96e4b116107da3f234`.
+
+Post-deploy live probes for `22dc267f02960fc37cc995f7d432f832d6a9faf9` and `e473c79237bb3fb9e9b4d1c0af62c5e1ba183807` found specificity failures. Both follow-up remediations are now covered locally and verified live.
 
 ## Problem
 
@@ -60,6 +62,21 @@ Second follow-up remediation:
 - mixed-process candidates are excluded from the default evidence row for a different explicit process;
 - ambiguous mixed cases now fall back to process-specialized deterministic rows instead of being misassigned.
 
+Final post-deploy probe at `5af57cd7641181fa20353d96e4b116107da3f234`:
+
+- Structured risk rows: `6`
+- Process counts: `굴착: 2`, `토사반출: 2`, `자재양중: 2`
+- Missing requested processes: none
+- Under-covered requested processes: none
+- Specificity failures: none
+- Route: `POST https://www.safeclaw.kr/api/ask`
+- Status: `200`
+
+Evidence:
+
+- `live-final-pass-summary.json`
+- `live-final-pass-sample.json`
+
 ## TDD Evidence
 
 RED:
@@ -101,8 +118,12 @@ PASS
 
 ## Post-Deploy Gate
 
-After deployment reaches this commit, rerun the live `/api/ask` multi-process probe and require:
+Closed at `5af57cd7641181fa20353d96e4b116107da3f234`:
 
 - each requested process still has at least two structured risk rows;
 - row text for each process contains process-specific equipment, hazard, controls, or evidence terms;
 - the single-task rerank path remains unchanged for comma-separated non-process conditions.
+
+## Follow-Up Quality Note
+
+The final live response intentionally prefers process-specialized deterministic fallback rows over misassigning mixed SIF cases to the wrong process. Next quality work should add richer process-specific SIF/KOSHA retrieval for excavation, soil haulage, and material lifting so these rows can regain stronger direct evidence without cross-process borrowing.

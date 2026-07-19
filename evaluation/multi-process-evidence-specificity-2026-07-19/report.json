@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-07-19T03:25:00.000Z",
-  "verdict": "local_pass_post_deploy_required",
+  "verdict": "pass",
   "firstPostDeployProbe": {
     "commitSha": "22dc267f02960fc37cc995f7d432f832d6a9faf9",
     "result": "specificity_failed",
@@ -44,6 +44,19 @@
       }
     ]
   },
+  "finalPostDeployProbe": {
+    "commitSha": "5af57cd7641181fa20353d96e4b116107da3f234",
+    "result": "pass",
+    "structuredRiskRowCount": 6,
+    "processCounts": {
+      "굴착": 2,
+      "토사반출": 2,
+      "자재양중": 2
+    },
+    "missingExpectedProcesses": [],
+    "underCoveredExpectedProcesses": [],
+    "specificityFailures": []
+  },
   "problem": "explicit multi-process prompts had process coverage but could reuse adjacent-process evidence or generic fallback rows",
   "fix": {
     "scope": "deterministic DB harness risk rows",
@@ -85,11 +98,16 @@
     }
   },
   "postDeployGate": {
-    "required": true,
+    "required": false,
+    "closedAtCommit": "5af57cd7641181fa20353d96e4b116107da3f234",
+    "result": "pass",
     "criteria": [
       "each requested process has at least two structured risk rows",
       "row text for each process contains process-specific equipment, hazard, controls, or evidence terms",
       "single-task comma-separated condition prompts stay on the existing rerank path"
     ]
+  },
+  "followUp": {
+    "note": "final live response now avoids cross-process evidence borrowing; next quality pass should add richer process-specific SIF/KOSHA retrieval so fallback rows can be replaced by direct evidence without misassignment"
   }
 }
