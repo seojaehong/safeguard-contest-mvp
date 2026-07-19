@@ -1,0 +1,17 @@
+{
+  "status": "ready",
+  "items": 9920,
+  "technicalTotal": 1040,
+  "technicalGuidelines": 803,
+  "technicalSupportRegulations": 237,
+  "localCorpusStatus": "ready",
+  "localCorpusItemCount": 234,
+  "localCorpusChunkCount": 7127,
+  "exactTrustRegistryStatus": "ready",
+  "exactTrustRegistryCount": 3,
+  "stableDocumentKeys": [
+    "D-C-13",
+    "D-C-7",
+    "B-E-10"
+  ]
+}

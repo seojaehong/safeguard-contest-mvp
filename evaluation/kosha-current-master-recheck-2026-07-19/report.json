@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-07-19T11:59:30+09:00",
+  "headSha": "8920ba3e14a56acb9b825863d5285d1a34beb6c5",
+  "liveBuildShaAtStart": "aee6abe420139700485596753175c7bcb3648483",
+  "scope": "current master KOSHA exact trust registry and local corpus readiness",
+  "verdict": "pass",
+  "liveStatus": {
+    "status": "ready",
+    "items": 9920,
+    "technicalTotal": 1040,
+    "technicalGuidelines": 803,
+    "technicalSupportRegulations": 237,
+    "localCorpusStatus": "ready",
+    "localCorpusItemCount": 234,
+    "localCorpusChunkCount": 7127,
+    "exactTrustRegistryStatus": "ready",
+    "exactTrustRegistryCount": 3,
+    "stableDocumentKeys": ["D-C-13", "D-C-7", "B-E-10"]
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\exact-kosha-applicability-policy.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "5 files / 80 tests PASS"
+    },
+    {
+      "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body",
+      "result": "19 tests PASS"
+    },
+    {
+      "command": "Invoke-RestMethod https://www.safeclaw.kr/api/safety-reference/status",
+      "result": "ready, exactTrustRegistry.count=3, localCorpus.itemCount=234, localCorpus.chunkCount=7127"
+    }
+  ],
+  "decision": "Do not range-merge historical feat/kosha-trust-registry-wave2. Current master already carries the launch-ready KOSHA runtime contract."
+}
