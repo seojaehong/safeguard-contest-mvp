@@ -68,6 +68,8 @@ The production page should not show the Next.js dev indicator.
 - Recipient confirmation uses the worker id from the share link as authoritative when present.
 - Vietnamese recipient chrome and document labels are covered by `tests/share-recipient-portal-browser.test.ts`.
 - Share session creation and dispatch remain manager-side authority flows.
+- `작업자 화면 미리보기` appears only after a share session exists. This is intentional because the recipient page is session-scoped and invited-only.
+- If provider dispatch channels are not configured, the share surface correctly falls back to `언어별 전송본 미리보기` / preview-only mode instead of pretending that an external send occurred.
 
 ## Capture Checklist
 
@@ -77,5 +79,6 @@ The production page should not show the Next.js dev indicator.
 - Show the share panel only after document readiness allows sharing.
 - In the language preview, select `베트남어 · Tiếng Việt`.
 - Show that the message body is real Vietnamese paragraph content, not a label-only language switch.
-- If `작업자 화면 미리보기` appears, open it in a new tab and show the recipient confirmation button.
+- If the video must show the recipient portal, first create or reuse a share session while logged in; then open `작업자 화면 미리보기` in a new tab and show the recipient confirmation button.
+- If no share session is available during capture, keep the video focused on the manager-side language preview and do not imply that worker confirmation has already been recorded.
 - Avoid using generated dev-harness screenshots as final product screenshots because of the Next.js `N` development indicator.

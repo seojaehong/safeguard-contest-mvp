@@ -23,8 +23,13 @@
     "recipientPortalRouteExists": true,
     "productionBuildSha": "895462484b86508d48cdb94d3fa7b654f793766b"
   },
+  "sessionScopedPreview": {
+    "workerPortalPreviewRequiresShareSession": true,
+    "previewOnlyFallbackWhenDispatchProviderUnavailable": true
+  },
   "captureWarnings": [
     "Generated browser-test screenshots use the Next.js dev harness and may show a black circular N development indicator.",
-    "Submission video capture should use the live production URL."
+    "Submission video capture should use the live production URL.",
+    "Open the worker recipient portal only after a real share session exists; otherwise capture the manager-side language preview."
   ]
 }
