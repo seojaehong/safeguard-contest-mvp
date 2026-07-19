@@ -1657,7 +1657,7 @@ ul {
 
 .safeclaw-terminal div em {
   margin-left: auto;
-  color: var(--os-green);
+  color: #5bd68c;
   font-style: normal;
   font-weight: 900;
 }
@@ -1787,10 +1787,15 @@ ul {
 }
 
 .hero-console-replay .agent-console-line {
+  color: #c6ccd2;
   font-size: var(--text-table);
   font-weight: 500;
   line-height: var(--leading-table);
   letter-spacing: var(--tracking-body);
+}
+
+.hero-console-replay .agent-console-line-active .agent-console-label {
+  color: #cfd5dc;
 }
 
 @media (prefers-reduced-motion: reduce) {

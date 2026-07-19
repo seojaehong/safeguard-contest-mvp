@@ -1,99 +1,19 @@
 {
-  "checkedAt": "2026-07-19T19:09:56.709Z",
+  "checkedAt": "2026-07-19T19:26:25.275Z",
   "results": [
     {
       "route": "/",
       "theme": "day",
-      "failureCount": 3,
-      "failures": [
-        {
-          "text": "기상청 실황·특보 확인",
-          "tag": "span",
-          "cls": "agent-console-label",
-          "ratio": 3.14,
-          "color": "rgb(88, 97, 107)",
-          "background": "rgb(10, 10, 11)",
-          "fontSize": 13,
-          "x": 70,
-          "y": 1301,
-          "w": 279,
-          "h": 20
-        },
-        {
-          "text": "연결됨",
-          "tag": "em",
-          "cls": "",
-          "ratio": 3.48,
-          "color": "rgb(6, 118, 71)",
-          "background": "rgb(10, 10, 11)",
-          "fontSize": 15,
-          "x": 308,
-          "y": 7097,
-          "w": 33,
-          "h": 48
-        },
-        {
-          "text": "준비됨",
-          "tag": "em",
-          "cls": "",
-          "ratio": 3.48,
-          "color": "rgb(6, 118, 71)",
-          "background": "rgb(10, 10, 11)",
-          "fontSize": 15,
-          "x": 309,
-          "y": 10020,
-          "w": 32,
-          "h": 48
-        }
-      ],
+      "failureCount": 0,
+      "failures": [],
       "bodyH": 10800,
       "overflowX": false
     },
     {
       "route": "/",
       "theme": "night",
-      "failureCount": 3,
-      "failures": [
-        {
-          "text": "기상청 실황·특보 확인",
-          "tag": "span",
-          "cls": "agent-console-label",
-          "ratio": 3.14,
-          "color": "rgb(88, 97, 107)",
-          "background": "rgb(10, 10, 11)",
-          "fontSize": 13,
-          "x": 70,
-          "y": 1301,
-          "w": 279,
-          "h": 20
-        },
-        {
-          "text": "연결됨",
-          "tag": "em",
-          "cls": "",
-          "ratio": 3.48,
-          "color": "rgb(6, 118, 71)",
-          "background": "rgb(10, 10, 11)",
-          "fontSize": 15,
-          "x": 308,
-          "y": 7097,
-          "w": 33,
-          "h": 48
-        },
-        {
-          "text": "준비됨",
-          "tag": "em",
-          "cls": "",
-          "ratio": 3.48,
-          "color": "rgb(6, 118, 71)",
-          "background": "rgb(10, 10, 11)",
-          "fontSize": 15,
-          "x": 309,
-          "y": 10020,
-          "w": 32,
-          "h": 48
-        }
-      ],
+      "failureCount": 0,
+      "failures": [],
       "bodyH": 10800,
       "overflowX": false
     },

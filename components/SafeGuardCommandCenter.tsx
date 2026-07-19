@@ -2272,7 +2272,6 @@ export function SafeGuardCommandCenter({
             <details
               className="document-provenance-drawer"
               data-testid="document-provenance-drawer"
-              open={busy}
             >
               <summary>근거 {documentEvidenceCount}건 · 확인 필요 {documentReviewCount}건</summary>
               <div className="document-provenance-drawer-body">
@@ -2391,7 +2390,7 @@ export function SafeGuardCommandCenter({
                 </article>
               </div>
             </div>
-            <details className="document-work-history" open={busy}>
+            <details className="document-work-history">
               <summary>
                 <span>작업 이력</span>
                 <strong>{busy ? "진행 중" : data ? "완료" : "생성 후 기록"}</strong>
