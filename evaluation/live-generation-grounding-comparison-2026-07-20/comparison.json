@@ -1,0 +1,389 @@
+{
+  "checkedAt": "2026-07-19T22:06:30.090Z",
+  "endpoint": "https://www.safeclaw.kr/api/ask",
+  "build": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "ae4a8f6cc440d1aac3d43e6e70e58db4f7326563",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-ref4ykjpc-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "question": "서울 성수동 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 추락, 비계 전도, 지게차 자재 양중 동선 충돌을 반영해서 위험성평가표와 TBM을 작성해줘.",
+  "responses": [
+    {
+      "aiMode": "template",
+      "rawPath": null,
+      "summary": {
+        "mode": "template",
+        "httpStatus": 200,
+        "elapsedMs": 254,
+        "ok": true,
+        "statusDetail": "AI_MODE=template (외부 호출 없음, DB 하네스 템플릿 계약 적용) / DB 하네스 계약: review_required",
+        "sourceMix": {
+          "total": 4,
+          "counts": {
+            "mock": 4
+          },
+          "koreanLawMcp": {
+            "enabled": false,
+            "configured": false,
+            "summary": "korean-law-mcp 비활성화"
+          }
+        },
+        "dbHarnessSummary": {
+          "mode": "db_harness_first",
+          "llmRole": "naturalize_only",
+          "llmOutputScope": "rewrite_fixed_evidence_only",
+          "evidenceAuthority": "db_harness",
+          "providerRetryScope": "naturalization_retry_only",
+          "fallbackChainAllowed": false,
+          "genericProseSubstitutionAllowed": false,
+          "missingEvidencePolicy": "surface_review_required",
+          "directEvidence": 0,
+          "sifCases": 0,
+          "supportingEvidence": 0,
+          "improvementMemory": 0,
+          "workpackMemory": 0,
+          "missingEvidence": [
+            "SIF 유사사례",
+            "위험성평가표 근거",
+            "TBM 브리핑 근거",
+            "TBM 기록 근거"
+          ],
+          "documentCoverage": [
+            {
+              "document": "위험성평가표",
+              "covered": false,
+              "evidenceTypes": []
+            },
+            {
+              "document": "TBM 브리핑",
+              "covered": false,
+              "evidenceTypes": []
+            },
+            {
+              "document": "TBM 기록",
+              "covered": false,
+              "evidenceTypes": []
+            }
+          ],
+          "retrievalContract": {
+            "source": "safety_reference_items",
+            "mode": "unconfigured",
+            "vector": {
+              "enabled": false,
+              "attempted": false,
+              "ready": false,
+              "reason": "disabled",
+              "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+            },
+            "sourceCounts": {
+              "directEvidence": 0,
+              "sifCases": 0,
+              "supportingEvidence": 0,
+              "rest": 0,
+              "ranked": 0,
+              "vector": 0,
+              "hybrid": 0,
+              "localTag": 0,
+              "localRanked": 0,
+              "localHybrid": 0
+            },
+            "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+          },
+          "ontologyStatus": "review_required"
+        },
+        "qualityOverall": "blocked",
+        "qualityItems": [
+          {
+            "label": "실시간 근거",
+            "status": "blocked",
+            "detail": "10개 근거 경로는 보조 자료 기준으로 표시됩니다. 전파 전 원문 확인을 권장합니다."
+          },
+          {
+            "label": "작업 이력 매칭",
+            "status": "degraded",
+            "detail": "유사 작업 이력이 아직 부족해 전파 전 안전조치 확인이 필요합니다."
+          },
+          {
+            "label": "증빙 매핑",
+            "status": "ready",
+            "detail": "필수 문서 7/7종이 시행령 제4조 증빙 라벨에 연결됐습니다."
+          },
+          {
+            "label": "문서 구조 검수",
+            "status": "blocked",
+            "detail": "필수 구조화 산출물 0/4종이 준비됐습니다. 나머지는 기본 문서 형식으로 보완됐습니다."
+          },
+          {
+            "label": "문서 본문 검수",
+            "status": "ready",
+            "detail": "핵심 문서 3/3종의 본문 placeholder와 필수 문구를 확인했습니다."
+          },
+          {
+            "label": "DB 하네스 계약",
+            "status": "blocked",
+            "detail": "고정된 DB 근거가 없어 전파 전 근거 매칭이 필요합니다."
+          },
+          {
+            "label": "DB 저장 준비",
+            "status": "ready",
+            "detail": "문서팩 본문과 증빙 요약이 있어 관리자 로그인 후 서버 저장할 수 있습니다."
+          }
+        ],
+        "rowCount": 0,
+        "rowSample": [],
+        "referenceCount": 4,
+        "directEvidenceCount": 0,
+        "supportingEvidenceCount": 0,
+        "hasKoshaReference": true,
+        "hasSifOrSeriousRiskSignal": true,
+        "koshaMentions": 21,
+        "sifMentions": 28,
+        "evidenceRefs": [],
+        "deliverableLengths": {
+          "riskAssessmentDraft": 1595,
+          "tbmBriefing": 1319,
+          "tbmLogDraft": 1278
+        },
+        "textSnippets": {
+          "riskAssessmentDraft": "[오늘 개선·이력 반영 - 위험성평가]\n- 공유 전 보완: SIF 유사사례\n- 공유 전 보완: 위험성평가표 근거\n- 공유 전 보완: TBM 브리핑 근거\n\n위험성평가표(초안)\n공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고\n\n업체명: 세이프건설\n업종: 건설업\n작업명: 외벽 도장 작업\n공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제\n작업장소: 서울 성수동 근린생활시설 현장\n작업인원: 5명\n기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요\n\n[1. 사전준비]\n- 평가대상 작업: 외벽 도장 작업\n- 참여자: 현장소장, 관리감독자, 작업반장, 해당 작업자\n- 확인자료: 작업계획, 기상조건, 장비·보호구 상태, 최근 TBM 기록\n\n[2. 유해·위험요인 파악]\n1. 세부작업: 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 유해·위험요인: 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 4M 체크: Man:■ Machine:■ Media:□ Management:□ / 중점 확인: Man, Machine\n\n2. 세부작업: 강풍 시 비계 전도와 공구·자재 낙하\n   - 유해·위험요인: 강풍 시 비계 전도와 공구·자재 낙하\n   - 4M 체크: Man:■ Machine:■ Media:■ Management:□ / 중점 확인: Man, Machine, Media\n\n3. 세부작업: 지게차 동선 인접 구간에서 작업자 충돌\n   - 유해·위험요인: 지게차 동선 인접 구간에서 작업자 충돌\n   - 4M 체크: Man:■ Machine:■ Media:■ Management:■ / 중점 확인: Man, Machine, Media, Management\n\n[3. 위험성 결정]\n1. 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 현재 위험성: 상\n   - 판단근거: 사고 발생 가능성과 중대성을 함께 고려\n2. 강풍 시 비계 전도와 공구·자재 낙하\n   - 현재 위험성: 상\n   - 판단근거: 작업 전 통제 여부와 노출 빈도 확인\n3. 지게차 동선 인접 구간에서 작업자 충돌\n   - 현재 위험성: 중\n   - 판단근거: 관리감독 및 작업자 숙지 여부 확인\n\n[4. 감소대책 수립 및 실행]\n1. 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검\n   - 실행시점: 작업 시작 전\n   - 담당: 관리감독자 / 작업반장\n   - 잔여 위험성: 중\n2. 풍속 상승 또는 돌",
+          "tbmBriefing": "[오늘 개선·이력 반영 - TBM]\n- 공유 전 보완: SIF 유사사례\n- 공유 전 보완: 위험성평가표 근거\n- 공유 전 보완: TBM 브리핑 근거\n\n작업 전 안전점검회의(TBM) 브리핑(초안)\n공식자료 기반: KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고\n\n일시: 작업 시작 전\n장소: 서울 성수동 근린생활시설 현장\n업체명: 세이프건설\n오늘 작업: 외벽 도장 작업\n참석 대상: 작업자 5명, 작업반장, 관리감독자\n\n[1. 작업내용]\n- 서울 성수동 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보\n- 기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요\n- 위험성평가 주요 유해·위험요인을 오늘 TBM 전달 항목으로 연결합니다.\n\n[2. 위험요인]\n1. 이동식 비계 승·하강 및 작업발판 이동 중 추락\n2. 강풍 시 비계 전도와 공구·자재 낙하\n3. 지게차 동선 인접 구간에서 작업자 충돌\n\n[3. 안전대책]\n- 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검\n- 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기\n- 작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인\n- 기상 API 또는 현장 기상 확인 결과가 악화되면 작업반장이 작업중지 여부를 재판단합니다.\n\n[4. 작업중지 기준]\n- 강풍 시 작업중지 판단은 누가 하고, 팀원에게 어떻게 전파할 것인가?\n- 이동식 비계 고정상태와 보호구 착용은 누가 상호 확인했는가?\n- 위험구역 통제, 보호구 미착용, 기상 악화, 미숙련 작업자 이해 부족 시 작업을 시작하지 않습니다.\n\n[5. 참석자 확인]\n- 작업자는 핵심 위험요인과 작업중지 기준을 구두 복창합니다.\n- 보호구 착용 상태와 위험구역 통제 상태를 상호 확인합니다.\n- 신규·외국인·미숙련 작업자는 쉬운 한국어 또는 통역/번역 메시지로 이해 여부를 추가 확인합니다.\n\n[6. 사진·증빙 위치]\n- 작업 전 현장 상태, 보호구 착용, 위험구역 통제, TBM 실시 사진을 작업일지·모바일 앱·문서팩 첨부자료에 남깁니다.\n- 참석자 서명, 구두 복창 확인, 신규/외국인 이해 확인 기록을 함께 보관합니다.\n\n[7. 교육시간 인정 검토]\n- 위험성평가 결과, 교육 내용, 대상, 시간, 확인증빙이 함께 남는 경우에만 교육 증빙 활용 가능 여부를 검토합니다.\n- TBM 자체가 법정교육을 자동 대체한다고 표현하지 않습니다.\n\n[확인 질문]\n1. "
+        }
+      }
+    },
+    {
+      "aiMode": "enhanced",
+      "rawPath": null,
+      "summary": {
+        "mode": "enhanced",
+        "httpStatus": 200,
+        "elapsedMs": 18704,
+        "ok": true,
+        "statusDetail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260720 0600) / 기상청 초단기예보 호출 성공 (서울, base 20260720 0630) / 기상청 단기예보 호출 성공 (서울, base 20260720 0500) / 기상청 기상특보 조회 성공 (전국, 202607200550) / 기상청 영향예보 연결 점검 필요: NO_DATA / 기상청 생활기상지수 자외선 조회 성공 (서울, areaNo 1100000000) / 기상청 생활기상지수 체감온도 연결 점검 필요: NO_DATA / 한국에너지기술연구원 실시간 홍반자외선 연결 점검 필요: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx/1.18.0 (Ubuntu)</center>\r\n</body>\r\n</html>\r\n / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 7건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 4건 / Supabase 카탈로그 매칭 8건 (configured=true) / structured 위험성평가 rows 5건, 검증 이슈 0건 (structured rows=DB harness deterministic) / TBM-risk 연결 5건 (TBM-risk links=DB harness deterministic) / TBM structured=deterministic from risk rows / AI_MODE=enhanced (DB 하네스 row-first: 위험성평가 row 확정, TBM 구조 deterministic 조립)",
+        "sourceMix": {
+          "total": 9,
+          "counts": {
+            "lawgo": 9
+          },
+          "koreanLawMcp": {
+            "enabled": false,
+            "configured": false,
+            "summary": "korean-law-mcp 비활성화"
+          }
+        },
+        "dbHarnessSummary": {
+          "mode": "db_harness_first",
+          "llmRole": "naturalize_only",
+          "llmOutputScope": "rewrite_fixed_evidence_only",
+          "evidenceAuthority": "db_harness",
+          "providerRetryScope": "naturalization_retry_only",
+          "fallbackChainAllowed": false,
+          "genericProseSubstitutionAllowed": false,
+          "missingEvidencePolicy": "surface_review_required",
+          "directEvidence": 2,
+          "sifCases": 3,
+          "supportingEvidence": 2,
+          "improvementMemory": 0,
+          "workpackMemory": 0,
+          "missingEvidence": [],
+          "documentCoverage": [
+            {
+              "document": "위험성평가표",
+              "covered": true,
+              "evidenceTypes": [
+                "directEvidence",
+                "sifCase"
+              ]
+            },
+            {
+              "document": "TBM 브리핑",
+              "covered": true,
+              "evidenceTypes": [
+                "directEvidence"
+              ]
+            },
+            {
+              "document": "TBM 기록",
+              "covered": true,
+              "evidenceTypes": [
+                "directEvidence"
+              ]
+            }
+          ],
+          "retrievalContract": {
+            "source": "safety_reference_items",
+            "mode": "hybrid-local-supabase",
+            "vector": {
+              "enabled": false,
+              "attempted": false,
+              "ready": false,
+              "reason": "disabled",
+              "message": "SIF 임베딩 검색은 승인 전 기본 비활성입니다."
+            },
+            "sourceCounts": {
+              "directEvidence": 2,
+              "sifCases": 3,
+              "supportingEvidence": 2,
+              "rest": 3,
+              "ranked": 0,
+              "vector": 0,
+              "hybrid": 0,
+              "localTag": 2,
+              "localRanked": 0,
+              "localHybrid": 2
+            },
+            "message": "Supabase 안전 지식 DB 호출 완료 (KOSHA 기술지원규정 3건, KOSHA 기술지침 0건, SIF 유사사례 3건, 일반 카탈로그 5건, 작업특화 rerank 적용)"
+          },
+          "ontologyStatus": "ready"
+        },
+        "qualityOverall": "ready",
+        "qualityItems": [
+          {
+            "label": "실시간 근거",
+            "status": "ready",
+            "detail": "주요 근거 조회가 실시간으로 연결됐습니다."
+          },
+          {
+            "label": "안전조치 검수",
+            "status": "ready",
+            "detail": "비계 조립·해체 작업의 필수 안전조치가 문서팩에 반영됐습니다."
+          },
+          {
+            "label": "증빙 매핑",
+            "status": "ready",
+            "detail": "필수 문서 7/7종이 시행령 제4조 증빙 라벨에 연결됐습니다."
+          },
+          {
+            "label": "문서 구조 검수",
+            "status": "ready",
+            "detail": "필수 구조화 산출물 3/3종이 준비됐습니다."
+          },
+          {
+            "label": "문서 본문 검수",
+            "status": "ready",
+            "detail": "핵심 문서 3/3종의 본문 placeholder와 필수 문구를 확인했습니다."
+          },
+          {
+            "label": "DB 하네스 계약",
+            "status": "ready",
+            "detail": "DB 근거 7건을 고정했고, 필수 문서 3/3종을 하네스가 커버했습니다."
+          },
+          {
+            "label": "DB 저장 준비",
+            "status": "ready",
+            "detail": "문서팩 본문과 증빙 요약이 있어 관리자 로그인 후 서버 저장할 수 있습니다."
+          }
+        ],
+        "rowCount": 5,
+        "rowSample": [
+          {
+            "process": "건설업 외벽 도장 작업",
+            "task": "서울 성수동 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보",
+            "hazard": "외벽 도장 중 이동식 비계 작업발판·난간 미확인으로 인한 추락·전도 위험",
+            "controls": null,
+            "evidenceRefs": [
+              "DB 하네스 직접근거",
+              "KOSHA 공식자료",
+              "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+              "검색: local-tag",
+              "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1"
+            ]
+          },
+          {
+            "process": "건설업 외벽 도장 작업",
+            "task": "서울 성수동 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보",
+            "hazard": "자재 반입 지게차 동선과 작업자 통행 동선 중첩으로 인한 충돌 위험",
+            "controls": null,
+            "evidenceRefs": [
+              "DB 하네스 보조근거",
+              "고위험요인 사례",
+              "OO공장 이동식 사다리를 사용하여 지게차 파렛트 위로 이동 중 발을 헛디뎌 높이 약 2.15m 아래 바닥으로 추락하여 사망 사례",
+              "검색: rest"
+            ]
+          },
+          {
+            "process": "건설업 외벽 도장 작업",
+            "task": "서울 성수동 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보",
+            "hazard": "지게차 운반·상하차 중 적재물 전도·낙하 및 작업자 타격 위험",
+            "controls": null,
+            "evidenceRefs": [
+              "DB 하네스 보조근거",
+              "고위험요인 사례",
+              "OO공장 OO 소속 지게차 포크로 프레임 구조부재와 상부철판 사이 틈을 벌리다가 프레임이 넘어지면서 재해자 흉부를 타격하여 사망 사례",
+              "검색: rest"
+            ]
+          },
+          {
+            "process": "건설업 외벽 도장 작업",
+            "task": "서울 성수동 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보",
+            "hazard": "비계 조립·사용 중 작업발판·안전난간·고정 상태 미확인으로 인한 추락·전도 위험",
+            "controls": null,
+            "evidenceRefs": [
+              "DB 하네스 직접근거",
+              "KOSHA 공식자료",
+              "D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정",
+              "검색: local-tag",
+              "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914243912403149/2"
+            ]
+          },
+          {
+            "process": "건설업 외벽 도장 작업",
+            "task": "도장 자재 취급 및 작업구역 환기",
+            "hazard": "도료·희석제 증기와 점화원 관리 미흡으로 인한 화재·폭발 및 유해증기 노출 위험",
+            "controls": null,
+            "evidenceRefs": [
+              "KOSHA 위험성평가",
+              "MSDS",
+              "화재·폭발 예방 조치",
+              "TBM 기록"
+            ]
+          }
+        ],
+        "referenceCount": 6,
+        "directEvidenceCount": 0,
+        "supportingEvidenceCount": 0,
+        "hasKoshaReference": true,
+        "hasSifOrSeriousRiskSignal": true,
+        "koshaMentions": 115,
+        "sifMentions": 21,
+        "evidenceRefs": [
+          "DB 하네스 직접근거",
+          "KOSHA 공식자료",
+          "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+          "검색: local-tag",
+          "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914371557826167/1",
+          "DB 하네스 보조근거",
+          "고위험요인 사례",
+          "OO공장 이동식 사다리를 사용하여 지게차 파렛트 위로 이동 중 발을 헛디뎌 높이 약 2.15m 아래 바닥으로 추락하여 사망 사례",
+          "검색: rest",
+          "OO공장 OO 소속 지게차 포크로 프레임 구조부재와 상부철판 사이 틈을 벌리다가 프레임이 넘어지면서 재해자 흉부를 타격하여 사망 사례",
+          "D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정",
+          "https://portal.kosha.or.kr/openapi/v1/file/down/CTC2026012914243912403149/2",
+          "KOSHA 위험성평가",
+          "MSDS",
+          "화재·폭발 예방 조치",
+          "TBM 기록"
+        ],
+        "deliverableLengths": {
+          "riskAssessmentDraft": 4645,
+          "tbmBriefing": 2843,
+          "tbmLogDraft": 2253
+        },
+        "textSnippets": {
+          "riskAssessmentDraft": "위험성평가표(초안)\n공식자료 기반: KOSHA 위험성평가 절차 및 4M 기법 참고\n\n업체명: 세이프건설\n업종: 건설업\n작업명: 외벽 도장 작업\n공정/세부작업: 이동식 비계 사용 외벽 도장, 자재 상하차, 하부 통제\n작업장소: 서울 성수동 근린생활시설 현장\n작업인원: 5명\n기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요\n\n[1. 사전준비]\n- 평가대상 작업: 외벽 도장 작업\n- 참여자: 현장소장, 관리감독자, 작업반장, 해당 작업자\n- 확인자료: 작업계획, 기상조건, 장비·보호구 상태, 최근 TBM 기록\n\n[2. 유해·위험요인 파악]\n1. 세부작업: 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 유해·위험요인: 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 4M 체크: Man:■ Machine:■ Media:□ Management:□ / 중점 확인: Man, Machine\n\n2. 세부작업: 강풍 시 비계 전도와 공구·자재 낙하\n   - 유해·위험요인: 강풍 시 비계 전도와 공구·자재 낙하\n   - 4M 체크: Man:■ Machine:■ Media:■ Management:□ / 중점 확인: Man, Machine, Media\n\n3. 세부작업: 지게차 동선 인접 구간에서 작업자 충돌\n   - 유해·위험요인: 지게차 동선 인접 구간에서 작업자 충돌\n   - 4M 체크: Man:■ Machine:■ Media:■ Management:■ / 중점 확인: Man, Machine, Media, Management\n\n[3. 위험성 결정]\n1. 이동식 비계 승·하강 및 작업발판 이동 중 추락\n   - 현재 위험성: 상\n   - 판단근거: 사고 발생 가능성과 중대성을 함께 고려\n2. 강풍 시 비계 전도와 공구·자재 낙하\n   - 현재 위험성: 상\n   - 판단근거: 작업 전 통제 여부와 노출 빈도 확인\n3. 지게차 동선 인접 구간에서 작업자 충돌\n   - 현재 위험성: 중\n   - 판단근거: 관리감독 및 작업자 숙지 여부 확인\n\n[4. 감소대책 수립 및 실행]\n1. 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검\n   - 실행시점: 작업 시작 전\n   - 담당: 관리감독자 / 작업반장\n   - 잔여 위험성: 중\n2. 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기\n   - 실행시점: 작업 시작 전 및 작업 중 수시\n   - 담당: 작업반장 / 신호수\n   - 잔여 위험성: 중",
+          "tbmBriefing": "작업 전 안전점검회의(TBM) 브리핑(초안)\n공식자료 기반: KOSHA TBM OPS 및 고용노동부 TBM 교육시간 인정 안내 참고\n\n일시: 작업 시작 전\n장소: 서울 성수동 근린생활시설 현장\n업체명: 세이프건설\n오늘 작업: 외벽 도장 작업\n참석 대상: 작업자 5명, 작업반장, 관리감독자\n\n[1. 작업내용]\n- 서울 성수동 외벽 도장 작업, 이동식 비계 사용, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보\n- 기상 및 작업조건: 오후 강풍 예보, 작업중지 기준 공유 필요\n- 위험성평가 주요 유해·위험요인을 오늘 TBM 전달 항목으로 연결합니다.\n\n[2. 위험요인]\n1. 이동식 비계 승·하강 및 작업발판 이동 중 추락\n2. 강풍 시 비계 전도와 공구·자재 낙하\n3. 지게차 동선 인접 구간에서 작업자 충돌\n\n[3. 안전대책]\n- 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검\n- 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기\n- 작업반장 주도로 보호구 착용과 작업구간 출입통제를 확인\n- 기상 API 또는 현장 기상 확인 결과가 악화되면 작업반장이 작업중지 여부를 재판단합니다.\n\n[4. 작업중지 기준]\n- 강풍 시 작업중지 판단은 누가 하고, 팀원에게 어떻게 전파할 것인가?\n- 이동식 비계 고정상태와 보호구 착용은 누가 상호 확인했는가?\n- 위험구역 통제, 보호구 미착용, 기상 악화, 미숙련 작업자 이해 부족 시 작업을 시작하지 않습니다.\n\n[5. 참석자 확인]\n- 작업자는 핵심 위험요인과 작업중지 기준을 구두 복창합니다.\n- 보호구 착용 상태와 위험구역 통제 상태를 상호 확인합니다.\n- 신규·외국인·미숙련 작업자는 쉬운 한국어 또는 통역/번역 메시지로 이해 여부를 추가 확인합니다.\n\n[6. 사진·증빙 위치]\n- 작업 전 현장 상태, 보호구 착용, 위험구역 통제, TBM 실시 사진을 작업일지·모바일 앱·문서팩 첨부자료에 남깁니다.\n- 참석자 서명, 구두 복창 확인, 신규/외국인 이해 확인 기록을 함께 보관합니다.\n\n[7. 교육시간 인정 검토]\n- 위험성평가 결과, 교육 내용, 대상, 시간, 확인증빙이 함께 남는 경우에만 교육 증빙 활용 가능 여부를 검토합니다.\n- TBM 자체가 법정교육을 자동 대체한다고 표현하지 않습니다.\n\n[확인 질문]\n1. 오늘 가장 큰 유해·위험요인과 작업중지 기준을 말할 수 있습니까?\n2. 기상 악화 또는 현장 변화가 생기면 누구에게 보고하고 어디서 대기합니까?\n3. "
+        }
+      }
+    }
+  ],
+  "findings": {
+    "enhancedAddsGrounding": true,
+    "enhancedHasKosha": true,
+    "enhancedHasSifOrSeriousRisk": true,
+    "modesDiffer": true
+  }
+}
