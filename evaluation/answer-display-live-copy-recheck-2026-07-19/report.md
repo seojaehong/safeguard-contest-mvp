@@ -1,7 +1,8 @@
 # Answer Display Live Copy Recheck
 
 Date: 2026-07-19
-Live commit: `9927fd1aabfe577f6eb6cce433f1851746ae0b31`
+Latest local refresh HEAD: `7a28f463842cc2ba5bddc5b8bf83046acfa44be6`
+Latest live build-info during adjacent checks: `3e6b4c2203328a7261aaf317c5081313d01e6bbb`
 
 ## Scenario
 
@@ -47,3 +48,17 @@ PASS.
 The `/ask` answer panel and practical checkpoints no longer expose the raw SIF/DB-harness diagnostic phrases that appeared in the previous live sample. Field-action content remains visible.
 
 This verifies the user-facing presentation boundary only. The raw API answer, evidence packet, SIF/KOSHA provenance, and audit data remain preserved by the backend.
+
+## Latest Focused Gate
+
+Command:
+
+```powershell
+npm.cmd test -- tests\customer-terminology-boundary.test.ts tests\answer-panel-display.test.ts tests\workspace-layout-regression.test.ts -t "DB 하네스|품질 계약|하네스 JSONL|default-visible|customer|terminology|blank|빈|alert|contrast|AA|primary" --maxWorkers=1 --fileParallelism=false
+```
+
+Result:
+
+- Test files: `2 passed | 1 skipped`
+- Tests: `6 passed | 38 skipped`
+- Duration: `25.02s`

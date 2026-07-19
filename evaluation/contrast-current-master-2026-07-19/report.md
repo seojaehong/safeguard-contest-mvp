@@ -4,8 +4,8 @@ Generated: 2026-07-19 KST
 
 ## 기준
 
-- Source HEAD at check start: `635981d83f8c0158531a896416d1099e73c6c29b`
-- Live build-info observed before this report: `db40ec6d223598ba218ea336443a713d3a9daf85`
+- Source HEAD at latest refresh: `7a28f463842cc2ba5bddc5b8bf83046acfa44be6`
+- Live build-info observed during latest refresh: `3e6b4c2203328a7261aaf317c5081313d01e6bbb`
 - Viewport for live probe: mobile `390x844`, Day theme
 - DB schema/data mutation: none
 
@@ -38,6 +38,20 @@ Result:
 - No current sample reproduced the previous white-on-`#f5c518` or yellow-on-white CTA failures.
 
 ## Focused gates
+
+Command:
+
+```powershell
+npm.cmd test -- tests\product-module-shell.test.ts tests\module-shell-design-regression.test.ts tests\reports-design-remediation.test.ts -t "contrast|AA|primary|Day|Night|workspace accents|heroCta" --maxWorkers=1 --fileParallelism=false
+```
+
+Latest refresh result:
+
+- 2 files PASS
+- 1 file SKIPPED
+- 2 tests PASS
+- 17 tests SKIPPED
+- Duration: 40.21s
 
 Command:
 
