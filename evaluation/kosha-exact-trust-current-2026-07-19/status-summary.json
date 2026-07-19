@@ -1,0 +1,129 @@
+{
+  "generatedAt": "2026-07-19T07:16:26.3574596Z",
+  "productionBuildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "98fa88888eacdc7f82e729fe01d5e0a02a207204",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-jmgt6d64a-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "safetyReference": {
+    "ok": true,
+    "configured": true,
+    "status": "ready",
+    "searchReady": true,
+    "sources": 1063,
+    "items": 9920,
+    "itemTypes": [
+      {
+        "itemType": "sif-case",
+        "count": 6033
+      },
+      {
+        "itemType": "construction-process",
+        "count": 626
+      },
+      {
+        "itemType": "machinery",
+        "count": 730
+      },
+      {
+        "itemType": "risk-manual",
+        "count": 1
+      },
+      {
+        "itemType": "jsa-training",
+        "count": 1
+      },
+      {
+        "itemType": "technical-guideline",
+        "count": 803
+      },
+      {
+        "itemType": "technical-support-regulation",
+        "count": 237
+      }
+    ],
+    "technical": {
+      "expectedTechnicalTotal": 1040,
+      "technicalTotal": 1040,
+      "technicalSupportRegulations": 237,
+      "technicalGuidelines": 803,
+      "technicalSplitOk": true
+    },
+    "localCorpus": {
+      "status": "ready",
+      "failures": [],
+      "snapshotId": "e99b7faf268c513c9eed329c016670339d686ba580141e54fe3ffdfafb478a12",
+      "manifestSha256": "e234586aa3f217acc701aca743eb70ab89448ac8de71e1eb61960e526cabefa5",
+      "inventoryCount": 234,
+      "itemCount": 234,
+      "chunkCount": 7127,
+      "failureCount": 0
+    },
+    "exactTrustRegistry": {
+      "status": "ready",
+      "count": 3,
+      "integrityStatus": "ready",
+      "loadedItemCount": 3,
+      "failureReason": null,
+      "stableDocumentKeys": [
+        "D-C-13",
+        "D-C-7",
+        "B-E-10"
+      ],
+      "versions": [
+        "D-C-13-2026",
+        "D-C-7-2026",
+        "B-E-10-2026"
+      ],
+      "items": [
+        {
+          "itemId": "technical-support-01-0065-d-c-13-2026-외벽도장보수공사에-안전작업에-관한-기술지원규정",
+          "stableDocumentKey": "D-C-13",
+          "version": "D-C-13-2026",
+          "title": "D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+          "itemType": "technical-support-regulation",
+          "publishedAt": "2026-01-30",
+          "officialFileId": "CTC2026012914371557826167",
+          "bodySha256": "ea8bb93a3e03a40873222ab385d257e1a5946cb4d28e5c65951353731b0a5919",
+          "pdfSha256": "790a823a3fceae0328ba3c2692486c057f33a036a2ea1fa672e94a626c481179",
+          "provenanceSha256": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282"
+        },
+        {
+          "itemId": "technical-support-01-0073-d-c-7-2026-비계-구조-및-안전작업에-관한-기술지원규정",
+          "stableDocumentKey": "D-C-7",
+          "version": "D-C-7-2026",
+          "title": "D-C-7-2026 비계 구조 및 안전작업에 관한 기술지원규정",
+          "itemType": "technical-support-regulation",
+          "publishedAt": "2026-01-30",
+          "officialFileId": "CTC2026012914243912403149",
+          "bodySha256": "97c58f2c39260e9e763bae54748466f0837064ddccfc8e29b77d857c9f390112",
+          "pdfSha256": "5059f9faefe6f5e1a81fb750a3a96e842508b38c1b420bbda935b698aa864ff3",
+          "provenanceSha256": "b2ade4323cddecc0a50dab98f944f0781dc09885c8bdece4c1a6c0ea2010d0ef"
+        },
+        {
+          "itemId": "technical-support-09-0002-b-e-10-2026-정전전로-및-그-인근에서의-전기작업에-관한-기술지원규정",
+          "stableDocumentKey": "B-E-10",
+          "version": "B-E-10-2026",
+          "title": "B-E-10-2026 정전전로 및 그 인근에서의 전기작업에 관한 기술지원규정",
+          "itemType": "technical-support-regulation",
+          "publishedAt": "2026-01-30",
+          "officialFileId": "CTC2026012913263450093332",
+          "bodySha256": "6fe137a8f788914b0f9804fbd81e8f9fa987dd108ce6edb2fd47eda9bee9b121",
+          "pdfSha256": "0a44548411eb5402761934de46fd70393064dca22c56b7b8a27967c3cab4eb23",
+          "provenanceSha256": "976068bc0f060e177be0392323a2853cd43f145c6d294e7759bcb6374f411282"
+        }
+      ]
+    }
+  },
+  "focusedTests": {
+    "result": "PASS",
+    "files": 6,
+    "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\exact-kosha-applicability-policy.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\safety-reference-status-route.test.ts --maxWorkers=1 --fileParallelism=false",
+    "tests": 88
+  }
+}
