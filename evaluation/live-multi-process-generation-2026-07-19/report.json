@@ -1,0 +1,66 @@
+{
+  "generatedAt": "2026-07-19T03:17:00.000Z",
+  "verdictBeforePatch": "hold",
+  "liveProbeBeforePatch": {
+    "route": "POST https://www.safeclaw.kr/api/ask",
+    "status": 200,
+    "requestedAiMode": "full",
+    "responseMode": "live",
+    "generationMode": "full",
+    "structuredRiskRowCount": 5,
+    "processCounts": {
+      "건설업 외벽 도장 작업": 5
+    },
+    "missingExpectedProcesses": [
+      "굴착",
+      "토사반출",
+      "자재양중"
+    ],
+    "underCoveredExpectedProcesses": [
+      "굴착",
+      "토사반출",
+      "자재양중"
+    ],
+    "sourceDetail": "structured rows=DB harness deterministic"
+  },
+  "fix": {
+    "scope": "deterministic DB harness risk rows",
+    "changedFiles": [
+      "lib/search.ts",
+      "tests/commercial-harness.test.ts"
+    ],
+    "contract": "explicit multi-process prompts preserve each requested process label with at least two deterministic risk rows per process, bounded to 18 rows"
+  },
+  "verification": {
+    "red": {
+      "command": "npm.cmd test -- tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "failed as expected",
+      "failure": "expected 0 to be greater than or equal to 2"
+    },
+    "green": {
+      "command": "npm.cmd test -- tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 1,
+      "tests": 54,
+      "result": "pass"
+    },
+    "regression": {
+      "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts tests\\ai-deliverables-scope.test.ts tests\\naturalize-output-contract.test.ts tests\\grounded-generation-contract.test.ts tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
+      "files": 4,
+      "tests": 114,
+      "result": "pass"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "pass"
+    }
+  },
+  "postDeployGate": {
+    "required": true,
+    "criteria": [
+      "missingExpectedProcesses is empty",
+      "underCoveredExpectedProcesses is empty",
+      "processCounts contains 굴착, 토사반출, 자재양중",
+      "each requested process has at least two structured risk rows"
+    ]
+  }
+}

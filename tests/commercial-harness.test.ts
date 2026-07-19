@@ -1607,6 +1607,57 @@ describe("runAsk DB harness mode", () => {
     expect(link.evidenceRefs).toEqual(row.evidenceRefs);
   });
 
+  it("preserves explicit multi-process labels in deterministic DB harness risk rows", () => {
+    const question = "서울 성수동 복합건물 현장. 굴착, 토사반출, 자재양중 3개 공종을 오늘 동시에 진행한다.";
+    const response = buildMockAskResponse(
+      "굴착, 토사반출, 자재양중 3개 공종 동시 작업",
+      mockSearchResults,
+      "mock",
+      "테스트"
+    );
+    const references = [
+      reference({
+        id: "sif-excavation-collapse",
+        title: "굴착 작업 절토사면 낙석 사고 사례",
+        summary: "굴착 작업 중 절토사면 하부에서 낙석에 맞은 사례",
+        keywords: ["굴착", "절토사면", "낙석"],
+        risk_tags: ["낙하", "붕괴"],
+        controls: ["굴착면 상태와 낙석 위험 확인", "굴착 하부 출입통제"],
+        evidence_role: "direct",
+        retrieval_source: "rest"
+      }),
+      reference({
+        id: "sif-soil-haulage-traffic",
+        title: "토사반출 덤프트럭 충돌 사고 사례",
+        summary: "토사 반출 덤프트럭이 가설도로에서 보행자를 충돌한 사례",
+        keywords: ["토사반출", "덤프트럭", "충돌"],
+        risk_tags: ["충돌"],
+        controls: ["토사반출 차량 동선과 보행 동선 분리", "후진 구간 신호수 배치"],
+        evidence_role: "direct",
+        retrieval_source: "rest"
+      }),
+      reference({
+        id: "sif-material-lifting-drop",
+        title: "자재양중 중 인양물 낙하 사고 사례",
+        summary: "자재 양중 중 줄걸이 불량으로 인양물이 낙하한 사례",
+        keywords: ["자재양중", "이동식 크레인", "낙하"],
+        risk_tags: ["낙하"],
+        controls: ["줄걸이 상태와 인양 반경 출입통제 확인", "신호수와 운전자 교신 상태 확인"],
+        evidence_role: "direct",
+        retrieval_source: "rest"
+      })
+    ];
+
+    const rows = buildSafetyReferenceRiskRows(response, references, "맑음", question);
+    const processes = rows.map((row) => row.process);
+
+    expect(processes.filter((process) => process === "굴착").length).toBeGreaterThanOrEqual(2);
+    expect(processes.filter((process) => process === "토사반출").length).toBeGreaterThanOrEqual(2);
+    expect(processes.filter((process) => process === "자재양중").length).toBeGreaterThanOrEqual(2);
+    expect(rows).toHaveLength(6);
+    expect(validateRiskAssessmentRows(rows).issues).toEqual([]);
+  });
+
   it("retains confined-space pump and actual machinery controls while generic evidence stays review-required", () => {
     const confinedReference = reference({
       id: "confined-pump-controls",

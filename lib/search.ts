@@ -523,6 +523,27 @@ function buildFallbackRiskAssessmentRows(response: AskResponse, weatherSummary: 
   ];
 }
 
+function extractExplicitProcessLabelsFromQuery(query: string): string[] {
+  const normalized = query.replace(/\s+/g, " ").trim();
+  const markerMatch = normalized.match(/([가-힣A-Za-z0-9\s,·/+]+?)\s*\d+\s*개\s*공종/u);
+  const source = markerMatch?.[1] || normalized;
+  const labels = new Set<string>();
+  for (const rawPart of source.split(/[,\n/·+]|(?:\s및\s)|(?:\s와\s)|(?:\s과\s)/u)) {
+    const candidates = rawPart.match(/[가-힣A-Za-z0-9]+(?:\s*[가-힣A-Za-z0-9]+){0,2}/gu) || [];
+    const candidate = candidates[candidates.length - 1]?.trim() || "";
+    const cleaned = candidate
+      .replace(/^(?:서울|부산|대구|인천|광주|대전|울산|세종|성수동|복합건물|현장|오늘)\s*/u, "")
+      .replace(/\s*(?:작업|공종|세부공정|위험성평가|rows?|행|각각|반영|병행|동시|진행).*$/iu, "")
+      .replace(/\s*(?:을|를|은|는|이|가)$/u, "")
+      .trim();
+    if (!cleaned) continue;
+    if (cleaned.length < 2 || cleaned.length > 18) continue;
+    if (!/[가-힣A-Za-z]/u.test(cleaned)) continue;
+    labels.add(cleaned);
+  }
+  return [...labels].slice(0, 6);
+}
+
 function compactRiskCell(value: string | null | undefined, maxLength = 96): string {
   const normalized = (value || "").replace(/\s+/g, " ").trim();
   if (!normalized) return "";
@@ -600,8 +621,7 @@ export function buildSafetyReferenceRiskRows(
   const topCandidates = rankedEligibleReferences;
   const seen = new Set<string>();
   const rows: RiskAssessmentRow[] = [];
-
-  for (const item of topCandidates) {
+  const createReferenceRow = (item: SafetyReferenceItem, processLabel: string, taskLabel: string): RiskAssessmentRow | null => {
     const displayTitle = getSafetyReferenceDisplayTitle(item);
     const operationalView = deriveSafetyReferenceOperationalView(item);
     const control = compactRiskCell(operationalView.controls[0], 120) ||
@@ -610,8 +630,8 @@ export function buildSafetyReferenceRiskRows(
       compactRiskCell(item.document_reflection_label, 120) ||
       control;
     const hazard = compactRiskCell(operationalView.hazard, 120);
-    const dedupeKey = `${hazard}|${control}`;
-    if (seen.has(dedupeKey)) continue;
+    const dedupeKey = `${processLabel}|${hazard}|${control}`;
+    if (seen.has(dedupeKey)) return null;
     seen.add(dedupeKey);
     const supportingEvidenceRefs = Array.from(new Set(filterAndRankSafetyReferencesByQuery(
       `${rankQuery} ${displayTitle} ${hazard} ${control}`,
@@ -630,10 +650,10 @@ export function buildSafetyReferenceRiskRows(
       item.source_url || "",
       ...supportingEvidenceRefs
     ].filter(Boolean);
-    const candidateRow = buildRiskRow({
+    return buildRiskRow({
       location,
-      process,
-      task: scenario.workSummary || compactRiskCell(displayTitle, 48) || "현장 작업",
+      process: processLabel,
+      task: taskLabel,
       equipment: compactRiskCell([item.category, item.subcategory].filter(Boolean).join(", "), 80) || "작업 장비·공구·보호구",
       hazard,
       currentControls: control,
@@ -649,6 +669,61 @@ export function buildSafetyReferenceRiskRows(
       evidenceRefs,
       verificationStatus: operationalView.reviewRequired ? "needsReview" : "planned"
     });
+  };
+
+  const explicitProcesses = query ? extractExplicitProcessLabelsFromQuery(query) : [];
+  if (explicitProcesses.length >= 2) {
+    const baselineRows = buildFallbackRiskAssessmentRows(response, weatherSummary);
+    for (const processLabel of explicitProcesses) {
+      const processQuery = `${rankQuery} ${processLabel}`;
+      const processCandidates = filterAndRankSafetyReferencesByQuery(
+        processQuery,
+        topCandidates.filter((item) => {
+          const itemText = [
+            item.title,
+            item.summary,
+            item.short_summary,
+            item.category,
+            item.subcategory,
+            ...item.keywords,
+            ...item.risk_tags,
+            ...item.controls
+          ].filter(Boolean).join(" ");
+          return itemText.includes(processLabel);
+        }),
+        topCandidates.length
+      );
+      const candidates = processCandidates.length
+        ? processCandidates
+        : filterAndRankSafetyReferencesByQuery(processQuery, [...topCandidates], topCandidates.length);
+      for (const item of candidates) {
+        const candidateRow = createReferenceRow(item, processLabel, `${processLabel} 작업`);
+        if (candidateRow) rows.push(candidateRow);
+        if (rows.filter((row) => row.process === processLabel).length >= 2) break;
+      }
+      for (const fallbackRow of baselineRows) {
+        if (rows.filter((row) => row.process === processLabel).length >= 2) break;
+        const key = `${processLabel}|${fallbackRow.hazard}|${fallbackRow.currentControls}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        rows.push({
+          ...fallbackRow,
+          process: processLabel,
+          task: `${processLabel} 작업`
+        });
+      }
+      if (rows.length >= explicitProcesses.length * 2) continue;
+    }
+    return rows.slice(0, Math.min(18, explicitProcesses.length * 2));
+  }
+
+  for (const item of topCandidates) {
+    const candidateRow = createReferenceRow(
+      item,
+      process,
+      scenario.workSummary || compactRiskCell(getSafetyReferenceDisplayTitle(item), 48) || "현장 작업"
+    );
+    if (!candidateRow) continue;
     rows.push(candidateRow);
 
     if (rows.length >= 4) break;
