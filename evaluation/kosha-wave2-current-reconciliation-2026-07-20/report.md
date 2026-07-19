@@ -12,10 +12,10 @@ Current master already proves the KOSHA Wave2 runtime contract with the focused 
 
 ## Current Base
 
-- Worktree: `kosha-wave2-current-integration-20260720-final`
-- Branch: `chore/kosha-wave2-current-integration-20260720`
+- Worktree: `recipient-foreign-live-gate-20260720`
+- Branch: `chore/recipient-foreign-live-gate-20260720`
 - Base: `origin/master`
-- Current HEAD: `1bce421e3b2d1f07e402a9b0453961199c17f58a`
+- Current HEAD: `e678c3d86ba982f62e86ff5994007678898e3e3d`
 
 ## Reconciliation Facts
 
@@ -49,7 +49,20 @@ Result:
 
 - Test files: 5 passed / 5
 - Tests: 80 passed / 80
+- Duration: 23.54s
 - Status: PASS
+
+Additional current-head checks:
+
+```powershell
+python -m unittest scripts.tests.test_acquire_exact_kosha_body
+npm.cmd run typecheck
+```
+
+Results:
+
+- Python acquisition tests: 19 passed / 19, 2.485s, PASS
+- Strict typecheck: PASS
 
 ## Decision
 

@@ -1,8 +1,8 @@
 {
-  "checkedAt": "2026-07-20T07:22:00+09:00",
+  "checkedAt": "2026-07-20T08:31:00+09:00",
   "verdict": "current_master_satisfies_kosha_wave2_functional_gate",
   "base": "origin/master",
-  "currentHead": "1bce421e3b2d1f07e402a9b0453961199c17f58a",
+  "currentHead": "e678c3d86ba982f62e86ff5994007678898e3e3d",
   "reviewedWave2Head": "b16a1e3239a2b238b6a16349974779e04532cec3",
   "wave2HeadIsAncestorOfOriginMaster": false,
   "cherryPickDecision": "do_not_range_merge_or_blind_cherry_pick",
@@ -11,7 +11,20 @@
     "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-kosha-applicability-policy.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts --maxWorkers=1 --fileParallelism=false",
     "status": "pass",
     "filesPassed": 5,
-    "testsPassed": 80
+    "testsPassed": 80,
+    "durationSeconds": 23.54
   },
+  "additionalVerification": [
+    {
+      "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body",
+      "status": "pass",
+      "testsPassed": 19,
+      "durationSeconds": 2.485
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "pass"
+    }
+  ],
   "safeFutureAction": "extract only still-relevant script or durability-test deltas after comparing against current master; preserve newer current evaluation artifacts"
 }
