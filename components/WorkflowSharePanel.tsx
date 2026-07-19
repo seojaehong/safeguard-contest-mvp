@@ -1151,7 +1151,7 @@ export function WorkflowSharePanel({
         <div>
           <span className="eyebrow">오늘 작업</span>
           <strong>{providerDispatchUi.canDispatch ? "문서팩 보내기" : "언어별 전송본 미리보기"}</strong>
-          <p>오늘 대상에게 문서팩을 보내고, 작업자는 개인 화면에서 확인을 남깁니다.</p>
+          <p>오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다.</p>
           {recipientPortalPreviewHref ? <p>첫 번째 작업자 화면을 미리 열어 전송본을 확인할 수 있습니다.</p> : null}
         </div>
         <div className="share-status-pill" aria-label="공유 워크플로 상태" aria-live="polite">

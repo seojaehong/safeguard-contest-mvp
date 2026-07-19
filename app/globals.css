@@ -14508,13 +14508,13 @@ body:has(.safeclaw-landing) :is(
 
 .share-panel.workflow-panel {
   display: grid;
-  width: min(100%, 880px);
+  width: min(100%, 800px);
   margin: 0 auto;
-  gap: 12px;
+  gap: 10px;
   border: 1px solid var(--share-line);
   border-radius: 4px;
   background: color-mix(in srgb, var(--share-canvas) 86%, var(--share-surface));
-  padding: 16px;
+  padding: 14px;
 }
 
 .share-workflow-header,
@@ -14666,7 +14666,7 @@ body:has(.safeclaw-landing) :is(
 }
 
 .share-panel.workflow-panel .channel-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 

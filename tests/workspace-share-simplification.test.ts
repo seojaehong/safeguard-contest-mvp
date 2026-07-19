@@ -61,7 +61,8 @@ describe("workspace share simplification", () => {
 
   it("describes language-specific preparation and the active worker viewer link contract", () => {
     expect(sharePanel).toContain("작업자별 저장 언어로 전송본을 준비합니다.");
-    expect(sharePanel).toContain("오늘 대상에게 문서팩을 보내고, 작업자는 개인 화면에서 확인을 남깁니다.");
+    expect(sharePanel).toContain("오늘 대상과 채널을 확인하고, 언어별 전송본을 미리 봅니다.");
+    expect(sharePanel).not.toContain("작업자는 개인 화면에서 확인을 남깁니다.");
     expect(sharePanel).toContain("첫 번째 작업자 화면을 미리 열어 전송본을 확인할 수 있습니다.");
     expect(sharePanel).toContain("recipientPortalPreviewHref");
     expect(sharePanel).toContain("작업자 화면 미리보기");
@@ -110,6 +111,9 @@ describe("workspace share simplification", () => {
     expect(sharePanel).not.toContain("메시지 복사");
     expect(sharePanel).not.toContain("전체 메시지 원문");
     expect(sharePanel).toContain('href="/login"');
+    expect(readFileSync(join(root, "app", "globals.css"), "utf8")).toContain(
+      ".share-panel.workflow-panel .channel-grid {\n  grid-template-columns: repeat(3, minmax(0, 1fr));"
+    );
   });
 
   it("keeps the localized message heading compact on mobile", () => {
