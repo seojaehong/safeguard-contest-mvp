@@ -1,0 +1,97 @@
+{
+  "checkedAt": "2026-07-19T21:55:11.997Z",
+  "build": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "7c8d045c32a8142f00432cd0ccd97f02d6f0412d",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-kfv5gtzq9-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "routes": [
+    "/",
+    "/documents",
+    "/roadmap",
+    "/why",
+    "/settings/ai-connect",
+    "/search",
+    "/worker",
+    "/workers",
+    "/archive",
+    "/home"
+  ],
+  "results": [
+    {
+      "route": "/",
+      "url": "https://www.safeclaw.kr/?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\contrast-yellow-cta-20260720\\evaluation\\contrast-yellow-cta-2026-07-20\\root.png",
+      "failureCount": 0,
+      "failures": []
+    },
+    {
+      "route": "/documents",
+      "url": "https://www.safeclaw.kr/documents?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\contrast-yellow-cta-20260720\\evaluation\\contrast-yellow-cta-2026-07-20\\documents.png",
+      "failureCount": 0,
+      "failures": []
+    },
+    {
+      "route": "/roadmap",
+      "url": "https://www.safeclaw.kr/roadmap?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\contrast-yellow-cta-20260720\\evaluation\\contrast-yellow-cta-2026-07-20\\roadmap.png",
+      "failureCount": 0,
+      "failures": []
+    },
+    {
+      "route": "/why",
+      "url": "https://www.safeclaw.kr/why?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\contrast-yellow-cta-20260720\\evaluation\\contrast-yellow-cta-2026-07-20\\why.png",
+      "failureCount": 0,
+      "failures": []
+    },
+    {
+      "route": "/settings/ai-connect",
+      "url": "https://www.safeclaw.kr/settings/ai-connect?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\contrast-yellow-cta-20260720\\evaluation\\contrast-yellow-cta-2026-07-20\\settings-ai-connect.png",
+      "failureCount": 0,
+      "failures": []
+    },
+    {
+      "route": "/search",
+      "url": "https://www.safeclaw.kr/search?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\contrast-yellow-cta-20260720\\evaluation\\contrast-yellow-cta-2026-07-20\\search.png",
+      "failureCount": 0,
+      "failures": []
+    },
+    {
+      "route": "/worker",
+      "url": "https://www.safeclaw.kr/worker?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\contrast-yellow-cta-20260720\\evaluation\\contrast-yellow-cta-2026-07-20\\worker.png",
+      "failureCount": 0,
+      "failures": []
+    },
+    {
+      "route": "/workers",
+      "url": "https://www.safeclaw.kr/workers?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\contrast-yellow-cta-20260720\\evaluation\\contrast-yellow-cta-2026-07-20\\workers.png",
+      "failureCount": 0,
+      "failures": []
+    },
+    {
+      "route": "/archive",
+      "url": "https://www.safeclaw.kr/archive?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\contrast-yellow-cta-20260720\\evaluation\\contrast-yellow-cta-2026-07-20\\archive.png",
+      "failureCount": 0,
+      "failures": []
+    },
+    {
+      "route": "/home",
+      "url": "https://www.safeclaw.kr/home?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\contrast-yellow-cta-20260720\\evaluation\\contrast-yellow-cta-2026-07-20\\home.png",
+      "failureCount": 0,
+      "failures": []
+    }
+  ]
+}
