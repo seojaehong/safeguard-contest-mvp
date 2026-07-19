@@ -74,9 +74,34 @@ async function collectRoute(page, route, viewport) {
 
   const metric = await page.evaluate((terms) => {
     const parseRgbInPage = (value) => {
-      const channels = (value.match(/[\d.]+/gu) ?? []).slice(0, 3).map(Number);
-      if (channels.length !== 3) return null;
-      return value.startsWith("color(srgb") ? channels.map((channel) => channel * 255) : channels;
+      const channels = (value.match(/[\d.]+/gu) ?? []).map(Number);
+      if (channels.length < 3) return null;
+      const rgb = value.startsWith("color(srgb")
+        ? channels.slice(0, 3).map((channel) => channel * 255)
+        : channels.slice(0, 3);
+      const alpha = value.startsWith("rgb(") || channels.length < 4 ? 1 : channels[3];
+      return { rgb, alpha };
+    };
+    const blend = (foreground, background) => ({
+      rgb: foreground.rgb.map((channel, index) => (
+        (channel * foreground.alpha) + (background.rgb[index] * (1 - foreground.alpha))
+      )),
+      alpha: 1,
+    });
+    const resolvedBackground = (element) => {
+      const stack = [];
+      let cursor = element;
+      while (cursor) {
+        const parsed = parseRgbInPage(window.getComputedStyle(cursor).backgroundColor);
+        if (parsed) stack.push(parsed);
+        cursor = cursor.parentElement;
+      }
+      let background = { rgb: [250, 250, 251], alpha: 1 };
+      for (let index = stack.length - 1; index >= 0; index -= 1) {
+        const layer = stack[index];
+        if (layer.alpha > 0) background = layer.alpha >= 1 ? layer : blend(layer, background);
+      }
+      return background;
     };
     const luminanceChannelInPage = (value) => {
       const normalized = value / 255;
@@ -124,18 +149,9 @@ async function collectRoute(page, route, viewport) {
       .map((element) => {
         const style = window.getComputedStyle(element);
         const foreground = parseRgbInPage(style.color);
-        let background = parseRgbInPage(style.backgroundColor);
-        let parent = element.parentElement;
-        while (background && background.every((channel) => channel === 0) && parent) {
-          const parentBackground = parseRgbInPage(window.getComputedStyle(parent).backgroundColor);
-          if (parentBackground && !parentBackground.every((channel) => channel === 0)) {
-            background = parentBackground;
-            break;
-          }
-          parent = parent.parentElement;
-        }
+        const background = resolvedBackground(element);
         if (!foreground || !background) return null;
-        const ratio = contrastRatioInPage(foreground, background);
+        const ratio = contrastRatioInPage(foreground.rgb, background.rgb);
         const rect = element.getBoundingClientRect();
         return ratio < 4.5 && rect.width >= 20 && rect.height >= 12
           ? {

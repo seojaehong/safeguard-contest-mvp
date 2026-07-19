@@ -18413,6 +18413,26 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+/* North Star launch contrast gate: keep the Linear shell quiet, but make
+   recurring labels and sample-state banners readable on light surfaces. */
+.command-center-shell.workspace-theme-day {
+  --workspace-subtle: #596270;
+}
+
+.command-center-shell.workspace-theme-day .workspace-side-group > span,
+.command-center-shell.workspace-theme-day .workspace-top-title span {
+  color: #596270;
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-current-workpack {
+  background: var(--workspace-surface-1);
+  color: var(--workspace-muted);
+}
+
+.safeclaw-module-shell.module-variant-document .safeclaw-current-workpack strong {
+  color: var(--workspace-ink);
+}
+
 /* Workspace generated-edit bridge: WorkpackEditor is also mounted after
    generation inside /workspace. Keep that edit surface in the same daylight
    workbench system as the main document route. */
