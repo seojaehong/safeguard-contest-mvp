@@ -4,7 +4,7 @@ Date: 2026-07-19
 
 ## Verdict
 
-LOCAL PASS. Post-deploy live probe is required after this commit reaches production.
+PASS. Local TDD gates passed, and the post-deploy live `/api/ask` probe confirmed production is serving the same process-specific fallback behavior at commit `aef86987a205996b2cb75bd91779952a2840b3e1`.
 
 ## Problem
 
@@ -53,9 +53,29 @@ PASS
 
 ## Post-Deploy Gate
 
-After deployment reaches this commit, rerun the live `/api/ask` multi-process probe and require:
+The live production probe passed on 2026-07-19:
+
+```text
+POST https://www.safeclaw.kr/api/ask
+commitSha: aef86987a205996b2cb75bd91779952a2840b3e1
+status: 200
+structuredRiskRowCount: 6
+processCounts: 굴착 2 / 토사반출 2 / 자재양중 2
+missingExpectedProcesses: 0
+underCoveredExpectedProcesses: 0
+qualityFailures: 0
+```
+
+Evidence files:
+
+- `evaluation/multi-process-fallback-quality-2026-07-19/live-postdeploy-summary.json`
+- `evaluation/multi-process-fallback-quality-2026-07-19/live-postdeploy-sample.json`
+
+The live `/api/ask` multi-process probe required:
 
 - `굴착` rows include excavation-specific terms such as `굴착면`, `사면`, `매몰`, `붕괴`, or `굴삭기`;
 - `토사반출` rows include haulage-specific terms such as `덤프트럭`, `후진`, `가설도로`, or `차량 동선`;
 - `자재양중` rows include lifting-specific terms such as `이동식 크레인`, `줄걸이`, `인양`, or `양중`;
 - no requested process falls back to unrelated scaffold/checklist wording.
+
+All four requirements passed in production.

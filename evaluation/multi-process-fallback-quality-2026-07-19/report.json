@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-07-19T04:00:00.000Z",
-  "verdict": "local_pass_post_deploy_required",
+  "verdict": "pass",
   "problem": "multi-process rows could preserve process labels while still using generic fallback hazards and controls",
   "fix": {
     "scope": "deterministic DB harness fallback rows",
@@ -38,7 +38,26 @@
     }
   },
   "postDeployGate": {
-    "required": true,
+    "required": false,
+    "result": "pass",
+    "summaryPath": "evaluation/multi-process-fallback-quality-2026-07-19/live-postdeploy-summary.json",
+    "samplePath": "evaluation/multi-process-fallback-quality-2026-07-19/live-postdeploy-sample.json",
+    "live": {
+      "generatedAt": "2026-07-19T04:02:42.499Z",
+      "url": "https://www.safeclaw.kr/api/ask",
+      "status": 200,
+      "ok": true,
+      "commitSha": "aef86987a205996b2cb75bd91779952a2840b3e1",
+      "structuredRiskRowCount": 6,
+      "processCounts": {
+        "굴착": 2,
+        "토사반출": 2,
+        "자재양중": 2
+      },
+      "missingExpectedProcesses": 0,
+      "underCoveredExpectedProcesses": 0,
+      "qualityFailures": 0
+    },
     "criteria": [
       "excavation rows include excavation-specific terms",
       "soil haulage rows include truck/route-specific terms",
