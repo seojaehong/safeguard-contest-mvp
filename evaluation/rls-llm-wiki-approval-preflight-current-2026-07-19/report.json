@@ -1,0 +1,118 @@
+{
+  "schemaVersion": "safeclaw-rls-llm-wiki-approval-preflight/v1",
+  "generatedAt": "2026-07-19T11:09:34.978Z",
+  "sourceSha": "2964918cd7cbcbb65d0b39acdf039c522caeae42",
+  "overall": "approval_ready_open",
+  "launchReadiness": false,
+  "dbMutationPerformed": false,
+  "networkOpened": false,
+  "schemaMutationAuthorized": false,
+  "approvalRequired": true,
+  "approvalsNeeded": [
+    "authoritative_supabase_project_and_secret_free_catalog_snapshot",
+    "disposable_two_tenant_ab_negative_matrix",
+    "storage_objects_cross_tenant_isolation",
+    "service_role_route_idor_and_state_invariance",
+    "llm_wiki_publication_ddl_rpc_and_grant_approval",
+    "publication_atomicity_idempotency_rollback_and_leak_tests"
+  ],
+  "forbiddenClaims": [
+    "RLS launch isolation proven",
+    "LLM Wiki publication available",
+    "production migration approved",
+    "service-role routes are safe because table RLS exists"
+  ],
+  "inputs": {
+    "rlsReport": "evaluation/supabase-rls-approval-2026-07-17/report.json",
+    "rlsChecklist": "evaluation/supabase-rls-approval-2026-07-17/approval-checklist.md",
+    "wikiReport": "evaluation/llm-wiki-rls-approval-2026-07-17/report.json",
+    "wikiReportMd": "evaluation/llm-wiki-rls-approval-2026-07-17/report.md",
+    "wikiSqlDesign": "evaluation/llm-wiki-rls-approval-2026-07-17/proposed-non-executable-publication-design.sql.txt",
+    "northstarReport": "evaluation/northstar-open-gates-current-2026-07-19/report.json",
+    "tenantHarness": "scripts/supabase_tenant_isolation_harness.mjs",
+    "tenantManifest": "scripts/supabase_tenant_isolation_manifest.mjs"
+  },
+  "checks": [
+    {
+      "id": "rls_status_approval_required",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "rls_launch_not_proven",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "rls_non_mutating",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "rls_catalog_missing_is_explicit",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "checklist_sections_present",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "checklist_sql_boundaries_present",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "wiki_verdict_red",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "wiki_launch_not_proven",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "wiki_non_mutating",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "wiki_publication_unavailable",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "wiki_sql_design_non_executable",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "wiki_sql_design_not_migration_path",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "tenant_manifest_v3",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "tenant_harness_no_live_adapter",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "northstar_rls_gate_approval_gated",
+      "passed": true,
+      "message": "ok"
+    },
+    {
+      "id": "northstar_wiki_gate_approval_gated",
+      "passed": true,
+      "message": "ok"
+    }
+  ],
+  "failedCheckIds": []
+}
