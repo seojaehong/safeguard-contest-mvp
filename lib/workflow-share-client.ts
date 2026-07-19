@@ -40,6 +40,8 @@ export type LocalizedDispatchRecipient = {
   dispatchLanguageCode: string;
   messageTarget: WorkflowDispatchMessageTarget;
   message: string;
+  portalUrl?: string;
+  deliveryText: string;
 };
 
 export type LocalizedDispatchRecipientsResult =
@@ -129,6 +131,8 @@ export function buildLocalizedDispatchRecipients(input: {
   recipients: Array<Record<string, unknown>>;
   messageVariants: Record<string, string>;
   channels: WorkflowShareChannel[];
+  shareSessionId?: string;
+  recipientPortalBaseUrl?: string;
 }): LocalizedDispatchRecipientsResult {
   const missingLanguageCodes = new Set<string>();
   const oversizedMessageLanguageCodes = new Set<string>();
@@ -140,7 +144,13 @@ export function buildLocalizedDispatchRecipients(input: {
       missingLanguageCodes.add(languageCode || "unknown");
       return [];
     }
-    if (input.channels.includes("sms") && message.length > 900) {
+    const portalUrl = buildRecipientPortalUrl({
+      baseUrl: input.recipientPortalBaseUrl,
+      shareSessionId: input.shareSessionId,
+      workerId
+    });
+    const deliveryText = portalUrl ? `${message}\n\n${portalUrl}` : message;
+    if (input.channels.includes("sms") && deliveryText.length > 900) {
       oversizedMessageLanguageCodes.add(languageCode);
       return [];
     }
@@ -150,8 +160,10 @@ export function buildLocalizedDispatchRecipients(input: {
       workerId,
       dispatchLanguageCode: languageCode,
       messageTarget: languageCode === "ko" ? "manager" : `foreign:${languageCode}`,
-      message
+      message,
+      deliveryText
     };
+    if (portalUrl) localizedRecipient.portalUrl = portalUrl;
     if (input.channels.some((channel) => channel === "sms" || channel === "kakao") && phone) {
       localizedRecipient.phone = phone;
     }
@@ -178,6 +190,8 @@ export function buildLocalizedDispatchWebhookPayload(input: {
   messageVariants: Record<string, string>;
   operatorNote: string;
   workpack: unknown;
+  shareSessionId?: string;
+  recipientPortalBaseUrl?: string;
   sentAt?: string;
 }): { ok: true; payload: {
   event: "safeguard.workpack.dispatch";
@@ -214,6 +228,24 @@ export function buildLocalizedDispatchWebhookPayload(input: {
       workpack: input.workpack
     }
   };
+}
+
+function buildRecipientPortalUrl(input: {
+  baseUrl?: string;
+  shareSessionId?: string;
+  workerId: string;
+}): string | undefined {
+  if (!input.baseUrl || !input.shareSessionId || !uuidPattern.test(input.shareSessionId) || !uuidPattern.test(input.workerId)) {
+    return undefined;
+  }
+  try {
+    const url = new URL(`/share/${encodeURIComponent(input.shareSessionId)}`, input.baseUrl);
+    url.searchParams.set("workerId", input.workerId);
+    return url.toString();
+  } catch (error) {
+    console.warn("recipient portal URL build failed", error);
+    return undefined;
+  }
 }
 
 function readString(value: unknown): string | undefined {

@@ -731,14 +731,16 @@ describe("workflow dispatch route authority", () => {
           phone: "010-1111-2222",
           dispatchLanguageCode: "vi",
           messageTarget: "foreign:vi",
-          message: VI_MESSAGE
+          message: VI_MESSAGE,
+          deliveryText: VI_MESSAGE
         },
         {
           workerId: KOREAN_WORKER_ID,
           phone: "010-3333-4444",
           dispatchLanguageCode: "ko",
           messageTarget: "manager",
-          message: KO_MESSAGE
+          message: KO_MESSAGE,
+          deliveryText: KO_MESSAGE
         }
       ]
     });
@@ -782,7 +784,8 @@ describe("workflow dispatch route authority", () => {
         workerId: WORKER_ID,
         email: "server@example.com",
         dispatchLanguageCode: "vi",
-        message: VI_MESSAGE
+        message: VI_MESSAGE,
+        deliveryText: VI_MESSAGE
       }]
     });
     expect(payload.recipients[0]).not.toHaveProperty("phone");
@@ -1445,7 +1448,8 @@ describe("workflow dispatch route authority", () => {
       phone: "010-1111-2222",
       dispatchLanguageCode: "vi",
       messageTarget: "foreign:vi",
-      message: VI_MESSAGE
+      message: VI_MESSAGE,
+      deliveryText: VI_MESSAGE
     });
     expect(Object.keys(foreignRecipient || {})).not.toEqual(expect.arrayContaining([
       "displayName",
@@ -1518,6 +1522,7 @@ describe("n8n recipient localization contract", () => {
     expect(script).not.toContain("const message = workpack.message");
     expect(script).not.toContain("payload.message");
     expect(script).toContain("recipient.message");
+    expect(script).toContain("recipient.deliveryText");
     expect(script).toContain("recipientText(recipient)");
     expect(script).toContain("for (const recipient of messageRecipients)");
     expect(script).toContain("recipients: [recipient]");
@@ -1549,7 +1554,8 @@ describe("n8n recipient localization contract", () => {
             phone: "010-1111-2222",
             dispatchLanguageCode: "vi",
             messageTarget: "foreign:vi",
-            message: VI_MESSAGE
+            message: VI_MESSAGE,
+            deliveryText: `${VI_MESSAGE}\n\nhttps://www.safeclaw.kr/share/${SESSION_ID}?workerId=${WORKER_ID}`
           },
           {
             workerId: KOREAN_WORKER_ID,
@@ -1574,11 +1580,12 @@ describe("n8n recipient localization contract", () => {
           phone: "010-1111-2222",
           dispatchLanguageCode: "vi",
           messageTarget: "foreign:vi",
-          message: VI_MESSAGE
+          message: VI_MESSAGE,
+          deliveryText: `${VI_MESSAGE}\n\nhttps://www.safeclaw.kr/share/${SESSION_ID}?workerId=${WORKER_ID}`
         }],
         messageTarget: "foreign:vi",
         message: VI_MESSAGE,
-        text: VI_MESSAGE
+        text: `${VI_MESSAGE}\n\nhttps://www.safeclaw.kr/share/${SESSION_ID}?workerId=${WORKER_ID}`
       }),
       expect.objectContaining({
         recipients: [{

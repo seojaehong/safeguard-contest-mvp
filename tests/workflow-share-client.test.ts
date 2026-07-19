@@ -214,6 +214,42 @@ describe("authenticated workflow share client", () => {
     });
   });
 
+  it("adds the invited worker portal URL only at the provider delivery boundary", async () => {
+    const { buildLocalizedDispatchWebhookPayload } = await loadClient();
+
+    const result = buildLocalizedDispatchWebhookPayload({
+      idempotencyKey: "provider-dispatch-v1-44444444-4444-4444-8444-444444444444-deadbeef",
+      channels: ["sms"],
+      recipients: [{
+        workerId: "11111111-1111-4111-8111-111111111111",
+        phone: "010-1111-2222",
+        languageCode: "vi"
+      }],
+      messageVariants: {
+        vi: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh."
+      },
+      operatorNote: "",
+      workpack: { companyName: "Safe Site" },
+      shareSessionId: "33333333-3333-4333-8333-333333333333",
+      recipientPortalBaseUrl: "https://www.safeclaw.kr"
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error("Expected localized dispatch payload");
+    expect(result.payload.messageVariants.vi).toBe("[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.");
+    expect(result.payload.recipients).toEqual([{
+      workerId: "11111111-1111-4111-8111-111111111111",
+      phone: "010-1111-2222",
+      dispatchLanguageCode: "vi",
+      messageTarget: "foreign:vi",
+      message: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.",
+      portalUrl: "https://www.safeclaw.kr/share/33333333-3333-4333-8333-333333333333?workerId=11111111-1111-4111-8111-111111111111",
+      deliveryText: "[SafeClaw]\nTiếng Việt\n\n- Dừng công việc khi gió mạnh.\n\nhttps://www.safeclaw.kr/share/33333333-3333-4333-8333-333333333333?workerId=11111111-1111-4111-8111-111111111111"
+    }]);
+    expect(result.payload.recipients[0]?.message).not.toContain("/share/");
+    expect(result.payload.recipients[0]?.deliveryText).toContain("/share/");
+  });
+
   it("rejects oversized or internal diagnostic dispatch messages before the request", async () => {
     const { dispatchAuthenticatedShareSession } = await loadClient();
     const fetcher = vi.fn();

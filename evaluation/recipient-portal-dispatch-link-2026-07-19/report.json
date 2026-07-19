@@ -1,0 +1,56 @@
+{
+  "title": "Recipient Portal Dispatch Link Remediation",
+  "date": "2026-07-19",
+  "baseHead": "254ce5be667070ee7d26f25f5e98568bd3ec95bd",
+  "status": "pass",
+  "changedContract": {
+    "canonicalMessage": "message remains the saved worker-language body and does not include /share/ links",
+    "portalUrl": "worker-specific /share/[sessionId]?workerId=[workerId] URL",
+    "deliveryText": "provider body that appends portalUrl to message when valid",
+    "smsLengthGate": "checks deliveryText"
+  },
+  "commands": [
+    {
+      "command": "npm.cmd test -- tests\\workflow-share-client.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "pass",
+      "files": 1,
+      "tests": 31
+    },
+    {
+      "command": "npm.cmd test -- tests\\workpack-share-authority-routes.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "pass",
+      "files": 1,
+      "tests": 37
+    },
+    {
+      "command": "npm.cmd test -- tests\\workflow-share-client.test.ts tests\\workspace-share-simplification.test.ts tests\\workflow-share-panel-behavior.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "pass",
+      "files": 3,
+      "tests": 49
+    },
+    {
+      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "pass",
+      "files": 1,
+      "tests": 4
+    },
+    {
+      "command": "npm.cmd run build",
+      "status": "pass",
+      "staticPages": 28
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "pass",
+      "note": "sequential rerun after build"
+    }
+  ],
+  "excludedEvidence": [
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "excluded",
+      "reason": "started in parallel with next build while .next/types was being regenerated"
+    }
+  ],
+  "dbChanges": false
+}

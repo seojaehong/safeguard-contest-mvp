@@ -501,7 +501,9 @@ export async function POST(request: NextRequest) {
     recipients,
     messageVariants: canonicalVariants.messageVariants,
     operatorNote: typeof body.operatorNote === "string" ? body.operatorNote : "",
-    workpack
+    workpack,
+    shareSessionId,
+    recipientPortalBaseUrl: request.nextUrl.origin
   });
   if (!localizedPayload.ok) {
     return NextResponse.json({
