@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "measuredAt": "2026-07-19T19:51:21.449Z",
+  "localArchive": {
+    "archiveCount": 10,
+    "pdfEntryCount": 1040,
+    "entryManifestSha256": "164ef50791bc6f3581420efa5cdcbbd675681e96ab0d83b848eb680151beeb5c",
+    "itemTypes": {
+      "technical-guideline": 803,
+      "technical-support-regulation": 237
+    }
+  },
+  "localParse": {
+    "rowsReturned": 1040,
+    "parseAttemptedCount": 237,
+    "parseSuccessCount": 222,
+    "parseEmptyOutputCount": 15,
+    "parseFailureCount": 0,
+    "parseNotAttemptedCount": 803,
+    "accountingMatches": true
+  },
+  "supabaseVisible": {
+    "sourceId": "kosha-technical-support-regulations-2025",
+    "rowCount": 1040,
+    "itemTypes": {
+      "technical-guideline": 803,
+      "technical-support-regulation": 237
+    },
+    "canonicalRowSha256": "8f068e0be64e8b16145da7dc5a25450c81f13944773cb5873f3df6a504df93e0"
+  },
+  "officialSnapshot": {
+    "currentCount": 1039,
+    "currentCanonicalSha256": "4ccd2d3a8e72ebaf3666882533df0b3f4f2ec04403a6458f3d72d62c07a99156",
+    "retiredCount": 679,
+    "retiredCanonicalSha256": "28dce36e21ed4a6caa261146cd79bbd2e24f5011b9e2b95def9dc8934e24a56f"
+  }
+}
