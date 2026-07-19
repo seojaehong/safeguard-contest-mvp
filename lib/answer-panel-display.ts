@@ -32,6 +32,7 @@ const GROUNDING_GROUP_LABELS: Readonly<Record<string, string>> = {
 };
 
 const internalOperationalPattern = new RegExp([
+  "하네스 판단",
   "OPENAI_API_KEY",
   "AI_MODE",
   "fallback",
@@ -47,8 +48,22 @@ const internalOperationalPattern = new RegExp([
   "KOREAN_LAW_MCP",
   "korean-law-mcp",
   "structured rows",
-  "TBM-risk"
+  "TBM-risk",
+  "DB 하네스",
+  "naturalize_only",
+  "품질 계약"
 ].join("|"), "i");
+
+const internalOperationalLinePattern = new RegExp([
+  "^\\s*[-•]?\\s*직접 근거\\s*:",
+  "^\\s*[-•]?\\s*SIF 유사사례\\s*:",
+  "SIF 사고개요",
+  "원문 감소대책",
+  "원시 태그",
+  "관리감독자 검토 완료 전",
+  "D-[A-Z]-\\d+",
+  "○○현장"
+].join("|"), "iu");
 
 function publicModeLabel(mode: IntegrationMode | "unconfigured") {
   if (mode === "live") return "연결됨";
@@ -61,7 +76,17 @@ export function sanitizeAnswerForDisplay(answer: string) {
   const blocks = answer
     .split(/\n{2,}/)
     .map((block) => block.trim())
-    .filter((block) => block && !internalOperationalPattern.test(block));
+    .map((block) => (
+      internalOperationalPattern.test(block)
+        ? ""
+        : block
+          .split(/\n/u)
+          .map((line) => line.trimEnd())
+          .filter((line) => line.trim() && !internalOperationalLinePattern.test(line))
+          .join("\n")
+          .trim()
+    ))
+    .filter(Boolean);
 
   return blocks.length
     ? blocks.join("\n\n")

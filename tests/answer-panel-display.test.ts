@@ -43,6 +43,26 @@ describe("answer panel display copy", () => {
     expect(sanitized).not.toMatch(/OpenAI|OPENAI_API_KEY|fallback|timeout|retry|graceful/i);
   });
 
+  it("removes DB harness and raw SIF diagnostics from visible answer text", () => {
+    const answer = [
+      "1) 하네스 판단",
+      "- 직접 근거: D-C-13-2026 외벽도장보수공사에 안전작업에 관한 기술지원규정",
+      "- SIF 유사사례: ○○현장에서 작업자가 로프와 함께 추락한 사례",
+      "",
+      "2) 오늘 문서에 먼저 반영할 조치",
+      "- SIF 사고개요와 원문 감소대책을 현장 작업조건에 대조해 직접 원인 확인",
+      "- 관리감독자 검토 완료 전 원시 태그·관리대책을 현장 통제대책으로 확정하지 않음",
+      "- 작업발판·안전난간·개구부 방호 상태를 작업 전 점검합니다.",
+      "- 오후 강풍 예보 시 작업중지 기준과 대피 기준을 TBM에서 공유합니다."
+    ].join("\n");
+
+    const sanitized = sanitizeAnswerForDisplay(answer);
+
+    expect(sanitized).toContain("작업발판");
+    expect(sanitized).toContain("강풍");
+    expect(sanitized).not.toMatch(/하네스|DB 하네스|SIF 사고개요|원시 태그|관리감독자 검토 완료 전|D-C-13|○○현장/u);
+  });
+
   it("builds public status notes without exposing raw status detail text", () => {
     const input: AnswerPanelPublicStatusInput = {
       status: {
