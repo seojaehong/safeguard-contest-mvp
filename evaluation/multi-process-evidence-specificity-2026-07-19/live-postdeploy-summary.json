@@ -1,0 +1,196 @@
+{
+  "generatedAt": "2026-07-19T03:30:20.427Z",
+  "elapsedMs": 77542,
+  "status": 200,
+  "ok": true,
+  "commitSha": "22dc267f02960fc37cc995f7d432f832d6a9faf9",
+  "question": "서울 성수동 복합건물 현장. 굴착, 토사반출, 자재양중 3개 공종을 오늘 동시에 진행한다. 작업자 8명, 굴삭기 1대, 덤프트럭 2대, 이동식 크레인 1대 사용. 각 공종별 위험성평가 rows와 TBM 핵심 확인사항을 만들어줘.",
+  "requestedAiMode": "full",
+  "responseMode": "live",
+  "generationMode": "full",
+  "askMode": "full",
+  "structuredRiskRowCount": 6,
+  "processCounts": {
+    "굴착": 2,
+    "토사반출": 2,
+    "자재양중": 2
+  },
+  "missingExpectedProcesses": [],
+  "underCoveredExpectedProcesses": [],
+  "specificityFailures": [
+    {
+      "label": "굴착",
+      "index": 1,
+      "matched": false,
+      "hazard": "작업차량 이동·후진 구간에서 작업자와 충돌·깔림 위험",
+      "evidenceRefs": [
+        "DB 하네스 보조근거",
+        "고위험요인 사례",
+        "2017월 11월경 ○○현장에서 토사 반출 작업을 위하여 덤프트럭(25.5ton)이 현장 내 가설도로에서 이동 중 앞서 걸어가고 있던 작업자를 치어 사망 사례",
+        "검색: rest"
+      ]
+    }
+  ],
+  "specificity": {
+    "굴착": [
+      {
+        "matched": true,
+        "hazard": "상부 물체·부재·장비의 낙하·비래로 인한 작업자 타격·깔림 위험",
+        "evidenceRefs": [
+          "DB 하네스 보조근거",
+          "고위험요인 사례",
+          "○○ 현장에서, 토사반출용 차량 진출입로 비산먼지 발생방지 및 주변정리 업무를 맡은 굴착작업이 있던 절토사면 하부에 있다가 낙석에 맞아 사망 사례",
+          "검색: rest"
+        ]
+      },
+      {
+        "matched": false,
+        "hazard": "작업차량 이동·후진 구간에서 작업자와 충돌·깔림 위험",
+        "evidenceRefs": [
+          "DB 하네스 보조근거",
+          "고위험요인 사례",
+          "2017월 11월경 ○○현장에서 토사 반출 작업을 위하여 덤프트럭(25.5ton)이 현장 내 가설도로에서 이동 중 앞서 걸어가고 있던 작업자를 치어 사망 사례",
+          "검색: rest"
+        ]
+      }
+    ],
+    "토사반출": [
+      {
+        "matched": true,
+        "hazard": "상부 물체·부재·장비의 낙하·비래로 인한 작업자 타격·깔림 위험",
+        "evidenceRefs": [
+          "DB 하네스 보조근거",
+          "고위험요인 사례",
+          "○○ 현장에서, 토사반출용 차량 진출입로 비산먼지 발생방지 및 주변정리 업무를 맡은 굴착작업이 있던 절토사면 하부에 있다가 낙석에 맞아 사망 사례",
+          "검색: rest"
+        ]
+      },
+      {
+        "matched": true,
+        "hazard": "작업차량 이동·후진 구간에서 작업자와 충돌·깔림 위험",
+        "evidenceRefs": [
+          "DB 하네스 보조근거",
+          "고위험요인 사례",
+          "2017월 11월경 ○○현장에서 토사 반출 작업을 위하여 덤프트럭(25.5ton)이 현장 내 가설도로에서 이동 중 앞서 걸어가고 있던 작업자를 치어 사망 사례",
+          "검색: rest"
+        ]
+      }
+    ],
+    "자재양중": [
+      {
+        "matched": true,
+        "hazard": "자재양중 작업 중 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+        "evidenceRefs": [
+          "자재양중 작업 입력 조건",
+          "산업안전보건법",
+          "KOSHA 위험성평가",
+          "문서팩 입력 조건"
+        ]
+      },
+      {
+        "matched": true,
+        "hazard": "자재양중 작업 중 단시간 구름많음, 강수없음, 기온 29℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보 반영)에 따른 작업환경 변화 위험",
+        "evidenceRefs": [
+          "자재양중 작업 입력 조건",
+          "기상청 현재·예보",
+          "KOSHA 위험성평가",
+          "작업중지 기준"
+        ]
+      }
+    ]
+  },
+  "statusSummary": "연결됨",
+  "statusDetail": "Law.go와 OpenAI 응답을 결합했습니다. / 법령 근거 상태: live / 기상청 초단기실황 호출 성공 (서울, base 20260719 1100) / 기상청 초단기예보 호출 성공 (서울, base 20260719 1130) / 기상청 단기예보 호출 성공 (서울, base 20260719 1100) / 기상청 기상특보 조회 성공 (전국, 202607191000) / 기상청 영향예보 조회 성공 (당진군, 보건(일반인)) / 고용24 사업주훈련 호출 성공 (지역코드 11). 교육 적합성은 현장 키워드와 대상 일치 여부로 재정렬했습니다. / KOSHA 교육포털 메타데이터 확인 성공. 교육대상 28개, 과정 후보 3건을 반영했습니다. / KOSHA·고용노동부 공식 자료 URL 5건 확인. 확인된 자료의 서식 힌트와 반영 위치를 위험성평가·TBM·교육 기록에 적용했습니다. / KOSHA 세부 OpenAPI 3건을 문서 반영 근거로 연결했습니다. 보류 상세: 정상 응답 / 화학물질 키워드가 없어 MSDS 호출을 건너뜁니다. / KOSHA 국내재해사례 후보 API live 호출 성공. 유사 사례를 TBM과 교육 문구에 반영했습니다. 연결 방식: urlsearchparams:raw / KOSHA 사고사망 게시판 live 호출 성공. 중대위험 사례를 TBM과 교육 문구에 반영했습니다. / 지식 DB 매칭 1건 / Supabase 카탈로그 매칭 6건 (configured=true) / structured 위험성평가 rows 6건, 검증 이슈 0건 (structured rows=DB harness deterministic) / TBM-risk 연결 6건 (TBM-risk links=DB harness deterministic) / TBM structured=template / AI_MODE=full (AI 본문 1개 채움: tbmRiskLinks) [riskAssessment=fallback workPlanStructured=fallback tbmBriefingStructured=fallback tbmLogStructured=fallback tbmLog=fallback educationRecordStructured=fallback structuredRiskRows=fallback free=fallback foreign=fallback tbmRiskLinks=fallback]",
+  "rowSample": [
+    {
+      "process": "굴착",
+      "task": "굴착 작업",
+      "equipment": "아카이브(건설업)",
+      "hazard": "상부 물체·부재·장비의 낙하·비래로 인한 작업자 타격·깔림 위험",
+      "currentControls": "물체·부재·부착장치의 고정·결속 및 낙하방지 상태 확인",
+      "additionalControls": "낙하 예상 작업반경과 하부 출입통제",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 보조근거",
+        "고위험요인 사례",
+        "○○ 현장에서, 토사반출용 차량 진출입로 비산먼지 발생방지 및 주변정리 업무를 맡은 굴착작업이 있던 절토사면 하부에 있다가 낙석에 맞아 사망 사례",
+        "검색: rest"
+      ]
+    },
+    {
+      "process": "굴착",
+      "task": "굴착 작업",
+      "equipment": "아카이브(건설업)",
+      "hazard": "작업차량 이동·후진 구간에서 작업자와 충돌·깔림 위험",
+      "currentControls": "운전자 시야·사각지대 확인 및 차량과 작업자 동선을 차단시설로 분리",
+      "additionalControls": "교차·후진 구간 신호수 배치, 후진 경보와 작업반경 접근통제 확인",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 보조근거",
+        "고위험요인 사례",
+        "2017월 11월경 ○○현장에서 토사 반출 작업을 위하여 덤프트럭(25.5ton)이 현장 내 가설도로에서 이동 중 앞서 걸어가고 있던 작업자를 치어 사망 사례",
+        "검색: rest"
+      ]
+    },
+    {
+      "process": "토사반출",
+      "task": "토사반출 작업",
+      "equipment": "아카이브(건설업)",
+      "hazard": "상부 물체·부재·장비의 낙하·비래로 인한 작업자 타격·깔림 위험",
+      "currentControls": "물체·부재·부착장치의 고정·결속 및 낙하방지 상태 확인",
+      "additionalControls": "낙하 예상 작업반경과 하부 출입통제",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 보조근거",
+        "고위험요인 사례",
+        "○○ 현장에서, 토사반출용 차량 진출입로 비산먼지 발생방지 및 주변정리 업무를 맡은 굴착작업이 있던 절토사면 하부에 있다가 낙석에 맞아 사망 사례",
+        "검색: rest"
+      ]
+    },
+    {
+      "process": "토사반출",
+      "task": "토사반출 작업",
+      "equipment": "아카이브(건설업)",
+      "hazard": "작업차량 이동·후진 구간에서 작업자와 충돌·깔림 위험",
+      "currentControls": "운전자 시야·사각지대 확인 및 차량과 작업자 동선을 차단시설로 분리",
+      "additionalControls": "교차·후진 구간 신호수 배치, 후진 경보와 작업반경 접근통제 확인",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "DB 하네스 보조근거",
+        "고위험요인 사례",
+        "2017월 11월경 ○○현장에서 토사 반출 작업을 위하여 덤프트럭(25.5ton)이 현장 내 가설도로에서 이동 중 앞서 걸어가고 있던 작업자를 치어 사망 사례",
+        "검색: rest"
+      ]
+    },
+    {
+      "process": "자재양중",
+      "task": "자재양중 작업",
+      "equipment": "자재양중 관련 장비·작업구역·보호구",
+      "hazard": "자재양중 작업 중 강풍 상황에서 이동식 비계가 흔들리며 작업자가 추락하거나 비계가 전도될 위험",
+      "currentControls": "자재양중 작업 전 작업 전 장비 상태, 작업구역, 보호구 착용 상태를 확인합니다.",
+      "additionalControls": "자재양중 담당자가 작업 전 비계 고정핀, 바퀴 잠금, 작업발판 상태 점검",
+      "riskLevel": "high",
+      "evidenceRefs": [
+        "자재양중 작업 입력 조건",
+        "산업안전보건법",
+        "KOSHA 위험성평가",
+        "문서팩 입력 조건"
+      ]
+    },
+    {
+      "process": "자재양중",
+      "task": "자재양중 작업",
+      "equipment": "자재양중 관련 장비·작업구역·보호구",
+      "hazard": "자재양중 작업 중 단시간 구름많음, 강수없음, 기온 29℃, 풍속 2m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보 반영)에 따른 작업환경 변화 위험",
+      "currentControls": "자재양중 작업 전 기상 변화와 작업장 바닥·시야·풍속 상태를 작업 전 확인합니다.",
+      "additionalControls": "자재양중 담당자가 풍속 상승 또는 돌풍 체감 시 즉시 작업중지 후 지상 대기",
+      "riskLevel": "medium",
+      "evidenceRefs": [
+        "자재양중 작업 입력 조건",
+        "기상청 현재·예보",
+        "KOSHA 위험성평가",
+        "작업중지 기준"
+      ]
+    }
+  ]
+}

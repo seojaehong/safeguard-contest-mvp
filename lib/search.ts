@@ -562,6 +562,17 @@ function specializeFallbackRiskRowForProcess(row: RiskAssessmentRow, processLabe
   };
 }
 
+function safetyReferenceProcessMatchSurface(item: SafetyReferenceItem): string {
+  return [
+    item.title,
+    item.category,
+    item.subcategory,
+    ...item.keywords,
+    ...item.risk_tags,
+    ...item.controls
+  ].filter(Boolean).join(" ");
+}
+
 function compactRiskCell(value: string | null | undefined, maxLength = 96): string {
   const normalized = (value || "").replace(/\s+/g, " ").trim();
   if (!normalized) return "";
@@ -697,17 +708,7 @@ export function buildSafetyReferenceRiskRows(
       const processCandidates = filterAndRankSafetyReferencesByQuery(
         processQuery,
         topCandidates.filter((item) => {
-          const itemText = [
-            item.title,
-            item.summary,
-            item.short_summary,
-            item.category,
-            item.subcategory,
-            ...item.keywords,
-            ...item.risk_tags,
-            ...item.controls
-          ].filter(Boolean).join(" ");
-          return itemText.includes(processLabel);
+          return safetyReferenceProcessMatchSurface(item).includes(processLabel);
         }),
         topCandidates.length
       );

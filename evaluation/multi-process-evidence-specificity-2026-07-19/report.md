@@ -4,7 +4,7 @@ Date: 2026-07-19
 
 ## Verdict
 
-LOCAL PASS. Post-deploy live probe is still required after this commit reaches production.
+LOCAL PASS. A post-deploy live probe for `22dc267f02960fc37cc995f7d432f832d6a9faf9` found one remaining specificity failure, and the follow-up remediation is now covered locally. A new post-deploy live probe is required after this latest remediation reaches production.
 
 ## Problem
 
@@ -21,6 +21,26 @@ This gate tightens the contract from simple process coverage to process-specific
 - specializes deterministic fallback rows with the requested process label in the hazard, controls, verification, equipment, and evidence refs.
 
 This keeps single complex work descriptions, such as a confined-space pump task with several comma-separated conditions, on the existing task-specific rerank path.
+
+## Live Finding After First Specificity Patch
+
+Post-deploy probe at `22dc267f02960fc37cc995f7d432f832d6a9faf9`:
+
+- Structured risk rows: `6`
+- Process counts: `굴착: 2`, `토사반출: 2`, `자재양중: 2`
+- Missing requested processes: none
+- Under-covered requested processes: none
+- Specificity failure: `굴착[1]` used a `토사반출 덤프트럭` accident case because the accident summary mentioned a nearby `굴착작업`.
+
+Evidence:
+
+- `live-postdeploy-summary.json`
+- `live-postdeploy-sample.json`
+
+Follow-up remediation:
+
+- process-specific reference matching now uses title/category/subcategory/keywords/risk tags/controls as the match surface;
+- summary-only mentions no longer qualify an adjacent-process accident case for the current process.
 
 ## TDD Evidence
 
@@ -44,14 +64,14 @@ GREEN:
 
 ```text
 npm.cmd test -- tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false
-1 file / 55 tests PASS
+1 file / 56 tests PASS
 ```
 
 Regression:
 
 ```text
 npm.cmd test -- tests\ai-deliverables-generation-trace.test.ts tests\ai-deliverables-scope.test.ts tests\naturalize-output-contract.test.ts tests\grounded-generation-contract.test.ts tests\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false
-4 files / 115 tests PASS
+4 files / 116 tests PASS
 ```
 
 TypeScript:

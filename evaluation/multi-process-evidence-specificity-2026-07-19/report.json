@@ -1,6 +1,25 @@
 {
   "generatedAt": "2026-07-19T03:25:00.000Z",
   "verdict": "local_pass_post_deploy_required",
+  "firstPostDeployProbe": {
+    "commitSha": "22dc267f02960fc37cc995f7d432f832d6a9faf9",
+    "result": "specificity_failed",
+    "structuredRiskRowCount": 6,
+    "processCounts": {
+      "굴착": 2,
+      "토사반출": 2,
+      "자재양중": 2
+    },
+    "missingExpectedProcesses": [],
+    "underCoveredExpectedProcesses": [],
+    "specificityFailures": [
+      {
+        "label": "굴착",
+        "index": 1,
+        "reason": "used a 토사반출 덤프트럭 accident case because the summary mentioned 굴착작업"
+      }
+    ]
+  },
   "problem": "explicit multi-process prompts had process coverage but could reuse adjacent-process evidence or generic fallback rows",
   "fix": {
     "scope": "deterministic DB harness risk rows",
@@ -8,6 +27,8 @@
       "multi-process branch requires explicit process markers",
       "adjacent-process evidence borrowing removed",
       "fallback rows are specialized with process-specific hazard, controls, equipment, verification, and evidence refs"
+      ,
+      "process-specific reference matching excludes summary-only mentions and uses title/category/subcategory/keywords/risk tags/controls"
     ],
     "changedFiles": [
       "lib/search.ts",
@@ -23,13 +44,13 @@
     "green": {
       "command": "npm.cmd test -- tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
       "files": 1,
-      "tests": 55,
+      "tests": 56,
       "result": "pass"
     },
     "regression": {
       "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts tests\\ai-deliverables-scope.test.ts tests\\naturalize-output-contract.test.ts tests\\grounded-generation-contract.test.ts tests\\commercial-harness.test.ts --maxWorkers=1 --fileParallelism=false",
       "files": 4,
-      "tests": 115,
+      "tests": 116,
       "result": "pass"
     },
     "typecheck": {
