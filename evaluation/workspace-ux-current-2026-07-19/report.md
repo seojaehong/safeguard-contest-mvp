@@ -8,14 +8,14 @@ Generated at: 2026-07-19 KST
 
 The prior production check confirmed that the user's complaint was real, not stale UI. This remediation keeps the current 3-step direction and makes a bounded launch fix: the document editor no longer expands into a 10000px+ page, mobile document selection no longer pushes the preview below the first viewport, and desktop share no longer renders as a narrow mobile-card composition.
 
-This report was re-run against the deployed production build after the remediation shipped.
+This report was re-run against the deployed production build after the share mobile compact follow-up shipped.
 
 ## Served Surface
 
 | Item | Evidence |
 | --- | --- |
 | URL | `https://www.safeclaw.kr/workspace?q=...&theme=day` |
-| Build marker | `/api/build-info` returned `a1df769154ebb616767611cca5dd351d916480db`, branch `master`, environment `production` |
+| Build marker | `/api/build-info` returned `1b3b6222131a3fde92ae168c113a4b8116a94c5b`, branch `master`, environment `production` |
 | Browser | Playwright Chromium |
 | Mutation | false |
 | Generated state | Local production build auto-generation completed in both desktop and mobile runs using the app fallback provider |
@@ -40,7 +40,7 @@ Screenshots:
 | Mobile document review | 2821px / 3.34x, preview y=845.72 | 1479px / 1.75x, preview y=691.05 | Improved; preview now begins inside first viewport |
 | Mobile document editor | 15770px / 18.68x | 1292px / 1.53x | Fixed for launch |
 | Desktop share | 1429px / 1.59x, panel 632px | 1255px / 1.39x, panel 968px | Fixed desktop breakpoint |
-| Mobile share | 2296px / 2.72x | 1795px / 2.13x | Improved, still long |
+| Mobile share | 2296px / 2.72x | 1503px / 1.78x | Improved, still above one viewport |
 
 ## Documents Screen
 
@@ -51,25 +51,25 @@ Screenshots:
 
 Remaining risk:
 
-- Mobile share is improved but still long. It is not the current video blocker, but it should be part of the next Share v2 IA pass.
+- Mobile share is improved again by the compact follow-up, but still remains above one viewport. It is usable for the video path and remains a Share v2 IA cleanup item.
 - Some visible controls under 44px remain in the document/editor surfaces. This patch prioritized launch video geometry over full touch-target cleanup.
 
 ## Share Screen
 
 Desktop share no longer uses a 632px mobile-like card. The measured share panel is 968px wide inside the workspace, and the form shell uses a desktop-width layout.
 
-Mobile share remains single-column and long, but horizontal overflow is false and under-44 controls were 0 in this run.
+Mobile share remains single-column and longer than one viewport, but horizontal overflow is false, under-44 controls were 0, and the latest production height is 1503px / 1.78x.
 
 ## Verification
 
 - `npm.cmd run typecheck`: PASS
 - `npm.cmd run build`: PASS, 28/28 static pages
-- `node evaluation/workspace-ux-current-2026-07-19/measure_workspace_ux.cjs`: PASS, desktop and mobile generated on production build `a1df769154ebb616767611cca5dd351d916480db`
+- `node evaluation/workspace-ux-current-2026-07-19/measure_workspace_ux.cjs`: PASS, desktop and mobile generated on production build `1b3b6222131a3fde92ae168c113a4b8116a94c5b`
 
 ## Post-Deploy Gate
 
 Next production gate:
 
-- Wait for GitHub Actions run `29688857645` to finish on the same head.
+- GitHub Actions run `29689208795` is still the authoritative CI gate for this head.
 - Continue Share v2 IA to reduce mobile share height further.
 - Continue touch-target cleanup for remaining document/editor controls under 44px.
