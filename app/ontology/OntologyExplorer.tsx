@@ -97,7 +97,7 @@ export function OntologyExplorer({
   const [sort, setSort] = useState<"degree" | "label">("degree");
   const [depth, setDepth] = useState<1 | 2>(1);
   const [zoom, setZoom] = useState(1);
-  const [visibleListCount, setVisibleListCount] = useState(18);
+  const [visibleListCount, setVisibleListCount] = useState(9);
   const [expanded, setExpanded] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState(model.focusNodeId || model.list[0]?.id || "");
   const expandButtonRef = useRef<HTMLButtonElement>(null);
@@ -245,7 +245,7 @@ export function OntologyExplorer({
 
         <div className={styles.mobileRelations} data-testid="ontology-mobile-relations">
           <h3>연결된 근거</h3>
-          {selectedCard?.related.length ? selectedCard.related.slice(0, 12).map((relation) => {
+          {selectedCard?.related.length ? selectedCard.related.slice(0, 6).map((relation) => {
             const relatedId = relation.direction === "incoming" ? relation.sourceId : relation.targetId;
             const relatedName = relation.direction === "incoming" ? relation.sourceLabel : relation.targetLabel;
             return (
@@ -256,6 +256,9 @@ export function OntologyExplorer({
               </button>
             );
           }) : <p>직접 연결된 근거가 없습니다.</p>}
+          {(selectedCard?.related.length ?? 0) > 6 ? (
+            <p>나머지 연결은 검색하거나 그래프 전체 화면에서 확인하세요.</p>
+          ) : null}
         </div>
       </section>
 
@@ -280,7 +283,7 @@ export function OntologyExplorer({
           ))}
         </div>
         {visibleListCount < filteredList.length ? (
-          <button type="button" className={styles.moreButton} onClick={() => setVisibleListCount((value) => value + 18)}>18개 더 보기</button>
+          <button type="button" className={styles.moreButton} onClick={() => setVisibleListCount((value) => value + 9)}>9개 더 보기</button>
         ) : null}
       </section>
 

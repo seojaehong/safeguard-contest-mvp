@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-07-20T03:17:30+09:00",
+  "verdict": "improved_not_final",
+  "baseUrl": "http://127.0.0.1:3029",
+  "measuredHead": "0498c29235f2374637bf0ddd3f10fe533750c137",
+  "changes": {
+    "mobileLoopStrip": "hidden",
+    "mobileRelationLimit": 6,
+    "initialDirectoryLimit": 9,
+    "moreIncrement": 9
+  },
+  "desktop": {
+    "viewport": { "width": 1440, "height": 900 },
+    "bodyHeight": 2077,
+    "horizontalOverflow": false,
+    "outsideViewportElements": 0,
+    "loopStripDisplay": "grid"
+  },
+  "mobile": {
+    "viewport": { "width": 390, "height": 844 },
+    "bodyHeight": 2893,
+    "previousLocalBodyHeight": 4602,
+    "bodyHeightReduction": 1709,
+    "horizontalOverflow": false,
+    "outsideViewportElements": 0,
+    "loopStripDisplay": "none",
+    "mobileRelationButtons": 6
+  },
+  "verification": {
+    "ontologyUiRemediationTest": "1 file / 7 tests PASS",
+    "typecheck": "PASS",
+    "build": "PASS, 28/28 static pages"
+  },
+  "remainingRisk": "Mobile ontology is still a long single route. Future IA should split or progressively disclose directory and schema sections."
+}

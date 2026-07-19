@@ -1,0 +1,59 @@
+{
+  "checkedAt": "2026-07-19T18:17:30.548Z",
+  "head": "0498c29235f2374637bf0ddd3f10fe533750c137",
+  "base": "http://127.0.0.1:3029",
+  "desktop": {
+    "metrics": {
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "bodyHeight": 2077,
+      "bodyWidth": 1440,
+      "overflowX": false,
+      "outside": 0,
+      "explorer": null,
+      "mobileRelations": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "bottom": 0
+      },
+      "mobileRelationButtons": 6,
+      "directoryRows": 0,
+      "nodeCount": 0,
+      "overlapPairs": 0,
+      "loopStripDisplay": "grid",
+      "loopStripHeight": 118
+    },
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-materialization-20260720\\evaluation\\ontology-mobile-ia-remediation-2026-07-20\\ontology-desktop-1440.png"
+  },
+  "mobile": {
+    "metrics": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "bodyHeight": 2893,
+      "bodyWidth": 390,
+      "overflowX": false,
+      "outside": 0,
+      "explorer": null,
+      "mobileRelations": {
+        "x": 17,
+        "y": 1044.375,
+        "w": 356,
+        "h": 686,
+        "bottom": 1730.375
+      },
+      "mobileRelationButtons": 6,
+      "directoryRows": 0,
+      "nodeCount": 0,
+      "overlapPairs": 0,
+      "loopStripDisplay": "none",
+      "loopStripHeight": 0
+    },
+    "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-materialization-20260720\\evaluation\\ontology-mobile-ia-remediation-2026-07-20\\ontology-mobile-390.png"
+  }
+}
