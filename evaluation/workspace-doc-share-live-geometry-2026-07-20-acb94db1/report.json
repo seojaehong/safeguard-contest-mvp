@@ -1,0 +1,137 @@
+{
+  "checkedAt": "2026-07-19T19:34:04.982Z",
+  "buildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "acb94db188b46fb8d1e057fe13ef713950963277",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-j3f5rdd0x-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "rows": [
+    {
+      "label": "desktop-1440x723-documents",
+      "viewport": {
+        "width": 1440,
+        "height": 723
+      },
+      "document": {
+        "scrollHeight": 1149,
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "horizontalOverflow": false,
+      "sticky": 0,
+      "bodyTextHasReady": true,
+      "selectors": {
+        "workbench": {
+          "selector": ".document-workbench",
+          "x": 186,
+          "y": 229,
+          "width": 1068,
+          "height": 800.23,
+          "position": "static",
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "text": "문서 생성 완료위험성평가표법령, 기상, 교육, 재해사례 근거를 확인하며 문서팩을 작성하고 있습니다.7/12실시간 검토 10건 · 진행 5건문서팩 생성 중구조화 산출물 조립 확인됨근거 2건 · 확인 필요 11건기상 확인진행법령 매칭진행SIF/KOSHA DB진행안전조치 검수진행문서 생성진행작성 근거생성 후 확인작성 근거문서 생성 후 확인KOSHA와 현장 이력 "
+        },
+        "preview": {
+          "selector": ".document-preview-pane",
+          "x": 410.34,
+          "y": 482.05,
+          "width": 830.66,
+          "height": 424,
+          "position": "static",
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "text": "생성 대기위험성평가표현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다.공유 단계로 이동"
+        },
+        "drawer": {
+          "selector": "[data-testid=\"document-provenance-drawer\"]",
+          "x": 199,
+          "y": 420,
+          "width": 1042,
+          "height": 50.05,
+          "position": "static",
+          "overflowX": "clip",
+          "overflowY": "clip",
+          "text": "근거 2건 · 확인 필요 11건기상 확인진행법령 매칭진행SIF/KOSHA DB진행안전조치 검수진행문서 생성진행작성 근거생성 후 확인작성 근거문서 생성 후 확인KOSHA와 현장 이력 근거를 확인한 뒤 문서에 반영합니다.안전조치 확인문서 생성 후 확인작업유형, 위험요인, 감소대책 누락을 문서 본문과 대조합니다.이전 개선사항저장된 내용 확인오늘 개선사항과 과거 "
+        },
+        "history": {
+          "selector": ".document-work-history",
+          "x": 199,
+          "y": 918.05,
+          "width": 1042,
+          "height": 44,
+          "position": "static",
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "text": "작업 이력진행 중법령, 기상, 교육, 재해사례 근거를 확인하며 문서팩을 작성하고 있습니다.작업 이력실시간 검토 중✓기상청 실황·특보 확인✓고용24 연계 교육과정 조회✓KOSHA 공식자료·재해사례 대조✓KOSHA 공식자료·재해사례 대조▸KOSHA 공식자료·재해사례 대조▸유사 재해사례 검색▸핵심 판단·즉시 조치 작성▸내부 안전지식 대조▸법제처에서 법령 근거 조"
+        }
+      }
+    },
+    {
+      "label": "mobile-390x844-documents",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "document": {
+        "scrollHeight": 1348,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "horizontalOverflow": false,
+      "sticky": 0,
+      "bodyTextHasReady": true,
+      "selectors": {
+        "workbench": {
+          "selector": ".document-workbench",
+          "x": 27,
+          "y": 262,
+          "width": 336,
+          "height": 981.23,
+          "position": "static",
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "text": "문서 생성 완료위험성평가표법령, 기상, 교육, 재해사례 근거를 확인하며 문서팩을 작성하고 있습니다.7/12실시간 검토 10건 · 진행 4건문서팩 생성 중구조화 산출물 조립 확인됨근거 2건 · 확인 필요 11건기상 확인진행법령 매칭진행SIF/KOSHA DB진행안전조치 검수진행문서 생성진행작성 근거생성 후 확인작성 근거문서 생성 후 확인KOSHA와 현장 이력 "
+        },
+        "preview": {
+          "selector": ".document-preview-pane",
+          "x": 40,
+          "y": 701.05,
+          "width": 310,
+          "height": 419,
+          "position": "static",
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "text": "생성 대기위험성평가표현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다.공유 단계로 이동"
+        },
+        "drawer": {
+          "selector": "[data-testid=\"document-provenance-drawer\"]",
+          "x": 40,
+          "y": 555,
+          "width": 310,
+          "height": 50.05,
+          "position": "static",
+          "overflowX": "clip",
+          "overflowY": "clip",
+          "text": "근거 2건 · 확인 필요 11건기상 확인진행법령 매칭진행SIF/KOSHA DB진행안전조치 검수진행문서 생성진행작성 근거생성 후 확인작성 근거문서 생성 후 확인KOSHA와 현장 이력 근거를 확인한 뒤 문서에 반영합니다.안전조치 확인문서 생성 후 확인작업유형, 위험요인, 감소대책 누락을 문서 본문과 대조합니다.이전 개선사항저장된 내용 확인오늘 개선사항과 과거 "
+        },
+        "history": {
+          "selector": ".document-work-history",
+          "x": 40,
+          "y": 1132.05,
+          "width": 310,
+          "height": 44,
+          "position": "static",
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "text": "작업 이력진행 중법령, 기상, 교육, 재해사례 근거를 확인하며 문서팩을 작성하고 있습니다.작업 이력실시간 검토 중✓기상청 실황·특보 확인✓고용24 연계 교육과정 조회✓KOSHA 공식자료·재해사례 대조✓KOSHA 공식자료·재해사례 대조✓KOSHA 공식자료·재해사례 대조▸유사 재해사례 검색▸핵심 판단·즉시 조치 작성▸내부 안전지식 대조▸법제처에서 법령 근거 조"
+        }
+      }
+    }
+  ]
+}
