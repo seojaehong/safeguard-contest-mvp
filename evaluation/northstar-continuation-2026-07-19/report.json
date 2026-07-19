@@ -1,0 +1,76 @@
+{
+  "artifact": "northstar-continuation-2026-07-19",
+  "checkedAt": "2026-07-19T09:28:30+09:00",
+  "verdict": "pass_current_kosha_sif_harness_and_worker_recipient_share_link_contract",
+  "sourceHead": "fa69500aaff5f64851fcecd83352c59ae5718073",
+  "liveBuildInfo": {
+    "ok": true,
+    "commitSha": "fa69500aaff5f64851fcecd83352c59ae5718073",
+    "branch": "master",
+    "environment": "production"
+  },
+  "recipientPortal": {
+    "staleFindingClosed": true,
+    "staleFindingSourceHead": "de4103db",
+    "routeExists": true,
+    "dispatchPayloadIncludesPortalUrl": true,
+    "canonicalMessageSeparatedFromDeliveryText": true,
+    "externalProviderDispatchMode": "preview_only_until_idempotency_storage_approval"
+  },
+  "koshaRuntime": {
+    "statusCode": 200,
+    "status": "ready",
+    "searchReady": true,
+    "items": 9920,
+    "technicalTotal": 1040,
+    "technicalGuidelines": 803,
+    "technicalSupportRegulations": 237,
+    "localCorpus": {
+      "status": "ready",
+      "itemCount": 234,
+      "chunkCount": 7127,
+      "failureCount": 0
+    },
+    "exactTrustRegistry": {
+      "status": "ready",
+      "count": 3,
+      "stableDocumentKeys": ["D-C-13", "D-C-7", "B-E-10"]
+    }
+  },
+  "verification": {
+    "koshaSifOntologyFocused": {
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-kosha-applicability-policy.test.ts tests\\grounded-generation-contract.test.ts tests\\ontology-evidence-chains.test.ts tests\\ontology-operation-memory.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 7,
+      "testFilesTotal": 7,
+      "testsPassed": 179,
+      "testsTotal": 179,
+      "status": "pass"
+    },
+    "shareRecipientAndExactKosha": {
+      "command": "npm.cmd test -- tests\\workflow-share-client.test.ts tests\\workpack-share-authority-routes.test.ts tests\\share-recipient-portal-browser.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-kosha-applicability-policy.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 6,
+      "testFilesTotal": 6,
+      "testsPassed": 133,
+      "testsTotal": 133,
+      "status": "pass"
+    },
+    "priorCurrentHeadValidation": {
+      "productionBuild": "pass_28_of_28_static_pages",
+      "typecheck": "pass",
+      "githubActionsForSourceHead": "success"
+    }
+  },
+  "mutations": {
+    "dbSchemaChanged": false,
+    "supabaseDataChanged": false,
+    "corpusUploaded": false,
+    "embeddingGenerated": false,
+    "historicalWave2RangeMerged": false
+  },
+  "remainingNonCompletionItems": [
+    "provider dispatch idempotency storage approval and implementation",
+    "SIF embedding migration and DB upload approval",
+    "future exact KOSHA promotion beyond D-C-13 D-C-7 B-E-10",
+    "read-only live Supabase RLS proof"
+  ]
+}
