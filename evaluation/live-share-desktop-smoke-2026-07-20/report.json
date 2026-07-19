@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-07-19T18:30:25.889Z",
+  "url": "https://www.safeclaw.kr/workspace?theme=day",
+  "marker": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "652ba44c26a1e729ca3c3cf8b9727f4fe96a80ae",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-efjyvwqt3-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "metrics": {
+    "viewport": {
+      "w": 1440,
+      "h": 723
+    },
+    "bodyHeight": 1039,
+    "layout": {
+      "x": 40,
+      "y": 124,
+      "w": 1360,
+      "h": 851,
+      "bottom": 975
+    },
+    "main": {
+      "x": 130,
+      "y": 189,
+      "w": 1180,
+      "h": 786,
+      "bottom": 975
+    },
+    "step": {
+      "x": 186,
+      "y": 237,
+      "w": 1068,
+      "h": 682,
+      "bottom": 919
+    },
+    "panel": {
+      "x": 186,
+      "y": 237,
+      "w": 1068,
+      "h": 682,
+      "bottom": 919
+    },
+    "form": {
+      "x": 201,
+      "y": 345,
+      "w": 646,
+      "h": 350.78125,
+      "bottom": 695.78125
+    },
+    "preview": {
+      "x": 859,
+      "y": 345,
+      "w": 380,
+      "h": 503,
+      "bottom": 848
+    },
+    "overflowX": false,
+    "activeTitle": "공유·기록공유"
+  },
+  "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\kosha-materialization-20260720\\evaluation\\live-share-desktop-smoke-2026-07-20\\live-share-desktop-1440.png"
+}
