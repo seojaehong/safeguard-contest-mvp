@@ -234,7 +234,7 @@ async function runCorePdfExportCheck(askPayload) {
   for (const document of coreDocumentChecks) {
     const sourceText = askPayload.deliverables?.[document.key] || "";
     const rows = buildRows(sourceText);
-    const htmlResponse = await fetchText("/api/export/pdf", {
+    const htmlResponse = await fetchText("/api/export/pdf?format=html", {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -607,7 +607,8 @@ async function runAuthHistoryGate(askPayload) {
 }
 
 async function runDispatchPolicyGate(askPayload) {
-  const activeResponse = await fetchJson("/api/workflow/dispatch", {
+  const capabilityResponse = await fetchJson("/api/workflow/dispatch");
+  const legacyRejectedResponse = await fetchJson("/api/workflow/dispatch", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
@@ -625,48 +626,77 @@ async function runDispatchPolicyGate(askPayload) {
       }
     })
   });
+  const idempotencyKey = "provider-dispatch-v1-123e4567-e89b-42d3-a456-426614174000-abcdef12";
+  const messageVariants = {
+    ko: [
+      "[SafeClaw 현장 전파]",
+      `오늘 작업: ${askPayload.scenario?.workSummary || "현장 작업"}`,
+      `핵심 위험: ${askPayload.riskSummary?.topRisk || "작업 전 위험 확인"}`,
+      "현장 확인 후 작업을 시작하세요."
+    ].join("\n")
+  };
   const lockedResponse = await fetchJson("/api/workflow/dispatch", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      channels: ["kakao", "band"],
-      recipients: ["01000000001"],
-      workpack: { title: "locked channel check" }
+      workpackId: "final99-workpack-fixture",
+      shareSessionId: "final99-share-fixture",
+      idempotencyKey,
+      channels: ["band"],
+      messageVariants
     })
   });
-  const channelResults = Array.isArray(activeResponse.parsed?.channelResults) ? activeResponse.parsed.channelResults : [];
-  const resultByChannel = new Map(channelResults.map((item) => [item.channel, item]));
-  const emailStatus = resultByChannel.get("email")?.status;
-  const smsStatus = resultByChannel.get("sms")?.status;
-  const officialConfigured = activeResponse.ok
-    && activeResponse.parsed?.configured === true
-    && !channelResults.some((item) => item.status === "unconfigured" || item.status === "skipped");
-  const activeOk = officialConfigured && emailStatus === "sent" && smsStatus === "sent";
-  const activeNotice = officialConfigured
-    && emailStatus === "sent"
-    && (smsStatus === "failed" || smsStatus === "partial");
-  const lockedOk = lockedResponse.status === 400 && Array.isArray(lockedResponse.parsed?.lockedChannels);
-  const lockedNotice = lockedResponse.status === 200
-    && typeof lockedResponse.parsed?.message === "string"
-    && lockedResponse.parsed.message.includes("연결 설정");
+  const authGateResponse = await fetchJson("/api/workflow/dispatch", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      workpackId: "final99-workpack-fixture",
+      shareSessionId: "final99-share-fixture",
+      idempotencyKey,
+      channels: ["email", "sms"],
+      messageVariants
+    })
+  });
+  const rejectedFields = Array.isArray(legacyRejectedResponse.parsed?.rejectedFields)
+    ? legacyRejectedResponse.parsed.rejectedFields
+    : [];
+  const legacyRejected = legacyRejectedResponse.status === 400
+    && rejectedFields.includes("recipients")
+    && rejectedFields.includes("workpack")
+    && typeof legacyRejectedResponse.parsed?.message === "string"
+    && legacyRejectedResponse.parsed.message.includes("서버 권한 식별자");
+  const lockedChannels = Array.isArray(lockedResponse.parsed?.lockedChannels)
+    ? lockedResponse.parsed.lockedChannels
+    : [];
+  const lockedOk = lockedResponse.status === 400 && lockedChannels.includes("band");
+  const authGateOk = authGateResponse.status === 401
+    && typeof authGateResponse.parsed?.message === "string"
+    && authGateResponse.parsed.message.includes("관리자 로그인");
+  const capabilityOk = capabilityResponse.ok && capabilityResponse.parsed?.ok === true;
+  const gateOk = capabilityOk && legacyRejected && lockedOk && authGateOk;
   return {
-    verdict: activeOk && lockedOk
-      ? "pass"
-      : (activeNotice || (officialConfigured && lockedNotice))
-        ? "pass_with_notice"
-        : "blocked",
+    verdict: gateOk ? "pass_with_notice" : "blocked",
     officialChannels: ["email", "sms"],
     excludedChannels: ["kakao", "band"],
-    policyNotice: "메일·문자만 정식 제출 채널입니다. SMS provider 실패는 API 접수/전달 실패를 분리해 notice로 기록하고, 카카오·밴드는 승인 전 제외합니다.",
-    active: {
-      status: activeResponse.status,
-      summary: activeResponse.parsed?.summary,
-      channelResults
+    policyNotice: "메일·문자는 관리자 인증과 서버 소유 workpack/share session이 있을 때만 provider 전송합니다. 이 게이트는 raw workpack 전송 차단, 밴드 잠금, 무인 provider 호출 차단을 확인합니다.",
+    capability: {
+      status: capabilityResponse.status,
+      providerDispatch: capabilityResponse.parsed?.providerDispatch || null
+    },
+    legacyRejected: {
+      status: legacyRejectedResponse.status,
+      rejectedFields,
+      message: legacyRejectedResponse.parsed?.message || ""
     },
     locked: {
       status: lockedResponse.status,
-      lockedChannels: lockedResponse.parsed?.lockedChannels || [],
+      lockedChannels,
       message: lockedResponse.parsed?.message || ""
+    },
+    authGate: {
+      status: authGateResponse.status,
+      message: authGateResponse.parsed?.message || "",
+      providerCalled: authGateResponse.parsed?.providerCalled ?? null
     }
   };
 }
@@ -802,7 +832,7 @@ function writeDecisionMarkdown(summary) {
     ...summary.gates.map((gate) => `| ${gate.name} | ${gate.verdict} | ${gate.evidence || ""} |`),
     "",
     "## Closing Notes",
-    "- 카카오/밴드는 승인 전이므로 정식 제출 게이트에서 제외했습니다.",
+    "- provider 전파는 관리자 인증과 서버 소유 workpack/share session에서만 허용하며, 카카오/밴드는 승인 전이므로 정식 제출 게이트에서 제외했습니다.",
     "- HWPX는 제출형 초안이며 원본 셀 단위 완전 복제는 별도 고급 기능으로 분리했습니다.",
     "- final gate는 pass 또는 pass_with_notice만 출시 후보로 봅니다. blocked가 있으면 제출 전 수정 대상입니다."
   ];
@@ -848,7 +878,7 @@ async function main() {
     { name: "document-downloads", verdict: documentDownloadGate.verdict, evidence: "core PDF + orchestration XLS/HWPX/PDF smoke" },
     { name: "public-data-ai-map", verdict: evidenceGate.verdict, evidence: "docs/submission-evidence-map.md" },
     { name: "ai-remediation-flow", verdict: remediationGate.verdict, evidence: remediationGate.providerLabel },
-    { name: "dispatch-policy", verdict: dispatchPolicyGate.verdict, evidence: "email/sms active, kakao/band locked" },
+    { name: "dispatch-policy", verdict: dispatchPolicyGate.verdict, evidence: "raw payload rejected, band locked, auth gate enforced" },
     { name: "screenshots", verdict: screenshotGate.verdict, evidence: Array.isArray(screenshotGate.screenshots) ? `${screenshotGate.screenshots.length} screenshots` : "" }
   ];
   const overall = gateVerdict(gates);
@@ -870,7 +900,7 @@ async function main() {
       commercializationDoc: "docs/commercialization-onepager.md"
     },
     notes: [
-      "카카오/밴드는 승인 전이라 제외했습니다.",
+      "provider 전파는 관리자 인증과 서버 소유 workpack/share session이 필요하며, 카카오/밴드는 승인 전이라 제외했습니다.",
       "HWPX는 제출형 초안으로 고지합니다.",
       "관리자 이력 게이트는 SAFEGUARD_AUTH_TOKEN이 없으면 pass_with_notice로 남습니다."
     ]
