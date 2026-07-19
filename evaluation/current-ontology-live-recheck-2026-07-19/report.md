@@ -1,8 +1,8 @@
 # SafeClaw Ontology Live Recheck
 
-- Generated: 2026-07-19T07:08:30Z
-- Local HEAD: `b4379f90775fe09924e091b5651cb4cbfce07d73`
-- Production build-info during adjacent checks: `2d5c9ef090ea990fb4451eb62ec1f5512fc4056d`
+- Generated: 2026-07-19T10:14:30Z
+- Local HEAD: `3e6b4c2203328a7261aaf317c5081313d01e6bbb`
+- Production build-info during adjacent checks: `1837daae8adf35babeca037afcb52a04b2183c5a`
 - URL: `https://www.safeclaw.kr/ontology`
 
 ## Verdict
@@ -31,8 +31,10 @@ Mobile 390x844:
 
 ## Verification
 
-- Command: `npm.cmd test -- tests\knowledge-page-layout.test.ts tests\frontend-route-coverage.test.ts --maxWorkers=1 --fileParallelism=false`
-- Result: 2 files / 46 tests PASS.
+- Command: `npm.cmd test -- tests\ontology-ui-remediation.test.ts tests\ontology-ui-browser.test.ts tests\why-mobile-layout.test.ts --maxWorkers=1 --fileParallelism=false`
+- Result: 2 files PASS / 1 skipped, 11 tests PASS / 1 skipped.
+- Command: `$env:ONTOLOGY_BASE_URL='https://www.safeclaw.kr'; npm.cmd test -- tests\ontology-ui-browser.test.ts --maxWorkers=1 --fileParallelism=false`
+- Result: 1 file / 1 test PASS.
 - Live browser probe: Playwright Chromium against `https://www.safeclaw.kr/ontology`.
 
 ## Remaining Note

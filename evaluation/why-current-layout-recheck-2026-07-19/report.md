@@ -2,6 +2,8 @@
 
 - Date: 2026-07-19
 - Route: `/why`
+- Local HEAD: `3e6b4c2203328a7261aaf317c5081313d01e6bbb`
+- Production build-info during adjacent checks: `1837daae8adf35babeca037afcb52a04b2183c5a`
 - Scope: mobile comparison table overflow and desktop comparison table preservation
 
 ## Verdict
