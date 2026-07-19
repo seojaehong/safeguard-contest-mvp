@@ -1,0 +1,99 @@
+{
+  "checkedAt": "2026-07-19T21:42:37.334Z",
+  "build": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "ca4cbab707052c03b096d3298ae67b34b36957a3",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-fg982t8cx-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "results": [
+    {
+      "name": "desktop-day",
+      "viewport": {
+        "name": "desktop-day",
+        "width": 1440,
+        "height": 900,
+        "theme": "day"
+      },
+      "url": "https://www.safeclaw.kr/why?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\why-mobile-overflow-20260720\\evaluation\\why-production-overflow-gate-2026-07-20\\desktop-day.png",
+      "metrics": {
+        "body": {
+          "width": 1440,
+          "clientWidth": 1440,
+          "height": 1142,
+          "clientHeight": 900,
+          "overflowX": false
+        },
+        "table": {
+          "x": 286,
+          "width": 1104,
+          "right": 1390
+        },
+        "outsideCount": 0,
+        "outside": [],
+        "textSample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n\n현장 안전 문서팩\n\n주요 메뉴\n01\n작업공간\n입력 · 생성\n02\n문서\n위험성평가 · TBM\n03\n리포트\n주간 · 월간\n04\n근거\nDB · 온톨로지\n05\n이력\n증빙 · 파일\n06\n설정\nAI · 현장\n작업공간 관련\n01\n대시보드\n SITE 기본 현장\n공공 근거 Law.go · KOSHA · 기상청\n바로 사용\nDay\nNight\n차별성\n왜 SafeClaw인가.\n\n검색기나 템플릿이 아니라, 근거를 위험성평가표, TBM, 교육기록, 전파 메시지의 문장으로 연결하는 작업공간입니다.\n\n업무 범위\n근거 연결 · 실행 문서 · 현장 전파\n작업공간 열기\n기상청\n\n현재·예보·특보 신호를 작업중지 기준과 TBM 문구에 반영합니다.\n\nLaw.go\n\n법령, 판례, 해석례를 문서 반영 근거로 연결합니다.\n\nWork24\n\n작업과 대상에 맞는 후속 교육 후보를 제안합니다.\n\nKOSHA\n\n공식자료, 교육, 재해사례를 위험성평가와 교육기록에 연결합니다.\n\n비교\n대안별 차이\nSafeClaw와 기존 안전 문서 작성 대안의 기능 비교\n기준\nSafeClaw\n안전관리 SaaS\n한글·엑셀 양식\n일반 AI\n한 줄 입력에서 문서팩 생성\n지원\n부분 지원\n직접 작성\n프롬프트 의존\n법령·기상·교육 근거 연결\n문서 문장에 연결\n제한적\n별도 검색\n별도 확인 필요\n외국인 전송본\n주요 언어 제공\n제한적\n직접 번역\n프롬프트 의존\nTBM 실행 흐름\n질문·확인·전파\n기록 중심\n수기\n별도 정리 필요\n증빙과 이력 확장성\n로드맵 포함\n제품별 상이\n파일 관리\n별도 구축\n차별성을 실제 작업 흐름에서 확인하려면\n작업공간 열기"
+      }
+    },
+    {
+      "name": "mobile-day",
+      "viewport": {
+        "name": "mobile-day",
+        "width": 390,
+        "height": 844,
+        "theme": "day"
+      },
+      "url": "https://www.safeclaw.kr/why?theme=day",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\why-mobile-overflow-20260720\\evaluation\\why-production-overflow-gate-2026-07-20\\mobile-day.png",
+      "metrics": {
+        "body": {
+          "width": 390,
+          "clientWidth": 390,
+          "height": 2727,
+          "clientHeight": 844,
+          "overflowX": false
+        },
+        "table": {
+          "x": 29,
+          "width": 332,
+          "right": 361
+        },
+        "outsideCount": 0,
+        "outside": [],
+        "textSample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n차별성\n왜 SafeClaw인가.\n\n검색기나 템플릿이 아니라, 근거를 위험성평가표, TBM, 교육기록, 전파 메시지의 문장으로 연결하는 작업공간입니다.\n\n업무 범위\n근거 연결 · 실행 문서 · 현장 전파\n작업공간 열기\n기상청\n\n현재·예보·특보 신호를 작업중지 기준과 TBM 문구에 반영합니다.\n\nLaw.go\n\n법령, 판례, 해석례를 문서 반영 근거로 연결합니다.\n\nWork24\n\n작업과 대상에 맞는 후속 교육 후보를 제안합니다.\n\nKOSHA\n\n공식자료, 교육, 재해사례를 위험성평가와 교육기록에 연결합니다.\n\n비교\n대안별 차이\nSafeClaw와 기존 안전 문서 작성 대안의 기능 비교\n기준\nSafeClaw\n안전관리 SaaS\n한글·엑셀 양식\n일반 AI\n한 줄 입력에서 문서팩 생성\n지원\n부분 지원\n직접 작성\n프롬프트 의존\n법령·기상·교육 근거 연결\n문서 문장에 연결\n제한적\n별도 검색\n별도 확인 필요\n외국인 전송본\n주요 언어 제공\n제한적\n직접 번역\n프롬프트 의존\nTBM 실행 흐름\n질문·확인·전파\n기록 중심\n수기\n별도 정리 필요\n증빙과 이력 확장성\n로드맵 포함\n제품별 상이\n파일 관리\n별도 구축\n차별성을 실제 작업 흐름에서 확인하려면\n작업공간 열기"
+      }
+    },
+    {
+      "name": "mobile-night",
+      "viewport": {
+        "name": "mobile-night",
+        "width": 390,
+        "height": 844,
+        "theme": "night"
+      },
+      "url": "https://www.safeclaw.kr/why?theme=night",
+      "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\why-mobile-overflow-20260720\\evaluation\\why-production-overflow-gate-2026-07-20\\mobile-night.png",
+      "metrics": {
+        "body": {
+          "width": 390,
+          "clientWidth": 390,
+          "height": 2727,
+          "clientHeight": 844,
+          "overflowX": false
+        },
+        "table": {
+          "x": 29,
+          "width": 332,
+          "right": 361
+        },
+        "outsideCount": 0,
+        "outside": [],
+        "textSample": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n차별성\n왜 SafeClaw인가.\n\n검색기나 템플릿이 아니라, 근거를 위험성평가표, TBM, 교육기록, 전파 메시지의 문장으로 연결하는 작업공간입니다.\n\n업무 범위\n근거 연결 · 실행 문서 · 현장 전파\n작업공간 열기\n기상청\n\n현재·예보·특보 신호를 작업중지 기준과 TBM 문구에 반영합니다.\n\nLaw.go\n\n법령, 판례, 해석례를 문서 반영 근거로 연결합니다.\n\nWork24\n\n작업과 대상에 맞는 후속 교육 후보를 제안합니다.\n\nKOSHA\n\n공식자료, 교육, 재해사례를 위험성평가와 교육기록에 연결합니다.\n\n비교\n대안별 차이\nSafeClaw와 기존 안전 문서 작성 대안의 기능 비교\n기준\nSafeClaw\n안전관리 SaaS\n한글·엑셀 양식\n일반 AI\n한 줄 입력에서 문서팩 생성\n지원\n부분 지원\n직접 작성\n프롬프트 의존\n법령·기상·교육 근거 연결\n문서 문장에 연결\n제한적\n별도 검색\n별도 확인 필요\n외국인 전송본\n주요 언어 제공\n제한적\n직접 번역\n프롬프트 의존\nTBM 실행 흐름\n질문·확인·전파\n기록 중심\n수기\n별도 정리 필요\n증빙과 이력 확장성\n로드맵 포함\n제품별 상이\n파일 관리\n별도 구축\n차별성을 실제 작업 흐름에서 확인하려면\n작업공간 열기"
+      }
+    }
+  ]
+}
