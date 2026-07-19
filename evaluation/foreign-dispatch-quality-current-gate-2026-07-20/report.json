@@ -1,0 +1,50 @@
+{
+  "checkedAt": "2026-07-20T07:26:00+09:00",
+  "verdict": "pass_current_foreign_dispatch_quality_and_fail_closed_provider_boundary",
+  "localHead": "8d37af9ccc0409578a76021786b4e080e4c02d3c",
+  "live": {
+    "url": "https://www.safeclaw.kr",
+    "buildInfoUrl": "https://www.safeclaw.kr/api/build-info",
+    "commitSha": "1bce421e3b2d1f07e402a9b0453961199c17f58a",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-xikm3xs18-seojaehongs-projects.vercel.app"
+  },
+  "verification": {
+    "command": "npm.cmd test -- tests\\foreign-worker-languages.test.ts tests\\foreign-parse.test.ts tests\\workflow-share-client.test.ts tests\\workpack-share-authority-routes.test.ts tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+    "status": "pass",
+    "filesPassed": 5,
+    "testsPassed": 84,
+    "durationSeconds": 76.62
+  },
+  "coveredBoundaries": {
+    "canonicalForeignMessageFromForeignWorkerLanguages": true,
+    "koreanLeakRejectedBeforeProviderDispatch": true,
+    "forgedForeignBodyRejectedBeforeProviderDispatch": true,
+    "unknownLanguageRejectedBeforeProviderDispatch": true,
+    "oversizedBodyRejectedBeforeProviderDispatch": true,
+    "internalDiagnosticsRejectedBeforeProviderDispatch": true,
+    "perRecipientDeliveryText": true,
+    "portalUrlAddedOnlyAtProviderBoundary": true,
+    "mobileVietnamesePreviewNoHorizontalOverflow": true
+  },
+  "liveDispatchCapability": {
+    "ok": true,
+    "capability": false,
+    "mode": "preview_only",
+    "reason": "persistent_idempotency_unavailable",
+    "channels": {
+      "email": { "capability": false, "reason": "persistent_idempotency_unavailable" },
+      "sms": { "capability": false, "reason": "persistent_idempotency_unavailable" },
+      "kakao": { "capability": false, "reason": "persistent_idempotency_unavailable" }
+    }
+  },
+  "mutationsPerformed": {
+    "productionDbWrite": false,
+    "providerMessageSent": false,
+    "shareSessionCreated": false,
+    "readConfirmationInserted": false
+  },
+  "safeDemoClaim": "SafeClaw prepares worker-language-specific dispatch bodies, blocks Korean/internal leakage before dispatch, and gives invited workers a mobile confirmation portal.",
+  "unsafeDemoClaimUntilCanary": "Production SMS/Kakao/email dispatch has been completed end-to-end."
+}
