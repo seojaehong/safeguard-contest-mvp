@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-07-20T07:22:00+09:00",
+  "verdict": "current_master_satisfies_kosha_wave2_functional_gate",
+  "base": "origin/master",
+  "currentHead": "1bce421e3b2d1f07e402a9b0453961199c17f58a",
+  "reviewedWave2Head": "b16a1e3239a2b238b6a16349974779e04532cec3",
+  "wave2HeadIsAncestorOfOriginMaster": false,
+  "cherryPickDecision": "do_not_range_merge_or_blind_cherry_pick",
+  "reason": "current master contains newer broader KOSHA evidence and the first report-only cherry-pick conflicts by attempting to replace that evidence with older wave2 report values",
+  "freshVerification": {
+    "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-kosha-applicability-policy.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts --maxWorkers=1 --fileParallelism=false",
+    "status": "pass",
+    "filesPassed": 5,
+    "testsPassed": 80
+  },
+  "safeFutureAction": "extract only still-relevant script or durability-test deltas after comparing against current master; preserve newer current evaluation artifacts"
+}
