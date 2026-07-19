@@ -1,0 +1,83 @@
+{
+  "checkedAt": "2026-07-19T20:58:51.472Z",
+  "build": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "818810c7efd5b5aacf5b51f55b40701718e7a0d0",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-52wrt10s1-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "results": [
+    {
+      "name": "workspace-desktop",
+      "url": "https://www.safeclaw.kr/workspace",
+      "w": 1440,
+      "h": 900,
+      "screenshot": "evaluation\\live-production-update-2026-07-20\\workspace-desktop.png",
+      "metric": {
+        "title": "작업공간 | SafeClaw",
+        "href": "https://www.safeclaw.kr/workspace",
+        "bodyText": "SafeClaw\n현장 안전 문서팩\n현장 상황\n입력\nDay\nNight\n준비됨\n현장 상황 입력\n작업공간\n입력\n진행 중\n▣\n문서\n잠김\n▣\n공유\n잠김\n현장 작업 입력\n오늘 작업은 무엇인가요?\n\n지역, 작업, 인원, 주요 위험만 적어도 됩니다.\n\n현장 상황 입력\n0/600자\n\n작성 팁: 지역, 작업인원, 장비, 날씨/조건, 신규·외국인 근로자 여부를 적고, 사진은 +로 최대 10장 첨부하세요.\n\n+\n사진\n사진 첨부 최대 10장\n첨부하면 위험요인 후보를 자동 분석하고, 선택한 후보만 문서에 반영합니다.\n강화 모드\n안전 문서 생성\n고급 설정\n예시 불러오기",
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "scrollHeight": 988,
+        "clientHeight": 900,
+        "outside": 0
+      }
+    },
+    {
+      "name": "workspace-mobile",
+      "url": "https://www.safeclaw.kr/workspace",
+      "w": 390,
+      "h": 844,
+      "screenshot": "evaluation\\live-production-update-2026-07-20\\workspace-mobile.png",
+      "metric": {
+        "title": "작업공간 | SafeClaw",
+        "href": "https://www.safeclaw.kr/workspace",
+        "bodyText": "SafeClaw\nDay\nNight\n작업공간\n입력\n▣\n문서\n▣\n공유\n현장 작업 입력\n오늘 작업은 무엇인가요?\n현장 상황 입력\n0/600자\n+\n사진\n사진 첨부 최대 10장\n강화 모드\n안전 문서 생성\n고급 설정\n예시 불러오기",
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 988,
+        "clientHeight": 844,
+        "outside": 0
+      }
+    },
+    {
+      "name": "documents-mobile",
+      "url": "https://www.safeclaw.kr/documents",
+      "w": 390,
+      "h": 844,
+      "screenshot": "evaluation\\live-production-update-2026-07-20\\documents-mobile.png",
+      "metric": {
+        "title": "SafeClaw | 안전 문서팩 생성",
+        "href": "https://www.safeclaw.kr/documents",
+        "bodyText": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n문서팩\n문서 편집.\n\n위험성평가표, 작업계획서, TBM, 안전보건교육 기록을 한 화면에서 편집하고 PDF, XLS, HWPX 제출본으로 출력합니다.\n\n업무 범위\n편집 · 보완 · PDF/XLS/HWPX 출력\n새 문서팩 만들기\n기본 예시 표시\n아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입력 후 진행합니다.\n오늘 문서\n핵심 3종\n위험성평가표\nTBM 브리핑\nTBM 기록\n문서 9종 · 제출 정보\n편집 문서\n점검결과 요약\n위험성평가표\n작업계획서\n안전작업허가 확인서\nTBM/작업 전 안전점검회의\nTBM 기록\n안전보건교육 기록\n비상대응 절차\n사진/증빙\n외국인 근로자 출력본\n외국인 근로자 전송본\n현장 공유 메시지\n문서 본문\n점검결과 요약\n\n현장명, 작업조건, 핵심 위험, 즉시조치, 연결 상태를 첫 장으로 정리합니다.\n\n자동 저장\n654자\n문서 유형\n점검 요약\n구조화",
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 2806,
+        "clientHeight": 844,
+        "outside": 0
+      }
+    },
+    {
+      "name": "reports-mobile",
+      "url": "https://www.safeclaw.kr/reports",
+      "w": 390,
+      "h": 844,
+      "screenshot": "evaluation\\live-production-update-2026-07-20\\reports-mobile.png",
+      "metric": {
+        "title": "SafeClaw 리포트 · 다운로드 센터",
+        "href": "https://www.safeclaw.kr/reports",
+        "bodyText": "본문으로 건너뛰기\nSafeClaw\n메뉴\n SITE 기본 현장\n바로 사용\nDay\nNight\n리포트\n개선 리포트.\n\n주간·월간·사용자 기간의 위험성평가와 승인된 개선 근거를 분류별로 정리합니다.\n\n업무 범위\n리포트 기능 사용 가능\n작업공간에서 개선 추가\n데이터 출처 · 없음\n최근 작업팩이 없습니다.\n\n작업공간에서 문서팩을 만든 뒤 리포트로 돌아오세요.\n\n현재 작업팩 필요\n작업팩을 만든 뒤 다운로드를 준비할 수 있습니다.\n\n작업공간에서 만들기\n샘플 미리보기",
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "scrollHeight": 844,
+        "clientHeight": 844,
+        "outside": 0
+      }
+    }
+  ]
+}
