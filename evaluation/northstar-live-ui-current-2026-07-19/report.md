@@ -1,28 +1,15 @@
 # SafeClaw Live UI Current Gate
 
-- Generated: 2026-07-19T01:40:08.611Z
+- Generated: 2026-07-19T02:49:19.086Z
 - Base URL: https://www.safeclaw.kr
 - Rows: 14
 - P1: 0
-- P2: 6
+- P2: 0
 - Launch UI smoke: PASS
-
-## Verification
-
-- Live smoke: `node evaluation\northstar-live-ui-current-2026-07-19\live-ui-smoke.mjs` → 14 rows, P1 0, P2 6.
-- Source UI contracts: `npm.cmd test -- tests\frontend-design-contract.test.ts tests\frontend-route-coverage.test.ts tests\frontend-workbench-visual-contract.test.ts --maxWorkers=1 --fileParallelism=false` → 3 files / 73 tests PASS.
-- Live ontology browser contract: `ONTOLOGY_BASE_URL=https://www.safeclaw.kr npm.cmd test -- tests\ontology-ui-browser.test.ts --maxWorkers=1 --fileParallelism=false` → 1 file / 1 test PASS.
-- Share/foreign worker distribution contracts: `npm.cmd test -- tests\share-recipient-portal-browser.test.ts tests\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false` → 2 files / 5 tests PASS.
-- JSON validation: `report.json` and `evaluation/ontology-ui-remediation-2026-07-15/browser-metrics.json` parse successfully.
 
 ## Findings
 
-- [P2] desktop workspace-day: contrast samples below AA: 작업공간 3.78; 진행 중 4.09
-- [P2] desktop workspace-night: contrast samples below AA: Day Night 1.06; Day 3.25; 작업공간 3.3
-- [P2] desktop documents-day: contrast samples below AA: 기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입 1.09
-- [P2] mobile workspace-day: contrast samples below AA: 작업공간 3.78
-- [P2] mobile workspace-night: contrast samples below AA: Day Night 1.06; Day 3.25; 작업공간 3.3
-- [P2] mobile documents-day: contrast samples below AA: 기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입 1.09
+- No P1/P2 findings in this bounded smoke.
 
 ## Route Metrics
 

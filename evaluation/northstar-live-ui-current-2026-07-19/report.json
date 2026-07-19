@@ -1,72 +1,13 @@
 {
   "summary": {
-    "generatedAt": "2026-07-19T01:40:08.611Z",
+    "generatedAt": "2026-07-19T02:49:19.086Z",
     "baseUrl": "https://www.safeclaw.kr",
     "rowCount": 14,
     "pass": true,
     "p1Count": 0,
-    "p2Count": 6
+    "p2Count": 0
   },
-  "verification": [
-    {
-      "command": "node evaluation\\northstar-live-ui-current-2026-07-19\\live-ui-smoke.mjs",
-      "result": "14 rows, P1 0, P2 6"
-    },
-    {
-      "command": "npm.cmd test -- tests\\frontend-design-contract.test.ts tests\\frontend-route-coverage.test.ts tests\\frontend-workbench-visual-contract.test.ts --maxWorkers=1 --fileParallelism=false",
-      "result": "3 files / 73 tests PASS"
-    },
-    {
-      "command": "ONTOLOGY_BASE_URL=https://www.safeclaw.kr npm.cmd test -- tests\\ontology-ui-browser.test.ts --maxWorkers=1 --fileParallelism=false",
-      "result": "1 file / 1 test PASS"
-    },
-    {
-      "command": "npm.cmd test -- tests\\share-recipient-portal-browser.test.ts tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
-      "result": "2 files / 5 tests PASS"
-    },
-    {
-      "command": "node -e \"JSON.parse(...)\"",
-      "result": "report.json and ontology browser metrics parse successfully"
-    }
-  ],
-  "blockers": [
-    {
-      "severity": "P2",
-      "route": "workspace-day",
-      "viewport": "desktop",
-      "issue": "contrast samples below AA: 작업공간 3.78; 진행 중 4.09"
-    },
-    {
-      "severity": "P2",
-      "route": "workspace-night",
-      "viewport": "desktop",
-      "issue": "contrast samples below AA: Day Night 1.06; Day 3.25; 작업공간 3.3"
-    },
-    {
-      "severity": "P2",
-      "route": "documents-day",
-      "viewport": "desktop",
-      "issue": "contrast samples below AA: 기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입 1.09"
-    },
-    {
-      "severity": "P2",
-      "route": "workspace-day",
-      "viewport": "mobile",
-      "issue": "contrast samples below AA: 작업공간 3.78"
-    },
-    {
-      "severity": "P2",
-      "route": "workspace-night",
-      "viewport": "mobile",
-      "issue": "contrast samples below AA: Day Night 1.06; Day 3.25; 작업공간 3.3"
-    },
-    {
-      "severity": "P2",
-      "route": "documents-day",
-      "viewport": "mobile",
-      "issue": "contrast samples below AA: 기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입 1.09"
-    }
-  ],
+  "blockers": [],
   "rows": [
     {
       "route": "workspace-day",
@@ -87,20 +28,7 @@
       "sub44ControlCount": 5,
       "minControlHeight": 20,
       "internalTermHits": [],
-      "contrastIssues": [
-        {
-          "text": "작업공간",
-          "ratio": 3.78,
-          "color": "rgb(123, 132, 145)",
-          "background": "rgba(0, 0, 0, 0)"
-        },
-        {
-          "text": "진행 중",
-          "ratio": 4.09,
-          "color": "rgb(110, 118, 130)",
-          "background": "rgba(0, 0, 0, 0)"
-        }
-      ],
+      "contrastIssues": [],
       "ontologyVisibleNodes": 0,
       "ontologyOverlapPairs": 0,
       "sharePortalChrome": {
@@ -130,62 +58,7 @@
       "sub44ControlCount": 5,
       "minControlHeight": 20,
       "internalTermHits": [],
-      "contrastIssues": [
-        {
-          "text": "Day Night",
-          "ratio": 1.06,
-          "color": "rgb(247, 248, 248)",
-          "background": "rgba(255, 255, 255, 0.03)"
-        },
-        {
-          "text": "Day",
-          "ratio": 3.25,
-          "color": "rgb(138, 143, 152)",
-          "background": "rgba(0, 0, 0, 0)"
-        },
-        {
-          "text": "작업공간",
-          "ratio": 3.3,
-          "color": "rgb(98, 102, 109)",
-          "background": "rgba(0, 0, 0, 0)"
-        },
-        {
-          "text": "입력 진행 중",
-          "ratio": 3.76,
-          "color": "rgb(247, 248, 248)",
-          "background": "rgba(108, 111, 247, 0.12)"
-        },
-        {
-          "text": "입력",
-          "ratio": 3.76,
-          "color": "rgb(247, 248, 248)",
-          "background": "rgba(0, 0, 0, 0)"
-        },
-        {
-          "text": "진행 중",
-          "ratio": 1.44,
-          "color": "rgb(98, 102, 109)",
-          "background": "rgba(0, 0, 0, 0)"
-        },
-        {
-          "text": "잠김",
-          "ratio": 3.3,
-          "color": "rgb(98, 102, 109)",
-          "background": "rgba(0, 0, 0, 0)"
-        },
-        {
-          "text": "잠김",
-          "ratio": 3.3,
-          "color": "rgb(98, 102, 109)",
-          "background": "rgba(0, 0, 0, 0)"
-        },
-        {
-          "text": "안전 문서 생성",
-          "ratio": 4,
-          "color": "rgb(255, 255, 255)",
-          "background": "rgb(108, 111, 247)"
-        }
-      ],
+      "contrastIssues": [],
       "ontologyVisibleNodes": 0,
       "ontologyOverlapPairs": 0,
       "sharePortalChrome": {
@@ -215,14 +88,7 @@
       "sub44ControlCount": 20,
       "minControlHeight": 24,
       "internalTermHits": [],
-      "contrastIssues": [
-        {
-          "text": "기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입",
-          "ratio": 1.09,
-          "color": "rgba(246, 245, 239, 0.72)",
-          "background": "rgb(255, 255, 255)"
-        }
-      ],
+      "contrastIssues": [],
       "ontologyVisibleNodes": 0,
       "ontologyOverlapPairs": 0,
       "sharePortalChrome": {
@@ -372,14 +238,7 @@
       "sub44ControlCount": 3,
       "minControlHeight": 20,
       "internalTermHits": [],
-      "contrastIssues": [
-        {
-          "text": "작업공간",
-          "ratio": 3.78,
-          "color": "rgb(123, 132, 145)",
-          "background": "rgba(0, 0, 0, 0)"
-        }
-      ],
+      "contrastIssues": [],
       "ontologyVisibleNodes": 0,
       "ontologyOverlapPairs": 0,
       "sharePortalChrome": {
@@ -409,44 +268,7 @@
       "sub44ControlCount": 3,
       "minControlHeight": 20,
       "internalTermHits": [],
-      "contrastIssues": [
-        {
-          "text": "Day Night",
-          "ratio": 1.06,
-          "color": "rgb(247, 248, 248)",
-          "background": "rgba(255, 255, 255, 0.03)"
-        },
-        {
-          "text": "Day",
-          "ratio": 3.25,
-          "color": "rgb(138, 143, 152)",
-          "background": "rgba(0, 0, 0, 0)"
-        },
-        {
-          "text": "작업공간",
-          "ratio": 3.3,
-          "color": "rgb(98, 102, 109)",
-          "background": "rgba(0, 0, 0, 0)"
-        },
-        {
-          "text": "입력",
-          "ratio": 3.76,
-          "color": "rgb(247, 248, 248)",
-          "background": "rgba(108, 111, 247, 0.12)"
-        },
-        {
-          "text": "입력",
-          "ratio": 3.76,
-          "color": "rgb(247, 248, 248)",
-          "background": "rgba(0, 0, 0, 0)"
-        },
-        {
-          "text": "안전 문서 생성",
-          "ratio": 4,
-          "color": "rgb(255, 255, 255)",
-          "background": "rgb(108, 111, 247)"
-        }
-      ],
+      "contrastIssues": [],
       "ontologyVisibleNodes": 0,
       "ontologyOverlapPairs": 0,
       "sharePortalChrome": {
@@ -476,14 +298,7 @@
       "sub44ControlCount": 3,
       "minControlHeight": 24,
       "internalTermHits": [],
-      "contrastIssues": [
-        {
-          "text": "기본 예시 표시 아직 생성된 문서팩이 없어 기본 예시 데이터로 화면을 보여줍니다. 실제 저장·전파는 작업 입",
-          "ratio": 1.09,
-          "color": "rgba(246, 245, 239, 0.72)",
-          "background": "rgb(255, 255, 255)"
-        }
-      ],
+      "contrastIssues": [],
       "ontologyVisibleNodes": 0,
       "ontologyOverlapPairs": 0,
       "sharePortalChrome": {
