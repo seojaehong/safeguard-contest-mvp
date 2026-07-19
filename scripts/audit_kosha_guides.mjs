@@ -141,6 +141,176 @@ function hashValue(value) {
   return createHash("sha256").update(stableJson(value), "utf8").digest("hex");
 }
 
+function canonicalJson(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => canonicalJson(item)).join(",")}]`;
+  }
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value)
+      .sort(codepointCompare)
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
+      .join(",")}}`;
+  }
+  const encoded = JSON.stringify(value);
+  if (encoded === undefined) throw new Error("kosha-bridge-canonical-json-invalid");
+  return encoded;
+}
+
+function canonicalSha256(value) {
+  return createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");
+}
+
+function isRecord(value) {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function readString(value) {
+  return typeof value === "string" ? value : "";
+}
+
+function isSha256(value) {
+  return /^[0-9a-f]{64}$/u.test(value);
+}
+
+const KOSHA_BODY_CURRENT_SCHEMA_VERSION = "safeclaw-kosha-body-current/v1";
+const KOSHA_BODY_CORPUS_SCHEMA_VERSION = "safeclaw-kosha-body-corpus/v2";
+const KOSHA_SNAPSHOT_OUTPUT_FILES = [
+  "items.jsonl",
+  "chunks.jsonl",
+  "failures.jsonl",
+  "checkpoint.json"
+];
+
+function readSnapshotOutputHashes(value, label) {
+  if (!isRecord(value)) throw new Error(`kosha-bridge-${label}-output-hashes-invalid`);
+  const expectedKeys = [...KOSHA_SNAPSHOT_OUTPUT_FILES].sort(codepointCompare);
+  const actualKeys = Object.keys(value).sort(codepointCompare);
+  if (
+    actualKeys.length !== expectedKeys.length ||
+    actualKeys.some((key, index) => key !== expectedKeys[index])
+  ) {
+    throw new Error(`kosha-bridge-${label}-output-hash-set-mismatch`);
+  }
+  const outputHashes = {};
+  for (const name of KOSHA_SNAPSHOT_OUTPUT_FILES) {
+    const digest = readString(value[name]);
+    if (!isSha256(digest)) {
+      throw new Error(`kosha-bridge-${label}-output-hash-invalid:${name}`);
+    }
+    outputHashes[name] = digest;
+  }
+  return outputHashes;
+}
+
+function verifyKoshaBridgeSnapshotIntegrityFast(snapshot) {
+  if (snapshot.currentSchemaVersion !== KOSHA_BODY_CURRENT_SCHEMA_VERSION) {
+    throw new Error("kosha-bridge-current-schema-version-mismatch");
+  }
+  if (snapshot.manifestSchemaVersion !== KOSHA_BODY_CORPUS_SCHEMA_VERSION) {
+    throw new Error("kosha-bridge-manifest-schema-version-mismatch");
+  }
+  if (!isRecord(snapshot.manifestSourceIdentity)) {
+    throw new Error("kosha-bridge-manifest-source-identity-mismatch");
+  }
+  const sourceIdentityMaterial = Object.fromEntries(
+    Object.entries(snapshot.manifestSourceIdentity).filter(([key]) => key !== "identity_sha256")
+  );
+  const recomputedSourceIdentitySha256 = canonicalSha256(sourceIdentityMaterial);
+  const embeddedSourceIdentitySha256 = readString(snapshot.manifestSourceIdentity.identity_sha256);
+  if (
+    !isSha256(snapshot.manifestSourceIdentitySha256) ||
+    !isSha256(embeddedSourceIdentitySha256) ||
+    snapshot.manifestSourceIdentitySha256 !== embeddedSourceIdentitySha256 ||
+    snapshot.manifestSourceIdentitySha256 !== recomputedSourceIdentitySha256
+  ) {
+    throw new Error("kosha-bridge-manifest-source-identity-mismatch");
+  }
+  if (
+    !isSha256(snapshot.currentSourceIdentitySha256) ||
+    snapshot.currentSourceIdentitySha256 !== recomputedSourceIdentitySha256
+  ) {
+    throw new Error("kosha-bridge-source-identity-mismatch");
+  }
+
+  if (!isRecord(snapshot.manifestGenerationPolicy)) {
+    throw new Error("kosha-bridge-manifest-generation-policy-hash-mismatch");
+  }
+  const recomputedGenerationPolicySha256 = canonicalSha256(snapshot.manifestGenerationPolicy);
+  if (
+    !isSha256(snapshot.manifestGenerationPolicySha256) ||
+    snapshot.manifestGenerationPolicySha256 !== recomputedGenerationPolicySha256
+  ) {
+    throw new Error("kosha-bridge-manifest-generation-policy-hash-mismatch");
+  }
+  if (
+    !isSha256(snapshot.currentGenerationPolicySha256) ||
+    snapshot.currentGenerationPolicySha256 !== recomputedGenerationPolicySha256
+  ) {
+    throw new Error("kosha-bridge-generation-policy-identity-mismatch");
+  }
+
+  const snapshotIds = [
+    snapshot.currentSnapshotId,
+    snapshot.currentReproducibilityHash,
+    snapshot.manifestSnapshotId,
+    snapshot.manifestReproducibilityHash
+  ];
+  if (!snapshotIds.every(isSha256) || new Set(snapshotIds).size !== 1) {
+    throw new Error("kosha-bridge-snapshot-id-mismatch");
+  }
+  if (
+    !isSha256(snapshot.currentManifestSha256) ||
+    !isSha256(snapshot.manifestFileSha256) ||
+    snapshot.currentManifestSha256 !== snapshot.manifestFileSha256
+  ) {
+    throw new Error("kosha-bridge-manifest-hash-mismatch");
+  }
+  if (
+    !isSha256(snapshot.manifestItemsSha256) ||
+    !isSha256(snapshot.itemsFileSha256) ||
+    snapshot.manifestItemsSha256 !== snapshot.itemsFileSha256
+  ) {
+    throw new Error("kosha-bridge-items-hash-mismatch");
+  }
+  if (
+    !isSha256(snapshot.manifestChunksSha256) ||
+    !isSha256(snapshot.chunksFileSha256) ||
+    snapshot.manifestChunksSha256 !== snapshot.chunksFileSha256
+  ) {
+    throw new Error("kosha-bridge-chunks-hash-mismatch");
+  }
+
+  const manifestOutputHashes = readSnapshotOutputHashes(snapshot.manifestOutputHashes, "manifest");
+  const snapshotOutputHashes = readSnapshotOutputHashes(snapshot.snapshotOutputHashes, "snapshot");
+  for (const name of KOSHA_SNAPSHOT_OUTPUT_FILES) {
+    if (manifestOutputHashes[name] !== snapshotOutputHashes[name]) {
+      throw new Error(`kosha-bridge-output-hash-mismatch:${name}`);
+    }
+  }
+  if (
+    manifestOutputHashes["items.jsonl"] !== snapshot.manifestItemsSha256 ||
+    snapshotOutputHashes["items.jsonl"] !== snapshot.itemsFileSha256
+  ) {
+    throw new Error("kosha-bridge-items-hash-mismatch");
+  }
+  if (
+    manifestOutputHashes["chunks.jsonl"] !== snapshot.manifestChunksSha256 ||
+    snapshotOutputHashes["chunks.jsonl"] !== snapshot.chunksFileSha256
+  ) {
+    throw new Error("kosha-bridge-chunks-hash-mismatch");
+  }
+
+  const recomputedReproducibilityHash = canonicalSha256({
+    schema_version: snapshot.manifestSchemaVersion,
+    source_identity_sha256: recomputedSourceIdentitySha256,
+    generation_policy_sha256: recomputedGenerationPolicySha256,
+    output_hashes: snapshotOutputHashes
+  });
+  if (snapshotIds[0] !== recomputedReproducibilityHash) {
+    throw new Error("kosha-bridge-reproducibility-hash-mismatch");
+  }
+}
+
 function countBy(values) {
   const counts = new Map();
   for (const value of values) counts.set(value, (counts.get(value) || 0) + 1);
@@ -565,6 +735,17 @@ async function fetchProductionBridgeRows(zipFile, internalPath, fetchJsonWithRet
   throw new Error(`Supabase bridge GET failed: ${attempts.map((item) => `${item.role}:${item.httpStatus}`).join(",")}`);
 }
 
+function assertSupabaseBridgeCredentialsAvailable() {
+  const baseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/$/u, "");
+  const credentials = [
+    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  ].filter(Boolean);
+  if (!baseUrl || credentials.length === 0) {
+    throw new Error("Supabase read credentials are unavailable");
+  }
+}
+
 function formatBridgeMarkdown(report) {
   const candidate = report.candidate;
   const chunkRows = candidate.chunks.length
@@ -619,6 +800,7 @@ ${chunkRows}
 async function runProductionLocalBridgeAudit({
   options,
   reviewedCandidatePath,
+  bridgePreflight,
   audit,
   generatedAt,
   started,
@@ -631,16 +813,16 @@ async function runProductionLocalBridgeAudit({
     throw new Error("--bridge-zip-file and --bridge-internal-path are required with --bridge-only");
   }
   if (options.offline) throw new Error("--bridge-only requires a production GET");
-  const local = readKoshaBridgeSnapshot(options.localCorpusRoot);
-  audit.verifyKoshaBridgeSnapshotIntegrity(local.snapshot);
+  const local = bridgePreflight?.local || readKoshaBridgeSnapshot(options.localCorpusRoot);
+  if (!bridgePreflight) audit.verifyKoshaBridgeSnapshotIntegrity(local.snapshot);
   const defaultEnvCandidates = [
     resolve(process.cwd(), ".env.local"),
     resolve(process.cwd(), "..", "..", ".env.local")
   ];
-  const envFile = options.envFile
+  const envFile = bridgePreflight?.envFile ?? (options.envFile
     ? resolve(options.envFile)
-    : defaultEnvCandidates.find((candidate) => existsSync(candidate)) || null;
-  const envLoaded = readEnvFile(envFile);
+    : defaultEnvCandidates.find((candidate) => existsSync(candidate)) || null);
+  const envLoaded = bridgePreflight?.envLoaded ?? readEnvFile(envFile);
   const production = await fetchProductionBridgeRows(
     options.bridgeZipFile,
     options.bridgeInternalPath,
@@ -1324,15 +1506,27 @@ const logLines = [`${generatedAt} KOSHA GUIDE audit started`, "readOnly=true dbM
 
 let moduleServer;
 try {
-  reviewedCandidatePath = options.bridgeOnly && options.reviewedCandidate
-    ? resolveKoshaReviewedCandidatePath(options.localCorpusRoot, options.reviewedCandidate)
-    : null;
+  let bridgePreflight = null;
   if (options.bridgeOnly) {
-    const local = readKoshaBridgeSnapshot(options.localCorpusRoot);
-    verifyKoshaBridgeSnapshotIntegrityLocal(local.snapshot);
-    if (!options.offline && !hasSupabaseBridgeCredentials()) {
-      throw new Error("Supabase read credentials are unavailable");
+    if (!options.bridgeZipFile || !options.bridgeInternalPath) {
+      throw new Error("--bridge-zip-file and --bridge-internal-path are required with --bridge-only");
     }
+    if (options.offline) throw new Error("--bridge-only requires a production GET");
+    reviewedCandidatePath = options.reviewedCandidate
+      ? resolveKoshaReviewedCandidatePath(options.localCorpusRoot, options.reviewedCandidate)
+      : null;
+    const local = readKoshaBridgeSnapshot(options.localCorpusRoot);
+    verifyKoshaBridgeSnapshotIntegrityFast(local.snapshot);
+    const defaultEnvCandidates = [
+      resolve(process.cwd(), ".env.local"),
+      resolve(process.cwd(), "..", "..", ".env.local")
+    ];
+    const envFile = options.envFile
+      ? resolve(options.envFile)
+      : defaultEnvCandidates.find((candidate) => existsSync(candidate)) || null;
+    const envLoaded = readEnvFile(envFile);
+    assertSupabaseBridgeCredentialsAvailable();
+    bridgePreflight = { local, envFile, envLoaded };
   }
   moduleServer = await createServer({
     root: process.cwd(),
@@ -1347,6 +1541,7 @@ try {
     await runProductionLocalBridgeAudit({
       options,
       reviewedCandidatePath,
+      bridgePreflight,
       audit,
       generatedAt,
       started,
