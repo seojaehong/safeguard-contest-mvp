@@ -6,33 +6,33 @@ Checked at: 2026-07-20 KST
 
 **PARTIALLY FIXED.**
 
-The current production surface no longer reproduces the old launch blocker for the default document review stage or the share desktop breakpoint. However, after the user clicks `편집`, the document editor still becomes a long single-page editing surface, especially on mobile. If the user is seeing the broken/long behavior in edit mode, that is not stale cache. It is still present on the current authoritative production commit.
+The current production surface no longer reproduces the old launch blocker for the default document review stage or the share desktop breakpoint. However, after the user clicks `편집`, the document editor still becomes a long single-page editing surface. If the user is seeing the broken/long behavior in edit mode, that is not stale cache. It is still present on the current authoritative production commit.
 
 ## Authoritative Surface
 
-- Git HEAD used for source comparison: `43559c89c4fe180a0867de7b47b2bab756e75990`
+- Git HEAD used for source comparison: `367d71b7350ed2fd44f2afe90777e70aae13647d`
 - Served URL: `https://www.safeclaw.kr/workspace`
 - Build info endpoint: `https://www.safeclaw.kr/api/build-info`
-- Served commit: `43559c89c4fe180a0867de7b47b2bab756e75990`
+- Served commit: `367d71b7350ed2fd44f2afe90777e70aae13647d`
 - Served branch: `master`
-- Deployment URL: `safeguard-contest-igkzhou2l-seojaehongs-projects.vercel.app`
+- Deployment URL: `safeguard-contest-79i90cj2y-seojaehongs-projects.vercel.app`
 
 ## Results
 
 | Viewport | Stage | Page height | Stage y | Stage height | Key result |
 | --- | --- | ---: | ---: | ---: | --- |
-| 1440x900 | Documents review | 1147 | 229 | 798 | Fixed versus prior 2070px/723px sticky report |
-| 1440x900 | Document edit | 1489 | 63 editor y | 2593 editor height | Still too long; sticky editor navigator remains |
+| 1440x900 | Documents review | 1149 | 229 | 800 | Fixed versus prior 2070px/723px sticky report |
+| 1440x900 | Document edit | 1489 | 63 editor y | 2561 editor height | Still too long; sticky editor navigator remains |
 | 1440x900 | Share | 1174 | 189 | 921 | Fixed; 1180px desktop surface, not mobile-card width |
 | 390x844 | Documents review | 1417 | 262 | 1050 | Acceptable as a compact step, no horizontal overflow |
-| 390x844 | Document edit | 1856 | 63 editor y / 688 textarea y | 2775 editor height | Still failing; first editable body starts low and creates a long page |
-| 390x844 | Share | 1487 | 241 | 1138 | Not the old 3836px share body; one primary CTA, no horizontal overflow |
+| 390x844 | Document edit | 1152 | 84 editor y / 632 textarea y | 2696 editor height | Partially improved; no overlap, but first editable body still starts low |
+| 390x844 | Share | 1487 | 244 | 1138 | Not the old 3836px share body; one primary CTA, no horizontal overflow |
 
 ## Interpretation
 
 The staged `입력 -> 문서 -> 공유` routing is now real in the default flow: only one of input, documents, or share is visible at a time. The old share desktop problem is also fixed on current production because the share surface is 1180px wide at 1440px desktop.
 
-The remaining blocker is narrower and more concrete: the document edit mode is not yet brought into the same compact stage contract. The editor includes a long editing surface and supporting chrome after the user clicks `편집`. On mobile, the textarea begins at y=688 in an 844px viewport, while the editor surface itself measures 2775px high. That matches the user's complaint that the design can feel like it fell back into the older long-page behavior.
+The remaining blocker is narrower and more concrete: the document edit mode is not yet brought into the same compact stage contract. The editor includes a long editing surface and supporting chrome after the user clicks `편집`. On mobile, the textarea begins at y=632 in an 844px viewport, while the editor surface itself measures 2696px high. That is substantially better than the previous overlap failure, but it can still feel like the old long-page behavior once edit mode opens.
 
 ## Evidence
 
@@ -77,13 +77,13 @@ Verification:
 
 ## Post-Deploy Verification
 
-After commit `975fb3eff075e9b81d1310b3f683878cb0e40a18` was deployed to production, the same geometry probe was rerun against `https://www.safeclaw.kr`.
+After commit `367d71b7350ed2fd44f2afe90777e70aae13647d` was deployed to production, the same geometry probe was rerun against `https://www.safeclaw.kr`.
 
-- Served commit: `975fb3eff075e9b81d1310b3f683878cb0e40a18`
-- Desktop documents review: page height 1147, horizontal overflow false
+- Served commit: `367d71b7350ed2fd44f2afe90777e70aae13647d`
+- Desktop documents review: page height 1149, horizontal overflow false
 - Desktop share: 1180px share surface, one primary CTA, horizontal overflow false
 - Mobile documents review: page height 1417, horizontal overflow false
-- Mobile document edit: page height 1152, horizontal overflow false, no sticky/fixed overlap detected
+- Mobile document edit: page height 1152, horizontal overflow false, no sticky/fixed overlap detected, but first textarea y=632 remains low
 - Mobile share: page height 1487, one primary CTA, horizontal overflow false
 
 Raw evidence was refreshed in `current-geometry.json` and the `*-current-*.png` screenshots.
