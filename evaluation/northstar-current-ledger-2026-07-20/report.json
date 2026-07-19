@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "safeclaw-northstar-current-ledger/v1",
+  "generatedAt": "2026-07-20T01:25:00+09:00",
+  "production": {
+    "url": "https://www.safeclaw.kr",
+    "commitSha": "0835874c788797c0fa00b650e3ea31574b2868ac",
+    "branch": "master",
+    "deploymentUrl": "safeguard-contest-7vkyit6kx-seojaehongs-projects.vercel.app"
+  },
+  "closed": {
+    "workspaceDocumentsShareUi": {
+      "commitSha": "0835874c788797c0fa00b650e3ea31574b2868ac",
+      "productionDeployed": true,
+      "build": "pass_28_static_pages",
+      "typecheck": "pass",
+      "northStarDocumentAndShareBrowserTests": {
+        "files": 2,
+        "tests": 5,
+        "status": "pass"
+      },
+      "recipientPortalBrowserTests": {
+        "files": 1,
+        "tests": 5,
+        "status": "pass"
+      },
+      "shareAuthorityTests": {
+        "files": 4,
+        "tests": 86,
+        "status": "pass"
+      }
+    },
+    "koshaCurrentMasterRecheck": {
+      "status": "current_master_supersedes_wave2",
+      "recheckCommitSha": "e5204327a0b55f471ec390833e3ebf50ea39a2ab",
+      "exactPins": ["D-C-13", "D-C-7", "B-E-10"],
+      "focusedVitest": {
+        "files": 5,
+        "tests": 80,
+        "status": "pass"
+      },
+      "pythonAcquisition": {
+        "tests": 19,
+        "status": "pass"
+      },
+      "typecheck": "pass",
+      "build": "pass_28_static_pages"
+    }
+  },
+  "openNorthStarWork": [
+    "document_editor_ia_v2",
+    "share_v2_desktop_and_dispatch_e2e",
+    "kosha_next_exact_pin_wave_from_current_master",
+    "hermes_openclaw_engine_adapter_long_path",
+    "llm_wiki_three_layer_knowledge_boundary"
+  ],
+  "nextRecommendedWorktree": "fix/document-editor-ia-v2-20260720"
+}
