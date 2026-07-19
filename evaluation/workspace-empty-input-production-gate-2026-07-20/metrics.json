@@ -1,0 +1,43 @@
+{
+  "checkedAt": "2026-07-19T21:50:12.679Z",
+  "build": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "0e398b9d559b3da62ebdacd67a25d572fef16f44",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-6altiq3nx-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "screenshot": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\workspace-empty-input-20260720\\evaluation\\workspace-empty-input-production-gate-2026-07-20\\workspace-empty-input-mobile-day.png",
+  "metrics": {
+    "body": {
+      "width": 390,
+      "clientWidth": 390,
+      "height": 1029,
+      "clientHeight": 844,
+      "overflowX": false
+    },
+    "inputValue": "",
+    "activeElementId": "field-command-input",
+    "inputAriaInvalid": "true",
+    "inputAriaDescribedBy": "field-command-tips field-command-error",
+    "fieldErrorText": "현장 상황을 입력해 주세요.",
+    "fieldErrorVisible": true,
+    "roleAlertCount": 1,
+    "documentPageCount": 0,
+    "inputRect": {
+      "x": 29,
+      "y": 413,
+      "w": 332,
+      "h": 142
+    },
+    "errorRect": {
+      "x": 29,
+      "y": 575,
+      "w": 332,
+      "h": 21
+    }
+  }
+}

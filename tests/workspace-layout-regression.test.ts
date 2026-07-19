@@ -715,6 +715,29 @@ describe("workspace layout regression", () => {
     await page.close();
   }, 90_000);
 
+  it("announces and focuses the empty workspace input instead of failing silently", async () => {
+    if (!browser) throw new Error("Browser was not started");
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    try {
+      await page.addInitScript((storageKey) => window.localStorage.removeItem(storageKey), CURRENT_WORKPACK_STORAGE_KEY);
+      await page.goto(`${baseUrl}/workspace?theme=day`, { waitUntil: "networkidle" });
+
+      const input = page.locator("#field-command-input");
+      await expect.poll(() => input.inputValue()).toBe("");
+      await page.getByRole("button", { name: "안전 문서 생성" }).click();
+
+      const alert = page.locator("#field-command-error[role='alert']");
+      await alert.waitFor({ state: "visible" });
+      expect(await alert.textContent()).toContain("현장 상황을 입력해 주세요.");
+      expect(await input.getAttribute("aria-invalid")).toBe("true");
+      expect(await input.getAttribute("aria-describedby")).toContain("field-command-error");
+      expect(await page.evaluate(() => document.activeElement?.id)).toBe("field-command-input");
+      expect(await page.locator(".workspace-document-page").count()).toBe(0);
+    } finally {
+      await page.close();
+    }
+  }, 90_000);
+
   it("keeps a filled workspace rail aligned without an independent desktop scrollbar", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 1560, height: 700 } });
