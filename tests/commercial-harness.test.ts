@@ -1788,11 +1788,12 @@ describe("runAsk DB harness mode", () => {
     const references = [
       reference({
         id: "sif-soil-haulage-excavation-mixed",
-        title: "토사반출용 차량 진출입로 주변 굴착작업 낙석 사고 사례",
+        title: "굴착 낙석 사고 사례",
+        display_title: "토사반출용 차량 진출입로 주변 굴착작업 낙석 사고 사례",
         summary: "토사반출용 차량 진출입로 주변에서 굴착작업 중 낙석에 맞은 사례",
-        keywords: ["토사반출", "굴착", "낙석"],
+        keywords: ["굴착", "낙석"],
         risk_tags: ["낙하", "붕괴"],
-        controls: ["토사반출 차량 진출입로와 굴착 하부 출입통제", "낙석 예상 반경 통제"],
+        controls: ["굴착 하부 출입통제", "낙석 예상 반경 통제"],
         evidence_role: "direct",
         retrieval_source: "rest"
       }),

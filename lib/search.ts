@@ -573,6 +573,31 @@ function safetyReferenceProcessMatchSurface(item: SafetyReferenceItem): string {
   ].filter(Boolean).join(" ");
 }
 
+function compactProcessText(value: string): string {
+  return value.replace(/\s+/g, "");
+}
+
+function rowTextContainsProcessLabel(row: RiskAssessmentRow, processLabel: string): boolean {
+  const rowText = compactProcessText([
+    row.equipment,
+    row.hazard,
+    row.currentControls,
+    row.additionalControls,
+    ...row.evidenceRefs
+  ].join(" "));
+  return rowText.includes(compactProcessText(processLabel));
+}
+
+function rowMentionsOtherExplicitProcess(
+  row: RiskAssessmentRow,
+  processLabel: string,
+  explicitProcesses: readonly string[]
+): boolean {
+  return explicitProcesses.some((otherProcess) => (
+    otherProcess !== processLabel && rowTextContainsProcessLabel(row, otherProcess)
+  ));
+}
+
 function compactRiskCell(value: string | null | undefined, maxLength = 96): string {
   const normalized = (value || "").replace(/\s+/g, " ").trim();
   if (!normalized) return "";
@@ -718,6 +743,7 @@ export function buildSafetyReferenceRiskRows(
       );
       for (const item of processCandidates) {
         const candidateRow = createReferenceRow(item, processLabel, `${processLabel} 작업`);
+        if (candidateRow && rowMentionsOtherExplicitProcess(candidateRow, processLabel, explicitProcesses)) continue;
         if (candidateRow) rows.push(candidateRow);
         if (rows.filter((row) => row.process === processLabel).length >= 2) break;
       }
