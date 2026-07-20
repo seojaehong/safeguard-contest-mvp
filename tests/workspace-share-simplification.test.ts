@@ -116,6 +116,30 @@ describe("workspace share simplification", () => {
     );
   });
 
+  it("uses a real desktop two-pane share composition instead of a narrow mobile card", () => {
+    const css = readFileSync(join(root, "app", "globals.css"), "utf8").replace(/\r\n/gu, "\n");
+    const desktopShareBlock = css.slice(
+      css.indexOf("@media (min-width: 960px)"),
+      css.indexOf(".share-workflow-header,", css.indexOf("@media (min-width: 960px)"))
+    );
+
+    expect(desktopShareBlock).toContain("grid-template-columns: minmax(0, 1fr) minmax(520px, 0.72fr);");
+    expect(desktopShareBlock).toContain(".share-form-shell {\n    grid-template-columns: repeat(3, minmax(0, 1fr));");
+    expect(desktopShareBlock).toContain(".share-form-card {\n    grid-row: 2;\n    align-content: start;\n    min-height: 150px;");
+    expect(desktopShareBlock).toContain("grid-row: 2;");
+    expect(desktopShareBlock).toContain(".channel-grid {\n    grid-template-columns: repeat(3, minmax(0, 1fr));");
+    expect(desktopShareBlock).toContain("position: sticky;");
+    expect(desktopShareBlock).toContain("top: 88px;");
+    expect(desktopShareBlock).toContain("min-height: min(400px, calc(100vh - 210px));");
+    expect(desktopShareBlock).toContain("max-height: calc(100vh - 160px);");
+    expect(desktopShareBlock).toContain("grid-column: 2;");
+    expect(desktopShareBlock).toContain("grid-row: 2 / span 4;");
+    expect(desktopShareBlock).toContain(".share-primary-action-row {\n    grid-column: 1 / -1;");
+    expect(desktopShareBlock).toContain("grid-row: 1;");
+    expect(desktopShareBlock).toContain("order: -1;");
+    expect(desktopShareBlock).toContain(".share-primary-action-row .button {\n    flex: 1 1 0;");
+  });
+
   it("keeps the localized message heading compact on mobile", () => {
     expect(sharePanel).toContain('return "한국어 메시지 미리보기"');
     expect(sharePanel).toContain('`${formatMessageTargetLabel(data, selectedTarget)} 핵심 안전 안내`');

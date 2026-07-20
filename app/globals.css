@@ -14877,7 +14877,7 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell.workspace-page-share .share-panel.workflow-panel {
     max-width: 1180px;
-    grid-template-columns: minmax(0, 0.92fr) minmax(420px, 0.62fr);
+    grid-template-columns: minmax(0, 1fr) minmax(520px, 0.72fr);
     align-items: start;
     gap: 16px;
     border-radius: var(--r-lg);
@@ -14895,25 +14895,69 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell.workspace-page-share .share-form-shell {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     align-content: start;
+    align-items: stretch;
+  }
+
+  .command-center-shell.workspace-page-share .share-form-card {
+    grid-row: 2;
+    align-content: start;
+    min-height: 150px;
+    padding: 10px;
+  }
+
+  .command-center-shell.workspace-page-share .share-form-card > p.muted.small,
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel .channel-readiness-note {
+    display: none;
+  }
+
+  .command-center-shell.workspace-page-share .recipient-chip-list {
+    max-height: 44px;
+    overflow: auto;
+  }
+
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel .channel-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .command-center-shell.workspace-page-share .share-panel.workflow-panel .channel-card {
+    min-height: 44px;
+    padding: 7px 6px;
+  }
+
+  .command-center-shell.workspace-page-share .share-primary-action-row {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    order: -1;
+    justify-content: stretch;
+  }
+
+  .command-center-shell.workspace-page-share .share-primary-action-row .button {
+    flex: 1 1 0;
   }
 
   .command-center-shell.workspace-page-share [data-share-preview] {
     grid-column: 2;
-    grid-row: 2 / span 3;
-    align-self: stretch;
-    min-height: 0;
+    grid-row: 2 / span 4;
+    position: sticky;
+    top: 88px;
+    align-self: start;
+    height: min(400px, calc(100vh - 210px));
+    min-height: min(400px, calc(100vh - 210px));
+    max-height: calc(100vh - 160px);
+    overflow: hidden;
   }
 
   .command-center-shell.workspace-page-share [data-share-preview] .message-preview-lines {
-    max-height: min(40vh, 380px);
+    max-height: calc(100vh - 310px);
     overflow: auto;
   }
 
-  .command-center-shell.workspace-page-share .share-panel.workflow-panel > .command-actions {
-    grid-column: 2;
-    justify-content: stretch;
+  .command-center-shell.workspace-page-share .share-inline-note,
+  .command-center-shell.workspace-page-share .share-readiness-warning {
+    grid-column: 1;
   }
 
   .command-center-shell.workspace-page-share .share-panel.workflow-panel > .command-actions .button {

@@ -9,6 +9,7 @@ const build = await (await fetch(`${baseUrl}/api/build-info`)).json();
 const browser = await chromium.launch({ headless: true });
 const inputText = "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.";
 const variants = [
+  { name: "desktop-short-day", width: 1440, height: 723, theme: "day" },
   { name: "desktop-day", width: 1440, height: 900, theme: "day" },
   { name: "mobile-day", width: 390, height: 844, theme: "day" }
 ];
@@ -64,7 +65,9 @@ async function readMetrics(page) {
       documentTextarea: rect(".document-textarea"),
       sharePage: rect(".workspace-share-page"),
       shareRoot: rect("[data-share-root]"),
+      shareForm: rect(".share-form-shell"),
       sharePreview: rect("[data-share-preview]"),
+      primaryShareCta: rect("[data-share-primary]"),
       primaryShareCtas: visible("[data-share-primary]"),
       stickyLike: [...document.querySelectorAll("body *")].filter((element) => {
         const style = getComputedStyle(element);

@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "safeclaw-workspace-share-ia-remediation/v1",
+  "generatedAt": "2026-07-20T14:25:00Z",
+  "scope": {
+    "route": "/workspace",
+    "surfaces": [
+      "documents",
+      "share"
+    ],
+    "measurementMode": "local-production-build"
+  },
+  "verdict": "desktop_share_cockpit_pass_mobile_preserved",
+  "changes": [
+    "Moved the primary share action into the compact share control strip so it appears before secondary notes and results.",
+    "Share desktop composition now reserves a right preview pane with minmax(520px, 0.72fr).",
+    "Share preview is sticky on desktop with bounded internal scrolling and a short-viewport height cap.",
+    "Documents deep review remains closed by default with no visible full document preview."
+  ],
+  "geometry": [
+    {
+      "name": "desktop-short-day",
+      "viewport": "1440x723",
+      "documents": {
+        "height": 1134,
+        "heightRatio": 1.57,
+        "deepReviewOpen": false,
+        "visibleDocumentPreviews": 0,
+        "outside": 0,
+        "overflowX": false
+      },
+      "share": {
+        "height": 920,
+        "heightRatio": 1.27,
+        "previewY": 305,
+        "previewBottom": 705,
+        "previewWidth": 520,
+        "primaryShareCtaY": 305,
+        "primaryShareCtaBottom": 349,
+        "shareFormBottom": 675,
+        "primaryShareCtas": 1,
+        "outside": 0,
+        "overflowX": false,
+        "stickyPreview": true
+      }
+    },
+    {
+      "name": "desktop-day",
+      "viewport": "1440x900",
+      "documents": {
+        "height": 1134,
+        "heightRatio": 1.26,
+        "deepReviewOpen": false,
+        "visibleDocumentPreviews": 0,
+        "outside": 0,
+        "overflowX": false
+      },
+      "share": {
+        "height": 920,
+        "heightRatio": 1.02,
+        "previewY": 305,
+        "previewBottom": 705,
+        "previewWidth": 520,
+        "primaryShareCtaY": 305,
+        "primaryShareCtaBottom": 349,
+        "shareFormBottom": 675,
+        "primaryShareCtas": 1,
+        "outside": 0,
+        "overflowX": false,
+        "stickyPreview": true
+      }
+    },
+    {
+      "name": "mobile-day",
+      "viewport": "390x844",
+      "documents": {
+        "height": 1269,
+        "heightRatio": 1.5,
+        "deepReviewOpen": false,
+        "visibleDocumentPreviews": 0,
+        "outside": 0,
+        "overflowX": false
+      },
+      "share": {
+        "height": 1455,
+        "heightRatio": 1.72,
+        "previewY": 380,
+        "previewBottom": 599,
+        "previewWidth": 310,
+        "primaryShareCtaY": 1199,
+        "primaryShareCtaBottom": 1243,
+        "shareFormBottom": 1243,
+        "primaryShareCtas": 1,
+        "outside": 0,
+        "overflowX": false,
+        "stickyPreview": false
+      }
+    }
+  ],
+  "closedAcceptance": [
+    "Desktop short viewport primary share CTA is inside the 723px fold.",
+    "Desktop short viewport preview bottom is inside the 723px fold.",
+    "Desktop short viewport critical form strip bottom is inside the 723px fold.",
+    "Desktop preview width is 520px, no longer a mobile-card width.",
+    "Mobile preview y-position remains 380px with no horizontal overflow."
+  ],
+  "remainingIaDebt": [
+    "Mobile Share remains a longer single-column flow; this patch preserves the previous mobile rescue but does not make mobile CTA first-viewport.",
+    "Documents short desktop remains 1.57x viewport; full preview is hidden, but a future manager-cockpit pass can further compress the default brief.",
+    "Production verification must be rerun after deployment because this report was measured on a local production build."
+  ],
+  "artifacts": [
+    "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
+    "evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-short-day-current-share.png",
+    "evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-day-current-share.png",
+    "evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-share.png"
+  ]
+}

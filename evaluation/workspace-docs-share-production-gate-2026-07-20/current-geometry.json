@@ -1,17 +1,208 @@
 {
-  "checkedAt": "2026-07-20T13:47:07.727Z",
+  "checkedAt": "2026-07-20T14:21:40.886Z",
   "build": {
     "ok": true,
-    "configured": true,
-    "source": "vercel-system-env",
-    "commitSha": "9fedcf019a6b24882131ba913ad7c6358b1ad9d4",
-    "branch": "master",
-    "environment": "production",
-    "deploymentUrl": "safeguard-contest-dktlinub5-seojaehongs-projects.vercel.app",
-    "message": "배포 커밋 식별자를 확인했습니다."
+    "configured": false,
+    "source": "unavailable",
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null,
+    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
   },
   "inputText": "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.",
   "results": [
+    {
+      "name": "desktop-short-day",
+      "viewport": {
+        "name": "desktop-short-day",
+        "width": 1440,
+        "height": 723,
+        "theme": "day"
+      },
+      "ok": true,
+      "documents": {
+        "body": {
+          "width": 1440,
+          "clientWidth": 1440,
+          "height": 1134,
+          "clientHeight": 723,
+          "overflowX": false
+        },
+        "outside": 0,
+        "visibleInputPages": 0,
+        "visibleDocumentPages": 1,
+        "visibleSharePages": 0,
+        "inputPage": null,
+        "documentPage": {
+          "x": 186,
+          "y": 229,
+          "w": 1068,
+          "h": 785,
+          "bottom": 1014
+        },
+        "documentWorkbench": {
+          "x": 186,
+          "y": 229,
+          "w": 1068,
+          "h": 785,
+          "bottom": 1014
+        },
+        "documentPreview": {
+          "x": 418,
+          "y": 903,
+          "w": 810,
+          "h": 381,
+          "bottom": 1284
+        },
+        "documentDeepReviewOpen": false,
+        "visibleDocumentPreviews": 0,
+        "documentEditor": null,
+        "documentTextarea": null,
+        "sharePage": null,
+        "shareRoot": null,
+        "shareForm": null,
+        "sharePreview": null,
+        "primaryShareCta": null,
+        "primaryShareCtas": 0,
+        "stickyLike": []
+      },
+      "editor": {
+        "body": {
+          "width": 1440,
+          "clientWidth": 1440,
+          "height": 2210,
+          "clientHeight": 723,
+          "overflowX": false
+        },
+        "outside": 0,
+        "visibleInputPages": 0,
+        "visibleDocumentPages": 1,
+        "visibleSharePages": 0,
+        "inputPage": null,
+        "documentPage": {
+          "x": 186,
+          "y": -9,
+          "w": 1068,
+          "h": 1853,
+          "bottom": 1844
+        },
+        "documentWorkbench": null,
+        "documentPreview": null,
+        "documentDeepReviewOpen": false,
+        "visibleDocumentPreviews": 0,
+        "documentEditor": {
+          "x": 482,
+          "y": 63,
+          "w": 772,
+          "h": 1433,
+          "bottom": 1496
+        },
+        "documentTextarea": {
+          "x": 499,
+          "y": 374,
+          "w": 738,
+          "h": 173,
+          "bottom": 547
+        },
+        "sharePage": null,
+        "shareRoot": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "bottom": 0
+        },
+        "shareForm": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "bottom": 0
+        },
+        "sharePreview": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "bottom": 0
+        },
+        "primaryShareCta": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "bottom": 0
+        },
+        "primaryShareCtas": 0,
+        "stickyLike": []
+      },
+      "share": {
+        "body": {
+          "width": 1440,
+          "clientWidth": 1440,
+          "height": 920,
+          "clientHeight": 723,
+          "overflowX": false
+        },
+        "outside": 0,
+        "visibleInputPages": 0,
+        "visibleDocumentPages": 0,
+        "visibleSharePages": 1,
+        "inputPage": null,
+        "documentPage": null,
+        "documentWorkbench": null,
+        "documentPreview": null,
+        "documentDeepReviewOpen": false,
+        "visibleDocumentPreviews": 0,
+        "documentEditor": null,
+        "documentTextarea": null,
+        "sharePage": {
+          "x": 130,
+          "y": 189,
+          "w": 1180,
+          "h": 667,
+          "bottom": 856
+        },
+        "shareRoot": {
+          "x": 130,
+          "y": 189,
+          "w": 1180,
+          "h": 667,
+          "bottom": 856
+        },
+        "shareForm": {
+          "x": 149,
+          "y": 305,
+          "w": 606,
+          "h": 370,
+          "bottom": 675
+        },
+        "sharePreview": {
+          "x": 771,
+          "y": 305,
+          "w": 520,
+          "h": 400,
+          "bottom": 705
+        },
+        "primaryShareCta": {
+          "x": 149,
+          "y": 305,
+          "w": 606,
+          "h": 44,
+          "bottom": 349
+        },
+        "primaryShareCtas": 1,
+        "stickyLike": [
+          {
+            "selector": "message-preview-panel",
+            "position": "sticky",
+            "y": 305,
+            "h": 400
+          }
+        ]
+      }
+    },
     {
       "name": "desktop-day",
       "viewport": {
@@ -61,7 +252,9 @@
         "documentTextarea": null,
         "sharePage": null,
         "shareRoot": null,
+        "shareForm": null,
         "sharePreview": null,
+        "primaryShareCta": null,
         "primaryShareCtas": 0,
         "stickyLike": []
       },
@@ -111,7 +304,21 @@
           "h": 0,
           "bottom": 0
         },
+        "shareForm": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "bottom": 0
+        },
         "sharePreview": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "bottom": 0
+        },
+        "primaryShareCta": {
           "x": 0,
           "y": 0,
           "w": 0,
@@ -125,7 +332,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 1174,
+          "height": 920,
           "clientHeight": 900,
           "overflowX": false
         },
@@ -145,25 +352,46 @@
           "x": 130,
           "y": 189,
           "w": 1180,
-          "h": 921,
-          "bottom": 1110
+          "h": 667,
+          "bottom": 856
         },
         "shareRoot": {
           "x": 130,
           "y": 189,
           "w": 1180,
-          "h": 921,
-          "bottom": 1110
+          "h": 667,
+          "bottom": 856
+        },
+        "shareForm": {
+          "x": 149,
+          "y": 305,
+          "w": 606,
+          "h": 370,
+          "bottom": 675
         },
         "sharePreview": {
-          "x": 838,
+          "x": 771,
           "y": 305,
-          "w": 453,
-          "h": 726,
-          "bottom": 1031
+          "w": 520,
+          "h": 400,
+          "bottom": 705
+        },
+        "primaryShareCta": {
+          "x": 149,
+          "y": 305,
+          "w": 606,
+          "h": 44,
+          "bottom": 349
         },
         "primaryShareCtas": 1,
-        "stickyLike": []
+        "stickyLike": [
+          {
+            "selector": "message-preview-panel",
+            "position": "sticky",
+            "y": 305,
+            "h": 400
+          }
+        ]
       }
     },
     {
@@ -215,7 +443,9 @@
         "documentTextarea": null,
         "sharePage": null,
         "shareRoot": null,
+        "shareForm": null,
         "sharePreview": null,
+        "primaryShareCta": null,
         "primaryShareCtas": 0,
         "stickyLike": []
       },
@@ -265,7 +495,21 @@
           "h": 0,
           "bottom": 0
         },
+        "shareForm": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "bottom": 0
+        },
         "sharePreview": {
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0,
+          "bottom": 0
+        },
+        "primaryShareCta": {
           "x": 0,
           "y": 0,
           "w": 0,
@@ -279,7 +523,7 @@
         "body": {
           "width": 390,
           "clientWidth": 390,
-          "height": 1451,
+          "height": 1455,
           "clientHeight": 844,
           "overflowX": false
         },
@@ -299,15 +543,22 @@
           "x": 27,
           "y": 244,
           "w": 336,
-          "h": 1102,
-          "bottom": 1346
+          "h": 1106,
+          "bottom": 1350
         },
         "shareRoot": {
           "x": 27,
           "y": 244,
           "w": 336,
-          "h": 1102,
-          "bottom": 1346
+          "h": 1106,
+          "bottom": 1350
+        },
+        "shareForm": {
+          "x": 40,
+          "y": 607,
+          "w": 310,
+          "h": 636,
+          "bottom": 1243
         },
         "sharePreview": {
           "x": 40,
@@ -315,6 +566,13 @@
           "w": 310,
           "h": 219,
           "bottom": 599
+        },
+        "primaryShareCta": {
+          "x": 40,
+          "y": 1199,
+          "w": 310,
+          "h": 44,
+          "bottom": 1243
         },
         "primaryShareCtas": 1,
         "stickyLike": []

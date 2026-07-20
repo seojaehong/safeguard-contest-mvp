@@ -1254,6 +1254,26 @@ export function WorkflowSharePanel({
           </p>
         </section>
 
+        <div className="command-actions share-primary-action-row">
+          {!authToken && providerDispatchUi.canDispatch ? (
+            <a href="/login" className="button command-primary workbench-primary-action" data-share-primary>{primaryLabel}</a>
+          ) : (
+            <button
+              type="button"
+              className="button command-primary workbench-primary-action"
+              onClick={dispatchWorkflow}
+              disabled={primaryDisabled}
+              data-share-primary
+            >
+              {primaryLabel}
+            </button>
+          )}
+          {recipientPortalPreviewHref ? (
+            <a className="button secondary" href={recipientPortalPreviewHref} target="_blank" rel="noreferrer">
+              작업자 화면 미리보기
+            </a>
+          ) : null}
+        </div>
       </div>
 
       <section className="message-preview-panel" aria-label={formatMessagePreviewHeading(data, selectedMessageTarget)} data-share-preview>
@@ -1279,27 +1299,6 @@ export function WorkflowSharePanel({
           <p className="share-inline-note">{shareDisabledReasons.join(" · ")}</p>
         </section>
       ) : null}
-
-      <div className="command-actions">
-        {!authToken && providerDispatchUi.canDispatch ? (
-          <a href="/login" className="button command-primary workbench-primary-action" data-share-primary>{primaryLabel}</a>
-        ) : (
-          <button
-            type="button"
-            className="button command-primary workbench-primary-action"
-            onClick={dispatchWorkflow}
-            disabled={primaryDisabled}
-            data-share-primary
-          >
-            {primaryLabel}
-          </button>
-        )}
-        {recipientPortalPreviewHref ? (
-          <a className="button secondary" href={recipientPortalPreviewHref} target="_blank" rel="noreferrer">
-            작업자 화면 미리보기
-          </a>
-        ) : null}
-      </div>
 
       {result ? (
         <div className={resultClassName}>
