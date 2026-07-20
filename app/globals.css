@@ -14407,6 +14407,45 @@ body:has(.safeclaw-landing) :is(
   gap: 12px;
 }
 
+.command-center-shell .document-secondary-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.command-center-shell .document-secondary-actions > details {
+  min-width: 0;
+}
+
+.command-center-shell .document-secondary-actions > details[open] {
+  grid-column: 1 / -1;
+}
+
+.command-center-shell .document-secondary-actions > .supporting-doc-cards {
+  padding: 0;
+}
+
+.command-center-shell .document-secondary-actions > .supporting-doc-cards > summary,
+.command-center-shell .document-secondary-actions > .document-work-history > summary {
+  min-height: 52px;
+  padding: 12px;
+}
+
+.command-center-shell .document-secondary-actions > .document-provenance-drawer > summary,
+.command-center-shell .document-secondary-actions > .document-deep-review > summary {
+  min-height: 52px;
+}
+
+.command-center-shell .document-secondary-actions > details > summary {
+  overflow: hidden;
+}
+
+.command-center-shell .document-secondary-actions > details > summary strong {
+  display: none;
+}
+
 .command-center-shell .document-deep-review {
   display: grid;
   border: 1px solid var(--workspace-rule);
@@ -16552,6 +16591,82 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+@media (min-width: 721px) and (max-height: 760px) {
+  .command-center-shell.workspace-page-document .document-workbench {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .command-center-shell.workspace-page-document .document-workbench-head {
+    gap: 12px;
+    padding-bottom: 8px;
+  }
+
+  .command-center-shell.workspace-page-document .document-workbench-head small {
+    display: none;
+  }
+
+  .command-center-shell.workspace-page-document .safety-brief-dashboard {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .command-center-shell.workspace-page-document .safety-brief-head {
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 8px;
+  }
+
+  .command-center-shell.workspace-page-document .safety-brief-head strong {
+    font-size: var(--text-table);
+    line-height: var(--leading-table);
+    letter-spacing: var(--tracking-body);
+  }
+
+  .command-center-shell.workspace-page-document .safety-brief-grid {
+    grid-template-columns: minmax(200px, 0.3fr) minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .command-center-shell.workspace-page-document .safety-brief-risk-card,
+  .command-center-shell.workspace-page-document .safety-brief-risk-table {
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .command-center-shell.workspace-page-document .safety-brief-risk-card ol,
+  .command-center-shell.workspace-page-document .safety-brief-row-list {
+    gap: 4px;
+  }
+
+  .command-center-shell.workspace-page-document .safety-brief-risk-card li {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+  }
+
+  .command-center-shell.workspace-page-document .safety-brief-row {
+    min-height: 46px;
+    gap: 8px;
+    padding: 6px 8px;
+  }
+
+  .command-center-shell.workspace-page-document .safety-brief-row small {
+    margin-top: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .command-center-shell.workspace-page-document .document-secondary-actions {
+    gap: 6px;
+  }
+
+  .command-center-shell.workspace-page-document .document-secondary-actions > details > summary {
+    min-height: 44px;
+    padding: 8px 10px;
+  }
+}
+
 @media (max-width: 720px) {
   .command-center-shell:has(.workspace-share-page) .command-main {
     padding-top: 14px;
@@ -16593,6 +16708,11 @@ body:has(.safeclaw-landing) :is(
   .command-center-shell .safety-brief-dashboard {
     gap: 10px;
     padding: 10px;
+  }
+
+  .command-center-shell .document-secondary-actions {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .command-center-shell .safety-brief-head {
@@ -16682,8 +16802,13 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell .document-deep-review > summary {
-    min-height: 48px;
-    padding: 10px;
+    min-height: 44px;
+    padding: 8px 10px;
+  }
+
+  .command-center-shell .document-secondary-actions > .document-provenance-drawer > summary {
+    min-height: 44px;
+    padding: 8px 10px;
   }
 
   .command-center-shell .document-deep-review > .document-viewer-shell {

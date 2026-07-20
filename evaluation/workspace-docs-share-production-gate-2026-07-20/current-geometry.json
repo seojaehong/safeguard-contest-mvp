@@ -1,14 +1,14 @@
 {
-  "checkedAt": "2026-07-20T14:25:39.984Z",
+  "checkedAt": "2026-07-20T14:49:56.320Z",
   "build": {
     "ok": true,
-    "configured": true,
-    "source": "vercel-system-env",
-    "commitSha": "928244cb28a575a23d951e621624ea8b014d77a1",
-    "branch": "master",
-    "environment": "production",
-    "deploymentUrl": "safeguard-contest-npuapwdkq-seojaehongs-projects.vercel.app",
-    "message": "배포 커밋 식별자를 확인했습니다."
+    "configured": false,
+    "source": "unavailable",
+    "commitSha": null,
+    "branch": null,
+    "environment": null,
+    "deploymentUrl": null,
+    "message": "배포 커밋 식별자가 런타임 환경에 노출되지 않았습니다."
   },
   "inputText": "서울 성수동 외벽 도장 작업, 작업자 5명, 신규 작업자 1명, 오후 강풍 예보. 이동식 비계와 자재 양중 동선 확인 필요.",
   "results": [
@@ -25,7 +25,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 1134,
+          "height": 876,
           "clientHeight": 723,
           "overflowX": false
         },
@@ -38,22 +38,78 @@
           "x": 186,
           "y": 229,
           "w": 1068,
-          "h": 785,
-          "bottom": 1014
+          "h": 493,
+          "bottom": 722
         },
         "documentWorkbench": {
           "x": 186,
           "y": 229,
           "w": 1068,
-          "h": 785,
-          "bottom": 1014
+          "h": 493,
+          "bottom": 722
+        },
+        "documentWorkbenchHead": {
+          "x": 197,
+          "y": 240,
+          "w": 1046,
+          "h": 76,
+          "bottom": 316
+        },
+        "safetyBrief": {
+          "x": 197,
+          "y": 336,
+          "w": 1046,
+          "h": 313,
+          "bottom": 649
+        },
+        "safetyBriefActions": {
+          "x": 1056,
+          "y": 347,
+          "w": 176,
+          "h": 94,
+          "bottom": 441
+        },
+        "riskAssessmentEditCta": {
+          "x": 1056,
+          "y": 347,
+          "w": 176,
+          "h": 44,
+          "bottom": 391
+        },
+        "safetyBriefShareCta": {
+          "x": 1056,
+          "y": 395,
+          "w": 176,
+          "h": 46,
+          "bottom": 441
+        },
+        "documentSecondaryActions": {
+          "x": 197,
+          "y": 657,
+          "w": 1046,
+          "h": 54,
+          "bottom": 711
+        },
+        "documentProvenanceSummary": {
+          "x": 198,
+          "y": 658,
+          "w": 255,
+          "h": 44,
+          "bottom": 702
+        },
+        "documentDeepReviewSummary": {
+          "x": 461,
+          "y": 658,
+          "w": 255,
+          "h": 52,
+          "bottom": 710
         },
         "documentPreview": {
-          "x": 418,
-          "y": 903,
-          "w": 810,
-          "h": 381,
-          "bottom": 1284
+          "x": 679,
+          "y": 723,
+          "w": 26,
+          "h": 422,
+          "bottom": 1145
         },
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
@@ -88,6 +144,14 @@
           "bottom": 1844
         },
         "documentWorkbench": null,
+        "documentWorkbenchHead": null,
+        "safetyBrief": null,
+        "safetyBriefActions": null,
+        "riskAssessmentEditCta": null,
+        "safetyBriefShareCta": null,
+        "documentSecondaryActions": null,
+        "documentProvenanceSummary": null,
+        "documentDeepReviewSummary": null,
         "documentPreview": null,
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
@@ -152,6 +216,14 @@
         "inputPage": null,
         "documentPage": null,
         "documentWorkbench": null,
+        "documentWorkbenchHead": null,
+        "safetyBrief": null,
+        "safetyBriefActions": null,
+        "riskAssessmentEditCta": null,
+        "safetyBriefShareCta": null,
+        "documentSecondaryActions": null,
+        "documentProvenanceSummary": null,
+        "documentDeepReviewSummary": null,
         "documentPreview": null,
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
@@ -216,7 +288,7 @@
         "body": {
           "width": 1440,
           "clientWidth": 1440,
-          "height": 1134,
+          "height": 1053,
           "clientHeight": 900,
           "overflowX": false
         },
@@ -229,22 +301,78 @@
           "x": 186,
           "y": 229,
           "w": 1068,
-          "h": 785,
-          "bottom": 1014
+          "h": 581,
+          "bottom": 810
         },
         "documentWorkbench": {
           "x": 186,
           "y": 229,
           "w": 1068,
-          "h": 785,
-          "bottom": 1014
+          "h": 581,
+          "bottom": 810
+        },
+        "documentWorkbenchHead": {
+          "x": 199,
+          "y": 242,
+          "w": 1042,
+          "h": 92,
+          "bottom": 334
+        },
+        "safetyBrief": {
+          "x": 199,
+          "y": 358,
+          "w": 1042,
+          "h": 365,
+          "bottom": 723
+        },
+        "safetyBriefActions": {
+          "x": 1048,
+          "y": 375,
+          "w": 176,
+          "h": 94,
+          "bottom": 469
+        },
+        "riskAssessmentEditCta": {
+          "x": 1048,
+          "y": 375,
+          "w": 176,
+          "h": 44,
+          "bottom": 419
+        },
+        "safetyBriefShareCta": {
+          "x": 1048,
+          "y": 423,
+          "w": 176,
+          "h": 46,
+          "bottom": 469
+        },
+        "documentSecondaryActions": {
+          "x": 199,
+          "y": 735,
+          "w": 1042,
+          "h": 62,
+          "bottom": 797
+        },
+        "documentProvenanceSummary": {
+          "x": 200,
+          "y": 736,
+          "w": 253,
+          "h": 52,
+          "bottom": 788
+        },
+        "documentDeepReviewSummary": {
+          "x": 463,
+          "y": 736,
+          "w": 253,
+          "h": 60,
+          "bottom": 796
         },
         "documentPreview": {
-          "x": 418,
-          "y": 903,
-          "w": 810,
-          "h": 424,
-          "bottom": 1327
+          "x": 681,
+          "y": 809,
+          "w": 26,
+          "h": 466,
+          "bottom": 1275
         },
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
@@ -279,6 +407,14 @@
           "bottom": 1844
         },
         "documentWorkbench": null,
+        "documentWorkbenchHead": null,
+        "safetyBrief": null,
+        "safetyBriefActions": null,
+        "riskAssessmentEditCta": null,
+        "safetyBriefShareCta": null,
+        "documentSecondaryActions": null,
+        "documentProvenanceSummary": null,
+        "documentDeepReviewSummary": null,
         "documentPreview": null,
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
@@ -343,6 +479,14 @@
         "inputPage": null,
         "documentPage": null,
         "documentWorkbench": null,
+        "documentWorkbenchHead": null,
+        "safetyBrief": null,
+        "safetyBriefActions": null,
+        "riskAssessmentEditCta": null,
+        "safetyBriefShareCta": null,
+        "documentSecondaryActions": null,
+        "documentProvenanceSummary": null,
+        "documentDeepReviewSummary": null,
         "documentPreview": null,
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
@@ -407,7 +551,7 @@
         "body": {
           "width": 390,
           "clientWidth": 390,
-          "height": 1269,
+          "height": 1205,
           "clientHeight": 844,
           "overflowX": false
         },
@@ -420,22 +564,78 @@
           "x": 27,
           "y": 262,
           "w": 336,
-          "h": 902,
-          "bottom": 1164
+          "h": 838,
+          "bottom": 1100
         },
         "documentWorkbench": {
           "x": 27,
           "y": 262,
           "w": 336,
-          "h": 902,
-          "bottom": 1164
+          "h": 838,
+          "bottom": 1100
+        },
+        "documentWorkbenchHead": {
+          "x": 38,
+          "y": 273,
+          "w": 314,
+          "h": 107,
+          "bottom": 380
+        },
+        "safetyBrief": {
+          "x": 38,
+          "y": 400,
+          "w": 314,
+          "h": 581,
+          "bottom": 981
+        },
+        "safetyBriefActions": {
+          "x": 49,
+          "y": 497,
+          "w": 292,
+          "h": 46,
+          "bottom": 543
+        },
+        "riskAssessmentEditCta": {
+          "x": 49,
+          "y": 498,
+          "w": 144,
+          "h": 44,
+          "bottom": 542
+        },
+        "safetyBriefShareCta": {
+          "x": 197,
+          "y": 497,
+          "w": 144,
+          "h": 46,
+          "bottom": 543
+        },
+        "documentSecondaryActions": {
+          "x": 38,
+          "y": 989,
+          "w": 314,
+          "h": 100,
+          "bottom": 1089
+        },
+        "documentProvenanceSummary": {
+          "x": 39,
+          "y": 990,
+          "w": 312,
+          "h": 44,
+          "bottom": 1034
+        },
+        "documentDeepReviewSummary": {
+          "x": 39,
+          "y": 1036,
+          "w": 312,
+          "h": 52,
+          "bottom": 1088
         },
         "documentPreview": {
           "x": 49,
-          "y": 1247,
+          "y": 1183,
           "w": 292,
           "h": 549,
-          "bottom": 1796
+          "bottom": 1732
         },
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
@@ -470,6 +670,14 @@
           "bottom": 1484
         },
         "documentWorkbench": null,
+        "documentWorkbenchHead": null,
+        "safetyBrief": null,
+        "safetyBriefActions": null,
+        "riskAssessmentEditCta": null,
+        "safetyBriefShareCta": null,
+        "documentSecondaryActions": null,
+        "documentProvenanceSummary": null,
+        "documentDeepReviewSummary": null,
         "documentPreview": null,
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,
@@ -534,6 +742,14 @@
         "inputPage": null,
         "documentPage": null,
         "documentWorkbench": null,
+        "documentWorkbenchHead": null,
+        "safetyBrief": null,
+        "safetyBriefActions": null,
+        "riskAssessmentEditCta": null,
+        "safetyBriefShareCta": null,
+        "documentSecondaryActions": null,
+        "documentProvenanceSummary": null,
+        "documentDeepReviewSummary": null,
         "documentPreview": null,
         "documentDeepReviewOpen": false,
         "visibleDocumentPreviews": 0,

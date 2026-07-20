@@ -1,26 +1,16 @@
 # Workspace Documents / Share Production Gate
 
-Checked at: 2026-07-20T06:30:32.287Z
+Checked at: 2026-07-20 KST
 
 ## Verdict
 
-**FIXED on authoritative production HEAD.**
+**CURRENT DEFAULT GEOMETRY: Documents desktop cockpit PASS, Documents mobile PARTIAL, Share desktop PASS.**
 
-The previously reported workspace blockers are not reproduced on the current production surface:
+The previous stale report claimed a broad fixed state from older production commits. This report is refreshed to match the current geometry probe and keeps the verdicts separate.
 
-- Documents is no longer an overlong sticky single-page composition.
-- Share desktop is no longer rendered as a narrow mobile-card-like panel.
+## Product Answer
 
-If the old behavior is still visible, the likely cause is stale local server, stale branch, browser cache, or a non-authoritative deployment URL.
-
-## Production Build
-
-- URL: `https://www.safeclaw.kr/workspace`
-- Build info source: `https://www.safeclaw.kr/api/build-info`
-- Commit: `42df140bf9889c89147dec962e6f76e6446f0427`
-- Branch: `master`
-- Environment: `production`
-- Deployment URL: `safeguard-contest-ro78y7g5u-seojaehongs-projects.vercel.app`
+Page splitting alone does not solve long content. The fix is viewport-first information architecture: each stage must expose the decision summary, critical controls, and primary action in the first viewport, while long documents, evidence, history, logs, and all 12 outputs stay behind explicit details or deep-review surfaces.
 
 ## Flow Tested
 
@@ -34,38 +24,54 @@ Browser path:
 2. Clear local storage and set template mode.
 3. Fill the work description.
 4. Click `안전 문서 생성`.
-5. Wait for `.workspace-document-page`.
-6. Wait for `12/12 생성` or `안전 문서팩 3종 준비 완료` before measuring the documents screen.
-7. Open the workspace menu and click `공유`.
-8. Wait for `.workspace-share-page`.
+5. Wait for `.workspace-document-page` and generated-ready text.
+6. Measure the default Documents closed state.
+7. Click `위험성평가표 편집` and measure editor state.
+8. Navigate to Share and measure Share state.
 
-## Geometry Metrics
+## Documents Current Geometry
 
-| Variant | Stage | Viewport | Page height | Stage y | Stage height | Stage width | Horizontal overflow | Outside elements | Primary share CTA |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Desktop Day | Documents | 1440x900 | 1147 | 229 | 798 | - | false | 0 | 0 |
-| Desktop Day | Share | 1440x900 | 1174 | - | 921 | 1180 | false | 0 | 1 |
-| Mobile Day | Documents | 390x844 | 1417 | 262 | 1050 | - | false | 0 | 0 |
-| Mobile Day | Share | 390x844 | 1487 | - | 1138 | 336 | false | 0 | 1 |
+| Variant | Viewport | Body | Workbench | Safety brief | Risk edit CTA | Share CTA | Detail cluster | Provenance | Deep review | Overflow | Outside |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| desktop-short-day | 1440x723 | 876 / 1.21x | bottom 722 | bottom 649 | bottom 391 | bottom 441 | bottom 711 | bottom 702 | bottom 710 | false | 0 |
+| desktop-day | 1440x900 | 1053 / 1.17x | bottom 810 | bottom 723 | bottom 419 | bottom 469 | bottom 797 | bottom 788 | bottom 796 | false | 0 |
+| mobile-day | 390x844 | 1205 / 1.43x | bottom 1100 | bottom 981 | bottom 542 | bottom 543 | bottom 1089 | bottom 1034 | bottom 1088 | false | 0 |
 
-## Interpretation
+Documents desktop short-height cockpit is PASS because the safety brief, risk assessment edit CTA, share CTA, provenance summary, and deep-review summary all fit inside the `723px` fold. Full document previews remain hidden while deep review is closed (`visibleDocumentPreviews = 0`).
 
-The reference-session failure measured approximately 2070px document height on a 723px viewport, about 2.9x one viewport, with stacked sticky regions. Current production desktop documents measured 1147px on a 900px viewport, about 1.27x, and mobile documents measured 1417px on an 844px viewport, about 1.68x. This is no longer the same launch-blocking geometry.
+Documents mobile remains PARTIAL because the primary CTAs are visible early, but the full safety brief and detail entrypoints still extend beyond the first viewport.
 
-The documents measurement now waits for the generated state. The latest run records `생성 중=false`, `생성 대기=false`, and ready state present for both desktop and mobile document stages.
+## Share Current Geometry
 
-Share desktop now opens a 1180px-wide production surface. That is a desktop-width composition rather than a narrow mobile card.
+| Variant | Viewport | Body | Preview | Primary CTA | Form | Overflow | Outside |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
+| desktop-short-day | 1440x723 | 920 / 1.27x | y 305, bottom 705, width 520 | bottom 349 | bottom 675 | false | 0 |
+| desktop-day | 1440x900 | 920 / 1.02x | y 305, bottom 705, width 520 | bottom 349 | bottom 675 | false | 0 |
+| mobile-day | 390x844 | 1455 / 1.72x | y 380, bottom 599, width 310 | bottom 1243 | bottom 1243 | false | 0 |
+
+Share desktop remains PASS: it is a true desktop two-pane cockpit, not a narrow mobile-card-like preview. Mobile Share remains a longer single-column flow and is not claimed as a full mobile cockpit pass.
+
+## Verification
+
+- `npm.cmd run build`: PASS, 28/28 app pages.
+- `npm.cmd test -- tests\north-star-document-ux.test.ts tests\workspace-layout-regression.test.ts tests\frontend-workbench-visual-contract.test.ts`: PASS, 3 files, 43 tests passed, 1 skipped.
+
+Note: `evaluation/north-star-document-ux-24h-2026-07-14/browser-metrics.json` is explicit deep-review/editor-mode evidence. It is not the default closed-state cockpit proof.
 
 ## Evidence
 
-- Raw metrics: `evaluation/workspace-docs-share-production-gate-2026-07-20/metrics.json`
-- Measurement script: `evaluation/workspace-docs-share-production-gate-2026-07-20/run-workspace-docs-share-production-gate.mjs`
+- Raw current geometry: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
+- Probe script: `evaluation/workspace-docs-share-production-gate-2026-07-20/run-current-geometry-probe.mjs`
 - Screenshots:
-  - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-day-documents.png`
-  - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-day-share.png`
-  - `evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-documents.png`
-  - `evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-share.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-short-day-current-documents.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-day-current-documents.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-documents.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-short-day-current-share.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/desktop-day-current-share.png`
+  - `evaluation/workspace-docs-share-production-gate-2026-07-20/mobile-day-current-share.png`
 
 ## Remaining Risk
 
-This gate only checks the exact stale-vs-current blocker: workspace documents length/sticky burden and share desktop width. It does not close all broader launch issues, including remaining copy terminology, contrast, long secondary pages, or future recipient portal/product-depth work.
+- Documents mobile density is still a follow-up if the goal is a full first-viewport mobile cockpit.
+- Document-specific field editors remain separate product depth work.
+- This gate does not close unrelated live issues such as ontology graph density, terminology, or legal/KOSHA source readiness.

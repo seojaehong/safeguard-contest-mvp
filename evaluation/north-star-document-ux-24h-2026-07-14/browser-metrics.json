@@ -11,13 +11,13 @@
       "review": {
         "viewportWidth": 1440,
         "viewportHeight": 900,
-        "pageHeight": 1147,
+        "pageHeight": 1503,
         "scrollWidth": 1440,
         "nestedScrollCount": 0,
-        "previewClientHeight": 318,
+        "previewClientHeight": 258,
         "previewScrollHeight": 1012,
         "previewOverflowY": "auto",
-        "drawerHeight": 50
+        "drawerHeight": 54
       },
       "editor": {
         "viewportWidth": 1440,
@@ -53,13 +53,13 @@
       "review": {
         "viewportWidth": 1440,
         "viewportHeight": 900,
-        "pageHeight": 1147,
+        "pageHeight": 1503,
         "scrollWidth": 1440,
         "nestedScrollCount": 0,
-        "previewClientHeight": 318,
+        "previewClientHeight": 258,
         "previewScrollHeight": 1012,
         "previewOverflowY": "auto",
-        "drawerHeight": 50
+        "drawerHeight": 54
       },
       "editor": {
         "viewportWidth": 1440,
@@ -95,13 +95,13 @@
       "review": {
         "viewportWidth": 391,
         "viewportHeight": 844,
-        "pageHeight": 1417,
+        "pageHeight": 1841,
         "scrollWidth": 391,
         "nestedScrollCount": 0,
         "previewClientHeight": 358,
-        "previewScrollHeight": 1492,
+        "previewScrollHeight": 1532,
         "previewOverflowY": "auto",
-        "drawerHeight": 50
+        "drawerHeight": 46
       },
       "editor": {
         "viewportWidth": 391,
@@ -137,13 +137,13 @@
       "review": {
         "viewportWidth": 391,
         "viewportHeight": 844,
-        "pageHeight": 1417,
+        "pageHeight": 1841,
         "scrollWidth": 391,
         "nestedScrollCount": 0,
         "previewClientHeight": 358,
-        "previewScrollHeight": 1238,
+        "previewScrollHeight": 1328,
         "previewOverflowY": "auto",
-        "drawerHeight": 50
+        "drawerHeight": 46
       },
       "editor": {
         "viewportWidth": 391,

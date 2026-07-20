@@ -2314,7 +2314,7 @@ export function SafeGuardCommandCenter({
                     <strong>핵심 위험과 위험성평가 상위 항목부터 확인합니다.</strong>
                   </div>
                   <div className="safety-brief-actions" aria-label="브리프 다음 작업">
-                    <button type="button" className="button secondary" onClick={() => focusWorkpackEditor("riskAssessmentDraft")}>
+                    <button type="button" className="button secondary safety-brief-edit-action" onClick={() => focusWorkpackEditor("riskAssessmentDraft")}>
                       위험성평가표 편집
                     </button>
                     <button
@@ -2359,163 +2359,165 @@ export function SafeGuardCommandCenter({
                 </div>
               </section>
             ) : null}
-            <details
-              className="document-provenance-drawer"
-              data-testid="document-provenance-drawer"
-            >
-              <summary>근거 {documentEvidenceCount}건 · 확인 필요 {documentReviewCount}건</summary>
-              <div className="document-provenance-drawer-body">
-                <section aria-label="문서 검수 상태">
-                  <div className="document-review-status-strip">
-                    {generationStages.map((stage) => (
-                      <article key={stage.label} className={readinessClass(stage.tone)}>
-                        <span>{stage.label}</span>
-                        <strong>{stageStatusCopy(stage.tone, state)}</strong>
-                      </article>
-                    ))}
-                  </div>
-                  <div
-                    className={`inline-progress document-review-meter workbench-loading-state ${busy ? "animated" : ""} ${generationProgress.indeterminate ? "indeterminate" : ""}`}
-                    aria-label={`문서 작성 진행 ${generationProgress.primary}`}
-                  >
-                    <progress
-                      value={generationProgress.indeterminate ? undefined : currentDocProgress}
-                      max={totalDocumentCount}
-                    />
-                  </div>
-                </section>
-                <section className="document-harness-loop" aria-label="작성 근거">
-                  <div className="document-harness-loop-head">
-                    <span>작성 근거</span>
-                    <strong>{data ? "법령·안전조치 확인" : "생성 후 확인"}</strong>
-                  </div>
-                  <div className="document-harness-loop-grid">
-                    {documentHarnessLoop.map((item) => (
-                      <article key={item.key} className={readinessClass(item.tone)}>
-                        <span>{item.label}</span>
-                        <strong>{item.status}</strong>
-                        <small>{item.detail}</small>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-                <section className="document-provenance-evidence" aria-label="선택 문서 인용 근거">
-                  {documentEvidence.map((item) => (
-                    <article key={item.label} className={readinessClass(item.tone)}>
-                      <span>{item.label}</span>
-                      <strong>{item.value}</strong>
-                      <small>{item.detail}</small>
-                      <em>{item.meta}</em>
-                      {item.href ? (
-                        <a href={item.href} target="_blank" rel="noreferrer">
-                          원문 열기
-                        </a>
-                      ) : null}
-                    </article>
-                  ))}
-                </section>
-              </div>
-            </details>
-            <details className="document-deep-review" data-testid="document-deep-review">
-              <summary>
-                <span>문서 깊게 보기</span>
-                <strong>{selectedOutputItem.title} 미리보기 · 편집 · 다운로드</strong>
-              </summary>
-              <div className="document-viewer-shell">
-                <div className="document-viewer-list workbench-document-rail" aria-label="문서 목록">
-                  {focusDocumentItems.map((item) => {
-                    const selected = item.key === selectedOutputItem.key;
-                    return (
-                      <button
-                        type="button"
-                        key={item.key}
-                        className={`${selected ? "selected" : ""} primary`}
-                        onClick={() => setRequestedDocumentKey(item.key)}
-                        aria-pressed={selected}
-                      >
-                        <span>{selected ? "선택" : "핵심 문서"}</span>
-                        <strong>{item.title}</strong>
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="document-preview-grid">
-                  <article className="document-preview-pane">
-                    <div className="document-preview-head">
-                      <div>
-                        <span>{data ? "문서 미리보기" : "생성 대기"}</span>
-                        <strong>{selectedOutputItem.title}</strong>
-                      </div>
-                      {data ? (
-                        <div className="doc-card-actions">
-                          <button type="button" onClick={() => focusWorkpackEditor(selectedOutputItem.key)}>편집</button>
-                          <button
-                            type="button"
-                            onClick={() => focusWorkpackEditor(selectedOutputItem.key)}
-                            title={`${selectedOutputItem.title} 준제출형 내려받기`}
-                          >
-                            다운로드 설정
-                          </button>
-                        </div>
-                      ) : null}
+            <div className="document-secondary-actions" aria-label="문서 세부 작업">
+              <details
+                className="document-provenance-drawer"
+                data-testid="document-provenance-drawer"
+              >
+                <summary>근거 {documentEvidenceCount}건 · 확인 필요 {documentReviewCount}건</summary>
+                <div className="document-provenance-drawer-body">
+                  <section aria-label="문서 검수 상태">
+                    <div className="document-review-status-strip">
+                      {generationStages.map((stage) => (
+                        <article key={stage.label} className={readinessClass(stage.tone)}>
+                          <span>{stage.label}</span>
+                          <strong>{stageStatusCopy(stage.tone, state)}</strong>
+                        </article>
+                      ))}
                     </div>
-                    <pre>
-                      {typeof selectedDocumentBody === "string" && selectedDocumentBody
-                        ? selectedDocumentBody.slice(0, 1200)
-                        : "현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다."}
-                    </pre>
-                    {requiresRevalidation ? (
+                    <div
+                      className={`inline-progress document-review-meter workbench-loading-state ${busy ? "animated" : ""} ${generationProgress.indeterminate ? "indeterminate" : ""}`}
+                      aria-label={`문서 작성 진행 ${generationProgress.primary}`}
+                    >
+                      <progress
+                        value={generationProgress.indeterminate ? undefined : currentDocProgress}
+                        max={totalDocumentCount}
+                      />
+                    </div>
+                  </section>
+                  <section className="document-harness-loop" aria-label="작성 근거">
+                    <div className="document-harness-loop-head">
+                      <span>작성 근거</span>
+                      <strong>{data ? "법령·안전조치 확인" : "생성 후 확인"}</strong>
+                    </div>
+                    <div className="document-harness-loop-grid">
+                      {documentHarnessLoop.map((item) => (
+                        <article key={item.key} className={readinessClass(item.tone)}>
+                          <span>{item.label}</span>
+                          <strong>{item.status}</strong>
+                          <small>{item.detail}</small>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                  <section className="document-provenance-evidence" aria-label="선택 문서 인용 근거">
+                    {documentEvidence.map((item) => (
+                      <article key={item.label} className={readinessClass(item.tone)}>
+                        <span>{item.label}</span>
+                        <strong>{item.value}</strong>
+                        <small>{item.detail}</small>
+                        <em>{item.meta}</em>
+                        {item.href ? (
+                          <a href={item.href} target="_blank" rel="noreferrer">
+                            원문 열기
+                          </a>
+                        ) : null}
+                      </article>
+                    ))}
+                  </section>
+                </div>
+              </details>
+              <details className="document-deep-review" data-testid="document-deep-review">
+                <summary>
+                  <span>문서 깊게 보기</span>
+                  <strong>{selectedOutputItem.title} 미리보기 · 편집 · 다운로드</strong>
+                </summary>
+                <div className="document-viewer-shell">
+                  <div className="document-viewer-list workbench-document-rail" aria-label="문서 목록">
+                    {focusDocumentItems.map((item) => {
+                      const selected = item.key === selectedOutputItem.key;
+                      return (
+                        <button
+                          type="button"
+                          key={item.key}
+                          className={`${selected ? "selected" : ""} primary`}
+                          onClick={() => setRequestedDocumentKey(item.key)}
+                          aria-pressed={selected}
+                        >
+                          <span>{selected ? "선택" : "핵심 문서"}</span>
+                          <strong>{item.title}</strong>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="document-preview-grid">
+                    <article className="document-preview-pane">
+                      <div className="document-preview-head">
+                        <div>
+                          <span>{data ? "문서 미리보기" : "생성 대기"}</span>
+                          <strong>{selectedOutputItem.title}</strong>
+                        </div>
+                        {data ? (
+                          <div className="doc-card-actions">
+                            <button type="button" onClick={() => focusWorkpackEditor(selectedOutputItem.key)}>편집</button>
+                            <button
+                              type="button"
+                              onClick={() => focusWorkpackEditor(selectedOutputItem.key)}
+                              title={`${selectedOutputItem.title} 준제출형 내려받기`}
+                            >
+                              다운로드 설정
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
+                      <pre>
+                        {typeof selectedDocumentBody === "string" && selectedDocumentBody
+                          ? selectedDocumentBody.slice(0, 1200)
+                          : "현장 상황을 입력하고 문서팩을 생성하면 이곳에서 문서 본문과 근거를 바로 검토합니다."}
+                      </pre>
+                      {requiresRevalidation ? (
+                        <button
+                          type="button"
+                          className="button command-primary workbench-primary-action"
+                          disabled={isRevalidating}
+                          onClick={() => void handleEditedWorkpackRevalidation()}
+                        >
+                          {isRevalidating ? "재검증 중" : "편집본 재검증"}
+                        </button>
+                      ) : null}
                       <button
                         type="button"
-                        className="button command-primary workbench-primary-action"
-                        disabled={isRevalidating}
-                        onClick={() => void handleEditedWorkpackRevalidation()}
+                        className="button command-primary document-next-button workbench-primary-action workbench-disabled-state"
+                        disabled={!data}
+                        onClick={() => moveToWorkspacePage("share")}
                       >
-                        {isRevalidating ? "재검증 중" : "편집본 재검증"}
+                        공유 단계로 이동
                       </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      className="button command-primary document-next-button workbench-primary-action workbench-disabled-state"
-                      disabled={!data}
-                      onClick={() => moveToWorkspacePage("share")}
-                    >
-                      공유 단계로 이동
-                    </button>
-                  </article>
+                    </article>
+                  </div>
                 </div>
-              </div>
-            </details>
-            <details className="document-work-history">
-              <summary>
-                <span>작업 이력</span>
-                <strong>{busy ? "진행 중" : data ? "완료" : "생성 후 기록"}</strong>
-              </summary>
-              <div className="document-work-history-body">
-                <p>{message || "문서 생성 과정의 확인 이력이 이곳에 남습니다."}</p>
-                {consoleLines.length ? (
-                  <AgentConsole lines={consoleLines} active={busy} />
-                ) : (
-                  <p className="work-history-empty">아직 표시할 작업 이력이 없습니다.</p>
-                )}
-              </div>
-            </details>
-            <details className="supporting-doc-cards">
-              <summary>+ {supportingDocumentItems.length}개 추가 산출물 보기</summary>
-              <div className="supporting-doc-list" aria-label="추가 산출물 목록">
-                {supportingDocumentItems.map((item) => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => focusWorkpackEditor(item.key)}
-                    disabled={!data}
-                  >
-                    <strong>{item.title}</strong>
-                    <span>{data ? "편집·다운로드 영역에서 열기" : "핵심 문서 생성 후 확인"}</span>
-                  </button>
-                ))}
-              </div>
-            </details>
+              </details>
+              <details className="document-work-history">
+                <summary>
+                  <span>작업 이력</span>
+                  <strong>{busy ? "진행 중" : data ? "완료" : "생성 후 기록"}</strong>
+                </summary>
+                <div className="document-work-history-body">
+                  <p>{message || "문서 생성 과정의 확인 이력이 이곳에 남습니다."}</p>
+                  {consoleLines.length ? (
+                    <AgentConsole lines={consoleLines} active={busy} />
+                  ) : (
+                    <p className="work-history-empty">아직 표시할 작업 이력이 없습니다.</p>
+                  )}
+                </div>
+              </details>
+              <details className="supporting-doc-cards">
+                <summary>+ {supportingDocumentItems.length}개 추가 산출물 보기</summary>
+                <div className="supporting-doc-list" aria-label="추가 산출물 목록">
+                  {supportingDocumentItems.map((item) => (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => focusWorkpackEditor(item.key)}
+                      disabled={!data}
+                    >
+                      <strong>{item.title}</strong>
+                      <span>{data ? "편집·다운로드 영역에서 열기" : "핵심 문서 생성 후 확인"}</span>
+                    </button>
+                  ))}
+                </div>
+              </details>
+            </div>
           </section>
           ) : data ? (
             <section className="document-editor-surface" aria-label="문서 편집 영역">
