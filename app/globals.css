@@ -14294,6 +14294,18 @@ body:has(.safeclaw-landing) :is(
   gap: 4px;
 }
 
+.command-center-shell .safety-brief-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.command-center-shell .safety-brief-actions .button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
 .command-center-shell .safety-brief-head span,
 .command-center-shell .safety-brief-risk-card > span,
 .command-center-shell .safety-brief-risk-table > span {
@@ -16465,18 +16477,48 @@ body:has(.safeclaw-landing) :is(
   }
 
   .command-center-shell .safety-brief-dashboard {
-    padding: 12px;
+    gap: 10px;
+    padding: 10px;
   }
 
-  .command-center-shell .safety-brief-head,
+  .command-center-shell .safety-brief-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding-bottom: 10px;
+  }
+
+  .command-center-shell .safety-brief-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .command-center-shell .safety-brief-actions .button {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 10px;
+  }
+
   .command-center-shell .safety-brief-grid {
     display: grid;
     grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .command-center-shell .safety-brief-risk-card,
+  .command-center-shell .safety-brief-risk-table {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .command-center-shell .safety-brief-risk-card ol {
+    gap: 6px;
   }
 
   .command-center-shell .safety-brief-row {
     grid-template-columns: 28px minmax(0, 1fr) auto;
-    min-height: 60px;
+    min-height: 52px;
     padding: 8px;
   }
 
@@ -16534,6 +16576,23 @@ body:has(.safeclaw-landing) :is(
     padding: 12px;
   }
 
+  .share-panel.workflow-panel > [data-share-preview] {
+    order: 1;
+  }
+
+  .share-panel.workflow-panel > .share-form-shell {
+    order: 2;
+  }
+
+  .share-panel.workflow-panel > .share-inline-note,
+  .share-panel.workflow-panel > .share-readiness-warning {
+    order: 3;
+  }
+
+  .share-panel.workflow-panel > .command-actions {
+    order: 4;
+  }
+
   .share-workflow-header {
     gap: 8px;
   }
@@ -16568,7 +16627,7 @@ body:has(.safeclaw-landing) :is(
   .share-form-card,
   .message-preview-panel {
     gap: 6px;
-    padding: 10px;
+    padding: 9px;
   }
 
   .share-panel.workflow-panel .channel-card {
@@ -16584,10 +16643,10 @@ body:has(.safeclaw-landing) :is(
   }
 
   [data-share-preview] .message-preview-lines {
-    max-height: 160px;
+    max-height: 132px;
     overflow: auto;
     gap: 2px;
-    padding-top: 8px;
+    padding-top: 6px;
   }
 
   [data-share-preview] .message-preview-lines p {

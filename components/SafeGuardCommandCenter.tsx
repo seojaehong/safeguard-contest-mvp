@@ -2313,9 +2313,18 @@ export function SafeGuardCommandCenter({
                     <span>현장 5분 브리프</span>
                     <strong>핵심 위험과 위험성평가 상위 항목부터 확인합니다.</strong>
                   </div>
-                  <button type="button" className="button secondary" onClick={() => focusWorkpackEditor("riskAssessmentDraft")}>
-                    위험성평가표 편집
-                  </button>
+                  <div className="safety-brief-actions" aria-label="브리프 다음 작업">
+                    <button type="button" className="button secondary" onClick={() => focusWorkpackEditor("riskAssessmentDraft")}>
+                      위험성평가표 편집
+                    </button>
+                    <button
+                      type="button"
+                      className="button command-primary safety-brief-share-action workbench-primary-action"
+                      onClick={() => moveToWorkspacePage("share")}
+                    >
+                      다음: 공유
+                    </button>
+                  </div>
                 </div>
                 <div className="safety-brief-grid">
                   <article className="safety-brief-risk-card">
