@@ -715,7 +715,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row authoring cockpit, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch or full 12-document authoring completion.",
       nextActions: [
         "Continue UI product depth on full 12-document field-first authoring, row-level validation actions, and document-specific drilldown beyond the current risk-row cockpit.",
-        "Run production live geometry after the risk-row cockpit commit deploys before calling that slice live-proven.",
+        "Keep the production live geometry recorded for the risk-row cockpit slice; do not expand it into a full 12-document authoring claim.",
         "Keep /share generated-result and mobile stepper improvements as separate gates when user-visible sessions reproduce the complaint.",
       ],
     });
