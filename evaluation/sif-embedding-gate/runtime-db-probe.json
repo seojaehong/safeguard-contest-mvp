@@ -1,10 +1,12 @@
 {
-  "generatedAt": "2026-07-20T05:05:03.681Z",
+  "generatedAt": "2026-07-20T16:29:30.479Z",
   "scope": "sif_embedding_runtime_db_probe",
   "dbMutationPerformed": false,
   "model": "text-embedding-3-small",
   "dimensions": 1536,
-  "envFilesLoaded": [],
+  "envFilesLoaded": [
+    "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\.env.local"
+  ],
   "configured": true,
   "safetyReferenceItems": {
     "ok": true,

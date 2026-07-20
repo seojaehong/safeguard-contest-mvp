@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-07-21T01:31:00+09:00",
+  "sourceHead": "4dd391e1ed773469627fe81bebe0f8a250766373",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "verdict": "APPROVAL_GATED_READY",
+  "dbMutationPerformed": false,
+  "embeddingGenerated": false,
+  "uploaded": false,
+  "vectorRuntimeActive": false,
+  "corpus": {
+    "sourceItems": 6033,
+    "corpusCount": 6032,
+    "batchCount": 61,
+    "corpusHash": "2712c6eafd24962588293749bb12d249cf761972dcdea7b249f16efea76b8f3e",
+    "embeddingModel": "text-embedding-3-small",
+    "embeddingDimensions": 1536
+  },
+  "runtimeDbProbe": {
+    "configured": true,
+    "status": "migration-required",
+    "safetyReferenceItemsCount": 6033,
+    "safetyReferenceEmbeddingsStatus": 404,
+    "matchRpcStatus": 404,
+    "vectorFeatureFlagEnabled": false
+  },
+  "checks": {
+    "runtimeProbe": "PASS",
+    "approvalPreflight": "PASS",
+    "focusedTests": "PASS 4 files / 12 tests"
+  },
+  "nextApprovalGate": [
+    "Approve/apply SIF-only migration before upload verification.",
+    "Run embedding generation only with explicit approved embedding flag.",
+    "Run upload only with explicit approved upload flag.",
+    "Verify 6032 uploaded rows before enabling vector retrieval."
+  ]
+}
