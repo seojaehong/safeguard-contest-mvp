@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "safeclaw-hermes-openclaw-runtime-current-gate/v1",
+  "checkedAt": "2026-07-20T02:44:12.000Z",
+  "sourceShaForFocusedTests": "6ac73639",
+  "productionBuildInfoAtLiveSmoke": {
+    "commitSha": "a888a4681293dcddf72b309af8a5532919d49d62",
+    "branch": "master",
+    "environment": "production"
+  },
+  "verdict": "adapter_boundary_pass_live_execution_not_claimed",
+  "focusedTests": {
+    "command": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testFilesPassed": 13,
+    "testsPassed": 289,
+    "durationSeconds": 16.88,
+    "status": "pass"
+  },
+  "liveUnauthenticatedBrokerSmoke": {
+    "endpoint": "https://www.safeclaw.kr/api/agent/chat",
+    "httpStatus": 401,
+    "code": "AUTH_REQUIRED",
+    "engineExecutionReached": false,
+    "status": "pass"
+  },
+  "liveExecutionReadiness": {
+    "claimed": false,
+    "requires": [
+      "authenticated operator-owned site context",
+      "local OpenClaw site/org binding attestation or configured remote Hermes gateway",
+      "service assertion and replay ledger",
+      "tenant-bound request envelope",
+      "tool-denial policy",
+      "Evidence Harness completeness",
+      "terminal ledger persistence"
+    ]
+  }
+}

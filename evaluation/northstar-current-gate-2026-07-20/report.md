@@ -19,6 +19,7 @@ Current `master` and the current production-visible product line are aligned wit
 - `/documents` standalone management density reduction
 - Live generation grounding comparison and DB-harness quality contract probe
 - Application-level tenant-boundary tests and RLS / LLM Wiki approval preflight
+- Hermes/OpenClaw runtime adapter, service-auth, and fail-closed route boundary
 
 This gate does not claim the entire 24h/72h North Star objective is complete. It records that the current high-risk KOSHA/SIF/ontology and terminology boundaries are green on the authoritative code state.
 
@@ -174,6 +175,26 @@ Evidence:
 - `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.md`
 - `evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json`
 
+### Hermes / OpenClaw Runtime Current Gate
+
+Commands:
+
+```powershell
+npm.cmd test -- tests\engine-adapter.test.ts tests\hermes-engine-adapter.test.ts tests\openclaw-hermes-route.test.ts tests\openclaw-chat.test.ts tests\openclaw-broker-ui-context.test.ts tests\remote-hermes-contract.test.ts tests\remote-hermes-runtime.test.ts tests\remote-hermes-route.test.ts tests\remote-hermes-https-transport.test.ts tests\remote-hermes-service-auth.test.ts tests\remote-engine-protocol.test.ts tests\engine-runtime-readiness-policy.test.ts tests\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false
+Invoke-WebRequest -Uri https://www.safeclaw.kr/api/agent/chat -Method Post -ContentType 'application/json' -Body '{"message":"status"}' -TimeoutSec 20 -SkipHttpErrorCheck
+```
+
+Result:
+
+- Runtime/adapter tests: 13 files passed / 13, 289 tests passed / 289
+- Live unauthenticated broker smoke: HTTP 401, `AUTH_REQUIRED`, engine execution not reached
+- Production build-info observed during live smoke: `a888a4681293dcddf72b309af8a5532919d49d62`
+
+Evidence:
+
+- `evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.md`
+- `evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json`
+
 ### TypeScript
 
 Command:
@@ -214,8 +235,8 @@ The current implementation preserves the accepted product direction:
 
 The broader objective remains active. The next highest-value workstreams are:
 
-1. Hermes/OpenClaw live runtime readiness: adapter boundaries are green, but service auth, tenant gating, and operator-owned runtime deployment still need live evidence.
-2. Public Reference Corpus / Operator Wiki Export: continue improving review/export surfaces without turning Markdown/wiki into runtime truth.
-3. Remaining page density: continue bringing non-workspace pages toward the compact workspace design.
-4. RLS live launch proof: application boundary is green, but live tenant A/B, Storage, service-role, and publication RPC gates remain approval-gated.
+1. Public Reference Corpus / Operator Wiki Export: continue improving review/export surfaces without turning Markdown/wiki into runtime truth.
+2. Remaining page density: continue bringing non-workspace pages toward the compact workspace design.
+3. RLS live launch proof: application boundary is green, but live tenant A/B, Storage, service-role, and publication RPC gates remain approval-gated.
+4. Hermes/OpenClaw live execution proof: adapter boundary is green, but an authenticated operator-owned runtime E2E is still not claimed.
 5. Re-run generation comparison after the next production product commit to keep the evidence current.

@@ -58,13 +58,23 @@
       "launchReadiness": false,
       "dbMutationPerformed": false,
       "status": "pass_approval_gated"
+    },
+    "hermesOpenClawRuntime": {
+      "testCommand": "npm.cmd test -- tests\\engine-adapter.test.ts tests\\hermes-engine-adapter.test.ts tests\\openclaw-hermes-route.test.ts tests\\openclaw-chat.test.ts tests\\openclaw-broker-ui-context.test.ts tests\\remote-hermes-contract.test.ts tests\\remote-hermes-runtime.test.ts tests\\remote-hermes-route.test.ts tests\\remote-hermes-https-transport.test.ts tests\\remote-hermes-service-auth.test.ts tests\\remote-engine-protocol.test.ts tests\\engine-runtime-readiness-policy.test.ts tests\\ai-provider-policy.test.ts --maxWorkers=1 --fileParallelism=false",
+      "testFilesPassed": 13,
+      "testsPassed": 289,
+      "liveBrokerHttpStatus": 401,
+      "liveBrokerCode": "AUTH_REQUIRED",
+      "engineExecutionReached": false,
+      "productionMarkerAtLiveSmoke": "a888a4681293dcddf72b309af8a5532919d49d62",
+      "status": "adapter_boundary_pass_live_execution_not_claimed"
     }
   },
   "remaining": [
-    "Hermes/OpenClaw live runtime readiness beyond adapter boundary",
     "Operator Wiki Export / Public Reference Corpus maturation",
     "remaining non-workspace page density",
     "RLS live tenant A/B, Storage, service-role, and publication RPC proof after explicit approval",
+    "Hermes/OpenClaw authenticated operator-owned runtime E2E proof",
     "regeneration comparison after next production product commit"
   ]
 }
