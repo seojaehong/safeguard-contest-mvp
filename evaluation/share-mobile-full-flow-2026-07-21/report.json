@@ -1,38 +1,84 @@
 {
-  "checkedAt": "2026-07-21T00:30:00+09:00",
+  "checkedAt": "2026-07-21T03:37:44+09:00",
   "verdict": "PASS",
-  "scope": "mobile Share default flow",
+  "scope": "mobile Share configuration-stack remediation",
   "source": {
-    "baseHead": "b4eabe94e949e7e71f2b12092dd0f6ec2ca7d2a6",
-    "productionMarker": "c18854e889f6fdbd7a6f85fafc70d0fa1177b54e",
+    "sourceHeadBeforePatch": "e3cddc4fd2100f28f4b3004d4d0bf85acf2c9523",
     "branch": "chore/recipient-foreign-live-gate-20260720",
-    "probeUrl": "https://www.safeclaw.kr",
-    "geometryArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json"
+    "harness": "current-source isolated browser harness",
+    "productionDispatchClaim": false,
+    "command": "npm.cmd test -- tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+    "result": "PASS",
+    "testFilesPassed": 1,
+    "testsPassed": 2
   },
-  "mobile390x844": {
-    "shareMobileSummaryBottom": 432,
-    "sharePreviewBottom": 659,
-    "primaryShareCtaBottom": 720,
-    "shareTargetCardBottom": 930,
-    "shareChannelCardBottom": 1184,
-    "shareLanguageCardBottom": 1321,
-    "shareBodyHeight": 1533,
-    "overflowX": false,
-    "outside": 0
+  "mobile390x844Day": {
+    "shareBodyHeight": 1020,
+    "shareMobileSummaryBottom": 256,
+    "sharePreviewBottom": 510,
+    "primaryShareCtaBottom": 571,
+    "configToggleBottom": 632,
+    "configToggleHeight": 44,
+    "mobileConfigExpanded": false,
+    "configCardCount": 3,
+    "configCardDisplays": ["none", "none", "none"],
+    "horizontalOverflow": 0,
+    "expandedOnDemand": {
+      "expanded": true,
+      "configCardDisplays": ["grid", "grid", "grid"],
+      "horizontalOverflow": 0
+    }
   },
-  "desktopPreservation": {
-    "desktopShortTargetBottom": 675,
-    "desktopShortChannelBottom": 675,
-    "desktopShortLanguageBottom": 675,
-    "desktopShortPreviewBottom": 705,
-    "desktopShortPrimaryCtaBottom": 349,
-    "overflowX": false,
-    "outside": 0
+  "mobile390x844Night": {
+    "shareBodyHeight": 1020,
+    "shareMobileSummaryBottom": 256,
+    "sharePreviewBottom": 510,
+    "primaryShareCtaBottom": 571,
+    "configToggleBottom": 632,
+    "configCardDisplays": ["none", "none", "none"],
+    "horizontalOverflow": 0
   },
-  "documentsPreservation": {
-    "mobileDocumentWorkbenchBottom": 835,
-    "mobileSafetyBriefBottom": 762,
-    "mobileDocumentSecondaryActionsBottom": 824,
-    "outside": 0
+  "workspaceShareDesktopDay": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "shareBodyHeight": 912,
+    "sharePreviewBottom": 705,
+    "primaryShareCtaBottom": 349,
+    "previewLeft": 771,
+    "primaryRight": 755,
+    "previewRightOfPrimary": true,
+    "channelCards": [
+      { "width": 172, "height": 44 },
+      { "width": 172, "height": 44 },
+      { "width": 172, "height": 44 }
+    ],
+    "configCardDisplays": ["grid", "grid", "grid"],
+    "horizontalOverflow": 0
+  },
+  "standaloneDispatchDesktopDay": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "shareBodyHeight": 1116,
+    "rootWidth": 1156,
+    "rootHeight": 652,
+    "sharePreviewBottom": 898,
+    "primaryShareCtaBottom": 544,
+    "previewRightOfPrimary": true,
+    "channelCards": [
+      { "width": 164, "height": 44 },
+      { "width": 164, "height": 44 },
+      { "width": 164, "height": 44 }
+    ],
+    "horizontalOverflow": 0
+  },
+  "interpretation": {
+    "routeSplitAloneAcceptedAsFix": false,
+    "progressiveDisclosureApplied": true,
+    "providerDispatchLiveClaimed": false,
+    "remainingFollowUp": "Optional guided mobile stepper and provider dispatch idempotency/result-ledger approval remain separate."
   }
 }

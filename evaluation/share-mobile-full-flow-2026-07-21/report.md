@@ -1,50 +1,77 @@
 # Share Mobile Full-Flow Gate
 
-Checked at: 2026-07-21 KST
+Checked at: 2026-07-21 03:37 KST
 
 ## Verdict
 
-PASS for the mobile Share default flow.
+PASS for the mobile Share configuration-stack remediation in current-source browser evidence.
 
-The detailed target, channel, and language cards still continue below the first viewport, but the selected transmission summary, message preview, and primary action are now all visible in the first viewport. This closes the mobile default-flow issue without broad route splitting or document-library rewrites.
+This closes the earlier mobile long-stack debt where target, channel, and language detail cards all remained below the first viewport. The current default flow keeps the selected 대상/채널/언어 summary, bounded message preview, primary CTA, and a compact "상세 설정" entry in the first viewport. The detailed cards are collapsed by default and expand on demand.
+
+This does not claim real provider dispatch is production-live. Provider delivery remains governed by the persistent idempotency and provider-result persistence approval gate.
 
 ## Source
 
-- Base HEAD: `b4eabe94e949e7e71f2b12092dd0f6ec2ca7d2a6`
+- Source HEAD before this patch: `e3cddc4fd2100f28f4b3004d4d0bf85acf2c9523`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
-- Production marker: `c18854e889f6fdbd7a6f85fafc70d0fa1177b54e`
-- Probe URL: `https://www.safeclaw.kr`
-- Probe artifact: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
+- Harness: current-source isolated browser harness
+- Viewports: desktop `1440x900`, mobile `390x844`
+- Themes: Day, Night
+- Focused command: `npm.cmd test -- tests\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false`
+- Result: PASS, `1` file / `2` tests
 
-## Current Geometry
+## Mobile Default Geometry
 
-Mobile 390x844:
+Mobile 390x844 Day:
 
-- `shareMobileSummary.bottom = 432`
-- `sharePreview.bottom = 659`
-- `primaryShareCta.bottom = 720`
-- `shareTargetCard.bottom = 930`
-- `shareChannelCard.bottom = 1184`
-- `shareLanguageCard.bottom = 1321`
-- `shareBody = 1533`
-- `overflowX = false`
-- `outside = 0`
+- `shareBody = 1020`
+- `shareMobileSummary.bottom = 256`
+- `sharePreview.bottom = 510`
+- `primaryShareCta.bottom = 571`
+- `configToggle.bottom = 632`
+- `configToggle.height = 44`
+- `mobileConfigExpanded = false`
+- `configCards.length = 3`
+- `configCards.display = ["none", "none", "none"]`
+- `overflowX = 0`
+- Expanded on demand: `cardDisplays = ["grid", "grid", "grid"]`, `overflowX = 0`
 
-Desktop preservation:
+Mobile 390x844 Night:
 
-- Desktop-short share target/channel/language cards bottom: `675`
-- Desktop-short share preview bottom: `705`
-- Desktop-short primary CTA bottom: `349`
-- Desktop-short overflow/outside: `false / 0`
+- `shareBody = 1020`
+- `shareMobileSummary.bottom = 256`
+- `sharePreview.bottom = 510`
+- `primaryShareCta.bottom = 571`
+- `configToggle.bottom = 632`
+- `configCards.display = ["none", "none", "none"]`
+- `overflowX = 0`
 
-Documents preservation:
+## Desktop Preservation
 
-- Mobile document workbench bottom: `835`
-- Mobile safety brief bottom: `762`
-- Mobile document secondary actions bottom: `824`
-- Mobile outside: `0`
+Workspace share desktop 1440x900 Day:
+
+- `shareBody = 912`
+- `sharePreview.bottom = 705`
+- `primaryShareCta.bottom = 349`
+- `previewLeft = 771`
+- `primaryRight = 755`
+- `channelCards = 172x44, 172x44, 172x44`
+- `configCards.display = ["grid", "grid", "grid"]`
+- `overflowX = 0`
+
+Standalone `/dispatch?theme=day` desktop 1440x900:
+
+- `shareBody = 1116`
+- `rootWidth = 1156`
+- `rootHeight = 652`
+- `sharePreview.bottom = 898`
+- `primaryShareCta.bottom = 544`
+- `previewRightOfPrimary = true`
+- `channelCards = 164x44, 164x44, 164x44`
+- `overflowX = 0`
 
 ## Interpretation
 
-Route splitting alone would not solve long mobile sharing. The bounded fix is a mobile summary strip that surfaces selected 대상/채널/언어 before the detailed cards, while preserving the deeper configuration cards below the fold.
+Route splitting alone is not the UX fix. This patch applies progressive disclosure inside the Share step: selected transmission state stays readable in the cockpit, the preview and primary action remain first-viewport visible, and long configuration details are opened only when needed.
 
+Remaining follow-up is product-depth, not this mobile default stack: refine the eventual Share mobile stepper if more guided editing is needed, and keep real provider dispatch separate until the idempotency/result ledger is approved.

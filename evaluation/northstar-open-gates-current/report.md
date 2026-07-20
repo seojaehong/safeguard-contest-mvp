@@ -1,7 +1,7 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T18:27:38.060Z
-Source SHA: `5bd750d6a6b1970c707baece5a7e8971ba96432d`
+Generated at: 2026-07-20T18:40:22.835Z
+Source SHA: `e3cddc4fd2100f28f4b3004d4d0bf85acf2c9523`
 Overall: `open`
 
 ## Gate Matrix
@@ -10,7 +10,7 @@ Overall: `open`
 | --- | --- | --- | --- |
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-20\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-20\notice-carry.json. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
-| ui_documents_share_cockpit | proven | evaluation\documents-mobile-pane-context-2026-07-21\report.json | Current evidence closes /documents mobile raw height, selected-document landing/context, and /share first-action visibility. It does not close document-specific drilldown depth or mobile share target/channel/language stepper. |
+| ui_documents_share_cockpit | proven | evaluation\documents-mobile-pane-context-2026-07-21\report.json | Current evidence closes /documents mobile raw height, selected-document landing/context, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not close document-specific drilldown depth or claim provider live dispatch. |
 | dispatch_standalone_cockpit | proven | evaluation\dispatch-standalone-cockpit-2026-07-21\report.json | Production /dispatch seeded desktop route is no longer mobile-stacked: pageHeight 1116 (1.24x), preview right pane, first-viewport CTA, readable channel cards, overflow false/outside 0. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Read-only RLS approval preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA cbb134c52185aab4e0ac3f9d648eee82aee2634f. |
@@ -38,7 +38,7 @@ Overall: `open`
 
 - final_99_gate: Do not claim fully automated launch readiness until admin-auth live save/reopen and approved provider dispatch are executed in a secure environment.
 - ui_documents_share_cockpit: Continue UI work on document-specific drilldown depth: selected document summary, accordions, and one-document-at-a-time editing.
-- ui_documents_share_cockpit: Convert mobile share target/channel/language configuration from a long below-fold stack into a stepper or collapsed configuration flow.
+- ui_documents_share_cockpit: Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed.
 - dispatch_standalone_cockpit: Keep provider dispatch live-send claims gated until persistent idempotency and provider result persistence are approved.
 - supabase_rls_launch_isolation: Approve authoritative project and credential provenance.
 - supabase_rls_launch_isolation: Run read-only live catalog capture.

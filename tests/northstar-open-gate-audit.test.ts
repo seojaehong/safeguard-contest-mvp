@@ -150,15 +150,20 @@ function createFixtureRoot(): string {
   });
   writeJson(rootDir, path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"), {
     verdict: "PASS",
-    mobile390x844: {
-      shareMobileSummaryBottom: 432,
-      sharePreviewBottom: 659,
-      primaryShareCtaBottom: 720,
-      overflowX: false,
-      outside: 0,
+    mobile390x844Day: {
+      shareMobileSummaryBottom: 256,
+      sharePreviewBottom: 510,
+      primaryShareCtaBottom: 571,
+      configToggleBottom: 632,
+      horizontalOverflow: 0,
+      configCardDisplays: ["none", "none", "none"],
+      expandedOnDemand: {
+        expanded: true,
+        configCardDisplays: ["grid", "grid", "grid"],
+      },
     },
-    documentsPreservation: {
-      mobileDocumentWorkbenchBottom: 835,
+    interpretation: {
+      providerDispatchLiveClaimed: false,
     },
   });
   writeJson(rootDir, path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"), {

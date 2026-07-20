@@ -540,6 +540,7 @@ export function WorkflowSharePanel({
   const [dispatchRecords, setDispatchRecords] = useState<DispatchRecordsState>(EMPTY_DISPATCH_RECORDS);
   const [providerDispatchState, setProviderDispatchState] = useState<ProviderDispatchUiState>({ status: "checking" });
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [mobileConfigExpanded, setMobileConfigExpanded] = useState(false);
 
   const selectedMessage = useMemo(() => {
     return resolveWorkflowMessagePreview(data, selectedMessageTarget);
@@ -1150,7 +1151,11 @@ export function WorkflowSharePanel({
               ? "저장 후 전송하기"
               : "문서팩 전송하기";
   return (
-    <article className={`share-panel workflow-panel ${styles.panel}`} id="dispatch" data-share-root>
+    <article
+      className={`share-panel workflow-panel ${mobileConfigExpanded ? "share-config-expanded" : "share-config-collapsed"} ${styles.panel}`}
+      id="dispatch"
+      data-share-root
+    >
       <header className="share-workflow-header">
         <div>
           <span className="eyebrow">오늘 작업</span>
@@ -1179,8 +1184,20 @@ export function WorkflowSharePanel({
         </span>
       </section>
 
-      <div className="share-form-shell">
-        <section className="share-form-card share-recipient-card" aria-labelledby="workflow-recipient-heading" data-share-owner="targets">
+      <button
+        type="button"
+        className="share-mobile-config-toggle"
+        aria-controls="share-mobile-config-panels"
+        aria-expanded={mobileConfigExpanded}
+        onClick={() => setMobileConfigExpanded((current) => !current)}
+        data-share-mobile-config-toggle
+      >
+        <span>대상·채널·언어 상세 설정</span>
+        <strong>{mobileConfigExpanded ? "접기" : "열기"}</strong>
+      </button>
+
+      <div className="share-form-shell" id="share-mobile-config-panels">
+        <section className="share-form-card share-recipient-card share-config-card" aria-labelledby="workflow-recipient-heading" data-share-owner="targets">
           <div className="recipient-section-head">
             <span className="share-form-step">01</span>
             <span className="field-label" id="workflow-recipient-heading">오늘 대상</span>
@@ -1205,7 +1222,7 @@ export function WorkflowSharePanel({
           <a className="button secondary" href="/workers">대상 변경</a>
         </section>
 
-        <section className="share-form-card" aria-labelledby="workflow-channel-heading" data-share-owner="channels">
+        <section className="share-form-card share-config-card" aria-labelledby="workflow-channel-heading" data-share-owner="channels">
           <div className="share-form-card-head">
             <span>02</span>
             <strong id="workflow-channel-heading">채널</strong>
@@ -1249,7 +1266,7 @@ export function WorkflowSharePanel({
           ) : null}
         </section>
 
-        <section className="share-form-card" aria-labelledby="workflow-language-heading" data-share-owner="language-preview">
+        <section className="share-form-card share-config-card" aria-labelledby="workflow-language-heading" data-share-owner="language-preview">
           <div className="share-form-card-head">
             <span>03</span>
             <strong id="workflow-language-heading">언어 미리보기</strong>

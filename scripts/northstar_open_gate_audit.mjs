@@ -518,13 +518,24 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       ? internalPane.productionGeometry
       : {};
   const contextAssertions = isRecord(paneContext.assertions) ? paneContext.assertions : {};
-  const shareDocuments = isRecord(share.documentsPreservation) ? share.documentsPreservation : {};
-  const shareMobile = isRecord(share.mobile390x844) ? share.mobile390x844 : {};
+  const shareMobile = isRecord(share.mobile390x844Day)
+    ? share.mobile390x844Day
+    : isRecord(share.mobile390x844)
+      ? share.mobile390x844
+      : {};
+  const shareInterpretation = isRecord(share.interpretation) ? share.interpretation : {};
   const paneChecksPass = allChecksPassed(paneContext);
   const bodyHeight = readNumber(internalPaneGeometry.bodyHeight);
   const viewportHeight = readNumber(isRecord(internalPaneGeometry.viewport) ? internalPaneGeometry.viewport.height : 844) || 844;
   const contextSourceSha = readString(paneContext.sourceHeadBeforeCommit);
   const contextSourceCurrent = isGitAncestor(rootDir, contextSourceSha);
+  const configCardDisplays = Array.isArray(shareMobile.configCardDisplays)
+    ? shareMobile.configCardDisplays
+    : [];
+  const expandedOnDemand = isRecord(shareMobile.expandedOnDemand) ? shareMobile.expandedOnDemand : {};
+  const expandedCardDisplays = Array.isArray(expandedOnDemand.configCardDisplays)
+    ? expandedOnDemand.configCardDisplays
+    : [];
 
   const documentsPass = readString(internalPane.verdict).startsWith("PASS")
     && bodyHeight !== null
@@ -543,10 +554,18 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && readNumber(shareMobile.shareMobileSummaryBottom) !== null
     && readNumber(shareMobile.sharePreviewBottom) !== null
     && readNumber(shareMobile.primaryShareCtaBottom) !== null
-    && readBoolean(shareMobile.overflowX) === false
-    && readNumber(shareMobile.outside) === 0
-    && readNumber(shareDocuments.mobileDocumentWorkbenchBottom) !== null
-    && readNumber(shareDocuments.mobileDocumentWorkbenchBottom) <= 844;
+    && readNumber(shareMobile.configToggleBottom) !== null
+    && readNumber(shareMobile.shareMobileSummaryBottom) <= 844
+    && readNumber(shareMobile.sharePreviewBottom) <= 844
+    && readNumber(shareMobile.primaryShareCtaBottom) <= 844
+    && readNumber(shareMobile.configToggleBottom) <= 844
+    && readNumber(shareMobile.horizontalOverflow) === 0
+    && configCardDisplays.length === 3
+    && configCardDisplays.every((display) => display === "none")
+    && readBoolean(expandedOnDemand.expanded) === true
+    && expandedCardDisplays.length === 3
+    && expandedCardDisplays.every((display) => display !== "none")
+    && readBoolean(shareInterpretation.providerDispatchLiveClaimed) === false;
 
   if (documentsPass && sharePass) {
     return gateResult({
@@ -554,10 +573,10 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       label: "Documents and Share cockpit UI",
       state: "proven",
       evidencePath: paneContextPath,
-      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context, and /share first-action visibility. It does not close document-specific drilldown depth or mobile share target/channel/language stepper.",
+      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not close document-specific drilldown depth or claim provider live dispatch.",
       nextActions: [
         "Continue UI work on document-specific drilldown depth: selected document summary, accordions, and one-document-at-a-time editing.",
-        "Convert mobile share target/channel/language configuration from a long below-fold stack into a stepper or collapsed configuration flow.",
+        "Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed.",
       ],
     });
   }

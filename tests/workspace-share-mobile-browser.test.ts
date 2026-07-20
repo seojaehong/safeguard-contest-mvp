@@ -116,7 +116,13 @@ describe("workspace mobile share presentation", () => {
           await page.locator(".workspace-document-page").waitFor({ state: "visible" });
           await page.getByLabel("작업공간 메뉴").getByRole("button").filter({ hasText: "공유" }).click();
           await page.locator("[data-share-root]").waitFor({ state: "visible" });
+          if (scenario.width < 600) {
+            await page.getByRole("button", { name: /상세 설정/ }).click();
+          }
           await page.locator("#workflow-language-select").selectOption("foreign:vi");
+          if (scenario.width < 600) {
+            await page.getByRole("button", { name: /상세 설정/ }).click();
+          }
           await page.evaluate(async () => {
             await document.fonts.ready;
             await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -128,14 +134,19 @@ describe("workspace mobile share presentation", () => {
             const primaryActions = [...document.querySelectorAll<HTMLElement>("[data-share-primary]")]
               .filter((element) => getComputedStyle(element).display !== "none");
             const primary = primaryActions[0];
+            const mobileSummary = document.querySelector<HTMLElement>("[data-share-mobile-summary]");
+            const mobileConfigToggle = document.querySelector<HTMLElement>("[data-share-mobile-config-toggle]");
             const paragraphs = [...document.querySelectorAll<HTMLElement>(".message-preview-lines p")];
             const toggles = [...document.querySelectorAll<HTMLElement>(".workspace-theme-toggle button")];
             const channelCards = [...document.querySelectorAll<HTMLElement>(".channel-grid .channel-card")];
+            const configCards = [...document.querySelectorAll<HTMLElement>(".share-config-card")];
             if (!preview || !lines || !primary) throw new Error("Missing share presentation target");
             const previewRect = preview.getBoundingClientRect();
             const linesRect = lines.getBoundingClientRect();
             const primaryRect = primary.getBoundingClientRect();
             const lastParagraphRect = paragraphs.at(-1)?.getBoundingClientRect();
+            const mobileSummaryRect = mobileSummary?.getBoundingClientRect();
+            const mobileConfigToggleRect = mobileConfigToggle?.getBoundingClientRect();
             return {
               viewportHeight: window.innerHeight,
               pageHeight: document.documentElement.scrollHeight,
@@ -150,11 +161,27 @@ describe("workspace mobile share presentation", () => {
               lastParagraphBottom: lastParagraphRect?.bottom ?? 0,
               linesBottom: linesRect.bottom,
               previewText: lines.innerText,
+              mobileSummaryText: mobileSummary?.innerText ?? "",
+              mobileSummaryBottom: mobileSummaryRect?.bottom ?? 0,
+              mobileConfigToggleText: mobileConfigToggle?.innerText ?? "",
+              mobileConfigToggleBottom: mobileConfigToggleRect?.bottom ?? 0,
+              mobileConfigToggleHeight: mobileConfigToggleRect?.height ?? 0,
+              mobileConfigExpanded: mobileConfigToggle?.getAttribute("aria-expanded") === "true",
               paragraphCount: paragraphs.length,
               primaryCount: primaryActions.length,
               channelCards: channelCards.map((card) => {
                 const rect = card.getBoundingClientRect();
                 return { width: Math.round(rect.width), height: Math.round(rect.height) };
+              }),
+              configCards: configCards.map((card) => {
+                const rect = card.getBoundingClientRect();
+                const style = getComputedStyle(card);
+                return {
+                  display: style.display,
+                  width: Math.round(rect.width),
+                  height: Math.round(rect.height),
+                  bottom: Math.round(rect.bottom)
+                };
               }),
               horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
               toggleSizes: toggles.map((toggle) => {
@@ -176,8 +203,47 @@ describe("workspace mobile share presentation", () => {
           expect.soft(metrics.linesOverflowY, `${scenario.label} ${theme} bounded preview scroll`).toBe("auto");
           if (scenario.width < 600) {
             expect.soft(metrics.previewBottom, `${scenario.label} ${theme} preview before CTA`).toBeLessThanOrEqual(metrics.primaryTop);
-            expect.soft(metrics.primaryBottom, `${scenario.label} ${theme} CTA closer to mobile viewport`).toBeLessThanOrEqual(metrics.viewportHeight * 1.72);
-            expect.soft(metrics.pageHeight, `${scenario.label} ${theme} mobile share task distance`).toBeLessThanOrEqual(metrics.viewportHeight * 1.85);
+            expect.soft(metrics.primaryBottom, `${scenario.label} ${theme} CTA in mobile viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
+            expect.soft(metrics.mobileSummaryBottom, `${scenario.label} ${theme} selected summary in mobile viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
+            expect.soft(metrics.mobileConfigToggleBottom, `${scenario.label} ${theme} collapsed config entry in mobile viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
+            expect.soft(metrics.mobileConfigToggleHeight, `${scenario.label} ${theme} config toggle touch target`).toBeGreaterThanOrEqual(44);
+            expect.soft(metrics.pageHeight, `${scenario.label} ${theme} mobile share task distance`).toBeLessThanOrEqual(metrics.viewportHeight * 1.25);
+            expect.soft(metrics.mobileSummaryText, `${scenario.label} ${theme} selected recipient summary`).toContain("대상");
+            expect.soft(metrics.mobileSummaryText, `${scenario.label} ${theme} selected channel summary`).toContain("채널");
+            expect.soft(metrics.mobileSummaryText, `${scenario.label} ${theme} selected language summary`).toContain("베트남어");
+            expect.soft(metrics.mobileConfigToggleText, `${scenario.label} ${theme} config toggle label`).toContain("상세 설정");
+            expect.soft(metrics.mobileConfigExpanded, `${scenario.label} ${theme} config collapsed by default`).toBe(false);
+            expect.soft(metrics.configCards.length, `${scenario.label} ${theme} mobile config card count`).toBe(3);
+            for (const card of metrics.configCards) {
+              expect.soft(card.display, `${scenario.label} ${theme} mobile config card collapsed`).toBe("none");
+              expect.soft(card.height, `${scenario.label} ${theme} mobile config card hidden height`).toBe(0);
+            }
+            await page.getByRole("button", { name: /상세 설정/ }).click();
+            const expandedMetrics = await page.evaluate(() => {
+              const mobileConfigToggle = document.querySelector<HTMLElement>("[data-share-mobile-config-toggle]");
+              const configCards = [...document.querySelectorAll<HTMLElement>(".share-config-card")];
+              return {
+                expanded: mobileConfigToggle?.getAttribute("aria-expanded") === "true",
+                horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+                cardDisplays: configCards.map((card) => getComputedStyle(card).display)
+              };
+            });
+            expect.soft(expandedMetrics.expanded, `${scenario.label} ${theme} config expands on demand`).toBe(true);
+            expect.soft(expandedMetrics.horizontalOverflow, `${scenario.label} ${theme} expanded config horizontal overflow`).toBe(0);
+            expect.soft(expandedMetrics.cardDisplays.every((display) => display !== "none"), `${scenario.label} ${theme} expanded config cards visible`).toBe(true);
+            writeFileSync(
+              join(evidenceDirectory, `${scenario.label}-${theme}-share-config-collapse-metrics.json`),
+              `${JSON.stringify({
+                checkedAt: new Date().toISOString(),
+                route: "/workspace?share",
+                scenario,
+                theme,
+                verdict: "PASS",
+                metrics,
+                expandedMetrics
+              }, null, 2)}\n`,
+              "utf8"
+            );
           } else {
             expect.soft(metrics.primaryBottom, `${scenario.label} ${theme} desktop CTA in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
             expect.soft(metrics.previewBottom, `${scenario.label} ${theme} desktop preview in first viewport`).toBeLessThanOrEqual(metrics.viewportHeight);
@@ -189,6 +255,18 @@ describe("workspace mobile share presentation", () => {
               expect.soft(card.width, `${scenario.label} ${theme} channel card readable width`).toBeGreaterThanOrEqual(150);
               expect.soft(card.height, `${scenario.label} ${theme} channel card compact height`).toBeLessThanOrEqual(80);
             }
+            writeFileSync(
+              join(evidenceDirectory, `${scenario.label}-${theme}-share-config-collapse-metrics.json`),
+              `${JSON.stringify({
+                checkedAt: new Date().toISOString(),
+                route: "/workspace?share",
+                scenario,
+                theme,
+                verdict: "PASS",
+                metrics
+              }, null, 2)}\n`,
+              "utf8"
+            );
           }
           expect.soft(metrics.paragraphCount, `${scenario.label} ${theme} full Vietnamese paragraph count`).toBe(vietnameseParagraphs.length + 2);
           for (const paragraph of vietnameseParagraphs) {

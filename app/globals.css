@@ -15095,6 +15095,10 @@ body:has(.safeclaw-landing) :is(
   display: none;
 }
 
+.share-mobile-config-toggle {
+  display: none;
+}
+
 @media (min-width: 960px) {
   .safeclaw-module-shell[data-module-route="/dispatch"] .safeclaw-module-grid.two {
     width: min(1180px, calc(100% - 48px));
@@ -17000,13 +17004,17 @@ body:has(.safeclaw-landing) :is(
     order: 2;
   }
 
-  .share-panel.workflow-panel > .share-inline-note,
-  .share-panel.workflow-panel > .share-readiness-warning {
+  .share-panel.workflow-panel > .share-mobile-config-toggle {
     order: 3;
   }
 
-  .share-panel.workflow-panel > .command-actions {
+  .share-panel.workflow-panel > .share-inline-note,
+  .share-panel.workflow-panel > .share-readiness-warning {
     order: 4;
+  }
+
+  .share-panel.workflow-panel > .command-actions {
+    order: 5;
   }
 
   .share-panel.workflow-panel .share-primary-action-row {
@@ -17064,6 +17072,49 @@ body:has(.safeclaw-landing) :is(
     letter-spacing: var(--tracking-body);
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .share-mobile-config-toggle {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px solid var(--share-line);
+    border-radius: 4px;
+    background: var(--share-surface);
+    color: var(--share-ink);
+    padding: 8px 10px;
+    font: inherit;
+    letter-spacing: var(--tracking-body);
+    text-align: left;
+  }
+
+  .share-mobile-config-toggle span,
+  .share-mobile-config-toggle strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .share-mobile-config-toggle span {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    font-weight: 700;
+  }
+
+  .share-mobile-config-toggle strong {
+    color: var(--share-muted);
+    font-size: var(--text-hud);
+    line-height: var(--leading-hud);
+    font-family: var(--font-hud);
+    font-weight: 700;
+    letter-spacing: var(--tracking-hud);
+  }
+
+  .share-panel.workflow-panel.share-config-collapsed .share-config-card {
+    display: none;
   }
 
   .share-workflow-header {

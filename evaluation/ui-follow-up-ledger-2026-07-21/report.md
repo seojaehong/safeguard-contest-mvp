@@ -10,7 +10,7 @@ Checked at: 2026-07-21 02:34 KST
 - Share mobile action cockpit: PASS after the 2026-07-21 bounded mobile patch
 - Share mobile default flow: PASS after adding the selected 대상/채널/언어 summary strip
 
-This ledger intentionally does not mark frontend as globally perfect. The current desktop blockers are closed, the mobile document cockpit is closed, and the mobile share default flow is closed. Deeper mobile share configuration cards still remain below the fold by design.
+This ledger intentionally does not mark frontend as globally perfect. The current desktop blockers are closed, the mobile document cockpit is closed, and the mobile share default flow is closed. Detailed mobile Share configuration is now opt-in/collapsed by default; a more guided stepper remains optional product-depth follow-up.
 
 ## Current Production Baseline
 
@@ -116,21 +116,28 @@ Current-source bounded gate:
 
 Interpretation: long artifacts can remain in bounded panes, but each pane needs persistent local context. This is the next step from "short page" to readable drilldown.
 
-Share mobile 390x844 current-source gate:
+Share mobile configuration-stack current-source gate:
 
-- `shareMobileSummary.bottom = 432`
-- `sharePreview.bottom = 659`
-- `primaryShareCta.bottom = 720`
-- `overflowX = false`
-- `outside = 0`
-- `shareBody = 1473`
-- `shareTargetCard.bottom = 870`
-- `shareChannelCard.bottom = 1124`
-- `shareLanguageCard.bottom = 1261`
+- Artifact: `evaluation/share-mobile-full-flow-2026-07-21/report.md`
+- Source HEAD before patch: `e3cddc4fd2100f28f4b3004d4d0bf85acf2c9523`
+- Focused browser: `workspace-share-mobile-browser` PASS, 2/2.
+- The baseline mobile Share debt was a long target/channel/language stack below the first viewport.
+- The new default uses progressive disclosure: selected 대상/채널/언어 remains readable, detailed configuration cards are collapsed by default, and they expand on demand.
+- `shareBody = 1020` at 390x844 (`1.21x`, down from `1533`)
+- `shareMobileSummary.bottom = 256`
+- `sharePreview.bottom = 510`
+- `primaryShareCta.bottom = 571`
+- `configToggle.bottom = 632`
+- `configCards.display = ["none", "none", "none"]`
+- Expanded on demand: `configCards.display = ["grid", "grid", "grid"]`
+- `overflowX = 0`
+- Desktop preservation: workspace Share keeps right-pane preview and `172x44` channel cards; standalone `/dispatch` keeps `rootWidth = 1156`, right-pane preview, and `164x44` channel cards.
+
+Interpretation: this closes mobile Share config-stack IA for the default flow. It does not claim a fully viewport-bound route, and it does not claim real provider dispatch.
 
 ## Next Bounded Wave
 
-Recommended branch name if deeper document-pane readability or full Share mobile closure is required:
+Recommended branch name if deeper document-specific drilldown or a more guided Share mobile stepper is required:
 
 ```text
 fix/mobile-doc-share-cockpit
@@ -144,7 +151,8 @@ Acceptance proposal:
    - provenance/deep-review/library entrypoints are compact chips or reachable via a sticky action drawer.
    - `visibleDocumentPreviews = 0`, `deepReviewOpen = false`, `overflowX = false`, `outside = 0`.
 2. Share mobile 390x844:
-   - first viewport contains transmission summary, selected channel/language, primary send or preview CTA, and preview entrypoint.
+   - current default summary, preview, CTA, and config toggle remain in the first viewport.
+   - target/channel/language detail cards remain collapsed by default or become a guided active-step editor.
    - long multilingual previews, evidence, and logs are accordions, drawer, or wizard steps.
    - if dispatch is gated, the gate is explicit and does not look like a broken send state.
 3. Evidence:

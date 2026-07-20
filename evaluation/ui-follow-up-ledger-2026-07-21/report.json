@@ -64,7 +64,47 @@
       "shareLanguageCardBottom": 1321,
       "overflowX": false,
       "outside": 0,
-      "interpretation": "action cockpit passes; full detail flow remains partial"
+      "interpretation": "historical action-cockpit gate before the mobile configuration-stack collapse"
+    }
+  },
+  "shareMobileConfigStackUpdate": {
+    "checkedAt": "2026-07-21T03:37:44+09:00",
+    "sourceHeadBeforePatch": "e3cddc4fd2100f28f4b3004d4d0bf85acf2c9523",
+    "artifact": "evaluation/share-mobile-full-flow-2026-07-21/report.json",
+    "scope": "mobile Share target/channel/language configuration stack",
+    "currentSourceContract": {
+      "selectedTransmissionSummaryVisible": true,
+      "boundedPreviewVisible": true,
+      "primaryCtaVisible": true,
+      "configurationToggleVisible": true,
+      "detailedConfigurationCardsCollapsedByDefault": true,
+      "detailedConfigurationCardsExpandOnDemand": true,
+      "providerDispatchLiveClaimed": false
+    },
+    "mobile390x844Day": {
+      "shareBodyHeight": 1020,
+      "shareMobileSummaryBottom": 256,
+      "sharePreviewBottom": 510,
+      "primaryShareCtaBottom": 571,
+      "configToggleBottom": 632,
+      "configCardDisplays": ["none", "none", "none"],
+      "expandedCardDisplays": ["grid", "grid", "grid"],
+      "horizontalOverflow": 0
+    },
+    "desktopPreservation": {
+      "workspacePreviewRightOfPrimary": true,
+      "workspaceChannelCards": [
+        { "width": 172, "height": 44 },
+        { "width": 172, "height": 44 },
+        { "width": 172, "height": 44 }
+      ],
+      "standaloneDispatchRootWidth": 1156,
+      "standaloneDispatchPreviewRightOfPrimary": true,
+      "standaloneDispatchChannelCards": [
+        { "width": 164, "height": 44 },
+        { "width": 164, "height": 44 },
+        { "width": 164, "height": 44 }
+      ]
     }
   },
   "standaloneDocumentsInternalPaneUpdate": {
@@ -164,10 +204,10 @@
     "managerMode": "full 12-document review, provenance, logs, and deep editing behind explicit disclosure"
   },
   "nextWave": {
-    "recommendedBranch": "fix/mobile-doc-pane-readability",
+    "recommendedBranch": "fix/document-drilldown-depth",
     "scope": [
       "documents internal pane readability and document-specific drilldown",
-      "share mobile compact flow"
+      "optional guided share mobile stepper beyond the current collapsed configuration stack"
     ]
   }
 }
