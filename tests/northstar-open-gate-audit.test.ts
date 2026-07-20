@@ -267,6 +267,31 @@ function createFixtureRoot(): string {
       { status: "PASS" },
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "share-desktop-composition-2026-07-21", "report.json"), {
+    verdict: "PASS_PRODUCTION",
+    scope: {
+      route: "/workspace",
+      surface: "share",
+      liveProviderDispatchClaimed: false,
+    },
+    production: {
+      build: {
+        commitSha: "fixture-sha",
+        branch: "master",
+        environment: "production",
+      },
+      desktop1440x900: {
+        pageHeight: 900,
+        viewportHeight: 900,
+        previewLeft: 771,
+        primaryRight: 755,
+        previewRightOfPrimary: true,
+        channelCardWidths: [191, 191, 191],
+        channelCardHeights: [44, 44, 44],
+        horizontalOverflow: 0,
+      },
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"), {
     verdict: "PASS",
     mobile390x844Day: {
