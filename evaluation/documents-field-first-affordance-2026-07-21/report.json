@@ -1,0 +1,107 @@
+{
+  "checkedAt": "2026-07-21T06:52:00+09:00",
+  "sourceHead": "3bb927635b9b9612e27da5ebf02819253f7cffa9",
+  "verdict": "PASS_CURRENT_SOURCE",
+  "scope": "standalone /documents selected-section field-first affordance",
+  "routeSplitAloneAcceptedAsFix": false,
+  "structuralContract": "route split plus first-viewport cockpit plus bounded drilldown plus document-specific field-first editing",
+  "backendProviderOrExportContractsChanged": false,
+  "currentSource": {
+    "baseUrl": "http://localhost:3218",
+    "mobile390x844": {
+      "bodyHeight": 844,
+      "viewportHeight": 844,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "horizontalOverflow": false,
+      "selectedTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 476,
+      "workpackShellBottom": 796,
+      "workpackShellHeight": 320,
+      "workpackShellScrollHeight": 1481,
+      "toolbarBottom": 572,
+      "fieldStripTop": 580,
+      "fieldStripBottom": 628,
+      "fieldStripHeight": 48,
+      "actionsTop": 628,
+      "actionsBottom": 672,
+      "actionsHeight": 44,
+      "firstTextareaTop": 672,
+      "firstTextareaBottom": 829,
+      "firstTextareaHeight": 157,
+      "visibleTextareaHeightInsidePane": 124,
+      "fieldStripBelowToolbar": true,
+      "actionsInsidePane": true,
+      "textareaHasUsableVisibleAreaInsidePane": true,
+      "toolbarCoversFieldStrip": false,
+      "toolbarCoversActions": false,
+      "toolbarCoversTextarea": false,
+      "fieldStripText": "현재 편집 필드기본 정보근거48건 연결점검초안 확인",
+      "actionTexts": ["근거 보기", "점검 보기"]
+    },
+    "desktop1440x723": {
+      "bodyHeight": 770,
+      "viewportHeight": 723,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "horizontalOverflow": false,
+      "selectedTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 336,
+      "workpackShellBottom": 722,
+      "workpackShellHeight": 386,
+      "workpackShellScrollHeight": 1521,
+      "toolbarBottom": 335,
+      "fieldStripTop": 493,
+      "fieldStripBottom": 541,
+      "fieldStripHeight": 48,
+      "actionsTop": 541,
+      "actionsBottom": 585,
+      "actionsHeight": 44,
+      "firstTextareaTop": 585,
+      "firstTextareaBottom": 738,
+      "firstTextareaHeight": 153,
+      "visibleTextareaHeightInsidePane": 137,
+      "fieldStripBelowToolbar": true,
+      "actionsInsidePane": true,
+      "textareaHasUsableVisibleAreaInsidePane": true,
+      "toolbarCoversFieldStrip": false,
+      "toolbarCoversActions": false,
+      "toolbarCoversTextarea": false
+    }
+  },
+  "assertions": {
+    "fieldStripVisibleBelowToolbar": true,
+    "fieldStripNamesCurrentEditableFieldEvidenceAndReview": true,
+    "evidenceAndReviewActionsVisibleInsidePane": true,
+    "firstTextareaTopVisibleInsidePane": true,
+    "firstTextareaUsableVisibleAreaAtLeast96px": true,
+    "defaultOpenSectionCountIsOne": true,
+    "horizontalOverflowClosed": true
+  },
+  "gates": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "selectedTests": 1
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor|opens a requested document|bounds the default documents route editor|keeps the editor workspace and expanded tools contained\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "selectedTests": 5
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    }
+  ],
+  "remainingDebt": [
+    "Full textarea visibility inside the 320px mobile pane is not claimed.",
+    "Richer risk-row field editing and row-level readability remain open.",
+    "Field-first authoring for all 12 document types remains product-depth follow-up.",
+    "Provider live dispatch remains approval-gated and is not claimed."
+  ]
+}

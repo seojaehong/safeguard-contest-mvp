@@ -231,6 +231,67 @@
     },
     "remainingDebt": "This reduces bounded pane default depth only; document-specific summaries, risk-row readability, and full 12-document authoring UX remain product-depth follow-up."
   },
+  "documentsFieldFirstAffordanceUpdate": {
+    "checkedAt": "2026-07-21T06:52:00+09:00",
+    "sourcePatchCommit": "3bb927635b9b9612e27da5ebf02819253f7cffa9",
+    "artifact": "evaluation/documents-field-first-affordance-2026-07-21/report.json",
+    "scope": "standalone /documents selected-section field-first affordance",
+    "verdict": "PASS_CURRENT_SOURCE",
+    "routeSplitAloneAcceptedAsFix": false,
+    "mobile390x844": {
+      "bodyHeight": 844,
+      "heightRatio": 1,
+      "selectedTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 476,
+      "workpackShellBottom": 796,
+      "workpackShellClientHeight": 320,
+      "workpackShellScrollHeight": 1481,
+      "toolbarBottom": 572,
+      "fieldStripTop": 580,
+      "fieldStripBottom": 628,
+      "actionsTop": 628,
+      "actionsBottom": 672,
+      "firstTextareaTop": 672,
+      "firstTextareaBottom": 829,
+      "visibleTextareaHeightInsidePane": 124,
+      "fieldStripBelowToolbar": true,
+      "actionsInsidePane": true,
+      "toolbarOverlap": false,
+      "horizontalOverflow": false
+    },
+    "desktopShort1440x723": {
+      "bodyHeight": 770,
+      "heightRatio": 1.07,
+      "selectedTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 336,
+      "workpackShellBottom": 722,
+      "workpackShellClientHeight": 386,
+      "workpackShellScrollHeight": 1521,
+      "fieldStripTop": 493,
+      "fieldStripBottom": 541,
+      "actionsTop": 541,
+      "actionsBottom": 585,
+      "firstTextareaTop": 585,
+      "firstTextareaBottom": 738,
+      "visibleTextareaHeightInsidePane": 137,
+      "horizontalOverflow": false
+    },
+    "focusedGate": {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS"
+    },
+    "preservationGate": {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor|opens a requested document|bounds the default documents route editor|keeps the editor workspace and expanded tools contained\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS"
+    },
+    "typecheck": {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    },
+    "remainingDebt": "This adds field/evidence/recheck affordance for the selected risk-assessment section. Full textarea visibility inside the mobile pane, richer risk-row editing, and all-document field-first UX remain product-depth follow-up."
+  },
   "productionMarker": "f504b15e9682e35bce97d629b86e02268c08a185",
   "documentsDesktopShort": {
     "viewport": {
