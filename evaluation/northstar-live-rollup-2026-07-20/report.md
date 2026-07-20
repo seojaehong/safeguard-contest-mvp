@@ -1,10 +1,10 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T06:57:00.000Z
+Generated at: 2026-07-20T07:36:00.000Z
 
-Current HEAD: `510596d503f432232520c9f1f43c7b6532057f9a`
+Current HEAD: `c051f659a4ee28a1d6d2e8612e5c406ff5cc26c9`
 
-Current live production build: `3a6b9f4e25739954ba3b89c0b9d067ff52a28ef2`
+Current live production build: `c051f659a4ee28a1d6d2e8612e5c406ff5cc26c9`
 
 Overall: `northstar_open_approval_gated`
 
@@ -27,6 +27,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 | Share recipient portal | PASS, 13 files / 143 tests, live Vietnamese chrome, no provider side effect | `evaluation/share-recipient-portal-current-gate-2026-07-20/report.json` |
 | Recipient demo capture | PASS non-mutating 390px capture, overflow 0, min control 44, saved confirmation true | `evaluation/recipient-demo-capture-2026-07-20/metrics.json` |
 | Workspace documents/share geometry | PASS, generated state verified, desktop docs 1.27x, mobile docs 1.68x, desktop share 1180px | `evaluation/workspace-docs-share-production-gate-2026-07-20/metrics.json` |
+| Workspace document edit compaction | PASS, bounded remediation shipped, editor panel desktop 1433px / mobile 1359px, textarea y desktop 374 / mobile 361, north-star 4/4 + workspace focused 1/1 + build 28/28 | `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json` |
 | UI documents contrast | PASS, focused UI 4 files / 19 tests, build 28/28 | `evaluation/ui-documents-contrast-current-gate-2026-07-20/report.json` |
 
 ## Still Approval-Gated

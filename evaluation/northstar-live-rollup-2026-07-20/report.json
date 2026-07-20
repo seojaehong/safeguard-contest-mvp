@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T06:57:00.000Z",
-  "head": "510596d503f432232520c9f1f43c7b6532057f9a",
+  "generatedAt": "2026-07-20T07:36:00.000Z",
+  "head": "c051f659a4ee28a1d6d2e8612e5c406ff5cc26c9",
   "liveBuildInfo": {
-    "commitSha": "3a6b9f4e25739954ba3b89c0b9d067ff52a28ef2",
+    "commitSha": "c051f659a4ee28a1d6d2e8612e5c406ff5cc26c9",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-itihzle6p-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-jw16yqknp-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -145,6 +145,22 @@
       "horizontalOverflow": false,
       "outsideElements": 0,
       "documentsGeneratedStateVerified": true
+    },
+    {
+      "id": "workspace_document_edit_compaction",
+      "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
+      "result": "pass_bounded_edit_mode_remediation_shipped",
+      "sourceCommit": "45faccac787858e4085db65651f3921c5b5b4bbf",
+      "evidenceCommit": "c051f659a4ee28a1d6d2e8612e5c406ff5cc26c9",
+      "desktopEditorPanelHeight": 1433,
+      "mobileEditorPanelHeight": 1359,
+      "desktopTextareaY": 374,
+      "mobileTextareaY": 361,
+      "horizontalOverflow": false,
+      "outsideElements": 0,
+      "northStarDocumentUxTestsPassed": 4,
+      "workspaceFocusedTestsPassed": 1,
+      "buildStaticPages": "28/28"
     },
     {
       "id": "ui_documents_contrast",
