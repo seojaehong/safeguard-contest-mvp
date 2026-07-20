@@ -12,7 +12,8 @@ The detailed target, channel, and language cards still continue below the first 
 
 - Base HEAD: `b4eabe94e949e7e71f2b12092dd0f6ec2ca7d2a6`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
-- Probe URL: `http://localhost:3021`
+- Production marker: `c18854e889f6fdbd7a6f85fafc70d0fa1177b54e`
+- Probe URL: `https://www.safeclaw.kr`
 - Probe artifact: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
 
 ## Current Geometry

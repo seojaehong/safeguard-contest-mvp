@@ -4,8 +4,9 @@
   "scope": "mobile Share default flow",
   "source": {
     "baseHead": "b4eabe94e949e7e71f2b12092dd0f6ec2ca7d2a6",
+    "productionMarker": "c18854e889f6fdbd7a6f85fafc70d0fa1177b54e",
     "branch": "chore/recipient-foreign-live-gate-20260720",
-    "probeUrl": "http://localhost:3021",
+    "probeUrl": "https://www.safeclaw.kr",
     "geometryArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json"
   },
   "mobile390x844": {
