@@ -1999,15 +1999,13 @@ function RiskAssessmentRowsEditor({
 }) {
   const rowIdSignature = rowIds.join("\u001f");
   const [expandedRiskRowIds, setExpandedRiskRowIds] = useState<Set<string>>(() => (
-    rowIds[0] ? new Set([rowIds[0]]) : new Set()
+    new Set()
   ));
 
   useEffect(() => {
     const currentRowIds = new Set(rowIds);
     setExpandedRiskRowIds((current) => {
-      const next = new Set(Array.from(current).filter((id) => currentRowIds.has(id)));
-      if (!next.size && rowIds[0]) next.add(rowIds[0]);
-      return next;
+      return new Set(Array.from(current).filter((id) => currentRowIds.has(id)));
     });
   }, [rowIdSignature]);
 
@@ -2050,7 +2048,7 @@ function RiskAssessmentRowsEditor({
         {rows.map((row, rowIndex) => {
           const rowId = rowIds[rowIndex] ?? `risk-row-${rowIndex}`;
           const rowIssues = validation.issues.filter((issue) => issue.rowIndex === rowIndex);
-          const isExpanded = rowIndex === 0 || rowIssues.length > 0 || expandedRiskRowIds.has(rowId);
+          const isExpanded = rowIssues.length > 0 || expandedRiskRowIds.has(rowId);
           return (
             <details
               className={styles.riskRow}
@@ -2061,7 +2059,7 @@ function RiskAssessmentRowsEditor({
                 const isOpen = event.currentTarget.open;
                 setExpandedRiskRowIds((current) => {
                   const next = new Set(current);
-                  if (isOpen || rowIndex === 0 || rowIssues.length > 0) next.add(rowId);
+                  if (isOpen || rowIssues.length > 0) next.add(rowId);
                   else next.delete(rowId);
                   return next;
                 });
@@ -3105,13 +3103,13 @@ export function WorkpackEditor({
             >
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;
-                const lineCount = Math.min(8, Math.max(4, section.value.split(/\r?\n/u).length + 1));
+                const lineCount = Math.min(5, Math.max(3, section.value.split(/\r?\n/u).length + 1));
                 return (
-                  <section key={section.id} className={styles.documentSection} data-section-kind="body">
-                    <label htmlFor={inputId}>
+                  <details key={section.id} className={styles.documentSection} data-section-kind="body" open={index === 0}>
+                    <summary>
                       <span>{String(index + 1).padStart(2, "0")}</span>
                       <strong>{section.label}</strong>
-                    </label>
+                    </summary>
                     <textarea
                       id={inputId}
                       ref={index === 0 ? textareaRef : undefined}
@@ -3121,7 +3119,7 @@ export function WorkpackEditor({
                       onChange={(event) => updateStructuredSection(section.id, event.target.value)}
                       aria-label={index === 0 ? `${selected.title} 편집` : `${selected.title} ${section.label} 편집`}
                     />
-                  </section>
+                  </details>
                 );
               })}
               {selected.key === "riskAssessmentDraft" ? (

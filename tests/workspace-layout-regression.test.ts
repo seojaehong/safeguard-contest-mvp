@@ -1674,7 +1674,7 @@ describe("workspace layout regression", () => {
     expect(metrics.loginRequiredMessageCount).toBe(1);
     expect(metrics.clawGreetingCount).toBe(0);
     expect(metrics.shell.display).toBe("grid");
-    expect(metrics.shell.overflowY).toBe("auto");
+    expect(metrics.shell.overflowY).toBe("visible");
     expect(metrics.navigator.right).toBeLessThanOrEqual(metrics.editor.left - 12);
     expect(metrics.desktopTabsDisplay).not.toBe("none");
     expect(metrics.mobilePickerDisplay).toBe("none");
@@ -1778,7 +1778,7 @@ describe("workspace layout regression", () => {
     });
     expect(mobileMetrics.scrollWidth).toBeLessThanOrEqual(mobileMetrics.viewportWidth + 1);
     expect(mobileCollapsedScrollHeight).toBeLessThanOrEqual(mobileMetrics.viewportHeight * 3.4);
-    expect(mobileCollapsedEditorMetrics.shellOverflowY).toBe("auto");
+    expect(mobileCollapsedEditorMetrics.shellOverflowY).toBe("visible");
     expect(mobileCollapsedEditorMetrics.operationsDisclosureDisplay).toBe("none");
     expect(mobileCollapsedEditorMetrics.structuredEditor.top).toBeLessThanOrEqual(520);
     expect(mobileCollapsedEditorMetrics.textarea.top).toBeLessThanOrEqual(680);

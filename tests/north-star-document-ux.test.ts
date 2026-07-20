@@ -177,7 +177,11 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
       open: rows.filter((row) => row instanceof HTMLDetailsElement && row.open).length
     }));
     if (rowDisclosureMetrics.total > 1) {
-      expect(rowDisclosureMetrics.open).toBe(1);
+      expect(rowDisclosureMetrics.open).toBe(0);
+      await page.getByTestId("risk-row-editor-row").first().locator("summary").click();
+      await expect.poll(() => page.getByTestId("risk-row-editor-row").first().evaluate((row) => (
+        row instanceof HTMLDetailsElement ? row.open : false
+      ))).toBe(true);
     }
     expect(await page.getByTestId("editor-provenance-appendices").count()).toBe(1);
     expect(await page.locator('select[aria-label="편집 문서 선택"] option').count()).toBe(12);
@@ -290,7 +294,8 @@ productionBrowserSuite(productionBrowserSuiteName, () => {
         }
         return false;
       }).map(targetLabel);
-      const sectionTextareas = Array.from(structured.querySelectorAll<HTMLElement>(".document-section-textarea"));
+      const sectionTextareas = Array.from(structured.querySelectorAll<HTMLElement>(".document-section-textarea"))
+        .filter(isVisible);
       const sectionOverlaps = sectionTextareas.slice(1).filter((element, index) => {
         const previous = sectionTextareas[index];
         return previous.getBoundingClientRect().bottom > element.getBoundingClientRect().top + 0.5;

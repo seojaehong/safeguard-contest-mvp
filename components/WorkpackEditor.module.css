@@ -518,15 +518,22 @@
   min-width: 0;
 }
 
-.documentSection > label {
+.documentSection > summary {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr);
   align-items: center;
   gap: var(--space-2);
+  min-height: 44px;
   color: var(--workspace-ink);
+  cursor: pointer;
+  list-style: none;
 }
 
-.documentSection > label span {
+.documentSection > summary::-webkit-details-marker {
+  display: none;
+}
+
+.documentSection > summary span {
   color: var(--workspace-subtle);
   font-family: var(--font-hud);
   font-size: var(--text-hud);
@@ -534,7 +541,7 @@
   font-weight: 700;
 }
 
-.documentSection > label strong {
+.documentSection > summary strong {
   font-size: var(--text-table);
   font-weight: 650;
   line-height: var(--leading-table);
@@ -978,6 +985,26 @@
 
   .documentHeader {
     flex-direction: column;
+  }
+
+  .documentHeading p,
+  .documentFootnote,
+  .riskRowsHeader small {
+    display: none;
+  }
+
+  .documentBody,
+  .structuredEditor {
+    gap: var(--space-2);
+  }
+
+  .secondaryTools {
+    padding: var(--space-2);
+  }
+
+  .utilitySummary {
+    min-height: 52px;
+    padding: var(--space-2) var(--space-3);
   }
 
   .documentMeta {

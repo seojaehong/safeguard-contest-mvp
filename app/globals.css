@@ -18792,6 +18792,42 @@ body:has(.safeclaw-landing) :is(
   }
 }
 
+/* Workspace edit mode should scroll as one page, not as a nested document shell.
+   This late scoped override protects the launch UX gate from older module bridges. */
+.command-center-shell .field-workspace.field-workspace-editor-focus .workpack-shell,
+.command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-shell,
+.command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-shell {
+  max-height: none;
+  overflow-x: visible;
+  overflow-y: visible;
+  overscroll-behavior: auto;
+}
+
+@media (max-width: 720px) {
+  .command-center-shell .field-workspace-editor-focus .documentBody {
+    gap: 8px;
+  }
+
+  .command-center-shell .field-workspace-editor-focus .documentHeading p,
+  .command-center-shell .field-workspace-editor-focus .documentFootnote,
+  .command-center-shell .field-workspace-editor-focus .riskRowsHeader small {
+    display: none;
+  }
+
+  .command-center-shell .field-workspace-editor-focus .riskRowsHeader {
+    align-items: center;
+  }
+
+  .command-center-shell .field-workspace-editor-focus .secondaryTools {
+    padding: 8px;
+  }
+
+  .command-center-shell .field-workspace-editor-focus .utilitySummary {
+    min-height: 52px;
+    padding: 8px 12px;
+  }
+}
+
 /* Share desktop final guard: keep the delivery step as a full-width workbench,
    not a tall mobile card floating inside the workspace canvas. */
 @media (min-width: 901px) {
@@ -19573,16 +19609,16 @@ body:has(.safeclaw-landing) :is(
 }
 
 .command-center-shell .field-workspace-editor-focus .workpack-shell {
-  max-height: calc(100dvh - 188px);
-  overflow: auto;
-  overscroll-behavior: contain;
+  max-height: none;
+  overflow: visible;
+  overscroll-behavior: auto;
 }
 
 .command-center-shell.workspace-theme-day .field-workspace.field-workspace-editor-focus .workpack-shell,
 .command-center-shell.workspace-theme-night .field-workspace.field-workspace-editor-focus .workpack-shell {
-  max-height: calc(100dvh - 188px);
-  overflow: auto;
-  overscroll-behavior: contain;
+  max-height: none;
+  overflow: visible;
+  overscroll-behavior: auto;
 }
 
 .command-center-shell .field-workspace-editor-focus .document-editor {
