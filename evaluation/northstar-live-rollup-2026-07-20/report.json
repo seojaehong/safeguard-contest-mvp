@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T06:45:00.000Z",
-  "head": "0fc8c0acd9c431e2fa1e008de725e3d52e8b0376",
+  "generatedAt": "2026-07-20T06:50:00.000Z",
+  "head": "6331d8aa45b23badca96495e67f762c4dd7702e8",
   "liveBuildInfo": {
     "commitSha": "3a6b9f4e25739954ba3b89c0b9d067ff52a28ef2",
     "branch": "master",
@@ -55,6 +55,19 @@
       "testsPassed": 279,
       "dbMutationPerformed": false,
       "embeddingGenerated": false
+    },
+    {
+      "id": "kosha_guide_repair_plan",
+      "artifact": "evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json",
+      "result": "pass_read_only_repair_queue",
+      "workstreams": 6,
+      "dryRunUpdates": 7,
+      "dryRunRetirements": 1,
+      "controlReviewRows": 71,
+      "retrievalScenarioBranchPairs": 8,
+      "testFilesPassed": 3,
+      "testsPassed": 116,
+      "dbMutationPerformed": false
     },
     {
       "id": "rls_llm_wiki_application_boundary",
