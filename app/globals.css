@@ -14311,7 +14311,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .safety-brief-risk-table > span {
   color: var(--workspace-subtle);
   font-size: var(--text-caption);
-  font-weight: 700;
+  font-weight: 600;
   line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
 }
@@ -14351,7 +14351,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .safety-brief-risk-card li {
   color: var(--workspace-ink);
   font-size: var(--text-table);
-  font-weight: 600;
+  font-weight: 500;
   line-height: var(--leading-table);
   letter-spacing: var(--tracking-body);
 }
@@ -14386,7 +14386,7 @@ body:has(.safeclaw-landing) :is(
   display: block;
   color: var(--workspace-ink);
   font-size: var(--text-table);
-  font-weight: 700;
+  font-weight: 500;
   line-height: var(--leading-table);
   letter-spacing: var(--tracking-body);
 }
@@ -14440,7 +14440,7 @@ body:has(.safeclaw-landing) :is(
   padding: 8px 10px;
   text-align: center;
   font-size: var(--text-caption);
-  font-weight: 700;
+  font-weight: 600;
   line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
 }
@@ -14452,7 +14452,7 @@ body:has(.safeclaw-landing) :is(
 .command-center-shell .document-deep-review > summary span {
   color: var(--workspace-subtle);
   font-size: var(--text-caption);
-  font-weight: 700;
+  font-weight: 600;
   line-height: var(--leading-caption);
   letter-spacing: var(--tracking-body);
 }
@@ -14461,7 +14461,7 @@ body:has(.safeclaw-landing) :is(
   display: block;
   color: var(--workspace-ink);
   font-size: var(--text-table);
-  font-weight: 700;
+  font-weight: 500;
   line-height: var(--leading-table);
   letter-spacing: var(--tracking-body);
 }
@@ -20048,7 +20048,7 @@ body:has(.safeclaw-landing) :is(
 
   .command-center-shell .field-workspace-editor-focus .document-toolbar .muted {
     margin-top: -2px;
-    line-height: 1.5;
+    line-height: var(--leading-caption);
   }
 
   .command-center-shell .field-workspace-editor-focus .editor-focus-message {

@@ -396,52 +396,6 @@ function hashBytes(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
-function isRecord(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function readString(value) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function isSha256(value) {
-  return /^[0-9a-f]{64}$/u.test(value);
-}
-
-const KOSHA_BODY_CURRENT_SCHEMA_VERSION = "safeclaw-kosha-body-current/v1";
-const KOSHA_BODY_CORPUS_SCHEMA_VERSION = "safeclaw-kosha-body-corpus/v2";
-const KOSHA_SNAPSHOT_OUTPUT_FILES = [
-  "items.jsonl",
-  "chunks.jsonl",
-  "failures.jsonl",
-  "checkpoint.json"
-];
-
-function canonicalSha256(value) {
-  return createHash("sha256").update(stableJson(value)).digest("hex");
-}
-
-function readSnapshotOutputHashes(value, label) {
-  if (!isRecord(value)) throw new Error(`kosha-bridge-${label}-output-hashes-invalid`);
-  const expectedKeys = [...KOSHA_SNAPSHOT_OUTPUT_FILES].sort(codepointCompare);
-  const actualKeys = Object.keys(value).sort(codepointCompare);
-  if (
-    actualKeys.length !== expectedKeys.length ||
-    actualKeys.some((key, index) => key !== expectedKeys[index])
-  ) {
-    throw new Error(`kosha-bridge-${label}-output-hash-set-mismatch`);
-  }
-  const outputHashes = {};
-  for (const name of KOSHA_SNAPSHOT_OUTPUT_FILES) {
-    const digest = readString(value[name]);
-    if (!isSha256(digest)) {
-      throw new Error(`kosha-bridge-${label}-output-hash-invalid:${name}`);
-    }
-    outputHashes[name] = digest;
-  }
-  return outputHashes;
-}
-
 function verifyKoshaBridgeSnapshotIntegrityLocal(snapshot) {
   if (snapshot.currentSchemaVersion !== KOSHA_BODY_CURRENT_SCHEMA_VERSION) {
     throw new Error("kosha-bridge-current-schema-version-mismatch");

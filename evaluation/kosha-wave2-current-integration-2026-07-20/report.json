@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-20T12:10:00Z",
+  "verdict": "PASS",
+  "dbSchemaChanged": false,
+  "dataMutationPerformed": false,
+  "changedProductFiles": [
+    "scripts/audit_kosha_guides.mjs",
+    "app/globals.css"
+  ],
+  "artifactFiles": [
+    "evaluation/kosha-wave2-current-integration-2026-07-20/report.md",
+    "evaluation/kosha-wave2-current-integration-2026-07-20/report.json",
+    "evaluation/share-mobile-p1/screenshots/mobile-390-day-vietnamese.png",
+    "evaluation/share-mobile-p1/screenshots/mobile-390-night-vietnamese.png"
+  ],
+  "gates": [
+    {
+      "name": "audit_kosha_guides syntax",
+      "command": "node --check scripts\\audit_kosha_guides.mjs",
+      "status": "PASS"
+    },
+    {
+      "name": "KOSHA corpus audit",
+      "command": "npm.cmd test -- tests\\kosha-guide-corpus-audit.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 110
+    },
+    {
+      "name": "Focused KOSHA wave2",
+      "command": "npm.cmd test -- tests\\exact-kosha-applicability-policy.test.ts tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 5,
+      "testsPassed": 80
+    },
+    {
+      "name": "Python acquisition",
+      "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body",
+      "status": "PASS",
+      "testsPassed": 19
+    },
+    {
+      "name": "Broad KOSHA/SIF/Ontology",
+      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-current-review-lifecycle.test.ts tests\\kosha-current-review-photo-storage.test.ts tests\\kosha-current-review-provenance.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-guide-corpus-audit.test.ts tests\\kosha-guide-offline-harness-expanded.test.ts tests\\kosha-guide-offline-harness.test.ts tests\\kosha-guide-provenance-gate.test.ts tests\\kosha-guide-supporting-row-relevance.test.ts tests\\kosha-verified-subset-gate.test.ts tests\\ontology-evidence-chains.test.ts tests\\ontology-graph-store.test.ts tests\\ontology-knowledge-tool.test.ts tests\\ontology-operation-memory.test.ts tests\\ontology-qa-review.test.ts tests\\ontology-query.test.ts tests\\ontology-schema.test.ts tests\\ontology-seed.test.ts tests\\ontology-tablet-overflow.test.ts tests\\ontology-typography-production-matrix.test.ts tests\\ontology-typography-role-contract.test.ts tests\\ontology-ui-browser.test.ts tests\\ontology-ui-remediation.test.ts tests\\ontology-visualization.test.ts tests\\sif-causality-audit-gate.test.ts tests\\sif-embedding-approval-packet.test.ts tests\\sif-embedding-gate-status.test.ts tests\\sif-embedding-post-migration-verify.test.ts tests\\sif-embedding-preflight.test.ts tests\\sif-embedding-runtime-probe.test.ts tests\\workpack-ontology-qa.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 31,
+      "filesSkipped": 3,
+      "testsPassed": 397,
+      "testsSkipped": 4
+    },
+    {
+      "name": "Static frontend consistency audit",
+      "command": "node scripts\\frontend_consistency_audit.mjs",
+      "status": "PASS",
+      "violationCount": 0
+    },
+    {
+      "name": "Ontology typography role contract",
+      "command": "npm.cmd test -- tests\\ontology-typography-role-contract.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 1
+    },
+    {
+      "name": "TypeScript strict typecheck",
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    {
+      "name": "Production build",
+      "command": "npm.cmd run build",
+      "status": "PASS",
+      "staticPages": "28/28"
+    },
+    {
+      "name": "Mobile workspace/share browser regression",
+      "command": "npm.cmd test -- tests\\workspace-layout-regression.test.ts tests\\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 2,
+      "testsPassed": 28,
+      "testsSkipped": 1
+    }
+  ]
+}
