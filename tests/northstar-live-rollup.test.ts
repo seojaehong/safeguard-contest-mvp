@@ -46,6 +46,7 @@ function createFixtureRoot(): { root: string; head: string } {
   execFileSync("git", ["config", "user.name", "SafeClaw Test"], { cwd: root, stdio: "ignore" });
 
   writeJson(root, "evaluation/northstar-open-gates-current/report.json", {
+    sourceSha: "OPEN_GATE_SOURCE_SHA",
     overall: "open",
     gates: [
       { id: "final_99_gate", state: "notice", evidencePath: "evaluation/final-99-gate-current-2026-07-20/report.json", detail: "notice carried" },
@@ -125,9 +126,9 @@ function createFixtureRoot(): { root: string; head: string } {
   });
 
   const firstCommit = commitAll(root, "seed fixtures");
-  const replaceToken = (relativePath: string): void => {
+  const replaceToken = (relativePath: string, commit = firstCommit): void => {
     const absolutePath = path.join(root, relativePath);
-    const next = fs.readFileSync(absolutePath, "utf8").replaceAll("TO_FILL", firstCommit);
+    const next = fs.readFileSync(absolutePath, "utf8").replaceAll("TO_FILL", commit);
     fs.writeFileSync(absolutePath, next, "utf8");
   };
   [
@@ -139,8 +140,13 @@ function createFixtureRoot(): { root: string; head: string } {
     "evaluation/live-critical-surface-current-2026-07-20-rerun/report.json",
     "evaluation/mobile-p0-workspace-gate-2026-07-20/report.json",
     "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
-  ].forEach(replaceToken);
+  ].forEach((relativePath) => replaceToken(relativePath));
   const head = commitAll(root, "bind evidence");
+  {
+    const openGatePath = path.join(root, "evaluation/northstar-open-gates-current/report.json");
+    const next = fs.readFileSync(openGatePath, "utf8").replaceAll("OPEN_GATE_SOURCE_SHA", head);
+    fs.writeFileSync(openGatePath, next, "utf8");
+  }
   return { root, head };
 }
 
@@ -170,6 +176,7 @@ describe("northstar live rollup", () => {
     expect(report.mobileP0.visibleDocumentPreviews).toBe(0);
     expect(report.mobileP0.documentsHeightRatio).toBe(1.5);
     expect(report.liveCritical.findings).toBe(0);
+    expect(report.evidence.find((item) => item.id === "open_gate")?.productionStatus).toBe("matches_live");
     expect(report.contradictions).toHaveLength(0);
   });
 

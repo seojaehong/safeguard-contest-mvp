@@ -175,7 +175,8 @@ function extractSourceCommit(report) {
  */
 function evidenceStatus(rootDir, currentHead, liveCommit, id, artifact, report) {
   const sourceCommit = extractSourceCommit(report);
-  const productionCommit = extractProductionCommit(report);
+  const explicitProductionCommit = extractProductionCommit(report);
+  const productionCommit = explicitProductionCommit || (id === "open_gate" ? sourceCommit : "");
   return {
     id,
     artifact,

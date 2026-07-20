@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T16:21:53.823Z",
-  "head": "972211083ac89ec9c428b74b706a11011643f550",
+  "generatedAt": "2026-07-20T16:26:08.119Z",
+  "head": "ffcf36bf598c11bfb78df84e113c89bbd49dca20",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "972211083ac89ec9c428b74b706a11011643f550",
+    "commitSha": "ffcf36bf598c11bfb78df84e113c89bbd49dca20",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ei4foj2mq-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-52jpjsvdz-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -117,10 +117,10 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "972211083ac89ec9c428b74b706a11011643f550",
+      "sourceCommit": "ffcf36bf598c11bfb78df84e113c89bbd49dca20",
       "sourceStatus": "exact",
-      "productionCommit": null,
-      "productionStatus": "missing"
+      "productionCommit": "ffcf36bf598c11bfb78df84e113c89bbd49dca20",
+      "productionStatus": "matches_live"
     },
     {
       "id": "final_99_gate",
@@ -192,7 +192,7 @@
     "SafeClaw fixes SIF/KOSHA/current work-history evidence before LLM wording.",
     "Hermes/OpenClaw is connected through a guarded EngineAdapter boundary, while SafeClaw remains the system of record.",
     "Worker recipient review is an invited-session flow, not an anonymous public portal.",
-    "Photo hazard analysis supports up to 10 images and keeps Before/After improvements as reviewed operation memory."
+    "Photo hazard analysis readiness supports up to 10 images and keeps Before/After improvements as reviewed operation memory."
   ],
   "forbiddenClaims": [
     "LLM Wiki publishes itself.",
@@ -201,6 +201,6 @@
     "SIF vector retrieval is production-active before the approved migration/upload/runtime gate.",
     "All KOSHA metadata-verified candidates are exact production evidence.",
     "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
-    "Provider dispatch is fully live for unapproved channels."
+    "Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval."
   ]
 }

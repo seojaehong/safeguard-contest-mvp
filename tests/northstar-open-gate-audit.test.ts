@@ -216,6 +216,8 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "kosha_exact_trust_registry")?.state).toBe("proven");
     expect(audit.forbiddenClaims).toContain("LLM Wiki publishes itself.");
     expect(audit.forbiddenClaims).toContain("All KOSHA metadata-verified candidates are exact production evidence.");
+    expect(audit.forbiddenClaims).toContain("Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.");
+    expect(audit.safeDemoClaims).toContain("Photo hazard analysis readiness supports up to 10 images and keeps Before/After improvements as reviewed operation memory.");
   });
 
   it("fails evidence completeness when the LLM Wiki publication packet is missing", async () => {

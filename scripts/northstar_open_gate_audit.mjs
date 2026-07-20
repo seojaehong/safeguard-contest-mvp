@@ -639,7 +639,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
       "SafeClaw fixes SIF/KOSHA/current work-history evidence before LLM wording.",
       "Hermes/OpenClaw is connected through a guarded EngineAdapter boundary, while SafeClaw remains the system of record.",
       "Worker recipient review is an invited-session flow, not an anonymous public portal.",
-      "Photo hazard analysis supports up to 10 images and keeps Before/After improvements as reviewed operation memory.",
+      "Photo hazard analysis readiness supports up to 10 images and keeps Before/After improvements as reviewed operation memory.",
     ],
     forbiddenClaims: [
       "LLM Wiki publishes itself.",
@@ -648,7 +648,7 @@ export function buildNorthstarOpenGateAudit(options = {}) {
       "SIF vector retrieval is production-active before the approved migration/upload/runtime gate.",
       "All KOSHA metadata-verified candidates are exact production evidence.",
       "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
-      "Provider dispatch is fully live for unapproved channels.",
+      "Real provider dispatch is production-live for any channel before persistent idempotency and provider result persistence approval.",
     ],
   };
 }
