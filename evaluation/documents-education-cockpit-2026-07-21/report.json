@@ -1,0 +1,48 @@
+{
+  "verdict": "PASS_CURRENT_SOURCE",
+  "checkedAt": "2026-07-21 KST",
+  "source": {
+    "productCommit": "66617f33e8e9ee7d1d8b100f7db8419be7af80a9",
+    "branch": "chore/recipient-foreign-live-gate-20260720"
+  },
+  "scope": {
+    "route": "/documents",
+    "surface": "safetyEducationRecordDraft",
+    "claim": "Education first-task cockpit before raw structured textarea",
+    "productionLiveClaimed": false
+  },
+  "contracts": {
+    "educationCockpitVisible": true,
+    "educationCockpitBelowToolbar": true,
+    "educationRawTextareaSecondary": true,
+    "workPlanAndPermitCockpitsStillCovered": true,
+    "providerOrExportContractsChanged": false
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts supporting document cockpits\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 1
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"supports roving keyboard navigation|bounds the default documents route editor|puts the core launcher before the mobile editor|puts supporting document cockpits|keeps the editor workspace and expanded tools contained\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 6
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "remainingDebt": [
+    "Current-source evidence only; production live geometry is not claimed.",
+    "Emergency response, photo evidence, multilingual briefing/transmission, field message, and summary still need first-task surfaces or bounded review cards.",
+    "The dirty scripts/northstar_open_gate_audit.mjs change was not included in this product/evidence slice."
+  ]
+}
