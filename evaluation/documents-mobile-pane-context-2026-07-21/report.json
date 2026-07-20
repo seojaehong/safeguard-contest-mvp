@@ -1,9 +1,10 @@
 {
-  "checkedAt": "2026-07-21T03:50:00+09:00",
+  "checkedAt": "2026-07-21T04:08:46+09:00",
   "sourceHeadBeforeCommit": "45a5e6285c1bdc788fd40b99bb29de58200495fc",
   "sourceHeadBeforeSummaryDepthPatch": "bb60fdf8461dbd117827748ba7e35ef51de00bb2",
+  "productionMarkerAfterOverlapPatch": "f5b29ce18abe4533b846de2ee70919df25f752e3",
   "branch": "chore/recipient-foreign-live-gate-20260720",
-  "verdict": "PASS_CURRENT_SOURCE",
+  "verdict": "PASS_CURRENT_SOURCE_AND_PRODUCTION_OVERLAP_REMEDIATION",
   "scope": "mobile /documents internal pane selected-document context",
   "baselineDebt": {
     "productionMarker": "45a5e6285c1bdc788fd40b99bb29de58200495fc",
@@ -30,6 +31,37 @@
     "toolbarShowsSelectedTitle": true,
     "toolbarShowsSelectedDrilldownSummary": true,
     "preservesInternalPaneAffordance": true
+  },
+  "productionOverlapRemediation": {
+    "productionMarker": "f5b29ce18abe4533b846de2ee70919df25f752e3",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "landing": {
+      "bodyHeight": 844,
+      "horizontalOverflow": 0,
+      "shellTop": 476,
+      "shellBottom": 796,
+      "shellScrollTop": 334,
+      "toolbarTop": 476,
+      "toolbarBottom": 572,
+      "summaryText": "7섹션 · 근거 4건 · 확인 1건",
+      "textareaTop": 656,
+      "textareaBottom": 814,
+      "textareaBelowToolbar": true,
+      "toolbarCoversTextarea": false
+    },
+    "deepScroll": {
+      "shellScrollTop": 1000,
+      "bodyHeight": 844,
+      "horizontalOverflow": 0,
+      "toolbarTop": 476,
+      "toolbarBottom": 572,
+      "summaryText": "7섹션 · 근거 4건 · 확인 1건",
+      "summaryVisible": true,
+      "toolbarCoversTextarea": false
+    }
   },
   "assertions": {
     "tbmLogToolbarVisibleInPaneAfterSelection": true,

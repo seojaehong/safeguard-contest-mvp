@@ -243,7 +243,36 @@
         "command": "npm.cmd run typecheck",
         "result": "PASS"
       }
-    ]
+    ],
+    "productionOverlapRemediation": {
+      "productionMarker": "f5b29ce18abe4533b846de2ee70919df25f752e3",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "landing": {
+        "bodyHeight": 844,
+        "horizontalOverflow": 0,
+        "shellTop": 476,
+        "shellBottom": 796,
+        "shellScrollTop": 334,
+        "toolbarBottom": 572,
+        "textareaTop": 656,
+        "textareaBottom": 814,
+        "textareaBelowToolbar": true,
+        "toolbarCoversTextarea": false,
+        "summaryText": "7섹션 · 근거 4건 · 확인 1건"
+      },
+      "deepScroll": {
+        "shellScrollTop": 1000,
+        "bodyHeight": 844,
+        "horizontalOverflow": 0,
+        "toolbarBottom": 572,
+        "summaryVisible": true,
+        "toolbarCoversTextarea": false,
+        "summaryText": "7섹션 · 근거 4건 · 확인 1건"
+      }
+    }
   },
   "structuralDecision": {
     "routeSplitAloneIsEnough": false,

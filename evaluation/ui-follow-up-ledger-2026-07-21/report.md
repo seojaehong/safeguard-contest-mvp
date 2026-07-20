@@ -129,6 +129,13 @@ Current-source bounded gate:
 - Full browser file: `documents-editor-layout` PASS, 31/31.
 - TypeScript: PASS.
 
+Production overlap remediation confirmation:
+
+- Production marker: `f5b29ce18abe4533b846de2ee70919df25f752e3`.
+- Live `/documents?theme=day`, 390x844, after selecting `위험성평가표`: page remains `844px`, horizontal overflow `0`, pane `476-796`, summary `7섹션 · 근거 4건 · 확인 1건`.
+- Landing no longer hides the first editable field under the sticky toolbar: toolbar `bottom=572`, textarea `top=656`, `toolbarCoversTextarea=false`, `textareaBelowToolbar=true`.
+- Deep internal pane scroll to `scrollTop=1000` keeps the same summary visible in the sticky toolbar and keeps `toolbarCoversTextarea=false`.
+
 Interpretation: selected-document summary is now part of the bounded pane context. Remaining document IA debt is deeper document-specific accordion/action design, not missing selected-document title or summary.
 
 Share mobile configuration-stack current-source gate:

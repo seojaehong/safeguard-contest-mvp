@@ -1,14 +1,16 @@
 # Documents Mobile Pane Context Gate
 
-Checked at: 2026-07-21 04:01 KST
+Checked at: 2026-07-21 04:08 KST
 
 Latest source HEAD before this summary-depth patch: `bb60fdf8461dbd117827748ba7e35ef51de00bb2`
+
+Latest overlap-remediation production marker: `f5b29ce18abe4533b846de2ee70919df25f752e3`
 
 Branch: `chore/recipient-foreign-live-gate-20260720`
 
 ## Verdict
 
-PASS for the bounded current-source gate.
+PASS for the bounded current-source gate and production overlap remediation.
 
 This wave keeps the `/documents` mobile page body bounded and adds persistent selected-document context inside the internal editor pane.
 
@@ -44,7 +46,14 @@ Production `a2028757e62553346733c757108f56a28495f888` confirms the selected-docu
 - After selecting `위험성평가표`: summary `7섹션 · 근거 4건 · 확인 1건`, toolbar sticky inside pane, `bodyHeight=844`, no horizontal overflow.
 - After internal deep scroll `scrollTop=1000`: the same summary remains visible in the sticky toolbar.
 
-Current-source patch after that production check additionally verifies the toolbar does not cover the selected document's first textarea on landing or deep scroll.
+Production `f5b29ce18abe4533b846de2ee70919df25f752e3` confirms the strengthened overlap acceptance is live:
+
+- `/documents?theme=day`, 390x844.
+- After selecting `위험성평가표`: `bodyHeight=844`, `horizontalOverflow=0`, pane `476-796`, `scrollTop=334`.
+- Summary remains `7섹션 · 근거 4건 · 확인 1건`.
+- Toolbar `top=476`, `bottom=572`; textarea `top=656`, `bottom=814`.
+- `toolbarCoversTextarea=false` and `textareaBelowToolbar=true`.
+- After internal deep scroll `scrollTop=1000`: summary remains visible, toolbar remains sticky at `476-572`, `toolbarCoversTextarea=false`, page stays `844px` tall with no horizontal overflow.
 
 ## Verified Contract
 
