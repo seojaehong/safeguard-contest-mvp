@@ -267,6 +267,77 @@ function createFixtureRoot(): string {
       { status: "PASS" },
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "documents-tbm-cockpit-2026-07-21", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE",
+    source: {
+      productCommit: "fixture-sha",
+    },
+    scope: {
+      route: "/documents",
+      surface: "tbmBriefing and tbmLogDraft",
+      productionLiveClaimed: false,
+    },
+    contracts: {
+      tbmCockpitVisible: true,
+      tbmCockpitBelowToolbar: true,
+      tbmRawTextareaSecondary: true,
+      riskRowHeaderAndHazardStillVisible: true,
+      providerOrExportContractsChanged: false,
+    },
+    verification: [
+      { status: "PASS" },
+      { status: "PASS" },
+      { status: "PASS" },
+    ],
+  });
+  writeJson(rootDir, path.join("evaluation", "documents-first-view-split-2026-07-21", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE",
+    source: {
+      productCommit: "fixture-sha",
+    },
+    scope: {
+      route: "/documents",
+      productionLiveClaimed: false,
+    },
+    contracts: {
+      coreDocumentsPrioritized: true,
+      supportingDocumentsGrouped: true,
+      workPlanExecutionCockpitBeforeRawEditor: true,
+      permitExecutionCockpitBeforeRawEditor: true,
+      riskAssessmentFirstHazardVisible: true,
+      providerOrExportContractsChanged: false,
+    },
+    verification: [
+      { status: "PASS" },
+      { status: "PASS" },
+      { status: "PASS" },
+      { status: "PASS" },
+    ],
+  });
+  writeJson(rootDir, path.join("evaluation", "documents-education-cockpit-2026-07-21", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE",
+    source: {
+      productCommit: "fixture-sha",
+    },
+    scope: {
+      route: "/documents",
+      surface: "safetyEducationRecordDraft",
+      productionLiveClaimed: false,
+    },
+    contracts: {
+      educationCockpitVisible: true,
+      educationCockpitBelowToolbar: true,
+      educationRawTextareaSecondary: true,
+      workPlanAndPermitCockpitsStillCovered: true,
+      providerOrExportContractsChanged: false,
+    },
+    verification: [
+      { status: "PASS" },
+      { status: "PASS" },
+      { status: "PASS" },
+      { status: "PASS" },
+    ],
+  });
   writeJson(rootDir, path.join("evaluation", "share-desktop-composition-2026-07-21", "report.json"), {
     verdict: "PASS_PRODUCTION",
     scope: {
@@ -288,6 +359,41 @@ function createFixtureRoot(): string {
         previewRightOfPrimary: true,
         channelCardWidths: [191, 191, 191],
         channelCardHeights: [44, 44, 44],
+        horizontalOverflow: 0,
+      },
+    },
+  });
+  writeJson(rootDir, path.join("evaluation", "share-staged-flow-rail-2026-07-21", "report.json"), {
+    verdict: "PASS_CURRENT_SOURCE",
+    source: {
+      productCommit: "fixture-sha",
+    },
+    scope: {
+      route: "/workspace?share",
+      productionLiveClaimed: false,
+    },
+    contracts: {
+      stageRailVisibleOnWorkspaceShareDesktop: true,
+      stageRailStepCount: 4,
+      desktopStageColumns: 4,
+      desktopHorizontalOverflow: 0,
+      ctaInsideDesktopViewport: true,
+      previewInsideDesktopViewport: true,
+      standaloneDispatchHeightGuardPreserved: true,
+      providerContractsChanged: false,
+    },
+    freshGeometry: {
+      workspaceShareDesktopDay1440x900: {
+        stageRailItemCount: 4,
+        stageColumns: 4,
+        horizontalOverflow: 0,
+        primaryBottom: 461,
+        previewBottom: 817,
+      },
+      standaloneDispatchDesktop1440x900: {
+        rootHeight: 626,
+        primaryBottom: 542,
+        previewBottom: 798,
         horizontalOverflow: 0,
       },
     },
@@ -499,6 +605,8 @@ describe("northstar open gate audit", () => {
     expect(audit.gates.find((gate) => gate.id === "final_99_gate")?.state).toBe("notice");
     expect(audit.gates.find((gate) => gate.id === "live_harness_quality")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.state).toBe("proven");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("risk-row, TBM, and education authoring cockpits");
+    expect(audit.gates.find((gate) => gate.id === "ui_documents_share_cockpit")?.detail).toContain("staged Share rail");
     expect(audit.gates.find((gate) => gate.id === "dispatch_standalone_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "share_result_fixture_cockpit")?.state).toBe("proven");
     expect(audit.gates.find((gate) => gate.id === "supabase_rls_launch_isolation")?.state).toBe("approval_gated");

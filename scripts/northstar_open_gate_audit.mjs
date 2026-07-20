@@ -35,8 +35,12 @@ const EVIDENCE_PATHS = Object.freeze({
   documentsInnerPaneDepth: path.join("evaluation", "documents-inner-pane-depth-2026-07-21", "report.json"),
   documentsFieldFirstAffordance: path.join("evaluation", "documents-field-first-affordance-2026-07-21", "report.json"),
   documentsRiskRowCockpit: path.join("evaluation", "documents-risk-row-cockpit-2026-07-21", "report.json"),
+  documentsTbmCockpit: path.join("evaluation", "documents-tbm-cockpit-2026-07-21", "report.json"),
+  documentsFirstViewSplit: path.join("evaluation", "documents-first-view-split-2026-07-21", "report.json"),
+  documentsEducationCockpit: path.join("evaluation", "documents-education-cockpit-2026-07-21", "report.json"),
   shareDesktopComposition: path.join("evaluation", "share-desktop-composition-2026-07-21", "report.json"),
   shareMobileFullFlow: path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"),
+  shareStagedFlowRail: path.join("evaluation", "share-staged-flow-rail-2026-07-21", "report.json"),
   shareResultDrilldown: path.join("evaluation", "share-result-drilldown-2026-07-21", "report.json"),
   dispatchStandalone: path.join("evaluation", "dispatch-standalone-cockpit-2026-07-21", "report.json"),
   koshaCurrentNorthstarRegression: path.join("evaluation", "kosha-current-northstar-regression-2026-07-21", "report.json"),
@@ -520,25 +524,33 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const innerPaneDepthPath = EVIDENCE_PATHS.documentsInnerPaneDepth;
   const fieldFirstPath = EVIDENCE_PATHS.documentsFieldFirstAffordance;
   const riskRowCockpitPath = EVIDENCE_PATHS.documentsRiskRowCockpit;
+  const tbmCockpitPath = EVIDENCE_PATHS.documentsTbmCockpit;
+  const firstViewSplitPath = EVIDENCE_PATHS.documentsFirstViewSplit;
+  const educationCockpitPath = EVIDENCE_PATHS.documentsEducationCockpit;
   const shareDesktopPath = EVIDENCE_PATHS.shareDesktopComposition;
   const sharePath = EVIDENCE_PATHS.shareMobileFullFlow;
+  const shareStageRailPath = EVIDENCE_PATHS.shareStagedFlowRail;
   const internalPane = readJsonFile(rootDir, internalPanePath);
   const paneContext = readJsonFile(rootDir, paneContextPath);
   const drilldown = readJsonFile(rootDir, drilldownPath);
   const innerPaneDepth = readJsonFile(rootDir, innerPaneDepthPath);
   const fieldFirst = readJsonFile(rootDir, fieldFirstPath);
   const riskRowCockpit = readJsonFile(rootDir, riskRowCockpitPath);
+  const tbmCockpit = readJsonFile(rootDir, tbmCockpitPath);
+  const firstViewSplit = readJsonFile(rootDir, firstViewSplitPath);
+  const educationCockpit = readJsonFile(rootDir, educationCockpitPath);
   const shareDesktop = readJsonFile(rootDir, shareDesktopPath);
   const share = readJsonFile(rootDir, sharePath);
+  const shareStageRail = readJsonFile(rootDir, shareStageRailPath);
 
-  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(shareDesktop) || !isRecord(share)) {
+  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(tbmCockpit) || !isRecord(firstViewSplit) || !isRecord(educationCockpit) || !isRecord(shareDesktop) || !isRecord(share) || !isRecord(shareStageRail)) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "missing",
-      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : !isRecord(shareDesktop) ? shareDesktopPath : sharePath,
+      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : !isRecord(tbmCockpit) ? tbmCockpitPath : !isRecord(firstViewSplit) ? firstViewSplitPath : !isRecord(educationCockpit) ? educationCockpitPath : !isRecord(shareDesktop) ? shareDesktopPath : !isRecord(share) ? sharePath : shareStageRailPath,
       detail: "Documents/share cockpit evidence is missing or invalid.",
-      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row cockpit, share desktop composition, and share mobile full-flow evidence."],
+      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row/TBM/first-view cockpit, share desktop/mobile, and share staged-flow evidence."],
     });
   }
 
@@ -559,9 +571,31 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const riskRowScope = isRecord(riskRowCockpit.scope) ? riskRowCockpit.scope : {};
   const riskRowContracts = isRecord(riskRowCockpit.contracts) ? riskRowCockpit.contracts : {};
   const riskRowCommands = Array.isArray(riskRowCockpit.commands) ? riskRowCockpit.commands : [];
+  const tbmScope = isRecord(tbmCockpit.scope) ? tbmCockpit.scope : {};
+  const tbmContracts = isRecord(tbmCockpit.contracts) ? tbmCockpit.contracts : {};
+  const tbmVerification = Array.isArray(tbmCockpit.verification) ? tbmCockpit.verification : [];
+  const tbmSource = isRecord(tbmCockpit.source) ? tbmCockpit.source : {};
+  const firstViewScope = isRecord(firstViewSplit.scope) ? firstViewSplit.scope : {};
+  const firstViewContracts = isRecord(firstViewSplit.contracts) ? firstViewSplit.contracts : {};
+  const firstViewVerification = Array.isArray(firstViewSplit.verification) ? firstViewSplit.verification : [];
+  const firstViewSource = isRecord(firstViewSplit.source) ? firstViewSplit.source : {};
+  const educationScope = isRecord(educationCockpit.scope) ? educationCockpit.scope : {};
+  const educationContracts = isRecord(educationCockpit.contracts) ? educationCockpit.contracts : {};
+  const educationVerification = Array.isArray(educationCockpit.verification) ? educationCockpit.verification : [];
+  const educationSource = isRecord(educationCockpit.source) ? educationCockpit.source : {};
   const shareDesktopScope = isRecord(shareDesktop.scope) ? shareDesktop.scope : {};
   const shareDesktopProduction = isRecord(shareDesktop.production) ? shareDesktop.production : {};
   const shareDesktopLive = isRecord(shareDesktopProduction.desktop1440x900) ? shareDesktopProduction.desktop1440x900 : {};
+  const shareStageScope = isRecord(shareStageRail.scope) ? shareStageRail.scope : {};
+  const shareStageContracts = isRecord(shareStageRail.contracts) ? shareStageRail.contracts : {};
+  const shareStageGeometry = isRecord(shareStageRail.freshGeometry) ? shareStageRail.freshGeometry : {};
+  const shareStageDesktop = isRecord(shareStageGeometry.workspaceShareDesktopDay1440x900)
+    ? shareStageGeometry.workspaceShareDesktopDay1440x900
+    : {};
+  const shareStageDispatch = isRecord(shareStageGeometry.standaloneDispatchDesktop1440x900)
+    ? shareStageGeometry.standaloneDispatchDesktop1440x900
+    : {};
+  const shareStageSource = isRecord(shareStageRail.source) ? shareStageRail.source : {};
   const shareMobile = isRecord(share.mobile390x844Day)
     ? share.mobile390x844Day
     : isRecord(share.mobile390x844)
@@ -582,6 +616,14 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const fieldFirstSourceCurrent = isGitAncestor(rootDir, fieldFirstSourceSha);
   const riskRowSourceSha = readString(riskRowCockpit.sourceHead);
   const riskRowSourceCurrent = isGitAncestor(rootDir, riskRowSourceSha);
+  const tbmSourceSha = readString(tbmSource.productCommit);
+  const tbmSourceCurrent = isGitAncestor(rootDir, tbmSourceSha);
+  const firstViewSourceSha = readString(firstViewSource.productCommit);
+  const firstViewSourceCurrent = isGitAncestor(rootDir, firstViewSourceSha);
+  const educationSourceSha = readString(educationSource.productCommit);
+  const educationSourceCurrent = isGitAncestor(rootDir, educationSourceSha);
+  const shareStageSourceSha = readString(shareStageSource.productCommit);
+  const shareStageSourceCurrent = isGitAncestor(rootDir, shareStageSourceSha);
   const fieldFirstMobileShellHeight = readFirstNumber(fieldFirstMobile, [
     "workpackShellClientHeight",
     "workpackShellHeight",
@@ -693,7 +735,43 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && readNumber(riskRowContracts.mobileWorkpackShellScrollHeightCap) <= 1500
     && riskRowContracts.horizontalOverflowClosed === true
     && riskRowCommands.length >= 4
-    && riskRowCommands.every((command) => isRecord(command) && command.status === "PASS");
+    && riskRowCommands.every((command) => isRecord(command) && command.status === "PASS")
+    && readString(tbmCockpit.verdict) === "PASS_CURRENT_SOURCE"
+    && tbmSourceCurrent
+    && readString(tbmScope.route) === "/documents"
+    && readString(tbmScope.surface).includes("tbmBriefing")
+    && readBoolean(tbmScope.productionLiveClaimed) === false
+    && tbmContracts.tbmCockpitVisible === true
+    && tbmContracts.tbmCockpitBelowToolbar === true
+    && tbmContracts.tbmRawTextareaSecondary === true
+    && tbmContracts.riskRowHeaderAndHazardStillVisible === true
+    && tbmContracts.providerOrExportContractsChanged === false
+    && tbmVerification.length >= 3
+    && tbmVerification.every((item) => isRecord(item) && item.status === "PASS")
+    && readString(firstViewSplit.verdict) === "PASS_CURRENT_SOURCE"
+    && firstViewSourceCurrent
+    && readString(firstViewScope.route) === "/documents"
+    && readBoolean(firstViewScope.productionLiveClaimed) === false
+    && firstViewContracts.coreDocumentsPrioritized === true
+    && firstViewContracts.supportingDocumentsGrouped === true
+    && firstViewContracts.workPlanExecutionCockpitBeforeRawEditor === true
+    && firstViewContracts.permitExecutionCockpitBeforeRawEditor === true
+    && firstViewContracts.riskAssessmentFirstHazardVisible === true
+    && firstViewContracts.providerOrExportContractsChanged === false
+    && firstViewVerification.length >= 4
+    && firstViewVerification.every((item) => isRecord(item) && item.status === "PASS")
+    && readString(educationCockpit.verdict) === "PASS_CURRENT_SOURCE"
+    && educationSourceCurrent
+    && readString(educationScope.route) === "/documents"
+    && readString(educationScope.surface) === "safetyEducationRecordDraft"
+    && readBoolean(educationScope.productionLiveClaimed) === false
+    && educationContracts.educationCockpitVisible === true
+    && educationContracts.educationCockpitBelowToolbar === true
+    && educationContracts.educationRawTextareaSecondary === true
+    && educationContracts.workPlanAndPermitCockpitsStillCovered === true
+    && educationContracts.providerOrExportContractsChanged === false
+    && educationVerification.length >= 4
+    && educationVerification.every((item) => isRecord(item) && item.status === "PASS");
 
   const sharePass = readString(share.verdict).includes("PASS")
     && readString(shareDesktop.verdict) === "PASS_PRODUCTION"
@@ -729,18 +807,45 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && readBoolean(expandedOnDemand.expanded) === true
     && expandedCardDisplays.length === 3
     && expandedCardDisplays.every((display) => display !== "none")
-    && readBoolean(shareInterpretation.providerDispatchLiveClaimed) === false;
+    && readBoolean(shareInterpretation.providerDispatchLiveClaimed) === false
+    && readString(shareStageRail.verdict) === "PASS_CURRENT_SOURCE"
+    && shareStageSourceCurrent
+    && readString(shareStageScope.route) === "/workspace?share"
+    && readBoolean(shareStageScope.productionLiveClaimed) === false
+    && shareStageContracts.stageRailVisibleOnWorkspaceShareDesktop === true
+    && readNumber(shareStageContracts.stageRailStepCount) === 4
+    && readNumber(shareStageContracts.desktopStageColumns) === 4
+    && readNumber(shareStageContracts.desktopHorizontalOverflow) === 0
+    && shareStageContracts.ctaInsideDesktopViewport === true
+    && shareStageContracts.previewInsideDesktopViewport === true
+    && shareStageContracts.standaloneDispatchHeightGuardPreserved === true
+    && shareStageContracts.providerContractsChanged === false
+    && readNumber(shareStageDesktop.stageRailItemCount) === 4
+    && readNumber(shareStageDesktop.stageColumns) === 4
+    && readNumber(shareStageDesktop.horizontalOverflow) === 0
+    && readNumber(shareStageDesktop.primaryBottom) !== null
+    && readNumber(shareStageDesktop.primaryBottom) <= 900
+    && readNumber(shareStageDesktop.previewBottom) !== null
+    && readNumber(shareStageDesktop.previewBottom) <= 900
+    && readNumber(shareStageDispatch.rootHeight) !== null
+    && readNumber(shareStageDispatch.rootHeight) <= 720
+    && readNumber(shareStageDispatch.primaryBottom) !== null
+    && readNumber(shareStageDispatch.primaryBottom) <= 900
+    && readNumber(shareStageDispatch.previewBottom) !== null
+    && readNumber(shareStageDispatch.previewBottom) <= 900
+    && readNumber(shareStageDispatch.horizontalOverflow) === 0;
 
   if (documentsPass && sharePass) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "proven",
-      evidencePath: riskRowCockpitPath,
-      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row authoring cockpit, /share desktop two-pane channel composition, and /share selected-summary, preview, primary CTA, and collapsed mobile configuration stack. It does not claim provider live dispatch or full 12-document authoring completion.",
+      evidencePath: firstViewSplitPath,
+      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row, TBM, and education authoring cockpits, core/supporting document navigation split, work-plan/permit execution cockpits, /share desktop two-pane channel composition, staged Share rail, selected-summary, preview, primary CTA, and collapsed mobile configuration stack. It does not claim provider live dispatch, production live Share rail geometry, or full 12-document authoring completion.",
       nextActions: [
-        "Continue UI product depth on full 12-document field-first authoring, row-level validation actions, and document-specific drilldown beyond the current risk-row cockpit.",
+        "Continue UI product depth on remaining document-specific first-task surfaces for education, emergency response, photo evidence, multilingual transmission, field message, and summary documents.",
         "Keep the production live geometry recorded for the risk-row cockpit slice; do not expand it into a full 12-document authoring claim.",
+        "Promote the Share staged rail to production evidence only after build-info reaches the staged-rail commit and live geometry is probed.",
         "Keep /share generated-result and mobile stepper improvements as separate gates when user-visible sessions reproduce the complaint.",
       ],
     });
