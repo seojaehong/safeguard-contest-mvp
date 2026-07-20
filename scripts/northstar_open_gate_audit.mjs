@@ -762,6 +762,7 @@ function evaluateShareResultFixtureCockpitGate(rootDir) {
     && assertions.dispatchPostCalledExactlyOnce === true
     && assertions.responseIdempotencyKeyCaptured === true
     && assertions.resultClosedByDefault === true
+    && assertions.closedResultSummaryShowsChannelStatus === true
     && assertions.openedResultShowsValidationCopy === true
     && assertions.openedResultShowsChannelStatus === true
     && readNumber(assertions.openedResultChannelCount) === 2
@@ -776,7 +777,7 @@ function evaluateShareResultFixtureCockpitGate(rootDir) {
       label: "Generated share result fixture cockpit",
       state: "proven",
       evidencePath,
-      detail: `Generated provider-result fixture proof is bounded: desktop page ${readNumber(desktop.pageHeight)}/${readNumber(desktop.viewportHeight)}, result panel ${readNumber(desktop.resultPanelWidth)}px with ${desktopRanges.length} x-ranges, mobile summary/preview/CTA/result inside ${readNumber(mobile.viewportHeight)}px, dispatch POST count 1, provider live dispatch unclaimed.`,
+      detail: `Generated provider-result fixture proof is bounded: desktop page ${readNumber(desktop.pageHeight)}/${readNumber(desktop.viewportHeight)}, result panel ${readNumber(desktop.resultPanelWidth)}px with ${desktopRanges.length} x-ranges, mobile summary/preview/CTA/result inside ${readNumber(mobile.viewportHeight)}px, closed summary shows channel status, dispatch POST count 1, provider live dispatch unclaimed.`,
       nextActions: [
         "Keep real provider dispatch gated until persistent idempotency and provider-result persistence are approved and live verified.",
       ],

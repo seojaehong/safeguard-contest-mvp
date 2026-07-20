@@ -890,6 +890,8 @@ describe("workspace mobile share presentation", () => {
           dispatchPostCalledExactlyOnce: dispatchPostCount === 1,
           responseIdempotencyKeyCaptured: /^provider-dispatch-v1-/u.test(dispatchPostIdempotencyKey),
           resultClosedByDefault: metrics.resultOpen === false,
+          closedResultSummaryShowsChannelStatus: metrics.resultSummaryText.includes("검증 전용")
+            && metrics.resultSummaryText.includes("2개 채널"),
           openedResultShowsValidationCopy: openedResultMetrics.resultDetailTextContent.includes("미리 확인용 응답입니다"),
           openedResultShowsChannelStatus: openedResultMetrics.resultDetailTextContent.includes("검증 전용"),
           openedResultChannelCount: openedResultMetrics.channelResultCount,
@@ -917,6 +919,8 @@ describe("workspace mobile share presentation", () => {
         expect.soft(dispatchPostCount, `${scenario.label} dispatch POST called`).toBe(1);
         expect.soft(dispatchPostIdempotencyKey, `${scenario.label} dispatch idempotency key`).toMatch(/^provider-dispatch-v1-/u);
         expect.soft(metrics.resultSummaryText, `${scenario.label} provider result visible summary`).toContain("전송 결과");
+        expect.soft(metrics.resultSummaryText, `${scenario.label} provider result summary status`).toContain("검증 전용");
+        expect.soft(metrics.resultSummaryText, `${scenario.label} provider result summary channel count`).toContain("2개 채널");
         expect.soft(metrics.resultDetailTextContent, `${scenario.label} validation result detail retained while closed`).toContain("미리 확인용 응답입니다");
         expect.soft(metrics.resultDetailTextContent, `${scenario.label} validation channel details retained`).toContain("검증 전용");
         expect.soft(metrics.resultOpen, `${scenario.label} validation result details closed by default`).toBe(false);

@@ -496,6 +496,18 @@ function formatChannelStatus(status?: string, validationOnly = false) {
   return "결과 확인 필요";
 }
 
+function formatResultSummaryMeta(result: WorkflowDispatchResult, validationOnly = false) {
+  const count = result.channelResults?.length || 0;
+  const countLabel = count ? `${count}개 채널` : "채널 결과 없음";
+  if (validationOnly) return `검증 전용 · ${countLabel}`;
+  if (result.duplicateRisk) return `중복 위험 · ${countLabel}`;
+  if (result.channelResults?.some((item) => item.status && item.status !== "sent")) {
+    return `확인 필요 · ${countLabel}`;
+  }
+  if (result.channelResults?.length) return `결과 수신 · ${countLabel}`;
+  return result.providerCalled === false ? "provider 호출 없음" : countLabel;
+}
+
 function customerSafeMessage(message: string | undefined, fallback: string) {
   void message;
   return fallback;
@@ -1353,6 +1365,7 @@ export function WorkflowSharePanel({
                     ? "미리 확인"
                     : "상태 확인"}
             </strong>
+            <em>{formatResultSummaryMeta(result, validationOnlyResult)}</em>
           </summary>
           <div className="workflow-result-detail">
             <p>

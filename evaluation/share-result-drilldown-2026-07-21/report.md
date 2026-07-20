@@ -1,6 +1,6 @@
 # Share Result Drilldown Gate
 
-Checked at: 2026-07-21 04:40 KST
+Checked at: 2026-07-21 05:32 KST
 
 ## Verdict
 
@@ -33,18 +33,20 @@ Generated provider-result fixture proof:
 - `npm.cmd test -- tests\workspace-share-mobile-browser.test.ts -t "generated provider-result" --maxWorkers=1 --fileParallelism=false` PASS, `1` file / `1` test, `3` skipped.
 - Browser route fixtures intercepted auth/save/share-session/dispatch APIs inside the test only.
 - Dispatch POST was called exactly once per viewport and returned a `providerStatus = validation-only` payload. No external provider was called and no provider live dispatch claim is made.
-- The closed result summary is intentionally generic (`전송 결과 / 미리 확인`). It is not treated as provider payload proof by itself.
-- The fixture-provider-result proof opens `[data-share-result-summary]` once, verifies retained validation-only detail text and `2` channel results, then records the default closed state separately. This prevents a placeholder-only layout panel from being counted as the generated result-state proof.
+- The closed result summary now exposes the result status and channel count: `전송 결과 / 미리 확인 / 검증 전용 · 2개 채널`.
+- The fixture-provider-result proof also opens `[data-share-result-summary]` once, verifies retained validation-only detail text and `2` channel results, then records the default closed state separately. This prevents a placeholder-only layout panel from being counted as the generated result-state proof.
 - Desktop 1440x900 fixture state:
   - `pageHeight = 900`, `viewportHeight = 900`, `horizontalOverflow = 0`.
   - `primary.bottom = 382`, `preview.bottom = 738`, `resultSummary.bottom = 772`, `result.bottom = 784`.
   - First viewport has distinct x ranges `[160, 800]`.
   - Result panel width is `606px`, below the 75% viewport-width monopoly threshold.
+  - Closed summary shows `검증 전용 · 2개 채널`.
   - Result details are closed by default, then open on demand and show `2` channel results with `검증 전용` (`메일`, `문자`).
 - Mobile 390x844 fixture state:
   - `pageHeight = 1052` (`1.25x`), `horizontalOverflow = 0`.
   - `preview.bottom = 577`, `primary.bottom = 638`, `resultSummary.bottom = 813`, `result.bottom = 825`.
   - Detailed target/channel/language config cards remain collapsed by default.
+  - Closed summary shows `검증 전용 · 2개 채널`.
   - Result details are closed by default, then open on demand and show `2` channel results with `검증 전용` (`메일`, `문자`).
 - Evidence artifacts:
   - `evaluation/share-mobile-p1/generated-result-desktop-provider-result-fixture-metrics.json`
@@ -66,6 +68,6 @@ The browser preservation gate reran existing share geometry evidence under `eval
 
 ## Interpretation
 
-This closes the next small result-depth layer: provider/channel/log details are contained as bounded drilldown rather than a full-width result stack, and the generated fixture result path proves the validation-only channel results are retained behind opt-in drilldown. The generic closed summary alone is not the proof. It does not claim generated provider delivery, live dispatch readiness, or a full result-detail redesign.
+This closes the next small result-depth layer: provider/channel/log details are contained as bounded drilldown rather than a full-width result stack, and the generated fixture result path proves the validation-only channel results are visible in the closed summary and retained behind opt-in drilldown. It does not claim generated provider delivery, live dispatch readiness, or a full result-detail redesign.
 
 Remaining IA depth: provider-result ledger UX after the backend idempotency/result persistence gate is approved. Real email/SMS/Kakao dispatch remains outside this proof.

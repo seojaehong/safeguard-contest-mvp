@@ -230,6 +230,7 @@ function createFixtureRoot(): string {
         dispatchPostCalledExactlyOnce: true,
         responseIdempotencyKeyCaptured: true,
         resultClosedByDefault: true,
+        closedResultSummaryShowsChannelStatus: true,
         openedResultShowsValidationCopy: true,
         openedResultShowsChannelStatus: true,
         openedResultChannelCount: 2,

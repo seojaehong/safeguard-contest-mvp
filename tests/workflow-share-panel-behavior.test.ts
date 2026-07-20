@@ -201,8 +201,11 @@ describe("workflow share panel behavior", () => {
     expect(componentSource).toContain("data-share-result-drilldown");
     expect(componentSource).toContain("data-share-result-summary");
     expect(componentSource).toContain("workflow-result-detail");
+    expect(componentSource).toContain("formatResultSummaryMeta");
+    expect(componentSource).toContain("검증 전용 · ${countLabel}");
     expect(componentSource).toContain("open={Boolean(resultHasFailure || result.duplicateRisk || logSaveState.status === \"duplicate-risk\")}");
     expect(cssSource).toContain(".workflow-result-detail");
+    expect(cssSource).toContain(".workflow-result > summary em");
     expect(cssSource).toContain("max-height: min(260px, 34vh)");
     expect(cssSource).toContain(".command-center-shell.workspace-page-share .workflow-result");
     expect(cssSource).toContain(".safeclaw-module-shell[data-module-route=\"/dispatch\"] .workflow-result");

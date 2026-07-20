@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-20T20:16:25.005Z",
+  "checkedAt": "2026-07-20T20:34:21.591Z",
   "route": "/workspace?share",
   "scenario": {
     "label": "generated-result-desktop",
@@ -10,7 +10,7 @@
   "fixtureGeneratedProviderResultProof": true,
   "providerDispatchLiveClaimed": false,
   "dispatchPostCount": 1,
-  "dispatchPostIdempotencyKey": "provider-dispatch-v1-05a8ff7a-aa28-4aab-b9f2-6fdf58ebf47e-5f174a74",
+  "dispatchPostIdempotencyKey": "provider-dispatch-v1-82660a90-b1ad-4abb-9594-fe1deb5ed522-10739339",
   "metrics": {
     "viewportWidth": 1440,
     "viewportHeight": 900,
@@ -64,7 +64,7 @@
       "height": 192
     },
     "resultOpen": false,
-    "resultSummaryText": "전송 결과\n미리 확인",
+    "resultSummaryText": "전송 결과\n미리 확인\n검증 전용 · 2개 채널",
     "resultDetailText": "",
     "resultDetailTextContent": "채널별 전송 결과를 확인해 주세요.미리 확인용 응답입니다. 실제 전송 기록으로 저장하지 않습니다.전송 이력 · 저장 상태를 확인해 주세요.메일검증 전용채널별 전송 결과를 확인해 주세요.문자검증 전용채널별 전송 결과를 확인해 주세요.",
     "resultDetailOverflowY": "auto",
@@ -122,6 +122,7 @@
     "dispatchPostCalledExactlyOnce": true,
     "responseIdempotencyKeyCaptured": true,
     "resultClosedByDefault": true,
+    "closedResultSummaryShowsChannelStatus": true,
     "openedResultShowsValidationCopy": true,
     "openedResultShowsChannelStatus": true,
     "openedResultChannelCount": 2,
