@@ -1672,6 +1672,12 @@ describe("documents editor layout", () => {
         title: "안전보건교육 기록",
         cockpitTestId: "education-document-cockpit",
         requiredText: ["교육 진행 cockpit", "교육 내용", "이해 확인", "TBM 연계"]
+      },
+      {
+        key: "emergencyResponseDraft",
+        title: "비상대응 절차",
+        cockpitTestId: "emergency-document-cockpit",
+        requiredText: ["비상대응 cockpit", "즉시 중지 기준", "보고 역할", "현장보존"]
       }
     ] as const;
 

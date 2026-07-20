@@ -383,6 +383,10 @@ function isEducationDocumentKey(key: DocumentKey) {
   return key === "safetyEducationRecordDraft";
 }
 
+function isEmergencyDocumentKey(key: DocumentKey) {
+  return key === "emergencyResponseDraft";
+}
+
 function compactList(items: readonly string[], fallback: string, limit: number) {
   const compacted = items.map((item) => item.trim()).filter(Boolean);
   return (compacted.length ? compacted : [fallback]).slice(0, limit);
@@ -554,6 +558,73 @@ function EducationDocumentCockpit({ data, documentKey }: { data: AskResponse; do
             <li>{tbmLink}</li>
             <li>{data.riskSummary.topRisk}</li>
             <li>{data.riskSummary.immediateActions[0] || "작업중지 기준 확인"}</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function EmergencyDocumentCockpit({ data, documentKey }: { data: AskResponse; documentKey: DocumentKey }) {
+  if (!isEmergencyDocumentKey(documentKey)) return null;
+  const stopSignals = compactList(
+    [
+      ...data.riskSummary.immediateActions,
+      ...data.externalData.weather.actions,
+      data.scenario.weatherNote
+    ],
+    data.riskSummary.topRisk,
+    3
+  );
+  const responseFlow = compactList(
+    [
+      "작업 즉시 중지 · 위험구역 이탈",
+      "관리감독자에게 상황 보고",
+      "현장보존 후 재발방지 조치 기록"
+    ],
+    "작업중지 후 보고·보존·재발방지",
+    3
+  );
+  const contactRoles = compactList(
+    ["작업반장", "관리감독자", "안전관리자"],
+    "현장 비상연락망 확인",
+    3
+  );
+
+  return (
+    <section className={styles.tbmCockpit} data-testid="emergency-document-cockpit" aria-label="비상대응 진행 요약">
+      <div className={styles.tbmCockpitHeader}>
+        <div>
+          <span className="eyebrow">비상대응 cockpit</span>
+          <strong>중지 · 보고 · 보존 흐름</strong>
+        </div>
+        <span>{data.scenario.siteName} · {data.riskSummary.riskLevel}</span>
+      </div>
+      <div className={styles.tbmCockpitGrid}>
+        <article>
+          <b>즉시 중지 기준</b>
+          <strong>{data.riskSummary.topRisk}</strong>
+          <small>{stopSignals[0]}</small>
+        </article>
+        <article>
+          <b>보고 역할</b>
+          <strong>{contactRoles.join(" → ")}</strong>
+          <small>번호는 현장 승인 연락망으로 별도 확인</small>
+        </article>
+      </div>
+      <div className={styles.tbmCockpitColumns}>
+        <div>
+          <b>초기조치</b>
+          <ol>
+            {responseFlow.map((item) => <li key={item}>{item}</li>)}
+          </ol>
+        </div>
+        <div>
+          <b>현장보존</b>
+          <ol>
+            <li>추가 접근 통제와 2차 위험 확인</li>
+            <li>사진·TBM·조치 기록을 같은 문서팩에 보관</li>
+            <li>{data.riskSummary.immediateActions[0] || "재발방지 조치 담당자 지정"}</li>
           </ol>
         </div>
       </div>
@@ -2837,6 +2908,13 @@ export function WorkpackEditor({
       alignPaneTargetBelowToolbar(educationCockpitTarget);
       return;
     }
+    const emergencyCockpitTarget = isEmergencyDocumentKey(selected.key)
+      ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="emergency-document-cockpit"]') || null
+      : null;
+    if (emergencyCockpitTarget) {
+      alignPaneTargetBelowToolbar(emergencyCockpitTarget);
+      return;
+    }
     const activeSection = Array.from(
       documentBodyRef.current?.querySelectorAll<HTMLElement>("[data-section-id]") || []
     ).find((section) => section.dataset.sectionId === expandedStructuredSectionId) || null;
@@ -2864,6 +2942,10 @@ export function WorkpackEditor({
             || null
         : isEducationDocumentKey(selected.key)
           ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="education-document-cockpit"]')
+            || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+            || null
+        : isEmergencyDocumentKey(selected.key)
+          ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="emergency-document-cockpit"]')
             || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
             || null
         : documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
@@ -3497,6 +3579,9 @@ export function WorkpackEditor({
               ) : null}
               {isEducationDocumentKey(selected.key) ? (
                 <EducationDocumentCockpit data={data} documentKey={selected.key} />
+              ) : null}
+              {isEmergencyDocumentKey(selected.key) ? (
+                <EmergencyDocumentCockpit data={data} documentKey={selected.key} />
               ) : null}
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;
