@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T06:05:20.000Z",
-  "head": "1b951d228bbbdeb0513c2e1031df9ddf4ee0a758",
+  "generatedAt": "2026-07-20T06:26:00.000Z",
+  "head": "553978d15e107f53d41fa7b883c569bccef1edaa",
   "liveBuildInfo": {
-    "commitSha": "1b951d228bbbdeb0513c2e1031df9ddf4ee0a758",
+    "commitSha": "553978d15e107f53d41fa7b883c569bccef1edaa",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-87j695295-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-lwzg2dx0z-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -92,18 +92,29 @@
       "id": "export_foreign_dispatch_quality",
       "artifact": "evaluation/export-foreign-dispatch-current-gate-2026-07-20/report.json",
       "result": "pass",
-      "testFilesPassed": 9,
-      "testsPassed": 67,
+      "testFilesPassed": 13,
+      "testsPassed": 143,
       "providerDispatchSideEffectPerformed": false
     },
     {
       "id": "share_recipient_portal",
       "artifact": "evaluation/share-recipient-portal-current-gate-2026-07-20/report.json",
       "result": "pass",
-      "testFilesPassed": 4,
-      "testsPassed": 76,
+      "testFilesPassed": 13,
+      "testsPassed": 143,
       "liveVietnameseChrome": true,
       "providerDispatchSideEffectPerformed": false
+    },
+    {
+      "id": "recipient_demo_capture",
+      "artifact": "evaluation/recipient-demo-capture-2026-07-20/metrics.json",
+      "result": "pass_non_mutating_demo_capture",
+      "viewport": "390x844",
+      "horizontalOverflow": false,
+      "outsideElements": 0,
+      "minControlHeight": 44,
+      "vietnameseChrome": true,
+      "savedConfirmation": true
     },
     {
       "id": "ui_documents_contrast",
