@@ -28,6 +28,26 @@ Measured at `http://127.0.0.1:3458/documents?theme=day` with viewport 390x844.
 - Document editor: top 602px, reachable inside the first viewport
 - Document textarea: top 823px, reachable at the bottom of the first viewport
 
+## Production Geometry
+
+Measured again after production `/api/build-info` advanced to `f504b15e9682e35bce97d629b86e02268c08a185`.
+
+- Production URL: `https://www.safeclaw.kr/documents?theme=day`
+- Deployment URL: `safeguard-contest-kiapofu1c-seojaehongs-projects.vercel.app`
+- Viewport: 390x844
+- Body height: 844px, 1.00x viewport
+- Horizontal overflow: false
+- Outside viewport elements: 0
+- Current-work strip: visible, top 207px, bottom 297px, height 90px
+- Current-work strip text includes the default/sample status and save/share-after-input notice
+- Mobile cockpit/launcher: top 305px, bottom 468px, text includes "오늘 문서" and "핵심 3종"
+- Workpack pane: top 476px, bottom 796px, height 320px, `overflow-y: auto`
+- Workpack pane content height: 1110px, client height: 320px
+- Document editor: top 602px, reachable inside the pane
+- Document textarea: top 823px, reachable in the first viewport
+
+Production interpretation: this closes the raw mobile `/documents` long-page complaint for the default surface. The long editor content still exists, but it no longer expands the route body; it lives in a bounded internal pane. Remaining IA work should focus on deeper document-specific drilldown affordance and readability, not raw page height.
+
 ## UX Contract
 
 - The page itself no longer becomes a 2x mobile scroll surface by default.

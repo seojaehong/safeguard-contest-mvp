@@ -72,6 +72,60 @@
       "reachableInsidePane": true
     }
   },
+  "productionGeometry": {
+    "build": {
+      "commitSha": "f504b15e9682e35bce97d629b86e02268c08a185",
+      "branch": "master",
+      "environment": "production",
+      "deploymentUrl": "safeguard-contest-kiapofu1c-seojaehongs-projects.vercel.app"
+    },
+    "baseUrl": "https://www.safeclaw.kr",
+    "route": "/documents?theme=day",
+    "evidenceType": "live production browser measurement",
+    "productionEvidence": true,
+    "bodyHeight": 844,
+    "heightRatio": 1.0,
+    "overflowX": false,
+    "outside": 0,
+    "currentWorkStrip": {
+      "visible": true,
+      "top": 207,
+      "bottom": 297,
+      "height": 90,
+      "textIncludes": [
+        "기본 예시 표시",
+        "실제 저장·전파는 작업 입력 후 진행합니다"
+      ]
+    },
+    "mobileCockpit": {
+      "top": 305,
+      "bottom": 468,
+      "height": 163,
+      "textIncludes": [
+        "오늘 문서",
+        "핵심 3종"
+      ]
+    },
+    "workpackPane": {
+      "top": 476,
+      "bottom": 796,
+      "height": 320,
+      "overflowY": "auto",
+      "clientHeight": 320,
+      "scrollHeight": 1110,
+      "scrollTop": 0
+    },
+    "documentEditor": {
+      "top": 602,
+      "height": 984,
+      "reachableInsidePane": true
+    },
+    "documentTextarea": {
+      "top": 823,
+      "height": 157,
+      "reachableInViewport": true
+    }
+  },
   "baselineComparison": {
     "beforeFirstDensityPatch": {
       "bodyHeight": 1816,
@@ -112,7 +166,7 @@
     }
   },
   "limitations": [
-    "Production deployment is not claimed until this commit is pushed and /api/build-info advances.",
+    "Production live geometry is recorded for commit f504b15e9682e35bce97d629b86e02268c08a185.",
     "This does not claim the full route-split IA redesign.",
     "Long document editing remains available inside the bounded pane."
   ]
