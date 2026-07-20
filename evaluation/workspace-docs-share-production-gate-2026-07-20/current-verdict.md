@@ -12,12 +12,12 @@ The initial mismatch was real: prior static/design-contract passes and the defau
 
 ## Authoritative Surface
 
-- Git HEAD used for source comparison: `45faccac787858e4085db65651f3921c5b5b4bbf`
+- Git HEAD used for source comparison: `96d16238ae71896aa608d93ee9db25d455bd6894`
 - Served URL: `https://www.safeclaw.kr/workspace`
 - Build info endpoint: `https://www.safeclaw.kr/api/build-info`
-- Served commit: `45faccac787858e4085db65651f3921c5b5b4bbf`
+- Served commit: `96d16238ae71896aa608d93ee9db25d455bd6894`
 - Served branch: `master`
-- Deployment URL: `safeguard-contest-e204b1a0y-seojaehongs-projects.vercel.app`
+- Deployment URL: `safeguard-contest-8bkp35kfa-seojaehongs-projects.vercel.app`
 
 The current probe waits for generated document readiness (`12/12 생성` or `안전 문서팩 3종 준비 완료`) before measuring, so it does not accidentally capture the interim generating shell.
 
@@ -26,7 +26,7 @@ The current probe waits for generated document readiness (`12/12 생성` or `안
 | Viewport | Stage | Page height | Stage y | Stage height | Key result |
 | --- | --- | ---: | ---: | ---: | --- |
 | 1440x900 | Documents review | 1147 | 229 | 798 | Fixed versus prior 2070px/723px sticky report |
-| 1440x900 | Document edit | 2210 | 63 editor y / 374 textarea y | 1433 editor height | Improved; no horizontal overflow, editor depth materially reduced |
+| 1440x900 | Document edit | 2210 | 63 editor y / 374 textarea y | 1433 editor height | Improved; no horizontal overflow, sticky count 0 |
 | 1440x900 | Share | 1174 | 189 | 921 | Fixed; 1180px desktop surface, not mobile-card width |
 | 390x844 | Documents review | 1417 | 262 | 1050 | Acceptable as a compact step, no horizontal overflow |
 | 390x844 | Document edit | 1981 | 63 editor y / 361 textarea y | 1359 editor height | Improved; textarea starts higher and editor depth is roughly halved |
@@ -69,7 +69,7 @@ The requested UX work was implemented across bounded fixes that are integrated i
 - `a2535d21` `chore: tighten workspace doc share gate`
   - tightened the production gate so document measurements wait for generated-state readiness.
 
-All five commits are ancestors of current HEAD `778f4601`. A separate older geometry commit `ddda375d` is not an ancestor of this branch, but the current DOM/CSS still contains the effective later fixes listed above.
+All five commits are ancestors of current HEAD `96d16238`. A separate older geometry commit `ddda375d` is not an ancestor of this branch, but the current DOM/CSS still contains the effective later fixes listed above.
 
 ## Mismatch Finding
 
@@ -77,8 +77,8 @@ All five commits are ancestors of current HEAD `778f4601`. A separate older geom
 
 Possible user-surface mismatch sources:
 
-- If the user saw a narrow share card on desktop, they were likely on stale/non-authoritative local dev, cached deploy, or an older branch. Current production build `778f4601` renders `1180px` share width.
-- If the user clicked `편집` and judged the full edit experience, that is not stale. The current production edit surface is still long internally and remains a bounded UX follow-up.
+- If the user saw a narrow share card on desktop, they were likely on stale/non-authoritative local dev, cached deploy, or an older branch. Current production build `96d16238` renders `1180px` share width.
+- If the user clicked `편집` and judged the full edit experience, that is not stale. The current production edit surface is no longer sticky, but it is still long internally and remains a bounded UX follow-up.
 - Static 0 / 108 contract passes should not be treated as proof for this workflow-level gate unless they also measure generated document readiness, document height ratio, editor entry y-position, sticky overlap, and desktop share width.
 
 ## Evidence
@@ -139,7 +139,7 @@ Raw evidence was refreshed in `current-geometry.json` and the `*-current-*.png` 
 
 ## Current Verification
 
-- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` — PASS, served commit `778f4601b359adc7ea716ee84eebdaa58f026115`, generated-state wait included.
+- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` — PASS, served commit `96d16238ae71896aa608d93ee9db25d455bd6894`, generated-state wait included.
 - `node -e "JSON.parse(...current-geometry.json); JSON.parse(...mismatch-investigation-2026-07-20.json)"` — PASS.
 - `npm.cmd test -- tests\workspace-layout-regression.test.ts tests\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false` — 2 files / 28 tests PASS, 1 skipped. Duration 201.93s.
 - `git diff --check` — PASS, line-ending warnings only.

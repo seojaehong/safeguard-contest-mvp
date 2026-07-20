@@ -1,11 +1,11 @@
 {
-  "checkedAt": "2026-07-20T06:59:37.096Z",
+  "checkedAt": "2026-07-20T08:15:44.127Z",
   "verdict": "PARTIALLY_FIXED",
-  "authoritativeHead": "45faccac787858e4085db65651f3921c5b5b4bbf",
+  "authoritativeHead": "96d16238ae71896aa608d93ee9db25d455bd6894",
   "servedUrl": "https://www.safeclaw.kr/workspace",
-  "servedCommit": "45faccac787858e4085db65651f3921c5b5b4bbf",
+  "servedCommit": "96d16238ae71896aa608d93ee9db25d455bd6894",
   "servedBranch": "master",
-  "deploymentUrl": "safeguard-contest-e204b1a0y-seojaehongs-projects.vercel.app",
+  "deploymentUrl": "safeguard-contest-8bkp35kfa-seojaehongs-projects.vercel.app",
   "generatedStateWait": true,
   "implementedAndIntegrated": [
     {
@@ -64,7 +64,7 @@
       "editorHeight": 1433,
       "horizontalOverflow": false,
       "outsideElements": 0,
-      "stickyLikeCount": 1,
+      "stickyLikeCount": 0,
       "status": "partial"
     },
     "desktopShare": {
@@ -119,7 +119,7 @@
       "status": "fixed"
     }
   },
-  "mismatchReason": "Default documents review and desktop share were fixed and integrated, but edit mode still has overlong internal editor depth. Prior static/design-contract passes did not fully prove generated-state workflow geometry.",
+  "mismatchReason": "Default documents review and desktop share were fixed and integrated, and the stacked-sticky edit rail is now closed. Edit mode still has long internal editor depth. Prior static/design-contract passes did not fully prove generated-state workflow geometry.",
   "nextRemediation": [
     "Keep default documents review and share layout unchanged.",
     "Compress document edit mode only.",

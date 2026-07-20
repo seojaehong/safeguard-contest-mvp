@@ -10,11 +10,11 @@ The default `입력 -> 문서 -> 공유` route flow and desktop share layout are
 
 ## Current Authoritative Surface
 
-- Source HEAD: `45faccac787858e4085db65651f3921c5b5b4bbf`
+- Source HEAD: `96d16238ae71896aa608d93ee9db25d455bd6894`
 - Served URL: `https://www.safeclaw.kr/workspace`
-- Served commit: `45faccac787858e4085db65651f3921c5b5b4bbf`
+- Served commit: `96d16238ae71896aa608d93ee9db25d455bd6894`
 - Served branch: `master`
-- Deployment URL: `safeguard-contest-e204b1a0y-seojaehongs-projects.vercel.app`
+- Deployment URL: `safeguard-contest-8bkp35kfa-seojaehongs-projects.vercel.app`
 - Probe guard: waits for `12/12 생성` or `안전 문서팩 3종 준비 완료` before measuring documents.
 
 ## What Was Implemented
@@ -34,7 +34,7 @@ The older `ddda375d` geometry commit is not an ancestor of the current branch, b
 | Surface | Viewport | Height ratio | Key geometry | Status |
 | --- | --- | ---: | --- | --- |
 | Documents review | 1440x900 | 1.27x | page 1147px, document y=229, no overflow, sticky 0 | Fixed |
-| Document edit | 1440x900 | 2.46x | textarea y=374, editor panel 1433px, sticky 1 | Improved |
+| Document edit | 1440x900 | 2.46x | textarea y=374, editor panel 1433px, sticky 0 | Improved |
 | Share | 1440x900 | 1.30x | share width 1180px, one primary CTA, no overflow | Fixed |
 | Documents review | 390x844 | 1.68x | document y=262, no overflow, sticky 0 | Fixed |
 | Document edit | 390x844 | 2.35x | textarea y=361, editor panel 1359px, sticky 0 | Improved |
@@ -42,11 +42,11 @@ The older `ddda375d` geometry commit is not an ancestor of the current branch, b
 
 ## Why The User Still Saw A Problem
 
-The previous "done" signal was too broad. It closed the original default document review and desktop share layout blocker, but it did not fully close the edit-mode information-density problem.
+The previous "done" signal was too broad. It closed the original default document review and desktop share layout blocker, then later closed the stacked-sticky edit rail. It did not fully close the edit-mode information-density problem, because the editor remains a long page by nature of the current textarea/provenance/export model.
 
-If the user saw a narrow share card on desktop, that was likely stale/non-authoritative surface: old local dev server, old branch, cached deployment, wrong URL, or pre-`778f4601` build. Current production renders an 1180px share surface at 1440px.
+If the user saw a narrow share card on desktop, that was likely stale/non-authoritative surface: old local dev server, old branch, cached deployment, wrong URL, or a build before the integrated share-width fixes. Current production renders an 1180px share surface at 1440px.
 
-If the user clicked `편집` before `45faccac`, that was a real remaining issue. Current production now shows a compacted edit surface, though it is still a full editing page rather than a tiny modal/card.
+If the user clicked `편집` before `689a597d`, that was a real remaining issue. Current production now shows a compacted edit surface with sticky count 0, though it is still a full editing page rather than a tiny modal/card.
 
 Static typography/design-contract passes should not be used as evidence for this workflow-level UX. The gate must explicitly measure generated-state readiness, stage separation, document height, edit entry y-position, sticky overlap, and desktop share width.
 
@@ -67,7 +67,7 @@ Raw evidence:
 
 Verification:
 
-- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` — PASS, served commit `45faccac787858e4085db65651f3921c5b5b4bbf`, generated-state wait included.
+- `node evaluation\workspace-docs-share-production-gate-2026-07-20\run-current-geometry-probe.mjs` — PASS, served commit `96d16238ae71896aa608d93ee9db25d455bd6894`, generated-state wait included.
 - JSON parse for `current-geometry.json` and `mismatch-investigation-2026-07-20.json` — PASS.
 - `npm.cmd test -- tests\workspace-layout-regression.test.ts tests\workspace-share-mobile-browser.test.ts --maxWorkers=1 --fileParallelism=false` — 2 files / 28 tests PASS, 1 skipped. Duration 201.93s.
 - `git diff --check` — PASS, line-ending warnings only.
