@@ -49,6 +49,26 @@ Current-source follow-up for `/dispatch` mobile sample shell:
 
 Interpretation: `/dispatch` mobile sample/default shell is materially reduced in current source. Generated provider-result state and provider live dispatch remain separate; the route split question is still answered by cockpit plus bounded detail, not by adding pages alone.
 
+Production marker catch-up:
+
+- Production `/api/build-info`: `668c08147edf9d9e6b3cab7edf68b3a4f00229b6`.
+- Live `/dispatch?theme=day`, 390x844: `pageHeight = 893`, `heightRatio = 1.06`, `scrollWidth = 390`, `horizontalOverflow = false`.
+- Interpretation: the `/dispatch` mobile sample/default compact patch is now production-confirmed, not source-only.
+
+## 2026-07-21 Documents First-Edit Cockpit Update
+
+Current-source bounded gate:
+
+- Artifact: `evaluation/documents-first-edit-cockpit-2026-07-21/report.md`
+- Source base before patch: `668c08147edf9d9e6b3cab7edf68b3a4f00229b6`
+- The previous `/documents` PASS artifacts remain valid for raw route height, bounded pane, one-section accordion, sticky-toolbar overlap, and section action shortcuts.
+- This wave targets the next IA complaint: the standalone document route should start with the high-value `위험성평가표`, not a summary-first document that makes the user hunt for the real risk-assessment edit surface.
+- Desktop 1440x723 current-source: selected `위험성평가표`, body `770px / 1.07x`, first textarea `top=493/bottom=658`, overflow `0`.
+- Mobile 390x844 current-source: selected `위험성평가표`, body `844px / 1.00x`, shell `476-796`, toolbar `476-572`, first textarea `580-737`, overflow `0`.
+- Focused browser: `documents-editor-layout` default cockpit slice PASS, 1/1 selected.
+
+Interpretation: this closes the first-edit arrival gap in current source. It does not claim full document-specific editing depth is finished; long content still belongs in bounded pane/drilldown, and richer section summaries remain product-depth follow-up.
+
 ## Current Production Baseline
 
 Current production evidence after the latest workspace IA work:

@@ -157,18 +157,31 @@ describe("documents editor layout", () => {
           clientWidth: document.documentElement.clientWidth,
           workpackShell: rect(".workpack-shell"),
           documentEditor: rect(".document-editor"),
-          mobileCoreLauncher: rect('[data-testid="mobile-core-document-launcher"]')
+          mobileCoreLauncher: rect('[data-testid="mobile-core-document-launcher"]'),
+          toolbar: rect(".document-toolbar"),
+          firstSectionTextarea: rect(".document-section-textarea"),
+          selectedDocumentTitle: document.querySelector(".document-toolbar .h2")?.textContent?.trim() || "",
+          riskLauncherPressed: document.querySelector<HTMLButtonElement>(
+            '[data-testid="mobile-core-document-launcher"] button[data-document-key="riskAssessmentDraft"]'
+          )?.getAttribute("aria-pressed") || ""
         };
       });
 
       expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
       expect(metrics.bodyHeight / metrics.viewportHeight).toBeLessThanOrEqual(viewport.maxRatio);
+      expect(metrics.selectedDocumentTitle).toBe("위험성평가표");
       expect(metrics.workpackShell.overflowY).toBe("auto");
       expect(metrics.workpackShell.top).toBeLessThanOrEqual(viewport.maxShellTop);
       expect(metrics.documentEditor.top).toBeLessThanOrEqual(viewport.maxEditorTop);
       expect(metrics.workpackShell.height).toBeGreaterThanOrEqual(viewport.minShellHeight);
       expect(metrics.workpackShell.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
       expect(metrics.mobileCoreLauncher.bottom).toBeLessThanOrEqual(metrics.viewportHeight);
+      expect(metrics.firstSectionTextarea.top).toBeLessThanOrEqual(metrics.viewportHeight);
+      expect(metrics.firstSectionTextarea.top).toBeGreaterThanOrEqual(metrics.toolbar.bottom + 4);
+      if (viewport.name === "mobile") {
+        expect(metrics.riskLauncherPressed).toBe("true");
+        expect(metrics.firstSectionTextarea.top).toBeLessThanOrEqual(720);
+      }
 
       await page.close();
     }

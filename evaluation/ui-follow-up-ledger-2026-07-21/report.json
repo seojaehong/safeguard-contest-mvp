@@ -58,6 +58,55 @@
       "samplePanelBottoms": [641, 844],
       "horizontalOverflow": 0,
       "providerDispatchLiveClaimed": false
+    },
+    "dispatchMobile390x844ProductionCatchUp": {
+      "productionMarker": "668c08147edf9d9e6b3cab7edf68b3a4f00229b6",
+      "outerPageHeight": 893,
+      "heightRatio": 1.06,
+      "scrollWidth": 390,
+      "horizontalOverflow": false,
+      "providerDispatchLiveClaimed": false
+    }
+  },
+  "documentsFirstEditCockpitUpdate": {
+    "checkedAt": "2026-07-21T06:15:00+09:00",
+    "sourceBase": "668c08147edf9d9e6b3cab7edf68b3a4f00229b6",
+    "artifact": "evaluation/documents-first-edit-cockpit-2026-07-21/report.json",
+    "scope": "standalone /documents default selected document and first editable section arrival",
+    "verdict": "PASS_CURRENT_SOURCE_PRODUCTION_PENDING",
+    "routeSplitAloneAcceptedAsFix": false,
+    "desktopShort1440x723": {
+      "bodyHeight": 770,
+      "heightRatio": 1.07,
+      "selectedTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 336,
+      "workpackShellBottom": 722,
+      "workpackShellClientHeight": 386,
+      "workpackShellScrollHeight": 1499,
+      "firstTextareaTop": 493,
+      "firstTextareaBottom": 658,
+      "horizontalOverflow": false
+    },
+    "mobile390x844": {
+      "bodyHeight": 844,
+      "heightRatio": 1,
+      "selectedTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 476,
+      "workpackShellBottom": 796,
+      "workpackShellClientHeight": 320,
+      "workpackShellScrollHeight": 1544,
+      "toolbarBottom": 572,
+      "firstTextareaTop": 580,
+      "firstTextareaBottom": 737,
+      "firstTextareaInsideFirstViewport": true,
+      "firstTextareaBelowToolbar": true,
+      "horizontalOverflow": false
+    },
+    "focusedGate": {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS"
     }
   },
   "productionMarker": "f504b15e9682e35bce97d629b86e02268c08a185",

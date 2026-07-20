@@ -910,7 +910,7 @@ export function CurrentDocumentsModule({ sample }: { sample: AskResponse }) {
   const currentRef = useRef(current);
   const [focusToken, setFocusToken] = useState(0);
   const [requestedDocumentKey, setRequestedDocumentKey] = useState<DocumentKey | undefined>();
-  const [selectedDocumentKey, setSelectedDocumentKey] = useState<DocumentKey>("workpackSummaryDraft");
+  const [selectedDocumentKey, setSelectedDocumentKey] = useState<DocumentKey>("riskAssessmentDraft");
   useEffect(() => {
     currentRef.current = current;
   }, [current]);

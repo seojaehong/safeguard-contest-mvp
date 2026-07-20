@@ -21580,6 +21580,23 @@ body:has(.safeclaw-landing) :is(
     padding: 0 6px;
   }
 
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-document-body"] {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-document-body"] [class*="editorModeBar"] {
+    padding: 6px 0;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="editor-document-body"] [class*="structuredEditor"] {
+    gap: 8px;
+  }
+
+  .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] [data-testid="document-section-accordion"] > summary {
+    min-height: 40px;
+  }
+
   .safeclaw-module-shell.module-variant-document[data-module-route="/documents"] .workpack-shell {
     position: relative;
     max-height: min(320px, calc(100vh - 524px));

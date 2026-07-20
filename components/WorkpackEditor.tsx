@@ -291,6 +291,8 @@ const documentCoverageLabels: Partial<Record<DocumentKey, string>> = {
   tbmLogDraft: "TBM 기록"
 };
 
+const DEFAULT_SELECTED_DOCUMENT_KEY: DocumentKey = "riskAssessmentDraft";
+
 function sanitizeFileName(value: string) {
   return value.replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, "-").slice(0, 80) || "safeclaw";
 }
@@ -2258,7 +2260,7 @@ export function WorkpackEditor({
     () => data.structured?.riskAssessmentRows ?? [],
     [data]
   );
-  const [selectedKey, setSelectedKey] = useState<DocumentKey>("workpackSummaryDraft");
+  const [selectedKey, setSelectedKey] = useState<DocumentKey>(() => requestedDocumentKey ?? DEFAULT_SELECTED_DOCUMENT_KEY);
   const [values, setValues] = useState<WorkpackDocumentValues>(initialValues);
   const [dirtyDocumentKeys, setDirtyDocumentKeys] = useState<DocumentKey[]>([]);
   const [canonicalRiskRows, setCanonicalRiskRows] = useState<RiskAssessmentRow[]>(initialRiskRows);
@@ -2573,7 +2575,13 @@ export function WorkpackEditor({
     const visibleTop = toolbarRect && toolbarRect.bottom > shellRect.top && toolbarRect.top < shellRect.bottom
       ? toolbarRect.bottom
       : shellRect.top;
-    const targetIsVisible = targetRect.bottom > visibleTop && targetRect.top >= visibleTop && targetRect.top < shellRect.bottom;
+    const comfortableTargetTop = Math.min(
+      shellRect.bottom - 80,
+      visibleTop + Math.max(96, shell.clientHeight * 0.45)
+    );
+    const targetIsVisible = targetRect.bottom > visibleTop
+      && targetRect.top >= visibleTop
+      && targetRect.top <= comfortableTargetTop;
     if (targetIsVisible) return;
 
     const padding = 8;

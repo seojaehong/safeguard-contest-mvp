@@ -1,0 +1,99 @@
+{
+  "id": "documents-first-edit-cockpit-2026-07-21",
+  "generatedAt": "2026-07-21T06:15:00+09:00",
+  "sourceBase": "668c08147edf9d9e6b3cab7edf68b3a4f00229b6",
+  "verdict": "PASS_CURRENT_SOURCE_PRODUCTION_PENDING",
+  "routeSplitAloneAcceptedAsFix": false,
+  "scope": {
+    "route": "/documents",
+    "viewports": ["1440x723", "390x844"],
+    "claim": "default standalone documents cockpit starts on riskAssessmentDraft and lands the first editable section in the first viewport"
+  },
+  "desktopShort1440x723": {
+    "bodyHeight": 770,
+    "viewportHeight": 723,
+    "heightRatio": 1.07,
+    "horizontalOverflow": false,
+    "selectedTitle": "위험성평가표",
+    "riskLauncherPressed": true,
+    "workpackShell": {
+      "top": 336,
+      "bottom": 722,
+      "height": 386,
+      "overflowY": "auto",
+      "clientHeight": 386,
+      "scrollHeight": 1499
+    },
+    "toolbar": {
+      "top": 229,
+      "bottom": 333
+    },
+    "firstSectionTextarea": {
+      "top": 493,
+      "bottom": 658,
+      "insideFirstViewport": true,
+      "belowToolbar": true
+    }
+  },
+  "mobile390x844": {
+    "bodyHeight": 844,
+    "viewportHeight": 844,
+    "heightRatio": 1,
+    "horizontalOverflow": false,
+    "selectedTitle": "위험성평가표",
+    "riskLauncherPressed": true,
+    "workpackShell": {
+      "top": 476,
+      "bottom": 796,
+      "height": 320,
+      "overflowY": "auto",
+      "clientHeight": 320,
+      "scrollHeight": 1544
+    },
+    "toolbar": {
+      "top": 476,
+      "bottom": 572
+    },
+    "firstSectionTextarea": {
+      "top": 580,
+      "bottom": 737,
+      "insideFirstViewport": true,
+      "belowToolbar": true
+    }
+  },
+  "focusedGate": {
+    "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"bounds the default documents route editor\" --maxWorkers=1 --fileParallelism=false",
+    "result": "PASS",
+    "files": 1,
+    "selectedTests": 1
+  },
+  "preservationGates": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"opens a requested document|bounds the default documents route editor|keeps the editor workspace and expanded tools contained\" --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 1,
+      "selectedTests": 3
+    },
+    {
+      "command": "npm.cmd test -- tests\\northstar-open-gate-audit.test.ts tests\\northstar-live-rollup.test.ts --maxWorkers=1 --fileParallelism=false",
+      "result": "PASS",
+      "files": 2,
+      "tests": 14
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "result": "PASS"
+    }
+  ],
+  "fullDocumentsBrowserSuite": {
+    "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+    "result": "HUNG_OR_SLOW_STOPPED",
+    "durationWithoutAdditionalOutputMinutes": 4,
+    "interpretation": "Focused browser slices were used for this patch; full suite was not counted as PASS."
+  },
+  "doesNotClaim": [
+    "all document-specific editing depth is complete",
+    "provider live dispatch is enabled",
+    "route split alone fixes long-content UX"
+  ]
+}
