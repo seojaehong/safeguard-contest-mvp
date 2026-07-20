@@ -1,14 +1,14 @@
 # SafeClaw North Star Open Gate Audit
 
-Generated at: 2026-07-20T05:07:32.185Z
-Source SHA: `3b0d71563017440d44f5b4a37c93e593d25e98e5`
+Generated at: 2026-07-20T12:36:58.782Z
+Source SHA: `d21e8d64f08e7b53976c508186d40defe59be2f9`
 Overall: `open`
 
 ## Gate Matrix
 
 | Gate | State | Evidence | Detail |
 | --- | --- | --- | --- |
-| final_99_gate | notice | evaluation\final-99-gate\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate\notice-carry.json. |
+| final_99_gate | notice | evaluation\final-99-gate-current-2026-07-20\report.json | final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\final-99-gate-current-2026-07-20\notice-carry.json. |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json | Live harness probe passed with zero failed contracts. |
 | supabase_rls_launch_isolation | approval_gated | evaluation\supabase-rls-approval-2026-07-17\report.md | Read-only audit exists, but live RLS catalog and tenant A/B isolation are not proven. |
 | llm_wiki_publication | approval_gated | evaluation\llm-wiki-rls-approval-2026-07-17\report.md | Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. |

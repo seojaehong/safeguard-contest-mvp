@@ -256,6 +256,45 @@ describe("northstar open gate audit", () => {
     expect(markdown).toContain("Do not claim fully automated launch readiness");
   });
 
+  it("prefers the current final-99 evidence packet over the legacy default folder", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    writeJson(rootDir, path.join("evaluation", "final-99-gate", "report.json"), {
+      overall: "blocked",
+    });
+    writeJson(rootDir, path.join("evaluation", "final-99-gate-current-2026-07-20", "report.json"), {
+      overall: "pass_with_notice",
+    });
+    writeJson(rootDir, path.join("evaluation", "final-99-gate-current-2026-07-20", "notice-carry.json"), {
+      verdict: "carried",
+      fullyAutomatedLaunchClaimAllowed: false,
+      safeLaunchDemoClaimAllowed: true,
+      notices: [
+        {
+          gate: "auth-history-reuse",
+          carried: true,
+          launchImpact: "operator-auth-gated",
+        },
+        {
+          gate: "dispatch-policy",
+          carried: true,
+          launchImpact: "provider-approval-gated",
+        },
+      ],
+    });
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+    const finalGate = audit.gates.find((gate) => gate.id === "final_99_gate");
+
+    expect(finalGate?.state).toBe("notice");
+    expect(finalGate?.evidencePath).toBe(path.join("evaluation", "final-99-gate-current-2026-07-20", "report.json"));
+    expect(finalGate?.detail).toContain(path.join("evaluation", "final-99-gate-current-2026-07-20", "notice-carry.json"));
+  });
+
   it("contradicts the KOSHA exact trust gate when live exact pins are stale", async () => {
     const { buildNorthstarOpenGateAudit } = await loadAuditModule();
     const rootDir = createFixtureRoot();

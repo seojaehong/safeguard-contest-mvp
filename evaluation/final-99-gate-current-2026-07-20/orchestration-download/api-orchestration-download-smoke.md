@@ -1,6 +1,6 @@
 # SafeGuard API 조합 및 다운로드 스모크
 
-- 생성시각: 2026-07-20T12:28:36.402Z
+- 생성시각: 2026-07-20T12:36:35.352Z
 - 대상 URL: https://www.safeclaw.kr
 - 질문: 세이프건설 서울 성수동 근린생활시설 외벽 도장 작업. 이동식 비계 사용, 작업자 5명, 신규 투입자 1명, 오후 강풍 예보. 추락과 지게차 동선 위험을 반영해 오늘 위험성평가와 TBM, 안전보건교육 기록을 만들어줘.
 - 기상 선조회: live / 단시간 흐림, 비, 기온 25℃, 풍속 1m/s (초단기실황/초단기예보/단기예보/기상특보/영향예보/생활기상 자외선 반영)
@@ -34,7 +34,7 @@
 | HWPX | ok | 12071 | evaluation\final-99-gate-current-2026-07-20\orchestration-download\files\세이프건설-risk-assessment.hwpx |
 | HWP_TABLE | ok | 19968 | evaluation\final-99-gate-current-2026-07-20\orchestration-download\files\세이프건설-risk-assessment.hwp |
 | XLSX_OOXML | ok | 13326 | evaluation\final-99-gate-current-2026-07-20\orchestration-download\files\세이프건설-risk-assessment.xlsx |
-| PDF | ok | 315146 | evaluation\final-99-gate-current-2026-07-20\orchestration-download\files\세이프건설-risk-assessment.pdf |
+| PDF | ok | 314689 | evaluation\final-99-gate-current-2026-07-20\orchestration-download\files\세이프건설-risk-assessment.pdf |
 | JPG | ok | 185138 | evaluation\final-99-gate-current-2026-07-20\orchestration-download\files\세이프건설-risk-assessment.jpg |
 | ALL_TXT | ok | 75392 | evaluation\final-99-gate-current-2026-07-20\orchestration-download\files\세이프건설-safeguard-workpack.txt |
 | ALL_CSV | ok | 109377 | evaluation\final-99-gate-current-2026-07-20\orchestration-download\files\세이프건설-safeguard-workpack.csv |

@@ -14,8 +14,14 @@ const REPO_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..");
 const DEFAULT_OUTPUT_DIR = path.join("evaluation", "northstar-open-gates-current");
 
 const EVIDENCE_PATHS = Object.freeze({
-  final99: path.join("evaluation", "final-99-gate", "report.json"),
-  final99NoticeCarry: path.join("evaluation", "final-99-gate", "notice-carry.json"),
+  final99Candidates: Object.freeze([
+    path.join("evaluation", "final-99-gate-current-2026-07-20", "report.json"),
+    path.join("evaluation", "final-99-gate", "report.json"),
+  ]),
+  final99NoticeCarryCandidates: Object.freeze([
+    path.join("evaluation", "final-99-gate-current-2026-07-20", "notice-carry.json"),
+    path.join("evaluation", "final-99-gate", "notice-carry.json"),
+  ]),
   liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
   rlsApproval: path.join("evaluation", "supabase-rls-approval-2026-07-17", "report.md"),
   llmWikiApproval: path.join("evaluation", "llm-wiki-rls-approval-2026-07-17", "report.md"),
@@ -135,8 +141,9 @@ function gateResult(gate) {
  * @returns {GateResult}
  */
 function evaluateFinal99Gate(rootDir) {
-  const evidencePath = EVIDENCE_PATHS.final99;
-  const report = readJsonFile(rootDir, evidencePath);
+  const evidence = readFirstJsonFile(rootDir, EVIDENCE_PATHS.final99Candidates);
+  const evidencePath = evidence?.path || EVIDENCE_PATHS.final99Candidates[0];
+  const report = evidence?.report;
   if (!isRecord(report)) {
     return gateResult({
       id: "final_99_gate",
@@ -150,7 +157,9 @@ function evaluateFinal99Gate(rootDir) {
 
   const overall = readString(report.overall);
   if (overall === "pass" || overall === "pass_with_notice") {
-    const noticeCarry = readJsonFile(rootDir, EVIDENCE_PATHS.final99NoticeCarry);
+    const noticeCarryEvidence = readFirstJsonFile(rootDir, EVIDENCE_PATHS.final99NoticeCarryCandidates);
+    const noticeCarry = noticeCarryEvidence?.report;
+    const noticeCarryPath = noticeCarryEvidence?.path || EVIDENCE_PATHS.final99NoticeCarryCandidates[0];
     const notices = Array.isArray(noticeCarry?.notices) ? noticeCarry.notices : [];
     const carriedNoticeCount = notices.filter((notice) => (
       isRecord(notice) && notice.carried === true && readString(notice.launchImpact)
@@ -165,7 +174,7 @@ function evaluateFinal99Gate(rootDir) {
       state: overall === "pass" ? "proven" : "notice",
       evidencePath,
       detail: overall === "pass_with_notice" && noticeCarryReady
-        ? `final-99 overall is ${overall}; ${carriedNoticeCount} notices are explicitly carried in ${EVIDENCE_PATHS.final99NoticeCarry}.`
+        ? `final-99 overall is ${overall}; ${carriedNoticeCount} notices are explicitly carried in ${noticeCarryPath}.`
         : `final-99 overall is ${overall}.`,
       nextActions: overall === "pass_with_notice"
         ? noticeCarryReady
