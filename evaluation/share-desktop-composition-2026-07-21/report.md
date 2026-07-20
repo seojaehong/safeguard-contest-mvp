@@ -4,7 +4,7 @@ Checked at: 2026-07-21 KST
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE`
+`PASS_PRODUCTION`
 
 The `/workspace` share step no longer relies on a narrow mobile-like channel stack on desktop. The desktop share composition keeps the two-pane shell, keeps message preview on the right pane, and stretches the channel selector across the full left workflow area so the three channel cards remain readable.
 
@@ -37,6 +37,22 @@ From refreshed `evaluation/share-mobile-p1/desktop-day-share-config-collapse-met
 - Channel card heights: `44 / 44 / 44`
 - Horizontal overflow: `0`
 - Page height: `918` (`1.02x` viewport height)
+
+## Production Live Geometry
+
+Production `https://www.safeclaw.kr` is now on commit `4979638493c0eebd410e2f1ab0f5383c2f3c7102`.
+
+Live `/workspace?theme=day` after generating a workpack and opening the Share step at 1440x900:
+
+- Page height: `900 / 900`
+- Share root: `1180x551`
+- Left form width: `606`
+- Primary CTA: `149-755`, bottom `421`
+- Preview: `771-1291`, width `520`, bottom `777`
+- Preview right of primary: `true`
+- Channel card widths: `191 / 191 / 191`
+- Channel card heights: `44 / 44 / 44`
+- Horizontal overflow: `0`
 
 ## Remaining debt
 

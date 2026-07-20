@@ -1,5 +1,5 @@
 {
-  "verdict": "PASS_CURRENT_SOURCE",
+  "verdict": "PASS_PRODUCTION",
   "checkedAt": "2026-07-21 KST",
   "scope": {
     "route": "/workspace",
@@ -32,6 +32,31 @@
     "channelCardWidths": [191, 191, 191],
     "channelCardHeights": [44, 44, 44],
     "horizontalOverflow": 0
+  },
+  "production": {
+    "build": {
+      "commitSha": "4979638493c0eebd410e2f1ab0f5383c2f3c7102",
+      "branch": "master",
+      "environment": "production"
+    },
+    "url": "https://www.safeclaw.kr/workspace?theme=day",
+    "desktop1440x900": {
+      "pageHeight": 900,
+      "viewportHeight": 900,
+      "shareRootWidth": 1180,
+      "shareRootHeight": 551,
+      "formWidth": 606,
+      "previewLeft": 771,
+      "previewRight": 1291,
+      "previewWidth": 520,
+      "previewBottom": 777,
+      "primaryRight": 755,
+      "primaryBottom": 421,
+      "previewRightOfPrimary": true,
+      "channelCardWidths": [191, 191, 191],
+      "channelCardHeights": [44, 44, 44],
+      "horizontalOverflow": 0
+    }
   },
   "remainingDebt": [
     "Broader share action-mode/wizard design is separate from this desktop composition patch.",
