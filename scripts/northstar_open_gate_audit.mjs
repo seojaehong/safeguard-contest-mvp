@@ -38,6 +38,7 @@ const EVIDENCE_PATHS = Object.freeze({
   documentsTbmCockpit: path.join("evaluation", "documents-tbm-cockpit-2026-07-21", "report.json"),
   documentsFirstViewSplit: path.join("evaluation", "documents-first-view-split-2026-07-21", "report.json"),
   documentsEducationCockpit: path.join("evaluation", "documents-education-cockpit-2026-07-21", "report.json"),
+  documentsEmergencyCockpit: path.join("evaluation", "documents-emergency-cockpit-2026-07-21", "report.json"),
   shareDesktopComposition: path.join("evaluation", "share-desktop-composition-2026-07-21", "report.json"),
   shareMobileFullFlow: path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"),
   shareStagedFlowRail: path.join("evaluation", "share-staged-flow-rail-2026-07-21", "report.json"),
@@ -527,6 +528,7 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const tbmCockpitPath = EVIDENCE_PATHS.documentsTbmCockpit;
   const firstViewSplitPath = EVIDENCE_PATHS.documentsFirstViewSplit;
   const educationCockpitPath = EVIDENCE_PATHS.documentsEducationCockpit;
+  const emergencyCockpitPath = EVIDENCE_PATHS.documentsEmergencyCockpit;
   const shareDesktopPath = EVIDENCE_PATHS.shareDesktopComposition;
   const sharePath = EVIDENCE_PATHS.shareMobileFullFlow;
   const shareStageRailPath = EVIDENCE_PATHS.shareStagedFlowRail;
@@ -539,18 +541,19 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const tbmCockpit = readJsonFile(rootDir, tbmCockpitPath);
   const firstViewSplit = readJsonFile(rootDir, firstViewSplitPath);
   const educationCockpit = readJsonFile(rootDir, educationCockpitPath);
+  const emergencyCockpit = readJsonFile(rootDir, emergencyCockpitPath);
   const shareDesktop = readJsonFile(rootDir, shareDesktopPath);
   const share = readJsonFile(rootDir, sharePath);
   const shareStageRail = readJsonFile(rootDir, shareStageRailPath);
 
-  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(tbmCockpit) || !isRecord(firstViewSplit) || !isRecord(educationCockpit) || !isRecord(shareDesktop) || !isRecord(share) || !isRecord(shareStageRail)) {
+  if (!isRecord(internalPane) || !isRecord(paneContext) || !isRecord(drilldown) || !isRecord(innerPaneDepth) || !isRecord(fieldFirst) || !isRecord(riskRowCockpit) || !isRecord(tbmCockpit) || !isRecord(firstViewSplit) || !isRecord(educationCockpit) || !isRecord(emergencyCockpit) || !isRecord(shareDesktop) || !isRecord(share) || !isRecord(shareStageRail)) {
     return gateResult({
       id: "ui_documents_share_cockpit",
       label: "Documents and Share cockpit UI",
       state: "missing",
-      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : !isRecord(tbmCockpit) ? tbmCockpitPath : !isRecord(firstViewSplit) ? firstViewSplitPath : !isRecord(educationCockpit) ? educationCockpitPath : !isRecord(shareDesktop) ? shareDesktopPath : !isRecord(share) ? sharePath : shareStageRailPath,
+      evidencePath: !isRecord(internalPane) ? internalPanePath : !isRecord(paneContext) ? paneContextPath : !isRecord(drilldown) ? drilldownPath : !isRecord(innerPaneDepth) ? innerPaneDepthPath : !isRecord(fieldFirst) ? fieldFirstPath : !isRecord(riskRowCockpit) ? riskRowCockpitPath : !isRecord(tbmCockpit) ? tbmCockpitPath : !isRecord(firstViewSplit) ? firstViewSplitPath : !isRecord(educationCockpit) ? educationCockpitPath : !isRecord(emergencyCockpit) ? emergencyCockpitPath : !isRecord(shareDesktop) ? shareDesktopPath : !isRecord(share) ? sharePath : shareStageRailPath,
       detail: "Documents/share cockpit evidence is missing or invalid.",
-      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row/TBM/first-view cockpit, share desktop/mobile, and share staged-flow evidence."],
+      nextActions: ["Regenerate documents mobile internal-pane, pane-context, drilldown-depth, inner-pane-depth, field-first-affordance, risk-row/TBM/first-view/education/emergency cockpit, share desktop/mobile, and share staged-flow evidence."],
     });
   }
 
@@ -583,6 +586,10 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const educationContracts = isRecord(educationCockpit.contracts) ? educationCockpit.contracts : {};
   const educationVerification = Array.isArray(educationCockpit.verification) ? educationCockpit.verification : [];
   const educationSource = isRecord(educationCockpit.source) ? educationCockpit.source : {};
+  const emergencyScope = isRecord(emergencyCockpit.scope) ? emergencyCockpit.scope : {};
+  const emergencyContracts = isRecord(emergencyCockpit.contracts) ? emergencyCockpit.contracts : {};
+  const emergencyVerification = Array.isArray(emergencyCockpit.verification) ? emergencyCockpit.verification : [];
+  const emergencySource = isRecord(emergencyCockpit.source) ? emergencyCockpit.source : {};
   const shareDesktopScope = isRecord(shareDesktop.scope) ? shareDesktop.scope : {};
   const shareDesktopProduction = isRecord(shareDesktop.production) ? shareDesktop.production : {};
   const shareDesktopLive = isRecord(shareDesktopProduction.desktop1440x900) ? shareDesktopProduction.desktop1440x900 : {};
@@ -622,6 +629,8 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
   const firstViewSourceCurrent = isGitAncestor(rootDir, firstViewSourceSha);
   const educationSourceSha = readString(educationSource.productCommit);
   const educationSourceCurrent = isGitAncestor(rootDir, educationSourceSha);
+  const emergencySourceSha = readString(emergencySource.productCommit);
+  const emergencySourceCurrent = isGitAncestor(rootDir, emergencySourceSha);
   const shareStageSourceSha = readString(shareStageSource.productCommit);
   const shareStageSourceCurrent = isGitAncestor(rootDir, shareStageSourceSha);
   const fieldFirstMobileShellHeight = readFirstNumber(fieldFirstMobile, [
@@ -771,7 +780,19 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && educationContracts.workPlanAndPermitCockpitsStillCovered === true
     && educationContracts.providerOrExportContractsChanged === false
     && educationVerification.length >= 4
-    && educationVerification.every((item) => isRecord(item) && item.status === "PASS");
+    && educationVerification.every((item) => isRecord(item) && item.status === "PASS")
+    && readString(emergencyCockpit.verdict) === "PASS_CURRENT_SOURCE"
+    && emergencySourceCurrent
+    && readString(emergencyScope.route) === "/documents"
+    && readString(emergencyScope.surface) === "emergencyResponseDraft"
+    && readBoolean(emergencyScope.productionLiveClaimed) === false
+    && emergencyContracts.emergencyCockpitVisible === true
+    && emergencyContracts.emergencyCockpitBelowToolbar === true
+    && emergencyContracts.emergencyRawTextareaSecondary === true
+    && emergencyContracts.phoneNumbersNotInvented === true
+    && emergencyContracts.providerOrExportContractsChanged === false
+    && emergencyVerification.length >= 4
+    && emergencyVerification.every((item) => isRecord(item) && item.status === "PASS");
 
   const sharePass = readString(share.verdict).includes("PASS")
     && readString(shareDesktop.verdict) === "PASS_PRODUCTION"
@@ -841,9 +862,9 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       label: "Documents and Share cockpit UI",
       state: "proven",
       evidencePath: firstViewSplitPath,
-      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row, TBM, and education authoring cockpits, core/supporting document navigation split, work-plan/permit execution cockpits, /share desktop two-pane channel composition, staged Share rail, selected-summary, preview, primary CTA, and collapsed mobile configuration stack. It does not claim provider live dispatch, production live Share rail geometry, or full 12-document authoring completion.",
+      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row, TBM, education, and emergency authoring cockpits, core/supporting document navigation split, work-plan/permit execution cockpits, /share desktop two-pane channel composition, staged Share rail, selected-summary, preview, primary CTA, and collapsed mobile configuration stack. It does not claim provider live dispatch, production live Share rail geometry, or full 12-document authoring completion.",
       nextActions: [
-        "Continue UI product depth on remaining document-specific first-task surfaces for education, emergency response, photo evidence, multilingual transmission, field message, and summary documents.",
+        "Continue UI product depth on remaining document-specific first-task surfaces for photo evidence, multilingual transmission, field message, and summary documents.",
         "Keep the production live geometry recorded for the risk-row cockpit slice; do not expand it into a full 12-document authoring claim.",
         "Promote the Share staged rail to production evidence only after build-info reaches the staged-rail commit and live geometry is probed.",
         "Keep /share generated-result and mobile stepper improvements as separate gates when user-visible sessions reproduce the complaint.",

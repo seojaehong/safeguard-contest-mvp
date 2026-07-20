@@ -1,7 +1,7 @@
 {
   "schemaVersion": "safeclaw-northstar-open-gate-audit/v1",
-  "generatedAt": "2026-07-20T22:43:03.821Z",
-  "sourceSha": "b8c582a53b549bd855e3aff785cd30f090be798a",
+  "generatedAt": "2026-07-20T23:54:57.225Z",
+  "sourceSha": "78475989b375be0b5b13d4651e8828cc331f2e5f",
   "overall": "open",
   "gates": [
     {
@@ -26,11 +26,12 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "label": "Documents and Share cockpit UI",
-      "evidencePath": "evaluation\\documents-risk-row-cockpit-2026-07-21\\report.json",
-      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row authoring cockpit, /share desktop two-pane channel composition, and /share selected-summary, preview, primary CTA, and collapsed mobile configuration stack. It does not claim provider live dispatch or full 12-document authoring completion.",
+      "evidencePath": "evaluation\\documents-first-view-split-2026-07-21\\report.json",
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, production-confirmed inner-pane default depth, selected-section field/evidence/recheck affordance, risk-row, TBM, education, and emergency authoring cockpits, core/supporting document navigation split, work-plan/permit execution cockpits, /share desktop two-pane channel composition, staged Share rail, selected-summary, preview, primary CTA, and collapsed mobile configuration stack. It does not claim provider live dispatch, production live Share rail geometry, or full 12-document authoring completion.",
       "nextActions": [
-        "Continue UI product depth on full 12-document field-first authoring, row-level validation actions, and document-specific drilldown beyond the current risk-row cockpit.",
+        "Continue UI product depth on remaining document-specific first-task surfaces for photo evidence, multilingual transmission, field message, and summary documents.",
         "Keep the production live geometry recorded for the risk-row cockpit slice; do not expand it into a full 12-document authoring claim.",
+        "Promote the Share staged rail to production evidence only after build-info reaches the staged-rail commit and live geometry is probed.",
         "Keep /share generated-result and mobile stepper improvements as separate gates when user-visible sessions reproduce the complaint."
       ]
     },

@@ -45,4 +45,4 @@ For emergency response, that means the first screen answers “When do we stop, 
 
 - This is current-source evidence only; production browser geometry is still needed before a final UX PASS claim.
 - Photo evidence, multilingual briefing/transmission, field message, and summary still need first-task surfaces or bounded review cards.
-- Existing dirty `evaluation/northstar-open-gates-current/report.md` and `report.json` files were preserved and intentionally not included in this slice.
+- The northstar current gate is tracked separately from this product evidence slice.
