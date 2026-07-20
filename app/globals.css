@@ -1116,8 +1116,10 @@ ul {
 .safeclaw-landing-nav nav button,
 .safeclaw-landing-nav nav a {
   display: inline-flex;
+  min-width: 44px;
   min-height: var(--control-height);
   align-items: center;
+  justify-content: center;
   border: 0;
   background: transparent;
   color: var(--sc-steel-650);
@@ -1877,6 +1879,11 @@ ul {
 }
 
 .safeclaw-landing-footer nav a {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
   color: var(--os-panel-text);
   font-size: var(--text-body);
   font-weight: 500;
@@ -5451,6 +5458,9 @@ ul {
 }
 
 .customer-template-panel summary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   cursor: pointer;
   color: var(--ink);
   font-weight: 900;
@@ -7300,7 +7310,7 @@ ul {
 
 .advanced-downloads summary {
   display: inline-flex;
-  min-height: 42px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--line);
