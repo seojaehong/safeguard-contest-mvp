@@ -1999,13 +1999,14 @@ function RiskAssessmentRowsEditor({
 }) {
   const rowIdSignature = rowIds.join("\u001f");
   const [expandedRiskRowIds, setExpandedRiskRowIds] = useState<Set<string>>(() => (
-    new Set()
+    new Set(rowIds[0] ? [rowIds[0]] : [])
   ));
 
   useEffect(() => {
     const currentRowIds = new Set(rowIds);
     setExpandedRiskRowIds((current) => {
-      return new Set(Array.from(current).filter((id) => currentRowIds.has(id)));
+      const retained = Array.from(current).filter((id) => currentRowIds.has(id));
+      return new Set(retained.length ? retained : rowIds[0] ? [rowIds[0]] : []);
     });
   }, [rowIdSignature]);
 
@@ -2054,7 +2055,7 @@ function RiskAssessmentRowsEditor({
               className={styles.riskRow}
               key={rowId}
               data-testid="risk-row-editor-row"
-              open={isExpanded}
+              open={rowIndex === 0 || isExpanded}
               onToggle={(event) => {
                 const isOpen = event.currentTarget.open;
                 setExpandedRiskRowIds((current) => {

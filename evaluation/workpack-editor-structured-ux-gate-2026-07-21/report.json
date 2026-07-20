@@ -1,0 +1,38 @@
+{
+  "claims": [
+    "12-document editor is no longer generic-textarea-only",
+    "structured/source modes are present",
+    "structured sections and risk rows are browser-tested",
+    "first risk row is visible by default"
+  ],
+  "verification": [
+    {
+      "result": "PASS",
+      "command": "npm.cmd test -- tests\\\\workpack-risk-rows-editor.test.ts tests\\\\workpack-editor-structured-sections.test.ts --maxWorkers=1 --fileParallelism=false",
+      "tests": 11,
+      "files": 2
+    },
+    {
+      "result": "PASS",
+      "command": "npm.cmd test -- tests\\\\documents-editor-layout.test.ts -t edits canonical risk rows --maxWorkers=1 --fileParallelism=false",
+      "testsPassed": 1,
+      "files": 1,
+      "testsSkipped": 29
+    },
+    {
+      "result": "PASS",
+      "command": "npm.cmd test -- tests\\\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+      "tests": 30,
+      "files": 1
+    }
+  ],
+  "sourceHead": "2a8baac195bd28f4259ab4b1d4535c7aec6324f6",
+  "verdict": "PASS_CURRENT_STALE_GAP_CLASSIFICATION",
+  "checkedAt": "2026-07-21T01:16:00+09:00",
+  "boundaries": [
+    "does not claim all 12 documents are final bespoke field-first editors",
+    "no live provider dispatch claim",
+    "no DB/schema/Supabase writes"
+  ],
+  "branch": "chore/recipient-foreign-live-gate-20260720"
+}

@@ -138,7 +138,7 @@ describe("documents editor layout", () => {
       await page.locator('select[aria-label="편집 문서 선택"]').selectOption(documentCase.key);
       const editor = page.getByTestId("document-structured-editor");
       await editor.waitFor({ state: "visible" });
-      await expect.poll(() => editor.locator('[data-section-kind="body"] label strong').allTextContents())
+      await expect.poll(() => editor.locator('[data-section-kind="body"] summary strong').allTextContents())
         .toEqual(documentCase.labels);
       expect(await editor.locator(".document-section-textarea").count()).toBe(documentCase.labels.length);
     }
