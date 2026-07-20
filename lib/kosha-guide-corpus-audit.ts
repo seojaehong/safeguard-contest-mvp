@@ -509,12 +509,36 @@ export type KoshaGuideRowAudit = {
     templateFallback: boolean;
     nonEmptyBodyRows: number;
   }>;
+  duplicateSummaryRowsManifest: Array<{
+    id: string;
+    title: string;
+    summary: string;
+    templateFallback: boolean;
+    nonEmptyBody: boolean;
+    duplicateGroupSize: number;
+  }>;
   exactBodyDuplicateCandidateGroups: number;
   exactBodyDuplicateCandidateRows: number;
   missingSourceUrlCount: number;
   missingOfficialFileIdCount: number;
   missingOfficialPublishedAtCount: number;
   missingOfficialStatusCount: number;
+  missingOfficialProvenanceRows: Array<{
+    id: string;
+    title: string;
+    missingSourceUrl: boolean;
+    missingOfficialFileId: boolean;
+    missingOfficialPublishedAt: boolean;
+    missingOfficialStatus: boolean;
+  }>;
+  emptyBodyRows: Array<{
+    id: string;
+    title: string;
+    summary: string;
+    itemType: string;
+    category: string | null;
+    subcategory: string | null;
+  }>;
   missingVersionCodeCount: number;
   rawTagStandaloneControlLeakCount: number;
   rawInitialControlContaminationCount: number;
@@ -1321,6 +1345,24 @@ function payloadValue(payload: Record<string, unknown> | undefined, keys: string
   return undefined;
 }
 
+function compactKoshaRow(row: SafetyReferenceItem): {
+  id: string;
+  title: string;
+  summary: string;
+  itemType: string;
+  category: string | null;
+  subcategory: string | null;
+} {
+  return {
+    id: row.id,
+    title: row.title,
+    summary: row.summary,
+    itemType: row.item_type,
+    category: row.category,
+    subcategory: row.subcategory
+  };
+}
+
 function controlContaminationFlags(
   item: SafetyReferenceItem,
   controls: string[],
@@ -1406,6 +1448,65 @@ export function auditKoshaGuideRows(
     .sort((left, right) => right.rowCount - left.rowCount || codepointCompare(left.summary, right.summary));
   const templatedFallbackSummaries = duplicateSummaryDetails.filter((detail) => detail.templateFallback);
   const nonTemplateDuplicateSummaries = duplicateSummaryDetails.filter((detail) => !detail.templateFallback);
+  const duplicateSummaryRowsManifest = [...summaryRows.entries()]
+    .filter(([, groupedRows]) => groupedRows.length > 1)
+    .flatMap(([summary, groupedRows]) => {
+      const templateFallback = isTemplatedFallbackSummary(summary);
+      return groupedRows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        summary,
+        templateFallback,
+        nonEmptyBody: Boolean(normalizeWhitespace(row.body || "")),
+        duplicateGroupSize: groupedRows.length
+      }));
+    })
+    .sort((left, right) =>
+      codepointCompare(left.summary, right.summary) || codepointCompare(left.id, right.id)
+    );
+  const emptyBodyRows = rows
+    .filter((row) => !normalizeWhitespace(row.body || ""))
+    .map(compactKoshaRow)
+    .sort((left, right) => codepointCompare(left.id, right.id));
+  const missingOfficialProvenanceRows = rows
+    .map((row) => ({
+      id: row.id,
+      title: row.title,
+      missingSourceUrl: !row.source_url && !payloadValue(row.payload, [
+        "officialDownloadUrl",
+        "official_download_url",
+        "officialUrl",
+        "official_url",
+        "sourceUrl",
+        "source_url",
+        "downloadUrl",
+        "download_url"
+      ]),
+      missingOfficialFileId: !payloadValue(row.payload, [
+        "officialFileId",
+        "official_file_id",
+        "techGdlnOrgnlAtcflNo"
+      ]),
+      missingOfficialPublishedAt: !payloadValue(row.payload, [
+        "officialPublishedAt",
+        "official_published_at",
+        "publishedAt",
+        "techGdlnOfancYmd"
+      ]),
+      missingOfficialStatus: !payloadValue(row.payload, [
+        "officialStatus",
+        "official_status",
+        "status",
+        "techGdlnSttsSeCdSt"
+      ])
+    }))
+    .filter((row) =>
+      row.missingSourceUrl ||
+      row.missingOfficialFileId ||
+      row.missingOfficialPublishedAt ||
+      row.missingOfficialStatus
+    )
+    .sort((left, right) => codepointCompare(left.id, right.id));
   const rawInitialControlContaminationRows: KoshaGuideRowAudit["rawInitialControlContaminationRows"] = [];
   const rawControlContaminationRows: KoshaGuideRowAudit["rawControlContaminationRows"] = [];
   const operationalInitialControlContaminationRows: KoshaGuideRowAudit["operationalInitialControlContaminationRows"] = [];
@@ -1516,6 +1617,7 @@ export function auditKoshaGuideRows(
     nonTemplateDuplicateSummaryGroups: nonTemplateDuplicateSummaries.length,
     nonTemplateDuplicateSummaryRows: nonTemplateDuplicateSummaries.reduce((sum, detail) => sum + detail.rowCount, 0),
     duplicateSummaryDetails,
+    duplicateSummaryRowsManifest,
     exactBodyDuplicateCandidateGroups: duplicateBodies.groups,
     exactBodyDuplicateCandidateRows: duplicateBodies.rows,
     missingSourceUrlCount: rows.filter((row) => !row.source_url && !payloadValue(row.payload, [
@@ -1545,6 +1647,8 @@ export function auditKoshaGuideRows(
       "status",
       "techGdlnSttsSeCdSt"
     ])).length,
+    missingOfficialProvenanceRows,
+    emptyBodyRows,
     missingVersionCodeCount: rows.filter((row) => !normalizeKoshaVersionCode(row.title)).length,
     rawTagStandaloneControlLeakCount,
     rawInitialControlContaminationCount: rawInitialControlContaminationRows.length,

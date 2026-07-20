@@ -76,6 +76,15 @@ function buildRepairPlan(report) {
     quality.operationalControlContaminationRows,
     "operationalControlContaminationRows"
   ).map(compactRow);
+  const missingOfficialProvenanceRows = asArray(
+    quality.missingOfficialProvenanceRows,
+    "missingOfficialProvenanceRows"
+  ).map(compactRow);
+  const emptyBodyRows = asArray(quality.emptyBodyRows, "emptyBodyRows").map(compactRow);
+  const duplicateSummaryRowsManifest = asArray(
+    quality.duplicateSummaryRowsManifest,
+    "duplicateSummaryRowsManifest"
+  ).map(compactRow);
   const duplicateSummaryDetails = asArray(
     quality.duplicateSummaryDetails,
     "duplicateSummaryDetails"
@@ -157,24 +166,24 @@ function buildRepairPlan(report) {
     evidenceCoverage: [
       {
         workstreamId: "provenance_and_status_backfill_dry_run",
-        coverage: "count_only",
+        coverage: "row_level_complete",
         count: asNumber(quality.missingSourceUrlCount, "missingSourceUrlCount"),
-        rowLevelEvidenceAvailable: false,
-        reason: "The current audit records missing official provenance counts, but does not include all 1040 row identifiers in the evaluation artifact."
+        rowLevelEvidenceAvailable: true,
+        reason: "The current audit includes every row that lacks official provenance/status fields."
       },
       {
         workstreamId: "body_hydration_or_ocr_review",
-        coverage: "count_only",
+        coverage: "row_level_complete",
         count: asNumber(quality.emptyBodyCount, "emptyBodyCount"),
-        rowLevelEvidenceAvailable: false,
-        reason: "The current audit records empty-body counts and parse accounting, but does not include all 818 row identifiers in the evaluation artifact."
+        rowLevelEvidenceAvailable: true,
+        reason: "The current audit includes every row with an empty parsed body."
       },
       {
         workstreamId: "summary_regeneration",
-        coverage: "group_sample",
+        coverage: "row_level_complete",
         count: asNumber(quality.duplicateSummaryRows, "duplicateSummaryRows"),
-        rowLevelEvidenceAvailable: false,
-        reason: "The current audit includes duplicate summary groups and sample IDs, not a complete 822-row manifest."
+        rowLevelEvidenceAvailable: true,
+        reason: "The current audit includes every duplicate or fallback-summary row, plus group metadata."
       },
       {
         workstreamId: "version_state_reconciliation",
@@ -202,6 +211,9 @@ function buildRepairPlan(report) {
     rowSets: {
       versionUpdates,
       retiredRows,
+      missingOfficialProvenanceRows,
+      emptyBodyRows,
+      duplicateSummaryRowsManifest,
       operationalControlReviewRequiredRows: operationalReviewRows,
       operationalControlSecondaryCandidateRows: operationalSecondaryRows,
       duplicateSummaryGroups: duplicateSummaryDetails,
@@ -231,9 +243,15 @@ function buildRowEvidenceManifest(report, plan) {
   const quality = asRecord(report.corpusQuality, "corpusQuality");
   const summaryGroups = asArray(quality.duplicateSummaryDetails, "duplicateSummaryDetails")
     .map((item) => asRecord(item, "duplicateSummaryDetail"));
-  const summarySampleIds = uniqueStrings(summaryGroups.flatMap((item) =>
-    asArray(item.sampleIds, "duplicateSummaryDetail.sampleIds")
-  ));
+  const missingOfficialProvenanceRows = asArray(
+    plan.rowSets.missingOfficialProvenanceRows,
+    "plan.rowSets.missingOfficialProvenanceRows"
+  );
+  const emptyBodyRows = asArray(plan.rowSets.emptyBodyRows, "plan.rowSets.emptyBodyRows");
+  const duplicateSummaryRowsManifest = asArray(
+    plan.rowSets.duplicateSummaryRowsManifest,
+    "plan.rowSets.duplicateSummaryRowsManifest"
+  );
   const controlReviewRows = asArray(
     plan.rowSets.operationalControlReviewRequiredRows,
     "plan.rowSets.operationalControlReviewRequiredRows"
@@ -249,30 +267,30 @@ function buildRowEvidenceManifest(report, plan) {
   const rowSetInventory = [
     {
       workstreamId: "provenance_and_status_backfill_dry_run",
-      evidenceMode: "count_only",
+      evidenceMode: "row_level_complete",
       sourceCount: asNumber(quality.missingSourceUrlCount, "missingSourceUrlCount"),
-      rowCountAvailable: 0,
-      rowLevelComplete: false,
-      missingRowManifestCount: asNumber(quality.missingSourceUrlCount, "missingSourceUrlCount"),
-      nextArtifact: "official-provenance-backfill-row-manifest.json"
+      rowCountAvailable: missingOfficialProvenanceRows.length,
+      rowLevelComplete: missingOfficialProvenanceRows.length === asNumber(quality.missingSourceUrlCount, "missingSourceUrlCount"),
+      missingRowManifestCount: asNumber(quality.missingSourceUrlCount, "missingSourceUrlCount") - missingOfficialProvenanceRows.length,
+      rowSetKeys: ["missingOfficialProvenanceRows"]
     },
     {
       workstreamId: "body_hydration_or_ocr_review",
-      evidenceMode: "count_only",
+      evidenceMode: "row_level_complete",
       sourceCount: asNumber(quality.emptyBodyCount, "emptyBodyCount"),
-      rowCountAvailable: 0,
-      rowLevelComplete: false,
-      missingRowManifestCount: asNumber(quality.emptyBodyCount, "emptyBodyCount"),
-      nextArtifact: "body-hydration-ocr-row-manifest.json"
+      rowCountAvailable: emptyBodyRows.length,
+      rowLevelComplete: emptyBodyRows.length === asNumber(quality.emptyBodyCount, "emptyBodyCount"),
+      missingRowManifestCount: asNumber(quality.emptyBodyCount, "emptyBodyCount") - emptyBodyRows.length,
+      rowSetKeys: ["emptyBodyRows"]
     },
     {
       workstreamId: "summary_regeneration",
-      evidenceMode: "group_sample",
+      evidenceMode: "row_level_complete",
       sourceCount: asNumber(quality.duplicateSummaryRows, "duplicateSummaryRows"),
-      rowCountAvailable: summarySampleIds.length,
-      rowLevelComplete: false,
-      missingRowManifestCount: asNumber(quality.duplicateSummaryRows, "duplicateSummaryRows") - summarySampleIds.length,
-      nextArtifact: "source-grounded-summary-row-manifest.json"
+      rowCountAvailable: duplicateSummaryRowsManifest.length,
+      rowLevelComplete: duplicateSummaryRowsManifest.length === asNumber(quality.duplicateSummaryRows, "duplicateSummaryRows"),
+      missingRowManifestCount: asNumber(quality.duplicateSummaryRows, "duplicateSummaryRows") - duplicateSummaryRowsManifest.length,
+      rowSetKeys: ["duplicateSummaryRowsManifest"]
     },
     {
       workstreamId: "version_state_reconciliation",
@@ -320,8 +338,11 @@ function buildRowEvidenceManifest(report, plan) {
     rowSetInventory,
     summarySample: {
       duplicateSummaryGroups: summaryGroups.length,
-      uniqueSampleIds: summarySampleIds.length,
-      sampleIds: summarySampleIds.slice(0, 20)
+      rowManifestIds: duplicateSummaryRowsManifest.length,
+      sampleIds: duplicateSummaryRowsManifest
+        .map((row) => asRecord(row, "duplicateSummaryRowsManifest.row").id)
+        .filter(Boolean)
+        .slice(0, 20)
     },
     incompleteWorkstreams: incomplete.map((item) => ({
       workstreamId: item.workstreamId,

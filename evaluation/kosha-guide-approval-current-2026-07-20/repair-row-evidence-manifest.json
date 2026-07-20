@@ -1,40 +1,46 @@
 {
   "schemaVersion": "safeclaw-kosha-guide-repair-row-evidence/v1",
-  "generatedAt": "2026-07-20T07:43:38.242Z",
+  "generatedAt": "2026-07-20T07:54:22.544Z",
   "sourceAudit": "evaluation/kosha-guide-approval-current-2026-07-20/report.json",
   "repairPlan": "evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json",
   "readOnly": true,
   "dbMutationPerformed": false,
   "uploadPerformed": false,
   "embeddingGenerated": false,
-  "decision": "row_level_evidence_incomplete_before_mutation_or_embedding",
+  "decision": "row_level_evidence_complete_for_review",
   "rowSetInventory": [
     {
       "workstreamId": "provenance_and_status_backfill_dry_run",
-      "evidenceMode": "count_only",
+      "evidenceMode": "row_level_complete",
       "sourceCount": 1040,
-      "rowCountAvailable": 0,
-      "rowLevelComplete": false,
-      "missingRowManifestCount": 1040,
-      "nextArtifact": "official-provenance-backfill-row-manifest.json"
+      "rowCountAvailable": 1040,
+      "rowLevelComplete": true,
+      "missingRowManifestCount": 0,
+      "rowSetKeys": [
+        "missingOfficialProvenanceRows"
+      ]
     },
     {
       "workstreamId": "body_hydration_or_ocr_review",
-      "evidenceMode": "count_only",
+      "evidenceMode": "row_level_complete",
       "sourceCount": 818,
-      "rowCountAvailable": 0,
-      "rowLevelComplete": false,
-      "missingRowManifestCount": 818,
-      "nextArtifact": "body-hydration-ocr-row-manifest.json"
+      "rowCountAvailable": 818,
+      "rowLevelComplete": true,
+      "missingRowManifestCount": 0,
+      "rowSetKeys": [
+        "emptyBodyRows"
+      ]
     },
     {
       "workstreamId": "summary_regeneration",
-      "evidenceMode": "group_sample",
+      "evidenceMode": "row_level_complete",
       "sourceCount": 822,
-      "rowCountAvailable": 33,
-      "rowLevelComplete": false,
-      "missingRowManifestCount": 789,
-      "nextArtifact": "source-grounded-summary-row-manifest.json"
+      "rowCountAvailable": 822,
+      "rowLevelComplete": true,
+      "missingRowManifestCount": 0,
+      "rowSetKeys": [
+        "duplicateSummaryRowsManifest"
+      ]
     },
     {
       "workstreamId": "version_state_reconciliation",
@@ -74,57 +80,59 @@
   ],
   "summarySample": {
     "duplicateSummaryGroups": 11,
-    "uniqueSampleIds": 33,
+    "rowManifestIds": 822,
     "sampleIds": [
-      "technical-support-07-0001-a-1-2018-구리에-대한-작업환경측정-분석-기술지침",
-      "technical-support-07-0002-a-102-2018-황산디메틸에-대한-작업환경측정-분석-기술지침-개정",
-      "technical-support-07-0003-a-103-2018-요오드화메틸에-대한-작업환경측정-분석-기술지침",
-      "technical-support-10-0095-d-1-2021-미압-배관-등에서의-폭연-방산구-설치에-관한-기술지침",
-      "technical-support-10-0096-d-12-2012-분진폭발방지에-관한-기술지침",
-      "technical-support-10-0097-d-13-2012-염소저장설비에-관한-기술지침",
-      "technical-support-02-0001-b-5-2011-조선업-안전점검-기술지침",
-      "technical-support-02-0002-b-6-2011-부선-안전작업-기술지침",
-      "technical-support-02-0004-b-m-10-2025-화학설비의-설치에-관한-기술지원규정",
-      "technical-support-09-0001-b-e-1-2025-피뢰시스템에-관한-기술지원규정",
-      "technical-support-09-0016-b-e-3-2025-변전실-등의-양압유지에-관한-기술지원규정",
-      "technical-support-09-0018-b-e-5-2025-비상전원의-선정-및-설치에-관한-기술지원규정",
-      "technical-support-08-0009-h-129-2023-폐활량검사-및-판정에-관한-지침",
-      "technical-support-08-0010-h-130-2021-접촉피부염의-작업관련성-평가지침",
-      "technical-support-08-0011-h-132-2023-벤젠-노출-근로자의-건강관리지침",
-      "technical-support-06-0014-a-g-3-2025-오토바이-배달작업-시-안전에-관한-기술지원규정",
-      "technical-support-06-0019-a-g-8-2025-산업재해-기록-분류에-관한-기술지원규정",
-      "technical-support-06-0020-a-g-9-2025-창고-작업-시-안전에-관한-기술지원규정",
+      "technical-support-02-0014-b-m-2-2025-혼합기의-안전작업에-관한-기술지원규정",
+      "technical-support-06-0017-a-g-6-2025-학교-급식실-근로자의-안전보건에-관한-기술지원규정",
+      "technical-support-06-0018-a-g-7-2025-공동주택-경비근로자의-관리업무-보조작업-시-안전에-관한-기술지원규정",
+      "technical-support-09-0012-b-e-2-2025-지중전선로의-시공-및-작업-안전에-관한-기술지원규정",
       "technical-support-01-0001-c-05-2016-건설공사-돌관작업-안전보건작업-지침",
-      "technical-support-01-0002-c-06-2015-타일-tile-공사-안전보건작업-지침"
+      "technical-support-01-0002-c-06-2015-타일-tile-공사-안전보건작업-지침",
+      "technical-support-01-0003-c-07-2012-시트-sheet-방수-안전보건작업-지침",
+      "technical-support-01-0004-c-103-2014-굴착공사-계측관리-기술지침",
+      "technical-support-01-0005-c-108-2017-건설현장-용접용단-안전보건작업-기술지침",
+      "technical-support-01-0006-c-11-2012-가설계단-설치-및-사용-안전보건작업-지침",
+      "technical-support-01-0007-c-113-2020-취약시기-건설현장-안전작업지침",
+      "technical-support-01-0008-c-114-2020-덤프트럭-및-화물자동차-안전작업-지침",
+      "technical-support-01-0009-c-14-2012-밀폐공간의-방수공사-안전보건작업-지침",
+      "technical-support-01-0010-c-16-2016-미장공사-안전보건작업-지침",
+      "technical-support-01-0011-c-17-2011-경량철골-천장공사-안전보건작업-지침",
+      "technical-support-01-0012-c-18-2015-건설공사-안전보건-설계지침",
+      "technical-support-01-0013-c-2-2020-수상-바지-barge-선-이용-건설공사-안전작업-지침",
+      "technical-support-01-0014-c-21-2011-현수교-교량공사-안전보건-작업지침",
+      "technical-support-01-0015-c-22-2011-사장교-교량공사-안전보건-작업지침",
+      "technical-support-01-0016-c-25-2018-재사용-가설기자재-성능기준에-관한-지침"
     ]
   },
-  "incompleteWorkstreams": [
+  "incompleteWorkstreams": [],
+  "completeWorkstreams": [
     {
       "workstreamId": "provenance_and_status_backfill_dry_run",
-      "evidenceMode": "count_only",
+      "evidenceMode": "row_level_complete",
       "sourceCount": 1040,
-      "rowCountAvailable": 0,
-      "missingRowManifestCount": 1040,
-      "nextArtifact": "official-provenance-backfill-row-manifest.json"
+      "rowCountAvailable": 1040,
+      "rowSetKeys": [
+        "missingOfficialProvenanceRows"
+      ]
     },
     {
       "workstreamId": "body_hydration_or_ocr_review",
-      "evidenceMode": "count_only",
+      "evidenceMode": "row_level_complete",
       "sourceCount": 818,
-      "rowCountAvailable": 0,
-      "missingRowManifestCount": 818,
-      "nextArtifact": "body-hydration-ocr-row-manifest.json"
+      "rowCountAvailable": 818,
+      "rowSetKeys": [
+        "emptyBodyRows"
+      ]
     },
     {
       "workstreamId": "summary_regeneration",
-      "evidenceMode": "group_sample",
+      "evidenceMode": "row_level_complete",
       "sourceCount": 822,
-      "rowCountAvailable": 33,
-      "missingRowManifestCount": 789,
-      "nextArtifact": "source-grounded-summary-row-manifest.json"
-    }
-  ],
-  "completeWorkstreams": [
+      "rowCountAvailable": 822,
+      "rowSetKeys": [
+        "duplicateSummaryRowsManifest"
+      ]
+    },
     {
       "workstreamId": "version_state_reconciliation",
       "evidenceMode": "row_level_complete",

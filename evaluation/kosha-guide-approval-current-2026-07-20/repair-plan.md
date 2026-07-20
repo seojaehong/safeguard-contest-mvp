@@ -1,6 +1,6 @@
 # KOSHA Guide Repair Plan
 
-Generated at: 2026-07-20T07:43:38.242Z
+Generated at: 2026-07-20T07:54:22.544Z
 
 ## Decision
 
@@ -23,9 +23,9 @@ This plan is a read-only repair queue. It does not authorize DB mutation, upload
 
 | Workstream | Coverage | Count | Row-level evidence available | Reason |
 | --- | --- | ---: | --- | --- |
-| `provenance_and_status_backfill_dry_run` | count_only | 1,040 | no | The current audit records missing official provenance counts, but does not include all 1040 row identifiers in the evaluation artifact. |
-| `body_hydration_or_ocr_review` | count_only | 818 | no | The current audit records empty-body counts and parse accounting, but does not include all 818 row identifiers in the evaluation artifact. |
-| `summary_regeneration` | group_sample | 822 | no | The current audit includes duplicate summary groups and sample IDs, not a complete 822-row manifest. |
+| `provenance_and_status_backfill_dry_run` | row_level_complete | 1,040 | yes | The current audit includes every row that lacks official provenance/status fields. |
+| `body_hydration_or_ocr_review` | row_level_complete | 818 | yes | The current audit includes every row with an empty parsed body. |
+| `summary_regeneration` | row_level_complete | 822 | yes | The current audit includes every duplicate or fallback-summary row, plus group metadata. |
 | `version_state_reconciliation` | row_level_complete | 8 | yes | The current audit includes every official version mismatch and retired local row. |
 | `control_causality_review` | row_level_complete | 71 | yes | The current audit includes every operational review-required row and remaining secondary candidate row. |
 | `retrieval_branch_observation` | scenario_branch_level_complete | 8 | yes | The current audit includes every untested retrieval scenario-branch pair. |

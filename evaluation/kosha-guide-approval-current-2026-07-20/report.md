@@ -1,10 +1,10 @@
 # KOSHA GUIDE corpus / harness audit
 
-- generatedAt: 2026-07-20T06:03:20.524Z
+- generatedAt: 2026-07-20T07:52:33.472Z
 - readOnly: true
 - dbMutationPerformed: false
 - uploadPerformed: false
-- elapsedSeconds: 94.293
+- elapsedSeconds: 93.195
 
 ## 결론
 
@@ -168,7 +168,7 @@ Production search가 관측한 mode: hybrid-local-supabase, rest-ilike, local-hy
 | `local-parse-accounting` | pass | 0 | 1040 returned; 237 attempted; 222 usable nonempty; 15 empty output; 0 hard failed |
 | `local-pdf-empty-output` | boundary | 15 | attempted PDF parses with no usable nonempty body; OCR or extraction review required |
 | `local-pdf-parse-failure` | pass | 0 | per-PDF parser exceptions; empty outputs are tracked as a separate boundary |
-| `operational-audit-deterministic` | pass | 0 | a01aae777ca702f0827f4774fc1d13ad31201762f135f9e9b3d3fe5398d70785 / a01aae777ca702f0827f4774fc1d13ad31201762f135f9e9b3d3fe5398d70785 |
+| `operational-audit-deterministic` | pass | 0 | 306033ddf4e9dfc61215d22a0ddecc9fe1f558a61c56dc906bad548ab554f065 / 306033ddf4e9dfc61215d22a0ddecc9fe1f558a61c56dc906bad548ab554f065 |
 | `source-mutation` | pass | 0 | derive operational metadata must not mutate source rows |
 | `empty-body` | fail | 818 | local ingest-equivalent rows with empty body |
 | `duplicate-summary` | fail | 822 | 11 normalized-summary groups; 818 fallback rows; not an identical full-content count |

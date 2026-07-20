@@ -90,9 +90,21 @@ describe("KOSHA Guide repair plan", () => {
       .toBeGreaterThanOrEqual(2);
     expect(evidenceCoverage.find((item) => item.workstreamId === "provenance_and_status_backfill_dry_run"))
       .toMatchObject({
-        coverage: "count_only",
-        rowLevelEvidenceAvailable: false,
+        coverage: "row_level_complete",
+        rowLevelEvidenceAvailable: true,
         count: 1040
+      });
+    expect(evidenceCoverage.find((item) => item.workstreamId === "body_hydration_or_ocr_review"))
+      .toMatchObject({
+        coverage: "row_level_complete",
+        rowLevelEvidenceAvailable: true,
+        count: 818
+      });
+    expect(evidenceCoverage.find((item) => item.workstreamId === "summary_regeneration"))
+      .toMatchObject({
+        coverage: "row_level_complete",
+        rowLevelEvidenceAvailable: true,
+        count: 822
       });
     expect(evidenceCoverage.find((item) => item.workstreamId === "version_state_reconciliation"))
       .toMatchObject({
@@ -144,7 +156,7 @@ describe("KOSHA Guide repair plan", () => {
     expect(retrieval?.countSemantics).toBe("scenario-branch pairs, not unique branch names");
   });
 
-  it("writes a row-evidence manifest without inflating count-only gaps into row-level evidence", () => {
+  it("writes a row-evidence manifest that proves every repair queue count with rows", () => {
     const outputDir = mkdtempSync(join(tmpdir(), "safeclaw-kosha-repair-plan-"));
     const output = join(outputDir, "repair-plan.json");
     const rowEvidenceOutput = join(outputDir, "repair-row-evidence-manifest.json");
@@ -182,7 +194,7 @@ describe("KOSHA Guide repair plan", () => {
     const summarySample = asRecord(manifest.summarySample, "summarySample");
     const approvalGate = asRecord(manifest.approvalGate, "approvalGate");
 
-    expect(manifest.decision).toBe("row_level_evidence_incomplete_before_mutation_or_embedding");
+    expect(manifest.decision).toBe("row_level_evidence_complete_for_review");
     expect(manifest.readOnly).toBe(true);
     expect(manifest.dbMutationPerformed).toBe(false);
     expect(manifest.uploadPerformed).toBe(false);
@@ -190,42 +202,42 @@ describe("KOSHA Guide repair plan", () => {
     expect(asBoolean(approvalGate.mutationAllowedByThisRun, "mutationAllowedByThisRun")).toBe(false);
     expect(asBoolean(approvalGate.embeddingAllowedByThisRun, "embeddingAllowedByThisRun")).toBe(false);
     expect(inventory).toHaveLength(6);
-    expect(incomplete.map((item) => item.workstreamId)).toEqual([
+    expect(incomplete).toHaveLength(0);
+    expect(complete.map((item) => item.workstreamId)).toEqual([
       "provenance_and_status_backfill_dry_run",
       "body_hydration_or_ocr_review",
-      "summary_regeneration"
-    ]);
-    expect(complete.map((item) => item.workstreamId)).toEqual([
+      "summary_regeneration",
       "version_state_reconciliation",
       "control_causality_review",
       "retrieval_branch_observation"
     ]);
     expect(inventory.find((item) => item.workstreamId === "provenance_and_status_backfill_dry_run"))
       .toMatchObject({
-        evidenceMode: "count_only",
+        evidenceMode: "row_level_complete",
         sourceCount: 1040,
-        rowCountAvailable: 0,
-        rowLevelComplete: false,
-        missingRowManifestCount: 1040
+        rowCountAvailable: 1040,
+        rowLevelComplete: true,
+        missingRowManifestCount: 0
       });
     expect(inventory.find((item) => item.workstreamId === "body_hydration_or_ocr_review"))
       .toMatchObject({
-        evidenceMode: "count_only",
+        evidenceMode: "row_level_complete",
         sourceCount: 818,
-        rowCountAvailable: 0,
-        rowLevelComplete: false,
-        missingRowManifestCount: 818
+        rowCountAvailable: 818,
+        rowLevelComplete: true,
+        missingRowManifestCount: 0
       });
     const summaryInventory = inventory.find((item) => item.workstreamId === "summary_regeneration");
     expect(summaryInventory).toMatchObject({
-      evidenceMode: "group_sample",
+      evidenceMode: "row_level_complete",
       sourceCount: 822,
-      rowLevelComplete: false,
-      nextArtifact: "source-grounded-summary-row-manifest.json"
+      rowCountAvailable: 822,
+      rowLevelComplete: true,
+      missingRowManifestCount: 0
     });
     expect(asNumber(summaryInventory?.rowCountAvailable, "summary.rowCountAvailable"))
-      .toBeLessThan(822);
-    expect(asNumber(summarySample.uniqueSampleIds, "summarySample.uniqueSampleIds"))
+      .toBe(822);
+    expect(asNumber(summarySample.rowManifestIds, "summarySample.rowManifestIds"))
       .toBe(asNumber(summaryInventory?.rowCountAvailable, "summary.rowCountAvailable"));
     expect(inventory.find((item) => item.workstreamId === "control_causality_review"))
       .toMatchObject({

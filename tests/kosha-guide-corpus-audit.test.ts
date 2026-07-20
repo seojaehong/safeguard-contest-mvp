@@ -1548,11 +1548,22 @@ describe("KOSHA GUIDE corpus quality", () => {
 
     expect(report.rowCount).toBe(3);
     expect(report.emptyBodyCount).toBe(2);
+    expect(report.emptyBodyRows.map((row) => row.id)).toEqual(["paint-1", "paint-2"]);
     expect(report.duplicateSummaryGroups).toBe(1);
     expect(report.duplicateSummaryRows).toBe(2);
+    expect(report.duplicateSummaryRowsManifest.map((row) => row.id)).toEqual(["paint-1", "paint-2"]);
+    expect(report.duplicateSummaryRowsManifest.every((row) => row.duplicateGroupSize === 2)).toBe(true);
     expect(report.missingSourceUrlCount).toBe(2);
     expect(report.missingOfficialFileIdCount).toBe(3);
     expect(report.missingOfficialPublishedAtCount).toBe(3);
+    expect(report.missingOfficialProvenanceRows).toHaveLength(3);
+    expect(report.missingOfficialProvenanceRows.find((row) => row.id === "confined-1"))
+      .toMatchObject({
+        missingSourceUrl: false,
+        missingOfficialFileId: true,
+        missingOfficialPublishedAt: true,
+        missingOfficialStatus: true
+      });
     expect(report.rawTagStandaloneControlLeakCount).toBe(2);
     expect(report.rawControlContaminationCount).toBe(2);
     expect(report.sourceMutationCount).toBe(0);
