@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "safeclaw-kosha-focused-current-gate/v1",
+  "generatedAt": "2026-07-20T05:17:15.591Z",
+  "head": "894f030b5684f10a98326774993de5db4d37e9e4",
+  "liveBuildInfo": {
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "894f030b5684f10a98326774993de5db4d37e9e4",
+    "branch": "master",
+    "environment": "production",
+    "deploymentUrl": "safeguard-contest-rjczwfegn-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
+  },
+  "result": "pass",
+  "dbMutationPerformed": false,
+  "tests": {
+    "result": "pass",
+    "command": "npm.cmd test -- tests\\kosha-materialization-matrix.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\exact-trusted-kosha-registry-wave3.test.ts tests\\safety-reference-status-bundled-corpus.test.ts tests\\safety-reference-status-route.test.ts --maxWorkers=1 --fileParallelism=false",
+    "testsPassed": 53,
+    "filesPassed": 5
+  },
+  "exactTrustPins": [
+    "D-C-13",
+    "D-C-7",
+    "B-E-10"
+  ],
+  "assertions": [
+    "KOSHA exact trust registry wave2 and wave3 pins remain atomic and query-bounded.",
+    "D-C-7 scaffold guidance and B-E-10 electrical guidance materialize into generated workpack evidence.",
+    "Safety reference status exposes bundled corpus without enabling unapproved vector retrieval."
+  ],
+  "boundaries": [
+    "No DB migration or data mutation.",
+    "No embedding generation or upload.",
+    "Metadata-verified KOSHA rows remain non-exact until separately promoted."
+  ]
+}
