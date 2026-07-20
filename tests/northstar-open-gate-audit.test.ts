@@ -137,6 +137,9 @@ function createFixtureRoot(): string {
     sourceHeadBeforeCommit: "fixture-sha",
     assertions: {
       riskAssessmentToolbarVisibleInPaneAfterDeepScroll: true,
+      tbmLogDrilldownSummaryContainsSectionsEvidenceAndReview: true,
+      riskAssessmentDrilldownSummaryContainsSectionsEvidenceAndReview: true,
+      riskAssessmentDrilldownSummaryVisibleAfterDeepScroll: true,
       toolbarNearPaneTopAfterDeepScroll: true,
       toolbarDoesNotCoverActiveTextarea: true,
       pageHeightBoundedAfterDeepScroll: true,

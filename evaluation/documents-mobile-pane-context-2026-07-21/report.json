@@ -1,6 +1,7 @@
 {
-  "checkedAt": "2026-07-21T03:20:00+09:00",
+  "checkedAt": "2026-07-21T03:50:00+09:00",
   "sourceHeadBeforeCommit": "45a5e6285c1bdc788fd40b99bb29de58200495fc",
+  "sourceHeadBeforeSummaryDepthPatch": "bb60fdf8461dbd117827748ba7e35ef51de00bb2",
   "branch": "chore/recipient-foreign-live-gate-20260720",
   "verdict": "PASS_CURRENT_SOURCE",
   "scope": "mobile /documents internal pane selected-document context",
@@ -21,14 +22,18 @@
     "routeScopedDocumentsOnly": true,
     "compactStickyDocumentToolbar": true,
     "toolbarShowsSelectedTitle": true,
+    "toolbarShowsSelectedDrilldownSummary": true,
     "preservesInternalPaneAffordance": true
   },
   "assertions": {
     "tbmLogToolbarVisibleInPaneAfterSelection": true,
     "tbmLogToolbarContainsSelectedTitle": true,
+    "tbmLogDrilldownSummaryContainsSectionsEvidenceAndReview": true,
     "riskAssessmentToolbarVisibleInPaneAfterSelection": true,
     "riskAssessmentToolbarContainsSelectedTitle": true,
+    "riskAssessmentDrilldownSummaryContainsSectionsEvidenceAndReview": true,
     "riskAssessmentToolbarVisibleInPaneAfterDeepScroll": true,
+    "riskAssessmentDrilldownSummaryVisibleAfterDeepScroll": true,
     "riskAssessmentDeepScrollAtLeast": 600,
     "toolbarNearPaneTopAfterDeepScroll": true,
     "toolbarDoesNotCoverActiveTextarea": true,

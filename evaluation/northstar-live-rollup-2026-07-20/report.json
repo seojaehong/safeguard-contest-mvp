@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T18:40:31.602Z",
-  "head": "e3cddc4fd2100f28f4b3004d4d0bf85acf2c9523",
+  "generatedAt": "2026-07-20T18:54:33.744Z",
+  "head": "bb60fdf8461dbd117827748ba7e35ef51de00bb2",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "e3cddc4fd2100f28f4b3004d4d0bf85acf2c9523",
+    "commitSha": "bb60fdf8461dbd117827748ba7e35ef51de00bb2",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-51vgguzkh-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-leoc17ng6-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -37,7 +37,7 @@
       "id": "ui_documents_share_cockpit",
       "state": "proven",
       "artifact": "evaluation\\documents-mobile-pane-context-2026-07-21\\report.json",
-      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not close document-specific drilldown depth or claim provider live dispatch."
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not close deeper document-specific accordion/drilldown depth or claim provider live dispatch."
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -92,7 +92,7 @@
   },
   "workspaceGeometry": {
     "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
-    "productionCommit": "72b282315b7dcdd2bcc538de13dee9fd7d4c1c80",
+    "productionCommit": "560dc6ad50aad22c89f7a7f7b56f3ac1b67d95f2",
     "mobileDocumentDeepReviewOpen": false,
     "mobileVisibleDocumentPreviews": 0
   },
@@ -140,9 +140,9 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "e3cddc4fd2100f28f4b3004d4d0bf85acf2c9523",
+      "sourceCommit": "bb60fdf8461dbd117827748ba7e35ef51de00bb2",
       "sourceStatus": "exact",
-      "productionCommit": "e3cddc4fd2100f28f4b3004d4d0bf85acf2c9523",
+      "productionCommit": "bb60fdf8461dbd117827748ba7e35ef51de00bb2",
       "productionStatus": "matches_live"
     },
     {
@@ -206,7 +206,7 @@
       "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
       "sourceCommit": null,
       "sourceStatus": "missing",
-      "productionCommit": "72b282315b7dcdd2bcc538de13dee9fd7d4c1c80",
+      "productionCommit": "560dc6ad50aad22c89f7a7f7b56f3ac1b67d95f2",
       "productionStatus": "ancestor_of_head"
     },
     {

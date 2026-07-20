@@ -91,6 +91,18 @@
       "expandedCardDisplays": ["grid", "grid", "grid"],
       "horizontalOverflow": 0
     },
+    "independentGeneratedFlow390x844": {
+      "shareBodyHeight": 980,
+      "shareMobileSummaryBottom": 350,
+      "sharePreviewBottom": 604,
+      "primaryShareCtaBottom": 665,
+      "configToggleBottom": 726,
+      "configToggleHeight": 44,
+      "mobileConfigExpanded": false,
+      "configCardDisplays": ["none", "none", "none"],
+      "configCardHeights": [0, 0, 0],
+      "horizontalOverflow": 0
+    },
     "desktopPreservation": {
       "workspacePreviewRightOfPrimary": true,
       "workspaceChannelCards": [
@@ -179,6 +191,34 @@
       "toolbarDoesNotCoverActiveTextarea": true,
       "pageHeightRemainsBounded": true,
       "horizontalOverflowClosed": true
+    },
+    "checks": [
+      {
+        "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts the core launcher before the mobile editor\" --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testsPassed": 2
+      },
+      {
+        "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts --maxWorkers=1 --fileParallelism=false",
+        "result": "PASS",
+        "testsPassed": 31
+      },
+      {
+        "command": "npm.cmd run typecheck",
+        "result": "PASS"
+      }
+    ]
+  },
+  "selectedDocumentSummaryUpdate": {
+    "checkedAt": "2026-07-21T03:50:00+09:00",
+    "sourceHeadBeforePatch": "bb60fdf8461dbd117827748ba7e35ef51de00bb2",
+    "artifact": "evaluation/documents-mobile-pane-context-2026-07-21/report.json",
+    "currentSourceContract": {
+      "stickyToolbarIncludesSelectedTitle": true,
+      "stickyToolbarIncludesSectionEvidenceReviewSummary": true,
+      "summaryVisibleAfterTbmSelection": true,
+      "summaryVisibleAfterRiskAssessmentSelection": true,
+      "summaryVisibleAfterRiskAssessmentDeepScroll": true
     },
     "checks": [
       {

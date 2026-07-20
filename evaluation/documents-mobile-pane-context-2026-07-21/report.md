@@ -1,8 +1,8 @@
 # Documents Mobile Pane Context Gate
 
-Checked at: 2026-07-21 03:20 KST
+Checked at: 2026-07-21 03:50 KST
 
-Source HEAD before commit: `45a5e6285c1bdc788fd40b99bb29de58200495fc`
+Latest source HEAD before this summary-depth patch: `bb60fdf8461dbd117827748ba7e35ef51de00bb2`
 
 Branch: `chore/recipient-foreign-live-gate-20260720`
 
@@ -27,6 +27,7 @@ The next readability debt was deep internal pane scroll:
 
 - Mobile `/documents` restores `.document-toolbar` as a route-scoped compact sticky pane header.
 - The toolbar shows the selected document title and compact status.
+- The toolbar now also carries a selected-document drilldown summary: `N섹션 · 근거 N건 · 확인 N건`.
 - The toolbar stays inside `.workpack-shell` while the pane scrolls.
 - The existing non-interactive bottom scroll affordance remains.
 
@@ -59,8 +60,11 @@ Result: PASS.
 Assertions added:
 
 - After selecting `TBM 기록`, the toolbar is visible in `.workpack-shell`, sticky, and contains `TBM 기록`.
+- After selecting `TBM 기록`, the selected-document summary remains visible and includes `섹션`, `근거`, and `확인`.
 - After selecting `위험성평가표`, the toolbar is visible in `.workpack-shell`, sticky, and contains `위험성평가표`.
+- After selecting `위험성평가표`, the selected-document summary remains visible and includes `섹션`, `근거`, and `확인`.
 - After programmatic deep scroll (`scrollTop >= 600`), the toolbar remains near the pane top, below the pane bottom, and does not cover the active textarea.
+- After programmatic deep scroll, the selected-document summary still remains attached to the sticky pane toolbar.
 - Page height remains bounded after selection and deep scroll: `pageHeight <= viewportHeight + 1`.
 - Horizontal overflow remains closed: `scrollWidth <= viewportWidth + 1`.
 

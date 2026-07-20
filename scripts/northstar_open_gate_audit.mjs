@@ -543,6 +543,9 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
     && readBoolean(internalPaneGeometry.overflowX) === false
     && readNumber(internalPaneGeometry.outside) === 0
     && contextAssertions.riskAssessmentToolbarVisibleInPaneAfterDeepScroll === true
+    && contextAssertions.tbmLogDrilldownSummaryContainsSectionsEvidenceAndReview === true
+    && contextAssertions.riskAssessmentDrilldownSummaryContainsSectionsEvidenceAndReview === true
+    && contextAssertions.riskAssessmentDrilldownSummaryVisibleAfterDeepScroll === true
     && contextAssertions.toolbarNearPaneTopAfterDeepScroll === true
     && contextAssertions.toolbarDoesNotCoverActiveTextarea === true
     && contextAssertions.pageHeightBoundedAfterDeepScroll === true
@@ -573,9 +576,9 @@ function evaluateUiDocumentsShareCockpitGate(rootDir) {
       label: "Documents and Share cockpit UI",
       state: "proven",
       evidencePath: paneContextPath,
-      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not close document-specific drilldown depth or claim provider live dispatch.",
+      detail: "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not close deeper document-specific accordion/drilldown depth or claim provider live dispatch.",
       nextActions: [
-        "Continue UI work on document-specific drilldown depth: selected document summary, accordions, and one-document-at-a-time editing.",
+        "Continue UI work on deeper document-specific drilldown depth: section accordions, selected-document detail actions, and one-document-at-a-time editing.",
         "Optional follow-up: make the mobile Share configuration disclosure a guided stepper if more hand-holding is needed.",
       ],
     });

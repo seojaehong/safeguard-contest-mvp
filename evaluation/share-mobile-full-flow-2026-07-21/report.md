@@ -71,6 +71,21 @@ Production `https://www.safeclaw.kr`, build marker `560dc6ad50aad22c89f7a7f7b56f
   - `overflowX = false`
   - `outside = 0`
 
+Independent live generated-flow probe at 390x844:
+
+- Flow: typed a real workspace prompt, generated documents, opened Share, selected Vietnamese, and collapsed detailed configuration. No send/save action was executed.
+- `shareBody = 980`
+- `shareMobileSummary.bottom = 350`
+- `sharePreview.bottom = 604`
+- `primaryShareCta.bottom = 665`
+- `configToggle.bottom = 726`
+- `configToggle.height = 44`
+- `mobileConfigExpanded = false`
+- `mobileSummaryText = 대상 3명 선택 · 채널 메일, 문자 · 언어 베트남어(Tiếng Việt)`
+- `configCards.display = ["none", "none", "none"]`
+- `configCards.height = [0, 0, 0]`
+- `overflowX = 0`
+
 ## Desktop Preservation
 
 Workspace share desktop 1440x900 Day:

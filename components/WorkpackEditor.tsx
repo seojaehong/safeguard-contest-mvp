@@ -2407,6 +2407,8 @@ export function WorkpackEditor({
       }
     ];
   }, [data.citations.length, harnessSummary, selectedEvidenceLabel]);
+  const selectedEvidenceCount = evidenceStats.reduce((sum, item) => sum + item.value, 0);
+  const selectedDrilldownSummary = `${structuredDocument.body.length.toLocaleString("ko-KR")}섹션 · 근거 ${selectedEvidenceCount.toLocaleString("ko-KR")}건 · 확인 ${selectedQualityIssues.toLocaleString("ko-KR")}건`;
 
   useEffect(() => {
     onDeliverablesChangeRef.current = onDeliverablesChange;
@@ -3075,6 +3077,7 @@ export function WorkpackEditor({
             </div>
             <div className={`editor-document-meta ${styles.documentMeta}`}>
               <span className={`editor-save-state ${styles.saveState}`}>{saveStatusLabel}</span>
+              <span data-testid="selected-document-drilldown-summary">{selectedDrilldownSummary}</span>
               <span>{selectedText.length.toLocaleString("ko-KR")}자</span>
               {lastEditedAt ? (
                 <span>수정 {lastEditedAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</span>

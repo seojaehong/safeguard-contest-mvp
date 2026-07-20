@@ -1182,10 +1182,11 @@ describe("documents editor layout", () => {
         const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
+        const drilldownSummary = document.querySelector<HTMLElement>('[data-testid="selected-document-drilldown-summary"]');
         const selectedLauncher = document.querySelector<HTMLButtonElement>(
           '[data-testid="mobile-core-document-launcher"] button[data-document-key="tbmLogDraft"]'
         );
-        if (!textarea || !documentBody || !documentSelect || !workpackShell || !toolbar || !selectedLauncher) {
+        if (!textarea || !documentBody || !documentSelect || !workpackShell || !toolbar || !drilldownSummary || !selectedLauncher) {
           throw new Error("Missing selected mobile editor target");
         }
         const textareaRect = textarea.getBoundingClientRect();
@@ -1202,6 +1203,7 @@ describe("documents editor layout", () => {
           selectedDocument: documentSelect.value,
           selectedPressed: selectedLauncher.getAttribute("aria-pressed"),
           toolbarText: toolbar.textContent?.replace(/\s+/gu, " ").trim(),
+          drilldownSummaryText: drilldownSummary.textContent?.replace(/\s+/gu, " ").trim(),
           toolbarDisplay: toolbarStyle.display,
           toolbarPosition: toolbarStyle.position,
           toolbarTop: Math.round(toolbarRect.top),
@@ -1230,6 +1232,9 @@ describe("documents editor layout", () => {
       expect(selected.selectedPressed).toBe("true");
       expect(selected.scrollY).toBe(0);
       expect(selected.toolbarText).toContain("TBM 기록");
+      expect(selected.drilldownSummaryText).toMatch(/섹션 \d+|^\d+섹션/u);
+      expect(selected.drilldownSummaryText).toContain("근거");
+      expect(selected.drilldownSummaryText).toContain("확인");
       expect(selected.toolbarDisplay).not.toBe("none");
       expect(selected.toolbarPosition).toBe("sticky");
       expect(selected.toolbarVisibleInPane).toBe(true);
@@ -1263,7 +1268,8 @@ describe("documents editor layout", () => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const documentSelect = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
-        if (!textarea || !workpackShell || !documentSelect || !toolbar) {
+        const drilldownSummary = document.querySelector<HTMLElement>('[data-testid="selected-document-drilldown-summary"]');
+        if (!textarea || !workpackShell || !documentSelect || !toolbar || !drilldownSummary) {
           throw new Error("Missing selected risk assessment mobile editor target");
         }
         const textareaRect = textarea.getBoundingClientRect();
@@ -1274,6 +1280,7 @@ describe("documents editor layout", () => {
           selectedDocument: documentSelect.value,
           activeLabel: document.activeElement?.getAttribute("aria-label"),
           toolbarText: toolbar.textContent?.replace(/\s+/gu, " ").trim(),
+          drilldownSummaryText: drilldownSummary.textContent?.replace(/\s+/gu, " ").trim(),
           toolbarPosition: toolbarStyle.position,
           toolbarTop: Math.round(toolbarRect.top),
           toolbarBottom: Math.round(toolbarRect.bottom),
@@ -1293,6 +1300,9 @@ describe("documents editor layout", () => {
       expect(riskAssessmentLanding.selectedDocument).toBe("riskAssessmentDraft");
       expect(riskAssessmentLanding.activeLabel).toBe("위험성평가표 편집");
       expect(riskAssessmentLanding.toolbarText).toContain("위험성평가표");
+      expect(riskAssessmentLanding.drilldownSummaryText).toMatch(/섹션 \d+|^\d+섹션/u);
+      expect(riskAssessmentLanding.drilldownSummaryText).toContain("근거");
+      expect(riskAssessmentLanding.drilldownSummaryText).toContain("확인");
       expect(riskAssessmentLanding.toolbarPosition).toBe("sticky");
       expect(riskAssessmentLanding.toolbarVisibleInPane).toBe(true);
       expect(riskAssessmentLanding.toolbarTop).toBeGreaterThanOrEqual(riskAssessmentLanding.shellTop - 1);
@@ -1308,7 +1318,8 @@ describe("documents editor layout", () => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
         const textarea = document.querySelector<HTMLTextAreaElement>('.document-textarea[aria-label="위험성평가표 편집"]');
-        if (!workpackShell || !toolbar || !textarea) {
+        const drilldownSummary = document.querySelector<HTMLElement>('[data-testid="selected-document-drilldown-summary"]');
+        if (!workpackShell || !toolbar || !textarea || !drilldownSummary) {
           throw new Error("Missing risk assessment deep-scroll target");
         }
         const nextScrollTop = Math.min(1000, workpackShell.scrollHeight - workpackShell.clientHeight);
@@ -1321,6 +1332,7 @@ describe("documents editor layout", () => {
         return {
           activeLabel: document.activeElement?.getAttribute("aria-label"),
           toolbarText: toolbar.textContent?.replace(/\s+/gu, " ").trim(),
+          drilldownSummaryText: drilldownSummary.textContent?.replace(/\s+/gu, " ").trim(),
           shellTop: Math.round(shellRect.top),
           shellBottom: Math.round(shellRect.bottom),
           shellScrollTop: Math.round(workpackShell.scrollTop),
@@ -1336,6 +1348,9 @@ describe("documents editor layout", () => {
       });
       expect(riskAssessmentDeepScroll.activeLabel).toBe("위험성평가표 편집");
       expect(riskAssessmentDeepScroll.toolbarText).toContain("위험성평가표");
+      expect(riskAssessmentDeepScroll.drilldownSummaryText).toMatch(/섹션 \d+|^\d+섹션/u);
+      expect(riskAssessmentDeepScroll.drilldownSummaryText).toContain("근거");
+      expect(riskAssessmentDeepScroll.drilldownSummaryText).toContain("확인");
       expect(riskAssessmentDeepScroll.shellScrollTop).toBeGreaterThanOrEqual(600);
       expect(riskAssessmentDeepScroll.toolbarVisibleInPane).toBe(true);
       expect(riskAssessmentDeepScroll.toolbarTop).toBeGreaterThanOrEqual(riskAssessmentDeepScroll.shellTop - 1);
