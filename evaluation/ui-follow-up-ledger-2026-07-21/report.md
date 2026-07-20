@@ -57,7 +57,7 @@ Production marker catch-up:
 
 ## 2026-07-21 Documents First-Edit Cockpit Update
 
-Current-source bounded gate:
+Current-source bounded gate and production confirmation:
 
 - Artifact: `evaluation/documents-first-edit-cockpit-2026-07-21/report.md`
 - Source base before patch: `668c08147edf9d9e6b3cab7edf68b3a4f00229b6`
@@ -88,8 +88,11 @@ Current-source bounded gate:
 - Focused browser: `documents-editor-layout` default cockpit slice PASS, 1/1 selected.
 - Focused preservation browser: `documents-editor-layout` requested document + default cockpit + expanded tools containment PASS, 3/3 selected.
 - TypeScript: PASS.
+- Production `/api/build-info`: `4119367905b3f3cf46bf20747d7cf7635f389c7a`, branch `master`, environment `production`.
+- Live mobile 390x844: body `844px / 1.00x`, shell `476-796`, `clientHeight = 320`, `scrollHeight = 1447`, selected `위험성평가표`, risk launcher pressed, first textarea `581-738`, secondary tools `213px`, default open sections `1`, overflow `0`.
+- Live desktop 1440x723: body `770px / 1.07x`, shell `336-722`, `clientHeight = 386`, `scrollHeight = 1499`, selected `위험성평가표`, first textarea `493-658`, default open sections `1`, overflow `0`.
 
-Interpretation: this closes a bounded default-depth slice inside the document pane. It still does not claim full 12-document authoring UX is solved; deeper document-specific summaries, risk-row readability, and per-section action design remain OPEN.
+Interpretation: this closes a bounded default-depth slice inside the document pane on production. It still does not claim full 12-document authoring UX is solved; deeper document-specific summaries, risk-row readability, and per-section action design remain OPEN.
 
 ## Current Production Baseline
 

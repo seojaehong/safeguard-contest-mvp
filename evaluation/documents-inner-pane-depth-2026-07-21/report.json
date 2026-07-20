@@ -1,7 +1,7 @@
 {
   "checkedAt": "2026-07-21T06:38:00+09:00",
   "sourceHead": "d3a19519d41ae16503fa6b05b51a75b9140eeee1",
-  "verdict": "PASS_CURRENT_SOURCE",
+  "verdict": "PASS_PRODUCTION",
   "scope": "standalone /documents inner-pane default secondary controls/details depth",
   "routeSplitAloneAcceptedAsFix": false,
   "structuralContract": "first-viewport cockpit plus bounded pane/drilldown; long document content must not drive route body height",
@@ -96,6 +96,59 @@
       "result": "PASS"
     }
   ],
+  "productionConfirmation": {
+    "buildInfo": {
+      "commitSha": "4119367905b3f3cf46bf20747d7cf7635f389c7a",
+      "branch": "master",
+      "environment": "production"
+    },
+    "baseUrl": "https://www.safeclaw.kr",
+    "mobile390x844": {
+      "bodyHeight": 844,
+      "viewportHeight": 844,
+      "heightRatio": 1,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "horizontalOverflow": false,
+      "selectedTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 476,
+      "workpackShellBottom": 796,
+      "workpackShellHeight": 320,
+      "workpackShellOverflowY": "auto",
+      "workpackShellClientHeight": 320,
+      "workpackShellScrollHeight": 1447,
+      "toolbarTop": 476,
+      "toolbarBottom": 572,
+      "firstTextareaTop": 581,
+      "firstTextareaBottom": 738,
+      "defaultOpenSectionCount": 1,
+      "sectionCount": 7,
+      "editorSecondaryToolsHeight": 213
+    },
+    "desktop1440x723": {
+      "bodyHeight": 770,
+      "viewportHeight": 723,
+      "heightRatio": 1.07,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "horizontalOverflow": false,
+      "selectedTitle": "위험성평가표",
+      "riskLauncherPressed": true,
+      "workpackShellTop": 336,
+      "workpackShellBottom": 722,
+      "workpackShellHeight": 386,
+      "workpackShellOverflowY": "auto",
+      "workpackShellClientHeight": 386,
+      "workpackShellScrollHeight": 1499,
+      "toolbarTop": 229,
+      "toolbarBottom": 333,
+      "firstTextareaTop": 493,
+      "firstTextareaBottom": 658,
+      "defaultOpenSectionCount": 1,
+      "sectionCount": 7
+    }
+  },
   "remainingDebt": [
     "This does not claim a complete 12-document authoring redesign.",
     "Deeper document-specific summaries, risk-row readability, and per-section action design remain product-depth follow-up."

@@ -4,7 +4,7 @@ Checked at: 2026-07-21 06:38 KST
 
 ## Verdict
 
-`PASS_CURRENT_SOURCE`
+`PASS_PRODUCTION`
 
 This is a bounded `/documents` inner-pane disclosure patch. It preserves the live-confirmed first-edit cockpit while reducing the default mobile pane depth from secondary controls/details. It is not a claim that all 12-document authoring UX is finished.
 
@@ -79,6 +79,48 @@ Source patch commit: `d3a19519d41ae16503fa6b05b51a75b9140eeee1`
   - Result: PASS, 1 file / 3 selected tests.
 - `npm.cmd run typecheck`
   - Result: PASS.
+
+## Production Confirmation
+
+Production `/api/build-info`:
+
+- `commitSha = 4119367905b3f3cf46bf20747d7cf7635f389c7a`
+- `branch = master`
+- `environment = production`
+
+Live probe: `https://www.safeclaw.kr/documents?theme=day`, cache-busted, Playwright Chromium.
+
+### Mobile 390x844
+
+- `bodyHeight = 844`
+- `heightRatio = 1.00`
+- `scrollWidth = 390`
+- `clientWidth = 390`
+- `horizontalOverflow = false`
+- `selectedTitle = 위험성평가표`
+- `riskLauncherPressed = true`
+- `.workpack-shell = top 476 / bottom 796 / height 320 / overflowY auto`
+- `.workpack-shell.clientHeight = 320`
+- `.workpack-shell.scrollHeight = 1447`
+- `.document-toolbar = top 476 / bottom 572`
+- first textarea `top = 581`, `bottom = 738`
+- `defaultOpenSectionCount = 1`
+- `editorSecondaryTools.height = 213`
+
+### Desktop 1440x723
+
+- `bodyHeight = 770`
+- `heightRatio = 1.07`
+- `scrollWidth = 1440`
+- `clientWidth = 1440`
+- `horizontalOverflow = false`
+- `selectedTitle = 위험성평가표`
+- `riskLauncherPressed = true`
+- `.workpack-shell = top 336 / bottom 722 / height 386 / overflowY auto`
+- `.workpack-shell.clientHeight = 386`
+- `.workpack-shell.scrollHeight = 1499`
+- first textarea `top = 493`, `bottom = 658`
+- `defaultOpenSectionCount = 1`
 
 ## Remaining Debt
 
