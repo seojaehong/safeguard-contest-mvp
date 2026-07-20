@@ -71,10 +71,11 @@
       "id": "kosha_exact_trust_registry",
       "state": "proven",
       "label": "KOSHA exact trust registry",
-      "evidencePath": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "detail": "Current live runtime has 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), local corpus 234 items/7127 chunks, and focused KOSHA tests passed on the current HEAD.",
+      "evidencePath": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
+      "detail": "Current source confirms 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), KOSHA guide corpus, structured risk rows/TBM evidenceRefs, grounded generation, and live harness quality: 8 files / 223 tests PASS plus typecheck.",
       "nextActions": [
-        "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review."
+        "Promote additional metadata-verified KOSHA candidates to exact trust only through separate immutable acquisition/review.",
+        "Keep broader corpus exact-publishing, SIF vector retrieval, and DB persistence approval-gated."
       ]
     }
   ],

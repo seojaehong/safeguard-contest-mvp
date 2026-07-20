@@ -42,8 +42,8 @@
     {
       "id": "kosha_exact_trust_registry",
       "state": "proven",
-      "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "detail": "Current live runtime has 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), local corpus 234 items/7127 chunks, and focused KOSHA tests passed on the current HEAD."
+      "artifact": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
+      "detail": "Current source confirms 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), KOSHA guide corpus, structured risk rows/TBM evidenceRefs, grounded generation, and live harness quality: 8 files / 223 tests PASS plus typecheck."
     }
   ],
   "approvalGated": [
@@ -169,11 +169,11 @@
     },
     {
       "id": "kosha_exact_trust_registry",
-      "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "sourceCommit": "1c6e93476b5371861e190272efda9381065d77f3",
-      "sourceStatus": "ancestor",
-      "productionCommit": "1c6e93476b5371861e190272efda9381065d77f3",
-      "productionStatus": "ancestor_of_head"
+      "artifact": "evaluation\\kosha-current-northstar-regression-2026-07-21\\report.json",
+      "sourceCommit": "3dc37bc5569492ac59e2cab48b8c5d52793e3f0c",
+      "sourceStatus": "exact",
+      "productionCommit": "aedc3d4b607af8316b5d9276b6cd6a49c1bb2488",
+      "productionStatus": "product_live"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",

@@ -21,7 +21,7 @@ Overall: `northstar_open_approval_gated`
 | final_99_gate | notice | evaluation\final-99-gate-current-2026-07-20\report.json |
 | live_harness_quality | proven | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
 | ui_documents_share_cockpit | proven | evaluation\documents-mobile-internal-pane-2026-07-21\report.json |
-| kosha_exact_trust_registry | proven | evaluation\kosha-current-live-gate-2026-07-20\report.json |
+| kosha_exact_trust_registry | proven | evaluation\kosha-current-northstar-regression-2026-07-21\report.json |
 | supabase_rls_launch_isolation | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | llm_wiki_publication | approval_gated | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | sif_embedding_runtime | approval_gated | evaluation\sif-embedding-gate\approval-preflight-report.json |
@@ -34,7 +34,7 @@ Overall: `northstar_open_approval_gated`
 | ui_documents_share_cockpit | exact | product_live | evaluation\documents-mobile-internal-pane-2026-07-21\report.json |
 | final_99_gate | ancestor | ancestor_of_head | evaluation\final-99-gate-current-2026-07-20\report.json |
 | live_harness_quality | ancestor | ancestor_of_head | evaluation\live-harness-quality-probe-current-2026-07-20\report.json |
-| kosha_exact_trust_registry | ancestor | ancestor_of_head | evaluation\kosha-current-live-gate-2026-07-20\report.json |
+| kosha_exact_trust_registry | exact | source_current | evaluation\kosha-current-northstar-regression-2026-07-21\report.json |
 | rls_llm_wiki_approval_preflight | ancestor | missing | evaluation\rls-llm-wiki-approval-preflight-current-2026-07-20\report.json |
 | sif_embedding_preflight | exact | missing | evaluation\sif-embedding-gate\approval-preflight-report.json |
 | live_critical_surface | missing | ancestor_of_head | evaluation\live-critical-surface-current-2026-07-20-rerun\report.json |
