@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T13:14:11.562Z",
-  "head": "b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2",
+  "generatedAt": "2026-07-20T13:21:06.553Z",
+  "head": "1c6e93476b5371861e190272efda9381065d77f3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2",
+    "commitSha": "1c6e93476b5371861e190272efda9381065d77f3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-q9s67d8e3-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-nmd2x4yxu-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -117,7 +117,7 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2",
+      "sourceCommit": "1c6e93476b5371861e190272efda9381065d77f3",
       "sourceStatus": "exact",
       "productionCommit": null,
       "productionStatus": "missing"
@@ -141,16 +141,16 @@
     {
       "id": "kosha_exact_trust_registry",
       "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
-      "sourceCommit": "3b7bf2f0d853b303ba8215e78f3c95aa4716a427",
-      "sourceStatus": "ancestor",
-      "productionCommit": "3b7bf2f0d853b303ba8215e78f3c95aa4716a427",
-      "productionStatus": "ancestor_of_head"
+      "sourceCommit": "1c6e93476b5371861e190272efda9381065d77f3",
+      "sourceStatus": "exact",
+      "productionCommit": "1c6e93476b5371861e190272efda9381065d77f3",
+      "productionStatus": "matches_live"
     },
     {
       "id": "rls_llm_wiki_approval_preflight",
       "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
       "sourceCommit": "b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },
@@ -158,7 +158,7 @@
       "id": "sif_embedding_preflight",
       "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
       "sourceCommit": "b25e1c2e2a1230bec29b6dcc5cc4853798cdd2c2",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": null,
       "productionStatus": "missing"
     },

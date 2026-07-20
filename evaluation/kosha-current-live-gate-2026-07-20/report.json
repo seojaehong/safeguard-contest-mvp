@@ -1,20 +1,77 @@
 {
   "schemaVersion": "safeclaw-kosha-current-live-gate/v1",
-  "generatedAt": "2026-07-20T03:49:18.0601344Z",
-  "sourceSha": "3b7bf2f0d853b303ba8215e78f3c95aa4716a427",
+  "generatedAt": "2026-07-20T13:21:05.488Z",
+  "sourceSha": "1c6e93476b5371861e190272efda9381065d77f3",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "3b7bf2f0d853b303ba8215e78f3c95aa4716a427",
+    "commitSha": "1c6e93476b5371861e190272efda9381065d77f3",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-ol7vv7uf3-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-nmd2x4yxu-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "verdict": "pass_current_kosha_exact_trust_and_corpus_gate",
+  "dbMutationPerformed": false,
+  "networkOpened": true,
+  "checks": [
+    {
+      "id": "build_info_configured",
+      "passed": true,
+      "detail": "Production build-info must identify a configured 40-character commit."
+    },
+    {
+      "id": "status_ready",
+      "passed": true,
+      "detail": "Safety reference status must be ready/searchReady."
+    },
+    {
+      "id": "catalog_total_ready",
+      "passed": true,
+      "detail": "Safety reference catalog must report 9,920 items."
+    },
+    {
+      "id": "technical_total_ready",
+      "passed": true,
+      "detail": "KOSHA technical corpus must report 1,040 technical rows."
+    },
+    {
+      "id": "technical_split_ready",
+      "passed": true,
+      "detail": "KOSHA technical split must remain 803 guides + 237 support regulations."
+    },
+    {
+      "id": "local_corpus_ready",
+      "passed": true,
+      "detail": "Local KOSHA corpus must be ready with 234+ items, 7,127+ chunks, and zero failures."
+    },
+    {
+      "id": "exact_registry_ready",
+      "passed": true,
+      "detail": "Exact KOSHA trust registry must be ready with no integrity failure."
+    },
+    {
+      "id": "exact_registry_count",
+      "passed": true,
+      "detail": "Exact KOSHA trust registry must load exactly three pinned documents."
+    },
+    {
+      "id": "exact_registry_required_keys",
+      "passed": true,
+      "detail": "Exact KOSHA keys must be D-C-13, D-C-7, B-E-10 only."
+    },
+    {
+      "id": "exact_registry_items_match_keys",
+      "passed": true,
+      "detail": "Exact trust registry item keys must match the required stable document keys."
+    }
+  ],
+  "failedCheckIds": [],
   "liveStatus": {
     "status": "ready",
+    "ok": true,
+    "searchReady": true,
     "items": 9920,
     "technicalTotal": 1040,
     "technicalGuidelines": 803,
@@ -87,23 +144,7 @@
       ]
     }
   },
-  "verification": [
-    {
-      "command": "npm.cmd test -- tests\\exact-trusted-kosha-grounding.test.ts tests\\exact-trusted-kosha-registry-wave2.test.ts tests\\kosha-grounding-fail-closed.test.ts tests\\kosha-current-review-run-ask.test.ts tests\\exact-kosha-applicability-policy.test.ts --maxWorkers=1 --fileParallelism=false",
-      "result": "pass",
-      "filesPassed": 5,
-      "testsPassed": 80
-    },
-    {
-      "command": "python -m unittest scripts.tests.test_acquire_exact_kosha_body",
-      "result": "pass",
-      "testsPassed": 19
-    },
-    {
-      "command": "npm.cmd run typecheck",
-      "result": "pass"
-    }
-  ],
+  "verification": [],
   "claimsAllowed": [
     "KOSHA technical corpus is live-ready for current retrieval/search status.",
     "Exact KOSHA evidence is limited to the pinned D-C-13, D-C-7, and B-E-10 documents.",
