@@ -1,8 +1,8 @@
 # SafeClaw North Star Live Rollup
 
-Generated at: 2026-07-20T04:09:00.000Z
+Generated at: 2026-07-20T04:16:20.000Z
 
-Current HEAD / live production build: `7d56f97bd9f28daa0b0db415730a124df54d2abb`
+Current HEAD / live production build: `dab7d4f8f8e546dcbcbe7725b5c064c0533eb292`
 
 Overall: `northstar_open_approval_gated`
 
@@ -16,6 +16,7 @@ This rollup does not claim the long-term North Star is complete. It records the 
 | KOSHA materialization | PASS, finding count 0 | `evaluation/kosha-live-materialization-2026-07-20/report.json` |
 | KOSHA exact trust registry | PASS, D-C-13 / D-C-7 / B-E-10 | `evaluation/kosha-current-live-gate-2026-07-20/report.json` |
 | RLS / LLM Wiki app boundary | PASS approval-gated, 9 files / 83 tests | `evaluation/rls-current-tenant-boundary-gate-2026-07-20/report.json` |
+| Live critical surface | PASS, 8 routes x 2 viewports, findings 0 | `evaluation/live-critical-surface-current-2026-07-20-rerun/report.json` |
 
 ## Still Approval-Gated
 

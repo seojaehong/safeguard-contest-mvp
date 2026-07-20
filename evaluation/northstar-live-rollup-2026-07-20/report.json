@@ -1,12 +1,12 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T04:09:00.000Z",
-  "head": "7d56f97bd9f28daa0b0db415730a124df54d2abb",
+  "generatedAt": "2026-07-20T04:16:20.000Z",
+  "head": "dab7d4f8f8e546dcbcbe7725b5c064c0533eb292",
   "liveBuildInfo": {
-    "commitSha": "7d56f97bd9f28daa0b0db415730a124df54d2abb",
+    "commitSha": "dab7d4f8f8e546dcbcbe7725b5c064c0533eb292",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-8dchc0ttf-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-4pecnxra5-seojaehongs-projects.vercel.app"
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
@@ -42,6 +42,14 @@
       "result": "pass_approval_gated",
       "testFilesPassed": 9,
       "testsPassed": 83
+    },
+    {
+      "id": "live_critical_surface",
+      "artifact": "evaluation/live-critical-surface-current-2026-07-20-rerun/report.json",
+      "result": "pass",
+      "routesChecked": 8,
+      "viewportsChecked": 2,
+      "findings": 0
     }
   ],
   "approvalGated": [
