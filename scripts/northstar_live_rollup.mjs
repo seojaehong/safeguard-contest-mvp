@@ -1,0 +1,472 @@
+#!/usr/bin/env node
+// @ts-check
+
+import fs from "node:fs";
+import path from "node:path";
+import process from "node:process";
+import { execFileSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const SCHEMA_VERSION = "safeclaw-northstar-live-rollup/v2";
+const SCRIPT_PATH = fileURLToPath(import.meta.url);
+const REPO_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..");
+const DEFAULT_OUTPUT_DIR = path.join("evaluation", "northstar-live-rollup-2026-07-20");
+const DEFAULT_BUILD_INFO_URL = "https://www.safeclaw.kr/api/build-info";
+
+const ARTIFACTS = Object.freeze({
+  openGate: path.join("evaluation", "northstar-open-gates-current", "report.json"),
+  final99: path.join("evaluation", "final-99-gate-current-2026-07-20", "report.json"),
+  final99NoticeCarry: path.join("evaluation", "final-99-gate-current-2026-07-20", "notice-carry.json"),
+  liveHarness: path.join("evaluation", "live-harness-quality-probe-current-2026-07-20", "report.json"),
+  kosha: path.join("evaluation", "kosha-current-live-gate-2026-07-20", "report.json"),
+  rlsWiki: path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json"),
+  sifEmbedding: path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"),
+  liveCritical: path.join("evaluation", "live-critical-surface-current-2026-07-20-rerun", "report.json"),
+  mobileP0: path.join("evaluation", "mobile-p0-workspace-gate-2026-07-20", "report.json"),
+  workspaceGeometry: path.join("evaluation", "workspace-docs-share-production-gate-2026-07-20", "current-geometry.json"),
+});
+
+/**
+ * @typedef {Record<string, unknown>} JsonRecord
+ */
+
+/**
+ * @param {unknown} value
+ * @returns {value is JsonRecord}
+ */
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * @param {unknown} value
+ */
+function asString(value) {
+  return typeof value === "string" ? value : "";
+}
+
+/**
+ * @param {unknown} value
+ */
+function asNumber(value) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string} relativePath
+ */
+function readJson(rootDir, relativePath) {
+  const absolutePath = path.join(rootDir, relativePath);
+  const text = fs.readFileSync(absolutePath, "utf8");
+  return JSON.parse(text);
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string} relativePath
+ */
+function tryReadJson(rootDir, relativePath) {
+  try {
+    return readJson(rootDir, relativePath);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * @param {string} rootDir
+ */
+function gitHead(rootDir) {
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: rootDir,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "unknown";
+  }
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string} possibleAncestor
+ */
+function isAncestor(rootDir, possibleAncestor) {
+  if (!/^[0-9a-f]{40}$/u.test(possibleAncestor)) {
+    return false;
+  }
+  try {
+    execFileSync("git", ["merge-base", "--is-ancestor", possibleAncestor, "HEAD"], {
+      cwd: rootDir,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string} sha
+ * @param {string} currentHead
+ */
+function classifySha(rootDir, sha, currentHead) {
+  if (!sha) {
+    return "missing";
+  }
+  if (sha === currentHead) {
+    return "exact";
+  }
+  if (isAncestor(rootDir, sha)) {
+    return "ancestor";
+  }
+  return "not_ancestor";
+}
+
+/**
+ * @param {unknown} report
+ */
+function extractProductionCommit(report) {
+  if (!isRecord(report)) {
+    return "";
+  }
+  if (isRecord(report.productionBuild)) {
+    return asString(report.productionBuild.commitSha);
+  }
+  if (isRecord(report.liveBuildInfo)) {
+    return asString(report.liveBuildInfo.commitSha);
+  }
+  if (isRecord(report.production)) {
+    return asString(report.production.commitSha);
+  }
+  if (isRecord(report.build)) {
+    return asString(report.build.commitSha);
+  }
+  if (isRecord(report.buildInfo)) {
+    return asString(report.buildInfo.commitSha);
+  }
+  return "";
+}
+
+/**
+ * @param {unknown} report
+ */
+function extractSourceCommit(report) {
+  if (!isRecord(report)) {
+    return "";
+  }
+  return asString(report.sourceCommit)
+    || asString(report.sourceSha)
+    || asString(report.head)
+    || asString(report.commitSha)
+    || asString(report.commit);
+}
+
+/**
+ * @param {string} rootDir
+ * @param {string} currentHead
+ * @param {string} liveCommit
+ * @param {string} id
+ * @param {string} artifact
+ * @param {unknown} report
+ */
+function evidenceStatus(rootDir, currentHead, liveCommit, id, artifact, report) {
+  const sourceCommit = extractSourceCommit(report);
+  const productionCommit = extractProductionCommit(report);
+  return {
+    id,
+    artifact,
+    sourceCommit: sourceCommit || null,
+    sourceStatus: classifySha(rootDir, sourceCommit, currentHead),
+    productionCommit: productionCommit || null,
+    productionStatus: productionCommit
+      ? productionCommit === liveCommit
+        ? "matches_live"
+        : isAncestor(rootDir, productionCommit)
+          ? "ancestor_of_head"
+          : "not_ancestor"
+      : "missing",
+  };
+}
+
+/**
+ * @param {string[]} argv
+ */
+function parseArgs(argv) {
+  /** @type {{ rootDir: string, outputDir: string, buildInfoUrl: string, buildInfoFile: string }} */
+  const options = {
+    rootDir: REPO_ROOT,
+    outputDir: DEFAULT_OUTPUT_DIR,
+    buildInfoUrl: DEFAULT_BUILD_INFO_URL,
+    buildInfoFile: "",
+  };
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    const next = argv[index + 1] || "";
+    if (arg === "--root") {
+      options.rootDir = path.resolve(next);
+      index += 1;
+    } else if (arg === "--output") {
+      options.outputDir = next;
+      index += 1;
+    } else if (arg === "--build-info-url") {
+      options.buildInfoUrl = next;
+      index += 1;
+    } else if (arg === "--build-info-file") {
+      options.buildInfoFile = next;
+      index += 1;
+    } else if (arg === "--help") {
+      console.log("Usage: node scripts/northstar_live_rollup.mjs [--root DIR] [--output DIR] [--build-info-url URL] [--build-info-file FILE]");
+      process.exit(0);
+    }
+  }
+  return options;
+}
+
+/**
+ * @param {{ rootDir: string, buildInfoUrl: string, buildInfoFile: string }} options
+ */
+async function loadBuildInfo(options) {
+  if (options.buildInfoFile) {
+    return readJson(options.rootDir, options.buildInfoFile);
+  }
+  const response = await fetch(options.buildInfoUrl, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Build info request failed with HTTP ${response.status}`);
+  }
+  return await response.json();
+}
+
+/**
+ * @param {unknown} value
+ * @param {string} key
+ */
+function recordAt(value, key) {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const next = value[key];
+  return isRecord(next) ? next : null;
+}
+
+/**
+ * @param {string} rootDir
+ * @param {unknown} buildInfo
+ * @param {string} generatedAt
+ */
+export function buildNorthstarLiveRollup(rootDir, buildInfo, generatedAt = new Date().toISOString()) {
+  const currentHead = gitHead(rootDir);
+  const liveCommit = isRecord(buildInfo) ? asString(buildInfo.commitSha) : "";
+  const openGate = tryReadJson(rootDir, ARTIFACTS.openGate);
+  const final99 = tryReadJson(rootDir, ARTIFACTS.final99);
+  const final99NoticeCarry = tryReadJson(rootDir, ARTIFACTS.final99NoticeCarry);
+  const liveHarness = tryReadJson(rootDir, ARTIFACTS.liveHarness);
+  const kosha = tryReadJson(rootDir, ARTIFACTS.kosha);
+  const rlsWiki = tryReadJson(rootDir, ARTIFACTS.rlsWiki);
+  const sifEmbedding = tryReadJson(rootDir, ARTIFACTS.sifEmbedding);
+  const liveCritical = tryReadJson(rootDir, ARTIFACTS.liveCritical);
+  const mobileP0 = tryReadJson(rootDir, ARTIFACTS.mobileP0);
+  const workspaceGeometry = tryReadJson(rootDir, ARTIFACTS.workspaceGeometry);
+
+  const openGates = isRecord(openGate) && Array.isArray(openGate.gates) ? openGate.gates : [];
+  const provenGates = [];
+  const approvalGated = [];
+  for (const gate of openGates) {
+    if (!isRecord(gate)) {
+      continue;
+    }
+    const id = asString(gate.id);
+    const state = asString(gate.state);
+    const entry = {
+      id,
+      state,
+      artifact: asString(gate.evidencePath),
+      detail: asString(gate.detail),
+    };
+    if (state === "proven" || state === "notice") {
+      provenGates.push(entry);
+    }
+    if (state === "approval_gated") {
+      approvalGated.push(entry);
+    }
+  }
+
+  const mobileFlow = recordAt(mobileP0, "mobileFlow");
+  const documentsSafetyBrief = recordAt(mobileFlow, "documentsSafetyBrief");
+  const share = recordAt(mobileFlow, "share");
+  const geometryResults = isRecord(workspaceGeometry) && Array.isArray(workspaceGeometry.results)
+    ? workspaceGeometry.results
+    : [];
+  const mobileGeometry = geometryResults.find((row) => isRecord(row) && row.name === "mobile-day");
+  const mobileDocuments = isRecord(mobileGeometry) ? recordAt(mobileGeometry, "documents") : null;
+  const liveCriticalRows = isRecord(liveCritical) && Array.isArray(liveCritical.rows) ? liveCritical.rows : [];
+
+  const evidence = [
+    evidenceStatus(rootDir, currentHead, liveCommit, "open_gate", ARTIFACTS.openGate, openGate),
+    evidenceStatus(rootDir, currentHead, liveCommit, "final_99_gate", ARTIFACTS.final99, final99),
+    evidenceStatus(rootDir, currentHead, liveCommit, "live_harness_quality", ARTIFACTS.liveHarness, liveHarness),
+    evidenceStatus(rootDir, currentHead, liveCommit, "kosha_exact_trust_registry", ARTIFACTS.kosha, kosha),
+    evidenceStatus(rootDir, currentHead, liveCommit, "rls_llm_wiki_approval_preflight", ARTIFACTS.rlsWiki, rlsWiki),
+    evidenceStatus(rootDir, currentHead, liveCommit, "sif_embedding_preflight", ARTIFACTS.sifEmbedding, sifEmbedding),
+    evidenceStatus(rootDir, currentHead, liveCommit, "live_critical_surface", ARTIFACTS.liveCritical, liveCritical),
+    evidenceStatus(rootDir, currentHead, liveCommit, "mobile_p0_workspace", ARTIFACTS.mobileP0, mobileP0),
+    evidenceStatus(rootDir, currentHead, liveCommit, "workspace_docs_share_geometry", ARTIFACTS.workspaceGeometry, workspaceGeometry),
+  ];
+
+  const contradictions = evidence.filter((item) => (
+    item.sourceStatus === "not_ancestor" || item.productionStatus === "not_ancestor"
+  ));
+
+  const final99Notices = isRecord(final99NoticeCarry) && Array.isArray(final99NoticeCarry.notices)
+    ? final99NoticeCarry.notices.filter(isRecord).map((notice) => ({
+      gate: asString(notice.gate),
+      launchImpact: asString(notice.launchImpact),
+      allowedClaim: asString(notice.allowedClaim),
+      forbiddenClaim: asString(notice.forbiddenClaim),
+    }))
+    : [];
+
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    generatedAt,
+    head: currentHead,
+    liveBuildInfo: buildInfo,
+    overall: contradictions.length > 0
+      ? "northstar_evidence_contradicted"
+      : isRecord(openGate) && openGate.overall === "open"
+        ? "northstar_open_approval_gated"
+        : "northstar_evidence_missing_or_unknown",
+    dbMutationPerformed: false,
+    launchReadiness: false,
+    openGate: {
+      artifact: ARTIFACTS.openGate,
+      overall: isRecord(openGate) ? asString(openGate.overall) : "missing",
+      gateCount: openGates.length,
+    },
+    provenGates,
+    approvalGated,
+    mobileP0: {
+      artifact: ARTIFACTS.mobileP0,
+      verdict: isRecord(mobileP0) ? asString(mobileP0.verdict) : "missing",
+      productionCommit: extractProductionCommit(mobileP0),
+      documentsHeightRatio: documentsSafetyBrief ? asNumber(documentsSafetyBrief.heightRatio) : null,
+      firstUsefulReviewY: documentsSafetyBrief ? asNumber(documentsSafetyBrief.firstUsefulReviewY) : null,
+      documentDeepReviewOpen: documentsSafetyBrief ? documentsSafetyBrief.documentDeepReviewOpen === true : null,
+      visibleDocumentPreviews: documentsSafetyBrief ? asNumber(documentsSafetyBrief.visibleDocumentPreviews) : null,
+      shareHeightRatio: share ? asNumber(share.heightRatio) : null,
+      sharePreviewY: share ? asNumber(share.messagePreviewY) : null,
+      hardBlockersClosed: isRecord(mobileP0) ? mobileP0.hardBlockersClosed === true : false,
+    },
+    liveCritical: {
+      artifact: ARTIFACTS.liveCritical,
+      productionCommit: extractProductionCommit(liveCritical),
+      findings: isRecord(liveCritical) && Array.isArray(liveCritical.findings) ? liveCritical.findings.length : null,
+      rowsChecked: liveCriticalRows.length,
+    },
+    workspaceGeometry: {
+      artifact: ARTIFACTS.workspaceGeometry,
+      productionCommit: extractProductionCommit(workspaceGeometry),
+      mobileDocumentDeepReviewOpen: mobileDocuments ? mobileDocuments.documentDeepReviewOpen === true : null,
+      mobileVisibleDocumentPreviews: mobileDocuments ? asNumber(mobileDocuments.visibleDocumentPreviews) : null,
+    },
+    final99: {
+      artifact: ARTIFACTS.final99,
+      overall: isRecord(final99) ? asString(final99.overall) : "missing",
+      productionCommit: extractProductionCommit(final99),
+      noticeCarry: final99Notices,
+    },
+    kosha: {
+      artifact: ARTIFACTS.kosha,
+      verdict: isRecord(kosha) ? asString(kosha.verdict) : "missing",
+      exactPins: isRecord(recordAt(kosha, "liveStatus")?.exactTrustRegistry)
+        ? recordAt(kosha, "liveStatus")?.exactTrustRegistry?.stableDocumentKeys
+        : [],
+      localCorpusItems: isRecord(recordAt(kosha, "liveStatus")?.localCorpus)
+        ? recordAt(kosha, "liveStatus")?.localCorpus?.itemCount
+        : null,
+    },
+    evidence,
+    contradictions,
+    safeDemoClaims: isRecord(openGate) && Array.isArray(openGate.safeDemoClaims) ? openGate.safeDemoClaims : [],
+    forbiddenClaims: isRecord(openGate) && Array.isArray(openGate.forbiddenClaims) ? openGate.forbiddenClaims : [],
+  };
+}
+
+/**
+ * @param {ReturnType<typeof buildNorthstarLiveRollup>} rollup
+ */
+export function renderNorthstarLiveRollupMarkdown(rollup) {
+  const lines = [
+    "# SafeClaw North Star Live Rollup",
+    "",
+    `Generated at: ${rollup.generatedAt}`,
+    `Current HEAD: ${rollup.head}`,
+    `Live commit: ${isRecord(rollup.liveBuildInfo) ? asString(rollup.liveBuildInfo.commitSha) : ""}`,
+    `Overall: \`${rollup.overall}\``,
+    "",
+    "## Current Mobile P0",
+    "",
+    `- Verdict: \`${rollup.mobileP0.verdict}\``,
+    `- Documents: ${rollup.mobileP0.documentsHeightRatio}x viewport, first useful y=${rollup.mobileP0.firstUsefulReviewY}`,
+    `- Deep review closed: ${rollup.mobileP0.documentDeepReviewOpen === false ? "yes" : "no"}`,
+    `- Visible full previews while closed: ${rollup.mobileP0.visibleDocumentPreviews}`,
+    `- Share: ${rollup.mobileP0.shareHeightRatio}x viewport, preview y=${rollup.mobileP0.sharePreviewY}`,
+    "",
+    "## Gate Matrix",
+    "",
+    "| Gate | State | Artifact |",
+    "| --- | --- | --- |",
+  ];
+  for (const gate of [...rollup.provenGates, ...rollup.approvalGated]) {
+    lines.push(`| ${gate.id} | ${gate.state} | ${gate.artifact} |`);
+  }
+  lines.push("", "## Evidence Freshness", "", "| Evidence | Source | Production | Artifact |", "| --- | --- | --- | --- |");
+  for (const item of rollup.evidence) {
+    lines.push(`| ${item.id} | ${item.sourceStatus} | ${item.productionStatus} | ${item.artifact} |`);
+  }
+  lines.push("", "## Carried Notices", "");
+  if (rollup.final99.noticeCarry.length === 0) {
+    lines.push("- None.");
+  } else {
+    for (const notice of rollup.final99.noticeCarry) {
+      lines.push(`- ${notice.gate}: ${notice.launchImpact} — forbidden: ${notice.forbiddenClaim}`);
+    }
+  }
+  lines.push("", "## Approval-Gated Work", "");
+  for (const gate of rollup.approvalGated) {
+    lines.push(`- ${gate.id}: ${gate.detail}`);
+  }
+  return `${lines.join("\n")}\n`;
+}
+
+async function main() {
+  const options = parseArgs(process.argv.slice(2));
+  const buildInfo = await loadBuildInfo(options);
+  const rollup = buildNorthstarLiveRollup(options.rootDir, buildInfo);
+  const outputDir = path.isAbsolute(options.outputDir)
+    ? options.outputDir
+    : path.join(options.rootDir, options.outputDir);
+  fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(path.join(outputDir, "report.json"), `${JSON.stringify(rollup, null, 2)}\n`, "utf8");
+  fs.writeFileSync(path.join(outputDir, "report.md"), renderNorthstarLiveRollupMarkdown(rollup), "utf8");
+  console.log(JSON.stringify({
+    overall: rollup.overall,
+    output: path.relative(options.rootDir, outputDir),
+    head: rollup.head,
+    liveCommit: isRecord(rollup.liveBuildInfo) ? asString(rollup.liveBuildInfo.commitSha) : "",
+    contradictions: rollup.contradictions.length,
+  }, null, 2));
+  if (rollup.contradictions.length > 0) {
+    process.exitCode = 1;
+  }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === SCRIPT_PATH) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

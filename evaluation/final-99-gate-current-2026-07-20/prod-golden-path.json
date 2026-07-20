@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-07-20T12:36:47.563Z",
-  "baseUrl": "https://www.safeclaw.kr",
-  "commit": "d21e8d64",
-  "sourceCommit": "d21e8d64f08e7b53976c508186d40defe59be2f9",
+  "generatedAt": "2026-07-20T13:04:46.729Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
+  "commit": "d34817a9",
+  "sourceCommit": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
   "productionBuild": {
     "ok": true,
     "status": 200,
-    "commitSha": "d21e8d64f08e7b53976c508186d40defe59be2f9",
+    "commitSha": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-edugi0er1-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-cz10gt5ar-seojaehongs-projects.vercel.app"
   },
   "overall": "pass_with_notice",
-  "elapsedMs": 81209,
+  "elapsedMs": 91026,
   "gates": [
     {
       "name": "ask-orchestration",
@@ -88,7 +88,7 @@
       "count": 6,
       "message": "KOSHA 오프라인 보조근거와 Supabase 안전 지식 DB에서 참고자료를 조회했습니다. 공식 KOSHA 정확 본문 번들로 partial DB 본문을 대체했습니다."
     },
-    "textPreview": "[보완 제안: 작업중지 및 안전관리 체크리스트] - 작업 시작 전 이동식 비계의 바퀴 잠금, 아웃트리거 및 작업발판 상태 점검 완료 여부 확인 - 풍속 측정 결과 및 오후 강풍 예보 재확인, 강풍 시 즉시 작업중지 및 대기 절차 공유 - 신규 투입자에 대한 작업 내용과 비계 사용 안전교육 이수 확인 - 지게차 운행 경로와 작업자 보행 동선 분리 확인, 신호수 배치와 사각지대 점검 - 작업 반장 및 관리감독자가 매일 TBM 실시 후 기록 유지 및 이행사항 점검 확인자/근거: 작업반장 및 현장소장이 점검 후 서명, ‘이동식 비계 작업발판·난간·바퀴 잠금 확인’ 및 ‘강풍 시 작업중지 기준’에 따른 현장 적용 근거 반영",
+    "textPreview": "[보완 제안: 위험성평가 및 TBM, 안전보건교육 기록 강화] - 작업 전 이동식 비계의 작업발판, 난간, 바퀴 잠금, 아웃트리거 상태를 반드시 점검하고 기록할 것 - 강풍 예보 시 작업중지 기준과 담당자(작업반장, 신호수 등)를 명확히 지정하고 TBM에서 공유 및 서면 기록할 것 - 지게차 운행 경로와 보행자 동선 분리 여부를 TBM에서 재확인하고, 신호수 배치 및 사각지대 점검 결과를 기록할 것 - 신규 작업자에게는 작업 전 별도 안전보건교육 실시 및 서명 기록을 남겨 작업 위험과 중지 기준을 숙지시키기 - 작업 종료 후 TBM 기록과 안전보건교육 기록을 현장관리자 및 안전담당자가 확인 및 보관하여 위험성평가 결과와 연계 관리 확인자/근거 확인: 작업발판, 강풍 작업중지 기준, 지게차 동선 분리, 신규자 교육 이행 여부를 위험성평가표·TBM·안전보건교육 기록에서 확인 및 관리하도록 반영.",
     "sourceCount": 5,
     "policy": "AI 보완은 자동 덮어쓰기가 아니라 제안, 사용자 편집, 삽입 흐름으로만 인정합니다."
   },

@@ -1,7 +1,7 @@
 {
   "verdict": "pass",
-  "generatedAt": "2026-07-20T12:36:07.176Z",
-  "baseUrl": "https://www.safeclaw.kr",
+  "generatedAt": "2026-07-20T13:03:58.264Z",
+  "baseUrl": "https://safeguard-contest-mvp.vercel.app",
   "principle": "공공데이터와 AI는 긴 원문 목록이 아니라 문서 문장, 확인 항목, 작업중지 기준에 반영된 위치로 설명합니다.",
   "items": [
     {

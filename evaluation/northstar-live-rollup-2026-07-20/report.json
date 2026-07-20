@@ -1,229 +1,206 @@
 {
-  "schemaVersion": "safeclaw-northstar-live-rollup/v1",
-  "generatedAt": "2026-07-20T08:11:31.019Z",
-  "head": "689a597dd5e87da64749c70b85d71716caebe1e8",
+  "schemaVersion": "safeclaw-northstar-live-rollup/v2",
+  "generatedAt": "2026-07-20T13:07:20.022Z",
+  "head": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
   "liveBuildInfo": {
-    "commitSha": "689a597dd5e87da64749c70b85d71716caebe1e8",
+    "ok": true,
+    "configured": true,
+    "source": "vercel-system-env",
+    "commitSha": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-a3mv9wxf6-seojaehongs-projects.vercel.app"
+    "deploymentUrl": "safeguard-contest-cz10gt5ar-seojaehongs-projects.vercel.app",
+    "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
   "dbMutationPerformed": false,
   "launchReadiness": false,
+  "openGate": {
+    "artifact": "evaluation\\northstar-open-gates-current\\report.json",
+    "overall": "open",
+    "gateCount": 6
+  },
   "provenGates": [
     {
-      "id": "live_harness_quality",
-      "artifact": "evaluation/live-harness-quality-probe-current-2026-07-20/report.json",
-      "result": "pass",
-      "failedContracts": 0
+      "id": "final_99_gate",
+      "state": "notice",
+      "artifact": "evaluation\\final-99-gate-current-2026-07-20\\report.json",
+      "detail": "final-99 overall is pass_with_notice; 2 notices are explicitly carried in evaluation\\final-99-gate-current-2026-07-20\\notice-carry.json."
     },
     {
-      "id": "kosha_materialization",
-      "artifact": "evaluation/kosha-materialization-current-gate-2026-07-20/report.json",
-      "result": "pass",
-      "testFilesPassed": 9,
-      "testsPassed": 169,
-      "pythonTestsPassed": 19,
-      "typecheck": "pass"
+      "id": "live_harness_quality",
+      "state": "proven",
+      "artifact": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
+      "detail": "Live harness probe passed with zero failed contracts."
     },
     {
       "id": "kosha_exact_trust_registry",
-      "artifact": "evaluation/kosha-focused-current-gate-2026-07-20/report.json",
-      "result": "pass",
-      "exactPins": [
-        "D-C-13",
-        "D-C-7",
-        "B-E-10"
-      ],
-      "localCorpusItems": 234,
-      "localCorpusChunks": 7127,
-      "testsPassed": 53,
-      "testFilesPassed": 5
-    },
-    {
-      "id": "kosha_guide_approval_packet",
-      "artifact": "evaluation/kosha-guide-approval-current-2026-07-20/approval-packet.json",
-      "result": "approval_required_before_mutation_or_embedding",
-      "readOnlyAudit": true,
-      "items": 1040,
-      "emptyBodyRows": 818,
-      "missingOfficialProvenanceRows": 1040,
-      "operationalControlReviewRequiredRows": 70,
-      "retrievalUntestedBranches": 2,
-      "approvalPacketTestsPassed": 114,
-      "testsPassed": 279,
-      "dbMutationPerformed": false,
-      "embeddingGenerated": false
-    },
-    {
-      "id": "kosha_guide_repair_plan",
-      "artifact": "evaluation/kosha-guide-approval-current-2026-07-20/repair-plan.json",
-      "result": "pass_read_only_repair_queue_with_complete_row_evidence_manifest",
-      "workstreams": 6,
-      "dryRunUpdates": 7,
-      "dryRunRetirements": 1,
-      "controlReviewRows": 71,
-      "retrievalScenarioBranchPairs": 8,
-      "evidenceCoverageDeclared": true,
-      "countOnlyWorkstreams": 3,
-      "rowLevelCompleteWorkstreams": 6,
-      "testFilesPassed": 3,
-      "testsPassed": 117,
-      "dbMutationPerformed": false,
-      "rowEvidenceArtifact": "evaluation/kosha-guide-approval-current-2026-07-20/repair-row-evidence-manifest.json",
-      "incompleteRowEvidenceWorkstreams": 0,
-      "missingProvenanceRowManifestRows": 1040,
-      "missingBodyHydrationRowManifestRows": 818,
-      "missingSummaryRegenerationRowManifestRows": 789,
-      "typecheck": "pass",
-      "embeddingGenerated": false,
-      "provenanceRowManifestRows": 1040,
-      "bodyHydrationRowManifestRows": 818,
-      "summaryRegenerationRowManifestRows": 822
-    },
-    {
-      "id": "rls_llm_wiki_application_boundary",
-      "artifact": "evaluation/rls-current-tenant-boundary-gate-2026-07-20/report.json",
-      "result": "pass_approval_gated",
-      "testFilesPassed": 9,
-      "testsPassed": 83
-    },
-    {
-      "id": "live_critical_surface",
-      "artifact": "evaluation/live-critical-surface-current-2026-07-20-rerun/report.json",
-      "result": "pass",
-      "routesChecked": 8,
-      "viewportsChecked": 2,
-      "findings": 0,
-      "rowsChecked": 16
-    },
-    {
-      "id": "operator_wiki_reference_corpus",
-      "artifact": "evaluation/operator-wiki-reference-corpus-current-gate-2026-07-20/report.json",
-      "result": "pass_approval_gated",
-      "testFilesPassed": 18,
-      "testsPassed": 208,
-      "safetyReferenceItems": 9920,
-      "publishedOntologyNodes": 166,
-      "publishedOntologyEdges": 169
-    },
-    {
-      "id": "hermes_openclaw_runtime_boundary",
-      "artifact": "evaluation/hermes-openclaw-runtime-current-gate-2026-07-20/report.json",
-      "result": "adapter_boundary_pass_live_execution_not_claimed",
-      "testFilesPassed": 13,
-      "testsPassed": 289,
-      "liveUnauthenticatedStatus": 401,
-      "engineExecutionReached": false
-    },
-    {
-      "id": "export_foreign_dispatch_quality",
-      "artifact": "evaluation/export-foreign-dispatch-current-gate-2026-07-20/report.json",
-      "result": "pass",
-      "testFilesPassed": 13,
-      "testsPassed": 143,
-      "providerDispatchSideEffectPerformed": false
-    },
-    {
-      "id": "share_recipient_portal",
-      "artifact": "evaluation/share-recipient-portal-current-gate-2026-07-20/report.json",
-      "result": "pass",
-      "testFilesPassed": 13,
-      "testsPassed": 143,
-      "liveVietnameseChrome": true,
-      "providerDispatchSideEffectPerformed": false
-    },
-    {
-      "id": "recipient_demo_capture",
-      "artifact": "evaluation/recipient-demo-capture-2026-07-20/metrics.json",
-      "result": "pass_non_mutating_demo_capture",
-      "viewport": "390x844",
-      "horizontalOverflow": false,
-      "outsideElements": 0,
-      "minControlHeight": 44,
-      "vietnameseChrome": true,
-      "savedConfirmation": true
-    },
-    {
-      "id": "workspace_docs_share_geometry",
-      "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/metrics.json",
-      "result": "pass_generated_state_verified",
-      "desktopDocumentsHeightRatio": 1.27,
-      "mobileDocumentsHeightRatio": 1.68,
-      "desktopShareWidth": 1180,
-      "horizontalOverflow": false,
-      "outsideElements": 0,
-      "documentsGeneratedStateVerified": true
-    },
-    {
-      "id": "workspace_document_edit_compaction",
-      "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
-      "result": "pass_bounded_edit_mode_remediation_shipped_sticky_zero",
-      "sourceCommit": "689a597dd5e87da64749c70b85d71716caebe1e8",
-      "evidenceCommit": "689a597dd5e87da64749c70b85d71716caebe1e8",
-      "desktopEditorPanelHeight": 1433,
-      "mobileEditorPanelHeight": 1359,
-      "desktopTextareaY": 374,
-      "mobileTextareaY": 361,
-      "horizontalOverflow": false,
-      "outsideElements": 0,
-      "northStarDocumentUxTestsPassed": 7,
-      "workspaceFocusedTestsPassed": 7,
-      "buildStaticPages": "28/28",
-      "desktopEditorStickyLike": 0,
-      "mobileEditorStickyLike": 0,
-      "typecheck": "pass"
-    },
-    {
-      "id": "ui_documents_contrast",
-      "artifact": "evaluation/ui-documents-contrast-current-gate-2026-07-20/report.json",
-      "result": "pass",
-      "testFilesPassed": 4,
-      "testFilesSkipped": 1,
-      "testsPassed": 19,
-      "testsSkipped": 4,
-      "buildStaticPages": "28/28"
+      "state": "proven",
+      "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
+      "detail": "Current live runtime has 3 exact KOSHA pins (D-C-13, D-C-7, B-E-10), local corpus 234 items/7127 chunks, and focused KOSHA tests passed on the current HEAD."
     }
   ],
   "approvalGated": [
     {
-      "id": "sif_embedding_runtime",
-      "artifact": "evaluation/sif-embedding-gate/approval-preflight-report.json",
-      "state": "approval_gated_execution_ready",
-      "corpusCount": 6032,
-      "executionReadyAfterApproval": true,
-      "vectorFeatureFlagEnabled": false
-    },
-    {
       "id": "supabase_rls_launch_isolation",
-      "artifact": "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
-      "state": "approval_ready_open",
-      "launchReadiness": false
+      "state": "approval_gated",
+      "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
+      "detail": "Read-only RLS approval preflight passed at source SHA 68b827d3dcc4537b4d22a079b87a831fef2fe7d9, but live RLS catalog and tenant A/B isolation are not proven."
     },
     {
       "id": "llm_wiki_publication",
-      "artifact": "evaluation/rls-llm-wiki-approval-preflight-current-2026-07-20/report.json",
-      "state": "approval_ready_open",
-      "launchReadiness": false
+      "state": "approval_gated",
+      "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
+      "detail": "Candidate/wiki surfaces exist, but publication RPC/RLS/ledger approval is not complete. Current preflight passed at source SHA 68b827d3dcc4537b4d22a079b87a831fef2fe7d9."
     },
     {
-      "id": "kosha_guide_full_corpus_embedding",
-      "artifact": "evaluation/kosha-guide-approval-current-2026-07-20/approval-packet.json",
-      "state": "approval_required_before_mutation_or_embedding",
-      "launchReadiness": false
+      "id": "sif_embedding_runtime",
+      "state": "approval_gated",
+      "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
+      "detail": "SIF corpus is ready for approval (6032 records), but embedding/upload/vector runtime is held. Source SHA: 131e486d7601a316dbd84db134a261843635818d."
     }
   ],
+  "mobileP0": {
+    "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
+    "verdict": "MOBILE_FIXED",
+    "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
+    "documentsHeightRatio": 1.5,
+    "firstUsefulReviewY": 262,
+    "documentDeepReviewOpen": false,
+    "visibleDocumentPreviews": 0,
+    "shareHeightRatio": 1.72,
+    "sharePreviewY": 380,
+    "hardBlockersClosed": true
+  },
+  "liveCritical": {
+    "artifact": "evaluation\\live-critical-surface-current-2026-07-20-rerun\\report.json",
+    "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
+    "findings": 0,
+    "rowsChecked": 16
+  },
+  "workspaceGeometry": {
+    "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
+    "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
+    "mobileDocumentDeepReviewOpen": false,
+    "mobileVisibleDocumentPreviews": 0
+  },
+  "final99": {
+    "artifact": "evaluation\\final-99-gate-current-2026-07-20\\report.json",
+    "overall": "pass_with_notice",
+    "productionCommit": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
+    "noticeCarry": [
+      {
+        "gate": "auth-history-reuse",
+        "launchImpact": "operator-auth-gated",
+        "allowedClaim": "관리자 인증 없는 환경에서도 비회원 임시 저장과 로그인 필요 상태가 방어된다.",
+        "forbiddenClaim": "관리자 서버 저장과 이력 재열기를 live에서 실행 완료했다."
+      },
+      {
+        "gate": "dispatch-policy",
+        "launchImpact": "provider-approval-gated",
+        "allowedClaim": "메일·문자는 관리자 인증과 서버 소유 세션에서만 전송 가능한 정책으로 잠겨 있다.",
+        "forbiddenClaim": "카카오·밴드 또는 모든 provider 전파가 실제 승인 채널로 live 완료됐다."
+      }
+    ]
+  },
+  "kosha": {
+    "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
+    "verdict": "pass_current_kosha_exact_trust_and_corpus_gate",
+    "exactPins": [
+      "D-C-13",
+      "D-C-7",
+      "B-E-10"
+    ],
+    "localCorpusItems": 234
+  },
+  "evidence": [
+    {
+      "id": "open_gate",
+      "artifact": "evaluation\\northstar-open-gates-current\\report.json",
+      "sourceCommit": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
+      "sourceStatus": "exact",
+      "productionCommit": null,
+      "productionStatus": "missing"
+    },
+    {
+      "id": "final_99_gate",
+      "artifact": "evaluation\\final-99-gate-current-2026-07-20\\report.json",
+      "sourceCommit": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
+      "sourceStatus": "exact",
+      "productionCommit": "d34817a951b17f85d20567f3ef1bd4956f9d3c05",
+      "productionStatus": "matches_live"
+    },
+    {
+      "id": "live_harness_quality",
+      "artifact": "evaluation\\live-harness-quality-probe-current-2026-07-20\\report.json",
+      "sourceCommit": null,
+      "sourceStatus": "missing",
+      "productionCommit": null,
+      "productionStatus": "missing"
+    },
+    {
+      "id": "kosha_exact_trust_registry",
+      "artifact": "evaluation\\kosha-current-live-gate-2026-07-20\\report.json",
+      "sourceCommit": "3b7bf2f0d853b303ba8215e78f3c95aa4716a427",
+      "sourceStatus": "ancestor",
+      "productionCommit": "3b7bf2f0d853b303ba8215e78f3c95aa4716a427",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "rls_llm_wiki_approval_preflight",
+      "artifact": "evaluation\\rls-llm-wiki-approval-preflight-current-2026-07-20\\report.json",
+      "sourceCommit": "68b827d3dcc4537b4d22a079b87a831fef2fe7d9",
+      "sourceStatus": "ancestor",
+      "productionCommit": null,
+      "productionStatus": "missing"
+    },
+    {
+      "id": "sif_embedding_preflight",
+      "artifact": "evaluation\\sif-embedding-gate\\approval-preflight-report.json",
+      "sourceCommit": "131e486d7601a316dbd84db134a261843635818d",
+      "sourceStatus": "ancestor",
+      "productionCommit": null,
+      "productionStatus": "missing"
+    },
+    {
+      "id": "live_critical_surface",
+      "artifact": "evaluation\\live-critical-surface-current-2026-07-20-rerun\\report.json",
+      "sourceCommit": null,
+      "sourceStatus": "missing",
+      "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "mobile_p0_workspace",
+      "artifact": "evaluation\\mobile-p0-workspace-gate-2026-07-20\\report.json",
+      "sourceCommit": null,
+      "sourceStatus": "missing",
+      "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
+      "productionStatus": "ancestor_of_head"
+    },
+    {
+      "id": "workspace_docs_share_geometry",
+      "artifact": "evaluation\\workspace-docs-share-production-gate-2026-07-20\\current-geometry.json",
+      "sourceCommit": null,
+      "sourceStatus": "missing",
+      "productionCommit": "ee08ddd4c782a4ccd4375eda3f1b9dbbcafea02d",
+      "productionStatus": "ancestor_of_head"
+    }
+  ],
+  "contradictions": [],
   "safeDemoClaims": [
     "SafeClaw fixes SIF/KOSHA/current work-history evidence before LLM wording.",
-    "KOSHA exact-trust pins and live harness contracts are proven on the current production line.",
-    "SIF embedding corpus is prepared, but vector retrieval remains disabled until approved migration/upload/runtime verification."
+    "Hermes/OpenClaw is connected through a guarded EngineAdapter boundary, while SafeClaw remains the system of record.",
+    "Worker recipient review is an invited-session flow, not an anonymous public portal.",
+    "Photo hazard analysis supports up to 10 images and keeps Before/After improvements as reviewed operation memory."
   ],
   "forbiddenClaims": [
-    "RLS launch isolation is proven.",
-    "LLM Wiki publication is available.",
-    "SIF vector retrieval is production-active.",
-    "All KOSHA metadata rows are exact evidence.",
-    "DB migration or data upload was performed in this rollup."
+    "LLM Wiki publishes itself.",
+    "Hermes is the production source of truth.",
+    "OpenClaw learns or mutates DB facts automatically.",
+    "SIF vector retrieval is production-active before the approved migration/upload/runtime gate.",
+    "All KOSHA metadata-verified candidates are exact production evidence.",
+    "Live Supabase RLS tenant isolation is launch-proven before catalog and tenant A/B evidence.",
+    "Provider dispatch is fully live for unapproved channels."
   ]
 }
