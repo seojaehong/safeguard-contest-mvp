@@ -1,19 +1,22 @@
 {
   "verdict": "pass_publication_approval_gated",
   "date": "2026-07-20",
+  "checkedAt": "2026-07-20T04:21:59.100Z",
   "worktree": "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\recipient-foreign-live-gate-20260720",
   "branch": "chore/recipient-foreign-live-gate-20260720",
+  "head": "b93d5b9815a718a271a72adec5b03c3bd6404898",
   "productionBuildInfo": {
-    "commitSha": "4025015b456c6c5903b40764c90782b7d90d503a",
+    "commitSha": "b93d5b9815a718a271a72adec5b03c3bd6404898",
     "branch": "master",
     "environment": "production",
-    "source": "vercel-system-env"
+    "source": "vercel-system-env",
+    "deploymentUrl": "safeguard-contest-jhm7qrz7s-seojaehongs-projects.vercel.app"
   },
   "focusedTests": {
     "command": "npm.cmd test -- tests\\knowledge-governance.test.ts tests\\knowledge-governance-ui-contract.test.ts tests\\knowledge-page-layout.test.ts tests\\knowledge-mobile-ia-browser.test.ts tests\\knowledge-review-actions.test.ts tests\\knowledge-review-route.test.ts tests\\knowledge-review-prepare.test.ts tests\\knowledge-review-prepare-route.test.ts tests\\knowledge-review-inbox-browser.test.ts tests\\knowledge-promotion-gate.test.ts tests\\knowledge-runtime-smoke.test.ts tests\\ontology-knowledge-tool.test.ts tests\\ontology-graph-store.test.ts tests\\ontology-query.test.ts tests\\safety-reference-status-route.test.ts tests\\safety-reference-status-bundled-corpus.test.ts tests\\workpack-commercial-tenant-hardening.test.ts tests\\reporting-downloads.test.ts --maxWorkers=1 --fileParallelism=false",
     "testFilesPassed": 18,
     "testsPassed": 208,
-    "durationSeconds": 115.39,
+    "durationSeconds": 116.66,
     "status": "pass"
   },
   "liveApiEvidence": {
@@ -24,7 +27,16 @@
       "technicalTotal": 1040,
       "technicalSupportRegulations": 237,
       "technicalGuidelines": 803,
-      "searchReady": true
+      "searchReady": true,
+      "catalogSearchOk": true,
+      "localCorpusItems": 234,
+      "localCorpusChunks": 7127,
+      "exactTrustRegistryCount": 3,
+      "exactTrustRegistryKeys": [
+        "D-C-13",
+        "D-C-7",
+        "B-E-10"
+      ]
     },
     "knowledgeGovernance": {
       "ok": true,
@@ -51,13 +63,13 @@
       "uncitedDroppedNodes": 0,
       "uncitedDroppedEdges": 0,
       "nodeCountsByKind": {
+        "Control": 64,
         "Task": 10,
         "Hazard": 31,
-        "Control": 64,
+        "Duty": 2,
         "Article": 56,
         "Accident": 0,
-        "Document": 3,
-        "Duty": 2
+        "Document": 3
       },
       "advisoryNoticePresent": true
     }

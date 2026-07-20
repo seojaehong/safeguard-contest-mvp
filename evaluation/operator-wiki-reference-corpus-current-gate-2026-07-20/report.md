@@ -1,10 +1,10 @@
 # Operator Wiki / Reference Corpus Current Gate
 
-Checked at: 2026-07-20 KST
+Checked at: 2026-07-20T04:21:59.100Z
 
 ## Verdict
 
-`PASS`, with publication and DB mutation still approval-gated.
+PASS, with publication and DB mutation still approval-gated.
 
 The current production deployment exposes the official-reference corpus, knowledge-governance boundary, and published ontology graph in a way that matches the SafeClaw North Star:
 
@@ -19,7 +19,8 @@ This does not claim that organization-specific wiki publication, live tenant A/B
 
 - Worktree: `C:\Users\iceam\dev\safeguard-contest-mvp\.worktrees\recipient-foreign-live-gate-20260720`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
-- Production build-info at live checks: `4025015b456c6c5903b40764c90782b7d90d503a`
+- Source HEAD: `b93d5b9815a718a271a72adec5b03c3bd6404898`
+- Production build-info at live checks: `b93d5b9815a718a271a72adec5b03c3bd6404898`
 - Production branch: `master`
 
 ## Focused Tests
@@ -34,7 +35,7 @@ Result:
 
 - Test files: 18 passed / 18
 - Tests: 208 passed / 208
-- Duration: 115.39s
+- Duration: 116.66s
 
 ## Live API Evidence
 
@@ -42,11 +43,12 @@ Result:
 
 - `ok`: `true`
 - `status`: `ready`
-- `items`: 9,920
-- `technicalTotal`: 1,040
+- `items`: 9920
+- `technicalTotal`: 1040
 - `technicalSupportRegulations`: 237
 - `technicalGuidelines`: 803
 - `searchReady`: `true`
+- Exact trusted KOSHA pins: D-C-13, D-C-7, B-E-10
 
 ### Knowledge Governance
 
@@ -70,17 +72,17 @@ Result:
 - Published edges: 169
 - Dropped uncited nodes: 0
 - Dropped uncited edges: 0
-- Advisory notice present: yes
+- Advisory notice present: true
 
 Node counts by kind:
 
-- Task: 10
-- Hazard: 31
-- Control: 64
-- Article: 56
 - Accident: 0
+- Article: 56
+- Control: 64
 - Document: 3
 - Duty: 2
+- Hazard: 31
+- Task: 10
 
 ## Boundary Decisions Confirmed
 
@@ -98,4 +100,3 @@ Node counts by kind:
 2. Keep organization/site wiki publication behind a human review and tenant boundary gate.
 3. Add authenticated operator-owned Hermes/OpenClaw E2E proof before claiming live agent execution.
 4. Continue improving operator surfaces so they say `공식자료 기반 안전지식 베이스`, not model-training or autonomous legal judgment.
-
