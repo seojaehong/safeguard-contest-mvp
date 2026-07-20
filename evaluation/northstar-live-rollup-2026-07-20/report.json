@@ -1,15 +1,15 @@
 {
   "schemaVersion": "safeclaw-northstar-live-rollup/v2",
-  "generatedAt": "2026-07-20T21:08:08.459Z",
-  "head": "8ec4db66eefc85e17efc28b6137a90526698f275",
+  "generatedAt": "2026-07-20T21:40:53.247Z",
+  "head": "0499d937a196c04a97a8117fb81fa9fd4ccb56f6",
   "liveBuildInfo": {
     "ok": true,
     "configured": true,
     "source": "vercel-system-env",
-    "commitSha": "552424531ae1bd9f6219cc27431509f4494e22e1",
+    "commitSha": "1836f33381574165bb7f3768ea274531c43a0851",
     "branch": "master",
     "environment": "production",
-    "deploymentUrl": "safeguard-contest-uv2xjentv-seojaehongs-projects.vercel.app",
+    "deploymentUrl": "safeguard-contest-90suiruai-seojaehongs-projects.vercel.app",
     "message": "배포 커밋 식별자를 확인했습니다."
   },
   "overall": "northstar_open_approval_gated",
@@ -36,8 +36,8 @@
     {
       "id": "ui_documents_share_cockpit",
       "state": "proven",
-      "artifact": "evaluation\\documents-drilldown-depth-2026-07-21\\report.json",
-      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, section-level evidence/quality actions, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch."
+      "artifact": "evaluation\\documents-inner-pane-depth-2026-07-21\\report.json",
+      "detail": "Current evidence closes /documents mobile raw height, selected-document landing/context/summary, one-section document drilldown accordion, section-level evidence/quality actions, production-confirmed inner-pane default depth, and /share selected-summary, preview, primary CTA, and collapsed configuration stack. It does not claim provider live dispatch."
     },
     {
       "id": "dispatch_standalone_cockpit",
@@ -146,18 +146,18 @@
     {
       "id": "open_gate",
       "artifact": "evaluation\\northstar-open-gates-current\\report.json",
-      "sourceCommit": "8ec4db66eefc85e17efc28b6137a90526698f275",
+      "sourceCommit": "0499d937a196c04a97a8117fb81fa9fd4ccb56f6",
       "sourceStatus": "exact",
-      "productionCommit": "8ec4db66eefc85e17efc28b6137a90526698f275",
+      "productionCommit": "0499d937a196c04a97a8117fb81fa9fd4ccb56f6",
       "productionStatus": "ancestor_of_head"
     },
     {
       "id": "final_99_gate",
       "artifact": "evaluation\\final-99-gate-current-2026-07-21\\report.json",
       "sourceCommit": "8ec4db66eefc85e17efc28b6137a90526698f275",
-      "sourceStatus": "exact",
+      "sourceStatus": "ancestor",
       "productionCommit": "552424531ae1bd9f6219cc27431509f4494e22e1",
-      "productionStatus": "matches_live_source_mismatch"
+      "productionStatus": "ancestor_of_head"
     },
     {
       "id": "live_harness_quality",
