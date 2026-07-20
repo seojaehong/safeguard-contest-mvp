@@ -15,7 +15,8 @@ This is a bounded mobile IA patch. It does not claim that every long detail is g
 
 - Worktree HEAD before this patch: `c2f3b0785728bef398677df7aa9ee2fd531eed7a`
 - Branch: `chore/recipient-foreign-live-gate-20260720`
-- Probe URL: `http://localhost:3021`
+- Production marker: `9455adb943b755fa87e0565347d63a50003ca20d`
+- Production URL: `https://www.safeclaw.kr`
 - Probe file: `evaluation/workspace-docs-share-production-gate-2026-07-20/run-current-geometry-probe.mjs`
 - Geometry artifact: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
 

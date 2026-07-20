@@ -8,8 +8,9 @@
   },
   "source": {
     "baseHead": "c2f3b0785728bef398677df7aa9ee2fd531eed7a",
+    "productionMarker": "9455adb943b755fa87e0565347d63a50003ca20d",
     "branch": "chore/recipient-foreign-live-gate-20260720",
-    "probeUrl": "http://localhost:3021",
+    "probeUrl": "https://www.safeclaw.kr",
     "probeFile": "evaluation/workspace-docs-share-production-gate-2026-07-20/run-current-geometry-probe.mjs",
     "geometryArtifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json"
   },
