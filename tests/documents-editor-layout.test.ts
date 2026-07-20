@@ -1648,7 +1648,7 @@ describe("documents editor layout", () => {
     90_000
   );
 
-  it("puts work-plan and permit execution cockpits before their long editors on mobile", async () => {
+  it("puts supporting document cockpits before their long editors on mobile", async () => {
     if (!browser) throw new Error("Browser was not started");
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await page.goto(`${baseUrl}/documents?theme=day`, { waitUntil: "networkidle" });
@@ -1658,12 +1658,20 @@ describe("documents editor layout", () => {
       {
         key: "workPlanDraft",
         title: "작업계획서",
+        cockpitTestId: "execution-document-cockpit",
         requiredText: ["작업 실행 cockpit", "작업 순서", "작업중지"]
       },
       {
         key: "workPermitDraft",
         title: "안전작업허가 확인서",
+        cockpitTestId: "execution-document-cockpit",
         requiredText: ["작업 실행 cockpit", "허가 조건", "첨부/종료"]
+      },
+      {
+        key: "safetyEducationRecordDraft",
+        title: "안전보건교육 기록",
+        cockpitTestId: "education-document-cockpit",
+        requiredText: ["교육 진행 cockpit", "교육 내용", "이해 확인", "TBM 연계"]
       }
     ] as const;
 
@@ -1675,10 +1683,10 @@ describe("documents editor layout", () => {
         return toolbar?.textContent?.includes(expectedTitle);
       }, item.title);
 
-      const metrics = await page.evaluate(() => {
+      const metrics = await page.evaluate((cockpitTestId) => {
         const workpackShell = document.querySelector<HTMLElement>(".workpack-shell");
         const toolbar = document.querySelector<HTMLElement>(".document-toolbar");
-        const cockpit = document.querySelector<HTMLElement>('[data-testid="execution-document-cockpit"]');
+        const cockpit = document.querySelector<HTMLElement>(`[data-testid="${cockpitTestId}"]`);
         const firstTextarea = document.querySelector<HTMLElement>(".document-section-textarea");
         const fieldStrip = document.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]');
         const documentSelectElement = document.querySelector<HTMLSelectElement>('select[aria-label="편집 문서 선택"]');
@@ -1714,7 +1722,7 @@ describe("documents editor layout", () => {
           fieldStripTop: Math.round(fieldStripRect.top),
           textareaVisibleInPane: textareaRect.bottom > shellRect.top && textareaRect.top < shellRect.bottom
         };
-      });
+      }, item.cockpitTestId);
 
       expect(metrics.selectedDocument).toBe(item.key);
       expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);

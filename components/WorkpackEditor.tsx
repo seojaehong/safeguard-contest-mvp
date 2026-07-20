@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
-import { AskResponse, type PermitInspectionStructured, type WorkPlanStructured } from "@/lib/types";
+import { AskResponse, type EducationRecordStructured, type PermitInspectionStructured, type WorkPlanStructured } from "@/lib/types";
 import {
   ACCIDENT_TYPE_VALUES,
   FOUR_M_VALUES,
@@ -379,6 +379,10 @@ function isExecutionDocumentKey(key: DocumentKey) {
   return key === "workPlanDraft" || key === "workPermitDraft";
 }
 
+function isEducationDocumentKey(key: DocumentKey) {
+  return key === "safetyEducationRecordDraft";
+}
+
 function compactList(items: readonly string[], fallback: string, limit: number) {
   const compacted = items.map((item) => item.trim()).filter(Boolean);
   return (compacted.length ? compacted : [fallback]).slice(0, limit);
@@ -493,6 +497,63 @@ function WorkExecutionDocumentCockpit({ data, documentKey }: { data: AskResponse
             {(isPermit ? [...blockedAttachments.slice(0, 2).map((attachment) => `${attachment.name} · ${attachment.status}`), ...completionChecks.map((check) => `${check.item} · ${check.status}`)].slice(0, 3) : stopCriteria).map((item) => (
               <li key={item}>{item}</li>
             ))}
+          </ol>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function getEducationRecordStructured(data: AskResponse): EducationRecordStructured | null {
+  const deliverables = data.deliverables as { educationRecordStructured?: EducationRecordStructured };
+  return deliverables.educationRecordStructured ?? null;
+}
+
+function EducationDocumentCockpit({ data, documentKey }: { data: AskResponse; documentKey: DocumentKey }) {
+  if (!isEducationDocumentKey(documentKey)) return null;
+  const education = getEducationRecordStructured(data);
+  const curriculum = education?.curriculum.slice(0, 3) ?? [];
+  const points = compactList(data.deliverables.safetyEducationPoints, data.riskSummary.topRisk, 3);
+  const topics = curriculum.length
+    ? curriculum.map((item) => `${item.topic} · ${item.keyPoints[0] ?? item.lawCitation}`)
+    : points;
+  const understandingCheck = education?.understandingCheck || "질문 · 복창 · 서명으로 이해 여부 확인";
+  const tbmLink = education?.tbmLink || compactList(data.deliverables.tbmQuestions, "TBM에서 작업중지 기준을 다시 확인", 1)[0];
+
+  return (
+    <section className={styles.tbmCockpit} data-testid="education-document-cockpit" aria-label="교육 진행 요약">
+      <div className={styles.tbmCockpitHeader}>
+        <div>
+          <span className="eyebrow">교육 진행 cockpit</span>
+          <strong>{education?.educationName || "교육 대상과 이해확인"}</strong>
+        </div>
+        <span>{data.scenario.workerCount.toLocaleString("ko-KR")}명 · {education?.type || "작업 전 교육"}</span>
+      </div>
+      <div className={styles.tbmCockpitGrid}>
+        <article>
+          <b>교육 대상</b>
+          <strong>{education?.target || `${data.scenario.workerCount.toLocaleString("ko-KR")}명 현장 작업자`}</strong>
+          <small>{education?.location || data.scenario.siteName}</small>
+        </article>
+        <article>
+          <b>이해 확인</b>
+          <strong>{understandingCheck}</strong>
+          <small>{education?.followupRecommendation || "미이해자는 추가 설명 후 재확인"}</small>
+        </article>
+      </div>
+      <div className={styles.tbmCockpitColumns}>
+        <div>
+          <b>교육 내용</b>
+          <ol>
+            {topics.map((topic) => <li key={topic}>{topic}</li>)}
+          </ol>
+        </div>
+        <div>
+          <b>TBM 연계</b>
+          <ol>
+            <li>{tbmLink}</li>
+            <li>{data.riskSummary.topRisk}</li>
+            <li>{data.riskSummary.immediateActions[0] || "작업중지 기준 확인"}</li>
           </ol>
         </div>
       </div>
@@ -2769,6 +2830,13 @@ export function WorkpackEditor({
       alignPaneTargetBelowToolbar(executionCockpitTarget);
       return;
     }
+    const educationCockpitTarget = isEducationDocumentKey(selected.key)
+      ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="education-document-cockpit"]') || null
+      : null;
+    if (educationCockpitTarget) {
+      alignPaneTargetBelowToolbar(educationCockpitTarget);
+      return;
+    }
     const activeSection = Array.from(
       documentBodyRef.current?.querySelectorAll<HTMLElement>("[data-section-id]") || []
     ).find((section) => section.dataset.sectionId === expandedStructuredSectionId) || null;
@@ -2792,6 +2860,10 @@ export function WorkpackEditor({
             || null
         : isExecutionDocumentKey(selected.key)
           ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="execution-document-cockpit"]')
+            || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
+            || null
+        : isEducationDocumentKey(selected.key)
+          ? documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="education-document-cockpit"]')
             || documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
             || null
         : documentBodyRef.current?.querySelector<HTMLElement>('[data-testid="document-section-field-strip"]')
@@ -3422,6 +3494,9 @@ export function WorkpackEditor({
               ) : null}
               {isExecutionDocumentKey(selected.key) ? (
                 <WorkExecutionDocumentCockpit data={data} documentKey={selected.key} />
+              ) : null}
+              {isEducationDocumentKey(selected.key) ? (
+                <EducationDocumentCockpit data={data} documentKey={selected.key} />
               ) : null}
               {structuredDocument.body.map((section, index) => {
                 const inputId = `document-section-${selected.key}-${index}`;
