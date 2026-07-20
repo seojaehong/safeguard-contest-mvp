@@ -178,6 +178,31 @@ function createFixtureRoot(): string {
       { result: "PASS" },
     ],
   });
+  writeJson(rootDir, path.join("evaluation", "documents-inner-pane-depth-2026-07-21", "report.json"), {
+    verdict: "PASS_PRODUCTION",
+    sourceHead: "fixture-sha",
+    assertions: {
+      defaultOpenSectionCountIsOne: true,
+      firstTextareaBelowToolbar: true,
+      firstTextareaInsideFirstViewport: true,
+    },
+    productionConfirmation: {
+      buildInfo: {
+        commitSha: "fixture-sha",
+        branch: "master",
+        environment: "production",
+      },
+      mobile390x844: {
+        bodyHeight: 844,
+        workpackShellClientHeight: 320,
+        workpackShellScrollHeight: 1447,
+        editorSecondaryToolsHeight: 213,
+        selectedTitle: "위험성평가표",
+        riskLauncherPressed: true,
+        horizontalOverflow: false,
+      },
+    },
+  });
   writeJson(rootDir, path.join("evaluation", "share-mobile-full-flow-2026-07-21", "report.json"), {
     verdict: "PASS",
     mobile390x844Day: {
