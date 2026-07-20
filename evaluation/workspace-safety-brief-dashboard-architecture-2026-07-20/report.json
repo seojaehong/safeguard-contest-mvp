@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-07-20T08:32:00.000Z",
+  "verdict": "adopt_next_bounded_architecture_patch",
+  "problemFrame": "information_density_and_progressive_disclosure",
+  "notEnough": [
+    "routing_only",
+    "cosmetic_css_only",
+    "static_typography_contract_only"
+  ],
+  "recommendedModes": [
+    {
+      "mode": "input",
+      "job": "capture scenario and generate"
+    },
+    {
+      "mode": "safety_brief_dashboard",
+      "job": "show work summary, top 3 hazards, and top 3-5 risk assessment rows"
+    },
+    {
+      "mode": "documents_review",
+      "job": "review one selected document or category at a time"
+    },
+    {
+      "mode": "evidence",
+      "job": "show KOSHA, law, accident, and work-history provenance on demand"
+    },
+    {
+      "mode": "share",
+      "job": "send the prepared pack to selected recipients with desktop and mobile-specific layouts"
+    }
+  ],
+  "acceptanceQuestions": [
+    "Can the user understand top risks and risk assessment without scrolling multiple viewports after generation?",
+    "Is Documents Review bounded because only one category or document is expanded by default?",
+    "Does Share desktop use a real desktop composition instead of a mobile panel width?",
+    "Are sticky regions limited to one concise header/status/index?"
+  ],
+  "implementationBoundary": {
+    "preserve": [
+      "workpack generation",
+      "provenance",
+      "exports",
+      "recipient portal",
+      "audit contracts"
+    ],
+    "defer": [
+      "full document-specific editor rewrite",
+      "database schema mutation",
+      "provider dispatch contract changes"
+    ]
+  }
+}
