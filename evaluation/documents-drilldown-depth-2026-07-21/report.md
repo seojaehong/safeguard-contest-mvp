@@ -1,6 +1,6 @@
 # Documents Drilldown Depth Gate
 
-Checked at: 2026-07-21 04:26 KST
+Checked at: 2026-07-21 04:33 KST
 
 Source HEAD before commit: `ea885c9f201b05810a13242edba891bb4bd98993`
 
@@ -33,6 +33,19 @@ Production `a31f097a8c7598751b0e09e274fd55b5bd2899a7` proved the one-section acc
 - `toolbarCoversOpenTextarea=true`.
 
 The current patch keeps the one-section contract and requires the opened section textarea to be visible in the pane below the sticky toolbar after section switching.
+
+## Production Confirmation
+
+Production `006aaa29904fe149825d1f75a1f88ce5f5919d14` confirms the section-switch overlap fix is live:
+
+- `/documents?theme=day`, 390x844.
+- After selecting `위험성평가표` and opening the second section: `bodyHeight=844`, horizontal overflow `0`, open section count `1`, open index `[1]`.
+- Section summaries: `9줄 · 펼치기`, `3줄 · 편집 중`.
+- Pane `476-796`, `scrollTop=470`.
+- Sticky toolbar `top=476`, `bottom=572`.
+- Opened section textarea `top=580`, `bottom=711`, visible in pane.
+- `toolbarCoversOpenTextarea=false`.
+- Selected summary remains `7섹션 · 근거 4건 · 확인 1건`.
 
 ## Verified Contract
 

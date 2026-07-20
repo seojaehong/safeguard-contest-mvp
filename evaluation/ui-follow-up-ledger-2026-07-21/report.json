@@ -290,6 +290,18 @@
         "openTextareaTop": 502,
         "toolbarCoversOpenTextarea": true
       },
+      "productionSectionOverlapRemediation": {
+        "productionMarker": "006aaa29904fe149825d1f75a1f88ce5f5919d14",
+        "bodyHeight": 844,
+        "horizontalOverflow": 0,
+        "openSectionCount": 1,
+        "openIndexes": [1],
+        "toolbarBottom": 572,
+        "openTextareaTop": 580,
+        "openTextareaBottom": 711,
+        "toolbarCoversOpenTextarea": false,
+        "selectedSummary": "7섹션 · 근거 4건 · 확인 1건"
+      },
       "openSectionTextareaVisibleInPaneAfterSectionSwitch": true,
       "toolbarDoesNotCoverOpenSectionTextareaAfterSectionSwitch": true,
       "pageHeightRemainsBoundedAfterSectionSwitch": true,

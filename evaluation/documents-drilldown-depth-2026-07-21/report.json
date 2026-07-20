@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-07-21T04:26:04+09:00",
+  "checkedAt": "2026-07-21T04:33:10+09:00",
   "sourceHeadBeforeCommit": "ea885c9f201b05810a13242edba891bb4bd98993",
   "sourceHeadBeforeSectionOverlapPatch": "a31f097a8c7598751b0e09e274fd55b5bd2899a7",
   "branch": "chore/recipient-foreign-live-gate-20260720",
@@ -34,6 +34,31 @@
       "openTextareaTop": 502,
       "openTextareaBottom": 633,
       "toolbarCoversOpenTextarea": true
+    }
+  },
+  "productionSectionOverlapRemediation": {
+    "productionMarker": "006aaa29904fe149825d1f75a1f88ce5f5919d14",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "afterOpeningSecondSection": {
+      "bodyHeight": 844,
+      "horizontalOverflow": 0,
+      "sectionCount": 7,
+      "openSectionCount": 1,
+      "openIndexes": [1],
+      "summaryMeta": ["9줄 · 펼치기", "3줄 · 편집 중"],
+      "shellTop": 476,
+      "shellBottom": 796,
+      "shellScrollTop": 470,
+      "toolbarTop": 476,
+      "toolbarBottom": 572,
+      "openTextareaTop": 580,
+      "openTextareaBottom": 711,
+      "openTextareaVisibleInPane": true,
+      "toolbarCoversOpenTextarea": false,
+      "selectedSummary": "7섹션 · 근거 4건 · 확인 1건"
     }
   },
   "assertions": {

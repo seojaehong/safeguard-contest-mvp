@@ -150,6 +150,7 @@ Current-source bounded gate:
 - Native `<details>` double-open flicker is prevented by driving summary click/Enter/Space through React state.
 - Live `a31f097a` proved the one-section accordion but exposed a stricter RED: after opening the second section, toolbar `bottom=572` covered opened-section textarea `top=502`.
 - The current patch aligns the opened section textarea below the sticky toolbar and requires `toolbarDoesNotCoverOpenSectionTextareaAfterSectionSwitch=true`.
+- Production `006aaa29` confirms the fix: after opening the second section, toolbar `bottom=572`, opened textarea `top=580`, `toolbarCoversOpenTextarea=false`, page `844px`, overflow `0`.
 - Page height and horizontal overflow remain bounded after section switching.
 - Focused browser: `documents-editor-layout` mobile launcher slice PASS, 2/2.
 - Full browser file: `documents-editor-layout` PASS, 31/31.
