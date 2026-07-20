@@ -103,6 +103,17 @@ function createFixtureRoot(): string {
     dbMutationPerformed: false,
     networkOpened: false,
     failedCheckIds: [],
+    checks: [
+      { id: "rls_status_approval_required", passed: true },
+      { id: "rls_launch_not_proven", passed: true },
+      { id: "rls_non_mutating", passed: true },
+      { id: "rls_catalog_missing_is_explicit", passed: true },
+      { id: "checklist_sections_present", passed: true },
+      { id: "checklist_sql_boundaries_present", passed: true },
+      { id: "tenant_manifest_v3", passed: true },
+      { id: "tenant_harness_no_live_adapter", passed: true },
+      { id: "northstar_rls_gate_approval_gated", passed: true },
+    ],
   });
   writeJson(rootDir, path.join("evaluation", "sif-embedding-gate", "approval-preflight-report.json"), {
     ok: true,
@@ -382,6 +393,26 @@ describe("northstar open gate audit", () => {
     const wikiGate = audit.gates.find((gate) => gate.id === "llm_wiki_publication");
     expect(wikiGate?.state).toBe("contradicted");
     expect(wikiGate?.detail).toContain("not an ancestor");
+  });
+
+  it("contradicts stale RLS approval preflight evidence from outside the current history", async () => {
+    const { buildNorthstarOpenGateAudit } = await loadAuditModule();
+    const rootDir = createFixtureRoot();
+    const reportPath = path.join("evaluation", "rls-llm-wiki-approval-preflight-current-2026-07-20", "report.json");
+    const report = JSON.parse(fs.readFileSync(path.join(rootDir, reportPath), "utf8")) as Record<string, unknown>;
+    report.sourceSha = "0000000000000000000000000000000000000000";
+    writeJson(rootDir, reportPath, report);
+
+    const audit = buildNorthstarOpenGateAudit({
+      rootDir,
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      sourceSha: "fixture-sha",
+    });
+
+    expect(audit.overall).toBe("contradicted");
+    const rlsGate = audit.gates.find((gate) => gate.id === "supabase_rls_launch_isolation");
+    expect(rlsGate?.state).toBe("contradicted");
+    expect(rlsGate?.detail).toContain("not an ancestor");
   });
 
   it("fails evidence completeness when the current KOSHA reconciliation is missing", async () => {

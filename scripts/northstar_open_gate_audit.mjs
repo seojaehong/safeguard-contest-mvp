@@ -265,6 +265,8 @@ function evaluateLiveHarnessGate(rootDir) {
 function evaluateRlsApprovalGate(rootDir) {
   const evidencePath = EVIDENCE_PATHS.rlsApproval;
   const text = readTextFile(rootDir, evidencePath);
+  const preflightPath = EVIDENCE_PATHS.rlsLlmWikiApprovalPreflight;
+  const preflight = readJsonFile(rootDir, preflightPath);
   if (text === null) {
     return gateResult({
       id: "supabase_rls_launch_isolation",
@@ -278,13 +280,39 @@ function evaluateRlsApprovalGate(rootDir) {
 
   const approvalRequired = /Status:\s*`approval_required`/u.test(text);
   const launchNotProven = /Launch isolation proven:\s*no/u.test(text);
-  if (approvalRequired && launchNotProven) {
+  const preflightSourceSha = isRecord(preflight) ? readString(preflight.sourceSha) : "";
+  const preflightCurrent = isGitAncestor(rootDir, preflightSourceSha);
+  const checks = isRecord(preflight) && Array.isArray(preflight.checks) ? preflight.checks : [];
+  const requiredRlsChecks = [
+    "rls_status_approval_required",
+    "rls_launch_not_proven",
+    "rls_non_mutating",
+    "rls_catalog_missing_is_explicit",
+    "checklist_sections_present",
+    "checklist_sql_boundaries_present",
+    "tenant_manifest_v3",
+    "tenant_harness_no_live_adapter",
+    "northstar_rls_gate_approval_gated",
+  ];
+  const passedCheckIds = new Set(checks
+    .filter((item) => isRecord(item) && item.passed === true)
+    .map((item) => readString(item.id)));
+  const preflightReady = isRecord(preflight)
+    && preflight.overall === "approval_ready_open"
+    && preflight.launchReadiness === false
+    && preflight.dbMutationPerformed === false
+    && preflight.networkOpened === false
+    && Array.isArray(preflight.failedCheckIds)
+    && preflight.failedCheckIds.length === 0
+    && requiredRlsChecks.every((id) => passedCheckIds.has(id))
+    && preflightCurrent;
+  if (approvalRequired && launchNotProven && preflightReady) {
     return gateResult({
       id: "supabase_rls_launch_isolation",
       label: "Supabase RLS launch isolation",
       state: "approval_gated",
-      evidencePath,
-      detail: "Read-only audit exists, but live RLS catalog and tenant A/B isolation are not proven.",
+      evidencePath: preflightPath,
+      detail: `Read-only RLS approval preflight passed at source SHA ${preflightSourceSha || "not-recorded"}, but live RLS catalog and tenant A/B isolation are not proven.`,
       nextActions: [
         "Approve authoritative project and credential provenance.",
         "Run read-only live catalog capture.",
@@ -297,9 +325,13 @@ function evaluateRlsApprovalGate(rootDir) {
     id: "supabase_rls_launch_isolation",
     label: "Supabase RLS launch isolation",
     state: "contradicted",
-    evidencePath,
-    detail: "RLS approval report does not preserve the approval-required launch boundary.",
-    nextActions: ["Re-audit RLS evidence and restore explicit launch-isolation status."],
+    evidencePath: isRecord(preflight) ? preflightPath : evidencePath,
+    detail: approvalRequired && launchNotProven
+      ? (preflightCurrent
+        ? "RLS approval preflight is missing or failed even though the base report remains approval-required."
+        : `RLS approval preflight source SHA ${preflightSourceSha} is not an ancestor of current HEAD.`)
+      : "RLS approval report does not preserve the approval-required launch boundary.",
+    nextActions: ["Re-run the RLS/LLM Wiki approval preflight and re-audit RLS evidence before making any launch isolation claim."],
   });
 }
 
