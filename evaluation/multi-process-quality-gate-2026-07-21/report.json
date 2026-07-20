@@ -1,0 +1,43 @@
+{
+  "verdict": "PASS",
+  "checkedAt": "2026-07-21T00:43:00+09:00",
+  "worktree": "recipient-foreign-live-gate-20260720",
+  "branch": "chore/recipient-foreign-live-gate-20260720",
+  "head": "f0b2ab37aba288d82cc62a60196187b32bfa12e2",
+  "productCodeChanged": false,
+  "dbSchemaChanged": false,
+  "supabaseWrites": false,
+  "productionAskCallClaimed": false,
+  "contract": {
+    "description": "Explicit multi-process work must preserve process-specific coverage instead of collapsing to one generic process.",
+    "sampleProcesses": ["굴착", "토사반출", "자재양중"],
+    "minimumRowsPerExplicitProcess": 2,
+    "maximumRows": 18
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\commercial-harness.test.ts",
+      "status": "PASS",
+      "files": 1,
+      "tests": 59
+    },
+    {
+      "command": "npm.cmd test -- tests\\ai-deliverables-generation-trace.test.ts",
+      "status": "PASS",
+      "files": 1,
+      "tests": 13
+    }
+  ],
+  "coveredRisks": [
+    "Prompt no longer treats explicit multi-process work as a fixed 5-7 total row request.",
+    "Deterministic DB harness preserves each explicit process label.",
+    "Rows for one explicit process do not borrow another process accident case by summary leakage.",
+    "Ambiguous or absent evidence falls back to process-specific controls."
+  ],
+  "limitations": [
+    "No live provider quality comparison was performed.",
+    "No production /ask call was claimed.",
+    "No browser or export rendering test was claimed from this gate.",
+    "Documents/Share IA follow-up remains a separate wave."
+  ]
+}
