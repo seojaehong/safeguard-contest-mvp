@@ -46,6 +46,31 @@ Mobile 390x844 Night:
 - `configCards.display = ["none", "none", "none"]`
 - `overflowX = 0`
 
+## Production Verification
+
+Production `https://www.safeclaw.kr`, build marker `560dc6ad50aad22c89f7a7f7b56f3ac1b67d95f2`, checked after deploy:
+
+- Artifact: `evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json`
+- Mobile 390x844 `/workspace` Share:
+  - `shareBody = 993`
+  - `shareMobileSummary.bottom = 432`
+  - `sharePreview.bottom = 659`
+  - `primaryShareCta.bottom = 720`
+  - `shareForm.bottom = 729`
+  - `shareTargetCard = 0x0`
+  - `shareChannelCard = 0x0`
+  - `shareLanguageCard = 0x0`
+  - `overflowX = false`
+  - `outside = 0`
+- Desktop-short 1440x723 `/workspace` Share:
+  - `shareBody = 912`
+  - `shareForm.bottom = 667`
+  - `sharePreview.bottom = 705`
+  - `primaryShareCta.bottom = 349`
+  - `previewRightOfPrimary = true`
+  - `overflowX = false`
+  - `outside = 0`
+
 ## Desktop Preservation
 
 Workspace share desktop 1440x900 Day:

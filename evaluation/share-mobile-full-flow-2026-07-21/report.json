@@ -38,6 +38,36 @@
     "configCardDisplays": ["none", "none", "none"],
     "horizontalOverflow": 0
   },
+  "productionVerification": {
+    "checkedAfterDeploy": true,
+    "commitSha": "560dc6ad50aad22c89f7a7f7b56f3ac1b67d95f2",
+    "baseUrl": "https://www.safeclaw.kr",
+    "artifact": "evaluation/workspace-docs-share-production-gate-2026-07-20/current-geometry.json",
+    "mobile390x844": {
+      "shareBodyHeight": 993,
+      "shareMobileSummaryBottom": 432,
+      "sharePreviewBottom": 659,
+      "primaryShareCtaBottom": 720,
+      "shareFormBottom": 729,
+      "shareTargetCardWidth": 0,
+      "shareTargetCardHeight": 0,
+      "shareChannelCardWidth": 0,
+      "shareChannelCardHeight": 0,
+      "shareLanguageCardWidth": 0,
+      "shareLanguageCardHeight": 0,
+      "overflowX": false,
+      "outside": 0
+    },
+    "desktopShort1440x723": {
+      "shareBodyHeight": 912,
+      "shareFormBottom": 667,
+      "sharePreviewBottom": 705,
+      "primaryShareCtaBottom": 349,
+      "previewRightOfPrimary": true,
+      "overflowX": false,
+      "outside": 0
+    }
+  },
   "workspaceShareDesktopDay": {
     "viewport": {
       "width": 1440,
