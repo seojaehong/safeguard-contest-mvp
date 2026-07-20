@@ -1,0 +1,49 @@
+{
+  "verdict": "PASS_CURRENT_SOURCE",
+  "checkedAt": "2026-07-21 KST",
+  "source": {
+    "productCommit": "ac9d12bcc37561f5774a1dfb3ea3209624b33563",
+    "branch": "chore/recipient-foreign-live-gate-20260720"
+  },
+  "scope": {
+    "route": "/documents",
+    "claim": "Core/supporting navigation split plus work-plan and permit first-view execution cockpits",
+    "productionLiveClaimed": false
+  },
+  "contracts": {
+    "coreDocumentsPrioritized": true,
+    "supportingDocumentsGrouped": true,
+    "workPlanExecutionCockpitBeforeRawEditor": true,
+    "permitExecutionCockpitBeforeRawEditor": true,
+    "riskAssessmentFirstHazardVisible": true,
+    "providerOrExportContractsChanged": false
+  },
+  "verification": [
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"puts work-plan and permit execution cockpits\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 1
+    },
+    {
+      "command": "npm.cmd test -- tests\\documents-editor-layout.test.ts -t \"supports roving keyboard navigation|bounds the default documents route editor|puts the core launcher before the mobile editor|puts work-plan and permit execution cockpits|keeps the editor workspace and expanded tools contained\" --maxWorkers=1 --fileParallelism=false",
+      "status": "PASS",
+      "filesPassed": 1,
+      "testsPassed": 6
+    },
+    {
+      "command": "npm.cmd run typecheck",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "remainingDebt": [
+    "Current-source evidence only; production live geometry is not claimed.",
+    "Full 12-document field-first authoring remains open.",
+    "Education, emergency response, photo evidence, multilingual documents, field message, and summary still need first-task surfaces or bounded review cards.",
+    "Share flow still needs staged recipient/channel/message/dispatch IA."
+  ]
+}
