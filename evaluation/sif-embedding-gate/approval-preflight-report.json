@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-20T05:05:03.861Z",
+  "generatedAt": "2026-07-20T05:11:57.549Z",
   "scope": "sif_embedding_next_approval_gate_preflight",
   "ok": true,
   "approvalHeld": true,
@@ -116,16 +116,18 @@
   ],
   "failedCheckIds": [],
   "env": {
-    "openaiApiKeyPresent": false,
+    "openaiApiKeyPresent": true,
     "supabaseUrlPresent": true,
     "supabaseServiceRolePresent": true,
     "vectorFeatureFlagEnabled": false,
-    "executionEnvReady": false,
-    "requireExecutionEnv": false,
+    "executionEnvReady": true,
+    "requireExecutionEnv": true,
     "envFailure": false
   },
-  "envFilesLoaded": [],
-  "executionReadyAfterApproval": false,
+  "envFilesLoaded": [
+    "C:\\Users\\iceam\\dev\\safeguard-contest-mvp\\.worktrees\\backend-harness-gate\\.env.local"
+  ],
+  "executionReadyAfterApproval": true,
   "nextApprovalDecisions": [
     "Approve and apply the SIF-only embedding migration, or explicitly choose the broader 010_commercial_operations.sql gate.",
     "Confirm OPENAI_API_KEY and Supabase service role are available in the execution environment.",
